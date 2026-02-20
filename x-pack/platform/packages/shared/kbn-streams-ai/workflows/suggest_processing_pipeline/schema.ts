@@ -27,6 +27,7 @@ import {
   renameProcessorSchema,
   convertProcessorSchema,
 } from '@kbn/streamlang';
+import { NonEmptyString } from '@kbn/zod-helpers/v4';
 
 export const pipelineDefinitionSchema = z
   .object({
@@ -55,7 +56,7 @@ export type PipelineDefinition = z.infer<typeof pipelineDefinitionSchema>;
 export function getPipelineDefinitionJsonSchema(schema: z.ZodType) {
   // Register recurring schemas with IDs for cleaner $defs output
   const registry = z.registry<{ id?: string }>();
-  // NonEmptyString, TODO: Fix
+  registry.add(NonEmptyString, { id: 'NonEmptyString' });
   registry.add(stringOrNumberOrBoolean, { id: 'StringOrNumberOrBoolean' });
   registry.add(rangeConditionSchema, { id: 'RangeCondition' });
   registry.add(shorthandBinaryFilterConditionSchema, { id: 'ShorthandBinaryFilterCondition' });
