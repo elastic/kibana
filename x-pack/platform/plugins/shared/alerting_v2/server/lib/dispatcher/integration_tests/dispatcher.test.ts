@@ -19,6 +19,8 @@ import {
   StorageService,
   type StorageServiceContract,
 } from '../../services/storage_service/storage_service';
+import type { NotificationPolicySavedObjectServiceContract } from '../../services/notification_policy_saved_object_service/notification_policy_saved_object_service';
+import type { RulesSavedObjectServiceContract } from '../../services/rules_saved_object_service/rules_saved_object_service';
 import { DispatcherService, type DispatcherServiceContract } from '../dispatcher';
 import { setupTestServers } from './setup_test_servers';
 
@@ -344,7 +346,29 @@ describe('DispatcherService integration tests', () => {
 
     queryService = new QueryService(esClient, mockLoggerService);
     storageService = new StorageService(esClient, mockLoggerService);
-    dispatcherService = new DispatcherService(queryService, mockLoggerService, storageService);
+    const mockRulesSoService: RulesSavedObjectServiceContract = {
+      bulkGetByIds: jest.fn().mockResolvedValue([]),
+      create: jest.fn(),
+      get: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+      find: jest.fn(),
+    };
+    const mockNpSoService: NotificationPolicySavedObjectServiceContract = {
+      bulkGetByIds: jest.fn().mockResolvedValue([]),
+      create: jest.fn(),
+      get: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+    };
+    dispatcherService = new DispatcherService(
+      queryService,
+      mockLoggerService,
+      storageService,
+      undefined as any,
+      mockRulesSoService,
+      mockNpSoService
+    );
   });
 
   describe('when there are no alert events', () => {
