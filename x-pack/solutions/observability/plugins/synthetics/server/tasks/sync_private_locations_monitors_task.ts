@@ -36,9 +36,7 @@ import { getSyntheticsDynamicSettings } from '../saved_objects/synthetics_settin
 
 const TASK_TYPE = 'Synthetics:Sync-Private-Location-Monitors';
 export const PRIVATE_LOCATIONS_SYNC_TASK_ID = `${TASK_TYPE}-single-instance`;
-export const DEFAULT_TASK_SCHEDULE = `${
-  DYNAMIC_SETTINGS_DEFAULTS.privateLocationsSyncInterval ?? MIN_PRIVATE_LOCATIONS_SYNC_INTERVAL
-}m`;
+export const DEFAULT_TASK_SCHEDULE = `${DYNAMIC_SETTINGS_DEFAULTS.privateLocationsSyncInterval}m`;
 
 export interface SyncTaskState extends Record<string, unknown> {
   lastStartedAt: string;

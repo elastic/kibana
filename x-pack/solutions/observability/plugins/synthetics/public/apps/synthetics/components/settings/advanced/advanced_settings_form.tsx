@@ -41,7 +41,7 @@ export const AdvancedSettingsForm = () => {
   const { settings, loading } = useSelector(selectDynamicSettings);
 
   const [syncInterval, setSyncInterval] = useState<number>(
-    DYNAMIC_SETTINGS_DEFAULTS.privateLocationsSyncInterval ?? MIN_PRIVATE_LOCATIONS_SYNC_INTERVAL
+    DYNAMIC_SETTINGS_DEFAULTS.privateLocationsSyncInterval
   );
 
   const canEdit: boolean =
@@ -151,8 +151,7 @@ export const AdvancedSettingsForm = () => {
             onClick={() => {
               setSyncInterval(
                 settings?.privateLocationsSyncInterval ??
-                  DYNAMIC_SETTINGS_DEFAULTS.privateLocationsSyncInterval ??
-                  MIN_PRIVATE_LOCATIONS_SYNC_INTERVAL
+                  DYNAMIC_SETTINGS_DEFAULTS.privateLocationsSyncInterval
               );
             }}
             flush="left"
