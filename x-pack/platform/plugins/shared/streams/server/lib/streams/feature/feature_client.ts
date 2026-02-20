@@ -163,7 +163,7 @@ export class FeatureClient {
     }
 
     const filterClauses: QueryDslQueryContainer[] = [
-      { terms: { [STREAM_NAME]: streams } },
+      ...termQuery(STREAM_NAME, streams),
       {
         bool: {
           should: [
