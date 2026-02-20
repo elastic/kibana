@@ -109,6 +109,22 @@ async function handleOAuth401Error({
   return axiosInstance.request(error.config);
 }
 
+/**
+ * Resolves the full EARS URL by combining the configured base URL with the path
+ * from the stored URL (which may be a full URL or just a path).
+ */
+function resolveEarsUrl(storedUrl: string, earsBaseUrl: string | undefined): string {
+  if (!earsBaseUrl) return storedUrl;
+  const base = earsBaseUrl.replace(/\/$/, '');
+  let path: string;
+  try {
+    path = new URL(storedUrl).pathname;
+  } catch {
+    path = storedUrl.startsWith('/') ? storedUrl : `/${storedUrl}`;
+  }
+  return `${base}${path}`;
+}
+
 interface EarsParams {
   tokenUrl?: string;
 }
@@ -137,12 +153,13 @@ async function handleEars401Error({
   error.config._retry = true;
   logger.debug(`Attempting EARS token refresh for connectorId ${connectorId} after 401 error`);
 
-  const { tokenUrl } = secrets;
-  if (!tokenUrl) {
+  const { tokenUrl: storedTokenUrl } = secrets;
+  if (!storedTokenUrl) {
     error.message = 'Authentication failed: Missing required EARS configuration (tokenUrl).';
     return Promise.reject(error);
   }
 
+  const tokenUrl = resolveEarsUrl(storedTokenUrl, configurationUtilities.getEarsUrl());
   const newAccessToken = await getEarsAccessToken({
     connectorId,
     logger,
@@ -291,7 +308,7 @@ export const getAxiosInstanceWithAuth = ({
               connectorId,
               logger,
               configurationUtilities,
-              tokenUrl: opts.tokenUrl,
+              tokenUrl: resolveEarsUrl(opts.tokenUrl, configurationUtilities.getEarsUrl()),
               connectorTokenClient,
             });
           }

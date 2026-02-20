@@ -77,6 +77,21 @@ const querySchema = schema.object(
   { unknowns: 'allow' }
 );
 
+/**
+ * Resolves the full EARS URL by combining the configured base URL with the path
+ * from the stored URL (which may be a full URL or just a path).
+ */
+function resolveEarsUrl(storedUrl: string, earsBaseUrl: string): string {
+  const base = earsBaseUrl.replace(/\/$/, '');
+  let path: string;
+  try {
+    path = new URL(storedUrl).pathname;
+  } catch {
+    path = storedUrl.startsWith('/') ? storedUrl : `/${storedUrl}`;
+  }
+  return `${base}${path}`;
+}
+
 interface OAuthConnectorSecrets {
   authType?: string;
   clientId?: string;
@@ -368,14 +383,18 @@ export const oauthCallbackRoute = (
           const config = rawAction.attributes.config;
           const secrets = rawAction.attributes.secrets;
           const authType = secrets.authType;
-          const tokenUrl = secrets.tokenUrl || config?.tokenUrl;
+          const storedTokenUrl = secrets.tokenUrl || config?.tokenUrl;
 
-          if (!tokenUrl) {
+          if (!storedTokenUrl) {
             throw new Error('Connector missing required OAuth configuration (tokenUrl)');
           }
 
           let tokenResult;
           if (authType === 'ears') {
+            const earsBaseUrl = configurationUtilities.getEarsUrl();
+            const tokenUrl = earsBaseUrl
+              ? resolveEarsUrl(storedTokenUrl, earsBaseUrl)
+              : storedTokenUrl;
             // EARS flow: JSON body with { code, pkce_verifier }, no client credentials
             tokenResult = await requestEarsToken(
               tokenUrl,
@@ -403,7 +422,7 @@ export const oauthCallbackRoute = (
             );
 
             tokenResult = await requestOAuthAuthorizationCodeToken(
-              tokenUrl,
+              storedTokenUrl,
               logger,
               {
                 code,

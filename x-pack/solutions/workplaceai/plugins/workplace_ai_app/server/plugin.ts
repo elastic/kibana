@@ -50,6 +50,10 @@ export class WorkplaceAIAppPlugin
     core: CoreSetup<WorkplaceAIAppPluginStartDependencies>,
     setupDeps: WorkplaceAIAppPluginSetupDependencies
   ): WorkplaceAIAppPluginSetup {
+    if (this.config.ears?.url) {
+      setupDeps.actions.setEarsBaseUrl(this.config.ears.url);
+    }
+
     setupDeps.workflowsExtensions.registerStepDefinition(rerankStepDefinition);
 
     const router = core.http.createRouter();

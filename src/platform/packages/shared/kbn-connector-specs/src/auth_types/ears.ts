@@ -14,8 +14,8 @@ import * as i18n from './translations';
 
 const authSchema = z
   .object({
-    authorizationUrl: z.url().meta({ label: i18n.EARS_AUTHORIZATION_URL_LABEL }),
-    tokenUrl: z.url().meta({ label: i18n.EARS_TOKEN_URL_LABEL }),
+    authorizationUrl: z.string().min(1).meta({ label: i18n.EARS_AUTHORIZATION_URL_LABEL }),
+    tokenUrl: z.string().min(1).meta({ label: i18n.EARS_TOKEN_URL_LABEL }),
     scope: z.string().meta({ label: i18n.OAUTH_SCOPE_LABEL }).optional(),
   })
   .meta({ label: i18n.EARS_LABEL });

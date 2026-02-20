@@ -16,6 +16,7 @@ import { OAuthStateClient } from '../lib/oauth_state_client';
 import { OAuthAuthorizationService } from '../lib/oauth_authorization_service';
 import type { ActionsPluginsStart } from '../plugin';
 import type { OAuthRateLimiter } from '../lib/oauth_rate_limiter';
+import type { ActionsConfigurationUtilities } from '../actions_config';
 
 const paramsSchema = schema.object({
   connectorId: schema.string(),
@@ -29,12 +30,30 @@ const bodySchema = schema.object({
  * Initiates OAuth2 Authorization Code flow
  * Returns authorization URL for user to visit
  */
+/**
+ * Resolves the full EARS URL by combining the configured base URL with the path
+ * from the stored URL (which may be a full URL or just a path).
+ * If no base URL is configured, returns the stored URL as-is.
+ */
+function resolveEarsUrl(storedUrl: string, earsBaseUrl: string | undefined): string {
+  if (!earsBaseUrl) return storedUrl;
+  const base = earsBaseUrl.replace(/\/$/, '');
+  let path: string;
+  try {
+    path = new URL(storedUrl).pathname;
+  } catch {
+    path = storedUrl.startsWith('/') ? storedUrl : `/${storedUrl}`;
+  }
+  return `${base}${path}`;
+}
+
 export const oauthAuthorizeRoute = (
   router: IRouter<ActionsRequestHandlerContext>,
   licenseState: ILicenseState,
   logger: Logger,
   coreSetup: CoreSetup<ActionsPluginsStart>,
-  oauthRateLimiter: OAuthRateLimiter
+  oauthRateLimiter: OAuthRateLimiter,
+  actionsConfigUtils: ActionsConfigurationUtilities
 ) => {
   router.post(
     {
@@ -143,7 +162,10 @@ export const oauthAuthorizeRoute = (
           let authorizationUrl: string;
           if (oauthConfig.authTypeId === 'ears') {
             authorizationUrl = oauthService.buildEarsAuthorizationUrl({
-              baseAuthorizationUrl: oauthConfig.authorizationUrl,
+              baseAuthorizationUrl: resolveEarsUrl(
+                oauthConfig.authorizationUrl,
+                actionsConfigUtils.getEarsUrl()
+              ),
               scope: oauthConfig.scope,
               callbackUri: redirectUri,
               state: state.state,

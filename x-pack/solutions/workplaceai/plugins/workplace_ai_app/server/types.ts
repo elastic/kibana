@@ -6,7 +6,10 @@
  */
 
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
-import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import type {
+  PluginSetupContract as ActionsPluginSetup,
+  PluginStartContract as ActionsPluginStart,
+} from '@kbn/actions-plugin/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { DataCatalogPluginSetup } from '@kbn/data-catalog-plugin/server';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
@@ -17,6 +20,7 @@ export interface WorkplaceAIAppPluginSetup {}
 export interface WorkplaceAIAppPluginStart {}
 
 export interface WorkplaceAIAppPluginSetupDependencies {
+  actions: ActionsPluginSetup;
   features: FeaturesPluginSetup;
   dataCatalog: DataCatalogPluginSetup;
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;

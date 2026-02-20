@@ -75,6 +75,7 @@ export interface ActionsConfigurationUtilities {
   getAwsSesConfig: () => AwsSesConfig;
   getEnabledEmailServices: () => string[];
   getMaxEmailBodyLength: () => number;
+  getEarsUrl(): string | undefined;
 }
 
 function allowListErrorMessage(field: AllowListingField, value: string) {
@@ -202,7 +203,8 @@ function validateEmails(
 }
 
 export function getActionsConfigurationUtilities(
-  config: ActionsConfig
+  config: ActionsConfig,
+  earsBaseUrlGetter?: () => string | undefined
 ): ActionsConfigurationUtilities {
   const isHostnameAllowed = curry(isAllowed)(config);
   const isUriAllowed = curry(isHostnameAllowedInUri)(config);
@@ -283,5 +285,6 @@ export function getActionsConfigurationUtilities(
       const nonNegativeLength = Math.max(0, configuredLength);
       return Math.min(nonNegativeLength, MAX_EMAIL_BODY_LENGTH);
     },
+    getEarsUrl: () => earsBaseUrlGetter?.(),
   };
 }
