@@ -100,9 +100,7 @@ export const formSerializer = (formData: InferenceEndpoint) => {
                 // Temporary solution until the endpoint is updated to no longer require it and to set its own default for this value
                 num_threads: DEFAULT_NUM_THREADS,
               }
-            : {
-                ...(numAllocations !== undefined ? { num_allocations: numAllocations } : {}),
-              }),
+            : { num_allocations: numAllocations }),
         },
         ...(headers ? { headers } : {}),
       },
