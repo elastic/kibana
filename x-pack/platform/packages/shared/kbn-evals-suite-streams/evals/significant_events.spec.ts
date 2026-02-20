@@ -16,11 +16,10 @@ import {
 } from '@kbn/streams-ai/src/significant_events/types';
 import { generateSignificantEvents } from '@kbn/streams-ai';
 import { significantEventsPrompt } from '@kbn/streams-ai/src/significant_events/prompt';
-
-import kbnDatemath from '@kbn/datemath';
 import { tags } from '@kbn/scout';
 import type { EvaluatorParams } from '@kbn/evals/src/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import kbnDatemath from '@kbn/datemath';
 import { evaluate } from '../src/evaluate';
 import type { SignificantEventsEvaluationExample } from './significant_events_datasets';
 import { SIGNIFICANT_EVENTS_DATASETS } from './significant_events_datasets';
@@ -216,14 +215,14 @@ evaluate.describe(
                     const { stream } = await apiServices.streams.getStreamDefinition(testIndex);
                     const { queries } = await generateSignificantEvents({
                       stream,
+                      esClient,
                       start: kbnDatemath.parse('now-24h')!.valueOf(),
                       end: kbnDatemath.parse('now')!.valueOf(),
-                      esClient,
                       inferenceClient,
                       logger,
                       signal: new AbortController().signal,
                       systemPrompt: significantEventsPrompt,
-                      features: example.input.features,
+                      getFeatures: async () => example.input.features,
                     });
 
                     // The task should return the array of generated queries
@@ -285,14 +284,14 @@ evaluate.describe(
               const { stream } = await apiServices.streams.getStreamDefinition(testIndex);
               const { queries } = await generateSignificantEvents({
                 stream,
+                esClient,
                 start: kbnDatemath.parse('now-24h')!.valueOf(),
                 end: kbnDatemath.parse('now')!.valueOf(),
-                esClient,
                 inferenceClient,
                 logger,
                 signal: new AbortController().signal,
                 systemPrompt: significantEventsPrompt,
-                features: [],
+                getFeatures: async () => [],
               });
 
               return queries;

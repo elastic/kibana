@@ -122,7 +122,9 @@ steps:
 `;
 
 /**
- * Workflow with 50 foreach iterations for scroll/virtualization tests.
+ * Workflow with 50 foreach iterations and post-foreach steps.
+ * Used for scroll tests and verifying that steps after a large foreach
+ * remain correctly ordered after collapsing and re-expanding the loop.
  */
 export const getManyIterationsWorkflowYaml = (name: string) => `
 name: ${name}
@@ -131,11 +133,18 @@ description: This is a new workflow
 triggers:
   - type: manual
 steps:
-  - name: hello_world_step
-    type: console
+  - name: foreach_loop
+    type: foreach
     foreach: '[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50]'
+    steps:
+      - name: hello_world_step
+        type: console
+        with:
+          message: "Hello world"
+  - name: after_foreach_step
+    type: console
     with:
-      message: "Hello world"
+      message: "After foreach"
 `;
 
 /**
