@@ -11,6 +11,7 @@ import { NonEmptyString } from '@kbn/zod-helpers';
 import type { Condition } from '@kbn/streamlang';
 import { conditionSchema } from '@kbn/streamlang';
 import { primitive } from '../shared/record_types';
+import type { SignificantEventsResponse } from '../api/significant_events';
 
 interface StreamQueryBase {
   id: string;
@@ -97,3 +98,15 @@ export const upsertStreamQueryRequestSchema = z.object({
   severity_score: z.number().optional(),
   evidence: z.array(z.string()).optional(),
 });
+
+export interface QueriesGetResponse {
+  queries: SignificantEventsResponse[];
+  page: number;
+  perPage: number;
+  total: number;
+}
+
+export interface QueriesOccurrencesGetResponse {
+  occurrences_histogram: Array<{ x: string; y: number }>;
+  total_occurrences: number;
+}
