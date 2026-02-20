@@ -103,7 +103,7 @@ export async function getMetricChanges({
 
   const groupAgg = getGroupingAggregation(groupBy);
 
-  const subAggs: Record<string, AggregationsAggregationContainer> = {
+  const subAggs = {
     over_time: {
       auto_date_histogram: dateHistogram,
       aggs: {
@@ -142,24 +142,11 @@ export async function getMetricChanges({
     },
   });
 
-  interface OverTimeBucket {
-    key_as_string?: string;
-    key?: string | number;
-    value?: { value?: number };
-  }
-
-  interface GroupBucket {
-    key?: string;
-    key_as_string?: string;
-    over_time?: { buckets?: OverTimeBucket[] };
-    changes?: AggregateOf<{ change_point: { buckets_path: string } }, unknown>;
-  }
-
   const groups = (response.aggregations?.groups.buckets || []) as Array<
     AggregateOfMap<typeof subAggs, unknown> & { key?: string; key_as_string?: string }
   >;
 
-  const series = groups.map((group: GroupBucket) => {
+  const series = groups.map((group) => {
     const key = group.key ?? 'all';
 
     const changes = group.changes as AggregateOf<

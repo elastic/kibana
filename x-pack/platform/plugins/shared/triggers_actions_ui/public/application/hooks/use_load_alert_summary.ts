@@ -108,7 +108,7 @@ async function fetchAlertSummary({
   consumers?: string[];
   signal: AbortSignal;
   timeRange: AlertSummaryTimeRange;
-  filter?: NonNullable<estypes.QueryDslQueryContainer>;
+  filter?: Pick<NonNullable<estypes.QueryDslQueryContainer>, 'bool' | 'ids'>;
 }): Promise<AlertSummary> {
   const res = ruleTypeIds.length
     ? await http.post<AsApiContract<any>>(`${BASE_RAC_ALERTS_API_PATH}/_alert_summary`, {

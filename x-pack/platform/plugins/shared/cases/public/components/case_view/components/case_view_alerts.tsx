@@ -36,7 +36,7 @@ export const CaseViewAlerts = ({
     services as SetRequired<typeof services, 'licensing'>;
   const alertIds = getManualAlertIds(caseData.comments);
   const alertIdsQuery = useMemo(
-    (): Partial<Pick<NonNullable<QueryDslQueryContainer>, 'ids' | 'bool'>> => ({
+    (): NonNullable<QueryDslQueryContainer> => ({
       ids: {
         values: alertIds,
       },

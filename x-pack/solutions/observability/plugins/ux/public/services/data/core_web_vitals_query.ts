@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ESSearchResponse } from '@kbn/es-types';
+import type { ESSearchResponse, ESSearchRequest } from '@kbn/es-types';
 import type { UXMetrics } from '@kbn/observability-shared-plugin/public';
 import {
   TBT_FIELD,
@@ -89,7 +89,7 @@ export function coreWebVitalsQuery(
   urlQuery?: string,
   uiFilters?: UxUIFilters,
   percentile = PERCENTILE_DEFAULT
-) {
+): Omit<ESSearchRequest, 'index'> {
   const setup: SetupUX = { uiFilters: uiFilters ?? {} };
 
   const projection = getRumPageLoadTransactionsProjection({
@@ -98,7 +98,7 @@ export function coreWebVitalsQuery(
     start,
     end,
   });
-  const params = mergeProjection(projection, {
+  const params: ESSearchRequest = mergeProjection(projection, {
     size: 0,
     query: {
       bool: {
