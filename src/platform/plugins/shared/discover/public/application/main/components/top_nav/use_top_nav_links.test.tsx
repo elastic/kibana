@@ -10,39 +10,72 @@
 import React from 'react';
 import { renderHook } from '@testing-library/react';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
+import { AppMenuActionId } from '@kbn/discover-utils';
 import { BehaviorSubject } from 'rxjs';
+import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 import { useTopNavLinks } from './use_top_nav_links';
-import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
+import {
+  getDiscoverInternalStateMock,
+  getDiscoverStateMock,
+} from '../../../../__mocks__/discover_state.mock';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
-import { DiscoverToolkitTestProvider } from '../../../../__mocks__/test_provider';
+import {
+  DiscoverToolkitTestProvider,
+  DiscoverTestProvider,
+} from '../../../../__mocks__/test_provider';
+import { internalStateActions } from '../../state_management/redux';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
+import type { DiscoverServices } from '../../../../build_services';
 
 jest.mock('@kbn/alerts-ui-shared', () => ({
   ...jest.requireActual('@kbn/alerts-ui-shared'),
-  useGetRuleTypesPermissions: jest.fn().mockReturnValue({ authorizedRuleTypes: [] }),
+  useGetRuleTypesPermissions: jest.fn(() => ({
+    authorizedRuleTypes: [
+      {
+        id: '.es-query',
+        authorizedConsumers: {
+          discover: { all: true, read: true },
+        },
+      },
+    ],
+  })),
 }));
 
-describe('useTopNavLinks', () => {
-  const getServices = () => {
-    const services = createDiscoverServicesMock();
-    const uiSettingsGetMock = services.uiSettings.get;
+const createTestServices = (overrides: Partial<DiscoverServices> = {}): DiscoverServices => {
+  const services = createDiscoverServicesMock();
+  const uiSettingsGetMock = services.uiSettings.get;
 
-    services.share = sharePluginMock.createStartContract();
-    services.application.currentAppId$ = new BehaviorSubject('discover');
-    services.capabilities.discover_v2 = {
-      save: true,
-      storeSearchSession: true,
-    };
-    services.uiSettings.get = <T,>(key: string) => {
-      return key === ENABLE_ESQL ? (true as T) : uiSettingsGetMock<T>(key);
-    };
-
-    return services;
+  services.share = sharePluginMock.createStartContract();
+  services.application.currentAppId$ = new BehaviorSubject('discover');
+  services.capabilities.discover_v2 = {
+    save: true,
+    storeSearchSession: true,
+  };
+  services.capabilities.management = {
+    ...services.capabilities.management,
+    insightsAndAlerting: {
+      triggersActions: true,
+    },
+  };
+  services.uiSettings.get = <T,>(key: string) => {
+    return key === ENABLE_ESQL ? (true as T) : uiSettingsGetMock<T>(key);
   };
 
+  // Apply overrides
+  return {
+    ...services,
+    ...overrides,
+    capabilities: {
+      ...services.capabilities,
+      ...overrides.capabilities,
+    },
+  } as DiscoverServices;
+};
+
+describe('useTopNavLinks', () => {
   const setup = async (hookAttrs: Partial<Parameters<typeof useTopNavLinks>[0]> = {}) => {
-    const services = hookAttrs.services ?? getServices();
+    const services = hookAttrs.services ?? createTestServices();
     const toolkit = getDiscoverInternalStateMock({ services });
 
     await toolkit.initializeTabs();
@@ -115,7 +148,7 @@ describe('useTopNavLinks', () => {
 
   describe('when share service included', () => {
     it('should include the share menu item', async () => {
-      const services = getServices();
+      const services = createTestServices();
 
       jest.spyOn(services.share!, 'availableIntegrations').mockReturnValue([]);
 
@@ -130,7 +163,7 @@ describe('useTopNavLinks', () => {
     });
 
     it('should include the export menu item', async () => {
-      const services = getServices();
+      const services = createTestServices();
 
       jest
         .spyOn(services.share!, 'availableIntegrations')
@@ -164,7 +197,7 @@ describe('useTopNavLinks', () => {
 
   describe('when background search is enabled', () => {
     it('should return the background search menu item', async () => {
-      const services = getServices();
+      const services = createTestServices();
       services.data.search.isBackgroundSearchEnabled = true;
       const appMenuConfig = await setup({ services });
 
@@ -262,6 +295,125 @@ describe('useTopNavLinks', () => {
       const resetChangesItem = items?.find((item) => item.id === 'resetChanges');
 
       expect(resetChangesItem?.disableButton).toBe(false);
+    });
+  });
+
+  describe('alerting v2 rules menu', () => {
+    const setupWithAlertingV2 = (
+      hookAttrs: Partial<Parameters<typeof useTopNavLinks>[0]> = {},
+      alertingV2Enabled = true
+    ) => {
+      const baseMock = createDiscoverServicesMock();
+      const v2Services = createTestServices({
+        capabilities: {
+          ...baseMock.capabilities,
+          discover_v2: {
+            save: true,
+            storeSearchSession: true,
+          },
+          alertingVTwo: {
+            uiEnabled: alertingV2Enabled,
+          },
+          management: {
+            ...baseMock.capabilities.management,
+            insightsAndAlerting: {
+              triggersActions: true,
+            },
+          },
+        },
+        // Required for legacy alerts menu to show
+        triggersActionsUi: triggersActionsUiMock.createStart(),
+      });
+
+      const v2State = getDiscoverStateMock({ isTimeBased: true });
+      v2State.internalState.dispatch(
+        v2State.injectCurrentTab(internalStateActions.assignNextDataView)({
+          dataView: dataViewMock,
+        })
+      );
+
+      const V2Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+        return (
+          <DiscoverTestProvider
+            services={v2Services}
+            stateContainer={v2State}
+            runtimeState={{
+              currentDataView: dataViewMock,
+              adHocDataViews: [],
+            }}
+          >
+            {children}
+          </DiscoverTestProvider>
+        );
+      };
+
+      return renderHook(
+        () =>
+          useTopNavLinks({
+            dataView: dataViewMock,
+            onOpenInspector: jest.fn(),
+            services: v2Services,
+            state: v2State,
+            hasUnsavedChanges: false,
+            isEsqlMode: true, // Default to ES|QL mode for v2 tests
+            adHocDataViews: [],
+            hasShareIntegration: false,
+            persistedDiscoverSession: undefined,
+            ...hookAttrs,
+          }),
+        {
+          wrapper: V2Wrapper,
+        }
+      ).result.current;
+    };
+
+    it('should include the createRule menu item when in ES|QL mode and alerting v2 is enabled', () => {
+      const appMenuConfig = setupWithAlertingV2({ isEsqlMode: true }, true);
+
+      const createRuleItem = appMenuConfig.items?.find(
+        (item) => item.id === AppMenuActionId.createRule
+      );
+      expect(createRuleItem).toBeDefined();
+      expect(createRuleItem?.label).toBe('Rules');
+    });
+
+    it('should NOT include the createRule menu item when not in ES|QL mode', () => {
+      const appMenuConfig = setupWithAlertingV2({ isEsqlMode: false }, true);
+
+      const createRuleItem = appMenuConfig.items?.find(
+        (item) => item.id === AppMenuActionId.createRule
+      );
+      expect(createRuleItem).toBeUndefined();
+    });
+
+    it('should NOT include the createRule menu item when alerting v2 is disabled', () => {
+      const appMenuConfig = setupWithAlertingV2({ isEsqlMode: true }, false);
+
+      const createRuleItem = appMenuConfig.items?.find(
+        (item) => item.id === AppMenuActionId.createRule
+      );
+      expect(createRuleItem).toBeUndefined();
+    });
+
+    it('should include the legacy alerts menu when not in ES|QL mode', () => {
+      const appMenuConfig = setupWithAlertingV2({ isEsqlMode: false }, true);
+
+      const alertsItem = appMenuConfig.items?.find((item) => item.id === AppMenuActionId.alerts);
+      expect(alertsItem).toBeDefined();
+    });
+
+    it('should NOT include the legacy alerts menu when in ES|QL mode and v2 is enabled', () => {
+      const appMenuConfig = setupWithAlertingV2({ isEsqlMode: true }, true);
+
+      const alertsItem = appMenuConfig.items?.find((item) => item.id === AppMenuActionId.alerts);
+      expect(alertsItem).toBeUndefined();
+    });
+
+    it('should include legacy alerts menu when in ES|QL mode but v2 is disabled', () => {
+      const appMenuConfig = setupWithAlertingV2({ isEsqlMode: true }, false);
+
+      const alertsItem = appMenuConfig.items?.find((item) => item.id === AppMenuActionId.alerts);
+      expect(alertsItem).toBeDefined();
     });
   });
 });
