@@ -62,7 +62,7 @@ export class CRUDClient {
     // EUID generation uses MD5. It is not a security-related feature.
     // eslint-disable-next-line @kbn/eslint/no_unsafe_hash
     const hashedId: string = createHash('md5').update(id).digest('hex');
-    this.logger.info(`Upserting entity ID ${id}`);
+    this.logger.debug(`Upserting entity ID ${id}`);
     if (!document.entity.id) {
       document.entity.id = id;
     }
@@ -82,7 +82,7 @@ export class CRUDClient {
         document: preparedDoc,
         refresh: 'wait_for',
       });
-      this.logger.info(`Created entity ID ${id}`);
+      this.logger.debug(`Created entity ID ${id}`);
       return;
     } catch (error) {
       if (error.statusCode !== 409) {
@@ -102,10 +102,10 @@ export class CRUDClient {
       case 'not_found':
         throw new Error(`Could not upsert entity ID ${id}`);
       case 'updated':
-        this.logger.info(`Entity ID ${id} updated`);
+        this.logger.debug(`Entity ID ${id} updated`);
         break;
       case 'noop':
-        this.logger.info(`Entity ID ${id} updated (no change)`);
+        this.logger.debug(`Entity ID ${id} updated (no change)`);
         break;
     }
   }
@@ -125,7 +125,7 @@ export class CRUDClient {
       operations.push({ create: {} }, preparedDoc);
     }
 
-    this.logger.info(`Upserting ${operations.length / 2} entities`);
+    this.logger.debug(`Upserting ${operations.length / 2} entities`);
     await this.esClient.bulk({
       index: getUpdatesEntitiesDataStreamName(this.namespace),
       operations,
@@ -135,7 +135,7 @@ export class CRUDClient {
 
   public async deleteEntity(id: string) {
     try {
-      this.logger.info(`Deleting Entity ID ${id}g`);
+      this.logger.debug(`Deleting Entity ID ${id}`);
       await this.esClient.delete({
         index: getLatestEntitiesIndexName(this.namespace),
         id,
