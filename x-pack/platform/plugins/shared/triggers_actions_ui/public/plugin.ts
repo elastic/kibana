@@ -283,7 +283,6 @@ export class Plugin
           defaultMessage: 'Rules',
         }),
         category: DEFAULT_APP_CATEGORIES.management,
-        visibleIn: ['sideNav'],
         async mount(params: AppMountParameters) {
           const [coreStart, pluginsStart] = (await core.getStartServices()) as [
             CoreStart,
