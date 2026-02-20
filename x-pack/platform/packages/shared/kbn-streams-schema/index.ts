@@ -39,7 +39,9 @@ export {
 export {
   keepFields,
   namespacePrefixes,
+  otelReservedFields,
   isNamespacedEcsField,
+  isOtelReservedField,
   getRegularEcsField,
 } from './src/helpers/namespaced_ecs';
 export { getAdvancedParameters } from './src/helpers/get_advanced_parameters';
