@@ -74,7 +74,8 @@ export const fromSettingsAttribute = (
     defaultEmail: attr.defaultEmail,
     defaultStatusRuleEnabled: attr.defaultStatusRuleEnabled ?? true,
     defaultTLSRuleEnabled: attr.defaultTLSRuleEnabled ?? true,
-    privateLocationsSyncInterval: attr.privateLocationsSyncInterval ?? 5,
+    privateLocationsSyncInterval:
+      attr.privateLocationsSyncInterval ?? MIN_PRIVATE_LOCATIONS_SYNC_INTERVAL,
   };
 };
 
