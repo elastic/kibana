@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type ComponentProps, useState, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   EuiModal,
   EuiOverlayMask,
@@ -16,7 +16,6 @@ import {
   EuiShowFor,
   EuiSpacer,
   EuiButton,
-  EuiButtonIcon,
   EuiCard,
   EuiIcon,
   EuiModalHeader,
@@ -27,6 +26,7 @@ import {
   EuiLink,
   EuiText,
 } from '@elastic/eui';
+import { AiButton } from '@kbn/shared-ux-ai-components';
 import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -37,7 +37,6 @@ import {
   PREFERRED_CHAT_EXPERIENCE_SETTING_KEY,
 } from '../../../common/ui_setting_keys';
 import { AIAssistantType } from '../../../common/ai_assistant_type';
-import { AssistantIcon } from '../../icons/assistant_icon/assistant_icon';
 import type { AIExperienceSelection } from '../../types';
 
 interface AIAssistantHeaderButtonProps {
@@ -108,34 +107,37 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
     }
   }, [selectedType, applySelection]);
 
-  const AiAssistantHeaderButton: React.FC<
-    ComponentProps<typeof EuiButton> & ComponentProps<typeof EuiButtonIcon>
-  > = (props) => (
-    <>
-      <EuiShowFor sizes={['m', 'l', 'xl']}>
-        <EuiButton {...props} data-test-subj="aiAssistantHeaderButton" />
-      </EuiShowFor>
-      <EuiShowFor sizes={['xs', 's']}>
-        <EuiButtonIcon {...props} display="base" data-test-subj="aiAssistantHeaderButtonIcon" />
-      </EuiShowFor>
-    </>
-  );
-
   return (
     <>
-      <AiAssistantHeaderButton
-        iconType={AssistantIcon}
-        onClick={() => setModalOpen(true)}
-        aria-label={i18n.translate('aiAssistantManagementSelection.headerButton.ariaLabel', {
-          defaultMessage: 'Open the AI Assistant selector',
-        })}
-        color="primary"
-        size="s"
-      >
-        {i18n.translate('aiAssistantManagementSelection.headerButton.label', {
-          defaultMessage: 'AI Assistant',
-        })}
-      </AiAssistantHeaderButton>
+      <EuiShowFor sizes={['m', 'l', 'xl']}>
+        <AiButton
+          iconType="aiAssistantLogo"
+          onClick={() => setModalOpen(true)}
+          aria-label={i18n.translate('aiAssistantManagementSelection.headerButton.ariaLabel', {
+            defaultMessage: 'Open the AI Assistant selector',
+          })}
+          variant="base"
+          size="s"
+          data-test-subj="aiAssistantHeaderButton"
+        >
+          {i18n.translate('aiAssistantManagementSelection.headerButton.label', {
+            defaultMessage: 'AI Assistant',
+          })}
+        </AiButton>
+      </EuiShowFor>
+      <EuiShowFor sizes={['xs', 's']}>
+        <AiButton
+          iconOnly
+          iconType="aiAssistantLogo"
+          onClick={() => setModalOpen(true)}
+          aria-label={i18n.translate('aiAssistantManagementSelection.headerButton.ariaLabel', {
+            defaultMessage: 'Open the AI Assistant selector',
+          })}
+          size="s"
+          variant="base"
+          data-test-subj="aiAssistantHeaderButtonIcon"
+        />
+      </EuiShowFor>
       {isModalOpen && (
         <EuiOverlayMask>
           <EuiModal onClose={onModalClose} aria-labelledby={modalTitleId}>
@@ -212,10 +214,10 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
                         justifyContent="center"
                       >
                         <EuiFlexItem grow={false}>
-                          <EuiIcon size="xxl" type="logoObservability" />
+                          <EuiIcon size="xxl" type="logoObservability" aria-hidden={true} />
                         </EuiFlexItem>
                         <EuiFlexItem grow={false}>
-                          <EuiIcon size="xxl" type="logoEnterpriseSearch" />
+                          <EuiIcon size="xxl" type="logoEnterpriseSearch" aria-hidden={true} />
                         </EuiFlexItem>
                       </EuiFlexGroup>
                     }
@@ -238,7 +240,7 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
                       }
                     )}
                     titleSize="xs"
-                    icon={<EuiIcon size="xxl" type="logoSecurity" />}
+                    icon={<EuiIcon size="xxl" type="logoSecurity" aria-hidden={true} />}
                     data-test-subj="aiAssistantSecurityCard"
                     isDisabled={!isSecurityAIAssistantEnabled}
                   />
@@ -266,7 +268,7 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
                       }
                     )}
                     titleSize="xs"
-                    icon={<EuiIcon type="productAgent" size="xxl" />}
+                    icon={<EuiIcon type="productAgent" size="xxl" aria-hidden={true} />}
                     data-test-subj="aiAssistantAgentCard"
                     isDisabled={!hasAgentBuilder}
                   />
