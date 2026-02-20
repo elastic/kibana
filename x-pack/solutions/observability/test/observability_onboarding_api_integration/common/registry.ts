@@ -99,25 +99,23 @@ export function RegistryProvider({ getService }: FtrProviderContext) {
       callbacks.length = 0;
 
       const byConfig = groupBy(groups, 'config');
+      const selectedConfigName = observabilityOnboardingFtrConfig.name;
 
-      Object.keys(byConfig).forEach((config) => {
-        const groupsForConfig = byConfig[config];
+      // Only register the currently selected config. Registering all configs and using
+      // `describe.skip` for non-selected ones creates a lot of "skipped suite" noise in CI.
+      const groupsForSelectedConfig = byConfig[selectedConfigName] ?? [];
 
-        // register suites for other configs, but skip them so tests are marked as such
-        // and their snapshots are not marked as obsolete
-        (config === observabilityOnboardingFtrConfig.name ? describe : describe.skip)(
-          config,
-          () => {
-            groupsForConfig.forEach((group) => {
-              const { runs } = group;
+      if (groupsForSelectedConfig.length > 0) {
+        describe(selectedConfigName, () => {
+          groupsForSelectedConfig.forEach((group) => {
+            const { runs } = group;
 
-              runs.forEach((run) => {
-                run.cb();
-              });
+            runs.forEach((run) => {
+              run.cb();
             });
-          }
-        );
-      });
+          });
+        });
+      }
 
       running = false;
     },

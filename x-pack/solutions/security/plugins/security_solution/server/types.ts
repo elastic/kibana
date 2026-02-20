@@ -42,6 +42,7 @@ import type { SiemRuleMigrationsClient } from './lib/siem_migrations/rules/siem_
 import type { ApiKeyManager } from './lib/entity_analytics/entity_store/auth/api_key';
 import type { ProductFeaturesService } from './lib/product_features_service';
 import type { MlAuthz } from './lib/machine_learning/authz';
+import type { EndpointAppContextService } from './endpoint/endpoint_app_context_services';
 export { AppClient };
 
 export interface SecuritySolutionApiRequestHandlerContext {
@@ -49,6 +50,7 @@ export interface SecuritySolutionApiRequestHandlerContext {
   getAnalytics: () => AnalyticsServiceSetup;
   getServerBasePath: () => string;
   getEndpointAuthz: () => Promise<Immutable<EndpointAuthz>>;
+  getEndpointService: () => EndpointAppContextService;
   getConfig: () => ConfigType;
   getFrameworkRequest: () => FrameworkRequest;
   getAppClient: () => AppClient;
