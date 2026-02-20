@@ -8,7 +8,6 @@
  */
 
 import type { Observable } from 'rxjs';
-import { set } from '@kbn/safer-lodash-set';
 import { map, takeUntil, firstValueFrom, Subject } from 'rxjs';
 
 import type { Logger } from '@kbn/logging';
@@ -25,13 +24,8 @@ import type {
   ElasticsearchClientConfig,
   ElasticsearchCapabilities,
 } from '@kbn/core-elasticsearch-server';
-import {
-  ClusterClient,
-  AgentManager,
-  type OnRequestHandler,
-} from '@kbn/core-elasticsearch-client-server-internal';
+import { ClusterClient, AgentManager } from '@kbn/core-elasticsearch-client-server-internal';
 
-import { isPlainObject } from 'lodash';
 import type { InternalSecurityServiceSetup } from '@kbn/core-security-server-internal';
 import { registerAnalyticsContextProvider } from './register_analytics_context_provider';
 import type { ElasticsearchConfigType } from './elasticsearch_config';
@@ -49,6 +43,7 @@ import { isInlineScriptingEnabled } from './is_scripting_enabled';
 import { mergeConfig } from './merge_config';
 import { type ClusterInfo, getClusterInfo$ } from './get_cluster_info';
 import { getElasticsearchCapabilities } from './get_capabilities';
+import { CpsRequestHandler } from './cps_request_handler';
 
 export interface SetupDeps {
   analytics: AnalyticsServiceSetup;
@@ -64,6 +59,7 @@ export class ElasticsearchService
   private readonly log: Logger;
   private readonly config$: Observable<ElasticsearchConfig>;
   private readonly isServerless: boolean;
+  private cpsRequestHandler!: CpsRequestHandler;
   private stop$ = new Subject<void>();
   private kibanaVersion: string;
   private authHeaders?: IAuthHeadersStorage;
@@ -73,7 +69,6 @@ export class ElasticsearchService
   private clusterInfo$?: Observable<ClusterInfo>;
   private unauthorizedErrorHandler?: UnauthorizedErrorHandler;
   private agentManager?: AgentManager;
-  private cpsEnabled = false;
   private security?: InternalSecurityServiceSetup;
 
   constructor(private readonly coreContext: CoreContext) {
@@ -105,6 +100,16 @@ export class ElasticsearchService
     this.log.debug('Setting up elasticsearch service');
 
     const config = await firstValueFrom(this.config$);
+
+    // TODO we should find a better method to determine whether the underlying ES is CPS-capable.
+    const cpsEnabled = this.isServerless
+      ? (
+          await firstValueFrom(
+            this.coreContext.configService.atPath<{ cpsEnabled?: boolean }>('cps')
+          ).catch(() => ({ cpsEnabled: false }))
+        ).cpsEnabled ?? false
+      : false;
+    this.cpsRequestHandler = new CpsRequestHandler(cpsEnabled);
 
     const agentManager = this.getAgentManager(config);
 
@@ -153,10 +158,6 @@ export class ElasticsearchService
         getAgentsStats: agentManager.getAgentsStats.bind(agentManager),
       },
       publicBaseUrl: config.publicBaseUrl,
-      setCpsFeatureFlag: (enabled) => {
-        this.cpsEnabled = enabled;
-        this.log.info(`CPS feature flag set to ${enabled}`);
-      },
     };
   }
 
@@ -251,7 +252,7 @@ export class ElasticsearchService
       getUnauthorizedErrorHandler: () => this.unauthorizedErrorHandler,
       agentFactoryProvider: this.getAgentManager(baseConfig),
       kibanaVersion: this.kibanaVersion,
-      onRequest: this.getOnRequestHandler(),
+      onRequest: this.cpsRequestHandler?.onRequest,
     });
   }
 
@@ -262,26 +263,5 @@ export class ElasticsearchService
       });
     }
     return this.agentManager;
-  }
-
-  private getOnRequestHandler(): OnRequestHandler | undefined {
-    if (!this.isServerless) return undefined;
-
-    return (ctx, params, options) => {
-      // Note: this.cpsEnabled may be set at a later point in time
-      if (!this.cpsEnabled) return;
-      const body = params.body;
-      if (
-        isPlainObject(body) &&
-        ((body as Record<string, unknown>).project_routing != null ||
-          (body as Record<string, unknown>).pit != null)
-      )
-        return;
-
-      const acceptedParams = params.meta?.acceptedParams;
-      const apiSupportsProjectRouting = acceptedParams?.includes('project_routing') ?? false;
-      if (!apiSupportsProjectRouting) return;
-      set(params, 'body.project_routing', '_alias:_origin');
-    };
   }
 }
