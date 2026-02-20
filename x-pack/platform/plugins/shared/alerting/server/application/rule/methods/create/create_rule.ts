@@ -40,6 +40,7 @@ import { createRuleDataSchema } from './schemas';
 import { createRuleSavedObject } from '../../../../rules_client/lib';
 import type { ValidateScheduleLimitResult } from '../get_schedule_frequency';
 import { validateScheduleLimit } from '../get_schedule_frequency';
+import { isIntervalSchedule } from '@kbn/response-ops-scheduling-types';
 
 export interface CreateRuleOptions {
   id?: string;
@@ -87,7 +88,7 @@ export async function createRule<Params extends RuleParams = never>(
   context.ruleTypeRegistry.get(data.alertTypeId);
 
   let validationPayload: ValidateScheduleLimitResult = null;
-  if (data.enabled) {
+  if (data.enabled && 'interval' in data.schedule && data.schedule.interval) {
     validationPayload = await validateScheduleLimit({
       context,
       updatedInterval: data.schedule.interval,
@@ -167,15 +168,17 @@ export async function createRule<Params extends RuleParams = never>(
     })
   );
 
-  // Throw error if schedule interval is less than the minimum and we are enforcing it
-  const intervalInMs = parseDuration(data.schedule.interval);
-  if (
-    intervalInMs < context.minimumScheduleIntervalInMs &&
-    context.minimumScheduleInterval.enforce
-  ) {
-    throw Boom.badRequest(
-      `Error creating rule: the interval is less than the allowed minimum interval of ${context.minimumScheduleInterval.value}`
-    );
+  // Throw error if schedule interval is less than the minimum accepted value (interval schedules only)
+  if (isIntervalSchedule(data.schedule)) {
+    const intervalInMs = parseDuration(data.schedule.interval);
+    if (
+      intervalInMs < context.minimumScheduleIntervalInMs &&
+      context.minimumScheduleInterval.enforce
+    ) {
+      throw Boom.badRequest(
+        `Error creating rule: the interval is less than the allowed minimum interval of ${context.minimumScheduleInterval.value}`
+      );
+    }
   }
 
   const allActions = [...data.actions, ...(data.systemActions ?? [])];
@@ -231,7 +234,6 @@ export async function createRule<Params extends RuleParams = never>(
     { name: 'createRuleSavedObject', type: 'rules' },
     () =>
       createRuleSavedObject(context, {
-        intervalInMs,
         rawRule: ruleAttributes,
         references,
         ruleId: id,

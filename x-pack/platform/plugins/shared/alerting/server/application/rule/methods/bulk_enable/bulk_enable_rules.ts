@@ -45,6 +45,7 @@ import type { BulkEnableRulesParams, BulkEnableRulesResult } from './types';
 import { bulkEnableRulesParamsSchema } from './schemas';
 import { transformRuleAttributesToRuleDomain, transformRuleDomainToRule } from '../../transforms';
 import { ruleDomainSchema } from '../../schemas';
+import { isIntervalSchedule } from '@kbn/response-ops-scheduling-types';
 
 /**
  * Updating too many rules in parallel can cause the denial of service of the
@@ -188,7 +189,9 @@ const bulkEnableRulesWithOCC = async (
       }
       await rulesFinder.close();
 
-      const updatedInterval = rulesFinderRules.map((rule) => rule.attributes.schedule?.interval);
+      const updatedInterval = rulesFinderRules
+        .filter((rule) => isIntervalSchedule(rule.attributes.schedule))
+        .map((rule) => rule.attributes.schedule.interval);
 
       const validationPayload = await validateScheduleLimit({
         context,

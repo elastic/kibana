@@ -128,6 +128,26 @@ describe('enable()', () => {
     },
   };
 
+  const rruleSchedule = {
+    rrule: {
+      dtstart: '2019-02-12T00:00:00.000Z',
+      freq: 3, // RRule.DAILY
+      interval: 1,
+      tzid: 'UTC',
+      byhour: [22],
+      byminute: [0],
+    },
+  };
+
+  const existingRuleWithRrule = {
+    ...existingRule,
+    attributes: {
+      ...existingRule.attributes,
+      schedule: rruleSchedule,
+      enabled: false,
+    },
+  };
+
   const mockTask = {
     id: 'task-123',
     taskType: 'alerting:123',
@@ -279,6 +299,56 @@ describe('enable()', () => {
           warning: null,
         },
         nextRun: '2019-02-12T21:01:32.479Z',
+      },
+      {
+        version: '123',
+      }
+    );
+    expect(taskManager.bulkEnable).toHaveBeenCalledWith(['task-123']);
+  });
+
+  test('enables a rule with rrule schedule and sets nextRun from rrule', async () => {
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue(existingRuleWithRrule);
+    unsecuredSavedObjectsClient.get.mockResolvedValue(existingRuleWithRrule);
+
+    await rulesClient.enableRule({ id: '1' });
+
+    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
+      RULE_SAVED_OBJECT_TYPE,
+      '1',
+      {
+        name: 'name',
+        schedule: rruleSchedule,
+        alertTypeId: 'myType',
+        consumer: 'myApp',
+        enabled: true,
+        meta: {
+          versionApiKeyLastmodified: kibanaVersion,
+        },
+        updatedAt: '2019-02-12T21:01:22.479Z',
+        updatedBy: 'elastic',
+        apiKey: 'MTIzOmFiYw==',
+        apiKeyOwner: 'elastic',
+        scheduledTaskId: 'task-123',
+        actions: [
+          {
+            group: 'default',
+            id: '1',
+            actionTypeId: '1',
+            actionRef: '1',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+        executionStatus: {
+          status: 'pending',
+          lastDuration: 0,
+          lastExecutionDate: '2019-02-12T21:01:22.479Z',
+          error: null,
+          warning: null,
+        },
+        nextRun: '2019-02-12T22:00:00.000Z',
       },
       {
         version: '123',

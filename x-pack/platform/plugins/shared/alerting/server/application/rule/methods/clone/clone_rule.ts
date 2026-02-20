@@ -14,7 +14,6 @@ import { withSpan } from '@kbn/apm-utils';
 import type { SanitizedRule, RawRule } from '../../../../types';
 import { getDefaultMonitoring } from '../../../../lib';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
-import { parseDuration } from '../../../../../common/parse_duration';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import { getRuleExecutionStatusPendingAttributes } from '../../../../lib/rule_execution_status';
 import { isDetectionEngineAADRuleType } from '../../../../saved_objects/migrations/utils';
@@ -156,7 +155,6 @@ export async function cloneRule<Params extends RuleParams = never>(
     { name: 'createRuleSavedObject', type: 'rules' },
     () =>
       createRuleSavedObject(context, {
-        intervalInMs: parseDuration(ruleAttributes.schedule.interval),
         rawRule: ruleAttributes,
         references: ruleSavedObject.references,
         ruleId,

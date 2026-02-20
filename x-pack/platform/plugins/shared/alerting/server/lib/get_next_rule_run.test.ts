@@ -51,7 +51,7 @@ describe('getNextRuleRun', () => {
       jest.useRealTimers();
     });
 
-    test('uses startDate as dtstart when provided', () => {
+    test('uses startDate when provided to find next occurrence after it', () => {
       jest.useFakeTimers();
       jest.setSystemTime(new Date('2025-06-30T08:00:00.000Z'));
       const startDate = new Date('2025-06-29T00:00:00.000Z');
@@ -68,7 +68,8 @@ describe('getNextRuleRun', () => {
           },
         },
       });
-      expect(result).toBe(new Date('2025-06-30T10:00:00.000Z').toISOString());
+      // Daily at 10:00; first occurrence at or after startDate (2025-06-29 00:00) is 2025-06-29 10:00
+      expect(result).toBe(new Date('2025-06-29T10:00:00.000Z').toISOString());
       jest.useRealTimers();
     });
 
@@ -112,7 +113,7 @@ describe('getNextRuleRun', () => {
       ).toThrow('Invalid schedule, unable to calculate next run');
     });
 
-    test('throws when rrule has no next occurrence', () => {
+    test('throws when rrule has no next occurrence (until in the past)', () => {
       jest.useFakeTimers();
       jest.setSystemTime(new Date('2025-07-20T12:00:00.000Z'));
       expect(() =>
@@ -120,12 +121,13 @@ describe('getNextRuleRun', () => {
           startDate: new Date('2025-07-01T00:00:00.000Z'),
           schedule: {
             rrule: {
-              dtstart: '2025-07-01T00:00:00.000Z',
+              dtstart: '2025-06-01T00:00:00.000Z',
               freq: 3,
               interval: 1,
               tzid: 'UTC',
               byhour: [1],
               byminute: [0],
+              until: new Date('2025-06-15T00:00:00.000Z'),
             },
           },
         })

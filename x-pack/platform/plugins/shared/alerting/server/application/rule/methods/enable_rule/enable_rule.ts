@@ -7,8 +7,8 @@
 import Boom from '@hapi/boom';
 import type { SavedObject } from '@kbn/core/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
-import type { RawRule, IntervalSchedule } from '../../../../types';
-import { resetMonitoringLastRun, getNextRun } from '../../../../lib';
+import type { RawRule } from '../../../../types';
+import { resetMonitoringLastRun, getNextRuleRun } from '../../../../lib';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
 import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
@@ -24,6 +24,7 @@ import { getRuleCircuitBreakerErrorMessage } from '../../../../../common';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import type { EnableRuleParams } from './types';
 import { enableRuleParamsSchema } from './schemas';
+import { isIntervalSchedule } from '@kbn/response-ops-scheduling-types';
 
 export async function enableRule(
   context: RulesClientContext,
@@ -70,20 +71,22 @@ async function enableWithOCC(context: RulesClientContext, params: EnableRulePara
     version = alert.version;
   }
 
-  const validationPayload = await validateScheduleLimit({
-    context,
-    updatedInterval: attributes.schedule.interval,
-  });
+  if (attributes.enabled && isIntervalSchedule(attributes.schedule)) {
+    const validationPayload = await validateScheduleLimit({
+      context,
+      updatedInterval: attributes.schedule.interval,
+    });
 
-  if (validationPayload) {
-    throw Boom.badRequest(
-      getRuleCircuitBreakerErrorMessage({
-        name: attributes.name,
-        interval: validationPayload.interval,
-        intervalAvailable: validationPayload.intervalAvailable,
-        action: 'enable',
-      })
-    );
+    if (validationPayload) {
+      throw Boom.badRequest(
+        getRuleCircuitBreakerErrorMessage({
+          name: attributes.name,
+          interval: validationPayload.interval,
+          intervalAvailable: validationPayload.intervalAvailable,
+          action: 'enable',
+        })
+      );
+    }
   }
 
   try {
@@ -139,9 +142,6 @@ async function enableWithOCC(context: RulesClientContext, params: EnableRulePara
 
     const username = await context.getUserName();
     const now = new Date();
-
-    const schedule = attributes.schedule as IntervalSchedule;
-
     const updateAttributes = updateMeta(context, {
       ...attributes,
       ...(!existingApiKey &&
@@ -154,7 +154,7 @@ async function enableWithOCC(context: RulesClientContext, params: EnableRulePara
       ...(attributes.monitoring && {
         monitoring: resetMonitoringLastRun(attributes.monitoring),
       }),
-      nextRun: getNextRun({ interval: schedule.interval }),
+      nextRun: getNextRuleRun({ schedule: attributes.schedule }),
       enabled: true,
       updatedBy: username,
       updatedAt: now.toISOString(),
@@ -222,7 +222,7 @@ async function enableWithOCC(context: RulesClientContext, params: EnableRulePara
       id,
       consumer: attributes.consumer,
       ruleTypeId: attributes.alertTypeId,
-      schedule: attributes.schedule as IntervalSchedule,
+      schedule: attributes.schedule,
       throwOnConflict: false,
     });
     await context.unsecuredSavedObjectsClient.update(RULE_SAVED_OBJECT_TYPE, id, {

@@ -15,6 +15,7 @@ import {
   systemActionRequestSchema,
   flappingSchema,
   artifactsSchema,
+  scheduleSchema,
 } from '../../../schemas';
 
 export const createRuleDataSchema = schema.object(
@@ -26,9 +27,7 @@ export const createRuleDataSchema = schema.object(
     tags: schema.arrayOf(schema.string(), { defaultValue: [] }),
     throttle: schema.maybe(schema.nullable(schema.string({ validate: validateDuration }))),
     params: ruleParamsSchemaWithDefaultValue,
-    schedule: schema.object({
-      interval: schema.string({ validate: validateDuration }),
-    }),
+    schedule: scheduleSchema,
     actions: schema.arrayOf(actionRequestSchema, {
       defaultValue: [],
     }),

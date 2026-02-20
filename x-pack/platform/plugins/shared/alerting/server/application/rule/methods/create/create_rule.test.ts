@@ -4733,4 +4733,95 @@ This is the type of text _investigation guides_ will contain.`;
       expect(result.artifacts?.investigation_guide).toEqual(investigationGuide.investigation_guide);
     });
   });
+
+  describe('schedule', () => {
+    test('creates a rule with rrule schedule', async () => {
+      const rruleSchedule = {
+        rrule: {
+          freq: 2,
+          interval: 1,
+          tzid: 'UTC',
+          byweekday: ['MO', 'FR'],
+          byhour: [10],
+          byminute: [0],
+        },
+      };
+      const data = getMockData({ schedule: rruleSchedule });
+      const createdAttributes = {
+        ...data,
+        alertTypeId: '123',
+        schedule: rruleSchedule,
+        params: {
+          bar: true,
+        },
+        createdAt: '2019-02-12T21:01:22.479Z',
+        createdBy: 'elastic',
+        updatedBy: 'elastic',
+        updatedAt: '2019-02-12T21:01:22.479Z',
+        muteAll: false,
+        snoozeSchedule: [],
+        mutedInstanceIds: [],
+        actions: [
+          {
+            group: 'default',
+            actionRef: 'action_0',
+            actionTypeId: 'test',
+            uuid: 'test-uuid',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+      };
+
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+        id: '1',
+        type: RULE_SAVED_OBJECT_TYPE,
+        attributes: {
+          ...createdAttributes,
+          running: false,
+          executionStatus: getRuleExecutionStatusPending(createdAttributes.createdAt),
+        },
+        references: [
+          {
+            name: 'action_0',
+            type: 'action',
+            id: '1',
+          },
+        ],
+      });
+
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+        id: '1',
+        type: RULE_SAVED_OBJECT_TYPE,
+        attributes: {
+          ...createdAttributes,
+          running: false,
+          executionStatus: getRuleExecutionStatusPending(createdAttributes.createdAt),
+          scheduledTaskId: 'task-123',
+        },
+        references: [
+          {
+            id: '1',
+            name: 'action_0',
+            type: 'action',
+          },
+        ],
+      });
+
+      const result = await rulesClient.create({ data });
+
+      expect(result.schedule).toEqual(rruleSchedule);
+      expect(result.scheduledTaskId).toBe('task-123');
+      expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+        RULE_SAVED_OBJECT_TYPE,
+        expect.objectContaining({
+          schedule: rruleSchedule,
+        }),
+        expect.any(Object)
+      );
+      expect(taskManager.schedule).toHaveBeenCalledTimes(1);
+      expect(taskManager.schedule.mock.calls[0][0].schedule).toEqual(rruleSchedule);
+    });
+  });
 });
