@@ -31,11 +31,10 @@ export class AgentBuilderPlatformPlugin
   }
 
   start(coreStart: CoreStart, startDeps: PluginStartDependencies): AgentBuilderPlatformPluginStart {
-    const { agentBuilder, share } = startDeps;
+    const { agentBuilder } = startDeps;
 
     registerAttachmentUiDefinitions({
       attachments: agentBuilder.attachments,
-      locators: share.url.locators,
     });
 
     return {};
