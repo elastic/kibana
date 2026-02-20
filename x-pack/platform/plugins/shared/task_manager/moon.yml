@@ -44,6 +44,7 @@ dependsOn:
   - '@kbn/core-http-server-utils'
   - '@kbn/licensing-plugin'
   - '@kbn/rrule'
+  - '@kbn/response-ops-scheduling-types'
   - '@kbn/logging-mocks'
   - '@kbn/spaces-utils'
   - '@kbn/licensing-types'
@@ -51,6 +52,7 @@ dependsOn:
   - '@kbn/security-plugin-types-server'
   - '@kbn/connector-specs'
   - '@kbn/es-errors'
+  - '@kbn/core-http-server'
 tags:
   - plugin
   - prod
