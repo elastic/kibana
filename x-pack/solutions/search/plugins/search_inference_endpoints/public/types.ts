@@ -56,6 +56,8 @@ export enum GroupByOptions {
   Service = 'service',
 }
 
+export type GroupByViewOptions = GroupByOptions.Model | GroupByOptions.Service;
+
 export interface FilterOptions {
   provider: ServiceProviderKeys[];
   type: InferenceTaskType[];

@@ -9,7 +9,11 @@ import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import { i18n } from '@kbn/i18n';
 import { SERVICE_PROVIDERS, ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
 
-import { type GroupedInferenceEndpointsData, GroupByOptions } from '../types';
+import {
+  type GroupedInferenceEndpointsData,
+  type GroupByViewOptions,
+  GroupByOptions,
+} from '../types';
 
 import { getModelId } from './get_model_id';
 import { KNOWN_MODEL_GROUPS, ELASTIC_GROUP_ID } from './known_models';
@@ -77,14 +81,14 @@ export const GroupByServiceReducer = (
   return acc;
 };
 
-export function GroupByReducer(groupBy: GroupByOptions) {
+export function GroupByReducer(groupBy: GroupByViewOptions) {
   switch (groupBy) {
     case GroupByOptions.Model:
       return GroupByModelReducer;
     case GroupByOptions.Service:
       return GroupByServiceReducer;
-    case GroupByOptions.None:
-      throw new Error('Grouping is not enabled');
+    default:
+      return assertNever(groupBy);
   }
 }
 
@@ -156,7 +160,7 @@ export function ServiceGroupBySort(
   return 1;
 }
 
-export function GroupBySort(groupBy: GroupByOptions) {
+export function GroupBySort(groupBy: GroupByViewOptions) {
   switch (groupBy) {
     case GroupByOptions.Model:
       return ModelsGroupBySort;
@@ -165,4 +169,8 @@ export function GroupBySort(groupBy: GroupByOptions) {
     default:
       return defaultGroupedInferenceEndpointsDataCompare;
   }
+}
+
+export function assertNever(x: never): never {
+  throw new Error(`Unhandled groupBy option: ${x}`);
 }
