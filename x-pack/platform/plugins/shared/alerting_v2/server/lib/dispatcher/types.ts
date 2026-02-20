@@ -107,7 +107,7 @@ export interface DispatcherPipelineState {
   readonly throttled?: NotificationGroup[];
 }
 
-export type DispatcherHaltReason = 'no_episodes';
+export type DispatcherHaltReason = 'no_episodes' | 'no_actions';
 
 export type DispatcherStepOutput =
   | { type: 'continue'; data?: Partial<Omit<DispatcherPipelineState, 'input'>> }

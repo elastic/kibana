@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import type { RulesSavedObjectServiceContract } from '../../services/rules_saved_object_service/rules_saved_object_service';
 import type {
+  DispatcherPipelineState,
+  DispatcherStep,
+  DispatcherStepOutput,
   Rule,
   RuleId,
-  DispatcherStep,
-  DispatcherPipelineState,
-  DispatcherStepOutput,
 } from '../types';
-import type { RulesSavedObjectServiceContract } from '../../services/rules_saved_object_service/rules_saved_object_service';
 
 export class FetchRulesStep implements DispatcherStep {
   public readonly name = 'fetch_rules';
@@ -22,7 +22,7 @@ export class FetchRulesStep implements DispatcherStep {
   public async execute(state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
     const { dispatchable = [] } = state;
 
-    const uniqueRuleIds = [...new Set(dispatchable.map((ep) => ep.rule_id))];
+    const uniqueRuleIds = Array.from(new Set(dispatchable.map((ep) => ep.rule_id)));
     if (uniqueRuleIds.length === 0) {
       return { type: 'continue', data: { rules: new Map() } };
     }

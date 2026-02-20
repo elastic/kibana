@@ -6,7 +6,6 @@
  */
 
 import { evaluateKql } from '@kbn/eval-kql';
-
 import type {
   AlertEpisode,
   MatchedPair,

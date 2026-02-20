@@ -27,7 +27,9 @@ export class FetchPoliciesStep implements DispatcherStep {
       return { type: 'continue', data: { policies: new Map() } };
     }
 
-    const uniquePolicyIds = [...new Set(rules.values().flatMap((r) => r.notificationPolicyIds))];
+    const uniquePolicyIds = Array.from(
+      new Set(rules.values().flatMap((r) => r.notificationPolicyIds))
+    );
     if (uniquePolicyIds.length === 0) {
       return { type: 'continue', data: { policies: new Map() } };
     }

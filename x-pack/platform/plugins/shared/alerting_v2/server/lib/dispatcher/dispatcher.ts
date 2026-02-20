@@ -11,23 +11,23 @@ import {
   LoggerServiceToken,
   type LoggerServiceContract,
 } from '../services/logger_service/logger_service';
+import type { NotificationPolicySavedObjectServiceContract } from '../services/notification_policy_saved_object_service/notification_policy_saved_object_service';
 import type { QueryServiceContract } from '../services/query_service/query_service';
 import { QueryServiceInternalToken } from '../services/query_service/tokens';
+import type { RulesSavedObjectServiceContract } from '../services/rules_saved_object_service/rules_saved_object_service';
 import type { StorageServiceContract } from '../services/storage_service/storage_service';
 import { StorageServiceInternalToken } from '../services/storage_service/tokens';
-import type { NotificationPolicySavedObjectServiceContract } from '../services/notification_policy_saved_object_service/notification_policy_saved_object_service';
-import type { RulesSavedObjectServiceContract } from '../services/rules_saved_object_service/rules_saved_object_service';
 import { DispatcherPipeline } from './execution_pipeline';
 import {
-  FetchEpisodesStep,
-  FetchSuppressionsStep,
   ApplySuppressionStep,
-  FetchRulesStep,
-  FetchPoliciesStep,
-  EvaluateMatchersStep,
-  BuildGroupsStep,
   ApplyThrottlingStep,
+  BuildGroupsStep,
   DispatchStep,
+  EvaluateMatchersStep,
+  FetchEpisodesStep,
+  FetchPoliciesStep,
+  FetchRulesStep,
+  FetchSuppressionsStep,
   RecordActionsStep,
 } from './steps';
 import type { DispatcherExecutionParams, DispatcherExecutionResult } from './types';
