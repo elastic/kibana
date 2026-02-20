@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, map, skip, combineLatest } from 'rxjs';
+import deepEqual from 'fast-deep-equal';
+import { BehaviorSubject, combineLatest, distinctUntilChanged, map } from 'rxjs';
 
 import type { DataControlState } from '@kbn/controls-schemas';
 import {
@@ -16,7 +17,7 @@ import {
   type SerializedTitles,
   type StateComparators,
 } from '@kbn/presentation-publishing';
-import type { SubjectsOf, StateManager } from '@kbn/presentation-publishing/state_manager/types';
+import type { StateManager, SubjectsOf } from '@kbn/presentation-publishing/state_manager/types';
 
 /**
  * Controls handle their own label rendering, so we cannot rely on the normal titles manager because
@@ -52,9 +53,9 @@ export const initializeLabelManager = <StateType extends ControlTitleState = Con
 
   const label$ = new BehaviorSubject<string>(state.title || defaultTitle$.getValue());
   const labelSubscription = combineLatest([title$, defaultTitle$])
-    .pipe(skip(1))
-    .subscribe(([title, defaultLabel]) => {
-      label$.next(title || defaultLabel);
+    .pipe(distinctUntilChanged(deepEqual))
+    .subscribe(([title, defaultTitle]) => {
+      label$.next(title || defaultTitle);
     });
 
   return {
