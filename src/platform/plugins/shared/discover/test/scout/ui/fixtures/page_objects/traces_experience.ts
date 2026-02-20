@@ -26,19 +26,12 @@ export class TracesExperiencePage {
 
   async submitQuery() {
     await this.page.testSubj.click('querySubmitButton');
-  }
-
-  async switchToEsql() {
-    const btn = this.page.testSubj.locator('select-text-based-language-btn');
-    if (await btn.isEnabled()) {
-      await btn.click();
-    }
+    await this.discover.waitUntilSearchingHasFinished();
   }
 
   async runEsqlQuery(query: string) {
-    await this.switchToEsql();
+    await this.discover.selectTextBaseLang();
     await this.setEsqlQuery(query);
     await this.submitQuery();
-    await this.discover.waitUntilSearchingHasFinished();
   }
 }
