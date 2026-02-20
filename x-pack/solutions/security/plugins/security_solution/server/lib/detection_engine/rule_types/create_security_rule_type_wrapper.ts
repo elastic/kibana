@@ -561,7 +561,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 result.totalEventsFound - createdSignalsCount - suppressedAlertsCount;
               if (unaccountedEvents > 0) {
                 ruleExecutionLogger.info(
-                  `Events that did not result in alerts: ${unaccountedEvents}\nThis is typically because alerts for these events already exist from a previous rule execution, or events were excluded by value list exceptions.`
+                  `Events that did not result in alerts: ${unaccountedEvents}\nThis is typically because alerts for these events already exist from a previous rule execution, or events were excluded by value list exceptions. This number doesn't include suppressed alerts.`
                 );
               }
             }
