@@ -44,7 +44,8 @@ export interface UseYamlValidationResult {
 }
 
 export function useYamlValidation(
-  editor: monaco.editor.IStandaloneCodeEditor | null
+  editor: monaco.editor.IStandaloneCodeEditor | null,
+  isDiffMode = false
 ): UseYamlValidationResult {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
@@ -69,10 +70,11 @@ export function useYamlValidation(
         return;
       }
 
-      if (!isWorkflowTab) {
-        // clear decorations and markers
+      if (isDiffMode || !isWorkflowTab) {
+        // In diff view or non-workflow tab: clear decorations and markers so they don't misalign
         if (decorationsCollection.current) {
           decorationsCollection.current.clear();
+          decorationsCollection.current = null;
         }
         CUSTOM_YAML_VALIDATION_MARKER_OWNERS.forEach((owner) => {
           monaco.editor.setModelMarkers(model, owner, []);
@@ -169,6 +171,7 @@ export function useYamlValidation(
     isWorkflowTab,
     connectors?.connectorTypes,
     workflowLookup,
+    isDiffMode,
   ]);
 
   return {

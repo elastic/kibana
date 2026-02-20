@@ -23,6 +23,7 @@ import type { WorkflowStepExecutionDto } from '@kbn/workflows/types/v1';
 import type { z } from '@kbn/zod/v4';
 import { ActionsMenuButton } from './actions_menu_button';
 import {
+  buildMergedDiffLines,
   useAlertTriggerDecorations,
   useConnectorTypeDecorations,
   useFocusedStepOutline,
@@ -135,12 +136,15 @@ const editorOptions: monaco.editor.IStandaloneEditorConstructionOptions = {
 
 export interface WorkflowYAMLEditorProps {
   highlightDiff?: boolean;
+  /** When set, line diff decorations compare current editor content to this value (e.g. a selected history version). */
+  diffOriginalValue?: string;
   onStepRun: (params: { stepId: string; actionType: string }) => void;
   editorRef: React.MutableRefObject<monaco.editor.IStandaloneCodeEditor | null>;
 }
 
 export const WorkflowYAMLEditor = ({
   highlightDiff = false,
+  diffOriginalValue,
   onStepRun,
   editorRef: parentEditorRef,
 }: WorkflowYAMLEditorProps) => {
@@ -162,7 +166,15 @@ export const WorkflowYAMLEditor = ({
   const hasChanges = useSelector(selectHasChanges);
   const workflow = useSelector(selectWorkflow);
 
-  const originalValue = workflow?.yaml ?? '';
+  const originalValue = diffOriginalValue ?? workflow?.yaml ?? '';
+
+  const mergedDiff = useMemo(() => {
+    if (!highlightDiff || !originalValue) return null;
+    return buildMergedDiffLines(originalValue, workflowYaml);
+  }, [highlightDiff, originalValue, workflowYaml]);
+
+  const displayValue = mergedDiff ? mergedDiff.text : workflowYaml;
+  const isDiffView = !!mergedDiff;
 
   // Refs
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -206,8 +218,11 @@ export const WorkflowYAMLEditor = ({
   // Styles
   const styles = useWorkflowEditorStyles();
   const [positionStyles, setPositionStyles] = useState<{ top: string; right: string } | null>(null);
-  const { styles: stepOutlineStyles } = useFocusedStepOutline(editorRef.current);
-  const { styles: stepExecutionStyles } = useStepDecorationsInExecution(editorRef.current);
+  const { styles: stepOutlineStyles } = useFocusedStepOutline(editorRef.current, highlightDiff);
+  const { styles: stepExecutionStyles } = useStepDecorationsInExecution(
+    editorRef.current,
+    highlightDiff
+  );
 
   useWorkflowsMonacoTheme();
   useDynamicTypeIcons(connectorsData);
@@ -239,7 +254,8 @@ export const WorkflowYAMLEditor = ({
   }, [workflowJsonSchemaStrict, workflowSchemaUriStrict]);
 
   const { error: errorValidating, isLoading: isLoadingValidation } = useYamlValidation(
-    editorRef.current
+    editorRef.current,
+    highlightDiff
   );
 
   const { validationErrors, transformMonacoMarkers, handleMarkersChanged } =
@@ -389,17 +405,19 @@ export const WorkflowYAMLEditor = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Decorations
+  // Decorations (trigger/connector/alert disabled in diff view so they don't misalign with merged diff content)
   useTriggerTypeDecorations({
     editor: editorRef.current,
     yamlDocument: yamlDocument || null,
     isEditorMounted,
+    isDiffMode: highlightDiff,
   });
 
   useConnectorTypeDecorations({
     editor: editorRef.current,
     yamlDocument: yamlDocument || null,
     isEditorMounted,
+    isDiffMode: highlightDiff,
   });
 
   useLineDifferencesDecorations({
@@ -415,6 +433,7 @@ export const WorkflowYAMLEditor = ({
     yamlDocument: yamlDocument || null,
     isEditorMounted,
     readOnly: isExecutionYaml,
+    isDiffMode: highlightDiff,
   });
 
   const updateContainerPosition = (
@@ -478,8 +497,12 @@ export const WorkflowYAMLEditor = ({
   );
 
   const options = useMemo(() => {
-    return { ...editorOptions, readOnly: isExecutionYaml };
-  }, [isExecutionYaml]);
+    return {
+      ...editorOptions,
+      readOnly: isExecutionYaml || isDiffView,
+      renderIndentGuides: !isDiffView,
+    };
+  }, [isExecutionYaml, isDiffView]);
 
   useEffect(() => {
     // Monkey patching
@@ -585,7 +608,7 @@ export const WorkflowYAMLEditor = ({
           onChange={onChange}
           options={options}
           schemas={schemas}
-          value={workflowYaml}
+          value={displayValue}
           enableFindAction={true}
         />
       </div>

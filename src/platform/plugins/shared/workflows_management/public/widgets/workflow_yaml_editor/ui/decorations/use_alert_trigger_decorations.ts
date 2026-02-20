@@ -21,6 +21,8 @@ interface UseAlertTriggerDecorationsProps {
   yamlDocument: Document | null;
   isEditorMounted: boolean;
   readOnly: boolean;
+  /** When true (e.g. diff view), decorations are cleared and not applied so they don't misalign with merged diff content. */
+  isDiffMode?: boolean;
 }
 
 export const useAlertTriggerDecorations = ({
@@ -28,21 +30,23 @@ export const useAlertTriggerDecorations = ({
   yamlDocument,
   isEditorMounted,
   readOnly,
+  isDiffMode = false,
 }: UseAlertTriggerDecorationsProps) => {
   const alertTriggerDecorationCollectionRef =
     useRef<monaco.editor.IEditorDecorationsCollection | null>(null);
 
   useEffect(() => {
-    const model = editor?.getModel() ?? null;
-    if (alertTriggerDecorationCollectionRef.current) {
-      // clear existing decorations
+    if (editor && alertTriggerDecorationCollectionRef.current) {
       alertTriggerDecorationCollectionRef.current.clear();
+      alertTriggerDecorationCollectionRef.current = null;
     }
 
-    // Don't show alert dots when in executions view or when prerequisites aren't met
-    if (!model || !yamlDocument || !isEditorMounted || readOnly || !editor) {
+    // Don't show in diff view (content is merged diff, line numbers don't match) or when other prerequisites aren't met
+    if (isDiffMode || !editor?.getModel() || !yamlDocument || !isEditorMounted || readOnly) {
       return;
     }
+
+    const model = editor.getModel()!;
 
     const triggerNodes = getTriggerNodes(yamlDocument);
     const alertTriggers = triggerNodes.filter(({ triggerType }) => triggerType === 'alert');
@@ -147,7 +151,7 @@ export const useAlertTriggerDecorations = ({
         setTimeout(createDecorations, 10);
       }
     }
-  }, [isEditorMounted, yamlDocument, readOnly, editor]);
+  }, [isEditorMounted, yamlDocument, readOnly, editor, isDiffMode]);
 
   // Return ref for cleanup purposes
   return {

@@ -84,6 +84,10 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
   // TODO: manage it in a workflow state context
   const [highlightDiff, setHighlightDiff] = useState(false);
   const [isVersionHistoryOpen, setIsVersionHistoryOpen] = useState(false);
+  const [selectedVersionForDiff, setSelectedVersionForDiff] = useState<{
+    eventId: string;
+    yaml: string;
+  } | null>(null);
 
   const onCloseExecutionDetail = useCallback(() => {
     setSelectedExecution(null);
@@ -95,6 +99,23 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
     }
     setIsVersionHistoryOpen(false);
   }, [dispatch, id]);
+
+  const onCloseVersionHistoryPanel = useCallback(() => {
+    setSelectedVersionForDiff(null);
+    setIsVersionHistoryOpen(false);
+  }, []);
+
+  const onToggleVersionHistory = useCallback(() => {
+    setSelectedVersionForDiff(null);
+    setIsVersionHistoryOpen((prev) => !prev);
+  }, []);
+
+  const onSelectVersionForDiff = useCallback(
+    (payload: { eventId: string; yaml: string } | null) => {
+      setSelectedVersionForDiff(payload);
+    },
+    []
+  );
 
   if (error) {
     return (
@@ -129,7 +150,7 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
           isLoading={isLoadingWorkflow}
           highlightDiff={highlightDiff}
           setHighlightDiff={setHighlightDiff}
-          onToggleVersionHistory={() => setIsVersionHistoryOpen((prev) => !prev)}
+          onToggleVersionHistory={onToggleVersionHistory}
           isVersionHistoryOpen={isVersionHistoryOpen}
         />
       </EuiFlexItem>
@@ -138,7 +159,12 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
           <WorkflowDetailLoadingState />
         ) : (
           <WorkflowEditorLayout
-            editor={<WorkflowDetailEditor highlightDiff={highlightDiff} />}
+            editor={
+              <WorkflowDetailEditor
+                highlightDiff={highlightDiff || !!selectedVersionForDiff}
+                diffOriginalValue={selectedVersionForDiff?.yaml}
+              />
+            }
             executionList={
               id && activeTab === 'executions' && !selectedExecutionId ? (
                 <WorkflowExecutionList workflowId={id} />
@@ -165,12 +191,14 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
                 >
                   <WorkflowVersionHistoryPanel
                     workflowId={id}
-                    onClose={() => setIsVersionHistoryOpen(false)}
+                    onClose={onCloseVersionHistoryPanel}
                     hasUnsavedChanges={hasUnsavedChanges}
                     highlightDiff={highlightDiff}
                     setHighlightDiff={setHighlightDiff}
                     lastUpdatedAt={lastUpdatedAt}
                     onRestoreSuccess={onVersionHistoryRestoreSuccess}
+                    selectedVersionEventId={selectedVersionForDiff?.eventId ?? null}
+                    onSelectVersionForDiff={onSelectVersionForDiff}
                   />
                 </div>
               ) : null

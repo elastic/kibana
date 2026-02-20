@@ -44,130 +44,135 @@ const WorkflowVisualEditor = React.lazy(() =>
 
 interface WorkflowDetailEditorProps {
   highlightDiff?: boolean;
+  /** When set, line diff compares current YAML to this (e.g. selected version from history). */
+  diffOriginalValue?: string;
 }
 
-export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ highlightDiff }) => {
-  const styles = useMemoCss(componentStyles);
-  const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
+export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(
+  ({ highlightDiff, diffOriginalValue }) => {
+    const styles = useMemoCss(componentStyles);
+    const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
 
-  // Redux selectors, only used in current workflow tab, not in executions tab
-  const workflowYaml = useSelector(selectYamlString) ?? '';
+    // Redux selectors, only used in current workflow tab, not in executions tab
+    const workflowYaml = useSelector(selectYamlString) ?? '';
 
-  // Hooks
-  const { uiSettings, notifications } = useKibana().services;
-  const { setSelectedExecution } = useWorkflowUrlState();
-  const getContextOverrideData = useContextOverrideData();
-  const { runIndividualStep } = useWorkflowActions();
+    // Hooks
+    const { uiSettings, notifications } = useKibana().services;
+    const { setSelectedExecution } = useWorkflowUrlState();
+    const getContextOverrideData = useContextOverrideData();
+    const { runIndividualStep } = useWorkflowActions();
 
-  // Local state
-  const [testStepId, setTestStepId] = useState<string | null>(null);
-  const [contextOverride, setContextOverride] = useState<ContextOverrideData | null>(null);
+    // Local state
+    const [testStepId, setTestStepId] = useState<string | null>(null);
+    const [contextOverride, setContextOverride] = useState<ContextOverrideData | null>(null);
 
-  // UI settings
-  const isVisualEditorEnabled = uiSettings?.get<boolean>(
-    WORKFLOWS_UI_VISUAL_EDITOR_SETTING_ID,
-    false
-  );
-  const isExecutionGraphEnabled = uiSettings?.get<boolean>(
-    WORKFLOWS_UI_EXECUTION_GRAPH_SETTING_ID,
-    false
-  );
+    // UI settings
+    const isVisualEditorEnabled = uiSettings?.get<boolean>(
+      WORKFLOWS_UI_VISUAL_EDITOR_SETTING_ID,
+      false
+    );
+    const isExecutionGraphEnabled = uiSettings?.get<boolean>(
+      WORKFLOWS_UI_EXECUTION_GRAPH_SETTING_ID,
+      false
+    );
 
-  // Modal handlers
-  const closeModal = useCallback(() => {
-    setTestStepId(null);
-    setContextOverride(null);
-  }, []);
+    // Modal handlers
+    const closeModal = useCallback(() => {
+      setTestStepId(null);
+      setContextOverride(null);
+    }, []);
 
-  // Step run handlers
-  const submitStepRun = useCallback(
-    async (stepId: string, mock: Partial<StepContext>) => {
-      try {
-        const response = await runIndividualStep.mutateAsync({
-          stepId,
-          workflowYaml,
-          contextOverride: mock,
-        });
-        setSelectedExecution(response.workflowExecutionId);
-        closeModal();
-      } catch (error) {
-        const errorMessage =
-          error.body?.message ||
-          error.message ||
-          'An unexpected error occurred while running the step';
-        notifications.toasts.addError(new Error(errorMessage), {
-          title: i18n.translate('workflows.detail.submitStepRun.error', {
-            defaultMessage: 'Failed to run step',
-          }),
-        });
-      }
-    },
-    [runIndividualStep, workflowYaml, setSelectedExecution, closeModal, notifications.toasts]
-  );
+    // Step run handlers
+    const submitStepRun = useCallback(
+      async (stepId: string, mock: Partial<StepContext>) => {
+        try {
+          const response = await runIndividualStep.mutateAsync({
+            stepId,
+            workflowYaml,
+            contextOverride: mock,
+          });
+          setSelectedExecution(response.workflowExecutionId);
+          closeModal();
+        } catch (error) {
+          const errorMessage =
+            error.body?.message ||
+            error.message ||
+            'An unexpected error occurred while running the step';
+          notifications.toasts.addError(new Error(errorMessage), {
+            title: i18n.translate('workflows.detail.submitStepRun.error', {
+              defaultMessage: 'Failed to run step',
+            }),
+          });
+        }
+      },
+      [runIndividualStep, workflowYaml, setSelectedExecution, closeModal, notifications.toasts]
+    );
 
-  const handleStepRun = useCallback(
-    async (params: { stepId: string; actionType: string }) => {
-      if (params.actionType !== 'run') {
-        return;
-      }
+    const handleStepRun = useCallback(
+      async (params: { stepId: string; actionType: string }) => {
+        if (params.actionType !== 'run') {
+          return;
+        }
 
-      const contextOverrideData = getContextOverrideData(params.stepId);
-      if (!contextOverrideData) {
-        return;
-      }
+        const contextOverrideData = getContextOverrideData(params.stepId);
+        if (!contextOverrideData) {
+          return;
+        }
 
-      // If step doesn't reference any other data/steps, submit immediately
-      if (!Object.keys(contextOverrideData.stepContext).length) {
-        await submitStepRun(params.stepId, {});
-        return;
-      }
+        // If step doesn't reference any other data/steps, submit immediately
+        if (!Object.keys(contextOverrideData.stepContext).length) {
+          await submitStepRun(params.stepId, {});
+          return;
+        }
 
-      // Otherwise, show modal for user input
-      setContextOverride(contextOverrideData);
-      setTestStepId(params.stepId);
-    },
-    [getContextOverrideData, submitStepRun]
-  );
+        // Otherwise, show modal for user input
+        setContextOverride(contextOverrideData);
+        setTestStepId(params.stepId);
+      },
+      [getContextOverrideData, submitStepRun]
+    );
 
-  return (
-    <>
-      <EuiFlexGroup gutterSize="none" style={{ height: '100%' }}>
-        <EuiFlexItem css={styles.yamlEditor}>
-          <React.Suspense fallback={<EuiLoadingSpinner />}>
-            <WorkflowYAMLEditor
-              highlightDiff={highlightDiff}
-              onStepRun={handleStepRun}
-              editorRef={editorRef}
-            />
-          </React.Suspense>
-        </EuiFlexItem>
-        {isVisualEditorEnabled && (
-          <EuiFlexItem css={styles.visualEditor}>
+    return (
+      <>
+        <EuiFlexGroup gutterSize="none" style={{ height: '100%' }}>
+          <EuiFlexItem css={styles.yamlEditor}>
             <React.Suspense fallback={<EuiLoadingSpinner />}>
-              <WorkflowVisualEditor />
+              <WorkflowYAMLEditor
+                highlightDiff={highlightDiff}
+                diffOriginalValue={diffOriginalValue}
+                onStepRun={handleStepRun}
+                editorRef={editorRef}
+              />
             </React.Suspense>
           </EuiFlexItem>
-        )}
-        {isExecutionGraphEnabled && (
-          <EuiFlexItem css={styles.visualEditor}>
-            <React.Suspense fallback={<EuiLoadingSpinner />}>
-              <ExecutionGraph />
-            </React.Suspense>
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
+          {isVisualEditorEnabled && (
+            <EuiFlexItem css={styles.visualEditor}>
+              <React.Suspense fallback={<EuiLoadingSpinner />}>
+                <WorkflowVisualEditor />
+              </React.Suspense>
+            </EuiFlexItem>
+          )}
+          {isExecutionGraphEnabled && (
+            <EuiFlexItem css={styles.visualEditor}>
+              <React.Suspense fallback={<EuiLoadingSpinner />}>
+                <ExecutionGraph />
+              </React.Suspense>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
 
-      {testStepId && contextOverride && (
-        <TestStepModal
-          initialcontextOverride={contextOverride}
-          onSubmit={({ stepInputs }) => submitStepRun(testStepId, stepInputs)}
-          onClose={closeModal}
-        />
-      )}
-      <WorkflowDetailConnectorFlyout editorRef={editorRef} />
-    </>
-  );
-});
+        {testStepId && contextOverride && (
+          <TestStepModal
+            initialcontextOverride={contextOverride}
+            onSubmit={({ stepInputs }) => submitStepRun(testStepId, stepInputs)}
+            onClose={closeModal}
+          />
+        )}
+        <WorkflowDetailConnectorFlyout editorRef={editorRef} />
+      </>
+    );
+  }
+);
 WorkflowDetailEditor.displayName = 'WorkflowDetailEditor';
 
 const componentStyles = {

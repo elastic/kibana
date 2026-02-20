@@ -20,12 +20,15 @@ interface UseConnectorTypeDecorationsProps {
   editor: monaco.editor.IStandaloneCodeEditor | null;
   yamlDocument: Document | null;
   isEditorMounted: boolean;
+  /** When true (e.g. diff view), decorations are cleared and not applied so they don't misalign with merged diff content. */
+  isDiffMode?: boolean;
 }
 
 export const useConnectorTypeDecorations = ({
   editor,
   yamlDocument,
   isEditorMounted,
+  isDiffMode = false,
 }: UseConnectorTypeDecorationsProps) => {
   const connectorTypeDecorationCollectionRef =
     useRef<monaco.editor.IEditorDecorationsCollection | null>(null);
@@ -36,11 +39,15 @@ export const useConnectorTypeDecorations = ({
   }, []);
 
   useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      if (!isEditorMounted || !editor || !yamlDocument) {
-        return;
-      }
+    if (editor && connectorTypeDecorationCollectionRef.current) {
+      connectorTypeDecorationCollectionRef.current.clear();
+      connectorTypeDecorationCollectionRef.current = null;
+    }
+    if (isDiffMode || !isEditorMounted || !editor || !yamlDocument) {
+      return;
+    }
 
+    const timeoutId = setTimeout(() => {
       const model = editor.getModel();
       if (!model) {
         return;
@@ -178,7 +185,7 @@ export const useConnectorTypeDecorations = ({
     }, 100); // Small delay to avoid multiple rapid executions
 
     return () => clearTimeout(timeoutId);
-  }, [isEditorMounted, yamlDocument, editor, typeExists]);
+  }, [isEditorMounted, yamlDocument, editor, typeExists, isDiffMode]);
 
   // Return ref for cleanup purposes
   return {

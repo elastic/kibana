@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useCallback, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { monaco } from '@kbn/monaco';
+import { buildMergedDiffLines } from './build_merged_diff_lines';
 
 interface UseLineDifferencesDecorationsProps {
   editor: monaco.editor.IStandaloneCodeEditor | null;
@@ -18,6 +19,11 @@ interface UseLineDifferencesDecorationsProps {
   currentValue?: string;
 }
 
+/**
+ * Applies diff line decorations (green/red) only after the editor model has
+ * been updated with the merged diff text. Listens for model content changes
+ * so decorations are applied after the diff is injected, keeping them in sync.
+ */
 export const useLineDifferencesDecorations = ({
   editor,
   isEditorMounted,
@@ -28,62 +34,111 @@ export const useLineDifferencesDecorations = ({
   const changesHighlightDecorationCollectionRef =
     useRef<monaco.editor.IEditorDecorationsCollection | null>(null);
 
-  // Helper to compute diff lines
-  const calculateLineDifferences = useCallback((original: string, current: string) => {
-    const originalLines = (original ?? '').split('\n');
-    const currentLines = (current ?? '').split('\n');
-    const changed: number[] = [];
-    const max = Math.max(originalLines.length, currentLines.length);
-    for (let i = 0; i < max; i++) {
-      if ((originalLines[i] ?? '') !== (currentLines[i] ?? '')) changed.push(i + 1);
-    }
-    return changed;
-  }, []);
-
-  // Apply diff highlight when toggled
   useEffect(() => {
-    if (!highlightDiff || !originalValue || !editor || !isEditorMounted) {
-      if (changesHighlightDecorationCollectionRef.current) {
-        changesHighlightDecorationCollectionRef.current.clear();
-      }
+    const collection = changesHighlightDecorationCollectionRef.current;
+    if (collection) {
+      collection.clear();
+      changesHighlightDecorationCollectionRef.current = null;
+    }
+
+    if (!highlightDiff || originalValue === undefined || !editor || !isEditorMounted) {
       return;
     }
+
+    const current = currentValue ?? '';
+    const { lineTypes, text: expectedDiffText } = buildMergedDiffLines(originalValue, current);
+
+    const applyDecorations = () => {
+      const model = editor.getModel();
+      if (!model) return;
+      const lineCount = model.getLineCount();
+      if (lineCount !== lineTypes.length) return;
+      const modelValue = model.getValue();
+      if (modelValue !== expectedDiffText) return;
+
+      const decorations: monaco.editor.IModelDeltaDecoration[] = [];
+
+      for (let i = 0; i < lineTypes.length; i++) {
+        const lineNumber = i + 1;
+        const type = lineTypes[i];
+        if (type === 'equal') continue;
+
+        const maxColumn = model.getLineMaxColumn(lineNumber);
+        const range = new monaco.Range(lineNumber, 1, lineNumber, maxColumn);
+
+        if (type === 'add') {
+          decorations.push({
+            range,
+            options: {
+              isWholeLine: true,
+              className: 'diff-line-added',
+              marginClassName: 'diff-line-added-margin',
+              glyphMarginClassName: 'diff-glyph-added',
+            },
+          });
+        } else {
+          decorations.push({
+            range,
+            options: {
+              isWholeLine: true,
+              className: 'diff-line-removed',
+              marginClassName: 'diff-line-removed-margin',
+              glyphMarginClassName: 'diff-glyph-removed',
+            },
+          });
+        }
+      }
+
+      if (decorations.length > 0) {
+        const existing = changesHighlightDecorationCollectionRef.current;
+        if (existing) {
+          existing.clear();
+          changesHighlightDecorationCollectionRef.current = null;
+        }
+        changesHighlightDecorationCollectionRef.current =
+          editor.createDecorationsCollection(decorations);
+      }
+    };
 
     const model = editor.getModel();
     if (!model) return;
 
-    if (changesHighlightDecorationCollectionRef.current) {
-      changesHighlightDecorationCollectionRef.current.clear();
-    }
+    const tryApplyOrClear = () => {
+      const model = editor.getModel();
+      if (!model) return;
+      const modelValue = model.getValue();
+      if (modelValue !== expectedDiffText) {
+        const coll = changesHighlightDecorationCollectionRef.current;
+        if (coll) {
+          coll.clear();
+          changesHighlightDecorationCollectionRef.current = null;
+        }
+        return;
+      }
+      applyDecorations();
+    };
 
-    const changedLines = calculateLineDifferences(originalValue, currentValue ?? '');
-    if (changedLines.length === 0) return;
+    const disposable = model.onDidChangeContent(tryApplyOrClear);
 
-    const decorations = changedLines.map((lineNumber) => ({
-      range: new monaco.Range(lineNumber, 1, lineNumber, model.getLineMaxColumn(lineNumber)),
-      options: {
-        className: 'changed-line-highlight',
-        isWholeLine: true,
-        marginClassName: 'changed-line-margin',
-      },
-    }));
-
-    changesHighlightDecorationCollectionRef.current =
-      editor.createDecorationsCollection(decorations);
+    const timeoutId = setTimeout(tryApplyOrClear, 0);
 
     return () => {
-      changesHighlightDecorationCollectionRef.current?.clear();
+      disposable.dispose();
+      clearTimeout(timeoutId);
+      const coll = changesHighlightDecorationCollectionRef.current;
+      if (coll) {
+        coll.clear();
+        changesHighlightDecorationCollectionRef.current = null;
+      }
     };
   }, [
     highlightDiff,
     originalValue,
     isEditorMounted,
     currentValue,
-    calculateLineDifferences,
     editor,
   ]);
 
-  // Return ref for cleanup purposes
   return {
     decorationCollectionRef: changesHighlightDecorationCollectionRef,
   };

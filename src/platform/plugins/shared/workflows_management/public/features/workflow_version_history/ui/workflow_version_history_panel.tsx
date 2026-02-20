@@ -51,6 +51,10 @@ export interface WorkflowVersionHistoryPanelProps {
   lastUpdatedAt?: Date | null;
   /** Called after a version is successfully restored; use to reload workflow and e.g. close the panel. */
   onRestoreSuccess?: () => void;
+  /** Event id of the version currently used for diff comparison in the editor. */
+  selectedVersionEventId?: string | null;
+  /** Set or clear the version used for diff (current YAML vs this version). Pass null to clear. */
+  onSelectVersionForDiff?: (payload: { eventId: string; yaml: string } | null) => void;
 }
 
 function getInitial(name: string | undefined, userId: string | undefined): string {
@@ -81,13 +85,25 @@ function formatVersionTimestamp(date: Date): string {
 const restoreLabel = i18n.translate('workflows.versionHistory.restore', {
   defaultMessage: 'Restore this version',
 });
+const compareWithVersionLabel = i18n.translate('workflows.versionHistory.compareWithVersion', {
+  defaultMessage: 'Compare with this version',
+});
+const clearComparisonLabel = i18n.translate('workflows.versionHistory.clearComparison', {
+  defaultMessage: 'Clear comparison',
+});
 
 function VersionHistoryListItem({
   item,
   onRestoreRequest,
+  onCompareWithVersion,
+  onClearComparison,
+  isComparingWithThisVersion,
 }: {
   item: WorkflowHistoryItem;
   onRestoreRequest: (eventId: string) => void;
+  onCompareWithVersion: (eventId: string) => void;
+  onClearComparison: () => void;
+  isComparingWithThisVersion: boolean;
 }) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const timestamp = item['@timestamp'] ? new Date(item['@timestamp']) : null;
@@ -125,6 +141,27 @@ function VersionHistoryListItem({
 
   const panelItems: EuiContextMenuPanelItemDescriptor[] = [];
   if (eventId) {
+    if (isComparingWithThisVersion) {
+      panelItems.push({
+        name: clearComparisonLabel,
+        icon: 'cross',
+        'data-test-subj': 'workflowVersionHistoryClearComparison',
+        onClick: () => {
+          setIsPopoverOpen(false);
+          onClearComparison();
+        },
+      });
+    } else {
+      panelItems.push({
+        name: compareWithVersionLabel,
+        icon: 'diff',
+        'data-test-subj': 'workflowVersionHistoryCompare',
+        onClick: () => {
+          setIsPopoverOpen(false);
+          onCompareWithVersion(eventId);
+        },
+      });
+    }
     panelItems.push({
       name: restoreLabel,
       icon: 'refresh',
@@ -308,6 +345,8 @@ export const WorkflowVersionHistoryPanel = React.memo<WorkflowVersionHistoryPane
     setHighlightDiff = () => {},
     lastUpdatedAt = null,
     onRestoreSuccess,
+    selectedVersionEventId = null,
+    onSelectVersionForDiff,
   }) => {
     const { euiTheme } = useEuiTheme();
     const styles = getPanelStyles(euiTheme);
@@ -320,6 +359,39 @@ export const WorkflowVersionHistoryPanel = React.memo<WorkflowVersionHistoryPane
     const onRestoreRequest = useCallback((eventId: string) => {
       setRestoreTargetEventId(eventId);
     }, []);
+
+    const onCompareWithVersion = useCallback(
+      async (eventId: string) => {
+        if (!onSelectVersionForDiff) return;
+        try {
+          const version = await http.get<Record<string, unknown>>(
+            `/api/workflows/${workflowId}/history/${eventId}`
+          );
+          const object = version?.object as { snapshot?: { yaml?: string } } | undefined;
+          const yaml = object?.snapshot?.yaml;
+          if (typeof yaml === 'string') {
+            onSelectVersionForDiff({ eventId, yaml });
+          } else {
+            notifications.toasts.addWarning(
+              i18n.translate('workflows.versionHistory.compareNoYaml', {
+                defaultMessage: 'This version has no YAML to compare.',
+              })
+            );
+          }
+        } catch (err) {
+          notifications.toasts.addError(err instanceof Error ? err : new Error(String(err)), {
+            title: i18n.translate('workflows.versionHistory.compareErrorTitle', {
+              defaultMessage: 'Could not load version',
+            }),
+          });
+        }
+      },
+      [workflowId, http, notifications.toasts, onSelectVersionForDiff]
+    );
+
+    const onClearComparison = useCallback(() => {
+      onSelectVersionForDiff?.(null);
+    }, [onSelectVersionForDiff]);
 
     const onRestoreConfirm = useCallback(async () => {
       if (!restoreTargetEventId) return;
@@ -413,9 +485,12 @@ export const WorkflowVersionHistoryPanel = React.memo<WorkflowVersionHistoryPane
             <>
               {hasUnsavedChanges && (
                 <div
-                  css={[styles.currentVersionCard, styles.versionEntryCardSelected]}
+                  css={[
+                    styles.currentVersionCard,
+                    !selectedVersionEventId && styles.versionEntryCardSelected,
+                  ]}
                   data-test-subj="workflowVersionHistoryCurrentVersion"
-                  data-selected="true"
+                  data-selected={!selectedVersionEventId ? 'true' : undefined}
                 >
                   <EuiFlexGroup
                     alignItems="center"
@@ -471,18 +546,29 @@ export const WorkflowVersionHistoryPanel = React.memo<WorkflowVersionHistoryPane
               ) : (
                 <>
                   {data.items.map((item, index) => {
-                    const isLatestVersion = !hasUnsavedChanges && index === 0;
+                    const isComparingWithThisVersion =
+                      selectedVersionEventId != null && item.event?.id === selectedVersionEventId;
+                    const isLatestVersionWhenNotComparing =
+                      !selectedVersionEventId && !hasUnsavedChanges && index === 0;
+                    const isSelected =
+                      isComparingWithThisVersion || isLatestVersionWhenNotComparing;
                     return (
                       <div
                         key={item.event?.id ?? item['@timestamp'] ?? Math.random()}
                         css={[
                           styles.versionEntryCard,
-                          isLatestVersion && styles.versionEntryCardSelected,
+                          isSelected && styles.versionEntryCardSelected,
                         ]}
                         data-test-subj="workflowVersionHistoryEntry"
-                        data-selected={isLatestVersion || undefined}
+                        data-selected={isSelected || undefined}
                       >
-                        <VersionHistoryListItem item={item} onRestoreRequest={onRestoreRequest} />
+                        <VersionHistoryListItem
+                          item={item}
+                          onRestoreRequest={onRestoreRequest}
+                          onCompareWithVersion={onCompareWithVersion}
+                          onClearComparison={onClearComparison}
+                          isComparingWithThisVersion={item.event?.id === selectedVersionEventId}
+                        />
                       </div>
                     );
                   })}

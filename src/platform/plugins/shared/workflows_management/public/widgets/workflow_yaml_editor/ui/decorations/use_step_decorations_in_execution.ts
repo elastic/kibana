@@ -19,7 +19,8 @@ import {
 } from '../../../../entities/workflows/store';
 
 export const useStepDecorationsInExecution = (
-  editor: monaco.editor.IStandaloneCodeEditor | null
+  editor: monaco.editor.IStandaloneCodeEditor | null,
+  isDiffMode = false
 ) => {
   const stepExecutions = useSelector(selectStepExecutions);
   const workflowLookup = useSelector(selectEditorWorkflowLookup);
@@ -34,7 +35,7 @@ export const useStepDecorationsInExecution = (
   useEffect(() => {
     decorationsCollection?.clear();
 
-    if (!stepExecutions?.length || !workflowLookup?.steps) {
+    if (isDiffMode || !stepExecutions?.length || !workflowLookup?.steps) {
       return;
     }
 
@@ -85,7 +86,7 @@ export const useStepDecorationsInExecution = (
       return [glyphDecoration, backgroundDecoration];
     });
     decorationsCollection?.set(decorations);
-  }, [stepExecutions, decorationsCollection, workflowLookup, highlightedStepId]);
+  }, [stepExecutions, decorationsCollection, workflowLookup, highlightedStepId, isDiffMode]);
 
   const { colors } = useEuiTheme().euiTheme;
   const styles = useMemo(

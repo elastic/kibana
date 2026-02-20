@@ -146,7 +146,40 @@ export const useWorkflowEditorStyles = () => {
           borderLeft: `2px solid ${euiTheme.colors.vis.euiColorVis1}`,
         },
 
-        // Diff highlighting styles
+        // Diff highlighting (subtle pastel green/red like unified diff)
+        '.diff-line-added': {
+          backgroundColor: euiTheme.colors.backgroundLightSuccess,
+          borderLeft: `2px solid ${transparentize(euiTheme.colors.success, 0.6)}`,
+        },
+        '.diff-line-added-margin': {
+          backgroundColor: euiTheme.colors.backgroundLightSuccess,
+        },
+        '.diff-line-removed': {
+          backgroundColor: euiTheme.colors.backgroundLightDanger,
+          borderLeft: `2px solid ${transparentize(euiTheme.colors.danger, 0.6)}`,
+        },
+        '.diff-line-removed-margin': {
+          backgroundColor: euiTheme.colors.backgroundLightDanger,
+        },
+        '.diff-glyph-added::before': {
+          content: '"+"',
+          display: 'block',
+          width: '100%',
+          textAlign: 'center',
+          fontWeight: 600,
+          color: transparentize(euiTheme.colors.success, 0.3),
+          fontSize: '14px',
+        },
+        '.diff-glyph-removed::before': {
+          content: '"−"',
+          display: 'block',
+          width: '100%',
+          textAlign: 'center',
+          fontWeight: 600,
+          color: transparentize(euiTheme.colors.danger, 0.3),
+          fontSize: '14px',
+        },
+        // Legacy single-style diff (kept for compatibility)
         '.changed-line-highlight': {
           backgroundColor: euiTheme.colors.backgroundLightWarning,
           borderLeft: `2px solid ${euiTheme.colors.warning}`,

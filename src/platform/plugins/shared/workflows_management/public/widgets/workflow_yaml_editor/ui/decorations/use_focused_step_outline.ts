@@ -13,7 +13,10 @@ import { useSelector } from 'react-redux';
 import { monaco } from '@kbn/monaco';
 import { selectEditorFocusedStepInfo } from '../../../../entities/workflows/store';
 
-export const useFocusedStepOutline = (editor: monaco.editor.IStandaloneCodeEditor | null) => {
+export const useFocusedStepOutline = (
+  editor: monaco.editor.IStandaloneCodeEditor | null,
+  isDiffMode = false
+) => {
   const focusedStepInfo = useSelector(selectEditorFocusedStepInfo);
 
   const scrollbarWidth = '24px';
@@ -73,7 +76,7 @@ export const useFocusedStepOutline = (editor: monaco.editor.IStandaloneCodeEdito
     }
     decorationsCollection.clear();
 
-    if (!focusedStepInfo) {
+    if (isDiffMode || !focusedStepInfo) {
       return;
     }
 
@@ -108,7 +111,7 @@ export const useFocusedStepOutline = (editor: monaco.editor.IStandaloneCodeEdito
     }
 
     decorationsCollection.set(decorations);
-  }, [editor, focusedStepInfo, decorationsCollection]);
+  }, [editor, focusedStepInfo, decorationsCollection, isDiffMode]);
 
   return { styles };
 };

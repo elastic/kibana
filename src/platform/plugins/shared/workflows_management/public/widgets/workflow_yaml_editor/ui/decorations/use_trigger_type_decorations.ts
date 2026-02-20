@@ -17,6 +17,8 @@ interface UseTriggerTypeDecorationsProps {
   editor: monaco.editor.IStandaloneCodeEditor | null;
   yamlDocument: Document | null;
   isEditorMounted: boolean;
+  /** When true (e.g. diff view), decorations are cleared and not applied so they don't misalign with merged diff content. */
+  isDiffMode?: boolean;
 }
 
 // Helper function to get trigger icon class
@@ -37,12 +39,17 @@ export const useTriggerTypeDecorations = ({
   editor,
   yamlDocument,
   isEditorMounted,
+  isDiffMode = false,
 }: UseTriggerTypeDecorationsProps) => {
   const triggerTypeDecorationCollectionRef =
     useRef<monaco.editor.IEditorDecorationsCollection | null>(null);
 
   useEffect(() => {
-    if (!isEditorMounted || !editor || !yamlDocument) {
+    if (editor && triggerTypeDecorationCollectionRef.current) {
+      triggerTypeDecorationCollectionRef.current.clear();
+      triggerTypeDecorationCollectionRef.current = null;
+    }
+    if (isDiffMode || !isEditorMounted || !editor || !yamlDocument) {
       return;
     }
 
@@ -166,7 +173,7 @@ export const useTriggerTypeDecorations = ({
     }, 100); // Small delay to avoid multiple rapid executions
 
     return () => clearTimeout(timeoutId);
-  }, [isEditorMounted, yamlDocument, editor]);
+  }, [isEditorMounted, yamlDocument, editor, isDiffMode]);
 
   // Return ref for cleanup purposes
   return {
