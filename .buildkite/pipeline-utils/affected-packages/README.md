@@ -10,11 +10,20 @@ Generic utilities for detecting which packages have been affected by changes in 
 .buildkite/pipeline-utils/affected-packages/list_affected [options]
 ```
 
+Each setting is resolved as **CLI flag > environment variable > default**.
+
 **Options:**
-- `--deep` - Include downstream dependencies (default: only directly changed packages)
+- `--deep` - Include downstream dependencies
 - `--json` - Output as JSON array (default: one package per line)
-- `--merge-base <commit>` - Git commit to compare against (default: `GITHUB_PR_MERGE_BASE` env var or `origin/main`)
-- `--strategy <git|moon>` - Strategy to use (default: `moon`)
+- `--merge-base <commit>` - Git commit to compare against
+- `--strategy <git|moon>` - Strategy to use
+- `--help, -h` - Show help message
+
+| Setting    | CLI flag       | Env var                | Default        |
+|------------|----------------|------------------------|----------------|
+| Strategy   | `--strategy`   | `AFFECTED_STRATEGY`    | `moon`         |
+| Downstream | `--deep`       | `AFFECTED_DOWNSTREAM`  | `false`        |
+| Merge base | `--merge-base` | `GITHUB_PR_MERGE_BASE` | `origin/main`  |
 
 **Examples:**
 
@@ -33,6 +42,9 @@ Generic utilities for detecting which packages have been affected by changes in 
 
 # Use Git strategy instead
 .buildkite/pipeline-utils/affected-packages/list_affected --strategy git --deep
+
+# Configure via environment
+AFFECTED_STRATEGY=git AFFECTED_DOWNSTREAM=true .buildkite/pipeline-utils/affected-packages/list_affected
 ```
 
 ## Programmatic Usage
@@ -82,9 +94,12 @@ const filteredFiles = filterFilesByAffectedPackages(
 
 ## Environment Variables
 
-- **`AFFECTED_STRATEGY`** - Strategy: `'git'` | `'moon'` | `'disabled'` (default: `'git'`)
-- **`AFFECTED_DOWNSTREAM`** - Include downstream: `'true'` | `'false'` (default: `'true'`)
-- **`AFFECTED_LOGGING`** - Detailed logging: `'true'` | `'false'` (default: `'true'`)
+| Variable               | Values                          | CLI default  | Programmatic default |
+|------------------------|---------------------------------|--------------|----------------------|
+| `AFFECTED_STRATEGY`    | `git`, `moon`, `disabled`       | `moon`       | `git`                |
+| `AFFECTED_DOWNSTREAM`  | `true`, `false`                 | `false`      | `true`               |
+| `AFFECTED_LOGGING`     | `true`, `false`                 | `false`      | `true`               |
+| `GITHUB_PR_MERGE_BASE` | any git ref                    | `origin/main`| —                    |
 
 ## How It Works
 
