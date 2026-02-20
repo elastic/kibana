@@ -6,24 +6,11 @@
  */
 
 import { get } from 'lodash';
-import {
-  ALERT_MUTED,
-  ALERT_SNOOZE_CONDITIONS,
-  ALERT_SNOOZE_EXPIRES_AT,
-} from '@kbn/rule-data-utils';
+import { ALERT_MUTED } from '@kbn/rule-data-utils';
 import type { AlertRuleData } from '../types';
+import { hasConditionalSnooze } from './snooze_utils';
 
-const hasConditionalSnooze = (existingAlert?: Record<string, unknown>): boolean => {
-  if (!existingAlert) {
-    return false;
-  }
-
-  const expiresAt = get(existingAlert, ALERT_SNOOZE_EXPIRES_AT);
-  const conditions = get(existingAlert, ALERT_SNOOZE_CONDITIONS);
-  const hasConditions = Array.isArray(conditions) && conditions.length > 0;
-
-  return expiresAt != null || hasConditions;
-};
+export { hasConditionalSnooze } from './snooze_utils';
 
 export function getAlertMutedStatus(
   alertInstanceId: string,

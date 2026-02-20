@@ -7,6 +7,7 @@
 import { Alert as LegacyAlert } from '../../../alert/alert';
 import { buildNewAlert } from './build_new_alert';
 import type { Alert } from '@kbn/alerts-as-data-utils';
+import { createConditionalSnoozeAlert } from '../fixtures/snooze_alert_fixtures';
 import {
   SPACE_IDS,
   ALERT_ACTION_GROUP,
@@ -518,16 +519,18 @@ describe('buildNewAlert', () => {
         },
       ];
       const snapshot = { 'kibana.alert.severity': 'critical' };
+      const existingAlert = {
+        ...createConditionalSnoozeAlert({
+          expiresAt,
+          conditions,
+          conditionOperator: 'any',
+          snapshot,
+        }),
+      } as unknown as Alert;
 
       const result = buildNewAlert<{}, {}, {}, 'default', 'recovered'>({
         legacyAlert,
-        existingAlert: {
-          [ALERT_MUTED]: true,
-          [ALERT_SNOOZE_EXPIRES_AT]: expiresAt,
-          [ALERT_SNOOZE_CONDITIONS]: conditions,
-          [ALERT_SNOOZE_CONDITION_OPERATOR]: 'any',
-          [ALERT_SNOOZE_SNAPSHOT]: snapshot,
-        } as unknown as Alert,
+        existingAlert,
         rule: alertRule,
         ruleData: {
           ...ruleData,

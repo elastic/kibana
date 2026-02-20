@@ -47,6 +47,10 @@ import {
   existingExpandedActiveAlert,
   rule,
 } from '../test_fixtures';
+import {
+  createConditionalSnoozeAlert,
+  createConditionOnlySnoozeAlert,
+} from '../fixtures/snooze_alert_fixtures';
 import { omit } from 'lodash';
 
 for (const flattened of [true, false]) {
@@ -850,16 +854,18 @@ for (const flattened of [true, false]) {
           { type: 'field_change', field: 'kibana.alert.severity', snapshotValue: 'low' },
         ];
         const snapshot = { 'kibana.alert.severity': 'low' };
+        const alert = {
+          ...existingFlattenedActiveAlert,
+          ...createConditionalSnoozeAlert({
+            expiresAt,
+            conditions,
+            conditionOperator: 'any',
+            snapshot,
+          }),
+        } as unknown as Alert;
 
         const result = buildRecoveredAlert<{}, {}, {}, 'default', 'recovered'>({
-          alert: {
-            ...existingFlattenedActiveAlert,
-            [ALERT_MUTED]: true,
-            [ALERT_SNOOZE_EXPIRES_AT]: expiresAt,
-            [ALERT_SNOOZE_CONDITIONS]: conditions,
-            [ALERT_SNOOZE_CONDITION_OPERATOR]: 'any',
-            [ALERT_SNOOZE_SNAPSHOT]: snapshot,
-          } as unknown as Alert,
+          alert,
           legacyAlert,
           rule: alertRule,
           recoveryActionGroup: 'recovered',
@@ -880,14 +886,13 @@ for (const flattened of [true, false]) {
         const conditions = [
           { type: 'severity_equals', field: 'kibana.alert.severity', value: 'medium' },
         ];
+        const alert = {
+          ...existingFlattenedActiveAlert,
+          ...createConditionOnlySnoozeAlert({ conditions, conditionOperator: 'all' }),
+        } as unknown as Alert;
 
         const result = buildRecoveredAlert<{}, {}, {}, 'default', 'recovered'>({
-          alert: {
-            ...existingFlattenedActiveAlert,
-            [ALERT_MUTED]: true,
-            [ALERT_SNOOZE_CONDITIONS]: conditions,
-            [ALERT_SNOOZE_CONDITION_OPERATOR]: 'all',
-          } as unknown as Alert,
+          alert,
           legacyAlert,
           rule: alertRule,
           recoveryActionGroup: 'recovered',

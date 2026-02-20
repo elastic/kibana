@@ -46,6 +46,7 @@ import { stripFrameworkFields } from '../strip_framework_fields';
 import { nanosToMicros } from '../nanos_to_micros';
 import { removeUnflattenedFieldsFromAlert, replaceRefreshableAlertFields } from '../format_alert';
 import { filterAlertState } from '../filter_alert_state';
+import { hasSnoozeConditions } from '../snooze_utils';
 
 interface BuildRecoveredAlertOpts<
   AlertData extends RuleAlertData,
@@ -106,11 +107,7 @@ export const buildRecoveredAlert = <
   // Preserve ALERT_MUTED from existing alert
   const alertMuted = get(alert, ALERT_MUTED);
   const existingSnoozeExpiresAt = get(alert, ALERT_SNOOZE_EXPIRES_AT);
-  const existingSnoozeConditions = get(alert, ALERT_SNOOZE_CONDITIONS);
-  const existingSnoozeConditionOperator = get(alert, ALERT_SNOOZE_CONDITION_OPERATOR);
-  const existingSnoozeSnapshot = get(alert, ALERT_SNOOZE_SNAPSHOT);
-  const hasSnoozeConditions =
-    Array.isArray(existingSnoozeConditions) && existingSnoozeConditions.length > 0;
+  const preserveConditionFields = hasSnoozeConditions(alert);
 
   const alertUpdates = {
     // Update the timestamp to reflect latest update time
@@ -142,20 +139,19 @@ export const buildRecoveredAlert = <
     // auto-unmutes if they are now satisfied. Snooze fields are cleared only when
     // the alert is NOT muted (i.e. no active snooze or mute to carry forward).
     ...(alertMuted
-      ? {
-          [ALERT_SNOOZE_EXPIRES_AT]: existingSnoozeExpiresAt,
-          ...(hasSnoozeConditions
-            ? {
-                [ALERT_SNOOZE_CONDITIONS]: existingSnoozeConditions,
-                [ALERT_SNOOZE_CONDITION_OPERATOR]: existingSnoozeConditionOperator,
-                [ALERT_SNOOZE_SNAPSHOT]: existingSnoozeSnapshot,
-              }
-            : {
-                [ALERT_SNOOZE_CONDITIONS]: undefined,
-                [ALERT_SNOOZE_CONDITION_OPERATOR]: undefined,
-                [ALERT_SNOOZE_SNAPSHOT]: undefined,
-              }),
-        }
+      ? preserveConditionFields
+        ? {
+            [ALERT_SNOOZE_EXPIRES_AT]: existingSnoozeExpiresAt,
+            [ALERT_SNOOZE_CONDITIONS]: get(alert, ALERT_SNOOZE_CONDITIONS),
+            [ALERT_SNOOZE_CONDITION_OPERATOR]: get(alert, ALERT_SNOOZE_CONDITION_OPERATOR),
+            [ALERT_SNOOZE_SNAPSHOT]: get(alert, ALERT_SNOOZE_SNAPSHOT),
+          }
+        : {
+            [ALERT_SNOOZE_EXPIRES_AT]: existingSnoozeExpiresAt,
+            [ALERT_SNOOZE_CONDITIONS]: undefined,
+            [ALERT_SNOOZE_CONDITION_OPERATOR]: undefined,
+            [ALERT_SNOOZE_SNAPSHOT]: undefined,
+          }
       : {
           [ALERT_SNOOZE_EXPIRES_AT]: undefined,
           [ALERT_SNOOZE_CONDITIONS]: undefined,

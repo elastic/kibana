@@ -19,10 +19,6 @@ import {
   ALERT_PENDING_RECOVERED_COUNT,
   ALERT_MUTED,
   ALERT_RULE_TAGS,
-  ALERT_SNOOZE_CONDITIONS,
-  ALERT_SNOOZE_CONDITION_OPERATOR,
-  ALERT_SNOOZE_EXPIRES_AT,
-  ALERT_SNOOZE_SNAPSHOT,
   ALERT_START,
   ALERT_STATUS,
   ALERT_TIME_RANGE,
@@ -47,6 +43,10 @@ import { stripFrameworkFields } from '../strip_framework_fields';
 import { nanosToMicros } from '../nanos_to_micros';
 import { filterAlertState } from '../filter_alert_state';
 import { getAlertMutedStatus } from '../get_alert_muted_status';
+import {
+  hasConditionalSnooze,
+  getSnoozeFieldsToPreserve,
+} from '../snooze_utils';
 
 interface BuildNewAlertOpts<
   AlertData extends RuleAlertData,
@@ -101,13 +101,8 @@ export const buildNewAlert = <
   const hasAlertState = Object.keys(filteredAlertState).length > 0;
   const alertInstanceId = legacyAlert.getId();
   const isMuted = getAlertMutedStatus(alertInstanceId, ruleData, existingAlert);
-  const existingSnoozeExpiresAt = get(existingAlert, ALERT_SNOOZE_EXPIRES_AT);
-  const existingSnoozeConditions = get(existingAlert, ALERT_SNOOZE_CONDITIONS);
-  const existingSnoozeConditionOperator = get(existingAlert, ALERT_SNOOZE_CONDITION_OPERATOR);
-  const existingSnoozeSnapshot = get(existingAlert, ALERT_SNOOZE_SNAPSHOT);
-  const hasConditionalSnooze =
-    existingSnoozeExpiresAt != null ||
-    (Array.isArray(existingSnoozeConditions) && existingSnoozeConditions.length > 0);
+  const preserveSnooze =
+    isMuted && existingAlert && hasConditionalSnooze(existingAlert);
 
   return deepmerge.all(
     [
@@ -127,22 +122,7 @@ export const buildNewAlert = <
         [ALERT_CONSECUTIVE_MATCHES]: legacyAlert.getActiveCount(),
         [ALERT_PENDING_RECOVERED_COUNT]: legacyAlert.getPendingRecoveredCount(),
         [ALERT_MUTED]: isMuted,
-        ...(isMuted && hasConditionalSnooze
-          ? {
-              ...(existingSnoozeExpiresAt !== undefined
-                ? { [ALERT_SNOOZE_EXPIRES_AT]: existingSnoozeExpiresAt }
-                : {}),
-              ...(existingSnoozeConditions !== undefined
-                ? { [ALERT_SNOOZE_CONDITIONS]: existingSnoozeConditions }
-                : {}),
-              ...(existingSnoozeConditionOperator !== undefined
-                ? { [ALERT_SNOOZE_CONDITION_OPERATOR]: existingSnoozeConditionOperator }
-                : {}),
-              ...(existingSnoozeSnapshot !== undefined
-                ? { [ALERT_SNOOZE_SNAPSHOT]: existingSnoozeSnapshot }
-                : {}),
-            }
-          : {}),
+        ...(preserveSnooze && existingAlert ? getSnoozeFieldsToPreserve(existingAlert) : {}),
         [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
         [ALERT_UUID]: legacyAlert.getUuid(),
         [ALERT_SEVERITY_IMPROVING]: false,

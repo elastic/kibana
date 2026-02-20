@@ -15,6 +15,7 @@ import {
   ALERT_SNOOZE_CONDITIONS,
   ALERT_SNOOZE_CONDITION_OPERATOR,
 } from '@kbn/rule-data-utils';
+import { hasConditionalSnooze } from '../../../alerts_client/lib/snooze_utils';
 import { evaluateSnoozeConditions } from '../../../lib/snooze';
 import type { AlertSnoozeConfig } from '../../../lib/snooze';
 import type { RuleTypeState, RuleAlertData } from '../../../../common';
@@ -405,10 +406,7 @@ export class PerAlertActionScheduler<
       | 'all'
       | undefined;
 
-    const hasConditionalSnooze =
-      snoozeExpiresAt || (snoozeConditions && snoozeConditions.length > 0);
-
-    if (!hasConditionalSnooze) {
+    if (!hasConditionalSnooze(alertData)) {
       // kibana.alert.muted is true but there are no snooze conditions -- this should not
       // happen through the normal API flow. Treat as not muted to avoid permanently
       // suppressing actions without an unmute path.
