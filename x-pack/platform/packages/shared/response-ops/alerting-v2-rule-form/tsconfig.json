@@ -28,5 +28,6 @@
     "@kbn/react-query",
     "@kbn/search-types",
     "@kbn/alerting-v2-schemas",
+    "@kbn/code-editor",
   ]
 }

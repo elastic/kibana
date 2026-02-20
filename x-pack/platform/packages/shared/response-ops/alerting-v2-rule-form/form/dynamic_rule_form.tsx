@@ -67,7 +67,12 @@ export const DynamicRuleForm: React.FC<DynamicRuleFormProps> = ({
         }}
         render={() => <></>}
       />
-      <RuleForm formId={formId} services={services} onSubmit={onSubmit} />
+      <RuleForm
+        formId={formId}
+        services={services}
+        onSubmit={onSubmit}
+        includeQueryEditor={false}
+      />
     </FormProvider>
   );
 };

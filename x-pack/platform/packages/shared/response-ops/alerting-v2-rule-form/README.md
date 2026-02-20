@@ -1,12 +1,12 @@
 # @kbn/alerting-v2-rule-form
 
-This package provides UI components for creating and editing v2 alerting rules with queries.
+This package provides UI components for creating and editing v2 alerting rules with ES|QL queries.
 
 ## Quick Start
 
 ### For Discover Integration
 
-Use `DynamicRuleFormFlyout` when the form needs to react to external query changes:
+Use `DynamicRuleFormFlyout` when the form needs to react to external query changes. The query editor is hidden since the query is controlled externally:
 
 ```tsx
 import { DynamicRuleFormFlyout } from '@kbn/alerting-v2-rule-form';
@@ -24,7 +24,7 @@ function MyComponent({ services, query, onClose }) {
 
 ### For Plugin Integration
 
-Use `StandaloneRuleFormFlyout` for a classic flyout where the user controls everything:
+Use `StandaloneRuleFormFlyout` for a classic flyout where the user controls everything, including the ES|QL query via a built-in editor:
 
 ```tsx
 import { StandaloneRuleFormFlyout } from '@kbn/alerting-v2-rule-form';
@@ -34,7 +34,6 @@ function MyComponent({ services, initialQuery, onClose }) {
     <StandaloneRuleFormFlyout
       services={services}
       query={initialQuery}
-      defaultTimeField="@timestamp"
       onClose={onClose}
     />
   );
@@ -45,12 +44,12 @@ function MyComponent({ services, initialQuery, onClose }) {
 
 The package uses a composable architecture with multiple layers:
 
-| Export | Use Case |
-|--------|----------|
-| `DynamicRuleFormFlyout` | Complete flyout that syncs with external query changes (Discover) |
-| `StandaloneRuleFormFlyout` | Complete flyout with static initialization (plugins) |
-| `RuleFormFlyout` + `DynamicRuleForm` | Composable pattern for custom flyout behavior |
-| `RuleFormFlyout` + `StandaloneRuleForm` | Composable pattern for custom flyout behavior |
+| Export | Query Editor | Use Case |
+|--------|--------------|----------|
+| `DynamicRuleFormFlyout` | Hidden | Complete flyout that syncs with external query changes (Discover) |
+| `StandaloneRuleFormFlyout` | Visible | Complete flyout with static initialization and editable query (plugins) |
+| `RuleFormFlyout` + `DynamicRuleForm` | Hidden | Composable pattern for custom flyout behavior |
+| `RuleFormFlyout` + `StandaloneRuleForm` | Visible | Composable pattern for custom flyout behavior |
 
 ## Composable Pattern
 
@@ -59,20 +58,18 @@ For advanced customization, use the composable pattern with the base `RuleFormFl
 ### Dynamic Form (Syncs with Props)
 
 ```tsx
-import { RuleFormFlyout, DynamicRuleForm } from '@kbn/alerting-v2-rule-form';
+import { RuleFormFlyout, DynamicRuleForm, RULE_FORM_ID } from '@kbn/alerting-v2-rule-form';
 
-function DiscoverRuleFlyout({ services, query, onClose }) {
+function DiscoverRuleFlyout({ services, query, onClose, onSubmit }) {
   return (
     <RuleFormFlyout
-      services={{
-        http: services.http,
-        notifications: services.notifications,
-      }}
       onClose={onClose}
       push={true}
     >
       <DynamicRuleForm
+        formId={RULE_FORM_ID}
         query={query}
+        onSubmit={onSubmit}
         services={{
           http: services.http,
           data: services.data,
@@ -91,21 +88,18 @@ The `DynamicRuleForm` uses react-hook-form's `values` prop with `resetOptions: {
 ### Standalone Form (Static Initialization)
 
 ```tsx
-import { RuleFormFlyout, StandaloneRuleForm } from '@kbn/alerting-v2-rule-form';
+import { RuleFormFlyout, StandaloneRuleForm, RULE_FORM_ID } from '@kbn/alerting-v2-rule-form';
 
-function PluginRuleFlyout({ services, initialQuery, onClose }) {
+function PluginRuleFlyout({ services, initialQuery, onClose, onSubmit }) {
   return (
     <RuleFormFlyout
-      services={{
-        http: services.http,
-        notifications: services.notifications,
-      }}
       onClose={onClose}
       push={true}
     >
       <StandaloneRuleForm
+        formId={RULE_FORM_ID}
         query={initialQuery}
-        defaultTimeField="@timestamp"
+        onSubmit={onSubmit}
         services={{
           http: services.http,
           data: services.data,
@@ -123,18 +117,27 @@ The `StandaloneRuleForm` uses react-hook-form's `defaultValues` for static initi
 
 ```typescript
 interface FormValues {
-  kind: 'signal' | 'alert';
-  name: string;
-  description: string;
-  tags: string[];
-  schedule: {
-    custom: string; // Duration string like '5m', '1h'
+  kind: RuleKind;
+  metadata: {
+    name: string;
+    enabled: boolean;
+    description?: string;
+    owner?: string;
+    labels?: string[];
   };
-  enabled: boolean;
-  query: string;
   timeField: string;
-  lookbackWindow: string; // Duration string
-  groupingKey: string[]; // Columns to group alerts by
+  schedule: {
+    every: string;    // Duration string like '5m', '1h'
+    lookback: string; // Duration string
+  };
+  evaluation: {
+    query: {
+      base: string;   // The ES|QL query
+    };
+  };
+  grouping?: {
+    fields: string[]; // Columns to group alerts by
+  };
 }
 ```
 

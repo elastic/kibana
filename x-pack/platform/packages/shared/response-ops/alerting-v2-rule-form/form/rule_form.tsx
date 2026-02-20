@@ -14,6 +14,7 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { FormValues } from './types';
 import { RuleExecutionFieldGroup } from './field_groups/rule_execution_field_group';
 import { RuleDetailsFieldGroup } from './field_groups/rule_details_field_group';
+import { EvaluationQueryField } from './fields/evaluation_query_field';
 import { ErrorCallOut } from '../flyout/error_callout';
 
 export interface RuleFormServices {
@@ -23,12 +24,11 @@ export interface RuleFormServices {
 }
 
 export interface RuleFormProps {
-  /** Form ID for submission */
   formId: string;
-  /** Services required for form fields */
   services: RuleFormServices;
-  /** Submit handler */
   onSubmit: (values: FormValues) => void;
+  /** Whether to include the ES|QL query editor (default: true) */
+  includeQueryEditor?: boolean;
 }
 
 /**
@@ -38,7 +38,12 @@ export interface RuleFormProps {
  * It does not manage form state - that responsibility belongs to the parent component
  * (DynamicRuleForm or StandaloneRuleForm).
  */
-export const RuleForm: React.FC<RuleFormProps> = ({ formId, services, onSubmit }) => {
+export const RuleForm: React.FC<RuleFormProps> = ({
+  formId,
+  services,
+  onSubmit,
+  includeQueryEditor = true,
+}) => {
   const { handleSubmit } = useFormContext<FormValues>();
 
   return (
@@ -46,6 +51,12 @@ export const RuleForm: React.FC<RuleFormProps> = ({ formId, services, onSubmit }
       <ErrorCallOut />
       <RuleDetailsFieldGroup />
       <EuiSpacer size="m" />
+      {includeQueryEditor && (
+        <>
+          <EvaluationQueryField />
+          <EuiSpacer size="m" />
+        </>
+      )}
       <RuleExecutionFieldGroup services={services} />
     </EuiForm>
   );
