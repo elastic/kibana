@@ -183,6 +183,7 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
       body: bulkBody,
     });
     expect(bulkUpsert.statusCode).toBe(200);
+    expect(bulkUpsert.body.errors).toHaveLength(0);
 
     const resp = await esClient.search({
       index: UPDATES_INDEX,
