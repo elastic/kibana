@@ -20,9 +20,9 @@ module.exports = {
   overrides: [
     {
       // Prevent new dangerouslySetInnerHTML usage for formatter output
-      // Except in format_value_react.tsx which wraps FormattedValue
+      // Except in format_field_value_react.tsx which wraps FormattedValue
       files: ['**/*.tsx'],
-      excludedFiles: ['**/format_value_react.tsx', '**/*.test.tsx'],
+      excludedFiles: ['**/format_field_value_react.tsx', '**/*.test.tsx'],
       rules: {
         'react/no-danger': [
           'error',
