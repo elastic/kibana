@@ -30,22 +30,24 @@ import { useInferenceEndpointMutation } from '../hooks/use_inference_endpoint_mu
 const MIN_ALLOCATIONS = 0;
 const DEFAULT_NUM_THREADS = 1;
 
-const formDeserializer = (data: InferenceEndpoint): InferenceEndpoint => {
-  const { providerConfig, ...restConfig } = data.config || {};
-  const {
-    'adaptive_allocations.max_number_of_allocations': maxAllocations,
-    'adaptive_allocations.enabled': adaptiveAllocationsEnabled,
-    'adaptive_allocations.min_number_of_allocations': minAllocations,
-    ...restProviderConfig
-  } = providerConfig || {};
+const formDeserializer = (data: InferenceEndpoint) => {
+  const maxAllocations =
+    data.config?.providerConfig?.adaptive_allocations?.max_number_of_allocations ||
+    data.config?.providerConfig?.['adaptive_allocations.max_number_of_allocations'];
 
-  if (maxAllocations || restConfig?.headers) {
-    const { headers, ...restConfigNoHeaders } = restConfig;
+  if (maxAllocations || data.config?.headers) {
+    const { headers, ...restConfig } = data.config;
+    const {
+      'adaptive_allocations.max_number_of_allocations': _flatMax,
+      'adaptive_allocations.enabled': _flatEnabled,
+      'adaptive_allocations.min_number_of_allocations': _flatMin,
+      ...restProviderConfig
+    } = (data.config.providerConfig || {}) as Record<string, unknown>;
 
     return {
       ...data,
       config: {
-        ...restConfigNoHeaders,
+        ...restConfig,
         providerConfig: {
           ...restProviderConfig,
           ...(headers ? { headers } : {}),
