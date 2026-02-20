@@ -214,11 +214,7 @@ test.describe(
 
       // Check that the Add button is disabled when there's a validation error
       const addButton = page.getByTestId('streamsAppSchemaEditorAddFieldButton');
-      await addButton.click();
-      // Flyout should still be open because the form is invalid
-      await expect(
-        page.getByTestId('streamsAppSchemaEditorAddFieldFlyoutCloseButton')
-      ).toBeVisible();
+      await expect(addButton).toBeDisabled();
 
       // Clear and try with a valid namespaced field
       const clearButton = page.getByTestId('comboBoxClearButton');
