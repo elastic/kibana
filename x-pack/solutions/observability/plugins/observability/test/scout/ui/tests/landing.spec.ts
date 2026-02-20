@@ -5,116 +5,120 @@
  * 2.0.
  */
 
-import { test } from '@kbn/scout-oblt';
+import { test, tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { generateApmData, generateLogsData } from '../fixtures/generators';
 
-test.describe('Observability Landing Page', { tag: ['@ess', '@svlOblt'] }, () => {
-  test.beforeAll(async ({ kbnClient }) => {
-    await kbnClient.savedObjects.cleanStandardList();
-  });
-
-  test.beforeEach(async ({ browserAuth, apmSynthtraceEsClient, logsSynthtraceEsClient }) => {
-    await browserAuth.loginAsAdmin();
-    await apmSynthtraceEsClient.clean();
-    await logsSynthtraceEsClient.clean();
-  });
-
-  test.afterAll(async ({ logsSynthtraceEsClient, apmSynthtraceEsClient }) => {
-    await apmSynthtraceEsClient.clean();
-    await logsSynthtraceEsClient.clean();
-  });
-
-  test('redirects to page specified in defaultRoute uiSetting', async ({
-    page,
-    kbnClient,
-    kbnUrl,
-  }) => {
-    // Set custom default route
-    const prevDefaultRoute = await kbnClient.uiSettings.get('defaultRoute');
-    await kbnClient.uiSettings.update({
-      defaultRoute: '/app/metrics',
+test.describe(
+  'Observability Landing Page',
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+  () => {
+    test.beforeAll(async ({ kbnClient }) => {
+      await kbnClient.savedObjects.cleanStandardList();
     });
 
-    // Navigate to observability landing page
-    await page.goto(kbnUrl.get('/'));
-
-    // Wait for redirect and verify we're on the metrics page
-    await expect(page).toHaveURL(/\/app\/metrics/, { timeout: 10000 });
-
-    // Restore default route
-    await kbnClient.uiSettings.update({
-      defaultRoute: prevDefaultRoute,
+    test.beforeEach(async ({ browserAuth, apmSynthtraceEsClient, logsSynthtraceEsClient }) => {
+      await browserAuth.loginAsAdmin();
+      await apmSynthtraceEsClient.clean();
+      await logsSynthtraceEsClient.clean();
     });
-  });
 
-  test('redirects to Discover logs when logs data exists', async ({
-    page,
-    pageObjects,
-    logsSynthtraceEsClient,
-  }) => {
-    // Generate logs data only
-    await generateLogsData(logsSynthtraceEsClient);
+    test.afterAll(async ({ logsSynthtraceEsClient, apmSynthtraceEsClient }) => {
+      await apmSynthtraceEsClient.clean();
+      await logsSynthtraceEsClient.clean();
+    });
 
-    // Navigate to observability landing page
-    await pageObjects.observabilityNavigation.gotoLanding();
+    test('redirects to page specified in defaultRoute uiSetting', async ({
+      page,
+      kbnClient,
+      kbnUrl,
+    }) => {
+      // Set custom default route
+      const prevDefaultRoute = await kbnClient.uiSettings.get('defaultRoute');
+      await kbnClient.uiSettings.update({
+        defaultRoute: '/app/metrics',
+      });
 
-    // Wait for redirect and verify we're on Discover logs page
-    await expect(page).toHaveURL(/\/app\/discover/, { timeout: 10000 });
-  });
+      // Navigate to observability landing page
+      await page.goto(kbnUrl.get('/'));
 
-  test('redirects to APM services when only APM data exists', async ({
-    page,
-    pageObjects,
-    apmSynthtraceEsClient,
-  }) => {
-    // Generate APM data only
-    await generateApmData(apmSynthtraceEsClient);
+      // Wait for redirect and verify we're on the metrics page
+      await expect(page).toHaveURL(/\/app\/metrics/, { timeout: 10000 });
 
-    // Navigate to observability landing page
-    await pageObjects.observabilityNavigation.gotoLanding();
+      // Restore default route
+      await kbnClient.uiSettings.update({
+        defaultRoute: prevDefaultRoute,
+      });
+    });
 
-    // Wait for redirect and verify we're on APM page
-    await expect(page).toHaveURL(/\/app\/apm/, { timeout: 10000 });
-  });
+    test('redirects to Discover logs when logs data exists', async ({
+      page,
+      pageObjects,
+      logsSynthtraceEsClient,
+    }) => {
+      // Generate logs data only
+      await generateLogsData(logsSynthtraceEsClient);
 
-  test('redirects to Discover logs when both logs and APM data exist (logs priority)', async ({
-    page,
-    pageObjects,
-    logsSynthtraceEsClient,
-    apmSynthtraceEsClient,
-  }) => {
-    // Generate both logs and APM data
-    await generateLogsData(logsSynthtraceEsClient);
-    await generateApmData(apmSynthtraceEsClient);
+      // Navigate to observability landing page
+      await pageObjects.observabilityNavigation.gotoLanding();
 
-    // Navigate to observability landing page
-    await pageObjects.observabilityNavigation.gotoLanding();
+      // Wait for redirect and verify we're on Discover logs page
+      await expect(page).toHaveURL(/\/app\/discover/, { timeout: 10000 });
+    });
 
-    // Wait for redirect and verify we're on Discover logs page (logs takes priority)
-    await expect(page).toHaveURL(/\/app\/discover/, { timeout: 10000 });
-  });
+    test('redirects to APM services when only APM data exists', async ({
+      page,
+      pageObjects,
+      apmSynthtraceEsClient,
+    }) => {
+      // Generate APM data only
+      await generateApmData(apmSynthtraceEsClient);
 
-  test('redirects to onboarding when no data exists', async ({ page, pageObjects }) => {
-    // Navigate to observability landing page with no data
-    await pageObjects.observabilityNavigation.gotoLanding();
+      // Navigate to observability landing page
+      await pageObjects.observabilityNavigation.gotoLanding();
 
-    // Wait for redirect and verify we're on onboarding page
-    await expect(page).toHaveURL(/\/app\/observabilityOnboarding/, { timeout: 10000 });
-  });
+      // Wait for redirect and verify we're on APM page
+      await expect(page).toHaveURL(/\/app\/apm/, { timeout: 10000 });
+    });
 
-  test('redirects to onboarding when log data that should be ignored exists', async ({
-    page,
-    pageObjects,
-    logsSynthtraceEsClient,
-  }) => {
-    // Generate Fleet Agent status change log data which should be ignored
-    await generateLogsData(logsSynthtraceEsClient, { dataset: 'elastic_agent.status_change' });
+    test('redirects to Discover logs when both logs and APM data exist (logs priority)', async ({
+      page,
+      pageObjects,
+      logsSynthtraceEsClient,
+      apmSynthtraceEsClient,
+    }) => {
+      // Generate both logs and APM data
+      await generateLogsData(logsSynthtraceEsClient);
+      await generateApmData(apmSynthtraceEsClient);
 
-    // Navigate to observability landing page with no data
-    await pageObjects.observabilityNavigation.gotoLanding();
+      // Navigate to observability landing page
+      await pageObjects.observabilityNavigation.gotoLanding();
 
-    // Wait for redirect and verify we're on onboarding page
-    await expect(page).toHaveURL(/\/app\/observabilityOnboarding/, { timeout: 10000 });
-  });
-});
+      // Wait for redirect and verify we're on Discover logs page (logs takes priority)
+      await expect(page).toHaveURL(/\/app\/discover/, { timeout: 10000 });
+    });
+
+    test('redirects to onboarding when no data exists', async ({ page, pageObjects }) => {
+      // Navigate to observability landing page with no data
+      await pageObjects.observabilityNavigation.gotoLanding();
+
+      // Wait for redirect and verify we're on onboarding page
+      await expect(page).toHaveURL(/\/app\/observabilityOnboarding/, { timeout: 10000 });
+    });
+
+    test('redirects to onboarding when log data that should be ignored exists', async ({
+      page,
+      pageObjects,
+      logsSynthtraceEsClient,
+    }) => {
+      // Generate Fleet Agent status change log data which should be ignored
+      await generateLogsData(logsSynthtraceEsClient, { dataset: 'elastic_agent.status_change' });
+
+      // Navigate to observability landing page with no data
+      await pageObjects.observabilityNavigation.gotoLanding();
+
+      // Wait for redirect and verify we're on onboarding page
+      await expect(page).toHaveURL(/\/app\/observabilityOnboarding/, { timeout: 10000 });
+    });
+  }
+);

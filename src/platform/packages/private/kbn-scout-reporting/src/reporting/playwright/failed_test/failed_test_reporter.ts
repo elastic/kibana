@@ -22,9 +22,9 @@ import {
   type CodeOwnersEntry,
 } from '@kbn/code-owners';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { SCOUT_REPORT_OUTPUT_ROOT } from '@kbn/scout-info';
 import { ToolingLog } from '@kbn/tooling-log';
 import path from 'node:path';
+import { SCOUT_REPORT_OUTPUT_ROOT, ScoutTestTarget } from '@kbn/scout-info';
 import {
   computeTestID,
   excapeHtmlCharacters,
@@ -49,9 +49,8 @@ export class ScoutFailedTestReporter implements Reporter {
   private readonly codeOwnersEntries: CodeOwnersEntry[];
   private readonly report: ScoutFailureReport;
   private readonly command: string;
+  private readonly testTarget: string;
   private failureTracker?: ScoutFailureTracker;
-
-  private target = 'undefined'; // when '--grep' is not provided in the command line
   private kibanaModule: TestFailure['kibanaModule'];
 
   constructor(private readonly reporterOptions: ScoutPlaywrightReporterOptions = {}) {
@@ -89,8 +88,6 @@ export class ScoutFailedTestReporter implements Reporter {
   }
 
   onBegin(config: FullConfig, suite: Suite) {
-    this.target = getRunTarget();
-
     // Get plugin or package metadata from kibana.jsonc
     if (config.configFile) {
       const metadata = getKibanaModuleData(config.configFile);
@@ -111,7 +108,13 @@ export class ScoutFailedTestReporter implements Reporter {
   }
 
   onTestEnd(test: TestCase, result: TestResult) {
-    if (result.status !== 'failed') {
+    // Playwright marks timeouts and interruptions as separate statuses, but we still
+    // want to generate a Scout failure report artifact for them (e.g. global.setup.ts timeouts).
+    if (
+      result.status !== 'failed' &&
+      result.status !== 'timedOut' &&
+      result.status !== 'interrupted'
+    ) {
       return;
     }
 
@@ -124,7 +127,7 @@ export class ScoutFailedTestReporter implements Reporter {
       id: computeTestID(testFilePath, fullTestTitle),
       suite: test.parent.title,
       title: test.title,
-      target: this.target,
+      target: this.testTarget,
       command: this.command,
       location: stripFilePath(test.location.file),
       owner: this.getFileOwners(path.relative(REPO_ROOT, test.location.file)),

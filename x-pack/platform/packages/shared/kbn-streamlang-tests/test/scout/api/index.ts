@@ -10,3 +10,5 @@ import { esqlFixture } from './fixtures/esql_fixture';
 import { testBedFixture } from './fixtures/test_bed_fixture';
 
 export const streamlangApiTest = mergeTests(apiTest, esqlFixture, testBedFixture);
+
+export { tags } from '@kbn/scout';

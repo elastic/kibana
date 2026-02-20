@@ -133,7 +133,7 @@ export function UnmanagedElasticsearchAssets({
     <>
       <EuiFlexGroup direction="column" gutterSize="l">
         <EuiFlexItem>
-          {significantEvents?.enabled && (
+          {significantEvents?.enabled && significantEvents?.available && (
             <StreamFeatureConfiguration definition={definition.stream} aiFeatures={aiFeatures} />
           )}
         </EuiFlexItem>

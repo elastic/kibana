@@ -5,18 +5,21 @@
  * 2.0.
  */
 
-import type { ScoutPage } from '@kbn/scout-oblt';
+import type { Locator, ScoutPage } from '@kbn/scout-oblt';
 
-export async function waitForTableToLoad(page: ScoutPage, testId: string) {
-  const table = page.getByTestId(testId);
+export async function waitForTableToLoad(page: ScoutPage, idOrLocator: Locator | string) {
+  const table = typeof idOrLocator === 'string' ? page.getByTestId(idOrLocator) : idOrLocator;
 
   await table.waitFor();
 
   await table.locator('div.euiBasicTable').waitFor();
 }
 
-export async function waitForChartToLoad(page: ScoutPage, testId: string) {
-  const chart = page.getByTestId(testId);
+export async function waitForChartToLoad(
+  page: ScoutPage,
+  idOrLocator: Locator | string
+): Promise<void> {
+  const chart = typeof idOrLocator === 'string' ? page.getByTestId(idOrLocator) : idOrLocator;
 
   await chart.waitFor();
   await chart.getByTestId('loading').waitFor({ state: 'hidden' });

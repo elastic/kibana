@@ -15,8 +15,8 @@ steps:
       - linting_with_types
       - check_types
       - check_oas_snapshot
-    timeout_in_minutes: 75
-    parallelism: 20
+    timeout_in_minutes: 60
+    parallelism: 22
     retry:
       automatic:
         - exit_status: '-1'

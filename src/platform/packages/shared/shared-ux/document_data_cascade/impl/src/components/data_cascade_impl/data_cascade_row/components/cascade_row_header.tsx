@@ -28,6 +28,7 @@ import {
 import type { CascadeRowHeaderPrimitiveProps } from '../../types';
 import { CascadeRowActions } from './cascade_row_actions';
 import { styles as cascadeRowHeaderStyles, flexHelper } from './cascade_row_header.styles';
+import { CascadeRowHeaderSlotsRenderer } from './cascade_row_header_slots_renderer';
 
 /**
  * @internal
@@ -194,14 +195,8 @@ export function CascadeRowHeaderPrimitive<G extends GroupNode, L extends LeafNod
               >
                 <React.Fragment>
                   {Boolean(headerMetaSlots?.length) && (
-                    <EuiFlexItem>
-                      <EuiFlexGroup gutterSize={size}>
-                        {headerMetaSlots?.map((metaSlot, index) => (
-                          <EuiFlexItem css={styles.rowHeaderSlotItemWrapper} key={index}>
-                            {metaSlot}
-                          </EuiFlexItem>
-                        ))}
-                      </EuiFlexGroup>
+                    <EuiFlexItem css={flexHelper} grow>
+                      <CascadeRowHeaderSlotsRenderer headerMetaSlots={headerMetaSlots!} />
                     </EuiFlexItem>
                   )}
                 </React.Fragment>

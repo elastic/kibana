@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { ScoutTestTarget } from '@kbn/scout-info';
+
 export const stripRunCommand = (commandArgs: string[]): string => {
   if (!Array.isArray(commandArgs) || commandArgs.length < 3) {
     throw new Error(`Invalid command arguments: must include at least 'npx playwright test'`);
@@ -61,36 +63,26 @@ export function getRunTarget(argv: string[] = process.argv): string {
   }
 
   // Fallback to parsing command line arguments
-  const tagsToMode: Record<string, string> = {
-    '@ess': 'stateful',
-    '@svlSearch': 'serverless-search',
-    '@svlOblt': 'serverless-oblt',
-    '@svlLogsEssentials': 'serverless-oblt-logs-essentials',
-    '@svlSecurity': 'serverless-security',
-    '@svlSecurityEssentials': 'serverless-security-essentials',
-    '@svlSecurityEase': 'serverless-security-ease',
-  };
-
   // Try to find --grep argument in different formats
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
+    let tag;
 
     // Handle --grep=@tag format
     if (arg.startsWith('--grep=')) {
-      const tag = arg.split('=')[1];
-      if (tag && tagsToMode[tag]) {
-        return tagsToMode[tag];
-      }
+      tag = arg.split('=')[1];
+    }
+    // Handle --grep @tag format
+    else if (arg === '--grep' && i + 1 < argv.length) {
+      tag = argv[i + 1];
     }
 
-    // Handle --grep @tag format
-    if (arg === '--grep' && i + 1 < argv.length) {
-      const tag = argv[i + 1];
-      if (tag && tagsToMode[tag]) {
-        return tagsToMode[tag];
+    if (tag) {
+      try {
+        return ScoutTestTarget.fromTag(tag);
+      } catch (e) {
+        // Whatever we found, it's not good.
       }
     }
   }
-
-  return 'undefined';
 }
