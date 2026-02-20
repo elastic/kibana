@@ -1783,6 +1783,7 @@ Object {
             "bearer",
             "apiKey",
             "basic",
+            "apiKeyInUrl",
           ],
           "type": "string",
         },
