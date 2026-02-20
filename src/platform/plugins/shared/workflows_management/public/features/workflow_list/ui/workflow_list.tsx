@@ -27,7 +27,7 @@ import { Link } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useQueryClient } from '@kbn/react-query';
-import type { WorkflowListItemDto, WorkflowsSearchParams } from '@kbn/workflows';
+import type { WorkflowListDto, WorkflowListItemDto, WorkflowsSearchParams } from '@kbn/workflows';
 import { useWorkflows } from '@kbn/workflows-ui';
 import { WorkflowsUtilityBar } from './workflows_utility_bar';
 import { WorkflowsEmptyState } from '../../../components';
@@ -90,29 +90,32 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
     setSelectedItems([]);
   }, []);
 
-  const onRefresh = useCallback(async () => {
-    // Get the previous workflows here, before
-    // the possible cache rewrite can happen
-    const previousWorkflows = workflowsRef.current;
-    const result = await refetch();
+  const onRefresh = useCallback(
+    async (previousWorkflowsOverride?: WorkflowListDto) => {
+      // Use the override when provided (e.g. pre-optimistic data captured before mutate),
+      // otherwise fall back to the current ref which may already reflect the optimistic update
+      const previousWorkflows = previousWorkflowsOverride ?? workflowsRef.current;
+      const result = await refetch();
 
-    if (previousWorkflows && result.data && areSimilarResults(result.data, previousWorkflows)) {
-      const sorted = keepPreviousWorkflowOrder({
-        previousData: previousWorkflows,
-        freshData: result.data,
-      });
-      queryClient.setQueryData(['workflows', search], sorted);
-    }
+      if (previousWorkflows && result.data && areSimilarResults(result.data, previousWorkflows)) {
+        const sorted = keepPreviousWorkflowOrder({
+          previousData: previousWorkflows,
+          freshData: result.data,
+        });
+        queryClient.setQueryData(['workflows', search], sorted);
+      }
 
-    const currentSelectedItems = selectedItemsRef.current;
-    if (result.data?.results && currentSelectedItems.length > 0) {
-      const selectedIds = new Set(currentSelectedItems.map((item) => item.id));
-      const updatedSelectedItems = result.data.results.filter((workflow) =>
-        selectedIds.has(workflow.id)
-      );
-      setSelectedItems(updatedSelectedItems);
-    }
-  }, [refetch, queryClient, search]);
+      const currentSelectedItems = selectedItemsRef.current;
+      if (result.data?.results && currentSelectedItems.length > 0) {
+        const selectedIds = new Set(currentSelectedItems.map((item) => item.id));
+        const updatedSelectedItems = result.data.results.filter((workflow) =>
+          selectedIds.has(workflow.id)
+        );
+        setSelectedItems(updatedSelectedItems);
+      }
+    },
+    [refetch, queryClient, search]
+  );
 
   const handleRunWorkflow = useCallback(
     (id: string, event: Record<string, unknown>, triggerTab?: 'manual' | 'alert' | 'index') => {
@@ -172,16 +175,18 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
 
   const handleToggleWorkflow = useCallback(
     (item: WorkflowListItemDto) => {
+      const preOptimisticWorkflows = workflowsRef.current;
       updateWorkflow.mutate(
         {
           id: item.id,
           workflow: {
             enabled: !item.enabled,
           },
+          skipRefetch: true,
         },
         {
           onSuccess: () => {
-            onRefresh();
+            onRefresh(preOptimisticWorkflows);
           },
           onError: (err: unknown) => {
             notifications?.toasts.addError(err as Error, {
