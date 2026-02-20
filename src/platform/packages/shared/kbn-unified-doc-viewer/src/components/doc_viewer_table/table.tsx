@@ -29,9 +29,9 @@ import {
   getVisibleColumns,
   canPrependTimeFieldColumn,
 } from '@kbn/discover-utils';
-import type { DocViewRenderProps, UnifiedDocViewerServices } from '@kbn/unified-doc-viewer/types';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { createRestorableStateProvider } from '@kbn/restorable-state';
+import type { DocViewRenderProps, UnifiedDocViewerServices } from '../../../types';
 import {
   DEFAULT_MARGIN_BOTTOM,
   getTabContentAvailableHeight,

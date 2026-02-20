@@ -14,8 +14,8 @@ import { EuiSpacer, EuiText, useEuiTheme, useResizeObserver } from '@elastic/eui
 import { getFormattedFields, getFlattenedFields } from '@kbn/discover-utils';
 import { css } from '@emotion/react';
 import useWindowSize from 'react-use/lib/useWindowSize';
-import { useUnifiedDocViewerServices } from '../../../services';
 import { FieldRow, TableGrid } from '@kbn/unified-doc-viewer';
+import { useUnifiedDocViewerServices } from '../../../services';
 import { FormattedValue } from './components/formatted_value';
 import { NamePopoverContent } from './components/name_popover_content';
 import { ValuePopoverContent } from './components/value_popover_content';

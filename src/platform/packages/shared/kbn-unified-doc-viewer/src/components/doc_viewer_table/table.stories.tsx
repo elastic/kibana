@@ -8,14 +8,14 @@
  */
 
 import type { Meta, StoryObj } from '@storybook/react';
-import type { DocViewRenderProps, UnifiedDocViewerServices } from '@kbn/unified-doc-viewer/types';
-import { DocViewerTable } from './table';
-import APMSpanFixture from '../../__fixtures__/span_apm';
 import { buildDataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
+import APMSpanFixture from '../../__fixtures__/span_apm';
+import type { DocViewRenderProps, UnifiedDocViewerServices } from '../../../types';
+import { DocViewerTable } from './table';
 
 type Args = DocViewRenderProps & { services: UnifiedDocViewerServices };
 const meta = {

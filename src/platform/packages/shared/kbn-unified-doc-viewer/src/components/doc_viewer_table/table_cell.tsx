@@ -8,9 +8,9 @@
  */
 
 import React, { useMemo } from 'react';
-import { FieldName } from '@kbn/unified-doc-viewer';
 import { FieldDescription, getFieldSearchMatchingHighlight } from '@kbn/field-utils';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import { FieldName } from '../../..';
 import { TableFieldValue } from './table_cell_value';
 import type { FieldRow } from './field_row';
 import { TermMatch, type UseTableFiltersCallbacksReturn } from './table_filters';

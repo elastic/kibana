@@ -11,12 +11,12 @@ import React from 'react';
 import type { EuiDataGridColumnCellActionProps } from '@elastic/eui';
 import { copyToClipboard } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import type { CoreStart } from '@kbn/core-lifecycle-browser';
+import type { DocViewFilterFn } from '../../../types';
 import {
   shouldShowFieldFilterExistAction,
   shouldShowFieldFilterInOutActions,
-} from '@kbn/unified-doc-viewer/utils/should_show_field_filter_actions';
-import type { CoreStart } from '@kbn/core-lifecycle-browser';
+} from '../../../utils/should_show_field_filter_actions';
 import type { FieldRow } from './field_row';
 
 interface TableActionsProps {

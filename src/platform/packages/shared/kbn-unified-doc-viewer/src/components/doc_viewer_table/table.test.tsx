@@ -18,7 +18,7 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { DocViewerTable, SHOW_ONLY_SELECTED_FIELDS } from './table';
 import { userEvent } from '@testing-library/user-event';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
-import type { UnifiedDocViewerServices } from '@kbn/unified-doc-viewer/types';
+import type { UnifiedDocViewerServices } from '../../../types';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 
 const storage = new Storage(window.localStorage);

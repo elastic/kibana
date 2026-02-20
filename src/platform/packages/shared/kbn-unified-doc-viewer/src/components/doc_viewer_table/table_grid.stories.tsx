@@ -28,11 +28,11 @@ import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks'
 import { buildDataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
 import type { EuiDataGridCellPopoverElementProps } from '@elastic/eui';
 import React from 'react';
+import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { TableGridProps } from './table_grid';
 import { TableGrid, GRID_COLUMN_FIELD_NAME, GRID_COLUMN_FIELD_VALUE } from './table_grid';
 import APMSpanFixture from '../../__fixtures__/span_apm';
 import { FieldRow } from './field_row';
-import type { CoreStart } from '@kbn/core-lifecycle-browser';
 
 const toasts = {
   addInfo: () => undefined,

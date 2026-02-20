@@ -12,13 +12,13 @@ import { EuiDataGrid } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import React, { useMemo } from 'react';
-import { useUnifiedDocViewerServices } from '../../../../services';
 import {
   FieldRow,
   TableCell,
   getFieldCellActions,
   getFieldValueCellActions,
 } from '@kbn/unified-doc-viewer';
+import { useUnifiedDocViewerServices } from '../../../../services';
 import type { AttributeField } from './attributes_overview';
 
 interface AttributesTableProps
