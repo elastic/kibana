@@ -7,16 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { buildDataViewMock, dataViewMock } from '@kbn/discover-utils/src/__mocks__';
+import {
+  dataViewMock,
+  createDataViewWithBytesField,
+  columnsMetaOverridingBytesType,
+  createFormatFieldValueSpy,
+  expectFieldCallToMatch,
+} from '@kbn/discover-utils/src/__mocks__';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { render } from '@testing-library/react';
 import React from 'react';
 import SourceDocument from './source_document';
-import type { DataTableColumnsMeta, EsHitRecord } from '@kbn/discover-utils/src/types';
+import type { EsHitRecord } from '@kbn/discover-utils/src/types';
 import { buildDataTableRecord } from '@kbn/discover-utils';
-import { fieldList } from '@kbn/data-views-plugin/common';
-import * as formatValueModule from '@kbn/discover-utils/src/utils/format_value';
 
 const mockServices = {
   fieldFormats: {
@@ -92,46 +96,9 @@ describe('Unified data table source document cell rendering', function () {
   });
 
   describe('with columnsMeta', () => {
-    let formatFieldValueSpy: jest.SpyInstance;
-
-    beforeEach(() => {
-      formatFieldValueSpy = jest
-        .spyOn(formatValueModule, 'formatFieldValue')
-        .mockReturnValue('formatted');
-    });
-
-    afterEach(() => {
-      formatFieldValueSpy.mockRestore();
-    });
-
-    it('should pass data view field to formatFieldValue when columnsMeta is undefined', () => {
-      const testDataView = buildDataViewMock({
-        name: 'test-data-view',
-        fields: fieldList([
-          {
-            name: '_index',
-            type: 'string',
-            scripted: false,
-            searchable: true,
-            aggregatable: false,
-          },
-          {
-            name: '_source',
-            type: '_source',
-            scripted: false,
-            searchable: false,
-            aggregatable: false,
-          },
-          {
-            name: 'bytes',
-            type: 'number',
-            esTypes: ['long'],
-            scripted: false,
-            searchable: true,
-            aggregatable: true,
-          },
-        ]),
-      });
+    it('should use data view field type when columnsMeta is undefined', () => {
+      const formatFieldValueSpy = createFormatFieldValueSpy();
+      const testDataView = createDataViewWithBytesField();
 
       const row = buildDataTableRecord(
         {
@@ -157,45 +124,13 @@ describe('Unified data table source document cell rendering', function () {
         />
       );
 
-      // Should pass the data view field (with type 'number') to formatFieldValue
-      const bytesFieldCall = formatFieldValueSpy.mock.calls.find(
-        (call) => call[4]?.name === 'bytes'
-      );
-      expect(bytesFieldCall).toBeDefined();
-      expect(bytesFieldCall![4]).toMatchObject({
-        name: 'bytes',
-        type: 'number',
-      });
+      expectFieldCallToMatch(formatFieldValueSpy, 'bytes', 'number');
+      formatFieldValueSpy.mockRestore();
     });
 
-    it('should pass field with columnsMeta type to formatFieldValue when types differ', () => {
-      const testDataView = buildDataViewMock({
-        name: 'test-data-view',
-        fields: fieldList([
-          {
-            name: '_index',
-            type: 'string',
-            scripted: false,
-            searchable: true,
-            aggregatable: false,
-          },
-          {
-            name: '_source',
-            type: '_source',
-            scripted: false,
-            searchable: false,
-            aggregatable: false,
-          },
-          {
-            name: 'bytes',
-            type: 'number',
-            esTypes: ['long'],
-            scripted: false,
-            searchable: true,
-            aggregatable: true,
-          },
-        ]),
-      });
+    it('should use columnsMeta type instead of data view field type when provided', () => {
+      const formatFieldValueSpy = createFormatFieldValueSpy();
+      const testDataView = createDataViewWithBytesField();
 
       const row = buildDataTableRecord(
         {
@@ -207,14 +142,6 @@ describe('Unified data table source document cell rendering', function () {
         testDataView
       );
 
-      // columnsMeta overrides bytes from number to string/keyword
-      const columnsMeta: DataTableColumnsMeta = {
-        bytes: {
-          type: 'string',
-          esType: 'keyword',
-        },
-      };
-
       render(
         <SourceDocument
           useTopLevelObjectColumns={false}
@@ -225,87 +152,12 @@ describe('Unified data table source document cell rendering', function () {
           shouldShowFieldHandler={() => true}
           maxEntries={100}
           isPlainRecord={true}
-          columnsMeta={columnsMeta}
+          columnsMeta={columnsMetaOverridingBytesType}
         />
       );
 
-      // Should pass a field with the columnsMeta type (string/keyword) to formatFieldValue
-      const bytesFieldCall = formatFieldValueSpy.mock.calls.find(
-        (call) => call[4]?.name === 'bytes'
-      );
-      expect(bytesFieldCall).toBeDefined();
-      expect(bytesFieldCall![4]).toMatchObject({
-        name: 'bytes',
-        type: 'string',
-        esTypes: ['keyword'],
-      });
-    });
-
-    it('should pass field created from columnsMeta to formatFieldValue for fields not in data view', () => {
-      const testDataView = buildDataViewMock({
-        name: 'test-data-view',
-        fields: fieldList([
-          {
-            name: '_index',
-            type: 'string',
-            scripted: false,
-            searchable: true,
-            aggregatable: false,
-          },
-          {
-            name: '_source',
-            type: '_source',
-            scripted: false,
-            searchable: false,
-            aggregatable: false,
-          },
-        ]),
-      });
-
-      const row = buildDataTableRecord(
-        {
-          _id: '1',
-          _index: 'test',
-          _score: 1,
-          fields: {
-            'custom.field': [42],
-          },
-        },
-        testDataView
-      );
-
-      // columnsMeta provides type for a field not in the data view
-      const columnsMeta: DataTableColumnsMeta = {
-        'custom.field': {
-          type: 'number',
-          esType: 'long',
-        },
-      };
-
-      render(
-        <SourceDocument
-          useTopLevelObjectColumns={true}
-          row={row}
-          dataView={testDataView}
-          columnId="custom"
-          fieldFormats={mockServices.fieldFormats as unknown as FieldFormatsStart}
-          shouldShowFieldHandler={() => true}
-          maxEntries={100}
-          isPlainRecord={true}
-          columnsMeta={columnsMeta}
-        />
-      );
-
-      // Should pass a field created from columnsMeta to formatFieldValue
-      const customFieldCall = formatFieldValueSpy.mock.calls.find(
-        (call) => call[4]?.name === 'custom.field'
-      );
-      expect(customFieldCall).toBeDefined();
-      expect(customFieldCall![4]).toMatchObject({
-        name: 'custom.field',
-        type: 'number',
-        esTypes: ['long'],
-      });
+      expectFieldCallToMatch(formatFieldValueSpy, 'bytes', 'string', ['keyword']);
+      formatFieldValueSpy.mockRestore();
     });
   });
 });

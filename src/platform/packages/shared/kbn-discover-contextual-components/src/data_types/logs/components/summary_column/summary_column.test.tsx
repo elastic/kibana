@@ -17,20 +17,20 @@ import type {
   SummaryColumnProps,
 } from './summary_column';
 import SummaryColumn, { SummaryCellPopover } from './summary_column';
-import {
-  DataGridDensity,
-  ROWS_HEIGHT_OPTIONS,
-  type DataTableColumnsMeta,
-} from '@kbn/unified-data-table';
+import { DataGridDensity, ROWS_HEIGHT_OPTIONS } from '@kbn/unified-data-table';
 import * as constants from '@kbn/discover-utils/src/data_types/logs/constants';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { coreMock as corePluginMock } from '@kbn/core/public/mocks';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { buildDataTableRecord } from '@kbn/discover-utils';
-import { buildDataViewMock, dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import { fieldList } from '@kbn/data-views-plugin/common';
+import {
+  dataViewMock,
+  createDataViewWithBytesField,
+  columnsMetaOverridingBytesType,
+  createFormatFieldValueSpy,
+  expectFieldCallToMatch,
+} from '@kbn/discover-utils/src/__mocks__';
 import type { IFieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
-import * as formatValueModule from '@kbn/discover-utils/src/utils/format_value';
 
 jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),
@@ -283,53 +283,9 @@ describe('SummaryCellPopover', () => {
 });
 
 describe('SummaryColumn with columnsMeta', () => {
-  let formatFieldValueSpy: jest.SpyInstance;
-
-  beforeEach(() => {
-    formatFieldValueSpy = jest
-      .spyOn(formatValueModule, 'formatFieldValue')
-      .mockReturnValue('formatted');
-  });
-
-  afterEach(() => {
-    formatFieldValueSpy.mockRestore();
-  });
-
-  it('should pass data view field to formatFieldValue when columnsMeta is undefined', () => {
-    const testDataView = buildDataViewMock({
-      name: 'test-data-view',
-      fields: fieldList([
-        {
-          name: '_index',
-          type: 'string',
-          scripted: false,
-          searchable: true,
-          aggregatable: false,
-        },
-        {
-          name: '_source',
-          type: '_source',
-          scripted: false,
-          searchable: false,
-          aggregatable: false,
-        },
-        {
-          name: 'bytes',
-          type: 'number',
-          esTypes: ['long'],
-          scripted: false,
-          searchable: true,
-          aggregatable: true,
-        },
-        {
-          name: '@timestamp',
-          type: 'date',
-          scripted: false,
-          searchable: true,
-          aggregatable: true,
-        },
-      ]),
-    });
+  it('should use data view field type when columnsMeta is undefined', () => {
+    const formatFieldValueSpy = createFormatFieldValueSpy();
+    const testDataView = createDataViewWithBytesField();
 
     const record = buildDataTableRecord(
       {
@@ -350,50 +306,13 @@ describe('SummaryColumn with columnsMeta', () => {
       />
     );
 
-    // Should pass the data view field (with type 'number') to formatFieldValue
-    const bytesFieldCall = formatFieldValueSpy.mock.calls.find((call) => call[4]?.name === 'bytes');
-    expect(bytesFieldCall).toBeDefined();
-    expect(bytesFieldCall![4]).toMatchObject({
-      name: 'bytes',
-      type: 'number',
-    });
+    expectFieldCallToMatch(formatFieldValueSpy, 'bytes', 'number');
+    formatFieldValueSpy.mockRestore();
   });
 
-  it('should pass field with columnsMeta type to formatFieldValue when types differ', () => {
-    const testDataView = buildDataViewMock({
-      name: 'test-data-view',
-      fields: fieldList([
-        {
-          name: '_index',
-          type: 'string',
-          scripted: false,
-          searchable: true,
-          aggregatable: false,
-        },
-        {
-          name: '_source',
-          type: '_source',
-          scripted: false,
-          searchable: false,
-          aggregatable: false,
-        },
-        {
-          name: 'bytes',
-          type: 'number',
-          esTypes: ['long'],
-          scripted: false,
-          searchable: true,
-          aggregatable: true,
-        },
-        {
-          name: '@timestamp',
-          type: 'date',
-          scripted: false,
-          searchable: true,
-          aggregatable: true,
-        },
-      ]),
-    });
+  it('should use columnsMeta type instead of data view field type when provided', () => {
+    const formatFieldValueSpy = createFormatFieldValueSpy();
+    const testDataView = createDataViewWithBytesField();
 
     const record = buildDataTableRecord(
       {
@@ -405,97 +324,16 @@ describe('SummaryColumn with columnsMeta', () => {
       testDataView
     );
 
-    // columnsMeta overrides bytes from number to string/keyword
-    const columnsMeta: DataTableColumnsMeta = {
-      bytes: {
-        type: 'string',
-        esType: 'keyword',
-      },
-    };
-
     render(
       <SummaryColumn
         {...getSummaryProps(record, {
           dataView: testDataView,
-          columnsMeta,
+          columnsMeta: columnsMetaOverridingBytesType,
         })}
       />
     );
 
-    // Should pass a field with the columnsMeta type (string/keyword) to formatFieldValue
-    const bytesFieldCall = formatFieldValueSpy.mock.calls.find((call) => call[4]?.name === 'bytes');
-    expect(bytesFieldCall).toBeDefined();
-    expect(bytesFieldCall![4]).toMatchObject({
-      name: 'bytes',
-      type: 'string',
-      esTypes: ['keyword'],
-    });
-  });
-
-  it('should pass field created from columnsMeta to formatFieldValue for fields not in data view', () => {
-    const testDataView = buildDataViewMock({
-      name: 'test-data-view',
-      fields: fieldList([
-        {
-          name: '_index',
-          type: 'string',
-          scripted: false,
-          searchable: true,
-          aggregatable: false,
-        },
-        {
-          name: '_source',
-          type: '_source',
-          scripted: false,
-          searchable: false,
-          aggregatable: false,
-        },
-        {
-          name: '@timestamp',
-          type: 'date',
-          scripted: false,
-          searchable: true,
-          aggregatable: true,
-        },
-      ]),
-    });
-
-    const record = buildDataTableRecord(
-      {
-        fields: {
-          '@timestamp': 1726218404776,
-          custom_esql_field: [42],
-        },
-      },
-      testDataView
-    );
-
-    // columnsMeta provides type for a field not in the data view
-    const columnsMeta: DataTableColumnsMeta = {
-      custom_esql_field: {
-        type: 'number',
-        esType: 'long',
-      },
-    };
-
-    render(
-      <SummaryColumn
-        {...getSummaryProps(record, {
-          dataView: testDataView,
-          columnsMeta,
-        })}
-      />
-    );
-
-    // Should pass a field created from columnsMeta to formatFieldValue
-    const customFieldCall = formatFieldValueSpy.mock.calls.find(
-      (call) => call[4]?.name === 'custom_esql_field'
-    );
-    expect(customFieldCall).toBeDefined();
-    expect(customFieldCall![4]).toMatchObject({
-      name: 'custom_esql_field',
-      type: 'number',
-      esTypes: ['long'],
-    });
+    expectFieldCallToMatch(formatFieldValueSpy, 'bytes', 'string', ['keyword']);
+    formatFieldValueSpy.mockRestore();
   });
 });
