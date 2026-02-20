@@ -97,7 +97,7 @@ describe('DeprecationCallout', () => {
 
     expect(screen.getByText('This integration is deprecated')).toBeInTheDocument();
     expect(screen.getByText('This package is no longer maintained')).toBeInTheDocument();
-    expect(screen.getByText(/Please use.*instead/)).toBeInTheDocument();
+    expect(screen.getByText(/Use.*instead/)).toBeInTheDocument();
 
     const link = screen.getByText('new-package');
     expect(link).toBeInTheDocument();
@@ -333,7 +333,7 @@ describe('DeprecatedFeaturesCallout', () => {
 
     renderCallout(packageInfo);
     expect(screen.getByTestId('deprecatedFeaturesCallout')).toBeInTheDocument();
-    expect(screen.getByText('This integration has deprecated features')).toBeInTheDocument();
+    expect(screen.getByText('This integration contains deprecated features')).toBeInTheDocument();
     expect(screen.getByText(/Deprecated Log Input/)).toBeInTheDocument();
     expect(screen.getByText(/This input is deprecated. Use CEL instead./)).toBeInTheDocument();
   });
