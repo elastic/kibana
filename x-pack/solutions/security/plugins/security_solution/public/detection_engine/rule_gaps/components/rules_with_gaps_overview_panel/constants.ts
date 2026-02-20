@@ -7,3 +7,6 @@
 
 /** Height of the donut chart in both summary sections */
 export const DONUT_HEIGHT = 140;
+
+// Min width for each chart section - when container is too narrow, sections wrap
+export const SECTION_MIN_WIDTH = 400;

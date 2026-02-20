@@ -12,9 +12,7 @@ import * as i18n from './translations';
 import { GapAutoFillStatus } from './gap_auto_fill_status';
 import { LastResponseSummaryChart } from './last_response_summary_chart';
 import { RuleGapSummaryChart } from './rule_gap_summary_chart';
-
-// Min width for each chart section - when container is too narrow, sections wrap
-const SECTION_MIN_WIDTH = 400;
+import { SECTION_MIN_WIDTH } from './constants';
 
 export const RulesWithGapsOverviewPanel = () => {
   const [isExpanded, setIsExpanded] = useState(false);
