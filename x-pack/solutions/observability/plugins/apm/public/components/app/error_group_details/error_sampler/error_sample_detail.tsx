@@ -362,7 +362,7 @@ export function ErrorSampleDetailTabContent({
       };
     };
     [AT_TIMESTAMP]: string;
-    error: Pick<APMError['error'], 'id' | 'log' | 'stack_trace' | 'exception' | 'message' | 'type'>;
+    error: Pick<APMError['error'], 'id' | 'log' | 'stack_trace' | 'exception'>;
   };
   currentTab: ErrorTab;
 }) {
