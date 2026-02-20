@@ -199,15 +199,17 @@ export class ConnectorTokenClient {
     }
 
     let accessToken: string;
+    let decryptedRefreshToken: string | undefined;
     try {
       const {
-        attributes: { token },
+        attributes: { token, refreshToken },
       } = await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<ConnectorToken>(
         CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
         connectorTokensResult[0].id
       );
 
       accessToken = token;
+      decryptedRefreshToken = refreshToken;
     } catch (err) {
       this.logger.error(
         `Failed to decrypt connector_token for connectorId "${connectorId}" and tokenType: "${
@@ -235,6 +237,7 @@ export class ConnectorTokenClient {
         id: connectorTokensResult[0].id,
         ...connectorTokensResult[0].attributes,
         token: accessToken,
+        refreshToken: decryptedRefreshToken,
       },
     };
   }
