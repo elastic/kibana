@@ -7,15 +7,28 @@
 
 import { createPlaywrightConfig } from '@kbn/scout';
 
+const parallelJobCount = process.env.BUILDKITE_PARALLEL_JOB_COUNT
+  ? parseInt(process.env.BUILDKITE_PARALLEL_JOB_COUNT, 10)
+  : undefined;
+const parallelJobIndex = process.env.BUILDKITE_PARALLEL_JOB
+  ? parseInt(process.env.BUILDKITE_PARALLEL_JOB, 10)
+  : undefined;
+
 const config: ReturnType<typeof createPlaywrightConfig> = {
   ...createPlaywrightConfig({
     testDir: './tests',
     workers: 1,
     runGlobalSetup: true,
   }),
-  // Osquery tests involve agent communication, live-query execution, alert generation
-  // and pack triggering — all of which can take well over the default 60 s.
   timeout: 300_000,
+  ...(parallelJobCount && parallelJobIndex !== undefined
+    ? {
+        shard: {
+          total: parallelJobCount,
+          current: parallelJobIndex + 1, // Buildkite is 0-based, Playwright is 1-based
+        },
+      }
+    : {}),
 };
 
 export default config;

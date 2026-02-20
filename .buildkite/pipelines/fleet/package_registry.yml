@@ -144,6 +144,7 @@ steps:
       machineType: n2-standard-4
       preemptible: true
     timeout_in_minutes: 60
+    parallelism: 4
     depends_on: build
     retry:
       automatic:
@@ -159,6 +160,7 @@ steps:
       machineType: n2-standard-4
       preemptible: true
     timeout_in_minutes: 60
+    parallelism: 4
     depends_on: build
     retry:
       automatic:
@@ -174,6 +176,7 @@ steps:
       machineType: n2-standard-4
       preemptible: true
     timeout_in_minutes: 60
+    parallelism: 2
     depends_on: build
     retry:
       automatic:
