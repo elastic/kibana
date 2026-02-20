@@ -33,7 +33,7 @@ describe('ScheduleField', () => {
   it('displays initial schedule value', () => {
     render(<ScheduleField />, {
       wrapper: createFormWrapper({
-        schedule: { every: '5m' },
+        schedule: { every: '5m', lookback: '1m' },
       }),
     });
 

@@ -28,14 +28,9 @@ describe('TimeFieldSelect', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.mocked(useDataFieldsModule.useDataFields).mockReturnValue({
-      data: undefined,
+      data: {},
       isLoading: false,
-      error: null,
-      isError: false,
-      isSuccess: true,
-      isFetching: false,
-      refetch: jest.fn(),
-    });
+    } as unknown as ReturnType<typeof useDataFieldsModule.useDataFields>);
   });
 
   it('renders the time field label', () => {
@@ -58,14 +53,9 @@ describe('TimeFieldSelect', () => {
 
   it('shows loading state when fetching fields', () => {
     jest.mocked(useDataFieldsModule.useDataFields).mockReturnValue({
-      data: undefined,
+      data: {},
       isLoading: true,
-      error: null,
-      isError: false,
-      isSuccess: false,
-      isFetching: true,
-      refetch: jest.fn(),
-    });
+    } as unknown as ReturnType<typeof useDataFieldsModule.useDataFields>);
 
     render(<TimeFieldSelect services={defaultServices} />, { wrapper: createFormWrapper() });
 
@@ -78,14 +68,9 @@ describe('TimeFieldSelect', () => {
     jest.mocked(useDataFieldsModule.useDataFields).mockReturnValue({
       data: {
         '@timestamp': { name: '@timestamp', type: 'date' },
-      } as any,
+      },
       isLoading: false,
-      error: null,
-      isError: false,
-      isSuccess: true,
-      isFetching: false,
-      refetch: jest.fn(),
-    });
+    } as unknown as ReturnType<typeof useDataFieldsModule.useDataFields>);
 
     render(<TimeFieldSelect services={defaultServices} />, {
       wrapper: createFormWrapper({
@@ -104,14 +89,9 @@ describe('TimeFieldSelect', () => {
       data: {
         '@timestamp': { name: '@timestamp', type: 'date' },
         event_time: { name: 'event_time', type: 'date' },
-      } as any,
+      },
       isLoading: false,
-      error: null,
-      isError: false,
-      isSuccess: true,
-      isFetching: false,
-      refetch: jest.fn(),
-    });
+    } as unknown as ReturnType<typeof useDataFieldsModule.useDataFields>);
 
     render(<TimeFieldSelect services={defaultServices} />, {
       wrapper: createFormWrapper({
