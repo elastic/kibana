@@ -55,13 +55,13 @@ export class CRUDClient {
     document: Entity,
     force: boolean
   ): Promise<void> {
-    const rawId = getEuidFromObject(entityType, document);
-    if (rawId === undefined) {
+    const id = getEuidFromObject(entityType, document);
+    if (id === undefined) {
       throw new BadCRUDRequestError(`Could not derive entity EUID from document`);
     }
     // EUID generation uses MD5. It is not a security-related feature.
     // eslint-disable-next-line @kbn/eslint/no_unsafe_hash
-    const id: string = createHash('md5').update(rawId).digest('hex');
+    const hashedId: string = createHash('md5').update(id).digest('hex');
     this.logger.info(`Upserting entity ID ${id}`);
     if (!document.entity.id) {
       document.entity.id = id;
@@ -78,7 +78,7 @@ export class CRUDClient {
     try {
       await this.esClient.create({
         index: getLatestEntitiesIndexName(this.namespace),
-        id,
+        id: hashedId,
         document: preparedDoc,
         refresh: 'wait_for',
       });
@@ -93,7 +93,7 @@ export class CRUDClient {
     removeEUIDFields(definition, preparedDoc);
     const { result } = await this.esClient.update({
       index: getLatestEntitiesIndexName(this.namespace),
-      id,
+      id: hashedId,
       doc: preparedDoc,
     });
 
