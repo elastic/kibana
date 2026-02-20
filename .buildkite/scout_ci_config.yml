@@ -5,8 +5,6 @@ plugins:
     - console
     - discover_enhanced
     - index_management
-    - infra
-    - lens
     - maps
     - observability_onboarding
     - painless_lab
