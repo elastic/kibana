@@ -99,8 +99,7 @@ export const UnifiedHistogramLayout = ({
 
   // When topPanelHeight is 'max-content', we must use Resizable mode so the layout
   // respects it (PanelsStatic ignores fixedPanelSize and would not expand the chart).
-  const forceResizableForExpandChart =
-    topPanelHeight === 'max-content' && (chart || hits);
+  const forceResizableForExpandChart = topPanelHeight === 'max-content' && (chart || hits);
 
   const panelsMode =
     chart || hits

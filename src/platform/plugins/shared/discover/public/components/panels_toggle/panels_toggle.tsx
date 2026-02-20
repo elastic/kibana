@@ -47,8 +47,7 @@ export const PanelsToggle: React.FC<PanelsToggleProps> = ({
   const viewMode = useAppStateSelector((state) => state.viewMode ?? VIEW_MODE.DOCUMENT_LEVEL);
 
   // Mutual exclusion: you can't collapse both chart and table at the same time.
-  // If one is collapsed and the user collapses the other, it acts as a swap/toggle:
-  // the collapsed one opens while the other one closes.
+  // If one is collapsed and the user collapses the other, it acts as a swap/toggle
   const isInDocumentView = viewMode === VIEW_MODE.DOCUMENT_LEVEL;
 
   const onToggleChart = useCallback(() => {
@@ -79,7 +78,7 @@ export const PanelsToggle: React.FC<PanelsToggleProps> = ({
   const isInTabsContext = renderedFor === 'tabs' || renderedFor === 'root';
 
   // Chart toggle: only in histogram toolbar (chart section).
-  // When chart is collapsed, the toggle stays in the collapsed chart bar — not in tabs.
+  // When chart is collapsed, the toggle stays in the collapsed chart bar
   const showChartToggle = isInsideHistogram;
 
   // Table toggle: only in tabs context when in document view and chart is available,

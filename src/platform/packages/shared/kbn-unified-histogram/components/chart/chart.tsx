@@ -59,9 +59,6 @@ export interface UnifiedHistogramChartProps {
   hits: UnifiedHistogramHitsContext | undefined;
   chart: UnifiedHistogramChartContext | undefined;
   renderCustomChartToggleActions?: () => ReactElement | undefined;
-  /**
-   * Label shown in the chart toolbar (e.g. "Chart" or "5 metrics")
-   */
   chartSectionTitle?: string;
   disableTriggers?: LensEmbeddableInput['disableTriggers'];
   disabledActions?: LensEmbeddableInput['disabledActions'];

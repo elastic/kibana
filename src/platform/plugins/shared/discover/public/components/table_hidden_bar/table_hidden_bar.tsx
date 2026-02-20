@@ -17,14 +17,10 @@ import type { PanelsToggleProps } from '../panels_toggle';
 
 export interface TableHiddenBarProps {
   stateContainer: DiscoverStateContainer;
-  /** Panels toggle (includes show/hide table) - when provided, renders grouped with hits counter */
   panelsToggle?: ReactElement<PanelsToggleProps>;
 }
 
-export const TableHiddenBar: React.FC<TableHiddenBarProps> = ({
-  stateContainer,
-  panelsToggle,
-}) => {
+export const TableHiddenBar: React.FC<TableHiddenBarProps> = ({ stateContainer, panelsToggle }) => {
   const { euiTheme } = useEuiTheme();
 
   return (
@@ -40,10 +36,7 @@ export const TableHiddenBar: React.FC<TableHiddenBarProps> = ({
     >
       {panelsToggle && <EuiFlexItem grow={false}>{panelsToggle}</EuiFlexItem>}
       <EuiFlexItem grow={false}>
-        <HitsCounter
-          mode={HitsCounterMode.standalone}
-          stateContainer={stateContainer}
-        />
+        <HitsCounter mode={HitsCounterMode.standalone} stateContainer={stateContainer} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
