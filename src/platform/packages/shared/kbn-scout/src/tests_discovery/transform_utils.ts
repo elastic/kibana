@@ -82,7 +82,7 @@ const NO_DATA_GROUP_SUFFIX = ' - clean env';
 /**
  * Flattens ModuleDiscoveryInfo[] into an array grouped by mode, group, and server run flag
  * for qaf-tests run (Cloud test execution).
- * Configs with `hasNoDataTests` are placed into a separate group suffixed with " - no data".
+ * Configs with `needsCleanEnv` are placed into a separate group suffixed with " - no data".
  */
 export const flattenModulesByServerRunFlag = (
   modules: ModuleDiscoveryInfo[]
