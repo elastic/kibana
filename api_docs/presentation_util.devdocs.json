@@ -311,7 +311,7 @@
           "\nA HOC which supplies React.Suspense with a fallback component, and a `EuiErrorBoundary` to contain errors."
         ],
         "signature": [
-          "<P extends {}, R = {}>(Component: React.ComponentType<P>, fallback?: React.ReactElement<any, string | React.JSXElementConstructor<any>> | null) => React.ForwardRefExoticComponent<React.PropsWithoutRef<P> & React.RefAttributes<R>>"
+          "<P extends {}, R = {}>(Component: React.ComponentType<P>, fallback?: React.ReactElement<any> | null) => React.ForwardRefExoticComponent<React.PropsWithoutRef<P> & React.RefAttributes<R>>"
         ],
         "path": "src/platform/plugins/shared/presentation_util/public/components/index.tsx",
         "lineNumber": 19,
@@ -543,7 +543,7 @@
             "label": "getProjects",
             "description": [],
             "signature": [
-              "(solutions?: (\"presentation\" | \"canvas\" | \"dashboard\")[] | undefined) => Record<\"labs:dashboard:deferBelowFold\" | \"labs:canvas:byValueEmbeddable\", ",
+              "(solutions?: (\"canvas\" | \"presentation\" | \"dashboard\")[] | undefined) => Record<\"labs:dashboard:deferBelowFold\" | \"labs:canvas:byValueEmbeddable\", ",
               {
                 "pluginId": "presentationUtil",
                 "scope": "common",
@@ -567,7 +567,7 @@
                 "label": "solutions",
                 "description": [],
                 "signature": [
-                  "(\"presentation\" | \"canvas\" | \"dashboard\")[] | undefined"
+                  "(\"canvas\" | \"presentation\" | \"dashboard\")[] | undefined"
                 ],
                 "path": "src/platform/plugins/shared/presentation_util/public/services/presentation_labs_service.ts",
                 "lineNumber": 25,
@@ -1318,7 +1318,7 @@
             "label": "solutions",
             "description": [],
             "signature": [
-              "(\"presentation\" | \"canvas\" | \"dashboard\")[]"
+              "(\"canvas\" | \"presentation\" | \"dashboard\")[]"
             ],
             "path": "src/platform/plugins/shared/presentation_util/common/labs.ts",
             "lineNumber": 75,
@@ -1498,7 +1498,7 @@
         "label": "SolutionName",
         "description": [],
         "signature": [
-          "\"presentation\" | \"canvas\" | \"dashboard\""
+          "\"canvas\" | \"presentation\" | \"dashboard\""
         ],
         "path": "src/platform/plugins/shared/presentation_util/common/labs.ts",
         "lineNumber": 56,
