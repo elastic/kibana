@@ -272,6 +272,8 @@ export class WorkflowsExecutionEnginePlugin
                 );
                 const intervalMs = parseDuration(config.executionHistory.lifecycleInterval);
                 const migrationOlderThan = new Date(Date.now() - intervalMs);
+
+                // Cleanup threshold is 2x the interval to ensure all data is migrated before cleanup
                 const cleanupOlderThan = new Date(Date.now() - intervalMs * 2);
 
                 await Promise.all([
