@@ -7,28 +7,35 @@
 
 import { RRule } from '@kbn/rrule';
 import moment from 'moment';
+import { isIntervalSchedule, isRruleSchedule } from '@kbn/response-ops-scheduling-types';
 import { parseDuration, type RuleSchedule } from '../../common';
 
+/**
+ * Computes the next run time for a rule from a given start date and schedule.
+ * Supports interval-based schedules (adds the interval to the start date) and
+ * RRule-based schedules (uses the rrule to find the next occurrence after the start date).
+ *
+ * @returns The next run time as an ISO 8601 string.
+ * @throws Error if the schedule is neither a valid interval nor an rrule schedule.
+ */
 export function getNextRuleRun({
-  startDate,
+  startDate = null,
   schedule,
 }: {
-  startDate: Date | null;
+  startDate?: Date | null;
   schedule: RuleSchedule;
 }): string {
-  const { rrule, interval } = schedule || {};
-
-  if (interval) {
+  if (isIntervalSchedule(schedule)) {
     return moment(startDate || new Date())
-      .add(parseDuration(interval), 'ms')
+      .add(parseDuration(schedule.interval), 'ms')
       .toISOString();
-  } else if (rrule) {
+  } else if (isRruleSchedule(schedule)) {
     const _rrule = new RRule({
-      ...rrule,
-      dtstart: startDate ? new Date(startDate) : new Date(),
+      ...schedule.rrule,
+      dtstart: schedule.rrule.dtstart ? new Date(schedule.rrule.dtstart) : new Date(),
     });
 
-    const nextRun = _rrule.after(new Date());
+    const nextRun = _rrule.after(startDate ? new Date(startDate) : new Date());
 
     if (nextRun) {
       return nextRun.toISOString();

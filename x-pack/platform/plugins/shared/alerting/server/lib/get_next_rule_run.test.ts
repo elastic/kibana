@@ -117,14 +117,14 @@ describe('getNextRuleRun', () => {
       jest.setSystemTime(new Date('2025-07-20T12:00:00.000Z'));
       expect(() =>
         getNextRuleRun({
-          startDate: null,
+          startDate: new Date('2025-07-01T00:00:00.000Z'),
           schedule: {
             rrule: {
               dtstart: '2025-07-01T00:00:00.000Z',
               freq: 3,
               interval: 1,
               tzid: 'UTC',
-              byhour: [12],
+              byhour: [1],
               byminute: [0],
             },
           },

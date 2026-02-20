@@ -9,10 +9,13 @@ import type { IntervalSchedule, RruleSchedule, Schedule } from './schedule_types
 
 export function isIntervalSchedule(schedule: Schedule): schedule is IntervalSchedule {
   return (
-    'interval' in schedule && typeof schedule.interval === 'string' && schedule.interval !== ''
+    schedule &&
+    'interval' in schedule &&
+    typeof schedule.interval === 'string' &&
+    schedule.interval !== ''
   );
 }
 
 export function isRruleSchedule(schedule: Schedule): schedule is RruleSchedule {
-  return 'rrule' in schedule && schedule.rrule !== null;
+  return schedule && 'rrule' in schedule && schedule.rrule !== null;
 }

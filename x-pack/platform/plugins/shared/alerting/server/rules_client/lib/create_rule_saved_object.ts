@@ -7,6 +7,7 @@
 
 import type { SavedObjectReference, SavedObject } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
+import { isIntervalSchedule } from '@kbn/response-ops-scheduling-types';
 import {
   type Rule,
   type RuleWithLegacyId,
@@ -23,7 +24,6 @@ import { scheduleTask } from './schedule_task';
 import { getAlertFromRaw } from './get_alert_from_raw';
 import { createRuleSo, deleteRuleSo, updateRuleSo } from '../../data/rule';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
-import { isIntervalSchedule } from '@kbn/response-ops-scheduling-types';
 
 interface CreateRuleSavedObjectParams {
   rawRule: RawRule;

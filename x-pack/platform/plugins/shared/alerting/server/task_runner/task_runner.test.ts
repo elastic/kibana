@@ -436,7 +436,7 @@ describe('Task Runner', () => {
     expect(alertsClient.getAlertsToUpdateWithLastScheduledActions).toHaveBeenCalledTimes(1);
   });
 
-  test('throws error when schedule.interval is not provided', async () => {
+  test('throws error when schedule has no interval nor rrule', async () => {
     mockGetRuleFromRaw.mockReturnValue({ ...mockedRuleTypeSavedObject, schedule: {} } as Rule);
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
       ...mockedRawRuleSO,
@@ -459,7 +459,7 @@ describe('Task Runner', () => {
     });
 
     await expect(taskRunner.run()).rejects.toThrowErrorMatchingInlineSnapshot(
-      '"Interval is required to calculate next run"'
+      '"Invalid schedule, unable to calculate next run"'
     );
   });
 
@@ -2739,7 +2739,7 @@ describe('Task Runner', () => {
     );
   });
 
-  test('successfully stores next run', async () => {
+  test('successfully stores next run with schedule.interval', async () => {
     const taskRunner = new TaskRunner({
       ruleType,
       internalSavedObjectsRepository,
@@ -2757,6 +2757,44 @@ describe('Task Runner', () => {
     await taskRunner.run();
     expect(elasticsearchService.client.asInternalUser.update).toHaveBeenCalledWith(
       ...generateRuleUpdateParams({ nextRun: '1970-01-01T00:00:10.000Z' })
+    );
+  });
+
+  test('successfully stores next run with schedule.rrule', async () => {
+    const rrule = {
+      freq: 3, // Daily
+      interval: 1,
+      tzid: 'UTC',
+      byhour: [12],
+      byminute: [15],
+    };
+    const taskRunner = new TaskRunner({
+      ruleType,
+      internalSavedObjectsRepository,
+      taskInstance: mockedTaskInstance,
+      context: taskRunnerFactoryInitializerParams,
+      inMemoryMetrics,
+    });
+    expect(AlertingEventLogger).toHaveBeenCalled();
+    mockGetRuleFromRaw.mockReturnValue({
+      ...mockedRuleTypeSavedObject,
+      schedule: {
+        rrule,
+      },
+    } as Rule);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+      ...mockedRawRuleSO,
+      attributes: {
+        ...mockedRawRuleSO.attributes,
+        schedule: {
+          rrule,
+        },
+      },
+    });
+
+    await taskRunner.run();
+    expect(elasticsearchService.client.asInternalUser.update).toHaveBeenCalledWith(
+      ...generateRuleUpdateParams({ nextRun: '1970-01-01T12:15:00.000Z' })
     );
   });
 
