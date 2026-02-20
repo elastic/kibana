@@ -5,34 +5,53 @@
  * 2.0.
  */
 
-import type { IconType } from '@elastic/eui';
 import type { ReactNode } from 'react';
+import type { IconType } from '@elastic/eui';
 import type { UnknownAttachment, AttachmentVersion } from '@kbn/agent-builder-common/attachments';
 
+export enum ActionButtonType {
+  PRIMARY = 'primary',
+  SECONDARY = 'secondary',
+  OVERFLOW = 'overflow',
+}
 /**
- * Props passed to attachment content renderers (view mode).
+ * Props passed to custom attachment content renderers.
  */
-export interface AttachmentContentProps<TAttachment extends UnknownAttachment = UnknownAttachment> {
-  /** The attachment being rendered */
+export interface AttachmentRenderProps<TAttachment extends UnknownAttachment = UnknownAttachment> {
+  /** The attachment to render */
   attachment: TAttachment;
-  /** The specific version being rendered */
-  version: AttachmentVersion;
+  /** Whether the attachment is being rendered in a sidebar context */
+  isSidebar: boolean;
 }
 
 /**
- * Props passed to attachment editor renderers (edit mode).
+ * Parameters passed when requesting action buttons for an inline-rendered attachment.
  */
-export interface AttachmentEditorProps<TAttachment extends UnknownAttachment = UnknownAttachment> {
-  /** The attachment being edited */
+export interface GetActionButtonsParams<TAttachment extends UnknownAttachment = UnknownAttachment> {
+  /** The attachment for which to provide action buttons */
   attachment: TAttachment;
-  /** The version being edited */
-  version: AttachmentVersion;
-  /** Callback when content changes */
-  onChange: (newContent: unknown) => void;
-  /** Callback to save changes (creates new version) */
-  onSave: () => void;
-  /** Callback to cancel editing */
-  onCancel: () => void;
+  /** Whether the attachment is being rendered in a sidebar context */
+  isSidebar: boolean;
+  /** Whether the attachment is being rendered in canvas mode (expanded flyout view) */
+  isCanvas: boolean;
+  /** Function to update the attachment's origin reference */
+  updateOrigin: (originId: string) => Promise<void>;
+  /** Callback to open the attachment in canvas mode (expanded flyout view). Undefined when already in canvas mode. */
+  openCanvas?: () => void;
+}
+
+/**
+ * Action button definition for inline-rendered attachments.
+ */
+export interface ActionButton {
+  /** Button label text */
+  label: string;
+  /** Optional icon to display in the button (EUI icon name or custom React element) */
+  icon?: IconType;
+  /** Whether this is the primary action button */
+  type: ActionButtonType;
+  /** Handler function called when the button is clicked */
+  handler: () => void | Promise<void>;
 }
 
 /**
@@ -53,20 +72,21 @@ export interface AttachmentUIDefinition<TAttachment extends UnknownAttachment = 
    */
   onClick?: (args: { attachment: TAttachment; version?: AttachmentVersion }) => void;
   /**
-   * Renders the attachment content in view mode.
-   * If not provided, a default JSON renderer will be used by consumers.
+   * Optional custom content renderer for inline attachment display.
+   * When provided, attachments can be rendered inline in the conversation
+   * using the <render_attachment> tag.
    */
-  renderContent?: (props: AttachmentContentProps<TAttachment>) => ReactNode;
+  renderInlineContent?: (props: AttachmentRenderProps<TAttachment>) => ReactNode;
   /**
-   * Renders the attachment editor in edit mode.
-   * If not provided, the attachment type is not editable.
+   * Optional custom content renderer for canvas mode (expanded flyout view).
+   * When provided, attachments can be opened in an expanded view via action buttons.
    */
-  renderEditor?: (props: AttachmentEditorProps<TAttachment>) => ReactNode;
+  renderCanvasContent?: (props: AttachmentRenderProps<TAttachment>) => ReactNode;
   /**
-   * Whether this attachment type supports editing.
-   * Defaults to false if renderEditor is not provided.
+   * Optional function to provide action buttons for inline-rendered attachments.
+   * Buttons will appear alongside or below the rendered content.
    */
-  isEditable?: boolean;
+  getActionButtons?: (params: GetActionButtonsParams<TAttachment>) => ActionButton[];
 }
 
 /**

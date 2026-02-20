@@ -8,13 +8,32 @@
  */
 
 import { createSelector } from '@reduxjs/toolkit';
-import type { DiscoverInternalState } from '../types';
+import { isOfAggregateQueryType, type Filter } from '@kbn/es-query';
+import { cloneDeep } from 'lodash';
+import type { DiscoverInternalState, TabState } from '../types';
 import { TabsBarVisibility } from '../types';
 
 export const selectTab = (state: DiscoverInternalState, tabId: string) => state.tabs.byId[tabId];
 
 export const selectTabAppState = (state: DiscoverInternalState, tabId: string) =>
   selectTab(state, tabId).appState;
+
+const EMPTY_FILTERS: Filter[] = [];
+
+export const selectTabCombinedFilters = createSelector(
+  [
+    (tab: TabState) => tab.globalState.filters,
+    (tab: TabState) => tab.appState.filters,
+    (tab: TabState) => tab.appState.query,
+  ],
+  (globalFilters, appFilters, query) => {
+    if (isOfAggregateQueryType(query)) {
+      return EMPTY_FILTERS;
+    }
+    const allFilters = [...(globalFilters ?? []), ...(appFilters ?? [])];
+    return allFilters.length ? cloneDeep(allFilters) : EMPTY_FILTERS;
+  }
+);
 
 export const selectAllTabs = createSelector(
   [

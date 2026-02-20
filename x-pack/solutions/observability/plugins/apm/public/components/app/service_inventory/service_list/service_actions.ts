@@ -11,25 +11,23 @@ import { ApmRuleType } from '@kbn/rule-data-utils';
 import { useMemo } from 'react';
 import type { ServiceListItem } from '../../../../../common/service_inventory';
 import type { ApmIndicatorType } from '../../../../../common/slo_indicator_types';
-import { APM_SLO_INDICATOR_TYPES } from '../../../../../common/slo_indicator_types';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import { getManageSlosUrl } from '../../../../hooks/use_manage_slos_url';
 import { getAlertingCapabilities } from '../../../alerting/utils/get_alerting_capabilities';
 import type { TableActions } from '../../../shared/managed_table';
+import type { IndexType } from '../../../shared/links/discover_links/get_esql_query';
 
 interface UseServiceActionsParams {
   openAlertFlyout: (ruleType: ApmRuleType, serviceName: string) => void;
   openSloFlyout: (indicatorType: ApmIndicatorType, serviceName: string) => void;
-}
-
-interface UseServiceActionsReturn {
-  actions: TableActions<ServiceListItem>;
-  showActionsColumn: boolean;
+  getDiscoverHref: (item: ServiceListItem, indexType: IndexType) => string | undefined;
 }
 
 export function useServiceActions({
   openAlertFlyout,
   openSloFlyout,
-}: UseServiceActionsParams): UseServiceActionsReturn {
+  getDiscoverHref,
+}: UseServiceActionsParams): TableActions<ServiceListItem> {
   const { core, plugins, share } = useApmPluginContext();
   const { capabilities } = core.application;
   const sloListLocator = share.url.locators.get<SloListLocatorParams>(sloListLocatorID);
@@ -37,10 +35,29 @@ export function useServiceActions({
   const { canSaveAlerts } = getAlertingCapabilities(plugins, capabilities);
   const canSaveApmAlerts = !!(capabilities.apm.save && canSaveAlerts);
   const canWriteSlos = !!capabilities.slo?.write;
-  const showActionsColumn = canSaveApmAlerts || canWriteSlos;
 
   const actions = useMemo(() => {
     const actionsList: TableActions<ServiceListItem> = [];
+
+    actionsList.push({
+      id: 'discover',
+      actions: [
+        {
+          id: 'servicesTable-openTracesInDiscover',
+          name: i18n.translate('xpack.apm.servicesTable.actions.openTracesInDiscover', {
+            defaultMessage: 'Open traces in Discover',
+          }),
+          href: (item) => getDiscoverHref(item, 'traces'),
+        },
+        {
+          id: 'servicesTable-openLogsInDiscover',
+          name: i18n.translate('xpack.apm.servicesTable.actions.openLogsInDiscover', {
+            defaultMessage: 'Open logs in Discover',
+          }),
+          href: (item) => getDiscoverHref(item, 'error'),
+        },
+      ],
+    });
 
     if (canSaveApmAlerts) {
       actionsList.push({
@@ -131,49 +148,21 @@ export function useServiceActions({
               defaultMessage: 'Manage SLOs',
             }),
             icon: 'tableOfContents',
-            href: (item) =>
-              sloListLocator?.getRedirectUrl({
-                filters: [
-                  {
-                    meta: {
-                      alias: null,
-                      disabled: false,
-                      key: 'service.name',
-                      negate: false,
-                      params: { query: item.serviceName },
-                      type: 'phrase',
-                    },
-                    query: {
-                      match_phrase: { 'service.name': item.serviceName },
-                    },
-                  },
-                  {
-                    meta: {
-                      alias: null,
-                      disabled: false,
-                      key: 'slo.indicator.type',
-                      negate: false,
-                      params: [...APM_SLO_INDICATOR_TYPES],
-                      type: 'phrases',
-                    },
-                    query: {
-                      bool: {
-                        minimum_should_match: 1,
-                        should: APM_SLO_INDICATOR_TYPES.map((type) => ({
-                          match_phrase: { 'slo.indicator.type': type },
-                        })),
-                      },
-                    },
-                  },
-                ],
-              }),
+            href: (item) => getManageSlosUrl(sloListLocator, { serviceName: item.serviceName }),
           },
         ],
       });
     }
 
     return actionsList;
-  }, [openAlertFlyout, openSloFlyout, canSaveApmAlerts, canWriteSlos, sloListLocator]);
+  }, [
+    openAlertFlyout,
+    openSloFlyout,
+    canSaveApmAlerts,
+    canWriteSlos,
+    sloListLocator,
+    getDiscoverHref,
+  ]);
 
-  return { actions, showActionsColumn };
+  return actions;
 }
