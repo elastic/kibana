@@ -133,16 +133,22 @@ export const BuiltInStepProperties = [
 export type BuiltInStepProperty = (typeof BuiltInStepProperties)[number];
 
 export const WaitStepSchema = BaseStepSchema.extend({
-  type: z.literal('wait'),
+  type: z.literal('wait').describe('Pause execution for a specified duration'),
   with: z.object({
-    duration: DurationSchema, // e.g., '5s', '1m', '2h'
+    duration: DurationSchema.describe(
+      'Duration to wait, e.g. "5s", "1m", "2h". Format: number + unit (ms/s/m/h/d/w)'
+    ),
   }),
 });
 export type WaitStep = z.infer<typeof WaitStepSchema>;
 
 export const DataSetStepSchema = BaseStepSchema.extend({
-  type: z.literal('data.set'),
-  with: z.record(z.string(), z.unknown()),
+  type: z.literal('data.set').describe('Set variables in the workflow context'),
+  with: z
+    .record(z.string(), z.unknown())
+    .describe(
+      'Key-value pairs where keys are variable names and values are the data to store. Values support Liquid expressions. Access via {{ variables.key_name }}'
+    ),
 });
 export type DataSetStep = z.infer<typeof DataSetStepSchema>;
 
@@ -158,16 +164,25 @@ export const FetcherConfigSchema = z
   .optional();
 
 export const HttpStepSchema = BaseStepSchema.extend({
-  type: z.literal('http'),
+  type: z.literal('http').describe('Make HTTP requests to external APIs'),
   with: z.object({
-    url: z.string().min(1),
-    method: z.enum(['GET', 'POST', 'PUT', 'DELETE', 'PATCH']).optional().default('GET'),
+    url: z.string().min(1).describe('The URL to send the request to'),
+    method: z
+      .enum(['GET', 'POST', 'PUT', 'DELETE', 'PATCH'])
+      .optional()
+      .default('GET')
+      .describe('HTTP method (default: GET)'),
     headers: z
       .record(z.string(), z.union([z.string(), z.number(), z.boolean()]))
       .optional()
-      .default({}),
-    body: z.any().optional(),
-    timeout: z.string().optional().default('30s'),
+      .default({})
+      .describe('Request headers as key-value pairs'),
+    body: z.any().optional().describe('Request body (for POST, PUT, PATCH)'),
+    timeout: z
+      .string()
+      .optional()
+      .default('30s')
+      .describe('Request timeout duration (default: 30s)'),
     fetcher: FetcherConfigSchema,
   }),
 })
@@ -266,9 +281,17 @@ export function getHttpStepSchema(stepSchema: z.ZodType, loose: boolean = false)
 }
 
 export const ForEachStepSchema = BaseStepSchema.extend({
-  type: z.literal('foreach'),
-  foreach: z.string(),
-  steps: z.array(BaseStepSchema).min(1),
+  type: z
+    .literal('foreach')
+    .describe(
+      'Loop over a collection. Access current item via {{ foreach.item }}, index via {{ foreach.index }}, total via {{ foreach.total }}'
+    ),
+  foreach: z
+    .string()
+    .describe(
+      'Liquid expression evaluating to an array, e.g. "{{ steps.search.output.hits.hits | json }}"'
+    ),
+  steps: z.array(BaseStepSchema).min(1).describe('Steps to execute for each item'),
 }).merge(StepWithIfConditionSchema);
 export type ForEachStep = z.infer<typeof ForEachStepSchema>;
 
@@ -287,10 +310,18 @@ export const getForEachStepSchema = (stepSchema: z.ZodType, loose: boolean = fal
 };
 
 export const IfStepSchema = BaseStepSchema.extend({
-  type: z.literal('if'),
-  condition: z.string(),
-  steps: z.array(BaseStepSchema).min(1),
-  else: z.array(BaseStepSchema).optional(),
+  type: z
+    .literal('if')
+    .describe(
+      'Conditional execution. Runs steps when condition is true, with optional else block for the false branch'
+    ),
+  condition: z
+    .string()
+    .describe(
+      'Condition expression that evaluates to true/false, e.g. "steps.prev.output.status : \'success\'"'
+    ),
+  steps: z.array(BaseStepSchema).min(1).describe('Steps to execute when the condition is true'),
+  else: z.array(BaseStepSchema).optional().describe('Steps to execute when the condition is false'),
 });
 export type IfStep = z.infer<typeof IfStepSchema>;
 
@@ -309,13 +340,19 @@ export const getIfStepSchema = (stepSchema: z.ZodType, loose: boolean = false) =
 };
 
 export const ParallelStepSchema = BaseStepSchema.extend({
-  type: z.literal('parallel'),
-  branches: z.array(
-    z.object({
-      name: z.string(),
-      steps: z.array(BaseStepSchema),
-    })
-  ),
+  type: z
+    .literal('parallel')
+    .describe(
+      'Execute multiple branches of steps concurrently. Each branch runs independently and results are available after all branches complete'
+    ),
+  branches: z
+    .array(
+      z.object({
+        name: z.string().describe('Unique name for this branch'),
+        steps: z.array(BaseStepSchema).describe('Steps to execute in this branch'),
+      })
+    )
+    .describe('Array of named branches to execute in parallel'),
 });
 export type ParallelStep = z.infer<typeof ParallelStepSchema>;
 
@@ -333,9 +370,13 @@ export const getParallelStepSchema = (stepSchema: z.ZodType, loose: boolean = fa
 };
 
 export const MergeStepSchema = BaseStepSchema.extend({
-  type: z.literal('merge'),
-  sources: z.array(z.string()), // references to branches or steps to merge
-  steps: z.array(BaseStepSchema), // steps to run after merge
+  type: z
+    .literal('merge')
+    .describe('Merge results from parallel branches and continue with subsequent steps'),
+  sources: z
+    .array(z.string())
+    .describe('References to branch or step names whose results to merge'),
+  steps: z.array(BaseStepSchema).describe('Steps to execute after merging'),
 });
 export type MergeStep = z.infer<typeof MergeStepSchema>;
 
