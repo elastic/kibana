@@ -140,7 +140,6 @@ describe('Metric Schema', () => {
               field: 'temperature',
               color: {
                 type: 'dynamic',
-                // @ts-expect-error - percentage not supported
                 range: 'percentage',
                 steps: [
                   { lt: 0, color: '#blue' },
