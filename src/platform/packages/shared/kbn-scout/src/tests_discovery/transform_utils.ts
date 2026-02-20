@@ -97,7 +97,7 @@ export const flattenModulesByServerRunFlag = (
           ? 'serverless'
           : 'stateful';
 
-        const groupName = config.hasNoDataTests
+        const groupName = config.needsCleanEnv
           ? `${module.group}${NO_DATA_GROUP_SUFFIX}`
           : module.group;
         const key = `${arch}:${groupName}:${serverRunFlag}`;

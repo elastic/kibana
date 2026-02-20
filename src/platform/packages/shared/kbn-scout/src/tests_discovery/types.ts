@@ -23,7 +23,7 @@ export interface ModuleDiscoveryInfo {
   configs: {
     path: string;
     hasTests: boolean;
-    hasNoDataTests: boolean;
+    needsCleanEnv: boolean;
     tags: string[];
     serverRunFlags: string[];
     usesParallelWorkers: boolean;

@@ -36,7 +36,7 @@ describe('flattenModulesByServerRunFlag', () => {
           {
             path: '/path/to/api/config',
             hasTests: true,
-            hasNoDataTests: false,
+            needsCleanEnv: false,
             tags: ['@local-stateful-classic'],
             serverRunFlags: ['--arch stateful --domain classic'],
             usesParallelWorkers: false,
@@ -65,7 +65,7 @@ describe('flattenModulesByServerRunFlag', () => {
           {
             path: '/path/config',
             hasTests: true,
-            hasNoDataTests: false,
+            needsCleanEnv: false,
             tags: [],
             serverRunFlags: ['--arch stateful --domain classic'],
             usesParallelWorkers: false,
@@ -87,7 +87,7 @@ describe('flattenModulesByServerRunFlag', () => {
           {
             path: '/path/config',
             hasTests: true,
-            hasNoDataTests: false,
+            needsCleanEnv: false,
             tags: [],
             serverRunFlags: ['--arch serverless --domain observability_complete'],
             usesParallelWorkers: false,
@@ -113,7 +113,7 @@ describe('flattenModulesByServerRunFlag', () => {
           {
             path: '/path/a',
             hasTests: true,
-            hasNoDataTests: false,
+            needsCleanEnv: false,
             tags: [],
             serverRunFlags: ['--arch stateful --domain classic'],
             usesParallelWorkers: false,
@@ -128,7 +128,7 @@ describe('flattenModulesByServerRunFlag', () => {
           {
             path: '/path/b',
             hasTests: true,
-            hasNoDataTests: false,
+            needsCleanEnv: false,
             tags: [],
             serverRunFlags: ['--arch stateful --domain classic'],
             usesParallelWorkers: false,
@@ -153,7 +153,7 @@ describe('flattenModulesByServerRunFlag', () => {
           {
             path: '/s',
             hasTests: true,
-            hasNoDataTests: false,
+            needsCleanEnv: false,
             tags: [],
             serverRunFlags: ['--arch serverless --domain search'],
             usesParallelWorkers: false,
@@ -168,7 +168,7 @@ describe('flattenModulesByServerRunFlag', () => {
           {
             path: '/e',
             hasTests: true,
-            hasNoDataTests: false,
+            needsCleanEnv: false,
             tags: [],
             serverRunFlags: ['--arch stateful --domain classic'],
             usesParallelWorkers: false,
@@ -192,7 +192,7 @@ describe('flattenModulesByServerRunFlag', () => {
           {
             path: '/path/to/parallel.playwright.config.ts',
             hasTests: true,
-            hasNoDataTests: false,
+            needsCleanEnv: false,
             tags: [],
             serverRunFlags: ['--arch stateful --domain classic'],
             usesParallelWorkers: true,
@@ -200,7 +200,7 @@ describe('flattenModulesByServerRunFlag', () => {
           {
             path: '/path/to/playwright.config.ts',
             hasTests: true,
-            hasNoDataTests: true,
+            needsCleanEnv: true,
             tags: [],
             serverRunFlags: ['--arch stateful --domain classic'],
             usesParallelWorkers: false,
@@ -231,7 +231,7 @@ describe('flattenModulesByServerRunFlag', () => {
           {
             path: '/path/a/playwright.config.ts',
             hasTests: true,
-            hasNoDataTests: true,
+            needsCleanEnv: true,
             tags: [],
             serverRunFlags: ['--arch serverless --domain observability_complete'],
             usesParallelWorkers: false,
@@ -246,7 +246,7 @@ describe('flattenModulesByServerRunFlag', () => {
           {
             path: '/path/b/playwright.config.ts',
             hasTests: true,
-            hasNoDataTests: true,
+            needsCleanEnv: true,
             tags: [],
             serverRunFlags: ['--arch serverless --domain observability_complete'],
             usesParallelWorkers: false,

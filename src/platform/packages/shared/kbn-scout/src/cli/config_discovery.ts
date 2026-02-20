@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import path from 'node:path';
 import type { Command, FlagsReader } from '@kbn/dev-cli-runner';
 import { SCOUT_PLAYWRIGHT_CONFIGS_PATH } from '@kbn/scout-info';
 import { testableModules } from '@kbn/scout-reporting/src/registry';
@@ -38,10 +37,10 @@ export type { FlattenedConfigGroup, ModuleDiscoveryInfo } from '../tests_discove
 
 // Builds module discovery info from testable modules
 
-const NO_DATA_SPEC_PREFIX = 'no_data_';
+const NEEDS_CLEAN_ENV_TAG = '@needs_clean_environment';
 
-const hasNoDataSpecFiles = (tests: { location: { file: string } }[]): boolean => {
-  return tests.some((test) => path.basename(test.location.file).startsWith(NO_DATA_SPEC_PREFIX));
+const hasCleanEnvTests = (tests: { tags: string[] }[]): boolean => {
+  return tests.some((test) => test.tags.includes(NEEDS_CLEAN_ENV_TAG));
 };
 
 const buildModuleDiscoveryInfo = (): ModuleDiscoveryInfo[] => {
@@ -60,7 +59,7 @@ const buildModuleDiscoveryInfo = (): ModuleDiscoveryInfo[] => {
       return {
         path: config.path,
         hasTests: !!runnableTest,
-        hasNoDataTests: hasNoDataSpecFiles(config.manifest.tests),
+        needsCleanEnv: hasCleanEnvTests(config.manifest.tests),
         tags: allTags,
         serverRunFlags: [],
         usesParallelWorkers,
