@@ -8,9 +8,14 @@
 import React, { useCallback, useMemo } from 'react';
 import { EuiFlyout, EuiFlyoutBody, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import type { AttachmentsService } from '../../../../../../services/attachments/attachements_service';
 import { AttachmentHeader } from './attachment_header';
 import { useCanvasContext } from './canvas_context';
+
+const FLYOUT_ARIA_LABEL = i18n.translate('xpack.agentBuilder.canvasFlyout.ariaLabel', {
+  defaultMessage: 'Attachment preview',
+});
 
 interface CanvasFlyoutProps {
   attachmentsService: AttachmentsService;
@@ -69,7 +74,7 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
   return (
     <EuiFlyout
       onClose={closeCanvas}
-      aria-labelledby="canvasModeFlyoutTitle"
+      aria-label={FLYOUT_ARIA_LABEL}
       ownFocus={false}
       outsideClickCloses={true}
       css={flyoutStyles}
