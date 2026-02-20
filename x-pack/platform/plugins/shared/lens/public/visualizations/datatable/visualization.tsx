@@ -69,7 +69,12 @@ import {
   TableDimensionEditorAdditionalSection,
 } from './components';
 import { DATATABLE_COLOR_MISMATCH } from '../../user_messages_ids';
-import { detectColorConfigMismatch, getDataBoundsForAccessor, resolveColorDefaults } from './utils';
+import {
+  detectColorConfigMismatch,
+  getDataBoundsForAccessor,
+  getFixedColorConfiguration,
+  resolveColorDefaults,
+} from './utils';
 
 const visualizationLabel = i18n.translate('xpack.lens.datatable.label', {
   defaultMessage: 'Table',
@@ -151,7 +156,8 @@ export const getDatatableVisualization = ({
     const columns = state.columns.map((column) => {
       const newColumn = { ...column };
       const accessor = newColumn.columnId;
-      const currentData = frame?.activeData?.[state.layerId];
+      const currentData =
+        frame?.activeData?.[state.layerId] ?? frame?.activeData?.[DatatableInspectorTables.Default];
 
       const { isNumeric, isCategory: isBucketable } = getAccessorType(datasource, accessor);
 
@@ -303,7 +309,8 @@ export const getDatatableVisualization = ({
       return { groups: [] };
     }
     const isTextBasedLanguage = datasource?.isTextBasedLanguage();
-    const currentData = frame.activeData?.[state.layerId];
+    const currentData =
+      frame.activeData?.[state.layerId] ?? frame.activeData?.[DatatableInspectorTables.Default];
 
     const getResolvedDisplayColors = (accessor: string) => {
       const { palette, colorMapping } = columnMap[accessor] ?? {};
@@ -684,55 +691,32 @@ export const getDatatableVisualization = ({
       return { state, references: [] };
     }
 
-    const currentData = activeData?.[state.layerId];
+    const currentData =
+      activeData?.[state.layerId] ?? activeData?.[DatatableInspectorTables.Default];
 
-    // Fix color config mismatches before saving by applying correct defaults
-    const normalizedColumns = state.columns.map((column) => {
-      const { colorMapping, palette, colorMode } = column;
-
-      if (!colorMode || colorMode === 'none') {
-        return column;
-      }
-
-      const columnMeta = getDatatableColumn(currentData, column.columnId)?.meta;
-      const { isCategory: isBucketable } = getAccessorType(
-        datasourceLayer,
-        column.columnId,
-        columnMeta?.type
-      );
-      const dataBounds =
-        getDataBoundsForAccessor(column.columnId, currentData, state.columns) ??
-        getFallbackDataBounds();
-
-      const {
-        palette: resolvedPalette,
-        colorMapping: resolvedColorMapping,
-        hasMismatch,
-      } = resolveColorDefaults({
-        colorByTerms: isBucketable,
-        palette,
-        colorMapping,
-        paletteService,
-        dataBounds,
-      });
-
-      if (hasMismatch) {
-        return { ...column, palette: resolvedPalette, colorMapping: resolvedColorMapping };
-      }
-
-      return column;
-    });
-
-    const hasChanges = normalizedColumns.some(
-      (col, i) =>
-        col.colorMapping !== state.columns[i].colorMapping ||
-        col.palette !== state.columns[i].palette
+    const fixedState = getFixedColorConfiguration(
+      state,
+      datasourceLayer,
+      paletteService,
+      currentData
     );
 
     return {
-      state: hasChanges ? { ...state, columns: normalizedColumns } : state,
+      state: fixedState ?? state,
       references: [],
     };
+  },
+
+  getFixedRuntimeState(state, frame) {
+    const { datasourceLayers, activeData } = frame;
+    const datasource = datasourceLayers?.[state.layerId];
+    if (!datasource) {
+      return undefined;
+    }
+    const currentData =
+      activeData?.[state.layerId] ?? activeData?.[DatatableInspectorTables.Default];
+
+    return getFixedColorConfiguration(state, datasource, paletteService, currentData);
   },
 
   getTelemetryEventsOnSave(state, prevState) {
@@ -888,7 +872,10 @@ export const getDatatableVisualization = ({
     const warnings: UserMessage[] = [];
     const { datasourceLayers, activeData } = frame;
     const datasource = datasourceLayers?.[state.layerId];
-    const currentData = activeData?.[state.layerId];
+    // When the active data comes from the embeddable side it might not have been indexed by layerId
+    // rather using a "default" key
+    const currentData =
+      activeData?.[state.layerId] ?? activeData?.[DatatableInspectorTables.Default];
 
     if (!datasource || !currentData || state.columns.length === 0) {
       return warnings;

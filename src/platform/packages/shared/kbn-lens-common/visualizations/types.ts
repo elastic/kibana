@@ -491,6 +491,15 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
   onDatasourceUpdate?: (state: T, frame?: FramePublicAPI) => T;
 
   /**
+   * Called after active data arrives in the editor (including the inline editor).
+   * If the returned state differs from the input, it will be dispatched to the store,
+   * enabling the Apply/Save button even without explicit user interaction.
+   * Use this to auto-fix known state issues that require active data to detect
+   * (e.g. color config mismatches that depend on the actual column data type).
+   */
+  getFixedRuntimeState?: (state: T, frame: FramePublicAPI) => T | undefined;
+
+  /**
    * Some visualization track indexPattern changes (i.e. annotations)
    * This method makes it aware of the change and produces a new updated state
    */
