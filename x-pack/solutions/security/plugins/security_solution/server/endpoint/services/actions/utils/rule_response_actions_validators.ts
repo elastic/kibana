@@ -284,7 +284,7 @@ const validateEndpointRunscriptResponseAction = async (
   }
 
   const scriptIds = Object.values(config).reduce((acc, osConfig) => {
-    if (osConfig.scriptId) {
+    if (osConfig.scriptId && !acc.includes(osConfig.scriptId)) {
       acc.push(osConfig.scriptId);
     }
 
