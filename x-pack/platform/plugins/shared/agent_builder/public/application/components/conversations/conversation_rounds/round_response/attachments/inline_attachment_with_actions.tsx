@@ -10,7 +10,6 @@ import type { UnknownAttachment } from '@kbn/agent-builder-common/attachments';
 import { EuiSplitPanel } from '@elastic/eui';
 import type { AttachmentsService } from '../../../../../../services/attachments/attachements_service';
 import { AttachmentHeader } from './attachment_header';
-import { InlineAttachmentContent } from './inline_attachment_content';
 import { useCanvasContext } from './canvas_context';
 
 interface InlineAttachmentWithActionsProps {
@@ -71,9 +70,9 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
         actionButtons={inlineActionButtons}
         showCurrentlyPreviewingBadge={isViewingAttachmentInCanvas}
       />
-      <InlineAttachmentContent>
+      <EuiSplitPanel.Inner grow={false} paddingSize="none">
         {uiDefinition?.renderInlineContent?.({ attachment, isSidebar })}
-      </InlineAttachmentContent>
+      </EuiSplitPanel.Inner>
     </EuiSplitPanel.Outer>
   );
 };
