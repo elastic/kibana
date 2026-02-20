@@ -83,7 +83,15 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       await testSubjects.setValue('ruleDetailsNameInput', 'test custom threshold rule', {
         clearWithKeyboard: true,
       });
-      await testSubjects.setValue('ruleDetailsTagsInput', 'tag1');
+      const ruleDetailsTagsInput = await find.byCssSelector(
+        '[data-test-subj="ruleDetailsTagsInput"] [data-test-subj="comboBoxSearchInput"]'
+      );
+      await ruleDetailsTagsInput.type('tag1');
+      await ruleDetailsTagsInput.pressKeys(Key.ENTER);
+      await retry.waitFor('tag to be selected', async () => {
+        const ruleDetailsTags = await testSubjects.find('ruleDetailsTagsInput');
+        return (await ruleDetailsTags.getVisibleText()).includes('tag1');
+      });
     });
 
     it('can add data view', async () => {
