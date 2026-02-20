@@ -17,6 +17,7 @@ import type {
   ManagedEntityDefinition,
 } from '../../common/domain/definitions/entity_schema';
 import { scheduleExtractEntityTask, stopExtractEntityTask } from '../tasks/extract_entity_task';
+import { scheduleEntityMaintainerTasks } from '../tasks/entity_maintainer';
 import { installElasticsearchAssets, uninstallElasticsearchAssets } from './assets/install_assets';
 import {
   EngineDescriptorTypeName,
@@ -81,16 +82,26 @@ export class AssetManager {
     this.security = deps.security;
   }
 
-  public async initEntity(
+  public async init(
     request: KibanaRequest,
-    type: EntityType,
+    entityTypes: EntityType[],
     logExtractionParams?: LogExtractionBodyParams
-  ): Promise<boolean> {
-    const installed = await this.install(type, logExtractionParams);
-    if (installed) {
-      await this.start(request, type);
+  ) {
+    try {
+      await Promise.all(
+        entityTypes.map((type) => this.initEntity(request, type, logExtractionParams))
+      );
+
+      await scheduleEntityMaintainerTasks({
+        logger: this.logger,
+        taskManager: this.taskManager,
+        namespace: this.namespace,
+        request,
+      });
+    } catch (error) {
+      this.logger.error('Error during entity store init:', error);
+      throw error;
     }
-    return installed;
   }
 
   public async start(request: KibanaRequest, type: EntityType) {
@@ -133,39 +144,7 @@ export class AssetManager {
     }
   }
 
-  public async install(
-    type: EntityType,
-    logExtractionParams?: LogExtractionBodyParams
-  ): Promise<boolean> {
-    try {
-      const { engines } = await this.getStatus();
-      if (engines.some((e) => e.type === type)) {
-        return false;
-      }
-
-      this.logger.get(type).debug(`Installing assets for entity type: ${type}`);
-      const definition = getEntityDefinition(type, this.namespace);
-      const initialState: Partial<LogExtractionState> = logExtractionParams ?? {};
-      await Promise.all([
-        this.engineDescriptorClient.init(type, initialState),
-        installElasticsearchAssets({
-          esClient: this.esClient,
-          logger: this.logger,
-          definition,
-          namespace: this.namespace,
-        }),
-      ]);
-      await this.engineDescriptorClient.update(type, { status: ENGINE_STATUS.STARTED });
-      this.logger.debug(`Installed definition: ${type}`);
-
-      return true;
-    } catch (error) {
-      this.logger.error(`Error installing assets for entity type ${type}`, { error });
-      throw error;
-    }
-  }
-
-  public async uninstall(type: EntityType): Promise<boolean> {
+  public async uninstall(type: EntityType) {
     try {
       const { engines } = await this.getStatus();
       if (!engines.some((e) => e.type === type)) {
@@ -211,6 +190,19 @@ export class AssetManager {
     }
   }
 
+  private async initEntity(
+    request: KibanaRequest,
+    type: EntityType,
+    logExtractionParams?: LogExtractionBodyParams
+  ): Promise<boolean> {
+    const installed = await this.install(type, logExtractionParams);
+    if (installed) {
+      await this.start(request, type);
+    }
+
+    return installed;
+  }
+
   public async getPrivileges(
     request: KibanaRequest,
     additionalIndexPatterns: string[] = []
@@ -241,6 +233,38 @@ export class AssetManager {
         index: { ...targetIndexPrivileges, ...sourceIndexPrivileges },
       },
     });
+  }
+
+  public async install(
+    type: EntityType,
+    logExtractionParams?: LogExtractionBodyParams
+  ): Promise<boolean> {
+    try {
+      const { engines } = await this.getStatus();
+      if (engines.some((e) => e.type === type)) {
+        return false;
+      }
+
+      this.logger.get(type).debug(`Installing assets for entity type: ${type}`);
+      const definition = getEntityDefinition(type, this.namespace);
+      const initialState: Partial<LogExtractionState> = logExtractionParams ?? {};
+      await Promise.all([
+        this.engineDescriptorClient.init(type, initialState),
+        installElasticsearchAssets({
+          esClient: this.esClient,
+          logger: this.logger,
+          definition,
+          namespace: this.namespace,
+        }),
+      ]);
+      await this.engineDescriptorClient.update(type, { status: ENGINE_STATUS.STARTED });
+      this.logger.debug(`Installed definition: ${type}`);
+
+      return true;
+    } catch (error) {
+      this.logger.error(`Error installing assets for entity type ${type}`, { error });
+      throw error;
+    }
   }
 
   private async getEngineWithComponents(
