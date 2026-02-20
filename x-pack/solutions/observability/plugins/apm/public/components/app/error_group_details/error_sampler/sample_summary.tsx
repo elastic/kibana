@@ -19,12 +19,12 @@ const Label = styled.div`
 
 interface Props {
   error: {
-    error: Pick<APMError['error'], 'log' | 'exception' | 'culprit'>;
+    error: Pick<APMError['error'], 'log' | 'exception' | 'culprit' | 'message'>;
   };
 }
 export function SampleSummary({ error }: Props) {
   const logMessage = error.error.log?.message;
-  const excMessage = error.error.exception?.[0].message;
+  const excMessage = error.error.exception?.[0].message || error.error.message;
   const culprit = error.error.culprit;
 
   return (
