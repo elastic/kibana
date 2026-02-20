@@ -212,7 +212,6 @@ export class Plugin
     const actionTypeRegistry = this.actionTypeRegistry;
     const ruleTypeRegistry = this.ruleTypeRegistry;
     const isServerless = this.isServerless;
-    const experimentalFeatures = this.experimentalFeatures;
     this.connectorServices = {
       validateEmailAddresses: plugins.actions.validateEmailAddresses,
       enabledEmailServices: plugins.actions.enabledEmailServices,
@@ -277,102 +276,22 @@ export class Plugin
     }
 
     if (this.config.rules.enabled) {
-      if (this.experimentalFeatures.unifiedRulesPage) {
-        core.application.register({
-          id: 'rules',
-          appRoute: '/app/rules',
-          title: i18n.translate('xpack.triggersActionsUI.rulesPage.title', {
-            defaultMessage: 'Rules',
-          }),
-          category: DEFAULT_APP_CATEGORIES.management,
-          visibleIn: ['sideNav'],
-          async mount(params: AppMountParameters) {
-            const [coreStart, pluginsStart] = (await core.getStartServices()) as [
-              CoreStart,
-              PluginsStart,
-              unknown
-            ];
-
-            const { renderRulesPageApp } = await import('./application/rules_page_app');
-
-            // The `/api/features` endpoint requires the "Global All" Kibana privilege. Users with a
-            // subset of this privilege are not authorized to access this endpoint and will receive a 404
-            // error that causes the Alerting view to fail to load.
-            let kibanaFeatures: KibanaFeature[];
-            try {
-              kibanaFeatures = await pluginsStart.features.getFeatures();
-            } catch (err) {
-              kibanaFeatures = [];
-            }
-
-            return renderRulesPageApp({
-              ...coreStart,
-              actions: plugins.actions,
-              cloud: plugins.cloud,
-              data: pluginsStart.data,
-              dataViews: pluginsStart.dataViews,
-              dataViewEditor: pluginsStart.dataViewEditor,
-              charts: pluginsStart.charts,
-              alerting: pluginsStart.alerting,
-              spaces: pluginsStart.spaces,
-              unifiedSearch: pluginsStart.unifiedSearch,
-              isCloud: Boolean(plugins.cloud?.isCloudEnabled),
-              element: params.element,
-              theme: coreStart.theme,
-              storage: new Storage(window.localStorage),
-              setBreadcrumbs: coreStart.chrome.setBreadcrumbs,
-              history: params.history,
-              actionTypeRegistry,
-              ruleTypeRegistry,
-              kibanaFeatures,
-              licensing: pluginsStart.licensing,
-              expressions: pluginsStart.expressions,
-              isServerless,
-              fieldFormats: pluginsStart.fieldFormats,
-              lens: pluginsStart.lens,
-              fieldsMetadata: pluginsStart.fieldsMetadata,
-              contentManagement: pluginsStart.contentManagement,
-              share: pluginsStart.share,
-            });
-          },
-        });
-      }
-
-      plugins.management.sections.section.insightsAndAlerting.registerApp({
-        id: PLUGIN_ID,
-        title: featureTitle,
-        order: 1,
-        async mount(params: ManagementAppMountParams) {
+      core.application.register({
+        id: 'rules',
+        appRoute: '/app/rules',
+        title: i18n.translate('xpack.triggersActionsUI.rulesPage.title', {
+          defaultMessage: 'Rules',
+        }),
+        category: DEFAULT_APP_CATEGORIES.management,
+        visibleIn: ['sideNav'],
+        async mount(params: AppMountParameters) {
           const [coreStart, pluginsStart] = (await core.getStartServices()) as [
             CoreStart,
             PluginsStart,
             unknown
           ];
 
-          if (experimentalFeatures.unifiedRulesPage) {
-            const currentLocation = params.history.location;
-            const search = currentLocation.search;
-
-            const [, page, id] = currentLocation.pathname.split('/');
-
-            switch (page) {
-              case 'rule':
-                await coreStart.application.navigateToApp('rules', {
-                  path: getRulesAppDetailsRoute(id),
-                  replace: true,
-                });
-                break;
-              default:
-                await coreStart.application.navigateToApp('rules', {
-                  path: currentLocation.pathname + search,
-                  replace: true,
-                });
-                break;
-            }
-
-            return () => {};
-          }
-          const { renderApp } = await import('./application/rules_app');
+          const { renderRulesPageApp } = await import('./application/rules_page_app');
 
           // The `/api/features` endpoint requires the "Global All" Kibana privilege. Users with a
           // subset of this privilege are not authorized to access this endpoint and will receive a 404
@@ -384,7 +303,7 @@ export class Plugin
             kibanaFeatures = [];
           }
 
-          return renderApp({
+          return renderRulesPageApp({
             ...coreStart,
             actions: plugins.actions,
             cloud: plugins.cloud,
@@ -397,23 +316,53 @@ export class Plugin
             unifiedSearch: pluginsStart.unifiedSearch,
             isCloud: Boolean(plugins.cloud?.isCloudEnabled),
             element: params.element,
-            theme: params.theme,
+            theme: coreStart.theme,
             storage: new Storage(window.localStorage),
-            setBreadcrumbs: params.setBreadcrumbs,
+            setBreadcrumbs: coreStart.chrome.setBreadcrumbs,
             history: params.history,
             actionTypeRegistry,
             ruleTypeRegistry,
             kibanaFeatures,
             licensing: pluginsStart.licensing,
             expressions: pluginsStart.expressions,
-            isServerless: !!pluginsStart.serverless,
+            isServerless,
             fieldFormats: pluginsStart.fieldFormats,
             lens: pluginsStart.lens,
             fieldsMetadata: pluginsStart.fieldsMetadata,
             contentManagement: pluginsStart.contentManagement,
             share: pluginsStart.share,
-            uiActions: pluginsStart.uiActions,
           });
+        },
+      });
+
+      plugins.management.sections.section.insightsAndAlerting.registerApp({
+        id: PLUGIN_ID,
+        title: featureTitle,
+        order: 1,
+        async mount(params: ManagementAppMountParams) {
+          const [coreStart] = (await core.getStartServices()) as [CoreStart, PluginsStart, unknown];
+
+          const currentLocation = params.history.location;
+          const search = currentLocation.search;
+
+          const [, page, id] = currentLocation.pathname.split('/');
+
+          switch (page) {
+            case 'rule':
+              await coreStart.application.navigateToApp('rules', {
+                path: getRulesAppDetailsRoute(id),
+                replace: true,
+              });
+              break;
+            default:
+              await coreStart.application.navigateToApp('rules', {
+                path: currentLocation.pathname + search,
+                replace: true,
+              });
+              break;
+          }
+
+          return () => {};
         },
       });
     }

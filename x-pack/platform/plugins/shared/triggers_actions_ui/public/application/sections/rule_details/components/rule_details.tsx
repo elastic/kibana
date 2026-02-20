@@ -26,7 +26,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { RuleExecutionStatusErrorReasons, parseDuration } from '@kbn/alerting-plugin/common';
-import { getEditRuleRoute, getRuleDetailsRoute } from '@kbn/rule-data-utils';
+import { getEditRuleRoute } from '@kbn/rule-data-utils';
 import { fetchUiConfig as triggersActionsUiConfig } from '@kbn/response-ops-rule-form';
 import { UpdateApiKeyModalConfirmation } from '../../../components/update_api_key_modal_confirmation';
 import { bulkUpdateAPIKey } from '../../../lib/rule_api/update_api_key';
@@ -49,7 +49,6 @@ import type {
 import type { ComponentOpts as BulkOperationsComponentOpts } from '../../common/components/with_bulk_rule_api_operations';
 import { withBulkRuleOperations } from '../../common/components/with_bulk_rule_api_operations';
 import { RuleRouteWithApi } from './rule_route';
-import { ViewInApp } from './view_in_app';
 import { ViewLinkedObject } from './view_linked_object';
 import { routeToHome } from '../../../constants';
 import {
@@ -57,7 +56,6 @@ import {
   rulesWarningReasonTranslationsMapping,
 } from '../../rules_list/translations';
 import { useKibana } from '../../../../common/lib/kibana';
-import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 import { loadAllActions as loadConnectors } from '../../../lib/action_connector_api';
 import { runRule } from '../../../lib/run_rule';
 import {
@@ -106,8 +104,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
     userProfile,
     notifications: { toasts },
   } = useKibana().services;
-  const { capabilities, navigateToApp, getUrlForApp } = application;
-  const useUnifiedRulesPage = getIsExperimentalFeatureEnabled('unifiedRulesPage');
+  const { capabilities, getUrlForApp } = application;
 
   const [rulesToDelete, setRulesToDelete] = useState<string[]>([]);
   const [rulesToUpdateAPIKey, setRulesToUpdateAPIKey] = useState<string[]>([]);
@@ -247,24 +244,14 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
   };
 
   const onEditRuleClick = () => {
-    if (useUnifiedRulesPage) {
-      const { pathname, search, hash } = history.location;
-      const returnPath = `${pathname}${search}${hash}` || `/${rule.id}`;
-      history.push({
-        pathname: getEditRuleRoute(rule.id),
-        state: {
-          returnPath,
-        },
-      });
-    } else {
-      navigateToApp('management', {
-        path: `insightsAndAlerting/triggersActions/${getEditRuleRoute(rule.id)}`,
-        state: {
-          returnApp: 'management',
-          returnPath: `insightsAndAlerting/triggersActions/${getRuleDetailsRoute(rule.id)}`,
-        },
-      });
-    }
+    const { pathname, search, hash } = history.location;
+    const returnPath = `${pathname}${search}${hash}` || `/${rule.id}`;
+    history.push({
+      pathname: getEditRuleRoute(rule.id),
+      state: {
+        returnPath,
+      },
+    });
   };
 
   const editButton = hasEditButton ? (
@@ -473,7 +460,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
               defaultMessage="Refresh"
             />
           </EuiButtonEmpty>,
-          useUnifiedRulesPage ? <ViewLinkedObject rule={rule} /> : <ViewInApp rule={rule} />,
+          <ViewLinkedObject rule={rule} />,
         ]}
       />
       <EuiPageSection>

@@ -13,7 +13,6 @@ import type { EuiTableSortingType, EuiSelectableOption } from '@elastic/eui';
 import {
   getRulesAppDetailsRoute,
   rulesAppRoute,
-  triggersActionsRoute,
 } from '@kbn/rule-data-utils/src/routes/stack_rule_paths';
 import {
   EuiBasicTable,
@@ -424,11 +423,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
         render: (name: string, rule: RuleTableItem) => {
           const ruleType = ruleTypesState.data.get(rule.ruleTypeId);
           const checkEnabledResult = checkRuleTypeEnabled(ruleType);
-          const pathToRuleDetails = `${
-            getIsExperimentalFeatureEnabled('unifiedRulesPage')
-              ? rulesAppRoute
-              : triggersActionsRoute
-          }${getRulesAppDetailsRoute(rule.id)}`;
+          const pathToRuleDetails = `${rulesAppRoute}${getRulesAppDetailsRoute(rule.id)}`;
 
           const linkProps = getRouterLinkProps({
             href: pathToRuleDetails,

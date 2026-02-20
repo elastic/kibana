@@ -24,7 +24,6 @@ import { RulesSettingsLink } from '../../components/rules_setting/rules_settings
 import { RulesListDocLink } from '../rules_list/components/rules_list_doc_link';
 import { RulesPageTemplate } from './rules_page_template';
 import { useKibana } from '../../../common/lib/kibana';
-import { getIsExperimentalFeatureEnabled } from '../../../common/get_experimental_features';
 import { getAlertingSectionBreadcrumb, getRulesBreadcrumbWithHref } from '../../lib/breadcrumb';
 import { CreateRuleButton } from '../rules_list/components/create_rule_button';
 import { getCurrentDocTitle } from '../../lib/doc_title';
@@ -46,7 +45,6 @@ const RulesPage = () => {
     notifications: { toasts },
     ruleTypeRegistry,
   } = useKibana().services;
-  const useUnifiedRulesPage = getIsExperimentalFeatureEnabled('unifiedRulesPage');
 
   const { authorizedToReadAnyRules, authorizedToCreateAnyRules } = useGetRuleTypesPermissions({
     http,
@@ -124,25 +122,14 @@ const RulesPage = () => {
     (ruleTypeId: string) => {
       const { pathname, search, hash } = locationRef.current;
       const returnPath = `${pathname}${search}${hash}`;
-
-      if (useUnifiedRulesPage) {
-        history.push({
-          pathname: getCreateRuleRoute(ruleTypeId),
-          search,
-          hash,
-          state: { returnPath },
-        });
-      } else {
-        navigateToApp('management', {
-          path: getCreateRuleRoute(ruleTypeId),
-          state: {
-            returnApp: 'management',
-            returnPath,
-          },
-        });
-      }
+      history.push({
+        pathname: getCreateRuleRoute(ruleTypeId),
+        search,
+        hash,
+        state: { returnPath },
+      });
     },
-    [navigateToApp, useUnifiedRulesPage, history]
+    [history]
   );
 
   const renderRulesList = useCallback(() => {
@@ -225,21 +212,15 @@ const RulesPage = () => {
         <RuleTypeModal
           onClose={() => setRuleTypeModalVisibility(false)}
           onSelectRuleType={(ruleTypeId) => {
-            if (navigateToCreateRuleForm) {
-              navigateToCreateRuleForm(ruleTypeId);
-            } else {
-              navigateToApp('management', {
-                path: `insightsAndAlerting/triggersActions/${getCreateRuleRoute(ruleTypeId)}`,
-              });
-            }
+            navigateToApp('rules', {
+              path: `${getCreateRuleRoute(ruleTypeId)}`,
+            });
           }}
           onSelectTemplate={(templateId) => {
             // For templates, we need to extract the ruleTypeId or handle it differently
             // For now, fall back to default behavior
-            navigateToApp('management', {
-              path: `insightsAndAlerting/triggersActions/${getCreateRuleFromTemplateRoute(
-                encodeURIComponent(templateId)
-              )}`,
+            navigateToApp('rules', {
+              path: getCreateRuleFromTemplateRoute(encodeURIComponent(templateId)),
             });
           }}
           http={http}
