@@ -56,7 +56,9 @@
     "@kbn/core-user-profile-server",
     "@kbn/es-mappings",
     "@kbn/workflows-management-plugin",
-    "@kbn/std"
+    "@kbn/std",
+    "@kbn/core-http-server-utils",
+    "@kbn/workflows"
   ],
   "exclude": ["target/**/*"]
 }
