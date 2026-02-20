@@ -77,34 +77,32 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
     isAgentlessSelected = false,
   }) => {
     const { docLinks, cloud } = useStartServices();
-    const { enableCloudConnectorVarGroups } = ExperimentalFeaturesService.get();
+    const { enableVarGroups, enableCloudConnectorVarGroups } = ExperimentalFeaturesService.get();
+
+    const varGroups = enableVarGroups ? packageInfo.var_groups : undefined;
 
     // Form show/hide states
     const [isShowingAdvanced, setIsShowingAdvanced] = useState<boolean>(noAdvancedToggle);
 
-    // Var group selections - derives from policy, initializes defaults, handles changes.
-    // packagePolicy is passed so that policy effects (e.g., supports_cloud_connector flag
-    // and supports_cloud_connectors var) are computed when the selection changes.
-    // When enableCloudConnectorVarGroups is false, packagePolicy is omitted to skip
-    // cloud connector policy effects computation.
     const { selections: varGroupSelections, handleSelectionChange: handleVarGroupSelectionChange } =
       useVarGroupSelections({
-        varGroups: packageInfo.var_groups,
+        varGroups,
         savedSelections: packagePolicy.var_group_selections,
         isAgentlessEnabled: isAgentlessSelected,
         onSelectionsChange: updatePackagePolicy,
-        packagePolicy: enableCloudConnectorVarGroups ? packagePolicy : undefined,
+        packagePolicy,
       });
 
     // Cloud connector state from var_group selections (gated by feature flag)
     const {
-      isSelected,
+      isSelected: isCloudConnectorSelected,
       cloudProvider,
       iacTemplateUrl,
       cloudConnectorVars,
       handleCloudConnectorUpdate,
     } = useVarGroupCloudConnector({
-      varGroups: enableCloudConnectorVarGroups ? packageInfo.var_groups : undefined,
+      enabled: enableCloudConnectorVarGroups,
+      varGroups,
       varGroupSelections,
       updatePackagePolicy,
     });
@@ -123,14 +121,14 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
 
           // Check if var should be shown based on var_group selections
           if (
-            packageInfo.var_groups &&
-            packageInfo.var_groups.length > 0 &&
-            !shouldShowVar(varDef.name, packageInfo.var_groups, varGroupSelections)
+            varGroups &&
+            varGroups.length > 0 &&
+            !shouldShowVar(varDef.name, varGroups, varGroupSelections)
           ) {
             return; // Skip this var, it's hidden by var_group selection
           }
 
-          if (isAdvancedVar(varDef, packageInfo.var_groups, varGroupSelections)) {
+          if (isAdvancedVar(varDef, varGroups, varGroupSelections)) {
             _advancedVars.push(varDef);
           } else {
             _requiredVars.push(varDef);
@@ -139,7 +137,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
       }
 
       return { requiredVars: _requiredVars, advancedVars: _advancedVars };
-    }, [packageInfo.vars, packageInfo.var_groups, varGroupSelections, cloudConnectorVars]);
+    }, [packageInfo.vars, varGroups, varGroupSelections, cloudConnectorVars]);
 
     // Outputs
     const {
@@ -291,20 +289,20 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
             </EuiFlexItem>
 
             {/* Var Group Selectors */}
-            {packageInfo.var_groups?.map((varGroup) => (
+            {varGroups?.map((varGroup) => (
               <EuiFlexItem key={varGroup.name}>
                 <VarGroupSelector
                   varGroup={varGroup}
                   selectedOptionName={varGroupSelections[varGroup.name]}
                   onSelectionChange={handleVarGroupSelectionChange}
                   isAgentlessEnabled={isAgentlessSelected}
-                  disabled={isEditPage && isSelected}
+                  disabled={isEditPage && isCloudConnectorSelected}
                 />
               </EuiFlexItem>
             ))}
 
             {/* Cloud Connector Setup - shown when a cloud connector option is selected */}
-            {isSelected && cloudProvider && (
+            {isCloudConnectorSelected && cloudProvider && (
               <EuiFlexItem>
                 <CloudConnectorSetup
                   newPolicy={packagePolicy}
@@ -328,7 +326,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
               const value = packagePolicy.vars[varName].value;
               const requiredByVarGroup = isVarRequiredByVarGroup(
                 varName,
-                packageInfo.var_groups,
+                varGroups,
                 varGroupSelections
               );
 
@@ -546,7 +544,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                     const value = packagePolicy.vars![varName].value;
                     const requiredByVarGroup = isVarRequiredByVarGroup(
                       varName,
-                      packageInfo.var_groups,
+                      varGroups,
                       varGroupSelections
                     );
                     return (

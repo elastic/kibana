@@ -33,6 +33,8 @@ export interface CloudConnectorInfo {
 }
 
 export interface UseVarGroupCloudConnectorProps {
+  /** Whether cloud connector support is enabled */
+  enabled: boolean;
   /** The var_groups from package info */
   varGroups: RegistryVarGroup[] | undefined;
   /** Current var_group selections */
@@ -56,26 +58,29 @@ export interface UseVarGroupCloudConnectorProps {
  * - A callback compatible with CloudConnectorSetup
  */
 export const useVarGroupCloudConnector = ({
+  enabled,
   varGroups,
   varGroupSelections,
   updatePackagePolicy,
 }: UseVarGroupCloudConnectorProps): CloudConnectorInfo => {
+  const effectiveVarGroups = enabled ? varGroups : undefined;
+
   // Check if a cloud connector option is selected
   const cloudConnectorOption = useMemo(
-    () => getCloudConnectorOption(varGroups, varGroupSelections),
-    [varGroups, varGroupSelections]
+    () => getCloudConnectorOption(effectiveVarGroups, varGroupSelections),
+    [effectiveVarGroups, varGroupSelections]
   );
 
   // Get IaC template URL from var_group selection
   const iacTemplateUrl = useMemo(
-    () => getIacTemplateUrlFromVarGroupSelection(varGroups, varGroupSelections),
-    [varGroups, varGroupSelections]
+    () => getIacTemplateUrlFromVarGroupSelection(effectiveVarGroups, varGroupSelections),
+    [effectiveVarGroups, varGroupSelections]
   );
 
   // Get vars that belong to the selected cloud connector option
   const cloudConnectorVars = useMemo(
-    () => getCloudConnectorVars(varGroups, varGroupSelections),
-    [varGroups, varGroupSelections]
+    () => getCloudConnectorVars(effectiveVarGroups, varGroupSelections),
+    [effectiveVarGroups, varGroupSelections]
   );
 
   // Create an UpdatePolicy callback compatible with CloudConnectorSetup

@@ -46,7 +46,11 @@ import {
   useFleetStatus,
   sendCreatePackagePolicyForRq,
 } from '../../../../../hooks';
-import { isVerificationError, packageToPackagePolicy } from '../../../../../services';
+import {
+  isVerificationError,
+  packageToPackagePolicy,
+  ExperimentalFeaturesService,
+} from '../../../../../services';
 import type { CreatePackagePolicyResponse } from '../../../../../../../../common';
 import {
   FLEET_ELASTIC_AGENT_PACKAGE,
@@ -314,6 +318,8 @@ export function useOnSubmit({
   const confirmForceInstall = useConfirmForceInstall();
   const spaceSettings = useSpaceSettingsContext();
   const { canUseMultipleAgentPolicies } = useMultipleAgentPolicies();
+  const { enableVarGroups, enableCloudConnectorVarGroups } = ExperimentalFeaturesService.get();
+  const varGroups = enableVarGroups ? packageInfo?.var_groups : undefined;
 
   // only used to store the resulting package policy once saved
   const [savedPackagePolicy, setSavedPackagePolicy] = useState<PackagePolicy>();
@@ -525,17 +531,21 @@ export function useOnSubmit({
         isAgentlessSelected ? 'agentless' : 'default',
         packageInfo
       );
-      const visibleForVarGroup = isInputVisibleForVarGroupSelections(
-        input,
-        packageInfo,
-        varGroupSelections
-      );
+      const visibleForVarGroup =
+        !enableVarGroups ||
+        isInputVisibleForVarGroupSelections(input, packageInfo, varGroupSelections);
       if (allowedForDeploymentMode && visibleForVarGroup) {
         return input;
       }
       return { ...input, enabled: false };
     });
-  }, [packagePolicy.inputs, packagePolicy.var_group_selections, isAgentlessSelected, packageInfo]);
+  }, [
+    packagePolicy.inputs,
+    packagePolicy.var_group_selections,
+    isAgentlessSelected,
+    packageInfo,
+    enableVarGroups,
+  ]);
 
   // Compare current vs desired input enabled states so the effect below only fires
   // when a var_group selection actually hides or reveals an input, preventing
@@ -548,7 +558,7 @@ export function useOnSubmit({
   useEffect(() => {
     const shouldApplyInputs =
       prevSetupTechnology !== selectedSetupTechnology ||
-      (packageInfo?.var_groups?.length && inputsEnablingDiffer);
+      (varGroups?.length && inputsEnablingDiffer);
     if (shouldApplyInputs) {
       updatePackagePolicy({
         inputs: newInputs,
@@ -561,7 +571,7 @@ export function useOnSubmit({
     updatePackagePolicy,
     packagePolicy,
     inputsEnablingDiffer,
-    packageInfo?.var_groups?.length,
+    varGroups?.length,
   ]);
 
   updateAgentlessCloudConnectorConfig(
@@ -569,7 +579,7 @@ export function useOnSubmit({
     newAgentPolicy,
     setNewAgentPolicy,
     setPackagePolicy,
-    packageInfo?.var_groups
+    varGroups
   );
 
   const onSaveNavigate = useOnSaveNavigate({
@@ -716,7 +726,7 @@ export function useOnSubmit({
             policy_ids: agentPolicyIdToSave,
             force: forceInstall,
           },
-          packageInfo?.var_groups
+          enableCloudConnectorVarGroups ? varGroups : undefined
         );
 
         if (data?.item.package) {
@@ -828,23 +838,25 @@ export function useOnSubmit({
     },
     [
       formState,
-      spaceId,
       hasErrors,
       agentCount,
+      agentPolicies,
+      selectedPolicyTab,
       isAgentlessIntegration,
       packageInfo,
-      selectedPolicyTab,
-      packagePolicy,
       isAgentlessAgentPolicy,
-      hasFleetAddAgentsPrivileges,
-      withSysMonitoring,
+      packagePolicy,
       newAgentPolicy,
+      withSysMonitoring,
       updatePackagePolicy,
       notifications.toasts,
-      agentPolicies,
+      docLinks.links.fleet.agentlessIntegrations,
+      enableCloudConnectorVarGroups,
+      varGroups,
+      hasFleetAddAgentsPrivileges,
+      spaceId,
       onSaveNavigate,
       confirmForceInstall,
-      docLinks.links.fleet.agentlessIntegrations,
     ]
   );
 

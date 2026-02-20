@@ -45,6 +45,7 @@ describe('useVarGroupCloudConnector hook', () => {
 
     const { result } = renderHook(() =>
       useVarGroupCloudConnector({
+        enabled: true,
         varGroups: undefined,
         varGroupSelections: selections,
         updatePackagePolicy: mockUpdatePackagePolicy,
@@ -57,12 +58,31 @@ describe('useVarGroupCloudConnector hook', () => {
     expect(result.current.cloudConnectorVars.size).toBe(0);
   });
 
+  it('should return isSelected: false when enabled is false', () => {
+    const varGroups = createMockVarGroups();
+    const selections: VarGroupSelection = { auth_method: 'cloud_connector' };
+
+    const { result } = renderHook(() =>
+      useVarGroupCloudConnector({
+        enabled: false,
+        varGroups,
+        varGroupSelections: selections,
+        updatePackagePolicy: mockUpdatePackagePolicy,
+      })
+    );
+
+    expect(result.current.isSelected).toBe(false);
+    expect(result.current.cloudProvider).toBeUndefined();
+    expect(result.current.cloudConnectorVars.size).toBe(0);
+  });
+
   it('should return isSelected: false when non-cloud-connector option is selected', () => {
     const varGroups = createMockVarGroups();
     const selections: VarGroupSelection = { auth_method: 'manual' };
 
     const { result } = renderHook(() =>
       useVarGroupCloudConnector({
+        enabled: true,
         varGroups,
         varGroupSelections: selections,
         updatePackagePolicy: mockUpdatePackagePolicy,
@@ -80,6 +100,7 @@ describe('useVarGroupCloudConnector hook', () => {
 
     const { result } = renderHook(() =>
       useVarGroupCloudConnector({
+        enabled: true,
         varGroups,
         varGroupSelections: selections,
         updatePackagePolicy: mockUpdatePackagePolicy,
@@ -98,6 +119,7 @@ describe('useVarGroupCloudConnector hook', () => {
 
     const { result } = renderHook(() =>
       useVarGroupCloudConnector({
+        enabled: true,
         varGroups,
         varGroupSelections: selections,
         updatePackagePolicy: mockUpdatePackagePolicy,
@@ -118,6 +140,7 @@ describe('useVarGroupCloudConnector hook', () => {
 
     const { result, rerender } = renderHook(() =>
       useVarGroupCloudConnector({
+        enabled: true,
         varGroups,
         varGroupSelections: selections,
         updatePackagePolicy: mockUpdatePackagePolicy,
@@ -140,6 +163,7 @@ describe('useVarGroupCloudConnector hook', () => {
 
     const { result, rerender } = renderHook(() =>
       useVarGroupCloudConnector({
+        enabled: true,
         varGroups,
         varGroupSelections: selections,
         updatePackagePolicy: mockUpdatePackagePolicy,
