@@ -5,21 +5,26 @@
  * 2.0.
  */
 
-import { omit } from 'lodash';
 import type { Feature } from '@kbn/streams-schema';
+import {
+  toFeatureForLlmContext,
+  getFeatureQueryFromToolArgs,
+  resolveFeatureTypeFilters,
+  PARTITION_FEATURE_TOOL_TYPES,
+} from './features_tool';
 
 /**
- * Tests for the feature serialization logic used in partitionStream.
+ * Tests for the feature tool utilities used in partitionStream.
  * The actual workflow function is tested through integration tests,
- * but this verifies the feature serialization pattern works correctly.
+ * but this verifies the feature serialization and tool argument parsing works correctly.
  */
-describe('partitionStream feature serialization', () => {
+describe('partitionStream features_tool', () => {
   const sampleFeatures: Feature[] = [
     {
       id: 'feature-1',
       uuid: 'uuid-1',
       stream_name: 'logs',
-      type: 'framework',
+      type: 'technology',
       title: 'Node.js',
       description: 'Node.js application framework detected',
       properties: { version: '18.x' },
@@ -34,7 +39,7 @@ describe('partitionStream feature serialization', () => {
       id: 'feature-2',
       uuid: 'uuid-2',
       stream_name: 'logs',
-      type: 'service',
+      type: 'entity',
       title: 'API Gateway',
       description: 'API Gateway service identified',
       properties: { endpoints: ['/api/v1', '/api/v2'] },
@@ -47,65 +52,33 @@ describe('partitionStream feature serialization', () => {
     },
   ];
 
-  it('should serialize features omitting id, status, last_seen, expires_at, evidence, and meta', () => {
-    // This mirrors the serialization pattern used in partitionStream:
-    // features: JSON.stringify(features.map((feature) => omit(feature, ['id', 'status', 'last_seen', 'expires_at', 'evidence', 'meta'])))
-    const serialized = JSON.stringify(
-      sampleFeatures.map((feature) =>
-        omit(feature, ['id', 'status', 'last_seen', 'expires_at', 'evidence', 'meta'])
-      )
-    );
+  describe('toFeatureForLlmContext', () => {
+    it('should pick only LLM-relevant fields from a feature', () => {
+      const result = toFeatureForLlmContext(sampleFeatures[0]);
 
-    const parsed = JSON.parse(serialized);
+      expect(result).toHaveProperty('type', 'technology');
+      expect(result).toHaveProperty('title', 'Node.js');
+      expect(result).toHaveProperty('description');
+      expect(result).toHaveProperty('confidence', 95);
+      expect(result).toHaveProperty('properties');
+      expect(result).toHaveProperty('evidence');
+      expect(result).toHaveProperty('tags');
+      expect(result).toHaveProperty('meta');
 
-    expect(parsed).toHaveLength(2);
+      expect(result).not.toHaveProperty('id');
+      expect(result).not.toHaveProperty('uuid');
+      expect(result).not.toHaveProperty('stream_name');
+      expect(result).not.toHaveProperty('status');
+      expect(result).not.toHaveProperty('last_seen');
+      expect(result).not.toHaveProperty('expires_at');
+    });
 
-    // Verify first feature - omitted fields should not be present
-    expect(parsed[0]).not.toHaveProperty('id');
-    expect(parsed[0]).not.toHaveProperty('status');
-    expect(parsed[0]).not.toHaveProperty('last_seen');
-    expect(parsed[0]).not.toHaveProperty('expires_at');
-    expect(parsed[0]).not.toHaveProperty('evidence');
-    expect(parsed[0]).not.toHaveProperty('meta');
-    // Essential semantic fields should be preserved
-    expect(parsed[0]).toHaveProperty('type', 'framework');
-    expect(parsed[0]).toHaveProperty('title', 'Node.js');
-    expect(parsed[0]).toHaveProperty('description');
-    expect(parsed[0]).toHaveProperty('properties');
-    expect(parsed[0]).toHaveProperty('confidence', 95);
-    expect(parsed[0]).toHaveProperty('tags');
-    expect(parsed[0]).toHaveProperty('stream_name', 'logs');
-    expect(parsed[0]).toHaveProperty('uuid', 'uuid-1');
-
-    // Verify second feature
-    expect(parsed[1]).not.toHaveProperty('id');
-    expect(parsed[1]).not.toHaveProperty('status');
-    expect(parsed[1]).not.toHaveProperty('last_seen');
-    expect(parsed[1]).not.toHaveProperty('expires_at');
-    expect(parsed[1]).not.toHaveProperty('evidence');
-    expect(parsed[1]).not.toHaveProperty('meta');
-    expect(parsed[1]).toHaveProperty('type', 'service');
-    expect(parsed[1]).toHaveProperty('title', 'API Gateway');
-  });
-
-  it('should handle empty features array', () => {
-    const emptyFeatures: Feature[] = [];
-    const serialized = JSON.stringify(
-      emptyFeatures.map((feature) =>
-        omit(feature, ['id', 'status', 'last_seen', 'expires_at', 'evidence', 'meta'])
-      )
-    );
-
-    expect(serialized).toBe('[]');
-  });
-
-  it('should preserve nested properties objects but omit meta', () => {
-    const featureWithComplexProperties: Feature[] = [
-      {
+    it('should preserve nested properties objects', () => {
+      const featureWithComplexProperties: Feature = {
         id: 'feature-3',
         uuid: 'uuid-3',
         stream_name: 'logs',
-        type: 'database',
+        type: 'infrastructure',
         title: 'PostgreSQL',
         description: 'PostgreSQL database detected',
         properties: {
@@ -121,57 +94,122 @@ describe('partitionStream feature serialization', () => {
         meta: { tables: ['users', 'orders'] },
         status: 'active',
         last_seen: '2024-01-15T00:00:00.000Z',
-      },
-    ];
+      };
 
-    const serialized = JSON.stringify(
-      featureWithComplexProperties.map((feature) =>
-        omit(feature, ['id', 'status', 'last_seen', 'expires_at', 'evidence', 'meta'])
-      )
-    );
+      const result = toFeatureForLlmContext(featureWithComplexProperties);
 
-    const parsed = JSON.parse(serialized);
-
-    expect(parsed[0].properties).toEqual({
-      version: '14.x',
-      config: {
-        host: 'localhost',
-        port: 5432,
-      },
+      expect(result.properties).toEqual({
+        version: '14.x',
+        config: {
+          host: 'localhost',
+          port: 5432,
+        },
+      });
     });
-    // meta should be omitted
-    expect(parsed[0]).not.toHaveProperty('meta');
-    expect(parsed[0]).not.toHaveProperty('evidence');
+
+    it('should result in valid JSON that can be embedded in tool responses', () => {
+      const llmFeatures = sampleFeatures.map(toFeatureForLlmContext);
+      const serialized = JSON.stringify(llmFeatures);
+
+      expect(() => JSON.parse(serialized)).not.toThrow();
+      expect(serialized).toContain('technology');
+      expect(serialized).toContain('Node.js');
+    });
   });
 
-  it('should omit evidence arrays', () => {
-    const serialized = JSON.stringify(
-      sampleFeatures.map((feature) =>
-        omit(feature, ['id', 'status', 'last_seen', 'expires_at', 'evidence', 'meta'])
-      )
-    );
+  describe('getFeatureQueryFromToolArgs', () => {
+    it('should parse valid tool arguments', () => {
+      const args = {
+        feature_types: ['technology', 'entity'],
+        min_confidence: 80,
+        limit: 10,
+      };
 
-    const parsed = JSON.parse(serialized);
+      const result = getFeatureQueryFromToolArgs(args);
 
-    // Evidence should be omitted as it's internal/operational data
-    expect(parsed[0]).not.toHaveProperty('evidence');
-    expect(parsed[1]).not.toHaveProperty('evidence');
+      expect(result.featureTypes).toEqual(['technology', 'entity']);
+      expect(result.minConfidence).toBe(80);
+      expect(result.limit).toBe(10);
+    });
+
+    it('should handle empty/missing arguments', () => {
+      expect(getFeatureQueryFromToolArgs({})).toEqual({
+        featureTypes: undefined,
+        minConfidence: undefined,
+        limit: undefined,
+      });
+
+      expect(getFeatureQueryFromToolArgs(undefined)).toEqual({
+        featureTypes: undefined,
+        minConfidence: undefined,
+        limit: undefined,
+      });
+    });
+
+    it('should filter out invalid feature types', () => {
+      const args = {
+        feature_types: ['technology', 'invalid_type', 'entity', 'another_invalid'],
+      };
+
+      const result = getFeatureQueryFromToolArgs(args);
+
+      expect(result.featureTypes).toEqual(['technology', 'entity']);
+    });
+
+    it('should return undefined for feature_types when no valid types remain', () => {
+      const args = {
+        feature_types: ['invalid_type', 'another_invalid'],
+      };
+
+      const result = getFeatureQueryFromToolArgs(args);
+
+      expect(result.featureTypes).toBeUndefined();
+    });
+
+    it('should handle invalid min_confidence values', () => {
+      expect(getFeatureQueryFromToolArgs({ min_confidence: -10 }).minConfidence).toBeUndefined();
+      expect(getFeatureQueryFromToolArgs({ min_confidence: 150 }).minConfidence).toBeUndefined();
+      expect(getFeatureQueryFromToolArgs({ min_confidence: 'abc' }).minConfidence).toBeUndefined();
+      expect(getFeatureQueryFromToolArgs({ min_confidence: NaN }).minConfidence).toBeUndefined();
+    });
+
+    it('should handle invalid limit values', () => {
+      expect(getFeatureQueryFromToolArgs({ limit: 0 }).limit).toBeUndefined();
+      expect(getFeatureQueryFromToolArgs({ limit: -5 }).limit).toBeUndefined();
+      expect(getFeatureQueryFromToolArgs({ limit: 'abc' }).limit).toBeUndefined();
+      expect(getFeatureQueryFromToolArgs({ limit: NaN }).limit).toBeUndefined();
+    });
+
+    it('should floor decimal limit values', () => {
+      expect(getFeatureQueryFromToolArgs({ limit: 5.7 }).limit).toBe(5);
+      expect(getFeatureQueryFromToolArgs({ limit: 3.1 }).limit).toBe(3);
+    });
   });
 
-  it('should result in valid JSON that can be embedded in prompts', () => {
-    const serialized = JSON.stringify(
-      sampleFeatures.map((feature) =>
-        omit(feature, ['id', 'status', 'last_seen', 'expires_at', 'evidence', 'meta'])
-      )
-    );
+  describe('resolveFeatureTypeFilters', () => {
+    it('should return undefined for empty or undefined input', () => {
+      expect(resolveFeatureTypeFilters(undefined)).toBeUndefined();
+      expect(resolveFeatureTypeFilters([])).toBeUndefined();
+    });
 
-    // The serialized string should be valid JSON
-    expect(() => JSON.parse(serialized)).not.toThrow();
+    it('should deduplicate feature types', () => {
+      const result = resolveFeatureTypeFilters(['technology', 'entity', 'technology']);
+      expect(result).toEqual(['technology', 'entity']);
+    });
 
-    // The serialized string should be embeddable in a prompt template
-    const promptContent = `Features:\n${serialized}`;
-    expect(promptContent).toContain('Features:');
-    expect(promptContent).toContain('framework');
-    expect(promptContent).toContain('Node.js');
+    it('should pass through valid feature types', () => {
+      const result = resolveFeatureTypeFilters(['infrastructure', 'dependency', 'schema']);
+      expect(result).toEqual(['infrastructure', 'dependency', 'schema']);
+    });
+  });
+
+  describe('PARTITION_FEATURE_TOOL_TYPES', () => {
+    it('should include the expected feature types for partitioning', () => {
+      expect(PARTITION_FEATURE_TOOL_TYPES).toContain('infrastructure');
+      expect(PARTITION_FEATURE_TOOL_TYPES).toContain('technology');
+      expect(PARTITION_FEATURE_TOOL_TYPES).toContain('dependency');
+      expect(PARTITION_FEATURE_TOOL_TYPES).toContain('entity');
+      expect(PARTITION_FEATURE_TOOL_TYPES).toContain('schema');
+    });
   });
 });
