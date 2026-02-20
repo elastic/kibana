@@ -63962,7 +63962,6 @@ paths:
                                   - type: object
                                     properties:
                                       esql:
-                                        additionalProperties: false
                                         type: object
                                         properties:
                                           query:
@@ -64082,7 +64081,6 @@ paths:
                                   - type: object
                                     properties:
                                       esql:
-                                        additionalProperties: false
                                         type: object
                                         properties:
                                           query:
@@ -64207,7 +64205,6 @@ paths:
                                   - type: object
                                     properties:
                                       esql:
-                                        additionalProperties: false
                                         type: object
                                         properties:
                                           query:
@@ -64327,7 +64324,6 @@ paths:
                                   - type: object
                                     properties:
                                       esql:
-                                        additionalProperties: false
                                         type: object
                                         properties:
                                           query:
@@ -64452,7 +64448,6 @@ paths:
                               - type: object
                                 properties:
                                   esql:
-                                    additionalProperties: false
                                     type: object
                                     properties:
                                       query:
