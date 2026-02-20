@@ -348,8 +348,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     expect(await titleElem.getAttribute('value')).to.equal(dataView);
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/252007
-  describe.skip('Search source Alert', () => {
+  describe('Search source Alert', () => {
     before(async () => {
       await security.testUser.setRoles(['discover_alert']);
 
@@ -649,8 +648,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should check that there are no errors detected after an alert is created', async () => {
+      try {
+        await deleteDataView(SOURCE_DATA_VIEW);
+      } catch {
+        // continue
+      }
+
       const newAlert = 'New Alert for checking its status';
-      await createDataView('search-source*');
+      await createDataView(SOURCE_DATA_VIEW);
 
       await PageObjects.common.navigateToApp('management');
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -680,7 +685,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       }
       const dataViewsElem = await testSubjects.find('euiSelectableList');
       const sourceDataViewOption = await dataViewsElem.findByCssSelector(
-        `[title="search-source*"]`
+        `[title="${SOURCE_DATA_VIEW}"]`
       );
       await sourceDataViewOption.click();
 

@@ -143,9 +143,7 @@ export const createChromeComponents = ({
       activeNodes$: projectNavigation.activeNodes$,
       navLinks$,
       dataTestSubj$: projectNavigation.activeDataTestSubj$,
-      feedbackUrlParams$: state.feedback.urlParams$,
       onToggleCollapsed: state.sideNav.collapsed.set,
-      isFeedbackEnabled$: state.feedback.isEnabled$,
     };
 
     return (

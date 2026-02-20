@@ -233,6 +233,60 @@ export class WorkflowEditorPage {
   }
 
   /**
+   * Trigger autocomplete at a specific text position using the Monaco API.
+   * Finds the first occurrence of `searchText` in the editor and places the cursor
+   * at the end of it, then triggers autocomplete via Ctrl+Space.
+   */
+  async triggerAutocompleteAfter(yamlContent: string, searchText: string) {
+    await this.setYamlEditorValue(yamlContent);
+
+    // Wait for the workflow definition to be parsed after setting the YAML.
+    // The autocomplete context schema depends on the parsed definition (e.g., triggers).
+    await this.page.waitForTimeout(1000);
+
+    // Use Monaco API to find the text and position cursor right after it
+    const uri = await this.yamlEditor.locator('.monaco-editor[data-uri]').getAttribute('data-uri');
+    if (!uri) {
+      throw new Error('Editor data-uri not found');
+    }
+    await this.page.evaluate(
+      ({ modelUri, text }) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- monaco environment is global, but we don't have a type for it
+        const monacoEnv = (window as any).MonacoEnvironment;
+        if (!monacoEnv?.monaco?.editor) {
+          throw new Error('MonacoEnvironment.monaco.editor is not available');
+        }
+        const model = monacoEnv.monaco.editor.getModel(modelUri);
+        if (!model) {
+          throw new Error('Editor model not found');
+        }
+
+        // Find the text in the model
+        const content = model.getValue();
+        const offset = content.indexOf(text);
+        if (offset === -1) {
+          throw new Error(`Text "${text}" not found in editor`);
+        }
+
+        // Position cursor right after the search text
+        const endOffset = offset + text.length;
+        const position = model.getPositionAt(endOffset);
+
+        // Get the editor instance and set cursor position + focus
+        const editors = monacoEnv.monaco.editor.getEditors();
+        if (editors.length > 0) {
+          const editor = editors[0];
+          editor.setPosition(position);
+          editor.focus();
+          // Trigger suggest directly via the editor command
+          editor.trigger('autocomplete-test', 'editor.action.triggerSuggest', {});
+        }
+      },
+      { modelUri: uri, text: searchText }
+    );
+  }
+
+  /**
    * Returns a locator for the current Monaco error markers inside the given
    * editor container.
    *
