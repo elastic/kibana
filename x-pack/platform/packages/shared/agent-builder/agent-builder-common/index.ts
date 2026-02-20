@@ -94,7 +94,6 @@ export {
   type RuntimeAgentConfigurationOverrides,
   type AgentCapabilities,
   type ResolvedAgentCapabilities,
-  getKibanaDefaultAgentCapabilities,
   type AgentAnswerStepConfiguration,
   type AgentResearchStepConfiguration,
   agentIdRegexp,
