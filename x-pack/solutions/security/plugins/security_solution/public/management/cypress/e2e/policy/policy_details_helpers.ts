@@ -7,7 +7,8 @@
 
 import { loadPage } from '../../tasks/common';
 
-export const getAutomaticUpdatesToggle = () => cy.getByTestSubj('protection-updates-manifest-switch');
+export const getAutomaticUpdatesToggle = () =>
+  cy.getByTestSubj('protection-updates-manifest-switch');
 export const clickAutomaticUpdatesToggle = () => getAutomaticUpdatesToggle().click();
 
 export const getProtectionUpdatesSaveButton = () => cy.getByTestSubj('protectionUpdatesSaveButton');
