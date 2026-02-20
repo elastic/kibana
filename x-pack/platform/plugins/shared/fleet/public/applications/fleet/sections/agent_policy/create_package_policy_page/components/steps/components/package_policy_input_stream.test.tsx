@@ -186,7 +186,9 @@ describe('PackagePolicyInputStreamConfig', () => {
       isAgentlessEnabled: false,
       isAgentlessDefault: false,
       isAgentlessAgentPolicy: jest.fn(),
-      getAgentlessStatusForPackage: jest.fn().mockReturnValue({ isAgentless: false, isDefaultDeploymentMode: false }),
+      getAgentlessStatusForPackage: jest
+        .fn()
+        .mockReturnValue({ isAgentless: false, isDefaultDeploymentMode: false }),
       isServerless: false,
       isCloud: false,
     });
@@ -336,7 +338,9 @@ describe('PackagePolicyInputStreamConfig', () => {
         isAgentlessEnabled: true,
         isAgentlessDefault: false,
         isAgentlessAgentPolicy: jest.fn(),
-        getAgentlessStatusForPackage: jest.fn().mockReturnValue({ isAgentless: false, isDefaultDeploymentMode: false }),
+        getAgentlessStatusForPackage: jest
+          .fn()
+          .mockReturnValue({ isAgentless: false, isDefaultDeploymentMode: false }),
         isServerless: false,
         isCloud: true,
       });
@@ -357,7 +361,9 @@ describe('PackagePolicyInputStreamConfig', () => {
         isAgentlessEnabled: false,
         isAgentlessDefault: false,
         isAgentlessAgentPolicy: jest.fn(),
-        getAgentlessStatusForPackage: jest.fn().mockReturnValue({ isAgentless: false, isDefaultDeploymentMode: false }),
+        getAgentlessStatusForPackage: jest
+          .fn()
+          .mockReturnValue({ isAgentless: false, isDefaultDeploymentMode: false }),
         isServerless: false,
         isCloud: false,
       });

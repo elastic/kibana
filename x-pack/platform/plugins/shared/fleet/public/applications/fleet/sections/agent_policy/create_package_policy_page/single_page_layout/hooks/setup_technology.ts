@@ -20,7 +20,6 @@ import { useStartServices } from '../../../../../hooks';
 import { SelectedPolicyTab } from '../../components';
 import {
   isAgentlessIntegration,
-  isAgentlessDefaultDeploymentMode,
   getAgentlessAgentPolicyNameFromPackagePolicyName,
   isOnlyAgentlessIntegration,
 } from '../../../../../../../../common/services/agentless_policy_helper';
