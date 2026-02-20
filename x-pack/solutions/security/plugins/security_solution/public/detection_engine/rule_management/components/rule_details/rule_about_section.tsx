@@ -122,7 +122,7 @@ export const SeverityMappingItem = ({ severityMappingItem }: SeverityMappingItem
       </EuiToolTip>
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
-      <EuiIcon type={'sortRight'} />
+      <EuiIcon type={'sortRight'} aria-label="Sort right" />
     </EuiFlexItem>
     <EuiFlexItem>
       <SeverityBadge
@@ -160,7 +160,7 @@ export const RiskScoreMappingItem = ({ riskScoreMappingItem }: RiskScoreMappingI
       </EuiToolTip>
     </OverrideColumn>
     <EuiFlexItem grow={false}>
-      <EuiIcon type={'sortRight'} />
+      <EuiIcon type={'sortRight'} aria-label="Sort right" />
     </EuiFlexItem>
     <EuiFlexItem data-test-subj="riskScoreOverridePropertyOverride">{ALERT_RISK_SCORE}</EuiFlexItem>
   </EuiFlexGroup>
@@ -515,7 +515,7 @@ export const RuleAboutSection = ({
   });
 
   return (
-    <div>
+    <div className="eui-xScroll">
       <EuiSpacer size="m" />
       <EuiDescriptionList
         type={descriptionListProps.type ?? 'column'}

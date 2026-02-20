@@ -31,7 +31,7 @@ export function InsightsTab() {
 
   const queriesFetch = useStreamsAppFetch(
     async ({ signal }) =>
-      streamsRepositoryClient.fetch('GET /internal/streams/_significant_events', {
+      streamsRepositoryClient.fetch('GET /internal/streams/_queries', {
         params: {
           query: {
             from: new Date(Date.now() - 15 * 60 * 1000).toISOString(),
@@ -48,10 +48,7 @@ export function InsightsTab() {
     return <EuiLoadingElastic />;
   }
 
-  const totalEvents = queriesFetch.value?.aggregated_occurrences.reduce(
-    (acc, current) => acc + current.count,
-    0
-  );
+  const totalEvents = queriesFetch.value?.total ?? 0;
 
   if (totalEvents === 0 || totalEvents === undefined) {
     return (

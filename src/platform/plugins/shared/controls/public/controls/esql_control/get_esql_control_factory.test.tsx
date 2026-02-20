@@ -53,6 +53,7 @@ describe('ESQLControlApi', () => {
       control_type: 'STATIC_VALUES',
     } as OptionsListESQLControlState;
     const { api } = await factory.buildEmbeddable({
+      initializeDrilldownsManager: jest.fn(),
       initialState,
       finalizeApi,
       uuid,
@@ -78,6 +79,7 @@ describe('ESQLControlApi', () => {
       control_type: 'STATIC_VALUES',
     } as OptionsListESQLControlState;
     const { api } = await factory.buildEmbeddable({
+      initializeDrilldownsManager: jest.fn(),
       initialState,
       finalizeApi,
       uuid,
@@ -106,6 +108,7 @@ describe('ESQLControlApi', () => {
         control_type: EsqlControlType.VALUES_FROM_QUERY,
       } as OptionsListESQLControlState;
       await factory.buildEmbeddable({
+        initializeDrilldownsManager: jest.fn(),
         initialState,
         finalizeApi,
         uuid,
@@ -127,6 +130,7 @@ describe('ESQLControlApi', () => {
         control_type: EsqlControlType.VALUES_FROM_QUERY,
       } as OptionsListESQLControlState;
       await factory.buildEmbeddable({
+        initializeDrilldownsManager: jest.fn(),
         initialState,
         finalizeApi,
         uuid,
@@ -165,6 +169,7 @@ describe('ESQLControlApi', () => {
         control_type: 'STATIC_VALUES',
       } as OptionsListESQLControlState;
       const { Component, api } = await factory.buildEmbeddable({
+        initializeDrilldownsManager: jest.fn(),
         initialState,
         finalizeApi,
         uuid,

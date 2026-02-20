@@ -57,7 +57,7 @@ export const createAttachmentReadTool = ({
     let formattedData: unknown = versionData.data;
     if (attachmentsService && formatContext) {
       const definition = attachmentsService.getTypeDefinition(attachment.type);
-      const typeReadonly = definition?.isReadonly ?? true;
+      const typeReadonly = definition?.isReadonly ?? false;
       if (definition && typeReadonly) {
         try {
           const formatted = await definition.format(

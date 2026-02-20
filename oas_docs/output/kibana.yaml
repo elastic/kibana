@@ -24921,6 +24921,20 @@ paths:
                                       type: string
                         agents:
                           type: number
+                        agents_per_version:
+                          items:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              count:
+                                type: number
+                              version:
+                                type: string
+                            required:
+                              - version
+                              - count
+                          maxItems: 1000
+                          type: array
                         data_output_id:
                           nullable: true
                           type: string
@@ -25923,6 +25937,20 @@ paths:
                                     type: string
                       agents:
                         type: number
+                      agents_per_version:
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            count:
+                              type: number
+                            version:
+                              type: string
+                          required:
+                            - version
+                            - count
+                        maxItems: 1000
+                        type: array
                       data_output_id:
                         nullable: true
                         type: string
@@ -26707,6 +26735,20 @@ paths:
                                       type: string
                         agents:
                           type: number
+                        agents_per_version:
+                          items:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              count:
+                                type: number
+                              version:
+                                type: string
+                            required:
+                              - version
+                              - count
+                          maxItems: 1000
+                          type: array
                         data_output_id:
                           nullable: true
                           type: string
@@ -27470,6 +27512,20 @@ paths:
                                     type: string
                       agents:
                         type: number
+                      agents_per_version:
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            count:
+                              type: number
+                            version:
+                              type: string
+                          required:
+                            - version
+                            - count
+                        maxItems: 1000
+                        type: array
                       data_output_id:
                         nullable: true
                         type: string
@@ -28471,6 +28527,20 @@ paths:
                                     type: string
                       agents:
                         type: number
+                      agents_per_version:
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            count:
+                              type: number
+                            version:
+                              type: string
+                          required:
+                            - version
+                            - count
+                        maxItems: 1000
+                        type: array
                       data_output_id:
                         nullable: true
                         type: string
@@ -29347,6 +29417,20 @@ paths:
                                     type: string
                       agents:
                         type: number
+                      agents_per_version:
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            count:
+                              type: number
+                            version:
+                              type: string
+                          required:
+                            - version
+                            - count
+                        maxItems: 1000
+                        type: array
                       data_output_id:
                         nullable: true
                         type: string
@@ -30016,21 +30100,30 @@ paths:
           required: true
           schema:
             type: string
-        - in: query
+        - description: If true, returns the policy as a downloadable file
+          in: query
           name: download
           required: false
           schema:
             type: boolean
-        - in: query
+        - description: If true, returns the policy formatted for standalone agents
+          in: query
           name: standalone
           required: false
           schema:
             type: boolean
-        - in: query
+        - description: If true, returns the policy formatted for Kubernetes deployment
+          in: query
           name: kubernetes
           required: false
           schema:
             type: boolean
+        - description: If provided, returns the policy at the specified revision. Cannot be used with standalone or kubernetes flags.
+          in: query
+          name: revision
+          required: false
+          schema:
+            type: number
       responses:
         '200':
           content:
@@ -30103,21 +30196,30 @@ paths:
           required: true
           schema:
             type: string
-        - in: query
+        - description: If true, returns the policy as a downloadable file
+          in: query
           name: download
           required: false
           schema:
             type: boolean
-        - in: query
+        - description: If true, returns the policy formatted for standalone agents
+          in: query
           name: standalone
           required: false
           schema:
             type: boolean
-        - in: query
+        - description: If true, returns the policy formatted for Kubernetes deployment
+          in: query
           name: kubernetes
           required: false
           schema:
             type: boolean
+        - description: If provided, returns the policy at the specified revision. Cannot be used with standalone or kubernetes flags.
+          in: query
+          name: revision
+          required: false
+          schema:
+            type: number
       responses:
         '200':
           content:
@@ -63857,6 +63959,19 @@ paths:
                                         type: number
                                     required:
                                       - kql
+                                  - type: object
+                                    properties:
+                                      esql:
+                                        additionalProperties: false
+                                        type: object
+                                        properties:
+                                          query:
+                                            description: Full ES|QL query.
+                                            type: string
+                                        required:
+                                          - query
+                                    required:
+                                      - esql
                               type: array
                             rules:
                               items:
@@ -63964,6 +64079,19 @@ paths:
                                         type: number
                                     required:
                                       - kql
+                                  - type: object
+                                    properties:
+                                      esql:
+                                        additionalProperties: false
+                                        type: object
+                                        properties:
+                                          query:
+                                            description: Full ES|QL query.
+                                            type: string
+                                        required:
+                                          - query
+                                    required:
+                                      - esql
                               type: array
                             rules:
                               items:
@@ -64076,6 +64204,19 @@ paths:
                                         type: number
                                     required:
                                       - kql
+                                  - type: object
+                                    properties:
+                                      esql:
+                                        additionalProperties: false
+                                        type: object
+                                        properties:
+                                          query:
+                                            description: Full ES|QL query.
+                                            type: string
+                                        required:
+                                          - query
+                                    required:
+                                      - esql
                               type: array
                             rules:
                               items:
@@ -64183,6 +64324,19 @@ paths:
                                         type: number
                                     required:
                                       - kql
+                                  - type: object
+                                    properties:
+                                      esql:
+                                        additionalProperties: false
+                                        type: object
+                                        properties:
+                                          query:
+                                            description: Full ES|QL query.
+                                            type: string
+                                        required:
+                                          - query
+                                    required:
+                                      - esql
                               type: array
                             rules:
                               items:
@@ -64295,6 +64449,19 @@ paths:
                                     type: number
                                 required:
                                   - kql
+                              - type: object
+                                properties:
+                                  esql:
+                                    additionalProperties: false
+                                    type: object
+                                    properties:
+                                      query:
+                                        description: Full ES|QL query.
+                                        type: string
+                                    required:
+                                      - query
+                                required:
+                                  - esql
                           type: array
                         rules:
                           items:
@@ -93837,6 +94004,11 @@ components:
                     id: 6724a474-cbba-41ef-a1aa-66aebf0879e2
                     query: select * from uptime;
                     saved_query_id: 42ba9c50-0cc5-11ed-aa1d-2b27890bc90d
+                result_counts:
+                  error_agents: 0
+                  responded_agents: 1
+                  successful_agents: 1
+                  total_rows: 42
                 user_id: elastic
       type: object
       properties: {}
