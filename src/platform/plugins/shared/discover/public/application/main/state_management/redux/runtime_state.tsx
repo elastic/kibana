@@ -147,8 +147,8 @@ export const selectTabRuntimeInternalState = (
   };
 };
 
-/** Default chart height for new tabs (chart open by default) */
-const DEFAULT_CHART_HEIGHT = 300;
+/** Default chart height for new tabs, matching UnifiedHistogramLayout's minTopPanelHeight (euiTheme.base * 12) */
+const DEFAULT_CHART_HEIGHT = 192;
 
 export const selectInitialUnifiedHistogramLayoutPropsMap = (
   runtimeStateManager: RuntimeStateManager,
