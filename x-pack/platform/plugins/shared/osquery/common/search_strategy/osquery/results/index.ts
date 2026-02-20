@@ -19,20 +19,12 @@ export interface ResultsStrategyResponse extends IEsSearchResponse {
 }
 
 export interface ResultsRequestOptions extends Omit<RequestOptionsPaginated, 'sort'> {
-  actionId: string;
+  actionId?: string;
   agentId?: string;
   startDate?: string;
   sort: SortField[];
   integrationNamespaces?: string[];
-}
-
-export interface ScheduledResultsRequestOptions extends Omit<RequestOptionsPaginated, 'sort'> {
-  scheduleId: string;
-  executionCount: number;
-  sort: SortField[];
-}
-
-export interface ScheduledResultsStrategyResponse extends IEsSearchResponse {
-  edges: ResultEdges;
-  inspect?: Maybe<Inspect>;
+  /** When provided, filters by schedule_id + execution_count instead of action_id */
+  scheduleId?: string;
+  executionCount?: number;
 }

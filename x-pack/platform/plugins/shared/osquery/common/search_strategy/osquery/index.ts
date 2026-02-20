@@ -19,8 +19,6 @@ import type {
 import type {
   ResultsStrategyResponse,
   ResultsRequestOptions,
-  ScheduledResultsStrategyResponse,
-  ScheduledResultsRequestOptions,
 } from './results';
 
 import type { SortField, PaginationInputPaginated } from '../common';
@@ -34,7 +32,6 @@ export enum OsqueryQueries {
   actionResults = 'actionResults',
   results = 'results',
   scheduledActionResults = 'scheduledActionResults',
-  scheduledResults = 'scheduledResults',
 }
 
 export type FactoryQueryTypes = OsqueryQueries;
@@ -64,8 +61,6 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends Osquer
   ? ResultsStrategyResponse
   : T extends OsqueryQueries.scheduledActionResults
   ? ScheduledActionResultsStrategyResponse
-  : T extends OsqueryQueries.scheduledResults
-  ? ScheduledResultsStrategyResponse
   : never;
 
 export type StrategyRequestType<T extends FactoryQueryTypes> = T extends OsqueryQueries.actions
@@ -78,6 +73,4 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends Osquery
   ? ResultsRequestOptions
   : T extends OsqueryQueries.scheduledActionResults
   ? ScheduledActionResultsRequestOptions
-  : T extends OsqueryQueries.scheduledResults
-  ? ScheduledResultsRequestOptions
   : never;

@@ -16,14 +16,15 @@ import { API_VERSIONS } from '../../../common/constants';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { OsqueryQueries, Direction } from '../../../common/search_strategy';
 import type {
-  ScheduledResultsRequestOptions,
-  ScheduledResultsStrategyResponse,
+  ResultsRequestOptions,
+  ResultsStrategyResponse,
 } from '../../../common/search_strategy';
 import { generateTablePaginationOptions } from '../../../common/utils/build_query';
 
 /**
- * Returns query result rows for a scheduled execution,
- * mirroring the response shape of GET /api/osquery/live_queries/{id}/results/{actionId}.
+ * Returns query result rows for a scheduled execution.
+ * Reuses the same results factory (OsqueryQueries.results) as live queries,
+ * passing scheduleId + executionCount instead of actionId as the identifier.
  */
 export const getScheduledQueryResultsRoute = (
   router: IRouter<DataRequestHandlerContext>,
@@ -70,11 +71,11 @@ export const getScheduledQueryResultsRoute = (
           const search = await context.search;
 
           const res = await lastValueFrom(
-            search.search<ScheduledResultsRequestOptions, ScheduledResultsStrategyResponse>(
+            search.search<ResultsRequestOptions, ResultsStrategyResponse>(
               {
                 scheduleId,
                 executionCount,
-                factoryQueryType: OsqueryQueries.scheduledResults,
+                factoryQueryType: OsqueryQueries.results,
                 pagination: generateTablePaginationOptions(page, pageSize),
                 sort: [
                   {
