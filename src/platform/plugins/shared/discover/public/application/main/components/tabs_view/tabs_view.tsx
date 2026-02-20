@@ -8,12 +8,7 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
-import {
-  EuiButtonEmpty,
-  EuiResizeObserver,
-  EuiText,
-  EuiTourStep,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiResizeObserver, EuiText, EuiTourStep } from '@elastic/eui';
 import { UnifiedTabs, type UnifiedTabsProps } from '@kbn/unified-tabs';
 import { AppMenuComponent } from '@kbn/core-chrome-app-menu-components';
 import { i18n } from '@kbn/i18n';
@@ -158,12 +153,10 @@ export const TabsView = (props: SingleTabViewProps) => {
           data-test-subj="discoverTabMenuSwitchModesCallout"
         />
       )}
-      {
-        /**
-         * AppMenuComponent handles responsiveness on its own, however, there are some edge cases e.g opening push flyout
-         * where this might not be good enough.
-         */
-      }
+      {/**
+       * AppMenuComponent handles responsiveness on its own, however, there are some edge cases e.g opening push flyout
+       * where this might not be good enough.
+       */}
       <EuiResizeObserver onResize={onResize}>
         {(resizeRef) => (
           <div ref={resizeRef}>
@@ -186,9 +179,9 @@ export const TabsView = (props: SingleTabViewProps) => {
                 <AppMenuComponent config={topNavMenuItems} isCollapsed={shouldCollapseAppMenu} />
               }
             />
-        </div>
-      )}
-    </EuiResizeObserver>
+          </div>
+        )}
+      </EuiResizeObserver>
     </>
   );
 };
