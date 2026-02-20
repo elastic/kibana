@@ -543,11 +543,9 @@ describe('useSchemaFields', () => {
       expect(result.current.pendingChangesCount).toBe(0);
     });
 
-    it('extracts fields with type "unmapped" from wired stream definition as doc-only overrides', () => {
-      // Fields with type: 'unmapped' are documentation-only fields that exist in the definition
-      // but are not mapped to Elasticsearch. The getDefinitionFields function returns them with
-      // status: 'unmapped' (no type property) since they don't have a real ES mapping.
-      // The UI layer handles these as "doc-only" overrides that only store descriptions.
+    it('extracts doc-only fields (no type) from wired stream definition as doc-only overrides', () => {
+      // Doc-only fields have no type and only store descriptions. The getDefinitionFields function
+      // returns them with status: 'unmapped' since they don't have a real ES mapping.
       const definition = createMockWiredStreamDefinition({
         stream: {
           name: 'logs.wired-test',
@@ -560,8 +558,7 @@ describe('useSchemaFields', () => {
             failure_store: { inherit: {} },
             wired: {
               fields: {
-                'attributes.documented_unmapped_field': {
-                  type: 'unmapped',
+                'attributes.documented_field': {
                   description: 'This field is documented but not mapped',
                 },
               },
@@ -575,15 +572,15 @@ describe('useSchemaFields', () => {
 
       expect(fields).toContainEqual(
         expect.objectContaining({
-          name: 'attributes.documented_unmapped_field',
+          name: 'attributes.documented_field',
           description: 'This field is documented but not mapped',
           status: 'unmapped', // Doc-only fields are returned with status 'unmapped'
         })
       );
     });
 
-    it('extracts fields with type "unmapped" from classic stream definition as doc-only overrides', () => {
-      // Similar to wired streams, classic streams with type: 'unmapped' are doc-only overrides.
+    it('extracts doc-only fields (no type) from classic stream definition as doc-only overrides', () => {
+      // Similar to wired streams, classic streams with typeless doc-only fields.
       // They are returned with status: 'unmapped' (no type property).
       const definition = createMockClassicStreamDefinition({
         stream: {
@@ -597,9 +594,8 @@ describe('useSchemaFields', () => {
             failure_store: { inherit: {} },
             classic: {
               field_overrides: {
-                'attributes.documented_unmapped_field': {
-                  type: 'unmapped',
-                  description: 'Classic stream documented unmapped field',
+                'attributes.documented_field': {
+                  description: 'Classic stream documented field',
                 },
               },
             },
@@ -611,8 +607,8 @@ describe('useSchemaFields', () => {
 
       expect(fields).toContainEqual(
         expect.objectContaining({
-          name: 'attributes.documented_unmapped_field',
-          description: 'Classic stream documented unmapped field',
+          name: 'attributes.documented_field',
+          description: 'Classic stream documented field',
           status: 'unmapped', // Doc-only fields are returned with status 'unmapped'
         })
       );

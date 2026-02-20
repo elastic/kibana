@@ -49,9 +49,6 @@ describe('stream_enrichment_state_machine/utils', () => {
         foo: { description: 'Foo description' },
         keep: { type: 'date' },
       });
-
-      // Ensure we never send `type: 'unmapped'` over the API.
-      expect(JSON.stringify(result)).not.toContain('"type":"unmapped"');
     });
 
     it('works for wired stream definitions too', () => {

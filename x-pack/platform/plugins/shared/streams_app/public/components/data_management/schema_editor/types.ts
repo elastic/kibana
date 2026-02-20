@@ -16,10 +16,10 @@ export type SchemaFieldStatus = 'inherited' | 'mapped' | 'unmapped';
 /**
  * Field types used by the Schema editor UI.
  *
- * Note: the UI supports pseudo-types like `system` and `unmapped` that must never be
- * persisted as real mapping types.
+ * Note: the UI supports the pseudo-type `system` that must never be
+ * persisted as a real mapping type.
  */
-export type SchemaFieldType = NonNullable<FieldDefinitionConfig['type']> | 'system' | 'unmapped';
+export type SchemaFieldType = NonNullable<FieldDefinitionConfig['type']> | 'system';
 export type PersistableSchemaFieldType = SchemaFieldType;
 
 export interface BaseSchemaField extends Omit<FieldDefinitionConfig, 'type'> {
@@ -87,7 +87,7 @@ export interface SchemaEditorProps {
 }
 
 export type TypedMappedSchemaField = MappedSchemaField & {
-  type: Exclude<SchemaFieldType, 'system' | 'unmapped'>;
+  type: Exclude<SchemaFieldType, 'system'>;
 };
 
 export const isSchemaFieldTyped = (field: SchemaField): field is TypedMappedSchemaField => {
@@ -96,7 +96,6 @@ export const isSchemaFieldTyped = (field: SchemaField): field is TypedMappedSche
     !!field.name &&
     field.status === 'mapped' &&
     !!field.type &&
-    field.type !== 'unmapped' &&
     field.type !== 'system'
   );
 };

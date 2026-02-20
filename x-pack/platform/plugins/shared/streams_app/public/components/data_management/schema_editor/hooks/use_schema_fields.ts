@@ -246,9 +246,9 @@ export const getDefinitionFields = (definition: Streams.ingest.all.GetResponse):
 
   for (const [name, field] of Object.entries(definitionFields)) {
     const type = field.type;
-    const isDocOnlyOverride = !type || type === 'unmapped';
+    const isDocOnlyOverride = !type;
 
-    // Doc-only override (typeless `{ description }`), or legacy `type: 'unmapped'`.
+    // Doc-only override (typeless `{ description }`).
     if (isDocOnlyOverride) {
       const inherited = inheritedFieldsByName.get(name);
       if (inherited) {

@@ -259,8 +259,8 @@ describe('generateLayer', () => {
     });
   });
 
-  it('should skip unmapped fields and not include them in mappings', () => {
-    const definitionWithUnmappedField: Streams.WiredStream.Definition = {
+  it('should skip doc-only fields (no type) and not include them in mappings', () => {
+    const definitionWithDocOnlyField: Streams.WiredStream.Definition = {
       name: 'logs.test',
       description: '',
       updated_at: new Date().toISOString(),
@@ -272,7 +272,6 @@ describe('generateLayer', () => {
             '@timestamp': { type: 'date' },
             message: { type: 'match_only_text' },
             'attributes.documented_field': {
-              type: 'unmapped',
               description: 'This field is only documented, not mapped',
             },
             'attributes.regular_field': { type: 'keyword' },
@@ -284,14 +283,14 @@ describe('generateLayer', () => {
       },
     };
 
-    const result = generateLayer('logs.test', definitionWithUnmappedField, false);
+    const result = generateLayer('logs.test', definitionWithDocOnlyField, false);
     const properties = result.template.mappings?.properties as Record<string, unknown>;
 
     // Verify @timestamp and message are in the mappings
     expect(properties['@timestamp']).toBeDefined();
     expect(properties.message).toBeDefined();
 
-    // Verify the unmapped field is NOT in the mappings
+    // Verify the doc-only field is NOT in the mappings
     const attributes = properties.attributes as { properties: Record<string, unknown> };
     expect(attributes.properties.documented_field).toBeUndefined();
 

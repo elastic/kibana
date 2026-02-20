@@ -515,7 +515,6 @@ export function getChanges(fields: SchemaEditorField[], storedFields: SchemaEdit
    * We intentionally ignore:
    * - description-only changes
    * - typeless doc-only overrides (`{ description }`)
-   * - legacy documentation-only fields (`type: 'unmapped'`)
    *
    * We include:
    * - adding/changing/removing real mapping overrides (type/format/advanced params)
@@ -524,8 +523,8 @@ export function getChanges(fields: SchemaEditorField[], storedFields: SchemaEdit
     // Only mapped fields can affect ES mappings; unmapped/inherited entries are either doc-only or inherited.
     if (field.status !== 'mapped') return null;
 
-    // Legacy documentation-only fields should not be treated as mapping changes.
-    if (!field.type || field.type === 'unmapped') return null;
+    // Documentation-only fields (no type) should not be treated as mapping changes.
+    if (!field.type) return null;
 
     return {
       type: field.type,

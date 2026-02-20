@@ -95,16 +95,8 @@ export const SchemaEditorFlyout = ({
         parent: field.parent,
       };
     }
-    // For wired streams, doc-only overrides are stored without a type.
-    // Default to 'unmapped' so the type dropdown shows the correct selection.
-    if (streamType === 'wired' && field.status === 'unmapped' && !field.type) {
-      return {
-        ...field,
-        type: 'unmapped' as const,
-      };
-    }
     return field;
-  }, [applyGeoPointSuggestionProp, geoPointSuggestion, field, streamType]);
+  }, [applyGeoPointSuggestionProp, geoPointSuggestion, field]);
 
   const [nextField, setNextField] = useReducer(
     (prev: SchemaField, updated: Partial<SchemaField>) =>
@@ -123,7 +115,7 @@ export const SchemaEditorFlyout = ({
   // 2. When explicitly requested via isDescriptionOnlyMode prop
   const isDescriptionOnlyEditing =
     isEditing && streamType === 'wired' && (field.status === 'inherited' || isDescriptionOnlyMode);
-  const isDocOnlyField = field.status === 'unmapped' && (!field.type || field.type === 'unmapped');
+  const isDocOnlyField = field.status === 'unmapped' && !field.type;
   const hasDescriptionChanged =
     (nextField.description ?? undefined) !== (field.description ?? undefined);
   const isInheritedDescriptionOnlyEditing =
@@ -218,7 +210,7 @@ export const SchemaEditorFlyout = ({
             enableGeoPointSuggestions={enableGeoPointSuggestions}
             onGoToField={onGoToField}
           />
-          {nextField.type !== 'unmapped' && !isDescriptionOnlyEditing && !nextField.alias_for && (
+          {nextField.type && !isDescriptionOnlyEditing && !nextField.alias_for && (
             <AdvancedFieldMappingOptions
               value={nextField.additionalParameters}
               onChange={(additionalParameters) => setNextField({ additionalParameters })}
@@ -227,7 +219,7 @@ export const SchemaEditorFlyout = ({
             />
           )}
           {withFieldSimulation &&
-            nextField.type !== 'unmapped' &&
+            nextField.type &&
             !isDescriptionOnlyEditing &&
             !nextField.alias_for && (
               <EuiFlexItem grow={false}>

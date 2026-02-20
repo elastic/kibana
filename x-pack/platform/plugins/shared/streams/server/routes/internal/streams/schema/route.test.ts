@@ -27,9 +27,8 @@ describe('schemaFieldsSimulationRoute', () => {
       expect(result).toEqual([]);
     });
 
-    it('filters out UI-only pseudo-types (unmapped/system)', () => {
+    it('filters out UI-only pseudo-type (system)', () => {
       const result = __test__.getSimulatableFieldDefinitions([
-        { name: 'attributes.foo', type: 'unmapped', description: 'docs' },
         { name: 'attributes.bar', type: 'system', description: 'docs' },
         { name: 'attributes.baz', type: 'boolean' },
       ] as any);
@@ -39,7 +38,6 @@ describe('schemaFieldsSimulationRoute', () => {
 
     it('returns an empty array when only UI-only pseudo-types are provided', () => {
       const result = __test__.getSimulatableFieldDefinitions([
-        { name: 'attributes.foo', type: 'unmapped', description: 'docs' },
         { name: 'attributes.bar', type: 'system', description: 'docs' },
       ] as any);
 

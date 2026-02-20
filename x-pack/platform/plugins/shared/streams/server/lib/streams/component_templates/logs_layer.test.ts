@@ -215,34 +215,28 @@ describe('logs_layer', () => {
       });
     });
 
-    it('should not create aliases for unmapped fields', () => {
-      // Unmapped fields are documentation-only and don't have actual ES mappings
-      const streamWithUnmappedField = {
+    it('should not create aliases for doc-only fields', () => {
+      // Doc-only fields (no type) don't have actual ES mappings
+      const streamWithDocOnlyField = {
         name: 'test-stream',
         ingest: {
           wired: {
             fields: {
               'attributes.some.field': { type: 'keyword' },
-              'attributes.unmapped.field': { type: 'unmapped', description: 'A documented field' },
               'attributes.doc_only.field': { description: 'A doc-only override without type' },
             },
           },
         },
       } as unknown as Streams.WiredStream.Definition;
 
-      const inheritedWithUnmapped: InheritedFieldDefinition = {
-        'resource.attributes.inherited.unmapped': {
-          type: 'unmapped',
-          description: 'An inherited unmapped field',
-          from: 'parent-stream',
-        },
+      const inheritedWithDocOnly: InheritedFieldDefinition = {
         'resource.attributes.inherited.doc_only': {
           description: 'An inherited doc-only override without type',
           from: 'parent-stream',
         },
       };
 
-      const result = addAliasesForNamespacedFields(streamWithUnmappedField, inheritedWithUnmapped);
+      const result = addAliasesForNamespacedFields(streamWithDocOnlyField, inheritedWithDocOnly);
 
       // Should create alias for the mapped field
       expect(result['some.field']).toEqual({
@@ -251,9 +245,6 @@ describe('logs_layer', () => {
         alias_for: 'attributes.some.field',
       });
 
-      // Should NOT create aliases for unmapped fields
-      expect(result['unmapped.field']).toBeUndefined();
-      expect(result['inherited.unmapped']).toBeUndefined();
       // Should NOT create aliases for typeless doc-only fields
       expect(result['doc_only.field']).toBeUndefined();
       expect(result['inherited.doc_only']).toBeUndefined();

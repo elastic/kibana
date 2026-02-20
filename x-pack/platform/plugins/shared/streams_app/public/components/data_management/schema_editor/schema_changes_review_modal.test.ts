@@ -14,51 +14,7 @@ import {
 } from '../shared/mocks';
 
 describe('getChanges', () => {
-  describe('filtering unmapped type fields', () => {
-    it('should not include new fields with type "unmapped" in added fields', () => {
-      const unmappedTypeField: SchemaEditorField = {
-        ...createMockMappedField({ name: 'documented_field' }),
-        type: 'unmapped',
-        description: 'This is a documentation-only field',
-      };
-
-      const regularField: SchemaEditorField = {
-        ...createMockMappedField({ name: 'regular_field' }),
-        type: 'keyword',
-      };
-
-      const fields: SchemaEditorField[] = [unmappedTypeField, regularField];
-      const storedFields: SchemaEditorField[] = [];
-
-      const changes = getChanges(fields, storedFields);
-
-      // Should only include the regular field, not the unmapped type field
-      expect(changes).toHaveLength(1);
-      expect(changes[0].name).toBe('regular_field');
-    });
-
-    it('should not include changed fields with type "unmapped"', () => {
-      const originalField: SchemaEditorField = {
-        ...createMockMappedField({ name: 'documented_field' }),
-        type: 'unmapped',
-        description: 'Original description',
-      };
-
-      const updatedField: SchemaEditorField = {
-        ...createMockMappedField({ name: 'documented_field' }),
-        type: 'unmapped',
-        description: 'Updated description',
-      };
-
-      const fields: SchemaEditorField[] = [updatedField];
-      const storedFields: SchemaEditorField[] = [originalField];
-
-      const changes = getChanges(fields, storedFields);
-
-      // Should not include any changes since the field has type 'unmapped'
-      expect(changes).toHaveLength(0);
-    });
-
+  describe('filtering doc-only fields', () => {
     it('should include regular mapped fields in added fields', () => {
       const newField: SchemaEditorField = {
         ...createMockMappedField({ name: 'new_keyword_field' }),
@@ -134,11 +90,10 @@ describe('getChanges', () => {
 
   describe('mixed scenarios', () => {
     it('should correctly filter multiple fields with mixed types', () => {
-      const documentationOnlyField: SchemaEditorField = {
-        ...createMockMappedField({ name: 'doc_field' }),
-        type: 'unmapped',
+      const documentationOnlyField: SchemaEditorField = createMockUnmappedField({
+        name: 'doc_field',
         description: 'Documentation only',
-      };
+      });
 
       const regularKeywordField: SchemaEditorField = {
         ...createMockMappedField({ name: 'keyword_field' }),
@@ -150,11 +105,10 @@ describe('getChanges', () => {
         type: 'date',
       };
 
-      const anotherDocField: SchemaEditorField = {
-        ...createMockMappedField({ name: 'another_doc_field' }),
-        type: 'unmapped',
+      const anotherDocField: SchemaEditorField = createMockUnmappedField({
+        name: 'another_doc_field',
         description: 'Another documentation field',
-      };
+      });
 
       const fields: SchemaEditorField[] = [
         documentationOnlyField,
@@ -175,18 +129,16 @@ describe('getChanges', () => {
       expect(changes.map((f) => f.name)).not.toContain('another_doc_field');
     });
 
-    it('should return empty array when all new fields are unmapped type', () => {
-      const docField1: SchemaEditorField = {
-        ...createMockMappedField({ name: 'doc_field_1' }),
-        type: 'unmapped',
+    it('should return empty array when all new fields are doc-only', () => {
+      const docField1: SchemaEditorField = createMockUnmappedField({
+        name: 'doc_field_1',
         description: 'Doc 1',
-      };
+      });
 
-      const docField2: SchemaEditorField = {
-        ...createMockMappedField({ name: 'doc_field_2' }),
-        type: 'unmapped',
+      const docField2: SchemaEditorField = createMockUnmappedField({
+        name: 'doc_field_2',
         description: 'Doc 2',
-      };
+      });
 
       const fields: SchemaEditorField[] = [docField1, docField2];
       const storedFields: SchemaEditorField[] = [];

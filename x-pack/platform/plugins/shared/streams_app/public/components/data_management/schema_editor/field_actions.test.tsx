@@ -170,26 +170,6 @@ describe('FieldActionsCell', () => {
       expect(actions).toContain('Clear description');
     });
 
-    it('should NOT show Unmap action for documentation-only fields (type === unmapped)', async () => {
-      // Documentation-only field: status: 'mapped', type: 'unmapped'
-      const documentationOnlyField: MappedSchemaField = {
-        name: 'attributes.documented_field',
-        parent: 'logs.test',
-        status: 'mapped',
-        type: 'unmapped',
-        description: 'This field is documented but not mapped',
-      };
-
-      renderWithContext(documentationOnlyField as SchemaEditorField);
-      await openActionsMenu();
-
-      const actions = getMenuItemNames();
-      expect(actions).toContain('View field');
-      expect(actions).toContain('Edit field');
-      expect(actions).toContain('Clear description');
-      expect(actions).not.toContain('Unmap field');
-    });
-
     it('should NOT show Unmap action for fields that are mapped in parent', async () => {
       // Field that overrides a parent field - should not have "Unmap" because parent's mapping still applies
       const mappedField: MappedSchemaField = {
@@ -305,25 +285,24 @@ describe('FieldActionsCell', () => {
       expect(actions).not.toContain('Map as geo field');
     });
 
-    it('should show Map field action when parent has type: unmapped', async () => {
-      // When parent has type: 'unmapped' (documentation-only), child should be able to map it
+    it('should show Map field action when parent has doc-only field (no type)', async () => {
+      // When parent has a doc-only field (no type), child should be able to map it
       const unmappedField: UnmappedSchemaField = {
         name: 'attributes.field1',
         parent: 'logs.test',
         status: 'unmapped',
       };
 
-      const inheritedUnmappedField: InheritedSchemaField = {
+      const inheritedDocOnlyField: InheritedSchemaField = {
         name: 'attributes.field1',
         parent: 'logs',
         status: 'inherited',
-        type: 'unmapped',
         description: 'Parent documentation',
       };
 
       renderWithContext(unmappedField as SchemaEditorField, [
         unmappedField as SchemaEditorField,
-        inheritedUnmappedField as SchemaEditorField,
+        inheritedDocOnlyField as SchemaEditorField,
       ]);
       await openActionsMenu();
 

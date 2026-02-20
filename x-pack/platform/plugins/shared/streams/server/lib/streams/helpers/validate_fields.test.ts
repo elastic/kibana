@@ -35,66 +35,7 @@ const createWiredStreamDefinition = (
 });
 
 describe('validateAncestorFields', () => {
-  describe('type: unmapped validation', () => {
-    it('should throw when setting type: unmapped on a field mapped in parent', () => {
-      const ancestor = createWiredStreamDefinition('logs', {
-        'attributes.field1': { type: 'keyword' },
-      });
-
-      const fields = {
-        'attributes.field1': { type: 'unmapped' as const, description: 'test description' },
-      };
-
-      expect(() =>
-        validateAncestorFields({
-          ancestors: [ancestor],
-          fields,
-        })
-      ).toThrow(MalformedFieldsError);
-      expect(() =>
-        validateAncestorFields({
-          ancestors: [ancestor],
-          fields,
-        })
-      ).toThrow(/cannot be set to 'unmapped'/);
-    });
-
-    it('should not throw when setting type: unmapped on a field that is also unmapped in parent', () => {
-      const ancestor = createWiredStreamDefinition('logs', {
-        'attributes.field1': { type: 'unmapped', description: 'parent description' },
-      });
-
-      const fields = {
-        'attributes.field1': { type: 'unmapped' as const, description: 'child description' },
-      };
-
-      expect(() =>
-        validateAncestorFields({
-          ancestors: [ancestor],
-          fields,
-        })
-      ).not.toThrow();
-    });
-
-    it('should not throw when setting type: unmapped on a field that is system type in parent', () => {
-      const ancestor = createWiredStreamDefinition('logs', {
-        'attributes.field1': { type: 'system' },
-      });
-
-      const fields = {
-        'attributes.field1': { type: 'unmapped' as const, description: 'description' },
-      };
-
-      // Note: This throws because system !== unmapped in the second check
-      // But the unmapped-specific check shouldn't fire
-      expect(() =>
-        validateAncestorFields({
-          ancestors: [ancestor],
-          fields,
-        })
-      ).toThrow(/incompatible type/);
-    });
-
+  describe('type validation', () => {
     it('should allow same type with description override', () => {
       const ancestor = createWiredStreamDefinition('logs', {
         'attributes.field1': { type: 'keyword' },
@@ -112,10 +53,10 @@ describe('validateAncestorFields', () => {
       ).not.toThrow();
     });
 
-    it('should allow setting a real type when parent has type: unmapped', () => {
-      // When parent has type: 'unmapped' (documentation-only), child should be able to map it
+    it('should allow setting a real type when parent has doc-only field (no type)', () => {
+      // When parent has a doc-only override (no type), child should be able to map it
       const ancestor = createWiredStreamDefinition('logs', {
-        'attributes.field1': { type: 'unmapped', description: 'Parent documentation' },
+        'attributes.field1': { description: 'Parent documentation' },
       });
 
       const fields = {
@@ -130,9 +71,9 @@ describe('validateAncestorFields', () => {
       ).not.toThrow();
     });
 
-    it('should allow setting a real type with description when parent has type: unmapped', () => {
+    it('should allow setting a real type with description when parent has doc-only field', () => {
       const ancestor = createWiredStreamDefinition('logs', {
-        'attributes.field1': { type: 'unmapped', description: 'Parent documentation' },
+        'attributes.field1': { description: 'Parent documentation' },
       });
 
       const fields = {

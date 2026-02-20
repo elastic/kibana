@@ -167,10 +167,6 @@ const createCellRenderer =
         }
         return EMPTY_CONTENT;
       }
-      // Fields with type: 'unmapped' should show the same as truly unmapped fields
-      if (field.type === 'unmapped') {
-        return EMPTY_CONTENT;
-      }
       return <FieldType type={field.type} aliasFor={field.alias_for} />;
     }
 
@@ -181,11 +177,9 @@ const createCellRenderer =
     if (columnId === 'status') {
       const editorField = field as SchemaEditorField;
       const streamType = getStreamTypeFromDefinition(stream);
-      // Fields with type: 'unmapped' should show as unmapped status, not mapped
-      const displayStatus = field.type === 'unmapped' ? 'unmapped' : status;
       return (
         <FieldStatusBadge
-          status={displayStatus}
+          status={status}
           uncommitted={editorField.uncommitted}
           streamType={streamType}
         />

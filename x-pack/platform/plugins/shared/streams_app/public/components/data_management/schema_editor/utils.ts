@@ -47,14 +47,6 @@ export const getGeoPointSuggestion = ({
 };
 
 export const convertToFieldDefinitionConfig = (field: MappedSchemaField): FieldDefinitionConfig => {
-  // Legacy doc-only fields (pre typeless override) only have type and description.
-  // Persist them in the new typeless form to avoid freezing mappings.
-  if (field.type === 'unmapped') {
-    return {
-      description: field.description!,
-    };
-  }
-
   if (field.type === 'system') {
     // `system` is a UI-only pseudo-type and must never be persisted in a stream definition.
     throw new Error('Cannot convert system-managed field type to FieldDefinitionConfig');
@@ -117,14 +109,7 @@ export const buildSchemaSavePayload = (
       if (field.type === 'system') {
         return acc;
       }
-      // For legacy doc-only `type: 'unmapped'`, only persist when description is present.
-      if (field.type === 'unmapped') {
-        if (hasNonEmptyDescription) {
-          acc[field.name] = { description: field.description!.trim() };
-        }
-      } else {
-        acc[field.name] = convertToFieldDefinitionConfig(field as MappedSchemaField);
-      }
+      acc[field.name] = convertToFieldDefinitionConfig(field as MappedSchemaField);
     } else if (field.status === 'unmapped' && hasNonEmptyDescription) {
       acc[field.name] = { description: field.description!.trim() };
     }

@@ -216,8 +216,8 @@ const upsertIngestRoute = createServerRoute({
     const unmappedFields = getUnmappedFieldsFromIngestUpsert(ingest);
     if (unmappedFields.length > 0) {
       throw badRequest(
-        `Field definitions must not use type: 'unmapped' on this API. ` +
-          `To apply a documentation-only override, omit \`type\` entirely and send { description }. ` +
+        `Field definitions must not use type: 'unmapped'. ` +
+          `For documentation-only fields, omit \`type\` entirely and send { description }. ` +
           `Invalid fields: ${unmappedFields.join(', ')}`
       );
     }
