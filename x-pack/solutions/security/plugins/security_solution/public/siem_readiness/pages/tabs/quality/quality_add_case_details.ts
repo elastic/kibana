@@ -80,7 +80,3 @@ export const getQualityCaseTitle = (): string => {
     defaultMessage: 'Data Quality: ECS Compatibility Issues',
   });
 };
-
-export const getQualityCaseTags = (): string[] => {
-  return ['siem-readiness', 'data-quality', 'ecs-compatibility'];
-};

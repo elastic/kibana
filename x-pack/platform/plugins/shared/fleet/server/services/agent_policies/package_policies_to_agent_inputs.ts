@@ -28,10 +28,12 @@ import {
   DATA_STREAM_TYPE_VAR_NAME,
   GLOBAL_DATA_TAG_EXCLUDED_INPUTS,
   OTEL_COLLECTOR_INPUT_TYPE,
+  USE_APM_VAR_NAME,
 } from '../../../common/constants/epm';
 import { _compilePackagePolicyInputs, getPackagePolicySavedObjectType } from '../package_policy';
 import { getAgentTemplateAssetsMap } from '../epm/packages/get';
 import { appContextService } from '../app_context';
+import { FleetError } from '../../errors';
 
 const isPolicyEnabled = (packagePolicy: PackagePolicy) => {
   return packagePolicy.enabled && packagePolicy.inputs && packagePolicy.inputs.length;
@@ -169,6 +171,11 @@ export const getFullInputStreams = (
                   ...(dsTypeVar ? { type: dsTypeVar } : {}),
                   ...(datasetVar ? { dataset: datasetVar } : {}),
                 };
+
+                const useAPMVar = stream.vars?.[USE_APM_VAR_NAME]?.value;
+                if (useAPMVar !== undefined) {
+                  fullStream[USE_APM_VAR_NAME] = useAPMVar;
+                }
               }
 
               streamsOriginalIdsMap?.set(fullStream.id, streamId);
@@ -247,11 +254,26 @@ export const storedPackagePoliciesToAgentInputs = async (
         await getPackagePolicySavedObjectType(),
         packagePolicy.id
       );
-      packagePolicyWithUpdatedInputs = {
-        ...packagePolicy,
-        inputs:
-          packagePolicySO?.attributes.inputs_for_versions?.[agentVersion] ?? packagePolicy.inputs,
-      };
+      const inputsForVersions = packagePolicySO?.attributes.inputs_for_versions;
+      const hasVersionSpecificInputs =
+        inputsForVersions && Object.keys(inputsForVersions).length > 0;
+
+      if (hasVersionSpecificInputs) {
+        // Package has version conditions - we should have compiled inputs for this version
+        const versionInputs = inputsForVersions[agentVersion];
+        if (!versionInputs) {
+          span?.end();
+          throw new FleetError(
+            `Missing inputs_for_versions for agent version ${agentVersion} in package policy ${packagePolicy.id}. ` +
+              `Available versions: ${Object.keys(inputsForVersions).join(', ')}`
+          );
+        }
+        packagePolicyWithUpdatedInputs = {
+          ...packagePolicy,
+          inputs: versionInputs,
+        };
+      }
+      // If no version-specific inputs exist, package doesn't have version conditions - use default inputs
       span?.end();
     }
 

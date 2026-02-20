@@ -16,7 +16,7 @@ import moment from 'moment';
 import { TasksConfig } from './config';
 import { EntityStoreTaskType } from './constants';
 import type * as types from '../types';
-import type { EntityType } from '../domain/definitions/entity_schema';
+import type { EntityType } from '../../common/domain/definitions/entity_schema';
 import { createLogsExtractionClient } from './factories';
 
 function getTaskType(entityType: EntityType): string {
@@ -24,7 +24,7 @@ function getTaskType(entityType: EntityType): string {
   return `${config.type}:${entityType}`;
 }
 
-function getTaskId(entityType: EntityType, namespace: string): string {
+export function getExtractEntityTaskId(entityType: EntityType, namespace: string): string {
   return `${getTaskType(entityType)}:${namespace}`;
 }
 
@@ -85,6 +85,7 @@ async function runTask({
       runs: runs + 1,
       entityType,
       lastExtractionSuccess: extractionResult.success,
+      status: 'success',
     };
 
     return {
@@ -154,13 +155,13 @@ export async function scheduleExtractEntityTask({
   logger: Logger;
   taskManager: TaskManagerStartContract;
   type: EntityType;
-  frequency?: string;
+  frequency: string;
   namespace: string;
   request: KibanaRequest;
 }): Promise<void> {
   try {
     const taskType = getTaskType(type);
-    const taskId = getTaskId(type, namespace);
+    const taskId = getExtractEntityTaskId(type, namespace);
     const interval = frequency ?? TasksConfig[EntityStoreTaskType.Values.extractEntity].interval;
     await taskManager.ensureScheduled(
       {
@@ -189,7 +190,7 @@ export async function stopExtractEntityTask({
   type: EntityType;
   namespace: string;
 }): Promise<void> {
-  const taskId = getTaskId(type, namespace);
+  const taskId = getExtractEntityTaskId(type, namespace);
   await taskManager.removeIfExists(taskId);
   logger.debug(`removed task: ${taskId}`);
 }

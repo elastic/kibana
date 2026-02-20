@@ -8,14 +8,18 @@
 import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
 import { isInferenceProviderError } from '@kbn/inference-common';
 import type { InsightsResult } from '@kbn/streams-schema';
+import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { TaskContext } from '.';
 import { cancellableTask } from '../cancellable_task';
 import type { TaskParams } from '../types';
 import { generateInsights } from '../../significant_events/insights/generate_insights';
+import { getErrorMessage } from '../../streams/errors/parse_error';
 import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
 
 export interface InsightsDiscoveryTaskParams {
   connectorId: string;
+  /** When provided, only generate insights for these stream names. Otherwise all streams are used. */
+  streamNames?: string[];
 }
 
 export const STREAMS_INSIGHTS_DISCOVERY_TASK_TYPE = 'streams_insights_discovery';
@@ -31,7 +35,7 @@ export function createStreamsInsightsDiscoveryTask(taskContext: TaskContext) {
                 throw new Error('Request is required to run this task');
               }
 
-              const { connectorId, _task } = runContext.taskInstance
+              const { connectorId, streamNames, _task } = runContext.taskInstance
                 .params as TaskParams<InsightsDiscoveryTaskParams>;
 
               const {
@@ -54,6 +58,7 @@ export function createStreamsInsightsDiscoveryTask(taskContext: TaskContext) {
                   inferenceClient: boundInferenceClient,
                   signal: runContext.abortController.signal,
                   logger: taskContext.logger.get('insights_discovery'),
+                  streamNames,
                 });
 
                 taskContext.telemetry.trackInsightsGenerated({
@@ -64,7 +69,7 @@ export function createStreamsInsightsDiscoveryTask(taskContext: TaskContext) {
 
                 await taskClient.complete<InsightsDiscoveryTaskParams, InsightsResult>(
                   _task,
-                  { connectorId },
+                  { connectorId, streamNames },
                   result
                 );
               } catch (error) {
@@ -73,13 +78,13 @@ export function createStreamsInsightsDiscoveryTask(taskContext: TaskContext) {
 
                 const errorMessage = isInferenceProviderError(error)
                   ? formatInferenceProviderError(error, connector)
-                  : error.message;
+                  : getErrorMessage(error);
 
                 if (
                   errorMessage.includes('ERR_CANCELED') ||
                   errorMessage.includes('Request was aborted')
                 ) {
-                  return;
+                  return getDeleteTaskRunResult();
                 }
 
                 taskContext.logger.error(
@@ -88,9 +93,10 @@ export function createStreamsInsightsDiscoveryTask(taskContext: TaskContext) {
 
                 await taskClient.fail<InsightsDiscoveryTaskParams>(
                   _task,
-                  { connectorId },
+                  { connectorId, streamNames },
                   errorMessage
                 );
+                return getDeleteTaskRunResult();
               }
             },
             runContext,

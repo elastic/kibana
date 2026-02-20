@@ -17,7 +17,6 @@ import type {
   ToolResultEvent,
 } from '@kbn/agent-builder-common/chat';
 import { isToolCallStep } from '@kbn/agent-builder-common/chat';
-import type { ToolIdMapping } from '@kbn/agent-builder-genai-utils/langchain';
 import {
   createBrowserToolCallEvent,
   createMessageEvent,
@@ -38,6 +37,7 @@ import type { Logger } from '@kbn/logging';
 import type { RunToolReturn } from '@kbn/agent-builder-server';
 import { createErrorResult } from '@kbn/agent-builder-server';
 import { AgentPromptRequestSourceType } from '@kbn/agent-builder-common/agents';
+import type { ToolManager } from '@kbn/agent-builder-server/runner';
 import type { StateType } from './state';
 import { BROWSER_TOOL_PREFIX, steps, tags } from './constants';
 import type { ToolCallResult } from './actions';
@@ -55,13 +55,13 @@ export type ConvertedEvents = ChatAgentEvent | InternalEvent;
 
 export const convertGraphEvents = ({
   graphName,
-  toolIdMapping,
+  toolManager,
   pendingRound,
   logger,
   startTime,
 }: {
   graphName: string;
-  toolIdMapping: ToolIdMapping;
+  toolManager: ToolManager;
   pendingRound: ConversationRound | undefined;
   logger: Logger;
   startTime: Date;
@@ -114,7 +114,7 @@ export const convertGraphEvents = ({
               let hasReasoningEvent = false;
 
               for (const toolCall of toolCalls) {
-                const toolId = toolIdentifierFromToolCall(toolCall, toolIdMapping);
+                const toolId = toolIdentifierFromToolCall(toolCall, toolManager.getToolIdMapping());
                 const { toolCallId, args } = toolCall;
 
                 const { _reasoning, ...toolCallArgs } = args;

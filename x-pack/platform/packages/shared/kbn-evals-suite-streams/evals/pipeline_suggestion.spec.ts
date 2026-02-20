@@ -9,6 +9,7 @@ import Path from 'path';
 import { node } from 'execa';
 import { REPO_ROOT } from '@kbn/repo-info';
 import kbnDatemath from '@kbn/datemath';
+import { tags } from '@kbn/scout';
 import type { ScoutTestConfig } from '@kbn/scout';
 import type { KbnClient } from '@kbn/scout';
 import type { StreamlangDSL } from '@kbn/streamlang';
@@ -31,7 +32,7 @@ import {
  * Tests the quality of complete pipeline generation (parsing + normalization)
  * using real LogHub log samples.
  *
- * @tags @ess
+ * @tags @local-stateful-classic @cloud-stateful-classic
  */
 
 evaluate.describe.configure({ timeout: 600_000 });
@@ -314,20 +315,113 @@ evaluate.describe('Pipeline suggestion quality evaluation', () => {
       // Parse SSE response
       const suggestedPipeline = parseSSEResponse(pipelineResponse.data as string);
 
-      // Check if pipeline suggestion failed
-      if (!suggestedPipeline) {
-        // Log first 1000 chars of response for debugging
+      // Check if no pipeline is expected
+      const expectsNoPipeline =
+        expected.expected_processors.parsing === undefined &&
+        (expected.expected_processors.normalization?.length ?? 0) === 0;
+
+      // Check if LLM returned no pipeline (null or empty steps array)
+      const isEmptyPipeline = !suggestedPipeline || (suggestedPipeline.steps?.length ?? 0) === 0;
+
+      // Handle case where LLM returns no pipeline (null or empty)
+      if (isEmptyPipeline) {
+        if (expectsNoPipeline) {
+          // LLM correctly identified that no pipeline is needed - perfect score
+          const perfectMetrics: PipelineSuggestionMetrics = {
+            parseRate: 1,
+            fieldCount: 0,
+            processorCount: 0,
+            processorTypes: {},
+            processorFailureRates: {},
+            otelCompliance: 1,
+            semanticFieldCoverage: 1,
+            typeCorrectness: 1,
+            stepCount: 0,
+            stepEfficiency: 1,
+            hasRedundantProcessors: false,
+            overallQuality: 1,
+          };
+
+          const emptySimulationResult: ProcessingSimulationResponse = {
+            documents: [],
+            processors_metrics: {},
+            documents_metrics: {
+              failed_rate: 0,
+              partially_parsed_rate: 0,
+              skipped_rate: 0,
+              parsed_rate: 1,
+              dropped_rate: 0,
+            },
+            detected_fields: [],
+            definition_error: undefined,
+          };
+
+          return {
+            input,
+            output: {
+              suggestedPipeline: null,
+              simulationResult: emptySimulationResult,
+              metrics: perfectMetrics,
+            },
+            expected,
+            metadata,
+          };
+        }
+
+        // LLM returned no/empty pipeline but we expected one - this is an error
         const responsePreview = (pipelineResponse.data as string).slice(0, 1000);
-        // Log sample of documents to check format
         const sampleDoc = documents[0];
         const bodyPreview = (sampleDoc['body.text'] as string | undefined)?.slice(0, 200);
 
         throw new Error(
-          `Pipeline suggestion returned null for ${input.stream_name}. ` +
+          `Pipeline suggestion returned null/empty for ${input.stream_name}. ` +
             `Response preview: ${responsePreview}. ` +
             `Sample document body.text: ${bodyPreview}. ` +
             `Document count: ${documents.length}`
         );
+      }
+
+      // If we get here, LLM suggested a non-empty pipeline but we expected none
+      if (expectsNoPipeline) {
+        const poorMetrics: PipelineSuggestionMetrics = {
+          parseRate: 0,
+          fieldCount: 0,
+          processorCount: suggestedPipeline.steps?.length ?? 0,
+          processorTypes: {},
+          processorFailureRates: {},
+          otelCompliance: 0,
+          semanticFieldCoverage: 0,
+          typeCorrectness: 0,
+          stepCount: suggestedPipeline.steps?.length ?? 0,
+          stepEfficiency: 0,
+          hasRedundantProcessors: true,
+          overallQuality: 0,
+        };
+
+        const emptySimulationResult: ProcessingSimulationResponse = {
+          documents: [],
+          processors_metrics: {},
+          documents_metrics: {
+            failed_rate: 1,
+            partially_parsed_rate: 0,
+            skipped_rate: 0,
+            parsed_rate: 0,
+            dropped_rate: 0,
+          },
+          detected_fields: [],
+          definition_error: undefined,
+        };
+
+        return {
+          input,
+          output: {
+            suggestedPipeline,
+            simulationResult: emptySimulationResult,
+            metrics: poorMetrics,
+          },
+          expected,
+          metadata,
+        };
       }
 
       // Simulate the suggested pipeline
@@ -432,6 +526,23 @@ evaluate.describe('Pipeline suggestion quality evaluation', () => {
         const pipeline = actualOutput?.suggestedPipeline;
         const metrics = actualOutput?.metrics;
 
+        // Check if no pipeline is expected (structured data that needs no processing)
+        const expectsNoPipeline =
+          expected?.expected_processors?.parsing === undefined &&
+          (expected?.expected_processors?.normalization?.length ?? 0) === 0;
+
+        const isEmptyPipeline = !pipeline || (pipeline.steps?.length ?? 0) === 0;
+
+        // If no pipeline was expected and LLM returned empty/no pipeline, that's perfect
+        if (expectsNoPipeline && isEmptyPipeline) {
+          return { score: 1.0 };
+        }
+
+        // If no pipeline was expected but LLM returned one, that's poor
+        if (expectsNoPipeline && !isEmptyPipeline) {
+          return { score: 0.0 };
+        }
+
         if (!metrics) {
           // eslint-disable-next-line no-console
           console.error('No metrics found for LLM evaluator:', JSON.stringify(output, null, 2));
@@ -506,7 +617,7 @@ evaluate.describe('Pipeline suggestion quality evaluation', () => {
    * Run tests for each dataset.
    */
   PIPELINE_SUGGESTION_DATASETS.forEach((dataset) => {
-    evaluate.describe(dataset.name, { tag: '@ess' }, () => {
+    evaluate.describe(dataset.name, { tag: tags.stateful.classic }, () => {
       evaluate.beforeAll(async ({ apiServices }) => {
         await apiServices.streams.enable();
       });

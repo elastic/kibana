@@ -10,6 +10,12 @@ export { IngestBase, type IngestStreamIndexMode } from './src/models/ingest/base
 export { Ingest } from './src/models/ingest';
 export { WiredIngest } from './src/models/ingest/wired';
 export { ClassicIngest } from './src/models/ingest/classic';
+export { Query } from './src/models/query';
+export {
+  ESQL_VIEW_PREFIX,
+  getEsqlViewName,
+  getStreamNameFromViewName,
+} from './src/models/query/view_name';
 
 export {
   type RoutingDefinition,
@@ -75,10 +81,12 @@ export {
 
 export {
   type StreamQuery,
-  type StreamQueryKql,
+  type StreamQueryInput,
+  type QueriesGetResponse,
+  type QueriesOccurrencesGetResponse,
   upsertStreamQueryRequestSchema,
-  streamQueryKqlSchema,
   streamQuerySchema,
+  streamQueryInputSchema,
 } from './src/queries';
 
 export {
@@ -105,6 +113,9 @@ export {
   type IngestStreamLifecycleInherit,
   type IngestStreamEffectiveLifecycle,
   type PhaseName,
+  type IlmPolicy,
+  type IlmPolicyWithUsage,
+  type IlmPolicyUsage,
   isDslLifecycle,
   isIlmLifecycle,
   isInheritLifecycle,
@@ -139,12 +150,21 @@ export type {
 } from './src/api/significant_events';
 
 export { emptyAssets } from './src/helpers/empty_assets';
+export {
+  validateStreamName,
+  MAX_STREAM_NAME_LENGTH,
+  INVALID_STREAM_NAME_CHARACTERS,
+} from './src/helpers/stream_name_validation';
 
 export {
   type Feature,
   type BaseFeature,
   type FeatureStatus,
   DATASET_ANALYSIS_FEATURE_TYPE,
+  LOG_SAMPLES_FEATURE_TYPE,
+  LOG_PATTERNS_FEATURE_TYPE,
+  ERROR_LOGS_FEATURE_TYPE,
+  COMPUTED_FEATURE_TYPES,
   isFeature,
   isComputedFeature,
   featureSchema,
@@ -168,6 +188,11 @@ export {
 
 export { type IngestStreamProcessing } from './src/models/ingest/processing';
 
-export { TaskStatus } from './src/tasks/types';
+export { TaskStatus, type TaskResult } from './src/tasks/types';
+
+export type { GenerateDescriptionResult } from './src/api/description_generation';
+export type { IdentifyFeaturesResult } from './src/api/features';
 
 export type { InsightsResult, Insight, InsightImpactLevel } from './src/insights';
+export type { OnboardingResult } from './src/onboarding';
+export { OnboardingStep } from './src/onboarding';

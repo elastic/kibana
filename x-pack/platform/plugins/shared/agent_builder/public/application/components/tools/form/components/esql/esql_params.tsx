@@ -34,6 +34,7 @@ import { useEsqlParamsValidation } from '../../hooks/use_esql_params_validation'
 import { i18nMessages } from '../../i18n';
 import type { EsqlParamFormData } from '../../types/tool_form_types';
 import { EsqlParamSource, type EsqlToolFormData } from '../../types/tool_form_types';
+import { ESQL_DEFAULT_PARAMS } from '../../registry/tool_types/esql';
 import { EsqlParamRow } from './esql_param_row';
 
 interface EsqlParamActionsProps {
@@ -65,6 +66,7 @@ const EsqlParamActions: React.FC<EsqlParamActionsProps> = ({ onAppend, onReplace
               type: EsqlToolFieldType.STRING,
               source: EsqlParamSource.Inferred,
               optional: false,
+              defaultValue: undefined,
             };
       }
     );
@@ -142,7 +144,10 @@ const EsqlParamsLayout = ({ actions, fields }: EsqlParamsLayoutProps) => {
 
 export const EsqlParams = () => {
   const { euiTheme } = useEuiTheme();
-  const { control } = useFormContext<EsqlToolFormData>();
+  const { control } = useFormContext<
+    // params is undefined for one render loop after type changes
+    Omit<EsqlToolFormData, 'params'> & { params?: EsqlParamFormData[] }
+  >();
   const {
     services: { docLinks },
   } = useKibana();
@@ -157,10 +162,11 @@ export const EsqlParams = () => {
     name: 'params',
   });
 
-  const params = useWatch({
-    control,
-    name: 'params',
-  });
+  const params =
+    useWatch({
+      control,
+      name: 'params',
+    }) ?? ESQL_DEFAULT_PARAMS;
 
   const hasArrayType = useMemo(() => {
     return params.some((param) => param.type === EsqlToolFieldType.ARRAY);
@@ -174,6 +180,7 @@ export const EsqlParams = () => {
         type: EsqlToolFieldType.STRING,
         source: EsqlParamSource.Custom,
         optional: false,
+        defaultValue: undefined,
       });
     },
     [appendParamField]
@@ -248,10 +255,10 @@ export const EsqlParams = () => {
                 <EuiTable compressed>
                   <EuiTableHeader>
                     <EuiTableHeaderCell width="24px" />
-                    <EuiTableHeaderCell width="25%">
+                    <EuiTableHeaderCell width="20%">
                       {i18nMessages.paramNameLabel}
                     </EuiTableHeaderCell>
-                    <EuiTableHeaderCell width="50%">
+                    <EuiTableHeaderCell width="40%">
                       {i18nMessages.paramDescriptionLabel}
                     </EuiTableHeaderCell>
                     <EuiTableHeaderCell width="128px">
@@ -259,6 +266,9 @@ export const EsqlParams = () => {
                     </EuiTableHeaderCell>
                     <EuiTableHeaderCell width="64px" align="center">
                       {i18nMessages.optionalParamLabel}
+                    </EuiTableHeaderCell>
+                    <EuiTableHeaderCell width="15%">
+                      {i18nMessages.defaultValueLabel}
                     </EuiTableHeaderCell>
                     <EuiTableHeaderCell width="36px" />
                   </EuiTableHeader>

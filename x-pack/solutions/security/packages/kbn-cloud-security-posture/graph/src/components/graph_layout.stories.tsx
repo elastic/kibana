@@ -1305,3 +1305,88 @@ export const EventsAndRelationshipsStacked: Story = {
     ]),
   },
 };
+
+/**
+ * This story tests the fan-out layout with three target nodes
+ * to verify proper distribution when there are more than two targets.
+ *
+ * Graph structure:
+ *   Actor → Label → Target1
+ *                ├─→ Target2
+ *                └─→ Target3
+ */
+export const FanOutThreeTargets: Story = {
+  args: {
+    ...meta.args,
+    nodes: [
+      {
+        id: 'actor',
+        label: 'actor@example.com',
+        color: 'primary',
+        shape: 'ellipse',
+        icon: 'user',
+      },
+      {
+        id: 'target1',
+        label: 'Target Identity 1',
+        color: 'primary',
+        shape: 'ellipse',
+        icon: 'user',
+      },
+      {
+        id: 'target2',
+        label: 'Target Storage 2',
+        color: 'primary',
+        shape: 'hexagon',
+        icon: 'storage',
+      },
+      {
+        id: 'target3',
+        label: 'Target Resource 3',
+        color: 'primary',
+        shape: 'rectangle',
+        icon: 'question',
+      },
+      {
+        id: 'label',
+        label: 'MultiTargetAction',
+        color: 'primary',
+        shape: 'label',
+      },
+    ],
+    edges: [
+      {
+        id: 'a(actor)-b(label)',
+        source: 'actor',
+        sourceShape: 'ellipse',
+        target: 'label',
+        targetShape: 'label',
+        color: 'primary',
+      },
+      {
+        id: 'a(label)-b(target1)',
+        source: 'label',
+        sourceShape: 'label',
+        target: 'target1',
+        targetShape: 'ellipse',
+        color: 'primary',
+      },
+      {
+        id: 'a(label)-b(target2)',
+        source: 'label',
+        sourceShape: 'label',
+        target: 'target2',
+        targetShape: 'hexagon',
+        color: 'primary',
+      },
+      {
+        id: 'a(label)-b(target3)',
+        source: 'label',
+        sourceShape: 'label',
+        target: 'target3',
+        targetShape: 'rectangle',
+        color: 'primary',
+      },
+    ],
+  },
+};

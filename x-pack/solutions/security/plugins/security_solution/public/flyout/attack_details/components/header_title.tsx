@@ -13,9 +13,11 @@ import { i18n } from '@kbn/i18n';
 import { FlyoutTitle } from '../../shared/components/flyout_title';
 import { PreferenceFormattedDate } from '../../../common/components/formatted_date';
 import { Status } from './status';
+import { Assignees } from './assignees';
 import { AlertHeaderBlock } from '../../shared/components/alert_header_block';
 import {
   HEADER_ALERTS_BLOCK_TEST_ID,
+  HEADER_ASSIGNEES_BLOCK_TEST_ID,
   HEADER_BADGE_TEST_ID,
   HEADER_TITLE_TEST_ID,
 } from '../constants/test_ids';
@@ -76,6 +78,20 @@ export const HeaderTitle = memo(() => {
                 data-test-subj={HEADER_ALERTS_BLOCK_TEST_ID}
               >
                 {alertsCount}
+              </AlertHeaderBlock>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <AlertHeaderBlock
+                hasBorder
+                title={
+                  <FormattedMessage
+                    id="xpack.securitySolution.attackDetailsFlyout.header.assigneesTitle"
+                    defaultMessage="Assignees"
+                  />
+                }
+                data-test-subj={HEADER_ASSIGNEES_BLOCK_TEST_ID}
+              >
+                <Assignees />
               </AlertHeaderBlock>
             </EuiFlexItem>
           </EuiFlexGroup>

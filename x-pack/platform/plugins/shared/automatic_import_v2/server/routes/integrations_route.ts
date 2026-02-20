@@ -153,7 +153,15 @@ const createIntegrationRoute = (
       async (context, request, response) => {
         const { automaticImportService, getCurrentUser, esClient } =
           await context.automaticImportv2;
-        const { integrationId, title, logo, description, connectorId, dataStreams } = request.body;
+        const {
+          integrationId,
+          title,
+          logo,
+          description,
+          connectorId,
+          dataStreams,
+          langSmithOptions,
+        } = request.body;
         try {
           const authenticatedUser = await getCurrentUser();
 
@@ -183,6 +191,7 @@ const createIntegrationRoute = (
                     dataStreamParams,
                     esClient,
                     connectorId,
+                    langSmithOptions,
                   },
                   request
                 )

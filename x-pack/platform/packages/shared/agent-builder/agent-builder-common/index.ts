@@ -44,7 +44,7 @@ export {
   type ErrorResult,
   type QueryResult,
   type ResourceResult,
-  type TabularDataResult,
+  type EsqlResults,
   type OtherResult,
   type IndexSearchToolDefinitionWithSchema,
   type BrowserApiToolMetadata,
@@ -59,6 +59,8 @@ export {
   isConversationNotFoundError,
   isBadRequestError,
   isRequestAbortedError,
+  isWorkflowAbortedError,
+  isWorkflowExecutionError,
   isAgentExecutionError,
   isContextLengthExceededAgentError,
   createAgentBuilderError,
@@ -68,6 +70,8 @@ export {
   createConversationNotFoundError,
   createBadRequestError,
   createRequestAbortedError,
+  createWorkflowAbortedError,
+  createWorkflowExecutionError,
   type AgentBuilderError,
   type AgentBuilderInternalError,
   type AgentBuilderToolNotFoundError,
@@ -75,9 +79,15 @@ export {
   type AgentBuilderConversationNotFoundError,
   type AgentBuilderBadRequestError,
   type AgentBuilderRequestAbortedError,
+  type AgentBuilderWorkflowAbortedError,
+  type AgentBuilderWorkflowExecutionError,
   type AgentBuilderAgentExecutionError,
+  type AgentBuilderHooksExecutionError,
   type SerializedAgentBuilderError,
+  isHooksExecutionError,
+  createHooksExecutionError,
 } from './base/errors';
+export { HookLifecycle, HookExecutionMode } from './hooks/lifecycle';
 export { type UserIdAndName } from './base/users';
 export { EsResourceType } from './base/resources';
 export {
@@ -114,6 +124,7 @@ export {
   ConversationRoundStatus,
   type ChatEventBase,
   type ChatEvent,
+  type ConversationAction,
   type ConversationCreatedEvent,
   type ConversationCreatedEventData,
   type ConversationUpdatedEvent,
@@ -145,6 +156,7 @@ export {
   isToolCallEvent,
   isBrowserToolCallEvent,
   isToolResultEvent,
+  isToolUiEvent,
   isReasoningEvent,
   isMessageChunkEvent,
   isMessageCompleteEvent,
@@ -156,4 +168,5 @@ export {
   isPromptRequestEvent,
 } from './chat';
 export * from './telemetry';
-export type { VersionedAttachment } from './attachments';
+export { AGENT_WORKFLOWS_FEATURE_FLAG } from './feature_flags';
+export { getLatestVersion, type VersionedAttachment } from './attachments';
