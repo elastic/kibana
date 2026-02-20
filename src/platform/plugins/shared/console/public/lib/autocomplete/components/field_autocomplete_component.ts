@@ -15,8 +15,6 @@ import type { AutocompleteTermDefinition } from './autocomplete_component';
 import type { SharedComponent } from './shared_component';
 import { isRecord } from '../../../../common/utils/record_utils';
 
-const isString = (value: unknown): value is string => typeof value === 'string';
-
 function FieldGenerator(context?: AutoCompleteContext): AutocompleteTermDefinition[] {
   if (!context) {
     return [];
@@ -25,16 +23,16 @@ function FieldGenerator(context?: AutoCompleteContext): AutocompleteTermDefiniti
   const indicesValue = context.indices;
   const typesValue = context.types;
 
-  const indices = isString(indicesValue)
+  const indices = _.isString(indicesValue)
     ? [indicesValue]
     : Array.isArray(indicesValue)
-    ? indicesValue.filter(isString)
+    ? indicesValue.filter(_.isString)
     : [];
 
-  const types = isString(typesValue)
+  const types = _.isString(typesValue)
     ? [typesValue]
     : Array.isArray(typesValue)
-    ? typesValue.filter(isString)
+    ? typesValue.filter(_.isString)
     : [];
 
   const entityContext = Object.assign(Object.create(Object.getPrototypeOf(context)), {
