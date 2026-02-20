@@ -205,6 +205,7 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
                 pageSize: fetchSize,
                 cursor: effectiveScheduledCursor,
                 scheduleIds: scheduleIdsForQuery,
+                spaceId,
                 startDate,
                 endDate,
               })

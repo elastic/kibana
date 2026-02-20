@@ -189,7 +189,8 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
                     newPackagePolicy,
                     spaceScopedClient,
                     allPacks.saved_objects,
-                    this.osqueryAppContextService
+                    this.osqueryAppContextService,
+                    soClient.getCurrentNamespace()
                   );
                 }
               }

@@ -17,6 +17,7 @@ import {
 } from '@kbn/fleet-plugin/common';
 import type { IRouter } from '@kbn/core/server';
 
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
 import type {
   UpdatePacksRequestParamsSchema,
@@ -78,6 +79,10 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           osqueryContext,
           request
         );
+
+        const spaceId = osqueryContext?.service?.getActiveSpace
+          ? (await osqueryContext.service.getActiveSpace(request))?.id || DEFAULT_SPACE_ID
+          : DEFAULT_SPACE_ID;
 
         const agentPolicyService = osqueryContext.service.getAgentPolicyService();
         const packagePolicyService = osqueryContext.service.getPackagePolicyService();
@@ -255,7 +260,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                         `inputs[0].config.osquery.value.packs.${updatedPackSO.attributes.name}`,
                         {
                           shard: policyShards[agentPolicyId] ?? 100,
-                          queries: convertSOQueriesToPackConfig(updatedPackSO.attributes.queries),
+                          queries: convertSOQueriesToPackConfig(updatedPackSO.attributes.queries, spaceId),
                         }
                       );
 
@@ -346,7 +351,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                       `inputs[0].config.osquery.value.packs.${updatedPackSO.attributes.name}`,
                       {
                         shard: policyShards[agentPolicyId] ?? 100,
-                        queries: convertSOQueriesToPackConfig(updatedPackSO.attributes.queries),
+                        queries: convertSOQueriesToPackConfig(updatedPackSO.attributes.queries, spaceId),
                       }
                     );
 
@@ -379,7 +384,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                       `inputs[0].config.osquery.value.packs.${updatedPackSO.attributes.name}`,
                       {
                         shard: policyShards[agentPolicyId] ?? 100,
-                        queries: convertSOQueriesToPackConfig(updatedPackSO.attributes.queries),
+                        queries: convertSOQueriesToPackConfig(updatedPackSO.attributes.queries, spaceId),
                       }
                     );
 

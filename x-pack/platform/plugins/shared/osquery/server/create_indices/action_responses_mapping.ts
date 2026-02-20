@@ -100,6 +100,10 @@ export const actionResponsesMapping: MappingTypeMapping = {
       type: 'keyword',
       ignore_above: 1024,
     },
+    space_id: {
+      type: 'keyword',
+      ignore_above: 1024,
+    },
     started_at: {
       type: 'date',
     },

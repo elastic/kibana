@@ -17,6 +17,7 @@ import {
 } from '@kbn/fleet-plugin/common';
 import type { IRouter } from '@kbn/core/server';
 
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
 import type { CreatePackRequestBodySchema } from '../../../common/api';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
@@ -71,6 +72,10 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           osqueryContext,
           request
         );
+
+        const spaceId = osqueryContext?.service?.getActiveSpace
+          ? (await osqueryContext.service.getActiveSpace(request))?.id || DEFAULT_SPACE_ID
+          : DEFAULT_SPACE_ID;
 
         const agentPolicyService = osqueryContext.service.getAgentPolicyService();
 
@@ -178,7 +183,7 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
 
                     set(draft, `inputs[0].config.osquery.value.packs.${packSO.attributes.name}`, {
                       shard: policyShards[agentPolicyId] ?? 100,
-                      queries: convertSOQueriesToPackConfig(queries),
+                      queries: convertSOQueriesToPackConfig(queries, spaceId),
                     });
 
                     return draft;
