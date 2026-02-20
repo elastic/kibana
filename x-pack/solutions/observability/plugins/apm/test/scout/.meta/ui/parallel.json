@@ -1,6 +1,5 @@
 {
-  "lastModified": "2026-02-10T11:18:11.867Z",
-  "sha1": "af556655fce897a109fca2469fca8f2961d51eb8",
+  "sha1": "4e645a9e1ebd8d0615712aa4407b0f5968c7ed2f",
   "tests": [
     {
       "id": "5e91b4cbd08e25e-f2cd2d3cdc77643",
@@ -19,8 +18,8 @@
       }
     },
     {
-      "id": "93959537d8145bf-c60ed75f55e6428",
-      "title": "Alerts Can create, trigger and view an 'Error count' alert from service inventory",
+      "id": "93959537d8145bf-66043be86cebc43",
+      "title": "Alerts Can create an error count rule from service inventory",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -30,8 +29,36 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/alerts/error_count.spec.ts",
-        "line": 30,
-        "column": 9
+        "line": 144,
+        "column": 7
+      }
+    },
+    {
+      "id": "93959537d8145bf-19460eecd1a223c",
+      "title": "Alerts Stateful - Displays an alert in the service details alerts tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/alerts/error_count.spec.ts",
+        "line": 187,
+        "column": 7
+      }
+    },
+    {
+      "id": "93959537d8145bf-a22699904fcf1be",
+      "title": "Alerts Serverless - Displays an alert in the service details alerts tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/alerts/error_count.spec.ts",
+        "line": 193,
+        "column": 7
       }
     },
     {
@@ -543,6 +570,246 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_inventory/service_inventory.spec.ts",
         "line": 61,
+        "column": 9
+      }
+    },
+    {
+      "id": "027a724476bf822-7a5ac6225930c1c",
+      "title": "Service map - accessibility axe-core automated accessibility checks pass",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_a11y.spec.ts",
+        "line": 29,
+        "column": 9
+      }
+    },
+    {
+      "id": "027a724476bf822-3e58cea4efef368",
+      "title": "Service map - accessibility keyboard navigation works correctly",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_a11y.spec.ts",
+        "line": 67,
+        "column": 9
+      }
+    },
+    {
+      "id": "027a724476bf822-d188045f3c69eae",
+      "title": "Service map - accessibility focus management and visible indicators work correctly",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_a11y.spec.ts",
+        "line": 114,
+        "column": 9
+      }
+    },
+    {
+      "id": "027a724476bf822-c5ee877afe0ab0a",
+      "title": "Service map - accessibility ARIA attributes are properly set for screen readers",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_a11y.spec.ts",
+        "line": 141,
+        "column": 9
+      }
+    },
+    {
+      "id": "6a80f754a8758b3-f8b7c44dd1a9b2b",
+      "title": "Service map - nodes, edges and popovers renders service map with controls",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_detailed.spec.ts",
+        "line": 32,
+        "column": 9
+      }
+    },
+    {
+      "id": "6a80f754a8758b3-bd179c28cf90db2",
+      "title": "Service map - nodes, edges and popovers shows popover when clicking on a service node",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_detailed.spec.ts",
+        "line": 63,
+        "column": 9
+      }
+    },
+    {
+      "id": "6a80f754a8758b3-0c21e23b58b1030",
+      "title": "Service map - nodes, edges and popovers dismisses popover when clicking outside",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_detailed.spec.ts",
+        "line": 78,
+        "column": 9
+      }
+    },
+    {
+      "id": "6a80f754a8758b3-c5a4af62fc020af",
+      "title": "Service map - nodes, edges and popovers shows popover when clicking on an edge",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_detailed.spec.ts",
+        "line": 91,
+        "column": 9
+      }
+    },
+    {
+      "id": "6a80f754a8758b3-6472bd63f825f5f",
+      "title": "Service map - nodes, edges and popovers shows popover when clicking on a dependency node",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_detailed.spec.ts",
+        "line": 102,
+        "column": 9
+      }
+    },
+    {
+      "id": "6a80f754a8758b3-39e157c4c45a87f",
+      "title": "Service map - nodes, edges and popovers navigates to Service Details from popover",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_detailed.spec.ts",
+        "line": 117,
+        "column": 9
+      }
+    },
+    {
+      "id": "6a80f754a8758b3-cfea2cecad5e86a",
+      "title": "Service map - nodes, edges and popovers navigates to Focus Map from popover",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_detailed.spec.ts",
+        "line": 136,
+        "column": 9
+      }
+    },
+    {
+      "id": "6a80f754a8758b3-c0cdd2e5496e521",
+      "title": "Service map - nodes, edges and popovers navigates to Dependency Details from popover",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_detailed.spec.ts",
+        "line": 154,
+        "column": 9
+      }
+    },
+    {
+      "id": "431bbf1927933f1-820ffa8139e87c1",
+      "title": "Service map renders page with selected date range",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map.spec.ts",
+        "line": 20,
+        "column": 9
+      }
+    },
+    {
+      "id": "431bbf1927933f1-9d4b191090eb231",
+      "title": "Service map shows a detailed service map",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map.spec.ts",
+        "line": 32,
+        "column": 9
+      }
+    },
+    {
+      "id": "431bbf1927933f1-bebd132799161c0",
+      "title": "Service map shows empty state when there is no data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map.spec.ts",
+        "line": 45,
         "column": 9
       }
     },
@@ -1672,54 +1939,6 @@
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/serverless_settings.spec.ts",
         "line": 38,
         "column": 7
-      }
-    },
-    {
-      "id": "bb77c5fe685c994-820ffa8139e87c1",
-      "title": "Service map renders page with selected date range",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map.spec.ts",
-        "line": 20,
-        "column": 9
-      }
-    },
-    {
-      "id": "bb77c5fe685c994-9d4b191090eb231",
-      "title": "Service map shows a detailed service map",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map.spec.ts",
-        "line": 32,
-        "column": 9
-      }
-    },
-    {
-      "id": "bb77c5fe685c994-bebd132799161c0",
-      "title": "Service map shows empty state when there is no data",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map.spec.ts",
-        "line": 45,
-        "column": 9
       }
     },
     {

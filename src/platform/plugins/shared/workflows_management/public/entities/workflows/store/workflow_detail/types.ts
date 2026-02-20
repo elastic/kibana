@@ -49,6 +49,8 @@ export interface WorkflowDetailState {
   schema: WorkflowZodSchemaType;
   /** Loading states for async operations */
   loading: LoadingStates;
+  /** Whether the editor has validation errors (strict schema + custom validations) */
+  hasYamlSchemaValidationErrors: boolean;
   /** Connector flyout state */
   connectorFlyout: {
     isOpen: boolean;
