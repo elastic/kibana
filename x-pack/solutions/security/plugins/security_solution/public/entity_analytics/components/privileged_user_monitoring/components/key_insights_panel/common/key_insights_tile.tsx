@@ -16,6 +16,7 @@ import { useEsqlGlobalFilterQuery } from '../../../../../../common/hooks/esql/us
 import { useGlobalTime } from '../../../../../../common/containers/use_global_time';
 import { useSpaceId } from '../../../../../../common/hooks/use_space_id';
 import { useVisualizationResponse } from '../../../../../../common/components/visualization_actions/use_visualization_response';
+import { VisualizationContextMenuActions } from '../../../../../../common/components/visualization_actions/types';
 import type { EsqlQueryOrInvalidFields } from '../../../queries/helpers';
 
 const LENS_VISUALIZATION_HEIGHT = 140;
@@ -127,6 +128,13 @@ export const KeyInsightsTile: React.FC<KeyInsightsTileProps> = ({
       height={LENS_VISUALIZATION_HEIGHT}
       disableOnClickFilter
       inspectTitle={inspectTitle}
+      withActions={[
+        VisualizationContextMenuActions.inspect,
+        VisualizationContextMenuActions.addToNewCase,
+        VisualizationContextMenuActions.addToExistingCase,
+        VisualizationContextMenuActions.saveToLibrary,
+        // Excluding VisualizationContextMenuActions.openInLens
+      ]}
     />
   );
 };

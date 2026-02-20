@@ -10,7 +10,6 @@
 import {
   EuiBadge,
   EuiButtonEmpty,
-  EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
@@ -19,18 +18,19 @@ import {
   useEuiFontSize,
 } from '@elastic/eui';
 import React, { Fragment, useCallback, useMemo, useState } from 'react';
-import type { Filter } from '@kbn/es-query';
 import { css } from '@emotion/react';
 import type { GroupStatsItem } from '../types';
 import { TAKE_ACTION } from '../translations';
 
+type GetActionItems = (args: { closePopover: () => void }) => JSX.Element | undefined;
+
 interface GroupStatsProps<T> {
   bucketKey: string;
-  groupFilter: Filter[];
-  groupNumber: number;
   onTakeActionsOpen?: () => void;
   stats?: GroupStatsItem[];
-  takeActionItems?: (groupFilters: Filter[], groupNumber: number) => JSX.Element[];
+  getActionItems?: GetActionItems;
+  /** Optional array of additional action buttons to display before the Take actions button */
+  additionalActionButtons?: React.ReactElement[];
 }
 
 const Separator = () => {
@@ -50,19 +50,15 @@ const Separator = () => {
 
 const GroupStatsComponent = <T,>({
   bucketKey,
-  groupFilter,
-  groupNumber,
   onTakeActionsOpen,
   stats,
-  takeActionItems: getTakeActionItems,
+  getActionItems,
+  additionalActionButtons,
 }: GroupStatsProps<T>) => {
   const { euiTheme } = useEuiTheme();
   const xsFontSize = useEuiFontSize('xs').fontSize;
 
   const [isPopoverOpen, setPopover] = useState(false);
-  const takeActionItems = useMemo(() => {
-    return getTakeActionItems?.(groupFilter, groupNumber) ?? [];
-  }, [getTakeActionItems, groupFilter, groupNumber]);
 
   const onButtonClick = useCallback(() => {
     return !isPopoverOpen && onTakeActionsOpen ? onTakeActionsOpen() : setPopover(!isPopoverOpen);
@@ -78,6 +74,7 @@ const GroupStatsComponent = <T,>({
                 component: (
                   <EuiToolTip position="top" content={stat.badge.value}>
                     <EuiBadge
+                      tabIndex={0}
                       style={{ marginLeft: 10, width: stat.badge.width ?? 35 }}
                       color={stat.badge.color ?? 'hollow'}
                     >
@@ -114,9 +111,29 @@ const GroupStatsComponent = <T,>({
     [stats, euiTheme, xsFontSize]
   );
 
+  const additionalActionButtonsComponents = useMemo(
+    () =>
+      additionalActionButtons?.map((button, index) => (
+        <EuiFlexItem grow={false} key={`additional-action-button-${index}`}>
+          {button}
+        </EuiFlexItem>
+      )) ?? [],
+    [additionalActionButtons]
+  );
+
+  const actionItems = useMemo(
+    () =>
+      getActionItems?.({
+        closePopover: () => {
+          setPopover(false);
+        },
+      }),
+    [getActionItems]
+  );
+
   const takeActionMenu = useMemo(
     () =>
-      takeActionItems.length ? (
+      actionItems ? (
         <EuiFlexItem grow={false}>
           <EuiPopover
             anchorPosition="downLeft"
@@ -134,11 +151,11 @@ const GroupStatsComponent = <T,>({
             isOpen={isPopoverOpen}
             panelPaddingSize="none"
           >
-            <EuiContextMenuPanel items={takeActionItems} />
+            {actionItems}
           </EuiPopover>
         </EuiFlexItem>
       ) : null,
-    [isPopoverOpen, onButtonClick, takeActionItems]
+    [isPopoverOpen, onButtonClick, actionItems]
   );
 
   return (
@@ -148,12 +165,14 @@ const GroupStatsComponent = <T,>({
       gutterSize="m"
       alignItems="center"
     >
-      {[...statsComponents, takeActionMenu].filter(Boolean).map((component, index, { length }) => (
-        <Fragment key={index}>
-          {component}
-          {index < length - 1 && <Separator />}
-        </Fragment>
-      ))}
+      {[...statsComponents, ...additionalActionButtonsComponents, takeActionMenu]
+        .filter(Boolean)
+        .map((component, index, { length }) => (
+          <Fragment key={index}>
+            {component}
+            {index < length - 1 && <Separator />}
+          </Fragment>
+        ))}
     </EuiFlexGroup>
   );
 };

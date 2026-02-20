@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
 import type { EuiTableRowProps } from '@elastic/eui';
 import { EuiBasicTable } from '@elastic/eui';
@@ -13,6 +14,7 @@ import { useOverviewStatus } from '../../../../hooks/use_overview_status';
 import type { FlyoutParamProps } from '../../types';
 import { useMonitorsTableColumns } from '../hooks/use_monitors_table_columns';
 import { useMonitorsTablePagination } from '../hooks/use_monitors_table_pagination';
+import { useOverviewTrendsRequests } from '../../../../hooks/use_overview_trends_requests';
 
 export const MonitorsTable = ({
   items,
@@ -27,6 +29,8 @@ export const MonitorsTable = ({
   const { pageOfItems, pagination, onTableChange } = useMonitorsTablePagination({
     totalItems: items,
   });
+
+  useOverviewTrendsRequests(pageOfItems);
 
   const { columns } = useMonitorsTableColumns({ setFlyoutConfigCallback, items: pageOfItems });
 
@@ -71,6 +75,9 @@ export const MonitorsTable = ({
       rowProps={getRowProps}
       data-test-subj="syntheticsCompactViewTable"
       tableLayout="auto"
+      tableCaption={i18n.translate('xpack.synthetics.monitorsTable.tableCaption', {
+        defaultMessage: 'Compact monitors list',
+      })}
     />
   );
 };

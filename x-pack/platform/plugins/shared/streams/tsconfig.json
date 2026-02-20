@@ -1,7 +1,8 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
-    "outDir": "target/types"
+    "outDir": "target/types",
+    "useUnknownInCatchVariables": true
   },
   "include": [
     "../../../../../typings/**/*",
@@ -9,7 +10,8 @@
     "scripts/**/*",
     "server/**/*",
     "public/**/*",
-    "types/**/*"
+    "types/**/*",
+    "test/**/*",
   ],
   "exclude": [
     "target/**/*"
@@ -39,7 +41,6 @@
     "@kbn/es-errors",
     "@kbn/lock-manager",
     "@kbn/core-elasticsearch-server",
-    "@kbn/core-http-server-utils",
     "@kbn/core-analytics-server",
     "@kbn/features-plugin",
     "@kbn/server-route-repository-utils",
@@ -57,12 +58,25 @@
     "@kbn/ai-tools",
     "@kbn/logging-mocks",
     "@kbn/grok-heuristics",
+    "@kbn/dissect-heuristics",
     "@kbn/streamlang",
     "@kbn/licensing-types",
+    "@kbn/core-elasticsearch-server-utils",
     "@kbn/safer-lodash-set",
     "@kbn/sse-utils",
     "@kbn/global-search-plugin",
     "@kbn/fields-metadata-plugin",
-    "@kbn/otel-semantic-conventions"
+    "@kbn/otel-semantic-conventions",
+    "@kbn/streams-ai",
+    "@kbn/spaces-plugin",
+    "@kbn/usage-collection-plugin",
+    "@kbn/utility-types",
+    "@kbn/console-plugin",
+    "@kbn/actions-plugin",
+    "@kbn/apm-utils",
+    "@kbn/alerting-types",
+    "@kbn/core-http-common",
+    "@kbn/scout",
+    "@kbn/esql-language",
   ]
 }

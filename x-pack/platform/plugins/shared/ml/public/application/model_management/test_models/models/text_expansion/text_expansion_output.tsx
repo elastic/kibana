@@ -148,7 +148,7 @@ export const DocumentResultWithTokens: FC<{
         >
           <>
             <EuiSpacer size="s" />
-            <EuiCallOut color="primary">
+            <EuiCallOut announceOnMount={false} color="primary">
               <FormattedMessage
                 id="xpack.ml.trainedModels.testModelsFlyout.textExpansion.output.tokenHelpInfo"
                 defaultMessage="Top {count} extracted tokens, which are not synonyms of the query, represent linguistic elements

@@ -80,8 +80,8 @@ export const useChatSend = ({
         toasts?.addError(
           new Error('The conversation needs a connector configured in order to send a message.'),
           {
-            title: i18n.translate('xpack.elasticAssistant.knowledgeBase.setupError', {
-              defaultMessage: 'Error setting up Knowledge Base',
+            title: i18n.translate('xpack.elasticAssistant.conversationConfig.setupError', {
+              defaultMessage: 'Error with conversation configuration',
             }),
           }
         );
@@ -226,7 +226,7 @@ export const useChatSend = ({
       http,
       // do not send any new messages, the previous conversation is already stored
       conversationId: currentConversation.id,
-      replacements: {},
+      replacements: currentConversation.replacements,
     });
 
     const responseMessage: ClientMessage = getMessageFromRawResponse(rawResponse);

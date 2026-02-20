@@ -9,7 +9,7 @@
 
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { Query } from '@kbn/data-plugin/common';
-import type { Filter } from '@kbn/es-query';
+import type { Filter, ProjectRouting } from '@kbn/es-query';
 import type { TimeRange } from '@kbn/es-query';
 import type {
   DrawState,
@@ -50,6 +50,7 @@ export type MapContext = Partial<MapViewContext> & {
   editState?: EditState;
   searchSessionId?: string;
   searchSessionMapBuffer?: MapExtent;
+  projectRouting?: ProjectRouting;
 };
 
 export type MapState = {
@@ -64,4 +65,5 @@ export type MapState = {
   waitingForMapReadyLayerList: LayerDescriptor[];
   settings: MapSettings;
   __rollbackSettings: MapSettings | null;
+  __pauseSyncData: boolean;
 };

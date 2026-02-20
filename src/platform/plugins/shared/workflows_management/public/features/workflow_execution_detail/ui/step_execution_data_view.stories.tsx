@@ -8,18 +8,41 @@
  */
 
 import type { Meta, StoryObj } from '@storybook/react';
-import { kibanaReactDecorator } from '../../../../.storybook/decorators';
+import React from 'react';
+import type { ExecutionStatus } from '@kbn/workflows';
 import { StepExecutionDataView } from './step_execution_data_view';
+import { kibanaReactDecorator } from '../../../../.storybook/decorators';
+
+// Decorator to ensure full height container
+const heightDecorator = (Story: React.ComponentType) => (
+  <div style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
+    <Story />
+  </div>
+);
 
 const meta: Meta = {
   title: 'Workflows Management/Step Execution Data View',
   component: StepExecutionDataView,
-  decorators: [kibanaReactDecorator],
+  decorators: [kibanaReactDecorator, heightDecorator],
 };
 
 export default meta;
 
 type Story = StoryObj<typeof StepExecutionDataView>;
+
+const stepExecution = {
+  id: 'step-exec-1',
+  stepId: 'step-1',
+  status: 'completed' as ExecutionStatus,
+  startedAt: '2023-10-01T12:00:00Z',
+  executionTimeMs: 300000,
+  scopeStack: [],
+  workflowRunId: 'run-123',
+  workflowId: 'id-123',
+  topologicalIndex: 0,
+  globalExecutionIndex: 0,
+  stepExecutionIndex: 0,
+};
 
 const alertsMockData = {
   alerts: {
@@ -123,39 +146,48 @@ const alertsMockData = {
 
 export const Default: Story = {
   args: {
-    title: 'Step Execution Data View',
-    data: alertsMockData.alerts,
+    mode: 'input',
+    stepExecution: {
+      ...stepExecution,
+      input: alertsMockData.alerts,
+    },
   },
 };
 
 export const ArrayData: Story = {
   args: {
-    title: 'Step Execution Data',
-    data: {
-      alerts: [
-        {
-          name: 'Alert 1',
-          description: 'Alert 1 description',
-          severity: 'high',
-        },
-        {
-          name: 'Alert 2',
-          description: 'Alert 2 description',
-          severity: 'medium',
-        },
-        {
-          name: 'Alert 3',
-          description: 'Alert 3 description',
-          severity: 'low',
-        },
-      ],
+    mode: 'input',
+    stepExecution: {
+      ...stepExecution,
+      input: {
+        alerts: [
+          {
+            name: 'Alert 1',
+            description: 'Alert 1 description',
+            severity: 'high',
+          },
+          {
+            name: 'Alert 2',
+            description: 'Alert 2 description',
+            severity: 'medium',
+          },
+          {
+            name: 'Alert 3',
+            description: 'Alert 3 description',
+            severity: 'low',
+          },
+        ],
+      },
     },
   },
 };
 
 export const Empty: Story = {
   args: {
-    title: 'Step Execution Data',
-    data: null,
+    mode: 'input',
+    stepExecution: {
+      ...stepExecution,
+      input: {},
+    },
   },
 };

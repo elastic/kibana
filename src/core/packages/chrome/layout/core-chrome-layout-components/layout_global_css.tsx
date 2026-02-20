@@ -9,43 +9,11 @@
 
 import React from 'react';
 import { Global, css } from '@emotion/react';
+import { layoutVarName } from '@kbn/core-chrome-layout-constants';
 import { useLayoutState } from './layout_state_context';
 
 /**
  * Defines global CSS variables for layout structure using custom properties.
- *
- * The following CSS variables are set and updated dynamically:
- *
- * Banner:
- *   --kbn-layout--banner-[top|left|height|width]
- *
- * Header:
- *   --kbn-layout--header-[top|left|right|height|width]
- *
- * Footer:
- *   --kbn-layout--footer-[height|top|bottom|left|width]
- *
- * Navigation:
- *   --kbn-layout--navigation-[top|bottom|height|width|panel-width]
- *
- * Sidebar:
- *   --kbn-layout--sidebar-[top|bottom|height|width|panel-width]
- *
- * Application:
- *   --kbn-layout--application-[top|bottom|left|right|height|width]
- *
- * Application Top Bar:
- *   --kbn-application--top-bar-[height|top|left|width|right|bottom]
- *
- * Application Bottom Bar:
- *   --kbn-application--bottom-bar-[height|top|left|width|right|bottom]
- *
- * Application Content:
- *   --kbn-application--content-[top|bottom|left|right|height|width]
- *
- * Common:
- *   --kbn-layout--aboveFlyoutLevel
- *
  * These variables are globally available for consistent and dynamic layout styling.
  * @returns The rendered GlobalCSS component.
  */
@@ -56,121 +24,107 @@ export const LayoutGlobalCSS = () => {
     headerHeight,
     navigationWidth,
     sidebarWidth,
-    sidebarPanelWidth,
     applicationTopBarHeight,
     applicationBottomBarHeight,
+    applicationMarginBottom,
+    applicationMarginRight,
   } = useLayoutState();
 
+  // Pre-calculate composite values for simplified CSS expressions
+  const headerAndBannerHeight = bannerHeight + headerHeight;
+  const applicationBottom = footerHeight + applicationMarginBottom;
+  const applicationRight = applicationMarginRight + sidebarWidth;
+  const applicationHorizontalOffset = navigationWidth + applicationRight;
+  const contentTop = headerAndBannerHeight + applicationTopBarHeight;
+  const contentBottom = applicationBottom + applicationBottomBarHeight;
+
   const banner = css`
-    --kbn-layout--banner-top: 0;
-    --kbn-layout--banner-left: 0;
-    --kbn-layout--banner-height: ${bannerHeight}px;
-    --kbn-layout--banner-width: 100vw;
+    ${layoutVarName('banner.top')}: 0;
+    ${layoutVarName('banner.left')}: 0;
+    ${layoutVarName('banner.height')}: ${bannerHeight}px;
+    ${layoutVarName('banner.width')}: 100vw;
+    ${layoutVarName('banner.bottom')}: calc(100vh - ${bannerHeight}px);
+    ${layoutVarName('banner.right')}: 0;
   `;
 
   const header = css`
-    --kbn-layout--header-top: var(--kbn-layout--banner-height);
-    --kbn-layout--header-left: ${navigationWidth}px;
-    --kbn-layout--header-right: ${sidebarWidth + sidebarPanelWidth}px;
-    --kbn-layout--header-height: ${headerHeight}px;
-    --kbn-layout--header-width: calc(
-      100vw - var(--kbn-layout--header-left) - var(--kbn-layout--header-right)
-    );
+    ${layoutVarName('header.top')}: ${bannerHeight}px;
+    ${layoutVarName('header.left')}: 0;
+    ${layoutVarName('header.right')}: 0;
+    ${layoutVarName('header.height')}: ${headerHeight}px;
+    ${layoutVarName('header.width')}: 100vw;
+    ${layoutVarName('header.bottom')}: calc(100vh - ${headerAndBannerHeight}px);
   `;
 
   const footer = css`
-    --kbn-layout--footer-height: ${footerHeight}px;
-    --kbn-layout--footer-top: calc(100vh - var(--kbn-layout--footer-height));
-    --kbn-layout--footer-bottom: 0;
-    --kbn-layout--footer-left: 0;
-    --kbn-layout--footer-width: 100vw;
+    ${layoutVarName('footer.height')}: ${footerHeight}px;
+    ${layoutVarName('footer.top')}: calc(100vh - ${footerHeight}px);
+    ${layoutVarName('footer.bottom')}: 0;
+    ${layoutVarName('footer.left')}: 0;
+    ${layoutVarName('footer.right')}: 0;
+    ${layoutVarName('footer.width')}: 100vw;
   `;
 
   const navigation = css`
-    --kbn-layout--navigation-top: var(--kbn-layout--banner-height);
-    --kbn-layout--navigation-bottom: var(--kbn-layout--footer-height);
-    --kbn-layout--navigation-left: 0;
-    --kbn-layout--navigation-height: calc(
-      100vh - var(--kbn-layout--navigation-top) - var(--kbn-layout--navigation-bottom)
-    );
-    --kbn-layout--navigation-width: ${navigationWidth}px;
+    ${layoutVarName('navigation.top')}: ${headerAndBannerHeight}px;
+    ${layoutVarName('navigation.bottom')}: ${footerHeight}px;
+    ${layoutVarName('navigation.left')}: 0;
+    ${layoutVarName('navigation.right')}: calc(100vw - ${navigationWidth}px);
+    ${layoutVarName('navigation.height')}: calc(100vh - ${headerAndBannerHeight + footerHeight}px);
+    ${layoutVarName('navigation.width')}: ${navigationWidth}px;
   `;
 
   const sidebar = css`
-    --kbn-layout--sidebar-top: var(--kbn-layout--banner-height);
-    --kbn-layout--sidebar-bottom: var(--kbn-layout--footer-height);
-    --kbn-layout--sidebar-right: 0;
-    --kbn-layout--sidebar-left: calc(100vw - ${sidebarWidth + sidebarPanelWidth}px);
-    --kbn-layout--sidebar-height: calc(
-      100vh - var(--kbn-layout--sidebar-top) - var(--kbn-layout--sidebar-bottom)
-    );
-    --kbn-layout--sidebar-width: ${sidebarWidth}px;
-    --kbn-layout--sidebar-panel-width: ${sidebarPanelWidth}px;
+    ${layoutVarName('sidebar.top')}: ${headerAndBannerHeight}px;
+    ${layoutVarName('sidebar.bottom')}: ${footerHeight}px;
+    ${layoutVarName('sidebar.right')}: 0;
+    ${layoutVarName('sidebar.left')}: calc(100vw - ${sidebarWidth}px);
+    ${layoutVarName('sidebar.height')}: calc(100vh - ${headerAndBannerHeight + footerHeight}px);
+    ${layoutVarName('sidebar.width')}: ${sidebarWidth}px;
   `;
 
   const application = css`
-    --kbn-layout--application-top: calc(
-      var(--kbn-layout--banner-height) + var(--kbn-layout--header-height)
-    );
-    --kbn-layout--application-bottom: var(--kbn-layout--footer-height);
-    --kbn-layout--application-left: var(--kbn-layout--navigation-width);
-    --kbn-layout--application-right: calc(
-      var(--kbn-layout--sidebar-width) + var(--kbn-layout--sidebar-panel-width)
-    );
-    --kbn-layout--application-height: calc(
-      100vh - var(--kbn-layout--application-top) - var(--kbn-layout--application-bottom)
-    );
-    --kbn-layout--application-width: calc(
-      100vw - var(--kbn-layout--application-left) - var(--kbn-layout--application-right)
-    );
+    ${layoutVarName('application.marginBottom')}: ${applicationMarginBottom}px;
+    ${layoutVarName('application.marginRight')}: ${applicationMarginRight}px;
+    ${layoutVarName('application.top')}: ${headerAndBannerHeight}px;
+    ${layoutVarName('application.bottom')}: ${applicationBottom}px;
+    ${layoutVarName('application.left')}: ${navigationWidth}px;
+    ${layoutVarName('application.right')}: ${applicationRight}px;
+    ${layoutVarName('application.height')}: calc(100vh - ${headerAndBannerHeight +
+    applicationBottom}px);
+    ${layoutVarName('application.width')}: calc(100vw - ${applicationHorizontalOffset}px);
   `;
 
   const applicationTopBar = css`
-    --kbn-application--top-bar-height: ${applicationTopBarHeight}px;
-    --kbn-application--top-bar-top: var(--kbn-layout--application-top);
-    --kbn-application--top-bar-left: var(--kbn-layout--application-left);
-    --kbn-application--top-bar-width: var(--kbn-layout--application-width);
-    --kbn-application--top-bar-right: var(--kbn-layout--application-right);
-    --kbn-application--top-bar-bottom: calc(
-      var(--kbn-layout--application-top) + var(--kbn-application--top-bar-height)
-    );
+    ${layoutVarName('application.topBar.height')}: ${applicationTopBarHeight}px;
+    ${layoutVarName('application.topBar.top')}: ${headerAndBannerHeight}px;
+    ${layoutVarName('application.topBar.left')}: ${navigationWidth}px;
+    ${layoutVarName('application.topBar.right')}: ${applicationRight}px;
+    ${layoutVarName('application.topBar.width')}: calc(100vw - ${applicationHorizontalOffset}px);
+    ${layoutVarName('application.topBar.bottom')}: calc(100vh - ${headerAndBannerHeight +
+    applicationTopBarHeight}px);
   `;
 
   const applicationBottomBar = css`
-    --kbn-application--bottom-bar-height: ${applicationBottomBarHeight}px;
-    --kbn-application--bottom-bar-top: calc(
-      var(--kbn-layout--application-bottom) - var(--kbn-application--bottom-bar-height)
-    );
-    --kbn-application--bottom-bar-left: var(--kbn-layout--application-left);
-    --kbn-application--bottom-bar-width: var(--kbn-layout--application-width);
-    --kbn-application--bottom-bar-right: var(--kbn-layout--application-right);
-    --kbn-application--bottom-bar-bottom: var(--kbn-layout--application-bottom);
+    ${layoutVarName('application.bottomBar.height')}: ${applicationBottomBarHeight}px;
+    ${layoutVarName('application.bottomBar.top')}: calc(100vh - ${footerHeight +
+    applicationBottomBarHeight}px);
+    ${layoutVarName('application.bottomBar.left')}: ${navigationWidth}px;
+    ${layoutVarName('application.bottomBar.right')}: ${applicationRight}px;
+    ${layoutVarName('application.bottomBar.width')}: calc(100vw - ${applicationHorizontalOffset}px);
+    ${layoutVarName('application.bottomBar.bottom')}: ${footerHeight}px;
   `;
 
   // The application content is the main area where the application renders its content.
   // It is not a slot, but it is styled to ensure it fits within the layout.
-  // It is positioned inside application area and takes the full heigh available minus that application top and bottom bars.
+  // It is positioned inside application area and takes the full height available minus the application top and bottom bars.
   const applicationContent = css`
-    --kbn-application--content-top: calc(
-      var(--kbn-layout--application-top) + var(--kbn-application--top-bar-height)
-    );
-    --kbn-application--content-bottom: calc(
-      var(--kbn-layout--application-bottom) - var(--kbn-application--bottom-bar-height)
-    );
-    --kbn-application--content-left: var(--kbn-layout--application-left);
-    --kbn-application--content-right: var(--kbn-layout--application-right);
-    --kbn-application--content-height: calc(
-      var(--kbn-layout--application-height) - var(--kbn-application--top-bar-height) -
-        var(--kbn-application--bottom-bar-height)
-    );
-    --kbn-application--content-width: var(--kbn-layout--application-width);
-  `;
-
-  // we want to place layout slots (like sidebar) on top of eui's flyouts (1000),
-  // so that when they are open, they are animating from under the sidebars
-  // this part of EUI flyout workaround and should be gone with https://github.com/elastic/eui/issues/8820
-  const common = css`
-    --kbn-layout--aboveFlyoutLevel: 1050;
+    ${layoutVarName('application.content.top')}: ${contentTop}px;
+    ${layoutVarName('application.content.bottom')}: ${contentBottom}px;
+    ${layoutVarName('application.content.left')}: ${navigationWidth}px;
+    ${layoutVarName('application.content.right')}: ${applicationRight}px;
+    ${layoutVarName('application.content.height')}: calc(100vh - ${contentTop + contentBottom}px);
+    ${layoutVarName('application.content.width')}: calc(100vw - ${applicationHorizontalOffset}px);
   `;
 
   const styles = css`
@@ -184,7 +138,6 @@ export const LayoutGlobalCSS = () => {
       ${applicationBottomBar}
       ${applicationContent}
       ${footer}
-      ${common}
     }
   `;
 

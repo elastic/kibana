@@ -7,8 +7,7 @@
 
 import { useCallback } from 'react';
 import { useSelector } from '@xstate/react';
-import type { OnRefreshProps } from '@elastic/eui';
-import { DEFAULT_DATEPICKER_REFRESH } from '../../common/constants';
+import type { FailureStore } from '@kbn/streams-schema';
 import { useDatasetQualityDetailsContext } from '../components/dataset_quality_details/context';
 import { indexNameToDataStreamParts } from '../../common/utils';
 import type { BasicDataStream } from '../../common/types';
@@ -29,6 +28,8 @@ export const useDatasetQualityDetailsState = () => {
     isIndexNotFoundError,
     expandedQualityIssue,
     view,
+    streamDefinition,
+    streamsUrls,
   } = useSelector(service, (state) => state.context) ?? {};
 
   const isNonAggregatable = useSelector(service, (state) =>
@@ -65,7 +66,9 @@ export const useDatasetQualityDetailsState = () => {
     state.matches(
       'initializing.dataStreamSettings.qualityIssues.dataStreamFailedDocs.errorFetchingFailedDocs'
     )
-      ? state.context.dataStreamSettings
+      ? 'dataStreamSettings' in state.context
+        ? state.context.dataStreamSettings
+        : undefined
       : undefined
   );
 
@@ -83,7 +86,9 @@ export const useDatasetQualityDetailsState = () => {
     ),
     dashboard: useSelector(service, (state) =>
       state.matches('initializing.checkAndLoadIntegrationAndDashboards.done')
-        ? state.context.integrationDashboards
+        ? 'integrationDashboards' in state.context
+          ? state.context.integrationDashboards
+          : undefined
         : undefined
     ),
   };
@@ -111,7 +116,9 @@ export const useDatasetQualityDetailsState = () => {
 
   const dataStreamDetails = useSelector(service, (state) =>
     state.matches('initializing.dataStreamDetails.done')
-      ? state.context.dataStreamDetails
+      ? 'dataStreamDetails' in state.context
+        ? state.context.dataStreamDetails
+        : undefined
       : undefined
   );
 
@@ -153,33 +160,36 @@ export const useDatasetQualityDetailsState = () => {
   );
 
   const updateTimeRange = useCallback(
-    ({ start, end, refreshInterval }: OnRefreshProps) => {
+    ({ start, end }: { start: string; end: string }) => {
       service.send({
         type: 'UPDATE_TIME_RANGE',
         timeRange: {
+          ...timeRange,
           from: start,
           to: end,
-          refresh: { ...DEFAULT_DATEPICKER_REFRESH, value: refreshInterval },
         },
       });
     },
-    [service]
+    [service, timeRange]
   );
 
   const updateFailureStore = useCallback(
     ({
-      failureStoreEnabled,
-      customRetentionPeriod,
+      failureStoreDataQualityConfig,
+      failureStoreStreamConfig,
     }: {
-      failureStoreEnabled: boolean;
-      customRetentionPeriod?: string;
+      failureStoreDataQualityConfig?: {
+        failureStoreEnabled: boolean;
+        customRetentionPeriod?: string;
+      };
+      failureStoreStreamConfig?: FailureStore;
     }) => {
       service.send({
         type: 'UPDATE_FAILURE_STORE',
-        data: {
+        dataStreamsDetails: {
           ...dataStreamDetails,
-          hasFailureStore: failureStoreEnabled,
-          customRetentionPeriod,
+          failureStoreDataQualityConfig,
+          failureStoreStreamConfig,
         },
       });
     },
@@ -222,5 +232,7 @@ export const useDatasetQualityDetailsState = () => {
     defaultRetentionPeriod,
     customRetentionPeriod,
     canUserManageFailureStore,
+    streamDefinition,
+    streamsUrls,
   };
 };

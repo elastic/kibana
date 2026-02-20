@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { PublicMethodsOf, Writable } from '@kbn/utility-types';
 import type { UsageCollectionSetup, UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type {
   PluginInitializerContext,
@@ -43,12 +43,15 @@ import type { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugi
 
 import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
-import type { ActionsConfig, EnabledConnectorTypes } from './config';
+import type { AxiosInstance } from 'axios';
+import type { UsageApiSetup } from '@kbn/usage-api-plugin/server';
+import { type ActionsConfig, type EnabledConnectorTypes } from './config';
 import { AllowedHosts, getValidatedConfig } from './config';
 import { resolveCustomHosts } from './lib/custom_host_settings';
 import { events } from './lib/event_based_telemetry';
 import { ActionsClient } from './actions_client/actions_client';
 import { ActionTypeRegistry } from './action_type_registry';
+import { AuthTypeRegistry, registerAuthTypes } from './auth_types';
 import { createBulkExecutionEnqueuerFunction } from './create_execute_function';
 import { registerActionsUsageCollector } from './usage';
 import type { ILicenseState } from './lib';
@@ -78,7 +81,6 @@ import {
 import { setupSavedObjects } from './saved_objects';
 import { ACTIONS_FEATURE } from './feature';
 import { ActionsAuthorization } from './authorization/actions_authorization';
-import type { ActionExecutionSource } from './lib/action_execution_source';
 import { ensureSufficientLicense } from './lib/ensure_sufficient_license';
 import { renderMustacheObject } from './lib/mustache_renderer';
 import { getAlertHistoryEsIndex } from './preconfigured_connectors/alert_history_es_index/alert_history_es_index';
@@ -103,6 +105,8 @@ import { createBulkUnsecuredExecutionEnqueuerFunction } from './create_unsecured
 import { createSystemConnectors } from './create_system_actions';
 import { ConnectorUsageReportingTask } from './usage/connector_usage_reporting_task';
 import { ConnectorRateLimiter } from './lib/connector_rate_limiter';
+import type { GetAxiosInstanceWithAuthFnOpts } from './lib/get_axios_instance';
+import { getAxiosInstanceWithAuth } from './lib/get_axios_instance';
 
 export interface PluginSetupContract {
   registerType<
@@ -120,6 +124,8 @@ export interface PluginSetupContract {
   >(
     connector: SubActionConnectorType<Config, Secrets>
   ): void;
+
+  getAxiosInstanceWithAuth(opts: GetAxiosInstanceWithAuthFnOpts): Promise<AxiosInstance>;
 
   isPreconfiguredConnector(connectorId: string): boolean;
 
@@ -148,7 +154,21 @@ export interface PluginStartContract {
 
   getAllTypes: ActionTypeRegistry['getAllTypes'];
 
+  listTypes(featureId?: string): ReturnType<ActionTypeRegistry['list']>;
+
   getActionsClientWithRequest(request: KibanaRequest): Promise<PublicMethodsOf<ActionsClient>>;
+
+  /**
+   * Returns an ActionsClient that is bound to the provided spaceId (namespace) while preserving
+   * the original request (and its auth context).
+   *
+   * This enables space-agnostic consumers to manage/execute connectors in a fixed space
+   * without forging fake requests (which can break auth under UIAM).
+   */
+  getActionsClientWithRequestInSpace(
+    request: KibanaRequest,
+    spaceId: string
+  ): Promise<PublicMethodsOf<ActionsClient>>;
 
   getActionsAuthorizationWithRequest(request: KibanaRequest): PublicMethodsOf<ActionsAuthorization>;
 
@@ -178,6 +198,7 @@ export interface ActionsPluginsSetup {
   monitoringCollection?: MonitoringCollectionSetup;
   serverless?: ServerlessPluginSetup;
   cloud: CloudSetup;
+  usageApi?: UsageApiSetup;
 }
 
 export interface ActionsPluginsStart {
@@ -205,9 +226,11 @@ export class ActionsPlugin
   private readonly actionsConfig: ActionsConfig;
   private taskRunnerFactory?: TaskRunnerFactory;
   private actionTypeRegistry?: ActionTypeRegistry;
+  private authTypeRegistry?: AuthTypeRegistry;
   private actionExecutor?: ActionExecutor;
   private licenseState: ILicenseState | null = null;
   private security?: SecurityPluginSetup;
+  private spaces?: SpacesPluginSetup;
   private eventLogService?: IEventLogService;
   private eventLogger?: IEventLogger;
   private isESOCanEncrypt?: boolean;
@@ -269,11 +292,13 @@ export class ActionsPlugin
           id: preconfiguredId,
           isPreconfigured: true,
           isSystemAction: false,
+          isConnectorTypeDeprecated: false,
         };
 
         this.inMemoryConnectors.push({
           ...rawPreconfiguredConnector,
           isDeprecated: isConnectorDeprecated(rawPreconfiguredConnector),
+          isConnectorTypeDeprecated: false,
         });
       } else {
         this.logger.warn(
@@ -294,6 +319,10 @@ export class ActionsPlugin
     this.actionTypeRegistry = actionTypeRegistry;
     this.actionExecutor = actionExecutor;
     this.security = plugins.security;
+    this.spaces = plugins.spaces;
+
+    this.authTypeRegistry = new AuthTypeRegistry();
+    registerAuthTypes(this.authTypeRegistry);
 
     setupSavedObjects(
       core.savedObjects,
@@ -327,13 +356,27 @@ export class ActionsPlugin
         eventLogIndex
       );
 
+      // We plan to remove the usage config from this plugin in the future in favor of the new Usage API plugin.
+      let usageApiConfig: Writable<ActionsConfig['usage']> = {};
+      if (plugins.usageApi?.config) {
+        usageApiConfig.enabled = plugins.usageApi?.config?.enabled;
+        usageApiConfig.url = plugins.usageApi?.config?.url;
+        if (plugins.usageApi?.config?.tls?.ca) {
+          // Normalize the CA path to the format expected by the ConnectorUsageReportingTask
+          usageApiConfig.ca = { path: plugins.usageApi.config.tls.ca };
+        }
+      } else {
+        // If no configuration is provided via the Usage API plugin, use the configuration from this plugin.
+        usageApiConfig = this.actionsConfig.usage;
+      }
+
       this.connectorUsageReportingTask = new ConnectorUsageReportingTask({
         logger: this.logger,
         eventLogIndex,
         core,
         taskManager: plugins.taskManager,
         projectId: plugins.cloud.serverless.projectId,
-        config: this.actionsConfig.usage,
+        config: usageApiConfig,
       });
     }
 
@@ -385,6 +428,7 @@ export class ActionsPlugin
       ) => {
         subActionFramework.registerConnector(connector);
       },
+      getAxiosInstanceWithAuth: this.getAxiosInstanceWithAuthHelper(actionsConfigUtils),
       isPreconfiguredConnector: (connectorId: string): boolean => {
         return !!this.inMemoryConnectors.find(
           (inMemoryConnector) =>
@@ -452,21 +496,15 @@ export class ActionsPlugin
      */
     this.setSystemActions();
 
-    const getActionsClientWithRequest = async (
-      request: KibanaRequest,
-      authorizationContext?: ActionExecutionSource<unknown>
-    ) => {
-      if (isESOCanEncrypt !== true) {
-        throw new Error(
-          `Unable to create actions client because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
-        );
-      }
-
-      const unsecuredSavedObjectsClient = getUnsecuredSavedObjectsClient(
-        core.savedObjects,
-        request
-      );
-
+    const createActionsClient = async ({
+      request,
+      unsecuredSavedObjectsClient,
+      spaceId,
+    }: {
+      request: KibanaRequest;
+      unsecuredSavedObjectsClient: SavedObjectsClientContract;
+      spaceId?: string;
+    }) => {
       return new ActionsClient({
         logger,
         unsecuredSavedObjectsClient,
@@ -475,6 +513,7 @@ export class ActionsPlugin
         scopedClusterClient: core.elasticsearch.client.asScoped(request),
         inMemoryConnectors: this.inMemoryConnectors,
         request,
+        spaceId,
         authorization: instantiateAuthorization(request),
         actionExecutor: actionExecutor!,
         bulkExecutionEnqueuer: createBulkExecutionEnqueuerFunction({
@@ -495,7 +534,40 @@ export class ActionsPlugin
         async getEventLogClient() {
           return plugins.eventLog.getClient(request);
         },
+        getAxiosInstanceWithAuth: this.getAxiosInstanceWithAuthHelper(actionsConfigUtils),
+        spaces: this.spaces?.spacesService,
+        isESOCanEncrypt: isESOCanEncrypt!,
+        encryptedSavedObjectsClient,
       });
+    };
+
+    const throwIfCannotEncrypt = () => {
+      if (isESOCanEncrypt !== true) {
+        throw new Error(
+          `Unable to create actions client because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
+        );
+      }
+    };
+
+    const getActionsClientWithRequest = async (request: KibanaRequest) => {
+      throwIfCannotEncrypt();
+
+      const unsecuredSavedObjectsClient = getUnsecuredSavedObjectsClient(
+        core.savedObjects,
+        request
+      );
+      return await createActionsClient({ request, unsecuredSavedObjectsClient });
+    };
+
+    const getActionsClientWithRequestInSpace = async (request: KibanaRequest, spaceId: string) => {
+      throwIfCannotEncrypt();
+
+      const unsecuredSavedObjectsClient = getUnsecuredSavedObjectsClient(
+        core.savedObjects,
+        request
+      ).asScopedToNamespace(spaceId);
+
+      return await createActionsClient({ request, unsecuredSavedObjectsClient, spaceId });
     };
 
     const getUnsecuredActionsClient = () => {
@@ -517,6 +589,7 @@ export class ActionsPlugin
         internalSavedObjectsRepository,
         kibanaIndices: core.savedObjects.getAllIndices(),
         logger: this.logger,
+        connectorTypeRegistry: actionTypeRegistry!,
       });
     };
 
@@ -611,10 +684,14 @@ export class ActionsPlugin
         return this.actionTypeRegistry!.isActionExecutable(actionId, actionTypeId, options);
       },
       getAllTypes: actionTypeRegistry!.getAllTypes.bind(actionTypeRegistry),
+      listTypes: (featureId?: string) => {
+        return this.actionTypeRegistry!.list({ featureId, exposeValidation: true });
+      },
       getActionsAuthorizationWithRequest(request: KibanaRequest) {
         return instantiateAuthorization(request);
       },
       getActionsClientWithRequest: secureGetActionsClientWithRequest,
+      getActionsClientWithRequestInSpace,
       getUnsecuredActionsClient,
       inMemoryConnectors: this.inMemoryConnectors,
       renderActionParameterTemplates: (...args) =>
@@ -730,6 +807,8 @@ export class ActionsPlugin
       security,
       usageCounter,
       logger,
+      getAxiosInstanceWithAuthHelper,
+      spaces,
     } = this;
 
     return async function actionsRouteHandlerContext(context, request) {
@@ -750,6 +829,10 @@ export class ActionsPlugin
             excludedExtensions: [SECURITY_EXTENSION_ID],
             includedHiddenTypes,
           });
+          const encryptedSavedObjectsClient = encryptedSavedObjects.getClient({
+            includedHiddenTypes,
+          });
+
           return new ActionsClient({
             logger,
             unsecuredSavedObjectsClient,
@@ -772,17 +855,21 @@ export class ActionsPlugin
             usageCounter,
             connectorTokenClient: new ConnectorTokenClient({
               unsecuredSavedObjectsClient,
-              encryptedSavedObjectsClient: encryptedSavedObjects.getClient({
-                includedHiddenTypes,
-              }),
+              encryptedSavedObjectsClient,
               logger,
             }),
             async getEventLogClient() {
               return eventLog.getClient(request);
             },
+            getAxiosInstanceWithAuth: getAxiosInstanceWithAuthHelper(actionsConfigUtils),
+            spaces: spaces?.spacesService,
+            isESOCanEncrypt: isESOCanEncrypt!,
+            encryptedSavedObjectsClient,
           });
         },
-        listTypes: actionTypeRegistry!.list.bind(actionTypeRegistry!),
+        listTypes: (featureId?: string) => {
+          return actionTypeRegistry!.list({ featureId });
+        },
       };
     };
   };
@@ -798,6 +885,18 @@ export class ActionsPlugin
         this.actionTypeRegistry?.get(connectorType);
       });
     }
+  };
+
+  private getAxiosInstanceWithAuthHelper = (actionsConfigUtils: ActionsConfigurationUtilities) => {
+    const getAxiosInstanceFn = getAxiosInstanceWithAuth({
+      authTypeRegistry: this.authTypeRegistry!,
+      configurationUtilities: actionsConfigUtils,
+      logger: this.logger,
+    });
+
+    return async (getAxiosParams: GetAxiosInstanceWithAuthFnOpts) => {
+      return await getAxiosInstanceFn(getAxiosParams);
+    };
   };
 
   public stop() {

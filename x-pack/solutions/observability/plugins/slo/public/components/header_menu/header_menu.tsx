@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiHeaderLink, EuiHeaderLinks } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
+import React from 'react';
+import { paths } from '@kbn/slo-shared-plugin/common/locators/paths';
 import { useKibana } from '../../hooks/use_kibana';
 import { usePluginContext } from '../../hooks/use_plugin_context';
-import { SLOS_BASE_PATH, SLO_SETTINGS_PATH } from '../../../common/locators/paths';
 import { FeedbackButton } from '../../pages/slos/components/common/feedback_button';
 
 export function HeaderMenu(): React.ReactElement | null {
   const { http, theme, docLinks } = useKibana().services;
 
-  const { appMountParameters, isServerless } = usePluginContext();
+  const { appMountParameters } = usePluginContext();
   return (
     <HeaderMenuPortal
       setHeaderActionMenu={appMountParameters?.setHeaderActionMenu!}
@@ -40,17 +40,12 @@ export function HeaderMenu(): React.ReactElement | null {
                 defaultMessage: 'SLO documentation',
               })}
             </EuiHeaderLink>
-            {!isServerless && (
-              <EuiHeaderLink
-                color="primary"
-                href={http.basePath.prepend(`${SLOS_BASE_PATH}${SLO_SETTINGS_PATH}`)}
-              >
-                {i18n.translate('xpack.slo.headerMenu.settings', {
-                  defaultMessage: 'Settings',
-                })}
-              </EuiHeaderLink>
-            )}
-            <EuiHeaderLink color="primary" href={http.basePath.prepend('/app/slos/management')}>
+            <EuiHeaderLink color="primary" href={http.basePath.prepend(paths.slosSettings)}>
+              {i18n.translate('xpack.slo.headerMenu.settings', {
+                defaultMessage: 'Settings',
+              })}
+            </EuiHeaderLink>
+            <EuiHeaderLink color="primary" href={http.basePath.prepend(paths.slosManagement)}>
               {i18n.translate('xpack.slo.home.manage', {
                 defaultMessage: 'Manage SLOs',
               })}

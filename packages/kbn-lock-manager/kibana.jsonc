@@ -1,6 +1,0 @@
-{
-  "type": "shared-server",
-  "id": "@kbn/lock-manager",
-  "owner": ["@elastic/obs-ai-assistant"],  
-  "devOnly": false
-}

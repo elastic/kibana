@@ -25,7 +25,6 @@ import type { RunTimeMappings } from '../../sourcerer/store/model';
 import { useKibana } from '../../common/lib/kibana';
 import { createFilter } from '../../common/containers/helpers';
 import { timelineActions } from '../store';
-import { detectionsTimelineIds } from './helpers';
 import { getInspectResponse } from '../../helpers';
 import type {
   PaginationInputPaginated,
@@ -46,6 +45,7 @@ import type {
 } from '../../../common/search_strategy/timeline/events/eql';
 import { useTrackHttpRequest } from '../../common/lib/apm/use_track_http_request';
 import { APP_UI_ID } from '../../../common/constants';
+import { DETECTIONS_TABLE_IDS } from '../../detections/constants';
 
 export interface TimelineArgs {
   events: TimelineItem[];
@@ -176,7 +176,7 @@ export const useTimelineEventsHandler = ({
   const { startTracking } = useTrackHttpRequest();
 
   const clearSignalsState = useCallback(() => {
-    if (id != null && detectionsTimelineIds.some((timelineId) => timelineId === id)) {
+    if (id != null && DETECTIONS_TABLE_IDS.some((timelineId) => timelineId === id)) {
       dispatch(timelineActions.clearEventsLoading({ id }));
       dispatch(timelineActions.clearEventsDeleted({ id }));
     }

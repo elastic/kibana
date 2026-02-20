@@ -19,7 +19,7 @@ import {
 
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { ActionConnectorMode } from '@kbn/triggers-actions-ui-plugin/public';
-import type { OpsgenieActionParams } from '../../../../server/connector_types';
+import type { Params as OpsgenieActionParams } from '@kbn/connector-schemas/opsgenie';
 import { RULE_TAGS_TEMPLATE } from '../../../../common/opsgenie';
 import * as i18n from './translations';
 import type { EditActionCallback } from '../types';

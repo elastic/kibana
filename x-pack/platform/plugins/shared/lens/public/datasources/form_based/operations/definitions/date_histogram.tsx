@@ -7,6 +7,7 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import moment from 'moment';
+import { snakeCase } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -34,29 +35,20 @@ import {
 } from '@kbn/data-plugin/common';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { TooltipWrapper } from '@kbn/visualization-utils';
-import { sanitazeESQLInput } from '@kbn/esql-utils';
-import type { DateRange } from '../../../../../common/types';
-import type { IndexPattern } from '../../../../types';
+import type {
+  DateHistogramIndexPatternColumn,
+  DateRange,
+  IndexPattern,
+  FormBasedLayer,
+} from '@kbn/lens-common';
 import { updateColumnParam } from '../layer_helpers';
 import type { FieldBasedOperationErrorMessage, OperationDefinition, ParamEditorProps } from '.';
-import type { FieldBasedIndexPatternColumn } from './column_types';
 import { getInvalidFieldMessage, getSafeName } from './helpers';
-import type { FormBasedLayer } from '../../types';
 import { TIME_SHIFT_MULTIPLE_DATE_HISTOGRAMS } from '../../../../user_messages_ids';
 
 const { isValidInterval } = search.aggs;
 const autoInterval = 'auto';
 const calendarOnlyIntervals = new Set(['w', 'M', 'q', 'y']);
-
-export interface DateHistogramIndexPatternColumn extends FieldBasedIndexPatternColumn {
-  operationType: 'date_histogram';
-  params: {
-    interval: string;
-    ignoreTimeRange?: boolean;
-    includeEmptyRows?: boolean;
-    dropPartials?: boolean;
-  };
-}
 
 function getMultipleDateHistogramsErrorMessage(
   layer: FormBasedLayer,
@@ -241,16 +233,22 @@ export const dateHistogramOperation: OperationDefinition<
     const { interval } = getTimeZoneAndInterval(column, indexPattern);
     const calcAutoInterval = getCalculateAutoTimeExpression((key) => uiSettings.get(key));
 
-    if (interval === 'auto') {
-      return `BUCKET(${sanitazeESQLInput(column.sourceField)}, ${mapToEsqlInterval(
-        dateRange,
-        calcAutoInterval({ from: dateRange.fromDate, to: dateRange.toDate }) || '1h'
-      )})`;
-    }
-    return `BUCKET(${sanitazeESQLInput(column.sourceField)}, ${mapToEsqlInterval(
-      dateRange,
-      interval
-    )})`;
+    const resolvedInterval =
+      interval === 'auto'
+        ? mapToEsqlInterval(
+            dateRange,
+            calcAutoInterval({ from: dateRange.fromDate, to: dateRange.toDate }) || '1h'
+          )
+        : mapToEsqlInterval(dateRange, interval);
+
+    // Use columnId to make param name unique
+    const fieldKey = `field_${snakeCase(columnId)}`;
+    // The interval is a safe string like '30 minutes' or '1h' - it doesn't need parameter escaping
+    // and should be directly in the template (not as a string parameter which would be quoted)
+    return {
+      template: `BUCKET(??${fieldKey}, ${resolvedInterval})`,
+      params: { [fieldKey]: column.sourceField },
+    };
   },
   toEsAggsFn: (column, columnId, indexPattern) => {
     const { usedField, timeZone, interval } = getTimeZoneAndInterval(column, indexPattern);

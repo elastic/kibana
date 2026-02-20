@@ -8,47 +8,23 @@
  */
 
 import { AbstractStorybookMock } from '@kbn/shared-ux-storybook-mock';
-import type { ArgumentParams } from '@kbn/shared-ux-storybook-mock';
 
 import type {
-  NoDataConfig,
   NoDataConfigPageProps,
   NoDataConfigPageServices,
 } from '@kbn/shared-ux-page-no-data-config-types';
 import { NoDataPageStorybookMock } from '@kbn/shared-ux-page-no-data-mocks';
 import type { NoDataPageStorybookParams } from '@kbn/shared-ux-page-no-data-mocks';
 
-type PropArguments = Pick<NoDataConfig, 'solution' | 'logo' | 'docsLink' | 'pageTitle'>;
-
-export type Params = ArgumentParams<PropArguments, {}> & NoDataPageStorybookParams;
+export type Params = NoDataPageStorybookParams;
 
 const dataPageMock = new NoDataPageStorybookMock();
 
 export class NoDataConfigPageStorybookMock extends AbstractStorybookMock<
   NoDataConfigPageProps,
-  NoDataConfigPageServices,
-  PropArguments
+  NoDataConfigPageServices
 > {
-  propArguments = {
-    solution: {
-      control: { control: 'text' },
-      defaultValue: 'Observability',
-    },
-    logo: {
-      control: { control: 'radio' },
-      options: ['logoElastic', 'logoKibana', 'logoCloud', undefined],
-      defaultValue: undefined,
-    },
-    docsLink: {
-      control: { control: 'text' },
-      defaultValue: 'docs/link',
-    },
-    pageTitle: {
-      control: { control: 'text' },
-      defaultValue: '',
-    },
-  };
-
+  propArguments = {};
   serviceArguments = {};
 
   dependencies = [dataPageMock];
@@ -61,15 +37,11 @@ export class NoDataConfigPageStorybookMock extends AbstractStorybookMock<
             title: 'Add Integrations',
           },
         },
-        solution: this.getArgumentValue('solution', params),
-        logo: this.getArgumentValue('logo', params),
-        docsLink: this.getArgumentValue('docsLink', params),
-        pageTitle: this.getArgumentValue('pageTitle', params),
       },
     };
   }
 
-  getServices(params: Params): NoDataConfigPageServices {
+  getServices(params: NoDataPageStorybookParams): NoDataConfigPageServices {
     return { ...dataPageMock.getServices(params) };
   }
 }

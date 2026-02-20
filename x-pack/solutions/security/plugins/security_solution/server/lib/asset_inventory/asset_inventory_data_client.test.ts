@@ -144,7 +144,7 @@ describe('AssetInventoryDataClient', () => {
       expect(
         mockSecSolutionContext.core.elasticsearch.client.asInternalUser.count
       ).toHaveBeenCalledWith({
-        index: '.entities.v1.latest.security_generic_default',
+        index: '.entities.*.latest.security_*_default',
       });
       // Verify that installAssetInventoryDataView was called
       expect(mockDataViewService.get).toHaveBeenCalledWith('asset-inventory-default', false);
@@ -182,7 +182,7 @@ describe('AssetInventoryDataClient', () => {
       expect(
         mockSecSolutionContext.core.elasticsearch.client.asInternalUser.count
       ).toHaveBeenCalledWith({
-        index: '.entities.v1.latest.security_generic_custom-space',
+        index: '.entities.*.latest.security_*_custom-space',
       });
       // Verify that installAssetInventoryDataView was called with custom space
       expect(mockDataViewService.get).toHaveBeenCalledWith('asset-inventory-custom-space', false);
@@ -217,7 +217,7 @@ describe('AssetInventoryDataClient', () => {
       expect(
         mockSecSolutionContext.core.elasticsearch.client.asInternalUser.count
       ).toHaveBeenCalledWith({
-        index: '.entities.v1.latest.security_generic_default',
+        index: '.entities.*.latest.security_*_default',
       });
       // Verify that installAssetInventoryDataView was attempted but failed
       expect(mockDataViewService.get).toHaveBeenCalledWith('asset-inventory-default', false);
@@ -248,11 +248,11 @@ describe('AssetInventoryDataClient', () => {
       expect(
         mockSecSolutionContext.core.elasticsearch.client.asInternalUser.count
       ).toHaveBeenCalledWith({
-        index: '.entities.v1.latest.security_generic_default',
+        index: '.entities.*.latest.security_*_default',
       });
       // Verify error was logged
       expect(loggerMock.error).toHaveBeenCalledWith(
-        'Error checking for generic documents: Index not found'
+        'Error checking for the presence of entities documents: Index not found'
       );
     });
 

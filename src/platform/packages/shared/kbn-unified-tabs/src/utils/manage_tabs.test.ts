@@ -235,5 +235,14 @@ describe('manage_tabs', () => {
       expect(nextState.items).toEqual([items[0]]);
       expect(nextState.selectedItem).toBe(items[0]);
     });
+
+    it('closes tabs to the right if tab-to-be-closed is a currently open one', () => {
+      const prevState = { items, selectedItem: items[4] };
+      const nextState = closeTabsToTheRight(prevState, items[2]);
+
+      expect(nextState.items).not.toBe(items);
+      expect(nextState.items).toEqual([items[0], items[1], items[2]]);
+      expect(nextState.selectedItem).toBe(items[2]);
+    });
   });
 });

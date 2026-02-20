@@ -15,7 +15,6 @@ import { FindingsSearchBar } from '../configurations/layout/findings_search_bar'
 import { ErrorCallout } from '../configurations/layout/error_callout';
 import { EmptyState } from '../../components/empty_state';
 import { CloudSecurityGrouping } from '../../components/cloud_security_grouping';
-import { DEFAULT_GROUPING_TABLE_HEIGHT } from '../../common/constants';
 
 export const LatestVulnerabilitiesContainer = () => {
   const SubGrouping = ({
@@ -122,7 +121,6 @@ export const LatestVulnerabilitiesContainer = () => {
               ...currentGroupFilters,
               ...(parentGroupFilters ? JSON.parse(parentGroupFilters) : []),
             ]}
-            height={DEFAULT_GROUPING_TABLE_HEIGHT}
           />
         );
       };

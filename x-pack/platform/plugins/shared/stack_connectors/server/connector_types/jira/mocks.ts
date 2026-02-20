@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { ExternalService, PushToServiceApiParams, ExecutorSubActionPushParams } from './types';
+import type {
+  PushToServiceApiParams,
+  ExecutorSubActionPushParams,
+} from '@kbn/connector-schemas/jira';
+import type { ExternalService } from './types';
 
 const createMock = (): jest.Mocked<ExternalService> => {
   const service = {

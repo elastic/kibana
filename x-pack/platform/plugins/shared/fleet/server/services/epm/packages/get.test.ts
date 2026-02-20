@@ -1434,9 +1434,10 @@ owner: elastic`,
           },
         });
 
-        // Mock paths that include knowledge base files
+        // Mock paths that include knowledge base files and README
         const mockPaths = [
           'my-package-1.0.0/manifest.yml',
+          'my-package-1.0.0/docs/README.md',
           'my-package-1.0.0/docs/knowledge_base/knowledge.md',
           'my-package-1.0.0/docs/knowledge_base/troubleshooting.md',
         ];
@@ -1465,12 +1466,20 @@ owner: elastic`,
         expect(MockRegistry.groupPathsByService).toHaveBeenCalledWith(
           expect.arrayContaining([
             'my-package-1.0.0/manifest.yml',
+            'my-package-1.0.0/docs/README.md',
             'my-package-1.0.0/docs/knowledge_base/knowledge.md',
             'my-package-1.0.0/docs/knowledge_base/troubleshooting.md',
           ])
         );
 
         expect(result.assets.elasticsearch?.knowledge_base).toEqual([
+          {
+            service: 'elasticsearch',
+            type: 'knowledge_base',
+            file: 'README.md',
+            pkgkey: 'my-package-1.0.0',
+            path: 'my-package-1.0.0/docs/README.md',
+          },
           {
             service: 'elasticsearch',
             type: 'knowledge_base',
@@ -1701,7 +1710,8 @@ owner: elastic`,
 
       expect(mockKnowledgeBaseIndex.getPackageKnowledgeBaseFromIndex).toHaveBeenCalledWith(
         esClient,
-        'nginx'
+        'nginx',
+        undefined
       );
 
       expect(result).toEqual({
@@ -1738,7 +1748,8 @@ owner: elastic`,
 
       expect(mockKnowledgeBaseIndex.getPackageKnowledgeBaseFromIndex).toHaveBeenCalledWith(
         esClient,
-        'nginx'
+        'nginx',
+        undefined
       );
 
       expect(result).toEqual({
@@ -1760,7 +1771,8 @@ owner: elastic`,
 
       expect(mockKnowledgeBaseIndex.getPackageKnowledgeBaseFromIndex).toHaveBeenCalledWith(
         esClient,
-        'nginx'
+        'nginx',
+        undefined
       );
 
       expect(result).toBeUndefined();
@@ -1782,7 +1794,8 @@ owner: elastic`,
 
       expect(mockKnowledgeBaseIndex.getPackageKnowledgeBaseFromIndex).toHaveBeenCalledWith(
         esClient,
-        'nginx'
+        'nginx',
+        undefined
       );
 
       expect(mockLogger.warn).toHaveBeenCalledWith(
@@ -1805,7 +1818,8 @@ owner: elastic`,
 
       expect(mockKnowledgeBaseIndex.getPackageKnowledgeBaseFromIndex).toHaveBeenCalledWith(
         esClient,
-        ''
+        '',
+        undefined
       );
 
       expect(result).toBeUndefined();

@@ -48,7 +48,7 @@ interface TLSContent {
 }
 
 const getValidBefore = (notBefore?: string): TLSContent => {
-  if (!notBefore) return { summary: 'Error, missing `certificate_not_valid_before` date.' };
+  if (!notBefore) return { summary: 'Error, missing `not_before` date.' };
   const relativeDate = moment().diff(notBefore, 'days');
   const formattedDate = moment(notBefore).format('MMM D, YYYY z');
   return relativeDate >= 0
@@ -62,7 +62,7 @@ const getValidBefore = (notBefore?: string): TLSContent => {
       };
 };
 const getValidAfter = (notAfter?: string): TLSContent => {
-  if (!notAfter) return { summary: 'Error, missing `certificate_not_valid_after` date.' };
+  if (!notAfter) return { summary: 'Error, missing `not_after` date.' };
   const relativeDate = moment().diff(notAfter, 'days');
   const formattedDate = moment(notAfter).format('MMM D, YYYY z');
   return relativeDate >= 0

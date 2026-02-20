@@ -95,6 +95,13 @@ export const AlertOverview = memo(
           },
         },
         {
+          id: ColumnIDs.WORKFLOW_TAGS,
+          key: i18n.translate('xpack.observability.alertFlyout.overviewTab.workflowTags', {
+            defaultMessage: 'Workflow tags',
+          }),
+          value: alert.fields['kibana.alert.workflow_tags'] as string[],
+        },
+        {
           id: ColumnIDs.SOURCE,
           key: i18n.translate('xpack.observability.alertFlyout.overviewTab.sources', {
             defaultMessage: 'Affected entity / source',
@@ -216,7 +223,15 @@ export const AlertOverview = memo(
           </h4>
         </EuiTitle>
         <EuiSpacer size="m" />
-        <EuiInMemoryTable width={'80%'} columns={overviewColumns} itemId="key" items={items} />
+        <EuiInMemoryTable
+          width={'80%'}
+          columns={overviewColumns}
+          itemId="key"
+          items={items}
+          tableCaption={i18n.translate('xpack.observability.alertFlyout.alertOverviewCaption', {
+            defaultMessage: 'Alert overview',
+          })}
+        />
       </>
     );
   }

@@ -24,8 +24,34 @@ export const dsl = {
   isNotPartiallyTranslated(): QueryDslQueryContainer {
     return { bool: { must_not: dsl.isPartiallyTranslated() } };
   },
+  isFullOrPartiallyTranslated(): QueryDslQueryContainer {
+    return {
+      terms: {
+        translation_result: [MigrationTranslationResult.FULL, MigrationTranslationResult.PARTIAL],
+      },
+    };
+  },
+  isNotFullOrPartiallyTranslated(): QueryDslQueryContainer {
+    return { bool: { must_not: dsl.isFullOrPartiallyTranslated() } };
+  },
   isUntranslatable(): QueryDslQueryContainer {
     return { term: { translation_result: MigrationTranslationResult.UNTRANSLATABLE } };
+  },
+  isEligibleForTranslation(): QueryDslQueryContainer {
+    return {
+      bool: {
+        must_not: [
+          {
+            bool: {
+              filter: [
+                { term: { 'original_rule.vendor': 'qradar' } },
+                { match_phrase: { 'original_rule.query': 'buildingBlock="true"' } },
+              ],
+            },
+          },
+        ],
+      },
+    };
   },
   isNotUntranslatable(): QueryDslQueryContainer {
     return { bool: { must_not: dsl.isUntranslatable() } };

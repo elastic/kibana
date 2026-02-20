@@ -31,7 +31,7 @@ describe('DetectionRulesClient.importRule', () => {
   let detectionRulesClient: IDetectionRulesClient;
 
   const mlAuthz = (buildMlAuthz as jest.Mock)();
-  let actionsClient: jest.Mocked<ActionsClient>;
+  const actionsClient: jest.Mocked<ActionsClient> = {} as unknown as jest.Mocked<ActionsClient>;
 
   const allowMissingConnectorSecrets = true;
   const ruleToImport = {
@@ -244,6 +244,8 @@ describe('DetectionRulesClient.importRule', () => {
           rule_source: {
             type: 'external' as const,
             is_customized: true,
+            customized_fields: [{ field_name: 'name' }],
+            has_base_version: true,
           },
         },
         allowMissingConnectorSecrets,
@@ -257,6 +259,8 @@ describe('DetectionRulesClient.importRule', () => {
               ruleSource: {
                 isCustomized: true,
                 type: 'external',
+                customizedFields: [{ fieldName: 'name' }],
+                hasBaseVersion: true,
               },
             }),
           }),
@@ -368,6 +372,8 @@ describe('DetectionRulesClient.importRule', () => {
           rule_source: {
             type: 'external' as const,
             is_customized: true,
+            customized_fields: [{ field_name: 'name' }],
+            has_base_version: true,
           },
         },
         allowMissingConnectorSecrets,
@@ -381,6 +387,8 @@ describe('DetectionRulesClient.importRule', () => {
               ruleSource: {
                 isCustomized: true,
                 type: 'external',
+                customizedFields: [{ fieldName: 'name' }],
+                hasBaseVersion: true,
               },
             }),
           }),

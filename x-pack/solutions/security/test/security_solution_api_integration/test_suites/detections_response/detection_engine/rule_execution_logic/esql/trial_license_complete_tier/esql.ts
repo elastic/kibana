@@ -23,6 +23,7 @@ import {
 
 import { getMaxSignalsWarning as getMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 import { EXCLUDED_DATA_TIERS_FOR_RULE_EXECUTION } from '@kbn/security-solution-plugin/common/constants';
+import { deleteAllRules, deleteAllAlerts, createRule } from '@kbn/detections-response-ftr-services';
 import {
   getPreviewAlerts,
   previewRule,
@@ -40,11 +41,6 @@ import {
   setBrokenRuntimeField,
   unsetBrokenRuntimeField,
 } from '../../../../utils';
-import {
-  deleteAllRules,
-  deleteAllAlerts,
-  createRule,
-} from '../../../../../../config/services/detections_response';
 import { deleteAllExceptions } from '../../../../../lists_and_exception_lists/utils';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
@@ -1721,7 +1717,7 @@ export default ({ getService }: FtrProviderContext) => {
             ...getCreateEsqlRulesSchemaMock(`rule-${id}`, true),
             query: `from ecs_compliant, ecs_compliant_synthetic_source metadata _id, _index ${internalIdPipe(
               id
-            )} | mv_expand agent.name | sort @timestamp asc`,
+            )} | mv_expand agent.name | sort @timestamp asc, _index asc`, // sort by timestamp and index to ensure deterministic results, see https://github.com/elastic/kibana/issues/253849
             from: '2020-10-28T05:15:00.000Z',
             to: '2020-10-28T06:00:00.000Z',
             interval: '45m',
@@ -1735,7 +1731,7 @@ export default ({ getService }: FtrProviderContext) => {
           };
 
           await Promise.all(
-            ['ecs_compliant', 'ecs_compliant_synthetic_source'].map((index) =>
+            ['ecs_compliant', 'ecs_compliant_synthetic_source'].map((index, i) =>
               es.index({
                 index,
                 id,

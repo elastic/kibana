@@ -11,44 +11,29 @@ import type { Subscription } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 import type { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { ILicense } from '@kbn/licensing-types';
-import { createStartServicesGetter, Storage } from '@kbn/kibana-utils-plugin/public';
+import { createStartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { UiActionsServiceEnhancements } from './services';
-import type { PublicDrilldownManagerComponent } from './drilldowns';
-import { createPublicDrilldownManager } from './drilldowns';
-import { dynamicActionEnhancement } from './dynamic_actions/dynamic_action_enhancement';
 
 interface SetupDependencies {
-  embeddable: EmbeddableSetup; // Embeddable are needed because they register basic triggers/actions.
   uiActions: UiActionsSetup;
   licensing?: LicensingPluginSetup;
 }
 
 export interface StartDependencies {
-  embeddable: EmbeddableStart;
   uiActions: UiActionsStart;
   licensing?: LicensingPluginStart;
 }
 
-export interface SetupContract
-  extends UiActionsSetup,
-    Pick<UiActionsServiceEnhancements, 'registerDrilldown'> {}
+export type SetupContract = UiActionsSetup;
 
 export interface StartContract
   extends UiActionsStart,
     Pick<
       UiActionsServiceEnhancements,
-      | 'getActionFactory'
-      | 'hasActionFactory'
-      | 'getActionFactories'
-      | 'telemetry'
-      | 'extract'
-      | 'inject'
-    > {
-  DrilldownManager: PublicDrilldownManagerComponent;
-}
+      'getActionFactory' | 'hasActionFactory' | 'getActionFactories'
+    > {}
 
 export class AdvancedUiActionsPublicPlugin
   implements Plugin<SetupContract, StartContract, SetupDependencies, StartDependencies>
@@ -69,7 +54,7 @@ export class AdvancedUiActionsPublicPlugin
 
   public setup(
     core: CoreSetup<StartDependencies>,
-    { embeddable, uiActions, licensing }: SetupDependencies
+    { uiActions, licensing }: SetupDependencies
   ): SetupContract {
     const startServices = createStartServicesGetter(core.getStartServices);
     this.enhancements = new UiActionsServiceEnhancements({
@@ -77,7 +62,6 @@ export class AdvancedUiActionsPublicPlugin
       featureUsageSetup: licensing?.featureUsage,
       getFeatureUsageStart: () => startServices().plugins.licensing?.featureUsage,
     });
-    embeddable.registerEnhancement(dynamicActionEnhancement(this.enhancements));
     return {
       ...uiActions,
       ...this.enhancements,
@@ -90,14 +74,6 @@ export class AdvancedUiActionsPublicPlugin
     return {
       ...uiActions,
       ...this.enhancements!,
-      DrilldownManager: createPublicDrilldownManager({
-        actionFactories: this.enhancements!.getActionFactories(),
-        getTrigger: (triggerId) => uiActions.getTrigger(triggerId),
-        storage: new Storage(window?.localStorage),
-        toastService: core.notifications.toasts,
-        docsLink: core.docLinks.links.dashboard.drilldowns,
-        triggerPickerDocsLink: core.docLinks.links.dashboard.drilldownsTriggerPicker,
-      }),
     };
   }
 

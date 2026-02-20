@@ -21,6 +21,7 @@ import type { AlertsTableProps } from '@kbn/response-ops-alerts-table/types';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { defaultAlertsTableColumns } from '@kbn/response-ops-alerts-table/configuration';
 import type { JsonObject } from '@kbn/utility-types';
+import { AlertDetailFlyout } from '@kbn/response-ops-alerts-table/components/alert_detail_flyout';
 import {
   CONFIG_EDITOR_KQL_ERROR_TOAST_TITLE,
   getSolutionRuleTypesAuthPromptBody,
@@ -30,7 +31,6 @@ import {
 } from '../translations';
 import type { EmbeddableAlertsTableQuery } from '../types';
 import { NO_AUTHORIZED_RULE_TYPE_PROMPT_SUBJ } from '../constants';
-import { InMemoryStorage } from '../utils/in_memory_storage';
 
 export interface EmbeddableAlertsTableProps {
   id: string;
@@ -40,7 +40,6 @@ export interface EmbeddableAlertsTableProps {
   services: AlertsTableProps['services'];
 }
 
-const inMemoryStorage = new InMemoryStorage();
 const columns = defaultAlertsTableColumns.map<EuiDataGridColumn>((column) => ({
   ...column,
   actions: false,
@@ -158,11 +157,11 @@ export const EmbeddableAlertsTable = ({
         variant: 'transparent',
       }}
       openLinksInNewTab={true}
-      flyoutOwnsFocus={true}
-      flyoutPagination={false}
-      // Saves the configuration in memory in case we want to add a shared configuration saved in
-      // the panel config in the future (and avoid localStorage migrations or deletions tasks)
-      configurationStorage={inMemoryStorage}
+      renderExpandedAlertView={(props) => (
+        <AlertDetailFlyout {...props} ownFocus={true} hasPagination={false} />
+      )}
+      // Disable configuration persistence
+      configurationStorage={null}
       // Disable columns customziation
       browserFields={{}}
       services={services}

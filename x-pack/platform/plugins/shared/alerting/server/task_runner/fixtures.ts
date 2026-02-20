@@ -381,7 +381,6 @@ export const generateRunnerResult = ({
   alertRecoveredInstances = {},
   summaryActions = {},
   taskRunError,
-  trackedExecutions = ['5f6aa57d-3e22-484e-bae8-cbed868f4d28'],
 }: GeneratorParams = {}) => {
   return {
     schedule: {
@@ -393,7 +392,6 @@ export const generateRunnerResult = ({
       ...(state && { alertTypeState: {} }),
       ...(state && { previousStartedAt: new Date('1970-01-01T00:00:00.000Z').toISOString() }),
       ...(state && { summaryActions }),
-      ...(state && { trackedExecutions }),
     },
     taskRunError,
   };
@@ -454,7 +452,15 @@ export const generateEnqueueFunctionInput = ({
 };
 
 export const generateAlertInstance = (
-  { id, duration, start, flappingHistory, actions, maintenanceWindowIds }: GeneratorParams = {
+  {
+    id,
+    duration,
+    start,
+    flappingHistory,
+    actions,
+    maintenanceWindowIds,
+    maintenanceWindowNames,
+  }: GeneratorParams = {
     id: 1,
     flappingHistory: [false],
   }
@@ -470,6 +476,7 @@ export const generateAlertInstance = (
       flappingHistory,
       flapping: false,
       maintenanceWindowIds: maintenanceWindowIds || [],
+      maintenanceWindowNames: maintenanceWindowNames || [],
       pendingRecoveredCount: 0,
       activeCount: 1,
     },

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { esql as esqlComposer } from '@kbn/esql-language';
 import { buildExpression, parseExpression } from '@kbn/expressions-plugin/common';
 import { operationDefinitionMap } from '.';
-import type { IndexPattern } from '../../../../types';
 import type { FormBasedLayer } from '../../../..';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import type { DateRange } from '../../../../../common/types';
+import type { DateRange, IndexPattern } from '@kbn/lens-common';
 
 describe('count operation', () => {
   describe('getGroupByKey', () => {
@@ -125,8 +125,8 @@ describe('count operation', () => {
   });
 
   describe('toESQL', () => {
-    const callToESQL = (column: unknown) =>
-      operationDefinitionMap.count.toESQL!(
+    const callToESQL = (column: unknown) => {
+      const esqlExpr = operationDefinitionMap.count.toESQL!(
         column as unknown as FormBasedLayer['columns'][0],
         '1',
         {
@@ -138,6 +138,21 @@ describe('count operation', () => {
         {} as unknown as IUiSettingsClient,
         {} as unknown as DateRange
       );
+
+      if (!esqlExpr) {
+        return undefined;
+      }
+
+      // Output format: "FROM _ | STATS result = <expression>"
+      // We then just split on ' = ' to get the expression part
+      const queryString = `FROM _ | STATS result = ${esqlExpr.template}`;
+      const query = esqlExpr.params
+        ? esqlComposer(queryString, esqlExpr.params)
+        : esqlComposer(queryString);
+      // Inline params to resolve ??paramName placeholders to actual values
+      query.inlineParams();
+      return query.print('basic').split(' = ')[1];
+    };
 
     test('doesnt support timeShift', () => {
       const esql = callToESQL({
@@ -160,7 +175,7 @@ describe('count operation', () => {
         sourceField: 'bytes',
         operationType: 'count',
       });
-      expect(esql).toBe('COUNT(`bytes`)');
+      expect(esql).toBe('COUNT(bytes)');
     });
   });
 });

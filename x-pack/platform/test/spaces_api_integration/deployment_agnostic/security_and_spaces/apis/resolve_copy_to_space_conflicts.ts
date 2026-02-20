@@ -6,6 +6,7 @@
  */
 
 import { AUTHENTICATION } from '../../../common/lib/authentication';
+import { createSpaces, deleteSpaces } from '../../../common/lib/space_test_utils';
 import { SPACES } from '../../../common/lib/spaces';
 import { resolveCopyToSpaceConflictsSuite } from '../../../common/suites/resolve_copy_to_space_conflicts.agnostic';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
@@ -32,13 +33,22 @@ export default function resolveCopyToSpaceConflictsTestSuite(
     NON_EXISTENT_SPACE_ID,
   } = resolveCopyToSpaceConflictsSuite(context);
 
+  const spacesService = context.getService('spaces');
+  const isServerless = context.getService('config').get('serverless');
+
   describe('resolve copy to spaces conflicts', () => {
+    before(async () => {
+      await createSpaces(spacesService, isServerless);
+    });
+
+    after(async () => {
+      await deleteSpaces(spacesService);
+    });
     [
       {
         spaceId: SPACES.DEFAULT.spaceId,
         users: {
           noAccess: AUTHENTICATION.NOT_A_KIBANA_USER,
-          superuser: AUTHENTICATION.SUPERUSER,
           allGlobally: AUTHENTICATION.KIBANA_RBAC_USER,
           readGlobally: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER,
           allAtSpace: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_ALL_USER,
@@ -51,7 +61,6 @@ export default function resolveCopyToSpaceConflictsTestSuite(
         spaceId: SPACES.SPACE_1.spaceId,
         users: {
           noAccess: AUTHENTICATION.NOT_A_KIBANA_USER,
-          superuser: AUTHENTICATION.SUPERUSER,
           allGlobally: AUTHENTICATION.KIBANA_RBAC_USER,
           readGlobally: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER,
           allAtSpace: AUTHENTICATION.KIBANA_RBAC_SPACE_1_ALL_USER,
@@ -182,10 +191,6 @@ export default function resolveCopyToSpaceConflictsTestSuite(
       resolveCopyToSpaceConflictsTest(
         `user with no access from the ${spaceId} space`,
         definitionNoAccess(scenario.users.noAccess)
-      );
-      resolveCopyToSpaceConflictsTest(
-        `superuser from the ${spaceId} space`,
-        definitionAuthorized(scenario.users.superuser)
       );
       resolveCopyToSpaceConflictsTest(
         `rbac user with all globally from the ${spaceId} space`,

@@ -8,7 +8,7 @@
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { SearchService } from './search_service';
-import { getIndicesForProductNames } from './utils';
+import { getIndicesForResourceTypes } from './utils';
 
 import { performSearch } from './perform_search';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
@@ -46,7 +46,7 @@ describe('SearchService', () => {
         searchQuery: 'What is Kibana?',
         size: 42,
         highlights: 3,
-        index: getIndicesForProductNames(['kibana'], undefined),
+        index: getIndicesForResourceTypes(['kibana'], undefined, undefined),
         client: esClient,
       });
     });
@@ -64,7 +64,7 @@ describe('SearchService', () => {
         searchQuery: 'What is Kibana?',
         size: 42,
         highlights: 3,
-        index: [`.kibana_ai_product_doc_kibana`],
+        index: `.kibana_ai_product_doc_kibana`,
         client: esClient,
       });
     });
@@ -83,7 +83,7 @@ describe('SearchService', () => {
         searchQuery: 'What is Kibana?',
         size: 42,
         highlights: 3,
-        index: [`.kibana_ai_product_doc_kibana`],
+        index: `.kibana_ai_product_doc_kibana`,
         client: esClient,
       });
     });
@@ -101,7 +101,7 @@ describe('SearchService', () => {
         searchQuery: 'What is Kibana?',
         size: 42,
         highlights: 3,
-        index: [`.kibana_ai_product_doc_kibana-${defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL}`],
+        index: `.kibana_ai_product_doc_kibana-${defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL}`,
         client: esClient,
       });
     });

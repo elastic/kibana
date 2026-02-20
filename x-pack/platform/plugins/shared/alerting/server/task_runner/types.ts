@@ -24,6 +24,8 @@ import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-p
 import type { IEventLogClient, IEventLogger } from '@kbn/event-log-plugin/server';
 import type { SharePluginStart } from '@kbn/share-plugin/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import type { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/search-types';
+import type { IAsyncSearchOptions } from '@kbn/data-plugin/common';
 import type { IAlertsClient } from '../alerts_client/types';
 import type { Alert } from '../alert';
 import type { AlertsService } from '../alerts_service/alerts_service';
@@ -43,6 +45,7 @@ import type {
 import type { ActionsConfigMap } from '../lib/get_actions_config_map';
 import type { NormalizedRuleType } from '../rule_type_registry';
 import type {
+  AsyncSearchParams,
   CombinedSummarizedAlerts,
   RawRule,
   RuleTypeRegistry,
@@ -78,6 +81,7 @@ export interface RunRuleResult {
 
 export interface RunRuleParams<Params extends RuleTypeParams> {
   apiKey: RawRule['apiKey'];
+  uiamApiKey?: RawRule['uiamApiKey'];
   fakeRequest: KibanaRequest;
   rule: SanitizedRule<Params>;
   validatedParams: Params;
@@ -155,11 +159,17 @@ export interface RuleTypeRunnerContext {
   ruleRunMetricsStore: RuleRunMetricsStore;
   spaceId: string;
   isServerless: boolean;
+  shouldGrantUiam?: boolean;
 }
 
 export interface RuleRunnerErrorStackTraceLog {
   message: ElasticsearchError;
   stackTrace?: string;
+}
+
+export enum ApiKeyType {
+  ES = 'es',
+  UIAM = 'uiam',
 }
 
 export interface TaskRunnerContext {
@@ -182,6 +192,7 @@ export interface TaskRunnerContext {
   maxAlerts: number;
   ruleTypeRegistry: RuleTypeRegistry;
   rulesSettingsService: RulesSettingsService;
+  apiKeyType: ApiKeyType;
   savedObjects: SavedObjectsServiceStart;
   share: SharePluginStart;
   spaceIdToNamespace: SpaceIdToNamespaceFunction;
@@ -189,4 +200,25 @@ export interface TaskRunnerContext {
   usageCounter?: UsageCounter;
   getEventLogClient: (request: KibanaRequest) => IEventLogClient;
   isServerless: boolean;
+  shouldGrantUiam?: boolean;
 }
+
+export interface AsyncSearchClient<T extends AsyncSearchParams> {
+  getMetrics: () => {
+    numSearches: number;
+    esSearchDurationMs: number;
+    totalSearchDurationMs: number;
+  };
+  search: ({
+    request,
+    options,
+  }: {
+    request: IKibanaSearchRequest<T>;
+    options?: IAsyncSearchOptions;
+  }) => Promise<IKibanaSearchResponse['rawResponse']>;
+}
+
+export type PublicAsyncSearchClient<T extends AsyncSearchParams> = Omit<
+  AsyncSearchClient<T>,
+  'getMetrics'
+>;

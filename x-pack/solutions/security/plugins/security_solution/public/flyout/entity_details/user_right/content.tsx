@@ -6,44 +6,39 @@
  */
 
 import { EuiHorizontalRule } from '@elastic/eui';
-
 import React from 'react';
-import type { UserItem } from '../../../../common/search_strategy';
+import { ObservedDataSection } from './components/observed_data_section';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { EntityHighlightsAccordion } from '../../../entity_analytics/components/entity_details_flyout/components/entity_highlights';
 import { AssetCriticalityAccordion } from '../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
-
 import { OBSERVED_USER_QUERY_ID } from '../../../explore/users/containers/users/observed_details';
 import { FlyoutRiskSummary } from '../../../entity_analytics/components/risk_summary_flyout/risk_summary';
 import type { RiskScoreState } from '../../../entity_analytics/api/hooks/use_risk_score';
-import { ManagedUser } from './components/managed_user';
-import type { ManagedUserData } from './types';
 import { EntityIdentifierFields, EntityType } from '../../../../common/entity_analytics/types';
 import { USER_PANEL_RISK_SCORE_QUERY_ID } from '.';
 import { FlyoutBody } from '../../shared/components/flyout_body';
-import { ObservedEntity } from '../shared/components/observed_entity';
-import type { ObservedEntityData } from '../shared/components/observed_entity/types';
-import { useObservedUserItems } from './hooks/use_observed_user_items';
 import type { EntityDetailsPath } from '../shared/components/left_panel/left_panel_header';
 import { EntityInsight } from '../../../cloud_security_posture/components/entity_insight';
+import type { ObservedEntityData } from '../shared/components/observed_entity/types';
+import type { UserItem } from '../../../../common/search_strategy';
+
+export type ObservedUserData = Omit<ObservedEntityData<UserItem>, 'anomalies'>;
 
 interface UserPanelContentProps {
   userName: string;
-  observedUser: ObservedEntityData<UserItem>;
-  managedUser: ManagedUserData;
+  observedUser: ObservedUserData;
   riskScoreState: RiskScoreState<EntityType.user>;
   recalculatingScore: boolean;
   contextID: string;
   scopeId: string;
   onAssetCriticalityChange: () => void;
   openDetailsPanel: (path: EntityDetailsPath) => void;
-  isPreviewMode?: boolean;
-  isLinkEnabled: boolean;
+  isPreviewMode: boolean;
 }
 
 export const UserPanelContent = ({
   userName,
   observedUser,
-  managedUser,
   riskScoreState,
   recalculatingScore,
   contextID,
@@ -51,13 +46,16 @@ export const UserPanelContent = ({
   openDetailsPanel,
   onAssetCriticalityChange,
   isPreviewMode,
-  isLinkEnabled,
 }: UserPanelContentProps) => {
-  const observedFields = useObservedUserItems(observedUser);
-  const isManagedUserEnable = useIsExperimentalFeatureEnabled('newUserDetailsFlyoutManagedUser');
+  const isEntityDetailsHighlightsAIEnabled = useIsExperimentalFeatureEnabled(
+    'entityDetailsHighlightsEnabled'
+  );
 
   return (
     <FlyoutBody>
+      {isEntityDetailsHighlightsAIEnabled && (
+        <EntityHighlightsAccordion entityIdentifier={userName} entityType={EntityType.user} />
+      )}
       {riskScoreState.hasEngineBeenInstalled && riskScoreState.data?.length !== 0 && (
         <>
           <FlyoutRiskSummary
@@ -66,7 +64,6 @@ export const UserPanelContent = ({
             queryId={USER_PANEL_RISK_SCORE_QUERY_ID}
             openDetailsPanel={openDetailsPanel}
             isPreviewMode={isPreviewMode}
-            isLinkEnabled={isLinkEnabled}
             entityType={EntityType.user}
           />
           <EuiHorizontalRule />
@@ -80,26 +77,16 @@ export const UserPanelContent = ({
         value={userName}
         field={EntityIdentifierFields.userName}
         isPreviewMode={isPreviewMode}
-        isLinkEnabled={isLinkEnabled}
         openDetailsPanel={openDetailsPanel}
       />
-      <ObservedEntity
-        observedData={observedUser}
+      <ObservedDataSection
+        userName={userName}
+        observedUser={observedUser}
         contextID={contextID}
         scopeId={scopeId}
-        observedFields={observedFields}
         queryId={OBSERVED_USER_QUERY_ID}
       />
       <EuiHorizontalRule margin="m" />
-      {isManagedUserEnable && (
-        <ManagedUser
-          managedUser={managedUser}
-          contextID={contextID}
-          openDetailsPanel={openDetailsPanel}
-          isPreviewMode={isPreviewMode}
-          isLinkEnabled={isLinkEnabled}
-        />
-      )}
     </FlyoutBody>
   );
 };

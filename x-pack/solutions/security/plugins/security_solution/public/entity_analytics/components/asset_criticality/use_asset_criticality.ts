@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { UseMutationResult, UseQueryResult } from '@tanstack/react-query';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import type { UseMutationResult, UseQueryResult } from '@kbn/react-query';
+import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
 import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
 import type { EntityType } from '../../../../common/entity_analytics/types';
 import { EntityTypeToIdentifierField } from '../../../../common/entity_analytics/types';

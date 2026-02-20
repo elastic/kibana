@@ -19,11 +19,14 @@ export interface SoftDeletionResults {
   };
 }
 
+const MAX_SOFT_DELETED_USERS_EXPECTED = 10_000;
+
 export const softDeleteOmittedUsers =
   (esClient: ElasticsearchClient, index: string, { flushBytes, retries }: Options) =>
   async (processed: BulkProcessingResults) => {
     const res = await esClient.helpers.search<MonitoredUserDoc>({
       index,
+      size: MAX_SOFT_DELETED_USERS_EXPECTED,
       query: {
         bool: {
           must: [{ term: { 'user.is_privileged': true } }, { term: { 'labels.sources': 'csv' } }],
@@ -55,6 +58,9 @@ export const softDeleteOmittedUsers =
                         ctx._source.labels.sources.removeIf(src -> src == params.to_remove);
                         if (ctx._source.labels.sources.isEmpty()) {
                           ctx._source.user.is_privileged = false;
+                          ctx._source.user.entity = ctx._source.user.entity != null ? ctx._source.user.entity : new HashMap();
+                          ctx._source.user.entity.attributes = ctx._source.user.entity.attributes != null ? ctx._source.user.entity.attributes : new HashMap();
+                          ctx._source.user.entity.attributes.Privileged = false;
                         }
                       }
 

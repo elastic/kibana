@@ -19,16 +19,17 @@ import {
 } from '@kbn/discover-utils';
 
 // Mock dependencies
-jest.mock('../../hooks/use_data_sources', () => ({
+jest.mock('../../../../../hooks/use_data_sources', () => ({
   useDataSourcesContext: () => ({
     indexes: { apm: { traces: 'apm-traces-*' } },
   }),
 }));
-jest.mock('../../hooks/use_get_generate_discover_link', () => ({
+jest.mock('../../../../../hooks/use_generate_discover_link', () => ({
   useGetGenerateDiscoverLink: () => ({
     generateDiscoverLink: jest.fn(() => 'http://discover/link'),
   }),
-  toESQLParamName: jest.requireActual('../../hooks/use_get_generate_discover_link').toESQLParamName,
+  toESQLParamName: jest.requireActual('../../../../../hooks/use_generate_discover_link')
+    .toESQLParamName,
 }));
 jest.mock('./get_columns', () => ({
   getColumns: jest.fn(() => [{ field: 'duration', name: 'Duration' }]),
@@ -38,6 +39,15 @@ jest.mock('./use_fetch_span_links', () => ({
 }));
 jest.mock('@kbn/esql-composer', () => ({
   where: jest.fn(),
+}));
+
+jest.mock('../../../../content_framework/lazy_content_framework_section', () => ({
+  ContentFrameworkSection: ({ children, title, ...rest }: any) => (
+    <div data-test-subj="ContentFrameworkSection" {...rest}>
+      <h2>{title}</h2>
+      {children}
+    </div>
+  ),
 }));
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires

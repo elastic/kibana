@@ -11,3 +11,4 @@ export type {
   InterceptDialogApi,
   InterceptWithoutRunId as Intercept,
 } from './intercept_dialog_api';
+export { UserInterceptRunPersistenceService } from './user_intercept_run_persistence_service';

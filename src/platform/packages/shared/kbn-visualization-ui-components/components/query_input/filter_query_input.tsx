@@ -78,6 +78,14 @@ export function FilterQueryInput({
     dataView
   );
 
+  const emptyFilterQueryText = i18n.translate(
+    'visualizationUiComponents.filterQueryInput.emptyFilterQuery',
+    {
+      defaultMessage: '(empty)',
+    }
+  );
+  const filterQueryText = (inputFilter?.query as string) || emptyFilterQueryText;
+
   return (
     <EuiFormRow
       display="rowCompressed"
@@ -135,14 +143,9 @@ export function FilterQueryInput({
                           defaultMessage: 'Click to edit',
                         }
                       )}
+                      aria-label={`${filterByLabel} ${filterQueryText}`}
                     >
-                      {(inputFilter?.query as string) ||
-                        i18n.translate(
-                          'visualizationUiComponents.filterQueryInput.emptyFilterQuery',
-                          {
-                            defaultMessage: '(empty)',
-                          }
-                        )}
+                      {filterQueryText}
                     </EuiLink>
                   </EuiFlexItem>
                 </EuiFlexGroup>

@@ -10,14 +10,14 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import type { HttpSetup } from '@kbn/core-http-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/public/common';
+import { OpenAiProviderType } from '@kbn/connector-schemas/openai';
 import type { PromptResponse, User } from '@kbn/elastic-assistant-common';
 import {
   getCurrentConversationOwner,
   ConversationSharedState,
 } from '@kbn/elastic-assistant-common';
 import { ShareSelect } from '../../share_conversation/share_select';
-import type { Conversation } from '../../../..';
+import { useAssistantContext, type Conversation } from '../../../..';
 import * as i18n from './translations';
 import * as i18nModel from '../../../connectorland/models/model_selector/translations';
 
@@ -33,6 +33,7 @@ import { getDefaultSystemPrompt } from '../../use_conversation/helpers';
 export interface ConversationSettingsEditorProps {
   allSystemPrompts: PromptResponse[];
   conversationSettings: Record<string, Conversation>;
+  currentUser?: User;
   conversationsSettingsBulkActions: ConversationsBulkActions;
   http: HttpSetup;
   isDisabled?: boolean;
@@ -50,13 +51,16 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
   ({
     allSystemPrompts,
     conversationsSettingsBulkActions,
+    currentUser,
     http,
     isDisabled = false,
     selectedConversation,
     setConversationsSettingsBulkActions,
   }) => {
+    const { settings } = useAssistantContext();
     const { data: connectors, isSuccess: areConnectorsFetched } = useLoadConnectors({
       http,
+      settings,
     });
     const [conversationUpdates, setConversationUpdates] =
       useState<Conversation>(selectedConversation);
@@ -308,18 +312,20 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
             />
           </EuiFormRow>
         )}
-        <EuiFormRow
-          data-test-subj="shared-field"
-          display="rowCompressed"
-          fullWidth
-          label={i18n.SHARING_OPTIONS}
-        >
-          <ShareSelect
-            selectedConversation={selectedConversation}
-            onSharedSelectionChange={handleOnSharedSelectionChange}
-            onUsersUpdate={handleUsersUpdate}
-          />
-        </EuiFormRow>
+        {currentUser && (
+          <EuiFormRow
+            data-test-subj="shared-field"
+            display="rowCompressed"
+            fullWidth
+            label={i18n.SHARING_OPTIONS}
+          >
+            <ShareSelect
+              selectedConversation={selectedConversation}
+              onSharedSelectionChange={handleOnSharedSelectionChange}
+              onUsersUpdate={handleUsersUpdate}
+            />
+          </EuiFormRow>
+        )}
       </>
     );
   }

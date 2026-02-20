@@ -30,7 +30,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     beforeEach(async () => {
       await dashboard.navigateToApp(); // required for svl until dashboard PO navigation is fixed
-      await dashboard.gotoDashboardEditMode('Convert to Lens - TSVB - Metric');
+      await dashboard.loadDashboardInEditMode('Convert to Lens - TSVB - Metric');
       await timePicker.setDefaultAbsoluteRange();
     });
 
@@ -51,7 +51,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await lens.waitForVisualization('mtrVis');
 
       await retry.try(async () => {
-        expect(await lens.getLayerCount()).to.be(1);
+        await lens.assertLayerCount(1);
 
         const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
         expect(dimensions).to.have.length(1);
@@ -64,7 +64,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await lens.waitForVisualization('mtrVis');
 
       await retry.try(async () => {
-        expect(await lens.getLayerCount()).to.be(1);
+        await lens.assertLayerCount(1);
 
         const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
         expect(dimensions).to.have.length(1);

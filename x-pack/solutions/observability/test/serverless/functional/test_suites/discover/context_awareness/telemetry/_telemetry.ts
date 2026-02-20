@@ -31,7 +31,8 @@ export default function ({ getService, getPageObjects }: ObservabilityTelemetryF
   const browser = getService('browser');
 
   describe('telemetry', () => {
-    describe('context', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/252235
+    describe.skip('context', () => {
       before(async () => {
         await svlCommonPage.loginAsAdmin();
         await esArchiver.loadIfNeeded(
@@ -88,7 +89,7 @@ export default function ({ getService, getPageObjects }: ObservabilityTelemetryF
         ]);
 
         // should reset the profiles when navigating away from Discover
-        await common.navigateToApp('home');
+        await testSubjects.click('logo');
         await retry.waitFor('home page to open', async () => {
           return await testSubjects.exists('homeApp');
         });
@@ -115,7 +116,7 @@ export default function ({ getService, getPageObjects }: ObservabilityTelemetryF
         await dashboard.waitForRenderComplete();
         const rows = await dataGrid.getDocTableRows();
         expect(rows.length).to.be.above(0);
-        await testSubjects.click('dashboardEditorMenuButton');
+        await dashboardAddPanel.openAddPanelFlyout();
 
         const events = await ebtUIHelper.getEvents(Number.MAX_SAFE_INTEGER, {
           eventTypes: ['click'],
@@ -129,7 +130,8 @@ export default function ({ getService, getPageObjects }: ObservabilityTelemetryF
       });
     });
 
-    describe('contextual profiles', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/252793
+    describe.skip('contextual profiles', () => {
       before(async () => {
         await esArchiver.loadIfNeeded(
           'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
@@ -240,7 +242,8 @@ export default function ({ getService, getPageObjects }: ObservabilityTelemetryF
       });
     });
 
-    describe('events', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/252799
+    describe.skip('events', () => {
       beforeEach(async () => {
         await common.navigateToApp('discover');
         await header.waitUntilLoadingHasFinished();

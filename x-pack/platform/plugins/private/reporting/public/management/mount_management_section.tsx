@@ -11,14 +11,13 @@ import ReactDOM from 'react-dom';
 import type { CoreStart, NotificationsStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import type { ClientConfigType, ReportingAPIClient, KibanaContext } from '@kbn/reporting-public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { InternalApiClientProvider } from '@kbn/reporting-public';
 import type { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
-import { QueryClientProvider } from '@tanstack/react-query';
+import { QueryClientProvider } from '@kbn/react-query';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import { Redirect } from 'react-router-dom';
@@ -60,6 +59,7 @@ export async function mountManagementSection({
     license$,
     actions: actionsService,
     notifications: notificationsService,
+    userProfile: coreStart.userProfile,
   };
   const sections: Section[] = ['exports', 'schedules'];
   const { element, history } = params;
@@ -67,7 +67,7 @@ export async function mountManagementSection({
   const sectionsRegex = sections.join('|');
 
   ReactDOM.render(
-    <KibanaRenderContextProvider {...coreStart}>
+    coreStart.rendering.addContext(
       <KibanaContextProvider services={services}>
         <InternalApiClientProvider apiClient={apiClient} http={coreStart.http}>
           <PolicyStatusContextProvider config={config}>
@@ -91,7 +91,7 @@ export async function mountManagementSection({
           </PolicyStatusContextProvider>
         </InternalApiClientProvider>
       </KibanaContextProvider>
-    </KibanaRenderContextProvider>,
+    ),
     element
   );
 

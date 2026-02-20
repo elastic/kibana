@@ -183,7 +183,7 @@ function SummaryMetric({
     <EuiFlexItem grow={false}>
       {tooltipContent ? (
         <EuiToolTip content={tooltipContent}>
-          <EuiText size="s" color="subdued">
+          <EuiText size="s" color="subdued" tabIndex={0}>
             {label} <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
           </EuiText>
         </EuiToolTip>

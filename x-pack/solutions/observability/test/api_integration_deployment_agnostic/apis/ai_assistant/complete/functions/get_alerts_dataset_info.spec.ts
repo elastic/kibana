@@ -9,7 +9,7 @@ import type { MessageAddEvent } from '@kbn/observability-ai-assistant-plugin/com
 import { MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import expect from '@kbn/expect';
 import { ApmRuleType } from '@kbn/rule-data-utils';
-import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
 import type { InternalRequestHeader, RoleCredentials } from '@kbn/ftr-common-functional-services';
 import { last } from 'lodash';
 import { GET_RELEVANT_FIELD_NAMES_SYSTEM_MESSAGE } from '@kbn/observability-ai-assistant-plugin/server/functions/get_dataset_info/get_relevant_field_names';

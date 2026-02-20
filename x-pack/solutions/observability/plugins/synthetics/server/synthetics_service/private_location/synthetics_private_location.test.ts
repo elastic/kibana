@@ -11,6 +11,7 @@ import { MonitorTypeEnum, ScheduleUnit, SourceType } from '../../../common/runti
 import { SyntheticsPrivateLocation } from './synthetics_private_location';
 import { testMonitorPolicy } from './test_policy';
 import { formatSyntheticsPolicy } from '../formatters/private_formatters/format_synthetics_policy';
+import { handleMultilineStringFormatter } from '../formatters/formatting_utils';
 import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 import type { SyntheticsServerSetup } from '../../types';
 import type { PrivateLocationAttributes } from '../../runtime_types/private_locations';
@@ -67,6 +68,7 @@ describe('SyntheticsPrivateLocation', () => {
         bulkCreate: jest.fn(),
         getByIDs: jest.fn(),
       },
+      runWithCache: async (cb: any) => await cb(),
     },
     spaces: {
       spacesService: {
@@ -176,6 +178,9 @@ describe('SyntheticsPrivateLocation', () => {
   });
 
   it('formats monitors stream properly', () => {
+    const expectedInlineSource = Buffer.from(
+      handleMultilineStringFormatter(dummyBrowserConfig['source.inline.script'] as string)
+    ).toString('base64');
     const test = formatSyntheticsPolicy(
       testMonitorPolicy,
       MonitorTypeEnum.BROWSER,
@@ -184,7 +189,7 @@ describe('SyntheticsPrivateLocation', () => {
       []
     );
 
-    expect(test.formattedPolicy.inputs[0].streams[1]).toStrictEqual({
+    expect(test.formattedPolicy.inputs[3].streams[1]).toStrictEqual({
       data_stream: {
         dataset: 'browser',
         type: 'synthetics',
@@ -246,8 +251,11 @@ describe('SyntheticsPrivateLocation', () => {
         },
         'source.inline.script': {
           type: 'yaml',
-          value:
-            "\"step('Go to https://www.elastic.co/', async () => {\\n  await page.goto('https://www.elastic.co/');\\n});\"",
+          value: expectedInlineSource,
+        },
+        'source.inline.encoding': {
+          type: 'text',
+          value: 'base64',
         },
         synthetics_args: {
           type: 'text',

@@ -23,23 +23,19 @@ import type {
   TypedLensByValueInput,
   PersistedIndexPatternLayer,
   XYState,
-  FormulaPublicApi,
   DateHistogramIndexPatternColumn,
+  FormulaIndexPatternColumn,
 } from '@kbn/lens-plugin/public';
 
 import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
-import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-plugin/common/constants';
+import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
 import type { StartDependencies } from './plugin';
 
 // Generate a Lens state based on some app-specific input parameters.
 // `TypedLensByValueInput` can be used for type-safety - it uses the same interfaces as Lens-internal code.
-function getLensAttributes(
-  color: string,
-  dataView: DataView,
-  formula: FormulaPublicApi
-): TypedLensByValueInput['attributes'] {
-  const baseLayer: PersistedIndexPatternLayer = {
-    columnOrder: ['col1'],
+function getLensAttributes(color: string, dataView: DataView): TypedLensByValueInput['attributes'] {
+  const dataLayer: PersistedIndexPatternLayer = {
+    columnOrder: ['col1', 'col2'],
     columns: {
       col1: {
         dataType: 'date',
@@ -50,15 +46,17 @@ function getLensAttributes(
         scale: 'interval',
         sourceField: dataView.timeFieldName!,
       } as DateHistogramIndexPatternColumn,
+      col2: {
+        dataType: 'number',
+        isBucketed: false,
+        label: 'count()',
+        operationType: 'formula',
+        params: {
+          formula: 'count()',
+        },
+      } as FormulaIndexPatternColumn,
     },
   };
-
-  const dataLayer = formula.insertOrReplaceFormulaColumn(
-    'col2',
-    { formula: 'count()' },
-    baseLayer,
-    dataView
-  );
 
   const xyConfig: XYState = {
     axisTitlesVisibilitySettings: { x: true, yLeft: true, yRight: true },
@@ -115,7 +113,6 @@ export const App = (props: {
   core: CoreStart;
   plugins: StartDependencies;
   defaultDataView: DataView;
-  formula: FormulaPublicApi;
 }) => {
   const [color, setColor] = useState('green');
   const [isLoading, setIsLoading] = useState(false);
@@ -131,7 +128,7 @@ export const App = (props: {
   const LensComponent = props.plugins.lens.EmbeddableComponent;
   const LensSaveModalComponent = props.plugins.lens.SaveModalComponent;
 
-  const attributes = getLensAttributes(color, props.defaultDataView, props.formula);
+  const attributes = getLensAttributes(color, props.defaultDataView);
 
   return (
     <EuiPage>

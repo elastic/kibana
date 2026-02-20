@@ -10,6 +10,7 @@ import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 const LOADED_RULE_ID = '74f3e6d7-b7bb-477d-ac28-92ee22728e6e';
+const STUCK_RULE_ID = 'd7f3cca6-e2aa-4921-aee8-12d2ad3873ca';
 
 export default function createRunSoonTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -71,6 +72,21 @@ export default function createRunSoonTests({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'foo');
         expect(runSoonResponse.status).to.eql(204);
       });
+    });
+
+    it('should successfully run rule where task is stuck in a running status', async () => {
+      // try running without forcing
+      const runSoonResponse = await supertest
+        .post(`${getUrlPrefix(``)}/internal/alerting/rule/${STUCK_RULE_ID}/_run_soon`)
+        .set('kbn-xsrf', 'foo');
+      expect(runSoonResponse.status).to.eql(200);
+      expect(runSoonResponse.text).to.eql(`Rule is already running`);
+
+      // now try running with force = true
+      const runSoonForcedResponse = await supertest
+        .post(`${getUrlPrefix(``)}/internal/alerting/rule/${STUCK_RULE_ID}/_run_soon?force=true`)
+        .set('kbn-xsrf', 'foo');
+      expect(runSoonForcedResponse.status).to.eql(204);
     });
 
     it('should return message when task does not exist for rule', async () => {

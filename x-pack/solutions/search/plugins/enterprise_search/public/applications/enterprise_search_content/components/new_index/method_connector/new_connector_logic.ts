@@ -34,7 +34,7 @@ import { CONNECTOR_DETAIL_TAB_PATH } from '../../../routes';
 import type { ConnectorViewActions } from '../../connector_detail/connector_view_logic';
 import { ConnectorViewLogic } from '../../connector_detail/connector_view_logic';
 import type { ConnectorCreationSteps } from '../../connectors/create_connector/create_connector';
-import { SearchIndexTabId } from '../../search_index/search_index';
+import { SearchIndexTabId } from '../../search_index/constants';
 
 export interface NewConnectorValues {
   canConfigureConnector: boolean;

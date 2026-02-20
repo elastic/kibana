@@ -16,11 +16,12 @@ import { createCommonUpdateUserActionBuilder } from '../common';
 import type { AttachmentUI } from '../../../containers/types';
 import * as i18n from './translations';
 import { createUserAttachmentUserActionBuilder } from './user';
-import { createAlertAttachmentUserActionBuilder } from './alert';
-import { createActionAttachmentUserActionBuilder } from './actions';
+import { createAlertAttachmentUserActionBuilder } from '../../attachments/alert/alert';
+import { createActionAttachmentUserActionBuilder } from '../../attachments/host_isolation/actions';
 import { createExternalReferenceAttachmentUserActionBuilder } from './external_reference';
 import { createPersistableStateAttachmentUserActionBuilder } from './persistable_state';
 import type { AttachmentType as AttachmentFrameworkAttachmentType } from '../../../client/attachment_framework/types';
+import { createEventAttachmentUserActionBuilder } from '../../attachments/event/event';
 
 const getUpdateLabelTitle = () => `${i18n.EDITED_FIELD} ${i18n.COMMENT.toLowerCase()}`;
 
@@ -206,6 +207,18 @@ const getCreateCommentUserAction = ({
       });
 
       return alertBuilder.build();
+
+    case AttachmentType.event:
+      const eventBuilder = createEventAttachmentUserActionBuilder({
+        userProfiles,
+        attachment,
+        userAction,
+        onShowAlertDetails,
+        handleDeleteComment,
+        loadingCommentIds,
+      });
+
+      return eventBuilder.build();
 
     case AttachmentType.actions:
       const actionBuilder = createActionAttachmentUserActionBuilder({

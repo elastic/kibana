@@ -8,7 +8,9 @@ paths-ignore:
   - '**/.storybook/**'
   - '**/*-mocks/**'
   - '**/*.cy.*'
+  - '**/*.md'
   - '**/*.yaml'
+  - '**/*.yml'
   - '**/*.hbs'
   - '**/*.njk'
   - '**/*.mock.*'
@@ -32,6 +34,7 @@ paths-ignore:
   - '**/test_helpers/**'
   - '**/test-helpers/**'
   - '**/test_utils/**'
+  - '.github/codeql/custom-queries/**'
   - api_docs
   - dev_docs
   - docs
@@ -99,7 +102,7 @@ paths-ignore:
   - src/platform/packages/private/kbn-some-dev-log
   - src/platform/packages/private/kbn-stdio-dev-helpers
   - src/platform/packages/private/kbn-telemetry-tools
-  - src/platform/packages/shared/kbn-apm-synthtrace
+  - src/platform/packages/shared/kbn-synthtrace
   - src/platform/packages/shared/kbn-axe-config
   - src/platform/packages/shared/kbn-cache-cli
   - src/platform/packages/shared/kbn-dev-cli-errors
@@ -136,3 +139,7 @@ query-filters:
       paths:
         - codeql/javascript-queries/AngularJS
         - codeql/javascript-queries/Electron
+packs:
+  - githubsecuritylab/codeql-javascript-queries
+queries:
+  - uses: ./.github/codeql/custom-queries

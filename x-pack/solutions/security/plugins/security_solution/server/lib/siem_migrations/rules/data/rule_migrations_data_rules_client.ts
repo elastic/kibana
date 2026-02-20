@@ -13,6 +13,7 @@ import type {
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { estypes } from '@elastic/elasticsearch';
+import type { SiemMigrationVendor } from '../../../../../common/siem_migrations/model/common.gen';
 import type { RuleMigrationFilters } from '../../../../../common/siem_migrations/rules/types';
 import { SiemMigrationStatus } from '../../../../../common/siem_migrations/constants';
 import {
@@ -38,6 +39,11 @@ export type RuleMigrationGetRulesOptions = SiemMigrationGetItemsOptions<RuleMigr
 export class RuleMigrationsDataRulesClient extends SiemMigrationsDataItemClient<RuleMigrationRule> {
   protected type = 'rule' as const;
 
+  public async getVendor(migrationId: string): Promise<SiemMigrationVendor | undefined> {
+    const { data: rules } = await this.get(migrationId, { size: 1 });
+    return rules.length > 0 ? rules[0].original_rule.vendor : undefined;
+  }
+
   /** Retrieves the translation stats for the rule migrations with the provided id */
   public async getTranslationStats(migrationId: string): Promise<RuleMigrationTranslationStats> {
     const index = await this.getIndexName();
@@ -48,7 +54,7 @@ export class RuleMigrationsDataRulesClient extends SiemMigrationsDataItemClient<
         filter: { term: { status: SiemMigrationStatus.COMPLETED } },
         aggs: {
           result: { terms: { field: 'translation_result' } },
-          installable: { filter: { bool: { must: dsl.isInstallable() } } },
+          installable: { filter: dsl.isInstallable() },
           prebuilt: { filter: dsl.isPrebuilt() },
           missing_index: { filter: dsl.isMissingIndex() },
         },
@@ -120,11 +126,14 @@ export class RuleMigrationsDataRulesClient extends SiemMigrationsDataItemClient<
     if (filters.searchTerm?.length) {
       filter.push(dsl.matchTitle(filters.searchTerm));
     }
+    if (filters.titles?.length) {
+      filter.push(dsl.matchTitles(filters.titles));
+    }
     if (filters.installed != null) {
       filter.push(filters.installed ? dsl.isInstalled() : dsl.isNotInstalled());
     }
     if (filters.installable != null) {
-      filter.push(...(filters.installable ? dsl.isInstallable() : dsl.isNotInstallable()));
+      filter.push(filters.installable ? dsl.isInstallable() : dsl.isNotInstallable());
     }
     if (filters.prebuilt != null) {
       filter.push(filters.prebuilt ? dsl.isPrebuilt() : dsl.isCustom());

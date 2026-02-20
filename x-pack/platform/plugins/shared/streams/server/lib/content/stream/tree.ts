@@ -7,10 +7,8 @@
 
 import { isEqual } from 'lodash';
 import type { ContentPackIncludedObjects, ContentPackStream } from '@kbn/content-packs-schema';
-import type { FieldDefinition } from '@kbn/streams-schema';
-import { filterQueries, filterRouting, includedObjectsFor } from './helpers';
+import { filterQueries, filterRouting, getFields, includedObjectsFor } from './helpers';
 import { ContentPackConflictError } from '../error';
-import { baseFields } from '../../streams/component_templates/logs_layer';
 
 export type StreamTree = ContentPackStream & {
   children: StreamTree[];
@@ -42,6 +40,7 @@ export function asTree({
           ...stream.request.stream.ingest,
           wired: {
             ...stream.request.stream.ingest.wired,
+            fields: getFields(stream, include),
             routing,
           },
         },
@@ -77,12 +76,7 @@ export function mergeTrees({
   ];
   const mergedFields = {
     ...existing.request.stream.ingest.wired.fields,
-    ...Object.keys(incoming.request.stream.ingest.wired.fields)
-      .filter((field) => !baseFields[field])
-      .reduce((fields, field) => {
-        fields[field] = incoming.request.stream.ingest.wired.fields[field];
-        return fields;
-      }, {} as FieldDefinition),
+    ...incoming.request.stream.ingest.wired.fields,
   };
   const mergedQueries = [...existing.request.queries, ...incoming.request.queries];
   const mergedChildren = [...existing.children, ...incoming.children];

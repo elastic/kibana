@@ -11,6 +11,7 @@ import type { PolicyConfig } from '../endpoint/types';
 import {
   DefaultPolicyNotificationMessage,
   DefaultPolicyRuleNotificationMessage,
+  DefaultPolicyDeviceNotificationMessage,
   policyFactoryWithoutPaidEnterpriseFeatures,
   policyFactoryWithoutPaidFeatures,
   policyFactoryWithSupportedFeatures,
@@ -262,7 +263,7 @@ function isEndpointDeviceControlPolicyValidForLicense(
     }
     if (
       policy.windows.popup.device_control.message !== '' &&
-      policy.windows.popup.device_control.message !== DefaultPolicyRuleNotificationMessage
+      policy.windows.popup.device_control.message !== DefaultPolicyDeviceNotificationMessage
     ) {
       return false;
     }
@@ -278,7 +279,7 @@ function isEndpointDeviceControlPolicyValidForLicense(
     }
     if (
       policy.mac.popup.device_control.message !== '' &&
-      policy.mac.popup.device_control.message !== DefaultPolicyRuleNotificationMessage
+      policy.mac.popup.device_control.message !== DefaultPolicyDeviceNotificationMessage
     ) {
       return false;
     }

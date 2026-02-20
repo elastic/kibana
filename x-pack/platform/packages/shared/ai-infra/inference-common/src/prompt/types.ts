@@ -98,7 +98,7 @@ export interface Prompt<TInput = any, TPromptVersions extends PromptVersion[] = 
   /**
    * A human-readable description of what the prompt does. Used for evaluations.
    */
-  description: string;
+  description?: string;
   /**
    * A zod schema that will validate and transform the input variables for a prompt.
    */
@@ -130,8 +130,6 @@ export type ToolOptionsOfPrompt<TPrompt extends Prompt> = TPrompt['versions'] ex
   infer TPromptVersion
 >
   ? TPromptVersion extends PromptVersion
-    ? TPromptVersion extends { tools?: ToolDefinitions }
-      ? Pick<TPromptVersion, 'tools'>
-      : {}
+    ? Pick<TPromptVersion, 'tools'>
     : {}
   : {};

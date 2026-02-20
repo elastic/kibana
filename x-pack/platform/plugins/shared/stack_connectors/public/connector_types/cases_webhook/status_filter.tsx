@@ -61,6 +61,7 @@ export const StatusFilter: React.FC<Props> = ({ selectedStatus, onStatusChanged 
       onChange={onStatusChanged}
       data-test-subj="case-status-filter"
       fullWidth={true}
+      aria-label={i18n.CASE_STATUS_ARIA_LABEL}
     />
   );
 };

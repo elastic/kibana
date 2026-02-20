@@ -26,11 +26,13 @@ import { getStatusFilter } from './utils/get_status_filter';
 import type { SearchUsageCollector } from '../../../../collectors';
 import type { SearchSessionsConfigSchema } from '../../../../../../server/config';
 import { mapToUISession } from './utils/map_to_ui_session';
+import type { ISearchSessionEBTManager } from '../../../ebt_manager';
 
 interface Props {
   core: CoreStart;
   locators: LocatorsStart;
   api: SearchSessionsMgmtAPI;
+  searchSessionEBTManager: ISearchSessionEBTManager;
   timezone: string;
   config: SearchSessionsConfigSchema;
   kibanaVersion: string;
@@ -48,6 +50,7 @@ interface Props {
     onActionComplete: OnActionComplete;
     onBackgroundSearchOpened?: BackgroundSearchOpenedHandler;
   }) => Array<EuiBasicTableColumn<UISession>>;
+  trackingProps: { openedFrom: string; renderedIn: string };
 }
 
 export type GetColumnsFn = Props['getColumns'];
@@ -58,12 +61,14 @@ export function SearchSessionsMgmtTable({
   api,
   timezone,
   config,
+  searchSessionEBTManager,
   kibanaVersion,
   searchUsageCollector,
   hideRefreshButton = false,
   getColumns = getDefaultColumns,
   appId,
   onBackgroundSearchOpened,
+  trackingProps,
   ...props
 }: Props) {
   const [tableData, setTableData] = useState<UISession[]>([]);
@@ -93,6 +98,10 @@ export function SearchSessionsMgmtTable({
     [isLoading]
   );
 
+  useEffect(() => {
+    searchSessionEBTManager.trackBgsListView({ entryPoint: trackingProps.openedFrom });
+  }, [searchSessionEBTManager, trackingProps.openedFrom]);
+
   // refresh behavior
   const doRefresh = useCallback(async () => {
     if (refreshTimeoutRef.current) {
@@ -111,7 +120,11 @@ export function SearchSessionsMgmtTable({
       try {
         const { savedObjects, statuses } = await api.fetchTableData({ appId });
         results = savedObjects.map((savedObject) =>
-          mapToUISession({ savedObject, locators, sessionStatuses: statuses })
+          mapToUISession({
+            savedObject,
+            locators,
+            sessionStatuses: statuses,
+          })
         );
       } catch (e) {} // eslint-disable-line no-empty
 
@@ -148,7 +161,13 @@ export function SearchSessionsMgmtTable({
     onActionComplete,
     kibanaVersion,
     searchUsageCollector,
-    onBackgroundSearchOpened,
+    onBackgroundSearchOpened: (attrs) => {
+      searchSessionEBTManager.trackBgsOpened({
+        session: attrs.session,
+        resumeSource: trackingProps.renderedIn,
+      });
+      onBackgroundSearchOpened?.(attrs);
+    },
   });
 
   const filters = useMemo(() => {

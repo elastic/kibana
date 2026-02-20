@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { apm, timerange, infra, generateShortId, log } from '@kbn/apm-synthtrace-client';
+import { apm, timerange, infra, generateShortId, log } from '@kbn/synthtrace-client';
 
 const SERVICE_PREFIX = 'service';
 // generates traces, metrics for services

@@ -7,11 +7,17 @@
 import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { ChartType, mapVisToChartType } from '@kbn/visualization-utils';
+import { hasTransformationalCommand } from '@kbn/esql-utils';
+import type {
+  DatasourceMap,
+  VisualizationMap,
+  VisualizeEditorContext,
+  Suggestion,
+  DataViewsState,
+  TypedLensByValueInput,
+} from '@kbn/lens-common';
 import { getSuggestions } from '../editor_frame_service/editor_frame/suggestion_helpers';
-import type { DatasourceMap, VisualizationMap, VisualizeEditorContext, Suggestion } from '../types';
-import type { DataViewsState } from '../state_management';
-import type { TypedLensByValueInput } from '../react_embeddable/types';
-import { mergeSuggestionWithVisContext } from './helpers';
+import { mergeSuggestionWithVisContext, switchVisualizationType } from './helpers';
 
 interface SuggestionsApiProps {
   context: VisualizeFieldContext | VisualizeEditorContext;
@@ -79,6 +85,11 @@ export const suggestionsApi = ({
   } as unknown as DataViewsState;
 
   const initialVisualization = visualizationMap?.[Object.keys(visualizationMap)[0]] || null;
+  const isInitialSubTypeSupported = preferredChartType
+    ? initialVisualization?.isSubtypeSupported?.(preferredChartType.toLowerCase())
+    : undefined;
+
+  const query = 'query' in context ? context.query : undefined;
 
   // find the active visualizations from the context
   const suggestions = getSuggestions({
@@ -88,14 +99,17 @@ export const suggestionsApi = ({
     activeVisualization: initialVisualization,
     visualizationState: undefined,
     visualizeTriggerFieldContext: context,
+    subVisualizationId: isInitialSubTypeSupported ? preferredChartType?.toLowerCase() : undefined,
     dataViews,
+    query,
   });
   if (!suggestions.length) return [];
 
-  const activeVisualization = suggestions[0];
+  const primarySuggestion = suggestions[0];
+  const activeVisualization = visualizationMap[primarySuggestion.visualizationId];
   if (
-    activeVisualization.incomplete ||
-    excludedVisualizations?.includes(activeVisualization.visualizationId)
+    primarySuggestion.incomplete ||
+    excludedVisualizations?.includes(primarySuggestion.visualizationId)
   ) {
     return [];
   }
@@ -105,13 +119,14 @@ export const suggestionsApi = ({
     datasourceStates: {
       textBased: {
         isLoading: false,
-        state: activeVisualization.datasourceState,
+        state: primarySuggestion.datasourceState,
       },
     },
     visualizationMap,
-    activeVisualization: visualizationMap[activeVisualization.visualizationId],
-    visualizationState: activeVisualization.visualizationState,
+    activeVisualization,
+    visualizationState: primarySuggestion.visualizationState,
     dataViews,
+    query,
   }).filter(
     (sug) =>
       // Datatables are always return as hidden suggestions
@@ -122,25 +137,26 @@ export const suggestionsApi = ({
       (!sug.hide && sug.visualizationId !== 'lnsLegacyMetric')
   );
 
-  // check if there is an XY chart suggested
-  // if user has requested for a line or area, we want to sligthly change the state
-  // to return line / area instead of a bar chart
   const chartType = preferredChartType?.toLowerCase();
-  const XYSuggestion = newSuggestions.find((s) => s.visualizationId === 'lnsXY');
-  // a type can be area, line, area_stacked, area_percentage etc
-  const isAreaOrLine = ['area', 'line'].some((type) => chartType?.includes(type));
-  if (XYSuggestion && chartType && isAreaOrLine) {
-    const visualizationState = visualizationMap[
-      XYSuggestion.visualizationId
-    ]?.switchVisualizationType?.(chartType, XYSuggestion?.visualizationState);
 
-    return [
-      {
-        ...XYSuggestion,
-        visualizationState,
-      },
-    ];
-  }
+  const xyResult = switchVisualizationType({
+    visualizationMap,
+    suggestions: newSuggestions,
+    targetTypeId: chartType,
+    familyType: 'lnsXY',
+    forceSwitch: ['area', 'line'].some((type) => chartType?.includes(type)),
+  });
+  if (xyResult) return xyResult;
+
+  // to return a donut instead of a pie chart
+  const pieResult = switchVisualizationType({
+    visualizationMap,
+    suggestions: newSuggestions,
+    targetTypeId: chartType,
+    familyType: 'lnsPie',
+    forceSwitch: preferredChartType === ChartType.Donut,
+  });
+  if (pieResult) return pieResult;
 
   const chartTypeFromAttrs = preferredVisAttributes
     ? mapVisToChartType(preferredVisAttributes.visualizationType)
@@ -148,9 +164,26 @@ export const suggestionsApi = ({
 
   const targetChartType = preferredChartType ?? chartTypeFromAttrs;
 
+  // However, for ESQL queries without transformational commands, prefer datatable
+  const hasTransformations = query ? hasTransformationalCommand(query.esql) : true;
+
   // in case the user asks for another type (except from area, line) check if it exists
   // in suggestions and return this instead
-  const suggestionsList = [activeVisualization, ...newSuggestions];
+  const suggestionsList = [primarySuggestion, ...newSuggestions]
+    .filter((s) => {
+      // if we only have non-transformed ESQL, suggest only table
+      if (!hasTransformations) {
+        return s.visualizationId === 'lnsDatatable';
+      }
+      return true;
+    })
+    .sort((a, b) => {
+      // If has transformations, prioritize lnsXY
+      if (a.visualizationId === 'lnsXY' && b.visualizationId !== 'lnsXY') return -1;
+      if (a.visualizationId !== 'lnsXY' && b.visualizationId === 'lnsXY') return 1;
+      // Both are same type, sort by score
+      return b.score - a.score;
+    });
 
   // Handle preferred chart type logic
   if (targetChartType) {
@@ -172,7 +205,6 @@ export const suggestionsApi = ({
     // Skip if user hasn't changed chart type, has multiple suggestions, and wants table
     const shouldSkipSearch =
       !preferredChartType && suggestionsList.length > 1 && targetChartType === ChartType.Table;
-
     if (!shouldSkipSearch) {
       const compatibleSuggestion = findCompatibleSuggestion(suggestionsList, targetChartType);
       const selectedSuggestion = compatibleSuggestion ?? suggestionsList[0];
@@ -181,9 +213,5 @@ export const suggestionsApi = ({
     }
   }
 
-  // if there is no preference from the user, send everything
-  // until we separate the text based suggestions logic from the dataview one,
-  // we want to sort XY first
-  const sortXYFirst = suggestionsList.sort((a, b) => (a.visualizationId === 'lnsXY' ? -1 : 1));
-  return sortXYFirst;
+  return suggestionsList;
 };

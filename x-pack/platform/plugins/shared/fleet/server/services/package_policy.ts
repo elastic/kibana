@@ -29,15 +29,15 @@ import { v4 as uuidv4 } from 'uuid';
 import { load } from 'js-yaml';
 import semverGt from 'semver/functions/gt';
 
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
+import { ALL_SPACES_ID, DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
 import pMap from 'p-map';
 
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 
-import { catchAndSetErrorStackTrace } from '../errors/utils';
+import apm from 'elastic-apm-node';
 
-import { HTTPAuthorizationHeader } from '../../common/http_authorization_header';
+import { catchAndSetErrorStackTrace, rethrowIfInstanceOrWrap } from '../errors/utils';
 
 import {
   packageToPackagePolicy,
@@ -49,6 +49,8 @@ import {
   getNormalizedDataStreams,
   getNormalizedInputs,
   isRootPrivilegesRequired,
+  checkIntegrationFipsLooseCompatibility,
+  varsReducer,
 } from '../../common/services';
 import {
   SO_SEARCH_LIMIT,
@@ -57,7 +59,6 @@ import {
   LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   DATA_STREAM_TYPE_VAR_NAME,
-  OTEL_COLLECTOR_INPUT_TYPE,
 } from '../../common/constants';
 import type {
   PostDeletePackagePoliciesResponse,
@@ -73,10 +74,22 @@ import type {
   RegistryDataStream,
   Installation,
   DeletePackagePoliciesResponse,
-  PolicySecretReference,
+  SecretReference,
   AgentPolicy,
   PackagePolicyAssetsMap,
+  PreconfiguredInputs,
+  CloudProvider,
+  CloudConnector,
+  CloudConnectorVars,
+  CloudConnectorSecretVar,
+  AwsCloudConnectorVars,
+  PackagePolicyConfigRecord,
+  ArchiveEntry,
 } from '../../common/types';
+import type {
+  AzureCloudConnectorVars,
+  CloudConnectorVar,
+} from '../../common/types/models/cloud_connector';
 import {
   FleetError,
   fleetErrorToResponseOptions,
@@ -91,6 +104,9 @@ import {
   StreamNotFoundError,
   FleetNotFoundError,
   PackageRollbackError,
+  CloudConnectorInvalidVarsError,
+  CloudConnectorCreateError,
+  CloudConnectorUpdateError,
 } from '../errors';
 import { NewPackagePolicySchema, PackagePolicySchema, UpdatePackagePolicySchema } from '../types';
 import type {
@@ -102,6 +118,7 @@ import type {
   PostPackagePolicyCreateCallback,
   PostPackagePolicyPostCreateCallback,
   PutPackagePolicyPostUpdateCallback,
+  AssetsMap,
 } from '../types';
 import type { ExternalCallback } from '..';
 
@@ -111,7 +128,21 @@ import {
   MAX_CONCURRENT_PACKAGE_ASSETS,
 } from '../constants';
 
-import { validateDeploymentModesForInputs } from '../../common/services/agentless_policy_helper';
+import {
+  validateDeploymentModesForInputs,
+  isAgentlessIntegration,
+} from '../../common/services/agentless_policy_helper';
+
+import {
+  AWS_CREDENTIALS_EXTERNAL_ID_VAR_NAME,
+  AWS_ROLE_ARN_VAR_NAME,
+  AZURE_TENANT_ID_VAR_NAME,
+  AZURE_CLIENT_ID_VAR_NAME,
+  AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID_VAR_NAME,
+  TENANT_ID_VAR_NAME,
+  CLIENT_ID_VAR_NAME,
+  AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID,
+} from '../../common/constants/cloud_connector';
 
 import { createSoFindIterable } from './utils/create_so_find_iterable';
 
@@ -122,9 +153,9 @@ import { getAuthzFromRequest, doesNotHaveRequiredFleetAuthz } from './security';
 import { agentPolicyService, getAgentPolicySavedObjectType } from './agent_policy';
 import { getPackageInfo, ensureInstalledPackage, getInstallationObject } from './epm/packages';
 import { getAssetsDataFromAssetsMap } from './epm/packages/assets';
-import { compileTemplate } from './epm/agent/agent';
+import { compileTemplate, getMetaVariables } from './epm/agent/agent';
 import { escapeSearchQueryPhrase, normalizeKuery } from './saved_object';
-import { appContextService } from '.';
+import { appContextService, cloudConnectorService } from '.';
 import { removeOldAssets } from './epm/packages/cleanup';
 import type { PackageUpdateEvent, UpdateEventType } from './upgrade_sender';
 import { sendTelemetryEvents } from './upgrade_sender';
@@ -137,6 +168,7 @@ import {
 import type {
   PackagePolicyClient,
   PackagePolicyClientBulkUpdateOptions,
+  PackagePolicyClientDeleteOptions,
   PackagePolicyClientFetchAllItemsOptions,
   PackagePolicyClientFindAllForAgentPolicyOptions,
   PackagePolicyClientGetByIdsOptions,
@@ -156,6 +188,7 @@ import {
   deleteSecretsIfNotReferenced as deleteSecrets,
   isSecretStorageEnabled,
 } from './secrets';
+import { extractAccountType } from './cloud_connectors/integration_helpers';
 import { getAgentTemplateAssetsMap } from './epm/packages/get';
 import { validateAgentPolicyOutputForIntegration } from './agent_policies/outputs_helpers';
 import type { PackagePolicyClientFetchAllItemIdsOptions } from './package_policy_service';
@@ -163,7 +196,12 @@ import {
   validateAdditionalDatastreamsPermissionsForSpace,
   validatePolicyNamespaceForSpace,
 } from './spaces/policy_namespaces';
-import { isSpaceAwarenessEnabled, isSpaceAwarenessMigrationPending } from './spaces/helpers';
+import {
+  getSpaceForPackagePolicy,
+  getSpaceForPackagePolicySO,
+  isSpaceAwarenessEnabled,
+  isSpaceAwarenessMigrationPending,
+} from './spaces/helpers';
 import { updatePackagePolicySpaces } from './spaces/package_policy';
 import {
   _packagePoliciesGetUpgradeDryRunDiff,
@@ -172,10 +210,19 @@ import {
 } from './package_policies/upgrade';
 
 import { getInputsWithIds } from './package_policies/get_input_with_ids';
+import { runWithCache } from './epm/packages/cache';
+import {
+  getAgentVersionsForVersionSpecificPolicies,
+  hasAgentVersionCondition,
+  hasAgentVersionConditionInInputTemplate,
+} from './utils/version_specific_policies';
+import { recompileInputsWithAgentVersion } from './agent_policies/package_policies_to_agent_inputs';
 
 export type InputsOverride = Partial<NewPackagePolicyInput> & {
   vars?: Array<NewPackagePolicyInput['vars'] & { name: string }>;
 };
+
+const ASYNC_DEPLOY_POLICIES_THRESHOLD = 100;
 
 async function getPkgInfoAssetsMap({
   savedObjectsClient,
@@ -235,6 +282,92 @@ export function _normalizePackagePolicyKuery(savedObjectType: string, kuery: str
   }
 }
 
+/**
+ * Validates package policy variables and extracts cloud connector configuration.
+ *
+ * Currently supports AWS cloud connector only. This function checks for both:
+ * - `aws.role_arn` and `aws.credentials.external_id` (CSPM and Asset Discovery)
+ * - `role_arn` and `external_id` (direct cloud connector variables)
+ *
+ * This is a temporary implementation pending the generic solution proposed by the
+ * Package Spec team. Once approved, this function should be updated to use the
+ * standardized approach.
+ *
+ * @see https://github.com/elastic/security-team/issues/13277#issuecomment-3245273903 for updates
+ * @todo Remove hardcoded checks for `aws.role_arn` and `aws.credentials.external_id`
+ *       and implement the generic Package Spec solution once approved.
+ */
+
+const extractPackagePolicyVars = (
+  cloudProvider: CloudProvider,
+  packagePolicy: NewPackagePolicy,
+  logger: Logger
+): CloudConnectorVars | undefined => {
+  logger.get('extract package policy vars');
+
+  if (packagePolicy.supports_cloud_connector && cloudProvider === 'aws') {
+    const vars = packagePolicy.inputs.find((input) => input.enabled)?.streams[0]?.vars;
+
+    if (!vars) {
+      logger.error('Package policy must contain vars');
+      throw new CloudConnectorInvalidVarsError('Package policy must contain vars');
+    }
+
+    const roleArn: string = vars.role_arn?.value || vars[AWS_ROLE_ARN_VAR_NAME]?.value;
+
+    if (roleArn) {
+      const externalId: CloudConnectorSecretVar = (
+        vars.external_id?.value?.isSecretRef
+          ? vars.external_id
+          : vars[AWS_CREDENTIALS_EXTERNAL_ID_VAR_NAME]
+      ) as CloudConnectorSecretVar;
+
+      const awsCloudConnectorVars: AwsCloudConnectorVars = {
+        role_arn: { type: 'text', value: roleArn },
+        external_id: externalId,
+      };
+
+      return awsCloudConnectorVars;
+    }
+  }
+
+  if (packagePolicy.supports_cloud_connector && cloudProvider === 'azure') {
+    const vars = packagePolicy.inputs.find((input) => input.enabled)?.streams[0]?.vars;
+
+    if (!vars) {
+      logger.error('Package policy must contain vars');
+      throw new CloudConnectorInvalidVarsError('Package policy must contain vars');
+    }
+
+    const tenantId = vars[TENANT_ID_VAR_NAME] || vars[AZURE_TENANT_ID_VAR_NAME];
+    const clientId = vars[CLIENT_ID_VAR_NAME] || vars[AZURE_CLIENT_ID_VAR_NAME];
+    const azureCredentials =
+      vars[AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID] ||
+      vars[AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID_VAR_NAME];
+
+    if (tenantId && clientId && azureCredentials) {
+      // Type assertions are needed because PackagePolicyConfigRecordEntry in packagePolicy.inputs.streams[0].vars has loose types (type?: string, value?: any)
+      // while CloudConnectorSecretVar/CloudConnectorVar in CloudConnectorVars expect specific literal types (type?: 'password' | 'text').
+      // Runtime validation occurs in cloudConnectorService.validateCloudConnectorDetails()
+      const azureCloudConnectorVars: AzureCloudConnectorVars = {
+        tenant_id: tenantId as CloudConnectorSecretVar,
+        client_id: clientId as CloudConnectorSecretVar,
+        azure_credentials_cloud_connector_id: azureCredentials as CloudConnectorVar,
+      };
+
+      logger.debug(
+        `Extracted Azure cloud connector vars: tenant_id=${!!tenantId}, client_id=${!!clientId}, azure_credentials=[REDACTED]`
+      );
+
+      return azureCloudConnectorVars;
+    } else {
+      logger.error(
+        `Missing required Azure vars: tenant_id=${!!tenantId}, client_id=${!!clientId}, azure_credentials=[REDACTED]`
+      );
+    }
+  }
+};
+
 class PackagePolicyClientImpl implements PackagePolicyClient {
   protected getLogger(...childContextPaths: string[]): Logger {
     return appContextService.getLogger().get('PackagePolicyClient', ...childContextPaths);
@@ -245,7 +378,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     esClient: ElasticsearchClient,
     packagePolicy: NewPackagePolicy,
     options: {
-      authorizationHeader?: HTTPAuthorizationHeader | null;
       spaceId?: string;
       id?: string;
       user?: AuthenticatedUser;
@@ -273,12 +405,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     const useSpaceAwareness = await isSpaceAwarenessEnabled();
     const packagePolicyId = options?.id || uuidv4();
 
-    let authorizationHeader = options.authorizationHeader;
-
-    if (!authorizationHeader && request) {
-      authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
-    }
-
     const savedObjectType = await getPackagePolicySavedObjectType();
     const basePkgInfo =
       options?.packageInfo ??
@@ -299,9 +425,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       savedObjectType,
     });
 
-    let secretReferences: PolicySecretReference[] | undefined;
+    let secretReferences: SecretReference[] | undefined;
 
     this.keepPolicyIdInSync(packagePolicy);
+
     await preflightCheckPackagePolicy(soClient, packagePolicy, basePkgInfo);
 
     let enrichedPackagePolicy = await packagePolicyService.runExternalCallbacks(
@@ -347,10 +474,11 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       );
     }
 
+    const spaceIds = agentPolicies.flatMap((ap) => ap.space_ids ?? []);
     // trailing whitespace causes issues creating API keys
     enrichedPackagePolicy.name = enrichedPackagePolicy.name.trim();
     if (!options?.skipUniqueNameVerification) {
-      await requireUniqueName(soClient, enrichedPackagePolicy);
+      await requireUniqueName(soClient, enrichedPackagePolicy, undefined, spaceIds);
     }
     if (enrichedPackagePolicy.namespace) {
       await validatePolicyNamespaceForSpace({
@@ -375,7 +503,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         pkgName: enrichedPackagePolicy.package.name,
         pkgVersion: enrichedPackagePolicy.package.version,
         force: options?.force,
-        authorizationHeader,
+        request,
       });
     }
 
@@ -421,8 +549,25 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       enrichedPackagePolicy = secretsRes.packagePolicy;
       secretReferences = secretsRes.secretReferences;
 
+      // Create cloud connector for package policy if it is supported and package supports agentless
+      if (
+        enrichedPackagePolicy?.supports_agentless &&
+        enrichedPackagePolicy?.supports_cloud_connector
+      ) {
+        const cloudConnector = await this.createCloudConnectorForPackagePolicy(
+          soClient,
+          enrichedPackagePolicy,
+          agentPolicies[0],
+          pkgInfo
+        );
+        if (cloudConnector) {
+          enrichedPackagePolicy.cloud_connector_id = cloudConnector.id;
+        }
+      }
+
       inputs = enrichedPackagePolicy.inputs as PackagePolicyInput[];
     }
+
     const assetsMap = await getAgentTemplateAssetsMap({
       logger,
       packageInfo: pkgInfo,
@@ -432,8 +577,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       pkgInfo,
       enrichedPackagePolicy.vars || {},
       inputs,
-      assetsMap,
-      { otelcolSuffixId: packagePolicyId }
+      assetsMap
     );
 
     const elasticsearchPrivileges = pkgInfo.elasticsearch?.privileges;
@@ -454,6 +598,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       enrichedPackagePolicy.package = {
         ...enrichedPackagePolicy.package,
         requires_root: requiresRoot,
+        fips_compatible: checkIntegrationFipsLooseCompatibility(pkgInfo?.name, pkgInfo),
       };
     }
 
@@ -462,7 +607,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       .create<PackagePolicySOAttributes>(
         savedObjectType,
         {
-          ...enrichedPackagePolicy,
+          ...omit(enrichedPackagePolicy, 'cloud_connector_name'),
           ...(enrichedPackagePolicy.package
             ? { package: omit(enrichedPackagePolicy.package, 'experimental_data_stream_features') }
             : {}),
@@ -492,7 +637,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         useSpaceAwareness &&
         agentPolicy &&
         agentPolicy.space_ids &&
-        agentPolicy.space_ids.length > 1
+        (agentPolicy.space_ids.length > 1 || agentPolicy.space_ids.includes(ALL_SPACES_ID))
       ) {
         await updatePackagePolicySpaces({
           packagePolicyId: newSo.id,
@@ -502,12 +647,22 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       }
     }
 
+    await this.compilePackagePolicyForVersions(
+      soClient,
+      pkgInfo,
+      assetsMap,
+      mapPackagePolicySavedObjectToPackagePolicy(newSo)
+    );
+
     if (options?.bumpRevision ?? true) {
-      for (const policyId of enrichedPackagePolicy.policy_ids) {
-        await agentPolicyService.bumpRevision(soClient, esClient, policyId, {
+      await this.bumpAgentPoliciesRevision(
+        { soClient, esClient },
+        enrichedPackagePolicy.policy_ids,
+        {
           user: options?.user,
-        });
-      }
+          hasAgentVersionConditions: hasAgentVersionCondition(pkgInfo, assetsMap),
+        }
+      );
     }
 
     const createdPackagePolicy = mapPackagePolicySavedObjectToPackagePolicy(newSo);
@@ -518,6 +673,83 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       createdPackagePolicy,
       soClient,
       esClient
+    );
+  }
+
+  public async compilePackagePolicyForVersions(
+    soClient: SavedObjectsClientContract,
+    packageInfo: PackageInfo,
+    assetsMap: PackagePolicyAssetsMap,
+    packagePolicy: PackagePolicy,
+    agentVersions?: string[]
+  ) {
+    if (!appContextService.getExperimentalFeatures().enableVersionSpecificPolicies) {
+      return;
+    }
+    if (!hasAgentVersionConditionInInputTemplate(assetsMap)) {
+      return;
+    }
+    const t = apm.startTransaction('compile-package-policy-versions', 'fleet');
+
+    const inputsForVersions: Record<string, PackagePolicyInput[]> = {};
+    for (const version of agentVersions ?? (await getAgentVersionsForVersionSpecificPolicies())) {
+      const inputs = await recompileInputsWithAgentVersion(
+        packageInfo!,
+        packagePolicy,
+        version,
+        soClient!
+      );
+      inputsForVersions[version] = inputs;
+    }
+
+    const savedObjectType = await getPackagePolicySavedObjectType();
+
+    const packagePolicySO = await soClient.get<PackagePolicySOAttributes>(
+      savedObjectType,
+      packagePolicy.id
+    );
+
+    await soClient
+      .update<PackagePolicySOAttributes>(savedObjectType, packagePolicy.id, {
+        inputs_for_versions: {
+          ...packagePolicySO.attributes.inputs_for_versions,
+          ...inputsForVersions,
+        },
+      })
+      .catch(
+        catchAndSetErrorStackTrace.withMessage(
+          `attempt to update package policy saved object with inputs_for_versions failed`
+        )
+      );
+    t.end();
+  }
+
+  private async bumpAgentPoliciesRevision(
+    deps: { soClient: SavedObjectsClientContract; esClient: ElasticsearchClient },
+    policyIds: string[],
+    options: {
+      user?: AuthenticatedUser;
+      removeProtectionFn?: (policyId: string) => undefined | boolean;
+      asyncDeploy?: boolean;
+      hasAgentVersionConditions?: boolean;
+    } = {}
+  ) {
+    return runWithCache(() =>
+      pMap(
+        policyIds,
+        (policyId) =>
+          agentPolicyService.bumpRevision(deps.soClient, deps.esClient, policyId, {
+            user: options?.user,
+            asyncDeploy: options.asyncDeploy || policyIds.length > ASYNC_DEPLOY_POLICIES_THRESHOLD,
+            removeProtection: options.removeProtectionFn
+              ? options.removeProtectionFn(policyId)
+              : undefined,
+            hasAgentVersionConditions: options?.hasAgentVersionConditions,
+          }),
+        {
+          concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_10,
+        }
+      )
     );
   }
 
@@ -545,7 +777,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       bumpRevision?: boolean;
       force?: true;
       asyncDeploy?: boolean;
-    }
+    },
+    request?: KibanaRequest
   ): Promise<{
     created: PackagePolicy[];
     failed: Array<{ packagePolicy: NewPackagePolicy; error?: Error | SavedObjectError }>;
@@ -644,13 +877,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         canDeployCustomPackageAsAgentlessOrThrow(packagePolicy, pkgInfo);
 
         inputs = pkgInfo
-          ? await _compilePackagePolicyInputs(
-              pkgInfo,
-              packagePolicy.vars || {},
-              inputs,
-              assetsMap,
-              { otelcolSuffixId: id }
-            )
+          ? await _compilePackagePolicyInputs(pkgInfo, packagePolicy.vars || {}, inputs, assetsMap)
           : inputs;
 
         const elasticsearch = pkgInfo?.elasticsearch;
@@ -660,6 +887,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           packagePolicy.package = {
             ...packagePolicy.package,
             requires_root: requiresRoot,
+            fips_compatible: checkIntegrationFipsLooseCompatibility(pkgInfo?.name, pkgInfo),
           };
         }
 
@@ -716,7 +944,11 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           continue;
         }
         const agentPolicy = agentPoliciesIndexById[newSo.attributes.policy_ids[0]];
-        if (agentPolicy && agentPolicy.space_ids && agentPolicy.space_ids.length > 1) {
+        if (
+          agentPolicy &&
+          agentPolicy.space_ids &&
+          (agentPolicy.space_ids.length > 1 || agentPolicy.space_ids.includes(ALL_SPACES_ID))
+        ) {
           await updatePackagePolicySpaces({
             packagePolicyId: newSo.id,
             currentSpaceId: soClient.getCurrentNamespace() ?? DEFAULT_SPACE_ID,
@@ -726,15 +958,33 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       }
     }
 
+    for (const newSo of newSos) {
+      const pkgInfo = packageInfos.get(
+        `${newSo.attributes.package?.name}-${newSo.attributes.package?.version}`
+      )!;
+      await this.compilePackagePolicyForVersions(
+        soClient,
+        pkgInfo,
+        packageInfosandAssetsMap.get(`${pkgInfo.name}-${pkgInfo.version}`)?.assetsMap!,
+        mapPackagePolicySavedObjectToPackagePolicy(newSo)
+      );
+    }
+
     // Assign it to the given agent policy
 
     if (options?.bumpRevision ?? true) {
-      for (const agentPolicyId of agentPolicyIds) {
-        await agentPolicyService.bumpRevision(soClient, esClient, agentPolicyId, {
-          user: options?.user,
-          asyncDeploy: options?.asyncDeploy,
-        });
-      }
+      await this.bumpAgentPoliciesRevision({ soClient, esClient }, [...agentPolicyIds], {
+        user: options?.user,
+        asyncDeploy: options?.asyncDeploy,
+        hasAgentVersionConditions: packageInfos
+          .values()
+          .some((pkgInfo) =>
+            hasAgentVersionCondition(
+              pkgInfo,
+              packageInfosandAssetsMap.get(`${pkgInfo.name}-${pkgInfo.version}`)?.assetsMap!
+            )
+          ),
+      });
     }
     logger.debug(`Created new package policies`);
     return {
@@ -778,9 +1028,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       savedObjectsClient: soClient,
     });
     inputs = pkgInfo
-      ? await _compilePackagePolicyInputs(pkgInfo, packagePolicy.vars || {}, inputs, assetsMap, {
-          otelcolSuffixId: id,
-        })
+      ? await _compilePackagePolicyInputs(pkgInfo, packagePolicy.vars || {}, inputs, assetsMap)
       : inputs;
 
     const elasticsearch = pkgInfo?.elasticsearch;
@@ -1104,7 +1352,12 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     esClient: ElasticsearchClient,
     id: string,
     packagePolicyUpdate: UpdatePackagePolicy,
-    options?: { user?: AuthenticatedUser; force?: boolean; skipUniqueNameVerification?: boolean }
+    options?: {
+      user?: AuthenticatedUser;
+      force?: boolean;
+      skipUniqueNameVerification?: boolean;
+      bumpRevision?: boolean;
+    }
   ): Promise<PackagePolicy> {
     const logger = this.getLogger('update');
 
@@ -1125,8 +1378,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     await preflightCheckPackagePolicy(soClient, packagePolicyUpdate);
 
     let enrichedPackagePolicy: UpdatePackagePolicy;
-    let secretReferences: PolicySecretReference[] | undefined;
-    let secretsToDelete: PolicySecretReference[] | undefined;
+    let secretReferences: SecretReference[] | undefined;
+    let secretsToDelete: SecretReference[] | undefined;
 
     try {
       logger.debug(`Starting update of package policy ${id}`);
@@ -1157,12 +1410,25 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       this.keepPolicyIdInSync(oldPackagePolicy);
     }
 
+    const agentPolicies: AgentPolicy[] = [];
+
+    for (const policyId of packagePolicyUpdate.policy_ids) {
+      const agentPolicy = await agentPolicyService.get(soClient, policyId, false);
+      if (!agentPolicy) {
+        throw new AgentPolicyNotFoundError('Agent policy not found');
+      }
+
+      agentPolicies.push(agentPolicy);
+    }
+
+    const spaceIds = agentPolicies.flatMap((ap) => ap.space_ids ?? []);
+
     if (
       packagePolicy.name &&
       packagePolicy.name !== oldPackagePolicy.name &&
       !options?.skipUniqueNameVerification
     ) {
-      await requireUniqueName(soClient, enrichedPackagePolicy, id);
+      await requireUniqueName(soClient, enrichedPackagePolicy, id, spaceIds);
     }
 
     if (packagePolicy.namespace) {
@@ -1224,8 +1490,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       pkgInfo,
       restOfPackagePolicy.vars || {},
       inputs,
-      assetsMap,
-      { otelcolSuffixId: id }
+      assetsMap
     );
     const elasticsearchPrivileges = pkgInfo.elasticsearch?.privileges;
 
@@ -1234,14 +1499,19 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       restOfPackagePolicy.package = {
         ...restOfPackagePolicy.package,
         requires_root: requiresRoot,
+        fips_compatible: checkIntegrationFipsLooseCompatibility(pkgInfo?.name, pkgInfo),
       };
     }
 
-    for (const policyId of packagePolicyUpdate.policy_ids) {
-      const agentPolicy = await agentPolicyService.get(soClient, policyId, true);
-      if ((agentPolicy?.space_ids?.length ?? 0) > 1) {
-        throw new FleetError(
-          'Reusable integration policies cannot be used with agent policies belonging to multiple spaces.'
+    for (const agentPolicy of agentPolicies) {
+      if (agentPolicy) {
+        validateReusableIntegrationsAndSpaceAwareness(packagePolicy, [agentPolicy]);
+      }
+
+      // Validate that if supports_agentless is true, the package actually supports agentless
+      if (packagePolicy.supports_agentless && !isAgentlessIntegration(pkgInfo)) {
+        throw new PackagePolicyValidationError(
+          `Package "${pkgInfo.name}" does not support agentless deployment mode`
         );
       }
 
@@ -1360,28 +1630,34 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       }
     }
 
+    await this.compilePackagePolicyForVersions(soClient, pkgInfo, assetsMap, newPolicy);
+
     // Bump revision of all associated agent policies (old and new)
     const associatedPolicyIds = new Set([...oldPackagePolicy.policy_ids, ...newPolicy.policy_ids]);
     logger.debug(`Bumping revision of associated agent policies ${associatedPolicyIds}`);
-    const bumpPromise = pMap(
-      associatedPolicyIds,
-      (policyId) => {
-        const isEndpointPolicy = newPolicy.package?.name === 'endpoint';
-        // Check if the agent policy is in both old and updated package policies
-        const assignedInOldPolicy = oldPackagePolicy.policy_ids.includes(policyId);
-        const assignedInNewPolicy = newPolicy.policy_ids.includes(policyId);
 
-        // Remove protection if policy is unassigned (in old but not in updated) or policy is assigned (in updated but not in old)
-        const removeProtection =
-          isEndpointPolicy &&
-          ((assignedInOldPolicy && !assignedInNewPolicy) ||
-            (!assignedInOldPolicy && assignedInNewPolicy));
-        return agentPolicyService.bumpRevision(soClient, esClient, policyId, {
-          user: options?.user,
-          removeProtection,
-        });
-      },
-      { concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS }
+    const bumpPromise = this.bumpAgentPoliciesRevision(
+      { soClient, esClient },
+      [...associatedPolicyIds],
+      {
+        user: options?.user,
+        removeProtectionFn: (policyId) => {
+          const isEndpointPolicy = newPolicy.package?.name === 'endpoint';
+
+          if (!isEndpointPolicy) {
+            return undefined;
+          }
+
+          const assignedInOldPolicy = oldPackagePolicy.policy_ids.includes(policyId);
+          const assignedInNewPolicy = newPolicy.policy_ids.includes(policyId);
+
+          return (
+            (assignedInOldPolicy && !assignedInNewPolicy) ||
+            (!assignedInOldPolicy && assignedInNewPolicy)
+          );
+        },
+        hasAgentVersionConditions: hasAgentVersionCondition(pkgInfo, assetsMap),
+      }
     );
 
     const assetRemovePromise = removeOldAssets({
@@ -1472,7 +1748,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       new Map<string, PackageInfo>()
     );
 
-    const allSecretsToDelete: PolicySecretReference[] = [];
+    const allSecretsToDelete: SecretReference[] = [];
 
     const packageInfosandAssetsMap = await getPkgInfoAssetsMap({
       logger,
@@ -1545,6 +1821,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             internalSoClientWithoutSpaceExtension,
             packagePolicy.policy_ids.map((policyId) => ({ id: policyId, spaceId: '*' }))
           );
+
+          validateReusableIntegrationsAndSpaceAwareness(packagePolicy, agentPolicies);
+
           if (!agentPolicies.some((policy) => policy.is_managed)) {
             logger.debug(
               `Saving previous revision of package policy ${id} with package version ${oldPackagePolicy.version}`
@@ -1574,7 +1853,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           }
         }
 
-        let secretReferences: PolicySecretReference[] | undefined;
+        let secretReferences: SecretReference[] | undefined;
 
         const { version } = packagePolicyUpdate;
         // id and version are not part of the saved object attributes
@@ -1618,8 +1897,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           pkgInfo,
           restOfPackagePolicy.vars || {},
           inputs,
-          assetsMap,
-          { otelcolSuffixId: id }
+          assetsMap
         );
         const elasticsearchPrivileges = pkgInfo.elasticsearch?.privileges;
 
@@ -1628,6 +1906,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           restOfPackagePolicy.package = {
             ...restOfPackagePolicy.package,
             requires_root: requiresRoot,
+            fips_compatible: checkIntegrationFipsLooseCompatibility(pkgInfo?.name, pkgInfo),
           };
         }
 
@@ -1728,6 +2007,18 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       .bulkUpdate<PackagePolicySOAttributes>(policiesToUpdate)
       .catch(catchAndSetErrorStackTrace.withMessage(`Saved objects bulk update failed`));
 
+    for (const updatedPolicy of updatedPolicies) {
+      const pkgInfo = packageInfos.get(
+        `${updatedPolicy.attributes.package?.name}-${updatedPolicy.attributes.package?.version}`
+      )!;
+      await this.compilePackagePolicyForVersions(
+        soClient,
+        pkgInfo,
+        packageInfosandAssetsMap.get(`${pkgInfo.name}-${pkgInfo.version}`)?.assetsMap!,
+        mapPackagePolicySavedObjectToPackagePolicy(updatedPolicy as any)
+      );
+    }
+
     // Bump revision of all associated agent policies (old and new)
     const associatedPolicyIds = new Set([
       ...packagePolicyUpdates.flatMap((p) => p.policy_ids),
@@ -1751,24 +2042,34 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_10,
     });
 
-    const bumpPromise = pMap(associatedPolicyIds, async (agentPolicyId) => {
-      // Check if the agent policy is in both old and updated package policies
-      const assignedInOldPolicies = endpointOldPackagePoliciesIds.has(agentPolicyId);
-      const assignedInUpdatedPolicies = endpointPackagePolicyUpdatesIds.has(agentPolicyId);
-
-      // Remove protection if policy is unassigned (in old but not in updated) or policy is assigned (in updated but not in old)
-      const removeProtection =
-        (assignedInOldPolicies && !assignedInUpdatedPolicies) ||
-        (!assignedInOldPolicies && assignedInUpdatedPolicies);
-
-      logger.debug(`bumping revision for agent policy id [${agentPolicyId}]`);
-
-      await agentPolicyService.bumpRevision(soClient, esClient, agentPolicyId, {
+    const bumpPromise = this.bumpAgentPoliciesRevision(
+      { soClient, esClient },
+      [...associatedPolicyIds],
+      {
         user: options?.user,
-        removeProtection,
         asyncDeploy: options?.asyncDeploy,
-      });
-    }).finally(() => {
+        removeProtectionFn: (agentPolicyId) => {
+          // Check if the agent policy is in both old and updated package policies
+          const assignedInOldPolicies = endpointOldPackagePoliciesIds.has(agentPolicyId);
+          const assignedInUpdatedPolicies = endpointPackagePolicyUpdatesIds.has(agentPolicyId);
+
+          // Remove protection if policy is unassigned (in old but not in updated) or policy is assigned (in updated but not in old)
+          const removeProtection =
+            (assignedInOldPolicies && !assignedInUpdatedPolicies) ||
+            (!assignedInOldPolicies && assignedInUpdatedPolicies);
+
+          return removeProtection;
+        },
+        hasAgentVersionConditions: packageInfos
+          .values()
+          .some((pkgInfo) =>
+            hasAgentVersionCondition(
+              pkgInfo,
+              packageInfosandAssetsMap.get(`${pkgInfo.name}-${pkgInfo.version}`)?.assetsMap!
+            )
+          ),
+      }
+    ).finally(() => {
       logger.debug(`bumping of revision for associated agent policies done`);
     });
 
@@ -1859,11 +2160,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     ids: string[],
-    options?: {
-      user?: AuthenticatedUser;
-      skipUnassignFromAgentPolicies?: boolean;
-      force?: boolean;
-    },
+    options?: PackagePolicyClientDeleteOptions,
     context?: RequestHandlerContext,
     request?: KibanaRequest
   ): Promise<PostDeletePackagePoliciesResponse> {
@@ -1880,8 +2177,13 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     const logger = this.getLogger('delete');
     logger.debug(`Deleting package policies ${ids}`);
 
-    const packagePolicies = await this.getByIDs(soClient, ids, { ignoreMissing: true });
-    if (!packagePolicies) {
+    const packagePolicies = await this.getByIDs(soClient, ids, {
+      ignoreMissing: true,
+      spaceIds: options?.spaceIds,
+    });
+
+    if (!packagePolicies || packagePolicies.length === 0) {
+      logger.debug(`No package policies to delete`);
       return [];
     }
 
@@ -1922,7 +2224,11 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           agentlessAgentPolicies.push(agentPolicyId);
         }
       } catch (e) {
-        hostedAgentPolicies.push(agentPolicyId);
+        logger.error(
+          `An error occurred while checking if policies are hosted: ${e?.output?.payload?.message}`
+        );
+        // in case of orphaned policies don't add the id to the hostedAgentPolicies array
+        if (e?.output?.statusCode !== 404) hostedAgentPolicies.push(agentPolicyId);
       }
     }
 
@@ -1971,6 +2277,17 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           )
         );
 
+      // delete previous versions
+      const response = await soClient
+        .bulkDelete(
+          idsToDelete.map((id) => ({ id: `${id}:prev`, type: savedObjectType })),
+          {
+            force: true, // need to delete through multiple space
+          }
+        )
+        .catch((error) => logger.error(`Error deleting previous versions: ${error}`));
+      logger.debug(`Attempted to delete previous versions ${JSON.stringify(response)}`);
+
       statuses.forEach(({ id, success, error }) => {
         const packagePolicy = packagePolicies.find((p) => p.id === id);
         if (success && packagePolicy) {
@@ -1986,8 +2303,18 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             policy_id: packagePolicy.policy_id,
             policy_ids: packagePolicy.policy_ids,
           });
+          // Only delete secrets that belong to the package policy itself,
+          // not to cloud connectors (which manage their own secret lifecycle)
           if (packagePolicy?.secret_references?.length) {
-            secretsToDelete.push(...packagePolicy.secret_references.map((s) => s.id));
+            if (!packagePolicy.cloud_connector_id) {
+              // Regular package policy secrets - safe to delete
+              secretsToDelete.push(...packagePolicy.secret_references.map((s) => s.id));
+            } else {
+              // Cloud connector secrets - managed by cloud connector lifecycle
+              logger.debug(
+                `Skipping secret deletion for package policy ${packagePolicy.id} - secrets are managed by cloud connector ${packagePolicy.cloud_connector_id}`
+              );
+            }
           }
         } else if (!success && error) {
           result.push({
@@ -2023,16 +2350,49 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
       const agentPolicies = await agentPolicyService.getByIds(soClient, uniquePolicyIdsR);
 
-      for (const policyId of uniquePolicyIdsR) {
-        const agentPolicy = agentPolicies.find((p) => p.id === policyId);
-        if (agentPolicy) {
-          // is the agent policy attached to package policy with endpoint
-          await agentPolicyService.bumpRevision(soClient, esClient, policyId, {
-            user: options?.user,
-            removeProtection: agentPoliciesWithEndpointPackagePolicies.has(policyId),
-          });
-        }
+      let packageInfos: Map<string, PackageInfo> | undefined;
+      let packageInfosandAssetsMap:
+        | Map<string, { assetsMap: PackagePolicyAssetsMap; pkgInfo: PackageInfo }>
+        | undefined;
+
+      if (appContextService.getExperimentalFeatures().enableVersionSpecificPolicies) {
+        const agentPoliciesWithPackagePolicies = await agentPolicyService.getByIds(
+          soClient,
+          uniquePolicyIdsR,
+          { withPackagePolicies: true }
+        );
+        const packagePoliciesToCheck = agentPoliciesWithPackagePolicies.flatMap(
+          (agentPolicy) => agentPolicy.package_policies || []
+        );
+
+        packageInfos = await getPackageInfoForPackagePolicies(
+          packagePoliciesToCheck,
+          soClient,
+          true
+        );
+        packageInfosandAssetsMap = await getPkgInfoAssetsMap({
+          logger,
+          packageInfos: [...packageInfos.values()],
+          savedObjectsClient: soClient,
+        });
       }
+
+      await this.bumpAgentPoliciesRevision(
+        { soClient, esClient },
+        agentPolicies.map((p) => p.id),
+        {
+          user: options?.user,
+          removeProtectionFn: (policyId) => agentPoliciesWithEndpointPackagePolicies.has(policyId),
+          hasAgentVersionConditions: packageInfos
+            ?.values()
+            .some((pkgInfo) =>
+              hasAgentVersionCondition(
+                pkgInfo,
+                packageInfosandAssetsMap?.get(`${pkgInfo.name}-${pkgInfo.version}`)?.assetsMap!
+              )
+            ),
+        }
+      );
     }
 
     if (secretsToDelete.length > 0) {
@@ -2153,7 +2513,11 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           output_id: newPolicy.output_id,
           inputs: newPolicy.inputs[0]?.streams ? newPolicy.inputs : inputs,
           vars: newPolicy.vars || newPP.vars,
+          var_group_selections: newPolicy.var_group_selections,
           supports_agentless: newPolicy.supports_agentless,
+          supports_cloud_connector: newPolicy.supports_cloud_connector,
+          cloud_connector_id: newPolicy.cloud_connector_id,
+          cloud_connector_name: newPolicy.cloud_connector_name,
           additional_datastreams_permissions: newPolicy.additional_datastreams_permissions,
         };
       }
@@ -2463,7 +2827,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         packagePolicies,
         async (packagePolicy) => {
           const soClient = appContextService.getInternalUserSOClientForSpaceId(
-            packagePolicy.spaceIds?.[0]
+            getSpaceForPackagePolicy(packagePolicy)
           );
           const existingPackagePolicy = await this.get(soClient, packagePolicy.id);
 
@@ -2494,7 +2858,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         packagePolicies,
         (packagePolicy) => {
           const soClient = appContextService.getInternalUserSOClientForSpaceId(
-            packagePolicy.spaceIds?.[0]
+            getSpaceForPackagePolicy(packagePolicy)
           );
           return this.update(
             soClient,
@@ -2641,7 +3005,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
   public async rollback(
     soClient: SavedObjectsClientContract,
-    packagePolicies: Array<SavedObjectsFindResult<PackagePolicySOAttributes>>
+    packagePolicies: Array<SavedObjectsFindResult<PackagePolicySOAttributes>>,
+    previousVersion: string
   ): Promise<RollbackResult> {
     const savedObjectType = await getPackagePolicySavedObjectType();
 
@@ -2649,7 +3014,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     // Create temporary SOs with id `id:copy` to allow cancellation in case rollback fails.
     const policiesToCreate: Record<
       string,
-      Array<SavedObjectsFindResult<PackagePolicySOAttributes>>
+      Array<SavedObjectsFindResult<PackagePolicySOAttributes> & { initialNamespaces?: string[] }>
     > = {};
     const policiesToUpdate: Record<
       string,
@@ -2661,36 +3026,40 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     > = {};
 
     packagePolicies.forEach((policy) => {
-      const namespace = policy.namespaces?.[0] || policy.attributes.namespace;
-      if (namespace) {
-        if (!policy.id.endsWith(':prev')) {
-          const previousRevision = packagePolicies.find((p) => p.id === `${policy.id}:prev`);
-          if (previousRevision?.attributes) {
-            if (!policiesToCreate[namespace]) {
-              policiesToCreate[namespace] = [];
-            }
-            policiesToCreate[namespace].push({
-              ...policy,
-              id: `${policy.id}:copy`,
-            });
-            if (!policiesToUpdate[namespace]) {
-              policiesToUpdate[namespace] = [];
-            }
-            policiesToUpdate[namespace].push({
-              ...policy,
-              attributes: {
-                ...previousRevision?.attributes,
-                revision: (policy?.attributes.revision ?? 0) + 1, // Bump revision
-                latest_revision: true,
-              },
-            });
+      const namespace = getSpaceForPackagePolicySO(policy);
+
+      if (
+        !policy.id.endsWith(':prev') &&
+        policy.attributes.package?.version &&
+        semverGt(policy.attributes.package.version, previousVersion)
+      ) {
+        const previousRevision = packagePolicies.find((p) => p.id === `${policy.id}:prev`);
+        if (previousRevision?.attributes) {
+          if (!policiesToCreate[namespace]) {
+            policiesToCreate[namespace] = [];
           }
-        } else {
-          if (!previousVersionPolicies[namespace]) {
-            previousVersionPolicies[namespace] = [];
+          policiesToCreate[namespace].push({
+            ...policy,
+            id: `${policy.id}:copy`,
+            initialNamespaces: policy.namespaces,
+          });
+          if (!policiesToUpdate[namespace]) {
+            policiesToUpdate[namespace] = [];
           }
-          previousVersionPolicies[namespace].push(policy);
+          policiesToUpdate[namespace].push({
+            ...policy,
+            attributes: {
+              ...previousRevision?.attributes,
+              revision: (policy?.attributes.revision ?? 0) + 1, // Bump revision
+              latest_revision: true,
+            },
+          });
         }
+      } else if (policy.id.endsWith(':prev')) {
+        if (!previousVersionPolicies[namespace]) {
+          previousVersionPolicies[namespace] = [];
+        }
+        previousVersionPolicies[namespace].push(policy);
       }
     });
 
@@ -2699,6 +3068,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       await soClient
         .bulkCreate<PackagePolicySOAttributes>(policies, { namespace })
         .catch(catchAndSetErrorStackTrace.withMessage('failed to bulk create package policies'));
+
       for (const policy of policies) {
         auditLoggingService.writeCustomSoAuditLog({
           action: 'create',
@@ -2739,7 +3109,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     for (const [namespace, policies] of Object.entries(copiedPolicies)) {
       // Update policies with copied data.
       const policiesToUpdate = policies.map((policy) => ({
-        ...policy,
+        ...omit(policy, 'initialNamespaces'),
         id: policy.id.replace(':copy', ''),
       }));
       await soClient
@@ -2813,6 +3183,72 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     for (const [namespace, policies] of Object.entries(updatedPolicies)) {
       const agentPolicyIds = policies.flatMap((policy) => policy.attributes.policy_ids || []);
       await agentPolicyService.bumpAgentPoliciesByIds(agentPolicyIds, {}, namespace);
+    }
+  }
+
+  public async createCloudConnectorForPackagePolicy(
+    soClient: SavedObjectsClientContract,
+    enrichedPackagePolicy: NewPackagePolicy,
+    agentPolicy: AgentPolicy,
+    packageInfo: PackageInfo
+  ): Promise<CloudConnector | undefined> {
+    const logger = this.getLogger('createCloudConnectorForPackagePolicy');
+
+    const cloudProvider = agentPolicy.agentless?.cloud_connectors?.target_csp as CloudProvider;
+    const agentlessCloudConnectorsEnabled = agentPolicy.agentless?.cloud_connectors?.enabled;
+
+    if (!agentlessCloudConnectorsEnabled) {
+      logger.debug('No agentless cloud connectors enabled for cloud provider');
+      return;
+    }
+
+    const cloudConnectorVars = extractPackagePolicyVars(
+      cloudProvider,
+      enrichedPackagePolicy,
+      logger
+    );
+
+    if (cloudConnectorVars && enrichedPackagePolicy?.supports_cloud_connector) {
+      if (enrichedPackagePolicy?.cloud_connector_id) {
+        // Update the existing cloud connector with new vars
+        logger.info(`Updating cloud connector: ${enrichedPackagePolicy.cloud_connector_id}`);
+        try {
+          const cloudConnector = await cloudConnectorService.update(
+            soClient,
+            enrichedPackagePolicy.cloud_connector_id,
+            {
+              vars: cloudConnectorVars,
+            }
+          );
+          logger.info(`Successfully updated cloud connector: ${cloudConnector.id}`);
+          return cloudConnector;
+        } catch (e) {
+          logger.error(`Error updating cloud connector: ${e}`);
+          throw new CloudConnectorUpdateError(`${e}`);
+        }
+      } else {
+        logger.info(`Creating cloud connector: ${enrichedPackagePolicy.cloud_connector_id}`);
+        // Extract account type from package policy vars
+        const accountType = extractAccountType(cloudProvider, enrichedPackagePolicy, packageInfo);
+        try {
+          // Extract cloud connector name from package policy
+          const cloudConnectorName = enrichedPackagePolicy.cloud_connector_name;
+
+          const cloudConnector = await cloudConnectorService.create(soClient, {
+            name:
+              cloudConnectorName ||
+              `${cloudProvider}-cloud-connector: ${enrichedPackagePolicy.name}`,
+            vars: cloudConnectorVars,
+            cloudProvider,
+            accountType,
+          });
+          logger.info(`Successfully created cloud connector: ${cloudConnector.id}`);
+          return cloudConnector;
+        } catch (error) {
+          logger.error(`Error creating cloud connector: ${error}`);
+          rethrowIfInstanceOrWrap(error, CloudConnectorCreateError);
+        }
+      }
     }
   }
 }
@@ -2913,7 +3349,6 @@ class PackagePolicyClientWithAuthz extends PackagePolicyClientImpl {
     esClient: ElasticsearchClient,
     packagePolicy: NewPackagePolicy,
     options?: {
-      authorizationHeader?: HTTPAuthorizationHeader | null;
       spaceId?: string;
       id?: string;
       user?: AuthenticatedUser;
@@ -2932,6 +3367,12 @@ class PackagePolicyClientWithAuthz extends PackagePolicyClientImpl {
         integrations: { writeIntegrationPolicies: true },
       },
     });
+
+    // Add debug logging
+    const logger = appContextService.getLogger();
+    logger.debug(
+      `PackagePolicyService.create called with supports_agentless: ${packagePolicy.supports_agentless}`
+    );
 
     return super.create(soClient, esClient, packagePolicy, options, context, request);
   }
@@ -2974,31 +3415,46 @@ export function _compilePackagePolicyInputs(
   vars: PackagePolicy['vars'],
   inputs: PackagePolicyInput[],
   assetsMap: PackagePolicyAssetsMap,
-  opts?: { otelcolSuffixId?: string }
+  agentVersion?: string
 ): PackagePolicyInput[] {
-  const experimentalFeature = appContextService.getExperimentalFeatures();
-
-  return inputs.map((input) => {
-    if (experimentalFeature.enableOtelIntegrations && input.type === OTEL_COLLECTOR_INPUT_TYPE) {
+  return inputs
+    .filter((input) => !agentVersion || input.enabled)
+    .map((input) => {
+      if (agentVersion) {
+        const hasVersionConditionInInputTemplate =
+          hasAgentVersionConditionInInputTemplate(assetsMap);
+        // skip recompile input if there is no agent version condition in any of the templates
+        if (!hasVersionConditionInInputTemplate) {
+          return input;
+        }
+      }
+      const span = apm.startSpan(
+        `_compilePackagePolicyInputs ${pkgInfo.name}-${pkgInfo.version} ${agentVersion}`,
+        'full-agent-policy'
+      );
+      const compiledInput = _compilePackagePolicyInput(
+        pkgInfo,
+        vars,
+        input,
+        assetsMap,
+        agentVersion
+      );
+      const compiledStreams = _compilePackageStreams(pkgInfo, vars, input, assetsMap, agentVersion);
+      span?.end();
       return {
         ...input,
-        streams: _compilePackageStreams(pkgInfo, vars, input, assetsMap, opts?.otelcolSuffixId),
-        compiled_input: [],
+        compiled_input: compiledInput,
+        streams: compiledStreams,
       };
-    }
-    return {
-      ...input,
-      compiled_input: _compilePackagePolicyInput(pkgInfo, vars, input, assetsMap),
-      streams: _compilePackageStreams(pkgInfo, vars, input, assetsMap),
-    };
-  });
+    });
 }
 
 function _compilePackagePolicyInput(
   pkgInfo: PackageInfo,
   vars: PackagePolicy['vars'],
   input: PackagePolicyInput,
-  assetsMap: PackagePolicyAssetsMap
+  assetsMap: PackagePolicyAssetsMap,
+  agentVersion?: string
 ) {
   const packagePolicyTemplate = input.policy_template
     ? pkgInfo.policy_templates?.find(
@@ -3039,6 +3495,7 @@ function _compilePackagePolicyInput(
   return compileTemplate(
     // Populate template variables from package- and input-level vars
     Object.assign({}, vars, input.vars),
+    getMetaVariables(pkgInfo, input, undefined, agentVersion),
     pkgInputTemplate.buffer.toString()
   );
 }
@@ -3048,10 +3505,10 @@ function _compilePackageStreams(
   vars: PackagePolicy['vars'],
   input: PackagePolicyInput,
   assetsMap: PackagePolicyAssetsMap,
-  otelcolSuffixId?: string
+  agentVersion?: string
 ) {
   return input.streams.map((stream) =>
-    _compilePackageStream(pkgInfo, vars, input, stream, assetsMap, otelcolSuffixId)
+    _compilePackageStream(pkgInfo, vars, input, stream, assetsMap, agentVersion)
   );
 }
 
@@ -3112,13 +3569,39 @@ export function _applyIndexPrivileges(
   return streamOut;
 }
 
+export function _getAssetForTemplatePath(
+  pkgInfo: PackageInfo,
+  assetsMap: AssetsMap,
+  datasetPath: string,
+  templatePath: string
+): ArchiveEntry {
+  const assets = getAssetsDataFromAssetsMap(
+    pkgInfo,
+    assetsMap,
+    (path: string) => path.endsWith(`/agent/stream/${templatePath}`),
+    datasetPath
+  );
+  if (assets.length === 1) {
+    return assets[0];
+  }
+
+  // fallback to old path structure for backward compatibility
+  const [fallbackPkgStreamTemplate] = getAssetsDataFromAssetsMap(
+    pkgInfo,
+    assetsMap,
+    (path: string) => path.endsWith(templatePath),
+    datasetPath
+  );
+  return fallbackPkgStreamTemplate;
+}
+
 function _compilePackageStream(
   pkgInfo: PackageInfo,
   vars: PackagePolicy['vars'],
   input: PackagePolicyInput,
   streamIn: PackagePolicyInputStream,
   assetsMap: PackagePolicyAssetsMap,
-  otelcolSuffixId?: string
+  agentVersion?: string
 ) {
   let stream = streamIn;
 
@@ -3160,11 +3643,11 @@ function _compilePackageStream(
 
   const datasetPath = packageDataStream.path;
 
-  const [pkgStreamTemplate] = getAssetsDataFromAssetsMap(
+  const pkgStreamTemplate = _getAssetForTemplatePath(
     pkgInfo,
     assetsMap,
-    (path: string) => path.endsWith(streamFromPkg.template_path),
-    datasetPath
+    datasetPath,
+    streamFromPkg.template_path
   );
 
   if (!pkgStreamTemplate || !pkgStreamTemplate.buffer) {
@@ -3176,9 +3659,8 @@ function _compilePackageStream(
   const yaml = compileTemplate(
     // Populate template variables from package-, input-, and stream-level vars
     Object.assign({}, vars, input.vars, stream.vars),
-    pkgStreamTemplate.buffer.toString(),
-    input.type,
-    otelcolSuffixId
+    getMetaVariables(pkgInfo, input, streamIn, agentVersion),
+    pkgStreamTemplate.buffer.toString()
   );
 
   stream.compiled_stream = yaml;
@@ -3297,6 +3779,7 @@ export function updatePackageInputs(
   if (!inputsUpdated) return basePackagePolicy;
 
   const availablePolicyTemplates = packageInfo.policy_templates ?? [];
+  const limitedPackage = isPackageLimited(packageInfo);
 
   const inputs = [
     ...basePackagePolicy.inputs.filter((input) => {
@@ -3350,6 +3833,10 @@ export function updatePackageInputs(
     // take the override value from the new package as-is. This case typically
     // occurs when inputs or package policy templates are added/removed between versions.
     if (originalInput === undefined) {
+      // Do not enable new inputs for limited packages
+      if (limitedPackage) {
+        update.enabled = false;
+      }
       inputs.push(update as NewPackagePolicyInput);
       continue;
     }
@@ -3357,7 +3844,7 @@ export function updatePackageInputs(
     // For flags like this, we only want to override the original value if it was set
     // as `undefined` in the original object. An explicit true/false value should be
     // persisted from the original object to the result after the override process is complete.
-    if (originalInput.enabled === undefined && update.enabled !== undefined) {
+    if (!limitedPackage && originalInput.enabled === undefined && update.enabled !== undefined) {
       originalInput.enabled = update.enabled;
     }
 
@@ -3371,9 +3858,11 @@ export function updatePackageInputs(
       originalInput.policy_template = update.policy_template;
     }
 
-    if (update.vars) {
+    if (update.vars || originalInput.vars) {
       const indexOfInput = inputs.indexOf(originalInput);
-      inputs[indexOfInput] = deepMergeVars(originalInput, update, true) as NewPackagePolicyInput;
+      const mergedVars = deepMergeVars(originalInput, update, true) as NewPackagePolicyInput;
+      const filteredVars = removeStaleVars<NewPackagePolicyInput>(mergedVars, update);
+      inputs[indexOfInput] = filteredVars;
       originalInput = inputs[indexOfInput];
     }
 
@@ -3382,7 +3871,6 @@ export function updatePackageInputs(
         packageInfo.type === 'input' &&
         update.streams.length === 1 &&
         originalInput?.streams.length === 1;
-
       for (const stream of update.streams) {
         let originalStream = originalInput?.streams.find(
           (s) => s.data_stream.dataset === stream.data_stream.dataset
@@ -3393,6 +3881,7 @@ export function updatePackageInputs(
         if (!originalStream && isInputPkgUpdate) {
           originalStream = {
             ...update.streams[0],
+            id: originalInput?.streams[0]?.id,
             vars: originalInput?.streams[0].vars,
           };
         }
@@ -3406,16 +3895,14 @@ export function updatePackageInputs(
           originalStream.enabled = stream.enabled;
         }
 
-        if (stream.vars) {
+        if (stream.vars || originalStream.vars) {
           // streams wont match for input pkgs
           const indexOfStream = isInputPkgUpdate
             ? 0
             : originalInput.streams.indexOf(originalStream);
-          originalInput.streams[indexOfStream] = deepMergeVars(
-            originalStream,
-            stream as InputsOverride,
-            true
-          );
+          const mergedVars = deepMergeVars(originalStream, stream as InputsOverride, true);
+          const filteredVars = removeStaleVars(mergedVars, stream);
+          originalInput.streams[indexOfStream] = filteredVars;
           originalStream = originalInput.streams[indexOfStream];
         }
       }
@@ -3430,9 +3917,12 @@ export function updatePackageInputs(
     });
   }
 
+  const vars = getUpdatedGlobalVars(packageInfo, basePackagePolicy);
+
   const resultingPackagePolicy: NewPackagePolicy = {
     ...basePackagePolicy,
     inputs,
+    vars,
   };
 
   const validationResults = validatePackagePolicy(resultingPackagePolicy, packageInfo, load);
@@ -3476,7 +3966,7 @@ export function updatePackageInputs(
 export function preconfigurePackageInputs(
   basePackagePolicy: NewPackagePolicy,
   packageInfo: PackageInfo,
-  preconfiguredInputs?: InputsOverride[]
+  preconfiguredInputs?: PreconfiguredInputs[]
 ): NewPackagePolicy {
   if (!preconfiguredInputs) return basePackagePolicy;
 
@@ -3637,7 +4127,10 @@ function validateReusableIntegrationsAndSpaceAwareness(
     return;
   }
   for (const agentPolicy of agentPolicies) {
-    if ((agentPolicy?.space_ids?.length ?? 0) > 1) {
+    if (
+      (agentPolicy?.space_ids?.length ?? 0) > 1 ||
+      agentPolicy?.space_ids?.includes(ALL_SPACES_ID)
+    ) {
       throw new FleetError(
         'Reusable integration policies cannot be used with agent policies belonging to multiple spaces.'
       );
@@ -3688,6 +4181,9 @@ export function sendUpdatePackagePolicyTelemetryEvent(
 }
 
 function deepMergeVars(original: any, override: any, keepOriginalValue = false): any {
+  if (!override.vars) {
+    return original;
+  }
   if (!original.vars) {
     original.vars = { ...override.vars };
   }
@@ -3716,20 +4212,85 @@ function deepMergeVars(original: any, override: any, keepOriginalValue = false):
   return result;
 }
 
+function getUpdatedGlobalVars(packageInfo: PackageInfo, packagePolicy: NewPackagePolicy) {
+  if (!packageInfo.vars) {
+    return undefined;
+  }
+
+  const packageInfoVars = packageInfo.vars.reduce(varsReducer, {});
+  const result = deepMergeVars(packagePolicy, { vars: packageInfoVars }, true);
+  return removeStaleVars(result, { vars: packageInfoVars }).vars;
+}
+
+interface SupportsVars {
+  vars?: PackagePolicyConfigRecord;
+}
+
+function removeStaleVars<T extends SupportsVars>(
+  currentWithVars: T,
+  expectedVars: SupportsVars
+): T {
+  if (!currentWithVars.vars) {
+    return currentWithVars;
+  }
+
+  if (!expectedVars.vars) {
+    return {
+      ...currentWithVars,
+      vars: {},
+    };
+  }
+
+  const filteredVars = Object.entries(currentWithVars.vars).reduce<PackagePolicyConfigRecord>(
+    (acc, [key, val]) => {
+      if (key in expectedVars.vars!) {
+        acc[key] = val;
+      }
+      return acc;
+    },
+    {}
+  );
+
+  return {
+    ...currentWithVars,
+    vars: filteredVars,
+  };
+}
+
 async function requireUniqueName(
   soClient: SavedObjectsClientContract,
   packagePolicy: UpdatePackagePolicy | NewPackagePolicy,
-  id?: string
+  id?: string,
+  spaceIds: string[] = []
 ) {
   const savedObjectType = await getPackagePolicySavedObjectType();
-  const existingPoliciesWithName = await packagePolicyService.list(soClient, {
+  const isMultiSpace = spaceIds.length > 1;
+  const baseSearchParams = {
     perPage: SO_SEARCH_LIMIT,
     kuery: `${savedObjectType}.name:"${packagePolicy.name}"`,
-  });
+  };
+
+  let existingPoliciesWithName;
+
+  if (isMultiSpace) {
+    existingPoliciesWithName = await packagePolicyService.list(
+      appContextService.getInternalUserSOClientWithoutSpaceExtension(),
+      {
+        ...baseSearchParams,
+        spaceId: '*',
+      }
+    );
+  } else {
+    existingPoliciesWithName = await packagePolicyService.list(soClient, baseSearchParams);
+  }
 
   const policiesToCheck = id
     ? // Check that the name does not exist already but exclude the current package policy
-      (existingPoliciesWithName?.items || []).filter((p) => p.id !== id)
+      (existingPoliciesWithName?.items || []).filter(
+        (p) =>
+          p.id !== id &&
+          (isMultiSpace ? (p.spaceIds ?? []).some((spaceId) => spaceIds.includes(spaceId)) : true)
+      )
     : existingPoliciesWithName?.items;
 
   if (policiesToCheck.length > 0) {

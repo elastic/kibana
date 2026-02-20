@@ -23,6 +23,7 @@ Object {
     "error.id",
     "error.grouping_key",
     "processor.event",
+    "_id",
     "parent.id",
     "transaction.id",
     "span.id",

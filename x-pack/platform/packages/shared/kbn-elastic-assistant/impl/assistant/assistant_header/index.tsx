@@ -6,11 +6,7 @@
  */
 
 import React, { useMemo, useCallback } from 'react';
-import type {
-  QueryObserverResult,
-  RefetchOptions,
-  RefetchQueryFilters,
-} from '@tanstack/react-query';
+import type { QueryObserverResult, RefetchOptions, RefetchQueryFilters } from '@kbn/react-query';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -20,7 +16,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { ApiConfig, ConversationSharedState } from '@kbn/elastic-assistant-common';
+import type { ApiConfig, ConversationSharedState, User } from '@kbn/elastic-assistant-common';
 import type { ConversationWithOwner } from '../api';
 import { ConversationSettingsMenu } from '../settings/settings_context_menu/conversation_settings_menu';
 import { ShareSelectModal } from '../share_conversation/share_select_modal';
@@ -34,11 +30,10 @@ import { AssistantSettingsModal } from '../settings/assistant_settings_modal';
 import type { AIConnector } from '../../connectorland/connector_selector';
 import { AssistantSettingsContextMenu } from '../settings/settings_context_menu/settings_context_menu';
 import * as i18n from './translations';
-import { ElasticLLMCostAwarenessTour } from '../../tour/elastic_llm';
-import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '../../tour/const';
 
 interface OwnProps {
   conversationSharedState: ConversationSharedState;
+  currentUser?: User;
   selectedConversation: Conversation | undefined;
   defaultConnector?: AIConnector;
   isConversationOwner: boolean;
@@ -87,6 +82,7 @@ export const AssistantHeader: React.FC<Props> = ({
   chatHistoryVisible,
   conversations,
   conversationsLoaded,
+  currentUser,
   defaultConnector,
   isConversationOwner,
   isAssistantEnabled,
@@ -221,7 +217,7 @@ export const AssistantHeader: React.FC<Props> = ({
                 )}
               </EuiFlexItem>
 
-              {!isNewConversation && (
+              {!isNewConversation && !!currentUser && (
                 <EuiFlexItem grow={false}>
                   <ShareSelectModal
                     conversationSharedState={conversationSharedState}
@@ -237,20 +233,14 @@ export const AssistantHeader: React.FC<Props> = ({
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="xs" alignItems={'center'} justifyContent="spaceBetween">
               <EuiFlexItem>
-                <ElasticLLMCostAwarenessTour
-                  isDisabled={isDisabled}
+                <ConnectorSelectorInline
+                  isDisabled={
+                    isDisabled || selectedConversation === undefined || !isConversationOwner
+                  }
                   selectedConnectorId={selectedConnectorId}
-                  storageKey={NEW_FEATURES_TOUR_STORAGE_KEYS.ELASTIC_LLM_USAGE_ASSISTANT_HEADER}
-                >
-                  <ConnectorSelectorInline
-                    isDisabled={
-                      isDisabled || selectedConversation === undefined || !isConversationOwner
-                    }
-                    selectedConnectorId={selectedConnectorId}
-                    selectedConversation={selectedConversation}
-                    onConnectorSelected={onConversationChange}
-                  />
-                </ElasticLLMCostAwarenessTour>
+                  selectedConversation={selectedConversation}
+                  onConnectorSelected={onConversationChange}
+                />
               </EuiFlexItem>
               {!isNewConversation && (
                 <EuiFlexItem>

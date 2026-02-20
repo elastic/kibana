@@ -39,6 +39,8 @@ import { convertShardsToArray } from '../utils';
 import type { PackSavedObject } from '../../common/types';
 import type { PackResponseData } from './types';
 import { updatePacksRequestBodySchema, updatePacksRequestParamsSchema } from '../../../common/api';
+import { getUserInfo } from '../../lib/get_user_info';
+import { escapeFilterValue } from '../utils/generate_copy_name';
 
 export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.versioned
@@ -78,9 +80,14 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
 
         const agentPolicyService = osqueryContext.service.getAgentPolicyService();
         const packagePolicyService = osqueryContext.service.getPackagePolicyService();
-        const currentUser = coreContext.security.authc.getCurrentUser()?.username;
 
-        // eslint-disable-next-line @typescript-eslint/naming-convention
+        const currentUser = await getUserInfo({
+          request,
+          security: osqueryContext.security,
+          logger: osqueryContext.logFactory.get('pack'),
+        });
+        const username = currentUser?.username ?? undefined;
+
         const { name, description, queries, enabled, policy_ids, shards = {} } = request.body;
 
         const currentPackSO = await spaceScopedClient.get<{ name: string; enabled: boolean }>(
@@ -91,7 +98,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         if (name) {
           const conflictingEntries = await spaceScopedClient.find<PackSavedObject>({
             type: packSavedObjectType,
-            filter: `${packSavedObjectType}.attributes.name: "${name}"`,
+            filter: `${packSavedObjectType}.attributes.name: "${escapeFilterValue(name)}"`,
           });
 
           if (
@@ -164,7 +171,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
             description: description || '',
             queries: queries && convertPackQueriesToSO(queries),
             updated_at: moment().toISOString(),
-            updated_by: currentUser,
+            updated_by: username,
             shards: convertShardsToArray(shards),
           },
           {

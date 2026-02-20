@@ -15,7 +15,9 @@ import { Env } from '@kbn/config';
 import { getEnvOptions, configServiceMock } from '@kbn/config-mocks';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
+import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
+import { userActivityServiceMock } from '@kbn/core-user-activity-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { IRouter } from '@kbn/core-http-server';
 import {
@@ -25,6 +27,7 @@ import {
   HttpService,
   config,
 } from '@kbn/core-http-server-internal';
+import { lazyObject } from '@kbn/lazy-object';
 
 const coreId = Symbol('core');
 const env = Env.createDefault(REPO_ROOT, getEnvOptions());
@@ -114,18 +117,19 @@ export const createConfigService = ({
 };
 
 const createDefaultContext = (): CoreContext => {
-  return {
+  return lazyObject({
     coreId,
     env,
     logger,
     configService: createConfigService(),
-  };
+  });
 };
 
-export const createCoreContext = (overrides: Partial<CoreContext> = {}): CoreContext => ({
-  ...createDefaultContext(),
-  ...overrides,
-});
+export const createCoreContext = (overrides: Partial<CoreContext> = {}): CoreContext =>
+  lazyObject({
+    ...createDefaultContext(),
+    ...overrides,
+  });
 
 /**
  * A mock of the HttpService that can be used in tests.
@@ -167,12 +171,14 @@ export const createHttpService = (): HttpIntegrationTestService => {
     preboot: async () => {
       await svc.preboot({
         context: contextServiceMock.createPrebootContract(),
+        docLinks: docLinksServiceMock.createSetupContract(),
       });
     },
     setup: () => {
       return svc.setup({
         context: contextServiceMock.createSetupContract(),
         executionContext: executionContextServiceMock.createInternalSetupContract(),
+        userActivity: userActivityServiceMock.createInternalSetupContract(),
       });
     },
     start: async () => {

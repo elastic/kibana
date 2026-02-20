@@ -12,9 +12,14 @@ import type { TimefilterContract } from '@kbn/data-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { CoreStart } from '@kbn/core/public';
 import type { ISearchGeneric } from '@kbn/search-types';
-import type { ESQLVariableType } from '@kbn/esql-types';
-import { type ESQLControlVariable, type ESQLControlState } from '@kbn/esql-types';
+import {
+  type ESQLControlVariable,
+  type ESQLVariableType,
+  type ControlTriggerSource,
+} from '@kbn/esql-types';
+import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import type { monaco } from '@kbn/monaco';
+import type { ESQLEditorTelemetryService } from '@kbn/esql-editor';
 import { untilPluginStartServicesReady } from '../../kibana_services';
 import { ESQLControlsFlyout } from './control_flyout';
 
@@ -25,12 +30,18 @@ interface Context {
   timefilter: TimefilterContract;
   variableType: ESQLVariableType;
   esqlVariables: ESQLControlVariable[];
-  onSaveControl?: (controlState: ESQLControlState, updatedQuery: string) => Promise<void>;
+  onSaveControl?: (
+    controlState: OptionsListESQLControlState,
+    updatedQuery: string
+  ) => Promise<void>;
   onCancelControl?: () => void;
   cursorPosition?: monaco.Position;
-  initialState?: ESQLControlState;
+  initialState?: OptionsListESQLControlState;
   closeFlyout?: () => void;
   ariaLabelledBy: string;
+  currentApp?: string;
+  triggerSource?: ControlTriggerSource;
+  telemetryService: ESQLEditorTelemetryService;
 }
 
 export async function loadESQLControlFlyout({
@@ -46,6 +57,9 @@ export async function loadESQLControlFlyout({
   initialState,
   closeFlyout = () => {},
   ariaLabelledBy,
+  currentApp,
+  triggerSource,
+  telemetryService,
 }: Context) {
   const timeRange = timefilter.getTime();
   const deps = await untilPluginStartServicesReady();
@@ -69,6 +83,9 @@ export async function loadESQLControlFlyout({
           initialState={initialState}
           esqlVariables={esqlVariables}
           timeRange={timeRange}
+          currentApp={currentApp}
+          telemetryTriggerSource={triggerSource}
+          telemetryService={telemetryService}
         />
       </KibanaContextProvider>
     </KibanaRenderContextProvider>

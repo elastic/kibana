@@ -56,7 +56,7 @@ const ExceptionsLinkedToListsComponent: React.FC<ExceptionsLinkedToListComponent
       <EuiInMemoryTable<ExceptionListRuleReferencesSchema>
         tableCaption="Table of exception lists"
         itemId="id"
-        message={message}
+        noItemsMessage={message}
         loading={isLoadingReferences}
         items={listAndReferences}
         error={error}

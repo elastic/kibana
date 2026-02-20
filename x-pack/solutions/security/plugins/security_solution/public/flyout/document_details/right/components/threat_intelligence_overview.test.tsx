@@ -19,6 +19,7 @@ import {
   SUMMARY_ROW_TEXT_TEST_ID,
 } from './test_ids';
 import {
+  EXPANDABLE_PANEL_HEADER_RIGHT_SECTION_TEST_ID,
   EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID,
   EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID,
   EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID,
@@ -26,9 +27,11 @@ import {
   EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID,
 } from '../../../shared/components/test_ids';
 import { useNavigateToLeftPanel } from '../../shared/hooks/use_navigate_to_left_panel';
+import { useKibana } from '../../../../common/lib/kibana';
 
 jest.mock('../../shared/context');
 jest.mock('../hooks/use_fetch_threat_intelligence');
+jest.mock('../../../../common/lib/kibana');
 
 const mockNavigateToLeftPanel = jest.fn();
 jest.mock('../../shared/hooks/use_navigate_to_left_panel');
@@ -43,6 +46,9 @@ const TITLE_ICON_TEST_ID = EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID(
   INSIGHTS_THREAT_INTELLIGENCE_TEST_ID
 );
 const TITLE_TEXT_TEST_ID = EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID(
+  INSIGHTS_THREAT_INTELLIGENCE_TEST_ID
+);
+const RIGHT_SECTION_TEXT_TEST_ID = EXPANDABLE_PANEL_HEADER_RIGHT_SECTION_TEST_ID(
   INSIGHTS_THREAT_INTELLIGENCE_TEST_ID
 );
 const LOADING_TEST_ID = EXPANDABLE_PANEL_LOADING_TEST_ID(INSIGHTS_THREAT_INTELLIGENCE_TEST_ID);
@@ -78,9 +84,13 @@ describe('<ThreatIntelligenceOverview />', () => {
     (useFetchThreatIntelligence as jest.Mock).mockReturnValue({
       loading: false,
     });
-    (useNavigateToLeftPanel as jest.Mock).mockReturnValue({
-      navigateToLeftPanel: mockNavigateToLeftPanel,
-      isEnabled: true,
+    (useNavigateToLeftPanel as jest.Mock).mockReturnValue(mockNavigateToLeftPanel);
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        storage: {
+          get: () => undefined,
+        },
+      },
     });
   });
 
@@ -93,30 +103,35 @@ describe('<ThreatIntelligenceOverview />', () => {
     expect(queryByTestId(TITLE_TEXT_TEST_ID)).not.toBeInTheDocument();
   });
 
+  it('should show default time range badge', () => {
+    const { getByTestId } = renderThreatIntelligenceOverview();
+
+    expect(getByTestId(RIGHT_SECTION_TEXT_TEST_ID)).toHaveTextContent('Time range applied');
+  });
+
+  it('should show custom time range badge', () => {
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        storage: {
+          get: () => ({ from: 'now-7d', to: 'now-3d' }),
+        },
+      },
+    });
+
+    const { getByTestId } = renderThreatIntelligenceOverview();
+
+    expect(getByTestId(RIGHT_SECTION_TEXT_TEST_ID)).toHaveTextContent('Custom time range applied');
+  });
+
   it('should render link without icon if in preview mode', () => {
     (useDocumentDetailsContext as jest.Mock).mockReturnValue({
       dataFormattedForFieldBrowser,
       isPreviewMode: true,
     });
-    (useNavigateToLeftPanel as jest.Mock).mockReturnValue({
-      navigateToLeftPanel: mockNavigateToLeftPanel,
-      isEnabled: true,
-    });
+
     const { getByTestId, queryByTestId } = renderThreatIntelligenceOverview();
     expect(queryByTestId(TITLE_ICON_TEST_ID)).not.toBeInTheDocument();
     expect(getByTestId(TITLE_LINK_TEST_ID)).toBeInTheDocument();
-  });
-
-  it('should not render link if navigation is not enabled', () => {
-    (useNavigateToLeftPanel as jest.Mock).mockReturnValue({
-      navigateToLeftPanel: mockNavigateToLeftPanel,
-      isEnabled: false,
-    });
-
-    const { getByTestId, queryByTestId } = renderThreatIntelligenceOverview();
-
-    expect(queryByTestId(TITLE_LINK_TEST_ID)).not.toBeInTheDocument();
-    expect(getByTestId(TITLE_TEXT_TEST_ID)).toBeInTheDocument();
   });
 
   it('should render 1 match detected and 1 field enriched', () => {

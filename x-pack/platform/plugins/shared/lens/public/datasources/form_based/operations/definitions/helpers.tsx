@@ -10,19 +10,20 @@ import React, { Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isEqual } from 'lodash';
 import type { Query } from '@kbn/es-query';
-import type { TextBasedLayerColumn } from '../../esql_layer/types';
-import type { IndexPattern, IndexPatternField } from '../../../../types';
-import {
-  type FieldBasedOperationErrorMessage,
-  type GenericIndexPatternColumn,
-  operationDefinitionMap,
-} from '.';
 import type {
   FieldBasedIndexPatternColumn,
   FormattedIndexPatternColumn,
+  GenericIndexPatternColumn,
   ReferenceBasedIndexPatternColumn,
-} from './column_types';
-import type { FormBasedLayer, LastValueIndexPatternColumn } from '../../types';
+  TextBasedLayerColumn,
+  LastValueIndexPatternColumn,
+  FormBasedLayer,
+  FormBasedPersistedState,
+  IndexPattern,
+  IndexPatternField,
+} from '@kbn/lens-common';
+import { cleanupFormulaReferenceColumns, hasStateFormulaColumn } from '@kbn/lens-common';
+import { type FieldBasedOperationErrorMessage, operationDefinitionMap } from '.';
 import { hasField } from '../../pure_utils';
 import { FIELD_NOT_FOUND, FIELD_WRONG_TYPE } from '../../../../user_messages_ids';
 
@@ -235,4 +236,21 @@ export function getFilter(
 
 export function isMetricCounterField(field?: IndexPatternField) {
   return field?.timeSeriesMetric === 'counter';
+}
+
+export function cleanupFormulaColumns(state: FormBasedPersistedState): FormBasedPersistedState {
+  // check whether it makes sense to perform all the work for formula
+  if (hasStateFormulaColumn(state)) {
+    return state;
+  }
+
+  const layers = { ...state.layers };
+  for (const layerId of Object.keys(layers)) {
+    layers[layerId] = cleanupFormulaReferenceColumns(layers[layerId]);
+  }
+
+  return {
+    ...state,
+    layers,
+  };
 }

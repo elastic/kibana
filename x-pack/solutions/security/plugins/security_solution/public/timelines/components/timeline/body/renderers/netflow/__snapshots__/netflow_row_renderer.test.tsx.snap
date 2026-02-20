@@ -10,22 +10,10 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
 }
 
 .c0 .euiAccordion + div {
-  background-color: #1d1e24;
+  background-color: #0B1628;
   padding: 0 8px;
-  border: 1px solid #343741;
+  border: 1px solid #243147;
   border-radius: 4px;
-}
-
-.c3 > span.euiToolTipAnchor {
-  display: block;
-}
-
-.c3 > span.euiToolTipAnchor.eui-textTruncate {
-  display: inline-block;
-}
-
-.c6 {
-  margin-right: 5px;
 }
 
 .c5 {
@@ -33,6 +21,10 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
 }
 
 .c4 {
+  margin-right: 5px;
+}
+
+.c3 {
   margin-right: 3px;
   position: relative;
   top: -1px;
@@ -82,15 +74,15 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                       >
                         <div>
                           <div
-                            data-provider-id="draggableId.content.draggable-badge-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-user_name-first_last"
                             tabindex="-1"
                           >
                             <span
-                              class="c3"
+                              class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
                               data-test-subj="render-content-user.name"
                             >
                               <span
                                 class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                                id="generated-id-wrapper"
                               >
                                 <span
                                   class="euiBadge eb5dvw90 emotion-euiBadge-hollow-Badge"
@@ -123,15 +115,15 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                   class="euiFlexItem emotion-euiFlexItem-growZero"
                 >
                   <div
-                    data-provider-id="draggableId.content.draggable-badge-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-process_name-rat"
                     tabindex="-1"
                   >
                     <span
-                      class="c3"
+                      class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
                       data-test-subj="render-content-process.name"
                     >
                       <span
                         class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                        id="generated-id-wrapper"
                       >
                         <span
                           class="euiBadge eb5dvw90 emotion-euiBadge-hollow-Badge"
@@ -169,22 +161,22 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                   class="euiFlexItem emotion-euiFlexItem-growZero"
                 >
                   <div
-                    data-provider-id="draggableId.content.duration-event-start-end-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-event_duration-1000000"
                     tabindex="-1"
                   >
                     <span
-                      class="c3"
+                      class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
                       data-test-subj="render-content-event.duration"
                     >
                       <div
                         class="euiText emotion-euiText-xs"
                       >
                         <span
-                          class="c4"
+                          class="c3"
                           data-euiicon-type="clock"
                         />
                         <span
                           class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                          id="generated-id-wrapper"
                         >
                           <div
                             data-test-subj="formatted-duration"
@@ -200,22 +192,22 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                   class="euiFlexItem emotion-euiFlexItem-growZero"
                 >
                   <div
-                    data-provider-id="draggableId.content.duration-event-start-end-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-event_start-2018-11-12T19:03:25_836Z"
                     tabindex="-1"
                   >
                     <span
-                      class="c3"
+                      class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
                       data-test-subj="render-content-event.start"
                     >
                       <div
                         class="euiText emotion-euiText-xs"
                       >
                         <span
-                          class="c4"
+                          class="c3"
                           data-euiicon-type="clock"
                         />
                         <span
                           class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                          id="generated-id-wrapper"
                         >
                           Nov 12, 2018 @ 19:03:25.836
                         </span>
@@ -235,22 +227,22 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                       >
                         <div>
                           <div
-                            data-provider-id="draggableId.content.duration-event-start-end-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-event_end-2018-11-12T19:03:25_936Z"
                             tabindex="-1"
                           >
                             <span
-                              class="c3"
+                              class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
                               data-test-subj="render-content-event.end"
                             >
                               <div
                                 class="euiText emotion-euiText-xs"
                               >
                                 <span
-                                  class="c4"
+                                  class="c3"
                                   data-euiicon-type="clock"
                                 />
                                 <span
                                   class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                                  id="generated-id-wrapper"
                                 >
                                   Nov 12, 2018 @ 19:03:25.936
                                 </span>
@@ -280,15 +272,15 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                       class="euiFlexItem e1kgdg111 emotion-euiFlexItem-growZero-EuiFlexItemMarginRight"
                     >
                       <div
-                        data-provider-id="draggableId.content.draggable-badge-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-network_direction-outgoing"
                         tabindex="-1"
                       >
                         <span
-                          class="c3"
+                          class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
                           data-test-subj="render-content-network.direction"
                         >
                           <span
                             class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                            id="generated-id-wrapper"
                           >
                             <span
                               class="euiBadge eb5dvw90 emotion-euiBadge-hollow-Badge"
@@ -317,15 +309,15 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                       class="euiFlexItem e1kgdg111 emotion-euiFlexItem-growZero-EuiFlexItemMarginRight"
                     >
                       <div
-                        data-provider-id="draggableId.content.draggable-badge-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-network_protocol-http"
                         tabindex="-1"
                       >
                         <span
-                          class="c3"
+                          class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
                           data-test-subj="render-content-network.protocol"
                         >
                           <span
                             class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                            id="generated-id-wrapper"
                           >
                             <span
                               class="euiBadge eb5dvw90 emotion-euiBadge-hollow-Badge"
@@ -349,15 +341,15 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                       class="euiFlexItem e1kgdg111 emotion-euiFlexItem-growZero-EuiFlexItemMarginRight"
                     >
                       <div
-                        data-provider-id="draggableId.content.network-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-network_bytes-100"
                         tabindex="-1"
                       >
                         <span
-                          class="c3"
+                          class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
                           data-test-subj="render-content-network.bytes"
                         >
                           <span
                             class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                            id="generated-id-wrapper"
                           >
                             <div
                               class="euiText e1kgdg110 emotion-euiText-xs-Stats"
@@ -374,15 +366,15 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                       class="euiFlexItem e1kgdg111 emotion-euiFlexItem-growZero-EuiFlexItemMarginRight"
                     >
                       <div
-                        data-provider-id="draggableId.content.network-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-network_packets-3"
                         tabindex="-1"
                       >
                         <span
-                          class="c3"
+                          class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
                           data-test-subj="render-content-network.packets"
                         >
                           <span
                             class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                            id="generated-id-wrapper"
                           >
                             <div
                               class="euiText e1kgdg110 emotion-euiText-xs-Stats"
@@ -399,15 +391,15 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                       class="euiFlexItem e1kgdg111 emotion-euiFlexItem-growZero-EuiFlexItemMarginRight"
                     >
                       <div
-                        data-provider-id="draggableId.content.draggable-badge-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-network_transport-tcp"
                         tabindex="-1"
                       >
                         <span
-                          class="c3"
+                          class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
                           data-test-subj="render-content-network.transport"
                         >
                           <span
                             class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                            id="generated-id-wrapper"
                           >
                             <span
                               class="euiBadge eb5dvw90 emotion-euiBadge-hollow-Badge"
@@ -431,15 +423,15 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                       class="euiFlexItem emotion-euiFlexItem-growZero"
                     >
                       <div
-                        data-provider-id="draggableId.content.draggable-badge-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-network_community_id-we_live_in_a"
                         tabindex="-1"
                       >
                         <span
-                          class="c3"
+                          class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
                           data-test-subj="render-content-network.community_id"
                         >
                           <span
                             class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                            id="generated-id-wrapper"
                           >
                             <span
                               class="euiBadge eb5dvw90 emotion-euiBadge-hollow-Badge"
@@ -582,15 +574,15 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                                         class="euiFlexItem emotion-euiFlexItem-growZero"
                                       >
                                         <div
-                                          data-provider-id="draggableId.content.geo-field-values-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-source_geo_continent_name-North America"
                                           tabindex="-1"
                                         >
                                           <span
-                                            class="c3"
+                                            class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
                                             data-test-subj="render-content-source.geo.continent_name"
                                           >
                                             <span
                                               class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                                              id="generated-id-wrapper"
                                             >
                                               North America
                                             </span>
@@ -609,15 +601,15 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                                         class="euiFlexItem emotion-euiFlexItem-growZero"
                                       >
                                         <div
-                                          data-provider-id="draggableId.content.geo-field-values-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-source_geo_country_name-United States"
                                           tabindex="-1"
                                         >
                                           <span
-                                            class="c3"
+                                            class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
                                             data-test-subj="render-content-source.geo.country_name"
                                           >
                                             <span
                                               class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                                              id="generated-id-wrapper"
                                             >
                                               United States
                                             </span>
@@ -646,15 +638,15 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                                         class="euiFlexItem emotion-euiFlexItem-growZero"
                                       >
                                         <div
-                                          data-provider-id="draggableId.content.geo-field-values-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-source_geo_country_iso_code-US"
                                           tabindex="-1"
                                         >
                                           <span
-                                            class="c3"
+                                            class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
                                             data-test-subj="render-content-source.geo.country_iso_code"
                                           >
                                             <span
                                               class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                                              id="generated-id-wrapper"
                                             >
                                               US
                                             </span>
@@ -681,15 +673,15 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                                             >
                                               <div>
                                                 <div
-                                                  data-provider-id="draggableId.content.geo-field-values-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-source_geo_region_name-Georgia"
                                                   tabindex="-1"
                                                 >
                                                   <span
-                                                    class="c3"
+                                                    class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
                                                     data-test-subj="render-content-source.geo.region_name"
                                                   >
                                                     <span
                                                       class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                                                      id="generated-id-wrapper"
                                                     >
                                                       Georgia
                                                     </span>
@@ -720,15 +712,15 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                                             >
                                               <div>
                                                 <div
-                                                  data-provider-id="draggableId.content.geo-field-values-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-source_geo_city_name-Atlanta"
                                                   tabindex="-1"
                                                 >
                                                   <span
-                                                    class="c3"
+                                                    class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
                                                     data-test-subj="render-content-source.geo.city_name"
                                                   >
                                                     <span
                                                       class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                                                      id="generated-id-wrapper"
                                                     >
                                                       Atlanta
                                                     </span>
@@ -769,15 +761,15 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                             class="euiFlexItem emotion-euiFlexItem-growZero"
                           >
                             <div
-                              data-provider-id="draggableId.content.source-arrow-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-source_bytes-60"
                               tabindex="-1"
                             >
                               <span
-                                class="c3"
+                                class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
                                 data-test-subj="render-content-source.bytes"
                               >
                                 <span
                                   class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                                  id="generated-id-wrapper"
                                 >
                                   <div
                                     class="euiText e1jag3830 emotion-euiText-xs-Data"
@@ -807,15 +799,15 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                             class="euiFlexItem emotion-euiFlexItem-growZero"
                           >
                             <div
-                              data-provider-id="draggableId.content.source-arrow-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-source_packets-2"
                               tabindex="-1"
                             >
                               <span
-                                class="c3"
+                                class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
                                 data-test-subj="render-content-source.packets"
                               >
                                 <span
                                   class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                                  id="generated-id-wrapper"
                                 >
                                   <div
                                     class="euiText e1jag3830 emotion-euiText-xs-Data"
@@ -882,15 +874,15 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                                 >
                                   <div>
                                     <div
-                                      data-provider-id="draggableId.content.destination-arrow-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-destination_bytes-40"
                                       tabindex="-1"
                                     >
                                       <span
-                                        class="c3"
+                                        class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
                                         data-test-subj="render-content-destination.bytes"
                                       >
                                         <span
                                           class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                                          id="generated-id-wrapper"
                                         >
                                           <div
                                             class="euiText e1jag3830 emotion-euiText-xs-Data"
@@ -924,15 +916,15 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                             class="euiFlexItem emotion-euiFlexItem-growZero"
                           >
                             <div
-                              data-provider-id="draggableId.content.destination-arrow-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-destination_packets-1"
                               tabindex="-1"
                             >
                               <span
-                                class="c3"
+                                class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
                                 data-test-subj="render-content-destination.packets"
                               >
                                 <span
                                   class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                                  id="generated-id-wrapper"
                                 >
                                   <div
                                     class="euiText e1jag3830 emotion-euiText-xs-Data"
@@ -1071,15 +1063,15 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                                         class="euiFlexItem emotion-euiFlexItem-growZero"
                                       >
                                         <div
-                                          data-provider-id="draggableId.content.geo-field-values-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-destination_geo_continent_name-North America"
                                           tabindex="-1"
                                         >
                                           <span
-                                            class="c3"
+                                            class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
                                             data-test-subj="render-content-destination.geo.continent_name"
                                           >
                                             <span
                                               class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                                              id="generated-id-wrapper"
                                             >
                                               North America
                                             </span>
@@ -1098,15 +1090,15 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                                         class="euiFlexItem emotion-euiFlexItem-growZero"
                                       >
                                         <div
-                                          data-provider-id="draggableId.content.geo-field-values-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-destination_geo_country_name-United States"
                                           tabindex="-1"
                                         >
                                           <span
-                                            class="c3"
+                                            class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
                                             data-test-subj="render-content-destination.geo.country_name"
                                           >
                                             <span
                                               class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                                              id="generated-id-wrapper"
                                             >
                                               United States
                                             </span>
@@ -1135,15 +1127,15 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                                         class="euiFlexItem emotion-euiFlexItem-growZero"
                                       >
                                         <div
-                                          data-provider-id="draggableId.content.geo-field-values-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-destination_geo_country_iso_code-US"
                                           tabindex="-1"
                                         >
                                           <span
-                                            class="c3"
+                                            class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
                                             data-test-subj="render-content-destination.geo.country_iso_code"
                                           >
                                             <span
                                               class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                                              id="generated-id-wrapper"
                                             >
                                               US
                                             </span>
@@ -1162,15 +1154,15 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                                         class="euiFlexItem emotion-euiFlexItem-growZero"
                                       >
                                         <div
-                                          data-provider-id="draggableId.content.geo-field-values-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-destination_geo_region_name-New York"
                                           tabindex="-1"
                                         >
                                           <span
-                                            class="c3"
+                                            class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
                                             data-test-subj="render-content-destination.geo.region_name"
                                           >
                                             <span
                                               class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                                              id="generated-id-wrapper"
                                             >
                                               New York
                                             </span>
@@ -1189,15 +1181,15 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                                         class="euiFlexItem emotion-euiFlexItem-growZero"
                                       >
                                         <div
-                                          data-provider-id="draggableId.content.geo-field-values-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-destination_geo_city_name-New York"
                                           tabindex="-1"
                                         >
                                           <span
-                                            class="c3"
+                                            class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
                                             data-test-subj="render-content-destination.geo.city_name"
                                           >
                                             <span
                                               class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                                              id="generated-id-wrapper"
                                             >
                                               New York
                                             </span>
@@ -1230,15 +1222,15 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
               class="euiFlexItem emotion-euiFlexItem-growZero"
             >
               <div
-                data-provider-id="draggableId.content.draggable-badge-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-tls_fingerprints_ja3_hash-tls_fingerprints_ja3_hash-value"
                 tabindex="-1"
               >
                 <span
-                  class="c3"
+                  class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
                   data-test-subj="render-content-tls.fingerprints.ja3.hash"
                 >
                   <span
                     class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                    id="generated-id-wrapper"
                   >
                     <span
                       class="euiBadge eb5dvw90 emotion-euiBadge-hollow-Badge"
@@ -1256,7 +1248,7 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                           class="euiBadge__text emotion-euiBadge__text"
                         >
                           <span
-                            class="c5"
+                            class="c4"
                           >
                             ja3
                           </span>
@@ -1290,15 +1282,15 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
               class="euiFlexItem emotion-euiFlexItem-growZero"
             >
               <div
-                data-provider-id="draggableId.content.draggable-badge-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-tls_client_certificate_fingerprint_sha1-tls_client_certificate_fingerprint_sha1-value"
                 tabindex="-1"
               >
                 <span
-                  class="c3"
+                  class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
                   data-test-subj="render-content-tls.client_certificate.fingerprint.sha1"
                 >
                   <span
                     class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                    id="generated-id-wrapper"
                   >
                     <span
                       class="euiBadge eb5dvw90 emotion-euiBadge-hollow-Badge"
@@ -1316,7 +1308,7 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                           class="euiBadge__text emotion-euiBadge__text"
                         >
                           <span
-                            class="c6"
+                            class="c5"
                           >
                             client cert
                           </span>
@@ -1350,15 +1342,15 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
               class="euiFlexItem emotion-euiFlexItem-growZero"
             >
               <div
-                data-provider-id="draggableId.content.draggable-badge-default-draggable-netflow-row-renderer-render-row-timeline-test-abcd-abcd-tls_server_certificate_fingerprint_sha1-tls_server_certificate_fingerprint_sha1-value"
                 tabindex="-1"
               >
                 <span
-                  class="c3"
+                  class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
                   data-test-subj="render-content-tls.server_certificate.fingerprint.sha1"
                 >
                   <span
                     class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                    id="generated-id-wrapper"
                   >
                     <span
                       class="euiBadge eb5dvw90 emotion-euiBadge-hollow-Badge"
@@ -1376,7 +1368,7 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                           class="euiBadge__text emotion-euiBadge__text"
                         >
                           <span
-                            class="c6"
+                            class="c5"
                           >
                             server cert
                           </span>

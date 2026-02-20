@@ -11,6 +11,7 @@ import type {
   InlineEditLensEmbeddableContext,
 } from '@kbn/lens-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import {
   EuiFlexGroup,
@@ -139,12 +140,16 @@ export const LensChart = (props: {
           <EuiButtonIcon
             size="xs"
             iconType="pencil"
+            aria-label={i18n.translate('lensChart.editButton.ariaLabel', {
+              defaultMessage: 'Edit chart',
+            })}
             onClick={() => {
               props?.setPanelActive?.(props.isESQL ? 1 : 2);
               if (triggerOptions) {
-                props.plugins.uiActions
-                  .getTrigger('IN_APP_EMBEDDABLE_EDIT_TRIGGER')
-                  .exec(triggerOptions);
+                props.plugins.uiActions.executeTriggerActions(
+                  'IN_APP_EMBEDDABLE_EDIT_TRIGGER',
+                  triggerOptions
+                );
                 props?.setIsinlineEditingVisible?.(true);
               }
             }}

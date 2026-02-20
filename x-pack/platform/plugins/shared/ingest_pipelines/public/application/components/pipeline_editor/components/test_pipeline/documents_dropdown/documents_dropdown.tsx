@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { FunctionComponent } from 'react';
+import type { CSSProperties, FunctionComponent } from 'react';
 import React, { useState } from 'react';
 import {
   EuiButton,
@@ -20,8 +20,6 @@ import {
 import type { Document } from '../../../types';
 
 import type { TestPipelineFlyoutTab } from '../test_pipeline_tabs';
-
-import './documents_dropdown.scss';
 
 const i18nTexts = {
   dropdownLabel: i18n.translate(
@@ -51,13 +49,15 @@ interface Props {
   openFlyout: (activeFlyoutTab: TestPipelineFlyoutTab) => void;
 }
 
+const panelStyle = { minWidth: '200px' } satisfies CSSProperties;
+
 export const DocumentsDropdown: FunctionComponent<Props> = ({
   documents,
   selectedDocumentIndex,
   updateSelectedDocument,
   openFlyout,
 }) => {
-  const [showPopover, setShowPopover] = useState<boolean>(false);
+  const [showPopover, setShowPopover] = useState(false);
 
   const managePipelineButton = (
     <EuiButtonEmpty
@@ -83,7 +83,7 @@ export const DocumentsDropdown: FunctionComponent<Props> = ({
       panelPaddingSize="none"
       repositionOnScroll
       data-test-subj="documentsDropdown"
-      panelClassName="documentsDropdownPanel"
+      panelStyle={panelStyle}
     >
       <EuiSelectable
         singleSelection

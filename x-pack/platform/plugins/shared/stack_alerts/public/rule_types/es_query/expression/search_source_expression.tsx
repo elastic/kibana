@@ -43,7 +43,6 @@ export const SearchSourceExpression = ({
     termField,
     termSize,
     excludeHitsFromPreviousRun,
-    sourceFields,
   } = ruleParams;
   const { data, isServerless } = useTriggerUiActionServices();
 
@@ -93,7 +92,8 @@ export const SearchSourceExpression = ({
           termSize: termSize ?? DEFAULT_VALUES.TERM_SIZE,
           excludeHitsFromPreviousRun:
             excludeHitsFromPreviousRun ?? DEFAULT_VALUES.EXCLUDE_PREVIOUS_HITS,
-          sourceFields,
+          // The sourceFields param is ignored
+          sourceFields: [],
         });
         setSearchSource(createdSearchSource);
       } catch (error) {
@@ -114,7 +114,7 @@ export const SearchSourceExpression = ({
   if (paramsError) {
     return (
       <>
-        <EuiCallOut color="danger" iconType="warning">
+        <EuiCallOut announceOnMount color="danger" iconType="warning">
           <p>{paramsError.message}</p>
         </EuiCallOut>
         <EuiSpacer size="s" />

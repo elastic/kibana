@@ -29,7 +29,7 @@ import type {
   RegistryInput,
 } from '../../../../common/types';
 import { _sortYamlKeys } from '../../../../common/services/full_agent_policy_to_yaml';
-import { generateOtelcolConfig } from '../../agent_policies/full_agent_policy';
+import { generateOtelcolConfig } from '../../agent_policies/otel_collector';
 import { OTEL_COLLECTOR_INPUT_TYPE } from '../../../../common/constants';
 import { getInputsWithIds } from '../../package_policies/get_input_with_ids';
 
@@ -197,7 +197,8 @@ export async function getTemplateInputs(
 
   let otelcolConfig;
   if (experimentalFeature.enableOtelIntegrations) {
-    otelcolConfig = generateOtelcolConfig(inputs);
+    // Template inputs don't have package info cache, so pass undefined
+    otelcolConfig = generateOtelcolConfig(inputs, undefined, undefined);
   }
   // filter out the otelcol inputs, they will be added at the root of the config
   const filteredInputs = inputs.filter((input) => input.type !== OTEL_COLLECTOR_INPUT_TYPE);

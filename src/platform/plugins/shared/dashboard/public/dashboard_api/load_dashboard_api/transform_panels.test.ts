@@ -11,47 +11,45 @@ import type { Reference } from '@kbn/content-management-utils';
 import { transformPanels } from './transform_panels';
 import type { DashboardPanel, DashboardSection } from '../../../server';
 
-jest.mock('../../services/kibana_services', () => {
-  function mockTransformOut(state: object, references?: Reference[]) {
-    // Implemenation exists for testing purposes only
-    // transformOut should not throw if there are no references
-    if (!references || references.length === 0) throw new Error('Simulated transformOut error');
-
-    return {
-      savedObjectId: references[0].id,
-    };
-  }
-  return {
-    embeddableService: {
-      getTransforms: async () => ({
-        transformOut: mockTransformOut,
-      }),
-    },
-  };
-});
-
 describe('transformPanels', () => {
+  const mockTransformOut = jest.fn();
+  beforeAll(() => {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    require('../../services/kibana_services').embeddableService = {
+      getLegacyURLTransform: async () => mockTransformOut,
+    };
+  });
+
+  beforeEach(() => {
+    mockTransformOut.mockReset();
+  });
+
   test('should transform panels', async () => {
+    mockTransformOut.mockImplementation((state: object, references?: Reference[]) => {
+      return {
+        savedObjectId: references?.[0]?.id,
+      };
+    });
     const panels = await transformPanels(
       [
         {
-          gridData: { x: 0, y: 0, w: 6, h: 6, i: '1' },
-          panelConfig: {},
-          panelIndex: '1',
+          grid: { x: 0, y: 0, w: 6, h: 6 },
+          config: {},
+          uid: '1',
           type: 'testPanelType',
         },
         {
           title: 'Section One',
           collapsed: true,
-          gridData: {
+          grid: {
             y: 6,
-            i: 'section1',
           },
+          uid: 'section1',
           panels: [
             {
-              gridData: { x: 0, y: 0, w: 6, h: 6, i: '3' },
-              panelConfig: {},
-              panelIndex: '3',
+              grid: { x: 0, y: 0, w: 6, h: 6 },
+              config: {},
+              uid: '3',
               type: 'testPanelType',
             },
           ],
@@ -70,24 +68,27 @@ describe('transformPanels', () => {
         },
       ]
     );
-    expect((panels[0] as DashboardPanel).panelConfig).toEqual({
+    expect((panels[0] as DashboardPanel).config).toEqual({
       savedObjectId: '1234',
     });
-    expect((panels[1] as DashboardSection).panels[0].panelConfig).toEqual({
+    expect((panels[1] as DashboardSection).panels[0].config).toEqual({
       savedObjectId: '5678',
     });
   });
 
   test('should handle transformOut throw', async () => {
+    mockTransformOut.mockImplementation((state: object, references?: Reference[]) => {
+      throw new Error('Simulated transformOut error');
+    });
     const panels = await transformPanels([
       {
-        gridData: { x: 0, y: 0, w: 6, h: 6, i: '1' },
-        panelConfig: { title: 'panel One' },
-        panelIndex: '1',
+        grid: { x: 0, y: 0, w: 6, h: 6 },
+        config: { title: 'panel One' },
+        uid: '1',
         type: 'testPanelType',
       },
     ]);
-    expect((panels[0] as DashboardPanel).panelConfig).toEqual({
+    expect((panels[0] as DashboardPanel).config).toEqual({
       title: 'panel One',
     });
   });

@@ -7,12 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// TODO: Remove eslint exceptions comments and fix the issues
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+import { ExecutionError } from '@kbn/workflows/server';
+import type { BaseStep, RunStepResult } from './node_implementation';
+import { BaseAtomicNodeImplementation } from './node_implementation';
 import type { ConnectorExecutor } from '../connector_executor';
-import type { WorkflowContextManager } from '../workflow_context_manager/workflow_context_manager';
+import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
-import type { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
-import type { RunStepResult, BaseStep } from './step_base';
-import { StepBase } from './step_base';
+import type { IWorkflowEventLogger } from '../workflow_event_logger';
 
 // Extend BaseStep for connector-specific properties
 export interface ConnectorStep extends BaseStep {
@@ -20,29 +24,21 @@ export interface ConnectorStep extends BaseStep {
   with?: Record<string, any>;
 }
 
-export class ConnectorStepImpl extends StepBase<ConnectorStep> {
+export class ConnectorStepImpl extends BaseAtomicNodeImplementation<ConnectorStep> {
   constructor(
     step: ConnectorStep,
-    contextManager: WorkflowContextManager,
+    stepExecutionRuntime: StepExecutionRuntime,
     connectorExecutor: ConnectorExecutor,
     workflowState: WorkflowExecutionRuntimeManager,
     private workflowLogger: IWorkflowEventLogger
   ) {
-    super(step, contextManager, connectorExecutor, workflowState);
+    super(step, stepExecutionRuntime, connectorExecutor, workflowState);
   }
 
   public getInput() {
-    // Get current context for templating
-    const context = this.contextManager.getContext();
-    // Render inputs from 'with'
-    return Object.entries(this.step.with ?? {}).reduce((acc: Record<string, any>, [key, value]) => {
-      if (typeof value === 'string') {
-        acc[key] = this.templatingEngine.render(value, context);
-      } else {
-        acc[key] = value;
-      }
-      return acc;
-    }, {});
+    return this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(
+      this.step.with || {}
+    );
   }
 
   public async _run(withInputs?: any): Promise<RunStepResult> {
@@ -56,26 +52,15 @@ export class ConnectorStepImpl extends StepBase<ConnectorStep> {
       const isSubAction = subActionName !== null;
 
       // TODO: remove this once we have a proper connector executor/step for console
-      if (step.type === 'console.log' || step.type === 'console') {
+      if (step.type === 'console') {
         this.workflowLogger.logInfo(`Log from step ${step.name}: \n${withInputs.message}`, {
           workflow: { step_id: step.name },
           event: { action: 'log', outcome: 'success' },
           tags: ['console', 'log'],
         });
-        // eslint-disable-next-line no-console
-        console.log(withInputs.message);
         return {
           input: withInputs,
           output: withInputs.message,
-          error: undefined,
-        };
-      } else if (step.type === 'delay') {
-        const delayTime = step.with?.delay ?? 1000;
-        // this.contextManager.logDebug(`Delaying for ${delayTime}ms`);
-        await new Promise((resolve) => setTimeout(resolve, delayTime));
-        return {
-          input: withInputs,
-          output: `Delayed for ${delayTime}ms`,
           error: undefined,
         };
       }
@@ -88,14 +73,24 @@ export class ConnectorStepImpl extends StepBase<ConnectorStep> {
           }
         : withInputs;
 
+      const connectorIdRendered =
+        this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(
+          step['connector-id']
+        );
+
+      if (!connectorIdRendered) {
+        throw new Error(`Connector ID is required`);
+      }
+
       const output = await this.connectorExecutor.execute(
         stepType,
-        step['connector-id']!,
+        connectorIdRendered,
         renderedInputs,
-        step.spaceId
+        step.spaceId,
+        this.stepExecutionRuntime.abortController
       );
 
-      const { data, status, message } = output;
+      const { data, status, message, serviceMessage } = output;
 
       if (status === 'ok') {
         return {
@@ -104,10 +99,17 @@ export class ConnectorStepImpl extends StepBase<ConnectorStep> {
           error: undefined,
         };
       } else {
-        return await this.handleFailure(withInputs, message);
+        return {
+          input: withInputs,
+          output: undefined,
+          error: new ExecutionError({
+            type: 'ConnectorExecutionError',
+            message: serviceMessage ?? message ?? 'Unknown error',
+          }),
+        };
       }
     } catch (error) {
-      return await this.handleFailure(withInputs, error);
+      return this.handleFailure(withInputs, error);
     }
   }
 }

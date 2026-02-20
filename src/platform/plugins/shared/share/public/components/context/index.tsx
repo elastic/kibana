@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type PropsWithChildren, createContext, useContext } from 'react';
+import React, { type PropsWithChildren, createContext, useContext, useState } from 'react';
 
 import type { ShareConfigs, ShareTypes, ShowShareMenuOptions } from '../../types';
 
 export interface IShareContext extends Omit<ShowShareMenuOptions, 'onClose'> {
   onClose: () => void;
   shareMenuItems: ShareConfigs[];
+  isSaving?: boolean;
 }
 
 const ShareContext = createContext<IShareContext | null>(null);
@@ -22,7 +23,35 @@ export const ShareProvider = ({
   shareContext,
   children,
 }: PropsWithChildren<{ shareContext: IShareContext }>) => {
-  return <ShareContext.Provider value={shareContext}>{children}</ShareContext.Provider>;
+  // If consumers provide an onSave function, we need to manage the state internally
+  const isStateful = Boolean(shareContext.onSave);
+  const [internalIsDirty, setInternalIsDirty] = useState(shareContext.isDirty);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleSave = async () => {
+    if (shareContext.onSave) {
+      setIsSaving(true);
+      try {
+        await shareContext.onSave();
+        setInternalIsDirty(false);
+      } catch (error) {
+        // onSave function is responsible for handling the error
+        // In case it doesn't, we still want to catch it to
+        // make sure the loading state is reset and allow retries.
+      } finally {
+        setIsSaving(false);
+      }
+    }
+  };
+
+  const value: IShareContext = {
+    ...shareContext,
+    isDirty: isStateful ? internalIsDirty : shareContext.isDirty,
+    isSaving,
+    onSave: isStateful ? handleSave : undefined,
+  };
+
+  return <ShareContext.Provider value={value}>{children}</ShareContext.Provider>;
 };
 
 export const useShareContext = () => {

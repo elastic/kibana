@@ -8,16 +8,7 @@
  */
 
 import { getStatusCodeDecorations } from './status_code_decoration_utils';
-import { STATUS_CODE_LINE_CLASSNAME } from './constants';
 import type { RequestResult } from '../../../hooks/use_send_current_request/send_request';
-
-const SUCCESS_STATUS_CODE_CLASSNAME = `${STATUS_CODE_LINE_CLASSNAME}--success`;
-const WARNING_STATUS_CODE_CLASSNAME = `${STATUS_CODE_LINE_CLASSNAME}--warning`;
-const DANGER_STATUS_CODE_CLASSNAME = `${STATUS_CODE_LINE_CLASSNAME}--danger`;
-
-const SUCCESS_STATUS_CODE_LINE_CLASSNAME = `${STATUS_CODE_LINE_CLASSNAME}_number--success`;
-const WARNING_STATUS_CODE_LINE_CLASSNAME = `${STATUS_CODE_LINE_CLASSNAME}_number--warning`;
-const DANGER_STATUS_CODE_LINE_CLASSNAME = `${STATUS_CODE_LINE_CLASSNAME}_number--danger`;
 
 describe('getStatusCodeDecorations', () => {
   it('correctly returns all decorations on full data', () => {
@@ -92,6 +83,19 @@ describe('getStatusCodeDecorations', () => {
       },
     ];
 
+    const SAMPLE_CLASSNAMES = {
+      monacoStatusCodeLineDefault: '.emotionGeneratedStatusCodeLineClassNameDefault',
+      monacoStatusCodeLineNumberDefault: '.emotionGeneratedStatusCodeLineClassName_numberDefault',
+      monacoStatusCodeLineSuccess: '.emotionGeneratedStatusCodeLineClassNameStatus',
+      monacoStatusCodeLineNumberSuccess: '.emotionGeneratedStatusCodeLineClassName_numberStatus',
+      monacoStatusCodeLinePrimary: '.emotionGeneratedStatusCodeLineClassNamePrimary',
+      monacoStatusCodeLineNumberPrimary: '.emotionGeneratedStatusCodeLineClassName_numberPrimary',
+      monacoStatusCodeLineWarning: '.emotionGeneratedStatusCodeLineClassNameWarning',
+      monacoStatusCodeLineNumberWarning: '.emotionGeneratedStatusCodeLineClassName_numberWarning',
+      monacoStatusCodeLineDanger: '.emotionGeneratedStatusCodeLineClassNameDanger',
+      monacoStatusCodeLineNumberDanger: '.emotionGeneratedStatusCodeLineClassName_numberDanger',
+    };
+
     const EXPECTED_DECORATIONS = [
       {
         range: {
@@ -102,8 +106,8 @@ describe('getStatusCodeDecorations', () => {
         },
         options: {
           isWholeLine: true,
-          blockClassName: SUCCESS_STATUS_CODE_CLASSNAME,
-          marginClassName: SUCCESS_STATUS_CODE_LINE_CLASSNAME,
+          blockClassName: SAMPLE_CLASSNAMES.monacoStatusCodeLineSuccess,
+          marginClassName: SAMPLE_CLASSNAMES.monacoStatusCodeLineNumberSuccess,
         },
       },
       {
@@ -115,8 +119,8 @@ describe('getStatusCodeDecorations', () => {
         },
         options: {
           isWholeLine: true,
-          blockClassName: WARNING_STATUS_CODE_CLASSNAME,
-          marginClassName: WARNING_STATUS_CODE_LINE_CLASSNAME,
+          blockClassName: SAMPLE_CLASSNAMES.monacoStatusCodeLineWarning,
+          marginClassName: SAMPLE_CLASSNAMES.monacoStatusCodeLineNumberWarning,
         },
       },
       {
@@ -128,12 +132,14 @@ describe('getStatusCodeDecorations', () => {
         },
         options: {
           isWholeLine: true,
-          blockClassName: DANGER_STATUS_CODE_CLASSNAME,
-          marginClassName: DANGER_STATUS_CODE_LINE_CLASSNAME,
+          blockClassName: SAMPLE_CLASSNAMES.monacoStatusCodeLineDanger,
+          marginClassName: SAMPLE_CLASSNAMES.monacoStatusCodeLineNumberDanger,
         },
       },
     ];
 
-    expect(getStatusCodeDecorations(SAMPLE_COMPLETE_DATA)).toEqual(EXPECTED_DECORATIONS);
+    expect(getStatusCodeDecorations(SAMPLE_COMPLETE_DATA, SAMPLE_CLASSNAMES)).toEqual(
+      EXPECTED_DECORATIONS
+    );
   });
 });

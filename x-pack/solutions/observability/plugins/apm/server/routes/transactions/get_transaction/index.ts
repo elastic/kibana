@@ -6,40 +6,42 @@
  */
 
 import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
-import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
 import type { Transaction } from '@kbn/apm-types';
 import { maybe } from '../../../../common/utils/maybe';
 import {
+  TRACE_ID,
   AGENT_NAME,
   PROCESSOR_EVENT,
-  SERVICE_NAME,
+  AT_TIMESTAMP,
   TIMESTAMP_US,
-  TRACE_ID,
-  TRANSACTION_DURATION,
+  SERVICE_NAME,
   TRANSACTION_ID,
+  TRANSACTION_DURATION,
   TRANSACTION_NAME,
   TRANSACTION_SAMPLED,
   TRANSACTION_TYPE,
-  AT_TIMESTAMP,
-  PROCESSOR_NAME,
   SPAN_LINKS,
   TRANSACTION_MARKS_AGENT,
-  SERVICE_LANGUAGE_NAME,
-  URL_FULL,
-  HTTP_REQUEST_METHOD,
-  HTTP_RESPONSE_STATUS_CODE,
-  TRANSACTION_PAGE_URL,
-  USER_AGENT_NAME,
-  URL_PATH,
-  URL_SCHEME,
-  SERVER_ADDRESS,
-  SERVER_PORT,
-  USER_AGENT_VERSION,
 } from '../../../../common/es_fields/apm';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { ApmDocumentType } from '../../../../common/document_type';
 import { RollupInterval } from '../../../../common/rollup';
+
+const requiredFields = asMutableArray([
+  TRACE_ID,
+  AGENT_NAME,
+  PROCESSOR_EVENT,
+  AT_TIMESTAMP,
+  TIMESTAMP_US,
+  SERVICE_NAME,
+  TRANSACTION_ID,
+  TRANSACTION_DURATION,
+  TRANSACTION_NAME,
+  TRANSACTION_SAMPLED,
+  TRANSACTION_TYPE,
+] as const);
 
 export async function getTransaction({
   transactionId,
@@ -54,35 +56,6 @@ export async function getTransaction({
   start: number;
   end: number;
 }): Promise<Transaction | undefined> {
-  const requiredFields = asMutableArray([
-    TRACE_ID,
-    AGENT_NAME,
-    PROCESSOR_EVENT,
-    AT_TIMESTAMP,
-    TIMESTAMP_US,
-    SERVICE_NAME,
-    TRANSACTION_ID,
-    TRANSACTION_DURATION,
-    TRANSACTION_NAME,
-    TRANSACTION_SAMPLED,
-    TRANSACTION_TYPE,
-  ] as const);
-
-  const optionalFields = asMutableArray([
-    PROCESSOR_NAME,
-    SERVICE_LANGUAGE_NAME,
-    URL_FULL,
-    TRANSACTION_PAGE_URL,
-    HTTP_RESPONSE_STATUS_CODE,
-    HTTP_REQUEST_METHOD,
-    USER_AGENT_NAME,
-    URL_PATH,
-    URL_SCHEME,
-    SERVER_ADDRESS,
-    SERVER_PORT,
-    USER_AGENT_VERSION,
-  ] as const);
-
   const resp = await apmEventClient.search('get_transaction', {
     apm: {
       sources: [
@@ -104,7 +77,8 @@ export async function getTransaction({
         ]),
       },
     },
-    fields: [...requiredFields, ...optionalFields],
+    // Custom links should allow users to use any transaction field as a placeholder.
+    fields: [{ field: '*', include_unmapped: true }],
     _source: [SPAN_LINKS, TRANSACTION_MARKS_AGENT],
   });
 
@@ -114,7 +88,9 @@ export async function getTransaction({
     return undefined;
   }
 
-  const event = unflattenKnownApmEventFields(hit.fields, requiredFields);
+  const { server, transaction, processor, ...event } = accessKnownApmEventFields(hit.fields)
+    .requireFields(requiredFields)
+    .unflatten();
 
   const source =
     'span' in hit._source || 'transaction' in hit._source
@@ -124,14 +100,16 @@ export async function getTransaction({
         })
       : undefined;
 
+  const serverTransaction = server as Transaction['server'];
+
   return {
     ...event,
     server: {
-      ...event.server,
-      port: event.server?.port ? Number(event.server?.port) : undefined,
+      ...serverTransaction,
+      port: serverTransaction?.port ? Number(serverTransaction.port) : undefined,
     },
     transaction: {
-      ...event.transaction,
+      ...transaction,
       marks: source?.transaction?.marks,
     },
     processor: {
@@ -139,5 +117,5 @@ export async function getTransaction({
       event: 'transaction',
     },
     span: source?.span,
-  };
+  } as Transaction;
 }

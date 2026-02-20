@@ -96,6 +96,7 @@ export const PathParameter = ({ field, allFields }: Props) => {
               {!Boolean(suggestedFields.length) && (
                 <>
                   <EuiCallOut
+                    announceOnMount
                     size="s"
                     color="warning"
                     title={i18n.translate(

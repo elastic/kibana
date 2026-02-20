@@ -32,6 +32,7 @@ describe('saved_searches_utils', () => {
             rowsPerPage: 250,
             sampleSize: 1000,
             breakdownField: 'extension.keyword',
+            chartInterval: 'm',
           },
         },
       ];
@@ -48,6 +49,8 @@ describe('saved_searches_utils', () => {
         rowsPerPage: 250,
         sampleSize: 1000,
         breakdownField: 'extension.keyword',
+        chartInterval: 'm',
+        controlGroupJson: undefined,
         tabs,
       };
 
@@ -64,10 +67,12 @@ describe('saved_searches_utils', () => {
       ).toMatchInlineSnapshot(`
         Object {
           "breakdownField": "extension.keyword",
+          "chartInterval": "m",
           "columns": Array [
             "a",
             "b",
           ],
+          "controlGroupJson": undefined,
           "density": undefined,
           "description": "foo",
           "grid": Object {},
@@ -112,6 +117,7 @@ describe('saved_searches_utils', () => {
             Object {
               "attributes": Object {
                 "breakdownField": "extension.keyword",
+                "chartInterval": "m",
                 "columns": Array [
                   "a",
                   "b",

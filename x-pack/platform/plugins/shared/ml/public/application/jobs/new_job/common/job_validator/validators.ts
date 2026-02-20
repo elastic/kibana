@@ -113,6 +113,8 @@ export function cardinalityValidator(
 
 export function jobIdValidator(jobCreator$: Subject<JobCreator>): Observable<JobExistsResult> {
   return jobCreator$.pipe(
+    // Emit a fresh { jobId, mlApi } snapshot to catch jobId changes
+    map((jc) => ({ jobId: jc.jobId, mlApi: jc.mlApi })),
     // No need to perform an API call if the analysis configuration hasn't been changed
     distinctUntilChanged(
       (prevJobCreator, currJobCreator) => prevJobCreator.jobId === currJobCreator.jobId

@@ -143,8 +143,14 @@ export async function createCCSIndexPatterns(
     return;
   }
 
-  const remoteInfo = await esClient.cluster.remoteInfo();
-  const remoteClusterNames = Object.keys(remoteInfo);
+  let remoteClusterNames: string[] = [];
+  try {
+    const remoteInfo = await esClient.cluster.remoteInfo();
+    remoteClusterNames = Object.keys(remoteInfo);
+  } catch (error) {
+    appContextService.getLogger().warn(`Error fetching remote cluster info: ${error.message}`);
+    return;
+  }
 
   if (remoteClusterNames.length === 0) {
     return;

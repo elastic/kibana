@@ -29,6 +29,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { SearchNavigationPluginStart } from '@kbn/search-navigation/public';
 import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { LicenseManagementUIPluginSetup } from '@kbn/license-management-plugin/public';
 import type {
   ActionConnector,
   UserConfiguredActionConnector,
@@ -52,6 +53,7 @@ export interface SearchPlaygroundPluginStart {}
 export interface AppPluginSetupDependencies {
   cloud?: CloudSetup;
   share: SharePluginSetup;
+  licenseManagement?: LicenseManagementUIPluginSetup;
 }
 
 export interface AppPluginStartDependencies {
@@ -69,7 +71,17 @@ export interface AppPluginStartDependencies {
   uiActions: UiActionsStart;
 }
 
-export type AppServicesContext = CoreStart & AppPluginStartDependencies;
+export interface PlaygroundLicenseStatus {
+  hasRequiredLicense: boolean;
+  hasExpiredLicense: boolean;
+}
+
+export type AppServices = AppPluginStartDependencies & {
+  licenseManagement?: LicenseManagementUIPluginSetup;
+  getLicenseStatus: () => PlaygroundLicenseStatus;
+};
+
+export type AppServicesContext = CoreStart & AppServices;
 
 export enum PlaygroundFormFields {
   question = 'question',
@@ -175,8 +187,6 @@ export interface ElasticsearchIndex {
   };
   uuid?: Uuid;
 }
-
-export type JSONValue = null | string | number | boolean | { [x: string]: JSONValue } | JSONValue[];
 
 export interface ChatRequestOptions {
   options?: RequestOptions;

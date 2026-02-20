@@ -107,7 +107,8 @@ describe('fetchSearchSourceQuery', () => {
         undefined,
         dateStart,
         dateEnd,
-        logger
+        logger,
+        100
       );
       const searchRequest = searchSource.getSearchRequestBody();
       expect(filterToExcludeHitsFromPreviousRun).toBe(null);
@@ -148,7 +149,8 @@ describe('fetchSearchSourceQuery', () => {
         '2020-02-09T23:12:41.941Z',
         dateStart,
         dateEnd,
-        logger
+        logger,
+        100
       );
       const searchRequest = searchSource.getSearchRequestBody();
       expect(searchRequest.track_total_hits).toBe(true);
@@ -214,7 +216,8 @@ describe('fetchSearchSourceQuery', () => {
         '2020-01-09T22:12:41.941Z',
         dateStart,
         dateEnd,
-        logger
+        logger,
+        100
       );
       const searchRequest = searchSource.getSearchRequestBody();
       expect(filterToExcludeHitsFromPreviousRun).toBe(null);
@@ -255,7 +258,8 @@ describe('fetchSearchSourceQuery', () => {
         '2020-02-09T23:12:41.941Z',
         dateStart,
         dateEnd,
-        logger
+        logger,
+        100
       );
       const searchRequest = searchSource.getSearchRequestBody();
       expect(filterToExcludeHitsFromPreviousRun).toBe(null);
@@ -302,7 +306,8 @@ describe('fetchSearchSourceQuery', () => {
         '2020-02-09T23:12:41.941Z',
         dateStart,
         dateEnd,
-        logger
+        logger,
+        100
       );
       const searchRequest = searchSource.getSearchRequestBody();
       expect(searchRequest.track_total_hits).toBeUndefined();
@@ -379,7 +384,8 @@ describe('fetchSearchSourceQuery', () => {
         '2020-02-09T23:12:41.941Z',
         dateStart,
         dateEnd,
-        logger
+        logger,
+        100
       );
       const searchRequest = searchSource.getSearchRequestBody();
       expect(searchRequest.track_total_hits).toBeUndefined();
@@ -513,6 +519,7 @@ describe('fetchSearchSourceQuery', () => {
         spacePrefix: '',
         dateStart: new Date().toISOString(),
         dateEnd: new Date().toISOString(),
+        sourceFields: [],
       });
 
       expect(mockRuleResultService.addLastRunWarning).toHaveBeenCalledWith(
@@ -625,6 +632,7 @@ describe('fetchSearchSourceQuery', () => {
         spacePrefix: '',
         dateStart: new Date().toISOString(),
         dateEnd: new Date().toISOString(),
+        sourceFields: [],
       });
 
       expect(mockRuleResultService.addLastRunWarning).toHaveBeenCalledWith(
@@ -652,6 +660,7 @@ describe('fetchSearchSourceQuery', () => {
           spacePrefix: '',
           dateStart: new Date().toISOString(),
           dateEnd: new Date().toISOString(),
+          sourceFields: [],
         });
       } catch (err) {
         expect(getErrorSource(err)).toBe(TaskErrorSource.USER);
@@ -672,7 +681,8 @@ describe('fetchSearchSourceQuery', () => {
           '2020-01-09T22:12:41.941Z',
           new Date().toISOString(),
           new Date().toISOString(),
-          logger
+          logger,
+          100
         );
       } catch (err) {
         expect(getErrorSource(err)).toBe(TaskErrorSource.USER);
@@ -697,6 +707,7 @@ describe('fetchSearchSourceQuery', () => {
           spacePrefix: '',
           dateStart: new Date().toISOString(),
           dateEnd: new Date().toISOString(),
+          sourceFields: [],
         });
       } catch (err) {
         expect(getErrorSource(err)).not.toBeDefined();
@@ -719,7 +730,8 @@ describe('fetchSearchSourceQuery', () => {
         '2020-02-09T23:12:41.941Z',
         dateStart,
         dateEnd,
-        logger
+        logger,
+        100
       );
 
       expect(filterToExcludeHitsFromPreviousRun).toMatchInlineSnapshot(`
@@ -839,6 +851,7 @@ describe('fetchSearchSourceQuery', () => {
           title: 'title',
           type: 'index-pattern',
           version: undefined,
+          managed: false,
         },
         true // skipFetchFields flag
       );

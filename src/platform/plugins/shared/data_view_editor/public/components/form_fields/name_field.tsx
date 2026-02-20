@@ -18,6 +18,7 @@ import { schema } from '../form_schema';
 
 interface NameFieldProps {
   namesNotAllowed: string[];
+  disabled?: boolean;
 }
 
 interface GetNameConfigArgs {
@@ -49,7 +50,7 @@ const getNameConfig = ({ namesNotAllowed }: GetNameConfigArgs): FieldConfig<stri
   };
 };
 
-export const NameField = ({ namesNotAllowed }: NameFieldProps) => {
+export const NameField = ({ namesNotAllowed, disabled }: NameFieldProps) => {
   const config = useMemo(
     () =>
       getNameConfig({
@@ -76,6 +77,7 @@ export const NameField = ({ namesNotAllowed }: NameFieldProps) => {
           <EuiFormRow label={field.label} fullWidth error={errorMessage} isInvalid={isInvalid}>
             <EuiFieldText
               isInvalid={isInvalid}
+              disabled={disabled}
               value={field.value}
               onChange={(e: ChangeEvent<HTMLInputElement>) => {
                 field.setValue(e.target.value);

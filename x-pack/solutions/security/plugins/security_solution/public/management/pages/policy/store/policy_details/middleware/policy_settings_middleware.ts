@@ -9,6 +9,7 @@ import type { IHttpFetchError } from '@kbn/core-http-browser';
 import {
   DefaultPolicyNotificationMessage,
   DefaultPolicyRuleNotificationMessage,
+  DefaultPolicyDeviceNotificationMessage,
 } from '../../../../../../../common/endpoint/models/policy_config';
 import type { MiddlewareRunner, UpdatePolicyResponse } from '../../../types';
 import {
@@ -81,11 +82,11 @@ export const policySettingsMiddlewareRunner: MiddlewareRunner = async (
       }
       if (policyItem.inputs[0].config.policy.value.windows.popup.device_control?.message === '') {
         policyItem.inputs[0].config.policy.value.windows.popup.device_control.message =
-          DefaultPolicyRuleNotificationMessage;
+          DefaultPolicyDeviceNotificationMessage;
       }
       if (policyItem.inputs[0].config.policy.value.mac.popup.device_control?.message === '') {
         policyItem.inputs[0].config.policy.value.mac.popup.device_control.message =
-          DefaultPolicyRuleNotificationMessage;
+          DefaultPolicyDeviceNotificationMessage;
       }
     } catch (error) {
       dispatch({

@@ -7,7 +7,6 @@
 
 import type { PluginInitializerContext } from '@kbn/core/public';
 import { LicenseManagementUIPlugin } from './plugin';
-import './application/index.scss';
 
 export type { LicenseManagementUIPluginSetup, LicenseManagementUIPluginStart } from './plugin';
 export const plugin = (ctx: PluginInitializerContext) => new LicenseManagementUIPlugin(ctx);

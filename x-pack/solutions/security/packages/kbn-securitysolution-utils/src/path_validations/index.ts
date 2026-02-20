@@ -25,9 +25,12 @@ export enum ConditionEntryField {
 export enum TrustedDeviceConditionEntryField {
   USERNAME = 'user.name',
   HOST = 'host.name',
-  DEVICE_ID = 'device.id',
-  MANUFACTURER = 'device.manufacturer',
-  PRODUCT_ID = 'device.model.identifier',
+  DEVICE_ID = 'device.serial_number',
+  MANUFACTURER = 'device.vendor.name',
+  PRODUCT_ID = 'device.product.id',
+  PRODUCT_NAME = 'device.product.name',
+  DEVICE_TYPE = 'device.type',
+  MANUFACTURER_ID = 'device.vendor.id',
 }
 
 export enum EntryFieldType {
@@ -66,10 +69,13 @@ export type EventFiltersTypes = EntryTypes | 'exists' | 'nested';
 export const TRUSTED_DEVICE_OS_FIELD_AVAILABILITY = {
   /** Fields available for all supported operating systems */
   ALL_OS: [
-    TrustedDeviceConditionEntryField.HOST,
     TrustedDeviceConditionEntryField.DEVICE_ID,
+    TrustedDeviceConditionEntryField.DEVICE_TYPE,
+    TrustedDeviceConditionEntryField.HOST,
     TrustedDeviceConditionEntryField.MANUFACTURER,
+    TrustedDeviceConditionEntryField.MANUFACTURER_ID,
     TrustedDeviceConditionEntryField.PRODUCT_ID,
+    TrustedDeviceConditionEntryField.PRODUCT_NAME,
   ] as const,
 
   /** Fields available only for Windows OS exclusively */

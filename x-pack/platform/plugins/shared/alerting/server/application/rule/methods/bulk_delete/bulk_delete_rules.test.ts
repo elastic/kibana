@@ -37,6 +37,8 @@ import {
   enabledRuleForBulkOpsWithActions2,
   returnedRuleForBulkEnableWithActions1,
   returnedRuleForBulkEnableWithActions2,
+  enabledRuleForBulkOpsWithActions1WithUiam,
+  enabledRuleForBulkOpsWithActions2WithUiam,
 } from '../../../../rules_client/tests/test_helpers';
 import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
@@ -44,6 +46,7 @@ import { backfillClientMock } from '../../../../backfill_client/backfill_client.
 import { softDeleteGaps } from '../../../../lib/rule_gaps/soft_delete/soft_delete_gaps';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_client.mock';
+import { nodeBuilder, toKqlExpression } from '@kbn/es-query';
 
 jest.mock('../../../../lib/rule_gaps/soft_delete/soft_delete_gaps');
 
@@ -109,8 +112,8 @@ const getBulkOperationStatusErrorResponse = (statusCode: number) => ({
 });
 
 beforeEach(() => {
-  getBeforeSetup(rulesClientParams, taskManager, ruleTypeRegistry, eventLogClient);
   jest.clearAllMocks();
+  getBeforeSetup(rulesClientParams, taskManager, ruleTypeRegistry, eventLogClient);
 });
 
 setGlobalDate();
@@ -179,6 +182,13 @@ describe('bulkDelete', () => {
     actionsClient = (await rulesClientParams.getActionsClient()) as jest.Mocked<ActionsClient>;
     actionsClient.isSystemAction.mockImplementation((id: string) => id === 'system_action:id');
     rulesClientParams.getActionsClient.mockResolvedValue(actionsClient);
+
+    unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
+      statuses: [
+        { id: 'id1', type: 'alert', success: true },
+        { id: 'id2', type: 'alert', success: true },
+      ],
+    });
   });
 
   test('should successfully delete two rule and return right actions', async () => {
@@ -233,10 +243,98 @@ describe('bulkDelete', () => {
     });
   });
 
+  test('invalidates UIAM ApiKeys as well', async () => {
+    rulesClient = new RulesClient({ ...rulesClientParams, shouldGrantUiam: true });
+
+    encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser = jest
+      .fn()
+      .mockResolvedValueOnce({
+        close: jest.fn(),
+        find: function* asyncGenerator() {
+          yield {
+            saved_objects: [
+              enabledRuleForBulkOpsWithActions1,
+              enabledRuleForBulkOpsWithActions1WithUiam,
+              enabledRuleForBulkOpsWithActions2WithUiam,
+            ],
+          };
+        },
+      });
+
+    unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
+      statuses: [
+        { id: 'id1', type: 'alert', success: true },
+        { id: 'uiam-1', type: 'alert', success: true },
+        { id: 'uiam-2', type: 'alert', success: true },
+      ],
+    });
+
+    await rulesClient.bulkDeleteRules({ filter: 'fake_filter' });
+
+    expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
+    expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
+      {
+        apiKeys: ['MTIzOmFiYw==', 'OTc4Onh5eg==', 'MTIzOmVzc3VfYWJj', 'NTc2Onh5eg=='],
+      },
+      expect.anything(),
+      expect.anything()
+    );
+  });
+
+  test('does not invalidate API keys created by user', async () => {
+    rulesClient = new RulesClient({ ...rulesClientParams, shouldGrantUiam: true });
+
+    encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser = jest
+      .fn()
+      .mockResolvedValueOnce({
+        close: jest.fn(),
+        find: function* asyncGenerator() {
+          yield {
+            saved_objects: [
+              {
+                ...enabledRuleForBulkOpsWithActions1,
+                attributes: {
+                  ...enabledRuleForBulkOpsWithActions1.attributes,
+                  apiKeyCreatedByUser: true,
+                },
+              },
+              {
+                ...enabledRuleForBulkOpsWithActions2WithUiam,
+                attributes: {
+                  ...enabledRuleForBulkOpsWithActions2WithUiam.attributes,
+                  apiKeyCreatedByUser: true,
+                },
+              },
+            ],
+          };
+        },
+      });
+
+    unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
+      statuses: [
+        { id: 'id1', type: 'alert', success: true },
+        { id: 'uiam-1', type: 'alert', success: true },
+        { id: 'uiam-2', type: 'alert', success: true },
+      ],
+    });
+
+    await rulesClient.bulkDeleteRules({ filter: 'fake_filter' });
+
+    expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
+    expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
+      {
+        apiKeys: [],
+      },
+      expect.anything(),
+      expect.anything()
+    );
+  });
+
   test('swallows errors when soft deleting gaps fails', async () => {
     mockCreatePointInTimeFinderAsInternalUser({
       saved_objects: [enabledRuleForBulkOpsWithActions1, enabledRuleForBulkOpsWithActions2],
     });
+
     unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
       statuses: [
         { id: 'id1', type: 'alert', success: true },
@@ -625,6 +723,70 @@ describe('bulkDelete', () => {
 
       expect(auditLogger.log.mock.calls[0][0]?.event?.action).toEqual('rule_delete');
       expect(auditLogger.log.mock.calls[0][0]?.event?.outcome).toEqual('failure');
+    });
+  });
+
+  describe('internally managed rule types', () => {
+    beforeEach(() => {
+      ruleTypeRegistry.list.mockReturnValue(
+        // @ts-expect-error: not all args are required for this test
+        new Map([
+          ['test.internal-rule-type', { id: 'test.internal-rule-type', internallyManaged: true }],
+          [
+            'test.internal-rule-type-2',
+            { id: 'test.internal-rule-type-2', internallyManaged: true },
+          ],
+        ])
+      );
+
+      // @ts-expect-error: not all args are required for this test
+      authorization.getFindAuthorizationFilter.mockResolvedValue({
+        filter: nodeBuilder.and([
+          nodeBuilder.is('alert.attributes.alertTypeId', 'foo'),
+          nodeBuilder.is('alert.attributes.consumer', 'bar'),
+        ]),
+      });
+    });
+
+    it('should ignore updates to internally managed rule types by default and combine all filters correctly', async () => {
+      await rulesClient.bulkDeleteRules({
+        filter: 'alert.attributes.tags: "APM"',
+      });
+
+      const findFilter = unsecuredSavedObjectsClient.find.mock.calls[0][0].filter;
+
+      const encryptedFindFilter =
+        encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser.mock.calls[0][0]
+          .filter;
+
+      expect(toKqlExpression(findFilter)).toMatchInlineSnapshot(
+        `"((alert.attributes.tags: \\"APM\\" AND (alert.attributes.alertTypeId: foo AND alert.attributes.consumer: bar)) AND NOT (alert.attributes.alertTypeId: test.internal-rule-type OR alert.attributes.alertTypeId: test.internal-rule-type-2))"`
+      );
+
+      expect(toKqlExpression(encryptedFindFilter)).toMatchInlineSnapshot(
+        `"((alert.attributes.tags: \\"APM\\" AND (alert.attributes.alertTypeId: foo AND alert.attributes.consumer: bar)) AND NOT (alert.attributes.alertTypeId: test.internal-rule-type OR alert.attributes.alertTypeId: test.internal-rule-type-2))"`
+      );
+    });
+
+    it('should not ignore updates to internally managed rule types by default and combine all filters correctly', async () => {
+      await rulesClient.bulkDeleteRules({
+        filter: 'alert.attributes.tags: "APM"',
+        ignoreInternalRuleTypes: false,
+      });
+
+      const findFilter = unsecuredSavedObjectsClient.find.mock.calls[0][0].filter;
+
+      const encryptedFindFilter =
+        encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser.mock.calls[0][0]
+          .filter;
+
+      expect(toKqlExpression(findFilter)).toMatchInlineSnapshot(
+        `"(alert.attributes.tags: \\"APM\\" AND (alert.attributes.alertTypeId: foo AND alert.attributes.consumer: bar))"`
+      );
+
+      expect(toKqlExpression(encryptedFindFilter)).toMatchInlineSnapshot(
+        `"(alert.attributes.tags: \\"APM\\" AND (alert.attributes.alertTypeId: foo AND alert.attributes.consumer: bar))"`
+      );
     });
   });
 });

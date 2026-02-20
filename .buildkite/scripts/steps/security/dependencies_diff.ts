@@ -38,7 +38,8 @@ async function getFileContent(path: string, ref: string) {
 
 async function getDependenciesDiff() {
   const oldPackageJson = await getFileContent('package.json', process.env.GITHUB_PR_MERGE_BASE!);
-  const headSha = execSync('git rev-parse HEAD').toString().trim();
+  const headSha =
+    process.env.GITHUB_PR_HEAD_SHA || execSync('git rev-parse HEAD').toString().trim();
   const newPackageJson = await getFileContent('package.json', headSha);
 
   const oldDeps = { ...oldPackageJson.dependencies, ...oldPackageJson.devDependencies };
@@ -66,7 +67,7 @@ async function getDependenciesDiff() {
 
 async function main() {
   // Skipping PRs from Renovate
-  if (process.env.GIT_BRANCH?.startsWith('renovate')) {
+  if (process.env.GIT_BRANCH?.startsWith('elastic:renovate')) {
     return;
   }
 

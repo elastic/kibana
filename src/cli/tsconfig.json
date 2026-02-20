@@ -1,27 +1,35 @@
 {
-  "extends": "../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
-    "outDir": "target/types",
+    "outDir": "target/types"
   },
   "include": [
+    "encryption_keys/**/*",
+    "health_gateway/**/*",
     "keystore/**/*",
+    "plugin/**/*",
     "profiler/**/*",
     "serve/**/*",
-    "*.js",
+    "setup/**/*",
+    "verification_code/**/*",
+    "*.js"
   ],
   "kbn_references": [
     "@kbn/core",
-    { "path": "../setup_node_env/tsconfig.json" },
+    "@kbn/setup-node-env",
+    "@kbn/interactive-setup-plugin",
+    "@kbn/health-gateway-server",
+    "@kbn/core-elasticsearch-client-server-internal",
+    "@kbn/core-elasticsearch-server-internal",
     "@kbn/utils",
     "@kbn/repo-info",
     "@kbn/safer-lodash-set",
     "@kbn/config",
     "@kbn/dev-utils",
-    "@kbn/apm-config-loader",
     "@kbn/projects-solutions-groups",
-    "@kbn/telemetry",
   ],
   "exclude": [
     "target/**/*",
+    "**/*.test.js"
   ]
 }

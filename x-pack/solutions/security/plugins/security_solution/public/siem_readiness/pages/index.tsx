@@ -5,59 +5,92 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { useLogReadinessTask } from '@kbn/siem-readiness';
-import { EuiPageHeader, EuiPageSection, EuiEmptyPrompt, EuiText, EuiButton } from '@elastic/eui';
+import React, { useCallback, useMemo, useState } from 'react';
+import { EuiPageHeader, EuiPageSection, EuiSpacer, EuiButtonEmpty } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { useHistory, useParams } from 'react-router-dom';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
+import type { MainCategories } from '@kbn/siem-readiness';
+import { ALL_CATEGORIES } from '@kbn/siem-readiness';
+import { SIEM_READINESS_PATH } from '../../../common/constants';
+import { VisibilitySectionBoxes, type VisibilityTabId } from './visibility_section_boxes';
+import { VisibilitySectionTabs } from './visibility_section_tabs';
+import {
+  CategoryConfigurationPanel,
+  ACTIVE_CATEGORIES_STORAGE_KEY,
+} from './components/configuration_panel';
+
+const VALID_TABS: VisibilityTabId[] = ['coverage', 'quality', 'continuity', 'retention'];
+const DEFAULT_TAB: VisibilityTabId = 'coverage';
 
 const SiemReadinessDashboard = () => {
-  const { logReadinessTask } = useLogReadinessTask();
+  const history = useHistory();
+  const { tab } = useParams<{ tab?: string }>();
 
-  const handleLogTask = useCallback(async () => {
-    logReadinessTask({ task_id: '1', status: 'complete', meta: { demo: 'demo_data' } });
-  }, [logReadinessTask]);
+  // Persistent state for category filtering (shared with configuration panel)
+  const [activeCategories, setActiveCategories] = useLocalStorage<MainCategories[]>(
+    ACTIVE_CATEGORIES_STORAGE_KEY,
+    ALL_CATEGORIES
+  );
+
+  // State for showing configuration modal
+  const [isConfigModalVisible, setIsConfigModalVisible] = useState(false);
+
+  // Get selected tab from URL path params
+  const selectedTabId = useMemo<VisibilityTabId>(() => {
+    return tab && VALID_TABS.includes(tab as VisibilityTabId)
+      ? (tab as VisibilityTabId)
+      : DEFAULT_TAB;
+  }, [tab]);
+
+  // Handle tab selection by updating URL path
+  const handleTabSelect = useCallback(
+    (tabId: VisibilityTabId) => {
+      history.push(`${SIEM_READINESS_PATH}/visibility/${tabId}`);
+    },
+    [history]
+  );
 
   return (
-    <>
-      <EuiPageHeader pageTitle="SIEM Readiness" bottomBorder={true} />
-      <EuiPageSection>
-        <EuiEmptyPrompt
-          iconType="managementApp"
-          title={
-            <h2>
-              <FormattedMessage
-                id="xpack.securitySolution.siemReadiness.wipTitle"
-                defaultMessage="Work in Progress"
-              />
-            </h2>
-          }
-          body={
-            <EuiText>
-              <p>
-                <FormattedMessage
-                  id="xpack.securitySolution.siemReadiness.wipUpperBody"
-                  defaultMessage="This page is a placeholder for the SIEM Readiness Dashboard, which is currently under development."
-                />
-              </p>
-              <p>
-                <FormattedMessage
-                  id="xpack.securitySolution.siemReadiness.wipLowerBody"
-                  defaultMessage="It will help you get a comprehensive view of your security posture and guide you through key steps to improve your readiness."
-                />
-              </p>
-            </EuiText>
-          }
-          actions={
-            <EuiButton color="primary" fill onClick={handleLogTask}>
-              <FormattedMessage
-                id="xpack.securitySolution.siemReadiness.logTestTask"
-                defaultMessage="Log Test Task"
-              />
-            </EuiButton>
-          }
+    <div>
+      <EuiPageHeader
+        pageTitle={i18n.translate('xpack.securitySolution.siemReadiness.pageTitle', {
+          defaultMessage: 'SIEM Readiness',
+        })}
+        bottomBorder={true}
+        rightSideItems={[
+          <EuiButtonEmpty
+            iconSide="right"
+            size="s"
+            iconType="gear"
+            onClick={() => setIsConfigModalVisible(true)}
+            data-test-subj="configurationsButton"
+          >
+            {i18n.translate('xpack.securitySolution.siemReadiness.configurations', {
+              defaultMessage: 'Configurations',
+            })}
+          </EuiButtonEmpty>,
+        ]}
+      />
+      <EuiSpacer />
+      <EuiPageSection paddingSize="none">
+        <VisibilitySectionBoxes selectedTabId={selectedTabId} onTabSelect={handleTabSelect} />
+      </EuiPageSection>
+      <EuiSpacer />
+      <EuiPageSection paddingSize="none">
+        <VisibilitySectionTabs
+          selectedTabId={selectedTabId}
+          onTabSelect={handleTabSelect}
+          activeCategories={activeCategories ?? ALL_CATEGORIES}
         />
       </EuiPageSection>
-    </>
+      {isConfigModalVisible && (
+        <CategoryConfigurationPanel
+          onClose={() => setIsConfigModalVisible(false)}
+          onSave={setActiveCategories}
+        />
+      )}
+    </div>
   );
 };
 

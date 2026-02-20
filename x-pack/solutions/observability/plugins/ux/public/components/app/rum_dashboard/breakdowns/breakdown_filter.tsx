@@ -85,6 +85,9 @@ export function BreakdownFilter({ selectedBreakdown, onBreakdownChange, dataTest
       valueOfSelected={selectedBreakdown?.fieldName ?? NO_BREAKDOWN}
       onChange={(value) => onOptionChange(value)}
       data-test-subj={dataTestSubj}
+      aria-label={i18n.translate('xpack.ux.breakdownFilter.ariaLabel', {
+        defaultMessage: 'Breakdown filter',
+      })}
     />
   );
 }

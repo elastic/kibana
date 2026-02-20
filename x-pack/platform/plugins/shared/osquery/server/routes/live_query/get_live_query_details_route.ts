@@ -41,7 +41,7 @@ export const getLiveQueryDetailsRoute = (
       path: '/api/osquery/live_queries/{id}',
       security: {
         authz: {
-          requiredPrivileges: [`${PLUGIN_ID}-read`],
+          requiredPrivileges: [`${PLUGIN_ID}-readLiveQueries`],
         },
       },
     })
@@ -108,6 +108,7 @@ export const getLiveQueryDetailsRoute = (
                   'agent_selection',
                   'agents',
                   'user_id',
+                  'user_profile_uid',
                   'pack_id',
                   'pack_name',
                   'prebuilt_pack'

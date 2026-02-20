@@ -14,6 +14,8 @@ import type {
   FindingsVulnerabilityPanelExpandableFlyoutPropsNonPreview,
   FindingsVulnerabilityPanelExpandableFlyoutPropsPreview,
 } from '@kbn/cloud-security-posture';
+import type { GraphGroupedNodePreviewPanelProps } from '@kbn/cloud-security-posture-graph';
+import { GraphGroupedNodePreviewPanelKey } from '@kbn/cloud-security-posture-graph';
 import type { GenericEntityDetailsExpandableFlyoutProps } from './entity_details/generic_details_left';
 import {
   GenericEntityDetailsPanel,
@@ -21,9 +23,9 @@ import {
 } from './entity_details/generic_details_left';
 import type { GenericEntityPanelExpandableFlyoutProps } from './entity_details/generic_right';
 import { GenericEntityPanel } from './entity_details/generic_right';
-import type { AIForSOCDetailsProps } from './ai_for_soc/types';
-import { AIForSOCDetailsProvider } from './ai_for_soc/context';
-import { AIForSOCPanel } from './ai_for_soc';
+import type { EaseDetailsProps } from './ease/types';
+import { EaseDetailsProvider } from './ease/context';
+import { EasePanel } from './ease';
 import { SessionViewPanelProvider } from './document_details/session_view/context';
 import type { SessionViewPanelProps } from './document_details/session_view';
 import { SessionViewPanel } from './document_details/session_view';
@@ -63,9 +65,9 @@ import { HostDetailsPanel, HostDetailsPanelKey } from './entity_details/host_det
 import type { AnalyzerPanelExpandableFlyoutProps } from './document_details/analyzer_panels';
 import { AnalyzerPanel } from './document_details/analyzer_panels';
 import {
+  GenericEntityPanelKey,
   HostPanelKey,
   ServicePanelKey,
-  GenericEntityPanelKey,
   UserPanelKey,
 } from './entity_details/shared/constants';
 import type { ServicePanelExpandableFlyoutProps } from './entity_details/service_right';
@@ -73,22 +75,72 @@ import { ServicePanel } from './entity_details/service_right';
 import type { ServiceDetailsExpandableFlyoutProps } from './entity_details/service_details_left';
 import { ServiceDetailsPanel, ServiceDetailsPanelKey } from './entity_details/service_details_left';
 import {
+  ATTACK_DETAILS_LEFT_PANEL_ARIA_LABEL,
+  ATTACK_DETAILS_RIGHT_PANEL_ARIA_LABEL,
+  DOCUMENT_DETAILS_ALERT_REASON_PANEL_ARIA_LABEL,
+  DOCUMENT_DETAILS_ANALYZER_PANEL_ARIA_LABEL,
+  DOCUMENT_DETAILS_ISOLATE_HOST_PANEL_ARIA_LABEL,
+  DOCUMENT_DETAILS_LEFT_PANEL_ARIA_LABEL,
+  DOCUMENT_DETAILS_PREVIEW_PANEL_ARIA_LABEL,
+  DOCUMENT_DETAILS_RIGHT_PANEL_ARIA_LABEL,
+  DOCUMENT_DETAILS_SESSION_VIEW_PANEL_ARIA_LABEL,
+  EASE_PANEL_ARIA_LABEL,
+  GENERIC_ENTITY_DETAILS_PANEL_ARIA_LABEL,
+  GENERIC_ENTITY_PANEL_ARIA_LABEL,
+  GRAPH_GROUPED_NODE_PREVIEW_PANEL_ARIA_LABEL,
+  HOST_DETAILS_PANEL_ARIA_LABEL,
+  HOST_PANEL_ARIA_LABEL,
+  HOST_PREVIEW_PANEL_ARIA_LABEL,
+  IOC_RIGHT_PANEL_ARIA_LABEL,
+  MISCONFIGURATION_FINDINGS_PREVIEW_PANEL_ARIA_LABEL,
+  MISCONFIGURATION_PANEL_ARIA_LABEL,
+  NETWORK_PANEL_ARIA_LABEL,
+  NETWORK_PREVIEW_PANEL_ARIA_LABEL,
+  RULE_PANEL_ARIA_LABEL,
+  RULE_PREVIEW_PANEL_ARIA_LABEL,
+  SERVICE_DETAILS_PANEL_ARIA_LABEL,
+  SERVICE_PANEL_ARIA_LABEL,
+  USER_DETAILS_PANEL_ARIA_LABEL,
+  USER_PANEL_ARIA_LABEL,
+  USER_PREVIEW_PANEL_ARIA_LABEL,
+  VULNERABILITY_FINDINGS_PANEL_ARIA_LABEL,
+  VULNERABILITY_FINDINGS_PREVIEW_PANEL_ARIA_LABEL,
+} from './panel_aria_labels';
+import {
   MisconfigurationFindingsPanelKey,
   MisconfigurationFindingsPreviewPanelKey,
 } from './csp_details/findings_flyout/constants';
 import { FindingsMisconfigurationPanel } from './csp_details/findings_flyout/findings_right';
-import { IOCPanelKey } from './ai_for_soc/constants/panel_keys';
+import { EasePanelKey } from './ease/constants/panel_keys';
 import {
   VulnerabilityFindingsPanelKey,
   VulnerabilityFindingsPreviewPanelKey,
 } from './csp_details/vulnerabilities_flyout/constants';
 import { FindingsVulnerabilityPanel } from './csp_details/vulnerabilities_flyout/vulnerabilities_right';
+import {
+  AttackDetailsLeftPanelKey,
+  AttackDetailsRightPanelKey,
+} from './attack_details/constants/panel_keys';
+import type { AttackDetailsProps } from './attack_details/types';
+import { AttackDetailsProvider } from './attack_details/context';
+import { AttackDetailsPanel } from './attack_details';
+import { AttackDetailsLeftPanel } from './attack_details/left';
+import type { IOCDetailsProps } from './ioc_details/types';
+import { IOCDetailsProvider } from './ioc_details/context';
+import { IOCPanel } from './ioc_details';
+import { IOCRightPanelKey } from './ioc_details/constants/panel_keys';
+
+const GraphGroupedNodePreviewPanel = React.lazy(() =>
+  import('@kbn/cloud-security-posture-graph').then((module) => ({
+    default: module.GraphGroupedNodePreviewPanel,
+  }))
+);
 
 /**
  * List of all panels that will be used within the document details expandable flyout.
  * This needs to be passed to the expandable flyout registeredPanels property.
  */
-const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels'] = [
+export const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels'] = [
   {
     key: DocumentDetailsRightPanelKey,
     component: (props) => (
@@ -96,6 +148,7 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
         <RightPanel path={props.path as DocumentDetailsProps['path']} />
       </DocumentDetailsProvider>
     ),
+    'aria-label': DOCUMENT_DETAILS_RIGHT_PANEL_ARIA_LABEL,
   },
   {
     key: DocumentDetailsLeftPanelKey,
@@ -104,6 +157,7 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
         <LeftPanel path={props.path as DocumentDetailsProps['path']} />
       </DocumentDetailsProvider>
     ),
+    'aria-label': DOCUMENT_DETAILS_LEFT_PANEL_ARIA_LABEL,
   },
   {
     key: DocumentDetailsPreviewPanelKey,
@@ -112,6 +166,7 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
         <PreviewPanel path={props.path as DocumentDetailsProps['path']} />
       </DocumentDetailsProvider>
     ),
+    'aria-label': DOCUMENT_DETAILS_PREVIEW_PANEL_ARIA_LABEL,
   },
   {
     key: DocumentDetailsAlertReasonPanelKey,
@@ -120,16 +175,28 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
         <AlertReasonPanel />
       </AlertReasonPanelProvider>
     ),
+    'aria-label': DOCUMENT_DETAILS_ALERT_REASON_PANEL_ARIA_LABEL,
+  },
+  {
+    key: GraphGroupedNodePreviewPanelKey,
+    component: (props) => {
+      // TODO Fix typing issue here
+      const params = props.params as unknown as GraphGroupedNodePreviewPanelProps;
+      return <GraphGroupedNodePreviewPanel {...params} />;
+    },
+    'aria-label': GRAPH_GROUPED_NODE_PREVIEW_PANEL_ARIA_LABEL,
   },
   {
     key: RulePanelKey,
     component: (props) => <RulePanel {...(props as RulePanelExpandableFlyoutProps).params} />,
+    'aria-label': RULE_PANEL_ARIA_LABEL,
   },
   {
     key: RulePreviewPanelKey,
     component: (props) => (
       <RulePanel {...(props as RulePanelExpandableFlyoutProps).params} isPreviewMode />
     ),
+    'aria-label': RULE_PREVIEW_PANEL_ARIA_LABEL,
   },
   {
     key: DocumentDetailsIsolateHostPanelKey,
@@ -138,12 +205,14 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
         <IsolateHostPanel path={props.path as IsolateHostPanelProps['path']} />
       </IsolateHostPanelProvider>
     ),
+    'aria-label': DOCUMENT_DETAILS_ISOLATE_HOST_PANEL_ARIA_LABEL,
   },
   {
     key: DocumentDetailsAnalyzerPanelKey,
     component: (props) => (
       <AnalyzerPanel {...(props as AnalyzerPanelExpandableFlyoutProps).params} />
     ),
+    'aria-label': DOCUMENT_DETAILS_ANALYZER_PANEL_ARIA_LABEL,
   },
   {
     key: DocumentDetailsSessionViewPanelKey,
@@ -152,71 +221,84 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
         <SessionViewPanel path={props.path as SessionViewPanelProps['path']} />
       </SessionViewPanelProvider>
     ),
+    'aria-label': DOCUMENT_DETAILS_SESSION_VIEW_PANEL_ARIA_LABEL,
   },
   {
     key: UserPanelKey,
     component: (props) => <UserPanel {...(props as UserPanelExpandableFlyoutProps).params} />,
+    'aria-label': USER_PANEL_ARIA_LABEL,
   },
   {
     key: UserDetailsPanelKey,
     component: (props) => (
       <UserDetailsPanel {...(props as UserDetailsExpandableFlyoutProps).params} />
     ),
+    'aria-label': USER_DETAILS_PANEL_ARIA_LABEL,
   },
   {
     key: UserPreviewPanelKey,
     component: (props) => (
       <UserPanel {...(props as UserPanelExpandableFlyoutProps).params} isPreviewMode />
     ),
+    'aria-label': USER_PREVIEW_PANEL_ARIA_LABEL,
   },
   {
     key: HostPanelKey,
     component: (props) => <HostPanel {...(props as HostPanelExpandableFlyoutProps).params} />,
+    'aria-label': HOST_PANEL_ARIA_LABEL,
   },
   {
     key: HostDetailsPanelKey,
     component: (props) => (
       <HostDetailsPanel {...(props as HostDetailsExpandableFlyoutProps).params} />
     ),
+    'aria-label': HOST_DETAILS_PANEL_ARIA_LABEL,
   },
   {
     key: HostPreviewPanelKey,
     component: (props) => (
       <HostPanel {...(props as HostPanelExpandableFlyoutProps).params} isPreviewMode />
     ),
+    'aria-label': HOST_PREVIEW_PANEL_ARIA_LABEL,
   },
   {
     key: NetworkPanelKey,
     component: (props) => <NetworkPanel {...(props as NetworkExpandableFlyoutProps).params} />,
+    'aria-label': NETWORK_PANEL_ARIA_LABEL,
   },
   {
     key: NetworkPreviewPanelKey,
     component: (props) => (
       <NetworkPanel {...(props as NetworkExpandableFlyoutProps).params} isPreviewMode />
     ),
+    'aria-label': NETWORK_PREVIEW_PANEL_ARIA_LABEL,
   },
 
   {
     key: ServicePanelKey,
     component: (props) => <ServicePanel {...(props as ServicePanelExpandableFlyoutProps).params} />,
+    'aria-label': SERVICE_PANEL_ARIA_LABEL,
   },
   {
     key: ServiceDetailsPanelKey,
     component: (props) => (
       <ServiceDetailsPanel {...(props as ServiceDetailsExpandableFlyoutProps).params} />
     ),
+    'aria-label': SERVICE_DETAILS_PANEL_ARIA_LABEL,
   },
   {
     key: GenericEntityPanelKey,
     component: (props) => (
       <GenericEntityPanel {...(props as GenericEntityPanelExpandableFlyoutProps).params} />
     ),
+    'aria-label': GENERIC_ENTITY_PANEL_ARIA_LABEL,
   },
   {
     key: GenericEntityDetailsPanelKey,
     component: (props) => (
       <GenericEntityDetailsPanel {...(props as GenericEntityDetailsExpandableFlyoutProps).params} />
     ),
+    'aria-label': GENERIC_ENTITY_DETAILS_PANEL_ARIA_LABEL,
   },
   {
     key: MisconfigurationFindingsPanelKey,
@@ -225,14 +307,34 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
         {...(props as FindingsMisconfigurationPanelExpandableFlyoutPropsNonPreview).params}
       />
     ),
+    'aria-label': MISCONFIGURATION_PANEL_ARIA_LABEL,
   },
   {
-    key: IOCPanelKey,
+    key: EasePanelKey,
     component: (props) => (
-      <AIForSOCDetailsProvider {...(props as AIForSOCDetailsProps).params}>
-        <AIForSOCPanel />
-      </AIForSOCDetailsProvider>
+      <EaseDetailsProvider {...(props as EaseDetailsProps).params}>
+        <EasePanel />
+      </EaseDetailsProvider>
     ),
+    'aria-label': EASE_PANEL_ARIA_LABEL,
+  },
+  {
+    key: AttackDetailsRightPanelKey,
+    component: (props) => (
+      <AttackDetailsProvider {...(props as AttackDetailsProps).params}>
+        <AttackDetailsPanel path={props.path as AttackDetailsProps['path']} />
+      </AttackDetailsProvider>
+    ),
+    'aria-label': ATTACK_DETAILS_RIGHT_PANEL_ARIA_LABEL,
+  },
+  {
+    key: AttackDetailsLeftPanelKey,
+    component: (props) => (
+      <AttackDetailsProvider {...(props as AttackDetailsProps).params}>
+        <AttackDetailsLeftPanel path={props.path as AttackDetailsProps['path']} />
+      </AttackDetailsProvider>
+    ),
+    'aria-label': ATTACK_DETAILS_LEFT_PANEL_ARIA_LABEL,
   },
   {
     key: MisconfigurationFindingsPreviewPanelKey,
@@ -241,6 +343,7 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
         {...(props as FindingsMisconfigurationPanelExpandableFlyoutPropsPreview).params}
       />
     ),
+    'aria-label': MISCONFIGURATION_FINDINGS_PREVIEW_PANEL_ARIA_LABEL,
   },
   {
     key: VulnerabilityFindingsPanelKey,
@@ -249,6 +352,7 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
         {...(props as FindingsVulnerabilityPanelExpandableFlyoutPropsNonPreview).params}
       />
     ),
+    'aria-label': VULNERABILITY_FINDINGS_PANEL_ARIA_LABEL,
   },
   {
     key: VulnerabilityFindingsPreviewPanelKey,
@@ -257,6 +361,16 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
         {...(props as FindingsVulnerabilityPanelExpandableFlyoutPropsPreview).params}
       />
     ),
+    'aria-label': VULNERABILITY_FINDINGS_PREVIEW_PANEL_ARIA_LABEL,
+  },
+  {
+    key: IOCRightPanelKey,
+    component: (props) => (
+      <IOCDetailsProvider {...(props as IOCDetailsProps).params}>
+        <IOCPanel path={props.path as IOCDetailsProps['path']} />
+      </IOCDetailsProvider>
+    ),
+    'aria-label': IOC_RIGHT_PANEL_ARIA_LABEL,
   },
 ];
 
@@ -265,11 +379,13 @@ export const TIMELINE_ON_CLOSE_EVENT = `expandable-flyout-on-close-${Flyouts.tim
 
 /**
  * Flyout used for the Security Solution application
- * We keep the default EUI 1000 z-index to ensure it is always rendered behind Timeline (which has a z-index of 1001)
+ * We keep the default EUI 1001 z-index to ensure it is always rendered behind Timeline (which has a z-index of 1002)
  * We propagate the onClose callback to the rest of Security Solution using a window event 'expandable-flyout-on-close-SecuritySolution'
  * This flyout support push/overlay mode. The value is saved in local storage.
  */
 export const SecuritySolutionFlyout = memo(() => {
+  const { euiTheme } = useEuiTheme();
+
   const onClose = useCallback(
     () =>
       window.dispatchEvent(
@@ -284,6 +400,7 @@ export const SecuritySolutionFlyout = memo(() => {
     <ExpandableFlyout
       registeredPanels={expandableFlyoutDocumentsPanels}
       paddingSize="none"
+      customStyles={{ 'z-index': (euiTheme.levels.flyout as number) + 1 }}
       onClose={onClose}
     />
   );
@@ -293,7 +410,7 @@ SecuritySolutionFlyout.displayName = 'SecuritySolutionFlyout';
 
 /**
  * Flyout used in Timeline
- * We set the z-index to 1002 to ensure it is always rendered above Timeline (which has a z-index of 1001)
+ * We set the z-index to 1003 to ensure it is always rendered above Timeline (which has a z-index of 1002)
  * We propagate the onClose callback to the rest of Security Solution using a window event 'expandable-flyout-on-close-Timeline'
  * This flyout does not support push mode, because timeline being rendered in a modal (EUiPortal), it's very difficult to dynamically change its width.
  */
@@ -314,7 +431,7 @@ export const TimelineFlyout = memo(() => {
     <ExpandableFlyout
       registeredPanels={expandableFlyoutDocumentsPanels}
       paddingSize="none"
-      customStyles={{ 'z-index': (euiTheme.levels.flyout as number) + 2 }}
+      customStyles={{ 'z-index': (euiTheme.levels.flyout as number) + 3 }}
       onClose={onClose}
       flyoutCustomProps={{
         pushVsOverlay: {

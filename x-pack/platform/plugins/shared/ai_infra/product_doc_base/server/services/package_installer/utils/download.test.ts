@@ -6,15 +6,9 @@
  */
 
 import { createReadStream } from 'fs';
-import { mkdir } from 'fs/promises';
-import fetch from 'node-fetch';
 import { downloadToDisk } from './download';
 
-jest.mock('fs', () => ({
-  createReadStream: jest.fn().mockReturnValue({
-    on: jest.fn(),
-    pipe: jest.fn(),
-  }),
+jest.mock('@kbn/fs', () => ({
   createWriteStream: jest.fn(() => ({
     on: jest.fn((event, callback) => {
       if (event === 'finish') {
@@ -23,64 +17,67 @@ jest.mock('fs', () => ({
     }),
     pipe: jest.fn(),
   })),
+  getSafePath: jest.fn().mockReturnValue({
+    fullPath: 'artifacts/package_installer/file.txt',
+    alias: 'disk:artifacts/package_installer/file.txt',
+  }),
 }));
 
-jest.mock('fs/promises', () => ({
-  mkdir: jest.fn(),
+jest.mock('fs', () => ({
+  createReadStream: jest.fn().mockReturnValue({
+    on: jest.fn(),
+    pipe: jest.fn(),
+  }),
 }));
 
-jest.mock('node-fetch', () => jest.fn());
+jest.mock('stream/promises', () => ({
+  pipeline: jest.fn(),
+}));
+
+const fetchMock = jest.spyOn(global, 'fetch');
 
 describe('downloadToDisk', () => {
   const mockFileUrl = 'http://example.com/file.txt';
-  const mockFilePath = '/path/to/file.txt';
-  const mockDirPath = '/path/to';
+  const mockFilePathAtVolume = 'artifacts/package_installer/file.txt';
   const mockLocalPath = '/local/path/to/file.txt';
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('should create the directory if it does not exist', async () => {
-    (fetch as unknown as jest.Mock).mockResolvedValue({
-      body: {
-        pipe: jest.fn(),
-        on: jest.fn(),
+  it('should download a file from a remote URL', async () => {
+    // Create a proper ReadableStream for the mock response body
+    // Readable.fromWeb() requires an actual ReadableStream instance
+    const mockResponseBody = new ReadableStream({
+      start(controller) {
+        controller.enqueue(new TextEncoder().encode('test content'));
+        controller.close();
       },
     });
 
-    await downloadToDisk(mockFileUrl, mockFilePath);
-
-    expect(mkdir).toHaveBeenCalledWith(mockDirPath, { recursive: true });
-  });
-
-  it('should download a file from a remote URL', async () => {
-    const mockResponseBody = {
-      pipe: jest.fn(),
-      on: jest.fn((event, callback) => {}),
-    };
-
-    (fetch as unknown as jest.Mock).mockResolvedValue({
+    fetchMock.mockResolvedValue({
       body: mockResponseBody,
-    });
+    } as unknown as Response);
 
-    await downloadToDisk(mockFileUrl, mockFilePath);
+    await downloadToDisk(mockFileUrl, mockFilePathAtVolume);
 
-    expect(fetch).toHaveBeenCalledWith(mockFileUrl);
+    expect(fetchMock).toHaveBeenCalledWith(mockFileUrl, {});
   });
 
   it('should copy a file from a local file URL', async () => {
     const mockLocalFileUrl = 'file:///local/path/to/file.txt';
 
-    await downloadToDisk(mockLocalFileUrl, mockFilePath);
+    await downloadToDisk(mockLocalFileUrl, mockFilePathAtVolume);
 
     expect(createReadStream).toHaveBeenCalledWith(mockLocalPath);
   });
 
   it('should handle errors during the download process', async () => {
     const mockError = new Error('Download failed');
-    (fetch as unknown as jest.Mock).mockRejectedValue(mockError);
+    fetchMock.mockRejectedValue(mockError);
 
-    await expect(downloadToDisk(mockFileUrl, mockFilePath)).rejects.toThrow('Download failed');
+    await expect(downloadToDisk(mockFileUrl, mockFilePathAtVolume)).rejects.toThrow(
+      'Download failed'
+    );
   });
 });

@@ -22,9 +22,9 @@ import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import type {
   LayerAction,
   RegisterLibraryAnnotationGroupFunction,
-  StartServices,
+  LensStartServices as StartServices,
   StateSetter,
-} from '../../../../types';
+} from '@kbn/lens-common';
 import type {
   XYByReferenceAnnotationLayerConfig,
   XYAnnotationLayerConfig,
@@ -369,6 +369,6 @@ export const getSaveLayerAction = ({
     isCompatible: true,
     'data-test-subj': 'lnsXY_annotationLayer_saveToLibrary',
     order: 100,
-    showOutsideList: true,
+    showOutsideList: false,
   };
 };

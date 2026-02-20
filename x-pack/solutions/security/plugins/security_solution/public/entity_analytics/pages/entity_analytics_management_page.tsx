@@ -17,6 +17,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import moment from 'moment';
+import { useMutation } from '@kbn/react-query';
 import { RiskScorePreviewSection } from '../components/risk_score_management/risk_score_preview_section';
 import { RiskScoreEnableSection } from '../components/risk_score_management/risk_score_enable_section';
 import { ENTITY_ANALYTICS_RISK_SCORE } from '../../app/translations';
@@ -31,6 +32,8 @@ import * as i18n from '../translations';
 import { getEntityAnalyticsRiskScorePageStyles } from '../components/risk_score_management/risk_score_page_styles';
 import { useConfigurableRiskEngineSettings } from '../components/risk_score_management/hooks/risk_score_configurable_risk_engine_settings_hooks';
 import { RiskScoreSaveBar } from '../components/risk_score_management/risk_score_save_bar';
+import { RiskScoreGeneralSection } from '../components/risk_score_management/risk_score_general_section';
+import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 
 const TEN_SECONDS = 10000;
 
@@ -47,6 +50,9 @@ export const EntityAnalyticsManagementPage = () => {
     setSelectedDateSetting,
     toggleSelectedClosedAlertsSetting,
     isLoadingRiskEngineSettings,
+    toggleScoreRetainment,
+    setAlertFilters,
+    getUIAlertFilters,
   } = useConfigurableRiskEngineSettings();
   const { data: riskEngineStatus } = useRiskEngineStatus({
     refetchInterval: TEN_SECONDS,
@@ -63,6 +69,16 @@ export const EntityAnalyticsManagementPage = () => {
         (!privileges.hasAllRequiredPrivileges &&
           privileges.missingPrivileges?.clusterPrivileges?.run?.length === 0))) ||
     false;
+  const riskScoreResetToZeroIsEnabled = useIsExperimentalFeatureEnabled(
+    'enableRiskScoreResetToZero'
+  );
+
+  // Create a wrapper mutation that takes no parameters for RiskScoreEnableSection
+  const saveSettingsWrapperMutation = useMutation(async () => {
+    if (selectedRiskEngineSettings) {
+      await saveSelectedSettingsMutation.mutateAsync(selectedRiskEngineSettings);
+    }
+  });
 
   const handleRunEngineClick = async () => {
     setIsLoadingRunRiskEngine(true);
@@ -133,7 +149,7 @@ export const EntityAnalyticsManagementPage = () => {
                 )}
                 <RiskScoreEnableSection
                   selectedSettingsMatchSavedSettings={selectedSettingsMatchSavedSettings}
-                  saveSelectedSettingsMutation={saveSelectedSettingsMutation}
+                  saveSelectedSettingsMutation={saveSettingsWrapperMutation}
                   privileges={privileges}
                 />
               </EuiFlexGroup>
@@ -144,14 +160,29 @@ export const EntityAnalyticsManagementPage = () => {
 
       <EuiHorizontalRule />
       <EuiFlexGroup gutterSize="xl" alignItems="flexStart">
-        {!selectedRiskEngineSettings && <EuiLoadingSpinner size="m" />}
+        {!selectedRiskEngineSettings && (
+          <EuiFlexItem>
+            <EuiLoadingSpinner size="m" />
+            <EuiText size="s">
+              <p>{i18n.LOADING_RISK_ENGINE_SETTINGS}</p>
+            </EuiText>
+          </EuiFlexItem>
+        )}
         {selectedRiskEngineSettings && (
           <>
             <EuiFlexItem grow={2}>
+              {riskScoreResetToZeroIsEnabled && (
+                <RiskScoreGeneralSection
+                  riskEngineSettings={selectedRiskEngineSettings}
+                  toggleScoreRetainment={toggleScoreRetainment}
+                />
+              )}
               <RiskScoreConfigurationSection
                 selectedRiskEngineSettings={selectedRiskEngineSettings}
                 setSelectedDateSetting={setSelectedDateSetting}
                 toggleSelectedClosedAlertsSetting={toggleSelectedClosedAlertsSetting}
+                onAlertFiltersChange={setAlertFilters}
+                uiAlertFilters={getUIAlertFilters()}
               />
               <EuiHorizontalRule />
               <RiskScoreUsefulLinksSection />
@@ -162,15 +193,24 @@ export const EntityAnalyticsManagementPage = () => {
                 includeClosedAlerts={selectedRiskEngineSettings.includeClosedAlerts}
                 from={selectedRiskEngineSettings.range.start}
                 to={selectedRiskEngineSettings.range.end}
+                alertFilters={selectedRiskEngineSettings.filters}
               />
             </EuiFlexItem>
           </>
         )}
       </EuiFlexGroup>
-      {savedRiskEngineSettings && !selectedSettingsMatchSavedSettings && (
+      {((savedRiskEngineSettings && !selectedSettingsMatchSavedSettings) ||
+        (!savedRiskEngineSettings &&
+          selectedRiskEngineSettings &&
+          selectedRiskEngineSettings.filters &&
+          selectedRiskEngineSettings.filters.length > 0)) && (
         <RiskScoreSaveBar
           resetSelectedSettings={resetSelectedSettings}
-          saveSelectedSettings={saveSelectedSettingsMutation.mutateAsync}
+          saveSelectedSettings={() => {
+            if (selectedRiskEngineSettings) {
+              saveSelectedSettingsMutation.mutateAsync(selectedRiskEngineSettings);
+            }
+          }}
           isLoading={isLoadingRiskEngineSettings || saveSelectedSettingsMutation.isLoading}
         />
       )}

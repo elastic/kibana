@@ -15,10 +15,8 @@ import { useWithInputTextEntered } from '../../../hooks/state_selectors/use_with
 import { UserCommandInput } from '../../user_command_input';
 import { useConsoleStateDispatch } from '../../../hooks/state_selectors/use_console_state_dispatch';
 import { useWithInputHistory } from '../../../hooks/state_selectors/use_with_input_history';
-import type { CommandDefinition } from '../../../types';
 import { useDataTestSubj } from '../../../hooks/state_selectors/use_data_test_subj';
 import { CommandInputClearHistory } from './command_input_clear_history';
-import { useConsoleStore } from '../../console_state/console_state';
 
 export const NO_HISTORY_EMPTY_MESSAGE = i18n.translate(
   'xpack.securitySolution.commandInputHistory.noHistoryEmptyMessage',
@@ -39,7 +37,6 @@ export const CommandInputHistory = memo(() => {
   const getTestId = useTestIdGenerator(useDataTestSubj());
   const dispatch = useConsoleStateDispatch();
   const inputHistory = useWithInputHistory();
-  const { state: consoleState } = useConsoleStore();
   const [priorInputState] = useState(useWithInputTextEntered());
   const optionWasSelected = useRef(false);
 
@@ -97,46 +94,22 @@ export const CommandInputHistory = memo(() => {
       dispatch({ type: 'updateInputPlaceholderState', payload: { placeholder: '' } });
 
       if (selected) {
-        const historyItem = selected.data as InputHistoryItem;
-        const originalArgState = historyItem.argState;
-
-        // Clean file selector values from history argState
-        // File selectors (selectorShowTextValue !== true) should not populate from history
-        const cleanedArgState: typeof originalArgState = {};
-
-        if (originalArgState) {
-          // Get command definitions to check selectorShowTextValue
-          const commandName = historyItem.input.split(' ')[0];
-          const commandDef = consoleState.commands.find(
-            (def: CommandDefinition) => def.name === commandName
-          );
-
-          for (const [argName, argValues] of Object.entries(originalArgState)) {
-            const argDef = commandDef?.args?.[argName];
-
-            if (argDef?.SelectorComponent && argDef.selectorShowTextValue !== true) {
-              // File selectors: Clear values (set to empty)
-              cleanedArgState[argName] = [];
-            } else {
-              // Script selectors: Keep original values
-              cleanedArgState[argName] = argValues;
-            }
-          }
-        }
+        const { input: historyItemInput, argState: historyItemArgState } =
+          selected.data as InputHistoryItem;
 
         dispatch({
           type: 'updateInputTextEnteredState',
           payload: {
-            leftOfCursorText: historyItem.input,
+            leftOfCursorText: historyItemInput,
             rightOfCursorText: '',
-            argState: cleanedArgState,
+            argState: historyItemArgState,
           },
         });
       }
 
       dispatch({ type: 'addFocusToKeyCapture' });
     },
-    [consoleState.commands, dispatch]
+    [dispatch]
   );
 
   const handleOnActiveOptionChange = useCallback<

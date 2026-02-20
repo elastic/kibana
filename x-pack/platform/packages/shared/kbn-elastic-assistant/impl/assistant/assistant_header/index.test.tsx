@@ -24,6 +24,7 @@ const mockConversations = {
 const testProps = {
   conversationSharedState: ConversationSharedState.PRIVATE,
   conversationsLoaded: true,
+  currentUser: { name: 'elastic' },
   selectedConversation: welcomeConvo,
   title: 'Test Title',
   docLinks: {
@@ -117,6 +118,20 @@ describe('AssistantHeader', () => {
     expect(
       within(screen.getByTestId('conversationTitle')).getByTestId('euiInlineReadModeButton')
     ).not.toBeDisabled();
+  });
+
+  it('disables assistant settings menu when isDisabled=true', () => {
+    render(<AssistantHeader {...testProps} isDisabled={true} />, {
+      wrapper: TestProviders,
+    });
+    expect(screen.getByTestId('chat-context-menu')).toBeDisabled();
+  });
+
+  it('enables assistant settings menu when isDisabled=false', () => {
+    render(<AssistantHeader {...testProps} isDisabled={false} />, {
+      wrapper: TestProviders,
+    });
+    expect(screen.getByTestId('chat-context-menu')).not.toBeDisabled();
   });
 
   it('disables share badge when isConversationOwner=false', () => {

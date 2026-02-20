@@ -16,6 +16,7 @@ import type { DeleteByQueryResponse } from '@elastic/elasticsearch/lib/api/types
 import { createConversation } from './create_conversation';
 import { updateConversation } from './update_conversation';
 import { getConversation } from './get_conversation';
+import { conversationExists } from './conversation_exists';
 import { deleteConversation } from './delete_conversation';
 import { appendConversationMessages } from './append_conversation_messages';
 import type { AIAssistantDataClientParams } from '..';
@@ -27,13 +28,29 @@ import { deleteAllConversations } from './delete_all_conversations';
  * configuration after initial plugin start
  */
 export interface GetAIAssistantConversationsDataClientParams {
-  contentReferencesEnabled?: boolean;
+  assistantInterruptsEnabled?: boolean;
 }
 
 export class AIAssistantConversationsDataClient extends AIAssistantDataClient {
   constructor(public readonly options: AIAssistantDataClientParams) {
     super(options);
   }
+
+  /**
+   * Checks if a conversation exists by ID without user access filtering.
+   * @param options
+   * @param options.id The conversation id to check.
+   * @returns Promise<boolean> indicating whether the conversation exists
+   */
+  public conversationExists = async ({ id }: { id: string }): Promise<boolean> => {
+    const esClient = await this.options.elasticsearchClientPromise;
+    return conversationExists({
+      esClient,
+      logger: this.options.logger,
+      conversationIndex: this.indexTemplateAndPattern.alias,
+      id,
+    });
+  };
 
   /**
    * Gets a conversation by its id.

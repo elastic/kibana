@@ -13,7 +13,7 @@ export const LOGO = {
   href: '/elasticsearch',
   id: 'elasticsearch',
   label: 'Elasticsearch',
-  type: 'logoElasticsearch',
+  iconType: 'logoElasticsearch',
 };
 
 export const PRIMARY_MENU_ITEMS: MenuItem[] = [
@@ -46,6 +46,7 @@ export const PRIMARY_MENU_ITEMS: MenuItem[] = [
     label: 'Web crawlers',
     iconType: 'managementApp',
     href: '/web-crawlers',
+    badgeType: 'new',
   },
   {
     id: 'dev_tools',
@@ -93,10 +94,10 @@ export const PRIMARY_MENU_FOOTER_ITEMS: MenuItem[] = [
     href: '/developer-tools',
   },
   {
-    id: 'settings',
+    id: 'project-settings',
     label: 'Settings',
     iconType: 'gear',
-    href: '/settings/project/performance',
+    href: '/settings/project/settings',
     sections: [
       {
         id: 'project',
@@ -106,11 +107,13 @@ export const PRIMARY_MENU_FOOTER_ITEMS: MenuItem[] = [
             id: 'project-performance',
             label: 'Performance',
             href: '/settings/project/performance',
+            badgeType: 'new',
           },
           {
             id: 'project-integrations',
             label: 'Integrations',
             href: '/settings/project/integrations',
+            badgeType: 'new',
           },
           {
             id: 'project-fleet',
@@ -317,3 +320,11 @@ export const PRIMARY_MENU_FOOTER_ITEMS: MenuItem[] = [
     ],
   },
 ];
+
+export const elasticsearchMock = {
+  logo: LOGO,
+  navItems: {
+    primaryItems: PRIMARY_MENU_ITEMS,
+    footerItems: PRIMARY_MENU_FOOTER_ITEMS,
+  },
+};

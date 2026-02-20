@@ -37,7 +37,7 @@ import {
 import { sendGetBulkAssets } from '../../../../../hooks';
 import { SideBarColumn } from '../../../components/side_bar_column';
 
-import { DeferredAssetsSection } from './deferred_assets_accordion';
+import { DeferredAssetsSection } from './deferred_assets_section';
 import { AssetsAccordion } from './assets_accordion';
 import { InstallKibanaAssetsButton } from './install_kibana_assets_button';
 
@@ -105,6 +105,7 @@ export const AssetsPage = ({ packageInfo, refetchPackageInfo }: AssetsPanelProps
       }, {} as Record<string, Array<EsAssetReference | KibanaAssetReference>>),
     [pkgAssets]
   );
+
   const [fetchError, setFetchError] = useState<undefined | Error>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
@@ -177,6 +178,7 @@ export const AssetsPage = ({ packageInfo, refetchPackageInfo }: AssetsPanelProps
   } else if (!canReadPackageSettings) {
     content = (
       <EuiCallOut
+        announceOnMount
         color="warning"
         title={
           <FormattedMessage
@@ -219,6 +221,7 @@ export const AssetsPage = ({ packageInfo, refetchPackageInfo }: AssetsPanelProps
       !assetsInstalledInCurrentSpace ? (
         <>
           <EuiCallOut
+            announceOnMount
             heading="h2"
             title={
               <FormattedMessage
@@ -276,12 +279,18 @@ export const AssetsPage = ({ packageInfo, refetchPackageInfo }: AssetsPanelProps
 
         const assets = pkgAssetsByType[assetType] || [];
         const soAssets = assetSavedObjectsByType[assetType] || {};
-        const finalAssets = assets.map((asset) => {
-          return {
-            ...asset,
-            ...soAssets[asset.id],
-          };
-        });
+        const finalAssets = assets
+          .map((asset) => {
+            return {
+              ...asset,
+              ...soAssets[asset.id],
+            };
+          })
+          .sort((a, b) => {
+            const titleA = a.attributes?.title ?? a.id;
+            const titleB = b.attributes?.title ?? b.id;
+            return titleA.localeCompare(titleB);
+          });
 
         if (!finalAssets.length) {
           return null;

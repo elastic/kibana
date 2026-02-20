@@ -57,15 +57,15 @@ export type {
   GetCustomFieldType,
   RenderFieldItemParams,
   SearchMode,
+  ExistingFieldsInfo,
 } from './src/types';
-export { ExistenceFetchStatus, FieldsGroupNames } from './src/types';
+export { ExistenceFetchStatus, FieldsGroupNames, type AdditionalFieldGroups } from './src/types';
 export type { UnifiedFieldListRestorableState } from './src/restorable_state';
 
 export {
   useExistingFieldsFetcher,
   useExistingFieldsReader,
   resetExistingFieldsCache,
-  type ExistingFieldsInfo,
   type ExistingFieldsFetcherParams,
   type ExistingFieldsFetcher,
   type ExistingFieldsReader,

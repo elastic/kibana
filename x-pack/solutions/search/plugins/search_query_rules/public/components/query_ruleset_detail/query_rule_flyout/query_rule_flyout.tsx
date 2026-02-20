@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 
 import {
   EuiButton,
@@ -81,7 +82,6 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
     setCriteriaCalloutActive,
     shouldShowCriteriaCallout,
     shouldShowMetadataEditor,
-    update,
   } = useQueryRuleFlyoutState({
     createMode,
     rulesetId,
@@ -203,7 +203,11 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
               {isIdRule && (
                 <>
                   <EuiCallOut
-                    title="Document action using 'ids' are unsupported"
+                    announceOnMount
+                    title={i18n.translate(
+                      'xpack.search.queryRuleset.queryRuleFlyout.documentActionUsingidsLabel',
+                      { defaultMessage: "Document action using 'ids' are unsupported" }
+                    )}
                     color="warning"
                     size="s"
                   >
@@ -235,6 +239,7 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
               </EuiFlexItem>
               {pinType === 'pinned' && documentCount !== 0 && (
                 <EuiCallOut
+                  announceOnMount
                   iconType="transitionTopIn"
                   size="s"
                   title={
@@ -295,6 +300,7 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
               {shouldShowCriteriaCallout && (
                 <>
                   <EuiCallOut
+                    announceOnMount
                     iconType="info"
                     size="s"
                     onDismiss={() => {
@@ -317,16 +323,24 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
                       const error = formState.errors?.criteria?.[index];
                       return (
                         <React.Fragment key={field.id}>
-                          <QueryRuleMetadataEditor
-                            criteria={field}
-                            key={field.id}
-                            onChange={(newCriteria) => {
-                              update(index, newCriteria);
+                          <Controller
+                            control={control}
+                            name={`criteria.${index}`}
+                            render={({ field: { onChange, value } }) => {
+                              return (
+                                <QueryRuleMetadataEditor
+                                  criteria={value}
+                                  key={field.id}
+                                  onRemove={() => {
+                                    remove(index);
+                                  }}
+                                  error={isQueryRuleFieldError(error) ? error : undefined}
+                                  onChange={(newCriteria) => {
+                                    onChange(newCriteria);
+                                  }}
+                                />
+                              );
                             }}
-                            onRemove={() => {
-                              remove(index);
-                            }}
-                            error={isQueryRuleFieldError(error) ? error : undefined}
                           />
                           <EuiSpacer size="m" />
                         </React.Fragment>
@@ -335,6 +349,7 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
                   ) : (
                     <>
                       <EuiCallOut
+                        announceOnMount
                         iconType="info"
                         size="s"
                         color="warning"

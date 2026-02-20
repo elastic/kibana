@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObjectsClient, ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
 import { AGENTS_INDEX, LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../common';
 import * as AgentService from '../services/agents';
@@ -27,7 +27,7 @@ export interface AgentUsage extends AgentStatus {
 }
 
 export const getAgentUsage = async (
-  soClient?: SavedObjectsClient,
+  soClient?: SavedObjectsClientContract,
   esClient?: ElasticsearchClient,
   onlyAgentless?: boolean
 ): Promise<AgentUsage> => {
@@ -120,7 +120,7 @@ const DEFAULT_AGENT_DATA = {
 
 export const getAgentData = async (
   esClient: ElasticsearchClient,
-  soClient: SavedObjectsClient,
+  soClient: SavedObjectsClientContract,
   abortController: AbortController
 ): Promise<AgentData> => {
   try {

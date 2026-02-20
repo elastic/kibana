@@ -34,11 +34,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     it('checks whether deeply nested stream is created correctly', async () => {
       function getChildNames(stream: Streams.all.Definition): string[] {
-        if (
-          Streams.GroupStream.Definition.is(stream) ||
-          Streams.ClassicStream.Definition.is(stream)
-        )
-          return [];
+        if (!Streams.WiredStream.Definition.is(stream)) return [];
         return stream.ingest.wired.routing.map((r) => r.destination);
       }
       const logs = await apiClient.fetch('GET /api/streams/{name} 2023-10-31', {

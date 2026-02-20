@@ -17,13 +17,15 @@ import {
   QueryColumn,
   HistoryAndStarredQueriesTabs,
 } from './history_starred_queries';
-import { of } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { act } from 'react-dom/test-utils';
 import { getHistoryItems, getStorageStats } from '../history_local_storage';
+import type { EsqlStarredQueriesService, StarredQueryItem } from './esql_starred_queries_service';
 
 jest.mock('../history_local_storage', () => ({
   getHistoryItems: jest.fn(),
   getStorageStats: jest.fn(() => ({ queryCount: 0, storageSizeKB: 0 })),
+  getTrimmedQuery: jest.fn((query: string) => query.trim()),
   dateFormat: 'MMM. DD, YY HH:mm:ss',
 }));
 
@@ -47,6 +49,22 @@ const mockHistoryItems = [
     status: 'error' as const,
   },
 ];
+
+// Add mock data with more than 20 items for pagination testing
+const mockManyHistoryItems = Array.from({ length: 25 }, (_, i) => ({
+  queryString: `FROM index_${i} | WHERE field = "value_${i}"`,
+  timeRan: '',
+  status: 'success' as const,
+}));
+
+const createMockStarredQueriesService = (items: StarredQueryItem[] = []) =>
+  ({
+    queries$: new BehaviorSubject(items),
+    discardModalVisibility$: new BehaviorSubject(false),
+    renderStarredButton: jest.fn(() => null),
+    checkIfQueryIsStarred: jest.fn(() => false),
+    onDiscardModalClose: jest.fn(async () => {}),
+  } as unknown as EsqlStarredQueriesService);
 
 describe('Starred and History queries components', () => {
   const services = {
@@ -88,11 +106,6 @@ describe('Starred and History queries components', () => {
       const columns = getTableColumns(50, false, []);
       expect(columns).toEqual([
         {
-          'data-test-subj': 'favoriteBtn',
-          render: expect.anything(),
-          width: '40px',
-        },
-        {
           css: {
             height: '100%',
           },
@@ -130,11 +143,6 @@ describe('Starred and History queries components', () => {
     it('should get the table columns correctly for the starred list', async () => {
       const columns = getTableColumns(50, false, [], true);
       expect(columns).toEqual([
-        {
-          'data-test-subj': 'favoriteBtn',
-          render: expect.anything(),
-          width: '40px',
-        },
         {
           css: {
             height: '100%',
@@ -175,11 +183,6 @@ describe('Starred and History queries components', () => {
     const columns = getTableColumns(50, true, []);
     expect(columns).toEqual([
       {
-        'data-test-subj': 'favoriteBtn',
-        render: expect.anything(),
-        width: 'auto',
-      },
-      {
         css: {
           height: '100%',
         },
@@ -188,14 +191,6 @@ describe('Starred and History queries components', () => {
         name: '',
         render: expect.anything(),
         sortable: false,
-        width: 'auto',
-      },
-      {
-        'data-test-subj': 'timeRan',
-        field: 'timeRan',
-        name: 'Time ran',
-        render: expect.anything(),
-        sortable: true,
         width: 'auto',
       },
       {
@@ -209,6 +204,14 @@ describe('Starred and History queries components', () => {
         actions: [],
         'data-test-subj': 'actions',
         name: '',
+        width: 'auto',
+      },
+      {
+        'data-test-subj': 'timeRan',
+        field: 'timeRan',
+        name: 'Time ran',
+        render: expect.anything(),
+        sortable: true,
         width: 'auto',
       },
     ]);
@@ -257,6 +260,7 @@ describe('Starred and History queries components', () => {
             containerWidth={1024}
             onUpdateAndSubmit={jest.fn()}
             height={200}
+            starredQueriesService={createMockStarredQueriesService()}
           />
         </KibanaContextProvider>
       );
@@ -274,6 +278,7 @@ describe('Starred and History queries components', () => {
             containerWidth={1024}
             onUpdateAndSubmit={jest.fn()}
             height={200}
+            starredQueriesService={createMockStarredQueriesService()}
           />
         </KibanaContextProvider>
       );
@@ -292,6 +297,7 @@ describe('Starred and History queries components', () => {
             isSpaceReduced={true}
             onUpdateAndSubmit={jest.fn()}
             height={200}
+            starredQueriesService={createMockStarredQueriesService()}
           />
         </KibanaContextProvider>
       );
@@ -309,6 +315,7 @@ describe('Starred and History queries components', () => {
             containerWidth={1024}
             onUpdateAndSubmit={jest.fn()}
             height={200}
+            starredQueriesService={createMockStarredQueriesService()}
           />
         </KibanaContextProvider>
       );
@@ -323,9 +330,7 @@ describe('Starred and History queries components', () => {
       );
     });
 
-    it('should hide starred tab if starred service failed to initialize', async () => {
-      jest.spyOn(services.core.userProfile, 'getEnabled$').mockImplementation(() => of(false));
-
+    it('should not render the starred tab without a service', () => {
       render(
         <KibanaContextProvider services={services}>
           <HistoryAndStarredQueriesTabs
@@ -333,19 +338,14 @@ describe('Starred and History queries components', () => {
             containerWidth={1024}
             onUpdateAndSubmit={jest.fn()}
             height={200}
+            starredQueriesService={null}
           />
         </KibanaContextProvider>
       );
 
-      // initial render two tabs are shown
       expect(screen.getByTestId('history-queries-tab')).toBeInTheDocument();
       expect(screen.getByTestId('history-queries-tab')).toHaveTextContent('Recent');
-      expect(screen.getByTestId('starred-queries-tab')).toBeInTheDocument();
-      expect(screen.getByTestId('starred-queries-tab')).toHaveTextContent('Starred');
-
-      await waitFor(() => {
-        expect(screen.queryByText('starred-queries-tab')).not.toBeInTheDocument();
-      });
+      expect(screen.queryByTestId('starred-queries-tab')).not.toBeInTheDocument();
     });
 
     it('should render search input only in Recent tab', async () => {
@@ -356,6 +356,7 @@ describe('Starred and History queries components', () => {
             containerWidth={800}
             onUpdateAndSubmit={jest.fn()}
             height={400}
+            starredQueriesService={createMockStarredQueriesService()}
           />
         </KibanaContextProvider>
       );
@@ -373,6 +374,7 @@ describe('Starred and History queries components', () => {
             containerWidth={800}
             onUpdateAndSubmit={jest.fn()}
             height={400}
+            starredQueriesService={createMockStarredQueriesService()}
           />
         </KibanaContextProvider>
       );
@@ -422,6 +424,7 @@ describe('Starred and History queries components', () => {
             containerWidth={800}
             onUpdateAndSubmit={jest.fn()}
             height={400}
+            starredQueriesService={createMockStarredQueriesService()}
           />
         </KibanaContextProvider>
       );
@@ -456,6 +459,7 @@ describe('Starred and History queries components', () => {
             containerWidth={800}
             onUpdateAndSubmit={jest.fn()}
             height={400}
+            starredQueriesService={createMockStarredQueriesService()}
           />
         </KibanaContextProvider>
       );
@@ -485,6 +489,7 @@ describe('Starred and History queries components', () => {
             containerWidth={800}
             onUpdateAndSubmit={jest.fn()}
             height={400}
+            starredQueriesService={createMockStarredQueriesService()}
           />
         </KibanaContextProvider>
       );
@@ -499,6 +504,62 @@ describe('Starred and History queries components', () => {
         expect(screen.getByPlaceholderText('Search starred queries')).toBeInTheDocument();
         expect(screen.queryByTestId('ESQLEditor-history-search')).not.toBeInTheDocument();
       });
+    });
+
+    it('should show pagination controls when there are more than 20 items', async () => {
+      mockGetHistoryItems.mockReturnValue(mockManyHistoryItems);
+      mockGetStorageStats.mockReturnValue({
+        queryCount: 25,
+        storageSizeKB: 5,
+        maxStorageLimitKB: 50,
+        storageUsagePercent: 10,
+      });
+
+      render(
+        <KibanaContextProvider services={services}>
+          <HistoryAndStarredQueriesTabs
+            containerCSS={{}}
+            containerWidth={800}
+            onUpdateAndSubmit={jest.fn()}
+            height={400}
+            starredQueriesService={createMockStarredQueriesService()}
+          />
+        </KibanaContextProvider>
+      );
+
+      // Wait for the component to render
+      await waitFor(() => {
+        expect(screen.getByTestId('ESQLEditor-queryHistory')).toBeInTheDocument();
+      });
+
+      // Check that pagination controls are present by looking for EUI pagination class
+      await waitFor(() => {
+        const paginationElement = document.querySelector('.euiPagination');
+        expect(paginationElement).toBeInTheDocument();
+      });
+    });
+
+    it('should not show pagination controls when there are 20 or fewer items', async () => {
+      render(
+        <KibanaContextProvider services={services}>
+          <HistoryAndStarredQueriesTabs
+            containerCSS={{}}
+            containerWidth={800}
+            onUpdateAndSubmit={jest.fn()}
+            height={400}
+            starredQueriesService={null}
+          />
+        </KibanaContextProvider>
+      );
+
+      // Wait for the component to render
+      await waitFor(() => {
+        expect(screen.getByTestId('ESQLEditor-queryHistory')).toBeInTheDocument();
+      });
+
+      // Check that pagination controls are not present
+      const paginationElement = document.querySelector('.euiPagination');
+      expect(paginationElement).not.toBeInTheDocument();
     });
   });
 });

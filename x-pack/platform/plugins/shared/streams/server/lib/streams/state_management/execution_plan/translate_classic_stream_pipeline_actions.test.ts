@@ -1045,5 +1045,12 @@ function emptyActionsByType(): ActionsByType {
     delete_dot_streams_document: [],
     update_data_stream_mappings: [],
     delete_queries: [],
+    unlink_assets: [],
+    unlink_systems: [],
+    unlink_features: [],
+    update_ingest_settings: [],
+    update_failure_store: [],
+    upsert_esql_view: [],
+    delete_esql_view: [],
   };
 }

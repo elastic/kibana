@@ -14,7 +14,6 @@ import {
   ENTERPRISE_SEARCH_ANALYTICS_APP_ID,
   SEARCH_HOMEPAGE,
   SEARCH_INDICES,
-  SEARCH_INDICES_START,
   SEARCH_INDEX_MANAGEMENT,
 } from '@kbn/deeplinks-search';
 import { i18n } from '@kbn/i18n';
@@ -30,7 +29,7 @@ export const ENTERPRISE_SEARCH_PRODUCT_NAME = i18n.translate('xpack.enterpriseSe
   defaultMessage: 'Enterprise Search',
 });
 
-export { SEARCH_INDICES_START, SEARCH_INDICES, SEARCH_INDEX_MANAGEMENT, SEARCH_HOMEPAGE };
+export { SEARCH_INDICES, SEARCH_INDEX_MANAGEMENT, SEARCH_HOMEPAGE };
 
 export const ENTERPRISE_SEARCH_HOME_PLUGIN = {
   ID: ENTERPRISE_SEARCH_APP_ID,
@@ -77,26 +76,6 @@ export const ANALYTICS_PLUGIN = {
   SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/',
 };
 
-export const SEARCH_EXPERIENCES_PLUGIN = {
-  ID: 'searchExperiences',
-  NAME: i18n.translate('xpack.enterpriseSearch.searchExperiences.productName', {
-    defaultMessage: 'Search Experiences',
-  }),
-  NAV_TITLE: i18n.translate('xpack.enterpriseSearch.searchExperiences.navTitle', {
-    defaultMessage: 'Search Experiences',
-  }),
-  DESCRIPTION: i18n.translate('xpack.enterpriseSearch.searchExperiences.productDescription', {
-    defaultMessage: 'Build an intuitive, engaging search experience without reinventing the wheel.',
-  }),
-  URL: '/app/enterprise_search/search_experiences',
-  SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/',
-  GITHUB_URL: 'https://github.com/elastic/search-ui/',
-  DOCUMENTATION_URL: 'https://docs.elastic.co/search-ui/',
-  ELASTICSEARCH_TUTORIAL_URL: 'https://docs.elastic.co/search-ui/tutorials/elasticsearch',
-  APP_SEARCH_TUTORIAL_URL: 'https://docs.elastic.co/search-ui/tutorials/app-search',
-  WORKPLACE_SEARCH_TUTORIAL_URL: 'https://docs.elastic.co/search-ui/tutorials/workplace-search',
-};
-
 export const APPLICATIONS_PLUGIN = {
   ID: ENTERPRISE_SEARCH_APPLICATIONS_APP_ID,
   LOGO: 'logoElasticsearch',
@@ -135,7 +114,7 @@ export const ENTERPRISE_SEARCH_AUDIT_LOGS_SOURCE_ID = 'ent-search-audit-logs';
 export const ENTERPRISE_SEARCH_ANALYTICS_LOGS_SOURCE_ID = 'ent-search-analytics-logs';
 
 export const CREATE_NEW_INDEX_URL = '/search_indices/new_index';
-export const PLAYGROUND_URL = '/playground';
+
 export const SEARCH_HOMEPAGE_URL = '/app/elasticsearch/home';
 
 export const MANAGE_API_KEYS_URL = '/app/management/security/api_keys';

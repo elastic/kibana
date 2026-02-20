@@ -119,6 +119,7 @@ export const buildDataViewMock = ({
     },
   } as unknown as DataView;
 
+  // @ts-expect-error upgrade typescript v5.9.3
   dataView.isTimeBased = () => !!timeFieldName;
 
   return dataView;

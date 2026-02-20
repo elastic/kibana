@@ -39,7 +39,6 @@ describe('Settings Page', () => {
   const appContextValue = {
     config: {
       spacesEnabled: true,
-      visibilityEnabled: true,
       logSourcesEnabled: true,
     },
     setBreadcrumbs: () => {},

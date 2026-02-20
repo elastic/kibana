@@ -22,6 +22,8 @@
           "\nInterfaces for registering tools to be used by the elastic assistant"
         ],
         "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+        "lineNumber": 257,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -33,6 +35,8 @@
             "label": "id",
             "description": [],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "lineNumber": 262,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -44,6 +48,8 @@
             "label": "name",
             "description": [],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "lineNumber": 263,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -55,6 +61,8 @@
             "label": "description",
             "description": [],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "lineNumber": 264,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -66,6 +74,8 @@
             "label": "sourceRegister",
             "description": [],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "lineNumber": 265,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -88,6 +98,8 @@
               ") => boolean"
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "lineNumber": 266,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -108,6 +120,8 @@
                   }
                 ],
                 "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+                "lineNumber": 266,
+                "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -138,6 +152,8 @@
               ", any, any> | null>"
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "lineNumber": 267,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -158,6 +174,8 @@
                   }
                 ],
                 "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+                "lineNumber": 267,
+                "columnNumber": 13,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -176,6 +194,8 @@
         "label": "AssistantToolParams",
         "description": [],
         "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+        "lineNumber": 276,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -190,6 +210,8 @@
               "string | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "lineNumber": 277,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -205,6 +227,8 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "lineNumber": 278,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -219,6 +243,8 @@
               "{ id: string; field: string; namespace?: string | undefined; timestamp?: string | undefined; createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; allowed?: boolean | undefined; anonymized?: boolean | undefined; }[] | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "lineNumber": 279,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -240,6 +266,8 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "lineNumber": 280,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -251,6 +279,8 @@
             "label": "isEnabledKnowledgeBase",
             "description": [],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "lineNumber": 281,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -265,6 +295,8 @@
               "string | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "lineNumber": 282,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -285,6 +317,8 @@
               }
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "lineNumber": 283,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -299,6 +333,8 @@
               "string | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "lineNumber": 284,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -390,35 +426,9 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "WriteResponseBase",
-              ">; }; helpers: ",
+              ">; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kProject]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; name: string | symbol; transport: ",
               "default",
-              "; search: { <TDocument = unknown, TAggregations = Record<string, ",
-              "AggregationsAggregate",
-              ">>(this: That, params?: ",
-              "SearchRequest",
-              " | undefined, options?: ",
-              "TransportRequestOptionsWithOutMeta",
-              " | undefined): Promise<",
-              "SearchResponse",
-              "<TDocument, TAggregations>>; <TDocument = unknown, TAggregations = Record<string, ",
-              "AggregationsAggregate",
-              ">>(this: That, params?: ",
-              "SearchRequest",
-              " | undefined, options?: ",
-              "TransportRequestOptionsWithMeta",
-              " | undefined): Promise<",
-              "TransportResult",
-              "<",
-              "SearchResponse",
-              "<TDocument, TAggregations>, unknown>>; <TDocument = unknown, TAggregations = Record<string, ",
-              "AggregationsAggregate",
-              ">>(this: That, params?: ",
-              "SearchRequest",
-              " | undefined, options?: ",
-              "TransportRequestOptions",
-              " | undefined): Promise<",
-              "SearchResponse",
-              "<TDocument, TAggregations>>; }; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+              "; helpers: ",
               "default",
               "; child: (opts: ",
               "ClientOptions",
@@ -980,6 +990,8 @@
               "TransportRequestOptions",
               " | undefined): Promise<boolean>; }; profiling: ",
               "default",
+              "; project: ",
+              "default",
               "; putScript: { (this: That, params: ",
               "PutScriptRequest",
               ", options?: ",
@@ -1130,6 +1142,32 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "ScrollResponse",
+              "<TDocument, TAggregations>>; }; search: { <TDocument = unknown, TAggregations = Record<string, ",
+              "AggregationsAggregate",
+              ">>(this: That, params?: ",
+              "SearchRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "SearchResponse",
+              "<TDocument, TAggregations>>; <TDocument = unknown, TAggregations = Record<string, ",
+              "AggregationsAggregate",
+              ">>(this: That, params?: ",
+              "SearchRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "SearchResponse",
+              "<TDocument, TAggregations>, unknown>>; <TDocument = unknown, TAggregations = Record<string, ",
+              "AggregationsAggregate",
+              ">>(this: That, params?: ",
+              "SearchRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "SearchResponse",
               "<TDocument, TAggregations>>; }; searchApplication: ",
               "default",
               "; searchMvt: { (this: That, params: ",
@@ -1299,6 +1337,8 @@
               "; }"
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "lineNumber": 285,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1314,6 +1354,8 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "lineNumber": 286,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1328,6 +1370,8 @@
               "number | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "lineNumber": 287,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1345,6 +1389,8 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "lineNumber": 288,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1366,6 +1412,8 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "lineNumber": 289,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1380,6 +1428,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "lineNumber": 290,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1400,6 +1450,8 @@
               }
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "lineNumber": 291,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1411,9 +1463,15 @@
             "label": "onNewReplacements",
             "description": [],
             "signature": [
-              "((newReplacements: Zod.objectOutputType<{}, Zod.ZodString, \"strip\">) => void) | undefined"
+              "((newReplacements: ",
+              "objectOutputType",
+              "<{}, ",
+              "ZodString",
+              ", \"strip\">) => void) | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "lineNumber": 292,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1425,9 +1483,14 @@
                 "label": "newReplacements",
                 "description": [],
                 "signature": [
-                  "Zod.objectOutputType<{}, Zod.ZodString, \"strip\">"
+                  "objectOutputType",
+                  "<{}, ",
+                  "ZodString",
+                  ", \"strip\">"
                 ],
                 "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+                "lineNumber": 292,
+                "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1443,9 +1506,14 @@
             "label": "replacements",
             "description": [],
             "signature": [
-              "Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined"
+              "objectOutputType",
+              "<{}, ",
+              "ZodString",
+              ", \"strip\"> | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "lineNumber": 293,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1458,9 +1526,23 @@
             "description": [],
             "signature": [
               "KibanaRequest",
-              "<unknown, unknown, { actionTypeId: string; subAction: \"invokeAI\" | \"invokeStream\"; replacements: {} & { [k: string]: string; }; message?: string | undefined; size?: number | undefined; allow?: string[] | undefined; conversationId?: string | undefined; model?: string | undefined; alertsIndexPattern?: string | undefined; allowReplacement?: string[] | undefined; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; screenContext?: { timeZone?: string | undefined; } | undefined; promptIds?: { promptId: string; promptGroupId: string; } | undefined; } | { size: number; subAction: \"invokeAI\" | \"invokeStream\"; alertsIndexPattern: string; anonymizationFields: { id: string; field: string; namespace?: string | undefined; timestamp?: string | undefined; createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; allowed?: boolean | undefined; anonymized?: boolean | undefined; }[]; apiConfig: { connectorId: string; actionTypeId: string; provider?: \"Other\" | \"OpenAI\" | \"Azure OpenAI\" | undefined; model?: string | undefined; defaultSystemPromptId?: string | undefined; }; start?: string | undefined; end?: string | undefined; filter?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; connectorName?: string | undefined; model?: string | undefined; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; } | { subAction: \"invokeAI\" | \"invokeStream\"; anonymizationFields: { id: string; field: string; namespace?: string | undefined; timestamp?: string | undefined; createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; allowed?: boolean | undefined; anonymized?: boolean | undefined; }[]; apiConfig: { connectorId: string; actionTypeId: string; provider?: \"Other\" | \"OpenAI\" | \"Azure OpenAI\" | undefined; model?: string | undefined; defaultSystemPromptId?: string | undefined; }; endpointIds: string[]; insightType: \"incompatible_antivirus\" | \"noisy_process_tree\" | \"policy_response_failure\"; model?: string | undefined; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; }, any>"
+              "<unknown, unknown, { actionTypeId: string; subAction: \"invokeAI\" | \"invokeStream\"; replacements: {} & { [k: string]: string; }; message?: string | undefined; size?: number | undefined; allow?: string[] | undefined; conversationId?: string | undefined; model?: string | undefined; alertsIndexPattern?: string | undefined; allowReplacement?: string[] | undefined; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; screenContext?: { timeZone?: string | undefined; } | undefined; promptIds?: { promptId: string; promptGroupId: string; } | undefined; } | { size: number; subAction: \"invokeAI\" | \"invokeStream\"; alertsIndexPattern: string; anonymizationFields: { id: string; field: string; namespace?: string | undefined; timestamp?: string | undefined; createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; allowed?: boolean | undefined; anonymized?: boolean | undefined; }[]; apiConfig: { connectorId: string; actionTypeId: string; provider?: \"Other\" | \"OpenAI\" | \"Azure OpenAI\" | undefined; model?: string | undefined; defaultSystemPromptId?: string | undefined; }; start?: string | undefined; end?: string | undefined; filter?: ",
+              "objectOutputType",
+              "<{}, ",
+              "ZodUnknown",
+              ", \"strip\"> | undefined; connectorName?: string | undefined; model?: string | undefined; replacements?: ",
+              "objectOutputType",
+              "<{}, ",
+              "ZodString",
+              ", \"strip\"> | undefined; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; } | { subAction: \"invokeAI\" | \"invokeStream\"; anonymizationFields: { id: string; field: string; namespace?: string | undefined; timestamp?: string | undefined; createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; allowed?: boolean | undefined; anonymized?: boolean | undefined; }[]; apiConfig: { connectorId: string; actionTypeId: string; provider?: \"Other\" | \"OpenAI\" | \"Azure OpenAI\" | undefined; model?: string | undefined; defaultSystemPromptId?: string | undefined; }; endpointIds: string[]; insightType: \"incompatible_antivirus\" | \"noisy_process_tree\" | \"policy_response_failure\"; model?: string | undefined; replacements?: ",
+              "objectOutputType",
+              "<{}, ",
+              "ZodString",
+              ", \"strip\"> | undefined; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; }, any>"
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "lineNumber": 294,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1475,6 +1557,8 @@
               "number | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "lineNumber": 301,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1490,6 +1574,8 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "lineNumber": 302,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1506,6 +1592,8 @@
               ">) | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "lineNumber": 303,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1522,6 +1610,8 @@
         "label": "ElasticAssistantPluginSetupDependencies",
         "description": [],
         "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+        "lineNumber": 129,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1542,6 +1632,8 @@
               }
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "lineNumber": 130,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1562,6 +1654,8 @@
               }
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "lineNumber": 131,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1582,6 +1676,8 @@
               }
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "lineNumber": 132,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1606,7 +1702,7 @@
               "SavedObjectsClientContract",
               ", request: ",
               "KibanaRequest",
-              "<unknown, unknown, unknown, any>): { preview: (args_0: Readonly<{} & { timeRange: string; sampleSize: number; alertParams: Readonly<{} & { severity: number; jobSelection: Readonly<{} & { groupIds: string[]; jobIds: string[]; }>; resultType: \"record\" | \"bucket\" | \"influencer\"; includeInterim: boolean; lookbackInterval: string | null; topNBuckets: number | null; }>; }>) => Promise<any>; execute: (params: Readonly<{} & { severity: number; jobSelection: Readonly<{} & { groupIds: string[]; jobIds: string[]; }>; resultType: \"record\" | \"bucket\" | \"influencer\"; includeInterim: boolean; lookbackInterval: string | null; topNBuckets: number | null; }>, spaceId: string, state?: ",
+              "<unknown, unknown, unknown, any>): { preview: (args_0: Readonly<{} & { timeRange: string; sampleSize: number; alertParams: Readonly<{} & { severity: number; jobSelection: Readonly<{} & { groupIds: string[]; jobIds: string[]; }>; resultType: \"record\" | \"bucket\" | \"influencer\"; includeInterim: boolean; lookbackInterval: string | null; topNBuckets: number | null; kqlQueryString: string | null; }>; }>) => Promise<any>; execute: (params: Readonly<{} & { severity: number; jobSelection: Readonly<{} & { groupIds: string[]; jobIds: string[]; }>; resultType: \"record\" | \"bucket\" | \"influencer\"; includeInterim: boolean; lookbackInterval: string | null; topNBuckets: number | null; kqlQueryString: string | null; }>, spaceId: string, state?: ",
               "AnomalyDetectionRuleState",
               " | undefined) => Promise<{ payload: ",
               "AnomalyDetectionAlertPayload",
@@ -1618,6 +1714,8 @@
               "TrainedModelsProvider"
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "lineNumber": 133,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1638,6 +1736,8 @@
               }
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "lineNumber": 134,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1658,6 +1758,8 @@
               }
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "lineNumber": 135,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1679,6 +1781,8 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "lineNumber": 136,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1693,6 +1797,8 @@
         "label": "ElasticAssistantPluginStartDependencies",
         "description": [],
         "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+        "lineNumber": 138,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1713,6 +1819,8 @@
               }
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "lineNumber": 139,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1733,6 +1841,8 @@
               }
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "lineNumber": 140,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1753,6 +1863,8 @@
               }
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "lineNumber": 141,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1773,6 +1885,8 @@
               }
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "lineNumber": 142,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1794,6 +1908,8 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "lineNumber": 143,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1814,6 +1930,8 @@
               }
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "lineNumber": 144,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1834,6 +1952,8 @@
               }
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "lineNumber": 145,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1854,6 +1974,8 @@
               }
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "lineNumber": 146,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1874,6 +1996,8 @@
         "The plugin setup interface"
       ],
       "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+      "lineNumber": 76,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -1894,6 +2018,8 @@
             }
           ],
           "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+          "lineNumber": 78,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         }
@@ -1911,6 +2037,8 @@
         "The plugin start interface"
       ],
       "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+      "lineNumber": 81,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -1933,6 +2061,8 @@
             }
           ],
           "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+          "lineNumber": 83,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         },
@@ -1955,6 +2085,8 @@
             }
           ],
           "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+          "lineNumber": 87,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         },
@@ -1979,6 +2111,8 @@
             ">) => void"
           ],
           "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+          "lineNumber": 91,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -1995,6 +2129,8 @@
                 "string"
               ],
               "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+              "lineNumber": 100,
+              "columnNumber": 22,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -2020,6 +2156,8 @@
                 ">"
               ],
               "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+              "lineNumber": 100,
+              "columnNumber": 42,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -2047,6 +2185,8 @@
             }
           ],
           "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+          "lineNumber": 101,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "returnComment": [],
@@ -2061,6 +2201,8 @@
                 "Name of the plugin to get the features for"
               ],
               "path": "x-pack/solutions/security/plugins/elastic_assistant/server/services/app_context.ts",
+              "lineNumber": 17,
+              "columnNumber": 38,
               "deprecated": false,
               "trackAdoption": false
             }
@@ -2087,6 +2229,8 @@
             "[]) => void"
           ],
           "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+          "lineNumber": 106,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -2103,6 +2247,8 @@
                 "string"
               ],
               "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+              "lineNumber": 115,
+              "columnNumber": 19,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -2127,6 +2273,8 @@
                 "[]"
               ],
               "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+              "lineNumber": 115,
+              "columnNumber": 39,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -2155,6 +2303,8 @@
             "[]"
           ],
           "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+          "lineNumber": 116,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "returnComment": [],
@@ -2172,6 +2322,8 @@
                 "string | string[]"
               ],
               "path": "x-pack/solutions/security/plugins/elastic_assistant/server/services/app_context.ts",
+              "lineNumber": 16,
+              "columnNumber": 35,
               "deprecated": false,
               "trackAdoption": false
             }
@@ -2192,6 +2344,8 @@
             ", callback: Function) => void"
           ],
           "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+          "lineNumber": 121,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -2206,6 +2360,8 @@
                 "CallbackIds"
               ],
               "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+              "lineNumber": 126,
+              "columnNumber": 22,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -2221,6 +2377,8 @@
                 "Function"
               ],
               "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+              "lineNumber": 126,
+              "columnNumber": 47,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true

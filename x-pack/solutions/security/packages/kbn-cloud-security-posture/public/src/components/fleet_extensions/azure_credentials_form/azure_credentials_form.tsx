@@ -5,17 +5,13 @@
  * 2.0.
  */
 import React, { useRef } from 'react';
-import { EuiCallOut, EuiFormRow, EuiLink, EuiSelect, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiCallOut, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import type { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import {
-  AZURE_SETUP_FORMAT_TEST_SUBJECTS,
-  AZURE_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ,
-} from '@kbn/cloud-security-posture-common';
-import { getAzureCredentialsFormManualOptions } from './get_azure_credentials_form_options';
+import { AZURE_SETUP_FORMAT_TEST_SUBJECTS } from '@kbn/cloud-security-posture-common';
 import { useAzureCredentialsForm } from './azure_hooks';
 import { updatePolicyWithInputs } from '../utils';
 import type { CspRadioOption } from '../../csp_boxed_radio_group';
@@ -23,8 +19,10 @@ import { RadioGroup } from '../../csp_boxed_radio_group';
 import { AZURE_SETUP_FORMAT, ARM_TEMPLATE_EXTERNAL_DOC_URL } from '../constants';
 import { AzureSetupInfoContent } from './azure_setup_info';
 import { AzureInputVarFields } from './azure_input_var_fields';
-import type { AzureCredentialsType, AzureSetupFormat, UpdatePolicy } from '../types';
+import type { AzureSetupFormat, UpdatePolicy } from '../types';
 import { useCloudSetup } from '../hooks/use_cloud_setup_context';
+import { AzureCredentialTypeSelector } from './azure_credential_type_selector';
+import { getAzureCredentialsFormManualOptions } from './get_azure_credentials_form_options';
 
 const getSetupFormatOptions = (): CspRadioOption[] => [
   {
@@ -53,7 +51,7 @@ const ArmTemplateSetup = ({
 }) => {
   if (!hasArmTemplateUrl) {
     return (
-      <EuiCallOut color="warning">
+      <EuiCallOut announceOnMount={false} color="warning">
         <FormattedMessage
           id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.azure.armTemplateSetupStep.notSupported"
           defaultMessage="ARM Template is not supported on the current Integration version, please upgrade your integration to the latest version to use ARM Template"
@@ -123,34 +121,6 @@ const ArmTemplateSetup = ({
     </>
   );
 };
-
-const AzureCredentialTypeSelector = ({
-  type,
-  onChange,
-}: {
-  onChange(type: AzureCredentialsType): void;
-  type: AzureCredentialsType;
-}) => (
-  <EuiFormRow
-    fullWidth
-    label={i18n.translate(
-      'securitySolutionPackages.cloudSecurityPosture.cloudSetup.azure.azureCredentialTypeSelectorLabel',
-      {
-        defaultMessage: 'Preferred manual method',
-      }
-    )}
-  >
-    <EuiSelect
-      fullWidth
-      options={getAzureCredentialsFormManualOptions()}
-      value={type}
-      onChange={(optionElem) => {
-        onChange(optionElem.target.value as AzureCredentialsType);
-      }}
-      data-test-subj={AZURE_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ}
-    />
-  </EuiFormRow>
-);
 
 const TemporaryManualSetup = ({ documentationLink }: { documentationLink: string }) => {
   return (
@@ -236,6 +206,17 @@ export const AzureCredentialsForm = ({
   });
   const { azurePolicyType, azureEnabled, azureManualFieldsEnabled } = useCloudSetup();
 
+  // Ensure supports_cloud_connector is false for agent-based deployments
+  if (newPolicy.supports_cloud_connector || newPolicy.cloud_connector_id) {
+    updatePolicy({
+      updatedPolicy: {
+        ...newPolicy,
+        supports_cloud_connector: false,
+        cloud_connector_id: undefined,
+      },
+    });
+  }
+
   if (!setupFormat) {
     onSetupFormatChange(AZURE_SETUP_FORMAT.ARM_TEMPLATE);
   }
@@ -255,7 +236,7 @@ export const AzureCredentialsForm = ({
     return (
       <>
         <EuiSpacer size="l" />
-        <EuiCallOut color="warning">
+        <EuiCallOut announceOnMount={false} color="warning">
           <FormattedMessage
             id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.azure.azureNotSupportedMessage"
             defaultMessage="CIS Azure is not supported on the current Integration version, please upgrade your integration to the latest version to use CIS Azure"
@@ -289,6 +270,7 @@ export const AzureCredentialsForm = ({
       {setupFormat === AZURE_SETUP_FORMAT.MANUAL && azureManualFieldsEnabled && (
         <>
           <AzureCredentialTypeSelector
+            options={getAzureCredentialsFormManualOptions()}
             type={azureCredentialsType}
             onChange={(optionId) => {
               updatePolicy({

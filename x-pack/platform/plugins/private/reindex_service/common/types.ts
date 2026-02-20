@@ -6,6 +6,7 @@
  */
 
 import type { SavedObject } from '@kbn/core/types';
+import type { ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
 
 // 8.0 -> 9.0 warnings
 export type IndexWarningType = 'indexSetting' | 'replaceIndexWithAlias' | 'makeIndexReadonly';
@@ -130,17 +131,6 @@ export enum ReindexStep {
   aliasCreated = 60,
   originalIndexDeleted = 70,
   existingAliasesUpdated = 80,
-}
-
-export enum ReindexStatus {
-  inProgress,
-  completed,
-  failed,
-  paused,
-  cancelled,
-  // Used by the UI to differentiate if there was a failure retrieving
-  // the status from the server API
-  fetchFailed,
 }
 
 export type ReindexSavedObject = SavedObject<ReindexOperation>;

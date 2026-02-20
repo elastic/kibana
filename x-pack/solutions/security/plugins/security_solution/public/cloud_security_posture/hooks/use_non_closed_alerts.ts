@@ -18,20 +18,18 @@ export const useNonClosedAlerts = ({
   to,
   from,
   queryId,
-  includeRelatedIntegrationPackage = false,
 }: {
   field: CloudPostureEntityIdentifier;
   value: string;
   to: string;
   from: string;
   queryId: string;
-  includeRelatedIntegrationPackage?: boolean;
 }) => {
   const { signalIndexName } = useSignalIndex();
 
   const entityFilter = useMemo(() => ({ field, value }), [field, value]);
 
-  const { items: alertsData, alertHas3rdPartyData } = useAlertsByStatus({
+  const { items: alertsData } = useAlertsByStatus({
     entityFilter,
     signalIndexName,
     queryId,
@@ -43,7 +41,6 @@ export const useNonClosedAlerts = ({
         type: 'keyword',
       },
     },
-    includeRelatedIntegrationPackage: true,
   });
 
   const filteredAlertsData: ParsedAlertsData = alertsData
@@ -53,5 +50,5 @@ export const useNonClosedAlerts = ({
   const hasNonClosedAlerts =
     (filteredAlertsData?.acknowledged?.total || 0) + (filteredAlertsData?.open?.total || 0) > 0;
 
-  return { hasNonClosedAlerts, filteredAlertsData, alertHas3rdPartyData };
+  return { hasNonClosedAlerts, filteredAlertsData };
 };

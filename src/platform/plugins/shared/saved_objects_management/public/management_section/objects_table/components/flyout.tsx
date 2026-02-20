@@ -360,6 +360,10 @@ export class FlyoutClass extends Component<
 
           return (
             <EuiSelect
+              aria-label={i18n.translate(
+                'savedObjectsManagement.objectsTable.flyout.renderConflicts.selectNewIndexPatternAriaLabel',
+                { defaultMessage: 'Data view' }
+              )}
               value={selectedValue}
               data-test-subj={`managementChangeIndexSelection-${id}`}
               onChange={(e) => this.onIndexChanged(id, e)}
@@ -381,6 +385,10 @@ export class FlyoutClass extends Component<
         columns={columns}
         pagination={pagination}
         onTableChange={onTableChange}
+        tableCaption={i18n.translate(
+          'savedObjectsManagement.objectsTable.flyout.renderConflicts.tableCaption',
+          { defaultMessage: 'Conflicting data views' }
+        )}
       />
     );
   }
@@ -567,6 +575,7 @@ export class FlyoutClass extends Component<
     if (this.hasUnmatchedReferences) {
       indexPatternConflictsWarning = (
         <EuiCallOut
+          announceOnMount
           data-test-subj="importSavedObjectsConflictsWarning"
           title={
             <FormattedMessage

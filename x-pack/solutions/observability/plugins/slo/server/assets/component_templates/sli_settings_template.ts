@@ -5,15 +5,18 @@
  * 2.0.
  */
 
+import type { ClusterPutComponentTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
 import {
   SLI_COMPONENT_TEMPLATE_SETTINGS_NAME,
   SLO_RESOURCES_VERSION,
 } from '../../../common/constants';
 
-export const SLI_SETTINGS_TEMPLATE = {
+export const SLI_SETTINGS_TEMPLATE: ClusterPutComponentTemplateRequest = {
   name: SLI_COMPONENT_TEMPLATE_SETTINGS_NAME,
   template: {
     settings: {
+      'sort.field': ['slo.id', 'slo.revision', 'slo.instanceId'],
+      'sort.order': ['asc', 'asc', 'asc'],
       auto_expand_replicas: '0-1',
       hidden: true,
     },

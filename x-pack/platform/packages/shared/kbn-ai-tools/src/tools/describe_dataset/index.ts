@@ -7,6 +7,7 @@
 
 import { dateRangeQuery } from '@kbn/es-query';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { getSampleDocuments } from './get_sample_documents';
 import { mergeSampleDocumentsWithFieldCaps } from './merge_sample_documents_with_field_caps';
 
@@ -16,12 +17,16 @@ export async function describeDataset({
   end,
   index,
   kql,
+  filter,
+  sampleDocsSize,
 }: {
   esClient: ElasticsearchClient;
   start: number;
   end: number;
   index: string | string[];
   kql?: string;
+  filter?: QueryDslQueryContainer | QueryDslQueryContainer[];
+  sampleDocsSize?: number;
 }) {
   const [fieldCaps, hits] = await Promise.all([
     esClient.fieldCaps({
@@ -39,6 +44,8 @@ export async function describeDataset({
       start,
       end,
       kql,
+      filter,
+      size: sampleDocsSize,
     }),
   ]);
 

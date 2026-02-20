@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Node, Range } from 'yaml';
 import { monaco } from '@kbn/monaco';
-import type { Node } from 'yaml';
-import type { YamlValidationErrorSeverity } from '../model/types';
+import type { YamlValidationErrorSeverity } from '../../../features/validate_workflow_yaml/model/types';
 
 // Copied from monaco-editor/esm/vs/editor/editor.api.d.ts because we can't import with turbopack
 export enum MarkerSeverity {
@@ -45,53 +45,25 @@ export function navigateToErrorPosition(
   editor.revealLineInCenter(lineNumber);
 }
 
-export function getHighlightStepDecorations(
-  model: monaco.editor.ITextModel,
-  range: monaco.IRange
-): monaco.editor.IModelDeltaDecoration[] {
-  const rangeBefore = new monaco.Range(0, 0, range.startLineNumber, range.startColumn);
-  const rangeAfter = new monaco.Range(
-    range.endLineNumber,
-    range.endColumn,
-    model.getLineCount(),
-    0
-  );
-  return [
-    {
-      range: rangeBefore,
-      options: {
-        inlineClassName: 'dimmed',
-        stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
-      },
-    },
-    {
-      range: rangeAfter,
-      options: {
-        inlineClassName: 'dimmed',
-        stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
-      },
-    },
-  ];
-}
-
 export function getMonacoRangeFromYamlNode(
   model: monaco.editor.ITextModel,
   node: Node
-): monaco.IRange | null {
-  const [startOffset, _, endOffset] = node.range ?? [];
-  if (!startOffset || !endOffset) {
+): monaco.Range | null {
+  if (!node.range) {
     return null;
   }
+  return getMonacoRangeFromYamlRange(model, node.range);
+}
+
+export function getMonacoRangeFromYamlRange(
+  model: monaco.editor.ITextModel,
+  range: Range
+): monaco.Range | null {
+  const [startOffset, _, endOffset] = range;
   const startPos = model.getPositionAt(startOffset);
   const endPos = model.getPositionAt(endOffset);
   if (!startPos || !endPos) {
     return null;
   }
-  const range = new monaco.Range(
-    startPos.lineNumber,
-    startPos.column,
-    endPos.lineNumber,
-    endPos.column
-  );
-  return range;
+  return new monaco.Range(startPos.lineNumber, startPos.column, endPos.lineNumber, endPos.column);
 }

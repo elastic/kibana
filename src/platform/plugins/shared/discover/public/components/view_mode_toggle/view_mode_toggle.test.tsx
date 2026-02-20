@@ -15,14 +15,14 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { DocumentViewModeToggle } from './view_mode_toggle';
 import { BehaviorSubject } from 'rxjs';
-import { getDiscoverStateMock } from '../../__mocks__/discover_state.mock';
+import { getDiscoverInternalStateMock } from '../../__mocks__/discover_state.mock';
 import type { DataTotalHits$ } from '../../application/main/state_management/discover_data_state_container';
 import { FetchStatus } from '../../application/types';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
-import { discoverServiceMock } from '../../__mocks__/services';
 import { act } from 'react-dom/test-utils';
-import { DiscoverTestProvider } from '../../__mocks__/test_provider';
+import { DiscoverToolkitTestProvider } from '../../__mocks__/test_provider';
 import type { DiscoverServices } from '../../build_services';
+import { createDiscoverServicesMock } from '../../__mocks__/services';
 
 describe('Document view mode toggle component', () => {
   const mountComponent = async ({
@@ -33,7 +33,7 @@ describe('Document view mode toggle component', () => {
     useDataViewWithTextFields = true,
   } = {}) => {
     const services = {
-      ...discoverServiceMock,
+      ...createDiscoverServicesMock(),
       uiSettings: {
         get: () => showFieldStatistics,
       },
@@ -62,14 +62,21 @@ describe('Document view mode toggle component', () => {
       ],
     } as unknown as DataView;
 
-    const stateContainer = getDiscoverStateMock({ isTimeBased: true });
+    const toolkit = getDiscoverInternalStateMock({ services });
+
+    await toolkit.initializeTabs();
+
+    const { stateContainer } = await toolkit.initializeSingleTab({
+      tabId: toolkit.getCurrentTab().id,
+    });
+
     stateContainer.dataState.data$.totalHits$ = new BehaviorSubject({
       fetchStatus: FetchStatus.COMPLETE,
       result: 10,
     }) as DataTotalHits$;
 
     const component = mountWithIntl(
-      <DiscoverTestProvider services={services}>
+      <DiscoverToolkitTestProvider toolkit={toolkit}>
         <DocumentViewModeToggle
           viewMode={viewMode}
           isEsqlMode={isEsqlMode}
@@ -77,7 +84,7 @@ describe('Document view mode toggle component', () => {
           setDiscoverViewMode={setDiscoverViewMode}
           dataView={useDataViewWithTextFields ? dataViewWithTextFields : dataViewWithoutTextFields}
         />
-      </DiscoverTestProvider>
+      </DiscoverToolkitTestProvider>
     );
 
     await act(async () => {
@@ -162,7 +169,7 @@ describe('Document view mode toggle component', () => {
       useDataViewWithTextFields: false,
       setDiscoverViewMode,
     });
-    expect(setDiscoverViewMode).toHaveBeenCalledWith(VIEW_MODE.DOCUMENT_LEVEL);
+    expect(setDiscoverViewMode).toHaveBeenCalledWith(VIEW_MODE.DOCUMENT_LEVEL, true);
     expect(component.find(EuiTab).length).toBe(2);
   });
 });

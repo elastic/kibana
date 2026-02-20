@@ -17,8 +17,7 @@ import {
   EuiFlexGroup,
   EuiSwitch,
   EuiFlyoutFooter,
-  EuiIcon,
-  EuiToolTip,
+  EuiIconTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -159,44 +158,53 @@ const RuleOverviewTab = ({
   </EuiFlexGroup>
 );
 
-const ruleState = (rule: CspBenchmarkRulesWithStates, switchRuleStates: () => Promise<void>) => [
-  {
-    title: (
-      <EuiFlexGroup gutterSize="xs" alignItems="center">
-        <EuiFlexItem grow={false}>
-          <FormattedMessage
-            id="xpack.csp.rules.rulesFlyout.ruleStateSwitchTitle"
-            defaultMessage="Enabled"
-          />
-        </EuiFlexItem>
-        <EuiFlexItem
-          grow={false}
-          css={{
-            '.euiToolTipAnchor': {
-              display: 'flex', // needed to align the icon with the title
-            },
-          }}
-        >
-          <EuiToolTip
-            content={i18n.translate('xpack.csp.rules.rulesFlyout.ruleStateSwitchTooltip', {
-              defaultMessage: `Disabling a rule will also disable its associated detection rules and alerts. Enabling it again does not automatically re-enable them`,
-            })}
+const ruleState = (rule: CspBenchmarkRulesWithStates, switchRuleStates: () => Promise<void>) => {
+  const ruleStateSwitchTooltipText = i18n.translate(
+    'xpack.csp.rules.rulesFlyout.ruleStateSwitchTooltip',
+    {
+      defaultMessage: `Disabling a rule will also disable its associated detection rules and alerts. Enabling it again does not automatically re-enable them`,
+    }
+  );
+
+  return [
+    {
+      title: (
+        <EuiFlexGroup gutterSize="xs" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <FormattedMessage
+              id="xpack.csp.rules.rulesFlyout.ruleStateSwitchTitle"
+              defaultMessage="Enabled"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem
+            grow={false}
+            css={{
+              '.euiToolTipAnchor': {
+                display: 'flex', // needed to align the icon with the title
+              },
+            }}
           >
-            <EuiIcon size="m" color="subdued" type="info" />
-          </EuiToolTip>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    ),
-    description: (
-      <>
-        <EuiSwitch
-          className="eui-textTruncate"
-          checked={rule?.state !== 'muted'}
-          onChange={switchRuleStates}
-          data-test-subj={RULES_FLYOUT_SWITCH_BUTTON}
-          label=" "
-        />
-      </>
-    ),
-  },
-];
+            <EuiIconTip
+              content={ruleStateSwitchTooltipText}
+              aria-label={ruleStateSwitchTooltipText}
+              type="info"
+              size="m"
+              color="subdued"
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ),
+      description: (
+        <>
+          <EuiSwitch
+            className="eui-textTruncate"
+            checked={rule?.state !== 'muted'}
+            onChange={switchRuleStates}
+            data-test-subj={RULES_FLYOUT_SWITCH_BUTTON}
+            label=" "
+          />
+        </>
+      ),
+    },
+  ];
+};

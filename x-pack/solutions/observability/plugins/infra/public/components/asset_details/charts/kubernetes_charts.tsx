@@ -32,7 +32,7 @@ interface Props extends MetricsChartsFields {
 export const KubernetesNodeCharts = React.forwardRef<HTMLDivElement, Props>(
   ({ entityId, dataView, dateRange, onShowAll, overview }, ref) => {
     const { charts } = useKubernetesCharts({
-      dataViewId: dataView?.id,
+      indexPattern: dataView?.getIndexPattern(),
       overview,
     });
 
@@ -44,7 +44,12 @@ export const KubernetesNodeCharts = React.forwardRef<HTMLDivElement, Props>(
 
     return (
       <Section
-        title={<SectionTitle title={HOST_METRIC_GROUP_TITLES.kubernetes} />}
+        title={
+          <SectionTitle
+            title={HOST_METRIC_GROUP_TITLES.kubernetes}
+            data-test-subj="infraAssetDetailsKubernetesChartsSectionTitle"
+          />
+        }
         data-test-subj="infraAssetDetailsKubernetesChartsSection"
         id="kubernetes"
         ref={ref}
@@ -80,6 +85,7 @@ export const KubernetesNodeCharts = React.forwardRef<HTMLDivElement, Props>(
               entityId={entityId}
               dateRange={dateRange}
               lensAttributes={chart}
+              dataView={dataView}
               queryField={findInventoryFields('host').id}
             />
           ))}

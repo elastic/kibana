@@ -30,6 +30,7 @@ export function TipsAndResources() {
   const router = useApmRouter();
   const { core } = useApmPluginContext();
   const { docLinks } = core;
+  const isFeedbackEnabled = core.notifications.feedback.isEnabled();
 
   const {
     query: { rangeFrom, rangeTo, environment, kuery, comparisonEnabled },
@@ -106,14 +107,18 @@ export function TipsAndResources() {
       target: '_blank',
       iconType: 'documentation',
     },
-    {
-      label: i18n.translate('xpack.apm.storageExplorer.resources.sendFeedback', {
-        defaultMessage: 'Give feedback',
-      }),
-      href: getStorageExplorerFeedbackHref(),
-      target: '_blank',
-      iconType: 'editorComment',
-    },
+    ...(isFeedbackEnabled
+      ? [
+          {
+            label: i18n.translate('xpack.apm.storageExplorer.resources.sendFeedback', {
+              defaultMessage: 'Give feedback',
+            }),
+            href: getStorageExplorerFeedbackHref(),
+            target: '_blank',
+            iconType: 'editorComment',
+          },
+        ]
+      : []),
   ];
 
   return (

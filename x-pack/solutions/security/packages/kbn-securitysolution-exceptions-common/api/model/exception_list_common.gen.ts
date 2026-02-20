@@ -27,8 +27,18 @@ export type ExceptionListId = z.infer<typeof ExceptionListId>;
 export const ExceptionListId = z.string().min(1).superRefine(isNonEmptyString);
 
 /**
- * The exception list's human readable string identifier, `endpoint_list`.
- */
+  * The exception list's human-readable string identifier.
+
+For endpoint artifacts, use one of the following values:
+
+* `endpoint_list`: [Elastic Endpoint exception list](https://www.elastic.co/docs/solutions/security/detect-and-alert/add-manage-exceptions)
+* `endpoint_trusted_apps`: [Trusted applications list](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/trusted-applications)
+* `endpoint_trusted_devices`: [Trusted devices list](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/trusted-devices)
+* `endpoint_event_filters`: [Event filters list](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/event-filters)
+* `endpoint_host_isolation_exceptions`: [Host isolation exceptions list](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/host-isolation-exceptions)
+* `endpoint_blocklists`: [Blocklists list](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/blocklist)
+
+  */
 export type ExceptionListHumanId = z.infer<typeof ExceptionListHumanId>;
 export const ExceptionListHumanId = z.string().min(1).superRefine(isNonEmptyString);
 
@@ -73,6 +83,8 @@ in which it is created, where:
 
 - `single`: Only available in the Kibana space in which it is created.
 - `agnostic`: Available in all Kibana spaces.
+
+For endpoint artifacts, the `namespace_type` must always be `agnostic`. Space awareness for endpoint artifacts is enforced based on Elastic Defend policy assignments.
 
   */
 export type ExceptionNamespaceType = z.infer<typeof ExceptionNamespaceType>;
@@ -184,6 +196,233 @@ export const ExceptionListItemExpireTime = z.string().datetime();
 export type ExceptionListItemTags = z.infer<typeof ExceptionListItemTags>;
 export const ExceptionListItemTags = z.array(z.string().min(1).superRefine(isNonEmptyString));
 
+/**
+  * Tags for categorization. Special tags for scope control:
+* `"policy:all"` - Global artifact (applies to all Elastic Defend policies)
+* `"policy:<policy_id>"` - Private artifact (applies to specific Elastic Defend policy only, where `<policy_id>` is the Elastic Defend integration policy ID)
+
+  */
+export type EndpointArtifactTags = z.infer<typeof EndpointArtifactTags>;
+export const EndpointArtifactTags = z.array(z.string()).default([]);
+
+/**
+ * Operating system types for trusted devices (Windows and macOS only - Linux not supported)
+ */
+export type EndpointTrustedDeviceOsTypes = z.infer<typeof EndpointTrustedDeviceOsTypes>;
+export const EndpointTrustedDeviceOsTypes = z.array(z.enum(['windows', 'macos'])).min(1);
+
+export type TrustedDeviceCommonFieldsEntry = z.infer<typeof TrustedDeviceCommonFieldsEntry>;
+export const TrustedDeviceCommonFieldsEntry = z.object({
+  /**
+   * Device field to match against (available on all OS)
+   */
+  field: z.enum([
+    'device.serial_number',
+    'device.type',
+    'host.name',
+    'device.vendor.name',
+    'device.vendor.id',
+    'device.product.id',
+    'device.product.name',
+  ]),
+  /**
+   * Entry match type
+   */
+  type: z.enum(['match', 'wildcard', 'match_any']),
+  value: z.union([z.string(), z.array(z.string()).min(1)]),
+  /**
+   * Must be the value "included"
+   */
+  operator: z.literal('included'),
+});
+
+export type TrustedDeviceUsernameEntry = z.infer<typeof TrustedDeviceUsernameEntry>;
+export const TrustedDeviceUsernameEntry = z.object({
+  /**
+   * Username field (Windows-only, requires os_types to be exclusively Windows)
+   */
+  field: z.literal('user.name'),
+  /**
+   * Entry match type
+   */
+  type: z.enum(['match', 'wildcard', 'match_any']),
+  value: z.union([z.string(), z.array(z.string()).min(1)]),
+  /**
+   * Must be the value "included"
+   */
+  operator: z.literal('included'),
+});
+
+export type BlocklistHashOrPathEntry = z.infer<typeof BlocklistHashOrPathEntry>;
+export const BlocklistHashOrPathEntry = z.object({
+  /**
+   * File hash or path field
+   */
+  field: z.enum([
+    'file.hash.md5',
+    'file.hash.sha1',
+    'file.hash.sha256',
+    'file.path',
+    'file.path.caseless',
+  ]),
+  /**
+   * Must be match_any for blocklists
+   */
+  type: z.literal('match_any'),
+  /**
+   * Array of hash values or file paths
+   */
+  value: z.array(z.string()).min(1),
+  /**
+   * Must be the value "included"
+   */
+  operator: z.literal('included'),
+});
+
+export type BlocklistWindowsCodeSignatureEntry = z.infer<typeof BlocklistWindowsCodeSignatureEntry>;
+export const BlocklistWindowsCodeSignatureEntry = z.object({
+  /**
+   * Windows code signature field
+   */
+  field: z.literal('file.Ext.code_signature'),
+  /**
+   * Must be nested for Windows code signature
+   */
+  type: z.literal('nested'),
+  /**
+   * Nested subject_name entries
+   */
+  entries: z
+    .array(
+      z.object({
+        /**
+         * Certificate subject name
+         */
+        field: z.literal('subject_name'),
+        /**
+         * Match type for subject name
+         */
+        type: z.enum(['match', 'match_any']),
+        value: z.union([z.string(), z.array(z.string()).min(1)]),
+        /**
+         * Must be the value "included"
+         */
+        operator: z.literal('included'),
+      })
+    )
+    .min(1),
+});
+
+export type TrustedAppHashEntry = z.infer<typeof TrustedAppHashEntry>;
+export const TrustedAppHashEntry = z.object({
+  /**
+   * Process hash field
+   */
+  field: z.enum(['process.hash.md5', 'process.hash.sha1', 'process.hash.sha256']),
+  /**
+   * Hash entries only support match type
+   */
+  type: z.literal('match'),
+  /**
+   * Hash value (MD5, SHA1, or SHA256)
+   */
+  value: z.string(),
+  operator: z.literal('included'),
+});
+
+export type TrustedAppPathEntry = z.infer<typeof TrustedAppPathEntry>;
+export const TrustedAppPathEntry = z.object({
+  /**
+   * Process executable path field
+   */
+  field: z.literal('process.executable.caseless'),
+  /**
+   * Path supports both match and wildcard types
+   */
+  type: z.enum(['match', 'wildcard']),
+  /**
+   * Executable path
+   */
+  value: z.string(),
+  operator: z.literal('included'),
+});
+
+export type TrustedAppWindowsCodeSignatureEntry = z.infer<
+  typeof TrustedAppWindowsCodeSignatureEntry
+>;
+export const TrustedAppWindowsCodeSignatureEntry = z.object({
+  /**
+   * Windows code signature field
+   */
+  field: z.literal('process.Ext.code_signature'),
+  type: z.literal('nested'),
+  /**
+   * Must include exactly 2 entries - one for subject_name and one for trusted
+   */
+  entries: z
+    .array(
+      z.union([
+        z.object({
+          field: z.literal('subject_name'),
+          type: z.literal('match'),
+          /**
+           * Certificate subject name
+           */
+          value: z.string(),
+          operator: z.literal('included'),
+        }),
+        z.object({
+          field: z.literal('trusted'),
+          type: z.literal('match'),
+          /**
+           * Must be the string 'true'
+           */
+          value: z.literal('true'),
+          operator: z.literal('included'),
+        }),
+      ])
+    )
+    .min(2)
+    .max(2),
+});
+
+export type TrustedAppMacCodeSignatureEntry = z.infer<typeof TrustedAppMacCodeSignatureEntry>;
+export const TrustedAppMacCodeSignatureEntry = z.object({
+  /**
+   * macOS code signature field
+   */
+  field: z.literal('process.code_signature'),
+  type: z.literal('nested'),
+  /**
+   * Must include exactly 2 entries - one for subject_name and one for trusted
+   */
+  entries: z
+    .array(
+      z.union([
+        z.object({
+          field: z.literal('subject_name'),
+          type: z.literal('match'),
+          /**
+           * Certificate subject name
+           */
+          value: z.string(),
+          operator: z.literal('included'),
+        }),
+        z.object({
+          field: z.literal('trusted'),
+          type: z.literal('match'),
+          /**
+           * Must be the string 'true'
+           */
+          value: z.literal('true'),
+          operator: z.literal('included'),
+        }),
+      ])
+    )
+    .min(2)
+    .max(2),
+});
+
 export type ExceptionListItemOsType = z.infer<typeof ExceptionListItemOsType>;
 export const ExceptionListItemOsType = z.enum(['linux', 'macos', 'windows']);
 export type ExceptionListItemOsTypeEnum = typeof ExceptionListItemOsType.enum;
@@ -216,6 +455,347 @@ export const ExceptionListItemComment = z.object({
   */
 export type ExceptionListItemCommentArray = z.infer<typeof ExceptionListItemCommentArray>;
 export const ExceptionListItemCommentArray = z.array(ExceptionListItemComment);
+
+/**
+ * Elastic Endpoint exception list item properties.
+ */
+export type EndpointListProperties = z.infer<typeof EndpointListProperties>;
+export const EndpointListProperties = z.object({
+  list_id: z.literal('endpoint_list'),
+  /**
+      * Exception entries for endpoint security exceptions (used to prevent detection rule alerts).
+
+**Fully flexible:** Supports any field name for maximum compatibility with detection rules. No field restrictions are enforced.
+
+      */
+  entries: ExceptionListItemEntryArray.optional(),
+  os_types: ExceptionListItemOsTypeArray.optional().default([]),
+  tags: EndpointArtifactTags.optional(),
+});
+
+/**
+ * Trusted applications list item properties (Windows).
+ */
+export type TrustedAppsWindowsProperties = z.infer<typeof TrustedAppsWindowsProperties>;
+export const TrustedAppsWindowsProperties = z.object({
+  list_id: z.literal('endpoint_trusted_apps'),
+  /**
+   * Must be Windows only
+   */
+  os_types: z.array(z.literal('windows')).min(1).max(1).optional(),
+  /**
+   * Process hash, executable path, or code signature entries
+   */
+  entries: z
+    .array(z.union([TrustedAppHashEntry, TrustedAppPathEntry, TrustedAppWindowsCodeSignatureEntry]))
+    .min(1)
+    .optional(),
+  tags: EndpointArtifactTags.optional(),
+});
+
+/**
+ * Trusted applications list item properties (macOS).
+ */
+export type TrustedAppsMacProperties = z.infer<typeof TrustedAppsMacProperties>;
+export const TrustedAppsMacProperties = z.object({
+  list_id: z.literal('endpoint_trusted_apps'),
+  /**
+   * Must be macOS only
+   */
+  os_types: z.array(z.literal('macos')).min(1).max(1).optional(),
+  /**
+   * Process hash, executable path, or code signature entries
+   */
+  entries: z
+    .array(z.union([TrustedAppHashEntry, TrustedAppPathEntry, TrustedAppMacCodeSignatureEntry]))
+    .min(1)
+    .optional(),
+  tags: EndpointArtifactTags.optional(),
+});
+
+/**
+ * Trusted applications list item properties (Linux).
+ */
+export type TrustedAppsLinuxProperties = z.infer<typeof TrustedAppsLinuxProperties>;
+export const TrustedAppsLinuxProperties = z.object({
+  list_id: z.literal('endpoint_trusted_apps'),
+  /**
+   * Must be Linux only
+   */
+  os_types: z.array(z.literal('linux')).min(1).max(1).optional(),
+  /**
+   * Process hash or executable path entries (code signature not supported on Linux)
+   */
+  entries: z
+    .array(z.union([TrustedAppHashEntry, TrustedAppPathEntry]))
+    .min(1)
+    .optional(),
+  tags: EndpointArtifactTags.optional(),
+});
+
+/**
+ * Trusted devices list item properties (Windows-only, allows username field).
+ */
+export type TrustedDevicesWindowsProperties = z.infer<typeof TrustedDevicesWindowsProperties>;
+export const TrustedDevicesWindowsProperties = z.object({
+  list_id: z.literal('endpoint_trusted_devices'),
+  /**
+   * Exception entries for the trusted device (duplicate field entries are not allowed)
+   */
+  entries: z
+    .array(
+      z.object({
+        /**
+         * Device field to match against (user.name is Windows-only)
+         */
+        field: z.enum([
+          'device.serial_number',
+          'device.type',
+          'host.name',
+          'device.vendor.name',
+          'device.vendor.id',
+          'device.product.id',
+          'device.product.name',
+          'user.name',
+        ]),
+        /**
+         * Entry match type
+         */
+        type: z.enum(['match', 'wildcard', 'match_any']),
+        value: z.union([z.string(), z.array(z.string()).min(1)]),
+        /**
+         * Must be the value "included"
+         */
+        operator: z.literal('included'),
+      })
+    )
+    .min(1)
+    .optional(),
+  /**
+   * Must be Windows-only to allow username field
+   */
+  os_types: z.array(z.literal('windows')).min(1).max(1).optional(),
+  tags: EndpointArtifactTags.optional(),
+});
+
+/**
+ * Trusted devices list item properties (macOS-only, username not supported).
+ */
+export type TrustedDevicesMacProperties = z.infer<typeof TrustedDevicesMacProperties>;
+export const TrustedDevicesMacProperties = z.object({
+  list_id: z.literal('endpoint_trusted_devices'),
+  /**
+   * Exception entries for the trusted device (duplicate field entries are not allowed)
+   */
+  entries: z
+    .array(
+      z.object({
+        /**
+         * Device field to match against
+         */
+        field: z.enum([
+          'device.serial_number',
+          'device.type',
+          'host.name',
+          'device.vendor.name',
+          'device.vendor.id',
+          'device.product.id',
+          'device.product.name',
+        ]),
+        /**
+         * Entry match type
+         */
+        type: z.enum(['match', 'wildcard', 'match_any']),
+        value: z.union([z.string(), z.array(z.string()).min(1)]),
+        /**
+         * Must be the value "included"
+         */
+        operator: z.literal('included'),
+      })
+    )
+    .min(1)
+    .optional(),
+  /**
+   * macOS-only
+   */
+  os_types: z.array(z.literal('macos')).min(1).max(1).optional(),
+  tags: EndpointArtifactTags.optional(),
+});
+
+/**
+ * Trusted devices list item properties (Windows + macOS, username not supported).
+ */
+export type TrustedDevicesWindowsMacProperties = z.infer<typeof TrustedDevicesWindowsMacProperties>;
+export const TrustedDevicesWindowsMacProperties = z.object({
+  list_id: z.literal('endpoint_trusted_devices'),
+  /**
+   * Exception entries for the trusted device (duplicate field entries are not allowed, username not available when targeting both OS)
+   */
+  entries: z
+    .array(
+      z.object({
+        /**
+         * Device field to match against (username not available for multi-OS)
+         */
+        field: z.enum([
+          'device.serial_number',
+          'device.type',
+          'host.name',
+          'device.vendor.name',
+          'device.vendor.id',
+          'device.product.id',
+          'device.product.name',
+        ]),
+        /**
+         * Entry match type
+         */
+        type: z.enum(['match', 'wildcard', 'match_any']),
+        value: z.union([z.string(), z.array(z.string()).min(1)]),
+        /**
+         * Must be the value "included"
+         */
+        operator: z.literal('included'),
+      })
+    )
+    .min(1)
+    .optional(),
+  /**
+   * Must include both Windows and macOS (username field not allowed)
+   */
+  os_types: z
+    .array(z.enum(['windows', 'macos']))
+    .min(2)
+    .max(2)
+    .optional(),
+  tags: EndpointArtifactTags.optional(),
+});
+
+/**
+ * Event filters list item properties.
+ */
+export type EventFiltersProperties = z.infer<typeof EventFiltersProperties>;
+export const EventFiltersProperties = z.object({
+  list_id: z.literal('endpoint_event_filters'),
+  /**
+      * Exception entries for the event filter.
+
+**Flexible field support:** Any event field name is allowed (e.g., `process.name`, `file.path`, `event.action`, `dns.question.name`, etc.)
+
+**Minimum requirement:** At least 1 entry required
+
+      */
+  entries: ExceptionListItemEntryArray.optional(),
+  os_types: ExceptionListItemOsTypeArray.optional().default([]),
+  tags: EndpointArtifactTags.optional(),
+});
+
+/**
+ * Host isolation exceptions list item properties.
+ */
+export type HostIsolationProperties = z.infer<typeof HostIsolationProperties>;
+export const HostIsolationProperties = z.object({
+  list_id: z.literal('endpoint_host_isolation_exceptions'),
+  /**
+   * Exactly one entry allowed for host isolation exceptions
+   */
+  entries: z
+    .array(
+      z.object({
+        /**
+         * Must be destination.ip
+         */
+        field: z.literal('destination.ip'),
+        /**
+         * Must be match
+         */
+        type: z.literal('match'),
+        /**
+         * Valid IPv4 address or CIDR notation (e.g., "192.168.1.1" or "10.0.0.0/8")
+         */
+        value: z.string(),
+        /**
+         * Must be the value "included"
+         */
+        operator: z.literal('included'),
+      })
+    )
+    .min(1)
+    .max(1)
+    .optional(),
+  /**
+   * Must include all three operating systems (windows, linux, macos)
+   */
+  os_types: z
+    .array(z.enum(['windows', 'linux', 'macos']))
+    .min(3)
+    .max(3)
+    .optional(),
+  tags: EndpointArtifactTags.optional(),
+});
+
+/**
+ * Blocklist list item properties (Windows, supports code signature).
+ */
+export type BlocklistWindowsProperties = z.infer<typeof BlocklistWindowsProperties>;
+export const BlocklistWindowsProperties = z.object({
+  list_id: z.literal('endpoint_blocklists'),
+  /**
+      * **Validation rules:**
+* Hash entries: up to 3 (one for each hash type: md5, sha1, sha256)
+* Path entry: only 1 allowed
+* Code signature entry: only 1 allowed
+
+      */
+  entries: z
+    .array(z.union([BlocklistHashOrPathEntry, BlocklistWindowsCodeSignatureEntry]))
+    .min(1)
+    .optional(),
+  /**
+   * Windows-only
+   */
+  os_types: z.array(z.literal('windows')).min(1).max(1).optional(),
+  tags: EndpointArtifactTags.optional(),
+});
+
+/**
+ * Blocklist list item properties (Linux, code signature not supported).
+ */
+export type BlocklistLinuxProperties = z.infer<typeof BlocklistLinuxProperties>;
+export const BlocklistLinuxProperties = z.object({
+  list_id: z.literal('endpoint_blocklists'),
+  /**
+      * **Validation rules:**
+* Hash entries: up to 3 (one for each hash type: md5, sha1, sha256)
+* Path entry: only 1 allowed
+
+      */
+  entries: z.array(BlocklistHashOrPathEntry).min(1).optional(),
+  /**
+   * Linux-only
+   */
+  os_types: z.array(z.literal('linux')).min(1).max(1).optional(),
+  tags: EndpointArtifactTags.optional(),
+});
+
+/**
+ * Blocklist list item properties (macOS, code signature not supported).
+ */
+export type BlocklistMacProperties = z.infer<typeof BlocklistMacProperties>;
+export const BlocklistMacProperties = z.object({
+  list_id: z.literal('endpoint_blocklists'),
+  /**
+      * **Validation rules:**
+* Hash entries: up to 3 (one for each hash type: md5, sha1, sha256)
+* Path entry: only 1 allowed
+
+      */
+  entries: z.array(BlocklistHashOrPathEntry).min(1).optional(),
+  /**
+   * macOS-only
+   */
+  os_types: z.array(z.literal('macos')).min(1).max(1).optional(),
+  tags: EndpointArtifactTags.optional(),
+});
 
 export type ExceptionListItem = z.infer<typeof ExceptionListItem>;
 export const ExceptionListItem = z.object({

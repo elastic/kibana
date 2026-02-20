@@ -6,10 +6,17 @@
  */
 
 import type { AlertAttachmentAttributes } from '../../../common/types/domain';
-import { AttachmentType } from '../../../common/types/domain';
+import { AttachmentType, CaseStatuses } from '../../../common/types/domain';
 import type { SavedObject } from '@kbn/core-saved-objects-api-server';
 import { createCasesClientMockArgs } from '../../client/mocks';
-import { alertComment, comment, mockCaseComments, mockCases, multipleAlert } from '../../mocks';
+import {
+  alertComment,
+  comment,
+  eventComment,
+  mockCaseComments,
+  mockCases,
+  multipleAlert,
+} from '../../mocks';
 import { CaseCommentModel } from './case_with_comments';
 import {
   MAX_PERSISTABLE_STATE_AND_EXTERNAL_REFERENCES,
@@ -23,6 +30,8 @@ import {
 
 describe('CaseCommentModel', () => {
   const theCase = mockCases[0];
+  const closedCase = mockCases[3];
+
   const clientArgs = createCasesClientMockArgs();
   const createdDate = '2023-04-07T12:18:36.941Z';
 
@@ -39,6 +48,7 @@ describe('CaseCommentModel', () => {
   clientArgs.services.attachmentService.getter.getAllAlertIds.mockResolvedValue(
     alertIdsAttachedToCase
   );
+  clientArgs.services.attachmentService.getter.getAllEventIds.mockResolvedValue(new Set());
 
   let model: CaseCommentModel;
 
@@ -303,6 +313,7 @@ describe('CaseCommentModel', () => {
             {
               userComments: 2,
               alerts: 2,
+              events: 0,
             },
           ],
         ])
@@ -331,6 +342,7 @@ describe('CaseCommentModel', () => {
             {
               userComments: 1,
               alerts: 3,
+              events: 0,
             },
           ],
         ])
@@ -392,6 +404,29 @@ describe('CaseCommentModel', () => {
           })
         ).resolves.not.toThrow();
       });
+
+      it('throws if trying to add an event or alert to a closed case', async () => {
+        expect(closedCase.attributes.status).toEqual(CaseStatuses.closed);
+        clientArgs.services.caseService.getCase.mockResolvedValue(closedCase);
+
+        const modelForClosedCase = await CaseCommentModel.create(closedCase.id, clientArgs);
+
+        await expect(
+          modelForClosedCase.createComment({
+            id: 'comment-1',
+            commentReq: alertComment,
+            createdDate,
+          })
+        ).rejects.toThrow();
+
+        await expect(
+          modelForClosedCase.createComment({
+            id: 'comment-1',
+            commentReq: eventComment,
+            createdDate,
+          })
+        ).rejects.toThrow();
+      });
     });
   });
 
@@ -422,6 +457,43 @@ describe('CaseCommentModel', () => {
 
       expect(attachments.length).toBe(3);
       expect(attachments[0].attributes.type).toBe('user');
+      expect(attachments[1].attributes.type).toBe('alert');
+      expect(attachments[2].attributes.type).toBe('alert');
+
+      expect(singleAlertCall.attributes.alertId).toEqual(['alert-id-1']);
+      expect(singleAlertCall.attributes.index).toEqual(['alert-index-1']);
+
+      // test-id-4 is omitted because it is returned by getAllAlertIds, see the top of this file
+      expect(multipleAlertsCall.attributes.alertId).toEqual(['test-id-3', 'test-id-5']);
+      expect(multipleAlertsCall.attributes.index).toEqual(['test-index-3', 'test-index-5']);
+    });
+
+    it('does not remove events when filtering out duplicate alerts', async () => {
+      await model.bulkCreate({
+        attachments: [
+          {
+            id: 'comment-1',
+            ...eventComment,
+          },
+          {
+            id: 'comment-2',
+            ...alertComment,
+          },
+          {
+            id: 'comment-3',
+            ...multipleAlert,
+          },
+        ],
+      });
+
+      const attachments =
+        clientArgs.services.attachmentService.bulkCreate.mock.calls[0][0].attachments;
+
+      const singleAlertCall = attachments[1] as SavedObject<AlertAttachmentAttributes>;
+      const multipleAlertsCall = attachments[2] as SavedObject<AlertAttachmentAttributes>;
+
+      expect(attachments.length).toBe(3);
+      expect(attachments[0].attributes.type).toBe('event');
       expect(attachments[1].attributes.type).toBe('alert');
       expect(attachments[2].attributes.type).toBe('alert');
 
@@ -680,6 +752,7 @@ describe('CaseCommentModel', () => {
             {
               userComments: 4,
               alerts: 5,
+              events: 0,
             },
           ],
         ])
@@ -789,6 +862,7 @@ describe('CaseCommentModel', () => {
             {
               userComments: 1,
               alerts: 2,
+              events: 0,
             },
           ],
         ])
@@ -821,6 +895,7 @@ describe('CaseCommentModel', () => {
             {
               userComments: 1,
               alerts: 2,
+              events: 0,
             },
           ],
         ])

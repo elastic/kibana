@@ -31,6 +31,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-types';
 import type { BoolQuery } from '@kbn/es-query';
 import type { GenericBuckets } from '@kbn/grouping/src';
+import type { KqlPluginStart } from '@kbn/kql/public';
 export interface BaseEsQuery {
   query?: {
     bool: BoolQuery;
@@ -43,6 +44,7 @@ export interface CspClientPluginStartDeps {
   dataViews: DataViewsServicePublic;
   dataViewFieldEditor: IndexPatternFieldEditorStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  kql: KqlPluginStart;
   uiActions: UiActionsStart;
   fieldFormats: FieldFormatsStart;
   toastNotifications: ToastsStart;
@@ -59,23 +61,6 @@ export interface CspClientPluginStartDeps {
   usageCollection?: UsageCollectionStart;
 }
 
-export interface CspBaseEsQuery {
-  query?: {
-    bool: {
-      filter: Array<estypes.QueryDslQueryContainer | undefined> | undefined;
-    };
-  };
-}
-
-export interface UseCspOptions extends CspBaseEsQuery {
-  sort?: Array<{
-    [key: string]: string;
-  }>;
-  enabled: boolean;
-  pageSize: number;
-  ignore_unavailable?: boolean;
-}
-
 export type LatestFindingsRequest = IKibanaSearchRequest<estypes.SearchRequest>;
 export type LatestFindingsResponse = IKibanaSearchResponse<
   estypes.SearchResponse<CspFinding, FindingsAggs>
@@ -83,7 +68,6 @@ export type LatestFindingsResponse = IKibanaSearchResponse<
 
 export interface FindingsAggs {
   count: estypes.AggregationsMultiBucketAggregateBase<estypes.AggregationsStringRareTermsBucketKeys>;
-  by_datastream_dataset?: estypes.AggregationsMultiBucketAggregateBase<estypes.AggregationsStringRareTermsBucketKeys>;
 }
 
 interface BaseMisconfigurationFlyoutProps {

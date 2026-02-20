@@ -21,11 +21,19 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 import { SettingsGroup } from './settings_group';
 import { SettingsFormRow } from './settings_form_row';
 import type { DevToolsSettings } from '../../../services';
 import type { EsHostService } from '../../lib';
+import { normalizeUrl } from '../../../lib/utils';
+
+const styles = {
+  minWidthControl: css`
+    min-width: 220px;
+  `,
+};
 
 const DEBOUNCE_DELAY = 500;
 const ON_LABEL = i18n.translate('console.settingsPage.onLabel', { defaultMessage: 'On' });
@@ -94,8 +102,13 @@ export const SettingsEditor = (props: Props) => {
         await props.esHostService.waitForInitialization();
         const hosts = props.esHostService.getAllHosts();
         setAvailableHosts(hosts);
-        // If no host is selected, default to the first one
-        if (!props.settings.selectedHost && hosts.length > 0) {
+
+        const storedHost = props.settings.selectedHost;
+        const isStoredHostValid =
+          storedHost != null && hosts.some((h) => normalizeUrl(h) === normalizeUrl(storedHost));
+
+        // Reset to first available host if nothing is selected OR if stored host is stale
+        if (!isStoredHostValid && hosts.length > 0) {
           setSelectedHost(hosts[0]);
         }
       }
@@ -268,7 +281,7 @@ export const SettingsEditor = (props: Props) => {
         })}
       >
         <EuiSuperSelect
-          css={{ minWidth: '220px' }}
+          css={styles.minWidthControl}
           compressed
           disabled={availableHosts.length < 2}
           options={availableHosts.map((host) => ({
@@ -276,6 +289,9 @@ export const SettingsEditor = (props: Props) => {
             inputDisplay: host,
           }))}
           valueOfSelected={selectedHost || (availableHosts.length > 0 ? availableHosts[0] : '')}
+          aria-label={i18n.translate('console.settingsPage.elasticsearchHostLabel', {
+            defaultMessage: 'Elasticsearch host',
+          })}
           onChange={(value) => setSelectedHost(value)}
         />
       </SettingsFormRow>
@@ -292,7 +308,7 @@ export const SettingsEditor = (props: Props) => {
         })}
       >
         <EuiFieldNumber
-          css={{ minWidth: '220px' }}
+          css={styles.minWidthControl}
           compressed
           data-test-subj="setting-font-size-input"
           value={fontSize}
@@ -370,10 +386,13 @@ export const SettingsEditor = (props: Props) => {
             })}
           >
             <EuiSuperSelect
-              css={{ minWidth: '220px' }}
+              css={styles.minWidthControl}
               compressed
               options={intervalOptions}
               valueOfSelected={pollInterval.toString()}
+              aria-label={i18n.translate('console.settingsPage.refreshingDataLabel', {
+                defaultMessage: 'Refresh frequency',
+              })}
               onChange={onPollingIntervalChange}
             />
           </SettingsFormRow>

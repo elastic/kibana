@@ -7,50 +7,43 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React, { useState } from 'react';
 import type { ComponentProps } from 'react';
-import React, { useEffect, useState } from 'react';
-import type { Meta, StoryFn, StoryObj } from '@storybook/react';
-import { Global, css } from '@emotion/react';
+import { EuiSkipLink, useEuiTheme } from '@elastic/eui';
 import type { UseEuiTheme } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiSkipLink, useEuiTheme } from '@elastic/eui';
-import { ChromeLayout, ChromeLayoutConfigProvider } from '@kbn/core-chrome-layout-components';
-import { Box } from '@kbn/core-chrome-layout-components/__stories__/box';
+import type { Meta, StoryFn, StoryObj } from '@storybook/react';
 import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants';
+import { Box } from '@kbn/core-chrome-layout-components/__stories__/box';
+import { ChromeLayout, ChromeLayoutConfigProvider } from '@kbn/core-chrome-layout-components';
+import { css, Global } from '@emotion/react';
 
+import { LOGO, PRIMARY_MENU_FOOTER_ITEMS, PRIMARY_MENU_ITEMS } from '../mocks/observability';
 import { Navigation } from '../components/navigation';
-import { LOGO, PRIMARY_MENU_ITEMS, PRIMARY_MENU_FOOTER_ITEMS } from '../mocks/observability';
+import { usePreventLinkNavigation } from '../hooks/use_prevent_link_navigation';
+import { NAVIGATION_ROOT_SELECTOR, NAVIGATION_SELECTOR_PREFIX } from '../constants';
 
-const styles = ({ euiTheme }: UseEuiTheme) => css`
-  body {
-    background-color: ${euiTheme.colors.backgroundBasePlain};
-  }
+const styles = ({ euiTheme }: UseEuiTheme) => {
+  const sidePanelClassName = `${NAVIGATION_SELECTOR_PREFIX}-sidePanel`;
 
-  #storybook-root {
-    display: flex;
-  }
+  return css`
+    body {
+      background-color: ${euiTheme.colors.backgroundBasePlain};
+    }
 
-  div.side-nav,
-  div.side_panel {
-    height: 100vh;
-  }
-`;
+    #storybook-root {
+      display: flex;
+    }
+
+    div.${NAVIGATION_ROOT_SELECTOR}, div.${sidePanelClassName} {
+      height: 100vh;
+    }
+  `;
+};
 
 type PropsAndArgs = ComponentProps<typeof Navigation>;
 
 const PreventLinkNavigation = (Story: StoryFn) => {
-  useEffect(() => {
-    const handleClick = (e: Event) => {
-      const target = e.target as HTMLElement;
-      const anchor = target.closest('a');
-
-      if (anchor && anchor.getAttribute('href')) {
-        e.preventDefault();
-      }
-    };
-
-    document.addEventListener('click', handleClick, true);
-    return () => document.removeEventListener('click', handleClick, true);
-  }, []);
+  usePreventLinkNavigation();
 
   return <Story />;
 };
@@ -73,7 +66,7 @@ export default {
       id: 'observability',
       href: LOGO.href,
       label: LOGO.label,
-      iconType: LOGO.type,
+      iconType: LOGO.iconType,
     },
     setWidth: () => {},
   },
@@ -91,23 +84,7 @@ export const Default: StoryObj<PropsAndArgs> = {
       );
     },
   ],
-};
-
-export const Collapsed: StoryObj<PropsAndArgs> = {
-  name: 'Collapsed Navigation',
-  decorators: [
-    (Story) => {
-      return (
-        <>
-          <Global styles={styles} />
-          <Story />
-        </>
-      );
-    },
-  ],
-  args: {
-    isCollapsed: true,
-  },
+  render: (args) => <ControlledNavigation {...args} />,
 };
 
 export const WithMinimalItems: StoryObj<PropsAndArgs> = {
@@ -128,6 +105,7 @@ export const WithMinimalItems: StoryObj<PropsAndArgs> = {
       footerItems: PRIMARY_MENU_FOOTER_ITEMS.slice(0, 2),
     },
   },
+  render: (args) => <ControlledNavigation {...args} />,
 };
 
 export const WithManyItems: StoryObj<PropsAndArgs> = {
@@ -168,11 +146,34 @@ export const WithManyItems: StoryObj<PropsAndArgs> = {
       footerItems: PRIMARY_MENU_FOOTER_ITEMS,
     },
   },
+  render: (args) => <ControlledNavigation {...args} />,
+};
+
+export const WithinLayout: StoryObj<PropsAndArgs> = {
+  name: 'Navigation within Layout',
+  render: (args) => <Layout {...args} />,
+};
+
+const ControlledNavigation = ({ ...props }: PropsAndArgs) => {
+  const [activeItemId, setActiveItemId] = useState(props.activeItemId || PRIMARY_MENU_ITEMS[0].id);
+  const [isCollapsed, setIsCollapsed] = useState(props.isCollapsed ?? false);
+
+  return (
+    <Navigation
+      {...props}
+      isCollapsed={isCollapsed}
+      activeItemId={activeItemId}
+      onItemClick={(item) => setActiveItemId(item.id)}
+      onToggleCollapsed={setIsCollapsed}
+    />
+  );
 };
 
 const Layout = ({ ...props }: PropsAndArgs) => {
   const { euiTheme } = useEuiTheme();
   const [navigationWidth, setNavigationWidth] = useState(0);
+  const [activeItemId, setActiveItemId] = useState(props.activeItemId || PRIMARY_MENU_ITEMS[0].id);
+  const [isCollapsed, setIsCollapsed] = useState(props.isCollapsed ?? false);
 
   const headerHeight = 48;
 
@@ -185,7 +186,6 @@ const Layout = ({ ...props }: PropsAndArgs) => {
           footerHeight: 48,
           headerHeight,
           navigationWidth,
-          sidebarPanelWidth: 368,
           sidebarWidth: 48,
           applicationTopBarHeight: 48,
           applicationBottomBarHeight: 48,
@@ -215,11 +215,12 @@ const Layout = ({ ...props }: PropsAndArgs) => {
           }
           navigation={
             <Navigation
-              activeItemId={props.activeItemId}
-              isCollapsed={props.isCollapsed}
-              items={props.items}
-              logo={props.logo}
+              {...props}
               setWidth={setNavigationWidth}
+              isCollapsed={isCollapsed}
+              activeItemId={activeItemId}
+              onItemClick={(item) => setActiveItemId(item.id)}
+              onToggleCollapsed={setIsCollapsed}
             />
           }
           sidebar={
@@ -231,30 +232,6 @@ const Layout = ({ ...props }: PropsAndArgs) => {
                 transform: translate(-50%, -50%) rotate(90deg);
               `}
             />
-          }
-          sidebarPanel={
-            <EuiFlexGroup direction="column" gutterSize="none" css={{ height: '100%' }}>
-              <EuiFlexItem
-                grow={false}
-                style={{ height: headerHeight }}
-                css={css`
-                  white-space: nowrap;
-                `}
-              >
-                <Box
-                  label="Sidebar Header"
-                  color={euiTheme.colors.accentSecondary}
-                  backgroundColor={euiTheme.colors.textAccentSecondary}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <Box
-                  label="Sidebar Panel"
-                  color={euiTheme.colors.accentSecondary}
-                  backgroundColor={euiTheme.colors.textAccentSecondary}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
           }
           applicationTopBar={
             <Box
@@ -284,9 +261,4 @@ const Layout = ({ ...props }: PropsAndArgs) => {
       </ChromeLayoutConfigProvider>
     </>
   );
-};
-
-export const WithinLayout: StoryObj<PropsAndArgs> = {
-  name: 'Navigation within Layout',
-  render: (args) => <Layout {...args} />,
 };

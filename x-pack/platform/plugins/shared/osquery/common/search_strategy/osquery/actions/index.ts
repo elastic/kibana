@@ -29,6 +29,7 @@ export interface ActionDetails {
   agent_policy_ids: string[];
   agents: string[];
   user_id?: string;
+  user_profile_uid?: string;
   pack_id?: string;
   pack_name?: string;
   space_id?: string;
@@ -86,6 +87,7 @@ export interface ActionResultsStrategyResponse
 
 export interface ActionResultsRequestOptions extends RequestOptionsPaginated {
   actionId: string;
+  agentIds?: string[];
   startDate?: string;
   useNewDataStream?: boolean;
   integrationNamespaces?: string[];

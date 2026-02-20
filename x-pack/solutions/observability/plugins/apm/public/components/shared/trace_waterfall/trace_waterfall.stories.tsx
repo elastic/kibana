@@ -39,7 +39,8 @@ export const ManyChildren: StoryFn<{}> = () => {
           duration: 5000000,
           serviceName: 'frontend',
           traceId: 'ed1aacaf31264b93e0e405e42b00af74',
-          errorCount: 1,
+          errors: [{ errorDocId: '1' }],
+          spanLinksCount: { incoming: 0, outgoing: 0 },
         },
         ...Array(200)
           .fill(0)
@@ -51,7 +52,8 @@ export const ManyChildren: StoryFn<{}> = () => {
             parentId: '1',
             serviceName: 'child-service',
             traceId: 'ed1aacaf31264b93e0e405e42b00af74',
-            errorCount: 0,
+            errors: [],
+            spanLinksCount: { incoming: 0, outgoing: 0 },
           })),
       ]}
     />
@@ -71,7 +73,8 @@ export const ExampleClockSkew: StoryFn<{}> = () => {
           duration: 5000000,
           serviceName: 'frontend',
           traceId: 'ed1aacaf31264b93e0e405e42b00af74',
-          errorCount: 1,
+          errors: [{ errorDocId: '1' }],
+          spanLinksCount: { incoming: 0, outgoing: 0 },
         },
         {
           id: 'cdd3568d81149715',
@@ -81,7 +84,8 @@ export const ExampleClockSkew: StoryFn<{}> = () => {
           parentId: 'd2efb76164a77608',
           serviceName: 'quote',
           traceId: 'ed1aacaf31264b93e0e405e42b00af74',
-          errorCount: 0,
+          errors: [],
+          spanLinksCount: { incoming: 0, outgoing: 0 },
         },
         {
           id: 'a111aabbccddeeff',
@@ -91,7 +95,8 @@ export const ExampleClockSkew: StoryFn<{}> = () => {
           parentId: 'cdd3568d81149715',
           serviceName: 'database',
           traceId: 'ed1aacaf31264b93e0e405e42b00af74',
-          errorCount: 0,
+          errors: [],
+          spanLinksCount: { incoming: 0, outgoing: 0 },
         },
       ]}
     />
@@ -107,8 +112,9 @@ export const Example: StoryFn<{}> = () => {
           name: 'POST',
           traceId: 'cc847a76570773d6fc96fac63dfcddd2',
           duration: 53170917,
-          errorCount: 0,
+          errors: [],
           serviceName: 'load-generator',
+          spanLinksCount: { incoming: 0, outgoing: 0 },
         },
         {
           id: '2b18312dfedbf16a',
@@ -116,9 +122,10 @@ export const Example: StoryFn<{}> = () => {
           name: 'executing api route (pages) /api/checkout',
           traceId: 'cc847a76570773d6fc96fac63dfcddd2',
           duration: 51298750,
-          errorCount: 0,
+          errors: [],
           parentId: '06b480d1e6e2ac2e',
           serviceName: 'frontend',
+          spanLinksCount: { incoming: 0, outgoing: 0 },
         },
         {
           id: '41b39c13ec0166a8',
@@ -126,9 +133,10 @@ export const Example: StoryFn<{}> = () => {
           name: 'grpc.oteldemo.ProductCatalogService/GetProduct',
           traceId: 'cc847a76570773d6fc96fac63dfcddd2',
           duration: 1187042,
-          errorCount: 0,
+          errors: [],
           parentId: '2b18312dfedbf16a',
           serviceName: 'frontend',
+          spanLinksCount: { incoming: 0, outgoing: 0 },
         },
         {
           id: '255547a7b6b19871',
@@ -136,9 +144,10 @@ export const Example: StoryFn<{}> = () => {
           name: 'oteldemo.ProductCatalogService/GetProduct',
           traceId: 'cc847a76570773d6fc96fac63dfcddd2',
           duration: 90416,
-          errorCount: 0,
+          errors: [],
           parentId: '41b39c13ec0166a8',
           serviceName: 'product-catalog',
+          spanLinksCount: { incoming: 0, outgoing: 0 },
         },
       ]}
       highlightedTraceId="41b39c13ec0166a8"
@@ -156,8 +165,9 @@ export const ExampleWithServiceLegend: StoryFn<{}> = () => {
           name: 'POST',
           traceId: 'cc847a76570773d6fc96fac63dfcddd2',
           duration: 53170917,
-          errorCount: 0,
+          errors: [],
           serviceName: 'load-generator',
+          spanLinksCount: { incoming: 0, outgoing: 0 },
         },
         {
           id: '2b18312dfedbf16a',
@@ -165,9 +175,10 @@ export const ExampleWithServiceLegend: StoryFn<{}> = () => {
           name: 'executing api route (pages) /api/checkout',
           traceId: 'cc847a76570773d6fc96fac63dfcddd2',
           duration: 51298750,
-          errorCount: 0,
+          errors: [],
           parentId: '06b480d1e6e2ac2e',
           serviceName: 'frontend',
+          spanLinksCount: { incoming: 0, outgoing: 0 },
         },
         {
           id: '41b39c13ec0166a8',
@@ -175,9 +186,10 @@ export const ExampleWithServiceLegend: StoryFn<{}> = () => {
           name: 'grpc.oteldemo.ProductCatalogService/GetProduct',
           traceId: 'cc847a76570773d6fc96fac63dfcddd2',
           duration: 1187042,
-          errorCount: 0,
+          errors: [],
           parentId: '2b18312dfedbf16a',
           serviceName: 'frontend',
+          spanLinksCount: { incoming: 0, outgoing: 0 },
         },
         {
           id: '255547a7b6b19871',
@@ -185,9 +197,10 @@ export const ExampleWithServiceLegend: StoryFn<{}> = () => {
           name: 'oteldemo.ProductCatalogService/GetProduct',
           traceId: 'cc847a76570773d6fc96fac63dfcddd2',
           duration: 90416,
-          errorCount: 0,
+          errors: [],
           parentId: '41b39c13ec0166a8',
           serviceName: 'product-catalog',
+          spanLinksCount: { incoming: 0, outgoing: 0 },
         },
       ]}
       highlightedTraceId="41b39c13ec0166a8"
@@ -206,8 +219,9 @@ export const ExampleWithTypeLegend: StoryFn<{}> = () => {
           name: 'POST',
           traceId: 'cc847a76570773d6fc96fac63dfcddd2',
           duration: 53170917,
-          errorCount: 0,
+          errors: [],
           serviceName: 'frontend',
+          spanLinksCount: { incoming: 0, outgoing: 0 },
         },
         {
           id: '2b18312dfedbf16a',
@@ -215,10 +229,11 @@ export const ExampleWithTypeLegend: StoryFn<{}> = () => {
           name: 'executing api route (pages) /api/checkout',
           traceId: 'cc847a76570773d6fc96fac63dfcddd2',
           duration: 51298750,
-          errorCount: 0,
+          errors: [],
           parentId: '06b480d1e6e2ac2e',
           serviceName: 'frontend',
           type: 'http',
+          spanLinksCount: { incoming: 0, outgoing: 0 },
         },
         {
           id: '41b39c13ec0166a8',
@@ -226,10 +241,11 @@ export const ExampleWithTypeLegend: StoryFn<{}> = () => {
           name: 'grpc.oteldemo.ProductCatalogService/GetProduct',
           traceId: 'cc847a76570773d6fc96fac63dfcddd2',
           duration: 1187042,
-          errorCount: 0,
+          errors: [],
           parentId: '2b18312dfedbf16a',
           serviceName: 'frontend',
           type: 'http',
+          spanLinksCount: { incoming: 0, outgoing: 0 },
         },
         {
           id: '255547a7b6b19871',
@@ -237,10 +253,11 @@ export const ExampleWithTypeLegend: StoryFn<{}> = () => {
           name: 'oteldemo.ProductCatalogService/GetProduct',
           traceId: 'cc847a76570773d6fc96fac63dfcddd2',
           duration: 90416,
-          errorCount: 0,
+          errors: [],
           parentId: '41b39c13ec0166a8',
           serviceName: 'frontend',
           type: 'css',
+          spanLinksCount: { incoming: 0, outgoing: 0 },
         },
       ]}
       highlightedTraceId="41b39c13ec0166a8"
@@ -302,4 +319,41 @@ export const APMExample: StoryFn<{}> = () => {
   );
 
   return <TraceWaterfall traceItems={traceItems} />;
+};
+
+export const CompositeSpanExample: StoryFn<{}> = () => {
+  return (
+    <TraceWaterfall
+      traceItems={[
+        {
+          id: 'root-tx',
+          timestampUs: new Date('2025-05-27T12:15:04.973Z').getTime() * 1000,
+          name: 'GET /users',
+          traceId: 'cc847a76570773d6fc96fac63dfcddd2',
+          duration: 10000000,
+          errors: [],
+          serviceName: 'api-service',
+          spanLinksCount: { incoming: 0, outgoing: 0 },
+        },
+        {
+          id: 'composite-span',
+          timestampUs: new Date('2025-05-27T12:15:05.000Z').getTime() * 1000,
+          name: 'SELECT * FROM users',
+          traceId: 'cc847a76570773d6fc96fac63dfcddd2',
+          duration: 5000000,
+          errors: [],
+          parentId: 'root-tx',
+          serviceName: 'api-service',
+          type: 'db',
+          spanLinksCount: { incoming: 0, outgoing: 0 },
+          icon: 'database',
+          composite: {
+            count: 9,
+            sum: 4500000,
+            compressionStrategy: 'exact_match',
+          },
+        },
+      ]}
+    />
+  );
 };

@@ -82,7 +82,7 @@ type PrimitiveOf<TProperty extends StorageMappingProperty> = {
     ? TEnums extends Array<infer TEnum>
       ? TEnum
       : never
-    : string;
+    : string | string[];
   match_only_text: string;
   text: string;
   boolean: boolean;

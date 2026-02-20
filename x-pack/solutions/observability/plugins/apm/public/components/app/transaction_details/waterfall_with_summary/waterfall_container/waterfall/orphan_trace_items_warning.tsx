@@ -19,12 +19,17 @@ export function OrphanTraceItemsWarning({
       position="left"
       content={i18n.translate('xpack.apm.transactionDetails.agentMissingTransactionMessage', {
         defaultMessage:
-          'This trace is incomplete and {itemsCount} items could not be displayed in the timeline. This could be a temporary problem caused by ingest delay, or a permanent problem caused by some events being dropped.',
+          'This trace is incomplete, and {itemsCount} items could not be displayed in the timeline. This could be a temporary problem caused by ingest delay, or a permanent problem caused by a broken parent–child span relationship.',
         values: { itemsCount: orphanTraceItemsCount },
       })}
       anchorClassName="eui-fullWidth"
     >
-      <EuiBadge iconType="warning" color="hollow" data-test-id="apm-missing-transaction-badge">
+      <EuiBadge
+        tabIndex={0}
+        iconType="warning"
+        color="hollow"
+        data-test-id="apm-missing-transaction-badge"
+      >
         {i18n.translate('xpack.apm.transactionDetails.agentMissingTransactionLabel', {
           defaultMessage: 'Incomplete trace',
         })}

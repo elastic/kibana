@@ -7,7 +7,7 @@
 
 import { isEmpty, isNil, omitBy } from 'lodash';
 import type { Logger } from '@kbn/logging';
-import type { MaintenanceWindow } from '@kbn/alerting-plugin/server/application/maintenance_window/types';
+import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
 import { formatMWs, replaceStringWithParams } from '../formatting_utils';
 import { PARAMS_KEYS_TO_SKIP } from '../common';
 import type {

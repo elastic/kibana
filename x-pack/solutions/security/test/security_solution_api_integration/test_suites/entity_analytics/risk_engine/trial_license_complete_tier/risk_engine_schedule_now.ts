@@ -6,7 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { deleteAllAlerts, deleteAllRules } from '../../../../config/services/detections_response';
+import { deleteAllAlerts, deleteAllRules } from '@kbn/detections-response-ftr-services';
 import {
   buildDocument,
   createAndSyncRuleAndAlertsFactory,

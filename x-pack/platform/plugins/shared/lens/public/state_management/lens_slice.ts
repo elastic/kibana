@@ -13,27 +13,31 @@ import type { History } from 'history';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
 import type { DragDropIdentifier, DropType } from '@kbn/dom-drag-drop';
-import type { SeriesType } from '@kbn/visualizations-plugin/common';
-import type { TableInspectorAdapter } from '../editor_frame_service/types';
 import type {
-  VisualizeEditorContext,
-  Suggestion,
-  IndexPattern,
+  DateRange,
+  VisualizationState,
+  DataViewsState,
+  FramePublicAPI,
+  Datasource,
   VisualizationMap,
   DatasourceMap,
+  SeriesType,
+  VisualizeEditorContext,
+  LensAppState,
+  LensStoreDeps,
+  TableInspectorAdapter,
   DragDropOperation,
-} from '../types';
+  LensAppServices,
+  IndexPattern,
+  LensEditEvent,
+  LensEditContextMapping,
+} from '@kbn/lens-common';
 import { getInitialDatasourceId, getResolvedDateRange, getRemoveOperation } from '../utils';
-import type { DataViewsState, LensAppState, LensStoreDeps, VisualizationState } from './types';
-import type { Datasource, Visualization } from '../types';
 import { generateId } from '../id_generator';
-import type { DateRange, LayerType } from '../../common/types';
 import { getVisualizeFieldSuggestions } from '../editor_frame_service/editor_frame/suggestion_helpers';
-import type { FramePublicAPI, LensEditContextMapping, LensEditEvent } from '../types';
 import { selectDataViews, selectFramePublicAPI } from './selectors';
 import { onDropForVisualization } from '../editor_frame_service/editor_frame/config_panel/buttons/drop_targets_utils';
-import type { LensAppServices } from '../app_plugin/types';
-import type { LensSerializedState } from '../react_embeddable/types';
+import type { LensSerializedState, LayerType, Suggestion, Visualization } from '..';
 
 const getQueryFromContext = (
   context: VisualizeFieldContext | VisualizeEditorContext,
@@ -63,13 +67,16 @@ export const initialState: LensAppState = {
   visualization: {
     state: null,
     activeId: null,
+    selectedLayerId: null,
   },
   dataViews: {
     indexPatternRefs: [],
     indexPatterns: {},
   },
   annotationGroups: {},
+  projectRouting: undefined,
   managed: false,
+  hideTextBasedEditor: false,
 };
 
 export const getPreloadedState = ({
@@ -116,6 +123,9 @@ export const getPreloadedState = ({
     ? data.query.queryString.getDefaultQuery()
     : getQueryFromContext(initialContext, data);
 
+  const isDashboardListingOrigin =
+    embeddableEditorIncomingState?.originatingApp === 'dashboards' &&
+    Boolean(embeddableEditorIncomingState?.originatingPath?.includes('/list/'));
   const state: LensAppState = {
     ...initialState,
     isLoading: true,
@@ -130,7 +140,7 @@ export const getPreloadedState = ({
     searchSessionId: data.search.session.getSessionId() ?? '',
     resolvedDateRange: getResolvedDateRange(data.query.timefilter.timefilter),
     isLinkedToOriginatingApp: Boolean(
-      embeddableEditorIncomingState?.originatingApp ??
+      (embeddableEditorIncomingState?.originatingApp && !isDashboardListingOrigin) ??
         (initialContext && 'isEmbeddable' in initialContext && initialContext.isEmbeddable)
     ),
     activeDatasourceId: initialDatasourceId,
@@ -138,6 +148,7 @@ export const getPreloadedState = ({
     visualization: {
       state: null,
       activeId: visualizationType ?? Object.keys(visualizationMap)[0] ?? null,
+      selectedLayerId: null,
     },
   };
   return state;
@@ -155,6 +166,8 @@ export interface InitialAppState {
   redirectCallback?: (savedObjectId?: string) => void;
   history?: History<unknown>;
   inlineEditing?: boolean;
+  /** If true, hides the ES|QL editor in the flyout, used by Discover */
+  hideTextBasedEditor?: boolean;
 }
 
 export const setState = createAction<Partial<LensAppState>>('lens/setState');
@@ -235,6 +248,9 @@ export const removeOrClearLayer = createAction<{
   layerId: string;
   layerIds: string[];
 }>('lens/removeOrClearLayer');
+export const setSelectedLayerId = createAction<{
+  layerId: string | null;
+}>('lens/setSelectedLayerId');
 
 export const cloneLayer = createAction(
   'cloneLayer',
@@ -311,6 +327,7 @@ export const lensActions = {
   editVisualizationAction,
   removeLayers,
   removeOrClearLayer,
+  setSelectedLayerId,
   addLayer,
   onDropToDimension,
   cloneLayer,
@@ -411,6 +428,8 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
           newLayerId,
           clonedIDsMap
         );
+        // Set the selected layer to the newly cloned layer
+        state.visualization.selectedLayerId = newLayerId;
       })
       .addCase(removeOrClearLayer, (state, { payload: { visualizationId, layerId, layerIds } }) => {
         const activeVisualization = visualizationMap[visualizationId];
@@ -465,6 +484,9 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
               removedId
             ))
         );
+      })
+      .addCase(setSelectedLayerId, (state, { payload }) => {
+        state.visualization.selectedLayerId = payload.layerId;
       })
       .addCase(changeIndexPattern, (state, { payload }) => {
         const { visualizationIds, datasourceIds, layerId, indexPatternId, dataViews } = payload;

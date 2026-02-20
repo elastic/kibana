@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { BasicPrettyPrinter, parse } from '@kbn/esql-ast';
+import { BasicPrettyPrinter, parse } from '@kbn/esql-language';
 import { correctAll, type QueryCorrection } from './corrections';
 
 interface CorrectWithAstResult {

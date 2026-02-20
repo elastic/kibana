@@ -14,6 +14,7 @@ import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { environmentServiceMock } from '@kbn/core-environment-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
+import { userActivityServiceMock } from '@kbn/core-user-activity-server-mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 import { httpResourcesMock } from '@kbn/core-http-resources-server-mocks';
 import { httpServiceMock } from '@kbn/core-http-server-mocks';
@@ -33,9 +34,10 @@ import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-server-mocks';
 import { pricingServiceMock } from '@kbn/core-pricing-server-mocks';
 import { injectionServiceMock } from '@kbn/core-di-mocks';
 import { dataStreamServiceMock } from '@kbn/core-data-streams-server-mocks';
+import { lazyObject } from '@kbn/lazy-object';
 
 export function createInternalCoreSetupMock() {
-  const setupDeps = {
+  const setupDeps = lazyObject({
     analytics: analyticsServiceMock.createAnalyticsServiceSetup(),
     capabilities: capabilitiesServiceMock.createSetupContract(),
     context: contextServiceMock.createSetupContract(),
@@ -53,6 +55,7 @@ export function createInternalCoreSetupMock() {
     logging: loggingServiceMock.createInternalSetupContract(),
     metrics: metricsServiceMock.createInternalSetupContract(),
     deprecations: deprecationsServiceMock.createInternalSetupContract(),
+    userActivity: userActivityServiceMock.createInternalSetupContract(),
     executionContext: executionContextServiceMock.createInternalSetupContract(),
     coreUsageData: coreUsageDataServiceMock.createSetupContract(),
     customBranding: customBrandingServiceMock.createSetupContract(),
@@ -62,6 +65,6 @@ export function createInternalCoreSetupMock() {
     pricing: pricingServiceMock.createSetupContract(),
     injection: injectionServiceMock.createInternalSetupContract(),
     dataStreams: dataStreamServiceMock.createSetupContract(),
-  };
+  });
   return setupDeps;
 }

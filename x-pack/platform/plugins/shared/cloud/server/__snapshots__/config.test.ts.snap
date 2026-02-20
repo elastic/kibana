@@ -5,10 +5,8 @@ exports[`Cloud plugin config Serverless config Fails on invalid project_type 1`]
 - [serverless.project_type.0]: expected value to equal [observability]
 - [serverless.project_type.1]: expected value to equal [security]
 - [serverless.project_type.2]: expected value to equal [search]
-- [serverless.project_type.3]: expected value to equal [chat]"
+- [serverless.project_type.3]: expected value to equal [workplaceai]"
 `;
-
-exports[`Cloud plugin config Serverless config For Kibana Solution "chat" Throws when any other product tier is provided 1`] = `"[serverless.product_tier]: a value wasn't expected to be present"`;
 
 exports[`Cloud plugin config Serverless config For Kibana Solution "observability" Throws when any other product tier is provided 1`] = `
 "[serverless.product_tier]: types that failed validation:
@@ -24,3 +22,5 @@ exports[`Cloud plugin config Serverless config For Kibana Solution "security" Th
 - [serverless.product_tier.1]: expected value to equal [essentials]
 - [serverless.product_tier.2]: expected value to equal [search_ai_lake]"
 `;
+
+exports[`Cloud plugin config Serverless config For Kibana Solution "workplaceai" Throws when any other product tier is provided 1`] = `"[serverless.product_tier]: a value wasn't expected to be present"`;

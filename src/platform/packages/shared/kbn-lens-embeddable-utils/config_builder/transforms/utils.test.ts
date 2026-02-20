@@ -17,14 +17,20 @@ import {
   buildDatasetState,
   isSingleLayer,
   generateLayer,
+  filtersAndQueryToLensState,
+  filtersAndQueryToApiFormat,
 } from './utils';
 import type {
   GenericIndexPatternColumn,
   PersistedIndexPatternLayer,
   FormBasedLayer,
-} from '@kbn/lens-plugin/public';
-import type { TextBasedLayer } from '@kbn/lens-plugin/public/datasources/form_based/esql_layer/types';
-import type { LensApiState } from '../schema';
+  ReferenceBasedIndexPatternColumn,
+} from '@kbn/lens-common';
+import type { TextBasedLayer } from '@kbn/lens-common';
+import type { LensApiState, MetricState } from '../schema';
+import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
+import type { LensAttributes } from '../types';
+import type { LensApiFilterType } from '../schema/filter';
 
 const dataView = 'test-dataview';
 
@@ -72,7 +78,7 @@ describe('getDatasetIndex', () => {
     expect(result).toMatchInlineSnapshot(`
       Object {
         "index": "test_index",
-        "timeFieldName": "@timestamp",
+        "timeFieldName": undefined,
       }
     `);
   });
@@ -130,11 +136,103 @@ describe('addLayerColumn', () => {
       }
     `);
   });
+
+  test('adds column with reference column', () => {
+    const layer: PersistedIndexPatternLayer = {
+      columns: {},
+      columnOrder: [],
+    };
+
+    const parentColumn: ReferenceBasedIndexPatternColumn = {
+      operationType: 'counter_rate',
+      label: 'Counter rate',
+      dataType: 'number',
+      isBucketed: false,
+      references: [],
+    };
+
+    const referenceColumn: GenericIndexPatternColumn = {
+      operationType: 'max',
+      sourceField: 'bytes',
+      label: 'Max of bytes',
+      dataType: 'number',
+      isBucketed: false,
+    };
+
+    addLayerColumn(layer, 'metric', [parentColumn, referenceColumn]);
+
+    expect(layer.columns.metric).toBeDefined();
+    expect(layer.columns.metric_reference).toBeDefined();
+    expect(layer.columns.metric).toHaveProperty('references', ['metric_reference']);
+    expect(layer.columnOrder).toEqual(['metric', 'metric_reference']);
+  });
+
+  test('adds reference column to the beginning when first=true', () => {
+    const layer: PersistedIndexPatternLayer = {
+      columns: {},
+      columnOrder: ['existing'],
+    };
+
+    const parentColumn: ReferenceBasedIndexPatternColumn = {
+      operationType: 'cumulative_sum',
+      label: 'Cumulative sum',
+      dataType: 'number',
+      isBucketed: false,
+      references: [],
+    };
+
+    const referenceColumn: GenericIndexPatternColumn = {
+      operationType: 'sum',
+      sourceField: 'sales',
+      label: 'Sum of sales',
+      dataType: 'number',
+      isBucketed: false,
+    };
+
+    addLayerColumn(layer, 'metric', [parentColumn, referenceColumn], true);
+
+    expect(layer.columns.metric).toBeDefined();
+    expect(layer.columns.metric_reference).toBeDefined();
+    expect(layer.columns.metric).toHaveProperty('references', ['metric_reference']);
+    expect(layer.columnOrder).toEqual(['metric_reference', 'metric', 'existing']);
+  });
+
+  test('adds column with postfix and reference', () => {
+    const layer: PersistedIndexPatternLayer = {
+      columns: {},
+      columnOrder: [],
+    };
+
+    const parentColumn: ReferenceBasedIndexPatternColumn = {
+      operationType: 'moving_average',
+      label: 'Moving average',
+      dataType: 'number',
+      isBucketed: false,
+      references: [],
+    };
+
+    const referenceColumn: GenericIndexPatternColumn = {
+      operationType: 'sum',
+      sourceField: 'count',
+      label: 'Sum of count',
+      dataType: 'number',
+      isBucketed: false,
+    };
+
+    addLayerColumn(layer, 'metric', [parentColumn, referenceColumn], false, '_trendline');
+
+    expect(layer.columns.metric_trendline).toBeDefined();
+    expect(layer.columns.metric_trendline_reference).toBeDefined();
+    expect(layer.columns.metric_trendline).toHaveProperty('references', [
+      'metric_trendline_reference',
+    ]);
+    expect(layer.columnOrder).toEqual(['metric_trendline', 'metric_trendline_reference']);
+  });
 });
 
 describe('buildDatasourceStates', () => {
   test('correctly builds esql layer', async () => {
-    const results = await buildDatasourceStates(
+    const results = buildDatasourceStates(
       {
         type: 'metric',
         title: 'test',
@@ -142,37 +240,48 @@ describe('buildDatasourceStates', () => {
           type: 'esql',
           query: 'from test | limit 10',
         },
-        metric: {
-          operation: 'value',
-          label: 'test',
-          column: 'test',
-          fit: false,
-          alignments: { labels: 'left', value: 'left' },
-        },
+        metrics: [
+          {
+            type: 'primary',
+            operation: 'value',
+            label: 'test',
+            column: 'test',
+            fit: false,
+            alignments: { labels: 'left', value: 'left' },
+          },
+        ],
         sampling: 1,
         ignore_global_filters: false,
       },
-      {},
       undefined as any,
       () => [{ columnId: 'test', fieldName: 'test' }]
     );
     expect(results).toMatchInlineSnapshot(`
       Object {
-        "textBased": Object {
-          "layers": Object {
-            "layer_0": Object {
-              "columns": Array [
-                Object {
-                  "columnId": "test",
-                  "fieldName": "test",
+        "layers": Object {
+          "textBased": Object {
+            "layers": Object {
+              "layer_0": Object {
+                "columns": Array [
+                  Object {
+                    "columnId": "test",
+                    "fieldName": "test",
+                  },
+                ],
+                "index": "test",
+                "query": Object {
+                  "esql": "from test | limit 10",
                 },
-              ],
-              "index": "test",
-              "query": Object {
-                "esql": "from test | limit 10",
+                "timeField": undefined,
               },
-              "timeField": "@timestamp",
             },
+          },
+        },
+        "usedDataviews": Object {
+          "layer_0": Object {
+            "index": "test",
+            "timeFieldName": undefined,
+            "type": "adHocDataView",
           },
         },
       }
@@ -257,7 +366,19 @@ describe('buildDatasetState', () => {
       allColumns: [],
     } as TextBasedLayer;
 
-    const result = buildDatasetState(textBasedLayer);
+    const result = buildDatasetState(
+      textBasedLayer,
+      'layer_0',
+      {},
+      [],
+      [
+        {
+          type: 'index-pattern',
+          id: 'my-index',
+          name: 'indexpattern-datasource-layer-layer_0',
+        },
+      ]
+    );
     expect(result).toMatchInlineSnapshot(`
       Object {
         "query": "from my-index | limit 10",
@@ -266,17 +387,51 @@ describe('buildDatasetState', () => {
     `);
   });
 
-  test('builds index dataset state', () => {
+  test('builds dataView dataset state', () => {
     const formBasedLayer = {
       indexPatternId: 'my-dataview-id',
       columns: {},
       columnOrder: [],
     } as FormBasedLayer;
 
-    const result = buildDatasetState(formBasedLayer);
+    const result = buildDatasetState(formBasedLayer, 'layer_0', {}, [], []);
     expect(result).toMatchInlineSnapshot(`
       Object {
-        "index": "my-dataview-id",
+        "id": "my-dataview-id",
+        "type": "dataView",
+      }
+    `);
+  });
+
+  test('builds index dataset state', () => {
+    const formBasedLayer = {
+      indexPatternId: 'my-adhoc-dataview-id',
+      columns: {},
+      columnOrder: [],
+    } as FormBasedLayer;
+
+    const result = buildDatasetState(
+      formBasedLayer,
+      'layer_1',
+      {
+        'my-adhoc-dataview-id': {
+          index: 'test-id',
+          title: 'my-adhoc-dataview-id',
+          timeFieldName: '@timestamp',
+        },
+      } as Record<string, unknown>,
+      [],
+      [
+        {
+          type: 'index-pattern',
+          id: 'my-adhoc-dataview-id',
+          name: 'indexpattern-datasource-layer-layer_1',
+        },
+      ]
+    );
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "index": "my-adhoc-dataview-id",
         "time_field": "@timestamp",
         "type": "index",
       }
@@ -311,7 +466,7 @@ describe('generateLayer', () => {
       type: 'metric',
       sampling: 0.5,
       ignore_global_filters: true,
-    } as LensApiState;
+    } as MetricState;
 
     const result = generateLayer('layer_1', options);
 
@@ -330,7 +485,7 @@ describe('generateLayer', () => {
   test('generates layer with default values', () => {
     const options = {
       type: 'metric',
-    } as LensApiState;
+    } as MetricState;
 
     const result = generateLayer('layer_0', options);
 
@@ -344,5 +499,133 @@ describe('generateLayer', () => {
         },
       }
     `);
+  });
+});
+
+describe('filtersAndQueryToLensState', () => {
+  test('converts API filters and query to Lens state format', () => {
+    const apiState: LensApiState = {
+      type: 'metric',
+      title: 'test metric',
+      dataset: {
+        type: 'esql',
+        query: 'from test | limit 10',
+      },
+      metrics: [
+        {
+          type: 'primary',
+          operation: 'value',
+          label: 'test',
+          column: 'test',
+          fit: false,
+          alignments: { labels: 'left', value: 'left' },
+        },
+      ],
+      sampling: 1,
+      ignore_global_filters: false,
+      filters: [
+        { language: 'kuery', query: 'category: "shoes"' },
+        { language: 'lucene', query: 'price > 100' },
+      ] as LensApiFilterType[],
+    };
+
+    const result = filtersAndQueryToLensState(apiState);
+
+    expect(result.query).toEqual({ esql: 'from test | limit 10' });
+    expect(result.filters).toHaveLength(2);
+    for (const [index, filter] of Object.entries(result.filters ?? [])) {
+      expect(filter).toEqual({ meta: {}, ...apiState.filters?.[index as unknown as number] });
+    }
+  });
+
+  test('handles missing filters and query gracefully', () => {
+    const apiState: LensApiState = {
+      type: 'metric',
+      title: 'test metric',
+      dataset: {
+        type: 'esql',
+        query: 'from test | limit 10',
+      },
+      metrics: [
+        {
+          type: 'primary',
+          operation: 'value',
+          label: 'test',
+          column: 'test',
+          fit: false,
+          alignments: { labels: 'left', value: 'left' },
+        },
+      ],
+      sampling: 1,
+      ignore_global_filters: false,
+    };
+
+    const result = filtersAndQueryToLensState(apiState);
+
+    expect(result.query).toEqual({ esql: 'from test | limit 10' });
+  });
+});
+
+describe('filtersAndQueryToApiFormat', () => {
+  test('converts Lens state filters and query to API format', () => {
+    const lensState: LensAttributes = {
+      state: {
+        filters: [
+          {
+            query: { language: 'kuery', query: 'category: "electronics"' },
+            meta: { disabled: false },
+          },
+          {
+            query: { language: 'lucene', query: 'price:[100 TO *]' },
+            meta: { negate: true },
+          },
+        ] as Filter[],
+        query: { language: 'kuery', query: 'brand: "apple"' } as Query,
+      },
+    } as LensAttributes;
+
+    const result = filtersAndQueryToApiFormat(lensState);
+
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "filters": Array [
+          Object {
+            "language": "kuery",
+            "query": "category: \\"electronics\\"",
+          },
+          Object {
+            "language": "lucene",
+            "query": "price:[100 TO *]",
+          },
+        ],
+        "query": Object {
+          "language": "kuery",
+          "query": "brand: \\"apple\\"",
+        },
+      }
+    `);
+  });
+
+  test('handles non-string query gracefully', () => {
+    const lensState = {
+      state: {
+        filters: [] as Filter[],
+        query: { language: 'kuery', query: { bool: { must: [] } } } as Query,
+      },
+    } as LensAttributes;
+
+    const result = filtersAndQueryToApiFormat(lensState);
+
+    expect(result).toEqual({});
+  });
+
+  test('should not include filters if empty and query if ES|QL', () => {
+    const lensState = {
+      state: { filters: [] as Filter[], query: { esql: 'FROM ...' } as AggregateQuery },
+    } as LensAttributes;
+
+    const result = filtersAndQueryToApiFormat(lensState);
+
+    expect(result).toEqual({});
   });
 });

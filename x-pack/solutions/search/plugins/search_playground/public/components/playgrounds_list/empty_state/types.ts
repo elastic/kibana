@@ -6,5 +6,5 @@
  */
 
 export interface PlaygroundsListEmptyStateProps {
-  onNewPlayground: () => void;
+  CTAContent: React.ReactNode;
 }

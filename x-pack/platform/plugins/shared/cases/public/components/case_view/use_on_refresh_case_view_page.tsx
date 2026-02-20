@@ -6,7 +6,7 @@
  */
 
 import { useCallback } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@kbn/react-query';
 import { casesQueriesKeys } from '../../containers/constants';
 
 /**
@@ -21,7 +21,6 @@ import { casesQueriesKeys } from '../../containers/constants';
 export const useRefreshCaseViewPage = () => {
   const queryClient = useQueryClient();
   return useCallback(() => {
-    queryClient.invalidateQueries(casesQueriesKeys.alerts);
     queryClient.invalidateQueries(casesQueriesKeys.caseView());
     queryClient.invalidateQueries(casesQueriesKeys.tags());
     queryClient.invalidateQueries(casesQueriesKeys.categories());

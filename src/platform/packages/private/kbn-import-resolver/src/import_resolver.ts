@@ -159,6 +159,22 @@ export class ImportResolver {
       return Path.resolve(REPO_ROOT, `node_modules/@typescript-eslint/parser/dist/index.js`);
     }
 
+    // zod migration from v3 to v4
+    if (req.startsWith('zod/v4')) {
+      return Path.resolve(REPO_ROOT, `node_modules/zod/v4/index.cjs`);
+    }
+    if (req.startsWith('zod') || req.startsWith('zod/v3')) {
+      return Path.resolve(REPO_ROOT, `node_modules/zod/v3/index.cjs`);
+    }
+
+    if (req.startsWith('vega-lite')) {
+      return Path.resolve(REPO_ROOT, `node_modules/vega-lite/build`);
+    }
+
+    if (req.startsWith('vega-tooltip')) {
+      return Path.resolve(REPO_ROOT, `node_modules/vega-tooltip/build`);
+    }
+
     // turn root-relative paths into relative paths
     if (
       req.startsWith('src/') ||
@@ -261,11 +277,6 @@ export class ImportResolver {
     const pkgName = parts[0].startsWith('@') ? `${parts[0]}/${parts[1]}` : parts[0];
     const subPathParts = parts.slice(pkgName.startsWith('@') ? 2 : 1);
 
-    // "exports" maps only apply to sub-paths (eg. "pkg/foo")
-    if (subPathParts.length === 0) {
-      return null;
-    }
-
     // Locate the dependency's package.json
     let manifestPath: string | undefined;
     try {
@@ -291,7 +302,8 @@ export class ImportResolver {
     }
 
     // Use resolve.exports to determine the correct file for the sub-path
-    const entry = `./${subPathParts.join('/')}`;
+    const entry = subPathParts.length ? `./${subPathParts.join('/')}` : '.';
+
     const targets = resolvePackageExports(pkgJson as any, entry) as string[] | undefined;
 
     if (!targets || targets.length === 0) {

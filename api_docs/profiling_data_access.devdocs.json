@@ -25,6 +25,8 @@
           "{ readonly elasticsearch?: Readonly<{} & { username: string; password: string; hosts: string; }> | undefined; }"
         ],
         "path": "x-pack/solutions/observability/plugins/profiling_data_access/server/index.ts",
+        "lineNumber": 28,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -78,6 +80,8 @@
           ">; }; }"
         ],
         "path": "x-pack/solutions/observability/plugins/profiling_data_access/server/plugin.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -95,6 +99,8 @@
         "void"
       ],
       "path": "x-pack/solutions/observability/plugins/profiling_data_access/server/plugin.ts",
+      "lineNumber": 20,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "start",
@@ -133,6 +139,8 @@
           " | null>"
         ],
         "path": "x-pack/solutions/observability/plugins/profiling_data_access/common/get_apm_policy.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -144,6 +152,8 @@
             "label": "{\n  packagePolicyClient,\n  soClient,\n}",
             "description": [],
             "path": "x-pack/solutions/observability/plugins/profiling_data_access/common/get_apm_policy.ts",
+            "lineNumber": 16,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -164,6 +174,8 @@
                   }
                 ],
                 "path": "x-pack/solutions/observability/plugins/profiling_data_access/common/get_apm_policy.ts",
+                "lineNumber": 17,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -178,6 +190,8 @@
                   "SavedObjectsClientContract"
                 ],
                 "path": "x-pack/solutions/observability/plugins/profiling_data_access/common/get_apm_policy.ts",
+                "lineNumber": 18,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -216,6 +230,8 @@
           " | undefined>"
         ],
         "path": "x-pack/solutions/observability/plugins/profiling_data_access/common/fleet_policies.ts",
+        "lineNumber": 33,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -227,6 +243,8 @@
             "label": "{\n  soClient,\n  packagePolicyClient,\n}",
             "description": [],
             "path": "x-pack/solutions/observability/plugins/profiling_data_access/common/fleet_policies.ts",
+            "lineNumber": 36,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -247,6 +265,8 @@
                   }
                 ],
                 "path": "x-pack/solutions/observability/plugins/profiling_data_access/common/fleet_policies.ts",
+                "lineNumber": 37,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -261,6 +281,8 @@
                   "SavedObjectsClientContract"
                 ],
                 "path": "x-pack/solutions/observability/plugins/profiling_data_access/common/fleet_policies.ts",
+                "lineNumber": 38,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -299,6 +321,8 @@
           " | undefined>"
         ],
         "path": "x-pack/solutions/observability/plugins/profiling_data_access/common/fleet_policies.ts",
+        "lineNumber": 67,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -310,6 +334,8 @@
             "label": "{\n  soClient,\n  packagePolicyClient,\n}",
             "description": [],
             "path": "x-pack/solutions/observability/plugins/profiling_data_access/common/fleet_policies.ts",
+            "lineNumber": 70,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -330,6 +356,8 @@
                   }
                 ],
                 "path": "x-pack/solutions/observability/plugins/profiling_data_access/common/fleet_policies.ts",
+                "lineNumber": 71,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -344,6 +372,8 @@
                   "SavedObjectsClientContract"
                 ],
                 "path": "x-pack/solutions/observability/plugins/profiling_data_access/common/fleet_policies.ts",
+                "lineNumber": 72,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -374,6 +404,8 @@
           "ProfilingSetupOptions"
         ],
         "path": "x-pack/solutions/observability/plugins/profiling_data_access/common/cloud_setup.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -394,6 +426,8 @@
               }
             ],
             "path": "x-pack/solutions/observability/plugins/profiling_data_access/common/cloud_setup.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -405,6 +439,8 @@
             "label": "isCloudEnabled",
             "description": [],
             "path": "x-pack/solutions/observability/plugins/profiling_data_access/common/cloud_setup.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -425,6 +461,8 @@
           "\"elastic-universal-profiling-collector\""
         ],
         "path": "x-pack/solutions/observability/plugins/profiling_data_access/common/fleet_policies.ts",
+        "lineNumber": 15,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -440,6 +478,8 @@
           "\"elastic-cloud-apm\""
         ],
         "path": "x-pack/solutions/observability/plugins/profiling_data_access/common/get_apm_policy.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -455,6 +495,8 @@
           "150000"
         ],
         "path": "x-pack/solutions/observability/plugins/profiling_data_access/common/cluster_settings.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -470,6 +512,8 @@
           "\"elastic-universal-profiling-symbolizer\""
         ],
         "path": "x-pack/solutions/observability/plugins/profiling_data_access/common/fleet_policies.ts",
+        "lineNumber": 16,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

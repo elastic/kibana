@@ -11,8 +11,8 @@ import React, { useCallback, useEffect, useMemo } from 'react';
 import { BehaviorSubject, firstValueFrom, merge } from 'rxjs';
 
 import { CellActionsProvider } from '@kbn/cell-actions';
-import { APPLY_FILTER_TRIGGER, generateFilters } from '@kbn/data-plugin/public';
-import { SEARCH_EMBEDDABLE_TYPE, SHOW_FIELD_STATISTICS } from '@kbn/discover-utils';
+import { generateFilters } from '@kbn/data-plugin/public';
+import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { FilterStateStore } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
@@ -24,24 +24,25 @@ import {
   timeRangeComparators,
   titleComparators,
   useBatchedPublishingSubjects,
+  initializeUnsavedChanges,
 } from '@kbn/presentation-publishing';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import type { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
 
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import { initializeUnsavedChanges } from '@kbn/presentation-containers';
-import { getValidViewMode } from '../application/main/utils/get_valid_view_mode';
+import { APPLY_FILTER_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { DiscoverServices } from '../build_services';
 import { SearchEmbeddablFieldStatsTableComponent } from './components/search_embeddable_field_stats_table_component';
 import { SearchEmbeddableGridComponent } from './components/search_embeddable_grid_component';
 import { initializeEditApi } from './initialize_edit_api';
 import { initializeFetch, isEsqlMode } from './initialize_fetch';
 import { initializeSearchEmbeddableApi } from './initialize_search_embeddable_api';
-import type { SearchEmbeddableApi, SearchEmbeddableSerializedState } from './types';
+import type { SearchEmbeddableState } from '../../common/embeddable/types';
+import type { SearchEmbeddableApi } from './types';
 import { deserializeState, serializeState } from './utils/serialization_utils';
 import { BaseAppWrapper } from '../context_awareness';
 import { ScopedServicesProvider } from '../components/scoped_services_provider';
+import { isFieldStatsMode } from './utils/is_field_stats_mode';
 
 export const getSearchEmbeddableFactory = ({
   startServices,
@@ -56,11 +57,17 @@ export const getSearchEmbeddableFactory = ({
   const { save, checkForDuplicateTitle } = discoverServices.savedSearch;
 
   const savedSearchEmbeddableFactory: EmbeddableFactory<
-    SearchEmbeddableSerializedState,
+    SearchEmbeddableState,
     SearchEmbeddableApi
   > = {
     type: SEARCH_EMBEDDABLE_TYPE,
-    buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
+    buildEmbeddable: async ({
+      initializeDrilldownsManager,
+      initialState,
+      finalizeApi,
+      parentApi,
+      uuid,
+    }) => {
       const runtimeState = await deserializeState({
         serializedState: initialState,
         discoverServices,
@@ -93,37 +100,11 @@ export const getSearchEmbeddableFactory = ({
       const fetchWarnings$ = new BehaviorSubject<SearchResponseIncompleteWarning[]>([]);
 
       /** Build API */
-      const titleManager = initializeTitleManager(initialState.rawState);
-      const timeRangeManager = initializeTimeRangeManager(initialState.rawState);
-      const dynamicActionsManager =
-        discoverServices.embeddableEnhanced?.initializeEmbeddableDynamicActions(
-          uuid,
-          () => titleManager.api.title$.getValue(),
-          initialState
-        );
-      const maybeStopDynamicActions = dynamicActionsManager?.startDynamicActions();
+      const titleManager = initializeTitleManager(initialState);
+      const timeRangeManager = initializeTimeRangeManager(initialState);
+      const drilldownsManager = await initializeDrilldownsManager(uuid, initialState);
       const searchEmbeddable = await initializeSearchEmbeddableApi(runtimeState, {
         discoverServices,
-      });
-      const unsubscribeFromFetch = initializeFetch({
-        api: {
-          parentApi,
-          ...titleManager.api,
-          ...timeRangeManager.api,
-          defaultTitle$,
-          savedSearch$: searchEmbeddable.api.savedSearch$,
-          dataViews$: searchEmbeddable.api.dataViews$,
-          savedObjectId$,
-          dataLoading$,
-          blockingError$,
-          fetchContext$,
-          fetchWarnings$,
-        },
-        discoverServices,
-        stateManager: searchEmbeddable.stateManager,
-        scopedProfilesManager,
-        setDataLoading: (dataLoading: boolean | undefined) => dataLoading$.next(dataLoading),
-        setBlockingError: (error: Error | undefined) => blockingError$.next(error),
       });
 
       const serialize = (savedObjectId?: string) =>
@@ -133,23 +114,23 @@ export const getSearchEmbeddableFactory = ({
           savedSearch: searchEmbeddable.api.savedSearch$.getValue(),
           serializeTitles: titleManager.getLatestState,
           serializeTimeRange: timeRangeManager.getLatestState,
-          serializeDynamicActions: dynamicActionsManager?.serializeState,
+          serializeDynamicActions: drilldownsManager.getLatestState,
           savedObjectId,
         });
 
-      const unsavedChangesApi = initializeUnsavedChanges<SearchEmbeddableSerializedState>({
+      const unsavedChangesApi = initializeUnsavedChanges<SearchEmbeddableState>({
         uuid,
         parentApi,
         serializeState: () => serialize(savedObjectId$.getValue()),
         anyStateChange$: merge(
-          ...(dynamicActionsManager ? [dynamicActionsManager.anyStateChange$] : []),
+          drilldownsManager.anyStateChange$,
           searchEmbeddable.anyStateChange$,
           titleManager.anyStateChange$,
           timeRangeManager.anyStateChange$
         ),
         getComparators: () => {
           return {
-            ...(dynamicActionsManager?.comparators ?? { enhancements: 'skip' }),
+            ...drilldownsManager.comparators,
             ...titleComparators,
             ...timeRangeComparators,
             ...searchEmbeddable.comparators,
@@ -164,14 +145,15 @@ export const getSearchEmbeddableFactory = ({
             savedObjectId: 'skip',
             timeRestore: 'skip',
             usesAdHocDataView: 'skip',
+            controlGroupJson: 'skip',
             visContext: 'skip',
             tabs: 'skip',
           };
         },
         onReset: async (lastSaved) => {
-          dynamicActionsManager?.reinitializeState(lastSaved?.rawState ?? {});
-          timeRangeManager.reinitializeState(lastSaved?.rawState);
-          titleManager.reinitializeState(lastSaved?.rawState);
+          drilldownsManager.reinitializeState(lastSaved ?? {});
+          timeRangeManager.reinitializeState(lastSaved);
+          titleManager.reinitializeState(lastSaved);
           if (lastSaved) {
             const lastSavedRuntimeState = await deserializeState({
               serializedState: lastSaved,
@@ -187,13 +169,14 @@ export const getSearchEmbeddableFactory = ({
         ...titleManager.api,
         ...searchEmbeddable.api,
         ...timeRangeManager.api,
-        ...dynamicActionsManager?.api,
+        ...drilldownsManager.api,
         ...initializeEditApi({
           uuid,
           parentApi,
           partialApi: { ...searchEmbeddable.api, fetchContext$, savedObjectId$ },
           discoverServices,
           isEditable: startServices.isEditable,
+          getTitle: () => titleManager.api.title$.getValue(),
         }),
         dataLoading$,
         blockingError$,
@@ -239,6 +222,28 @@ export const getSearchEmbeddableFactory = ({
         },
       });
 
+      const unsubscribeFromFetch = initializeFetch({
+        api: {
+          ...api,
+          parentApi,
+          ...titleManager.api,
+          ...timeRangeManager.api,
+          defaultTitle$,
+          savedSearch$: searchEmbeddable.api.savedSearch$,
+          dataViews$: searchEmbeddable.api.dataViews$,
+          savedObjectId$,
+          dataLoading$,
+          blockingError$,
+          fetchContext$,
+          fetchWarnings$,
+        },
+        discoverServices,
+        stateManager: searchEmbeddable.stateManager,
+        scopedProfilesManager,
+        setDataLoading: (dataLoading: boolean | undefined) => dataLoading$.next(dataLoading),
+        setBlockingError: (error: Error | undefined) => blockingError$.next(error),
+      });
+
       return {
         api,
         Component: () => {
@@ -249,19 +254,11 @@ export const getSearchEmbeddableFactory = ({
 
           useEffect(() => {
             return () => {
+              drilldownsManager.cleanup();
               searchEmbeddable.cleanup();
               unsubscribeFromFetch();
-              maybeStopDynamicActions?.stopDynamicActions();
             };
           }, []);
-
-          const viewMode = useMemo(() => {
-            if (!savedSearch.searchSource) return;
-            return getValidViewMode({
-              viewMode: savedSearch.viewMode,
-              isEsqlMode: isEsqlMode(savedSearch),
-            });
-          }, [savedSearch]);
 
           const dataView = useMemo(() => {
             const hasDataView = (dataViews ?? []).length > 0;
@@ -309,12 +306,8 @@ export const getSearchEmbeddableFactory = ({
           );
 
           const renderAsFieldStatsTable = useMemo(
-            () =>
-              Boolean(discoverServices.uiSettings.get(SHOW_FIELD_STATISTICS)) &&
-              viewMode === VIEW_MODE.AGGREGATED_LEVEL &&
-              Boolean(dataView) &&
-              Array.isArray(savedSearch.columns),
-            [savedSearch, dataView, viewMode]
+            () => isFieldStatsMode(savedSearch, dataView, discoverServices.uiSettings),
+            [savedSearch, dataView]
           );
 
           return (
@@ -345,7 +338,6 @@ export const getSearchEmbeddableFactory = ({
                           api={{ ...api, fetchWarnings$, fetchContext$ }}
                           dataView={dataView!}
                           onAddFilter={
-                            isEsqlMode(savedSearch) ||
                             runtimeState.nonPersistedDisplayOptions?.enableFilters === false
                               ? undefined
                               : onAddFilter

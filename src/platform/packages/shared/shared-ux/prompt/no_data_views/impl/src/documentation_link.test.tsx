@@ -8,22 +8,40 @@
  */
 
 import React from 'react';
-
-import { EuiLink, EuiTitle } from '@elastic/eui';
-import { shallowWithIntl } from '@kbn/test-jest-helpers';
+import { render, screen } from '@testing-library/react';
 
 import { DocumentationLink } from './documentation_link';
 
-describe('<DocumentationLink />', () => {
-  test('is rendered correctly', () => {
-    const component = shallowWithIntl(<DocumentationLink href={'dummy'} />);
-    expect(component).toMatchSnapshot();
+describe('DocumentationLink', () => {
+  it('renders link correctly with href', () => {
+    render(<DocumentationLink href="https://example.com" />);
 
-    expect(component.find('dl').length).toBe(1);
-    expect(component.find(EuiTitle).length).toBe(1);
-    expect(component.find(EuiLink).length).toBe(1);
+    // Should render the title text
+    expect(screen.getByText('Want to learn more?')).toBeInTheDocument();
 
-    const link = component.find(EuiLink).at(0);
-    expect(link.prop('href')).toBe('dummy');
+    // Should render a link with the correct href
+    const link = screen.getByRole('link', { name: /Read the docs/ });
+    expect(link).toBeInTheDocument();
+    expect(link).toHaveAttribute('href', 'https://example.com');
+    expect(link).toHaveAttribute('target', '_blank');
+
+    // Should show the link text
+    expect(screen.getByText('Read the docs')).toBeInTheDocument();
+  });
+
+  it('renders with default href when none provided', () => {
+    render(<DocumentationLink />);
+
+    // Should use default Kibana docs URL
+    const link = screen.getByRole('link', { name: /Read the docs/ });
+    expect(link).toHaveAttribute('href', 'https://www.elastic.co/kibana');
+  });
+
+  it('renders with custom data-test-subj', () => {
+    render(<DocumentationLink href="https://example.com" data-test-subj="custom-link" />);
+
+    // Should render with the custom test subject
+    expect(screen.getByTestId('custom-link')).toBeInTheDocument();
+    expect(screen.getByTestId('custom-link')).toHaveAttribute('href', 'https://example.com');
   });
 });

@@ -73,6 +73,9 @@ export interface EndpointFleetServicesInterface {
    * @param integrationNames
    */
   getIntegrationNamespaces(integrationNames: string[]): Promise<Record<string, string[]>>;
+
+  /** Checks to see if the Endpoint (Elastic Defend) package is installed */
+  isEndpointPackageInstalled: () => Promise<boolean>;
 }
 
 export interface EndpointInternalFleetServicesInterface extends EndpointFleetServicesInterface {
@@ -186,6 +189,16 @@ export class EndpointFleetServicesFactory implements EndpointFleetServicesFactor
         });
       };
 
+    const isEndpointPackageInstalled = async (): Promise<boolean> => {
+      const installedEndpointPackages = await packageService.asInternalUser.getInstalledPackages({
+        nameQuery: 'endpoint',
+        perPage: 1000,
+        sortOrder: 'asc',
+      });
+
+      return installedEndpointPackages.items.some((pkg) => pkg.name === 'endpoint');
+    };
+
     return {
       spaceId: spaceId || DEFAULT_SPACE_ID,
       logger: this.logger,
@@ -203,6 +216,7 @@ export class EndpointFleetServicesFactory implements EndpointFleetServicesFactor
       getPolicyNamespace,
       getIntegrationNamespaces,
       getSoClient,
+      isEndpointPackageInstalled,
     };
   }
 }

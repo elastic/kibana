@@ -7,14 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { FilterStateStore } from '@kbn/es-query-constants';
 import { COMPARE_ALL_OPTIONS, compareFilters } from './compare_filters';
-import {
-  BooleanRelation,
-  buildCombinedFilter,
-  buildEmptyFilter,
-  buildQueryFilter,
-  FilterStateStore,
-} from '..';
+import { BooleanRelation, buildCombinedFilter, buildEmptyFilter, buildQueryFilter } from '..';
 import type { DataViewBase } from '../../..';
 
 describe('filter manager utilities', () => {

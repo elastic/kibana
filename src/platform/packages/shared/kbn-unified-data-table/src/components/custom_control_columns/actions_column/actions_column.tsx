@@ -53,14 +53,17 @@ export const getActionsColumn = ({
     columnWidth += externalControlColumns.reduce((acc, column) => acc + column.width, 0);
   }
   if (rowAdditionalLeadingControls?.length) {
-    const additionalRowControColumns = getAdditionalRowControlColumns(rowAdditionalLeadingControls);
-    actions.push(...additionalRowControColumns);
-    columnWidth += DEFAULT_CONTROL_COLUMN_WIDTH * additionalRowControColumns.length;
+    const { columns: additionalRowControlColumns, totalWidth } = getAdditionalRowControlColumns(
+      rowAdditionalLeadingControls
+    );
+    actions.push(...additionalRowControlColumns);
+    columnWidth += totalWidth;
   }
 
   return {
     id: COLUMN_ID,
     width: columnWidth,
+    headerCellProps: { className: 'unifiedDataTable__headerCell' },
     rowCellRender: (props: EuiDataGridCellValueElementProps) => (
       <EuiFlexGroup
         data-test-subj="unifiedDataTable_actionsColumnCell"

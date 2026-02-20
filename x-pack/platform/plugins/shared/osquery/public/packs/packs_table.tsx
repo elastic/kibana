@@ -22,10 +22,12 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useHistory } from 'react-router-dom';
 import { useKibana, useRouterNavigate } from '../common/lib/kibana';
+import { useIsExperimentalFeatureEnabled } from '../common/experimental_features_context';
 import { usePacks } from './use_packs';
 import { ActiveStateSwitch } from './active_state_switch';
 import { AgentsPolicyLink } from '../agent_policies/agents_policy_link';
 import type { PackSavedObject } from './types';
+import { PackRowActions } from './pack_row_actions';
 
 const updatedAtCss = {
   whiteSpace: 'nowrap' as const,
@@ -82,6 +84,7 @@ export const AgentPoliciesPopover = ({ agentPolicyIds = [] }: { agentPolicyIds?:
 
 const PacksTableComponent = () => {
   const permissions = useKibana().services.application.capabilities.osquery;
+  const isHistoryEnabled = useIsExperimentalFeatureEnabled('queryHistoryRework');
   const { push } = useHistory();
   const { data, isLoading } = usePacks({});
 
@@ -104,21 +107,22 @@ const PacksTableComponent = () => {
 
     return updatedAt ? (
       <EuiToolTip content={`${moment(updatedAt).fromNow()}${updatedBy}`}>
-        <span css={updatedAtCss}>{`${moment(updatedAt).fromNow()}${updatedBy}`}</span>
+        <span tabIndex={0} css={updatedAtCss}>{`${moment(updatedAt).fromNow()}${updatedBy}`}</span>
       </EuiToolTip>
     ) : (
       '-'
     );
   }, []);
 
+  const newQueryPath = isHistoryEnabled ? '/new' : '/live_queries/new';
   const handlePlayClick = useCallback<(item: PackSavedObject) => () => void>(
     (item) => () =>
-      push('/live_queries/new', {
+      push(newQueryPath, {
         form: {
           packId: item.saved_object_id,
         },
       }),
-    [push]
+    [push, newQueryPath]
   );
 
   const renderPlayAction = useCallback(
@@ -131,12 +135,13 @@ const PacksTableComponent = () => {
       });
 
       return (
-        <EuiToolTip position="top" content={playText}>
+        <EuiToolTip position="top" content={playText} disableScreenReaderOutput>
           <EuiButtonIcon
             iconType="play"
             onClick={handlePlayClick(item)}
             isDisabled={!enabled}
             data-test-subj={`play-${item.name}-button`}
+            aria-label={playText}
           />
         </EuiToolTip>
       );
@@ -207,6 +212,14 @@ const PacksTableComponent = () => {
           },
         ],
       } as EuiTableActionsColumnType<PackSavedObject>,
+      ...(isHistoryEnabled
+        ? [
+            {
+              width: '40px',
+              render: (item: PackSavedObject) => <PackRowActions item={item} />,
+            },
+          ]
+        : []),
     ],
     [
       permissions.runSavedQueries,
@@ -216,6 +229,7 @@ const PacksTableComponent = () => {
       renderPlayAction,
       renderQueries,
       renderUpdatedAt,
+      isHistoryEnabled,
     ]
   );
 
@@ -239,6 +253,9 @@ const PacksTableComponent = () => {
       columns={columns}
       pagination={true}
       sorting={sorting}
+      tableCaption={i18n.translate('xpack.osquery.packs.table.caption', {
+        defaultMessage: 'List of saved packs',
+      })}
     />
   );
 };

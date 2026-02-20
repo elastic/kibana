@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { LensRuntimeState } from '../types';
+import type { LensRuntimeState } from '@kbn/lens-common';
 import { getLensRuntimeStateMock, getLensInternalApiMock, makeEmbeddableServices } from '../mocks';
 import { initializeSearchContext } from './initialize_search_context';
 

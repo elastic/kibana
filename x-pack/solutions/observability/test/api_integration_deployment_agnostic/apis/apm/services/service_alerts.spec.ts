@@ -7,9 +7,9 @@
 import expect from '@kbn/expect';
 import { AggregationType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
 import { ApmRuleType } from '@kbn/rule-data-utils';
-import { apm, timerange } from '@kbn/apm-synthtrace-client';
+import { apm, timerange } from '@kbn/synthtrace-client';
 import type { RoleCredentials } from '@kbn/ftr-common-functional-services';
-import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import type { ApmAlertFields } from '../alerts/helpers/alerting_helper';
 import { APM_ACTION_VARIABLE_INDEX, APM_ALERTS_INDEX } from '../alerts/helpers/alerting_helper';

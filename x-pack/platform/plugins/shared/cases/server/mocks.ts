@@ -15,6 +15,7 @@ import type {
   AlertAttachmentPayload,
   AttachmentAttributes,
   ConnectorMappings,
+  EventAttachmentPayload,
   UserActionAttributes,
   UserCommentAttachmentPayload,
 } from '../common/types/domain';
@@ -153,6 +154,7 @@ export const mockCases: CaseSavedObjectTransformed[] = [
       status: CaseStatuses.open,
       tags: ['defacement'],
       observables: [],
+      total_observables: 0,
       updated_at: '2019-11-25T21:54:48.952Z',
       updated_by: {
         full_name: 'elastic',
@@ -161,6 +163,7 @@ export const mockCases: CaseSavedObjectTransformed[] = [
       },
       settings: {
         syncAlerts: true,
+        extractObservables: true,
       },
       owner: SECURITY_SOLUTION_OWNER,
       assignees: [],
@@ -205,8 +208,10 @@ export const mockCases: CaseSavedObjectTransformed[] = [
       },
       settings: {
         syncAlerts: true,
+        extractObservables: true,
       },
       observables: [],
+      total_observables: 0,
       owner: SECURITY_SOLUTION_OWNER,
       assignees: [],
       category: null,
@@ -250,8 +255,10 @@ export const mockCases: CaseSavedObjectTransformed[] = [
       },
       settings: {
         syncAlerts: true,
+        extractObservables: true,
       },
       observables: [],
+      total_observables: 0,
       owner: SECURITY_SOLUTION_OWNER,
       assignees: [],
       category: null,
@@ -299,8 +306,10 @@ export const mockCases: CaseSavedObjectTransformed[] = [
       },
       settings: {
         syncAlerts: true,
+        extractObservables: true,
       },
       observables: [],
+      total_observables: 0,
       owner: SECURITY_SOLUTION_OWNER,
       assignees: [],
       category: null,
@@ -669,6 +678,7 @@ export const newCase: CasePostRequest = {
   },
   settings: {
     syncAlerts: true,
+    extractObservables: true,
   },
   owner: SECURITY_SOLUTION_OWNER,
 };
@@ -705,6 +715,13 @@ export const alertComment: AlertAttachmentPayload = {
   owner: SECURITY_SOLUTION_OWNER,
 };
 
+export const eventComment: EventAttachmentPayload = {
+  eventId: 'event-id-1',
+  index: 'mock-index',
+  type: AttachmentType.event as const,
+  owner: SECURITY_SOLUTION_OWNER,
+};
+
 export const multipleAlert: AlertAttachmentPayload = {
   ...alertComment,
   alertId: ['test-id-3', 'test-id-4', 'test-id-5'],
@@ -735,6 +752,7 @@ export const mockCasesContract = (): CasesServerStart => ({
   getCasesClientWithRequest: jest.fn().mockResolvedValue(casesClientMock),
   getExternalReferenceAttachmentTypeRegistry: jest.fn(),
   getPersistableStateAttachmentTypeRegistry: jest.fn(),
+  getUnifiedAttachmentTypeRegistry: jest.fn(),
   config: {
     enabled: true,
     stack: {
@@ -749,6 +767,17 @@ export const mockCasesContract = (): CasesServerStart => ({
       index: {
         enabled: true,
       },
+    },
+    incrementalId: {
+      enabled: true,
+      taskIntervalMinutes: 10,
+      taskStartDelayMinutes: 10,
+    },
+    templates: {
+      enabled: true,
+    },
+    attachments: {
+      enabled: true,
     },
   },
 });

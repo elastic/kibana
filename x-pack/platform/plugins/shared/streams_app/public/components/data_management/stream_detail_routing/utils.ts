@@ -6,11 +6,12 @@
  */
 
 import { htmlIdGenerator } from '@elastic/eui';
-import type { RoutingDefinition } from '@kbn/streams-schema';
-import { omit } from 'lodash';
 import { isAlwaysCondition, type Condition } from '@kbn/streamlang';
-import type { RoutingDefinitionWithUIAttributes } from './types';
+import type { RoutingDefinition, Streams } from '@kbn/streams-schema';
+import { omit } from 'lodash';
+import type { IngestUpsertRequest } from '@kbn/streams-schema/src/models/ingest';
 import { emptyEqualsToAlways } from '../../../util/condition';
+import type { RoutingDefinitionWithUIAttributes } from './types';
 
 const createId = htmlIdGenerator();
 const toUIDefinition = <TRoutingDefinition extends RoutingDefinition>(
@@ -38,4 +39,39 @@ export const processCondition = (condition?: Condition): Condition | undefined =
   return convertedCondition && isAlwaysCondition(convertedCondition)
     ? undefined
     : convertedCondition;
+};
+
+// Convert SampleDocument[] to DataTableRecordWithIndex[] for flyout compatibility
+export const toDataTableRecordWithIndex = <T>(documents: T[]) =>
+  documents.map((doc, index) => ({
+    raw: doc,
+    flattened: doc,
+    index,
+    id: `${index}-${Date.now()}`,
+  }));
+
+export const buildRoutingSaveRequestPayload = (
+  definition: Streams.WiredStream.GetResponse,
+  routing: RoutingDefinition[]
+): { ingest: IngestUpsertRequest } => {
+  return {
+    ingest: {
+      ...definition.stream.ingest,
+      processing: omit(definition.stream.ingest.processing, 'updated_at'),
+      wired: {
+        ...definition.stream.ingest.wired,
+        routing,
+      },
+    },
+  };
+};
+
+export const buildRoutingForkRequestPayload = (rule: RoutingDefinition) => {
+  return {
+    where: rule.where,
+    status: rule.status,
+    stream: {
+      name: rule.destination,
+    },
+  };
 };

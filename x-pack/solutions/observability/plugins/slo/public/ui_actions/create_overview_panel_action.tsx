@@ -7,7 +7,7 @@
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { COMMON_OBSERVABILITY_GROUPING } from '@kbn/observability-shared-plugin/common';
-import { apiIsPresentationContainer } from '@kbn/presentation-containers';
+import { apiIsPresentationContainer } from '@kbn/presentation-publishing';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import {
   IncompatibleActionError,
@@ -42,11 +42,11 @@ export function createOverviewPanelAction(
         embeddable.addNewPanel(
           {
             panelType: SLO_OVERVIEW_EMBEDDABLE_ID,
-            serializedState: {
-              rawState: initialState,
-            },
+            serializedState: initialState,
           },
-          true
+          {
+            displaySuccessMessage: true,
+          }
         );
       } catch (e) {
         return Promise.reject();

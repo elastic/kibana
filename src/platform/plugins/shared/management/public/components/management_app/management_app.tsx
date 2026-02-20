@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import './management_app.scss';
-
 import React, { useState, useEffect, useCallback } from 'react';
 import type { BehaviorSubject, Observable } from 'rxjs';
 
@@ -28,7 +26,12 @@ import type { ManagementSection } from '../../utils';
 import { MANAGEMENT_BREADCRUMB, MANAGEMENT_BREADCRUMB_NO_HREF } from '../../utils';
 import { ManagementRouter } from './management_router';
 import { managementSidebarNav } from '../management_sidebar_nav/management_sidebar_nav';
-import type { SectionsServiceStart, NavigationCardsSubject, AppDependencies } from '../../types';
+import type {
+  SectionsServiceStart,
+  NavigationCardsSubject,
+  AppDependencies,
+  AutoOpsStatusHook,
+} from '../../types';
 
 interface ManagementAppProps {
   appBasePath: string;
@@ -40,10 +43,13 @@ export interface ManagementAppDependencies {
   sections: SectionsServiceStart;
   kibanaVersion: string;
   coreStart: CoreStart;
+  cloud?: { isCloudEnabled: boolean; baseUrl?: string };
+  hasEnterpriseLicense: boolean;
   setBreadcrumbs: (newBreadcrumbs: ChromeBreadcrumb[]) => void;
   isSidebarEnabled$: BehaviorSubject<boolean>;
   cardsNavigationConfig$: BehaviorSubject<NavigationCardsSubject>;
   chromeStyle$: Observable<ChromeStyle>;
+  getAutoOpsStatusHook: () => AutoOpsStatusHook;
 }
 
 export const ManagementApp = ({ dependencies, history, appBasePath }: ManagementAppProps) => {
@@ -111,6 +117,9 @@ export const ManagementApp = ({ dependencies, history, appBasePath }: Management
     kibanaVersion: dependencies.kibanaVersion,
     coreStart,
     chromeStyle,
+    cloud: dependencies.cloud,
+    hasEnterpriseLicense: dependencies.hasEnterpriseLicense,
+    getAutoOpsStatusHook: dependencies.getAutoOpsStatusHook,
   };
 
   return (

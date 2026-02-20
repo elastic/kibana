@@ -10,6 +10,10 @@ export type * from './layer_descriptor_types';
 export type * from './map_descriptor';
 
 export type {
+  CustomIcon,
+  MapCenter,
+  MapSettings,
+
   //
   // Source types
   //
@@ -47,7 +51,6 @@ export type {
   ColorDynamicStylePropertyDescriptor,
   ColorStaticStylePropertyDescriptor,
   ColorStylePropertyDescriptor,
-  CustomIcon,
   DynamicStyleProperties,
   DynamicStylePropertyOptions,
   EMSVectorTileStyleDescriptor,

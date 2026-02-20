@@ -5,36 +5,47 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
-import type { TestBed } from '@kbn/test-jest-helpers';
+import { screen, within, waitFor } from '@testing-library/react';
 import type { Phase } from '../../../common/types';
 
-const createWaitForValidationAction = (testBed: TestBed) => () => {
-  const { component } = testBed;
-  act(() => {
-    jest.runAllTimers();
+const getErrorMessages = (phase?: Phase): string[] => {
+  const container = phase ? screen.getByTestId(`${phase}-phase`) : document.body;
+  const errorTexts: string[] = [];
+
+  // Method 1: Look for elements with role="alert"
+  const alertElements = phase
+    ? within(container).queryAllByRole('alert')
+    : screen.queryAllByRole('alert');
+
+  alertElements.forEach((el) => {
+    const texts = el.querySelectorAll('.euiFormErrorText');
+    texts.forEach((text) => {
+      const content = text.textContent?.trim();
+      if (content) errorTexts.push(content);
+    });
   });
-  component.update();
+
+  // Method 2: Look for .euiFormErrorText directly
+  if (errorTexts.length === 0) {
+    const errorElements = container.querySelectorAll('.euiFormErrorText');
+    errorElements.forEach((el) => {
+      const content = el.textContent?.trim();
+      if (content) errorTexts.push(content);
+    });
+  }
+
+  return errorTexts;
 };
 
-const createExpectMessagesAction =
-  (testBed: TestBed) => (expectedMessages: string[], phase?: Phase) => {
-    const { form } = testBed;
-    if (phase) {
-      expect(form.getErrorsMessages(`${phase}-phase`)).toEqual(expectedMessages);
-    } else {
-      expect(form.getErrorsMessages()).toEqual(expectedMessages);
-    }
-  };
-
-export const createErrorsActions = (testBed: TestBed) => {
-  const { exists } = testBed;
-  return {
-    errors: {
-      waitForValidation: createWaitForValidationAction(testBed),
-      haveGlobalCallout: () => exists('policyFormErrorsCallout'),
-      havePhaseCallout: (phase: Phase) => exists(`phaseErrorIndicator-${phase}`),
-      expectMessages: createExpectMessagesAction(testBed),
-    },
-  };
+export const expectErrorMessages = async (expectedMessages: string[], phase?: Phase) => {
+  await waitFor(() => {
+    const actualMessages = getErrorMessages(phase);
+    expect(actualMessages).toEqual(expectedMessages);
+  });
 };
+
+export const haveGlobalErrorCallout = () =>
+  Boolean(screen.queryByTestId('policyFormErrorsCallout'));
+
+export const havePhaseErrorCallout = (phase: Phase) =>
+  Boolean(screen.queryByTestId(`phaseErrorIndicator-${phase}`));

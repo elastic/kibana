@@ -5,21 +5,25 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { Suspense, useState } from 'react';
 import {
   EuiCard,
+  EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiPanel,
+  EuiSkeletonRectangle,
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useBoolean } from '@kbn/react-hooks';
 import { IndexSelectorModal } from './select_index_modal';
 import { UploadPrivilegedUsersModal } from './file_uploader/upload_privileged_users_modal';
+import { IntegrationCards } from './integrations_cards';
 
 interface AddDataSourcePanelProps {
   onComplete: (userCount: number) => void;
@@ -53,6 +57,37 @@ export const AddDataSourcePanel = ({ onComplete }: AddDataSourcePanelProps) => {
       </EuiText>
 
       <EuiSpacer size="xl" />
+
+      <Suspense
+        fallback={
+          <EuiFlexGrid gutterSize="l" columns={2}>
+            {Array.from({ length: 2 }).map((_, index) => (
+              <EuiFlexItem grow={1} key={index}>
+                <EuiSkeletonRectangle height="85px" width="100%" />
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGrid>
+        }
+      >
+        <IntegrationCards onIntegrationInstalled={onComplete} />
+      </Suspense>
+      <EuiSpacer size="m" />
+      <EuiFlexGroup alignItems="center" justifyContent="spaceAround" responsive={false}>
+        <EuiFlexItem grow={true}>
+          <EuiHorizontalRule size="full" margin="none" />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <FormattedMessage
+            id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.addDataSource.or"
+            defaultMessage="OR"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={true}>
+          <EuiHorizontalRule size="full" margin="none" />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="m" />
+
       <EuiFlexGroup direction="row" justifyContent="spaceBetween">
         <EuiFlexItem grow={1}>
           <EuiCard

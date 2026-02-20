@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@kbn/react-query';
 import { MachineLearningJobIdReadOnly } from './machine_learning_job_id';
 import { ThreeWayDiffStorybookProviders } from '../../storybook/three_way_diff_storybook_providers';
 import { GET_MODULES_QUERY_KEY } from '../../../../../../../../common/components/ml_popover/hooks/use_fetch_modules_query';

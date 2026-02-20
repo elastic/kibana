@@ -33,6 +33,10 @@ const pluginInitializerContextParams = {
   max_attempts: 9,
   poll_interval: 3000,
   version_conflict_threshold: 80,
+  invalidate_api_key_task: {
+    interval: '5m',
+    removalDelay: '1h',
+  },
   request_capacity: 1000,
   allow_reading_invalid_state: false,
   discovery: {

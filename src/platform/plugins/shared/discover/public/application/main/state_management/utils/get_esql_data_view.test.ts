@@ -8,17 +8,21 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { TIMEFIELD_ROUTE } from '@kbn/esql-types';
 import { getEsqlDataView } from './get_esql_data_view';
 import { dataViewAdHoc } from '../../../../__mocks__/data_view_complex';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { discoverServiceMock } from '../../../../__mocks__/services';
 
 describe('getEsqlDataView', () => {
-  discoverServiceMock.dataViews.create = jest.fn().mockReturnValue({
-    ...dataViewMock,
-    isPersisted: () => false,
-    id: 'ad-hoc-id',
-    title: 'test',
+  discoverServiceMock.dataViews.create = jest.fn().mockImplementation((spec) => {
+    return Promise.resolve({
+      ...dataViewMock,
+      isPersisted: () => false,
+      id: 'ad-hoc-id',
+      title: 'test',
+      timeFieldName: spec.timeFieldName,
+    });
   });
 
   const dataViewAdHocNoAtTimestamp = {
@@ -26,6 +30,17 @@ describe('getEsqlDataView', () => {
     timeFieldName: undefined,
   } as DataView;
   const services = discoverServiceMock;
+
+  const mockGetTimeFieldRoute = (query: string, timeFieldResponse: string) => {
+    const originalHttpGet = services.http.get;
+    services.http.get = jest.fn().mockImplementation((url: string) => {
+      if (url.includes(`${TIMEFIELD_ROUTE}${encodeURIComponent(query)}`)) {
+        return Promise.resolve({ timeField: timeFieldResponse });
+      }
+      return Promise.resolve('');
+    });
+    return originalHttpGet;
+  };
 
   it('returns the current dataview if it is adhoc with no named params and query index pattern is the same as the dataview index pattern', async () => {
     const query = { esql: 'from data-view-ad-hoc-title' };
@@ -35,12 +50,18 @@ describe('getEsqlDataView', () => {
 
   it('returns an adhoc dataview if it is adhoc with named params and query index pattern is the same as the dataview index pattern', async () => {
     const query = { esql: 'from data-view-ad-hoc-title | where time >= ?_tstart' };
+
+    mockGetTimeFieldRoute(query.esql, 'time');
+
     const dataView = await getEsqlDataView(query, dataViewAdHocNoAtTimestamp, services);
     expect(dataView.timeFieldName).toBe('time');
   });
 
   it('creates an adhoc dataview if the current dataview is persistent and query index pattern is the same as the dataview index pattern', async () => {
     const query = { esql: 'from the-data-view-title' };
+
+    mockGetTimeFieldRoute(query.esql, '@timestamp');
+
     const dataView = await getEsqlDataView(query, dataViewMock, services);
     expect(dataView.isPersisted()).toEqual(false);
     expect(dataView.timeFieldName).toBe('@timestamp');

@@ -18,6 +18,7 @@ import {
   EuiText,
   useEuiBackgroundColor,
   useEuiTheme,
+  transparentize,
 } from '@elastic/eui';
 import { rgba } from 'polished';
 import { css } from '@emotion/react';
@@ -112,18 +113,28 @@ export const LabelShape = styled(EuiText, {
   min-width: 100%;
 
   ${({ shadow }) => `
-    /* Apply shadow when node is selected */
-    .react-flow__node.selected & {
+    /* Apply shadow when node is selected (only for interactive nodes) */
+    .react-flow__node:not(.non-interactive).selected & {
       ${shadow};
     }
 
-    /* Apply shadow when node is pressed but still not selected */
-    .react-flow__node:active:not(.selected) & {
+    /* Apply shadow when node is pressed but still not selected (only for interactive nodes) */
+    .react-flow__node:not(.non-interactive):active:not(.selected) & {
       ${shadow};
     }
 
     /* After dragging node, it'll remain selected so shadow is visible until clicked outside */
   `};
+`;
+
+export const LabelStackedShape = styled.div<{ borderColor: string }>`
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  transform: scale(0.9) translateY(calc(-100% + 3px));
+  z-index: -1;
+  border: ${(props) => `${LABEL_BORDER_WIDTH}px solid ${props.borderColor}`};
+  border-radius: ${LABEL_BORDER_RADIUS}px;
 `;
 
 export const LabelShapeOnHover = styled.div`
@@ -146,12 +157,13 @@ export const LabelShapeOnHover = styled.div`
   width: calc(100% + 12px);
   height: calc(100% + 12px);
 
-  ${LabelNodeContainer}:hover & {
+  /* Only show hover effects for interactive nodes */
+  .react-flow__node:not(.non-interactive) ${LabelNodeContainer}:hover & {
     opacity: 1; /* Show on hover */
   }
 
-  .react-flow__node:focus:focus-visible & {
-    opacity: 1; /* Show on hover */
+  .react-flow__node:not(.non-interactive):focus:focus-visible & {
+    opacity: 1; /* Show on focus */
   }
 `;
 
@@ -164,7 +176,7 @@ export const NodeContainer = styled.div`
 `;
 
 /**
- * Gets the background, border and text colors for the label based on document analysis
+ * Gets the background, border and text colors for label nodes based on color prop
  */
 export const getLabelColors = (
   color: LabelNodeViewModel['color'],
@@ -185,27 +197,45 @@ export const getLabelColors = (
   };
 };
 
+/**
+ * Gets the background, border and text colors for relationship nodes
+ * Relationship nodes have fixed colors (dark background with light text)
+ */
+export const getRelationshipColors = (
+  euiTheme: EuiThemeComputed
+): { backgroundColor: string; borderColor: string; textColor: string } => {
+  return {
+    backgroundColor: euiTheme.colors.backgroundFilledText,
+    borderColor: euiTheme.colors.borderBaseProminent,
+    textColor: euiTheme.colors.textInverse,
+  };
+};
+
 export const NodeShapeContainer = styled.div`
   position: relative;
   width: ${NODE_WIDTH}px;
   height: ${NODE_HEIGHT}px;
 `;
 
-export const NodeShapeSvg = styled.svg<{ shadow?: string }>`
+export const NodeShapeSvg = styled.svg<{ shadow?: string; yPosDelta?: number }>`
   position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%);
   z-index: 1;
 
+  ${({ yPosDelta }) => {
+    const delta = typeof yPosDelta === 'number' ? yPosDelta : 0;
+    return `transform: translate(-50%, calc(-50% + ${delta}px));`;
+  }}
+
   ${({ shadow }) => `
-    /* Apply shadow when node is selected */
-    .react-flow__node.selected & {
+    /* Apply shadow when node is selected (only for interactive nodes) */
+    .react-flow__node:not(.non-interactive).selected & {
       ${shadow};
     }
 
-    /* Apply shadow when node is pressed but still not selected */
-    .react-flow__node:active:not(.selected) & {
+    /* Apply shadow when node is pressed but still not selected (only for interactive nodes) */
+    .react-flow__node:not(.non-interactive):active:not(.selected) & {
       ${shadow};
     }
 
@@ -264,7 +294,9 @@ export const NodeExpandButtonContainer = styled.div<NodeExpandButtonContainerPro
     opacity: 1;
   }
 
-  ${NodeShapeContainer}:hover &, ${LabelNodeContainer}:hover & {
+  /* Only show hover effects for interactive nodes */
+  .react-flow__node:not(.non-interactive) ${NodeShapeContainer}:hover &,
+  .react-flow__node:not(.non-interactive) ${LabelNodeContainer}:hover & {
     opacity: 1; /* Show on hover */
   }
 
@@ -272,7 +304,7 @@ export const NodeExpandButtonContainer = styled.div<NodeExpandButtonContainerPro
     opacity: 1; /* Show when button is active */
   }
 
-  .react-flow__node:focus:focus-visible & {
+  .react-flow__node:not(.non-interactive):focus:focus-visible & {
     opacity: 1; /* Show on node focus */
   }
 `;
@@ -281,17 +313,23 @@ export const NodeShapeOnHoverSvg = styled(NodeShapeSvg)`
   opacity: 0; /* Hidden by default */
   transition: opacity 0.2s ease; /* Smooth transition */
 
-  ${NodeShapeContainer}:hover &, ${LabelNodeContainer}:hover & {
+  /* Only show hover effects for interactive nodes */
+  .react-flow__node:not(.non-interactive) ${NodeShapeContainer}:hover &,
+  .react-flow__node:not(.non-interactive) ${LabelNodeContainer}:hover & {
     opacity: 1; /* Show on hover */
   }
 
-  ${NodeShapeContainer}:has(${NodeExpandButtonContainer}.toggled) &,
-  ${LabelNodeContainer}:has(${NodeExpandButtonContainer}.toggled) & {
-    opacity: 1; /* Show on hover */
+  .react-flow__node:not(.non-interactive)
+    ${NodeShapeContainer}:has(${NodeExpandButtonContainer}.toggled)
+    &,
+  .react-flow__node:not(.non-interactive)
+    ${LabelNodeContainer}:has(${NodeExpandButtonContainer}.toggled)
+    & {
+    opacity: 1; /* Show when expand button is toggled */
   }
 
-  .react-flow__node:focus:focus-visible & {
-    opacity: 1; /* Show on hover */
+  .react-flow__node:not(.non-interactive):focus:focus-visible & {
+    opacity: 1; /* Show on focus */
   }
 `;
 
@@ -328,7 +366,7 @@ export const RoundEuiButtonIcon = styled(EuiButtonIcon, {
     position: absolute;
     left: 50%;
     top: 50%;
-    transform: translate(-50%, -50%) translate(0.5px, 0.5px);
+    transform: translate(-50%, -50%);
   }
 
   :hover,
@@ -415,4 +453,20 @@ export const ToolTipButton = (props: PropsWithChildren) => {
       type="button"
     />
   );
+};
+
+export const middleEntityNodeShapeStyle = (strokeColor: string) => {
+  return {
+    transform: 'scale(0.9) translateY(7px)',
+    transformOrigin: 'center',
+    stroke: transparentize(strokeColor, 0.5),
+  };
+};
+
+export const bottomEntityNodeShapeStyle = (strokeColor: string) => {
+  return {
+    transform: 'scale(0.8) translateY(16px)',
+    transformOrigin: 'center',
+    stroke: transparentize(strokeColor, 0.3),
+  };
 };

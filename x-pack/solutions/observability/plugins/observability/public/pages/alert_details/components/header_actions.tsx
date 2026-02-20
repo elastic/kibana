@@ -30,7 +30,7 @@ import {
 } from './alert_details_rule_form_flyout';
 import { ObsCasesContext } from './obs_cases_context';
 import { AddToCaseButton } from './add_to_case_button';
-import { useDiscoverUrl } from '../hooks/use_discover_url';
+import { useDiscoverUrl } from '../hooks/use_discover_url/use_discover_url';
 
 export interface HeaderActionsProps extends AlertDetailsRuleFormFlyoutBaseProps {
   alert: TopAlert | null;
@@ -91,7 +91,7 @@ export function HeaderActions({
               href={discoverUrl}
               iconType="discoverApp"
               target="_blank"
-              data-test-subj="view-in-discover-button"
+              data-test-subj={`alertDetailsPage_viewInDiscover${rule ? `_${rule.ruleTypeId}` : ''}`}
             >
               <EuiText size="s">
                 {i18n.translate('xpack.observability.alertDetails.viewInDiscover', {

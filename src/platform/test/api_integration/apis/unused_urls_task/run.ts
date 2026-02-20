@@ -29,22 +29,17 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('runs unused URLs cleanup if its enabled', async () => {
+      const { total: initialUrls } = await kibanaServer.savedObjects.find({ type: 'url' });
+      // 6 unused URLs + 1 regular URL
+      expect(initialUrls).to.be(7);
+
       const response1 = await supertest.post('/internal/unused_urls_task/run');
 
       expect(response1.status).to.be(200);
-      // Deletes only 5 URLs because the limit is set to 5
+      // Deletes 5 unused URLs out of 7 total because share.url_expiration.url_limit is set to 5
       expect(response1.body).to.eql({
         message: 'Unused URLs cleanup task has finished.',
         deletedCount: 5,
-      });
-
-      // Delete the remaining URL
-      const response2 = await supertest.post('/internal/unused_urls_task/run');
-
-      expect(response2.status).to.be(200);
-      expect(response2.body).to.eql({
-        message: 'Unused URLs cleanup task has finished.',
-        deletedCount: 1,
       });
     });
   });

@@ -161,6 +161,20 @@ export const EntityRiskScoreRecord = z.object({
   notes: z.array(z.string()),
   criticality_modifier: z.number().optional(),
   criticality_level: AssetCriticalityLevel.optional(),
+  /**
+   * A list of modifiers that were applied to the risk score calculation.
+   */
+  modifiers: z
+    .array(
+      z.object({
+        type: z.string(),
+        subtype: z.string().optional(),
+        modifier_value: z.number().optional(),
+        contribution: z.number(),
+        metadata: z.object({}).catchall(z.unknown()).optional(),
+      })
+    )
+    .optional(),
 });
 
 export type RiskScoreEntityIdentifierWeights = z.infer<typeof RiskScoreEntityIdentifierWeights>;

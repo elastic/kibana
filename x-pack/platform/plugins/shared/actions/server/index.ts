@@ -21,12 +21,16 @@ export type {
   ActionResult,
   ActionTypeExecutorOptions,
   ActionType,
+  ClassicActionType,
   InMemoryConnector,
   ActionsApiRequestHandlerContext,
-  SSLSettings,
 } from './types';
 
-export type { ConnectorWithExtraFindData as FindActionResult } from './application/connector/types';
+export type {
+  ConnectorWithExtraFindData as FindActionResult,
+  Connector,
+  ConnectorType,
+} from './application/connector/types';
 
 export type { PluginSetupContract, PluginStartContract } from './plugin';
 

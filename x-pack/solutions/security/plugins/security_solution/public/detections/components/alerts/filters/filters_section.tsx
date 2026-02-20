@@ -33,6 +33,10 @@ export interface FiltersSectionProps {
    */
   dataView: DataView | DataViewSpec;
   /**
+   * Page filters for the alerts page
+   */
+  pageFilters: Filter[] | undefined;
+  /**
    * Callback to set the page filter handler for the alerts page to allow a refresh after the table has reloaded
    */
   setPageFilterHandler: Dispatch<SetStateAction<FilterGroupHandler | undefined>>;
@@ -53,6 +57,7 @@ export const FiltersSection = memo(
   ({
     assignees,
     dataView,
+    pageFilters,
     setPageFilterHandler,
     setPageFilters,
     setStatusFilter,
@@ -77,8 +82,9 @@ export const FiltersSection = memo(
         ...buildShowBuildingBlockFilter(showBuildingBlockAlerts),
         ...buildThreatMatchFilter(showOnlyThreatIndicatorAlerts),
         ...buildAlertAssigneesFilter(assignees),
+        ...(pageFilters ?? []),
       ];
-    }, [assignees, showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts, filters]);
+    }, [assignees, showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts, filters, pageFilters]);
 
     const onFilterControlsChange = useCallback(
       (newFilters: Filter[]) => {

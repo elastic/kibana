@@ -1,0 +1,31 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": [
+    "index.ts",
+    "common/**/*",
+    "public/**/*",
+    "server/**/*",
+    "test/**/*",
+    "../../../../../typings/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/workflows",
+    "@kbn/zod",
+    "@kbn/config-schema",
+    "@kbn/crypto",
+    "@kbn/scout",
+    "@kbn/i18n",
+    "@kbn/inference-plugin",
+    "@kbn/inference-common",
+    "@kbn/actions-plugin",
+    "@kbn/utility-types"
+  ],
+  "exclude": [
+    "target/**/*"
+  ]
+}
+

@@ -78,8 +78,8 @@ export const AttributesTable = ({
   );
 
   const fieldCellActions = useMemo(
-    () => getFieldCellActions({ rows, isEsqlMode, onFilter: filter, onToggleColumn }),
-    [rows, filter, onToggleColumn, isEsqlMode]
+    () => getFieldCellActions({ rows, isEsqlMode, onFilter: filter, onToggleColumn, columns }),
+    [rows, filter, onToggleColumn, isEsqlMode, columns]
   );
   const fieldValueCellActions = useMemo(
     () => getFieldValueCellActions({ rows, isEsqlMode, toasts, onFilter: filter }),
@@ -121,6 +121,7 @@ export const AttributesTable = ({
           rowIndex={rowIndex}
           columnId={columnId}
           isDetails={false}
+          isESQLMode={isEsqlMode}
         />
       )}
       columnVisibility={{

@@ -6,14 +6,12 @@
  */
 
 import { useMemo } from 'react';
-import { DataViewManagerScopeName } from '../constants';
+import { PageScope } from '../constants';
 import { useDataView } from './use_data_view';
 
 const emptyArray: string[] = [];
 
-export const useSelectedPatterns = (
-  scope: DataViewManagerScopeName = DataViewManagerScopeName.default
-): string[] => {
+export const useSelectedPatterns = (scope: PageScope = PageScope.default): string[] => {
   const { dataView } = useDataView(scope);
   const indexPattern = dataView?.getIndexPattern?.() ?? '';
 

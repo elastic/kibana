@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { ByteSizeValue } from '@kbn/config-schema';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { IndexDataEnricher } from '../services';
 import type { Index } from '..';
@@ -35,6 +34,7 @@ async function fetchIndicesCall(
       '*.settings.index.number_of_replicas',
       '*.settings.index.frozen',
       '*.settings.index.hidden',
+      '*.settings.index.mode',
       '*.data_stream',
     ],
     // for better performance only compute aliases and settings of indices but not mappings
@@ -66,6 +66,7 @@ async function fetchIndicesCall(
         aliases: aliases.length ? aliases : 'none',
         hidden: indexData.settings?.index?.hidden === 'true',
         data_stream: indexData.data_stream,
+        mode: indexData.settings?.index?.mode,
       };
 
       if (indicesStats) {
@@ -78,10 +79,8 @@ async function fetchIndicesCall(
           uuid: indexStats?.uuid,
           documents: indexStats?.primaries?.docs?.count ?? 0,
           documents_deleted: indexStats?.primaries?.docs?.deleted ?? 0,
-          size: new ByteSizeValue(indexStats?.total?.store?.size_in_bytes ?? 0).toString(),
-          primary_size: new ByteSizeValue(
-            indexStats?.primaries?.store?.size_in_bytes ?? 0
-          ).toString(),
+          size: indexStats?.total?.store?.size_in_bytes ?? 0,
+          primary_size: indexStats?.primaries?.store?.size_in_bytes ?? 0,
         };
       }
 
@@ -90,7 +89,7 @@ async function fetchIndicesCall(
   }
 
   // uses the _metering/stats API to get the number of documents and size of the index
-  // this API is only available in ES3
+  // this API is only available in ES3 (serverless)
   if (config.isSizeAndDocCountEnabled) {
     const { indices: indicesStats } =
       await client.asSecondaryAuthUser.transport.request<MeteringStatsResponse>({
@@ -107,6 +106,7 @@ async function fetchIndicesCall(
         aliases: aliases.length ? aliases : 'none',
         hidden: indexData.settings?.index?.hidden === 'true',
         data_stream: indexData.data_stream,
+        mode: indexData.settings?.index?.mode,
       };
 
       if (indicesStats) {
@@ -115,7 +115,7 @@ async function fetchIndicesCall(
         return {
           ...baseResponse,
           documents: indexStats?.num_docs ?? 0,
-          size: new ByteSizeValue(indexStats?.size_in_bytes ?? 0).toString(),
+          size: indexStats?.size_in_bytes ?? 0,
         };
       }
 
@@ -137,6 +137,7 @@ async function fetchIndicesCall(
       aliases: aliases.length ? aliases : 'none',
       hidden: indexData.settings?.index?.hidden === 'true',
       data_stream: indexData.data_stream,
+      mode: indexData.settings?.index?.mode,
     };
   });
 }

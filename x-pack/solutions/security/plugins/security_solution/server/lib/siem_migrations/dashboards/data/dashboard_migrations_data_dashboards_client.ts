@@ -11,6 +11,7 @@ import type {
   AggregationsStringTermsAggregate,
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
+import type { SiemMigrationVendor } from '../../../../../common/siem_migrations/model/common.gen';
 import type {
   DashboardMigrationDashboard,
   DashboardMigrationTranslationStats,
@@ -29,6 +30,11 @@ export class DashboardMigrationsDataDashboardsClient extends SiemMigrationsDataI
     return getSortingOptions(sort);
   }
 
+  public async getVendor(migrationId: string): Promise<SiemMigrationVendor | undefined> {
+    const { data: dashboards } = await this.get(migrationId, { size: 1 });
+    return dashboards.length > 0 ? dashboards[0].original_dashboard.vendor : undefined;
+  }
+
   protected getFilterQuery(
     migrationId: string,
     filters: DashboardMigrationFilters = {}
@@ -43,7 +49,7 @@ export class DashboardMigrationsDataDashboardsClient extends SiemMigrationsDataI
       filter.push(filters.installed ? dsl.isInstalled() : dsl.isNotInstalled());
     }
     if (filters.installable != null) {
-      filter.push(...(filters.installable ? dsl.isInstallable() : dsl.isNotInstallable()));
+      filter.push(filters.installable ? dsl.isInstallable() : dsl.isNotInstallable());
     }
 
     return { bool: { filter } };
@@ -60,7 +66,7 @@ export class DashboardMigrationsDataDashboardsClient extends SiemMigrationsDataI
         filter: { term: { status: SiemMigrationStatus.COMPLETED } },
         aggs: {
           result: { terms: { field: 'translation_result' } },
-          installable: { filter: { bool: { must: dsl.isInstallable() } } },
+          installable: { filter: dsl.isInstallable() },
         },
       },
       failed: { filter: { term: { status: SiemMigrationStatus.FAILED } } },

@@ -6,112 +6,273 @@
  */
 
 import type { SomeDevLog } from '@kbn/some-dev-log';
-import type { Model } from '@kbn/inference-common';
 import type { Client as EsClient } from '@elastic/elasticsearch';
-import { hostname } from 'os';
-import type { DatasetScoreWithStats } from './evaluation_stats';
+import type { Model } from '@kbn/inference-common';
 
-interface ModelScoreDocument {
+interface BulkDroppedDocument<TDocument> {
+  status?: number;
+  error?: {
+    type?: string;
+    reason?: string;
+    caused_by?: unknown;
+    root_cause?: unknown;
+  };
+  operation?: unknown;
+  document?: TDocument;
+}
+
+export interface EvaluationScoreDocument {
   '@timestamp': string;
   run_id: string;
-  model: {
-    id: string;
-    family: string;
-    provider: string;
+  experiment_id: string;
+
+  /**
+   * Optional CI metadata to correlate scores back to a suite and Buildkite build/job.
+   * These fields are safe to omit in non-CI environments.
+   */
+  suite?: {
+    id?: string;
   };
-  dataset: {
-    id: string;
-    name: string;
-    examples_count: number;
+  ci?: {
+    buildkite?: {
+      build_id?: string;
+      job_id?: string;
+      build_url?: string;
+      pipeline_slug?: string;
+      pull_request?: string;
+      branch?: string;
+      commit?: string;
+    };
   };
+
+  example: {
+    id: string;
+    index: number;
+    dataset: {
+      id: string;
+      name: string;
+    };
+  };
+
+  task: {
+    trace_id: string | null;
+    repetition_index: number;
+    model: Model;
+  };
+
   evaluator: {
     name: string;
-    stats: {
-      mean: number;
-      median: number;
-      std_dev: number;
-      min: number;
-      max: number;
-      count: number;
-      percentage: number;
-    };
-    scores: number[];
+    score: number | null;
+    label: string | null;
+    explanation: string | null;
+    metadata: Record<string, unknown> | null;
+    trace_id: string | null;
+    model: Model;
   };
-  experiments: Array<{
-    id?: string;
-  }>;
+
+  run_metadata: {
+    git_branch: string | null;
+    git_commit_sha: string | null;
+    total_repetitions: number;
+  };
+
   environment: {
     hostname: string;
   };
-  tags: string[];
 }
 
-const EVALUATIONS_DATA_STREAM_ALIAS = '.kibana-evaluations';
-const EVALUATIONS_DATA_STREAM_WILDCARD = '.kibana-evaluations*';
-const EVALUATIONS_DATA_STREAM_TEMPLATE = 'kibana-evaluations-template';
+type BuildkiteCiMetadata = NonNullable<NonNullable<EvaluationScoreDocument['ci']>['buildkite']>;
 
+export interface ExportScoresOptions {
+  /**
+   * Optional suite identifier to attach to exported documents.
+   *
+   * Defaults to `process.env.EVAL_SUITE_ID`.
+   */
+  suiteId?: string;
+
+  /**
+   * Optional Buildkite CI metadata to attach to exported documents.
+   *
+   * Defaults to environment-derived Buildkite metadata (if any).
+   */
+  buildkite?: BuildkiteCiMetadata;
+}
+
+function getBuildkiteCiMetadataFromEnv(): BuildkiteCiMetadata | undefined {
+  const pullRequest =
+    process.env.BUILDKITE_PULL_REQUEST && process.env.BUILDKITE_PULL_REQUEST !== 'false'
+      ? process.env.BUILDKITE_PULL_REQUEST
+      : undefined;
+
+  const hasAnyBuildkiteMetadata =
+    process.env.BUILDKITE_BUILD_ID ||
+    process.env.BUILDKITE_JOB_ID ||
+    process.env.BUILDKITE_BUILD_URL ||
+    process.env.BUILDKITE_PIPELINE_SLUG ||
+    pullRequest ||
+    process.env.BUILDKITE_BRANCH ||
+    process.env.BUILDKITE_COMMIT;
+
+  if (!hasAnyBuildkiteMetadata) {
+    return undefined;
+  }
+
+  return {
+    build_id: process.env.BUILDKITE_BUILD_ID,
+    job_id: process.env.BUILDKITE_JOB_ID,
+    build_url: process.env.BUILDKITE_BUILD_URL,
+    pipeline_slug: process.env.BUILDKITE_PIPELINE_SLUG,
+    pull_request: pullRequest,
+    branch: process.env.BUILDKITE_BRANCH,
+    commit: process.env.BUILDKITE_COMMIT,
+  };
+}
+
+/**
+ * Statistics for a single evaluator on a single dataset.
+ * This is the core data structure returned by ES aggregations and used throughout the reporting system.
+ */
+export interface EvaluatorStats {
+  datasetId: string;
+  datasetName: string;
+  evaluatorName: string;
+  stats: {
+    mean: number;
+    median: number;
+    stdDev: number;
+    min: number;
+    max: number;
+    count: number;
+  };
+}
+
+export interface RunStats {
+  stats: EvaluatorStats[];
+  taskModel: Model;
+  evaluatorModel: Model;
+  totalRepetitions: number;
+}
+
+interface RunStatsAggregations {
+  by_dataset?: {
+    buckets?: Array<{
+      key: string;
+      dataset_name?: { buckets?: Array<{ key: string }> };
+      by_evaluator?: {
+        buckets?: Array<{
+          key: string;
+          score_stats?: {
+            avg?: number;
+            std_deviation?: number;
+            min?: number;
+            max?: number;
+            count?: number;
+          };
+          // Captured by percentiles aggregation opposed to the extended_stats aggregation used for the above
+          score_median?: { values?: Record<string, number> };
+        }>;
+      };
+    }>;
+  };
+}
+
+const EVALUATIONS_DATA_STREAM_ALIAS = 'kibana-evaluations';
+const EVALUATIONS_DATA_STREAM_WILDCARD = 'kibana-evaluations*';
+const EVALUATIONS_DATA_STREAM_TEMPLATE = 'kibana-evaluations-template';
 export class EvaluationScoreRepository {
   constructor(private readonly esClient: EsClient, private readonly log: SomeDevLog) {}
 
   private async ensureIndexTemplate(): Promise<void> {
     const templateBody = {
       index_patterns: [EVALUATIONS_DATA_STREAM_WILDCARD],
-      data_stream: {
-        hidden: true,
-      },
+      data_stream: {},
       template: {
         settings: {
-          number_of_shards: 1,
-          number_of_replicas: 0,
-          refresh_interval: '30s',
-          'index.hidden': true,
+          refresh_interval: '5s',
         },
         mappings: {
           properties: {
             '@timestamp': { type: 'date' },
             run_id: { type: 'keyword' },
-            model: {
+            experiment_id: { type: 'keyword' },
+            suite: {
               type: 'object',
               properties: {
                 id: { type: 'keyword' },
-                family: { type: 'keyword' },
-                provider: { type: 'keyword' },
               },
             },
-            dataset: {
+            ci: {
+              type: 'object',
+              properties: {
+                buildkite: {
+                  type: 'object',
+                  properties: {
+                    build_id: { type: 'keyword' },
+                    job_id: { type: 'keyword' },
+                    build_url: { type: 'keyword' },
+                    pipeline_slug: { type: 'keyword' },
+                    pull_request: { type: 'keyword' },
+                    branch: { type: 'keyword' },
+                    commit: { type: 'keyword' },
+                  },
+                },
+              },
+            },
+            example: {
               type: 'object',
               properties: {
                 id: { type: 'keyword' },
-                name: { type: 'keyword' },
-                examples_count: { type: 'integer' },
+                index: { type: 'integer' },
+                dataset: {
+                  type: 'object',
+                  properties: {
+                    id: { type: 'keyword' },
+                    name: { type: 'keyword' },
+                  },
+                },
+              },
+            },
+            task: {
+              type: 'object',
+              properties: {
+                trace_id: { type: 'keyword' },
+                repetition_index: { type: 'integer' },
+                model: {
+                  type: 'object',
+                  properties: {
+                    id: { type: 'keyword' },
+                    family: { type: 'keyword' },
+                    provider: { type: 'keyword' },
+                  },
+                },
               },
             },
             evaluator: {
               type: 'object',
               properties: {
                 name: { type: 'keyword' },
-                stats: {
+                score: { type: 'float' },
+                label: { type: 'keyword' },
+                explanation: { type: 'text', index: false },
+                metadata: { type: 'flattened' },
+                trace_id: { type: 'keyword' },
+                model: {
                   type: 'object',
                   properties: {
-                    mean: { type: 'float' },
-                    median: { type: 'float' },
-                    std_dev: { type: 'float' },
-                    min: { type: 'float' },
-                    max: { type: 'float' },
-                    count: { type: 'integer' },
-                    percentage: { type: 'float' },
+                    id: { type: 'keyword' },
+                    family: { type: 'keyword' },
+                    provider: { type: 'keyword' },
                   },
-                },
-                scores: {
-                  type: 'float',
-                  index: false,
                 },
               },
             },
-            experiments: {
-              type: 'nested',
+            run_metadata: {
+              type: 'object',
               properties: {
-                id: { type: 'keyword' },
+                git_branch: { type: 'keyword' },
+                git_commit_sha: { type: 'keyword' },
+                total_repetitions: { type: 'integer' },
               },
             },
             environment: {
@@ -120,7 +281,6 @@ export class EvaluationScoreRepository {
                 hostname: { type: 'keyword' },
               },
             },
-            tags: { type: 'keyword' },
           },
         },
       },
@@ -131,7 +291,6 @@ export class EvaluationScoreRepository {
         .existsIndexTemplate({
           name: EVALUATIONS_DATA_STREAM_TEMPLATE,
         })
-        .then(() => true)
         .catch(() => false);
 
       if (!templateExists) {
@@ -152,13 +311,11 @@ export class EvaluationScoreRepository {
 
   private async ensureDatastream(): Promise<void> {
     try {
-      // Check if datastream exists by trying to get it
       await this.esClient.indices.getDataStream({
         name: EVALUATIONS_DATA_STREAM_ALIAS,
       });
     } catch (error: any) {
       if (error?.statusCode === 404) {
-        // Datastream doesn't exist, create it
         await this.esClient.indices.createDataStream({
           name: EVALUATIONS_DATA_STREAM_ALIAS,
         });
@@ -169,140 +326,245 @@ export class EvaluationScoreRepository {
     }
   }
 
-  async exportScores({
-    datasetScoresWithStats,
-    evaluatorNames,
-    model,
-    runId,
-    tags = [],
-  }: {
-    datasetScoresWithStats: DatasetScoreWithStats[];
-    evaluatorNames: string[];
-    model: Model;
-    runId: string;
-    tags?: string[];
-  }): Promise<void> {
+  async exportScores(
+    documents: EvaluationScoreDocument[],
+    options: ExportScoresOptions = {}
+  ): Promise<void> {
     try {
       await this.ensureIndexTemplate();
       await this.ensureDatastream();
 
-      if (datasetScoresWithStats.length === 0) {
-        this.log.warning('No dataset scores found to export');
+      if (documents.length === 0) {
+        this.log.warning('No evaluation scores to export');
         return;
       }
 
-      const documents: ModelScoreDocument[] = [];
-      const timestamp = new Date().toISOString();
+      const buildkite = options.buildkite ?? getBuildkiteCiMetadataFromEnv();
+      const suiteId = options.suiteId ?? process.env.EVAL_SUITE_ID;
+      const enrichedDocuments =
+        suiteId || buildkite
+          ? documents.map((doc) => ({
+              ...doc,
+              suite: doc.suite ?? (suiteId ? { id: suiteId } : undefined),
+              ci: doc.ci ?? (buildkite ? { buildkite } : undefined),
+            }))
+          : documents;
 
-      for (const dataset of datasetScoresWithStats) {
-        for (const evaluatorName of evaluatorNames) {
-          const stats = dataset.evaluatorStats.get(evaluatorName);
-          const scores = dataset.evaluatorScores.get(evaluatorName) || [];
-          if (!stats || stats.count === 0) {
-            continue;
-          }
-
-          const document: ModelScoreDocument = {
-            '@timestamp': timestamp,
-            run_id: runId,
-            model: {
-              id: model.id || 'unknown',
-              family: model.family,
-              provider: model.provider,
-            },
-            dataset: {
-              id: dataset.id,
-              name: dataset.name,
-              examples_count: dataset.numExamples,
-            },
-            evaluator: {
-              name: evaluatorName,
-              stats: {
-                mean: stats.mean,
-                median: stats.median,
-                std_dev: stats.stdDev,
-                min: stats.min,
-                max: stats.max,
-                count: stats.count,
-                percentage: stats.percentage,
-              },
-              scores,
-            },
-            experiments: dataset.experiments || [],
-            environment: {
-              hostname: hostname(),
-            },
-            tags,
-          };
-
-          documents.push(document);
-        }
-      }
       // Bulk index documents
-      if (documents.length > 0) {
+      if (enrichedDocuments.length > 0) {
+        const dropped: Array<BulkDroppedDocument<EvaluationScoreDocument>> = [];
+
         const stats = await this.esClient.helpers.bulk({
-          datasource: documents,
+          datasource: enrichedDocuments,
           onDocument: (doc) => {
+            // Documents are exported from multiple suites *and* multiple task models/connectors.
+            // Keep IDs unique across that matrix while maintaining deterministic IDs for re-runs.
+            const suiteIdPart = doc.suite?.id ?? 'unknown-suite';
+            const taskModelIdPart = doc.task.model.id;
+            const docId = [
+              doc.run_id,
+              suiteIdPart,
+              taskModelIdPart,
+              doc.example.dataset.id,
+              doc.example.id,
+              doc.evaluator.name,
+              doc.task.repetition_index,
+            ].join('-');
+
             return {
+              // Data streams only allow create operations. Use deterministic document IDs so:
+              // - Re-runs/retries don't create duplicates (they'll 409 conflict instead)
+              // - We can treat 409s as a no-op for idempotency
               create: {
                 _index: EVALUATIONS_DATA_STREAM_ALIAS,
-                _id: `${doc.environment.hostname}-${doc.model.id}-${doc.dataset.id}-${doc.evaluator.name}-${timestamp}`,
+                _id: docId,
               },
             };
           },
+          onDrop: (droppedDoc) => {
+            dropped.push(droppedDoc as BulkDroppedDocument<EvaluationScoreDocument>);
+          },
+          refresh: 'wait_for',
         });
 
         // Check for bulk operation errors
         if (stats.failed > 0) {
+          // `helpers.bulk` counts any dropped operation as failed, including expected 409 conflicts
+          // when re-exporting the same deterministic IDs. Ignore 409s to keep exports idempotent.
+          //
+          // Note: In the unlikely event that `helpers.bulk` reports `failed > 0` but does not call
+          // `onDrop`, fall back to failing with an "unknown" reason.
+          if (dropped.length === 0) {
+            const firstErrorSummary = 'unknown failure reason';
+            this.log.error(
+              `Bulk indexing had ${stats.failed} failed operations out of ${stats.total}. ` +
+                `First error: ${firstErrorSummary}`
+            );
+
+            throw new Error(
+              `Bulk indexing failed: ${stats.failed} of ${stats.total} operations failed. ` +
+                `First error: ${firstErrorSummary}`
+            );
+          }
+
+          const conflicts = dropped.filter((d) => d.status === 409);
+          const nonConflictDropped = dropped.filter((d) => d.status !== 409);
+
+          if (nonConflictDropped.length === 0) {
+            this.log.debug(
+              `Bulk indexing had ${conflicts.length} 409 conflicts out of ${stats.total} operations (ignored)`
+            );
+            this.log.debug(
+              `Successfully indexed ${stats.successful} evaluation scores (${conflicts.length} already existed)`
+            );
+            return;
+          }
+
+          const first = nonConflictDropped[0];
+          const firstErrorSummary = first.error
+            ? `${first.status ?? 'unknown status'} ${first.error.type ?? 'unknown type'}: ${
+                first.error.reason ?? 'unknown reason'
+              }`
+            : 'unknown failure reason';
+
           this.log.error(
-            `Bulk indexing had ${stats.failed} failed operations out of ${stats.total}`
+            `Bulk indexing had ${nonConflictDropped.length} failed operations out of ${stats.total} ` +
+              `(${conflicts.length} conflicts ignored). First error: ${firstErrorSummary}`
           );
+
           throw new Error(
-            `Bulk indexing failed: ${stats.failed} of ${stats.total} operations failed`
+            `Bulk indexing failed: ${nonConflictDropped.length} of ${stats.total} operations failed ` +
+              `(${conflicts.length} conflicts ignored). First error: ${firstErrorSummary}`
           );
         }
 
-        this.log.success(
-          `Successfully indexed evaluation results to a datastream: ${EVALUATIONS_DATA_STREAM_ALIAS}`
-        );
-
-        // Log summary information for easy querying
-        this.log.info(`Export details:`);
-        this.log.info(
-          `  - Query filter: environment.hostname:"${hostname()}" AND model.id:"${
-            model.id
-          }" AND run_id:"${runId}"`
-        );
-        this.log.info(`  - Timestamp: ${timestamp}`);
-        this.log.info(`  - Datasets: ${datasetScoresWithStats.map((d) => d.name).join(', ')}`);
-        this.log.info(`  - Evaluators: ${evaluatorNames.join(', ')}`);
+        this.log.debug(`Successfully indexed ${stats.successful} evaluation scores`);
       }
     } catch (error) {
-      this.log.error('Failed to export scores to Elasticsearch:', error);
-      throw error;
+      const cause = error instanceof Error ? error : new Error(String(error));
+      this.log.error('Failed to export scores to Elasticsearch', cause);
+      throw cause;
     }
   }
 
-  async getScoresByRunId(runId: string): Promise<ModelScoreDocument[]> {
+  async getStatsByRunId(
+    runId: string,
+    options?: { taskModelId?: string; suiteId?: string }
+  ): Promise<RunStats | null> {
     try {
-      const query = {
-        bool: {
-          must: [{ term: { run_id: runId } }],
-        },
-      };
+      const must: Array<Record<string, unknown>> = [{ term: { run_id: runId } }];
+      if (options?.taskModelId) {
+        must.push({ term: { 'task.model.id': options.taskModelId } });
+      }
+      if (options?.suiteId) {
+        must.push({ term: { 'suite.id': options.suiteId } });
+      }
 
-      const response = await this.esClient.search({
-        index: EVALUATIONS_DATA_STREAM_WILDCARD,
+      const runQuery = { bool: { must } };
+
+      const metadataResponse = await this.esClient.search<EvaluationScoreDocument>({
+        index: EVALUATIONS_DATA_STREAM_ALIAS,
+        query: runQuery,
+        size: 1,
+      });
+
+      // Used for metedata for the evaluation run (all score documents capture the same metadata)
+      const firstDoc = metadataResponse.hits?.hits[0]?._source;
+      if (!firstDoc) {
+        return null;
+      }
+
+      const aggResponse = await this.esClient.search({
+        index: EVALUATIONS_DATA_STREAM_ALIAS,
+        size: 0,
+        query: runQuery,
+        aggs: {
+          by_dataset: {
+            terms: { field: 'example.dataset.id', size: 10000 },
+            aggs: {
+              dataset_name: { terms: { field: 'example.dataset.name', size: 1 } },
+              by_evaluator: {
+                terms: { field: 'evaluator.name', size: 1000 },
+                aggs: {
+                  score_stats: { extended_stats: { field: 'evaluator.score' } },
+                  score_median: { percentiles: { field: 'evaluator.score', percents: [50] } },
+                },
+              },
+            },
+          },
+        },
+      });
+
+      const aggregations = aggResponse.aggregations as RunStatsAggregations | undefined;
+      const datasetBuckets = aggregations?.by_dataset?.buckets ?? [];
+
+      const stats = datasetBuckets.flatMap((datasetBucket) => {
+        const datasetId = datasetBucket.key;
+        const datasetName = datasetBucket.dataset_name?.buckets?.[0]?.key ?? datasetId;
+        const evaluatorBuckets = datasetBucket.by_evaluator?.buckets ?? [];
+
+        return evaluatorBuckets.map((evaluatorBucket) => {
+          const scoreStats = evaluatorBucket.score_stats;
+          const median = evaluatorBucket.score_median?.values?.['50.0'];
+
+          return {
+            datasetId,
+            datasetName,
+            evaluatorName: evaluatorBucket.key,
+            stats: {
+              mean: scoreStats?.avg ?? 0,
+              median: median ?? 0,
+              stdDev: scoreStats?.std_deviation ?? 0,
+              min: scoreStats?.min ?? 0,
+              max: scoreStats?.max ?? 0,
+              count: scoreStats?.count ?? 0,
+            },
+          };
+        });
+      });
+
+      return {
+        stats,
+        taskModel: firstDoc.task.model,
+        evaluatorModel: firstDoc.evaluator.model,
+        totalRepetitions: firstDoc.run_metadata?.total_repetitions ?? 1,
+      };
+    } catch (error) {
+      this.log.error(`Failed to retrieve stats for run ID ${runId}:`, error);
+      return null;
+    }
+  }
+
+  async getScoresByRunId(
+    runId: string,
+    options?: { taskModelId?: string; suiteId?: string }
+  ): Promise<EvaluationScoreDocument[]> {
+    try {
+      const must: Array<Record<string, unknown>> = [{ term: { run_id: runId } }];
+      if (options?.taskModelId) {
+        must.push({ term: { 'task.model.id': options.taskModelId } });
+      }
+      if (options?.suiteId) {
+        must.push({ term: { 'suite.id': options.suiteId } });
+      }
+      const query = { bool: { must } };
+
+      const response = await this.esClient.search<EvaluationScoreDocument>({
+        index: EVALUATIONS_DATA_STREAM_ALIAS,
         query,
         sort: [
-          { 'dataset.name': { order: 'asc' as const } },
+          { 'example.dataset.name': { order: 'asc' as const } },
+          { 'example.index': { order: 'asc' as const } },
           { 'evaluator.name': { order: 'asc' as const } },
+          { 'task.repetition_index': { order: 'asc' as const } },
         ],
-        size: 1000,
+        size: 10000,
       });
 
       const hits = response.hits?.hits || [];
-      const scores = hits.map((hit: any) => hit._source);
+      const scores = hits
+        .map((hit) => hit._source)
+        .filter((source): source is EvaluationScoreDocument => source !== undefined);
 
       this.log.info(`Retrieved ${scores.length} scores for run ID: ${runId}`);
       return scores;

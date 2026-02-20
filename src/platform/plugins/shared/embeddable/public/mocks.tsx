@@ -19,6 +19,7 @@ import { savedObjectsManagementPluginMock } from '@kbn/saved-objects-management-
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 
+import { BehaviorSubject, of } from 'rxjs';
 import type { EmbeddableStateTransfer } from '.';
 import { setKibanaServices } from './kibana_services';
 import { EmbeddablePublicPlugin } from './plugin';
@@ -30,6 +31,8 @@ import type {
   EmbeddableStart,
   EmbeddableStartDependencies,
 } from './types';
+import type { DrilldownActionState, DrilldownsManager } from './drilldowns/types';
+import type { SerializedDrilldowns } from '../server';
 
 export type Setup = jest.Mocked<EmbeddableSetup>;
 export type Start = jest.Mocked<EmbeddableStart>;
@@ -40,18 +43,16 @@ export const createEmbeddableStateTransferMock = (): Partial<EmbeddableStateTran
     getIncomingEditorState: jest.fn(),
     getIncomingEmbeddablePackage: jest.fn(),
     navigateToEditor: jest.fn(),
-    navigateToWithEmbeddablePackage: jest.fn(),
+    navigateToWithEmbeddablePackages: jest.fn(),
   };
 };
 
 const createSetupContract = (): Setup => {
   const setupContract: Setup = {
     registerAddFromLibraryType: jest.fn().mockImplementation(registerAddFromLibraryType),
+    registerDrilldown: jest.fn(),
     registerReactEmbeddableFactory: jest.fn().mockImplementation(registerReactEmbeddableFactory),
-    registerTransforms: jest.fn(),
-    registerEnhancement: jest.fn(),
-    transformEnhancementsIn: jest.fn(),
-    transformEnhancementsOut: jest.fn(),
+    registerLegacyURLTransform: jest.fn(),
   };
   return setupContract;
 };
@@ -60,9 +61,8 @@ const createStartContract = (): Start => {
   const startContract: Start = {
     getAddFromLibraryComponent: jest.fn(),
     getStateTransfer: jest.fn(() => createEmbeddableStateTransferMock() as EmbeddableStateTransfer),
-    getTransforms: jest.fn(),
-    hasTransforms: jest.fn(),
-    getEnhancement: jest.fn(),
+    getLegacyURLTransform: jest.fn(),
+    hasLegacyURLTransform: jest.fn(),
   };
   return startContract;
 };
@@ -123,3 +123,26 @@ export const setStubKibanaServices = () => {
     contentManagement: contentManagementMock.createStartContract(),
   });
 };
+
+export function mockDrilldownsManager(): DrilldownsManager {
+  return {
+    api: {
+      drilldowns$: new BehaviorSubject<DrilldownActionState[]>([]),
+      setDrilldowns: jest.fn(),
+    },
+    cleanup: jest.fn(),
+    comparators: {
+      drilldowns: jest.fn(),
+    },
+    anyStateChange$: of(),
+    getLatestState: jest.fn(),
+    reinitializeState: jest.fn(),
+  };
+}
+
+export async function mockInitializeDrilldownsManager(
+  embeddableUuid: string,
+  state: SerializedDrilldowns
+): Promise<DrilldownsManager> {
+  return mockDrilldownsManager();
+}

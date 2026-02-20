@@ -171,6 +171,7 @@ export const StepsList = ({
             href={`${basePath}/app/uptime/journey/${item.monitor.check_group}/step/${item.synthetics?.step?.index}`}
             target="_blank"
             iconType="visArea"
+            aria-label={VIEW_PERFORMANCE}
           />
         ) : (
           <StepDetailLink
@@ -235,6 +236,9 @@ export const StepsList = ({
       <EuiBasicTable
         compressed={compactView}
         loading={loading}
+        tableCaption={i18n.translate('xpack.uptime.synthetics.stepsList.tableCaption', {
+          defaultMessage: 'Journey step details',
+        })}
         columns={columns}
         error={error?.message}
         items={steps}

@@ -28,8 +28,8 @@ import type {
 } from '@kbn/content-management-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { HomePublicPluginSetup, HomePublicPluginStart } from '@kbn/home-plugin/public';
-import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import type { KqlPluginStart } from '@kbn/kql/public';
 import { checkLicense } from '../common/check_license';
 import type { ConfigSchema } from '../server/config';
 import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
@@ -43,7 +43,7 @@ export interface GraphPluginStartDependencies {
   navigation: NavigationStart;
   licensing: LicensingPluginStart;
   data: DataPublicPluginStart;
-  unifiedSearch: UnifiedSearchPublicPluginStart;
+  kql: KqlPluginStart;
   inspector: InspectorPublicPluginStart;
   home?: HomePublicPluginStart;
   spaces?: SpacesApi;
@@ -115,7 +115,7 @@ export class GraphPlugin
           coreStart,
           navigation: pluginsStart.navigation,
           data: pluginsStart.data,
-          unifiedSearch: pluginsStart.unifiedSearch,
+          kql: pluginsStart.kql,
           contentClient: pluginsStart.contentManagement.client,
           addBasePath: core.http.basePath.prepend,
           getBasePath: core.http.basePath.get,
@@ -125,7 +125,7 @@ export class GraphPlugin
           capabilities: coreStart.application.capabilities,
           chrome: coreStart.chrome,
           toastNotifications: coreStart.notifications.toasts,
-          indexPatterns: pluginsStart.data!.indexPatterns,
+          dataViews: pluginsStart.data.dataViews,
           overlays: coreStart.overlays,
           uiSettings: core.uiSettings,
           spaces: pluginsStart.spaces,

@@ -30,10 +30,21 @@ interface ResolveIndexResponseItem {
   mode?: 'lookup' | 'time_series' | string;
   indices?: string[];
   aliases?: string[];
+  attributes?: string[];
+  backing_indices?: string[];
 }
 
 export interface ResolveIndexResponse {
   indices?: ResolveIndexResponseItem[];
   aliases?: ResolveIndexResponseItem[];
   data_streams?: ResolveIndexResponseItem[];
+}
+
+export interface EsqlView {
+  name: string;
+  query: string;
+}
+
+export interface EsqlViewsResult {
+  views: EsqlView[];
 }

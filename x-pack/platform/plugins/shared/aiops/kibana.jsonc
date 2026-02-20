@@ -31,11 +31,9 @@
       "usageCollection"
     ],
     "requiredBundles": [
-      "dataViews",
       "fieldFormats",
       "kibanaReact",
       "kibanaUtils",
-      "embeddable",
       "cases"
     ]
   }

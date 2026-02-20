@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -15,9 +15,10 @@
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/dev-cli-runner",
     "@kbn/dev-cli-errors",
     "@kbn/inference-common",
     "@kbn/inference-tracing",
+    "@kbn/zod",
+    "@kbn/inference-cli",
   ]
 }

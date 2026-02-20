@@ -48,6 +48,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
         name: 'An index action',
         connector_type_id: '.index',
         is_missing_secrets: false,
+        is_connector_type_deprecated: false,
         config: {
           index: ES_TEST_INDEX_NAME,
           refresh: false,
@@ -67,6 +68,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
         is_system_action: false,
         is_deprecated: false,
         is_missing_secrets: false,
+        is_connector_type_deprecated: false,
         name: 'An index action',
         connector_type_id: '.index',
         config: { index: ES_TEST_INDEX_NAME, refresh: false, executionTimeField: null },
@@ -95,6 +97,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
         name: 'An index action with index config',
         connector_type_id: '.index',
         is_missing_secrets: false,
+        is_connector_type_deprecated: false,
         config: {
           index: ES_TEST_INDEX_NAME,
           refresh: true,
@@ -116,6 +119,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
         name: 'An index action with index config',
         connector_type_id: '.index',
         is_missing_secrets: false,
+        is_connector_type_deprecated: false,
         config: {
           index: ES_TEST_INDEX_NAME,
           refresh: true,
@@ -138,8 +142,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
           expect(resp.body).to.eql({
             statusCode: 400,
             error: 'Bad Request',
-            message:
-              'error validating action type config: [index]: expected value of type [string] but got [number]',
+            message: `error validating connector type config: Field \"index\": Expected string, received number`,
           });
         });
     });

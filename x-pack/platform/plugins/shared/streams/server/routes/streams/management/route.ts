@@ -90,10 +90,38 @@ export const getStreamsStatusRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
-  handler: async ({ request, getScopedClients }): Promise<{ enabled: boolean | 'conflict' }> => {
+  handler: async ({
+    request,
+    getScopedClients,
+  }): Promise<{ enabled: boolean | 'conflict'; can_manage: boolean }> => {
     const { streamsClient } = await getScopedClients({ request });
 
-    return { enabled: await streamsClient.checkStreamStatus() };
+    const privileges = await streamsClient.getPrivileges('logs,logs.*');
+
+    return { enabled: await streamsClient.checkStreamStatus(), can_manage: privileges.manage };
+  },
+});
+
+export const getClassicStreamsStatusRoute = createServerRoute({
+  endpoint: 'GET /internal/streams/_classic_status',
+  options: {
+    access: 'internal',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+    },
+  },
+  handler: async ({ request, getScopedClients }): Promise<{ can_manage: boolean }> => {
+    const { scopedClusterClient } = await getScopedClients({ request });
+
+    const REQUIRED_MANAGE_PRIVILEGES = ['manage_index_templates'];
+
+    const privileges = await scopedClusterClient.asCurrentUser.security.hasPrivileges({
+      cluster: REQUIRED_MANAGE_PRIVILEGES,
+    });
+
+    return { can_manage: privileges.cluster.manage_index_templates === true };
   },
 });
 
@@ -101,4 +129,5 @@ export const managementRoutes = {
   ...forkStreamsRoute,
   ...resyncStreamsRoute,
   ...getStreamsStatusRoute,
+  ...getClassicStreamsStatusRoute,
 };

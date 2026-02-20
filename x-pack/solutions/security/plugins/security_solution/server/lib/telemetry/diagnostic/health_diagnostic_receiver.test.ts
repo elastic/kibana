@@ -90,9 +90,9 @@ describe('Security Solution - Health Diagnostic Queries - CircuitBreakingQueryEx
       const doc2 = { ...mockDocument, id: 2 };
 
       mockEsClient.search
-        .mockResolvedValueOnce(createMockSearchResponse([doc1]))
-        .mockResolvedValueOnce(createMockSearchResponse([doc2]))
-        .mockResolvedValueOnce(createMockSearchResponse([]));
+        .mockResolvedValueOnce(createMockSearchResponse([doc1], undefined, 'test-pit-id-1'))
+        .mockResolvedValueOnce(createMockSearchResponse([doc2], undefined, 'test-pit-id-2'))
+        .mockResolvedValueOnce(createMockSearchResponse([], undefined, 'test-pit-id-3'));
 
       executeObservableTest(
         queryExecutor.search({ query, circuitBreakers: [circuitBreaker] }),
@@ -101,7 +101,22 @@ describe('Security Solution - Health Diagnostic Queries - CircuitBreakingQueryEx
           expect(results[0]).toEqual(doc1);
           expect(results[1]).toEqual(doc2);
           expect(mockEsClient.search).toHaveBeenCalledTimes(3);
-          done();
+
+          expect(mockEsClient.search.mock.calls[0][0]).toMatchObject({
+            pit: { id: 'test-pit-id' },
+          });
+          expect(mockEsClient.search.mock.calls[1][0]).toMatchObject({
+            pit: { id: 'test-pit-id-1' },
+          });
+          expect(mockEsClient.search.mock.calls[2][0]).toMatchObject({
+            pit: { id: 'test-pit-id-2' },
+          });
+
+          // small delay for finalize to execute
+          setTimeout(() => {
+            expect(mockEsClient.closePointInTime).toHaveBeenCalledWith({ id: 'test-pit-id-3' });
+            done();
+          }, 10);
         },
         done
       );
@@ -361,6 +376,193 @@ describe('Security Solution - Health Diagnostic Queries - CircuitBreakingQueryEx
         },
         done
       );
+    });
+
+    test('should handle ILM API errors and assume serverless', (done) => {
+      const query = createMockQuery(QueryType.DSL, { tiers: ['hot', 'warm'] });
+      const circuitBreaker = createMockCircuitBreaker(true);
+
+      const ilmError = new Error(
+        'no handler found for uri [/.alerts-security.alerts*/_ilm/explain?only_managed=false&filter_path=indices.*.phase] and method [GET]'
+      );
+      mockEsClient.ilm.explainLifecycle.mockRejectedValue(ilmError);
+      setupPointInTime(mockEsClient);
+      mockEsClient.search.mockResolvedValue(createMockSearchResponse([]));
+
+      executeObservableTest(
+        queryExecutor.search({ query, circuitBreakers: [circuitBreaker] }),
+        () => {
+          expect(mockEsClient.ilm.explainLifecycle).toHaveBeenCalledWith({
+            index: 'test-index',
+            only_managed: false,
+            filter_path: ['indices.*.phase'],
+          });
+          expect(mockEsClient.openPointInTime).toHaveBeenCalledWith({
+            index: ['test-index'],
+            keep_alive: '1m',
+          });
+          done();
+        },
+        done
+      );
+    });
+
+    test('should handle network errors during ILM checks', (done) => {
+      const query = createMockQuery(QueryType.DSL, { tiers: ['hot'] });
+      const circuitBreaker = createMockCircuitBreaker(true);
+
+      const networkError = new Error('ECONNREFUSED');
+      mockEsClient.ilm.explainLifecycle.mockRejectedValue(networkError);
+      setupPointInTime(mockEsClient);
+      mockEsClient.search.mockResolvedValue(createMockSearchResponse([]));
+
+      executeObservableTest(
+        queryExecutor.search({ query, circuitBreakers: [circuitBreaker] }),
+        () => {
+          expect(mockEsClient.openPointInTime).toHaveBeenCalledWith({
+            index: ['test-index'],
+            keep_alive: '1m',
+          });
+          done();
+        },
+        done
+      );
+    });
+
+    test('should handle malformed ILM responses', (done) => {
+      const query = createMockQuery(QueryType.DSL, { tiers: ['hot'] });
+      const circuitBreaker = createMockCircuitBreaker(true);
+
+      mockEsClient.ilm.explainLifecycle.mockResolvedValue({});
+      setupPointInTime(mockEsClient);
+      mockEsClient.search.mockResolvedValue(createMockSearchResponse([]));
+
+      executeObservableTest(
+        queryExecutor.search({ query, circuitBreakers: [circuitBreaker] }),
+        () => {
+          expect(mockEsClient.openPointInTime).toHaveBeenCalledWith({
+            index: ['test-index'],
+            keep_alive: '1m',
+          });
+          done();
+        },
+        done
+      );
+    });
+  });
+
+  describe('indicesFor method', () => {
+    test('should return original index when no tiers are specified', async () => {
+      const query = createMockQuery(QueryType.DSL);
+      const result = await queryExecutor.indicesFor(query);
+      expect(result).toEqual(['test-index']);
+      expect(mockEsClient.ilm.explainLifecycle).not.toHaveBeenCalled();
+    });
+
+    test('should filter indices by tiers when ILM is available', async () => {
+      const query = createMockQuery(QueryType.DSL, { tiers: ['hot', 'warm'] });
+
+      mockEsClient.ilm.explainLifecycle.mockResolvedValue({
+        indices: {
+          'test-index-000001': { phase: 'hot' },
+          'test-index-000002': { phase: 'warm' },
+          'test-index-000003': { phase: 'cold' },
+          'test-index-000004': { phase: 'hot' },
+        },
+      });
+
+      const result = await queryExecutor.indicesFor(query);
+      expect(result).toEqual(['test-index-000001', 'test-index-000002', 'test-index-000004']);
+      expect(mockEsClient.ilm.explainLifecycle).toHaveBeenCalledWith({
+        index: 'test-index',
+        only_managed: false,
+        filter_path: ['indices.*.phase'],
+      });
+    });
+
+    test('should handle serverless environment (undefined indices)', async () => {
+      const query = createMockQuery(QueryType.DSL, { tiers: ['hot'] });
+
+      mockEsClient.ilm.explainLifecycle.mockResolvedValue({ indices: undefined });
+
+      const result = await queryExecutor.indicesFor(query);
+      expect(result).toEqual(['test-index']);
+    });
+
+    test('should handle empty ILM response', async () => {
+      const query = createMockQuery(QueryType.DSL, { tiers: ['hot'] });
+
+      mockEsClient.ilm.explainLifecycle.mockResolvedValue({});
+
+      const result = await queryExecutor.indicesFor(query);
+      expect(result).toEqual(['test-index']);
+    });
+
+    test('should handle indices without phase information', async () => {
+      const query = createMockQuery(QueryType.DSL, { tiers: ['hot'] });
+
+      mockEsClient.ilm.explainLifecycle.mockResolvedValue({
+        indices: {
+          'test-index-000001': { phase: 'hot' },
+          'test-index-000002': {},
+          'test-index-000003': { other_field: 'value' },
+        },
+      });
+
+      const result = await queryExecutor.indicesFor(query);
+      expect(result).toEqual(['test-index-000001']);
+    });
+
+    test('should filter out indices not in specified tiers', async () => {
+      const query = createMockQuery(QueryType.DSL, { tiers: ['hot'] });
+
+      mockEsClient.ilm.explainLifecycle.mockResolvedValue({
+        indices: {
+          'test-index-000001': { phase: 'hot' },
+          'test-index-000002': { phase: 'warm' },
+          'test-index-000003': { phase: 'cold' },
+        },
+      });
+
+      const result = await queryExecutor.indicesFor(query);
+      expect(result).toEqual(['test-index-000001']);
+    });
+
+    test('should handle ILM API errors by falling back to original index', async () => {
+      const query = createMockQuery(QueryType.DSL, { tiers: ['hot'] });
+
+      const serverlessError = new Error(
+        'no handler found for uri [/.alerts-security.alerts*/_ilm/explain?only_managed=false&filter_path=indices.*.phase] and method [GET]'
+      );
+      mockEsClient.ilm.explainLifecycle.mockRejectedValue(serverlessError);
+
+      const result = await queryExecutor.indicesFor(query);
+      expect(result).toEqual(['test-index']);
+    });
+
+    test('should handle authorization errors gracefully', async () => {
+      const query = createMockQuery(QueryType.DSL, { tiers: ['hot'] });
+
+      const authError = new Error('security_exception');
+      mockEsClient.ilm.explainLifecycle.mockRejectedValue(authError);
+
+      const result = await queryExecutor.indicesFor(query);
+      expect(result).toEqual(['test-index']);
+    });
+
+    test('should return empty array when no indices match tiers', async () => {
+      const query = createMockQuery(QueryType.DSL, { tiers: ['frozen'] });
+
+      mockEsClient.ilm.explainLifecycle.mockResolvedValue({
+        indices: {
+          'test-index-000001': { phase: 'hot' },
+          'test-index-000002': { phase: 'warm' },
+          'test-index-000003': { phase: 'cold' },
+        },
+      });
+
+      const result = await queryExecutor.indicesFor(query);
+      expect(result).toEqual([]);
     });
   });
 });

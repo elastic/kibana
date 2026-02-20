@@ -43,7 +43,10 @@ export const getAPIKeyForSyntheticsService = async ({
   server,
 }: {
   server: SyntheticsServerSetup;
-}): Promise<{ apiKey?: SyntheticsServiceApiKey; isValid: boolean }> => {
+}): Promise<{
+  apiKey?: SyntheticsServiceApiKey;
+  isValid: boolean;
+}> => {
   try {
     const apiKey = await syntheticsServiceAPIKeySavedObject.get(server);
 
@@ -67,7 +70,6 @@ export const getAPIKeyForSyntheticsService = async ({
       if (!hasPermissions) {
         return { isValid: false, apiKey };
       }
-
       return { apiKey, isValid };
     }
   } catch (error) {

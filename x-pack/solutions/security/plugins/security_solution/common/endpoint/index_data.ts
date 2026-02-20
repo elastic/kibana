@@ -23,6 +23,7 @@ import {
 } from './data_loaders/index_endpoint_hosts';
 import { enableFleetServerIfNecessary } from './data_loaders/index_fleet_server';
 import { indexAlerts } from './data_loaders/index_alerts';
+import { indexDeviceEvents } from './data_loaders/index_device_events';
 import { setupFleetForEndpoint } from './data_loaders/setup_fleet_for_endpoint';
 import { createToolingLogger, mergeAndAppendArrays } from './data_loaders/utils';
 import {
@@ -67,6 +68,7 @@ export const indexHostsAndAlerts = usageTracker.track(
     policyResponseIndex: string,
     eventIndex: string,
     alertIndex: string,
+    deviceIndex: string,
     alertsPerHost: number,
     fleet: boolean,
     options: TreeOptions = {},
@@ -142,6 +144,16 @@ export const indexHostsAndAlerts = usageTracker.track(
           alertIndex,
           generator,
           numAlerts: alertsPerHost,
+          options,
+        });
+      }
+
+      if (options.deviceEvents && options.deviceEvents > 0) {
+        await indexDeviceEvents({
+          client,
+          deviceIndex,
+          generator,
+          numDeviceEvents: options.deviceEvents,
           options,
         });
       }

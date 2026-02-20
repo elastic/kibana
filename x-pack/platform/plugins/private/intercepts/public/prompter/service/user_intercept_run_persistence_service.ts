@@ -7,6 +7,7 @@
 
 import * as Rx from 'rxjs';
 import type { CoreStart } from '@kbn/core/public';
+import { apm } from '@elastic/apm-rum';
 import { TRIGGER_USER_INTERACTION_METADATA_API_ROUTE } from '../../../common/constants';
 
 /**
@@ -22,20 +23,44 @@ export class UserInterceptRunPersistenceService {
 
   userInterceptRunId(http: CoreStart['http'], triggerId: string) {
     return Rx.from(
-      http.get<{ lastInteractedInterceptId: number }>(
+      http.get<{ lastInteractedInterceptId: number | null }>(
         TRIGGER_USER_INTERACTION_METADATA_API_ROUTE.replace('{triggerId}', triggerId)
       )
+    ).pipe(
+      Rx.catchError((error) => {
+        apm.captureError(error, {
+          labels: {
+            triggerId,
+            errorContext: 'userInterceptRunId',
+          },
+        });
+        // Return a default value to prevent the stream from breaking
+        // This allows the intercept to continue functioning even if the API call fails
+        return Rx.of({ lastInteractedInterceptId: null });
+      })
     );
   }
 
   persistInterceptRunInteraction(http: CoreStart['http'], triggerId: string, runId: number) {
-    return http.post(
-      TRIGGER_USER_INTERACTION_METADATA_API_ROUTE.replace('{triggerId}', triggerId),
-      {
+    return Rx.from(
+      http.post(TRIGGER_USER_INTERACTION_METADATA_API_ROUTE.replace('{triggerId}', triggerId), {
         body: JSON.stringify({
           lastInteractedInterceptId: runId,
         }),
-      }
+      })
+    ).pipe(
+      Rx.catchError((error) => {
+        apm.captureError(error, {
+          labels: {
+            triggerId,
+            runId: String(runId),
+            errorContext: 'persistInterceptRunInteraction',
+          },
+        });
+        // Return empty observable to gracefully handle the error
+        // This prevents the update failure from breaking the user experience
+        return Rx.EMPTY;
+      })
     );
   }
 }

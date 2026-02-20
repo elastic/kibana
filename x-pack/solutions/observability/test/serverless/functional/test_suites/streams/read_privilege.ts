@@ -25,9 +25,8 @@ const request: Streams.WiredStream.UpsertRequest = {
     description: '',
     ingest: {
       lifecycle: { inherit: {} },
-      processing: {
-        steps: [],
-      },
+      processing: { steps: [] },
+      settings: {},
       wired: {
         routing: [],
         fields: {
@@ -36,6 +35,7 @@ const request: Streams.WiredStream.UpsertRequest = {
           },
         },
       },
+      failure_store: { inherit: {} },
     },
   },
   ...emptyAssets,

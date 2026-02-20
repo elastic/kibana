@@ -19,7 +19,7 @@ export function StreamsPromotion({ dataStreamName }: { dataStreamName: string })
     url,
     plugins: { streams },
   } = useAppContext();
-  const streamsEnabled = useObservable(streams?.status$ || EMPTY)?.status === 'enabled';
+  const streamsEnabled = useObservable(streams?.navigationStatus$ || EMPTY)?.status === 'enabled';
   const streamsLocator = url.locators.get<StreamsAppLocatorParams>(STREAMS_APP_LOCATOR_ID);
 
   if (!streamsEnabled || !streamsLocator) {
@@ -32,7 +32,7 @@ export function StreamsPromotion({ dataStreamName }: { dataStreamName: string })
       <EuiCallOut
         size="s"
         title={i18n.translate('xpack.idxMgmt.streamsPromotion.title', {
-          defaultMessage: 'Explore the New Streams UI in Technical Preview',
+          defaultMessage: 'Explore the New Streams UI',
         })}
         color="primary"
       >

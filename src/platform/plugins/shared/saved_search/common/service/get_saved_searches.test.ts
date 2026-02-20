@@ -80,9 +80,11 @@ describe('getSavedSearch', () => {
     expect(savedSearch).toMatchInlineSnapshot(`
       Object {
         "breakdownField": undefined,
+        "chartInterval": undefined,
         "columns": Array [
           "_source",
         ],
+        "controlGroupJson": undefined,
         "density": undefined,
         "description": "description",
         "grid": Object {},
@@ -230,9 +232,11 @@ describe('getSavedSearch', () => {
     expect(savedSearch).toMatchInlineSnapshot(`
       Object {
         "breakdownField": undefined,
+        "chartInterval": undefined,
         "columns": Array [
           "_source",
         ],
+        "controlGroupJson": undefined,
         "density": undefined,
         "description": "description",
         "grid": Object {},

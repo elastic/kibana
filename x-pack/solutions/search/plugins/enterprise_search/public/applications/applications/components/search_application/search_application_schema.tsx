@@ -117,6 +117,7 @@ const SchemaFieldDetails: React.FC<{ schemaField: SchemaField }> = ({ schemaFiel
       <EuiFlexGroup direction="column" gutterSize="l">
         {notInAllIndices && (
           <EuiCallOut
+            announceOnMount
             iconType="info"
             title={
               <FormattedMessage
@@ -143,6 +144,13 @@ const SchemaFieldDetails: React.FC<{ schemaField: SchemaField }> = ({ schemaFiel
         )}
         <EuiBasicTable
           css={{ '& .euiTable': { backgroundColor: 'transparent' } }}
+          tableCaption={i18n.translate(
+            'xpack.enterpriseSearch.searchApplications.searchApplication.schema.fieldIndices.tableCaption',
+            {
+              defaultMessage: 'Indices for {fieldName}',
+              values: { fieldName: schemaField.name },
+            }
+          )}
           columns={columns}
           items={schemaField.indices}
           responsiveBreakpoint={false}
@@ -352,6 +360,7 @@ export const SearchApplicationSchema: React.FC = () => {
       <EuiFlexGroup direction="column" gutterSize="l">
         {hasSchemaConflicts && (
           <EuiCallOut
+            announceOnMount
             title={i18n.translate(
               'xpack.enterpriseSearch.searchApplications.searchApplication.schema.conflictsCallOut.title',
               { defaultMessage: 'Potential field mapping issues found' }
@@ -446,6 +455,12 @@ export const SearchApplicationSchema: React.FC = () => {
         </EuiFlexGroup>
 
         <EuiBasicTable
+          tableCaption={i18n.translate(
+            'xpack.enterpriseSearch.searchApplications.searchApplication.schema.tableCaption',
+            {
+              defaultMessage: 'Search application schema fields',
+            }
+          )}
           items={filteredSchemaFields}
           columns={columns}
           loading={isLoadingSearchApplicationSchema}
@@ -455,6 +470,7 @@ export const SearchApplicationSchema: React.FC = () => {
         />
         {totalConflictsHiddenByTypeFilters > 0 && (
           <EuiCallOut
+            announceOnMount
             title={
               <FormattedMessage
                 id="xpack.enterpriseSearch.searchApplications.searchApplication.schema.filters.conflict.callout.title"

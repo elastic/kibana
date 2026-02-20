@@ -12,11 +12,13 @@ import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { isTab } from '@kbn/timelines-plugin/public';
+import { useSpaceId } from '../../../common/hooks/use_space_id';
+import { DEFAULT_ALERTS_INDEX, DEFAULT_DATA_VIEW_ID } from '../../../../common/constants';
+import { PageScope } from '../../../data_view_manager/constants';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { timelineActions, timelineSelectors } from '../../store';
 import { timelineDefaults } from '../../store/defaults';
 import type { CellValueElementProps } from './cell_rendering';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { TimelineModalHeader } from '../modal/header';
 import type { RowRenderer, TimelineId } from '../../../../common/types/timeline';
 import { TimelineTypeEnum } from '../../../../common/api/timeline';
@@ -39,6 +41,10 @@ const TimelineBody = styled.div`
   height: 100%;
   display: flex;
   flex-direction: column;
+  @media (max-width: 767px) {
+    height: fit-content;
+    min-height: 400px;
+  }
 `;
 
 export interface Props {
@@ -70,10 +76,10 @@ const StatefulTimelineComponent: React.FC<Props> = ({
   const containerElement = useRef<HTMLDivElement | null>(null);
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const selectedPatternsSourcerer = useSelector((state: State) => {
-    return sourcererSelectors.sourcererScopeSelectedPatterns(state, SourcererScopeName.timeline);
+    return sourcererSelectors.sourcererScopeSelectedPatterns(state, PageScope.timeline);
   });
   const selectedDataViewIdSourcerer = useSelector((state: State) => {
-    return sourcererSelectors.sourcererScopeSelectedDataViewId(state, SourcererScopeName.timeline);
+    return sourcererSelectors.sourcererScopeSelectedDataViewId(state, PageScope.timeline);
   });
   const {
     dataViewId: selectedDataViewIdTimeline,
@@ -101,8 +107,9 @@ const StatefulTimelineComponent: React.FC<Props> = ({
   const { timelineFullScreen } = useTimelineFullScreen();
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.timeline);
-  const { dataView: experimentalDataView, status } = useDataView(SourcererScopeName.timeline);
+  const spaceId = useSpaceId();
+  const experimentalSelectedPatterns = useSelectedPatterns(PageScope.timeline);
+  const { dataView: experimentalDataView, status } = useDataView(PageScope.timeline);
 
   const selectedDataViewId = useMemo(
     () => (newDataViewPickerEnabled ? experimentalDataView.id ?? '' : selectedDataViewIdSourcerer),
@@ -143,6 +150,15 @@ const StatefulTimelineComponent: React.FC<Props> = ({
     ) {
       return;
     }
+    // TODO: newDataViewPickerEnabled: With the new data view picker, we should not update the selected patterns
+    // on timeline, as that prevents us from guiding the user to duplicate the data view or using the new alerts only dv
+    if (
+      selectedDataViewIdTimeline === `${DEFAULT_DATA_VIEW_ID}-${spaceId}` &&
+      selectedPatternsTimeline.length === 1 &&
+      selectedPatternsTimeline[0].includes(DEFAULT_ALERTS_INDEX)
+    ) {
+      return;
+    }
     dispatch(
       timelineActions.updateDataView({
         dataViewId: selectedDataViewId,
@@ -157,6 +173,7 @@ const StatefulTimelineComponent: React.FC<Props> = ({
     selectedDataViewIdTimeline,
     selectedPatterns,
     selectedPatternsTimeline,
+    spaceId,
     timelineId,
   ]);
 

@@ -11,153 +11,228 @@ import {
   EuiForm,
   EuiFormLabel,
   EuiFormRow,
-  EuiTitle,
+  EuiHorizontalRule,
+  EuiPanel,
+  EuiSuperSelect,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { StreamQueryKql, Streams } from '@kbn/streams-schema';
-import React, { useEffect, useState } from 'react';
-import { useKibana } from '../../../../hooks/use_kibana';
-import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
-import { useTimefilter } from '../../../../hooks/use_timefilter';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import type { StreamQueryKql, Streams, System } from '@kbn/streams-schema';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useDebounceFn } from '@kbn/react-hooks';
 import { UncontrolledStreamsAppSearchBar } from '../../../streams_app_search_bar/uncontrolled_streams_app_bar';
 import { PreviewDataSparkPlot } from '../common/preview_data_spark_plot';
 import { validateQuery } from '../common/validate_query';
+import { SeveritySelector } from '../common/severity_selector';
+import { ALL_DATA_OPTION } from '../../system_selector';
 
 interface Props {
   definition: Streams.all.Definition;
   query: StreamQueryKql;
-  isEditMode: boolean;
   isSubmitting: boolean;
+  isEditMode: boolean;
   setQuery: (query: StreamQueryKql) => void;
   setCanSave: (canSave: boolean) => void;
+  systems: System[];
+  dataViews: DataView[];
 }
+
+const DEBOUNCE_DELAY_MS = 300;
+const DEBOUNCE_OPTIONS = { wait: DEBOUNCE_DELAY_MS };
 
 export function ManualFlowForm({
   definition,
   query,
   setQuery,
-  isEditMode,
   setCanSave,
   isSubmitting,
+  isEditMode,
+  systems,
+  dataViews,
 }: Props) {
-  const {
-    dependencies: {
-      start: { data },
-    },
-  } = useKibana();
-  const {
-    timeState: { timeRange: initialTimeRange },
-  } = useTimefilter();
+  const [touched, setTouched] = useState({
+    title: false,
+    feature: false,
+    kql: false,
+    severity: false,
+  });
 
-  const [touched, setTouched] = useState({ title: false, kql: false });
-  const [timeRange, setTimeRange] = useState(initialTimeRange);
+  // Debounced KQL query for preview chart API calls
+  const [debouncedKqlQuery, setDebouncedKqlQuery] = useState(query.kql.query);
 
-  const dataViewsFetch = useStreamsAppFetch(() => {
-    return data.dataViews.create({ title: definition.name }).then((value) => {
-      return [value];
-    });
-  }, [data.dataViews, definition.name]);
+  const { run: updateDebouncedKqlQuery } = useDebounceFn(
+    (kqlQuery: string) => setDebouncedKqlQuery(kqlQuery),
+    DEBOUNCE_OPTIONS
+  );
+
+  // Create a query object with debounced KQL for the preview chart
+  const debouncedQuery = useMemo(
+    (): StreamQueryKql => ({
+      ...query,
+      kql: { query: debouncedKqlQuery },
+    }),
+    [query, debouncedKqlQuery]
+  );
 
   const validation = validateQuery(query);
 
   useEffect(() => {
     const isValid = !validation.title.isInvalid && !validation.kql.isInvalid;
-    const isTouched = touched.title || touched.kql;
+    const isTouched = touched.title || touched.kql || touched.feature || touched.severity;
     setCanSave(isValid && isTouched);
-  }, [validation, setCanSave, touched.title, touched.kql]);
+  }, [validation, setCanSave, touched]);
+
+  const options = [
+    { value: ALL_DATA_OPTION.value, inputDisplay: ALL_DATA_OPTION.label },
+    ...systems.map((system) => ({
+      value: system,
+      inputDisplay: system.name,
+    })),
+  ];
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="m">
-      {!isEditMode && (
-        <EuiTitle size="xs">
-          <h3>
-            {i18n.translate('xpack.streams.addSignificantEventFlyout.manualFlow.title', {
-              defaultMessage: 'Create from a query',
-            })}
-          </h3>
-        </EuiTitle>
-      )}
-
-      <EuiForm fullWidth>
-        <EuiFormRow
-          {...(touched.title && { ...validation.title })}
-          label={
-            <EuiFormLabel>
-              {i18n.translate(
-                'xpack.streams.addSignificantEventFlyout.manualFlow.formFieldTitleLabel',
-                { defaultMessage: 'Title' }
-              )}
-            </EuiFormLabel>
-          }
-        >
-          <EuiFieldText
-            value={query?.title}
-            disabled={isSubmitting}
-            onBlur={() => {
-              setTouched((prev) => ({ ...prev, title: true }));
-            }}
-            onChange={(event) => {
-              const next = event.currentTarget.value;
-              setQuery({ ...query, title: next });
-              setTouched((prev) => ({ ...prev, title: true }));
-            }}
-            placeholder={i18n.translate(
-              'xpack.streams.addSignificantEventFlyout.manualFlow.titlePlaceholder',
-              { defaultMessage: 'What should we call this event?' }
-            )}
-          />
-        </EuiFormRow>
-        <EuiFormRow
-          label={
-            <EuiFormLabel>
-              {i18n.translate(
-                'xpack.streams.addSignificantEventFlyout.manualFlow.formFieldQueryLabel',
-                { defaultMessage: 'Query' }
-              )}
-            </EuiFormLabel>
-          }
-          {...(touched.kql && { ...validation.kql })}
-        >
-          <UncontrolledStreamsAppSearchBar
-            query={
-              query.kql ? { language: 'kuery', ...query.kql } : { language: 'kuery', query: '' }
+    <EuiPanel hasShadow={false} color="subdued">
+      <EuiFlexGroup direction="column" gutterSize="m">
+        <EuiForm fullWidth>
+          <EuiFormRow
+            {...(touched.title && { ...validation.title })}
+            label={
+              <EuiFormLabel>
+                {i18n.translate(
+                  'xpack.streams.addSignificantEventFlyout.manualFlow.formFieldTitleLabel',
+                  { defaultMessage: 'Title' }
+                )}
+              </EuiFormLabel>
             }
-            showQueryInput
-            isDisabled={isSubmitting}
-            onQueryChange={() => {
-              setTouched((prev) => ({ ...prev, kql: true }));
-            }}
-            onQuerySubmit={(next) => {
-              setQuery({
-                ...query,
-                kql: {
-                  query: typeof next.query?.query === 'string' ? next.query.query : '',
-                },
-              });
+          >
+            <EuiFieldText
+              value={query?.title}
+              disabled={isSubmitting}
+              onBlur={() => {
+                setTouched((prev) => ({ ...prev, title: true }));
+              }}
+              onChange={(event) => {
+                const next = event.currentTarget.value;
+                setQuery({ ...query, title: next });
+                setTouched((prev) => ({ ...prev, title: true }));
+              }}
+              placeholder={i18n.translate(
+                'xpack.streams.addSignificantEventFlyout.manualFlow.titlePlaceholder',
+                { defaultMessage: 'Add title' }
+              )}
+            />
+          </EuiFormRow>
 
-              setTouched((prev) => ({ ...prev, kql: true }));
-              if (next.dateRange) {
-                setTimeRange(next.dateRange);
+          <EuiFormRow
+            label={
+              <EuiFormLabel>
+                {i18n.translate(
+                  'xpack.streams.addSignificantEventFlyout.manualFlow.formFieldSeverityLabel',
+                  { defaultMessage: 'Severity' }
+                )}
+              </EuiFormLabel>
+            }
+          >
+            <SeveritySelector
+              severityScore={query.severity_score}
+              onChange={(score) => {
+                setQuery({ ...query, severity_score: score });
+                setTouched((prev) => ({ ...prev, severity: true }));
+              }}
+            />
+          </EuiFormRow>
+
+          <EuiFormRow
+            label={
+              <EuiFormLabel>
+                {i18n.translate(
+                  'xpack.streams.addSignificantEventFlyout.manualFlow.formFieldSystemLabel',
+                  { defaultMessage: 'System' }
+                )}
+              </EuiFormLabel>
+            }
+          >
+            <EuiSuperSelect
+              options={options}
+              valueOfSelected={
+                query.feature
+                  ? options.find(
+                      (option) =>
+                        option.value.name === query.feature?.name &&
+                        option.value.type === query.feature?.type
+                    )?.value
+                  : ALL_DATA_OPTION.value
               }
-            }}
-            dateRangeFrom={timeRange.from}
-            dateRangeTo={timeRange.to}
-            placeholder={i18n.translate(
-              'xpack.streams.addSignificantEventFlyout.manualFlow.queryPlaceholder',
-              { defaultMessage: 'What are you looking for?' }
-            )}
-            indexPatterns={dataViewsFetch.value}
-            submitOnBlur
-          />
-        </EuiFormRow>
-      </EuiForm>
+              placeholder={i18n.translate(
+                'xpack.streams.addSignificantEventFlyout.manualFlow.systemPlaceholder',
+                { defaultMessage: 'Select system' }
+              )}
+              disabled={isSubmitting || systems.length === 0 || isEditMode}
+              onBlur={() => {
+                setTouched((prev) => ({ ...prev, feature: true }));
+              }}
+              onChange={(value) => {
+                const feature =
+                  value.type === ALL_DATA_OPTION.value.type
+                    ? undefined
+                    : {
+                        name: value.name,
+                        filter: value.filter,
+                        type: value.type,
+                      };
+                setQuery({ ...query, feature });
+                setTouched((prev) => ({ ...prev, feature: true }));
+              }}
+              fullWidth
+            />
+          </EuiFormRow>
 
-      <PreviewDataSparkPlot
-        definition={definition}
-        query={query}
-        timeRange={timeRange}
-        isQueryValid={!validation.kql.isInvalid}
-      />
-    </EuiFlexGroup>
+          <EuiFormRow
+            label={
+              <EuiFormLabel>
+                {i18n.translate(
+                  'xpack.streams.addSignificantEventFlyout.manualFlow.formFieldQueryLabel',
+                  { defaultMessage: 'Query' }
+                )}
+              </EuiFormLabel>
+            }
+            {...(touched.kql && { ...validation.kql })}
+          >
+            <UncontrolledStreamsAppSearchBar
+              query={
+                query.kql ? { language: 'kuery', ...query.kql } : { language: 'kuery', query: '' }
+              }
+              showQueryInput
+              showSubmitButton={false}
+              isDisabled={isSubmitting}
+              onQueryChange={(next) => {
+                // Immediately sync query state so it's always up-to-date for save
+                const nextKqlQuery = typeof next.query?.query === 'string' ? next.query.query : '';
+                setQuery({
+                  ...query,
+                  kql: { query: nextKqlQuery },
+                });
+                // Debounce the preview chart update
+                updateDebouncedKqlQuery(nextKqlQuery);
+                setTouched((prev) => ({ ...prev, kql: true }));
+              }}
+              placeholder={i18n.translate(
+                'xpack.streams.addSignificantEventFlyout.manualFlow.queryPlaceholder',
+                { defaultMessage: 'Enter query' }
+              )}
+              indexPatterns={dataViews}
+            />
+          </EuiFormRow>
+        </EuiForm>
+
+        <EuiHorizontalRule margin="m" />
+
+        <PreviewDataSparkPlot
+          definition={definition}
+          query={debouncedQuery}
+          isQueryValid={!validation.kql.isInvalid}
+        />
+      </EuiFlexGroup>
+    </EuiPanel>
   );
 }

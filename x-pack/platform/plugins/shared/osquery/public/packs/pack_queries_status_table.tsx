@@ -373,7 +373,7 @@ const ScheduledQueryLastResults: React.FC<ScheduledQueryLastResultsProps> = ({
   });
 
   const timestamp = useMemo(() => {
-    const dateTime = lastResultsData?.['@timestamp'];
+    const dateTime = lastResultsData?.lastResultTime;
     if (!dateTime) return undefined;
 
     return Array.isArray(dateTime) ? dateTime[0] : dateTime;
@@ -395,7 +395,7 @@ const ScheduledQueryLastResults: React.FC<ScheduledQueryLastResultsProps> = ({
               </>
             }
           >
-            <div data-test-subj="last-results-date">
+            <div data-test-subj="last-results-date" tabIndex={0}>
               <FormattedRelative value={timestamp} />
             </div>
           </EuiToolTip>
@@ -494,6 +494,9 @@ const ErrorsColumnResults: React.FC<ScheduledQueryErrorsProps> = ({
             isDisabled={!errorsData?.total}
             onClick={handleErrorsToggle}
             iconType={expanded ? 'arrowUp' : 'arrowDown'}
+            aria-label={i18n.translate('xpack.osquery.pack.queriesTable.errorsAriaLabel', {
+              defaultMessage: 'Error details',
+            })}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -519,11 +522,11 @@ const PackViewInDiscoverActionComponent: React.FC<PackViewInActionProps> = ({ it
     interval,
   });
 
-  const startDate = lastResultsData?.['@timestamp']
-    ? moment(lastResultsData?.['@timestamp'][0]).subtract(interval, 'seconds').toISOString()
+  const startDate = lastResultsData?.lastResultTime
+    ? moment(lastResultsData.lastResultTime[0]).subtract(interval, 'seconds').toISOString()
     : `now-${interval}s`;
-  const endDate = lastResultsData?.['@timestamp']
-    ? moment(lastResultsData?.['@timestamp'][0]).toISOString()
+  const endDate = lastResultsData?.lastResultTime
+    ? moment(lastResultsData.lastResultTime[0]).toISOString()
     : 'now';
 
   return (
@@ -532,7 +535,7 @@ const PackViewInDiscoverActionComponent: React.FC<PackViewInActionProps> = ({ it
       buttonType={ViewResultsActionButtonType.icon}
       startDate={startDate}
       endDate={endDate}
-      mode={lastResultsData?.['@timestamp'][0] ? 'absolute' : 'relative'}
+      mode={lastResultsData?.lastResultTime ? 'absolute' : 'relative'}
     />
   );
 };
@@ -547,11 +550,11 @@ const PackViewInLensActionComponent: React.FC<PackViewInActionProps> = ({ item, 
     interval,
   });
 
-  const startDate = lastResultsData?.['@timestamp']
-    ? moment(lastResultsData?.['@timestamp'][0]).subtract(interval, 'seconds').toISOString()
+  const startDate = lastResultsData?.lastResultTime
+    ? moment(lastResultsData.lastResultTime[0]).subtract(interval, 'seconds').toISOString()
     : `now-${interval}s`;
-  const endDate = lastResultsData?.['@timestamp']
-    ? moment(lastResultsData?.['@timestamp'][0]).toISOString()
+  const endDate = lastResultsData?.lastResultTime
+    ? moment(lastResultsData.lastResultTime[0]).toISOString()
     : 'now';
 
   return (
@@ -560,7 +563,7 @@ const PackViewInLensActionComponent: React.FC<PackViewInActionProps> = ({ item, 
       buttonType={ViewResultsActionButtonType.icon}
       startDate={startDate}
       endDate={endDate}
-      mode={lastResultsData?.['@timestamp'][0] ? 'absolute' : 'relative'}
+      mode={lastResultsData?.lastResultTime ? 'absolute' : 'relative'}
     />
   );
 };
@@ -749,6 +752,13 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
 
   return (
     <EuiBasicTable<PackQueryFormData>
+      tableCaption={i18n.translate(
+        'xpack.osquery.pack.queriesTable.packQueriesStatusTableCaption',
+        {
+          defaultMessage: 'Status of pack {packName} queries',
+          values: { packName },
+        }
+      )}
       // eslint-disable-next-line react-perf/jsx-no-new-array-as-prop
       items={data ?? []}
       itemId={getItemId}

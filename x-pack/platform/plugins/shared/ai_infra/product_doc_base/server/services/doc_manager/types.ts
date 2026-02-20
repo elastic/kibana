@@ -7,6 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import type { InstallationStatus, ProductInstallState } from '../../../common/install_status';
+import type { PerformUpdateResponse } from '../../../common/http_api/installation';
 
 /**
  * APIs to manage the product documentation.
@@ -24,6 +25,11 @@ export interface DocumentationManagerAPI {
    */
   update(options?: DocUpdateOptions): Promise<void>;
   /**
+   * Update the product documentation for all previously installed inference IDs to the latest version.
+   * No-op if the product documentation is not currently installed.
+   */
+  updateAll(options?: DocUpdateAllOptions): Promise<{ inferenceIds: string[] }>;
+  /**
    * Uninstall the product documentation.
    * No-op if the product documentation is not currently installed.
    */
@@ -33,6 +39,71 @@ export interface DocumentationManagerAPI {
    * @param inferenceId - The inference ID to get the status for.
    */
   getStatus({ inferenceId }: { inferenceId: string }): Promise<DocGetStatusResponse>;
+  /**
+   * Returns the installation status of the documentation for the given inference IDs.
+   * @param inferenceIds - The inference IDs to get the status for.
+   */
+  getStatuses({
+    inferenceIds,
+  }: {
+    inferenceIds: string[];
+  }): Promise<Record<string, PerformUpdateResponse>>;
+
+  // Security Labs methods
+
+  /**
+   * Install Security Labs content from the CDN.
+   */
+  installSecurityLabs(options: SecurityLabsInstallOptions): Promise<void>;
+  /**
+   * Uninstall Security Labs content.
+   */
+  uninstallSecurityLabs(options: SecurityLabsUninstallOptions): Promise<void>;
+  /**
+   * Returns the installation status of Security Labs content.
+   */
+  getSecurityLabsStatus({
+    inferenceId,
+  }: {
+    inferenceId: string;
+  }): Promise<SecurityLabsStatusResponse>;
+
+  /**
+   * Update Security Labs content for all previously installed inference IDs to the latest version.
+   * No-op if Security Labs content is not currently installed.
+   */
+  updateSecurityLabsAll(options?: DocUpdateAllOptions): Promise<{ inferenceIds: string[] }>;
+}
+
+/**
+ * Response for Security Labs status
+ */
+export interface SecurityLabsStatusResponse {
+  status: InstallationStatus;
+  version?: string;
+  latestVersion?: string;
+  isUpdateAvailable?: boolean;
+  failureReason?: string;
+}
+
+/**
+ * Options for installing Security Labs content
+ */
+export interface SecurityLabsInstallOptions {
+  request?: KibanaRequest;
+  wait?: boolean;
+  inferenceId: string;
+  /** Optional specific version to install (YYYY.MM.DD format) */
+  version?: string;
+}
+
+/**
+ * Options for uninstalling Security Labs content
+ */
+export interface SecurityLabsUninstallOptions {
+  request?: KibanaRequest;
+  wait?: boolean;
+  inferenceId: string;
 }
 
 /**
@@ -109,4 +180,28 @@ export interface DocUpdateOptions {
    * If provided, the docs will be updated with the model indicated by Inference ID
    */
   inferenceId: string;
+  /**
+   * If true, the docs with the same version majorMinor version will be forced to updated regardless
+   */
+  forceUpdate?: boolean;
+}
+
+/**
+ * Options for {@link DocumentationManagerAPI.updateAll}
+ */
+export interface DocUpdateAllOptions {
+  /**
+   * When the operation was requested by a user, the request that initiated it.
+   *
+   * If not provided, the call will be considered as being done on behalf of system.
+   */
+  request?: KibanaRequest;
+  /**
+   * If true, the docs with the same version majorMinor version will be forced to updated regardless
+   */
+  forceUpdate?: boolean;
+  /**
+   * inferenceIds to update
+   */
+  inferenceIds?: string[];
 }

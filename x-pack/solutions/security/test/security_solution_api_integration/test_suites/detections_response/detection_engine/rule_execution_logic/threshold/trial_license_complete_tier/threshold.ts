@@ -27,11 +27,7 @@ import {
   ALERT_THRESHOLD_RESULT,
 } from '@kbn/security-solution-plugin/common/field_maps/field_names';
 import { getMaxSignalsWarning as getMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
-import {
-  createRule,
-  deleteAllRules,
-  deleteAllAlerts,
-} from '../../../../../../config/services/detections_response';
+import { createRule, deleteAllRules, deleteAllAlerts } from '@kbn/detections-response-ftr-services';
 import {
   getAlerts,
   getPreviewAlerts,
@@ -136,6 +132,19 @@ export default ({ getService }: FtrProviderContext) => {
       };
       const { logs } = await previewRule({ supertest, rule });
       expect(logs[0].warnings).not.toContain(getMaxAlertsWarning());
+    });
+
+    it('generates alerts from Threshold rules when threshold is met and no field is defined', async () => {
+      const rule: ThresholdRuleCreateProps = {
+        ...getThresholdRuleForAlertTesting(['auditbeat-*']),
+        threshold: {
+          field: [],
+          value: 100,
+        },
+      };
+      const { previewId } = await previewRule({ supertest, rule });
+      const previewAlerts = await getPreviewAlerts({ es, previewId });
+      expect(previewAlerts.length).toEqual(1);
     });
 
     it('generates 2 alerts from Threshold rules when threshold is met', async () => {

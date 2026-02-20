@@ -25,6 +25,7 @@ interface Props {
   fieldIconProps?: Omit<FieldIconProps, 'type'>;
   scripted?: boolean;
   highlight?: string;
+  disableMultiFieldBadge?: boolean;
 }
 
 export function FieldName({
@@ -35,6 +36,7 @@ export function FieldName({
   displayNameOverride,
   scripted = false,
   highlight = '',
+  disableMultiFieldBadge = false,
 }: Props) {
   const typeName = getFieldTypeName(fieldType);
   const fieldMappingDisplayName = fieldMapping?.displayName ? fieldMapping.displayName : fieldName;
@@ -78,7 +80,7 @@ export function FieldName({
             </EuiToolTip>
           </EuiFlexItem>
 
-          {isMultiField && (
+          {isMultiField && !disableMultiFieldBadge && (
             <EuiToolTip
               position="top"
               delay="long"
@@ -90,6 +92,7 @@ export function FieldName({
               )}
             >
               <EuiBadge
+                tabIndex={0}
                 title=""
                 className="kbnDocViewer__fieldName_multiFieldBadge"
                 color="default"

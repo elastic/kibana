@@ -249,6 +249,14 @@ export const bulkActionKnowledgeBaseEntriesRoute = (router: ElasticAssistantPlug
             });
           }
 
+          if (body.update && body.update.length > 0) {
+            body.update.forEach((entry) => {
+              if (isGlobalEntry(entry) && !manageGlobalKnowledgeBaseAIAssistant) {
+                throw new Error(`User lacks privileges to create global knowledge base entries`);
+              }
+            });
+          }
+
           await validateDocumentsModification(
             kbDataClient,
             authenticatedUser,

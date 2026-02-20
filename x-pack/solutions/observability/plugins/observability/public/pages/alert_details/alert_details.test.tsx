@@ -170,6 +170,15 @@ const MOCK_RULE = {
   name: 'ruleName',
   ruleTypeId: MOCK_RULE_TYPE_ID,
   consumer: 'logs',
+  params: {
+    searchConfiguration: {
+      index: 'index',
+      query: {
+        query: 'tags: tag1',
+      },
+    },
+    criteria: [],
+  },
   artifacts: {
     dashboards: [
       {
@@ -341,7 +350,7 @@ describe('Alert details', () => {
     await userEvent.click(alertDetails.getByText(/Related dashboards/));
     expect(myLocator.getRedirectUrl).toHaveBeenCalledWith({
       dashboardId: 'suggested-dashboard-1',
-      timeRange: {
+      time_range: {
         from: moment(alertDetail.formatted.start).subtract(30, 'minutes').toISOString(),
         to: moment(alertDetail.formatted.start).add(30, 'minutes').toISOString(),
       },

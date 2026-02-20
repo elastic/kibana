@@ -11,8 +11,14 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useEuiTheme, euiScrollBarStyles } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiBetaBadge } from '@elastic/eui';
-import type { LanguageDocumentationSections, LicenseInfo, MultipleLicenseInfo } from '../../types';
+import type {
+  DocumentationGroupItem,
+  LanguageDocumentationSections,
+  LicenseInfo,
+  MultipleLicenseInfo,
+} from '../../types';
 import { getLicensesArray } from '../../utils/get_license_array';
+import { MarkdownWithHighlight } from './markdown_with_highlight';
 
 function toTitleCase(str: string): string {
   return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
@@ -48,12 +54,9 @@ interface DocumentationContentProps {
   filteredGroups?: Array<{
     label: string;
     description?: string;
-    options: Array<{
-      label: string;
-      description?: JSX.Element | undefined;
-      preview?: boolean;
-      license?: MultipleLicenseInfo | undefined;
-    }>;
+    items: Array<
+      DocumentationGroupItem & { preview?: boolean; license?: MultipleLicenseInfo | undefined }
+    >;
   }>;
   sections?: LanguageDocumentationSections;
 }
@@ -95,9 +98,11 @@ function DocumentationContent({
               <section
                 key={helpGroup.label}
                 css={css`
-                  border-top: ${theme.euiTheme.border.thin};
-                  padding-top: ${theme.euiTheme.size.xxl};
-                  margin-top: ${theme.euiTheme.size.xxl};
+                  &:not(:first-of-type) {
+                    border-top: ${theme.euiTheme.border.thin};
+                    padding-top: ${theme.euiTheme.size.xxl};
+                    margin-top: ${theme.euiTheme.size.xxl};
+                  }
                 `}
                 ref={(el) => {
                   if (el) {
@@ -105,11 +110,13 @@ function DocumentationContent({
                   }
                 }}
               >
-                <h2>{helpGroup.label}</h2>
+                <h2>{<MarkdownWithHighlight markdownContent={helpGroup.label} />}</h2>
 
-                <p>{helpGroup.description}</p>
+                {helpGroup.description !== undefined ? (
+                  <MarkdownWithHighlight markdownContent={helpGroup.description} />
+                ) : null}
 
-                {filteredGroups?.[index].options.map((helpItem) => {
+                {filteredGroups?.[index].items.map((helpItem) => {
                   return (
                     <article
                       css={css`
@@ -162,7 +169,10 @@ function DocumentationContent({
                           ))}
                         </EuiFlexGroup>
                       )}
-                      {helpItem.description}
+                      <MarkdownWithHighlight
+                        markdownContent={helpItem.description?.markdownContent ?? ''}
+                        openLinksInNewTab={helpItem.description?.openLinksInNewTab}
+                      />
                     </article>
                   );
                 })}

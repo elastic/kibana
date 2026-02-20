@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import { emptyAssets } from '@kbn/streams-schema';
 import type { Streams } from '@kbn/streams-schema';
+import { omit } from 'lodash';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import { disableStreams, enableStreams, indexDocument, putStream } from './helpers/requests';
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
@@ -16,36 +17,18 @@ import { createStreamsRepositoryAdminClient } from './helpers/repository_client'
 const rootStreamDefinition: Streams.WiredStream.Definition = {
   name: 'logs',
   description: '',
+  updated_at: new Date().toISOString(),
   ingest: {
     lifecycle: { dsl: {} },
-    processing: {
-      steps: [],
-    },
+    processing: { steps: [], updated_at: new Date().toISOString() },
+    settings: {},
     wired: {
       routing: [],
       fields: {
         '@timestamp': {
           type: 'date',
         },
-        'scope.dropped_attributes_count': {
-          type: 'long',
-        },
-        dropped_attributes_count: {
-          type: 'long',
-        },
-        'resource.dropped_attributes_count': {
-          type: 'long',
-        },
-        'resource.schema_url': {
-          type: 'keyword',
-        },
         'scope.name': {
-          type: 'keyword',
-        },
-        'scope.schema_url': {
-          type: 'keyword',
-        },
-        'scope.version': {
           type: 'keyword',
         },
         trace_id: {
@@ -76,6 +59,9 @@ const rootStreamDefinition: Streams.WiredStream.Definition = {
           type: 'system',
         },
       },
+    },
+    failure_store: {
+      lifecycle: { enabled: { data_retention: '30d' } },
     },
   },
 };
@@ -131,6 +117,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           description: '',
           ingest: {
             ...rootStreamDefinition.ingest,
+            processing: omit(rootStreamDefinition.ingest.processing, 'updated_at'),
             wired: {
               ...rootStreamDefinition.ingest.wired,
               fields: {
@@ -158,6 +145,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           description: '',
           ingest: {
             ...rootStreamDefinition.ingest,
+            processing: omit(rootStreamDefinition.ingest.processing, 'updated_at'),
             wired: {
               ...rootStreamDefinition.ingest.wired,
               routing: [
@@ -184,7 +172,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         message: 'test',
       };
       const response = await indexDocument(esClient, 'logs.gcpcloud', doc, false);
-      // @ts-expect-error failure_store is not in the types, but in the actual response
       expect(response.failure_store).to.be('used');
     });
   });

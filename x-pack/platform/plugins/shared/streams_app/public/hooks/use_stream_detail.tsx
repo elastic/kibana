@@ -11,10 +11,12 @@ import { EuiFlexGroup, EuiLoadingSpinner } from '@elastic/eui';
 import { Streams } from '@kbn/streams-schema';
 import { STREAMS_UI_PRIVILEGES } from '@kbn/streams-plugin/public';
 import { getAncestorsAndSelf, getSegments } from '@kbn/streams-schema';
+import { isHttpFetchError } from '@kbn/server-route-repository-client';
 import { useStreamsAppFetch } from './use_streams_app_fetch';
 import { useStreamsAppBreadcrumbs } from './use_streams_app_breadcrumbs';
 import { useStreamsAppParams } from './use_streams_app_params';
 import { useKibana } from './use_kibana';
+import { StreamNotFoundPrompt } from '../components/stream_not_found_prompt';
 
 export interface StreamDetailContextProviderProps {
   name: string;
@@ -47,6 +49,7 @@ export function StreamDetailContextProvider({
     value: definition,
     loading,
     refresh,
+    error,
   } = useStreamsAppFetch(
     async ({ signal }) => {
       return streamsRepositoryClient
@@ -71,11 +74,11 @@ export function StreamDetailContextProvider({
             };
           }
 
-          if (Streams.GroupStream.GetResponse.is(response)) {
+          if (Streams.QueryStream.GetResponse.is(response)) {
             return response;
           }
 
-          throw new Error('Stream detail only supports Ingest streams and Group streams.');
+          throw new Error('Stream detail only supports Ingest and Query streams.');
         });
     },
     [streamsRepositoryClient, name, canManage]
@@ -112,6 +115,10 @@ export function StreamDetailContextProvider({
         <EuiLoadingSpinner size="xxl" />
       </EuiFlexGroup>
     );
+  }
+
+  if (!definition && error && isHttpFetchError(error) && error.body?.statusCode === 404) {
+    return <StreamNotFoundPrompt streamName={name} />;
   }
 
   if (!definition) {

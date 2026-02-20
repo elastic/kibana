@@ -12,9 +12,9 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiToolTip,
   EuiLink,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedDate, FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
@@ -32,6 +32,11 @@ import { AgentPolicySummaryLine } from '../../../../../../components';
 import { Tags } from '../../components/tags';
 import type { AgentMetrics } from '../../../../../../../common/types';
 import { formatAgentCPU, formatAgentMemory } from '../../services/agent_metrics';
+
+import {
+  hasVersionSuffix,
+  removeVersionSuffixFromPolicyId,
+} from '../../../../../../../common/services/version_specific_policies_utils';
 
 import { AgentUpgradeStatus } from './agent_upgrade_status';
 
@@ -75,7 +80,7 @@ interface Props {
     }>
   ) => void;
   clearFilters: () => void;
-  isCurrentRequestIncremented: boolean;
+  queryHasChanged: boolean;
 }
 
 export const AgentListTable: React.FC<Props> = (props: Props) => {
@@ -96,7 +101,7 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
     isUsingFilter,
     setEnrollmentFlyoutState,
     clearFilters,
-    isCurrentRequestIncremented,
+    queryHasChanged,
   } = props;
 
   const authz = useAuthz();
@@ -109,7 +114,8 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
       if (!agent.active) return false;
       if (!agent.policy_id) return true;
 
-      const agentPolicy = agentPoliciesIndexedById[agent.policy_id];
+      const basePolicyId = removeVersionSuffixFromPolicyId(agent.policy_id);
+      const agentPolicy = agentPoliciesIndexedById[basePolicyId];
       const isHosted = agentPolicy?.is_managed === true;
       return !isHosted;
     },
@@ -125,7 +131,7 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
   }, [agents, isAgentSelectable, showUpgradeable, totalAgents]);
 
   const noItemsMessage =
-    isLoading && isCurrentRequestIncremented ? (
+    isLoading && queryHasChanged ? (
       <FormattedMessage
         id="xpack.fleet.agentList.loadingAgentsMessage"
         defaultMessage="Loading agents…"
@@ -139,7 +145,7 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
             <EuiLink onClick={() => clearFilters()}>
               <FormattedMessage
                 id="xpack.fleet.agentList.clearFiltersLinkText"
-                defaultMessage="Clear filters"
+                defaultMessage="Reset filters"
               />
             </EuiLink>
           ),
@@ -198,11 +204,22 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
       }),
       width: '220px',
       render: (policyId: string, agent: Agent) => {
-        const agentPolicy = agentPoliciesIndexedById[policyId];
+        const basePolicyId = removeVersionSuffixFromPolicyId(policyId);
+        const agentPolicy = agentPoliciesIndexedById[basePolicyId];
+        const isVersionSpecific = hasVersionSuffix(policyId);
 
         return (
           agentPolicy && (
-            <AgentPolicySummaryLine direction="column" policy={agentPolicy} agent={agent} />
+            <EuiFlexGroup gutterSize="xs" alignItems="center" wrap={false} css={{ minWidth: 0 }}>
+              <EuiFlexItem grow={true} css={{ minWidth: 0 }}>
+                <AgentPolicySummaryLine
+                  policy={agentPolicy}
+                  agent={agent}
+                  showPolicyId
+                  isVersionSpecific={isVersionSpecific}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           )
         );
       },
@@ -220,7 +237,7 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
             />
           }
         >
-          <span>
+          <span tabIndex={0}>
             <FormattedMessage id="xpack.fleet.agentList.cpuTitle" defaultMessage="CPU" />
             &nbsp;
             <EuiIcon type="info" />
@@ -231,7 +248,9 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
       render: (metrics: AgentMetrics | undefined, agent: Agent) =>
         formatAgentCPU(
           agent.metrics,
-          agent.policy_id ? agentPoliciesIndexedById[agent.policy_id] : undefined
+          agent.policy_id
+            ? agentPoliciesIndexedById[removeVersionSuffixFromPolicyId(agent.policy_id)]
+            : undefined
         ),
     },
     {
@@ -246,7 +265,7 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
             />
           }
         >
-          <span>
+          <span tabIndex={0}>
             <FormattedMessage id="xpack.fleet.agentList.memoryTitle" defaultMessage="Memory" />
             &nbsp;
             <EuiIcon type="info" />
@@ -257,7 +276,9 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
       render: (metrics: AgentMetrics | undefined, agent: Agent) =>
         formatAgentMemory(
           agent.metrics,
-          agent.policy_id ? agentPoliciesIndexedById[agent.policy_id] : undefined
+          agent.policy_id
+            ? agentPoliciesIndexedById[removeVersionSuffixFromPolicyId(agent.policy_id)]
+            : undefined
         ),
     },
     {
@@ -290,7 +311,9 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
               />
             }
           >
-            <FormattedRelative value={lastCheckin} />
+            <span tabIndex={0}>
+              <FormattedRelative value={lastCheckin} />
+            </span>
           </EuiToolTip>
         ) : undefined,
     },
@@ -345,6 +368,9 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
     <EuiBasicTable<Agent>
       className="fleet__agentList__table"
       data-test-subj="fleetAgentListTable"
+      tableCaption={i18n.translate('xpack.fleet.agentList.tableCaption', {
+        defaultMessage: 'Fleet agents',
+      })}
       loading={isLoading}
       noItemsMessage={noItemsMessage}
       items={agentsShown}

@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import type { DashboardAttributes, DashboardPanel } from '@kbn/dashboard-plugin/server';
-import type { Logger, SavedObjectsClientContract, SavedObjectsFindResult } from '@kbn/core/server';
+import type { DashboardPanel } from '@kbn/dashboard-plugin/server';
+import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type { Reference } from '@kbn/content-management-utils';
 import type { ReferencedPanelAttributes, ReferencedPanelAttributesWithReferences } from './helpers';
 
 export class ReferencedPanelManager {
-  // The panelIndex refers to the ID of the saved object reference, while the panelId refers to the ID of the saved object itself (the panel).
-  // So, if the same saved object panel is referenced in two different dashboards, it will have different panelIndex values in each dashboard, but the same panelId, since they're both referencing the same panel.
+  // The uid refers to the ID of the saved object reference, while the panelId refers to the ID of the saved object itself (the panel).
+  // So, if the same saved object panel is referenced in two different dashboards, it will have different uid values in each dashboard, but the same panelId, since they're both referencing the same panel.
   private panelsById = new Map<string, ReferencedPanelAttributesWithReferences>();
-  private panelIndexToId = new Map<string, string>();
+  private panelUidToId = new Map<string, string>();
   private panelsTypeById = new Map<string, string>();
 
   constructor(private logger: Logger, private soClient: SavedObjectsClientContract) {}
@@ -40,36 +41,36 @@ export class ReferencedPanelManager {
     }
   }
 
-  getByIndex(panelIndex: string): ReferencedPanelAttributesWithReferences | undefined {
-    const panelId = this.panelIndexToId.get(panelIndex);
+  getByUid(uid: string): ReferencedPanelAttributesWithReferences | undefined {
+    const panelId = this.panelUidToId.get(uid);
     return panelId ? this.panelsById.get(panelId) : undefined;
   }
 
-  // This method adds the panel type to the map, so that we can fetch the panel later and it links the panelIndex to the panelId.
+  // This method adds the panel type to the map, so that we can fetch the panel later and it links the panel uid to the panelId.
   addReferencedPanel({
-    dashboard,
+    dashboardId,
+    references,
     panel,
   }: {
-    dashboard: SavedObjectsFindResult<DashboardAttributes>;
+    dashboardId: string;
+    references: Reference[];
     panel: DashboardPanel;
   }) {
-    const { panelIndex, type } = panel;
-    if (!panelIndex) return;
+    const { uid, type } = panel;
+    if (!uid) return;
 
-    const panelReference = dashboard.references.find(
-      (r) => r.name.includes(panelIndex) && r.type === type
-    );
+    const panelReference = references.find((r) => r.name.includes(uid) && r.type === type);
     // A reference of the panel was not found
     if (!panelReference) {
       this.logger.error(
-        `Reference for panel of type ${type} and panelIndex ${panelIndex} was not found in dashboard with id ${dashboard.id}`
+        `Reference for panel of type ${type} and uid ${uid} was not found in dashboard with id ${dashboardId}`
       );
       return;
     }
 
     const panelId = panelReference.id;
 
-    this.panelIndexToId.set(panelIndex, panelId);
+    this.panelUidToId.set(uid, panelId);
 
     if (!this.panelsTypeById.has(panelId)) {
       this.panelsTypeById.set(panelId, panel.type);

@@ -8,11 +8,14 @@
 import { i18n } from '@kbn/i18n';
 
 import React, { useEffect } from 'react';
-import type { DefaultEmbeddableApi, EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type {
+  DefaultEmbeddableApi,
+  EmbeddableFactory,
+  HasDrilldowns,
+} from '@kbn/embeddable-plugin/public';
 import type {
   PublishesWritableTitle,
   PublishesTitle,
-  SerializedTitles,
   HasEditCapabilities,
   HasSupportedTriggers,
 } from '@kbn/presentation-publishing';
@@ -22,18 +25,17 @@ import {
   fetch$,
   titleComparators,
 } from '@kbn/presentation-publishing';
-import { initializeUnsavedChanges } from '@kbn/presentation-containers';
+import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
 import { BehaviorSubject, Subject, map, merge } from 'rxjs';
 import type { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
-import type {
-  DynamicActionsSerializedState,
-  HasDynamicActions,
-} from '@kbn/embeddable-enhanced-plugin/public';
-import type { MonitorFilters } from '../monitors_overview/types';
-import { SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE } from '../constants';
 import type { ClientPluginsStart } from '../../../plugin';
 import { StatsOverviewComponent } from './stats_overview_component';
 import { openMonitorConfiguration } from '../common/monitors_open_configuration';
+import type {
+  MonitorFilters,
+  OverviewStatsEmbeddableState,
+} from '../../../../common/embeddables/stats_overview/types';
+import { SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE } from '../../../../common/embeddables/stats_overview/constants';
 
 export const getOverviewPanelTitle = () =>
   i18n.translate('xpack.synthetics.statusOverview.list.displayName', {
@@ -48,19 +50,11 @@ const DEFAULT_FILTERS: MonitorFilters = {
   monitorTypes: [],
 };
 
-export interface OverviewStatsEmbeddableCustomState {
-  filters?: MonitorFilters;
-}
-
-export type OverviewStatsEmbeddableState = SerializedTitles &
-  DynamicActionsSerializedState &
-  OverviewStatsEmbeddableCustomState;
-
 export type StatsOverviewApi = DefaultEmbeddableApi<OverviewStatsEmbeddableState> &
   PublishesWritableTitle &
   PublishesTitle &
   HasEditCapabilities &
-  HasDynamicActions &
+  HasDrilldowns &
   HasSupportedTriggers;
 
 export const getStatsOverviewEmbeddableFactory = (
@@ -68,32 +62,27 @@ export const getStatsOverviewEmbeddableFactory = (
 ) => {
   const factory: EmbeddableFactory<OverviewStatsEmbeddableState, StatsOverviewApi> = {
     type: SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE,
-    buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
+    buildEmbeddable: async ({
+      initializeDrilldownsManager,
+      initialState,
+      finalizeApi,
+      parentApi,
+      uuid,
+    }) => {
       const [coreStart, pluginStart] = await getStartServices();
 
-      const titleManager = initializeTitleManager(initialState.rawState);
+      const titleManager = initializeTitleManager(initialState);
       const defaultTitle$ = new BehaviorSubject<string | undefined>(getOverviewPanelTitle());
       const reload$ = new Subject<boolean>();
-      const filters$ = new BehaviorSubject(initialState.rawState.filters);
+      const filters$ = new BehaviorSubject(initialState.filters);
 
-      const { embeddableEnhanced } = pluginStart;
-      const dynamicActionsManager = embeddableEnhanced?.initializeEmbeddableDynamicActions(
-        uuid,
-        () => titleManager.api.title$.getValue(),
-        initialState
-      );
-      const maybeStopDynamicActions = dynamicActionsManager?.startDynamicActions();
+      const drilldownsManager = await initializeDrilldownsManager(uuid, initialState);
 
       function serializeState() {
-        const { rawState: dynamicActionsState, references: dynamicActionsReferences } =
-          dynamicActionsManager?.serializeState() ?? {};
         return {
-          rawState: {
-            ...titleManager.getLatestState(),
-            filters: filters$.getValue(),
-            ...dynamicActionsState,
-          },
-          references: dynamicActionsReferences ?? [],
+          ...titleManager.getLatestState(),
+          filters: filters$.getValue(),
+          ...drilldownsManager.getLatestState(),
         };
       }
 
@@ -104,26 +93,26 @@ export const getStatsOverviewEmbeddableFactory = (
         anyStateChange$: merge(
           titleManager.anyStateChange$,
           filters$,
-          ...(dynamicActionsManager ? [dynamicActionsManager.anyStateChange$] : [])
+          drilldownsManager.anyStateChange$
         ).pipe(map(() => undefined)),
         getComparators: () => ({
           ...titleComparators,
           filters: 'referenceEquality',
-          ...(dynamicActionsManager?.comparators ?? { enhancements: 'skip' }),
+          ...drilldownsManager.comparators,
         }),
         defaultState: {
           filters: DEFAULT_FILTERS,
         },
         onReset: (lastSaved) => {
-          dynamicActionsManager?.reinitializeState(lastSaved?.rawState ?? {});
-          titleManager.reinitializeState(lastSaved?.rawState);
-          filters$.next(lastSaved?.rawState.filters ?? DEFAULT_FILTERS);
+          drilldownsManager.reinitializeState(lastSaved ?? {});
+          titleManager.reinitializeState(lastSaved);
+          filters$.next(lastSaved?.filters ?? DEFAULT_FILTERS);
         },
       });
 
       const api = finalizeApi({
         ...titleManager.api,
-        ...(dynamicActionsManager?.api ?? {}),
+        ...drilldownsManager.api,
         ...unsavedChangesApi,
         supportedTriggers: () => [],
         defaultTitle$,
@@ -167,8 +156,8 @@ export const getStatsOverviewEmbeddableFactory = (
 
           useEffect(() => {
             return () => {
+              drilldownsManager.cleanup();
               fetchSubscription.unsubscribe();
-              maybeStopDynamicActions?.stopDynamicActions();
             };
           }, []);
           return (

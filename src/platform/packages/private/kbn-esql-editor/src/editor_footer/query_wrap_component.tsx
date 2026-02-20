@@ -9,16 +9,9 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexItem, EuiToolTip, EuiButtonIcon } from '@elastic/eui';
-import { prettifyQuery } from '@kbn/esql-utils';
+import { EuiButtonIcon, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 
-export function QueryWrapComponent({
-  code,
-  updateQuery,
-}: {
-  code: string;
-  updateQuery: (qs: string) => void;
-}) {
+export function QueryWrapComponent({ onPrettifyQuery }: { onPrettifyQuery: () => void }) {
   return (
     <EuiFlexItem grow={false}>
       <EuiToolTip
@@ -29,19 +22,14 @@ export function QueryWrapComponent({
         disableScreenReaderOutput
       >
         <EuiButtonIcon
-          iconType={'pipeBreaks'}
+          iconType="pipeBreaks"
           color="text"
           size="xs"
           data-test-subj="ESQLEditor-toggleWordWrap"
           aria-label={i18n.translate('esqlEditor.query.formatQueryLabel', {
             defaultMessage: 'Prettify query',
           })}
-          onClick={() => {
-            const updatedCode = prettifyQuery(code);
-            if (code !== updatedCode) {
-              updateQuery(updatedCode);
-            }
-          }}
+          onClick={onPrettifyQuery}
         />
       </EuiToolTip>
     </EuiFlexItem>

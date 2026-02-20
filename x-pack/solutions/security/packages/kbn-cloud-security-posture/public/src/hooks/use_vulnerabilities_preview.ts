@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { lastValueFrom } from 'rxjs';
 import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-types';
@@ -16,12 +16,13 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { CspVulnerabilityFinding } from '@kbn/cloud-security-posture-common/schema/vulnerabilities/latest';
 import type { CoreStart } from '@kbn/core/public';
-import type { CspClientPluginStartDeps, UseCspOptions } from '../types';
-import { showErrorToast } from '../..';
 import {
   getVulnerabilitiesAggregationCount,
   getVulnerabilitiesQuery,
-} from '../utils/findings_query_builders';
+} from '@kbn/cloud-security-posture-common/utils/findings_query_builders';
+import type { UseCspOptions } from '@kbn/cloud-security-posture-common/types/findings';
+import type { CspClientPluginStartDeps } from '../types';
+import { showErrorToast } from '../..';
 
 type LatestFindingsRequest = IKibanaSearchRequest<SearchRequest>;
 type LatestFindingsResponse = IKibanaSearchResponse<
@@ -30,7 +31,6 @@ type LatestFindingsResponse = IKibanaSearchResponse<
 
 interface FindingsAggs {
   count: AggregationsMultiBucketAggregateBase<AggregationsStringRareTermsBucketKeys>;
-  by_datastream_dataset?: AggregationsMultiBucketAggregateBase<AggregationsStringRareTermsBucketKeys>;
 }
 
 export const useVulnerabilitiesPreview = (options: UseCspOptions) => {
@@ -52,9 +52,6 @@ export const useVulnerabilitiesPreview = (options: UseCspOptions) => {
 
       return {
         count: getVulnerabilitiesAggregationCount(aggregations?.count?.buckets),
-        data_stream: Array.isArray(aggregations?.by_datastream_dataset?.buckets)
-          ? aggregations.by_datastream_dataset.buckets.map((bucket) => bucket.key)
-          : [],
       };
     },
     {

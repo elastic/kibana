@@ -24,11 +24,10 @@ import type {
   SearchIndicesServicesContextDeps,
 } from './types';
 import { initQueryClient } from './services/query_client';
-import { SEARCH_INDEX_MANAGEMENT_APP_ID, INDICES_APP_ID, START_APP_ID } from '../common';
+import { SEARCH_INDEX_MANAGEMENT_APP_ID, INDICES_APP_ID } from '../common';
 import {
   CREATE_INDEX_PATH,
   INDICES_APP_BASE,
-  START_APP_BASE,
   SearchIndexDetailsTabValues,
   SEARCH_INDEX_MANAGEMENT_APP_BASE,
 } from './routes';
@@ -48,24 +47,6 @@ export class SearchIndicesPlugin
 
     const queryClient = initQueryClient(core.notifications.toasts);
 
-    core.application.register({
-      id: START_APP_ID,
-      appRoute: START_APP_BASE,
-      title: i18n.translate('xpack.searchIndices.elasticsearchStart.startAppTitle', {
-        defaultMessage: 'Elasticsearch Start',
-      }),
-      async mount({ element, history }) {
-        const { renderApp } = await import('./application');
-        const { ElasticsearchStartPage } = await import('./components/start/start_page');
-        const [coreStart, depsStart] = await core.getStartServices();
-        const startDeps: SearchIndicesServicesContextDeps = {
-          ...depsStart,
-          history,
-        };
-        return renderApp(ElasticsearchStartPage, coreStart, startDeps, element, queryClient);
-      },
-      visibleIn: [],
-    });
     core.application.register({
       id: INDICES_APP_ID,
       appRoute: INDICES_APP_BASE,
@@ -109,7 +90,7 @@ export class SearchIndicesPlugin
           indexManagement: plugins.indexManagement,
         });
       },
-      order: 1,
+      order: 2,
       visibleIn: ['sideNav'],
     });
 
@@ -117,8 +98,6 @@ export class SearchIndicesPlugin
 
     return {
       enabled: true,
-      startAppId: START_APP_ID,
-      startRoute: START_APP_BASE,
     };
   }
 
@@ -148,8 +127,6 @@ export class SearchIndicesPlugin
     }
     return {
       enabled: this.pluginEnabled,
-      startAppId: START_APP_ID,
-      startRoute: START_APP_BASE,
     };
   }
 

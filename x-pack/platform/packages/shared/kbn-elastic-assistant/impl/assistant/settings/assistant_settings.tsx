@@ -39,7 +39,11 @@ const StyledEuiModal = styled(EuiModal)`
 interface Props {
   defaultConnector?: AIConnector;
   onClose: (
-    event?: React.KeyboardEvent<HTMLDivElement> | React.MouseEvent<HTMLButtonElement>
+    event?:
+      | React.KeyboardEvent<HTMLDivElement>
+      | React.MouseEvent<HTMLButtonElement>
+      | MouseEvent
+      | TouchEvent
   ) => void;
   onSave: (success: boolean) => Promise<void>;
   selectedConversationId?: string;
@@ -69,6 +73,7 @@ export const AssistantSettings: React.FC<Props> = React.memo(
       selectedSettingsTab,
       setSelectedSettingsTab,
       toasts,
+      settings,
     } = useAssistantContext();
 
     useEffect(() => {
@@ -81,6 +86,7 @@ export const AssistantSettings: React.FC<Props> = React.memo(
 
     const { data: connectors } = useLoadConnectors({
       http,
+      settings,
     });
     const {
       conversationsSettingsBulkActions,

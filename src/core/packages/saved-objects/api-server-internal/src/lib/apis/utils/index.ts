@@ -11,7 +11,6 @@ export { isFoundGetResponse, type GetResponseFound } from './es_responses';
 export { findSharedOriginObjects } from './find_shared_origin_objects';
 export {
   rawDocExistsInNamespace,
-  errorContent,
   rawDocExistsInNamespaces,
   isMgetDoc,
   getCurrentTime,
@@ -23,5 +22,4 @@ export {
   getSavedObjectNamespaces,
   type GetSavedObjectFromSourceOptions,
 } from './internal_utils';
-export { type Left, type Either, type Right, isLeft, isRight, left, right } from './either';
 export { mergeForUpdate } from './merge_for_update';

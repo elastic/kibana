@@ -49,6 +49,7 @@ export const defaultConfig: StorybookConfig = {
     // https://storybook.js.org/docs/essentials
     '@storybook/addon-essentials',
     '@storybook/addon-jest',
+    '@storybook/addon-docs',
     {
       /**
        * This addon replaces rules in the default SB webpack config
@@ -83,7 +84,10 @@ export const defaultConfig: StorybookConfig = {
                     const req = JSON.stringify(
                       loaderContext.utils.contextify(
                         loaderContext.context || loaderContext.rootContext,
-                        resolve(REPO_ROOT, 'src/core/public/styles/core_app/_globals_v8light.scss')
+                        resolve(
+                          REPO_ROOT,
+                          'src/core/public/styles/core_app/_globals_borealislight.scss'
+                        )
                       )
                     );
                     return `@import ${req};\n${content}`;

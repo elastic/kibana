@@ -15,9 +15,10 @@ import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mo
 import type { ScopedClusterClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 import type { Version } from '@kbn/upgrade-assistant-pkg-common';
+import { ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
 import type { ReindexOperation } from '../../../common';
 import type { ReindexSavedObject } from './types';
-import { ReindexStatus, ReindexStep } from '../../../common';
+import { ReindexStep } from '../../../common';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 
@@ -109,10 +110,6 @@ describe('reindexService', () => {
             allow_restricted_indices: true,
             privileges: ['all'],
           },
-          {
-            names: ['.tasks'],
-            privileges: ['read'],
-          },
         ],
       });
     });
@@ -152,7 +149,9 @@ describe('reindexService', () => {
 
   describe('createReindexOperation', () => {
     it('creates new reindex operation', async () => {
-      clusterClient.asCurrentUser.indices.exists.mockResponse(true);
+      clusterClient.asCurrentUser.indices.exists
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(false);
       actions.findReindexOperations.mockResolvedValueOnce({ total: 0 });
       actions.createReindexOp.mockResolvedValueOnce();
 
@@ -170,7 +169,19 @@ describe('reindexService', () => {
     });
 
     it('fails if index does not exist', async () => {
-      clusterClient.asCurrentUser.indices.exists.mockResponse(false);
+      clusterClient.asCurrentUser.indices.exists.mockResolvedValue(false);
+
+      await expect(
+        service.createReindexOperation({
+          indexName: 'myIndex',
+          newIndexName: 'reindexed-myIndex',
+        })
+      ).rejects.toThrow();
+      expect(actions.createReindexOp).not.toHaveBeenCalled();
+    });
+
+    it('fails if new index already exists', async () => {
+      clusterClient.asCurrentUser.indices.exists.mockResolvedValue(true);
       await expect(
         service.createReindexOperation({
           indexName: 'myIndex',
@@ -181,7 +192,9 @@ describe('reindexService', () => {
     });
 
     it('deletes existing operation if it failed', async () => {
-      clusterClient.asCurrentUser.indices.exists.mockResponse(true);
+      clusterClient.asCurrentUser.indices.exists
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(false);
       actions.findReindexOperations.mockResolvedValueOnce({
         saved_objects: [{ id: 1, attributes: { status: ReindexStatus.failed } }],
         total: 1,
@@ -200,7 +213,9 @@ describe('reindexService', () => {
     });
 
     it('deletes existing operation if it was cancelled', async () => {
-      clusterClient.asCurrentUser.indices.exists.mockResponse(true);
+      clusterClient.asCurrentUser.indices.exists
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(false);
       actions.findReindexOperations.mockResolvedValueOnce({
         saved_objects: [{ id: 1, attributes: { status: ReindexStatus.cancelled } }],
         total: 1,
@@ -470,16 +485,40 @@ describe('reindexService', () => {
         });
       });
 
-      it('fails if create index is not acknowledged', async () => {
-        clusterClient.asCurrentUser.indices.get.mockResponseOnce(
-          // @ts-expect-error not full interface
-          { myIndex: settingsMappings }
+      it('serverless: creates new index without index.number_of_replicas in settings_override', async () => {
+        const serverlessService = reindexServiceFactory(
+          clusterClient.asCurrentUser,
+          actions,
+          log,
+          licensingPluginSetup,
+          versionMock,
+          true // isServerless
         );
 
-        clusterClient.asCurrentUser.indices.create.mockResponseOnce(
-          // @ts-expect-error not full interface
-          { acknowledged: false }
-        );
+        actions.getFlatSettings.mockResolvedValueOnce(settingsMappings);
+        clusterClient.asCurrentUser.transport.request.mockResolvedValueOnce({ acknowledged: true });
+
+        const updatedOp = await serverlessService.processNextStep(reindexOp);
+
+        expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.newIndexCreated);
+
+        // Check if index.number_of_replicas is not present in the settings_override
+        expect(clusterClient.asCurrentUser.transport.request).toHaveBeenCalledWith({
+          method: 'POST',
+          path: `_create_from/myIndex/myIndex-reindex-0`,
+          body: {
+            settings_override: {
+              'index.refresh_interval': -1,
+            },
+          },
+        });
+      });
+
+      it('fails if create index is not acknowledged', async () => {
+        actions.getFlatSettings.mockResolvedValueOnce(settingsMappings);
+        clusterClient.asCurrentUser.transport.request.mockResolvedValueOnce({
+          acknowledged: false,
+        });
         const updatedOp = await service.processNextStep(reindexOp);
         expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.readonly);
         expect(updatedOp.attributes.status).toEqual(ReindexStatus.failed);
@@ -488,12 +527,8 @@ describe('reindexService', () => {
       });
 
       it('fails if create index fails', async () => {
-        clusterClient.asCurrentUser.indices.get.mockResponseOnce(
-          // @ts-expect-error not full interface
-          { myIndex: settingsMappings }
-        );
-
-        clusterClient.asCurrentUser.indices.create.mockRejectedValueOnce(new Error(`blah!`));
+        actions.getFlatSettings.mockResolvedValueOnce(settingsMappings);
+        clusterClient.asCurrentUser.transport.request.mockRejectedValueOnce(new Error(`blah!`));
 
         clusterClient.asCurrentUser.indices.putSettings.mockResponseOnce({ acknowledged: true });
 
@@ -743,6 +778,47 @@ describe('reindexService', () => {
           settings: {
             'index.number_of_replicas': null,
             'index.refresh_interval': null,
+          },
+        });
+      });
+
+      it('serverless: restores settings without index.number_of_replicas', async () => {
+        const serverlessService = reindexServiceFactory(
+          clusterClient.asCurrentUser,
+          actions,
+          log,
+          licensingPluginSetup,
+          versionMock,
+          true // isServerless
+        );
+
+        actions.getFlatSettings.mockResolvedValueOnce({
+          settings: {
+            'index.provided_name': 'myIndex',
+          },
+          mappings: {},
+        });
+
+        clusterClient.asCurrentUser.indices.putSettings.mockResponseOnce({ acknowledged: true });
+
+        const updatedOp = await serverlessService.processNextStep({
+          ...reindexOp,
+          attributes: {
+            ...reindexOp.attributes,
+            backupSettings: {
+              'index.refresh_interval': 1,
+            },
+          },
+        });
+
+        expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.indexSettingsRestored);
+
+        // Check if index.number_of_replicas is not present in the settings
+        expect(clusterClient.asCurrentUser.indices.putSettings).toHaveBeenCalledWith({
+          index: reindexOp.attributes.newIndexName,
+          reopen: true,
+          settings: {
+            'index.refresh_interval': 1,
           },
         });
       });

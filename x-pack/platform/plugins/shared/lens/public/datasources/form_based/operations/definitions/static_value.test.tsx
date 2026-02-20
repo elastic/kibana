@@ -9,17 +9,19 @@ import React from 'react';
 import type { IUiSettingsClient, HttpSetup } from '@kbn/core/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
-import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { kqlPluginMock } from '@kbn/kql/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMockedIndexPattern } from '../../mocks';
 import { staticValueOperation } from '.';
-import type { FormBasedLayer } from '../../types';
-import type { IndexPattern } from '../../../../types';
-import type { StaticValueIndexPatternColumn } from './static_value';
-import type { TermsIndexPatternColumn } from './terms';
+import type {
+  FormBasedLayer,
+  IndexPattern,
+  StaticValueIndexPatternColumn,
+  TermsIndexPatternColumn,
+} from '@kbn/lens-common';
 
 const uiSettingsMock = {} as IUiSettingsClient;
 const dateRange = {
@@ -33,7 +35,7 @@ const defaultProps = {
   dateRange: { fromDate: 'now-1d', toDate: 'now' },
   data: dataPluginMock.createStartContract(),
   fieldFormats: fieldFormatsServiceMock.createStartContract(),
-  unifiedSearch: unifiedSearchPluginMock.createStartContract(),
+  kql: kqlPluginMock.createStartContract(),
   dataViews: dataViewPluginMocks.createStartContract(),
   http: {} as HttpSetup,
   indexPattern: {

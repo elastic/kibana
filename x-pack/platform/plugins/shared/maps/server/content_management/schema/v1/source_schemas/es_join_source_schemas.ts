@@ -6,24 +6,9 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { querySchema } from '@kbn/es-query-server';
 import { SOURCE_TYPES } from '../../../../../common';
 import { BaseESAggSourceSchema } from './es_agg_source_schemas';
-
-// TODO - replace querySchema with reusable querySchema
-export const querySchema = schema.object({
-  query: schema.oneOf([
-    schema.string({
-      meta: {
-        description:
-          'A text-based query such as Kibana Query Language (KQL) or Lucene query language.',
-      },
-    }),
-    schema.recordOf(schema.string(), schema.any()),
-  ]),
-  language: schema.string({
-    meta: { description: 'The query language such as KQL or Lucene.' },
-  }),
-});
 
 export const ESJoinSourceSchema = BaseESAggSourceSchema.extends({
   type: schema.string(),

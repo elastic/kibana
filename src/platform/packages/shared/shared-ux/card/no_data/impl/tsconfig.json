@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -7,7 +7,8 @@
       "node",
       "react",
       "@emotion/react/types/css-prop",
-      "@kbn/ambient-ui-types"
+      "@kbn/ambient-ui-types",
+      "@testing-library/jest-dom"
     ]
   },
   "include": [
@@ -16,7 +17,6 @@
   ],
   "kbn_references": [
     "@kbn/i18n",
-    "@kbn/shared-ux-link-redirect-app",
     "@kbn/shared-ux-card-no-data-types",
     "@kbn/shared-ux-card-no-data-mocks",
   ],

@@ -18,6 +18,7 @@ interface SearchStepExecutionsParams {
   workflowExecutionId: string;
   additionalQuery?: estypes.QueryDslQueryContainer;
   spaceId: string;
+  sourceExcludes?: string[];
 }
 
 export const searchStepExecutions = async ({
@@ -27,9 +28,10 @@ export const searchStepExecutions = async ({
   workflowExecutionId,
   additionalQuery,
   spaceId,
+  sourceExcludes,
 }: SearchStepExecutionsParams): Promise<EsWorkflowStepExecution[]> => {
   try {
-    logger.info(`Searching workflows in index ${stepsExecutionIndex}`);
+    logger.debug(`Searching workflows in index ${stepsExecutionIndex}`);
 
     const mustQueries: estypes.QueryDslQueryContainer[] = [
       { match: { workflowRunId: workflowExecutionId } },
@@ -47,12 +49,13 @@ export const searchStepExecutions = async ({
           must: mustQueries,
         },
       },
+      ...(sourceExcludes?.length ? { _source: { excludes: sourceExcludes } } : {}),
       sort: 'startedAt:desc',
       from: 0,
       size: 1000, // TODO: without it, it returns up to 10 results by default. We should improve this.
     });
 
-    logger.info(
+    logger.debug(
       `Found ${response.hits.hits.length} workflows, ${response.hits.hits.map((hit) => hit._id)}`
     );
 
@@ -61,7 +64,7 @@ export const searchStepExecutions = async ({
         .map((hit) => hit._source as EsWorkflowStepExecution)
         // TODO: It should be sorted on ES side
         // This sort is needed to ensure steps are returned in the execution order
-        .sort((fst, scd) => fst.topologicalIndex - scd.topologicalIndex)
+        .sort((fst, scd) => fst.globalExecutionIndex - scd.globalExecutionIndex)
     );
   } catch (error) {
     logger.error(`Failed to search workflows: ${error}`);

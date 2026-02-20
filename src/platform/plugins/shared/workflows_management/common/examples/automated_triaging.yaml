@@ -1,0 +1,302 @@
+version: '1'
+name: 🔒 AD - Automated Triaging
+description: A workflow to automatically process attack discoveries, create cases, analyze with AI, and execute remediation steps
+enabled: true
+tags:
+  - Example
+  - Agentic Workflow
+  - SOC Agent
+triggers:
+  - type: alert
+steps:
+  - name: for_each_discovery
+    type: foreach
+    foreach: '{{event.alerts}}'
+    steps:
+      - name: create_case
+        type: kibana.createCase
+        with:
+          owner: securitySolution
+          title: '[Attack Discovery] {{foreach.item.attack_discovery.title_with_replacements}}'
+          description: |
+            ## Attack Summary
+            {{foreach.item.attack_discovery.summary_markdown_with_replacements}}
+            ## Detailed Analysis
+            {{foreach.item.attack_discovery.details_markdown_with_replacements}}
+            ## Affected Entities
+            {{foreach.item.attack_discovery.entity_summary_markdown_with_replacements}}
+            ## Investigation Context
+            - **Discovery ID:** {{foreach.item.uuid}}
+            - **Detection Time:** {{foreach.item.start}}
+            - **Alert Count:** {{foreach.item.attack_discovery.alerts_context_count}}
+            - **Risk Score:** {{foreach.item.alert.risk_score}}
+            - **Rule:** {{foreach.item.rule.name}}
+
+            ## View Full Discovery
+
+            {{foreach.item.url}}
+          tags:
+            - '{{foreach.item.attack_discovery.mitre_attack_tactics}}'
+          settings:
+            syncAlerts: false
+          severity: high
+          connector:
+            id: none
+            name: none
+            type: .none
+            fields: null
+      - name: foreach_alert_in_ad
+        type: foreach
+        foreach: '{{for_each_discovery.item.attack_discovery.alert_ids}}'
+        steps:
+          - name: get_details
+            type: elasticsearch.search
+            with:
+              index: .alerts-security.alerts-default
+              size: 10
+              query:
+                match:
+                  _id: '{{foreach.item}}'
+          - name: add_to_case
+            type: kibana.request
+            with:
+              method: POST
+              path: /api/cases/{{ steps.create_case.output.id }}/comments
+              body:
+                type: alert
+                alertId: '{{ foreach.item}}'
+                index: .alerts-security.alerts-default
+                rule:
+                  name: '{{ steps.get_details.output.hits.hits._source.kibana.alert.rule.name }}'
+                  id: '{{ steps.get_details.output.hits.hits._source.kibana.alert.rule.uuid }}'
+                owner: securitySolution
+              headers:
+                kbn-xsrf: string
+                Content-Type: application/json
+                Authorization: '{{ consts.secret }}'
+      - name: triage_agent
+        type: http
+        with:
+          url: '{{ consts.kibana }}/api/security_ai_assistant/chat/complete'
+          method: POST
+          headers:
+            kbn-xsrf: string
+            Content-Type: application/json
+            Authorization: '{{ consts.secret }}'
+          body:
+            isStream: false
+            persist: false
+            connectorId: '{{ consts.sonnet }}'
+            messages:
+              - role: user
+                content: >-
+                  <instructions>
+
+                  How would we remediate and respond to the attack below?
+
+                  - Reference our knowledge for our in-depth guides, and, knowing this is Elastic Defend, generate any
+                  commands required for remediation that can be run via the Elastic Security Response console (use ONLY
+                  the product documentation tool for this). Leverage the open alerts tool if you need process pid's or
+                  anything else to appropriate stitch these commands together. Output any commands as individual code
+                  blocks.
+
+                  - NEVER Render any videos/gifs. 
+
+                  - Generate sophisticated, performant ES|QL queries with the appropriate ES|QL tool to help me triage
+                  further (format them as "esql" appropriately). Make sure to use the logs-* index pattern 
+
+                  - ALWAYS Reference Elastic Security labs for any matching attacks
+
+                  - Include a confidence score of the true positive ratio of the attack. This output will be shared will
+                  all relevant team members.
+
+                  - Make sure to never include references or citations 
+
+                  </instructions>
+
+
+                  <detected attack>
+
+                      {{ event | json:2 }}
+
+                  </detected attack>
+          timeout: 10m
+      - name: add_analysis_to_case
+        type: kibana.request
+        with:
+          method: POST
+          path: /api/cases/{{ steps.create_case.output.id }}/comments
+          body:
+            type: user
+            owner: securitySolution
+            comment: '{{ steps.triage_agent.output.data.data | json }}'
+          headers:
+            kbn-xsrf: string
+            Content-Type: application/json
+            Authorization: '{{ consts.secret }}'
+      - name: get_host_details
+        type: console
+        with:
+          message: getting host details
+      - name: ai_summary
+        type: kibana.request
+        with:
+          method: POST
+          path: /api/security_ai_assistant/chat/complete
+          body:
+            isStream: false
+            timeout: 10m
+            persist: false
+            connectorId: '{{ consts.sonnet }}'
+            messages:
+              - role: user
+                content: |
+                  <instructions>
+                   Can you generate a one-to-two-sentence summary of the attack above? Make sure the summary captures key details of this attack. This output will be used as content for a Slack message, so make sure sure everything an analyst needs is captured succinctly and very clearly. When references entites like hosts and users, put them in apostrophes (`) like like `hostname`   
+
+                   MAKE SURE TO ONLY OUTPUT THE SUMMARY message
+                  </instructions>
+
+                   <detected attack>
+
+                       {{ event | json:2 }}
+
+                   </detected attack>
+          headers:
+            kbn-xsrf: string
+            Content-Type: application/json
+            Authorization: '{{ consts.secret }}'
+      - name: isolate_host
+        type: kibana.request
+        with:
+          method: POST
+          path: /api/endpoint/action/isolate
+          body:
+            endpoint_ids:
+              - 345d5ffc-80a8-413c-9a5d-829687e8a5f2
+            comment: >-
+              Based on my analysis so far, I've isolated the host in question pending further investigation and
+              analysis. As a next step, I'll notify the team.
+            case_ids:
+              - '{{ steps.create_case.output.id }}'
+          headers:
+            kbn-xsrf: string
+            Content-Type: application/json
+            Authorization: '{{ consts.secret }}'
+      - name: notify_team
+        type: http
+        with:
+          url: '{{ consts.slack_web_hook }}'
+          method: POST
+          headers:
+            content-type: application/json
+          body: |
+            {
+              "blocks": [
+                {
+                  "type": "header",
+                  "text": {
+                    "type": "plain_text",
+                    "text": "🚨 Attack Discovery: {{foreach.item.attack_discovery.title_with_replacements}}",
+                    "emoji": true
+                  }
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "{{steps.ai_summary.output.data}} \n"
+                  }
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*📝 Current Status:*\n \n• ✅ Security case created with {{foreach.item.attack_discovery.alerts_context_count}} related alerts consolidated for investigation\n• ✅ Initial threat analysis completed by AI security agent\n• ✅ Affected host `srv-win-defend-07` isolated from network pending further review\n• ✅ Forensic data collection and evidence preservation in progress\n• ✅ Incident response workflow initiated with automated triage complete"
+                  }
+                },
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Risk Score:* `{{foreach.item.risk_score}}`"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Alert Count:* {{foreach.item.attack_discovery.alerts_context_count}}"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Status:* {{foreach.item.status}}"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Time:* {{foreach.item.start}}"
+                    }
+                  ]
+                },
+                {
+                  "type": "context",
+                  "elements": [
+                    {
+                      "type": "mrkdwn",
+                      "text": "Case ID: `{{steps.create_case.output.id}}` | {{foreach.item.attack_discovery.alerts_context_count}} related alerts | MITRE: {{foreach.item.attack_discovery.mitre_attack_tactics}}"
+                    }
+                  ]
+                },
+                {
+                  "type": "divider"
+                },
+                {
+                  "type": "actions",
+                  "elements": [
+                    {
+                      "type": "button",
+                      "text": {
+                        "type": "plain_text",
+                        "text": "🔎 View Attack in Kibana",
+                        "emoji": true
+                      },
+                      "style": "primary",
+                      "url": "{{foreach.item.url}}"
+                    },
+                    {
+                      "type": "button",
+                      "text": {
+                        "type": "plain_text",
+                        "text": "📁 Go to Case",
+                        "emoji": true
+                      },
+                      "url": "{{consts.kibana}}/app/security/cases/{{steps.create_case.output.id}}"
+                    },
+                    {
+                      "type": "button",
+                      "text": {
+                        "type": "plain_text",
+                        "text": "💻 View Host",
+                        "emoji": true
+                      },
+                      "url": "{{consts.kibana}}/app/security/administration/endpoints?agent_ids=345d5ffc-80a8-413c-9a5d-829687e8a5f2"
+                    },
+                    {
+                      "type": "button",
+                      "text": {
+                        "type": "plain_text",
+                        "text": "🤖 View Workflow Execution",
+                        "emoji": true
+                      },
+                      "url": "{{consts.kibana}}/app/workflows/{{ workflow.id }}?executionId={{ execution.id }}&tab=executions"
+                    }
+                  ]
+                }
+              ]
+            }
+          timeout: 30s
+consts:
+  schedule_id: 'REDACTED'
+  kibana: 'REDACTED'
+  secret: 'REDACTED'
+  sonnet: 'REDACTED'
+  endpoint_id: 'REDACTED'
+  slack_web_hook: 'REDACTED'

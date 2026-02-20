@@ -854,8 +854,8 @@ describe('update', () => {
       });
 
       const caseCommentsStats = new Map();
-      caseCommentsStats.set(mockCases[0].id, { userComments: 1, alerts: 2 });
-      caseCommentsStats.set(mockCases[1].id, { userComments: 3, alerts: 4 });
+      caseCommentsStats.set(mockCases[0].id, { userComments: 1, alerts: 2, events: 0 });
+      caseCommentsStats.set(mockCases[1].id, { userComments: 3, alerts: 4, events: 0 });
       clientArgs.services.attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
         caseCommentsStats
       );
@@ -914,6 +914,7 @@ describe('update', () => {
             "observables": Array [],
             "owner": "securitySolution",
             "settings": Object {
+              "extractObservables": true,
               "syncAlerts": true,
             },
             "severity": "low",
@@ -924,6 +925,8 @@ describe('update', () => {
             "title": "Super Bad Security Issue",
             "totalAlerts": 2,
             "totalComment": 1,
+            "totalEvents": 0,
+            "total_observables": 0,
             "updated_at": "2019-11-25T21:54:48.952Z",
             "updated_by": Object {
               "email": "testemail@elastic.co",
@@ -959,6 +962,7 @@ describe('update', () => {
             "observables": Array [],
             "owner": "securitySolution",
             "settings": Object {
+              "extractObservables": true,
               "syncAlerts": true,
             },
             "severity": "low",
@@ -969,6 +973,8 @@ describe('update', () => {
             "title": "Damaging Data Destruction Detected",
             "totalAlerts": 4,
             "totalComment": 3,
+            "totalEvents": 0,
+            "total_observables": 0,
             "updated_at": "2019-11-25T22:32:00.900Z",
             "updated_by": Object {
               "email": "testemail@elastic.co",

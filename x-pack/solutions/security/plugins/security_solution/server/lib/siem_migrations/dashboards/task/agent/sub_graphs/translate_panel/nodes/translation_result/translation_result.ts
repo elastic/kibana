@@ -13,6 +13,7 @@ import { MISSING_INDEX_PATTERN_PLACEHOLDER } from '../../../../../../../common/c
 import { MigrationTranslationResult } from '../../../../../../../../../../common/siem_migrations/constants';
 import type { GraphNode } from '../../types';
 import { processPanel } from './process_panel';
+import { createMarkdownPanel } from '../../../../helpers/markdown_panel/create_markdown_panel';
 
 interface GetTranslationResultNodeParams {
   logger: Logger;
@@ -20,9 +21,27 @@ interface GetTranslationResultNodeParams {
 
 export const getTranslationResultNode = (params: GetTranslationResultNodeParams): GraphNode => {
   return async (state) => {
+    if (state.parsed_panel.viz_type === 'markdown') {
+      const panelJSON = createMarkdownPanel(state.parsed_panel.query, state.parsed_panel);
+
+      return {
+        elastic_panel: panelJSON,
+        comments: [
+          generateAssistantComment(
+            `Successfully translated Markdown Panel: <b>${state.parsed_panel.title}</b>`
+          ),
+        ],
+        translation_result: MigrationTranslationResult.FULL,
+      };
+    }
     const query = state.esql_query;
     if (!query) {
-      return { translation_result: MigrationTranslationResult.UNTRANSLATABLE };
+      const message = 'SPL query unsupported or missing, cannot translate panel';
+      const panelJSON = createMarkdownPanel(message, state.parsed_panel);
+      return {
+        elastic_panel: panelJSON,
+        translation_result: MigrationTranslationResult.UNTRANSLATABLE,
+      };
     }
 
     let translationResult;
@@ -51,7 +70,12 @@ export const getTranslationResultNode = (params: GetTranslationResultNodeParams)
       };
     }
 
-    const panelJSON = processPanel(panel, query, state.parsed_panel);
+    const panelJSON = processPanel(
+      panel,
+      query,
+      state.esql_query_columns ?? [],
+      state.parsed_panel
+    );
 
     return {
       elastic_panel: panelJSON,

@@ -120,7 +120,7 @@ const uiSettings: Record<string, unknown> = {
 const services: Partial<KibanaServices> = {
   appName: 'test',
   application: applicationServiceMock.createStartContract(),
-  unifiedSearch: {
+  kql: {
     autocomplete: {
       getQuerySuggestions: () => [],
       getAutocompleteSettings: () => {},
@@ -167,6 +167,11 @@ const services: Partial<KibanaServices> = {
     },
     dataViews: {
       getIdsWithTitle: () => [],
+    },
+    search: {
+      session: {
+        state$: of({}),
+      },
     },
   },
   dataViewEditor: {

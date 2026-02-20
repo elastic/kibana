@@ -10,6 +10,7 @@ import type {
   EntityNodeDataModel,
   GroupNodeDataModel,
   LabelNodeDataModel,
+  RelationshipNodeDataModel,
   EdgeDataModel,
   NodeShape,
   NodeColor,
@@ -34,12 +35,20 @@ export type ExpandButtonClickCallback = (
   unToggleCallback: () => void
 ) => void;
 
+export type IpClickCallback = (e: React.MouseEvent<HTMLElement>) => void;
+
+export type CountryClickCallback = (e: React.MouseEvent<HTMLElement>) => void;
+
+export type EventClickCallback = (e: React.MouseEvent<HTMLButtonElement>) => void;
+
 export interface EntityNodeViewModel
   extends Record<string, unknown>,
     EntityNodeDataModel,
     BaseNodeDataViewModel {
   expandButtonClick?: ExpandButtonClickCallback;
   nodeClick?: NodeClickCallback;
+  ipClickHandler?: IpClickCallback;
+  countryClickHandler?: CountryClickCallback;
 }
 
 export interface GroupNodeViewModel
@@ -53,13 +62,23 @@ export interface LabelNodeViewModel
   extends Record<string, unknown>,
     LabelNodeDataModel,
     BaseNodeDataViewModel {
-  eventsCount?: number;
-  alertsCount?: number;
   expandButtonClick?: ExpandButtonClickCallback;
   nodeClick?: NodeClickCallback;
+  ipClickHandler?: IpClickCallback;
+  countryClickHandler?: CountryClickCallback;
+  eventClickHandler?: EventClickCallback;
 }
 
-export type NodeViewModel = EntityNodeViewModel | GroupNodeViewModel | LabelNodeViewModel;
+export interface RelationshipNodeViewModel
+  extends Record<string, unknown>,
+    RelationshipNodeDataModel,
+    BaseNodeDataViewModel {}
+
+export type NodeViewModel =
+  | EntityNodeViewModel
+  | GroupNodeViewModel
+  | LabelNodeViewModel
+  | RelationshipNodeViewModel;
 
 export type NodeProps = xyNodeProps<Node<NodeViewModel>>;
 

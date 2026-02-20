@@ -113,7 +113,6 @@ export function alertTests({ getService }: FtrProviderContext, space: Space) {
           createdBy: null,
           updatedBy: null,
           actions: response.body.actions.map((action: any) => {
-            /* eslint-disable @typescript-eslint/naming-convention */
             const { connector_type_id, group, id, params, uuid } = action;
             return {
               actionTypeId: connector_type_id,
@@ -527,7 +526,7 @@ instanceStateValue: true
       } = await supertestWithoutAuth.get(`${getUrlPrefix(space.id)}/api/licensing/feature_usage`);
       expect(features).to.be.an(Array);
       const indexRecordFeature = features.find(
-        (feature: { name: string }) => feature.name === 'Connector: Test: Index Record'
+        (feature: { id: string }) => feature.id === 'Connector: Test: Index Record'
       );
       expect(indexRecordFeature).to.be.ok();
       expect(indexRecordFeature.last_used).to.be.a('string');

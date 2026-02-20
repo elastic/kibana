@@ -28,6 +28,7 @@ export const WorkpadShortcuts = compose<WorkpadShortcutsProps, HandlerCreatorPro
 
 WorkpadShortcuts.propTypes = {
   pageId: PropTypes.string.isRequired,
+  // @ts-expect-error upgrade typescript v5.9.3
   selectedNodes: PropTypes.arrayOf(PropTypes.object),
   elementLayer: PropTypes.func.isRequired,
   insertNodes: PropTypes.func.isRequired,

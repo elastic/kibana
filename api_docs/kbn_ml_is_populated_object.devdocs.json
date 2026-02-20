@@ -32,6 +32,8 @@
           "<U extends string = string, T extends unknown = unknown>(arg: unknown, requiredAttributes?: U[]) => arg is Record<U, T>"
         ],
         "path": "x-pack/platform/packages/private/ml/is_populated_object/src/is_populated_object.ts",
+        "lineNumber": 25,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -46,6 +48,8 @@
               "unknown"
             ],
             "path": "x-pack/platform/packages/private/ml/is_populated_object/src/is_populated_object.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -61,6 +65,8 @@
               "U[]"
             ],
             "path": "x-pack/platform/packages/private/ml/is_populated_object/src/is_populated_object.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

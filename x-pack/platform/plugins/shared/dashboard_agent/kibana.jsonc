@@ -1,0 +1,16 @@
+{
+  "type": "plugin",
+  "id": "@kbn/dashboard-agent-plugin",
+  "owner": "@elastic/appex-ai-infra",
+  "group": "platform",
+  "visibility": "shared",
+  "plugin": {
+    "id": "dashboardAgent",
+    "server": true,
+    "browser": true,
+    "configPath": ["xpack", "dashboardAgent"],
+    "requiredPlugins": ["agentBuilder", "agentBuilderPlatform", "dashboard", "dashboardMarkdown", "data"],
+    "optionalPlugins": ["share"],
+    "requiredBundles": []
+  }
+}

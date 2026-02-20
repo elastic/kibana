@@ -17,6 +17,7 @@ import {
 import type { MonitoringConfig } from '../../types';
 import type { LazyExpressionProps } from '../components/param_details_form/lazy_expression';
 import { LazyExpression } from '../components/param_details_form/lazy_expression';
+import { getDescriptionFields } from '../get_description_fields';
 
 export function createCCRReadExceptionsAlertType(
   config: MonitoringConfig
@@ -38,5 +39,6 @@ export function createCCRReadExceptionsAlertType(
     validate: validateDuration,
     defaultActionMessage: '{{context.internalFullMessage}}',
     requiresAppContext: RULE_REQUIRES_APP_CONTEXT,
+    getDescriptionFields,
   };
 }

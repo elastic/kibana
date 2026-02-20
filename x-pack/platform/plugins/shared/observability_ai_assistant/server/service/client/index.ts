@@ -12,6 +12,7 @@ import type { Logger } from '@kbn/logging';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { last, merge, omit } from 'lodash';
 import type { Observable } from 'rxjs';
+import { addSpaceIdToPath } from '@kbn/spaces-utils';
 import {
   catchError,
   defer,
@@ -35,6 +36,7 @@ import type {
   InferenceClient,
 } from '@kbn/inference-common';
 import { ToolChoiceType } from '@kbn/inference-common';
+import type { AnalyticsServiceStart } from '@kbn/core/server';
 import { CONTEXT_FUNCTION_NAME } from '../../../common';
 import { resourceNames } from '..';
 import type {
@@ -65,7 +67,6 @@ import type { ChatFunctionClient } from '../chat_function_client';
 import type { KnowledgeBaseService, RecalledEntry } from '../knowledge_base_service';
 import { getAccessQuery } from '../util/get_access_query';
 import { getSystemMessageFromInstructions } from '../util/get_system_message_from_instructions';
-import { failOnNonExistingFunctionCall } from './operators/fail_on_non_existing_function_call';
 import { getContextFunctionRequestIfNeeded } from './get_context_function_request_if_needed';
 import { continueConversation } from './operators/continue_conversation';
 import { convertInferenceEventsToStreamingEvents } from './operators/convert_inference_events_to_streaming_events';
@@ -77,6 +78,12 @@ import type { ObservabilityAIAssistantConfig } from '../../config';
 import { warmupModel } from '../inference_endpoint';
 import { reIndexKnowledgeBaseWithLock } from '../knowledge_base_service/reindex_knowledge_base';
 import { addAnonymizationData } from './operators/add_anonymization_data';
+import {
+  conversationDeleteEvent,
+  type ConversationDeleteEvent,
+} from '../../analytics/conversation_delete';
+import type { ConversationDuplicateEvent } from '../../analytics/conversation_duplicate';
+import { conversationDuplicateEvent } from '../../analytics/conversation_duplicate';
 
 const MAX_FUNCTION_CALLS = 8;
 
@@ -100,12 +107,17 @@ export class ObservabilityAIAssistantClient {
       };
       knowledgeBaseService: KnowledgeBaseService;
       scopes: AssistantScope[];
+      analytics: AnalyticsServiceStart;
     }
   ) {}
 
   private getConversationWithMetaFields = async (
-    conversationId: string
+    conversationId: string | undefined
   ): Promise<SearchHit<Conversation> | undefined> => {
+    if (!conversationId) {
+      return undefined;
+    }
+
     const response = await this.dependencies.esClient.asInternalUser.search<Conversation>({
       index: resourceNames.writeIndexAlias.conversations,
       query: {
@@ -172,6 +184,10 @@ export class ObservabilityAIAssistantClient {
       index: conversation._index,
       refresh: true,
     });
+    this.dependencies.analytics.reportEvent<ConversationDeleteEvent>(
+      conversationDeleteEvent.eventType,
+      {}
+    );
   };
 
   complete = ({
@@ -200,14 +216,28 @@ export class ObservabilityAIAssistantClient {
     userInstructions?: Instruction[];
     simulateFunctionCalling?: boolean;
     disableFunctions?: boolean;
-  }): Observable<Exclude<StreamingChatResponseEvent, ChatCompletionErrorEvent>> => {
+  }): {
+    response$: Observable<Exclude<StreamingChatResponseEvent, ChatCompletionErrorEvent>>;
+    getConversation: () => Promise<ConversationCreateRequest>;
+  } => {
     return withActiveInferenceSpan('RunTools', () => {
       const isConversationUpdate = persist && !!predefinedConversationId;
-      const conversationId = persist ? predefinedConversationId || v4() : '';
+      const conversationId = persist ? predefinedConversationId || v4() : undefined;
+      let resolveConversationRequest: (value: ConversationCreateRequest | undefined) => void;
+      const conversationRequestPromise = new Promise<ConversationCreateRequest | undefined>(
+        (resolve) => {
+          resolveConversationRequest = resolve;
+        }
+      );
 
       if (persist && !isConversationUpdate && kibanaPublicUrl) {
+        const { namespace } = this.dependencies;
+        const spaceAwarePath = addSpaceIdToPath('/', namespace, '/app/observabilityAIAssistant');
+
+        const conversationUrl = `${kibanaPublicUrl}${spaceAwarePath}/conversations/${conversationId}`;
+
         functionClient.registerInstruction(
-          `This conversation will be persisted in Kibana and available at this url: ${kibanaPublicUrl}/app/observabilityAIAssistant/conversations/${conversationId}.`
+          `This conversation will be persisted in Kibana and available at this url: ${conversationUrl}.`
         );
       }
 
@@ -250,10 +280,27 @@ export class ObservabilityAIAssistantClient {
         shareReplay()
       );
 
+      const connector$ = defer(() =>
+        from(
+          this.dependencies.actionsClient.get({
+            id: connectorId,
+            throwIfSystemAction: true,
+          })
+        ).pipe(
+          catchError((error) => {
+            this.dependencies.logger.debug(
+              `Failed to fetch connector for analytics: ${error.message}`
+            );
+            return of(undefined);
+          }),
+          shareReplay()
+        )
+      );
+
       // we continue the conversation here, after resolving both the materialized
       // messages and the knowledge base instructions
-      const nextEvents$ = forkJoin([systemMessage$, kbUserInstructions$]).pipe(
-        switchMap(([systemMessage, kbUserInstructions]) => {
+      const nextEvents$ = forkJoin([systemMessage$, kbUserInstructions$, connector$]).pipe(
+        switchMap(([systemMessage, kbUserInstructions, connector]) => {
           // if needed, inject a context function request here
           const contextRequest = functionClient.hasFunction(CONTEXT_FUNCTION_NAME)
             ? getContextFunctionRequestIfNeeded(initialMessages)
@@ -288,6 +335,9 @@ export class ObservabilityAIAssistantClient {
                 disableFunctions,
                 connectorId,
                 simulateFunctionCalling,
+                analytics: this.dependencies.analytics,
+                connector,
+                scopes: this.dependencies.scopes,
               })
             )
           );
@@ -337,7 +387,22 @@ export class ObservabilityAIAssistantClient {
                     // on the function response to have a valid conversation
                     const isFunctionRequest = !!lastMessage?.message.function_call?.name;
 
-                    if (!persist || isFunctionRequest) {
+                    const conversationCreateRequest: ConversationCreateRequest = {
+                      '@timestamp': new Date().toISOString(),
+                      conversation: {
+                        title,
+                        id: conversationId,
+                      },
+                      public: !!isPublic,
+                      labels: {},
+                      numeric_labels: {},
+                      systemMessage,
+                      messages: deanonymizedMessages,
+                      archived: false,
+                    };
+
+                    if (!persist || !conversationId || isFunctionRequest) {
+                      resolveConversationRequest(conversationCreateRequest);
                       return of();
                     }
 
@@ -365,6 +430,7 @@ export class ObservabilityAIAssistantClient {
                         )
                       ).pipe(
                         map((conversationUpdated): ConversationUpdateEvent => {
+                          resolveConversationRequest(conversationUpdated);
                           return {
                             conversation: conversationUpdated.conversation,
                             type: StreamingChatResponseEventType.ConversationUpdate,
@@ -373,22 +439,9 @@ export class ObservabilityAIAssistantClient {
                       );
                     }
 
-                    return from(
-                      this.create({
-                        '@timestamp': new Date().toISOString(),
-                        conversation: {
-                          title,
-                          id: conversationId,
-                        },
-                        public: !!isPublic,
-                        labels: {},
-                        numeric_labels: {},
-                        systemMessage,
-                        messages: deanonymizedMessages,
-                        archived: false,
-                      })
-                    ).pipe(
+                    return from(this.create(conversationCreateRequest)).pipe(
                       map((conversationCreated): ConversationCreateEvent => {
+                        resolveConversationRequest(conversationCreated);
                         return {
                           conversation: conversationCreated.conversation,
                           type: StreamingChatResponseEventType.ConversationCreate,
@@ -403,7 +456,7 @@ export class ObservabilityAIAssistantClient {
         })
       );
 
-      return output$.pipe(
+      const response$ = output$.pipe(
         catchError((error) => {
           this.dependencies.logger.error(error);
           return throwError(() => error);
@@ -429,6 +482,24 @@ export class ObservabilityAIAssistantClient {
         }),
         shareReplay()
       );
+
+      return {
+        response$,
+        getConversation: async () => {
+          const subscription = response$.subscribe();
+
+          try {
+            const response = await conversationRequestPromise;
+            if (!response) {
+              throw new Error('Failed to generate conversation response');
+            }
+
+            return response;
+          } finally {
+            subscription.unsubscribe();
+          }
+        },
+      };
     });
   };
 
@@ -506,7 +577,6 @@ export class ObservabilityAIAssistantClient {
         })
       ).pipe(
         convertInferenceEventsToStreamingEvents(),
-        failOnNonExistingFunctionCall({ functions }),
         tap((event) => {
           if (event.type === StreamingChatResponseEventType.ChatCompletionChunk) {
             this.dependencies.logger.trace(
@@ -629,7 +699,7 @@ export class ObservabilityAIAssistantClient {
       throw notFound();
     }
     const _source = conversation._source!;
-    return this.create({
+    const duplicatedConversation = await this.create({
       ..._source,
       conversation: {
         ..._source.conversation,
@@ -638,6 +708,11 @@ export class ObservabilityAIAssistantClient {
       public: false,
       archived: false,
     });
+    this.dependencies.analytics.reportEvent<ConversationDuplicateEvent>(
+      conversationDuplicateEvent.eventType,
+      {}
+    );
+    return duplicatedConversation;
   };
 
   recall = async ({

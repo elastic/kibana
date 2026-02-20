@@ -14,6 +14,7 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./usage_collector/value_list_metrics'));
     loadTestFile(require.resolve('./usage_collector/detection_rule_status'));
     loadTestFile(require.resolve('./usage_collector/detection_rule_upgrade_status'));
+    loadTestFile(require.resolve('./usage_collector/detection_rule_customization_status'));
     loadTestFile(require.resolve('./usage_collector/detection_rules_legacy_action'));
 
     loadTestFile(require.resolve('./task_based/all_types'));

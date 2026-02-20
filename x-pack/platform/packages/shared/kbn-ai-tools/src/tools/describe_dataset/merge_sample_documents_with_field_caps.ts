@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { castArray, sortBy, uniq } from 'lodash';
+import { castArray, sortBy } from 'lodash';
 import type { FieldCapsResponse, SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { getFlattenedObject } from '@kbn/std';
 import type { DocumentAnalysis } from './document_analysis';
@@ -19,8 +19,8 @@ export function mergeSampleDocumentsWithFieldCaps({
   hits: SearchHit[];
   fieldCaps: FieldCapsResponse;
 }): DocumentAnalysis {
-  const nonEmptyFields = new Set<string>();
-  const fieldValues = new Map<string, Array<string | number | boolean>>();
+  const valueDocCountsByField = new Map<string, Map<string | number | boolean, number>>();
+  const docsWithValueByField = new Map<string, number>();
 
   const samples = hits.map((hit) => ({
     ...hit.fields,
@@ -38,56 +38,68 @@ export function mergeSampleDocumentsWithFieldCaps({
   );
 
   for (const document of samples) {
-    Object.keys(document).forEach((field) => {
-      if (!nonEmptyFields.has(field)) {
-        nonEmptyFields.add(field);
-      }
+    const fieldsWithValuesInDocument = new Set<string>();
 
+    Object.entries(document).forEach(([field, rawValue]) => {
       if (!typesByFields.has(field)) {
         typesByFields.set(field, []);
       }
 
-      const values = castArray(document[field]);
-
-      const currentFieldValues = fieldValues.get(field) ?? [];
-
-      values.forEach((value) => {
-        if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
-          currentFieldValues.push(value);
-        }
+      const values = castArray(rawValue).filter((value) => {
+        return typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean';
       });
 
-      fieldValues.set(field, currentFieldValues);
+      if (values.length === 0) {
+        return;
+      }
+
+      const uniqueValues = new Set<string | number | boolean>(values);
+      fieldsWithValuesInDocument.add(field);
+
+      let valueDocCounts = valueDocCountsByField.get(field);
+      if (!valueDocCounts) {
+        valueDocCounts = new Map();
+        valueDocCountsByField.set(field, valueDocCounts);
+      }
+
+      uniqueValues.forEach((value) => {
+        const currentCount = valueDocCounts!.get(value) ?? 0;
+        valueDocCounts!.set(value, currentCount + 1);
+      });
+    });
+
+    fieldsWithValuesInDocument.forEach((field) => {
+      const currentCount = docsWithValueByField.get(field) ?? 0;
+      docsWithValueByField.set(field, currentCount + 1);
     });
   }
 
-  const fields = Array.from(typesByFields.entries()).flatMap(([name, types]) => {
-    const values = fieldValues.get(name);
+  const allFieldNames = Array.from(
+    new Set([...typesByFields.keys(), ...valueDocCountsByField.keys()])
+  );
 
-    const countByValues = new Map<string | number | boolean, number>();
-
-    values?.forEach((value) => {
-      const currentCount = countByValues.get(value) ?? 0;
-      countByValues.set(value, currentCount + 1);
-    });
+  const fields = allFieldNames.map((name) => {
+    const types = typesByFields.get(name) ?? [];
+    const valueDocCounts = valueDocCountsByField.get(name) ?? new Map();
+    const docsWithValue = docsWithValueByField.get(name) ?? 0;
 
     const sortedValues = sortBy(
-      Array.from(countByValues.entries()).map(([value, count]) => {
+      Array.from(valueDocCounts.entries()).map(([value, count]) => {
         return {
           value,
           count,
         };
       }),
-      'count',
-      'desc'
+      ({ count }) => -count
     );
 
     return {
       name,
       types,
-      empty: !nonEmptyFields.has(name),
-      cardinality: countByValues.size || null,
-      values: uniq(sortedValues.flatMap(({ value }) => value)),
+      empty: docsWithValue === 0,
+      cardinality: valueDocCounts.size > 0 ? valueDocCounts.size : null,
+      values: sortedValues,
+      documentsWithValue: docsWithValue,
     };
   });
 

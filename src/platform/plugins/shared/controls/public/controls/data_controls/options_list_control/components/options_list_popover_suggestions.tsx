@@ -16,8 +16,8 @@ import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import type { OptionsListSelection } from '@kbn/controls-schemas';
 import type { OptionsListSuggestions } from '../../../../../common/options_list/types';
-import type { OptionsListSelection } from '../../../../../common/options_list/options_list_selections';
 import { MAX_OPTIONS_LIST_REQUEST_SIZE } from '../constants';
 import { useOptionsListContext } from '../options_list_context_provider';
 import { OptionsListStrings } from '../options_list_strings';
@@ -33,7 +33,7 @@ export const OptionsListPopoverSuggestions = ({
 }: OptionsListPopoverSuggestionsProps) => {
   const {
     componentApi,
-    displaySettings: { hideExists },
+    displaySettings: { hide_exists },
   } = useOptionsListContext();
 
   const { euiTheme } = useEuiTheme();
@@ -64,7 +64,7 @@ export const OptionsListPopoverSuggestions = ({
     componentApi.totalCardinality$,
     componentApi.dataLoading$,
     componentApi.fieldFormatter,
-    componentApi.parentApi.allowExpensiveQueries$
+    componentApi.allowExpensiveQueries$
   );
 
   const listRef = useRef<HTMLDivElement>(null);
@@ -83,7 +83,7 @@ export const OptionsListPopoverSuggestions = ({
   }, [availableOptions, selectedOptions, showOnlySelected]);
 
   const existsSelectableOption = useMemo<EuiSelectableOption | undefined>(() => {
-    if (hideExists || (!existsSelected && (showOnlySelected || suggestions?.length === 0))) return;
+    if (hide_exists || (!existsSelected && (showOnlySelected || suggestions?.length === 0))) return;
 
     return {
       key: 'exists-option',
@@ -92,7 +92,7 @@ export const OptionsListPopoverSuggestions = ({
       css: styles.optionsListExistsFilter,
       'data-test-subj': 'optionsList-control-selection-exists',
     };
-  }, [suggestions, existsSelected, showOnlySelected, hideExists, styles]);
+  }, [suggestions, existsSelected, showOnlySelected, hide_exists, styles]);
 
   const [selectableOptions, setSelectableOptions] = useState<EuiSelectableOption[]>([]); // will be set in following useEffect
   useEffect(() => {

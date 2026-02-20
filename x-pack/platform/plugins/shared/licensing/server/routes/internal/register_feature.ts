@@ -27,7 +27,7 @@ export function registerRegisterFeatureRoute(
       validate: {
         body: schema.arrayOf(
           schema.object({
-            featureName: schema.string(),
+            featureId: schema.string(),
             licenseType: schema.string({
               validate: (value) => {
                 if (!(value in LICENSE_TYPE)) {
@@ -42,8 +42,8 @@ export function registerRegisterFeatureRoute(
     async (context, request, response) => {
       const registrations = request.body;
 
-      registrations.forEach(({ featureName, licenseType }) => {
-        featureUsageSetup.register(featureName, licenseType as LicenseType);
+      registrations.forEach(({ featureId, licenseType }) => {
+        featureUsageSetup.register(featureId, licenseType as LicenseType);
       });
 
       return response.ok({

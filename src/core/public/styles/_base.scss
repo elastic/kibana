@@ -21,8 +21,3 @@
     animation: none !important;
   }
 }
-
-// Add support for serverless navbar
-.euiBody--hasFlyout .euiBottomBar--fixed {
-  margin-left: var(--euiCollapsibleNavOffset, 0);
-}

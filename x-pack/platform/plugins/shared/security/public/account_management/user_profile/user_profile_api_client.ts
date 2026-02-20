@@ -66,6 +66,11 @@ export class UserProfileAPIClient implements UserProfileAPIClientType {
    * optional "dataPath" parameter can be used to return personal data for this user.
    */
   public getCurrent<D extends UserProfileData>(params?: UserProfileGetCurrentParams) {
+    if (this.http.anonymousPaths.isAnonymous(window.location.pathname)) {
+      this._enabled$.next(false);
+      this._userProfileLoaded$.next(true);
+      return Promise.reject(new Error('Unable to retrieve user profile for anonymous paths'));
+    }
     return this.http
       .get<GetUserProfileResponse<D>>('/internal/security/user_profile', {
         query: { dataPath: params?.dataPath },

@@ -66,7 +66,9 @@ describe('useDisableAttackDiscoverySchedule', () => {
 
     await act(async () => {
       await result.mutateAsync({ id: 'test-0' });
-      expect(disableAttackDiscoveryScheduleMock).toHaveBeenCalledWith({ id: 'test-0' });
+      expect(disableAttackDiscoveryScheduleMock).toHaveBeenCalledWith({
+        id: 'test-0',
+      });
     });
   });
 

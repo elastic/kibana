@@ -7,7 +7,7 @@
 
 import React, { type FC } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFieldNumber, EuiFormRow, EuiIcon, EuiToolTip } from '@elastic/eui';
+import { EuiFieldNumber, EuiFormRow, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { type NumberValidationResult, numberValidator } from '@kbn/ml-agg-utils';
 import { MAX_SERIES } from '../../embeddables/change_point_chart/const';
@@ -46,13 +46,12 @@ export const MaxSeriesControl: FC<{
         disabled={disabled}
         prepend={inline ? label : undefined}
         append={
-          <EuiToolTip
+          <EuiIconTip
             content={i18n.translate('xpack.aiops.changePointDetection.maxSeriesToPlotDescription', {
               defaultMessage: 'The maximum number of change points to visualize.',
             })}
-          >
-            <EuiIcon type={'question'} />
-          </EuiToolTip>
+            type="question"
+          />
         }
         compressed
         fullWidth

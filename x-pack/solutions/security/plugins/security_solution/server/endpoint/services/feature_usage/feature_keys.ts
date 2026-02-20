@@ -26,6 +26,8 @@ export const FEATURE_KEYS = {
   EXECUTE: 'Execute command',
   SCAN: 'Scan files',
   RUN_SCRIPT: 'Run script',
+  CANCEL: 'Cancel action',
+  MEMORY_DUMP: 'Memory dump',
   ALERTS_BY_PROCESS_ANCESTRY: 'Get related alerts by process ancestry',
   ENDPOINT_EXCEPTIONS: 'Endpoint exceptions',
 } as const;
@@ -44,6 +46,8 @@ const RESPONSE_ACTIONS_FEATURE_KEY: Readonly<Record<ResponseActionsApiCommandNam
     upload: 'UPLOAD',
     scan: 'SCAN',
     runscript: 'RUN_SCRIPT',
+    cancel: 'CANCEL',
+    'memory-dump': 'MEMORY_DUMP',
   };
 
 export const getResponseActionFeatureKey = (

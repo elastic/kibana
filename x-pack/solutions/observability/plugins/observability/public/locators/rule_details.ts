@@ -10,7 +10,7 @@ import { DEFAULT_CONTROLS } from '@kbn/alerts-ui-shared/src/alert_filter_control
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { LocatorDefinition } from '@kbn/share-plugin/public';
-import { ruleDetailsLocatorID } from '../../common';
+import { ruleDetailsLocatorID } from '@kbn/deeplinks-observability';
 import { RULES_PATH } from '../../common/locators/paths';
 import {
   RULE_DETAILS_ALERTS_TAB,
@@ -43,7 +43,7 @@ export class RuleDetailsLocatorDefinition implements LocatorDefinition<RuleDetai
       rangeFrom?: string;
       rangeTo?: string;
       kuery?: string;
-      controlConfigs?: RuleDetailsControlConfigs;
+      controlConfigs?: FilterControlConfig[];
     } = {};
 
     appState.rangeFrom = rangeFrom || 'now-15m';

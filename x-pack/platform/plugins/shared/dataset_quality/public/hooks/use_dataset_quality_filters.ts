@@ -24,9 +24,9 @@ export const useDatasetQualityFilters = () => {
     service,
     (state) =>
       state.matches('initializing') ||
-      (state.matches('main.integrations.fetching') &&
-        (state.matches('main.stats.datasets.fetching') ||
-          state.matches('main.stats.degradedDocs.fetching')))
+      (state.matches({ main: { integrations: 'fetching' } }) &&
+        (state.matches({ main: { stats: { datasets: 'fetching' } } }) ||
+          state.matches({ main: { stats: { degradedDocs: 'fetching' } } })))
   );
 
   const authorizedDatasetTypes = useSelector(service, (state) =>
@@ -66,11 +66,7 @@ export const useDatasetQualityFilters = () => {
   );
 
   const onTimeChange = useCallback(
-    (selectedTime: { start: string; end: string; isInvalid: boolean }) => {
-      if (selectedTime.isInvalid) {
-        return;
-      }
-
+    (selectedTime: { start: string; end: string }) => {
       service.send({
         type: 'UPDATE_TIME_RANGE',
         timeRange: {
@@ -90,7 +86,7 @@ export const useDatasetQualityFilters = () => {
   }, [service]);
 
   const onRefreshChange = useCallback(
-    ({ refreshInterval, isPaused }: OnRefreshChangeProps) => {
+    ({ refreshInterval, isPaused }: Pick<OnRefreshChangeProps, 'refreshInterval' | 'isPaused'>) => {
       service.send({
         type: 'UPDATE_TIME_RANGE',
         timeRange: {

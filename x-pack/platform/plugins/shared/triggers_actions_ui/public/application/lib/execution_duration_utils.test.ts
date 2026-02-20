@@ -65,6 +65,7 @@ function mockRuleType(overwrites: Partial<RuleType> = {}): RuleType {
     enabledInLicense: true,
     category: 'my-category',
     isExportable: true,
+    isInternallyManaged: false,
     ...overwrites,
   };
 }

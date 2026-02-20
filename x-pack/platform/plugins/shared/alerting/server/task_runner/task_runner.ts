@@ -59,6 +59,7 @@ import { RuleRunningHandler } from './rule_running_handler';
 import { RuleResultService } from '../monitoring/rule_result_service';
 import { RuleTypeRunner } from './rule_type_runner';
 import { initializeAlertsClient } from '../alerts_client';
+import type { AlertsToUpdateWithLastScheduledActions } from '../alerts_client/types';
 import {
   createTaskRunnerLogger,
   withAlertingSpan,
@@ -73,7 +74,6 @@ import {
   isOutdatedTaskVersionError,
   OUTDATED_TASK_VERSION,
 } from '../lib/error_with_type';
-import { getTrackedExecutions } from './lib/get_tracked_execution';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 
@@ -272,6 +272,7 @@ export class TaskRunner<
     fakeRequest,
     rule,
     apiKey,
+    uiamApiKey,
     validatedParams: params,
   }: RunRuleParams<Params>): Promise<RunRuleResult> {
     if (apm.currentTransaction) {
@@ -297,14 +298,12 @@ export class TaskRunner<
 
     const ruleFlappingSettings = rule.flapping
       ? {
-          enabled: true,
+          enabled: true, // default to true if flapping.enabled is undefined
           ...rule.flapping,
         }
       : null;
 
-    const flappingSettings = spaceFlappingSettings.enabled
-      ? ruleFlappingSettings || spaceFlappingSettings
-      : spaceFlappingSettings;
+    const flappingSettings = ruleFlappingSettings || spaceFlappingSettings;
 
     const ruleTypeRunnerContext = {
       alertingEventLogger: this.alertingEventLogger,
@@ -319,6 +318,7 @@ export class TaskRunner<
       ruleRunMetricsStore,
       spaceId,
       isServerless: this.context.isServerless,
+      shouldGrantUiam: this.context.shouldGrantUiam,
     };
     const alertsClient = await withAlertingSpan('alerting:initialize-alerts-client', () =>
       initializeAlertsClient<
@@ -342,6 +342,8 @@ export class TaskRunner<
           revision: rule.revision,
           alertDelay: rule.alertDelay,
           params: rule.params,
+          muteAll: rule.muteAll,
+          mutedInstanceIds: rule.mutedInstanceIds,
         },
         ruleType: this.ruleType as UntypedNormalizedRuleType,
         startedAt: this.taskInstance.startedAt,
@@ -362,6 +364,7 @@ export class TaskRunner<
         spaceId,
       },
       ruleTaskTimeout: this.ruleType.ruleTaskTimeout,
+      uiamApiKey,
     });
 
     const actionsClient = await this.context.actionsPlugin.getActionsClientWithRequest(fakeRequest);
@@ -389,6 +392,11 @@ export class TaskRunner<
       this.stackTraceLog = stackTrace ?? null;
       throw error;
     }
+
+    // Get alerts affected by maintenance windows here,
+    // so we can have the maintenance windows on in-memory alerts before scheduling actions
+    const alertsToUpdateWithMaintenanceWindows =
+      await alertsClient.getAlertsToUpdateWithMaintenanceWindows();
 
     const actionScheduler = new ActionScheduler({
       rule,
@@ -429,6 +437,7 @@ export class TaskRunner<
 
     let alertsToReturn: Record<string, RawAlertInstance> = {};
     let recoveredAlertsToReturn: Record<string, RawAlertInstance> = {};
+    let alertsToUpdateWithLastScheduledActions: AlertsToUpdateWithLastScheduledActions = {};
 
     // Only serialize alerts into task state if we're auto-recovering, otherwise
     // we don't need to keep this information around.
@@ -436,6 +445,23 @@ export class TaskRunner<
       const alerts = alertsClient.getRawAlertInstancesForState(true);
       alertsToReturn = alerts.rawActiveAlerts;
       recoveredAlertsToReturn = alerts.rawRecoveredAlerts;
+      alertsToUpdateWithLastScheduledActions =
+        alertsClient.getAlertsToUpdateWithLastScheduledActions();
+    }
+
+    if (this.shouldLogAndScheduleActionsForAlerts()) {
+      await withAlertingSpan('alerting:update-alerts', () =>
+        this.timer.runWithTimer(TaskRunnerTimerSpan.UpdateAlerts, async () => {
+          await alertsClient.updatePersistedAlerts({
+            alertsToUpdateWithLastScheduledActions,
+            alertsToUpdateWithMaintenanceWindows,
+          });
+        })
+      );
+    } else {
+      this.logger.debug(
+        `skipping updating alerts for rule ${ruleTypeRunnerContext.ruleLogPrefix}: rule execution has been cancelled.`
+      );
     }
 
     return {
@@ -445,11 +471,6 @@ export class TaskRunner<
         alertInstances: alertsToReturn,
         alertRecoveredInstances: recoveredAlertsToReturn,
         summaryActions: actionSchedulerResult.throttledSummaryActions,
-        trackedExecutions: getTrackedExecutions({
-          trackedExecutions: alertsClient.getTrackedExecutions(),
-          currentExecution: this.executionId,
-          limit: flappingSettings.lookBackWindow,
-        }),
       },
     };
   }

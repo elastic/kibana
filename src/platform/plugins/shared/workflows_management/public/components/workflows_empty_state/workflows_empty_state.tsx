@@ -17,10 +17,9 @@ import {
   EuiLink,
   EuiTitle,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
-
+import { FormattedMessage } from '@kbn/i18n-react';
+import { useKibana } from '../../hooks/use_kibana';
 interface WorkflowsEmptyStateProps {
   onCreateWorkflow?: () => void;
   canCreateWorkflow?: boolean;
@@ -36,12 +35,12 @@ export function WorkflowsEmptyState({
       icon={
         <EuiImage
           size="fullWidth"
-          src={http!.basePath.prepend('/plugins/workflowsManagement/assets/empty_state.svg')}
+          src={http?.basePath.prepend('/plugins/workflowsManagement/assets/empty_state.svg')}
           alt=""
         />
       }
       title={
-        <h2>
+        <h2 style={{ whiteSpace: 'nowrap' }}>
           <FormattedMessage
             id="workflows.emptyState.title"
             defaultMessage="Get Started with Workflows"
@@ -55,7 +54,7 @@ export function WorkflowsEmptyState({
           <p>
             <FormattedMessage
               id="workflows.emptyState.body.firstParagraph"
-              defaultMessage="Workflows let you automate and orchestrate security actions across your environment. Build step-by-step processes to enrich alerts, trigger responses, or streamline investigations—all in one place. Start by creating a workflow to simplify repetitive tasks and improve efficiency."
+              defaultMessage="Workflows let you automate repetitive tasks and streamline processes across your environment. Create workflows to connect actions, reduce manual effort, and improve operational efficiency."
             />
           </p>
         </>
@@ -73,10 +72,11 @@ export function WorkflowsEmptyState({
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                href="https://github.com/elastic/workflow-examples"
+                href="https://github.com/elastic/workflows"
                 target="_blank"
                 iconType="popout"
                 iconSide="right"
+                aria-label="Example workflows"
               >
                 <FormattedMessage
                   id="workflows.emptyState.exampleWorkflowsButton"
@@ -97,7 +97,7 @@ export function WorkflowsEmptyState({
               />
             </span>
           </EuiTitle>{' '}
-          <EuiLink href="#" target="_blank">
+          <EuiLink href="https://ela.st/workflows-docs" target="_blank">
             <FormattedMessage
               id="workflows.emptyState.footer.link"
               defaultMessage="Read documentation"

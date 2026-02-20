@@ -113,15 +113,17 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           });
 
           it('Elasticsearch streams is enabled too', async () => {
-            const response = await esClient.transport.request({
+            type StreamsStatusResponse = {
+              logs: { enabled: boolean } & Record<string, unknown>;
+            } & Record<string, unknown>;
+
+            const response = await esClient.transport.request<StreamsStatusResponse>({
               method: 'GET',
               path: '/_streams/status',
             });
-            expect(response).to.eql({
-              logs: {
-                enabled: true,
-              },
-            });
+            // Elasticsearch may return additional status keys (e.g. `logs.ecs`, `logs.otel`).
+            expect(response).to.have.property('logs');
+            expect(response.logs).to.have.property('enabled', true);
           });
         }
 
@@ -171,6 +173,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const doc = {
           '@timestamp': '2024-01-01T00:00:00.000Z',
           message: JSON.stringify({
+            '@timestamp': '2024-01-01T00:00:00.000Z',
             'log.level': 'info',
             'log.logger': 'nginx',
             message: 'test',
@@ -195,6 +198,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const doc = {
           '@timestamp': '2024-01-01T00:00:00.000Z',
           message: JSON.stringify({
+            '@timestamp': '2024-01-01T00:00:00.000Z',
             'log.level': 'info',
             'log.logger': 'nginx',
             message: 'test',
@@ -244,14 +248,91 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(response).to.have.property('message', 'Child stream logs.nginx already exists');
       });
 
+      it('fails to fork logs when stream name contains uppercase characters', async () => {
+        const body = {
+          stream: {
+            name: 'logs.Nginx',
+          },
+          where: {
+            field: 'log.logger',
+            eq: 'nginx',
+          },
+          status,
+        };
+        const response = await forkStream(apiClient, 'logs', body, 400);
+        expect(response).to.have.property(
+          'message',
+          'Desired stream state is invalid: Stream name cannot contain uppercase characters.'
+        );
+      });
+
+      it('fails to fork logs with empty stream name', async () => {
+        const body = {
+          stream: {
+            name: 'logs.', // empty child stream name
+          },
+          where: {
+            field: 'log.logger',
+            eq: 'nginx',
+          },
+          status,
+        };
+        const response = await forkStream(apiClient, 'logs', body, 400);
+        expect(response).to.have.property(
+          'message',
+          'Desired stream state is invalid: Stream name must not be empty.'
+        );
+      });
+
+      it('fails to fork logs with stream name that is over the 200 character limit', async () => {
+        const body = {
+          stream: {
+            // child stream is 201 chars
+            name: 'logs.xwdaqmsegtkamcrofcfcomnlkkkrkqtlkbqizvjvtrbwereqygqaaxmodzccqipzpwymyowrtvljtxevczoohrbpgijilsdptszgssmrkpwhvkukkgiqhvmcuzygmolyyadbxwngbkqjkretmzhgntkjkhrmltgyurufizwlelvmaqtngwhwqhxpfsuxiivxspvtwfcem',
+          },
+          where: {
+            field: 'log.logger',
+            eq: 'nginx',
+          },
+          status,
+        };
+        const response = await forkStream(apiClient, 'logs', body, 400);
+        expect(response).to.have.property(
+          'message',
+          'Desired stream state is invalid: Stream name cannot be longer than 200 characters.'
+        );
+      });
+
       it('Index an Nginx access log message, should goto logs.nginx', async () => {
         const doc = {
           '@timestamp': '2024-01-01T00:00:10.000Z',
           message: JSON.stringify({
+            '@timestamp': '2024-01-01T00:00:10.000Z',
             'log.level': 'info',
             'log.logger': 'nginx',
             message: 'test',
           }),
+        };
+        const result = await indexAndAssertTargetStream(esClient, 'logs.nginx', doc);
+        expect(result._source).to.eql({
+          '@timestamp': '2024-01-01T00:00:10.000Z',
+          body: { text: 'test' },
+          severity_text: 'info',
+          attributes: {
+            'log.logger': 'nginx',
+          },
+          stream: { name: 'logs.nginx' },
+        });
+      });
+
+      it('Index an Nginx access log message with subobjects, should goto logs.nginx', async () => {
+        const doc = {
+          '@timestamp': '2024-01-01T00:00:10.000Z',
+          message: 'test',
+          log: {
+            level: 'info',
+            logger: 'nginx',
+          },
         };
         const result = await indexAndAssertTargetStream(esClient, 'logs.nginx', doc);
         expect(result._source).to.eql({
@@ -280,6 +361,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const accessLogDoc = {
         '@timestamp': '2024-01-01T00:00:20.000Z',
         message: JSON.stringify({
+          '@timestamp': '2024-01-01T00:00:20.000Z',
           'log.level': 'info',
           'log.logger': 'nginx',
           message: 'test',
@@ -310,9 +392,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             description: '',
             ingest: {
               lifecycle: { inherit: {} },
-              processing: {
-                steps: [],
-              },
+              settings: {},
+              processing: { steps: [] },
               wired: {
                 fields: {},
                 routing: [
@@ -323,6 +404,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   },
                 ],
               },
+              failure_store: { inherit: {} },
             },
           },
         });
@@ -346,6 +428,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const doc = {
           '@timestamp': '2024-01-01T00:00:20.000Z',
           message: JSON.stringify({
+            '@timestamp': '2024-01-01T00:00:20.000Z',
             'log.level': 'error',
             'log.logger': 'nginx',
             message: 'test',
@@ -379,6 +462,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const doc1 = {
           '@timestamp': '2024-01-01T00:00:20.000Z',
           message: JSON.stringify({
+            '@timestamp': '2024-01-01T00:00:20.000Z',
             code: '500',
             message: 'test',
           }),
@@ -386,6 +470,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const doc2 = {
           '@timestamp': '2024-01-01T00:00:20.000Z',
           message: JSON.stringify({
+            '@timestamp': '2024-01-01T00:00:20.000Z',
             code: 500,
             message: 'test',
           }),
@@ -415,12 +500,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const doc1 = {
           '@timestamp': '2024-01-01T00:00:20.000Z',
           message: JSON.stringify({
+            '@timestamp': '2024-01-01T00:00:20.000Z',
             message: 'status_code: 500',
           }),
         };
         const doc2 = {
           '@timestamp': '2024-01-01T00:00:20.000Z',
           message: JSON.stringify({
+            '@timestamp': '2024-01-01T00:00:20.000Z',
             message: 'status_code: 400',
           }),
         };
@@ -471,9 +558,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             description: '',
             ingest: {
               lifecycle: { inherit: {} },
-              processing: {
-                steps: [],
-              },
+              processing: { steps: [] },
+              settings: {},
               wired: {
                 fields: {
                   'attributes.myfield': {
@@ -482,6 +568,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 },
                 routing: [],
               },
+              failure_store: { inherit: {} },
             },
           },
         };
@@ -517,9 +604,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             description: '',
             ingest: {
               lifecycle: { inherit: {} },
-              processing: {
-                steps: [],
-              },
+              processing: { steps: [] },
+              settings: {},
               wired: {
                 fields: {
                   'attributes.myfield': {
@@ -528,6 +614,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 },
                 routing: [],
               },
+              failure_store: { inherit: {} },
             },
           },
         };
@@ -636,10 +723,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             description: '',
             ingest: {
               lifecycle: { inherit: {} },
-              processing: {
-                steps: [],
-              },
+              processing: { steps: [] },
+              settings: {},
               wired: { fields, routing: [] },
+              failure_store: { inherit: {} },
             },
           },
         });
@@ -650,10 +737,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             description: '',
             ingest: {
               lifecycle: { inherit: {} },
-              processing: {
-                steps: [],
-              },
+              processing: { steps: [] },
+              settings: {},
               wired: { fields: {}, routing: [] },
+              failure_store: { inherit: {} },
             },
           },
         });
@@ -683,10 +770,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               description: '',
               ingest: {
                 lifecycle: { inherit: {} },
-                processing: {
-                  steps: [],
-                },
+                processing: { steps: [] },
+                settings: {},
                 wired: { fields: {}, routing: [] },
+                failure_store: { inherit: {} },
               },
             },
           },
@@ -701,15 +788,90 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             description: '',
             ingest: {
               lifecycle: { inherit: {} },
-              processing: {
-                steps: [],
-              },
+              processing: { steps: [] },
+              settings: {},
               wired: { fields: {}, routing: [] },
+              failure_store: { inherit: {} },
             },
           },
         };
 
         await putStream(apiClient, 'logs.super.duper.hyper.deeply.nested.streamname', body, 400);
+      });
+
+      describe('stream name validation', () => {
+        const validStreamBody: Streams.WiredStream.UpsertRequest = {
+          ...emptyAssets,
+          stream: {
+            description: '',
+            ingest: {
+              lifecycle: { inherit: {} },
+              processing: { steps: [] },
+              settings: {},
+              wired: { fields: {}, routing: [] },
+              failure_store: { inherit: {} },
+            },
+          },
+        };
+
+        it('fails to create a wired stream with uppercase characters in the name', async () => {
+          const response = await putStream(apiClient, 'logs.UpperCase', validStreamBody, 400);
+          expect((response as unknown as { message: string }).message).to.contain(
+            'Stream name cannot contain uppercase characters.'
+          );
+        });
+
+        it('fails to create a wired stream with spaces in the name', async () => {
+          const response = await putStream(apiClient, 'logs.with space', validStreamBody, 400);
+          expect((response as unknown as { message: string }).message).to.contain(
+            'Stream name cannot contain spaces.'
+          );
+        });
+
+        it('fails to create a wired stream with asterisk in the name', async () => {
+          const response = await putStream(apiClient, 'logs.with*asterisk', validStreamBody, 400);
+          expect((response as unknown as { message: string }).message).to.contain(
+            'Stream name cannot contain "*".'
+          );
+        });
+
+        it('fails to create a wired stream with angle brackets in the name', async () => {
+          const response = await putStream(apiClient, 'logs.with<brackets>', validStreamBody, 400);
+          expect((response as unknown as { message: string }).message).to.contain(
+            'Stream name cannot contain "<".'
+          );
+        });
+
+        it('fails to create a wired stream with question mark in the name', async () => {
+          const response = await putStream(apiClient, 'logs.with?question', validStreamBody, 400);
+          expect((response as unknown as { message: string }).message).to.contain(
+            'Stream name cannot contain "?".'
+          );
+        });
+
+        it('fails to create a wired stream with pipe in the name', async () => {
+          const response = await putStream(apiClient, 'logs.with|pipe', validStreamBody, 400);
+          expect((response as unknown as { message: string }).message).to.contain(
+            'Stream name cannot contain "|".'
+          );
+        });
+
+        it('fails to fork a wired stream with special characters in the destination name', async () => {
+          const body = {
+            stream: {
+              name: 'logs.with*special',
+            },
+            where: {
+              field: 'log.logger',
+              eq: 'test',
+            },
+            status,
+          };
+          const response = await forkStream(apiClient, 'logs', body, 400);
+          expect((response as unknown as { message: string }).message).to.contain(
+            'Stream name cannot contain "*".'
+          );
+        });
       });
     });
   });

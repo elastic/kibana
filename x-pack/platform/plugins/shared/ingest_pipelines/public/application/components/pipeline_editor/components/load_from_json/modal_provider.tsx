@@ -120,6 +120,7 @@ export const ModalProvider: FunctionComponent<Props> = ({ onDone, children }) =>
             {error && (
               <>
                 <EuiCallOut
+                  announceOnMount
                   data-test-subj="errorCallOut"
                   title={i18nTexts.error.title}
                   color="danger"

@@ -11,7 +11,7 @@ import { EuiSwitch } from '@elastic/eui';
 import { cloneDeep } from 'lodash';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 import type { PolicyFormComponentCommonProps } from '../types';
-import type { ImmutableArray, PolicyConfig } from '../../../../../../../common/endpoint/types';
+import type { ImmutableArray } from '../../../../../../../common/endpoint/types';
 import { DeviceControlAccessLevel as DeviceControlAccessLevelEnum } from '../../../../../../../common/endpoint/types';
 import type { DeviceControlOSes } from '../../../types';
 
@@ -19,22 +19,12 @@ export interface DeviceControlSettingCardSwitchProps extends PolicyFormComponent
   selected: boolean;
   protectionLabel?: string;
   osList: ImmutableArray<DeviceControlOSes>;
-  additionalOnSwitchChange?: ({
-    value,
-    policyConfigData,
-    protectionOsList,
-  }: {
-    value: boolean;
-    policyConfigData: PolicyConfig;
-    protectionOsList: ImmutableArray<DeviceControlOSes>;
-  }) => PolicyConfig;
 }
 
 export const DeviceControlSettingCardSwitch = React.memo(
   ({
     protectionLabel,
     osList,
-    additionalOnSwitchChange,
     onChange,
     policy,
     mode,
@@ -50,62 +40,52 @@ export const DeviceControlSettingCardSwitch = React.memo(
 
         if (event.target.checked === false) {
           // Disable device control for Windows and Mac
-          newPayload.windows.device_control = newPayload.windows.device_control || {
+          newPayload.windows.device_control = {
             enabled: false,
             usb_storage: DeviceControlAccessLevelEnum.audit,
           };
-          newPayload.windows.device_control.enabled = false;
-          newPayload.windows.popup.device_control = newPayload.windows.popup.device_control || {
+          newPayload.windows.popup.device_control = {
             enabled: false,
-            message: 'Elastic Security {action} {rule}',
+            message: newPayload.windows.popup.device_control?.message || '',
           };
-          newPayload.windows.popup.device_control.enabled = false;
 
-          newPayload.mac.device_control = newPayload.mac.device_control || {
+          newPayload.mac.device_control = {
             enabled: false,
             usb_storage: DeviceControlAccessLevelEnum.audit,
           };
-          newPayload.mac.device_control.enabled = false;
-          newPayload.mac.popup.device_control = newPayload.mac.popup.device_control || {
+          newPayload.mac.popup.device_control = {
             enabled: false,
-            message: 'Elastic Security {action} {rule}',
+            message: newPayload.mac.popup.device_control?.message || '',
           };
-          newPayload.mac.popup.device_control.enabled = false;
         } else {
           // Enable device control for Windows and Mac
           newPayload.windows.device_control = {
             enabled: true,
             usb_storage: DeviceControlAccessLevelEnum.deny_all,
           };
-          newPayload.windows.popup.device_control = newPayload.windows.popup.device_control || {
+          newPayload.windows.popup = newPayload.windows.popup || {};
+          newPayload.windows.popup.device_control = {
             enabled: true,
-            message: 'Elastic Security {action} {rule}',
+            message: newPayload.windows.popup.device_control?.message || '',
           };
-          newPayload.windows.popup.device_control.enabled = true;
 
           newPayload.mac.device_control = {
             enabled: true,
             usb_storage: DeviceControlAccessLevelEnum.deny_all,
           };
-          newPayload.mac.popup.device_control = newPayload.mac.popup.device_control || {
+          newPayload.mac.popup = newPayload.mac.popup || {};
+          newPayload.mac.popup.device_control = {
             enabled: true,
-            message: 'Elastic Security {action} {rule}',
+            message: newPayload.mac.popup.device_control?.message || '',
           };
-          newPayload.mac.popup.device_control.enabled = true;
         }
 
         onChange({
           isValid: true,
-          updatedPolicy: additionalOnSwitchChange
-            ? additionalOnSwitchChange({
-                value: event.target.checked,
-                policyConfigData: newPayload,
-                protectionOsList: osList,
-              })
-            : newPayload,
+          updatedPolicy: newPayload,
         });
       },
-      [policy, onChange, additionalOnSwitchChange, osList]
+      [policy, onChange]
     );
 
     return (

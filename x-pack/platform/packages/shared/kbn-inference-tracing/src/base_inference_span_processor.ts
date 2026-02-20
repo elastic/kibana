@@ -35,10 +35,8 @@ export abstract class BaseInferenceSpanProcessor implements tracing.SpanProcesso
 
   onEnd(span: tracing.ReadableSpan): void {
     if (span.attributes._should_track) {
-      delete span.attributes._should_track;
-
       // if this is the "root" inference span, but has a parent,
-      // drop the parent context and Langfuse only shows root spans
+      // drop the parent context as Phoenix only shows root spans
       if (span.attributes[IS_ROOT_INFERENCE_SPAN_ATTRIBUTE_NAME] && span.parentSpanContext) {
         span = {
           ...span,
@@ -46,11 +44,21 @@ export abstract class BaseInferenceSpanProcessor implements tracing.SpanProcesso
           parentSpanContext: undefined,
         };
       }
-
       delete span.attributes[IS_ROOT_INFERENCE_SPAN_ATTRIBUTE_NAME];
 
       span = this.processInferenceSpan(span);
-      this.delegate.onEnd(span);
+
+      // Phoenix does not show resource attributes, so we move them under `attributes.resource.*`
+      Object.entries(span.resource.attributes).forEach(([name, value]) => {
+        span.attributes[`resource.${name}`] = value;
+      });
+
+      const { _should_track, ...attributesToCapture } = span.attributes;
+      this.delegate.onEnd({
+        ...span,
+        spanContext: span.spanContext.bind(span),
+        attributes: attributesToCapture,
+      });
     }
   }
 

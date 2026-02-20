@@ -6,6 +6,7 @@
  */
 
 import expect from 'expect';
+import { deleteAllRules, deleteRule } from '@kbn/detections-response-ftr-services';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
   deleteAllTimelines,
@@ -19,13 +20,12 @@ import {
   installPrebuiltRules,
   getInstalledRules,
 } from '../../../../utils';
-import { deleteAllRules, deleteRule } from '../../../../../../config/services/detections_response';
 
 export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const supertest = getService('supertest');
   const log = getService('log');
-  const securitySolutionApi = getService('securitySolutionApi');
+  const detectionsApi = getService('detectionsApi');
 
   describe('@ess @serverless @skipInServerlessMKI Install from mocked prebuilt rule assets', () => {
     beforeEach(async () => {
@@ -203,7 +203,7 @@ export default ({ getService }: FtrProviderContext): void => {
         ]);
         await installPrebuiltRulesAndTimelines(es, supertest);
 
-        await securitySolutionApi
+        await detectionsApi
           .patchRule({
             body: {
               rule_id: 'rule-1',
@@ -230,7 +230,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(response.rules_installed).toBe(0);
         expect(response.rules_updated).toBe(1);
 
-        const { body: prebuiltRule } = await securitySolutionApi.readRule({
+        const { body: prebuiltRule } = await detectionsApi.readRule({
           query: { rule_id: 'rule-1' },
         });
 
@@ -253,7 +253,7 @@ export default ({ getService }: FtrProviderContext): void => {
         ]);
         await installPrebuiltRulesAndTimelines(es, supertest);
 
-        await securitySolutionApi
+        await detectionsApi
           .patchRule({
             body: {
               rule_id: 'rule-1',
@@ -279,7 +279,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(response.rules_installed).toBe(0);
         expect(response.rules_updated).toBe(1);
 
-        const { body: prebuiltRule } = await securitySolutionApi.readRule({
+        const { body: prebuiltRule } = await detectionsApi.readRule({
           query: { rule_id: 'rule-1' },
         });
 

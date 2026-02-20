@@ -20,7 +20,7 @@ import { getLensSOFromResponse } from './utils';
  * This is a wrapper client used only to update basic attributes from the vis plugin
  */
 export function getLensBasicClient<Attr extends SerializableAttributes = SerializableAttributes>(
-  cm: ContentManagementPublicStart,
+  _: ContentManagementPublicStart,
   http: HttpStart
 ): BasicVisualizationClient<'lens', Attr> {
   const lensClient = new LensClient(http);
@@ -58,6 +58,10 @@ export function getLensBasicClient<Attr extends SerializableAttributes = Seriali
           attributes: lensSavedObject.attributes as unknown as Attr,
         },
       } satisfies Awaited<ReturnType<BasicVisualizationClient<'lens', Attr>['update']>>;
+    },
+
+    delete: async (id: string) => {
+      return lensClient.delete(id);
     },
   };
 }

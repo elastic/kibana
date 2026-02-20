@@ -158,10 +158,10 @@ import { TIMELINE } from '../screens/timelines';
 import { COMBO_BOX_INPUT, EUI_FILTER_SELECT_ITEM } from '../screens/common/controls';
 import { ruleFields } from '../data/detection_engine';
 import { waitForAlerts } from './alerts';
-import { refreshPage } from './security_header';
 import { COMBO_BOX_OPTION, TOOLTIP } from '../screens/common';
 import { EMPTY_ALERT_TABLE } from '../screens/alerts';
 import { fillComboBox } from './eui_form_interactions';
+import { refreshPage } from './security_header';
 
 export const createAndEnableRule = () => {
   cy.get(CREATE_AND_ENABLE_BTN).click();
@@ -597,6 +597,7 @@ export const fillDefineThresholdRuleAndContinue = (rule: ThresholdRuleCreateProp
 
 export const fillDefineEqlRule = (rule: EqlRuleCreateProps) => {
   cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).should('exist');
+  cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).scrollIntoView();
   cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).should('be.visible');
   cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).type(rule.query);
   cy.get(RULES_CREATION_FORM).find(EQL_QUERY_VALIDATION_SPINNER).should('not.exist');
@@ -838,6 +839,7 @@ export const fillDefineMachineLearningRule = (rule: MachineLearningRuleCreatePro
     ? rule.machine_learning_job_id
     : [rule.machine_learning_job_id];
   cy.get(MACHINE_LEARNING_DROPDOWN_INPUT).click({ force: true });
+  cy.get(COMBO_BOX_OPTION).should('have.length.gte', 1);
   cy.get(MACHINE_LEARNING_DROPDOWN_INPUT).type(optionsToComboboxText(jobsAsArray));
   cy.get(ANOMALY_THRESHOLD_INPUT).type(`{selectall}${rule.anomaly_threshold}`, {
     force: true,
@@ -965,12 +967,14 @@ export const clearAlertSuppressionFields = () => {
 };
 
 export const selectAlertSuppressionPerInterval = () => {
+  cy.get(ALERT_SUPPRESSION_DURATION_PER_TIME_INTERVAL).should('be.enabled');
   // checkbox is covered by label, force:true is a workaround
   // click on label not working, likely because it has child components
   cy.get(ALERT_SUPPRESSION_DURATION_PER_TIME_INTERVAL).click({ force: true });
 };
 
 export const selectAlertSuppressionPerRuleExecution = () => {
+  cy.get(ALERT_SUPPRESSION_DURATION_PER_RULE_EXECUTION).should('be.enabled');
   cy.get(ALERT_SUPPRESSION_DURATION_PER_RULE_EXECUTION).click();
 };
 
@@ -979,7 +983,10 @@ export const selectDoNotSuppressForMissingFields = () => {
 };
 
 export const setAlertSuppressionDuration = (interval: number, timeUnit: 's' | 'm' | 'h') => {
+  cy.get(ALERT_SUPPRESSION_DURATION_VALUE_INPUT).should('be.enabled');
   cy.get(ALERT_SUPPRESSION_DURATION_VALUE_INPUT).type(`{selectall}${interval}`);
+
+  cy.get(ALERT_SUPPRESSION_DURATION_UNIT_INPUT).should('be.enabled');
   cy.get(ALERT_SUPPRESSION_DURATION_UNIT_INPUT).select(timeUnit);
 };
 

@@ -70,7 +70,9 @@ function setup({
   });
 
   // mock transaction types
-  jest.spyOn(useApmDataViewHook, 'useAdHocApmDataView').mockReturnValue({ dataView: undefined });
+  jest
+    .spyOn(useApmDataViewHook, 'useAdHocApmDataView')
+    .mockReturnValue({ dataView: undefined, apmIndices: undefined });
 
   jest.spyOn(useFetcherHook, 'useFetcher').mockReturnValue({} as any);
 

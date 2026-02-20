@@ -2,7 +2,7 @@
   "type": "plugin",
   "id": "@kbn/uptime-plugin",
   "owner": [
-    "@elastic/obs-ux-management-team"
+    "@elastic/actionable-obs-team"
   ],
   "group": "observability",
   "visibility": "private",
@@ -37,6 +37,7 @@
       "triggersActionsUi",
       "usageCollection",
       "unifiedSearch",
+      "kql",
       "charts",
       "fieldsMetadata"
     ],

@@ -8,8 +8,23 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema, offeringBasedSchema } from '@kbn/config-schema';
 import { ALLOWED_MIME_TYPES } from '../common/constants/mime_types';
+import {
+  DEFAULT_TASK_INTERVAL_MINUTES,
+  DEFAULT_TASK_START_DELAY_MINUTES,
+} from '../common/constants/incremental_id';
 
 export const ConfigSchema = schema.object({
+  analytics: schema.object({
+    index: schema.object({
+      enabled: offeringBasedSchema({
+        serverless: schema.boolean({ defaultValue: false }),
+        traditional: schema.boolean({ defaultValue: false }),
+      }),
+    }),
+  }),
+  attachments: schema.object({
+    enabled: schema.boolean({ defaultValue: false }),
+  }),
   markdownPlugins: schema.object({
     lens: schema.boolean({ defaultValue: true }),
   }),
@@ -20,23 +35,35 @@ export const ConfigSchema = schema.object({
     // intentionally not setting a default here so that we can determine if the user set it
     maxSize: schema.maybe(schema.number({ min: 0 })),
   }),
+  incrementalId: schema.object({
+    /**
+     * Whether the incremental id service should be enabled
+     */
+    enabled: schema.boolean({ defaultValue: true }),
+    /**
+     * The interval that the task should be scheduled at
+     */
+    taskIntervalMinutes: schema.number({
+      defaultValue: DEFAULT_TASK_INTERVAL_MINUTES,
+      min: 5,
+    }),
+    /**
+     * The initial delay the task will be started with
+     */
+    taskStartDelayMinutes: schema.number({
+      defaultValue: DEFAULT_TASK_START_DELAY_MINUTES,
+      min: 1,
+    }),
+  }),
   stack: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
   }),
-  analytics: schema.object({
-    index: schema.object({
-      enabled: offeringBasedSchema({
-        serverless: schema.boolean({ defaultValue: false }),
-        traditional: schema.boolean({ defaultValue: false }),
-      }),
-    }),
+  // NOTE: exposed to the Browser via `exposeToBrowser` setting in cases/server/index.ts
+  // WARN: enabling this feature and disabling it later is not supported (saved objects will throw errors)
+  templates: schema.object({
+    enabled: schema.boolean({ defaultValue: false }),
   }),
   enabled: schema.boolean({ defaultValue: true }),
-  unsafe: schema.maybe(
-    schema.object({
-      enableCaseSummary: schema.boolean({ defaultValue: false }),
-    })
-  ),
 });
 
 export type ConfigType = TypeOf<typeof ConfigSchema>;

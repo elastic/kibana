@@ -2,6 +2,8 @@
   "type": "plugin",
   "id": "@kbn/application-usage-test-plugin",
   "owner": "@elastic/kibana-core",
+  "group": "platform",
+  "visibility": "private",
   "plugin": {
     "id": "applicationUsageTest",
     "server": false,

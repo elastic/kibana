@@ -10,12 +10,18 @@ import { i18n } from '@kbn/i18n';
 import { extractErrorMessage } from '@kbn/cloud-security-posture-common/utils/helpers';
 import type { Node, Edge } from '@xyflow/react';
 import { Position } from '@xyflow/react';
+import {
+  DOCUMENT_TYPE_ENTITY,
+  DOCUMENT_TYPE_EVENT,
+  DOCUMENT_TYPE_ALERT,
+} from '@kbn/cloud-security-posture-common/schema/graph/v1';
 import type {
   NodeViewModel,
   NodeDocumentDataViewModel,
   EntityNodeViewModel,
   LabelNodeViewModel,
   GroupNodeViewModel,
+  RelationshipNodeViewModel,
   EdgeViewModel,
 } from './types';
 
@@ -29,11 +35,29 @@ export const isEntityNode = (node: NodeViewModel): node is EntityNodeViewModel =
 export const isLabelNode = (node: NodeViewModel): node is LabelNodeViewModel =>
   node.shape === 'label';
 
+export const isRelationshipNode = (node: NodeViewModel): node is RelationshipNodeViewModel =>
+  node.shape === 'relationship';
+
+/**
+ * Returns true if the shape is a connector shape (label or relationship).
+ * Connector shapes act as connectors between entity nodes.
+ */
+export const isConnectorShape = (shape?: string): boolean =>
+  shape === 'label' || shape === 'relationship';
+
+/**
+ * Returns true for nodes that act as connectors between entity nodes (label or relationship nodes).
+ * These nodes share similar layout and sizing behavior.
+ */
+export const isConnectorNode = (
+  node: NodeViewModel
+): node is LabelNodeViewModel | RelationshipNodeViewModel => isConnectorShape(node.shape);
+
 export const isStackNode = (node: NodeViewModel): node is GroupNodeViewModel =>
   node.shape === 'group';
 
 export const isStackedLabel = (node: NodeViewModel): boolean =>
-  !(node.shape === 'label' && Boolean(node.parentId));
+  !((node.shape === 'label' || node.shape === 'relationship') && Boolean(node.parentId));
 
 /**
  * Type guard: Returns true if node.documentsData is a non-empty array.
@@ -65,9 +89,15 @@ export const getNodeDocumentMode = (
   }
 
   // Single alert contains both event's document data and alert's document data.
-  if (node.documentsData.find((doc) => doc.type === 'alert') && node.documentsData.length <= 2) {
+  if (
+    node.documentsData.find((doc) => doc.type === DOCUMENT_TYPE_ALERT) &&
+    node.documentsData.length <= 1
+  ) {
     return 'single-alert';
-  } else if (node.documentsData.length === 1 && node.documentsData[0].type === 'event') {
+  } else if (
+    node.documentsData.length === 1 &&
+    node.documentsData[0].type === DOCUMENT_TYPE_EVENT
+  ) {
     return 'single-event';
   } else if (isEntityNode(node) && node.documentsData.length === 1) {
     return 'single-entity';
@@ -81,6 +111,26 @@ export const getNodeDocumentMode = (
 };
 
 /**
+ * Checks if a node has entity store enrichment.
+ * Only relevant for single-entity mode - returns false for all other modes.
+ * For single-entity nodes, checks if at least one document has entity.availableInEntityStore === true.
+ */
+export const isEntityNodeEnriched = (node: NodeViewModel): boolean => {
+  const docMode = getNodeDocumentMode(node);
+
+  if (docMode !== 'single-entity') {
+    return false;
+  }
+
+  return (
+    'documentsData' in node &&
+    Array.isArray(node.documentsData) &&
+    node.documentsData.length > 0 &&
+    node.documentsData.some((doc) => doc.entity?.availableInEntityStore === true)
+  );
+};
+
+/**
  * Returns the single document data for a node if it is in single-* mode.
  * If the node is not in one of these modes, or if it has no documentsData, it returns undefined.
  */
@@ -88,14 +138,22 @@ export const getSingleDocumentData = (
   node: NodeViewModel
 ): NodeDocumentDataViewModel | undefined => {
   const mode = getNodeDocumentMode(node);
-  if (!hasNodeDocumentsData(node) || (mode !== 'single-alert' && mode !== 'single-event')) {
+  if (
+    !hasNodeDocumentsData(node) ||
+    (mode !== 'single-alert' && mode !== 'single-event' && mode !== 'single-entity')
+  ) {
     return undefined;
   }
 
-  // For single-alert we might have both event and alert documents. We prefer to return the alert document if it exists.
+  // For single-entity mode, prioritize finding the entity document
+  if (mode === 'single-entity') {
+    return node.documentsData.find((doc) => doc.type === DOCUMENT_TYPE_ENTITY);
+  }
+
+  // For single-alert and single-event modes, prefer alert document over event document
   const documentData =
-    node.documentsData.find((doc) => doc.type === 'alert') ??
-    node.documentsData.find((doc) => doc.type === 'event');
+    node.documentsData.find((doc) => doc.type === DOCUMENT_TYPE_ALERT) ??
+    node.documentsData.find((doc) => doc.type === DOCUMENT_TYPE_EVENT);
 
   return documentData;
 };
@@ -107,6 +165,13 @@ const FETCH_GRAPH_FAILED_TEXT = i18n.translate(
   }
 );
 
+const FETCH_GROUP_DETAILS_FAILED_TEXT = i18n.translate(
+  'securitySolutionPackages.csp.graph.investigation.errorFetchingGroupDetails',
+  {
+    defaultMessage: 'Error fetching group details',
+  }
+);
+
 export const showErrorToast = (
   toasts: CoreStart['notifications']['toasts'],
   error: unknown
@@ -115,6 +180,17 @@ export const showErrorToast = (
     toasts.addError(error, { title: FETCH_GRAPH_FAILED_TEXT });
   } else {
     toasts.addDanger(extractErrorMessage(error, FETCH_GRAPH_FAILED_TEXT));
+  }
+};
+
+export const showDetailsErrorToast = (
+  toasts: CoreStart['notifications']['toasts'],
+  error: unknown
+): void => {
+  if (error instanceof Error) {
+    toasts.addError(error, { title: FETCH_GROUP_DETAILS_FAILED_TEXT });
+  } else {
+    toasts.addDanger(extractErrorMessage(error, FETCH_GROUP_DETAILS_FAILED_TEXT));
   }
 };
 
@@ -143,7 +219,10 @@ export const buildGraphFromViewModels = (
       node.targetPosition = Position.Left;
       node.resizing = false;
       node.focusable = false;
-    } else if (nodeData.shape === 'label' && nodeData.parentId) {
+    } else if (
+      (nodeData.shape === 'label' || nodeData.shape === 'relationship') &&
+      nodeData.parentId
+    ) {
       node.parentId = nodeData.parentId;
       node.extent = 'parent';
       node.expandParent = false;
@@ -156,18 +235,13 @@ export const buildGraphFromViewModels = (
   const edges: Array<Edge<EdgeViewModel>> = edgesModel
     .filter((edgeData) => nodesById[edgeData.source] && nodesById[edgeData.target])
     .map((edgeData) => {
-      const isIn =
-        nodesById[edgeData.source].shape !== 'label' &&
-        nodesById[edgeData.target].shape === 'group';
-      const isInside =
-        nodesById[edgeData.source].shape === 'group' &&
-        nodesById[edgeData.target].shape === 'label';
-      const isOut =
-        nodesById[edgeData.source].shape === 'label' &&
-        nodesById[edgeData.target].shape === 'group';
-      const isOutside =
-        nodesById[edgeData.source].shape === 'group' &&
-        nodesById[edgeData.target].shape !== 'label';
+      const sourceShape = nodesById[edgeData.source].shape;
+      const targetShape = nodesById[edgeData.target].shape;
+
+      const isIn = !isConnectorShape(sourceShape) && targetShape === 'group';
+      const isInside = sourceShape === 'group' && isConnectorShape(targetShape);
+      const isOut = isConnectorShape(sourceShape) && targetShape === 'group';
+      const isOutside = sourceShape === 'group' && !isConnectorShape(targetShape);
 
       return {
         id: edgeData.id,
@@ -191,3 +265,5 @@ export const buildGraphFromViewModels = (
 
   return { nodes, edges };
 };
+
+export const showStackedShape = (count?: number) => !!count && count > 1;

@@ -5,10 +5,9 @@
  * 2.0.
  */
 import React from 'react';
+import { load } from 'js-yaml';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiCode } from '@elastic/eui';
-
 import { z } from '@kbn/zod';
 
 import { AGENT_LOG_LEVELS, DEFAULT_LOG_LEVEL } from '../constants';
@@ -17,14 +16,30 @@ import type { SettingsConfig } from './types';
 
 export const zodStringWithDurationValidation = z
   .string()
-  .refine((val) => val.match(/^(\d+[s|m|h|d])?$/), {
+  .refine((val) => val.match(/^(\d+[s|m|h])?$/), {
     message: i18n.translate(
       'xpack.fleet.settings.agentPolicyAdvanced.downloadTimeoutValidationMessage',
       {
-        defaultMessage: 'Must be a string with a time unit, e.g. 30s, 5m, 2h, 1d',
+        defaultMessage: 'Must be a string with a time unit, e.g. 30s, 5m, 2h',
       }
     ),
   });
+
+export const zodStringWithYamlValidation = z.string().refine(
+  (val) => {
+    try {
+      load(val);
+      return true;
+    } catch (error) {
+      return false;
+    }
+  },
+  {
+    message: i18n.translate('xpack.fleet.settings.agentPolicyAdvanced.yamlValidationMessage', {
+      defaultMessage: 'Must be a valid YAML string',
+    }),
+  }
+);
 
 export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
   {
@@ -32,9 +47,10 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
     title: i18n.translate('xpack.fleet.settings.agentPolicyAdvanced.goMaxProcsTitle', {
       defaultMessage: 'Limit CPU usage',
     }),
-    description: i18n.translate('xpack.fleet.settings.agentPolicyAdvanced.goMaxProcsDescription', {
-      defaultMessage: 'Limits the maximum number of CPUs that can be executing simultaneously.',
-    }),
+    description: () =>
+      i18n.translate('xpack.fleet.settings.agentPolicyAdvanced.goMaxProcsDescription', {
+        defaultMessage: 'Limits the maximum number of CPUs that can be executing simultaneously.',
+      }),
     learnMoreLink:
       'https://www.elastic.co/guide/en/fleet/current/agent-policy.html#agent-policy-limit-cpu',
     api_field: {
@@ -49,12 +65,10 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
     title: i18n.translate('xpack.fleet.settings.agentPolicyAdvanced.downloadTimeoutTitle', {
       defaultMessage: 'Agent binary download timeout',
     }),
-    description: i18n.translate(
-      'xpack.fleet.settings.agentPolicyAdvanced.downloadTimeoutDescription',
-      {
+    description: () =>
+      i18n.translate('xpack.fleet.settings.agentPolicyAdvanced.downloadTimeoutDescription', {
         defaultMessage: 'Timeout for downloading the agent binary.',
-      }
-    ),
+      }),
     learnMoreLink:
       'https://www.elastic.co/guide/en/fleet/current/enable-custom-policy-settings.html#configure-agent-download-timeout',
     api_field: {
@@ -75,12 +89,13 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
         defaultMessage: 'Agent binary target directory',
       }
     ),
-    description: i18n.translate(
-      'xpack.fleet.settings.agentPolicyAdvanced.agentDownloadTargetDirectoryDescription',
-      {
-        defaultMessage: 'The disk path to which the agent binary will be downloaded.',
-      }
-    ),
+    description: () =>
+      i18n.translate(
+        'xpack.fleet.settings.agentPolicyAdvanced.agentDownloadTargetDirectoryDescription',
+        {
+          defaultMessage: 'The disk path to which the agent binary will be downloaded.',
+        }
+      ),
     learnMoreLink:
       'https://www.elastic.co/guide/en/fleet/current/elastic-agent-standalone-download.html',
     schema: z.string(),
@@ -98,12 +113,13 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
         defaultMessage: 'Agent logging metrics period',
       }
     ),
-    description: i18n.translate(
-      'xpack.fleet.settings.agentPolicyAdvanced.agentLoggingMetricsPeriodDescription',
-      {
-        defaultMessage: 'The frequency of logging the internal Elastic Agent metrics.',
-      }
-    ),
+    description: () =>
+      i18n.translate(
+        'xpack.fleet.settings.agentPolicyAdvanced.agentLoggingMetricsPeriodDescription',
+        {
+          defaultMessage: 'The frequency of logging the internal Elastic Agent metrics.',
+        }
+      ),
     learnMoreLink:
       'https://www.elastic.co/guide/en/fleet/current/elastic-agent-standalone-logging-config.html#elastic-agent-standalone-logging-settings',
     schema: zodStringWithDurationValidation,
@@ -114,11 +130,11 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
     title: i18n.translate('xpack.fleet.settings.agentPolicyAdvanced.agentLoggingLevelTitle', {
       defaultMessage: 'Agent logging level',
     }),
-    description: (
+    description: ({ renderer }) => (
       <FormattedMessage
         id="xpack.fleet.settings.agentPolicyAdvanced.agentLoggingLevelDescription"
         defaultMessage="Sets the log level for all the agents on the policy. The default log level is {level}."
-        values={{ level: <EuiCode>{DEFAULT_LOG_LEVEL}</EuiCode> }}
+        values={{ level: renderer.renderCode(DEFAULT_LOG_LEVEL) }}
       />
     ),
     api_field: {
@@ -134,7 +150,7 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
     title: i18n.translate('xpack.fleet.settings.agentPolicyAdvanced.agentLoggingToFilesTitle', {
       defaultMessage: 'Agent logging to files',
     }),
-    description: (
+    description: () => (
       <FormattedMessage
         id="xpack.fleet.settings.agentPolicyAdvanced.agentLoggingToFilesDescription"
         defaultMessage="Enables logging to rotating files."
@@ -153,7 +169,7 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
     title: i18n.translate('xpack.fleet.settings.agentPolicyAdvanced.agentLoggingFileSizeTitle', {
       defaultMessage: 'Agent logging file size limit',
     }),
-    description: (
+    description: () => (
       <FormattedMessage
         id="xpack.fleet.settings.agentPolicyAdvanced.agentLoggingFileSizeDescription"
         defaultMessage="Configure log file size limit in bytes. If limit is reached, log file will be automatically rotated."
@@ -172,7 +188,7 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
     title: i18n.translate('xpack.fleet.settings.agentPolicyAdvanced.agentLoggingFileLimitTitle', {
       defaultMessage: 'Agent logging number of files',
     }),
-    description: (
+    description: () => (
       <FormattedMessage
         id="xpack.fleet.settings.agentPolicyAdvanced.agentLoggingFileLimitDescription"
         defaultMessage="Number of rotated log files to keep. Oldest files will be deleted first."
@@ -194,10 +210,10 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
         defaultMessage: 'Agent logging file rotation interval',
       }
     ),
-    description: (
+    description: () => (
       <FormattedMessage
         id="xpack.fleet.settings.agentPolicyAdvanced.agentLoggingFileIntervalDescription"
-        defaultMessage="Enable log file rotation on time intervals in addition to size-based rotation, i.e. 24h, 7d."
+        defaultMessage="Enable log file rotation on time intervals in addition to size-based rotation, i.e. 1s, 1m , 1h, 24h."
       />
     ),
     api_field: {
@@ -213,7 +229,7 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
     title: i18n.translate('xpack.fleet.settings.agentPolicyAdvanced.monitoringRuntimeTitle', {
       defaultMessage: 'Monitoring runtime (experimental)',
     }),
-    description: (
+    description: () => (
       <FormattedMessage
         id="xpack.fleet.settings.agentPolicyAdvanced.monitoringRuntimeDescription"
         defaultMessage="Change how the Beat inputs used for Elastic Agent self-monitored are executed."
@@ -253,5 +269,23 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
         ),
       },
     ],
+  },
+  {
+    name: 'agent.internal',
+    title: i18n.translate('xpack.fleet.settings.agentPolicyAdvanced.internalYamlSettingsTitle', {
+      defaultMessage: 'Advanced internal YAML settings',
+    }),
+    description: () => (
+      <FormattedMessage
+        id="xpack.fleet.settings.agentPolicyAdvanced.internalYamlSettingsDescription"
+        defaultMessage="Control advanced agent internal settings and feature flags. No stability guarantee is provided for these settings."
+      />
+    ),
+    api_field: {
+      name: 'agent_internal',
+    },
+    schema: zodStringWithYamlValidation,
+    type: 'yaml',
+    example_value: `'agent:\n internal:\n runtime:\n default: otel'`,
   },
 ];

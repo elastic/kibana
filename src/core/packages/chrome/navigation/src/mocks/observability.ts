@@ -13,7 +13,7 @@ export const LOGO = {
   href: '/observability',
   id: 'observability',
   label: 'Observability',
-  type: 'logoObservability',
+  iconType: 'logoObservability',
 };
 
 export const PRIMARY_MENU_ITEMS: MenuItem[] = [
@@ -36,7 +36,7 @@ export const PRIMARY_MENU_ITEMS: MenuItem[] = [
     iconType: 'info',
     href: '/overview',
   },
-  { id: 'alerts', label: 'Alerts', iconType: 'bell', href: '/alerts' },
+  { id: 'alerts', label: 'Alerts', iconType: 'bell', href: '/alerts', badgeType: 'new' },
   { id: 'cases', label: 'Cases', iconType: 'casesApp', href: '/cases', badgeType: 'techPreview' },
   {
     id: 'slos',
@@ -45,63 +45,68 @@ export const PRIMARY_MENU_ITEMS: MenuItem[] = [
     href: '/slos',
   },
   {
-    id: 'apps',
+    id: 'service-inventory',
     label: 'Apps',
     iconType: 'apps',
     href: '/apps/service-inventory',
+    badgeType: 'beta',
     sections: [
       {
         id: 'apps-section-1',
-        label: null,
         items: [
           {
             id: 'service-inventory',
             label: 'Service inventory',
             href: '/apps/service-inventory',
           },
-          { id: 'traces', label: 'Traces', href: '/apps/traces' },
+          { id: 'traces', label: 'Traces', href: '/apps/traces', isExternal: true },
           {
             id: 'dependencies',
             label: 'Dependencies',
             href: '/apps/dependencies',
           },
-          { id: 'settings', label: 'Settings', href: '/apps/settings' },
+          { id: 'apps-settings', label: 'Settings', href: '/apps/settings' },
         ],
       },
       {
         id: 'synthetics',
         label: 'Synthetics',
         items: [
-          { id: 'overview', label: 'Overview', href: '/synthetics/overview' },
+          { id: 'synthetics-overview', label: 'Overview', href: '/synthetics/overview' },
           {
             id: 'tls-certificates',
             label: 'TLS certificates',
             href: '/synthetics/tls-certificates',
+            badgeType: 'beta',
           },
         ],
       },
     ],
   },
   {
-    id: 'infrastructure',
+    id: 'inventory',
     label: 'Infrastructure',
     iconType: 'storage',
     href: '/infrastructure/inventory',
     sections: [
       {
         id: 'infrastructure-section-1',
-        label: null,
         items: [
           {
             id: 'inventory',
             label: 'Infrastructure inventory',
             href: '/infrastructure/inventory',
           },
-          { id: 'hosts', label: 'Hosts', href: '/infrastructure/hosts' },
+          { id: 'hosts', label: 'Hosts', href: '/infrastructure/hosts', badgeType: 'techPreview' },
           {
-            id: 'settings',
+            id: 'infrastructure-settings',
             label: 'Settings',
             href: '/infrastructure/settings',
+          },
+          {
+            id: 'infrastructure-services',
+            label: 'Services',
+            href: '/infrastructure/services',
           },
         ],
       },
@@ -120,17 +125,16 @@ export const PRIMARY_MENU_ITEMS: MenuItem[] = [
     href: '/streams',
   },
   {
-    id: 'machine-learning',
+    id: 'ml-overview',
     label: 'Machine learning',
     iconType: 'machineLearningApp',
     href: '/ml/overview',
-    badgeType: 'beta',
+    badgeType: 'techPreview',
     sections: [
       {
         id: 'ml-section-1',
-        label: null,
         items: [
-          { id: 'overview', label: 'Overview', href: '/ml/overview' },
+          { id: 'ml-overview', label: 'Overview', href: '/ml/overview' },
           {
             id: 'data-visualizer',
             label: 'Data visualizer',
@@ -211,7 +215,7 @@ export const PRIMARY_MENU_FOOTER_ITEMS: MenuItem[] = [
     badgeType: 'techPreview',
   },
   {
-    id: 'settings',
+    id: 'project-performance',
     label: 'Settings',
     iconType: 'gear',
     href: '/settings/project/performance',
@@ -289,6 +293,7 @@ export const PRIMARY_MENU_FOOTER_ITEMS: MenuItem[] = [
             id: 'access-org-members',
             label: 'Org members',
             href: '/settings/access/org-members',
+            badgeType: 'techPreview',
             isExternal: true,
           },
           {
@@ -360,7 +365,7 @@ export const PRIMARY_MENU_FOOTER_ITEMS: MenuItem[] = [
         label: 'Machine learning',
         items: [
           {
-            id: 'ml-overview',
+            id: 'settings-ml-overview',
             label: 'Overview',
             href: '/settings/ml/overview',
           },
@@ -437,4 +442,19 @@ export const PRIMARY_MENU_FOOTER_ITEMS: MenuItem[] = [
       },
     ],
   },
+  {
+    id: 'whats_new',
+    label: "What's new",
+    iconType: 'bell',
+    href: '/whats-new',
+    badgeType: 'new',
+  },
 ];
+
+export const observabilityMock = {
+  logo: LOGO,
+  navItems: {
+    primaryItems: PRIMARY_MENU_ITEMS,
+    footerItems: PRIMARY_MENU_FOOTER_ITEMS,
+  },
+};

@@ -18,8 +18,7 @@ import {
   EuiModalBody,
   EuiComboBox,
   EuiFlexGroup,
-  EuiToolTip,
-  EuiIcon,
+  EuiIconTip,
   EuiButtonEmpty,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -77,9 +76,15 @@ export function SaveDashboardModal({
   );
 
   const isEditMode = !!currentDashboard?.id;
+  const selectDashboardLabel = i18n.translate(
+    'xpack.apm.serviceDashboards.selectDashboard.placeholder',
+    {
+      defaultMessage: 'Select dashboard',
+    }
+  );
 
   const options = allAvailableDashboards?.map((dashboardItem) => ({
-    label: dashboardItem.attributes.title,
+    label: dashboardItem.data.title,
     value: dashboardItem.id,
     disabled:
       serviceDashboards?.some(
@@ -168,9 +173,8 @@ export function SaveDashboardModal({
           <EuiComboBox
             isLoading={status === FETCH_STATUS.LOADING || isLoading}
             isDisabled={status === FETCH_STATUS.LOADING || isEditMode}
-            placeholder={i18n.translate('xpack.apm.serviceDashboards.selectDashboard.placeholder', {
-              defaultMessage: 'Select dashboard',
-            })}
+            placeholder={selectDashboardLabel}
+            aria-label={selectDashboardLabel}
             singleSelection={{ asPlainText: true }}
             options={options}
             selectedOptions={selectedDashboard}
@@ -186,7 +190,7 @@ export function SaveDashboardModal({
                 {i18n.translate('xpack.apm.dashboard.addDashboard.useContextFilterLabel', {
                   defaultMessage: 'Filter by service and environment',
                 })}{' '}
-                <EuiToolTip
+                <EuiIconTip
                   position="bottom"
                   content={i18n.translate(
                     'xpack.apm.dashboard.addDashboard.useContextFilterLabel.tooltip',
@@ -195,15 +199,12 @@ export function SaveDashboardModal({
                         'Enabling this option will apply filters to the dashboard based on your chosen service and environment.',
                     }
                   )}
-                >
-                  <EuiIcon
-                    type="question"
-                    title={i18n.translate(
-                      'xpack.apm.saveDashboardModal.euiIcon.iconWithTooltipLabel',
-                      { defaultMessage: 'Icon with tooltip' }
-                    )}
-                  />
-                </EuiToolTip>
+                  type="question"
+                  title={i18n.translate(
+                    'xpack.apm.saveDashboardModal.euiIcon.iconWithTooltipLabel',
+                    { defaultMessage: 'Icon with tooltip' }
+                  )}
+                />
               </p>
             }
             onChange={() => setServiceFiltersEnabled(!serviceFiltersEnabled)}

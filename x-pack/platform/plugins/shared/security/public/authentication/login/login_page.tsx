@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import './login_page.scss';
-
 import {
   EuiButton,
   EuiFlexGroup,
@@ -15,9 +13,10 @@ import {
   EuiImage,
   EuiSpacer,
   EuiText,
+  type EuiThemeComputed,
   EuiTitle,
 } from '@elastic/eui';
-import classNames from 'classnames';
+import { css } from '@emotion/react';
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import type { Subscription } from 'rxjs';
@@ -36,7 +35,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { LoginFormProps } from './components';
-import { DisabledLoginForm, LoginForm, LoginFormMessageType } from './components';
+import { DisabledLoginForm, LoginForm } from './components';
 import type { StartServices } from '../..';
 import {
   AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER,
@@ -45,6 +44,7 @@ import {
 import type { LoginState } from '../../../common/login_state';
 import type { LogoutReason } from '../../../common/types';
 import type { ConfigType } from '../../config';
+import { MessageType } from '../components';
 
 interface Props {
   http: HttpStart;
@@ -62,31 +62,31 @@ interface State {
 
 const loginFormMessages: Record<LogoutReason, NonNullable<LoginFormProps['message']>> = {
   SESSION_EXPIRED: {
-    type: LoginFormMessageType.Info,
+    type: MessageType.Info,
     content: i18n.translate('xpack.security.login.sessionExpiredDescription', {
       defaultMessage: 'Your session has timed out. Please log in again.',
     }),
   },
   CONCURRENCY_LIMIT: {
-    type: LoginFormMessageType.Info,
+    type: MessageType.Info,
     content: i18n.translate('xpack.security.login.concurrencyLimitDescription', {
       defaultMessage: 'You have logged in on another device. Please log in again.',
     }),
   },
   AUTHENTICATION_ERROR: {
-    type: LoginFormMessageType.Info,
+    type: MessageType.Info,
     content: i18n.translate('xpack.security.login.authenticationErrorDescription', {
       defaultMessage: 'An unexpected authentication error occurred. Please log in again.',
     }),
   },
   LOGGED_OUT: {
-    type: LoginFormMessageType.Info,
+    type: MessageType.Info,
     content: i18n.translate('xpack.security.login.loggedOutDescription', {
       defaultMessage: 'You have logged out of Elastic.',
     }),
   },
   UNAUTHENTICATED: {
-    type: LoginFormMessageType.Danger,
+    type: MessageType.Danger,
     content: i18n.translate('xpack.security.unauthenticated.errorDescription', {
       defaultMessage:
         'Try logging in again, and if the problem persists, contact your system administrator.',
@@ -138,13 +138,24 @@ export class LoginPage extends Component<Props, State> {
         ? false
         : allowLogin && layout === 'form';
 
-    const contentHeaderClasses = classNames('loginWelcome__content', 'eui-textCenter', {
-      ['loginWelcome__contentDisabledForm']: !loginIsSupported,
-    });
+    const loginWelcomeStyle = (euiTheme: EuiThemeComputed) =>
+      css`
+        position: relative;
+        margin: auto;
+        max-width: 460px;
+        padding-left: ${euiTheme.size.xl};
+        padding-right: ${euiTheme.size.xl};
+        z-index: 10;
+        text-align: center;
+      `;
 
-    const contentBodyClasses = classNames('loginWelcome__content', 'loginWelcome-body', {
-      ['loginWelcome__contentDisabledForm']: !loginIsSupported,
-    });
+    const contentHeaderStyles = (euiTheme: EuiThemeComputed) => [
+      loginWelcomeStyle(euiTheme),
+      !loginIsSupported &&
+        css`
+          max-width: 700px;
+        `,
+    ];
 
     const customLogo = this.state.customBranding?.logo;
     const logo = customLogo ? (
@@ -155,9 +166,16 @@ export class LoginPage extends Component<Props, State> {
     // custom logo needs to be centered
     const logoStyle = customLogo ? { padding: 0 } : {};
     return (
-      <div className="loginWelcome login-form" css={kbnFullScreenBgCss}>
-        <header className="loginWelcome__header">
-          <div className={contentHeaderClasses}>
+      <div data-test-subj="loginForm" css={kbnFullScreenBgCss}>
+        <header
+          css={({ euiTheme }) => css`
+            margin-top: calc(${euiTheme.size.xxl} * 3);
+            position: relative;
+            padding: ${euiTheme.size.base};
+            z-index: 10;
+          `}
+        >
+          <div css={({ euiTheme }) => contentHeaderStyles(euiTheme)}>
             <span className="loginWelcome__logo" style={logoStyle}>
               {logo}
             </span>
@@ -171,7 +189,7 @@ export class LoginPage extends Component<Props, State> {
             </EuiTitle>
           </div>
         </header>
-        <div className={contentBodyClasses}>
+        <div css={({ euiTheme }) => contentHeaderStyles(euiTheme)}>
           <EuiFlexGroup gutterSize="l">
             <EuiFlexItem>
               {this.getLoginForm({

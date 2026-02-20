@@ -12,13 +12,13 @@ import { securityLink } from '../links';
 
 export const createInvestigationsNavigationTree = (): NodeDefinition => ({
   id: SecurityGroupName.investigations,
+  icon: 'inspect',
   title: SecurityLinkGroup[SecurityGroupName.investigations].title,
   renderAs: 'panelOpener',
   children: [
     {
       id: SecurityPageName.timelines,
       link: securityLink(SecurityPageName.timelines),
-      renderAs: 'item',
       children: [
         {
           id: SecurityPageName.timelinesTemplates,

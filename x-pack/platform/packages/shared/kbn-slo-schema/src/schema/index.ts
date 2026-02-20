@@ -12,3 +12,4 @@ export * from './time_window';
 export * from './slo';
 export * from './settings';
 export * from './health';
+export * from './slo_template';

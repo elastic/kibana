@@ -15,7 +15,6 @@ import { TestSubActionConnector } from './mocks';
 import type { ActionsConfigurationUtilities } from '../actions_config';
 import * as utils from '../lib/axios_utils';
 import { ConnectorUsageCollector } from '../usage';
-import { TaskErrorSource, getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 
 jest.mock('axios');
 
@@ -213,9 +212,19 @@ describe('SubActionConnector', () => {
       requestMock.mockReturnValue({ data: { invalidField: 'test' } });
       await expect(async () =>
         service.testUrl({ url: 'https://example.com' }, connectorUsageCollector)
-      ).rejects.toThrow(
-        'Response validation failed (Error: [status]: expected value of type [string] but got [undefined])'
-      );
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`
+        "Response validation failed ([
+          {
+            \\"code\\": \\"invalid_type\\",
+            \\"expected\\": \\"string\\",
+            \\"received\\": \\"undefined\\",
+            \\"path\\": [
+              \\"status\\"
+            ],
+            \\"message\\": \\"Required\\"
+          }
+        ])"
+      `);
     });
 
     it('formats the response error correctly', async () => {
@@ -273,25 +282,6 @@ describe('SubActionConnector', () => {
         url: 'https://example.com',
         connectorUsageCollector,
       });
-    });
-
-    it('marks 429 errors as user errors', async () => {
-      expect.assertions(1);
-
-      requestMock.mockImplementation(() => {
-        const error = createAxiosError();
-        error.status = 429;
-        // @ts-expect-error: response.data.errorCode  are returned by createAxiosError
-        error.response.data.errorCode = 429;
-
-        throw error;
-      });
-
-      try {
-        await service.testUrl({ url: 'https://example.com' }, connectorUsageCollector);
-      } catch (error) {
-        expect(getErrorSource(error)).toBe(TaskErrorSource.USER);
-      }
     });
   });
 });

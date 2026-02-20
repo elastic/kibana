@@ -13,7 +13,7 @@ export const LOGO = {
   href: '/security',
   id: 'security',
   label: 'Security',
-  type: 'logoSecurity',
+  iconType: 'logoSecurity',
 };
 
 export const PRIMARY_MENU_ITEMS: MenuItem[] = [
@@ -30,10 +30,11 @@ export const PRIMARY_MENU_ITEMS: MenuItem[] = [
     href: '/dashboards',
   },
   {
-    id: 'rules',
+    id: 'detection-rules',
     label: 'Rules',
     iconType: 'info',
-    href: '/rules',
+    href: '/rules/management/detection-rules',
+    badgeType: 'new',
     sections: [
       {
         id: 'management',
@@ -62,7 +63,7 @@ export const PRIMARY_MENU_ITEMS: MenuItem[] = [
         ],
       },
       {
-        id: 'discover',
+        id: 'rules-discover',
         label: 'Discover',
         items: [
           {
@@ -75,16 +76,45 @@ export const PRIMARY_MENU_ITEMS: MenuItem[] = [
     ],
   },
   {
-    id: 'coverage',
-    label: 'Coverage',
-    iconType: 'visGauge',
-    href: '/coverage',
-  },
-  {
     id: 'alerts',
     label: 'Alerts',
     iconType: 'bell',
     href: '/alerts',
+    sections: [
+      {
+        id: 'alerts-views',
+        label: 'Views',
+        items: [
+          {
+            id: 'alerts-overview',
+            label: 'Overview',
+            href: '/alerts',
+          },
+          {
+            id: 'attacks',
+            label: 'Attacks',
+            href: '/alerts/attacks',
+            badgeType: 'new',
+          },
+        ],
+      },
+      {
+        id: 'alerts-management',
+        label: 'Management',
+        items: [
+          {
+            id: 'alert-summary',
+            label: 'Alert summary',
+            href: '/alerts/summary',
+          },
+          {
+            id: 'alert-settings',
+            label: 'Settings',
+            href: '/alerts/settings',
+          },
+        ],
+      },
+    ],
   },
   {
     id: 'attack_discovery',
@@ -105,14 +135,13 @@ export const PRIMARY_MENU_ITEMS: MenuItem[] = [
     href: '/cases',
   },
   {
-    id: 'investigations',
+    id: 'investigations-timelines',
     label: 'Investigations',
     iconType: 'casesApp',
-    href: '/investigations',
+    href: '/investigations/timelines',
     sections: [
       {
         id: 'investigations-section',
-        label: null,
         items: [
           {
             id: 'investigations-timelines',
@@ -140,14 +169,13 @@ export const PRIMARY_MENU_ITEMS: MenuItem[] = [
     href: '/intelligence',
   },
   {
-    id: 'explore',
+    id: 'hosts',
     label: 'Explore',
     iconType: 'search',
-    href: '/explore',
+    href: '/explore/hosts',
     sections: [
       {
         id: 'explore-section',
-        label: null,
         items: [
           {
             id: 'hosts',
@@ -172,7 +200,7 @@ export const PRIMARY_MENU_ITEMS: MenuItem[] = [
     id: 'assets',
     label: 'Assets',
     iconType: 'indexManagementApp',
-    href: '/assets',
+    href: '/assets/fleet/agents',
     sections: [
       {
         id: 'fleet',
@@ -204,7 +232,7 @@ export const PRIMARY_MENU_ITEMS: MenuItem[] = [
             href: '/assets/fleet/data-streams',
           },
           {
-            id: 'settings',
+            id: 'fleet-settings',
             label: 'Settings',
             href: '/assets/fleet/settings',
           },
@@ -254,17 +282,16 @@ export const PRIMARY_MENU_ITEMS: MenuItem[] = [
     ],
   },
   {
-    id: 'machine_learning',
+    id: 'ml-overview',
     label: 'Machine learning',
     iconType: 'machineLearningApp',
     href: '/ml/overview',
     sections: [
       {
         id: 'ml-section-1',
-        label: null,
         items: [
           {
-            id: 'overview',
+            id: 'ml-overview',
             label: 'Overview',
             href: '/ml/overview',
           },
@@ -330,6 +357,12 @@ export const PRIMARY_MENU_ITEMS: MenuItem[] = [
       },
     ],
   },
+  {
+    id: 'coverage',
+    label: 'Coverage',
+    iconType: 'visGauge',
+    href: '/coverage',
+  },
 ];
 
 export const PRIMARY_MENU_FOOTER_ITEMS: MenuItem[] = [
@@ -346,7 +379,7 @@ export const PRIMARY_MENU_FOOTER_ITEMS: MenuItem[] = [
     href: '/developer-tools',
   },
   {
-    id: 'settings',
+    id: 'project-performance',
     label: 'Settings',
     iconType: 'gear',
     href: '/settings/project/performance',
@@ -530,7 +563,7 @@ export const PRIMARY_MENU_FOOTER_ITEMS: MenuItem[] = [
         ],
       },
       {
-        id: 'assets',
+        id: 'settings-assets',
         label: 'Assets',
         items: [
           {
@@ -570,3 +603,11 @@ export const PRIMARY_MENU_FOOTER_ITEMS: MenuItem[] = [
     ],
   },
 ];
+
+export const securityMock = {
+  logo: LOGO,
+  navItems: {
+    primaryItems: PRIMARY_MENU_ITEMS,
+    footerItems: PRIMARY_MENU_FOOTER_ITEMS,
+  },
+};

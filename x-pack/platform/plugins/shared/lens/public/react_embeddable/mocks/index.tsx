@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { BehaviorSubject, Subject, of } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import deepMerge from 'deepmerge';
 import React from 'react';
 import { faker } from '@faker-js/faker';
 import type { Query, Filter, AggregateQuery, TimeRange } from '@kbn/es-query';
-import type { PhaseEvent, ViewMode } from '@kbn/presentation-publishing';
+import type { PhaseEvent, ProjectRoutingOverrides, ViewMode } from '@kbn/presentation-publishing';
 import { initializeTitleManager } from '@kbn/presentation-publishing';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { Adapters } from '@kbn/inspector-plugin/common';
@@ -22,21 +22,23 @@ import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import type { ReactExpressionRendererProps } from '@kbn/expressions-plugin/public';
 import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
 import type { ESQLControlVariable } from '@kbn/esql-types';
-import type { EmbeddableDynamicActionsManager } from '@kbn/embeddable-enhanced-plugin/public';
-import { DOC_TYPE } from '../../../common/constants';
-import { createEmptyLensState } from '../helper';
 import type {
+  Datasource,
+  DatasourceMap,
+  Visualization,
+  VisualizationMap,
   ExpressionWrapperProps,
-  LensApi,
-  LensEmbeddableStartServices,
   LensInternalApi,
   LensRendererProps,
   LensRuntimeState,
   LensSerializedState,
-} from '../types';
+} from '@kbn/lens-common';
+import type { LensApi } from '@kbn/lens-common-2';
+import { DOC_TYPE } from '../../../common/constants';
+import { createEmptyLensState } from '../helper';
 import { createMockDatasource, createMockVisualization, makeDefaultServices } from '../../mocks';
-import type { Datasource, DatasourceMap, Visualization, VisualizationMap } from '../../types';
 import { initializeInternalApi } from '../initializers/initialize_internal_api';
+import type { LensEmbeddableStartServices } from '../types';
 
 function getDefaultLensApiMock() {
   const LensApiMock: LensApi = {
@@ -76,6 +78,7 @@ function getDefaultLensApiMock() {
     checkForDuplicateTitle: jest.fn().mockResolvedValue(false),
     /** New embeddable api inherited methods */
     serializeState: jest.fn(),
+    getLegacySerializedState: jest.fn(),
     saveToLibrary: jest.fn(async () => 'saved-id'),
     onEdit: jest.fn(),
     getEditPanel: jest.fn(async () => <div data-test-subj="editLensFlyout" />),
@@ -105,6 +108,9 @@ function getDefaultLensApiMock() {
     setDisabledActionIds: jest.fn(),
     rendered$: new BehaviorSubject<boolean>(false),
     searchSessionId$: new BehaviorSubject<string | undefined>(undefined),
+    hasUnsavedChanges$: new BehaviorSubject<boolean>(false),
+    resetUnsavedChanges: jest.fn(),
+    projectRoutingOverrides$: new BehaviorSubject<ProjectRoutingOverrides | undefined>(undefined),
   };
   return LensApiMock;
 }
@@ -192,29 +198,8 @@ export function makeEmbeddableServices(
       ...services.uiActions,
       getTrigger: jest.fn().mockImplementation(() => ({ exec: jest.fn() })),
     },
-    embeddableEnhanced: {
-      initializeEmbeddableDynamicActions: jest.fn(mockDynamicActionsManager),
-    },
     fieldsMetadata: fieldsMetadataPluginPublicMock.createStartContract(),
   };
-}
-
-export function mockDynamicActionsManager() {
-  return {
-    api: {
-      enhancements: { dynamicActions: {} },
-      setDynamicActions: jest.fn(),
-      dynamicActionsState$: {},
-    } as unknown as EmbeddableDynamicActionsManager['api'],
-    anyStateChange$: of(undefined),
-    comparators: {
-      enhancements: jest.fn(),
-    },
-    getLatestState: jest.fn(),
-    serializeState: jest.fn(),
-    reinitializeState: jest.fn(),
-    startDynamicActions: jest.fn(),
-  } as EmbeddableDynamicActionsManager;
 }
 
 export const mockVisualizationMap = (
@@ -316,12 +301,14 @@ export function createUnifiedSearchApi(
     language: 'kuery',
   },
   filters: Filter[] = [],
-  timeRange: TimeRange = { from: 'now-7d', to: 'now' }
+  timeRange: TimeRange = { from: 'now-7d', to: 'now' },
+  projectRouting?: string
 ) {
   return {
     filters$: new BehaviorSubject<Filter[] | undefined>(filters),
     query$: new BehaviorSubject<Query | AggregateQuery | undefined>(query),
     timeRange$: new BehaviorSubject<TimeRange | undefined>(timeRange),
+    projectRouting$: new BehaviorSubject<string | undefined>(projectRouting),
   };
 }
 

@@ -7,9 +7,9 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 
-import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
 
-import { appContextService } from '../../services';
+import { appContextService, licenseService, packagePolicyService } from '../../services';
 import type {
   BulkRollbackPackagesRequestSchema,
   BulkUninstallPackagesRequestSchema,
@@ -17,14 +17,13 @@ import type {
   FleetRequestHandler,
   GetOneBulkOperationPackagesRequestSchema,
 } from '../../types';
-import { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
 
 import type {
   BulkOperationPackagesResponse,
   GetOneBulkOperationPackagesResponse,
 } from '../../../common/types';
 import { getInstallationsByName } from '../../services/epm/packages/get';
-import { FleetError } from '../../errors';
+import { FleetError, FleetUnauthorizedError } from '../../errors';
 import {
   scheduleBulkUninstall,
   scheduleBulkUpgrade,
@@ -66,20 +65,21 @@ export const postBulkUpgradePackagesHandler: FleetRequestHandler<
   const fleetContext = await context.fleet;
   const savedObjectsClient = fleetContext.internalSoClient;
   const spaceId = fleetContext.spaceId;
-  const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
-  const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, user?.username);
 
   const taskManagerStart = getTaskManagerStart();
   await validateInstalledPackages(savedObjectsClient, request.body.packages, 'upgrade');
 
-  const taskId = await scheduleBulkUpgrade(taskManagerStart, {
-    authorizationHeader,
-    spaceId,
-    packages: request.body.packages,
-    upgradePackagePolicies: request.body.upgrade_package_policies,
-    force: request.body.force,
-    prerelease: request.body.prerelease,
-  });
+  const taskId = await scheduleBulkUpgrade(
+    taskManagerStart,
+    {
+      spaceId,
+      packages: request.body.packages,
+      upgradePackagePolicies: request.body.upgrade_package_policies,
+      force: request.body.force,
+      prerelease: request.body.prerelease,
+    },
+    request
+  );
 
   const body: BulkOperationPackagesResponse = {
     taskId,
@@ -98,10 +98,14 @@ export const postBulkUninstallPackagesHandler: FleetRequestHandler<
   const taskManagerStart = getTaskManagerStart();
   await validateInstalledPackages(savedObjectsClient, request.body.packages, 'uninstall');
 
-  const taskId = await scheduleBulkUninstall(taskManagerStart, {
-    packages: request.body.packages,
-    force: request.body.force,
-  });
+  const taskId = await scheduleBulkUninstall(
+    taskManagerStart,
+    {
+      packages: request.body.packages,
+      force: request.body.force,
+    },
+    request
+  );
 
   const body: BulkOperationPackagesResponse = {
     taskId,
@@ -123,6 +127,25 @@ export const getOneBulkOperationPackagesHandler: FleetRequestHandler<
   return response.ok({ body });
 };
 
+export const getPackagePolicyIdsForCurrentUser = async (
+  request: KibanaRequest,
+  packages: { name: string }[]
+): Promise<{ [packageName: string]: string[] }> => {
+  const soClient = appContextService.getInternalUserSOClient(request);
+
+  const packagePolicyIdsByPackageName: { [packageName: string]: string[] } = {};
+  for (const pkg of packages) {
+    const packagePolicySORes = await packagePolicyService.getPackagePolicySavedObjects(soClient, {
+      searchFields: ['package.name'],
+      search: pkg.name,
+      spaceIds: ['*'],
+      fields: ['id', 'name'],
+    });
+    packagePolicyIdsByPackageName[pkg.name] = packagePolicySORes.saved_objects.map((so) => so.id);
+  }
+  return packagePolicyIdsByPackageName;
+};
+
 export const postBulkRollbackPackagesHandler: FleetRequestHandler<
   undefined,
   undefined,
@@ -132,13 +155,25 @@ export const postBulkRollbackPackagesHandler: FleetRequestHandler<
   const savedObjectsClient = fleetContext.internalSoClient;
   const spaceId = fleetContext.spaceId;
 
+  if (!licenseService.isEnterprise()) {
+    throw new FleetUnauthorizedError('Rollback integration requires an enterprise license.');
+  }
+
   const taskManagerStart = getTaskManagerStart();
   await validateInstalledPackages(savedObjectsClient, request.body.packages, 'rollback');
 
-  const taskId = await scheduleBulkRollback(taskManagerStart, {
-    packages: request.body.packages,
-    spaceId,
-  });
+  const taskId = await scheduleBulkRollback(
+    taskManagerStart,
+    {
+      packages: request.body.packages,
+      spaceId,
+      packagePolicyIdsForCurrentUser: await getPackagePolicyIdsForCurrentUser(
+        request,
+        request.body.packages
+      ),
+    },
+    request
+  );
 
   const body: BulkOperationPackagesResponse = {
     taskId,

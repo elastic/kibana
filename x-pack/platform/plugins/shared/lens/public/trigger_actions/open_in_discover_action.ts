@@ -10,12 +10,15 @@ import { createAction, IncompatibleActionError } from '@kbn/ui-actions-plugin/pu
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { DataViewsService } from '@kbn/data-views-plugin/public';
 import { map } from 'rxjs';
-import type { DiscoverAppLocator } from './open_in_discover_helpers';
-import type { LensApi } from '../react_embeddable/types';
+import type { LensApi } from '@kbn/lens-common-2';
+import {
+  execute,
+  getHref,
+  isCompatible,
+  type DiscoverAppLocator,
+} from './open_in_discover_helpers';
 
 const ACTION_OPEN_IN_DISCOVER = 'ACTION_OPEN_IN_DISCOVER';
-
-export const getDiscoverHelpersAsync = async () => await import('../async_services');
 
 export const createOpenInDiscoverAction = (
   locator: DiscoverAppLocator,
@@ -32,7 +35,6 @@ export const createOpenInDiscoverAction = (
         defaultMessage: 'Explore in Discover',
       }),
     getHref: async (context: EmbeddableApiContext) => {
-      const { getHref } = await getDiscoverHelpersAsync();
       return getHref({
         locator,
         dataViews,
@@ -41,8 +43,7 @@ export const createOpenInDiscoverAction = (
       });
     },
     isCompatible: async (context: EmbeddableApiContext) => {
-      const { isCompatible } = await getDiscoverHelpersAsync();
-      return await isCompatible({
+      return isCompatible({
         hasDiscoverAccess,
         locator,
         dataViews,
@@ -59,7 +60,6 @@ export const createOpenInDiscoverAction = (
       return (embeddable as LensApi).canViewUnderlyingData$.pipe(map(() => undefined));
     },
     execute: async (context: EmbeddableApiContext) => {
-      const { execute } = await getDiscoverHelpersAsync();
       return execute({ ...context, locator, dataViews, hasDiscoverAccess });
     },
   };

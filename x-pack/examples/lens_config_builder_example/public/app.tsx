@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 
 import type { CoreStart } from '@kbn/core/public';
-import type { LensEmbeddableInput, FormulaPublicApi } from '@kbn/lens-plugin/public';
+import type { LensEmbeddableInput } from '@kbn/lens-plugin/public';
 
 import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builder';
@@ -36,7 +36,6 @@ export const App = (props: {
   core: CoreStart;
   plugins: StartDependencies;
   dataViews: DataViewsContract;
-  formula: FormulaPublicApi;
 }) => {
   const [error, setError] = useState<string | null>(null);
   const [isSaveModalVisible, setIsSaveModalVisible] = useState(false);
@@ -55,16 +54,19 @@ export const App = (props: {
       type: 'esql',
       query: 'from kibana_sample_data_logs | stats totalBytes = sum(bytes)',
     },
-    metric: {
-      operation: 'value',
-      column: 'totalBytes',
-      label: 'Total Bytes Value',
-      fit: false,
-      alignments: {
-        value: 'left',
-        labels: 'left',
+    metrics: [
+      {
+        type: 'primary',
+        operation: 'value',
+        column: 'totalBytes',
+        label: 'Total Bytes Value',
+        fit: false,
+        alignments: {
+          value: 'left',
+          labels: 'left',
+        },
       },
-    },
+    ],
     ignore_global_filters: true,
     sampling: 1,
   });
@@ -75,7 +77,7 @@ export const App = (props: {
 
   const attributes = useAsync(async () => {
     try {
-      const configBuilder = new LensConfigBuilder(props.dataViews, props.formula);
+      const configBuilder = new LensConfigBuilder(props.dataViews);
       // eslint-disable-next-line no-console
       console.log('lensConfig', lensConfig);
       const validatedConfig = lensApiStateSchema.validate(lensConfig);

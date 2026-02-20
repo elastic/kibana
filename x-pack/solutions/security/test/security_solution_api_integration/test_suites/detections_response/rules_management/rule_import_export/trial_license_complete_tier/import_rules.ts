@@ -19,30 +19,36 @@ import type {
   ReadExceptionListItemRequestQueryInput,
   ReadExceptionListRequestQueryInput,
 } from '@kbn/securitysolution-exceptions-common/api';
+import { createRule } from '@kbn/detections-response-ftr-services';
+import { deleteAllRules } from '@kbn/detections-response-ftr-services';
+import type TestAgent from 'supertest/lib/agent';
+import { createSupertestErrorLogger } from '../../../../edr_workflows/utils';
 import { PRECONFIGURED_EMAIL_ACTION_CONNECTOR_ID } from '../../../../../config/shared';
 import {
+  combineArrayToNdJson,
   fetchRule,
   getCustomQueryRuleParams,
   getThresholdRuleForAlertTesting,
   importRules,
   importRulesWithSuccess,
 } from '../../../utils';
-import { createRule } from '../../../../../config/services/detections_response';
-import { deleteAllRules } from '../../../../../config/services/detections_response';
 import { deleteAllExceptions } from '../../../../lists_and_exception_lists/utils';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { getWebHookConnectorParams } from '../../../utils/connectors/get_web_hook_connector_params';
 import { createConnector } from '../../../utils/connectors';
+import { ROLE } from '../../../../../config/services/security_solution_edr_workflows_roles_users';
 
 const RULE_TO_IMPORT_RULE_ID = 'imported-rule';
 const RULE_TO_IMPORT_RULE_ID_2 = 'another-imported-rule';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
-  const securitySolutionApi = getService('securitySolutionApi');
-  const securitySolutionExceptionsApi = getService('securitySolutionExceptionsApi');
+  const detectionsApi = getService('detectionsApi');
+  const exceptionsApi = getService('exceptionsApi');
   const log = getService('log');
   const spacesServices = getService('spaces');
+  const utils = getService('securitySolutionUtils');
+  const rolesUsersProvider = getService('rolesUsersProvider');
 
   describe('@ess @serverless @skipInServerlessMKI import custom rules', () => {
     const spaceId = '4567-space';
@@ -187,7 +193,7 @@ export default ({ getService }: FtrProviderContext): void => {
             spaceId: kibanaSpaceId,
           });
 
-          const { body: importedRule } = await securitySolutionApi.readRule(
+          const { body: importedRule } = await detectionsApi.readRule(
             {
               query: { rule_id: RULE_TO_IMPORT_RULE_ID },
             },
@@ -224,7 +230,7 @@ export default ({ getService }: FtrProviderContext): void => {
             spaceId: kibanaSpaceId,
           });
 
-          const { body: importedRule } = await securitySolutionApi.readRule(
+          const { body: importedRule } = await detectionsApi.readRule(
             {
               query: { rule_id: RULE_TO_IMPORT_RULE_ID },
             },
@@ -261,7 +267,7 @@ export default ({ getService }: FtrProviderContext): void => {
             spaceId: kibanaSpaceId,
           });
 
-          const { body: importedRule1 } = await securitySolutionApi.readRule(
+          const { body: importedRule1 } = await detectionsApi.readRule(
             {
               query: { rule_id: RULE_TO_IMPORT_RULE_ID },
             },
@@ -270,7 +276,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
           expect(importedRule1).toMatchObject(IMPORT_PAYLOAD[0]);
 
-          const { body: importedRule2 } = await securitySolutionApi.readRule(
+          const { body: importedRule2 } = await detectionsApi.readRule(
             {
               query: { rule_id: RULE_TO_IMPORT_RULE_ID_2 },
             },
@@ -310,7 +316,7 @@ export default ({ getService }: FtrProviderContext): void => {
             spaceId: kibanaSpaceId,
           });
 
-          const { body: importedRule } = await securitySolutionApi.readRule(
+          const { body: importedRule } = await detectionsApi.readRule(
             {
               query: { rule_id: RULE_TO_IMPORT_RULE_ID },
             },
@@ -414,7 +420,7 @@ export default ({ getService }: FtrProviderContext): void => {
         query: ReadExceptionListRequestQueryInput;
         expected: Record<string, unknown>;
       }) => {
-        const { body: exceptionList } = await securitySolutionExceptionsApi
+        const { body: exceptionList } = await exceptionsApi
           .readExceptionList(
             {
               query,
@@ -432,7 +438,7 @@ export default ({ getService }: FtrProviderContext): void => {
         query: ReadExceptionListItemRequestQueryInput;
         expected: Record<string, unknown>;
       }) => {
-        const { body: exceptionListItem } = await securitySolutionExceptionsApi
+        const { body: exceptionListItem } = await exceptionsApi
           .readExceptionListItem(
             {
               query,
@@ -488,7 +494,7 @@ export default ({ getService }: FtrProviderContext): void => {
             exceptions_success_count: 1,
           });
 
-          const { body: importedRule } = await securitySolutionApi.readRule(
+          const { body: importedRule } = await detectionsApi.readRule(
             {
               query: { rule_id: RULE_TO_IMPORT_RULE_ID },
             },
@@ -564,7 +570,7 @@ export default ({ getService }: FtrProviderContext): void => {
             exceptions_success_count: 1,
           });
 
-          const { body: importedRule } = await securitySolutionApi.readRule(
+          const { body: importedRule } = await detectionsApi.readRule(
             {
               query: { rule_id: RULE_TO_IMPORT_RULE_ID },
             },
@@ -674,7 +680,7 @@ export default ({ getService }: FtrProviderContext): void => {
             exceptions_success_count: 1,
           });
 
-          const { body: importedRule } = await securitySolutionApi.readRule(
+          const { body: importedRule } = await detectionsApi.readRule(
             {
               query: { rule_id: RULE_TO_IMPORT_RULE_ID },
             },
@@ -772,7 +778,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         it('removes non-existent exception list from the imported rule', async () => {
-          const { body: exceptionBody } = await securitySolutionExceptionsApi
+          const { body: exceptionBody } = await exceptionsApi
             .createExceptionList(
               {
                 body: {
@@ -831,7 +837,7 @@ export default ({ getService }: FtrProviderContext): void => {
             exceptions_success_count: 0,
           });
 
-          const { body: importedRule } = await securitySolutionApi.readRule(
+          const { body: importedRule } = await detectionsApi.readRule(
             {
               query: { rule_id: RULE_TO_IMPORT_RULE_ID },
             },
@@ -1438,6 +1444,85 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
+    describe('importing with endpoint response actions', () => {
+      let superTestResponseActionsNoAuthz: TestAgent;
+      let rulesToImport: unknown[];
+
+      before(async () => {
+        superTestResponseActionsNoAuthz = await utils.createSuperTestWithCustomRole({
+          name: ROLE.endpoint_response_actions_no_access,
+          privileges: rolesUsersProvider.loader.getPreDefinedRole(
+            ROLE.endpoint_response_actions_no_access
+          ),
+        });
+      });
+
+      beforeEach(async () => {
+        rulesToImport = [
+          getCustomQueryRuleParams({
+            rule_id: uuid(),
+            response_actions: [
+              {
+                action_type_id: '.endpoint',
+                params: {
+                  command: 'suspend-process',
+                  config: { field: 'some-field', overwrite: false },
+                },
+              },
+            ],
+          }),
+        ];
+      });
+
+      afterEach(async () => {
+        await deleteAllRules(supertest, log);
+      });
+
+      it('should import rules with response actions when user has authz', async () => {
+        const importResponse = await importRules({
+          getService,
+          rules: rulesToImport,
+          overwrite: false,
+        });
+
+        expect(importResponse).toMatchObject({
+          success: true,
+          success_count: 1,
+          rules_count: 1,
+          errors: [],
+        });
+      });
+
+      it('should NOT import rules with response actions when user does NOT have authz', async () => {
+        // @ts-expect-error due to array of `unknown` items
+        const ruleId = rulesToImport[0].rule_id;
+        const fileBuffer = Buffer.from(combineArrayToNdJson(rulesToImport));
+
+        const { body } = await superTestResponseActionsNoAuthz
+          .post('/api/detection_engine/rules/_import')
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .on('error', createSupertestErrorLogger(log).ignoreCodes([403]))
+          .attach('file', fileBuffer, { filename: 'rules.ndjson' })
+          .expect(200);
+
+        expect(body).toMatchObject({
+          success: false,
+          success_count: 0,
+          errors: [
+            {
+              error: {
+                message: 'User is not authorized to create/update suspend-process response action',
+                status_code: 403,
+              },
+              id: '',
+              rule_id: ruleId,
+            },
+          ],
+        });
+      });
+    });
+
     describe('forward compatibility', () => {
       it('removes any extra rule fields when importing', async () => {
         const rule = getCustomQueryRuleParams({
@@ -1527,7 +1612,7 @@ export default ({ getService }: FtrProviderContext): void => {
             overwrite: false,
           });
 
-          const { body: importedRule } = await securitySolutionApi.readRule({
+          const { body: importedRule } = await detectionsApi.readRule({
             query: { rule_id: RULE_TO_IMPORT_RULE_ID },
           });
 
@@ -1564,7 +1649,7 @@ export default ({ getService }: FtrProviderContext): void => {
             spaceId,
           });
 
-          const { body: importedRule } = await securitySolutionApi.readRule(
+          const { body: importedRule } = await detectionsApi.readRule(
             {
               query: { rule_id: RULE_TO_IMPORT_RULE_ID },
             },

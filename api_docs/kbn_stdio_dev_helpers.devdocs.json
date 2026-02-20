@@ -38,6 +38,8 @@
           "<string>"
         ],
         "path": "src/platform/packages/private/kbn-stdio-dev-helpers/src/observe_lines.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -52,6 +54,8 @@
               "Readable"
             ],
             "path": "src/platform/packages/private/kbn-stdio-dev-helpers/src/observe_lines.ts",
+            "lineNumber": 27,
+            "columnNumber": 30,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -77,6 +81,8 @@
           "<never>"
         ],
         "path": "src/platform/packages/private/kbn-stdio-dev-helpers/src/observe_readable.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -91,6 +97,8 @@
               "Readable"
             ],
             "path": "src/platform/packages/private/kbn-stdio-dev-helpers/src/observe_readable.ts",
+            "lineNumber": 19,
+            "columnNumber": 33,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

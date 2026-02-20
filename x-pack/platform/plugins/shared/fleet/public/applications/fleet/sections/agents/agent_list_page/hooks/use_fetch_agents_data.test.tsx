@@ -17,19 +17,51 @@ import { useFetchAgentsData } from './use_fetch_agents_data';
 jest.mock('../../../../../../services/experimental_features');
 const mockedExperimentalFeaturesService = jest.mocked(ExperimentalFeaturesService);
 
+const defaultState = {
+  search: '',
+  selectedAgentPolicies: [],
+  selectedStatus: ['healthy', 'unhealthy', 'orphaned', 'updating', 'offline'],
+  selectedTags: [],
+  showUpgradeable: false,
+  sort: { field: 'enrolled_at', direction: 'desc' },
+  page: { index: 0, size: 20 },
+};
+
+jest.mock('./use_session_agent_list_state', () => {
+  let currentMockState = { ...defaultState };
+
+  const mockUseSessionAgentListState = jest.fn(() => {
+    const mockUpdateTableState = jest.fn((updates: any) => {
+      currentMockState = { ...currentMockState, ...updates };
+    });
+
+    return {
+      ...currentMockState,
+      updateTableState: mockUpdateTableState,
+      onTableChange: jest.fn(),
+      clearFilters: jest.fn(),
+      resetToDefaults: jest.fn(),
+    };
+  });
+
+  return {
+    useSessionAgentListState: mockUseSessionAgentListState,
+    getDefaultAgentListState: jest.fn(() => defaultState),
+    defaultAgentListState: defaultState,
+  };
+});
+
 jest.mock('../../../../hooks', () => ({
   ...jest.requireActual('../../../../hooks'),
-  sendGetAgents: jest.fn().mockResolvedValue({
-    data: {
-      statusSummary: {},
-      items: [
-        {
-          id: 'agent123',
-          policy_id: 'agent-policy-1',
-        },
-      ],
-      total: 5,
-    },
+  sendGetAgentsForRq: jest.fn().mockResolvedValue({
+    statusSummary: {},
+    items: [
+      {
+        id: 'agent123',
+        policy_id: 'agent-policy-1',
+      },
+    ],
+    total: 5,
   }),
   sendGetAgentStatus: jest.fn().mockResolvedValue({
     data: {
@@ -39,18 +71,16 @@ jest.mock('../../../../hooks', () => ({
       totalInactive: 2,
     },
   }),
-  sendBulkGetAgentPolicies: jest.fn().mockReturnValue({
-    data: {
-      items: [
-        { id: 'agent-policy-1', name: 'Agent policy 1', namespace: 'default' },
-        {
-          id: 'agent-policy-managed',
-          name: 'Managed Agent policy',
-          namespace: 'default',
-          managed: true,
-        },
-      ],
-    },
+  sendBulkGetAgentPoliciesForRq: jest.fn().mockReturnValue({
+    items: [
+      { id: 'agent-policy-1', name: 'Agent policy 1', namespace: 'default' },
+      {
+        id: 'agent-policy-managed',
+        name: 'Managed Agent policy',
+        namespace: 'default',
+        managed: true,
+      },
+    ],
   }),
   sendGetAgentPolicies: jest.fn().mockReturnValue({
     data: {
@@ -81,7 +111,7 @@ jest.mock('../../../../hooks', () => ({
     isLoading: false,
     resendRequest: jest.fn(),
   } as any),
-  sendGetAgentTags: jest.fn().mockReturnValue({ data: { items: ['tag1', 'tag2'] } }),
+  sendGetAgentTagsForRq: jest.fn().mockReturnValue({ items: ['tag1', 'tag2'] }),
   useStartServices: jest.fn().mockReturnValue({
     notifications: {
       toasts: {
@@ -90,14 +120,6 @@ jest.mock('../../../../hooks', () => ({
     },
     cloud: {},
     data: { dataViews: { getFieldsForWildcard: jest.fn() } },
-  }),
-  usePagination: jest.fn().mockReturnValue({
-    pagination: {
-      currentPage: 1,
-      pageSize: 5,
-    },
-    pageSizeOptions: [5, 20, 50],
-    setPagination: jest.fn(),
   }),
 }));
 
@@ -112,12 +134,17 @@ describe('useFetchAgentsData', () => {
   beforeEach(() => {
     mockErrorToast.mockReset();
     mockErrorToast.mockResolvedValue({});
+    // Reset sendGetAgentTagsForRq to default value
+    const { sendGetAgentTagsForRq } = jest.requireMock('../../../../hooks');
+    sendGetAgentTagsForRq.mockReturnValue({ items: ['tag1', 'tag2'] });
   });
 
   it('should fetch agents and agent policies data', async () => {
     const renderer = createFleetTestRendererMock();
     const { result } = renderer.renderHook(() => useFetchAgentsData());
-    await waitFor(() => new Promise((resolve) => resolve(null)));
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
 
     expect(result?.current.selectedStatus).toEqual([
       'healthy',
@@ -150,8 +177,8 @@ describe('useFetchAgentsData', () => {
     expect(result?.current.kuery).toEqual(
       'status:online or (status:error or status:degraded) or status:orphaned or (status:updating or status:unenrolling or status:enrolling) or status:offline'
     );
-    expect(result?.current.currentRequestRef).toEqual({ current: 2 });
-    expect(result?.current.pagination).toEqual({ currentPage: 1, pageSize: 5 });
+
+    expect(result?.current.page).toEqual({ index: 0, size: 20 });
     expect(result?.current.pageSizeOptions).toEqual([5, 20, 50]);
   });
 
@@ -174,5 +201,95 @@ describe('useFetchAgentsData', () => {
     });
 
     await waitFor(() => expect(renderer.history.location.search).toEqual(''));
+  });
+
+  it('should update allTags when tags are fetched', async () => {
+    const renderer = createFleetTestRendererMock();
+    const { result } = renderer.renderHook(() => useFetchAgentsData());
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    expect(result.current.allTags).toEqual(['tag1', 'tag2']);
+  });
+
+  describe('allTags', () => {
+    it('should be updated to empty array when all tags are removed', async () => {
+      const { sendGetAgentTagsForRq } = jest.requireMock('../../../../hooks');
+
+      sendGetAgentTagsForRq.mockResolvedValueOnce({ items: ['tag1'] });
+
+      const renderer = createFleetTestRendererMock();
+      const { result } = renderer.renderHook(() => useFetchAgentsData());
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      expect(result.current.allTags).toEqual(['tag1']);
+
+      // Simulate removing the last tag - server returns empty array
+      sendGetAgentTagsForRq.mockResolvedValueOnce({ items: [] });
+
+      await act(async () => {
+        await result.current.fetchData({ refreshTags: true });
+      });
+
+      await waitFor(() => {
+        expect(result.current.allTags).toEqual([]);
+      });
+    });
+
+    it('should be updated when tags change from multiple to fewer', async () => {
+      const { sendGetAgentTagsForRq } = jest.requireMock('../../../../hooks');
+
+      sendGetAgentTagsForRq.mockResolvedValueOnce({ items: ['tag1', 'tag2', 'tag3'] });
+
+      const renderer = createFleetTestRendererMock();
+      const { result } = renderer.renderHook(() => useFetchAgentsData());
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      expect(result.current.allTags).toEqual(['tag1', 'tag2', 'tag3']);
+
+      // Remove one tag - server returns fewer tags
+      sendGetAgentTagsForRq.mockResolvedValueOnce({ items: ['tag1', 'tag2'] });
+
+      await act(async () => {
+        await result.current.fetchData({ refreshTags: true });
+      });
+
+      await waitFor(() => {
+        expect(result.current.allTags).toEqual(['tag1', 'tag2']);
+      });
+    });
+
+    it('should not be updated when they have not changed', async () => {
+      const { sendGetAgentTagsForRq } = jest.requireMock('../../../../hooks');
+
+      sendGetAgentTagsForRq.mockResolvedValue({ items: ['tag1', 'tag2'] });
+
+      const renderer = createFleetTestRendererMock();
+      const { result } = renderer.renderHook(() => useFetchAgentsData());
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      const initialTags = result.current.allTags;
+      expect(initialTags).toEqual(['tag1', 'tag2']);
+
+      await act(async () => {
+        await result.current.fetchData({ refreshTags: true });
+      });
+
+      await waitFor(() => {
+        // Tags should still be the same reference (no unnecessary state update)
+        expect(result.current.allTags).toEqual(['tag1', 'tag2']);
+      });
+    });
   });
 });

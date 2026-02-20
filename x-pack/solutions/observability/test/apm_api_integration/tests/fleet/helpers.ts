@@ -51,7 +51,7 @@ export async function createPackagePolicy({
   const apmPackageResponse = await bettertest<{ item: any }>({
     pathname: `/api/fleet/epm/packages/apm`,
   });
-  const apmPackageVersion = apmPackageResponse.body.item.version;
+  const apmPackageVersion = apmPackageResponse?.body?.item?.version ?? 'latest';
 
   // Create package policy for APM attached to given agent policy id
   const packagePolicyResponse = await bettertest<{ item: NewPackagePolicy }>({

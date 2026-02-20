@@ -224,6 +224,7 @@ export function DataPreviewChart({
         <>
           <EuiSpacer size="xs" />
           <EuiCallOut
+            announceOnMount
             size="s"
             color="warning"
             title={i18n.translate('xpack.slo.sloEdit.dataPreviewChart.moreThan100', {
@@ -299,7 +300,7 @@ export function DataPreviewChart({
                 yAccessors={['value']}
                 data={(previewData?.results ?? []).map((datum) => ({
                   date: new Date(datum.date).getTime(),
-                  value: datum.sliValue && datum.sliValue >= 0 ? datum.sliValue : null,
+                  value: datum.sliValue != null && datum.sliValue >= 0 ? datum.sliValue : null,
                   events: datum.events,
                 }))}
               />
@@ -315,7 +316,7 @@ export function DataPreviewChart({
                   yAccessors={['value']}
                   data={data.map((datum) => ({
                     date: new Date(datum.date).getTime(),
-                    value: datum.sliValue && datum.sliValue >= 0 ? datum.sliValue : null,
+                    value: datum.sliValue != null && datum.sliValue >= 0 ? datum.sliValue : null,
                     events: datum.events,
                   }))}
                 />

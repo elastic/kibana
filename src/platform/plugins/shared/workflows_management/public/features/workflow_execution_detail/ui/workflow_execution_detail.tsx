@@ -7,141 +7,157 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useCallback } from 'react';
+import { EuiPanel } from '@elastic/eui';
+import React, { useCallback, useEffect, useMemo } from 'react';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 
-import type { EsWorkflowStepExecution } from '@kbn/workflows';
-import { ExecutionStatus } from '@kbn/workflows';
-import { useWorkflowExecution } from '../../../entities/workflows/model/use_workflow_execution';
-import { WorkflowStepExecutionList } from './workflow_step_execution_list';
+import { useQueryClient } from '@kbn/react-query';
+import {
+  ResizableLayout,
+  ResizableLayoutDirection,
+  ResizableLayoutMode,
+  ResizableLayoutOrder,
+} from '@kbn/resizable-layout';
+import type { WorkflowStepExecutionDto } from '@kbn/workflows';
+import { WorkflowExecutionPanel } from './workflow_execution_panel';
+import {
+  buildOverviewStepExecutionFromContext,
+  buildTriggerStepExecutionFromContext,
+} from './workflow_pseudo_step_context';
+import { WorkflowStepExecutionDetails } from './workflow_step_execution_details';
+import { useWorkflowExecutionPolling } from '../../../entities/workflows/model/use_workflow_execution_polling';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
-import { WorkflowStepExecutionFlyout } from './workflow_step_execution_flyout';
+import { useStepExecution } from '../model/use_step_execution';
 
-export interface WorkflowExecutionProps {
-  workflowExecutionId: string;
-  workflowYaml: string;
-  fields?: Array<keyof EsWorkflowStepExecution>;
+const WidthStorageKey = 'WORKFLOWS_EXECUTION_DETAILS_WIDTH';
+const DefaultSidebarWidth = 300;
+export interface WorkflowExecutionDetailProps {
+  executionId: string;
+  onClose: () => void;
 }
 
-export const WorkflowExecutionDetail: React.FC<WorkflowExecutionProps> = ({
-  workflowExecutionId,
-}) => {
-  const {
-    data: workflowExecution,
-    isLoading,
-    error,
-    refetch,
-  } = useWorkflowExecution(workflowExecutionId);
+export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = React.memo(
+  ({ executionId, onClose }) => {
+    const { workflowExecution, error } = useWorkflowExecutionPolling(executionId);
+    const queryClient = useQueryClient();
 
-  const {
-    setSelectedStepExecution,
-    selectedStepExecutionId,
-    setSelectedExecution,
-    setSelectedStep,
-  } = useWorkflowUrlState();
+    const { activeTab, setSelectedStepExecution, selectedStepExecutionId } = useWorkflowUrlState();
+    const [sidebarWidth = DefaultSidebarWidth, setSidebarWidth] = useLocalStorage(
+      WidthStorageKey,
+      DefaultSidebarWidth
+    );
+    const showBackButton = activeTab === 'executions';
 
-  const closeFlyout = useCallback(() => {
-    setSelectedStepExecution(null);
-  }, [setSelectedStepExecution]);
+    // Clear cached step I/O data when switching to a different execution
+    useEffect(() => {
+      return () => {
+        queryClient.removeQueries({ queryKey: ['stepExecution', executionId] });
+      };
+    }, [executionId, queryClient]);
 
-  useEffect(() => {
-    if (!workflowExecution) {
-      return;
-    }
-
-    const intervalId = setInterval(() => {
+    useEffect(() => {
       if (
-        ![
-          ExecutionStatus.COMPLETED,
-          ExecutionStatus.FAILED,
-          ExecutionStatus.CANCELLED,
-          ExecutionStatus.SKIPPED,
-        ].includes(workflowExecution.status)
+        !selectedStepExecutionId && // no step execution selected
+        executionId === workflowExecution?.id && // execution id matches (not stale execution used)
+        workflowExecution?.stepExecutions?.length // step executions are loaded
       ) {
-        refetch();
-        return;
+        setSelectedStepExecution('__overview');
+      }
+    }, [workflowExecution, selectedStepExecutionId, setSelectedStepExecution, executionId]);
+
+    const setSelectedStepExecutionId = useCallback(
+      (stepExecutionId: string | null) => {
+        setSelectedStepExecution(stepExecutionId);
+      },
+      [setSelectedStepExecution]
+    );
+
+    const workflowDefinition = useMemo(() => {
+      if (workflowExecution) {
+        return workflowExecution.workflowDefinition;
+      }
+      return null;
+    }, [workflowExecution]);
+
+    // For pseudo-steps (overview, trigger), build from execution context directly
+    const isPseudoStep =
+      selectedStepExecutionId === '__overview' || selectedStepExecutionId === 'trigger';
+
+    // Find the lightweight step from the polled execution (has status/duration but no I/O)
+    const lightweightStep = useMemo(() => {
+      if (!selectedStepExecutionId || isPseudoStep) {
+        return undefined;
+      }
+      return workflowExecution?.stepExecutions?.find((step) => step.id === selectedStepExecutionId);
+    }, [workflowExecution?.stepExecutions, selectedStepExecutionId, isPseudoStep]);
+
+    // Lazy-load full step data (with input/output) for real steps
+    const { data: fullStepData, isLoading: isLoadingStepData } = useStepExecution(
+      executionId,
+      isPseudoStep ? undefined : selectedStepExecutionId ?? undefined,
+      lightweightStep?.status
+    );
+
+    const selectedStepExecution = useMemo<WorkflowStepExecutionDto | undefined>(() => {
+      if (!selectedStepExecutionId) {
+        return undefined;
       }
 
-      clearInterval(intervalId);
-    }, 500); // Refresh every 500ms
+      if (selectedStepExecutionId === '__overview' && workflowExecution) {
+        return buildOverviewStepExecutionFromContext(workflowExecution);
+      }
 
-    return () => clearInterval(intervalId);
-  }, [workflowExecution, refetch]);
+      if (selectedStepExecutionId === 'trigger' && workflowExecution?.context) {
+        return buildTriggerStepExecutionFromContext(workflowExecution) ?? undefined;
+      }
 
-  const renderSelectedStepExecutionFlyout = useCallback(() => {
-    if (!workflowExecution?.stepExecutions?.length) {
-      return null;
-    }
+      if (!lightweightStep) {
+        return undefined;
+      }
 
-    const selectedStepExecutionIndex = workflowExecution.stepExecutions.findIndex(
-      (step) => step.id === selectedStepExecutionId
-    );
-    const selectedStepExecution = workflowExecution.stepExecutions[selectedStepExecutionIndex];
+      // Merge: use lightweight step for structure/status, overlay full I/O when available
+      if (fullStepData) {
+        return { ...lightweightStep, input: fullStepData.input, output: fullStepData.output };
+      }
 
-    if (!selectedStepExecution) {
-      return null;
-    }
-
-    const goNext =
-      selectedStepExecutionIndex < workflowExecution.stepExecutions.length - 1
-        ? () => {
-            const nextStepExecutionIndex =
-              (selectedStepExecutionIndex + 1) % workflowExecution.stepExecutions.length;
-            const nextStepExecution = workflowExecution.stepExecutions[nextStepExecutionIndex];
-            setSelectedStepExecution(nextStepExecution.id);
-          }
-        : undefined;
-
-    const goPrevious =
-      selectedStepExecutionIndex > 0
-        ? () => {
-            const previousStepExecutionIndex =
-              (selectedStepExecutionIndex - 1 + workflowExecution.stepExecutions.length) %
-              workflowExecution.stepExecutions.length;
-            const previousStepExecution =
-              workflowExecution.stepExecutions[previousStepExecutionIndex];
-            setSelectedStepExecution(previousStepExecution.id);
-          }
-        : undefined;
+      return lightweightStep;
+    }, [workflowExecution, selectedStepExecutionId, lightweightStep, fullStepData]);
 
     return (
-      <WorkflowStepExecutionFlyout
-        workflowExecutionId={workflowExecutionId}
-        stepExecutionId={selectedStepExecution.id}
-        stepExecution={selectedStepExecution}
-        closeFlyout={closeFlyout}
-        goNext={goNext}
-        goPrevious={goPrevious}
-        setSelectedStepId={setSelectedStep}
-        isLoading={isLoading}
-      />
+      <EuiPanel paddingSize="none" color="plain" hasShadow={false} style={{ height: '100%' }}>
+        <ResizableLayout
+          fixedPanel={
+            <WorkflowExecutionPanel
+              definition={workflowDefinition}
+              execution={workflowExecution ?? null}
+              showBackButton={showBackButton}
+              error={error}
+              onClose={onClose}
+              onStepExecutionClick={setSelectedStepExecutionId}
+              selectedId={selectedStepExecutionId ?? null}
+            />
+          }
+          fixedPanelSize={sidebarWidth}
+          onFixedPanelSizeChange={setSidebarWidth}
+          minFixedPanelSize={200}
+          fixedPanelOrder={ResizableLayoutOrder.Start}
+          flexPanel={
+            <WorkflowStepExecutionDetails
+              workflowExecutionId={executionId}
+              stepExecution={selectedStepExecution}
+              workflowExecutionDuration={workflowExecution?.duration ?? undefined}
+              isLoadingStepData={isLoadingStepData && !isPseudoStep}
+            />
+          }
+          minFlexPanelSize={200}
+          mode={ResizableLayoutMode.Resizable}
+          direction={ResizableLayoutDirection.Horizontal}
+          resizeButtonClassName="workflowExecutionDetailResizeButton"
+          data-test-subj="WorkflowEditorWithExecutionDetailLayout"
+          className="workflowExecutionDetailResizableLayout"
+        />
+      </EuiPanel>
     );
-  }, [
-    workflowExecution?.stepExecutions,
-    workflowExecutionId,
-    closeFlyout,
-    setSelectedStep,
-    selectedStepExecutionId,
-    setSelectedStepExecution,
-    isLoading,
-  ]);
-
-  const closeSidePanel = useCallback(() => {
-    setSelectedExecution(null);
-  }, [setSelectedExecution]);
-
-  return (
-    <>
-      {renderSelectedStepExecutionFlyout()}
-      <WorkflowStepExecutionList
-        execution={workflowExecution ?? null}
-        isLoading={isLoading}
-        error={error as Error | null}
-        onStepExecutionClick={(stepExecutionId) => {
-          setSelectedStepExecution(stepExecutionId);
-        }}
-        onClose={closeSidePanel}
-        selectedId={selectedStepExecutionId ?? null}
-      />
-    </>
-  );
-};
+  }
+);
+WorkflowExecutionDetail.displayName = 'WorkflowExecutionDetail';
