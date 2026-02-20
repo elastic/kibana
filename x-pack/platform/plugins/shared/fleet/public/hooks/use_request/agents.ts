@@ -103,6 +103,15 @@ export function useGetAgentsQuery(
   });
 }
 
+export function useGetAgentEffectiveConfigQuery(agentId: string) {
+  return useQuery(['agent-effective-config', agentId], () =>
+    sendRequestForRq({
+      path: agentRouteService.getAgentEffectiveConfig(agentId),
+      method: 'get',
+    })
+  );
+}
+
 /**
  * @deprecated use sendGetAgentsForRq or useGetAgentsQuery instead
  */

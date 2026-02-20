@@ -48,7 +48,6 @@ export function registerInstall(router: EntityStorePluginRouter) {
             },
           });
         }
-
         const { engines } = await assetManager.getStatus();
         const installedTypes = new Set(engines.map((e) => e.type));
         const toInstall = entityTypes.filter((type) => !installedTypes.has(type));
@@ -57,7 +56,7 @@ export function registerInstall(router: EntityStorePluginRouter) {
           return res.ok({ body: { ok: true } });
         }
 
-        await Promise.all(toInstall.map((type) => assetManager.initEntity(req, type, params)));
+        await assetManager.init(req, toInstall, params);
 
         return res.created({ body: { ok: true } });
       })

@@ -26,7 +26,7 @@ export type {
 // Hooks.
 export { useContentListItems, useContentListState } from './src/state';
 export type { ContentListQueryData } from './src/state';
-export { useContentListSort, useContentListSearch } from './src/features';
+export { useContentListSort, useContentListSearch, useContentListSelection } from './src/features';
 export { useContentListPagination } from './src/features';
 
 // State.
@@ -46,6 +46,7 @@ export type {
   UseContentListPaginationReturn,
   SearchConfig,
   UseContentListSearchReturn,
+  UseContentListSelectionReturn,
 } from './src/features';
 export type {
   ActiveFilters,
