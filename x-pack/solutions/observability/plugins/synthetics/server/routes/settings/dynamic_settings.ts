@@ -57,7 +57,7 @@ export const createPostDynamicSettingsRoute: SyntheticsRestApiRouteFactory = () 
 
     // Trigger the sync task immediately so the new interval takes effect right away
     if (syncIntervalChanged) {
-      runSynPrivateLocationMonitorsTaskSoon({ server });
+      void runSynPrivateLocationMonitorsTaskSoon({ server });
     }
 
     return fromSettingsAttribute(attr as DynamicSettingsAttributes);
