@@ -175,15 +175,13 @@ export function getEvalPipeline(githubPrLabels: string): string | null {
     .find((label) => label.startsWith('models:judge:'))
     ?.slice('models:judge:'.length)
     ?.trim();
-  const evaluationConnectorId =
-    typeof rawEvaluationConnectorId === 'string' && rawEvaluationConnectorId.length > 0
-      ? normalizeEvaluationConnectorId(rawEvaluationConnectorId)
-      : undefined;
+  const evaluationConnectorId = rawEvaluationConnectorId
+    ? normalizeEvaluationConnectorId(rawEvaluationConnectorId)
+    : undefined;
   const includeEisModels =
-    parsedLabels.includes('models:all') ||
-    parsedLabels.some((label) => label.startsWith('models:eis/')) ||
-    (typeof rawEvaluationConnectorId === 'string' && rawEvaluationConnectorId.startsWith('eis/')) ||
-    (typeof evaluationConnectorId === 'string' && evaluationConnectorId.startsWith('eis-'));
+    parsedLabels.some((label) => label === 'models:all' || label.startsWith('models:eis/')) ||
+    !!rawEvaluationConnectorId?.startsWith('eis/') ||
+    !!evaluationConnectorId?.startsWith('eis-');
   const selectedModelGroups = parsedLabels
     .filter((label) => label.startsWith('models:') && !label.startsWith('models:judge:'))
     .map((label) => label.slice('models:'.length))
