@@ -102,10 +102,10 @@ export function filterFilesByAffectedPackages(
  * @param mergeBase - Git commit to compare against (e.g., GITHUB_PR_MERGE_BASE)
  * @returns Set of affected package IDs, or null to skip filtering
  */
-export async function getAffectedPackagesForFiltering(
-  mergeBase: string | undefined
+export async function getAffectedPackages(
+  mergeBase: string | undefined,
+  config: AffectedPackagesConfig = getConfigFromEnv()
 ): Promise<Set<string> | null> {
-  const config = getConfigFromEnv();
   const log = config.logging ? console.warn : () => {};
 
   // Check if filtering is disabled
@@ -137,53 +137,5 @@ export async function getAffectedPackagesForFiltering(
   } catch (error) {
     console.error('Error during affected package detection:', error);
     return null;
-  }
-}
-
-/**
- * Get affected packages using the configured strategy
- *
- * @param mergeBase - Git commit to compare against
- * @param config - Optional configuration override
- * @returns Set of affected package IDs
- */
-export async function getAffectedPackages(
-  mergeBase: string,
-  config?: Partial<AffectedPackagesConfig>
-): Promise<Set<string>> {
-  const fullConfig = { ...getConfigFromEnv(), ...config };
-
-  if (fullConfig.logging) {
-    console.error(`Using ${fullConfig.strategy} strategy to detect affected packages`);
-    console.error(`Merge base: ${mergeBase}`);
-    console.error(`Include downstream: ${fullConfig.includeDownstream}`);
-  }
-
-  const startTime = Date.now();
-
-  try {
-    let packages: Set<string>;
-
-    if (fullConfig.strategy === 'git') {
-      packages = getAffectedPackagesGit(mergeBase, fullConfig.includeDownstream);
-    } else if (fullConfig.strategy === 'moon') {
-      packages = getAffectedPackagesMoon(mergeBase, fullConfig.includeDownstream);
-    } else {
-      return new Set<string>();
-    }
-
-    const durationMs = Date.now() - startTime;
-
-    if (fullConfig.logging) {
-      console.error(`Found ${packages.size} affected packages in ${durationMs}ms`);
-      if (packages.size > 0 && packages.size <= 20) {
-        console.error('Affected packages:', Array.from(packages).sort().join(', '));
-      }
-    }
-
-    return packages;
-  } catch (error) {
-    console.error(`Failed to get affected packages using ${fullConfig.strategy} strategy:`, error);
-    throw error;
   }
 }

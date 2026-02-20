@@ -11,30 +11,34 @@
 
 /**
  * CLI script to list affected packages
- * 
+ *
+ * Precedence for each setting: CLI flag > environment variable > default
+ *
  * Usage:
  *   .buildkite/pipeline-utils/affected-packages/list_affected [options]
- * 
+ *
  * Options:
- *   --deep         Include downstream dependencies (default: false)
+ *   --deep         Include downstream dependencies
  *   --json         Output as JSON array
- *   --merge-base   Git commit to compare against (default: GITHUB_PR_MERGE_BASE env var or 'origin/main')
- *   --strategy     Strategy to use: git or moon (default: moon)
- * 
+ *   --merge-base   Git commit to compare against
+ *   --strategy     Strategy to use: git or moon
+ *   --help, -h     Show help
+ *
+ * Environment variables:
+ *   AFFECTED_STRATEGY    - 'git' | 'moon' | 'disabled' (default: 'moon')
+ *   AFFECTED_DOWNSTREAM  - 'true' | 'false' (default: 'false')
+ *   GITHUB_PR_MERGE_BASE - merge base commit (default: 'origin/main')
+ *
  * Examples:
  *   .buildkite/pipeline-utils/affected-packages/list_affected
  *   .buildkite/pipeline-utils/affected-packages/list_affected --deep
  *   .buildkite/pipeline-utils/affected-packages/list_affected --deep --json
  *   .buildkite/pipeline-utils/affected-packages/list_affected --merge-base HEAD~5
- *   .buildkite/pipeline-utils/affected-packages/list_affected --strategy moon --deep
+ *   .buildkite/pipeline-utils/affected-packages/list_affected --strategy git --deep
  */
-
-// Must be before imports to suppress logging
-process.env.AFFECTED_LOGGING = 'false';
 
 const path = require('path');
 
-// Add the parent directories to the require path so we can load TypeScript via ts-node
 require('ts-node').register({
   transpileOnly: true,
   compilerOptions: {
@@ -48,21 +52,33 @@ const { getAffectedPackages } = require(path.join(__dirname, './index'));
 const HELP_TEXT = `
 Usage: .buildkite/pipeline-utils/affected-packages/list_affected [options]
 
+Precedence: CLI flags > environment variables > defaults
+
 Options:
-  --deep                Include downstream dependencies (default: false)
+  --deep                Include downstream dependencies
   --json                Output as JSON array (default: one per line)
   --merge-base <commit> Git commit to compare against
-                        (default: GITHUB_PR_MERGE_BASE env var or 'origin/main')
-  --strategy <git|moon> Strategy to use (default: moon)
+  --strategy <git|moon> Strategy to use
   --help, -h            Show this help message
+
+Environment variables:
+  AFFECTED_STRATEGY      Strategy (default: moon)
+  AFFECTED_DOWNSTREAM    Include downstream: true | false (default: false)
+  GITHUB_PR_MERGE_BASE   Merge base commit (default: origin/main)
 
 Examples:
   list_affected
   list_affected --deep
   list_affected --deep --json
   list_affected --merge-base HEAD~5
-  list_affected --strategy moon --deep
+  list_affected --strategy git --deep
+  AFFECTED_STRATEGY=git list_affected
 `.trim();
+
+function getArgValue(args, flag) {
+  const idx = args.indexOf(flag);
+  return idx !== -1 && args[idx + 1] ? args[idx + 1] : undefined;
+}
 
 async function main() {
   const args = process.argv.slice(2);
@@ -72,49 +88,36 @@ async function main() {
     process.exit(0);
   }
 
-  // Parse flags
-  const flags = {
-    deep: args.includes('--deep'),
-    json: args.includes('--json'),
-    mergeBase: undefined,
-    strategy: 'moon',
-  };
-
-  // Parse --merge-base value
-  const mergeBaseIndex = args.indexOf('--merge-base');
-  if (mergeBaseIndex !== -1 && args[mergeBaseIndex + 1]) {
-    flags.mergeBase = args[mergeBaseIndex + 1];
-  } else {
-    flags.mergeBase = process.env.GITHUB_PR_MERGE_BASE || 'origin/main';
+  // Resolve strategy: flag > env > default
+  const flagStrategy = getArgValue(args, '--strategy');
+  if (flagStrategy && flagStrategy !== 'git' && flagStrategy !== 'moon') {
+    console.error(`Invalid strategy: ${flagStrategy}. Must be 'git' or 'moon'.`);
+    process.exit(1);
   }
+  const strategy = flagStrategy || process.env.AFFECTED_STRATEGY || 'moon';
 
-  // Parse --strategy value
-  const strategyIndex = args.indexOf('--strategy');
-  if (strategyIndex !== -1 && args[strategyIndex + 1]) {
-    const strategy = args[strategyIndex + 1];
-    if (strategy !== 'git' && strategy !== 'moon') {
-      console.error(`Invalid strategy: ${strategy}. Must be 'git' or 'moon'.`);
-      process.exit(1);
-    }
-    flags.strategy = strategy;
-  }
+  // Resolve downstream: flag > env > default
+  const includeDownstream = args.includes('--deep')
+    ? true
+    : process.env.AFFECTED_DOWNSTREAM === 'true';
+
+  // Resolve merge base: flag > env > default
+  const mergeBase =
+    getArgValue(args, '--merge-base') || process.env.GITHUB_PR_MERGE_BASE || 'origin/main';
 
   try {
-    // Get affected packages with logging disabled
-    const affectedPackages = await getAffectedPackages(flags.mergeBase, {
-      strategy: flags.strategy,
-      includeDownstream: flags.deep,
+    const affectedPackages = await getAffectedPackages(mergeBase, {
+      strategy,
+      includeDownstream,
       logging: false,
     });
 
-    const packageList = Array.from(affectedPackages).sort();
+    const packageList = Array.from(affectedPackages || []).sort();
 
-    if (flags.json) {
-      // Output as JSON array
+    if (args.includes('--json')) {
       console.log(JSON.stringify(packageList, null, 2));
     } else {
-      // Output one package per line
-      packageList.forEach(pkg => console.log(pkg));
+      packageList.forEach((pkg) => console.log(pkg));
     }
 
     process.exit(0);
