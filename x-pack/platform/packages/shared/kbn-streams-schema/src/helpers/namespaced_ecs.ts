@@ -14,7 +14,8 @@ export const namespacePrefixes: readonly string[] = NAMESPACE_PREFIXES;
 /**
  * Field names that are reserved for OTel compatibility mode.
  * These are either passthrough objects or alias fields that cannot be used as custom field names.
- * See logs_layer.ts baseMappings for the server-side definition.
+ * IMPORTANT: This list must match the keys of baseMappings in logs_layer.ts.
+ * A test in logs_layer.test.ts ensures these stay in sync.
  */
 export const otelReservedFields = [
   'body',
