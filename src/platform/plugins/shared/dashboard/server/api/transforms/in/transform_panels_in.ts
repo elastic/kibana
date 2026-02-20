@@ -65,6 +65,8 @@ function transformPanelIn(
   const { uid, grid, config, ...restPanel } = panel;
   const idx = uid ?? uuidv4();
 
+  // Temporary escape hatch for lens as code
+  // TODO remove when lens as code transforms are ready for production
   const type = panel.type === 'lens' && isDashboardAppRequest ? 'lens-dashboard-app' : panel.type;
   const transforms = embeddableService?.getTransforms(type);
   const panelSchema = transforms?.schema;
