@@ -27,6 +27,14 @@ jest.mock('undici', () => {
   };
 });
 
+jest.mock('@kbn/dev-utils', () => {
+  return {
+    CA_CERT_PATH: '/some/path/ca.crt',
+    KBN_CERT_PATH: '/some/path/kibana.crt',
+    KBN_KEY_PATH: '/some/path/kibana.key',
+  };
+});
+
 // Import undici after mocking to get the mocked exports
 import * as undici from 'undici';
 const mockUndiciFetch = jest.mocked(undici.fetch);
@@ -94,7 +102,7 @@ describe(`#runUiamContainer()`, () => {
             "curl -sk http://127.0.0.1:8080/ready | grep -q \\"\\\\\\"overall\\\\\\": true\\"",
             "--name",
             "uiam-cosmosdb",
-            "mcr.microsoft.com/cosmosdb/linux/azure-cosmos-emulator:vnext-EN20251223",
+            "docker.elastic.co/kibana-ci/uiam-azure-cosmos-emulator:latest-verified",
             "--protocol",
             "https",
             "--port",
@@ -147,10 +155,22 @@ describe(`#runUiamContainer()`, () => {
             "/some_path/run_java_with_custom_ca.sh:/opt/jboss/container/java/run/run-java-with-custom-ca.sh:z",
             "--volume",
             "/some_path/uiam_cosmosdb.pfx:/tmp/uiam_cosmosdb.pfx:z",
+            "--volume",
+            "/some/path/ca.crt:/tmp/ca.crt:z",
+            "--volume",
+            "/some/path/kibana.key:/tmp/server.key:z",
+            "--volume",
+            "/some/path/kibana.crt:/tmp/server.crt:z",
             "-p",
-            "127.0.0.1:8080:8080",
+            "127.0.0.1:8443:8443",
             "--entrypoint",
             "/opt/jboss/container/java/run/run-java-with-custom-ca.sh",
+            "--env",
+            "quarkus.tls.https.key-store.pem.0.cert=/tmp/server.crt",
+            "--env",
+            "quarkus.tls.https.key-store.pem.0.key=/tmp/server.key",
+            "--env",
+            "quarkus.tls.https.trust-store.pem.certs=/tmp/ca.crt",
             "--env",
             "quarkus.http.ssl.certificate.key-store-provider=JKS",
             "--env",
@@ -161,6 +181,8 @@ describe(`#runUiamContainer()`, () => {
             "quarkus.log.category.\\"io\\".level=INFO",
             "--env",
             "quarkus.log.category.\\"org\\".level=INFO",
+            "--env",
+            "quarkus.log.category.\\"co.elastic.cloud.uiam\\".level=DEBUG",
             "--env",
             "quarkus.log.console.json.enabled=false",
             "--env",
