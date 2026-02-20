@@ -1,6 +1,6 @@
 {
   "type": "shared-browser",
-  "id": "@kbn/url-utils",
+  "id": "@kbn/shared-ux-url",
   "owner": [
     "@elastic/appex-sharedux"
   ],
