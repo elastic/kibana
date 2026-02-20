@@ -27,7 +27,7 @@ export default ({ getService }: FtrProviderContext) => {
   const { username, password } = parsedUrl;
   parsedUrl.username = '';
   parsedUrl.password = '';
-  kibanaServerUrl = parsedUrl.toString();
+  kibanaServerUrl = parsedUrl.toString().slice(0, -1); // Remove trailing slash
   const authHeader: Record<string, string> =
     username && password
       ? { Authorization: `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}` }
