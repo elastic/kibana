@@ -135,6 +135,51 @@ steps:
         - exit_status: '-1'
           limit: 1
 
+  - command: .buildkite/scripts/steps/functional/osquery_scout_stateful.sh
+    label: 'Osquery Scout Stateful Tests'
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-4
+      preemptible: true
+    timeout_in_minutes: 60
+    depends_on: build
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 1
+
+  - command: .buildkite/scripts/steps/functional/osquery_scout_serverless.sh
+    label: 'Osquery Scout Serverless Security Complete Tests'
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-4
+      preemptible: true
+    timeout_in_minutes: 60
+    depends_on: build
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 1
+
+  - command: .buildkite/scripts/steps/functional/osquery_scout_serverless_essentials.sh
+    label: 'Osquery Scout Serverless Security Essentials Tests'
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-4
+      preemptible: true
+    timeout_in_minutes: 60
+    depends_on: build
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 1
+
   - command: |
       echo "--- Promoting base image to temp..."
       docker buildx imagetools create -t "$PACKAGE_REGISTRY_TEMP_IMAGE" "$PACKAGE_REGISTRY_BASE_IMAGE"
