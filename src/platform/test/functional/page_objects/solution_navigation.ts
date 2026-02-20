@@ -107,6 +107,20 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
     return found;
   }
 
+  async function clickDisplayedNavItem(selector: string, label: string): Promise<void> {
+    await retry.try(async () => {
+      const candidates = await testSubjects.findAll(selector, TIMEOUT_CHECK);
+      for (const candidate of candidates) {
+        if ((await candidate.isDisplayed()) && (await candidate.isEnabled())) {
+          await candidate.scrollIntoViewIfNecessary();
+          await candidate.click();
+          return;
+        }
+      }
+      throw new Error(`No displayed, enabled element found for "${label}" (${selector})`);
+    });
+  }
+
   return {
     // check that chrome ui is in project/solution mode
     async expectExists() {
@@ -335,7 +349,7 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
         await collapseMoreIfNeeded();
         // TODO: properly distinguish between panel link and main nav link
         // https://github.com/elastic/kibana/issues/236242
-        await testSubjects.click(`~nav-item-id-${navId}`);
+        await clickDisplayedNavItem(`~nav-item-id-${navId}`, `panel navId ${navId}`);
       },
 
       async expectPanelExists(sectionId: NavigationId) {
