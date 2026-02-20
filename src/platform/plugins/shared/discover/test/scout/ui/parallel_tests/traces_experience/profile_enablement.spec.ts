@@ -17,8 +17,10 @@ spaceTest.describe(
     tag: [...tags.stateful.all, ...tags.serverless.observability.complete],
   },
   () => {
-    spaceTest.beforeAll(async ({ scoutSpace }) => {
-      await scoutSpace.setSolutionView('oblt');
+    spaceTest.beforeAll(async ({ scoutSpace, config }) => {
+      if (!config.serverless) {
+        await scoutSpace.setSolutionView('oblt');
+      }
       await scoutSpace.savedObjects.load(testData.TRACES.KBN_ARCHIVE);
       await scoutSpace.uiSettings.setDefaultIndex(testData.TRACES.DATA_VIEW_NAME);
       await scoutSpace.uiSettings.setDefaultTime({
