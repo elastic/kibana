@@ -2995,6 +2995,8 @@ x-pack/platform/plugins/shared/actions/server/lib/token_tracking @elastic/securi
 
 ## Security Solution sub teams - security-defend-workflows
 /x-pack/solutions/security/test/defend_workflows_cypress @elastic/security-defend-workflows
+/x-pack/solutions/security/test/scout_defend_workflows @elastic/security-defend-workflows
+/x-pack/solutions/security/test/DEFEND_WORKFLOWS_SCOUT_MIGRATION.md @elastic/security-defend-workflows
 /x-pack/platform/test/api_integration/apis/osquery @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution/public/management/ @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution/public/common/lib/endpoint/ @elastic/security-defend-workflows
