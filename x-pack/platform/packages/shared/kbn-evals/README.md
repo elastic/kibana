@@ -191,22 +191,21 @@ Create/update a specific judge override label:
 When running evals against **EIS-backed models**, `@kbn/evals` can tag inference requests with:
 
 - **Header**: `X-Elastic-Product-Use-Case`
-- **Value**: `(<prefix>[_<suffix>])`
+- **Value**: `<pluginId>`
 
 This value is sent via `metadata.connectorTelemetry.pluginId` on inference API calls and is forwarded to the ES `_inference` request.
 
-Configuration is done via environment variables:
+By default, `@kbn/evals` sets this to `kbn_evals`.
 
-- **prefix**: `KBN_EVALS_TELEMETRY_PREFIX` (CI sets `eval_suite`; otherwise falls back to `EVAL_SUITE_ID`)
-- **suffix**: `KBN_EVALS_TELEMETRY_SUFFIX` (optional; CI defaults to `EVAL_SUITE_ID`)
+To override (rare), set:
 
-If the prefix is not set (and `EVAL_SUITE_ID` is not set), the header is not sent.
+- **pluginId**: `KBN_EVALS_TELEMETRY_PLUGIN_ID`
 
 Example:
 
 ```bash
 EVAL_SUITE_ID=agent-builder ...
-# -> X-Elastic-Product-Use-Case: eval_suite_agent_builder
+# -> X-Elastic-Product-Use-Case: kbn_evals
 ```
 
 ### CI ops: sharing a Vault update command

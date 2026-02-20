@@ -16,31 +16,11 @@ import type {
   UnboundPromptOptions,
 } from '@kbn/inference-common';
 
-function normalizeProductUseCasePart(raw: string): string | undefined {
-  const normalized = raw
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '_')
-    .replace(/_+/g, '_')
-    .replace(/^_+|_+$/g, '');
-
-  return normalized.length > 0 ? normalized : undefined;
-}
-
-function getEisProductUseCase(): string | undefined {
-  // `EVAL_SUITE_ID` is required for CI runs (see `.buildkite/scripts/steps/evals/run_suite.sh`)
-  // and is a good default "prefix" for eval suites that can live anywhere in the repo.
-  const rawPrefix = process.env.KBN_EVALS_TELEMETRY_PREFIX ?? process.env.EVAL_SUITE_ID;
-
-  // Allow a CI pipeline to add a suffix to distinguish eval traffic from interactive usage.
-  const rawSuffix = process.env.KBN_EVALS_TELEMETRY_SUFFIX;
-
-  const prefix = rawPrefix ? normalizeProductUseCasePart(rawPrefix) : undefined;
-  const suffix = rawSuffix ? normalizeProductUseCasePart(rawSuffix) : undefined;
-
-  if (!prefix) return undefined;
-  if (!suffix || suffix === prefix) return prefix;
-  return `${prefix}_${suffix}`;
+function getTelemetryPluginId(): string | undefined {
+  const raw = process.env.KBN_EVALS_TELEMETRY_PLUGIN_ID;
+  if (raw == null) return 'kbn_evals';
+  const trimmed = raw.trim();
+  return trimmed.length > 0 ? trimmed : 'kbn_evals';
 }
 
 function withConnectorTelemetry(
@@ -81,10 +61,6 @@ function withConnectorTelemetry(
 export function wrapInferenceClientWithEisConnectorTelemetry(
   client: BoundInferenceClient
 ): BoundInferenceClient {
-  // Temporarily disable traffic-tagging while the header value is being finalized.
-  // (We plan to re-enable this soon.)
-  //
-  // const productUseCase = getEisProductUseCase();
-  // return productUseCase ? withConnectorTelemetry(client, { pluginId: productUseCase }) : client;
-  return client;
+  const pluginId = getTelemetryPluginId();
+  return pluginId ? withConnectorTelemetry(client, { pluginId }) : client;
 }

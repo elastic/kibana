@@ -90,6 +90,9 @@ describe('InferenceConnector', () => {
         {
           asStream: true,
           meta: true,
+          headers: {
+            'X-Elastic-Product-Use-Case': 'security_ai_assistant',
+          },
         }
       );
       expect(response.choices[0].message.content).toEqual(' you');

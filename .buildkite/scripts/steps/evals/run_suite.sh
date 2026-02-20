@@ -14,18 +14,9 @@ if [[ -z "$EVAL_SUITE_ID" ]]; then
   exit 1
 fi
 
-# Tag EIS traffic with `X-Elastic-Product-Use-Case` so it can be attributed in logs/metrics.
-# The value is derived from:
-# - prefix:  KBN_EVALS_TELEMETRY_PREFIX (defaults to "eval_suite" in CI)
-# - suffix:  KBN_EVALS_TELEMETRY_SUFFIX (defaults to EVAL_SUITE_ID in CI)
-#
-# e.g. EVAL_SUITE_ID=agent-builder -> eval_suite_agent_builder
-if [[ -z "${KBN_EVALS_TELEMETRY_PREFIX:-}" ]]; then
-  export KBN_EVALS_TELEMETRY_PREFIX="eval_suite"
-fi
-if [[ -z "${KBN_EVALS_TELEMETRY_SUFFIX:-}" ]]; then
-  export KBN_EVALS_TELEMETRY_SUFFIX="${EVAL_SUITE_ID}"
-fi
+# Tag inference traffic with `X-Elastic-Product-Use-Case` (forwarded from inference connector telemetry).
+# The value should be the platform-level `pluginId` use-case identifier.
+# `@kbn/evals` defaults this to `kbn_evals`, but you can override via KBN_EVALS_TELEMETRY_PLUGIN_ID.
 
 # Ensure a stable run id across steps/jobs in the same Buildkite build.
 # If unset, Scout will generate a random run id when Playwright loads configs,
