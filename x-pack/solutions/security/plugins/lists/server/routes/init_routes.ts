@@ -58,7 +58,7 @@ export const initRoutes = (
   kibanaVersion: string
 ): void => {
   // lists
-  createListRoute(router);
+  createListRoute(router, kibanaVersion);
   readListRoute(router);
   updateListRoute(router);
   deleteListRoute(router);

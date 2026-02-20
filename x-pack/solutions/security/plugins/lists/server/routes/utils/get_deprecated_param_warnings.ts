@@ -6,6 +6,13 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
+import { isEmpty } from 'lodash';
+import type {
+  CreateListRequestBody,
+  ImportListItemsRequestQuery,
+} from '@kbn/securitysolution-lists-common/api';
+
+// type requestSerializerTypes = { body: typeof CreateListRequestBody} | {query: typeof ImportListItemsRequestQuery}
 
 /**
  * Creates HTTP Warning headers for deprecated query parameters.
@@ -15,22 +22,32 @@ import type { KibanaRequest } from '@kbn/core/server';
  * @returns An object with warning headers if deprecated params are found, or undefined
  */
 export const getDeprecatedParamWarnings = (
-  request: KibanaRequest,
+  request: KibanaRequest<
+    unknown,
+    ImportListItemsRequestQuery | unknown,
+    CreateListRequestBody | unknown
+  >,
   kibanaVersion: string
 ): { warning?: string } | undefined => {
   const warnings: string[] = [];
 
   // Check for serializer parameter in query string
-  if (request.url.searchParams.has('serializer')) {
+  if (
+    request.url.searchParams.has('serializer') ||
+    !isEmpty((request.body as Record<string, unknown>)?.serializer)
+  ) {
     warnings.push(
-      'The "serializer" query parameter is deprecated and will be ignored. Custom serializers are no longer supported.'
+      'The "serializer" query parameter is not supported and will be ignored. Custom serializers have been removed.'
     );
   }
 
   // Check for deserializer parameter in query string
-  if (request.url.searchParams.has('deserializer')) {
+  if (
+    request.url.searchParams.has('deserializer') ||
+    !isEmpty((request.body as Record<string, unknown>)?.deserializer)
+  ) {
     warnings.push(
-      'The "deserializer" query parameter is deprecated and will be ignored. Custom deserializers are no longer supported.'
+      'The "deserializer" query parameter is not supported and will be ignored. Custom deserializers have been removed.'
     );
   }
 

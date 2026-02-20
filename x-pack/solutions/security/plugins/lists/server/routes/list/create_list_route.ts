@@ -14,8 +14,9 @@ import { LISTS_API_ALL } from '@kbn/security-solution-features/constants';
 import type { ListsPluginRouter } from '../../types';
 import { buildSiemResponse } from '../utils';
 import { getListClient } from '..';
+import { getDeprecatedParamWarnings } from '../utils/get_deprecated_param_warnings';
 
-export const createListRoute = (router: ListsPluginRouter): void => {
+export const createListRoute = (router: ListsPluginRouter, kibanaVersion: string): void => {
   router.versioned
     .post({
       access: 'public',
@@ -30,7 +31,7 @@ export const createListRoute = (router: ListsPluginRouter): void => {
       {
         validate: {
           request: {
-            body: buildRouteValidationWithZod(CreateListRequestBody),
+            body: buildRouteValidationWithZod(CreateListRequestBody.passthrough()),
           },
         },
         version: '2023-10-31',
@@ -39,6 +40,9 @@ export const createListRoute = (router: ListsPluginRouter): void => {
         const siemResponse = buildSiemResponse(response);
         try {
           const { name, description, id, type, meta, version } = request.body;
+          // Check for deprecated query parameters and generate warning headers
+          const warningHeaders = getDeprecatedParamWarnings(request, kibanaVersion);
+
           const lists = await getListClient(context);
           const dataStreamExists = await lists.getListDataStreamExists();
           const indexExists = await lists.getListIndexExists();
@@ -75,7 +79,10 @@ export const createListRoute = (router: ListsPluginRouter): void => {
             version,
           });
 
-          return response.ok({ body: CreateListResponse.parse(list) });
+          return response.ok({
+            body: CreateListResponse.parse(list),
+            ...(warningHeaders && { headers: warningHeaders }),
+          });
         } catch (err) {
           const error = transformError(err);
           return siemResponse.error({
