@@ -29,6 +29,7 @@ import type {
   TrimProcessor,
   JoinProcessor,
   ConcatProcessor,
+  NetworkDirectionProcessor,
 } from '../../../types/processors';
 import { type StreamlangProcessorDefinition } from '../../../types/processors';
 import { convertRenameProcessorToESQL } from './processors/rename';
@@ -47,6 +48,7 @@ import { convertMathProcessorToESQL } from './processors/math';
 import { createTransformStringESQL } from './transform_string';
 import { convertJoinProcessorToESQL } from './processors/join';
 import { convertConcatProcessorToESQL } from './processors/concat';
+import { convertNetworkDirectionProcessorToESQL } from './processors/network_direction';
 
 function convertProcessorToESQL(processor: StreamlangProcessorDefinition): ESQLAstCommand[] | null {
   switch (processor.action) {
@@ -106,6 +108,9 @@ function convertProcessorToESQL(processor: StreamlangProcessorDefinition): ESQLA
 
     case 'concat':
       return convertConcatProcessorToESQL(processor as ConcatProcessor);
+
+    case 'network_direction':
+      return convertNetworkDirectionProcessorToESQL(processor as NetworkDirectionProcessor);
 
     case 'manual_ingest_pipeline':
       return [
