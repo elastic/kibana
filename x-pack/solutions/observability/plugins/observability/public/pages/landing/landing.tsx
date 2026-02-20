@@ -70,7 +70,7 @@ function ObservabilityLogsEssentialsLandingPage() {
     }
 
     redirectToLanding();
-  }, [logsDataAccess.services.logDataService, share]);
+  }, [logsDataAccess, share]);
 
   return <></>;
 }
