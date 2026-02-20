@@ -15,12 +15,12 @@ import { defaultConfig } from '../../default/stateful/base.config';
 
 const EIS_QA_URL = 'https://inference.eu-west-1.aws.svc.qa.elastic.cloud';
 
-type AvailableConnector = {
+interface AvailableConnector {
   name: string;
   actionTypeId: string;
   config: Record<string, unknown>;
   secrets?: Record<string, unknown>;
-};
+}
 
 function getPreconfiguredEisConnectorsArg(): string | undefined {
   const raw = process.env.KIBANA_TESTING_AI_CONNECTORS;

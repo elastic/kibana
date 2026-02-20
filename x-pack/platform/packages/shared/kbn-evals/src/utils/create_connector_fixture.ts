@@ -42,7 +42,9 @@ export async function createConnectorFixture({
   log: ToolingLog;
   use: (connector: AvailableConnectorWithId) => Promise<void>;
 }) {
-  type ConnectorGetResponse = { is_preconfigured?: boolean };
+  interface ConnectorGetResponse {
+    is_preconfigured?: boolean;
+  }
 
   async function isPreconfiguredConnector(connectorId: string): Promise<boolean> {
     try {

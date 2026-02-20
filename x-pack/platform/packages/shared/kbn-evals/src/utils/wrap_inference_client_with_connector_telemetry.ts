@@ -84,4 +84,3 @@ export function wrapInferenceClientWithEisConnectorTelemetry(
   const productUseCase = getEisProductUseCase();
   return productUseCase ? withConnectorTelemetry(client, { pluginId: productUseCase }) : client;
 }
-

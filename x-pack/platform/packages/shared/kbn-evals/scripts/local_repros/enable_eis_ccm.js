@@ -89,7 +89,9 @@ async function sleep(ms) {
 function loadEsUrlFromScoutConfig(scoutConfigPath) {
   const abs = Path.resolve(scoutConfigPath);
   if (!Fs.existsSync(abs)) {
-    die(`Missing Scout servers config: ${abs}\nStart Scout first (node scripts/scout.js start-server ...)`);
+    die(
+      `Missing Scout servers config: ${abs}\nStart Scout first (node scripts/scout.js start-server ...)`
+    );
   }
   const raw = Fs.readFileSync(abs, 'utf8');
   const parsed = JSON.parse(raw);
@@ -163,10 +165,11 @@ async function main() {
       die(`❌ Timed out waiting for EIS endpoints after ${retries} attempts.`);
     }
 
-    process.stdout.write(`No endpoints yet (attempt ${attempt}/${retries}), waiting ${delayMs}ms...\n`);
+    process.stdout.write(
+      `No endpoints yet (attempt ${attempt}/${retries}), waiting ${delayMs}ms...\n`
+    );
     await sleep(delayMs);
   }
 }
 
 main().catch((e) => die(e && e.stack ? e.stack : String(e)));
-
