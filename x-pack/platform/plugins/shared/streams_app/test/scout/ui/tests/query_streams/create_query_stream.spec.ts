@@ -10,8 +10,10 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../../fixtures';
 
-// View names created by this spec (stream name => ES|QL view name with $. prefix)
-const ESQL_VIEW_NAMES_CREATED_BY_SPEC = ['$.test-query-stream', '$.logs.host-1'];
+// Stream names created by this spec
+const STREAM_NAMES_CREATED_BY_SPEC = ['logs.host-1', 'test-query-stream'];
+// ES|QL view names
+const ESQL_VIEW_NAMES_CREATED_BY_SPEC = ['$.logs.host-1', '$.test-query-stream'];
 
 test.describe(
   'Query streams - Create query stream',
@@ -25,11 +27,14 @@ test.describe(
       await pageObjects.streams.gotoStreamMainPage();
     });
 
-    test.afterAll(async ({ kbnClient, esClient }) => {
-      await kbnClient.uiSettings.update({
-        [OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS]: false,
-      });
-
+    test.afterAll(async ({ kbnClient, apiServices, esClient }) => {
+      for (const streamName of STREAM_NAMES_CREATED_BY_SPEC) {
+        try {
+          await apiServices.streams.deleteStream(streamName);
+        } catch {
+          // Stream may not exist or already deleted
+        }
+      }
       for (const viewName of ESQL_VIEW_NAMES_CREATED_BY_SPEC) {
         try {
           await esClient.transport.request({
@@ -40,6 +45,9 @@ test.describe(
           // 404 or other; ignore so afterAll doesn't fail
         }
       }
+      await kbnClient.uiSettings.update({
+        [OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS]: false,
+      });
     });
 
     test('should properly create a root query stream', async ({ pageObjects, esClient }) => {
