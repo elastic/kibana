@@ -106,7 +106,7 @@ export const createEventSignal = async ({
     loadFields: true,
   });
 
-  ruleExecutionLogger.debug(`Matched signals found: ${ids?.length}`);
+  ruleExecutionLogger.debug(`Matched events found: ${ids?.length}`);
 
   const enrichment = threatEnrichmentFactory({
     signalIdToMatchedQueriesMap,

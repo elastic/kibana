@@ -14,11 +14,13 @@ import { getFragmentData, withAutoSuggest } from '../../definitions/utils/autoco
 import { getDateLiterals } from '../../definitions/utils/literals';
 import {
   getPromqlFunctionSuggestions,
-  getPromqlFunctionSuggestionsForReturnTypes,
+  getPromqlLabelMatcherSuggestions,
+  getPromqlOperatorSuggestions,
   getMetricTypesForSignature,
+  getPromqlParamTypesForFunction,
 } from '../../definitions/utils/promql';
 import type { ICommandCallbacks, ISuggestionItem, ICommandContext } from '../types';
-import { ESQL_NUMBER_TYPES, ESQL_STRING_TYPES } from '../../definitions/types';
+import { ESQL_STRING_TYPES, type PromQLFunctionParamType } from '../../definitions/types';
 import {
   assignCompletionItem,
   buildAddValuePlaceholder,
@@ -28,6 +30,7 @@ import {
   pipeCompleteItem,
   promqlByCompleteItem,
   promqlLabelSelectorItem,
+  promqlOpenParensCompleteItem,
   promqlRangeSelectorItem,
   valuePlaceholderConstant,
 } from '../complete_items';
@@ -36,14 +39,25 @@ import {
   getPromqlParam,
   getUsedPromqlParamNames,
   isAfterCustomColumnAssignment,
+  getPreGroupedAggregationName,
   PromqlParamValueType,
   getPosition,
   getIndexAssignmentContext,
   isParamValueComplete,
   isAtValidColumnSuggestionPosition,
+  PromqlParamName,
 } from './utils';
 import { findPipeOutsideQuotes } from '../../definitions/utils/shared';
 import { SuggestionCategory } from '../../../language/autocomplete/utils';
+
+let commaWithAutoSuggest: ISuggestionItem | undefined;
+const getCommaWithAutoSuggest = (): ISuggestionItem => {
+  if (!commaWithAutoSuggest) {
+    commaWithAutoSuggest = withAutoSuggest({ ...commaCompleteItem, text: ', ' });
+  }
+
+  return commaWithAutoSuggest;
+};
 
 export async function autocomplete(
   query: string,
@@ -61,13 +75,17 @@ export async function autocomplete(
   const pipeIndex = findPipeOutsideQuotes(query, commandStart);
   const commandText = query.substring(commandStart, pipeIndex === -1 ? query.length : pipeIndex);
   const position = getPosition(innerText, command, commandText);
-  const needsWrappedQuery = isAfterCustomColumnAssignment(innerCommandText);
+  const preGroupedAgg = getPreGroupedAggregationName(innerCommandText);
+  const shouldWrap = isAfterCustomColumnAssignment(innerCommandText) || !!preGroupedAgg;
 
   switch (position.type) {
     case 'after_command': {
       const usedParams = getUsedPromqlParamNames(commandText);
       const availableParamSuggestions = getPromqlParamKeySuggestions().filter(
-        (suggestion) => !usedParams.has(suggestion.label)
+        ({ label }) =>
+          !usedParams.has(label) &&
+          !(label === PromqlParamName.Step && usedParams.has(PromqlParamName.Buckets)) &&
+          !(label === PromqlParamName.Buckets && usedParams.has(PromqlParamName.Step))
       );
 
       const canSuggestColumn =
@@ -80,10 +98,7 @@ export async function autocomplete(
       const baseSuggestions = [
         ...availableParamSuggestions,
         ...(columnSuggestion ? [columnSuggestion] : []),
-        ...(canSuggestColumn
-          ? buildFieldSuggestions(context, ESQL_NUMBER_TYPES, needsWrappedQuery ? 'wrap' : 'plain')
-          : []),
-        ...(canSuggestColumn ? wrapFunctionSuggestions(needsWrappedQuery) : []),
+        ...(canSuggestColumn ? buildVectorSuggestions(context, [], shouldWrap) : []),
       ];
 
       const indexSuggestions = suggestForIndexAssignment(
@@ -108,69 +123,124 @@ export async function autocomplete(
 
     case 'inside_grouping':
       return position.isCompleteLabel
-        ? [commaCompleteItem]
+        ? [getCommaWithAutoSuggest()]
         : buildFieldSuggestions(context, ESQL_STRING_TYPES, 'plain');
 
-    // TODO: Re-enable label matcher suggestions when label signatures are implemented
-    // case 'after_label_brace':
-    //   return position.isCompleteLabel
-    //     ? [commaCompleteItem]
-    //     : buildFieldSuggestions(context, ESQL_STRING_TYPES, 'plain');
-    // case 'after_label_name':
-    //   return getPromqlLabelMatcherSuggestions();
-    // case 'after_label_operator':
-    //   return [valuePlaceholderConstant];
     case 'after_label_brace':
+      return position.isCompleteLabel
+        ? [getCommaWithAutoSuggest()]
+        : buildFieldSuggestions(context, ESQL_STRING_TYPES, 'plain');
     case 'after_label_name':
+      return getPromqlLabelMatcherSuggestions();
     case 'after_label_operator':
-      return [];
+      return [valuePlaceholderConstant];
+
+    case 'after_operator': {
+      const signatureTypes = position.signatureTypes ?? [];
+      const canSuggestScalar = signatureTypes.length === 0 || signatureTypes.includes('scalar');
+
+      return [
+        ...buildVectorSuggestions(context, signatureTypes, shouldWrap),
+        ...(canSuggestScalar ? [buildAddValuePlaceholder('number')] : []),
+      ];
+    }
 
     case 'after_metric': {
-      return position.signatureTypes?.includes('range_vector') && !position.selector?.duration
-        ? [promqlLabelSelectorItem, promqlRangeSelectorItem]
-        : [promqlLabelSelectorItem];
+      const metricSuggestions: ISuggestionItem[] = [promqlLabelSelectorItem];
+
+      const expectsRangeVector = position.signatureTypes?.includes('range_vector');
+      const hasDuration = position.selector?.duration;
+
+      if (expectsRangeVector && !hasDuration) {
+        metricSuggestions.push(promqlRangeSelectorItem);
+      } else {
+        metricSuggestions.push(...getPromqlOperatorSuggestions());
+      }
+
+      return metricSuggestions;
     }
 
     case 'after_label_selector': {
-      return position.signatureTypes?.includes('range_vector') && position.canSuggestRangeSelector
-        ? [promqlRangeSelectorItem]
-        : [];
+      const labelSelectorSuggestions: ISuggestionItem[] = [];
+
+      const expectsRangeVector = position.signatureTypes?.includes('range_vector');
+      const canSuggestRange = position.canSuggestRangeSelector;
+
+      if (expectsRangeVector && canSuggestRange) {
+        labelSelectorSuggestions.push(promqlRangeSelectorItem);
+      } else {
+        labelSelectorSuggestions.push(...getPromqlOperatorSuggestions());
+      }
+
+      return labelSelectorSuggestions;
     }
 
-    case 'inside_query':
-      return position.canAddGrouping ? [promqlByCompleteItem] : [];
+    case 'inside_query': {
+      if (position.isAfterAggregationName) {
+        return [promqlByCompleteItem, promqlOpenParensCompleteItem];
+      }
 
-    case 'after_complete_arg':
-      return position.canSuggestCommaInFunctionArgs ? [commaCompleteItem] : [];
+      if (preGroupedAgg) {
+        return buildVectorSuggestions(
+          context,
+          getPromqlParamTypesForFunction(preGroupedAgg, 0),
+          shouldWrap
+        );
+      }
+
+      const insideQuerySuggestions: ISuggestionItem[] = [...getPromqlOperatorSuggestions()];
+
+      if (position.canAddGrouping) {
+        insideQuerySuggestions.push(promqlByCompleteItem);
+      }
+
+      return insideQuerySuggestions;
+    }
+
+    case 'after_complete_arg': {
+      const expectsRangeVector = position.signatureTypes?.includes('range_vector');
+      const completeArgSuggestions: ISuggestionItem[] = expectsRangeVector
+        ? []
+        : [...getPromqlOperatorSuggestions()];
+
+      if (position.canSuggestCommaInFunctionArgs) {
+        completeArgSuggestions.push(getCommaWithAutoSuggest());
+      }
+
+      return completeArgSuggestions;
+    }
 
     case 'after_open_paren':
     case 'inside_function_args': {
       if (position.canSuggestCommaInFunctionArgs) {
-        return [commaCompleteItem];
+        return [getCommaWithAutoSuggest()];
       }
-      const signatureTypes = position.signatureTypes ?? [];
-      const types = getMetricTypesForSignature(signatureTypes);
 
+      const signatureTypes = position.signatureTypes ?? [];
       const expectsOnlyScalar =
         signatureTypes.length > 0 && signatureTypes.every((type) => type === 'scalar');
-      const scalarValues = expectsOnlyScalar ? [buildAddValuePlaceholder('number')] : [];
 
-      const metrics = expectsOnlyScalar
-        ? []
-        : buildFieldSuggestions(context, types, needsWrappedQuery ? 'wrap' : 'plain');
+      if (expectsOnlyScalar) {
+        return [buildAddValuePlaceholder('number')];
+      }
 
-      const functions = expectsOnlyScalar
-        ? []
-        : wrapFunctionSuggestions(
-            needsWrappedQuery,
-            getPromqlFunctionSuggestionsForReturnTypes(signatureTypes)
-          );
-
-      return [...scalarValues, ...metrics, ...functions];
+      return buildVectorSuggestions(context, signatureTypes, shouldWrap);
     }
 
     case 'after_query': {
-      const suggestions: ISuggestionItem[] = [pipeCompleteItem];
+      if (position.isAfterAggregationName) {
+        return [promqlByCompleteItem, promqlOpenParensCompleteItem];
+      }
+
+      if (preGroupedAgg) {
+        return buildVectorSuggestions(
+          context,
+          getPromqlParamTypesForFunction(preGroupedAgg, 0),
+          shouldWrap
+        );
+      }
+
+      const suggestions: ISuggestionItem[] = [...getPromqlOperatorSuggestions(), pipeCompleteItem];
 
       if (position.canAddGrouping) {
         suggestions.unshift(promqlByCompleteItem);
@@ -295,13 +365,33 @@ function suggestParamValues(
     return getDateLiterals();
   }
 
-  if (param === 'step') {
+  const durationPlaceholder = {
+    ...valuePlaceholderConstant,
+    label: 'Insert duration',
+    text: '"${0:5m}"',
+    detail: 'Use units like s, m, h, d',
+  };
+
+  if (param === PromqlParamName.Step) {
+    return [durationPlaceholder];
+  }
+
+  if (param === PromqlParamName.ScrapeInterval) {
+    return [
+      {
+        ...durationPlaceholder,
+        text: '"${0:1m}"',
+      },
+    ];
+  }
+
+  if (param === PromqlParamName.Buckets) {
     return [
       {
         ...valuePlaceholderConstant,
-        label: 'Insert duration',
-        text: '"${0:5m}"',
-        detail: 'Use units like s, m, h, d',
+        label: 'Insert number of buckets',
+        text: '${0:100}',
+        detail: 'Positive integer (default: 100)',
       },
     ];
   }
@@ -313,6 +403,20 @@ function suggestParamValues(
 // Field Suggestions
 // ============================================================================
 
+function buildVectorSuggestions(
+  context: ICommandContext | undefined,
+  signatureTypes: PromQLFunctionParamType[],
+  wrap: boolean
+): ISuggestionItem[] {
+  const metricTypes = getMetricTypesForSignature(signatureTypes);
+  const functionSuggestions = getPromqlFunctionSuggestions(signatureTypes);
+
+  return [
+    ...buildFieldSuggestions(context, metricTypes, wrap ? 'wrap' : 'plain'),
+    ...wrapFunctionSuggestions(wrap, functionSuggestions),
+  ];
+}
+
 /* Wraps function suggestions in parentheses when needed for column assignment syntax. */
 function wrapFunctionSuggestions(
   wrap: boolean,
@@ -322,10 +426,14 @@ function wrapFunctionSuggestions(
     return suggestions;
   }
 
-  return suggestions.map((suggestion) => ({
-    ...suggestion,
-    text: `(${suggestion.text})`,
-  }));
+  return suggestions.map((suggestion) => {
+    const hasCursorPlaceholder = suggestion.text.includes('$0');
+    const text = hasCursorPlaceholder
+      ? `(${suggestion.text})`
+      : `(${suggestion.text.trimEnd()} $0) `;
+
+    return { ...suggestion, text };
+  });
 }
 
 function buildFieldSuggestions(

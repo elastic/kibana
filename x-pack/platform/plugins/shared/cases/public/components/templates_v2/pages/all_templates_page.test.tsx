@@ -34,6 +34,7 @@ describe('AllTemplatesPage', () => {
         lastUsedAt: '2024-01-01T00:00:00.000Z',
         usageCount: 10,
         isDefault: true,
+        fieldSearchMatches: false,
       },
       {
         templateId: 'template-2',
@@ -49,6 +50,7 @@ describe('AllTemplatesPage', () => {
         lastUsedAt: '2024-01-02T00:00:00.000Z',
         usageCount: 5,
         isDefault: false,
+        fieldSearchMatches: false,
       },
     ],
     page: 1,

@@ -12,14 +12,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
+import { SECURITY_CELL_ACTIONS_DEFAULT } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { Indicator } from '../../../../common/threat_intelligence/types/indicator';
 import { IndicatorFieldValue } from '../../../threat_intelligence/modules/indicators/components/common/field_value';
 import { unwrapValue } from '../../../threat_intelligence/modules/indicators/utils/unwrap_value';
-import {
-  CellActionsMode,
-  SecurityCellActions,
-  SecurityCellActionsTrigger,
-} from '../../../common/components/cell_actions';
+import { CellActionsMode, SecurityCellActions } from '../../../common/components/cell_actions';
 
 const euiTableSearchOptions: EuiSearchBarProps = {
   box: {
@@ -70,7 +67,7 @@ export const IndicatorFieldsTable: FC<IndicatorFieldsTableProps> = ({
             <SecurityCellActions
               data={{ field: item.key, value: item.value }}
               mode={CellActionsMode.HOVER_DOWN}
-              triggerId={SecurityCellActionsTrigger.DEFAULT}
+              triggerId={SECURITY_CELL_ACTIONS_DEFAULT}
             >
               <IndicatorFieldValue indicator={indicator} field={item.key} />
             </SecurityCellActions>
