@@ -20,7 +20,7 @@ const generalFormatError = i18n.translate(
 );
 
 const compileError = (message: string) =>
-  i18n.translate('uiActionsEnhanced.drilldowns.urlDrilldownValidation.urlCompileErrorMessage', {
+  i18n.translate('xpack.urlDrilldown.validation.urlCompileErrorMessage', {
     defaultMessage: 'The URL template is not valid in the given context. {message}.',
     values: {
       message: message.replaceAll('[object Object]', 'context'),

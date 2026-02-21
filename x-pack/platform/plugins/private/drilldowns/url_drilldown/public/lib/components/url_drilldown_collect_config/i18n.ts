@@ -10,7 +10,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const txtUrlTemplateLabel = i18n.translate(
-  'uiActionsEnhanced.drilldowns.urlDrilldownCollectConfig.urlTemplateLabel',
+  'xpack.urlDrilldown.editor.urlTemplateLabel',
   {
     defaultMessage: 'Enter URL',
   }
