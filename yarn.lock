@@ -8978,6 +8978,9 @@
   version "0.0.0"
   uid ""
 
+"@kbn/slo-flyout-types@link:x-pack/platform/packages/shared/kbn-slo-flyout-types":
+  version "0.0.0"
+  uid ""
 
 "@kbn/slo-plugin@link:x-pack/solutions/observability/plugins/slo":
   version "0.0.0"

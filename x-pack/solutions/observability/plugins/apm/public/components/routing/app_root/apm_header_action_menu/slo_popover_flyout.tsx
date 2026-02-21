@@ -8,16 +8,15 @@
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiContextMenu, EuiHeaderLink, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import React, { useCallback, useState } from 'react';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import type { ApmIndicatorType } from '../../../../../common/slo_indicator_types';
 import { APM_SLO_INDICATOR_TYPES } from '../../../../../common/slo_indicator_types';
-import type { ApmPluginStartDeps } from '../../../../plugin';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useManageSlosUrl } from '../../../../hooks/use_manage_slos_url';
 import { useServiceName } from '../../../../hooks/use_service_name';
+import { useSloFlyouts } from '../../../../hooks/use_slo_flyouts';
 
 const sloLabel = i18n.translate('xpack.apm.home.sloMenu.slosHeaderLink', {
   defaultMessage: 'SLOs',
@@ -41,7 +40,7 @@ interface Props {
 }
 
 export function SloPopoverAndFlyout({ canReadSlos, canWriteSlos }: Props) {
-  const { slo } = useKibana<ApmPluginStartDeps>().services;
+  const { CreateSLOFormFlyout } = useSloFlyouts();
   const { query } = useApmParams('/*');
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [flyoutState, setFlyoutState] = useState<{
@@ -99,25 +98,7 @@ export function SloPopoverAndFlyout({ canReadSlos, canWriteSlos }: Props) {
     },
   ];
 
-  const CreateSloFlyout =
-    flyoutState.isOpen && flyoutState.indicatorType
-      ? slo?.getCreateSLOFormFlyout({
-          initialValues: {
-            ...(serviceName && { name: `APM SLO for ${serviceName}` }),
-            indicator: {
-              type: flyoutState.indicatorType,
-              params: {
-                ...(serviceName && { service: serviceName }),
-                environment: sloEnvironment,
-              },
-            },
-          },
-          onClose: closeFlyout,
-          formSettings: {
-            allowedIndicatorTypes: [...APM_SLO_INDICATOR_TYPES],
-          },
-        })
-      : null;
+  const showCreateFlyout = flyoutState.isOpen && flyoutState.indicatorType && CreateSLOFormFlyout;
 
   return (
     <>
@@ -141,7 +122,24 @@ export function SloPopoverAndFlyout({ canReadSlos, canWriteSlos }: Props) {
       >
         <EuiContextMenu initialPanelId={0} panels={panels} />
       </EuiPopover>
-      {CreateSloFlyout}
+      {showCreateFlyout && (
+        <CreateSLOFormFlyout
+          initialValues={{
+            ...(serviceName && { name: `APM SLO for ${serviceName}` }),
+            indicator: {
+              type: flyoutState.indicatorType!,
+              params: {
+                ...(serviceName && { service: serviceName }),
+                environment: sloEnvironment,
+              },
+            },
+          }}
+          onClose={closeFlyout}
+          formSettings={{
+            allowedIndicatorTypes: [...APM_SLO_INDICATOR_TYPES],
+          }}
+        />
+      )}
     </>
   );
 }

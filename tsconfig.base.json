@@ -2254,6 +2254,8 @@
       "@kbn/sidebar-examples-plugin/*": ["examples/sidebar_examples/*"],
       "@kbn/siem-readiness": ["x-pack/solutions/security/packages/siem-readiness"],
       "@kbn/siem-readiness/*": ["x-pack/solutions/security/packages/siem-readiness/*"],
+      "@kbn/slo-flyout-types": ["x-pack/platform/packages/shared/kbn-slo-flyout-types"],
+      "@kbn/slo-flyout-types/*": ["x-pack/platform/packages/shared/kbn-slo-flyout-types/*"],
       "@kbn/slo-plugin": ["x-pack/solutions/observability/plugins/slo"],
       "@kbn/slo-plugin/*": ["x-pack/solutions/observability/plugins/slo/*"],
       "@kbn/slo-schema": ["x-pack/platform/packages/shared/kbn-slo-schema"],

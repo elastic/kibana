@@ -1,0 +1,8 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/slo-flyout-types",
+  "owner": ["@elastic/actionable-obs-team"],
+  "description": "DI service tokens and interfaces for SLO flyout factories, consumed via Global injection.",
+  "group": "platform",
+  "visibility": "shared"
+}
