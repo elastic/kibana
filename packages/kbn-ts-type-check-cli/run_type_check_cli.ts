@@ -21,6 +21,7 @@ import { archiveTSBuildArtifacts } from './src/archive/archive_ts_build_artifact
 import { restoreTSBuildArtifacts } from './src/archive/restore_ts_build_artifacts';
 import { LOCAL_CACHE_ROOT } from './src/archive/constants';
 import { isCiEnvironment } from './src/archive/utils';
+import { normalizeProjectPath } from './src/normalize_project_path';
 
 const rel = (from: string, to: string) => {
   const path = Path.relative(from, to);
@@ -133,7 +134,7 @@ run(
       log.verbose('Skipping TypeScript cache restore because --with-archive was not provided.');
     }
 
-    const projectFilter = flagsReader.path('project');
+    const projectFilter = normalizeProjectPath(flagsReader.path('project'), log);
 
     const projects = TS_PROJECTS.filter(
       (p) => !p.isTypeCheckDisabled() && (!projectFilter || p.path === projectFilter)

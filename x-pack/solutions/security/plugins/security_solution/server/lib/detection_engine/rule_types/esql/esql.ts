@@ -149,7 +149,7 @@ export const esqlExecutor = async ({
         };
         const hasLoggedRequestsReachedLimit = iteration >= 2;
 
-        ruleExecutionLogger.debug(`ES|QL query request: ${JSON.stringify(esqlRequest)}`);
+        ruleExecutionLogger.trace(`ES|QL query to execute\n${JSON.stringify(esqlRequest)}`);
         const exceptionsWarning = getUnprocessedExceptionsWarnings(unprocessedExceptions);
         if (exceptionsWarning) {
           result.warningMessages.push(exceptionsWarning);
@@ -170,8 +170,8 @@ export const esqlExecutor = async ({
         const esqlSearchDuration = performance.now() - esqlSignalSearchStart;
         result.searchAfterTimes.push(makeFloatString(esqlSearchDuration));
 
-        ruleExecutionLogger.debug(
-          `ES|QL query request for ${iteration} iteration took: ${esqlSearchDuration}ms`
+        ruleExecutionLogger.trace(
+          `ES|QL query iteration\nIteration: ${iteration}. Search took: ${esqlSearchDuration}ms.`
         );
 
         const results = response.values.map((row) => rowToDocument(response.columns, row));
@@ -239,9 +239,8 @@ export const esqlExecutor = async ({
             maxNumberOfAlertsMultiplier: 1,
           });
 
-          ruleExecutionLogger.debug(
-            `Created ${bulkCreateResult.createdItemsCount} alerts. Suppressed ${bulkCreateResult.suppressedItemsCount} alerts`
-          );
+          ruleExecutionLogger.info(`Alerts created: ${bulkCreateResult.createdItemsCount}`);
+          ruleExecutionLogger.info(`Alerts suppressed: ${bulkCreateResult.suppressedItemsCount}`);
 
           updateExcludedDocuments({
             excludedDocuments,
@@ -272,7 +271,7 @@ export const esqlExecutor = async ({
           });
 
           addToSearchAfterReturn({ current: result, next: bulkCreateResult });
-          ruleExecutionLogger.debug(`Created ${bulkCreateResult.createdItemsCount} alerts`);
+          ruleExecutionLogger.info(`Alerts created: ${bulkCreateResult.createdItemsCount}`);
 
           updateExcludedDocuments({
             excludedDocuments,
@@ -297,8 +296,8 @@ export const esqlExecutor = async ({
 
         // no more results will be found
         if (response.values.length < size) {
-          ruleExecutionLogger.debug(
-            `End of search: Found ${response.values.length} results with page size ${size}`
+          ruleExecutionLogger.trace(
+            `End of search. Found ${response.values.length} results\nPage size ${size}.`
           );
           break;
         }
