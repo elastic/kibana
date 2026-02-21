@@ -227,6 +227,14 @@ export interface Artifacts {
   };
 }
 
+/** Per-alert snooze condition (e.g. severity_equals, field_change) */
+export interface SnoozeCondition {
+  type: string;
+  field: string;
+  value?: string;
+  snapshotValue?: string;
+}
+
 export interface Rule<Params extends RuleTypeParams = never> {
   id: string;
   enabled: boolean;
@@ -252,6 +260,12 @@ export interface Rule<Params extends RuleTypeParams = never> {
   muteAll: boolean;
   notifyWhen?: RuleNotifyWhenType | null;
   mutedInstanceIds: string[];
+  snoozedInstances?: Array<{
+    instanceId: string;
+    expiresAt?: string;
+    conditions?: SnoozeCondition[];
+    conditionOperator?: 'any' | 'all';
+  }>;
   executionStatus: RuleExecutionStatus;
   monitoring?: RuleMonitoring;
   snoozeSchedule?: RuleSnooze; // Remove ? when this parameter is made available in the public API
