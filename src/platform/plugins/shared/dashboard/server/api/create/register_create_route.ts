@@ -21,17 +21,8 @@ import { throwOnUnmappedKeys } from '../scope_tooling';
 import { DASHBOARD_API_PATH } from '../../../common/constants';
 
 export function registerCreateRoute(router: VersionedRouter<RequestHandlerContext>) {
-  // deprecated route for creating a dashboard without specifying an ID. This will be removed in a future release.
-  router.post({
-    path: DASHBOARD_API_PATH,
-    summary: 'Create a dashboard',
-    ...commonRouteConfig,
-    discontinued:
-      'This endpoint is deprecated and will be removed in a future release. Please use POST /api/dashboards/{id?} instead.',
-  });
-
   const createRoute = router.post({
-    path: `${DASHBOARD_API_PATH}/{id?}`,
+    path: `${DASHBOARD_API_PATH}/:id?`,
     summary: 'Create a dashboard',
     ...commonRouteConfig,
   });
