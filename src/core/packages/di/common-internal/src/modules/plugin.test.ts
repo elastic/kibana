@@ -10,7 +10,14 @@
 import { Container } from 'inversify';
 import type { PluginOpaqueId } from '@kbn/core-base-common';
 import { OnSetup, OnStart, Setup, Start } from '@kbn/core-di';
-import { ContributedExtensionPoint, Fork, PluginModule, ProvidedService, Scope } from './plugin';
+import {
+  ContributedExtensionPoint,
+  Fork,
+  Global,
+  PluginModule,
+  ProvidedService,
+  Scope,
+} from './plugin';
 
 describe('PluginModule', () => {
   const token1 = Symbol.for('token1');
@@ -22,6 +29,10 @@ describe('PluginModule', () => {
   beforeEach(() => {
     root = new Container();
     root.loadSync(new PluginModule(root));
+  });
+
+  it('exposes the deprecated `Global` marker as an alias of `ProvidedService`', () => {
+    expect(Global).toBe(ProvidedService);
   });
 
   describe('Scope', () => {

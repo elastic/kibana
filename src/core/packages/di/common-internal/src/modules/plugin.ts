@@ -28,6 +28,13 @@ export const ContributedExtensionPoint = Symbol.for(
   'ContributedExtensionPoint'
 ) as ServiceIdentifier<ServiceIdentifier>;
 
+/**
+ * @deprecated Superseded by the more specific {@link ProvidedService},
+ * {@link HostedExtensionPoint}, and {@link ContributedExtensionPoint} markers.
+ * Retained as an alias of {@link ProvidedService} for backward compatibility.
+ */
+export const Global = ProvidedService;
+
 type ScopeFactory = (id?: PluginOpaqueId) => Container;
 
 /**

@@ -6,7 +6,7 @@
  */
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import { ProvidedService } from '@kbn/core-di-internal';
+import { Global } from '@kbn/core-di-internal';
 import { Request } from '@kbn/core-di-server';
 import type { CoreDiServiceStart } from '@kbn/core-di';
 import { resolveRequestScoped } from './resolve_request_scoped';
@@ -44,12 +44,12 @@ describe('resolveRequestScoped', () => {
     expect(scope.bind.mock.results[0].value.toConstantValue).toHaveBeenCalledWith(request);
   });
 
-  it('binds ProvidedService to the Request token to activate request scope', () => {
+  it('binds Global to the Request token to activate request scope', () => {
     const scope = createMockScope();
 
     resolveRequestScoped(createMockInjection(scope), httpServerMock.createKibanaRequest(), TOKEN);
 
-    expect(scope.bind).toHaveBeenCalledWith(ProvidedService);
+    expect(scope.bind).toHaveBeenCalledWith(Global);
     expect(scope.bind.mock.results[1].value.toConstantValue).toHaveBeenCalledWith(Request);
   });
 
