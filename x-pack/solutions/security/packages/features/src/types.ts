@@ -110,7 +110,16 @@ export interface ProductFeatureParams<
   productFeatureConfig?: ProductFeaturesConfig<K, S>;
 }
 
-export interface ConfigExtensions<C extends ProductFeaturesConfig> {
+/** Infers the key type from a ProductFeaturesConfig-like type */
+export type ProductFeaturesConfigKey<C> = C extends Partial<
+  Record<infer K, ProductFeatureKibanaConfig<string>>
+>
+  ? K
+  : never;
+
+export interface ConfigExtensions<
+  C extends ProductFeaturesConfig<ProductFeaturesConfigKey<C> & ProductFeatureKeyType>
+> {
   /** The `allVersions` is used to extend all the versions of the feature group */
   allVersions: C;
   /** The `version` object indexed by the feature `id` */

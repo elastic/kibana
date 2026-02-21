@@ -56,7 +56,7 @@ export class ProductFeatures {
       for (const featureVersion of featureGroupVersions) {
         const versionExtensions = versionsExtensions[featureVersion.baseKibanaFeature.id] ?? {};
 
-        const extendedConfig = extendProductFeatureConfigs<ProductFeatureKeyType, string>(
+        const extendedConfig = extendProductFeatureConfigs(
           featureVersion.productFeatureConfig ?? {},
           allVersionsExtensions,
           versionExtensions

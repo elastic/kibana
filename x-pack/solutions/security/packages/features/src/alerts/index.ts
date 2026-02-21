@@ -5,11 +5,12 @@
  * 2.0.
  */
 
+import type { ProductFeatureAlertsKey } from '../product_features_keys';
 import { getAlertsBaseKibanaFeature } from './kibana_features';
 import type { ProductFeatureParams } from '../types';
 import { alertsDefaultProductFeaturesConfig } from './product_feature_config';
 
-export const getAlertsFeature = (): ProductFeatureParams => ({
+export const getAlertsFeature = (): ProductFeatureParams<ProductFeatureAlertsKey, string> => ({
   baseKibanaFeature: getAlertsBaseKibanaFeature(),
   baseKibanaSubFeatureIds: [],
   subFeaturesMap: new Map(),
