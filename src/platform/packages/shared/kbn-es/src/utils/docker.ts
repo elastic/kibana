@@ -1208,7 +1208,8 @@ export async function runDockerSnapshotContainer(
   log: ToolingLog,
   options: DockerSnapshotOptions
 ): Promise<string> {
-  await setupDocker({ log, options });
+  await verifyDockerInstalled(log);
+  await maybeCreateDockerNetwork(log);
 
   const tag = options.tag || (options.version ? `${options.version}-SNAPSHOT` : DOCKER_TAG);
   const image = resolveDockerImage({
