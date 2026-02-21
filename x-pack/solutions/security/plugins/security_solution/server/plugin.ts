@@ -263,6 +263,8 @@ export class Plugin implements ISecuritySolutionPlugin {
     });
     registerSkills(agentBuilder, experimentalFeatures, {
       endpointAppContextService,
+      core,
+      ruleMonitoringService: this.ruleMonitoringService,
     }).catch((error) => {
       this.logger.error(`Error registering security skills: ${error}`);
     });
