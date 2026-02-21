@@ -198,7 +198,7 @@ export const CreateAttackDiscoveryAlertsParams = z.object({
   anonymizedAlerts: z.array(
     z.object({
       id: z.string().optional(),
-      metadata: z.object({}),
+      metadata: z.record(z.string(), z.unknown()),
       pageContent: z.string(),
     })
   ),
