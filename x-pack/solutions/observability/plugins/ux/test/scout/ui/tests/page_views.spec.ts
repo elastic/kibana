@@ -9,6 +9,7 @@ import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../fixtures';
 
+// This journey was commented out in the original synthetics index.ts but the test code is valid
 test.describe('Page Views Chart', { tag: tags.stateful.classic }, () => {
   test('displays page views with browser breakdown', async ({ pageObjects, page, browserAuth }) => {
     await test.step('Navigate to UX Dashboard', async () => {
@@ -18,36 +19,35 @@ test.describe('Page Views Chart', { tag: tags.stateful.classic }, () => {
     });
 
     await test.step('Select browser breakdown', async () => {
-      const breakdownButton = page.locator(
-        'text=Total page viewsSelect an option: No breakdown, is selectedNo breakdown >> button'
-      );
-      await breakdownButton.click();
+      await pageObjects.uxDashboard.waitForChartData();
+      await page.testSubj.click('pvBreakdownFilter');
       await page.locator('button[role="option"]:has-text("Browser")').click();
     });
 
     await test.step('Verify browser breakdown values', async () => {
-      await expect(page.getByText('Chrome')).toBeVisible();
-      await expect(page.getByText('Chrome Mobile iOS')).toBeVisible();
-      await expect(page.getByText('Edge')).toBeVisible();
-      await expect(page.getByText('Safari')).toBeVisible();
-      await expect(page.getByText('Firefox')).toBeVisible();
+      await expect(page.getByText('Chrome', { exact: true })).toBeVisible();
+      await expect(page.getByText('Chrome Mobile iOS', { exact: true })).toBeVisible();
+      await expect(page.getByText('Edge', { exact: true })).toBeVisible();
+      await expect(page.getByText('Safari', { exact: true })).toBeVisible();
+      await expect(page.getByText('Firefox', { exact: true })).toBeVisible();
     });
 
     await test.step('Navigate to exploratory view', async () => {
       await page.hover('text=Firefox');
-      await page.testSubj.click('embeddablePanelToggleMenuIcon');
+      await pageObjects.uxDashboard.embeddablePanelMenuIcon('.pageViewsChart').click();
       await page.testSubj.click('embeddablePanelAction-expViewExplore');
       await page.waitForURL(/exploratory-view/);
     });
 
     await test.step('Verify chart in exploratory view', async () => {
+      await pageObjects.uxDashboard.waitForChartData();
       await expect(page.getByText('User experience (RUM)')).toBeVisible();
       await expect(page.getByText('Page views')).toBeVisible();
-      await expect(page.getByText('Chrome')).toBeVisible();
-      await expect(page.getByText('Chrome Mobile iOS')).toBeVisible();
-      await expect(page.getByText('Edge')).toBeVisible();
-      await expect(page.getByText('Safari')).toBeVisible();
-      await expect(page.getByText('Firefox')).toBeVisible();
+      await expect(page.getByText('Chrome', { exact: true })).toBeVisible();
+      await expect(page.getByText('Chrome Mobile iOS', { exact: true })).toBeVisible();
+      await expect(page.getByText('Edge', { exact: true })).toBeVisible();
+      await expect(page.getByText('Safari', { exact: true })).toBeVisible();
+      await expect(page.getByText('Firefox', { exact: true })).toBeVisible();
     });
   });
 });

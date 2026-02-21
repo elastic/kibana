@@ -18,6 +18,15 @@ export class UxDashboardPage {
 
   async waitForLoadingToFinish(): Promise<void> {
     await this.page.testSubj.locator('kbnLoadingMessage').waitFor({ state: 'hidden' });
+    await this.page.waitForLoadingIndicatorHidden();
+  }
+
+  async waitForChartData(): Promise<void> {
+    await this.page.waitForFunction(
+      () => document.querySelectorAll('.euiLoadingChart').length === 0,
+      null,
+      { timeout: 30000 }
+    );
   }
 
   async scrollToBottom(): Promise<void> {
@@ -26,5 +35,11 @@ export class UxDashboardPage {
 
   lensEmbeddableLocator(dataTestId: string) {
     return this.page.locator(`[data-test-embeddable-id="${dataTestId}"]`);
+  }
+
+  embeddablePanelMenuIcon(containerSelector: string) {
+    return this.page.locator(
+      `${containerSelector} [data-test-subj="embeddablePanelToggleMenuIcon"]`
+    );
   }
 }

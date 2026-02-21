@@ -18,6 +18,7 @@ test.describe('UX Client Metrics', { tag: tags.stateful.classic }, () => {
     });
 
     await test.step('Confirm metrics values', async () => {
+      await pageObjects.uxDashboard.waitForChartData();
       await expect(page.testSubj.locator('uxClientMetrics-totalPageLoad')).toContainText('Total');
       await expect(page.testSubj.locator('uxClientMetrics-totalPageLoad')).toContainText('4.24 s');
 

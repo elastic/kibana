@@ -130,8 +130,24 @@ function getPageExitDocument(inpValue: number = 200) {
 
 async function indexInpTestData(esClient: any) {
   const index = 'apm-8.0.0-transaction-000001';
-  const pageLoadDoc = getPageLoadDocument();
 
+  const { count } = await esClient.count({
+    index,
+    query: {
+      bool: {
+        must: [
+          { term: { 'transaction.type': 'page-exit' } },
+          { exists: { field: 'numeric_labels.inp_value' } },
+        ],
+      },
+    },
+  });
+
+  if (count > 0) {
+    return;
+  }
+
+  const pageLoadDoc = getPageLoadDocument();
   await esClient.index({ index, document: pageLoadDoc });
   for (const inpValue of INP_VALUES) {
     await esClient.index({ index, document: getPageExitDocument(inpValue) });

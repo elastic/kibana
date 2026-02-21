@@ -19,7 +19,7 @@ test.describe('Core Web Vitals', { tag: tags.stateful.classic }, () => {
 
     await test.step('Check Core Web Vitals labels', async () => {
       await expect(page.getByText('Largest contentful paint')).toBeVisible();
-      await expect(page.getByText('First input delay')).toBeVisible();
+      await expect(page.getByText('Interaction to next paint')).toBeVisible();
       await expect(page.getByText('Cumulative layout shift')).toBeVisible();
     });
 

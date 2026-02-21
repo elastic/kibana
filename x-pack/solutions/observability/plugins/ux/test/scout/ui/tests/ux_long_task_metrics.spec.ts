@@ -18,6 +18,7 @@ test.describe('UX Long Task Metrics', { tag: tags.stateful.classic }, () => {
     });
 
     await test.step('Confirm long task metrics values', async () => {
+      await pageObjects.uxDashboard.waitForChartData();
       const longestTask = page.testSubj.locator('uxLongestTask');
       await expect(longestTask).toContainText('Longest long task duration');
       await expect(longestTask).toContainText('237 ms');
