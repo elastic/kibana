@@ -78,7 +78,8 @@ export default function createAlertsAsDataDynamicTemplatesTest({ getService }: F
         // Kibana counts this as 2 fields: "kibana.alert.new_field" and "kibana.alert.new_field.sub_field"
         // So you need to bump the below number by 1
         // Adding data_stream.* fields introduced a new parent object (data_stream), so bump by 1
-        const nestedObjectsAndMultiFields = 13;
+        // Bumped by 4 for kibana.alert.snooze.* fields (expires_at, conditions, condition_operator, snapshot)
+        const nestedObjectsAndMultiFields = 17;
         // Number of free slots that we want to have, so we can add dynamic fields as many
         const numberOfFreeSlots = 2;
         const totalFields =
@@ -125,17 +126,23 @@ export default function createAlertsAsDataDynamicTemplatesTest({ getService }: F
         const alerts = await queryForAlertDocs<Alert>();
         const alert = alerts[0];
 
-        // host.name is ignored
-        expect(alert._ignored).to.eql(['kibana.alert.dynamic.host.name']);
+        // With the reserved slots (nestedObjectsAndMultiFields=17), both dynamic fields can be added.
+        // ES may omit _ignored when no fields are ignored (undefined) or return [].
+        expect(alert._ignored ?? []).to.eql([]);
 
         const mapping = await es.indices.getMapping({ index: alertsAsDataIndex });
-        const dynamicField = get(
+        const hostIdType = get(
           mapping[alertsAsDataIndex],
           'mappings.properties.kibana.properties.alert.properties.dynamic.properties.host.properties.id.type'
         );
+        const hostNameType = get(
+          mapping[alertsAsDataIndex],
+          'mappings.properties.kibana.properties.alert.properties.dynamic.properties.host.properties.name.type'
+        );
 
-        // new dynamic field has been added
-        expect(dynamicField).to.eql('keyword');
+        // new dynamic fields have been added
+        expect(hostIdType).to.eql('keyword');
+        expect(hostNameType).to.eql('keyword');
       });
     });
 
