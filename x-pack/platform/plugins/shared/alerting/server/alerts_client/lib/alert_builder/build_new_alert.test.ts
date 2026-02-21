@@ -511,9 +511,12 @@ describe('buildNewAlert', () => {
         rule: alertRule,
         ruleData: {
           ...ruleData,
-          snoozedInstances: {
-            'alert-A': { expiresAt: new Date(Date.now() + 3600000).toISOString() },
-          },
+          snoozedInstances: [
+            {
+              instanceId: 'alert-A',
+              expiresAt: new Date(Date.now() + 3600000).toISOString(),
+            },
+          ],
         },
         timestamp: '2023-03-28T12:27:28.159Z',
         kibanaVersion: '8.9.0',

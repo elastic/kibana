@@ -19,5 +19,5 @@ export function getAlertMutedStatus(
     return true;
   }
 
-  return alertInstanceId in (ruleData.snoozedInstances ?? {});
+  return (ruleData.snoozedInstances ?? []).some((e) => e.instanceId === alertInstanceId);
 }

@@ -32,6 +32,7 @@ export type RuleData<Params extends RuleTypeParams> = Pick<
   | 'params'
   | 'muteAll'
   | 'mutedInstanceIds'
+  | 'snoozedInstances'
 >;
 
 interface InitializeAlertsClientOpts<Params extends RuleTypeParams> {
@@ -112,6 +113,7 @@ export const initializeAlertsClient = async <
           alertDelay: rule.alertDelay?.active ?? 0,
           muteAll: rule.muteAll,
           mutedInstanceIds: rule.mutedInstanceIds,
+          snoozedInstances: rule.snoozedInstances,
         },
       })) ?? null;
 

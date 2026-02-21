@@ -1095,9 +1095,12 @@ for (const flattened of [true, false]) {
           rule: alertRule,
           ruleData: {
             ...ruleData,
-            snoozedInstances: {
-              'alert-A': { expiresAt: new Date(Date.now() + 3600000).toISOString() },
-            },
+            snoozedInstances: [
+              {
+                instanceId: 'alert-A',
+                expiresAt: new Date(Date.now() + 3600000).toISOString(),
+              },
+            ],
           },
           isImproving: null,
           timestamp: '2023-03-28T12:27:28.159Z',
@@ -1110,9 +1113,12 @@ for (const flattened of [true, false]) {
       test('should keep ALERT_MUTED true across consecutive ongoing updates when in snoozedInstances', () => {
         const snoozedRuleData = {
           ...ruleData,
-          snoozedInstances: {
-            'alert-A': { expiresAt: new Date(Date.now() + 3600000).toISOString() },
-          },
+          snoozedInstances: [
+            {
+              instanceId: 'alert-A',
+              expiresAt: new Date(Date.now() + 3600000).toISOString(),
+            },
+          ],
         };
         const firstLegacyAlert = new LegacyAlert<{}, {}, 'default'>('alert-A');
         firstLegacyAlert.scheduleActions('default');

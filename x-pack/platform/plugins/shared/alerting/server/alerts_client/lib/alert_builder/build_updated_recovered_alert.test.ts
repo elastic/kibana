@@ -31,7 +31,6 @@ import {
   ALERT_PREVIOUS_ACTION_GROUP,
   ALERT_RULE_EXECUTION_UUID,
 } from '@kbn/rule-data-utils';
-import type { Alert } from '@kbn/alerts-as-data-utils';
 import {
   alertRule,
   existingFlattenedRecoveredAlert,

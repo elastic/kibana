@@ -45,31 +45,32 @@ describe('getAlertMutedStatus', () => {
 
   test('should return true when alertInstanceId is in snoozedInstances (time-only)', () => {
     const ruleData = createMockRuleData({
-      snoozedInstances: {
-        'alert-1': { expiresAt: new Date(Date.now() + 60_000).toISOString() },
-      },
+      snoozedInstances: [
+        { instanceId: 'alert-1', expiresAt: new Date(Date.now() + 60_000).toISOString() },
+      ],
     });
     expect(getAlertMutedStatus('alert-1', ruleData)).toBe(true);
   });
 
   test('should return true when alertInstanceId is in snoozedInstances (condition-based)', () => {
     const ruleData = createMockRuleData({
-      snoozedInstances: {
-        'alert-1': {
+      snoozedInstances: [
+        {
+          instanceId: 'alert-1',
           conditions: [
             { type: 'field_change', field: 'kibana.alert.severity', snapshotValue: 'critical' },
           ],
         },
-      },
+      ],
     });
     expect(getAlertMutedStatus('alert-1', ruleData)).toBe(true);
   });
 
   test('should return false when a different alertInstanceId is in snoozedInstances', () => {
     const ruleData = createMockRuleData({
-      snoozedInstances: {
-        'alert-2': { expiresAt: new Date(Date.now() + 60_000).toISOString() },
-      },
+      snoozedInstances: [
+        { instanceId: 'alert-2', expiresAt: new Date(Date.now() + 60_000).toISOString() },
+      ],
     });
     expect(getAlertMutedStatus('alert-1', ruleData)).toBe(false);
   });
@@ -85,9 +86,9 @@ describe('getAlertMutedStatus', () => {
   test('should return true when alert is in both mutedInstanceIds and snoozedInstances', () => {
     const ruleData = createMockRuleData({
       mutedInstanceIds: ['alert-1'],
-      snoozedInstances: {
-        'alert-1': { expiresAt: new Date(Date.now() + 60_000).toISOString() },
-      },
+      snoozedInstances: [
+        { instanceId: 'alert-1', expiresAt: new Date(Date.now() + 60_000).toISOString() },
+      ],
     });
     expect(getAlertMutedStatus('alert-1', ruleData)).toBe(true);
   });
