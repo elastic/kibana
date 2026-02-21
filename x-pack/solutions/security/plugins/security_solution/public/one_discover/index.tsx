@@ -6,4 +6,4 @@
  */
 
 export { getCellRendererForGivenRecord } from './cell_renderers';
-export { getAlertFlyoutOverviewTabComponent } from './alert_flyout_overview_tab_component';
+export { AlertFlyoutOverviewTab } from './alert_flyout_overview_tab_component';

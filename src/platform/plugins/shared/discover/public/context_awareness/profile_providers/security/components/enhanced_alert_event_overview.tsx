@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useState } from 'react';
 import type { DocViewerComponent } from '@kbn/unified-doc-viewer/types';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 
@@ -23,31 +22,6 @@ export const EnhancedAlertEventOverview: DocViewerComponent = ({ hit }) => {
     'security-solution-alert-flyout-overview-tab'
   );
 
-  const [AlertFlyoutOverviewTab, setAlertFlyoutOverviewTab] = useState<(() => JSX.Element) | null>(
-    null
-  );
-
-  useEffect(() => {
-    let isMounted = true;
-
-    const load = async () => {
-      const render = alertFlyoutOverviewTabFeature?.render;
-      if (!render) return;
-
-      const component = await render(hit);
-      if (!isMounted) return;
-
-      setAlertFlyoutOverviewTab(() => component);
-    };
-
-    load();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [alertFlyoutOverviewTabFeature, hit]);
-
-  if (!AlertFlyoutOverviewTab) return null;
-
-  return <AlertFlyoutOverviewTab />;
+  const render = alertFlyoutOverviewTabFeature?.render;
+  return render ? render(hit) : null;
 };

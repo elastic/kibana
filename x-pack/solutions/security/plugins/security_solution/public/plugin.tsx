@@ -301,12 +301,18 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     };
     discoverFeatureRegistry.register(cellRendererFeature);
 
+    const LazyAlertFlyoutOverviewTab = React.lazy(async () => {
+      const { AlertFlyoutOverviewTab } = await this.getLazyDiscoverSharedDeps();
+      return { default: AlertFlyoutOverviewTab };
+    });
+
     const alertFlyoutOverviewTabFeature: SecuritySolutionAlertFlyoutOverviewTabFeature = {
       id: 'security-solution-alert-flyout-overview-tab',
-      render: async (hit) => {
-        const { getAlertFlyoutOverviewTabComponent } = await this.getLazyDiscoverSharedDeps();
-        return () => getAlertFlyoutOverviewTabComponent(hit);
-      },
+      render: (hit) => (
+        <React.Suspense fallback={null}>
+          <LazyAlertFlyoutOverviewTab hit={hit} />
+        </React.Suspense>
+      ),
     };
     discoverFeatureRegistry.register(alertFlyoutOverviewTabFeature);
   }

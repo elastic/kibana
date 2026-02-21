@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { memo } from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { OverviewTab } from '../../flyout_v2/document/tabs/overview_tab';
 
-export const getAlertFlyoutOverviewTabComponent = (hit: DataTableRecord) => {
+export const AlertFlyoutOverviewTab = memo(({ hit }: { hit: DataTableRecord }) => {
   return <OverviewTab hit={hit} />;
-};
+});
+
+AlertFlyoutOverviewTab.displayName = 'AlertFlyoutOverviewTab';

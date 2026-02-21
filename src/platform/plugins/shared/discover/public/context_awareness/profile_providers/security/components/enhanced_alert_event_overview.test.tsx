@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { act, render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -31,7 +31,7 @@ const hit = createMockHit({
 
 describe('EnhancedAlertEventOverview', () => {
   it('renders the security solution overview tab feature', async () => {
-    const renderFeature = jest.fn().mockResolvedValue(() => <div>OverviewTab</div>);
+    const renderFeature = jest.fn().mockReturnValue(<div>OverviewTab</div>);
     const mockDiscoverServices = {
       discoverShared: {
         features: {
@@ -54,9 +54,6 @@ describe('EnhancedAlertEventOverview', () => {
     );
 
     await waitFor(() => expect(renderFeature).toHaveBeenCalledWith(hit));
-    await act(async () => {
-      await renderFeature.mock.results[0].value;
-    });
 
     expect(screen.getByText('OverviewTab')).toBeInTheDocument();
   });

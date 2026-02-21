@@ -121,7 +121,7 @@ export interface SecuritySolutionAppWrapperFeature {
 
 export interface SecuritySolutionAlertFlyoutOverviewTabFeature {
   id: 'security-solution-alert-flyout-overview-tab';
-  render: (hit: DataTableRecord) => Promise<() => JSX.Element>;
+  render: (hit: DataTableRecord) => JSX.Element;
 }
 
 export type SecuritySolutionFeature =
