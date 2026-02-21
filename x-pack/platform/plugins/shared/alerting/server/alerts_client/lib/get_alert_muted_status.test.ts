@@ -81,4 +81,14 @@ describe('getAlertMutedStatus', () => {
     });
     expect(getAlertMutedStatus('alert-1', ruleData)).toBe(true);
   });
+
+  test('should return true when alert is in both mutedInstanceIds and snoozedInstances', () => {
+    const ruleData = createMockRuleData({
+      mutedInstanceIds: ['alert-1'],
+      snoozedInstances: {
+        'alert-1': { expiresAt: new Date(Date.now() + 60_000).toISOString() },
+      },
+    });
+    expect(getAlertMutedStatus('alert-1', ruleData)).toBe(true);
+  });
 });

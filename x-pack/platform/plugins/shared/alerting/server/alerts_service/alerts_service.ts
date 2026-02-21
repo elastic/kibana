@@ -689,9 +689,10 @@ export class AlertsService implements IAlertsService {
   }
 
   /**
-   * Writes snooze configuration fields to the alert ES document.
-   * This stores conditions, expiry, and snapshot data directly on
-   * the alert-as-data document so the task runner can evaluate them.
+   * Materializes snooze state on the alert ES document by setting
+   * ALERT_MUTED=true and writing snooze fields for visibility/debugging.
+   * The durable source of truth is rule SO snoozedInstances; this doc
+   * write enables query-time filtering (e.g. summarized alert exclusion).
    */
   public async snoozeAlertInstance({
     ruleId,

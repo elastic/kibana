@@ -35,8 +35,6 @@ import {
   ALERT_SEVERITY_IMPROVING,
   ALERT_PREVIOUS_ACTION_GROUP,
   ALERT_PENDING_RECOVERED_COUNT,
-  ALERT_SNOOZE_CONDITIONS,
-  ALERT_SNOOZE_EXPIRES_AT,
 } from '@kbn/rule-data-utils';
 import { alertRule, existingFlattenedNewAlert, existingExpandedNewAlert } from '../test_fixtures';
 
