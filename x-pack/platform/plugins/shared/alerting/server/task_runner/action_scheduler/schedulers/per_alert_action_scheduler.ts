@@ -5,10 +5,13 @@
  * 2.0.
  */
 
+import { compact } from 'lodash';
 import type { AlertInstanceState, AlertInstanceContext } from '@kbn/alerting-state-types';
 import type { RuleAction, RuleTypeParams } from '@kbn/alerting-types';
 import { RuleNotifyWhen } from '@kbn/alerting-types';
-import { compact } from 'lodash';
+import { evaluateSnoozeConditions } from '../../../lib/snooze';
+import type { AlertSnoozeConfig } from '../../../lib/snooze';
+import type { SnoozedInstanceConfig } from '../../../alerts_client/types';
 import type { RuleTypeState, RuleAlertData } from '../../../../common';
 import { parseDuration } from '../../../../common';
 import type { GetSummarizedAlertsParams } from '../../../alerts_client/types';
@@ -28,6 +31,7 @@ import type {
   ActionSchedulerOptions,
   ActionsToSchedule,
   AddSummarizedAlertsOpts,
+  AlertToAutoUnmute,
   GetActionsToScheduleOpts,
   HelperOpts,
   IActionScheduler,
@@ -58,8 +62,12 @@ export class PerAlertActionScheduler<
 {
   private actions: RuleAction[] = [];
   private mutedAlertIdsSet: Set<string> = new Set();
+  private snoozedInstancesMap: Record<string, SnoozedInstanceConfig> = {};
   private ruleTypeActionGroups?: Map<ActionGroupIds | RecoveryActionGroupId, string>;
   private skippedAlerts: { [key: string]: { reason: string } } = {};
+
+  /** Alert instance IDs whose snooze conditions were met during this run and should be auto-unmuted. */
+  public alertsToAutoUnmute: AlertToAutoUnmute[] = [];
 
   constructor(
     private readonly context: ActionSchedulerOptions<
@@ -77,6 +85,17 @@ export class PerAlertActionScheduler<
       context.ruleType.actionGroups.map((actionGroup) => [actionGroup.id, actionGroup.name])
     );
     this.mutedAlertIdsSet = new Set(context.rule.mutedInstanceIds);
+    this.snoozedInstancesMap = (context.rule.snoozedInstances ?? []).reduce(
+      (acc, e) => {
+        acc[e.instanceId] = {
+          expiresAt: e.expiresAt,
+          conditions: e.conditions,
+          conditionOperator: e.conditionOperator,
+        };
+        return acc;
+      },
+      {} as Record<string, SnoozedInstanceConfig>
+    );
 
     const canGetSummarizedAlerts =
       !!context.ruleType.alerts && !!context.alertsClient.getSummarizedAlerts;
@@ -103,6 +122,10 @@ export class PerAlertActionScheduler<
     return 2;
   }
 
+  public getAlertsToAutoUnmute(): AlertToAutoUnmute[] {
+    return this.alertsToAutoUnmute;
+  }
+
   public async getActionsToSchedule({
     activeAlerts,
     recoveredAlerts,
@@ -117,6 +140,15 @@ export class PerAlertActionScheduler<
 
     const activeAlertsArray = Object.values(activeAlerts || {});
     const recoveredAlertsArray = Object.values(recoveredAlerts || {});
+
+    // Evaluate per-alert snooze expiry and populate alertsToAutoUnmute even when the rule
+    // has no actions, so auto-unsnooze runs regardless of action count.
+    for (const alert of activeAlertsArray) {
+      this.evaluateAlertForAutoUnmute(alert);
+    }
+    for (const alert of recoveredAlertsArray) {
+      this.evaluateAlertForAutoUnmute(alert);
+    }
 
     for (const action of this.actions) {
       let summarizedAlerts = null;
@@ -360,24 +392,115 @@ export class PerAlertActionScheduler<
     return actionGroup === this.context.ruleType.recoveryActionGroup.id;
   }
 
+  /**
+   * Evaluates whether an alert's per-alert snooze (snoozedInstances entry) has expired
+   * and should be auto-unmuted. Returns null if the alert has no snooze config.
+   */
+  private evaluateSnoozeForAlert(
+    alertId: string
+  ): { shouldUnmute: boolean; reason?: string } | null {
+    const snoozeInstanceConfig = this.snoozedInstancesMap[alertId];
+    if (!snoozeInstanceConfig) {
+      return null;
+    }
+
+    const snoozeConfig: AlertSnoozeConfig = {
+      expiresAt: snoozeInstanceConfig.expiresAt,
+      conditions: snoozeInstanceConfig.conditions as AlertSnoozeConfig['conditions'],
+      conditionOperator: snoozeInstanceConfig.conditionOperator,
+    };
+
+    const alertData =
+      (this.context.alertsClient.getBuiltAlertByInstanceId?.(alertId) as
+        | Record<string, unknown>
+        | undefined) ??
+      (this.context.alertsClient.getTrackedAlertByInstanceId?.(alertId) as
+        | Record<string, unknown>
+        | undefined) ??
+      {};
+    const evalResult = evaluateSnoozeConditions(snoozeConfig, alertData);
+    return {
+      shouldUnmute: evalResult.shouldUnmute,
+      reason: evalResult.reason ?? 'conditions met',
+    };
+  }
+
+  /**
+   * Evaluates whether an alert's per-alert snooze has expired and should be auto-unmuted.
+   * Populates alertsToAutoUnmute so the task runner can clear the rule SO and AAD doc
+   * even when the rule has no actions.
+   */
+  private evaluateAlertForAutoUnmute(
+    alert: Alert<
+      AlertInstanceState,
+      AlertInstanceContext,
+      ActionGroupIds | RecoveryActionGroupId
+    >
+  ): void {
+    const alertId = alert.getId();
+    const result = this.evaluateSnoozeForAlert(alertId);
+    if (!result?.shouldUnmute) {
+      return;
+    }
+    if (!this.alertsToAutoUnmute.some((a) => a.alertInstanceId === alertId)) {
+      this.alertsToAutoUnmute.push({
+        alertInstanceId: alertId,
+        reason: result.reason ?? 'conditions met',
+      });
+      this.context.logger.debug(
+        `auto-unmuting alert '${alertId}' in rule ${this.context.ruleLabel}: ${result.reason}`
+      );
+    }
+  }
+
   private isAlertMuted(
     alert: Alert<AlertInstanceState, AlertInstanceContext, ActionGroupIds | RecoveryActionGroupId>
   ) {
     const alertId = alert.getId();
-    const muted = this.mutedAlertIdsSet.has(alertId);
-    if (muted) {
-      if (
-        !this.skippedAlerts[alertId] ||
-        (this.skippedAlerts[alertId] && this.skippedAlerts[alertId].reason !== Reasons.MUTED)
-      ) {
+
+    // Path 1: Simple mute via rule SO's mutedInstanceIds.
+    if (this.mutedAlertIdsSet.has(alertId)) {
+      return this.markAlertAsMuted(alertId);
+    }
+
+    // Path 2: Conditional snooze from rule SO snoozedInstances (durable store).
+    // Skip re-evaluation if already in alertsToAutoUnmute (e.g. from initial pass).
+    if (this.alertsToAutoUnmute.some((a) => a.alertInstanceId === alertId)) {
+      return false;
+    }
+
+    const result = this.evaluateSnoozeForAlert(alertId);
+    if (!result) {
+      return false;
+    }
+    if (result.shouldUnmute) {
+      if (!this.alertsToAutoUnmute.some((a) => a.alertInstanceId === alertId)) {
+        this.alertsToAutoUnmute.push({
+          alertInstanceId: alertId,
+          reason: result.reason ?? 'conditions met',
+        });
         this.context.logger.debug(
-          `skipping scheduling of actions for '${alertId}' in rule ${this.context.ruleLabel}: rule is muted`
+          `auto-unmuting alert '${alertId}' in rule ${this.context.ruleLabel}: ${result.reason}`
         );
       }
-      this.skippedAlerts[alertId] = { reason: Reasons.MUTED };
-      return true;
+      return false;
     }
-    return false;
+
+    // Conditional snooze not yet met -- suppress actions
+    return this.markAlertAsMuted(alertId);
+  }
+
+  private markAlertAsMuted(alertId: string): true {
+    if (
+      !this.skippedAlerts[alertId] ||
+      (this.skippedAlerts[alertId] && this.skippedAlerts[alertId].reason !== Reasons.MUTED)
+    ) {
+      this.context.logger.debug(
+        `skipping scheduling of actions for '${alertId}' in rule ${this.context.ruleLabel}: alert is muted`
+      );
+    }
+    this.skippedAlerts[alertId] = { reason: Reasons.MUTED };
+    return true;
   }
 
   private isAlertDelayed(

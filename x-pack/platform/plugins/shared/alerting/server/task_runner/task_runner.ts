@@ -13,6 +13,7 @@ import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { nanosToMillis } from '@kbn/event-log-plugin/server';
 import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common';
 import { ActionScheduler, type RunResult } from './action_scheduler';
+
 import type {
   RuleRunnerErrorStackTraceLog,
   RuleTaskInstance,
@@ -417,6 +418,7 @@ export class TaskRunner<
     });
 
     let actionSchedulerResult: RunResult = { throttledSummaryActions: {} };
+    let alertsToAutoUnmute: Array<{ alertInstanceId: string; reason: string }> = [];
 
     await withAlertingSpan('alerting:schedule-actions', () =>
       this.timer.runWithTimer(TaskRunnerTimerSpan.TriggerActions, async () => {
@@ -432,6 +434,8 @@ export class TaskRunner<
             activeAlerts: alertsClient.getProcessedAlerts('active'),
             recoveredAlerts: alertsClient.getProcessedAlerts('recovered'),
           });
+
+          alertsToAutoUnmute = actionScheduler.getAlertsToAutoUnmute();
         }
       })
     );
@@ -450,12 +454,50 @@ export class TaskRunner<
         alertsClient.getAlertsToUpdateWithLastScheduledActions();
     }
 
+    // Auto-unmute: remove from snoozedInstances on the rule SO and clear
+    // ALERT_MUTED on the AAD docs in the same execution.
+    const alertUuidsToAutoUnmute: string[] = [];
+    if (alertsToAutoUnmute.length > 0) {
+      const autoUnmuteInstanceIds = new Set(
+        alertsToAutoUnmute.map((a) => a.alertInstanceId)
+      );
+      const updatedSnoozedInstances = (rule.snoozedInstances ?? []).filter(
+        (e) => !autoUnmuteInstanceIds.has(e.instanceId)
+      );
+      for (const { alertInstanceId, reason } of alertsToAutoUnmute) {
+        const uuid = alertsToReturn[alertInstanceId]?.meta?.uuid;
+        if (uuid) {
+          alertUuidsToAutoUnmute.push(uuid);
+        }
+        this.logger.info(
+          `Auto-unmuting alert '${alertInstanceId}' for rule '${rule.id}': ${reason}`
+        );
+        this.alertingEventLogger.logAlert({
+          action: 'auto-unsnooze',
+          id: alertInstanceId,
+          uuid: uuid ?? alertInstanceId,
+          message: `${ruleLabel} auto-unsnoozed alert '${alertInstanceId}': ${reason}`,
+          flapping: false,
+        });
+      }
+
+      try {
+        const esClient = this.context.elasticsearch.client.asInternalUser;
+        await partiallyUpdateRuleWithEs(esClient, rule.id, {
+          snoozedInstances: updatedSnoozedInstances,
+        });
+      } catch (err) {
+        this.logger.error(`Error updating snoozedInstances for rule '${rule.id}': ${err.message}`);
+      }
+    }
+
     if (this.shouldLogAndScheduleActionsForAlerts()) {
       await withAlertingSpan('alerting:update-alerts', () =>
         this.timer.runWithTimer(TaskRunnerTimerSpan.UpdateAlerts, async () => {
           await alertsClient.updatePersistedAlerts({
             alertsToUpdateWithLastScheduledActions,
             alertsToUpdateWithMaintenanceWindows,
+            alertUuidsToAutoUnmute,
           });
         })
       );
