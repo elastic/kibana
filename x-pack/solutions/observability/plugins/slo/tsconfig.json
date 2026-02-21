@@ -10,12 +10,15 @@
     "test/scout*/**/*",
     "../../../../typings/**/*"
   ],
-  "exclude": ["target/**/*"],
+  "exclude": [
+    "target/**/*"
+  ],
   "kbn_references": [
     "@kbn/i18n",
     "@kbn/i18n-react",
     "@kbn/shared-ux-router",
     "@kbn/core",
+    "@kbn/plugin-di",
     "@kbn/rule-data-utils",
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/observability-plugin",
@@ -26,6 +29,7 @@
     "@kbn/slo-schema",
     "@kbn/zod",
     "@kbn/slo-shared-plugin",
+    "@kbn/slo-flyout-types",
     "@kbn/alerting-plugin",
     "@kbn/rison",
     "@kbn/embeddable-plugin",

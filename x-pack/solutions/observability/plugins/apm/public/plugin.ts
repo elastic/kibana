@@ -84,7 +84,6 @@ import type {
   DiscoverSharedPublicStart,
 } from '@kbn/discover-shared-plugin/public';
 import type { KqlPluginSetup, KqlPluginStart } from '@kbn/kql/public';
-import type { SLOPublicStart } from '@kbn/slo-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
 import type { ICPSManager } from '@kbn/cps-utils';
 import { ProjectRoutingAccess } from '@kbn/cps-utils';
@@ -193,7 +192,6 @@ export interface ApmPluginStartDeps {
   discoverShared: DiscoverSharedPublicStart;
   agentBuilder?: AgentBuilderPluginStart;
   observabilityAgentBuilder?: ObservabilityAgentBuilderPluginPublicStart;
-  slo?: SLOPublicStart;
   cps?: CPSPluginStart;
 }
 

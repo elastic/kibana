@@ -170,6 +170,8 @@ dependsOn:
   - '@kbn/apm-types-shared'
   - '@kbn/apm-common'
   - '@kbn/storybook'
+  - '@kbn/slo-flyout-types'
+  - '@kbn/core-di'
 tags:
   - plugin
   - prod
