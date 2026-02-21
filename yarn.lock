@@ -9304,10 +9304,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ui-actions-enhanced-plugin@link:src/platform/plugins/shared/ui_actions_enhanced":
-  version "0.0.0"
-  uid ""
-
 "@kbn/ui-actions-plugin@link:src/platform/plugins/shared/ui_actions":
   version "0.0.0"
   uid ""
