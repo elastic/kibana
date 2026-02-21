@@ -22,7 +22,7 @@ import { DASHBOARD_API_PATH } from '../../../common/constants';
 
 export function registerCreateRoute(router: VersionedRouter<RequestHandlerContext>) {
   const createRoute = router.post({
-    path: `${DASHBOARD_API_PATH}/:id?`,
+    path: `${DASHBOARD_API_PATH}/{id?}`,
     summary: 'Create a dashboard',
     ...commonRouteConfig,
   });

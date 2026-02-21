@@ -77,7 +77,7 @@ apiTest.describe('dashboards - create', { tag: tags.deploymentAgnostic }, () => 
     const title = `foo-${Date.now()}-${Math.random()}`;
     const spaceId = 'space-1';
 
-    const response = await apiClient.post(`/s/${spaceId}/${DASHBOARD_API_PATH}`, {
+    const response = await apiClient.post(`s/${spaceId}/${DASHBOARD_API_PATH}`, {
       headers: {
         ...COMMON_HEADERS,
         ...editorCredentials.apiKeyHeader,
