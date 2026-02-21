@@ -38,6 +38,17 @@ import type { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import type { RulesSettingsFlappingProperties } from '../../common/rules_settings';
 import type { PublicAlertFactory } from '../alert/create_alert_factory';
 
+export interface SnoozedInstanceConfig {
+  expiresAt?: string;
+  conditions?: Array<{
+    type: string;
+    field: string;
+    value?: string;
+    snapshotValue?: string;
+  }>;
+  conditionOperator?: 'any' | 'all';
+}
+
 export interface AlertRuleData {
   consumer: string;
   executionId: string;
@@ -50,6 +61,7 @@ export interface AlertRuleData {
   alertDelay: number;
   muteAll: boolean;
   mutedInstanceIds: string[];
+  snoozedInstances?: Record<string, SnoozedInstanceConfig>;
 }
 
 export interface AlertRule {

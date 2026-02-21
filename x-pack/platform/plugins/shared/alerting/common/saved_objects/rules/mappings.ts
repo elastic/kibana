@@ -239,6 +239,11 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
       },
     },
     // NO NEED TO BE INDEXED
+    // snoozedInstances: {
+    //   type: 'flattened',
+    //   index: false,
+    // },
+    // NO NEED TO BE INDEXED
     // flapping: {
     //   index: false,
     //   properties: {

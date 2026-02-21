@@ -139,6 +139,19 @@ export const monitoringSchema = schema.object({
   }),
 });
 
+const perAlertSnoozeConditionSchema = schema.object({
+  type: schema.string(),
+  field: schema.string(),
+  value: schema.maybe(schema.string()),
+  snapshotValue: schema.maybe(schema.string()),
+});
+
+export const snoozedInstanceConfigSchema = schema.object({
+  expiresAt: schema.maybe(schema.string()),
+  conditions: schema.maybe(schema.arrayOf(perAlertSnoozeConditionSchema)),
+  conditionOperator: schema.maybe(schema.oneOf([schema.literal('any'), schema.literal('all')])),
+});
+
 export const snoozeScheduleSchema = schema.object({
   duration: schema.number(),
   rRule: rRuleSchema,
@@ -192,6 +205,7 @@ export const ruleDomainSchema = schema.object({
   legacyId: schema.maybe(schema.nullable(schema.string())),
   flapping: schema.maybe(schema.nullable(flappingSchema)),
   artifacts: schema.maybe(artifactsSchema),
+  snoozedInstances: schema.maybe(schema.recordOf(schema.string(), snoozedInstanceConfigSchema)),
 });
 
 /**
@@ -234,4 +248,5 @@ export const ruleSchema = schema.object({
   legacyId: schema.maybe(schema.nullable(schema.string())),
   flapping: schema.maybe(schema.nullable(flappingSchema)),
   artifacts: schema.maybe(artifactsSchema),
+  snoozedInstances: schema.maybe(schema.recordOf(schema.string(), snoozedInstanceConfigSchema)),
 });
