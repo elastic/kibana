@@ -6,7 +6,6 @@
  */
 import { Alert as LegacyAlert } from '../../../alert/alert';
 import { buildRecoveredAlert } from './build_recovered_alert';
-import type { Alert } from '@kbn/alerts-as-data-utils';
 import {
   ALERT_RULE_NAME,
   ALERT_RULE_PARAMETERS,

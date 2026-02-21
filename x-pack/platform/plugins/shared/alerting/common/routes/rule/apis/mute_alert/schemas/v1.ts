@@ -32,3 +32,44 @@ export const muteAlertQuerySchema = schema.maybe(
     ),
   })
 );
+
+const muteAlertBodyConditionSchema = schema.object({
+  type: schema.string({
+    meta: { description: 'Condition type, e.g. severity_change, severity_equals, field_change.' },
+  }),
+  field: schema.string({
+    meta: { description: 'The alert doc field to monitor.' },
+  }),
+  value: schema.maybe(
+    schema.string({
+      meta: { description: 'Target value for severity_equals.' },
+    })
+  ),
+  snapshot_value: schema.maybe(
+    schema.string({
+      meta: { description: 'Snapshot at snooze time for severity_change/field_change.' },
+    })
+  ),
+});
+
+export const muteAlertBodySchema = schema.maybe(
+  schema.object({
+    expires_at: schema.maybe(
+      schema.string({
+        meta: {
+          description: 'ISO date after which the snooze expires. Absent = indefinite.',
+        },
+      })
+    ),
+    conditions: schema.maybe(
+      schema.arrayOf(muteAlertBodyConditionSchema, {
+        meta: { description: 'Conditions that auto-lift the snooze.' },
+      })
+    ),
+    condition_operator: schema.maybe(
+      schema.oneOf([schema.literal('any'), schema.literal('all')], {
+        meta: { description: 'How conditions combine: any (OR, default), all (AND).' },
+      })
+    ),
+  })
+);

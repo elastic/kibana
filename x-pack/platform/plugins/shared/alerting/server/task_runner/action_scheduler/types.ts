@@ -107,6 +107,12 @@ export interface ActionsToSchedule {
   actionToLog: ActionOpts;
 }
 
+/** Alert instance that should be auto-unmuted because its snooze conditions were met */
+export interface AlertToAutoUnmute {
+  alertInstanceId: string;
+  reason: string;
+}
+
 export interface IActionScheduler<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,

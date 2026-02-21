@@ -16,6 +16,7 @@ import {
   ALERT_END,
   ALERT_INSTANCE_ID,
   ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_MUTED,
   ALERT_RULE_EXECUTION_UUID,
   ALERT_RULE_UUID,
   ALERT_START,
@@ -164,6 +165,16 @@ const getQueryByExecutionUuid = ({
         ],
       },
     },
+    // Exclude muted/snoozed alerts (simple mute or conditional snooze)
+    {
+      bool: {
+        must_not: {
+          term: {
+            [ALERT_MUTED]: true,
+          },
+        },
+      },
+    },
   ];
   if (action) {
     filter.push({
@@ -228,6 +239,16 @@ const getQueryByTimeRange = ({
         must_not: {
           term: {
             [ALERT_STATUS]: ALERT_STATUS_DELAYED,
+          },
+        },
+      },
+    },
+    // Exclude muted/snoozed alerts (simple mute or conditional snooze)
+    {
+      bool: {
+        must_not: {
+          term: {
+            [ALERT_MUTED]: true,
           },
         },
       },
@@ -329,6 +350,16 @@ export const getQueryByScopedQueries = ({
         must_not: {
           term: {
             [ALERT_STATUS]: ALERT_STATUS_DELAYED,
+          },
+        },
+      },
+    },
+    // Exclude muted/snoozed alerts (simple mute or conditional snooze)
+    {
+      bool: {
+        must_not: {
+          term: {
+            [ALERT_MUTED]: true,
           },
         },
       },

@@ -351,6 +351,22 @@ describe('mappingFromFieldMap', () => {
                 severity_improving: {
                   type: 'boolean',
                 },
+                snooze: {
+                  properties: {
+                    condition_operator: {
+                      type: 'keyword',
+                    },
+                    conditions: {
+                      type: 'object',
+                    },
+                    expires_at: {
+                      type: 'date',
+                    },
+                    snapshot: {
+                      type: 'object',
+                    },
+                  },
+                },
                 start: {
                   type: 'date',
                 },

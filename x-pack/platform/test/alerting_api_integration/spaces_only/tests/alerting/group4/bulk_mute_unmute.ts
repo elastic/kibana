@@ -17,7 +17,7 @@ import { Spaces } from '../../../scenarios';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
 
-const alertAsDataIndex = '.internal.alerts-observability.test.alerts.alerts-default-000001';
+const alertAsDataIndexPattern = '.internal.alerts-observability.test.alerts.alerts-default-*';
 
 export default function bulkMuteUnmuteTests({ getService }: FtrProviderContext) {
   const es = getService('es');
@@ -25,8 +25,7 @@ export default function bulkMuteUnmuteTests({ getService }: FtrProviderContext) 
   const supertest = getService('supertest');
   const esTestIndexTool = new ESTestIndexTool(es, retry);
 
-  // Failing: See https://github.com/elastic/kibana/issues/246730
-  describe.skip('bulkMuteUnmute', () => {
+  describe('bulkMuteUnmute', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     const createRule = async (): Promise<string> => {
@@ -52,10 +51,12 @@ export default function bulkMuteUnmuteTests({ getService }: FtrProviderContext) 
     };
 
     const getActiveAlertsByRuleId = async (ruleId: string): Promise<any[]> => {
+      await es.indices.refresh({ index: alertAsDataIndexPattern, ignore_unavailable: true });
       const {
         hits: { hits: alerts },
       } = await es.search({
-        index: alertAsDataIndex,
+        index: alertAsDataIndexPattern,
+        ignore_unavailable: true,
         query: {
           bool: {
             must: [{ term: { [ALERT_RULE_UUID]: ruleId } }, { term: { [ALERT_STATUS]: 'active' } }],
@@ -100,7 +101,7 @@ export default function bulkMuteUnmuteTests({ getService }: FtrProviderContext) 
 
     afterEach(async () => {
       await es.deleteByQuery({
-        index: alertAsDataIndex,
+        index: alertAsDataIndexPattern,
         query: { match_all: {} },
         conflicts: 'proceed',
         ignore_unavailable: true,

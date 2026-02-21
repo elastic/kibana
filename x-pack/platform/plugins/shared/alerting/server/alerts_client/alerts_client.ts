@@ -9,6 +9,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 
 import {
   ALERT_INSTANCE_ID,
+  ALERT_MUTED,
   ALERT_RULE_UUID,
   ALERT_STATUS,
   ALERT_UUID,
@@ -21,6 +22,10 @@ import {
   ALERT_SCHEDULED_ACTION_GROUP,
   ALERT_SCHEDULED_ACTION_DATE,
   ALERT_SCHEDULED_ACTION_THROTTLING,
+  ALERT_SNOOZE_EXPIRES_AT,
+  ALERT_SNOOZE_CONDITIONS,
+  ALERT_SNOOZE_CONDITION_OPERATOR,
+  ALERT_SNOOZE_SNAPSHOT,
   ALERT_STATUS_DELAYED,
 } from '@kbn/rule-data-utils';
 import { get, isEmpty } from 'lodash';
@@ -132,6 +137,7 @@ export class AlertsClient<
   private indexTemplateAndPattern: IIndexPatternString;
 
   private reportedAlerts: Record<string, DeepPartial<AlertData>> = {};
+  private builtAlerts: Record<string, Alert & AlertData> = {};
   private _isUsingDataStreams: boolean;
   private ruleInfoMessage: string;
   private logTags: { tags: string[] };
@@ -389,6 +395,14 @@ export class AlertsClient<
     this.legacyAlertsClient.determineDelayedAlerts(opts);
   }
 
+  public getTrackedAlertByInstanceId(id: string): Record<string, unknown> | undefined {
+    return this.trackedAlerts.getById(id) as Record<string, unknown> | undefined;
+  }
+
+  public getBuiltAlertByInstanceId(id: string): Record<string, unknown> | undefined {
+    return this.builtAlerts[id] as Record<string, unknown> | undefined;
+  }
+
   public logAlerts(opts: LogAlertsOpts) {
     this.legacyAlertsClient.logAlerts(opts);
   }
@@ -501,6 +515,13 @@ export class AlertsClient<
 
     const alertsToIndex = alertBuilder.buildAlerts();
 
+    for (const alert of alertsToIndex) {
+      const instanceId = get(alert, ALERT_INSTANCE_ID);
+      if (instanceId) {
+        this.builtAlerts[instanceId] = alert;
+      }
+    }
+
     if (alertsToIndex.length > 0) {
       const bulkBody = alertBuilder.getBulkBody(alertsToIndex);
 
@@ -546,13 +567,16 @@ export class AlertsClient<
   public async updatePersistedAlerts({
     alertsToUpdateWithMaintenanceWindows,
     alertsToUpdateWithLastScheduledActions,
+    alertUuidsToAutoUnmute = [],
   }: {
     alertsToUpdateWithMaintenanceWindows: AlertsToUpdateWithMaintenanceWindows;
     alertsToUpdateWithLastScheduledActions: AlertsToUpdateWithLastScheduledActions;
+    alertUuidsToAutoUnmute?: string[];
   }) {
     const idsToUpdate = new Set([
       ...Object.keys(alertsToUpdateWithMaintenanceWindows),
       ...Object.keys(alertsToUpdateWithLastScheduledActions),
+      ...alertUuidsToAutoUnmute,
     ]);
 
     if (idsToUpdate.size === 0) {
@@ -583,11 +607,19 @@ export class AlertsClient<
                 if (params.toMaintenanceWindows.containsKey(ctx._source['${ALERT_UUID}'])) {
                   ctx._source['${ALERT_MAINTENANCE_WINDOW_IDS}'] = params.toMaintenanceWindows[ctx._source['${ALERT_UUID}']];
                 }
+                if (ctx._source['${ALERT_UUID}'] != null && params.toAutoUnmute.contains(ctx._source['${ALERT_UUID}'])) {
+                  ctx._source['${ALERT_MUTED}'] = false;
+                  ctx._source.remove('${ALERT_SNOOZE_EXPIRES_AT}');
+                  ctx._source.remove('${ALERT_SNOOZE_CONDITIONS}');
+                  ctx._source.remove('${ALERT_SNOOZE_CONDITION_OPERATOR}');
+                  ctx._source.remove('${ALERT_SNOOZE_SNAPSHOT}');
+                }
               `,
               lang: 'painless',
               params: {
                 toScheduledAction: alertsToUpdateWithLastScheduledActions,
                 toMaintenanceWindows: alertsToUpdateWithMaintenanceWindows,
+                toAutoUnmute: alertUuidsToAutoUnmute,
               },
             },
           });
@@ -596,7 +628,7 @@ export class AlertsClient<
       );
     } catch (err) {
       this.options.logger.error(
-        `Error updating alerts. (last scheduled actions or maintenance windows) ${this.ruleInfoMessage}: ${err}`,
+        `Error updating alerts. (last scheduled actions, maintenance windows, or auto-unmute) ${this.ruleInfoMessage}: ${err}`,
         this.logTags
       );
       throw err;
