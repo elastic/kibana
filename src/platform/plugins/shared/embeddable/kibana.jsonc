@@ -18,7 +18,14 @@
       "contentManagement"
     ],
     "optionalPlugins": ["licensing", "savedObjectsTaggingOss", "usageCollection"],
-    "requiredBundles": ["kibanaReact", "kibanaUtils", "unifiedSearch"],
-    "extraPublicDirs": ["common"]
+    "requiredBundles": ["kibanaReact", "kibanaUtils", "unifiedSearch", "presentationPanel"],
+    "extraPublicDirs": ["common"],
+    "globals": {
+      "extensionPoints": {
+        "hosts": [
+          "embeddable.FactoryRegistration"
+        ]
+      }
+    }
   }
 }
