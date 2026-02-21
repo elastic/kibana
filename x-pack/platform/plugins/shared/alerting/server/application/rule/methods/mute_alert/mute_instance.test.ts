@@ -279,12 +279,13 @@ describe('mute alert instance', () => {
       'alert',
       '1',
       expect.objectContaining({
-        snoozedInstances: {
-          instance1: expect.objectContaining({
+        snoozedInstances: [
+          expect.objectContaining({
+            instanceId: 'instance1',
             expiresAt: expect.any(String),
             conditions: expect.any(Array),
           }),
-        },
+        ],
         updatedAt: expect.any(String),
       }),
       { version: 'v1' }
@@ -333,11 +334,12 @@ describe('mute alert instance', () => {
       '1',
       expect.objectContaining({
         mutedInstanceIds: ['instance2'],
-        snoozedInstances: {
-          instance1: expect.objectContaining({
+        snoozedInstances: [
+          expect.objectContaining({
+            instanceId: 'instance1',
             conditions: expect.any(Array),
           }),
-        },
+        ],
         updatedAt: expect.any(String),
       }),
       { version: 'v1' }

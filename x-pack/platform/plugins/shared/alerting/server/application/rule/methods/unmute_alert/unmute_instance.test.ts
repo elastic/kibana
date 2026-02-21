@@ -130,9 +130,9 @@ describe('unmuteInstance()', () => {
         enabled: true,
         scheduledTaskId: 'task-123',
         mutedInstanceIds: [],
-        snoozedInstances: {
-          '2': { expiresAt: new Date(Date.now() + 86400000).toISOString() },
-        },
+        snoozedInstances: [
+          { instanceId: '2', expiresAt: new Date(Date.now() + 86400000).toISOString() },
+        ],
       },
       version: '123',
       references: [],
@@ -149,7 +149,7 @@ describe('unmuteInstance()', () => {
       RULE_SAVED_OBJECT_TYPE,
       '1',
       expect.objectContaining({
-        snoozedInstances: {},
+        snoozedInstances: [],
         updatedAt: expect.any(String),
       }),
       { version: '123' }

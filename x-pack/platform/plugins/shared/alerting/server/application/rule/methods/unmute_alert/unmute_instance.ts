@@ -45,9 +45,9 @@ async function unmuteInstanceWithOCC(
   );
 
   const mutedInstanceIds = attributes.mutedInstanceIds || [];
-  const snoozedInstances = attributes.snoozedInstances ?? {};
+  const snoozedInstances = attributes.snoozedInstances ?? [];
   const isSimpleMute = mutedInstanceIds.includes(alertInstanceId);
-  const isConditionalSnooze = alertInstanceId in snoozedInstances;
+  const isConditionalSnooze = snoozedInstances.some((e) => e.instanceId === alertInstanceId);
   const auditAction =
     attributes.muteAll || isSimpleMute
       ? RuleAuditAction.UNMUTE_ALERT
@@ -113,8 +113,9 @@ async function unmuteInstanceWithOCC(
   } else if (isConditionalSnooze) {
     // Cancel conditional snooze: remove from snoozedInstances on rule SO and
     // clear ALERT_MUTED + snooze fields on the AAD doc.
-    const updatedSnoozedInstances = { ...snoozedInstances };
-    delete updatedSnoozedInstances[alertInstanceId];
+    const updatedSnoozedInstances = snoozedInstances.filter(
+      (e) => e.instanceId !== alertInstanceId
+    );
 
     await updateRuleSo({
       savedObjectsClient: context.unsecuredSavedObjectsClient,

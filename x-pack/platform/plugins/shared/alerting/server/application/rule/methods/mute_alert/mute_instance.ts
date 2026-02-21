@@ -127,12 +127,15 @@ async function muteInstanceWithOCC(
     if (isConditionalSnooze && body) {
       // Conditional snooze: persist config on rule SO (durable, survives alert lifecycle)
       // and materialize ALERT_MUTED on the current AAD doc (for query-time filtering).
-      const snoozedInstances = { ...(attributes.snoozedInstances ?? {}) };
-      snoozedInstances[alertInstanceId] = {
-        ...(body.expiresAt ? { expiresAt: body.expiresAt } : {}),
-        ...(body.conditions ? { conditions: body.conditions } : {}),
-        ...(body.conditionOperator ? { conditionOperator: body.conditionOperator } : {}),
-      };
+      const existing = attributes.snoozedInstances ?? [];
+      const snoozedInstances = existing
+        .filter((e) => e.instanceId !== alertInstanceId)
+        .concat({
+          instanceId: alertInstanceId,
+          ...(body.expiresAt ? { expiresAt: body.expiresAt } : {}),
+          ...(body.conditions ? { conditions: body.conditions } : {}),
+          ...(body.conditionOperator ? { conditionOperator: body.conditionOperator } : {}),
+        });
 
       await updateRuleSo({
         savedObjectsClient: context.unsecuredSavedObjectsClient,
