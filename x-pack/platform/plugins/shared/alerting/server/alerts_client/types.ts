@@ -139,6 +139,7 @@ export interface IAlertsClient<
   determineFlappingAlerts(): void;
   determineDelayedAlerts(opts: DetermineDelayedAlertsOpts): void;
   getTrackedAlertByInstanceId?(id: string): Record<string, unknown> | undefined;
+  getBuiltAlertByInstanceId?(id: string): Record<string, unknown> | undefined;
 }
 
 export interface ProcessAndLogAlertsOpts {

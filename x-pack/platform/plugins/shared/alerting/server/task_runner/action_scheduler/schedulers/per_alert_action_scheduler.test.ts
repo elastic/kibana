@@ -604,6 +604,78 @@ describe('Per-Alert Action Scheduler', () => {
       expect(scheduler.alertsToAutoUnmute).toHaveLength(0);
     });
 
+    test('should evaluate snooze conditions against current-execution built alert data (no one-cycle delay)', async () => {
+      // Tracked alert (previous execution) has severity=low.
+      // Built alert (current execution) has severity=medium.
+      // Snooze condition: severity_equals 'medium' → should unmute using current data.
+      alertsClient.getTrackedAlertByInstanceId.mockImplementation((id: string) => {
+        if (id === '2') {
+          return { 'kibana.alert.instance.id': '2', 'kibana.alert.severity': 'low' };
+        }
+        return undefined;
+      });
+      alertsClient.getBuiltAlertByInstanceId.mockImplementation((id: string) => {
+        if (id === '2') {
+          return { 'kibana.alert.instance.id': '2', 'kibana.alert.severity': 'medium' };
+        }
+        return undefined;
+      });
+
+      const scheduler = new PerAlertActionScheduler({
+        ...getSchedulerContext(),
+        rule: {
+          ...rule,
+          snoozedInstances: {
+            '2': {
+              conditions: [
+                { type: 'severity_equals', field: 'kibana.alert.severity', value: 'medium' },
+              ],
+            },
+          },
+        },
+      });
+      const results = await scheduler.getActionsToSchedule({ activeAlerts: alerts });
+
+      expect(results).toHaveLength(4);
+      expect(scheduler.alertsToAutoUnmute).toHaveLength(1);
+      expect(scheduler.alertsToAutoUnmute[0].alertInstanceId).toBe('2');
+
+      alertsClient.getTrackedAlertByInstanceId.mockReset();
+      alertsClient.getBuiltAlertByInstanceId.mockReset();
+    });
+
+    test('should fall back to tracked alert data when built alert is not available', async () => {
+      alertsClient.getBuiltAlertByInstanceId.mockReturnValue(undefined);
+      alertsClient.getTrackedAlertByInstanceId.mockImplementation((id: string) => {
+        if (id === '2') {
+          return { 'kibana.alert.instance.id': '2', 'kibana.alert.severity': 'medium' };
+        }
+        return undefined;
+      });
+
+      const scheduler = new PerAlertActionScheduler({
+        ...getSchedulerContext(),
+        rule: {
+          ...rule,
+          snoozedInstances: {
+            '2': {
+              conditions: [
+                { type: 'severity_equals', field: 'kibana.alert.severity', value: 'medium' },
+              ],
+            },
+          },
+        },
+      });
+      const results = await scheduler.getActionsToSchedule({ activeAlerts: alerts });
+
+      expect(results).toHaveLength(4);
+      expect(scheduler.alertsToAutoUnmute).toHaveLength(1);
+      expect(scheduler.alertsToAutoUnmute[0].alertInstanceId).toBe('2');
+
+      alertsClient.getTrackedAlertByInstanceId.mockReset();
+      alertsClient.getBuiltAlertByInstanceId.mockReset();
+    });
+
     test('should not treat alert as muted when doc has kibana.alert.muted=false even with snooze fields', async () => {
       // If snoozedInstances does not contain the alert, doc-level ALERT_MUTED is irrelevant.
       alertsClient.getTrackedAlertByInstanceId.mockImplementation((id: string) => {

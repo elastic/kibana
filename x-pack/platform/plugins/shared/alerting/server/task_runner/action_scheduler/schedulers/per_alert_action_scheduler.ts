@@ -391,14 +391,17 @@ export class PerAlertActionScheduler<
       conditionOperator: snoozeInstanceConfig.conditionOperator,
     };
 
-    // For condition evaluation, use tracked alert data from the previous execution.
-    // Current-execution field values are not yet persisted, so condition evaluation
-    // is one cycle behind for field-change/severity conditions. TTL evaluation
-    // uses Date.now() and is always current.
+    // Prefer built alert data from the current execution (zero delay for
+    // rule-type-reported fields). Fall back to tracked data from the
+    // previous execution for fields not in the build output.
     const alertData =
+      (this.context.alertsClient.getBuiltAlertByInstanceId?.(alertId) as
+        | Record<string, unknown>
+        | undefined) ??
       (this.context.alertsClient.getTrackedAlertByInstanceId?.(alertId) as
         | Record<string, unknown>
-        | undefined) ?? {};
+        | undefined) ??
+      {};
     const evalResult = evaluateSnoozeConditions(snoozeConfig, alertData);
     if (evalResult.shouldUnmute) {
       if (!this.alertsToAutoUnmute.some((a) => a.alertInstanceId === alertId)) {

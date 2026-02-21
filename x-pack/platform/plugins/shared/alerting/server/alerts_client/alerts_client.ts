@@ -137,6 +137,7 @@ export class AlertsClient<
   private indexTemplateAndPattern: IIndexPatternString;
 
   private reportedAlerts: Record<string, DeepPartial<AlertData>> = {};
+  private builtAlerts: Record<string, Alert & AlertData> = {};
   private _isUsingDataStreams: boolean;
   private ruleInfoMessage: string;
   private logTags: { tags: string[] };
@@ -398,6 +399,10 @@ export class AlertsClient<
     return this.trackedAlerts.getById(id) as Record<string, unknown> | undefined;
   }
 
+  public getBuiltAlertByInstanceId(id: string): Record<string, unknown> | undefined {
+    return this.builtAlerts[id] as Record<string, unknown> | undefined;
+  }
+
   public logAlerts(opts: LogAlertsOpts) {
     this.legacyAlertsClient.logAlerts(opts);
   }
@@ -509,6 +514,13 @@ export class AlertsClient<
     });
 
     const alertsToIndex = alertBuilder.buildAlerts();
+
+    for (const alert of alertsToIndex) {
+      const instanceId = get(alert, ALERT_INSTANCE_ID);
+      if (instanceId) {
+        this.builtAlerts[instanceId] = alert;
+      }
+    }
 
     if (alertsToIndex.length > 0) {
       const bulkBody = alertBuilder.getBulkBody(alertsToIndex);

@@ -16,7 +16,13 @@ import {
 import { nodeBuilder } from '@kbn/es-query';
 import { Spaces } from '../../../scenarios';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import { AlertUtils, getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
+import {
+  AlertUtils,
+  getEventLog,
+  getUrlPrefix,
+  getTestRuleData,
+  ObjectRemover,
+} from '../../../../common/lib';
 
 const alertAsDataIndex = '.internal.alerts-observability.test.alerts.alerts-default-000001';
 
@@ -296,7 +302,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
         });
       });
 
-      // Now unmute all alerts
+      // Now unmute all
       await alertUtils.getUnmuteAllRequest(ruleId);
 
       // Run the rule to trigger reconciliation
@@ -376,6 +382,180 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
         );
         expect(reconciledAlert).to.not.be(undefined);
         expect(reconciledAlert._source[ALERT_MUTED]).to.be(true);
+      });
+    });
+
+    it('should auto-unsnooze when time-based TTL expires', async () => {
+      const ruleId = await createRule();
+
+      // Wait for alerts to be created. The first execution may fail due to
+      // shards not being available yet; runSoon retries until successful.
+      let alerts: any[] = [];
+      await retry.try(async () => {
+        alerts = await getAlertsByRuleId(ruleId);
+        if (alerts.length === 0) {
+          await alertUtils.runSoon(ruleId);
+          throw new Error('No alerts yet, retrying...');
+        }
+      });
+
+      const alertInstanceId = alerts[0]._source[ALERT_INSTANCE_ID];
+
+      // Snooze with a short TTL
+      await supertest
+        .post(
+          `${getUrlPrefix(
+            Spaces.space1.id
+          )}/api/alerting/rule/${ruleId}/alert/${alertInstanceId}/_mute`
+        )
+        .set('kbn-xsrf', 'foo')
+        .send({ expires_at: new Date(Date.now() + 3000).toISOString() })
+        .expect(204);
+
+      // Run the rule so ALERT_MUTED is materialized on the alert doc
+      await alertUtils.runSoon(ruleId);
+
+      // Verify ALERT_MUTED is true after snooze
+      await retry.try(async () => {
+        const snoozedAlerts = await getAlertsByRuleId(ruleId);
+        const snoozedAlert: any = snoozedAlerts.find(
+          (a: any) => a._source[ALERT_INSTANCE_ID] === alertInstanceId
+        );
+        expect(snoozedAlert._source[ALERT_MUTED]).to.be(true);
+      });
+
+      // Wait for TTL to expire
+      await new Promise((resolve) => setTimeout(resolve, 4000));
+
+      // Run again to trigger auto-unsnooze
+      await alertUtils.runSoon(ruleId);
+
+      // Verify ALERT_MUTED is false after auto-unsnooze
+      await retry.try(async () => {
+        const unsnoozedAlerts = await getAlertsByRuleId(ruleId);
+        const unsnoozedAlert: any = unsnoozedAlerts.find(
+          (a: any) => a._source[ALERT_INSTANCE_ID] === alertInstanceId
+        );
+        expect(unsnoozedAlert).to.not.be(undefined);
+        expect(unsnoozedAlert._source[ALERT_MUTED]).to.be(false);
+      });
+    });
+
+    // TODO: snoozedInstances with any key triggers [snoozedInstances]: expected
+    // value of type [object] but got [Array] validation error when loading the
+    // rule SO. This is a schema.recordOf serialization issue that needs to be
+    // addressed in the SO layer before this test can pass.
+    it.skip('should keep alert snoozed across recovery and re-fire via rule SO', async () => {
+      const patternAadIndex = '.alerts-test.patternfiring.alerts-default';
+
+      const { body: createdRule } = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .send(
+          getTestRuleData({
+            rule_type_id: 'test.patternFiringAad',
+            schedule: { interval: '1d' },
+            throttle: null,
+            params: {
+              pattern: { alert1: [true, false, true] },
+            },
+            actions: [],
+          })
+        )
+        .expect(200);
+      objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
+
+      // Wait for alert doc to appear. The first execution may fail due to
+      // shards not being available; runSoon retries until successful.
+      await retry.try(async () => {
+        const {
+          hits: { hits },
+        } = await es.search({
+          index: patternAadIndex,
+          ignore_unavailable: true,
+          query: {
+            bool: {
+              must: [
+                { term: { [ALERT_RULE_UUID]: createdRule.id } },
+                { term: { [ALERT_INSTANCE_ID]: 'alert1' } },
+              ],
+            },
+          },
+        });
+        if (hits.length === 0) {
+          await alertUtils.runSoon(createdRule.id);
+          throw new Error('No alerts yet, retrying...');
+        }
+      });
+
+      // Snooze with far-future TTL
+      await supertest
+        .post(
+          `${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${
+            createdRule.id
+          }/alert/alert1/_mute?validate_alerts_existence=false`
+        )
+        .set('kbn-xsrf', 'foo')
+        .send({ expires_at: new Date(Date.now() + 86400000).toISOString() })
+        .expect(204);
+
+      // Run 2: alert recovers (pattern[1] = false)
+      await alertUtils.runSoon(createdRule.id);
+      await retry.try(async () => {
+        await getEventLog({
+          getService,
+          spaceId: Spaces.space1.id,
+          type: 'alert',
+          id: createdRule.id,
+          provider: 'alerting',
+          actions: new Map([['execute', { gte: 2 }]]),
+        });
+      });
+
+      // Run 3: alert re-fires (pattern[2] = true) -- new UUID, snooze from rule SO
+      await alertUtils.runSoon(createdRule.id);
+      await retry.try(async () => {
+        await getEventLog({
+          getService,
+          spaceId: Spaces.space1.id,
+          type: 'alert',
+          id: createdRule.id,
+          provider: 'alerting',
+          actions: new Map([['execute', { gte: 3 }]]),
+        });
+      });
+
+      // The re-fired alert (run 3) creates a new doc with status=active.
+      // It should have ALERT_MUTED=true because snoozedInstances on the rule SO
+      // still contains 'alert1'.
+      await retry.try(async () => {
+        const {
+          hits: { hits },
+        } = await es.search({
+          index: patternAadIndex,
+          query: {
+            bool: {
+              must: [
+                { term: { [ALERT_RULE_UUID]: createdRule.id } },
+                { term: { [ALERT_INSTANCE_ID]: 'alert1' } },
+                { term: { [ALERT_STATUS]: 'active' } },
+              ],
+            },
+          },
+          sort: [{ '@timestamp': { order: 'desc' } }],
+          size: 1,
+        });
+        expect(hits.length).to.be(1);
+        const activeAlert: any = hits[0];
+        expect(activeAlert._source[ALERT_MUTED]).to.be(true);
+      });
+
+      // Cleanup
+      await es.deleteByQuery({
+        index: patternAadIndex,
+        query: { match_all: {} },
+        conflicts: 'proceed',
+        ignore_unavailable: true,
       });
     });
   });
