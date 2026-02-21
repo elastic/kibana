@@ -10,7 +10,7 @@
 import { i18n } from '@kbn/i18n';
 
 const generalFormatError = i18n.translate(
-  'kibanaUtils.url.validate.invalidUrlMessage',
+  'kibana_utils.url.validate.invalidUrlMessage',
   {
     defaultMessage: 'Invalid URL format.',
   }
