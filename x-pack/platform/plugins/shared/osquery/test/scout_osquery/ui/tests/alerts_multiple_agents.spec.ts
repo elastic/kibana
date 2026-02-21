@@ -24,12 +24,11 @@ test.describe(
       ruleId = rule.id;
     });
 
-    test.beforeEach(async ({ browserAuth, page, kbnUrl }) => {
+    test.beforeEach(async ({ browserAuth, page, kbnUrl, kbnClient }) => {
       await browserAuth.loginWithCustomRole(socManagerRole);
-      // Navigate to the rule and wait for alerts (reloads periodically until alerts appear)
       await page.goto(kbnUrl.get(`/app/security/rules/id/${ruleId}`));
       await waitForPageReady(page);
-      await waitForAlerts(page);
+      await waitForAlerts(page, kbnClient, ruleId);
     });
 
     test.afterAll(async ({ kbnClient }) => {

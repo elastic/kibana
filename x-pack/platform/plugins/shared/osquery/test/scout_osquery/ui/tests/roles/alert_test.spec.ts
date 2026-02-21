@@ -23,20 +23,12 @@ test.describe('Alert Test', { tag: [...tags.stateful.classic] }, () => {
     ruleId = rule.id;
   });
 
-  test.beforeEach(async ({ browserAuth, page, kbnUrl }) => {
+  test.beforeEach(async ({ browserAuth, page, kbnUrl, kbnClient }) => {
     test.setTimeout(300_000);
     await browserAuth.loginWithCustomRole(t1AnalystRole);
-    await page.goto(kbnUrl.get('/app/security/rules'));
+    await page.goto(kbnUrl.get(`/app/security/rules/id/${ruleId}`));
     await waitForPageReady(page);
-
-    // Click on the rule name
-    await page.getByText(ruleName).first().click();
-    await waitForPageReady(page);
-
-    // Go to Alerts tab and wait for alerts to be generated
-    await page.testSubj.locator('navigation-alerts').click();
-    await waitForPageReady(page);
-    await waitForAlerts(page);
+    await waitForAlerts(page, kbnClient, ruleId);
 
     // Expand first event
     await page.testSubj.locator('expand-event').first().click();

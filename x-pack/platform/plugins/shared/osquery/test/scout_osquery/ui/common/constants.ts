@@ -6,6 +6,7 @@
  */
 
 import type { ScoutPage } from '@kbn/scout';
+import type { KbnClient } from '@kbn/test';
 
 export const OSQUERY_APP = 'osquery';
 
@@ -49,40 +50,60 @@ export async function dismissAllToasts(page: ScoutPage): Promise<void> {
 }
 
 /**
- * Wait for alerts to appear on the rule details page. In serverless mode, alert
- * generation can take over a minute. This helper periodically reloads the page
- * to check for new alerts instead of relying on a single long wait.
+ * Poll the detection engine API until at least one alert exists for the given
+ * rule, then navigate to the rule's alerts tab and wait for the expand-event
+ * button to be visible.
  *
- * Navigates to the /alerts sub-route of the current rule URL to ensure
- * the alerts tab is active.
+ * Two-phase approach: first confirm alerts exist via the API (avoids slow page
+ * reloads), then open the UI and wait for the table row to render.
  */
 export async function waitForAlerts(
   page: ScoutPage,
-  { timeout = 240_000 }: { timeout?: number } = {}
+  kbnClient: KbnClient,
+  ruleId: string,
+  { timeout = 300_000 }: { timeout?: number } = {}
 ): Promise<void> {
   const start = Date.now();
+  const pollInterval = 10_000;
 
-  // Navigate to the alerts tab if we're on the rule overview
+  // Phase 1 — wait for at least one alert via API
+  while (Date.now() - start < timeout - 30_000) {
+    try {
+      const { data } = await kbnClient.request<{ hits: { total: { value: number } } }>({
+        method: 'POST',
+        path: '/api/detection_engine/signals/search',
+        body: {
+          query: {
+            bool: {
+              filter: [{ term: { 'kibana.alert.rule.uuid': ruleId } }],
+            },
+          },
+          size: 0,
+        },
+      });
+
+      if (data.hits?.total?.value > 0) {
+        break;
+      }
+    } catch {
+      // API might not be ready yet; keep polling
+    }
+
+    await new Promise((r) => setTimeout(r, pollInterval));
+  }
+
+  // Phase 2 — navigate to the alerts tab and wait for the UI row
   const currentUrl = page.url();
   if (currentUrl.includes('/rules/id/') && !currentUrl.includes('/alerts')) {
     const alertsUrl = currentUrl.replace(/\/rules\/id\/([^/?#]+).*/, '/rules/id/$1/alerts');
     await page.goto(alertsUrl);
-    await waitForPageReady(page);
+  } else {
+    await page.reload();
   }
+
+  await waitForPageReady(page);
 
   const expandEvent = page.testSubj.locator('expand-event');
-
-  while (Date.now() - start < timeout) {
-    try {
-      await expandEvent.waitFor({ state: 'visible', timeout: 15_000 });
-
-      return;
-    } catch {
-      await page.reload();
-      await waitForPageReady(page);
-    }
-  }
-
-  // Final attempt — let it throw with a clear error
-  await expandEvent.waitFor({ state: 'visible', timeout: 30_000 });
+  const remaining = Math.max(timeout - (Date.now() - start), 30_000);
+  await expandEvent.waitFor({ state: 'visible', timeout: remaining });
 }
