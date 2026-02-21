@@ -9,12 +9,9 @@
 
 import { i18n } from '@kbn/i18n';
 
-const generalFormatError = i18n.translate(
-  'kibana_utils.url.validate.invalidUrlMessage',
-  {
-    defaultMessage: 'Invalid URL format.',
-  }
-);
+const generalFormatError = i18n.translate('kibana_utils.url.validate.invalidUrlMessage', {
+  defaultMessage: 'Invalid URL format.',
+});
 
 const SAFE_URL_PATTERN = /^(?:(?:https?|mailto):|[^&:/?#]*(?:[/?#]|$))/gi;
 export function validateUrl(url: string): {

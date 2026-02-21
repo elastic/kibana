@@ -1,20 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
 
-export const txtUrlTemplateLabel = i18n.translate(
-  'xpack.urlDrilldown.editor.urlTemplateLabel',
-  {
-    defaultMessage: 'Enter URL',
-  }
-);
+export const txtUrlTemplateLabel = i18n.translate('xpack.urlDrilldown.editor.urlTemplateLabel', {
+  defaultMessage: 'Enter URL',
+});
 
 export const txtEmptyErrorMessage = i18n.translate(
   'xpack.urlDrilldown.editor.urlTemplateEmptyErrorMessage',
@@ -30,16 +25,13 @@ export const txtInvalidFormatErrorMessage = ({
   error: string;
   example: string;
 }) =>
-  i18n.translate(
-    'xpack.urlDrilldown.editor.urlTemplateInvalidFormatErrorMessage',
-    {
-      defaultMessage: '{error} Example: {example}',
-      values: {
-        error,
-        example,
-      },
-    }
-  );
+  i18n.translate('xpack.urlDrilldown.editor.urlTemplateInvalidFormatErrorMessage', {
+    defaultMessage: '{error} Example: {example}',
+    values: {
+      error,
+      example,
+    },
+  });
 
 export const txtUrlTemplateSyntaxTestingHelpText = i18n.translate(
   'xpack.urlDrilldown.editor.urlTemplateSyntaxTestingHelpText',
@@ -70,12 +62,9 @@ export const txtUrlTemplateAdditionalOptions = i18n.translate(
   }
 );
 
-export const txtUrlTemplateEncodeUrl = i18n.translate(
-  'xpack.urlDrilldown.editor.encodeUrl',
-  {
-    defaultMessage: 'Encode URL',
-  }
-);
+export const txtUrlTemplateEncodeUrl = i18n.translate('xpack.urlDrilldown.editor.encodeUrl', {
+  defaultMessage: 'Encode URL',
+});
 
 export const txtUrlTemplateEncodeDescription = i18n.translate(
   'xpack.urlDrilldown.editor.encodeDescription',

@@ -14,5 +14,5 @@ export const url = {
   encodeQuery,
   encodeUriQuery,
   addQueryParam,
-  validate: validateUrl
+  validate: validateUrl,
 };
