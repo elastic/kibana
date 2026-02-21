@@ -22,7 +22,7 @@ That change is required to resolve most of the challenges related to circular de
 The Dependency Injection Subsystem is not a replacement for the existing plugin API. All the services exposed using InversifyJS are accessible in the classic plugins, or the other way around. A plugin can use both simultaneously and gradually migrate to the declarative DI API.
 
 ## Implementation
-The implementation utilizes the [hierarchical dependency injection](https://inversify.io/docs/fundamentals/di-hierarchy/) provided by InversifyJS. Every plugin has its own container inhertied from the root one. That provides sufficient level of isolation with an option to share common services.
+The implementation utilizes the [hierarchical dependency injection](https://inversify.io/docs/fundamentals/di-hierarchy/) provided by InversifyJS. Every plugin has its own container inherited from the root one. That provides sufficient level of isolation with an option to share common services.
 
 ```mermaid
 graph TD
@@ -60,10 +60,11 @@ The services marked as globally available will be registered in the global scope
 
 ## Usage
 ### Get Started
-To get started, just create an empty plugin and declare a named export called `module` in your `index.ts`:
+To get started, create an empty plugin and declare a named export called `services` in your `index.ts`.  Use `declareServices` from `@kbn/core-di` — it returns a `ContainerModule` and exposes a `publish` helper for cross-plugin services:
 
 ```ts
-import { ContainerModule, inject, injectable } from 'inversify';
+import { declareServices } from '@kbn/core-di';
+import { inject, injectable } from 'inversify';
 
 @injectable()
 export class Greeting {
@@ -72,15 +73,16 @@ export class Greeting {
   }
 }
 
-export const module = new ContainerModule(({ bind }) => {
+export const services = declareServices(({ bind }) => {
   bind(Greeting).toSelf();
 });
 ```
 
-The service should now be available in other container modules.
+The service is now available to other `ContainerModule`s within the same plugin scope.
 
 ```ts
-import { ContainerModule, inject, injectable } from 'inversify';
+import { declareServices } from '@kbn/core-di';
+import { inject, injectable } from 'inversify';
 import { Greeting } from '@kbn/greeting';
 
 @injectable()
@@ -92,10 +94,12 @@ class HelloWorld {
   }
 }
 
-export const module = new ContainerModule(({ bind }) => {
+export const services = declareServices(({ bind }) => {
   bind(HelloWorld).toSelf();
 });
 ```
+
+> **Note:** The platform also accepts a `module` named export (`export const module = new ContainerModule(...)`) for backward compatibility, but `services = declareServices(...)` is the preferred form going forward.
 
 ### Exposing Contracts
 In order to expose services to already existing plugins, they should be returned as part of the contract via the `Setup` or `Start` services.
@@ -435,5 +439,187 @@ In most cases, the underlying problem is either duplicating some functionality o
 With the decoupled container module configuration, it should be easier to detect that.
 But if there is no other option to get away from the services composition, deferred dependency injection via the `onActivation` hook is an acceptable option since it does not break the Inversion of Control principle.
 
+### Global Services (Cross-Plugin Sharing)
+
+Normally, if you want to use another plugin's service, you have to add it to `requiredPlugins`. **Global DI** lets you skip this by publishing services that any plugin can request.
+
+#### Publishing a global service
+
+1. Define the interface and token in a **shared package** (e.g. `@kbn/my-service-types`):
+
+```ts
+import { createToken } from '@kbn/core-di';
+
+export interface IMyService {
+  doWork(): string;
+}
+
+export const MyServiceToken = createToken<IMyService>('myPlugin.MyService');
+```
+
+2. In your plugin, use `publish` to make the service available to everyone:
+
+```ts
+import { declareServices } from '@kbn/core-di';
+import { MyServiceToken } from '@kbn/my-service-types';
+import { MyService } from './my_service';
+
+export const services = declareServices(({ publish }) => {
+  // `publish` makes it global. (Use `bind` for private services).
+  publish(MyServiceToken).to(MyService);
+});
+```
+
+3. Any other plugin can now inject `MyServiceToken` to use your service!
+
+#### Token Naming Convention
+
+Global tokens **must** follow a strict `<pluginId>.<ServiceName>` naming pattern (e.g., `slo.CreateSLOFormFlyout`). This prevents name collisions and makes it obvious who owns the service.
+- `pluginId` must be camelCase (no dots).
+- `ServiceName` must be PascalCase.
+
+A lint rule (`@kbn/eslint/require_di_token_naming`) enforces this format.
+
+#### Declaring dependencies in `kibana.jsonc`
+
+Even though you don't use `requiredPlugins`, Kibana still needs to track who uses what. The `plugin.globals` field in `kibana.jsonc` tracks these global services.
+
+**You don't have to manage this manually.** Just run `node scripts/lint_packages --fix` and the `diGlobals` lint rule will automatically update `globals.published` and `globals.consumed` based on your code:
+
+```jsonc
+{
+  "plugin": {
+    "globals": {
+      "published": ["slo.CreateSLOFormFlyout", "slo.SLODetailsFlyout"],
+      "consumed": ["apm.TransactionSummary"]
+    }
+  }
+}
+```
+
+#### Auto-bridging classic plugins
+
+If you are adding DI to an existing plugin, the platform automatically connects your classic `start()` method to the DI system via the `Start` token.
+
+You can easily expose your classic plugin methods as global DI services using a three-argument shorthand for `publish`:
+
+```ts
+import { declareServices, Start } from '@kbn/core-di';
+import { MyServiceToken, type IMyService } from '@kbn/my-service-types';
+
+export const plugin = () => new MyPlugin();
+
+export const services = declareServices(({ publish }) => {
+  // This grabs your classic `start` contract and publishes it globally
+  publish(MyServiceToken, Start, (start: IMyService) => start);
+});
+```
+
+#### Multi-binding (Registries)
+
+You can bind multiple things to the same token to build a **collection** or registry.
+
+For example, instead of an Embeddable plugin making everyone call `registerFactory`, plugins can just publish their factories to a shared `EmbeddableFactoryRegistration` token. The Embeddable plugin then collects them all at once:
+
+```ts
+// In the provider plugins (e.g. lens, image_embeddable):
+publish(EmbeddableFactoryRegistration).toConstantValue({ type: MY_TYPE, getFactory });
+
+// In the collecting plugin (embeddable):
+bind(OnStart).toConstantValue((container: Container) => {
+  for (const entry of container.getAll(EmbeddableFactoryRegistration)) {
+    registerReactEmbeddableFactory(entry.type, entry.getFactory);
+  }
+});
+```
+
+#### Timing and Risks
+
+Global services are loaded lazily. If you try to use a global service before the plugin that provides it has finished starting, it won't work.
+
+**Rule of thumb:**
+- Never resolve global tokens inside `OnSetup` or `OnStart` lifecycle hooks.
+- Only use them inside route handlers, React components, or after all plugins have started.
+
+If you try to consume a token that no enabled plugin provides, Kibana will log a warning at startup.
+
+#### Tooling
+
+| Script | Purpose |
+|---|---|
+| `node scripts/lint_packages --fix [pkg]` | Auto-updates `globals.published` and `globals.consumed` in your `kibana.jsonc`. |
+| `node scripts/generate_di_global_tokens` | Generates a registry of all global tokens (`src/core/packages/di/common/global-tokens.json`) to help developers find available services. |
+
+## Decision Guide — When to use what
+
+| Scenario | Recommendation |
+|---|---|
+| One plugin absolutely requires another to start? | Use `requiredPlugins` — classic explicit dependencies are best here. |
+| Sharing simple types or UI components? | Extract a **shared package** (`@kbn/my-feature-types`). No DI needed. |
+| Sharing optional services or UI across apps? | Use **Global DI** (`publish(token)`). |
+| Multiple plugins adding to a shared list? | Use **Multi-binding** with Global DI. |
+| Sharing data within a single React app? | Use React Context. |
+
+## Testing
+
+### Unit tests — isolated container
+
+Build an isolated `Container` directly from InversifyJS, bind mock values, then resolve the service under test.
+
+```ts
+import { Container } from 'inversify';
+import { MyService } from './my_service';
+import { DepToken, type IDep } from './tokens';
+
+const dep: IDep = { doWork: jest.fn(() => 'mock') };
+
+const container = new Container({ defaultScope: 'Singleton' });
+container.bind(DepToken).toConstantValue(dep);
+container.bind(MyService).toSelf();
+
+const svc = container.get(MyService);
+svc.run();
+expect(dep.doWork).toHaveBeenCalled();
+```
+
+### React component tests
+
+Wrap the component in a `Context.Provider` with an isolated test container:
+
+```tsx
+import { Container } from 'inversify';
+import { render } from '@testing-library/react';
+import { Context } from '@kbn/core-di-browser';
+import { MyComponent } from './my_component';
+import { MyServiceToken } from '@kbn/my-service-types';
+
+const container = new Container({ defaultScope: 'Singleton' });
+container.bind(MyServiceToken).toConstantValue({ doWork: () => 'ok' });
+
+render(
+  <Context.Provider value={container}>
+    <MyComponent />
+  </Context.Provider>
+);
+```
+
+### Route handler tests
+
+Instantiate the route class directly with mocked dependencies; no container setup required:
+
+```ts
+import { MyRoute } from './my_route';
+
+const request = httpServerMock.createKibanaRequest();
+const response = httpServerMock.createResponseFactory();
+const myService = { doWork: jest.fn(() => ({ result: true })) };
+
+const route = new MyRoute(myService, request, response);
+const result = await route.handle();
+expect(result).toMatchObject({ status: 200 });
+```
+
 ## Examples
 There is an [example](https://github.com/elastic/kibana/tree/main/examples/dependency_injection) plugin covering the complete injection flow.
+
+The [Alpha](../../../../../examples/di_global_alpha) and [Beta](../../../../../examples/di_global_beta) plugins demonstrate bidirectional cross-plugin service resolution via `Global`, including the hybrid classic+module pattern (Alpha) and the `globals.provides` / `globals.consumes` manifest fields.
