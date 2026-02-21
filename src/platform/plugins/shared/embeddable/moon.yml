@@ -18,6 +18,9 @@ project:
   sourceRoot: src/platform/plugins/shared/embeddable
 dependsOn:
   - '@kbn/core'
+  - '@kbn/core-di'
+  - '@kbn/plugin-di'
+  - '@kbn/embeddable-factory-types'
   - '@kbn/inspector-plugin'
   - '@kbn/kibana-utils-plugin'
   - '@kbn/ui-actions-plugin'
