@@ -11,6 +11,10 @@ examples/data_streams_example @elastic/kibana-core
 examples/data_view_field_editor_example @elastic/kibana-data-discovery
 examples/dependency_injection @elastic/kibana-core
 examples/developer_examples @elastic/appex-sharedux
+examples/di_global_alpha @elastic/kibana-core
+examples/di_global_alpha_types @elastic/kibana-core
+examples/di_global_beta @elastic/kibana-core
+examples/di_global_beta_types @elastic/kibana-core
 examples/discover_customization_examples @elastic/kibana-data-discovery
 examples/embeddable_examples @elastic/kibana-presentation
 examples/error_boundary @elastic/appex-sharedux

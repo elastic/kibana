@@ -6429,6 +6429,22 @@
   version "0.0.0"
   uid ""
 
+"@kbn/di-global-alpha-plugin@link:examples/di_global_alpha":
+  version "0.0.0"
+  uid ""
+
+"@kbn/di-global-alpha-types@link:examples/di_global_alpha_types":
+  version "0.0.0"
+  uid ""
+
+"@kbn/di-global-beta-plugin@link:examples/di_global_beta":
+  version "0.0.0"
+  uid ""
+
+"@kbn/di-global-beta-types@link:examples/di_global_beta_types":
+  version "0.0.0"
+  uid ""
+
 "@kbn/discover-contextual-components@link:src/platform/packages/shared/kbn-discover-contextual-components":
   version "0.0.0"
   uid ""
@@ -6532,6 +6548,7 @@
 "@kbn/embeddable-examples-plugin@link:examples/embeddable_examples":
   version "0.0.0"
   uid ""
+
 
 "@kbn/embeddable-plugin@link:src/platform/plugins/shared/embeddable":
   version "0.0.0"
@@ -8960,6 +8977,7 @@
 "@kbn/siem-readiness@link:x-pack/solutions/security/packages/siem-readiness":
   version "0.0.0"
   uid ""
+
 
 "@kbn/slo-plugin@link:x-pack/solutions/observability/plugins/slo":
   version "0.0.0"
