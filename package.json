@@ -583,6 +583,7 @@
     "@kbn/elasticsearch-client-xpack-plugin": "link:x-pack/platform/test/plugin_api_integration/plugins/elasticsearch_client",
     "@kbn/embeddable-alerts-table-plugin": "link:x-pack/platform/plugins/shared/embeddable_alerts_table",
     "@kbn/embeddable-examples-plugin": "link:examples/embeddable_examples",
+    "@kbn/embeddable-factory-types": "link:src/platform/packages/shared/kbn-embeddable-factory-types",
     "@kbn/embeddable-plugin": "link:src/platform/plugins/shared/embeddable",
     "@kbn/embedded-lens-example-plugin": "link:x-pack/examples/embedded_lens_example",
     "@kbn/encrypted-saved-objects-plugin": "link:x-pack/platform/plugins/shared/encrypted_saved_objects",

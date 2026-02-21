@@ -19,6 +19,11 @@
     ],
     "optionalPlugins": ["licensing", "savedObjectsTaggingOss", "usageCollection"],
     "requiredBundles": ["kibanaUtils", "presentationPanel"],
-    "extraPublicDirs": ["common"]
+    "extraPublicDirs": ["common"],
+    "globals": {
+      "provides": [
+        "embeddable.FactoryRegistration"
+      ]
+    }
   }
 }

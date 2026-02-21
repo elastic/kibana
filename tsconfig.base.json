@@ -1040,6 +1040,8 @@
       "@kbn/embeddable-alerts-table-plugin/*": ["x-pack/platform/plugins/shared/embeddable_alerts_table/*"],
       "@kbn/embeddable-examples-plugin": ["examples/embeddable_examples"],
       "@kbn/embeddable-examples-plugin/*": ["examples/embeddable_examples/*"],
+      "@kbn/embeddable-factory-types": ["src/platform/packages/shared/kbn-embeddable-factory-types"],
+      "@kbn/embeddable-factory-types/*": ["src/platform/packages/shared/kbn-embeddable-factory-types/*"],
       "@kbn/embeddable-plugin": ["src/platform/plugins/shared/embeddable"],
       "@kbn/embeddable-plugin/*": ["src/platform/plugins/shared/embeddable/*"],
       "@kbn/embedded-lens-example-plugin": ["x-pack/examples/embedded_lens_example"],

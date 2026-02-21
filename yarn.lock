@@ -6549,6 +6549,9 @@
   version "0.0.0"
   uid ""
 
+"@kbn/embeddable-factory-types@link:src/platform/packages/shared/kbn-embeddable-factory-types":
+  version "0.0.0"
+  uid ""
 
 "@kbn/embeddable-plugin@link:src/platform/plugins/shared/embeddable":
   version "0.0.0"
