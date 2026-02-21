@@ -12,11 +12,17 @@ This page shows the **minimum setup** to add Scout tests to a plugin/package. Fo
 
 ::::::::::{step} Generate a working scaffold
 
-Generate a working scaffold (folders, configs, and sample tests):
+Generate a working scaffold (folders, configs, and sample tests) by following the guided setup:
 
 ```bash
 node scripts/scout.js generate
 ```
+
+::::::::::
+
+::::::::::{step} Write and run tests
+
+Tweak the new Playwright config(s) and [write UI tests](./write-ui-tests.md) or [API tests](./write-api-tests.md).
 
 ::::::::::
 
@@ -47,9 +53,15 @@ your-plugin/
 
 ::::::::
 
-::::::::{step} Add Playwright config(s)
+::::::::{step} Create Playwright config(s)
 
-Create `playwright.config.ts` under `test/scout/ui` and/or `test/scout/api`:
+Create a config under `test/scout/ui` and/or `test/scout/api`.
+
+::::::::{tab-set}
+
+:::::::{tab-item} Standard config (sequential test runs)
+
+Create `playwright.config.ts`:
 
 ```ts
 import { createPlaywrightConfig } from '@kbn/scout';
@@ -65,9 +77,11 @@ Use the conventional name `playwright.config.ts` so Scout tooling (and `node scr
 
 Then create the `tests/` directory next to the config.
 
-::::::::
+If many files share one-time setup (archives/ingest/settings), add a [global setup hook](./global-setup-hook.md).
 
-::::::::{step} (Optional) Add a parallel UI config
+:::::::
+
+:::::::{tab-item} Parallel config (parallel test runs)
 
 If your UI suites can be isolated, add `parallel.playwright.config.ts` under `test/scout/ui` and point it at `parallel_tests/`:
 
@@ -84,7 +98,13 @@ export default createPlaywrightConfig({
 Use the conventional name `parallel.playwright.config.ts` so Scout tooling (and `node scripts/scout.js run-tests --testFiles ...`) can reliably discover/derive the config for `./parallel_tests`.
 ::::::
 
-See [Parallelism](./parallelism.md) and [Global setup hook](./global-setup-hook.md) for recommended parallel patterns.
+Then create the `parallel_tests/` directory next to the config. For parallel suites, prefer defining test suites and test cases using `spaceTest` so each worker runs in an isolated Space (see [Parallelism](./parallelism.md)).
+
+If many files share one-time setup (archives/ingest/settings), add a [global setup hook](./global-setup-hook.md).
+
+:::::::
+
+::::::::
 
 ::::::::
 
