@@ -192,6 +192,9 @@ export enum ProductFeatureAlertsKey {
 
   /** Enables external detections for AI SOC, includes alerts_summary, basic_rules*/
   externalDetections = 'external_detections',
+
+  // TODO remove. This is here to make the types work.
+  foo123 = 'foo123',
 }
 
 // Merges the two enums.
