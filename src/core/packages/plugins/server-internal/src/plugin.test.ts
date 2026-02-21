@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ContainerModule } from 'inversify';
+import { Container, ContainerModule } from 'inversify';
 import { join } from 'path';
 import { BehaviorSubject } from 'rxjs';
 import { REPO_ROOT } from '@kbn/repo-info';
@@ -22,7 +22,7 @@ import { nodeServiceMock } from '@kbn/core-node-server-mocks';
 import type { PluginManifest } from '@kbn/core-plugins-server';
 import { PluginType } from '@kbn/core-base-common';
 import { coreInternalLifecycleMock } from '@kbn/core-lifecycle-server-mocks';
-import { PluginSetup, PluginStart, Setup, Start } from '@kbn/core-di';
+import { OnStart, PluginSetup, PluginStart, Setup, Start } from '@kbn/core-di';
 import { CoreSetup, CoreStart, PluginInitializer } from '@kbn/core-di-server';
 import { createRuntimePluginContractResolverMock } from './test_helpers';
 import { PluginWrapper } from './plugin';
@@ -54,6 +54,11 @@ jest.doMock(join('plugin-with-wrong-initializer-path', 'server'), () => ({ plugi
 jest.doMock(join('plugin-with-module', 'server'), () => ({ module: pluginModule }), {
   virtual: true,
 });
+jest.doMock(
+  join('plugin-with-instance-and-module', 'server'),
+  () => ({ plugin: mockPluginInitializer, module: pluginModule }),
+  { virtual: true }
+);
 
 const OSS_PLUGIN_PATH_POSIX = '/kibana/src/plugins/ossPlugin';
 const OSS_PLUGIN_PATH_WINDOWS = 'C:\\kibana\\src\\plugins\\ossPlugin';
@@ -71,6 +76,10 @@ function createPluginManifest(manifestProps: Partial<PluginManifest> = {}): Plug
     optionalPlugins: ['some-optional-dep'],
     requiredBundles: [],
     runtimePluginDependencies: ['some-runtime-dep'],
+    globals: {
+      services: { provides: [], consumes: [] },
+      extensionPoints: { hosts: [], contributes: [] },
+    },
     server: true,
     ui: true,
     owner: { name: 'Core' },
@@ -210,7 +219,7 @@ test('`init` fails if no `plugin` initializer nor `module` is exported', async (
   });
 
   await expect(() => plugin.init()).rejects.toThrowErrorMatchingInlineSnapshot(
-    `"Plugin \\"some-plugin-id\\" does not export the \\"plugin\\" definition or \\"module\\" (plugin-without-initializer-path)."`
+    `"Plugin \\"some-plugin-id\\" does not export \\"plugin\\", \\"services\\", or \\"module\\" (plugin-without-initializer-path)."`
   );
 });
 
@@ -523,6 +532,85 @@ test('`start` loads start dependencies into the plugin container', async () => {
   const container = setupContext.injection.getContainer();
   expect(container.get(CoreStart('injection'))).toBeDefined();
   expect(container.get(PluginStart('someDep'))).toBe('value');
+});
+
+test('`start` bridges the classic start contract into DI before OnStart hooks resolve Start', async () => {
+  // Mimic PluginModule: a default Start binding plus a container-module
+  // activation that fires OnStart hooks. The wrapper operates on a child scope,
+  // matching production, so the rebound Start is observed by the hooks.
+  const root = new Container({ defaultScope: 'Singleton' });
+  const activated = new WeakSet<Container>();
+  root.loadSync(
+    new ContainerModule(({ bind, onActivation }) => {
+      bind(Setup)
+        .toResolvedValue(() => undefined)
+        .inRequestScope();
+      bind(Start)
+        .toResolvedValue(() => undefined)
+        .inRequestScope();
+      onActivation(Start, ({ get }, contract) => {
+        const container = get(Container);
+        if (!activated.has(container)) {
+          activated.add(container);
+          container.getAll(OnStart, { chained: true }).forEach((callback) => callback(container));
+        }
+        return contract;
+      });
+    })
+  );
+  const child = new Container({ defaultScope: 'Singleton', parent: root });
+  child.bind(Container).toConstantValue(child);
+
+  const manifest = createPluginManifest();
+  const opaqueId = Symbol();
+  const plugin = new PluginWrapper({
+    path: 'plugin-with-instance-and-module',
+    manifest,
+    opaqueId,
+    initializerContext: createPluginInitializerContext({
+      coreContext,
+      opaqueId,
+      manifest,
+      instanceInfo,
+      nodeInfo,
+    }),
+  });
+
+  const internalSetupDeps = coreInternalLifecycleMock.createInternalSetup();
+  internalSetupDeps.injection.getContainer.mockReturnValue(child);
+  const internalStartDeps = coreInternalLifecycleMock.createInternalStart();
+  internalStartDeps.injection.getContainer.mockReturnValue(child);
+
+  const setupContext = createPluginSetupContext({
+    deps: internalSetupDeps,
+    plugin,
+    runtimeResolver,
+  });
+  const startContext = createPluginStartContext({
+    deps: internalStartDeps,
+    plugin,
+    runtimeResolver,
+  });
+
+  const classicStartContract = { value: 'classic-start' };
+  mockPluginInitializer.mockResolvedValue({
+    setup: jest.fn(),
+    start: jest.fn().mockReturnValue(classicStartContract),
+  });
+
+  let observedStart: unknown;
+  mockContainerModuleCallback.mockImplementationOnce(({ bind }) => {
+    bind(OnStart).toConstantValue((container: Container) => {
+      observedStart = container.get(Start);
+    });
+  });
+
+  await plugin.init();
+  await plugin.setup(setupContext, {} as any);
+  const startContract = await plugin.start(startContext, {} as any);
+
+  expect(startContract).toBe(classicStartContract);
+  expect(observedStart).toBe(classicStartContract);
 });
 
 test('`stop` fails if plugin is not set up', async () => {

@@ -17,6 +17,7 @@ const {
   isValidPluginId,
   isValidPkgType,
   isArrOfIds,
+  isArrOfGlobalTokenIds,
   isArrOfStrings,
   PACKAGE_TYPES,
 } = require('./parse_helpers');
@@ -62,6 +63,7 @@ function validatePackageManifestPlugin(plugin, repoRoot, path) {
     configPath,
     requiredPlugins,
     optionalPlugins,
+    globals,
     requiredBundles,
     runtimePluginDependencies,
     enabledOnAnonymousPages,
@@ -99,10 +101,72 @@ function validatePackageManifestPlugin(plugin, repoRoot, path) {
 
   if (optionalPlugins !== undefined && !isArrOfIds(optionalPlugins)) {
     throw err(
-      `plugin.requiredPlugins`,
+      `plugin.optionalPlugins`,
       optionalPlugins,
       `must be an array of strings in camel or snake case`
     );
+  }
+
+  if (globals !== undefined) {
+    if (!isObj(globals)) {
+      throw err(`plugin.globals`, globals, `must be an object when defined`);
+    }
+
+    if (globals.services !== undefined) {
+      if (!isObj(globals.services)) {
+        throw err(`plugin.globals.services`, globals.services, `must be an object when defined`);
+      }
+      if (
+        globals.services.provides !== undefined &&
+        !isArrOfGlobalTokenIds(globals.services.provides)
+      ) {
+        throw err(
+          `plugin.globals.services.provides`,
+          globals.services.provides,
+          `must be an array of strings in <pluginId>.<ServiceName> format`
+        );
+      }
+      if (
+        globals.services.consumes !== undefined &&
+        !isArrOfGlobalTokenIds(globals.services.consumes)
+      ) {
+        throw err(
+          `plugin.globals.services.consumes`,
+          globals.services.consumes,
+          `must be an array of strings in <pluginId>.<ServiceName> format`
+        );
+      }
+    }
+
+    if (globals.extensionPoints !== undefined) {
+      if (!isObj(globals.extensionPoints)) {
+        throw err(
+          `plugin.globals.extensionPoints`,
+          globals.extensionPoints,
+          `must be an object when defined`
+        );
+      }
+      if (
+        globals.extensionPoints.hosts !== undefined &&
+        !isArrOfGlobalTokenIds(globals.extensionPoints.hosts)
+      ) {
+        throw err(
+          `plugin.globals.extensionPoints.hosts`,
+          globals.extensionPoints.hosts,
+          `must be an array of strings in <pluginId>.<ServiceName> format`
+        );
+      }
+      if (
+        globals.extensionPoints.contributes !== undefined &&
+        !isArrOfGlobalTokenIds(globals.extensionPoints.contributes)
+      ) {
+        throw err(
+          `plugin.globals.extensionPoints.contributes`,
+          globals.extensionPoints.contributes,
+          `must be an array of strings in <pluginId>.<ServiceName> format`
+        );
+      }
+    }
   }
 
   if (runtimePluginDependencies !== undefined && !isArrOfIds(runtimePluginDependencies)) {
@@ -163,6 +227,7 @@ function validatePackageManifestPlugin(plugin, repoRoot, path) {
     configPath,
     requiredPlugins,
     optionalPlugins,
+    globals,
     requiredBundles,
     runtimePluginDependencies,
     enabledOnAnonymousPages,

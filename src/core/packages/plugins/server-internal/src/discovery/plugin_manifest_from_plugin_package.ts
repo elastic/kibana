@@ -24,6 +24,16 @@ export function pluginManifestFromPluginPackage(
     serviceFolders: manifest.serviceFolders,
     kibanaVersion,
     optionalPlugins: manifest.plugin.optionalPlugins ?? [],
+    globals: {
+      services: {
+        provides: manifest.plugin.globals?.services?.provides ?? [],
+        consumes: manifest.plugin.globals?.services?.consumes ?? [],
+      },
+      extensionPoints: {
+        hosts: manifest.plugin.globals?.extensionPoints?.hosts ?? [],
+        contributes: manifest.plugin.globals?.extensionPoints?.contributes ?? [],
+      },
+    },
     requiredBundles: manifest.plugin.requiredBundles ?? [],
     requiredPlugins: manifest.plugin.requiredPlugins ?? [],
     runtimePluginDependencies: manifest.plugin.runtimePluginDependencies ?? [],

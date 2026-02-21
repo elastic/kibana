@@ -32,6 +32,10 @@ const createUiPlugins = (pluginDeps: Record<string, string[]>) => {
       optionalPlugins: [],
       requiredPlugins: [],
       runtimePluginDependencies: [],
+      globals: {
+        services: { provides: [], consumes: [] },
+        extensionPoints: { hosts: [], contributes: [] },
+      },
       requiredBundles: deps,
     });
 

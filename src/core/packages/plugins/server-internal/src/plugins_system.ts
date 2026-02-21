@@ -292,6 +292,9 @@ export class PluginsSystem<T extends PluginType> {
             optionalPlugins: plugin.manifest.optionalPlugins.filter(filterUiPlugins),
             runtimePluginDependencies: plugin.manifest.runtimePluginDependencies,
             requiredBundles: plugin.manifest.requiredBundles,
+            // TODO: use `globals` at runtime to log warnings for
+            // unresolved tokens at startup and to drive browser bundle loading.
+            globals: plugin.manifest.globals,
             enabledOnAnonymousPages: plugin.manifest.enabledOnAnonymousPages,
           },
         ];
@@ -487,7 +490,9 @@ export const findCircularDependencies = (
  * This helps identify duplicate cycles regardless of where we start traversing
  */
 export const normalizeCycle = (cycle: PluginName[]): PluginName[] => {
-  if (cycle.length <= 1) return cycle;
+  if (cycle.length <= 1) {
+    return cycle;
+  }
   if (new Set(cycle).size !== cycle.length) {
     throw new Error(`Cycle contains duplicate plugins: ${cycle}`);
   }
