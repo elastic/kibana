@@ -255,7 +255,7 @@ export async function loadRule(kbnClient: KbnClient, includeResponseActions = fa
     description: 'Test rule',
     tags: [],
     license: '',
-    interval: '1m',
+    interval: '10s',
     from: 'now-360s',
     to: 'now',
     meta: { from: '1m', kibana_siem_app_url: 'http://localhost:5620/app/security' },

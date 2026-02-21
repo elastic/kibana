@@ -193,9 +193,14 @@ test.describe(
 
         // Navigate to the policy and add osquery
         await page.testSubj.locator('agentPolicyNameLink').getByText(policyName).click();
+        await waitForPageReady(page);
         await page.testSubj.locator('addPackagePolicyButton').click();
-        await page.testSubj.locator('epmList.searchBar').fill('osquery');
+        await waitForPageReady(page);
+        const searchBar = page.testSubj.locator('epmList.searchBar');
+        await searchBar.waitFor({ state: 'visible', timeout: 30_000 });
+        await searchBar.fill('osquery');
         await page.testSubj.locator('integration-card:epr:osquery_manager').click();
+        await waitForPageReady(page);
         await page.testSubj.locator('addIntegrationPolicyButton').click();
         await waitForPageReady(page);
 
