@@ -126,13 +126,13 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
       const concreteFilePaths = isGrepReturnedFilePaths
         ? grepSpecPattern // use the returned concrete file paths
         : globby.sync(
-            specPattern,
-            excludeSpecPattern
-              ? {
-                  ignore: excludeSpecPattern,
-                }
-              : undefined
-          ); // convert the glob pattern to concrete file paths
+          specPattern,
+          excludeSpecPattern
+            ? {
+              ignore: excludeSpecPattern,
+            }
+            : undefined
+        ); // convert the glob pattern to concrete file paths
 
       let files = retrieveIntegrations(concreteFilePaths);
 
@@ -297,16 +297,16 @@ Cypress FTR setup for file: ${filePath}:
 ----------------------------------------------
 
 ${JSON.stringify(
-  config.getAll(),
-  (key, v) => {
-    if (Array.isArray(v) && v.length > 32) {
-      return v.slice(0, 32).concat('... trimmed after 32 items.');
-    } else {
-      return v;
-    }
-  },
-  2
-)}
+                config.getAll(),
+                (key, v) => {
+                  if (Array.isArray(v) && v.length > 32) {
+                    return v.slice(0, 32).concat('... trimmed after 32 items.');
+                  } else {
+                    return v;
+                  }
+                },
+                2
+              )}
 
 ----------------------------------------------
 `);
@@ -332,7 +332,7 @@ ${JSON.stringify(
               let shutdownEs;
 
               const esFromEnv = process.env.CYPRESS_ES_FROM;
-              const esFrom = esFromEnv || config.get('esTestCluster')?.from || 'snapshot';
+              const esFrom = esFromEnv || 'docker';
 
               try {
                 shutdownEs = await pRetry(

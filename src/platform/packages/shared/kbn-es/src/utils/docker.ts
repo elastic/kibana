@@ -1280,7 +1280,7 @@ export async function runDockerSnapshotContainer(
     '--name',
     containerName,
     '-p',
-    `127.0.0.1:${port}:${port}`,
+    `127.0.0.1:${port}:9200`,
     '-p',
     `127.0.0.1:${port + 100}:9300`,
     ...envArgs,
