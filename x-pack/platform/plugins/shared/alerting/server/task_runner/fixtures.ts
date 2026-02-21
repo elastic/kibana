@@ -281,7 +281,7 @@ export const mockedRawRuleSO: SavedObject<RawRule> = {
   },
 };
 
-export const mockedRule: SanitizedRule<typeof mockedRawRuleSO.attributes.params> = {
+export const mockedRule = {
   id: mockedRawRuleSO.id,
   ...mockedRawRuleSO.attributes,
   nextRun: undefined,
@@ -310,7 +310,7 @@ export const mockedRule: SanitizedRule<typeof mockedRawRuleSO.attributes.params>
       blob: '## Summary',
     },
   },
-};
+} as SanitizedRule<typeof mockedRawRuleSO.attributes.params>;
 
 export const mockTaskInstance = () => ({
   id: '1',

@@ -458,9 +458,13 @@ export class TaskRunner<
     // ALERT_MUTED on the AAD docs in the same execution.
     const alertUuidsToAutoUnmute: string[] = [];
     if (alertsToAutoUnmute.length > 0) {
-      const updatedSnoozedInstances = { ...(rule.snoozedInstances ?? {}) };
+      const autoUnmuteInstanceIds = new Set(
+        alertsToAutoUnmute.map((a) => a.alertInstanceId)
+      );
+      const updatedSnoozedInstances = (rule.snoozedInstances ?? []).filter(
+        (e) => !autoUnmuteInstanceIds.has(e.instanceId)
+      );
       for (const { alertInstanceId, reason } of alertsToAutoUnmute) {
-        delete updatedSnoozedInstances[alertInstanceId];
         const uuid = alertsToReturn[alertInstanceId]?.meta?.uuid;
         if (uuid) {
           alertUuidsToAutoUnmute.push(uuid);
@@ -483,8 +487,8 @@ export class TaskRunner<
       // cleared by updatePersistedAlerts below, but rule SO still has the entry),
       // which self-heals when the next build sets ALERT_MUTED from the rule SO.
       try {
-        const client = this.context.internalSavedObjectsRepository;
-        await partiallyUpdateRuleWithEs(client, rule.id, {
+        const esClient = this.context.elasticsearch.client.asInternalUser;
+        await partiallyUpdateRuleWithEs(esClient, rule.id, {
           snoozedInstances: updatedSnoozedInstances,
         });
       } catch (err) {
