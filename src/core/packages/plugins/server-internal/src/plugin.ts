@@ -172,11 +172,13 @@ export class PluginWrapper<
 
     if (isPromise(contract)) {
       return contract.then((resolvedContract) => {
+        this.container?.rebindSync(Start).toConstantValue(resolvedContract);
         this.startDependencies$.next([startContext, plugins, resolvedContract]);
         return resolvedContract!;
       });
     }
 
+    this.container?.rebindSync(Start).toConstantValue(contract);
     this.startDependencies$.next([startContext, plugins, contract]);
 
     return contract;
@@ -213,10 +215,13 @@ export class PluginWrapper<
     return config;
   }
 
-  protected async getPluginDefinition(): Promise<
-    PluginDefinition<TSetup, TStart, TPluginsSetup, TPluginsStart>
-  > {
-    return (await import(join(this.path, 'server'))) ?? {};
+  // Synchronous `require()` is intentional: server-side plugins are CommonJS
+  // modules, and synchronous loading allows `getConfigDescriptor()` and
+  // `init()` to avoid unnecessary async overhead.  The DI `module` export is
+  // available immediately after require, which simplifies container loading
+  // during `setup()`.
+  protected getPluginDefinition(): PluginDefinition<TSetup, TStart, TPluginsSetup, TPluginsStart> {
+    return require(join(this.path, 'server')) ?? {};
   }
 
   protected async createPluginInstance() {

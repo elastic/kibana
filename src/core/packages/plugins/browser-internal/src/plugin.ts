@@ -96,6 +96,7 @@ export class PluginWrapper<
       this.container?.get<TStart>(Start),
     ].find(Boolean)!;
 
+    this.container?.rebindSync(Start).toConstantValue(contract);
     this.startDependencies$.next([startContext, plugins, contract]);
 
     return contract;
