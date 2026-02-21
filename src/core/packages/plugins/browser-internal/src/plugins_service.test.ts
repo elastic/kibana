@@ -69,6 +69,7 @@ function createManifest(
     optionalPlugins: optional,
     requiredBundles: [],
     runtimePluginDependencies: [],
+    globals: { provides: [], consumes: [] },
   };
 }
 

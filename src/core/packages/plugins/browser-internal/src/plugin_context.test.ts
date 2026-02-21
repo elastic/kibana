@@ -23,6 +23,7 @@ const createPluginManifest = (pluginName: string): DiscoveredPlugin => {
     optionalPlugins: [],
     requiredBundles: [],
     runtimePluginDependencies: [],
+    globals: { provides: [], consumes: [] },
   };
 };
 

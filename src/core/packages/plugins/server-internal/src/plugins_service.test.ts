@@ -81,6 +81,7 @@ const createPlugin = (
     requiredBundles = [],
     optionalPlugins = [],
     runtimePluginDependencies = [],
+    globals = { provides: [], consumes: [] },
     kibanaVersion = '7.0.0',
     configPath = [path],
     server = true,
@@ -94,6 +95,7 @@ const createPlugin = (
     requiredBundles?: string[];
     optionalPlugins?: string[];
     runtimePluginDependencies?: string[];
+    globals?: { provides?: string[]; consumes?: string[] };
     kibanaVersion?: string;
     configPath?: ConfigPath;
     server?: boolean;
@@ -112,6 +114,7 @@ const createPlugin = (
       requiredBundles,
       optionalPlugins,
       runtimePluginDependencies,
+      globals,
       server,
       owner: {
         name: 'Core',
@@ -747,16 +750,17 @@ describe('PluginsService', () => {
 
       expect(mockDiscover).toHaveBeenCalledTimes(1);
       expect(mockDiscover).toHaveBeenCalledWith({
-        config: {
+        config: expect.objectContaining({
           additionalPluginPaths: [],
           allowlistPluginGroups: ['observability'],
+          globalTokenValidation: 'warn',
           initialize: true,
           pluginSearchPaths: [
             resolve(REPO_ROOT, '..', 'kibana-extra'),
             resolve(REPO_ROOT, 'plugins'),
           ],
           shouldEnableAllPlugins: false,
-        },
+        }),
         coreContext: { coreId, env, logger, configService },
         instanceInfo: { uuid: 'uuid', airgapped: false },
         nodeInfo: { roles: { backgroundTasks: true, ui: true, migrator: false } },
@@ -1001,6 +1005,7 @@ describe('PluginsService', () => {
         requiredBundles: [],
         optionalPlugins: [],
         runtimePluginDependencies: [],
+        globals: { provides: [], consumes: [] },
       },
     ];
 
