@@ -39,6 +39,7 @@ module.exports = {
     scout_no_promise_all_with_playwright_apis: require('./rules/scout_no_promise_all_with_playwright_apis'),
     require_kbn_fs: require('./rules/require_kbn_fs'),
     require_include_in_check_a11y: require('./rules/require_include_in_check_a11y'),
+    require_di_token_naming: require('./rules/require_di_token_naming'),
     no_wrapped_error_in_logger: require('./rules/no_wrapped_error_in_logger'),
     no_sync_import_from_plugin: require('./rules/no_sync_import_from_plugin'),
     no_npx_playwright: require('./rules/no_npx_playwright'),
