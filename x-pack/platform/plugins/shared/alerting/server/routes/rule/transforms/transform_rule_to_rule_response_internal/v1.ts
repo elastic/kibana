@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isEmpty } from 'lodash';
 import type {
   RuleResponseInternalV1,
   RuleParamsV1,
@@ -12,6 +13,8 @@ import type {
   MonitoringV1,
 } from '../../../../../common/routes/rule/response';
 import type { Rule, RuleLastRun, RuleParams, Monitoring } from '../../../../application/rule/types';
+
+type Artifacts = Rule['artifacts'];
 
 export const transformRuleLastRun = (lastRun: RuleLastRun): RuleLastRunV1 => {
   return {
@@ -157,5 +160,12 @@ export const transformRuleToRuleResponseInternal = <Params extends RuleParams = 
     : {}),
   ...(rule.alertDelay !== undefined ? { alert_delay: rule.alertDelay } : {}),
   ...(rule.flapping !== undefined ? { flapping: transformFlapping(rule.flapping) } : {}),
-  ...(rule.artifacts !== undefined ? { artifacts: rule.artifacts } : {}),
+  ...(!areArtifactsEmpty(rule.artifacts) ? { artifacts: rule.artifacts } : {}),
 });
+
+const areArtifactsEmpty = (artifacts?: Artifacts): boolean => {
+  return (
+    isEmpty(artifacts) ||
+    (isEmpty(artifacts?.dashboards) && isEmpty(artifacts?.investigation_guide?.blob))
+  );
+};

@@ -158,6 +158,6 @@ export const transformRuleToRuleResponse = <Params extends RuleParams = never>(
 const areArtifactsEmpty = (artifacts?: Artifacts): boolean => {
   return (
     isEmpty(artifacts) ||
-    (isEmpty(artifacts?.dashboards) && isEmpty(artifacts?.investigation_guide))
+    (isEmpty(artifacts?.dashboards) && isEmpty(artifacts?.investigation_guide?.blob))
   );
 };

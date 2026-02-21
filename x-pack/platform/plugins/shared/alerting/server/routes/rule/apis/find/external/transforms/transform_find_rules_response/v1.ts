@@ -99,7 +99,7 @@ export const transformPartialRule = (
 const areArtifactsEmpty = (artifacts?: Artifacts): boolean => {
   return (
     isEmpty(artifacts) ||
-    (isEmpty(artifacts?.dashboards) && isEmpty(artifacts?.investigation_guide))
+    (isEmpty(artifacts?.dashboards) && isEmpty(artifacts?.investigation_guide?.blob))
   );
 };
 
