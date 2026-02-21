@@ -191,6 +191,10 @@ describe('CoreApp', () => {
         requiredBundles: [],
         requiredPlugins: [],
         runtimePluginDependencies: [],
+        globals: {
+          services: { provides: [], consumes: [] },
+          extensionPoints: { hosts: [], contributes: [] },
+        },
       });
     });
     it('calls `registerBundleRoutes` with the correct options', async () => {
@@ -302,6 +306,10 @@ describe('CoreApp', () => {
         requiredBundles: [],
         requiredPlugins: [],
         runtimePluginDependencies: [],
+        globals: {
+          services: { provides: [], consumes: [] },
+          extensionPoints: { hosts: [], contributes: [] },
+        },
       });
       prebootUIPlugins.internal.set('some-plugin-2', {
         publicAssetsDir: '/foo',
@@ -433,6 +441,10 @@ describe('CoreApp', () => {
       requiredBundles: [],
       requiredPlugins: [],
       runtimePluginDependencies: [],
+      globals: {
+        services: { provides: [], consumes: [] },
+        extensionPoints: { hosts: [], contributes: [] },
+      },
     });
     uiPlugins.internal.set('some-plugin', {
       publicAssetsDir: '/foo',
@@ -448,6 +460,10 @@ describe('CoreApp', () => {
       requiredBundles: [],
       requiredPlugins: [],
       runtimePluginDependencies: [],
+      globals: {
+        services: { provides: [], consumes: [] },
+        extensionPoints: { hosts: [], contributes: [] },
+      },
     });
     uiPlugins.internal.set('some-plugin-2', {
       publicAssetsDir: '/foo',

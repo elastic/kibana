@@ -142,5 +142,71 @@ export const MANIFEST_V1: JSONSchema = {
       `,
       type: 'boolean',
     },
+    globals: {
+      description: desc`
+        Cross-plugin contract declarations. The platform uses these for visibility, startup
+        health checks, and future bundle-loading optimisation.
+      `,
+      type: 'object',
+      properties: {
+        services: {
+          type: 'object',
+          properties: {
+            provides: {
+              description: desc`
+                Service token names (in \`<pluginId>.<ServiceName>\` format) that this plugin
+                provides for cross-plugin consumption. Auto-maintained by \`node scripts/lint_packages --fix\`.
+              `,
+              type: 'array',
+              items: {
+                type: 'string',
+                pattern: '^[a-z][a-zA-Z0-9]*\\.[A-Z][a-zA-Z0-9]*$',
+              },
+            },
+            consumes: {
+              description: desc`
+                Service token names (in \`<pluginId>.<ServiceName>\` format) that this plugin
+                consumes from other plugins. Auto-maintained by \`node scripts/lint_packages --fix\`.
+              `,
+              type: 'array',
+              items: {
+                type: 'string',
+                pattern: '^[a-z][a-zA-Z0-9]*\\.[A-Z][a-zA-Z0-9]*$',
+              },
+            },
+          },
+          additionalProperties: false,
+        },
+        extensionPoints: {
+          type: 'object',
+          properties: {
+            hosts: {
+              description: desc`
+                Extension point token names (in \`<pluginId>.<ServiceName>\` format) hosted by this
+                plugin. Auto-maintained by \`node scripts/lint_packages --fix\`.
+              `,
+              type: 'array',
+              items: {
+                type: 'string',
+                pattern: '^[a-z][a-zA-Z0-9]*\\.[A-Z][a-zA-Z0-9]*$',
+              },
+            },
+            contributes: {
+              description: desc`
+                Extension point token names (in \`<pluginId>.<ServiceName>\` format) this plugin
+                contributes to. Auto-maintained by \`node scripts/lint_packages --fix\`.
+              `,
+              type: 'array',
+              items: {
+                type: 'string',
+                pattern: '^[a-z][a-zA-Z0-9]*\\.[A-Z][a-zA-Z0-9]*$',
+              },
+            },
+          },
+          additionalProperties: false,
+        },
+      },
+      additionalProperties: false,
+    },
   },
 };

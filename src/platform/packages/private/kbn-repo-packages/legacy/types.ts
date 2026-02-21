@@ -33,6 +33,16 @@ export interface LegacyKibanaPlatformPluginManifest {
   requiredPlugins: readonly string[];
   optionalPlugins: readonly string[];
   runtimePluginDependencies?: readonly string[];
+  globals?: {
+    services?: {
+      provides?: readonly string[];
+      consumes?: readonly string[];
+    };
+    extensionPoints?: {
+      hosts?: readonly string[];
+      contributes?: readonly string[];
+    };
+  };
   requiredBundles: readonly string[];
   extraPublicDirs: readonly string[];
 }
