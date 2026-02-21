@@ -2477,6 +2477,8 @@
       "@kbn/significant-events-plugin/*": ["./x-pack/platform/plugins/shared/significant_events/*"],
       "@kbn/significant-events-schema": ["./x-pack/platform/packages/shared/kbn-significant-events-schema"],
       "@kbn/significant-events-schema/*": ["./x-pack/platform/packages/shared/kbn-significant-events-schema/*"],
+      "@kbn/slo-flyout-types": ["./x-pack/platform/packages/shared/kbn-slo-flyout-types"],
+      "@kbn/slo-flyout-types/*": ["./x-pack/platform/packages/shared/kbn-slo-flyout-types/*"],
       "@kbn/slo-plugin": ["./x-pack/solutions/observability/plugins/slo"],
       "@kbn/slo-plugin/*": ["./x-pack/solutions/observability/plugins/slo/*"],
       "@kbn/slo-schema": ["./x-pack/platform/packages/shared/kbn-slo-schema"],

@@ -9,7 +9,10 @@
     "id": "apm",
     "browser": true,
     "server": true,
-    "configPath": ["xpack", "apm"],
+    "configPath": [
+      "xpack",
+      "apm"
+    ],
     "requiredPlugins": [
       "apmSourcesAccess",
       "apmDataAccess",
@@ -68,6 +71,14 @@
       "slo",
       "cps",
     ],
+    "globals": {
+      "services": {
+        "consumes": [
+          "slo.CreateSLOFormFlyout",
+          "slo.SLODetailsFlyout"
+        ]
+      }
+    },
     "requiredBundles": [
       "fleet",
       "kibanaReact",

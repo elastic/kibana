@@ -260,3 +260,4 @@ rest are conventions to keep in mind.
 These plugins use this authoring pattern directly:
 
 - `examples/di_global_alpha` and `examples/di_global_beta` for bidirectional service resolution, including the hybrid classic-plus-module pattern
+- `x-pack/solutions/observability/plugins/slo` provides its flyout components as services (`slo.CreateSLOFormFlyout`, `slo.SLODetailsFlyout`, in `@kbn/slo-flyout-types`) that `apm` consumes with no direct plugin dependency — a start-selector projection of a real plugin's `start()` contract

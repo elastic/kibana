@@ -1091,6 +1091,7 @@ x-pack/platform/packages/shared/kbn-sample-parser @elastic/streams-ui @elastic/o
 x-pack/platform/packages/shared/kbn-search-index-documents @elastic/search-kibana
 x-pack/platform/packages/shared/kbn-shared-components @elastic/search-kibana
 x-pack/platform/packages/shared/kbn-significant-events-schema @elastic/obs-sig-events-team
+x-pack/platform/packages/shared/kbn-slo-flyout-types @elastic/actionable-obs-team
 x-pack/platform/packages/shared/kbn-slo-schema @elastic/actionable-obs-team
 x-pack/platform/packages/shared/kbn-streamlang @elastic/streams-ui
 x-pack/platform/packages/shared/kbn-streamlang-tests @elastic/streams-ui
