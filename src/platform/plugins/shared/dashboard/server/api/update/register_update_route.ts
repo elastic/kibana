@@ -59,7 +59,7 @@ export function registerUpdateRoute(router: VersionedRouter<RequestHandlerContex
         if (e.isBoom && e.output.statusCode === 404) {
           return res.notFound({
             body: {
-              message: `A dashboard with ID ${req.params.id} was not found.`,
+              message: `A dashboard with ID [${req.params.id}] was not found.`,
             },
           });
         }
