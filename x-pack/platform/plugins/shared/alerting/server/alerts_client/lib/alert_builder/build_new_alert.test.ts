@@ -7,7 +7,6 @@
 import { Alert as LegacyAlert } from '../../../alert/alert';
 import { buildNewAlert } from './build_new_alert';
 import type { Alert } from '@kbn/alerts-as-data-utils';
-import { createConditionalSnoozeAlert } from '../fixtures/snooze_alert_fixtures';
 import {
   SPACE_IDS,
   ALERT_ACTION_GROUP,
@@ -32,10 +31,6 @@ import {
   ALERT_RULE_EXECUTION_TIMESTAMP,
   ALERT_SEVERITY_IMPROVING,
   ALERT_PENDING_RECOVERED_COUNT,
-  ALERT_SNOOZE_CONDITIONS,
-  ALERT_SNOOZE_CONDITION_OPERATOR,
-  ALERT_SNOOZE_EXPIRES_AT,
-  ALERT_SNOOZE_SNAPSHOT,
 } from '@kbn/rule-data-utils';
 import { alertRule } from '../test_fixtures';
 import type { AlertRuleData } from '../../types';
