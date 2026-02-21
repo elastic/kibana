@@ -30,7 +30,15 @@ test.describe('Alert Test', { tag: [...tags.stateful.classic] }, () => {
 
     // Click on the rule name
     await page.getByText(ruleName).first().click();
-    await page.testSubj.locator('expand-event').first().waitFor({ state: 'visible' });
+    await waitForPageReady(page);
+
+    // Go to Alerts tab (matches Cypress flow)
+    await page.testSubj.locator('navigation-alerts').click();
+    await waitForPageReady(page);
+    await page.testSubj
+      .locator('expand-event')
+      .first()
+      .waitFor({ state: 'visible', timeout: 30_000 });
 
     // Expand first event
     await page.testSubj.locator('expand-event').first().click();

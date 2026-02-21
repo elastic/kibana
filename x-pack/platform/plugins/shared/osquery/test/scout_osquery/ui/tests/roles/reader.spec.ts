@@ -60,7 +60,7 @@ test.describe('Reader - only READ', { tag: [...tags.stateful.classic] }, () => {
     const addSavedQueryButton = page.getByRole('button', { name: 'Add saved query' });
     await expect(addSavedQueryButton).toBeVisible({ timeout: 30_000 });
     await expect(addSavedQueryButton).toBeDisabled();
-    await expect(page.locator(`[aria-label="Run ${savedQueryName}"]`)).not.toBeVisible();
+    await expect(page.locator(`[aria-label="Run ${savedQueryName}"]`)).toBeDisabled();
 
     await pageObjects.savedQueries.clickEditSavedQuery(savedQueryName);
     await expect(page.locator('input[name="id"]')).toBeDisabled();
@@ -111,7 +111,7 @@ test.describe('Reader - only READ', { tag: [...tags.stateful.classic] }, () => {
     await pageObjects.packs.navigateToPackDetail(packId);
     await expect(page.getByText(`${packName} details`).first()).toBeVisible();
     await expect(page.getByText('Edit').first()).toBeDisabled();
-    await expect(page.locator(`[aria-label="Run ${savedQueryId}"]`)).not.toBeVisible();
-    await expect(page.locator(`[aria-label="Edit ${savedQueryId}"]`)).not.toBeVisible();
+    await expect(page.locator(`[aria-label="Run ${savedQueryName}"]`)).not.toBeVisible();
+    await expect(page.locator(`[aria-label="Edit ${savedQueryName}"]`)).not.toBeVisible();
   });
 });

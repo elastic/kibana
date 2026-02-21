@@ -145,14 +145,16 @@ test.describe(
         page.getByText('Use the fields below to map results from this query to ECS fields.').first()
       ).toBeVisible();
 
+      const advancedAccordion = page.testSubj.locator('advanced-accordion-content');
+      const advancedToggle = advancedAccordion.locator('.euiAccordion__button');
+
       // Click Advanced to toggle/hide
-      await page.getByText('Advanced').first().click();
-      await expect(
-        page.getByText('Use the fields below to map results from this query to ECS fields.').first()
-      ).not.toBeVisible();
+      await advancedToggle.click();
+      await expect(advancedToggle).toHaveAttribute('aria-expanded', 'false');
 
       // Click Advanced again to show
-      await page.getByText('Advanced').first().click();
+      await advancedToggle.click();
+      await expect(advancedToggle).toHaveAttribute('aria-expanded', 'true');
       await expect(
         page.getByText('Use the fields below to map results from this query to ECS fields.').first()
       ).toBeVisible();

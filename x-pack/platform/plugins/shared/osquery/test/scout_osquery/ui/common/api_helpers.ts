@@ -182,6 +182,18 @@ export async function cleanupPack(
   }
 }
 
+/**
+ * Load or update Elastic prebuilt packs via the assets update API.
+ * Call this in beforeAll to ensure prebuilt packs are available for tests.
+ */
+export async function loadPrebuiltPacks(kbnClient: KbnClient): Promise<void> {
+  await kbnClient.request({
+    method: 'POST',
+    path: '/internal/osquery/assets/update',
+    headers: { 'elastic-api-version': '1' },
+  });
+}
+
 // ── Live Queries ──────────────────────────────────────────────────────────────
 
 export async function loadLiveQuery(

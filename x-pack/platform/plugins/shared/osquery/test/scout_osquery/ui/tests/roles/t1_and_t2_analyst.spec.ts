@@ -72,8 +72,21 @@ roles.forEach(({ name, role }) => {
         pageObjects,
       }) => {
         await pageObjects.savedQueries.navigate();
-        await expect(page.getByText(savedQueryName)).toBeVisible();
         await waitForPageReady(page);
+        // Saved query may be on another page - paginate to find it
+        const savedQueryRow = page.getByText(savedQueryName).first();
+        if ((await savedQueryRow.isVisible({ timeout: 3_000 }).catch(() => false)) === false) {
+          const nextPageLink = page.getByRole('link', { name: 'Next page' });
+          while (await nextPageLink.isVisible({ timeout: 2_000 }).catch(() => false)) {
+            await nextPageLink.click();
+            await new Promise((r) => setTimeout(r, 1_000));
+            if (await savedQueryRow.isVisible({ timeout: 2_000 }).catch(() => false)) {
+              break;
+            }
+          }
+        }
+
+        await expect(page.getByText(savedQueryName).first()).toBeVisible({ timeout: 10_000 });
         const addSavedQueryButton = page.getByRole('button', { name: 'Add saved query' });
         await expect(addSavedQueryButton).toBeVisible({ timeout: 30_000 });
         await expect(addSavedQueryButton).toBeDisabled();
@@ -119,11 +132,12 @@ roles.forEach(({ name, role }) => {
         await newLiveQueryButton.click();
 
         await pageObjects.liveQuery.selectAllAgents();
-        const savedQueryCombo = page.testSubj
-          .locator('savedQuerySelect')
-          .locator('[data-test-subj="comboBoxInput"]');
-        await savedQueryCombo.click();
-        await savedQueryCombo.pressSequentially(savedQueryName);
+        const savedQuerySelect = page.testSubj.locator('savedQuerySelect');
+        await savedQuerySelect.locator('[data-test-subj="comboBoxInput"]').click();
+        const searchInput = savedQuerySelect.locator('[data-test-subj="comboBoxSearchInput"]');
+        await searchInput.waitFor({ state: 'visible', timeout: 10_000 });
+        await searchInput.fill('');
+        await searchInput.pressSequentially(savedQueryName);
         await page
           .getByRole('option', { name: new RegExp(savedQueryName, 'i') })
           .first()
@@ -157,8 +171,8 @@ roles.forEach(({ name, role }) => {
         await pageObjects.packs.navigateToPackDetail(packId);
         await expect(page.getByText(`${packName} details`).first()).toBeVisible();
         await expect(page.getByText('Edit').first()).toBeDisabled();
-        await expect(page.locator(`[aria-label="Run ${savedQueryId}"]`)).not.toBeVisible();
-        await expect(page.locator(`[aria-label="Edit ${savedQueryId}"]`)).not.toBeVisible();
+        await expect(page.locator(`[aria-label="Run ${savedQueryName}"]`)).not.toBeVisible();
+        await expect(page.locator(`[aria-label="Edit ${savedQueryName}"]`)).not.toBeVisible();
       });
 
       test('should not be able to create new liveQuery from scratch', async ({
@@ -170,7 +184,7 @@ roles.forEach(({ name, role }) => {
         await page.getByText('New live query').first().click();
         await waitForPageReady(page);
         await pageObjects.liveQuery.selectAllAgents();
-        await expect(page.testSubj.locator('kibanaCodeEditor')).not.toBeVisible();
+        await expect(page.testSubj.locator('kibanaCodeEditor')).toHaveCount(0);
         await pageObjects.liveQuery.submitQuery();
         await expect(page.getByText('Query is a required field').first()).toBeVisible();
       });

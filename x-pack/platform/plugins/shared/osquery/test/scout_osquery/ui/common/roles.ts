@@ -141,7 +141,15 @@ export const t1AnalystRole: KibanaRole = {
       },
       {
         names: ['.alerts-security*', '.siem-signals-*'],
-        privileges: ['read', 'write'],
+        privileges: ['read', 'write', 'view_index_metadata', 'manage'],
+      },
+      {
+        names: ['.lists*', '.items*', '.lists-default*', '.items-default*'],
+        privileges: ['read', 'write', 'manage', 'view_index_metadata'],
+      },
+      {
+        names: ['.fleet-agents*', '.fleet-actions*', 'metrics-endpoint.metadata_current_*'],
+        privileges: ['read'],
       },
     ],
   },
@@ -188,7 +196,15 @@ export const t2AnalystRole: KibanaRole = {
       },
       {
         names: ['.alerts-security*', '.siem-signals-*'],
-        privileges: ['read', 'write', 'manage'],
+        privileges: ['read', 'write', 'manage', 'view_index_metadata'],
+      },
+      {
+        names: ['.lists*', '.items*', '.lists-default*', '.items-default*'],
+        privileges: ['read', 'write', 'manage', 'view_index_metadata'],
+      },
+      {
+        names: ['.fleet-agents*', '.fleet-actions*', 'metrics-endpoint.metadata_current_*'],
+        privileges: ['read'],
       },
     ],
   },

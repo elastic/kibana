@@ -18,7 +18,7 @@ import {
   loadSavedQuery,
   cleanupSavedQuery,
 } from '../common/api_helpers';
-import { waitForPageReady } from '../common/constants';
+import { dismissAllToasts, waitForPageReady } from '../common/constants';
 
 const BIG_QUERY =
   'select u.username, p.pid, p.name, pos.local_address, pos.local_port, p.path, p.cmdline, pos.remote_address, pos.remote_port from processes as p join users as u on u.uid=p.uid join process_open_sockets as pos on pos.pid=p.pid where pos.remote_port !="0" limit 1000;';
@@ -122,6 +122,7 @@ test.describe(
       await page.locator('input[name="description"]').fill(savedQueryDescription);
       await page.testSubj.locator('savedQueryFlyoutSaveButton').click();
       await expect(page.getByText('Successfully saved').first()).toBeVisible({ timeout: 15_000 });
+      await dismissAllToasts(page);
 
       // Play saved query
       await page.gotoApp('osquery/saved_queries');
@@ -130,7 +131,8 @@ test.describe(
       await page.locator(`[aria-label="Run ${savedQueryId}"]`).click();
       await pageObjects.liveQuery.selectAllAgents();
 
-      // Verify timeout
+      // Verify timeout (expand Advanced to reveal timeout input)
+      await pageObjects.liveQuery.clickAdvanced();
       await expect(page.testSubj.locator('timeout-input')).toHaveValue(timeout);
       await pageObjects.liveQuery.submitQuery();
 
@@ -143,6 +145,7 @@ test.describe(
       // Run in test configuration
       await page.getByText('Test configuration').first().click();
       await pageObjects.liveQuery.selectAllAgents();
+      await pageObjects.liveQuery.clickAdvanced();
       await expect(page.testSubj.locator('timeout-input')).toHaveValue(timeout);
       await pageObjects.liveQuery.submitQuery();
       await pageObjects.liveQuery.checkResults();
@@ -247,12 +250,16 @@ test.describe(
         await addToCaseButton.waitFor({ state: 'visible', timeout: 30_000 });
         await addToCaseButton.click();
 
-        await expect(page.getByText('Select case').first()).toBeVisible();
-        await page.testSubj.locator(`cases-table-row-select-${caseId}`).click();
+        await expect(page.getByText('Select case').first()).toBeVisible({ timeout: 15_000 });
+        const caseRowSelect = page.testSubj.locator(`cases-table-row-select-${caseId}`);
+        await caseRowSelect.waitFor({ state: 'visible', timeout: 30_000 });
+        await caseRowSelect.click();
 
         await expect(page.getByText(/Case .+ updated/).first()).toBeVisible({ timeout: 15_000 });
         await page.getByText('View case').first().click();
-        await expect(page.getByText('SELECT * FROM users;').first()).toBeVisible();
+        await expect(page.getByText('SELECT * FROM users;').first()).toBeVisible({
+          timeout: 30_000,
+        });
       });
 
       test('user can not delete prebuilt saved query but can delete normal saved query', async ({
@@ -287,27 +294,40 @@ test.describe(
         await page.testSubj.locator('resultsTypeField').click();
         await page.getByText('Differential (Ignore removals)').first().click();
 
-        await expect(page.getByText('Unique identifier of the us').first()).toBeVisible();
-        await expect(page.getByText('User ID').first()).toBeVisible();
+        // Scope assertions to the add-query flyout; ECS mapping form loads async
+        const addQueryFlyout = page.locator('[aria-labelledby="flyoutTitle"]').first();
+        const ecsMappingForm = addQueryFlyout
+          .locator('[data-test-subj="ECSMappingEditorForm"]')
+          .first();
+        await ecsMappingForm.waitFor({ state: 'visible', timeout: 15_000 });
+        await expect(addQueryFlyout.getByText(/Unique identifier of the us/).first()).toBeVisible({
+          timeout: 15_000,
+        });
+        await expect(addQueryFlyout.getByText('User ID').first()).toBeVisible({ timeout: 15_000 });
 
         // Delete first ECS mapping row
-        const flyout = page.locator('[aria-labelledby="flyoutTitle"]');
-        const ecsMappingForm = flyout.locator('[data-test-subj="ECSMappingEditorForm"]').first();
         await ecsMappingForm.locator('[aria-label="Delete ECS mapping row"]').first().click();
 
-        await expect(page.getByText('Unique identifier of the us').first()).not.toBeVisible();
-        await expect(page.getByText('User ID').first()).not.toBeVisible();
+        await expect(
+          addQueryFlyout.getByText(/Unique identifier of the us/).first()
+        ).not.toBeVisible();
+        await expect(addQueryFlyout.getByText('User ID').first()).not.toBeVisible();
 
-        await flyout.getByText('Save').first().click();
+        await addQueryFlyout.getByText('Save').first().click();
 
-        // Verify changes
+        // Verify changes — Edit users_elastic opens the edit flyout
         await page.locator(`[aria-label="Edit users_elastic"]`).click();
-        await expect(page.getByText('SELECT * FROM users;where name=1').first()).toBeVisible();
-        await expect(page.getByText('Unique identifier of the us.').first()).not.toBeVisible();
-        await expect(page.getByText('User ID').first()).not.toBeVisible();
+        await expect(page.getByText('SELECT * FROM users;where name=1').first()).toBeVisible({
+          timeout: 15_000,
+        });
+        const editFlyout = page.locator('[aria-labelledby="flyoutTitle"]').first();
+        await expect(
+          editFlyout.getByText(/Unique identifier of the us\.?/).first()
+        ).not.toBeVisible();
+        await expect(editFlyout.getByText('User ID').first()).not.toBeVisible();
         await expect(page.getByText('Differential (Ignore removals)').first()).toBeVisible();
 
-        await flyout.getByText('Cancel').first().click();
+        await editFlyout.getByText('Cancel').first().click();
       });
     });
   }

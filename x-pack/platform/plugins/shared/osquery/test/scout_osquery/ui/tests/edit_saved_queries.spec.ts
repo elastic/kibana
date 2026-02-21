@@ -68,9 +68,11 @@ test.describe(
       // Re-open the saved query to verify changes
       await page.locator(`[aria-label="Edit ${savedQueryName}"]`).click();
 
-      // Verify ECS mapping was removed
-      await expect(page.getByText('Custom key/value pairs').first()).not.toBeVisible();
-      await expect(page.getByText('Hours of uptime').first()).not.toBeVisible();
+      // Verify ECS mapping was removed. Use toHaveCount(0) instead of not.toBeVisible()
+      // because EUI hides content via CSS (height: 0; overflow: hidden) but Playwright
+      // still considers those elements visible.
+      await expect(page.getByText('Custom key/value pairs')).toHaveCount(0);
+      await expect(page.getByText('Hours of uptime')).toHaveCount(0);
 
       // Verify all platforms are now checked
       const platformGroup2 = page.testSubj.locator('osquery-platform-checkbox-group');

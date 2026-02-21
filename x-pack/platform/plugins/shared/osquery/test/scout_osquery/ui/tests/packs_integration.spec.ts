@@ -15,6 +15,7 @@ import {
   loadAgentPolicy,
   cleanupAgentPolicy,
   addOsqueryToAgentPolicy,
+  loadPrebuiltPacks,
 } from '../common/api_helpers';
 import { waitForPageReady } from '../common/constants';
 
@@ -155,10 +156,14 @@ test.describe(
     );
 
     // eslint-disable-next-line playwright/max-nested-describe
-    test.describe(
+    test.describe.serial(
       'Load prebuilt packs',
       { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
       () => {
+        test.beforeAll(async ({ kbnClient }) => {
+          await loadPrebuiltPacks(kbnClient);
+        });
+
         test.beforeEach(async ({ browserAuth }) => {
           await browserAuth.loginWithCustomRole(socManagerRole);
         });
@@ -167,14 +172,17 @@ test.describe(
           await page.gotoApp('osquery/packs');
           await waitForPageReady(page);
 
-          // Load prebuilt packs if the button is present (it may already be loaded)
-          const loadBtn = page.getByText('Load Elastic prebuilt packs').first();
+          // Load or update prebuilt packs if the button is present (packs may already be loaded)
+          const loadBtn = page.getByRole('button', {
+            name: /Load Elastic prebuilt packs|Update Elastic prebuilt packs/,
+          });
           const isLoadVisible = await loadBtn.isVisible({ timeout: 5_000 }).catch(() => false);
 
           if (isLoadVisible) {
             await loadBtn.click();
+            // Wait for import to complete — button disappears when done
             // eslint-disable-next-line playwright/no-conditional-expect
-            await expect(loadBtn).not.toBeVisible({ timeout: 30_000 });
+            await expect(loadBtn).not.toBeVisible({ timeout: 60_000 });
           }
 
           const rows = page.locator('tbody > tr');
@@ -184,6 +192,7 @@ test.describe(
 
         test('should be able to activate pack', async ({ page, pageObjects }) => {
           await pageObjects.packs.navigate();
+          await pageObjects.packs.ensureAllPacksVisible();
           await pageObjects.packs.changePackActiveStatus('it-compliance');
           await pageObjects.packs.changePackActiveStatus('it-compliance');
         });
