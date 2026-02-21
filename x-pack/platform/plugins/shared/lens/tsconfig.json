@@ -14,6 +14,8 @@
   "kbn_references": [
     "@kbn/spaces-plugin",
     "@kbn/core",
+    "@kbn/core-di-internal",
+    "@kbn/embeddable-factory-types",
     "@kbn/task-manager-plugin",
     "@kbn/global-search-plugin",
     "@kbn/saved-objects-tagging-plugin",
@@ -143,5 +145,7 @@
     "@kbn/scout",
     "@kbn/cps-utils",
   ],
-  "exclude": ["target/**/*"]
+  "exclude": [
+    "target/**/*"
+  ]
 }

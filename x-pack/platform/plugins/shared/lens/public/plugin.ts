@@ -142,6 +142,14 @@ import type { LensEmbeddableStartServices } from './react_embeddable/types';
 import type { EditorFrameServiceValue } from './editor_frame_service/editor_frame_service_context';
 import { setLensBuilder } from './lazy_builder';
 
+let lensEmbeddableServicesGetter: (() => Promise<LensEmbeddableStartServices>) | undefined;
+
+/**
+ * Returns the deferred getter for Lens embeddable start services.
+ * Set during `setup()`, consumed by the DI module's `getFactory` callback at render time.
+ */
+export const getLensEmbeddableServicesGetter = () => lensEmbeddableServicesGetter;
+
 export type { SaveProps } from './app_plugin';
 
 export interface LensPluginSetupDependencies {
@@ -381,16 +389,9 @@ export class LensPlugin {
       };
     };
 
-    if (embeddable) {
-      // Let Kibana know about the Lens embeddable
-      embeddable.registerReactEmbeddableFactory(LENS_EMBEDDABLE_TYPE, async () => {
-        const [deps, { createLensEmbeddableFactory }] = await Promise.all([
-          getStartServicesForEmbeddable(),
-          import('./async_services'),
-        ]);
-        return createLensEmbeddableFactory(deps);
-      });
+    lensEmbeddableServicesGetter = getStartServicesForEmbeddable;
 
+    if (embeddable) {
       this.setupPendingTasks.push(
         core.getStartServices().then(async ([{ featureFlags }]) => {
           // This loads the feature flags async to allow synchronous access to flags via getLensFeatureFlags
