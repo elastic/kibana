@@ -180,14 +180,14 @@ Use `bind` for local DI bindings that are not cross-plugin contracts, such as
 ```ts
 import { OnStart, getExtensions, type Container } from '@kbn/core-di';
 import { declare } from '@kbn/plugin-di';
-import { MyRegistrationToken } from '@kbn/my-plugin-types';
+import { EmbeddableFactoryRegistration } from '@kbn/embeddable-factory-types';
 
 export const services = declare(({ bind, host }) => {
-  host(MyRegistrationToken);
+  host(EmbeddableFactoryRegistration);
 
   bind(OnStart).toConstantValue((container: Container) => {
-    for (const entry of getExtensions(container, MyRegistrationToken)) {
-      registerEntry(entry);
+    for (const entry of getExtensions(container, EmbeddableFactoryRegistration)) {
+      registerReactEmbeddableFactory(entry.type, entry.getFactory);
     }
   });
 });
@@ -261,3 +261,4 @@ These plugins use this authoring pattern directly:
 
 - `examples/di_global_alpha` and `examples/di_global_beta` for bidirectional service resolution, including the hybrid classic-plus-module pattern
 - `x-pack/solutions/observability/plugins/slo` provides its flyout components as services (`slo.CreateSLOFormFlyout`, `slo.SLODetailsFlyout`, in `@kbn/slo-flyout-types`) that `apm` consumes with no direct plugin dependency — a start-selector projection of a real plugin's `start()` contract
+- `src/platform/plugins/shared/embeddable` hosts the `embeddable.FactoryRegistration` extension point (in `@kbn/embeddable-factory-types`), and `lens`, `dashboard_markdown`, and `image_embeddable` contribute factories to it
