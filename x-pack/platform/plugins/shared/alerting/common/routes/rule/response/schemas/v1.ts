@@ -598,6 +598,35 @@ export const ruleResponseSchema = schema.object({
       },
     })
   ),
+  snoozed_instances: schema.maybe(
+    schema.arrayOf(
+      schema.object({
+        instance_id: schema.string({
+          meta: { description: 'The alert instance identifier that is snoozed.' },
+        }),
+        expires_at: schema.maybe(
+          schema.string({
+            meta: {
+              description: 'ISO timestamp after which the snooze expires automatically.',
+            },
+          })
+        ),
+        conditions: schema.maybe(
+          schema.arrayOf(
+            schema.object({
+              type: schema.string(),
+              field: schema.string(),
+              value: schema.maybe(schema.string()),
+              snapshot_value: schema.maybe(schema.string()),
+            })
+          )
+        ),
+        condition_operator: schema.maybe(
+          schema.oneOf([schema.literal('any'), schema.literal('all')])
+        ),
+      })
+    )
+  ),
   execution_status: ruleExecutionStatusSchema,
   monitoring: schema.maybe(monitoringSchema),
   snooze_schedule: schema.maybe(schema.arrayOf(ruleSnoozeScheduleSchema)),

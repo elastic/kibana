@@ -146,7 +146,7 @@ function getPartialRuleFromRaw<Params extends RuleTypeParams>(
     : null;
   const includeMonitoring = monitoring && !excludeFromPublicApi;
 
-  const rule: PartialRule<Params> = {
+  const rule = {
     id: opts.id,
     notifyWhen,
     ...omit(partialRawRule, excludeFromPublicApi ? [...fieldsToExcludeFromPublicApi] : ''),
@@ -208,7 +208,7 @@ function getPartialRuleFromRaw<Params extends RuleTypeParams>(
           },
         }
       : {}),
-  };
+  } as PartialRule<Params>;
 
   if (omitGeneratedValues) {
     if (rule.actions) {
