@@ -216,4 +216,8 @@ describe('buildUpdatedRecoveredAlert', () => {
       [TAGS]: ['rule-', '-tags'],
     });
   });
+
+  // Snooze config now lives on the rule SO, not on alert docs.
+  // The scheduler handles TTL/condition evaluation; the builder no longer
+  // clears snooze fields during recovery.
 });

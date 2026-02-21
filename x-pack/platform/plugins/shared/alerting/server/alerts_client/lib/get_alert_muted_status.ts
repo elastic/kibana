@@ -7,10 +7,17 @@
 
 import type { AlertRuleData } from '../types';
 
-export function getAlertMutedStatus(alertInstanceId: string, ruleData?: AlertRuleData): boolean {
+export function getAlertMutedStatus(
+  alertInstanceId: string,
+  ruleData?: AlertRuleData
+): boolean {
   if (!ruleData) {
     return false;
   }
 
-  return ruleData.muteAll || ruleData.mutedInstanceIds.includes(alertInstanceId);
+  if (ruleData.muteAll || ruleData.mutedInstanceIds.includes(alertInstanceId)) {
+    return true;
+  }
+
+  return (ruleData.snoozedInstances ?? []).some((e) => e.instanceId === alertInstanceId);
 }

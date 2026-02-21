@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { Alert as LegacyAlert } from '../../../alert/alert';
+import type { Alert } from '@kbn/alerts-as-data-utils';
 import { buildOngoingAlert } from './build_ongoing_alert';
 import type { AlertRuleData } from '../../types';
 import {
@@ -1082,6 +1083,71 @@ for (const flattened of [true, false]) {
         });
 
         expect((result as Record<string, unknown>)[ALERT_MUTED]).toBe(true);
+      });
+
+      test('should set ALERT_MUTED to true when alert is in snoozedInstances', () => {
+        const legacyAlert = new LegacyAlert<{}, {}, 'default'>('alert-A');
+        legacyAlert.scheduleActions('default');
+
+        const result = buildOngoingAlert<{}, {}, {}, 'default', 'recovered'>({
+          alert: existingFlattenedNewAlert,
+          legacyAlert,
+          rule: alertRule,
+          ruleData: {
+            ...ruleData,
+            snoozedInstances: [
+              {
+                instanceId: 'alert-A',
+                expiresAt: new Date(Date.now() + 3600000).toISOString(),
+              },
+            ],
+          },
+          isImproving: null,
+          timestamp: '2023-03-28T12:27:28.159Z',
+          kibanaVersion: '8.9.0',
+        });
+
+        expect((result as Record<string, unknown>)[ALERT_MUTED]).toBe(true);
+      });
+
+      test('should keep ALERT_MUTED true across consecutive ongoing updates when in snoozedInstances', () => {
+        const snoozedRuleData = {
+          ...ruleData,
+          snoozedInstances: [
+            {
+              instanceId: 'alert-A',
+              expiresAt: new Date(Date.now() + 3600000).toISOString(),
+            },
+          ],
+        };
+        const firstLegacyAlert = new LegacyAlert<{}, {}, 'default'>('alert-A');
+        firstLegacyAlert.scheduleActions('default');
+
+        const firstRunResult = buildOngoingAlert<{}, {}, {}, 'default', 'recovered'>({
+          alert: existingAlert as unknown as Alert,
+          legacyAlert: firstLegacyAlert,
+          rule: alertRule,
+          ruleData: snoozedRuleData,
+          isImproving: null,
+          timestamp: '2023-03-28T12:27:28.159Z',
+          kibanaVersion: '8.9.0',
+        });
+
+        const secondLegacyAlert = new LegacyAlert<{}, {}, 'default'>('alert-A');
+        secondLegacyAlert.scheduleActions('default');
+
+        const secondRunResult = buildOngoingAlert<{}, {}, {}, 'default', 'recovered'>({
+          alert: firstRunResult,
+          legacyAlert: secondLegacyAlert,
+          rule: alertRule,
+          ruleData: snoozedRuleData,
+          isImproving: null,
+          timestamp: '2023-03-29T12:27:28.159Z',
+          kibanaVersion: '8.9.0',
+        });
+
+        expect((firstRunResult as Record<string, unknown>)[ALERT_MUTED]).toBe(true);
+        expect((secondRunResult as Record<string, unknown>)[ALERT_MUTED]).toBe(true);
       });
 
       test('should set ALERT_MUTED to false when ruleData is not provided', () => {
