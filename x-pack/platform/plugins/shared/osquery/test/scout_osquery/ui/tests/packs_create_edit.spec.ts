@@ -468,6 +468,13 @@ test.describe(
           if (discoverHref) {
             const baseUrl = new URL(page.url()).origin;
             await page.goto(`${baseUrl}${discoverHref}`);
+            await waitForPageReady(page);
+
+            // Wait for Discover doc table to be visible and fully rendered (data loaded)
+            const discoverTable = page.locator(
+              '[data-test-subj="discoverDocTable"][data-render-complete="true"]'
+            );
+            await expect(discoverTable).toBeVisible({ timeout: 60_000 });
 
             await expect(page.testSubj.locator('breadcrumbs')).toContainText('Discover', {
               timeout: 30_000,
@@ -592,11 +599,20 @@ test.describe(
         });
 
         await test.step('Verify pack results badges', async () => {
-          await expect(page.testSubj.locator('last-results-date')).toBeVisible({ timeout: 30_000 });
-          await expect(page.testSubj.locator('docs-count-badge')).toContainText('1', {
+          // Ensure loading spinners are gone before asserting badges
+          await page.testSubj.locator('docsLoading').waitFor({ state: 'hidden', timeout: 30_000 });
+
+          await expect(page.testSubj.locator('last-results-date').first()).toBeVisible({
             timeout: 30_000,
           });
-          await expect(page.testSubj.locator('agent-count-badge')).toContainText('1', {
+          await expect(page.testSubj.locator('docs-count-badge').first()).toContainText('1', {
+            timeout: 30_000,
+          });
+          await expect(page.testSubj.locator('agent-count-badge').first()).toContainText('1', {
+            timeout: 30_000,
+          });
+          // Wait for errors column to finish loading before asserting (spinner -> packResultsErrorsEmpty)
+          await expect(page.testSubj.locator('packResultsErrorsEmpty').first()).toBeVisible({
             timeout: 30_000,
           });
           await expect(page.testSubj.locator('packResultsErrorsEmpty')).toHaveCount(1);
