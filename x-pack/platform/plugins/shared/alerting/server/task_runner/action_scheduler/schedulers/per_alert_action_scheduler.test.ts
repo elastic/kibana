@@ -514,7 +514,7 @@ describe('Per-Alert Action Scheduler', () => {
       expect(logger.debug).toHaveBeenCalledTimes(1);
       expect(logger.debug).toHaveBeenNthCalledWith(
         1,
-        `skipping scheduling of actions for '2' in rule rule-label: rule is muted`
+        `skipping scheduling of actions for '2' in rule rule-label: alert is muted`
       );
 
       expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toEqual(2);
@@ -532,6 +532,129 @@ describe('Per-Alert Action Scheduler', () => {
 
       // @ts-expect-error private variable
       expect(scheduler.skippedAlerts).toEqual({ '2': { reason: 'muted' } });
+    });
+
+    test('should auto-unmute alert when conditional snooze conditions are met', async () => {
+      // Alert 2 has a conditional snooze on its document (not in mutedInstanceIds).
+      // The snooze has expired, so the alert should be auto-unmuted.
+      alertsClient.getTrackedAlertByInstanceId.mockImplementation((id: string) => {
+        if (id === '2') {
+          return {
+            'kibana.alert.instance.id': '2',
+            'kibana.alert.muted': true,
+            'kibana.alert.snooze.expires_at': new Date(Date.now() - 60000).toISOString(),
+          };
+        }
+        return undefined;
+      });
+      const scheduler = new PerAlertActionScheduler(getSchedulerContext());
+      const results = await scheduler.getActionsToSchedule({
+        activeAlerts: alerts,
+      });
+
+      // Alert 2 should be scheduled (not muted) because snooze expired
+      expect(results).toHaveLength(4);
+      expect(scheduler.alertsToAutoUnmute).toHaveLength(1);
+      expect(scheduler.alertsToAutoUnmute[0].alertInstanceId).toBe('2');
+      expect(scheduler.alertsToAutoUnmute[0].reason).toContain('Time expiry reached');
+
+      alertsClient.getTrackedAlertByInstanceId.mockReset();
+    });
+
+    test('should keep alert muted when conditional snooze conditions are not met', async () => {
+      // Alert 2 has a conditional snooze on its document with a future expiry.
+      // Conditions are not yet met, so the alert should remain muted.
+      alertsClient.getTrackedAlertByInstanceId.mockImplementation((id: string) => {
+        if (id === '2') {
+          return {
+            'kibana.alert.instance.id': '2',
+            'kibana.alert.muted': true,
+            'kibana.alert.snooze.expires_at': new Date(Date.now() + 3600000).toISOString(),
+          };
+        }
+        return undefined;
+      });
+      const scheduler = new PerAlertActionScheduler(getSchedulerContext());
+      const results = await scheduler.getActionsToSchedule({
+        activeAlerts: alerts,
+      });
+
+      // Alert 2 should remain muted -- only alert 1 gets actions
+      expect(results).toHaveLength(2);
+      expect(scheduler.alertsToAutoUnmute).toHaveLength(0);
+
+      // @ts-expect-error private variable
+      expect(scheduler.skippedAlerts).toEqual({ '2': { reason: 'muted' } });
+
+      alertsClient.getTrackedAlertByInstanceId.mockReset();
+    });
+
+    test('should treat alert as simple mute when no snooze config exists on tracked alert', async () => {
+      // Alert 2 is muted but has no snooze config
+      alertsClient.getTrackedAlertByInstanceId.mockReturnValue(undefined);
+      const scheduler = new PerAlertActionScheduler({
+        ...getSchedulerContext(),
+        rule: { ...rule, mutedInstanceIds: ['2'] },
+      });
+      const results = await scheduler.getActionsToSchedule({
+        activeAlerts: alerts,
+      });
+
+      // Alert 2 should remain muted (simple mute)
+      expect(results).toHaveLength(2);
+      expect(scheduler.alertsToAutoUnmute).toHaveLength(0);
+
+      alertsClient.getTrackedAlertByInstanceId.mockReset();
+    });
+
+    test('should not treat alert as muted when doc has kibana.alert.muted=true but no snooze config', async () => {
+      // Edge case: alert document has kibana.alert.muted = true but no snooze conditions.
+      // This should not happen through normal API flow. The alert should NOT be treated
+      // as muted to avoid permanently suppressing actions without an unmute path.
+      alertsClient.getTrackedAlertByInstanceId.mockImplementation((id: string) => {
+        if (id === '2') {
+          return {
+            'kibana.alert.instance.id': '2',
+            'kibana.alert.muted': true,
+          };
+        }
+        return undefined;
+      });
+      const scheduler = new PerAlertActionScheduler(getSchedulerContext());
+      const results = await scheduler.getActionsToSchedule({
+        activeAlerts: alerts,
+      });
+
+      // Alert 2 should NOT be muted -- all alerts get actions
+      expect(results).toHaveLength(4);
+      expect(scheduler.alertsToAutoUnmute).toHaveLength(0);
+
+      alertsClient.getTrackedAlertByInstanceId.mockReset();
+    });
+
+    test('should not treat alert as muted when doc has kibana.alert.muted=false even with snooze fields', async () => {
+      // If kibana.alert.muted is false (e.g. after auto-unmute cleared it), the alert
+      // should not be suppressed even if stale snooze fields remain on the document.
+      alertsClient.getTrackedAlertByInstanceId.mockImplementation((id: string) => {
+        if (id === '2') {
+          return {
+            'kibana.alert.instance.id': '2',
+            'kibana.alert.muted': false,
+            'kibana.alert.snooze.expires_at': new Date(Date.now() + 3600000).toISOString(),
+          };
+        }
+        return undefined;
+      });
+      const scheduler = new PerAlertActionScheduler(getSchedulerContext());
+      const results = await scheduler.getActionsToSchedule({
+        activeAlerts: alerts,
+      });
+
+      // Alert 2 should NOT be muted
+      expect(results).toHaveLength(4);
+      expect(scheduler.alertsToAutoUnmute).toHaveLength(0);
+
+      alertsClient.getTrackedAlertByInstanceId.mockReset();
     });
 
     test('should skip creating actions to schedule when alert action group has not changed and notifyWhen is onActionGroupChange', async () => {

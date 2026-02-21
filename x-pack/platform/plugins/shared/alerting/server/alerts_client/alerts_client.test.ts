@@ -1978,6 +1978,7 @@ describe('Alerts Client', () => {
                     group: 'default',
                   },
                 },
+                toAutoUnmute: [],
               },
               source: `
                 if (params.toScheduledAction.containsKey(ctx._source['kibana.alert.uuid'])) {
@@ -1989,6 +1990,13 @@ describe('Alerts Client', () => {
                 }
                 if (params.toMaintenanceWindows.containsKey(ctx._source['kibana.alert.uuid'])) {
                   ctx._source['kibana.alert.maintenance_window_ids'] = params.toMaintenanceWindows[ctx._source['kibana.alert.uuid']];
+                }
+                if (params.toAutoUnmute.contains(ctx._source['kibana.alert.uuid'])) {
+                  ctx._source['kibana.alert.muted'] = false;
+                  ctx._source.remove('kibana.alert.snooze.expires_at');
+                  ctx._source.remove('kibana.alert.snooze.conditions');
+                  ctx._source.remove('kibana.alert.snooze.condition_operator');
+                  ctx._source.remove('kibana.alert.snooze.snapshot');
                 }
               `,
             },
@@ -2066,6 +2074,7 @@ describe('Alerts Client', () => {
                 [alert2.getUuid()]: ['mw1', 'mw2'],
                 [alert3.getUuid()]: ['mw2', 'mw3'],
               },
+              toAutoUnmute: [],
             },
           });
         });
@@ -2091,7 +2100,7 @@ describe('Alerts Client', () => {
           ).rejects.toBe('something went wrong!');
 
           expect(logger.error).toHaveBeenCalledWith(
-            `Error updating alerts. (last scheduled actions or maintenance windows) for test.rule-type:1 'rule-name': something went wrong!`,
+            `Error updating alerts. (last scheduled actions, maintenance windows, or auto-unmute) for test.rule-type:1 'rule-name': something went wrong!`,
             logTags
           );
         });

@@ -44,6 +44,13 @@ async function unmuteInstanceWithOCC(
     ruleId
   );
 
+  const mutedInstanceIds = attributes.mutedInstanceIds || [];
+  const isSimpleMute = mutedInstanceIds.includes(alertInstanceId);
+  const auditAction =
+    attributes.muteAll || isSimpleMute
+      ? RuleAuditAction.UNMUTE_ALERT
+      : RuleAuditAction.UNSNOOZE_ALERT;
+
   try {
     await context.authorization.ensureAuthorized({
       ruleTypeId: attributes.alertTypeId,
@@ -57,7 +64,7 @@ async function unmuteInstanceWithOCC(
   } catch (error) {
     context.auditLogger?.log(
       ruleAuditEvent({
-        action: RuleAuditAction.UNMUTE_ALERT,
+        action: auditAction,
         savedObject: { type: RULE_SAVED_OBJECT_TYPE, id: ruleId, name: attributes.name },
         error,
       })
@@ -67,7 +74,7 @@ async function unmuteInstanceWithOCC(
 
   context.auditLogger?.log(
     ruleAuditEvent({
-      action: RuleAuditAction.UNMUTE_ALERT,
+      action: auditAction,
       outcome: 'unknown',
       savedObject: { type: RULE_SAVED_OBJECT_TYPE, id: ruleId, name: attributes.name },
     })
@@ -75,10 +82,13 @@ async function unmuteInstanceWithOCC(
 
   context.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
 
-  const mutedInstanceIds = attributes.mutedInstanceIds || [];
-  if (!attributes.muteAll && mutedInstanceIds.includes(alertInstanceId)) {
-    const indices = context.getAlertIndicesAlias([attributes.alertTypeId], context.spaceId);
+  if (attributes.muteAll) {
+    return;
+  }
 
+  const indices = context.getAlertIndicesAlias([attributes.alertTypeId], context.spaceId);
+
+  if (isSimpleMute) {
     await updateRuleSo({
       savedObjectsClient: context.unsecuredSavedObjectsClient,
       savedObjectsUpdateOptions: { version },
@@ -91,12 +101,21 @@ async function unmuteInstanceWithOCC(
     });
 
     if (indices && indices.length > 0) {
-      await context.alertsService?.unmuteAlertInstance({
+      await context.alertsService?.clearSnoozeAndUnmuteAlertInstances({
         ruleId,
-        alertInstanceId,
+        alertInstanceIds: [alertInstanceId],
         indices,
         logger: context.logger,
       });
     }
+  } else if (indices && indices.length > 0) {
+    // Cancel conditional snooze: alert is not in mutedInstanceIds but may have
+    // snooze fields on the ES document. This call is idempotent.
+    await context.alertsService?.clearSnoozeAndUnmuteAlertInstances({
+      ruleId,
+      alertInstanceIds: [alertInstanceId],
+      indices,
+      logger: context.logger,
+    });
   }
 }

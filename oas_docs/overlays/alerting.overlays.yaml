@@ -86,3 +86,42 @@ actions:
                     # Threshold rule (siem.thresholdRule)
                     # TLS certificate rule (xpack.uptime.alerts.tlsCertificate)
                     # Transform health (transform_health)
+  # Add examples for get alerting health response
+  - target: "$.paths['/api/alerting/_health']['get']"
+    description: "Add examples to get alerting health response"
+    update:
+      responses:
+        200:
+          content:
+            application/json:
+              examples:
+                getAlertingHealthResponse:
+                  $ref: '../../x-pack/platform/plugins/shared/alerting/docs/openapi/components/examples/get_health_response.yaml'
+  # Add examples for get rule types response
+  - target: "$.paths['/api/alerting/rule_types']['get']"
+    description: "Add examples to get rule types response"
+    update:
+      responses:
+        200:
+          content:
+            application/json:
+              examples:
+                getRuleTypesResponse:
+                  $ref: '../../x-pack/platform/plugins/shared/alerting/docs/openapi/components/examples/get_rule_types_response.yaml'
+  # Add examples for mute alert request body
+  - target: "$.paths['/api/alerting/rule/{rule_id}/alert/{alert_id}/_mute']['post']"
+    description: "Add examples to mute alert request body"
+    update:
+      requestBody:
+        content:
+          application/json:
+            examples:
+              muteAlertWithSnoozeRequest:
+                summary: Mute an alert with snooze conditions
+                value:
+                  expires_at: "2025-12-31T23:59:59.000Z"
+                  conditions:
+                    - type: severity_change
+                      field: kibana.alert.severity
+                      snapshot_value: warning
+                  condition_operator: any

@@ -153,3 +153,8 @@ export interface AddSummarizedAlertsOpts<
   alert: Alert<AlertInstanceState, AlertInstanceContext, ActionGroupIds | RecoveryActionGroupId>;
   summarizedAlerts: CombinedSummarizedAlerts | null;
 }
+
+export interface AlertToAutoUnmute {
+  alertInstanceId: string;
+  reason: string;
+}

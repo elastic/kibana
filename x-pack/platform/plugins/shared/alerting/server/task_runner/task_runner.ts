@@ -13,6 +13,7 @@ import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { nanosToMillis } from '@kbn/event-log-plugin/server';
 import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common';
 import { ActionScheduler, type RunResult } from './action_scheduler';
+
 import type {
   RuleRunnerErrorStackTraceLog,
   RuleTaskInstance,
@@ -272,6 +273,7 @@ export class TaskRunner<
     fakeRequest,
     rule,
     apiKey,
+    uiamApiKey,
     validatedParams: params,
   }: RunRuleParams<Params>): Promise<RunRuleResult> {
     if (apm.currentTransaction) {
@@ -317,6 +319,7 @@ export class TaskRunner<
       ruleRunMetricsStore,
       spaceId,
       isServerless: this.context.isServerless,
+      shouldGrantUiam: this.context.shouldGrantUiam,
     };
     const alertsClient = await withAlertingSpan('alerting:initialize-alerts-client', () =>
       initializeAlertsClient<
@@ -362,6 +365,7 @@ export class TaskRunner<
         spaceId,
       },
       ruleTaskTimeout: this.ruleType.ruleTaskTimeout,
+      uiamApiKey,
     });
 
     const actionsClient = await this.context.actionsPlugin.getActionsClientWithRequest(fakeRequest);
@@ -413,6 +417,7 @@ export class TaskRunner<
     });
 
     let actionSchedulerResult: RunResult = { throttledSummaryActions: {} };
+    let alertsToAutoUnmute: Array<{ alertInstanceId: string; reason: string }> = [];
 
     await withAlertingSpan('alerting:schedule-actions', () =>
       this.timer.runWithTimer(TaskRunnerTimerSpan.TriggerActions, async () => {
@@ -428,6 +433,8 @@ export class TaskRunner<
             activeAlerts: alertsClient.getProcessedAlerts('active'),
             recoveredAlerts: alertsClient.getProcessedAlerts('recovered'),
           });
+
+          alertsToAutoUnmute = actionScheduler.getAlertsToAutoUnmute();
         }
       })
     );
@@ -446,12 +453,40 @@ export class TaskRunner<
         alertsClient.getAlertsToUpdateWithLastScheduledActions();
     }
 
+    // Map auto-unmute alertInstanceIds to alert UUIDs for the batched update.
+    // The snooze fields and muted flag are cleared as part of updatePersistedAlerts
+    // so that all alert doc updates happen in a single ES updateByQuery call.
+    const alertUuidsToAutoUnmute: string[] = [];
+    if (alertsToAutoUnmute.length > 0) {
+      for (const { alertInstanceId, reason } of alertsToAutoUnmute) {
+        const uuid = alertsToReturn[alertInstanceId]?.meta?.uuid;
+        if (uuid) {
+          alertUuidsToAutoUnmute.push(uuid);
+          this.logger.info(
+            `Auto-unmuting alert '${alertInstanceId}' for rule '${rule.id}': ${reason}`
+          );
+          this.alertingEventLogger.logAlert({
+            action: 'auto-unsnooze',
+            id: alertInstanceId,
+            uuid,
+            message: `${ruleLabel} auto-unsnoozed alert '${alertInstanceId}': ${reason}`,
+            flapping: false,
+          });
+        } else {
+          this.logger.warn(
+            `Could not resolve UUID for auto-unmute alert '${alertInstanceId}' in rule '${rule.id}'`
+          );
+        }
+      }
+    }
+
     if (this.shouldLogAndScheduleActionsForAlerts()) {
       await withAlertingSpan('alerting:update-alerts', () =>
         this.timer.runWithTimer(TaskRunnerTimerSpan.UpdateAlerts, async () => {
           await alertsClient.updatePersistedAlerts({
             alertsToUpdateWithLastScheduledActions,
             alertsToUpdateWithMaintenanceWindows,
+            alertUuidsToAutoUnmute,
           });
         })
       );

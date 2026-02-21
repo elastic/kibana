@@ -11,7 +11,12 @@ import { ExecutionResponseType } from '@kbn/actions-plugin/server/create_execute
 import { ActionsCompletion } from '@kbn/alerting-state-types';
 import { chunk } from 'lodash';
 import type { ThrottledActions } from '../../types';
-import type { ActionSchedulerOptions, ActionsToSchedule, IActionScheduler } from './types';
+import type {
+  ActionSchedulerOptions,
+  ActionsToSchedule,
+  AlertToAutoUnmute,
+  IActionScheduler,
+} from './types';
 import type { Alert } from '../../alert';
 import type {
   AlertInstanceContext,
@@ -23,6 +28,7 @@ import type {
 import { getSummaryActionsFromTaskState } from './lib';
 import { withAlertingSpan } from '../lib';
 import * as schedulers from './schedulers';
+import { PerAlertActionScheduler } from './schedulers/per_alert_action_scheduler';
 
 const BULK_SCHEDULE_CHUNK_SIZE = 1000;
 
@@ -155,5 +161,19 @@ export class ActionScheduler<
     }
 
     return { throttledSummaryActions };
+  }
+
+  /**
+   * Returns alert instances that were conditionally snoozed but whose
+   * conditions were met during this execution, so they should be auto-unmuted.
+   */
+  public getAlertsToAutoUnmute(): AlertToAutoUnmute[] {
+    const results: AlertToAutoUnmute[] = [];
+    for (const scheduler of this.schedulers) {
+      if (scheduler instanceof PerAlertActionScheduler && scheduler.alertsToAutoUnmute) {
+        results.push(...scheduler.alertsToAutoUnmute);
+      }
+    }
+    return results;
   }
 }

@@ -41,7 +41,7 @@ const alertsService = {
   isInitialized: jest.fn(),
   createAlertsClient: jest.fn(),
   muteAlertInstance: jest.fn(),
-  unmuteAlertInstance: jest.fn(),
+  clearSnoozeAndUnmuteAlertInstances: jest.fn(),
   muteAllAlerts: jest.fn(),
   unmuteAllAlerts: jest.fn(),
   getContextInitializationPromise: jest.fn(),
@@ -82,7 +82,7 @@ beforeEach(() => {
   getBeforeSetup(rulesClientParams, taskManager, ruleTypeRegistry);
   (auditLogger.log as jest.Mock).mockClear();
   alertsService.muteAlertInstance.mockClear();
-  alertsService.unmuteAlertInstance.mockClear();
+  alertsService.clearSnoozeAndUnmuteAlertInstances.mockClear();
   (rulesClientParams.getAlertIndicesAlias as jest.Mock).mockReturnValue(['.alerts-default']);
 });
 

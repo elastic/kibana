@@ -6,6 +6,7 @@
  */
 import { Alert as LegacyAlert } from '../../../alert/alert';
 import { buildRecoveredAlert } from './build_recovered_alert';
+import type { Alert } from '@kbn/alerts-as-data-utils';
 import {
   ALERT_RULE_NAME,
   ALERT_RULE_PARAMETERS,
@@ -18,6 +19,10 @@ import {
   ALERT_MAINTENANCE_WINDOW_IDS,
   ALERT_MAINTENANCE_WINDOW_NAMES,
   ALERT_MUTED,
+  ALERT_SNOOZE_CONDITIONS,
+  ALERT_SNOOZE_CONDITION_OPERATOR,
+  ALERT_SNOOZE_EXPIRES_AT,
+  ALERT_SNOOZE_SNAPSHOT,
   ALERT_START,
   ALERT_STATUS,
   ALERT_UUID,
@@ -42,6 +47,10 @@ import {
   existingExpandedActiveAlert,
   rule,
 } from '../test_fixtures';
+import {
+  createConditionalSnoozeAlert,
+  createConditionOnlySnoozeAlert,
+} from '../fixtures/snooze_alert_fixtures';
 import { omit } from 'lodash';
 
 for (const flattened of [true, false]) {
@@ -804,6 +813,128 @@ for (const flattened of [true, false]) {
         });
 
         expect((result as Record<string, unknown>)[ALERT_MUTED]).toBe(false);
+      });
+    });
+
+    describe('snooze fields', () => {
+      test('should preserve time-only snooze expiry on recovery', () => {
+        const legacyAlert = new LegacyAlert<{}, {}, 'default'>('alert-A');
+        legacyAlert.scheduleActions('default');
+        const expiresAt = new Date(Date.now() + 60 * 60 * 1000).toISOString();
+
+        const result = buildRecoveredAlert<{}, {}, {}, 'default', 'recovered'>({
+          alert: {
+            ...existingFlattenedActiveAlert,
+            [ALERT_MUTED]: true,
+            [ALERT_SNOOZE_EXPIRES_AT]: expiresAt,
+          } as unknown as Alert,
+          legacyAlert,
+          rule: alertRule,
+          recoveryActionGroup: 'recovered',
+          timestamp: '2023-03-28T12:27:28.159Z',
+          kibanaVersion: '8.9.0',
+        });
+
+        expect((result as Record<string, unknown>)[ALERT_MUTED]).toBe(true);
+        expect((result as Record<string, unknown>)[ALERT_SNOOZE_EXPIRES_AT]).toBe(expiresAt);
+        expect((result as Record<string, unknown>)[ALERT_SNOOZE_CONDITIONS]).toBeUndefined();
+        expect(
+          (result as Record<string, unknown>)[ALERT_SNOOZE_CONDITION_OPERATOR]
+        ).toBeUndefined();
+        expect((result as Record<string, unknown>)[ALERT_SNOOZE_SNAPSHOT]).toBeUndefined();
+      });
+
+      test('should preserve condition-based snooze fields on recovery', () => {
+        // Snooze must survive recovery: when the alert re-activates, isAlertMuted()
+        // re-evaluates conditions and auto-unmutes only if they are now satisfied.
+        const legacyAlert = new LegacyAlert<{}, {}, 'default'>('alert-A');
+        legacyAlert.scheduleActions('default');
+        const expiresAt = new Date(Date.now() + 60 * 60 * 1000).toISOString();
+        const conditions = [
+          { type: 'field_change', field: 'kibana.alert.severity', snapshotValue: 'low' },
+        ];
+        const snapshot = { 'kibana.alert.severity': 'low' };
+        const alert = {
+          ...existingFlattenedActiveAlert,
+          ...createConditionalSnoozeAlert({
+            expiresAt,
+            conditions,
+            conditionOperator: 'any',
+            snapshot,
+          }),
+        } as unknown as Alert;
+
+        const result = buildRecoveredAlert<{}, {}, {}, 'default', 'recovered'>({
+          alert,
+          legacyAlert,
+          rule: alertRule,
+          recoveryActionGroup: 'recovered',
+          timestamp: '2023-03-28T12:27:28.159Z',
+          kibanaVersion: '8.9.0',
+        });
+
+        expect((result as Record<string, unknown>)[ALERT_MUTED]).toBe(true);
+        expect((result as Record<string, unknown>)[ALERT_SNOOZE_EXPIRES_AT]).toBe(expiresAt);
+        expect((result as Record<string, unknown>)[ALERT_SNOOZE_CONDITIONS]).toEqual(conditions);
+        expect((result as Record<string, unknown>)[ALERT_SNOOZE_CONDITION_OPERATOR]).toBe('any');
+        expect((result as Record<string, unknown>)[ALERT_SNOOZE_SNAPSHOT]).toEqual(snapshot);
+      });
+
+      test('should preserve condition-only snooze (no expires_at) on recovery', () => {
+        const legacyAlert = new LegacyAlert<{}, {}, 'default'>('alert-A');
+        legacyAlert.scheduleActions('default');
+        const conditions = [
+          { type: 'severity_equals', field: 'kibana.alert.severity', value: 'medium' },
+        ];
+        const alert = {
+          ...existingFlattenedActiveAlert,
+          ...createConditionOnlySnoozeAlert({ conditions, conditionOperator: 'all' }),
+        } as unknown as Alert;
+
+        const result = buildRecoveredAlert<{}, {}, {}, 'default', 'recovered'>({
+          alert,
+          legacyAlert,
+          rule: alertRule,
+          recoveryActionGroup: 'recovered',
+          timestamp: '2023-03-28T12:27:28.159Z',
+          kibanaVersion: '8.9.0',
+        });
+
+        expect((result as Record<string, unknown>)[ALERT_MUTED]).toBe(true);
+        expect((result as Record<string, unknown>)[ALERT_SNOOZE_EXPIRES_AT]).toBeUndefined();
+        expect((result as Record<string, unknown>)[ALERT_SNOOZE_CONDITIONS]).toEqual(conditions);
+        expect((result as Record<string, unknown>)[ALERT_SNOOZE_CONDITION_OPERATOR]).toBe('all');
+      });
+
+      test('should clear all snooze fields on recovery when alert is not muted', () => {
+        const legacyAlert = new LegacyAlert<{}, {}, 'default'>('alert-A');
+        legacyAlert.scheduleActions('default');
+
+        const result = buildRecoveredAlert<{}, {}, {}, 'default', 'recovered'>({
+          alert: {
+            ...existingFlattenedActiveAlert,
+            [ALERT_MUTED]: false,
+            [ALERT_SNOOZE_EXPIRES_AT]: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+            [ALERT_SNOOZE_CONDITIONS]: [
+              { type: 'field_change', field: 'kibana.alert.severity', snapshotValue: 'low' },
+            ],
+            [ALERT_SNOOZE_CONDITION_OPERATOR]: 'any',
+            [ALERT_SNOOZE_SNAPSHOT]: { 'kibana.alert.severity': 'low' },
+          } as unknown as Alert,
+          legacyAlert,
+          rule: alertRule,
+          recoveryActionGroup: 'recovered',
+          timestamp: '2023-03-28T12:27:28.159Z',
+          kibanaVersion: '8.9.0',
+        });
+
+        expect((result as Record<string, unknown>)[ALERT_MUTED]).toBe(false);
+        expect((result as Record<string, unknown>)[ALERT_SNOOZE_EXPIRES_AT]).toBeUndefined();
+        expect((result as Record<string, unknown>)[ALERT_SNOOZE_CONDITIONS]).toBeUndefined();
+        expect(
+          (result as Record<string, unknown>)[ALERT_SNOOZE_CONDITION_OPERATOR]
+        ).toBeUndefined();
+        expect((result as Record<string, unknown>)[ALERT_SNOOZE_SNAPSHOT]).toBeUndefined();
       });
     });
   });

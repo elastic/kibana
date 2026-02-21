@@ -7,6 +7,7 @@
 import { Alert as LegacyAlert } from '../../../alert/alert';
 import { buildNewAlert } from './build_new_alert';
 import type { Alert } from '@kbn/alerts-as-data-utils';
+import { createConditionalSnoozeAlert } from '../fixtures/snooze_alert_fixtures';
 import {
   SPACE_IDS,
   ALERT_ACTION_GROUP,
@@ -31,6 +32,10 @@ import {
   ALERT_RULE_EXECUTION_TIMESTAMP,
   ALERT_SEVERITY_IMPROVING,
   ALERT_PENDING_RECOVERED_COUNT,
+  ALERT_SNOOZE_CONDITIONS,
+  ALERT_SNOOZE_CONDITION_OPERATOR,
+  ALERT_SNOOZE_EXPIRES_AT,
+  ALERT_SNOOZE_SNAPSHOT,
 } from '@kbn/rule-data-utils';
 import { alertRule } from '../test_fixtures';
 import type { AlertRuleData } from '../../types';
@@ -500,6 +505,108 @@ describe('buildNewAlert', () => {
       });
 
       expect((result as Record<string, unknown>)[ALERT_MUTED]).toBe(true);
+    });
+
+    test('should preserve ALERT_MUTED when existing alert has conditional snooze state', () => {
+      const legacyAlert = new LegacyAlert<{}, {}, 'default'>('alert-A');
+      legacyAlert.scheduleActions('default');
+      const expiresAt = new Date(Date.now() + 3600000).toISOString();
+      const conditions = [
+        {
+          type: 'field_change',
+          field: 'kibana.alert.severity',
+          snapshotValue: 'critical',
+        },
+      ];
+      const snapshot = { 'kibana.alert.severity': 'critical' };
+      const existingAlert = {
+        ...createConditionalSnoozeAlert({
+          expiresAt,
+          conditions,
+          conditionOperator: 'any',
+          snapshot,
+        }),
+      } as unknown as Alert;
+
+      const result = buildNewAlert<{}, {}, {}, 'default', 'recovered'>({
+        legacyAlert,
+        existingAlert,
+        rule: alertRule,
+        ruleData: {
+          ...ruleData,
+          mutedInstanceIds: ['alert-B'],
+        },
+        timestamp: '2023-03-28T12:27:28.159Z',
+        kibanaVersion: '8.9.0',
+      });
+
+      expect((result as Record<string, unknown>)[ALERT_MUTED]).toBe(true);
+      expect((result as Record<string, unknown>)[ALERT_SNOOZE_EXPIRES_AT]).toBe(expiresAt);
+      expect((result as Record<string, unknown>)[ALERT_SNOOZE_CONDITIONS]).toEqual(conditions);
+      expect((result as Record<string, unknown>)[ALERT_SNOOZE_CONDITION_OPERATOR]).toBe('any');
+      expect((result as Record<string, unknown>)[ALERT_SNOOZE_SNAPSHOT]).toEqual(snapshot);
+    });
+
+    test('should inherit snooze config from recovered alert with matching instance ID', () => {
+      const legacyAlert = new LegacyAlert<{}, {}, 'default'>('alert-A');
+      legacyAlert.scheduleActions('default');
+      const expiresAt = new Date(Date.now() + 86400000).toISOString();
+      const conditions = [
+        {
+          type: 'field_change',
+          field: 'host.cpu.pct',
+          snapshotValue: '0.99',
+        },
+      ];
+      const snapshot = { 'host.cpu.pct': '0.99' };
+      const recoveredAlert = {
+        ...createConditionalSnoozeAlert({
+          expiresAt,
+          conditions,
+          conditionOperator: 'any',
+          snapshot,
+        }),
+        [ALERT_STATUS]: 'recovered',
+      } as unknown as Alert;
+
+      const result = buildNewAlert<{}, {}, {}, 'default', 'recovered'>({
+        legacyAlert,
+        existingAlert: recoveredAlert,
+        rule: alertRule,
+        ruleData: {
+          ...ruleData,
+          mutedInstanceIds: [],
+        },
+        timestamp: '2023-03-28T12:27:28.159Z',
+        kibanaVersion: '8.9.0',
+      });
+
+      expect((result as Record<string, unknown>)[ALERT_MUTED]).toBe(true);
+      expect((result as Record<string, unknown>)[ALERT_SNOOZE_EXPIRES_AT]).toBe(expiresAt);
+      expect((result as Record<string, unknown>)[ALERT_SNOOZE_CONDITIONS]).toEqual(conditions);
+      expect((result as Record<string, unknown>)[ALERT_SNOOZE_CONDITION_OPERATOR]).toBe('any');
+      expect((result as Record<string, unknown>)[ALERT_SNOOZE_SNAPSHOT]).toEqual(snapshot);
+    });
+
+    test('should not preserve ALERT_MUTED when existing alert has no conditional snooze state', () => {
+      const legacyAlert = new LegacyAlert<{}, {}, 'default'>('alert-A');
+      legacyAlert.scheduleActions('default');
+
+      const result = buildNewAlert<{}, {}, {}, 'default', 'recovered'>({
+        legacyAlert,
+        existingAlert: {
+          [ALERT_MUTED]: true,
+        } as unknown as Alert,
+        rule: alertRule,
+        ruleData: {
+          ...ruleData,
+          mutedInstanceIds: ['alert-B'],
+        },
+        timestamp: '2023-03-28T12:27:28.159Z',
+        kibanaVersion: '8.9.0',
+      });
+
+      expect((result as Record<string, unknown>)[ALERT_MUTED]).toBe(false);
     });
 
     test('should set ALERT_MUTED to false when alert instance ID is not in mutedInstanceIds', () => {

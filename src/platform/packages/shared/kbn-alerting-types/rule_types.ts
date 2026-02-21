@@ -198,6 +198,20 @@ export interface AlertDelay extends SavedObjectAttributes {
   active: number;
 }
 
+/**
+ * Describes a condition under which a per-alert mute/snooze should be automatically lifted.
+ */
+export interface SnoozeCondition {
+  /** The kind of condition to evaluate. */
+  type: 'severity_change' | 'severity_equals' | 'field_change';
+  /** The alert document field to monitor (e.g. 'kibana.alert.severity'). */
+  field: string;
+  /** For 'severity_equals': the target value that triggers unmute. */
+  value?: string;
+  /** Snapshot of the field value at the time the snooze was created. */
+  snapshotValue?: string;
+}
+
 export interface SanitizedAlertsFilter extends AlertsFilter {
   query?: {
     kql: string;
@@ -247,6 +261,7 @@ export interface Rule<Params extends RuleTypeParams = never> {
   apiKey: string | null;
   apiKeyOwner: string | null;
   apiKeyCreatedByUser?: boolean | null;
+  uiamApiKey?: string | null;
   throttle?: string | null;
   muteAll: boolean;
   notifyWhen?: RuleNotifyWhenType | null;

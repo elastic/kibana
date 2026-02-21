@@ -16,6 +16,7 @@ import {
   ALERT_END,
   ALERT_INSTANCE_ID,
   ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_MUTED,
   ALERT_RULE_EXECUTION_UUID,
   ALERT_RULE_UUID,
   ALERT_START,
@@ -161,6 +162,11 @@ const getQueryByExecutionUuid = ({
               [ALERT_STATUS]: ALERT_STATUS_DELAYED,
             },
           },
+          {
+            term: {
+              [ALERT_MUTED]: true,
+            },
+          },
         ],
       },
     },
@@ -225,11 +231,18 @@ const getQueryByTimeRange = ({
     },
     {
       bool: {
-        must_not: {
-          term: {
-            [ALERT_STATUS]: ALERT_STATUS_DELAYED,
+        must_not: [
+          {
+            term: {
+              [ALERT_STATUS]: ALERT_STATUS_DELAYED,
+            },
           },
-        },
+          {
+            term: {
+              [ALERT_MUTED]: true,
+            },
+          },
+        ],
       },
     },
   ];

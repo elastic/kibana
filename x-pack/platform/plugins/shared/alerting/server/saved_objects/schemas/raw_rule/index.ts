@@ -15,3 +15,4 @@ export { rawRuleSchema as rawRuleSchemaV5 } from './v5';
 export { rawRuleSchema as rawRuleSchemaV6 } from './v6';
 export { rawRuleSchema as rawRuleSchemaV7 } from './v7';
 export { rawRuleSchema as rawRuleSchemaV8 } from './v8';
+export { rawRuleSchema as rawRuleSchemaV9 } from './v9';
