@@ -69,7 +69,7 @@ export async function waitForAlerts(
   // Phase 1 — wait for at least one alert via API
   while (Date.now() - start < timeout - 30_000) {
     try {
-      const { data } = await kbnClient.request<{ hits: { total: { value: number } } }>({
+      const { data } = await kbnClient.request<any>({
         method: 'POST',
         path: '/api/detection_engine/signals/search',
         body: {
@@ -82,7 +82,7 @@ export async function waitForAlerts(
         },
       });
 
-      if (data.hits?.total?.value > 0) {
+      if ((data as any).hits?.total?.value > 0) {
         break;
       }
     } catch {

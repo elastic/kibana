@@ -14,12 +14,10 @@ import { loadRule, cleanupRule } from '../../common/api_helpers';
 import { waitForPageReady, waitForAlerts } from '../../common/constants';
 
 test.describe('Alert Test', { tag: [...tags.stateful.classic] }, () => {
-  let ruleName: string;
   let ruleId: string;
 
   test.beforeAll(async ({ kbnClient }) => {
     const rule = await loadRule(kbnClient);
-    ruleName = rule.name;
     ruleId = rule.id;
   });
 
