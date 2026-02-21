@@ -110,7 +110,7 @@ test.describe(
             .getByText('Loading Fleet...')
             .first()
             .waitFor({ state: 'hidden', timeout: 60_000 })
-            .catch(() => {});
+            .catch(() => { });
           await page
             .getByText(agentPolicyName)
             .first()

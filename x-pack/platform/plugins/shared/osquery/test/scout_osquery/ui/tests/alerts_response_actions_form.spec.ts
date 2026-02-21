@@ -48,9 +48,17 @@ test.describe(
     });
 
     test.afterEach(async ({ kbnClient }) => {
-      await cleanupPack(kbnClient, packId);
-      await cleanupPack(kbnClient, multiQueryPackId);
-      await cleanupRule(kbnClient, ruleId);
+      if (packId) {
+        await cleanupPack(kbnClient, packId);
+      }
+
+      if (multiQueryPackId) {
+        await cleanupPack(kbnClient, multiQueryPackId);
+      }
+
+      if (ruleId) {
+        await cleanupRule(kbnClient, ruleId);
+      }
     });
 
     test('adds response actions with osquery with proper validation and form values', async ({

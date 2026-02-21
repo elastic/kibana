@@ -33,7 +33,9 @@ test.describe(
     });
 
     test.afterAll(async ({ kbnClient }) => {
-      await cleanupRule(kbnClient, ruleId);
+      if (ruleId) {
+        await cleanupRule(kbnClient, ruleId);
+      }
     });
 
     test('should substitute parameters in investigation guide', async ({ page }) => {

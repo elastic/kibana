@@ -94,7 +94,7 @@ test.describe(
         await page.testSubj
           .locator('globalLoadingIndicator')
           .waitFor({ state: 'hidden' })
-          .catch(() => {});
+          .catch(() => { });
       }
 
       // Exit fullscreen
@@ -294,7 +294,7 @@ test.describe(
         await page.testSubj
           .locator('globalLoadingIndicator')
           .waitFor({ state: 'hidden', timeout: 15_000 })
-          .catch(() => {});
+          .catch(() => { });
         await expect(page.testSubj.locator('kibanaCodeEditor')).toBeVisible({ timeout: 15_000 });
 
         // Select the prebuilt saved query
@@ -325,7 +325,7 @@ test.describe(
         });
 
         await addQueryFlyout.getByText('Save').first().click();
-        await addQueryFlyout.waitFor({ state: 'hidden', timeout: 15_000 }).catch(() => {});
+        await addQueryFlyout.waitFor({ state: 'hidden', timeout: 15_000 }).catch(() => { });
 
         // Verify changes
         const editButton = page.locator(`[aria-label="Edit users_elastic"]`);

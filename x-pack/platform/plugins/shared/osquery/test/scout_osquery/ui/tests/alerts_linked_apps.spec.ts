@@ -35,7 +35,9 @@ test.describe(
     });
 
     test.afterAll(async ({ kbnClient }) => {
-      await cleanupRule(kbnClient, ruleId);
+      if (ruleId) {
+        await cleanupRule(kbnClient, ruleId);
+      }
     });
 
     test('should be able to add investigation guides to response actions', async ({ page }) => {

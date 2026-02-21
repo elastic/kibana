@@ -48,8 +48,13 @@ test.describe(
     });
 
     test.afterAll(async ({ kbnClient }) => {
-      await cleanupPack(kbnClient, packId);
-      await cleanupRule(kbnClient, ruleId);
+      if (packId) {
+        await cleanupPack(kbnClient, packId);
+      }
+
+      if (ruleId) {
+        await cleanupRule(kbnClient, ruleId);
+      }
     });
 
     // eslint-disable-next-line playwright/max-nested-describe

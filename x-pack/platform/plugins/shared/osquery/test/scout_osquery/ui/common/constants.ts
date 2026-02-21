@@ -52,6 +52,9 @@ export async function dismissAllToasts(page: ScoutPage): Promise<void> {
  * Wait for alerts to appear on the rule details page. In serverless mode, alert
  * generation can take over a minute. This helper periodically reloads the page
  * to check for new alerts instead of relying on a single long wait.
+ *
+ * Navigates to the /alerts sub-route of the current rule URL to ensure
+ * the alerts tab is active.
  */
 export async function waitForAlerts(
   page: ScoutPage,
@@ -59,10 +62,11 @@ export async function waitForAlerts(
 ): Promise<void> {
   const start = Date.now();
 
-  // Ensure the Alerts tab is active (rule details may default to another tab)
-  const alertsTab = page.testSubj.locator('navigation-alerts');
-  if (await alertsTab.isVisible({ timeout: 5_000 }).catch(() => false)) {
-    await alertsTab.click();
+  // Navigate to the alerts tab if we're on the rule overview
+  const currentUrl = page.url();
+  if (currentUrl.includes('/rules/id/') && !currentUrl.includes('/alerts')) {
+    const alertsUrl = currentUrl.replace(/\/rules\/id\/([^/?#]+).*/, '/rules/id/$1/alerts');
+    await page.goto(alertsUrl);
     await waitForPageReady(page);
   }
 
@@ -76,11 +80,6 @@ export async function waitForAlerts(
     } catch {
       await page.reload();
       await waitForPageReady(page);
-      // Re-click the Alerts tab after reload if needed
-      if (await alertsTab.isVisible({ timeout: 3_000 }).catch(() => false)) {
-        await alertsTab.click();
-        await waitForPageReady(page);
-      }
     }
   }
 

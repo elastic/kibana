@@ -389,11 +389,11 @@ test.describe(
             await page.testSubj
               .locator('docsLoading')
               .waitFor({ state: 'visible' })
-              .catch(() => {});
+              .catch(() => { });
             await page.testSubj
               .locator('docsLoading')
               .waitFor({ state: 'hidden', timeout: 60_000 })
-              .catch(() => {});
+              .catch(() => { });
 
             const viewInLensButton = page.locator('[aria-label="View in Lens"]').first();
             await viewInLensButton.waitFor({ state: 'visible', timeout: 30_000 });
