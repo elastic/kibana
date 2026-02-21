@@ -332,8 +332,7 @@ ${JSON.stringify(
               let shutdownEs;
 
               const esFromEnv = process.env.CYPRESS_ES_FROM;
-              const esFrom =
-                esFromEnv || config.get('esTestCluster')?.from || 'snapshot';
+              const esFrom = esFromEnv || config.get('esTestCluster')?.from || 'snapshot';
 
               try {
                 shutdownEs = await pRetry(
