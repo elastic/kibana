@@ -37,7 +37,8 @@
     "@kbn/react-kibana-context-render",
     "@kbn/share-plugin",
     "@kbn/es-query",
-    "@kbn/presentation-util"
+    "@kbn/presentation-util",
+    "@kbn/kibana-utils-plugin"
   ],
   "exclude": ["target/**/*"]
 }
