@@ -19,6 +19,18 @@ import type { Field } from './types';
 import { type AutoCompleteEntitiesApiResponse } from './types';
 import { isRecord } from '../../../common/utils/record_utils';
 
+// NOTE: This reflects the pre-migration `FieldMapping` shape that callers historically assumed.
+// Values are still treated as unvalidated payloads and must be guarded at runtime.
+//
+// interface FieldMapping {
+//   enabled?: boolean;
+//   path?: string;
+//   properties?: Record<string, FieldMapping>;
+//   type?: string;
+//   index_name?: string;
+//   fields?: Record<string, FieldMapping>;
+// }
+//
 type FieldMappingLike = Record<string, unknown> & {
   enabled?: unknown;
   path?: unknown;
