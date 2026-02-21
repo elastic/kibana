@@ -17,6 +17,7 @@ import type {
 import type {
   snoozeScheduleSchema,
   snoozedInstanceConfigSchema,
+  snoozedInstanceEntrySchema,
   ruleExecutionStatusSchema,
   ruleLastRunSchema,
   monitoringSchema,
@@ -37,6 +38,7 @@ export type RuleExecutionStatusWarningReason =
 export type RuleParams = TypeOf<typeof ruleParamsSchema>;
 export type RuleSnoozeSchedule = TypeOf<typeof snoozeScheduleSchema>;
 export type SnoozedInstanceConfig = TypeOf<typeof snoozedInstanceConfigSchema>;
+export type SnoozedInstanceEntry = TypeOf<typeof snoozedInstanceEntrySchema>;
 export type RuleLastRun = TypeOf<typeof ruleLastRunSchema>;
 export type Monitoring = TypeOf<typeof monitoringSchema>;
 type RuleSchemaType = TypeOf<typeof ruleSchema>;

@@ -152,6 +152,13 @@ export const snoozedInstanceConfigSchema = schema.object({
   conditionOperator: schema.maybe(schema.oneOf([schema.literal('any'), schema.literal('all')])),
 });
 
+export const snoozedInstanceEntrySchema = schema.object({
+  instanceId: schema.string(),
+  expiresAt: schema.maybe(schema.string()),
+  conditions: schema.maybe(schema.arrayOf(perAlertSnoozeConditionSchema)),
+  conditionOperator: schema.maybe(schema.oneOf([schema.literal('any'), schema.literal('all')])),
+});
+
 export const snoozeScheduleSchema = schema.object({
   duration: schema.number(),
   rRule: rRuleSchema,
@@ -205,7 +212,7 @@ export const ruleDomainSchema = schema.object({
   legacyId: schema.maybe(schema.nullable(schema.string())),
   flapping: schema.maybe(schema.nullable(flappingSchema)),
   artifacts: schema.maybe(artifactsSchema),
-  snoozedInstances: schema.maybe(schema.recordOf(schema.string(), snoozedInstanceConfigSchema)),
+  snoozedInstances: schema.maybe(schema.arrayOf(snoozedInstanceEntrySchema)),
 });
 
 /**
@@ -248,5 +255,5 @@ export const ruleSchema = schema.object({
   legacyId: schema.maybe(schema.nullable(schema.string())),
   flapping: schema.maybe(schema.nullable(flappingSchema)),
   artifacts: schema.maybe(artifactsSchema),
-  snoozedInstances: schema.maybe(schema.recordOf(schema.string(), snoozedInstanceConfigSchema)),
+  snoozedInstances: schema.maybe(schema.arrayOf(snoozedInstanceEntrySchema)),
 });
