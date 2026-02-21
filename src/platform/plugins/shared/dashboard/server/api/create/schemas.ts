@@ -11,17 +11,15 @@ import { schema } from '@kbn/config-schema';
 import { allowUnmappedKeysSchema, getDashboardStateSchema } from '../dashboard_state_schemas';
 import { baseMetaSchema, createdMetaSchema, updatedMetaSchema } from '../meta_schemas';
 
-export const createRequestParamsSchema = schema.maybe(
-  schema.object(
-    {
-      id: schema.maybe(
-        schema.string({
-          meta: { description: 'A unique identifier for the dashboard.' },
-        })
-      ),
-    },
-    { unknowns: 'forbid' }
-  )
+export const createRequestParamsSchema = schema.object(
+  {
+    id: schema.maybe(
+      schema.string({
+        meta: { description: 'A unique identifier for the dashboard.' },
+      })
+    ),
+  },
+  { unknowns: 'forbid' }
 );
 
 export const createRequestQuerySchema = schema.maybe(

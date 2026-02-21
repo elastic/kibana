@@ -22,12 +22,50 @@ import { DASHBOARD_API_PATH } from '../../../common/constants';
 
 export function registerCreateRoute(router: VersionedRouter<RequestHandlerContext>) {
   const createRoute = router.post({
-    path: `${DASHBOARD_API_PATH}/{id?}`,
+    path: DASHBOARD_API_PATH,
     summary: 'Create a dashboard',
     ...commonRouteConfig,
   });
 
   createRoute.addVersion(
+    {
+      version: INTERNAL_API_VERSION,
+      validate: () => ({
+        request: {
+          query: createRequestQuerySchema,
+          body: getCreateRequestBodySchema(),
+        },
+        response: {
+          200: {
+            body: getCreateResponseBodySchema,
+          },
+        },
+      }),
+    },
+    async (ctx, req, res) => {
+      try {
+        const allowUnmappedKeys = req.query?.allowUnmappedKeys ?? false;
+        if (!allowUnmappedKeys) throwOnUnmappedKeys(req.body);
+
+        const result = await create(ctx, req.body);
+        return res.ok({ body: result });
+      } catch (e) {
+        if (e.isBoom && e.output.statusCode === 403) {
+          return res.forbidden();
+        }
+
+        return res.badRequest({ body: e });
+      }
+    }
+  );
+
+  const createWithIdRoute = router.post({
+    path: `${DASHBOARD_API_PATH}/{id}`,
+    summary: 'Create a dashboard with an specific ID',
+    ...commonRouteConfig,
+  });
+
+  createWithIdRoute.addVersion(
     {
       version: INTERNAL_API_VERSION,
       validate: () => ({
