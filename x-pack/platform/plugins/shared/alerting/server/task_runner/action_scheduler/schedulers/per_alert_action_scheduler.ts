@@ -5,19 +5,13 @@
  * 2.0.
  */
 
-import { compact, get } from 'lodash';
+import { compact } from 'lodash';
 import type { AlertInstanceState, AlertInstanceContext } from '@kbn/alerting-state-types';
 import type { RuleAction, RuleTypeParams } from '@kbn/alerting-types';
 import { RuleNotifyWhen } from '@kbn/alerting-types';
-import {
-  ALERT_MUTED,
-  ALERT_SNOOZE_EXPIRES_AT,
-  ALERT_SNOOZE_CONDITIONS,
-  ALERT_SNOOZE_CONDITION_OPERATOR,
-} from '@kbn/rule-data-utils';
-import { hasConditionalSnooze } from '../../../alerts_client/lib/snooze_utils';
 import { evaluateSnoozeConditions } from '../../../lib/snooze';
 import type { AlertSnoozeConfig } from '../../../lib/snooze';
+import type { SnoozedInstanceConfig } from '../../../alerts_client/types';
 import type { RuleTypeState, RuleAlertData } from '../../../../common';
 import { parseDuration } from '../../../../common';
 import type { GetSummarizedAlertsParams } from '../../../alerts_client/types';
@@ -68,6 +62,7 @@ export class PerAlertActionScheduler<
 {
   private actions: RuleAction[] = [];
   private mutedAlertIdsSet: Set<string> = new Set();
+  private snoozedInstancesMap: Record<string, SnoozedInstanceConfig> = {};
   private ruleTypeActionGroups?: Map<ActionGroupIds | RecoveryActionGroupId, string>;
   private skippedAlerts: { [key: string]: { reason: string } } = {};
 
@@ -90,6 +85,7 @@ export class PerAlertActionScheduler<
       context.ruleType.actionGroups.map((actionGroup) => [actionGroup.id, actionGroup.name])
     );
     this.mutedAlertIdsSet = new Set(context.rule.mutedInstanceIds);
+    this.snoozedInstancesMap = context.rule.snoozedInstances ?? {};
 
     const canGetSummarizedAlerts =
       !!context.ruleType.alerts && !!context.alertsClient.getSummarizedAlerts;
@@ -383,55 +379,28 @@ export class PerAlertActionScheduler<
       return this.markAlertAsMuted(alertId);
     }
 
-    // Path 2: Conditional snooze stored on the alert-as-data document.
-    // Conditional snoozes do NOT add to mutedInstanceIds; the document's
-    // kibana.alert.muted field is the sole indicator.
-    const alertData =
-      (this.context.alertsClient.getTrackedAlertByInstanceId?.(alertId) as
-        | Record<string, unknown>
-        | undefined) ?? undefined;
-    if (!alertData) {
-      return false;
-    }
-
-    const isMutedOnDoc = get(alertData, ALERT_MUTED) === true;
-    if (!isMutedOnDoc) {
-      return false;
-    }
-
-    const snoozeExpiresAt = get(alertData, ALERT_SNOOZE_EXPIRES_AT) as string | undefined;
-    const snoozeConditions = get(alertData, ALERT_SNOOZE_CONDITIONS) as unknown[] | undefined;
-    const snoozeConditionOperator = get(alertData, ALERT_SNOOZE_CONDITION_OPERATOR) as
-      | 'any'
-      | 'all'
-      | undefined;
-
-    if (!hasConditionalSnooze(alertData)) {
-      // kibana.alert.muted is true but there are no snooze conditions -- this should not
-      // happen through the normal API flow. Treat as not muted to avoid permanently
-      // suppressing actions without an unmute path.
+    // Path 2: Conditional snooze from rule SO snoozedInstances (durable store).
+    const snoozeInstanceConfig = this.snoozedInstancesMap[alertId];
+    if (!snoozeInstanceConfig) {
       return false;
     }
 
     const snoozeConfig: AlertSnoozeConfig = {
-      expiresAt: snoozeExpiresAt,
-      conditions: snoozeConditions as AlertSnoozeConfig['conditions'],
-      conditionOperator: snoozeConditionOperator,
+      expiresAt: snoozeInstanceConfig.expiresAt,
+      conditions: snoozeInstanceConfig.conditions as AlertSnoozeConfig['conditions'],
+      conditionOperator: snoozeInstanceConfig.conditionOperator,
     };
 
-    // NOTE: alertData here comes from getTrackedAlertByInstanceId(), which is populated
-    // during initializeExecution() from documents persisted by the *previous* execution.
-    // The current execution's rule-type-reported field values (e.g. updated severity) are
-    // not yet persisted when this runs. This means condition evaluation is always one
-    // execution cycle behind:
-    //   - Execution N:   rule reports severity=medium (changed from low), but trackedAlerts
-    //                    still holds severity=low from last persist → condition not yet met
-    //   - Execution N+1: trackedAlerts now shows severity=medium → condition met → auto-unmute
-    // For rules on short intervals this is negligible; for hourly rules it adds one interval
-    // of extra suppression after the condition is actually satisfied.
+    // For condition evaluation, use tracked alert data from the previous execution.
+    // Current-execution field values are not yet persisted, so condition evaluation
+    // is one cycle behind for field-change/severity conditions. TTL evaluation
+    // uses Date.now() and is always current.
+    const alertData =
+      (this.context.alertsClient.getTrackedAlertByInstanceId?.(alertId) as
+        | Record<string, unknown>
+        | undefined) ?? {};
     const evalResult = evaluateSnoozeConditions(snoozeConfig, alertData);
     if (evalResult.shouldUnmute) {
-      // Conditions met -- mark for auto-unmute, allow actions to fire
       if (!this.alertsToAutoUnmute.some((a) => a.alertInstanceId === alertId)) {
         this.alertsToAutoUnmute.push({
           alertInstanceId: alertId,

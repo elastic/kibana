@@ -454,30 +454,36 @@ export class TaskRunner<
         alertsClient.getAlertsToUpdateWithLastScheduledActions();
     }
 
-    // Map auto-unmute alertInstanceIds to alert UUIDs for the batched update.
-    // The snooze fields and muted flag are cleared as part of updatePersistedAlerts
-    // so that all alert doc updates happen in a single ES updateByQuery call.
+    // Auto-unmute: remove from snoozedInstances on the rule SO and clear
+    // ALERT_MUTED on the AAD docs in the same execution.
     const alertUuidsToAutoUnmute: string[] = [];
     if (alertsToAutoUnmute.length > 0) {
+      const updatedSnoozedInstances = { ...(rule.snoozedInstances ?? {}) };
       for (const { alertInstanceId, reason } of alertsToAutoUnmute) {
+        delete updatedSnoozedInstances[alertInstanceId];
         const uuid = alertsToReturn[alertInstanceId]?.meta?.uuid;
         if (uuid) {
           alertUuidsToAutoUnmute.push(uuid);
-          this.logger.info(
-            `Auto-unmuting alert '${alertInstanceId}' for rule '${rule.id}': ${reason}`
-          );
-          this.alertingEventLogger.logAlert({
-            action: 'auto-unsnooze',
-            id: alertInstanceId,
-            uuid,
-            message: `${ruleLabel} auto-unsnoozed alert '${alertInstanceId}': ${reason}`,
-            flapping: false,
-          });
-        } else {
-          this.logger.warn(
-            `Could not resolve UUID for auto-unmute alert '${alertInstanceId}' in rule '${rule.id}'`
-          );
         }
+        this.logger.info(
+          `Auto-unmuting alert '${alertInstanceId}' for rule '${rule.id}': ${reason}`
+        );
+        this.alertingEventLogger.logAlert({
+          action: 'auto-unsnooze',
+          id: alertInstanceId,
+          uuid: uuid ?? alertInstanceId,
+          message: `${ruleLabel} auto-unsnoozed alert '${alertInstanceId}': ${reason}`,
+          flapping: false,
+        });
+      }
+
+      try {
+        const client = this.context.internalSavedObjectsRepository;
+        await partiallyUpdateRuleWithEs(client, rule.id, {
+          snoozedInstances: updatedSnoozedInstances,
+        });
+      } catch (err) {
+        this.logger.error(`Error updating snoozedInstances for rule '${rule.id}': ${err.message}`);
       }
     }
 
