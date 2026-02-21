@@ -274,8 +274,21 @@ describe('mute alert instance', () => {
     );
     expect(alertsServiceMock.muteAlertInstance).not.toHaveBeenCalled();
 
-    // Conditional snooze should NOT update the rule SO's mutedInstanceIds
-    expect(unsecuredSavedObjectsClient.update).not.toHaveBeenCalled();
+    // Conditional snooze writes snoozedInstances to the rule SO
+    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
+      'alert',
+      '1',
+      expect.objectContaining({
+        snoozedInstances: {
+          instance1: expect.objectContaining({
+            expiresAt: expect.any(String),
+            conditions: expect.any(Array),
+          }),
+        },
+        updatedAt: expect.any(String),
+      }),
+      { version: 'v1' }
+    );
   });
 
   it('removes stale mutedInstanceIds when transitioning from simple mute to conditional snooze', async () => {
@@ -320,6 +333,11 @@ describe('mute alert instance', () => {
       '1',
       expect.objectContaining({
         mutedInstanceIds: ['instance2'],
+        snoozedInstances: {
+          instance1: expect.objectContaining({
+            conditions: expect.any(Array),
+          }),
+        },
         updatedAt: expect.any(String),
       }),
       { version: 'v1' }

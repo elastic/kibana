@@ -125,31 +125,40 @@ async function muteInstanceWithOCC(
     const mutedInstanceIds = attributes.mutedInstanceIds || [];
 
     if (isConditionalSnooze && body) {
-      // Conditional snooze: write snooze configuration to the alert ES document only.
-      // The alert document is the single source of truth for conditional snooze state;
-      // mutedInstanceIds on the rule SO is NOT updated.
-      await context.alertsService?.snoozeAlertInstance({
-        ruleId,
-        alertInstanceId,
-        indices,
-        logger: context.logger,
-        expiresAt: body.expiresAt,
-        conditions: body.conditions,
-        conditionOperator: body.conditionOperator ?? 'any',
+      // Conditional snooze: persist config on rule SO (durable, survives alert lifecycle)
+      // and materialize ALERT_MUTED on the current AAD doc (for query-time filtering).
+      const snoozedInstances = { ...(attributes.snoozedInstances ?? {}) };
+      snoozedInstances[alertInstanceId] = {
+        ...(body.expiresAt ? { expiresAt: body.expiresAt } : {}),
+        ...(body.conditions ? { conditions: body.conditions } : {}),
+        ...(body.conditionOperator ? { conditionOperator: body.conditionOperator } : {}),
+      };
+
+      await updateRuleSo({
+        savedObjectsClient: context.unsecuredSavedObjectsClient,
+        savedObjectsUpdateOptions: { version },
+        id: ruleId,
+        updateRuleAttributes: updateMeta(context, {
+          snoozedInstances,
+          // Transitioning from simple mute -> conditional snooze: remove from mutedInstanceIds
+          ...(mutedInstanceIds.includes(alertInstanceId)
+            ? { mutedInstanceIds: mutedInstanceIds.filter((id) => id !== alertInstanceId) }
+            : {}),
+          updatedBy: await context.getUserName(),
+          updatedAt: new Date().toISOString(),
+        }),
       });
 
-      // Transitioning from simple mute -> conditional snooze requires removing
-      // stale rule SO mute state; otherwise scheduler short-circuits on simple mute.
-      if (mutedInstanceIds.includes(alertInstanceId)) {
-        await updateRuleSo({
-          savedObjectsClient: context.unsecuredSavedObjectsClient,
-          savedObjectsUpdateOptions: { version },
-          id: ruleId,
-          updateRuleAttributes: updateMeta(context, {
-            mutedInstanceIds: mutedInstanceIds.filter((id) => id !== alertInstanceId),
-            updatedBy: await context.getUserName(),
-            updatedAt: new Date().toISOString(),
-          }),
+      // Also set ALERT_MUTED=true on the current AAD doc for query-time filtering.
+      if (indices && indices.length > 0) {
+        await context.alertsService?.snoozeAlertInstance({
+          ruleId,
+          alertInstanceId,
+          indices,
+          logger: context.logger,
+          expiresAt: body.expiresAt,
+          conditions: body.conditions,
+          conditionOperator: body.conditionOperator ?? 'any',
         });
       }
     } else if (!mutedInstanceIds.includes(alertInstanceId)) {

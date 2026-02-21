@@ -45,7 +45,9 @@ async function unmuteInstanceWithOCC(
   );
 
   const mutedInstanceIds = attributes.mutedInstanceIds || [];
+  const snoozedInstances = attributes.snoozedInstances ?? {};
   const isSimpleMute = mutedInstanceIds.includes(alertInstanceId);
+  const isConditionalSnooze = alertInstanceId in snoozedInstances;
   const auditAction =
     attributes.muteAll || isSimpleMute
       ? RuleAuditAction.UNMUTE_ALERT
@@ -108,14 +110,30 @@ async function unmuteInstanceWithOCC(
         logger: context.logger,
       });
     }
-  } else if (indices && indices.length > 0) {
-    // Cancel conditional snooze: alert is not in mutedInstanceIds but may have
-    // snooze fields on the ES document. This call is idempotent.
-    await context.alertsService?.clearSnoozeAndUnmuteAlertInstances({
-      ruleId,
-      alertInstanceIds: [alertInstanceId],
-      indices,
-      logger: context.logger,
+  } else if (isConditionalSnooze) {
+    // Cancel conditional snooze: remove from snoozedInstances on rule SO and
+    // clear ALERT_MUTED + snooze fields on the AAD doc.
+    const updatedSnoozedInstances = { ...snoozedInstances };
+    delete updatedSnoozedInstances[alertInstanceId];
+
+    await updateRuleSo({
+      savedObjectsClient: context.unsecuredSavedObjectsClient,
+      savedObjectsUpdateOptions: { version },
+      id: ruleId,
+      updateRuleAttributes: updateMeta(context, {
+        snoozedInstances: updatedSnoozedInstances,
+        updatedBy: await context.getUserName(),
+        updatedAt: new Date().toISOString(),
+      }),
     });
+
+    if (indices && indices.length > 0) {
+      await context.alertsService?.clearSnoozeAndUnmuteAlertInstances({
+        ruleId,
+        alertInstanceIds: [alertInstanceId],
+        indices,
+        logger: context.logger,
+      });
+    }
   }
 }
