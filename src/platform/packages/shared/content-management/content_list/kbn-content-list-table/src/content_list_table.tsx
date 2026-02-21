@@ -11,8 +11,9 @@ import React, { useMemo } from 'react';
 import type { ReactNode } from 'react';
 import { EuiBasicTable } from '@elastic/eui';
 import { useContentListItems, type ContentListItem } from '@kbn/content-list-provider';
-import { Column as BaseColumn, NameColumn, UpdatedAtColumn } from './column';
-import { useColumns, useSorting } from './hooks';
+import { Column as BaseColumn, NameColumn, UpdatedAtColumn, ActionsColumn } from './column';
+import { Action as BaseAction, EditAction, DeleteAction } from './action';
+import { useColumns, useSorting, useSelection } from './hooks';
 import { EmptyState } from './empty_state';
 
 /**
@@ -68,7 +69,12 @@ export const getRowId = (id: string): string => `content-list-table-row-${id}`;
  * ContentListTable - Table renderer for content listings.
  *
  * Integrates with EUI's EuiBasicTable and ContentListProvider for state management.
- * Supports configurable columns via compound components, and empty states.
+ * Supports configurable columns via compound components, row selection with
+ * checkboxes, and empty states.
+ *
+ * Selection checkboxes are automatically added when `features.selection` is enabled
+ * (the default). Selection state is managed by the provider and accessible to the
+ * toolbar for bulk actions via {@link useContentListSelection}.
  *
  * @example Basic usage (defaults to Name column)
  * ```tsx
@@ -77,18 +83,25 @@ export const getRowId = (id: string): string => `content-list-table-row-${id}`;
  * </ContentListProvider>
  * ```
  *
- * @example Custom columns
+ * @example With actions column
  * ```tsx
- * const { Column } = ContentListTable;
+ * const { Column, Action } = ContentListTable;
  *
  * <ContentListTable title="My Dashboards">
  *   <Column.Name width="40%" />
- *   <Column
- *     id="status"
- *     name="Status"
- *     render={(item) => <Badge>{item.status}</Badge>}
- *   />
+ *   <Column.Actions>
+ *     <Action.Edit />
+ *     <Action.Delete />
+ *   </Column.Actions>
  * </ContentListTable>
+ * ```
+ *
+ * @example With selection and toolbar
+ * ```tsx
+ * <ContentListProvider {...config}>
+ *   <ContentListToolbar />
+ *   <ContentListTable title="Dashboards" />
+ * </ContentListProvider>
  * ```
  */
 const ContentListTableComponent = ({
@@ -105,6 +118,7 @@ const ContentListTableComponent = ({
 
   const columns = useColumns(children);
   const { sorting, onChange } = useSorting();
+  const { selection } = useSelection();
 
   const isTableEmpty = !loading && !error && items.length === 0;
 
@@ -124,6 +138,7 @@ const ContentListTableComponent = ({
       loading={loading}
       onChange={onChange}
       sorting={sorting}
+      selection={selection}
       tableLayout={tableLayout}
       data-test-subj={dataTestSubj}
     />
@@ -134,8 +149,16 @@ const ContentListTableComponent = ({
 export const Column = Object.assign(BaseColumn, {
   Name: NameColumn,
   UpdatedAt: UpdatedAtColumn,
+  Actions: ActionsColumn,
+});
+
+// Create Action namespace with sub-components.
+export const Action = Object.assign(BaseAction, {
+  Edit: EditAction,
+  Delete: DeleteAction,
 });
 
 export const ContentListTable = Object.assign(ContentListTableComponent, {
   Column,
+  Action,
 });

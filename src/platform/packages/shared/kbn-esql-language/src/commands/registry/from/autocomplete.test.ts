@@ -70,6 +70,29 @@ describe('FROM Autocomplete', () => {
     );
   });
   describe('... <sources> ...', () => {
+    test('suggests Browse data sources in empty source slots when enabled', async () => {
+      mockCallbacks = {
+        ...mockCallbacks,
+        canSuggestResourceBrowser: jest.fn().mockResolvedValue(true),
+      };
+
+      const suggest = async (query: string) => {
+        const correctedQuery = correctQuerySyntax(query);
+        const { root } = Parser.parse(correctedQuery, { withFormatting: true });
+
+        const cursorPosition = query.length;
+        const { command } = findAstPosition(root, cursorPosition);
+
+        return autocomplete(query, command!, mockCallbacks, mockContext, cursorPosition);
+      };
+
+      const initialSlotLabels = (await suggest('FROM /')).map((s) => s.label);
+      expect(initialSlotLabels).toContain('Browse data sources');
+
+      const afterCommaLabels = (await suggest('FROM index, /')).map((s) => s.label);
+      expect(afterCommaLabels).toContain('Browse data sources');
+    });
+
     test('suggests visible indices on space', async () => {
       await fromExpectSuggestions('from /', [...visibleIndices, '(FROM $0)'], mockCallbacks);
       await fromExpectSuggestions('FROM /', [...visibleIndices, '(FROM $0)'], mockCallbacks);

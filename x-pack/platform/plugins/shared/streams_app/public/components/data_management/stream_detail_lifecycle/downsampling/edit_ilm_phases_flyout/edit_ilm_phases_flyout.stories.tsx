@@ -171,6 +171,7 @@ export const PreserveMsUnits: Story = {
           min_age: '1500ms',
           downsample: { after: '1500ms', fixed_interval: '1500ms' },
         },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any;
 
       const [selectedPhase, setSelectedPhase] = useState<PhaseName | undefined>('warm');
