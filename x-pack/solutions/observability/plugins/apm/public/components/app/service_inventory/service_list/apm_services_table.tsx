@@ -8,7 +8,6 @@
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiText, EuiToolTip } from '@elastic/eui';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { apmEnableServiceInventoryTableSearchBar } from '@kbn/observability-plugin/common';
 import { ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
 import type { ApmRuleType } from '@kbn/rule-data-utils';
@@ -18,7 +17,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import type { AgentName } from '@kbn/elastic-agent-utils';
 import { EmptyCellValue } from '@kbn/shared-ux-column-presets';
 import { AlertingFlyout } from '../../../alerting/ui_components/alerting_flyout';
-import type { ApmPluginStartDeps } from '../../../../plugin';
+import { useSloFlyouts } from '../../../../hooks/use_slo_flyouts';
 import type { ServiceListItem } from '../../../../../common/service_inventory';
 import { ServiceInventoryFieldName } from '../../../../../common/service_inventory';
 import { isDefaultTransactionType } from '../../../../../common/transaction_types';
@@ -375,8 +374,8 @@ export function ApmServicesTable({
   const breakpoints = useBreakpoints();
   const { core, share } = useApmPluginContext();
   const discoverLocator = share?.url?.locators?.get(DISCOVER_APP_LOCATOR);
-  const { slo } = useKibana<ApmPluginStartDeps>().services;
   const { indexSettings = [] } = useApmIndexSettingsContext();
+  const { CreateSLOFormFlyout } = useSloFlyouts();
   const { link } = useApmRouter();
   const showTransactionTypeColumn = items.some(
     ({ transactionType }) => transactionType && !isDefaultTransactionType(transactionType)
@@ -444,24 +443,27 @@ export function ApmServicesTable({
     useSloOverviewFlyout();
 
   const CreateSloFlyout =
-    sloFlyoutState.isOpen && sloFlyoutState.indicatorType && sloFlyoutState.serviceName
-      ? slo?.getCreateSLOFormFlyout({
-          initialValues: {
-            name: `APM SLO for ${sloFlyoutState.serviceName}`,
-            indicator: {
-              type: sloFlyoutState.indicatorType,
-              params: {
-                service: sloFlyoutState.serviceName,
-                environment: environment === ENVIRONMENT_ALL.value ? '*' : environment,
-              },
+    sloFlyoutState.isOpen &&
+    sloFlyoutState.indicatorType &&
+    sloFlyoutState.serviceName &&
+    CreateSLOFormFlyout ? (
+      <CreateSLOFormFlyout
+        initialValues={{
+          name: `APM SLO for ${sloFlyoutState.serviceName}`,
+          indicator: {
+            type: sloFlyoutState.indicatorType,
+            params: {
+              service: sloFlyoutState.serviceName,
+              environment: environment === ENVIRONMENT_ALL.value ? '*' : environment,
             },
           },
-          onClose: closeSloFlyout,
-          formSettings: {
-            allowedIndicatorTypes: [...APM_SLO_INDICATOR_TYPES],
-          },
-        })
-      : null;
+        }}
+        onClose={closeSloFlyout}
+        formSettings={{
+          allowedIndicatorTypes: [...APM_SLO_INDICATOR_TYPES],
+        }}
+      />
+    ) : null;
 
   const serviceColumns = useMemo(() => {
     return getServiceColumns({
@@ -524,7 +526,9 @@ export function ApmServicesTable({
         indexSettings,
       });
 
-      if (!esqlQuery) return undefined;
+      if (!esqlQuery) {
+        return undefined;
+      }
 
       return discoverLocator?.getRedirectUrl({
         timeRange: { from: query.rangeFrom, to: query.rangeTo },

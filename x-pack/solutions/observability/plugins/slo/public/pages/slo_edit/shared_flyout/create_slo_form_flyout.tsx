@@ -7,13 +7,11 @@
 
 import { EuiFlyout, EuiFlyoutBody, EuiFlyoutFooter, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { CreateSLOInput } from '@kbn/slo-schema';
-import type { RecursivePartial } from '@kbn/utility-types';
+import type { CreateSLOFormFlyoutProps } from '@kbn/slo-flyout-types';
 import React, { useEffect } from 'react';
 import { OutPortal, createHtmlPortalNode } from 'react-reverse-portal';
 import { SloEditForm } from '../components/slo_edit_form';
 import { transformPartialSLODataToFormState } from '../helpers/process_slo_form_values';
-import type { FormSettings } from '../types';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
 
 export const sloEditFormFooterPortal = createHtmlPortalNode();
@@ -23,11 +21,7 @@ export default function CreateSLOFormFlyout({
   onClose,
   initialValues = {},
   formSettings,
-}: {
-  onClose: () => void;
-  initialValues: RecursivePartial<CreateSLOInput>;
-  formSettings?: FormSettings;
-}) {
+}: CreateSLOFormFlyoutProps) {
   const formInitialValues = transformPartialSLODataToFormState(initialValues);
   const { telemetry } = usePluginContext();
 

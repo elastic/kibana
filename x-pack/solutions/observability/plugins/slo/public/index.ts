@@ -5,6 +5,8 @@
  * 2.0.
  */
 import type { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
+import { SloCreateFlyoutToken, SloDetailsFlyoutToken } from '@kbn/slo-flyout-types';
+import { declare } from '@kbn/plugin-di';
 import { SLOPlugin } from './plugin';
 import type {
   SLOPublicSetup,
@@ -21,6 +23,18 @@ export const plugin: PluginInitializer<
 > = (initializerContext: PluginInitializerContext) => {
   return new SLOPlugin(initializerContext);
 };
+
+/**
+ * Provides SLO flyout factories as cross-plugin services.
+ *
+ * Both tokens use `toResolvedValue` with `Start`, which the platform
+ * auto-bridges to the value returned by the classic `start()` method.
+ * No manual `rebindSync` is needed.
+ */
+export const services = declare<SLOPublicStart>(({ provide }) => {
+  provide(SloCreateFlyoutToken, (start) => start.getCreateSLOFormFlyout);
+  provide(SloDetailsFlyoutToken, (start) => start.getSLODetailsFlyout);
+});
 
 export type {
   SLOPublicPluginsSetup,

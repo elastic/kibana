@@ -17,10 +17,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useState } from 'react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { METRIC_TYPE, useTrackMetric } from '@kbn/observability-shared-plugin/public';
-import type { ApmPluginStartDeps } from '../../../plugin';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
+import { useSloFlyouts } from '../../../hooks/use_slo_flyouts';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { APM_SLO_INDICATOR_TYPES } from '../../../../common/slo_indicator_types';
 import illustrationSrc from './assets/illustration_slo_callout.svg';
@@ -36,7 +35,7 @@ export function SloCallout({ dismissCallout, serviceName, environment }: Props) 
   const {
     core: { docLinks },
   } = useApmPluginContext();
-  const { slo: sloPlugin } = useKibana<ApmPluginStartDeps>().services;
+  const { CreateSLOFormFlyout } = useSloFlyouts();
 
   const [createSloFlyoutOpen, setCreateSloFlyoutOpen] = useState(false);
 
@@ -51,9 +50,10 @@ export function SloCallout({ dismissCallout, serviceName, environment }: Props) 
     dismissCallout();
   }, [dismissCallout]);
 
-  const CreateSloFlyout = createSloFlyoutOpen
-    ? sloPlugin?.getCreateSLOFormFlyout({
-        initialValues: {
+  const CreateSloFlyout =
+    createSloFlyoutOpen && CreateSLOFormFlyout ? (
+      <CreateSLOFormFlyout
+        initialValues={{
           name: `APM SLO for ${serviceName}`,
           indicator: {
             type: DEFAULT_INDICATOR_TYPE,
@@ -62,13 +62,13 @@ export function SloCallout({ dismissCallout, serviceName, environment }: Props) 
               environment: environment === ENVIRONMENT_ALL.value ? '*' : environment,
             },
           },
-        },
-        onClose: closeCreateSloFlyout,
-        formSettings: {
+        }}
+        onClose={closeCreateSloFlyout}
+        formSettings={{
           allowedIndicatorTypes: [...APM_SLO_INDICATOR_TYPES],
-        },
-      })
-    : null;
+        }}
+      />
+    ) : null;
 
   return (
     <>

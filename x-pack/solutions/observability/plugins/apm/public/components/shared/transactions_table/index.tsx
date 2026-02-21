@@ -13,7 +13,6 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { apmEnableTableSearchBar } from '@kbn/observability-plugin/common';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import type { ApmRuleType } from '@kbn/rule-data-utils';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ApmDocumentType } from '../../../../common/document_type';
 import type { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 import { getLatencyAggregationType } from '../../../../common/latency_aggregation_types';
@@ -22,11 +21,11 @@ import {
   APM_SLO_INDICATOR_TYPES,
   type ApmIndicatorType,
 } from '../../../../common/slo_indicator_types';
-import type { ApmPluginStartDeps } from '../../../plugin';
 import { useApmIndexSettingsContext } from '../../../context/apm_index_settings/use_apm_index_settings_context';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../hooks/use_apm_router';
+import { useSloFlyouts } from '../../../hooks/use_slo_flyouts';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
 import { useStateDebounced } from '../../../hooks/use_debounce';
 import { FETCH_STATUS, isPending, isSuccess, useFetcher } from '../../../hooks/use_fetcher';
@@ -88,7 +87,7 @@ export function TransactionsTable({
 }: Props) {
   const { link } = useApmRouter();
   const { core, observabilityAIAssistant } = useApmPluginContext();
-  const { slo: sloPlugin } = useKibana<ApmPluginStartDeps>().services;
+  const { CreateSLOFormFlyout } = useSloFlyouts();
   const [renderedItems, setRenderedItems] = useState<ApiResponse['transactionGroups']>([]);
 
   const [flyoutState, setFlyoutState] = useState<ApmFlyoutState>({ type: 'closed' });
@@ -233,26 +232,33 @@ export function TransactionsTable({
 
   const CreateSloFlyout = useMemo(
     () =>
-      sloIndicatorType && sloTransactionName
-        ? sloPlugin?.getCreateSLOFormFlyout({
-            initialValues: {
-              name: `APM SLO for ${serviceName} - ${sloTransactionName}`,
-              indicator: {
-                type: sloIndicatorType,
-                params: {
-                  service: serviceName,
-                  environment: sloEnvironment,
-                  transactionName: sloTransactionName,
-                },
+      sloIndicatorType && sloTransactionName && CreateSLOFormFlyout ? (
+        <CreateSLOFormFlyout
+          initialValues={{
+            name: `APM SLO for ${serviceName} - ${sloTransactionName}`,
+            indicator: {
+              type: sloIndicatorType,
+              params: {
+                service: serviceName,
+                environment: sloEnvironment,
+                transactionName: sloTransactionName,
               },
             },
-            onClose: closeFlyout,
-            formSettings: {
-              allowedIndicatorTypes: [...APM_SLO_INDICATOR_TYPES],
-            },
-          }) ?? null
-        : null,
-    [sloPlugin, sloIndicatorType, sloTransactionName, serviceName, sloEnvironment, closeFlyout]
+          }}
+          onClose={closeFlyout}
+          formSettings={{
+            allowedIndicatorTypes: [...APM_SLO_INDICATOR_TYPES],
+          }}
+        />
+      ) : null,
+    [
+      CreateSLOFormFlyout,
+      sloIndicatorType,
+      sloTransactionName,
+      serviceName,
+      sloEnvironment,
+      closeFlyout,
+    ]
   );
 
   return (
