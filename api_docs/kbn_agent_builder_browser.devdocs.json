@@ -114,7 +114,7 @@
           "\nPublic-facing contract for the attachment service."
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-        "lineNumber": 67,
+        "lineNumber": 72,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -144,7 +144,7 @@
               "<TAttachment>) => void"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-            "lineNumber": 71,
+            "lineNumber": 76,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -162,7 +162,7 @@
                   "string"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-                "lineNumber": 78,
+                "lineNumber": 83,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -188,7 +188,7 @@
                   "<TAttachment>"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-                "lineNumber": 79,
+                "lineNumber": 84,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -222,7 +222,7 @@
               "<TAttachment> | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-            "lineNumber": 82,
+            "lineNumber": 87,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -240,7 +240,7 @@
                   "string"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-                "lineNumber": 89,
+                "lineNumber": 94,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -341,6 +341,77 @@
           },
           {
             "parentPluginId": "@kbn/agent-builder-browser",
+            "id": "def-common.AttachmentUIDefinition.onClick",
+            "type": "Function",
+            "tags": [],
+            "label": "onClick",
+            "description": [
+              "\nOptional custom click handler for attachment pills.\nWhen provided, pills will invoke this instead of the default behavior."
+            ],
+            "signature": [
+              "((args: { attachment: TAttachment; version?: ",
+              "AttachmentVersion",
+              "<unknown, unknown> | undefined; }) => void) | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/agent-builder-browser",
+                "id": "def-common.AttachmentUIDefinition.onClick.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "args",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
+                "lineNumber": 54,
+                "columnNumber": 20,
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/agent-builder-browser",
+                    "id": "def-common.AttachmentUIDefinition.onClick.$1.attachment",
+                    "type": "Uncategorized",
+                    "tags": [],
+                    "label": "attachment",
+                    "description": [],
+                    "signature": [
+                      "TAttachment"
+                    ],
+                    "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
+                    "lineNumber": 54,
+                    "columnNumber": 22,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/agent-builder-browser",
+                    "id": "def-common.AttachmentUIDefinition.onClick.$1.version",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "version",
+                    "description": [],
+                    "signature": [
+                      "AttachmentVersion",
+                      "<unknown, unknown> | undefined"
+                    ],
+                    "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
+                    "lineNumber": 54,
+                    "columnNumber": 47,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-browser",
             "id": "def-common.AttachmentUIDefinition.renderContent",
             "type": "Function",
             "tags": [],
@@ -354,7 +425,7 @@
               "<TAttachment>) => React.ReactNode) | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-            "lineNumber": 50,
+            "lineNumber": 55,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -371,7 +442,7 @@
                   "<TAttachment>"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-                "lineNumber": 54,
+                "lineNumber": 59,
                 "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -395,7 +466,7 @@
               "<TAttachment>) => React.ReactNode) | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-            "lineNumber": 55,
+            "lineNumber": 60,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -412,7 +483,7 @@
                   "<TAttachment>"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-                "lineNumber": 59,
+                "lineNumber": 64,
                 "columnNumber": 19,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -434,7 +505,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-            "lineNumber": 60,
+            "lineNumber": 65,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -576,7 +647,7 @@
                 "section": "def-common.ToolResult",
                 "text": "ToolResult"
               },
-              "<Record<string, unknown>>[]"
+              "[]"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/tools/contract.ts",
             "lineNumber": 18,
