@@ -10,21 +10,21 @@
 import { i18n } from '@kbn/i18n';
 
 export const txtAddVariableButtonTitle = i18n.translate(
-  'uiActionsEnhanced.drilldowns.urlDrilldownCollectConfig.addVariableButtonTitle',
+  'xpack.urlDrilldown.editor.addVariableButtonTitle',
   {
     defaultMessage: 'Add variable',
   }
 );
 
 export const txtUrlTemplateVariablesHelpLinkText = i18n.translate(
-  'uiActionsEnhanced.drilldowns.urlDrilldownCollectConfig.urlTemplateVariablesHelpLinkText',
+  'xpack.urlDrilldown.editor.urlTemplateVariablesHelpLinkText',
   {
     defaultMessage: 'Help',
   }
 );
 
 export const txtUrlTemplateVariablesFilterPlaceholderText = i18n.translate(
-  'uiActionsEnhanced.drilldowns.urlDrilldownCollectConfig.urlTemplateVariablesFilterPlaceholderText',
+  'xpack.urlDrilldown.editor.urlTemplateVariablesFilterPlaceholderText',
   {
     defaultMessage: 'Filter variables',
   }

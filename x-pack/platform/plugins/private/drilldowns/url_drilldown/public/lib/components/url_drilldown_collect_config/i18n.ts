@@ -17,7 +17,7 @@ export const txtUrlTemplateLabel = i18n.translate(
 );
 
 export const txtEmptyErrorMessage = i18n.translate(
-  'uiActionsEnhanced.drilldowns.urlDrilldownCollectConfig.urlTemplateEmptyErrorMessage',
+  'xpack.urlDrilldown.editor.urlTemplateEmptyErrorMessage',
   {
     defaultMessage: 'URL template is required.',
   }
@@ -31,7 +31,7 @@ export const txtInvalidFormatErrorMessage = ({
   example: string;
 }) =>
   i18n.translate(
-    'uiActionsEnhanced.drilldowns.urlDrilldownCollectConfig.urlTemplateInvalidFormatErrorMessage',
+    'xpack.urlDrilldown.editor.urlTemplateInvalidFormatErrorMessage',
     {
       defaultMessage: '{error} Example: {example}',
       values: {
@@ -42,7 +42,7 @@ export const txtInvalidFormatErrorMessage = ({
   );
 
 export const txtUrlTemplateSyntaxTestingHelpText = i18n.translate(
-  'uiActionsEnhanced.drilldowns.urlDrilldownCollectConfig.urlTemplateSyntaxTestingHelpText',
+  'xpack.urlDrilldown.editor.urlTemplateSyntaxTestingHelpText',
   {
     defaultMessage:
       'To validate and test the URL template, save the configuration and use this drilldown from the panel.',
@@ -50,35 +50,35 @@ export const txtUrlTemplateSyntaxTestingHelpText = i18n.translate(
 );
 
 export const txtUrlTemplateSyntaxHelpLinkText = i18n.translate(
-  'uiActionsEnhanced.drilldowns.urlDrilldownCollectConfig.urlTemplateSyntaxHelpLinkText',
+  'xpack.urlDrilldown.editor.urlTemplateSyntaxHelpLinkText',
   {
     defaultMessage: 'Syntax help',
   }
 );
 
 export const txtUrlTemplateOpenInNewTab = i18n.translate(
-  'uiActionsEnhanced.drilldowns.urlDrilldownCollectConfig.openInNewTabLabel',
+  'xpack.urlDrilldown.editor.openInNewTabLabel',
   {
     defaultMessage: 'Open URL in new tab',
   }
 );
 
 export const txtUrlTemplateAdditionalOptions = i18n.translate(
-  'uiActionsEnhanced.drilldowns.urlDrilldownCollectConfig.additionalOptions',
+  'xpack.urlDrilldown.editor.additionalOptions',
   {
     defaultMessage: 'Additional options',
   }
 );
 
 export const txtUrlTemplateEncodeUrl = i18n.translate(
-  'uiActionsEnhanced.drilldowns.urlDrilldownCollectConfig.encodeUrl',
+  'xpack.urlDrilldown.editor.encodeUrl',
   {
     defaultMessage: 'Encode URL',
   }
 );
 
 export const txtUrlTemplateEncodeDescription = i18n.translate(
-  'uiActionsEnhanced.drilldowns.urlDrilldownCollectConfig.encodeDescription',
+  'xpack.urlDrilldown.editor.encodeDescription',
   {
     defaultMessage: 'If enabled, URL will be escaped using percent encoding',
   }
