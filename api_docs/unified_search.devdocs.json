@@ -740,7 +740,15 @@
                 "section": "def-common.ESQLControlVariable",
                 "text": "ESQLControlVariable"
               },
-              "[]; onSaveControl: (controlState: Record<string, unknown>, updatedQuery: string) => Promise<void>; onCancelControl?: (() => void) | undefined; controlsWrapper: React.ReactNode; } | undefined; onOpenQueryInNewTab?: ((tabName: string, esqlQuery: string) => Promise<void>) | undefined; esqlEditorInitialState?: Partial<",
+              "[]; onSaveControl: (controlState: Record<string, unknown>, updatedQuery: string) => Promise<void>; onCancelControl?: (() => void) | undefined; controlsWrapper: React.ReactNode; } | undefined; esqlQueryStats?: ",
+              {
+                "pluginId": "@kbn/esql-types",
+                "scope": "common",
+                "docId": "kibKbnEsqlTypesPluginApi",
+                "section": "def-common.ESQLQueryStats",
+                "text": "ESQLQueryStats"
+              },
+              " | undefined; onOpenQueryInNewTab?: ((tabName: string, esqlQuery: string) => Promise<void>) | undefined; esqlEditorInitialState?: Partial<",
               {
                 "pluginId": "@kbn/esql-editor",
                 "scope": "public",
@@ -2081,7 +2089,7 @@
           "SearchBarInjectedDeps"
         ],
         "path": "src/platform/plugins/shared/unified_search/public/search_bar/search_bar.tsx",
-        "lineNumber": 171,
+        "lineNumber": 173,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

@@ -9627,7 +9627,7 @@
                 "tags": [],
                 "label": "context",
                 "description": [
-                  "Object with functions to perform side effects. This object\nis created for the duration of the execution of expression and is the\nsame for all functions in expression chain."
+                  "Object with functions to perform side effects. This object"
                 ],
                 "signature": [
                   "Context"
@@ -11310,7 +11310,9 @@
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "input",
-                "description": [],
+                "description": [
+                  "// This any is for legacy reasons."
+                ],
                 "signature": [
                   "Input"
                 ],
@@ -13064,7 +13066,7 @@
                 "section": "def-public.ExpressionRenderError",
                 "text": "ExpressionRenderError"
               },
-              " | null | undefined) => React.ReactElement<any, string | React.JSXElementConstructor<any>> | React.ReactElement<any, string | React.JSXElementConstructor<any>>[]) | undefined"
+              " | null | undefined) => React.ReactElement<any> | React.ReactElement<any>[]) | undefined"
             ],
             "path": "src/platform/plugins/shared/expressions/public/react_expression_renderer/react_expression_renderer.tsx",
             "lineNumber": 24,
@@ -22243,7 +22245,7 @@
                 "tags": [],
                 "label": "context",
                 "description": [
-                  "Object with functions to perform side effects. This object\nis created for the duration of the execution of expression and is the\nsame for all functions in expression chain."
+                  "Object with functions to perform side effects. This object"
                 ],
                 "signature": [
                   "Context"
@@ -32094,7 +32096,9 @@
             "type": "Object",
             "tags": [],
             "label": "options",
-            "description": [],
+            "description": [
+              "Optional options, set `allowColumnOverwrite` to true to not raise an exception if the output column exists already"
+            ],
             "path": "src/platform/plugins/shared/expressions/common/expression_functions/series_calculation_helpers.ts",
             "lineNumber": 39,
             "columnNumber": 12,
@@ -36687,7 +36691,7 @@
                 "tags": [],
                 "label": "context",
                 "description": [
-                  "Object with functions to perform side effects. This object\nis created for the duration of the execution of expression and is the\nsame for all functions in expression chain."
+                  "Object with functions to perform side effects. This object"
                 ],
                 "signature": [
                   "Context"
@@ -38580,7 +38584,9 @@
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "input",
-                "description": [],
+                "description": [
+                  "// This any is for legacy reasons."
+                ],
                 "signature": [
                   "Input"
                 ],

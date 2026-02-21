@@ -179,7 +179,7 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
-            "lineNumber": 513,
+            "lineNumber": 536,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -195,7 +195,7 @@
                   "CoreStart"
                 ],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
-                "lineNumber": 513,
+                "lineNumber": 536,
                 "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -212,7 +212,7 @@
                   "PluginsStart"
                 ],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
-                "lineNumber": 513,
+                "lineNumber": 536,
                 "columnNumber": 33,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -232,7 +232,7 @@
               "() => void"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
-            "lineNumber": 639,
+            "lineNumber": 662,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1118,7 +1118,7 @@
           "React.NamedExoticComponent<SimpleConnectorFormProps>"
         ],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/components/simple_connector_form.tsx",
-        "lineNumber": 228,
+        "lineNumber": 234,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2388,7 +2388,7 @@
             "label": "iconClass",
             "description": [],
             "signature": [
-              "string | React.ComponentType<{}>"
+              "string | React.ComponentType"
             ],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
             "lineNumber": 131,
@@ -3545,7 +3545,7 @@
           "<T>"
         ],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/components/simple_connector_form.tsx",
-        "lineNumber": 33,
+        "lineNumber": 34,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3561,7 +3561,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/components/simple_connector_form.tsx",
-            "lineNumber": 34,
+            "lineNumber": 35,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3577,7 +3577,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/components/simple_connector_form.tsx",
-            "lineNumber": 35,
+            "lineNumber": 36,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3593,7 +3593,7 @@
               "T | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/components/simple_connector_form.tsx",
-            "lineNumber": 36,
+            "lineNumber": 37,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5160,7 +5160,7 @@
           "<any>"
         ],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/components/simple_connector_form.tsx",
-        "lineNumber": 39,
+        "lineNumber": 40,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -5176,7 +5176,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/components/simple_connector_form.tsx",
-            "lineNumber": 40,
+            "lineNumber": 41,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -7650,7 +7650,7 @@
             },
             "[]) => void; }) => React.ReactElement<",
             "ActionAccordionFormProps",
-            ", string | React.JSXElementConstructor<any>>"
+            ">"
           ],
           "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
           "lineNumber": 112,
@@ -7700,7 +7700,7 @@
             "CreateConnectorFlyoutProps",
             ", \"actionTypeRegistry\">) => React.ReactElement<",
             "CreateConnectorFlyoutProps",
-            ", string | React.JSXElementConstructor<any>>"
+            ">"
           ],
           "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
           "lineNumber": 117,
@@ -7742,7 +7742,7 @@
             "EditConnectorFlyoutProps",
             ", \"actionTypeRegistry\">) => React.ReactElement<",
             "EditConnectorFlyoutProps",
-            ", string | React.JSXElementConstructor<any>>"
+            ">"
           ],
           "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
           "lineNumber": 120,
@@ -7784,7 +7784,7 @@
             "AlertsSearchBarProps",
             ") => React.ReactElement<",
             "AlertsSearchBarProps",
-            ", string | React.JSXElementConstructor<any>>"
+            ">"
           ],
           "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
           "lineNumber": 123,
@@ -7824,7 +7824,7 @@
             "ComponentOpts",
             ") => React.ReactElement<",
             "ComponentOpts",
-            ", string | React.JSXElementConstructor<any>>"
+            ">"
           ],
           "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
           "lineNumber": 124,
@@ -7864,7 +7864,7 @@
             "RuleTagFilterProps",
             ") => React.ReactElement<",
             "RuleTagFilterProps",
-            ", string | React.JSXElementConstructor<any>>"
+            ">"
           ],
           "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
           "lineNumber": 125,
@@ -7916,7 +7916,7 @@
               "section": "def-public.RuleStatusFilterProps",
               "text": "RuleStatusFilterProps"
             },
-            ", string | React.JSXElementConstructor<any>>"
+            ">"
           ],
           "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
           "lineNumber": 126,
@@ -8064,7 +8064,7 @@
           "signature": [
             "(props: ",
             "RulesListProps",
-            ") => React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+            ") => React.ReactElement<any>"
           ],
           "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
           "lineNumber": 133,
@@ -8104,7 +8104,7 @@
             "RulesListNotifyBadgePropsWithApi",
             ") => React.ReactElement<",
             "RulesListNotifyBadgePropsWithApi",
-            ", string | React.JSXElementConstructor<any>>"
+            ">"
           ],
           "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
           "lineNumber": 134,
@@ -8227,7 +8227,7 @@
             "RuleStatusPanelProps",
             ") => React.ReactElement<",
             "RuleStatusPanelProps",
-            ", string | React.JSXElementConstructor<any>>"
+            ">"
           ],
           "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
           "lineNumber": 138,
@@ -8267,7 +8267,7 @@
             "AlertSummaryWidgetProps",
             ") => React.ReactElement<",
             "AlertSummaryWidgetProps",
-            ", string | React.JSXElementConstructor<any>>"
+            ">"
           ],
           "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
           "lineNumber": 139,
@@ -8307,7 +8307,7 @@
             "RuleSnoozeModalProps",
             ") => React.ReactElement<",
             "RuleSnoozeModalProps",
-            ", string | React.JSXElementConstructor<any>>"
+            ">"
           ],
           "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
           "lineNumber": 140,
@@ -8347,7 +8347,7 @@
             "UntrackAlertsModalProps",
             ") => React.ReactElement<",
             "UntrackAlertsModalProps",
-            ", string | React.JSXElementConstructor<any>>"
+            ">"
           ],
           "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
           "lineNumber": 141,
@@ -8387,7 +8387,7 @@
             "RuleSettingsLinkProps",
             ") => React.ReactElement<",
             "RuleSettingsLinkProps",
-            ", string | React.JSXElementConstructor<any>>"
+            ">"
           ],
           "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
           "lineNumber": 142,
@@ -8502,7 +8502,7 @@
             "GlobalRuleEventLogListProps",
             ") => React.ReactElement<",
             "GlobalRuleEventLogListProps",
-            ", string | React.JSXElementConstructor<any>>"
+            ">"
           ],
           "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
           "lineNumber": 152,

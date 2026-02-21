@@ -16,7 +16,7 @@
           ") => React.JSX.Element"
         ],
         "path": "src/core/packages/chrome/navigation/src/components/navigation.tsx",
-        "lineNumber": 78,
+        "lineNumber": 79,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -32,7 +32,7 @@
               "NavigationProps"
             ],
             "path": "src/core/packages/chrome/navigation/src/components/navigation.tsx",
-            "lineNumber": 78,
+            "lineNumber": 79,
             "columnNumber": 28,
             "deprecated": false,
             "trackAdoption": false,
@@ -184,7 +184,7 @@
               "\nThe icon to display for the menu item."
             ],
             "signature": [
-              "string | React.ComponentType<{}>"
+              "string | React.ComponentType"
             ],
             "path": "src/core/packages/chrome/navigation/types.ts",
             "lineNumber": 61,
@@ -247,7 +247,7 @@
             "tags": [],
             "label": "badgeType",
             "description": [
-              "\n(optional) The type of badge shown next to the item (e.g. `beta`, `techPreview`)."
+              "\n(optional) The type of badge shown next to the item (e.g. `beta`, `techPreview`, `new`)."
             ],
             "signature": [
               "BadgeType",
@@ -289,7 +289,7 @@
         "label": "NavigationProps",
         "description": [],
         "path": "src/core/packages/chrome/navigation/src/components/navigation.tsx",
-        "lineNumber": 36,
+        "lineNumber": 37,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -307,7 +307,7 @@
               "string | undefined"
             ],
             "path": "src/core/packages/chrome/navigation/src/components/navigation.tsx",
-            "lineNumber": 37,
+            "lineNumber": 38,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -322,7 +322,7 @@
               "\nWhether the navigation is collapsed. This can be controlled by the parent component."
             ],
             "path": "src/core/packages/chrome/navigation/src/components/navigation.tsx",
-            "lineNumber": 41,
+            "lineNumber": 42,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -340,7 +340,7 @@
               "NavigationStructure"
             ],
             "path": "src/core/packages/chrome/navigation/src/components/navigation.tsx",
-            "lineNumber": 45,
+            "lineNumber": 46,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -358,7 +358,7 @@
               "SideNavLogo"
             ],
             "path": "src/core/packages/chrome/navigation/src/components/navigation.tsx",
-            "lineNumber": 49,
+            "lineNumber": 50,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -376,7 +376,7 @@
               "(width: number) => void"
             ],
             "path": "src/core/packages/chrome/navigation/src/components/navigation.tsx",
-            "lineNumber": 53,
+            "lineNumber": 54,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -392,7 +392,7 @@
                   "number"
                 ],
                 "path": "src/core/packages/chrome/navigation/src/components/navigation.tsx",
-                "lineNumber": 56,
+                "lineNumber": 57,
                 "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -420,7 +420,7 @@
               ") => void) | undefined"
             ],
             "path": "src/core/packages/chrome/navigation/src/components/navigation.tsx",
-            "lineNumber": 57,
+            "lineNumber": 58,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -440,7 +440,7 @@
                   "SecondaryMenuItem"
                 ],
                 "path": "src/core/packages/chrome/navigation/src/components/navigation.tsx",
-                "lineNumber": 60,
+                "lineNumber": 61,
                 "columnNumber": 18,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -462,7 +462,7 @@
               "(isCollapsed: boolean) => void"
             ],
             "path": "src/core/packages/chrome/navigation/src/components/navigation.tsx",
-            "lineNumber": 61,
+            "lineNumber": 62,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -478,7 +478,7 @@
                   "boolean"
                 ],
                 "path": "src/core/packages/chrome/navigation/src/components/navigation.tsx",
-                "lineNumber": 67,
+                "lineNumber": 68,
                 "columnNumber": 23,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -497,10 +497,10 @@
               "\n(optional) Content to display inside the side panel footer."
             ],
             "signature": [
-              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+              "React.ReactNode"
             ],
             "path": "src/core/packages/chrome/navigation/src/components/navigation.tsx",
-            "lineNumber": 68,
+            "lineNumber": 69,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -518,7 +518,7 @@
               "string | undefined"
             ],
             "path": "src/core/packages/chrome/navigation/src/components/navigation.tsx",
-            "lineNumber": 72,
+            "lineNumber": 73,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -663,7 +663,7 @@
             "tags": [],
             "label": "badgeType",
             "description": [
-              "\n(optional) The type of badge shown next to the item (e.g. `beta`, `techPreview`)."
+              "\n(optional) The type of badge shown next to the item (e.g. `beta`, `techPreview`, `new`)."
             ],
             "signature": [
               "BadgeType",
@@ -869,7 +869,7 @@
         "label": "BadgeType",
         "description": [],
         "signature": [
-          "\"beta\" | \"techPreview\""
+          "\"new\" | \"beta\" | \"techPreview\""
         ],
         "path": "src/core/packages/chrome/navigation/types.ts",
         "lineNumber": 12,
