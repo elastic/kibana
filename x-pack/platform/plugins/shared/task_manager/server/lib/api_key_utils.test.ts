@@ -5,12 +5,18 @@
  * 2.0.
  */
 
+jest.mock('@kbn/core-security-server', () => ({
+  isUiamCredential: jest.fn(() => false),
+}));
+
+import { isUiamCredential } from '@kbn/core-security-server';
 import {
   isRequestApiKeyType,
   getApiKeyFromRequest,
   createApiKey,
   getApiKeyAndUserScope,
 } from './api_key_utils';
+import type { ApiKeyAndUserScopeBoth, EncodedApiKeyResultBoth } from './api_key_utils';
 import { coreMock } from '@kbn/core/server/mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { AuthenticatedUser, FakeRawRequest } from '@kbn/core/server';
@@ -76,9 +82,15 @@ describe('api_key_utils', () => {
         api_key: 'apiKey',
       });
 
-      const result = await createApiKey([mockTask], request, coreStart.security);
-      const apiKeyResult = result.get('task');
-      const decodedApiKey = Buffer.from(apiKeyResult!.apiKey, 'base64').toString();
+      const result = await createApiKey([mockTask], request, coreStart.security, {
+        shouldGrantUiam: false,
+      });
+      const apiKeyResult = result.get('task')!;
+      expect('apiKey' in apiKeyResult && apiKeyResult.apiKey).toBeDefined();
+      const decodedApiKey = Buffer.from(
+        'apiKey' in apiKeyResult ? apiKeyResult.apiKey : '',
+        'base64'
+      ).toString();
       expect(decodedApiKey).toEqual('apiKeyId:apiKey');
 
       expect(coreStart.security.authc.apiKeys.areAPIKeysEnabled).toHaveBeenCalled();
@@ -107,9 +119,15 @@ describe('api_key_utils', () => {
       coreStart.security.authc.apiKeys.areAPIKeysEnabled = jest.fn().mockReturnValueOnce(true);
       coreStart.security.authc.getCurrentUser = jest.fn().mockReturnValue(mockUser);
 
-      const result = await createApiKey([mockTask], request, coreStart.security);
-      const apiKeyResult = result.get('task');
-      const decodedApiKey = Buffer.from(apiKeyResult!.apiKey, 'base64').toString();
+      const result = await createApiKey([mockTask], request, coreStart.security, {
+        shouldGrantUiam: false,
+      });
+      const apiKeyResult = result.get('task')!;
+      expect('apiKey' in apiKeyResult && apiKeyResult.apiKey).toBeDefined();
+      const decodedApiKey = Buffer.from(
+        'apiKey' in apiKeyResult ? apiKeyResult.apiKey : '',
+        'base64'
+      ).toString();
       expect(decodedApiKey).toEqual('apiKeyId:apiKey');
 
       expect(coreStart.security.authc.apiKeys.areAPIKeysEnabled).toHaveBeenCalled();
@@ -133,9 +151,15 @@ describe('api_key_utils', () => {
       coreStart.security.authc.apiKeys.areAPIKeysEnabled = jest.fn().mockReturnValueOnce(true);
       coreStart.security.authc.getCurrentUser = jest.fn().mockReturnValue(null);
 
-      const result = await createApiKey([mockTask], fakeRequest, coreStart.security);
-      const apiKeyResult = result.get('task');
-      const decodedApiKey = Buffer.from(apiKeyResult!.apiKey, 'base64').toString();
+      const result = await createApiKey([mockTask], fakeRequest, coreStart.security, {
+        shouldGrantUiam: false,
+      });
+      const apiKeyResult = result.get('task')!;
+      expect('apiKey' in apiKeyResult && apiKeyResult.apiKey).toBeDefined();
+      const decodedApiKey = Buffer.from(
+        'apiKey' in apiKeyResult ? apiKeyResult.apiKey : '',
+        'base64'
+      ).toString();
       expect(decodedApiKey).toEqual('apiKeyId:my-fake-apiKey');
 
       expect(coreStart.security.authc.apiKeys.areAPIKeysEnabled).toHaveBeenCalled();
@@ -149,7 +173,9 @@ describe('api_key_utils', () => {
       coreStart.security.authc.apiKeys.areAPIKeysEnabled = jest.fn().mockReturnValueOnce(false);
       coreStart.security.authc.getCurrentUser = jest.fn().mockReturnValue(null);
 
-      await expect(createApiKey([mockTask], request, coreStart.security)).rejects.toMatchObject({
+      await expect(
+        createApiKey([mockTask], request, coreStart.security, { shouldGrantUiam: false })
+      ).rejects.toMatchObject({
         message: 'API keys are not enabled, cannot create API key.',
       });
     });
@@ -171,7 +197,9 @@ describe('api_key_utils', () => {
       coreStart.security.authc.apiKeys.areAPIKeysEnabled = jest.fn().mockReturnValueOnce(true);
       coreStart.security.authc.getCurrentUser = jest.fn().mockReturnValue(mockUser);
 
-      await expect(createApiKey([mockTask], request, coreStart.security)).rejects.toMatchObject({
+      await expect(
+        createApiKey([mockTask], request, coreStart.security, { shouldGrantUiam: false })
+      ).rejects.toMatchObject({
         message: 'Could not extract API key from user request header.',
       });
 
@@ -195,11 +223,11 @@ describe('api_key_utils', () => {
       coreStart.security.authc.apiKeys.areAPIKeysEnabled = jest.fn().mockReturnValueOnce(true);
       coreStart.security.authc.getCurrentUser = jest.fn().mockReturnValue(null);
 
-      await expect(createApiKey([mockTask], fakeRequest, coreStart.security)).rejects.toMatchObject(
-        {
-          message: 'Could not extract API key from fake request header.',
-        }
-      );
+      await expect(
+        createApiKey([mockTask], fakeRequest, coreStart.security, { shouldGrantUiam: false })
+      ).rejects.toMatchObject({
+        message: 'Could not extract API key from fake request header.',
+      });
 
       expect(coreStart.security.authc.apiKeys.areAPIKeysEnabled).toHaveBeenCalled();
       expect(coreStart.security.authc.getCurrentUser).toHaveBeenCalledWith(fakeRequest);
@@ -216,13 +244,155 @@ describe('api_key_utils', () => {
       coreStart.security.authc.apiKeys.areAPIKeysEnabled = jest.fn().mockReturnValueOnce(true);
       coreStart.security.authc.getCurrentUser = jest.fn().mockReturnValueOnce(mockUser);
       coreStart.security.authc.apiKeys.grantAsInternalUser = jest.fn().mockResolvedValueOnce(null);
-      await expect(createApiKey([mockTask], request, coreStart.security)).rejects.toMatchObject({
+      await expect(
+        createApiKey([mockTask], request, coreStart.security, { shouldGrantUiam: false })
+      ).rejects.toMatchObject({
         message: 'Could not create API key.',
       });
     });
+
+    test('should create both ES and UIAM API keys when shouldGrantUiam true and uiam is available', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      const coreStart = coreMock.createStart();
+      const mockUser = {
+        authentication_type: 'basic',
+        username: 'testUser',
+      };
+
+      coreStart.security.authc.apiKeys.areAPIKeysEnabled = jest.fn().mockReturnValueOnce(true);
+      coreStart.security.authc.getCurrentUser = jest.fn().mockReturnValueOnce(mockUser);
+      coreStart.security.authc.apiKeys.uiam = {
+        grant: jest.fn().mockResolvedValueOnce({
+          id: 'uiamKeyId',
+          api_key: 'uiamKey',
+        }),
+        invalidate: jest.fn(),
+      } as unknown as typeof coreStart.security.authc.apiKeys.uiam;
+
+      coreStart.security.authc.apiKeys.grantAsInternalUser = jest.fn().mockResolvedValueOnce({
+        id: 'apiKeyId',
+        name: 'TaskManager: testUser',
+        api_key: 'apiKey',
+      });
+
+      const result = await createApiKey([mockTask], request, coreStart.security, {
+        shouldGrantUiam: true,
+      });
+
+      const apiKeyResult = result.get('task')! as EncodedApiKeyResultBoth;
+      expect(apiKeyResult).toHaveProperty('apiKey');
+      expect(apiKeyResult).toHaveProperty('apiKeyId', 'apiKeyId');
+      expect(apiKeyResult).toHaveProperty('uiamApiKey');
+      expect(apiKeyResult).toHaveProperty('uiamApiKeyId', 'uiamKeyId');
+      expect(Buffer.from(apiKeyResult.apiKey, 'base64').toString()).toEqual('apiKeyId:apiKey');
+      expect(Buffer.from(apiKeyResult.uiamApiKey, 'base64').toString()).toEqual(
+        'uiamKeyId:uiamKey'
+      );
+      expect(coreStart.security.authc.apiKeys.uiam!.grant).toHaveBeenCalledWith(request, {
+        name: expect.stringContaining('uiam - TaskManager: report'),
+      });
+    });
+
+    test('should create ES API key only when shouldGrantUiam true but uiam is not available', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      const coreStart = coreMock.createStart();
+      const mockUser = {
+        authentication_type: 'basic',
+        username: 'testUser',
+      };
+
+      coreStart.security.authc.apiKeys.areAPIKeysEnabled = jest.fn().mockReturnValueOnce(true);
+      coreStart.security.authc.getCurrentUser = jest.fn().mockReturnValueOnce(mockUser);
+      const uiamOriginal = coreStart.security.authc.apiKeys.uiam;
+      (coreStart.security.authc.apiKeys as { uiam?: unknown }).uiam = undefined;
+
+      coreStart.security.authc.apiKeys.grantAsInternalUser = jest.fn().mockResolvedValueOnce({
+        id: 'apiKeyId',
+        name: 'TaskManager: testUser',
+        api_key: 'apiKey',
+      });
+
+      const result = await createApiKey([mockTask], request, coreStart.security, {
+        shouldGrantUiam: true,
+      });
+
+      const apiKeyResult = result.get('task')!;
+      expect(apiKeyResult).toHaveProperty('apiKey');
+      expect(apiKeyResult).toHaveProperty('apiKeyId', 'apiKeyId');
+      expect(apiKeyResult).not.toHaveProperty('uiamApiKey');
+      expect(apiKeyResult).not.toHaveProperty('uiamApiKeyId');
+
+      (coreStart.security.authc.apiKeys as { uiam?: unknown }).uiam = uiamOriginal;
+    });
+
+    test('should create ES API key only when shouldGrantUiam true but uiam.grant returns null', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      const coreStart = coreMock.createStart();
+      const mockUser = {
+        authentication_type: 'basic',
+        username: 'testUser',
+      };
+
+      coreStart.security.authc.apiKeys.areAPIKeysEnabled = jest.fn().mockReturnValueOnce(true);
+      coreStart.security.authc.getCurrentUser = jest.fn().mockReturnValueOnce(mockUser);
+      coreStart.security.authc.apiKeys.uiam = {
+        grant: jest.fn().mockResolvedValueOnce(null),
+        invalidate: jest.fn(),
+      } as unknown as typeof coreStart.security.authc.apiKeys.uiam;
+
+      coreStart.security.authc.apiKeys.grantAsInternalUser = jest.fn().mockResolvedValueOnce({
+        id: 'apiKeyId',
+        name: 'TaskManager: testUser',
+        api_key: 'apiKey',
+      });
+
+      const result = await createApiKey([mockTask], request, coreStart.security, {
+        shouldGrantUiam: true,
+      });
+
+      const apiKeyResult = result.get('task')!;
+      expect(apiKeyResult).toHaveProperty('apiKey');
+      expect(apiKeyResult).toHaveProperty('apiKeyId', 'apiKeyId');
+      expect(apiKeyResult).not.toHaveProperty('uiamApiKey');
+      expect(apiKeyResult).not.toHaveProperty('uiamApiKeyId');
+      expect(coreStart.security.authc.apiKeys.uiam!.grant).toHaveBeenCalled();
+    });
+
+    test('should return uiamApiKey only when request has API key, shouldGrantUiam true, and isUiamCredential true', async () => {
+      const mockApiKey = Buffer.from('uiamKeyId:uiamKey').toString('base64');
+      (isUiamCredential as jest.Mock).mockReturnValueOnce(true);
+
+      const request = httpServerMock.createKibanaRequest({
+        headers: { authorization: `ApiKey ${mockApiKey}` },
+      });
+      const coreStart = coreMock.createStart();
+      const mockUser = {
+        authentication_type: 'api_key',
+        username: 'testUser',
+      };
+
+      coreStart.security.authc.apiKeys.areAPIKeysEnabled = jest.fn().mockReturnValueOnce(true);
+      coreStart.security.authc.getCurrentUser = jest.fn().mockReturnValue(mockUser);
+
+      const result = await createApiKey([mockTask], request, coreStart.security, {
+        shouldGrantUiam: true,
+      });
+
+      const apiKeyResult = result.get('task')!;
+      expect(apiKeyResult).not.toHaveProperty('apiKey');
+      expect(apiKeyResult).toHaveProperty('uiamApiKey');
+      expect(apiKeyResult).toHaveProperty('uiamApiKeyId', 'uiamKeyId');
+      expect(
+        Buffer.from(
+          'uiamApiKey' in apiKeyResult ? apiKeyResult.uiamApiKey : '',
+          'base64'
+        ).toString()
+      ).toEqual('uiamKeyId:uiamKey');
+      expect(coreStart.security.authc.apiKeys.grantAsInternalUser).not.toHaveBeenCalled();
+    });
   });
 
-  describe('getUserScope', () => {
+  describe('getApiKeyAndUserScope', () => {
     test('should return the users scope based on their request', async () => {
       const request = httpServerMock.createKibanaRequest({ path: '/s/test-space' });
       const coreStart = coreMock.createStart();
@@ -250,7 +420,8 @@ describe('api_key_utils', () => {
         [mockTask],
         request,
         coreStart.security,
-        basePathMock
+        basePathMock,
+        { shouldGrantUiam: false }
       );
 
       expect(result.get('task')).toEqual({
@@ -290,7 +461,8 @@ describe('api_key_utils', () => {
         [mockTask],
         request,
         coreStart.security,
-        basePathMock
+        basePathMock,
+        { shouldGrantUiam: false }
       );
 
       expect(result.get('task')).toEqual({
@@ -330,7 +502,8 @@ describe('api_key_utils', () => {
         [mockTask],
         request,
         coreStart.security,
-        basePathMock
+        basePathMock,
+        { shouldGrantUiam: false }
       );
 
       expect(result.get('task')).toEqual({
@@ -369,7 +542,8 @@ describe('api_key_utils', () => {
         [mockTask],
         request,
         coreStart.security,
-        basePathMock
+        basePathMock,
+        { shouldGrantUiam: false }
       );
 
       expect(result.get('task')).toEqual({
@@ -405,7 +579,8 @@ describe('api_key_utils', () => {
         [mockTask],
         fakeRequest,
         coreStart.security,
-        basePathMock
+        basePathMock,
+        { shouldGrantUiam: false }
       );
 
       expect(result.get('task')).toEqual({
@@ -416,6 +591,98 @@ describe('api_key_utils', () => {
           apiKeyCreatedByUser: true,
         },
       });
+    });
+
+    test('should return both apiKey and uiamApiKey with uiamApiKeyId in userScope when shouldGrantUiam and uiam grant succeed', async () => {
+      const request = httpServerMock.createKibanaRequest({ path: '/s/test-space' });
+      const coreStart = coreMock.createStart();
+      const mockUser = {
+        authentication_type: 'basic',
+        username: 'testUser',
+      };
+
+      coreStart.security.authc.apiKeys.areAPIKeysEnabled = jest.fn().mockReturnValueOnce(true);
+      coreStart.security.authc.getCurrentUser = jest.fn().mockReturnValueOnce(mockUser);
+      coreStart.security.authc.apiKeys.uiam = {
+        grant: jest.fn().mockResolvedValueOnce({
+          id: 'uiamKeyId',
+          api_key: 'uiamKey',
+        }),
+        invalidate: jest.fn(),
+      } as unknown as typeof coreStart.security.authc.apiKeys.uiam;
+
+      coreStart.security.authc.apiKeys.grantAsInternalUser = jest.fn().mockResolvedValueOnce({
+        id: 'apiKeyId',
+        name: 'TaskManager: testUser',
+        api_key: 'apiKey',
+      });
+
+      const basePathMock = {
+        get: jest.fn(() => '/s/test-space'),
+        serverBasePath: '/',
+      } as unknown as IBasePath;
+
+      const result = await getApiKeyAndUserScope(
+        [mockTask],
+        request,
+        coreStart.security,
+        basePathMock,
+        { shouldGrantUiam: true }
+      );
+
+      const entry = result.get('task')! as ApiKeyAndUserScopeBoth;
+      expect(entry).toHaveProperty('apiKey');
+      expect(entry).toHaveProperty('uiamApiKey');
+      expect(entry.userScope).toEqual({
+        apiKeyId: 'apiKeyId',
+        uiamApiKeyId: 'uiamKeyId',
+        spaceId: 'test-space',
+        apiKeyCreatedByUser: false,
+      });
+      expect(Buffer.from(entry.apiKey, 'base64').toString()).toEqual('apiKeyId:apiKey');
+      expect(Buffer.from(entry.uiamApiKey, 'base64').toString()).toEqual('uiamKeyId:uiamKey');
+    });
+
+    test('should return uiamApiKey only when request has API key, shouldGrantUiam true, and isUiamCredential true', async () => {
+      const mockApiKey = Buffer.from('uiamKeyId:uiamKey').toString('base64');
+      (isUiamCredential as jest.Mock).mockReturnValueOnce(true);
+
+      const request = httpServerMock.createKibanaRequest({
+        headers: { authorization: `ApiKey ${mockApiKey}` },
+      });
+      const coreStart = coreMock.createStart();
+      const mockUser = {
+        authentication_type: 'api_key',
+        username: 'testUser',
+      };
+
+      coreStart.security.authc.apiKeys.areAPIKeysEnabled = jest.fn().mockReturnValueOnce(true);
+      coreStart.security.authc.getCurrentUser = jest.fn().mockReturnValue(mockUser);
+
+      const basePathMock = {
+        get: jest.fn(() => '/'),
+        serverBasePath: '/',
+      } as unknown as IBasePath;
+
+      const result = await getApiKeyAndUserScope(
+        [mockTask],
+        request,
+        coreStart.security,
+        basePathMock,
+        { shouldGrantUiam: true }
+      );
+
+      const entry = result.get('task')!;
+      expect(entry).not.toHaveProperty('apiKey');
+      expect(entry).toHaveProperty('uiamApiKey');
+      expect(entry.userScope).toEqual({
+        uiamApiKeyId: 'uiamKeyId',
+        spaceId: 'default',
+        apiKeyCreatedByUser: true,
+      });
+      expect(
+        Buffer.from('uiamApiKey' in entry ? entry.uiamApiKey : '', 'base64').toString()
+      ).toEqual('uiamKeyId:uiamKey');
     });
   });
 });

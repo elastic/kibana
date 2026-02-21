@@ -41,6 +41,7 @@
     "@kbn/licensing-types",
     "@kbn/lazy-object",
     "@kbn/security-plugin-types-server",
+    "@kbn/core-security-server",
     "@kbn/connector-specs",
     "@kbn/es-errors",
     "@kbn/core-http-server",

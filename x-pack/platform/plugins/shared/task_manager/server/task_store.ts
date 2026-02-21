@@ -64,6 +64,7 @@ import { BulkUpdateError, MsearchError } from './lib/errors';
 import { TASK_SO_NAME } from './saved_objects';
 import { getApiKeyAndUserScope } from './lib/api_key_utils';
 import type { ApiKeyAndUserScope } from './lib/api_key_utils';
+import type { ApiKeyToMarkForInvalidation } from './lib/bulk_mark_api_keys_for_invalidation';
 import { getFirstRunAt } from './lib/get_first_run_at';
 import { isInterval } from './lib/intervals';
 import { bulkMarkApiKeysForInvalidation } from './lib/bulk_mark_api_keys_for_invalidation';
@@ -85,6 +86,7 @@ export interface StoreOpts {
   esoClient?: EncryptedSavedObjectsClient;
   getIsSecurityEnabled: () => boolean;
   basePath: IBasePath;
+  shouldGrantUiam: boolean;
 }
 
 export interface SearchOpts {
@@ -158,6 +160,7 @@ export class TaskStore {
   private getIsSecurityEnabled: () => boolean;
   private logger: Logger;
   private basePath: IBasePath;
+  private shouldGrantUiam: boolean;
 
   /**
    * Constructs a new TaskStore.
@@ -189,6 +192,7 @@ export class TaskStore {
     this.getIsSecurityEnabled = opts.getIsSecurityEnabled;
     this.logger = opts.logger;
     this.basePath = opts.basePath;
+    this.shouldGrantUiam = opts.shouldGrantUiam;
   }
 
   public registerEncryptedSavedObjectsClient(client: EncryptedSavedObjectsClient) {
@@ -221,8 +225,8 @@ export class TaskStore {
   }
 
   private async regenerateApiKeyFromRequest(docs: ConcreteTaskInstance[], options?: ApiKeyOptions) {
-    const hasEncryptedFields = docs.some((doc) => doc.apiKey && doc.userScope);
-    const apiKeyIdsToRemoveMap = new Map<string, string>();
+    const hasEncryptedFields = docs.some((doc) => (doc.apiKey || doc.uiamApiKey) && doc.userScope);
+    const apiKeysToRemove: ApiKeyToMarkForInvalidation[] = [];
     let apiKeyAndUserScopeMap: Map<string, ApiKeyAndUserScope> | null = null;
 
     // If a task with an API key is updated with a request
@@ -230,11 +234,14 @@ export class TaskStore {
       const docsWithApiKeys: ConcreteTaskInstance[] = [];
 
       docs.forEach((taskInstance) => {
-        const { apiKey, userScope } = taskInstance;
-        if (apiKey && userScope) {
+        const { apiKey, uiamApiKey, userScope } = taskInstance;
+        if ((apiKey || uiamApiKey) && userScope && !userScope.apiKeyCreatedByUser) {
           docsWithApiKeys.push(taskInstance);
-          if (!userScope.apiKeyCreatedByUser) {
-            apiKeyIdsToRemoveMap.set(taskInstance.id, userScope.apiKeyId);
+          if (apiKey && userScope.apiKeyId) {
+            apiKeysToRemove.push({ apiKeyId: userScope.apiKeyId });
+          }
+          if (uiamApiKey && userScope.uiamApiKeyId) {
+            apiKeysToRemove.push({ apiKeyId: userScope.uiamApiKeyId, uiamApiKey });
           }
         }
       });
@@ -245,11 +252,11 @@ export class TaskStore {
       }
     }
 
-    return { apiKeyAndUserScopeMap, apiKeyIdsToRemoveMap };
+    return { apiKeyAndUserScopeMap, apiKeysToRemove };
   }
 
   private getSoClientForUpdate(docs: ConcreteTaskInstance[], options?: ApiKeyOptions) {
-    const hasEncryptedFields = docs.some((doc) => doc.apiKey && doc.userScope);
+    const hasEncryptedFields = docs.some((doc) => (doc.apiKey || doc.uiamApiKey) && doc.userScope);
 
     // If a task with an API key is updated without a request, throw an error.
     if (hasEncryptedFields && !options?.request) {
@@ -290,7 +297,8 @@ export class TaskStore {
         taskInstances,
         request,
         this.security,
-        this.basePath
+        this.basePath,
+        { shouldGrantUiam: this.shouldGrantUiam, logger: this.logger }
       );
     } catch (e) {
       this.errors$.next(e);
@@ -300,8 +308,41 @@ export class TaskStore {
     return userScopeAndApiKey;
   }
 
+  /**
+   * Invalidates UIAM API keys that were created but not used (e.g. after schedule failure).
+   * No-op if security.uiam is unavailable or no ids are provided.
+   */
+  private async invalidateUnusedUiamApiKeys(
+    request: KibanaRequest,
+    uiamApiKeyIds: string[],
+    context: string
+  ): Promise<void> {
+    if (!this.security.authc.apiKeys.uiam || uiamApiKeyIds.length === 0) {
+      return;
+    }
+    for (const id of uiamApiKeyIds) {
+      try {
+        const invalidateResult = await this.security.authc.apiKeys.uiam.invalidate(request, { id });
+        if (invalidateResult && invalidateResult.error_count > 0) {
+          const details = invalidateResult.error_details?.length
+            ? `: ${JSON.stringify(invalidateResult.error_details)}`
+            : '';
+          this.logger.error(
+            `Failed to invalidate unused UIAM API key ${context} (error_count=${invalidateResult.error_count})${details}`
+          );
+        }
+      } catch (invalidateErr) {
+        this.logger.warn(
+          `Failed to invalidate unused UIAM API key ${context}: ${
+            invalidateErr instanceof Error ? invalidateErr.message : String(invalidateErr)
+          }`
+        );
+      }
+    }
+  }
+
   private async bulkGetDecryptedTaskApiKeys(ids: string[]) {
-    const result = new Map<string, string | undefined>();
+    const result = new Map<string, { apiKey?: string; uiamApiKey?: string }>();
     if (!this.canEncryptSo() || !ids.length) {
       return result;
     }
@@ -322,7 +363,11 @@ export class TaskStore {
 
     for await (const response of finder.find()) {
       response.saved_objects.forEach((savedObject) => {
-        result.set(savedObject.id, savedObject.attributes.apiKey);
+        const attrs = savedObject.attributes;
+        result.set(savedObject.id, {
+          ...(attrs.apiKey ? { apiKey: attrs.apiKey } : {}),
+          ...(attrs.uiamApiKey ? { uiamApiKey: attrs.uiamApiKey } : {}),
+        });
       });
     }
     await finder.close();
@@ -334,7 +379,7 @@ export class TaskStore {
     const ids: string[] = [];
 
     tasks.forEach((task) => {
-      if (task.apiKey) {
+      if (task.apiKey || task.uiamApiKey) {
         ids.push(task.id);
       }
     });
@@ -343,14 +388,17 @@ export class TaskStore {
       return tasks;
     }
 
-    const decryptedTaskApiKeysMap = await this.bulkGetDecryptedTaskApiKeys(ids);
+    const decryptedMap = await this.bulkGetDecryptedTaskApiKeys(ids);
 
-    const tasksWithDecryptedApiKeys = tasks.map((task) => ({
-      ...task,
-      ...(decryptedTaskApiKeysMap.get(task.id)
-        ? { apiKey: decryptedTaskApiKeysMap.get(task.id) }
-        : {}),
-    }));
+    const tasksWithDecryptedApiKeys = tasks.map((task) => {
+      const decrypted = decryptedMap.get(task.id);
+      if (!decrypted) return task;
+      return {
+        ...task,
+        ...(decrypted.apiKey ? { apiKey: decrypted.apiKey } : {}),
+        ...(decrypted.uiamApiKey ? { uiamApiKey: decrypted.uiamApiKey } : {}),
+      };
+    });
 
     return tasksWithDecryptedApiKeys;
   }
@@ -385,7 +433,7 @@ export class TaskStore {
 
     const apiKeyAndUserScopeMap =
       (await this.getApiKeyFromRequest([taskInstance], options?.request)) || new Map();
-    const { apiKey, userScope } = apiKeyAndUserScopeMap.get(taskInstance.id) || {};
+    const { apiKey, uiamApiKey, userScope } = apiKeyAndUserScopeMap.get(taskInstance.id!) || {};
 
     const soClient = this.getSoClientForCreate(options || {});
 
@@ -401,6 +449,7 @@ export class TaskStore {
           ...taskInstanceToAttributes(validatedTaskInstance, id),
           ...(userScope ? { userScope } : {}),
           ...(apiKey ? { apiKey } : {}),
+          ...(uiamApiKey ? { uiamApiKey } : {}),
           runAt: getFirstRunAt({ taskInstance: validatedTaskInstance, logger: this.logger }),
         },
         { id, refresh: false }
@@ -412,6 +461,13 @@ export class TaskStore {
         this.adHocTaskCounter.increment();
       }
     } catch (e) {
+      if (userScope?.uiamApiKeyId && options?.request) {
+        await this.invalidateUnusedUiamApiKeys(
+          options.request,
+          [userScope.uiamApiKeyId],
+          'after schedule failure'
+        );
+      }
       this.errors$.next(e);
       throw e;
     }
@@ -449,7 +505,7 @@ export class TaskStore {
 
     const objects = taskInstances.reduce(
       (acc: Array<SavedObjectsBulkCreateObject<SerializedConcreteTaskInstance>>, taskInstance) => {
-        const { apiKey, userScope } = apiKeyAndUserScopeMap.get(taskInstance.id) || {};
+        const { apiKey, uiamApiKey, userScope } = apiKeyAndUserScopeMap.get(taskInstance.id!) || {};
         const id = taskInstance.id || v4();
         this.definitions.ensureHas(taskInstance.taskType);
 
@@ -464,6 +520,7 @@ export class TaskStore {
               attributes: {
                 ...taskInstanceToAttributes(validatedTaskInstance, id),
                 ...(apiKey ? { apiKey } : {}),
+                ...(uiamApiKey ? { uiamApiKey } : {}),
                 ...(userScope ? { userScope } : {}),
                 runAt: getFirstRunAt({ taskInstance: validatedTaskInstance, logger: this.logger }),
               },
@@ -491,7 +548,34 @@ export class TaskStore {
           return get(task, 'schedule.interval', null) == null;
         }).length
       );
+      // bulkCreate can return partial success; invalidate UIAM keys for any failed items.
+      // so.id matches the id we passed (taskInstance.id || v4()), and the map is keyed by task id.
+      if (options?.request) {
+        const failedUiamApiKeyIds = savedObjects.saved_objects
+          .filter((so) => so.error)
+          .map((so) => apiKeyAndUserScopeMap.get(so.id)?.userScope?.uiamApiKeyId)
+          .filter((id) => id != null);
+        if (failedUiamApiKeyIds.length) {
+          await this.invalidateUnusedUiamApiKeys(
+            options.request,
+            failedUiamApiKeyIds,
+            'after bulkSchedule partial failure'
+          );
+        }
+      }
     } catch (e) {
+      if (options?.request) {
+        const uiamApiKeyIds = taskInstances
+          .map(
+            (taskInstance) => apiKeyAndUserScopeMap.get(taskInstance.id!)?.userScope?.uiamApiKeyId
+          )
+          .filter((id): id is string => id != null);
+        await this.invalidateUnusedUiamApiKeys(
+          options.request,
+          uiamApiKeyIds,
+          'after bulkSchedule failure'
+        );
+      }
       this.errors$.next(e);
       throw e;
     }
@@ -581,7 +665,7 @@ export class TaskStore {
     const soClientToUpdate = this.getSoClientForUpdate(docs, options);
     const regenerateResult = await this.regenerateApiKeyFromRequest(docs, options);
     const apiKeyAndUserScopeMap = regenerateResult.apiKeyAndUserScopeMap || new Map();
-    const apiKeyIdsToRemoveMap = regenerateResult.apiKeyIdsToRemoveMap;
+    const apiKeysToRemove = regenerateResult.apiKeysToRemove || [];
 
     const newDocs = docs.reduce(
       (acc: Map<string, SavedObjectsBulkUpdateObject<SerializedConcreteTaskInstance>>, doc) => {
@@ -589,10 +673,14 @@ export class TaskStore {
           const taskInstance = this.taskValidator.getValidatedTaskInstanceForUpdating(doc, {
             validate,
           });
-          const { apiKey: updatedApiKey, userScope: updatedUserScope } =
-            apiKeyAndUserScopeMap.get(taskInstance.id) || {};
-          const apiKey = updatedApiKey || doc?.apiKey;
-          const userScope = updatedUserScope || doc?.userScope;
+          const {
+            apiKey: updatedApiKey,
+            uiamApiKey: updatedUiamApiKey,
+            userScope: updatedUserScope,
+          } = apiKeyAndUserScopeMap.get(taskInstance.id) || {};
+          const apiKey = updatedApiKey ?? doc?.apiKey;
+          const uiamApiKey = updatedUiamApiKey ?? doc?.uiamApiKey;
+          const userScope = updatedUserScope ?? doc?.userScope;
 
           acc.set(doc.id, {
             type: 'task',
@@ -601,6 +689,7 @@ export class TaskStore {
             attributes: {
               ...taskInstanceToAttributes(taskInstance, doc.id),
               ...(apiKey ? { apiKey } : {}),
+              ...(uiamApiKey ? { uiamApiKey } : {}),
               ...(userScope ? { userScope } : {}),
             },
             mergeAttributes,
@@ -629,7 +718,6 @@ export class TaskStore {
       throw e;
     }
 
-    const apiKeyIdsToRemove: string[] = [];
     const updates = updatedSavedObjects.map((updatedSavedObject) => {
       if (updatedSavedObject.error !== undefined) {
         return asErr({
@@ -649,17 +737,14 @@ export class TaskStore {
       const result = this.taskValidator.getValidatedTaskInstanceFromReading(taskInstance, {
         validate,
       });
-      const oldApiKey = apiKeyIdsToRemoveMap.get(updatedSavedObject.id);
-      if (oldApiKey) {
-        apiKeyIdsToRemove.push(oldApiKey);
-      }
       return asOk(result);
     });
 
-    // after successful updates we should invalidate the old API keys
-    if (apiKeyIdsToRemove.length) {
+    // after successful updates we should invalidate the old API keys (ES and/or UIAM)
+    const allSucceeded = updatedSavedObjects.every((so) => !so.error);
+    if (apiKeysToRemove.length && allSucceeded) {
       await bulkMarkApiKeysForInvalidation({
-        apiKeyIds: apiKeyIdsToRemove,
+        apiKeysToInvalidate: apiKeysToRemove,
         logger: this.logger,
         savedObjectsClient: this.savedObjectsRepository,
       });
@@ -758,12 +843,19 @@ export class TaskStore {
    */
   public async remove(id: string): Promise<void> {
     const taskInstance = await this.get(id);
-    const { apiKey, userScope } = taskInstance;
+    const { apiKey, uiamApiKey, userScope } = taskInstance;
 
-    if (apiKey && userScope) {
-      if (!userScope.apiKeyCreatedByUser) {
+    if ((apiKey || uiamApiKey) && userScope && !userScope.apiKeyCreatedByUser) {
+      const apiKeysToInvalidate: ApiKeyToMarkForInvalidation[] = [];
+      if (apiKey && userScope.apiKeyId) {
+        apiKeysToInvalidate.push({ apiKeyId: userScope.apiKeyId });
+      }
+      if (uiamApiKey && userScope.uiamApiKeyId) {
+        apiKeysToInvalidate.push({ apiKeyId: userScope.uiamApiKeyId, uiamApiKey });
+      }
+      if (apiKeysToInvalidate.length) {
         await bulkMarkApiKeysForInvalidation({
-          apiKeyIds: [userScope.apiKeyId],
+          apiKeysToInvalidate,
           logger: this.logger,
           savedObjectsClient: this.savedObjectsRepository,
         });
@@ -786,21 +878,24 @@ export class TaskStore {
    */
   public async bulkRemove(taskIds: string[]): Promise<SavedObjectsBulkDeleteResponse> {
     const taskInstances = await this.bulkGet(taskIds);
-    const apiKeyIdsToRemove: string[] = [];
+    const apiKeysToInvalidate: ApiKeyToMarkForInvalidation[] = [];
 
     taskInstances.forEach((taskInstance) => {
       const unwrappedTaskInstance = unwrap(taskInstance) as ConcreteTaskInstance;
-      const { apiKey, userScope } = unwrappedTaskInstance;
-      if (apiKey && userScope) {
-        if (!userScope.apiKeyCreatedByUser) {
-          apiKeyIdsToRemove.push(userScope.apiKeyId);
+      const { apiKey, uiamApiKey, userScope } = unwrappedTaskInstance;
+      if ((apiKey || uiamApiKey) && userScope && !userScope.apiKeyCreatedByUser) {
+        if (apiKey && userScope.apiKeyId) {
+          apiKeysToInvalidate.push({ apiKeyId: userScope.apiKeyId });
+        }
+        if (uiamApiKey && userScope.uiamApiKeyId) {
+          apiKeysToInvalidate.push({ apiKeyId: userScope.uiamApiKeyId, uiamApiKey });
         }
       }
     });
 
-    if (apiKeyIdsToRemove.length) {
+    if (apiKeysToInvalidate.length) {
       await bulkMarkApiKeysForInvalidation({
-        apiKeyIds: apiKeyIdsToRemove,
+        apiKeysToInvalidate,
         logger: this.logger,
         savedObjectsClient: this.savedObjectsRepository,
       });
@@ -1154,7 +1249,7 @@ export function taskInstanceToAttributes(
   id: string
 ): SerializedConcreteTaskInstance {
   return {
-    ...omit(doc, 'id', 'version', 'userScope', 'apiKey'),
+    ...omit(doc, 'id', 'version', 'userScope', 'apiKey', 'uiamApiKey'),
     params: JSON.stringify(doc.params || {}),
     state: JSON.stringify(doc.state || {}),
     attempts: (doc as ConcreteTaskInstance).attempts || 0,
@@ -1171,7 +1266,7 @@ export function partialTaskInstanceToAttributes(
   doc: PartialConcreteTaskInstance
 ): PartialSerializedConcreteTaskInstance {
   return {
-    ...omit(doc, 'id', 'version', 'userScope', 'apiKey'),
+    ...omit(doc, 'id', 'version', 'userScope', 'apiKey', 'uiamApiKey'),
     ...(doc.params ? { params: JSON.stringify(doc.params) } : {}),
     ...(doc.state ? { state: JSON.stringify(doc.state) } : {}),
     ...(doc.scheduledAt ? { scheduledAt: doc.scheduledAt.toISOString() } : {}),

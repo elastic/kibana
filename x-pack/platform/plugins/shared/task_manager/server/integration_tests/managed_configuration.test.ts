@@ -16,6 +16,7 @@ import type { TaskManagerStartContract } from '../plugin';
 import { TaskManagerPlugin } from '../plugin';
 import { coreMock } from '@kbn/core/server/mocks';
 import type { TaskManagerConfig } from '../config';
+import { ApiKeyType } from '../config';
 import { BulkUpdateError } from '../lib/errors';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 
@@ -106,6 +107,7 @@ describe('managed configuration', () => {
       update_by_query: 1000,
     },
     auto_calculate_default_ech_capacity: false,
+    api_key_type: ApiKeyType.ES,
   };
 
   async function runSetTimeout0() {

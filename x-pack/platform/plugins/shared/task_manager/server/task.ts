@@ -303,8 +303,14 @@ interface RruleHourly extends RruleCommon {
   bymonthday?: never;
 }
 
+/**
+ * User scope for task API keys.
+ * At least one of apiKeyId (ES) or uiamApiKeyId (UIAM) must be set.
+ * When both are set (system-created keys), apiKeyCreatedByUser is always false.
+ */
 export interface TaskUserScope {
-  apiKeyId: string;
+  apiKeyId?: string;
+  uiamApiKeyId?: string;
   spaceId?: string;
   apiKeyCreatedByUser: boolean;
 }
@@ -419,6 +425,11 @@ export interface TaskInstance {
    * Used to allow tasks to be scoped to a user via their API key
    */
   apiKey?: string;
+
+  /**
+   * UIAM API key when UIAM is supported (encrypted at rest)
+   */
+  uiamApiKey?: string;
 
   /**
    * Meta data related to the API key associated with this task
@@ -562,6 +573,7 @@ export type SerializedConcreteTaskInstance = Omit<
   runAt: string;
   partition?: number;
   apiKey?: string;
+  uiamApiKey?: string;
   userScope?: TaskUserScope;
 };
 

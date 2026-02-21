@@ -21,7 +21,7 @@ describe('bulkMarkApiKeysForInvalidation', () => {
     unsecuredSavedObjectsClient.bulkCreate.mockResolvedValueOnce({ saved_objects: [] });
 
     await bulkMarkApiKeysForInvalidation({
-      apiKeyIds: ['123', '456'],
+      apiKeysToInvalidate: [{ apiKeyId: '123' }, { apiKeyId: '456' }],
       logger,
       savedObjectsClient: unsecuredSavedObjectsClient,
     });
@@ -46,7 +46,7 @@ describe('bulkMarkApiKeysForInvalidation', () => {
     unsecuredSavedObjectsClient.bulkCreate.mockRejectedValueOnce(new Error('Fail'));
 
     await bulkMarkApiKeysForInvalidation({
-      apiKeyIds: ['123', '456'],
+      apiKeysToInvalidate: [{ apiKeyId: '123' }, { apiKeyId: '456' }],
       logger,
       savedObjectsClient: unsecuredSavedObjectsClient,
     });
@@ -61,7 +61,7 @@ describe('bulkMarkApiKeysForInvalidation', () => {
     unsecuredSavedObjectsClient.bulkCreate.mockResolvedValueOnce({ saved_objects: [] });
 
     await bulkMarkApiKeysForInvalidation({
-      apiKeyIds: [],
+      apiKeysToInvalidate: [],
       logger,
       savedObjectsClient: unsecuredSavedObjectsClient,
     });

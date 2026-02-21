@@ -64,7 +64,7 @@ import type {
 import { isFailedRunResult, TaskStatus } from '../task';
 import type { TaskTypeDictionary } from '../task_type_dictionary';
 import { isUnrecoverableError, isUserError } from './errors';
-import { CLAIM_STRATEGY_MGET, type TaskManagerConfig } from '../config';
+import { ApiKeyType, CLAIM_STRATEGY_MGET, type TaskManagerConfig } from '../config';
 import { TaskValidator } from '../task_validator';
 import { getRetryAt, getRetryDate, getTimeout } from '../lib/get_retry_at';
 import { getNextRunAt } from '../lib/get_next_run_at';
@@ -394,11 +394,12 @@ export class TaskManagerRunner implements TaskRunner {
     const stopUpdatingLongRunningTasks = this.updateRetryAtOnIntervalForLongRunningTasks();
 
     try {
-      const sanitizedTaskInstance = omit(modifiedContext.taskInstance, ['apiKey', 'userScope']);
-      const fakeRequest = this.getFakeKibanaRequest(
-        modifiedContext.taskInstance.apiKey,
-        modifiedContext.taskInstance.userScope?.spaceId
-      );
+      const sanitizedTaskInstance = omit(modifiedContext.taskInstance, [
+        'apiKey',
+        'userScope',
+        'uiamApiKey',
+      ]);
+      const fakeRequest = this.getFakeKibanaRequest(modifiedContext.taskInstance);
 
       const abortController = new AbortController();
 
@@ -929,12 +930,23 @@ export class TaskManagerRunner implements TaskRunner {
     return this.definition?.maxAttempts ?? this.defaultMaxAttempts;
   }
 
-  private getFakeKibanaRequest(apiKey?: string, spaceId?: string): KibanaRequest | undefined {
-    if (apiKey) {
-      const requestHeaders: Headers = {};
+  private getFakeKibanaRequest(taskInstance: ConcreteTaskInstance): KibanaRequest | undefined {
+    const { api_key_type: apiKeyType } = this.config;
+    const apiKeyToUse =
+      apiKeyType === ApiKeyType.UIAM && taskInstance.uiamApiKey
+        ? taskInstance.uiamApiKey
+        : taskInstance.apiKey;
 
-      requestHeaders.authorization = `ApiKey ${apiKey}`;
-      const path = addSpaceIdToPath('/', spaceId || 'default');
+    if (apiKeyType === ApiKeyType.UIAM && taskInstance.apiKey && !taskInstance.uiamApiKey) {
+      this.logger.error(
+        `Task ${taskInstance.id} (${this.taskType}) is configured to use UIAM API key but has no uiamApiKey; falling back to ES API key`
+      );
+    }
+
+    if (apiKeyToUse) {
+      const requestHeaders: Headers = {};
+      requestHeaders.authorization = `ApiKey ${apiKeyToUse}`;
+      const path = addSpaceIdToPath('/', taskInstance.userScope?.spaceId || 'default');
 
       const fakeRawRequest: FakeRawRequest = {
         headers: requestHeaders,

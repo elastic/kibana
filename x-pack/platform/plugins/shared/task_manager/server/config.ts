@@ -45,6 +45,11 @@ const FIVE_MIN_IN_MS = 5 * 60 * 1000;
 
 export const DEFAULT_KIBANAS_PER_PARTITION = 2;
 
+export enum ApiKeyType {
+  ES = 'es',
+  UIAM = 'uiam',
+}
+
 export const taskExecutionFailureThresholdSchema = schema.object(
   {
     error_threshold: schema.number({
@@ -212,6 +217,9 @@ export const configSchema = schema.object(
     claim_strategy: schema.string({ defaultValue: CLAIM_STRATEGY_MGET }),
     request_timeouts: requestTimeoutsConfig,
     auto_calculate_default_ech_capacity: schema.boolean({ defaultValue: false }),
+    api_key_type: schema.oneOf([schema.literal(ApiKeyType.ES), schema.literal(ApiKeyType.UIAM)], {
+      defaultValue: ApiKeyType.ES,
+    }),
   },
   {
     validate: (config) => {

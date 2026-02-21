@@ -81,3 +81,16 @@ export const taskSchemaV6 = taskSchemaV5.extends({
 export const taskSchemaV7 = taskSchemaV6.extends({
   schedule: schema.maybe(schema.oneOf([scheduleIntervalSchema, scheduleRruleSchemaV3])),
 });
+
+/** userScope: at least one of apiKeyId or uiamApiKeyId; when both present, apiKeyCreatedByUser is false */
+const userScopeSchemaV8 = schema.object({
+  apiKeyId: schema.maybe(schema.string()),
+  uiamApiKeyId: schema.maybe(schema.string()),
+  spaceId: schema.string(),
+  apiKeyCreatedByUser: schema.boolean(),
+});
+
+export const taskSchemaV8 = taskSchemaV7.extends({
+  uiamApiKey: schema.maybe(schema.string()),
+  userScope: schema.maybe(userScopeSchemaV8),
+});

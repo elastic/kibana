@@ -23,7 +23,12 @@ import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks
 import type { SearchOpts, AggregationOpts } from './task_store';
 import { TaskStore, taskInstanceToAttributes } from './task_store';
 import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
-import type { SavedObjectAttributes, IBasePath, SavedObjectsServiceStart } from '@kbn/core/server';
+import type {
+  SavedObjectAttributes,
+  IBasePath,
+  SavedObjectsServiceStart,
+  SavedObject,
+} from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { TaskTypeDictionary } from './task_type_dictionary';
 import { mockLogger } from './test_utils';
@@ -146,6 +151,7 @@ describe('TaskStore', () => {
         canEncryptSavedObjects: true,
         getIsSecurityEnabled: () => true,
         basePath: basePathMock,
+        shouldGrantUiam: false,
       });
 
       store.registerEncryptedSavedObjectsClient(esoClient);
@@ -275,6 +281,7 @@ describe('TaskStore', () => {
         canEncryptSavedObjects: true,
         getIsSecurityEnabled: () => false,
         basePath: basePathMock,
+        shouldGrantUiam: false,
       });
 
       store.registerEncryptedSavedObjectsClient(esoClient);
@@ -334,7 +341,7 @@ describe('TaskStore', () => {
 
       const mockUserScope = {
         apiKeyId: 'apiKeyId',
-        apiKeyCreatedBy: 'testUser',
+        apiKeyCreatedByUser: false,
         spaceId: 'testSpace',
       };
 
@@ -386,7 +393,8 @@ describe('TaskStore', () => {
         [task],
         request,
         coreStart.security,
-        basePathMock
+        basePathMock,
+        expect.objectContaining({ shouldGrantUiam: false })
       );
 
       expect(savedObjectsClient.create).not.toHaveBeenCalled();
@@ -429,6 +437,7 @@ describe('TaskStore', () => {
         canEncryptSavedObjects: false,
         getIsSecurityEnabled: () => true,
         basePath: basePathMock,
+        shouldGrantUiam: false,
       });
 
       const task = {
@@ -552,6 +561,7 @@ describe('TaskStore', () => {
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
         basePath: basePathMock,
+        shouldGrantUiam: false,
       });
     });
 
@@ -679,6 +689,7 @@ describe('TaskStore', () => {
         canEncryptSavedObjects: true,
         getIsSecurityEnabled: () => true,
         basePath: basePathMock,
+        shouldGrantUiam: false,
       });
 
       esoClient.createPointInTimeFinderDecryptedAsInternalUser = jest.fn().mockResolvedValue({
@@ -866,6 +877,7 @@ describe('TaskStore', () => {
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
         basePath: basePathMock,
+        shouldGrantUiam: false,
       });
     });
 
@@ -994,6 +1006,7 @@ describe('TaskStore', () => {
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
         basePath: basePathMock,
+        shouldGrantUiam: false,
       });
     });
 
@@ -1223,6 +1236,7 @@ describe('TaskStore', () => {
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
         basePath: basePathMock,
+        shouldGrantUiam: false,
       });
       store.registerEncryptedSavedObjectsClient(esoClient);
     });
@@ -1546,7 +1560,7 @@ describe('TaskStore', () => {
       });
 
       expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith({
-        apiKeyIds: ['apiKeyId'],
+        apiKeysToInvalidate: [{ apiKeyId: 'apiKeyId' }],
         logger,
         savedObjectsClient,
       });
@@ -1554,7 +1568,8 @@ describe('TaskStore', () => {
         [{ ...bulkUpdateTask, apiKey: mockApiKey, userScope: mockUserScope }],
         mockRequest,
         coreStart.security,
-        basePathMock
+        basePathMock,
+        expect.objectContaining({ shouldGrantUiam: false })
       );
 
       expect(mockScopedClient.bulkUpdate).toHaveBeenCalledWith(
@@ -1576,6 +1591,87 @@ describe('TaskStore', () => {
 
       expect(logger.debug).not.toHaveBeenCalled();
       expect(savedObjectsClient.bulkUpdate).not.toHaveBeenCalled();
+    });
+
+    test('bulk update with regenerated API key marks both ES and UIAM keys for invalidation when task has both', async () => {
+      const mockUiamApiKey = Buffer.from('uiamKeyId:uiamKey').toString('base64');
+      const mockScopedClient = {
+        bulkUpdate: jest.fn().mockResolvedValue({
+          saved_objects: [
+            {
+              id: 'task:324242',
+              type: 'task',
+              attributes: {
+                ...bulkUpdateTask,
+                state: '{"foo":"bar"}',
+                params: '{"hello":"world"}',
+              },
+              references: [],
+              version: '123',
+            },
+          ],
+        }),
+      };
+      mockGetScopedClient.mockReturnValue(mockScopedClient);
+
+      const mockUpdatedApiKey = Buffer.from('apiKeyIdUpdated:apiKey').toString('base64');
+      const mockUpdatedUiamApiKey = Buffer.from('uiamKeyIdUpdated:uiamKey').toString('base64');
+      const mockUpdatedUserScope = {
+        apiKeyId: 'apiKeyIdUpdated',
+        uiamApiKeyId: 'uiamKeyIdUpdated',
+        apiKeyCreatedByUser: false,
+        spaceId: 'testSpace',
+      };
+
+      const apiKeyAndUserScopeMap = new Map();
+      apiKeyAndUserScopeMap.set('task:324242', {
+        apiKey: mockUpdatedApiKey,
+        uiamApiKey: mockUpdatedUiamApiKey,
+        userScope: mockUpdatedUserScope,
+      });
+      (getApiKeyAndUserScope as jest.Mock).mockResolvedValueOnce(apiKeyAndUserScopeMap);
+
+      const docWithBothKeys = {
+        ...bulkUpdateTask,
+        apiKey: mockApiKey,
+        uiamApiKey: mockUiamApiKey,
+        userScope: {
+          ...mockUserScope,
+          uiamApiKeyId: 'uiamKeyId',
+        },
+      };
+
+      await store.bulkUpdate([docWithBothKeys], {
+        validate: false,
+        mergeAttributes: false,
+        options: { request: mockRequest, regenerateApiKey: true },
+      });
+
+      expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith({
+        apiKeysToInvalidate: [
+          { apiKeyId: 'apiKeyId' },
+          { apiKeyId: 'uiamKeyId', uiamApiKey: mockUiamApiKey },
+        ],
+        logger,
+        savedObjectsClient,
+      });
+      expect(mockScopedClient.bulkUpdate).toHaveBeenCalledWith(
+        [
+          {
+            id: bulkUpdateTask.id,
+            mergeAttributes: false,
+            type: 'task',
+            version: bulkUpdateTask.version,
+            attributes: {
+              ...taskInstanceToAttributes(bulkUpdateTask, bulkUpdateTask.id),
+              apiKey: mockUpdatedApiKey,
+              uiamApiKey: mockUpdatedUiamApiKey,
+              userScope: mockUpdatedUserScope,
+            },
+          },
+        ],
+        { refresh: false }
+      );
     });
 
     test('bulk update task with regenerated API key when api key but do not invalidate user created api keys', async () => {
@@ -1645,18 +1741,7 @@ describe('TaskStore', () => {
       });
 
       expect(bulkMarkApiKeysForInvalidation).not.toHaveBeenCalled();
-      expect(getApiKeyAndUserScope).toHaveBeenCalledWith(
-        [
-          {
-            ...bulkUpdateTask,
-            apiKey: mockApiKey,
-            userScope: { ...mockUserScope, apiKeyCreatedByUser: true },
-          },
-        ],
-        mockRequest,
-        coreStart.security,
-        basePathMock
-      );
+      expect(getApiKeyAndUserScope).not.toHaveBeenCalled();
 
       expect(mockScopedClient.bulkUpdate).toHaveBeenCalledWith(
         [
@@ -1667,8 +1752,8 @@ describe('TaskStore', () => {
             version: bulkUpdateTask.version,
             attributes: {
               ...taskInstanceToAttributes(bulkUpdateTask, bulkUpdateTask.id),
-              apiKey: mockUpdatedApiKey,
-              userScope: mockUpdatedUserScope,
+              apiKey: mockApiKey,
+              userScope: { ...mockUserScope, apiKeyCreatedByUser: true },
             },
           },
         ],
@@ -1763,7 +1848,8 @@ describe('TaskStore', () => {
         ],
         mockRequest,
         coreStart.security,
-        basePathMock
+        basePathMock,
+        expect.objectContaining({ shouldGrantUiam: false })
       );
 
       expect(mockScopedClient.bulkUpdate).toHaveBeenCalledWith(
@@ -1984,6 +2070,7 @@ describe('TaskStore', () => {
         security: coreStart.security,
         getIsSecurityEnabled: () => false,
         basePath: basePathMock,
+        shouldGrantUiam: false,
       });
 
       savedObjectsClient.bulkUpdate.mockResolvedValue({
@@ -2058,6 +2145,7 @@ describe('TaskStore', () => {
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
         basePath: basePathMock,
+        shouldGrantUiam: false,
       });
     });
 
@@ -2583,7 +2671,7 @@ describe('TaskStore', () => {
         apiKey: mockApiKey,
         userScope: {
           apiKeyId: 'apiKeyId',
-          apiKeyCreatedBy: 'testUser',
+          apiKeyCreatedByUser: false,
           spaceId: 'testSpace',
         },
       },
@@ -2610,6 +2698,7 @@ describe('TaskStore', () => {
         canEncryptSavedObjects: true,
         getIsSecurityEnabled: () => true,
         basePath: basePathMock,
+        shouldGrantUiam: false,
       });
 
       esoClient.createPointInTimeFinderDecryptedAsInternalUser = jest.fn().mockResolvedValue({
@@ -2637,7 +2726,36 @@ describe('TaskStore', () => {
       expect(result).toBeUndefined();
       expect(savedObjectsClient.delete).toHaveBeenCalledWith('task', id, { refresh: false });
       expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith({
-        apiKeyIds: ['apiKeyId'],
+        apiKeysToInvalidate: [{ apiKeyId: 'apiKeyId' }],
+        logger,
+        savedObjectsClient,
+      });
+    });
+
+    test('invalidates both ES and UIAM API keys when task has both', async () => {
+      const mockUiamApiKey = Buffer.from('uiamKeyId:uiamKey').toString('base64');
+      const taskWithBothKeys = {
+        ...mockTask,
+        attributes: {
+          ...mockTask.attributes,
+          apiKey: mockTask.attributes.apiKey,
+          uiamApiKey: mockUiamApiKey,
+          userScope: {
+            apiKeyId: 'apiKeyId',
+            uiamApiKeyId: 'uiamKeyId',
+            apiKeyCreatedByUser: false,
+            spaceId: 'testSpace',
+          },
+        },
+      };
+      savedObjectsClient.get.mockResolvedValueOnce(taskWithBothKeys);
+      const id = 'task1';
+      await store.remove(id);
+      expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith({
+        apiKeysToInvalidate: [
+          { apiKeyId: 'apiKeyId' },
+          { apiKeyId: 'uiamKeyId', uiamApiKey: mockUiamApiKey },
+        ],
         logger,
         savedObjectsClient,
       });
@@ -2678,7 +2796,7 @@ describe('TaskStore', () => {
         apiKey: mockApiKey1,
         userScope: {
           apiKeyId: 'apiKeyId1',
-          apiKeyCreatedBy: 'testUser',
+          apiKeyCreatedByUser: false,
           spaceId: 'testSpace',
         },
       },
@@ -2705,7 +2823,7 @@ describe('TaskStore', () => {
         apiKey: mockApiKey2,
         userScope: {
           apiKeyId: 'apiKeyId2',
-          apiKeyCreatedBy: 'testUser',
+          apiKeyCreatedByUser: false,
           spaceId: 'testSpace',
         },
       },
@@ -2734,6 +2852,7 @@ describe('TaskStore', () => {
         canEncryptSavedObjects: true,
         getIsSecurityEnabled: () => true,
         basePath: basePathMock,
+        shouldGrantUiam: false,
       });
 
       esoClient.createPointInTimeFinderDecryptedAsInternalUser = jest.fn().mockResolvedValue({
@@ -2768,7 +2887,35 @@ describe('TaskStore', () => {
       const result = await store.bulkRemove(['task1', 'task2']);
       expect(result).toBeUndefined();
       expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith({
-        apiKeyIds: ['apiKeyId1', 'apiKeyId2'],
+        apiKeysToInvalidate: [{ apiKeyId: 'apiKeyId1' }, { apiKeyId: 'apiKeyId2' }],
+        logger,
+        savedObjectsClient,
+      });
+    });
+
+    test('bulk marks both ES and UIAM API keys for invalidation when tasks have uiamApiKey', async () => {
+      const mockUiamApiKey1 = Buffer.from('uiamKeyId1:uiamKey').toString('base64');
+      const task1WithUiam = {
+        ...mockTask1,
+        attributes: {
+          ...mockTask1.attributes,
+          uiamApiKey: mockUiamApiKey1,
+          userScope: {
+            ...mockTask1.attributes.userScope,
+            uiamApiKeyId: 'uiamKeyId1',
+          },
+        },
+      };
+      savedObjectsClient.bulkGet.mockResolvedValueOnce({
+        saved_objects: [task1WithUiam, mockTask2],
+      });
+      await store.bulkRemove(['task1', 'task2']);
+      expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith({
+        apiKeysToInvalidate: [
+          { apiKeyId: 'apiKeyId1' },
+          { apiKeyId: 'uiamKeyId1', uiamApiKey: mockUiamApiKey1 },
+          { apiKeyId: 'apiKeyId2' },
+        ],
         logger,
         savedObjectsClient,
       });
@@ -2808,6 +2955,7 @@ describe('TaskStore', () => {
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
         basePath: basePathMock,
+        shouldGrantUiam: false,
       });
     });
 
@@ -2875,6 +3023,7 @@ describe('TaskStore', () => {
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
         basePath: basePathMock,
+        shouldGrantUiam: false,
       });
     });
 
@@ -2977,6 +3126,7 @@ describe('TaskStore', () => {
             security: coreStart.security,
             getIsSecurityEnabled: () => true,
             basePath: basePathMock,
+            shouldGrantUiam: false,
           });
 
           expect(await store.getLifecycle(task.id)).toEqual(status);
@@ -3006,6 +3156,7 @@ describe('TaskStore', () => {
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
         basePath: basePathMock,
+        shouldGrantUiam: false,
       });
 
       expect(await store.getLifecycle(randomId())).toEqual(TaskLifecycleResult.NotFound);
@@ -3033,6 +3184,7 @@ describe('TaskStore', () => {
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
         basePath: basePathMock,
+        shouldGrantUiam: false,
       });
 
       return expect(store.getLifecycle(randomId())).rejects.toThrow('Bad Request');
@@ -3062,6 +3214,7 @@ describe('TaskStore', () => {
         canEncryptSavedObjects: true,
         getIsSecurityEnabled: () => true,
         basePath: basePathMock,
+        shouldGrantUiam: false,
       });
 
       store.registerEncryptedSavedObjectsClient(esoClient);
@@ -3198,7 +3351,7 @@ describe('TaskStore', () => {
 
       const mockUserScope = {
         apiKeyId: 'apiKeyId',
-        apiKeyCreatedBy: 'testUser',
+        apiKeyCreatedByUser: false,
         spaceId: 'testSpace',
       };
 
@@ -3271,7 +3424,8 @@ describe('TaskStore', () => {
         [task1, task2],
         request,
         coreStart.security,
-        basePathMock
+        basePathMock,
+        expect.objectContaining({ shouldGrantUiam: false })
       );
 
       expect(savedObjectsClient.create).not.toHaveBeenCalled();
@@ -3335,6 +3489,7 @@ describe('TaskStore', () => {
         canEncryptSavedObjects: false,
         getIsSecurityEnabled: () => true,
         basePath: basePathMock,
+        shouldGrantUiam: false,
       });
 
       const task1 = {
@@ -3370,6 +3525,7 @@ describe('TaskStore', () => {
         canEncryptSavedObjects: true,
         getIsSecurityEnabled: () => false,
         basePath: basePathMock,
+        shouldGrantUiam: false,
       });
 
       store.registerEncryptedSavedObjectsClient(esoClient);
@@ -3493,6 +3649,184 @@ describe('TaskStore', () => {
       );
 
       expect(getApiKeyAndUserScope).toHaveBeenCalled();
+    });
+
+    test('when bulkCreate returns partial success, invalidates unused UIAM API keys for failed items only', async () => {
+      store = new TaskStore({
+        logger: mockLogger(),
+        index: 'tasky',
+        taskManagerId: '',
+        serializer,
+        esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
+        definitions: taskDefinitions,
+        savedObjectsRepository: savedObjectsClient,
+        adHocTaskCounter,
+        allowReadingInvalidState: false,
+        requestTimeouts: { update_by_query: 1000 },
+        savedObjectsService: coreStart.savedObjects,
+        security: coreStart.security,
+        canEncryptSavedObjects: true,
+        getIsSecurityEnabled: () => true,
+        basePath: basePathMock,
+        shouldGrantUiam: true,
+      });
+      store.registerEncryptedSavedObjectsClient(esoClient);
+
+      const uiamInvalidate = jest.fn().mockResolvedValue({ error_count: 0 });
+      (coreStart.security.authc.apiKeys as unknown as { uiam?: { invalidate: jest.Mock } }).uiam = {
+        invalidate: uiamInvalidate,
+      };
+
+      const task1 = {
+        id: 'task1',
+        params: { hello: 'world' },
+        state: { foo: 'bar' },
+        taskType: 'report',
+      };
+      const task2 = {
+        id: 'task2',
+        params: { hello: 'world' },
+        state: { foo: 'bar' },
+        taskType: 'report',
+      };
+
+      const mockApiKey = Buffer.from('apiKeyId:apiKey').toString('base64');
+      const mockUiamKeyId1 = 'uiamKeyId1';
+      const mockUiamKeyId2 = 'uiamKeyId2';
+      const apiKeyAndUserScopeMap = new Map();
+      apiKeyAndUserScopeMap.set('task1', {
+        apiKey: mockApiKey,
+        userScope: {
+          apiKeyId: 'apiKeyId',
+          uiamApiKeyId: mockUiamKeyId1,
+          apiKeyCreatedByUser: false,
+          spaceId: 'default',
+        },
+      });
+      apiKeyAndUserScopeMap.set('task2', {
+        apiKey: mockApiKey,
+        userScope: {
+          apiKeyId: 'apiKeyId',
+          uiamApiKeyId: mockUiamKeyId2,
+          apiKeyCreatedByUser: false,
+          spaceId: 'default',
+        },
+      });
+      (getApiKeyAndUserScope as jest.Mock).mockResolvedValueOnce(apiKeyAndUserScopeMap);
+
+      coreStart.savedObjects.getScopedClient.mockReturnValueOnce(scopedSavedObjectsClient);
+
+      scopedSavedObjectsClient.bulkCreate.mockImplementationOnce(async () => ({
+        saved_objects: [
+          {
+            id: 'task1',
+            type: 'task',
+            attributes: {
+              attempts: 0,
+              params: '{}',
+              retryAt: null,
+              runAt: '2019-02-12T21:01:22.479Z',
+              scheduledAt: '2019-02-12T21:01:22.479Z',
+              startedAt: null,
+              state: '{}',
+              stateVersion: 1,
+              status: 'idle',
+              taskType: 'report',
+              partition: 225,
+            },
+            references: [],
+            version: '123',
+          },
+          {
+            id: 'task2',
+            type: 'task',
+            error: { error: 'Conflict', message: 'conflict', statusCode: 409 },
+          },
+        ] as SavedObject<unknown>[],
+      }));
+
+      const request = httpServerMock.createKibanaRequest();
+
+      await expect(store.bulkSchedule([task1, task2], { request })).rejects.toThrow();
+
+      expect(uiamInvalidate).toHaveBeenCalledTimes(1);
+      expect(uiamInvalidate).toHaveBeenCalledWith(request, { id: mockUiamKeyId2 });
+    });
+
+    test('when bulkCreate throws, invalidates all UIAM API keys for the batch', async () => {
+      store = new TaskStore({
+        logger: mockLogger(),
+        index: 'tasky',
+        taskManagerId: '',
+        serializer,
+        esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
+        definitions: taskDefinitions,
+        savedObjectsRepository: savedObjectsClient,
+        adHocTaskCounter,
+        allowReadingInvalidState: false,
+        requestTimeouts: { update_by_query: 1000 },
+        savedObjectsService: coreStart.savedObjects,
+        security: coreStart.security,
+        canEncryptSavedObjects: true,
+        getIsSecurityEnabled: () => true,
+        basePath: basePathMock,
+        shouldGrantUiam: true,
+      });
+      store.registerEncryptedSavedObjectsClient(esoClient);
+
+      const uiamInvalidate = jest.fn().mockResolvedValue({ error_count: 0 });
+      (coreStart.security.authc.apiKeys as unknown as { uiam?: { invalidate: jest.Mock } }).uiam = {
+        invalidate: uiamInvalidate,
+      };
+
+      const task1 = {
+        id: 'task1',
+        params: { hello: 'world' },
+        state: { foo: 'bar' },
+        taskType: 'report',
+      };
+      const task2 = {
+        id: 'task2',
+        params: { hello: 'world' },
+        state: { foo: 'bar' },
+        taskType: 'report',
+      };
+
+      const mockUiamKeyId1 = 'uiamKeyId1';
+      const mockUiamKeyId2 = 'uiamKeyId2';
+      const apiKeyAndUserScopeMap = new Map();
+      apiKeyAndUserScopeMap.set('task1', {
+        apiKey: Buffer.from('id:key').toString('base64'),
+        userScope: {
+          apiKeyId: 'apiKeyId',
+          uiamApiKeyId: mockUiamKeyId1,
+          apiKeyCreatedByUser: false,
+          spaceId: 'default',
+        },
+      });
+      apiKeyAndUserScopeMap.set('task2', {
+        apiKey: Buffer.from('id:key').toString('base64'),
+        userScope: {
+          apiKeyId: 'apiKeyId',
+          uiamApiKeyId: mockUiamKeyId2,
+          apiKeyCreatedByUser: false,
+          spaceId: 'default',
+        },
+      });
+      (getApiKeyAndUserScope as jest.Mock).mockResolvedValueOnce(apiKeyAndUserScopeMap);
+
+      coreStart.savedObjects.getScopedClient.mockReturnValueOnce(scopedSavedObjectsClient);
+      scopedSavedObjectsClient.bulkCreate.mockRejectedValueOnce(new Error('Bulk create failed'));
+
+      const request = httpServerMock.createKibanaRequest();
+
+      await expect(store.bulkSchedule([task1, task2], { request })).rejects.toThrow(
+        'Bulk create failed'
+      );
+
+      expect(uiamInvalidate).toHaveBeenCalledTimes(2);
+      expect(uiamInvalidate).toHaveBeenNthCalledWith(1, request, { id: mockUiamKeyId1 });
+      expect(uiamInvalidate).toHaveBeenNthCalledWith(2, request, { id: mockUiamKeyId2 });
     });
 
     test('errors if the task type is unknown', async () => {
@@ -3628,6 +3962,7 @@ describe('TaskStore', () => {
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
         basePath: basePathMock,
+        shouldGrantUiam: false,
       });
 
       savedObjectsClient.create.mockImplementation(async (type: string, attributes: unknown) => ({
@@ -3680,6 +4015,7 @@ describe('TaskStore', () => {
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
         basePath: basePathMock,
+        shouldGrantUiam: false,
       });
 
       savedObjectsClient.create.mockImplementation(async (type: string, attributes: unknown) => ({
@@ -3728,6 +4064,7 @@ describe('TaskStore', () => {
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
         basePath: basePathMock,
+        shouldGrantUiam: false,
       });
     });
     test('should pass requestTimeout and retryOnTimeout', async () => {
@@ -3765,6 +4102,7 @@ describe('TaskStore', () => {
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
         basePath: basePathMock,
+        shouldGrantUiam: false,
       });
     });
 
@@ -3882,6 +4220,7 @@ describe('TaskStore', () => {
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
         basePath: basePathMock,
+        shouldGrantUiam: false,
       });
     });
 
