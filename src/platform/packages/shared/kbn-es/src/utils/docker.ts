@@ -1254,6 +1254,16 @@ export async function runDockerSnapshotContainer(
       continue;
     }
 
+    if (v) {
+      const hostPath = resolve(REPO_ROOT, v);
+      if (fs.existsSync(hostPath) && fs.statSync(hostPath).isFile()) {
+        const containerPath = getDockerFileMountPath(hostPath);
+        volumeMounts.push('--volume', `${hostPath}:${containerPath}`);
+        esArgsMap.set(k, containerPath);
+        continue;
+      }
+    }
+
     esArgsMap.set(k, v);
   }
 
