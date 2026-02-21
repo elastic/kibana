@@ -1224,6 +1224,10 @@ export async function runDockerSnapshotContainer(
   const port = options.port || DEFAULT_PORT;
   const password = options.password || 'changeme';
 
+  await execa('docker', ['rm', '-f', containerName]).catch(() => {
+    // ignore if container doesn't exist
+  });
+
   const esArgsMap = new Map<string, string>(DEFAULT_DOCKER_SNAPSHOT_ESARGS);
 
   if (options.license === 'trial') {
