@@ -13,7 +13,7 @@ import type { UrlDrilldownScope } from './types';
 import { compile } from './url_template';
 
 const generalFormatError = i18n.translate(
-  'uiActionsEnhanced.drilldowns.urlDrilldownValidation.urlFormatGeneralErrorMessage',
+  'xpack.urlDrilldown.validation.invalidUrlMessage',
   {
     defaultMessage: 'Invalid URL format.',
   }

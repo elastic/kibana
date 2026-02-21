@@ -10,7 +10,7 @@
 import { i18n } from '@kbn/i18n';
 
 const generalFormatError = i18n.translate(
-  'uiActionsEnhanced.drilldowns.urlDrilldownValidation.urlFormatGeneralErrorMessage',
+  'kibanaUtils.url.validate.invalidUrlMessage',
   {
     defaultMessage: 'Invalid URL format.',
   }
