@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DocViewerComponent } from '@kbn/unified-doc-viewer/types';
-import { useDiscoverServices } from '../../../../hooks/use_discover_services';
+import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
+import type { ProfileProviderServices } from '../../profile_provider_services';
 
 /**
  * This component is a placeholder for the new alert/event Overview tab content.
@@ -16,9 +16,15 @@ import { useDiscoverServices } from '../../../../hooks/use_discover_services';
  * The intention keep implementing its content as we're extracting flyout code from the Security Solution plugin to a set of package.
  * The feature flag will remain disabled until we're ready to ship some of the content. The target is to release an MVP by 9.4 then have it fully functional by 9.5.
  */
-export const EnhancedAlertEventOverview: DocViewerComponent = ({ hit }) => {
-  const { discoverShared } = useDiscoverServices();
-  const alertFlyoutOverviewTabFeature = discoverShared.features.registry.getById(
+export interface EnhancedAlertEventOverviewProps extends DocViewRenderProps {
+  providerServices: ProfileProviderServices;
+}
+
+export const EnhancedAlertEventOverview = ({
+  hit,
+  providerServices,
+}: EnhancedAlertEventOverviewProps) => {
+  const alertFlyoutOverviewTabFeature = providerServices.discoverShared.features.registry.getById(
     'security-solution-alert-flyout-overview-tab'
   );
 

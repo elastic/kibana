@@ -13,9 +13,7 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { EnhancedAlertEventOverview } from './enhanced_alert_event_overview';
-import { useDiscoverServices } from '../../../../hooks/use_discover_services';
-
-jest.mock('../../../../hooks/use_discover_services');
+import type { ProfileProviderServices } from '../../profile_provider_services';
 
 const createMockHit = (flattened: DataTableRecord['flattened']): DataTableRecord =>
   ({
@@ -32,7 +30,7 @@ const hit = createMockHit({
 describe('EnhancedAlertEventOverview', () => {
   it('renders the security solution overview tab feature', async () => {
     const renderFeature = jest.fn().mockReturnValue(<div>OverviewTab</div>);
-    const mockDiscoverServices = {
+    const providerServices = {
       discoverShared: {
         features: {
           registry: {
@@ -43,13 +41,15 @@ describe('EnhancedAlertEventOverview', () => {
           },
         },
       },
-    };
-
-    (useDiscoverServices as jest.Mock).mockReturnValue(mockDiscoverServices);
+    } as unknown as ProfileProviderServices;
 
     render(
       <IntlProvider locale="en">
-        <EnhancedAlertEventOverview hit={hit} dataView={dataViewMock} />
+        <EnhancedAlertEventOverview
+          hit={hit}
+          dataView={dataViewMock}
+          providerServices={providerServices}
+        />
       </IntlProvider>
     );
 
