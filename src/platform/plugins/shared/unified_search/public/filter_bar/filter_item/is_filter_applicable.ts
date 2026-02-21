@@ -36,6 +36,6 @@ export const isFilterApplicable = (filter: Filter, dataViews: DataView[]): boole
     if (ip) return true;
 
     const key = f.meta?.key;
-    return typeof key === 'string' && key.length > 0 && flatFields.includes(key);
+    return typeof key === 'string' && key.length > 0 && allFields.includes(key);
   });
 };
