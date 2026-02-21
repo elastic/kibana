@@ -1087,28 +1087,19 @@ for (const flattened of [true, false]) {
         expect((result as Record<string, unknown>)[ALERT_MUTED]).toBe(true);
       });
 
-      test('should preserve ALERT_MUTED when existing alert has conditional snooze state', () => {
+      test('should set ALERT_MUTED to true when alert is in snoozedInstances', () => {
         const legacyAlert = new LegacyAlert<{}, {}, 'default'>('alert-A');
         legacyAlert.scheduleActions('default');
 
         const result = buildOngoingAlert<{}, {}, {}, 'default', 'recovered'>({
-          alert: {
-            ...existingFlattenedNewAlert,
-            [ALERT_MUTED]: true,
-            [ALERT_SNOOZE_EXPIRES_AT]: new Date(Date.now() + 3600000).toISOString(),
-            [ALERT_SNOOZE_CONDITIONS]: [
-              {
-                type: 'field_change',
-                field: 'kibana.alert.severity',
-                snapshotValue: 'critical',
-              },
-            ],
-          },
+          alert: existingFlattenedNewAlert,
           legacyAlert,
           rule: alertRule,
           ruleData: {
             ...ruleData,
-            mutedInstanceIds: ['alert-B'],
+            snoozedInstances: {
+              'alert-A': { expiresAt: new Date(Date.now() + 3600000).toISOString() },
+            },
           },
           isImproving: null,
           timestamp: '2023-03-28T12:27:28.159Z',
@@ -1118,53 +1109,21 @@ for (const flattened of [true, false]) {
         expect((result as Record<string, unknown>)[ALERT_MUTED]).toBe(true);
       });
 
-      test('should not preserve ALERT_MUTED when existing alert has no conditional snooze state', () => {
-        const legacyAlert = new LegacyAlert<{}, {}, 'default'>('alert-A');
-        legacyAlert.scheduleActions('default');
-
-        const result = buildOngoingAlert<{}, {}, {}, 'default', 'recovered'>({
-          alert: {
-            ...existingFlattenedNewAlert,
-            [ALERT_MUTED]: true,
+      test('should keep ALERT_MUTED true across consecutive ongoing updates when in snoozedInstances', () => {
+        const snoozedRuleData = {
+          ...ruleData,
+          snoozedInstances: {
+            'alert-A': { expiresAt: new Date(Date.now() + 3600000).toISOString() },
           },
-          legacyAlert,
-          rule: alertRule,
-          ruleData: {
-            ...ruleData,
-            mutedInstanceIds: ['alert-B'],
-          },
-          isImproving: null,
-          timestamp: '2023-03-28T12:27:28.159Z',
-          kibanaVersion: '8.9.0',
-        });
-
-        expect((result as Record<string, unknown>)[ALERT_MUTED]).toBe(false);
-      });
-
-      test('should keep conditional snooze muted across consecutive ongoing updates', () => {
-        const futureExpiry = new Date(Date.now() + 3600000).toISOString();
+        };
         const firstLegacyAlert = new LegacyAlert<{}, {}, 'default'>('alert-A');
         firstLegacyAlert.scheduleActions('default');
 
         const firstRunResult = buildOngoingAlert<{}, {}, {}, 'default', 'recovered'>({
-          alert: {
-            ...existingAlert,
-            [ALERT_MUTED]: true,
-            [ALERT_SNOOZE_EXPIRES_AT]: futureExpiry,
-            [ALERT_SNOOZE_CONDITIONS]: [
-              {
-                type: 'field_change',
-                field: 'kibana.alert.severity',
-                snapshotValue: 'critical',
-              },
-            ],
-          } as unknown as Alert,
+          alert: existingAlert as unknown as Alert,
           legacyAlert: firstLegacyAlert,
           rule: alertRule,
-          ruleData: {
-            ...ruleData,
-            mutedInstanceIds: [],
-          },
+          ruleData: snoozedRuleData,
           isImproving: null,
           timestamp: '2023-03-28T12:27:28.159Z',
           kibanaVersion: '8.9.0',
@@ -1177,10 +1136,7 @@ for (const flattened of [true, false]) {
           alert: firstRunResult,
           legacyAlert: secondLegacyAlert,
           rule: alertRule,
-          ruleData: {
-            ...ruleData,
-            mutedInstanceIds: [],
-          },
+          ruleData: snoozedRuleData,
           isImproving: null,
           timestamp: '2023-03-29T12:27:28.159Z',
           kibanaVersion: '8.9.0',

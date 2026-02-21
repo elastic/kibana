@@ -5,13 +5,8 @@
  * 2.0.
  */
 
-import { ALERT_MUTED } from '@kbn/rule-data-utils';
 import { getAlertMutedStatus } from './get_alert_muted_status';
 import type { AlertRuleData } from '../types';
-import {
-  createTimeOnlySnoozeAlert,
-  createConditionOnlySnoozeAlert,
-} from './fixtures/snooze_alert_fixtures';
 
 const createMockRuleData = (overrides: Partial<AlertRuleData> = {}): AlertRuleData => ({
   consumer: 'test-consumer',
@@ -29,74 +24,60 @@ const createMockRuleData = (overrides: Partial<AlertRuleData> = {}): AlertRuleDa
 });
 
 describe('getAlertMutedStatus', () => {
-  test('should return false when ruleData is undefined and no conditional snooze exists', () => {
+  test('should return false when ruleData is undefined', () => {
     expect(getAlertMutedStatus('alert-1')).toBe(false);
   });
 
-  test('should return true when alert document is conditionally snoozed with expiry', () => {
-    const alert = createTimeOnlySnoozeAlert(new Date(Date.now() + 60_000).toISOString());
-    expect(getAlertMutedStatus('alert-1', undefined, alert)).toBe(true);
-  });
-
-  test('should return true when alert document is conditionally snoozed with conditions', () => {
-    const alert = createConditionOnlySnoozeAlert({
-      conditions: [
-        {
-          type: 'field_change',
-          field: 'kibana.alert.severity',
-          snapshotValue: 'critical',
-        },
-      ],
-    });
-    expect(getAlertMutedStatus('alert-1', undefined, alert)).toBe(true);
-  });
-
-  test('should return false when alert document is muted but has no conditional snooze config', () => {
-    expect(
-      getAlertMutedStatus('alert-1', undefined, {
-        [ALERT_MUTED]: true,
-      })
-    ).toBe(false);
-  });
-
-  test('should return false when ruleData exists but muteAll is false and alertInstanceId is not muted', () => {
+  test('should return false when alert is not in mutedInstanceIds or snoozedInstances', () => {
     const ruleData = createMockRuleData();
     expect(getAlertMutedStatus('alert-1', ruleData)).toBe(false);
   });
 
-  test('should return false when alertInstanceId is not in mutedInstanceIds', () => {
-    const ruleData = createMockRuleData({
-      mutedInstanceIds: ['alert-2', 'alert-3'],
-    });
-    expect(getAlertMutedStatus('alert-1', ruleData)).toBe(false);
-  });
-
   test('should return true when muteAll is true', () => {
-    const ruleData = createMockRuleData({
-      muteAll: true,
-    });
+    const ruleData = createMockRuleData({ muteAll: true });
     expect(getAlertMutedStatus('alert-1', ruleData)).toBe(true);
   });
 
   test('should return true when alertInstanceId is in mutedInstanceIds', () => {
+    const ruleData = createMockRuleData({ mutedInstanceIds: ['alert-1', 'alert-2'] });
+    expect(getAlertMutedStatus('alert-1', ruleData)).toBe(true);
+  });
+
+  test('should return true when alertInstanceId is in snoozedInstances (time-only)', () => {
     const ruleData = createMockRuleData({
-      mutedInstanceIds: ['alert-1', 'alert-2'],
+      snoozedInstances: {
+        'alert-1': { expiresAt: new Date(Date.now() + 60_000).toISOString() },
+      },
     });
     expect(getAlertMutedStatus('alert-1', ruleData)).toBe(true);
+  });
+
+  test('should return true when alertInstanceId is in snoozedInstances (condition-based)', () => {
+    const ruleData = createMockRuleData({
+      snoozedInstances: {
+        'alert-1': {
+          conditions: [
+            { type: 'field_change', field: 'kibana.alert.severity', snapshotValue: 'critical' },
+          ],
+        },
+      },
+    });
+    expect(getAlertMutedStatus('alert-1', ruleData)).toBe(true);
+  });
+
+  test('should return false when a different alertInstanceId is in snoozedInstances', () => {
+    const ruleData = createMockRuleData({
+      snoozedInstances: {
+        'alert-2': { expiresAt: new Date(Date.now() + 60_000).toISOString() },
+      },
+    });
+    expect(getAlertMutedStatus('alert-1', ruleData)).toBe(false);
   });
 
   test('should return true when both muteAll is true and alertInstanceId is in mutedInstanceIds', () => {
     const ruleData = createMockRuleData({
       muteAll: true,
       mutedInstanceIds: ['alert-1'],
-    });
-    expect(getAlertMutedStatus('alert-1', ruleData)).toBe(true);
-  });
-
-  test('should return true when muteAll is true even if alertInstanceId is not in mutedInstanceIds', () => {
-    const ruleData = createMockRuleData({
-      muteAll: true,
-      mutedInstanceIds: ['alert-2'],
     });
     expect(getAlertMutedStatus('alert-1', ruleData)).toBe(true);
   });

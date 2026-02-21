@@ -106,7 +106,7 @@ export const buildOngoingAlert = <
   const filteredAlertState = filterAlertState(alertState);
   const hasAlertState = Object.keys(filteredAlertState).length > 0;
   const alertInstanceId = legacyAlert.getId();
-  const isMuted = getAlertMutedStatus(alertInstanceId, ruleData, alert);
+  const isMuted = getAlertMutedStatus(alertInstanceId, ruleData);
 
   const alertUpdates = {
     // Set latest rule configuration

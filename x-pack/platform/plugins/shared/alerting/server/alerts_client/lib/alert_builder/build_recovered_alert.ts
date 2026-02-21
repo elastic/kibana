@@ -16,10 +16,6 @@ import {
   ALERT_MAINTENANCE_WINDOW_IDS,
   ALERT_MAINTENANCE_WINDOW_NAMES,
   ALERT_MUTED,
-  ALERT_SNOOZE_EXPIRES_AT,
-  ALERT_SNOOZE_CONDITIONS,
-  ALERT_SNOOZE_CONDITION_OPERATOR,
-  ALERT_SNOOZE_SNAPSHOT,
   ALERT_STATUS,
   EVENT_ACTION,
   TAGS,
@@ -46,7 +42,6 @@ import { stripFrameworkFields } from '../strip_framework_fields';
 import { nanosToMicros } from '../nanos_to_micros';
 import { removeUnflattenedFieldsFromAlert, replaceRefreshableAlertFields } from '../format_alert';
 import { filterAlertState } from '../filter_alert_state';
-import { hasSnoozeConditions } from '../snooze_utils';
 
 interface BuildRecoveredAlertOpts<
   AlertData extends RuleAlertData,
@@ -104,10 +99,8 @@ export const buildRecoveredAlert = <
   const filteredAlertState = filterAlertState(alertState);
   const hasAlertState = Object.keys(filteredAlertState).length > 0;
 
-  // Preserve ALERT_MUTED from existing alert
+  // Preserve ALERT_MUTED from existing alert (materialized from rule SO)
   const alertMuted = get(alert, ALERT_MUTED);
-  const existingSnoozeExpiresAt = get(alert, ALERT_SNOOZE_EXPIRES_AT);
-  const preserveConditionFields = hasSnoozeConditions(alert);
 
   const alertUpdates = {
     // Update the timestamp to reflect latest update time
@@ -131,33 +124,10 @@ export const buildRecoveredAlert = <
     // Set latest match count, should be 0
     [ALERT_CONSECUTIVE_MATCHES]: legacyAlert.getActiveCount(),
     [ALERT_PENDING_RECOVERED_COUNT]: legacyAlert.getPendingRecoveredCount(),
-    // Preserve muted state from existing alert
+    // Preserve muted state from existing alert (materialized from rule SO).
+    // Snooze config lives on the rule SO, not on the doc, so no snooze fields
+    // need to be preserved or cleared here.
     ...(alertMuted !== undefined ? { [ALERT_MUTED]: alertMuted } : {}),
-    // Preserve ALL snooze configuration across recovery. Snooze should remain in effect
-    // until conditions are met or TTL expires, even if the alert temporarily recovers.
-    // When the alert re-activates, isAlertMuted() re-evaluates conditions/TTL and
-    // auto-unmutes if they are now satisfied. Snooze fields are cleared only when
-    // the alert is NOT muted (i.e. no active snooze or mute to carry forward).
-    ...(alertMuted
-      ? preserveConditionFields
-        ? {
-            [ALERT_SNOOZE_EXPIRES_AT]: existingSnoozeExpiresAt,
-            [ALERT_SNOOZE_CONDITIONS]: get(alert, ALERT_SNOOZE_CONDITIONS),
-            [ALERT_SNOOZE_CONDITION_OPERATOR]: get(alert, ALERT_SNOOZE_CONDITION_OPERATOR),
-            [ALERT_SNOOZE_SNAPSHOT]: get(alert, ALERT_SNOOZE_SNAPSHOT),
-          }
-        : {
-            [ALERT_SNOOZE_EXPIRES_AT]: existingSnoozeExpiresAt,
-            [ALERT_SNOOZE_CONDITIONS]: undefined,
-            [ALERT_SNOOZE_CONDITION_OPERATOR]: undefined,
-            [ALERT_SNOOZE_SNAPSHOT]: undefined,
-          }
-      : {
-          [ALERT_SNOOZE_EXPIRES_AT]: undefined,
-          [ALERT_SNOOZE_CONDITIONS]: undefined,
-          [ALERT_SNOOZE_CONDITION_OPERATOR]: undefined,
-          [ALERT_SNOOZE_SNAPSHOT]: undefined,
-        }),
     // Set status to 'recovered'
     [ALERT_STATUS]: ALERT_STATUS_RECOVERED,
     // Set latest duration as recovered alerts should have updated duration

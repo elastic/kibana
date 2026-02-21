@@ -906,7 +906,7 @@ for (const flattened of [true, false]) {
         expect((result as Record<string, unknown>)[ALERT_SNOOZE_CONDITION_OPERATOR]).toBe('all');
       });
 
-      test('should clear all snooze fields on recovery when alert is not muted', () => {
+      test('should preserve ALERT_MUTED=false on recovery without clearing snooze fields', () => {
         const legacyAlert = new LegacyAlert<{}, {}, 'default'>('alert-A');
         legacyAlert.scheduleActions('default');
 
@@ -914,12 +914,6 @@ for (const flattened of [true, false]) {
           alert: {
             ...existingFlattenedActiveAlert,
             [ALERT_MUTED]: false,
-            [ALERT_SNOOZE_EXPIRES_AT]: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
-            [ALERT_SNOOZE_CONDITIONS]: [
-              { type: 'field_change', field: 'kibana.alert.severity', snapshotValue: 'low' },
-            ],
-            [ALERT_SNOOZE_CONDITION_OPERATOR]: 'any',
-            [ALERT_SNOOZE_SNAPSHOT]: { 'kibana.alert.severity': 'low' },
           } as unknown as Alert,
           legacyAlert,
           rule: alertRule,
@@ -929,12 +923,6 @@ for (const flattened of [true, false]) {
         });
 
         expect((result as Record<string, unknown>)[ALERT_MUTED]).toBe(false);
-        expect((result as Record<string, unknown>)[ALERT_SNOOZE_EXPIRES_AT]).toBeUndefined();
-        expect((result as Record<string, unknown>)[ALERT_SNOOZE_CONDITIONS]).toBeUndefined();
-        expect(
-          (result as Record<string, unknown>)[ALERT_SNOOZE_CONDITION_OPERATOR]
-        ).toBeUndefined();
-        expect((result as Record<string, unknown>)[ALERT_SNOOZE_SNAPSHOT]).toBeUndefined();
       });
     });
   });

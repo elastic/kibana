@@ -5,24 +5,19 @@
  * 2.0.
  */
 
-import { get } from 'lodash';
-import { ALERT_MUTED } from '@kbn/rule-data-utils';
 import type { AlertRuleData } from '../types';
-import { hasConditionalSnooze } from './snooze_utils';
-
-export { hasConditionalSnooze } from './snooze_utils';
 
 export function getAlertMutedStatus(
   alertInstanceId: string,
-  ruleData?: AlertRuleData,
-  existingAlert?: Record<string, unknown>
+  ruleData?: AlertRuleData
 ): boolean {
-  const isMutedByRuleSo =
-    !!ruleData?.muteAll || !!ruleData?.mutedInstanceIds.includes(alertInstanceId);
-  if (isMutedByRuleSo) {
+  if (!ruleData) {
+    return false;
+  }
+
+  if (ruleData.muteAll || ruleData.mutedInstanceIds.includes(alertInstanceId)) {
     return true;
   }
 
-  // Preserve per-alert conditional snoozes that are stored on alert documents.
-  return get(existingAlert, ALERT_MUTED) === true && hasConditionalSnooze(existingAlert);
+  return alertInstanceId in (ruleData.snoozedInstances ?? {});
 }

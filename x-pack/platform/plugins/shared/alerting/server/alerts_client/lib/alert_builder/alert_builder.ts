@@ -211,7 +211,7 @@ export class AlertBuilder<
           activeAlertsToIndex.push(
             buildNewAlert<AlertData, State, Context, ActionGroupIds, RecoveryActionGroupId>({
               legacyAlert: activeAlert,
-              existingAlert: trackedAlert ?? this.trackedAlerts.getById(id),
+              existingAlert: trackedAlert,
               rule: this.rule,
               ruleData: this.alertRuleData,
               runTimestamp: this.runTimestampString,
