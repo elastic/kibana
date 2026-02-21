@@ -10,7 +10,7 @@
 import { Container } from 'inversify';
 import type { PluginOpaqueId } from '@kbn/core-base-common';
 import { OnSetup, OnStart, Setup, Start } from '@kbn/core-di';
-import { Fork, Global, PluginModule, Scope } from './plugin';
+import { ContributedExtensionPoint, Fork, PluginModule, ProvidedService, Scope } from './plugin';
 
 describe('PluginModule', () => {
   const token1 = Symbol.for('token1');
@@ -90,14 +90,14 @@ describe('PluginModule', () => {
     it('should dispose the entire forked scope when deactivating the plugin scope', async () => {
       const child1 = root.get(Scope)(token2);
       child1.bind('service1').toResolvedValue((service2) => service2, ['service2']);
-      child1.bind(Global).toConstantValue('service1');
+      child1.bind(ProvidedService).toConstantValue('service1');
 
       const forkedChild2 = root.get(Fork)(token2);
       const forkedChild1 = forkedChild2.get(Scope)(token1);
 
       forkedChild1.bind('something').toConstantValue('value');
       forkedChild2.bind('service2').toConstantValue('value2');
-      forkedChild2.bind(Global).toConstantValue('service2');
+      forkedChild2.bind(ProvidedService).toConstantValue('service2');
 
       expect(forkedChild2.get('service1')).toBe('value2');
 
@@ -107,7 +107,7 @@ describe('PluginModule', () => {
     });
   });
 
-  describe('Global', () => {
+  describe('Cross-plugin services and extensions', () => {
     function activate(id: PluginOpaqueId) {
       root.get(Scope)(id).get(Setup);
     }
@@ -119,14 +119,14 @@ describe('PluginModule', () => {
       plugin1 = root.get(Scope)(token1);
       plugin1.bind('service1').toConstantValue('service1');
       plugin1.bind('service2').toConstantValue('service2');
-      plugin1.bind(Global).toConstantValue('service1');
+      plugin1.bind(ProvidedService).toConstantValue('service1');
 
       plugin2 = root.get(Scope)(token2);
       plugin2.bind('service3').toConstantValue('service3.1');
       plugin2.bind('service3').toConstantValue('service3.2');
       plugin2.bind('service4').toConstantValue('service4');
-      plugin2.bind(Global).toConstantValue('service3');
-      plugin2.bind(Global).toConstantValue('service3');
+      plugin2.bind(ContributedExtensionPoint).toConstantValue('service3');
+      plugin2.bind(ContributedExtensionPoint).toConstantValue('service3');
 
       activate(token1);
       activate(token2);
@@ -146,7 +146,7 @@ describe('PluginModule', () => {
         expect(plugin2.get('service1')).toBe('service1');
       });
 
-      it('should bind multiple global services with the same name', () => {
+      it('should bind multiple extension point contributions with the same name', () => {
         expect(plugin1.getAll('service3')).toEqual(['service3.1', 'service3.2']);
       });
 
@@ -180,7 +180,7 @@ describe('PluginModule', () => {
           .bind('service5')
           .toDynamicValue(({ getAll }) => getAll('service6'))
           .inRequestScope();
-        plugin3.bind(Global).toConstantValue('service5');
+        plugin3.bind(ProvidedService).toConstantValue('service5');
 
         activate(token3);
 
@@ -189,7 +189,7 @@ describe('PluginModule', () => {
 
       it('should resolve dependencies from the forked context', () => {
         plugin2Fork.bind('service6').toConstantValue('service6');
-        plugin2Fork.bind(Global).toConstantValue('service6');
+        plugin2Fork.bind(ContributedExtensionPoint).toConstantValue('service6');
 
         expect(plugin2.get('service5')).toEqual([]);
         expect(plugin2Fork.get('service5')).toEqual(['service6']);
@@ -198,8 +198,8 @@ describe('PluginModule', () => {
       it('should resolve multiple dependencies from the forked context', () => {
         plugin2Fork.bind('service6').toConstantValue('service6.1');
         plugin2Fork.bind('service6').toConstantValue('service6.2');
-        plugin2Fork.bind(Global).toConstantValue('service6');
-        plugin2Fork.bind(Global).toConstantValue('service6');
+        plugin2Fork.bind(ContributedExtensionPoint).toConstantValue('service6');
+        plugin2Fork.bind(ContributedExtensionPoint).toConstantValue('service6');
 
         expect(plugin2Fork.get('service5')).toEqual(['service6.1', 'service6.2']);
       });
