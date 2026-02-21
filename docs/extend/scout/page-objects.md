@@ -17,15 +17,21 @@ For practical tips, see [best practices](./best-practices.md#page-object-tips).
 Page objects are exposed through the `pageObjects` fixture and are lazy-initialized:
 
 ```ts
-test.beforeEach(async ({ browserAuth, pageObjects }) => {
-  await browserAuth.loginAsViewer();
-  await pageObjects.discover.goto();
+import { tags } from '@kbn/scout';
+import { test } from '../fixtures';
+
+test.describe('My suite', { tag: tags.deploymentAgnostic }, () => {
+  test.beforeEach(async ({ browserAuth, pageObjects }) => {
+    await browserAuth.loginAsViewer();
+    await pageObjects.discover.goto();
+  });
 });
 ```
 
 ## Where they live [scout-page-objects-where]
 
-- Shared page objects: `@kbn/scout` and solution Scout packages (`<package>/src/playwright/page_objects`)
+- Core page objects: `@kbn/scout` (available as `pageObjects.<name>`)
+- Solution Scout packages may provide additional page objects (their internal folder layout varies—search within the package for `page_objects` if you need the source).
 - Plugin-local page objects: `<plugin-root>/test/scout/ui/fixtures/page_objects`
 
 To make your page object available as `pageObjects.newPage`, register it in your plugin fixtures.
@@ -45,7 +51,7 @@ export class NewPage {
   constructor(private readonly page: ScoutPage) {}
 
   async goto() {
-    await this.page.gotoApp('sample/app/name');
+    await this.page.gotoApp('myPlugin'); // replace with your app id
   }
 }
 ```
@@ -61,9 +67,9 @@ import type { PageObjects, ScoutPage } from '@kbn/scout';
 import { createLazyPageObject } from '@kbn/scout';
 import { NewPage } from './new_page';
 
-export interface MyPluginPageObjects extends PageObjects {
+export type MyPluginPageObjects = PageObjects & {
   newPage: NewPage;
-}
+};
 
 export function extendPageObjects(pageObjects: PageObjects, page: ScoutPage): MyPluginPageObjects {
   return {
@@ -77,30 +83,30 @@ export function extendPageObjects(pageObjects: PageObjects, page: ScoutPage): My
 
 :::::::::{step} Wire it into your plugin `test` fixture
 
-In `<plugin-root>/test/scout/ui/fixtures/index.ts`, extend Scout’s `test` so `pageObjects` uses your extended type:
+In `<plugin-root>/test/scout/ui/fixtures/index.ts`, extend Scout’s `test` so `pageObjects` has your extended type:
 
 ```ts
 import { test as base } from '@kbn/scout';
-import type { ScoutPage, ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout';
 
 import type { MyPluginPageObjects } from './page_objects';
 import { extendPageObjects } from './page_objects';
 
-export interface MyPluginTestFixtures extends ScoutTestFixtures {
-  pageObjects: MyPluginPageObjects;
-}
-
-export const test = base.extend<MyPluginTestFixtures, ScoutWorkerFixtures>({
-  pageObjects: async (
-    { pageObjects, page }: { pageObjects: MyPluginPageObjects; page: ScoutPage },
-    use: (pageObjects: MyPluginPageObjects) => Promise<void>
-  ) => {
+export const test = base.extend<{ pageObjects: MyPluginPageObjects }>({
+  pageObjects: async ({ pageObjects, page }, use) => {
     await use(extendPageObjects(pageObjects, page));
   },
 });
 ```
 
 Now your specs can use `pageObjects.newPage` without importing the page object class directly.
+
+:::::::{note}
+If your page object constructor needs extra arguments, pass them after `page`:
+
+`createLazyPageObject(NewPage, page, extraArg1, extraArg2)`.
+
+If you use `spaceTest` (parallel UI suites), extend it the same way: import `spaceTest as base` from `@kbn/scout`, then `export const spaceTest = base.extend<{ pageObjects: MyPluginPageObjects }>(...)`.
+:::::::
 
 :::::::::
 

@@ -13,7 +13,7 @@ Scout UI tests are Playwright tests that use Scout fixtures and page objects for
 ## The building blocks [scout-write-ui-tests-building-blocks]
 
 - **Tags**: every suite needs one or more [deployment tags](./deployment-tags.md) (use `tags.*`). Scout validates tags at runtime.
-- **Auth**: use `browserAuth` in `beforeEach` for a clean, readable flow.
+- **[Authentication](./browser-auth.md)**: use `browserAuth` in `beforeEach` for a clean, readable flow.
 - **Navigation + actions**: use `pageObjects` (preferred) or `page.gotoApp(...)`.
 - **Selectors**: use `page.testSubj` for `data-test-subj`-based locators/actions.
 - **Assertions**: import `expect` from your Scout package’s UI entrypoint (for example `@kbn/scout/ui` or `@kbn/scout-<solution>/ui`).

@@ -72,7 +72,13 @@ spaceTest.describe('My parallel suite', { tag: tags.deploymentAgnostic }, () => 
 
 ## API tests and parallelism [api-tests-and-parallelism]
 
-Parallel execution for API tests is not currently supported.
+API tests can run in parallel workers (set `workers > 1` in your API Playwright config), but Scout does **not** provide Space-per-worker isolation for API tests. All parallel workers will reuse the same (default) Space.
+
+If you run API tests in parallel, isolate state yourself:
+
+- Use unique resource names per worker (for example include `workerInfo.parallelIndex` in index/role/object names)
+- Avoid global mutations (cluster-wide settings, shared indices) unless the suite is fully isolated
+- Clean up in `afterAll` / `afterEach`
 
 ## Parallel best practices [scout-parallelism-best-practices]
 

@@ -60,7 +60,7 @@ export default createPlaywrightConfig({
 ```
 
 ::::::{important}
-Name the file exactly `playwright.config.ts` so Scout tooling can discover it.
+Use the conventional name `playwright.config.ts` so Scout tooling (and `node scripts/scout.js run-tests --testFiles ...`) can reliably discover/derive the config for `./tests`.
 ::::::
 
 Then create the `tests/` directory next to the config.
@@ -81,7 +81,7 @@ export default createPlaywrightConfig({
 ```
 
 ::::::{important}
-Name the file exactly `parallel.playwright.config.ts` so Scout tooling can discover it.
+Use the conventional name `parallel.playwright.config.ts` so Scout tooling (and `node scripts/scout.js run-tests --testFiles ...`) can reliably discover/derive the config for `./parallel_tests`.
 ::::::
 
 See [Parallelism](./parallelism.md) and [Global setup hook](./global-setup-hook.md) for recommended parallel patterns.
