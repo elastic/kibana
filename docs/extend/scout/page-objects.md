@@ -28,7 +28,13 @@ test.beforeEach(async ({ browserAuth, pageObjects }) => {
 - Shared page objects: `@kbn/scout` and solution Scout packages (`<package>/src/playwright/page_objects`)
 - Plugin-local page objects: `<plugin-root>/test/scout/ui/fixtures/page_objects`
 
-## Create a plugin page object [create-a-page-object]
+To make your page object available as `pageObjects.newPage`, register it in your plugin fixtures.
+
+## Create and register a new page object in your plugin
+
+::::::::::{stepper}
+
+:::::::::{step} Create a plugin page object
 
 Create a class that takes `ScoutPage` and exposes locators + actions:
 
@@ -44,11 +50,11 @@ export class NewPage {
 }
 ```
 
-## Register a plugin page object [register-plugin-page-object]
+:::::::::
 
-To make your page object available as `pageObjects.newPage`, register it in your plugin fixtures.
+:::::::::{step} Register a plugin page object
 
-### 1. Register it in `fixtures/page_objects/index.ts`
+Register it in `fixtures/page_objects/index.ts`
 
 ```ts
 import type { PageObjects, ScoutPage } from '@kbn/scout';
@@ -67,7 +73,9 @@ export function extendPageObjects(pageObjects: PageObjects, page: ScoutPage): My
 }
 ```
 
-### 2. Wire it into your plugin `test` fixture
+:::::::::
+
+:::::::::{step} Wire it into your plugin `test` fixture
 
 In `<plugin-root>/test/scout/ui/fixtures/index.ts`, extend Scout’s `test` so `pageObjects` uses your extended type:
 
@@ -93,3 +101,7 @@ export const test = base.extend<MyPluginTestFixtures, ScoutWorkerFixtures>({
 ```
 
 Now your specs can use `pageObjects.newPage` without importing the page object class directly.
+
+:::::::::
+
+::::::::::

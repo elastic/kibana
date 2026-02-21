@@ -55,11 +55,19 @@ Availability varies by test type (UI vs API). When in doubt, rely on editor auto
 
 ## Create plugin/solution fixtures [create-a-new-fixture]
 
+:::::::::::{stepper}
+
+::::::::::{step} Add fixture folders
+
 Add fixtures under your test tree:
 
 - UI fixtures: `<plugin-root>/test/scout/ui/fixtures`
 - API fixtures: `<plugin-root>/test/scout/api/fixtures`
 - Shared: `<plugin-root>/test/scout/common/fixtures`
+
+::::::::::
+
+::::::::::{step} Create a `fixtures/index.ts` entry point
 
 Typically you’ll create a `fixtures/index.ts` entry point that **extends** Scout’s base `test` (UI) and/or `apiTest` (API), then import that in your spec files:
 
@@ -72,4 +80,12 @@ test('uses plugin fixtures', async ({ pageObjects }) => {
 });
 ```
 
+::::::::::
+
+::::::::::{step} Contribute when broadly useful
+
 If a fixture would be broadly useful, consider contributing it to `@kbn/scout` (platform-wide) or your solution Scout package.
+
+::::::::::
+
+:::::::::::

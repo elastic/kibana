@@ -33,6 +33,16 @@ If you find repeated API setup/cleanup code across suites, add a helper to your 
 
 ## Extend `apiServices` in your plugin fixtures [extend-apiServices]
 
+:::::::::::{stepper}
+
+::::::::::{step} Define your service
+
+Create a helper that bundles repeated setup/teardown operations (for example `getMyFeatureApiService(...)`).
+
+::::::::::
+
+::::::::::{step} Extend the `apiServices` fixture
+
 You can add plugin-specific helpers by extending the `apiServices` fixture in your `fixtures/index.ts`.
 
 Example (API tests):
@@ -58,4 +68,12 @@ export const apiTest = baseApiTest.extend<{ apiServices: MyFeatureApiServicesFix
 });
 ```
 
+::::::::::
+
+::::::::::{step} Use it for setup/teardown
+
 Use the helper for **setup/teardown** (and keep the endpoint under test in `apiClient` for readable, scoped tests). See [best practices](./best-practices.md#api-tests).
+
+::::::::::
+
+:::::::::::

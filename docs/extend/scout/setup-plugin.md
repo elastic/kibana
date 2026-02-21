@@ -8,17 +8,31 @@ This page shows the **minimum setup** to add Scout tests to a plugin/package. Fo
 
 ## Guided setup with the Scout CLI [scout-setup-cli]
 
+:::::::::::{stepper}
+
+::::::::::{step} Generate a working scaffold
+
 Generate a working scaffold (folders, configs, and sample tests):
 
 ```bash
 node scripts/scout.js generate
 ```
 
+::::::::::
+
+::::::::::{step} Enable Scout runs in CI
+
 Then, [enable your plugin or package](#enable-scout-tests-in-ci) in the CI.
+
+::::::::::
+
+:::::::::::
 
 ## Manual setup [scout-setup-manual]
 
-### 1. Create the folder layout [scout-setup-folders]
+:::::::::{stepper}
+
+::::::::{step} Create the folder layout
 
 Create `test/scout`:
 
@@ -31,7 +45,9 @@ your-plugin/
         └── common/  # shared code (optional)
 ```
 
-### 2. Add Playwright config(s) [scout-setup-config]
+::::::::
+
+::::::::{step} Add Playwright config(s)
 
 Create `playwright.config.ts` under `test/scout/ui` and/or `test/scout/api`:
 
@@ -49,7 +65,9 @@ Name the file exactly `playwright.config.ts` so Scout tooling can discover it.
 
 Then create the `tests/` directory next to the config.
 
-### 3. (Optional) Add a parallel UI config [scout-setup-parallel-config]
+::::::::
+
+::::::::{step} (Optional) Add a parallel UI config
 
 If your UI suites can be isolated, add `parallel.playwright.config.ts` under `test/scout/ui` and point it at `parallel_tests/`:
 
@@ -68,9 +86,15 @@ Name the file exactly `parallel.playwright.config.ts` so Scout tooling can disco
 
 See [Parallelism](./parallelism.md) and [Global setup hook](./global-setup-hook.md) for recommended parallel patterns.
 
-### 4. Enable tests in CI
+::::::::
+
+::::::::{step} Enable Scout runs in CI
 
 Finally, [enable Scout test runs in the CI](#enable-scout-tests-in-ci) for your plugin or package.
+
+::::::::
+
+:::::::::
 
 ## Enable Scout tests in CI [enable-scout-tests-in-ci]
 
