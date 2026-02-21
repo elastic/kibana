@@ -110,7 +110,17 @@ export interface ProductFeatureParams<
   productFeatureConfig?: ProductFeaturesConfig<K, S>;
 }
 
-/** Infers the key type from a ProductFeaturesConfig-like type */
+/** Infers the key type from ProductFeatureParams */
+export type ProductFeatureParamsKey<P> = P extends ProductFeatureParams<infer K, infer _S>
+  ? K
+  : never;
+
+/** Infers the sub-feature id type from ProductFeatureParams */
+export type ProductFeatureParamsSubFeatureId<P> = P extends ProductFeatureParams<infer _K, infer S>
+  ? S
+  : never;
+
+/** Infers the key type from a ProductFeaturesConfig-like type (Partial<Record<K, ...>>) */
 export type ProductFeaturesConfigKey<C> = C extends Partial<
   Record<infer K, ProductFeatureKibanaConfig<string>>
 >
