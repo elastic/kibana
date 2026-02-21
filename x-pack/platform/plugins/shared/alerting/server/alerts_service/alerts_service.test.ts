@@ -3268,11 +3268,13 @@ describe('Alerts Service', () => {
           });
 
           const call = clusterClient.updateByQuery.mock.calls[0][0];
-          expect(call.script.source).toContain(`ctx._source['kibana.alert.muted'] = true;`);
-          expect(call.script.source).toContain(
+          const script = call.script as { source: string; params: Record<string, unknown> };
+          expect(script).toBeDefined();
+          expect(script.source).toContain(`ctx._source['kibana.alert.muted'] = true;`);
+          expect(script.source).toContain(
             `ctx._source['kibana.alert.snooze.expires_at'] = params.expiresAt;`
           );
-          expect(call.script.params).toEqual({ expiresAt });
+          expect(script.params).toEqual({ expiresAt });
         });
 
         test('should throw when no matching alert documents were updated', async () => {

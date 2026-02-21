@@ -48,13 +48,17 @@ export const buildUpdatedRecoveredAlert = <AlertData extends RuleAlertData>({
   // Omit fields that are overwrite-able with undefined value
   const cleanedAlert = omit(alert, ALERT_SEVERITY_IMPROVING);
 
-  // Snooze config lives on the rule SO, not on the doc. No snooze field
-  // maintenance is needed here -- the scheduler handles TTL/condition evaluation.
   const alertUpdates = {
+    // Update the timestamp to reflect latest update time
     [TIMESTAMP]: timestamp,
     [ALERT_RULE_EXECUTION_TIMESTAMP]: runTimestamp ?? timestamp,
+    // Set latest flapping state
     [ALERT_FLAPPING]: legacyRawAlert.meta?.flapping,
+    // Set latest flapping history
     [ALERT_FLAPPING_HISTORY]: legacyRawAlert.meta?.flappingHistory,
+    // For an "ongoing recovered" alert, we do not want to update the execution UUID to the current one so it does
+    // not get returned for summary alerts. In the future, we may want to restore this and add another field to the
+    // alert doc indicating that this is an ongoing recovered alert that can be used for querying.
     [ALERT_RULE_EXECUTION_UUID]: get(alert, ALERT_RULE_EXECUTION_UUID),
     [ALERT_PREVIOUS_ACTION_GROUP]: get(alert, ALERT_ACTION_GROUP),
   };

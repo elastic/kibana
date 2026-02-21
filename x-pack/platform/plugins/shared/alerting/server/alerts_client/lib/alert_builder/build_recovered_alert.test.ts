@@ -806,9 +806,5 @@ for (const flattened of [true, false]) {
         expect((result as Record<string, unknown>)[ALERT_MUTED]).toBe(false);
       });
     });
-
-    // Snooze config lives on the rule SO (snoozedInstances), not on alert docs.
-    // The builder preserves ALERT_MUTED from the existing doc (materialized from
-    // the rule SO by prior builders). No snooze field preservation tests needed.
   });
 }
