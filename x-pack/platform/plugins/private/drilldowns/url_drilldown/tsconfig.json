@@ -6,7 +6,6 @@
   "include": ["common/**/*", "public/**/*", "server/**/*"],
   "kbn_references": [
     "@kbn/core",
-    "@kbn/ui-actions-enhanced-plugin",
     "@kbn/embeddable-plugin",
     "@kbn/expressions-plugin",
     "@kbn/kibana-react-plugin",

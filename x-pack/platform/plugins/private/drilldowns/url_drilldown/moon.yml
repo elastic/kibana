@@ -19,7 +19,6 @@ project:
     sourceRoot: x-pack/platform/plugins/private/drilldowns/url_drilldown
 dependsOn:
   - '@kbn/core'
-  - '@kbn/ui-actions-enhanced-plugin'
   - '@kbn/embeddable-plugin'
   - '@kbn/expressions-plugin'
   - '@kbn/kibana-react-plugin'
