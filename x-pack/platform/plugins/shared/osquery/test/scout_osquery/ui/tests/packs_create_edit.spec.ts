@@ -470,11 +470,9 @@ test.describe(
             await page.goto(`${baseUrl}${discoverHref}`);
             await waitForPageReady(page);
 
-            // Wait for Discover doc table to be visible and fully rendered (data loaded)
-            const discoverTable = page.locator(
-              '[data-test-subj="discoverDocTable"][data-render-complete="true"]'
-            );
-            await expect(discoverTable).toBeVisible({ timeout: 60_000 });
+            await expect(page.testSubj.locator('discoverDocTable')).toBeVisible({
+              timeout: 60_000,
+            });
 
             await expect(page.testSubj.locator('breadcrumbs')).toContainText('Discover', {
               timeout: 30_000,

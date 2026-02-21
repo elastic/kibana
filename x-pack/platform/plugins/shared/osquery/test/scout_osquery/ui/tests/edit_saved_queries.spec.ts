@@ -62,17 +62,21 @@ test.describe(
       // Click update
       await page.testSubj.locator('update-query-button').click();
 
-      // Wait for save to complete
+      // Wait for save confirmation toast and the list to reload
+      await expect(page.getByText('Successfully saved').first()).toBeVisible({ timeout: 15_000 });
       await waitForPageReady(page);
 
-      // Re-open the saved query to verify changes
+      // Re-open the saved query to verify changes persisted
+      await page.locator(`[aria-label="Edit ${savedQueryName}"]`).waitFor({
+        state: 'visible',
+        timeout: 15_000,
+      });
       await page.locator(`[aria-label="Edit ${savedQueryName}"]`).click();
+      await waitForPageReady(page);
 
-      // Verify ECS mapping was removed. Use toHaveCount(0) instead of not.toBeVisible()
-      // because EUI hides content via CSS (height: 0; overflow: hidden) but Playwright
-      // still considers those elements visible.
-      await expect(page.getByText('Custom key/value pairs')).toHaveCount(0);
-      await expect(page.getByText('Hours of uptime')).toHaveCount(0);
+      // Verify ECS mapping was removed (text no longer in the DOM)
+      await expect(page.getByText('Custom key/value pairs.')).toHaveCount(0, { timeout: 15_000 });
+      await expect(page.getByText('Hours of uptime')).toHaveCount(0, { timeout: 15_000 });
 
       // Verify all platforms are now checked
       const platformGroup2 = page.testSubj.locator('osquery-platform-checkbox-group');

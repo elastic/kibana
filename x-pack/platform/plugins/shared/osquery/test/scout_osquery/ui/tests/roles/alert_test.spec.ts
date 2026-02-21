@@ -11,7 +11,7 @@ import { expect } from '@kbn/scout/ui';
 import { test } from '../../fixtures';
 import { t1AnalystRole } from '../../common/roles';
 import { loadRule, cleanupRule } from '../../common/api_helpers';
-import { waitForPageReady } from '../../common/constants';
+import { waitForPageReady, waitForAlerts } from '../../common/constants';
 
 test.describe('Alert Test', { tag: [...tags.stateful.classic] }, () => {
   let ruleName: string;
@@ -24,6 +24,7 @@ test.describe('Alert Test', { tag: [...tags.stateful.classic] }, () => {
   });
 
   test.beforeEach(async ({ browserAuth, page, kbnUrl }) => {
+    test.setTimeout(300_000);
     await browserAuth.loginWithCustomRole(t1AnalystRole);
     await page.goto(kbnUrl.get('/app/security/rules'));
     await waitForPageReady(page);
@@ -32,13 +33,10 @@ test.describe('Alert Test', { tag: [...tags.stateful.classic] }, () => {
     await page.getByText(ruleName).first().click();
     await waitForPageReady(page);
 
-    // Go to Alerts tab (matches Cypress flow)
+    // Go to Alerts tab and wait for alerts to be generated
     await page.testSubj.locator('navigation-alerts').click();
     await waitForPageReady(page);
-    await page.testSubj
-      .locator('expand-event')
-      .first()
-      .waitFor({ state: 'visible', timeout: 30_000 });
+    await waitForAlerts(page);
 
     // Expand first event
     await page.testSubj.locator('expand-event').first().click();

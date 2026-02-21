@@ -185,7 +185,7 @@ roles.forEach(({ name, role }) => {
         await waitForPageReady(page);
         await pageObjects.liveQuery.selectAllAgents();
         await expect(page.testSubj.locator('kibanaCodeEditor')).toHaveCount(0);
-        await pageObjects.liveQuery.submitQuery();
+        await pageObjects.liveQuery.clickSubmit();
         await expect(page.getByText('Query is a required field').first()).toBeVisible();
       });
     }

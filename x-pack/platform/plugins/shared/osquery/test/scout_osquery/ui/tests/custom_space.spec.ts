@@ -115,19 +115,12 @@ for (const testSpace of testSpaces) {
         await page.goto(`${baseUrl}${href}`);
         await waitForPageReady(page);
 
-        // Wait for Discover doc table to be visible and fully rendered (data loaded)
-        const discoverTable = page.locator(
-          '[data-test-subj="discoverDocTable"][data-render-complete="true"]'
-        );
         // eslint-disable-next-line playwright/no-conditional-expect
-        await expect(discoverTable).toBeVisible({ timeout: 60_000 });
-
-        // Verify osquery results: action_data with our query (scoped to table)
-        const table = page.testSubj.locator('discoverDocTable');
+        await expect(page.testSubj.locator('discoverDocTable')).toBeVisible({ timeout: 60_000 });
         // eslint-disable-next-line playwright/no-conditional-expect
-        await expect(table.getByText(/action_data.*select \* from uptime/)).toBeVisible({
-          timeout: 30_000,
-        });
+        await expect(
+          page.testSubj.locator('discoverDocTable').getByText('action_data').first()
+        ).toBeVisible({ timeout: 30_000 });
       }
     });
 

@@ -28,7 +28,9 @@ test.describe('ALL - Timelines', { tag: [...tags.stateful.classic] }, () => {
     await waitForPageReady(page);
 
     // Open the timeline bar
-    await page.testSubj.locator('timeline-bottom-bar').waitFor({ state: 'visible' });
+    await page.testSubj
+      .locator('timeline-bottom-bar')
+      .waitFor({ state: 'visible', timeout: 30_000 });
     await page.testSubj.locator('timeline-bottom-bar-title-button').click();
 
     // Type the query in the timeline search input

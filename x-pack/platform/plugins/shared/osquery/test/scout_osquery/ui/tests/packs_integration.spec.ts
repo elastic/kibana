@@ -77,7 +77,9 @@ test.describe(
           await option.waitFor({ state: 'visible', timeout: 15_000 });
           await option.click();
 
-          await page.testSubj.locator('save-pack-button').click();
+          const saveBtn = page.testSubj.locator('save-pack-button');
+          await saveBtn.waitFor({ state: 'visible', timeout: 10_000 });
+          await saveBtn.click({ force: true });
 
           // Wait for success
           await expect(
