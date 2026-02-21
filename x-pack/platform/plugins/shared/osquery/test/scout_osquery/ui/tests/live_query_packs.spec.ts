@@ -27,11 +27,13 @@ test.describe(
           system_memory_linux_elastic: {
             ecs_mapping: {},
             interval: 3600,
+            platform: 'linux',
             query: 'SELECT * FROM memory_info;',
           },
           system_info_elastic: {
             ecs_mapping: {},
             interval: 3600,
+            platform: 'linux,windows,darwin',
             query: 'SELECT * FROM system_info;',
           },
           failingQuery: {
@@ -82,21 +84,28 @@ test.describe(
       await packInput.click();
       await packInput.pressSequentially(packName);
       const option = page.getByRole('option', { name: new RegExp(packName, 'i') }).first();
-      await option.waitFor({ state: 'visible', timeout: 15_000 });
+      await option.waitFor({ state: 'visible', timeout: 30_000 });
       await option.click();
 
       // Verify the pack contains 3 queries (check individual rows directly since
       // EUI table caption "This table contains N rows" is screen-reader only)
       await expect(page.getByText('system_memory_linux_elastic').first()).toBeVisible({
+        timeout: 30_000,
+      });
+      await expect(page.getByText('system_info_elastic').first()).toBeVisible({
         timeout: 15_000,
       });
-      await expect(page.getByText('system_info_elastic').first()).toBeVisible();
-      await expect(page.getByText('failingQuery').first()).toBeVisible();
+      await expect(page.getByText('failingQuery').first()).toBeVisible({
+        timeout: 15_000,
+      });
 
       await pageObjects.liveQuery.selectAllAgents();
       await pageObjects.liveQuery.submitQuery();
 
       // Expand the system_memory_linux_elastic query results
+      await page.testSubj
+        .locator('toggleIcon-system_memory_linux_elastic')
+        .waitFor({ state: 'visible', timeout: 60_000 });
       await page.testSubj.locator('toggleIcon-system_memory_linux_elastic').click();
       await pageObjects.liveQuery.checkResults();
 

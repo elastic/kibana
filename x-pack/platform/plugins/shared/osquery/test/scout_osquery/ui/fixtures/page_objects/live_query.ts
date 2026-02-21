@@ -58,9 +58,10 @@ export class LiveQueryPage {
     await allAgentsOption.click();
 
     // Confirm agents were selected by waiting for the selection indicator
+    // Serverless agents can take longer to appear in the Fleet UI
     await this.page
       .getByText(/\d+ agents? selected\./)
-      .waitFor({ state: 'visible', timeout: 30_000 });
+      .waitFor({ state: 'visible', timeout: 60_000 });
   }
 
   async inputQuery(query: string) {

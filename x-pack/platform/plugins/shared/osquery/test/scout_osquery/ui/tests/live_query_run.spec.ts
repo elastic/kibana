@@ -39,7 +39,7 @@ test.describe(
     });
 
     test('should run query and enable ecs mapping', async ({ page, pageObjects }) => {
-      test.setTimeout(300_000); // ECS mapping queries can be slow
+      test.setTimeout(300_000); // ECS mapping queries can be slow; serverless agents can be delayed
 
       const liveQuery = pageObjects.liveQuery;
 
@@ -102,7 +102,7 @@ test.describe(
         await savedQueryInput.click();
         await savedQueryInput.pressSequentially(savedQueryName);
         const option = page.getByRole('option', { name: new RegExp(savedQueryName, 'i') }).first();
-        await option.waitFor({ state: 'visible', timeout: 15_000 });
+        await option.waitFor({ state: 'visible', timeout: 30_000 });
         await option.click();
 
         await page.testSubj.locator('kibanaCodeEditor').waitFor({ state: 'visible' });
@@ -137,9 +137,14 @@ test.describe(
     });
 
     test('should open query details by clicking the details icon', async ({ page }) => {
+      test.setTimeout(120_000); // Details page can be slow to load in serverless
       await test.step('Navigate to Osquery and click details icon', async () => {
         await page.gotoApp('osquery');
         await waitForPageReady(page);
+        await page
+          .locator('[aria-label="Details"]')
+          .first()
+          .waitFor({ state: 'visible', timeout: 30_000 });
         await page.locator('[aria-label="Details"]').first().click();
       });
 

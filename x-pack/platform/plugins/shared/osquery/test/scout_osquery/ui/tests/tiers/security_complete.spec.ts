@@ -12,11 +12,14 @@ import { loadRule, cleanupRule } from '../../common/api_helpers';
 import { checkOsqueryResponseActionsPermissions } from '../../common/response_actions';
 import { waitForPageReady } from '../../common/constants';
 
-// This test runs against the osquery_tiers config set, which configures the
-// security_complete domain with ONLY the security complete PLI (no endpoint).
-// Without endpoint complete, response actions should NOT be available.
-test.describe(
-  'App Features for Security Complete PLI',
+// This test requires a server config with ONLY security complete PLI (no endpoint).
+// The osquery serverless security_complete config inherits from the default config
+// which includes endpoint complete. Response actions are thus available, so this
+// test would fail. Cypress achieves the security-only tier via env.ftrConfig.productTypes
+// override; Scout uses a single server config per run and cannot override per-test.
+// Skipped in Scout; covered by Cypress security_complete.cy.ts.
+test.describe.skip(
+  'App Features for Security Complete PLI (no Endpoint)',
   { tag: [...tags.serverless.security.complete] },
   () => {
     let ruleId: string;

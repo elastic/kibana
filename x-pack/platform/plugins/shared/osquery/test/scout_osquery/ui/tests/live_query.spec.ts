@@ -122,7 +122,7 @@ test.describe(
     });
 
     test('should run a live query and check results', async ({ page, pageObjects }) => {
-      test.setTimeout(180_000); // Live queries can take time for agents to respond
+      test.setTimeout(240_000); // Live queries can take time; serverless agents respond slowly
       const liveQuery = pageObjects.liveQuery;
 
       await test.step('Navigate and configure live query', async () => {

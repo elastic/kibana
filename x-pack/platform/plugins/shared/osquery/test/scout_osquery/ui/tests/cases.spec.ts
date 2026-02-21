@@ -53,12 +53,27 @@ test.describe(
         pageObjects,
         kbnUrl,
       }) => {
+        test.setTimeout(180_000);
         await test.step('Navigate to live query results page', async () => {
           await page.goto(kbnUrl.get(`/app/osquery/live_queries/${liveQueryId}`));
           await waitForPageReady(page);
+          // Single-query rows auto-expand; wait for results table (agents can be slow)
+          const start = Date.now();
+          while (Date.now() - start < 90_000) {
+            try {
+              await page.testSubj
+                .locator('osqueryResultsTable')
+                .waitFor({ state: 'visible', timeout: 20_000 });
+              break;
+            } catch {
+              await page.reload();
+              await waitForPageReady(page);
+            }
+          }
+
           await page.testSubj
             .locator('osqueryResultsTable')
-            .waitFor({ state: 'visible', timeout: 60_000 });
+            .waitFor({ state: 'visible', timeout: 30_000 });
         });
 
         await test.step('Add to Case and select case', async () => {
