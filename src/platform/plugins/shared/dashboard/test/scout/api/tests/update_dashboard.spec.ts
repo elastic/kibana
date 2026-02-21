@@ -64,7 +64,7 @@ apiTest.describe('dashboards - update', { tag: tags.deploymentAgnostic }, () => 
     expect(response.body).toStrictEqual({
       statusCode: 404,
       error: 'Not Found',
-      message: 'A dashboard with ID not-an-id was not found.',
+      message: 'A dashboard with ID [not-an-id] was not found.',
     });
   });
 
