@@ -100,6 +100,9 @@ const assertLocalName = (name: string) => {
   }
 };
 
+// Dev-only duplicate-definition guard. Identity is heuristic: it keys off a
+// process-global registry and compares captured stack strings, so it catches
+// common mistakes but is not authoritative. Skipped entirely in production.
 const registerToken = (fullName: string, kind: TokenKind) => {
   if (isProduction()) {
     return;
@@ -144,11 +147,15 @@ const createToken = <T>(
 /**
  * Creates a {@link TokenFactory} scoped to `pluginId`.
  *
- * Each token is backed by a global `Symbol.for('<pluginId>.<name>')`, making it
- * safe to import and share across plugin boundaries. In non-production
- * environments the factory validates that each fully-qualified token is defined
- * only once and that service and extension-point tokens are never mixed for the
- * same name.
+ * Each token is backed by a global `Symbol.for('<pluginId>.<name>')`. The string
+ * key is a deliberate cross-package protocol: producers and consumers in
+ * different packages resolve the same well-known symbol without importing a
+ * shared binding, so neither side needs a hard dependency on the other.
+ *
+ * In non-production environments the factory runs a best-effort guard that each
+ * fully-qualified token is defined only once and that service and
+ * extension-point tokens are never mixed for the same name. The guard is a
+ * dev-only heuristic (see {@link registerToken}); it is not a runtime guarantee.
  *
  * @example
  * ```ts
@@ -162,6 +169,7 @@ const createToken = <T>(
  *   (e.g. `"myPlugin"`). Must match the pattern `[a-z][a-zA-Z0-9]*`.
  * @returns A {@link TokenFactory} whose methods mint tokens scoped to `pluginId`.
  * @public
+ * @experimental
  */
 export const createTokenFactory = (pluginId: string): TokenFactory => {
   assertPluginId(pluginId);

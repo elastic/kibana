@@ -9,6 +9,15 @@
 
 import type { ServiceIdentifier } from 'inversify';
 
+/**
+ * Well-known marker for hosted extension points.
+ *
+ * The `Symbol.for('HostedExtensionPoint')` key is a deliberate cross-package
+ * protocol, not an implementation detail. Other packages (e.g. `@kbn/plugin-di`)
+ * resolve the same well-known symbol rather than importing this binding, so they
+ * participate in the protocol without a hard dependency on `@kbn/core-di`
+ * internals. The string key is the contract; keep it stable.
+ */
 export const HostedExtensionPoint = Symbol.for(
   'HostedExtensionPoint'
 ) as ServiceIdentifier<ServiceIdentifier>;

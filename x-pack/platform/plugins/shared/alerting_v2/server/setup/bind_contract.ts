@@ -7,7 +7,7 @@
 
 import type { ContainerModuleLoadOptions } from 'inversify';
 import { Start } from '@kbn/core-di';
-import { ProvidedService } from '@kbn/core-di-internal';
+import { Global } from '@kbn/core-di-internal';
 import { CoreStart, Request } from '@kbn/core-di-server';
 import type { KibanaRequest } from '@kbn/core/server';
 import { RulesClient } from '../lib/rules_client';
@@ -22,10 +22,10 @@ export function bindContract({ bind }: ContainerModuleLoadOptions) {
     const buildScope = (request: KibanaRequest, spaceId?: string) => {
       const scope = injection.fork();
       scope.bind(Request).toConstantValue(request);
-      scope.bind(ProvidedService).toConstantValue(Request);
+      scope.bind(Global).toConstantValue(Request);
       if (spaceId) {
         scope.bind(RequestSpaceIdToken).toConstantValue(spaceId);
-        scope.bind(ProvidedService).toConstantValue(RequestSpaceIdToken);
+        scope.bind(Global).toConstantValue(RequestSpaceIdToken);
       }
       return scope;
     };

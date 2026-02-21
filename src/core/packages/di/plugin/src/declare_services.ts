@@ -231,6 +231,7 @@ export interface DeclareOptions<TStart = RequiresPluginStart> {
  *   The callback is invoked synchronously when the module is loaded into a
  *   container.
  * @public
+ * @experimental
  */
 export const declare = <TStart = RequiresPluginStart>(
   callback: (options: DeclareOptions<TStart>) => void

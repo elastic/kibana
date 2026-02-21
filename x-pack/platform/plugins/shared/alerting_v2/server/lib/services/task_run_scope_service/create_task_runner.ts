@@ -7,7 +7,7 @@
 
 import type { ObjectType } from '@kbn/config-schema';
 import type { CoreDiServiceStart } from '@kbn/core-di';
-import { ProvidedService } from '@kbn/core-di-internal';
+import { Global } from '@kbn/core-di-internal';
 import { Request } from '@kbn/core-di-server';
 import type {
   RunContext,
@@ -98,7 +98,7 @@ export function createTaskRunnerFactory({
 
         if (fakeRequest) {
           scope.bind(Request).toConstantValue(fakeRequest);
-          scope.bind(ProvidedService).toConstantValue(Request);
+          scope.bind(Global).toConstantValue(Request);
           scope.bind(taskRunnerClass).toSelf().inRequestScope();
         } else {
           scope.bind(taskRunnerClass).toSelf().inTransientScope();

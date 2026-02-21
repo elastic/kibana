@@ -19,6 +19,7 @@ export {
 } from './src/modules/lifecycle';
 export {
   ContributedExtensionPoint,
+  Global,
   HostedExtensionPoint,
   ProvidedService,
 } from './src/modules/plugin';

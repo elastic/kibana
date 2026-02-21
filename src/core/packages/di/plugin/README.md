@@ -1,5 +1,11 @@
 # `@kbn/plugin-di`
 
+> **Status: experimental.** This package is an unstable proof-of-concept
+> authoring layer. Its API may change incompatibly or be removed, and it should
+> not be treated as a supported platform API until the cross-plugin integration
+> it enables has been validated. Despite its `shared` visibility, prefer not to
+> depend on it from production code paths yet.
+
 Plugin-author ergonomics for Kibana's DI proof of concept.
 
 This package is intentionally small. The one question that decides what you reach for: **who provides the implementation?** Use a **service** when *you* own the implementation and publish it for others to consume; use an **extension point** when you own the contract but invite *other* plugins to supply the implementations you then collect.
@@ -21,5 +27,4 @@ lifecycle tokens.
 Treat this package as PoC-era DX guidance rather than a finalized platform API.
 
 Start with [GETTING_STARTED.md](./GETTING_STARTED.md) for the blessed authoring
-path. Follow-on candidate migrations for the PoC live in
-[NEXT_CANDIDATES.md](./NEXT_CANDIDATES.md).
+path.
