@@ -30,7 +30,9 @@ export let trackUiMetric: (
 const servicesReady$ = new BehaviorSubject(false);
 
 export const untilPluginStartServicesReady = () => {
-  if (servicesReady$.value) return Promise.resolve();
+  if (servicesReady$.value) {
+    return Promise.resolve();
+  }
   return new Promise<void>((resolve) => {
     const subscription = servicesReady$.subscribe((isInitialized) => {
       if (isInitialized) {
