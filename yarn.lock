@@ -6677,6 +6677,22 @@
   version "0.0.0"
   uid ""
 
+"@kbn/di-global-alpha-plugin@link:examples/di_global_alpha":
+  version "0.0.0"
+  uid ""
+
+"@kbn/di-global-alpha-types@link:examples/di-global-alpha-types":
+  version "0.0.0"
+  uid ""
+
+"@kbn/di-global-beta-plugin@link:examples/di_global_beta":
+  version "0.0.0"
+  uid ""
+
+"@kbn/di-global-beta-types@link:examples/di-global-beta-types":
+  version "0.0.0"
+  uid ""
+
 "@kbn/discover-contextual-components@link:src/platform/packages/shared/kbn-discover-contextual-components":
   version "0.0.0"
   uid ""
