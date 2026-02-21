@@ -540,9 +540,9 @@ describe('Per-Alert Action Scheduler', () => {
         ...getSchedulerContext(),
         rule: {
           ...rule,
-          snoozedInstances: {
-            '2': { expiresAt: new Date(Date.now() - 60000).toISOString() },
-          },
+          snoozedInstances: [
+            { instanceId: '2', expiresAt: new Date(Date.now() - 60000).toISOString() },
+          ],
         },
       });
       const results = await scheduler.getActionsToSchedule({
@@ -562,9 +562,9 @@ describe('Per-Alert Action Scheduler', () => {
         ...getSchedulerContext(),
         rule: {
           ...rule,
-          snoozedInstances: {
-            '2': { expiresAt: new Date(Date.now() + 3600000).toISOString() },
-          },
+          snoozedInstances: [
+            { instanceId: '2', expiresAt: new Date(Date.now() + 3600000).toISOString() },
+          ],
         },
       });
       const results = await scheduler.getActionsToSchedule({
@@ -577,6 +577,30 @@ describe('Per-Alert Action Scheduler', () => {
 
       // @ts-expect-error private variable
       expect(scheduler.skippedAlerts).toEqual({ '2': { reason: 'muted' } });
+    });
+
+    test('should auto-unmute alert when conditional snooze TTL expires and rule has no actions', async () => {
+      // Rule has no actions; alert 2 has an expired per-alert snooze.
+      // Without the dedicated evaluateAlertForAutoUnmute pass, we would never
+      // enter the actions loop and alertsToAutoUnmute would stay empty.
+      const scheduler = new PerAlertActionScheduler({
+        ...getSchedulerContext(),
+        rule: {
+          ...rule,
+          actions: [],
+          snoozedInstances: [
+            { instanceId: '2', expiresAt: new Date(Date.now() - 60000).toISOString() },
+          ],
+        },
+      });
+      const results = await scheduler.getActionsToSchedule({
+        activeAlerts: alerts,
+      });
+
+      expect(results).toHaveLength(0);
+      expect(scheduler.alertsToAutoUnmute).toHaveLength(1);
+      expect(scheduler.alertsToAutoUnmute[0].alertInstanceId).toBe('2');
+      expect(scheduler.alertsToAutoUnmute[0].reason).toContain('Time expiry reached');
     });
 
     test('should treat alert as simple mute when in mutedInstanceIds but not snoozedInstances', async () => {
@@ -625,13 +649,14 @@ describe('Per-Alert Action Scheduler', () => {
         ...getSchedulerContext(),
         rule: {
           ...rule,
-          snoozedInstances: {
-            '2': {
+          snoozedInstances: [
+            {
+              instanceId: '2',
               conditions: [
                 { type: 'severity_equals', field: 'kibana.alert.severity', value: 'medium' },
               ],
             },
-          },
+          ],
         },
       });
       const results = await scheduler.getActionsToSchedule({ activeAlerts: alerts });
@@ -657,13 +682,14 @@ describe('Per-Alert Action Scheduler', () => {
         ...getSchedulerContext(),
         rule: {
           ...rule,
-          snoozedInstances: {
-            '2': {
+          snoozedInstances: [
+            {
+              instanceId: '2',
               conditions: [
                 { type: 'severity_equals', field: 'kibana.alert.severity', value: 'medium' },
               ],
             },
-          },
+          ],
         },
       });
       const results = await scheduler.getActionsToSchedule({ activeAlerts: alerts });

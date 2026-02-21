@@ -28,7 +28,6 @@ import type {
 import { getSummaryActionsFromTaskState } from './lib';
 import { withAlertingSpan } from '../lib';
 import * as schedulers from './schedulers';
-import { PerAlertActionScheduler } from './schedulers/per_alert_action_scheduler';
 
 const BULK_SCHEDULE_CHUNK_SIZE = 1000;
 
@@ -170,8 +169,9 @@ export class ActionScheduler<
   public getAlertsToAutoUnmute(): AlertToAutoUnmute[] {
     const results: AlertToAutoUnmute[] = [];
     for (const scheduler of this.schedulers) {
-      if (scheduler instanceof PerAlertActionScheduler && scheduler.alertsToAutoUnmute) {
-        results.push(...scheduler.alertsToAutoUnmute);
+      const list = scheduler.getAlertsToAutoUnmute?.();
+      if (list?.length) {
+        results.push(...list);
       }
     }
     return results;

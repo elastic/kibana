@@ -24,7 +24,7 @@ import {
   ObjectRemover,
 } from '../../../../common/lib';
 
-const alertAsDataIndex = '.internal.alerts-observability.test.alerts.alerts-default-000001';
+const alertAsDataIndexPattern = '.internal.alerts-observability.test.alerts.alerts-default-*';
 
 export default function createDisableRuleTests({ getService }: FtrProviderContext) {
   const es = getService('es');
@@ -66,7 +66,8 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       const {
         hits: { hits: alerts },
       } = await es.search({
-        index: alertAsDataIndex,
+        index: alertAsDataIndexPattern,
+        ignore_unavailable: true,
         query: { match_all: {} },
       });
 
@@ -77,7 +78,8 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       const {
         hits: { hits: alerts },
       } = await es.search({
-        index: alertAsDataIndex,
+        index: alertAsDataIndexPattern,
+        ignore_unavailable: true,
         query: {
           bool: {
             must: [{ term: { [ALERT_RULE_UUID]: ruleId } }, { term: { [ALERT_STATUS]: 'active' } }],
@@ -94,7 +96,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
 
     afterEach(async () => {
       await es.deleteByQuery({
-        index: alertAsDataIndex,
+        index: alertAsDataIndexPattern,
         query: {
           match_all: {},
         },
@@ -111,6 +113,10 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
     it('should reflect muted alert instance ids in rule', async () => {
       const createdRule1 = await createRule();
       const createdRule2 = await createRule();
+
+      // Trigger first execution so alerts are created (schedule is 24h)
+      await alertUtils.runSoon(createdRule1);
+      await alertUtils.runSoon(createdRule2);
 
       let alerts: any[] = [];
 
@@ -237,13 +243,10 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
         expect(mutedAlert._source[ALERT_MUTED]).to.be(true);
       });
 
-      // Now unmute the alert instance
+      // Now unmute the alert instance (updates rule SO and AAD doc via updateByQuery with refresh)
       await alertUtils.getUnmuteInstanceRequest(ruleId, alertInstanceId);
 
-      // Run the rule to trigger reconciliation
-      await alertUtils.runSoon(ruleId);
-
-      // Wait for alert document to be updated
+      // Wait for alert document to reflect unmuted state
       await retry.try(async () => {
         const unmutedAlerts = await getAlertsByRuleId(ruleId);
         const unmutedAlert: any = unmutedAlerts.find(
@@ -346,7 +349,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       // Wrap in retry because concurrent updates may cause version conflicts with conflicts: 'proceed'
       await retry.try(async () => {
         await es.updateByQuery({
-          index: alertAsDataIndex,
+          index: alertAsDataIndexPattern,
           conflicts: 'proceed',
           query: {
             bool: {
@@ -401,7 +404,9 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
 
       const alertInstanceId = alerts[0]._source[ALERT_INSTANCE_ID];
 
-      // Snooze with a short TTL
+      // Snooze with a short TTL (5s) so auto-unsnooze runs on the next execution after expiry
+      const snoozeMs = 5000;
+      const expiresAt = new Date(Date.now() + snoozeMs).toISOString();
       await supertest
         .post(
           `${getUrlPrefix(
@@ -409,8 +414,18 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
           )}/api/alerting/rule/${ruleId}/alert/${alertInstanceId}/_mute`
         )
         .set('kbn-xsrf', 'foo')
-        .send({ expires_at: new Date(Date.now() + 3000).toISOString() })
+        .send({ expires_at: expiresAt })
         .expect(204);
+
+      // If the API returns snoozed_instances, validate the mute path wrote correctly
+      const { body: ruleAfterMute } = await supertest
+        .get(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${ruleId}`)
+        .expect(200);
+      if (Array.isArray(ruleAfterMute?.snoozed_instances)) {
+        expect(ruleAfterMute.snoozed_instances).to.have.length(1);
+        expect(ruleAfterMute.snoozed_instances[0].instance_id).to.eql(alertInstanceId);
+        expect(ruleAfterMute.snoozed_instances[0].expires_at).to.eql(expiresAt);
+      }
 
       // Run the rule so ALERT_MUTED is materialized on the alert doc
       await alertUtils.runSoon(ruleId);
@@ -424,13 +439,31 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
         expect(snoozedAlert._source[ALERT_MUTED]).to.be(true);
       });
 
-      // Wait for TTL to expire
-      await new Promise((resolve) => setTimeout(resolve, 4000));
+      // Wait for TTL to expire (wait past snooze TTL so auto-unsnooze is applied on next run)
+      await new Promise((resolve) => setTimeout(resolve, snoozeMs + 2000));
 
-      // Run again to trigger auto-unsnooze
+      // Run again to trigger auto-unsnooze (remove from rule SO snoozedInstances + clear ALERT_MUTED)
       await alertUtils.runSoon(ruleId);
 
-      // Verify ALERT_MUTED is false after auto-unsnooze
+      // Wait for the execution to complete (runSoon returns before the task finishes)
+      await retry.try(async () => {
+        await getEventLog({
+          getService,
+          spaceId: Spaces.space1.id,
+          type: 'alert',
+          id: ruleId,
+          provider: 'alerting',
+          actions: new Map([['execute', { gte: 3 }]]),
+        });
+      });
+
+      // Allow the 3rd execution to finish writing to the alerts index
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      // Ensure the alerts index is refreshed so the search sees the updated ALERT_MUTED
+      await es.indices.refresh({ index: alertAsDataIndexPattern, ignore_unavailable: true });
+
+      // Verify ALERT_MUTED is false after auto-unsnooze (poll for index refresh)
       await retry.try(async () => {
         const unsnoozedAlerts = await getAlertsByRuleId(ruleId);
         const unsnoozedAlert: any = unsnoozedAlerts.find(
@@ -442,11 +475,8 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
     });
 
     // TODO: snoozedInstances with any key triggers [snoozedInstances]: expected
-    // value of type [object] but got [Array] validation error when loading the
-    // rule SO. This is a schema.recordOf serialization issue that needs to be
-    // addressed in the SO layer before this test can pass.
-    it.skip('should keep alert snoozed across recovery and re-fire via rule SO', async () => {
-      const patternAadIndex = '.alerts-test.patternfiring.alerts-default';
+    it('should keep alert snoozed across recovery and re-fire via rule SO', async () => {
+      const patternAadIndex = '.internal.alerts-test.patternfiring.alerts-default-*';
 
       const { body: createdRule } = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
@@ -527,12 +557,14 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
 
       // The re-fired alert (run 3) creates a new doc with status=active.
       // It should have ALERT_MUTED=true because snoozedInstances on the rule SO
-      // still contains 'alert1'.
+      // still contains 'alert1'. Retry to allow index refresh and persistence.
       await retry.try(async () => {
+        await es.indices.refresh({ index: patternAadIndex, ignore_unavailable: true });
         const {
           hits: { hits },
         } = await es.search({
           index: patternAadIndex,
+          ignore_unavailable: true,
           query: {
             bool: {
               must: [

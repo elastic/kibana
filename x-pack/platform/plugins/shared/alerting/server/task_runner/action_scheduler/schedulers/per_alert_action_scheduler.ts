@@ -85,7 +85,17 @@ export class PerAlertActionScheduler<
       context.ruleType.actionGroups.map((actionGroup) => [actionGroup.id, actionGroup.name])
     );
     this.mutedAlertIdsSet = new Set(context.rule.mutedInstanceIds);
-    this.snoozedInstancesMap = context.rule.snoozedInstances ?? {};
+    this.snoozedInstancesMap = (context.rule.snoozedInstances ?? []).reduce(
+      (acc, e) => {
+        acc[e.instanceId] = {
+          expiresAt: e.expiresAt,
+          conditions: e.conditions,
+          conditionOperator: e.conditionOperator,
+        };
+        return acc;
+      },
+      {} as Record<string, SnoozedInstanceConfig>
+    );
 
     const canGetSummarizedAlerts =
       !!context.ruleType.alerts && !!context.alertsClient.getSummarizedAlerts;
@@ -112,6 +122,10 @@ export class PerAlertActionScheduler<
     return 2;
   }
 
+  public getAlertsToAutoUnmute(): AlertToAutoUnmute[] {
+    return this.alertsToAutoUnmute;
+  }
+
   public async getActionsToSchedule({
     activeAlerts,
     recoveredAlerts,
@@ -126,6 +140,15 @@ export class PerAlertActionScheduler<
 
     const activeAlertsArray = Object.values(activeAlerts || {});
     const recoveredAlertsArray = Object.values(recoveredAlerts || {});
+
+    // Evaluate per-alert snooze expiry and populate alertsToAutoUnmute even when the rule
+    // has no actions, so auto-unsnooze runs regardless of action count.
+    for (const alert of activeAlertsArray) {
+      this.evaluateAlertForAutoUnmute(alert);
+    }
+    for (const alert of recoveredAlertsArray) {
+      this.evaluateAlertForAutoUnmute(alert);
+    }
 
     for (const action of this.actions) {
       let summarizedAlerts = null;
@@ -369,6 +392,67 @@ export class PerAlertActionScheduler<
     return actionGroup === this.context.ruleType.recoveryActionGroup.id;
   }
 
+  /**
+   * Evaluates whether an alert's per-alert snooze (snoozedInstances entry) has expired
+   * and should be auto-unmuted. Returns null if the alert has no snooze config.
+   */
+  private evaluateSnoozeForAlert(
+    alertId: string
+  ): { shouldUnmute: boolean; reason?: string } | null {
+    const snoozeInstanceConfig = this.snoozedInstancesMap[alertId];
+    if (!snoozeInstanceConfig) {
+      return null;
+    }
+
+    const snoozeConfig: AlertSnoozeConfig = {
+      expiresAt: snoozeInstanceConfig.expiresAt,
+      conditions: snoozeInstanceConfig.conditions as AlertSnoozeConfig['conditions'],
+      conditionOperator: snoozeInstanceConfig.conditionOperator,
+    };
+
+    const alertData =
+      (this.context.alertsClient.getBuiltAlertByInstanceId?.(alertId) as
+        | Record<string, unknown>
+        | undefined) ??
+      (this.context.alertsClient.getTrackedAlertByInstanceId?.(alertId) as
+        | Record<string, unknown>
+        | undefined) ??
+      {};
+    const evalResult = evaluateSnoozeConditions(snoozeConfig, alertData);
+    return {
+      shouldUnmute: evalResult.shouldUnmute,
+      reason: evalResult.reason ?? 'conditions met',
+    };
+  }
+
+  /**
+   * Evaluates whether an alert's per-alert snooze has expired and should be auto-unmuted.
+   * Populates alertsToAutoUnmute so the task runner can clear the rule SO and AAD doc
+   * even when the rule has no actions.
+   */
+  private evaluateAlertForAutoUnmute(
+    alert: Alert<
+      AlertInstanceState,
+      AlertInstanceContext,
+      ActionGroupIds | RecoveryActionGroupId
+    >
+  ): void {
+    const alertId = alert.getId();
+    const result = this.evaluateSnoozeForAlert(alertId);
+    if (!result?.shouldUnmute) {
+      return;
+    }
+    if (!this.alertsToAutoUnmute.some((a) => a.alertInstanceId === alertId)) {
+      this.alertsToAutoUnmute.push({
+        alertInstanceId: alertId,
+        reason: result.reason ?? 'conditions met',
+      });
+      this.context.logger.debug(
+        `auto-unmuting alert '${alertId}' in rule ${this.context.ruleLabel}: ${result.reason}`
+      );
+    }
+  }
+
   private isAlertMuted(
     alert: Alert<AlertInstanceState, AlertInstanceContext, ActionGroupIds | RecoveryActionGroupId>
   ) {
@@ -380,39 +464,25 @@ export class PerAlertActionScheduler<
     }
 
     // Path 2: Conditional snooze from rule SO snoozedInstances (durable store).
-    const snoozeInstanceConfig = this.snoozedInstancesMap[alertId];
-    if (!snoozeInstanceConfig) {
+    // Skip re-evaluation if already in alertsToAutoUnmute (e.g. from initial pass).
+    if (this.alertsToAutoUnmute.some((a) => a.alertInstanceId === alertId)) {
       return false;
     }
 
-    const snoozeConfig: AlertSnoozeConfig = {
-      expiresAt: snoozeInstanceConfig.expiresAt,
-      conditions: snoozeInstanceConfig.conditions as AlertSnoozeConfig['conditions'],
-      conditionOperator: snoozeInstanceConfig.conditionOperator,
-    };
-
-    // Prefer built alert data from the current execution (zero delay for
-    // rule-type-reported fields). Fall back to tracked data from the
-    // previous execution for fields not in the build output.
-    const alertData =
-      (this.context.alertsClient.getBuiltAlertByInstanceId?.(alertId) as
-        | Record<string, unknown>
-        | undefined) ??
-      (this.context.alertsClient.getTrackedAlertByInstanceId?.(alertId) as
-        | Record<string, unknown>
-        | undefined) ??
-      {};
-    const evalResult = evaluateSnoozeConditions(snoozeConfig, alertData);
-    if (evalResult.shouldUnmute) {
+    const result = this.evaluateSnoozeForAlert(alertId);
+    if (!result) {
+      return false;
+    }
+    if (result.shouldUnmute) {
       if (!this.alertsToAutoUnmute.some((a) => a.alertInstanceId === alertId)) {
         this.alertsToAutoUnmute.push({
           alertInstanceId: alertId,
-          reason: evalResult.reason ?? 'conditions met',
+          reason: result.reason ?? 'conditions met',
         });
+        this.context.logger.debug(
+          `auto-unmuting alert '${alertId}' in rule ${this.context.ruleLabel}: ${result.reason}`
+        );
       }
-      this.context.logger.debug(
-        `auto-unmuting alert '${alertId}' in rule ${this.context.ruleLabel}: ${evalResult.reason}`
-      );
       return false;
     }
 
