@@ -828,7 +828,6 @@ src/platform/plugins/shared/telemetry @elastic/kibana-core
 src/platform/plugins/shared/telemetry_collection_manager @elastic/kibana-core
 src/platform/plugins/shared/telemetry_management_section @elastic/kibana-core
 src/platform/plugins/shared/ui_actions @elastic/appex-sharedux
-src/platform/plugins/shared/ui_actions_enhanced @elastic/appex-sharedux
 src/platform/plugins/shared/unified_doc_viewer @elastic/kibana-data-discovery
 src/platform/plugins/shared/unified_search @elastic/kibana-presentation
 src/platform/plugins/shared/usage_collection @elastic/kibana-core
