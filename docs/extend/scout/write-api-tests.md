@@ -23,7 +23,7 @@ Example test ([Console](https://github.com/elastic/kibana/blob/main/src/platform
 
 ## API matchers [scout-write-api-tests-matchers]
 
-For API tests, prefer importing `expect` from `@kbn/scout/api` (or your [solution-specific Scout package](../scout.md#scout-packages)).
+For API tests, import `expect` from `@kbn/scout/api` or `@kbn/scout-<solution>/api` (more on [solution-specific Scout packages](../scout.md#scout-packages)).
 
 Scout provides response matchers for `apiClient` responses and `kbnClient.request(...)` (Axios) responses:
 
