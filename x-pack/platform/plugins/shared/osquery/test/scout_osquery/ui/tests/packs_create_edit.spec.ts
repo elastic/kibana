@@ -470,13 +470,20 @@ test.describe(
             await page.goto(`${baseUrl}${discoverHref}`);
             await waitForPageReady(page);
 
-            await expect(page.testSubj.locator('discoverDocTable')).toBeVisible({
-              timeout: 60_000,
-            });
-
             await expect(page.testSubj.locator('breadcrumbs')).toContainText('Discover', {
               timeout: 30_000,
             });
+
+            // Pack results may not be indexed yet; retry until doc table appears
+            const docTable = page.testSubj.locator('discoverDocTable');
+            const start = Date.now();
+            while (Date.now() - start < 90_000) {
+              if (await docTable.isVisible({ timeout: 5_000 }).catch(() => false)) break;
+              await page.reload();
+              await waitForPageReady(page);
+            }
+
+            await expect(docTable).toBeVisible({ timeout: 30_000 });
 
             // Verify the correct action_id filter is applied
             await expect(

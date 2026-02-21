@@ -89,23 +89,10 @@ test.describe('Reader - only READ', { tag: [...tags.stateful.classic] }, () => {
     const packs = pageObjects.packs;
     await packs.navigate();
     await expect(page.testSubj.locator('add-pack-button')).toBeDisabled();
+    await packs.ensureAllPacksVisible();
 
-    // Ensure the pack is visible - it may be on page 2 due to accumulated packs from previous test runs
-    let toggle = page.locator(`[aria-label="${packName}"]`);
-    if ((await toggle.isVisible({ timeout: 3_000 }).catch(() => false)) === false) {
-      // Click through pages to find the pack
-      const nextPageLink = page.getByRole('link', { name: 'Next page' });
-      while (await nextPageLink.isVisible({ timeout: 2_000 }).catch(() => false)) {
-        await nextPageLink.click();
-        await new Promise((r) => setTimeout(r, 1000));
-        if (await toggle.isVisible({ timeout: 2_000 }).catch(() => false)) {
-          break;
-        }
-      }
-    }
-
-    toggle = page.locator(`[aria-label="${packName}"]`);
-    await toggle.waitFor({ state: 'visible', timeout: 10_000 });
+    const toggle = page.locator(`[aria-label="${packName}"]`);
+    await toggle.waitFor({ state: 'visible', timeout: 15_000 });
     await expect(toggle).toBeDisabled();
 
     await pageObjects.packs.navigateToPackDetail(packId);

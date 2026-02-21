@@ -62,8 +62,8 @@ test.describe(
       // Click update
       await page.testSubj.locator('update-query-button').click();
 
-      // Wait for save confirmation toast and the list to reload
-      await expect(page.getByText('Successfully saved').first()).toBeVisible({ timeout: 15_000 });
+      // Wait for update confirmation toast and the list to reload
+      await expect(page.getByText(/Successfully updated/).first()).toBeVisible({ timeout: 15_000 });
       await waitForPageReady(page);
 
       // Re-open the saved query to verify changes persisted
