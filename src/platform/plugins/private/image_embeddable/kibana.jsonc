@@ -12,6 +12,8 @@
     "browser": true,
     "server": true,
     "requiredPlugins": [
+      // TODO(DI): browser-side factory registration moved to DI module;
+      // `embeddable` remains required for server-side `registerTransforms`.
       "embeddable",
       "files",
       "uiActions",
@@ -22,6 +24,11 @@
       "screenshotMode",
     ],
     "requiredBundles": [],
-    "extraPublicDirs": ["common"]
+    "extraPublicDirs": ["common"],
+    "globals": {
+      "consumes": [
+        "embeddable.FactoryRegistration"
+      ]
+    }
   }
 }

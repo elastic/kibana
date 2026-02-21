@@ -19,6 +19,8 @@ project:
     sourceRoot: src/platform/plugins/private/image_embeddable
 dependsOn:
   - '@kbn/core'
+  - '@kbn/core-di-internal'
+  - '@kbn/embeddable-factory-types'
   - '@kbn/embeddable-plugin'
   - '@kbn/files-plugin'
   - '@kbn/security-plugin'

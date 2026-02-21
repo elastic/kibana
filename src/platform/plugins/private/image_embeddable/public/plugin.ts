@@ -8,7 +8,6 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { FilesSetup, FilesStart } from '@kbn/files-plugin/public';
 import type {
   ScreenshotModePluginSetup,
@@ -21,10 +20,9 @@ import {
   ADD_PANEL_TRIGGER,
 } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { setKibanaServices, untilPluginStartServicesReady } from './services/kibana_services';
-import { ADD_IMAGE_EMBEDDABLE_ACTION_ID, IMAGE_EMBEDDABLE_TYPE } from '../common/constants';
+import { ADD_IMAGE_EMBEDDABLE_ACTION_ID } from '../common/constants';
 
 export interface ImageEmbeddableSetupDependencies {
-  embeddable: EmbeddableSetup;
   files: FilesSetup;
   security?: SecurityPluginSetup;
   uiActions: UiActionsSetup;
@@ -35,7 +33,6 @@ export interface ImageEmbeddableStartDependencies {
   files: FilesStart;
   security?: SecurityPluginStart;
   uiActions: UiActionsStart;
-  embeddable: EmbeddableStart;
   screenshotMode?: ScreenshotModePluginStart;
 }
 
@@ -57,16 +54,9 @@ export class ImageEmbeddablePlugin
   constructor() {}
 
   public setup(
-    core: CoreSetup<ImageEmbeddableStartDependencies>,
-    plugins: ImageEmbeddableSetupDependencies
+    _core: CoreSetup<ImageEmbeddableStartDependencies>,
+    _plugins: ImageEmbeddableSetupDependencies
   ): SetupContract {
-    plugins.embeddable.registerReactEmbeddableFactory(IMAGE_EMBEDDABLE_TYPE, async () => {
-      const [_, { getImageEmbeddableFactory }] = await Promise.all([
-        untilPluginStartServicesReady(),
-        import('./image_embeddable/get_image_embeddable_factory'),
-      ]);
-      return getImageEmbeddableFactory();
-    });
     return {};
   }
 
