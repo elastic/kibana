@@ -17,7 +17,7 @@ import {
   addOsqueryToAgentPolicy,
   loadPrebuiltPacks,
 } from '../common/api_helpers';
-import { waitForPageReady } from '../common/constants';
+import { dismissAllToasts, waitForPageReady } from '../common/constants';
 
 test.describe(
   'ALL - Packs',
@@ -80,8 +80,8 @@ test.describe(
           const saveBtn = page.testSubj.locator('save-pack-button');
           await saveBtn.scrollIntoViewIfNeeded();
           await saveBtn.waitFor({ state: 'visible', timeout: 10_000 });
-          await new Promise((r) => setTimeout(r, 1_000));
-          await saveBtn.click();
+          await dismissAllToasts(page);
+          await saveBtn.click({ force: true });
 
           // Wait for success
           await expect(

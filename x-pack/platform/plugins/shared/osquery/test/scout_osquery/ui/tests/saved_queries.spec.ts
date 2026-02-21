@@ -107,6 +107,7 @@ test.describe(
         .locator('[data-test-subj^="dataGridHeaderCellActionButton-"]')
         .first();
       if (await sortButton.isVisible({ timeout: 5_000 }).catch(() => false)) {
+        await sortButton.scrollIntoViewIfNeeded();
         await sortButton.click({ force: true });
         const sortAZ = page.getByText(/Sort A-Z/).first();
         if (await sortAZ.isVisible({ timeout: 3_000 }).catch(() => false)) {
@@ -310,7 +311,12 @@ test.describe(
           .locator('[data-test-subj="ECSMappingEditorForm"]')
           .first();
         await ecsMappingForm.waitFor({ state: 'visible', timeout: 60_000 });
-        await expect(addQueryFlyout.getByText('User ID').first()).toBeVisible({ timeout: 60_000 });
+        // Wait for ECS mapping rows to render (at least one delete button means rows are loaded)
+        await ecsMappingForm
+          .locator('[aria-label="Delete ECS mapping row"]')
+          .first()
+          .waitFor({ state: 'visible', timeout: 60_000 });
+        await expect(addQueryFlyout.getByText('User ID').first()).toBeVisible({ timeout: 30_000 });
 
         // Delete first ECS mapping row
         await ecsMappingForm.locator('[aria-label="Delete ECS mapping row"]').first().click();

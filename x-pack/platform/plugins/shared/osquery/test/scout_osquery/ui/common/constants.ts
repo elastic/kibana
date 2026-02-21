@@ -58,17 +58,29 @@ export async function waitForAlerts(
   { timeout = 240_000 }: { timeout?: number } = {}
 ): Promise<void> {
   const start = Date.now();
+
+  // Ensure the Alerts tab is active (rule details may default to another tab)
+  const alertsTab = page.testSubj.locator('navigation-alerts');
+  if (await alertsTab.isVisible({ timeout: 5_000 }).catch(() => false)) {
+    await alertsTab.click();
+    await waitForPageReady(page);
+  }
+
   const expandEvent = page.testSubj.locator('expand-event');
 
   while (Date.now() - start < timeout) {
     try {
-      await expandEvent.waitFor({ state: 'visible', timeout: 30_000 });
+      await expandEvent.waitFor({ state: 'visible', timeout: 15_000 });
 
       return;
     } catch {
-      // Alerts not yet generated — reload and try again
       await page.reload();
       await waitForPageReady(page);
+      // Re-click the Alerts tab after reload if needed
+      if (await alertsTab.isVisible({ timeout: 3_000 }).catch(() => false)) {
+        await alertsTab.click();
+        await waitForPageReady(page);
+      }
     }
   }
 

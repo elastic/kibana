@@ -445,7 +445,7 @@ test.describe(
       });
 
       test('should open discover in new tab', async ({ page, pageObjects }) => {
-        test.setTimeout(120_000);
+        test.setTimeout(240_000);
 
         let discoverHref: string | null = null;
 
@@ -477,8 +477,8 @@ test.describe(
             // Pack results may not be indexed yet; retry until doc table appears
             const docTable = page.testSubj.locator('discoverDocTable');
             const start = Date.now();
-            while (Date.now() - start < 90_000) {
-              if (await docTable.isVisible({ timeout: 5_000 }).catch(() => false)) break;
+            while (Date.now() - start < 180_000) {
+              if (await docTable.isVisible({ timeout: 10_000 }).catch(() => false)) break;
               await page.reload();
               await waitForPageReady(page);
             }

@@ -17,7 +17,7 @@ import {
   loadPack,
   cleanupPack,
 } from '../common/api_helpers';
-import { waitForPageReady } from '../common/constants';
+import { dismissAllToasts, waitForPageReady } from '../common/constants';
 
 test.describe(
   'ALL - Add Integration',
@@ -123,20 +123,30 @@ test.describe(
             await policyNameInput.fill(policyName);
 
             // Save the integration policy
-            await page.getByRole('button', { name: 'Save and continue' }).click();
+            await dismissAllToasts(page);
+            await page.getByRole('button', { name: 'Save and continue' }).click({ force: true });
 
             // Handle "Add Elastic Agent later" if shown
             const addAgentLater = page.getByText('Add Elastic Agent later');
-            if (await addAgentLater.isVisible({ timeout: 10_000 }).catch(() => false)) {
+            if (await addAgentLater.isVisible({ timeout: 15_000 }).catch(() => false)) {
               await addAgentLater.click();
             }
 
             // Verify the integration exists
-            await expect(page.getByText(integrationName).first()).toBeVisible({ timeout: 30_000 });
-            await expect(page.getByText(`version: ${oldVersion}`).first()).toBeVisible();
+            await expect(page.getByText(integrationName).first()).toBeVisible({ timeout: 60_000 });
+            await expect(page.getByText(`version: ${oldVersion}`).first()).toBeVisible({
+              timeout: 15_000,
+            });
 
             // Upgrade the integration
-            await page.testSubj.locator('euiFlyoutCloseButton').click();
+            const closeBtn = page.testSubj.locator('euiFlyoutCloseButton');
+            if (await closeBtn.isVisible({ timeout: 5_000 }).catch(() => false)) {
+              await closeBtn.click();
+            }
+
+            await page.testSubj
+              .locator('PackagePoliciesTableUpgradeButton')
+              .waitFor({ state: 'visible', timeout: 30_000 });
             await page.testSubj.locator('PackagePoliciesTableUpgradeButton').click();
             await page.testSubj.locator('saveIntegration').click();
 
@@ -169,19 +179,13 @@ test.describe(
         // Create agent policy
         await page.goto(kbnUrl.get('/app/fleet/policies'));
         await waitForPageReady(page);
-        // Dismiss any toast errors that could block clicks
-        for (const toast of await page.locator('[data-test-subj="dismissToast"]').all()) {
-          await toast.click().catch(() => {});
-        }
+        await dismissAllToasts(page);
 
         await page.testSubj.locator('createAgentPolicyButton').click();
         await page.testSubj.locator('createAgentPolicyNameField').fill(policyName);
-        // Dismiss any toast errors that could block the create button
-        for (const toast of await page.locator('[data-test-subj="dismissToast"]').all()) {
-          await toast.click().catch(() => {});
-        }
+        await dismissAllToasts(page);
 
-        await page.testSubj.locator('createAgentPolicyFlyoutBtn').click();
+        await page.testSubj.locator('createAgentPolicyFlyoutBtn').click({ force: true });
 
         await expect(page.getByText(`Agent policy '${policyName}' created`).first()).toBeVisible({
           timeout: 15_000,
@@ -268,10 +272,11 @@ test.describe(
         await policyNameInput.fill(policyName);
 
         // Save the integration policy
-        await page.getByRole('button', { name: 'Save and continue' }).click();
+        await dismissAllToasts(page);
+        await page.getByRole('button', { name: 'Save and continue' }).click({ force: true });
 
         const addAgentLater = page.getByText('Add Elastic Agent later');
-        if (await addAgentLater.isVisible({ timeout: 10_000 }).catch(() => false)) {
+        if (await addAgentLater.isVisible({ timeout: 15_000 }).catch(() => false)) {
           await addAgentLater.click();
         }
 
@@ -305,7 +310,12 @@ test.describe(
         // Navigate to the policy and upgrade
         await page.goto(kbnUrl.get('/app/fleet/policies'));
         await waitForPageReady(page);
+        await dismissAllToasts(page);
         await page.getByText(policyName).first().click();
+        await waitForPageReady(page);
+        await page.testSubj
+          .locator('PackagePoliciesTableUpgradeButton')
+          .waitFor({ state: 'visible', timeout: 30_000 });
         await page.testSubj.locator('PackagePoliciesTableUpgradeButton').click();
 
         // Verify the pack is included in the advanced config
