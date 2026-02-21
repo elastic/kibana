@@ -1,5 +1,13 @@
 # Kibana's Dependency Injection Subsystem
 
+This package documents Kibana's runtime DI subsystem: container hierarchy,
+lifecycle tokens, resolution helpers, and the way plugin and core services are
+wired through InversifyJS.
+
+The branch's plugin-author PoC guidance lives alongside
+[`@kbn/plugin-di`](../plugin/README.md), including follow-on candidate ideas in
+[`../plugin/NEXT_CANDIDATES.md`](../plugin/NEXT_CANDIDATES.md).
+
 ## Motivation
 - *Decoupling* should improve reusability, testability, and maintainability.
 - Prevent *circular dependencies*.
@@ -7,10 +15,17 @@
 - *Clean Code* should provide declarativity and minimize the amount of boilerplate code.
 
 ## Dependencies
-The Kibana's Dependency Injection Subsystem is built on top of [InversifyJS](https://www.npmjs.com/package/inversify) library.
-It does not wrap or encapsulate it in any way, but provides support for the [Container Modules](https://inversify.io/docs/api/container-module/) declared using that library.
+Kibana's DI subsystem is built on top of
+[InversifyJS](https://www.npmjs.com/package/inversify).
 
-That means there is no service API layer exposed on the Kibana side, and hence, knowledge of the InversifyJS API is the only requirement to get started.
+- `@kbn/core-di` exposes runtime-facing primitives: resolution helpers,
+  decorators, lifecycle tokens, and shared DI types.
+- `@kbn/plugin-di` is a separate optional PoC helper package for plugin-author
+  ergonomics such as `createTokenFactory(...)` and `declare(...)`.
+
+Plugins can always use plain
+[Container Modules](https://inversify.io/docs/api/container-module/) directly.
+The helper package is convenience, not a competing DI runtime.
 
 ## Approach
 The provided DI subsystem imposes declaring your services and their dependencies declaratively.
@@ -22,7 +37,7 @@ That change is required to resolve most of the challenges related to circular de
 The Dependency Injection Subsystem is not a replacement for the existing plugin API. All the services exposed using InversifyJS are accessible in the classic plugins, or the other way around. A plugin can use both simultaneously and gradually migrate to the declarative DI API.
 
 ## Implementation
-The implementation utilizes the [hierarchical dependency injection](https://inversify.io/docs/fundamentals/di-hierarchy/) provided by InversifyJS. Every plugin has its own container inhertied from the root one. That provides sufficient level of isolation with an option to share common services.
+The implementation utilizes the [hierarchical dependency injection](https://inversify.io/docs/fundamentals/di-hierarchy/) provided by InversifyJS. Every plugin has its own container inherited from the root one. That provides sufficient level of isolation with an option to share common services.
 
 ```mermaid
 graph TD
@@ -54,16 +69,30 @@ There are two limitations in this setup:
 1. There is no way to publish services registered in the plugin scope to make them available for other plugins.
 2. The request-scoped services bound in the forked context will not be available in a forked plugin scope.
 
-The internal module provided by the core services solves those problems by introducing the `Global` injection token.
+The internal module provided by the core services solves those problems by
+introducing explicit cross-plugin contracts:
 
-The services marked as globally available will be registered in the global scope so that every plugin scope will inherit them. They will be resolved dynamically through the bound context so that the services bound in the request scope can inject request-scope dependencies.
+- **Services** for single-owner, single-value contracts.
+- **Extension points** for single-host, multi-contributor contracts.
+
+Those contracts are registered in a shared scope so every plugin container can
+inherit them. They are resolved dynamically through the bound context so that
+services bound in the request scope can still inject request-scope dependencies.
 
 ## Usage
 ### Get Started
-To get started, just create an empty plugin and declare a named export called `module` in your `index.ts`:
+To get started, create an empty plugin and declare a named export called
+`services` in your `index.ts`. The plugin-author guide for the PoC now lives in
+[`@kbn/plugin-di/GETTING_STARTED.md`](../plugin/GETTING_STARTED.md).
+
+The short version is:
+
+- define cross-plugin tokens with `createTokenFactory('myPlugin')`
+- author a plugin `services` module with `declare(({ bind, provide, host, contribute }) => ...)`
 
 ```ts
-import { ContainerModule, inject, injectable } from 'inversify';
+import { declare } from '@kbn/plugin-di';
+import { inject, injectable } from 'inversify';
 
 @injectable()
 export class Greeting {
@@ -72,15 +101,16 @@ export class Greeting {
   }
 }
 
-export const module = new ContainerModule(({ bind }) => {
+export const services = declare(({ bind }) => {
   bind(Greeting).toSelf();
 });
 ```
 
-The service should now be available in other container modules.
+The service is now available to other `ContainerModule`s within the same plugin scope.
 
 ```ts
-import { ContainerModule, inject, injectable } from 'inversify';
+import { declare } from '@kbn/plugin-di';
+import { inject, injectable } from 'inversify';
 import { Greeting } from '@kbn/greeting';
 
 @injectable()
@@ -92,10 +122,12 @@ class HelloWorld {
   }
 }
 
-export const module = new ContainerModule(({ bind }) => {
+export const services = declare(({ bind }) => {
   bind(HelloWorld).toSelf();
 });
 ```
+
+> **Note:** Plugins may also export a `module` named export (`export const module = new ContainerModule(...)`) when they want to author bindings directly with plain Inversify. The `services = declare(...)` form is the blessed `@kbn/plugin-di` authoring path in this PoC.
 
 ### Exposing Contracts
 In order to expose services to already existing plugins, they should be returned as part of the contract via the `Setup` or `Start` services.
@@ -272,7 +304,8 @@ export const module = new ContainerModule(({ bind }) => {
 
 ### React
 The DI can be used from within a React application.
-The `@kbn/core-di-browser` provides hooks `useService` and `useContainer` that can resolve services in React components.
+`@kbn/core-di-browser` provides `useContainer`, `useService`, and `useExtensions`
+for resolving DI contracts in React components.
 
 In order to use them, the corresponding context should be provided:
 ```tsx
@@ -303,7 +336,8 @@ class HelloWorldApplication {
 }
 ```
 
-And then, the `useService` hook can be used directly to resolve all the services available within the plugin's scope:
+And then, `useService` can be used to resolve a single service from the plugin's
+scope:
 ```tsx
 import React from 'react';
 import { useService } from '@kbn/core-di-browser';
@@ -311,6 +345,23 @@ import { HelloWorld } from '@kbn/hello-world';
 
 export function HelloWorldApp() {
   const helloWorld = useService(HelloWorld);
+
+  return (
+    /* ... */
+  );
+}
+```
+
+If your plugin hosts an extension point, `useExtensions` resolves all registered
+contributions as an array:
+
+```tsx
+import React from 'react';
+import { useExtensions } from '@kbn/core-di-browser';
+import { EmbeddableFactoryRegistration } from '@kbn/embeddable-factory-types';
+
+export function FactoryList() {
+  const factories = useExtensions(EmbeddableFactoryRegistration);
 
   return (
     /* ... */
@@ -435,5 +486,88 @@ In most cases, the underlying problem is either duplicating some functionality o
 With the decoupled container module configuration, it should be easier to detect that.
 But if there is no other option to get away from the services composition, deferred dependency injection via the `onActivation` hook is an acceptable option since it does not break the Inversion of Control principle.
 
+### Cross-Plugin Contracts
+
+Cross-plugin DI introduces two explicit runtime patterns:
+
+- **Services** for one-owner, one-value contracts resolved with
+  `getService(...)`, `useService(...)`, and `injectService(...)`
+- **Extension points** for one-host, many-contributor contracts resolved with
+  `getExtensions(...)`, `useExtensions(...)`, and `injectExtensions(...)`
+
+Those patterns are part of the runtime subsystem documented here, but the
+plugin-author workflow for defining tokens, declaring providers/hosts, and
+keeping `plugin.globals` in sync now lives in
+[`@kbn/plugin-di/GETTING_STARTED.md`](../plugin/GETTING_STARTED.md).
+
+## Testing
+
+### Unit tests — isolated container
+
+Build an isolated `Container` directly from InversifyJS, bind mock values, then resolve the service under test.
+
+```ts
+import { Container } from 'inversify';
+import { MyService } from './my_service';
+import { DepToken, type IDep } from './tokens';
+
+const dep: IDep = { doWork: jest.fn(() => 'mock') };
+
+const container = new Container({ defaultScope: 'Singleton' });
+container.bind(DepToken).toConstantValue(dep);
+container.bind(MyService).toSelf();
+
+const svc = container.get(MyService);
+svc.run();
+expect(dep.doWork).toHaveBeenCalled();
+```
+
+### React component tests
+
+Wrap the component in a `Context.Provider` with an isolated test container:
+
+```tsx
+import { Container } from 'inversify';
+import { render } from '@testing-library/react';
+import { Context } from '@kbn/core-di-browser';
+import { MyComponent } from './my_component';
+import { MyServiceToken } from '@kbn/my-service-types';
+
+const container = new Container({ defaultScope: 'Singleton' });
+container.bind(MyServiceToken).toConstantValue({ doWork: () => 'ok' });
+
+render(
+  <Context.Provider value={container}>
+    <MyComponent />
+  </Context.Provider>
+);
+```
+
+### Route handler tests
+
+Instantiate the route class directly with mocked dependencies; no container setup required:
+
+```ts
+import { MyRoute } from './my_route';
+
+const request = httpServerMock.createKibanaRequest();
+const response = httpServerMock.createResponseFactory();
+const myService = { doWork: jest.fn(() => ({ result: true })) };
+
+const route = new MyRoute(myService, request, response);
+const result = await route.handle();
+expect(result).toMatchObject({ status: 200 });
+```
+
 ## Examples
 There is an [example](https://github.com/elastic/kibana/tree/main/examples/dependency_injection) plugin covering the complete injection flow.
+
+The [Alpha](../../../../../examples/di_global_alpha) and
+[Beta](../../../../../examples/di_global_beta) plugins demonstrate bidirectional
+cross-plugin **service** resolution using `createTokenFactory(...).service(...)`,
+`provide(...)`, and `injectService(...)`, including the hybrid
+classic-plus-module pattern.
+
+The embeddable factory example demonstrates an **extension point** using
+`createTokenFactory(...).extensionPoint(...)`, `host(...)`, `contribute(...)`, and
+`getExtensions(...)`.
