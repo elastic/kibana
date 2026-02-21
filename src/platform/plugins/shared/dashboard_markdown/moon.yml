@@ -20,6 +20,8 @@ project:
 dependsOn:
   - '@kbn/css-utils'
   - '@kbn/core'
+  - '@kbn/core-di-internal'
+  - '@kbn/embeddable-factory-types'
   - '@kbn/i18n'
   - '@kbn/visualizations-plugin'
   - '@kbn/presentation-publishing'
