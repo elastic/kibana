@@ -31,6 +31,9 @@ dependsOn:
   - '@kbn/core-ui-settings-browser'
   - '@kbn/presentation-publishing'
   - '@kbn/config-schema'
+  - '@kbn/handlebars'
+  - '@kbn/rison'
+  - '@kbn/datemath'
 tags:
   - plugin
   - prod
