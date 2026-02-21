@@ -16,7 +16,7 @@ export const LOG_SAMPLES_FEATURE_TYPE = 'log_samples' as const;
 export const LOG_PATTERNS_FEATURE_TYPE = 'log_patterns' as const;
 export const ERROR_LOGS_FEATURE_TYPE = 'error_logs' as const;
 
-const COMPUTED_FEATURE_TYPES = [
+export const COMPUTED_FEATURE_TYPES = [
   DATASET_ANALYSIS_FEATURE_TYPE,
   LOG_SAMPLES_FEATURE_TYPE,
   LOG_PATTERNS_FEATURE_TYPE,
