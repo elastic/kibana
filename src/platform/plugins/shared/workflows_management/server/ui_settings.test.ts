@@ -8,7 +8,7 @@
  */
 
 import { createCoreSetupMock } from '@kbn/core-lifecycle-server-mocks/src/core_setup.mock';
-import { WORKFLOWS_UI_SETTING_ID, WORKFLOWS_UI_SHOW_EXECUTOR_SETTING_ID } from '@kbn/workflows';
+import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows';
 import type { WorkflowsServerPluginSetupDeps } from './types';
 import { registerUISettings } from './ui_settings';
 
@@ -22,19 +22,17 @@ describe('Workflows Management UI Settings', () => {
   it('should register the workflows UI setting', () => {
     registerUISettings(coreSetupMock, {} as WorkflowsServerPluginSetupDeps);
 
-    expect(coreSetupMock.uiSettings.register).toHaveBeenCalledWith(
-      expect.objectContaining({
-        [WORKFLOWS_UI_SETTING_ID]: {
-          description: expect.any(String),
-          name: expect.any(String),
-          schema: expect.any(Object),
-          value: false,
-          readonly: false,
-          requiresPageReload: true,
-          category: expect.any(Array),
-        },
-      })
-    );
+    expect(coreSetupMock.uiSettings.register).toHaveBeenCalledWith({
+      [WORKFLOWS_UI_SETTING_ID]: {
+        description: expect.any(String),
+        name: expect.any(String),
+        schema: expect.any(Object),
+        value: false,
+        readonly: false,
+        requiresPageReload: true,
+        category: expect.any(Array),
+      },
+    });
   });
 
   it('should register UI settings only once', () => {
@@ -46,38 +44,20 @@ describe('Workflows Management UI Settings', () => {
   it('should include license text if serverless is false', () => {
     registerUISettings(coreSetupMock, {} as WorkflowsServerPluginSetupDeps);
 
-    expect(coreSetupMock.uiSettings.register).toHaveBeenCalledWith(
-      expect.objectContaining({
-        [WORKFLOWS_UI_SETTING_ID]: expect.objectContaining({
-          description: expect.stringContaining('Requires <b>enterprise</b> license'),
-        }),
-      })
-    );
+    expect(coreSetupMock.uiSettings.register).toHaveBeenCalledWith({
+      [WORKFLOWS_UI_SETTING_ID]: expect.objectContaining({
+        description: expect.stringContaining('Requires <b>enterprise</b> license'),
+      }),
+    });
   });
 
   it('should not include license text if serverless is true', () => {
     registerUISettings(coreSetupMock, { serverless: {} } as WorkflowsServerPluginSetupDeps);
 
-    expect(coreSetupMock.uiSettings.register).toHaveBeenCalledWith(
-      expect.objectContaining({
-        [WORKFLOWS_UI_SETTING_ID]: expect.objectContaining({
-          description: expect.not.stringContaining('Requires <b>enterprise</b> license'),
-        }),
-      })
-    );
-  });
-
-  it('should register the show executor UI setting with default value false', () => {
-    registerUISettings(coreSetupMock, {} as WorkflowsServerPluginSetupDeps);
-
-    expect(coreSetupMock.uiSettings.register).toHaveBeenCalledWith(
-      expect.objectContaining({
-        [WORKFLOWS_UI_SHOW_EXECUTOR_SETTING_ID]: expect.objectContaining({
-          value: false,
-          schema: expect.any(Object),
-          requiresPageReload: false,
-        }),
-      })
-    );
+    expect(coreSetupMock.uiSettings.register).toHaveBeenCalledWith({
+      [WORKFLOWS_UI_SETTING_ID]: expect.objectContaining({
+        description: expect.not.stringContaining('Requires <b>enterprise</b> license'),
+      }),
+    });
   });
 });
