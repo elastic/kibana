@@ -107,6 +107,17 @@ function visitAbstractStep(currentStep: BaseStep, context: GraphBuildContext): W
     }
   }
 
+  if ((currentStep as TimeoutProp).timeout) {
+    const step = currentStep as BaseStep & TimeoutProp;
+    return handleTimeout(
+      getStepId(step, context),
+      'step_level_timeout',
+      step.timeout as string,
+      visitAbstractStep(omit(step, ['timeout']) as BaseStep, context),
+      context
+    );
+  }
+
   if ((currentStep as StepWithIfCondition).if) {
     return createIfGraphForIfStepLevel(currentStep as StepWithIfCondition, context);
   }
@@ -121,17 +132,6 @@ function visitAbstractStep(currentStep: BaseStep, context: GraphBuildContext): W
 
   if ((currentStep as StepWithForeach).foreach) {
     return createForeachGraphForStepWithForeach(currentStep as StepWithForeach, context);
-  }
-
-  if ((currentStep as TimeoutProp).timeout) {
-    const step = currentStep as BaseStep & TimeoutProp;
-    return handleTimeout(
-      getStepId(step, context),
-      'step_level_timeout',
-      step.timeout as string,
-      visitAbstractStep(omit(step, ['timeout']) as BaseStep, context),
-      context
-    );
   }
 
   if ((currentStep as WaitStep).type === 'wait') {

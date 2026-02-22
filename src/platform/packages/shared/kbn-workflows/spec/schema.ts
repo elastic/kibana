@@ -356,7 +356,9 @@ export const ForEachStepSchema = BaseStepSchema.extend({
   type: z.literal('foreach'),
   foreach: z.union([z.string(), z.array(z.unknown())]),
   steps: z.array(BaseStepSchema).min(1),
-}).merge(StepWithIfConditionSchema);
+})
+  .merge(StepWithIfConditionSchema)
+  .merge(TimeoutPropSchema);
 export type ForEachStep = z.infer<typeof ForEachStepSchema>;
 
 export const getForEachStepSchema = (stepSchema: z.ZodType, loose: boolean = false) => {
