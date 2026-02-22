@@ -206,7 +206,7 @@ test.describe('Home page A11y', { tag: [...tags.stateful.classic] }, () => {
     const policy = await createAgentPolicy(kbnClient, 'Agent policy for A11y test', {
       id: 'agent-policy-a11y',
     });
-    policyIdA11y = policy.id;
+    policyIdA11y = policy.id as string;
 
     try {
       await page.goto('/app/fleet/uninstall-tokens');

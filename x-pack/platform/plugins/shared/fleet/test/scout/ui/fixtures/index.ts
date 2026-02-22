@@ -18,12 +18,11 @@ export interface FleetTestFixtures extends ScoutTestFixtures {
 const LOADING_INDICATOR = 'globalLoadingIndicator';
 
 async function waitForPageReady(page: ScoutPage) {
-  await page.testSubj
-    .locator(LOADING_INDICATOR)
-    .waitFor({ state: 'hidden', timeout: 30_000 })
-    .catch(() => {
-      // Indicator may never appear for already-loaded pages
-    });
+  try {
+    await page.testSubj.locator(LOADING_INDICATOR).waitFor({ state: 'hidden', timeout: 30_000 });
+  } catch {
+    // Indicator may never appear for already-loaded pages
+  }
 }
 
 export const test = baseTest.extend<FleetTestFixtures, ScoutWorkerFixtures>({
@@ -38,8 +37,9 @@ export const test = baseTest.extend<FleetTestFixtures, ScoutWorkerFixtures>({
     }) as ScoutPage['goto'];
 
     page.gotoApp = (async (appName: string, options?: Parameters<ScoutPage['gotoApp']>[1]) => {
-      await originalGotoApp(appName, options);
+      const response = await originalGotoApp(appName, options);
       await waitForPageReady(page);
+      return response;
     }) as ScoutPage['gotoApp'];
 
     await use(page);

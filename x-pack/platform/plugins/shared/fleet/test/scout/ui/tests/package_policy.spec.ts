@@ -16,7 +16,7 @@ test.describe('Package policy', { tag: [...tags.stateful.classic] }, () => {
   });
 
   test('should edit package policy', async ({ page, kbnClient }) => {
-    const policy = await createAgentPolicy(kbnClient, 'Test policy', { id: 'policy-1' });
+    await createAgentPolicy(kbnClient, 'Test policy', { id: 'policy-1' });
 
     await page.route('**/api/fleet/package_policies/**', (route) => route.continue());
     await page.route('**/api/fleet/agent_policies/policy-1**', (route) => {

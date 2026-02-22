@@ -23,8 +23,12 @@ test.describe('Add agent flyout', { tag: [...tags.stateful.classic] }, () => {
   test.beforeAll(async ({ kbnClient, esClient }) => {
     await setFleetServerHost(kbnClient);
     const policy = await createAgentPolicy(kbnClient, `Scout test policy ${Date.now()}`);
-    const agentDoc = createAgentDoc('scout-agent-1', policy.id, 'online', '8.1.0');
+    const agentDoc = createAgentDoc('scout-agent-1', policy.id as string, 'online', '8.1.0');
     await insertDocs(esClient, '.fleet-agents', [agentDoc]);
+  });
+
+  test.beforeEach(async ({ browserAuth }) => {
+    await browserAuth.loginAsPrivilegedUser();
   });
 
   test.afterAll(async ({ kbnClient, esClient }) => {
@@ -39,10 +43,6 @@ test.describe('Add agent flyout', { tag: [...tags.stateful.classic] }, () => {
     } catch {
       // Ignore
     }
-  });
-
-  test.beforeEach(async ({ browserAuth }) => {
-    await browserAuth.loginAsPrivilegedUser();
   });
 
   test('should show add agent flyout with Fleet Server already set up', async ({ page }) => {
