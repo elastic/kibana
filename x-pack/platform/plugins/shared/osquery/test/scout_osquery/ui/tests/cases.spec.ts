@@ -79,7 +79,9 @@ test.describe('Add to Cases', { tag: [...tags.stateful.classic] }, () => {
       });
 
       await test.step('Verify case content and action items', async () => {
-        await page.getByRole('link', { name: 'View case' }).click();
+        const viewCaseLink = page.getByRole('link', { name: 'View case' });
+        await viewCaseLink.waitFor({ state: 'visible', timeout: 30_000 });
+        await viewCaseLink.click();
         await expect(page.getByText(liveQueryQuery)).toBeVisible();
 
         // eslint-disable-next-line playwright/no-nth-methods -- first visible result
@@ -136,7 +138,9 @@ test.describe('Add to Cases', { tag: [...tags.stateful.classic] }, () => {
       });
 
       await test.step('Verify case content and action items', async () => {
-        await page.getByRole('link', { name: 'View case' }).click();
+        const viewCaseLink = page.getByRole('link', { name: 'View case' });
+        await viewCaseLink.waitFor({ state: 'visible', timeout: 30_000 });
+        await viewCaseLink.click();
         await expect(page.getByText('SELECT * FROM os_version;')).toBeVisible();
 
         // eslint-disable-next-line playwright/no-nth-methods -- first visible result

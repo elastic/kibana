@@ -21,7 +21,8 @@ export class PacksPage {
   }
 
   async clickAddPack() {
-    await this.page.testSubj.locator('add-pack-button').click();
+    // eslint-disable-next-line playwright/no-nth-methods -- may appear in both header and empty state
+    await this.page.testSubj.locator('add-pack-button').first().click();
   }
 
   async clickEditPack() {

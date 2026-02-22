@@ -47,9 +47,12 @@ test.describe('ALL - Inventory', { tag: [...tags.stateful.classic] }, () => {
 
     // Host nodes are rendered as buttons with names like "scout-osquery-agent-X..." inside the waffle map
     // Note: The first button in waffleMap is "Group by All" which is NOT a host
+    /* eslint-disable playwright/no-nth-methods */
     const hostButton = page.testSubj
       .locator('waffleMap')
-      .getByRole('button', { name: /scout-osquery-agent/i });
+      .getByRole('button', { name: /scout-osquery-agent/i })
+      .first();
+    /* eslint-enable playwright/no-nth-methods */
     await expect(hostButton).toBeVisible({ timeout: 30_000 });
     await hostButton.click();
 
@@ -91,9 +94,12 @@ test.describe('ALL - Inventory', { tag: [...tags.stateful.classic] }, () => {
     }
 
     // Host nodes are rendered as buttons with names like "scout-osquery-agent-X..." inside the waffle map
+    /* eslint-disable playwright/no-nth-methods */
     const hostButton = page.testSubj
       .locator('waffleMap')
-      .getByRole('button', { name: /scout-osquery-agent/i });
+      .getByRole('button', { name: /scout-osquery-agent/i })
+      .first();
+    /* eslint-enable playwright/no-nth-methods */
     await expect(hostButton).toBeVisible({ timeout: 30_000 });
     await hostButton.click();
 

@@ -59,7 +59,8 @@ test.describe(
 
           // Create a pack with the agent policy
           await page.gotoApp('osquery/packs');
-          await page.testSubj.locator('add-pack-button').click();
+          // eslint-disable-next-line playwright/no-nth-methods -- may appear in both header and empty state
+          await page.testSubj.locator('add-pack-button').first().click();
 
           const nameInput = page.locator('input[name="name"]');
           await nameInput.fill(removingPack);
@@ -250,7 +251,8 @@ test.describe(
           try {
             // Create a global pack
             await page.gotoApp('osquery/packs');
-            await page.testSubj.locator('add-pack-button').click();
+            // eslint-disable-next-line playwright/no-nth-methods -- may appear in both header and empty state
+            await page.testSubj.locator('add-pack-button').first().click();
 
             await page.locator('input[name="name"]').fill(globalPack);
             await expect(page.testSubj.locator('policyIdsComboBox')).toBeVisible();
