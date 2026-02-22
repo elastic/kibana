@@ -1178,6 +1178,8 @@ export interface DockerSnapshotOptions extends EsClusterExecOptions {
   name?: string;
   /** When true, returns immediately after ES is ready instead of tailing logs. */
   background?: boolean;
+  /** Host-side transport port to map to container port 9300. Defaults to port + 100. */
+  transportPort?: number;
 }
 
 /**
@@ -1223,6 +1225,7 @@ export async function runDockerSnapshotContainer(
   const containerName = options.name || 'es01';
   const port = options.port || DEFAULT_PORT;
   const password = options.password || 'changeme';
+  const transportPort = options.transportPort ?? port + 100;
 
   await execa('docker', ['rm', '-f', containerName]).catch(() => {
     // ignore if container doesn't exist
@@ -1284,7 +1287,13 @@ export async function runDockerSnapshotContainer(
     volumeMounts.push(...getESp12Volume());
   }
 
-  const envArgs = Array.from(esArgsMap).flatMap(([k, v]) => ['--env', `${k}=${v}`]);
+  const envArgs = Array.from(esArgsMap).flatMap(([k, v]) => {
+    const value =
+      k.startsWith('cluster.remote.') && k.endsWith('.seeds') && v.includes('localhost')
+        ? v.replace(/localhost/g, 'host.docker.internal')
+        : v;
+    return ['--env', `${k}=${value}`];
+  });
 
   const dockerCmd = [
     'run',
@@ -1292,12 +1301,14 @@ export async function runDockerSnapshotContainer(
     '-t',
     '--net',
     'elastic',
+    '--add-host',
+    'host.docker.internal:host-gateway',
     '--name',
     containerName,
     '-p',
     `${port}:9200`,
     '-p',
-    `${port + 100}:9300`,
+    `${transportPort}:9300`,
     ...envArgs,
     ...volumeMounts,
     image,

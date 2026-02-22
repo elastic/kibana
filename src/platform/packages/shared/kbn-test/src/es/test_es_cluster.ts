@@ -277,6 +277,7 @@ export function createTestEsCluster<
           name: `es-${clusterName}`,
           background: true,
           kill: true,
+          transportPort: transportPort as number | undefined,
         });
         return;
       } else if (esFrom === 'serverless') {
