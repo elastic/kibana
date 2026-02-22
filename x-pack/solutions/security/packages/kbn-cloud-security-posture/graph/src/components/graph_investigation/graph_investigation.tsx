@@ -17,6 +17,10 @@ import { Panel } from '@xyflow/react';
 import { getEsQueryConfig } from '@kbn/data-service';
 import { EuiFlexGroup, EuiFlexItem, EuiProgress } from '@elastic/eui';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
+import {
+  GRAPH_ACTOR_ENTITY_FIELDS,
+  GRAPH_TARGET_ENTITY_FIELDS,
+} from '@kbn/cloud-security-posture-common/constants';
 import { Graph, isEntityNode, type NodeProps } from '../../..';
 import { Callout } from '../callout/callout';
 import { type UseFetchGraphDataParams, useFetchGraphData } from '../../hooks/use_fetch_graph_data';
@@ -30,7 +34,11 @@ import { analyzeDocuments } from '../node/label_node/analyze_documents';
 import { EVENT_ID, GRAPH_NODES_LIMIT, TOGGLE_SEARCH_BAR_STORAGE_KEY } from '../../common/constants';
 import { Actions } from '../controls/actions';
 import { AnimatedSearchBarContainer, useBorder } from './styles';
-import { CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER, addFilter } from './search_filters';
+import {
+  CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER,
+  addFilter,
+  getFilterValues,
+} from './search_filters';
 import { useEntityNodeExpandPopover } from '../popovers/node_expand/use_entity_node_expand_popover';
 import { useLabelNodeExpandPopover } from '../popovers/node_expand/use_label_node_expand_popover';
 import type { NodeViewModel } from '../types';
@@ -339,6 +347,13 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       return lastValidEsQuery.current;
     }, [dataView, kquery, notifications, searchFilters, uiSettings]);
 
+    const pinnedIds = useMemo(() => {
+      return getFilterValues(searchFilters, [
+        ...GRAPH_ACTOR_ENTITY_FIELDS,
+        ...GRAPH_TARGET_ENTITY_FIELDS,
+      ]).map(String);
+    }, [searchFilters]);
+
     const { data, refresh, isFetching, isError, error } = useFetchGraphData({
       req: {
         query: {
@@ -348,6 +363,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
           start: timeRange.from,
           end: timeRange.to,
           entityIds: entityIdsForApi,
+          pinnedIds,
         },
         nodesLimit: GRAPH_NODES_LIMIT,
       },
