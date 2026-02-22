@@ -139,15 +139,16 @@ export const WorkflowDetailHeader = React.memo(
 
     // Combined validity: syntax must parse AND no strict validation errors AND server considers it valid.
     // workflow?.valid !== false covers the initial page load before Monaco validates.
-    const isValid = isSyntaxValid && !hasYamlSchemaValidationErrors && workflow?.valid !== false;
+    const isSchemaValid =
+      isSyntaxValid && !hasYamlSchemaValidationErrors && workflow?.valid !== false;
 
     const runWorkflowTooltipContent = useMemo(() => {
       return getTestRunTooltipContent({
         isExecutionsTab,
-        isValid,
+        isValid: isSyntaxValid,
         canRunWorkflow: canExecuteWorkflow,
       });
-    }, [isValid, canExecuteWorkflow, isExecutionsTab]);
+    }, [isSyntaxValid, canExecuteWorkflow, isExecutionsTab]);
 
     const saveWorkflowTooltipContent = useMemo(() => {
       const isCreate = !workflowId;
@@ -268,7 +269,7 @@ export const WorkflowDetailHeader = React.memo(
                       ? i18n.translate('workflows.workflowDetailHeader.unsaved', {
                           defaultMessage: 'Save changes to enable/disable workflow',
                         })
-                      : !isValid
+                      : !isSchemaValid
                       ? i18n.translate('workflows.workflowDetailHeader.invalid', {
                           defaultMessage: 'Fix validation errors to enable workflow',
                         })
@@ -280,7 +281,7 @@ export const WorkflowDetailHeader = React.memo(
                       !workflowId ||
                       isLoading ||
                       !canUpdateWorkflow ||
-                      !isValid ||
+                      !isSchemaValid ||
                       hasUnsavedChanges
                     }
                     checked={isEnabled}
@@ -298,7 +299,7 @@ export const WorkflowDetailHeader = React.memo(
                     iconType="play"
                     size="s"
                     onClick={handleRunClickWithUnsavedCheck}
-                    disabled={isExecutionsTab || !canExecuteWorkflow || isLoading || !isValid}
+                    disabled={isExecutionsTab || !canExecuteWorkflow || isLoading || !isSyntaxValid}
                     aria-label={Translations.runWorkflow}
                     data-test-subj="runWorkflowHeaderButton"
                   />

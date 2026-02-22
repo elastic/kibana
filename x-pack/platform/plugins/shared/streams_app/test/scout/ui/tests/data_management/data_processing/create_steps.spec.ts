@@ -27,6 +27,8 @@ test.describe(
       await apiServices.streams.clearStreamProcessors('logs-generic-default');
 
       await pageObjects.streams.gotoProcessingTab('logs-generic-default');
+      // Ensure the interactive mode + simulator have finished initializing before interacting.
+      await pageObjects.streams.waitForModifiedFieldsDetection();
     });
 
     test.afterAll(async ({ apiServices, logsSynthtraceEsClient }) => {
@@ -66,6 +68,27 @@ test.describe(
       await pageObjects.streams.clickSaveCondition();
       await pageObjects.streams.saveStepsListChanges();
       expect(await pageObjects.streams.getConditionsListItems()).toHaveLength(1);
+    });
+
+    test('should disable saving a condition when syntax JSON is invalid', async ({
+      page,
+      pageObjects,
+    }) => {
+      await pageObjects.streams.clickAddCondition();
+
+      await pageObjects.streams.toggleConditionEditorWithSyntaxSwitch();
+      await pageObjects.streams.fillConditionEditorWithSyntax(
+        '{"field":"test_field","contains":"logs"}'
+      );
+      await expect(
+        page.getByTestId('streamsAppConditionConfigurationSaveConditionButton')
+      ).toBeEnabled();
+
+      // Regression check: going from valid JSON to invalid JSON must disable Update.
+      await pageObjects.streams.fillConditionEditorWithSyntax('{');
+      await expect(
+        page.getByTestId('streamsAppConditionConfigurationSaveConditionButton')
+      ).toBeDisabled();
     });
 
     test('should be able to nest steps under conditions', async ({ pageObjects }) => {

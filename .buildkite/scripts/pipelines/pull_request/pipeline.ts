@@ -129,7 +129,6 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/synthetics_plugin.yml'));
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/uptime_plugin.yml'));
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/exploratory_view_plugin.yml'));
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/ux_plugin_e2e.yml'));
     }
 
@@ -144,10 +143,10 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       /^x-pack\/platform\/plugins\/shared\/stack_connectors\/server\/connector_types\/openai/,
       /^x-pack\/platform\/plugins\/shared\/stack_connectors\/server\/connector_types\/inference/,
     ];
-    // const agentBuilderPaths = [
-    //   /^x-pack\/platform\/plugins\/shared\/agent_builder/,
-    //   /^x-pack\/platform\/packages\/shared\/agent_builder/,
-    // ];
+    const agentBuilderPaths = [
+      /^x-pack\/platform\/plugins\/shared\/agent_builder/,
+      /^x-pack\/platform\/packages\/shared\/agent_builder/,
+    ];
 
     if (
       (await doAnyChangesMatch([...aiInfraPaths, ...aiConnectorPaths])) ||
@@ -157,9 +156,8 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/ai_infra_gen_ai.yml'));
     }
 
-    // Temporarily disable auto-trigger on file changes - smoke tests still run daily
     if (
-      // (await doAnyChangesMatch([...aiInfraPaths, ...aiConnectorPaths, ...agentBuilderPaths])) ||
+      (await doAnyChangesMatch([...aiInfraPaths, ...aiConnectorPaths, ...agentBuilderPaths])) ||
       GITHUB_PR_LABELS.includes('agent-builder:run-smoke-tests') ||
       GITHUB_PR_LABELS.includes('ci:all-gen-ai-suites') ||
       ALL_UI_TEST_SUITES
