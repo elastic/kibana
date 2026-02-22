@@ -83,7 +83,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "args",
-                "description": [],
+                "description": [
+                  "- Get public download arguments."
+                ],
                 "path": "src/platform/plugins/shared/files/common/files_client.ts",
                 "lineNumber": 29,
                 "columnNumber": 26,
@@ -191,7 +193,7 @@
                 "tags": [],
                 "label": "fileKind",
                 "description": [
-                  "- The {@link FileKind } to create a client for."
+                  "- The {@link FileKind} to create a client for."
                 ],
                 "signature": [
                   "string"
@@ -773,7 +775,7 @@
             "tags": [],
             "label": "arg",
             "description": [
-              "- See {@link CreateEsFileClientArgs }"
+              "- See {@link CreateEsFileClientArgs}"
             ],
             "signature": [
               {
@@ -3012,7 +3014,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "arg",
-                "description": [],
+                "description": [
+                  "- Arguments to bulk retrieve file metadata"
+                ],
                 "path": "src/platform/plugins/shared/files/server/file_client/file_metadata_client/file_metadata_client.ts",
                 "lineNumber": 122,
                 "columnNumber": 16,

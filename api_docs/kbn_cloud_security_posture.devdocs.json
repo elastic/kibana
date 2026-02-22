@@ -3114,7 +3114,7 @@
             "signature": [
               "(props: { context: ",
               "GroupRenderContext",
-              "<TGroup>; }) => React.ReactElement<any, string | React.JSXElementConstructor<any>> | null"
+              "<TGroup>; }) => React.ReactElement<any> | null"
             ],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/grouping/types.ts",
             "lineNumber": 24,

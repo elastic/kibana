@@ -115,7 +115,7 @@
           ">"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/index.tsx",
-        "lineNumber": 658,
+        "lineNumber": 655,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1173,7 +1173,9 @@
             "type": "string",
             "tags": [],
             "label": "category",
-            "description": [],
+            "description": [
+              "/**\n   * The category of data, e.g. `alert | alerts | event | events | string`\n   *\n   * `category` helps the assistant display the most relevant user prompts\n   */"
+            ],
             "signature": [
               "string"
             ],
@@ -1190,7 +1192,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "conversationTitle",
-            "description": [],
+            "description": [
+              "/**\n   * optionally automatically add this context to a specific conversation when the assistant is displayed\n   */"
+            ],
             "signature": [
               "string | null"
             ],
@@ -1207,7 +1211,9 @@
             "type": "string",
             "tags": [],
             "label": "description",
-            "description": [],
+            "description": [
+              "/**\n   * The assistant will display this **short**, static description\n   * in the context pill\n   */"
+            ],
             "signature": [
               "string"
             ],
@@ -1224,7 +1230,9 @@
             "type": "Function",
             "tags": [],
             "label": "getPromptContext",
-            "description": [],
+            "description": [
+              "/**\n   * The assistant will invoke this function to retrieve the context data,\n   * which will be included in a prompt (e.g. the contents of an alert or an event)\n   */"
+            ],
             "signature": [
               "() => Promise<string> | Promise<Record<string, string[]>>"
             ],
@@ -1241,7 +1249,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "id",
-            "description": [],
+            "description": [
+              "/**\n   * Optionally provide a unique identifier for this prompt context, or accept the uuid default.\n   */"
+            ],
             "signature": [
               "string | null"
             ],
@@ -1258,7 +1268,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "suggestedUserPrompt",
-            "description": [],
+            "description": [
+              "/**\n   * An optional user prompt that's filled in, but not sent, when the Elastic AI Assistant opens\n   */"
+            ],
             "signature": [
               "string | null | undefined"
             ],
@@ -1275,7 +1287,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "tooltip",
-            "description": [],
+            "description": [
+              "/**\n   * The assistant will display this tooltip when the user hovers over the context pill\n   */"
+            ],
             "signature": [
               "React.ReactNode"
             ],
@@ -1292,7 +1306,9 @@
             "type": "boolean",
             "tags": [],
             "label": "isAssistantEnabled",
-            "description": [],
+            "description": [
+              "/** Required to identify the availability of the Assistant for the current license level */"
+            ],
             "signature": [
               "boolean"
             ],
@@ -1309,7 +1325,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "replacements",
-            "description": [],
+            "description": [
+              "/**\n   * Optionally provide a map of replacements associated with the context, i.e. replacements for an attack discovery that's provided as context\n   */"
+            ],
             "signature": [
               "objectOutputType",
               "<{}, ",
@@ -2743,7 +2761,7 @@
             "label": "button",
             "description": [],
             "signature": [
-              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+              "React.ReactNode"
             ],
             "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/use_conversation/helpers.ts",
             "lineNumber": 20,
@@ -2980,7 +2998,7 @@
             "label": "update",
             "description": [],
             "signature": [
-              "Record<string, { id: string; title?: string | undefined; category?: \"assistant\" | \"insights\" | undefined; users?: { id?: string | undefined; name?: string | undefined; }[] | undefined; replacements?: ",
+              "Record<string, { id: string; title?: string | undefined; category?: \"insights\" | \"assistant\" | undefined; users?: { id?: string | undefined; name?: string | undefined; }[] | undefined; replacements?: ",
               "objectOutputType",
               "<{}, ",
               "ZodString",
@@ -3086,7 +3104,7 @@
             "label": "create",
             "description": [],
             "signature": [
-              "Record<string, { title: string; id?: string | undefined; category?: \"assistant\" | \"insights\" | undefined; replacements?: ",
+              "Record<string, { title: string; id?: string | undefined; category?: \"insights\" | \"assistant\" | undefined; replacements?: ",
               "objectOutputType",
               "<{}, ",
               "ZodString",
@@ -3332,7 +3350,7 @@
               "\nThe Elastic AI Assistant will display this tooltip when the user hovers over the context pill"
             ],
             "signature": [
-              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+              "React.ReactNode"
             ],
             "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/prompt_context/types.ts",
             "lineNumber": 69,
@@ -3531,7 +3549,7 @@
           " | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/connectorland/connector_selector/index.tsx",
-        "lineNumber": 54,
+        "lineNumber": 55,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

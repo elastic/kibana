@@ -3694,6 +3694,45 @@
       },
       {
         "parentPluginId": "metricsDataAccess",
+        "id": "def-common.isFilterWithAggregations",
+        "type": "Function",
+        "tags": [],
+        "label": "isFilterWithAggregations",
+        "description": [],
+        "signature": [
+          "(agg: unknown) => agg is Pick<",
+          "AggregationsAggregationContainer",
+          ", \"filter\" | \"aggs\">"
+        ],
+        "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/index.ts",
+        "lineNumber": 105,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "metricsDataAccess",
+            "id": "def-common.isFilterWithAggregations.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "agg",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/index.ts",
+            "lineNumber": 106,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "metricsDataAccess",
         "id": "def-common.isSumBucketAgg",
         "type": "Function",
         "tags": [],
