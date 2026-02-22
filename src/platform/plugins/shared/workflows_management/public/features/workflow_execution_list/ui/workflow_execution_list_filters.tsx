@@ -225,6 +225,12 @@ export function ExecutionListFilters({
             </EuiText>
             <EuiSpacer size="xs" />
             <EuiComboBox
+              aria-label={i18n.translate(
+                'workflows.workflowExecutionList.filterIconButton.executedByAriaLabel',
+                {
+                  defaultMessage: 'Filter by executor',
+                }
+              )}
               placeholder={i18n.translate(
                 'workflows.workflowExecutionList.filterIconButton.executedByPlaceholder',
                 {
