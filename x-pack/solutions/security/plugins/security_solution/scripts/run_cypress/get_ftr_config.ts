@@ -153,8 +153,7 @@ export const getFTRConfig = ({
             ])}`
           );
         } else {
-          const fleetEsHost =
-            effectiveEsFrom === 'docker' ? 'host.docker.internal' : hostRealIp;
+          const fleetEsHost = effectiveEsFrom === 'docker' ? 'host.docker.internal' : hostRealIp;
           vars.kbnTestServer.serverArgs.push(
             `--xpack.fleet.agents.fleet_server.hosts=["https://${hostRealIp}:${fleetServerPort}"]`
           );
