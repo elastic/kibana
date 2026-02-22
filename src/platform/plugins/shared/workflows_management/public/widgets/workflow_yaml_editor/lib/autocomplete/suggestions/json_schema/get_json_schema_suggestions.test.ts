@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { monaco } from '@kbn/monaco';
 import { getJsonSchemaSuggestions } from './get_json_schema_suggestions';
 import type { ExtendedAutocompleteContext } from '../../context/autocomplete.types';
 
@@ -74,7 +75,9 @@ describe('getJsonSchemaSuggestions', () => {
 
       expect(suggestions.length).toBe(3);
       expect(suggestions.map((s) => s.label)).toEqual(['active', 'inactive', 'pending']);
-      expect(suggestions.every((s) => s.kind === 13)).toBe(true); // EnumMember
+      expect(
+        suggestions.every((s) => s.kind === monaco.languages.CompletionItemKind.EnumMember)
+      ).toBe(true);
     });
 
     it('should provide numeric enum value suggestions', () => {

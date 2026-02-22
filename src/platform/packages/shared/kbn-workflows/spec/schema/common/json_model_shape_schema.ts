@@ -57,19 +57,13 @@ export interface JsonSchema {
   title?: string;
   description?: string;
   format?: string;
-  default?: unknown;
-  $ref?: string;
-  $id?: string;
-  $schema?: string;
+  default?: string | number | boolean | null;
 
   // Logical Composition
   allOf?: JsonSchema[];
   anyOf?: JsonSchema[];
   oneOf?: JsonSchema[];
   not?: JsonSchema;
-  if?: JsonSchema;
-  then?: JsonSchema;
-  else?: JsonSchema;
 
   // Structure
   properties?: Record<string, JsonSchema>;
@@ -84,8 +78,8 @@ export interface JsonSchema {
   $defs?: Record<string, JsonSchema>;
 
   // Constraints
-  enum?: any[];
-  const?: any;
+  enum?: (string | number | boolean | null)[];
+  const?: string | number | boolean | null;
   multipleOf?: number;
   minimum?: number;
   exclusiveMinimum?: number;
@@ -123,13 +117,6 @@ export const JSON_SCHEMA_PROPERTY_KEYS = [
   'anyOf',
   'oneOf',
   'not',
-  'if',
-  'then',
-  'else',
-  '$ref',
-  '$id',
-  '$schema',
-  '$defs',
   'definitions',
   'minimum',
   'exclusiveMinimum',
@@ -154,9 +141,6 @@ export const JSON_SCHEMA_PROPERTY_KEYS = [
 export const JsonModelShapeSchema: z.ZodType<JsonSchema> = z
   .lazy(() =>
     z.object({
-      $schema: z.string().url().optional(),
-      $id: z.string().optional(),
-      $ref: z.string().optional(),
       type: z
         .union([z.enum(JSON_SCHEMA_TYPE_VALUES), z.array(z.enum(JSON_SCHEMA_TYPE_VALUES))])
         .optional(),
@@ -170,9 +154,6 @@ export const JsonModelShapeSchema: z.ZodType<JsonSchema> = z
       anyOf: z.array(JsonModelShapeSchema).optional(),
       oneOf: z.array(JsonModelShapeSchema).optional(),
       not: JsonModelShapeSchema.optional(),
-      if: JsonModelShapeSchema.optional(),
-      then: JsonModelShapeSchema.optional(),
-      else: JsonModelShapeSchema.optional(),
 
       // --- Object Properties ---
       properties: z.record(z.string(), JsonModelShapeSchema).optional(),
