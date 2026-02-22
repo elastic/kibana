@@ -13,11 +13,12 @@ import type { InferSearchResponseOf } from '@kbn/es-types';
 import type { KibanaRequest } from '@kbn/core/server';
 import { RequestStatus } from '@kbn/inspector-plugin/common';
 import { searchExcludedDataTiers } from '@kbn/observability-plugin/common/ui_settings_keys';
-import type { DataTier, InspectResponse } from '@kbn/observability-shared-plugin/common';
+import type { DataTier } from '@kbn/observability-shared-plugin/common';
 import { getInspectResponse } from '@kbn/observability-shared-plugin/common';
 import { excludeTiersQuery } from '@kbn/observability-utils-common/es/queries/exclude_tiers_query';
 import type { InfraPluginRequestHandlerContext } from '../../types';
 import type { InfraBackendLibs } from '../infra_types';
+import { inspectableEsQueriesMap } from './with_inspect';
 
 type RequiredParams = Omit<ESSearchRequest, 'index'> & {
   size: number;
@@ -28,8 +29,6 @@ export type MSearchParams = Omit<RequiredParams, 'allow_no_indices'>;
 interface TypedMSearchResponse<TDocument, TParams extends RequiredParams> {
   responses: Array<InferSearchResponseOf<TDocument, TParams>>;
 }
-
-export const inspectableEsQueriesMap = new WeakMap<KibanaRequest, InspectResponse>();
 
 export type InfraMetricsClient = Awaited<ReturnType<typeof getInfraMetricsClient>>;
 

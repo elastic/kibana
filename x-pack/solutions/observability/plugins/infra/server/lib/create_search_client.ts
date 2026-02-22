@@ -14,7 +14,7 @@ import { excludeTiersQuery } from '@kbn/observability-utils-common/es/queries/ex
 import type { InfraPluginRequestHandlerContext } from '../types';
 import type { CallWithRequestParams, InfraDatabaseSearchResponse } from './adapters/framework';
 import type { KibanaFramework } from './adapters/framework/kibana_framework_adapter';
-import { inspectableEsQueriesMap } from './helpers/get_infra_metrics_client';
+import { inspectableEsQueriesMap } from './helpers/with_inspect';
 
 export const createSearchClient =
   (
@@ -61,7 +61,7 @@ export const createSearchClient =
                 esRequestStatus: RequestStatus.OK,
                 esResponse: response,
                 kibanaRequest: request,
-                operationName: (opts as Record<string, any>).operationName ?? 'snapshot search',
+                operationName: 'snapshot search',
                 startTime,
               })
             );
@@ -77,7 +77,7 @@ export const createSearchClient =
                 esRequestStatus: RequestStatus.ERROR,
                 esResponse: null,
                 kibanaRequest: request,
-                operationName: (opts as Record<string, any>).operationName ?? 'snapshot search',
+                operationName: 'snapshot search',
                 startTime,
               })
             );

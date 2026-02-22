@@ -10,7 +10,6 @@ import type { DependencyList } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { HttpFetchOptions } from '@kbn/core-http-browser';
 import type { BehaviorSubject } from 'rxjs';
-import { startsWith } from 'lodash';
 import { enableInspectEsQueries } from '@kbn/observability-plugin/public';
 import { useInspectorContext } from '@kbn/observability-shared-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
@@ -81,7 +80,14 @@ function getDetailsFromErrorResponse(error: InfraHttpError) {
   );
 }
 
-const INFRA_PATH_PREFIXES = ['/api/metrics/', '/api/infra/'];
+function isInspectableRoute(path: string): boolean {
+  return (
+    path.startsWith('/api/metrics/infra/') ||
+    path === '/api/metrics/snapshot' ||
+    path === '/api/infra/metadata' ||
+    (path.startsWith('/api/infra/') && path.endsWith('/count'))
+  );
+}
 
 function createInfraApiClient(
   signal: AbortSignal,
@@ -90,8 +96,7 @@ function createInfraApiClient(
   addInspectorRequest: <Data>(result: FetcherResult<Data>) => void
 ): ApiCallClient {
   return ((path: string, options: HttpFetchOptions) => {
-    const shouldInspect =
-      inspectEnabled && INFRA_PATH_PREFIXES.some((prefix) => startsWith(path, prefix));
+    const shouldInspect = inspectEnabled && isInspectableRoute(path);
 
     return http
       .fetch(path, {

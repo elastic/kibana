@@ -7,7 +7,9 @@
 
 import Boom from '@hapi/boom';
 import type { KibanaRequest, KibanaResponseFactory, RequestHandlerContext } from '@kbn/core/server';
-import { inspectableEsQueriesMap } from './get_infra_metrics_client';
+import type { InspectResponse } from '@kbn/observability-shared-plugin/common';
+
+export const inspectableEsQueriesMap = new WeakMap<KibanaRequest, InspectResponse>();
 
 export function withInspect<
   TParams = unknown,

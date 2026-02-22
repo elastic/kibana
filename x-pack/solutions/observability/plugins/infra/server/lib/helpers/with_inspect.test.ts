@@ -6,8 +6,7 @@
  */
 
 import type { KibanaRequest, KibanaResponseFactory, RequestHandlerContext } from '@kbn/core/server';
-import { inspectableEsQueriesMap } from './get_infra_metrics_client';
-import { withInspect } from './with_inspect';
+import { inspectableEsQueriesMap, withInspect } from './with_inspect';
 
 const createMockResponse = () =>
   ({
