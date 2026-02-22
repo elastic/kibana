@@ -55,7 +55,7 @@ apiTest.describe('dashboard REST schema', { tag: tags.deploymentAgnostic }, () =
     );
 
     expect(response.statusCode).toBe(200);
-    expect(response.body.paths?.[oasPath]).toBeDefined();
+    expect(response.body.paths?.[`${oasPath}/{id}`]).toBeDefined();
 
     const createBodySchema =
       response.body.paths[`${oasPath}/{id}`].post.requestBody.content[
