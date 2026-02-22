@@ -70,9 +70,7 @@ test.describe('Agent Configuration', { tag: tags.stateful.classic }, () => {
       await expect(page).toHaveURL(/.*apm\/settings\/agent-configuration/);
       await expect(page.getByText('Configurations')).toBeVisible();
       await expect(agentConfigurationsPage.getConfigurationServiceName('All')).toBeVisible();
-      await expect(
-        agentConfigurationsPage.getConfigurationEnvironment('production')
-      ).toBeVisible();
+      await expect(agentConfigurationsPage.getConfigurationEnvironment('production')).toBeVisible();
 
       // Delete the configuration
       await agentConfigurationsPage.clickDeleteConfiguration();
