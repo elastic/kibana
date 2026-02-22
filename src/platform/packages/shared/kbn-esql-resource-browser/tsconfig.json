@@ -6,23 +6,42 @@
       "jest",
       "node",
       "react",
-      "@emotion/react/types/css-prop"
+      "@kbn/ambient-ui-types",
+      "@kbn/ambient-storybook-types",
+      "@testing-library/jest-dom",
+      "@testing-library/react"
     ]
   },
   "include": [
-    ".storybook/**/*.ts",
-    ".storybook/**/*.tsx",
-    "src/**/*",
     "**/*.ts",
     "**/*.tsx"
   ],
-  "exclude": [
-    "target/**/*"
-  ],
   "kbn_references": [
     "@kbn/i18n",
-    "@kbn/esql-types",
-    "@kbn/react-field",
-    "@kbn/field-utils",
+    "@kbn/i18n-react",
+    "@kbn/content-management-content-editor",
+    "@kbn/core-http-browser",
+    "@kbn/core-mount-utils-browser",
+    "@kbn/core-overlays-browser",
+    "@kbn/core-analytics-browser",
+    "@kbn/core-i18n-browser",
+    "@kbn/core-theme-browser",
+    "@kbn/shared-ux-page-kibana-template",
+    "@kbn/test-jest-helpers",
+    "@kbn/content-management-table-list-view-common",
+    "@kbn/user-profile-components",
+    "@kbn/core-user-profile-browser",
+    "@kbn/react-kibana-mount",
+    "@kbn/content-management-user-profiles",
+    "@kbn/recently-accessed",
+    "@kbn/content-management-content-insights-public",
+    "@kbn/content-management-favorites-public",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/shared-ux-table-persist",
+    "@kbn/react-query",
+    "@kbn/shared-ux-utility"
+  ],
+  "exclude": [
+    "target/**/*"
   ]
 }
