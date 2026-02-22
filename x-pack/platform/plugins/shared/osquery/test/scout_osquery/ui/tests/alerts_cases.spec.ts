@@ -114,7 +114,8 @@ test.describe(
       });
 
       await test.step('Add to case and create new case', async () => {
-        await page.testSubj.locator('addToCaseButton').click();
+        // eslint-disable-next-line playwright/no-nth-methods -- first visible result
+        await page.testSubj.locator('addToCaseButton').first().click();
         await expect(page.getByText('Select case')).toBeVisible();
         await page.testSubj.locator('cases-table-add-case-filter-bar').click();
         await expect(page.testSubj.locator('create-case-flyout')).toBeVisible();
@@ -186,9 +187,18 @@ test.describe(
           });
         }
 
-        await expect(page.testSubj.locator('viewInDiscover')).toBeVisible({ timeout: 30_000 });
-        await expect(page.testSubj.locator('viewInLens')).toBeVisible({ timeout: 30_000 });
-        await expect(page.testSubj.locator('addToCaseButton')).toBeVisible({ timeout: 30_000 });
+        // eslint-disable-next-line playwright/no-nth-methods -- first visible result in response actions
+        await expect(page.testSubj.locator('viewInDiscover').first()).toBeVisible({
+          timeout: 30_000,
+        });
+        // eslint-disable-next-line playwright/no-nth-methods -- first visible result in response actions
+        await expect(page.testSubj.locator('viewInLens').first()).toBeVisible({
+          timeout: 30_000,
+        });
+        // eslint-disable-next-line playwright/no-nth-methods -- first visible result in response actions
+        await expect(page.testSubj.locator('addToCaseButton').first()).toBeVisible({
+          timeout: 30_000,
+        });
         await expect(
           page.getByRole('button', { name: 'Add to Timeline investigation' })
         ).toBeVisible({
@@ -197,7 +207,8 @@ test.describe(
       });
 
       await test.step('Add to case and verify case content', async () => {
-        await page.testSubj.locator('addToCaseButton').click();
+        // eslint-disable-next-line playwright/no-nth-methods -- first visible result
+        await page.testSubj.locator('addToCaseButton').first().click();
         await expect(page.getByText('Select case')).toBeVisible();
         await page.testSubj.locator(`cases-table-row-select-${caseId}`).click();
 

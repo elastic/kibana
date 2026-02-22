@@ -94,7 +94,8 @@ export class PacksPage {
     const input = select.locator('[data-test-subj="comboBoxSearchInput"]');
     await input.click();
     await input.pressSequentially(queryName);
-    const option = this.page.getByRole('option', { name: new RegExp(queryName, 'i') });
+    // Use exact match to avoid matching "logged_in_users_elastic" when selecting "users_elastic"
+    const option = this.page.getByRole('option', { name: queryName, exact: true });
     await option.waitFor({ state: 'visible', timeout: 15_000 });
     await option.click();
   }

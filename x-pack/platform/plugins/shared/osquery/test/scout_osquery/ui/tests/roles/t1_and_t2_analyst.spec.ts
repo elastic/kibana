@@ -99,9 +99,16 @@ roles.forEach(({ name, role }) => {
 
         // Check action items - wait for results actions to load
         // Note: t1/t2 analysts don't have Lens permissions, so "View in Lens" should not be visible
-        await expect(page.testSubj.locator('viewInDiscover')).toBeVisible({ timeout: 30_000 });
-        await expect(page.testSubj.locator('addToCaseButton')).toBeVisible({ timeout: 30_000 });
-        await expect(page.testSubj.locator('viewInLens')).not.toBeVisible();
+        // eslint-disable-next-line playwright/no-nth-methods -- single saved query; only one result section
+        await expect(page.testSubj.locator('viewInDiscover').first()).toBeVisible({
+          timeout: 30_000,
+        });
+        // eslint-disable-next-line playwright/no-nth-methods -- single saved query; only one result section
+        await expect(page.testSubj.locator('addToCaseButton').first()).toBeVisible({
+          timeout: 30_000,
+        });
+        // eslint-disable-next-line playwright/no-nth-methods -- single saved query; only one result section
+        await expect(page.testSubj.locator('viewInLens').first()).not.toBeVisible();
         await expect(
           page.getByRole('button', { name: 'Add to Timeline investigation' })
         ).not.toBeVisible();
@@ -112,7 +119,9 @@ roles.forEach(({ name, role }) => {
         await expect(page.testSubj.locator('newLiveQueryButton')).toBeEnabled();
         await expect(page.getByText(liveQueryQuery)).toBeVisible();
 
-        const runQueryButton = page.getByRole('button', { name: 'Run query' });
+        // Scope to row containing the saved query - multiple rows have Run buttons
+        const savedQueryRow = page.locator('tbody tr').filter({ hasText: liveQueryQuery });
+        const runQueryButton = savedQueryRow.getByRole('button', { name: 'Run query' });
         await expect(runQueryButton).toBeEnabled();
         await runQueryButton.click();
 

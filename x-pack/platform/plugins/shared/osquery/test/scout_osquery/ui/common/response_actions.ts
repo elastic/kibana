@@ -69,7 +69,10 @@ export async function checkOsqueryResponseActionsPermissions(
   if (enabled) {
     // Endpoint Complete: response actions should be available
     await page.testSubj.locator(ENDPOINT_RESPONSE_ACTION_ADD_BUTTON).click();
-    await expect(page.getByText('Query is a required field')).toBeVisible({ timeout: 15_000 });
+    // eslint-disable-next-line playwright/no-nth-methods -- multiple response actions can show same error
+    await expect(page.getByText('Query is a required field').first()).toBeVisible({
+      timeout: 15_000,
+    });
     await expect(page.getByText('Select an endpoint response action.')).toBeVisible({
       timeout: 15_000,
     });

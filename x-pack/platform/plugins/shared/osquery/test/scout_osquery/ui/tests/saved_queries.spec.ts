@@ -246,7 +246,8 @@ test.describe(
       await pageObjects.liveQuery.submitQuery();
       await pageObjects.liveQuery.checkResults();
 
-      const addToCaseButton = page.testSubj.locator('addToCaseButton');
+      // eslint-disable-next-line playwright/no-nth-methods -- first visible result
+      const addToCaseButton = page.testSubj.locator('addToCaseButton').first();
       await addToCaseButton.waitFor({ state: 'visible', timeout: 30_000 });
       await addToCaseButton.click();
 

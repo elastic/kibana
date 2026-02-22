@@ -84,7 +84,8 @@ test.describe(
 
       // Check validation errors
       const errorsContainer = page.testSubj.locator('response-actions-error');
-      await expect(errorsContainer.getByText('Query is a required field')).toBeVisible();
+      // eslint-disable-next-line playwright/no-nth-methods -- multiple response actions can show same error
+      await expect(errorsContainer.getByText('Query is a required field').first()).toBeVisible();
       await expect(
         errorsContainer.getByText('The timeout value must be 60 seconds or higher.')
       ).not.toBeVisible();
@@ -97,7 +98,8 @@ test.describe(
       await expect(
         errorsContainer.getByText('The timeout value must be 60 seconds or higher.')
       ).toBeVisible();
-      await expect(errorsContainer.getByText('Query is a required field')).toBeVisible();
+      // eslint-disable-next-line playwright/no-nth-methods -- multiple response actions can show same error
+      await expect(errorsContainer.getByText('Query is a required field').first()).toBeVisible();
 
       await timeoutInput.fill('6');
       await expect(
@@ -108,7 +110,8 @@ test.describe(
       await expect(
         errorsContainer.getByText('The timeout value must be 60 seconds or higher.')
       ).not.toBeVisible();
-      await expect(errorsContainer.getByText('Query is a required field')).toBeVisible();
+      // eslint-disable-next-line playwright/no-nth-methods -- multiple response actions can show same error
+      await expect(errorsContainer.getByText('Query is a required field').first()).toBeVisible();
 
       // Fill in query
       await expect(responseAction0.getByText('Query is a required field')).toBeVisible();
@@ -120,7 +123,8 @@ test.describe(
       await page.testSubj.locator('Osquery-response-action-type-selection-option').click();
       const responseAction1 = page.testSubj.locator('response-actions-list-item-1');
       await responseAction1.getByText('Run a set of queries in a pack').click();
-      await expect(errorsContainer.getByText('Pack is a required field')).toBeVisible();
+      // eslint-disable-next-line playwright/no-nth-methods -- multiple response actions can show same error
+      await expect(errorsContainer.getByText('Pack is a required field').first()).toBeVisible();
       await expect(responseAction1.getByText('Pack is a required field')).toBeVisible();
 
       const packComboBox = responseAction1.locator('[data-test-subj="comboBoxInput"]');

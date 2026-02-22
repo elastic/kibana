@@ -109,9 +109,16 @@ test.describe(
       await pageObjects.liveQuery.checkResults();
 
       // Check action items in results
-      await expect(page.testSubj.locator('viewInLens')).toBeVisible({ timeout: 30_000 });
-      await expect(page.testSubj.locator('viewInDiscover')).toBeVisible({ timeout: 30_000 });
-      await expect(page.testSubj.locator('addToCaseButton')).toBeVisible({ timeout: 30_000 });
+      // eslint-disable-next-line playwright/no-nth-methods -- first visible result in expanded pack query row
+      await expect(page.testSubj.locator('viewInLens').first()).toBeVisible({ timeout: 30_000 });
+      // eslint-disable-next-line playwright/no-nth-methods -- first visible result in expanded pack query row
+      await expect(page.testSubj.locator('viewInDiscover').first()).toBeVisible({
+        timeout: 30_000,
+      });
+      // eslint-disable-next-line playwright/no-nth-methods -- first visible result in expanded pack query row
+      await expect(page.testSubj.locator('addToCaseButton').first()).toBeVisible({
+        timeout: 30_000,
+      });
 
       // Check Status tab headers
       await page.getByRole('tab', { name: 'Status' }).click();
@@ -127,7 +134,8 @@ test.describe(
       await page.testSubj.locator('toggleIcon-system_memory_linux_elastic').click();
 
       // Add to case
-      const addToCaseButton = page.testSubj.locator('addToCaseButton');
+      // eslint-disable-next-line playwright/no-nth-methods -- first visible result
+      const addToCaseButton = page.testSubj.locator('addToCaseButton').first();
       await addToCaseButton.waitFor({ state: 'visible', timeout: 30_000 });
       await addToCaseButton.click();
 

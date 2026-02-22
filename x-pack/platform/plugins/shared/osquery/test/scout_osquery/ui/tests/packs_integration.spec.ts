@@ -222,9 +222,18 @@ test.describe(
           await page.testSubj.locator('toggleIcon-events').click();
           await pageObjects.liveQuery.checkResults();
 
-          await expect(page.testSubj.locator('viewInLens')).toBeVisible({ timeout: 30_000 });
-          await expect(page.testSubj.locator('viewInDiscover')).toBeVisible({ timeout: 30_000 });
-          await expect(page.testSubj.locator('addToCaseButton')).toBeVisible({ timeout: 30_000 });
+          // eslint-disable-next-line playwright/no-nth-methods -- first result action button in prebuilt pack
+          await expect(page.testSubj.locator('viewInLens').first()).toBeVisible({
+            timeout: 30_000,
+          });
+          // eslint-disable-next-line playwright/no-nth-methods -- first result action button in prebuilt pack
+          await expect(page.testSubj.locator('viewInDiscover').first()).toBeVisible({
+            timeout: 30_000,
+          });
+          // eslint-disable-next-line playwright/no-nth-methods -- first result action button in prebuilt pack
+          await expect(page.testSubj.locator('addToCaseButton').first()).toBeVisible({
+            timeout: 30_000,
+          });
         });
       }
     );

@@ -97,12 +97,22 @@ for (const testSpace of testSpaces) {
       await pageObjects.liveQuery.checkResults();
 
       // Check action items - wait for results to fully load
-      await expect(page.testSubj.locator('viewInDiscover')).toBeVisible({ timeout: 30_000 });
-      await expect(page.testSubj.locator('viewInLens')).toBeVisible({ timeout: 30_000 });
-      await expect(page.testSubj.locator('addToCaseButton')).toBeVisible({ timeout: 30_000 });
+      // eslint-disable-next-line playwright/no-nth-methods -- single live query; only one result section
+      await expect(page.testSubj.locator('viewInDiscover').first()).toBeVisible({
+        timeout: 30_000,
+      });
+      // eslint-disable-next-line playwright/no-nth-methods -- single live query; only one result section
+      await expect(page.testSubj.locator('viewInLens').first()).toBeVisible({
+        timeout: 30_000,
+      });
+      // eslint-disable-next-line playwright/no-nth-methods -- single live query; only one result section
+      await expect(page.testSubj.locator('addToCaseButton').first()).toBeVisible({
+        timeout: 30_000,
+      });
 
       // Verify Discover link works
-      const discoverLink = page.testSubj.locator('viewInDiscover');
+      // eslint-disable-next-line playwright/no-nth-methods -- first visible result
+      const discoverLink = page.testSubj.locator('viewInDiscover').first();
       await expect(discoverLink).toBeVisible({ timeout: 30_000 });
       await expect(discoverLink).toHaveAttribute('href');
       const href = await discoverLink.evaluate((el) =>

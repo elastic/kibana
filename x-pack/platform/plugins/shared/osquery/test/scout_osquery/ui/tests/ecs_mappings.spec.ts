@@ -67,7 +67,8 @@ test.describe(
 
       await pageObjects.liveQuery.submitQuery();
       await pageObjects.liveQuery.checkResults();
-      await expect(page.getByText('[ "test1", "test2" ]')).toBeVisible();
+      // eslint-disable-next-line playwright/no-nth-methods -- multiple data grid cells can have same static value
+      await expect(page.getByText('[ "test1", "test2" ]').first()).toBeVisible();
 
       // Second ECS mapping row: client.domain -> Static value "test3"
       await pageObjects.liveQuery.typeInECSFieldInput('client.domain', 1);
@@ -87,7 +88,8 @@ test.describe(
 
       await pageObjects.liveQuery.submitQuery();
       await pageObjects.liveQuery.checkResults();
-      await expect(page.getByText('[ "test1", "test2" ]')).toBeVisible();
+      // eslint-disable-next-line playwright/no-nth-methods -- multiple data grid cells can have same static value
+      await expect(page.getByText('[ "test1", "test2" ]').first()).toBeVisible();
       await expect(page.getByText('test3')).toBeVisible();
 
       // Remove "test1" from the first static value
@@ -121,7 +123,7 @@ test.describe(
           .catch(() => {});
         await searchInput.fill('');
         await searchInput.pressSequentially('users_elastic');
-        const option = page.locator('[role="option"]').filter({ hasText: 'users_elastic' });
+        const option = page.getByRole('option', { name: 'users_elastic', exact: true });
         try {
           await option.waitFor({ state: 'visible', timeout: 10_000 });
           await option.click();

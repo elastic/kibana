@@ -56,21 +56,36 @@ test.describe(
             '[data-test-subj="osquery-results-comment"]'
           );
           // eslint-disable-next-line playwright/no-nth-methods -- first osquery result comment
-          await expect(resultComments.first()).toBeVisible({ timeout: 120_000 });
+          const firstResultComment = resultComments.first();
+          await expect(firstResultComment).toBeVisible({ timeout: 120_000 });
 
-          await expect(page.testSubj.locator('viewInDiscover')).toBeVisible({ timeout: 30_000 });
-          await expect(page.testSubj.locator('viewInLens')).toBeVisible({ timeout: 30_000 });
-          await expect(page.testSubj.locator('addToCaseButton')).toBeVisible({ timeout: 30_000 });
+          await expect(firstResultComment.locator('[data-test-subj="viewInDiscover"]')).toBeVisible(
+            {
+              timeout: 30_000,
+            }
+          );
+          await expect(firstResultComment.locator('[data-test-subj="viewInLens"]')).toBeVisible({
+            timeout: 30_000,
+          });
+          await expect(
+            firstResultComment.locator('[data-test-subj="addToCaseButton"]')
+          ).toBeVisible({
+            timeout: 30_000,
+          });
           await expect(
             page.getByRole('button', { name: 'Add to Timeline investigation' })
           ).toBeVisible({ timeout: 30_000 });
         });
 
         await test.step('Navigate to Discover and verify results', async () => {
-          const discoverLink = page.testSubj.locator('viewInDiscover');
+          const resultComments = page.testSubj
+            .locator('responseActionsViewWrapper')
+            .locator('[data-test-subj="osquery-results-comment"]');
+          // eslint-disable-next-line playwright/no-nth-methods -- first osquery result comment in alert flyout
+          const discoverLink = resultComments.first().locator('[data-test-subj="viewInDiscover"]');
           await expect(discoverLink).toBeVisible({ timeout: 30_000 });
           await expect(discoverLink).toHaveAttribute('href');
-          const href = (await discoverLink.getAttribute('href'))!;
+          const href = await discoverLink.getAttribute('href');
 
           const baseUrl = new URL(page.url()).origin;
           await page.goto(`${baseUrl}${href}`);
@@ -103,11 +118,22 @@ test.describe(
             '[data-test-subj="osquery-results-comment"]'
           );
           // eslint-disable-next-line playwright/no-nth-methods -- first osquery result comment
-          await expect(resultComments.first()).toBeVisible({ timeout: 120_000 });
+          const firstResultComment = resultComments.first();
+          await expect(firstResultComment).toBeVisible({ timeout: 120_000 });
 
-          await expect(page.testSubj.locator('viewInDiscover')).toBeVisible({ timeout: 30_000 });
-          await expect(page.testSubj.locator('viewInLens')).toBeVisible({ timeout: 30_000 });
-          await expect(page.testSubj.locator('addToCaseButton')).toBeVisible({ timeout: 30_000 });
+          await expect(firstResultComment.locator('[data-test-subj="viewInDiscover"]')).toBeVisible(
+            {
+              timeout: 30_000,
+            }
+          );
+          await expect(firstResultComment.locator('[data-test-subj="viewInLens"]')).toBeVisible({
+            timeout: 30_000,
+          });
+          await expect(
+            firstResultComment.locator('[data-test-subj="addToCaseButton"]')
+          ).toBeVisible({
+            timeout: 30_000,
+          });
           await expect(
             page.getByRole('button', { name: 'Add to Timeline investigation' })
           ).toBeVisible({ timeout: 30_000 });
@@ -154,11 +180,22 @@ test.describe(
             '[data-test-subj="osquery-results-comment"]'
           );
           // eslint-disable-next-line playwright/no-nth-methods -- first osquery result comment
-          await expect(resultComments.first()).toBeVisible({ timeout: 120_000 });
+          const firstResultComment = resultComments.first();
+          await expect(firstResultComment).toBeVisible({ timeout: 120_000 });
 
-          await expect(page.testSubj.locator('viewInDiscover')).toBeVisible({ timeout: 30_000 });
-          await expect(page.testSubj.locator('viewInLens')).toBeVisible({ timeout: 30_000 });
-          await expect(page.testSubj.locator('addToCaseButton')).toBeVisible({ timeout: 30_000 });
+          await expect(firstResultComment.locator('[data-test-subj="viewInDiscover"]')).toBeVisible(
+            {
+              timeout: 30_000,
+            }
+          );
+          await expect(firstResultComment.locator('[data-test-subj="viewInLens"]')).toBeVisible({
+            timeout: 30_000,
+          });
+          await expect(
+            firstResultComment.locator('[data-test-subj="addToCaseButton"]')
+          ).toBeVisible({
+            timeout: 30_000,
+          });
           await expect(
             page.getByRole('button', { name: 'Add to Timeline investigation' })
           ).toBeVisible({ timeout: 30_000 });

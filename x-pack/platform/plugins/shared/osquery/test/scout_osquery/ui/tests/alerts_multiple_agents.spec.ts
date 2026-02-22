@@ -132,7 +132,8 @@ test.describe(
       await allAgentsOption.waitFor({ state: 'visible', timeout: 15_000 });
       await allAgentsOption.click();
 
-      await expect(agentSelection.getByText('All agents')).toBeVisible();
+      // eslint-disable-next-line playwright/no-nth-methods -- "All agents" appears as pill and screen reader text
+      await expect(agentSelection.getByText('All agents').first()).toBeVisible();
 
       await pageObjects.liveQuery.inputQuery(
         "SELECT * FROM os_version where name='{{host.os.name}}';"

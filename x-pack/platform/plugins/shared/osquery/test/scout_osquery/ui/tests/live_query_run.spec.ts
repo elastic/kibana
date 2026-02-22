@@ -127,7 +127,8 @@ test.describe(
       await test.step('Navigate back and verify query was saved with custom values', async () => {
         await page.gotoApp('osquery');
         await waitForPageReady(page);
-        await page.getByRole('button', { name: 'Run query' }).click();
+        // eslint-disable-next-line playwright/no-nth-methods -- most recent query is first; multiple rows have Run buttons
+        await page.getByRole('button', { name: 'Run query' }).first().click();
 
         await expect(page.testSubj.locator('kibanaCodeEditor')).toContainText(
           'select * from users;'

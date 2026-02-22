@@ -388,7 +388,8 @@ test.describe(
               .waitFor({ state: 'hidden', timeout: 60_000 })
               .catch(() => {});
 
-            const viewInLensButton = page.testSubj.locator('viewInLens');
+            // eslint-disable-next-line playwright/no-nth-methods -- first visible result in pack queries table
+            const viewInLensButton = page.testSubj.locator('viewInLens').first();
             await viewInLensButton.waitFor({ state: 'visible', timeout: 30_000 });
             await viewInLensButton.click();
           });
@@ -444,7 +445,8 @@ test.describe(
         await test.step('Navigate to pack details and get Discover link', async () => {
           await pageObjects.packs.navigateToPackDetail(packId);
 
-          const discoverLink = page.testSubj.locator('viewInDiscover');
+          // eslint-disable-next-line playwright/no-nth-methods -- first visible result in pack queries table
+          const discoverLink = page.testSubj.locator('viewInDiscover').first();
           await discoverLink.waitFor({ state: 'visible', timeout: 30_000 });
 
           // Verify the href contains the pack action_id filter

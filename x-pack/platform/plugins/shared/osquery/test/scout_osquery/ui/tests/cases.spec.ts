@@ -70,7 +70,8 @@ test.describe('Add to Cases', { tag: [...tags.stateful.classic] }, () => {
       });
 
       await test.step('Add to Case and select case', async () => {
-        const addToCaseButton = page.testSubj.locator('addToCaseButton');
+        // eslint-disable-next-line playwright/no-nth-methods -- first visible result
+        const addToCaseButton = page.testSubj.locator('addToCaseButton').first();
         await addToCaseButton.waitFor({ state: 'visible', timeout: 30_000 });
         await addToCaseButton.click();
 
@@ -84,9 +85,12 @@ test.describe('Add to Cases', { tag: [...tags.stateful.classic] }, () => {
         await page.getByRole('link', { name: 'View case' }).click();
         await expect(page.getByText(liveQueryQuery)).toBeVisible();
 
-        await expect(page.testSubj.locator('viewInLens')).toBeVisible();
-        await expect(page.testSubj.locator('viewInDiscover')).toBeVisible();
-        await expect(page.testSubj.locator('addToCaseButton')).not.toBeVisible();
+        // eslint-disable-next-line playwright/no-nth-methods -- first visible result
+        await expect(page.testSubj.locator('viewInLens').first()).toBeVisible();
+        // eslint-disable-next-line playwright/no-nth-methods -- first visible result
+        await expect(page.testSubj.locator('viewInDiscover').first()).toBeVisible();
+        // eslint-disable-next-line playwright/no-nth-methods -- first visible result
+        await expect(page.testSubj.locator('addToCaseButton').first()).not.toBeVisible();
         await expect(page.getByText('Add to Timeline investigation')).not.toBeVisible();
       });
     }
@@ -125,7 +129,8 @@ test.describe('Add to Cases', { tag: [...tags.stateful.classic] }, () => {
       });
 
       await test.step('Add to Case and select case', async () => {
-        const addToCaseButton = page.testSubj.locator('addToCaseButton');
+        // eslint-disable-next-line playwright/no-nth-methods -- first visible result
+        const addToCaseButton = page.testSubj.locator('addToCaseButton').first();
         await addToCaseButton.waitFor({ state: 'visible', timeout: 30_000 });
         await addToCaseButton.click();
 
@@ -139,9 +144,12 @@ test.describe('Add to Cases', { tag: [...tags.stateful.classic] }, () => {
         await page.getByRole('link', { name: 'View case' }).click();
         await expect(page.getByText('SELECT * FROM os_version;')).toBeVisible();
 
-        await expect(page.testSubj.locator('viewInLens')).toBeVisible();
-        await expect(page.testSubj.locator('viewInDiscover')).toBeVisible();
-        await expect(page.testSubj.locator('addToCaseButton')).not.toBeVisible();
+        // eslint-disable-next-line playwright/no-nth-methods -- first visible result
+        await expect(page.testSubj.locator('viewInLens').first()).toBeVisible();
+        // eslint-disable-next-line playwright/no-nth-methods -- first visible result
+        await expect(page.testSubj.locator('viewInDiscover').first()).toBeVisible();
+        // eslint-disable-next-line playwright/no-nth-methods -- first visible result
+        await expect(page.testSubj.locator('addToCaseButton').first()).not.toBeVisible();
         await expect(page.getByText('Add to Timeline investigation')).not.toBeVisible();
       });
     }

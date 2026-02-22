@@ -79,7 +79,7 @@ test.describe(
         await expect(
           page.getByText('Add this integration to run and schedule queries for Elastic Agent.')
         ).toBeVisible({ timeout: 30_000 });
-        await expect(page.getByText('Add Osquery Manager')).toBeVisible();
+        await expect(page.getByRole('heading', { name: 'Add Osquery Manager' })).toBeVisible();
         await expect(page.testSubj.locator('osquery-add-integration-button')).toBeVisible();
 
         // Test nav search
