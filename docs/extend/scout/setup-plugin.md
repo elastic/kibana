@@ -72,7 +72,7 @@ export default createPlaywrightConfig({
 ```
 
 ::::::{important}
-Use the conventional name `playwright.config.ts` so Scout tooling (and `node scripts/scout.js run-tests --testFiles ...`) can reliably discover/derive the config for `./tests`.
+Use the conventional name `playwright.config.ts` so Scout tooling can discover the config.
 ::::::
 
 Then create the `tests/` directory next to the config.
@@ -95,7 +95,7 @@ export default createPlaywrightConfig({
 ```
 
 ::::::{important}
-Use the conventional name `parallel.playwright.config.ts` so Scout tooling (and `node scripts/scout.js run-tests --testFiles ...`) can reliably discover/derive the config for `./parallel_tests`.
+Use the conventional name `parallel.playwright.config.ts` so Scout tooling can discover the config.
 ::::::
 
 Then create the `parallel_tests/` directory next to the config. For parallel suites, prefer defining test suites and test cases using `spaceTest` so each worker runs in an isolated Space (see [Parallelism](./parallelism.md)).
@@ -103,6 +103,12 @@ Then create the `parallel_tests/` directory next to the config. For parallel sui
 If many files share one-time setup (archives/ingest/settings), add a [global setup hook](./global-setup-hook.md).
 
 :::::::
+
+::::::::::{step} Enable Scout runs in CI
+
+Then, [enable your plugin or package](#enable-scout-tests-in-ci) in the CI.
+
+::::::::::
 
 ::::::::
 
