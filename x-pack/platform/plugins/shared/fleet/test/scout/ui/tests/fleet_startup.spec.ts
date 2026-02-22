@@ -17,7 +17,7 @@ test.describe('Fleet startup', { tag: [...tags.stateful.classic] }, () => {
   });
 
   test.beforeEach(async ({ browserAuth }) => {
-    await browserAuth.loginAsAdmin();
+    await browserAuth.loginAsPrivilegedUser();
   });
 
   test('should create agent policy with System integration', async ({ page }) => {
@@ -29,7 +29,9 @@ test.describe('Fleet startup', { tag: [...tags.stateful.classic] }, () => {
       .waitFor({ state: 'visible', timeout: 15_000 });
     await page.testSubj.locator('createAgentPolicyNameField').fill(`Test policy ${Date.now()}`);
     await page.testSubj.locator('createAgentPolicyFlyoutBtn').click();
-    await expect(page.getByRole('link', { name: /Test policy/ }).first()).toBeVisible({
+    await expect(
+      page.testSubj.locator('agentPoliciesTable').getByRole('link', { name: /Test policy/ })
+    ).toBeVisible({
       timeout: 15_000,
     });
   });

@@ -6,7 +6,6 @@
  */
 
 import { type ScoutPage } from '@kbn/scout';
-import { expect } from '@kbn/scout/ui';
 import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants';
 
 export class BrowseIntegrationPage {
@@ -17,16 +16,16 @@ export class BrowseIntegrationPage {
   }
 
   async searchForIntegration(integrationName: string) {
-    const searchInput = this.page.getByTestId('browseIntegrations.searchBar.input');
+    const searchInput = this.page.testSubj.locator('browseIntegrations.searchBar.input');
     await searchInput.fill(integrationName);
   }
 
   async sortIntegrations(sort: 'z-a' | 'a-z') {
-    await this.page.getByTestId('browseIntegrations.searchBar.sortBtn').click();
+    await this.page.testSubj.locator('browseIntegrations.searchBar.sortBtn').click();
     if (sort === 'z-a') {
-      await this.page.getByTestId('browseIntegrations.searchBar.sortByZAOption').click();
+      await this.page.testSubj.locator('browseIntegrations.searchBar.sortByZAOption').click();
     } else {
-      await this.page.getByTestId('browseIntegrations.searchBar.sortByAZOption').click();
+      await this.page.testSubj.locator('browseIntegrations.searchBar.sortByAZOption').click();
     }
   }
 
@@ -62,10 +61,10 @@ export class BrowseIntegrationPage {
   }
 
   getMainColumn() {
-    return this.page.getByTestId('epmList.mainColumn');
+    return this.page.testSubj.locator('epmList.mainColumn');
   }
 
-  async expectIntegrationCardToBeVisible(integrationName: string) {
-    return expect(this.page.getByTestId(`integration-card:epr:${integrationName}`)).toBeVisible();
+  getIntegrationCard(integrationName: string) {
+    return this.page.testSubj.locator(`integration-card:epr:${integrationName}`);
   }
 }

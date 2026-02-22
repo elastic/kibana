@@ -42,7 +42,7 @@ test.describe('Add agent flyout', { tag: [...tags.stateful.classic] }, () => {
   });
 
   test.beforeEach(async ({ browserAuth }) => {
-    await browserAuth.loginAsAdmin();
+    await browserAuth.loginAsPrivilegedUser();
   });
 
   test('should show add agent flyout with Fleet Server already set up', async ({ page }) => {

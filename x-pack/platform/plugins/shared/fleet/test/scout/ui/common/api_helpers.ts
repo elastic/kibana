@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-/**
- * API helpers for Fleet Scout tests.
- * Functions to create/delete agent policies, enrollment tokens, download sources,
- * insert/delete ES docs, install/uninstall test packages, etc.
- */
+import type { KbnClient, EsClient } from '@kbn/scout';
 
 function randomString(length = 8): string {
   return Math.random()
@@ -18,7 +14,7 @@ function randomString(length = 8): string {
 }
 
 export async function createAgentPolicy(
-  kbnClient: any,
+  kbnClient: KbnClient,
   name: string,
   options?: {
     id?: string;
@@ -28,7 +24,7 @@ export async function createAgentPolicy(
     download_source_id?: string;
     has_fleet_server?: boolean;
   }
-): Promise<any> {
+): Promise<Record<string, unknown>> {
   const body = {
     name,
     namespace: options?.namespace ?? 'default',
@@ -49,7 +45,7 @@ export async function createAgentPolicy(
 }
 
 export async function deleteAgentPolicy(
-  kbnClient: any,
+  kbnClient: KbnClient,
   id: string,
   spaceId?: string
 ): Promise<void> {
@@ -67,14 +63,16 @@ export async function deleteAgentPolicy(
   }
 }
 
-export async function cleanupAgentPolicies(kbnClient: any, spaceId?: string): Promise<void> {
+export async function cleanupAgentPolicies(kbnClient: KbnClient, spaceId?: string): Promise<void> {
   try {
     const path = spaceId
       ? `/s/${spaceId}/api/fleet/agent_policies?withAgentCount=true`
       : '/api/fleet/agent_policies?withAgentCount=true';
     const response = await kbnClient.request({ method: 'GET', path });
     const items = response.data?.items ?? response.items ?? [];
-    const toDelete = items.filter((p: any) => (p.agents ?? 0) === 0);
+    const toDelete = items.filter(
+      (p: Record<string, unknown>) => ((p.agents as number) ?? 0) === 0
+    );
 
     for (const policy of toDelete) {
       await deleteAgentPolicy(kbnClient, policy.id, spaceId);
@@ -85,9 +83,9 @@ export async function cleanupAgentPolicies(kbnClient: any, spaceId?: string): Pr
 }
 
 export async function createDownloadSource(
-  kbnClient: any,
+  kbnClient: KbnClient,
   payload: { name: string; host: string; id?: string; is_default?: boolean }
-): Promise<any> {
+): Promise<Record<string, unknown>> {
   const response = await kbnClient.request({
     method: 'POST',
     path: '/api/fleet/agent_download_sources',
@@ -97,14 +95,16 @@ export async function createDownloadSource(
   return response.data?.item ?? response.item;
 }
 
-export async function cleanupDownloadSources(kbnClient: any): Promise<void> {
+export async function cleanupDownloadSources(kbnClient: KbnClient): Promise<void> {
   try {
     const response = await kbnClient.request({
       method: 'GET',
       path: '/api/fleet/agent_download_sources',
     });
     const items = response.data?.items ?? response.items ?? [];
-    const nonDefault = items.filter((ds: any) => !ds.is_default);
+    const nonDefault = items.filter(
+      (ds: Record<string, unknown>) => !ds.is_default
+    );
 
     for (const ds of nonDefault) {
       try {
@@ -122,9 +122,9 @@ export async function cleanupDownloadSources(kbnClient: any): Promise<void> {
 }
 
 export async function insertDoc(
-  esClient: any,
+  esClient: EsClient,
   index: string,
-  doc: any,
+  doc: Record<string, unknown>,
   id?: string
 ): Promise<void> {
   await esClient.index({
@@ -135,15 +135,19 @@ export async function insertDoc(
   });
 }
 
-export async function insertDocs(esClient: any, index: string, docs: any[]): Promise<void> {
+export async function insertDocs(
+  esClient: EsClient,
+  index: string,
+  docs: Record<string, unknown>[]
+): Promise<void> {
   const operations = docs.flatMap((doc) => [{ index: { _index: index } }, doc]);
   await esClient.bulk({ operations, refresh: 'wait_for' });
 }
 
 export async function deleteDocsByQuery(
-  esClient: any,
+  esClient: EsClient,
   index: string,
-  query: any,
+  query: Record<string, unknown>,
   options?: { ignoreUnavailable?: boolean }
 ): Promise<void> {
   try {
@@ -161,10 +165,10 @@ export async function deleteDocsByQuery(
 }
 
 export async function installTestPackage(
-  kbnClient: any,
+  kbnClient: KbnClient,
   pkgName: string,
   version: string = 'latest'
-): Promise<any> {
+): Promise<Record<string, unknown>> {
   // Fleet EPM install: POST /api/fleet/epm/packages/{name}/{version}
   const path =
     version === 'latest'
@@ -184,10 +188,10 @@ export async function installTestPackage(
  * Zip path: fleet plugin root / cypress / packages / {pkgName}.zip
  */
 export async function installTestPackageFromZip(
-  kbnClient: any,
+  kbnClient: KbnClient,
   pkgName: string,
   zipPath?: string
-): Promise<any> {
+): Promise<Record<string, unknown>> {
   const pathModule = await import('path');
   const fs = await import('fs').then((m) => m.promises);
   const resolvedPath =
@@ -204,7 +208,7 @@ export async function installTestPackageFromZip(
 }
 
 export async function uninstallTestPackage(
-  kbnClient: any,
+  kbnClient: KbnClient,
   pkgName: string,
   version?: string
 ): Promise<void> {
@@ -222,7 +226,7 @@ export async function uninstallTestPackage(
 }
 
 export async function setFleetServerHost(
-  kbnClient: any,
+  kbnClient: KbnClient,
   host: string = 'https://fleetserver:8220'
 ): Promise<void> {
   await kbnClient.request({
@@ -295,8 +299,8 @@ export function createAgentDoc(
 }
 
 export async function setupFleetServer(
-  kbnClient: any,
-  esClient: any,
+  kbnClient: KbnClient,
+  esClient: EsClient,
   kibanaVersion: string = '8.1.0'
 ): Promise<string> {
   const FLEET_SERVER_POLICY_ID = 'fleet-server-policy';
@@ -312,8 +316,9 @@ export async function setupFleetServer(
         has_fleet_server: true,
       },
     });
-  } catch (e: any) {
-    if (e?.response?.status !== 409) {
+  } catch (e: unknown) {
+    const error = e as { response?: { status?: number } };
+    if (error?.response?.status !== 409) {
       throw e;
     }
   }
@@ -326,10 +331,10 @@ export async function setupFleetServer(
 }
 
 export async function createEnrollmentToken(
-  kbnClient: any,
+  kbnClient: KbnClient,
   policyId: string,
   name?: string
-): Promise<any> {
+): Promise<Record<string, unknown>> {
   const response = await kbnClient.request({
     method: 'POST',
     path: '/api/fleet/enrollment_api_keys',
@@ -342,7 +347,7 @@ export async function createEnrollmentToken(
   return response.data?.item ?? response.item;
 }
 
-export async function enableSpaceAwareness(kbnClient: any): Promise<void> {
+export async function enableSpaceAwareness(kbnClient: KbnClient): Promise<void> {
   try {
     await kbnClient.request({
       method: 'POST',
@@ -354,11 +359,11 @@ export async function enableSpaceAwareness(kbnClient: any): Promise<void> {
 }
 
 export async function createSpace(
-  kbnClient: any,
+  kbnClient: KbnClient,
   id: string,
   name: string,
   options?: { description?: string; color?: string; initials?: string }
-): Promise<any> {
+): Promise<Record<string, unknown>> {
   const body = {
     id,
     name,
@@ -378,7 +383,7 @@ export async function createSpace(
   return response.data ?? response;
 }
 
-export async function unenrollAgents(kbnClient: any): Promise<void> {
+export async function unenrollAgents(kbnClient: KbnClient): Promise<void> {
   try {
     const response = await kbnClient.request({
       method: 'GET',

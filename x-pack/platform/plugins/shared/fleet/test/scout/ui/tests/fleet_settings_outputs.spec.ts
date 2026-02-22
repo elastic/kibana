@@ -13,7 +13,7 @@ import { SETTINGS_OUTPUTS } from '../common/selectors';
 
 test.describe('Fleet settings outputs', { tag: [...tags.stateful.classic] }, () => {
   test.beforeEach(async ({ browserAuth }) => {
-    await browserAuth.loginAsAdmin();
+    await browserAuth.loginAsPrivilegedUser();
   });
 
   test('should add ES output', async ({ page }) => {

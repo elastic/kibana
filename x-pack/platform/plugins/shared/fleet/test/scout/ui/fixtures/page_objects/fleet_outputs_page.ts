@@ -18,12 +18,16 @@ export class FleetOutputsPage {
 
   async navigateTo() {
     await this.page.goto('/app/fleet/settings');
-    await this.page.waitForLoadState('networkidle');
+    await this.page.testSubj
+      .locator(SETTINGS_OUTPUTS.TABLE)
+      .waitFor({ state: 'visible', timeout: 20_000 });
   }
 
   async navigateToOutput(outputId: string) {
     await this.page.goto(`/app/fleet/settings/outputs/${outputId}`);
-    await this.page.waitForLoadState('networkidle');
+    await this.page.testSubj
+      .locator(SETTINGS_OUTPUTS.NAME_INPUT)
+      .waitFor({ state: 'visible', timeout: 20_000 });
   }
 
   getAddOutputButton() {
@@ -64,8 +68,7 @@ export class FleetOutputsPage {
     await this.getAddOutputButton().click();
     await this.getTypeInput().selectOption('elasticsearch');
     await this.getNameInput().fill(name);
-    const hostInput = this.page.locator('[placeholder="Specify host"]').first();
-    await hostInput.fill(hosts[0]);
+    await this.page.getByPlaceholder('Specify host').fill(hosts[0]);
   }
 
   async addRemoteESOutput(name: string, hosts: string[]) {
@@ -77,7 +80,7 @@ export class FleetOutputsPage {
   async addKafkaOutput(name: string) {
     await this.getAddOutputButton().click();
     await this.getTypeInput().selectOption('kafka');
-    await this.getKafkaAuthUsernamePasswordOption().locator('label').click();
+    await this.getKafkaAuthUsernamePasswordOption().getByRole('radio').click();
     await this.getNameInput().fill(name);
   }
 

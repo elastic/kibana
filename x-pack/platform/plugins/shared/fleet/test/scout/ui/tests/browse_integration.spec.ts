@@ -62,7 +62,7 @@ test.describe('Browse integration', { tag: tags.stateful.classic }, () => {
 
     await browseIntegrations.sortIntegrations('z-a');
 
-    await browseIntegrations.expectIntegrationCardToBeVisible('zoom');
+    await expect(browseIntegrations.getIntegrationCard('zoom')).toBeVisible();
   });
 
   test('it allow to search for an integration', async ({ pageObjects, browserAuth }) => {
@@ -75,6 +75,6 @@ test.describe('Browse integration', { tag: tags.stateful.classic }, () => {
 
     await browseIntegrations.searchForIntegration('nginx');
 
-    await browseIntegrations.expectIntegrationCardToBeVisible('nginx');
+    await expect(browseIntegrations.getIntegrationCard('nginx')).toBeVisible();
   });
 });

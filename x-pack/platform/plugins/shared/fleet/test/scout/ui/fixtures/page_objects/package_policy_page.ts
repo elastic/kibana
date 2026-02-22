@@ -36,7 +36,7 @@ export class PackagePolicyPage {
   }
 
   getPackagePolicyLink(name: string) {
-    return this.page.locator(`a[title="${name}"]`);
+    return this.page.getByRole('link', { name });
   }
 
   getInspectPipelinesButton() {

@@ -90,6 +90,6 @@ export class AgentFlyoutPage {
     await this.getFleetServerSetupSelectHosts().click();
     await this.getFleetServerSetupAddHostButton().click();
     await this.getFleetServerSetupNameInput().fill(name);
-    await this.page.locator('[placeholder="Specify host URL"]').first().fill(hostUrl);
+    await this.page.getByPlaceholder('Specify host URL').fill(hostUrl);
   }
 }

@@ -14,7 +14,7 @@ import { AGENT_FLYOUT, AGENT_POLICY_DETAILS_PAGE } from '../common/selectors';
 
 test.describe('Edit agent policy', { tag: [...tags.stateful.classic] }, () => {
   test.beforeEach(async ({ browserAuth }) => {
-    await browserAuth.loginAsAdmin();
+    await browserAuth.loginAsPrivilegedUser();
   });
 
   test('should edit agent policy', async ({ page, kbnClient }) => {
@@ -41,7 +41,7 @@ test.describe('Edit agent policy', { tag: [...tags.stateful.classic] }, () => {
     });
 
     await page.goto('/app/fleet/policies/policy-1/settings');
-    const descInput = page.locator('[placeholder="Optional description"]').first();
+    const descInput = page.getByPlaceholder('Optional description');
     await descInput.clear();
     await descInput.fill('desc');
 
@@ -49,7 +49,7 @@ test.describe('Edit agent policy', { tag: [...tags.stateful.classic] }, () => {
       (res) =>
         res.url().includes('/api/fleet/agent_policies/policy-1') && res.request().method() === 'PUT'
     );
-    await page.getByRole('button', { name: 'Save changes' }).first().click();
+    await page.getByRole('button', { name: 'Save changes' }).click();
     const response = await updateResponse;
     const body = JSON.parse((await response.request().postData()) ?? '{}');
     expect(body.description).toBe('desc');
@@ -127,7 +127,8 @@ test.describe('Edit agent policy', { tag: [...tags.stateful.classic] }, () => {
     await page.testSubj.locator(AGENT_POLICY_DETAILS_PAGE.ADD_AGENT_LINK).click();
     await page.testSubj.locator(AGENT_FLYOUT.PLATFORM_SELECTOR_EXTENDED).click();
     await page.testSubj.locator(AGENT_FLYOUT.KUBERNETES_PLATFORM_TYPE).click();
-    await expect(page.getByText('https://xxx.yyy.zzz:443').first()).toBeVisible();
-    await expect(page.getByText('this-is-the-api-key').first()).toBeVisible();
+    const flyout = page.testSubj.locator('agentEnrollmentFlyout');
+    await expect(flyout.getByText('https://xxx.yyy.zzz:443')).toBeVisible();
+    await expect(flyout.getByText('this-is-the-api-key')).toBeVisible();
   });
 });

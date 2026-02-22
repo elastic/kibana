@@ -13,7 +13,7 @@ export class EnrollmentTokensPage {
 
   async navigateTo() {
     await this.page.goto('/app/fleet/enrollment-tokens');
-    await this.page.waitForLoadState('networkidle');
+    await this.getListTable().waitFor({ state: 'visible', timeout: 20_000 });
   }
 
   getCreateTokenButton() {
@@ -46,16 +46,17 @@ export class EnrollmentTokensPage {
     await this.getNameField().clear();
     await this.getNameField().fill(name);
     if (policyName) {
-      await this.getPolicySelectField().locator('input').fill(`${policyName}`);
-      await this.page.getByRole('option').filter({ hasText: policyName }).first().click();
+      await this.getPolicySelectField().getByRole('textbox').fill(`${policyName}`);
+      await this.page.getByRole('option', { name: policyName }).click();
     } else {
-      await this.getPolicySelectField().locator('input').press('ArrowDown');
-      await this.getPolicySelectField().locator('input').press('Enter');
+      await this.getPolicySelectField().getByRole('textbox').press('ArrowDown');
+      await this.getPolicySelectField().getByRole('textbox').press('Enter');
     }
     await this.getConfirmButton().click();
   }
 
-  async revokeFirstToken() {
-    await this.getRevokeButtons().first().click();
+  async revokeToken(policyName: string) {
+    const row = this.getListTable().getByRole('row', { name: policyName });
+    await row.locator(this.page.testSubj.locator(ENROLLMENT_TOKENS.TABLE_REVOKE_BTN)).click();
   }
 }

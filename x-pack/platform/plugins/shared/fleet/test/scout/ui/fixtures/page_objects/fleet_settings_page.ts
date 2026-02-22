@@ -92,7 +92,11 @@ export class FleetSettingsPage {
   }
 
   async editDownloadSource(name: string, host: string) {
-    await this.getEditDownloadSourceButton().first().click();
+    await this.getAgentBinarySourcesTable()
+      .getByRole('row')
+      .filter({ has: this.page.testSubj.locator(AGENT_BINARY_SOURCES_TABLE_ACTIONS.EDIT) })
+      .locator(this.page.testSubj.locator(AGENT_BINARY_SOURCES_TABLE_ACTIONS.EDIT))
+      .click();
     await this.getDownloadSourceFlyoutNameInput().clear();
     await this.getDownloadSourceFlyoutNameInput().fill(name);
     await this.getDownloadSourceFlyoutHostInput().clear();

@@ -42,20 +42,27 @@ test.describe('Agent binary download source section', { tag: [...tags.stateful.c
 
   test('has a default value and allows to edit an existing object', async ({
     page,
-    browserAuth,
   }) => {
-    await browserAuth.loginAsAdmin();
     await page.gotoApp('fleet');
     await page.testSubj.locator(SETTINGS_TAB).click();
 
-    await expect(page.testSubj.locator(AGENT_BINARY_SOURCES_TABLE).locator('tr')).toHaveCount(2);
+    const tableRows = page.testSubj.locator(AGENT_BINARY_SOURCES_TABLE).locator('tr');
+    await expect(tableRows).toHaveCount(2);
+    const defaultRow = page.testSubj
+      .locator(AGENT_BINARY_SOURCES_TABLE)
+      .getByRole('row')
+      .filter({
+        has: page.testSubj.locator(AGENT_BINARY_SOURCES_TABLE_ACTIONS.DEFAULT_VALUE),
+      });
     await expect(
-      page.testSubj.locator(AGENT_BINARY_SOURCES_TABLE_ACTIONS.HOST).first()
+      defaultRow.locator(`[data-test-subj="${AGENT_BINARY_SOURCES_TABLE_ACTIONS.HOST}"]`)
     ).toContainText('https://artifacts.elastic.co/downloads/');
     await expect(
-      page.testSubj.locator(AGENT_BINARY_SOURCES_TABLE_ACTIONS.DEFAULT_VALUE).first()
+      defaultRow.locator(`[data-test-subj="${AGENT_BINARY_SOURCES_TABLE_ACTIONS.DEFAULT_VALUE}"]`)
     ).toBeVisible();
-    await page.testSubj.locator(AGENT_BINARY_SOURCES_TABLE_ACTIONS.EDIT).first().click();
+    await defaultRow
+      .locator(`[data-test-subj="${AGENT_BINARY_SOURCES_TABLE_ACTIONS.EDIT}"]`)
+      .click();
     await page.testSubj.locator(AGENT_BINARY_SOURCES_FLYOUT.NAME_INPUT).clear();
     await page.testSubj.locator(AGENT_BINARY_SOURCES_FLYOUT.NAME_INPUT).fill('New Name');
     await page.testSubj.locator(AGENT_BINARY_SOURCES_FLYOUT.HOST_INPUT).clear();
@@ -66,8 +73,7 @@ test.describe('Agent binary download source section', { tag: [...tags.stateful.c
     await page.testSubj.locator(CONFIRM_MODAL.CONFIRM_BUTTON).click();
   });
 
-  test('allows to create new download source objects', async ({ page, browserAuth }) => {
-    await browserAuth.loginAsAdmin();
+  test('allows to create new download source objects', async ({ page }) => {
     await page.gotoApp('fleet');
     await page.testSubj.locator(SETTINGS_TAB).click();
 
@@ -95,7 +101,6 @@ test.describe('Agent binary download source section', { tag: [...tags.stateful.c
   test('the download source is displayed in agent policy settings', async ({
     page,
     kbnClient,
-    browserAuth,
   }) => {
     await createDownloadSource(kbnClient, {
       name: 'Custom Host',
@@ -107,7 +112,6 @@ test.describe('Agent binary download source section', { tag: [...tags.stateful.c
       download_source_id: 'fleet-local-registry',
     });
 
-    await browserAuth.loginAsAdmin();
     await page.goto('/app/fleet/policies/new-agent-policy/settings');
     await expect(page.testSubj.locator(AGENT_POLICY_FORM.DOWNLOAD_SOURCE_SELECT)).toContainText(
       'Custom Host'

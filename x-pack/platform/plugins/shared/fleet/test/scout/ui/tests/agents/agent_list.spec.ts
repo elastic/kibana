@@ -68,7 +68,7 @@ test.describe('View agents list', { tag: [...tags.stateful.classic] }, () => {
   });
 
   test.beforeEach(async ({ browserAuth, page }) => {
-    await browserAuth.loginAsAdmin();
+    await browserAuth.loginAsPrivilegedUser();
     await page.route('**/api/fleet/agents/setup', (route) =>
       route.fulfill({
         status: 200,
@@ -124,7 +124,7 @@ test.describe('View agents list', { tag: [...tags.stateful.classic] }, () => {
   test('should filter on single policy (no results)', async ({ page }) => {
     await page.goto('/app/fleet/agents');
     await page.testSubj.locator(FLEET_AGENT_LIST_PAGE.POLICY_FILTER).click();
-    await page.getByText('Agent policy 4').first().click();
+    await page.getByRole('option', { name: 'Agent policy 4' }).click();
     await expect(
       page.testSubj.locator(FLEET_AGENT_LIST_PAGE.TABLE).getByText('No agents found')
     ).toBeVisible();
@@ -133,7 +133,7 @@ test.describe('View agents list', { tag: [...tags.stateful.classic] }, () => {
   test('should filter on single policy', async ({ page }) => {
     await page.goto('/app/fleet/agents');
     await page.testSubj.locator(FLEET_AGENT_LIST_PAGE.POLICY_FILTER).click();
-    await page.getByText('Agent policy 1').first().click();
+    await page.getByRole('option', { name: 'Agent policy 1' }).click();
     await expect(
       page.testSubj.locator(FLEET_AGENT_LIST_PAGE.TABLE).getByText('agent-1')
     ).toBeVisible();

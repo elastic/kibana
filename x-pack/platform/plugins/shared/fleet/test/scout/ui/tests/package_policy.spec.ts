@@ -39,16 +39,16 @@ test.describe('Package policy', { tag: [...tags.stateful.classic] }, () => {
     });
 
     await page.goto('/app/fleet/policies/policy-1');
-    await page.getByRole('link', { name: 'system-1' }).first().click();
-    await page.getByRole('button', { name: 'Edit integration' }).first().click();
-    const descInput = page.locator('[placeholder="Optional description"]').first();
+    await page.testSubj.locator('PackagePoliciesTableLink').click();
+    await page.getByRole('button', { name: 'Edit integration' }).click();
+    const descInput = page.getByPlaceholder('Optional description');
     await descInput.clear();
     await descInput.fill('Updated description');
 
     const updatePromise = page.waitForResponse(
       (res) => res.url().includes('/api/fleet/package_policies') && res.request().method() === 'PUT'
     );
-    await page.getByRole('button', { name: 'Save integration' }).first().click();
+    await page.getByRole('button', { name: 'Save integration' }).click();
     await updatePromise;
   });
 });

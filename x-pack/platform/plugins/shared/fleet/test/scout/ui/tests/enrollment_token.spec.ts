@@ -10,7 +10,7 @@ import { tags } from '@kbn/scout';
 
 import { test } from '../fixtures';
 import { createAgentPolicy, cleanupAgentPolicies } from '../common/api_helpers';
-import { ENROLLMENT_TOKENS, CONFIRM_MODAL } from '../common/selectors';
+import { ENROLLMENT_TOKENS } from '../common/selectors';
 
 test.describe('Enrollment token page', { tag: [...tags.stateful.classic] }, () => {
   test.beforeAll(async ({ kbnClient }) => {
@@ -26,47 +26,34 @@ test.describe('Enrollment token page', { tag: [...tags.stateful.classic] }, () =
   });
 
   test.beforeEach(async ({ browserAuth }) => {
-    await browserAuth.loginAsAdmin();
+    await browserAuth.loginAsPrivilegedUser();
   });
 
-  test('Create new Token', async ({ page }) => {
-    await page.goto('/app/fleet/enrollment-tokens');
-    await page.testSubj.locator(ENROLLMENT_TOKENS.CREATE_TOKEN_BUTTON).click();
-    await page.testSubj.locator(ENROLLMENT_TOKENS.CREATE_TOKEN_MODAL_NAME_FIELD).clear();
-    await page.testSubj.locator(ENROLLMENT_TOKENS.CREATE_TOKEN_MODAL_NAME_FIELD).fill('New Token');
-    await page.testSubj
-      .locator(ENROLLMENT_TOKENS.CREATE_TOKEN_MODAL_SELECT_FIELD)
-      .locator('input')
-      .fill('Agent policy 1');
-    await page.getByRole('option').filter({ hasText: 'Agent policy 1' }).first().click();
-    await page.testSubj.locator(CONFIRM_MODAL.CONFIRM_BUTTON).click();
+  test('Create new Token', async ({ pageObjects }) => {
+    await pageObjects.enrollmentTokens.navigateTo();
+    await pageObjects.enrollmentTokens.createToken('New Token', 'Agent policy 1');
 
     await expect(
-      page.testSubj.locator(ENROLLMENT_TOKENS.LIST_TABLE).getByText('Agent policy 1')
+      pageObjects.enrollmentTokens.getListTable().getByText('Agent policy 1')
     ).toBeVisible({ timeout: 15_000 });
   });
 
-  test('Delete Token - inactivates the token', async ({ page }) => {
-    await page.goto('/app/fleet/enrollment-tokens');
-    await expect(page.testSubj.locator(ENROLLMENT_TOKENS.LIST_TABLE).locator('tr')).toHaveCount(2);
-    await page.testSubj.locator(ENROLLMENT_TOKENS.TABLE_REVOKE_BTN).first().click();
-    await expect(
-      page
-        .locator('.euiPanel')
-        .getByText(/Are you sure you want to revoke/)
-        .first()
-    ).toBeVisible();
-    await page
-      .getByRole('button', { name: 'Revoke enrollment token' })
-      .first()
-      .click({ force: true });
+  test('Delete Token - inactivates the token', async ({ page, pageObjects }) => {
+    await pageObjects.enrollmentTokens.navigateTo();
+
+    const listTable = pageObjects.enrollmentTokens.getListTable();
+    await expect(listTable.getByRole('row')).toHaveCount(2);
+
+    await pageObjects.enrollmentTokens.revokeToken('Agent policy 1');
 
     await expect(
-      page.testSubj
-        .locator(ENROLLMENT_TOKENS.LIST_TABLE)
-        .locator('.euiTableRow')
-        .first()
-        .locator(ENROLLMENT_TOKENS.TABLE_REVOKE_BTN)
+      page.getByRole('dialog').getByText(/Are you sure you want to revoke/)
+    ).toBeVisible();
+    await page.getByRole('dialog').getByRole('button', { name: 'Revoke enrollment token' }).click();
+
+    const row = listTable.getByRole('row', { name: 'Agent policy 1' });
+    await expect(
+      row.locator(page.testSubj.locator(ENROLLMENT_TOKENS.TABLE_REVOKE_BTN))
     ).not.toBeVisible();
   });
 });

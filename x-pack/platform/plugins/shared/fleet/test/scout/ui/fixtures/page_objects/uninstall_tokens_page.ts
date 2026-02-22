@@ -14,7 +14,7 @@ export class UninstallTokensPage {
   async navigateTo() {
     await this.page.gotoApp('fleet');
     await this.page.testSubj.locator('fleet-uninstall-tokens-tab').click();
-    await this.page.waitForLoadState('networkidle');
+    await this.getPolicyIdSearchInput().waitFor({ state: 'visible', timeout: 20_000 });
   }
 
   getPolicyIdSearchInput() {
@@ -41,7 +41,13 @@ export class UninstallTokensPage {
     return this.page.testSubj.locator(UNINSTALL_TOKENS.SHOW_HIDE_TOKEN_BUTTON);
   }
 
-  async openUninstallCommandFlyout() {
-    await this.getViewUninstallCommandButtons().first().click();
+  async openUninstallCommandFlyout(policyId: string) {
+    const row = this.page.testSubj
+      .locator(UNINSTALL_TOKENS.POLICY_ID_TABLE_FIELD)
+      .filter({ hasText: policyId })
+      .locator('..');
+    await row
+      .locator(this.page.testSubj.locator(UNINSTALL_TOKENS.VIEW_UNINSTALL_COMMAND_BUTTON))
+      .click();
   }
 }

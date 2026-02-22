@@ -13,7 +13,7 @@ import { createAgentPolicy } from '../../common/api_helpers';
 
 test.describe('Agentless policy', { tag: [...tags.stateful.classic] }, () => {
   test.beforeEach(async ({ browserAuth }) => {
-    await browserAuth.loginAsAdmin();
+    await browserAuth.loginAsPrivilegedUser();
   });
 
   test('should not show Add integration button for agentless policy', async ({
@@ -45,6 +45,6 @@ test.describe('Agentless policy', { tag: [...tags.stateful.classic] }, () => {
 
     await createAgentPolicy(kbnClient, 'Agentless policy', { id: 'policy-1' });
     await page.goto('/app/fleet/policies/policy-1');
-    await expect(page.getByText('Add integration').first()).not.toBeVisible();
+    await expect(page.testSubj.locator('addPackagePolicyButton')).not.toBeVisible();
   });
 });
