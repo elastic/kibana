@@ -11,6 +11,7 @@ import chalk from 'chalk';
 import path from 'path';
 import { userInfo } from 'os';
 import { unlink as deleteFile } from 'fs/promises';
+import { statfs } from 'fs/promises';
 import { dump } from './utils';
 import type { DownloadedAgentInfo } from './agent_downloads_service';
 import { BaseDataGenerator } from '../../../common/endpoint/data_generators/base_data_generator';
@@ -263,44 +264,70 @@ const createVagrantVm = async ({
 
   const VAGRANT_CWD = path.dirname(vagrantFile);
 
-  // Destroy the VM running (if any) with the provided vagrant file before re-creating it
-  try {
-    await execa.command(`vagrant destroy -f`, {
-      env: {
-        VAGRANT_CWD,
-      },
-      // Only `pipe` STDERR to parent process
-      stdio: ['inherit', 'inherit', 'pipe'],
-    });
-    // eslint-disable-next-line no-empty
-  } catch (e) {}
-
   if (memory || cpus || disk) {
     log.warning(
       `cpu, memory and disk options ignored for creation of vm via Vagrant. These should be defined in the Vagrantfile`
     );
   }
 
-  try {
-    const vagrantUpResponse = (
-      await execa.command(`vagrant up`, {
-        env: {
-          VAGRANT_DISABLE_VBOXSYMLINKCREATE: '1',
-          VAGRANT_CWD,
-          VMNAME: name,
-          CACHED_AGENT_SOURCE: agentFullFilePath,
-          CACHED_AGENT_FILENAME: agentFileName,
-          AGENT_DESTINATION_FOLDER: agentFileName.replace('.tar.gz', ''),
-        },
-        // Only `pipe` STDERR to parent process
-        stdio: ['inherit', 'inherit', 'pipe'],
-      })
-    ).stdout;
+  const vagrantEnv = {
+    VAGRANT_DISABLE_VBOXSYMLINKCREATE: '1',
+    VAGRANT_CWD,
+    VMNAME: name,
+    CACHED_AGENT_SOURCE: agentFullFilePath,
+    CACHED_AGENT_FILENAME: agentFileName,
+    AGENT_DESTINATION_FOLDER: agentFileName.replace('.tar.gz', ''),
+  };
 
-    log.debug(`Vagrant up command response: `, vagrantUpResponse);
+  const MIN_DISK_GB = 10;
+  try {
+    const stats = await statfs(VAGRANT_CWD);
+    const freeGB = (stats.bfree * stats.bsize) / 1024 / 1024 / 1024;
+    log.info(`Host disk free space: ${freeGB.toFixed(1)} GB`);
+
+    if (freeGB < MIN_DISK_GB) {
+      throw new Error(
+        `Insufficient disk space for vagrant VM: ${freeGB.toFixed(1)} GB free, need at least ${MIN_DISK_GB} GB`
+      );
+    }
   } catch (e) {
-    log.error(e);
-    throw e;
+    if (e.message?.includes('Insufficient disk space')) {
+      throw e;
+    }
+    log.debug(`Unable to check disk space: ${e.message}`);
+  }
+
+  const MAX_ATTEMPTS = 2;
+
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    try {
+      await execa
+        .command('vagrant destroy -f', {
+          env: { VAGRANT_CWD },
+          stdio: ['inherit', 'pipe', 'pipe'],
+        })
+        .catch(() => {});
+
+      const vagrantUpResponse = (
+        await execa.command('vagrant up', {
+          env: vagrantEnv,
+          stdio: ['inherit', 'pipe', 'pipe'],
+        })
+      ).stdout;
+
+      log.debug('Vagrant up command response: ', vagrantUpResponse);
+      break;
+    } catch (e) {
+      log.error(
+        `vagrant up failed (attempt ${attempt}/${MAX_ATTEMPTS}):\nSTDOUT: ${e.stdout}\nSTDERR: ${e.stderr}`
+      );
+
+      if (attempt === MAX_ATTEMPTS) {
+        throw e;
+      }
+
+      log.info('Retrying vagrant up after cleanup...');
+    }
   }
 
   return createVagrantHostVmClient(name, undefined, log);
