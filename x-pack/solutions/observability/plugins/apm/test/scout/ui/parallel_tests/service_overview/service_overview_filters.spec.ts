@@ -88,9 +88,7 @@ test.describe(
       });
 
       await test.step('Verify URL contains environment parameter', async () => {
-        await expect(page).toHaveURL(
-          new RegExp(`environment=${PRODUCTION_ENVIRONMENT}`)
-        );
+        await expect(page).toHaveURL(new RegExp(`environment=${PRODUCTION_ENVIRONMENT}`));
       });
     });
 

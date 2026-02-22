@@ -37,5 +37,7 @@ export async function waitForApmSettingsHeaderLink(page: ScoutPage): Promise<voi
  */
 export async function waitForApmMainContainer(page: ScoutPage): Promise<void> {
   await waitForPageReady(page);
-  await page.testSubj.locator('apmMainContainer').waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+  await page.testSubj
+    .locator('apmMainContainer')
+    .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
 }

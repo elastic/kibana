@@ -23,7 +23,9 @@ export class ServiceInventoryPage {
         rangeTo: overrides.rangeTo ?? testData.END_DATE,
       })}`
     );
-    await this.page.testSubj.locator('apmUnifiedSearchBar').waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+    await this.page.testSubj
+      .locator('apmUnifiedSearchBar')
+      .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
     await this.waitForServicesTableToLoad();
   }
 

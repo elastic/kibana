@@ -91,10 +91,9 @@ test.describe(
           }
         );
 
-        await expect(page).toHaveURL(
-          new RegExp(encodeURIComponent(specialServiceName)),
-          { timeout: EXTENDED_TIMEOUT }
-        );
+        await expect(page).toHaveURL(new RegExp(encodeURIComponent(specialServiceName)), {
+          timeout: EXTENDED_TIMEOUT,
+        });
       });
     });
   }

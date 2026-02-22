@@ -95,9 +95,7 @@ test.describe(
       kbnUrl,
     }) => {
       await page.goto(`${kbnUrl.app('apm')}/diagnostics`);
-      await expect(
-        page.getByText('Not all features are available')
-      ).toBeVisible();
+      await expect(page.getByText('Not all features are available')).toBeVisible();
     });
 
     test('hides the tabs that require cluster privileges', async ({ page, kbnUrl }) => {
