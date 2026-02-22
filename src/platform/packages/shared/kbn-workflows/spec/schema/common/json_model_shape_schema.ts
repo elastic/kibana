@@ -57,7 +57,8 @@ export interface JsonSchema {
   title?: string;
   description?: string;
   format?: string;
-  default?: string | number | boolean | null;
+  default?: unknown;
+  $ref?: string;
 
   // Logical Composition
   allOf?: JsonSchema[];
@@ -117,6 +118,7 @@ export const JSON_SCHEMA_PROPERTY_KEYS = [
   'anyOf',
   'oneOf',
   'not',
+  '$ref',
   'definitions',
   'minimum',
   'exclusiveMinimum',
@@ -132,11 +134,10 @@ export const JSON_SCHEMA_PROPERTY_KEYS = [
 ] as const satisfies readonly (keyof JsonSchema)[];
 
 /**
- * Zod schema representing a JSON Schema model shape (Draft 7 / 2020-12).
- * This schema is converted to JSON Schema and fed to monaco-yaml, which provides
- * autocomplete suggestions for all property keys, type values, and format values
- * automatically. The `.meta({ jsonSchemaModel: true })` tag is preserved for
- * programmatic detection.
+ * Zod schema representing any JSON Schema node (Draft 7 / 2020-12).
+ * Used recursively inside property definitions, allOf/anyOf/oneOf, etc.
+ * Allows the full set of JSON Schema keywords because an individual
+ * property can be any type (string, number, array, object, ...).
  */
 export const JsonModelShapeSchema: z.ZodType<JsonSchema> = z
   .lazy(() =>
@@ -148,6 +149,7 @@ export const JsonModelShapeSchema: z.ZodType<JsonSchema> = z
       description: z.string().optional(),
       format: z.enum(JSON_SCHEMA_FORMAT_VALUES).optional(),
       default: z.any().optional(),
+      $ref: z.string().optional(),
 
       // --- Logical Operators ---
       allOf: z.array(JsonModelShapeSchema).optional(),
@@ -185,4 +187,27 @@ export const JsonModelShapeSchema: z.ZodType<JsonSchema> = z
       pattern: z.string().optional(),
     })
   )
+  .meta({ jsonSchemaModel: true });
+
+/**
+ * Root-level JSON Schema shape for workflow inputs.
+ * Only exposes object-level keywords (properties, required, definitions, etc.)
+ * so that monaco-yaml autocomplete at the `inputs:` level does not suggest
+ * irrelevant constraint keywords like enum, maxLength, minimum, etc.
+ * Individual property schemas inside `properties` still use the full
+ * JsonModelShapeSchema with all keywords available.
+ */
+export const JsonModelRootShapeSchema = z
+  .object({
+    type: z.literal('object').optional(),
+    title: z.string().optional(),
+    description: z.string().optional(),
+    $ref: z.string().optional(),
+    properties: z.record(z.string(), JsonModelShapeSchema).optional(),
+    patternProperties: z.record(z.string(), JsonModelShapeSchema).optional(),
+    additionalProperties: z.union([z.boolean(), JsonModelShapeSchema]).optional(),
+    required: z.array(z.string()).optional(),
+    definitions: z.record(z.string(), JsonModelShapeSchema).optional(),
+    $defs: z.record(z.string(), JsonModelShapeSchema).optional(),
+  })
   .meta({ jsonSchemaModel: true });

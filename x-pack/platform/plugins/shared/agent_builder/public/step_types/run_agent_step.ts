@@ -135,7 +135,7 @@ When a schema is provided, the agent's response will be available in \`output.st
           return RunAgentOutputSchema;
         }
         return RunAgentOutputSchema.extend({
-          structured_output: fromJSONSchema(input.schema),
+          structured_output: fromJSONSchema(input.schema as Record<string, unknown>),
         });
       },
     },
