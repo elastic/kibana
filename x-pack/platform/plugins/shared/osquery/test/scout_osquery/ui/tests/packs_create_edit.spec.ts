@@ -123,6 +123,10 @@ test.describe(
         });
 
         await test.step('Navigate to pack details, edit result types and update', async () => {
+          if (!resultTypePackId) {
+            throw new Error('Expected resultTypePackId to be defined after pack creation');
+          }
+
           await packs.navigateToPackDetail(resultTypePackId);
           await packs.clickEditPack();
 
