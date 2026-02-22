@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-/* eslint-disable playwright/no-nth-methods */
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
@@ -29,9 +28,10 @@ test.describe('Alert Test', { tag: [...tags.stateful.classic] }, () => {
     await waitForAlerts(page, kbnClient, ruleId);
 
     // Expand first event
+    // eslint-disable-next-line playwright/no-nth-methods -- first event in list
     await page.testSubj.locator('expand-event').first().click();
     await page.testSubj.locator('securitySolutionFlyoutInvestigationGuideButton').click();
-    await page.getByText('Get processes').first().click();
+    await page.getByRole('button', { name: 'Get processes' }).click();
   });
 
   test.afterAll(async ({ kbnClient }) => {
@@ -59,6 +59,6 @@ test.describe('Alert Test', { tag: [...tags.stateful.classic] }, () => {
     });
 
     await pageObjects.liveQuery.submitQuery();
-    await expect(page.getByText('Forbidden').first()).toBeVisible();
+    await expect(page.getByText('Forbidden')).toBeVisible();
   });
 });

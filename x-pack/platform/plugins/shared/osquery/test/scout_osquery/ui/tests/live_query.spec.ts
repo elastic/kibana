@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-/* eslint-disable playwright/no-nth-methods */
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
@@ -29,16 +28,16 @@ test.describe(
 
       await test.step('Submit without required fields and verify validation errors', async () => {
         await liveQuery.clickSubmit();
-        await expect(page.getByText('Agents is a required field').first()).toBeVisible();
-        await expect(page.getByText('Query is a required field').first()).toBeVisible();
+        await expect(page.getByText('Agents is a required field')).toBeVisible();
+        await expect(page.getByText('Query is a required field')).toBeVisible();
       });
 
       await test.step('Type query and verify agents validation remains', async () => {
         await liveQuery.inputQuery('select * from uptime;');
         await liveQuery.clickSubmit();
 
-        await expect(page.getByText('Query is a required field').first()).not.toBeVisible();
-        await expect(page.getByText('Agents is a required field').first()).toBeVisible();
+        await expect(page.getByText('Query is a required field')).not.toBeVisible();
+        await expect(page.getByText('Agents is a required field')).toBeVisible();
       });
     });
 
@@ -54,7 +53,7 @@ test.describe(
         await liveQuery.fillInQueryTimeout('86410');
         await liveQuery.clickSubmit();
         await expect(
-          page.getByText('The timeout value must be 86400 seconds or or lower.').first()
+          page.getByText('The timeout value must be 86400 seconds or or lower.')
         ).toBeVisible();
       });
 
@@ -62,7 +61,7 @@ test.describe(
         await liveQuery.fillInQueryTimeout('890');
         await liveQuery.clickSubmit();
         await expect(
-          page.getByText('The timeout value must be 86400 seconds or or lower.').first()
+          page.getByText('The timeout value must be 86400 seconds or or lower.')
         ).not.toBeVisible();
       });
     });
@@ -206,7 +205,7 @@ test.describe(
       await test.step('Test ECS mapping validation and fix', async () => {
         await liveQuery.typeInOsqueryFieldInput('days');
         await liveQuery.clickSubmit();
-        await expect(page.getByText('ECS field is required.').first()).toBeVisible();
+        await expect(page.getByText('ECS field is required.')).toBeVisible();
 
         await liveQuery.typeInECSFieldInput('message');
       });
@@ -220,7 +219,7 @@ test.describe(
         );
 
         await liveQuery.submitQuery();
-        await expect(page.getByText('ECS field is required.').first()).not.toBeVisible();
+        await expect(page.getByText('ECS field is required.')).not.toBeVisible();
 
         const response = await postQueryPromise;
         const requestBody = response.request().postDataJSON();

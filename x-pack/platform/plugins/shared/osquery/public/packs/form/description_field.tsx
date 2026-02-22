@@ -39,7 +39,7 @@ const DescriptionFieldComponent: React.FC<DescriptionFieldProps> = ({ euiFieldPr
         value={value}
         name={fieldName}
         fullWidth
-        data-test-subj="input"
+        data-test-subj="packDescriptionInput"
         {...euiFieldProps}
       />
     </EuiFormRow>

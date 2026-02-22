@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable playwright/no-nth-methods */
 import { expect } from '@kbn/scout/ui';
 import type { ScoutPage, KibanaUrl } from '@kbn/scout';
 import { waitForPageReady } from './constants';
@@ -70,18 +69,14 @@ export async function checkOsqueryResponseActionsPermissions(
   if (enabled) {
     // Endpoint Complete: response actions should be available
     await page.testSubj.locator(ENDPOINT_RESPONSE_ACTION_ADD_BUTTON).click();
-    await expect(page.getByText('Query is a required field').first()).toBeVisible({
-      timeout: 15_000,
-    });
-    await expect(page.getByText('Select an endpoint response action.').first()).toBeVisible({
+    await expect(page.getByText('Query is a required field')).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByText('Select an endpoint response action.')).toBeVisible({
       timeout: 15_000,
     });
   } else {
     // Other tiers: upgrade message should appear
     await expect(
-      page
-        .getByText('Upgrade your license to Endpoint Complete to use Osquery Response Actions.')
-        .first()
+      page.getByText('Upgrade your license to Endpoint Complete to use Osquery Response Actions.')
     ).toBeVisible({ timeout: 15_000 });
     await expect(page.testSubj.locator(ENDPOINT_RESPONSE_ACTION_ADD_BUTTON)).toBeDisabled();
   }

@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-/* eslint-disable playwright/no-nth-methods */
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
@@ -74,7 +73,7 @@ roles.forEach(({ name, role }) => {
         await pageObjects.savedQueries.navigate();
         await waitForPageReady(page);
         // Saved query may be on another page - paginate to find it
-        const savedQueryRow = page.getByText(savedQueryName).first();
+        const savedQueryRow = page.getByText(savedQueryName);
         if ((await savedQueryRow.isVisible({ timeout: 3_000 }).catch(() => false)) === false) {
           const nextPageLink = page.getByRole('link', { name: 'Next page' });
           while (await nextPageLink.isVisible({ timeout: 2_000 }).catch(() => false)) {
@@ -86,7 +85,7 @@ roles.forEach(({ name, role }) => {
           }
         }
 
-        await expect(page.getByText(savedQueryName).first()).toBeVisible({ timeout: 10_000 });
+        await expect(page.getByText(savedQueryName)).toBeVisible({ timeout: 10_000 });
         const addSavedQueryButton = page.getByRole('button', { name: 'Add saved query' });
         await expect(addSavedQueryButton).toBeVisible({ timeout: 30_000 });
         await expect(addSavedQueryButton).toBeDisabled();
@@ -94,24 +93,26 @@ roles.forEach(({ name, role }) => {
 
         await pageObjects.savedQueries.clickRunSavedQuery(savedQueryName);
         await pageObjects.liveQuery.selectAllAgents();
-        await expect(page.getByText('select * from uptime;').first()).toBeVisible();
+        await expect(page.getByText('select * from uptime;')).toBeVisible();
         await pageObjects.liveQuery.submitQuery();
         await pageObjects.liveQuery.checkResults();
 
         // Check action items - wait for results actions to load
         // Note: t1/t2 analysts don't have Lens permissions, so "View in Lens" should not be visible
-        await expect(page.getByText('View in Discover').first()).toBeVisible({ timeout: 30_000 });
-        await expect(page.getByText('Add to Case').first()).toBeVisible({ timeout: 30_000 });
-        await expect(page.getByText('View in Lens').first()).not.toBeVisible();
-        await expect(page.getByText('Add to Timeline investigation').first()).not.toBeVisible();
+        await expect(page.testSubj.locator('viewInDiscover')).toBeVisible({ timeout: 30_000 });
+        await expect(page.testSubj.locator('addToCaseButton')).toBeVisible({ timeout: 30_000 });
+        await expect(page.testSubj.locator('viewInLens')).not.toBeVisible();
+        await expect(
+          page.getByRole('button', { name: 'Add to Timeline investigation' })
+        ).not.toBeVisible();
       });
 
       test('should be able to play in live queries history', async ({ page, pageObjects }) => {
         await pageObjects.liveQuery.navigate();
-        await expect(page.getByText('New live query').first()).toBeEnabled();
-        await expect(page.getByText(liveQueryQuery).first()).toBeVisible();
+        await expect(page.testSubj.locator('newLiveQueryButton')).toBeEnabled();
+        await expect(page.getByText(liveQueryQuery)).toBeVisible();
 
-        const runQueryButton = page.locator('[aria-label="Run query"]').first();
+        const runQueryButton = page.getByRole('button', { name: 'Run query' });
         await expect(runQueryButton).toBeEnabled();
         await runQueryButton.click();
 
@@ -127,7 +128,7 @@ roles.forEach(({ name, role }) => {
 
       test('should be able to use saved query in a new query', async ({ page, pageObjects }) => {
         await pageObjects.liveQuery.navigate();
-        const newLiveQueryButton = page.getByText('New live query').first();
+        const newLiveQueryButton = page.testSubj.locator('newLiveQueryButton');
         await expect(newLiveQueryButton).toBeEnabled();
         await newLiveQueryButton.click();
 
@@ -138,11 +139,8 @@ roles.forEach(({ name, role }) => {
         await searchInput.waitFor({ state: 'visible', timeout: 10_000 });
         await searchInput.fill('');
         await searchInput.pressSequentially(savedQueryName);
-        await page
-          .getByRole('option', { name: new RegExp(savedQueryName, 'i') })
-          .first()
-          .click();
-        await expect(page.getByText('select * from uptime').first()).toBeVisible();
+        await page.getByRole('option', { name: new RegExp(savedQueryName, 'i') }).click();
+        await expect(page.getByText('select * from uptime')).toBeVisible();
         await pageObjects.liveQuery.submitQuery();
         await pageObjects.liveQuery.checkResults();
       });
@@ -157,7 +155,7 @@ roles.forEach(({ name, role }) => {
           const nextPageLink = page.getByRole('link', { name: 'Next page' });
           while (await nextPageLink.isVisible({ timeout: 2_000 }).catch(() => false)) {
             await nextPageLink.click();
-            await new Promise((r) => setTimeout(r, 1000));
+            await waitForPageReady(page);
             if (await toggle.isVisible({ timeout: 2_000 }).catch(() => false)) {
               break;
             }
@@ -169,8 +167,8 @@ roles.forEach(({ name, role }) => {
         await expect(toggle).toBeDisabled();
 
         await pageObjects.packs.navigateToPackDetail(packId);
-        await expect(page.getByText(`${packName} details`).first()).toBeVisible();
-        await expect(page.getByText('Edit').first()).toBeDisabled();
+        await expect(page.getByText(`${packName} details`)).toBeVisible();
+        await expect(page.getByRole('button', { name: 'Edit' })).toBeDisabled();
         await expect(page.locator(`[aria-label="Run ${savedQueryName}"]`)).not.toBeVisible();
         await expect(page.locator(`[aria-label="Edit ${savedQueryName}"]`)).not.toBeVisible();
       });
@@ -181,12 +179,12 @@ roles.forEach(({ name, role }) => {
       }) => {
         await page.gotoApp('osquery');
         await waitForPageReady(page);
-        await page.getByText('New live query').first().click();
+        await page.testSubj.locator('newLiveQueryButton').click();
         await waitForPageReady(page);
         await pageObjects.liveQuery.selectAllAgents();
         await expect(page.testSubj.locator('kibanaCodeEditor')).toHaveCount(0);
         await pageObjects.liveQuery.clickSubmit();
-        await expect(page.getByText('Query is a required field').first()).toBeVisible();
+        await expect(page.getByText('Query is a required field')).toBeVisible();
       });
     }
   );

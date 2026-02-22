@@ -4,8 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-/* eslint-disable playwright/no-nth-methods */
-
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
@@ -47,43 +45,41 @@ test.describe(
         const discoverRegex = new RegExp(`action_id: ${UUID_REGEX}`);
 
         await test.step('Expand alert and open response action results', async () => {
+          // eslint-disable-next-line playwright/no-nth-methods -- first alert row
           await page.testSubj.locator('expand-event').first().click();
           await page.testSubj.locator('securitySolutionFlyoutResponseSectionHeader').click();
           await page.testSubj.locator('securitySolutionFlyoutResponseButton').click();
           const responseWrapper = page.testSubj.locator('responseActionsViewWrapper');
           await expect(responseWrapper).toBeVisible();
 
-          await expect(
-            responseWrapper.locator('[data-test-subj="osquery-results-comment"]').first()
-          ).toBeVisible({ timeout: 120_000 });
+          const resultComments = responseWrapper.locator(
+            '[data-test-subj="osquery-results-comment"]'
+          );
+          // eslint-disable-next-line playwright/no-nth-methods -- first osquery result comment
+          await expect(resultComments.first()).toBeVisible({ timeout: 120_000 });
 
-          await expect(page.getByText('View in Discover').first()).toBeVisible({ timeout: 30_000 });
-          await expect(page.getByText('View in Lens').first()).toBeVisible({ timeout: 30_000 });
-          await expect(page.getByText('Add to Case').first()).toBeVisible({ timeout: 30_000 });
-          await expect(page.getByText('Add to Timeline investigation').first()).toBeVisible({
-            timeout: 30_000,
-          });
+          await expect(page.testSubj.locator('viewInDiscover')).toBeVisible({ timeout: 30_000 });
+          await expect(page.testSubj.locator('viewInLens')).toBeVisible({ timeout: 30_000 });
+          await expect(page.testSubj.locator('addToCaseButton')).toBeVisible({ timeout: 30_000 });
+          await expect(
+            page.getByRole('button', { name: 'Add to Timeline investigation' })
+          ).toBeVisible({ timeout: 30_000 });
         });
 
         await test.step('Navigate to Discover and verify results', async () => {
-          const discoverLink = page.getByRole('link', { name: 'View in Discover' }).first();
+          const discoverLink = page.testSubj.locator('viewInDiscover');
           await expect(discoverLink).toBeVisible({ timeout: 30_000 });
           await expect(discoverLink).toHaveAttribute('href');
-          const href = await discoverLink.getAttribute('href');
+          const href = (await discoverLink.getAttribute('href'))!;
 
-          if (href) {
-            const baseUrl = new URL(page.url()).origin;
-            await page.goto(`${baseUrl}${href}`);
-            await waitForPageReady(page);
-            // eslint-disable-next-line playwright/no-conditional-expect
-            await expect(page.testSubj.locator('discoverDocTable')).toBeVisible({
-              timeout: 60_000,
-            });
-            // eslint-disable-next-line playwright/no-conditional-expect
-            await expect(page.getByText(/action_data\.query\s*.+;/).first()).toBeVisible();
-            // eslint-disable-next-line playwright/no-conditional-expect
-            await expect(page.getByText(discoverRegex).first()).toBeVisible();
-          }
+          const baseUrl = new URL(page.url()).origin;
+          await page.goto(`${baseUrl}${href}`);
+          await waitForPageReady(page);
+          await expect(page.testSubj.locator('discoverDocTable')).toBeVisible({
+            timeout: 60_000,
+          });
+          await expect(page.getByText(/action_data\.query\s*.+;/)).toBeVisible();
+          await expect(page.getByText(discoverRegex)).toBeVisible();
         });
       }
     );
@@ -96,25 +92,29 @@ test.describe(
         const lensRegex = new RegExp(`Action ${UUID_REGEX} results`);
 
         await test.step('Expand alert and open response action results', async () => {
+          // eslint-disable-next-line playwright/no-nth-methods -- first alert row
           await page.testSubj.locator('expand-event').first().click();
           await page.testSubj.locator('securitySolutionFlyoutResponseSectionHeader').click();
           await page.testSubj.locator('securitySolutionFlyoutResponseButton').click();
           const responseWrapper = page.testSubj.locator('responseActionsViewWrapper');
           await expect(responseWrapper).toBeVisible();
 
-          await expect(
-            responseWrapper.locator('[data-test-subj="osquery-results-comment"]').first()
-          ).toBeVisible({ timeout: 120_000 });
+          const resultComments = responseWrapper.locator(
+            '[data-test-subj="osquery-results-comment"]'
+          );
+          // eslint-disable-next-line playwright/no-nth-methods -- first osquery result comment
+          await expect(resultComments.first()).toBeVisible({ timeout: 120_000 });
 
-          await expect(page.getByText('View in Discover').first()).toBeVisible({ timeout: 30_000 });
-          await expect(page.getByText('View in Lens').first()).toBeVisible({ timeout: 30_000 });
-          await expect(page.getByText('Add to Case').first()).toBeVisible({ timeout: 30_000 });
-          await expect(page.getByText('Add to Timeline investigation').first()).toBeVisible({
-            timeout: 30_000,
-          });
+          await expect(page.testSubj.locator('viewInDiscover')).toBeVisible({ timeout: 30_000 });
+          await expect(page.testSubj.locator('viewInLens')).toBeVisible({ timeout: 30_000 });
+          await expect(page.testSubj.locator('addToCaseButton')).toBeVisible({ timeout: 30_000 });
+          await expect(
+            page.getByRole('button', { name: 'Add to Timeline investigation' })
+          ).toBeVisible({ timeout: 30_000 });
         });
 
         await test.step('Click View in Lens and verify new tab', async () => {
+          // eslint-disable-next-line playwright/no-nth-methods -- first osquery result comment
           const firstResultComment = page.testSubj.locator('osquery-results-comment').first();
           const lensButton = firstResultComment.locator('[aria-label="View in Lens"]');
 
@@ -143,26 +143,31 @@ test.describe(
         const filterRegex = new RegExp(`action_id: "${UUID_REGEX}"`);
 
         await test.step('Expand alert and open response action results', async () => {
+          // eslint-disable-next-line playwright/no-nth-methods -- first alert row
           await page.testSubj.locator('expand-event').first().click();
           await page.testSubj.locator('securitySolutionFlyoutResponseSectionHeader').click();
           await page.testSubj.locator('securitySolutionFlyoutResponseButton').click();
           const responseWrapper = page.testSubj.locator('responseActionsViewWrapper');
           await expect(responseWrapper).toBeVisible();
 
-          await expect(
-            responseWrapper.locator('[data-test-subj="osquery-results-comment"]').first()
-          ).toBeVisible({ timeout: 120_000 });
+          const resultComments = responseWrapper.locator(
+            '[data-test-subj="osquery-results-comment"]'
+          );
+          // eslint-disable-next-line playwright/no-nth-methods -- first osquery result comment
+          await expect(resultComments.first()).toBeVisible({ timeout: 120_000 });
 
-          await expect(page.getByText('View in Discover').first()).toBeVisible({ timeout: 30_000 });
-          await expect(page.getByText('View in Lens').first()).toBeVisible({ timeout: 30_000 });
-          await expect(page.getByText('Add to Case').first()).toBeVisible({ timeout: 30_000 });
-          await expect(page.getByText('Add to Timeline investigation').first()).toBeVisible({
-            timeout: 30_000,
-          });
+          await expect(page.testSubj.locator('viewInDiscover')).toBeVisible({ timeout: 30_000 });
+          await expect(page.testSubj.locator('viewInLens')).toBeVisible({ timeout: 30_000 });
+          await expect(page.testSubj.locator('addToCaseButton')).toBeVisible({ timeout: 30_000 });
+          await expect(
+            page.getByRole('button', { name: 'Add to Timeline investigation' })
+          ).toBeVisible({ timeout: 30_000 });
         });
 
         await test.step('Add to timeline and verify', async () => {
+          // eslint-disable-next-line playwright/no-nth-methods -- first osquery result comment
           const firstResultComment = page.testSubj.locator('osquery-results-comment').first();
+          // eslint-disable-next-line playwright/no-nth-methods -- first table row in results
           const firstTableRow = firstResultComment.locator('.euiTableRow').first();
           await firstTableRow.locator('[data-test-subj="add-to-timeline"]').click();
 

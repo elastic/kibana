@@ -101,6 +101,83 @@ Important: `apiServices`/`kbnClient` run with elevated privileges. Don’t use t
 - Fix the source of flakiness (selectors/readiness) instead of adding manual retry loops.
 - Use the Flaky Test Runner when adding new tests or fixing flaky tests (see `dev_docs/operations/flaky_test_runner.mdx`).
 
+## Playwright Best Practices (Applies to UI)
+
+### `eslint-plugin-playwright` — Zero Suppression Policy
+
+Kibana enforces `plugin:playwright/recommended` with strict rules for all Scout files. **Never** add `eslint-disable` for any `playwright/*` rule. Every violation has a proper fix:
+
+| Rule | Violation | Proper Fix |
+|---|---|---|
+| `no-nth-methods` | `.first()`, `.nth()`, `.last()` | Make locator unique via `data-test-subj` or role-based query |
+| `no-wait-for-timeout` | `page.waitForTimeout(N)` | `locator.waitFor()`, `expect(loc).toBeVisible()`, `page.waitForResponse()` |
+| `max-nested-describe` | Nested `describe` (depth > 1) | `test.step()` or split into separate spec files |
+| `no-conditional-expect` | `expect` in `if`/`else` | Assert deterministic state directly |
+| `prefer-web-first-assertions` | `expect(await loc.isVisible()).toBe(true)` | `await expect(loc).toBeVisible()` |
+| `no-wait-for-selector` | `page.waitForSelector()` | `locator.waitFor()` |
+| `no-focused-test` | `test.only(...)` | Remove before committing |
+| `no-page-pause` | `page.pause()` | Remove before committing |
+
+If you find existing `eslint-disable` comments during review, flag them for removal.
+
+### Locator Priority
+
+Use locators in this order of preference:
+1. `page.testSubj.locator('dataTestSubj')` — Kibana's stable test selector
+2. `page.getByRole('button', { name: 'Submit' })` — accessible role + name
+3. `page.getByLabel('Username')` — form control labels
+4. `page.getByText('Welcome')` — visible text content
+5. `page.getByTestId('id')` — generic data-testid
+
+Never use CSS classes, tag names, XPath, or DOM hierarchy selectors as primary locators.
+Never use `page.$()`, `page.$$()`, or `ElementHandle` — always use `Locator`.
+
+### Web-First Assertions (auto-retry)
+
+Always use Playwright's auto-retrying assertions:
+- `await expect(locator).toBeVisible()` — NOT `expect(await locator.isVisible()).toBe(true)`
+- `await expect(locator).toHaveText('...')` — NOT `expect(await locator.textContent()).toBe('...')`
+- Available: `toBeVisible`, `toBeHidden`, `toBeEnabled`, `toBeDisabled`, `toHaveText`, `toContainText`, `toHaveValue`, `toHaveAttribute`, `toHaveClass`, `toHaveCount`, `toHaveURL`, `toHaveTitle`
+
+### No Manual Waits
+
+- Never use `page.waitForTimeout(N)` or `new Promise(r => setTimeout(r, N))`
+- Wait on real conditions: `locator.waitFor()`, `expect(locator).toBeVisible()`, `page.waitForResponse()`, `expect.poll()`
+
+### Locator Strictness
+
+- Playwright strict mode requires locators to resolve to exactly one element
+- Never use `.first()` / `.nth()` as a quick fix — make the locator more specific or add `data-test-subj` to the source component
+- Chain and filter locators to narrow scope instead of global queries
+
+### Actions Auto-Wait
+
+- Playwright actions (`click`, `fill`, `check`, `selectOption`) auto-wait for actionability
+- Don't add redundant `waitFor({ state: 'visible' })` before actions
+- Only use explicit `waitFor` for disappearance checks or async-load readiness signals
+
+### Readable Selectors
+
+- Inline multi-step locator chains must be extracted into named constants or page object methods
+- Variable names describe **what** the element is (`saveButton`, `agentSearchInput`), not how it's found
+- If a locator has 2+ chained calls, it needs a descriptive name
+- Reused locators belong as page object properties or methods
+
+### Anti-Patterns to Flag
+
+- Any `eslint-disable playwright/*` comment — must be removed and properly fixed
+- `page.waitForTimeout()` or manual `setTimeout` delays
+- `expect(await loc.isVisible()).toBe(true)` instead of web-first assertion
+- `page.locator('.css-class')` or `#id` selectors
+- `.first()` / `.nth()` / `.last()` instead of unique locators
+- Nested `test.describe` deeper than 1 level
+- `expect` inside conditionals
+- `force: true` without a documented reason
+- `networkidle` as a wait condition
+- Assertions inside page objects (they belong in specs)
+- `test.setTimeout(300_000)` without a comment explaining why
+- Inline multi-step locator chains without a descriptive name
+
 ## Debugging Cheatsheet
 
 - Enable Scout debug logs: `SCOUT_LOG_LEVEL=debug`.

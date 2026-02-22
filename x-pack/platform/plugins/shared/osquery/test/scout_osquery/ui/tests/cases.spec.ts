@@ -4,8 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-/* eslint-disable playwright/no-nth-methods */
-
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
@@ -27,30 +25,28 @@ test.describe('Add to Cases', { tag: [...tags.stateful.classic] }, () => {
     liveQueryQuery = liveQuery.queries?.[0].query || 'SELECT * FROM os_version;';
   });
 
-  // eslint-disable-next-line playwright/max-nested-describe
-  test.describe('observability', { tag: [...tags.stateful.classic] }, () => {
-    let caseId: string;
-    let caseTitle: string;
+  let caseId: string;
+  let caseTitle: string;
 
-    test.beforeEach(async ({ browserAuth, kbnClient }) => {
+  test.beforeEach(async ({ browserAuth }) => {
+    await browserAuth.loginWithCustomRole(socManagerRole);
+  });
+
+  test.afterEach(async ({ kbnClient }) => {
+    if (caseId) {
+      await cleanupCase(kbnClient, caseId);
+    }
+  });
+
+  test(
+    'should add result to a case without showing add to timeline button (observability)',
+    { tag: [...tags.stateful.classic] },
+    async ({ page, pageObjects, kbnUrl, kbnClient }) => {
+      test.setTimeout(180_000);
       const caseData = await loadCase(kbnClient, 'observability');
       caseId = caseData.id;
       caseTitle = caseData.title;
-      await browserAuth.loginWithCustomRole(socManagerRole);
-    });
 
-    test.afterEach(async ({ kbnClient }) => {
-      if (caseId) {
-        await cleanupCase(kbnClient, caseId);
-      }
-    });
-
-    test('should add result to a case without showing add to timeline button', async ({
-      page,
-      pageObjects,
-      kbnUrl,
-    }) => {
-      test.setTimeout(180_000);
       await test.step('Navigate to live query results page', async () => {
         await page.goto(kbnUrl.get(`/app/osquery/live_queries/${liveQueryId}`));
         await waitForPageReady(page);
@@ -74,52 +70,37 @@ test.describe('Add to Cases', { tag: [...tags.stateful.classic] }, () => {
       });
 
       await test.step('Add to Case and select case', async () => {
-        const addToCaseButton = page.locator('[aria-label="Add to Case"]').first();
+        const addToCaseButton = page.testSubj.locator('addToCaseButton');
         await addToCaseButton.waitFor({ state: 'visible', timeout: 30_000 });
         await addToCaseButton.click();
 
-        await expect(page.getByText('Select case').first()).toBeVisible();
+        await expect(page.getByText('Select case')).toBeVisible();
         await page.testSubj.locator(`cases-table-row-select-${caseId}`).click();
 
-        await expect(page.getByText(`Case ${caseTitle} updated`).first()).toBeVisible();
+        await expect(page.getByText(`Case ${caseTitle} updated`)).toBeVisible();
       });
 
       await test.step('Verify case content and action items', async () => {
-        await page.getByText('View case').first().click();
-        await expect(page.getByText(liveQueryQuery).first()).toBeVisible();
+        await page.getByRole('link', { name: 'View case' }).click();
+        await expect(page.getByText(liveQueryQuery)).toBeVisible();
 
-        await expect(page.getByText('View in Lens').first()).toBeVisible();
-        await expect(page.getByText('View in Discover').first()).toBeVisible();
-        await expect(page.getByText('Add to Case').first()).not.toBeVisible();
-        await expect(page.getByText('Add to Timeline investigation').first()).not.toBeVisible();
+        await expect(page.testSubj.locator('viewInLens')).toBeVisible();
+        await expect(page.testSubj.locator('viewInDiscover')).toBeVisible();
+        await expect(page.testSubj.locator('addToCaseButton')).not.toBeVisible();
+        await expect(page.getByText('Add to Timeline investigation')).not.toBeVisible();
       });
-    });
-  });
+    }
+  );
 
-  // eslint-disable-next-line playwright/max-nested-describe
-  test.describe('security', { tag: [...tags.serverless.security.complete] }, () => {
-    let caseId: string;
-    let caseTitle: string;
+  test(
+    'should add result to a case without showing add to timeline button (security)',
+    { tag: [...tags.serverless.security.complete] },
+    async ({ page, pageObjects, kbnUrl, kbnClient }) => {
+      test.setTimeout(180_000);
 
-    test.beforeEach(async ({ browserAuth, kbnClient }) => {
       const caseData = await loadCase(kbnClient, 'securitySolution');
       caseId = caseData.id;
       caseTitle = caseData.title;
-      await browserAuth.loginWithCustomRole(socManagerRole);
-    });
-
-    test.afterEach(async ({ kbnClient }) => {
-      if (caseId) {
-        await cleanupCase(kbnClient, caseId);
-      }
-    });
-
-    test('should add result to a case without showing add to timeline button', async ({
-      page,
-      pageObjects,
-      kbnUrl,
-    }) => {
-      test.setTimeout(180_000); // Live query results can take time in serverless
 
       await test.step('Navigate to live query results page', async () => {
         await page.goto(kbnUrl.get(`/app/osquery/live_queries/${liveQueryId}`));
@@ -144,25 +125,25 @@ test.describe('Add to Cases', { tag: [...tags.stateful.classic] }, () => {
       });
 
       await test.step('Add to Case and select case', async () => {
-        const addToCaseButton = page.locator('[aria-label="Add to Case"]').first();
+        const addToCaseButton = page.testSubj.locator('addToCaseButton');
         await addToCaseButton.waitFor({ state: 'visible', timeout: 30_000 });
         await addToCaseButton.click();
 
-        await expect(page.getByText('Select case').first()).toBeVisible();
+        await expect(page.getByText('Select case')).toBeVisible();
         await page.testSubj.locator(`cases-table-row-select-${caseId}`).click();
 
-        await expect(page.getByText(`Case ${caseTitle} updated`).first()).toBeVisible();
+        await expect(page.getByText(`Case ${caseTitle} updated`)).toBeVisible();
       });
 
       await test.step('Verify case content and action items', async () => {
-        await page.getByText('View case').first().click();
-        await expect(page.getByText('SELECT * FROM os_version;').first()).toBeVisible();
+        await page.getByRole('link', { name: 'View case' }).click();
+        await expect(page.getByText('SELECT * FROM os_version;')).toBeVisible();
 
-        await expect(page.getByText('View in Lens').first()).toBeVisible();
-        await expect(page.getByText('View in Discover').first()).toBeVisible();
-        await expect(page.getByText('Add to Case').first()).not.toBeVisible();
-        await expect(page.getByText('Add to Timeline investigation').first()).not.toBeVisible();
+        await expect(page.testSubj.locator('viewInLens')).toBeVisible();
+        await expect(page.testSubj.locator('viewInDiscover')).toBeVisible();
+        await expect(page.testSubj.locator('addToCaseButton')).not.toBeVisible();
+        await expect(page.getByText('Add to Timeline investigation')).not.toBeVisible();
       });
-    });
-  });
+    }
+  );
 });

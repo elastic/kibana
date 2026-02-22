@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable playwright/no-nth-methods */
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
@@ -41,12 +40,10 @@ test.describe('ALL - Timelines', { tag: [...tags.stateful.classic] }, () => {
     );
     await page.keyboard.press('Enter');
 
-    // Wait for results and expand the first event
-    await page.testSubj
-      .locator('docTableExpandToggleColumn')
-      .first()
-      .waitFor({ state: 'visible', timeout: 120_000 });
-    await page.testSubj.locator('docTableExpandToggleColumn').first().click({ force: true });
+    const firstExpandToggle = page.testSubj.locator('docTableExpandToggleColumn');
+    await firstExpandToggle.waitFor({ state: 'visible', timeout: 120_000 });
+    // eslint-disable-next-line playwright/no-nth-methods -- first event row expand
+    await firstExpandToggle.first().click({ force: true });
 
     // Take Osquery action with params
     await page.testSubj.locator('securitySolutionFlyoutFooterDropdownButton').click();

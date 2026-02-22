@@ -4,8 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-/* eslint-disable playwright/no-nth-methods */
-
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
@@ -42,7 +40,7 @@ test.describe('ALL - Inventory', { tag: [...tags.stateful.classic] }, () => {
     await waitForPageReady(page);
 
     // Dismiss "Want a different view?" dialog if it appears (may cover the waffle map)
-    const dismissButton = page.getByText('Dismiss').first();
+    const dismissButton = page.getByRole('button', { name: 'Dismiss' });
     if (await dismissButton.isVisible({ timeout: 3_000 }).catch(() => false)) {
       await dismissButton.click();
       await waitForPageReady(page);
@@ -52,13 +50,12 @@ test.describe('ALL - Inventory', { tag: [...tags.stateful.classic] }, () => {
     // Note: The first button in waffleMap is "Group by All" which is NOT a host
     const hostButton = page.testSubj
       .locator('waffleMap')
-      .getByRole('button', { name: /scout-osquery-agent/i })
-      .first();
+      .getByRole('button', { name: /scout-osquery-agent/i });
     await expect(hostButton).toBeVisible({ timeout: 30_000 });
     await hostButton.click();
 
     // Wait for the host details flyout/dialog to open
-    const hostDialog = page.locator('[role="dialog"]').first();
+    const hostDialog = page.getByRole('dialog');
     await hostDialog.waitFor({ state: 'visible', timeout: 15_000 });
 
     // Click the Osquery tab in the host details flyout using the role selector
@@ -89,7 +86,7 @@ test.describe('ALL - Inventory', { tag: [...tags.stateful.classic] }, () => {
     await waitForPageReady(page);
 
     // Dismiss "Want a different view?" dialog if it appears
-    const dismissButton = page.getByText('Dismiss').first();
+    const dismissButton = page.getByRole('button', { name: 'Dismiss' });
     if (await dismissButton.isVisible({ timeout: 3_000 }).catch(() => false)) {
       await dismissButton.click();
       await waitForPageReady(page);
@@ -98,13 +95,12 @@ test.describe('ALL - Inventory', { tag: [...tags.stateful.classic] }, () => {
     // Host nodes are rendered as buttons with names like "scout-osquery-agent-X..." inside the waffle map
     const hostButton = page.testSubj
       .locator('waffleMap')
-      .getByRole('button', { name: /scout-osquery-agent/i })
-      .first();
+      .getByRole('button', { name: /scout-osquery-agent/i });
     await expect(hostButton).toBeVisible({ timeout: 30_000 });
     await hostButton.click();
 
     // Wait for the host details flyout/dialog to open
-    const hostDialog = page.locator('[role="dialog"]').first();
+    const hostDialog = page.getByRole('dialog');
     await hostDialog.waitFor({ state: 'visible', timeout: 15_000 });
 
     // Click the Osquery tab in the host details flyout using the role selector
@@ -112,19 +108,12 @@ test.describe('ALL - Inventory', { tag: [...tags.stateful.classic] }, () => {
     await osqueryTab.waitFor({ state: 'visible', timeout: 30_000 });
     await osqueryTab.click();
 
-    // Wait for the osquery content to load within the host flyout
-    await page.testSubj
-      .locator('comboBoxInput')
-      .first()
-      .waitFor({ state: 'visible', timeout: 15_000 });
+    await page.testSubj.locator('comboBoxInput').waitFor({ state: 'visible', timeout: 15_000 });
 
-    // Select saved query
-    const comboBox = page.testSubj.locator('comboBoxInput').first();
+    const comboBox = page.testSubj.locator('comboBoxInput');
     await comboBox.click();
-    // eslint-disable-next-line playwright/no-wait-for-timeout -- wait for combobox dropdown to render before typing
-    await page.waitForTimeout(500);
     await comboBox.pressSequentially(savedQueryName);
-    const option = page.getByRole('option', { name: new RegExp(savedQueryName, 'i') }).first();
+    const option = page.getByRole('option', { name: new RegExp(savedQueryName, 'i') });
     await option.waitFor({ state: 'visible', timeout: 15_000 });
     await option.click();
 

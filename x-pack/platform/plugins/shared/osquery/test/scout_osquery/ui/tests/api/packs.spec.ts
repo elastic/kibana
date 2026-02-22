@@ -34,17 +34,45 @@ test.describe(
       await cleanupAgentPolicy(kbnClient, policyId);
     });
 
-    // eslint-disable-next-line playwright/max-nested-describe
-    test.describe('Duplicate policy ids', () => {
-      let packId: string;
+    test('should strip duplicate policy ids when saving pack', async ({ kbnClient }) => {
+      const { data } = await kbnClient.request({
+        method: 'POST',
+        path: '/api/osquery/packs',
+        body: {
+          name: `test-pack-${Date.now()}`,
+          policy_ids: Array(1000).fill(policyId),
+          queries: {
+            test: {
+              ecs_mapping: {},
+              interval: 3600,
+              query: 'select * from uptime;',
+            },
+          },
+          enabled: true,
+          shards: {},
+        },
+      });
+      const packId = (data as any).data.saved_object_id;
+      try {
+        const pack = await getPack(kbnClient, packId);
+        expect(pack.policy_ids).toHaveLength(1);
+        expect(pack.policy_ids[0]).toBe(policyId);
+      } finally {
+        await cleanupPack(kbnClient, packId);
+      }
+    });
 
-      test.beforeEach(async ({ kbnClient }) => {
-        const { data } = await kbnClient.request({
+    const nonExistentPolicyId = 'non-existent-policy-id';
+
+    test('single non-existent policy id', async ({ kbnClient }) => {
+      let caughtError: any;
+      try {
+        await kbnClient.request({
           method: 'POST',
           path: '/api/osquery/packs',
           body: {
             name: `test-pack-${Date.now()}`,
-            policy_ids: Array(1000).fill(policyId),
+            policy_ids: [nonExistentPolicyId],
             queries: {
               test: {
                 ecs_mapping: {},
@@ -56,89 +84,56 @@ test.describe(
             shards: {},
           },
         });
-        packId = (data as any).data.saved_object_id;
-      });
+      } catch (error: any) {
+        caughtError = error;
+      }
 
-      test.afterEach(async ({ kbnClient }) => {
-        if (packId) {
-          await cleanupPack(kbnClient, packId);
-        }
-      });
-
-      test('should strip duplicate policy ids when saving pack', async ({ kbnClient }) => {
-        const pack = await getPack(kbnClient, packId);
-        expect(pack.policy_ids).toHaveLength(1);
-        expect(pack.policy_ids[0]).toBe(policyId);
-      });
+      expect(caughtError).toBeDefined();
+      const status =
+        caughtError?.statusCode || caughtError?.status || caughtError?.response?.status;
+      const message =
+        caughtError?.data?.message ||
+        caughtError?.response?.data?.message ||
+        caughtError?.message ||
+        '';
+      expect(status).toBe(400);
+      expect(message).toContain(nonExistentPolicyId);
     });
 
-    // eslint-disable-next-line playwright/max-nested-describe
-    test.describe('Non existent policy id should return bad request error', () => {
-      const nonExistentPolicyId = 'non-existent-policy-id';
-
-      test('single non-existent policy id', async ({ kbnClient }) => {
-        try {
-          await kbnClient.request({
-            method: 'POST',
-            path: '/api/osquery/packs',
-            body: {
-              name: `test-pack-${Date.now()}`,
-              policy_ids: [nonExistentPolicyId],
-              queries: {
-                test: {
-                  ecs_mapping: {},
-                  interval: 3600,
-                  query: 'select * from uptime;',
-                },
+    test('multiple policy ids with one non-existent policy id', async ({ kbnClient }) => {
+      let caughtError: any;
+      try {
+        await kbnClient.request({
+          method: 'POST',
+          path: '/api/osquery/packs',
+          body: {
+            name: `test-pack-${Date.now()}`,
+            policy_ids: [...Array(999).fill(policyId), nonExistentPolicyId],
+            queries: {
+              test: {
+                ecs_mapping: {},
+                interval: 3600,
+                query: 'select * from uptime;',
               },
-              enabled: true,
-              shards: {},
             },
-          });
-          // Should not reach here - expect 400
-          expect(true).toBe(false);
-        } catch (error: any) {
-          const status = error.statusCode || error.status || error.response?.status;
-          const message =
-            error.data?.message || error.response?.data?.message || error.message || '';
-          // eslint-disable-next-line playwright/no-conditional-expect
-          expect(status).toBe(400);
-          // eslint-disable-next-line playwright/no-conditional-expect
-          expect(message).toContain(nonExistentPolicyId);
-        }
-      });
+            enabled: true,
+            shards: {},
+          },
+        });
+      } catch (error: any) {
+        caughtError = error;
+      }
 
-      test('multiple policy ids with one non-existent policy id', async ({ kbnClient }) => {
-        try {
-          await kbnClient.request({
-            method: 'POST',
-            path: '/api/osquery/packs',
-            body: {
-              name: `test-pack-${Date.now()}`,
-              policy_ids: [...Array(999).fill(policyId), nonExistentPolicyId],
-              queries: {
-                test: {
-                  ecs_mapping: {},
-                  interval: 3600,
-                  query: 'select * from uptime;',
-                },
-              },
-              enabled: true,
-              shards: {},
-            },
-          });
-          // Should not reach here - expect 400
-          expect(true).toBe(false);
-        } catch (error: any) {
-          const status = error.statusCode || error.status || error.response?.status;
-          const message =
-            error.data?.message || error.response?.data?.message || error.message || '';
-          // eslint-disable-next-line playwright/no-conditional-expect
-          expect(status).toBe(400);
-          // eslint-disable-next-line playwright/no-conditional-expect
-          expect(message).toContain(nonExistentPolicyId);
-        }
-      });
+      expect(caughtError).toBeDefined();
+      const status =
+        caughtError?.statusCode || caughtError?.status || caughtError?.response?.status;
+      const message =
+        caughtError?.data?.message ||
+        caughtError?.response?.data?.message ||
+        caughtError?.message ||
+        '';
+      expect(status).toBe(400);
+      expect(message).toContain(nonExistentPolicyId);
     });
   }
 );

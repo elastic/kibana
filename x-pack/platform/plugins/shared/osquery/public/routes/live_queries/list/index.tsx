@@ -57,6 +57,7 @@ const NewLiveQueryButton = React.memo(() => {
       fill
       {...newQueryLinkProps}
       iconType="plusInCircle"
+      data-test-subj="newLiveQueryButton"
       isDisabled={
         !(
           permissions.writeLiveQueries ||

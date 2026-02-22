@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-/* eslint-disable playwright/no-nth-methods */
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
@@ -101,7 +100,7 @@ test.describe(
         const savedQueryInput = savedQueryDropdown.locator('[data-test-subj="comboBoxInput"]');
         await savedQueryInput.click();
         await savedQueryInput.pressSequentially(savedQueryName);
-        const option = page.getByRole('option', { name: new RegExp(savedQueryName, 'i') }).first();
+        const option = page.getByRole('option', { name: new RegExp(savedQueryName, 'i') });
         await option.waitFor({ state: 'visible', timeout: 30_000 });
         await option.click();
 
@@ -120,7 +119,7 @@ test.describe(
         await liveQuery.clickAdvanced();
         await liveQuery.fillInQueryTimeout('601');
 
-        await page.getByText('Submit').first().waitFor({ state: 'visible' });
+        await page.testSubj.locator('liveQuerySubmitButton').waitFor({ state: 'visible' });
         await liveQuery.submitQuery();
         await liveQuery.checkResults();
       });
@@ -128,7 +127,7 @@ test.describe(
       await test.step('Navigate back and verify query was saved with custom values', async () => {
         await page.gotoApp('osquery');
         await waitForPageReady(page);
-        await page.locator('[aria-label="Run query"]').first().click();
+        await page.getByRole('button', { name: 'Run query' }).click();
 
         await expect(page.testSubj.locator('kibanaCodeEditor')).toContainText(
           'select * from users;'
@@ -141,16 +140,14 @@ test.describe(
       await test.step('Navigate to Osquery and click details icon', async () => {
         await page.gotoApp('osquery');
         await waitForPageReady(page);
-        await page
-          .locator('[aria-label="Details"]')
-          .first()
-          .waitFor({ state: 'visible', timeout: 30_000 });
-        await page.locator('[aria-label="Details"]').first().click();
+        const detailsButton = page.getByRole('button', { name: 'Details' });
+        await detailsButton.waitFor({ state: 'visible', timeout: 30_000 });
+        await detailsButton.click();
       });
 
       await test.step('Verify live query details are visible', async () => {
-        await expect(page.getByText('Live query details').first()).toBeVisible();
-        await expect(page.getByText('select * from users;').first()).toBeVisible();
+        await expect(page.getByText('Live query details')).toBeVisible();
+        await expect(page.getByText('select * from users;')).toBeVisible();
       });
     });
   }

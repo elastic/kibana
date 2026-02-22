@@ -4,8 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-/* eslint-disable playwright/no-nth-methods, playwright/no-conditional-expect */
-
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
@@ -91,7 +89,7 @@ test.describe(
       await cleanupSavedQuery(kbnClient, multipleMappingsSavedQueryId);
     });
 
-    // eslint-disable-next-line playwright/max-nested-describe
+    // eslint-disable-next-line playwright/max-nested-describe -- group has shared beforeEach/afterEach
     test.describe('Check if result type is correct', () => {
       let resultTypePackId: string;
 
@@ -142,17 +140,17 @@ test.describe(
 
           await page.locator(`[aria-label="Edit Query1"]`).click();
           await page.testSubj.locator('resultsTypeField').getByText('Snapshot').click();
-          await page.getByText('Differential').first().click();
+          await page.getByRole('button', { name: 'Differential' }).click();
           await packs.clickSaveQueryInFlyout();
 
           await page.locator(`[aria-label="Edit Query2"]`).click();
           await page.testSubj.locator('resultsTypeField').getByText('Differential').click();
-          await page.getByText('Differential (Ignore removals)').first().click();
+          await page.getByRole('button', { name: 'Differential (Ignore removals)' }).click();
           await packs.clickSaveQueryInFlyout();
 
           await page.locator(`[aria-label="Edit Query3"]`).click();
           await page.testSubj.locator('resultsTypeField').getByText('(Ignore removals)').click();
-          await page.getByText('Snapshot').first().click();
+          await page.getByRole('button', { name: 'Snapshot' }).click();
           await packs.clickSaveQueryInFlyout();
 
           await packs.clickUpdatePack();
@@ -160,7 +158,7 @@ test.describe(
       });
     });
 
-    // eslint-disable-next-line playwright/max-nested-describe
+    // eslint-disable-next-line playwright/max-nested-describe -- group has shared beforeEach/afterEach
     test.describe('Check if pack is created', () => {
       let packId: string;
       let packName: string;
@@ -181,7 +179,7 @@ test.describe(
           await packs.fillPackDescription('Pack description');
 
           await packs.clickAddQuery();
-          await expect(page.getByText('Attach next query').first()).toBeVisible();
+          await expect(page.getByText('Attach next query')).toBeVisible();
           await page.testSubj.locator('globalLoadingIndicator').waitFor({ state: 'hidden' });
           await expect(page.testSubj.locator('kibanaCodeEditor')).toBeVisible();
           await packs.selectSavedQuery(savedQueryName);
@@ -202,20 +200,18 @@ test.describe(
         });
 
         await test.step('Verify pack appears in list', async () => {
-          await expect(
-            page.getByText(`Successfully created "${packName}" pack`).first()
-          ).toBeVisible({
+          await expect(page.getByText(`Successfully created "${packName}" pack`)).toBeVisible({
             timeout: 30_000,
           });
 
           await pageObjects.packs.ensureAllPacksVisible();
 
-          await expect(page.getByText(packName).first()).toBeVisible();
+          await expect(page.getByText(packName)).toBeVisible();
         });
       });
     });
 
-    // eslint-disable-next-line playwright/max-nested-describe
+    // eslint-disable-next-line playwright/max-nested-describe -- group has shared beforeEach/afterEach
     test.describe('to click the edit button and edit pack', () => {
       let packId: string;
       let packName: string;
@@ -252,21 +248,20 @@ test.describe(
           await packs.navigateToPackDetail(packId);
           await packs.clickEditPack();
 
-          await expect(page.getByText(`Edit ${packName}`).first()).toBeVisible();
+          await expect(page.getByText(`Edit ${packName}`)).toBeVisible();
           await packs.clickAddQuery();
 
-          await expect(page.getByText('Attach next query').first()).toBeVisible();
+          await expect(page.getByText('Attach next query')).toBeVisible();
           await page.testSubj.locator('kibanaCodeEditor').click();
           await page.testSubj.locator('kibanaCodeEditor').pressSequentially('select * from uptime');
           await page.locator('input[name="id"]').fill(`${savedQueryName}`);
 
           await packs.clickSaveQueryInFlyout();
-          await expect(page.getByText('ID must be unique').first()).toBeVisible();
+          await expect(page.getByText('ID must be unique')).toBeVisible();
 
           await page.locator('input[name="id"]').fill(newQueryName);
-          await expect(page.getByText('ID must be unique').first()).not.toBeVisible();
-          // eslint-disable-next-line playwright/no-wait-for-timeout -- wait for form validation to settle
-          await page.waitForTimeout(500);
+          await expect(page.getByText('ID must be unique')).not.toBeVisible();
+          await expect(page.locator('input[name="id"]')).toHaveValue(newQueryName);
           await packs.clickSaveQueryInFlyout();
         });
 
@@ -275,16 +270,14 @@ test.describe(
             timeout: 15_000,
           });
           await packs.clickUpdatePack();
-          await expect(
-            page.getByText(`Successfully updated "${packName}" pack`).first()
-          ).toBeVisible({
+          await expect(page.getByText(`Successfully updated "${packName}" pack`)).toBeVisible({
             timeout: 30_000,
           });
         });
       });
     });
 
-    // eslint-disable-next-line playwright/max-nested-describe
+    // eslint-disable-next-line playwright/max-nested-describe -- group has shared beforeEach/afterEach
     test.describe('should trigger validation when saved query is being chosen', () => {
       let packId: string;
 
@@ -321,22 +314,22 @@ test.describe(
           await packs.clickEditPack();
 
           await packs.clickAddQuery();
-          await expect(page.getByText('Attach next query').first()).toBeVisible();
+          await expect(page.getByText('Attach next query')).toBeVisible();
           await page.testSubj.locator('globalLoadingIndicator').waitFor({ state: 'hidden' });
           await expect(page.testSubj.locator('kibanaCodeEditor')).toBeVisible();
-          await expect(page.getByText('ID must be unique').first()).not.toBeVisible();
+          await expect(page.getByText('ID must be unique')).not.toBeVisible();
         });
 
         await test.step('Select saved query and verify ID must be unique validation', async () => {
           await packs.selectSavedQuery(savedQueryName);
           await packs.clickSaveQueryInFlyout();
-          await expect(page.getByText('ID must be unique').first()).toBeVisible();
+          await expect(page.getByText('ID must be unique')).toBeVisible();
           await packs.clickCancelQueryInFlyout();
         });
       });
     });
 
-    // eslint-disable-next-line playwright/max-nested-describe
+    // eslint-disable-next-line playwright/max-nested-describe -- group has shared beforeEach/afterEach
     test.describe('should open lens in new tab', { tag: [...tags.stateful.classic] }, () => {
       let packId: string;
       let packName: string;
@@ -395,28 +388,27 @@ test.describe(
               .waitFor({ state: 'hidden', timeout: 60_000 })
               .catch(() => {});
 
-            const viewInLensButton = page.locator('[aria-label="View in Lens"]').first();
+            const viewInLensButton = page.testSubj.locator('viewInLens');
             await viewInLensButton.waitFor({ state: 'visible', timeout: 30_000 });
             await viewInLensButton.click();
           });
 
           await test.step('Navigate to captured Lens URL and verify', async () => {
-            if (lensUrl) {
-              const absoluteLensUrl = lensUrl.startsWith('http')
-                ? lensUrl
-                : new URL(lensUrl, page.url()).href;
-              await page.goto(absoluteLensUrl);
-              await expect(page.testSubj.locator('lnsWorkspace')).toBeVisible({ timeout: 60_000 });
-              await expect(page.testSubj.locator('breadcrumbs')).toContainText(
-                `Action pack_${packName}_${savedQueryName}`
-              );
-            }
+            expect(lensUrl).toBeTruthy();
+            const absoluteLensUrl = lensUrl.startsWith('http')
+              ? lensUrl
+              : new URL(lensUrl, page.url()).href;
+            await page.goto(absoluteLensUrl);
+            await expect(page.testSubj.locator('lnsWorkspace')).toBeVisible({ timeout: 60_000 });
+            await expect(page.testSubj.locator('breadcrumbs')).toContainText(
+              `Action pack_${packName}_${savedQueryName}`
+            );
           });
         }
       );
     });
 
-    // eslint-disable-next-line playwright/max-nested-describe
+    // eslint-disable-next-line playwright/max-nested-describe -- group has shared beforeEach/afterEach
     test.describe('should open discover in new tab', { tag: [...tags.stateful.classic] }, () => {
       let packId: string;
       let packName: string;
@@ -452,7 +444,7 @@ test.describe(
         await test.step('Navigate to pack details and get Discover link', async () => {
           await pageObjects.packs.navigateToPackDetail(packId);
 
-          const discoverLink = page.getByRole('link', { name: 'View in Discover' }).first();
+          const discoverLink = page.testSubj.locator('viewInDiscover');
           await discoverLink.waitFor({ state: 'visible', timeout: 30_000 });
 
           // Verify the href contains the pack action_id filter
@@ -465,41 +457,37 @@ test.describe(
         });
 
         await test.step('Navigate to Discover and verify filter is applied', async () => {
-          if (discoverHref) {
-            const baseUrl = new URL(page.url()).origin;
-            await page.goto(`${baseUrl}${discoverHref}`);
+          expect(discoverHref).toBeTruthy();
+          const baseUrl = new URL(page.url()).origin;
+          await page.goto(`${baseUrl}${discoverHref}`);
+          await waitForPageReady(page);
+
+          await expect(page.testSubj.locator('breadcrumbs')).toContainText('Discover', {
+            timeout: 30_000,
+          });
+
+          const docTable = page.testSubj.locator('discoverDocTable');
+          const start = Date.now();
+          while (Date.now() - start < 180_000) {
+            if (await docTable.isVisible({ timeout: 10_000 }).catch(() => false)) break;
+            await page.reload();
             await waitForPageReady(page);
-
-            await expect(page.testSubj.locator('breadcrumbs')).toContainText('Discover', {
-              timeout: 30_000,
-            });
-
-            // Pack results may not be indexed yet; retry until doc table appears
-            const docTable = page.testSubj.locator('discoverDocTable');
-            const start = Date.now();
-            while (Date.now() - start < 180_000) {
-              if (await docTable.isVisible({ timeout: 10_000 }).catch(() => false)) break;
-              await page.reload();
-              await waitForPageReady(page);
-            }
-
-            await expect(docTable).toBeVisible({ timeout: 30_000 });
-
-            // Verify the correct action_id filter is applied
-            await expect(
-              page.getByText(`action_id: pack_${packName}_${savedQueryName}`).first()
-            ).toBeVisible({ timeout: 30_000 });
-
-            // Verify the data view is osquery results
-            await expect(page.getByText('logs-osquery_manager.result').first()).toBeVisible({
-              timeout: 10_000,
-            });
           }
+
+          await expect(docTable).toBeVisible({ timeout: 30_000 });
+
+          await expect(page.getByText(`action_id: pack_${packName}_${savedQueryName}`)).toBeVisible(
+            { timeout: 30_000 }
+          );
+
+          await expect(page.getByText('logs-osquery_manager.result')).toBeVisible({
+            timeout: 10_000,
+          });
         });
       });
     });
 
-    // eslint-disable-next-line playwright/max-nested-describe
+    // eslint-disable-next-line playwright/max-nested-describe -- group has shared beforeEach/afterEach
     test.describe('deactivate and activate pack', () => {
       let packId: string;
 
@@ -548,7 +536,7 @@ test.describe(
       });
     });
 
-    // eslint-disable-next-line playwright/max-nested-describe
+    // eslint-disable-next-line playwright/max-nested-describe -- group has shared beforeEach/afterEach
     test.describe('should verify that packs are triggered', () => {
       let packId: string;
       let packName: string;
@@ -582,7 +570,7 @@ test.describe(
 
         await test.step('Navigate to pack details and wait for results', async () => {
           await packs.navigateToPackDetail(packId);
-          await expect(page.getByText(`${packName} details`).first()).toBeVisible();
+          await expect(page.getByText(`${packName} details`)).toBeVisible();
 
           let lastResultsDate = '-';
           const maxWait = Date.now() + 300_000;
@@ -593,12 +581,15 @@ test.describe(
               'tbody .euiTableRow > td:nth-child(5) > .euiTableCellContent'
             );
             if ((await resultsCell.count()) > 0) {
+              // eslint-disable-next-line playwright/no-nth-methods -- first row's result cell in table
               lastResultsDate = (await resultsCell.first().textContent()) || '-';
             }
 
             if (lastResultsDate === '-') {
               await page.reload();
-              await new Promise((r) => setTimeout(r, 5_000));
+              await page.testSubj
+                .locator('docsLoading')
+                .waitFor({ state: 'hidden', timeout: 5_000 });
             }
           }
         });
@@ -607,17 +598,17 @@ test.describe(
           // Ensure loading spinners are gone before asserting badges
           await page.testSubj.locator('docsLoading').waitFor({ state: 'hidden', timeout: 30_000 });
 
-          await expect(page.testSubj.locator('last-results-date').first()).toBeVisible({
+          await expect(page.testSubj.locator('last-results-date')).toBeVisible({
             timeout: 30_000,
           });
-          await expect(page.testSubj.locator('docs-count-badge').first()).toContainText('1', {
+          await expect(page.testSubj.locator('docs-count-badge')).toContainText('1', {
             timeout: 30_000,
           });
-          await expect(page.testSubj.locator('agent-count-badge').first()).toContainText('1', {
+          await expect(page.testSubj.locator('agent-count-badge')).toContainText('1', {
             timeout: 30_000,
           });
           // Wait for errors column to finish loading before asserting (spinner -> packResultsErrorsEmpty)
-          await expect(page.testSubj.locator('packResultsErrorsEmpty').first()).toBeVisible({
+          await expect(page.testSubj.locator('packResultsErrorsEmpty')).toBeVisible({
             timeout: 30_000,
           });
           await expect(page.testSubj.locator('packResultsErrorsEmpty')).toHaveCount(1);
@@ -625,7 +616,7 @@ test.describe(
       });
     });
 
-    // eslint-disable-next-line playwright/max-nested-describe
+    // eslint-disable-next-line playwright/max-nested-describe -- group has shared beforeEach/afterEach
     test.describe('delete all queries in pack', () => {
       let packId: string;
       let packName: string;
@@ -658,37 +649,29 @@ test.describe(
 
         await test.step('Open pack, select all queries and delete', async () => {
           await packs.navigateToPackDetail(packId);
-          await page
-            .getByText(/^Edit$/)
-            .first()
-            .click();
+          await page.getByRole('button', { name: /^Edit$/ }).click();
 
-          await expect(page.getByText(`Edit ${packName}`).first()).toBeVisible({ timeout: 15_000 });
+          await expect(page.getByText(`Edit ${packName}`)).toBeVisible({ timeout: 15_000 });
           await page.testSubj.locator('checkboxSelectAll').click();
-          await page
-            .getByText(/^Delete \d+ quer(y|ies)/)
-            .first()
-            .click();
+          await page.getByRole('button', { name: /^Delete \d+ quer(y|ies)/ }).click();
 
           await packs.clickUpdatePack();
-          await expect(
-            page.getByText(`Successfully updated "${packName}" pack`).first()
-          ).toBeVisible({
+          await expect(page.getByText(`Successfully updated "${packName}" pack`)).toBeVisible({
             timeout: 30_000,
           });
         });
 
         await test.step('Verify pack has no queries', async () => {
           await packs.navigateToPackDetail(packId);
-          await expect(page.getByText(`${packName} details`).first()).toBeVisible({
+          await expect(page.getByText(`${packName} details`)).toBeVisible({
             timeout: 15_000,
           });
-          await expect(page.getByText(/^No items found/).first()).toBeVisible({ timeout: 15_000 });
+          await expect(page.getByText(/^No items found/)).toBeVisible({ timeout: 15_000 });
         });
       });
     });
 
-    // eslint-disable-next-line playwright/max-nested-describe
+    // eslint-disable-next-line playwright/max-nested-describe -- group has shared beforeEach/afterEach
     test.describe('enable changing saved queries and ecs_mappings', () => {
       let packId: string;
 
@@ -719,10 +702,7 @@ test.describe(
 
         await test.step('Open pack and add query', async () => {
           await packs.navigateToPackDetail(packId);
-          await page
-            .getByText(/^Edit$/)
-            .first()
-            .click();
+          await page.getByRole('button', { name: /^Edit$/ }).click();
 
           await packs.clickAddQuery();
           await page.testSubj.locator('globalLoadingIndicator').waitFor({ state: 'hidden' });
@@ -731,28 +711,26 @@ test.describe(
 
         await test.step('Switch between saved queries and verify ECS mapping changes', async () => {
           await packs.selectSavedQuery(multipleMappingsSavedQueryName);
-          await expect(page.getByText('Custom key/value pairs').first()).toBeVisible();
-          await expect(page.getByText('Days of uptime').first()).toBeVisible();
-          await expect(page.getByText('List of keywords used to tag each').first()).toBeVisible();
-          await expect(page.getByText('Seconds of uptime').first()).toBeVisible();
-          await expect(page.getByText('Client network address.').first()).toBeVisible();
-          await expect(page.getByText('Total uptime seconds').first()).toBeVisible();
+          await expect(page.getByText('Custom key/value pairs')).toBeVisible();
+          await expect(page.getByText('Days of uptime')).toBeVisible();
+          await expect(page.getByText('List of keywords used to tag each')).toBeVisible();
+          await expect(page.getByText('Seconds of uptime')).toBeVisible();
+          await expect(page.getByText('Client network address.')).toBeVisible();
+          await expect(page.getByText('Total uptime seconds')).toBeVisible();
           await expect(page.testSubj.locator('ECSMappingEditorForm')).toHaveCount(4);
 
           await packs.selectSavedQuery(nomappingSavedQueryName);
-          await expect(page.getByText('Custom key/value pairs').first()).not.toBeVisible();
-          await expect(page.getByText('Days of uptime').first()).not.toBeVisible();
-          await expect(
-            page.getByText('List of keywords used to tag each').first()
-          ).not.toBeVisible();
-          await expect(page.getByText('Seconds of uptime').first()).not.toBeVisible();
-          await expect(page.getByText('Client network address.').first()).not.toBeVisible();
-          await expect(page.getByText('Total uptime seconds').first()).not.toBeVisible();
+          await expect(page.getByText('Custom key/value pairs')).not.toBeVisible();
+          await expect(page.getByText('Days of uptime')).not.toBeVisible();
+          await expect(page.getByText('List of keywords used to tag each')).not.toBeVisible();
+          await expect(page.getByText('Seconds of uptime')).not.toBeVisible();
+          await expect(page.getByText('Client network address.')).not.toBeVisible();
+          await expect(page.getByText('Total uptime seconds')).not.toBeVisible();
           await expect(page.testSubj.locator('ECSMappingEditorForm')).toHaveCount(1);
 
           await packs.selectSavedQuery(oneMappingSavedQueryName);
-          await expect(page.getByText('Name of the continent').first()).toBeVisible();
-          await expect(page.getByText('Seconds of uptime').first()).toBeVisible();
+          await expect(page.getByText('Name of the continent')).toBeVisible();
+          await expect(page.getByText('Seconds of uptime')).toBeVisible();
           await expect(page.testSubj.locator('ECSMappingEditorForm')).toHaveCount(2);
 
           await packs.clickSaveQueryInFlyout();
@@ -761,14 +739,14 @@ test.describe(
         await test.step('Re-open query and verify saved ECS mapping and timeout', async () => {
           await page.locator(`[aria-label="Edit ${oneMappingSavedQueryName}"]`).click();
 
-          await expect(page.getByText('Name of the continent').first()).toBeVisible();
-          await expect(page.getByText('Seconds of uptime').first()).toBeVisible();
+          await expect(page.getByText('Name of the continent')).toBeVisible();
+          await expect(page.getByText('Seconds of uptime')).toBeVisible();
           await expect(page.testSubj.locator('timeout-input')).toHaveValue('607');
         });
       });
     });
 
-    // eslint-disable-next-line playwright/max-nested-describe
+    // eslint-disable-next-line playwright/max-nested-describe -- group has shared beforeEach/afterEach
     test.describe('to click delete button', () => {
       let packId: string;
 

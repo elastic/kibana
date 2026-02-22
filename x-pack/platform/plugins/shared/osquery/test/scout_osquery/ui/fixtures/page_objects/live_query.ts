@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-/* eslint-disable playwright/no-nth-methods */
 
 import type { ScoutPage, Locator } from '@kbn/scout';
 import { RESULTS_TIMEOUT, waitForPageReady } from '../../common/constants';
@@ -18,7 +17,7 @@ export class LiveQueryPage {
 
   constructor(private readonly page: ScoutPage) {
     this.queryEditor = this.page.testSubj.locator('kibanaCodeEditor');
-    this.submitButton = this.page.locator('#submit-button');
+    this.submitButton = this.page.testSubj.locator('liveQuerySubmitButton');
     this.resultsTable = this.page.testSubj.locator('osqueryResultsTable');
     this.agentSelection = this.page.testSubj.locator('agentSelection');
     this.resultsPanel = this.page.testSubj.locator('osqueryResultsPanel');
@@ -27,15 +26,14 @@ export class LiveQueryPage {
   async navigate() {
     await this.page.gotoApp('osquery');
     await waitForPageReady(this.page);
-    await this.page
-      .getByText('New live query')
-      .first()
+    await this.page.testSubj
+      .locator('newLiveQueryButton')
       .waitFor({ state: 'visible', timeout: 30_000 });
   }
 
   async clickNewLiveQuery() {
     await this.navigate();
-    await this.page.getByText('New live query').first().click();
+    await this.page.testSubj.locator('newLiveQueryButton').click();
     await waitForPageReady(this.page);
   }
 
@@ -50,10 +48,7 @@ export class LiveQueryPage {
     await agentInput.click();
 
     // Wait for the "All agents" option to appear in the dropdown
-    const allAgentsOption = this.page
-      .locator('[role="option"]')
-      .filter({ hasText: 'All agents' })
-      .first();
+    const allAgentsOption = this.page.getByRole('option', { name: /All agents/ });
     await allAgentsOption.waitFor({ state: 'visible', timeout: 15_000 });
     await allAgentsOption.click();
 
@@ -70,22 +65,15 @@ export class LiveQueryPage {
   }
 
   async clearAndInputQuery(query: string) {
-    // Click the editor to focus it
+    await this.queryEditor.waitFor({ state: 'visible' });
     await this.queryEditor.click();
-    // Small delay to let Monaco fully activate and register focus
-    await new Promise((r) => setTimeout(r, 500));
 
     // Select all content and delete it (repeat to ensure clean state)
     await this.page.keyboard.press('ControlOrMeta+a');
-    await new Promise((r) => setTimeout(r, 200));
     await this.page.keyboard.press('Backspace');
-    await new Promise((r) => setTimeout(r, 200));
     await this.page.keyboard.press('ControlOrMeta+a');
-    await new Promise((r) => setTimeout(r, 200));
     await this.page.keyboard.press('Backspace');
-    await new Promise((r) => setTimeout(r, 300));
 
-    // Type the new query character by character via keyboard (avoids element interception)
     await this.page.keyboard.type(query);
   }
 
@@ -94,16 +82,18 @@ export class LiveQueryPage {
    * Use for validation tests where the form may not submit successfully.
    */
   async clickSubmit() {
-    const submitButton = this.page.getByText('Submit').first();
+    const submitButton = this.page.testSubj.locator('liveQuerySubmitButton');
     await submitButton.waitFor({ state: 'visible' });
     await submitButton.click();
   }
 
   async submitQuery() {
-    // Small delay to let React form state settle (ECS mapping sync, validation, etc.)
-    await new Promise((r) => setTimeout(r, 1_000));
+    await this.page.testSubj
+      .locator('globalLoadingIndicator')
+      .waitFor({ state: 'hidden', timeout: 10_000 })
+      .catch(() => {});
 
-    const submitButton = this.page.getByText('Submit').first();
+    const submitButton = this.page.testSubj.locator('liveQuerySubmitButton');
     await submitButton.waitFor({ state: 'visible' });
 
     // Click Submit and simultaneously wait for the live query API response
@@ -124,7 +114,7 @@ export class LiveQueryPage {
 
     // Wait for either the single-query results tab or pack-query results to appear
     const resultsTab = this.page.testSubj.locator('osquery-results-tab');
-    const packResultsHeading = this.page.getByText('Results').first();
+    const packResultsHeading = this.page.getByRole('heading', { name: 'Results' });
     await Promise.race([
       resultsTab.waitFor({ state: 'visible', timeout: 30_000 }),
       packResultsHeading.waitFor({ state: 'visible', timeout: 30_000 }),
@@ -151,6 +141,7 @@ export class LiveQueryPage {
 
     while (Date.now() - start < maxWaitMs) {
       const resultsTable = this.page.testSubj.locator('osqueryResultsTable');
+      // eslint-disable-next-line playwright/no-nth-methods -- selecting the first data cell to confirm results loaded
       const dataCell = this.page.testSubj.locator('dataGridRowCell').first();
 
       try {
@@ -180,11 +171,17 @@ export class LiveQueryPage {
                 await waitForPageReady(this.page);
               }
             } else {
-              await new Promise((r) => setTimeout(r, 5_000));
+              await this.page.testSubj
+                .locator('globalLoadingIndicator')
+                .waitFor({ state: 'hidden', timeout: 15_000 })
+                .catch(() => {});
             }
           }
         } catch {
-          await new Promise((r) => setTimeout(r, 5_000));
+          await this.page.testSubj
+            .locator('globalLoadingIndicator')
+            .waitFor({ state: 'hidden', timeout: 15_000 })
+            .catch(() => {});
         }
       }
     }
@@ -212,8 +209,10 @@ export class LiveQueryPage {
   }
 
   async typeInOsqueryFieldInput(text: string, index = 0) {
+    // eslint-disable-next-line playwright/no-nth-methods -- selecting ECS field by index parameter
     const fieldSelect = this.page.testSubj.locator('osqueryColumnValueSelect').nth(index);
     const searchInput = fieldSelect.locator('[data-test-subj="comboBoxSearchInput"]');
+    // eslint-disable-next-line playwright/no-nth-methods -- selecting first matching option from combo
     const option = this.page.getByRole('option').first();
     const cleanText = text.replace('{downArrow}{enter}', '');
 
@@ -235,7 +234,10 @@ export class LiveQueryPage {
       } catch {
         // Dropdown didn't show options — schema may not be loaded yet
         await searchInput.press('Escape');
-        await new Promise((r) => setTimeout(r, 5_000));
+        await this.page.testSubj
+          .locator('globalLoadingIndicator')
+          .waitFor({ state: 'hidden', timeout: 15_000 })
+          .catch(() => {});
       }
     }
 
@@ -248,6 +250,7 @@ export class LiveQueryPage {
   }
 
   async typeInECSFieldInput(text: string, index = 0) {
+    // eslint-disable-next-line playwright/no-nth-methods -- selecting ECS field by index parameter
     const ecsWrapper = this.page.testSubj.locator('ECS-field-input').nth(index);
     const searchInput = ecsWrapper.locator('[data-test-subj="comboBoxSearchInput"]');
     const cleanText = text.replace('{downArrow}{enter}', '');
@@ -266,6 +269,7 @@ export class LiveQueryPage {
       const matchingOption = this.page
         .locator('[role="option"]')
         .filter({ hasText: new RegExp(`^.*${cleanText}.*$`, 'i') })
+        // eslint-disable-next-line playwright/no-nth-methods -- selecting ECS field by index parameter
         .first();
 
       try {
@@ -275,8 +279,10 @@ export class LiveQueryPage {
         return;
       } catch {
         await searchInput.press('Escape');
-        // eslint-disable-next-line playwright/no-wait-for-timeout
-        await this.page.waitForTimeout(3_000);
+        await this.page.testSubj
+          .locator('globalLoadingIndicator')
+          .waitFor({ state: 'hidden', timeout: 5_000 })
+          .catch(() => {});
       }
     }
 
@@ -287,6 +293,7 @@ export class LiveQueryPage {
     const matchingOption = this.page
       .locator('[role="option"]')
       .filter({ hasText: new RegExp(`^.*${cleanText}.*$`, 'i') })
+      // eslint-disable-next-line playwright/no-nth-methods -- selecting ECS field by index parameter
       .first();
     await matchingOption.waitFor({ state: 'visible', timeout: 15_000 });
     await matchingOption.click();

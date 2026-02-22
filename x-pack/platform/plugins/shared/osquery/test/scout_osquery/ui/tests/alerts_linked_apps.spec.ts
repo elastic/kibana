@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-/* eslint-disable playwright/no-nth-methods */
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
@@ -45,7 +44,7 @@ test.describe(
       await page.testSubj.locator('edit-rule-actions-tab').click();
       await expect(page.testSubj.locator('osquery-investigation-guide-text')).toBeVisible();
       await waitForPageReady(page);
-      await expect(page.getByText('Loading connectors...').first()).not.toBeVisible();
+      await expect(page.getByText('Loading connectors...')).not.toBeVisible();
 
       await page.testSubj.locator('osqueryAddInvestigationGuideQueries').click();
       // Wait for the investigation guide text to be replaced by response actions
@@ -75,8 +74,8 @@ test.describe(
 
       // Dismiss any toasts that may overlay the Save button
       await dismissAllToasts(page);
-      await page.getByText('Save changes').first().click();
-      await expect(page.getByText(`${ruleName} was saved`).first()).toBeVisible({
+      await page.testSubj.locator('ruleEditSubmitButton').click();
+      await expect(page.getByText(`${ruleName} was saved`)).toBeVisible({
         timeout: 60_000,
       });
     });
@@ -85,10 +84,11 @@ test.describe(
       test.setTimeout(180_000); // Alert tests can take time
       const TIMELINE_NAME = 'Untitled timeline';
 
+      // eslint-disable-next-line playwright/no-nth-methods -- first event in list
       await page.testSubj.locator('expand-event').first().click();
       await page.testSubj.locator('securitySolutionFlyoutFooterDropdownButton').click();
       await page.testSubj.locator('osquery-action-item').click();
-      await expect(page.getByText(/^\d+ agent selected\./).first()).toBeVisible({
+      await expect(page.getByText(/^\d+ agent selected\./)).toBeVisible({
         timeout: 30_000,
       });
 
@@ -99,7 +99,7 @@ test.describe(
       const allAgentsOption = page.getByRole('option', { name: /All agents/ });
       await expect(allAgentsOption).toBeVisible({ timeout: 15_000 });
       await allAgentsOption.click();
-      await expect(page.getByText(/\d+ agents? selected\./).first()).toBeVisible({
+      await expect(page.getByText(/\d+ agents? selected\./)).toBeVisible({
         timeout: 30_000,
       });
 
@@ -111,31 +111,34 @@ test.describe(
       await queryEditor.pressSequentially('select * from uptime;');
 
       // Submit query
-      await page.getByText('Submit').first().waitFor({ state: 'visible' });
-      await page.getByText('Submit').first().click();
+      const submitButton = page.testSubj.locator('liveQuerySubmitButton');
+      await submitButton.waitFor({ state: 'visible' });
+      await submitButton.click();
 
       // Check results
       const resultsTable = page.testSubj.locator('osqueryResultsTable');
       await expect(resultsTable).toBeVisible({ timeout: 120_000 });
+      // eslint-disable-next-line playwright/no-nth-methods -- first cell in results grid
       const dataCell = page.testSubj.locator('dataGridRowCell').first();
       await expect(dataCell).toBeVisible({ timeout: 120_000 });
 
-      await expect(page.getByText('Add to Timeline investigation').first()).toBeVisible({
-        timeout: 30_000,
-      });
+      await expect(page.getByRole('button', { name: 'Add to Timeline investigation' })).toBeVisible(
+        {
+          timeout: 30_000,
+        }
+      );
+      // eslint-disable-next-line playwright/no-nth-methods -- first add-to-timeline in results
       await page.testSubj.locator('add-to-timeline').first().click();
       await expect(page.testSubj.locator('globalToastList').getByText(/Added/)).toBeVisible();
 
       // Close the osquery flyout using keyboard (Escape) to avoid portal intercept issues
       await page.keyboard.press('Escape');
-      // eslint-disable-next-line playwright/no-wait-for-timeout -- wait for flyout close animation
-      await page.waitForTimeout(2000);
-      // If the overlay mask is still present, press Escape again
-      const overlayMask = page.locator('.euiOverlayMask').first();
+      const flyout = page.testSubj.locator('flyout-body-osquery');
+      await flyout.waitFor({ state: 'hidden', timeout: 5_000 }).catch(() => {});
+      const overlayMask = page.locator('.euiOverlayMask');
       if (await overlayMask.isVisible({ timeout: 2_000 }).catch(() => false)) {
         await page.keyboard.press('Escape');
-        // eslint-disable-next-line playwright/no-wait-for-timeout -- wait for overlay dismiss
-        await page.waitForTimeout(1000);
+        await overlayMask.waitFor({ state: 'hidden', timeout: 5_000 }).catch(() => {});
       }
 
       // Also close the security solution flyout if it's still open

@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-/* eslint-disable playwright/no-nth-methods */
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
@@ -65,8 +64,8 @@ test.describe('Reader - only READ', { tag: [...tags.stateful.classic] }, () => {
     await pageObjects.savedQueries.clickEditSavedQuery(savedQueryName);
     await expect(page.locator('input[name="id"]')).toBeDisabled();
     await expect(page.locator('input[name="description"]')).toBeDisabled();
-    await expect(page.getByText('Update query').first()).not.toBeVisible();
-    await expect(page.getByText('Delete query').first()).not.toBeVisible();
+    await expect(page.getByRole('button', { name: 'Update query' })).not.toBeVisible();
+    await expect(page.getByRole('button', { name: 'Delete query' })).not.toBeVisible();
   });
 
   test('should not be able to enter live queries with just read and no run saved queries', async ({
@@ -74,15 +73,15 @@ test.describe('Reader - only READ', { tag: [...tags.stateful.classic] }, () => {
   }) => {
     await page.gotoApp('osquery/live_queries/new');
     await waitForPageReady(page);
-    await expect(page.getByText('Permission denied').first()).toBeVisible();
+    await expect(page.getByText('Permission denied')).toBeVisible();
   });
 
   test('should not be able to play in live queries history', async ({ page, pageObjects }) => {
     await pageObjects.liveQuery.navigate();
-    await expect(page.getByText('New live query').first()).toBeDisabled();
-    await expect(page.getByText(liveQueryQuery).first()).toBeVisible();
+    await expect(page.testSubj.locator('newLiveQueryButton')).toBeDisabled();
+    await expect(page.getByText(liveQueryQuery)).toBeVisible();
     await expect(page.locator(`[aria-label="Run ${savedQueryName}"]`)).not.toBeVisible();
-    await expect(page.locator('[aria-label="Details"]').first()).toBeVisible();
+    await expect(page.getByLabel('Details')).toBeVisible();
   });
 
   test('should not be able to add nor edit packs', async ({ page, pageObjects }) => {
@@ -96,8 +95,8 @@ test.describe('Reader - only READ', { tag: [...tags.stateful.classic] }, () => {
     await expect(toggle).toBeDisabled();
 
     await pageObjects.packs.navigateToPackDetail(packId);
-    await expect(page.getByText(`${packName} details`).first()).toBeVisible();
-    await expect(page.getByText('Edit').first()).toBeDisabled();
+    await expect(page.getByText(`${packName} details`)).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Edit' })).toBeDisabled();
     await expect(page.locator(`[aria-label="Run ${savedQueryName}"]`)).not.toBeVisible();
     await expect(page.locator(`[aria-label="Edit ${savedQueryName}"]`)).not.toBeVisible();
   });

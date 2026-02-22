@@ -192,6 +192,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
           <EuiFlexItem grow={false}>
             <EuiButton
               id="submit-button"
+              data-test-subj="liveQuerySubmitButton"
               disabled={!enabled}
               isLoading={isLoading}
               onClick={handleSubmit(onSubmit)}

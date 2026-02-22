@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-/* eslint-disable playwright/no-nth-methods */
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
@@ -43,11 +42,10 @@ test.describe(
       await page.locator(`[aria-label="Edit ${savedQueryName}"]`).click();
 
       // Verify existing ECS mapping content
-      await expect(page.getByText('Custom key/value pairs.').first()).toBeVisible();
-      await expect(page.getByText('Hours of uptime').first()).toBeVisible();
+      await expect(page.getByText('Custom key/value pairs.')).toBeVisible();
+      await expect(page.getByText('Hours of uptime')).toBeVisible();
 
-      // Delete the ECS mapping row
-      const ecsMappingForm = page.testSubj.locator('ECSMappingEditorForm').first();
+      const ecsMappingForm = page.testSubj.locator('ECSMappingEditorForm');
       await ecsMappingForm.locator('[aria-label="Delete ECS mapping row"]').click();
 
       // Verify platform checkboxes
@@ -63,7 +61,9 @@ test.describe(
       await page.testSubj.locator('update-query-button').click();
 
       // Wait for update confirmation toast and the list to reload
-      await expect(page.getByText(/Successfully updated/).first()).toBeVisible({ timeout: 15_000 });
+      await expect(
+        page.testSubj.locator('globalToastList').getByText(/Successfully updated/)
+      ).toBeVisible({ timeout: 15_000 });
       await waitForPageReady(page);
 
       // Re-open the saved query to verify changes persisted

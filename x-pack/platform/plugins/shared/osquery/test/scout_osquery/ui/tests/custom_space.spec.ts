@@ -4,8 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-/* eslint-disable playwright/no-nth-methods */
-
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
@@ -91,7 +89,7 @@ for (const testSpace of testSpaces) {
       // Navigate to osquery page in the space
       await page.goto(kbnUrl.get(`/s/${spaceId}/app/osquery`));
       await waitForPageReady(page);
-      await page.getByText('New live query').first().click();
+      await page.testSubj.locator('newLiveQueryButton').click();
       await waitForPageReady(page);
       await pageObjects.liveQuery.selectAllAgents();
       await pageObjects.liveQuery.inputQuery('select * from uptime;');
@@ -99,37 +97,35 @@ for (const testSpace of testSpaces) {
       await pageObjects.liveQuery.checkResults();
 
       // Check action items - wait for results to fully load
-      await expect(page.getByText('View in Discover').first()).toBeVisible({ timeout: 30_000 });
-      await expect(page.getByText('View in Lens').first()).toBeVisible({ timeout: 30_000 });
-      await expect(page.getByText('Add to Case').first()).toBeVisible({ timeout: 30_000 });
+      await expect(page.testSubj.locator('viewInDiscover')).toBeVisible({ timeout: 30_000 });
+      await expect(page.testSubj.locator('viewInLens')).toBeVisible({ timeout: 30_000 });
+      await expect(page.testSubj.locator('addToCaseButton')).toBeVisible({ timeout: 30_000 });
 
       // Verify Discover link works
-      const discoverLink = page.getByRole('link', { name: 'View in Discover' }).first();
+      const discoverLink = page.testSubj.locator('viewInDiscover');
       await expect(discoverLink).toBeVisible({ timeout: 30_000 });
       await expect(discoverLink).toHaveAttribute('href');
-      const href = await discoverLink.getAttribute('href');
+      const href = await discoverLink.evaluate((el) =>
+        (el as HTMLAnchorElement).getAttribute('href')
+      );
+      expect(href).toBeTruthy();
 
-      if (href) {
-        const baseUrl = new URL(page.url()).origin;
-        await page.goto(`${baseUrl}${href}`);
+      const baseUrl = new URL(page.url()).origin;
+      await page.goto(`${baseUrl}${href!}`);
+      await waitForPageReady(page);
+
+      const docTable = page.testSubj.locator('discoverDocTable');
+      const discoverStart = Date.now();
+      while (Date.now() - discoverStart < 120_000) {
+        if (await docTable.isVisible({ timeout: 10_000 }).catch(() => false)) break;
+        await page.reload();
         await waitForPageReady(page);
-
-        // Results may not be indexed yet; retry until doc table appears
-        const docTable = page.testSubj.locator('discoverDocTable');
-        const discoverStart = Date.now();
-        while (Date.now() - discoverStart < 120_000) {
-          if (await docTable.isVisible({ timeout: 10_000 }).catch(() => false)) break;
-          await page.reload();
-          await waitForPageReady(page);
-        }
-
-        // eslint-disable-next-line playwright/no-conditional-expect
-        await expect(docTable).toBeVisible({ timeout: 30_000 });
-        // eslint-disable-next-line playwright/no-conditional-expect
-        await expect(
-          page.testSubj.locator('discoverDocTable').getByText('action_data').first()
-        ).toBeVisible({ timeout: 30_000 });
       }
+
+      await expect(docTable).toBeVisible({ timeout: 30_000 });
+      await expect(page.testSubj.locator('discoverDocTable').getByText('action_data')).toBeVisible({
+        timeout: 30_000,
+      });
     });
 
     test('runs packs normally', async ({ page, pageObjects, kbnUrl }) => {
@@ -137,7 +133,7 @@ for (const testSpace of testSpaces) {
 
       await page.goto(kbnUrl.get(`/s/${spaceId}/app/osquery`));
       await waitForPageReady(page);
-      await page.getByText('Packs').first().click();
+      await page.getByRole('link', { name: 'Packs' }).click();
       await waitForPageReady(page);
 
       // Handle pagination - the pack may be on page 2 due to accumulated packs from previous runs
@@ -146,7 +142,10 @@ for (const testSpace of testSpaces) {
         const nextPageLink = page.getByRole('link', { name: 'Next page' });
         while (await nextPageLink.isVisible({ timeout: 2_000 }).catch(() => false)) {
           await nextPageLink.click();
-          await new Promise((r) => setTimeout(r, 1000));
+          await page.testSubj
+            .locator('globalLoadingIndicator')
+            .waitFor({ state: 'hidden', timeout: 1000 })
+            .catch(() => {});
           if (await playButton.isVisible({ timeout: 2_000 }).catch(() => false)) {
             break;
           }
@@ -155,7 +154,7 @@ for (const testSpace of testSpaces) {
 
       await playButton.click();
       await pageObjects.liveQuery.selectAllAgents();
-      await page.getByText('Submit').first().click();
+      await page.testSubj.locator('liveQuerySubmitButton').click();
       await pageObjects.liveQuery.checkResults();
     });
   });

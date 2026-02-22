@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable playwright/no-nth-methods */
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
@@ -23,7 +22,7 @@ test.describe(
   'ALL - Packs',
   { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {
-    // eslint-disable-next-line playwright/max-nested-describe
+    // eslint-disable-next-line playwright/max-nested-describe -- group has shared beforeEach/afterEach
     test.describe(
       'Validate that agent policy is removed from pack when agent policy is removed',
       {
@@ -61,7 +60,7 @@ test.describe(
           // Create a pack with the agent policy
           await page.gotoApp('osquery/packs');
           await waitForPageReady(page);
-          await page.testSubj.locator('add-pack-button').first().click();
+          await page.testSubj.locator('add-pack-button').click();
 
           const nameInput = page.locator('input[name="name"]');
           await nameInput.fill(removingPack);
@@ -71,9 +70,7 @@ test.describe(
             .locator('[data-test-subj="comboBoxInput"]');
           await policyComboBox.click();
           await policyComboBox.pressSequentially(agentPolicyName);
-          const option = page
-            .getByRole('option', { name: new RegExp(agentPolicyName, 'i') })
-            .first();
+          const option = page.getByRole('option', { name: new RegExp(agentPolicyName, 'i') });
           await option.waitFor({ state: 'visible', timeout: 15_000 });
           await option.click();
 
@@ -91,19 +88,17 @@ test.describe(
             saveBtn.click({ force: true }),
           ]);
 
-          await expect(
-            page.getByText(`Successfully created "${removingPack}" pack`).first()
-          ).toBeVisible({ timeout: 30_000 });
+          await expect(page.getByText(`Successfully created "${removingPack}" pack`)).toBeVisible({
+            timeout: 30_000,
+          });
 
-          // Navigate to pack and verify policy is set
           await pageObjects.packs.ensureAllPacksVisible();
           await page
             .getByRole('link', { name: removingPack })
-            .first()
             .waitFor({ state: 'visible', timeout: 15_000 });
-          await page.getByRole('link', { name: removingPack }).first().click();
-          await expect(page.getByText(`${removingPack} details`).first()).toBeVisible();
-          await page.getByText('Edit').first().click();
+          await page.getByRole('link', { name: removingPack }).click();
+          await expect(page.getByText(`${removingPack} details`)).toBeVisible();
+          await page.getByRole('button', { name: 'Edit' }).click();
 
           await expect(
             page.testSubj.locator('comboBoxInput').getByText(agentPolicyName)
@@ -113,26 +108,21 @@ test.describe(
           await page.goto(kbnUrl.get('/app/fleet/policies'));
           await waitForPageReady(page);
           // Wait for Fleet to finish loading
-          await page
-            .getByText('Loading Fleet...')
-            .first()
+          await page.testSubj
+            .locator('fleetSetupLoading')
             .waitFor({ state: 'hidden', timeout: 60_000 })
             .catch(() => {});
           await page
-            .getByText(agentPolicyName)
-            .first()
+            .getByRole('link', { name: agentPolicyName })
             .waitFor({ state: 'visible', timeout: 30_000 });
-          await page.getByText(agentPolicyName).first().click();
+          await page.getByRole('link', { name: agentPolicyName }).click();
           await waitForPageReady(page);
 
-          const actionsButton = page
-            .locator('.euiTableCellContent .euiPopover [aria-label="Open"]')
-            .first();
+          const actionsButton = page.locator(
+            '.euiTableCellContent .euiPopover [aria-label="Open"]'
+          );
           await actionsButton.click();
-          await page
-            .getByText(/^Delete integration$/)
-            .first()
-            .click();
+          await page.getByRole('button', { name: /^Delete integration$/ }).click();
 
           // Confirm deletion modal if visible
           const confirmBtn = page.testSubj.locator('confirmModalConfirmButton');
@@ -140,7 +130,7 @@ test.describe(
             await confirmBtn.click();
           }
 
-          await expect(page.getByText(/Deleted integration/).first()).toBeVisible({
+          await expect(page.getByText(/Deleted integration/)).toBeVisible({
             timeout: 15_000,
           });
 
@@ -150,12 +140,12 @@ test.describe(
           await pageObjects.packs.ensureAllPacksVisible();
           await page
             .getByRole('link', { name: removingPack })
-            .first()
             .waitFor({ state: 'visible', timeout: 15_000 });
-          await page.getByRole('link', { name: removingPack }).first().click();
-          await expect(page.getByText(`${removingPack} details`).first()).toBeVisible();
-          await page.getByText('Edit').first().waitFor({ state: 'visible' });
-          await page.getByText('Edit').first().click();
+          await page.getByRole('link', { name: removingPack }).click();
+          await expect(page.getByText(`${removingPack} details`)).toBeVisible();
+          const editButton = page.getByRole('button', { name: 'Edit' });
+          await editButton.waitFor({ state: 'visible' });
+          await editButton.click();
 
           await expect(
             page.testSubj
@@ -183,20 +173,14 @@ test.describe(
           await page.gotoApp('osquery/packs');
           await waitForPageReady(page);
 
-          // Load or update prebuilt packs if the button is present (packs may already be loaded)
           const loadBtn = page.getByRole('button', {
             name: /Load Elastic prebuilt packs|Update Elastic prebuilt packs/,
           });
-          const isLoadVisible = await loadBtn.isVisible({ timeout: 5_000 }).catch(() => false);
-
-          if (isLoadVisible) {
-            await loadBtn.click();
-            // Wait for import to complete — button disappears when done
-            // eslint-disable-next-line playwright/no-conditional-expect
-            await expect(loadBtn).not.toBeVisible({ timeout: 60_000 });
-          }
+          await loadBtn.click({ timeout: 5_000 }).catch(() => {});
+          await expect(loadBtn).not.toBeVisible({ timeout: 60_000 });
 
           const rows = page.locator('tbody > tr');
+          // eslint-disable-next-line playwright/no-nth-methods -- first table row in pack list
           await rows.first().waitFor({ state: 'visible', timeout: 30_000 });
           expect(await rows.count()).toBeGreaterThan(5);
         });
@@ -213,11 +197,11 @@ test.describe(
 
           await page.gotoApp('osquery/live_queries');
           await waitForPageReady(page);
-          await page.getByText('New live query').first().click();
+          await page.testSubj.locator('newLiveQueryButton').click();
           await waitForPageReady(page);
 
           // Switch to pack mode
-          await page.getByText('Run a set of queries in a pack.').first().click();
+          await page.getByRole('radio', { name: /Run a set of queries in a pack/ }).click();
           await expect(page.testSubj.locator('kibanaCodeEditor')).not.toBeVisible();
 
           await pageObjects.liveQuery.selectAllAgents();
@@ -230,7 +214,7 @@ test.describe(
           const packInput = packSelect.locator('[data-test-subj="comboBoxSearchInput"]');
           await packInput.click();
           await packInput.pressSequentially('osquery-monitoring');
-          const option = page.getByRole('option', { name: /osquery-monitoring/i }).first();
+          const option = page.getByRole('option', { name: /osquery-monitoring/i });
           await option.waitFor({ state: 'visible', timeout: 15_000 });
           await option.click();
 
@@ -238,14 +222,14 @@ test.describe(
           await page.testSubj.locator('toggleIcon-events').click();
           await pageObjects.liveQuery.checkResults();
 
-          await expect(page.getByText('View in Lens').first()).toBeVisible({ timeout: 30_000 });
-          await expect(page.getByText('View in Discover').first()).toBeVisible({ timeout: 30_000 });
-          await expect(page.getByText('Add to Case').first()).toBeVisible({ timeout: 30_000 });
+          await expect(page.testSubj.locator('viewInLens')).toBeVisible({ timeout: 30_000 });
+          await expect(page.testSubj.locator('viewInDiscover')).toBeVisible({ timeout: 30_000 });
+          await expect(page.testSubj.locator('addToCaseButton')).toBeVisible({ timeout: 30_000 });
         });
       }
     );
 
-    // eslint-disable-next-line playwright/max-nested-describe
+    // eslint-disable-next-line playwright/max-nested-describe -- group has shared beforeEach/afterEach
     test.describe(
       'Global packs',
       { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
@@ -264,7 +248,7 @@ test.describe(
             // Create a global pack
             await page.gotoApp('osquery/packs');
             await waitForPageReady(page);
-            await page.testSubj.locator('add-pack-button').first().click();
+            await page.testSubj.locator('add-pack-button').click();
 
             await page.locator('input[name="name"]').fill(globalPack);
             await expect(page.testSubj.locator('policyIdsComboBox')).toBeVisible();
@@ -272,36 +256,32 @@ test.describe(
             await expect(page.testSubj.locator('policyIdsComboBox')).not.toBeVisible();
             await page.testSubj.locator('save-pack-button').click();
 
-            await expect(
-              page.getByText(`Successfully created "${globalPack}" pack`).first()
-            ).toBeVisible({ timeout: 30_000 });
+            await expect(page.getByText(`Successfully created "${globalPack}" pack`)).toBeVisible({
+              timeout: 30_000,
+            });
 
             // Create agent policy with osquery integration
             const agentPolicy = await loadAgentPolicy(kbnClient);
             agentPolicyId = agentPolicy.id;
             await addOsqueryToAgentPolicy(kbnClient, agentPolicy.id, agentPolicy.name);
 
-            // Wait for pack propagation — the global pack is attached asynchronously.
-            // Poll until the pack appears in the agent policy (up to 60s).
-            let packFound = false;
-            for (let attempt = 0; attempt < 12; attempt++) {
-              // eslint-disable-next-line playwright/no-wait-for-timeout
-              await page.waitForTimeout(5_000);
-              const { data: policiesData } = await kbnClient.request({
-                method: 'GET',
-                path: '/internal/osquery/fleet_wrapper/package_policies',
-                headers: { 'elastic-api-version': '1' },
-              });
-              const item = (policiesData as any).items.find(
-                (p: any) => p.policy_id === agentPolicyId
-              );
-              if (item?.inputs[0]?.config?.osquery?.value?.packs?.[globalPack]) {
-                packFound = true;
-                break;
-              }
-            }
+            await expect
+              .poll(
+                async () => {
+                  const { data: policiesData } = await kbnClient.request({
+                    method: 'GET',
+                    path: '/internal/osquery/fleet_wrapper/package_policies',
+                    headers: { 'elastic-api-version': '1' },
+                  });
+                  const item = (policiesData as any).items.find(
+                    (p: any) => p.policy_id === agentPolicyId
+                  );
 
-            expect(packFound).toBe(true);
+                  return !!item?.inputs[0]?.config?.osquery?.value?.packs?.[globalPack];
+                },
+                { timeout: 60_000 }
+              )
+              .toBe(true);
           } finally {
             if (globalPackId) {
               await cleanupPack(kbnClient, globalPackId);

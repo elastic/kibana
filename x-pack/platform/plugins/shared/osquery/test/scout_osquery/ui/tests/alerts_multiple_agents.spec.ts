@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-/* eslint-disable playwright/no-nth-methods */
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
@@ -38,6 +37,7 @@ test.describe(
     });
 
     test('should substitute parameters in investigation guide', async ({ page }) => {
+      // eslint-disable-next-line playwright/no-nth-methods -- first event in list
       await page.testSubj.locator('expand-event').first().click();
       await page.testSubj
         .locator('securitySolutionFlyoutInvestigationGuideButton')
@@ -45,7 +45,7 @@ test.describe(
       await page.testSubj.locator('securitySolutionFlyoutInvestigationGuideButton').click();
 
       // Wait for investigation guide to load, then click the osquery action button
-      const getProcessesButton = page.getByText('Get processes').first();
+      const getProcessesButton = page.getByRole('button', { name: 'Get processes' });
       await expect(getProcessesButton).toBeVisible({ timeout: 30_000 });
 
       // The "Get processes" button needs to be clicked to trigger the osquery action
@@ -76,6 +76,7 @@ test.describe(
       page,
       pageObjects,
     }) => {
+      // eslint-disable-next-line playwright/no-nth-methods -- first event in list
       await page.testSubj.locator('expand-event').first().click();
       const notificationBadge = page.testSubj.locator('response-actions-notification');
       await expect(notificationBadge).not.toHaveText('0');
@@ -117,6 +118,7 @@ test.describe(
     }) => {
       test.setTimeout(600_000);
 
+      // eslint-disable-next-line playwright/no-nth-methods -- first event in list
       await page.testSubj.locator('expand-event').first().click();
       await page.testSubj.locator('securitySolutionFlyoutFooterDropdownButton').click();
       await page.testSubj.locator('osquery-action-item').click();
@@ -135,12 +137,13 @@ test.describe(
       await pageObjects.liveQuery.inputQuery(
         "SELECT * FROM os_version where name='{{host.os.name}}';"
       );
-      await page.getByText('Submit').first().waitFor({ state: 'visible' });
+      await page.testSubj.locator('liveQuerySubmitButton').waitFor({ state: 'visible' });
       await pageObjects.liveQuery.submitQuery();
 
       // At least 2 agents should respond
       const flyoutBody = page.testSubj.locator('flyout-body-osquery');
       // Wait for results to appear, then verify at least 2 agents responded
+      // eslint-disable-next-line playwright/no-nth-methods -- first row in data grid
       await flyoutBody.locator('[data-grid-row-index]').first().waitFor({
         state: 'visible',
         timeout: 600_000,
@@ -156,10 +159,12 @@ test.describe(
       test.setTimeout(300_000);
 
       // Send alert to timeline
+      // eslint-disable-next-line playwright/no-nth-methods -- first send-alert button
       await page.testSubj.locator('send-alert-to-timeline-button').first().click();
 
       // Expand first event in the timeline
       const queryEventsTable = page.testSubj.locator('query-events-table');
+      // eslint-disable-next-line playwright/no-nth-methods -- first event in timeline
       await queryEventsTable.locator('[data-test-subj="expand-event"]').first().click();
 
       // Take osquery action with params

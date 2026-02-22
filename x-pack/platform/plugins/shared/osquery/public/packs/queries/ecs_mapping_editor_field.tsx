@@ -673,6 +673,7 @@ export const ECSMappingEditorForm: React.FC<ECSMappingEditorFormProps> = ({
                       iconType="trash"
                       color="danger"
                       onClick={handleDeleteClick}
+                      data-test-subj="deleteEcsMappingRow"
                     />
                   )}
                 </div>

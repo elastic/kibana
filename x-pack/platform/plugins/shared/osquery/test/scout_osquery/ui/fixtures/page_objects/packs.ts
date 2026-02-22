@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-/* eslint-disable playwright/no-nth-methods */
 
 import type { ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
@@ -24,7 +23,7 @@ export class PacksPage {
   }
 
   async clickAddPack() {
-    await this.page.testSubj.locator('add-pack-button').first().click();
+    await this.page.testSubj.locator('add-pack-button').click();
   }
 
   async clickEditPack() {
@@ -52,8 +51,7 @@ export class PacksPage {
     await this.page.testSubj.locator('query-flyout-save-button').click();
     // Wait for the flyout to close (the "Attach next query" heading disappears)
     await this.page
-      .getByText('Attach next query')
-      .first()
+      .getByRole('heading', { name: 'Attach next query' })
       .waitFor({ state: 'hidden', timeout: 10_000 })
       .catch(() => {});
   }
@@ -63,13 +61,13 @@ export class PacksPage {
   }
 
   async fillPackName(name: string) {
-    const input = this.page.locator('input[name="name"]');
+    const input = this.page.testSubj.locator('packNameInput');
     await input.clear();
     await input.fill(name);
   }
 
   async fillPackDescription(description: string) {
-    const input = this.page.locator('input[name="description"]');
+    const input = this.page.testSubj.locator('packDescriptionInput');
     await input.clear();
     await input.fill(description);
   }
@@ -86,7 +84,7 @@ export class PacksPage {
       .locator('[data-test-subj="comboBoxInput"]');
     await comboBox.click();
     await comboBox.pressSequentially(policyName);
-    const option = this.page.getByRole('option', { name: new RegExp(policyName, 'i') }).first();
+    const option = this.page.getByRole('option', { name: new RegExp(policyName, 'i') });
     await option.waitFor({ state: 'visible', timeout: 15_000 });
     await option.click();
   }
@@ -96,7 +94,7 @@ export class PacksPage {
     const input = select.locator('[data-test-subj="comboBoxSearchInput"]');
     await input.click();
     await input.pressSequentially(queryName);
-    const option = this.page.getByRole('option', { name: new RegExp(queryName, 'i') }).first();
+    const option = this.page.getByRole('option', { name: new RegExp(queryName, 'i') });
     await option.waitFor({ state: 'visible', timeout: 15_000 });
     await option.click();
   }
@@ -109,7 +107,6 @@ export class PacksPage {
     // Wait for the table to load first
     await this.page
       .locator('table caption')
-      .first()
       .waitFor({ state: 'visible', timeout: 10_000 })
       .catch(() => {});
 
@@ -155,10 +152,10 @@ export class PacksPage {
    * Navigate through table pages until an item with the given name is visible.
    */
   private async findItemOnPage(name: string) {
+    // eslint-disable-next-line playwright/no-nth-methods -- pagination may show duplicate names across pages
     const target = this.page.locator(`[aria-label="${name}"]`).first();
     const caption = await this.page
       .locator('table caption')
-      .first()
       .textContent()
       .catch(() => '');
     const pageMatch = caption?.match(/Page \d+ of (\d+)/);
@@ -175,8 +172,7 @@ export class PacksPage {
         });
         if (await pageLink.isVisible({ timeout: 2_000 }).catch(() => false)) {
           await pageLink.dispatchEvent('click');
-          // eslint-disable-next-line playwright/no-wait-for-timeout
-          await this.page.waitForTimeout(500);
+          await waitForPageReady(this.page);
         }
       }
     }
@@ -186,12 +182,12 @@ export class PacksPage {
     // Always navigate to the packs list to ensure we're on the right page
     await this.navigate();
 
+    // eslint-disable-next-line playwright/no-nth-methods -- multiple packs may share name in DOM during pagination
     const link = this.page.locator('tbody').getByRole('link', { name: packName }).first();
 
     // Determine total pages from table caption (e.g., "Page 1 of 5.")
     const caption = await this.page
       .locator('table caption')
-      .first()
       .textContent()
       .catch(() => '');
     const pageMatch = caption?.match(/Page \d+ of (\d+)/);
@@ -212,8 +208,7 @@ export class PacksPage {
         });
         if (await pageLink.isVisible({ timeout: 2_000 }).catch(() => false)) {
           await pageLink.dispatchEvent('click');
-          // eslint-disable-next-line playwright/no-wait-for-timeout
-          await this.page.waitForTimeout(500);
+          await waitForPageReady(this.page);
         }
       }
     }
@@ -229,7 +224,7 @@ export class PacksPage {
   }
 
   async getTableRowCount(): Promise<number> {
-    return this.page.locator('tbody > tr').count();
+    return this.page.locator('tbody').getByRole('row').count();
   }
 
   async editSavedQuery(queryName: string) {

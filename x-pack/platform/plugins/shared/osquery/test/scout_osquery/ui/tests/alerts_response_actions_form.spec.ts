@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-/* eslint-disable playwright/no-nth-methods */
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
@@ -71,7 +70,7 @@ test.describe(
 
       await page.goto(kbnUrl.get('/app/security/rules'));
       await waitForPageReady(page);
-      await page.getByText(ruleName).first().click();
+      await page.getByText(ruleName).click();
       await waitForPageReady(page);
       await page.testSubj.locator('editRuleSettingsLink').click();
       await waitForPageReady(page);
@@ -79,15 +78,15 @@ test.describe(
       await waitForPageReady(page);
 
       await expect(
-        page.getByText('Response actions are run on each rule execution.').first()
+        page.getByText('Response actions are run on each rule execution.')
       ).toBeVisible();
       await page.testSubj.locator('Osquery-response-action-type-selection-option').click();
 
       // Check validation errors
       const errorsContainer = page.testSubj.locator('response-actions-error');
-      await expect(errorsContainer.getByText('Query is a required field').first()).toBeVisible();
+      await expect(errorsContainer.getByText('Query is a required field')).toBeVisible();
       await expect(
-        errorsContainer.getByText('The timeout value must be 60 seconds or higher.').first()
+        errorsContainer.getByText('The timeout value must be 60 seconds or higher.')
       ).not.toBeVisible();
 
       // Test that changing one error doesn't clear others
@@ -96,23 +95,23 @@ test.describe(
       const timeoutInput = responseAction0.locator('[data-test-subj="timeout-input"]');
       await timeoutInput.clear();
       await expect(
-        errorsContainer.getByText('The timeout value must be 60 seconds or higher.').first()
+        errorsContainer.getByText('The timeout value must be 60 seconds or higher.')
       ).toBeVisible();
-      await expect(errorsContainer.getByText('Query is a required field').first()).toBeVisible();
+      await expect(errorsContainer.getByText('Query is a required field')).toBeVisible();
 
       await timeoutInput.fill('6');
       await expect(
-        errorsContainer.getByText('The timeout value must be 60 seconds or higher.').first()
+        errorsContainer.getByText('The timeout value must be 60 seconds or higher.')
       ).toBeVisible();
 
       await timeoutInput.fill('66');
       await expect(
-        errorsContainer.getByText('The timeout value must be 60 seconds or higher.').first()
+        errorsContainer.getByText('The timeout value must be 60 seconds or higher.')
       ).not.toBeVisible();
-      await expect(errorsContainer.getByText('Query is a required field').first()).toBeVisible();
+      await expect(errorsContainer.getByText('Query is a required field')).toBeVisible();
 
       // Fill in query
-      await expect(responseAction0.getByText('Query is a required field').first()).toBeVisible();
+      await expect(responseAction0.getByText('Query is a required field')).toBeVisible();
       const queryEditor0 = responseAction0.locator('[data-test-subj="kibanaCodeEditor"]');
       await queryEditor0.click();
       await queryEditor0.pressSequentially('select * from uptime1');
@@ -121,36 +120,30 @@ test.describe(
       await page.testSubj.locator('Osquery-response-action-type-selection-option').click();
       const responseAction1 = page.testSubj.locator('response-actions-list-item-1');
       await responseAction1.getByText('Run a set of queries in a pack').click();
-      await expect(errorsContainer.getByText('Pack is a required field').first()).toBeVisible();
-      await expect(responseAction1.getByText('Pack is a required field').first()).toBeVisible();
+      await expect(errorsContainer.getByText('Pack is a required field')).toBeVisible();
+      await expect(responseAction1.getByText('Pack is a required field')).toBeVisible();
 
       const packComboBox = responseAction1.locator('[data-test-subj="comboBoxInput"]');
       await packComboBox.click();
       await packComboBox.pressSequentially(packName);
-      await expect(page.getByText(`doesn't match any options`).first()).not.toBeVisible();
+      await expect(page.getByText("doesn't match any options")).not.toBeVisible();
       await page.getByRole('option', { name: packName }).click();
 
       // Add third response action (query with ECS mapping)
       await page.testSubj.locator('Osquery-response-action-type-selection-option').click();
       const responseAction2 = page.testSubj.locator('response-actions-list-item-2');
-      await expect(responseAction2.getByText('Query is a required field').first()).toBeVisible();
+      await expect(responseAction2.getByText('Query is a required field')).toBeVisible();
 
       const queryEditor2 = responseAction2.locator('[data-test-subj="kibanaCodeEditor"]');
       await queryEditor2.click();
       await queryEditor2.pressSequentially('select * from uptime');
-      await expect(
-        responseAction2.getByText('Query is a required field').first()
-      ).not.toBeVisible();
+      await expect(responseAction2.getByText('Query is a required field')).not.toBeVisible();
 
       await responseAction2.getByText('Advanced').click();
       const ecsFieldInput = responseAction2.locator('[data-test-subj="ECS-field-input"]');
       const ecsComboBox = ecsFieldInput.locator('[data-test-subj="comboBoxInput"]');
       await ecsComboBox.click();
-      // eslint-disable-next-line playwright/no-wait-for-timeout -- wait for combobox dropdown to render before typing
-      await page.waitForTimeout(500);
-      await ecsComboBox.pressSequentially('labels', { delay: 100 });
-      // The option accessible name is "Custom key/value pairs." so match by text content
-      const labelOption = page.locator('[role="option"]').filter({ hasText: 'labels' }).first();
+      const labelOption = page.getByRole('option', { name: /labels/ });
       await labelOption.waitFor({ state: 'visible', timeout: 15_000 });
       await labelOption.click();
 
@@ -159,18 +152,15 @@ test.describe(
       );
       const columnComboBox = osqueryColumnSelect.locator('[data-test-subj="comboBoxInput"]');
       await columnComboBox.click();
-      // eslint-disable-next-line playwright/no-wait-for-timeout -- wait for combobox dropdown to render before typing
-      await page.waitForTimeout(1000);
       await columnComboBox.pressSequentially('days', { delay: 100 });
-      // Wait for the option to appear and click it - use filter by text content since option name may differ
-      const daysOption = page.locator('[role="option"]').filter({ hasText: 'days' }).first();
+      const daysOption = page.getByRole('option', { name: /days/ });
       await daysOption.waitFor({ state: 'visible', timeout: 15_000 });
       await daysOption.click();
 
       // Save rule - dismiss any toasts that may overlay the button
       await dismissAllToasts(page);
       await page.testSubj.locator('ruleEditSubmitButton').click();
-      await expect(page.getByText(`${ruleName} was saved`).first()).toBeVisible();
+      await expect(page.getByText(`${ruleName} was saved`)).toBeVisible();
 
       // Verify saved values
       await waitForPageReady(page);
@@ -201,13 +191,11 @@ test.describe(
       // Verify responseAction1 is now the first item and is a pack
       const newResponseAction0 = page.testSubj.locator('response-actions-list-item-0');
       await newResponseAction0.locator('[data-test-subj="comboBoxSearchInput"]').click();
-      await expect(page.getByText('Search for a pack to run').first()).toBeVisible();
+      await expect(page.getByText('Search for a pack to run')).toBeVisible();
       await page.keyboard.press('Escape');
-      // eslint-disable-next-line playwright/no-wait-for-timeout -- wait for dropdown to close before refocus
-      await page.waitForTimeout(500);
-      await newResponseAction0.locator('[data-test-subj="comboBoxInput"]').click();
-      // eslint-disable-next-line playwright/no-wait-for-timeout -- wait for focus before typing
-      await page.waitForTimeout(300);
+      const comboBoxInput = newResponseAction0.locator('[data-test-subj="comboBoxInput"]');
+      await comboBoxInput.waitFor({ state: 'visible', timeout: 5_000 });
+      await comboBoxInput.click();
       await newResponseAction0
         .locator('[data-test-subj="comboBoxInput"]')
         .pressSequentially(packName);
@@ -249,7 +237,7 @@ test.describe(
       ];
       expect(requestBody.response_actions[0].params.queries).toStrictEqual(oneQuery);
 
-      await expect(page.getByText(`${ruleName} was saved`).first()).toBeVisible();
+      await expect(page.getByText(`${ruleName} was saved`)).toBeVisible();
 
       // Change pack to multi-query pack
       await waitForPageReady(page);
@@ -264,12 +252,8 @@ test.describe(
       // Clear the current pack selection before typing the new one
       const finalPackComboBox = finalResponseAction0.locator('[data-test-subj="comboBoxInput"]');
       await finalPackComboBox.click();
-      // eslint-disable-next-line playwright/no-wait-for-timeout -- wait for focus before keyboard input
-      await page.waitForTimeout(300);
       await page.keyboard.press('ControlOrMeta+a');
       await page.keyboard.press('Backspace');
-      // eslint-disable-next-line playwright/no-wait-for-timeout -- wait for field to clear before typing
-      await page.waitForTimeout(300);
       await finalPackComboBox.pressSequentially(multiQueryPackName);
       const multiPackOption = page.getByRole('option', { name: multiQueryPackName });
       await multiPackOption.waitFor({ state: 'visible', timeout: 15_000 });
@@ -299,7 +283,7 @@ test.describe(
 
       // Dismiss any toasts that may overlay the Save button
       await dismissAllToasts(page);
-      await page.getByText('Save changes').first().click();
+      await page.testSubj.locator('ruleEditSubmitButton').click();
       const finalResponse = await finalSavePromise;
       const finalRequestBody = finalResponse.request().postDataJSON();
 
