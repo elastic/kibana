@@ -6,23 +6,18 @@
       "jest",
       "node",
       "react",
-      "@emotion/react/types/css-prop",
+      "@kbn/ambient-ui-types",
       "@testing-library/jest-dom",
-      "@testing-library/react"
+      "@testing-library/react",
     ]
   },
   "include": ["**/*.ts", "**/*.tsx"],
   "kbn_references": [
-    "@kbn/ui-theme",
     "@kbn/i18n",
-    "@kbn/core",
-    "@kbn/data-plugin",
-    "@kbn/es-query",
-    "@kbn/ui-actions-plugin",
-    "@kbn/field-types",
-    "@kbn/data-views-plugin",
-    "@kbn/core-notifications-browser",
-    "@kbn/utility-types",
+    "@kbn/ai-assistant-connector-selector-action",
+    "@kbn/triggers-actions-ui-plugin",
+    "@kbn/management-settings-ids",
+    "@kbn/core-ui-settings-browser",
   ],
   "exclude": ["target/**/*"]
 }
