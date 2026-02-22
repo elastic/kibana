@@ -89,17 +89,9 @@ test.describe(
       await cleanupSavedQuery(kbnClient, multipleMappingsSavedQueryId);
     });
 
-    // eslint-disable-next-line playwright/max-nested-describe -- group has shared beforeEach/afterEach
-    test.describe('Check if result type is correct', () => {
-      let resultTypePackId: string;
-
-      test.afterEach(async ({ kbnClient }) => {
-        if (resultTypePackId) {
-          await cleanupPack(kbnClient, resultTypePackId);
-        }
-      });
-
-      test('Check if result type is correct', async ({ page, pageObjects, kbnClient }) => {
+    test('Check if result type is correct', async ({ page, pageObjects, kbnClient }) => {
+      let resultTypePackId: string | undefined;
+      try {
         const packs = pageObjects.packs;
 
         await test.step('Create pack with queries via API (Query1 Snapshot, Query2 Differential, Query3 Differential Ignore removals)', async () => {
@@ -155,22 +147,21 @@ test.describe(
 
           await packs.clickUpdatePack();
         });
-      });
+      } finally {
+        if (resultTypePackId) {
+          await cleanupPack(kbnClient, resultTypePackId);
+        }
+      }
     });
 
-    // eslint-disable-next-line playwright/max-nested-describe -- group has shared beforeEach/afterEach
-    test.describe('Check if pack is created', () => {
-      let packId: string;
-      let packName: string;
-
-      test.afterEach(async ({ kbnClient }) => {
-        if (packId) {
-          await cleanupPack(kbnClient, packId);
-        }
-      });
-
-      test('should add a pack from a saved query', async ({ page, pageObjects, kbnClient }) => {
-        packName = `Pack-name${Date.now()}`;
+    test('Check if pack is created: should add a pack from a saved query', async ({
+      page,
+      pageObjects,
+      kbnClient,
+    }) => {
+      let packId: string | undefined;
+      const packName = `Pack-name${Date.now()}`;
+      try {
         const packs = pageObjects.packs;
 
         await test.step('Create pack with saved query', async () => {
@@ -208,40 +199,33 @@ test.describe(
 
           await expect(page.getByText(packName)).toBeVisible();
         });
-      });
-    });
-
-    // eslint-disable-next-line playwright/max-nested-describe -- group has shared beforeEach/afterEach
-    test.describe('to click the edit button and edit pack', () => {
-      let packId: string;
-      let packName: string;
-      let newQueryName: string;
-
-      test.beforeEach(async ({ kbnClient }) => {
-        const policyIds = await getFirstPackagePolicyIds(kbnClient);
-
-        const pack = await loadPack(kbnClient, {
-          policy_ids: policyIds,
-          queries: {
-            [savedQueryName]: {
-              ecs_mapping: {},
-              interval: 3600,
-              query: 'select * from uptime;',
-            },
-          },
-        });
-        packId = pack.saved_object_id;
-        packName = pack.name;
-        newQueryName = `new-query-name${Date.now()}`;
-      });
-
-      test.afterEach(async ({ kbnClient }) => {
+      } finally {
         if (packId) {
           await cleanupPack(kbnClient, packId);
         }
-      });
+      }
+    });
 
-      test('should edit pack and add new query', async ({ page, pageObjects }) => {
+    test('to click the edit button and edit pack: should edit pack and add new query', async ({
+      page,
+      pageObjects,
+      kbnClient,
+    }) => {
+      const policyIds = await getFirstPackagePolicyIds(kbnClient);
+      const pack = await loadPack(kbnClient, {
+        policy_ids: policyIds,
+        queries: {
+          [savedQueryName]: {
+            ecs_mapping: {},
+            interval: 3600,
+            query: 'select * from uptime;',
+          },
+        },
+      });
+      const packId = pack.saved_object_id;
+      const packName = pack.name;
+      const newQueryName = `new-query-name${Date.now()}`;
+      try {
         const packs = pageObjects.packs;
 
         await test.step('Open pack and add new query', async () => {
@@ -274,39 +258,29 @@ test.describe(
             timeout: 30_000,
           });
         });
-      });
+      } finally {
+        await cleanupPack(kbnClient, packId);
+      }
     });
 
-    // eslint-disable-next-line playwright/max-nested-describe -- group has shared beforeEach/afterEach
-    test.describe('should trigger validation when saved query is being chosen', () => {
-      let packId: string;
-
-      test.beforeAll(async ({ kbnClient }) => {
-        const policyIds = await getFirstPackagePolicyIds(kbnClient);
-
-        const pack = await loadPack(kbnClient, {
-          policy_ids: policyIds,
-          queries: {
-            [savedQueryName]: {
-              ecs_mapping: {},
-              interval: 3600,
-              query: 'select * from uptime;',
-            },
+    test('should trigger validation when saved query is being chosen', async ({
+      page,
+      pageObjects,
+      kbnClient,
+    }) => {
+      const policyIds = await getFirstPackagePolicyIds(kbnClient);
+      const pack = await loadPack(kbnClient, {
+        policy_ids: policyIds,
+        queries: {
+          [savedQueryName]: {
+            ecs_mapping: {},
+            interval: 3600,
+            query: 'select * from uptime;',
           },
-        });
-        packId = pack.saved_object_id;
+        },
       });
-
-      test.afterAll(async ({ kbnClient }) => {
-        if (packId) {
-          await cleanupPack(kbnClient, packId);
-        }
-      });
-
-      test('should trigger validation when saved query is being chosen', async ({
-        page,
-        pageObjects,
-      }) => {
+      const packId = pack.saved_object_id;
+      try {
         const packs = pageObjects.packs;
 
         await test.step('Open pack and add query', async () => {
@@ -326,17 +300,17 @@ test.describe(
           await expect(page.getByText('ID must be unique')).toBeVisible();
           await packs.clickCancelQueryInFlyout();
         });
-      });
+      } finally {
+        await cleanupPack(kbnClient, packId);
+      }
     });
 
-    // eslint-disable-next-line playwright/max-nested-describe -- group has shared beforeEach/afterEach
-    test.describe('should open lens in new tab', { tag: [...tags.stateful.classic] }, () => {
-      let packId: string;
-      let packName: string;
-
-      test.beforeEach(async ({ kbnClient }) => {
+    test(
+      'should open lens in new tab',
+      { tag: [...tags.stateful.classic] },
+      async ({ page, pageObjects, kbnClient }) => {
+        test.setTimeout(300_000);
         const policyIds = await getFirstPackagePolicyIds(kbnClient);
-
         const pack = await loadPack(kbnClient, {
           policy_ids: policyIds,
           queries: {
@@ -347,22 +321,9 @@ test.describe(
             },
           },
         });
-        packId = pack.saved_object_id;
-        packName = pack.name;
-      });
-
-      test.afterEach(async ({ kbnClient }) => {
-        if (packId) {
-          await cleanupPack(kbnClient, packId);
-        }
-      });
-
-      test(
-        'should open lens in new tab',
-        { tag: [...tags.stateful.classic] },
-        async ({ page, pageObjects }) => {
-          test.setTimeout(300_000);
-
+        const packId = pack.saved_object_id;
+        const packName = pack.name;
+        try {
           let lensUrl = '';
 
           await test.step('Set up window.open stub, navigate to pack details and click View in Lens', async () => {
@@ -405,97 +366,18 @@ test.describe(
               `Action pack_${packName}_${savedQueryName}`
             );
           });
-        }
-      );
-    });
-
-    // eslint-disable-next-line playwright/max-nested-describe -- group has shared beforeEach/afterEach
-    test.describe('should open discover in new tab', { tag: [...tags.stateful.classic] }, () => {
-      let packId: string;
-      let packName: string;
-
-      test.beforeAll(async ({ kbnClient }) => {
-        const policyIds = await getFirstPackagePolicyIds(kbnClient);
-
-        const pack = await loadPack(kbnClient, {
-          policy_ids: policyIds,
-          queries: {
-            [savedQueryName]: {
-              ecs_mapping: {},
-              interval: 3600,
-              query: 'select * from uptime;',
-            },
-          },
-        });
-        packId = pack.saved_object_id;
-        packName = pack.name;
-      });
-
-      test.afterAll(async ({ kbnClient }) => {
-        if (packId) {
+        } finally {
           await cleanupPack(kbnClient, packId);
         }
-      });
+      }
+    );
 
-      test('should open discover in new tab', async ({ page, pageObjects }) => {
+    test(
+      'should open discover in new tab',
+      { tag: [...tags.stateful.classic] },
+      async ({ page, pageObjects, kbnClient }) => {
         test.setTimeout(240_000);
-
-        let discoverHref: string | null = null;
-
-        await test.step('Navigate to pack details and get Discover link', async () => {
-          await pageObjects.packs.navigateToPackDetail(packId);
-
-          // eslint-disable-next-line playwright/no-nth-methods -- first visible result in pack queries table
-          const discoverLink = page.testSubj.locator('viewInDiscover').first();
-          await discoverLink.waitFor({ state: 'visible', timeout: 30_000 });
-
-          // Verify the href contains the pack action_id filter
-          await expect(discoverLink).toHaveAttribute(
-            'href',
-            expect.stringContaining(`pack_${packName}_${savedQueryName}`)
-          );
-
-          discoverHref = await discoverLink.evaluate((el) => el.getAttribute('href'));
-        });
-
-        await test.step('Navigate to Discover and verify filter is applied', async () => {
-          expect(discoverHref).toBeTruthy();
-          const baseUrl = new URL(page.url()).origin;
-          await page.goto(`${baseUrl}${discoverHref}`);
-          await waitForPageReady(page);
-
-          await expect(page.testSubj.locator('breadcrumbs')).toContainText('Discover', {
-            timeout: 30_000,
-          });
-
-          const docTable = page.testSubj.locator('discoverDocTable');
-          const start = Date.now();
-          while (Date.now() - start < 180_000) {
-            if (await docTable.isVisible({ timeout: 10_000 }).catch(() => false)) break;
-            await page.reload();
-            await waitForPageReady(page);
-          }
-
-          await expect(docTable).toBeVisible({ timeout: 30_000 });
-
-          await expect(page.getByText(`action_id: pack_${packName}_${savedQueryName}`)).toBeVisible(
-            { timeout: 30_000 }
-          );
-
-          await expect(page.getByText('logs-osquery_manager.result')).toBeVisible({
-            timeout: 10_000,
-          });
-        });
-      });
-    });
-
-    // eslint-disable-next-line playwright/max-nested-describe -- group has shared beforeEach/afterEach
-    test.describe('deactivate and activate pack', () => {
-      let packId: string;
-
-      test.beforeEach(async ({ kbnClient }) => {
         const policyIds = await getFirstPackagePolicyIds(kbnClient);
-
         const pack = await loadPack(kbnClient, {
           policy_ids: policyIds,
           queries: {
@@ -506,16 +388,75 @@ test.describe(
             },
           },
         });
-        packId = pack.saved_object_id;
-      });
+        const packId = pack.saved_object_id;
+        const packName = pack.name;
+        try {
+          let discoverHref: string | null = null;
 
-      test.afterEach(async ({ kbnClient }) => {
-        if (packId) {
+          await test.step('Navigate to pack details and get Discover link', async () => {
+            await pageObjects.packs.navigateToPackDetail(packId);
+
+            // eslint-disable-next-line playwright/no-nth-methods -- first visible result in pack queries table
+            const discoverLink = page.testSubj.locator('viewInDiscover').first();
+            await discoverLink.waitFor({ state: 'visible', timeout: 30_000 });
+
+            // Verify the href contains the pack action_id filter
+            await expect(discoverLink).toHaveAttribute(
+              'href',
+              expect.stringContaining(`pack_${packName}_${savedQueryName}`)
+            );
+
+            discoverHref = await discoverLink.evaluate((el) => el.getAttribute('href'));
+          });
+
+          await test.step('Navigate to Discover and verify filter is applied', async () => {
+            expect(discoverHref).toBeTruthy();
+            const baseUrl = new URL(page.url()).origin;
+            await page.goto(`${baseUrl}${discoverHref}`);
+            await waitForPageReady(page);
+
+            await expect(page.testSubj.locator('breadcrumbs')).toContainText('Discover', {
+              timeout: 30_000,
+            });
+
+            const docTable = page.testSubj.locator('discoverDocTable');
+            const start = Date.now();
+            while (Date.now() - start < 180_000) {
+              if (await docTable.isVisible({ timeout: 10_000 }).catch(() => false)) break;
+              await page.reload();
+              await waitForPageReady(page);
+            }
+
+            await expect(docTable).toBeVisible({ timeout: 30_000 });
+
+            await expect(
+              page.getByText(`action_id: pack_${packName}_${savedQueryName}`)
+            ).toBeVisible({ timeout: 30_000 });
+
+            await expect(page.getByText('logs-osquery_manager.result')).toBeVisible({
+              timeout: 10_000,
+            });
+          });
+        } finally {
           await cleanupPack(kbnClient, packId);
         }
-      });
+      }
+    );
 
-      test('deactivate and activate pack', async ({ kbnClient }) => {
+    test('deactivate and activate pack', async ({ kbnClient, pageObjects }) => {
+      const policyIds = await getFirstPackagePolicyIds(kbnClient);
+      const pack = await loadPack(kbnClient, {
+        policy_ids: policyIds,
+        queries: {
+          [savedQueryName]: {
+            ecs_mapping: {},
+            interval: 3600,
+            query: 'select * from uptime;',
+          },
+        },
+      });
+      const packId = pack.saved_object_id;
+      try {
         await test.step('Deactivate pack via API', async () => {
           await kbnClient.request({
             method: 'PUT',
@@ -535,39 +476,27 @@ test.describe(
           const packData = await getPack(kbnClient, packId);
           expect(packData.enabled).toBe(true);
         });
-      });
+      } finally {
+        await cleanupPack(kbnClient, packId);
+      }
     });
 
-    // eslint-disable-next-line playwright/max-nested-describe -- group has shared beforeEach/afterEach
-    test.describe('should verify that packs are triggered', () => {
-      let packId: string;
-      let packName: string;
-
-      test.beforeEach(async ({ kbnClient }) => {
-        const policyIds = await getFirstPackagePolicyIds(kbnClient);
-
-        const pack = await loadPack(kbnClient, {
-          policy_ids: policyIds,
-          queries: {
-            [savedQueryName]: {
-              ecs_mapping: {},
-              interval: 60,
-              query: 'select * from uptime;',
-            },
+    test('should verify that packs are triggered', async ({ page, pageObjects, kbnClient }) => {
+      test.setTimeout(360_000); // Pack execution + 5-min result polling
+      const policyIds = await getFirstPackagePolicyIds(kbnClient);
+      const pack = await loadPack(kbnClient, {
+        policy_ids: policyIds,
+        queries: {
+          [savedQueryName]: {
+            ecs_mapping: {},
+            interval: 60,
+            query: 'select * from uptime;',
           },
-        });
-        packId = pack.saved_object_id;
-        packName = pack.name;
+        },
       });
-
-      test.afterEach(async ({ kbnClient }) => {
-        if (packId) {
-          await cleanupPack(kbnClient, packId);
-        }
-      });
-
-      test('should verify that packs are triggered', async ({ page, pageObjects }) => {
-        test.setTimeout(360_000); // Pack execution + 5-min result polling
+      const packId = pack.saved_object_id;
+      const packName = pack.name;
+      try {
         const packs = pageObjects.packs;
 
         await test.step('Navigate to pack details and wait for results', async () => {
@@ -579,12 +508,12 @@ test.describe(
 
           while (lastResultsDate === '-' && Date.now() < maxWait) {
             await page.testSubj.locator('docsLoading').waitFor({ state: 'hidden' });
-            const resultsCell = page.locator(
+            const packQueryResultsDateCells = page.locator(
               'tbody .euiTableRow > td:nth-child(5) > .euiTableCellContent'
             );
-            if ((await resultsCell.count()) > 0) {
+            if ((await packQueryResultsDateCells.count()) > 0) {
               // eslint-disable-next-line playwright/no-nth-methods -- first row's result cell in table
-              lastResultsDate = (await resultsCell.first().textContent()) || '-';
+              lastResultsDate = (await packQueryResultsDateCells.first().textContent()) || '-';
             }
 
             if (lastResultsDate === '-') {
@@ -615,38 +544,26 @@ test.describe(
           });
           await expect(page.testSubj.locator('packResultsErrorsEmpty')).toHaveCount(1);
         });
-      });
+      } finally {
+        await cleanupPack(kbnClient, packId);
+      }
     });
 
-    // eslint-disable-next-line playwright/max-nested-describe -- group has shared beforeEach/afterEach
-    test.describe('delete all queries in pack', () => {
-      let packId: string;
-      let packName: string;
-
-      test.beforeEach(async ({ kbnClient }) => {
-        const policyIds = await getFirstPackagePolicyIds(kbnClient);
-
-        const pack = await loadPack(kbnClient, {
-          policy_ids: policyIds,
-          queries: {
-            [savedQueryName]: {
-              ecs_mapping: {},
-              interval: 3600,
-              query: 'select * from uptime;',
-            },
+    test('delete all queries in pack', async ({ page, pageObjects, kbnClient }) => {
+      const policyIds = await getFirstPackagePolicyIds(kbnClient);
+      const pack = await loadPack(kbnClient, {
+        policy_ids: policyIds,
+        queries: {
+          [savedQueryName]: {
+            ecs_mapping: {},
+            interval: 3600,
+            query: 'select * from uptime;',
           },
-        });
-        packId = pack.saved_object_id;
-        packName = pack.name;
+        },
       });
-
-      test.afterEach(async ({ kbnClient }) => {
-        if (packId) {
-          await cleanupPack(kbnClient, packId);
-        }
-      });
-
-      test('delete all queries in pack', async ({ page, pageObjects }) => {
+      const packId = pack.saved_object_id;
+      const packName = pack.name;
+      try {
         const packs = pageObjects.packs;
 
         await test.step('Open pack, select all queries and delete', async () => {
@@ -670,36 +587,29 @@ test.describe(
           });
           await expect(page.getByText(/^No items found/)).toBeVisible({ timeout: 15_000 });
         });
-      });
+      } finally {
+        await cleanupPack(kbnClient, packId);
+      }
     });
 
-    // eslint-disable-next-line playwright/max-nested-describe -- group has shared beforeEach/afterEach
-    test.describe('enable changing saved queries and ecs_mappings', () => {
-      let packId: string;
-
-      test.beforeEach(async ({ kbnClient }) => {
-        const policyIds = await getFirstPackagePolicyIds(kbnClient);
-
-        const pack = await loadPack(kbnClient, {
-          policy_ids: policyIds,
-          queries: {
-            [savedQueryName]: {
-              ecs_mapping: {},
-              interval: 3600,
-              query: 'select * from uptime;',
-            },
+    test('enable changing saved queries and ecs_mappings', async ({
+      page,
+      pageObjects,
+      kbnClient,
+    }) => {
+      const policyIds = await getFirstPackagePolicyIds(kbnClient);
+      const pack = await loadPack(kbnClient, {
+        policy_ids: policyIds,
+        queries: {
+          [savedQueryName]: {
+            ecs_mapping: {},
+            interval: 3600,
+            query: 'select * from uptime;',
           },
-        });
-        packId = pack.saved_object_id;
+        },
       });
-
-      test.afterEach(async ({ kbnClient }) => {
-        if (packId) {
-          await cleanupPack(kbnClient, packId);
-        }
-      });
-
-      test('enable changing saved queries and ecs_mappings', async ({ page, pageObjects }) => {
+      const packId = pack.saved_object_id;
+      try {
         const packs = pageObjects.packs;
 
         await test.step('Open pack and add query', async () => {
@@ -745,36 +655,25 @@ test.describe(
           await expect(page.getByText('Seconds of uptime')).toBeVisible();
           await expect(page.testSubj.locator('timeout-input')).toHaveValue('607');
         });
-      });
+      } finally {
+        await cleanupPack(kbnClient, packId);
+      }
     });
 
-    // eslint-disable-next-line playwright/max-nested-describe -- group has shared beforeEach/afterEach
-    test.describe('to click delete button', () => {
-      let packId: string;
-
-      test.beforeEach(async ({ kbnClient }) => {
-        const policyIds = await getFirstPackagePolicyIds(kbnClient);
-
-        const pack = await loadPack(kbnClient, {
-          policy_ids: policyIds,
-          queries: {
-            [savedQueryName]: {
-              ecs_mapping: {},
-              interval: 3600,
-              query: 'select * from uptime;',
-            },
+    test('should delete pack', async ({ pageObjects, kbnClient }) => {
+      const policyIds = await getFirstPackagePolicyIds(kbnClient);
+      const pack = await loadPack(kbnClient, {
+        policy_ids: policyIds,
+        queries: {
+          [savedQueryName]: {
+            ecs_mapping: {},
+            interval: 3600,
+            query: 'select * from uptime;',
           },
-        });
-        packId = pack.saved_object_id;
+        },
       });
-
-      test.afterEach(async ({ kbnClient }) => {
-        if (packId) {
-          await cleanupPack(kbnClient, packId);
-        }
-      });
-
-      test('should delete pack', async ({ pageObjects }) => {
+      const packId = pack.saved_object_id;
+      try {
         const packs = pageObjects.packs;
 
         await test.step('Open pack and navigate to edit', async () => {
@@ -785,7 +684,9 @@ test.describe(
         await test.step('Delete pack and confirm', async () => {
           await packs.deleteAndConfirm('pack');
         });
-      });
+      } finally {
+        await cleanupPack(kbnClient, packId).catch(() => {});
+      }
     });
   }
 );

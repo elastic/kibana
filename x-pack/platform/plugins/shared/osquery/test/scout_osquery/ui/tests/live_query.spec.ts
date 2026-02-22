@@ -134,11 +134,14 @@ test.describe(
       await test.step('Check results and click through to agent details', async () => {
         await liveQuery.checkResults();
 
-        const firstCell = page.locator(
+        const firstAgentRowFirstCell = page.locator(
           '[data-gridcell-column-index="0"][data-gridcell-row-index="0"]'
         );
-        await expect(firstCell).toBeVisible();
-        await firstCell.locator('[data-euigrid-tab-managed="true"]').click();
+        const clickableCellContent = firstAgentRowFirstCell.locator(
+          '[data-euigrid-tab-managed="true"]'
+        );
+        await expect(firstAgentRowFirstCell).toBeVisible();
+        await clickableCellContent.click();
         await expect(page).toHaveURL(/app\/fleet\/agents\//);
       });
     });

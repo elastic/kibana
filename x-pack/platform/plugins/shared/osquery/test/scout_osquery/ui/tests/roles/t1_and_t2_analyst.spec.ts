@@ -78,7 +78,7 @@ roles.forEach(({ name, role }) => {
           const nextPageLink = page.getByRole('link', { name: 'Next page' });
           while (await nextPageLink.isVisible({ timeout: 2_000 }).catch(() => false)) {
             await nextPageLink.click();
-            await new Promise((r) => setTimeout(r, 1_000));
+            await waitForPageReady(page);
             if (await savedQueryRow.isVisible({ timeout: 2_000 }).catch(() => false)) {
               break;
             }

@@ -88,6 +88,7 @@ export const AddToCaseButton: React.FC<AddToCaseButtonProps> = ({
           onClick={handleClick}
           isDisabled={isDisabled || !hasCasesPermissions}
           aria-label={ADD_TO_CASE}
+          data-test-subj="addToCaseButton"
           {...iconProps}
         />
       </EuiToolTip>
