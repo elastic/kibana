@@ -81,7 +81,7 @@ function getDetailsFromErrorResponse(error: InfraHttpError) {
   );
 }
 
-const INFRA_PATH_PREFIXES = ['/api/metrics/infra', '/api/infra/'];
+const INFRA_PATH_PREFIXES = ['/api/metrics/', '/api/infra/'];
 
 function createInfraApiClient(
   signal: AbortSignal,
