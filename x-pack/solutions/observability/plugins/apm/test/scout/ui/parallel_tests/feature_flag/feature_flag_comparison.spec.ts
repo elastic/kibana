@@ -10,12 +10,12 @@ import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../../fixtures';
 
 async function setAdvancedSetting(
-  kbnUrl: { base: string },
+  kbnUrl: { get: () => string },
   key: string,
   value: string,
   auth: { username: string; password: string }
 ) {
-  const url = `${kbnUrl.base}/internal/kibana/settings`;
+  const url = `${kbnUrl.get()}/internal/kibana/settings`;
   const response = await fetch(url, {
     method: 'POST',
     headers: {
@@ -38,7 +38,7 @@ test.describe(
 
     test.describe('when comparison feature is enabled', () => {
       test.beforeEach(async ({ browserAuth, kbnUrl }) => {
-        await browserAuth.loginAsEditor();
+        await browserAuth.loginAsPrivilegedUser();
         await setAdvancedSetting(
           kbnUrl,
           'observability:enableComparisonByDefault',
@@ -80,7 +80,7 @@ test.describe(
 
     test.describe('when comparison feature is disabled', () => {
       test.beforeEach(async ({ browserAuth, kbnUrl }) => {
-        await browserAuth.loginAsEditor();
+        await browserAuth.loginAsPrivilegedUser();
         await setAdvancedSetting(
           kbnUrl,
           'observability:enableComparisonByDefault',

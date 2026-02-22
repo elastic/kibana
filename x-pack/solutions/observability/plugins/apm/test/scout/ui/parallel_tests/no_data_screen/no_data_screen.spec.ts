@@ -10,11 +10,11 @@ import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../../fixtures';
 
 async function setApmIndices(
-  kbnUrl: { base: string },
+  kbnUrl: { get: () => string },
   body: Record<string, string>,
   auth: { username: string; password: string }
 ) {
-  const url = `${kbnUrl.base}/internal/apm-sources/settings/apm-indices/save`;
+  const url = `${kbnUrl.get()}/internal/apm-sources/settings/apm-indices/save`;
   const response = await fetch(url, {
     method: 'POST',
     headers: {
@@ -51,7 +51,7 @@ test.describe(
       });
 
       test.beforeEach(async ({ browserAuth }) => {
-        await browserAuth.loginAsEditor();
+        await browserAuth.loginAsPrivilegedUser();
       });
 
       test('shows no data screen instead of service inventory', async ({ page, kbnUrl }) => {

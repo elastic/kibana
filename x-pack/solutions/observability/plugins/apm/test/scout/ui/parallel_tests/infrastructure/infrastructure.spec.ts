@@ -14,7 +14,7 @@ test.describe(
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     test.beforeEach(async ({ browserAuth }) => {
-      await browserAuth.loginAsEditor();
+      await browserAuth.loginAsPrivilegedUser();
     });
 
     test('when container ids, pod names and host names are returned shows all tabs', async ({

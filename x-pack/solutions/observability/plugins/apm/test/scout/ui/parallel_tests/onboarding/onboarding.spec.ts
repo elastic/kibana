@@ -15,7 +15,7 @@ test.describe(
   () => {
     test.describe('General navigation', () => {
       test.beforeEach(async ({ browserAuth }) => {
-        await browserAuth.loginAsEditor();
+        await browserAuth.loginAsPrivilegedUser();
       });
 
       test('includes section for APM Agents', async ({ page, kbnUrl }) => {
@@ -62,7 +62,7 @@ test.describe(
 
     test.describe('check Agent Status', () => {
       test.beforeEach(async ({ browserAuth }) => {
-        await browserAuth.loginAsEditor();
+        await browserAuth.loginAsPrivilegedUser();
       });
 
       test('when no data is present', async ({ page, kbnUrl }) => {
@@ -78,7 +78,7 @@ test.describe(
         kbnUrl,
         browserAuth,
       }) => {
-        await browserAuth.loginAsEditor();
+        await browserAuth.loginAsPrivilegedUser();
         await page.goto(`${kbnUrl.app('apm')}/onboarding`);
 
         const responsePromise = page.waitForResponse(

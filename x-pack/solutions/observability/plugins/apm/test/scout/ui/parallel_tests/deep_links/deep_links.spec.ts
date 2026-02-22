@@ -20,7 +20,7 @@ test.describe(
     for (const keyword of ['apm', 'applications']) {
       test.describe(`Deep links for ${keyword} keyword`, () => {
         test('contains all the expected deep links', async ({ page, kbnUrl }) => {
-          await page.goto(kbnUrl.base);
+          await page.goto(kbnUrl.get());
           const searchInput = page.getByTestId('nav-search-input');
           await searchInput.waitFor({ state: 'visible' });
           await searchInput.fill(keyword);
@@ -34,7 +34,7 @@ test.describe(
         });
 
         test('navigates to Service inventory page', async ({ page, kbnUrl }) => {
-          await page.goto(kbnUrl.base);
+          await page.goto(kbnUrl.get());
           const searchInput = page.getByTestId('nav-search-input');
           await searchInput.waitFor({ state: 'visible' });
           await searchInput.fill(keyword);
@@ -43,7 +43,7 @@ test.describe(
         });
 
         test('navigates to Service groups page', async ({ page, kbnUrl }) => {
-          await page.goto(kbnUrl.base);
+          await page.goto(kbnUrl.get());
           const searchInput = page.getByTestId('nav-search-input');
           await searchInput.waitFor({ state: 'visible' });
           await searchInput.fill(keyword);
@@ -52,7 +52,7 @@ test.describe(
         });
 
         test('navigates to Traces page', async ({ page, kbnUrl }) => {
-          await page.goto(kbnUrl.base);
+          await page.goto(kbnUrl.get());
           const searchInput = page.getByTestId('nav-search-input');
           await searchInput.waitFor({ state: 'visible' });
           await searchInput.fill(keyword);
@@ -61,7 +61,7 @@ test.describe(
         });
 
         test('navigates to Service map page', async ({ page, kbnUrl }) => {
-          await page.goto(kbnUrl.base);
+          await page.goto(kbnUrl.get());
           const searchInput = page.getByTestId('nav-search-input');
           await searchInput.waitFor({ state: 'visible' });
           await searchInput.fill(keyword);
@@ -70,7 +70,7 @@ test.describe(
         });
 
         test('navigates to Dependencies page', async ({ page, kbnUrl }) => {
-          await page.goto(kbnUrl.base);
+          await page.goto(kbnUrl.get());
           const searchInput = page.getByTestId('nav-search-input');
           await searchInput.waitFor({ state: 'visible' });
           await searchInput.fill(keyword);
@@ -81,7 +81,7 @@ test.describe(
         });
 
         test('navigates to Settings page', async ({ page, kbnUrl }) => {
-          await page.goto(kbnUrl.base);
+          await page.goto(kbnUrl.get());
           const searchInput = page.getByTestId('nav-search-input');
           await searchInput.waitFor({ state: 'visible' });
           await searchInput.fill(keyword);

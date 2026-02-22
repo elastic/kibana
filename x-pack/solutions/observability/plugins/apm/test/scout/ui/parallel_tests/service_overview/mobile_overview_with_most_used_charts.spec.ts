@@ -23,7 +23,7 @@ test.describe(
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     test.beforeEach(async ({ browserAuth }) => {
-      await browserAuth.loginAsEditor();
+      await browserAuth.loginAsPrivilegedUser();
     });
 
     test.skip('shows the most used charts', async ({ page, kbnUrl }) => {
