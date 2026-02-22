@@ -60,6 +60,7 @@ export const getAllHosts = async ({
         },
       },
       aggs: {
+        // Aggregation to find hosts whose metrics are monitored by the system integration.
         monitoredHosts: {
           filter: { bool: { filter: [...(inventoryModel.nodeFilter?.({ schema }) ?? [])] } },
           aggs: {
