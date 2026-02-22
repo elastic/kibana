@@ -10,7 +10,7 @@ import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 import { socManagerRole } from '../common/roles';
 import { loadRule, cleanupRule } from '../common/api_helpers';
-import { waitForPageReady, waitForAlerts } from '../common/constants';
+import { waitForAlerts } from '../common/constants';
 
 test.describe(
   'Alert Event Details - dynamic params',
@@ -26,7 +26,6 @@ test.describe(
     test.beforeEach(async ({ browserAuth, page, kbnUrl, kbnClient }) => {
       await browserAuth.loginWithCustomRole(socManagerRole);
       await page.goto(kbnUrl.get(`/app/security/rules/id/${ruleId}`));
-      await waitForPageReady(page);
       await waitForAlerts(page, kbnClient, ruleId);
     });
 

@@ -27,7 +27,6 @@ test.describe(
 
       await test.step('Navigate to osquery', async () => {
         await page.gotoApp('osquery');
-        await waitForPageReady(page);
       });
 
       await test.step('Click New live query', async () => {
@@ -106,7 +105,6 @@ test.describe(
       pageObjects,
     }) => {
       await page.gotoApp('osquery');
-      await waitForPageReady(page);
       await page.testSubj.locator('newLiveQueryButton').click();
       await waitForPageReady(page);
 

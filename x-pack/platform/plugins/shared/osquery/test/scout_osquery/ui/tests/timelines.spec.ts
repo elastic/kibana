@@ -9,7 +9,6 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 import { socManagerRole } from '../common/roles';
-import { waitForPageReady } from '../common/constants';
 
 test.describe('ALL - Timelines', { tag: [...tags.stateful.classic] }, () => {
   test.beforeEach(async ({ browserAuth }) => {
@@ -24,7 +23,6 @@ test.describe('ALL - Timelines', { tag: [...tags.stateful.classic] }, () => {
     test.setTimeout(300_000);
 
     await page.goto(kbnUrl.get('/app/security/timelines'));
-    await waitForPageReady(page);
 
     // Open the timeline bar
     await page.testSubj

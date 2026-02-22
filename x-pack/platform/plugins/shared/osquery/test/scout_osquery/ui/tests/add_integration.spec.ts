@@ -61,7 +61,6 @@ test.describe(
       async ({ page, kbnUrl }) => {
         // Visit osquery — when not installed, should prompt to add integration
         await page.goto(kbnUrl.get('/app/osquery'));
-        await waitForPageReady(page);
 
         // Intercept the status API to simulate osquery not being installed
         await page.route('**/internal/osquery/status', async (route) => {
@@ -74,7 +73,6 @@ test.describe(
         });
 
         await page.reload();
-        await waitForPageReady(page);
 
         await expect(
           page.getByText('Add this integration to run and schedule queries for Elastic Agent.')
@@ -104,7 +102,6 @@ test.describe(
         await page.goto(
           kbnUrl.get(`/app/integrations/detail/osquery_manager-${oldVersion}/overview`)
         );
-        await waitForPageReady(page);
 
         // Add the integration
         await page.testSubj.locator('addIntegrationPolicyButton').click();
@@ -172,7 +169,6 @@ test.describe(
 
       // Create agent policy
       await page.goto(kbnUrl.get('/app/fleet/policies'));
-      await waitForPageReady(page);
       await dismissAllToasts(page);
 
       await page.testSubj.locator('createAgentPolicyButton').click();
@@ -222,7 +218,6 @@ test.describe(
 
       // Navigate to osquery and verify it's accessible
       await page.gotoApp('osquery');
-      await waitForPageReady(page);
       await expect(page.getByText('Live queries history')).toBeVisible();
     });
 
@@ -240,7 +235,6 @@ test.describe(
       await page.goto(
         kbnUrl.get(`/app/integrations/detail/osquery_manager-${upgradeOldVersion}/overview`)
       );
-      await waitForPageReady(page);
 
       // Add the integration
       await page.testSubj.locator('addIntegrationPolicyButton').click();
@@ -293,7 +287,6 @@ test.describe(
 
       // Navigate to the policy and upgrade
       await page.goto(kbnUrl.get('/app/fleet/policies'));
-      await waitForPageReady(page);
       await dismissAllToasts(page);
       await page.getByRole('link', { name: policyName }).click();
       await waitForPageReady(page);
@@ -321,7 +314,6 @@ test.describe(
 
       // Verify prebuilt saved queries exist
       await page.gotoApp('osquery/saved_queries');
-      await waitForPageReady(page);
       const rows = page.locator('tbody > tr');
       expect(await rows.count()).toBeGreaterThan(5);
     });

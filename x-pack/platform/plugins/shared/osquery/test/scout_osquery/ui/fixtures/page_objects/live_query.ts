@@ -6,7 +6,7 @@
  */
 
 import type { ScoutPage, Locator } from '@kbn/scout';
-import { RESULTS_TIMEOUT, waitForPageReady } from '../../common/constants';
+import { RESULTS_TIMEOUT } from '../../common/constants';
 
 export class LiveQueryPage {
   public readonly queryEditor: Locator;
@@ -25,7 +25,6 @@ export class LiveQueryPage {
 
   async navigate() {
     await this.page.gotoApp('osquery');
-    await waitForPageReady(this.page);
     await this.page.testSubj
       .locator('newLiveQueryButton')
       .waitFor({ state: 'visible', timeout: 30_000 });
@@ -34,7 +33,6 @@ export class LiveQueryPage {
   async clickNewLiveQuery() {
     await this.navigate();
     await this.page.testSubj.locator('newLiveQueryButton').click();
-    await waitForPageReady(this.page);
   }
 
   async selectAllAgents() {
@@ -173,7 +171,6 @@ export class LiveQueryPage {
     const resultsTab = this.page.testSubj.locator('osquery-results-tab');
     if (await resultsTab.isVisible().catch(() => false)) {
       await resultsTab.click();
-      await waitForPageReady(this.page);
     }
 
     while (Date.now() - start < maxWaitMs) {
@@ -193,19 +190,15 @@ export class LiveQueryPage {
         try {
           if (attempt % 2 === 0) {
             await this.page.reload();
-            await waitForPageReady(this.page);
             if (await resultsTab.isVisible().catch(() => false)) {
               await resultsTab.click();
-              await waitForPageReady(this.page);
             }
           } else {
             const statusTab = this.page.testSubj.locator('osquery-status-tab');
             if (await statusTab.isVisible().catch(() => false)) {
               await statusTab.click();
-              await waitForPageReady(this.page);
               if (await resultsTab.isVisible().catch(() => false)) {
                 await resultsTab.click();
-                await waitForPageReady(this.page);
               }
             } else {
               await this.page.testSubj

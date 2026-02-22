@@ -81,7 +81,6 @@ test.describe(
       const timeout = '601';
 
       await page.gotoApp('osquery');
-      await waitForPageReady(page);
       await page.testSubj.locator('newLiveQueryButton').click();
       await waitForPageReady(page);
 
@@ -161,7 +160,6 @@ test.describe(
 
       // Play saved query
       await page.gotoApp('osquery/saved_queries');
-      await waitForPageReady(page);
       await expect(page.getByText(savedQueryIdLocal)).toBeVisible();
       await page.locator(`[aria-label="Run ${savedQueryIdLocal}"]`).click();
       await pageObjects.liveQuery.selectAllAgents();
@@ -173,7 +171,6 @@ test.describe(
 
       // Edit saved query
       await page.gotoApp('osquery/saved_queries');
-      await waitForPageReady(page);
       await expect(page.getByText(savedQueryIdLocal)).toBeVisible();
       await page.locator(`[aria-label="Edit ${savedQueryIdLocal}"]`).click();
       await waitForPageReady(page);
@@ -260,7 +257,6 @@ test.describe(
 
     test('checks result type on prebuilt saved query', async ({ page, pageObjects }) => {
       await page.gotoApp('osquery/saved_queries');
-      await waitForPageReady(page);
       await pageObjects.packs.ensureAllPacksVisible();
       await page.locator(`[aria-label="Edit users_elastic"]`).click();
       await expect(page.testSubj.locator('resultsTypeField').getByText('Snapshot')).toBeVisible();
@@ -268,7 +264,6 @@ test.describe(
 
     test('user can run prebuilt saved query and add to case', async ({ page, pageObjects }) => {
       await page.gotoApp('osquery/saved_queries');
-      await waitForPageReady(page);
       await pageObjects.packs.ensureAllPacksVisible();
       await page.locator(`[aria-label="Run users_elastic"]`).click();
       await pageObjects.liveQuery.selectAllAgents();
@@ -290,7 +285,6 @@ test.describe(
 
       // Navigate to the case directly since the toast link may auto-dismiss
       await page.gotoApp(`security/cases/${caseId}`);
-      await waitForPageReady(page);
       await expect(page.getByText('SELECT * FROM users;')).toBeVisible({
         timeout: 30_000,
       });
@@ -302,19 +296,16 @@ test.describe(
       kbnUrl,
     }) => {
       await page.gotoApp('osquery/saved_queries');
-      await waitForPageReady(page);
       await pageObjects.packs.ensureAllPacksVisible();
       await page.locator(`[aria-label="Edit users_elastic"]`).click();
       await expect(page.getByText('Delete query')).not.toBeVisible();
       await page.goto(kbnUrl.get(`/app/osquery/saved_queries/${savedQueryId}`));
-      await waitForPageReady(page);
       await pageObjects.savedQueries.deleteAndConfirm('query');
     });
 
     test('user can edit prebuilt saved query under pack', async ({ page, pageObjects }) => {
       test.setTimeout(120_000);
       await page.gotoApp('osquery/saved_queries');
-      await waitForPageReady(page);
       await pageObjects.packs.ensureAllPacksVisible();
       await pageObjects.packs.navigateToPackDetail(packId);
       await pageObjects.packs.clickEditPack();

@@ -71,7 +71,6 @@ roles.forEach(({ name, role }) => {
         pageObjects,
       }) => {
         await pageObjects.savedQueries.navigate();
-        await waitForPageReady(page);
         // Saved query may be on another page - paginate to find it
         const savedQueryRow = page.getByText(savedQueryName);
         if ((await savedQueryRow.isVisible({ timeout: 3_000 }).catch(() => false)) === false) {
@@ -187,7 +186,6 @@ roles.forEach(({ name, role }) => {
         pageObjects,
       }) => {
         await page.gotoApp('osquery');
-        await waitForPageReady(page);
         await page.testSubj.locator('newLiveQueryButton').click();
         await waitForPageReady(page);
         await pageObjects.liveQuery.selectAllAgents();

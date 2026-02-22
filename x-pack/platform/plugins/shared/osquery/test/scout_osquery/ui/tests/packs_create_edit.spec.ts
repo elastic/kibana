@@ -417,7 +417,6 @@ test.describe(
             expect(discoverHref).toBeTruthy();
             const baseUrl = new URL(page.url()).origin;
             await page.goto(`${baseUrl}${discoverHref}`);
-            await waitForPageReady(page);
 
             await expect(page.testSubj.locator('breadcrumbs')).toContainText('Discover', {
               timeout: 30_000,
@@ -428,7 +427,6 @@ test.describe(
             while (Date.now() - start < 180_000) {
               if (await docTable.isVisible({ timeout: 10_000 }).catch(() => false)) break;
               await page.reload();
-              await waitForPageReady(page);
             }
 
             await expect(docTable).toBeVisible({ timeout: 30_000 });

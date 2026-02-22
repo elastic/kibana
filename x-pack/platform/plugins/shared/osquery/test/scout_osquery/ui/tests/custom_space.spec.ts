@@ -88,7 +88,6 @@ for (const testSpace of testSpaces) {
 
       // Navigate to osquery page in the space
       await page.goto(kbnUrl.get(`/s/${spaceId}/app/osquery`));
-      await waitForPageReady(page);
       await page.testSubj.locator('newLiveQueryButton').click();
       await waitForPageReady(page);
       await pageObjects.liveQuery.selectAllAgents();
@@ -122,14 +121,12 @@ for (const testSpace of testSpaces) {
 
       const baseUrl = new URL(page.url()).origin;
       await page.goto(`${baseUrl}${href!}`);
-      await waitForPageReady(page);
 
       const docTable = page.testSubj.locator('discoverDocTable');
       const discoverStart = Date.now();
       while (Date.now() - discoverStart < 120_000) {
         if (await docTable.isVisible({ timeout: 10_000 }).catch(() => false)) break;
         await page.reload();
-        await waitForPageReady(page);
       }
 
       await expect(docTable).toBeVisible({ timeout: 30_000 });
@@ -142,7 +139,6 @@ for (const testSpace of testSpaces) {
       test.setTimeout(180_000); // Live queries can take time for agents to respond
 
       await page.goto(kbnUrl.get(`/s/${spaceId}/app/osquery`));
-      await waitForPageReady(page);
       await page.getByRole('link', { name: 'Packs' }).click();
       await waitForPageReady(page);
 

@@ -10,7 +10,6 @@ import { test } from '../../fixtures';
 import { socManagerRole } from '../../common/roles';
 import { loadRule, cleanupRule } from '../../common/api_helpers';
 import { checkOsqueryResponseActionsPermissions } from '../../common/response_actions';
-import { waitForPageReady } from '../../common/constants';
 
 // This test runs against the security_complete domain (osquery config set),
 // which uses the default full complete tier — including endpoint complete.
@@ -26,7 +25,6 @@ test.describe(
       ruleId = rule.id;
       await browserAuth.loginWithCustomRole(socManagerRole);
       await page.goto(kbnUrl.get(`/app/security/rules/id/${ruleId}/edit`));
-      await waitForPageReady(page);
     });
 
     test.afterEach(async ({ kbnClient }) => {

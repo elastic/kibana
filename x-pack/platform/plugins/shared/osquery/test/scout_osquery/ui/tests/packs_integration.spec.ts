@@ -59,7 +59,6 @@ test.describe(
 
           // Create a pack with the agent policy
           await page.gotoApp('osquery/packs');
-          await waitForPageReady(page);
           await page.testSubj.locator('add-pack-button').click();
 
           const nameInput = page.locator('input[name="name"]');
@@ -106,7 +105,6 @@ test.describe(
 
           // Delete the osquery integration from the agent policy
           await page.goto(kbnUrl.get('/app/fleet/policies'));
-          await waitForPageReady(page);
           // Wait for Fleet to finish loading
           await page.testSubj
             .locator('fleetSetupLoading')
@@ -116,7 +114,6 @@ test.describe(
             .getByRole('link', { name: agentPolicyName })
             .waitFor({ state: 'visible', timeout: 30_000 });
           await page.getByRole('link', { name: agentPolicyName }).click();
-          await waitForPageReady(page);
 
           const actionsButton = page.locator(
             '.euiTableCellContent .euiPopover [aria-label="Open"]'
@@ -136,7 +133,6 @@ test.describe(
 
           // Navigate back to pack and verify policy is removed
           await page.gotoApp('osquery/packs');
-          await waitForPageReady(page);
           await pageObjects.packs.ensureAllPacksVisible();
           await page
             .getByRole('link', { name: removingPack })
@@ -171,7 +167,6 @@ test.describe(
 
         test('should load prebuilt packs', async ({ page }) => {
           await page.gotoApp('osquery/packs');
-          await waitForPageReady(page);
 
           const loadBtn = page.getByRole('button', {
             name: /Load Elastic prebuilt packs|Update Elastic prebuilt packs/,
@@ -196,7 +191,6 @@ test.describe(
           test.setTimeout(300_000);
 
           await page.gotoApp('osquery/live_queries');
-          await waitForPageReady(page);
           await page.testSubj.locator('newLiveQueryButton').click();
           await waitForPageReady(page);
 
@@ -256,7 +250,6 @@ test.describe(
           try {
             // Create a global pack
             await page.gotoApp('osquery/packs');
-            await waitForPageReady(page);
             await page.testSubj.locator('add-pack-button').click();
 
             await page.locator('input[name="name"]').fill(globalPack);

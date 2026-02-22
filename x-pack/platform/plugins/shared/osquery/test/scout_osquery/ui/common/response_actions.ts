@@ -7,7 +7,6 @@
 
 import { expect } from '@kbn/scout/ui';
 import type { ScoutPage, KibanaUrl } from '@kbn/scout';
-import { waitForPageReady } from './constants';
 
 const OSQUERY_RESPONSE_ACTION_ADD_BUTTON = 'Osquery-response-action-type-selection-option';
 const ENDPOINT_RESPONSE_ACTION_ADD_BUTTON = 'Elastic Defend-response-action-type-selection-option';
@@ -36,7 +35,6 @@ export async function checkOsqueryResponseActionsPermissions(
   }
 
   await page.goto(kbnUrl.get(`/app/security/rules/id/${ruleId}/edit`));
-  await waitForPageReady(page);
 
   // Wait for the rule to fully load
   await page.testSubj

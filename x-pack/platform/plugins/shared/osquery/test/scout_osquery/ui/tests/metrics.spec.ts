@@ -31,7 +31,6 @@ test.describe('ALL - Inventory', { tag: [...tags.stateful.classic] }, () => {
 
     // Navigate to Infrastructure Inventory
     await page.gotoApp('metrics/inventory');
-    await waitForPageReady(page);
 
     // Wait for the waffle map to show host nodes
     await expect(page.testSubj.locator('waffleMap')).toBeVisible({ timeout: 60_000 });
@@ -77,7 +76,6 @@ test.describe('ALL - Inventory', { tag: [...tags.stateful.classic] }, () => {
 
     // Navigate to Infrastructure Inventory
     await page.gotoApp('metrics/inventory');
-    await waitForPageReady(page);
 
     // Wait for the waffle map to show host nodes
     await expect(page.testSubj.locator('waffleMap')).toBeVisible({ timeout: 60_000 });

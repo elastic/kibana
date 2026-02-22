@@ -10,7 +10,6 @@ import { test } from '../../fixtures';
 import { socManagerRole } from '../../common/roles';
 import { loadRule, cleanupRule } from '../../common/api_helpers';
 import { checkOsqueryResponseActionsPermissions } from '../../common/response_actions';
-import { waitForPageReady } from '../../common/constants';
 
 // This test requires a server config with ONLY security complete PLI (no endpoint).
 // The osquery serverless security_complete config inherits from the default config
@@ -29,7 +28,6 @@ test.describe.skip(
       ruleId = rule.id;
       await browserAuth.loginWithCustomRole(socManagerRole);
       await page.goto(kbnUrl.get(`/app/security/rules/id/${ruleId}/edit`));
-      await waitForPageReady(page);
     });
 
     test.afterEach(async ({ kbnClient }) => {

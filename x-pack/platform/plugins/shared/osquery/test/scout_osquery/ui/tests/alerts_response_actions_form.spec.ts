@@ -69,7 +69,6 @@ test.describe(
       await browserAuth.loginWithCustomRole(socManagerRole);
 
       await page.goto(kbnUrl.get('/app/security/rules'));
-      await waitForPageReady(page);
       await page.getByText(ruleName).click();
       await waitForPageReady(page);
       await page.testSubj.locator('editRuleSettingsLink').click();

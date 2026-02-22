@@ -67,7 +67,6 @@ test.describe(
       test.setTimeout(300_000);
 
       await page.gotoApp('osquery');
-      await waitForPageReady(page);
       await page.testSubj.locator('newLiveQueryButton').click();
       await waitForPageReady(page);
 

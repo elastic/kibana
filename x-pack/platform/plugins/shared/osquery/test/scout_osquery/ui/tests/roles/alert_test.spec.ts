@@ -10,7 +10,7 @@ import { expect } from '@kbn/scout/ui';
 import { test } from '../../fixtures';
 import { t1AnalystRole } from '../../common/roles';
 import { loadRule, cleanupRule } from '../../common/api_helpers';
-import { waitForPageReady, waitForAlerts } from '../../common/constants';
+import { waitForAlerts } from '../../common/constants';
 
 test.describe('Alert Test', { tag: [...tags.stateful.classic] }, () => {
   let ruleId: string;
@@ -24,7 +24,6 @@ test.describe('Alert Test', { tag: [...tags.stateful.classic] }, () => {
     test.setTimeout(300_000);
     await browserAuth.loginWithCustomRole(t1AnalystRole);
     await page.goto(kbnUrl.get(`/app/security/rules/id/${ruleId}`));
-    await waitForPageReady(page);
     await waitForAlerts(page, kbnClient, ruleId);
 
     // Expand first event

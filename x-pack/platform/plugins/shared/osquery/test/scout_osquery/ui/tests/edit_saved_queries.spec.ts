@@ -36,7 +36,6 @@ test.describe(
     test('by changing ecs mappings and platforms', async ({ page, pageObjects }) => {
       // Navigate to saved queries
       await page.gotoApp('osquery/saved_queries');
-      await waitForPageReady(page);
 
       // Click edit on the saved query
       await page.locator(`[aria-label="Edit ${savedQueryName}"]`).click();

@@ -16,7 +16,6 @@ import {
   cleanupSavedQuery,
   loadLiveQuery,
 } from '../../common/api_helpers';
-import { waitForPageReady } from '../../common/constants';
 
 test.describe('Reader - only READ', { tag: [...tags.stateful.classic] }, () => {
   let savedQueryName: string;
@@ -55,7 +54,6 @@ test.describe('Reader - only READ', { tag: [...tags.stateful.classic] }, () => {
   test('should not be able to add nor run saved queries', async ({ page, pageObjects }) => {
     await pageObjects.savedQueries.navigate();
     await expect(page.getByText(savedQueryName)).toBeVisible();
-    await waitForPageReady(page);
     const addSavedQueryLink = page.getByRole('link', { name: 'Add saved query' });
     await expect(addSavedQueryLink).toBeVisible({ timeout: 30_000 });
     await expect(addSavedQueryLink).toHaveAttribute('aria-disabled', 'true');
@@ -72,7 +70,6 @@ test.describe('Reader - only READ', { tag: [...tags.stateful.classic] }, () => {
     page,
   }) => {
     await page.gotoApp('osquery/live_queries/new');
-    await waitForPageReady(page);
     await expect(page.getByText('Permission denied')).toBeVisible();
   });
 

@@ -18,7 +18,7 @@ import {
   loadCase,
   cleanupCase,
 } from '../common/api_helpers';
-import { waitForPageReady, waitForAlerts } from '../common/constants';
+import { waitForAlerts } from '../common/constants';
 
 test.describe(
   'Alert Event Details - Cases',
@@ -43,7 +43,6 @@ test.describe(
     test.beforeEach(async ({ browserAuth, page, kbnUrl, kbnClient }) => {
       await browserAuth.loginWithCustomRole(socManagerRole);
       await page.goto(kbnUrl.get(`/app/security/rules/id/${ruleId}`));
-      await waitForPageReady(page);
       await waitForAlerts(page, kbnClient, ruleId);
       const caseData = await loadCase(kbnClient, 'securitySolution');
       caseId = caseData.id;

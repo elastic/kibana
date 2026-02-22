@@ -9,7 +9,6 @@ import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 import { socManagerRole } from '../common/roles';
 import { loadLiveQuery, loadCase, cleanupCase } from '../common/api_helpers';
-import { waitForPageReady } from '../common/constants';
 
 test.describe('Add to Cases', { tag: [...tags.stateful.classic] }, () => {
   let liveQueryId: string;
@@ -49,7 +48,6 @@ test.describe('Add to Cases', { tag: [...tags.stateful.classic] }, () => {
 
       await test.step('Navigate to live query results page', async () => {
         await page.goto(kbnUrl.get(`/app/osquery/live_queries/${liveQueryId}`));
-        await waitForPageReady(page);
         // Single-query rows auto-expand; wait for results table (agents can be slow)
         const start = Date.now();
         while (Date.now() - start < 90_000) {
@@ -60,7 +58,6 @@ test.describe('Add to Cases', { tag: [...tags.stateful.classic] }, () => {
             break;
           } catch {
             await page.reload();
-            await waitForPageReady(page);
           }
         }
 
@@ -108,7 +105,6 @@ test.describe('Add to Cases', { tag: [...tags.stateful.classic] }, () => {
 
       await test.step('Navigate to live query results page', async () => {
         await page.goto(kbnUrl.get(`/app/osquery/live_queries/${liveQueryId}`));
-        await waitForPageReady(page);
 
         const start = Date.now();
         while (Date.now() - start < 120_000) {
@@ -119,7 +115,6 @@ test.describe('Add to Cases', { tag: [...tags.stateful.classic] }, () => {
             break;
           } catch {
             await page.reload();
-            await waitForPageReady(page);
           }
         }
 

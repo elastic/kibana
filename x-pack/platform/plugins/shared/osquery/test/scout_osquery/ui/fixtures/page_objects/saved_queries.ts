@@ -6,14 +6,12 @@
  */
 
 import type { ScoutPage } from '@kbn/scout';
-import { waitForPageReady } from '../../common/constants';
 
 export class SavedQueriesPage {
   constructor(private readonly page: ScoutPage) {}
 
   async navigate() {
     await this.page.gotoApp('osquery/saved_queries');
-    await waitForPageReady(this.page);
   }
 
   async clickNewSavedQuery() {

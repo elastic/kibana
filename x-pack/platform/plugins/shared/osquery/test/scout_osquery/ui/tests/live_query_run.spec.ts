@@ -10,7 +10,6 @@ import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 import { socManagerRole } from '../common/roles';
 import { loadSavedQuery, cleanupSavedQuery } from '../common/api_helpers';
-import { waitForPageReady } from '../common/constants';
 
 test.describe(
   'ALL - Live Query run custom and saved',
@@ -126,7 +125,6 @@ test.describe(
 
       await test.step('Navigate back and verify query was saved with custom values', async () => {
         await page.gotoApp('osquery');
-        await waitForPageReady(page);
         // eslint-disable-next-line playwright/no-nth-methods -- most recent query is first; multiple rows have Run buttons
         await page.getByRole('button', { name: 'Run query' }).first().click();
 
@@ -140,7 +138,6 @@ test.describe(
       test.setTimeout(120_000); // Details page can be slow to load in serverless
       await test.step('Navigate to Osquery and click details icon', async () => {
         await page.gotoApp('osquery');
-        await waitForPageReady(page);
         const detailsButton = page.getByRole('button', { name: 'Details' });
         await detailsButton.waitFor({ state: 'visible', timeout: 30_000 });
         await detailsButton.click();

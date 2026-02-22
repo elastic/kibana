@@ -14,12 +14,10 @@ export class PacksPage {
 
   async navigate() {
     await this.page.gotoApp('osquery/packs');
-    await waitForPageReady(this.page);
   }
 
   async navigateToPackDetail(packId: string) {
     await this.page.gotoApp(`osquery/packs/${packId}`);
-    await waitForPageReady(this.page);
   }
 
   async clickAddPack() {

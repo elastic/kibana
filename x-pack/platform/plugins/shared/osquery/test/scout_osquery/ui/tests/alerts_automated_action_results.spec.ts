@@ -9,7 +9,7 @@ import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 import { socManagerRole } from '../common/roles';
 import { loadRule, cleanupRule } from '../common/api_helpers';
-import { waitForPageReady, waitForAlerts } from '../common/constants';
+import { waitForAlerts } from '../common/constants';
 
 const UUID_REGEX = '[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}';
 
@@ -27,7 +27,6 @@ test.describe(
     test.beforeEach(async ({ browserAuth, page, kbnUrl, kbnClient }) => {
       await browserAuth.loginWithCustomRole(socManagerRole);
       await page.goto(kbnUrl.get(`/app/security/rules/id/${ruleId}`));
-      await waitForPageReady(page);
       await waitForAlerts(page, kbnClient, ruleId);
     });
 
@@ -89,7 +88,6 @@ test.describe(
 
           const baseUrl = new URL(page.url()).origin;
           await page.goto(`${baseUrl}${href}`);
-          await waitForPageReady(page);
           await expect(page.testSubj.locator('discoverDocTable')).toBeVisible({
             timeout: 60_000,
           });
