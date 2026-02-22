@@ -11,16 +11,16 @@ import type { CoreStart } from '@kbn/core/server';
 import type { EsWorkflowExecution, WorkflowContext } from '@kbn/workflows';
 import {
   applyInputDefaults,
-  normalizeInputsToJsonSchema,
+  normalizeInputsToJsonSchemaAsync,
 } from '@kbn/workflows/spec/lib/input_conversion';
 import type { ContextDependencies } from './types';
 import { buildWorkflowExecutionUrl, getKibanaUrl } from '../utils';
 
-export function buildWorkflowContext(
+export async function buildWorkflowContext(
   workflowExecution: EsWorkflowExecution,
   coreStart?: CoreStart,
   dependencies?: ContextDependencies
-): WorkflowContext {
+): Promise<WorkflowContext> {
   const kibanaUrl = getKibanaUrl(coreStart, dependencies?.cloudSetup);
   const executionUrl = buildWorkflowExecutionUrl(
     kibanaUrl,
@@ -28,13 +28,17 @@ export function buildWorkflowContext(
     workflowExecution.workflowId,
     workflowExecution.id
   );
-  const normalizedInputsSchema = normalizeInputsToJsonSchema(
+  const normalizedInputsSchema = await normalizeInputsToJsonSchemaAsync(
     workflowExecution.workflowDefinition.inputs
   );
-  const inputsWithDefaults = applyInputDefaults(
-    workflowExecution.context?.inputs as Record<string, unknown> | undefined,
-    normalizedInputsSchema
-  );
+
+  // Only apply defaults if we have a valid schema
+  const inputsWithDefaults = normalizedInputsSchema
+    ? applyInputDefaults(
+        workflowExecution.context?.inputs as Record<string, unknown> | undefined,
+        normalizedInputsSchema
+      )
+    : (workflowExecution.context?.inputs as Record<string, unknown> | undefined);
 
   return {
     execution: {

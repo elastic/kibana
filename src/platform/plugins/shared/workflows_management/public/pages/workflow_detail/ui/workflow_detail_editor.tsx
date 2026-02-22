@@ -111,7 +111,7 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
         return;
       }
 
-      const contextOverrideData = getContextOverrideData(params.stepId);
+      const contextOverrideData = await getContextOverrideData(params.stepId);
       if (!contextOverrideData) {
         return;
       }

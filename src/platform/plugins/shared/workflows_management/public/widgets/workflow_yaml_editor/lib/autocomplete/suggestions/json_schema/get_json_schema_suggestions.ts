@@ -9,6 +9,7 @@
 
 import type { JSONSchema7 } from 'json-schema';
 import { monaco } from '@kbn/monaco';
+import { resolveAllReferences } from '@kbn/workflows/spec/lib/input_conversion';
 import type { ExtendedAutocompleteContext } from '../../context/autocomplete.types';
 import { getInputPropertyName, isInInputsPropertiesContext } from '../../context/inputs_utils';
 
@@ -279,11 +280,52 @@ function shouldProvidePropertyKeySuggestions(
 }
 
 /**
+ * Get property suggestions from a resolved remote schema
+ * When a property has a $ref, resolve it and suggest properties from the referenced schema
+ */
+async function getRemoteRefPropertySuggestions(
+  propertySchema: JSONSchema7,
+  range: monaco.IRange
+): Promise<monaco.languages.CompletionItem[]> {
+  if (!propertySchema.$ref || !propertySchema.$ref.startsWith('http')) {
+    return [];
+  }
+
+  try {
+    // Resolve the remote reference
+    const resolved = await resolveAllReferences(propertySchema);
+
+    // Extract properties from resolved schema
+    if (resolved.properties && typeof resolved.properties === 'object') {
+      return Object.entries(resolved.properties).map(([propName, propSchema]) => {
+        const schema = propSchema as JSONSchema7;
+        return {
+          label: propName,
+          kind: monaco.languages.CompletionItemKind.Property,
+          detail: schema.description || 'Property from remote schema',
+          documentation: {
+            value: schema.description || `Property: ${propName}`,
+            isTrusted: true,
+          },
+          insertText: `${propName}: `,
+          range,
+        };
+      });
+    }
+  } catch (error) {
+    // Silently fail - remote refs might not be resolvable in autocomplete context
+  }
+
+  return [];
+}
+
+/**
  * Get JSON Schema autocompletion suggestions
  */
-export function getJsonSchemaSuggestions(
+// eslint-disable-next-line complexity
+export async function getJsonSchemaSuggestions(
   autocompleteContext: ExtendedAutocompleteContext
-): monaco.languages.CompletionItem[] {
+): Promise<monaco.languages.CompletionItem[]> {
   const { lineParseResult, path, range, workflowDefinition, lineUpToCursor } = autocompleteContext;
 
   let inferredPath = path;
@@ -350,6 +392,31 @@ export function getJsonSchemaSuggestions(
   }
 
   if (shouldProvidePropertyKeySuggestions(inferredPath, lineUpToCursor, autocompleteContext)) {
+    const propertyName = getInputPropertyName(inferredPath);
+
+    // Check if this property has a remote $ref
+    if (propertyName && workflowDefinition?.inputs) {
+      if (
+        typeof workflowDefinition.inputs === 'object' &&
+        !Array.isArray(workflowDefinition.inputs) &&
+        'properties' in workflowDefinition.inputs
+      ) {
+        const properties = workflowDefinition.inputs.properties as
+          | Record<string, JSONSchema7>
+          | undefined;
+        if (properties && propertyName in properties) {
+          const propertySchema = properties[propertyName] as JSONSchema7;
+          if (propertySchema.$ref && propertySchema.$ref.startsWith('http')) {
+            // Try to get suggestions from remote ref
+            const remoteSuggestions = await getRemoteRefPropertySuggestions(propertySchema, range);
+            if (remoteSuggestions.length > 0) {
+              return remoteSuggestions;
+            }
+          }
+        }
+      }
+    }
+
     return getPropertyKeySuggestions(range);
   }
 

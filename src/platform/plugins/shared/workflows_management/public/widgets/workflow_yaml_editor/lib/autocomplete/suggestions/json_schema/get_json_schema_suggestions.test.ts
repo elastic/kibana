@@ -53,13 +53,13 @@ describe('getJsonSchemaSuggestions', () => {
   };
 
   describe('property key suggestions', () => {
-    it('should provide property key suggestions on empty line after property definition', () => {
+    it('should provide property key suggestions on empty line after property definition', async () => {
       const context = createMockContext(
         ['inputs', 'properties'],
         '      ' // 6 spaces - empty line after property
       );
 
-      const suggestions = getJsonSchemaSuggestions(context);
+      const suggestions = await getJsonSchemaSuggestions(context);
 
       expect(suggestions.length).toBeGreaterThan(0);
       expect(suggestions.some((s) => s.label === 'type')).toBe(true);
@@ -67,25 +67,25 @@ describe('getJsonSchemaSuggestions', () => {
       expect(suggestions.some((s) => s.label === 'format')).toBe(true);
     });
 
-    it('should provide property key suggestions when typing property key', () => {
+    it('should provide property key suggestions when typing property key', async () => {
       const context = createMockContext(
         ['inputs', 'properties', 'x'],
         '      type' // typing "type"
       );
 
-      const suggestions = getJsonSchemaSuggestions(context);
+      const suggestions = await getJsonSchemaSuggestions(context);
 
       expect(suggestions.length).toBeGreaterThan(0);
       expect(suggestions.some((s) => s.label === 'type')).toBe(true);
     });
 
-    it('should NOT provide property key suggestions when line has property key with colon', () => {
+    it('should NOT provide property key suggestions when line has property key with colon', async () => {
       const context = createMockContext(
         ['inputs', 'properties'],
         '      type: ' // property key with colon - should show value suggestions instead
       );
 
-      const suggestions = getJsonSchemaSuggestions(context);
+      const suggestions = await getJsonSchemaSuggestions(context);
 
       // Should not have property key suggestions when we have "type: "
       expect(suggestions.some((s) => s.insertText === 'type: ')).toBe(false);
@@ -93,7 +93,7 @@ describe('getJsonSchemaSuggestions', () => {
   });
 
   describe('type value suggestions', () => {
-    it('should provide type value suggestions when typing after "type:"', () => {
+    it('should provide type value suggestions when typing after "type:"', async () => {
       const lineUpToCursor = '      type: ';
       const typeMatch = lineUpToCursor.match(/^(?<prefix>\s*-?\s*type:)\s*(?<value>.*)$/);
       const context = createMockContext(
@@ -110,7 +110,7 @@ describe('getJsonSchemaSuggestions', () => {
           : null
       );
 
-      const suggestions = getJsonSchemaSuggestions(context);
+      const suggestions = await getJsonSchemaSuggestions(context);
 
       expect(suggestions.length).toBeGreaterThan(0);
       expect(suggestions.some((s) => s.label === 'string')).toBe(true);
@@ -120,10 +120,10 @@ describe('getJsonSchemaSuggestions', () => {
   });
 
   describe('format value suggestions', () => {
-    it('should provide format value suggestions when typing after "format:"', () => {
+    it('should provide format value suggestions when typing after "format:"', async () => {
       const context = createMockContext(['inputs', 'properties', 'x'], '      format: ');
 
-      const suggestions = getJsonSchemaSuggestions(context);
+      const suggestions = await getJsonSchemaSuggestions(context);
 
       expect(suggestions.length).toBeGreaterThan(0);
       expect(suggestions.some((s) => s.label === 'email')).toBe(true);
@@ -133,7 +133,7 @@ describe('getJsonSchemaSuggestions', () => {
   });
 
   describe('empty path inference', () => {
-    it('should infer path from indentation when path is empty on empty line after property', () => {
+    it('should infer path from indentation when path is empty on empty line after property', async () => {
       const mockModel = {
         getLineContent: (lineNum: number) => {
           if (lineNum === 1) return '    x:';
@@ -146,14 +146,14 @@ describe('getJsonSchemaSuggestions', () => {
       context.model = mockModel;
       context.position = { lineNumber: 2, column: 7 } as any;
 
-      const suggestions = getJsonSchemaSuggestions(context);
+      const suggestions = await getJsonSchemaSuggestions(context);
 
       expect(suggestions.length).toBeGreaterThan(0);
       expect(suggestions.some((s) => s.label === 'type')).toBe(true);
       expect(suggestions.some((s) => s.label === 'default')).toBe(true);
     });
 
-    it('should infer path from properties line when path is empty', () => {
+    it('should infer path from properties line when path is empty', async () => {
       const mockModel = {
         getLineContent: (lineNum: number) => {
           if (lineNum === 1) return '  properties:';
@@ -166,26 +166,26 @@ describe('getJsonSchemaSuggestions', () => {
       context.model = mockModel;
       context.position = { lineNumber: 2, column: 7 } as any;
 
-      const suggestions = getJsonSchemaSuggestions(context);
+      const suggestions = await getJsonSchemaSuggestions(context);
 
       expect(suggestions.length).toBeGreaterThan(0);
     });
   });
 
   describe('context validation', () => {
-    it('should return empty array when not in inputs.properties context', () => {
+    it('should return empty array when not in inputs.properties context', async () => {
       const context = createMockContext(['steps'], '      ');
 
-      const suggestions = getJsonSchemaSuggestions(context);
+      const suggestions = await getJsonSchemaSuggestions(context);
 
       expect(suggestions).toEqual([]);
     });
 
-    it('should return empty array when in triggers context', () => {
+    it('should return empty array when in triggers context', async () => {
       const context = createMockContext(['inputs', 'properties', 'x'], '      type');
       context.isInTriggersContext = true;
 
-      const suggestions = getJsonSchemaSuggestions(context);
+      const suggestions = await getJsonSchemaSuggestions(context);
 
       expect(suggestions).toEqual([]);
     });

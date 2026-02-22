@@ -45,7 +45,7 @@ export class CustomStepImpl extends BaseAtomicNodeImplementation<BaseStep> {
   /**
    * Get and validate the input for this step
    */
-  public override getInput(): unknown {
+  public override async getInput(): Promise<unknown> {
     const withData = this.node.configuration.with || {};
     return this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(withData);
   }
@@ -84,7 +84,7 @@ export class CustomStepImpl extends BaseAtomicNodeImplementation<BaseStep> {
         getScopedEsClient: () => {
           return this.stepExecutionRuntime.contextManager.getEsClientAsUser();
         },
-        renderInputTemplate: (value, additionalContext) => {
+        renderInputTemplate: async (value, additionalContext) => {
           return this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(
             value,
             additionalContext

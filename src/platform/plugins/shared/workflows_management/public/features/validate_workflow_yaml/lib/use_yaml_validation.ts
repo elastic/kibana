@@ -135,7 +135,7 @@ export function useYamlValidation(
             workflowDefinition,
             yamlDocument
           ),
-          ...validateJsonSchemaDefaults(yamlDocument, workflowDefinition, model)
+          ...(await validateJsonSchemaDefaults(yamlDocument, workflowDefinition, model))
         );
       }
 

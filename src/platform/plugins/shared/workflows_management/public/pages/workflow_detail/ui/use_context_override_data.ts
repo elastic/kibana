@@ -32,7 +32,7 @@ export function useContextOverrideData() {
   const yamlString = useSelector(selectYamlString);
 
   const getContextOverrideData = useCallback(
-    (stepId: string): ContextOverrideData | null => {
+    async (stepId: string): Promise<ContextOverrideData | null> => {
       if (!workflowGraph || !workflowDefinition || !spaceId) {
         return null;
       }
