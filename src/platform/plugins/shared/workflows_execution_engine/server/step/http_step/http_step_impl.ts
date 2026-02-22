@@ -17,6 +17,7 @@ import type { HttpGraphNode } from '@kbn/workflows/graph';
 import { ExecutionError } from '@kbn/workflows/server';
 import type { z } from '@kbn/zod/v4';
 import type { UrlValidator } from '../../lib/url_validator';
+import { parseDuration } from '../../utils';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger';
@@ -68,7 +69,7 @@ export class HttpStepImpl extends BaseAtomicNodeImplementation<HttpStep> {
   }
 
   public getInput() {
-    const { url, method = 'GET', headers = {}, body, fetcher } = this.step.with;
+    const { url, method = 'GET', headers = {}, body, fetcher, timeout } = this.step.with as any;
 
     return this.stepExecutionRuntime.contextManager.renderValueAccordingToContext({
       url,
@@ -76,6 +77,7 @@ export class HttpStepImpl extends BaseAtomicNodeImplementation<HttpStep> {
       headers,
       body,
       fetcher,
+      timeout,
     });
   }
 
@@ -88,7 +90,7 @@ export class HttpStepImpl extends BaseAtomicNodeImplementation<HttpStep> {
   }
 
   private async executeHttpRequest(input?: any): Promise<RunStepResult> {
-    const { url, method, headers, body, fetcher: fetcherOptions } = input;
+    const { url, method, headers, body, fetcher: fetcherOptions, timeout } = input;
 
     // Validate that the URL is allowed based on the allowedHosts configuration
     try {
@@ -118,6 +120,7 @@ export class HttpStepImpl extends BaseAtomicNodeImplementation<HttpStep> {
       headers,
       signal: this.stepExecutionRuntime.abortController.signal,
       ...(body && { data: body }),
+      ...(timeout && { timeout: parseDuration(timeout) }),
     };
 
     // Apply fetcher options if provided
@@ -232,6 +235,13 @@ export class HttpStepImpl extends BaseAtomicNodeImplementation<HttpStep> {
       });
     }
 
+    if (error.code === 'ECONNABORTED') {
+      return new ExecutionError({
+        type: 'HttpRequestTimeout',
+        message: error.message,
+      });
+    }
+
     if (error.response) {
       return new ExecutionError({
         type: 'HttpRequestError',
@@ -249,7 +259,8 @@ export class HttpStepImpl extends BaseAtomicNodeImplementation<HttpStep> {
       type: error.code || 'UnknownHttpRequestError',
       message: error.message,
       details: error.config && {
-        config: error.config,
+        url: error.config.url,
+        method: error.config.method,
       },
     });
   }
