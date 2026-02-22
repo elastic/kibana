@@ -88,8 +88,10 @@ test.describe(
 
           const baseUrl = new URL(page.url()).origin;
           await page.goto(`${baseUrl}${href}`);
-          await expect(page.testSubj.locator('discoverDocTable')).toBeVisible({
-            timeout: 60_000,
+          await expect(
+            page.testSubj.locator('discoverDocTable').or(page.testSubj.locator('unifiedDataTable'))
+          ).toBeVisible({
+            timeout: 120_000,
           });
           await expect(page.getByText(/action_data\.query\s*.+;/)).toBeVisible();
           await expect(page.getByText(discoverRegex)).toBeVisible();

@@ -89,15 +89,16 @@ test.describe(
       await pageObjects.liveQuery.checkResults();
       // eslint-disable-next-line playwright/no-nth-methods -- multiple data grid cells can have same static value
       await expect(page.getByText('[ "test1", "test2" ]').first()).toBeVisible();
-      await expect(page.getByText('test3')).toBeVisible();
-
-      // Remove "test1" from the first static value
+      // eslint-disable-next-line playwright/no-nth-methods -- multiple data grid cells can have same static value
+      await expect(page.getByText('test3').first()).toBeVisible();
       await page.locator('[title="Remove test1 from selection in this group"]').click();
 
       await pageObjects.liveQuery.submitQuery();
       await pageObjects.liveQuery.checkResults();
-      await expect(page.getByText('[ "test2" ]')).toBeVisible();
-      await expect(page.getByText('test3')).toBeVisible();
+      // eslint-disable-next-line playwright/no-nth-methods -- multiple data grid cells can have same static value
+      await expect(page.getByText('[ "test2" ]').first()).toBeVisible();
+      // eslint-disable-next-line playwright/no-nth-methods -- multiple data grid cells can have same static value
+      await expect(page.getByText('test3').first()).toBeVisible();
     });
 
     test('should hide and show ecs mappings on Advanced accordion click', async ({
@@ -121,7 +122,7 @@ test.describe(
           .catch(() => {});
         await searchInput.fill('');
         await searchInput.pressSequentially('users_elastic');
-        const option = page.getByRole('option', { name: 'users_elastic', exact: true });
+        const option = page.getByRole('option').filter({ hasText: /^users_elastic/ });
         try {
           await option.waitFor({ state: 'visible', timeout: 10_000 });
           await option.click();

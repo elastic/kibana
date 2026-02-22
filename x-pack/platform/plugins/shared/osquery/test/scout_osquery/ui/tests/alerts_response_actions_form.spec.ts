@@ -114,7 +114,8 @@ test.describe(
       await expect(errorsContainer.getByText('Query is a required field').first()).toBeVisible();
 
       // Fill in query
-      await expect(responseAction0.getByText('Query is a required field')).toBeVisible();
+      // eslint-disable-next-line playwright/no-nth-methods -- query error shows in both combobox and code editor
+      await expect(responseAction0.getByText('Query is a required field').first()).toBeVisible();
       const queryEditor0 = responseAction0.locator('[data-test-subj="kibanaCodeEditor"]');
       await queryEditor0.click();
       await queryEditor0.pressSequentially('select * from uptime1');
@@ -136,18 +137,25 @@ test.describe(
       // Add third response action (query with ECS mapping)
       await page.testSubj.locator('Osquery-response-action-type-selection-option').click();
       const responseAction2 = page.testSubj.locator('response-actions-list-item-2');
-      await expect(responseAction2.getByText('Query is a required field')).toBeVisible();
+      // eslint-disable-next-line playwright/no-nth-methods -- query error shows in both combobox and code editor
+      await expect(responseAction2.getByText('Query is a required field').first()).toBeVisible();
 
       const queryEditor2 = responseAction2.locator('[data-test-subj="kibanaCodeEditor"]');
       await queryEditor2.click();
       await queryEditor2.pressSequentially('select * from uptime');
-      await expect(responseAction2.getByText('Query is a required field')).not.toBeVisible();
+
+      /* eslint-disable playwright/no-nth-methods -- query error shows in both combobox and code editor */
+      await expect(
+        responseAction2.getByText('Query is a required field').first()
+      ).not.toBeVisible();
+      /* eslint-enable playwright/no-nth-methods */
 
       await responseAction2.getByText('Advanced').click();
       const ecsFieldInput = responseAction2.locator('[data-test-subj="ECS-field-input"]');
       const ecsComboBox = ecsFieldInput.locator('[data-test-subj="comboBoxInput"]');
       await ecsComboBox.click();
-      const labelOption = page.getByRole('option', { name: /labels/ });
+      await ecsComboBox.pressSequentially('labels', { delay: 50 });
+      const labelOption = page.getByRole('option').filter({ hasText: 'labels' });
       await labelOption.waitFor({ state: 'visible', timeout: 15_000 });
       await labelOption.click();
 
@@ -157,7 +165,7 @@ test.describe(
       const columnComboBox = osqueryColumnSelect.locator('[data-test-subj="comboBoxInput"]');
       await columnComboBox.click();
       await columnComboBox.pressSequentially('days', { delay: 100 });
-      const daysOption = page.getByRole('option', { name: /days/ });
+      const daysOption = page.getByRole('option').filter({ hasText: /days/i });
       await daysOption.waitFor({ state: 'visible', timeout: 15_000 });
       await daysOption.click();
 

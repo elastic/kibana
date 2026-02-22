@@ -18,7 +18,7 @@ import {
   loadCase,
   cleanupCase,
 } from '../common/api_helpers';
-import { waitForAlerts } from '../common/constants';
+import { waitForAlerts, waitForPageReady } from '../common/constants';
 
 test.describe(
   'Alert Event Details - Cases',
@@ -80,9 +80,9 @@ test.describe(
           timeout: 30_000,
         });
         await waitForPageReady(page);
-        const runPackRadio = page.getByRole('radio', { name: /Run a set of queries in a pack/ });
-        await runPackRadio.waitFor({ state: 'visible' });
-        await runPackRadio.click();
+        const runPackSwitch = page.getByText('Run a set of queries in a pack.');
+        await runPackSwitch.waitFor({ state: 'visible', timeout: 30_000 });
+        await runPackSwitch.click();
         await expect(
           page.testSubj
             .locator('flyout-body-osquery')
@@ -198,20 +198,25 @@ test.describe(
         await expect(page.testSubj.locator('addToCaseButton').first()).toBeVisible({
           timeout: 30_000,
         });
+
+        /* eslint-disable playwright/no-nth-methods */
         await expect(
-          page.getByRole('button', { name: 'Add to Timeline investigation' })
+          page.getByRole('button', { name: 'Add to Timeline investigation' }).first()
         ).toBeVisible({
           timeout: 30_000,
         });
+        /* eslint-enable playwright/no-nth-methods */
       });
 
       await test.step('Add to case and verify case content', async () => {
         // eslint-disable-next-line playwright/no-nth-methods -- first visible result
         await page.testSubj.locator('addToCaseButton').first().click();
-        await expect(page.getByText('Select case')).toBeVisible();
+        await expect(page.getByText('Select case')).toBeVisible({ timeout: 15_000 });
         await page.testSubj.locator(`cases-table-row-select-${caseId}`).click();
 
-        await page.getByRole('link', { name: 'View case' }).click();
+        const viewCaseLink = page.getByRole('link', { name: 'View case' });
+        await viewCaseLink.waitFor({ state: 'visible', timeout: 60_000 });
+        await viewCaseLink.click();
         await expect(
           page.getByText(/attached Osquery results[\s]?[\d]+[\s]?second(?:s)? ago/)
         ).toBeVisible();
