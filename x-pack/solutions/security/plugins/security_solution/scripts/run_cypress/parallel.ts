@@ -261,6 +261,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
                 specFilePath: filePath,
                 specFileFTRConfig,
                 isOpen,
+                esFrom: process.env.CYPRESS_ES_FROM || 'docker',
               });
 
               const createUrlFromFtrConfig = (

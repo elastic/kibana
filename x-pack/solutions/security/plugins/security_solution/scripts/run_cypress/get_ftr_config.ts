@@ -21,6 +21,7 @@ export const getFTRConfig = ({
   specFilePath,
   specFileFTRConfig,
   isOpen,
+  esFrom,
 }: {
   log: ToolingLog;
   esPort: number;
@@ -30,6 +31,7 @@ export const getFTRConfig = ({
   specFilePath: string;
   specFileFTRConfig: ReturnType<typeof parseTestFileConfig>;
   isOpen: boolean;
+  esFrom?: string;
 }) =>
   readConfigFile(
     log,
@@ -59,6 +61,8 @@ export const getFTRConfig = ({
     },
     (vars) => {
       const hostRealIp = getLocalhostRealIp();
+      const effectiveEsFrom =
+        esFrom || (vars.esTestCluster?.from === 'serverless' ? 'serverless' : 'docker');
 
       const hasFleetServerArgs = _.some(
         vars.kbnTestServer.serverArgs,
@@ -149,11 +153,13 @@ export const getFTRConfig = ({
             ])}`
           );
         } else {
+          const fleetEsHost =
+            effectiveEsFrom === 'docker' ? 'host.docker.internal' : hostRealIp;
           vars.kbnTestServer.serverArgs.push(
             `--xpack.fleet.agents.fleet_server.hosts=["https://${hostRealIp}:${fleetServerPort}"]`
           );
           vars.kbnTestServer.serverArgs.push(
-            `--xpack.fleet.agents.elasticsearch.host=http://${hostRealIp}:${esPort}`
+            `--xpack.fleet.agents.elasticsearch.host=http://${fleetEsHost}:${esPort}`
           );
         }
       }
