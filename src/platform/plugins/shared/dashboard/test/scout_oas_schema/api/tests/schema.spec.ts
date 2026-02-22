@@ -43,7 +43,7 @@ apiTest.describe('dashboard REST schema', { tag: tags.deploymentAgnostic }, () =
    */
   apiTest('Registered embeddable schemas have not changed', async ({ apiClient }) => {
     // OAS paths are stored with leading slashes, so we need to use the full path here
-    const oasPath = `/${DASHBOARD_API_PATH}/{id?}`;
+    const oasPath = `/${DASHBOARD_API_PATH}`;
     const response = await apiClient.get(
       `api/oas?pathStartsWith=${oasPath}&access=internal&version=1`,
       {
@@ -58,7 +58,7 @@ apiTest.describe('dashboard REST schema', { tag: tags.deploymentAgnostic }, () =
     expect(response.body.paths?.[oasPath]).toBeDefined();
 
     const createBodySchema =
-      response.body.paths[oasPath].post.requestBody.content[
+      response.body.paths[`${oasPath}/{id}`].post.requestBody.content[
         'application/json; Elastic-Api-Version=1'
       ].schema;
     const panelsSchema = createBodySchema.properties.panels;
