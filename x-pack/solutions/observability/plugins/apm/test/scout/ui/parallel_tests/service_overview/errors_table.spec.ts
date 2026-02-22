@@ -48,9 +48,9 @@ test.describe(
         rangeTo: testData.END_DATE,
       });
       await expect(page.getByTestId('apmUnifiedSearchBar')).toBeVisible();
-      await page.getByText('Exception').first().click();
+      await page.getByRole('cell', { name: 'Exception' }).getByRole('link').click();
       await expect(page.getByTestId('apmUnifiedSearchBar')).toBeVisible();
-      await expect(page.locator('table').locator(`td:has-text("Exception")`)).toHaveCount(1);
+      await expect(page.getByRole('cell', { name: 'Exception' })).toHaveCount(1);
     });
 
     test('navigates to error detail page', async ({

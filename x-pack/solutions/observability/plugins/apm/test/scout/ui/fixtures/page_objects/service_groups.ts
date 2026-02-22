@@ -6,7 +6,6 @@
  */
 
 import type { KibanaUrl, ScoutPage } from '@kbn/scout-oblt';
-import { expect } from '@kbn/scout-oblt/ui';
 import { waitForApmSettingsHeaderLink } from '../page_helpers';
 
 export class ServiceGroupsPage {
@@ -22,7 +21,7 @@ export class ServiceGroupsPage {
   async typeInTheSearchBar(text: string) {
     await this.page.getByText('Select services').click();
     const kuery = this.page.getByTestId('headerFilterKuerybar');
-    await expect(kuery).toBeVisible();
+    await kuery.waitFor({ state: 'visible' });
     await kuery.fill(text);
     await this.page.getByTestId('apmSelectServicesButton').click();
   }
@@ -30,13 +29,11 @@ export class ServiceGroupsPage {
   async createNewServiceGroup(name: string) {
     await this.page.getByTestId('apmCreateServiceGroupButton').click();
     const groupNameInput = this.page.getByTestId('apmGroupNameInput');
-    await expect(groupNameInput).toBeVisible();
+    await groupNameInput.waitFor({ state: 'visible' });
     await groupNameInput.fill(name);
     await groupNameInput.press('Enter');
   }
-  async expectByText(texts: string[]) {
-    for (const text of texts) {
-      await expect(this.page.getByText(text)).toBeVisible();
-    }
+  getTextLocator(text: string) {
+    return this.page.getByText(text);
   }
 }

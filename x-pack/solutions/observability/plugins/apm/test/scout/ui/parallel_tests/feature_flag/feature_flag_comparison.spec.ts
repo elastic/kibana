@@ -52,7 +52,8 @@ test.describe(
         kbnUrl,
       }) => {
         await page.goto(`${kbnUrl.app('apm')}/services`);
-        await expect(page.locator('input[type="checkbox"]#comparison')).toBeChecked();
+        const comparisonCheckbox = page.getByTestId('comparisonCheckbox');
+        await expect(comparisonCheckbox).toBeChecked();
         await expect(page.getByTestId('comparisonSelect')).not.toBeDisabled();
       });
 
@@ -61,7 +62,8 @@ test.describe(
         kbnUrl,
       }) => {
         await page.goto(`${kbnUrl.app('apm')}/dependencies`);
-        await expect(page.locator('input[type="checkbox"]#comparison')).toBeChecked();
+        const comparisonCheckbox = page.getByTestId('comparisonCheckbox');
+        await expect(comparisonCheckbox).toBeChecked();
         await expect(page.getByTestId('comparisonSelect')).not.toBeDisabled();
       });
 
@@ -70,7 +72,8 @@ test.describe(
         kbnUrl,
       }) => {
         await page.goto(`${kbnUrl.app('apm')}/service-map`);
-        await expect(page.locator('input[type="checkbox"]#comparison')).toBeChecked();
+        const comparisonCheckbox = page.getByTestId('comparisonCheckbox');
+        await expect(comparisonCheckbox).toBeChecked();
         await expect(page.getByTestId('comparisonSelect')).not.toBeDisabled();
       });
     });
@@ -100,7 +103,8 @@ test.describe(
         kbnUrl,
       }) => {
         await page.goto(`${kbnUrl.app('apm')}/services`);
-        await expect(page.locator('input[type="checkbox"]#comparison')).not.toBeChecked();
+        const comparisonCheckbox = page.getByTestId('comparisonCheckbox');
+        await expect(comparisonCheckbox).not.toBeChecked();
         await expect(page.getByTestId('comparisonSelect')).toBeDisabled();
       });
 
@@ -112,7 +116,8 @@ test.describe(
         await page.waitForResponse((res) =>
           res.url().includes('/internal/apm/dependencies/top_dependencies')
         );
-        await expect(page.locator('input[type="checkbox"]#comparison')).not.toBeChecked();
+        const comparisonCheckbox = page.getByTestId('comparisonCheckbox');
+        await expect(comparisonCheckbox).not.toBeChecked();
         await expect(page.getByTestId('comparisonSelect')).toBeDisabled();
       });
 
@@ -121,7 +126,8 @@ test.describe(
         kbnUrl,
       }) => {
         await page.goto(`${kbnUrl.app('apm')}/service-map`);
-        await expect(page.locator('input[type="checkbox"]#comparison')).not.toBeChecked();
+        const comparisonCheckbox = page.getByTestId('comparisonCheckbox');
+        await expect(comparisonCheckbox).not.toBeChecked();
         await expect(page.getByTestId('comparisonSelect')).toBeDisabled();
       });
     });

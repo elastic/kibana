@@ -30,6 +30,7 @@ export class ServiceMapPage {
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
     this.serviceMap = page.testSubj.locator('serviceMap');
     this.serviceMapGraph = page.testSubj.locator('serviceMapGraph');
+    // React Flow controls use data-testid (not data-test-subj)
     this.mapControls = page.locator('[data-testid="rf__controls"]');
     this.zoomInBtn = this.mapControls.getByRole('button', { name: 'Zoom In' });
     this.zoomOutBtn = this.mapControls.getByRole('button', { name: 'Zoom Out' });
@@ -37,6 +38,7 @@ export class ServiceMapPage {
     this.zoomInBtnControl = this.zoomInBtn;
     this.zoomOutBtnControl = this.zoomOutBtn;
     this.fitViewBtn = this.centerServiceMapBtn;
+    // EUI empty prompt has no data-test-subj; using CSS class as fallback
     this.noServicesPlaceholder = page.locator('.euiEmptyPrompt__content .euiTitle');
     this.serviceMapPopover = page.testSubj.locator('serviceMapPopover');
     this.serviceMapPopoverContent = page.testSubj.locator('serviceMapPopoverContent');
@@ -73,7 +75,7 @@ export class ServiceMapPage {
   }
 
   async getSearchBar() {
-    await this.page.testSubj.waitForSelector('apmUnifiedSearchBar');
+    await this.page.testSubj.locator('apmUnifiedSearchBar').waitFor({ state: 'visible' });
   }
 
   async typeInTheSearchBar(text: string) {
@@ -157,6 +159,7 @@ export class ServiceMapPage {
     await node.scrollIntoViewIfNeeded();
     await node.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
     await node.focus();
+    // React Flow SVG canvas intercepts pointer events; force bypass required
     await node.click({ force: true });
   }
 
@@ -165,6 +168,7 @@ export class ServiceMapPage {
     const button = this.getServiceNode(serviceName);
     await button.scrollIntoViewIfNeeded();
     await button.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+    // React Flow SVG canvas intercepts pointer events; force bypass required
     await button.click({ force: true });
   }
 
@@ -173,6 +177,7 @@ export class ServiceMapPage {
     await edge.scrollIntoViewIfNeeded();
     await edge.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
     await edge.focus();
+    // React Flow SVG canvas intercepts pointer events; force bypass required
     await edge.click({ force: true });
   }
 

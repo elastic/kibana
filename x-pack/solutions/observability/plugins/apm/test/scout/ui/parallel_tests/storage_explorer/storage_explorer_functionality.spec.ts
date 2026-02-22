@@ -51,10 +51,11 @@ test.describe('Storage Explorer - Admin User', { tag: tags.stateful.classic }, (
       await expect(
         page.getByTestId('tableHeaderCell_serviceName_0').getByTestId('tableHeaderSortButton')
       ).toBeVisible();
-      await page
+
+      const serviceNameSortButton = page
         .getByTestId('tableHeaderCell_serviceName_0')
-        .getByTestId('tableHeaderSortButton')
-        .click();
+        .getByTestId('tableHeaderSortButton');
+      await serviceNameSortButton.click();
 
       // Verify the service icon links are present
       await page.getByTestId('serviceLink_nodejs').scrollIntoViewIfNeeded();

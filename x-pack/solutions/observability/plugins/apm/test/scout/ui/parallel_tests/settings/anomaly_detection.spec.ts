@@ -36,11 +36,7 @@ test.describe(
 
       await test.step('verify create button functionality', async () => {
         await anomalyDetectionPage.clickCreateJobButton();
-
-        // Verify that clicking the button navigates to the job creation flow
-        // This could show different content depending on available data
-        const pageContent = await page.textContent('body');
-        expect(pageContent).toContain('Select environments');
+        await expect(page.getByText('Select environments')).toBeVisible();
       });
     });
 
@@ -68,23 +64,17 @@ test.describe(
       browserAuth,
       config,
     }) => {
+      test.skip(config.isCloud, 'Role permissions differ in MKI/ECH environments');
+
       await browserAuth.loginAsApmReadPrivilegesWithWriteSettings();
       await anomalyDetectionPage.goto();
       const createButton = anomalyDetectionPage.getCreateJobButtonLocator();
-      // TODO: Test fails in MKI/ECH environments - investigate role permissions
-      // eslint-disable-next-line playwright/no-conditional-in-test
-      if (!config.isCloud) {
-        // eslint-disable-next-line playwright/no-conditional-expect
-        await expect(createButton).toBeEnabled();
+      await expect(createButton).toBeEnabled();
 
-        await test.step('verify create button functionality', async () => {
-          await anomalyDetectionPage.clickCreateJobButton();
-
-          const pageContent = await page.textContent('body');
-          // eslint-disable-next-line playwright/no-conditional-expect
-          expect(pageContent).toContain('Select environments');
-        });
-      }
+      await test.step('verify create button functionality', async () => {
+        await anomalyDetectionPage.clickCreateJobButton();
+        await expect(page.getByText('Select environments')).toBeVisible();
+      });
     });
 
     test('APM All Privileges Without Write Settings should not be able to modify settings', async ({

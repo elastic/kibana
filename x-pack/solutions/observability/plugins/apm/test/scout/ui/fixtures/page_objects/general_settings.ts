@@ -16,21 +16,22 @@ export class GeneralSettingsPage {
     return await waitForApmSettingsHeaderLink(this.page);
   }
 
-  async getInspectEsQueriesButton() {
+  getInspectEsQueriesButton() {
+    // Button identified by name attribute; no data-test-subj available
     return this.page.locator('button[name="Inspect ES queries"]');
   }
 
-  async getSaveChangesButton() {
+  getSaveChangesButton() {
     return this.page.getByText('Save changes');
   }
 
   async clickInspectEsQueriesButton() {
-    const button = await this.getInspectEsQueriesButton();
+    const button = this.getInspectEsQueriesButton();
     await button.click();
   }
 
   async clickSaveChanges() {
-    const button = await this.getSaveChangesButton();
+    const button = this.getSaveChangesButton();
     await button.click();
   }
 }

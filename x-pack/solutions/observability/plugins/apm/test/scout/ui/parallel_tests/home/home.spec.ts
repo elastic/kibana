@@ -59,7 +59,7 @@ test.describe(
       await page
         .getByRole('heading', { name: 'Service inventory', level: 1 })
         .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
-      await page.getByText(testData.SERVICE_OPBEANS_RUM).first().click();
+      await page.getByRole('link', { name: testData.SERVICE_OPBEANS_RUM }).click();
       await expect(page.getByTestId('headerFilterTransactionType')).toBeVisible();
       await expect(page.getByTestId('headerFilterTransactionType')).toHaveValue('page-load');
     });

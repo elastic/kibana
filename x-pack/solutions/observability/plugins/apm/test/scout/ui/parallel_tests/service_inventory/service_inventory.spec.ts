@@ -23,7 +23,7 @@ test.describe(
 
     test('renders page with selected date range', async ({ page }) => {
       await test.step('shows correct heading', async () => {
-        expect(page.url()).toContain('/app/apm/services');
+        await expect(page).toHaveURL(/\/app\/apm\/services/);
         await expect(
           page.getByRole('heading', { name: 'Service inventory', level: 1 })
         ).toBeVisible();
@@ -36,14 +36,15 @@ test.describe(
       });
 
       await test.step('shows a list of environments', async () => {
-        const environmentEntrySelector = page.locator(`td:has-text("${PRODUCTION_ENVIRONMENT}")`);
-        await expect(environmentEntrySelector).toHaveCount(10);
+        await expect(page.getByRole('cell', { name: PRODUCTION_ENVIRONMENT })).toHaveCount(10);
       });
     });
 
     test('loads the service overview for a service when clicking on it', async ({ page }) => {
       await page.getByText(testData.SERVICE_OPBEANS_NODE).click();
-      expect(page.url()).toContain(`/apm/services/${testData.SERVICE_OPBEANS_NODE}/overview`);
+      await expect(page).toHaveURL(
+        new RegExp(`/apm/services/${testData.SERVICE_OPBEANS_NODE}/overview`)
+      );
       await expect(page.getByTestId('apmMainTemplateHeaderServiceName')).toHaveText(
         testData.SERVICE_OPBEANS_NODE
       );
@@ -53,7 +54,7 @@ test.describe(
       await page.testSubj.click('environmentFilter > comboBoxSearchInput');
       await page
         .getByTestId('comboBoxOptionsList environmentFilter-optionsList')
-        .locator(`button:has-text("${PRODUCTION_ENVIRONMENT}")`)
+        .getByRole('button', { name: PRODUCTION_ENVIRONMENT })
         .click();
       await expect(page.getByTestId('comboBoxSearchInput')).toHaveValue(PRODUCTION_ENVIRONMENT);
     });

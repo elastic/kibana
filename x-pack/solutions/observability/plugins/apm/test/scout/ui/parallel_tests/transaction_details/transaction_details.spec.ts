@@ -68,7 +68,7 @@ test.describe(
       await test.step('Persists current page after reload', async () => {
         const url = page.url();
         await transactionDetailsPage.reload();
-        expect(page.url()).toBe(url);
+        await expect(page).toHaveURL(url);
       });
     });
 

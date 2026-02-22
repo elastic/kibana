@@ -97,9 +97,8 @@ test.describe(
       );
 
       await test.step('Verify redirected to mobile-services route', async () => {
-        await page.waitForURL(/mobile-services/, { timeout: EXTENDED_TIMEOUT });
-        expect(page.url()).toContain('mobile-services');
-        expect(page.url()).toContain(testData.SERVICE_MOBILE_ANDROID);
+        await expect(page).toHaveURL(/mobile-services/, { timeout: EXTENDED_TIMEOUT });
+        await expect(page).toHaveURL(new RegExp(testData.SERVICE_MOBILE_ANDROID));
       });
     });
   }
