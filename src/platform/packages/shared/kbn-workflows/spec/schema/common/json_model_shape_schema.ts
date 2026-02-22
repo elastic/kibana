@@ -53,11 +53,12 @@ export const JSON_SCHEMA_FORMAT_VALUES = [
 ] as const;
 
 export interface JsonSchema {
+  [key: string]: unknown;
   type?: JsonSchemaType | JsonSchemaType[];
   title?: string;
   description?: string;
   format?: string;
-  default?: unknown;
+  default?: string | number | boolean | null | object;
   $ref?: string;
 
   // Logical Composition
@@ -79,8 +80,8 @@ export interface JsonSchema {
   $defs?: Record<string, JsonSchema>;
 
   // Constraints
-  enum?: (string | number | boolean | null)[];
-  const?: string | number | boolean | null;
+  enum?: (string | number | boolean | null | object)[];
+  const?: string | number | boolean | null | object;
   multipleOf?: number;
   minimum?: number;
   exclusiveMinimum?: number;
