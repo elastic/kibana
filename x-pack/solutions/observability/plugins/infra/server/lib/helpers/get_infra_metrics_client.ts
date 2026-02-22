@@ -11,8 +11,10 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { InferSearchResponseOf } from '@kbn/es-types';
 import type { KibanaRequest } from '@kbn/core/server';
+import { RequestStatus } from '@kbn/inspector-plugin/common';
 import { searchExcludedDataTiers } from '@kbn/observability-plugin/common/ui_settings_keys';
-import type { DataTier } from '@kbn/observability-shared-plugin/common';
+import type { DataTier, InspectResponse } from '@kbn/observability-shared-plugin/common';
+import { getInspectResponse } from '@kbn/observability-shared-plugin/common';
 import { excludeTiersQuery } from '@kbn/observability-utils-common/es/queries/exclude_tiers_query';
 import type { InfraPluginRequestHandlerContext } from '../../types';
 import type { InfraBackendLibs } from '../infra_types';
@@ -26,6 +28,8 @@ export type MSearchParams = Omit<RequiredParams, 'allow_no_indices'>;
 interface TypedMSearchResponse<TDocument, TParams extends RequiredParams> {
   responses: Array<InferSearchResponseOf<TDocument, TParams>>;
 }
+
+export const inspectableEsQueriesMap = new WeakMap<KibanaRequest, InspectResponse>();
 
 export type InfraMetricsClient = Awaited<ReturnType<typeof getInfraMetricsClient>>;
 
@@ -49,28 +53,66 @@ export async function getInfraMetricsClient({
 
   return {
     search<TDocument, TParams extends RequiredParams>(
-      searchParams: TParams
+      searchParams: TParams,
+      operationName?: string
     ): Promise<InferSearchResponseOf<TDocument, TParams>> {
-      return framework.callWithRequest(
-        context,
-        'search',
-        {
-          ...searchParams,
-          ignore_unavailable: true,
-          index: metricsIndices,
-          query: {
-            bool: {
-              filter: excludedQuery,
-              must: [searchParams.query],
-            },
+      const startTime = Date.now();
+      const collector = request ? inspectableEsQueriesMap.get(request) : undefined;
+      const finalParams = {
+        ...searchParams,
+        ignore_unavailable: true,
+        index: metricsIndices,
+        query: {
+          bool: {
+            filter: excludedQuery,
+            must: [searchParams.query],
           },
         },
-        request
-      ) as Promise<any>;
+      };
+
+      return (
+        framework.callWithRequest(context, 'search', finalParams, request) as Promise<any>
+      ).then(
+        (response) => {
+          if (collector && request) {
+            collector.push(
+              getInspectResponse({
+                esError: null,
+                esRequestParams: finalParams,
+                esRequestStatus: RequestStatus.OK,
+                esResponse: response,
+                kibanaRequest: request,
+                operationName: operationName ?? 'infra metrics search',
+                startTime,
+              })
+            );
+          }
+          return response;
+        },
+        (error) => {
+          if (collector && request) {
+            collector.push(
+              getInspectResponse({
+                esError: error,
+                esRequestParams: finalParams,
+                esRequestStatus: RequestStatus.ERROR,
+                esResponse: null,
+                kibanaRequest: request,
+                operationName: operationName ?? 'infra metrics search',
+                startTime,
+              })
+            );
+          }
+          throw error;
+        }
+      );
     },
     msearch<TDocument, TParams extends MSearchParams>(
-      searchParams: TParams[]
+      searchParams: TParams[],
+      operationName?: string
     ): Promise<TypedMSearchResponse<TDocument, TParams>> {
+      const startTime = Date.now();
+      const collector = request ? inspectableEsQueriesMap.get(request) : undefined;
       const searches = searchParams
         .map((params) => {
           const search: [MsearchMultisearchHeader, SearchSearchRequestBody] = [
@@ -92,7 +134,45 @@ export async function getInfraMetricsClient({
           return search;
         })
         .flat();
-      return framework.callWithRequest(context, 'msearch', { searches }, request) as Promise<any>;
+
+      const msearchParams = { searches };
+
+      return (
+        framework.callWithRequest(context, 'msearch', msearchParams, request) as Promise<any>
+      ).then(
+        (response) => {
+          if (collector && request) {
+            collector.push(
+              getInspectResponse({
+                esError: null,
+                esRequestParams: msearchParams,
+                esRequestStatus: RequestStatus.OK,
+                esResponse: response,
+                kibanaRequest: request,
+                operationName: operationName ?? 'infra metrics msearch',
+                startTime,
+              })
+            );
+          }
+          return response;
+        },
+        (error) => {
+          if (collector && request) {
+            collector.push(
+              getInspectResponse({
+                esError: error,
+                esRequestParams: msearchParams,
+                esRequestStatus: RequestStatus.ERROR,
+                esResponse: null,
+                kibanaRequest: request,
+                operationName: operationName ?? 'infra metrics msearch',
+                startTime,
+              })
+            );
+          }
+          throw error;
+        }
+      );
     },
   };
 }

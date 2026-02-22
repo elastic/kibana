@@ -23,6 +23,8 @@ export const initServicesRoute = (libs: InfraBackendLibs) => {
       path: '/api/infra/services',
       validate: {
         query: (q, res) => {
+          // Strip _inspect added by the frontend inspector integration
+          delete q._inspect;
           const [invalidResponse, parsedFilters] = validateStringAssetFilters(q, res);
           if (invalidResponse) {
             return invalidResponse;
