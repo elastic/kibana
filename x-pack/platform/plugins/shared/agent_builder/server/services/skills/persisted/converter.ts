@@ -21,6 +21,6 @@ export const convertPersistedSkill = (
     relativePath: rc.relativePath,
     content: rc.content,
   })),
-  getAllowedTools: () => skill.tool_ids ?? [],
+  getRegistryTools: () => skill.tool_ids ?? [],
   // Persisted skills have no inline tools or basePath
 });

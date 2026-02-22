@@ -53,20 +53,20 @@ describe('convertBuiltinSkill', () => {
     ]);
   });
 
-  it('returns empty array from getAllowedTools when skill has no getAllowedTools', () => {
-    const skill = createMockSkillDefinition({ getAllowedTools: undefined });
+  it('returns empty array from getRegistryTools when skill has no getRegistryTools', () => {
+    const skill = createMockSkillDefinition({ getRegistryTools: undefined });
     const result = convertBuiltinSkill(skill);
 
-    expect(result.getAllowedTools()).toEqual([]);
+    expect(result.getRegistryTools()).toEqual([]);
   });
 
-  it('delegates getAllowedTools to the original skill', () => {
+  it('delegates getRegistryTools to the original skill', () => {
     const skill = createMockSkillDefinition({
-      getAllowedTools: () => ['tool-a', 'tool-b'] as any,
+      getRegistryTools: () => ['tool-a', 'tool-b'] as any,
     });
     const result = convertBuiltinSkill(skill);
 
-    expect(result.getAllowedTools()).toEqual(['tool-a', 'tool-b']);
+    expect(result.getRegistryTools()).toEqual(['tool-a', 'tool-b']);
   });
 
   it('preserves getInlineTools function', () => {

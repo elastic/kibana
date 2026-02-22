@@ -81,7 +81,7 @@ describe('createPersistedSkillProvider', () => {
       expect(result).toBeDefined();
       expect(result!.id).toBe('skill-1');
       expect(result!.readonly).toBe(false);
-      expect(result!.getAllowedTools()).toEqual(['tool-a']);
+      expect(result!.getRegistryTools()).toEqual(['tool-a']);
     });
 
     it('returns undefined when client throws', async () => {

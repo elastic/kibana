@@ -49,11 +49,11 @@ export interface InternalSkillDefinition {
    */
   basePath?: string;
   /**
-   * Returns tool IDs this skill is allowed to use.
-   * - Builtin skills: returns from the skill definition's getAllowedTools()
+   * Returns tool IDs from the tool registry that this skill can use.
+   * - Builtin skills: returns from the skill definition's getRegistryTools()
    * - Persisted skills: returns tool_ids from persistence
    */
-  getAllowedTools: () => string[];
+  getRegistryTools: () => string[];
   /**
    * Returns inline tool definitions specific to this skill.
    * Only available for builtin skills.

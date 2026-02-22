@@ -19,7 +19,7 @@ describe('SkillsStore', () => {
     description: 'A test skill',
     content: 'Skill body content',
     readonly: true,
-    getAllowedTools: () => [],
+    getRegistryTools: () => [],
     ...overrides,
   });
 

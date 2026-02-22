@@ -89,12 +89,10 @@ class SkillRegistryImpl implements SkillRegistry {
       throw createBadRequestError(`Invalid skill id: "${skillId}": ${validationError}`);
     }
 
-    // Check for duplicates across all providers
     if (await this.has(skillId)) {
       throw createBadRequestError(`Skill with id '${skillId}' already exists`);
     }
 
-    // Validate tool IDs exist in the tool registry
     await this.validateToolIds(createRequest.tool_ids);
 
     return this.persistedProvider.create(createRequest);
@@ -110,7 +108,6 @@ class SkillRegistryImpl implements SkillRegistry {
           throw createBadRequestError(`Skill '${skillId}' is read-only and can't be updated`);
         }
 
-        // Validate tool IDs if provided
         if (update.tool_ids) {
           await this.validateToolIds(update.tool_ids);
         }

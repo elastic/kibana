@@ -33,16 +33,16 @@ export async function loadSkillTools({
     const inlineTools = (await skill.getInlineTools?.()) ?? [];
     const inlineExecutableTools = inlineTools.map((tool) => skillsService.convertSkillTool(tool));
 
-    const allowedTools = skill.getAllowedTools();
-
-    // For user-created skills, getAllowedTools() returns tool IDs from the tool registry.
-    // For built-in skills, it returns built-in tool type identifiers.
-    // Both are resolved via pickTools.
-    const registryExecutableTools = await pickTools({
-      toolProvider,
-      selection: [{ tool_ids: allowedTools }],
-      request,
-    });
+    const registryToolIds = skill.getRegistryTools();
+    if (registryToolIds.length > 25) {
+      throw new Error(
+        `Skill '${skill.id}' returned ${registryToolIds.length} registry tools, exceeding the 25-tool limit.`
+      );
+    }
+    const registryExecutableTools =
+      registryToolIds.length > 0
+        ? await pickTools({ toolProvider, selection: [{ tool_ids: registryToolIds }], request })
+        : [];
 
     await toolManager.addTools(
       {
@@ -55,7 +55,6 @@ export async function loadSkillTools({
       }
     );
   } else {
-    // Skill not found - could be a user-created skill that was deleted
     logger.warn(`Skill '${entry.metadata.skill_id}' not found in registry. Skipping tool loading.`);
   }
 }

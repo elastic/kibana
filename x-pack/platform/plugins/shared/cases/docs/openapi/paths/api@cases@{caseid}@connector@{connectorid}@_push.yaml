@@ -20,7 +20,7 @@ post:
     '200':
       description: Indicates a successful call.
       content:
-        application/json: 
+        application/json:
           schema:
             $ref: '../components/schemas/case_response_properties.yaml'
           examples:
@@ -31,4 +31,4 @@ post:
       content:
         application/json:
           schema:
-            $ref: '../components/schemas/4xx_response.yaml'
+            $ref: '../components/schemas/response_4xx.yaml'

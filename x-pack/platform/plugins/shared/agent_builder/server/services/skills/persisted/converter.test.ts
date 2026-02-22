@@ -53,18 +53,18 @@ describe('convertPersistedSkill', () => {
     expect(result.getInlineTools).toBeUndefined();
   });
 
-  it('returns tool_ids from getAllowedTools', () => {
+  it('returns tool_ids from getRegistryTools', () => {
     const skill = createMockPersistedSkill({ tool_ids: ['tool-a', 'tool-b'] });
     const result = convertPersistedSkill(skill);
 
-    expect(result.getAllowedTools()).toEqual(['tool-a', 'tool-b']);
+    expect(result.getRegistryTools()).toEqual(['tool-a', 'tool-b']);
   });
 
-  it('returns empty array from getAllowedTools when tool_ids is empty', () => {
+  it('returns empty array from getRegistryTools when tool_ids is empty', () => {
     const skill = createMockPersistedSkill({ tool_ids: [] });
     const result = convertPersistedSkill(skill);
 
-    expect(result.getAllowedTools()).toEqual([]);
+    expect(result.getRegistryTools()).toEqual([]);
   });
 
   it('converts referenced_content to referencedContent', () => {

@@ -17,7 +17,7 @@ describe('internalToPublicDefinition', () => {
     description: 'A test skill',
     content: 'Skill content',
     readonly: true,
-    getAllowedTools: () => [],
+    getRegistryTools: () => [],
     ...overrides,
   });
 
@@ -67,18 +67,18 @@ describe('internalToPublicDefinition', () => {
     expect(result.referenced_content).toBeUndefined();
   });
 
-  it('converts getAllowedTools to tool_ids', () => {
+  it('converts getRegistryTools to tool_ids', () => {
     const skill = createMockInternalSkill({
-      getAllowedTools: () => ['tool-a', 'tool-b'],
+      getRegistryTools: () => ['tool-a', 'tool-b'],
     });
     const result = internalToPublicDefinition(skill);
 
     expect(result.tool_ids).toEqual(['tool-a', 'tool-b']);
   });
 
-  it('returns empty tool_ids when getAllowedTools returns empty array', () => {
+  it('returns empty tool_ids when getRegistryTools returns empty array', () => {
     const skill = createMockInternalSkill({
-      getAllowedTools: () => [],
+      getRegistryTools: () => [],
     });
     const result = internalToPublicDefinition(skill);
 
@@ -94,6 +94,6 @@ describe('internalToPublicDefinition', () => {
 
     expect(result).not.toHaveProperty('basePath');
     expect(result).not.toHaveProperty('getInlineTools');
-    expect(result).not.toHaveProperty('getAllowedTools');
+    expect(result).not.toHaveProperty('getRegistryTools');
   });
 });

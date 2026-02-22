@@ -42,7 +42,7 @@ const createMockSkillDefinition = (overrides: Partial<SkillDefinition> = {}): Sk
   basePath: 'skills/platform' as any,
   description: 'A test skill',
   content: 'Skill body content',
-  getAllowedTools: () => [],
+  getRegistryTools: () => [],
   ...overrides,
 });
 

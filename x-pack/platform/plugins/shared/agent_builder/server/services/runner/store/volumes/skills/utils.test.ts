@@ -27,7 +27,7 @@ describe('skills utils', () => {
     description: 'A test skill',
     content: 'This is the skill body content.',
     readonly: true,
-    getAllowedTools: () => [],
+    getRegistryTools: () => [],
     ...overrides,
   });
 

@@ -24,6 +24,6 @@ export const internalToPublicDefinition = (
     relativePath: rc.relativePath,
     content: rc.content,
   })),
-  tool_ids: skill.getAllowedTools(),
+  tool_ids: skill.getRegistryTools(),
   readonly: skill.readonly,
 });

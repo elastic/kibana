@@ -18,7 +18,7 @@ const createMockInternalSkillDefinition = (
   description: 'A test skill',
   content: 'Skill body content',
   readonly: true,
-  getAllowedTools: () => [],
+  getRegistryTools: () => [],
   ...overrides,
 });
 
@@ -48,7 +48,7 @@ const createMockPersistedProvider = (
     create: jest.fn(async (params) => ({
       ...params,
       readonly: false,
-      getAllowedTools: () => params.tool_ids ?? [],
+      getRegistryTools: () => params.tool_ids ?? [],
     })),
     update: jest.fn(async (id, update) => ({
       id,
@@ -56,7 +56,7 @@ const createMockPersistedProvider = (
       description: update.description ?? 'original-description',
       content: update.content ?? 'original-content',
       readonly: false,
-      getAllowedTools: () => update.tool_ids ?? [],
+      getRegistryTools: () => update.tool_ids ?? [],
     })),
     delete: jest.fn(async (_skillId: string) => true),
   };
@@ -367,7 +367,9 @@ describe('createSkillRegistry', () => {
         toolRegistry: createMockToolRegistry(),
       });
 
-      await expect(registry.delete('non-existent')).rejects.toThrow('Skill non-existent not found');
+      await expect(registry.delete('non-existent')).rejects.toThrow(
+        'Skill non-existent not found'
+      );
     });
   });
 });
