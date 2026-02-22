@@ -53,6 +53,7 @@ export function registerInternalToolsRoutes({
       validate: {
         body: schema.object({
           ids: schema.arrayOf(schema.string()),
+          force: schema.boolean({ defaultValue: true }),
         }),
       },
       options: { access: 'internal' },
@@ -61,8 +62,39 @@ export function registerInternalToolsRoutes({
       },
     },
     wrapHandler(async (ctx, request, response) => {
-      const { ids } = request.body;
-      const { tools: toolService, auditLogService } = getInternalServices();
+      const { ids, force } = request.body;
+      const { tools: toolService, agents: agentsService, auditLogService } = getInternalServices();
+
+      if (!force) {
+        const { agents } = await agentsService.getAgentsUsingTools({
+          request,
+          toolIds: ids,
+        });
+        if (agents.length > 0) {
+          return response.conflict({
+            body: {
+              message:
+                'One or more tools are used by agents. Use force=true to remove them from agents and delete.',
+              attributes: {
+                code: 'TOOL_USED_BY_AGENTS',
+                agents,
+              },
+            },
+          });
+        }
+      } else {
+        const { agents } = await agentsService.removeToolRefsFromAgents({
+          request,
+          toolIds: ids,
+        });
+        for (const agent of agents) {
+          auditLogService.logAgentUpdated(request, {
+            agentId: agent.id,
+            agentName: agent.name,
+          });
+        }
+      }
+
       const registry = await toolService.getRegistry({ request });
       const deleteResults = await Promise.allSettled(ids.map((id) => registry.delete(id)));
 
@@ -86,9 +118,7 @@ export function registerInternalToolsRoutes({
       auditLogService.logBulkToolDeleteResults(request, { ids, deleteResults });
 
       return response.ok<BulkDeleteToolResponse>({
-        body: {
-          results,
-        },
+        body: { results },
       });
     })
   );
