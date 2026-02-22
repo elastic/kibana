@@ -6,23 +6,21 @@
       "jest",
       "node",
       "react",
-      "@emotion/react/types/css-prop"
+      "@kbn/ambient-ui-types",
+      "@testing-library/jest-dom",
+      "@testing-library/react"
     ]
   },
   "include": [
     "**/*.ts",
-    "**/*.tsx",
-    "**/*.js"
+    "**/*.tsx"
   ],
   "exclude": [
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/expressions-plugin",
-    "@kbn/chart-expressions-common",
-    "@kbn/css-utils",
     "@kbn/i18n",
-    "@kbn/core",
-    "@kbn/safer-lodash-set"
+    "@kbn/kibana-utils-plugin",
+    "@kbn/i18n-react"
   ]
 }
