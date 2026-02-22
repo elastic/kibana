@@ -21,7 +21,7 @@ steps:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp
-      machineType: n2-standard-4
+      machineType: n2-standard-8
       preemptible: true
     key: build
     if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
@@ -75,7 +75,7 @@ steps:
       provider: gcp
       enableNestedVirtualization: true
       machineType: n2-standard-4
-      diskSizeGb: 120
+      diskSizeGb: 105
     timeout_in_minutes: 75
     parallelism: 22
     key: defend-workflows-stateful
@@ -93,7 +93,7 @@ steps:
       provider: gcp
       enableNestedVirtualization: true
       machineType: n2-standard-4
-      diskSizeGb: 120
+      diskSizeGb: 105
     timeout_in_minutes: 75
     parallelism: 14
     key: defend-workflows-serverless

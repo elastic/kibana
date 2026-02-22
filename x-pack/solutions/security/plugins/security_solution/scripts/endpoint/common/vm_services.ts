@@ -247,6 +247,94 @@ interface CreateVagrantVmOptions extends BaseVmCreateOptions {
   log?: ToolingLog;
 }
 
+const ensureVirtualBoxProvider = async (log: ToolingLog): Promise<void> => {
+  const isVboxKernelLoaded = async (): Promise<boolean> => {
+    try {
+      const result = await execa.command('VBoxManage --version', {
+        stdio: 'pipe',
+        all: true,
+      });
+      const combined = `${result.stdout}\n${result.stderr}`;
+      if (combined.toLowerCase().includes('kernel module is not loaded')) {
+        log.warning('VBoxManage reports kernel module not loaded');
+        return false;
+      }
+      log.info(`VirtualBox version: ${result.stdout.trim()}`);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  if (await isVboxKernelLoaded()) {
+    return;
+  }
+
+  const loadModules = async (): Promise<boolean> => {
+    for (const cmd of [
+      'sudo modprobe vboxdrv',
+      'sudo /sbin/vboxconfig',
+      'sudo /sbin/rcvboxdrv setup',
+    ]) {
+      try {
+        await execa.command(cmd, { stdio: 'pipe' });
+        if (await isVboxKernelLoaded()) {
+          log.info(`VirtualBox kernel module loaded via: ${cmd}`);
+          return true;
+        }
+      } catch {
+        log.debug(`Recovery command failed: ${cmd}`);
+      }
+    }
+    return false;
+  };
+
+  const upgradeToVbox71 = async (): Promise<boolean> => {
+    log.info('Upgrading to VirtualBox 7.1 (supports newer kernels)...');
+    try {
+      await execa.command('sudo apt-get install -y --no-install-recommends virtualbox-7.1', {
+        stdio: 'pipe',
+      });
+      return (await loadModules()) && (await isVboxKernelLoaded());
+    } catch {
+      log.debug('virtualbox-7.1 package not available or install failed');
+      return false;
+    }
+  };
+
+  log.warning('VirtualBox kernel module not loaded, attempting recovery...');
+
+  if (await loadModules()) {
+    return;
+  }
+
+  log.warning('Kernel module build failed, upgrading to VirtualBox 7.1...');
+
+  if (await upgradeToVbox71()) {
+    return;
+  }
+
+  const diagnostics: string[] = [];
+  for (const diagCmd of [
+    'VBoxManage --version 2>&1',
+    'lsmod | grep vbox || echo "no vbox modules"',
+    'uname -r',
+    'dpkg -l | grep -i virtualbox 2>/dev/null || echo "no vbox packages"',
+    'dkms status 2>/dev/null || echo "dkms not available"',
+  ]) {
+    try {
+      const { stdout } = await execa.command(diagCmd, { stdio: 'pipe', shell: true });
+      diagnostics.push(`${diagCmd}: ${stdout.trim()}`);
+    } catch {
+      diagnostics.push(`${diagCmd}: (failed)`);
+    }
+  }
+
+  throw new Error(
+    `VirtualBox kernel module could not be loaded.\nDiagnostics:\n${diagnostics.join('\n')}`
+  );
+};
+
 /**
  * Creates a new VM using `vagrant`
  */
@@ -270,6 +358,7 @@ const createVagrantVm = async ({
   }
 
   const vagrantEnv = {
+    ...(process.env.CI ? { VAGRANT_DEFAULT_PROVIDER: 'virtualbox' } : {}),
     VAGRANT_DISABLE_VBOXSYMLINKCREATE: '1',
     VAGRANT_CWD,
     VMNAME: name,
@@ -292,10 +381,14 @@ const createVagrantVm = async ({
       );
     }
   } catch (e) {
-    if (e.message?.includes('Insufficient disk space')) {
+    if ((e as Error).message?.includes('Insufficient disk space')) {
       throw e;
     }
-    log.debug(`Unable to check disk space: ${e.message}`);
+    log.debug(`Unable to check disk space: ${(e as Error).message}`);
+  }
+
+  if (process.env.CI) {
+    await ensureVirtualBoxProvider(log);
   }
 
   const MAX_ATTEMPTS = 2;
@@ -319,8 +412,9 @@ const createVagrantVm = async ({
       log.debug('Vagrant up command response: ', vagrantUpResponse);
       break;
     } catch (e) {
+      const execError = e as execa.ExecaError;
       log.error(
-        `vagrant up failed (attempt ${attempt}/${MAX_ATTEMPTS}):\nSTDOUT: ${e.stdout}\nSTDERR: ${e.stderr}`
+        `vagrant up failed (attempt ${attempt}/${MAX_ATTEMPTS}):\nSTDOUT: ${execError.stdout}\nSTDERR: ${execError.stderr}`
       );
 
       if (attempt === MAX_ATTEMPTS) {
