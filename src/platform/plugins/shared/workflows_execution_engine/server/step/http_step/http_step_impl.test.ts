@@ -652,5 +652,161 @@ describe('HttpStepImpl', () => {
         })
       );
     });
+
+    it('should apply proxy_url option', async () => {
+      const input = {
+        url: 'https://api.example.com/users',
+        method: 'GET',
+        headers: {},
+        fetcher: {
+          proxy_url: 'http://corporate-proxy.example.com:8080',
+        },
+      };
+
+      (mockedAxios as any).mockResolvedValueOnce({ status: 200, data: { success: true } });
+
+      await (httpStep as any)._run(input);
+
+      expect(mockedAxios).toHaveBeenCalledWith(
+        expect.objectContaining({
+          proxy: {
+            protocol: 'http',
+            host: 'corporate-proxy.example.com',
+            port: 8080,
+          },
+        })
+      );
+    });
+
+    it('should apply proxy_url with authentication', async () => {
+      const input = {
+        url: 'https://api.example.com/users',
+        method: 'GET',
+        headers: {},
+        fetcher: {
+          proxy_url: 'http://proxy.internal:3128',
+          proxy_username: 'proxyuser',
+          proxy_password: 'proxypass',
+        },
+      };
+
+      (mockedAxios as any).mockResolvedValueOnce({ status: 200, data: { success: true } });
+
+      await (httpStep as any)._run(input);
+
+      expect(mockedAxios).toHaveBeenCalledWith(
+        expect.objectContaining({
+          proxy: {
+            protocol: 'http',
+            host: 'proxy.internal',
+            port: 3128,
+            auth: {
+              username: 'proxyuser',
+              password: 'proxypass',
+            },
+          },
+        })
+      );
+    });
+
+    it('should not include proxy auth when only username is provided', async () => {
+      const input = {
+        url: 'https://api.example.com/users',
+        method: 'GET',
+        headers: {},
+        fetcher: {
+          proxy_url: 'http://proxy.internal:3128',
+          proxy_username: 'proxyuser',
+        },
+      };
+
+      (mockedAxios as any).mockResolvedValueOnce({ status: 200, data: { success: true } });
+
+      await (httpStep as any)._run(input);
+
+      expect(mockedAxios).toHaveBeenCalledWith(
+        expect.objectContaining({
+          proxy: {
+            protocol: 'http',
+            host: 'proxy.internal',
+            port: 3128,
+          },
+        })
+      );
+    });
+
+    it('should default proxy port to 443 for https proxy_url', async () => {
+      const input = {
+        url: 'https://api.example.com/users',
+        method: 'GET',
+        headers: {},
+        fetcher: {
+          proxy_url: 'https://secure-proxy.example.com',
+        },
+      };
+
+      (mockedAxios as any).mockResolvedValueOnce({ status: 200, data: { success: true } });
+
+      await (httpStep as any)._run(input);
+
+      expect(mockedAxios).toHaveBeenCalledWith(
+        expect.objectContaining({
+          proxy: {
+            protocol: 'https',
+            host: 'secure-proxy.example.com',
+            port: 443,
+          },
+        })
+      );
+    });
+
+    it('should combine proxy with skip_ssl_verification', async () => {
+      const input = {
+        url: 'https://api.example.com/users',
+        method: 'GET',
+        headers: {},
+        fetcher: {
+          proxy_url: 'http://proxy.internal:8080',
+          skip_ssl_verification: true,
+        },
+      };
+
+      (mockedAxios as any).mockResolvedValueOnce({ status: 200, data: { success: true } });
+
+      await (httpStep as any)._run(input);
+
+      expect(mockedAxios).toHaveBeenCalledWith(
+        expect.objectContaining({
+          proxy: {
+            protocol: 'http',
+            host: 'proxy.internal',
+            port: 8080,
+          },
+          httpsAgent: expect.objectContaining({
+            options: expect.objectContaining({
+              rejectUnauthorized: false,
+            }),
+          }),
+        })
+      );
+    });
+
+    it('should not set proxy when proxy_url is not provided', async () => {
+      const input = {
+        url: 'https://api.example.com/users',
+        method: 'GET',
+        headers: {},
+        fetcher: {
+          skip_ssl_verification: true,
+        },
+      };
+
+      (mockedAxios as any).mockResolvedValueOnce({ status: 200, data: { success: true } });
+
+      await (httpStep as any)._run(input);
+
+      const calledConfig = (mockedAxios as any).mock.calls[0][0];
+      expect(calledConfig.proxy).toBeUndefined();
+    });
   });
 });

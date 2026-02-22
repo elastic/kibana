@@ -12,7 +12,7 @@
 
 import axios, { type AxiosError, type AxiosRequestConfig, type AxiosResponse } from 'axios';
 import https from 'https';
-import type { FetcherConfigSchema } from '@kbn/workflows';
+import type { HttpFetcherConfigSchema } from '@kbn/workflows';
 import type { HttpGraphNode } from '@kbn/workflows/graph';
 import { ExecutionError } from '@kbn/workflows/server';
 import type { z } from '@kbn/zod/v4';
@@ -29,7 +29,7 @@ type HttpHeaders = Record<string, string | number | boolean>;
  * Fetcher configuration options for customizing HTTP requests
  * Derived from the Zod schema to ensure type safety and avoid duplication
  */
-type FetcherOptions = NonNullable<z.infer<typeof FetcherConfigSchema>> & {
+type FetcherOptions = NonNullable<z.infer<typeof HttpFetcherConfigSchema>> & {
   // Allow additional options to be passed through
   [key: string]: any;
 };
@@ -122,7 +122,15 @@ export class HttpStepImpl extends BaseAtomicNodeImplementation<HttpStep> {
 
     // Apply fetcher options if provided
     if (fetcherOptions && Object.keys(fetcherOptions).length > 0) {
-      const { skip_ssl_verification, follow_redirects, max_redirects, keep_alive } = fetcherOptions;
+      const {
+        skip_ssl_verification,
+        follow_redirects,
+        max_redirects,
+        keep_alive,
+        proxy_url,
+        proxy_username,
+        proxy_password,
+      } = fetcherOptions;
 
       // Configure HTTPS agent for SSL and keep-alive options
       const httpsAgentOptions: https.AgentOptions = {};
@@ -142,6 +150,19 @@ export class HttpStepImpl extends BaseAtomicNodeImplementation<HttpStep> {
         config.maxRedirects = 0;
       } else if (max_redirects !== undefined) {
         config.maxRedirects = max_redirects;
+      }
+
+      // Configure proxy if provided
+      if (proxy_url) {
+        const parsedProxy = new URL(proxy_url);
+        config.proxy = {
+          protocol: parsedProxy.protocol.replace(':', ''),
+          host: parsedProxy.hostname,
+          port: Number(parsedProxy.port) || (parsedProxy.protocol === 'https:' ? 443 : 80),
+          ...(proxy_username && proxy_password
+            ? { auth: { username: proxy_username, password: proxy_password } }
+            : {}),
+        };
       }
     }
 
