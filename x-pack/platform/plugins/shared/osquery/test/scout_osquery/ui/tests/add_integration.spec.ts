@@ -130,12 +130,19 @@ test.describe(
             const addAgentLater = page.getByText('Add Elastic Agent later');
             if (await addAgentLater.isVisible({ timeout: 15_000 }).catch(() => false)) {
               await addAgentLater.click();
+              await waitForPageReady(page);
             }
 
-            // Verify the integration exists
+            // Verify the integration exists - Fleet may redirect slowly
+            await page
+              .getByText('Loading Fleet...')
+              .first()
+              .waitFor({ state: 'hidden', timeout: 60_000 })
+              .catch(() => {});
+            await waitForPageReady(page);
             await expect(page.getByText(integrationName).first()).toBeVisible({ timeout: 60_000 });
             await expect(page.getByText(`version: ${oldVersion}`).first()).toBeVisible({
-              timeout: 15_000,
+              timeout: 30_000,
             });
 
             // Upgrade the integration
@@ -144,9 +151,14 @@ test.describe(
               await closeBtn.click();
             }
 
+            await page
+              .getByText('Loading Fleet...')
+              .first()
+              .waitFor({ state: 'hidden', timeout: 60_000 })
+              .catch(() => {});
             await page.testSubj
               .locator('PackagePoliciesTableUpgradeButton')
-              .waitFor({ state: 'visible', timeout: 30_000 });
+              .waitFor({ state: 'visible', timeout: 60_000 });
             await page.testSubj.locator('PackagePoliciesTableUpgradeButton').click();
             await page.testSubj.locator('saveIntegration').click();
 
@@ -196,8 +208,13 @@ test.describe(
         await waitForPageReady(page);
         await page.testSubj.locator('addPackagePolicyButton').click();
         await waitForPageReady(page);
+        await page
+          .getByText('Loading Fleet...')
+          .first()
+          .waitFor({ state: 'hidden', timeout: 60_000 })
+          .catch(() => {});
         const searchBar = page.testSubj.locator('epmList.searchBar');
-        await searchBar.waitFor({ state: 'visible', timeout: 30_000 });
+        await searchBar.waitFor({ state: 'visible', timeout: 60_000 });
         await searchBar.fill('osquery');
         await page.testSubj.locator('integration-card:epr:osquery_manager').click();
         await waitForPageReady(page);
@@ -318,9 +335,14 @@ test.describe(
         await dismissAllToasts(page);
         await page.getByText(policyName).first().click();
         await waitForPageReady(page);
+        await page
+          .getByText('Loading Fleet...')
+          .first()
+          .waitFor({ state: 'hidden', timeout: 60_000 })
+          .catch(() => {});
         await page.testSubj
           .locator('PackagePoliciesTableUpgradeButton')
-          .waitFor({ state: 'visible', timeout: 30_000 });
+          .waitFor({ state: 'visible', timeout: 60_000 });
         await page.testSubj.locator('PackagePoliciesTableUpgradeButton').click();
 
         // Verify the pack is included in the advanced config

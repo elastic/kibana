@@ -141,42 +141,54 @@ export class LiveQueryPage {
   async waitForResults() {
     const start = Date.now();
     const maxWaitMs = RESULTS_TIMEOUT;
+    let attempt = 0;
 
-    // Click the results tab to ensure we're viewing results
     const resultsTab = this.page.testSubj.locator('osquery-results-tab');
-    if (await resultsTab.isVisible()) {
+    if (await resultsTab.isVisible().catch(() => false)) {
       await resultsTab.click();
       await waitForPageReady(this.page);
     }
 
     while (Date.now() - start < maxWaitMs) {
-      // Check for the results data grid or row cells
       const resultsTable = this.page.testSubj.locator('osqueryResultsTable');
       const dataCell = this.page.testSubj.locator('dataGridRowCell').first();
 
       try {
-        // Wait for either the data grid or a cell to appear
         await Promise.race([
           resultsTable.waitFor({ state: 'visible', timeout: 20_000 }),
           dataCell.waitFor({ state: 'visible', timeout: 20_000 }),
         ]);
 
-        return; // Results found
+        return;
       } catch {
-        // Switch to status tab and back to force a refresh
-        const statusTab = this.page.testSubj.locator('osquery-status-tab');
-        if (await statusTab.isVisible()) {
-          await statusTab.click();
-          await waitForPageReady(this.page);
-          await resultsTab.click();
-          await waitForPageReady(this.page);
-        } else {
+        attempt++;
+        try {
+          if (attempt % 2 === 0) {
+            await this.page.reload();
+            await waitForPageReady(this.page);
+            if (await resultsTab.isVisible().catch(() => false)) {
+              await resultsTab.click();
+              await waitForPageReady(this.page);
+            }
+          } else {
+            const statusTab = this.page.testSubj.locator('osquery-status-tab');
+            if (await statusTab.isVisible().catch(() => false)) {
+              await statusTab.click();
+              await waitForPageReady(this.page);
+              if (await resultsTab.isVisible().catch(() => false)) {
+                await resultsTab.click();
+                await waitForPageReady(this.page);
+              }
+            } else {
+              await new Promise((r) => setTimeout(r, 5_000));
+            }
+          }
+        } catch {
           await new Promise((r) => setTimeout(r, 5_000));
         }
       }
     }
 
-    // Final check — let it throw with a clear error if results never appeared
     await this.page.testSubj
       .locator('osqueryResultsTable')
       .waitFor({ state: 'visible', timeout: 60_000 });

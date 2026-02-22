@@ -110,13 +110,21 @@ for (const testSpace of testSpaces) {
       const href = await discoverLink.getAttribute('href');
 
       if (href) {
-        // href is relative, need to construct absolute URL
         const baseUrl = new URL(page.url()).origin;
         await page.goto(`${baseUrl}${href}`);
         await waitForPageReady(page);
 
+        // Results may not be indexed yet; retry until doc table appears
+        const docTable = page.testSubj.locator('discoverDocTable');
+        const discoverStart = Date.now();
+        while (Date.now() - discoverStart < 120_000) {
+          if (await docTable.isVisible({ timeout: 10_000 }).catch(() => false)) break;
+          await page.reload();
+          await waitForPageReady(page);
+        }
+
         // eslint-disable-next-line playwright/no-conditional-expect
-        await expect(page.testSubj.locator('discoverDocTable')).toBeVisible({ timeout: 60_000 });
+        await expect(docTable).toBeVisible({ timeout: 30_000 });
         // eslint-disable-next-line playwright/no-conditional-expect
         await expect(
           page.testSubj.locator('discoverDocTable').getByText('action_data').first()

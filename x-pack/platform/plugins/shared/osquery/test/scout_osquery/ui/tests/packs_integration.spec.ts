@@ -81,9 +81,16 @@ test.describe(
           await saveBtn.scrollIntoViewIfNeeded();
           await saveBtn.waitFor({ state: 'visible', timeout: 10_000 });
           await dismissAllToasts(page);
-          await saveBtn.click({ force: true });
 
-          // Wait for success
+          await Promise.all([
+            page.waitForResponse(
+              (resp) =>
+                resp.url().includes('/api/osquery/packs') && resp.request().method() === 'POST',
+              { timeout: 30_000 }
+            ),
+            saveBtn.click({ force: true }),
+          ]);
+
           await expect(
             page.getByText(`Successfully created "${removingPack}" pack`).first()
           ).toBeVisible({ timeout: 30_000 });

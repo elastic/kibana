@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+/* eslint-disable playwright/no-nth-methods */
 
 import type { ScoutPage } from '@kbn/scout';
 import type { KbnClient } from '@kbn/test';
@@ -103,7 +104,7 @@ export async function waitForAlerts(
 
   await waitForPageReady(page);
 
-  const expandEvent = page.testSubj.locator('expand-event');
+  const expandEvent = page.testSubj.locator('expand-event').first();
   const remaining = Math.max(timeout - (Date.now() - start), 30_000);
   await expandEvent.waitFor({ state: 'visible', timeout: remaining });
 }
