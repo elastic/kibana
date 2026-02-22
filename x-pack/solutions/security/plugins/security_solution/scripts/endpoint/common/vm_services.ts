@@ -10,8 +10,7 @@ import execa from 'execa';
 import chalk from 'chalk';
 import path from 'path';
 import { userInfo } from 'os';
-import { unlink as deleteFile } from 'fs/promises';
-import { statfs } from 'fs/promises';
+import { unlink as deleteFile, statfs } from 'fs/promises';
 import { dump } from './utils';
 import type { DownloadedAgentInfo } from './agent_downloads_service';
 import { BaseDataGenerator } from '../../../common/endpoint/data_generators/base_data_generator';
@@ -287,7 +286,9 @@ const createVagrantVm = async ({
 
     if (freeGB < MIN_DISK_GB) {
       throw new Error(
-        `Insufficient disk space for vagrant VM: ${freeGB.toFixed(1)} GB free, need at least ${MIN_DISK_GB} GB`
+        `Insufficient disk space for vagrant VM: ${freeGB.toFixed(
+          1
+        )} GB free, need at least ${MIN_DISK_GB} GB`
       );
     }
   } catch (e) {
