@@ -11,7 +11,9 @@ import React from 'react';
 import { EuiIcon } from '@elastic/eui';
 import type { ConnectorIconProps } from '../../../types';
 
+import amazonS3Icon from './amazon_s3.svg';
+
 export default (props: ConnectorIconProps) => {
   // Placeholder icon: use built-in EUI icon until a custom one is added
-  return <EuiIcon type="globe" {...props} aria-hidden={true} />;
+  return <EuiIcon type={amazonS3Icon} {...props} />;
 };

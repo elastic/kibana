@@ -13,6 +13,7 @@ import type { ConnectorSpec } from '../../connector_spec';
 import {
   S3Client,
   ListBucketsCommand,
+  ListObjectsV2Command,
   GetObjectCommand,
   HeadObjectCommand,
 } from '@aws-sdk/client-s3';
@@ -55,7 +56,7 @@ export const AmazonS3: ConnectorSpec = {
     description: i18n.translate('core.kibanaConnectorSpecs.amazonS3.metadata.description', {
       defaultMessage: 'List buckets and download files from Amazon S3',
     }),
-    minimumLicense: 'basic',
+    minimumLicense: 'enterprise',
     supportedFeatureIds: ['workflows'],
   },
   schema: z.object({
@@ -79,7 +80,7 @@ export const AmazonS3: ConnectorSpec = {
       .describe('AWS Secret Access Key')
       .meta({
         sensitive: true,
-        widget: 'text',
+        widget: 'password',
         label: i18n.translate(
           'core.kibanaConnectorSpecs.amazonS3.config.secretAccessKey.label',
           {
@@ -95,7 +96,6 @@ export const AmazonS3: ConnectorSpec = {
       }),
     region: z
       .string()
-      .optional()
       .default('us-east-1')
       .describe('AWS region')
       .meta({
@@ -130,15 +130,71 @@ export const AmazonS3: ConnectorSpec = {
               name: bucket.Name,
               creationDate: bucket.CreationDate?.toISOString(),
             })),
-            owner: response.Owner
-              ? {
-                  id: response.Owner.ID,
-                  displayName: response.Owner.DisplayName,
-                }
-              : undefined,
           };
         } catch (error: unknown) {
           ctx.log.error(`Failed to list S3 buckets: ${error}`);
+          throwS3Error(error);
+          throw error;
+        }
+      },
+    },
+
+    listBucketObjects: {
+      isTool: true,
+      input: z.object({
+        bucket: z.string().min(1).describe('The name of the S3 bucket'),
+      }),
+      handler: async (ctx, input) => {
+        const config = ctx.config as {
+          accessKeyId: string;
+          secretAccessKey: string;
+          region?: string;
+        };
+        const typedInput = input as {
+          bucket: string;
+        };
+
+        try {
+          const s3Client = createS3Client(config);
+          const objects: Array<{
+            key?: string;
+            size?: number;
+            lastModified?: string;
+            storageClass?: string;
+          }> = [];
+          let continuationToken: string | undefined;
+          let isTruncated = true;
+
+          // Recursively list all objects using pagination
+          while (isTruncated) {
+            const command = new ListObjectsV2Command({
+              Bucket: typedInput.bucket,
+              ContinuationToken: continuationToken,
+            });
+            const response = await s3Client.send(command);
+
+            if (response.Contents) {
+              objects.push(
+                ...response.Contents.map((obj) => ({
+                  key: obj.Key,
+                  size: obj.Size,
+                  lastModified: obj.LastModified?.toISOString(),
+                  storageClass: obj.StorageClass,
+                }))
+              );
+            }
+
+            isTruncated = response.IsTruncated || false;
+            continuationToken = response.NextContinuationToken;
+          }
+
+          return {
+            bucket: typedInput.bucket,
+            objectCount: objects.length,
+            objects,
+          };
+        } catch (error: unknown) {
+          ctx.log.error(`Failed to list objects in S3 bucket (${typedInput.bucket}): ${error}`);
           throwS3Error(error);
           throw error;
         }
@@ -257,17 +313,17 @@ export const AmazonS3: ConnectorSpec = {
         const response = await s3Client.send(command);
 
         if (!response.Buckets) {
-          return { ok: false, message: 'Failed to connect to AWS S3' };
+          return { ok: false, message: 'Failed to connect to Amazon S3' };
         }
 
         return {
           ok: true,
-          message: `Successfully connected to AWS S3. Found ${response.Buckets.length} bucket(s)`,
+          message: `Successfully connected to Amazon S3. Found ${response.Buckets.length} bucket(s)`,
         };
       } catch (error) {
         return {
           ok: false,
-          message: `Failed to connect to AWS S3: ${
+          message: `Failed to connect to Amazon S3: ${
             error instanceof Error ? error.message : 'Unknown error'
           }`,
         };
