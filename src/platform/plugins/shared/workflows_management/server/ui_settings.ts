@@ -10,7 +10,10 @@
 import { schema } from '@kbn/config-schema';
 import type { CoreSetup } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows/common/constants';
+import {
+  WORKFLOWS_UI_SETTING_ID,
+  WORKFLOWS_UI_SHOW_EXECUTOR_SETTING_ID,
+} from '@kbn/workflows/common/constants';
 import type { WorkflowsServerPluginSetupDeps } from './types';
 
 export const registerUISettings = (
@@ -46,6 +49,19 @@ export const registerUISettings = (
       value: false,
       readonly: false,
       requiresPageReload: true,
+      category: ['general'],
+    },
+    [WORKFLOWS_UI_SHOW_EXECUTOR_SETTING_ID]: {
+      description: i18n.translate('workflowsManagement.uiSettings.showExecutor.description', {
+        defaultMessage: 'Show who executed each workflow in the execution history.',
+      }),
+      name: i18n.translate('workflowsManagement.uiSettings.showExecutor.name', {
+        defaultMessage: 'Show workflow executor',
+      }),
+      schema: schema.boolean(),
+      value: false,
+      readonly: false,
+      requiresPageReload: false,
       category: ['general'],
     },
   });
