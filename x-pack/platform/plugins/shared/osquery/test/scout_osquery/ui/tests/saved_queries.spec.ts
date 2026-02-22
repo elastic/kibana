@@ -120,7 +120,7 @@ test.describe(
         await page.testSubj
           .locator('globalLoadingIndicator')
           .waitFor({ state: 'hidden' })
-          .catch(() => { });
+          .catch(() => {});
       }
 
       // Exit fullscreen
@@ -194,15 +194,16 @@ test.describe(
 
       // The EuiBottomBar ("Update query") overlays the flyout's submit button.
       // Scroll the flyout body to bring the submit button into view, then click directly.
-      const flyoutSubmitButton = playgroundFlyout.locator('[data-test-subj="liveQuerySubmitButton"]');
+      const flyoutSubmitButton = playgroundFlyout.locator(
+        '[data-test-subj="liveQuerySubmitButton"]'
+      );
       await flyoutSubmitButton.waitFor({ state: 'visible', timeout: 15_000 });
       await flyoutSubmitButton.evaluate((el) => el.scrollIntoView({ block: 'center' }));
 
       const [submitResponse] = await Promise.all([
         page.waitForResponse(
           (resp) =>
-            resp.url().includes('/api/osquery/live_queries') &&
-            resp.request().method() === 'POST',
+            resp.url().includes('/api/osquery/live_queries') && resp.request().method() === 'POST',
           { timeout: 30_000 }
         ),
         flyoutSubmitButton.dispatchEvent('click'),
@@ -212,14 +213,17 @@ test.describe(
         const body = await submitResponse.text().catch(() => 'Unable to read body');
         throw new Error(`Live query submission failed with status ${submitStatus}: ${body}`);
       }
+
       await pageObjects.liveQuery.checkResults();
 
       // Verify submit button is still functional
-      await expect(playgroundFlyout.locator('[data-test-subj="liveQuerySubmitButton"]')).not.toBeDisabled();
+      await expect(
+        playgroundFlyout.locator('[data-test-subj="liveQuerySubmitButton"]')
+      ).not.toBeDisabled();
 
       // Save edited — close the playground flyout first
       await playgroundFlyout.locator('[data-test-subj="euiFlyoutCloseButton"]').click();
-      await playgroundFlyout.waitFor({ state: 'hidden', timeout: 10_000 }).catch(() => { });
+      await playgroundFlyout.waitFor({ state: 'hidden', timeout: 10_000 }).catch(() => {});
       await page.testSubj.locator('update-query-button').click();
       await expect(page.getByText(`${savedQueryDescription} Edited`)).toBeVisible();
       await dismissAllToasts(page);
@@ -322,7 +326,7 @@ test.describe(
       await page.testSubj
         .locator('globalLoadingIndicator')
         .waitFor({ state: 'hidden', timeout: 15_000 })
-        .catch(() => { });
+        .catch(() => {});
       await expect(page.testSubj.locator('kibanaCodeEditor')).toBeVisible({ timeout: 15_000 });
 
       await pageObjects.packs.selectSavedQuery('users_elastic');
@@ -339,6 +343,7 @@ test.describe(
         if (!monacoEnv?.monaco?.editor) {
           throw new Error('MonacoEnvironment.monaco.editor is not available');
         }
+
         const models = monacoEnv.monaco.editor.getModels();
         for (const model of models) {
           if (model.getValue().includes('SELECT * FROM users')) {
@@ -376,7 +381,7 @@ test.describe(
       });
 
       await addQueryFlyout.getByRole('button', { name: 'Save' }).click();
-      await addQueryFlyout.waitFor({ state: 'hidden', timeout: 15_000 }).catch(() => { });
+      await addQueryFlyout.waitFor({ state: 'hidden', timeout: 15_000 }).catch(() => {});
 
       const editButton = page.locator(`[aria-label="Edit users_elastic"]`);
       await editButton.waitFor({ state: 'visible', timeout: 15_000 });

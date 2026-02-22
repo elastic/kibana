@@ -41,7 +41,7 @@ export class LiveQueryPage {
     await this.page.testSubj
       .locator('globalLoadingIndicator')
       .waitFor({ state: 'hidden', timeout: 30_000 })
-      .catch(() => { });
+      .catch(() => {});
 
     const agentInput = this.agentSelection.locator('[data-test-subj="comboBoxSearchInput"]');
     await agentInput.waitFor({ state: 'visible', timeout: 15_000 });
@@ -91,7 +91,7 @@ export class LiveQueryPage {
     await this.page.testSubj
       .locator('globalLoadingIndicator')
       .waitFor({ state: 'hidden', timeout: 10_000 })
-      .catch(() => { });
+      .catch(() => {});
 
     const submitButton = this.page.testSubj.locator('liveQuerySubmitButton');
     await submitButton.waitFor({ state: 'visible' });
@@ -104,7 +104,7 @@ export class LiveQueryPage {
         .locator('[data-test-subj="toastCloseButton"]')
         .all();
       for (const btn of closeButtons) {
-        await btn.click().catch(() => { });
+        await btn.click().catch(() => {});
       }
 
       if (closeButtons.length > 0) {
@@ -140,7 +140,7 @@ export class LiveQueryPage {
         await Promise.race([
           resultsTab.waitFor({ state: 'visible', timeout: 30_000 }),
           packResultsHeading.waitFor({ state: 'visible', timeout: 30_000 }),
-        ]).catch(() => { });
+        ]).catch(() => {});
 
         return;
       } catch (e) {
@@ -152,7 +152,7 @@ export class LiveQueryPage {
           .locator('[data-test-subj="toastCloseButton"]')
           .all();
         for (const btn of retryCloseButtons) {
-          await btn.click().catch(() => { });
+          await btn.click().catch(() => {});
         }
 
         await submitButton.scrollIntoViewIfNeeded();
@@ -211,14 +211,14 @@ export class LiveQueryPage {
               await this.page.testSubj
                 .locator('globalLoadingIndicator')
                 .waitFor({ state: 'hidden', timeout: 15_000 })
-                .catch(() => { });
+                .catch(() => {});
             }
           }
         } catch {
           await this.page.testSubj
             .locator('globalLoadingIndicator')
             .waitFor({ state: 'hidden', timeout: 15_000 })
-            .catch(() => { });
+            .catch(() => {});
         }
       }
     }
@@ -259,7 +259,7 @@ export class LiveQueryPage {
       await this.page.testSubj
         .locator('globalLoadingIndicator')
         .waitFor({ state: 'hidden', timeout: 15_000 })
-        .catch(() => { });
+        .catch(() => {});
       await searchInput.fill('');
       await searchInput.pressSequentially(cleanText);
 
@@ -274,7 +274,7 @@ export class LiveQueryPage {
         await this.page.testSubj
           .locator('globalLoadingIndicator')
           .waitFor({ state: 'hidden', timeout: 15_000 })
-          .catch(() => { });
+          .catch(() => {});
       }
     }
 
@@ -298,7 +298,7 @@ export class LiveQueryPage {
       await this.page.testSubj
         .locator('globalLoadingIndicator')
         .waitFor({ state: 'hidden', timeout: 15_000 })
-        .catch(() => { });
+        .catch(() => {});
       await searchInput.fill('');
       await searchInput.pressSequentially(cleanText);
 
@@ -319,7 +319,7 @@ export class LiveQueryPage {
         await this.page.testSubj
           .locator('globalLoadingIndicator')
           .waitFor({ state: 'hidden', timeout: 5_000 })
-          .catch(() => { });
+          .catch(() => {});
       }
     }
 
