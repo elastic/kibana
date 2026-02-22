@@ -64,23 +64,17 @@ export class AgentListPage {
 
   async selectPolicyFilterOption(optionText: string) {
     await this.getPolicyFilter().click();
-    await this.page
-      .getByRole('option', { name: optionText })
-      .click();
+    await this.page.getByRole('option', { name: optionText }).click();
   }
 
   async selectStatusFilterOption(optionText: string) {
     await this.getStatusFilter().click();
-    await this.page
-      .getByRole('option', { name: optionText })
-      .click();
+    await this.page.getByRole('option', { name: optionText }).click();
   }
 
   async selectTagsFilterOption(optionText: string) {
     await this.getTagsFilter().click();
-    await this.page
-      .getByRole('option', { name: optionText })
-      .click();
+    await this.page.getByRole('option', { name: optionText }).click();
   }
 
   async clickBulkAction(buttonText: string) {

@@ -40,9 +40,7 @@ test.describe('Agent binary download source section', { tag: [...tags.stateful.c
     }
   });
 
-  test('has a default value and allows to edit an existing object', async ({
-    page,
-  }) => {
+  test('has a default value and allows to edit an existing object', async ({ page }) => {
     await page.gotoApp('fleet');
     await page.testSubj.locator(SETTINGS_TAB).click();
 
@@ -98,10 +96,7 @@ test.describe('Agent binary download source section', { tag: [...tags.stateful.c
     await page.testSubj.locator(AGENT_BINARY_SOURCES_FLYOUT.SUBMIT_BUTTON).click();
   });
 
-  test('the download source is displayed in agent policy settings', async ({
-    page,
-    kbnClient,
-  }) => {
+  test('the download source is displayed in agent policy settings', async ({ page, kbnClient }) => {
     await createDownloadSource(kbnClient, {
       name: 'Custom Host',
       id: 'fleet-local-registry',

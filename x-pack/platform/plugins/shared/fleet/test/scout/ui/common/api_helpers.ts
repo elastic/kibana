@@ -102,9 +102,7 @@ export async function cleanupDownloadSources(kbnClient: KbnClient): Promise<void
       path: '/api/fleet/agent_download_sources',
     });
     const items = response.data?.items ?? response.items ?? [];
-    const nonDefault = items.filter(
-      (ds: Record<string, unknown>) => !ds.is_default
-    );
+    const nonDefault = items.filter((ds: Record<string, unknown>) => !ds.is_default);
 
     for (const ds of nonDefault) {
       try {

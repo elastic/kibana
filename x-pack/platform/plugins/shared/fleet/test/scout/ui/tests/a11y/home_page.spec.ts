@@ -162,10 +162,7 @@ test.describe('Home page A11y', { tag: [...tags.stateful.classic] }, () => {
       .waitFor({ state: 'visible', timeout: 15_000 });
   });
 
-  test('Agent Policies - Agent Table After Adding Another Agent', async ({
-    pageObjects,
-    page,
-  }) => {
+  test('Agent Policies - Agent Table After Adding Another Agent', async ({ pageObjects, page }) => {
     await pageObjects.fleetHome.navigateTo();
     await pageObjects.fleetHome.navigateToAgentPoliciesTab();
     await page.testSubj
@@ -243,9 +240,7 @@ test.describe('Home page A11y', { tag: [...tags.stateful.classic] }, () => {
         .locator(UNINSTALL_TOKENS.VIEW_UNINSTALL_COMMAND_BUTTON)
         .getByRole('button')
         .click();
-      await expect(
-        page.testSubj.locator(UNINSTALL_TOKENS.UNINSTALL_COMMAND_FLYOUT)
-      ).toBeVisible();
+      await expect(page.testSubj.locator(UNINSTALL_TOKENS.UNINSTALL_COMMAND_FLYOUT)).toBeVisible();
     } finally {
       try {
         await deleteAgentPolicy(kbnClient, 'agent-policy-a11y-flyout');

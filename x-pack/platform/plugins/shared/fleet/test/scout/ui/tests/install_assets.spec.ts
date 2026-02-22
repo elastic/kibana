@@ -43,6 +43,8 @@ test.describe('Install assets', { tag: [...tags.stateful.classic] }, () => {
 
     await page.goto('/app/integrations/detail/test-package-1.0.0/overview');
     await page.testSubj.locator('installAssetsButton').click();
-    await expect(page.getByRole('heading', { name: /Install unverified integration/ })).toBeVisible();
+    await expect(
+      page.getByRole('heading', { name: /Install unverified integration/ })
+    ).toBeVisible();
   });
 });

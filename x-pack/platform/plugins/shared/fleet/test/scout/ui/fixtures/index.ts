@@ -37,10 +37,7 @@ export const test = baseTest.extend<FleetTestFixtures, ScoutWorkerFixtures>({
       return response;
     }) as ScoutPage['goto'];
 
-    page.gotoApp = (async (
-      appName: string,
-      options?: Parameters<ScoutPage['gotoApp']>[1]
-    ) => {
+    page.gotoApp = (async (appName: string, options?: Parameters<ScoutPage['gotoApp']>[1]) => {
       await originalGotoApp(appName, options);
       await waitForPageReady(page);
     }) as ScoutPage['gotoApp'];

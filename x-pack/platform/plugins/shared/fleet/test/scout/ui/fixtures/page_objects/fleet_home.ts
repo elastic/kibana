@@ -21,9 +21,7 @@ export class FleetHomePage {
     await this.page.testSubj
       .locator(FLEET_AGENTS_TAB_SELECTOR)
       .waitFor({ state: 'visible', timeout: 20_000 });
-    await this.page.testSubj
-      .locator(FLEET_SETUP_LOADING_SELECTOR)
-      .waitFor({ state: 'hidden' });
+    await this.page.testSubj.locator(FLEET_SETUP_LOADING_SELECTOR).waitFor({ state: 'hidden' });
   }
 
   getMissingPrivilegesPromptTitle() {

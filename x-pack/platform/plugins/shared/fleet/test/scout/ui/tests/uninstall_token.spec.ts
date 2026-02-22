@@ -54,9 +54,7 @@ test.describe(
     test('should show token by clicking on the eye button', async ({ page }) => {
       await page.goto('/app/fleet/uninstall-tokens');
       const row = getPolicyRow(page, TARGET_POLICY_ID);
-      const tokenField = row.locator(
-        page.testSubj.locator(UNINSTALL_TOKENS.TOKEN_FIELD)
-      );
+      const tokenField = row.locator(page.testSubj.locator(UNINSTALL_TOKENS.TOKEN_FIELD));
       const showHideButton = row.locator(
         page.testSubj.locator(UNINSTALL_TOKENS.SHOW_HIDE_TOKEN_BUTTON)
       );
@@ -74,7 +72,9 @@ test.describe(
       await uninstallTokens.openUninstallCommandFlyout(TARGET_POLICY_ID);
       await expect(uninstallTokens.getUninstallCommandFlyout()).toBeVisible();
       await expect(
-        uninstallTokens.getUninstallCommandFlyout().getByText(/sudo elastic-agent uninstall --uninstall-token/)
+        uninstallTokens
+          .getUninstallCommandFlyout()
+          .getByText(/sudo elastic-agent uninstall --uninstall-token/)
       ).toBeVisible();
     });
 
