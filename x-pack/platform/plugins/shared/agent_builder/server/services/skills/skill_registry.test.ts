@@ -367,9 +367,7 @@ describe('createSkillRegistry', () => {
         toolRegistry: createMockToolRegistry(),
       });
 
-      await expect(registry.delete('non-existent')).rejects.toThrow(
-        'Skill non-existent not found'
-      );
+      await expect(registry.delete('non-existent')).rejects.toThrow('Skill non-existent not found');
     });
   });
 });
