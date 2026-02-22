@@ -84,31 +84,32 @@ test.describe(
 
       // Check validation errors
       const errorsContainer = page.testSubj.locator('response-actions-error');
+      const responseAction0 = page.testSubj.locator('response-actions-list-item-0');
       // eslint-disable-next-line playwright/no-nth-methods -- multiple response actions can show same error
       await expect(errorsContainer.getByText('Query is a required field').first()).toBeVisible();
       await expect(
-        errorsContainer.getByText('The timeout value must be 60 seconds or higher.')
+        responseAction0.getByText('The timeout value must be 60 seconds or higher.')
       ).not.toBeVisible();
 
       // Test that changing one error doesn't clear others
-      const responseAction0 = page.testSubj.locator('response-actions-list-item-0');
       await responseAction0.getByText('Advanced').click();
       const timeoutInput = responseAction0.locator('[data-test-subj="timeout-input"]');
       await timeoutInput.clear();
-      await expect(
-        errorsContainer.getByText('The timeout value must be 60 seconds or higher.')
-      ).toBeVisible();
+      const timeoutError = errorsContainer.getByText(
+        'The timeout value must be 60 seconds or higher.'
+      );
+      // eslint-disable-next-line playwright/no-nth-methods -- multiple response actions can show same error
+      await expect(timeoutError.first()).toBeVisible();
       // eslint-disable-next-line playwright/no-nth-methods -- multiple response actions can show same error
       await expect(errorsContainer.getByText('Query is a required field').first()).toBeVisible();
 
       await timeoutInput.fill('6');
-      await expect(
-        errorsContainer.getByText('The timeout value must be 60 seconds or higher.')
-      ).toBeVisible();
+      // eslint-disable-next-line playwright/no-nth-methods -- multiple response actions can show same error
+      await expect(timeoutError.first()).toBeVisible();
 
       await timeoutInput.fill('66');
       await expect(
-        errorsContainer.getByText('The timeout value must be 60 seconds or higher.')
+        responseAction0.getByText('The timeout value must be 60 seconds or higher.')
       ).not.toBeVisible();
       // eslint-disable-next-line playwright/no-nth-methods -- multiple response actions can show same error
       await expect(errorsContainer.getByText('Query is a required field').first()).toBeVisible();

@@ -29,14 +29,16 @@ test.describe(
       await test.step('Submit without required fields and verify validation errors', async () => {
         await liveQuery.clickSubmit();
         await expect(page.getByText('Agents is a required field')).toBeVisible();
-        await expect(page.getByText('Query is a required field')).toBeVisible();
+        // eslint-disable-next-line playwright/no-nth-methods -- both saved query and query editor show same error
+        await expect(page.getByText('Query is a required field').first()).toBeVisible();
       });
 
       await test.step('Type query and verify agents validation remains', async () => {
         await liveQuery.inputQuery('select * from uptime;');
         await liveQuery.clickSubmit();
 
-        await expect(page.getByText('Query is a required field')).not.toBeVisible();
+        // eslint-disable-next-line playwright/no-nth-methods -- both saved query and query editor show same error
+        await expect(page.getByText('Query is a required field').first()).not.toBeVisible();
         await expect(page.getByText('Agents is a required field')).toBeVisible();
       });
     });

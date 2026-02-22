@@ -41,7 +41,7 @@ export class LiveQueryPage {
     await this.page.testSubj
       .locator('globalLoadingIndicator')
       .waitFor({ state: 'hidden', timeout: 30_000 })
-      .catch(() => {});
+      .catch(() => { });
 
     const agentInput = this.agentSelection.locator('[data-test-subj="comboBoxSearchInput"]');
     await agentInput.waitFor({ state: 'visible', timeout: 15_000 });
@@ -91,36 +91,73 @@ export class LiveQueryPage {
     await this.page.testSubj
       .locator('globalLoadingIndicator')
       .waitFor({ state: 'hidden', timeout: 10_000 })
-      .catch(() => {});
+      .catch(() => { });
 
     const submitButton = this.page.testSubj.locator('liveQuerySubmitButton');
     await submitButton.waitFor({ state: 'visible' });
+    await submitButton.scrollIntoViewIfNeeded();
 
-    // Click Submit and simultaneously wait for the live query API response
-    const [response] = await Promise.all([
-      this.page.waitForResponse(
-        (resp) =>
-          resp.url().includes('/api/osquery/live_queries') && resp.request().method() === 'POST',
-        { timeout: 30_000 }
-      ),
-      submitButton.click(),
-    ]);
+    // Dismiss overlaying toasts twice — new toasts can appear between iterations
+    for (let dismissRound = 0; dismissRound < 2; dismissRound++) {
+      const closeButtons = await this.page.testSubj
+        .locator('globalToastList')
+        .locator('[data-test-subj="toastCloseButton"]')
+        .all();
+      for (const btn of closeButtons) {
+        await btn.click().catch(() => { });
+      }
 
-    const status = response.status();
-    if (status !== 200) {
-      const body = await response.text().catch(() => 'Unable to read body');
-      throw new Error(`Live query submission failed with status ${status}: ${body}`);
+      if (closeButtons.length > 0) {
+        // eslint-disable-next-line playwright/no-wait-for-timeout -- brief pause for toast dismiss animation
+        await this.page.waitForTimeout(500);
+      }
     }
 
-    // Wait for either the single-query results tab or pack-query results to appear
-    const resultsTab = this.page.testSubj.locator('osquery-results-tab');
-    const packResultsHeading = this.page.getByRole('heading', { name: 'Results' });
-    await Promise.race([
-      resultsTab.waitFor({ state: 'visible', timeout: 30_000 }),
-      packResultsHeading.waitFor({ state: 'visible', timeout: 30_000 }),
-    ]).catch(() => {
-      // Allow the caller to handle missing results
-    });
+    // Retry up to 3 times: the button click may be intercepted by a late-appearing
+    // toast or the submit may silently fail to produce a network request.
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        const [response] = await Promise.all([
+          this.page.waitForResponse(
+            (resp) =>
+              resp.url().includes('/api/osquery/live_queries') &&
+              resp.request().method() === 'POST',
+            { timeout: 30_000 }
+          ),
+          // eslint-disable-next-line playwright/no-force-option -- toasts may overlay the button
+          submitButton.click({ force: true }),
+        ]);
+
+        const status = response.status();
+        if (status !== 200) {
+          const body = await response.text().catch(() => 'Unable to read body');
+          throw new Error(`Live query submission failed with status ${status}: ${body}`);
+        }
+
+        // Wait for either the single-query results tab or pack-query results to appear
+        const resultsTab = this.page.testSubj.locator('osquery-results-tab');
+        const packResultsHeading = this.page.getByRole('heading', { name: 'Results' });
+        await Promise.race([
+          resultsTab.waitFor({ state: 'visible', timeout: 30_000 }),
+          packResultsHeading.waitFor({ state: 'visible', timeout: 30_000 }),
+        ]).catch(() => { });
+
+        return;
+      } catch (e) {
+        if (attempt === 2) throw e;
+
+        // Dismiss any new toasts before retrying
+        const retryCloseButtons = await this.page.testSubj
+          .locator('globalToastList')
+          .locator('[data-test-subj="toastCloseButton"]')
+          .all();
+        for (const btn of retryCloseButtons) {
+          await btn.click().catch(() => { });
+        }
+
+        await submitButton.scrollIntoViewIfNeeded();
+      }
+    }
   }
 
   /**
@@ -174,14 +211,14 @@ export class LiveQueryPage {
               await this.page.testSubj
                 .locator('globalLoadingIndicator')
                 .waitFor({ state: 'hidden', timeout: 15_000 })
-                .catch(() => {});
+                .catch(() => { });
             }
           }
         } catch {
           await this.page.testSubj
             .locator('globalLoadingIndicator')
             .waitFor({ state: 'hidden', timeout: 15_000 })
-            .catch(() => {});
+            .catch(() => { });
         }
       }
     }
@@ -222,7 +259,7 @@ export class LiveQueryPage {
       await this.page.testSubj
         .locator('globalLoadingIndicator')
         .waitFor({ state: 'hidden', timeout: 15_000 })
-        .catch(() => {});
+        .catch(() => { });
       await searchInput.fill('');
       await searchInput.pressSequentially(cleanText);
 
@@ -237,7 +274,7 @@ export class LiveQueryPage {
         await this.page.testSubj
           .locator('globalLoadingIndicator')
           .waitFor({ state: 'hidden', timeout: 15_000 })
-          .catch(() => {});
+          .catch(() => { });
       }
     }
 
@@ -261,7 +298,7 @@ export class LiveQueryPage {
       await this.page.testSubj
         .locator('globalLoadingIndicator')
         .waitFor({ state: 'hidden', timeout: 15_000 })
-        .catch(() => {});
+        .catch(() => { });
       await searchInput.fill('');
       await searchInput.pressSequentially(cleanText);
 
@@ -282,7 +319,7 @@ export class LiveQueryPage {
         await this.page.testSubj
           .locator('globalLoadingIndicator')
           .waitFor({ state: 'hidden', timeout: 5_000 })
-          .catch(() => {});
+          .catch(() => { });
       }
     }
 

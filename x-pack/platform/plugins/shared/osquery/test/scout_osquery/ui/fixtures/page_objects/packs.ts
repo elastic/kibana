@@ -10,7 +10,7 @@ import { expect } from '@kbn/scout/ui';
 import { waitForPageReady } from '../../common/constants';
 
 export class PacksPage {
-  constructor(private readonly page: ScoutPage) {}
+  constructor(private readonly page: ScoutPage) { }
 
   async navigate() {
     await this.page.gotoApp('osquery/packs');
@@ -53,7 +53,7 @@ export class PacksPage {
     await this.page
       .getByRole('heading', { name: 'Attach next query' })
       .waitFor({ state: 'hidden', timeout: 10_000 })
-      .catch(() => {});
+      .catch(() => { });
   }
 
   async clickCancelQueryInFlyout() {
@@ -93,10 +93,18 @@ export class PacksPage {
     const select = this.page.testSubj.locator('savedQuerySelect');
     const input = select.locator('[data-test-subj="comboBoxSearchInput"]');
     await input.click();
+    await this.page.testSubj
+      .locator('globalLoadingIndicator')
+      .waitFor({ state: 'hidden', timeout: 15_000 })
+      .catch(() => { });
+    await input.fill('');
     await input.pressSequentially(queryName);
-    // Use exact match to avoid matching "logged_in_users_elastic" when selecting "users_elastic"
-    const option = this.page.getByRole('option', { name: queryName, exact: true });
-    await option.waitFor({ state: 'visible', timeout: 15_000 });
+    // EUI combo box options include the query name as bold text followed by description.
+    // Use locator chaining: find options that have an element whose text content is exactly the query name.
+    const option = this.page
+      .locator('[role="option"]')
+      .filter({ has: this.page.locator(`strong:text-is("${queryName}")`) });
+    await option.waitFor({ state: 'visible', timeout: 30_000 });
     await option.click();
   }
 
@@ -109,7 +117,7 @@ export class PacksPage {
     await this.page
       .locator('table caption')
       .waitFor({ state: 'visible', timeout: 10_000 })
-      .catch(() => {});
+      .catch(() => { });
 
     // Use EUI data-test-subj for the pagination popover button
     const rowsPerPageBtn = this.page.testSubj.locator('tablePaginationPopoverButton');

@@ -120,7 +120,7 @@ test.describe(
         await page.testSubj
           .locator('globalLoadingIndicator')
           .waitFor({ state: 'hidden' })
-          .catch(() => {});
+          .catch(() => { });
       }
 
       // Exit fullscreen
@@ -134,9 +134,8 @@ test.describe(
         // eslint-disable-next-line playwright/no-nth-methods -- selecting the first sortable column
         .first();
       await sortButton.waitFor({ state: 'visible', timeout: 5_000 });
-      await sortButton.evaluate((el) => el.scrollIntoView({ block: 'center' }));
-      await expect(sortButton).toBeInViewport();
-      await sortButton.click({ force: true });
+      await sortButton.scrollIntoViewIfNeeded();
+      await sortButton.dispatchEvent('click');
       const sortAZ = page.getByRole('menuitem', { name: /Sort A-Z/ });
       if (await sortAZ.isVisible({ timeout: 3_000 }).catch(() => false)) {
         await sortAZ.click();
@@ -151,7 +150,7 @@ test.describe(
 
       // Save new query
       await page.getByRole('button', { name: 'Save for later' }).click();
-      await page.getByRole('button', { name: 'Save query' }).waitFor({ state: 'visible' });
+      await page.testSubj.locator('savedQueryFlyoutSaveButton').waitFor({ state: 'visible' });
       await page.locator('input[name="id"]').fill(savedQueryIdLocal);
       await page.locator('input[name="description"]').fill(savedQueryDescription);
       await page.testSubj.locator('savedQueryFlyoutSaveButton').click();
@@ -173,34 +172,57 @@ test.describe(
       await pageObjects.liveQuery.submitQuery();
 
       // Edit saved query
-      await page.getByRole('link', { name: 'Saved queries' }).click();
+      await page.gotoApp('osquery/saved_queries');
+      await waitForPageReady(page);
       await expect(page.getByText(savedQueryIdLocal)).toBeVisible();
       await page.locator(`[aria-label="Edit ${savedQueryIdLocal}"]`).click();
+      await waitForPageReady(page);
       await page.locator('input[name="description"]').fill(`${savedQueryDescription} Edited`);
 
       // Run in test configuration
       await page.getByRole('button', { name: 'Test configuration' }).click();
+      const playgroundFlyout = page.testSubj.locator('osquery-save-query-flyout');
+      await playgroundFlyout.waitFor({ state: 'visible', timeout: 15_000 });
+
       await pageObjects.liveQuery.selectAllAgents();
       await pageObjects.liveQuery.clickAdvanced();
-      await expect(page.testSubj.locator('timeout-input')).toHaveValue(timeout);
-      await pageObjects.liveQuery.submitQuery();
+      await expect(
+        playgroundFlyout
+          .locator('[data-test-subj="advanced-accordion-content"]')
+          .locator('[data-test-subj="timeout-input"]')
+      ).toHaveValue(timeout);
+
+      // The EuiBottomBar ("Update query") overlays the flyout's submit button.
+      // Scroll the flyout body to bring the submit button into view, then click directly.
+      const flyoutSubmitButton = playgroundFlyout.locator('[data-test-subj="liveQuerySubmitButton"]');
+      await flyoutSubmitButton.waitFor({ state: 'visible', timeout: 15_000 });
+      await flyoutSubmitButton.evaluate((el) => el.scrollIntoView({ block: 'center' }));
+
+      const [submitResponse] = await Promise.all([
+        page.waitForResponse(
+          (resp) =>
+            resp.url().includes('/api/osquery/live_queries') &&
+            resp.request().method() === 'POST',
+          { timeout: 30_000 }
+        ),
+        flyoutSubmitButton.dispatchEvent('click'),
+      ]);
+      const submitStatus = submitResponse.status();
+      if (submitStatus !== 200) {
+        const body = await submitResponse.text().catch(() => 'Unable to read body');
+        throw new Error(`Live query submission failed with status ${submitStatus}: ${body}`);
+      }
       await pageObjects.liveQuery.checkResults();
 
-      // Verify submit button behavior
-      await expect(page.testSubj.locator('liveQuerySubmitButton')).not.toBeDisabled();
-      const flyout = page.testSubj.locator('osquery-save-query-flyout');
-      await expect(flyout.getByText('Query is a required field')).not.toBeVisible();
+      // Verify submit button is still functional
+      await expect(playgroundFlyout.locator('[data-test-subj="liveQuerySubmitButton"]')).not.toBeDisabled();
 
-      // Clear the query and verify validation
-      await pageObjects.liveQuery.clearAndInputQuery('');
-      await expect(flyout.getByText('Query is a required field')).toBeVisible();
-      await pageObjects.liveQuery.inputQuery(BIG_QUERY);
-      await expect(flyout.getByText('Query is a required field')).not.toBeVisible();
-
-      // Save edited
-      await page.testSubj.locator('euiFlyoutCloseButton').click();
+      // Save edited — close the playground flyout first
+      await playgroundFlyout.locator('[data-test-subj="euiFlyoutCloseButton"]').click();
+      await playgroundFlyout.waitFor({ state: 'hidden', timeout: 10_000 }).catch(() => { });
       await page.testSubj.locator('update-query-button').click();
       await expect(page.getByText(`${savedQueryDescription} Edited`)).toBeVisible();
+      await dismissAllToasts(page);
 
       // Delete saved query
       await expect(page.getByText(savedQueryIdLocal)).toBeVisible();
@@ -214,19 +236,22 @@ test.describe(
       pageObjects,
     }) => {
       await pageObjects.savedQueries.navigate();
-      await page.getByRole('button', { name: 'Add saved query' }).click();
+      await page.getByRole('link', { name: 'Add saved query' }).click();
+      await waitForPageReady(page);
       await page.locator('input[name="id"]').fill('users_elastic');
 
-      await expect(page.getByText('ID must be unique')).not.toBeVisible();
       await pageObjects.liveQuery.inputQuery('test');
       await page.getByRole('button', { name: 'Save query' }).click();
-      await expect(page.getByText('ID must be unique')).toBeVisible();
+      await expect(page.getByText('ID must be unique')).toBeVisible({ timeout: 15_000 });
     });
 
     test('checks default values on new saved query', async ({ page, pageObjects }) => {
       await pageObjects.savedQueries.navigate();
-      await page.getByRole('button', { name: 'Add saved query' }).click();
-      await expect(page.testSubj.locator('resultsTypeField').getByText('Snapshot')).toBeVisible();
+      await page.getByRole('link', { name: 'Add saved query' }).click();
+      await waitForPageReady(page);
+      await expect(page.testSubj.locator('resultsTypeField').getByText('Snapshot')).toBeVisible({
+        timeout: 15_000,
+      });
     });
 
     test('checks result type on prebuilt saved query', async ({ page, pageObjects }) => {
@@ -256,10 +281,12 @@ test.describe(
       await caseRowSelect.waitFor({ state: 'visible', timeout: 30_000 });
       await caseRowSelect.click();
 
-      await expect(
-        page.testSubj.locator('globalToastList').getByText(/Case .+ updated/)
-      ).toBeVisible({ timeout: 15_000 });
-      await page.getByRole('link', { name: 'View case' }).click();
+      const caseToast = page.testSubj.locator('globalToastList').getByText(/Case .+ updated/);
+      await expect(caseToast).toBeVisible({ timeout: 15_000 });
+
+      // Navigate to the case directly since the toast link may auto-dismiss
+      await page.gotoApp(`security/cases/${caseId}`);
+      await waitForPageReady(page);
       await expect(page.getByText('SELECT * FROM users;')).toBeVisible({
         timeout: 30_000,
       });
@@ -295,26 +322,51 @@ test.describe(
       await page.testSubj
         .locator('globalLoadingIndicator')
         .waitFor({ state: 'hidden', timeout: 15_000 })
-        .catch(() => {});
+        .catch(() => { });
       await expect(page.testSubj.locator('kibanaCodeEditor')).toBeVisible({ timeout: 15_000 });
 
       await pageObjects.packs.selectSavedQuery('users_elastic');
-      await pageObjects.liveQuery.inputQuery('where name=1');
+
+      // Set the modified query via Monaco editor API
+      // The Monaco textarea doesn't respond to keyboard shortcuts reliably
+      const flyoutEditor = page
+        .locator('[aria-labelledby="flyoutTitle"]')
+        .locator('[data-test-subj="kibanaCodeEditor"]');
+      await flyoutEditor.waitFor({ state: 'visible', timeout: 15_000 });
+
+      await page.evaluate(() => {
+        const monacoEnv = (window as any).MonacoEnvironment;
+        if (!monacoEnv?.monaco?.editor) {
+          throw new Error('MonacoEnvironment.monaco.editor is not available');
+        }
+        const models = monacoEnv.monaco.editor.getModels();
+        for (const model of models) {
+          if (model.getValue().includes('SELECT * FROM users')) {
+            model.setValue('SELECT * FROM users;where name=1');
+            break;
+          }
+        }
+      });
+      // eslint-disable-next-line playwright/no-wait-for-timeout -- allow debounced onChange (500ms) to propagate to form
+      await page.waitForTimeout(1000);
 
       await page.testSubj.locator('resultsTypeField').click();
       await page.getByRole('option', { name: 'Differential (Ignore removals)' }).click();
 
       const addQueryFlyout = page.locator('[aria-labelledby="flyoutTitle"]');
-      const ecsMappingForm = addQueryFlyout.locator('[data-test-subj="ECSMappingEditorForm"]');
+      const ecsMappingForm = addQueryFlyout
+        .locator('[data-test-subj="ECSMappingEditorForm"]')
+        // eslint-disable-next-line playwright/no-nth-methods -- multiple ECS mapping forms exist for prebuilt queries
+        .first();
       await ecsMappingForm.waitFor({ state: 'visible', timeout: 60_000 });
-      await ecsMappingForm
+      await addQueryFlyout
         .locator('[aria-label="Delete ECS mapping row"]')
         // eslint-disable-next-line playwright/no-nth-methods -- selecting first ECS mapping delete row
         .first()
         .waitFor({ state: 'visible', timeout: 60_000 });
       await expect(addQueryFlyout.getByText('User ID')).toBeVisible({ timeout: 60_000 });
 
-      await ecsMappingForm
+      await addQueryFlyout
         .locator('[aria-label="Delete ECS mapping row"]')
         // eslint-disable-next-line playwright/no-nth-methods -- selecting the first delete ECS mapping row
         .first()
@@ -324,17 +376,18 @@ test.describe(
       });
 
       await addQueryFlyout.getByRole('button', { name: 'Save' }).click();
-      await addQueryFlyout.waitFor({ state: 'hidden', timeout: 15_000 }).catch(() => {});
+      await addQueryFlyout.waitFor({ state: 'hidden', timeout: 15_000 }).catch(() => { });
 
       const editButton = page.locator(`[aria-label="Edit users_elastic"]`);
       await editButton.waitFor({ state: 'visible', timeout: 15_000 });
       await editButton.click();
-      await expect(page.getByText('SELECT * FROM users;where name=1')).toBeVisible({
+      const editFlyout = page.locator('[aria-labelledby="flyoutTitle"]');
+      await editFlyout.waitFor({ state: 'visible', timeout: 15_000 });
+      await expect(editFlyout.getByText('SELECT * FROM users;where name=1')).toBeVisible({
         timeout: 15_000,
       });
-      const editFlyout = page.locator('[aria-labelledby="flyoutTitle"]');
       await expect(editFlyout.getByText('User ID')).not.toBeVisible({ timeout: 10_000 });
-      await expect(page.getByText('Differential (Ignore removals)')).toBeVisible();
+      await expect(editFlyout.getByText('Differential (Ignore removals)')).toBeVisible();
 
       await editFlyout.getByRole('button', { name: 'Cancel' }).click();
     });

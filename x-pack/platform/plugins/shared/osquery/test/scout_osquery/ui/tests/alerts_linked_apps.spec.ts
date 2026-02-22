@@ -122,11 +122,13 @@ test.describe(
       const dataCell = page.testSubj.locator('dataGridRowCell').first();
       await expect(dataCell).toBeVisible({ timeout: 120_000 });
 
-      await expect(page.getByRole('button', { name: 'Add to Timeline investigation' })).toBeVisible(
-        {
-          timeout: 30_000,
-        }
-      );
+      const addToTimelineButtons = page.getByRole('button', {
+        name: 'Add to Timeline investigation',
+      });
+      // eslint-disable-next-line playwright/no-nth-methods -- multiple timeline buttons may exist across result rows
+      await expect(addToTimelineButtons.first()).toBeVisible({
+        timeout: 30_000,
+      });
       // eslint-disable-next-line playwright/no-nth-methods -- first add-to-timeline in results
       await page.testSubj.locator('add-to-timeline').first().click();
       await expect(page.testSubj.locator('globalToastList').getByText(/Added/)).toBeVisible();
@@ -134,11 +136,11 @@ test.describe(
       // Close the osquery flyout using keyboard (Escape) to avoid portal intercept issues
       await page.keyboard.press('Escape');
       const flyout = page.testSubj.locator('flyout-body-osquery');
-      await flyout.waitFor({ state: 'hidden', timeout: 5_000 }).catch(() => {});
+      await flyout.waitFor({ state: 'hidden', timeout: 5_000 }).catch(() => { });
       const overlayMask = page.locator('.euiOverlayMask');
       if (await overlayMask.isVisible({ timeout: 2_000 }).catch(() => false)) {
         await page.keyboard.press('Escape');
-        await overlayMask.waitFor({ state: 'hidden', timeout: 5_000 }).catch(() => {});
+        await overlayMask.waitFor({ state: 'hidden', timeout: 5_000 }).catch(() => { });
       }
 
       // Also close the security solution flyout if it's still open

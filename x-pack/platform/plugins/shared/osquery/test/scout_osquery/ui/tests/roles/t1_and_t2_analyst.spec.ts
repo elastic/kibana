@@ -86,9 +86,9 @@ roles.forEach(({ name, role }) => {
         }
 
         await expect(page.getByText(savedQueryName)).toBeVisible({ timeout: 10_000 });
-        const addSavedQueryButton = page.getByRole('button', { name: 'Add saved query' });
-        await expect(addSavedQueryButton).toBeVisible({ timeout: 30_000 });
-        await expect(addSavedQueryButton).toBeDisabled();
+        const addSavedQueryLink = page.getByRole('link', { name: 'Add saved query' });
+        await expect(addSavedQueryLink).toBeVisible({ timeout: 30_000 });
+        await expect(addSavedQueryLink).toHaveAttribute('aria-disabled', 'true');
         await expect(page.locator(`[aria-label="Run ${savedQueryName}"]`)).toBeEnabled();
 
         await pageObjects.savedQueries.clickRunSavedQuery(savedQueryName);
@@ -193,7 +193,8 @@ roles.forEach(({ name, role }) => {
         await pageObjects.liveQuery.selectAllAgents();
         await expect(page.testSubj.locator('kibanaCodeEditor')).toHaveCount(0);
         await pageObjects.liveQuery.clickSubmit();
-        await expect(page.getByText('Query is a required field')).toBeVisible();
+        // eslint-disable-next-line playwright/no-nth-methods -- both saved query and query editor show same error
+        await expect(page.getByText('Query is a required field').first()).toBeVisible();
       });
     }
   );

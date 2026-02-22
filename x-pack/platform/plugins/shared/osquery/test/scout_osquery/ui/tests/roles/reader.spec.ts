@@ -56,9 +56,9 @@ test.describe('Reader - only READ', { tag: [...tags.stateful.classic] }, () => {
     await pageObjects.savedQueries.navigate();
     await expect(page.getByText(savedQueryName)).toBeVisible();
     await waitForPageReady(page);
-    const addSavedQueryButton = page.getByRole('button', { name: 'Add saved query' });
-    await expect(addSavedQueryButton).toBeVisible({ timeout: 30_000 });
-    await expect(addSavedQueryButton).toBeDisabled();
+    const addSavedQueryLink = page.getByRole('link', { name: 'Add saved query' });
+    await expect(addSavedQueryLink).toBeVisible({ timeout: 30_000 });
+    await expect(addSavedQueryLink).toHaveAttribute('aria-disabled', 'true');
     await expect(page.locator(`[aria-label="Run ${savedQueryName}"]`)).toBeDisabled();
 
     await pageObjects.savedQueries.clickEditSavedQuery(savedQueryName);

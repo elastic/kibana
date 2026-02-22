@@ -79,7 +79,8 @@ test.describe(
       // eslint-disable-next-line playwright/no-nth-methods -- first event in list
       await page.testSubj.locator('expand-event').first().click();
       const notificationBadge = page.testSubj.locator('response-actions-notification');
-      await expect(notificationBadge).not.toHaveText('0');
+      await notificationBadge.waitFor({ state: 'visible', timeout: 30_000 });
+      await expect(notificationBadge).not.toHaveText('0', { timeout: 30_000 });
       const initialNotificationCount = parseInt((await notificationBadge.textContent()) || '0', 10);
 
       // Take osquery action with params
@@ -125,7 +126,9 @@ test.describe(
 
       // Clear the pre-filled agent and select All agents
       const agentSelection = page.testSubj.locator('agentSelection');
-      await agentSelection.locator('[data-test-subj="comboBoxClearButton"]').click();
+      const clearButton = agentSelection.locator('[data-test-subj="comboBoxClearButton"]');
+      await clearButton.waitFor({ state: 'visible', timeout: 30_000 });
+      await clearButton.click();
       const agentInput = agentSelection.locator('[data-test-subj="comboBoxInput"]');
       await agentInput.pressSequentially('All');
       const allAgentsOption = page.getByRole('option', { name: /All agents/ });
@@ -166,7 +169,9 @@ test.describe(
       // Expand first event in the timeline
       const queryEventsTable = page.testSubj.locator('query-events-table');
       // eslint-disable-next-line playwright/no-nth-methods -- first event in timeline
-      await queryEventsTable.locator('[data-test-subj="expand-event"]').first().click();
+      const firstExpandEvent = queryEventsTable.locator('[data-test-subj="expand-event"]').first();
+      await firstExpandEvent.waitFor({ state: 'visible', timeout: 60_000 });
+      await firstExpandEvent.click();
 
       // Take osquery action with params
       await page.testSubj.locator('securitySolutionFlyoutFooterDropdownButton').click();

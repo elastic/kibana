@@ -73,7 +73,7 @@ test.describe(
             timeout: 30_000,
           });
           await expect(
-            page.getByRole('button', { name: 'Add to Timeline investigation' })
+            firstResultComment.getByRole('button', { name: 'Add to Timeline investigation' })
           ).toBeVisible({ timeout: 30_000 });
         });
 
@@ -135,7 +135,7 @@ test.describe(
             timeout: 30_000,
           });
           await expect(
-            page.getByRole('button', { name: 'Add to Timeline investigation' })
+            firstResultComment.getByRole('button', { name: 'Add to Timeline investigation' })
           ).toBeVisible({ timeout: 30_000 });
         });
 
@@ -197,7 +197,7 @@ test.describe(
             timeout: 30_000,
           });
           await expect(
-            page.getByRole('button', { name: 'Add to Timeline investigation' })
+            firstResultComment.getByRole('button', { name: 'Add to Timeline investigation' })
           ).toBeVisible({ timeout: 30_000 });
         });
 

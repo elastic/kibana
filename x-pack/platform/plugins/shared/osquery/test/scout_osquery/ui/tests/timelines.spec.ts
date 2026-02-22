@@ -40,10 +40,10 @@ test.describe('ALL - Timelines', { tag: [...tags.stateful.classic] }, () => {
     );
     await page.keyboard.press('Enter');
 
-    const firstExpandToggle = page.testSubj.locator('docTableExpandToggleColumn');
-    await firstExpandToggle.waitFor({ state: 'visible', timeout: 120_000 });
     // eslint-disable-next-line playwright/no-nth-methods -- first event row expand
-    await firstExpandToggle.first().click({ force: true });
+    const firstExpandToggle = page.testSubj.locator('docTableExpandToggleColumn').first();
+    await firstExpandToggle.waitFor({ state: 'visible', timeout: 120_000 });
+    await firstExpandToggle.click({ force: true });
 
     // Take Osquery action with params
     await page.testSubj.locator('securitySolutionFlyoutFooterDropdownButton').click();
