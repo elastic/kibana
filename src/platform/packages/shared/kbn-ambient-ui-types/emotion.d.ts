@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  contextMenuTrigger,
-  CONTEXT_MENU_TRIGGER,
-  panelBadgeTrigger,
-  panelNotificationTrigger,
-  PANEL_BADGE_TRIGGER,
-  PANEL_NOTIFICATION_TRIGGER,
-} from './triggers';
+import '@emotion/react';
+import '@emotion/react/types/css-prop';
+import type { UseEuiTheme } from '@elastic/eui';
+
+declare module '@emotion/react' {
+  // eslint-disable-next-line @typescript-eslint/no-empty-interface
+  export interface Theme extends UseEuiTheme {}
+}
