@@ -147,7 +147,7 @@
               "\nThe React component(s) to render in the toolbar"
             ],
             "signature": [
-              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+              "React.ReactNode"
             ],
             "path": "src/platform/packages/shared/kbn-developer-toolbar/src/components/developer_toolbar_item.tsx",
             "lineNumber": 21,

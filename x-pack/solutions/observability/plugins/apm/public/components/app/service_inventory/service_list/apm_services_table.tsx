@@ -172,13 +172,9 @@ export function getServiceColumns({
             width: `${unit * 8}px`,
             sortable: true,
             render: (_, { serviceName, agentName, sloStatus, sloCount }) => {
-              if (!sloStatus) {
-                return null;
-              }
-
               return (
                 <SloStatusBadge
-                  sloStatus={sloStatus}
+                  sloStatus={sloStatus ?? 'noSLOs'}
                   sloCount={sloCount}
                   serviceName={serviceName}
                   onClick={() => onSloBadgeClick(serviceName, agentName)}

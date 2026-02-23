@@ -26,10 +26,6 @@ import {
   OBSERVABILITY_GET_LOG_GROUPS_TOOL_ID,
   createGetLogGroupsTool,
 } from './get_log_groups/tool';
-import {
-  OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID,
-  createGetCorrelatedLogsTool,
-} from './get_correlated_logs/tool';
 import { OBSERVABILITY_GET_HOSTS_TOOL_ID, createGetHostsTool } from './get_hosts/tool';
 import { createGetServicesTool, OBSERVABILITY_GET_SERVICES_TOOL_ID } from './get_services/tool';
 import {
@@ -71,7 +67,6 @@ const OBSERVABILITY_TOOL_IDS = [
   OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID,
   OBSERVABILITY_GET_ALERTS_TOOL_ID,
   OBSERVABILITY_GET_LOG_GROUPS_TOOL_ID,
-  OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID,
   OBSERVABILITY_GET_SERVICES_TOOL_ID,
   OBSERVABILITY_GET_HOSTS_TOOL_ID,
   OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
@@ -103,7 +98,6 @@ export async function registerTools({
     createGetAlertsTool({ core, logger }),
     createGetLogGroupsTool({ core, plugins, logger }),
     createGetServicesTool({ core, plugins, dataRegistry, logger }),
-    createGetCorrelatedLogsTool({ core, logger }),
     createGetHostsTool({ core, logger, dataRegistry }),
     createGetTraceMetricsTool({ core, plugins, logger }),
     createGetTracesTool({ core, plugins, logger }),
