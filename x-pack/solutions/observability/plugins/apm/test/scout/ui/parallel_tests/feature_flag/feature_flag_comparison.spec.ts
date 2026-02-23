@@ -36,82 +36,100 @@ test.describe(
   () => {
     const editorAuth = { username: 'editor', password: 'changeme' };
 
-    test.describe('when comparison feature is enabled', () => {
-      test.beforeEach(async ({ browserAuth, kbnUrl }) => {
-        await browserAuth.loginAsPrivilegedUser();
-        await setAdvancedSetting(
-          kbnUrl,
-          'observability:enableComparisonByDefault',
-          'true',
-          editorAuth
-        );
-      });
-
-      test('shows the comparison feature enabled in services overview', async ({
-        page,
+    test('shows comparison enabled in services overview when feature is on', async ({
+      page,
+      kbnUrl,
+      browserAuth,
+    }) => {
+      await browserAuth.loginAsPrivilegedUser();
+      await setAdvancedSetting(
         kbnUrl,
-      }) => {
-        await page.goto(`${kbnUrl.app('apm')}/services`);
-        const comparisonCheckbox = page.getByTestId('comparisonCheckbox');
-        await expect(comparisonCheckbox).toBeChecked();
-        await expect(page.getByTestId('comparisonSelect')).not.toBeDisabled();
-      });
-
-      test('shows the comparison feature enabled in dependencies overview', async ({
-        page,
-        kbnUrl,
-      }) => {
-        await page.goto(`${kbnUrl.app('apm')}/dependencies`);
-        const comparisonCheckbox = page.getByTestId('comparisonCheckbox');
-        await expect(comparisonCheckbox).toBeChecked();
-        await expect(page.getByTestId('comparisonSelect')).not.toBeDisabled();
-      });
-
-      test('shows the comparison feature enabled in service map overview page', async ({
-        page,
-        kbnUrl,
-      }) => {
-        await page.goto(`${kbnUrl.app('apm')}/service-map`);
-        const comparisonCheckbox = page.getByTestId('comparisonCheckbox');
-        await expect(comparisonCheckbox).toBeChecked();
-        await expect(page.getByTestId('comparisonSelect')).not.toBeDisabled();
-      });
+        'observability:enableComparisonByDefault',
+        'true',
+        editorAuth
+      );
+      await page.goto(`${kbnUrl.app('apm')}/services`);
+      const comparisonCheckbox = page.getByTestId('comparisonCheckbox');
+      await expect(comparisonCheckbox).toBeChecked();
+      await expect(page.getByTestId('comparisonSelect')).not.toBeDisabled();
     });
 
-    test.describe('when comparison feature is disabled', () => {
-      test.beforeEach(async ({ browserAuth, kbnUrl }) => {
-        await browserAuth.loginAsPrivilegedUser();
-        await setAdvancedSetting(
-          kbnUrl,
-          'observability:enableComparisonByDefault',
-          'false',
-          editorAuth
-        );
-      });
-
-      test.afterEach(async ({ kbnUrl }) => {
-        await setAdvancedSetting(
-          kbnUrl,
-          'observability:enableComparisonByDefault',
-          'true',
-          editorAuth
-        );
-      });
-
-      test('shows the comparison feature disabled in services overview', async ({
-        page,
+    test('shows comparison enabled in dependencies overview when feature is on', async ({
+      page,
+      kbnUrl,
+      browserAuth,
+    }) => {
+      await browserAuth.loginAsPrivilegedUser();
+      await setAdvancedSetting(
         kbnUrl,
-      }) => {
+        'observability:enableComparisonByDefault',
+        'true',
+        editorAuth
+      );
+      await page.goto(`${kbnUrl.app('apm')}/dependencies`);
+      const comparisonCheckbox = page.getByTestId('comparisonCheckbox');
+      await expect(comparisonCheckbox).toBeChecked();
+      await expect(page.getByTestId('comparisonSelect')).not.toBeDisabled();
+    });
+
+    test('shows comparison enabled in service map overview when feature is on', async ({
+      page,
+      kbnUrl,
+      browserAuth,
+    }) => {
+      await browserAuth.loginAsPrivilegedUser();
+      await setAdvancedSetting(
+        kbnUrl,
+        'observability:enableComparisonByDefault',
+        'true',
+        editorAuth
+      );
+      await page.goto(`${kbnUrl.app('apm')}/service-map`);
+      const comparisonCheckbox = page.getByTestId('comparisonCheckbox');
+      await expect(comparisonCheckbox).toBeChecked();
+      await expect(page.getByTestId('comparisonSelect')).not.toBeDisabled();
+    });
+
+    test('shows comparison disabled in services overview when feature is off', async ({
+      page,
+      kbnUrl,
+      browserAuth,
+    }) => {
+      await browserAuth.loginAsPrivilegedUser();
+      await setAdvancedSetting(
+        kbnUrl,
+        'observability:enableComparisonByDefault',
+        'false',
+        editorAuth
+      );
+      try {
         await page.goto(`${kbnUrl.app('apm')}/services`);
         const comparisonCheckbox = page.getByTestId('comparisonCheckbox');
         await expect(comparisonCheckbox).not.toBeChecked();
         await expect(page.getByTestId('comparisonSelect')).toBeDisabled();
-      });
+      } finally {
+        await setAdvancedSetting(
+          kbnUrl,
+          'observability:enableComparisonByDefault',
+          'true',
+          editorAuth
+        );
+      }
+    });
 
-      test('shows the comparison feature disabled in dependencies overview page', async ({
-        page,
+    test('shows comparison disabled in dependencies overview when feature is off', async ({
+      page,
+      kbnUrl,
+      browserAuth,
+    }) => {
+      await browserAuth.loginAsPrivilegedUser();
+      await setAdvancedSetting(
         kbnUrl,
-      }) => {
+        'observability:enableComparisonByDefault',
+        'false',
+        editorAuth
+      );
+      try {
         await page.goto(`${kbnUrl.app('apm')}/dependencies`);
         await page.waitForResponse((res) =>
           res.url().includes('/internal/apm/dependencies/top_dependencies')
@@ -119,17 +137,41 @@ test.describe(
         const comparisonCheckbox = page.getByTestId('comparisonCheckbox');
         await expect(comparisonCheckbox).not.toBeChecked();
         await expect(page.getByTestId('comparisonSelect')).toBeDisabled();
-      });
+      } finally {
+        await setAdvancedSetting(
+          kbnUrl,
+          'observability:enableComparisonByDefault',
+          'true',
+          editorAuth
+        );
+      }
+    });
 
-      test('shows the comparison feature disabled in service map overview page', async ({
-        page,
+    test('shows comparison disabled in service map overview when feature is off', async ({
+      page,
+      kbnUrl,
+      browserAuth,
+    }) => {
+      await browserAuth.loginAsPrivilegedUser();
+      await setAdvancedSetting(
         kbnUrl,
-      }) => {
+        'observability:enableComparisonByDefault',
+        'false',
+        editorAuth
+      );
+      try {
         await page.goto(`${kbnUrl.app('apm')}/service-map`);
         const comparisonCheckbox = page.getByTestId('comparisonCheckbox');
         await expect(comparisonCheckbox).not.toBeChecked();
         await expect(page.getByTestId('comparisonSelect')).toBeDisabled();
-      });
+      } finally {
+        await setAdvancedSetting(
+          kbnUrl,
+          'observability:enableComparisonByDefault',
+          'true',
+          editorAuth
+        );
+      }
     });
   }
 );

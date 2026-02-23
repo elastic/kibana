@@ -16,17 +16,15 @@ const DIAGNOSTICS_BUNDLE_PATH = path.join(
 );
 
 test.describe(
-  'Diagnostics - Superuser',
+  'Diagnostics',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    test.beforeEach(async ({ browserAuth }) => {
-      await browserAuth.loginAsAdmin();
-    });
-
-    test('can display summary tab for superuser when no data is loaded', async ({
+    test('superuser can display summary tab when no data is loaded', async ({
       page,
       kbnUrl,
+      browserAuth,
     }) => {
+      await browserAuth.loginAsAdmin();
       await page.goto(`${kbnUrl.app('apm')}/diagnostics`);
       await expect(page.getByTestId('integrationPackageStatus_Badge')).toHaveText('OK');
       await expect(page.getByTestId('dataStreamsStatus_Badge')).toHaveText('OK');
@@ -34,7 +32,12 @@ test.describe(
       await expect(page.getByTestId('fieldMappingStatus_Badge')).toHaveText('OK');
     });
 
-    test('shows the remove button after importing a file', async ({ page, kbnUrl }) => {
+    test('superuser sees remove button after importing a file', async ({
+      page,
+      kbnUrl,
+      browserAuth,
+    }) => {
+      await browserAuth.loginAsAdmin();
       await page.goto(`${kbnUrl.app('apm')}/diagnostics/import-export`);
       await page.locator('#file-picker').setInputFiles(DIAGNOSTICS_BUNDLE_PATH);
       await expect(page.getByTestId('apmImportCardRemoveReportButton')).toBeVisible();
@@ -42,7 +45,12 @@ test.describe(
       await expect(page.getByTestId('apmImportCardRemoveReportButton')).not.toBeVisible();
     });
 
-    test('can display summary tab after importing a file', async ({ page, kbnUrl }) => {
+    test('superuser can display summary tab after importing a file', async ({
+      page,
+      kbnUrl,
+      browserAuth,
+    }) => {
+      await browserAuth.loginAsAdmin();
       await page.goto(`${kbnUrl.app('apm')}/diagnostics/import-export`);
       await page.locator('#file-picker').setInputFiles(DIAGNOSTICS_BUNDLE_PATH);
       await page.getByTestId('summary-tab').click();
@@ -55,21 +63,36 @@ test.describe(
       await expect(page.getByTestId('fieldMappingStatus_Badge')).toHaveText('Warning');
     });
 
-    test('can display index template tab after importing a file', async ({ page, kbnUrl }) => {
+    test('superuser can display index template tab after importing a file', async ({
+      page,
+      kbnUrl,
+      browserAuth,
+    }) => {
+      await browserAuth.loginAsAdmin();
       await page.goto(`${kbnUrl.app('apm')}/diagnostics/import-export`);
       await page.locator('#file-picker').setInputFiles(DIAGNOSTICS_BUNDLE_PATH);
       await page.getByTestId('index-templates-tab').click();
       await expect(page.getByRole('row')).toHaveCount(20);
     });
 
-    test('can display data streams tab after importing a file', async ({ page, kbnUrl }) => {
+    test('superuser can display data streams tab after importing a file', async ({
+      page,
+      kbnUrl,
+      browserAuth,
+    }) => {
+      await browserAuth.loginAsAdmin();
       await page.goto(`${kbnUrl.app('apm')}/diagnostics/import-export`);
       await page.locator('#file-picker').setInputFiles(DIAGNOSTICS_BUNDLE_PATH);
       await page.getByTestId('data-streams-tab').click();
       await expect(page.getByRole('row')).toHaveCount(9);
     });
 
-    test('can display indices tab after importing a file', async ({ page, kbnUrl }) => {
+    test('superuser can display indices tab after importing a file', async ({
+      page,
+      kbnUrl,
+      browserAuth,
+    }) => {
+      await browserAuth.loginAsAdmin();
       await page.goto(`${kbnUrl.app('apm')}/diagnostics/import-export`);
       await page.locator('#file-picker').setInputFiles(DIAGNOSTICS_BUNDLE_PATH);
       await page.getByTestId('indices-tab').click();
@@ -79,26 +102,23 @@ test.describe(
       await expect(indicesWithProblems.getByRole('row')).toHaveCount(139);
       await expect(indicesWithoutProblems.getByRole('row')).toHaveCount(28);
     });
-  }
-);
 
-test.describe(
-  'Diagnostics - Viewer',
-  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
-  () => {
-    test.beforeEach(async ({ browserAuth }) => {
-      await browserAuth.loginAsViewer();
-    });
-
-    test('displays a warning about missing privileges when no data is loaded', async ({
+    test('viewer sees warning about missing privileges when no data is loaded', async ({
       page,
       kbnUrl,
+      browserAuth,
     }) => {
+      await browserAuth.loginAsViewer();
       await page.goto(`${kbnUrl.app('apm')}/diagnostics`);
       await expect(page.getByText('Not all features are available')).toBeVisible();
     });
 
-    test('hides the tabs that require cluster privileges', async ({ page, kbnUrl }) => {
+    test('viewer sees only tabs that do not require cluster privileges', async ({
+      page,
+      kbnUrl,
+      browserAuth,
+    }) => {
+      await browserAuth.loginAsViewer();
       await page.goto(`${kbnUrl.app('apm')}/diagnostics`);
       const tabs = ['Summary', 'Documents', 'Import/Export'];
       const diagnosticsTemplate = page.getByTestId('apmDiagnosticsTemplate');
@@ -108,7 +128,12 @@ test.describe(
       }
     });
 
-    test('displays documents tab for the imported bundle', async ({ page, kbnUrl }) => {
+    test('viewer can display documents tab for the imported bundle', async ({
+      page,
+      kbnUrl,
+      browserAuth,
+    }) => {
+      await browserAuth.loginAsViewer();
       await page.goto(`${kbnUrl.app('apm')}/diagnostics/import-export`);
       await page.locator('#file-picker').setInputFiles(DIAGNOSTICS_BUNDLE_PATH);
       await page.getByTestId('documents-tab').click();
