@@ -10,8 +10,6 @@ import { INTERNAL_TEMPLATE_DETAILS_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
 import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
-// eslint-disable-next-line @kbn/imports/no_boundary_crossing
-import { mockTemplates } from './mock_data';
 import { parseTemplate } from './parse_template';
 
 /**
@@ -37,17 +35,14 @@ export const getTemplateRoute = createCasesRoute({
   handler: async ({ context, request, response }) => {
     try {
       const caseContext = await context.cases;
-      await caseContext.getCasesClient();
+      const casesClient = await caseContext.getCasesClient();
 
       const { template_id: templateId } = request.params;
       const { version } = request.query;
 
-      // Find template by ID (and optionally version)
-      const template = mockTemplates.find(
-        (t) =>
-          t.templateId === templateId &&
-          t.deletedAt === null &&
-          (version === undefined || t.templateVersion === version)
+      const template = await casesClient.templates.getTemplate(
+        templateId,
+        version !== undefined ? String(version) : undefined
       );
 
       if (!template) {
@@ -56,7 +51,7 @@ export const getTemplateRoute = createCasesRoute({
         });
       }
 
-      const parsedTemplate = parseTemplate(template);
+      const parsedTemplate = parseTemplate(template.attributes);
 
       return response.ok({
         body: parsedTemplate,

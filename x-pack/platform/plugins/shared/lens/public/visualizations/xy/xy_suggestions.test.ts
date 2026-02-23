@@ -947,7 +947,7 @@ describe('xy_suggestions', () => {
     expect((suggestions[0].state.layers[0] as XYDataLayerConfig).seriesType).toEqual('line');
   });
 
-  test('suggests bar if changeType is initial and date column is involved', () => {
+  test('suggests line if changeType is initial and date column is involved for formBased datasource', () => {
     const currentState: XYState = {
       legend: { isVisible: true, position: 'bottom' },
       valueLabels: 'hide',
@@ -973,6 +973,43 @@ describe('xy_suggestions', () => {
       },
       state: currentState,
       keptLayerIds: ['first'],
+      datasourceId: 'formBased',
+    });
+
+    expect(suggestions).toHaveLength(1);
+
+    expect(suggestions[0].hide).toEqual(false);
+    expect(suggestions[0].state.preferredSeriesType).toEqual('line');
+    expect((suggestions[0].state.layers[0] as XYDataLayerConfig).seriesType).toEqual('line');
+  });
+
+  test('suggests bar_stacked if changeType is initial and date column is involved for textBased datasource', () => {
+    const currentState: XYState = {
+      legend: { isVisible: true, position: 'bottom' },
+      valueLabels: 'hide',
+      fittingFunction: 'None',
+      preferredSeriesType: 'bar_stacked',
+      layers: [
+        {
+          accessors: [],
+          layerId: 'first',
+          layerType: LayerTypes.DATA,
+          seriesType: 'bar_stacked',
+          splitAccessors: undefined,
+          xAccessor: '',
+        },
+      ],
+    };
+    const suggestions = getSuggestions({
+      table: {
+        isMultiRow: true,
+        columns: [numCol('price'), dateCol('date')],
+        layerId: 'first',
+        changeType: 'initial',
+      },
+      state: currentState,
+      keptLayerIds: ['first'],
+      datasourceId: 'textBased',
     });
 
     expect(suggestions).toHaveLength(1);
@@ -1492,5 +1529,81 @@ describe('xy_suggestions', () => {
         ],
       })
     );
+  });
+
+  describe('TS/PromQL prefer line for time series', () => {
+    const tsQuery = { esql: 'TS kibana_sample_data_logstsdb' };
+    const plainEsqlQuery = {
+      esql: 'FROM kibana_sample_data_logs | STATS count = COUNT(*) BY @timestamp',
+    };
+
+    test('suggests bar_stacked when query is plain ESQL (no TS/PromQL) in chart switcher', () => {
+      const suggestions = getSuggestions({
+        table: {
+          isMultiRow: true,
+          columns: [numCol('bytes'), dateCol('date')],
+          layerId: 'first',
+          changeType: 'unchanged',
+        },
+        keptLayerIds: [],
+        datasourceId: 'textBased',
+        query: plainEsqlQuery,
+      });
+
+      const visibleSuggestion = suggestions.find((s) => !s.hide);
+      expect(visibleSuggestion).toBeDefined();
+      expect(visibleSuggestion!.state.preferredSeriesType).toBe('bar_stacked');
+    });
+
+    test('suggests line when query is TS and chart switcher (unchanged, no state)', () => {
+      const suggestions = getSuggestions({
+        table: {
+          isMultiRow: true,
+          columns: [numCol('col0'), dateCol('step')],
+          layerId: 'first',
+          changeType: 'unchanged',
+        },
+        keptLayerIds: [],
+        datasourceId: 'textBased',
+        query: tsQuery,
+      });
+
+      const visibleSuggestion = suggestions.find((s) => !s.hide);
+      expect(visibleSuggestion).toBeDefined();
+      expect(visibleSuggestion!.state.preferredSeriesType).toBe('line');
+    });
+
+    test('suggests bar_stacked when query is TS but x-axis is not date (ordinal)', () => {
+      const suggestions = getSuggestions({
+        table: {
+          isMultiRow: true,
+          columns: [numCol('col0'), strCol('category')],
+          layerId: 'first',
+          changeType: 'initial',
+        },
+        keptLayerIds: ['first'],
+        datasourceId: 'textBased',
+        query: tsQuery,
+      });
+
+      expect(suggestions).toHaveLength(1);
+      expect(suggestions[0].state.preferredSeriesType).toBe('bar_stacked');
+    });
+
+    test('suggests bar_stacked when no query is passed (changeType initial with string)', () => {
+      const suggestions = getSuggestions({
+        table: {
+          isMultiRow: true,
+          columns: [numCol('col0'), strCol('category')],
+          layerId: 'first',
+          changeType: 'initial',
+        },
+        keptLayerIds: ['first'],
+        datasourceId: 'textBased',
+      });
+
+      expect(suggestions).toHaveLength(1);
+      expect(suggestions[0].state.preferredSeriesType).toBe('bar_stacked');
+    });
   });
 });

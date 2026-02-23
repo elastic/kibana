@@ -1,0 +1,68 @@
+version: '1'
+name: 'sources.slack.search_messages'
+description: 'Search Slack messages and return compact results suitable for LLM summaries and follow-up navigation. Uses Slack Real-time Search API (assistant.search.context). Actions and inputs: searchMessages (required query, optional in_channel, optional from_user, optional after, optional before, optional sort, optional sort_dir, optional count, optional cursor, optional raw). Output (compact default): matches with text, channel {id,name}, sender, mentions, and permalink.'
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: query
+    type: string
+    required: true
+    description: 'Search query. You can include Slack search operators directly (e.g. in:#general from:@user after:2026-02-10).'
+  - name: in_channel
+    type: string
+    required: false
+    description: 'Optional constraint. Appends `in:<channel_name>` to the query (e.g. general).'
+  - name: from_user
+    type: string
+    required: false
+    description: 'Optional constraint. Appends `in:<display_name>` to the query. This should be the display name of the user.'
+  - name: after
+    type: string
+    required: false
+    description: 'Optional constraint. Appends `after:<date>` to the query (e.g. 2026-02-10).'
+  - name: before
+    type: string
+    required: false
+    description: 'Optional constraint. Appends `before:<date>` to the query (e.g. 2026-02-10).'
+  - name: sort
+    type: string
+    required: false
+    default: "score"
+    description: 'Sort order. Valid values: [score, timestamp].'
+  - name: sort_dir
+    type: string
+    required: false
+    default: "desc"
+    description: 'Sort direction. Valid values: [asc, desc].'
+  - name: count
+    type: number
+    required: false
+    default: 20
+    description: 'Number of results to return (1-20). Slack returns up to 20 results per page.'
+  - name: cursor
+    type: string
+    required: false
+    description: 'Pagination cursor from a previous response (response_metadata.next_cursor).'
+  - name: raw
+    type: boolean
+    required: false
+    default: false
+    description: 'If true, return the full raw Slack API response (very verbose). If false, return compact results.'
+steps:
+  - name: search-messages
+    type: slack2.searchMessages
+    connector-id: <%= slack2-stack-connector-id %>
+    with:
+      query: "${{inputs.query}}"
+      inChannel: "${{inputs.in_channel}}"
+      fromUser: "${{inputs.from_user}}"
+      after: "${{inputs.after}}"
+      before: "${{inputs.before}}"
+      sort: "${{inputs.sort}}"
+      sortDir: "${{inputs.sort_dir}}"
+      count: ${{inputs.count}}
+      cursor: "${{inputs.cursor}}"
+      raw: ${{inputs.raw}}
+

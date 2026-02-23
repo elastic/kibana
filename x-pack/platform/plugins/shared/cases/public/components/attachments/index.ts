@@ -7,12 +7,14 @@
 
 import type { ExternalReferenceAttachmentTypeRegistry } from '../../client/attachment_framework/external_reference_registry';
 import type { PersistableStateAttachmentTypeRegistry } from '../../client/attachment_framework/persistable_state_registry';
+import type { UnifiedAttachmentTypeRegistry } from '../../client/attachment_framework/unified_attachment_registry';
 import { getFileType } from './file/file_type';
 import { getVisualizationAttachmentType } from './lens/attachment';
 
 export const registerInternalAttachments = (
   externalRefRegistry: ExternalReferenceAttachmentTypeRegistry,
-  persistableStateRegistry: PersistableStateAttachmentTypeRegistry
+  persistableStateRegistry: PersistableStateAttachmentTypeRegistry,
+  unifiedRegistry: UnifiedAttachmentTypeRegistry
 ) => {
   externalRefRegistry.register(getFileType());
   persistableStateRegistry.register(getVisualizationAttachmentType());

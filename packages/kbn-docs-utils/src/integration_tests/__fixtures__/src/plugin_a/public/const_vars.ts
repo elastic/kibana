@@ -91,6 +91,8 @@ export const literalString = 'HI';
 //     line 19 - notAnArrowFn
 //     line 24 - aPropertyMisdirection
 //     line 29 - aPropertyInlineFn
+//   missing complex type info (1):
+//     line 32 - a
 //   no references (14):
 //     line 18 - aPretendNamespaceObj
 //     line 19 - notAnArrowFn

@@ -132,6 +132,9 @@ export interface IReturnAReactComponent {
 //     line 52 - Constructor
 //     line 91 - anOptionalFn
 //     line 101 - fnTypeWithGeneric
+//   missing complex type info (2):
+//     line 50 - component
+//     line 117 - component
 //   no references (23):
 //     line 28 - WithGen
 //     line 32 - t

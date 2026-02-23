@@ -112,6 +112,10 @@ export const iShouldBeInternalFn = () => 'hi';
 //   param doc mismatches (2):
 //     line 83 - fnWithNonExportedRef
 //     line 85 - NotAnArrowFnType
+//   missing complex type info (3):
+//     line 27 - d
+//     line 27 - d
+//     line 27 - d
 //   no references (40):
 //     line 13 - notAnArrowFn
 //     line 24 - a
