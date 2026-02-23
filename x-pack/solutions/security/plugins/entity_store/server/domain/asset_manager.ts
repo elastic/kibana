@@ -48,6 +48,8 @@ import type { LogsExtractionClient } from './logs_extraction_client';
 import type { ManagedEntityDefinition } from '../../common/domain/definitions/entity_schema';
 import { getEntityDefinition } from '../../common/domain/definitions/registry';
 import { installEuidStoredScripts, deleteEuidStoredScripts } from './assets/euid_stored_scripts';
+import { type TelemetryReporter, TELEMETRY } from '../telemetry/events';
+import { getErrorMessage } from '../../common';
 
 interface AssetManagerDependencies {
   logger: Logger;
@@ -58,6 +60,7 @@ interface AssetManagerDependencies {
   isServerless: boolean;
   logsExtractionClient: LogsExtractionClient;
   security: SecurityPluginStart;
+  analytics: { reportEvent: TelemetryReporter };
 }
 
 export class AssetManager {
@@ -69,6 +72,7 @@ export class AssetManager {
   private readonly isServerless: boolean;
   private readonly logsExtractionClient: LogsExtractionClient;
   private readonly security: SecurityPluginStart;
+  private readonly analytics: { reportEvent: TelemetryReporter };
 
   constructor(deps: AssetManagerDependencies) {
     this.logger = deps.logger;
@@ -79,6 +83,7 @@ export class AssetManager {
     this.isServerless = deps.isServerless;
     this.logsExtractionClient = deps.logsExtractionClient;
     this.security = deps.security;
+    this.analytics = deps.analytics;
   }
 
   public async init(
@@ -102,7 +107,16 @@ export class AssetManager {
           logger: this.logger,
         }),
       ]);
+      this.analytics.reportEvent(TELEMETRY.INIT, {
+        entityType: entityTypes.join(','),
+        namespace: this.namespace,
+      });
     } catch (error) {
+      this.analytics.reportEvent(TELEMETRY.INIT, {
+        entityType: entityTypes.join(','),
+        namespace: this.namespace,
+        error: getErrorMessage(error),
+      });
       this.logger.error('Error during entity store init:', error);
       throw error;
     }
@@ -171,7 +185,10 @@ export class AssetManager {
         }),
       ]);
       this.logger.get(type).debug(`Uninstalled definition: ${type}`);
-
+      this.analytics.reportEvent(TELEMETRY.DELETION, {
+        entityType: type,
+        namespace: this.namespace,
+      });
       return true;
     } catch (error) {
       this.logger.get(type).error(`Error uninstalling assets for entity type ${type}`, { error });

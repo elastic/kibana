@@ -52,3 +52,13 @@ export const ENTITY_STORE_ROUTES = {
   UNINSTALL: '/internal/security/entity-store/uninstall',
   STATUS: '/internal/security/entity-store/status',
 } as const satisfies Record<string, string>;
+
+export const getErrorMessage = (error: unknown): string => {
+  if (error instanceof Error) {
+    return error.message;
+  }
+  if (typeof error === 'string') {
+    return error;
+  }
+  return String(error);
+};
