@@ -5,5 +5,7 @@
  * 2.0.
  */
 
-export { TelemetryTracer } from './telemetry_tracer';
-export type { TelemetryParams, LangChainTracerFields } from './telemetry_tracer';
+export { APMTracer } from './apm';
+export { TelemetryTracer } from './telemetry';
+export type { TelemetryParams, LangChainTracerFields } from './telemetry';
+export { getLangSmithTracer, isLangSmithEnabled } from './langsmith';
