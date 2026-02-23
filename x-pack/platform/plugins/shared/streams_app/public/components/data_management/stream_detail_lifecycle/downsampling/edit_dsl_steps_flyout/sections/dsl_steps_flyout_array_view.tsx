@@ -66,17 +66,6 @@ export const DslStepsFlyoutArrayView = ({
   const pendingSelectedStepIndexRef = useRef<number | null>(null);
   const pendingEnsureIndexRef = useRef<number | null>(null);
   const pendingEnsureTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const pendingRevalidateTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const scheduleRevalidate = useCallback(() => {
-    if (pendingRevalidateTimeoutRef.current) return;
-    pendingRevalidateTimeoutRef.current = setTimeout(() => {
-      pendingRevalidateTimeoutRef.current = null;
-      // Updating UseArray items via updateFieldValues recreates ArrayItem ids, which can remount fields and
-      // temporarily clear form-level errors/isValid. Revalidate on the next tick once fields have mounted.
-      void form.validate();
-    }, 0);
-  }, [form]);
 
   const getCurrentSteps = useCallback((): DslStepMetaFields[] => {
     const fields = form.getFields();
@@ -172,7 +161,7 @@ export const DslStepsFlyoutArrayView = ({
         _meta: { __dslStepsFlyout: true, downsampleSteps: nextSteps },
       };
       form.updateFieldValues(payload, { runDeserializer: false });
-      scheduleRevalidate();
+      void form.validate();
     },
     [
       clampStepIndex,
@@ -180,7 +169,6 @@ export const DslStepsFlyoutArrayView = ({
       form,
       getCurrentSteps,
       items.length,
-      scheduleRevalidate,
       setSelectedStepIndex,
     ]
   );
@@ -254,10 +242,6 @@ export const DslStepsFlyoutArrayView = ({
         clearTimeout(pendingEnsureTimeoutRef.current);
         pendingEnsureTimeoutRef.current = null;
       }
-      if (pendingRevalidateTimeoutRef.current) {
-        clearTimeout(pendingRevalidateTimeoutRef.current);
-        pendingRevalidateTimeoutRef.current = null;
-      }
       pendingEnsureIndexRef.current = null;
     };
   }, []);
@@ -278,16 +262,9 @@ export const DslStepsFlyoutArrayView = ({
       _meta: { __dslStepsFlyout: true, downsampleSteps: nextSteps },
     };
     form.updateFieldValues(payload, { runDeserializer: false });
-    scheduleRevalidate();
+    void form.validate();
     setSelectedStepIndex(nextIndex);
-  }, [
-    createNextStepFromPrevious,
-    form,
-    getCurrentSteps,
-    items.length,
-    scheduleRevalidate,
-    setSelectedStepIndex,
-  ]);
+  }, [createNextStepFromPrevious, form, getCurrentSteps, items.length, setSelectedStepIndex]);
 
   const removeStep = useCallback(
     (stepIndex: number) => {
@@ -300,7 +277,7 @@ export const DslStepsFlyoutArrayView = ({
         _meta: { __dslStepsFlyout: true, downsampleSteps: nextSteps },
       };
       form.updateFieldValues(payload, { runDeserializer: false });
-      scheduleRevalidate();
+      void form.validate();
 
       if (selectedStepIndex === undefined) return;
       const newLength = oldLength - 1;
@@ -323,7 +300,6 @@ export const DslStepsFlyoutArrayView = ({
       getCurrentSteps,
       items.length,
       reindexErrorsAfterRemoval,
-      scheduleRevalidate,
       selectedStepIndex,
       setSelectedStepIndex,
     ]
