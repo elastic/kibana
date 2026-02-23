@@ -81,12 +81,12 @@ export {
 
 export {
   type StreamQuery,
-  type StreamQueryKql,
+  type StreamQueryInput,
   type QueriesGetResponse,
   type QueriesOccurrencesGetResponse,
   upsertStreamQueryRequestSchema,
-  streamQueryKqlSchema,
   streamQuerySchema,
+  streamQueryInputSchema,
 } from './src/queries';
 
 export {
