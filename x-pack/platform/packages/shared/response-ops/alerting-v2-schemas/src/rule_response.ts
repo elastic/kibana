@@ -36,7 +36,6 @@ export interface RuleResponse {
     type: 'query' | 'no_breach';
     query?: {
       base?: string;
-      condition?: string;
     };
   };
   state_transition?: {

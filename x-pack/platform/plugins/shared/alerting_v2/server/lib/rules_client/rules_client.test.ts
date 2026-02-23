@@ -94,6 +94,9 @@ describe('RulesClient', () => {
       page: 1,
       per_page: 20,
     });
+    mockSavedObjectsClient.bulkGet.mockResolvedValue({
+      saved_objects: [],
+    });
 
     ensureRuleExecutorTaskScheduledMock.mockResolvedValue({ id: 'task-123' });
     getRuleExecutorTaskIdMock.mockReturnValue('task:fallback');
@@ -397,6 +400,133 @@ describe('RulesClient', () => {
       await expect(client.getRule({ id: 'rule-id-get-404' })).rejects.toMatchObject({
         output: { statusCode: 404 },
       });
+    });
+  });
+
+  describe('getRules', () => {
+    it('returns rules for the provided ids', async () => {
+      const client = createClient();
+      const so1Attrs = createRuleSoAttributes({
+        metadata: { name: 'rule-get-many-1' },
+      });
+      const so2Attrs = createRuleSoAttributes({
+        metadata: { name: 'rule-get-many-2' },
+      });
+
+      mockSavedObjectsClient.bulkGet.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'rule-id-get-many-1',
+            type: RULE_SAVED_OBJECT_TYPE,
+            attributes: so1Attrs,
+            references: [],
+          },
+          {
+            id: 'rule-id-get-many-2',
+            type: RULE_SAVED_OBJECT_TYPE,
+            attributes: so2Attrs,
+            references: [],
+          },
+        ],
+      });
+
+      const res = await client.getRules(['rule-id-get-many-1', 'rule-id-get-many-2']);
+
+      expect(mockSavedObjectsClient.bulkGet).toHaveBeenCalledWith([
+        { type: RULE_SAVED_OBJECT_TYPE, id: 'rule-id-get-many-1' },
+        { type: RULE_SAVED_OBJECT_TYPE, id: 'rule-id-get-many-2' },
+      ]);
+      expect(res).toHaveLength(2);
+      expect(res[0]).toEqual(
+        expect.objectContaining({
+          id: 'rule-id-get-many-1',
+          metadata: expect.objectContaining({ name: 'rule-get-many-1' }),
+        })
+      );
+      expect(res[1]).toEqual(
+        expect.objectContaining({
+          id: 'rule-id-get-many-2',
+          metadata: expect.objectContaining({ name: 'rule-get-many-2' }),
+        })
+      );
+    });
+
+    it('excludes missing ids returned as bulk get errors', async () => {
+      const client = createClient();
+      const soAttrs = createRuleSoAttributes({
+        metadata: { name: 'rule-get-many-success' },
+      });
+
+      mockSavedObjectsClient.bulkGet.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'rule-id-get-many-success',
+            type: RULE_SAVED_OBJECT_TYPE,
+            attributes: soAttrs,
+            references: [],
+          },
+          {
+            id: 'rule-id-get-many-missing',
+            type: RULE_SAVED_OBJECT_TYPE,
+            attributes: {} as RuleSavedObjectAttributes,
+            references: [],
+            error: {
+              statusCode: 404,
+              error: 'Not Found',
+              message: 'Saved object [alerting-rule/rule-id-get-many-missing] not found',
+            },
+          },
+        ],
+      });
+
+      const res = await client.getRules(['rule-id-get-many-success', 'rule-id-get-many-missing']);
+
+      expect(res).toHaveLength(1);
+      expect(res[0]).toEqual(
+        expect.objectContaining({
+          id: 'rule-id-get-many-success',
+          metadata: expect.objectContaining({ name: 'rule-get-many-success' }),
+        })
+      );
+    });
+
+    it('ignores documents with non-404 errors and returns valid documents', async () => {
+      const client = createClient();
+      const validAttrs = createRuleSoAttributes({
+        metadata: { name: 'rule-get-many-valid' },
+      });
+
+      mockSavedObjectsClient.bulkGet.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'rule-id-get-many-valid',
+            type: RULE_SAVED_OBJECT_TYPE,
+            attributes: validAttrs,
+            references: [],
+          },
+          {
+            id: 'rule-id-get-many-failure',
+            type: RULE_SAVED_OBJECT_TYPE,
+            attributes: {} as RuleSavedObjectAttributes,
+            references: [],
+            error: {
+              statusCode: 500,
+              error: 'Internal Server Error',
+              message: 'bulk get failed',
+            },
+          },
+        ],
+      });
+
+      const res = await client.getRules(['rule-id-get-many-valid', 'rule-id-get-many-failure']);
+
+      expect(res).toHaveLength(1);
+      expect(res[0]).toEqual(
+        expect.objectContaining({
+          id: 'rule-id-get-many-valid',
+          metadata: expect.objectContaining({ name: 'rule-get-many-valid' }),
+        })
+      );
     });
   });
 
