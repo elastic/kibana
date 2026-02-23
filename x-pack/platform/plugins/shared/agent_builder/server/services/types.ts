@@ -10,6 +10,7 @@ import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
+import type { FeatureFlagsStart } from '@kbn/core-feature-flags-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { DataStreamsStart } from '@kbn/core-data-streams-server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
@@ -45,6 +46,10 @@ export interface InternalStartServices {
   runnerFactory: RunnerFactory;
   hooks: HooksServiceStart;
   auditLogService: AuditLogService;
+  spaces?: SpacesPluginStart;
+  featureFlags: FeatureFlagsStart;
+  uiSettings: UiSettingsServiceStart;
+  savedObjects: SavedObjectsServiceStart;
   execution: AgentExecutionService;
   taskHandler: TaskHandler;
 }
@@ -62,6 +67,7 @@ export interface ServicesStartDeps {
   security: SecurityServiceStart;
   uiSettings: UiSettingsServiceStart;
   savedObjects: SavedObjectsServiceStart;
+  featureFlags: FeatureFlagsStart;
   dataStreams: DataStreamsStart;
   // plugin deps
   inference: InferenceServerStart;

@@ -220,7 +220,13 @@
         "description": [],
         "signature": [
           "EntityBase & { type: \"stream\"; properties: ",
-          "IngestStream",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.Streams",
+            "text": "Streams"
+          },
           ".all.Definition; }"
         ],
         "path": "x-pack/platform/plugins/shared/streams_app/common/index.ts",
@@ -239,7 +245,13 @@
         "description": [],
         "signature": [
           "EntityBase & { type: \"stream\"; properties: ",
-          "IngestStream",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.Streams",
+            "text": "Streams"
+          },
           ".all.Definition; }"
         ],
         "path": "x-pack/platform/plugins/shared/streams_app/common/index.ts",
