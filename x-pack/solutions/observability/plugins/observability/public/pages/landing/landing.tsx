@@ -84,6 +84,7 @@ async function getHasLogsData(
     });
     return hasData;
   } catch {
+    // On failure, fall through to APM/onboarding redirect instead of stalling on a blank page
     return false;
   }
 }
