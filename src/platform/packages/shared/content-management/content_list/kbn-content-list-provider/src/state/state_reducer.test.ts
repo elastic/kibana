@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { reducer } from './state_reducer';
+import { reducer, DEFAULT_SELECTION } from './state_reducer';
 import { CONTENT_LIST_ACTIONS, DEFAULT_FILTERS } from './types';
 import type { ContentListClientState, ContentListAction } from './types';
 
@@ -15,7 +15,7 @@ describe('state_reducer', () => {
   /**
    * Creates initial client state for testing.
    *
-   * Note: The reducer only manages client-controlled state (search, filters, sort, pagination).
+   * Note: The reducer only manages client-controlled state (search, filters, sort, pagination, selection).
    * Query data (items, isLoading, error) is managed by React Query directly.
    */
   const createInitialState = (
@@ -25,6 +25,7 @@ describe('state_reducer', () => {
     filters: DEFAULT_FILTERS,
     sort: { field: 'updatedAt', direction: 'desc' },
     page: { index: 0, size: 20 },
+    selection: { ...DEFAULT_SELECTION },
     ...overrides,
   });
 
@@ -68,6 +69,20 @@ describe('state_reducer', () => {
 
       expect(newState.filters).toEqual({ search: 'test query' });
     });
+
+    it('clears selection when sort changes', () => {
+      const initialState = createInitialState({
+        selection: { selectedIds: ['1', '2'] },
+      });
+      const action: ContentListAction = {
+        type: CONTENT_LIST_ACTIONS.SET_SORT,
+        payload: { field: 'title', direction: 'asc' },
+      };
+
+      const newState = reducer(initialState, action);
+
+      expect(newState.selection.selectedIds).toEqual([]);
+    });
   });
 
   describe('SET_PAGE_INDEX', () => {
@@ -103,6 +118,95 @@ describe('state_reducer', () => {
       const action: ContentListAction = {
         type: CONTENT_LIST_ACTIONS.SET_PAGE_INDEX,
         payload: { index: 1 },
+      };
+
+      const newState = reducer(initialState, action);
+
+      expect(newState.filters).toEqual({ search: 'test query' });
+      expect(newState.sort).toEqual({ field: 'title', direction: 'asc' });
+    });
+
+    it('clears selection when page index changes', () => {
+      const initialState = createInitialState({
+        selection: { selectedIds: ['1', '2'] },
+      });
+      const action: ContentListAction = {
+        type: CONTENT_LIST_ACTIONS.SET_PAGE_INDEX,
+        payload: { index: 2 },
+      };
+
+      const newState = reducer(initialState, action);
+
+      expect(newState.selection.selectedIds).toEqual([]);
+    });
+  });
+
+  describe('SET_SELECTION', () => {
+    it('sets selected IDs', () => {
+      const initialState = createInitialState();
+      const action: ContentListAction = {
+        type: CONTENT_LIST_ACTIONS.SET_SELECTION,
+        payload: { ids: ['1', '3'] },
+      };
+
+      const newState = reducer(initialState, action);
+
+      expect(newState.selection.selectedIds).toEqual(['1', '3']);
+    });
+
+    it('replaces existing selection', () => {
+      const initialState = createInitialState({
+        selection: { selectedIds: ['1', '2'] },
+      });
+      const action: ContentListAction = {
+        type: CONTENT_LIST_ACTIONS.SET_SELECTION,
+        payload: { ids: ['3'] },
+      };
+
+      const newState = reducer(initialState, action);
+
+      expect(newState.selection.selectedIds).toEqual(['3']);
+    });
+
+    it('preserves sort and filters when setting selection', () => {
+      const initialState = createInitialState({
+        filters: { search: 'test query' },
+        sort: { field: 'title', direction: 'asc' },
+      });
+      const action: ContentListAction = {
+        type: CONTENT_LIST_ACTIONS.SET_SELECTION,
+        payload: { ids: ['1'] },
+      };
+
+      const newState = reducer(initialState, action);
+
+      expect(newState.filters).toEqual({ search: 'test query' });
+      expect(newState.sort).toEqual({ field: 'title', direction: 'asc' });
+    });
+  });
+
+  describe('CLEAR_SELECTION', () => {
+    it('clears all selected IDs', () => {
+      const initialState = createInitialState({
+        selection: { selectedIds: ['1', '2', '3'] },
+      });
+      const action: ContentListAction = {
+        type: CONTENT_LIST_ACTIONS.CLEAR_SELECTION,
+      };
+
+      const newState = reducer(initialState, action);
+
+      expect(newState.selection.selectedIds).toEqual([]);
+    });
+
+    it('preserves sort and filters when clearing selection', () => {
+      const initialState = createInitialState({
+        filters: { search: 'test query' },
+        sort: { field: 'title', direction: 'asc' },
+        selection: { selectedIds: ['1'] },
+      });
+      const action: ContentListAction = {
+        type: CONTENT_LIST_ACTIONS.CLEAR_SELECTION,
       };
 
       const newState = reducer(initialState, action);
@@ -181,6 +285,20 @@ describe('state_reducer', () => {
       expect(newState.search.queryText).toBe('');
       expect(newState.filters).toEqual({ search: undefined });
     });
+
+    it('clears selection when search changes', () => {
+      const initialState = createInitialState({
+        selection: { selectedIds: ['1', '2'] },
+      });
+      const action: ContentListAction = {
+        type: CONTENT_LIST_ACTIONS.SET_SEARCH,
+        payload: { queryText: 'dashboard', filters: { search: 'dashboard' } },
+      };
+
+      const newState = reducer(initialState, action);
+
+      expect(newState.selection.selectedIds).toEqual([]);
+    });
   });
 
   describe('CLEAR_FILTERS', () => {
@@ -240,6 +358,21 @@ describe('state_reducer', () => {
       expect(newState.page.index).toBe(0);
       expect(newState.page.size).toBe(20);
     });
+
+    it('clears selection when filters are cleared', () => {
+      const initialState = createInitialState({
+        filters: { search: 'test' },
+        search: { queryText: 'test' },
+        selection: { selectedIds: ['1', '2'] },
+      });
+      const action: ContentListAction = {
+        type: CONTENT_LIST_ACTIONS.CLEAR_FILTERS,
+      };
+
+      const newState = reducer(initialState, action);
+
+      expect(newState.selection.selectedIds).toEqual([]);
+    });
   });
 
   describe('SET_PAGE_SIZE', () => {
@@ -281,6 +414,20 @@ describe('state_reducer', () => {
 
       expect(newState.filters).toEqual({ search: 'test query' });
       expect(newState.sort).toEqual({ field: 'title', direction: 'asc' });
+    });
+
+    it('clears selection when page size changes', () => {
+      const initialState = createInitialState({
+        selection: { selectedIds: ['1', '2'] },
+      });
+      const action: ContentListAction = {
+        type: CONTENT_LIST_ACTIONS.SET_PAGE_SIZE,
+        payload: { size: 50 },
+      };
+
+      const newState = reducer(initialState, action);
+
+      expect(newState.selection.selectedIds).toEqual([]);
     });
   });
 
@@ -327,6 +474,7 @@ describe('state_reducer', () => {
       const initialState = createInitialState();
       const originalSort = initialState.sort;
       const originalFilters = initialState.filters;
+      const originalSelection = initialState.selection;
 
       reducer(initialState, {
         type: CONTENT_LIST_ACTIONS.SET_SORT,
@@ -335,6 +483,32 @@ describe('state_reducer', () => {
 
       expect(initialState.sort).toBe(originalSort);
       expect(initialState.filters).toBe(originalFilters);
+      expect(initialState.selection).toBe(originalSelection);
+    });
+
+    it('returns a new state object for SET_SELECTION', () => {
+      const initialState = createInitialState();
+      const action: ContentListAction = {
+        type: CONTENT_LIST_ACTIONS.SET_SELECTION,
+        payload: { ids: ['1'] },
+      };
+
+      const newState = reducer(initialState, action);
+
+      expect(newState).not.toBe(initialState);
+    });
+
+    it('returns a new state object for CLEAR_SELECTION', () => {
+      const initialState = createInitialState({
+        selection: { selectedIds: ['1'] },
+      });
+      const action: ContentListAction = {
+        type: CONTENT_LIST_ACTIONS.CLEAR_SELECTION,
+      };
+
+      const newState = reducer(initialState, action);
+
+      expect(newState).not.toBe(initialState);
     });
 
     it('returns a new state object for SET_SEARCH', () => {

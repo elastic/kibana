@@ -54,9 +54,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { createPortal } from 'react-dom';
 import useObservable from 'react-use/lib/useObservable';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { firstValueFrom, of } from 'rxjs';
 import { QuerySource } from '@kbn/esql-types';
-import { useCanCreateLookupIndex, useLookupIndexCommand } from './lookup_join';
+import { useLookupIndexCommand } from './lookup_join';
 import { useFieldsBrowser } from './resource_browser/use_fields_browser';
 import { EditorFooter } from './editor_footer';
 import { QuickSearchVisor } from './editor_visor';
@@ -669,8 +668,6 @@ const ESQLEditorInternal = function ESQLEditor({
     return { cache: fn.cache, memoizedHistoryStarredItems: fn };
   }, []);
 
-  const canCreateLookupIndex = useCanCreateLookupIndex();
-
   // Extract source command and build minimal query with cluster prefixes
   const minimalQuery = useMemo(() => {
     const prefix = code.match(/\b(FROM|TS)\b/i)?.[1]?.toUpperCase();
@@ -719,11 +716,6 @@ const ESQLEditorInternal = function ESQLEditor({
   });
   useEsqlEditorActionsRegistration(editorActions);
 
-  const isResourceBrowserEnabled = useCallback(async () => {
-    const currentApp = await firstValueFrom(application?.currentAppId$ ?? of(undefined));
-    return Boolean(enableResourceBrowser && currentApp === 'discover');
-  }, [application?.currentAppId$, enableResourceBrowser]);
-
   const esqlCallbacks = useEsqlCallbacks({
     core,
     data,
@@ -732,7 +724,6 @@ const ESQLEditorInternal = function ESQLEditor({
     esqlService,
     histogramBarTarget,
     activeSolutionId: activeSolutionId ?? undefined,
-    canCreateLookupIndex,
     minimalQueryRef,
     abortControllerRef,
     dataSourcesCache,
@@ -743,7 +734,7 @@ const ESQLEditorInternal = function ESQLEditor({
     memoizedHistoryStarredItems,
     favoritesClient,
     getJoinIndicesCallback,
-    isResourceBrowserEnabled,
+    enableResourceBrowser,
   });
 
   const {
@@ -798,21 +789,13 @@ const ESQLEditorInternal = function ESQLEditor({
         color: 'text',
       };
     }
-    if (code !== codeWhenSubmitted) {
-      return {
-        label: i18n.translate('esqlEditor.query.runQuery', {
-          defaultMessage: 'Run query',
-        }),
-        color: 'success',
-      };
-    }
     return {
       label: i18n.translate('esqlEditor.query.searchLabel', {
         defaultMessage: 'Search',
       }),
       color: 'primary',
     };
-  }, [allowQueryCancellation, code, codeWhenSubmitted, isLoading]);
+  }, [allowQueryCancellation, isLoading]);
 
   const parseMessages = useCallback(
     async (options?: { invalidateColumnsCache?: boolean }) => {
@@ -1158,8 +1141,8 @@ const ESQLEditorInternal = function ESQLEditor({
           <EuiFlexItem grow={false}>
             <EuiToolTip
               position="top"
-              content={i18n.translate('esqlEditor.query.runQuery', {
-                defaultMessage: 'Run query',
+              content={i18n.translate('esqlEditor.query.searchLabel', {
+                defaultMessage: 'Search',
               })}
             >
               <EuiButton

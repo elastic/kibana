@@ -52,6 +52,7 @@ import {
   useAuthz,
   useBulkGetAgentPoliciesQuery,
 } from '../../../../hooks';
+import { useIncompatibleAgentVersionStatus } from '../../../../hooks/use_incompatible_agent_version_status';
 import {
   DevtoolsRequestFlyoutButton,
   Error as ErrorComponent,
@@ -59,7 +60,11 @@ import {
   Loading,
 } from '../../../../components';
 
-import { agentPolicyFormValidation, ConfirmDeployAgentPolicyModal } from '../../components';
+import {
+  agentPolicyFormValidation,
+  ConfirmDeployAgentPolicyModal,
+  IncompatibleAgentVersionCallout,
+} from '../../components';
 import { pkgKeyFromPackageInfo } from '../../../../services';
 
 import type { CreatePackagePolicyParams } from '../types';
@@ -317,6 +322,11 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
 
     return agentPolicyData.items.reduce((acc, item) => (acc += item.fips_agents || 0), 0);
   }, [agentPolicyData?.items]);
+
+  const incompatibleAgentVersion = useIncompatibleAgentVersionStatus(
+    packageInfo,
+    agentPolicyData?.items
+  );
 
   useEffect(() => {
     if (
@@ -673,6 +683,14 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
           <EuiSpacer size="m" />
         </>
       )}
+
+      {incompatibleAgentVersion.status !== 'NONE' && (
+        <IncompatibleAgentVersionCallout
+          incompatibility={incompatibleAgentVersion.status}
+          versionCondition={incompatibleAgentVersion.versionCondition}
+        />
+      )}
+
       {showSecretsDisabledCallout && (
         <>
           <EuiCallOut
