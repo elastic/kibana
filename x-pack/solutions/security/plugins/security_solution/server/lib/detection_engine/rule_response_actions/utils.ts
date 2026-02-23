@@ -162,7 +162,7 @@ export const getResponseActionDataFromAlert = (
   return {
     hostName: alert.host?.name ?? '',
     hostOsType,
-    agentId: alert.agent.id ?? '',
+    agentId: alert.agent?.id ?? '',
     alertId: alert._id,
     ruleId: alert.kibana?.alert?.rule.uuid ?? '',
     ruleName: alert.kibana?.alert?.rule.name ?? '',

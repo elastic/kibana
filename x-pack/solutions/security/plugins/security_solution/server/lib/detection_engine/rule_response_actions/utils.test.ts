@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { getErrorProcessAlerts, getIsolateAlerts, getProcessAlerts } from './utils';
+import {
+  getErrorProcessAlerts,
+  getIsolateAlerts,
+  getProcessAlerts,
+  getResponseActionDataFromAlert,
+} from './utils';
 import type { AlertWithAgent } from './types';
 
 const getSampleAlerts = (): AlertWithAgent[] => {
@@ -237,6 +242,42 @@ describe('EndpointResponseActionsUtils', () => {
         },
       };
       expect(processAlerts).toEqual(result);
+    });
+  });
+
+  describe('getResponseActionDataFromAlert()', () => {
+    const getAlertMock = (): AlertWithAgent => {
+      return {
+        _id: 'alert1',
+        agent: {
+          name: 'jammy-1',
+          id: 'agent-id-1',
+          type: 'endpoint',
+        },
+        host: { name: 'foo', os: { type: 'linux' } },
+        kibana: { alert: { rule: { uuid: 'rule-id-1', name: 'rule one' } } },
+      } as unknown as AlertWithAgent;
+    };
+
+    it('should return expected data from alert', () => {
+      expect(getResponseActionDataFromAlert(getAlertMock())).toEqual({
+        agentId: 'agent-id-1',
+        alertId: 'alert1',
+        hostName: 'foo',
+        hostOsType: 'linux',
+        ruleId: 'rule-id-1',
+        ruleName: 'rule one',
+      });
+    });
+
+    it('should return default values if data not found in alert', () => {
+      expect(getResponseActionDataFromAlert({} as AlertWithAgent)).toEqual({
+        agentId: '',
+        hostOsType: undefined,
+        hostName: '',
+        ruleId: '',
+        ruleName: '',
+      });
     });
   });
 });
