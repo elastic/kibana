@@ -46,9 +46,9 @@ spec:
         kibana-tech-leads:
           access_level: MANAGE_BUILD_AND_READ
       schedules:
-        Weekly build:
-          cronline: 0 9 * * 1 America/New_York
-          message: Weekly build
+        Daily build:
+          cronline: 0 9 * * * America/New_York
+          message: Daily build
           branch: main
       tags:
         - kibana

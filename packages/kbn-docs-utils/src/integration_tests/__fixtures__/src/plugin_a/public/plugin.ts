@@ -186,6 +186,10 @@ export class PluginA implements PluginMock<Setup, Start> {
 //     line 135 - fn
 //     line 135 - foo
 //     line 135 - param
+//   param doc mismatches (1):
+//     line 135 - fn
+//   missing complex type info (1):
+//     line 135 - foo
 //   no references (23):
 //     line 19 - SearchSpec
 //     line 24 - username

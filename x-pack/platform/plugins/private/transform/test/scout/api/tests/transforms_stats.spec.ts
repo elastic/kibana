@@ -16,7 +16,7 @@ import { generateTransformConfig } from '../helpers/transform_config';
 const TRANSFORM_1_ID = 'transform-test-stats-1';
 const TRANSFORM_2_ID = 'transform-test-stats-2';
 
-apiTest.describe('/internal/transform/transforms/_stats', { tag: tags.ESS_ONLY }, () => {
+apiTest.describe('/internal/transform/transforms/_stats', { tag: tags.stateful.all }, () => {
   apiTest.beforeAll(async ({ apiServices }) => {
     const config1 = generateTransformConfig(TRANSFORM_1_ID);
     const config2 = generateTransformConfig(TRANSFORM_2_ID);
