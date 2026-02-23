@@ -25,7 +25,7 @@ import type { FlattenRecord, SampleDocument } from '@kbn/streams-schema';
 import { isEmpty } from 'lodash';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { GrokExpressionsProvider, GrokSampleWithContext } from '@kbn/grok-ui';
+import { useGrokExpressions, GrokExpressionsProvider, GrokSampleWithContext } from '@kbn/grok-ui';
 import { useDocViewerSetup } from '../../../hooks/use_doc_viewer_setup';
 import { useDocumentExpansion } from '../../../hooks/use_document_expansion';
 import { useStreamDataViewFieldTypes } from '../../../hooks/use_stream_data_view_field_types';
@@ -37,6 +37,7 @@ import { DOC_VIEW_DIFF_ID, DocViewerContext } from './doc_viewer_diff';
 import {
   createOriginalGrokFieldValuesMap,
   getGrokFieldDisplayValue,
+  grokExpressionOverwritesSourceField,
   hasPrecedingProcessorTouchedField,
 } from './processor_outcome_preview_helpers';
 import {
@@ -354,16 +355,61 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
       ? draftProcessor.processor.patterns
       : [];
 
-  // NOTE: Even when a Grok expression attempts to overwrite the configured field (e.g., message → message),
-  // we still enable grok mode and use the original (pre-transformation) value for highlighting.
-  const grokMode =
+  // Convert patterns to DraftGrokExpression instances for field analysis
+  const grokExpressions = useGrokExpressions(grokPatterns);
+
+  // Determine if the grok processor is active (has a from field)
+  const isGrokProcessorActive =
     draftProcessor?.processor &&
     'action' in draftProcessor.processor &&
     draftProcessor.processor.action === 'grok' &&
     !isEmpty(draftProcessor.processor.from);
 
-  const grokField = grokMode ? (draftProcessor.processor as GrokProcessor).from : undefined;
-  const validGrokField = grokField && allColumns.includes(grokField) ? grokField : undefined;
+  // Get the source field for the grok processor
+  const grokSourceField = isGrokProcessorActive
+    ? (draftProcessor.processor as GrokProcessor).from
+    : undefined;
+  const validGrokSourceField =
+    grokSourceField && allColumns.includes(grokSourceField) ? grokSourceField : undefined;
+
+  // Check if the grok expression overwrites the source field (non-additive pattern)
+  const grokOverwritesSourceField = useMemo(() => {
+    if (!validGrokSourceField || grokExpressions.length === 0) return false;
+    return grokExpressionOverwritesSourceField(grokExpressions, validGrokSourceField);
+  }, [grokExpressions, validGrokSourceField]);
+
+  // Check if any preceding processor has touched the grok source field
+  const precedingProcessorTouchedGrokField = useMemo(() => {
+    if (!validGrokSourceField) return false;
+    return hasPrecedingProcessorTouchedField(
+      stepIds,
+      currentStepId,
+      processorsMetrics,
+      validGrokSourceField
+    );
+  }, [stepIds, currentStepId, processorsMetrics, validGrokSourceField]);
+
+  /**
+   * Grok mode enables the special highlighting preview for grok patterns.
+   *
+   * We enable grok mode when:
+   * - We have a grok processor with a valid source field
+   * - AND one of:
+   *   - The grok pattern is additive (doesn't overwrite the source field), OR
+   *   - The grok pattern overwrites the source field BUT no preceding processor has touched it
+   *     (in this case, we can safely use the original pre-transformation value for highlighting)
+   *
+   * We DISABLE grok mode when:
+   * - The grok pattern overwrites the source field AND a preceding processor touched the field
+   *   (in this case, we can't show correct highlighting - the original value doesn't reflect
+   *   preceding transformations, and the current value has been overwritten by grok)
+   */
+  const grokMode =
+    isGrokProcessorActive &&
+    validGrokSourceField !== undefined &&
+    !(grokOverwritesSourceField && precedingProcessorTouchedGrokField);
+
+  const validGrokField = grokMode ? validGrokSourceField : undefined;
 
   const validCurrentProcessorSourceField =
     currentProcessorSourceField && allColumns.includes(currentProcessorSourceField)
@@ -416,40 +462,20 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
   );
 
   /**
-   * Check if any preceding processor in the current simulation has touched the grok source field.
-   * If so, we should NOT use the original values for highlighting, since those values don't reflect
-   * the transformations applied by preceding processors.
-   */
-  const precedingProcessorTouchedGrokField = useMemo(() => {
-    if (!validGrokField) return false;
-    return hasPrecedingProcessorTouchedField(
-      stepIds,
-      currentStepId,
-      processorsMetrics,
-      validGrokField
-    );
-  }, [stepIds, currentStepId, processorsMetrics, validGrokField]);
-
-  /**
    * Map from preview document to the original (pre-transformation) value of the grok field.
    * This is needed when the grok pattern extracts into the same field it reads from (e.g., message → message).
    * We use a WeakMap keyed by the document object reference for O(1) lookup in renderCellValue.
    *
-   * IMPORTANT: We only create this map if no preceding processor has touched the grok source field.
-   * If a preceding processor modified the field, using the original value would be incorrect.
+   * We only create this map when grok mode is active AND the grok expression overwrites the source field.
+   * When the grok expression is additive (doesn't overwrite the source field), the current document value
+   * is correct for highlighting and we don't need the original values.
    */
   const originalGrokFieldValues = useMemo(() => {
     if (!grokMode || !validGrokField || !originalSamples) return undefined;
-    if (precedingProcessorTouchedGrokField) return undefined;
+    if (!grokOverwritesSourceField) return undefined;
 
     return createOriginalGrokFieldValuesMap(previewDocuments, originalSamples, validGrokField);
-  }, [
-    grokMode,
-    validGrokField,
-    originalSamples,
-    previewDocuments,
-    precedingProcessorTouchedGrokField,
-  ]);
+  }, [grokMode, validGrokField, originalSamples, previewDocuments, grokOverwritesSourceField]);
 
   const previewColumns = grokColumns ?? availableColumns;
 

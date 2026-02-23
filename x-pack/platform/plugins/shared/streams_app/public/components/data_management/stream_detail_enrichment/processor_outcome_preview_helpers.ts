@@ -6,6 +6,7 @@
  */
 
 import { flattenObjectNestedLast } from '@kbn/object-utils';
+import type { DraftGrokExpression } from '@kbn/grok-ui';
 import type { FlattenRecord, ProcessorMetrics, SampleDocument } from '@kbn/streams-schema';
 
 /**
@@ -114,5 +115,26 @@ export function hasPrecedingProcessorTouchedField(
   return precedingStepIds.some((stepId) => {
     const metrics = processorsMetrics[stepId];
     return metrics?.detected_fields?.includes(grokSourceField) ?? false;
+  });
+}
+
+/**
+ * Checks if any of the grok expressions extract into the same field that they read from.
+ * This indicates a "non-additive" grok pattern that overwrites the source field.
+ *
+ * For example, a pattern like `%{WORD:level} %{GREEDYDATA:message}` applied to the `message` field
+ * would overwrite `message` with the extracted portion, which is a non-additive change.
+ *
+ * @param grokExpressions - Array of DraftGrokExpression instances
+ * @param sourceField - The field that the grok processor reads from
+ * @returns true if any expression extracts into the source field, false otherwise
+ */
+export function grokExpressionOverwritesSourceField(
+  grokExpressions: DraftGrokExpression[],
+  sourceField: string
+): boolean {
+  return grokExpressions.some((grokExpression) => {
+    const fields = grokExpression.getFields();
+    return Array.from(fields.values()).some((field) => field.name === sourceField);
   });
 }

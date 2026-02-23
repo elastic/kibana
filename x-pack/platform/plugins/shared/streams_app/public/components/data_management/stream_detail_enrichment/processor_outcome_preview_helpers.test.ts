@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import type { DraftGrokExpression, FieldDefinition } from '@kbn/grok-ui';
 import type { FlattenRecord, ProcessorMetrics, SampleDocument } from '@kbn/streams-schema';
 import {
   createOriginalGrokFieldValuesMap,
   getGrokFieldDisplayValue,
+  grokExpressionOverwritesSourceField,
   hasPrecedingProcessorTouchedField,
   type SampleWithDataSource,
 } from './processor_outcome_preview_helpers';
@@ -475,6 +477,86 @@ describe('processor_outcome_preview_helpers', () => {
         'message'
       );
 
+      expect(result).toBe(false);
+    });
+  });
+
+  describe('grokExpressionOverwritesSourceField', () => {
+    const createMockGrokExpression = (fieldNames: string[]): DraftGrokExpression => {
+      const fields = new Map<string, FieldDefinition>();
+      fieldNames.forEach((name, index) => {
+        fields.set(`field-${index}`, {
+          name,
+          type: null,
+          colour: '#000',
+          pattern: 'WORD',
+        });
+      });
+
+      return {
+        getFields: () => fields,
+        getExpression: () => '',
+        getExpression$: () => ({ subscribe: () => ({ unsubscribe: () => {} }) }),
+        getRegex: () => null,
+        getRegexPattern: () => '',
+        parse: () => [],
+        updateExpression: () => {},
+        destroy: () => {},
+      } as unknown as DraftGrokExpression;
+    };
+
+    it('returns false when grok expressions array is empty', () => {
+      const result = grokExpressionOverwritesSourceField([], 'message');
+      expect(result).toBe(false);
+    });
+
+    it('returns false when no expression extracts into the source field', () => {
+      const expressions = [
+        createMockGrokExpression(['level', 'timestamp']),
+        createMockGrokExpression(['host', 'port']),
+      ];
+
+      const result = grokExpressionOverwritesSourceField(expressions, 'message');
+      expect(result).toBe(false);
+    });
+
+    it('returns true when an expression extracts into the source field', () => {
+      const expressions = [
+        createMockGrokExpression(['level', 'message', 'timestamp']), // extracts into message
+      ];
+
+      const result = grokExpressionOverwritesSourceField(expressions, 'message');
+      expect(result).toBe(true);
+    });
+
+    it('returns true when one of multiple expressions extracts into the source field', () => {
+      const expressions = [
+        createMockGrokExpression(['level', 'timestamp']), // doesn't overwrite
+        createMockGrokExpression(['host', 'message']), // this one overwrites
+      ];
+
+      const result = grokExpressionOverwritesSourceField(expressions, 'message');
+      expect(result).toBe(true);
+    });
+
+    it('handles expression with single field matching source field', () => {
+      const expressions = [createMockGrokExpression(['message'])];
+
+      const result = grokExpressionOverwritesSourceField(expressions, 'message');
+      expect(result).toBe(true);
+    });
+
+    it('is case-sensitive when matching field names', () => {
+      const expressions = [createMockGrokExpression(['Message', 'MESSAGE'])];
+
+      const result = grokExpressionOverwritesSourceField(expressions, 'message');
+      expect(result).toBe(false);
+    });
+
+    it('handles expressions with no fields', () => {
+      const expressions = [createMockGrokExpression([])];
+
+      const result = grokExpressionOverwritesSourceField(expressions, 'message');
       expect(result).toBe(false);
     });
   });
