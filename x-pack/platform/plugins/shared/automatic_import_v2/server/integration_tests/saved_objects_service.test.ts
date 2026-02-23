@@ -194,12 +194,10 @@ describe('AutomaticImportSavedObjectService', () => {
         const updateData = {
           integration_id: 'test-update-integration',
           created_by: 'test-user',
-          status: TASK_STATUSES.completed,
           metadata: { ...baseMetadata, title: 'Updated Title' },
         };
         const result = await savedObjectService.updateIntegration(updateData, '0.0.0');
 
-        expect(result.attributes.status).toBe(TASK_STATUSES.completed);
         expect(result.attributes.metadata?.version).toBe('0.0.1');
 
         await savedObjectsClient.delete(INTEGRATION_SAVED_OBJECT_TYPE, 'test-update-integration');
@@ -965,8 +963,10 @@ describe('AutomaticImportSavedObjectService', () => {
         integrationParams,
         authenticatedUser
       );
-      expect(createdIntegration.attributes.status).toBe(TASK_STATUSES.pending);
-
+      expect(createdIntegration.attributes.created_by).toBe(authenticatedUser.username);
+      expect(createdIntegration.attributes.created_by_profile_uid).toBe(
+        authenticatedUser.profile_uid
+      );
       const dataStreamParams1: DataStreamParams = {
         ...mockDataStreamParams,
         integrationId,
@@ -1001,7 +1001,6 @@ describe('AutomaticImportSavedObjectService', () => {
         {
           integration_id: integrationId,
           created_by: 'test-user',
-          status: TASK_STATUSES.completed,
           metadata: {
             title: 'Workflow Test Integration - Completed',
             description: 'Workflow integration description',
@@ -1011,7 +1010,8 @@ describe('AutomaticImportSavedObjectService', () => {
       );
 
       const finalIntegration = await savedObjectService.getIntegration(integrationId);
-      expect(finalIntegration.status).toBe(TASK_STATUSES.completed);
+      expect(finalIntegration.created_by).toBe(authenticatedUser.username);
+      expect(finalIntegration.created_by_profile_uid).toBe(authenticatedUser.profile_uid);
       ds = await savedObjectService.findAllDataStreamsByIntegrationId(integrationId);
       expect(ds.total).toBe(2);
 
