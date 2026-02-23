@@ -140,8 +140,8 @@ The `mget`-based access pattern depends on all execution IDs being known upfront
 
 Two separate Elasticsearch data streams store completed execution history:
 
-- **Workflow Execution Data Stream** (`.workflows-execution-data-stream-executions`): Stores completed workflow execution records.
-- **Step Execution Data Stream** (`.workflows-execution-data-stream-step-executions`): Stores completed step execution records.
+- **Workflow Execution Data Stream** (`.workflows-executions-history-data-stream`): Stores completed workflow execution records.
+- **Step Execution Data Stream** (`.workflows-step-executions-history-data-stream`): Stores completed step execution records.
 
 Data streams are registered during plugin setup via the Kibana Data Streams API, which manages index templates, component templates, and versioned mappings. Each data stream has:
 - Explicit field mappings with `dynamic: false` (only mapped fields are indexed)
