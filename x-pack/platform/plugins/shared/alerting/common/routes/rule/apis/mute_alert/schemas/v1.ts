@@ -53,25 +53,27 @@ const muteAlertBodyConditionSchema = schema.object({
   ),
 });
 
-export const muteAlertBodySchema = schema.nullable(
-  schema.object({
-    expires_at: schema.maybe(
-      schema.string({
-        meta: {
-          description: 'ISO date after which the snooze expires. Absent = indefinite.',
-        },
-      })
-    ),
-    conditions: schema.maybe(
-      schema.arrayOf(muteAlertBodyConditionSchema, {
-        maxSize: MAX_SNOOZE_CONDITIONS_PER_ENTRY,
-        meta: { description: 'Conditions that auto-lift the snooze.' },
-      })
-    ),
-    condition_operator: schema.maybe(
-      schema.oneOf([schema.literal('any'), schema.literal('all')], {
-        meta: { description: 'How conditions combine: any (OR, default), all (AND).' },
-      })
-    ),
-  })
+export const muteAlertBodySchema = schema.maybe(
+  schema.nullable(
+    schema.object({
+      expires_at: schema.maybe(
+        schema.string({
+          meta: {
+            description: 'ISO date after which the snooze expires. Absent = indefinite.',
+          },
+        })
+      ),
+      conditions: schema.maybe(
+        schema.arrayOf(muteAlertBodyConditionSchema, {
+          maxSize: MAX_SNOOZE_CONDITIONS_PER_ENTRY,
+          meta: { description: 'Conditions that auto-lift the snooze.' },
+        })
+      ),
+      condition_operator: schema.maybe(
+        schema.oneOf([schema.literal('any'), schema.literal('all')], {
+          meta: { description: 'How conditions combine: any (OR, default), all (AND).' },
+        })
+      ),
+    })
+  )
 );
