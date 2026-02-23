@@ -9,23 +9,23 @@
 
 import { i18n } from '@kbn/i18n';
 import {
+  ON_CLICK_VALUE,
+  ON_CLICK_IMAGE,
+  ON_CLICK_ROW,
+  ON_SELECT_RANGE,
+  ON_APPLY_FILTER,
+  ON_OPEN_PANEL_MENU,
   ADD_PANEL_TRIGGER,
   ALERT_RULE_TRIGGER,
-  EDIT_LOOKUP_INDEX_CONTENT_TRIGGER_ID,
-  IMAGE_CLICK_TRIGGER,
-  ROW_CLICK_TRIGGER,
   VISUALIZE_FIELD_TRIGGER,
   VISUALIZE_GEO_FIELD_TRIGGER,
-  CONTROL_MENU_TRIGGER,
   CONTROL_HOVER_TRIGGER_ID,
-  APPLY_FILTER_TRIGGER,
+  CONTROL_MENU_TRIGGER,
+  EDIT_LOOKUP_INDEX_CONTENT_TRIGGER_ID,
   SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID,
   DISCOVER_CELL_ACTIONS_TRIGGER_ID,
-  CONTEXT_MENU_TRIGGER,
   PANEL_BADGE_TRIGGER,
   PANEL_NOTIFICATION_TRIGGER,
-  SELECT_RANGE_TRIGGER,
-  VALUE_CLICK_TRIGGER,
   MULTI_VALUE_CLICK_TRIGGER,
   CELL_VALUE_TRIGGER,
   ESQL_CONTROL_TRIGGER,
@@ -53,6 +53,61 @@ import {
 import type { Trigger } from './types';
 
 export const triggers: { [key: string]: Trigger } = {
+  [ON_CLICK_VALUE]: {
+    id: ON_CLICK_VALUE,
+    title: i18n.translate('uiActions.triggers.onClickValue.title', {
+      defaultMessage: 'Single click',
+    }),
+    description: i18n.translate('uiActions.triggers.onClickValue.description', {
+      defaultMessage: 'A data point click on the visualization',
+    }),
+  },
+  [ON_CLICK_IMAGE]: {
+    id: ON_CLICK_IMAGE,
+    title: i18n.translate('uiActions.triggers.onClickImage.title', {
+      defaultMessage: 'Image click',
+    }),
+    description: i18n.translate('uiActions.triggers.onClickImage.description', {
+      defaultMessage: 'Clicking the image will trigger the action',
+    }),
+  },
+  [ON_CLICK_ROW]: {
+    id: ON_CLICK_ROW,
+    title: i18n.translate('uiActions.triggers.onClickRow.title', {
+      defaultMessage: 'Table row click',
+    }),
+    description: i18n.translate('uiActions.triggers.onClickRow.description', {
+      defaultMessage: 'A click on a table row',
+    }),
+  },
+  [ON_SELECT_RANGE]: {
+    id: ON_SELECT_RANGE,
+    title: i18n.translate('uiActions.triggers.onSelectRange.title', {
+      defaultMessage: 'Range selection',
+    }),
+    description: i18n.translate('uiActions.triggers.onSelectRange.description', {
+      defaultMessage: 'A range of values on the visualization',
+    }),
+  },
+  [ON_APPLY_FILTER]: {
+    id: ON_APPLY_FILTER,
+    title: i18n.translate('uiActions.triggers.onApplyFilter.title', {
+      defaultMessage: 'Apply filter',
+    }),
+    description: i18n.translate('uiActions.triggers.onApplyFilter.description', {
+      defaultMessage: 'When kibana filter is applied. Could be a single value or a range filter.',
+    }),
+  },
+  [ON_OPEN_PANEL_MENU]: {
+    id: ON_OPEN_PANEL_MENU,
+    title: i18n.translate('uiActions.triggers.onOpenPanelMenu.title', {
+      defaultMessage: 'Context menu',
+    }),
+    description: i18n.translate('uiActions.triggers.onOpenPanelMenu.description', {
+      defaultMessage: "A new option will be added to the panel's context menu",
+    }),
+  },
+  // Legacy triggers below this line
   [ADD_PANEL_TRIGGER]: {
     id: ADD_PANEL_TRIGGER,
     title: i18n.translate('uiActions.triggers.dashboard.addPanelMenu.title', {
@@ -60,15 +115,6 @@ export const triggers: { [key: string]: Trigger } = {
     }),
     description: i18n.translate('uiActions.triggers.dashboard.addPanelMenu.description', {
       defaultMessage: "A new action will appear to the dashboard's add panel menu",
-    }),
-  },
-  [ROW_CLICK_TRIGGER]: {
-    id: ROW_CLICK_TRIGGER,
-    title: i18n.translate('uiActions.triggers.rowClickTitle', {
-      defaultMessage: 'Table row click',
-    }),
-    description: i18n.translate('uiActions.triggers.rowClickkDescription', {
-      defaultMessage: 'A click on a table row',
     }),
   },
   [ALERT_RULE_TRIGGER]: {
@@ -90,18 +136,13 @@ export const triggers: { [key: string]: Trigger } = {
     title: 'Visualize Geo field',
     description: 'Triggered when user wants to visualize a geo field.',
   },
-  [EDIT_LOOKUP_INDEX_CONTENT_TRIGGER_ID]: {
-    id: EDIT_LOOKUP_INDEX_CONTENT_TRIGGER_ID,
-    title: 'Edit Lookup Index',
-    description: 'This trigger is used to edit the lookup index content.',
-  },
-  [IMAGE_CLICK_TRIGGER]: {
-    id: IMAGE_CLICK_TRIGGER,
-    title: i18n.translate('uiActions.triggers.imageClickTriggerTitle', {
-      defaultMessage: 'Image click',
+  [CONTROL_HOVER_TRIGGER_ID]: {
+    id: CONTROL_HOVER_TRIGGER_ID,
+    title: i18n.translate('uiActions.triggers.controls.hoverTrigger.title', {
+      defaultMessage: 'Control hover',
     }),
-    description: i18n.translate('uiActions.triggers.imageClickDescription', {
-      defaultMessage: 'Clicking the image will trigger the action',
+    description: i18n.translate('uiActions.triggers.controls.hoverTrigger.description', {
+      defaultMessage: "Add action to controls's hover menu",
     }),
   },
   [CONTROL_MENU_TRIGGER]: {
@@ -113,38 +154,16 @@ export const triggers: { [key: string]: Trigger } = {
       defaultMessage: 'A new action will appear in the control type menu',
     }),
   },
-  [CONTROL_HOVER_TRIGGER_ID]: {
-    id: CONTROL_HOVER_TRIGGER_ID,
-    title: i18n.translate('uiActions.triggers.controls.hoverTrigger.title', {
-      defaultMessage: 'Control hover',
-    }),
-    description: i18n.translate('uiActions.triggers.controls.hoverTrigger.description', {
-      defaultMessage: "Add action to controls's hover menu",
-    }),
-  },
-  [APPLY_FILTER_TRIGGER]: {
-    id: APPLY_FILTER_TRIGGER,
-    title: i18n.translate('uiActions.triggers.applyFilterTitle', {
-      defaultMessage: 'Apply filter',
-    }),
-    description: i18n.translate('uiActions.triggers.applyFilterDescription', {
-      defaultMessage: 'When kibana filter is applied. Could be a single value or a range filter.',
-    }),
+  [EDIT_LOOKUP_INDEX_CONTENT_TRIGGER_ID]: {
+    id: EDIT_LOOKUP_INDEX_CONTENT_TRIGGER_ID,
+    title: 'Edit Lookup Index',
+    description: 'This trigger is used to edit the lookup index content.',
   },
   [SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID]: {
     id: SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID,
     title: 'Discover session embeddable cell actions',
     description:
       'This trigger is used to replace the cell actions for Discover session embeddable grid.',
-  },
-  [CONTEXT_MENU_TRIGGER]: {
-    id: CONTEXT_MENU_TRIGGER,
-    title: i18n.translate('uiActions.triggers.contextMenuTrigger.title', {
-      defaultMessage: 'Context menu',
-    }),
-    description: i18n.translate('uiActions.triggers.contextMenuTrigger.description', {
-      defaultMessage: "A new action will be added to the panel's context menu",
-    }),
   },
   [PANEL_BADGE_TRIGGER]: {
     id: PANEL_BADGE_TRIGGER,
@@ -162,24 +181,6 @@ export const triggers: { [key: string]: Trigger } = {
     }),
     description: i18n.translate('uiActions.triggers.panelNotificationTrigger.description', {
       defaultMessage: 'Actions appear in top-right corner of a panel.',
-    }),
-  },
-  [SELECT_RANGE_TRIGGER]: {
-    id: SELECT_RANGE_TRIGGER,
-    title: i18n.translate('uiActions.triggers.selectRangeTrigger.title', {
-      defaultMessage: 'Range selection',
-    }),
-    description: i18n.translate('uiActions.triggers.selectRangeTrigger.description', {
-      defaultMessage: 'A range of values on the visualization',
-    }),
-  },
-  [VALUE_CLICK_TRIGGER]: {
-    id: VALUE_CLICK_TRIGGER,
-    title: i18n.translate('uiActions.triggers.valueClickTrigger.title', {
-      defaultMessage: 'Single click',
-    }),
-    description: i18n.translate('uiActions.triggers.valueClickTrigger.description', {
-      defaultMessage: 'A data point click on the visualization',
     }),
   },
   [MULTI_VALUE_CLICK_TRIGGER]: {
