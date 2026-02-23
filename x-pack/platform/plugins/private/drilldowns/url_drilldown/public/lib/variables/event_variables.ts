@@ -69,7 +69,7 @@ const getEventScopeFromRangeSelectTriggerContext = (
   const { table, column: columnIndex, range } = eventScopeInput.data;
   const column = table.columns[columnIndex];
   return deleteUndefinedKeys({
-    key: toPrimitiveOrUndefined(column?.meta.field) as string,
+    key: toPrimitiveOrUndefined(column?.meta?.field ?? column?.name) as string,
     from: toPrimitiveOrUndefined(range[0]) as string | number | undefined,
     to: toPrimitiveOrUndefined(range[range.length - 1]) as string | number | undefined,
   });
@@ -83,7 +83,8 @@ const getEventScopeFromValueClickTriggerContext = (
     const column = table.columns[columnIndex];
     return {
       value: toPrimitiveOrUndefined(value) as Primitive,
-      key: column?.meta?.field,
+      // `meta.field` is not always available (e.g. ES|QL result tables).
+      key: column?.meta?.field ?? column?.name,
     };
   });
 
