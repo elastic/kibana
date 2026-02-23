@@ -97,11 +97,13 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
     varGroupSelections = {},
   }) => {
     const { docLinks } = useStartServices();
-    const { isAgentlessEnabled } = useAgentless();
+    const { isAgentlessEnabled } = useAgentless();``
     const { enableVarGroups } = ExperimentalFeaturesService.get();
 
-    const pkgVarGroups = enableVarGroups ? packageInfo.var_groups : undefined;
-    const streamVarGroups = enableVarGroups ? packageInputStream.var_groups : undefined;
+    const pkgVarGroups =
+      enableVarGroups && packageInfo.var_groups ? packageInfo.var_groups : undefined;
+    const streamVarGroups =
+      enableVarGroups && packageInputStream.var_groups ? packageInputStream.var_groups : undefined;
 
     const {
       params: { packagePolicyId },

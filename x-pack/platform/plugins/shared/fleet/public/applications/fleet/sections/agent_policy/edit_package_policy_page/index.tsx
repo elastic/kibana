@@ -154,7 +154,8 @@ export const EditPackagePolicyForm = memo<{
 
   // Derive var_group_selections from policy for edit mode
   const { enableVarGroups } = ExperimentalFeaturesService.get();
-  const varGroups = enableVarGroups ? packageInfo?.var_groups : undefined;
+  const varGroups =
+    enableVarGroups && packageInfo?.var_groups ? packageInfo?.var_groups : undefined;
   const varGroupSelections = useMemo((): VarGroupSelection => {
     if (packagePolicy.var_group_selections) {
       return packagePolicy.var_group_selections;

@@ -319,7 +319,8 @@ export function useOnSubmit({
   const spaceSettings = useSpaceSettingsContext();
   const { canUseMultipleAgentPolicies } = useMultipleAgentPolicies();
   const { enableVarGroups } = ExperimentalFeaturesService.get();
-  const varGroups = enableVarGroups ? packageInfo?.var_groups : undefined;
+  const varGroups =
+    enableVarGroups && packageInfo?.var_groups ? packageInfo?.var_groups : undefined;
 
   // only used to store the resulting package policy once saved
   const [savedPackagePolicy, setSavedPackagePolicy] = useState<PackagePolicy>();
