@@ -48,3 +48,10 @@ export const paths = {
       `${OBSERVABILITY_BASE_PATH}${RULES_PATH}/edit/${encodeURIComponent(id)}`,
   },
 };
+
+export const relativePaths = {
+  observability: {
+    ruleDetails: (ruleId: string) => `${RULES_PATH}/${encodeURIComponent(ruleId)}`,
+    editRule: (id: string) => `${RULES_PATH}/edit/${encodeURIComponent(id)}`,
+  },
+};
