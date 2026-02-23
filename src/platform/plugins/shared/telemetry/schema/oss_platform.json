@@ -11638,6 +11638,12 @@
           "_meta": {
             "description": "Switches the Entity Store Engine to v2"
           }
+        },
+        "securitySolution:extendedRuleExecutionLoggingMinLevel": {
+          "type": "keyword",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
         }
       }
     },

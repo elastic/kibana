@@ -190,4 +190,5 @@ export interface UsageStats {
   'observability:streamsEnableContentPacks': boolean;
   'observability:streamsEnableQueryStreams': boolean;
   'securitySolution:entityStoreEnableV2': boolean;
+  'securitySolution:extendedRuleExecutionLoggingMinLevel': string;
 }

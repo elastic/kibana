@@ -752,4 +752,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       description: 'Switches the Entity Store Engine to v2',
     },
   },
+  'securitySolution:extendedRuleExecutionLoggingMinLevel': {
+    type: 'keyword',
+    _meta: {
+      description: 'Minimum log level for extended rule execution logging to the event log.',
+    },
+  },
 };
