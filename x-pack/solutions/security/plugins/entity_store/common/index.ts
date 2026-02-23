@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { z } from '@kbn/zod';
 import * as euidModule from './domain/euid';
 
 export const PLUGIN_ID = 'entityStore';
@@ -24,10 +25,30 @@ export const FF_ENABLE_ENTITY_STORE_V2 = 'securitySolution:entityStoreEnableV2';
 export const euid = {
   getEuidFromObject: euidModule.getEuidFromObject,
   getEuidPainlessEvaluation: euidModule.getEuidPainlessEvaluation,
+  getEuidPainlessRuntimeMapping: euidModule.getEuidPainlessRuntimeMapping,
   getEuidDslFilterBasedOnDocument: euidModule.getEuidDslFilterBasedOnDocument,
+  getEuidDslDocumentsContainsIdFilter: euidModule.getEuidDslDocumentsContainsIdFilter,
   getEuidEsqlDocumentsContainsIdFilter: euidModule.getEuidEsqlDocumentsContainsIdFilter,
   getEuidEsqlEvaluation: euidModule.getEuidEsqlEvaluation,
   getEuidEsqlFilterBasedOnDocument: euidModule.getEuidEsqlFilterBasedOnDocument,
+  getEuidSourceFields: euidModule.getEuidSourceFields,
 };
 
 export type { EntityType } from './domain/definitions/entity_schema';
+export type { IdentitySourceFields } from './domain/euid';
+export { ALL_ENTITY_TYPES } from './domain/definitions/entity_schema';
+
+export type EntityStoreStatus = z.infer<typeof EntityStoreStatus>;
+export const EntityStoreStatus = z.enum([
+  'not_installed',
+  'installing',
+  'running',
+  'stopped',
+  'error',
+]);
+
+export const ENTITY_STORE_ROUTES = {
+  INSTALL: '/internal/security/entity-store/install',
+  UNINSTALL: '/internal/security/entity-store/uninstall',
+  STATUS: '/internal/security/entity-store/status',
+} as const satisfies Record<string, string>;
