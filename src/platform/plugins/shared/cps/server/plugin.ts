@@ -27,13 +27,9 @@ export class CPSServerPlugin implements Plugin<CPSServerSetup> {
     const { initContext, config$ } = this;
     const { cpsEnabled } = config$;
 
-    // Register route only for serverless
     if (this.isServerless) {
       registerRoutes(core, initContext);
     }
-
-    // Set CPS feature flag in Elasticsearch service
-    core.elasticsearch.setCpsFeatureFlag(cpsEnabled);
 
     return {
       getCpsEnabled: () => cpsEnabled,

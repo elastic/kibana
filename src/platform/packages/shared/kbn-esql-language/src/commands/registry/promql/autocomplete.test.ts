@@ -493,6 +493,22 @@ describe('inside query', () => {
 });
 
 describe('aggregation functions (by clause)', () => {
+  test('suggests by after aggregation name before opening paren', async () => {
+    await expectPromqlSuggestions('PROMQL sum ', {
+      textsContain: [promqlByCompleteItem.text, '($0) '],
+      textsNotContain: [pipeCompleteItem.text],
+    });
+  });
+
+  test('suggests expression items in second paren of pre-grouping form', async () => {
+    const numericFields = getFieldNamesByType(ESQL_NUMBER_TYPES, true);
+
+    await expectPromqlSuggestions('PROMQL sum by (keywordField) (', {
+      labelsContain: ['abs', 'avg', ...numericFields],
+      labelsNotContain: [promqlByCompleteItem.label],
+    });
+  });
+
   test('suggests by and pipe when cursor is at end of aggregation without space', async () => {
     await expectPromqlSuggestions('PROMQL sum(rate(http_requests_total[5m]))', {
       textsContain: [promqlByCompleteItem.text, pipeCompleteItem.text],
@@ -594,6 +610,19 @@ describe('aggregation functions (by clause)', () => {
     await expectPromqlSuggestions('PROMQL sum(rate(http_requests[5m])) by (job) ', {
       textsNotContain: [promqlByCompleteItem.text],
       textsContain: [pipeCompleteItem.text],
+    });
+  });
+
+  test('does not suggest by after complete pre-grouped aggregation', async () => {
+    await expectPromqlSuggestions('PROMQL sum by (keywordField) (rate(doubleField[5m])) ', {
+      textsNotContain: [promqlByCompleteItem.text],
+      textsContain: [pipeCompleteItem.text],
+    });
+  });
+
+  test('wrapped aggregation functions keep cursor inside parens (pre-grouped form)', async () => {
+    await expectPromqlSuggestions('PROMQL sum by (keywordField) ', {
+      textsContain: ['(avg $0) '],
     });
   });
 
