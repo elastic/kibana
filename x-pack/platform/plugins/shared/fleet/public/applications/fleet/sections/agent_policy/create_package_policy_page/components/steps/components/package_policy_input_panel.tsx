@@ -81,6 +81,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
   updatePackagePolicyInput: (updatedInput: Partial<NewPackagePolicyInput>) => void;
   inputValidationResults: PackagePolicyInputValidationResults;
   forceShowErrors?: boolean;
+  isSingleInputAndStreams?: boolean;
   isEditPage?: boolean;
   varGroupSelections?: Record<string, string>;
 }> = memo(
@@ -92,6 +93,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
     updatePackagePolicyInput,
     inputValidationResults,
     forceShowErrors,
+    isSingleInputAndStreams = false,
     isEditPage = false,
     varGroupSelections = {},
   }) => {
@@ -160,64 +162,78 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
     );
     const showTopLevelDescription = inputStreams.length === 1;
 
+    const topLevelDescription = showTopLevelDescription && (
+      <EuiText size="s" color="subdued">
+        <ReactMarkdown>{String(inputStreams[0]?.packageInputStream?.description)}</ReactMarkdown>
+      </EuiText>
+    );
+
+    const errors = hasErrors && (
+      <EuiFlexItem grow={false}>
+        <EuiText color="danger" size="s">
+          <FormattedMessage
+            id="xpack.fleet.createPackagePolicy.stepConfigure.errorCountText"
+            defaultMessage="{count, plural, one {# error} other {# errors}}"
+            values={{ count: errorCount }}
+          />
+        </EuiText>
+      </EuiFlexItem>
+    );
+
     return (
       <>
         {/* Header / input-level toggle */}
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiSwitch
-              data-test-subj="PackagePolicy.InputStreamConfig.Switch"
-              label={
-                <EuiFlexGroup alignItems="center" gutterSize="s">
-                  <EuiFlexItem grow={false}>
-                    <EuiTitle size="xs">
-                      <h3 data-test-subj="PackagePolicy.InputStreamConfig.title">
-                        {packageInput.title || packageInput.type}
-                      </h3>
-                    </EuiTitle>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              }
-              checked={packagePolicyInput.enabled}
-              disabled={packagePolicyInput.keep_enabled}
-              onChange={(e) => {
-                const enabled = e.target.checked;
-                updatePackagePolicyInput({
-                  enabled,
-                  streams: packagePolicyInput.streams.map((stream) => ({
-                    ...stream,
-                    enabled,
-                  })),
-                });
-                if (!enabled && isShowingStreams) {
-                  setIsShowingStreams(false);
+          {isSingleInputAndStreams ? (
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="xs">
+                <h3 data-test-subj="PackagePolicy.InputStreamConfig.title">
+                  {packageInput.title || packageInput.type}
+                </h3>
+              </EuiTitle>
+              <EuiSpacer size="s" />
+              {/* show the description under the top level toggle if theres only one stream */}
+              {showTopLevelDescription && topLevelDescription}
+            </EuiFlexItem>
+          ) : (
+            <EuiFlexItem grow={false}>
+              <EuiSwitch
+                data-test-subj="PackagePolicy.InputStreamConfig.Switch"
+                label={
+                  <EuiFlexGroup alignItems="center" gutterSize="s">
+                    <EuiFlexItem grow={false}>
+                      <EuiTitle size="xs">
+                        <h3 data-test-subj="PackagePolicy.InputStreamConfig.title">
+                          {packageInput.title || packageInput.type}
+                        </h3>
+                      </EuiTitle>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
                 }
-              }}
-            />
-            <EuiSpacer size="s" />
-            {/* show the description under the top level toggle if theres only one stream */}
-            {showTopLevelDescription && (
-              <EuiText size="s" color="subdued">
-                <ReactMarkdown>
-                  {String(inputStreams[0]?.packageInputStream?.description)}
-                </ReactMarkdown>
-              </EuiText>
-            )}
-          </EuiFlexItem>
-
+                checked={packagePolicyInput.enabled}
+                disabled={packagePolicyInput.keep_enabled}
+                onChange={(e) => {
+                  const enabled = e.target.checked;
+                  updatePackagePolicyInput({
+                    enabled,
+                    streams: packagePolicyInput.streams.map((stream) => ({
+                      ...stream,
+                      enabled,
+                    })),
+                  });
+                  if (!enabled && isShowingStreams) {
+                    setIsShowingStreams(false);
+                  }
+                }}
+              />
+              <EuiSpacer size="s" />
+              {/* show the description under the top level toggle if theres only one stream */}
+              {showTopLevelDescription && topLevelDescription}
+            </EuiFlexItem>
+          )}
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="s" alignItems="center">
-              {hasErrors ? (
-                <EuiFlexItem grow={false}>
-                  <EuiText color="danger" size="s">
-                    <FormattedMessage
-                      id="xpack.fleet.createPackagePolicy.stepConfigure.errorCountText"
-                      defaultMessage="{count, plural, one {# error} other {# errors}}"
-                      values={{ count: errorCount }}
-                    />
-                  </EuiText>
-                </EuiFlexItem>
-              ) : null}
+              {hasErrors ? errors : null}
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
                   color={hasErrors ? 'danger' : 'primary'}
@@ -261,6 +277,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
               inputValidationResults={inputValidationResults}
               forceShowErrors={forceShowErrors}
               isEditPage={isEditPage}
+              showDescriptionColumn={!isSingleInputAndStreams}
             />
             {hasInputStreams ? <ShortenedHorizontalRule margin="m" /> : <EuiSpacer size="l" />}
           </Fragment>
@@ -277,6 +294,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
                   packageInputStream={packageInputStream}
                   totalStreams={inputStreams.length}
                   packagePolicyInputStream={packagePolicyInputStream!}
+                  showDescriptionColumn={!isSingleInputAndStreams}
                   updatePackagePolicyInputStream={(
                     updatedStream: Partial<PackagePolicyInputStream>
                   ) => {

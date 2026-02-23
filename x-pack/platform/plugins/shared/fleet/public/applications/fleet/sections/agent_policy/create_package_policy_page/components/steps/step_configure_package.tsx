@@ -95,6 +95,9 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
         : packageInfo.policy_templates || [],
     [packageInfo.policy_templates, showOnlyIntegration]
   );
+
+  const isSinglePolicyTemplate = packagePolicyTemplates.length === 1;
+
   // Configure inputs (and their streams)
   const renderConfigureInputs = () =>
     packagePolicyTemplates.length ? (
@@ -104,12 +107,43 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
           {packagePolicyTemplates.map((policyTemplate) => {
             const inputs = getNormalizedInputs(policyTemplate);
             const packagePolicyInputs = packagePolicy.inputs;
-            return inputs.map((packageInput) => {
-              const packagePolicyInput = packagePolicyInputs.find(
-                (input) =>
-                  input.type === packageInput.type &&
-                  (hasIntegrations ? input.policy_template === policyTemplate.name : true)
+
+            const inputsToRender = inputs
+              .map((packageInput) => {
+                const packagePolicyInput = packagePolicyInputs.find(
+                  (input) =>
+                    input.type === packageInput.type &&
+                    (hasIntegrations ? input.policy_template === policyTemplate.name : true)
+                );
+
+                if (
+                  !packagePolicyInput ||
+                  !isInputAllowedForDeploymentMode(
+                    packagePolicyInput,
+                    deploymentMode,
+                    packageInfo
+                  ) ||
+                  !isInputCompatibleWithVarGroupSelections(packageInput, varGroupSelections)
+                ) {
+                  return null;
+                }
+
+                return { packageInput, packagePolicyInput };
+              })
+              .filter(
+                (
+                  item
+                ): item is {
+                  packageInput: RegistryInput;
+                  packagePolicyInput: NewPackagePolicyInput;
+                } => item !== null
               );
+
+            const isSingleInput = isSinglePolicyTemplate && inputsToRender.length === 1;
+            const isSingleInputAndStreams =
+              isSingleInput && inputsToRender[0].packagePolicyInput.streams.length <= 1;
+
+            return inputsToRender.map(({ packageInput, packagePolicyInput }) => {
               const packageInputStreams = getRegistryStreamWithDataStreamForInputType(
                 packageInput.type,
                 packageInfo,
@@ -134,14 +168,10 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
                 });
               };
 
-              const isInputAvailable =
-                packagePolicyInput &&
-                isInputAllowedForDeploymentMode(packagePolicyInput, deploymentMode, packageInfo) &&
-                isInputCompatibleWithVarGroupSelections(packageInput, varGroupSelections);
-
-              return isInputAvailable ? (
+              return (
                 <EuiFlexItem key={packageInput.type}>
                   <PackagePolicyInputPanel
+                    isSingleInputAndStreams={isSingleInputAndStreams}
                     packageInput={packageInput}
                     packageInfo={packageInfo}
                     packageInputStreams={packageInputStreams}
@@ -160,7 +190,7 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
                   />
                   <EuiHorizontalRule margin="m" />
                 </EuiFlexItem>
-              ) : null;
+              );
             });
           })}
         </EuiFlexGroup>
