@@ -49,7 +49,7 @@ dependsOn:
   - '@kbn/react-kibana-context-theme'
   - '@kbn/router-utils'
   - '@kbn/observability-utils-common'
-  - '@kbn/esql-ast'
+  - '@kbn/esql-utils'
 tags:
   - plugin
   - prod
