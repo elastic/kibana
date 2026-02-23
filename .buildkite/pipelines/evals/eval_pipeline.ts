@@ -66,12 +66,31 @@ function parseGithubPrLabels(raw: string): string[] {
     .filter(Boolean);
 }
 
+function normalizeEvaluationConnectorId(raw: string): string {
+  // Support `models:judge:eis/<modelId>` where the judge value is a model id, not a connector id.
+  if (raw.startsWith('eis/')) {
+    return `eis-${normalizeBuildkiteKey(raw.slice('eis/'.length))}`;
+  }
+
+  // Support `models:judge:<modelGroup>` (e.g. `llm-gateway/gpt-5.2`) where the judge value is a model group.
+  if (raw.includes('/')) {
+    return `litellm-${normalizeBuildkiteKey(raw)}`;
+  }
+
+  // Already a connector id (e.g. `litellm-*` / `eis-*`) or some other explicit id.
+  return raw;
+}
+
 function buildEvalsYaml({
   selectedSuites,
   modelGroups,
+  evaluationConnectorId,
+  includeEisModels,
 }: {
   selectedSuites: EvalsSuiteMetadataEntry[];
   modelGroups: string[] | undefined;
+  evaluationConnectorId: string | undefined;
+  includeEisModels: boolean;
 }): string {
   const suiteSteps = selectedSuites
     .map((suite) => {
@@ -81,17 +100,29 @@ function buildEvalsYaml({
         modelGroups && modelGroups.length > 0
           ? `          EVAL_MODEL_GROUPS: '${modelGroups.join(',')}'`
           : null;
+      const evaluationConnectorIdEnv = evaluationConnectorId
+        ? `          EVALUATION_CONNECTOR_ID: '${evaluationConnectorId}'`
+        : null;
+      const includeEisModelsEnv = includeEisModels
+        ? `          EVAL_INCLUDE_EIS_MODELS: '1'`
+        : null;
       return [
         `      - label: '${label}'`,
         `        key: ${key}`,
         `        command: bash .buildkite/scripts/steps/evals/run_suite.sh`,
         `        env:`,
         `          KBN_EVALS: '1'`,
+        `          FTR_EIS_CCM: '1'`,
         `          EVAL_SUITE_ID: '${suite.id}'`,
         `          EVAL_FANOUT: '1'`,
+        ...(evaluationConnectorIdEnv ? [evaluationConnectorIdEnv] : []),
+        ...(includeEisModelsEnv ? [includeEisModelsEnv] : []),
         ...(modelGroupsEnv ? [modelGroupsEnv] : []),
         `        timeout_in_minutes: 60`,
         `        agents:`,
+        `          image: family/kibana-ubuntu-2404`,
+        `          imageProject: elastic-images-prod`,
+        `          provider: gcp`,
         `          machineType: n2-standard-8`,
         `          preemptible: true`,
         `        retry:`,
@@ -127,23 +158,35 @@ function buildEvalsYaml({
  * for the matching eval suites.
  */
 export function getEvalPipeline(githubPrLabels: string): string | null {
+  const parsedLabels = parseGithubPrLabels(githubPrLabels);
+
   // Run eval suite(s) when their GH label(s) are present (see `evals.suites.json`).
   const evalSuites = readEvalsSuiteMetadata();
-  const runAllEvals = githubPrLabels.includes('evals:all');
+  const runAllEvals = parsedLabels.includes('evals:all');
   const selectedEvalSuites = runAllEvals
     ? evalSuites
     : evalSuites.filter((suite) => {
         const labels = suite.ciLabels?.length ? suite.ciLabels : [`evals:${suite.id}`];
-        return labels.some((label) => githubPrLabels.includes(label));
+        return labels.some((label) => parsedLabels.includes(label));
       });
   // Optional model filtering for eval fanout (models:* labels).
   // - No `models:*` labels => run all models returned by LiteLLM (current behavior).
   // - One or more `models:<model-group>` labels => only run connectors whose `defaultModel`
   //   matches one of those model groups.
   // - `models:all` can be used to explicitly opt into all models (ignored if combined with specifics).
-  const parsedLabels = parseGithubPrLabels(githubPrLabels);
+  const rawEvaluationConnectorId = parsedLabels
+    .find((label) => label.startsWith('models:judge:'))
+    ?.slice('models:judge:'.length)
+    ?.trim();
+  const evaluationConnectorId = rawEvaluationConnectorId
+    ? normalizeEvaluationConnectorId(rawEvaluationConnectorId)
+    : undefined;
+  const includeEisModels =
+    parsedLabels.some((label) => label === 'models:all' || label.startsWith('models:eis/')) ||
+    !!rawEvaluationConnectorId?.startsWith('eis/') ||
+    !!evaluationConnectorId?.startsWith('eis-');
   const selectedModelGroups = parsedLabels
-    .filter((label) => label.startsWith('models:'))
+    .filter((label) => label.startsWith('models:') && !label.startsWith('models:judge:'))
     .map((label) => label.slice('models:'.length))
     .map((value) => value.trim())
     .filter(Boolean)
@@ -156,5 +199,7 @@ export function getEvalPipeline(githubPrLabels: string): string | null {
   return buildEvalsYaml({
     selectedSuites: selectedEvalSuites,
     modelGroups: selectedModelGroups.length > 0 ? selectedModelGroups : undefined,
+    evaluationConnectorId,
+    includeEisModels,
   });
 }
