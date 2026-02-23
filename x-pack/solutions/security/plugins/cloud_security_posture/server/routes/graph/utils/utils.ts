@@ -35,3 +35,23 @@ export const transformEntityTypeToIconAndShape = (entityGroupType: string): Enti
     shape: entityTypeMappings.shapes[entityGroupTypeLower],
   };
 };
+
+/**
+ * Comparator for sorting connector nodes: relationship nodes first, then label nodes,
+ * then alphabetically by label within each group.
+ * Accepts objects with at least { shape?: string; label?: string }.
+ */
+export const compareConnectorNodes = (
+  a?: { shape?: string; label?: string },
+  b?: { shape?: string; label?: string }
+): number => {
+  const shapeA = a?.shape;
+  const shapeB = b?.shape;
+
+  if (shapeA === 'relationship' && shapeB === 'label') return -1;
+  if (shapeA === 'label' && shapeB === 'relationship') return 1;
+
+  const labelA = a?.label ?? '';
+  const labelB = b?.label ?? '';
+  return labelA.localeCompare(labelB);
+};

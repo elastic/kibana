@@ -604,7 +604,7 @@
               "\nCommon set of properties used by most actions."
             ],
             "signature": [
-              "string[] | undefined[] | boolean[] | number[] | ",
+              "string[] | undefined[] | number[] | boolean[] | ",
               {
                 "pluginId": "@kbn/utility-types",
                 "scope": "common",
@@ -908,7 +908,7 @@
         "label": "CellActionFieldValue",
         "description": [],
         "signature": [
-          "string[] | undefined[] | boolean[] | number[] | ",
+          "string[] | undefined[] | number[] | boolean[] | ",
           {
             "pluginId": "@kbn/utility-types",
             "scope": "common",
@@ -953,7 +953,7 @@
           "CellActionsMode",
           "; showActionTooltips?: boolean | undefined; visibleCellActions?: number | undefined; disabledActionTypes?: string[] | undefined; metadata?: Metadata | undefined; className?: string | undefined; extraActionsIconType?: ",
           "IconType",
-          " | undefined; extraActionsColor?: \"text\" | \"primary\" | \"neutral\" | \"success\" | \"accent\" | \"accentSecondary\" | \"warning\" | \"risk\" | \"danger\" | undefined; } & { children?: React.ReactNode; }"
+          " | undefined; extraActionsColor?: \"text\" | \"primary\" | \"success\" | \"warning\" | \"accent\" | \"accentSecondary\" | \"danger\" | \"neutral\" | \"risk\" | undefined; } & { children?: React.ReactNode; }"
         ],
         "path": "src/platform/packages/shared/kbn-cell-actions/src/types.ts",
         "lineNumber": 51,
@@ -1014,7 +1014,7 @@
         "label": "DefaultActionsSupportedValue",
         "description": [],
         "signature": [
-          "string[] | boolean[] | number[]"
+          "string[] | number[] | boolean[]"
         ],
         "path": "src/platform/packages/shared/kbn-cell-actions/src/actions/types.ts",
         "lineNumber": 14,

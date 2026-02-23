@@ -35,6 +35,7 @@ interface BuildEsqlQueryParams {
   isEnrichPolicyExists: boolean;
   spaceId: string;
   alertsMappingsIncluded: boolean;
+  pinnedIds?: string[];
 }
 
 /**
@@ -51,6 +52,7 @@ export const fetchEvents = async ({
   indexPatterns,
   spaceId,
   esQuery,
+  pinnedIds,
 }: {
   esClient: IScopedClusterClient;
   logger: Logger;
@@ -61,6 +63,7 @@ export const fetchEvents = async ({
   indexPatterns: string[];
   spaceId: string;
   esQuery?: EsQuery;
+  pinnedIds?: string[];
 }): Promise<EsqlToRecords<EventEdge>> => {
   const originAlertIds = originEventIds.filter((originEventId) => originEventId.isAlert);
 
@@ -94,6 +97,7 @@ export const fetchEvents = async ({
     isEnrichPolicyExists,
     spaceId,
     alertsMappingsIncluded,
+    pinnedIds,
   });
 
   logger.trace(`Executing query [${query}]`);
@@ -110,6 +114,7 @@ export const fetchEvents = async ({
         ...originEventIds
           .filter((originEventId) => originEventId.isAlert)
           .map((originEventId, idx) => ({ [`og_alrt_id${idx}`]: originEventId.id })),
+        ...(pinnedIds ?? []).map((id, idx) => ({ [`pinned_id${idx}`]: id })),
       ],
     })
     .toRecords<EventEdge>();
@@ -170,6 +175,25 @@ const buildDslFilter = (
 });
 
 /**
+ * Generates ESQL statement for evaluating pinned IDs.
+ * This checks if the document _id, actorEntityId, or targetEntityId matches any of the pinned IDs.
+ */
+const buildPinnedEsql = (pinnedIds?: string[]): string => {
+  if (!pinnedIds || pinnedIds.length === 0) {
+    return '| EVAL pinned = TO_STRING(null)';
+  }
+
+  const pinnedParamsStr = pinnedIds.map((_id, idx) => `?pinned_id${idx}`).join(', ');
+
+  return `| EVAL pinned = CASE(
+    _id IN (${pinnedParamsStr}), _id,
+    actorEntityId IN (${pinnedParamsStr}), actorEntityId,
+    targetEntityId IN (${pinnedParamsStr}), targetEntityId,
+    null
+  )`;
+};
+
+/**
  * Generates ESQL statements for building entity fields with enrichment data.
  * This is used when entity store enrichment is available (via LOOKUP JOIN or ENRICH).
  * Uses REPLACE to fix "{," pattern that occurs when first property is null.
@@ -226,6 +250,7 @@ const buildEsqlQuery = ({
   isEnrichPolicyExists,
   spaceId,
   alertsMappingsIncluded,
+  pinnedIds,
 }: BuildEsqlQueryParams): string => {
   const SECURITY_ALERTS_PARTIAL_IDENTIFIER = '.alerts-security.alerts-';
 
@@ -265,6 +290,7 @@ const buildEsqlQuery = ({
 ${targetEntityIdEvals}
 | MV_EXPAND actorEntityId
 | MV_EXPAND targetEntityId
+${buildPinnedEsql(pinnedIds)}
 | EVAL actorEntityFieldHint = CASE(
 ${actorFieldHintCases},
     ""
@@ -391,9 +417,12 @@ ${buildEnrichedEntityFieldsEsql()}
       targetEntityType,
       targetEntitySubType,
       isOrigin,
-      isOriginAlert
+      isOriginAlert,
+      pinned
+| EVAL pinnedSort = CASE(pinned IS NULL, 1, 0)
+| SORT action DESC, pinnedSort ASC, isOrigin
 | LIMIT 1000
-| SORT action DESC, isOrigin`;
+| DROP pinnedSort`;
 
   return query;
 };
