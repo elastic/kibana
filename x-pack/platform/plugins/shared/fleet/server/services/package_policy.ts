@@ -3456,41 +3456,34 @@ function _compilePackagePolicyInput(
       )
     : pkgInfo.policy_templates?.[0];
 
-  if (!input.enabled || !input.migrate_from || !packagePolicyTemplate) {
+  if (!input.enabled || !packagePolicyTemplate) {
     return undefined;
   }
+
   const packageInputs = getNormalizedInputs(packagePolicyTemplate);
 
   if (!packageInputs.length) {
     return undefined;
   }
-  let templatePath: string;
 
-  if (input.migrate_from) {
-    const packageInputToMigrate = packageInputs.find(
-      (pkgInput) => pkgInput.title === input.migrate_from
+  const packageInput = packageInputs.find((pkgInput) => pkgInput.type === input.type);
+  if (!packageInput) {
+    throw new InputNotFoundError(
+      `Input template not found, unable to find input type ${input.type}`
     );
-    if (!packageInputToMigrate?.template_path) return undefined;
-    templatePath = packageInputToMigrate.template_path;
-  } else {
-    const packageInput = packageInputs.find((pkgInput) => pkgInput.type === input.type);
-    if (!packageInput) {
-      throw new InputNotFoundError(
-        `Input template not found, unable to find input type ${input.type}`
-      );
-    }
-    if (!packageInput.template_path) {
-      return undefined;
-    }
-    templatePath = packageInput.template_path;
+  }
+  if (!packageInput.template_path) {
+    return undefined;
   }
 
   const [pkgInputTemplate] = getAssetsDataFromAssetsMap(pkgInfo, assetsMap, (path: string) =>
-    path.endsWith(`/agent/input/${templatePath!}`)
+    path.endsWith(`/agent/input/${packageInput.template_path!}`)
   );
 
   if (!pkgInputTemplate || !pkgInputTemplate.buffer) {
-    throw new InputNotFoundError(`Unable to load input template at /agent/input/${templatePath!}`);
+    throw new InputNotFoundError(
+      `Unable to load input template at /agent/input/${packageInput.template_path!}`
+    );
   }
 
   return compileTemplate(
@@ -3839,10 +3832,29 @@ export function updatePackageInputs(
           (i) => i.type === update.migrate_from
         );
         if (originalInputToMigrate) {
-          originalInput = { ...originalInputToMigrate, enabled: false };
+          // Ensure the old input doesn't linger in inputs when it has no policy_template
+          // (inputs with a policy_template are already removed by the filter above)
+          const staleIdx = inputs.findIndex((i) => i.type === update.migrate_from);
+          if (staleIdx !== -1) inputs.splice(staleIdx, 1);
+
           update.vars = deepMergeVars(originalInputToMigrate.vars, update.vars, true);
           update.enabled = true;
-          // TO DO: handle streams
+
+          // Migrate stream-level vars by position since datasets differ between input types.
+          // Use the new stream as the structural base (preserving data_stream identity) and seed
+          // its vars with values from the old stream so user configuration is carried over.
+          if (update.streams && originalInputToMigrate.streams.length > 0) {
+            update.streams = update.streams.map((newStream, idx) => {
+              const oldStream = originalInputToMigrate.streams[idx];
+              if (!oldStream) return newStream;
+              const merged = deepMergeVars(
+                { ...newStream, vars: oldStream.vars ?? {} },
+                newStream as InputsOverride,
+                true
+              );
+              return removeStaleVars(merged, newStream);
+            });
+          }
         }
       }
 

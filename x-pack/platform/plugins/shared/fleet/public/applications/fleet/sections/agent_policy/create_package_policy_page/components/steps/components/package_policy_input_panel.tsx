@@ -19,6 +19,7 @@ import {
   EuiHorizontalRule,
   EuiSpacer,
   EuiButtonEmpty,
+  EuiIconTip,
 } from '@elastic/eui';
 
 import type {
@@ -176,6 +177,22 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
                       </h3>
                     </EuiTitle>
                   </EuiFlexItem>
+                  {packagePolicyInput.migrate_from && (
+                    <EuiFlexItem grow={false}>
+                      <EuiIconTip
+                        type="info"
+                        color="subdued"
+                        content={i18n.translate(
+                          'xpack.fleet.createPackagePolicy.stepConfigure.inputMigratedTooltip',
+                          {
+                            defaultMessage:
+                              'This input was automatically migrated from {migrateFrom}.',
+                            values: { migrateFrom: packagePolicyInput.migrate_from },
+                          }
+                        )}
+                      />
+                    </EuiFlexItem>
+                  )}
                 </EuiFlexGroup>
               }
               checked={packagePolicyInput.enabled}

@@ -150,6 +150,37 @@ const ReadyToUpgradeCallOut = ({
   );
 };
 
+const InputMigrationCallout = ({
+  migratedInputs,
+}: {
+  migratedInputs: Array<{ from: string; to: string }>;
+}) => (
+  <EuiCallOut
+    title={i18n.translate('xpack.fleet.upgradePackagePolicy.statusCallOut.inputMigrationTitle', {
+      defaultMessage: 'Input type migration',
+    })}
+    color="warning"
+    iconType="warning"
+  >
+    <FormattedMessage
+      id="xpack.fleet.upgradePackagePolicy.statusCallout.inputMigrationContent"
+      defaultMessage="This upgrade replaces one or more input types. Your existing configuration has been automatically carried over."
+    />
+    <EuiSpacer size="s" />
+    <ul>
+      {migratedInputs.map(({ from, to }) => (
+        <li key={from}>
+          <FormattedMessage
+            id="xpack.fleet.upgradePackagePolicy.statusCallout.inputMigrationItem"
+            defaultMessage="{from} → {to}"
+            values={{ from, to }}
+          />
+        </li>
+      ))}
+    </ul>
+  </EuiCallOut>
+);
+
 export const UpgradeStatusCallout: React.FunctionComponent<{
   dryRunData: UpgradePackagePolicyDryRunResponse;
   newSecrets: RegistryVarsEntry[];
@@ -163,6 +194,11 @@ export const UpgradeStatusCallout: React.FunctionComponent<{
   const hasNewSecrets = newSecrets.length > 0;
   const [currentPackagePolicy, proposedUpgradePackagePolicy] = dryRunData[0].diff || [];
   const isReadyForUpgrade = currentPackagePolicy && !dryRunData[0].hasErrors;
+
+  const migratedInputs = (proposedUpgradePackagePolicy?.inputs ?? [])
+    .filter((i) => i.migrate_from)
+    .map((i) => ({ from: i.migrate_from!, to: i.type }));
+  const hasMigratedInputs = migratedInputs.length > 0;
 
   return (
     <>
@@ -208,6 +244,12 @@ export const UpgradeStatusCallout: React.FunctionComponent<{
         <>
           <EuiSpacer size="m" />
           <HasNewSecretsCallOut newSecrets={newSecrets} />
+        </>
+      )}
+      {hasMigratedInputs && (
+        <>
+          <EuiSpacer size="m" />
+          <InputMigrationCallout migratedInputs={migratedInputs} />
         </>
       )}
     </>
