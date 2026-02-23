@@ -29,5 +29,8 @@
     "@kbn/projects-solutions-groups",
     "@kbn/search-types",
     "@kbn/esql-utils",
+    "@kbn/kibana-react-plugin",
+    "@kbn/licensing-types",
+    "@kbn/data-plugin",
   ]
 }
