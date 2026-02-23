@@ -205,11 +205,6 @@ export interface CodeEditorProps
    */
   onFocus?: () => void;
   onBlur?: () => void;
-  /**
-   * Enables the suggestion widget repositioning. Enabled by default.
-   * Disabled for cases like embedded console.
-   */
-  enableSuggestWidgetRepositioning?: boolean;
 }
 
 export const CodeEditor: React.FC<CodeEditorProps> = ({
@@ -251,7 +246,6 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   links = false,
   onFocus,
   onBlur,
-  enableSuggestWidgetRepositioning = true,
   overflowWidgetsContainerZIndexOverride,
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -668,12 +662,13 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
               fontSize: isFullScreen ? 16 : 12,
               lineHeight: isFullScreen ? 24 : 21,
               contextmenu: enableCustomContextMenu,
-              fixedOverflowWidgets: enableSuggestWidgetRepositioning,
               // @ts-expect-error, see https://github.com/microsoft/monaco-editor/issues/3829
               'bracketPairColorization.enabled': false,
               ...options,
               // Explicit links prop always takes precedence over any value passed in options
               links,
+              // Explicit not possible to override because of the way the suggestion widget is rendered in a separate container
+              fixedOverflowWidgets: true,
             }}
           />
         </ReBroadcastMouseDownEvents>

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 
@@ -13,7 +12,7 @@ const TRIGGER_DEF_ID = 'productInterceptTrigger';
 const INTERCEPT_PROMPTER_LOCAL_STORAGE_KEY = 'intercepts.prompter.clientCache';
 const CONFIGURED_STANDARD_INTERCEPT_INTERVAL = 90 * 24 * 60 * 60 * 1000;
 
-test.describe('Standard Product intercept', { tag: tags.stateful.classic }, () => {
+test.describe('Standard Product intercept', { tag: '@local-stateful-classic' }, () => {
   test('on initial page load - presents all available navigable steps', async ({
     page,
     pageObjects,
