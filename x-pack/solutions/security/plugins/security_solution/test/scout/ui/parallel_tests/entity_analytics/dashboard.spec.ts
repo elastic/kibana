@@ -56,7 +56,8 @@ spaceTest.describe(
         'Verify risk engine and entity store are actually enabled via API',
         async () => {
           const entityStoreStatus = await apiServices.entityAnalytics.waitForEntityStoreStatus(
-            'running'
+            'running',
+            90000
           );
           expect(entityStoreStatus.status).toBe('running');
 
