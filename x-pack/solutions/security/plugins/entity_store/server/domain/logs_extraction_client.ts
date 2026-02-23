@@ -160,14 +160,12 @@ export class LogsExtractionClient {
         esClient: this.esClient,
         query,
       });
-      const countColumnIdx = esqlResponse.columns.findIndex(
-        (col) => col.name === 'document_count'
-      );
+      const countColumnIdx = esqlResponse.columns.findIndex((col) => col.name === 'document_count');
       if (countColumnIdx === -1 || esqlResponse.values.length === 0) {
         return 0;
       }
       const count = esqlResponse.values[0][countColumnIdx];
-      
+
       return Number(count);
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
