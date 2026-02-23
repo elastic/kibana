@@ -43,13 +43,51 @@ export async function createAgentPolicy(
     ...(options?.has_fleet_server !== undefined && { has_fleet_server: options.has_fleet_server }),
   };
 
-  const response = await kbnClient.request<FleetItemResponse>({
-    method: 'POST',
-    path: '/api/fleet/agent_policies',
-    body,
-  });
+  try {
+    const response = await kbnClient.request<FleetItemResponse>({
+      method: 'POST',
+      path: '/api/fleet/agent_policies',
+      body,
+    });
+    return response.data.item;
+  } catch (e: unknown) {
+    const error = e as { response?: { status?: number } };
+    if (error?.response?.status === 409 && options?.id) {
+      const resp = await kbnClient.request<FleetItemResponse>({
+        method: 'GET',
+        path: `/api/fleet/agent_policies/${options.id}`,
+      });
+      return resp.data.item;
+    }
+    throw e;
+  }
+}
 
-  return response.data.item;
+export async function getOrCreateAgentPolicy(
+  kbnClient: KbnClient,
+  name: string,
+  options?: {
+    id?: string;
+    namespace?: string;
+    description?: string;
+    monitoring_enabled?: string[];
+    download_source_id?: string;
+    has_fleet_server?: boolean;
+  }
+): Promise<Record<string, unknown>> {
+  try {
+    return await createAgentPolicy(kbnClient, name, options);
+  } catch (e: unknown) {
+    const error = e as { response?: { status?: number } };
+    if (error?.response?.status === 409 && options?.id) {
+      const resp = await kbnClient.request<FleetItemResponse>({
+        method: 'GET',
+        path: `/api/fleet/agent_policies/${options.id}`,
+      });
+      return resp.data.item;
+    }
+    throw e;
+  }
 }
 
 export async function deleteAgentPolicy(
@@ -380,13 +418,20 @@ export async function createSpace(
     imageUrl: undefined,
   };
 
-  const response = await kbnClient.request<Record<string, unknown>>({
-    method: 'POST',
-    path: '/api/spaces/space',
-    body,
-  });
-
-  return response.data;
+  try {
+    const response = await kbnClient.request<Record<string, unknown>>({
+      method: 'POST',
+      path: '/api/spaces/space',
+      body,
+    });
+    return response.data;
+  } catch (e: unknown) {
+    const error = e as { response?: { status?: number } };
+    if (error?.response?.status === 409) {
+      return { id, name };
+    }
+    throw e;
+  }
 }
 
 export async function unenrollAgents(kbnClient: KbnClient): Promise<void> {

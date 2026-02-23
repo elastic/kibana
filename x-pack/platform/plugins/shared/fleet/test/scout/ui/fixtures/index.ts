@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ScoutPage, ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout';
+import type { ScoutPage, ScoutTestFixtures, ScoutWorkerFixtures, KibanaUrl } from '@kbn/scout';
 import { test as baseTest } from '@kbn/scout';
 
 import type { FleetPageObjects } from './page_objects';
@@ -26,12 +26,16 @@ async function waitForPageReady(page: ScoutPage) {
 }
 
 export const test = baseTest.extend<FleetTestFixtures, ScoutWorkerFixtures>({
-  page: async ({ page }: { page: ScoutPage }, use: (page: ScoutPage) => Promise<void>) => {
+  page: async (
+    { page, kbnUrl }: { page: ScoutPage; kbnUrl: KibanaUrl },
+    use: (page: ScoutPage) => Promise<void>
+  ) => {
     const originalGoto = page.goto.bind(page);
     const originalGotoApp = page.gotoApp.bind(page);
 
     page.goto = (async (url: string, options?: Parameters<ScoutPage['goto']>[1]) => {
-      const response = await originalGoto(url, options);
+      const resolvedUrl = url.startsWith('/') ? kbnUrl.get(url) : url;
+      const response = await originalGoto(resolvedUrl, options);
       await waitForPageReady(page);
       return response;
     }) as ScoutPage['goto'];
