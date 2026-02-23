@@ -9,10 +9,12 @@ import { expect } from '@kbn/scout/ui';
 import { tags } from '@kbn/scout';
 
 import { test } from '../fixtures';
+import { mockFleetSetupEndpoints } from '../common/api_helpers';
 
 test.describe('Install assets', { tag: [...tags.stateful.classic] }, () => {
   test.beforeEach(async ({ browserAuth, page }) => {
     await browserAuth.loginAsAdmin();
+    await mockFleetSetupEndpoints(page);
     await page.route('**/api/fleet/epm/packages/**/install**', (route) => {
       if (route.request().method() === 'POST') {
         return route.fulfill({

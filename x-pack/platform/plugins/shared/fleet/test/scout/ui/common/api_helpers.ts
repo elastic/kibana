@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { KbnClient, EsClient } from '@kbn/scout';
+import type { KbnClient, EsClient, ScoutPage } from '@kbn/scout';
 
 interface FleetItemResponse {
   item: Record<string, unknown>;
@@ -273,15 +273,41 @@ export async function setFleetServerHost(
   kbnClient: KbnClient,
   host: string = 'https://fleetserver:8220'
 ): Promise<void> {
-  await kbnClient.request({
-    method: 'POST',
-    path: '/api/fleet/fleet_server_hosts',
-    body: {
-      name: 'Default host',
-      host_urls: [host],
-      is_default: true,
-    },
-  });
+  try {
+    await kbnClient.request({
+      method: 'POST',
+      path: '/api/fleet/fleet_server_hosts',
+      body: {
+        name: 'Default host',
+        host_urls: [host],
+        is_default: true,
+      },
+    });
+  } catch (e: unknown) {
+    const error = e as { response?: { status?: number } };
+    if (error?.response?.status !== 409) {
+      throw e;
+    }
+  }
+}
+
+export async function mockFleetSetupEndpoints(page: ScoutPage): Promise<void> {
+  await page.route('**/api/fleet/agents/setup', (route) =>
+    route.fulfill({
+      status: 200,
+      body: JSON.stringify({
+        isReady: true,
+        missing_optional_features: [],
+        missing_requirements: [],
+      }),
+    })
+  );
+  await page.route('**/api/fleet/setup', (route) =>
+    route.fulfill({
+      status: 200,
+      body: JSON.stringify({ isInitialized: true, nonFatalErrors: [] }),
+    })
+  );
 }
 
 export function createAgentDoc(

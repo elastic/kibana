@@ -9,15 +9,16 @@ import { expect } from '@kbn/scout/ui';
 import { tags } from '@kbn/scout';
 
 import { test } from '../fixtures';
-import { setFleetServerHost } from '../common/api_helpers';
+import { setFleetServerHost, mockFleetSetupEndpoints } from '../common/api_helpers';
 
 test.describe('Fleet startup', { tag: [...tags.stateful.classic] }, () => {
   test.beforeAll(async ({ kbnClient }) => {
     await setFleetServerHost(kbnClient);
   });
 
-  test.beforeEach(async ({ browserAuth }) => {
+  test.beforeEach(async ({ browserAuth, page }) => {
     await browserAuth.loginAsPrivilegedUser();
+    await mockFleetSetupEndpoints(page);
   });
 
   test('should create agent policy with System integration', async ({ page }) => {

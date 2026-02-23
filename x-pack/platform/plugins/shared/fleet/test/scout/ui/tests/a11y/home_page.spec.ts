@@ -15,6 +15,7 @@ import {
   cleanupAgentPolicies,
   setFleetServerHost,
   unenrollAgents,
+  mockFleetSetupEndpoints,
 } from '../../common/api_helpers';
 import {
   AGENT_FLYOUT,
@@ -38,8 +39,9 @@ test.describe('Home page A11y', { tag: [...tags.stateful.classic] }, () => {
     await setFleetServerHost(kbnClient, 'https://fleetserver:8220');
   });
 
-  test.beforeEach(async ({ browserAuth }) => {
+  test.beforeEach(async ({ browserAuth, page }) => {
     await browserAuth.loginAsAdmin();
+    await mockFleetSetupEndpoints(page);
   });
 
   test.afterAll(async ({ kbnClient }) => {

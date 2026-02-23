@@ -8,11 +8,12 @@
 import { tags } from '@kbn/scout';
 
 import { test } from '../fixtures';
-import { createAgentPolicy } from '../common/api_helpers';
+import { createAgentPolicy, mockFleetSetupEndpoints } from '../common/api_helpers';
 
 test.describe('Package policy', { tag: [...tags.stateful.classic] }, () => {
-  test.beforeEach(async ({ browserAuth }) => {
+  test.beforeEach(async ({ browserAuth, page }) => {
     await browserAuth.loginAsAdmin();
+    await mockFleetSetupEndpoints(page);
   });
 
   test('should edit package policy', async ({ page, kbnClient }) => {

@@ -16,6 +16,7 @@ import {
   insertDocs,
   deleteDocsByQuery,
   cleanupAgentPolicies,
+  mockFleetSetupEndpoints,
 } from '../common/api_helpers';
 import { AGENT_FLYOUT } from '../common/selectors';
 
@@ -27,8 +28,9 @@ test.describe('Add agent flyout', { tag: [...tags.stateful.classic] }, () => {
     await insertDocs(esClient, '.fleet-agents', [agentDoc]);
   });
 
-  test.beforeEach(async ({ browserAuth }) => {
+  test.beforeEach(async ({ browserAuth, page }) => {
     await browserAuth.loginAsPrivilegedUser();
+    await mockFleetSetupEndpoints(page);
   });
 
   test.afterAll(async ({ kbnClient, esClient }) => {

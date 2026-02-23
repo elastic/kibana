@@ -9,12 +9,17 @@ import { expect } from '@kbn/scout/ui';
 import { tags } from '@kbn/scout';
 
 import { test } from '../fixtures';
-import { setupFleetServer, createAgentPolicy } from '../common/api_helpers';
+import {
+  setupFleetServer,
+  createAgentPolicy,
+  mockFleetSetupEndpoints,
+} from '../common/api_helpers';
 import { AGENT_FLYOUT, AGENT_POLICY_DETAILS_PAGE } from '../common/selectors';
 
 test.describe('Edit agent policy', { tag: [...tags.stateful.classic] }, () => {
-  test.beforeEach(async ({ browserAuth }) => {
+  test.beforeEach(async ({ browserAuth, page }) => {
     await browserAuth.loginAsPrivilegedUser();
+    await mockFleetSetupEndpoints(page);
   });
 
   test('should edit agent policy', async ({ page, kbnClient }) => {

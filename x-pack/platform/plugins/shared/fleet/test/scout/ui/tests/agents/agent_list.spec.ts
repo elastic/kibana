@@ -16,6 +16,7 @@ import {
   insertDocs,
   deleteDocsByQuery,
   cleanupAgentPolicies,
+  mockFleetSetupEndpoints,
 } from '../../common/api_helpers';
 import { FLEET_AGENT_LIST_PAGE } from '../../common/selectors';
 
@@ -55,22 +56,7 @@ test.describe('View agents list', { tag: [...tags.stateful.classic] }, () => {
 
   test.beforeEach(async ({ browserAuth, page }) => {
     await browserAuth.loginAsPrivilegedUser();
-    await page.route('**/api/fleet/agents/setup', (route) =>
-      route.fulfill({
-        status: 200,
-        body: JSON.stringify({
-          isReady: true,
-          missing_optional_features: [],
-          missing_requirements: [],
-        }),
-      })
-    );
-    await page.route('**/api/fleet/setup', (route) =>
-      route.fulfill({
-        status: 200,
-        body: JSON.stringify({ isInitialized: true, nonFatalErrors: [] }),
-      })
-    );
+    await mockFleetSetupEndpoints(page);
     await page.route('**/api/fleet/agents_status', (route) =>
       route.fulfill({
         status: 200,

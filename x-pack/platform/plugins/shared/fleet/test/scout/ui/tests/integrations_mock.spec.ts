@@ -9,10 +9,12 @@ import { expect } from '@kbn/scout/ui';
 import { tags } from '@kbn/scout';
 
 import { test } from '../fixtures';
+import { mockFleetSetupEndpoints } from '../common/api_helpers';
 
 test.describe('Integrations mock', { tag: [...tags.stateful.classic] }, () => {
-  test.beforeEach(async ({ browserAuth }) => {
+  test.beforeEach(async ({ browserAuth, page }) => {
     await browserAuth.loginAsAdmin();
+    await mockFleetSetupEndpoints(page);
   });
 
   test('should verify upgrade package and policy flow', async ({ page }) => {

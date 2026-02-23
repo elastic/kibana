@@ -9,7 +9,12 @@ import { expect } from '@kbn/scout/ui';
 import { tags } from '@kbn/scout';
 
 import { test } from '../../fixtures';
-import { enableSpaceAwareness, createSpace, cleanupAgentPolicies } from '../../common/api_helpers';
+import {
+  enableSpaceAwareness,
+  createSpace,
+  cleanupAgentPolicies,
+  mockFleetSetupEndpoints,
+} from '../../common/api_helpers';
 import {
   ADD_AGENT_POLICY_BTN,
   AGENT_POLICIES_TABLE,
@@ -32,6 +37,7 @@ test.describe('Space aware policies creation', { tag: [...tags.stateful.classic]
 
   test.beforeEach(async ({ browserAuth, page }) => {
     await browserAuth.loginAsAdmin();
+    await mockFleetSetupEndpoints(page);
     await page.route('**/api/fleet/agent_policies**', (route) => route.continue());
     await page.route('**/internal/fleet/agent_policies_spaces**', (route) => route.continue());
   });

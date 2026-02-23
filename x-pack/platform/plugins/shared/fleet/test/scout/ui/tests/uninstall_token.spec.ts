@@ -10,7 +10,11 @@ import type { KbnClient, ScoutPage } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 
 import { test } from '../fixtures';
-import { createAgentPolicy, cleanupAgentPolicies } from '../common/api_helpers';
+import {
+  createAgentPolicy,
+  cleanupAgentPolicies,
+  mockFleetSetupEndpoints,
+} from '../common/api_helpers';
 import { UNINSTALL_TOKENS } from '../common/selectors';
 
 const TARGET_POLICY_ID = 'agent-policy-100';
@@ -36,8 +40,9 @@ test.describe('Uninstall token page', { tag: [...tags.stateful.classic] }, () =>
     await generatePolicies(kbnClient);
   });
 
-  test.beforeEach(async ({ browserAuth }) => {
+  test.beforeEach(async ({ browserAuth, page }) => {
     await browserAuth.loginAsPrivilegedUser();
+    await mockFleetSetupEndpoints(page);
   });
 
   test.afterAll(async ({ kbnClient }) => {
