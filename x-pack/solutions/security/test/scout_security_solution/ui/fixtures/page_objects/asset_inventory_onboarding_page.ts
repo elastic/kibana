@@ -6,6 +6,7 @@
  */
 
 import type { ScoutPage } from '@kbn/scout';
+import { waitForPageReady } from '../../common/page_utils';
 
 const ASSET_INVENTORY_INTEGRATION_URL =
   '/app/fleet/integrations/cloud_asset_inventory/add-integration';
@@ -15,21 +16,23 @@ export class AssetInventoryOnboardingPage {
 
   async goto() {
     await this.page.goto(ASSET_INVENTORY_INTEGRATION_URL);
+    await waitForPageReady(this.page);
   }
 
   async gotoIntegrationsBrowse() {
     await this.page.goto('/app/integrations/browse');
+    await waitForPageReady(this.page);
   }
 
-  get saveButton() {
+  public get saveButton() {
     return this.page.testSubj.locator('createPackagePolicySaveButton');
   }
 
-  get addElasticAgentLaterButton() {
+  public get addElasticAgentLaterButton() {
     return this.page.testSubj.locator('confirmModalCancelButton');
   }
 
-  get policyNameInput() {
+  public get policyNameInput() {
     return this.page.locator('#name');
   }
 

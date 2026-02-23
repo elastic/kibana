@@ -59,9 +59,7 @@ test.describe(
         const badges = page.testSubj
           .locator('fields-browser-container')
           .locator('[data-test-subj="category-badges"]');
-        await expect(badges.first())
-          .toHaveCount(0)
-          .catch(() => {});
+        await expect(badges.first()).toHaveCount(0);
       });
 
       test('displays only the default selected fields when "view selected" option is enabled', async ({
@@ -122,9 +120,7 @@ test.describe(
           .click();
         await page.testSubj.locator('reset-fields').first().click();
         const hostGeoCountryHeader = page.testSubj.locator('header-cell-host.geo.country_name');
-        await expect(hostGeoCountryHeader.first())
-          .toHaveCount(0)
-          .catch(() => {});
+        await expect(hostGeoCountryHeader.first()).toHaveCount(0);
       });
     });
 
@@ -134,9 +130,7 @@ test.describe(
       }) => {
         const filterInput = 'aa7ca589f1b8220002f2fc61c64cfbf1';
         const serverSideEventCount = page.testSubj.locator('server-side-event-count');
-        await expect(serverSideEventCount.first())
-          .toBeVisible({ timeout: 15_000 })
-          .catch(() => {});
+        await expect(serverSideEventCount.first()).toBeVisible({ timeout: 15_000 });
         const kqlInput = page.testSubj.locator('queryInput').first();
         await kqlInput.fill(filterInput);
         await kqlInput.press('Enter');

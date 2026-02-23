@@ -6,6 +6,7 @@
  */
 
 import type { ScoutPage, Locator } from '@kbn/scout';
+import { waitForPageReady } from '../../common/page_utils';
 
 export class RuleCreationPage {
   readonly defineStepContainer: Locator;
@@ -28,6 +29,7 @@ export class RuleCreationPage {
 
   async goto(): Promise<void> {
     await this.page.gotoApp('security/rules/create');
+    await waitForPageReady(this.page);
   }
 
   async selectRuleType(ruleType: string): Promise<void> {

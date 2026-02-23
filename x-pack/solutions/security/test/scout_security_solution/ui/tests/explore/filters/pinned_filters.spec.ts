@@ -17,8 +17,14 @@ const DATAVIEW = 'audit*';
 
 test.describe('ESS - pinned filters', { tag: [...tags.stateful.classic] }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects, kbnClient, apiServices }) => {
-    await apiServices.deleteDataView(DATAVIEW).catch(() => {});
-    await apiServices.createDataView(DATAVIEW).catch(() => {});
+    await apiServices.dataViews.deleteByTitle(DATAVIEW).catch(() => {});
+    await kbnClient
+      .request({
+        method: 'POST',
+        path: '/api/data_views/data_view',
+        body: { data_view: { title: DATAVIEW, name: DATAVIEW } },
+      })
+      .catch(() => {});
     await browserAuth.loginAsAdmin();
   });
 
@@ -40,9 +46,7 @@ test.describe('ESS - pinned filters', { tag: [...tags.stateful.classic] }, () =>
     await pageObjects.explore.navigateFromKibanaCollapsibleTo('Alerts');
     await expect(page).toHaveURL(new RegExp(ALERTS_URL.replace(/\//g, '\\/')));
     const filterAfterNav = page.locator('[id^="popoverFor_filter"]');
-    await expect(filterAfterNav.first())
-      .toHaveCount(0)
-      .catch(() => {});
+    await expect(filterAfterNav.first()).toHaveCount(0);
   });
 });
 
@@ -51,8 +55,14 @@ test.describe(
   { tag: [...tags.serverless.security.complete] },
   () => {
     test.beforeEach(async ({ browserAuth, pageObjects, kbnClient, apiServices }) => {
-      await apiServices.deleteDataView(DATAVIEW).catch(() => {});
-      await apiServices.createDataView(DATAVIEW).catch(() => {});
+      await apiServices.dataViews.deleteByTitle(DATAVIEW).catch(() => {});
+      await kbnClient
+        .request({
+          method: 'POST',
+          path: '/api/data_views/data_view',
+          body: { data_view: { title: DATAVIEW, name: DATAVIEW } },
+        })
+        .catch(() => {});
       await browserAuth.loginAsAdmin();
     });
 
@@ -72,9 +82,7 @@ test.describe(
       await pageObjects.explore.navigateFromHeaderTo('solutionSideNavPanelLink-alerts');
       await expect(page).toHaveURL(new RegExp(ALERTS_URL.replace(/\//g, '\\/')));
       const filterAfterNav = page.locator('[id^="popoverFor_filter"]');
-      await expect(filterAfterNav.first())
-        .toHaveCount(0)
-        .catch(() => {});
+      await expect(filterAfterNav.first()).toHaveCount(0);
     });
   }
 );

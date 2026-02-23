@@ -6,6 +6,7 @@
  */
 
 import type { ScoutPage, Locator } from '@kbn/scout';
+import { waitForPageReady } from '../../common/page_utils';
 
 export type RuleDetailsTab =
   | 'alerts'
@@ -44,6 +45,7 @@ export class RuleDetailsPage {
   async goto(ruleId: string, tab?: RuleDetailsTab): Promise<void> {
     const path = tab ? `security/rules/id/${ruleId}/${tab}` : `security/rules/id/${ruleId}`;
     await this.page.gotoApp(path as 'security/rules/id');
+    await waitForPageReady(this.page);
   }
 
   async waitForPageToLoad(ruleName: string): Promise<void> {

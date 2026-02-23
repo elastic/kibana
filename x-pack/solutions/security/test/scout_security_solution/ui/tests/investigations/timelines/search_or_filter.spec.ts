@@ -18,7 +18,7 @@ test.describe(
       await browserAuth.loginAsAdmin();
       await page.goto(HOSTS_ALL_URL);
       await pageObjects.timeline.openTimelineUsingToggle();
-      await pageObjects.timeline.createNewTimeline();
+      await pageObjects.timeline.openNewTimeline();
     });
     test('should display search or filter container', async ({ pageObjects }) => {
       await expect(pageObjects.timeline.searchOrFilterContainer.first()).toBeVisible();

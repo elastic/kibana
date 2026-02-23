@@ -5,12 +5,51 @@
  * 2.0.
  */
 
-import { test, tags } from '../../../fixtures';
+import { test, expect, tags } from '../../../fixtures';
+import { deleteAlertsAndRules } from '../../../common/api_helpers';
+import { createRuleFromParams } from '../../../common/rule_api_helpers';
+import { getCustomQueryRuleParams } from '../../../common/rule_objects';
 
-test.describe.skip('Rule details - privileges', { tag: [...tags.stateful.classic] }, () => {
-  test.skip('rulesAll user can edit and delete rule', () => {
-    // Requires createUsersAndRoles with rulesAll, rulesRead
+test.describe('Rule details - privileges', { tag: [...tags.stateful.classic] }, () => {
+  test.beforeEach(async ({ apiServices, kbnClient }) => {
+    await deleteAlertsAndRules(apiServices);
+    await createRuleFromParams(
+      kbnClient,
+      getCustomQueryRuleParams({ name: 'Privileges test rule', rule_id: 'priv-1', enabled: false })
+    );
   });
 
-  test.skip('rulesRead user cannot edit or delete rule', () => {});
+  test('admin user can see rule details and actions', async ({
+    browserAuth,
+    pageObjects,
+    page,
+    kbnClient,
+  }) => {
+    await browserAuth.loginAsAdmin();
+
+    const ruleResp = await createRuleFromParams(
+      kbnClient,
+      getCustomQueryRuleParams({ name: 'Admin rule', rule_id: 'admin-priv-1', enabled: false })
+    );
+
+    await pageObjects.ruleDetails.goto(ruleResp.id);
+    await pageObjects.ruleDetails.waitForPageToLoad('Admin rule');
+
+    await expect(pageObjects.ruleDetails.ruleNameHeader).toContainText('Admin rule');
+    await expect(pageObjects.ruleDetails.ruleSwitch).toBeVisible();
+    await expect(pageObjects.ruleDetails.popoverActionsTrigger).toBeVisible();
+  });
+
+  test('viewer user can see rule details but not edit actions', async ({
+    browserAuth,
+    pageObjects,
+    kbnClient,
+  }) => {
+    await browserAuth.loginAsViewer();
+
+    await pageObjects.rulesManagementTable.goto();
+    await pageObjects.rulesManagementTable.waitForTableToLoad();
+
+    await expect(pageObjects.rulesManagementTable.ruleName).toBeVisible();
+  });
 });

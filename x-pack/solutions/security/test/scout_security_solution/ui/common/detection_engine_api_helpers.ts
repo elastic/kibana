@@ -8,18 +8,13 @@
 const EXCEPTION_LISTS_URL = '/api/exception_lists';
 const EXCEPTION_LISTS_ITEMS_URL = '/api/exception_lists/items';
 
+import type { KbnClient } from '@kbn/scout';
+
 /**
  * Create an exception list.
  */
 export async function createExceptionList(
-  kbnClient: {
-    request: (opts: {
-      method: string;
-      path: string;
-      body?: unknown;
-      retries?: number;
-    }) => Promise<unknown>;
-  },
+  kbnClient: KbnClient,
   params: { list_id: string; name: string; description: string; type: string }
 ): Promise<{ id: string; list_id: string }> {
   const response = await kbnClient.request<{ id: string; list_id: string }>({
@@ -28,21 +23,14 @@ export async function createExceptionList(
     body: params,
     retries: 0,
   });
-  return response as { id: string; list_id: string };
+  return response.data;
 }
 
 /**
  * Create an exception list item.
  */
 export async function createExceptionListItem(
-  kbnClient: {
-    request: (opts: {
-      method: string;
-      path: string;
-      body?: unknown;
-      retries?: number;
-    }) => Promise<unknown>;
-  },
+  kbnClient: KbnClient,
   params: {
     list_id: string;
     item_id?: string;
@@ -65,16 +53,14 @@ export async function createExceptionListItem(
     },
     retries: 0,
   });
-  return response as { id: string };
+  return response.data;
 }
 
 /**
  * Delete an exception list.
  */
 export async function deleteExceptionList(
-  kbnClient: {
-    request: (opts: { method: string; path: string; retries?: number }) => Promise<unknown>;
-  },
+  kbnClient: KbnClient,
   listId: string,
   namespaceType = 'single'
 ): Promise<void> {
@@ -92,16 +78,14 @@ export async function deleteExceptionList(
 /**
  * Get all exception lists and delete them.
  */
-export async function deleteAllExceptionLists(kbnClient: {
-  request: (opts: { method: string; path: string; retries?: number }) => Promise<unknown>;
-}): Promise<void> {
+export async function deleteAllExceptionLists(kbnClient: KbnClient): Promise<void> {
   try {
-    const response = (await kbnClient.request({
+    const response = await kbnClient.request<{ data?: Array<{ list_id: string }> }>({
       method: 'GET',
       path: `${EXCEPTION_LISTS_URL}/_find`,
       retries: 0,
-    })) as { data?: Array<{ list_id: string }> };
-    const lists = response?.data ?? [];
+    });
+    const lists = response.data?.data ?? [];
     for (const list of lists) {
       await deleteExceptionList(kbnClient, list.list_id);
     }

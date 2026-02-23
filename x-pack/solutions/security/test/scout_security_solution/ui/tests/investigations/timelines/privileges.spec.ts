@@ -8,6 +8,7 @@
 import { test, expect, tags } from '../../../fixtures';
 import { deleteTimelines } from '../../../common/timeline_api_helpers';
 import { TIMELINES_URL } from '../../../common/urls';
+import { t1AnalystRole } from '../../../common/roles';
 
 test.describe(
   'Timelines - Privileges',
@@ -15,14 +16,13 @@ test.describe(
   () => {
     test.beforeEach(async ({ kbnClient, browserAuth, page, pageObjects }) => {
       await deleteTimelines(kbnClient);
-      await browserAuth.loginWithCustomRole('t1_analyst');
+      await browserAuth.loginWithCustomRole(t1AnalystRole);
       await page.goto(TIMELINES_URL);
-      await page.waitForLoadState('networkidle');
       await pageObjects.timeline.timelinesTable
         .first()
         .waitFor({ state: 'visible', timeout: 10_000 });
       await pageObjects.timeline.openTimelineUsingToggle();
-      await pageObjects.timeline.createNewTimeline();
+      await pageObjects.timeline.openNewTimeline();
     });
 
     test('should not be able to create/update timeline with only read privileges', async ({

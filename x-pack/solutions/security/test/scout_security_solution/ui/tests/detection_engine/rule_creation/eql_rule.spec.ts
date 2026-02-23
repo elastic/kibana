@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { test, tags } from '../../../fixtures';
+import { test, expect, tags } from '../../../fixtures';
 import { deleteAlertsAndRules } from '../../../common/api_helpers';
+import { createRuleFromParams } from '../../../common/rule_api_helpers';
+import { getNewEqlRule } from '../../../common/rule_objects';
 
 test.describe(
   'EQL rule - Rule Creation',
@@ -14,17 +16,89 @@ test.describe(
     tag: [...tags.stateful.classic, ...tags.serverless.security.complete],
   },
   () => {
-    test.beforeEach(async ({ browserAuth, apiServices, kbnClient }) => {
+    test.beforeEach(async ({ browserAuth, apiServices }) => {
       await browserAuth.loginAsAdmin();
       await deleteAlertsAndRules(apiServices);
     });
 
-    test.skip('Creates and enables an EQL rule', async () => {
-      // Needs: EQL rule type, fillDefineEqlRuleAndContinue, etc.
+    test('Creates and enables an EQL rule', async ({ page, pageObjects }) => {
+      const { ruleCreation } = pageObjects;
+      const RULE_NAME = 'EQL Rule Test';
+
+      await test.step('Navigate to rule creation page', async () => {
+        await ruleCreation.goto();
+      });
+
+      await test.step('Select EQL rule type', async () => {
+        const eqlRuleType = page.testSubj.locator('eqlRuleType');
+        await eqlRuleType.click();
+      });
+
+      await test.step('Fill EQL query and continue', async () => {
+        const eqlQueryInput = page.testSubj.locator('eqlQueryBarTextInput');
+        await eqlQueryInput.fill('any where true');
+        await ruleCreation.clickContinue();
+      });
+
+      await test.step('Fill about step', async () => {
+        await ruleCreation.fillRuleName(RULE_NAME);
+        await ruleCreation.clickContinue();
+      });
+
+      await test.step('Fill schedule step and create rule', async () => {
+        await ruleCreation.clickContinue();
+        await ruleCreation.createRule();
+      });
+
+      await test.step('Verify rule is created', async () => {
+        const ruleNameHeader = page.testSubj.locator('header-page-title');
+        await expect(ruleNameHeader).toContainText(RULE_NAME);
+      });
     });
 
-    test.skip('Creates and enables an EQL rule with a sequence', async () => {
-      // Needs: EQL sequence rule creation flow
+    test('Creates and enables an EQL rule with a sequence', async ({ page, pageObjects }) => {
+      const { ruleCreation } = pageObjects;
+      const RULE_NAME = 'EQL Sequence Rule Test';
+
+      await test.step('Navigate to rule creation page', async () => {
+        await ruleCreation.goto();
+      });
+
+      await test.step('Select EQL rule type', async () => {
+        const eqlRuleType = page.testSubj.locator('eqlRuleType');
+        await eqlRuleType.click();
+      });
+
+      await test.step('Fill EQL sequence query and continue', async () => {
+        const eqlQueryInput = page.testSubj.locator('eqlQueryBarTextInput');
+        await eqlQueryInput.fill('sequence [any where true] [any where true]');
+        await ruleCreation.clickContinue();
+      });
+
+      await test.step('Fill about step', async () => {
+        await ruleCreation.fillRuleName(RULE_NAME);
+        await ruleCreation.clickContinue();
+      });
+
+      await test.step('Fill schedule step and create rule', async () => {
+        await ruleCreation.clickContinue();
+        await ruleCreation.createRule();
+      });
+
+      await test.step('Verify rule is created', async () => {
+        const ruleNameHeader = page.testSubj.locator('header-page-title');
+        await expect(ruleNameHeader).toContainText(RULE_NAME);
+      });
+    });
+
+    test('Creates EQL rule via API and verifies on details page', async ({
+      pageObjects,
+      kbnClient,
+    }) => {
+      const rule = getNewEqlRule({ rule_id: `eql-${Date.now()}` });
+      const created = await createRuleFromParams(kbnClient, rule);
+      await pageObjects.ruleDetails.goto(created.id);
+      await expect(pageObjects.ruleDetails.ruleNameHeader).toContainText(rule.name);
     });
   }
 );

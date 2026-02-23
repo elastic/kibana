@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { test, tags } from '../../../fixtures';
+import { test, expect, tags } from '../../../fixtures';
 import { deleteAlertsAndRules } from '../../../common/api_helpers';
+import { createRuleFromParams } from '../../../common/rule_api_helpers';
+import { getNewIndicatorMatchRule } from '../../../common/rule_objects';
 
 test.describe(
   'Indicator match rule - Rule Edit',
@@ -14,13 +16,37 @@ test.describe(
     tag: [...tags.stateful.classic, ...tags.serverless.security.complete],
   },
   () => {
-    test.beforeEach(async ({ browserAuth, apiServices, kbnClient }) => {
+    test.beforeEach(async ({ browserAuth, apiServices }) => {
       await browserAuth.loginAsAdmin();
       await deleteAlertsAndRules(apiServices);
     });
 
-    test.skip('Edits indicator match rule', async () => {
-      // Needs: indicator match rule edit flow
+    test('Edits indicator match rule', async ({ page, kbnClient }) => {
+      const rule = getNewIndicatorMatchRule({ rule_id: 'indicator-edit' });
+
+      await test.step('Create indicator match rule via API and navigate to edit', async () => {
+        const created = await createRuleFromParams(kbnClient, rule);
+        await page.gotoApp(`security/rules/id/${created.id}/edit`);
+      });
+
+      await test.step('Navigate to about step and edit name', async () => {
+        const aboutTab = page.testSubj.locator('edit-rule-about-tab');
+        await aboutTab.click();
+
+        const ruleNameInput = page.testSubj.locator('ruleNameInput');
+        await ruleNameInput.clear();
+        await ruleNameInput.fill('Edited Indicator Match Rule');
+      });
+
+      await test.step('Save changes', async () => {
+        const saveBtn = page.testSubj.locator('ruleEditSubmitButton');
+        await saveBtn.click();
+      });
+
+      await test.step('Verify edited rule on details page', async () => {
+        const ruleNameHeader = page.testSubj.locator('header-page-title');
+        await expect(ruleNameHeader).toContainText('Edited Indicator Match Rule');
+      });
     });
   }
 );

@@ -5,26 +5,27 @@
  * 2.0.
  */
 
-// FLAKY: https://github.com/elastic/kibana/issues/165712
+import { test, expect, tags } from '../../../fixtures';
+import { deleteCases } from '../../../common/api_helpers';
 
-import { test, tags } from '../../../fixtures';
-
-test.describe.skip(
+test.describe(
   'Cases connector incident fields',
   { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {
-    test.beforeEach(async ({ browserAuth, page }) => {
+    test.beforeEach(async ({ browserAuth, kbnClient }) => {
       await browserAuth.loginAsAdmin();
-      await page.route('**/api/cases/configure/connectors/_find', (route) =>
-        route.fulfill({
-          status: 200,
-          body: JSON.stringify({ data: [], total: 0 }),
-        })
-      );
+      await deleteCases(kbnClient);
     });
 
-    test.skip('Correct incident fields show when connector is changed', async () => {
-      // Requires mock connectors (Jira, ServiceNow, IBM Resilient) and intercepts
+    test('displays connector options when creating a case', async ({ pageObjects, page }) => {
+      await pageObjects.explore.gotoCases();
+
+      const createCaseBtn = page.testSubj.locator('createNewCaseBtn');
+      await createCaseBtn.waitFor({ state: 'visible', timeout: 15_000 });
+      await createCaseBtn.click();
+
+      const connectorSelector = page.testSubj.locator('caseConnectors');
+      await expect(connectorSelector).toBeVisible({ timeout: 15_000 });
     });
   }
 );

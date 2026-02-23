@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { deleteAllCases } from '../../../common/api_helpers';
 import { test, expect, tags } from '../../../fixtures';
 import { CASES_URL, OVERVIEW_URL } from '../../../common/urls';
 import {
@@ -29,7 +30,7 @@ test.describe(
   () => {
     test.beforeEach(async ({ browserAuth, kbnClient, apiServices }) => {
       await deleteTimelines(kbnClient);
-      await apiServices.cases?.deleteAll().catch(() => {});
+      await deleteAllCases(apiServices.cases);
       await browserAuth.loginAsAdmin();
     });
 
@@ -38,12 +39,11 @@ test.describe(
       page,
       kbnClient,
     }) => {
-      const timelineResp = await createTimeline(kbnClient, {
+      await createTimeline(kbnClient, {
         ...getDefaultTimeline(),
         title: testCase.timeline.title,
         query: testCase.timeline.query,
       });
-      const timelineId = timelineResp.savedObjectId;
 
       await pageObjects.explore.gotoUrl(CASES_URL);
       await page.testSubj.locator('createNewCaseBtn').first().click();

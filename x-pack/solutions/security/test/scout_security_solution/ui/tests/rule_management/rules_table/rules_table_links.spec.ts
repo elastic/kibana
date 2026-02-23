@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { test, expect, tags } from '../../../../fixtures';
-import { deleteAlertsAndRules } from '../../../../common/api_helpers';
-import { createRuleFromParams } from '../../../../common/rule_api_helpers';
-import { getCustomQueryRuleParams } from '../../../../common/rule_objects';
-import { resetRulesTableState } from '../../../../common/rule_api_helpers';
+import { test, expect, tags } from '../../../fixtures';
+import { deleteAlertsAndRules } from '../../../common/api_helpers';
+import { createRuleFromParams } from '../../../common/rule_api_helpers';
+import { getCustomQueryRuleParams } from '../../../common/rule_objects';
+import { resetRulesTableState } from '../../../common/rule_api_helpers';
 
 test.describe('Rules table: links', { tag: [...tags.stateful.classic] }, () => {
   test.beforeEach(async ({ browserAuth, apiServices, kbnClient, page }) => {

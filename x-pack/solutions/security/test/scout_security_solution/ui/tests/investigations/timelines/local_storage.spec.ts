@@ -18,7 +18,7 @@ test.describe(
       await browserAuth.loginAsAdmin();
       await page.goto(TIMELINES_URL);
       await pageObjects.timeline.openTimelineUsingToggle();
-      await pageObjects.timeline.createNewTimeline();
+      await pageObjects.timeline.openNewTimeline();
     });
     test('should persist timeline panel in view', async ({ page }) => {
       await expect(page.getByTestId('timeline-modal-header-panel').first()).toBeVisible();

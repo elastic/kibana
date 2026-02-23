@@ -6,6 +6,7 @@
  */
 
 import type { ScoutPage, Locator } from '@kbn/scout';
+import { waitForPageReady } from '../../common/page_utils';
 
 export class PrebuiltRulesPage {
   readonly page: ScoutPage;
@@ -28,10 +29,12 @@ export class PrebuiltRulesPage {
 
   async gotoAddRules(): Promise<void> {
     await this.page.gotoApp('security/rules/add_rules');
+    await waitForPageReady(this.page);
   }
 
   async gotoRuleUpdates(): Promise<void> {
     await this.page.gotoApp('security/rules/updates');
+    await waitForPageReady(this.page);
   }
 
   async waitForAddRulesTable(): Promise<void> {

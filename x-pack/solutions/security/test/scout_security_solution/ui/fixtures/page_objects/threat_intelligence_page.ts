@@ -6,6 +6,7 @@
  */
 
 import type { ScoutPage } from '@kbn/scout';
+import { waitForPageReady } from '../../common/page_utils';
 
 const INDICATORS_URL = '/app/security/threat_intelligence/indicators';
 
@@ -14,37 +15,38 @@ export class ThreatIntelligencePage {
 
   async goto() {
     await this.page.goto(INDICATORS_URL);
+    await waitForPageReady(this.page);
   }
 
-  get indicatorsTable() {
+  public get indicatorsTable() {
     return this.page.testSubj.locator('tiIndicatorsTable');
   }
 
-  get breadcrumbs() {
+  public get breadcrumbs() {
     return this.page.testSubj.locator('breadcrumbs');
   }
 
-  get defaultLayoutTitle() {
+  public get defaultLayoutTitle() {
     return this.page.testSubj.locator('default-layout-page-title');
   }
 
-  get emptyState() {
+  public get emptyState() {
     return this.page.testSubj.locator('tiIndicatorsEmptyState');
   }
 
-  get addIntegrationsButton() {
+  public get addIntegrationsButton() {
     return this.page.testSubj.locator('add-integrations-button');
   }
 
-  get fieldBrowser() {
+  public get fieldBrowser() {
     return this.page.testSubj.locator('show-field-browser');
   }
 
-  get inspectorButton() {
+  public get inspectorButton() {
     return this.page.testSubj.locator('inspectButton');
   }
 
-  get queryInput() {
+  public get queryInput() {
     return this.page.testSubj.locator('queryInput');
   }
 }

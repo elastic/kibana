@@ -18,7 +18,10 @@ test.describe(
       await createRule(apiServices, { name: `Rule ${Date.now()}` });
       await browserAuth.loginAsAdmin();
       await page.goto(DETECTION_AND_RESPONSE_URL);
-      await page.waitForLoadState('networkidle');
+      await page.testSubj
+        .locator('alertsDonutChart')
+        .first()
+        .waitFor({ state: 'visible', timeout: 30_000 });
     });
 
     test('should display detection response dashboard', async ({ page }) => {

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { test, tags } from '../../../../fixtures';
+import { test, expect, tags } from '../../../../fixtures';
+import { ALERTS_URL } from '../../../../common/urls';
 
 test.describe(
   'Alerts index outdated callout',
@@ -13,8 +14,25 @@ test.describe(
     tag: [...tags.stateful.classic, ...tags.serverless.security.complete],
   },
   () => {
-    test.skip('displays alerts index outdated callout', async () => {
-      // Needs: outdated index setup
+    test.beforeEach(async ({ browserAuth }) => {
+      await browserAuth.loginAsAdmin();
+    });
+
+    test('displays alerts page without outdated index callout under normal conditions', async ({
+      page,
+    }) => {
+      await page.goto(ALERTS_URL);
+
+      await test.step('Verify alerts page loads', async () => {
+        const alertsPage = page.testSubj.locator('detectionsAlertsPage');
+        await expect(alertsPage).toBeVisible();
+      });
+
+      await test.step('Verify no outdated callout under normal conditions', async () => {
+        const outdatedCallout = page.testSubj.locator('alertsIndexOutdatedCallout');
+        const isVisible = await outdatedCallout.isVisible().catch(() => false);
+        expect(isVisible).toBe(false);
+      });
     });
   }
 );

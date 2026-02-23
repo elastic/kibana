@@ -6,34 +6,35 @@
  */
 
 import type { ScoutPage, Locator } from '@kbn/scout';
+import { waitForPageReady } from '../../common/page_utils';
 
 /** Entity Analytics Anomalies dashboard table */
 export class EntityAnalyticsAnomaliesPage {
   constructor(private readonly page: ScoutPage) {}
 
-  get anomaliesTable(): Locator {
+  public get anomaliesTable(): Locator {
     return this.page.testSubj
       .locator('entity_analytics_anomalies')
       .locator('#entityAnalyticsDashboardAnomaliesTable');
   }
 
-  get anomaliesTableRows(): Locator {
+  public get anomaliesTableRows(): Locator {
     return this.page.testSubj.locator('entity_analytics_anomalies').locator('.euiTableRow');
   }
 
-  get enableJobButton(): Locator {
+  public get enableJobButton(): Locator {
     return this.page.testSubj.locator('enable-job');
   }
 
-  get enableJobLoader(): Locator {
+  public get enableJobLoader(): Locator {
     return this.page.testSubj.locator('job-switch-loader');
   }
 
-  get countColumn(): Locator {
+  public get countColumn(): Locator {
     return this.page.testSubj.locator('anomalies-table-column-count');
   }
 
-  get nextPageButton(): Locator {
+  public get nextPageButton(): Locator {
     return this.page.testSubj
       .locator('entity_analytics_anomalies')
       .locator('[data-test-subj="pagination-button-next"]');
@@ -41,6 +42,7 @@ export class EntityAnalyticsAnomaliesPage {
 
   async navigate(): Promise<void> {
     await this.page.gotoApp('security/entity_analytics');
+    await waitForPageReady(this.page);
   }
 
   async enableJobInRow(rowIndex: number): Promise<void> {

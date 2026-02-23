@@ -6,27 +6,29 @@
  */
 
 import type { ScoutPage } from '@kbn/scout';
+import { waitForPageReady } from '../../common/page_utils';
 
 export class Ai4dsocPage {
   constructor(private readonly page: ScoutPage) {}
 
   async goto(url: string) {
     await this.page.goto(url);
+    await waitForPageReady(this.page);
   }
 
-  get alertsSummaryPrompt() {
+  public get alertsSummaryPrompt() {
     return this.page.testSubj.locator('alert-summary-landing-page-prompt');
   }
 
-  get getStartedPage() {
+  public get getStartedPage() {
     return this.page.testSubj.locator('onboarding-hub-page');
   }
 
-  get appNotFoundPage() {
+  public get appNotFoundPage() {
     return this.page.testSubj.locator('appNotFoundPageContent');
   }
 
-  get aiSocNavigation() {
+  public get aiSocNavigation() {
     return this.page.locator('[data-test-subj*="securitySolutionSideNav"]');
   }
 
@@ -34,35 +36,35 @@ export class Ai4dsocPage {
     return this.page.testSubj.locator(`nav-item-id-${linkId}`);
   }
 
-  get securityFeature() {
+  public get securityFeature() {
     return this.page.testSubj.locator('featureCategory_securitySolution');
   }
 
-  get securityFeatureDescription() {
+  public get securityFeatureDescription() {
     return this.page.testSubj.locator('featurePrivilegeDescriptionText');
   }
 
-  get socManagementSubFeature() {
+  public get socManagementSubFeature() {
     return this.page.testSubj.locator('securitySolution_siemV5_soc_management');
   }
 
-  get securitySubFeatureTable() {
+  public get securitySubFeatureTable() {
     return this.page.testSubj.locator('securitySolution_siemV5_subFeaturesTable');
   }
 
-  get casesFeature() {
+  public get casesFeature() {
     return this.page.testSubj.locator('featureCategory_securitySolution_securitySolutionCasesV3');
   }
 
-  get machineLearningFeature() {
+  public get machineLearningFeature() {
     return this.page.testSubj.locator('featureCategory_securitySolution_ml');
   }
 
-  get elasticAiAssistantFeature() {
+  public get elasticAiAssistantFeature() {
     return this.page.testSubj.locator('featureCategory_securitySolution_securitySolutionAssistant');
   }
 
-  get attackDiscoveryFeature() {
+  public get attackDiscoveryFeature() {
     return this.page.testSubj.locator(
       'featureCategory_securitySolution_securitySolutionAttackDiscovery'
     );
@@ -82,23 +84,23 @@ export class Ai4dsocPage {
     );
   }
 
-  get assignToSpaceButton() {
+  public get assignToSpaceButton() {
     return this.page.testSubj.locator('addSpacePrivilegeButton');
   }
 
-  get spaceSelectorComboBox() {
+  public get spaceSelectorComboBox() {
     return this.page.testSubj.locator('spaceSelectorComboBox');
   }
 
-  get securityCategory() {
+  public get securityCategory() {
     return this.page.testSubj.locator('featureCategory_securitySolution');
   }
 
-  get noPrivilegesPage() {
+  public get noPrivilegesPage() {
     return this.page.testSubj.locator('noPrivilegesPage');
   }
 
-  get mlAccessDenied() {
+  public get mlAccessDenied() {
     return this.page.testSubj.locator('mlAccessDenied');
   }
 }

@@ -5,14 +5,39 @@
  * 2.0.
  */
 
-import { test, tags } from '../../../fixtures';
+import { test, expect, tags } from '../../../fixtures';
+import { deleteAlertsAndRules } from '../../../common/api_helpers';
+import { createRuleFromParams } from '../../../common/rule_api_helpers';
+import { getCustomQueryRuleParams } from '../../../common/rule_objects';
 
-test.describe.skip(
+test.describe(
   'Rule details - execution log',
   { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {
-    test.skip('displays execution log tab', () => {
-      // Requires rule with execution history
+    test.beforeEach(async ({ browserAuth, apiServices }) => {
+      await browserAuth.loginAsAdmin();
+      await deleteAlertsAndRules(apiServices);
+    });
+
+    test('displays execution log tab with execution entries', async ({
+      pageObjects,
+      page,
+      kbnClient,
+    }) => {
+      const ruleResp = await createRuleFromParams(
+        kbnClient,
+        getCustomQueryRuleParams({
+          name: 'Execution log rule',
+          rule_id: 'exec-log-1',
+          enabled: true,
+        })
+      );
+
+      await pageObjects.ruleDetails.goto(ruleResp.id, 'execution_results');
+      await pageObjects.ruleDetails.waitForPageToLoad('Execution log rule');
+
+      const executionLogTable = page.testSubj.locator('executionLogTable');
+      await expect(executionLogTable).toBeVisible({ timeout: 60_000 });
     });
   }
 );

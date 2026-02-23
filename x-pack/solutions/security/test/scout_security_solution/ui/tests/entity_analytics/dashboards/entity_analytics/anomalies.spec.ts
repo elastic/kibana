@@ -21,7 +21,7 @@ test.describe(
 
     test.afterAll(async ({ esArchiver }) => {
       try {
-        await esArchiver.unload('auditbeat_multiple');
+        // no-op: Scout EsArchiverFixture does not support unload;
       } catch {
         // Best-effort
       }
@@ -29,7 +29,7 @@ test.describe(
 
     test.afterEach(async ({ esArchiver }) => {
       try {
-        await esArchiver.unload('network');
+        // no-op: Scout EsArchiverFixture does not support unload;
       } catch {
         // Best-effort
       }

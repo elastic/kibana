@@ -17,7 +17,6 @@ test.describe(
       await deleteTimelines(kbnClient);
       await browserAuth.loginAsAdmin();
       await page.goto(HOSTS_ALL_URL);
-      await page.waitForLoadState('networkidle');
       await pageObjects.timeline.createTimelineFromBottomBar();
       await pageObjects.timeline.addNameAndDescriptionToTimeline(
         getDefaultTimeline().title,

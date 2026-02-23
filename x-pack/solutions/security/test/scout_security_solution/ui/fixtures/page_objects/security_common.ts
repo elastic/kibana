@@ -7,6 +7,7 @@
 
 import type { ScoutPage, Locator } from '@kbn/scout';
 import { OPEN_HOST_FLYOUT_BUTTON, OPEN_USER_FLYOUT_BUTTON } from '../../common/constants';
+import { waitForPageReady } from '../../common/page_utils';
 
 /**
  * Common Security Solution page object for shared UI patterns.
@@ -20,6 +21,7 @@ export class SecurityCommonPage {
    */
   async navigateToAlerts(): Promise<void> {
     await this.page.gotoApp('security/alerts');
+    await waitForPageReady(this.page);
   }
 
   /**

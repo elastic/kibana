@@ -5,19 +5,51 @@
  * 2.0.
  */
 
-import { test, tags } from '../../../../fixtures';
+import { test, expect, tags } from '../../../../fixtures';
 import { deleteAlertsAndRules } from '../../../../common/api_helpers';
 import { createRuleFromParams } from '../../../../common/rule_api_helpers';
 import { getNewRule } from '../../../../common/rule_objects';
+import { SECURITY_ARCHIVES } from '../../../../common/es_helpers';
+import { ALERTS_URL } from '../../../../common/urls';
 
 test.describe('Alert status (ESS)', { tag: [...tags.stateful.classic] }, () => {
-  test.beforeEach(async ({ browserAuth, apiServices, kbnClient }) => {
+  test.beforeEach(async ({ browserAuth, apiServices, kbnClient, esArchiver }) => {
     await browserAuth.loginAsAdmin();
+    await esArchiver.loadIfNeeded(SECURITY_ARCHIVES.AUDITBEAT_MULTIPLE);
     await deleteAlertsAndRules(apiServices);
-    await createRuleFromParams(kbnClient, getNewRule());
+    await createRuleFromParams(kbnClient, getNewRule({ rule_id: 'ess-status-rule' }));
   });
 
-  test.skip('alert status in ESS', async () => {
-    // Needs: ESS-specific status flow
+  test.afterAll(async ({ esArchiver }) => {
+    // no-op: Scout EsArchiverFixture does not support unload;
+  });
+
+  test('alert status in ESS - close and acknowledge alerts', async ({ page, pageObjects }) => {
+    const { detectionAlerts } = pageObjects;
+
+    await page.goto(ALERTS_URL);
+    await detectionAlerts.waitForAlertsToLoad();
+
+    await test.step('Select and acknowledge alerts', async () => {
+      const alertCheckboxes = detectionAlerts.alertCheckbox;
+      const count = await alertCheckboxes.count();
+      test.skip(count < 1, 'No alerts available');
+      await detectionAlerts.selectNumberOfAlerts(1);
+
+      const acknowledgeBtn = page.testSubj.locator('alert-acknowledge-context-menu-item');
+      const isVisible = await acknowledgeBtn.isVisible().catch(() => false);
+      test.skip(!isVisible, 'Acknowledge action not available');
+      await acknowledgeBtn.click();
+    });
+
+    await test.step('Verify success toast', async () => {
+      await expect(page.testSubj.locator('globalToastList')).toContainText('acknowledged');
+    });
+
+    await test.step('View acknowledged alerts', async () => {
+      await detectionAlerts.acknowledgedAlertsFilterBtn.click();
+      await detectionAlerts.waitForAlertsToLoad();
+      await expect(detectionAlerts.alertsTable).toBeVisible();
+    });
   });
 });

@@ -19,7 +19,10 @@ test.describe(
       const searchInput = page.locator('[data-test-subj="timelineQueryInput"]').first();
       await searchInput.fill('*');
       await searchInput.press('Enter');
-      await page.waitForTimeout(2000);
+      await page.testSubj
+        .locator('full-screen-active')
+        .first()
+        .waitFor({ state: 'visible', timeout: 10_000 });
     });
 
     test('should hide timeline header and tab list area', async ({ page }) => {

@@ -155,43 +155,61 @@ export class ExplorePage {
     await this.page.reload();
   }
 
-  get headerSubtitle() {
+  public get headerSubtitle() {
     return this.page.testSubj.locator('header-panel-subtitle').first();
   }
 
-  get allUsersTable() {
+  public get allUsersTable() {
     return this.page.testSubj.locator('table-allUsers-loading-false');
   }
 
-  get allHostsTable() {
+  public get allHostsTable() {
     return this.page.testSubj.locator('table-allHosts-loading-false');
   }
 
-  get authenticationsTable() {
+  public get authenticationsTable() {
     return this.page.testSubj.locator('table-users-authentications-loading-false');
   }
 
-  get uncommonProcessesTable() {
+  public get uncommonProcessesTable() {
     return this.page.testSubj.locator('table-uncommonProcesses-loading-false');
   }
 
-  get tableFirstPage() {
+  public get tableFirstPage() {
     return this.page.testSubj.locator('pagination-button-0');
   }
 
-  get tableSecondPage() {
+  public get tableSecondPage() {
     return this.page.testSubj.locator('pagination-button-1');
   }
 
-  get processNameField() {
+  public get processNameField() {
     return this.page.testSubj.locator('processName');
   }
 
-  get hostNames() {
+  public get hostNames() {
     return this.page.testSubj.locator('cellActions-renderContent-host.name');
   }
 
-  get notFoundPage() {
+  public get notFoundPage() {
     return this.page.testSubj.locator('empty-state');
+  }
+
+  public get kqlInput() {
+    return this.page.testSubj.locator('queryInput');
+  }
+
+  public get EXPLORE_URLS() {
+    return EXPLORE_URLS;
+  }
+
+  async goToTablePage(pageNumber: number): Promise<void> {
+    const btn = this.page.testSubj.locator(`pagination-button-${pageNumber}`);
+    await btn.first().click();
+  }
+
+  async sortFirstTableColumn(): Promise<void> {
+    const header = this.page.locator('.euiTableHeaderCell button').first();
+    await header.click();
   }
 }

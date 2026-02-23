@@ -6,6 +6,7 @@
  */
 
 import type { ScoutPage } from '@kbn/scout';
+import { waitForPageReady } from '../../common/page_utils';
 import { GET_STARTED_URL_PATH } from '../../common/urls';
 
 export class SiemMigrationsPage {
@@ -13,25 +14,26 @@ export class SiemMigrationsPage {
 
   async goto() {
     await this.page.goto(GET_STARTED_URL_PATH);
+    await waitForPageReady(this.page);
   }
 
-  get onboardingSiemMigrationsList() {
+  public get onboardingSiemMigrationsList() {
     return this.page.testSubj.locator('onboarding-siem-migrations-list');
   }
 
-  get ruleMigrationsGroupPanel() {
+  public get ruleMigrationsGroupPanel() {
     return this.page.testSubj.locator('rule-migrations-group-panel');
   }
 
-  get migrationPanelName() {
+  public get migrationPanelName() {
     return this.page.testSubj.locator('migration-panel-name');
   }
 
-  get uploadRulesBtn() {
+  public get uploadRulesBtn() {
     return this.page.testSubj.locator('upload-rules-btn');
   }
 
-  get uploadRulesFlyout() {
+  public get uploadRulesFlyout() {
     return this.page.testSubj.locator('upload-rules-flyout');
   }
 }

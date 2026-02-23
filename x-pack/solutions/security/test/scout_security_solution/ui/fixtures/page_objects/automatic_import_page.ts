@@ -6,6 +6,7 @@
  */
 
 import type { ScoutPage } from '@kbn/scout';
+import { waitForPageReady } from '../../common/page_utils';
 
 const CREATE_INTEGRATION_LANDING_PAGE = '/app/integrations/create';
 const ASSISTANT_BUTTON = 'assistantButton';
@@ -15,9 +16,10 @@ export class AutomaticImportPage {
 
   async gotoCreateIntegration() {
     await this.page.goto(CREATE_INTEGRATION_LANDING_PAGE);
+    await waitForPageReady(this.page);
   }
 
-  get assistantButton() {
+  public get assistantButton() {
     return this.page.locator(`[data-test-subj="${ASSISTANT_BUTTON}"]`);
   }
 

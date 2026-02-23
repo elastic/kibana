@@ -23,7 +23,11 @@ test.describe(
         .first();
       await searchContainer.fill(hostExistsQuery);
       await searchContainer.press('Enter');
-      await page.waitForTimeout(2000);
+      await page.testSubj
+        .locator('timeline-container')
+        .locator('inspect-empty-button')
+        .first()
+        .waitFor({ state: 'visible', timeout: 10_000 });
     });
 
     test('should open inspect modal', async ({ page, pageObjects }) => {

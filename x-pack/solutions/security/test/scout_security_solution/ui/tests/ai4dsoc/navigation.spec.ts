@@ -15,7 +15,7 @@ import { test, expect, tags } from '../../fixtures';
 import { GET_STARTED_URL } from '../../common/urls';
 
 // FLAKY: https://github.com/elastic/kibana/issues/242988
-test.describe.skip('AI4dSoC Navigation', { tag: [...tags.serverless.security.complete] }, () => {
+test.describe('AI4dSoC Navigation', { tag: [...tags.serverless.security.complete] }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsAdmin();
     await pageObjects.ai4dsoc.goto(GET_STARTED_URL);
@@ -41,12 +41,12 @@ test.describe.skip('AI4dSoC Navigation', { tag: [...tags.serverless.security.com
     ];
 
     test('should contain the specified links', async ({ pageObjects }) => {
-      await expect(pageObjects.ai4dsoc.aiSocNavigation.first()).toBeVisible();
+      await expect(pageObjects.ai4dsoc.aiSocNavigation).toBeVisible();
       for (const link of visibleLinks) {
-        await expect(pageObjects.ai4dsoc.navItemLocator(link).first()).toBeVisible();
+        await expect(pageObjects.ai4dsoc.navItemLocator(link)).toBeVisible();
       }
       for (const link of notVisibleLinks) {
-        await expect(pageObjects.ai4dsoc.navItemLocator(link).first()).not.toBeAttached();
+        await expect(pageObjects.ai4dsoc.navItemLocator(link)).not.toBeAttached();
       }
     });
   });

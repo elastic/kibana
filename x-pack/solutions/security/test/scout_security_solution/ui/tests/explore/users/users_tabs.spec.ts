@@ -63,7 +63,7 @@ test.describe(
         await expect(tabContent.first()).toBeVisible({ timeout: 15_000 });
       });
 
-      test.skip(
+      test(
         'renders users risk tab',
         { tag: [...tags.stateful.classic] },
         async ({ pageObjects, page }) => {

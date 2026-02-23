@@ -6,6 +6,7 @@
  */
 
 import type { ScoutPage } from '@kbn/scout';
+import { waitForPageReady } from '../../common/page_utils';
 
 const TIMELINES_URL = '/app/security/timelines/default';
 
@@ -14,91 +15,93 @@ export class TimelinePage {
 
   async goto() {
     await this.page.goto(TIMELINES_URL);
+    await waitForPageReady(this.page);
   }
 
   async gotoWithTimeRange() {
     const timerange =
       'timerange=(global:(linkTo:!(timeline),timerange:(from:1547914976217,fromStr:2019-01-19T16:22:56.217Z,kind:relative,to:1579537385745,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1547914976217,fromStr:2019-01-19T16:22:56.217Z,kind:relative,to:1579537385745,toStr:now)))';
     await this.page.goto(`${TIMELINES_URL}?${timerange}`);
+    await waitForPageReady(this.page);
   }
 
-  get timelinesTable() {
+  public get timelinesTable() {
     return this.page.testSubj.locator('timelines-table');
   }
 
-  get newTimelineAction() {
+  public get newTimelineAction() {
     return this.page.testSubj.locator('timeline-modal-new-timeline').first();
   }
 
-  get createNewTimeline() {
+  public get createNewTimeline() {
     return this.page.testSubj.locator('timeline-modal-new-timeline');
   }
 
-  get timelineBottomBarToggle() {
+  public get timelineBottomBarToggle() {
     return this.page.testSubj.locator('timeline-bottom-bar-open-button');
   }
 
-  get timelineFlyoutWrapper() {
+  public get timelineFlyoutWrapper() {
     return this.page.testSubj.locator('timeline-portal-ref');
   }
 
-  get timelineQuery() {
+  public get timelineQuery() {
     return this.page.testSubj.locator('timelineQueryInput');
   }
 
-  get timelinePanel() {
+  public get timelinePanel() {
     return this.page.testSubj.locator('timeline-modal-header-panel');
   }
 
-  get saveTimelineBtn() {
+  public get saveTimelineBtn() {
     return this.page.testSubj.locator('timeline-modal-save-timeline').first();
   }
 
-  get timelineTitleInput() {
+  public get timelineTitleInput() {
     return this.page.testSubj.locator('save-timeline-modal-title-input');
   }
 
-  get timelineDescriptionInput() {
+  public get timelineDescriptionInput() {
     return this.page.testSubj.locator('save-timeline-modal-description-input');
   }
 
-  get saveTimelineModalSaveBtn() {
+  public get saveTimelineModalSaveBtn() {
     return this.page.testSubj.locator('save-timeline-modal-save-button');
   }
 
-  get closeTimelineBtn() {
+  public get closeTimelineBtn() {
     return this.page.testSubj.locator('timeline-modal-header-close-button');
   }
 
-  get queryTabButton() {
+  public get queryTabButton() {
     return this.page.testSubj.locator('timelineTabs-query');
   }
 
-  get addFilterBtn() {
+  public get addFilterBtn() {
     return this.page.testSubj.locator('addFilter');
   }
 
-  get searchOrFilterContainer() {
+  public get searchOrFilterContainer() {
     return this.page.testSubj.locator('timeline-select-search-or-filter');
   }
 
-  get dataProvidersContainer() {
+  public get dataProvidersContainer() {
     return this.page.testSubj.locator('dataProviders');
   }
 
-  get toggleDataProviderBtn() {
+  public get toggleDataProviderBtn() {
     return this.page.testSubj.locator('toggle-data-provider');
   }
 
-  get fullScreenButton() {
+  public get fullScreenButton() {
     return this.page.testSubj.locator('full-screen-active');
   }
 
-  get inspectButton() {
+  public get inspectButton() {
     return this.page.testSubj.locator('timeline-container').locator('inspect-empty-button');
   }
 
-  get timelinesTabTemplate() {
+  public get timelinesTabTemplate() {
     return this.page.testSubj.locator('timeline-tab-template');
   }
 
@@ -106,55 +109,55 @@ export class TimelinePage {
     return this.page.testSubj.locator(`timeline-title-${id}`);
   }
 
-  get refreshButton() {
+  public get refreshButton() {
     return this.page.testSubj.locator('refreshButton-linkIcon');
   }
 
-  get openTimelineModal() {
+  public get openTimelineModal() {
     return this.page.testSubj.locator('open-timeline-modal');
   }
 
-  get bottomBarCreateNewTimeline() {
+  public get bottomBarCreateNewTimeline() {
     return this.page.testSubj.locator('timeline-bottom-bar-new-timeline');
   }
 
-  get bottomBarCreateNewTimelineTemplate() {
+  public get bottomBarCreateNewTimelineTemplate() {
     return this.page.testSubj.locator('timeline-bottom-bar-new-timeline-template');
   }
 
-  get loadingIndicator() {
+  public get loadingIndicator() {
     return this.page.testSubj.locator('loadingIndicator');
   }
 
-  get rows() {
+  public get rows() {
     return this.page.locator('.euiTableRow');
   }
 
-  get timelineStatus() {
+  public get timelineStatus() {
     return this.page.testSubj.locator('timeline-save-status');
   }
 
-  get saveTimelineTooltip() {
+  public get saveTimelineTooltip() {
     return this.page.testSubj.locator('timeline-modal-save-timeline-tooltip');
   }
 
-  get saveAsNewSwitch() {
+  public get saveAsNewSwitch() {
     return this.page.testSubj.locator('save-timeline-modal-save-as-new-switch');
   }
 
-  get collapsedActionBtn() {
+  public get collapsedActionBtn() {
     return this.page.testSubj.locator('euiCollapsedItemActionsButton');
   }
 
-  get createFromTemplateBtn() {
+  public get createFromTemplateBtn() {
     return this.page.testSubj.locator('create-from-template');
   }
 
-  get createTemplateFromTimelineBtn() {
+  public get createTemplateFromTimelineBtn() {
     return this.page.testSubj.locator('create-template-from-timeline');
   }
 
-  get inspectModal() {
+  public get inspectModal() {
     return this.page.testSubj.locator('inspectorPanel');
   }
 
@@ -172,10 +175,9 @@ export class TimelinePage {
     await this.timelineFlyoutWrapper.first().waitFor({ state: 'visible', timeout: 10_000 });
   }
 
-  async createNewTimeline() {
+  async openNewTimeline() {
     const toggle = this.timelineBottomBarToggle.first();
     await toggle.click();
-    await this.page.waitForTimeout(500);
     const createBtn = this.createNewTimeline.first();
     await createBtn.waitFor({ state: 'visible', timeout: 5000 });
     await createBtn.click();
@@ -244,7 +246,6 @@ export class TimelinePage {
 
   async createTimelineFromBottomBar() {
     await this.timelineBottomBarToggle.first().click();
-    await this.page.waitForTimeout(500);
     const createNewBtn = this.bottomBarCreateNewTimeline.first();
     await createNewBtn.waitFor({ state: 'visible', timeout: 5000 });
     await createNewBtn.click();
@@ -252,20 +253,21 @@ export class TimelinePage {
 
   async createTimelineTemplateFromBottomBar() {
     await this.timelineBottomBarToggle.first().click();
-    await this.page.waitForTimeout(500);
     const templateBtn = this.bottomBarCreateNewTimelineTemplate.first();
     await templateBtn.waitFor({ state: 'visible', timeout: 5000 });
     await templateBtn.click();
   }
 
   async refreshTimelinesUntilPresent(timelineId: string) {
-    for (let i = 0; i < 10; i++) {
+    const row = this.timelineTitleById(timelineId);
+    for (let i = 0; i < 30; i++) {
       await this.refreshButton.first().click();
-      const row = this.timelineTitleById(timelineId);
-      if (await row.first().isVisible()) {
+      try {
+        await row.first().waitFor({ state: 'visible', timeout: 1_000 });
         return;
+      } catch {
+        // not visible yet, retry
       }
-      await this.page.waitForTimeout(1000);
     }
   }
 

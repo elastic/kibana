@@ -18,7 +18,7 @@ test.describe(
       await browserAuth.loginAsAdmin();
       await page.goto(HOSTS_ALL_URL);
       await pageObjects.timeline.openTimelineUsingToggle();
-      await pageObjects.timeline.createNewTimeline();
+      await pageObjects.timeline.openNewTimeline();
     });
     test('should display EQL correlation tab', async ({ page }) => {
       await page.getByTestId('timelineTabs-eql').first().click();

@@ -5,18 +5,57 @@
  * 2.0.
  */
 
-import { test, tags } from '../../../fixtures';
+import { test, expect, tags } from '../../../fixtures';
+import { deleteAlertsAndRules } from '../../../common/api_helpers';
+import { createRuleFromParams, resetRulesTableState } from '../../../common/rule_api_helpers';
+import { getCustomQueryRuleParams, getNewEqlRule } from '../../../common/rule_objects';
 
-test.describe.skip(
+test.describe(
   'Rules table: filtering',
   { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {
-    test.skip('Filters rules by last response', () => {
-      // Requires installMockPrebuiltRulesPackage, createIndex, createDocument, createRule with execution
+    test.beforeEach(async ({ browserAuth, apiServices, kbnClient, page }) => {
+      await browserAuth.loginAsAdmin();
+      await resetRulesTableState(page);
+      await deleteAlertsAndRules(apiServices);
+      await createRuleFromParams(
+        kbnClient,
+        getCustomQueryRuleParams({
+          name: 'Tagged Rule',
+          rule_id: 'filter-1',
+          tags: ['test-tag-alpha'],
+          enabled: false,
+        })
+      );
+      await createRuleFromParams(
+        kbnClient,
+        getNewEqlRule({
+          name: 'EQL Filter Rule',
+          rule_id: 'filter-2',
+          tags: ['test-tag-beta'],
+          enabled: false,
+        })
+      );
     });
 
-    test.skip('Filters rules by tags', () => {});
+    test('Filters rules by search term', async ({ pageObjects }) => {
+      await pageObjects.rulesManagementTable.goto();
+      await pageObjects.rulesManagementTable.waitForTableToLoad();
+      await pageObjects.rulesManagementTable.disableAutoRefresh();
 
-    test.skip('Filters rules by rule type', () => {});
+      await pageObjects.rulesManagementTable.filterBySearchTerm('Tagged Rule');
+      const rows = await pageObjects.rulesManagementTable.getTableRows();
+      await expect(rows).toHaveCount(1);
+    });
+
+    test('Filters rules by tags', async ({ pageObjects }) => {
+      await pageObjects.rulesManagementTable.goto();
+      await pageObjects.rulesManagementTable.waitForTableToLoad();
+      await pageObjects.rulesManagementTable.disableAutoRefresh();
+
+      await pageObjects.rulesManagementTable.filterByTags(['test-tag-alpha']);
+      const rows = await pageObjects.rulesManagementTable.getTableRows();
+      await expect(rows).toHaveCount(1);
+    });
   }
 );

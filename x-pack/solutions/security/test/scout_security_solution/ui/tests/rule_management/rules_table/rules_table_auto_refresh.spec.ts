@@ -5,14 +5,43 @@
  * 2.0.
  */
 
-import { test, tags } from '../../../fixtures';
+import { test, expect, tags } from '../../../fixtures';
+import { deleteAlertsAndRules } from '../../../common/api_helpers';
+import { createRuleFromParams, resetRulesTableState } from '../../../common/rule_api_helpers';
+import { getCustomQueryRuleParams } from '../../../common/rule_objects';
 
-test.describe.skip('Rules table: auto-refresh', { tag: [...tags.stateful.classic] }, () => {
-  test.skip('gets deactivated when any rule selected and activated after rules unselected', () => {
-    // Requires installMockPrebuiltRulesPackage, setRulesTableAutoRefreshIntervalSetting, mockGlobalClock
+test.describe('Rules table: auto-refresh', { tag: [...tags.stateful.classic] }, () => {
+  test.beforeEach(async ({ browserAuth, apiServices, kbnClient, page }) => {
+    await browserAuth.loginAsAdmin();
+    await resetRulesTableState(page);
+    await deleteAlertsAndRules(apiServices);
+    await createRuleFromParams(
+      kbnClient,
+      getCustomQueryRuleParams({ name: 'Auto refresh rule', rule_id: 'auto-1', enabled: false })
+    );
   });
 
-  test.skip('refreshes rules table at set interval', () => {});
+  test('auto-refresh gets deactivated when rules are selected', async ({ pageObjects }) => {
+    await pageObjects.rulesManagementTable.goto();
+    await pageObjects.rulesManagementTable.waitForTableToLoad();
 
-  test.skip('can be disabled via settings', () => {});
+    const autoRefreshBtn = pageObjects.rulesManagementTable.autoRefreshPopoverTrigger;
+    await expect(autoRefreshBtn).toBeVisible();
+
+    await pageObjects.rulesManagementTable.selectAllRules();
+    await autoRefreshBtn.click();
+    const switchEl = pageObjects.rulesManagementTable.refreshSettingsSwitch;
+    const isChecked = await switchEl.getAttribute('aria-checked');
+    expect(isChecked).toBe('false');
+  });
+
+  test('can disable auto-refresh via settings', async ({ pageObjects }) => {
+    await pageObjects.rulesManagementTable.goto();
+    await pageObjects.rulesManagementTable.waitForTableToLoad();
+    await pageObjects.rulesManagementTable.disableAutoRefresh();
+
+    await pageObjects.rulesManagementTable.autoRefreshPopoverTrigger.click();
+    const switchEl = pageObjects.rulesManagementTable.refreshSettingsSwitch;
+    await expect(switchEl).toHaveAttribute('aria-checked', 'false');
+  });
 });

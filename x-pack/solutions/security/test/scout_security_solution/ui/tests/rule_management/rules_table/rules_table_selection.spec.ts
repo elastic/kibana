@@ -33,13 +33,12 @@ test.describe(
       await expect(bulkActionsBtn).toBeEnabled();
     });
 
-    test('should show bulk actions when rules are selected', async ({ pageObjects }) => {
+    test('should show bulk actions when rules are selected', async ({ pageObjects, page }) => {
       await pageObjects.rulesManagementTable.goto();
       await pageObjects.rulesManagementTable.waitForTableToLoad();
       await pageObjects.rulesManagementTable.selectRuleByName('New Rule Test');
       await pageObjects.rulesManagementTable.bulkActionsBtn.click();
-      const deleteBulkBtn =
-        pageObjects.rulesManagementTable.page.testSubj.locator('deleteRuleBulk');
+      const deleteBulkBtn = page.testSubj.locator('deleteRuleBulk');
       await expect(deleteBulkBtn.first()).toBeVisible({ timeout: 5_000 });
     });
   }

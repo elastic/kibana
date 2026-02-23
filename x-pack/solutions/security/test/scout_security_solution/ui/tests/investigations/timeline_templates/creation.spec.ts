@@ -35,7 +35,6 @@ test.describe(
 
       const plusIcon = page.getByTestId('timeline-bottom-bar-open-button').first();
       await plusIcon.click();
-      await page.waitForTimeout(500);
       const templateOption = page.getByTestId('timeline-bottom-bar-new-timeline-template').first();
       await templateOption.waitFor({ state: 'visible', timeout: 5000 });
       await templateOption.click();
@@ -59,7 +58,7 @@ test.describe(
       kbnClient,
     }) => {
       test.slow();
-      const created = await createTimeline(kbnClient, mockTimeline);
+      await createTimeline(kbnClient, mockTimeline);
       await browserAuth.loginAsAdmin();
       await page.goto(TIMELINES_URL);
       await pageObjects.timeline.timelinesTable.waitFor({ state: 'visible', timeout: 15_000 });

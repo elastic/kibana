@@ -15,7 +15,10 @@ test.describe(
     test.beforeEach(async ({ browserAuth, page }) => {
       await browserAuth.loginAsAdmin();
       await page.goto(INDICATORS_URL);
-      await page.waitForLoadState('networkidle');
+      await page.testSubj
+        .locator('breadcrumbs')
+        .first()
+        .waitFor({ state: 'visible', timeout: 15_000 });
     });
 
     test('should render breadcrumb', async ({ page }) => {

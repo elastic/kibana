@@ -54,7 +54,7 @@ test.describe('Rules table: sorting', { tag: [...tags.stateful.classic] }, () =>
     await expect(ruleSwitch.nth(SECOND_RULE)).toHaveAttribute('role', 'switch');
   });
 
-  test('Pagination updates page number and results', async ({ pageObjects, kbnClient }) => {
+  test('Pagination updates page number and results', async ({ pageObjects, page, kbnClient }) => {
     await createRuleFromParams(
       kbnClient,
       getNewRule({ name: 'Test a rule', rule_id: '5', enabled: false })
@@ -69,9 +69,7 @@ test.describe('Rules table: sorting', { tag: [...tags.stateful.classic] }, () =>
     await pageObjects.rulesManagementTable.setRowsPerPage(5);
 
     const rulesTable = pageObjects.rulesManagementTable.rulesTable;
-    const firstPageBtn = pageObjects.rulesManagementTable.page.locator(
-      '[data-test-subj="pagination-button-0"]'
-    );
+    const firstPageBtn = page.locator('[data-test-subj="pagination-button-0"]');
     await expect(firstPageBtn).toHaveAttribute('aria-current', 'page');
 
     const ruleNameFirst = await pageObjects.rulesManagementTable.ruleName.first().textContent();
@@ -81,9 +79,7 @@ test.describe('Rules table: sorting', { tag: [...tags.stateful.classic] }, () =>
     await expect(rows).toHaveCount(1, { timeout: 5000 });
     await expect(rulesTable).not.toContainText(ruleNameFirst ?? '');
 
-    const secondPageBtn = pageObjects.rulesManagementTable.page.locator(
-      '[data-test-subj="pagination-button-1"]'
-    );
+    const secondPageBtn = page.locator('[data-test-subj="pagination-button-1"]');
     await expect(firstPageBtn).not.toHaveAttribute('aria-current', 'page');
     await expect(secondPageBtn).toHaveAttribute('aria-current', 'page');
   });

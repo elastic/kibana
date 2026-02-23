@@ -25,9 +25,7 @@ test.describe(
       const { savedObjectId } = await createTimeline(kbnClient, mockTimeline);
       await browserAuth.loginAsAdmin();
       await page.goto(TIMELINES_URL);
-      await page.waitForLoadState('networkidle');
       await pageObjects.timeline.refreshTimelinesUntilPresent(savedObjectId);
-      await page.waitForTimeout(1000);
       try {
         await addNoteToTimeline(kbnClient, 'Test note', savedObjectId);
       } catch {

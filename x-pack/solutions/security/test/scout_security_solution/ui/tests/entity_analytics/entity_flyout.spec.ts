@@ -8,7 +8,6 @@
 import { test, expect, tags } from '../../fixtures';
 
 const USER_NAME = 'user1';
-const SIEM_KIBANA_HOST_NAME = 'Host-fwarau82er';
 
 test.describe(
   'Entity Flyout',
@@ -16,7 +15,7 @@ test.describe(
   () => {
     test.beforeEach(async ({ page, browserAuth, esArchiver, apiServices }) => {
       await esArchiver.loadIfNeeded('risk_scores_new_complete_data');
-      await esArchiver.loadIfNeeded('query_alert', { useCreate: true, docsOnly: true });
+      await esArchiver.loadIfNeeded('query_alert');
       await esArchiver.loadIfNeeded('user_managed_data');
 
       await page.route('**/internal/risk_score/engine/status', (route) =>
@@ -39,8 +38,8 @@ test.describe(
         // Best-effort cleanup
       }
       try {
-        await esArchiver.unload('risk_scores_new_complete_data');
-        await esArchiver.unload('user_managed_data');
+        // no-op: Scout EsArchiverFixture does not support unload;
+        // no-op: Scout EsArchiverFixture does not support unload;
       } catch {
         // Best-effort cleanup
       }

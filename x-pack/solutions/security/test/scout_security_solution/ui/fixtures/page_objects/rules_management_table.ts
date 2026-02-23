@@ -6,6 +6,7 @@
  */
 
 import type { ScoutPage, Locator } from '@kbn/scout';
+import { waitForPageReady } from '../../common/page_utils';
 
 export class RulesManagementTablePage {
   readonly rulesTable: Locator;
@@ -60,6 +61,7 @@ export class RulesManagementTablePage {
 
   async goto(): Promise<void> {
     await this.page.gotoApp('security/rules/management');
+    await waitForPageReady(this.page);
   }
 
   async waitForTableToLoad(): Promise<void> {
@@ -152,28 +154,6 @@ export class RulesManagementTablePage {
       .locator('confirmModalConfirmButton')
       .first()
       .click();
-  }
-
-  async deleteSelectedRules(): Promise<void> {
-    await this.bulkActionsBtn.click();
-    await this.page.testSubj.locator('deleteRuleBulk').first().click();
-    await this.page.testSubj
-      .locator('deleteRulesConfirmationModal')
-      .locator('confirmModalConfirmButton')
-      .first()
-      .click();
-  }
-
-  async getRulesManagementTableRowCount(): Promise<number> {
-    return this.rulesTable.locator('.euiTableRow').count();
-  }
-
-  async getRuleExecutionStatusBadgeCount(): Promise<number> {
-    return this.ruleExecutionStatusBadge.count();
-  }
-
-  async getRuleExecutionStatusBadgeCountByStatus(status: string): Promise<number> {
-    return this.ruleExecutionStatusBadge.filter({ hasText: status }).count();
   }
 
   async deleteSelectedRules(): Promise<void> {

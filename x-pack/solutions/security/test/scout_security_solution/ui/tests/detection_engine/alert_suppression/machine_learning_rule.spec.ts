@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { test, tags } from '../../../fixtures';
+import { test, expect, tags } from '../../../fixtures';
 import { deleteAlertsAndRules } from '../../../common/api_helpers';
+import { createRuleFromParams } from '../../../common/rule_api_helpers';
+import { getNewMachineLearningRule } from '../../../common/rule_objects';
 
 test.describe(
   'Alert suppression - ML rule',
@@ -14,13 +16,64 @@ test.describe(
     tag: [...tags.stateful.classic, ...tags.serverless.security.complete],
   },
   () => {
-    test.beforeEach(async ({ browserAuth, apiServices, kbnClient }) => {
+    const suppressByFields = ['by_field_name', 'by_field_value'];
+
+    test.beforeEach(async ({ browserAuth, apiServices }) => {
       await browserAuth.loginAsAdmin();
       await deleteAlertsAndRules(apiServices);
     });
 
-    test.skip('Alert suppression ML', async () => {
-      // Needs: ML rule with alert_suppression
+    test('Creates ML rule with per-execution suppression and verifies details', async ({
+      page,
+      pageObjects,
+      kbnClient,
+    }) => {
+      const rule = getNewMachineLearningRule();
+      const created = await createRuleFromParams(kbnClient, {
+        ...rule,
+        rule_id: `rule-${Date.now()}`,
+        alert_suppression: {
+          group_by: suppressByFields,
+          missing_fields_strategy: 'suppress',
+        },
+      });
+
+      await pageObjects.ruleDetails.goto(created.id);
+
+      const definitionDetails = page.testSubj.locator('definitionRule');
+      await expect(definitionDetails).toBeVisible();
+      await expect(definitionDetails.getByText(suppressByFields.join(''))).toBeVisible();
+      await expect(definitionDetails.getByText('One rule execution')).toBeVisible();
+      await expect(
+        definitionDetails.getByText('Suppress and group alerts for events with missing fields')
+      ).toBeVisible();
+    });
+
+    test('Creates ML rule with time interval suppression and verifies details', async ({
+      page,
+      pageObjects,
+      kbnClient,
+    }) => {
+      const rule = getNewMachineLearningRule();
+      const created = await createRuleFromParams(kbnClient, {
+        ...rule,
+        rule_id: `rule-${Date.now()}`,
+        alert_suppression: {
+          group_by: suppressByFields,
+          duration: { value: 45, unit: 'm' },
+          missing_fields_strategy: 'doNotSuppress',
+        },
+      });
+
+      await pageObjects.ruleDetails.goto(created.id);
+
+      const definitionDetails = page.testSubj.locator('definitionRule');
+      await expect(definitionDetails).toBeVisible();
+      await expect(definitionDetails.getByText(suppressByFields.join(''))).toBeVisible();
+      await expect(definitionDetails.getByText('45m')).toBeVisible();
+      await expect(
+        definitionDetails.getByText('Do not suppress alerts for events with missing fields')
+      ).toBeVisible();
     });
   }
 );

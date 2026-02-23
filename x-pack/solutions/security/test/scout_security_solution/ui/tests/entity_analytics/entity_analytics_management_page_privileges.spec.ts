@@ -39,7 +39,9 @@ test.describe(
       pageObjects,
     }) => {
       const { ROLES } = await import('@kbn/security-solution-plugin/common/test');
-      await browserAuth.loginWithCustomRole(ROLES.no_risk_engine_privileges);
+      await browserAuth.loginWithCustomRole(
+        ROLES.no_risk_engine_privileges as unknown as import('@kbn/scout').KibanaRole
+      );
       await pageObjects.entityAnalyticsManagement.navigate();
 
       await expect(pageObjects.entityAnalyticsManagement.riskScoreStatusLoading).not.toBeVisible();

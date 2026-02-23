@@ -5,14 +5,32 @@
  * 2.0.
  */
 
-import { test, tags } from '../../../fixtures';
+import { test, expect, tags } from '../../../fixtures';
+import { deleteAlertsAndRules } from '../../../common/api_helpers';
+import { createRuleFromParams } from '../../../common/rule_api_helpers';
+import { getNewEsqlRule } from '../../../common/rule_objects';
 
-test.describe.skip(
+test.describe(
   'Rule details - ESQL rule',
   { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {
-    test.skip('displays ESQL rule details', () => {
-      // Requires ESQL rule creation
+    test.beforeEach(async ({ browserAuth, apiServices }) => {
+      await browserAuth.loginAsAdmin();
+      await deleteAlertsAndRules(apiServices);
+    });
+
+    test('displays ESQL rule details', async ({ pageObjects, page, kbnClient }) => {
+      const esqlRule = getNewEsqlRule({ name: 'ESQL Detail Test', rule_id: 'esql-detail-1' });
+      const ruleResp = await createRuleFromParams(kbnClient, esqlRule);
+
+      await pageObjects.ruleDetails.goto(ruleResp.id);
+      await pageObjects.ruleDetails.waitForPageToLoad('ESQL Detail Test');
+
+      await expect(pageObjects.ruleDetails.ruleNameHeader).toContainText('ESQL Detail Test');
+
+      const definitionSection = pageObjects.ruleDetails.definitionDetails;
+      await expect(definitionSection).toContainText('ES|QL');
+      await expect(definitionSection).toContainText(esqlRule.query);
     });
   }
 );

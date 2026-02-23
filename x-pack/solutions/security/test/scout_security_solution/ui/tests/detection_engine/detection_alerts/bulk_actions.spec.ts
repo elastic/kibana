@@ -9,6 +9,8 @@ import { test, expect, tags } from '../../../fixtures';
 import { deleteAlertsAndRules } from '../../../common/api_helpers';
 import { createRuleFromParams } from '../../../common/rule_api_helpers';
 import { getNewRule } from '../../../common/rule_objects';
+import { SECURITY_ARCHIVES } from '../../../common/es_helpers';
+import { ALERTS_URL } from '../../../common/urls';
 
 test.describe(
   'Alerts table bulk actions',
@@ -16,26 +18,38 @@ test.describe(
     tag: [...tags.stateful.classic, ...tags.serverless.security.complete],
   },
   () => {
-    test.beforeEach(async ({ browserAuth, apiServices, kbnClient }) => {
+    test.beforeEach(async ({ browserAuth, apiServices, kbnClient, esArchiver }) => {
       await browserAuth.loginAsAdmin();
+      await esArchiver.loadIfNeeded(SECURITY_ARCHIVES.AUDITBEAT_MULTIPLE);
       await deleteAlertsAndRules(apiServices);
-      await createRuleFromParams(kbnClient, getNewRule());
+      await createRuleFromParams(kbnClient, getNewRule({ rule_id: 'bulk-actions-rule' }));
     });
 
-    test('shows the and cases bulk actions', async ({ pageObjects, page }) => {
-      await pageObjects.detectionAlerts.goto();
-      await pageObjects.detectionAlerts.waitForAlertsToLoad();
-      await page.waitForTimeout(15_000); // Wait for alerts to populate (auditbeat data)
-      const rows = await pageObjects.detectionAlerts.getDataGridRows().count();
-      test.skip(rows < 2, 'Insufficient alert data - needs auditbeat_multiple esArchiver');
-      await pageObjects.detectionAlerts.selectNumberOfAlerts(2);
-      await expect(pageObjects.detectionAlerts.selectedAlertsButton.first()).toHaveText(
-        'Selected 2 alerts'
-      );
-      await pageObjects.detectionAlerts.clickTakeActionPopover();
-      await expect(pageObjects.detectionAlerts.takeActionPopoverBtn.first()).toBeVisible();
-      await expect(pageObjects.detectionAlerts.addToNewCaseButton.first()).toBeVisible();
-      await expect(pageObjects.detectionAlerts.addToExistingCaseButton.first()).toBeVisible();
+    test.afterAll(async ({ esArchiver }) => {
+      // no-op: Scout EsArchiverFixture does not support unload;
+    });
+
+    test('shows bulk actions and case actions', async ({ pageObjects, page }) => {
+      const { detectionAlerts } = pageObjects;
+
+      await page.goto(ALERTS_URL);
+      await detectionAlerts.waitForAlertsToLoad();
+
+      await test.step('Select multiple alerts', async () => {
+        const alertCheckboxes = detectionAlerts.alertCheckbox;
+        const count = await alertCheckboxes.count();
+        test.skip(count < 2, 'Insufficient alert data');
+        await detectionAlerts.selectNumberOfAlerts(2);
+      });
+
+      await test.step('Verify bulk actions are available', async () => {
+        await expect(detectionAlerts.selectedAlertsButton.first()).toContainText(
+          'Selected 2 alerts'
+        );
+        await detectionAlerts.clickTakeActionPopover();
+        await expect(detectionAlerts.addToNewCaseButton.first()).toBeVisible();
+        await expect(detectionAlerts.addToExistingCaseButton.first()).toBeVisible();
+      });
     });
   }
 );

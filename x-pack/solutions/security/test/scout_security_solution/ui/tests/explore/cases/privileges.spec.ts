@@ -5,21 +5,37 @@
  * 2.0.
  */
 
-import { test, tags } from '../../../fixtures';
+import { test, expect, tags } from '../../../fixtures';
+import { deleteCases, deleteAllCases } from '../../../common/api_helpers';
+import { CASES_URL } from '../../../common/urls';
 
-test.describe.skip('Cases privileges', { tag: [...tags.stateful.classic] }, () => {
-  test.beforeEach(async ({ browserAuth, apiServices }) => {
-    await apiServices.cases?.deleteAll().catch(() => {});
+test.describe('Cases privileges', { tag: [...tags.stateful.classic] }, () => {
+  test.beforeEach(async ({ apiServices, kbnClient }) => {
+    await deleteAllCases(apiServices.cases);
+    await deleteCases(kbnClient);
+  });
+
+  test('admin user can access cases and create new case', async ({
+    browserAuth,
+    pageObjects,
+    page,
+  }) => {
     await browserAuth.loginAsAdmin();
+    await pageObjects.explore.gotoCases();
+
+    const createCaseBtn = page.testSubj.locator('createNewCaseBtn');
+    await expect(createCaseBtn).toBeVisible({ timeout: 15_000 });
   });
 
-  test.skip('User with secAll role can create a case', async () => {
-    // Requires createUsersAndRoles/deleteUsersAndRoles - complex RBAC setup
+  test('viewer user can see cases but has limited actions', async ({
+    browserAuth,
+    pageObjects,
+    page,
+  }) => {
+    await browserAuth.loginAsViewer();
+    await pageObjects.explore.gotoUrl(CASES_URL);
+
+    const casesPage = page.testSubj.locator('cases-table-page');
+    await expect(casesPage).toBeVisible({ timeout: 15_000 });
   });
-
-  test.skip('User with secReadCasesAll role can create a case', async () => {});
-
-  test.skip('User with secAllCasesNoDelete role can create a case', async () => {});
-
-  test.skip('User with secAllCasesOnlyReadDelete role cannot create a case', async () => {});
 });

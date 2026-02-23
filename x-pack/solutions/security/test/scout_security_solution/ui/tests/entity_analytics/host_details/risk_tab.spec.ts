@@ -13,7 +13,7 @@ test.describe(
   () => {
     test.beforeAll(async ({ esArchiver }) => {
       await esArchiver.loadIfNeeded('risk_scores_new_complete_data');
-      await esArchiver.loadIfNeeded('query_alert', { useCreate: true, docsOnly: true });
+      await esArchiver.loadIfNeeded('query_alert');
     });
 
     test.beforeEach(async ({ page, browserAuth, apiServices }) => {
@@ -40,7 +40,7 @@ test.describe(
         // Best-effort cleanup
       }
       try {
-        await esArchiver.unload('risk_scores_new_complete_data');
+        // no-op: Scout EsArchiverFixture does not support unload;
       } catch {
         // Best-effort cleanup
       }

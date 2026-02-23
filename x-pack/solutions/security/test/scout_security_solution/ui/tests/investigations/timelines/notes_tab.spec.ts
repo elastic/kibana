@@ -28,7 +28,10 @@ test.describe(
       const { savedObjectId } = await createTimeline(kbnClient, mockTimeline);
       await browserAuth.loginAsAdmin();
       await page.goto(`${TIMELINES_URL}/${savedObjectId}`);
-      await page.waitForLoadState('networkidle');
+      await page.testSubj
+        .locator('timelineTabs-notes')
+        .first()
+        .waitFor({ state: 'visible', timeout: 15_000 });
     });
 
     test('renders notes UI and basic content and delete it', async ({ page }) => {

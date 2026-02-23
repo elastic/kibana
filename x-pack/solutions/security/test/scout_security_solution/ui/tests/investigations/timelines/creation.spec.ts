@@ -31,7 +31,7 @@ test.describe(
       await browserAuth.loginAsAdmin();
       await page.goto(OVERVIEW_URL);
       await pageObjects.timeline.openTimelineUsingToggle();
-      await pageObjects.timeline.createNewTimeline();
+      await pageObjects.timeline.openNewTimeline();
       await pageObjects.timeline.addNameAndDescriptionToTimeline(
         mockTimeline.title,
         mockTimeline.description

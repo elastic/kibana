@@ -64,7 +64,7 @@ test.describe('Asset Inventory page - user flyout', { tag: [...tags.stateful.cla
       });
     });
     await page.reload();
-    await page.waitForTimeout(5000);
+    await page.testSubj.locator('allAssetsTitle').waitFor({ state: 'visible', timeout: 30_000 });
   });
 
   test('should display All assets title', async ({ pageObjects }) => {

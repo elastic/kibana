@@ -16,16 +16,64 @@ test.describe(
     tag: [...tags.stateful.classic, ...tags.serverless.security.complete],
   },
   () => {
-    test.beforeEach(async ({ browserAuth, apiServices, kbnClient }) => {
+    test.beforeEach(async ({ browserAuth, apiServices }) => {
       await browserAuth.loginAsAdmin();
       await deleteAlertsAndRules(apiServices);
     });
 
-    test('Creates and enables a threshold rule', async ({ pageObjects, kbnClient }) => {
+    test('Creates and enables a threshold rule', async ({ page, pageObjects }) => {
+      const { ruleCreation } = pageObjects;
+      const RULE_NAME = 'Threshold Rule Test';
+
+      await test.step('Navigate to rule creation page', async () => {
+        await ruleCreation.goto();
+      });
+
+      await test.step('Select threshold rule type', async () => {
+        const thresholdType = page.testSubj.locator('thresholdRuleType');
+        await thresholdType.click();
+      });
+
+      await test.step('Fill threshold define step', async () => {
+        const thresholdFieldCombo = page.testSubj.locator('thresholdField');
+        if (await thresholdFieldCombo.isVisible()) {
+          await thresholdFieldCombo.locator('input').fill('host.name');
+          await page.getByRole('option', { name: 'host.name' }).first().click();
+        }
+
+        const thresholdValueInput = page.testSubj.locator('thresholdValue');
+        if (await thresholdValueInput.isVisible()) {
+          await thresholdValueInput.clear();
+          await thresholdValueInput.fill('1');
+        }
+
+        await ruleCreation.clickContinue();
+      });
+
+      await test.step('Fill about step', async () => {
+        await ruleCreation.fillRuleName(RULE_NAME);
+        await ruleCreation.clickContinue();
+      });
+
+      await test.step('Fill schedule step and create rule', async () => {
+        await ruleCreation.clickContinue();
+        await ruleCreation.createRule();
+      });
+
+      await test.step('Verify rule is created', async () => {
+        const ruleNameHeader = page.testSubj.locator('header-page-title');
+        await expect(ruleNameHeader).toContainText(RULE_NAME);
+      });
+    });
+
+    test('Creates threshold rule via API and verifies on details page', async ({
+      pageObjects,
+      kbnClient,
+    }) => {
       const rule = getNewThresholdRule({ rule_id: `threshold-${Date.now()}` });
       const created = await createRuleFromParams(kbnClient, rule);
-      await pageObjects.ruleEdit.gotoRuleDetails(created.id);
-      await expect(pageObjects.ruleEdit.ruleNameHeader.first()).toContainText(rule.name);
+      await pageObjects.ruleDetails.goto(created.id);
+      await expect(pageObjects.ruleDetails.ruleNameHeader).toContainText(rule.name);
     });
   }
 );

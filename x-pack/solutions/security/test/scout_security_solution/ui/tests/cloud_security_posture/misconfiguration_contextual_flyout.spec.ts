@@ -77,32 +77,30 @@ async function putIndexMapping(esClient: EsClient): Promise<void> {
   });
   await esClient.indices.putMapping({
     index: CDR_MOCK_THIRD_PARTY_MISCONFIGURATION_LATEST_INDEX,
-    body: {
-      properties: {
-        'result.evaluation': { type: 'keyword' },
-        'host.name': { type: 'keyword' },
-        'resource.id': { type: 'keyword' },
-        resource: {
-          type: 'object',
-          properties: {
-            id: { type: 'keyword' },
-            name: { type: 'keyword' },
-            sub_type: { type: 'keyword' },
-          },
+    properties: {
+      'result.evaluation': { type: 'keyword' },
+      'host.name': { type: 'keyword' },
+      'resource.id': { type: 'keyword' },
+      resource: {
+        type: 'object',
+        properties: {
+          id: { type: 'keyword' },
+          name: { type: 'keyword' },
+          sub_type: { type: 'keyword' },
         },
-        rule: {
-          type: 'object',
-          properties: {
-            name: { type: 'keyword' },
-            section: { type: 'keyword' },
-            benchmark: {
-              type: 'object',
-              properties: {
-                id: { type: 'keyword' },
-                posture_type: { type: 'keyword' },
-                name: { type: 'keyword' },
-                version: { type: 'keyword' },
-              },
+      },
+      rule: {
+        type: 'object',
+        properties: {
+          name: { type: 'keyword' },
+          section: { type: 'keyword' },
+          benchmark: {
+            type: 'object',
+            properties: {
+              id: { type: 'keyword' },
+              posture_type: { type: 'keyword' },
+              name: { type: 'keyword' },
+              version: { type: 'keyword' },
             },
           },
         },

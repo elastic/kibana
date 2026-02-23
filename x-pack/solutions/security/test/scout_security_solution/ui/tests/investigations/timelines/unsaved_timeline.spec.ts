@@ -18,7 +18,7 @@ test.describe(
       await browserAuth.loginAsAdmin();
       await page.goto(TIMELINES_URL);
       await pageObjects.timeline.openTimelineUsingToggle();
-      await pageObjects.timeline.createNewTimeline();
+      await pageObjects.timeline.openNewTimeline();
     });
 
     test('should show different timeline states', async ({ page, pageObjects }) => {
@@ -27,7 +27,9 @@ test.describe(
       await expect(status.first()).toBeVisible();
       await expect(status.first()).toContainText('Unsaved');
       await pageObjects.timeline.addNameToTimelineAndSave('Test Timeline');
-      await page.waitForTimeout(2000);
+      await pageObjects.timeline.timelineStatus
+        .first()
+        .waitFor({ state: 'visible', timeout: 10_000 });
       await pageObjects.timeline.executeTimelineKQL('agent.name : *');
       await expect(status.first()).toContainText('Unsaved changes');
     });

@@ -15,7 +15,10 @@ test.describe(
     test.beforeEach(async ({ browserAuth, page }) => {
       await browserAuth.loginAsAdmin();
       await page.goto(INDICATORS_URL);
-      await page.waitForLoadState('networkidle');
+      await page.testSubj
+        .locator('queryInput')
+        .first()
+        .waitFor({ state: 'visible', timeout: 15_000 });
     });
     test('should display query input', async ({ page }) => {
       const queryInput = page.getByTestId('queryInput');

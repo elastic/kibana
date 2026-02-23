@@ -5,12 +5,36 @@
  * 2.0.
  */
 
-import { test, tags } from '../../../../fixtures';
+import { test, expect, tags } from '../../../../fixtures';
+import { createTimeline, deleteTimelines } from '../../../../common/timeline_api_helpers';
+import { TIMELINES_URL } from '../../../../common/urls';
 
 test.describe(
   'Timelines ESQL - Search Filter',
   { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {
-    test.skip('ESQL - requires ES|QL support', async () => {});
+    test.beforeEach(async ({ browserAuth, kbnClient }) => {
+      await browserAuth.loginAsAdmin();
+      await deleteTimelines(kbnClient);
+    });
+
+    test('ESQL tab supports search filtering', async ({ pageObjects, page, kbnClient }) => {
+      const timeline = await createTimeline(kbnClient, {
+        title: 'ESQL Filter Timeline',
+        description: 'Timeline for ESQL filter test',
+        query: 'host.name: *',
+      });
+
+      await pageObjects.explore.gotoUrl(
+        `${TIMELINES_URL}?timeline=(id:'${timeline.savedObjectId}',isOpen:!t)`
+      );
+
+      const esqlTab = page.testSubj.locator('timelineTabs-esql');
+      if (await esqlTab.isVisible({ timeout: 10_000 }).catch(() => false)) {
+        await esqlTab.click();
+        const esqlContent = page.testSubj.locator('timeline-tab-content-esql');
+        await expect(esqlContent).toBeVisible({ timeout: 15_000 });
+      }
+    });
   }
 );

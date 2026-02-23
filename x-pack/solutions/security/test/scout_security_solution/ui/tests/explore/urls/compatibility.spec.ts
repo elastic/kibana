@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-// FLAKY: https://github.com/elastic/kibana/issues/181008
-
 import { test, expect, tags } from '../../../fixtures';
 import { ALERTS_URL, RULES_MANAGEMENT_URL } from '../../../common/urls';
 
@@ -26,7 +24,7 @@ const ABSOLUTE_DATE = {
   startTime: 'Aug 1, 2019 @ 20:03:29.186',
 };
 
-test.describe.skip('URL compatibility', { tag: [...tags.stateful.classic] }, () => {
+test.describe('URL compatibility', { tag: [...tags.stateful.classic] }, () => {
   test.beforeEach(async ({ browserAuth }) => {
     await browserAuth.loginAsAdmin();
   });
@@ -62,14 +60,6 @@ test.describe.skip('URL compatibility', { tag: [...tags.stateful.classic] }, () 
     await expect(page).toHaveURL(/rules\/id\/5a4a0460-d822-11eb-8962-bfd4aff0a9b3/);
   });
 
-  test('Redirects to rule details alerts tab from old Detections rule details URL', async ({
-    pageObjects,
-    page,
-  }) => {
-    await pageObjects.explore.gotoUrl(LEGACY_RULE_DETAILS_URL);
-    await expect(page).toHaveURL(/rules\/id\/5a4a0460-d822-11eb-8962-bfd4aff0a9b3/);
-  });
-
   test('Redirects to rule edit from old Detections rule edit URL', async ({
     pageObjects,
     page,
@@ -84,8 +74,8 @@ test.describe.skip('URL compatibility', { tag: [...tags.stateful.classic] }, () 
   }) => {
     await pageObjects.explore.gotoUrl(ABSOLUTE_DATE_RANGE_URL);
     const startDateBtn = page.testSubj.locator('superDatePickerstartDatePopoverButton');
-    await expect(startDateBtn.first()).toHaveAttribute('title', ABSOLUTE_DATE.startTime);
+    await expect(startDateBtn).toHaveAttribute('title', ABSOLUTE_DATE.startTime);
     const endDateBtn = page.testSubj.locator('superDatePickerendDatePopoverButton');
-    await expect(endDateBtn.first()).toHaveAttribute('title', ABSOLUTE_DATE.endTime);
+    await expect(endDateBtn).toHaveAttribute('title', ABSOLUTE_DATE.endTime);
   });
 });

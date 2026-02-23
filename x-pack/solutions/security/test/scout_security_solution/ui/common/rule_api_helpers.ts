@@ -31,7 +31,7 @@ export async function createRuleFromParams(
     body: rule,
     retries: 0,
   });
-  return response as CreateRuleResponse;
+  return response.data;
 }
 
 /**
@@ -47,6 +47,22 @@ export async function deleteAllRules(kbnClient: KbnClient): Promise<void> {
   } catch {
     // Best-effort cleanup
   }
+}
+
+/**
+ * Find all detection rules.
+ */
+export async function findAllRules(
+  kbnClient: KbnClient
+): Promise<{ data: Array<{ id: string; rule_id: string; name: string }> }> {
+  const response = await kbnClient.request<{
+    data: Array<{ id: string; rule_id: string; name: string }>;
+  }>({
+    method: 'GET',
+    path: DETECTION_ENGINE_RULES_URL_FIND,
+    query: { per_page: 100 },
+  });
+  return response.data;
 }
 
 /**

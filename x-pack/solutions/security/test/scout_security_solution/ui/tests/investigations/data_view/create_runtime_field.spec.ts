@@ -22,7 +22,6 @@ test.describe(
       await createRule(apiServices, { name: `Rule ${Date.now()}` });
       await browserAuth.loginAsAdmin();
       await page.goto(ALERTS_URL);
-      await page.waitForLoadState('networkidle');
 
       const fieldBrowser = page.getByTestId('show-field-browser').first();
       await fieldBrowser.waitFor({ state: 'visible', timeout: 15_000 });
@@ -47,9 +46,9 @@ test.describe(
       const searchInput = page.locator('[data-test-subj="timelineQueryInput"]').first();
       await searchInput.fill('host.name: *');
       await searchInput.press('Enter');
-      await page.waitForTimeout(3000);
 
       const addFieldBtn = page.getByTestId('timeline-discover-fields-button').first();
+      await addFieldBtn.waitFor({ state: 'visible', timeout: 10_000 });
       await addFieldBtn.click();
       await page.getByTestId('fieldNameInput').fill(timelineRuntimeField);
       await page.getByTestId('saveField').click();

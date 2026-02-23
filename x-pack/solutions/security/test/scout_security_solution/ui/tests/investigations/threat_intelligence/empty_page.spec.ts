@@ -19,7 +19,6 @@ test.describe(
     }) => {
       await browserAuth.loginAsAdmin();
       await page.goto(INDICATORS_URL);
-      await page.waitForLoadState('networkidle');
 
       const emptyState = page.getByTestId('tiIndicatorsEmptyState');
       const table = page.getByTestId('tiIndicatorsTable');

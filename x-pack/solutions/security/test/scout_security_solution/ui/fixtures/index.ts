@@ -19,7 +19,24 @@ import {
   DetectionAlertsPage,
   RuleCreationPage,
   RuleEditPage,
+  RuleDetailsPage,
   ExceptionsPage,
+  ExpandableFlyoutPage,
+  AlertFiltersPage,
+  RuleGapsPage,
+  Ai4dsocPage,
+  AssetInventoryPage,
+  AssetInventoryOnboardingPage,
+  AutomaticImportPage,
+  PrebuiltRulesPage,
+  EntityAnalyticsManagementPage,
+  EntityAnalyticsAssetCriticalityPage,
+  EntityAnalyticsFlyoutPage,
+  EntityAnalyticsThreatHuntingPage,
+  EntityAnalyticsPrivMonPage,
+  EntityAnalyticsRiskInfoPage,
+  EntityAnalyticsAnomaliesPage,
+  HostRiskTabPage,
 } from './page_objects';
 
 export interface ScoutSecuritySolutionPageObjects extends SecurityPageObjects {
@@ -32,7 +49,24 @@ export interface ScoutSecuritySolutionPageObjects extends SecurityPageObjects {
   detectionAlerts: DetectionAlertsPage;
   ruleCreation: RuleCreationPage;
   ruleEdit: RuleEditPage;
+  ruleDetails: RuleDetailsPage;
   exceptions: ExceptionsPage;
+  expandableFlyout: ExpandableFlyoutPage;
+  alertFilters: AlertFiltersPage;
+  ruleGaps: RuleGapsPage;
+  ai4dsoc: Ai4dsocPage;
+  assetInventory: AssetInventoryPage;
+  assetInventoryOnboarding: AssetInventoryOnboardingPage;
+  automaticImport: AutomaticImportPage;
+  prebuiltRules: PrebuiltRulesPage;
+  entityAnalyticsManagement: EntityAnalyticsManagementPage;
+  entityAnalyticsAssetCriticality: EntityAnalyticsAssetCriticalityPage;
+  entityAnalyticsFlyout: EntityAnalyticsFlyoutPage;
+  entityAnalyticsThreatHunting: EntityAnalyticsThreatHuntingPage;
+  entityAnalyticsPrivMon: EntityAnalyticsPrivMonPage;
+  entityAnalyticsRiskInfo: EntityAnalyticsRiskInfoPage;
+  entityAnalyticsAnomalies: EntityAnalyticsAnomaliesPage;
+  hostRiskTab: HostRiskTabPage;
 }
 
 const extendedTest = baseTest.extend<{
@@ -53,7 +87,27 @@ const extendedTest = baseTest.extend<{
       detectionAlerts: createLazyPageObject(DetectionAlertsPage, page),
       ruleCreation: createLazyPageObject(RuleCreationPage, page),
       ruleEdit: createLazyPageObject(RuleEditPage, page),
+      ruleDetails: createLazyPageObject(RuleDetailsPage, page),
       exceptions: createLazyPageObject(ExceptionsPage, page),
+      expandableFlyout: createLazyPageObject(ExpandableFlyoutPage, page),
+      alertFilters: createLazyPageObject(AlertFiltersPage, page),
+      ruleGaps: createLazyPageObject(RuleGapsPage, page),
+      ai4dsoc: createLazyPageObject(Ai4dsocPage, page),
+      assetInventory: createLazyPageObject(AssetInventoryPage, page),
+      assetInventoryOnboarding: createLazyPageObject(AssetInventoryOnboardingPage, page),
+      automaticImport: createLazyPageObject(AutomaticImportPage, page),
+      prebuiltRules: createLazyPageObject(PrebuiltRulesPage, page),
+      entityAnalyticsManagement: createLazyPageObject(EntityAnalyticsManagementPage, page),
+      entityAnalyticsAssetCriticality: createLazyPageObject(
+        EntityAnalyticsAssetCriticalityPage,
+        page
+      ),
+      entityAnalyticsFlyout: createLazyPageObject(EntityAnalyticsFlyoutPage, page),
+      entityAnalyticsThreatHunting: createLazyPageObject(EntityAnalyticsThreatHuntingPage, page),
+      entityAnalyticsPrivMon: createLazyPageObject(EntityAnalyticsPrivMonPage, page),
+      entityAnalyticsRiskInfo: createLazyPageObject(EntityAnalyticsRiskInfoPage, page),
+      entityAnalyticsAnomalies: createLazyPageObject(EntityAnalyticsAnomaliesPage, page),
+      hostRiskTab: createLazyPageObject(HostRiskTabPage, page),
     };
     await use(extended);
   },

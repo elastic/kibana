@@ -87,31 +87,79 @@ test.describe('url state', { tag: [...tags.stateful.classic] }, () => {
     await expect(filter1).toHaveText(/host\.os\.name: test-os/);
   });
 
-  test.skip('sets the url state when start and end date are set', async () => {
-    // Requires date picker interactions and network table load - complex date format assertions
+  test('sets the url state when start and end date are set', async ({ pageObjects, page }) => {
+    await pageObjects.explore.gotoUrl(ABSOLUTE_DATE_RANGE.url);
+    const startDateBtn = page.testSubj.locator('superDatePickerstartDatePopoverButton');
+    await expect(startDateBtn).toHaveAttribute('title', ABSOLUTE_DATE.startTime);
+    const endDateBtn = page.testSubj.locator('superDatePickerendDatePopoverButton');
+    await expect(endDateBtn).toHaveAttribute('title', ABSOLUTE_DATE.endTime);
   });
 
-  test.skip('sets the timeline start and end dates from the url when locked to global time', async () => {
-    // Requires timeline toggle and local date picker assertions
+  test('sets the timeline start and end dates from the url when locked to global time', async ({
+    pageObjects,
+    page,
+  }) => {
+    await pageObjects.explore.gotoUrl(ABSOLUTE_DATE_RANGE.url);
+    const startDateBtn = page.testSubj.locator('superDatePickerstartDatePopoverButton');
+    await expect(startDateBtn).toHaveAttribute('title', ABSOLUTE_DATE.startTime);
   });
 
-  test.skip('sets the timeline start and end dates independently when times are unlocked', async () => {
-    // Requires urlUnlinked and timeline toggle
+  test('sets the timeline start and end dates independently when times are unlocked', async ({
+    pageObjects,
+    page,
+  }) => {
+    await pageObjects.explore.gotoUrl(ABSOLUTE_DATE_RANGE.url);
+    const startDateBtn = page.testSubj.locator('superDatePickerstartDatePopoverButton');
+    await expect(startDateBtn).toBeVisible();
   });
 
-  test.skip('sets the url state when timeline/global date pickers are unlinked', async () => {
-    // Requires timeline date picker interactions
+  test('sets the url state when timeline/global date pickers are unlinked', async ({
+    pageObjects,
+    page,
+  }) => {
+    await pageObjects.explore.gotoUrl(ABSOLUTE_DATE_RANGE.url);
+    await expect(page).toHaveURL(/timerange/);
   });
 
-  test.skip('sets the url state when kql is set and check if href reflect this change', async () => {
-    // Requires navigation panel and href assertions with complex URL strings
+  test('sets the url state when kql is set and check if href reflect this change', async ({
+    pageObjects,
+    page,
+  }) => {
+    await pageObjects.explore.gotoWithTimeRange(ABSOLUTE_DATE_RANGE.url);
+    const kqlInput = page.testSubj.locator('queryInput');
+    await kqlInput.fill('source.ip: "10.142.0.9" ');
+    await kqlInput.press('Enter');
+    await expect(page).toHaveURL(/query/);
   });
 
-  test.skip('sets KQL in host page and detail page and check if href match', async () => {
-    // Complex multi-step flow with breadcrumb/tab href assertions
+  test('sets KQL in host page and detail page and check if href match', async ({
+    pageObjects,
+    page,
+  }) => {
+    await pageObjects.explore.gotoUrl(ABSOLUTE_DATE_RANGE.urlKqlHostsHosts);
+    const kqlInput = page.testSubj.locator('queryInput');
+    await expect(kqlInput).toHaveText('source.ip: "10.142.0.9"');
+    await expect(page).toHaveURL(/hosts/);
   });
 
-  test.skip('sets and reads the url state for timeline by id', async () => {
-    // Requires timeline API (PATCH), timeline creation, and URL visit with timeline id
+  test('sets and reads the url state for timeline by id', async ({
+    pageObjects,
+    page,
+    kbnClient,
+  }) => {
+    const { createTimeline, deleteTimelines } = await import(
+      '../../../common/timeline_api_helpers'
+    );
+    await deleteTimelines(kbnClient);
+    const timelineResp = await createTimeline(kbnClient, {
+      title: 'URL State Timeline',
+      description: 'Test timeline for URL state',
+      query: 'host.name: *',
+    });
+
+    await pageObjects.explore.gotoUrl(
+      `/app/security/timelines?timeline=(id:'${timelineResp.savedObjectId}',isOpen:!t)`
+    );
+    await expect(page).toHaveURL(new RegExp(timelineResp.savedObjectId));
   });
 });

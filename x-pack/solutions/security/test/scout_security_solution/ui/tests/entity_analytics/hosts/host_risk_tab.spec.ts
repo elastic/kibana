@@ -31,7 +31,7 @@ test.describe(
 
     test.afterAll(async ({ esArchiver }) => {
       try {
-        await esArchiver.unload('risk_scores_new');
+        // no-op: Scout EsArchiverFixture does not support unload;
       } catch {
         // Best-effort cleanup
       }

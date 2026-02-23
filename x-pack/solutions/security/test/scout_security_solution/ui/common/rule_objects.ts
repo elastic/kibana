@@ -8,6 +8,12 @@
 import type {
   QueryRuleCreateProps,
   ThresholdRuleCreateProps,
+  EqlRuleCreateProps,
+  EsqlRuleCreateProps,
+  ThreatMatchRuleCreateProps,
+  MachineLearningRuleCreateProps,
+  NewTermsRuleCreateProps,
+  SavedQueryRuleCreateProps,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { DEFAULT_SECURITY_SOLUTION_INDEXES } from '@kbn/scout-security/src/playwright/constants/detection_rules';
 
@@ -101,5 +107,126 @@ export const getNewThresholdRule = (rewrites?: ThresholdOverrides): ThresholdRul
   interval: '100m',
   from: '1900-01-01T00:00:00.000Z',
   max_signals: 100,
+  ...rewrites,
+});
+
+export const getNewEqlRule = (rewrites?: Partial<EqlRuleCreateProps>): EqlRuleCreateProps => ({
+  type: 'eql',
+  language: 'eql',
+  query: 'any where true',
+  index: getIndexPatterns(),
+  name: 'EQL Rule Test',
+  description: 'EQL rule description.',
+  severity: 'high',
+  risk_score: 17,
+  tags: ['test'],
+  references: [],
+  false_positives: [],
+  threat: [],
+  interval: '100m',
+  from: '1900-01-01T00:00:00.000Z',
+  ...rewrites,
+});
+
+export const getNewEsqlRule = (rewrites?: Partial<EsqlRuleCreateProps>): EsqlRuleCreateProps => ({
+  type: 'esql',
+  language: 'esql',
+  query: 'FROM auditbeat-* | LIMIT 10',
+  name: 'ES|QL Rule Test',
+  description: 'ES|QL rule description.',
+  severity: 'high',
+  risk_score: 17,
+  tags: ['test'],
+  references: [],
+  false_positives: [],
+  threat: [],
+  interval: '100m',
+  from: '1900-01-01T00:00:00.000Z',
+  ...rewrites,
+});
+
+export const getNewIndicatorMatchRule = (
+  rewrites?: Partial<ThreatMatchRuleCreateProps>
+): ThreatMatchRuleCreateProps => ({
+  type: 'threat_match',
+  query: '*:*',
+  index: getIndexPatterns(),
+  name: 'Indicator Match Rule Test',
+  description: 'Indicator match rule description.',
+  severity: 'critical',
+  risk_score: 20,
+  tags: ['test'],
+  references: [],
+  false_positives: [],
+  threat: [],
+  threat_mapping: [
+    {
+      entries: [{ field: 'host.name', type: 'mapping', value: 'threat.indicator.ip' }],
+    },
+  ],
+  threat_index: ['threat-indicator-*'],
+  threat_query: '*:*',
+  threat_language: 'kuery',
+  interval: '100m',
+  from: '1900-01-01T00:00:00.000Z',
+  ...rewrites,
+});
+
+export const getNewMachineLearningRule = (
+  rewrites?: Partial<MachineLearningRuleCreateProps>
+): MachineLearningRuleCreateProps => ({
+  type: 'machine_learning',
+  machine_learning_job_id: ['v3_linux_anomalous_network_activity'],
+  anomaly_threshold: 20,
+  name: 'ML Rule Test',
+  description: 'ML rule description.',
+  severity: 'critical',
+  risk_score: 70,
+  tags: ['test', 'ml'],
+  references: [],
+  false_positives: [],
+  threat: [],
+  interval: '100m',
+  from: '1900-01-01T00:00:00.000Z',
+  ...rewrites,
+});
+
+export const getNewTermsRule = (
+  rewrites?: Partial<NewTermsRuleCreateProps>
+): NewTermsRuleCreateProps => ({
+  type: 'new_terms',
+  query: '*:*',
+  new_terms_fields: ['host.name'],
+  history_window_start: 'now-7d',
+  index: getIndexPatterns(),
+  name: 'New Terms Rule Test',
+  description: 'New terms rule description.',
+  severity: 'high',
+  risk_score: 21,
+  tags: ['test'],
+  references: [],
+  false_positives: [],
+  threat: [],
+  interval: '100m',
+  from: '1900-01-01T00:00:00.000Z',
+  ...rewrites,
+});
+
+export const getNewSavedQueryRule = (
+  rewrites?: Partial<SavedQueryRuleCreateProps>
+): SavedQueryRuleCreateProps => ({
+  type: 'saved_query',
+  saved_id: 'test-saved-query',
+  index: getIndexPatterns(),
+  name: 'Saved Query Rule Test',
+  description: 'Saved query rule description.',
+  severity: 'high',
+  risk_score: 17,
+  tags: ['test'],
+  references: [],
+  false_positives: [],
+  threat: [],
+  interval: '100m',
+  from: '1900-01-01T00:00:00.000Z',
   ...rewrites,
 });

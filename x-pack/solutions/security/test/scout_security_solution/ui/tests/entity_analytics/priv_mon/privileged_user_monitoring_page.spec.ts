@@ -18,7 +18,7 @@ test.describe('Privileged User Monitoring - Page', { tag: tags.stateful.classic 
 
   test.afterAll(async ({ esArchiver }) => {
     try {
-      await esArchiver.unload('linux_process');
+      // no-op: Scout EsArchiverFixture does not support unload;
     } catch {
       // Best-effort cleanup
     }

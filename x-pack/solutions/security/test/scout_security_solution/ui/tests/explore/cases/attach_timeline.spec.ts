@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { deleteAllCases } from '../../../common/api_helpers';
 import { test, expect, tags } from '../../../fixtures';
 import { createTimeline, deleteTimelines } from '../../../common/timeline_api_helpers';
 
@@ -22,7 +23,7 @@ test.describe(
       test.beforeEach(async ({ browserAuth, kbnClient, apiServices }) => {
         await browserAuth.loginAsAdmin();
         await deleteTimelines(kbnClient);
-        await apiServices.cases?.deleteAll().catch(() => {});
+        await deleteAllCases(apiServices.cases);
       });
 
       test('attach timeline to a new case', async ({ pageObjects, page, kbnClient }) => {
@@ -62,7 +63,7 @@ test.describe(
       test.beforeEach(async ({ browserAuth, kbnClient, apiServices }) => {
         await browserAuth.loginAsAdmin();
         await deleteTimelines(kbnClient);
-        await apiServices.cases?.deleteAll().catch(() => {});
+        await deleteAllCases(apiServices.cases);
       });
 
       test('attach timeline to an existing case', async ({
@@ -73,8 +74,15 @@ test.describe(
       }) => {
         const timelineResp = await createTimeline(kbnClient, mockTimeline);
         const timelineId = timelineResp.savedObjectId;
-        const caseResp = await apiServices.cases?.create?.({ title: 'Existing case' });
-        const caseId = caseResp?.id;
+        const caseResp = await apiServices.cases?.create?.({
+          title: 'Existing case',
+          description: 'Test case',
+          tags: [],
+          connector: { id: 'none', name: 'none', type: '.none', fields: null },
+          settings: { syncAlerts: true, extractObservables: false },
+          owner: 'securitySolution',
+        });
+        const caseId = caseResp?.data?.id;
         if (!caseId) {
           test.skip();
           return;
@@ -98,7 +106,14 @@ test.describe(
       }) => {
         const timelineResp = await createTimeline(kbnClient, mockTimeline);
         const timelineId = timelineResp.savedObjectId;
-        await apiServices.cases?.create?.({ title: 'Existing case' });
+        await apiServices.cases?.create?.({
+          title: 'Existing case',
+          description: 'Test case',
+          tags: [],
+          connector: { id: 'none', name: 'none', type: '.none', fields: null },
+          settings: { syncAlerts: true, extractObservables: false },
+          owner: 'securitySolution',
+        });
 
         await pageObjects.explore.gotoUrl(
           `/app/security/timelines?timeline=(id:'${timelineId}',isOpen:!t)`

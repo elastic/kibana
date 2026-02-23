@@ -6,6 +6,7 @@
  */
 
 import type { ScoutPage, Locator } from '@kbn/scout';
+import { waitForPageReady } from '../../common/page_utils';
 
 export class DetectionAlertsPage {
   readonly alertsDataGrid: Locator;
@@ -50,6 +51,7 @@ export class DetectionAlertsPage {
 
   async goto(): Promise<void> {
     await this.page.gotoApp('security/alerts');
+    await waitForPageReady(this.page);
   }
 
   async waitForAlertsToLoad(): Promise<void> {
@@ -76,7 +78,7 @@ export class DetectionAlertsPage {
     await this.takeActionPopoverBtn.first().click();
   }
 
-  async getDataGridRows(): Locator {
+  getDataGridRows(): Locator {
     return this.page.locator('.euiDataGridRow');
   }
 }
