@@ -985,7 +985,7 @@ x-pack/platform/packages/shared/kbn-failure-store-modal @elastic/kibana-manageme
 x-pack/platform/packages/shared/kbn-fs @elastic/kibana-security
 x-pack/platform/packages/shared/kbn-grok-heuristics @elastic/obs-onboarding-team
 x-pack/platform/packages/shared/kbn-inference-cli @elastic/appex-ai-infra @elastic/search-inference-team
-x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common @elastic/appex-ai-infra
+x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common @elastic/search-kibana
 x-pack/platform/packages/shared/kbn-inference-prompt-utils @elastic/appex-ai-infra
 x-pack/platform/packages/shared/kbn-inference-tracing @elastic/appex-ai-infra
 x-pack/platform/packages/shared/kbn-inference-tracing-config @elastic/appex-ai-infra
@@ -1104,7 +1104,7 @@ x-pack/platform/plugins/shared/fleet/cypress @elastic/fleet
 x-pack/platform/plugins/shared/global_search @elastic/appex-sharedux
 x-pack/platform/plugins/shared/index_management @elastic/kibana-management
 x-pack/platform/plugins/shared/inference @elastic/appex-ai-infra
-x-pack/platform/plugins/shared/inference_endpoint @elastic/ml-ui
+x-pack/platform/plugins/shared/inference_endpoint @elastic/search-kibana
 x-pack/platform/plugins/shared/ingest_pipelines @elastic/kibana-management
 x-pack/platform/plugins/shared/lens @elastic/kibana-visualizations
 x-pack/platform/plugins/shared/license_management @elastic/kibana-management
