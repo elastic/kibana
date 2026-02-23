@@ -114,6 +114,11 @@ export class ThemeService {
     this.theme$ = theme.theme$;
     this.theme$.subscribe((newTheme) => {
       this._chartsBaseTheme$.next(getChartsTheme(newTheme));
+      const chartsTheme = getChartsTheme(newTheme);
+      const { fill } = chartsTheme.axes.tickLabel;
+      chartsTheme.axes.axisTitle.fill = fill;
+      chartsTheme.axes.axisPanelTitle.fill = fill;
+      this._chartsBaseTheme$.next(chartsTheme);
     });
   }
 }
