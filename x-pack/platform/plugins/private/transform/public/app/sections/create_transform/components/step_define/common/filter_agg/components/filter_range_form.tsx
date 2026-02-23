@@ -12,12 +12,10 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
-  EuiButton,
+  EuiButtonIcon,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { FilterAggConfigRange } from '../types';
-
-const BUTTON_SIZE = 40;
 
 // The config prop of the component, to be used for the `updateConfig` function.
 type FilterRangeFormConfig = ComponentProps<
@@ -70,16 +68,15 @@ export const FilterRangeForm: FilterAggConfigRange['aggTypeConfig']['FilterAggFo
               }}
               step="any"
               prepend={
-                <EuiButton
-                  minWidth={BUTTON_SIZE}
-                  style={{ maxWidth: BUTTON_SIZE }}
-                  onChange={(e: any) => {
+                <EuiButtonIcon
+                  iconType={includeFrom ? 'arrowEnd' : 'arrowRight'}
+                  onClick={(e: any) => {
                     updateConfig({ includeFrom: e.target.checked });
                   }}
-                  fill={includeFrom}
-                >
-                  {includeFrom ? '≥' : '>'}
-                </EuiButton>
+                  display={includeFrom ? 'fill' : 'base'}
+                  aria-pressed={includeFrom}
+                  aria-label={includeFrom ? '≥' : '>'}
+                />
               }
             />
           </EuiFormRow>
@@ -101,16 +98,15 @@ export const FilterRangeForm: FilterAggConfigRange['aggTypeConfig']['FilterAggFo
               }}
               step="any"
               append={
-                <EuiButton
-                  minWidth={BUTTON_SIZE}
-                  style={{ maxWidth: BUTTON_SIZE }}
+                <EuiButtonIcon
+                  iconType={includeTo ? 'arrowStart' : 'arrowLeft'}
                   onClick={() => {
                     updateConfig({ includeTo: !includeTo });
                   }}
-                  fill={includeTo}
-                >
-                  {includeTo ? '≤' : '<'}
-                </EuiButton>
+                  display={includeTo ? 'fill' : 'base'}
+                  aria-pressed={includeTo}
+                  aria-label={includeTo ? '≤' : '<'}
+                />
               }
             />
           </EuiFormRow>
