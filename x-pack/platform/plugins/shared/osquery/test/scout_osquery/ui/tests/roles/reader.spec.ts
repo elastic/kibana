@@ -80,6 +80,7 @@ test.describe('Reader - only READ', { tag: [...tags.stateful.classic] }, () => {
     // eslint-disable-next-line playwright/no-nth-methods -- multiple rows may contain the same query text
     await expect(page.getByText(liveQueryQuery).first()).toBeVisible({ timeout: 15_000 });
     await expect(page.locator(`[aria-label="Run ${savedQueryName}"]`)).not.toBeVisible();
+    // eslint-disable-next-line playwright/no-nth-methods -- multiple Details buttons in the table; we just need the first one
     await expect(page.getByLabel('Details').first()).toBeVisible();
   });
 
