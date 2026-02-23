@@ -67,7 +67,7 @@ const createConnectorFields = (
   const ConnectorFields = (props: { readOnly: boolean; isEdit: boolean }) => {
     const [formData] = useFormData();
 
-    const authType = formData?.secrets?.authType as string | undefined;
+    const authType = formData?.secrets?.authType;
 
     const dynamicSchema = generateSchema(spec, {
       secrets: authType ? { authType } : undefined,

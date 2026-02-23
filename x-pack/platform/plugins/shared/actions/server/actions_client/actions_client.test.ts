@@ -2212,6 +2212,7 @@ describe('update()', () => {
       isMissingSecrets: false,
       name: 'my name',
       config: {},
+      authMode: 'shared',
     });
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
     expect(unsecuredSavedObjectsClient.create.mock.calls[0]).toMatchInlineSnapshot(`
@@ -2280,6 +2281,7 @@ describe('update()', () => {
       isMissingSecrets: true,
       name: 'my name',
       config: {},
+      authMode: 'shared',
     });
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
     expect(unsecuredSavedObjectsClient.create.mock.calls[0]).toMatchInlineSnapshot(`
@@ -2430,6 +2432,7 @@ describe('update()', () => {
         b: true,
         c: true,
       },
+      authMode: 'shared',
     });
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
     expect(unsecuredSavedObjectsClient.create.mock.calls[0]).toMatchInlineSnapshot(`
