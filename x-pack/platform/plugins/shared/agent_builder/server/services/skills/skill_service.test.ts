@@ -47,9 +47,9 @@ const createMockSkillDefinition = (overrides: Partial<SkillDefinition> = {}): Sk
 });
 
 const createMockToolRegistry = (toolIds: string[] = []) =>
-  ({
-    has: jest.fn(async (id: string) => toolIds.includes(id)),
-  } as any);
+({
+  has: jest.fn(async (id: string) => toolIds.includes(id)),
+} as any);
 
 describe('createSkillService', () => {
   beforeEach(() => {
@@ -171,6 +171,35 @@ describe('createSkillService', () => {
       await expect(
         start.registerSkill(createMockSkillDefinition({ id: 'dup', name: 'other' as any }))
       ).rejects.toThrow('Skill type with id dup already registered');
+    });
+
+    it('serializes concurrent registrations to prevent TOCTOU races', async () => {
+      const mockToolRegistry = createMockToolRegistry();
+      const service = createSkillService();
+      service.setup();
+
+      const start = service.start({
+        elasticsearch: { client: { asInternalUser: {} } } as any,
+        logger: { warn: jest.fn() } as any,
+        getToolRegistry: jest.fn().mockResolvedValue(mockToolRegistry),
+      });
+
+      const skillA = createMockSkillDefinition({ id: 'race-skill', name: 'race-a' as any });
+      const skillB = createMockSkillDefinition({ id: 'race-skill', name: 'race-b' as any });
+
+      const [resultA, resultB] = await Promise.allSettled([
+        start.registerSkill(skillA),
+        start.registerSkill(skillB),
+      ]);
+
+      const fulfilled = [resultA, resultB].filter((r) => r.status === 'fulfilled');
+      const rejected = [resultA, resultB].filter((r) => r.status === 'rejected');
+
+      expect(fulfilled).toHaveLength(1);
+      expect(rejected).toHaveLength(1);
+      expect((rejected[0] as PromiseRejectedResult).reason.message).toContain(
+        'Skill type with id race-skill already registered'
+      );
     });
   });
 

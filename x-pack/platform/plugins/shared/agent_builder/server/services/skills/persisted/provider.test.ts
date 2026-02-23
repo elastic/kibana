@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { createSkillNotFoundError } from '@kbn/agent-builder-common';
 import { createPersistedSkillProvider } from './provider';
 import type { SkillClient, SkillPersistedDefinition } from './client';
 
@@ -84,13 +85,20 @@ describe('createPersistedSkillProvider', () => {
       expect(result!.getRegistryTools()).toEqual(['tool-a']);
     });
 
-    it('returns undefined when client throws', async () => {
-      mockClient.get.mockRejectedValue(new Error('not found'));
+    it('returns undefined when client throws skillNotFound', async () => {
+      mockClient.get.mockRejectedValue(createSkillNotFoundError({ skillId: 'non-existent' }));
       const provider = createProvider();
 
       const result = await provider.get('non-existent');
 
       expect(result).toBeUndefined();
+    });
+
+    it('propagates non-skillNotFound errors', async () => {
+      mockClient.get.mockRejectedValue(new Error('ES connection failed'));
+      const provider = createProvider();
+
+      await expect(provider.get('skill-1')).rejects.toThrow('ES connection failed');
     });
   });
 
@@ -162,12 +170,11 @@ describe('createPersistedSkillProvider', () => {
 
   describe('delete', () => {
     it('delegates to skillClient.delete', async () => {
-      mockClient.delete.mockResolvedValue(true);
+      mockClient.delete.mockResolvedValue(undefined);
       const provider = createProvider();
 
-      const result = await provider.delete('skill-1');
+      await provider.delete('skill-1');
 
-      expect(result).toBe(true);
       expect(mockClient.delete).toHaveBeenCalledWith('skill-1');
     });
   });

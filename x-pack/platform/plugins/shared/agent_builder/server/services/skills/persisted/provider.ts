@@ -7,6 +7,7 @@
 
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { isSkillNotFoundError } from '@kbn/agent-builder-common';
 import type { WritableSkillProvider } from '../skill_provider';
 import { createClient } from './client';
 import { convertPersistedSkill } from './converter';
@@ -32,8 +33,11 @@ export const createPersistedSkillProvider = ({
       try {
         const skill = await skillClient.get(skillId);
         return convertPersistedSkill(skill);
-      } catch {
-        return undefined;
+      } catch (e) {
+        if (isSkillNotFoundError(e)) {
+          return undefined;
+        }
+        throw e;
       }
     },
     async list() {

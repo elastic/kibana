@@ -271,9 +271,9 @@ export function registerSkillsRoutes({ router, getInternalServices, logger }: Ro
         const { skillId } = request.params;
         const { skills: skillService } = getInternalServices();
         const registry = await skillService.getRegistry({ request });
-        const success = await registry.delete(skillId);
+        await registry.delete(skillId);
         return response.ok<DeleteSkillResponse>({
-          body: { success },
+          body: { success: true },
         });
       }, featureFlagConfig)
     );

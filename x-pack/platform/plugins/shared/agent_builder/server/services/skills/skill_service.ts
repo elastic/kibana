@@ -25,20 +25,28 @@ export interface SkillServiceSetup {
 export interface SkillServiceStart {
   /**
    * Create a skill registry scoped to the current user and context.
-   * The registry provides access to both built-in and persisted skills.
-   * This is the single entry point for all skill access.
+   *
+   * Each call snapshots the currently registered builtin skills, so
+   * dynamic registrations or unregistrations that happen after the
+   * registry is created do not affect that registry instance.
    */
   getRegistry(opts: { request: KibanaRequest }): Promise<SkillRegistry>;
 
   /**
    * Register a skill dynamically after plugin start.
-   * Only affects future registry instances (existing ones snapshot skills at creation time).
+   *
+   * The operation is serialized internally so concurrent calls are safe.
+   * Only affects future `getRegistry()` calls -- existing registry
+   * instances hold an immutable snapshot of the builtin skills that
+   * existed at creation time.
    */
   registerSkill(skill: SkillDefinition): Promise<void>;
 
   /**
    * Unregister a previously registered skill by ID.
-   * Returns true if the skill was found and removed.
+   *
+   * Returns `true` if the skill was found and removed, `false` otherwise.
+   * Serialized with `registerSkill` to avoid races.
    */
   unregisterSkill(skillId: string): Promise<boolean>;
 }
@@ -62,6 +70,12 @@ export const createSkillService = (): SkillService => {
 class SkillServiceImpl implements SkillService {
   private readonly skills: Map<string, SkillDefinition> = new Map();
   private readonly skillFullPaths: Set<string> = new Set();
+
+  /**
+   * Promise chain used to serialize dynamic registration / unregistration
+   * so that the async validate-then-mutate sequence is atomic.
+   */
+  private mutationQueue: Promise<unknown> = Promise.resolve();
 
   setup(): SkillServiceSetup {
     return {
@@ -88,9 +102,6 @@ class SkillServiceImpl implements SkillService {
     logger,
     getToolRegistry,
   }: SkillServiceStartDeps): SkillServiceStart {
-    // Validate all registered skills eagerly at start time (deferred from setup
-    // to keep registration sync, matching the tool registration pattern).
-    // The promise is cached so validation runs once and getRegistry awaits it.
     const validated = Promise.all(
       [...this.skills.values()].map((skill) => validateSkillDefinition(skill))
     );
@@ -113,32 +124,40 @@ class SkillServiceImpl implements SkillService {
           toolRegistry,
         });
       },
-      registerSkill: async (skill) => {
-        await validateSkillDefinition(skill);
+      registerSkill: (skill) => {
+        const op = this.mutationQueue.then(async () => {
+          await validateSkillDefinition(skill);
 
-        if (this.skills.has(skill.id)) {
-          throw new Error(`Skill type with id ${skill.id} already registered`);
-        }
+          if (this.skills.has(skill.id)) {
+            throw new Error(`Skill type with id ${skill.id} already registered`);
+          }
 
-        const fullPath = getSkillEntryPath({ skill });
-        if (this.skillFullPaths.has(fullPath)) {
-          throw new Error(
-            `Skill with path ${skill.basePath} and name ${skill.name} already registered`
-          );
-        }
-        this.skillFullPaths.add(fullPath);
-        this.skills.set(skill.id, skill);
+          const fullPath = getSkillEntryPath({ skill });
+          if (this.skillFullPaths.has(fullPath)) {
+            throw new Error(
+              `Skill with path ${skill.basePath} and name ${skill.name} already registered`
+            );
+          }
+          this.skillFullPaths.add(fullPath);
+          this.skills.set(skill.id, skill);
+        });
+        this.mutationQueue = op.catch(() => { });
+        return op;
       },
-      unregisterSkill: async (skillId) => {
-        const skill = this.skills.get(skillId);
-        if (!skill) {
-          return false;
-        }
+      unregisterSkill: (skillId) => {
+        const op = this.mutationQueue.then(async () => {
+          const skill = this.skills.get(skillId);
+          if (!skill) {
+            return false;
+          }
 
-        const fullPath = getSkillEntryPath({ skill });
-        this.skillFullPaths.delete(fullPath);
-        this.skills.delete(skillId);
-        return true;
+          const fullPath = getSkillEntryPath({ skill });
+          this.skillFullPaths.delete(fullPath);
+          this.skills.delete(skillId);
+          return true;
+        });
+        this.mutationQueue = op.catch(() => { });
+        return op;
       },
     };
   }

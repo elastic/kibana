@@ -27,7 +27,8 @@ export interface WritableSkillProvider extends Omit<ReadonlySkillProvider, 'read
     skillId: string,
     update: PersistedSkillUpdateRequest
   ): MaybePromise<InternalSkillDefinition>;
-  delete(skillId: string): MaybePromise<boolean>;
+  /** Deletes a skill. Throws if the skill does not exist or is read-only. */
+  delete(skillId: string): MaybePromise<void>;
 }
 
 export type SkillProvider = ReadonlySkillProvider | WritableSkillProvider;

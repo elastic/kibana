@@ -58,14 +58,14 @@ const createMockPersistedProvider = (
       readonly: false,
       getRegistryTools: () => update.tool_ids ?? [],
     })),
-    delete: jest.fn(async (_skillId: string) => true),
+    delete: jest.fn(async (_skillId: string) => undefined),
   };
 };
 
 const createMockToolRegistry = (toolIds: string[] = []): ToolRegistry =>
-  ({
-    has: jest.fn(async (id: string) => toolIds.includes(id)),
-  } as unknown as ToolRegistry);
+({
+  has: jest.fn(async (id: string) => toolIds.includes(id)),
+} as unknown as ToolRegistry);
 
 describe('createSkillRegistry', () => {
   const builtinSkill1 = createMockInternalSkillDefinition({
@@ -343,8 +343,7 @@ describe('createSkillRegistry', () => {
         toolRegistry: createMockToolRegistry(),
       });
 
-      const result = await registry.delete('custom-skill-1');
-      expect(result).toBe(true);
+      await registry.delete('custom-skill-1');
       expect(persistedProvider.delete).toHaveBeenCalledWith('custom-skill-1');
     });
 

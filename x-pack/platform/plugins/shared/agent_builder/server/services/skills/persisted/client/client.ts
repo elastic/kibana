@@ -19,6 +19,8 @@ import { createStorage } from './storage';
 import { fromEs, createAttributes, updateDocument } from './converters';
 import type { SkillDocument, SkillPersistedDefinition } from './types';
 
+const MAX_SKILLS_PER_SPACE = 1000;
+
 /**
  * Client for persisted skill definitions.
  */
@@ -27,7 +29,10 @@ export interface SkillClient {
   list(): Promise<SkillPersistedDefinition[]>;
   create(request: PersistedSkillCreateRequest): Promise<SkillPersistedDefinition>;
   update(skillId: string, updates: PersistedSkillUpdateRequest): Promise<SkillPersistedDefinition>;
-  delete(skillId: string): Promise<boolean>;
+  /**
+   * Deletes a skill. Throws if the skill does not exist.
+   */
+  delete(skillId: string): Promise<void>;
   has(skillId: string): Promise<boolean>;
 }
 
@@ -41,16 +46,26 @@ export const createClient = ({
   esClient: ElasticsearchClient;
 }): SkillClient => {
   const storage = createStorage({ logger, esClient });
-  return new SkillClientImpl({ space, storage });
+  return new SkillClientImpl({ space, storage, logger });
 };
 
 class SkillClientImpl implements SkillClient {
   private readonly space: string;
   private readonly storage: SkillStorage;
+  private readonly logger: Logger;
 
-  constructor({ space, storage }: { space: string; storage: SkillStorage }) {
+  constructor({
+    space,
+    storage,
+    logger,
+  }: {
+    space: string;
+    storage: SkillStorage;
+    logger: Logger;
+  }) {
     this.space = space;
     this.storage = storage;
+    this.logger = logger;
   }
 
   async get(id: string): Promise<SkillPersistedDefinition> {
@@ -68,9 +83,20 @@ class SkillClientImpl implements SkillClient {
           filter: [createSpaceDslFilter(this.space)],
         },
       },
-      size: 1000,
-      track_total_hits: false,
+      size: MAX_SKILLS_PER_SPACE,
+      track_total_hits: true,
     });
+
+    const total =
+      typeof response.hits.total === 'number'
+        ? response.hits.total
+        : response.hits.total?.value ?? 0;
+
+    if (total > MAX_SKILLS_PER_SPACE) {
+      this.logger.warn(
+        `Space "${this.space}" has ${total} skills which exceeds the limit of ${MAX_SKILLS_PER_SPACE}. Results are truncated.`
+      );
+    }
 
     return response.hits.hits.map((hit) => fromEs(hit as SkillDocument));
   }
@@ -78,6 +104,9 @@ class SkillClientImpl implements SkillClient {
   async create(createRequest: PersistedSkillCreateRequest): Promise<SkillPersistedDefinition> {
     const { id } = createRequest;
 
+    // Defense-in-depth: the registry already checks uniqueness across all
+    // providers, but we verify again at the storage layer to guard against
+    // direct client usage or concurrent writes.
     const document = await this._get(id);
     if (document) {
       throw createBadRequestError(`Skill with id '${id}' already exists.`);
@@ -114,7 +143,7 @@ class SkillClientImpl implements SkillClient {
     });
   }
 
-  async delete(id: string): Promise<boolean> {
+  async delete(id: string): Promise<void> {
     const document = await this._get(id);
     if (!document) {
       throw createSkillNotFoundError({ skillId: id });
@@ -123,7 +152,6 @@ class SkillClientImpl implements SkillClient {
     if (result.result === 'not_found') {
       throw createSkillNotFoundError({ skillId: id });
     }
-    return true;
   }
 
   async has(id: string): Promise<boolean> {

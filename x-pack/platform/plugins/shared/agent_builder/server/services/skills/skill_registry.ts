@@ -23,7 +23,8 @@ export interface SkillRegistry {
   list(): Promise<InternalSkillDefinition[]>;
   create(params: PersistedSkillCreateRequest): Promise<InternalSkillDefinition>;
   update(skillId: string, update: PersistedSkillUpdateRequest): Promise<InternalSkillDefinition>;
-  delete(skillId: string): Promise<boolean>;
+  /** Deletes a skill. Throws if the skill does not exist or is read-only. */
+  delete(skillId: string): Promise<void>;
 }
 
 export interface CreateSkillRegistryParams {
@@ -118,13 +119,14 @@ class SkillRegistryImpl implements SkillRegistry {
     throw createSkillNotFoundError({ skillId });
   }
 
-  async delete(skillId: string): Promise<boolean> {
+  async delete(skillId: string): Promise<void> {
     for (const provider of this.orderedProviders) {
       if (await provider.has(skillId)) {
         if (isReadonlySkillProvider(provider)) {
           throw createBadRequestError(`Skill '${skillId}' is read-only and can't be deleted`);
         }
-        return provider.delete(skillId);
+        await provider.delete(skillId);
+        return;
       }
     }
     throw createSkillNotFoundError({ skillId });
