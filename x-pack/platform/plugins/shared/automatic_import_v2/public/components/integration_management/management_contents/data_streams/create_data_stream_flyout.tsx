@@ -219,8 +219,18 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
   const isIntegrationFieldsValid =
     !!formData?.title?.trim() && !!formData?.description?.trim() && !!formData?.connectorId?.trim();
 
+  const existingDataStreamNames = useMemo(
+    () => new Set((integration?.dataStreams ?? []).map((ds) => ds.title.toLowerCase())),
+    [integration?.dataStreams]
+  );
+
+  const hasDuplicateDataStreamName =
+    !!formData?.dataStreamTitle?.trim() &&
+    existingDataStreamNames.has(formData.dataStreamTitle.trim().toLowerCase());
+
   const isDataStreamFieldsValid =
     !!formData?.dataStreamTitle?.trim() &&
+    !hasDuplicateDataStreamName &&
     formData?.dataCollectionMethod != null &&
     formData.dataCollectionMethod.length > 0;
 
