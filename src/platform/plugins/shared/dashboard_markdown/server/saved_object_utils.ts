@@ -35,5 +35,6 @@ export function getMarkdownCRUResponseBody(
     id: savedObject.id,
     data: savedObject.attributes as MarkdownAttributes,
     meta: getMarkdownMeta(savedObject, operation),
+    spaces: savedObject.namespaces,
   };
 }
