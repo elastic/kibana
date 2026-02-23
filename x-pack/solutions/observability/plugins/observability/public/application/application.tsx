@@ -16,6 +16,7 @@ import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
+import { useObservabilityAgentDefault } from '@kbn/observability-shared-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
@@ -26,10 +27,13 @@ import { PluginContext } from '../context/plugin_context/plugin_context';
 import type { ConfigSchema, ObservabilityPublicPluginsStart } from '../plugin';
 import { useAppRoutes } from '../routes/routes';
 import type { ObservabilityRuleTypeRegistry } from '../rules/create_observability_rule_type_registry';
+import { useKibana } from '../utils/kibana_react';
 import { HideableReactQueryDevTools } from './hideable_react_query_dev_tools';
 import type { TelemetryServiceStart } from '../services/telemetry/types';
 
 export function App() {
+  useObservabilityAgentDefault(useKibana().services.agentBuilder);
+
   const allRoutes = useAppRoutes();
   return (
     <>
