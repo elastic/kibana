@@ -203,6 +203,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "usage-counters": "cdfa1fa5d0dd16bc612eed3762d801053a6fb606eb387fcad22d257963d54a26",
         "user_connector_token": "524b43a59d7bbc5b0430b19332f8f0f69e323dec2e391a87c568bb4fb4b3690c",
         "visualization": "b7c299233eb6fc88faccdf5924d4cff9fc2f4c3fe8acf5376d7232c05c9a3cfd",
+        "watchlist-config": "447ff0c6227fa2ca64fe05afb5b3bc4808063926c1da3edacb9c28d52c1fb86a",
         "workplace_search_telemetry": "b17dd0963b685cea46246d00b7da598822668434659b7e698313da6c2212febb",
       }
     `);
@@ -1324,6 +1325,11 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "visualization|warning: This type uses 'migrations:' WRAPPER functions that prevent detecting changes in the implementation.",
         "visualization|warning: The SO type owner should ensure these transform functions DO NOT mutate after they are defined.",
         "======================================================================================================================",
+        "watchlist-config|global: 2344beeb2a769a61b59eab878404b5a91fb29fd9",
+        "watchlist-config|mappings: 3e0e4d6aff23f4103a7428e9d4e23baa904555b5",
+        "watchlist-config|schemas: da39a3ee5e6b4b0d3255bfef95601890afd80709",
+        "watchlist-config|10.1.0: 895160f5280b70553de3e5afb38ab5d7ff43d4ea54cffc4aa5255c1793a8d840",
+        "=========================================================================================",
         "workplace_search_telemetry|global: 1788a0f48253a7ac02a9d00de8047bc5128cd4be",
         "workplace_search_telemetry|mappings: e1b10e5bec060a176469a5e9a4f80c94e23abcd7",
         "workplace_search_telemetry|schemas: da39a3ee5e6b4b0d3255bfef95601890afd80709",
@@ -1483,6 +1489,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "usage-counters": "10.0.0",
         "user_connector_token": "10.1.0",
         "visualization": "10.0.0",
+        "watchlist-config": "10.1.0",
         "workplace_search_telemetry": "10.0.0",
       }
     `);
@@ -1640,6 +1647,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "usage-counters": "0.0.0",
         "user_connector_token": "10.1.0",
         "visualization": "8.5.0",
+        "watchlist-config": "10.1.0",
         "workplace_search_telemetry": "0.0.0",
       }
     `);

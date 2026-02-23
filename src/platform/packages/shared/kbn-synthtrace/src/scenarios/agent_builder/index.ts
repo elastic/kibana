@@ -10,7 +10,6 @@
 export * from './tools/get_hosts/hosts';
 export * from './tools/get_services/services';
 export * from './tools/get_log_groups/log_groups';
-export * from './tools/get_correlated_logs/correlated_logs';
 export * from './tools/get_alerts/alerts';
 export * from './tools/get_alerts/apm_errors';
 export * from './tools/run_log_rate_analysis/log_rate_analysis_spike';
