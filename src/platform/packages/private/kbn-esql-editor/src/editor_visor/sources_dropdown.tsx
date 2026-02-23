@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { css } from '@emotion/react';
 import useMountedState from 'react-use/lib/useMountedState';
 import type { EuiComboBoxOptionOption, EuiContextMenuPanelProps } from '@elastic/eui';
@@ -61,33 +61,57 @@ export function SourcesDropdown({ currentSources, onChangeSources }: SourcesDrop
   const euiTheme = useEuiTheme();
   const isMounted = useMountedState();
   const popoverId = useMemo(() => htmlIdGenerator()(), []);
+  const isFetchingSources = useRef(false);
+  const hasAutoSelectedDefaultSource = useRef(false);
 
   const kibana = useKibana<ESQLEditorDeps>();
   const { core } = kibana.services;
   const getLicense = kibana.services?.esql?.getLicense;
 
   useEffect(() => {
-    async function fetchSources() {
-      const sources = await getESQLSources(core, getLicense);
-      if (isMounted()) {
-        const sourceNames = sources.filter((source) => !source.hidden).map((source) => source.name);
-
-        // Generate dash patterns from the source names
-        const dashPatterns = generateIndexPatterns(sourceNames);
-
-        const allOptions = [
-          ...dashPatterns.map((pattern) => ({ label: pattern })),
-          ...sourceNames.map((name) => ({ label: name })),
-        ];
-
-        setFetchedSources(allOptions);
-        if (!currentSources.length && allOptions.length > 0) {
-          onChangeSources([allOptions[0].label]);
-        }
-      }
+    if (fetchedSources.length > 0 || isFetchingSources.current) {
+      return;
     }
-    fetchSources();
-  }, [core, currentSources.length, getLicense, isMounted, onChangeSources]);
+
+    isFetchingSources.current = true;
+    let cancelled = false;
+
+    const fetchSources = async () => {
+      const sources = await getESQLSources(core, getLicense);
+      if (cancelled || !isMounted()) {
+        return;
+      }
+
+      const sourceNames = sources.filter((source) => !source.hidden).map((source) => source.name);
+      // Generate dash patterns from the source names
+      const dashPatterns = generateIndexPatterns(sourceNames);
+
+      const allOptions = [
+        ...dashPatterns.map((pattern) => ({ label: pattern })),
+        ...sourceNames.map((name) => ({ label: name })),
+      ];
+      setFetchedSources(allOptions);
+    };
+
+    fetchSources().finally(() => {
+      isFetchingSources.current = false;
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [core, fetchedSources.length, getLicense, isMounted]);
+
+  useEffect(() => {
+    if (hasAutoSelectedDefaultSource.current || fetchedSources.length === 0) {
+      return;
+    }
+    hasAutoSelectedDefaultSource.current = true;
+
+    if (!currentSources.length) {
+      onChangeSources([fetchedSources[0].label]);
+    }
+  }, [currentSources.length, fetchedSources, onChangeSources]);
 
   const sourcesOptions = useMemo(() => {
     const existingLabels = new Set(fetchedSources.map((option) => option.label));

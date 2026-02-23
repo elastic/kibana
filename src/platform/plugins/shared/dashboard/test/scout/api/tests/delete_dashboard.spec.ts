@@ -18,11 +18,12 @@ import {
   TEST_DASHBOARD_ID,
 } from '../fixtures';
 
-apiTest.describe('dashboards - delete', { tag: tags.ESS_ONLY }, () => {
+apiTest.describe('dashboards - delete', { tag: tags.deploymentAgnostic }, () => {
   let editorCredentials: RoleApiCredentials;
 
   apiTest.beforeAll(async ({ kbnClient, requestAuth }) => {
-    editorCredentials = await requestAuth.getApiKey('editor');
+    // returns editor role in most deployment project and deployment types
+    editorCredentials = await requestAuth.getApiKeyForPrivilegedUser();
     await kbnClient.importExport.load(KBN_ARCHIVES.BASIC);
   });
 
@@ -42,7 +43,7 @@ apiTest.describe('dashboards - delete', { tag: tags.ESS_ONLY }, () => {
     expect(response.body).toStrictEqual({
       statusCode: 404,
       error: 'Not Found',
-      message: 'A dashboard with ID non-existent-dashboard was not found.',
+      message: 'A dashboard with ID [non-existent-dashboard] was not found.',
     });
   });
 

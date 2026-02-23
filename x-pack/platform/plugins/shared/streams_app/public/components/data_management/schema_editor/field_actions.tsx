@@ -43,7 +43,8 @@ export const FieldActionsCell = ({ field }: { field: SchemaField }) => {
     let actions = [];
 
     const openFlyout = (
-      props: { isEditingByDefault?: boolean; applyGeoPointSuggestion?: boolean } = {}
+      props: { isEditingByDefault?: boolean; applyGeoPointSuggestion?: boolean } = {},
+      targetField: SchemaField = field
     ) => {
       if (!Streams.ingest.all.Definition.is(stream)) {
         return;
@@ -52,7 +53,7 @@ export const FieldActionsCell = ({ field }: { field: SchemaField }) => {
         toMountPoint(
           <StreamsAppContextProvider context={context}>
             <SchemaEditorFlyout
-              field={field}
+              field={targetField}
               onClose={() => overlay.close()}
               onStage={(stagedField) => {
                 const exists = fields.some((f) => f.name === stagedField.name);
@@ -68,6 +69,7 @@ export const FieldActionsCell = ({ field }: { field: SchemaField }) => {
               withFieldSimulation={withFieldSimulation}
               fields={fields}
               enableGeoPointSuggestions={enableGeoPointSuggestions}
+              onGoToField={handleGoToField}
               {...props}
             />
           </StreamsAppContextProvider>,
@@ -75,6 +77,14 @@ export const FieldActionsCell = ({ field }: { field: SchemaField }) => {
         ),
         { maxWidth: 500 }
       );
+
+      function handleGoToField(fieldName: string) {
+        overlay.close();
+        const targetFieldObj = fields.find((f) => f.name === fieldName);
+        if (targetFieldObj) {
+          openFlyout({}, targetFieldObj);
+        }
+      }
     };
 
     const viewFieldAction = {

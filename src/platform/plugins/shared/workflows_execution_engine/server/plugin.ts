@@ -32,6 +32,7 @@ import {
 } from './execution_functions';
 import { checkLicense } from './lib/check_license';
 import { getAuthenticatedUser } from './lib/get_user';
+import { WorkflowExecutionTelemetryClient } from './lib/telemetry/workflow_execution_telemetry_client';
 import { initializeLogsRepositoryDataStream } from './repositories/logs_repository/data_stream';
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
 import type {
@@ -83,6 +84,9 @@ export class WorkflowsExecutionEnginePlugin
   ) {
     this.logger.debug('workflows-execution-engine: Setup');
 
+    // Register telemetry event schemas
+    WorkflowExecutionTelemetryClient.setup(core.analytics);
+
     const logger = this.logger;
     const config = this.config;
 
@@ -117,8 +121,8 @@ export class WorkflowsExecutionEnginePlugin
                 : null;
               const queueDelayMs = scheduledAt ? now - scheduledAt : null;
 
-              const apm = await import('elastic-apm-node');
-              const currentTransaction = apm.default.currentTransaction;
+              const { default: apm } = await import('elastic-apm-node');
+              const currentTransaction = apm.currentTransaction;
               if (currentTransaction) {
                 if (queueDelayMs !== null) {
                   currentTransaction.setLabel('queue_delay_ms', queueDelayMs);
@@ -188,8 +192,8 @@ export class WorkflowsExecutionEnginePlugin
               const queueDelayMs = scheduledAt ? now - scheduledAt : null;
               const resumeDelayMs = runAt ? now - runAt : null;
 
-              const apm = await import('elastic-apm-node');
-              const currentTransaction = apm.default.currentTransaction;
+              const { default: apm } = await import('elastic-apm-node');
+              const currentTransaction = apm.currentTransaction;
               if (currentTransaction) {
                 if (queueDelayMs !== null) {
                   currentTransaction.setLabel('queue_delay_ms', queueDelayMs);
@@ -268,8 +272,8 @@ export class WorkflowsExecutionEnginePlugin
               const scheduleDelayMs = runAt ? now - runAt : null;
 
               // Add labels to current APM transaction for queue visibility
-              const apm = await import('elastic-apm-node');
-              const currentTransaction = apm.default.currentTransaction;
+              const { default: apm } = await import('elastic-apm-node');
+              const currentTransaction = apm.currentTransaction;
               if (currentTransaction) {
                 if (queueDelayMs !== null) {
                   currentTransaction.setLabel('queue_delay_ms', queueDelayMs);
