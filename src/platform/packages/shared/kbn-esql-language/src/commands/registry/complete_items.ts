@@ -644,7 +644,7 @@ export function createIndicesBrowserSuggestion(
 ): ISuggestionItem {
   return createResourceBrowserSuggestion({
     label: i18n.translate('kbn-esql-language.esql.autocomplete.indicesBrowser.suggestionLabel', {
-      defaultMessage: 'Browse indices',
+      defaultMessage: 'Browse data sources',
     }),
     description: i18n.translate(
       'kbn-esql-language.esql.autocomplete.indicesBrowser.suggestionDescription',
