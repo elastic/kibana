@@ -4554,6 +4554,23 @@
       }
     }
   },
+  "watchlist-config": {
+    "dynamic": false,
+    "properties": {
+      "description": {
+        "type": "text"
+      },
+      "managed": {
+        "type": "boolean"
+      },
+      "name": {
+        "type": "keyword"
+      },
+      "riskModifier": {
+        "type": "float"
+      }
+    }
+  },
   "workplace_search_telemetry": {
     "dynamic": false,
     "properties": {}
