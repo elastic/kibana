@@ -29,6 +29,18 @@ export interface SkillServiceStart {
    * This is the single entry point for all skill access.
    */
   getRegistry(opts: { request: KibanaRequest }): Promise<SkillRegistry>;
+
+  /**
+   * Register a skill dynamically after plugin start.
+   * Only affects future registry instances (existing ones snapshot skills at creation time).
+   */
+  registerSkill(skill: SkillDefinition): Promise<void>;
+
+  /**
+   * Unregister a previously registered skill by ID.
+   * Returns true if the skill was found and removed.
+   */
+  unregisterSkill(skillId: string): Promise<boolean>;
 }
 
 export interface SkillService {
@@ -100,6 +112,33 @@ class SkillServiceImpl implements SkillService {
           persistedProvider,
           toolRegistry,
         });
+      },
+      registerSkill: async (skill) => {
+        await validateSkillDefinition(skill);
+
+        if (this.skills.has(skill.id)) {
+          throw new Error(`Skill type with id ${skill.id} already registered`);
+        }
+
+        const fullPath = getSkillEntryPath({ skill });
+        if (this.skillFullPaths.has(fullPath)) {
+          throw new Error(
+            `Skill with path ${skill.basePath} and name ${skill.name} already registered`
+          );
+        }
+        this.skillFullPaths.add(fullPath);
+        this.skills.set(skill.id, skill);
+      },
+      unregisterSkill: async (skillId) => {
+        const skill = this.skills.get(skillId);
+        if (!skill) {
+          return false;
+        }
+
+        const fullPath = getSkillEntryPath({ skill });
+        this.skillFullPaths.delete(fullPath);
+        this.skills.delete(skillId);
+        return true;
       },
     };
   }

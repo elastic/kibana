@@ -185,6 +185,8 @@ export class AgentBuilderPlugin
       },
       skills: {
         getRegistry: skills.getRegistry.bind(skills),
+        register: skills.registerSkill.bind(skills),
+        unregister: skills.unregisterSkill.bind(skills),
       },
     };
   }

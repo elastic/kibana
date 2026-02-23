@@ -134,4 +134,109 @@ describe('createSkillService', () => {
       expect(validateSkillDefinition).toHaveBeenCalledWith(skill);
     });
   });
+
+  describe('start().registerSkill (dynamic)', () => {
+    it('registers a skill dynamically after start', async () => {
+      const mockToolRegistry = createMockToolRegistry();
+      const service = createSkillService();
+      service.setup();
+
+      const start = service.start({
+        elasticsearch: { client: { asInternalUser: {} } } as any,
+        logger: { warn: jest.fn() } as any,
+        getToolRegistry: jest.fn().mockResolvedValue(mockToolRegistry),
+      });
+
+      const skill = createMockSkillDefinition({ id: 'dynamic-1' });
+      await start.registerSkill(skill);
+
+      const registry = await start.getRegistry({ request: {} as any });
+      expect(await registry.has('dynamic-1')).toBe(true);
+      expect(validateSkillDefinition).toHaveBeenCalledWith(skill);
+    });
+
+    it('throws when registering duplicate skill id dynamically', async () => {
+      const mockToolRegistry = createMockToolRegistry();
+      const service = createSkillService();
+      const { registerSkill } = service.setup();
+
+      registerSkill(createMockSkillDefinition({ id: 'dup' }));
+
+      const start = service.start({
+        elasticsearch: { client: { asInternalUser: {} } } as any,
+        logger: { warn: jest.fn() } as any,
+        getToolRegistry: jest.fn().mockResolvedValue(mockToolRegistry),
+      });
+
+      await expect(
+        start.registerSkill(createMockSkillDefinition({ id: 'dup', name: 'other' as any }))
+      ).rejects.toThrow('Skill type with id dup already registered');
+    });
+  });
+
+  describe('start().unregisterSkill', () => {
+    it('unregisters a previously registered skill', async () => {
+      const mockToolRegistry = createMockToolRegistry();
+      const service = createSkillService();
+      const { registerSkill } = service.setup();
+      registerSkill(createMockSkillDefinition({ id: 'removable' }));
+
+      const start = service.start({
+        elasticsearch: { client: { asInternalUser: {} } } as any,
+        logger: { warn: jest.fn() } as any,
+        getToolRegistry: jest.fn().mockResolvedValue(mockToolRegistry),
+      });
+
+      const result = await start.unregisterSkill('removable');
+      expect(result).toBe(true);
+
+      const registry = await start.getRegistry({ request: {} as any });
+      expect(await registry.has('removable')).toBe(false);
+    });
+
+    it('returns false for non-existent skill', async () => {
+      const mockToolRegistry = createMockToolRegistry();
+      const service = createSkillService();
+      service.setup();
+
+      const start = service.start({
+        elasticsearch: { client: { asInternalUser: {} } } as any,
+        logger: { warn: jest.fn() } as any,
+        getToolRegistry: jest.fn().mockResolvedValue(mockToolRegistry),
+      });
+
+      const result = await start.unregisterSkill('non-existent');
+      expect(result).toBe(false);
+    });
+
+    it('frees the path so a skill with the same path can be re-registered', async () => {
+      const mockToolRegistry = createMockToolRegistry();
+      const service = createSkillService();
+      service.setup();
+
+      const start = service.start({
+        elasticsearch: { client: { asInternalUser: {} } } as any,
+        logger: { warn: jest.fn() } as any,
+        getToolRegistry: jest.fn().mockResolvedValue(mockToolRegistry),
+      });
+
+      const skill = createMockSkillDefinition({
+        id: 'skill-1',
+        name: 'my-skill' as any,
+        basePath: 'skills/platform' as any,
+      });
+      await start.registerSkill(skill);
+      await start.unregisterSkill('skill-1');
+
+      const newSkill = createMockSkillDefinition({
+        id: 'skill-2',
+        name: 'my-skill' as any,
+        basePath: 'skills/platform' as any,
+      });
+      await expect(start.registerSkill(newSkill)).resolves.not.toThrow();
+
+      const registry = await start.getRegistry({ request: {} as any });
+      expect(await registry.has('skill-2')).toBe(true);
+    });
+  });
 });
