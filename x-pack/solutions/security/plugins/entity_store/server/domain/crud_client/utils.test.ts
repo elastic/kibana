@@ -13,7 +13,7 @@ import {
 } from '../../../common/domain/definitions/entity_schema';
 import { getEntityDefinition } from '../../../common/domain/definitions/registry';
 import { BadCRUDRequestError } from '../errors';
-import { removeEUIDFields, validateAndTransformDoc } from './utils';
+import { validateAndTransformDoc } from './utils';
 
 jest.mock('../../../common/domain/definitions/registry');
 
@@ -165,40 +165,5 @@ describe('crud_client utils', () => {
     };
 
     expect(() => validateAndTransformDoc('generic', 'default', doc, true)).not.toThrow();
-  });
-
-  it('removeEUIDFields: removes identity fields from update doc', () => {
-    const definition = createDefinition('host', [], ['host.name']);
-    const doc: Record<string, unknown> = {
-      host: {
-        name: 'host-to-remove',
-        id: ['host-id'],
-      },
-    };
-
-    removeEUIDFields(definition, doc);
-
-    expect(doc).toEqual({
-      host: {
-        id: ['host-id'],
-      },
-    });
-  });
-
-  it('removeEUIDFields: is a no-op with no identity fields', () => {
-    const definition = createDefinition('host', [], []);
-    const doc: Record<string, unknown> = {
-      host: {
-        name: 'host-unchanged',
-      },
-    };
-
-    removeEUIDFields(definition, doc);
-
-    expect(doc).toEqual({
-      host: {
-        name: 'host-unchanged',
-      },
-    });
   });
 });

@@ -14,13 +14,12 @@ import type {
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { createHash } from 'crypto';
 import type { Entity } from '../../../common/domain/definitions/entity.gen';
-import { getEntityDefinition } from '../../../common/domain/definitions/registry';
 import type { EntityType } from '../../../common';
 import { getEuidFromObject } from '../../../common/domain/euid';
 import { getLatestEntitiesIndexName } from '../assets/latest_index';
 import { BadCRUDRequestError, EntityNotFoundError } from '../errors';
 import { getUpdatesEntitiesDataStreamName } from '../assets/updates_data_stream';
-import { removeEUIDFields, validateAndTransformDoc } from './utils';
+import { validateAndTransformDoc } from './utils';
 
 interface CRUDClientDependencies {
   logger: Logger;
@@ -51,42 +50,6 @@ export class CRUDClient {
     this.namespace = deps.namespace;
   }
 
-  private async createEntity(hashedId: string, doc: Record<string, unknown>): Promise<void> {
-    this.logger.debug(`Creating entity ID: ${hashedId}`);
-    await this.esClient.create({
-      index: getLatestEntitiesIndexName(this.namespace),
-      id: hashedId,
-      document: doc,
-      refresh: 'wait_for',
-    });
-    this.logger.debug(`Created entity ID ${hashedId}`);
-  }
-
-  private async updateEntity(
-    hashedId: string,
-    entityType: EntityType,
-    doc: Record<string, unknown>
-  ): Promise<void> {
-    this.logger.debug(`Updating entity ID: ${hashedId}`);
-    const definition = getEntityDefinition(entityType, this.namespace);
-    removeEUIDFields(definition, doc);
-    const { result } = await this.esClient.update({
-      index: getLatestEntitiesIndexName(this.namespace),
-      id: hashedId,
-      doc,
-      retry_on_conflict: 3,
-    });
-
-    switch (result as Result) {
-      case 'updated':
-        this.logger.debug(`Updated entity ID ${hashedId}`);
-        break;
-      case 'noop':
-        this.logger.debug(`Updated entity ID ${hashedId} (no change)`);
-        break;
-    }
-  }
-
   public async upsertEntity(entityType: EntityType, doc: Entity, force: boolean): Promise<void> {
     const id = getEuidFromObject(entityType, doc);
     if (id === undefined) {
@@ -100,18 +63,28 @@ export class CRUDClient {
     if (!doc.entity?.id) {
       doc.entity.id = id;
     }
+
     const readyDoc = validateAndTransformDoc(entityType, this.namespace, doc, force);
 
-    try {
-      await this.createEntity(hashedId, readyDoc);
-    } catch (error) {
-      if (error.statusCode !== 409) {
-        throw error;
-      }
-      this.logger.debug(`Conflict while creating entity ID ${id}, updating instead`);
-    }
+    const { result } = await this.esClient.update({
+      index: getLatestEntitiesIndexName(this.namespace),
+      id: hashedId,
+      doc: readyDoc,
+      doc_as_upsert: true,
+      retry_on_conflict: 3,
+    });
 
-    await this.updateEntity(hashedId, entityType, readyDoc);
+    switch (result as Result) {
+      case 'created':
+        this.logger.debug(`Created entity ID ${hashedId}`);
+        break;
+      case 'updated':
+        this.logger.debug(`Updated entity ID ${hashedId}`);
+        break;
+      case 'noop':
+        this.logger.debug(`Updated entity ID ${hashedId} (no change)`);
+        break;
+    }
     return;
   }
 

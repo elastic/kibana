@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { unset } from 'lodash';
 import { getFlattenedObject } from '@kbn/std';
 import { ENTITY_ID_FIELD } from '../../../common/domain/definitions/common_fields';
 import { BadCRUDRequestError } from '../errors';
@@ -119,13 +118,4 @@ function transformDocForUpsert(type: EntityType, data: Partial<Entity>): Record<
   doc[type as keyof typeof doc] = typeData;
 
   return doc;
-}
-
-export function removeEUIDFields(
-  definition: ManagedEntityDefinition,
-  doc: Record<string, unknown>
-) {
-  for (const euidField of definition.identityField.requiresOneOfFields) {
-    unset(doc, euidField);
-  }
 }
