@@ -60,10 +60,7 @@ const optionListControlStyles = {
     css({
       fontWeight: `${euiTheme.font.weight.regular} !important` as 'normal',
       color: `${euiTheme.colors.textSubdued} !important`,
-      padding: `0`,
-      '&.optionsList--pinned': {
-        padding: `0 ${euiTheme.size.s}`,
-      },
+      padding: `0 ${euiTheme.size.s}`,
       blockSize: '100% !important',
       boxShadow: 'none !important',
       '&:hover:not(:focus)': {
@@ -210,7 +207,6 @@ export const OptionsListControl = ({
       isLoading={loading}
       compressed={isCompressed(componentApi)}
       iconType={'arrowDown'}
-      className={isPinned ? `optionsList--pinned` : undefined}
       isSelected={isPopoverOpen}
       numActiveFilters={selectedOptionsCount}
       hasActiveFilters={Boolean(selectedOptionsCount)}

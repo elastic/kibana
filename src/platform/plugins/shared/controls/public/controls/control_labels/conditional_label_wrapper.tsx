@@ -28,7 +28,7 @@ export const ConditionalLabelWrapper = ({
   ) : (
     <EuiFlexGroup direction="column" css={styles.flexGroup}>
       <EuiFlexItem css={styles.disableGrow}>
-        <EuiText size="s" color="subdued" css={styles.truncatedText} component="p">
+        <EuiText size="s" color="subdued" css={styles.label} component="p">
           {label}
         </EuiText>
       </EuiFlexItem>
@@ -41,14 +41,16 @@ const labelWrapperStyles = {
   flexGroup: ({ euiTheme }: UseEuiTheme) =>
     css({
       gap: '1px',
-      padding: `${euiTheme.size.xs} ${euiTheme.size.s} 1px ${euiTheme.size.s}`,
+      padding: `${euiTheme.size.xs} 0 1px 0`,
       overflow: 'hidden',
     }),
   disableGrow: css({ flexGrow: 0 }),
-  truncatedText: css({
-    lineHeight: '1.2rem',
-    overflow: 'hidden',
-    whiteSpace: 'nowrap',
-    textOverflow: 'ellipsis',
-  }),
+  label: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      padding: `0 ${euiTheme.size.s}`,
+      lineHeight: '1.2rem',
+      overflow: 'hidden',
+      whiteSpace: 'nowrap',
+      textOverflow: 'ellipsis',
+    }),
 };
