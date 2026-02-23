@@ -35,7 +35,7 @@ export interface AffectedPackagesConfig {
  * Get configuration from environment variables
  *
  * Environment variables:
- * - AFFECTED_STRATEGY: 'git' | 'moon' | 'disabled' (default: 'git')
+ * - AFFECTED_STRATEGY: 'git' | 'moon' | 'disabled' (default: 'moon')
  * - AFFECTED_DOWNSTREAM: 'true' | 'false' (default: 'true')
  * - AFFECTED_LOGGING: 'true' | 'false' (default: 'true')
  *
@@ -44,7 +44,7 @@ export interface AffectedPackagesConfig {
 function getConfigFromEnv(): AffectedPackagesConfig {
   const strategy = (process.env.AFFECTED_STRATEGY ||
     process.env.JEST_AFFECTED_STRATEGY ||
-    'git') as 'git' | 'moon' | 'disabled';
+    'moon') as 'git' | 'moon' | 'disabled';
   const includeDownstream =
     (process.env.AFFECTED_DOWNSTREAM || process.env.JEST_AFFECTED_DOWNSTREAM) !== 'false';
   const logging = (process.env.AFFECTED_LOGGING || process.env.JEST_AFFECTED_LOGGING) !== 'false';
