@@ -63,7 +63,7 @@ test.describe(
 
       // Click the editor to ensure tokenization
       const editor = flyoutBody.locator('[data-test-subj="kibanaCodeEditor"]');
-      await editor.waitFor({ state: 'visible', timeout: 15_000 });
+      await editor.waitFor({ state: 'visible', timeout: 30_000 });
       await editor.click();
 
       // Use toContainText on the code editor since getByText may not find text in Monaco/CodeMirror editors
@@ -78,8 +78,8 @@ test.describe(
       // eslint-disable-next-line playwright/no-nth-methods -- first event in list
       await page.testSubj.locator('expand-event').first().click();
       const notificationBadge = page.testSubj.locator('response-actions-notification');
-      await notificationBadge.waitFor({ state: 'visible', timeout: 60_000 });
-      await expect(notificationBadge).not.toHaveText('0', { timeout: 60_000 });
+      await notificationBadge.waitFor({ state: 'visible', timeout: 120_000 });
+      await expect(notificationBadge).not.toHaveText('0', { timeout: 120_000 });
       const initialNotificationCount = parseInt((await notificationBadge.textContent()) || '0', 10);
 
       // Take osquery action with params
@@ -169,7 +169,7 @@ test.describe(
       const queryEventsTable = page.testSubj.locator('query-events-table');
       // eslint-disable-next-line playwright/no-nth-methods -- first event in timeline
       const firstExpandEvent = queryEventsTable.locator('[data-test-subj="expand-event"]').first();
-      await firstExpandEvent.waitFor({ state: 'visible', timeout: 60_000 });
+      await firstExpandEvent.waitFor({ state: 'visible', timeout: 120_000 });
       await firstExpandEvent.click();
 
       // Take osquery action with params

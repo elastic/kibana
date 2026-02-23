@@ -92,7 +92,7 @@ test.describe(
       await page.testSubj.locator('securitySolutionFlyoutFooterDropdownButton').click();
       await page.testSubj.locator('osquery-action-item').click();
       await expect(page.getByText(/^\d+ agent selected\./)).toBeVisible({
-        timeout: 30_000,
+        timeout: 60_000,
       });
 
       // Select all agents

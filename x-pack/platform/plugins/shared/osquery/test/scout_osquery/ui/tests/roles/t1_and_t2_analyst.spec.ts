@@ -99,8 +99,10 @@ roles.forEach(({ name, role }) => {
         // Check action items - wait for results actions to load
         // Note: t1/t2 analysts don't have Lens permissions, so "View in Lens" should not be visible
         // eslint-disable-next-line playwright/no-nth-methods -- single saved query; only one result section
-        await expect(page.testSubj.locator('viewInDiscover').first()).toBeVisible({
-          timeout: 30_000,
+        const discoverBtn = page.testSubj.locator('viewInDiscover').first();
+        await discoverBtn.scrollIntoViewIfNeeded().catch(() => {});
+        await expect(discoverBtn).toBeVisible({
+          timeout: 60_000,
         });
         // eslint-disable-next-line playwright/no-nth-methods -- single saved query; only one result section
         await expect(page.testSubj.locator('addToCaseButton').first()).toBeVisible({

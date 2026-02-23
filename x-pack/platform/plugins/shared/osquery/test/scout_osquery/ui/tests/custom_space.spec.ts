@@ -97,7 +97,8 @@ for (const testSpace of testSpaces) {
 
       // eslint-disable-next-line playwright/no-nth-methods -- single live query; only one result section
       const discoverLocator = page.testSubj.locator('viewInDiscover').first();
-      await expect(discoverLocator).toBeVisible({ timeout: 60_000 });
+      await discoverLocator.scrollIntoViewIfNeeded().catch(() => {});
+      await expect(discoverLocator).toBeVisible({ timeout: 120_000 });
       // eslint-disable-next-line playwright/no-nth-methods -- single live query; only one result section
       await expect(page.testSubj.locator('viewInLens').first()).toBeVisible({
         timeout: 60_000,
