@@ -91,7 +91,7 @@ describe('Export rules request schema', () => {
       const result = ExportRulesRequestQuery.safeParse(payload);
       expectParseError(result);
       expect(stringifyZodError(result.error)).toEqual(
-        'file_name: Expected string, received number'
+        'file_name: Invalid input: expected string, received number'
       );
     });
 
@@ -120,7 +120,7 @@ describe('Export rules request schema', () => {
       const result = ExportRulesRequestQuery.safeParse(payload);
       expectParseError(result);
       expect(stringifyZodError(result.error)).toEqual(
-        `exclude_export_details: Invalid enum value. Expected 'true' | 'false', received 'invalid string', exclude_export_details: Expected boolean, received string`
+        'exclude_export_details: Invalid option: expected one of "true"|"false", exclude_export_details: Invalid input: expected boolean, received string'
       );
     });
   });

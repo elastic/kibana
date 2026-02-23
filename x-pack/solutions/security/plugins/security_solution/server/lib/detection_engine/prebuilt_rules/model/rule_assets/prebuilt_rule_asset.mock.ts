@@ -91,6 +91,7 @@ export const getPrebuiltThreatMatchRuleMock = (): PrebuiltRuleAsset => ({
   name: 'Query with a rule id',
   severity: 'high',
   risk_score: 55,
+  max_signals: 100,
   rule_id: 'rule-1',
   version: 1,
   author: [],

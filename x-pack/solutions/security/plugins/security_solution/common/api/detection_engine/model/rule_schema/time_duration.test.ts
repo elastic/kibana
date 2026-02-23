@@ -118,7 +118,7 @@ describe('TimeDuration schema', () => {
     const result = schema.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"Expected string, received number"`
+      `"Invalid input: expected string, received number"`
     );
   });
 

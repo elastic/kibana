@@ -385,7 +385,7 @@ describe('rules schema', () => {
     const result = RuleCreateProps.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toEqual(
-      'references.0: Expected string, received number'
+      'references.0: Invalid input: expected string, received number'
     );
   });
 
@@ -397,7 +397,9 @@ describe('rules schema', () => {
 
     const result = RuleCreateProps.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toEqual('index.0: Expected string, received number');
+    expect(stringifyZodError(result.error)).toEqual(
+      'index.0: Invalid input: expected string, received number'
+    );
   });
 
   test('saved_query type can have filters with it', () => {
@@ -419,7 +421,9 @@ describe('rules schema', () => {
 
     const result = RuleCreateProps.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toEqual('filters: Expected array, received string');
+    expect(stringifyZodError(result.error)).toEqual(
+      'filters: Invalid input: expected array, received string'
+    );
   });
 
   test('language validates with kuery', () => {
@@ -453,7 +457,7 @@ describe('rules schema', () => {
     const result = RuleCreateProps.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toEqual(
-      "language: Invalid enum value. Expected 'kuery' | 'lucene', received 'something-made-up'"
+      "language: Invalid option: expected one of 'kuery'|'lucene'"
     );
   });
 
@@ -466,7 +470,7 @@ describe('rules schema', () => {
     const result = RuleCreateProps.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toEqual(
-      'max_signals: Number must be greater than or equal to 1'
+      'max_signals: Too small: expected number to be >=1'
     );
   });
 
@@ -479,7 +483,7 @@ describe('rules schema', () => {
     const result = RuleCreateProps.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toEqual(
-      'max_signals: Number must be greater than or equal to 1'
+      'max_signals: Too small: expected number to be >=1'
     );
   });
 
@@ -514,7 +518,7 @@ describe('rules schema', () => {
     const result = RuleCreateProps.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toEqual(
-      'tags.0: Expected string, received number, tags.1: Expected string, received number, tags.2: Expected string, received number'
+      'tags.0: Invalid input: expected string, received number, tags.1: Invalid input: expected string, received number, tags.2: Invalid input: expected string, received number'
     );
   });
 
@@ -606,7 +610,7 @@ describe('rules schema', () => {
     const result = RuleCreateProps.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toEqual(
-      'false_positives.0: Expected string, received number, false_positives.1: Expected string, received number'
+      'false_positives.0: Invalid input: expected string, received number, false_positives.1: Invalid input: expected string, received number'
     );
   });
 
@@ -632,7 +636,7 @@ describe('rules schema', () => {
     const result = RuleCreateProps.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toEqual(
-      'risk_score: Number must be greater than or equal to 0'
+      'risk_score: Too small: expected number to be >=0'
     );
   });
 
@@ -715,7 +719,7 @@ describe('rules schema', () => {
     const result = RuleCreateProps.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toEqual(
-      "severity: Invalid enum value. Expected 'low' | 'medium' | 'high' | 'critical', received 'junk'"
+      "severity: Invalid option: expected one of 'low'|'medium'|'high'|'critical'"
     );
   });
 
@@ -803,7 +807,9 @@ describe('rules schema', () => {
 
       const result = RuleCreateProps.safeParse(payload);
       expectParseError(result);
-      expect(stringifyZodError(result.error)).toEqual('note: Expected string, received object');
+      expect(stringifyZodError(result.error)).toEqual(
+        'note: Invalid input: expected string, received object'
+      );
     });
 
     test('empty name is not valid', () => {
@@ -815,7 +821,7 @@ describe('rules schema', () => {
       const result = RuleCreateProps.safeParse(payload);
       expectParseError(result);
       expect(stringifyZodError(result.error)).toEqual(
-        'name: String must contain at least 1 character(s)'
+        'name: Too small: expected string to have >= 1 character(s)'
       );
     });
 
@@ -828,7 +834,7 @@ describe('rules schema', () => {
       const result = RuleCreateProps.safeParse(payload);
       expectParseError(result);
       expect(stringifyZodError(result.error)).toEqual(
-        'description: String must contain at least 1 character(s)'
+        'description: Too small: expected string to have >= 1 character(s)'
       );
     });
 
@@ -904,7 +910,7 @@ describe('rules schema', () => {
     const result = RuleCreateProps.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toEqual(
-      'threshold.value: Number must be greater than or equal to 1'
+      'threshold.value: Too small: expected number to be >=1'
     );
   });
 
@@ -973,7 +979,7 @@ describe('rules schema', () => {
       const result = RuleCreateProps.safeParse(payload);
       expectParseError(result);
       expect(stringifyZodError(result.error)).toEqual(
-        "exceptions_list.0.list_id: Required, exceptions_list.0.type: Required, exceptions_list.0.namespace_type: Invalid enum value. Expected 'agnostic' | 'single', received 'not a namespace type'"
+        "exceptions_list.0.list_id: Required, exceptions_list.0.type: Required, exceptions_list.0.namespace_type: Invalid option: expected one of 'agnostic'|'single'"
       );
     });
 
@@ -1086,7 +1092,7 @@ describe('rules schema', () => {
       const result = RuleCreateProps.safeParse(payload);
       expectParseError(result);
       expect(stringifyZodError(result.error)).toEqual(
-        'data_view_id: Expected string, received number'
+        'data_view_id: Invalid input: expected string, received number'
       );
     });
 
@@ -1186,7 +1192,7 @@ describe('rules schema', () => {
       const result = RuleCreateProps.safeParse(payload);
       expectParseError(result);
       expect(stringifyZodError(result.error)).toEqual(
-        'investigation_fields.field_names.0: Expected string, received number, investigation_fields.field_names.1: Expected string, received number, investigation_fields.field_names.2: Expected string, received number'
+        'investigation_fields.field_names.0: Invalid input: expected string, received number, investigation_fields.field_names.1: Invalid input: expected string, received number, investigation_fields.field_names.2: Invalid input: expected string, received number'
       );
     });
 
@@ -1247,7 +1253,7 @@ describe('rules schema', () => {
         const result = RuleCreateProps.safeParse(payload);
         expectParseError(result);
         expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-          `"alert_suppression.duration: Required"`
+          `"alert_suppression.duration: Invalid input: expected object, received undefined"`
         );
       });
     });
@@ -1291,7 +1297,7 @@ describe('rules schema', () => {
           const result = RuleCreateProps.safeParse(payload);
           expectParseError(result);
           expect(stringifyZodError(result.error)).toEqual(
-            'alert_suppression.group_by: Expected array, received string'
+            'alert_suppression.group_by: Invalid input: expected array, received string'
           );
         });
 

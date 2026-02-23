@@ -27,8 +27,6 @@ describe('SortOrder schema', () => {
     const payload = 'invalid';
     const result = SortOrder.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toEqual(
-      "Invalid enum value. Expected 'asc' | 'desc', received 'invalid'"
-    );
+    expect(stringifyZodError(result.error)).toEqual("Invalid option: expected one of 'asc'|'desc'");
   });
 });

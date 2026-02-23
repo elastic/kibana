@@ -33,7 +33,7 @@ describe('Perform Rule Upgrade Route Schemas', () => {
         const result = PickVersionValues.safeParse(value);
         expectParseError(result);
         expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-          `"Invalid enum value. Expected 'BASE' | 'CURRENT' | 'TARGET' | 'MERGED', received '${value}'"`
+          "Invalid option: expected one of 'BASE'|'CURRENT'|'TARGET'|'MERGED'"
         );
       });
     });
@@ -112,7 +112,7 @@ describe('Perform Rule Upgrade Route Schemas', () => {
         const result = RuleFieldsToUpgrade.safeParse(input);
         expectParseError(result);
         expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-          `"tags.resolved_value: Expected array, received number, references.resolved_value: Expected array, received string"`
+          `"tags.resolved_value: Invalid input: expected array, received number, references.resolved_value: Invalid input: expected array, received string"`
         );
       });
 
@@ -229,7 +229,7 @@ describe('Perform Rule Upgrade Route Schemas', () => {
       const result = RuleUpgradeSpecifier.safeParse(invalid);
       expectParseError(result);
       expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-        `"rule_id: Expected string, received number"`
+        `"rule_id: Invalid input: expected string, received number"`
       );
     });
   });

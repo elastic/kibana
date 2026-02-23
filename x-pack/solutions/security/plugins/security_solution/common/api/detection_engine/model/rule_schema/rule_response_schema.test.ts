@@ -40,9 +40,7 @@ describe('Rule response schema', () => {
 
     const result = RuleResponse.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"type: Invalid discriminator value. Expected 'eql' | 'query' | 'saved_query' | 'threshold' | 'threat_match' | 'machine_learning' | 'new_terms' | 'esql'"`
-    );
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(`""`);
   });
 
   test('it should validate a type of "query" with a saved_id together', () => {
@@ -70,7 +68,9 @@ describe('Rule response schema', () => {
 
     const result = RuleResponse.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(`"saved_id: Required"`);
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"saved_id: Invalid input: expected string, received undefined"`
+    );
   });
 
   test('it should validate a type of "timeline_id" if there is a "timeline_title" dependent', () => {
@@ -101,7 +101,7 @@ describe('Rule response schema', () => {
       const result = RuleResponse.safeParse(payload);
       expectParseError(result);
       expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-        `"exceptions_list: Expected array, received string"`
+        `"exceptions_list: Invalid input: expected array, received string"`
       );
     });
   });
@@ -237,7 +237,7 @@ describe('investigation_fields', () => {
     const result = RuleResponse.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"investigation_fields: Expected object, received string"`
+      `"investigation_fields: Invalid input: expected object, received string"`
     );
   });
 });
@@ -275,6 +275,8 @@ describe('rule_source', () => {
 
     const result = RuleResponse.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(`"rule_source: Required"`);
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"rule_source: Invalid input: expected object, received undefined"`
+    );
   });
 });

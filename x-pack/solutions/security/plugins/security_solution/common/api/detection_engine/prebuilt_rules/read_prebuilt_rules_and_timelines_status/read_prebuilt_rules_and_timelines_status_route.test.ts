@@ -58,7 +58,7 @@ describe('Get prebuilt rules and timelines status response schema', () => {
 
     expectParseError(result);
     expect(stringifyZodError(result.error)).toEqual(
-      'rules_installed: Number must be greater than or equal to 0'
+      'rules_installed: Too small: expected number to be >=0'
     );
   });
 
@@ -76,7 +76,7 @@ describe('Get prebuilt rules and timelines status response schema', () => {
 
     expectParseError(result);
     expect(stringifyZodError(result.error)).toEqual(
-      'rules_not_installed: Number must be greater than or equal to 0'
+      'rules_not_installed: Too small: expected number to be >=0'
     );
   });
 
@@ -94,7 +94,7 @@ describe('Get prebuilt rules and timelines status response schema', () => {
 
     expectParseError(result);
     expect(stringifyZodError(result.error)).toEqual(
-      'rules_not_updated: Number must be greater than or equal to 0'
+      'rules_not_updated: Too small: expected number to be >=0'
     );
   });
 
@@ -112,7 +112,7 @@ describe('Get prebuilt rules and timelines status response schema', () => {
 
     expectParseError(result);
     expect(stringifyZodError(result.error)).toEqual(
-      'rules_custom_installed: Number must be greater than or equal to 0'
+      'rules_custom_installed: Too small: expected number to be >=0'
     );
   });
 

@@ -46,7 +46,7 @@ describe('Install prebuilt rules and timelines response schema', () => {
     const result = InstallPrebuiltRulesAndTimelinesResponse.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toEqual(
-      'rules_installed: Number must be greater than or equal to 0'
+      'rules_installed: Too small: expected number to be >=0'
     );
   });
 
@@ -60,7 +60,7 @@ describe('Install prebuilt rules and timelines response schema', () => {
     const result = InstallPrebuiltRulesAndTimelinesResponse.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toEqual(
-      'rules_updated: Number must be greater than or equal to 0'
+      'rules_updated: Too small: expected number to be >=0'
     );
   });
 

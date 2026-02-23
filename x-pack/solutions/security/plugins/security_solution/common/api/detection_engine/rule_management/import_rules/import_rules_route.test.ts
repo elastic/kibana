@@ -129,7 +129,7 @@ describe('Import rules schema', () => {
       const result = ImportRulesResponse.safeParse(payload);
       expectParseError(result);
       expect(stringifyZodError(result.error)).toEqual(
-        'success_count: Number must be greater than or equal to 0'
+        'success_count: Too small: expected number to be >=0'
       );
     });
 
@@ -150,7 +150,7 @@ describe('Import rules schema', () => {
       const result = ImportRulesResponse.safeParse(payload);
       expectParseError(result);
       expect(stringifyZodError(result.error)).toEqual(
-        'exceptions_success_count: Number must be greater than or equal to 0'
+        'exceptions_success_count: Too small: expected number to be >=0'
       );
     });
 
@@ -170,7 +170,9 @@ describe('Import rules schema', () => {
       };
       const result = ImportRulesResponse.safeParse(payload);
       expectParseError(result);
-      expect(stringifyZodError(result.error)).toEqual('success: Expected boolean, received string');
+      expect(stringifyZodError(result.error)).toEqual(
+        'success: Invalid input: expected boolean, received string'
+      );
     });
 
     test('it should NOT validate a exceptions_success that is not a boolean', () => {
@@ -192,7 +194,7 @@ describe('Import rules schema', () => {
       const result = ImportRulesResponse.safeParse(payload);
       expectParseError(result);
       expect(stringifyZodError(result.error)).toEqual(
-        'exceptions_success: Expected boolean, received string'
+        'exceptions_success: Invalid input: expected boolean, received string'
       );
     });
 
@@ -305,7 +307,7 @@ describe('Import rules schema', () => {
       const result = ImportRulesResponse.safeParse(payload);
       expectParseError(result);
       expect(stringifyZodError(result.error)).toEqual(
-        'action_connectors_success: Expected boolean, received string'
+        'action_connectors_success: Invalid input: expected boolean, received string'
       );
     });
 
@@ -326,7 +328,7 @@ describe('Import rules schema', () => {
       const result = ImportRulesResponse.safeParse(payload);
       expectParseError(result);
       expect(stringifyZodError(result.error)).toEqual(
-        'action_connectors_success_count: Number must be greater than or equal to 0'
+        'action_connectors_success_count: Too small: expected number to be >=0'
       );
     });
     test('it should validate a action_connectors_warnings after importing successfully', () => {
@@ -369,7 +371,7 @@ describe('Import rules schema', () => {
       const result = ImportRulesResponse.safeParse(payload);
       expectParseError(result);
       expect(stringifyZodError(result.error)).toEqual(
-        'action_connectors_warnings: Expected array, received string'
+        'action_connectors_warnings: Invalid input: expected array, received string'
       );
     });
   });

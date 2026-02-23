@@ -131,7 +131,7 @@ describe('risk weight schema', () => {
 
         expect(decoded.success).toBeFalsy();
         expect(stringifyZodError(decoded.error)).toContain(
-          `host: Number must be greater than or equal to 0`
+          `host: Too small: expected number to be >=0`
         );
       });
     });
