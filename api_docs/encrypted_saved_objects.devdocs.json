@@ -508,7 +508,7 @@
                 "tags": [],
                 "label": "findOptions",
                 "description": [
-                  "matches interface of corresponding argument of Saved Objects API `createPointInTimeFinder` {@link SavedObjectsCreatePointInTimeFinderOptions }"
+                  "matches interface of corresponding argument of Saved Objects API `createPointInTimeFinder` {@link SavedObjectsCreatePointInTimeFinderOptions}"
                 ],
                 "signature": [
                   "SavedObjectsCreatePointInTimeFinderOptions"
@@ -527,7 +527,7 @@
                 "tags": [],
                 "label": "dependencies",
                 "description": [
-                  "matches interface of corresponding argument of Saved Objects API `createPointInTimeFinder` {@link SavedObjectsCreatePointInTimeFinderDependencies }"
+                  "matches interface of corresponding argument of Saved Objects API `createPointInTimeFinder` {@link SavedObjectsCreatePointInTimeFinderDependencies}"
                 ],
                 "signature": [
                   "SavedObjectsCreatePointInTimeFinderDependencies",
