@@ -39,7 +39,9 @@ export {
 export {
   keepFields,
   namespacePrefixes,
+  otelReservedFields,
   isNamespacedEcsField,
+  isOtelReservedField,
   getRegularEcsField,
 } from './src/helpers/namespaced_ecs';
 export { getAdvancedParameters } from './src/helpers/get_advanced_parameters';
@@ -81,10 +83,12 @@ export {
 
 export {
   type StreamQuery,
-  type StreamQueryKql,
+  type StreamQueryInput,
+  type QueriesGetResponse,
+  type QueriesOccurrencesGetResponse,
   upsertStreamQueryRequestSchema,
-  streamQueryKqlSchema,
   streamQuerySchema,
+  streamQueryInputSchema,
 } from './src/queries';
 
 export {
@@ -148,6 +152,11 @@ export type {
 } from './src/api/significant_events';
 
 export { emptyAssets } from './src/helpers/empty_assets';
+export {
+  validateStreamName,
+  MAX_STREAM_NAME_LENGTH,
+  INVALID_STREAM_NAME_CHARACTERS,
+} from './src/helpers/stream_name_validation';
 
 export {
   type Feature,
