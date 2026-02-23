@@ -16,25 +16,34 @@ import { CustomizeCps } from './customize_cps';
 
 describe('CustomizeCps', () => {
   const mockOnChange = jest.fn();
-  const mockFetchProjects = jest.fn().mockResolvedValue({
-    origin: {
-      _alias: 'local_project',
-      _id: 'abcde1234567890',
-      _organization: 'org1234567890',
-      _type: 'observability',
-      env: 'local',
-    },
-    linkedProjects: [
-      {
-        _alias: 'linked_local_project',
-        _id: 'badce1234567890',
-        _organization: 'org1234567890',
-        _type: 'observability',
-        env: 'local',
-        key1: 'value1',
-      },
-    ],
+
+  const originProject = {
+    _alias: 'local_project',
+    _id: 'abcde1234567890',
+    _organization: 'org1234567890',
+    _type: 'observability',
+    env: 'local',
+  };
+
+  const linkedProject = {
+    _alias: 'linked_local_project',
+    _id: 'badce1234567890',
+    _organization: 'org1234567890',
+    _type: 'observability',
+    env: 'local',
+    key1: 'value1',
+  };
+
+  const mockFetchProjects = jest.fn().mockImplementation(async (projectRouting?: string) => {
+    // When scoped to "This project" we should not return linked projects.
+    if (projectRouting === '_alias:_origin') {
+      return { origin: originProject, linkedProjects: [] };
+    }
+
+    // Default (all projects) includes linked projects.
+    return { origin: originProject, linkedProjects: [linkedProject] };
   });
+
   const mockCpsManager = {
     fetchProjects: mockFetchProjects,
   };
@@ -180,6 +189,8 @@ describe('CustomizeCps', () => {
     });
 
     it('allows the user to select project routing if the user has the manage_space_default capability', async () => {
+      const user = userEvent.setup();
+
       const capabilities = {
         project_routing: { manage_space_default: true },
       };
@@ -190,17 +201,19 @@ describe('CustomizeCps', () => {
       expect(await screen.findByText('local_project')).toBeInTheDocument();
       expect(await screen.findByText('linked_local_project')).toBeInTheDocument();
 
-      await userEvent.click(await getThisProjectButton());
+      await user.click(await getThisProjectButton());
 
       expect(await screen.findByText('local_project')).toBeInTheDocument();
-      expect(screen.queryByText('linked_local_project')).not.toBeInTheDocument();
+      await waitFor(() =>
+        expect(screen.queryByText('linked_local_project')).not.toBeInTheDocument()
+      );
       expect(mockOnChange).toHaveBeenCalledWith({
         id: 'test-space',
         name: 'Test Space',
         projectRouting: '_alias:_origin',
       });
 
-      await userEvent.click(await getAllProjectsButton());
+      await user.click(await getAllProjectsButton());
 
       expect(await screen.findByText('local_project')).toBeInTheDocument();
       expect(await screen.findByText('linked_local_project')).toBeInTheDocument();
