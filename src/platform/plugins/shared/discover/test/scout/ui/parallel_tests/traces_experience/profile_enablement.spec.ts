@@ -9,7 +9,7 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { spaceTest, testData } from '../../fixtures';
+import { spaceTest, tracesTestData } from '../../fixtures';
 
 spaceTest.describe(
   'Traces in Discover - Profile enablement',
@@ -21,11 +21,11 @@ spaceTest.describe(
       if (!config.serverless) {
         await scoutSpace.setSolutionView('oblt');
       }
-      await scoutSpace.savedObjects.load(testData.TRACES.KBN_ARCHIVE);
-      await scoutSpace.uiSettings.setDefaultIndex(testData.TRACES.DATA_VIEW_NAME);
+      await scoutSpace.savedObjects.load(tracesTestData.TRACES.KBN_ARCHIVE);
+      await scoutSpace.uiSettings.setDefaultIndex(tracesTestData.TRACES.DATA_VIEW_NAME);
       await scoutSpace.uiSettings.setDefaultTime({
-        from: testData.TRACES.DEFAULT_START_TIME,
-        to: testData.TRACES.DEFAULT_END_TIME,
+        from: tracesTestData.TRACES.DEFAULT_START_TIME,
+        to: tracesTestData.TRACES.DEFAULT_END_TIME,
       });
     });
 
@@ -53,7 +53,7 @@ spaceTest.describe(
       'should load Discover with trace data in ES|QL mode',
       async ({ page, pageObjects }) => {
         await spaceTest.step('run ES|QL query for traces', async () => {
-          await pageObjects.discover.writeEsqlQuery(testData.TRACES.ESQL_QUERY);
+          await pageObjects.discover.writeEsqlQuery(tracesTestData.TRACES.ESQL_QUERY);
         });
 
         await spaceTest.step('verify Discover loaded with results', async () => {

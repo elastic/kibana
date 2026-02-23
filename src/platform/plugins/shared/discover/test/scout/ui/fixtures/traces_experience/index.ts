@@ -7,5 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { spaceTest } from '@kbn/scout';
-export * as tracesTestData from './traces_experience';
+export { TRACES } from './constants';
+export { simpleTrace } from './synthtrace/simple_trace';
