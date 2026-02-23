@@ -110,8 +110,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardAddPanel.clickAddNewPanelFromUIActionLink('ES|QL');
       await dashboardAddPanel.expectAddPanelFlyoutClosed();
       await dashboard.waitForRenderComplete();
+      await header.waitUntilLoadingHasFinished();
 
       await monacoEditor.setCodeEditorValue('from logstash-* | stats maxB = max(bytes)');
+      const editorValue = await monacoEditor.getCodeEditorValue();
+      expect(editorValue).to.be('from logstash-* | stats maxB = max(bytes)');
       await testSubjects.click('ESQLEditor-run-query-button');
       await header.waitUntilLoadingHasFinished();
       // wait for Lens to re-render the suggestion with the new query results
