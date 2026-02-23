@@ -13,6 +13,10 @@ import {
   ruleExecutionStatusErrorReason,
   ruleExecutionStatusWarningReason,
 } from '../constants';
+import {
+  MAX_SNOOZED_INSTANCES,
+  MAX_SNOOZE_CONDITIONS_PER_ENTRY,
+} from '../../../../common/constants';
 import { rRuleSchema } from '../../r_rule/schemas';
 import { dateSchema } from './date_schema';
 import { notifyWhenSchema } from './notify_when_schema';
@@ -148,14 +152,18 @@ const perAlertSnoozeConditionSchema = schema.object({
 
 export const snoozedInstanceConfigSchema = schema.object({
   expiresAt: schema.maybe(schema.string()),
-  conditions: schema.maybe(schema.arrayOf(perAlertSnoozeConditionSchema)),
+  conditions: schema.maybe(
+    schema.arrayOf(perAlertSnoozeConditionSchema, { maxSize: MAX_SNOOZE_CONDITIONS_PER_ENTRY })
+  ),
   conditionOperator: schema.maybe(schema.oneOf([schema.literal('any'), schema.literal('all')])),
 });
 
 export const snoozedInstanceEntrySchema = schema.object({
   instanceId: schema.string(),
   expiresAt: schema.maybe(schema.string()),
-  conditions: schema.maybe(schema.arrayOf(perAlertSnoozeConditionSchema)),
+  conditions: schema.maybe(
+    schema.arrayOf(perAlertSnoozeConditionSchema, { maxSize: MAX_SNOOZE_CONDITIONS_PER_ENTRY })
+  ),
   conditionOperator: schema.maybe(schema.oneOf([schema.literal('any'), schema.literal('all')])),
 });
 
@@ -212,7 +220,9 @@ export const ruleDomainSchema = schema.object({
   legacyId: schema.maybe(schema.nullable(schema.string())),
   flapping: schema.maybe(schema.nullable(flappingSchema)),
   artifacts: schema.maybe(artifactsSchema),
-  snoozedInstances: schema.maybe(schema.arrayOf(snoozedInstanceEntrySchema)),
+  snoozedInstances: schema.maybe(
+    schema.arrayOf(snoozedInstanceEntrySchema, { maxSize: MAX_SNOOZED_INSTANCES })
+  ),
 });
 
 /**
@@ -255,5 +265,7 @@ export const ruleSchema = schema.object({
   legacyId: schema.maybe(schema.nullable(schema.string())),
   flapping: schema.maybe(schema.nullable(flappingSchema)),
   artifacts: schema.maybe(artifactsSchema),
-  snoozedInstances: schema.maybe(schema.arrayOf(snoozedInstanceEntrySchema)),
+  snoozedInstances: schema.maybe(
+    schema.arrayOf(snoozedInstanceEntrySchema, { maxSize: MAX_SNOOZED_INSTANCES })
+  ),
 });

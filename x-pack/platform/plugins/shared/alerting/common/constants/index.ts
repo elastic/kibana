@@ -23,3 +23,4 @@ export { validFields } from './valid_fields_with_read_auth';
 export { gapAutoFillSchedulerLimits } from './gap_auto_fill_scheduler';
 export { GAP_AUTO_FILL_STATUS } from './gap_auto_fill_scheduler';
 export type { GapAutoFillStatus } from './gap_auto_fill_scheduler';
+export { MAX_SNOOZED_INSTANCES, MAX_SNOOZE_CONDITIONS_PER_ENTRY } from './snooze_limits';

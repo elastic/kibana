@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { MAX_SNOOZE_CONDITIONS_PER_ENTRY } from '../../../../../constants';
 
 export const muteAlertParamsSchema = schema.object({
   rule_id: schema.string({
@@ -63,6 +64,7 @@ export const muteAlertBodySchema = schema.maybe(
     ),
     conditions: schema.maybe(
       schema.arrayOf(muteAlertBodyConditionSchema, {
+        maxSize: MAX_SNOOZE_CONDITIONS_PER_ENTRY,
         meta: { description: 'Conditions that auto-lift the snooze.' },
       })
     ),
