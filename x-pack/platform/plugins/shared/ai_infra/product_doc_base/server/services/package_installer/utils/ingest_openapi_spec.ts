@@ -145,9 +145,6 @@ async function ingestDoc(
           type: 'semantic_text',
           inference_id: '.multilingual-e5-small-elasticsearch',
         },
-        // Text fields for lexical search
-        description_text: { type: 'text' },
-        summary_text: { type: 'text' },
         operationId: { type: 'text' },
         // Keyword fields for exact and prefix matching
         method: { type: 'keyword' },
@@ -187,9 +184,6 @@ async function ingestDoc(
       method: doc.method ?? '',
       path: doc.path ?? '',
       tags: doc.tags ?? [],
-      // Text versions for lexical search
-      description_text: doc.description ?? '',
-      summary_text: doc.summary ?? '',
       // Store complete data for tool generation (but don't index deeply)
       parameters: doc.parameters ?? [],
       responses: doc.responses ?? {},

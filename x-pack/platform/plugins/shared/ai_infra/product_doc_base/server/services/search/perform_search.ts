@@ -208,28 +208,9 @@ export const performOpenapiSpecSearch = async ({
           { semantic: { field: 'description', query: searchQuery, boost: 4 } },
           { semantic: { field: 'endpoint', query: searchQuery, boost: 3 } },
 
-          // Lexical matches with phrase matching for better precision
-          {
-            match_phrase: {
-              summary_text: {
-                query: searchQuery,
-                boost: 3,
-                slop: 3,
-              },
-            },
-          },
-          {
-            match_phrase: {
-              description_text: {
-                query: searchQuery,
-                boost: 2.5,
-                slop: 5,
-              },
-            },
-          },
           {
             match: {
-              summary_text: {
+              summary: {
                 query: searchQuery,
                 boost: 2,
                 operator: 'and',
@@ -238,7 +219,7 @@ export const performOpenapiSpecSearch = async ({
           },
           {
             match: {
-              description_text: {
+              description: {
                 query: searchQuery,
                 boost: 1.5,
                 operator: 'and',
