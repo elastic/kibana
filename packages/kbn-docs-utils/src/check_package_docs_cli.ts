@@ -68,9 +68,15 @@ export const getValidationResults = (
 
   return plugins
     .filter((plugin) => {
-      if (!hasPluginFilter && !hasPackageFilter) return true;
-      if (plugin.isPlugin && hasPluginFilter) return pluginFilter.includes(plugin.id);
-      if (!plugin.isPlugin && hasPackageFilter) return packageFilter.includes(plugin.id);
+      if (!hasPluginFilter && !hasPackageFilter) {
+        return true;
+      }
+      if (plugin.isPlugin && hasPluginFilter) {
+        return pluginFilter.includes(plugin.id);
+      }
+      if (!plugin.isPlugin && hasPackageFilter) {
+        return packageFilter.includes(plugin.id);
+      }
       return false;
     })
     .map((plugin) => {
@@ -87,7 +93,8 @@ export const getValidationResults = (
         shouldCheckComments &&
         (pluginStats.missingComments.length > 0 ||
           pluginStats.paramDocMismatches.length > 0 ||
-          pluginStats.missingComplexTypeInfo.length > 0);
+          pluginStats.missingComplexTypeInfo.length > 0 ||
+          pluginStats.missingReturns.length > 0);
       const hasExportIssues = shouldCheckExports && missingExports > 0;
 
       return {

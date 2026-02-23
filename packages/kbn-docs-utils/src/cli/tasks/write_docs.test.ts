@@ -94,6 +94,7 @@ describe('writeDocs', () => {
         isAnyType: [],
         noReferences: [],
         paramDocMismatches: [],
+        missingReturns: [],
         missingExports: 0,
         deprecatedAPIsReferencedCount: 0,
         unreferencedDeprecatedApisCount: 0,

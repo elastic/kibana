@@ -4,11 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { SetupState } from './setup';
 
-import '@emotion/react';
-import type { UseEuiTheme } from '@elastic/eui';
+export interface ServerlessSetupStateType {
+  type: 'serverless';
+  setupState: SetupState;
+}
 
-declare module '@emotion/react' {
-  // eslint-disable-next-line @typescript-eslint/no-empty-interface
-  export interface Theme extends UseEuiTheme {}
+export function areServerlessResourcesSetup(state: SetupState): boolean {
+  return state.profiling.enabled;
 }

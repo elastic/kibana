@@ -5,24 +5,15 @@
  * 2.0.
  */
 
-import {
-  validateMaximumBuckets,
-  validateProfilingStatus,
-  validateResourceManagement,
-} from '../../../common/cluster_settings';
+import { validateProfilingStatus } from '../../../common/cluster_settings';
 import { hasProfilingData } from '../../../common/has_profiling_data';
 import type { ProfilingSetupOptions, SetupState } from '../../../common/setup';
 import { createDefaultSetupState, mergePartialSetupStates } from '../../../common/setup';
 
-export async function selfManagedSetupState(params: ProfilingSetupOptions): Promise<SetupState> {
+export async function serverlessSetupState(params: ProfilingSetupOptions): Promise<SetupState> {
   const state = createDefaultSetupState();
 
-  const verifyFunctions = [
-    validateProfilingStatus,
-    validateMaximumBuckets,
-    validateResourceManagement,
-    hasProfilingData,
-  ];
+  const verifyFunctions = [validateProfilingStatus, hasProfilingData];
 
   const partialStates = await Promise.all(verifyFunctions.map((fn) => fn(params)));
 

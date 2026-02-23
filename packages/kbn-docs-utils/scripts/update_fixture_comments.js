@@ -14,6 +14,7 @@ const categories = [
   { key: 'missingComments', title: 'missing comments' },
   { key: 'paramDocMismatches', title: 'param doc mismatches' },
   { key: 'missingComplexTypeInfo', title: 'missing complex type info' },
+  { key: 'missingReturns', title: 'missing returns' },
   { key: 'isAnyType', title: 'any usage' },
   { key: 'noReferences', title: 'no references' },
 ];
@@ -51,7 +52,9 @@ const groupByFile = (stats) => {
     const entries = stats[key] || [];
     entries.forEach((entry) => {
       const absPath = normalizePath(entry.path);
-      if (!byFile.has(absPath)) byFile.set(absPath, emptyCategories());
+      if (!byFile.has(absPath)) {
+        byFile.set(absPath, emptyCategories());
+      }
       byFile.get(absPath)[key].push(entry);
     });
   });
@@ -78,7 +81,9 @@ const buildBlock = (fileStats) => {
   let added = false;
   categories.forEach(({ key, title }) => {
     const entries = fileStats[key] || [];
-    if (!entries.length) return;
+    if (!entries.length) {
+      return;
+    }
     parts.push(formatCategory(title, entries));
     added = true;
   });
@@ -103,7 +108,9 @@ const main = () => {
   const byFile = groupByFile(stats);
 
   byFile.forEach((fileStats, absPath) => {
-    if (!fs.existsSync(absPath)) return;
+    if (!fs.existsSync(absPath)) {
+      return;
+    }
     const original = fs.readFileSync(absPath, 'utf8');
     const block = buildBlock(fileStats);
     const next = replaceBlock(original, block);

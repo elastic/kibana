@@ -295,6 +295,7 @@ export interface ApiStats {
   noReferences: ApiDeclaration[];
   paramDocMismatches: ApiDeclaration[];
   missingComplexTypeInfo: ApiDeclaration[];
+  missingReturns: ApiDeclaration[];
   apiCount: number;
   missingExports: number;
   deprecatedAPIsReferencedCount: number;

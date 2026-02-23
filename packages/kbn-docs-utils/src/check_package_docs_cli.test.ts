@@ -44,6 +44,7 @@ const createBaseStats = (pluginId: string): AllPluginStats => ({
     isAnyType: [],
     noReferences: [],
     paramDocMismatches: [],
+    missingReturns: [],
     apiCount: 0,
     missingExports: 0,
     deprecatedAPIsReferencedCount: 0,
