@@ -11,7 +11,8 @@ import type {
   SeriesType,
   XYAnnotationLayerConfig,
   XYDataLayerConfig,
-  XYLayerConfig,
+  XYPersistedByReferenceAnnotationLayerConfig,
+  XYPersistedLayerConfig,
   XYReferenceLineLayerConfig,
   YConfig,
 } from '@kbn/lens-common';
@@ -192,14 +193,23 @@ export function buildXYLayer(
   layer: unknown,
   i: number,
   dataViewId: string
-): XYLayerConfig | undefined {
-  if (!isAPIXYLayer(layer) || 'group_id' in layer) {
-    // TODO - support by-reference annotation layers (will have group_id)
+): XYPersistedLayerConfig | undefined {
+  if (!isAPIXYLayer(layer)) {
     return;
   }
 
-  // now enrich the layer based on its type
   if (isAPIAnnotationLayer(layer)) {
+    if ('group_id' in layer) {
+      // by-reference annotation layer
+      const layerId = getIdForLayer(layer, i);
+      const persistedLayer: XYPersistedByReferenceAnnotationLayerConfig = {
+        layerType: 'annotations',
+        persistanceType: 'byReference',
+        layerId,
+        annotationGroupRef: `ref-${layerId}`,
+      };
+      return persistedLayer;
+    }
     return buildByValueAnnotationLayer(layer, i, dataViewId);
   }
   if (isAPIReferenceLineLayer(layer)) {

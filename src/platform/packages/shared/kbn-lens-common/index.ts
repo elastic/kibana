@@ -243,7 +243,7 @@ export type {
   XYLayerConfig,
   ValidXYDataLayerConfig,
   ValidLayer,
-  XYState,
+  XYRuntimeState as XYState,
 } from './visualizations/xy/types';
 export type {
   XYPersistedAnnotationLayerConfig,

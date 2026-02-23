@@ -12,7 +12,7 @@ import type {
   XYByValueAnnotationLayerConfig,
   XYDataLayerConfig,
   XYReferenceLineLayerConfig,
-  XYState,
+  XYRuntimeState,
 } from './types';
 
 /**
@@ -58,7 +58,7 @@ export type XYPersistedLayerConfig =
   | XYReferenceLineLayerConfig
   | XYPersistedAnnotationLayerConfig;
 
-export type XYPersistedState = Omit<XYState, 'layers'> & {
+export type XYPersistedState = Omit<XYRuntimeState, 'layers'> & {
   layers: XYPersistedLayerConfig[];
   valuesInLegend?: boolean;
 };

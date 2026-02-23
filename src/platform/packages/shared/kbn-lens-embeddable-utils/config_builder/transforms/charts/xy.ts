@@ -23,7 +23,10 @@ import { LENS_LAYER_SUFFIX } from '../constants';
 type XYLens = Extract<TypedLensSerializedState['attributes'], { visualizationType: 'lnsXY' }>;
 type XYLensState = Omit<XYLens['state'], 'filters' | 'query'>;
 
-type XYLensWithoutQueryAndFilters = Omit<XYLens, 'state'> & { state: XYLensState };
+type XYLensWithoutQueryAndFilters = Omit<XYLens, 'state'> & {
+  // Use XYPersistedState for visualization since the config builder works with persisted format
+  state: Omit<XYLensState, 'visualization'> & { visualization: XYPersistedState };
+};
 
 export function fromAPItoLensState(config: XYState): XYLensWithoutQueryAndFilters {
   // convert layers and produce references from them

@@ -58,7 +58,7 @@ import type {
   VisualizationDisplayOptions,
 } from '../types';
 import type { FormBasedPersistedState, TextBasedPersistedState } from '../datasources/types';
-import type { XYState } from '../visualizations/xy/types';
+import type { XYRuntimeState } from '../visualizations/xy/types';
 import type { HeatmapVisualizationState } from '../visualizations/heatmap/types';
 import type { GaugeVisualizationState } from '../visualizations/gauge/types';
 import type { LegacyMetricState } from '../visualizations/legacy_metric/types';
@@ -470,7 +470,7 @@ type TypedLensAttributes<TVisType, TVisState> = Simplify<
 export type TypedLensSerializedState = Simplify<
   Omit<LensSerializedState, 'attributes'> & {
     attributes:
-      | TypedLensAttributes<'lnsXY', XYState>
+      | TypedLensAttributes<'lnsXY', XYRuntimeState>
       | TypedLensAttributes<'lnsPie', LensPartitionVisualizationState>
       | TypedLensAttributes<'lnsHeatmap', HeatmapVisualizationState>
       | TypedLensAttributes<'lnsGauge', GaugeVisualizationState>

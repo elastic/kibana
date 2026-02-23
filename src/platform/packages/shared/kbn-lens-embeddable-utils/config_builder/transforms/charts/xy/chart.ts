@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { XYState as XYLensState, XYPersistedState } from '@kbn/lens-common';
+import type { XYPersistedState } from '@kbn/lens-common';
 import type { AxisExtentConfig } from '@kbn/expression-xy-plugin/common';
 import type { SavedObjectReference } from '@kbn/core/server';
 import type { Writable } from '@kbn/utility-types';
@@ -70,7 +70,7 @@ const orientationDictionary = {
 function convertAxisSettingsToStateFormat(
   axis: XYState['axis']
 ): Pick<
-  XYLensState,
+  XYPersistedState,
   | 'xTitle'
   | 'yTitle'
   | 'yRightTitle'
@@ -149,7 +149,7 @@ type LayerToDataView = Record<string, string>;
 export function buildVisualizationState(
   config: XYState,
   usedDataViews: LayerToDataView
-): XYLensState {
+): XYPersistedState {
   const layers = config.layers
     .map((layer, index) => buildXYLayer(layer, index, usedDataViews[getIdForLayer(layer, index)]))
     .filter(nonNullable);
@@ -164,7 +164,7 @@ export function buildVisualizationState(
 }
 
 export function buildVisualizationAPI(
-  config: XYPersistedState | XYLensState,
+  config: XYPersistedState,
   layers: Record<string, DataSourceStateLayer>,
   adHocDataViews: Record<string, unknown>,
   references: SavedObjectReference[],
@@ -190,9 +190,7 @@ export function buildVisualizationAPI(
   };
 }
 
-function convertFittingToAPIFormat(
-  config: XYLensState | XYPersistedState
-): Pick<XYState, 'fitting'> | {} {
+function convertFittingToAPIFormat(config: XYPersistedState): Pick<XYState, 'fitting'> | {} {
   const fittingOptions = {
     ...(config.fittingFunction ? { type: config.fittingFunction.toLowerCase() } : {}),
     ...(config.emphasizeFitting ? { dotted: config.emphasizeFitting } : {}),
@@ -249,9 +247,7 @@ function convertXExtent(extent: AxisExtentConfig | undefined): {
   return {};
 }
 
-function convertAxisSettingsToAPIFormat(
-  config: XYLensState | XYPersistedState
-): Pick<XYState, 'axis'> | {} {
+function convertAxisSettingsToAPIFormat(config: XYPersistedState): Pick<XYState, 'axis'> | {} {
   const axis: EditableAxisType = {};
 
   const xAxis: XAxisType = stripUndefined({
@@ -360,7 +356,7 @@ function convertAxisSettingsToAPIFormat(
 }
 
 function buildXYLayerAPI(
-  visualization: XYLensState | XYPersistedState,
+  visualization: XYPersistedState,
   layers: Record<string, DataSourceStateLayer>,
   adHocDataViews: Record<string, unknown>,
   references: SavedObjectReference[],
