@@ -63,17 +63,11 @@ export const AttackEntitiesDetails: React.FC = memo(() => {
       <EuiFlexItem>
         <EuiTitle size="xs">
           <h3>
-            {userNames.length > 1 ? (
-              <FormattedMessage
-                id="xpack.securitySolution.flyout.left.insights.entities.userDetailsTitlePlural"
-                defaultMessage="Users"
-              />
-            ) : (
-              <FormattedMessage
-                id="xpack.securitySolution.flyout.left.insights.entities.userDetailsTitle"
-                defaultMessage="User"
-              />
-            )}
+            <FormattedMessage
+              id="xpack.securitySolution.flyout.left.insights.entities.userDetailsTitle"
+              defaultMessage="{userCount, plural, one {User} other {Users}}:"
+              values={{ userCount: userNames.length }}
+            />
           </h3>
         </EuiTitle>
         <EuiSpacer size="s" />
@@ -93,17 +87,11 @@ export const AttackEntitiesDetails: React.FC = memo(() => {
       <EuiFlexItem>
         <EuiTitle size="xs">
           <h3>
-            {hostNames.length > 1 ? (
-              <FormattedMessage
-                id="xpack.securitySolution.flyout.left.insights.entities.hostDetailsTitlePlural"
-                defaultMessage="Hosts"
-              />
-            ) : (
-              <FormattedMessage
-                id="xpack.securitySolution.flyout.left.insights.entities.hostDetailsTitle"
-                defaultMessage="Host"
-              />
-            )}
+            <FormattedMessage
+              id="xpack.securitySolution.flyout.left.insights.entities.hostDetailsTitle"
+              defaultMessage="{hostCount, plural, one {Host} other {Hosts}}:"
+              values={{ hostCount: hostNames.length }}
+            />
           </h3>
         </EuiTitle>
         <EuiSpacer size="s" />

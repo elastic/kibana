@@ -63,7 +63,7 @@ export type AttackDetailsProviderProps = {
 
 export const AttackDetailsProvider = memo(
   ({ attackId, indexName, children }: AttackDetailsProviderProps) => {
-    const currentSpaceId = useSpaceId();
+    const scopeId = useSpaceId();
     // data view side: browserFields + field-browser data
     const {
       browserFields,
@@ -77,11 +77,14 @@ export const AttackDetailsProvider = memo(
       indexName,
     });
 
-    const scopeId = currentSpaceId ?? 'attack-details-flyout';
-
     const contextValue = useMemo<AttackDetailsContext | undefined>(
       () =>
-        attackId && browserFields && dataFormattedForFieldBrowser && indexName && searchHit
+        attackId &&
+        browserFields &&
+        dataFormattedForFieldBrowser &&
+        indexName &&
+        searchHit &&
+        scopeId
           ? {
               attackId,
               browserFields,
