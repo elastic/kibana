@@ -53,7 +53,7 @@ if is_pr; then
   # First, we try to obtain its SHA (or one of its ancestors)
   MERGE_BASE_REV="$(findExistingSnapshotSha "$GITHUB_PR_MERGE_BASE")"
   if [[ $? -ne 0 ]]; then
-    echo "❌ Could not find an existing snapshot to use as a baseline. Aborting Saved Objects checks" >&2
+    echo "❌ Could not find an existing snapshot to use as a baseline. Please rebase this PR branch onto the latest 'main' commit, then rerun CI." >&2
     exit 1
   fi
 

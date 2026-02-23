@@ -260,10 +260,8 @@ describe('Serialization utils', () => {
         serializeDynamicActions: jest.fn(),
       });
 
-      const attributes = toSavedSearchAttributes(
-        savedSearch,
-        searchSource.serialize().searchSourceJSON
-      );
+      const searchSourceJSON = JSON.stringify(searchSource.getSerializedFields());
+      const attributes = toSavedSearchAttributes(savedSearch, searchSourceJSON);
 
       expect(serializedState).toEqual({
         attributes: {
@@ -274,7 +272,6 @@ describe('Serialization utils', () => {
               id: expect.any(String),
             },
           ],
-          references: mockedSavedSearchAttributes.references,
         },
       });
     });

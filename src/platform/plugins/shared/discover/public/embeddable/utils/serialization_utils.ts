@@ -11,7 +11,7 @@ import { omit, pick } from 'lodash';
 import deepEqual from 'react-fast-compare';
 import { type SerializedTimeRange, type SerializedTitles } from '@kbn/presentation-publishing';
 import { toSavedSearchAttributes, type SavedSearch } from '@kbn/saved-search-plugin/common';
-import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
+import type { SerializedDrilldowns } from '@kbn/embeddable-plugin/server';
 import { EDITABLE_SAVED_SEARCH_KEYS } from '../../../common/embeddable/constants';
 import type {
   SearchEmbeddableByReferenceState,
@@ -107,12 +107,12 @@ export const serializeState = ({
   savedSearch: SavedSearch;
   serializeTitles: () => SerializedTitles;
   serializeTimeRange: () => SerializedTimeRange;
-  serializeDynamicActions: (() => DynamicActionsSerializedState) | undefined;
+  serializeDynamicActions: () => SerializedDrilldowns;
   savedObjectId?: string;
   selectedTabId?: string;
 }): SearchEmbeddableState => {
   const searchSource = savedSearch.searchSource;
-  const { searchSourceJSON, references: originalReferences } = searchSource.serialize();
+  const searchSourceJSON = JSON.stringify(searchSource.getSerializedFields());
   const savedSearchAttributes = toSavedSearchAttributes(savedSearch, searchSourceJSON);
 
   if (savedObjectId) {
@@ -145,17 +145,10 @@ export const serializeState = ({
     };
   }
 
-  const state = {
-    attributes: {
-      ...savedSearchAttributes,
-      references: originalReferences,
-    },
-  };
-
   return {
     ...serializeTitles(),
     ...serializeTimeRange(),
     ...serializeDynamicActions?.(),
-    ...state,
+    attributes: savedSearchAttributes,
   };
 };
