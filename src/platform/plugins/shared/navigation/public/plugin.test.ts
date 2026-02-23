@@ -74,10 +74,7 @@ describe('Navigation Plugin', () => {
       navigationTree$,
     });
 
-    expect(coreStart.chrome.project.initNavigation).toHaveBeenCalledWith(
-      'es',
-      navigationTree$
-    );
+    expect(coreStart.chrome.project.initNavigation).toHaveBeenCalledWith('es', navigationTree$);
   });
 
   it('should not load the active space on non authenticated pages', async () => {
@@ -145,10 +142,7 @@ describe('Navigation Plugin', () => {
         navigationTree$,
       });
 
-      expect(coreStart.chrome.project.initNavigation).toHaveBeenCalledWith(
-        'oblt',
-        navigationTree$
-      );
+      expect(coreStart.chrome.project.initNavigation).toHaveBeenCalledWith('oblt', navigationTree$);
     });
   });
 

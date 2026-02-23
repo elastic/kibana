@@ -8,7 +8,15 @@
  */
 
 import { createMemoryHistory } from 'history';
-import { firstValueFrom, lastValueFrom, take, map, BehaviorSubject, of, type Observable } from 'rxjs';
+import {
+  firstValueFrom,
+  lastValueFrom,
+  take,
+  map,
+  BehaviorSubject,
+  of,
+  type Observable,
+} from 'rxjs';
 import { loggerMock } from '@kbn/logging-mocks';
 import type {
   ChromeNavLinks,
@@ -90,7 +98,10 @@ describe('initNavigation()', () => {
 
     const getNavigationTree = () =>
       lastValueFrom(
-        projectNavigation.getNavigation$().pipe(take(1), map((nav) => nav.navigationTree))
+        projectNavigation.getNavigation$().pipe(
+          take(1),
+          map((nav) => nav.navigationTree)
+        )
       );
 
     return { projectNavigation, getNavigationTree };
@@ -296,7 +307,10 @@ describe('initNavigation()', () => {
 
     // 1. getNavigation$() is called
     const promise = lastValueFrom(
-      projectNavigation.getNavigation$().pipe(take(1), map((nav) => nav.navigationTree))
+      projectNavigation.getNavigation$().pipe(
+        take(1),
+        map((nav) => nav.navigationTree)
+      )
     );
 
     // 2. initNavigation() is called
@@ -349,7 +363,10 @@ describe('initNavigation()', () => {
     );
 
     const treeDefinition = await lastValueFrom(
-      projectNavigation.getNavigation$().pipe(take(1), map((nav) => nav.navigationTree))
+      projectNavigation.getNavigation$().pipe(
+        take(1),
+        map((nav) => nav.navigationTree)
+      )
     );
     const [node] = treeDefinition.body as [ChromeProjectNavigationNode];
     expect(node?.children?.length).toBe(4);
@@ -429,7 +446,10 @@ describe('initNavigation()', () => {
 
     // Verify that billingAndSub link is NOT in the tree (no URL available)
     let treeDefinition = await lastValueFrom(
-      projectNavigation.getNavigation$().pipe(take(1), map((nav) => nav.navigationTree))
+      projectNavigation.getNavigation$().pipe(
+        take(1),
+        map((nav) => nav.navigationTree)
+      )
     );
     let [node] = treeDefinition.body as [ChromeProjectNavigationNode];
     expect(node?.children?.length).toBe(3); // Only 3 links without billing
@@ -449,7 +469,10 @@ describe('initNavigation()', () => {
 
     // Verify that billingAndSub link IS now in the tree
     treeDefinition = await lastValueFrom(
-      projectNavigation.getNavigation$().pipe(take(1), map((nav) => nav.navigationTree))
+      projectNavigation.getNavigation$().pipe(
+        take(1),
+        map((nav) => nav.navigationTree)
+      )
     );
     [node] = treeDefinition.body as [ChromeProjectNavigationNode];
     expect(node?.children?.length).toBe(4); // Now 4 links including billing
@@ -761,9 +784,7 @@ describe('getNavigation$() active nodes', () => {
       })
     );
 
-    const { activeNodes } = await lastValueFrom(
-      projectNavigation.getNavigation$().pipe(take(1))
-    );
+    const { activeNodes } = await lastValueFrom(projectNavigation.getNavigation$().pipe(take(1)));
 
     expect(activeNodes).toEqual([
       [
@@ -817,9 +838,7 @@ describe('getNavigation$() active nodes', () => {
       })
     );
 
-    const { activeNodes } = await lastValueFrom(
-      projectNavigation.getNavigation$().pipe(take(1))
-    );
+    const { activeNodes } = await lastValueFrom(projectNavigation.getNavigation$().pipe(take(1)));
 
     expect(activeNodes).toEqual([
       [
@@ -857,15 +876,10 @@ describe('getActiveSolutionNavId$()', () => {
   it('should return null initially and update when initNavigation is called', async () => {
     const { projectNavigation } = setup({ navLinkIds: ['app1', 'app2'] });
 
-    const activeId = await lastValueFrom(
-      projectNavigation.getActiveSolutionNavId$().pipe(take(1))
-    );
+    const activeId = await lastValueFrom(projectNavigation.getActiveSolutionNavId$().pipe(take(1)));
     expect(activeId).toBeNull();
 
-    projectNavigation.initNavigation<any>(
-      'es',
-      of({ body: [{ type: 'navItem', link: 'app1' }] })
-    );
+    projectNavigation.initNavigation<any>('es', of({ body: [{ type: 'navItem', link: 'app1' }] }));
 
     const activeIdAfterInit = await lastValueFrom(
       projectNavigation.getActiveSolutionNavId$().pipe(take(1))
@@ -876,14 +890,9 @@ describe('getActiveSolutionNavId$()', () => {
   it('should update when switching to a different solution', async () => {
     const { projectNavigation } = setup({ navLinkIds: ['app1', 'app2'] });
 
-    projectNavigation.initNavigation<any>(
-      'es',
-      of({ body: [{ type: 'navItem', link: 'app1' }] })
-    );
+    projectNavigation.initNavigation<any>('es', of({ body: [{ type: 'navItem', link: 'app1' }] }));
 
-    let activeId = await lastValueFrom(
-      projectNavigation.getActiveSolutionNavId$().pipe(take(1))
-    );
+    let activeId = await lastValueFrom(projectNavigation.getActiveSolutionNavId$().pipe(take(1)));
     expect(activeId).toBe('es');
 
     projectNavigation.initNavigation<any>(
@@ -891,9 +900,7 @@ describe('getActiveSolutionNavId$()', () => {
       of({ body: [{ type: 'navItem', link: 'app2' }] })
     );
 
-    activeId = await lastValueFrom(
-      projectNavigation.getActiveSolutionNavId$().pipe(take(1))
-    );
+    activeId = await lastValueFrom(projectNavigation.getActiveSolutionNavId$().pipe(take(1)));
     expect(activeId).toBe('oblt');
   });
 });
