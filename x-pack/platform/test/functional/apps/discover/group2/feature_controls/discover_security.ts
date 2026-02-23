@@ -119,6 +119,7 @@ export default function (ctx: FtrProviderContext) {
         expect(navLinks.map((link) => link.text)).to.eql([
           'Discover',
           'Stack Management', // because `global_discover_all_role` enables search sessions and reporting
+          'Rules',
         ]);
       });
 

@@ -67,6 +67,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           'Applications',
           'User Experience',
           'Stack Management',
+          'Rules',
         ]);
       });
 
@@ -122,6 +123,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           'Applications',
           'User Experience',
           'Stack Management',
+          'Rules',
         ]);
       });
 
