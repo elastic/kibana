@@ -16,7 +16,6 @@
     ],
     "requiredPlugins": [
       "uiActions",
-      "embeddable",
       "discover"
     ],
     "optionalPlugins": [
@@ -25,7 +24,6 @@
     ],
     "requiredBundles": [
       "kibanaUtils",
-      "data",
       "lens"
     ]
   }

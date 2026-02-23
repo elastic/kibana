@@ -16,13 +16,12 @@ import type { Ast } from '@kbn/interpreter';
 import { LayoutDirection } from '@elastic/charts';
 import { hasIcon } from '@kbn/visualization-ui-components';
 import type { ThemeServiceStart } from '@kbn/core/public';
-import type { DatasourceLayers } from '@kbn/lens-common';
+import type { DatasourceLayers, MetricVisualizationState } from '@kbn/lens-common';
+import { LENS_LEGACY_METRIC_STATE_DEFAULTS, LENS_METRIC_STATE_DEFAULTS } from '@kbn/lens-common';
 import type { CollapseArgs, CollapseFunction } from '../../../common/expressions';
 import type { CollapseExpressionFunction } from '../../../common/expressions/defs/collapse/types';
 import { showingBar } from './metric_visualization';
 import { DEFAULT_MAX_COLUMNS, getDefaultColor } from './visualization';
-import type { MetricVisualizationState } from './types';
-import { legacyMetricStateDefaults, metricStateDefaults } from './constants';
 import {
   getColorMode,
   getDefaultConfigForMode,
@@ -175,9 +174,9 @@ export const toExpression = (
   let iconAlign: 'right' | 'left';
   if (hasMetricIcon) {
     // Legacy: If iconAlign is missing, default to 'left'
-    iconAlign = state.iconAlign ?? legacyMetricStateDefaults.iconAlign;
+    iconAlign = state.iconAlign ?? LENS_LEGACY_METRIC_STATE_DEFAULTS.iconAlign;
   } else {
-    iconAlign = metricStateDefaults.iconAlign;
+    iconAlign = LENS_METRIC_STATE_DEFAULTS.iconAlign;
   }
 
   const metricFn = buildExpressionFunction<MetricVisExpressionFunctionDefinition>('metricVis', {
@@ -205,13 +204,13 @@ export const toExpression = (
     progressDirection: showingBar(state)
       ? state.progressDirection || LayoutDirection.Vertical
       : undefined,
-    titlesTextAlign: state.titlesTextAlign ?? metricStateDefaults.titlesTextAlign,
-    primaryAlign: state.primaryAlign ?? metricStateDefaults.primaryAlign,
-    secondaryAlign: state.secondaryAlign ?? metricStateDefaults.secondaryAlign,
+    titlesTextAlign: state.titlesTextAlign ?? LENS_METRIC_STATE_DEFAULTS.titlesTextAlign,
+    primaryAlign: state.primaryAlign ?? LENS_METRIC_STATE_DEFAULTS.primaryAlign,
+    secondaryAlign: state.secondaryAlign ?? LENS_METRIC_STATE_DEFAULTS.secondaryAlign,
     iconAlign,
-    valueFontSize: state.valueFontMode ?? metricStateDefaults.valueFontMode,
-    primaryPosition: state.primaryPosition ?? metricStateDefaults.primaryPosition,
-    titleWeight: state.titleWeight ?? metricStateDefaults.titleWeight,
+    valueFontSize: state.valueFontMode ?? LENS_METRIC_STATE_DEFAULTS.valueFontMode,
+    primaryPosition: state.primaryPosition ?? LENS_METRIC_STATE_DEFAULTS.primaryPosition,
+    titleWeight: state.titleWeight ?? LENS_METRIC_STATE_DEFAULTS.titleWeight,
     color: state.color ?? getDefaultColor(state, isMetricNumeric),
     icon: hasMetricIcon ? state.icon : undefined,
     palette:
@@ -226,8 +225,8 @@ export const toExpression = (
     minTiles: maxPossibleTiles ?? undefined,
     inspectorTableId: state.layerId,
     secondaryLabelPosition:
-      state.secondaryLabelPosition ?? metricStateDefaults.secondaryLabelPosition,
-    applyColorTo: state.applyColorTo ?? metricStateDefaults.applyColorTo,
+      state.secondaryLabelPosition ?? LENS_METRIC_STATE_DEFAULTS.secondaryLabelPosition,
+    applyColorTo: state.applyColorTo ?? LENS_METRIC_STATE_DEFAULTS.applyColorTo,
   });
 
   return {

@@ -8,8 +8,8 @@
 import React from 'react';
 import type { z } from '@kbn/zod';
 
-import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib/components/use_field';
-import { SelectField } from '@kbn/es-ui-shared-plugin/static/forms/components/fields/select_field';
+import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { SelectField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { CASE_EXTENDED_FIELDS } from '../../../../../common/constants';
 import type { SelectBasicFieldSchema } from '../../../../../common/types/domain/template/fields';
 

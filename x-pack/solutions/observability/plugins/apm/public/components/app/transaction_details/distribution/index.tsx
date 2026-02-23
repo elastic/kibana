@@ -204,6 +204,9 @@ export function TransactionDistribution({
           onShowCriticalPathChange={onShowCriticalPathChange}
           logsTableConfig={logsTableConfig}
           onLogsTableConfigChange={onLogsTableConfigChange}
+          rangeFrom={rangeFrom}
+          rangeTo={rangeTo}
+          traceId={traceId}
         />
       </div>
     </ResettingHeightRetainer>

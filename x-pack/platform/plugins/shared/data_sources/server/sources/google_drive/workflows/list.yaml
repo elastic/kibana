@@ -25,7 +25,7 @@ inputs:
 steps:
   - name: list_files
     type: google_drive.listFiles
-    connector-id: <%= stackConnectorId %>
+    connector-id: <%= google_drive-stack-connector-id %>
     with:
       folderId: "${{inputs.folderId}}"
       pageSize: ${{inputs.pageSize}}

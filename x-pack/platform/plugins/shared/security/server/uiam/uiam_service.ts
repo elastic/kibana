@@ -10,12 +10,12 @@ import { readFileSync } from 'fs';
 import { Agent } from 'undici';
 
 import type { Logger } from '@kbn/core/server';
+import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
 import type {
   ClientAuthentication,
   GrantUiamAPIKeyParams,
 } from '@kbn/security-plugin-types-server';
 
-import { HTTPAuthorizationHeader } from '..';
 import { ES_CLIENT_AUTHENTICATION_HEADER } from '../../common/constants';
 import type { UiamConfigType } from '../config';
 import { getDetailedErrorMessage } from '../errors';
@@ -69,12 +69,6 @@ export interface UiamServicePublic {
    * `client_authentication` option in Elasticsearch client.
    */
   getClientAuthentication(): ClientAuthentication;
-
-  /**
-   * Returns the Elasticsearch client authentication header (`x-client-authentication`) with the shared secret value.
-   * This header is used to authenticate requests from Kibana to Elasticsearch when using UIAM credentials.
-   */
-  getEsClientAuthenticationHeader(): Record<string, string>;
 
   /**
    * Refreshes the UIAM user session and returns new access and refresh session tokens.
@@ -154,13 +148,6 @@ export class UiamService implements UiamServicePublic {
    */
   getClientAuthentication(): ClientAuthentication {
     return { scheme: 'SharedSecret', value: this.#config.sharedSecret };
-  }
-
-  /**
-   * See {@link UiamServicePublic.getEsClientAuthenticationHeader}.
-   */
-  getEsClientAuthenticationHeader(): Record<string, string> {
-    return { [ES_CLIENT_AUTHENTICATION_HEADER]: this.getClientAuthentication().value };
   }
 
   /**
@@ -302,23 +289,31 @@ export class UiamService implements UiamServicePublic {
   #createFetchDispatcher() {
     const { certificateAuthorities, verificationMode } = this.#config.ssl;
 
+    const readFile = (file: string) => readFileSync(file, 'utf8');
+
+    // Read client certificate and key for mTLS from PEM files.
+    const cert = this.#config.ssl.certificate ? readFile(this.#config.ssl.certificate) : undefined;
+    const key = this.#config.ssl.key ? readFile(this.#config.ssl.key) : undefined;
+
     // Read CA certificate(s) from the file paths defined in the config.
     const ca = certificateAuthorities
       ? (Array.isArray(certificateAuthorities)
           ? certificateAuthorities
           : [certificateAuthorities]
-        ).map((caPath) => readFileSync(caPath, 'utf8'))
+        ).map((caPath) => readFile(caPath))
       : undefined;
 
-    // If we don't have custom CAs and the full verification is required, we don't need custom
-    // dispatcher as it's a default `fetch` behavior.
-    if (!ca && verificationMode === 'full') {
+    // If we don't have any custom TLS settings and the full verification is required, we don't
+    // need a custom dispatcher as it's the default `fetch` behavior.
+    if (!ca && !cert && !key && verificationMode === 'full') {
       return;
     }
 
     return new Agent({
       connect: {
         ca,
+        cert,
+        key,
         // The applications, including Kibana, running inside the MKI cluster should not need access to things like the
         // root CA and should be able to work with the CAs related to that particular cluster. The trust bundle we
         // currently deploy in the Kibana pods includes only the intermediate CA that is scoped to the application
