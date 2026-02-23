@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { formatMillisecondsInUnit, parseInterval, toMilliseconds } from './duration_utils';
+import {
+  formatMillisecondsInUnit,
+  getDoubledDurationFromPrevious,
+  parseInterval,
+  toMilliseconds,
+} from './duration_utils';
 
 describe('downsampling/shared/duration_utils', () => {
   describe('toMilliseconds()', () => {
@@ -71,6 +76,62 @@ describe('downsampling/shared/duration_utils', () => {
     it('allows overriding precision', () => {
       expect(formatMillisecondsInUnit(1.234 * 3_600_000, 'h', 3)).toBe('1.234h');
       expect(formatMillisecondsInUnit(106_617_600, 'd', 3)).toBe('1.234d');
+    });
+  });
+
+  describe('getDoubledDurationFromPrevious()', () => {
+    it('doubles the previous value and preserves the unit', () => {
+      expect(
+        getDoubledDurationFromPrevious({
+          previousValue: '30',
+          previousUnit: 'd',
+          previousValueFallback: 30,
+          previousValueMinInclusive: 0,
+        })
+      ).toEqual({ value: '60', unit: 'd', ms: 60 * 86_400_000 });
+    });
+
+    it('uses fallback when previous value is invalid', () => {
+      expect(
+        getDoubledDurationFromPrevious({
+          previousValue: 'abc',
+          previousUnit: 'h',
+          previousValueFallback: 1,
+          previousValueMinInclusive: 0,
+        })
+      ).toEqual({ value: '2', unit: 'h', ms: 2 * 3_600_000 });
+    });
+
+    it('uses fallback when previous value violates minimum constraints', () => {
+      expect(
+        getDoubledDurationFromPrevious({
+          previousValue: '-5',
+          previousUnit: 'm',
+          previousValueFallback: 0,
+          previousValueMinInclusive: 0,
+        })
+      ).toEqual({ value: '0', unit: 'm', ms: 0 });
+
+      expect(
+        getDoubledDurationFromPrevious({
+          previousValue: '0',
+          previousUnit: 'd',
+          previousValueFallback: 1,
+          previousValueMinExclusive: 0,
+        })
+      ).toEqual({ value: '2', unit: 'd', ms: 2 * 86_400_000 });
+    });
+
+    it('allows overriding the multiplier', () => {
+      expect(
+        getDoubledDurationFromPrevious({
+          previousValue: '10',
+          previousUnit: 's',
+          multiplier: 3,
+          previousValueFallback: 10,
+          previousValueMinInclusive: 0,
+        })
+      ).toEqual({ value: '30', unit: 's', ms: 30_000 });
     });
   });
 });
