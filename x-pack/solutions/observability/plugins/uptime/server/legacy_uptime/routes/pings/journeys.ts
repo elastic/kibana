@@ -58,7 +58,7 @@ export const createJourneyFailedStepsRoute: UMRestApiRouteFactory = (libs: UMSer
   path: API_URLS.JOURNEY_FAILED_STEPS,
   validate: {
     query: schema.object({
-      checkGroups: schema.arrayOf(schema.string()),
+      checkGroups: schema.arrayOf(schema.string(), { maxSize: 100 }),
     }),
   },
   handler: async ({ uptimeEsClient, request, response }): Promise<any> => {
