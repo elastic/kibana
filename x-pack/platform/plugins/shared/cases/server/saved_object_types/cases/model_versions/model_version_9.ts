@@ -27,9 +27,7 @@ export const modelVersion9: SavedObjectsModelVersion = {
           },
         },
         [CASE_EXTENDED_FIELDS]: {
-          dynamic: false,
-          type: 'object',
-          properties: {},
+          type: 'flattened',
         },
       },
     },

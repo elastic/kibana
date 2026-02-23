@@ -236,9 +236,7 @@ describe('Model versions', () => {
           Object {
             "addedMappings": Object {
               "extended_fields": Object {
-                "dynamic": false,
-                "properties": Object {},
-                "type": "object",
+                "type": "flattened",
               },
               "template": Object {
                 "properties": Object {

@@ -609,9 +609,7 @@
         "type": "unsigned_long"
       },
       "extended_fields": {
-        "dynamic": false,
-        "properties": {},
-        "type": "object"
+        "type": "flattened"
       },
       "external_service": {
         "properties": {

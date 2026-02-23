@@ -284,9 +284,7 @@ export const createCaseSavedObjectType = (
         },
       },
       [CASE_EXTENDED_FIELDS]: {
-        dynamic: false,
-        type: 'object',
-        properties: {},
+        type: 'flattened',
       },
     },
   },
