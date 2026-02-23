@@ -53,6 +53,8 @@ dependsOn:
   - '@kbn/inference-plugin'
   - '@kbn/core-elasticsearch-server'
   - '@kbn/actions-plugin'
+  - '@kbn/core-http-server'
+  - '@kbn/management-settings-ids'
 tags:
   - plugin
   - prod
