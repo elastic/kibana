@@ -41,12 +41,19 @@ const getPromqlFunctionDeclaration = (fn: PromQLFunctionDefinition) => {
 
 /* Converts a PROMQL function definition into an autocomplete suggestion. */
 const getPromqlFunctionSuggestion = (fn: PromQLFunctionDefinition): ISuggestionItem => {
-  const { description, examples, name, preview, signatures } = fn;
+  const { description, examples, name, preview, signatures, type } = fn;
   const detail = description;
   const docDetail = preview ? `**[${techPreviewLabel}]** ${detail}` : detail;
 
   const hasNoArguments = signatures.every((signature) => signature.params.length === 0);
-  const text = hasNoArguments ? `${name}() ` : `${name}($0) `;
+
+  // Aggregations insert just the name (e.g. `sum `) without parens: a follow-up prompt lets the user pick `<aggregation>` or `()`.
+  const text =
+    type === PromQLFunctionDefinitionTypes.ACROSS_SERIES
+      ? `${name} `
+      : hasNoArguments
+      ? `${name}() `
+      : `${name}($0) `;
 
   return {
     label: name,

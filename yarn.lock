@@ -2431,34 +2431,34 @@
     semver "^7.6.3"
     topojson-client "^3.1.0"
 
-"@elastic/eslint-plugin-eui@2.8.0":
-  version "2.8.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-2.8.0.tgz#437c8fc6ad62a0caf7b65b4756497ca37a72d982"
-  integrity sha512-qN5TxJCGM0WrNnwJ9pWGJetWnvddpRLHp8TMF/hfPvmDeYfXFE4yghMp9Wzk8Nohx4NwhYY0sMi6YZFgKZD+1w==
+"@elastic/eslint-plugin-eui@2.9.0":
+  version "2.9.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-2.9.0.tgz#0901bb3c98b4a1006473d2d4e54b6e49cd537095"
+  integrity sha512-aIW2iGyeL36w8nXK3huGKBd68sskSr0NdrvXh7Ldx02jz/ASnyZ0PlK7LireueNa8hjd7pG+VWa5b3YHdgQb3w==
 
-"@elastic/eui-theme-borealis@5.4.0":
-  version "5.4.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-borealis/-/eui-theme-borealis-5.4.0.tgz#b392b43457c5db3fb39c6f148799b5e65ffc5803"
-  integrity sha512-2NQ9s7A/EM6VgQlkkw4IUFhyqPvs37M8jVNX5nYjwTPRfQwLBMEUXqYqUhIWMQXzjocf1x2IkzEejT8C9eqbXA==
+"@elastic/eui-theme-borealis@6.0.0":
+  version "6.0.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-borealis/-/eui-theme-borealis-6.0.0.tgz#cb18a04a1cb986fd5725650dd36e65f9df721dc7"
+  integrity sha512-A+GNRgX2oERsue9Dog0RABVAYaoye1gi5zzdTOp/tMXzYzS2TaUEgIYjzRttJIQU95q8eJxPgmzcgSKo7CaUUQ==
   dependencies:
-    "@elastic/eui-theme-common" "7.3.0"
+    "@elastic/eui-theme-common" "8.0.0"
     chroma-js "^2.4.2"
 
-"@elastic/eui-theme-common@7.3.0":
-  version "7.3.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-common/-/eui-theme-common-7.3.0.tgz#6116ab791624ae57b6936afb0a112792a56f1912"
-  integrity sha512-IhQ2SNcfmWJweS1w4nL76b7cHLho1EN71bIaHYPwRynuB6BAWY9Z1bQRsYH0KKHJwHr5+MIkmjA5pvQ3A2qMKQ==
+"@elastic/eui-theme-common@8.0.0":
+  version "8.0.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-common/-/eui-theme-common-8.0.0.tgz#551e37a0183e2ffc24e362a7db7ff92eaca27c08"
+  integrity sha512-5Ad88+l4hd7/0rxta5RPh/ZAasM5G4bhSwcWNN6mlKKK1IvTddlLKAOm+i9XzpRS15pb8wU+TmSltikgjn+MtA==
   dependencies:
     "@types/lodash" "^4.14.202"
     chroma-js "^2.4.2"
     lodash "^4.17.21"
 
-"@elastic/eui@112.3.0":
-  version "112.3.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-112.3.0.tgz#017534307c3cf240e536ac646086def958a3c2c9"
-  integrity sha512-BgUrVEralLuL8XvRkyJ3rfmD4Mn07yhAKLqnG9w4li786F3GFSMmN4SbWQdBMeVLqApZGfHEoMwC6WWRWqI/6w==
+"@elastic/eui@113.0.0":
+  version "113.0.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-113.0.0.tgz#3890892f98322094ae3c1d9d8e6bf591a64e97f6"
+  integrity sha512-Cv+UiPh/NYPqwGJ2ylSjZ6DGhJV7DXLc0QKETZIYm+V2Anj/7losny+D67GkfWziz7oIc8wDRTm5FJ4Vppf85g==
   dependencies:
-    "@elastic/eui-theme-common" "7.3.0"
+    "@elastic/eui-theme-common" "8.0.0"
     "@elastic/prismjs-esql" "^1.1.2"
     "@hello-pangea/dnd" "^16.6.0"
     "@types/lodash" "^4.14.202"
@@ -6152,6 +6152,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/cps-server-utils@link:src/platform/packages/shared/kbn-cps-server-utils":
+  version "0.0.0"
+  uid ""
+
 "@kbn/cps-utils@link:src/platform/packages/shared/kbn-cps-utils":
   version "0.0.0"
   uid ""
@@ -6909,10 +6913,6 @@
   uid ""
 
 "@kbn/flyout-system-example-plugin@link:examples/flyout_system":
-  version "0.0.0"
-  uid ""
-
-"@kbn/flyout-ui@link:src/platform/packages/shared/kbn-flyout-ui":
   version "0.0.0"
   uid ""
 
@@ -8180,6 +8180,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/response-ops-scheduling-types@link:x-pack/platform/packages/shared/response-ops/scheduling-types":
+  version "0.0.0"
+  uid ""
+
 "@kbn/response-stream-plugin@link:examples/response_stream":
   version "0.0.0"
   uid ""
@@ -8500,10 +8504,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/security-solution-common@link:src/platform/packages/shared/kbn-security-solution-common":
-  version "0.0.0"
-  uid ""
-
 "@kbn/security-solution-connectors@link:x-pack/solutions/security/packages/connectors":
   version "0.0.0"
   uid ""
@@ -8521,10 +8521,6 @@
   uid ""
 
 "@kbn/security-solution-fixtures-plugin@link:x-pack/platform/test/cases_api_integration/common/plugins/security_solution":
-  version "0.0.0"
-  uid ""
-
-"@kbn/security-solution-flyout@link:src/platform/packages/shared/kbn-security-solution-flyout":
   version "0.0.0"
   uid ""
 
@@ -8729,6 +8725,10 @@
   uid ""
 
 "@kbn/shared-svg@link:src/platform/packages/shared/kbn-shared-svg":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-ai-components@link:src/platform/packages/shared/shared-ux/ai-components":
   version "0.0.0"
   uid ""
 
@@ -9077,6 +9077,10 @@
   uid ""
 
 "@kbn/synthetics-e2e@link:x-pack/solutions/observability/plugins/synthetics/e2e":
+  version "0.0.0"
+  uid ""
+
+"@kbn/synthetics-forge@link:x-pack/solutions/observability/packages/kbn-synthetics-forge":
   version "0.0.0"
   uid ""
 
@@ -16745,9 +16749,9 @@ bn.js@^4.0.0, bn.js@^4.1.0, bn.js@^4.11.9:
   integrity sha512-E6QoYqCKZfgatHTdHzs1RRKP7ip4vvm+EyRUeE2RF0NblwVvb0p6jSVeNTOFxPn26QXN2o6SMfNxKp6kU8zQaw==
 
 bn.js@^5.0.0, bn.js@^5.2.1:
-  version "5.2.1"
-  resolved "https://registry.yarnpkg.com/bn.js/-/bn.js-5.2.1.tgz#0bc527a6a0d18d0aa8d5b0538ce4a77dccfa7b70"
-  integrity sha512-eXRvHzWyYPBuB4NBy0cmYQjGitUrtqwbvlzP3G6VFnNRbsZQIxQ10PbKKHt8gZ/HW/D/747aDl+QkDqg3KQLMQ==
+  version "5.2.3"
+  resolved "https://registry.yarnpkg.com/bn.js/-/bn.js-5.2.3.tgz#16a9e409616b23fef3ccbedb8d42f13bff80295e"
+  integrity sha512-EAcmnPkxpntVL+DS7bO1zhcZNvCkxqtkd0ZY53h06GNQ3DEkkGZ/gKgmDv6DdZQGj9BgfSPKtJJ7Dp1GPP8f7w==
 
 body-parser@1.20.3:
   version "1.20.3"
@@ -19906,10 +19910,10 @@ dotenv@16.4.7:
   resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-16.4.7.tgz#0e20c5b82950140aa99be360a8a5f52335f53c26"
   integrity sha512-47qPchRCykZC03FhkYAhrvwU4xDBFIj1QPqaarj6mdM/hgUzfPHcpkHJOn3mJAufFeeAxAzeGsr5X0M4k6fLZQ==
 
-dotenv@17.2.3, dotenv@^17.2.3:
-  version "17.2.3"
-  resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-17.2.3.tgz#ad995d6997f639b11065f419a22fabf567cdb9a2"
-  integrity sha512-JVUnt+DUIzu87TABbhPmNfVdBDt18BLOWjMUFJMSi/Qqg7NTYtabbvSNJGOJ7afbRuv9D/lngizHtP7QyLQ+9w==
+dotenv@17.2.4, dotenv@^17.2.3:
+  version "17.2.4"
+  resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-17.2.4.tgz#b5a0e2f015e0be287a5330a90bf0e804606504c2"
+  integrity sha512-mudtfb4zRB4bVvdj0xRo+e6duH1csJRM8IukBqfTRvHotn9+LBXB8ynAidP9zHqoRC/fsllXgk4kCKlR21fIhw==
 
 dotenv@^16.0.2, dotenv@^16.5.0:
   version "16.5.0"
@@ -29253,10 +29257,10 @@ qs@6.13.0:
   dependencies:
     side-channel "^1.0.6"
 
-qs@6.14.1, qs@^6.11.0, qs@^6.12.3, qs@^6.14.0, qs@^6.9.7:
-  version "6.14.1"
-  resolved "https://registry.yarnpkg.com/qs/-/qs-6.14.1.tgz#a41d85b9d3902f31d27861790506294881871159"
-  integrity sha512-4EK3+xJl8Ts67nLYNwqw/dsFVnCf+qR7RgXSK9jEEm9unao3njwMDdmsdvoKBKHzxd7tCYz5e5M+SnMjdtXGQQ==
+qs@6.14.2, qs@^6.11.0, qs@^6.12.3, qs@^6.14.0, qs@^6.9.7:
+  version "6.14.2"
+  resolved "https://registry.yarnpkg.com/qs/-/qs-6.14.2.tgz#b5634cf9d9ad9898e31fba3504e866e8efb6798c"
+  integrity sha512-V/yCWTTF7VJ9hIh18Ugr2zhJMP01MY7c5kh4J870L7imm6/DIzBsNLTXzMwUA3yZ5b/KBqLx8Kp3uRvd7xSe3Q==
   dependencies:
     side-channel "^1.1.0"
 

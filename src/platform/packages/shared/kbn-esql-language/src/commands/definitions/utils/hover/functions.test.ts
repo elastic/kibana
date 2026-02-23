@@ -315,7 +315,7 @@ describe('getFormattedFunctionSignature', () => {
       columns.forEach(({ name, type }) => {
         columnMap.set(name, {
           name,
-          type: type as any,
+          type,
           userDefined: false,
         });
       });
