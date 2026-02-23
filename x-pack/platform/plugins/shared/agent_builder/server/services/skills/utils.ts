@@ -12,9 +12,9 @@ import type { PublicSkillDefinition } from '@kbn/agent-builder-common';
  * Converts an InternalSkillDefinition to a PublicSkillDefinition
  * suitable for API responses. This is used at the route handler boundary.
  */
-export const internalToPublicDefinition = (
+export const internalToPublicDefinition = async (
   skill: InternalSkillDefinition
-): PublicSkillDefinition => ({
+): Promise<PublicSkillDefinition> => ({
   id: skill.id,
   name: skill.name,
   description: skill.description,
@@ -24,6 +24,6 @@ export const internalToPublicDefinition = (
     relativePath: rc.relativePath,
     content: rc.content,
   })),
-  tool_ids: skill.getRegistryTools(),
+  tool_ids: await skill.getRegistryTools(),
   readonly: skill.readonly,
 });

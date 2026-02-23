@@ -184,8 +184,7 @@ export class AgentBuilderPlugin
         execute: runner.runTool.bind(runner),
       },
       skills: {
-        register: skills.registerSkill.bind(skills),
-        unregister: skills.unregisterSkill.bind(skills),
+        getRegistry: skills.getRegistry.bind(skills),
       },
     };
   }

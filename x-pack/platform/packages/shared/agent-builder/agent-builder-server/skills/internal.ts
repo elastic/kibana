@@ -53,7 +53,7 @@ export interface InternalSkillDefinition {
    * - Builtin skills: returns from the skill definition's getRegistryTools()
    * - Persisted skills: returns tool_ids from persistence
    */
-  getRegistryTools: () => string[];
+  getRegistryTools: () => MaybePromise<string[]>;
   /**
    * Returns inline tool definitions specific to this skill.
    * Only available for builtin skills.

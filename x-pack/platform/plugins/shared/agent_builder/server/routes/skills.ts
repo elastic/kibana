@@ -133,7 +133,7 @@ export function registerSkillsRoutes({ router, getInternalServices, logger }: Ro
         const skills = await registry.list();
         return response.ok<ListSkillsResponse>({
           body: {
-            results: skills.map(internalToPublicDefinition),
+            results: await Promise.all(skills.map(internalToPublicDefinition)),
           },
         });
       }, featureFlagConfig)
@@ -169,7 +169,7 @@ export function registerSkillsRoutes({ router, getInternalServices, logger }: Ro
         const skill = await registry.get(skillId);
 
         return response.ok<GetSkillResponse>({
-          body: internalToPublicDefinition(skill),
+          body: await internalToPublicDefinition(skill),
         });
       }, featureFlagConfig)
     );
@@ -203,7 +203,7 @@ export function registerSkillsRoutes({ router, getInternalServices, logger }: Ro
         const registry = await skillService.getRegistry({ request });
         const skill = await registry.create(createRequest);
         return response.ok<CreateSkillResponse>({
-          body: internalToPublicDefinition(skill),
+          body: await internalToPublicDefinition(skill),
         });
       }, featureFlagConfig)
     );
@@ -239,7 +239,7 @@ export function registerSkillsRoutes({ router, getInternalServices, logger }: Ro
         const registry = await skillService.getRegistry({ request });
         const skill = await registry.update(skillId, update);
         return response.ok<UpdateSkillResponse>({
-          body: internalToPublicDefinition(skill),
+          body: await internalToPublicDefinition(skill),
         });
       }, featureFlagConfig)
     );

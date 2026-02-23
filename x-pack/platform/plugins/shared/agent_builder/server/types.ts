@@ -26,10 +26,10 @@ import type {
 import type { BuiltInAgentDefinition } from '@kbn/agent-builder-server/agents';
 import type { HooksServiceSetup } from '@kbn/agent-builder-server';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
-import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
 import type { ToolsServiceSetup, ToolRegistry } from './services/tools';
 import type { AttachmentServiceSetup } from './services/attachments';
 import type { SkillServiceSetup } from './services/skills';
+import type { SkillRegistry } from './services/skills/skill_registry';
 
 export interface AgentBuilderSetupDependencies {
   cloud?: CloudSetup;
@@ -83,15 +83,10 @@ export interface ToolsSetup {
  */
 export interface SkillsStart {
   /**
-   * Register a skill dynamically after plugin start.
-   * Only affects future conversations (existing ones snapshot skills at creation time).
+   * Create a skill registry scoped to the current user and context.
+   * The registry provides access to both built-in and persisted skills.
    */
-  register: (skill: SkillDefinition) => Promise<void>;
-  /**
-   * Unregister a previously registered skill by ID.
-   * Returns true if the skill was found and removed.
-   */
-  unregister: (skillId: string) => Promise<boolean>;
+  getRegistry(opts: { request: KibanaRequest }): Promise<SkillRegistry>;
 }
 
 /**
