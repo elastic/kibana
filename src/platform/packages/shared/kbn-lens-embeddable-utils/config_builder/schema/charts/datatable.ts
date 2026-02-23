@@ -298,7 +298,7 @@ const datatableStateMetricsOptionsSchema = {
 };
 
 interface SortByValidationInput {
-  metrics: Array<{}>;
+  metrics?: Array<{}>;
   rows?: Array<{}>;
   split_metrics_by?: Array<{}>;
   sort_by?: {
@@ -320,9 +320,11 @@ function validateSortBy({
 
   const { column_type, index, values } = sort_by;
 
+  const numberOfMetrics = metrics?.length ?? 0;
+
   if (column_type === 'metric') {
-    if (index == null || index >= metrics.length) {
-      return `The 'sort_by.index' (${index}) is out of bounds. The 'metrics' array has ${metrics.length} item(s).`;
+    if (index == null || index >= numberOfMetrics) {
+      return `The 'sort_by.index' (${index}) is out of bounds. The 'metrics' array has ${numberOfMetrics} item(s).`;
     }
   }
 
@@ -341,8 +343,8 @@ function validateSortBy({
       return `Cannot sort by 'pivoted_metric' when no split_metrics_by columns are defined.`;
     }
 
-    if (index == null || index >= metrics.length) {
-      return `The 'sort_by.index' (${index}) is out of bounds. The 'metrics' array has ${metrics.length} item(s).`;
+    if (index == null || index >= numberOfMetrics) {
+      return `The 'sort_by.index' (${index}) is out of bounds. The 'metrics' array has ${numberOfMetrics} item(s).`;
     }
 
     if (values == null || values.length !== split_metrics_by.length) {
@@ -413,15 +415,17 @@ export const datatableStateSchemaESQL = schema.object(
     /**
      * Metric columns configuration, must define operation.
      */
-    metrics: schema.arrayOf(
-      esqlColumnOperationWithLabelAndFormatSchema.extends(datatableStateMetricsOptionsSchema, {
-        meta: { id: 'datatableESQLMetric' },
-      }),
-      {
-        minSize: 1,
-        maxSize: 1000,
-        meta: { description: 'Array of metrics to display as columns in the datatable' },
-      }
+    metrics: schema.maybe(
+      schema.arrayOf(
+        esqlColumnOperationWithLabelAndFormatSchema.extends(datatableStateMetricsOptionsSchema, {
+          meta: { id: 'datatableESQLMetric' },
+        }),
+        {
+          minSize: 1,
+          maxSize: 1000,
+          meta: { description: 'Array of metrics to display as columns in the datatable' },
+        }
+      )
     ),
     /**
      * Row configuration, optional operations.
@@ -445,7 +449,18 @@ export const datatableStateSchemaESQL = schema.object(
     ),
   },
   {
-    validate: validateSortBy,
+    validate: (arg) => {
+      const sortByError = validateSortBy(arg);
+      if (sortByError) {
+        return sortByError;
+      }
+
+      const { metrics, rows } = arg;
+
+      if (!metrics && !rows) {
+        return 'Datatable must have at least one column';
+      }
+    },
     meta: {
       id: 'datatableESQL',
       description: 'Datatable state configuration for ES|QL queries',

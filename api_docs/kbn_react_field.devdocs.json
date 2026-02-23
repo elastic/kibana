@@ -75,7 +75,7 @@
           ") => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-react-field/src/field_icon/field_icon.tsx",
-        "lineNumber": 78,
+        "lineNumber": 79,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -97,7 +97,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-react-field/src/field_icon/field_icon.tsx",
-            "lineNumber": 81,
+            "lineNumber": 82,
             "columnNumber": 27,
             "deprecated": false,
             "trackAdoption": false,
@@ -193,7 +193,7 @@
               "\nLabel for the button"
             ],
             "signature": [
-              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+              "React.ReactNode"
             ],
             "path": "src/platform/packages/shared/kbn-react-field/src/field_button/field_button.tsx",
             "lineNumber": 18,
@@ -211,7 +211,7 @@
               "\nIcon representing the field type.\nRecommend using FieldIcon"
             ],
             "signature": [
-              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+              "React.ReactNode"
             ],
             "path": "src/platform/packages/shared/kbn-react-field/src/field_button/field_button.tsx",
             "lineNumber": 22,
@@ -229,7 +229,7 @@
               "\nAn optional node to place inside and at the end of the <button>"
             ],
             "signature": [
-              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+              "React.ReactNode"
             ],
             "path": "src/platform/packages/shared/kbn-react-field/src/field_button/field_button.tsx",
             "lineNumber": 27,
@@ -247,7 +247,7 @@
               "\nAn optional node to place outside of and to the right of the <button>"
             ],
             "signature": [
-              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+              "React.ReactNode"
             ],
             "path": "src/platform/packages/shared/kbn-react-field/src/field_button/field_button.tsx",
             "lineNumber": 31,
@@ -283,7 +283,7 @@
               "\nCustom drag handle element"
             ],
             "signature": [
-              "React.ReactElement<any, string | React.JSXElementConstructor<any>> | undefined"
+              "React.ReactElement<any> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-react-field/src/field_button/field_button.tsx",
             "lineNumber": 39,
@@ -426,7 +426,7 @@
           ", \"iconType\">"
         ],
         "path": "src/platform/packages/shared/kbn-react-field/src/field_icon/field_icon.tsx",
-        "lineNumber": 72,
+        "lineNumber": 73,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -439,10 +439,10 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"string\" | \"number\" | \"boolean\" | \"wildcard\" | \"nested\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"search_as_you_type\" | \"date\" | \"version\" | \"murmur3\" | \"percolator\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"scaled_float\" | \"double\" | \"date_range\" | \"ip_range\" | \"rank_feature\" | \"rank_features\" | \"flattened\" | \"shape\" | \"histogram\" | \"constant_keyword\" | \"dense_vector\" | \"semantic_text\" | \"sparse_vector\" | \"match_only_text\" | (string & {}) | \"conflict\" | \"point\" | \"unsigned_long\" | \"_source\" | \"null\" | \"gauge\" | \"counter\" | \"number_range\" | \"exponential_histogram\" | \"tdigest\""
+              "\"string\" | \"number\" | \"boolean\" | \"wildcard\" | \"nested\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"search_as_you_type\" | \"date\" | \"date_nanos\" | \"version\" | \"murmur3\" | \"percolator\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"scaled_float\" | \"double\" | \"date_range\" | \"ip_range\" | \"rank_feature\" | \"rank_features\" | \"flattened\" | \"shape\" | \"histogram\" | \"constant_keyword\" | \"dense_vector\" | \"semantic_text\" | \"sparse_vector\" | \"match_only_text\" | \"gauge\" | \"point\" | \"conflict\" | \"unsigned_long\" | \"_source\" | (string & {}) | \"null\" | \"counter\" | \"number_range\" | \"exponential_histogram\" | \"tdigest\""
             ],
             "path": "src/platform/packages/shared/kbn-react-field/src/field_icon/field_icon.tsx",
-            "lineNumber": 73,
+            "lineNumber": 74,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -458,7 +458,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-react-field/src/field_icon/field_icon.tsx",
-            "lineNumber": 74,
+            "lineNumber": 75,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -474,7 +474,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-react-field/src/field_icon/field_icon.tsx",
-            "lineNumber": 75,
+            "lineNumber": 76,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -516,7 +516,7 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"string\" | \"number\" | \"boolean\" | \"wildcard\" | \"nested\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"search_as_you_type\" | \"date\" | \"version\" | \"murmur3\" | \"percolator\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"scaled_float\" | \"double\" | \"date_range\" | \"ip_range\" | \"rank_feature\" | \"rank_features\" | \"flattened\" | \"shape\" | \"histogram\" | \"constant_keyword\" | \"dense_vector\" | \"semantic_text\" | \"sparse_vector\" | \"match_only_text\" | (string & {}) | \"conflict\" | \"point\" | \"unsigned_long\" | \"_source\" | \"null\" | \"gauge\" | \"counter\" | \"number_range\" | \"exponential_histogram\" | \"tdigest\" | undefined"
+              "\"string\" | \"number\" | \"boolean\" | \"wildcard\" | \"nested\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"search_as_you_type\" | \"date\" | \"date_nanos\" | \"version\" | \"murmur3\" | \"percolator\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"scaled_float\" | \"double\" | \"date_range\" | \"ip_range\" | \"rank_feature\" | \"rank_features\" | \"flattened\" | \"shape\" | \"histogram\" | \"constant_keyword\" | \"dense_vector\" | \"semantic_text\" | \"sparse_vector\" | \"match_only_text\" | \"gauge\" | \"point\" | \"conflict\" | \"unsigned_long\" | \"_source\" | (string & {}) | \"null\" | \"counter\" | \"number_range\" | \"exponential_histogram\" | \"tdigest\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-react-field/src/field_name_with_icon/field_name_with_icon.tsx",
             "lineNumber": 17,
