@@ -13,7 +13,7 @@ import { HeaderFieldType, type MCPInternalConnectorForm } from '../types';
 
 describe('serialization utils', () => {
   describe('formSerializer', () => {
-    it('should substitute {{apiKey}} in serverUrl with token and set hasAuth false when authType is ApiKeyInUrl', () => {
+    it('should keep template URL in config and store token in secrets when authType is ApiKeyInUrl (no secret in config)', () => {
       const formData: MCPInternalConnectorForm = {
         actionTypeId: '.mcp',
         isDeprecated: false,
@@ -30,17 +30,19 @@ describe('serialization utils', () => {
         ...formData,
         config: {
           ...formData.config,
-          serverUrl: 'https://mcp.example.com/my-api-key-123/v2/mcp',
-          hasAuth: false,
+          serverUrl: `https://mcp.example.com/${API_KEY_URL_PLACEHOLDER}/v2/mcp`,
+          hasAuth: true,
+          authType: MCPAuthType.ApiKeyInUrl,
           headers: undefined,
         },
         secrets: {
           secretHeaders: undefined,
+          token: 'my-api-key-123',
         },
       });
     });
 
-    it('should substitute {{apiKey}} with apiKey secret when token is empty and authType is ApiKeyInUrl', () => {
+    it('should keep template URL in config and store apiKey in secrets as token when authType is ApiKeyInUrl', () => {
       const formData: MCPInternalConnectorForm = {
         actionTypeId: '.mcp',
         isDeprecated: false,
@@ -57,12 +59,14 @@ describe('serialization utils', () => {
         ...formData,
         config: {
           ...formData.config,
-          serverUrl: 'https://mcp.example.com/key-from-api-key-field/v2/mcp',
-          hasAuth: false,
+          serverUrl: `https://mcp.example.com/${API_KEY_URL_PLACEHOLDER}/v2/mcp`,
+          hasAuth: true,
+          authType: MCPAuthType.ApiKeyInUrl,
           headers: undefined,
         },
         secrets: {
           secretHeaders: undefined,
+          token: 'key-from-api-key-field',
         },
       });
     });
