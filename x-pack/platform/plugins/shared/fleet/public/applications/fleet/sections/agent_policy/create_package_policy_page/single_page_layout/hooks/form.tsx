@@ -342,7 +342,7 @@ export function useOnSubmit({
   const [validationResults, setValidationResults] = useState<PackagePolicyValidationResults>();
   const [hasAgentPolicyError, setHasAgentPolicyError] = useState<boolean>(false);
 
-  const { isAgentlessIntegration, isAgentlessAgentPolicy } = useAgentless();
+  const { getAgentlessStatusForPackage, isAgentlessAgentPolicy } = useAgentless();
 
   const hasErrors = validationResults ? validationHasErrors(validationResults) : false;
 
@@ -522,7 +522,8 @@ export function useOnSubmit({
   });
   const prevSetupTechnology = setupTechnologyRef.current;
   const isAgentlessSelected =
-    isAgentlessIntegration(packageInfo) && selectedSetupTechnology === SetupTechnology.AGENTLESS;
+    getAgentlessStatusForPackage(packageInfo).isAgentless &&
+    selectedSetupTechnology === SetupTechnology.AGENTLESS;
 
   const newInputs = useMemo(() => {
     const varGroupSelections = packagePolicy.var_group_selections ?? {};
@@ -611,7 +612,8 @@ export function useOnSubmit({
         (agentCount !== 0 ||
           (agentPolicies.length === 0 && selectedPolicyTab !== SelectedPolicyTab.NEW)) &&
         !(
-          isAgentlessIntegration(packageInfo) || isAgentlessAgentPolicy(overrideCreatedAgentPolicy)
+          getAgentlessStatusForPackage(packageInfo).isAgentless ||
+          isAgentlessAgentPolicy(overrideCreatedAgentPolicy)
         ) &&
         formState !== 'CONFIRM'
       ) {
@@ -714,7 +716,8 @@ export function useOnSubmit({
         : packagePolicy.policy_ids;
 
       const shouldForceInstallOnAgentless =
-        isAgentlessAgentPolicy(createdPolicy) || isAgentlessIntegration(packageInfo);
+        isAgentlessAgentPolicy(createdPolicy) ||
+        getAgentlessStatusForPackage(packageInfo).isAgentless;
 
       const forceInstall = force || shouldForceInstallOnAgentless;
 
@@ -844,6 +847,7 @@ export function useOnSubmit({
       agentPolicies,
       selectedPolicyTab,
       isAgentlessIntegration,
+      getAgentlessStatusForPackage,
       packageInfo,
       isAgentlessAgentPolicy,
       packagePolicy,
