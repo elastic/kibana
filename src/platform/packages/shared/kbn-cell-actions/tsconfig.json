@@ -14,10 +14,15 @@
   "include": ["**/*.ts", "**/*.tsx"],
   "kbn_references": [
     "@kbn/i18n",
-    "@kbn/ai-assistant-connector-selector-action",
-    "@kbn/triggers-actions-ui-plugin",
-    "@kbn/management-settings-ids",
-    "@kbn/core-ui-settings-browser",
+    "@kbn/data-views-plugin",
+    "@kbn/core",
+    "@kbn/field-types",
+    "@kbn/data-plugin",
+    "@kbn/es-query",
+    "@kbn/core-notifications-browser",
+    "@kbn/utility-types",
+    "@kbn/ui-theme",
+    "@kbn/ui-actions-plugin",
   ],
   "exclude": ["target/**/*"]
 }
