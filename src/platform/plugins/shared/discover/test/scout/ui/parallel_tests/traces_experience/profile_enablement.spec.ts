@@ -53,7 +53,7 @@ spaceTest.describe(
       'should load Discover with trace data in ES|QL mode',
       async ({ page, pageObjects }) => {
         await spaceTest.step('run ES|QL query for traces', async () => {
-          await pageObjects.tracesExperience.runEsqlQuery(testData.TRACES.ESQL_QUERY);
+          await pageObjects.discover.writeEsqlQuery(testData.TRACES.ESQL_QUERY);
         });
 
         await spaceTest.step('verify Discover loaded with results', async () => {
