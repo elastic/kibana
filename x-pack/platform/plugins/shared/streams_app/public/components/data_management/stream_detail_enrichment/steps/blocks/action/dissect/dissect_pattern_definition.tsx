@@ -50,7 +50,7 @@ export const DissectPatternDefinition = () => {
         helpText={
           <FormattedMessage
             id="xpack.streams.streamDetailView.managementTab.enrichment.processor.dissectPatternDefinitionsHelpText"
-            defaultMessage="Pattern used to dissect the specified field. The pattern is defined by the parts of the string to discard. Use a {keyModifier} to alter the dissection behavior."
+            defaultMessage="The pattern is defined by the parts of the string to discard. Use a {keyModifier} to alter the dissection behavior."
             values={{
               keyModifier: (
                 <EuiLink

@@ -13,6 +13,7 @@ export {
   asCodeGroupFilterSchema,
   asCodeDSLFilterSchema,
   asCodeSpatialFilterSchema,
+  type AsCodeGroupFilterRecursive,
 } from './src/schemas/filter';
 
 export type {
@@ -22,5 +23,3 @@ export type {
   AsCodeDSLFilter,
   AsCodeSpatialFilter,
 } from './src/types';
-
-export type { RecursiveCondition } from './src/schemas/filter';
