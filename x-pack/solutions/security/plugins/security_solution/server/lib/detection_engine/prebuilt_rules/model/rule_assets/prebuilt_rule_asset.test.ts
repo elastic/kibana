@@ -17,7 +17,7 @@ describe('Prebuilt rule asset schema', () => {
     const result = PrebuiltRuleAsset.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"name: Invalid input: expected string, received undefined, description: Invalid input: expected string, received undefined, risk_score: Invalid input: expected number, received undefined, severity: Invalid option: expected one of \\"low\\"|\\"medium\\"|\\"high\\"|\\"critical\\", rule_id: Invalid input: expected string, received undefined, and 1 more"`
+      `"name: Invalid input: expected string, received undefined, description: Invalid input: expected string, received undefined, risk_score: Invalid input: expected number, received undefined, severity: Invalid option: expected one of \\"low\\"|\\"medium\\"|\\"high\\"|\\"critical\\", type: Invalid input, and 2 more"`
     );
   });
 
@@ -82,7 +82,7 @@ describe('Prebuilt rule asset schema', () => {
     const result = PrebuiltRuleAsset.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"name: Invalid input: expected string, received undefined, description: Invalid input: expected string, received undefined, risk_score: Invalid input: expected number, received undefined, severity: Invalid option: expected one of \\"low\\"|\\"medium\\"|\\"high\\"|\\"critical\\", version: Invalid input: expected number, received undefined"`
+      `"name: Invalid input: expected string, received undefined, description: Invalid input: expected string, received undefined, risk_score: Invalid input: expected number, received undefined, severity: Invalid option: expected one of \\"low\\"|\\"medium\\"|\\"high\\"|\\"critical\\", type: Invalid input, and 1 more"`
     );
   });
 

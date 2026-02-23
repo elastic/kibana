@@ -34,6 +34,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
     createIncidentUrl: 'https://coolsite.net/rest/api/2/issue',
     getIncidentResponseExternalTitleKey: 'key',
     hasAuth: true,
+    authType: 'webhook-authentication-basic',
     headers: { ['content-type']: 'application/json', ['kbn-xsrf']: 'abcd' },
     viewIncidentUrl: 'https://coolsite.net/browse/{{{external.system.title}}}',
     getIncidentUrl: 'https://coolsite.net/rest/api/2/issue/{{{external.system.id}}}',

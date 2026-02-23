@@ -50,7 +50,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(body).to.eql({
           error: 'Bad Request',
-          message: '[request body]: ids: Array must contain at least 1 element(s)',
+          message: '[request body]: ids: Too small: expected array to have >=1 items',
           statusCode: 400,
         });
       });

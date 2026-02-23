@@ -191,7 +191,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect(res.status).to.be('error');
         expect(res.serviceMessage).to.be(
-          'Request validation failed (Field "maximumCasesToOpen": Number must be greater than or equal to 1)'
+          'Request validation failed (Field "maximumCasesToOpen": Too small: expected number to be >=1)'
         );
       });
     });

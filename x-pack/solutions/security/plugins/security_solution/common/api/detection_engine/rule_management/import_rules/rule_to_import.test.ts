@@ -56,7 +56,7 @@ describe('RuleToImport', () => {
     expectParseError(result);
 
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"name: Invalid input: expected string, received undefined, description: Invalid input: expected string, received undefined, risk_score: Invalid input: expected number, received undefined, severity: Invalid option: expected one of \\"low\\"|\\"medium\\"|\\"high\\"|\\"critical\\", rule_id: Invalid input: expected string, received undefined"`
+      `"name: Invalid input: expected string, received undefined, description: Invalid input: expected string, received undefined, risk_score: Invalid input: expected number, received undefined, severity: Invalid option: expected one of \\"low\\"|\\"medium\\"|\\"high\\"|\\"critical\\", type: Invalid input, and 1 more"`
     );
   });
 
@@ -81,7 +81,7 @@ describe('RuleToImport', () => {
     expectParseError(result);
 
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"name: Invalid input: expected string, received undefined, description: Invalid input: expected string, received undefined, risk_score: Invalid input: expected number, received undefined, severity: Invalid option: expected one of \\"low\\"|\\"medium\\"|\\"high\\"|\\"critical\\""`
+      `"name: Invalid input: expected string, received undefined, description: Invalid input: expected string, received undefined, risk_score: Invalid input: expected number, received undefined, severity: Invalid option: expected one of \\"low\\"|\\"medium\\"|\\"high\\"|\\"critical\\", type: Invalid input"`
     );
   });
 
@@ -95,7 +95,7 @@ describe('RuleToImport', () => {
     expectParseError(result);
 
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"name: Invalid input: expected string, received undefined, risk_score: Invalid input: expected number, received undefined, severity: Invalid option: expected one of \\"low\\"|\\"medium\\"|\\"high\\"|\\"critical\\""`
+      `"name: Invalid input: expected string, received undefined, risk_score: Invalid input: expected number, received undefined, severity: Invalid option: expected one of \\"low\\"|\\"medium\\"|\\"high\\"|\\"critical\\", type: Invalid input"`
     );
   });
 
@@ -110,7 +110,7 @@ describe('RuleToImport', () => {
     expectParseError(result);
 
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"name: Invalid input: expected string, received undefined, risk_score: Invalid input: expected number, received undefined, severity: Invalid option: expected one of \\"low\\"|\\"medium\\"|\\"high\\"|\\"critical\\""`
+      `"name: Invalid input: expected string, received undefined, risk_score: Invalid input: expected number, received undefined, severity: Invalid option: expected one of \\"low\\"|\\"medium\\"|\\"high\\"|\\"critical\\", type: Invalid input"`
     );
   });
 
@@ -1009,7 +1009,7 @@ describe('RuleToImport', () => {
       expectParseError(result);
 
       expect(stringifyZodError(result.error)).toEqual(
-        "exceptions_list.0.list_id: Required, exceptions_list.0.type: Required, exceptions_list.0.namespace_type: Invalid option: expected one of 'agnostic'|'single'"
+        'exceptions_list.0.list_id: Invalid input: expected string, received undefined, exceptions_list.0.type: Invalid option: expected one of "detection"|"rule_default"|"endpoint"|"endpoint_trusted_apps"|"endpoint_trusted_devices"|"endpoint_events"|"endpoint_host_isolation_exceptions"|"endpoint_blocklists", exceptions_list.0.namespace_type: Invalid option: expected one of "agnostic"|"single"'
       );
     });
 

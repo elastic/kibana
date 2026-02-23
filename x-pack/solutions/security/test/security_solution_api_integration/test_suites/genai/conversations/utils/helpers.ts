@@ -77,7 +77,7 @@ export const getConversationNotFoundError = (conversationId: string) => {
 export const getConversationBadRequestError = (attributeName: string) => {
   return {
     error: 'Bad Request',
-    message: `[request body]: ${attributeName}: Required`,
+    message: `[request body]: ${attributeName}: Invalid input: expected string, received undefined`,
     statusCode: 400,
   };
 };

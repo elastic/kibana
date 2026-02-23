@@ -94,7 +94,10 @@ export default ({ getService }: FtrProviderContext): void => {
           });
 
           expect(importResponse.errors[0]).toEqual({
-            error: { status_code: 400, message: 'threshold: Required' },
+            error: {
+              status_code: 400,
+              message: 'threshold: Invalid input: expected object, received undefined',
+            },
           });
         });
 
@@ -140,7 +143,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
           expect(importResponse.errors[0]).toEqual({
             error: {
-              message: 'threshold.value: Number must be greater than or equal to 1',
+              message: 'threshold.value: Too small: expected number to be >=1',
               status_code: 400,
             },
           });

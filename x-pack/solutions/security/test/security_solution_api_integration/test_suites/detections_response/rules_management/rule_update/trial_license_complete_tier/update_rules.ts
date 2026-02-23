@@ -443,7 +443,8 @@ export default ({ getService }: FtrProviderContext) => {
 
           expect(body).to.eql({
             error: 'Bad Request',
-            message: '[request body]: threshold: Required',
+            message:
+              '[request body]: threshold: Invalid input: expected object, received undefined',
             statusCode: 400,
           });
         });
@@ -483,7 +484,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           expect(body).to.eql({
             error: 'Bad Request',
-            message: '[request body]: threshold.value: Number must be greater than or equal to 1',
+            message: '[request body]: threshold.value: Too small: expected number to be >=1',
             statusCode: 400,
           });
         });
