@@ -120,6 +120,8 @@ dependsOn:
   - '@kbn/reporting-common'
   - '@kbn/reporting-plugin'
   - '@kbn/css-utils'
+  - '@kbn/rison'
+  - '@kbn/rule-data-utils'
 tags:
   - plugin
   - prod
