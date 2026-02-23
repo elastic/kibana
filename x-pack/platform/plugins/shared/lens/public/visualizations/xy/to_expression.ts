@@ -529,7 +529,7 @@ const dataLayerToExpression = (
             default: [paletteService.get(layer.palette.name).toExpression(layer.palette.params)],
           })
         : buildExpressionFunction<SystemPaletteExpressionFunctionDefinition>('system_palette', {
-            name: getDefaultPalette(seriesType),
+            name: getDefaultPalette(layer.seriesType),
           }),
     ]).toAst(),
     colorMapping: layer.colorMapping ? JSON.stringify(layer.colorMapping) : undefined,
