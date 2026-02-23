@@ -195,7 +195,7 @@ describe('assetCriticalityDynamicInlineToolHandler', () => {
     const result = await assetCriticalityDynamicInlineToolHandler(defaultToolArgs, createContext());
 
     expect(result.results).toHaveLength(1);
-    expect(result.results[0].type).toBe(ToolResultType.other);
+    expect(result.results[0].type).toBe(ToolResultType.error);
     expect((result.results[0].data as { error: string }).error).toContain(
       'Error retrieving entity analytics data'
     );

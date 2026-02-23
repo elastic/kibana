@@ -187,7 +187,7 @@ export const riskScoreStaticInlineToolHandler = async (
     return {
       results: [
         {
-          type: ToolResultType.other,
+          type: ToolResultType.error,
           data: {
             error: `Error retrieving entity analytics data: ${
               error instanceof Error ? error.message : 'Unknown error'
