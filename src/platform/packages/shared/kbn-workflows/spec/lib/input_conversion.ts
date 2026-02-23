@@ -8,7 +8,8 @@
  */
 
 import type { JSONSchema7 } from 'json-schema';
-import type { z } from '@kbn/zod/v4';
+import { z } from '@kbn/zod/v4';
+import { fromJSONSchema } from '@kbn/zod/v4/from_json_schema';
 import type { LegacyWorkflowInput, WorkflowInputSchema } from '../schema';
 import type { JsonModelSchemaType } from '../schema/common/json_model_schema';
 import type { JsonSchema } from '../schema/common/json_model_shape_schema';
@@ -390,4 +391,88 @@ export function applyInputDefaults(
   }
 
   return result;
+}
+
+/**
+ * Converts a JSON Schema to a Zod schema, resolving $ref references along the way.
+ */
+export function convertJsonSchemaToZodWithRefs(
+  jsonSchema: JSONSchema7,
+  inputsSchema: ReturnType<typeof normalizeInputsToJsonSchema>
+): z.ZodType {
+  let schemaToConvert = jsonSchema;
+  if (jsonSchema.$ref) {
+    const resolved = resolveRef(jsonSchema.$ref, inputsSchema);
+    if (resolved) {
+      schemaToConvert = resolved;
+    }
+  }
+
+  const zodSchema = fromJSONSchema(schemaToConvert as Record<string, unknown>);
+  if (zodSchema !== undefined) {
+    return zodSchema;
+  }
+
+  if (schemaToConvert.type === 'object' && schemaToConvert.properties) {
+    const shape: Record<string, z.ZodType> = {};
+    for (const [key, propSchema] of Object.entries(schemaToConvert.properties)) {
+      const prop = propSchema as JSONSchema7;
+      let zodProp = convertJsonSchemaToZodWithRefs(prop, inputsSchema);
+
+      const isRequired = schemaToConvert.required?.includes(key) ?? false;
+
+      if (prop.default !== undefined) {
+        zodProp = zodProp.default(prop.default);
+      } else if (!isRequired) {
+        zodProp = zodProp.optional();
+      }
+
+      shape[key] = zodProp;
+    }
+    return z.object(shape);
+  }
+
+  return z.any();
+}
+
+/**
+ * Builds a Zod schema that validates workflow inputs against the workflow's input definition.
+ * Used by both the UI form and the execution engine for consistent validation.
+ *
+ * @param inputs - The workflow's input definition (legacy array or JSON Schema format)
+ * @returns A Zod object schema for validating input values
+ */
+export function makeWorkflowInputsValidator(
+  inputs?: JsonModelSchemaType | Array<z.infer<typeof WorkflowInputSchema>>
+): z.ZodType<Record<string, unknown>> {
+  const normalizedInputs = normalizeInputsToJsonSchema(inputs);
+
+  if (!normalizedInputs?.properties) {
+    return z.object({});
+  }
+
+  const validatorObject: Record<string, z.ZodType> = {};
+
+  for (const [propertyName, propertySchema] of Object.entries(normalizedInputs.properties)) {
+    const jsonSchema = propertySchema as JSONSchema7;
+
+    const resolvedSchema = jsonSchema.$ref
+      ? resolveRef(jsonSchema.$ref, normalizedInputs) || jsonSchema
+      : jsonSchema;
+
+    let zodSchema: z.ZodType = convertJsonSchemaToZodWithRefs(jsonSchema, normalizedInputs);
+
+    if (resolvedSchema.default !== undefined) {
+      zodSchema = zodSchema.default(resolvedSchema.default);
+    }
+
+    const isRequired = normalizedInputs.required?.includes(propertyName) ?? false;
+    if (!isRequired && resolvedSchema.default === undefined) {
+      zodSchema = zodSchema.optional();
+    }
+
+    validatorObject[propertyName] = zodSchema;
+  }
+
+  return z.object(validatorObject);
 }

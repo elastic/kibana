@@ -11,6 +11,7 @@ import type { z } from '@kbn/zod/v4';
 import {
   applyInputDefaults,
   convertLegacyInputsToJsonSchema,
+  makeWorkflowInputsValidator,
   normalizeInputsToJsonSchema,
 } from './input_conversion';
 import type { WorkflowInputSchema } from '../schema';
@@ -710,5 +711,105 @@ describe('applyInputDefaults', () => {
         notifyTeams: ['SOC', 'Management'],
       },
     });
+  });
+});
+
+describe('makeWorkflowInputsValidator', () => {
+  it('should return a permissive schema when inputs is undefined', () => {
+    const validator = makeWorkflowInputsValidator(undefined);
+    expect(validator.safeParse({}).success).toBe(true);
+    expect(validator.safeParse({ anything: 'goes' }).success).toBe(true);
+  });
+
+  it('should pass valid inputs', () => {
+    const inputs: JsonModelSchemaType = {
+      properties: {
+        name: { type: 'string' },
+        count: { type: 'number' },
+      },
+      required: ['name'],
+    };
+
+    const validator = makeWorkflowInputsValidator(inputs);
+    expect(validator.safeParse({ name: 'hello', count: 5 }).success).toBe(true);
+  });
+
+  it('should fail when a required input is missing', () => {
+    const inputs: JsonModelSchemaType = {
+      properties: {
+        name: { type: 'string' },
+      },
+      required: ['name'],
+    };
+
+    const validator = makeWorkflowInputsValidator(inputs);
+    const result = validator.safeParse({});
+    expect(result.success).toBe(false);
+  });
+
+  it('should pass when a required input has a default', () => {
+    const inputs: JsonModelSchemaType = {
+      properties: {
+        name: { type: 'string', default: 'default-name' },
+      },
+      required: ['name'],
+    };
+
+    const validator = makeWorkflowInputsValidator(inputs);
+    expect(validator.safeParse({}).success).toBe(true);
+  });
+
+  it('should fail on type mismatch', () => {
+    const inputs: JsonModelSchemaType = {
+      properties: {
+        count: { type: 'number' },
+      },
+      required: ['count'],
+    };
+
+    const validator = makeWorkflowInputsValidator(inputs);
+    const result = validator.safeParse({ count: 'not-a-number' });
+    expect(result.success).toBe(false);
+  });
+
+  it('should allow optional inputs to be omitted', () => {
+    const inputs: JsonModelSchemaType = {
+      properties: {
+        name: { type: 'string' },
+        optionalField: { type: 'string' },
+      },
+      required: ['name'],
+    };
+
+    const validator = makeWorkflowInputsValidator(inputs);
+    expect(validator.safeParse({ name: 'hello' }).success).toBe(true);
+  });
+
+  it('should validate legacy array format inputs', () => {
+    const legacyInputs = [
+      { name: 'greeting', type: 'string' as const, required: true },
+      { name: 'count', type: 'number' as const, required: false },
+    ] as Array<z.infer<typeof WorkflowInputSchema>>;
+
+    const validator = makeWorkflowInputsValidator(legacyInputs);
+    expect(validator.safeParse({ greeting: 'hi' }).success).toBe(true);
+
+    const missing = validator.safeParse({});
+    expect(missing.success).toBe(false);
+  });
+
+  it('should validate enum constraints', () => {
+    const inputs: JsonModelSchemaType = {
+      properties: {
+        severity: { type: 'string', enum: ['low', 'medium', 'high'] },
+      },
+      required: ['severity'],
+    };
+
+    const validator = makeWorkflowInputsValidator(inputs);
+    expect(validator.safeParse({ severity: 'medium' }).success).toBe(true);
+
+    const invalid = validator.safeParse({ severity: 'critical' });
+    expect(invalid.success).toBe(false);
   });
 });

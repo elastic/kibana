@@ -15,99 +15,11 @@ import { i18n } from '@kbn/i18n';
 import type { WorkflowYaml } from '@kbn/workflows';
 import {
   applyInputDefaults,
+  makeWorkflowInputsValidator,
   normalizeInputsToJsonSchema,
-  resolveRef,
 } from '@kbn/workflows/spec/lib/input_conversion';
-import { z } from '@kbn/zod/v4';
-import { fromJSONSchema } from '@kbn/zod/v4/from_json_schema';
-import { convertJsonSchemaToZod } from '../../../../common/lib/json_schema_to_zod';
+import type { z } from '@kbn/zod/v4';
 import { WORKFLOWS_MONACO_EDITOR_THEME } from '../../../widgets/workflow_yaml_editor/styles/use_workflows_monaco_theme';
-
-// Recursively convert JSON Schema to Zod, resolving $ref along the way
-function convertJsonSchemaToZodWithRefs(
-  jsonSchema: JSONSchema7,
-  inputsSchema: ReturnType<typeof normalizeInputsToJsonSchema>
-): z.ZodType {
-  // Resolve $ref if present
-  let schemaToConvert = jsonSchema;
-  if (jsonSchema.$ref) {
-    const resolved = resolveRef(jsonSchema.$ref, inputsSchema);
-    if (resolved) {
-      schemaToConvert = resolved;
-    }
-  }
-
-  // After resolving $ref, try using fromJSONSchema (which handles objects, defaults, required, etc.)
-  const zodSchema = fromJSONSchema(schemaToConvert as Record<string, unknown>);
-  if (zodSchema !== undefined) {
-    return zodSchema;
-  }
-
-  // Fallback: If fromJSONSchema doesn't support this schema, use manual conversion
-  // This handles edge cases and ensures backward compatibility
-  if (schemaToConvert.type === 'object' && schemaToConvert.properties) {
-    const shape: Record<string, z.ZodType> = {};
-    for (const [key, propSchema] of Object.entries(schemaToConvert.properties)) {
-      const prop = propSchema as JSONSchema7;
-      let zodProp = convertJsonSchemaToZodWithRefs(prop, inputsSchema);
-
-      // Check if required
-      const isRequired = schemaToConvert.required?.includes(key) ?? false;
-
-      // Apply default if present
-      if (prop.default !== undefined) {
-        zodProp = zodProp.default(prop.default);
-      } else if (!isRequired) {
-        zodProp = zodProp.optional();
-      }
-
-      shape[key] = zodProp;
-    }
-    return z.object(shape);
-  }
-
-  // For non-object types, use the standard converter
-  return convertJsonSchemaToZod(schemaToConvert);
-}
-
-const makeWorkflowInputsValidator = (inputs: WorkflowYaml['inputs']) => {
-  // Normalize inputs to the new JSON Schema format (handles backward compatibility)
-  // This handles both array (legacy) and object (new) formats
-  const normalizedInputs = normalizeInputsToJsonSchema(inputs);
-
-  if (!normalizedInputs?.properties) {
-    return z.object({});
-  }
-
-  const validatorObject: Record<string, z.ZodType> = {};
-
-  for (const [propertyName, propertySchema] of Object.entries(normalizedInputs.properties)) {
-    const jsonSchema = propertySchema as JSONSchema7;
-
-    // Resolve $ref to get the actual schema (for default extraction)
-    const resolvedSchema = jsonSchema.$ref
-      ? resolveRef(jsonSchema.$ref, normalizedInputs) || jsonSchema
-      : jsonSchema;
-
-    // Convert JSON Schema to Zod schema, resolving $ref if needed
-    let zodSchema: z.ZodType = convertJsonSchemaToZodWithRefs(jsonSchema, normalizedInputs);
-
-    // Apply default from resolved schema if present
-    if (resolvedSchema.default !== undefined) {
-      zodSchema = zodSchema.default(resolvedSchema.default);
-    }
-
-    // Make optional if not required and no default
-    const isRequired = normalizedInputs.required?.includes(propertyName) ?? false;
-    if (!isRequired && resolvedSchema.default === undefined) {
-      zodSchema = zodSchema.optional();
-    }
-
-    validatorObject[propertyName] = zodSchema;
-  }
-
-  return z.object(validatorObject);
-};
 
 interface WorkflowExecuteManualFormProps {
   definition: WorkflowYaml | null;

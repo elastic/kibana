@@ -23,6 +23,11 @@ import type {
   WorkflowExecutionEngineModel,
 } from '@kbn/workflows';
 import { WorkflowExecutionNotFoundError } from '@kbn/workflows/common/errors';
+import {
+  applyInputDefaults,
+  makeWorkflowInputsValidator,
+  normalizeInputsToJsonSchema,
+} from '@kbn/workflows/spec/lib/input_conversion';
 import { ConcurrencyManager } from './concurrency/concurrency_manager';
 import type { WorkflowsExecutionEngineConfig } from './config';
 import {
@@ -474,6 +479,32 @@ export class WorkflowsExecutionEnginePlugin
       workflowsExtensions: plugins.workflowsExtensions,
     };
 
+    const validateWorkflowInputs = (
+      workflow: WorkflowExecutionEngineModel,
+      context: Record<string, unknown>
+    ): void => {
+      const inputsDef = workflow.definition?.inputs;
+      if (!inputsDef) {
+        return;
+      }
+      const normalizedSchema = normalizeInputsToJsonSchema(inputsDef);
+      if (!normalizedSchema?.properties) {
+        return;
+      }
+      const providedInputs = context.inputs as Record<string, unknown> | undefined;
+      const inputsWithDefaults = applyInputDefaults(providedInputs, normalizedSchema);
+      const validator = makeWorkflowInputsValidator(inputsDef);
+      const result = validator.safeParse(inputsWithDefaults ?? {});
+      if (!result.success) {
+        const issues = result.error.issues
+          .map((issue) => `${issue.path.join('.')}: ${issue.message}`)
+          .join('; ');
+        throw new Error(
+          `Workflow input validation failed for workflow "${workflow.id}": ${issues}`
+        );
+      }
+    };
+
     // Helper function to create and persist a workflow execution
     const createAndPersistWorkflowExecution = async (
       workflow: WorkflowExecutionEngineModel,
@@ -557,6 +588,8 @@ export class WorkflowsExecutionEnginePlugin
       if (!isRunningInTaskManager && !request) {
         throw new Error('Workflows cannot be executed without the user context');
       }
+
+      validateWorkflowInputs(workflow, context);
 
       const { workflowExecution } = await createAndPersistWorkflowExecution(
         workflow,
