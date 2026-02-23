@@ -23,8 +23,7 @@ import type {
 import type { Observable } from 'rxjs';
 
 /** @internal */
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface InternalChromeSetup extends ChromeSetup {}
+export type InternalChromeSetup = ChromeSetup;
 
 /** @internal */
 export interface InternalChromeStart extends ChromeStart {

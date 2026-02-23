@@ -297,7 +297,7 @@
             "section": "def-common.AvailableAnnotationIcon",
             "text": "AvailableAnnotationIcon"
           },
-          "; label: string; icon?: string | React.ComponentClass<{}, any> | React.FunctionComponent<{}> | undefined; shouldRotate?: boolean | undefined; }[]"
+          "; label: string; icon?: string | React.ComponentType | undefined; shouldRotate?: boolean | undefined; }[]"
         ],
         "path": "src/platform/packages/shared/kbn-event-annotation-components/components/annotation_editor_controls/icon_set.ts",
         "lineNumber": 15,
@@ -350,7 +350,7 @@
         "void"
       ],
       "path": "src/platform/plugins/private/event_annotation_listing/public/plugin.ts",
-      "lineNumber": 41,
+      "lineNumber": 46,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,

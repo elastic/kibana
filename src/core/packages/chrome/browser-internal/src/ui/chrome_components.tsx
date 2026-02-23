@@ -149,7 +149,8 @@ export const createChromeComponents = ({
 
     return (
       <GridLayoutProjectSideNav
-        isCollapsed$={state.sideNav.collapsed.subject$}
+        isCollapsed$={state.sideNav.collapsed.$}
+        initialIsCollapsed={state.sideNav.collapsed.get()}
         navProps={navProps}
       />
     );

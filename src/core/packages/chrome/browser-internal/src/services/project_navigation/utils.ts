@@ -50,19 +50,12 @@ export const flattenNav = (
   return acc;
 };
 
-function trim(str: string) {
-  return (divider: string) => {
-    const position = str.indexOf(divider);
-
-    if (position !== -1) {
-      str = str.slice(0, position);
-    }
-
-    return str;
-  };
+function truncateAt(str: string, divider: string): string {
+  const position = str.indexOf(divider);
+  return position !== -1 ? str.slice(0, position) : str;
 }
 
-export const stripQueryParams = (url: string) => trim(url)('?');
+export const stripQueryParams = (url: string) => truncateAt(url, '?');
 
 /**
  * Extract the parent paths from a key
