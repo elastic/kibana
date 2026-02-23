@@ -107,14 +107,14 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
     });
 
     // Package-level vars, filtered by var_group visibility
+    // and hiding deprecated vars on new installations
     const { requiredVars, advancedVars } = useMemo(() => {
       const _requiredVars: RegistryVarsEntry[] = [];
       const _advancedVars: RegistryVarsEntry[] = [];
 
       if (packageInfo.vars) {
         packageInfo.vars.forEach((varDef) => {
-          // Skip vars handled by cloud connector (they render their own fields)
-          if (cloudConnectorVars.has(varDef.name)) {
+          if (cloudConnectorVars.has(varDef.name) || (!isEditPage && !!varDef.deprecated)) {
             return;
           }
 
@@ -136,7 +136,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
       }
 
       return { requiredVars: _requiredVars, advancedVars: _advancedVars };
-    }, [packageInfo.vars, varGroups, varGroupSelections, cloudConnectorVars]);
+    }, [packageInfo.vars, varGroups, varGroupSelections, cloudConnectorVars, isEditPage]);
 
     // Outputs
     const {
