@@ -5,6 +5,14 @@ Object {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "additionalProperties": false,
   "properties": Object {
+    "authMode": Object {
+      "enum": Array [
+        "shared",
+        "per-user",
+      ],
+      "hidden": true,
+      "type": "string",
+    },
     "config": Object {
       "additionalProperties": false,
       "properties": Object {

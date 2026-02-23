@@ -12,6 +12,7 @@ import { type ConnectorSpec } from '@kbn/connector-specs';
 import type { TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-actions-ui-plugin/public';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import { WorkflowsConnectorFeatureId } from '@kbn/actions-plugin/common';
+import { useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { getIcon } from './get_icon';
 import {
   createConnectorFormSerializer,
@@ -58,13 +59,37 @@ export function registerConnectorTypesFromSpecs({
   });
 }
 
+const createConnectorFields = (
+  spec: ConnectorSpec,
+  generateFormFields: typeof import('@kbn/response-ops-form-generator').generateFormFields,
+  generateSchema: typeof import('./generate_schema').generateSchema
+) => {
+  const ConnectorFields = (props: { readOnly: boolean; isEdit: boolean }) => {
+    const [formData] = useFormData();
+
+    const authType = formData?.secrets?.authType as string | undefined;
+
+    const dynamicSchema = generateSchema(spec, {
+      secrets: authType ? { authType } : undefined,
+      authMode: formData?.authMode,
+    });
+
+    return generateFormFields({
+      schema: dynamicSchema,
+      formConfig: { disabled: props.readOnly, isEdit: props.isEdit },
+    });
+  };
+
+  return ConnectorFields;
+};
+
 const createConnectorTypeFromSpec = (
   spec: ConnectorSpec,
   ref: { uiSettings?: IUiSettingsClient },
   generateFormFields: typeof import('@kbn/response-ops-form-generator').generateFormFields,
   generateSchema: typeof import('./generate_schema').generateSchema
 ): ActionTypeModel => {
-  const schema = generateSchema(spec);
+  const baseSchema = generateSchema(spec);
 
   return {
     id: spec.metadata.id,
@@ -85,19 +110,14 @@ const createConnectorTypeFromSpec = (
     },
     actionConnectorFields: lazy(() =>
       Promise.resolve({
-        default: (props) => {
-          return generateFormFields({
-            schema,
-            formConfig: { disabled: props.readOnly, isEdit: props.isEdit },
-          });
-        },
+        default: createConnectorFields(spec, generateFormFields, generateSchema),
       })
     ),
     actionParamsFields: lazy(() => Promise.resolve({ default: () => null })),
     validateParams: async () => ({ errors: {} }),
     connectorForm: {
       serializer: createConnectorFormSerializer(),
-      deserializer: createConnectorFormDeserializer(schema),
+      deserializer: createConnectorFormDeserializer(baseSchema),
     },
   };
 };

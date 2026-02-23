@@ -87,7 +87,7 @@ export type ConnectorFormSchema<
   UserConfiguredActionConnector<Config, Secrets>,
   'actionTypeId' | 'isDeprecated' | 'config' | 'secrets'
 > &
-  Partial<Pick<UserConfiguredActionConnector<Config, Secrets>, 'id' | 'name'>>;
+  Partial<Pick<UserConfiguredActionConnector<Config, Secrets>, 'id' | 'name' | 'authMode'>>;
 
 export type InternalConnectorForm = ConnectorFormSchema & {
   __internal__?: {

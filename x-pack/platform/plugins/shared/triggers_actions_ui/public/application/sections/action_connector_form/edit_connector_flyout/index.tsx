@@ -62,6 +62,7 @@ const getConnectorWithoutSecrets = (
   ...connector,
   isMissingSecrets: connector.isMissingSecrets ?? false,
   secrets: {},
+  authMode: connector.authMode,
 });
 
 const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({

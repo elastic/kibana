@@ -241,6 +241,88 @@ describe('Field Builder', () => {
 
       expect(result?.message).toContain('First validation failed');
     });
+
+    describe('optional field validation', () => {
+      it('should skip validation for optional field when value is undefined', () => {
+        const schema = z.enum(['a', 'b']).optional();
+        const path = 'field';
+
+        const field = getFieldFromSchema({ schema, path, formConfig });
+        const result = field.validate(createValidationArg(undefined, path));
+
+        expect(result).toBeUndefined();
+      });
+
+      it('should skip validation for optional field when value is null', () => {
+        const schema = z.enum(['a', 'b']).optional();
+        const path = 'field';
+
+        const field = getFieldFromSchema({ schema, path, formConfig });
+        const result = field.validate(createValidationArg(null, path));
+
+        expect(result).toBeUndefined();
+      });
+
+      it('should skip validation for optional field when value is empty string', () => {
+        const schema = z.enum(['a', 'b']).optional();
+        const path = 'field';
+
+        const field = getFieldFromSchema({ schema, path, formConfig });
+        const result = field.validate(createValidationArg('', path));
+
+        expect(result).toBeUndefined();
+      });
+
+      it('should still validate optional field when a non-empty value is provided', () => {
+        const schema = z.enum(['a', 'b']).optional();
+        const path = 'field';
+
+        const field = getFieldFromSchema({ schema, path, formConfig });
+        const result = field.validate(createValidationArg('invalid', path)) as ValidationError;
+
+        expect(result?.message).toContain('Invalid option: expected one of "a"|"b"');
+      });
+
+      it('should pass validation for optional field with a valid non-empty value', () => {
+        const schema = z.enum(['a', 'b']).optional();
+        const path = 'field';
+
+        const field = getFieldFromSchema({ schema, path, formConfig });
+        const result = field.validate(createValidationArg('a', path));
+
+        expect(result).toBeUndefined();
+      });
+
+      it('should not skip validation for required field when value is undefined', () => {
+        const schema = z.enum(['a', 'b']);
+        const path = 'field';
+
+        const field = getFieldFromSchema({ schema, path, formConfig });
+        const result = field.validate(createValidationArg(undefined, path)) as ValidationError;
+
+        expect(result?.message).toContain('Invalid option: expected one of "a"|"b"');
+      });
+
+      it('should not skip validation for optional field when value is 0', () => {
+        const schema = z.number().optional();
+        const path = 'field';
+
+        const field = getFieldFromSchema({ schema, path, formConfig });
+        const result = field.validate(createValidationArg(0, path));
+
+        expect(result).toBeUndefined();
+      });
+
+      it('should not skip validation for optional field when value is false', () => {
+        const schema = z.boolean().optional();
+        const path = 'field';
+
+        const field = getFieldFromSchema({ schema, path, formConfig });
+        const result = field.validate(createValidationArg(false, path));
+
+        expect(result).toBeUndefined();
+      });
+    });
   });
 
   describe('renderField', () => {

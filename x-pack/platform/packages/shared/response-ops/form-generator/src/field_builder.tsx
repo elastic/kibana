@@ -61,6 +61,10 @@ export const getFieldFromSchema = ({
     validate: (...args: Parameters<ValidationFunc>): ReturnType<ValidationFunc> => {
       const [{ value, path: formPath }] = args;
 
+      if (isOptional && (value === undefined || value === null || value === '')) {
+        return undefined;
+      }
+
       try {
         schema.parse(value);
         return undefined;

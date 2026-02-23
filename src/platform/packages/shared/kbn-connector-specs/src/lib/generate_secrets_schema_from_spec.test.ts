@@ -48,4 +48,64 @@ describe('generateSecretsSchemaFromSpec', () => {
     const schema = generateSecretsSchemaFromSpec({ types: [] });
     expect(z.toJSONSchema(schema)).toMatchSnapshot();
   });
+
+  test('filters out per-user auth types when authMode is shared', () => {
+    const schema = generateSecretsSchemaFromSpec(
+      {
+        types: ['basic', 'bearer', 'oauth_authorization_code'],
+      },
+      { isPfxEnabled: true, authMode: 'shared' }
+    );
+    const jsonSchema = z.toJSONSchema(schema) as {
+      anyOf?: Array<{ properties?: { authType?: { const?: string } } }>;
+    };
+
+    const anyOfOptions = jsonSchema.anyOf || [];
+    const authTypes = anyOfOptions
+      .map((opt) => opt.properties?.authType?.const)
+      .filter(Boolean) as string[];
+
+    expect(authTypes).toContain('basic');
+    expect(authTypes).toContain('bearer');
+    expect(authTypes).not.toContain('oauth_authorization_code');
+  });
+
+  test('filters out shared auth types when authMode is per-user', () => {
+    const schema = generateSecretsSchemaFromSpec(
+      {
+        types: ['basic', 'bearer', 'oauth_authorization_code'],
+      },
+      { isPfxEnabled: true, authMode: 'per-user' }
+    );
+    const jsonSchema = z.toJSONSchema(schema) as {
+      anyOf?: Array<{ properties?: { authType?: { const?: string } } }>;
+    };
+
+    const anyOfOptions = jsonSchema.anyOf || [];
+    const authTypes = anyOfOptions
+      .map((opt) => opt.properties?.authType?.const)
+      .filter(Boolean) as string[];
+
+    expect(authTypes).not.toContain('basic');
+    expect(authTypes).not.toContain('bearer');
+    expect(authTypes).toContain('oauth_authorization_code');
+  });
+
+  test('includes all auth types when authMode is not specified', () => {
+    const schema = generateSecretsSchemaFromSpec({
+      types: ['basic', 'bearer', 'oauth_authorization_code'],
+    });
+    const jsonSchema = z.toJSONSchema(schema) as {
+      anyOf?: Array<{ properties?: { authType?: { const?: string } } }>;
+    };
+
+    const anyOfOptions = jsonSchema.anyOf || [];
+    const authTypes = anyOfOptions
+      .map((opt) => opt.properties?.authType?.const)
+      .filter(Boolean) as string[];
+
+    expect(authTypes).toContain('basic');
+    expect(authTypes).toContain('bearer');
+    expect(authTypes).toContain('oauth_authorization_code');
+  });
 });
