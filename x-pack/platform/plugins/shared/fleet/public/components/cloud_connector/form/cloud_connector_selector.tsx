@@ -94,7 +94,7 @@ export const CloudConnectorSelector = ({
       } else if (isAzureCloudConnectorVars(connector.vars, provider)) {
         identifier = connector.vars.azure_credentials_cloud_connector_id?.value || '';
       } else if (isGcpCloudConnectorVars(connector.vars, provider)) {
-        identifier = connector.vars.gcp_credentials_cloud_connector_id?.value || '';
+        identifier = connector.vars.gcp_credentials_cloud_connector_id?.value?.id || '';
       }
 
       return {

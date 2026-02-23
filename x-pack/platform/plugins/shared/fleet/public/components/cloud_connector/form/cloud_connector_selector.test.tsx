@@ -324,12 +324,24 @@ describe('CloudConnectorSelector', () => {
         cloudProvider: 'gcp',
         accountType: SINGLE_ACCOUNT,
         vars: {
-          service_account: { value: 'test-service-account@project.iam.gserviceaccount.com' },
-          audience: {
-            value:
-              '//iam.googleapis.com/projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider',
+          service_account: {
+            value: {
+              isSecretRef: true,
+              id: 'test-service-account@project.iam.gserviceaccount.com',
+            },
+            type: 'password',
           },
-          gcp_credentials_cloud_connector_id: { value: 'gcp-connector-id-1' },
+          audience: {
+            value: {
+              isSecretRef: true,
+              id: '//iam.googleapis.com/projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider',
+            },
+            type: 'password',
+          },
+          gcp_credentials_cloud_connector_id: {
+            value: { isSecretRef: true, id: 'gcp-connector-id-1' },
+            type: 'password',
+          },
         },
         packagePolicyCount: 3,
         created_at: '2024-01-01T00:00:00Z',
@@ -341,12 +353,21 @@ describe('CloudConnectorSelector', () => {
         cloudProvider: 'gcp',
         accountType: ORGANIZATION_ACCOUNT,
         vars: {
-          service_account: { value: 'org-service-account@project.iam.gserviceaccount.com' },
-          audience: {
-            value:
-              '//iam.googleapis.com/projects/987654321/locations/global/workloadIdentityPools/org-pool/providers/org-provider',
+          service_account: {
+            value: { isSecretRef: true, id: 'org-service-account@project.iam.gserviceaccount.com' },
+            type: 'password',
           },
-          gcp_credentials_cloud_connector_id: { value: 'gcp-connector-id-2' },
+          audience: {
+            value: {
+              isSecretRef: true,
+              id: '//iam.googleapis.com/projects/987654321/locations/global/workloadIdentityPools/org-pool/providers/org-provider',
+            },
+            type: 'password',
+          },
+          gcp_credentials_cloud_connector_id: {
+            value: { isSecretRef: true, id: 'gcp-connector-id-2' },
+            type: 'password',
+          },
         },
         packagePolicyCount: 1,
         created_at: '2024-01-01T00:00:00Z',
@@ -402,10 +423,15 @@ describe('CloudConnectorSelector', () => {
       await user.click(screen.getByText('GCP Connector 1'));
 
       expect(mockSetCredentials).toHaveBeenCalledWith({
-        serviceAccount: 'test-service-account@project.iam.gserviceaccount.com',
-        audience:
-          '//iam.googleapis.com/projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider',
-        gcp_credentials_cloud_connector_id: 'gcp-connector-id-1',
+        serviceAccount: {
+          isSecretRef: true,
+          id: 'test-service-account@project.iam.gserviceaccount.com',
+        },
+        audience: {
+          isSecretRef: true,
+          id: '//iam.googleapis.com/projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider',
+        },
+        gcp_credentials_cloud_connector_id: { isSecretRef: true, id: 'gcp-connector-id-1' },
         cloudConnectorId: 'gcp-connector-1',
       });
     });

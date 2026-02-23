@@ -2037,7 +2037,7 @@ describe('CloudConnectorService', () => {
             created_at: '2023-01-01T00:00:00.000Z',
             updated_at: '2023-01-01T00:00:00.000Z',
           },
-        } as SavedObject<CloudConnector>;
+        } as unknown as SavedObject<CloudConnector>;
 
         // Mock the find call for duplicate name checking
         mockSoClient.find.mockResolvedValue({
@@ -2100,7 +2100,7 @@ describe('CloudConnectorService', () => {
             created_at: '2023-01-01T00:00:00.000Z',
             updated_at: '2023-01-01T00:00:00.000Z',
           },
-        } as SavedObject<CloudConnector>;
+        } as unknown as SavedObject<CloudConnector>;
 
         mockSoClient.create.mockResolvedValue(mockSavedObject);
 
@@ -2177,7 +2177,7 @@ describe('CloudConnectorService', () => {
             created_at: '2023-01-01T00:00:00.000Z',
             updated_at: '2023-01-01T00:00:00.000Z',
           },
-        } as SavedObject<CloudConnector>;
+        } as unknown as SavedObject<CloudConnector>;
 
         const updateRequest = {
           vars: {
@@ -2235,7 +2235,7 @@ describe('CloudConnectorService', () => {
             created_at: '2023-01-01T00:00:00.000Z',
             updated_at: '2023-01-01T00:00:00.000Z',
           },
-        } as SavedObject<CloudConnector>;
+        } as unknown as SavedObject<CloudConnector>;
 
         const invalidUpdateRequest = {
           vars: {
@@ -2338,23 +2338,30 @@ describe('CloudConnectorService', () => {
           cloudProvider: 'gcp',
           vars: {
             service_account: {
-              value: 'test-service-account@project.iam.gserviceaccount.com',
-              type: 'text',
+              value: {
+                isSecretRef: true,
+                id: 'test-service-account@project.iam.gserviceaccount.com',
+              },
+              type: 'password',
             },
             audience: {
-              value:
-                '//iam.googleapis.com/projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider',
-              type: 'text',
+              value: {
+                isSecretRef: true,
+                id: '//iam.googleapis.com/projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider',
+              },
+              type: 'password',
             },
             gcp_credentials_cloud_connector_id: {
-              value: 'gcp-connector-id',
-              type: 'text',
+              value: { isSecretRef: true, id: 'gcp-connector-id' },
+              type: 'password',
             },
           },
         };
 
         const mockSavedObject = {
           id: 'cloud-connector-123',
+          type: CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+          references: [],
           attributes: {
             name: 'gcp-test-connector',
             namespace: '*',
@@ -2364,7 +2371,7 @@ describe('CloudConnectorService', () => {
             created_at: '2023-01-01T00:00:00.000Z',
             updated_at: '2023-01-01T00:00:00.000Z',
           },
-        } as SavedObject<CloudConnector>;
+        } as unknown as SavedObject<CloudConnector>;
 
         // Mock the find call for duplicate name checking
         mockSoClient.find.mockResolvedValue({
@@ -2472,45 +2479,57 @@ describe('CloudConnectorService', () => {
       it('should update GCP cloud connector vars', async () => {
         const existingConnector = {
           id: 'cloud-connector-123',
+          type: CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+          references: [],
           attributes: {
             name: 'existing-gcp-connector',
             namespace: '*',
             cloudProvider: 'gcp',
             vars: {
               service_account: {
-                value: 'old-service-account@project.iam.gserviceaccount.com',
-                type: 'text',
+                value: {
+                  isSecretRef: true,
+                  id: 'old-service-account@project.iam.gserviceaccount.com',
+                },
+                type: 'password',
               },
               audience: {
-                value:
-                  '//iam.googleapis.com/projects/111111111/locations/global/workloadIdentityPools/old-pool/providers/old-provider',
-                type: 'text',
+                value: {
+                  isSecretRef: true,
+                  id: '//iam.googleapis.com/projects/111111111/locations/global/workloadIdentityPools/old-pool/providers/old-provider',
+                },
+                type: 'password',
               },
               gcp_credentials_cloud_connector_id: {
-                value: 'old-gcp-connector-id',
-                type: 'text',
+                value: { isSecretRef: true, id: 'old-gcp-connector-id' },
+                type: 'password',
               },
             },
             packagePolicyCount: 1,
             created_at: '2023-01-01T00:00:00.000Z',
             updated_at: '2023-01-01T00:00:00.000Z',
           },
-        } as SavedObject<CloudConnector>;
+        } as unknown as SavedObject<CloudConnector>;
 
         const updateRequest = {
           vars: {
             service_account: {
-              value: 'new-service-account@project.iam.gserviceaccount.com',
-              type: 'text',
+              value: {
+                isSecretRef: true,
+                id: 'new-service-account@project.iam.gserviceaccount.com',
+              },
+              type: 'password',
             },
             audience: {
-              value:
-                '//iam.googleapis.com/projects/222222222/locations/global/workloadIdentityPools/new-pool/providers/new-provider',
-              type: 'text',
+              value: {
+                isSecretRef: true,
+                id: '//iam.googleapis.com/projects/222222222/locations/global/workloadIdentityPools/new-pool/providers/new-provider',
+              },
+              type: 'password',
             },
             gcp_credentials_cloud_connector_id: {
-              value: 'new-gcp-connector-id',
-              type: 'text',
+              value: { isSecretRef: true, id: 'new-gcp-connector-id' },
+              type: 'password',
             },
           },
         } as Partial<UpdateCloudConnectorRequest>;
@@ -2544,30 +2563,37 @@ describe('CloudConnectorService', () => {
       it('should validate GCP vars on update', async () => {
         const existingConnector = {
           id: 'cloud-connector-123',
+          type: CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+          references: [],
           attributes: {
             name: 'existing-gcp-connector',
             namespace: '*',
             cloudProvider: 'gcp',
             vars: {
               service_account: {
-                value: 'old-service-account@project.iam.gserviceaccount.com',
-                type: 'text',
+                value: {
+                  isSecretRef: true,
+                  id: 'old-service-account@project.iam.gserviceaccount.com',
+                },
+                type: 'password',
               },
               audience: {
-                value:
-                  '//iam.googleapis.com/projects/111111111/locations/global/workloadIdentityPools/old-pool/providers/old-provider',
-                type: 'text',
+                value: {
+                  isSecretRef: true,
+                  id: '//iam.googleapis.com/projects/111111111/locations/global/workloadIdentityPools/old-pool/providers/old-provider',
+                },
+                type: 'password',
               },
               gcp_credentials_cloud_connector_id: {
-                value: 'old-gcp-connector-id',
-                type: 'text',
+                value: { isSecretRef: true, id: 'old-gcp-connector-id' },
+                type: 'password',
               },
             },
             packagePolicyCount: 1,
             created_at: '2023-01-01T00:00:00.000Z',
             updated_at: '2023-01-01T00:00:00.000Z',
           },
-        } as SavedObject<CloudConnector>;
+        } as unknown as SavedObject<CloudConnector>;
 
         const invalidUpdateRequest = {
           vars: {
@@ -2599,17 +2625,22 @@ describe('CloudConnectorService', () => {
           cloudProvider: 'gcp',
           vars: {
             service_account: {
-              value: 'test-service-account@project.iam.gserviceaccount.com',
-              type: 'text',
+              value: {
+                isSecretRef: true,
+                id: 'test-service-account@project.iam.gserviceaccount.com',
+              },
+              type: 'password',
             },
             audience: {
-              value:
-                '//iam.googleapis.com/projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider',
-              type: 'text',
+              value: {
+                isSecretRef: true,
+                id: '//iam.googleapis.com/projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider',
+              },
+              type: 'password',
             },
             gcp_credentials_cloud_connector_id: {
-              value: 'gcp-connector-id',
-              type: 'text',
+              value: { isSecretRef: true, id: 'gcp-connector-id' },
+              type: 'password',
             },
           },
         };

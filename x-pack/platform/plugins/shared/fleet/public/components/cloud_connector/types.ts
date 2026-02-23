@@ -45,9 +45,9 @@ export interface AzureCloudConnectorCredentials extends BaseCloudConnectorCreden
 }
 
 export interface GcpCloudConnectorCredentials extends BaseCloudConnectorCredentials {
-  serviceAccount?: string;
-  audience?: string;
-  gcp_credentials_cloud_connector_id?: string;
+  serviceAccount?: string | CloudConnectorSecretReference;
+  audience?: string | CloudConnectorSecretReference;
+  gcp_credentials_cloud_connector_id?: string | CloudConnectorSecretReference;
 }
 
 export type CloudConnectorCredentials =
@@ -98,9 +98,9 @@ export interface GcpCloudConnectorOption {
   label: string;
   value: string;
   id: string;
-  serviceAccount?: CloudConnectorVar;
-  audience?: CloudConnectorVar;
-  gcp_credentials_cloud_connector_id?: CloudConnectorVar;
+  serviceAccount?: CloudConnectorSecretVar;
+  audience?: CloudConnectorSecretVar;
+  gcp_credentials_cloud_connector_id?: CloudConnectorSecretVar;
 }
 
 export interface CloudConnectorFormProps {
