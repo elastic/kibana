@@ -24,6 +24,7 @@ Analyze this data stream and determine if an ingest pipeline is needed. Use an *
 
 ## Tools
 
+- **`get_stream_features(feature_types?, min_confidence?, limit?)`** - Fetches extracted stream features (e.g., log format, programming language, service info). Use this to understand the data better before designing processors. Available feature types: {{{available_feature_types}}}
 - **`simulate_pipeline(pipeline)`** - Runs your COMPLETE pipeline against the ORIGINAL raw documents. Returns errors and metrics. The dataset analysis below shows parsed output - but simulation starts from raw data, so include the parsing processor in your pipeline.
 - **`commit_pipeline(message)`** - Finalize when simulation passes.
 
@@ -55,9 +56,6 @@ Analyze this data stream and determine if an ingest pipeline is needed. Use an *
 ## Dataset: {{stream.name}}
 
 {{{stream.description}}}
-
-## Features
-{{{features}}}
 
 ---
 

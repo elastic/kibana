@@ -10,6 +10,7 @@ import { createPrompt } from '@kbn/inference-common';
 import { Streams } from '@kbn/streams-schema';
 import systemPromptTemplate from './system_prompt.text';
 import taskPromptTemplate from './task_prompt.text';
+import { suggestPipelineFeaturesTool, SUGGEST_PIPELINE_FEATURE_TOOL_TYPES } from './features_tool';
 
 export const SuggestIngestPipelinePrompt = createPrompt({
   name: 'suggest_ingest_pipeline_prompt',
@@ -20,7 +21,7 @@ export const SuggestIngestPipelinePrompt = createPrompt({
     fields_schema: z.string(),
     parsing_processor: z.string().optional(),
     initial_dataset_analysis: z.string(),
-    features: z.string(),
+    available_feature_types: z.string(),
   }),
 })
   .version({
@@ -35,6 +36,7 @@ export const SuggestIngestPipelinePrompt = createPrompt({
       },
     },
     tools: {
+      get_stream_features: suggestPipelineFeaturesTool,
       simulate_pipeline: {
         description:
           'Test your pipeline against sample data. Use this iteratively: simulate → read errors → fix → simulate again. Returns validation errors and simulation metrics. Keep calling until errors are resolved.',
@@ -69,3 +71,5 @@ export const SuggestIngestPipelinePrompt = createPrompt({
     } as const,
   })
   .get();
+
+export { SUGGEST_PIPELINE_FEATURE_TOOL_TYPES };

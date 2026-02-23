@@ -160,7 +160,6 @@ export const suggestProcessingPipelineRoute = createServerRoute({
             400
           );
         }
-        const { hits: features } = await featureClient.getFeatures(params.path.name, { type: [] });
 
         const abortController = new AbortController();
         let parsingProcessor: GrokProcessor | DissectProcessor | undefined;
@@ -262,7 +261,14 @@ export const suggestProcessingPipelineRoute = createServerRoute({
           documents: params.body.documents,
           esClient: scopedClusterClient.asCurrentUser,
           fieldsMetadataClient,
-          features,
+          getFeatures: async (query) => {
+            const { hits } = await featureClient.getFeatures(params.path.name, {
+              type: query?.type ?? [],
+              minConfidence: query?.minConfidence,
+              limit: query?.limit,
+            });
+            return hits;
+          },
           simulatePipeline: (pipeline: StreamlangDSL) =>
             simulateProcessing({
               params: {

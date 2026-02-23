@@ -5,30 +5,37 @@
  * 2.0.
  */
 
+import { COMPUTED_FEATURE_TYPES } from '@kbn/streams-schema/src/feature';
 import {
   createGetFeatureQueryFromToolArgs,
-  createGetFeatureTypesFromToolArgs,
   createGetStreamFeaturesTool,
   resolveFeatureTypeFilters,
   toFeatureForLlmContext,
-  type GetStreamFeaturesInput,
   type GetStreamFeaturesQuery,
   type LlmFeature,
 } from '../../src/features/tool';
 
-export const PARTITION_FEATURE_TOOL_TYPES = ['entity'] as const;
+export const SUGGEST_PIPELINE_FEATURE_TOOL_TYPES = [
+  'infrastructure',
+  'technology',
+  'dependency',
+  'entity',
+  'schema',
+  'log_format',
+  'programming_language',
+  'service',
+  ...COMPUTED_FEATURE_TYPES,
+] as const;
 
-export type PartitionFeatureToolType = (typeof PARTITION_FEATURE_TOOL_TYPES)[number];
-
-export const getFeatureTypesFromToolArgs = createGetFeatureTypesFromToolArgs(
-  PARTITION_FEATURE_TOOL_TYPES
-);
+export type SuggestPipelineFeatureToolType = (typeof SUGGEST_PIPELINE_FEATURE_TOOL_TYPES)[number];
 
 export const getFeatureQueryFromToolArgs = createGetFeatureQueryFromToolArgs(
-  PARTITION_FEATURE_TOOL_TYPES
+  SUGGEST_PIPELINE_FEATURE_TOOL_TYPES
 );
 
-export const partitionStreamFeaturesTool = createGetStreamFeaturesTool(PARTITION_FEATURE_TOOL_TYPES);
+export const suggestPipelineFeaturesTool = createGetStreamFeaturesTool(
+  SUGGEST_PIPELINE_FEATURE_TOOL_TYPES
+);
 
 export { resolveFeatureTypeFilters, toFeatureForLlmContext };
-export type { GetStreamFeaturesInput, GetStreamFeaturesQuery, LlmFeature };
+export type { GetStreamFeaturesQuery, LlmFeature };

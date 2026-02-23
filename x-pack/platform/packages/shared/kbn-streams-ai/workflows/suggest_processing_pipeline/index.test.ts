@@ -6,8 +6,13 @@
  */
 
 import type { ProcessingSimulationResponse, Feature } from '@kbn/streams-schema';
-import { omit } from 'lodash';
 import { getUniqueDocumentErrors } from '.';
+import {
+  toFeatureForLlmContext,
+  getFeatureQueryFromToolArgs,
+  resolveFeatureTypeFilters,
+  SUGGEST_PIPELINE_FEATURE_TOOL_TYPES,
+} from './features_tool';
 
 describe('getUniqueDocumentErrors', () => {
   it('returns empty array when no documents', () => {
@@ -396,11 +401,11 @@ describe('getUniqueDocumentErrors', () => {
 });
 
 /**
- * Tests for the feature serialization logic used in suggestProcessingPipeline.
+ * Tests for the feature tool utilities used in suggestProcessingPipeline.
  * The actual workflow function is tested through integration tests,
- * but this verifies the feature serialization pattern works correctly.
+ * but this verifies the feature serialization and tool argument parsing works correctly.
  */
-describe('suggestProcessingPipeline feature serialization', () => {
+describe('suggestProcessingPipeline features_tool', () => {
   const sampleFeatures: Feature[] = [
     {
       id: 'feature-1',
@@ -434,61 +439,29 @@ describe('suggestProcessingPipeline feature serialization', () => {
     },
   ];
 
-  it('should serialize features omitting id, status, last_seen, expires_at, evidence, and meta', () => {
-    // This mirrors the serialization pattern used in suggestProcessingPipeline:
-    // features: JSON.stringify(features.map((feature) => omit(feature, ['id', 'status', 'last_seen', 'expires_at', 'evidence', 'meta'])))
-    const serialized = JSON.stringify(
-      sampleFeatures.map((feature) =>
-        omit(feature, ['id', 'status', 'last_seen', 'expires_at', 'evidence', 'meta'])
-      )
-    );
+  describe('toFeatureForLlmContext', () => {
+    it('should pick only LLM-relevant fields from a feature', () => {
+      const result = toFeatureForLlmContext(sampleFeatures[0]);
 
-    const parsed = JSON.parse(serialized);
+      expect(result).toHaveProperty('type', 'programming_language');
+      expect(result).toHaveProperty('title', 'Python');
+      expect(result).toHaveProperty('description');
+      expect(result).toHaveProperty('confidence', 93);
+      expect(result).toHaveProperty('properties');
+      expect(result).toHaveProperty('evidence');
+      expect(result).toHaveProperty('tags');
+      expect(result).toHaveProperty('meta');
 
-    expect(parsed).toHaveLength(2);
+      expect(result).not.toHaveProperty('id');
+      expect(result).not.toHaveProperty('uuid');
+      expect(result).not.toHaveProperty('stream_name');
+      expect(result).not.toHaveProperty('status');
+      expect(result).not.toHaveProperty('last_seen');
+      expect(result).not.toHaveProperty('expires_at');
+    });
 
-    // Verify first feature - omitted fields should not be present
-    expect(parsed[0]).not.toHaveProperty('id');
-    expect(parsed[0]).not.toHaveProperty('status');
-    expect(parsed[0]).not.toHaveProperty('last_seen');
-    expect(parsed[0]).not.toHaveProperty('expires_at');
-    expect(parsed[0]).not.toHaveProperty('evidence');
-    expect(parsed[0]).not.toHaveProperty('meta');
-    // Essential semantic fields should be preserved
-    expect(parsed[0]).toHaveProperty('type', 'programming_language');
-    expect(parsed[0]).toHaveProperty('title', 'Python');
-    expect(parsed[0]).toHaveProperty('description');
-    expect(parsed[0]).toHaveProperty('properties');
-    expect(parsed[0]).toHaveProperty('confidence', 93);
-    expect(parsed[0]).toHaveProperty('tags');
-    expect(parsed[0]).toHaveProperty('stream_name', 'logs');
-    expect(parsed[0]).toHaveProperty('uuid', 'uuid-1');
-
-    // Verify second feature
-    expect(parsed[1]).not.toHaveProperty('id');
-    expect(parsed[1]).not.toHaveProperty('status');
-    expect(parsed[1]).not.toHaveProperty('last_seen');
-    expect(parsed[1]).not.toHaveProperty('expires_at');
-    expect(parsed[1]).not.toHaveProperty('evidence');
-    expect(parsed[1]).not.toHaveProperty('meta');
-    expect(parsed[1]).toHaveProperty('type', 'log_format');
-    expect(parsed[1]).toHaveProperty('title', 'JSON Structured');
-  });
-
-  it('should handle empty features array', () => {
-    const emptyFeatures: Feature[] = [];
-    const serialized = JSON.stringify(
-      emptyFeatures.map((feature) =>
-        omit(feature, ['id', 'status', 'last_seen', 'expires_at', 'evidence', 'meta'])
-      )
-    );
-
-    expect(serialized).toBe('[]');
-  });
-
-  it('should preserve nested properties objects but omit meta', () => {
-    const featureWithComplexProperties: Feature[] = [
-      {
+    it('should preserve nested properties objects', () => {
+      const featureWithComplexProperties: Feature = {
         id: 'feature-3',
         uuid: 'uuid-3',
         stream_name: 'logs',
@@ -508,73 +481,132 @@ describe('suggestProcessingPipeline feature serialization', () => {
         meta: { indices: ['logs', 'metrics'] },
         status: 'active',
         last_seen: '2024-01-15T00:00:00.000Z',
-      },
-    ];
+      };
 
-    const serialized = JSON.stringify(
-      featureWithComplexProperties.map((feature) =>
-        omit(feature, ['id', 'status', 'last_seen', 'expires_at', 'evidence', 'meta'])
-      )
-    );
+      const result = toFeatureForLlmContext(featureWithComplexProperties);
 
-    const parsed = JSON.parse(serialized);
-
-    expect(parsed[0].properties).toEqual({
-      version: '8.x',
-      config: {
-        cluster_name: 'production',
-        nodes: ['node-1', 'node-2'],
-      },
+      expect(result.properties).toEqual({
+        version: '8.x',
+        config: {
+          cluster_name: 'production',
+          nodes: ['node-1', 'node-2'],
+        },
+      });
     });
-    // meta should be omitted
-    expect(parsed[0]).not.toHaveProperty('meta');
-    expect(parsed[0]).not.toHaveProperty('evidence');
+
+    it('should result in valid JSON that can be embedded in tool responses', () => {
+      const llmFeatures = sampleFeatures.map(toFeatureForLlmContext);
+      const serialized = JSON.stringify(llmFeatures);
+
+      expect(() => JSON.parse(serialized)).not.toThrow();
+      expect(serialized).toContain('programming_language');
+      expect(serialized).toContain('Python');
+    });
   });
 
-  it('should produce JSON that can be used as prompt input', () => {
-    const serialized = JSON.stringify(
-      sampleFeatures.map((feature) =>
-        omit(feature, ['id', 'status', 'last_seen', 'expires_at', 'evidence', 'meta'])
-      )
-    );
+  describe('getFeatureQueryFromToolArgs', () => {
+    it('should parse valid tool arguments', () => {
+      const args = {
+        feature_types: ['programming_language', 'log_format'],
+        min_confidence: 80,
+        limit: 10,
+      };
 
-    // The serialized string should be valid JSON
-    expect(() => JSON.parse(serialized)).not.toThrow();
+      const result = getFeatureQueryFromToolArgs(args);
 
-    // The serialized string should be embeddable in a prompt template
-    const promptContent = `## Features\n${serialized}`;
-    expect(promptContent).toContain('## Features');
-    expect(promptContent).toContain('programming_language');
-    expect(promptContent).toContain('Python');
-    expect(promptContent).toContain('log_format');
-    expect(promptContent).toContain('JSON Structured');
+      expect(result.featureTypes).toEqual(['programming_language', 'log_format']);
+      expect(result.minConfidence).toBe(80);
+      expect(result.limit).toBe(10);
+    });
+
+    it('should handle empty/missing arguments', () => {
+      expect(getFeatureQueryFromToolArgs({})).toEqual({
+        featureTypes: undefined,
+        minConfidence: undefined,
+        limit: undefined,
+      });
+
+      expect(getFeatureQueryFromToolArgs(undefined)).toEqual({
+        featureTypes: undefined,
+        minConfidence: undefined,
+        limit: undefined,
+      });
+    });
+
+    it('should filter out invalid feature types', () => {
+      const args = {
+        feature_types: ['programming_language', 'invalid_type', 'service', 'another_invalid'],
+      };
+
+      const result = getFeatureQueryFromToolArgs(args);
+
+      expect(result.featureTypes).toEqual(['programming_language', 'service']);
+    });
+
+    it('should return undefined for feature_types when no valid types remain', () => {
+      const args = {
+        feature_types: ['invalid_type', 'another_invalid'],
+      };
+
+      const result = getFeatureQueryFromToolArgs(args);
+
+      expect(result.featureTypes).toBeUndefined();
+    });
+
+    it('should handle invalid min_confidence values', () => {
+      expect(getFeatureQueryFromToolArgs({ min_confidence: -10 }).minConfidence).toBeUndefined();
+      expect(getFeatureQueryFromToolArgs({ min_confidence: 150 }).minConfidence).toBeUndefined();
+      expect(getFeatureQueryFromToolArgs({ min_confidence: 'abc' }).minConfidence).toBeUndefined();
+      expect(getFeatureQueryFromToolArgs({ min_confidence: NaN }).minConfidence).toBeUndefined();
+    });
+
+    it('should handle invalid limit values', () => {
+      expect(getFeatureQueryFromToolArgs({ limit: 0 }).limit).toBeUndefined();
+      expect(getFeatureQueryFromToolArgs({ limit: -5 }).limit).toBeUndefined();
+      expect(getFeatureQueryFromToolArgs({ limit: 'abc' }).limit).toBeUndefined();
+      expect(getFeatureQueryFromToolArgs({ limit: NaN }).limit).toBeUndefined();
+    });
+
+    it('should floor decimal limit values', () => {
+      expect(getFeatureQueryFromToolArgs({ limit: 5.7 }).limit).toBe(5);
+      expect(getFeatureQueryFromToolArgs({ limit: 3.1 }).limit).toBe(3);
+    });
   });
 
-  it('should preserve all relevant fields for LLM context', () => {
-    const serialized = JSON.stringify(
-      sampleFeatures.map((feature) =>
-        omit(feature, ['id', 'status', 'last_seen', 'expires_at', 'evidence', 'meta'])
-      )
-    );
+  describe('resolveFeatureTypeFilters', () => {
+    it('should return undefined for empty or undefined input', () => {
+      expect(resolveFeatureTypeFilters(undefined)).toBeUndefined();
+      expect(resolveFeatureTypeFilters([])).toBeUndefined();
+    });
 
-    const parsed = JSON.parse(serialized);
+    it('should deduplicate feature types', () => {
+      const result = resolveFeatureTypeFilters(['programming_language', 'programming_language']);
+      expect(result).toEqual(['programming_language']);
+    });
 
-    // LLM needs these essential semantic fields to understand the context
-    for (const feature of parsed) {
-      // These fields help identify what the feature is
-      expect(feature).toHaveProperty('type');
-      expect(feature).toHaveProperty('title');
-      expect(feature).toHaveProperty('description');
+    it('should pass through valid feature types', () => {
+      const result = resolveFeatureTypeFilters(['service', 'log_format']);
+      expect(result).toEqual(['service', 'log_format']);
+    });
+  });
 
-      // These fields provide context for pipeline generation
-      expect(feature).toHaveProperty('properties');
-      expect(feature).toHaveProperty('confidence');
-      expect(feature).toHaveProperty('tags');
+  describe('SUGGEST_PIPELINE_FEATURE_TOOL_TYPES', () => {
+    it('should include all expected feature types for pipeline suggestion', () => {
+      expect(SUGGEST_PIPELINE_FEATURE_TOOL_TYPES).toContain('infrastructure');
+      expect(SUGGEST_PIPELINE_FEATURE_TOOL_TYPES).toContain('technology');
+      expect(SUGGEST_PIPELINE_FEATURE_TOOL_TYPES).toContain('dependency');
+      expect(SUGGEST_PIPELINE_FEATURE_TOOL_TYPES).toContain('entity');
+      expect(SUGGEST_PIPELINE_FEATURE_TOOL_TYPES).toContain('schema');
+      expect(SUGGEST_PIPELINE_FEATURE_TOOL_TYPES).toContain('log_format');
+      expect(SUGGEST_PIPELINE_FEATURE_TOOL_TYPES).toContain('programming_language');
+      expect(SUGGEST_PIPELINE_FEATURE_TOOL_TYPES).toContain('service');
+    });
 
-      // Internal/operational data should be omitted
-      expect(feature).not.toHaveProperty('evidence');
-      expect(feature).not.toHaveProperty('meta');
-      expect(feature).not.toHaveProperty('expires_at');
-    }
+    it('should include computed feature types', () => {
+      expect(SUGGEST_PIPELINE_FEATURE_TOOL_TYPES).toContain('dataset_analysis');
+      expect(SUGGEST_PIPELINE_FEATURE_TOOL_TYPES).toContain('log_samples');
+      expect(SUGGEST_PIPELINE_FEATURE_TOOL_TYPES).toContain('log_patterns');
+      expect(SUGGEST_PIPELINE_FEATURE_TOOL_TYPES).toContain('error_logs');
+    });
   });
 });
