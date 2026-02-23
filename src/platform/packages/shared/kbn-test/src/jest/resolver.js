@@ -64,9 +64,9 @@ module.exports = (request, options) => {
   }
 
   if (request === 'openpgp') {
-    // openpgp v6 Node CJS build uses createRequire(document.baseURI) when document exists,
-    // which fails in jsdom (produces http://localhost/openpgp.min.cjs). The wrapper temporarily
-    // hides document so the build takes the Node.js code path.
+    // openpgp v6 Node CJS build uses createRequire(document.baseURI) when document
+    // exists (jsdom), which fails. The wrapper patches the source to force Node.js
+    // code paths before compiling, without touching any globals.
     return Path.resolve(__dirname, 'openpgp_jest_resolver.js');
   }
 

@@ -7,19 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/* eslint-disable no-restricted-globals */
+const Module = require('module');
+const resolve = require('resolve');
 
-// openpgp v6 Node CJS build uses createRequire(document.baseURI) when document
-// exists (jsdom), producing an invalid http://localhost/openpgp.min.cjs URL.
-// Temporarily hide document so the build takes the Node.js path instead.
-const savedDocument = global.document;
-delete global.document;
+// openpgp v6 Node CJS build calls createRequire(document.baseURI) at load time
+// when document exists (jsdom). In jsdom, document.baseURI is "http://localhost",
+// producing an invalid URL for createRequire which only accepts file paths.
+// Temporarily override createRequire to handle HTTP URLs gracefully.
 
-// eslint-disable-next-line @kbn/imports/no_unresolvable_imports
-const openpgp = require('openpgp/dist/node/openpgp.min.cjs');
+const openpgpPath = resolve.sync('openpgp', { basedir: __dirname });
 
-if (savedDocument !== undefined) {
-  global.document = savedDocument;
-}
+const originalCreateRequire = Module.createRequire;
+Module.createRequire = function (filename) {
+  if (typeof filename === 'string' && filename.startsWith('http://')) {
+    return originalCreateRequire(__filename);
+  }
+  return originalCreateRequire.apply(this, arguments);
+};
 
-module.exports = openpgp;
+// eslint-disable-next-line import/no-dynamic-require
+module.exports = require(openpgpPath);
+
+Module.createRequire = originalCreateRequire;
