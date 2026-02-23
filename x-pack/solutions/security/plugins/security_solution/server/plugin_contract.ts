@@ -47,8 +47,8 @@ import type { ElasticAssistantPluginStart } from '@kbn/elastic-assistant-plugin/
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
 import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
-import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
-import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
+import type { WorkflowsServerPluginSetup, WorkflowsServerPluginStart } from '@kbn/workflows-management-plugin/server';
+import type { WorkflowsExtensionsServerPluginSetup, WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import type { ProductFeaturesService } from './lib/product_features_service/product_features_service';
 import type { ExperimentalFeatures } from '../common';
 
@@ -98,6 +98,8 @@ export interface SecuritySolutionPluginStartDependencies {
   actions: ActionsPluginStartContract;
   inference: InferenceServerStart;
   llmTasks?: LlmTasksPluginStart;
+  workflowsManagement?: WorkflowsServerPluginStart;
+  workflowsExtensions?: WorkflowsExtensionsServerPluginStart;
 }
 
 export interface SecuritySolutionPluginSetup {

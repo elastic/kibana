@@ -66,7 +66,7 @@ export class PreinstalledWorkflowsBootstrap {
   }
 
   /**
-   * Main bootstrap method - installs or updates all preinstalled workflows
+   * Main bootstrap method - installs or updates all preinstalled workflows.
    */
   public async bootstrap(): Promise<BootstrapResult> {
     this.logger.info(

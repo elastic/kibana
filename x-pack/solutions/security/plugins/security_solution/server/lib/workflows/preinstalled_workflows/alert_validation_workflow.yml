@@ -163,39 +163,267 @@ steps:
           # the distribution of close reasons (e.g. false_positive, resolved).
           # Looks back from the alert timestamp so results are relative to
           # when the alert actually fired, not when the workflow runs.
-          - name: get_close_history
-            type: security.getRuleAlertCloseHistory
+          - name: get_close_history_search
+            type: elasticsearch.search
             with:
-              ruleId: "{{event.rule.id}}"
-              timestamp: '{{foreach.item["@timestamp"]}}'
-              time_range: "30d"
+              index: ".alerts-security.alerts-*"
+              size: 0
+              track_total_hits: true
+              query:
+                bool:
+                  filter:
+                    - term:
+                        kibana.alert.rule.uuid: "{{event.rule.id}}"
+                    - term:
+                        kibana.alert.workflow_status: "closed"
+                    - range:
+                        "@timestamp":
+                          gte: '{{foreach.item["@timestamp"]}}||-30d'
+                          lte: '{{foreach.item["@timestamp"]}}'
+
+          - name: get_close_history_false_positive_count
+            type: elasticsearch.search
+            with:
+              index: ".alerts-security.alerts-*"
+              size: 0
+              track_total_hits: true
+              query:
+                bool:
+                  filter:
+                    - term:
+                        kibana.alert.rule.uuid: "{{event.rule.id}}"
+                    - term:
+                        kibana.alert.workflow_status: "closed"
+                    - range:
+                        "@timestamp":
+                          gte: '{{foreach.item["@timestamp"]}}||-30d'
+                          lte: '{{foreach.item["@timestamp"]}}'
+                    - bool:
+                        should:
+                          - term:
+                              kibana.alert.workflow_reason: "false_positive"
+                          - script:
+                              script:
+                                lang: painless
+                                source: |
+                                  if (!doc.containsKey('kibana.alert.workflow_tags') || doc['kibana.alert.workflow_tags'].empty) return false;
+                                  for (def tag : doc['kibana.alert.workflow_tags']) {
+                                    def normalized = tag.toLowerCase();
+                                    if (normalized.contains('false_positive') || normalized.contains('false-positive') || normalized.contains('fp')) {
+                                      return true;
+                                    }
+                                  }
+                                  return false;
+                        minimum_should_match: 1
+
+          - name: get_close_history_reasons_summary
+            type: elasticsearch.esql.query
+            with:
+              query: |-
+                FROM .alerts-security.alerts-*
+                | WHERE `kibana.alert.rule.uuid` == ?1 AND `kibana.alert.workflow_status` == "closed"
+                | EVAL close_reason = COALESCE(`kibana.alert.workflow_reason`, "unknown")
+                | STATS close_reason_count = COUNT(*) BY close_reason
+                | SORT close_reason_count DESC
+              params:
+                - "{{event.rule.id}}"
+              filter:
+                bool:
+                  filter:
+                    - range:
+                        "@timestamp":
+                          gte: '{{foreach.item["@timestamp"]}}||-30d'
+                          lte: '{{foreach.item["@timestamp"]}}'
+
+          - name: get_close_history
+            type: data.set
+            with:
+              total_closed_alerts: "{{ steps.get_close_history_search.output.hits.total.value | default: 0 }}"
+              false_positive_count: "{{ steps.get_close_history_false_positive_count.output.hits.total.value | default: 0 }}"
+              close_reasons_summary: "${{ steps.get_close_history_reasons_summary.output.values }}"
+              message: >-
+                Found {{ steps.get_close_history_search.output.hits.total.value | default: 0 }} closed alert{% if steps.get_close_history_search.output.hits.total.value != 1 %}s{% endif %}
+                for same rule in the last 30d.
+                {% if steps.get_close_history_false_positive_count.output.hits.total.value > 0 %}{{ steps.get_close_history_false_positive_count.output.hits.total.value }} were marked as false positive.{% endif %}
 
           # Global prevalence: total alert count, unique hosts, unique users,
           # and top-N hosts for this rule across the environment.
           # Uses the alert timestamp as the anchor so prevalence reflects
           # the state of the environment at the time the alert was raised.
-          - name: get_global_prevalence
-            type: security.getRuleGlobalPrevalence
+          - name: get_global_prevalence_stats
+            type: elasticsearch.esql.query
             with:
-              ruleId: "{{event.rule.id}}"
-              timestamp: '{{foreach.item["@timestamp"]}}'
-              time_range: "24h"
+              query: |-
+                FROM .alerts-security.alerts-*
+                | WHERE `kibana.alert.rule.uuid` == ?1
+                | STATS total_alerts = COUNT(*), unique_hosts = COUNT_DISTINCT(`host.name`), unique_users = COUNT_DISTINCT(`user.name`)
+              params:
+                - "{{event.rule.id}}"
+              filter:
+                bool:
+                  filter:
+                    - range:
+                        "@timestamp":
+                          gte: '{{foreach.item["@timestamp"]}}||-24h'
+                          lte: '{{foreach.item["@timestamp"]}}||+24h'
+
+          - name: get_global_prevalence_top_hosts
+            type: elasticsearch.esql.query
+            with:
+              query: |-
+                FROM .alerts-security.alerts-*
+                | WHERE `kibana.alert.rule.uuid` == ?1
+                | WHERE `host.name` IS NOT NULL
+                | STATS alert_count = COUNT(*) BY `host.name`
+                | SORT alert_count DESC
+                | LIMIT 10
+              params:
+                - "{{event.rule.id}}"
+              filter:
+                bool:
+                  filter:
+                    - range:
+                        "@timestamp":
+                          gte: '{{foreach.item["@timestamp"]}}||-24h'
+                          lte: '{{foreach.item["@timestamp"]}}||+24h'
+
+          - name: set_global_prevalence_values
+            type: data.set
+            with:
+              global_prevalence_total_alerts: "${{ steps.get_global_prevalence_stats.output.values[0][0] | default: 0 }}"
+              global_prevalence_unique_hosts: "${{ steps.get_global_prevalence_stats.output.values[0][1] | default: 0 }}"
+              global_prevalence_unique_users: "${{ steps.get_global_prevalence_stats.output.values[0][2] | default: 0 }}"
+              global_prevalence_top_hosts: "${{ steps.get_global_prevalence_top_hosts.output.values }}"
+
+          - name: get_global_prevalence
+            type: data.set
+            with:
+              total_alerts: "${{ variables.global_prevalence_total_alerts }}"
+              unique_hosts: "${{ variables.global_prevalence_unique_hosts }}"
+              unique_users: "${{ variables.global_prevalence_unique_users }}"
+              top_hosts: "${{ variables.global_prevalence_top_hosts }}"
+              message: >-
+                {% if variables.global_prevalence_unique_hosts >= 50 -%}
+                Very high prevalence: Rule is triggering across {{ variables.global_prevalence_unique_hosts }} unique hosts during +- 24h. This suggests widespread activity.
+                {% elsif variables.global_prevalence_unique_hosts >= 20 -%}
+                High prevalence: Rule is triggering across {{ variables.global_prevalence_unique_hosts }} unique hosts during +- 24h. This suggests significant spread.
+                {% elsif variables.global_prevalence_unique_hosts >= 5 -%}
+                Medium prevalence: Rule is triggering across {{ variables.global_prevalence_unique_hosts }} unique hosts during +- 24h.
+                {% else -%}
+                Low prevalence: Rule is triggering across {{ variables.global_prevalence_unique_hosts }} unique host(s) during +- 24h.
+                {% endif -%}
+
+          - name: get_noise_signal_stats
+            type: elasticsearch.esql.query
+            with:
+              query: |-
+                FROM .alerts-security.alerts-*
+                | WHERE `kibana.alert.rule.uuid` == ?1
+                | STATS total_alerts = COUNT(*), unique_hosts = COUNT_DISTINCT(`host.name`), unique_users = COUNT_DISTINCT(`user.name`)
+              params:
+                - "{{event.rule.id}}"
+              filter:
+                bool:
+                  filter:
+                    - range:
+                        "@timestamp":
+                          gte: '{{foreach.item["@timestamp"]}}||-7d'
+                          lte: '{{foreach.item["@timestamp"]}}||+7d'
+
+          - name: set_noise_signal_values
+            type: data.set
+            with:
+              noise_signal_total_alerts: "${{ steps.get_noise_signal_stats.output.values[0][0] | default: 0 }}"
+              noise_signal_unique_hosts: "${{ steps.get_noise_signal_stats.output.values[0][1] | default: 0 }}"
+              noise_signal_unique_users: "${{ steps.get_noise_signal_stats.output.values[0][2] | default: 0 }}"
 
           - name: get_noise_signal
-            type: security.getRuleGlobalPrevalence
+            type: data.set
             with:
-              ruleId: "{{event.rule.id}}"
-              timestamp: '{{foreach.item["@timestamp"]}}'
-              time_range: "7d"
+              total_alerts: "${{ variables.noise_signal_total_alerts }}"
+              unique_hosts: "${{ variables.noise_signal_unique_hosts }}"
+              unique_users: "${{ variables.noise_signal_unique_users }}"
+              message: >-
+                {% if variables.noise_signal_unique_hosts >= 50 -%}
+                Very high prevalence: Rule is triggering across {{ variables.noise_signal_unique_hosts }} unique hosts during +- 7d. This suggests widespread activity.
+                {% elsif variables.noise_signal_unique_hosts >= 20 -%}
+                High prevalence: Rule is triggering across {{ variables.noise_signal_unique_hosts }} unique hosts during +- 7d. This suggests significant spread.
+                {% elsif variables.noise_signal_unique_hosts >= 5 -%}
+                Medium prevalence: Rule is triggering across {{ variables.noise_signal_unique_hosts }} unique hosts during +- 7d.
+                {% else -%}
+                Low prevalence: Rule is triggering across {{ variables.noise_signal_unique_hosts }} unique host(s) during +- 7d.
+                {% endif -%}
 
           # Alert history: how many times the rule fired in a symmetric
           # window around the alert timestamp (past and future from that time),
           # with a date histogram of alerts over time.
           # Rule metadata: name, description, severity, MITRE ATT&CK mapping.
-          - name: get_rule_metadata
-            type: security.getRuleMetadata
+          - name: get_rule_metadata_source
+            type: elasticsearch.search
             with:
-              ruleId: "{{event.rule.id}}"
+              index: ".alerts-security.alerts-*"
+              size: 1
+              _source:
+                - "kibana.alert.rule.name"
+                - "kibana.alert.rule.rule_id"
+                - "kibana.alert.rule.uuid"
+                - "kibana.alert.rule.description"
+                - "kibana.alert.rule.category"
+                - "kibana.alert.rule.type"
+                - "kibana.alert.severity"
+                - "kibana.alert.rule.references"
+                - "kibana.alert.rule.threat"
+              query:
+                term:
+                  kibana.alert.rule.uuid: "{{event.rule.id}}"
+
+          - name: get_rule_metadata
+            type: data.set
+            with:
+              rule_id: "{{event.rule.id}}"
+              metadata:
+                rule_id: "{{event.rule.id}}"
+                rule_name: '{{ steps.get_rule_metadata_source.output.hits.hits[0]._source["kibana.alert.rule.name"] }}'
+                rule_uuid: '{{ steps.get_rule_metadata_source.output.hits.hits[0]._source["kibana.alert.rule.uuid"] }}'
+                rule_description: '{{ steps.get_rule_metadata_source.output.hits.hits[0]._source["kibana.alert.rule.description"] }}'
+                rule_category: '{{ steps.get_rule_metadata_source.output.hits.hits[0]._source["kibana.alert.rule.category"] }}'
+                rule_type: '{{ steps.get_rule_metadata_source.output.hits.hits[0]._source["kibana.alert.rule.type"] }}'
+                severity: '{{ steps.get_rule_metadata_source.output.hits.hits[0]._source["kibana.alert.severity"] }}'
+                references: '${{ steps.get_rule_metadata_source.output.hits.hits[0]._source["kibana.alert.rule.references"] }}'
+                threat_framework: '{{ steps.get_rule_metadata_source.output.hits.hits[0]._source["kibana.alert.rule.threat"][0].framework }}'
+                threats: '${{ steps.get_rule_metadata_source.output.hits.hits[0]._source["kibana.alert.rule.threat"] }}'
+              message: "Fetched latest rule metadata from recent alerts."
+              note: "Note: Exceptions are not included in alert data. To check for exceptions, query the rule directly from saved objects."
+
+          # Build a flat list of "Tactic > Technique" lines from all threats
+          - name: init_threat_technique_lines
+            type: data.set
+            with:
+              threat_technique_lines: []
+
+          - name: build_threat_technique_lines
+            type: foreach
+            foreach: '{{ steps.get_rule_metadata.output.metadata.threats | json }}'
+            steps:
+              - name: set_current_threat_tactic
+                type: data.set
+                with:
+                  current_threat_tactic_name: "{{ foreach.item.tactic.name }}"
+                  current_threat_tactic_id: "{{ foreach.item.tactic.id }}"
+
+              - name: build_techniques_for_tactic
+                type: foreach
+                foreach: '{{ foreach.item.technique | json }}'
+                steps:
+                  - name: set_threat_technique_line
+                    type: data.set
+                    with:
+                      threat_technique_line: "{{ variables.current_threat_tactic_name }} ({{ variables.current_threat_tactic_id }}) > {{ foreach.item.name }} ({{ foreach.item.id }})"
+
+                  - name: push_threat_technique_line
+                    type: data.set
+                    with:
+                      threat_technique_lines: "${{ variables.threat_technique_lines | push: variables.threat_technique_line }}"
 
           # Related alerts: builds a graph of alerts that share entity values
           # (host, user, process, IP, etc.) with the seed alert. Scores edges
@@ -305,15 +533,8 @@ steps:
           # alert history) and the raw alert as an attachment to the AI agent.
           # The agent returns a structured JSON object conforming to the schema
           # defined below.
-          - name: onechat_runAgent_step
-            type: ai.agent
-            agent-id: "elastic-ai-agent"
-            connector-id: gpt41Azure
-            create-conversation: true
-            on-failure:
-              retry:
-                max-attempts: 5
-                delay: "30s"
+          - name: build_agent_message
+            type: data.set
             with:
               message: |
                 <role>
@@ -370,7 +591,7 @@ steps:
                 {% if steps.get_global_prevalence.output.top_hosts and steps.get_global_prevalence.output.top_hosts.size > 0 -%}
                 ##### Top Hosts
                 {%- for host in steps.get_global_prevalence.output.top_hosts %}
-                - {{ host.host_name }}: {{host.alert_count}} alerts
+                - {{ host[1] }}: {{host[0]}} alerts
                 {%- endfor %}
                 {%- endif %}
 
@@ -383,7 +604,6 @@ steps:
 
                 ### Related Alerts
                 Graph nodes: {{steps.get_related_alerts.output.stats.nodes}}
-
                 Graph edges: {{steps.get_related_alerts.output.stats.edges}}
 
                 {% if variables.related_alert_lines and variables.related_alert_lines.size > 0 -%}
@@ -391,7 +611,6 @@ steps:
                 - {{ line }}
                 {%- endfor %}
                 {%- endif %}
-
                 ### Rule: {{steps.get_rule_metadata.output.metadata.rule_name}}
                 {{steps.get_rule_metadata.output.metadata.rule_description}}
                 {% capture metadata %}
@@ -408,13 +627,14 @@ steps:
                 UUID: {{ steps.get_rule_metadata.output.metadata.rule_uuid }}
                 {%- endif %}
                 {% if steps.get_rule_metadata.output.metadata.threat_framework -%}
+
                 Threat framework: {{ steps.get_rule_metadata.output.metadata.threat_framework }}
                 {%- endif %}
-                {% if steps.get_rule_metadata.output.metadata.threat_tactic and steps.get_rule_metadata.output.metadata.threat_tactic.name -%}
-                Tactic: {{ steps.get_rule_metadata.output.metadata.threat_tactic.name }}
-                {%- endif %}
-                {% if steps.get_rule_metadata.output.metadata.threat_technique and steps.get_rule_metadata.output.metadata.threat_technique.name -%}
-                Technique: {{ steps.get_rule_metadata.output.metadata.threat_technique.name }}
+                {% if variables.threat_technique_lines and variables.threat_technique_lines.size > 0 -%}
+                ##### Threat Mapping
+                {%- for line in variables.threat_technique_lines limit: 5 %}
+                - {{ line }}
+                {%- endfor %}
                 {%- endif %}
                 {% endcapture %}
                 {{ metadata | strip }}
@@ -428,10 +648,21 @@ steps:
                 {% if steps.get_close_history.output.close_reasons_summary and steps.get_close_history.output.total_closed_alerts > 0 -%}
                 ##### Close Reasons
                 {% for reason in steps.get_close_history.output.close_reasons_summary -%}
-                - {{ reason[0] }}: {{ reason[1] }}
+                - {{ reason[1] }}: {{ reason[0] }}
                 {% endfor %}
-                {%- endif %}
+                {%- endif %} 
 
+          - name: onechat_runAgent_step
+            type: ai.agent
+            agent-id: "elastic-ai-agent"
+            connector-id: gpt41Azure
+            create-conversation: true
+            on-failure:
+              retry:
+                max-attempts: 5
+                delay: "30s"
+            with:
+              message: "{{ steps.build_agent_message.output.message }}"
               attachments:
                 - type: "security.alert"
                   data:
