@@ -65,7 +65,6 @@ export class GenAiSettingsPlugin
         title: i18n.translate('genAiSettings.managementSectionLabel', {
           defaultMessage: 'GenAI Settings',
         }),
-        euiIconType: 'sparkles',
         order: 1,
         keywords: ['ai', 'generative', 'settings', 'configuration'],
 
