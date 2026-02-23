@@ -7,7 +7,8 @@
 
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ChatCompleteOptions, AnonymizationRule } from '@kbn/inference-common';
+import type { ChatCompleteOptions, AnonymizationRule, ChatCompleteAnonymizationTarget } from '@kbn/inference-common';
+import type { EffectivePolicy } from '@kbn/anonymization-common';
 import {
   createInferenceRequestError,
   getConnectorFamily,
@@ -41,6 +42,7 @@ import { ReplacementsRepository } from './anonymization/replacements/replacement
 
 interface CreateChatCompleteApiOptions {
   request: KibanaRequest;
+  namespace: string;
   actions: ActionsPluginStart;
   logger: Logger;
   anonymizationRulesPromise: Promise<AnonymizationRule[]>;
@@ -48,6 +50,10 @@ interface CreateChatCompleteApiOptions {
   esClient: ElasticsearchClient;
   replacementsEncryptionKey?: string;
   callbackManager?: InferenceCallbackManager;
+  saltPromise?: Promise<string | undefined>;
+  resolveEffectivePolicy?: (
+    target?: ChatCompleteAnonymizationTarget
+  ) => Promise<EffectivePolicy | undefined>;
 }
 
 type CreateChatCompleteApiOptionsKey =
@@ -77,6 +83,7 @@ export function createChatCompleteCallbackApi(
 
 export function createChatCompleteCallbackApi({
   request,
+  namespace,
   actions,
   logger,
   anonymizationRulesPromise,
@@ -130,7 +137,6 @@ export function createChatCompleteCallbackApi({
           return from(
             (async () => {
               const replacementsId = metadata?.anonymization?.replacementsId;
-              const namespace = request.getSavedObjectsClient().getCurrentNamespace() ?? 'default';
               const repo = new ReplacementsRepository(esClient, {
                 encryptionKey: replacementsEncryptionKey,
               });

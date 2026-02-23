@@ -149,6 +149,21 @@ export class AnonymizationPlugin
         return [];
       }
     };
+    const alertsDataViewExists = async (namespace: string): Promise<boolean> => {
+      const client = core.savedObjects
+        .getUnsafeInternalClient()
+        .asScopedToNamespace(namespace);
+      try {
+        await client.get('index-pattern', getAlertsDataViewTargetId(namespace));
+        return true;
+      } catch (err) {
+        if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
+          return false;
+        }
+        throw err;
+      }
+    };
+
     // Ensure a default alerts data view profile exists in the default space at startup.
     void (async () => {
       try {
@@ -158,6 +173,7 @@ export class AnonymizationPlugin
           profilesRepo,
           saltService,
           logger: this.logger,
+          checkDataViewExists: () => alertsDataViewExists('default'),
         });
       } catch (err) {
         this.logger.error(
@@ -179,6 +195,7 @@ export class AnonymizationPlugin
             profilesRepo,
             saltService,
             logger: this.logger,
+            checkDataViewExists: () => alertsDataViewExists(namespace),
           });
         }
 

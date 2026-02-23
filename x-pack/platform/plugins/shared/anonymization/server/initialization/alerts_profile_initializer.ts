@@ -10,13 +10,15 @@ import type { ProfilesRepository } from '../repository';
 import type { SaltService } from '../salt';
 import { getDefaultAlertFieldRules } from './default_field_rules';
 
-/** Well-known target ID for the alerts data view profile (space-aware). */
-export const getAlertsDataViewTargetId = (namespace: string) => `security-solution-${namespace}`;
+export const getAlertsDataViewTargetId = (namespace: string) =>
+  `security-solution-alert-${namespace}`;
 export const ALERTS_DATA_VIEW_TARGET_TYPE = 'data_view' as const;
 
 /**
  * Ensures the out-of-the-box alerts data view anonymization profile exists
  * in the given space. Idempotent: if the profile already exists, this is a no-op.
+ * If the alerts data view does not yet exist, this is a no-op; the lazy path in
+ * `resolveEffectivePolicy` will create the profile once the data view is present.
  *
  * Called:
  * - Automatically on startup when Security Solution is available in a space
@@ -27,13 +29,23 @@ export const ensureAlertsDataViewProfile = async ({
   profilesRepo,
   saltService,
   logger,
+  checkDataViewExists,
 }: {
   namespace: string;
   profilesRepo: ProfilesRepository;
   saltService: SaltService;
   logger: Logger;
+  checkDataViewExists: () => Promise<boolean>;
 }): Promise<void> => {
   try {
+    const dataViewExists = await checkDataViewExists();
+    if (!dataViewExists) {
+      logger.debug(
+        `Alerts data view not yet created in space: ${namespace}, skipping profile initialization`
+      );
+      return;
+    }
+
     const targetId = getAlertsDataViewTargetId(namespace);
 
     // Check if the profile already exists (do not overwrite)
@@ -44,7 +56,9 @@ export const ensureAlertsDataViewProfile = async ({
     );
 
     if (existing) {
-      logger.debug(`Alerts data view anonymization profile already exists in space: ${namespace}`);
+      logger.debug(
+        `Security alerts data view anonymization profile already exists in space: ${namespace}`
+      );
     } else {
       // Ensure salt exists for this space
       await saltService.getSalt(namespace);
@@ -52,8 +66,8 @@ export const ensureAlertsDataViewProfile = async ({
 
       // Create the default profile
       await profilesRepo.create({
-        name: 'Security Default Anonymization Profile',
-        description: 'Default allow/anonymize/deny rules for SOC workflows',
+        name: 'Security Alerts Anonymization Profile',
+        description: 'Security Alerts data view allow/anonymize/deny rules for SOC workflows',
         targetType: ALERTS_DATA_VIEW_TARGET_TYPE,
         targetId,
         rules: {
@@ -66,18 +80,18 @@ export const ensureAlertsDataViewProfile = async ({
         createdBy: 'system',
       });
 
-      logger.info(`Created alerts data view anonymization profile in space: ${namespace}`);
+      logger.info(`Created security alerts data view anonymization profile in space: ${namespace}`);
     }
   } catch (err) {
     // If another node created it concurrently, that's fine
     if ((err as any).statusCode === 409) {
       logger.debug(
-        `Alerts data view anonymization profile already exists in space: ${namespace} (concurrent creation)`
+        `Security alerts data view anonymization profile already exists in space: ${namespace} (concurrent creation)`
       );
       return;
     }
     logger.error(
-      `Failed to initialize alerts data view anonymization profile in space ${namespace}: ${err.message}`
+      `Failed to initialize security alerts data view anonymization profile in space ${namespace}: ${err.message}`
     );
   }
 };

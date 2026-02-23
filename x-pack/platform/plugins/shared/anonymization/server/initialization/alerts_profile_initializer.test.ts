@@ -26,8 +26,11 @@ describe('ensureAlertsDataViewProfile', () => {
     getSalt: jest.fn().mockResolvedValue('test-salt'),
   } as unknown as jest.Mocked<SaltService>;
 
+  const checkDataViewExists = jest.fn().mockResolvedValue(true);
+
   beforeEach(() => {
     jest.clearAllMocks();
+    checkDataViewExists.mockResolvedValue(true);
   });
 
   it('creates a profile when none exists', async () => {
@@ -39,6 +42,7 @@ describe('ensureAlertsDataViewProfile', () => {
       profilesRepo: mockProfilesRepo,
       saltService: mockSaltService,
       logger,
+      checkDataViewExists,
     });
 
     expect(mockProfilesRepo.create).toHaveBeenCalledWith(
@@ -60,8 +64,24 @@ describe('ensureAlertsDataViewProfile', () => {
       profilesRepo: mockProfilesRepo,
       saltService: mockSaltService,
       logger,
+      checkDataViewExists,
     });
 
+    expect(mockProfilesRepo.create).not.toHaveBeenCalled();
+  });
+
+  it('does not create a profile when the alerts data view does not exist', async () => {
+    checkDataViewExists.mockResolvedValue(false);
+
+    await ensureAlertsDataViewProfile({
+      namespace: 'default',
+      profilesRepo: mockProfilesRepo,
+      saltService: mockSaltService,
+      logger,
+      checkDataViewExists,
+    });
+
+    expect(mockProfilesRepo.findByTarget).not.toHaveBeenCalled();
     expect(mockProfilesRepo.create).not.toHaveBeenCalled();
   });
 
@@ -77,6 +97,7 @@ describe('ensureAlertsDataViewProfile', () => {
         profilesRepo: mockProfilesRepo,
         saltService: mockSaltService,
         logger,
+        checkDataViewExists,
       })
     ).resolves.toBeUndefined();
   });

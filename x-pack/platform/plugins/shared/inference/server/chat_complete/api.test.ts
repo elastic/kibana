@@ -49,6 +49,7 @@ describe('createChatCompleteApi', () => {
     regexWorker = createRegexWorkerServiceMock();
     const callbackApi = createChatCompleteCallbackApi({
       request,
+      namespace: 'default',
       actions,
       logger,
       anonymizationRulesPromise: Promise.resolve([]),

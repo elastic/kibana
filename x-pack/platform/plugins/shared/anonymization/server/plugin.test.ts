@@ -19,7 +19,7 @@ jest.mock('./system_index', () => ({
 
 jest.mock('./initialization', () => ({
   ALERTS_DATA_VIEW_TARGET_TYPE: 'data_view',
-  getAlertsDataViewTargetId: (namespace: string) => `security-solution-${namespace}`,
+  getAlertsDataViewTargetId: (namespace: string) => `security-solution-alert-${namespace}`,
   ensureAlertsDataViewProfile: jest.fn().mockResolvedValue(undefined),
 }));
 
@@ -72,8 +72,10 @@ describe('AnonymizationPlugin policy resolution', () => {
         },
       },
     });
+    const get = jest.fn().mockResolvedValue({ id: 'security-solution-alert-default' });
     const asScopedToNamespace = jest.fn().mockReturnValue({
       resolve,
+      get,
     });
     coreStart.savedObjects.getUnsafeInternalClient = jest.fn().mockReturnValue({
       asScopedToNamespace,
@@ -146,8 +148,10 @@ describe('AnonymizationPlugin policy resolution', () => {
       'my-data-view'
     );
     const resolve = jest.fn().mockRejectedValue(notFoundError);
+    const get = jest.fn().mockResolvedValue({ id: 'security-solution-alert-default' });
     const asScopedToNamespace = jest.fn().mockReturnValue({
       resolve,
+      get,
     });
     coreStart.savedObjects.getUnsafeInternalClient = jest.fn().mockReturnValue({
       asScopedToNamespace,

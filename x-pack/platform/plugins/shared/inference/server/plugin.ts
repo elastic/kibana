@@ -93,8 +93,11 @@ export class InferencePlugin
 
     return {
       getClient: <T extends InferenceClientCreateOptions>(options: T) => {
+        const namespace =
+          core.savedObjects.getScopedClient(options.request).getCurrentNamespace() ?? 'default';
         return createInferenceClient({
           ...options,
+          namespace,
           anonymizationRulesPromise: createAnonymizationRulesPromise(options.request),
           regexWorker: this.regexWorker!,
           actions: pluginsStart.actions,

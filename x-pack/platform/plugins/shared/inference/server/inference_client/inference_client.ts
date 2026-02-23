@@ -28,6 +28,7 @@ import { createCallbackManager } from './callback_manager';
 
 export function createInferenceClient({
   request,
+  namespace,
   actions,
   logger,
   anonymizationRulesPromise,
@@ -39,6 +40,7 @@ export function createInferenceClient({
   replacementsEncryptionKey,
 }: {
   request: KibanaRequest;
+  namespace: string;
   logger: Logger;
   actions: ActionsPluginStart;
   anonymizationRulesPromise: Promise<AnonymizationRule[]>;
@@ -55,6 +57,7 @@ export function createInferenceClient({
 
   const callbackApi = createChatCompleteCallbackApi({
     request,
+    namespace,
     actions,
     logger,
     anonymizationRulesPromise,
