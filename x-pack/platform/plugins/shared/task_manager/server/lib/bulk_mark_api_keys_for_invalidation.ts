@@ -20,6 +20,20 @@ export interface BulkMarkApiKeysForInvalidationOpts {
   savedObjectsClient: SavedObjectsClientContract;
 }
 
+/**
+ * Extracts the API key value (secret) from an encoded "id:value" string.
+ * uiamApiKey is base64-encoded "id:uiamApiKeyValue"; we store only the value part.
+ */
+function getUiamApiKeyValueOnly(encodedUiamApiKey: string): string | undefined {
+  try {
+    const decoded = Buffer.from(encodedUiamApiKey, 'base64').toString();
+    const colonIndex = decoded.indexOf(':');
+    return colonIndex === -1 ? undefined : decoded.slice(colonIndex + 1);
+  } catch {
+    return undefined;
+  }
+}
+
 export const bulkMarkApiKeysForInvalidation = async (opts: BulkMarkApiKeysForInvalidationOpts) => {
   const { apiKeysToInvalidate, logger, savedObjectsClient } = opts;
   if (apiKeysToInvalidate.length === 0) {
@@ -28,14 +42,18 @@ export const bulkMarkApiKeysForInvalidation = async (opts: BulkMarkApiKeysForInv
 
   try {
     await savedObjectsClient.bulkCreate(
-      apiKeysToInvalidate.map(({ apiKeyId, uiamApiKey }) => ({
-        attributes: {
-          apiKeyId,
-          createdAt: new Date().toISOString(),
-          ...(uiamApiKey ? { uiamApiKey } : {}),
-        },
-        type: INVALIDATE_API_KEY_SO_NAME,
-      }))
+      apiKeysToInvalidate.map(({ apiKeyId, uiamApiKey }) => {
+        const uiamApiKeyValue =
+          uiamApiKey !== undefined ? getUiamApiKeyValueOnly(uiamApiKey) : undefined;
+        return {
+          attributes: {
+            apiKeyId,
+            createdAt: new Date().toISOString(),
+            ...(uiamApiKeyValue !== undefined ? { uiamApiKey: uiamApiKeyValue } : {}),
+          },
+          type: INVALIDATE_API_KEY_SO_NAME,
+        };
+      })
     );
   } catch (e) {
     logger.error(

@@ -68,4 +68,63 @@ describe('bulkMarkApiKeysForInvalidation', () => {
 
     expect(unsecuredSavedObjectsClient.bulkCreate).not.toHaveBeenCalled();
   });
+
+  test('should pass only uiamApiKeyValue (after colon) to bulkCreate when uiamApiKey is provided', async () => {
+    const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
+    unsecuredSavedObjectsClient.bulkCreate.mockResolvedValueOnce({ saved_objects: [] });
+
+    const encodedIdAndValue = Buffer.from('uiamKeyId:uiamKeySecret').toString('base64');
+
+    await bulkMarkApiKeysForInvalidation({
+      apiKeysToInvalidate: [{ apiKeyId: 'uiamKeyId', uiamApiKey: encodedIdAndValue }],
+      logger,
+      savedObjectsClient: unsecuredSavedObjectsClient,
+    });
+
+    const savedObjects = unsecuredSavedObjectsClient.bulkCreate.mock.calls[0][0] as Array<{
+      attributes: Record<string, unknown>;
+    }>;
+    expect(savedObjects).toHaveLength(1);
+    expect(savedObjects[0].attributes).toMatchObject({
+      apiKeyId: 'uiamKeyId',
+      uiamApiKey: 'uiamKeySecret',
+    });
+    expect(savedObjects[0].attributes.createdAt).toBeDefined();
+  });
+
+  test('should not add uiamApiKey to attributes when only apiKeyId is provided', async () => {
+    const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
+    unsecuredSavedObjectsClient.bulkCreate.mockResolvedValueOnce({ saved_objects: [] });
+
+    await bulkMarkApiKeysForInvalidation({
+      apiKeysToInvalidate: [{ apiKeyId: '123' }],
+      logger,
+      savedObjectsClient: unsecuredSavedObjectsClient,
+    });
+
+    const savedObjects = unsecuredSavedObjectsClient.bulkCreate.mock.calls[0][0] as Array<{
+      attributes: Record<string, unknown>;
+    }>;
+    expect(savedObjects[0].attributes).not.toHaveProperty('uiamApiKey');
+    expect(savedObjects[0].attributes).toMatchObject({ apiKeyId: '123' });
+  });
+
+  test('should not add uiamApiKey to attributes when encoded value has no colon', async () => {
+    const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
+    unsecuredSavedObjectsClient.bulkCreate.mockResolvedValueOnce({ saved_objects: [] });
+
+    const invalidEncoded = Buffer.from('no-colon-here').toString('base64');
+
+    await bulkMarkApiKeysForInvalidation({
+      apiKeysToInvalidate: [{ apiKeyId: 'id1', uiamApiKey: invalidEncoded }],
+      logger,
+      savedObjectsClient: unsecuredSavedObjectsClient,
+    });
+
+    const savedObjects = unsecuredSavedObjectsClient.bulkCreate.mock.calls[0][0] as Array<{
+      attributes: Record<string, unknown>;
+    }>;
+    expect(savedObjects[0].attributes).not.toHaveProperty('uiamApiKey');
+    expect(savedObjects[0].attributes).toMatchObject({ apiKeyId: 'id1' });
+  });
 });
