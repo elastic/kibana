@@ -17,3 +17,8 @@ export const GroupBySelectableContainer = ({ euiTheme }: UseEuiTheme) =>
   css({
     width: `${euiTheme.base * 10}px`,
   });
+
+export const ServiceIcon = ({ euiTheme }: UseEuiTheme) =>
+  css({
+    marginRight: euiTheme.size.s,
+  });

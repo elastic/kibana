@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { SERVICE_PROVIDERS, ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
 
 import { GroupByOptions, type GroupedInferenceEndpointsData } from '../../../types';
+import { ServiceIcon } from '../styles';
 
 function isServiceProviderKeys(groupId: string): groupId is ServiceProviderKeys {
   return groupId in ServiceProviderKeys;
@@ -41,7 +42,7 @@ export const GroupByIcon = ({ groupBy, data }: GroupByIconProps) => {
         )}
         data-test-subj={`group-by-service-provider-icon-${data.groupId}`}
         type={provider.icon}
-        style={{ marginRight: '8px' }}
+        css={ServiceIcon}
       />
     </EuiFlexItem>
   );
