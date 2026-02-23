@@ -27,6 +27,7 @@ export const euid = {
   getEuidPainlessEvaluation: euidModule.getEuidPainlessEvaluation,
   getEuidPainlessRuntimeMapping: euidModule.getEuidPainlessRuntimeMapping,
   getEuidDslFilterBasedOnDocument: euidModule.getEuidDslFilterBasedOnDocument,
+  getEuidDslDocumentsContainsIdFilter: euidModule.getEuidDslDocumentsContainsIdFilter,
   getEuidEsqlDocumentsContainsIdFilter: euidModule.getEuidEsqlDocumentsContainsIdFilter,
   getEuidEsqlEvaluation: euidModule.getEuidEsqlEvaluation,
   getEuidEsqlFilterBasedOnDocument: euidModule.getEuidEsqlFilterBasedOnDocument,
@@ -35,6 +36,7 @@ export const euid = {
 
 export type { EntityType } from './domain/definitions/entity_schema';
 export type { IdentitySourceFields } from './domain/euid';
+export { ALL_ENTITY_TYPES } from './domain/definitions/entity_schema';
 
 export type EntityStoreStatus = z.infer<typeof EntityStoreStatus>;
 export const EntityStoreStatus = z.enum([
