@@ -15,7 +15,7 @@ import { kibanaPackageJson } from '@kbn/repo-info';
 
 import type { Logger } from '@kbn/core/server';
 import { AgentManager, ClusterClient } from '@kbn/core-elasticsearch-client-server-internal';
-import { configSchema } from '@kbn/core-elasticsearch-server-internal';
+import { configSchema, getRequestHandlerFactory } from '@kbn/core-elasticsearch-server-internal';
 import { ElasticsearchService } from '@kbn/interactive-setup-plugin/server/elasticsearch_service';
 import { KibanaConfigWriter } from '@kbn/interactive-setup-plugin/server/kibana_config_writer';
 import type { EnrollmentToken } from '@kbn/interactive-setup-plugin/common';
@@ -54,6 +54,8 @@ export const elasticsearch = new ElasticsearchService(logger, kibanaPackageJson.
           dnsCacheTtlInSeconds: config?.dnsCacheTtl?.asSeconds() ?? 0,
         }),
         kibanaVersion: kibanaPackageJson.version,
+        // The CLI runs on-prem only; CPS is disabled so project_routing is stripped.
+        onRequestHandlerFactory: getRequestHandlerFactory(false),
       });
     },
   },
