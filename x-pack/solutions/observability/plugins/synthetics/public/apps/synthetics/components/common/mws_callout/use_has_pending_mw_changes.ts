@@ -66,9 +66,7 @@ export const useHasPendingMwChanges = (monitorMWIds: string[]) => {
       const mw = allMWsById.get(id);
       if (!mw) return true;
 
-      const updatedAtStr = (mw as unknown as Record<string, unknown>).updated_at as
-        | string
-        | undefined;
+      const updatedAtStr = (mw as unknown as { updated_at: string | undefined }).updated_at;
       if (updatedAtStr) {
         const updatedAt = new Date(updatedAtStr).getTime();
         return now - updatedAt < syncWindowMs;
