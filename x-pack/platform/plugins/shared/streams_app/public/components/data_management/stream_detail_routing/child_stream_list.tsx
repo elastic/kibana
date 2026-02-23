@@ -177,6 +177,8 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
     toggleSuggestionSelection,
     isSuggestionSelected,
     bulkAcceptSuggestions,
+    selectAllSuggestions,
+    clearSuggestionSelection,
   } = useReviewSuggestionsForm();
 
   const [showBulkAcceptModal, setShowBulkAcceptModal] = React.useState(false);
@@ -397,6 +399,8 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
                   toggleSuggestionSelection={toggleSuggestionSelection}
                   isSuggestionSelected={isSuggestionSelected}
                   onBulkAccept={handleBulkAccept}
+                  selectAllSuggestions={selectAllSuggestions}
+                  clearSuggestionSelection={clearSuggestionSelection}
                 />
               )
             ) : null}

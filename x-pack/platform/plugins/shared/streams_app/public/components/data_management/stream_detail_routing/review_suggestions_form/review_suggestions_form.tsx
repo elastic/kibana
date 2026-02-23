@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import { EuiText, EuiCallOut, EuiSpacer, EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiText,
+  EuiCallOut,
+  EuiSpacer,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
 import React from 'react';
@@ -37,6 +45,8 @@ export interface ReviewSuggestionsFormProps
     | 'selectedSuggestionIndexes'
     | 'toggleSuggestionSelection'
     | 'isSuggestionSelected'
+    | 'selectAllSuggestions'
+    | 'clearSuggestionSelection'
   > {
   suggestions: PartitionSuggestion[];
   onRegenerate: (connectorId: string) => void;
@@ -60,6 +70,8 @@ export function ReviewSuggestionsForm({
   toggleSuggestionSelection,
   isSuggestionSelected,
   onBulkAccept,
+  selectAllSuggestions,
+  clearSuggestionSelection,
 }: ReviewSuggestionsFormProps) {
   const ruleUnderReview = useStreamsRoutingSelector((snapshot) =>
     snapshot.matches({ ready: { ingestMode: 'reviewSuggestedRule' } })
@@ -149,7 +161,7 @@ export function ReviewSuggestionsForm({
               </NestedView>
             ))}
             <EuiSpacer size="m" />
-            <EuiFlexGroup gutterSize="m" alignItems="center">
+            <EuiFlexGroup gutterSize="m" alignItems="center" wrap>
               <EuiFlexItem grow={false}>
                 <GenerateSuggestionButton
                   iconType="refresh"
@@ -166,6 +178,32 @@ export function ReviewSuggestionsForm({
                   )}
                 </GenerateSuggestionButton>
               </EuiFlexItem>
+              {selectedSuggestionIndexes.size < suggestions.length && (
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    size="s"
+                    onClick={selectAllSuggestions}
+                    data-test-subj="streamsAppSelectAllSuggestionsButton"
+                  >
+                    {i18n.translate('xpack.streams.reviewSuggestionsForm.selectAllButton', {
+                      defaultMessage: 'Select all',
+                    })}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              )}
+              {selectedSuggestionIndexes.size > 0 && (
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    size="s"
+                    onClick={clearSuggestionSelection}
+                    data-test-subj="streamsAppClearSelectionButton"
+                  >
+                    {i18n.translate('xpack.streams.reviewSuggestionsForm.clearSelectionButton', {
+                      defaultMessage: 'Clear',
+                    })}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              )}
               {selectedSuggestionIndexes.size > 0 && (
                 <EuiFlexItem grow={false}>
                   <EuiButton

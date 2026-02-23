@@ -23,9 +23,13 @@ import {
   clickAcceptSelectedButton,
   openBulkAcceptModal,
   clickBulkModalCancelButton,
+  clickSelectAllButton,
+  clickClearSelectionButton,
   MOCK_SUGGESTIONS_MULTIPLE,
   BULK_ACCEPT_BUTTON_TEST_ID,
   BULK_MODAL_TEST_IDS,
+  SELECT_ALL_BUTTON_TEST_ID,
+  CLEAR_SELECTION_BUTTON_TEST_ID,
   type LlmProxySetup,
 } from '../../../fixtures/ai_suggestions_helpers';
 
@@ -258,8 +262,12 @@ test.describe(
       const modal = await openBulkAcceptModal(page, [suggestion0Name, suggestion1Name]);
 
       // Verify modal content
-      await expect(modal.getByTestId(BULK_MODAL_TEST_IDS.streamItem(suggestion0Name))).toBeVisible();
-      await expect(modal.getByTestId(BULK_MODAL_TEST_IDS.streamItem(suggestion1Name))).toBeVisible();
+      await expect(
+        modal.getByTestId(BULK_MODAL_TEST_IDS.streamItem(suggestion0Name))
+      ).toBeVisible();
+      await expect(
+        modal.getByTestId(BULK_MODAL_TEST_IDS.streamItem(suggestion1Name))
+      ).toBeVisible();
 
       // Verify modal title shows correct count
       await expect(
@@ -294,6 +302,97 @@ test.describe(
       // Accept Selected button should still show correct count
       const acceptSelectedButton = page.getByTestId(BULK_ACCEPT_BUTTON_TEST_ID);
       await expect(acceptSelectedButton).toContainText('Accept selected (2)');
+    });
+
+    test('should select all suggestions with Select All button', async ({ page }) => {
+      const suggestion0Name = MOCK_SUGGESTIONS_MULTIPLE[0].name;
+      const suggestion1Name = MOCK_SUGGESTIONS_MULTIPLE[1].name;
+      const suggestion2Name = MOCK_SUGGESTIONS_MULTIPLE[2].name;
+
+      // Initially nothing should be selected
+      expect(await isSuggestionCheckboxChecked(page, suggestion0Name)).toBe(false);
+      expect(await isSuggestionCheckboxChecked(page, suggestion1Name)).toBe(false);
+      expect(await isSuggestionCheckboxChecked(page, suggestion2Name)).toBe(false);
+
+      // Select All button should be visible
+      await expect(page.getByTestId(SELECT_ALL_BUTTON_TEST_ID)).toBeVisible();
+
+      // Clear button should not be visible when nothing is selected
+      await expect(page.getByTestId(CLEAR_SELECTION_BUTTON_TEST_ID)).toBeHidden();
+
+      // Click Select All
+      await clickSelectAllButton(page);
+
+      // All suggestions should be selected
+      expect(await isSuggestionCheckboxChecked(page, suggestion0Name)).toBe(true);
+      expect(await isSuggestionCheckboxChecked(page, suggestion1Name)).toBe(true);
+      expect(await isSuggestionCheckboxChecked(page, suggestion2Name)).toBe(true);
+
+      // Accept Selected button should show count for all suggestions
+      const acceptSelectedButton = page.getByTestId(BULK_ACCEPT_BUTTON_TEST_ID);
+      await expect(acceptSelectedButton).toContainText('Accept selected (3)');
+
+      // Select All button should be hidden when all are selected
+      await expect(page.getByTestId(SELECT_ALL_BUTTON_TEST_ID)).toBeHidden();
+
+      // Clear button should now be visible
+      await expect(page.getByTestId(CLEAR_SELECTION_BUTTON_TEST_ID)).toBeVisible();
+    });
+
+    test('should clear all selections with Clear button', async ({ page }) => {
+      const suggestion0Name = MOCK_SUGGESTIONS_MULTIPLE[0].name;
+      const suggestion1Name = MOCK_SUGGESTIONS_MULTIPLE[1].name;
+      const suggestion2Name = MOCK_SUGGESTIONS_MULTIPLE[2].name;
+
+      // Select all suggestions first
+      await clickSelectAllButton(page);
+
+      // Verify all are selected
+      expect(await isSuggestionCheckboxChecked(page, suggestion0Name)).toBe(true);
+      expect(await isSuggestionCheckboxChecked(page, suggestion1Name)).toBe(true);
+      expect(await isSuggestionCheckboxChecked(page, suggestion2Name)).toBe(true);
+
+      // Click Clear
+      await clickClearSelectionButton(page);
+
+      // All suggestions should be deselected
+      expect(await isSuggestionCheckboxChecked(page, suggestion0Name)).toBe(false);
+      expect(await isSuggestionCheckboxChecked(page, suggestion1Name)).toBe(false);
+      expect(await isSuggestionCheckboxChecked(page, suggestion2Name)).toBe(false);
+
+      // Accept Selected button should be hidden
+      await expect(page.getByTestId(BULK_ACCEPT_BUTTON_TEST_ID)).toBeHidden();
+
+      // Clear button should be hidden
+      await expect(page.getByTestId(CLEAR_SELECTION_BUTTON_TEST_ID)).toBeHidden();
+
+      // Select All button should be visible again
+      await expect(page.getByTestId(SELECT_ALL_BUTTON_TEST_ID)).toBeVisible();
+    });
+
+    test('should show Select All when some but not all suggestions are selected', async ({
+      page,
+    }) => {
+      const suggestion0Name = MOCK_SUGGESTIONS_MULTIPLE[0].name;
+      const suggestion1Name = MOCK_SUGGESTIONS_MULTIPLE[1].name;
+      const suggestion2Name = MOCK_SUGGESTIONS_MULTIPLE[2].name;
+
+      // Select only one suggestion
+      await toggleSuggestionCheckbox(page, suggestion0Name);
+
+      // Select All should be visible (not all are selected)
+      await expect(page.getByTestId(SELECT_ALL_BUTTON_TEST_ID)).toBeVisible();
+
+      // Clear should also be visible (at least one is selected)
+      await expect(page.getByTestId(CLEAR_SELECTION_BUTTON_TEST_ID)).toBeVisible();
+
+      // Click Select All to select remaining suggestions
+      await clickSelectAllButton(page);
+
+      // All should now be selected
+      expect(await isSuggestionCheckboxChecked(page, suggestion0Name)).toBe(true);
+      expect(await isSuggestionCheckboxChecked(page, suggestion1Name)).toBe(true);
+      expect(await isSuggestionCheckboxChecked(page, suggestion2Name)).toBe(true);
     });
   }
 );

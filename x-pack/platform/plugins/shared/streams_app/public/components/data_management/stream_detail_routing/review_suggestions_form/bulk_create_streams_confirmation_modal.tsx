@@ -129,13 +129,16 @@ export function BulkCreateStreamsConfirmationModal({
       <EuiModalBody>
         {isCreating && (
           <>
-            <EuiProgress
-              value={progress}
-              max={totalCount}
-              size="s"
-              color="primary"
-              data-test-subj="streamsAppBulkCreateProgress"
-            />
+            <div style={{ position: 'relative', height: 4 }}>
+              <EuiProgress
+                value={progress}
+                max={totalCount}
+                size="s"
+                color="primary"
+                position="absolute"
+                data-test-subj="streamsAppBulkCreateProgress"
+              />
+            </div>
             <EuiSpacer size="s" />
             <EuiText size="s" color="subdued">
               {i18n.translate('xpack.streams.bulkCreateStreams.progressText', {

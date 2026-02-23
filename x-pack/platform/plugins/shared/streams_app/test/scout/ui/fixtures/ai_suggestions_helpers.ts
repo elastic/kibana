@@ -55,6 +55,8 @@ export const BULK_MODAL_TEST_IDS = {
 } as const;
 
 export const BULK_ACCEPT_BUTTON_TEST_ID = 'streamsAppAcceptSelectedSuggestionsButton';
+export const SELECT_ALL_BUTTON_TEST_ID = 'streamsAppSelectAllSuggestionsButton';
+export const CLEAR_SELECTION_BUTTON_TEST_ID = 'streamsAppClearSelectionButton';
 
 // Mock suggestion data constants
 export const MOCK_SUGGESTION_INFO: PartitionSuggestion = {
@@ -387,4 +389,22 @@ export async function clickBulkModalCancelButton(
 ): Promise<void> {
   const cancelButton = modal.getByTestId(BULK_MODAL_TEST_IDS.cancelButton);
   await cancelButton.click();
+}
+
+/**
+ * Clicks the "Select All" button to select all suggestions
+ */
+export async function clickSelectAllButton(page: ScoutPage): Promise<void> {
+  const button = page.getByTestId(SELECT_ALL_BUTTON_TEST_ID);
+  await expect(button).toBeVisible();
+  await button.click();
+}
+
+/**
+ * Clicks the "Clear" button to clear all selections
+ */
+export async function clickClearSelectionButton(page: ScoutPage): Promise<void> {
+  const button = page.getByTestId(CLEAR_SELECTION_BUTTON_TEST_ID);
+  await expect(button).toBeVisible();
+  await button.click();
 }
