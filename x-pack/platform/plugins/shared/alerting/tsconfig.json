@@ -75,6 +75,8 @@
     "@kbn/config",
     "@kbn/expect",
     "@kbn/cps",
+    "@kbn/core-feature-flags-server-mocks",
+    "@kbn/core-feature-flags-server",
   ],
   "exclude": ["target/**/*"]
 }
