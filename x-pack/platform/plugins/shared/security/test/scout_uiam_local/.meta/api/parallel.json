@@ -1,6 +1,5 @@
 {
-  "lastModified": "2026-02-09T18:23:04.470Z",
-  "sha1": "579ee2a06b8d95f4859fe4cff1128e4b6cc8fb8d",
+  "sha1": "ccff3738ea647688379ef3f9f4a3edfff68f9bad",
   "tests": [
     {
       "id": "a0d24173047b2e4-f5d34cb95fb2e09",
@@ -26,7 +25,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_invalidate_session.spec.ts",
-        "line": 69,
+        "line": 70,
         "column": 12
       }
     },
@@ -69,6 +68,62 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_refresh_session.spec.ts",
         "line": 104,
+        "column": 12
+      }
+    },
+    {
+      "id": "66a114b644ef8c1-55923cebb82a3d8",
+      "title": "[NON-MKI] Use internal UIAM credentials for various purposes in real and fake requests should be able to use internal UIAM API key in fake requests",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_use_uiam_credentials.spec.ts",
+        "line": 62,
+        "column": 12
+      }
+    },
+    {
+      "id": "66a114b644ef8c1-925c7ef1e8e1d8c",
+      "title": "[NON-MKI] Use internal UIAM credentials for various purposes in real and fake requests should be able to use internal UIAM credentials to grant and invalidate native Elasticsearch API keys",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_use_uiam_credentials.spec.ts",
+        "line": 86,
+        "column": 12
+      }
+    },
+    {
+      "id": "66a114b644ef8c1-a0da52cb23fc777",
+      "title": "[NON-MKI] Use internal UIAM credentials for various purposes in real and fake requests should be able to use internal UIAM session token as secondary credentials",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_use_uiam_credentials.spec.ts",
+        "line": 138,
+        "column": 12
+      }
+    },
+    {
+      "id": "66a114b644ef8c1-0d2b9cccabad016",
+      "title": "[NON-MKI] Use internal UIAM credentials for various purposes in real and fake requests should be able to use internal UIAM API key as secondary credentials",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_use_uiam_credentials.spec.ts",
+        "line": 155,
         "column": 12
       }
     }
