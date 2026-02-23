@@ -293,10 +293,9 @@ function buildVisualizationState(
   const primaryGroups = (config.group_by ?? []).map((_, index) =>
     getAccessorName('group_by', index)
   );
-
   const { colorMapping, ...sharedState } = computeSharedPartitionLayerState(config);
   const isLegacyColorMode = 'palette' in (colorMapping ?? {});
-  console.log('buildVisualizationState', { sharedState });
+
   if (isAPIPieChartLayer(config)) {
     return {
       shape: config.type,
@@ -318,12 +317,14 @@ function buildVisualizationState(
   if (isAPITreemapChartLayer(config)) {
     return {
       shape: config.type,
+      ...(isLegacyColorMode && { ...colorMapping }),
       layers: [
         {
           metrics,
           primaryGroups,
           allowMultipleMetrics: shouldAllowMultipleMetrics(config),
-          ...computeSharedPartitionLayerState(config),
+          ...sharedState,
+          ...(!isLegacyColorMode && { ...colorMapping }),
           categoryDisplay: 'default',
         },
       ],
@@ -333,12 +334,14 @@ function buildVisualizationState(
   if (isAPIWaffleChartLayer(config)) {
     return {
       shape: config.type,
+      ...(isLegacyColorMode && { ...colorMapping }),
       layers: [
         {
           metrics,
           primaryGroups,
           allowMultipleMetrics: shouldAllowMultipleMetrics(config),
-          ...computeSharedPartitionLayerState(config),
+          ...sharedState,
+          ...(!isLegacyColorMode && { ...colorMapping }),
           categoryDisplay: 'default',
         },
       ],
@@ -348,6 +351,7 @@ function buildVisualizationState(
   if (isAPIMosaicChartLayer(config)) {
     return {
       shape: config.type,
+      ...(isLegacyColorMode && { ...colorMapping }),
       layers: [
         {
           metrics,
@@ -358,7 +362,8 @@ function buildVisualizationState(
             ) ?? [],
           // there's no multiple metrics support in mosaic charts
           allowMultipleMetrics: false,
-          ...computeSharedPartitionLayerState(config),
+          ...sharedState,
+          ...(!isLegacyColorMode && { ...colorMapping }),
           categoryDisplay: 'default',
         },
       ],
@@ -534,8 +539,8 @@ function convertLensStateToAPIGrouping(
   groupIndexForColorMapping: number,
   legacyPalette?: PaletteOutput
 ) {
-  console.log('convertLensStateToAPIGrouping', { vizLayer });
-  const colorMapping = fromColorMappingLensStateToAPI(vizLayer.colorMapping);
+  console.log('convertLensStateToAPIGrouping', { vizLayer, legacyPalette });
+  const colorMapping = fromColorMappingLensStateToAPI(vizLayer.colorMapping, legacyPalette);
   if (isTextBasedLayer(layer)) {
     return groupByAccessors.map(
       (id, index) =>
