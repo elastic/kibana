@@ -65,16 +65,32 @@ const registerLensEmbeddableActions = (store: SecurityAppStore, services: StartS
   const { uiActions } = services;
 
   const filterInLegendActions = createFilterInLensAction({ store, order: 2, services });
-  uiActions.addTriggerAction(CELL_VALUE_TRIGGER, filterInLegendActions);
+  uiActions.addTriggerActionAsync(
+    CELL_VALUE_TRIGGER,
+    filterInLegendActions.id,
+    async () => filterInLegendActions
+  );
 
   const filterOutLegendActions = createFilterOutLensAction({ store, order: 3, services });
-  uiActions.addTriggerAction(CELL_VALUE_TRIGGER, filterOutLegendActions);
+  uiActions.addTriggerActionAsync(
+    CELL_VALUE_TRIGGER,
+    filterOutLegendActions.id,
+    async () => filterOutLegendActions
+  );
 
   const addToTimelineAction = createAddToTimelineLensAction({ store, order: 4 });
-  uiActions.addTriggerAction(CELL_VALUE_TRIGGER, addToTimelineAction);
+  uiActions.addTriggerActionAsync(
+    CELL_VALUE_TRIGGER,
+    addToTimelineAction.id,
+    async () => addToTimelineAction
+  );
 
   const copyToClipboardAction = createCopyToClipboardLensAction({ order: 5 });
-  uiActions.addTriggerAction(CELL_VALUE_TRIGGER, copyToClipboardAction);
+  uiActions.addTriggerActionAsync(
+    CELL_VALUE_TRIGGER,
+    copyToClipboardAction.id,
+    async () => copyToClipboardAction
+  );
 };
 
 const registerDiscoverCellActions = (store: SecurityAppStore, services: StartServices) => {
@@ -96,7 +112,11 @@ const registerDiscoverCellActions = (store: SecurityAppStore, services: StartSer
       if (actionFactory) {
         const action = actionFactory({ id: `${triggerId}-${actionName}`, order });
         const actionWithTelemetry = enhanceActionWithTelemetry(action, services);
-        uiActions.addTriggerAction(triggerId, actionWithTelemetry);
+        uiActions.addTriggerActionAsync(
+          triggerId,
+          actionWithTelemetry.id,
+          async () => actionWithTelemetry
+        );
       }
     });
   };
@@ -137,7 +157,11 @@ const registerCellActions = (
       if (actionFactory) {
         const action = actionFactory({ id: `${triggerId}-${actionName}`, order });
         const actionWithTelemetry = enhanceActionWithTelemetry(action, services);
-        uiActions.addTriggerAction(triggerId, actionWithTelemetry);
+        uiActions.addTriggerActionAsync(
+          triggerId,
+          actionWithTelemetry.id,
+          async () => actionWithTelemetry
+        );
       }
     });
   };
