@@ -169,4 +169,8 @@ export {
 } from './chat';
 export * from './telemetry';
 export { AGENT_WORKFLOWS_FEATURE_FLAG } from './feature_flags';
-export { getLatestVersion, type VersionedAttachment } from './attachments';
+export {
+  getLatestVersion,
+  type VersionedAttachment,
+  type UpdateOriginResponse,
+} from './attachments';

@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import type { VersionedAttachment } from '@kbn/agent-builder-common';
+import type { VersionedAttachment, UpdateOriginResponse } from '@kbn/agent-builder-common';
+
+export type { UpdateOriginResponse };
 
 export interface ListAttachmentsResponse {
   results: VersionedAttachment[];
