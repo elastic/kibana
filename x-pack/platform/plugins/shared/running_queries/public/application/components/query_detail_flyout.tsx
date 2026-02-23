@@ -90,6 +90,20 @@ export const QueryDetailFlyout: React.FC<QueryDetailFlyoutProps> = ({
           </EuiFlexItem>
         </EuiFlexGroup>
 
+        {query.traceId && (
+          <>
+            <EuiSpacer size="s" />
+            <EuiText size="s">
+              <strong>
+                {i18n.translate('xpack.runningQueries.flyout.traceIdLabel', {
+                  defaultMessage: 'Trace ID',
+                })}
+              </strong>{' '}
+              {query.traceId}
+            </EuiText>
+          </>
+        )}
+
         <EuiSpacer size="s" />
 
         <EuiText size="s">

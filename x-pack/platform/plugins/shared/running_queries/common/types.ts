@@ -15,6 +15,7 @@ export interface RunningQuery {
   indices: number;
   remoteSearch?: string;
   query: string;
+  traceId?: string;
   cancellable: boolean;
   cancelled: boolean;
 }

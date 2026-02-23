@@ -133,8 +133,10 @@ export function transformTasks(tasks: TasksTaskInfo[]): RunningQuery[] {
     const action = task.action ?? '';
     const queryType = getQueryType(action);
     const description = task.description ?? '';
-    const xOpaqueId = (task.headers as Record<string, string> | undefined)?.['X-Opaque-Id'];
+    const headers = task.headers as Record<string, string> | undefined;
+    const xOpaqueId = headers?.['X-Opaque-Id'];
     const source = capitalise(extractSource(xOpaqueId));
+    const traceId = headers?.['trace.id'];
 
     let indices = 0;
     let query = '';
@@ -152,6 +154,7 @@ export function transformTasks(tasks: TasksTaskInfo[]): RunningQuery[] {
       startTime: task.start_time_in_millis as number,
       indices,
       query,
+      traceId,
       cancellable: task.cancellable ?? false,
       cancelled: task.cancelled ?? false,
     });
