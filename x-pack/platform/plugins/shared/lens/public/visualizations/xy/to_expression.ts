@@ -51,8 +51,9 @@ import type {
   AxisConfig,
   ValidXYDataLayerConfig,
   XYLayerConfig,
+  SeriesType as LensSeriesType,
 } from './types';
-import { getColumnToLabelMap } from './state_helpers';
+import { getColumnToLabelMap, isLineSeries } from './state_helpers';
 import { defaultReferenceLineColor } from './color_assignment';
 import { getDefaultVisualValuesForLayer } from '../../shared_components/datasource_default_values';
 import {
@@ -460,8 +461,8 @@ const annotationLayerToExpression = (
  * Returns the default palette for a given series type.
  * Line charts use a line-optimized palette for better contrast between overlapping series.
  */
-function getDefaultPalette(seriesType: string): string {
-  if (seriesType === 'line') {
+function getDefaultPalette(seriesType: LensSeriesType): string {
+  if (isLineSeries(seriesType)) {
     return KbnPalette.ElasticLineOptimized;
   }
   return KbnPalette.Default;
