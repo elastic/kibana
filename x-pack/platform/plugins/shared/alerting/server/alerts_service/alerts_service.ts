@@ -688,6 +688,24 @@ export class AlertsService implements IAlertsService {
     });
   }
 
+  public async unmuteAlertInstance({
+    ruleId,
+    alertInstanceId,
+    indices,
+    logger,
+  }: {
+    ruleId: string;
+    alertInstanceId: string;
+    indices: string[];
+    logger: Logger;
+  }) {
+    return this.unmuteAlertInstances({
+      targets: [{ ruleId, alertInstanceIds: [alertInstanceId] }],
+      indices,
+      logger,
+    });
+  }
+
   /**
    * Materializes snooze state on the alert ES document by setting
    * ALERT_MUTED=true and writing snooze fields for visibility/debugging.

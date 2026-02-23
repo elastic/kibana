@@ -16,7 +16,13 @@ import {
 import { nodeBuilder } from '@kbn/es-query';
 import { Spaces } from '../../../scenarios';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import { AlertUtils, getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
+import {
+  AlertUtils,
+  getEventLog,
+  getUrlPrefix,
+  getTestRuleData,
+  ObjectRemover,
+} from '../../../../common/lib';
 
 const alertAsDataIndexPattern = '.internal.alerts-observability.test.alerts.alerts-default-*';
 
@@ -299,7 +305,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
         });
       });
 
-      // Now unmute all alerts
+      // Now unmute all
       await alertUtils.getUnmuteAllRequest(ruleId);
 
       // Run the rule to trigger reconciliation
@@ -468,7 +474,6 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       });
     });
 
-    // TODO: snoozedInstances with any key triggers [snoozedInstances]: expected
     it('should keep alert snoozed across recovery and re-fire via rule SO', async () => {
       const patternAadIndex = '.internal.alerts-test.patternfiring.alerts-default-*';
 

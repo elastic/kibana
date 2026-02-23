@@ -24,6 +24,10 @@ import {
   ALERT_TIME_RANGE,
   ALERT_UUID,
   ALERT_WORKFLOW_STATUS,
+  ALERT_SNOOZE_EXPIRES_AT,
+  ALERT_SNOOZE_CONDITIONS,
+  ALERT_SNOOZE_CONDITION_OPERATOR,
+  ALERT_SNOOZE_SNAPSHOT,
   EVENT_ACTION,
   EVENT_KIND,
   SPACE_IDS,
@@ -52,6 +56,8 @@ interface BuildNewAlertOpts<
   RecoveryActionGroupId extends string
 > {
   legacyAlert: LegacyAlert<LegacyState, LegacyContext, ActionGroupIds | RecoveryActionGroupId>;
+  /** When re-indexing an existing active alert, pass the current document to preserve snooze fields */
+  existingAlert?: Alert & AlertData;
   rule: AlertRule;
   ruleData?: AlertRuleData;
   payload?: DeepPartial<AlertData>;
@@ -74,6 +80,7 @@ export const buildNewAlert = <
   RecoveryActionGroupId extends string
 >({
   legacyAlert,
+  existingAlert,
   rule,
   ruleData,
   runTimestamp,
@@ -96,10 +103,25 @@ export const buildNewAlert = <
   const alertInstanceId = legacyAlert.getId();
   const isMuted = getAlertMutedStatus(alertInstanceId, ruleData);
 
+  const snoozeFromExisting =
+    existingAlert &&
+    (existingAlert[ALERT_SNOOZE_EXPIRES_AT] != null ||
+      existingAlert[ALERT_SNOOZE_CONDITIONS] != null ||
+      existingAlert[ALERT_SNOOZE_CONDITION_OPERATOR] != null ||
+      existingAlert[ALERT_SNOOZE_SNAPSHOT] != null)
+      ? {
+          [ALERT_SNOOZE_EXPIRES_AT]: existingAlert[ALERT_SNOOZE_EXPIRES_AT],
+          [ALERT_SNOOZE_CONDITIONS]: existingAlert[ALERT_SNOOZE_CONDITIONS],
+          [ALERT_SNOOZE_CONDITION_OPERATOR]: existingAlert[ALERT_SNOOZE_CONDITION_OPERATOR],
+          [ALERT_SNOOZE_SNAPSHOT]: existingAlert[ALERT_SNOOZE_SNAPSHOT],
+        }
+      : {};
+
   return deepmerge.all(
     [
       cleanedPayload,
       rule,
+      snoozeFromExisting,
       {
         [TIMESTAMP]: timestamp,
         [EVENT_ACTION]: 'open',

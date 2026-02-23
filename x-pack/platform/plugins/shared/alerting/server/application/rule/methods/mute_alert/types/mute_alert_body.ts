@@ -4,4 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-export { muteAlertParamsSchema, muteAlertQuerySchema, muteAlertBodySchema } from './v1';
+
+import type { SnoozeCondition } from '@kbn/alerting-types';
+
+export interface MuteAlertBody {
+  expiresAt?: string;
+  conditions?: SnoozeCondition[];
+  conditionOperator?: 'any' | 'all';
+}
