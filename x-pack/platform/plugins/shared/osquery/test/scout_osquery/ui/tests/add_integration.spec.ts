@@ -16,7 +16,7 @@ import {
   loadPack,
   cleanupPack,
 } from '../common/api_helpers';
-import { dismissAllToasts, waitForPageReady } from '../common/constants';
+import { dismissAllToasts, dismissErrorDialogs, waitForPageReady } from '../common/constants';
 
 test.describe(
   'ALL - Add Integration',
@@ -131,7 +131,7 @@ test.describe(
         await page.testSubj
           .locator('fleetSetupLoading')
           .waitFor({ state: 'hidden', timeout: 60_000 })
-          .catch(() => {});
+          .catch(() => { });
         await waitForPageReady(page);
         await expect(page.getByText(integrationName)).toBeVisible({ timeout: 60_000 });
         await expect(page.getByText(`version: ${oldVersion}`)).toBeVisible({
@@ -147,7 +147,7 @@ test.describe(
         await page.testSubj
           .locator('fleetSetupLoading')
           .waitFor({ state: 'hidden', timeout: 60_000 })
-          .catch(() => {});
+          .catch(() => { });
         await page.testSubj
           .locator('PackagePoliciesTableUpgradeButton')
           .waitFor({ state: 'visible', timeout: 60_000 });
@@ -169,10 +169,12 @@ test.describe(
 
       // Create agent policy
       await page.goto(kbnUrl.get('/app/fleet/policies'));
+      await dismissErrorDialogs(page);
       await dismissAllToasts(page);
 
       await page.testSubj.locator('createAgentPolicyButton').click();
       await page.testSubj.locator('createAgentPolicyNameField').fill(policyName);
+      await dismissErrorDialogs(page);
       await dismissAllToasts(page);
 
       await page.testSubj.locator('createAgentPolicyFlyoutBtn').click({ force: true });
@@ -189,8 +191,12 @@ test.describe(
       await page.testSubj
         .locator('fleetSetupLoading')
         .waitFor({ state: 'hidden', timeout: 60_000 })
-        .catch(() => {});
-      const searchBar = page.testSubj.locator('epmList.searchBar');
+        .catch(() => { });
+      // Fleet search bar may use different test subjects across versions
+      const searchBar = page.testSubj
+        .locator('epmList.searchBar')
+        .or(page.testSubj.locator('epmList-searchBar'))
+        .or(page.locator('input[placeholder*="Search"]'));
       await searchBar.waitFor({ state: 'visible', timeout: 60_000 });
       await searchBar.fill('osquery');
       await page.testSubj.locator('integration-card:epr:osquery_manager').click();
@@ -293,7 +299,7 @@ test.describe(
       await page.testSubj
         .locator('fleetSetupLoading')
         .waitFor({ state: 'hidden', timeout: 60_000 })
-        .catch(() => {});
+        .catch(() => { });
       await page.testSubj
         .locator('PackagePoliciesTableUpgradeButton')
         .waitFor({ state: 'visible', timeout: 60_000 });

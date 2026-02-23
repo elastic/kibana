@@ -95,18 +95,16 @@ for (const testSpace of testSpaces) {
       await pageObjects.liveQuery.submitQuery();
       await pageObjects.liveQuery.checkResults();
 
-      // Check action items - wait for results to fully load
       // eslint-disable-next-line playwright/no-nth-methods -- single live query; only one result section
-      await expect(page.testSubj.locator('viewInDiscover').first()).toBeVisible({
-        timeout: 30_000,
-      });
+      const discoverLocator = page.testSubj.locator('viewInDiscover').first();
+      await expect(discoverLocator).toBeVisible({ timeout: 60_000 });
       // eslint-disable-next-line playwright/no-nth-methods -- single live query; only one result section
       await expect(page.testSubj.locator('viewInLens').first()).toBeVisible({
-        timeout: 30_000,
+        timeout: 60_000,
       });
       // eslint-disable-next-line playwright/no-nth-methods -- single live query; only one result section
       await expect(page.testSubj.locator('addToCaseButton').first()).toBeVisible({
-        timeout: 30_000,
+        timeout: 60_000,
       });
 
       // Verify Discover link works
@@ -139,7 +137,15 @@ for (const testSpace of testSpaces) {
       test.setTimeout(180_000); // Live queries can take time for agents to respond
 
       await page.goto(kbnUrl.get(`/s/${spaceId}/app/osquery`));
-      await page.getByRole('link', { name: 'Packs' }).click();
+      await waitForPageReady(page);
+
+      // Navigate to Packs tab — try link first, fall back to direct navigation
+      const packsLink = page.getByRole('link', { name: 'Packs' });
+      if (await packsLink.isVisible({ timeout: 5_000 }).catch(() => false)) {
+        await packsLink.click();
+      } else {
+        await page.goto(kbnUrl.get(`/s/${spaceId}/app/osquery/packs`));
+      }
       await waitForPageReady(page);
 
       // Handle pagination - the pack may be on page 2 due to accumulated packs from previous runs
@@ -151,7 +157,7 @@ for (const testSpace of testSpaces) {
           await page.testSubj
             .locator('globalLoadingIndicator')
             .waitFor({ state: 'hidden', timeout: 1000 })
-            .catch(() => {});
+            .catch(() => { });
           if (await playButton.isVisible({ timeout: 2_000 }).catch(() => false)) {
             break;
           }

@@ -126,10 +126,13 @@ test.describe(
       await test.step('Navigate back and verify query was saved with custom values', async () => {
         await page.gotoApp('osquery');
         // eslint-disable-next-line playwright/no-nth-methods -- most recent query is first; multiple rows have Run buttons
-        await page.getByRole('button', { name: 'Run query' }).first().click();
+        const runButton = page.getByRole('button', { name: 'Run query' }).first();
+        await runButton.waitFor({ state: 'visible', timeout: 30_000 });
+        await runButton.click();
 
         await expect(page.testSubj.locator('kibanaCodeEditor')).toContainText(
-          'select * from users;'
+          'select * from users;',
+          { timeout: 15_000 }
         );
       });
     });
@@ -138,7 +141,8 @@ test.describe(
       test.setTimeout(120_000); // Details page can be slow to load in serverless
       await test.step('Navigate to Osquery and click details icon', async () => {
         await page.gotoApp('osquery');
-        const detailsButton = page.getByRole('button', { name: 'Details' });
+        // eslint-disable-next-line playwright/no-nth-methods -- first Details link in the list
+        const detailsButton = page.getByLabel('Details').first();
         await detailsButton.waitFor({ state: 'visible', timeout: 30_000 });
         await detailsButton.click();
       });

@@ -112,11 +112,16 @@ test.describe('ALL - Inventory', { tag: [...tags.stateful.classic] }, () => {
     await osqueryTab.waitFor({ state: 'visible', timeout: 30_000 });
     await osqueryTab.click();
 
-    await page.testSubj.locator('comboBoxInput').waitFor({ state: 'visible', timeout: 15_000 });
+    const savedQuerySelect = page.testSubj.locator('savedQuerySelect');
+    await savedQuerySelect
+      .locator('[data-test-subj="comboBoxInput"]')
+      .waitFor({ state: 'visible', timeout: 15_000 });
 
-    const comboBox = page.testSubj.locator('comboBoxInput');
+    const comboBox = savedQuerySelect.locator('[data-test-subj="comboBoxInput"]');
     await comboBox.click();
-    await comboBox.pressSequentially(savedQueryName);
+    const searchInput = savedQuerySelect.locator('[data-test-subj="comboBoxSearchInput"]');
+    await searchInput.fill('');
+    await searchInput.pressSequentially(savedQueryName);
     const option = page.getByRole('option', { name: new RegExp(savedQueryName, 'i') });
     await option.waitFor({ state: 'visible', timeout: 15_000 });
     await option.click();

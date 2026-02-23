@@ -57,7 +57,7 @@ test.describe('Alert Test', { tag: [...tags.stateful.classic] }, () => {
       }
     });
 
-    await pageObjects.liveQuery.submitQuery();
-    await expect(page.getByText('Forbidden')).toBeVisible();
+    await pageObjects.liveQuery.clickSubmit();
+    await expect(page.getByText('Forbidden')).toBeVisible({ timeout: 30_000 });
   });
 });

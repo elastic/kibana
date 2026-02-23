@@ -98,7 +98,7 @@ test.describe(
             .waitFor({ state: 'visible', timeout: 15_000 });
           await page.getByRole('link', { name: removingPack }).click();
           await expect(page.getByText(`${removingPack} details`)).toBeVisible();
-          await page.getByRole('button', { name: 'Edit' }).click();
+          await pageObjects.packs.clickEditPack();
 
           await expect(
             page.testSubj.locator('comboBoxInput').getByText(agentPolicyName)
@@ -196,7 +196,7 @@ test.describe(
           await waitForPageReady(page);
 
           // Switch to pack mode
-          await page.getByRole('radio', { name: /Run a set of queries in a pack/ }).click();
+          await page.getByText('Run a set of queries in a pack.').click();
           await expect(page.testSubj.locator('kibanaCodeEditor')).not.toBeVisible();
 
           await pageObjects.liveQuery.selectAllAgents();

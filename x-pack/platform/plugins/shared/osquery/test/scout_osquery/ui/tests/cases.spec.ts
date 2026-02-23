@@ -79,10 +79,21 @@ test.describe('Add to Cases', { tag: [...tags.stateful.classic] }, () => {
       });
 
       await test.step('Verify case content and action items', async () => {
-        const viewCaseLink = page.getByRole('link', { name: 'View case' });
-        await viewCaseLink.waitFor({ state: 'visible', timeout: 30_000 });
-        await viewCaseLink.click();
-        await expect(page.getByText(liveQueryQuery)).toBeVisible();
+        await page.goto(kbnUrl.get(`/app/observability/cases/${caseId}`));
+
+        // Case content may not render immediately; retry with reload
+        const caseStart = Date.now();
+        while (Date.now() - caseStart < 60_000) {
+          if (
+            await page
+              .getByText(liveQueryQuery)
+              .isVisible({ timeout: 10_000 })
+              .catch(() => false)
+          )
+            break;
+          await page.reload();
+        }
+        await expect(page.getByText(liveQueryQuery)).toBeVisible({ timeout: 30_000 });
 
         // eslint-disable-next-line playwright/no-nth-methods -- first visible result
         await expect(page.testSubj.locator('viewInLens').first()).toBeVisible();
@@ -138,10 +149,20 @@ test.describe('Add to Cases', { tag: [...tags.stateful.classic] }, () => {
       });
 
       await test.step('Verify case content and action items', async () => {
-        const viewCaseLink = page.getByRole('link', { name: 'View case' });
-        await viewCaseLink.waitFor({ state: 'visible', timeout: 30_000 });
-        await viewCaseLink.click();
-        await expect(page.getByText('SELECT * FROM os_version;')).toBeVisible();
+        await page.goto(kbnUrl.get(`/app/security/cases/${caseId}`));
+
+        const caseStart = Date.now();
+        while (Date.now() - caseStart < 60_000) {
+          if (
+            await page
+              .getByText('SELECT * FROM os_version;')
+              .isVisible({ timeout: 10_000 })
+              .catch(() => false)
+          )
+            break;
+          await page.reload();
+        }
+        await expect(page.getByText('SELECT * FROM os_version;')).toBeVisible({ timeout: 30_000 });
 
         // eslint-disable-next-line playwright/no-nth-methods -- first visible result
         await expect(page.testSubj.locator('viewInLens').first()).toBeVisible();

@@ -85,9 +85,9 @@ roles.forEach(({ name, role }) => {
         }
 
         await expect(page.getByText(savedQueryName)).toBeVisible({ timeout: 10_000 });
-        const addSavedQueryLink = page.getByRole('link', { name: 'Add saved query' });
-        await expect(addSavedQueryLink).toBeVisible({ timeout: 30_000 });
-        await expect(addSavedQueryLink).toHaveAttribute('aria-disabled', 'true');
+        const addSavedQueryButton = page.getByText('Add saved query');
+        await expect(addSavedQueryButton).toBeVisible({ timeout: 30_000 });
+        await expect(addSavedQueryButton).toBeDisabled();
         await expect(page.locator(`[aria-label="Run ${savedQueryName}"]`)).toBeEnabled();
 
         await pageObjects.savedQueries.clickRunSavedQuery(savedQueryName);
@@ -116,10 +116,13 @@ roles.forEach(({ name, role }) => {
       test('should be able to play in live queries history', async ({ page, pageObjects }) => {
         await pageObjects.liveQuery.navigate();
         await expect(page.testSubj.locator('newLiveQueryButton')).toBeEnabled();
-        await expect(page.getByText(liveQueryQuery)).toBeVisible();
+        // eslint-disable-next-line playwright/no-nth-methods -- multiple rows may contain the same query text
+        await expect(page.getByText(liveQueryQuery).first()).toBeVisible({ timeout: 15_000 });
 
         // Scope to row containing the saved query - multiple rows have Run buttons
-        const savedQueryRow = page.locator('tbody tr').filter({ hasText: liveQueryQuery });
+        const savedQueryRow = page.locator('tbody tr').filter({ hasText: liveQueryQuery })
+          // eslint-disable-next-line playwright/no-nth-methods -- multiple matching rows; pick the first
+          .first();
         const runQueryButton = savedQueryRow.getByRole('button', { name: 'Run query' });
         await expect(runQueryButton).toBeEnabled();
         await runQueryButton.click();
@@ -176,7 +179,7 @@ roles.forEach(({ name, role }) => {
 
         await pageObjects.packs.navigateToPackDetail(packId);
         await expect(page.getByText(`${packName} details`)).toBeVisible();
-        await expect(page.getByRole('button', { name: 'Edit' })).toBeDisabled();
+        await expect(page.testSubj.locator('edit-pack-button')).toBeDisabled();
         await expect(page.locator(`[aria-label="Run ${savedQueryName}"]`)).not.toBeVisible();
         await expect(page.locator(`[aria-label="Edit ${savedQueryName}"]`)).not.toBeVisible();
       });

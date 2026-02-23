@@ -79,7 +79,11 @@ test.describe(
       });
     });
 
-    test('should be able to run live query and add to timeline', async ({ page, kbnUrl }) => {
+    test('should be able to run live query and add to timeline', async ({
+      page,
+      kbnUrl,
+      pageObjects,
+    }) => {
       test.setTimeout(180_000); // Alert tests can take time
       const TIMELINE_NAME = 'Untitled timeline';
 
@@ -109,14 +113,18 @@ test.describe(
       await queryEditor.click();
       await queryEditor.pressSequentially('select * from uptime;');
 
-      // Submit query
-      const submitButton = page.testSubj.locator('liveQuerySubmitButton');
-      await submitButton.waitFor({ state: 'visible' });
-      await submitButton.click();
+      // Submit query using the page object's retry-aware submitQuery
+      await pageObjects.liveQuery.submitQuery();
 
-      // Check results
+      // Check results - use a polling loop for agent response delays
       const resultsTable = page.testSubj.locator('osqueryResultsTable');
-      await expect(resultsTable).toBeVisible({ timeout: 120_000 });
+      const resultStart = Date.now();
+      while (Date.now() - resultStart < 120_000) {
+        if (await resultsTable.isVisible({ timeout: 15_000 }).catch(() => false)) break;
+        // eslint-disable-next-line playwright/no-wait-for-timeout -- brief pause between checks
+        await page.waitForTimeout(5_000);
+      }
+      await expect(resultsTable).toBeVisible({ timeout: 30_000 });
       // eslint-disable-next-line playwright/no-nth-methods -- first cell in results grid
       const dataCell = page.testSubj.locator('dataGridRowCell').first();
       await expect(dataCell).toBeVisible({ timeout: 120_000 });
@@ -135,11 +143,11 @@ test.describe(
       // Close the osquery flyout using keyboard (Escape) to avoid portal intercept issues
       await page.keyboard.press('Escape');
       const flyout = page.testSubj.locator('flyout-body-osquery');
-      await flyout.waitFor({ state: 'hidden', timeout: 5_000 }).catch(() => {});
+      await flyout.waitFor({ state: 'hidden', timeout: 5_000 }).catch(() => { });
       const overlayMask = page.locator('.euiOverlayMask');
       if (await overlayMask.isVisible({ timeout: 2_000 }).catch(() => false)) {
         await page.keyboard.press('Escape');
-        await overlayMask.waitFor({ state: 'hidden', timeout: 5_000 }).catch(() => {});
+        await overlayMask.waitFor({ state: 'hidden', timeout: 5_000 }).catch(() => { });
       }
 
       // Also close the security solution flyout if it's still open

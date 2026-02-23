@@ -27,6 +27,7 @@ export const socManagerRole: KibanaRole = {
           'endgame-*',
           'filebeat-*',
           'logs-*',
+          '.logs-osquery_manager*',
           'packetbeat-*',
           'winlogbeat-*',
           'metrics-*',
@@ -134,6 +135,7 @@ export const t1AnalystRole: KibanaRole = {
           'endgame-*',
           'filebeat-*',
           'logs-*',
+          '.logs-osquery_manager*',
           'packetbeat-*',
           'winlogbeat-*',
         ],
@@ -189,6 +191,7 @@ export const t2AnalystRole: KibanaRole = {
           'endgame-*',
           'filebeat-*',
           'logs-*',
+          '.logs-osquery_manager*',
           'packetbeat-*',
           'winlogbeat-*',
         ],
@@ -238,7 +241,7 @@ export const readerRole: KibanaRole = {
     cluster: [],
     indices: [
       {
-        names: ['logs-*', 'filebeat-*', 'auditbeat-*'],
+        names: ['logs-*', '.logs-osquery_manager*', 'filebeat-*', 'auditbeat-*'],
         privileges: ['read'],
       },
     ],
@@ -268,7 +271,7 @@ export const platformEngineerRole: KibanaRole = {
     cluster: ['manage'],
     indices: [
       {
-        names: ['logs-*', 'metrics-*', '.fleet-*'],
+        names: ['logs-*', '.logs-osquery_manager*', 'metrics-*', '.fleet-*'],
         privileges: ['all'],
       },
     ],

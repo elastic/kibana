@@ -70,8 +70,12 @@ test.describe(
       await page.testSubj.locator('newLiveQueryButton').click();
       await waitForPageReady(page);
 
-      // Switch to pack mode
-      await page.getByRole('button', { name: 'Run a set of queries in a pack.' }).click();
+      // Switch to pack mode — the toggle renders as an EUI radio group
+      const packModeToggle = page
+        .getByText('Run a set of queries in a pack.')
+        .or(page.getByRole('radio', { name: /Run a set of queries in a pack/i }));
+      await packModeToggle.waitFor({ state: 'visible', timeout: 15_000 });
+      await packModeToggle.click();
 
       // The query editor should not be visible in pack mode
       await expect(page.testSubj.locator('kibanaCodeEditor')).not.toBeVisible();
@@ -145,8 +149,10 @@ test.describe(
       await expect(
         page.testSubj.locator('globalToastList').getByText(/Case .+ updated/)
       ).toBeVisible({ timeout: 15_000 });
-      await page.getByRole('link', { name: 'View case' }).click();
-      await expect(page.getByText('SELECT * FROM memory_info;')).toBeVisible();
+
+      // Navigate directly to the case — the toast "View case" link can auto-dismiss
+      await page.gotoApp(`security/cases/${caseId}`);
+      await expect(page.getByText('SELECT * FROM memory_info;')).toBeVisible({ timeout: 30_000 });
     });
   }
 );

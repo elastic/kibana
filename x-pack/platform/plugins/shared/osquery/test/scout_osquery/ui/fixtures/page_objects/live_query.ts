@@ -50,6 +50,9 @@ export class LiveQueryPage {
     await allAgentsOption.waitFor({ state: 'visible', timeout: 15_000 });
     await allAgentsOption.click();
 
+    // Close the dropdown to prevent it from overlaying other elements
+    await this.page.keyboard.press('Escape');
+
     // Confirm agents were selected by waiting for the selection indicator
     // Serverless agents can take longer to appear in the Fleet UI
     await this.page
@@ -66,13 +69,18 @@ export class LiveQueryPage {
     await this.queryEditor.waitFor({ state: 'visible' });
     await this.queryEditor.click();
 
-    // Select all content and delete it (repeat to ensure clean state)
-    await this.page.keyboard.press('ControlOrMeta+a');
-    await this.page.keyboard.press('Backspace');
-    await this.page.keyboard.press('ControlOrMeta+a');
-    await this.page.keyboard.press('Backspace');
-
-    await this.page.keyboard.type(query);
+    // Use Monaco API to clear and set the value directly for reliability
+    await this.page.evaluate((newQuery: string) => {
+      const monacoEnv = (window as any).MonacoEnvironment;
+      if (monacoEnv?.monaco?.editor) {
+        const models = monacoEnv.monaco.editor.getModels();
+        for (const model of models) {
+          model.setValue(newQuery);
+        }
+      }
+    }, query);
+    // eslint-disable-next-line playwright/no-wait-for-timeout -- allow debounced onChange (500ms) to propagate
+    await this.page.waitForTimeout(1000);
   }
 
   /**
@@ -89,7 +97,7 @@ export class LiveQueryPage {
     await this.page.testSubj
       .locator('globalLoadingIndicator')
       .waitFor({ state: 'hidden', timeout: 10_000 })
-      .catch(() => {});
+      .catch(() => { });
 
     const submitButton = this.page.testSubj.locator('liveQuerySubmitButton');
     await submitButton.waitFor({ state: 'visible' });
@@ -102,7 +110,7 @@ export class LiveQueryPage {
         .locator('[data-test-subj="toastCloseButton"]')
         .all();
       for (const btn of closeButtons) {
-        await btn.click().catch(() => {});
+        await btn.click().catch(() => { });
       }
 
       if (closeButtons.length > 0) {
@@ -138,7 +146,7 @@ export class LiveQueryPage {
         await Promise.race([
           resultsTab.waitFor({ state: 'visible', timeout: 30_000 }),
           packResultsHeading.waitFor({ state: 'visible', timeout: 30_000 }),
-        ]).catch(() => {});
+        ]).catch(() => { });
 
         return;
       } catch (e) {
@@ -150,7 +158,7 @@ export class LiveQueryPage {
           .locator('[data-test-subj="toastCloseButton"]')
           .all();
         for (const btn of retryCloseButtons) {
-          await btn.click().catch(() => {});
+          await btn.click().catch(() => { });
         }
 
         await submitButton.scrollIntoViewIfNeeded();
@@ -160,8 +168,8 @@ export class LiveQueryPage {
 
   /**
    * Wait for query results to appear. Checks for the results table or the
-   * results tab to become visible. Periodically reloads to trigger refresh.
-   * Throws if results never appear within the configured RESULTS_TIMEOUT.
+   * results tab to become visible. Toggles between Status/Results tabs to
+   * trigger re-render without reloading the page (reload wipes SPA state).
    */
   async waitForResults() {
     const start = Date.now();
@@ -188,30 +196,25 @@ export class LiveQueryPage {
       } catch {
         attempt++;
         try {
-          if (attempt % 2 === 0) {
-            await this.page.reload();
+          const statusTab = this.page.testSubj.locator('osquery-status-tab');
+          if (await statusTab.isVisible().catch(() => false)) {
+            await statusTab.click();
+            // eslint-disable-next-line playwright/no-wait-for-timeout -- brief pause to let the tab switch render
+            await this.page.waitForTimeout(2_000);
             if (await resultsTab.isVisible().catch(() => false)) {
               await resultsTab.click();
             }
           } else {
-            const statusTab = this.page.testSubj.locator('osquery-status-tab');
-            if (await statusTab.isVisible().catch(() => false)) {
-              await statusTab.click();
-              if (await resultsTab.isVisible().catch(() => false)) {
-                await resultsTab.click();
-              }
-            } else {
-              await this.page.testSubj
-                .locator('globalLoadingIndicator')
-                .waitFor({ state: 'hidden', timeout: 15_000 })
-                .catch(() => {});
-            }
+            await this.page.testSubj
+              .locator('globalLoadingIndicator')
+              .waitFor({ state: 'hidden', timeout: 15_000 })
+              .catch(() => { });
           }
         } catch {
           await this.page.testSubj
             .locator('globalLoadingIndicator')
             .waitFor({ state: 'hidden', timeout: 15_000 })
-            .catch(() => {});
+            .catch(() => { });
         }
       }
     }
@@ -252,7 +255,7 @@ export class LiveQueryPage {
       await this.page.testSubj
         .locator('globalLoadingIndicator')
         .waitFor({ state: 'hidden', timeout: 15_000 })
-        .catch(() => {});
+        .catch(() => { });
       await searchInput.fill('');
       await searchInput.pressSequentially(cleanText);
 
@@ -267,7 +270,7 @@ export class LiveQueryPage {
         await this.page.testSubj
           .locator('globalLoadingIndicator')
           .waitFor({ state: 'hidden', timeout: 15_000 })
-          .catch(() => {});
+          .catch(() => { });
       }
     }
 
@@ -291,7 +294,7 @@ export class LiveQueryPage {
       await this.page.testSubj
         .locator('globalLoadingIndicator')
         .waitFor({ state: 'hidden', timeout: 15_000 })
-        .catch(() => {});
+        .catch(() => { });
       await searchInput.fill('');
       await searchInput.pressSequentially(cleanText);
 
@@ -312,7 +315,7 @@ export class LiveQueryPage {
         await this.page.testSubj
           .locator('globalLoadingIndicator')
           .waitFor({ state: 'hidden', timeout: 5_000 })
-          .catch(() => {});
+          .catch(() => { });
       }
     }
 

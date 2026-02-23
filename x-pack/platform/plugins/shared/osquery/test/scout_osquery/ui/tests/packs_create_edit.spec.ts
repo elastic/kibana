@@ -135,18 +135,18 @@ test.describe(
           await expect(page.getByText('Query3')).toBeVisible();
 
           await page.locator(`[aria-label="Edit Query1"]`).click();
-          await page.testSubj.locator('resultsTypeField').getByText('Snapshot').click();
-          await page.getByRole('button', { name: 'Differential' }).click();
+          await page.testSubj.locator('resultsTypeField').click();
+          await page.getByRole('option', { name: 'Differential', exact: true }).click();
           await packs.clickSaveQueryInFlyout();
 
           await page.locator(`[aria-label="Edit Query2"]`).click();
-          await page.testSubj.locator('resultsTypeField').getByText('Differential').click();
-          await page.getByRole('button', { name: 'Differential (Ignore removals)' }).click();
+          await page.testSubj.locator('resultsTypeField').click();
+          await page.getByRole('option', { name: 'Differential (Ignore removals)' }).click();
           await packs.clickSaveQueryInFlyout();
 
           await page.locator(`[aria-label="Edit Query3"]`).click();
-          await page.testSubj.locator('resultsTypeField').getByText('(Ignore removals)').click();
-          await page.getByRole('button', { name: 'Snapshot' }).click();
+          await page.testSubj.locator('resultsTypeField').click();
+          await page.getByRole('option', { name: 'Snapshot' }).click();
           await packs.clickSaveQueryInFlyout();
 
           await packs.clickUpdatePack();
@@ -201,7 +201,7 @@ test.describe(
 
           await pageObjects.packs.ensureAllPacksVisible();
 
-          await expect(page.getByText(packName)).toBeVisible();
+          await expect(page.getByRole('link', { name: packName })).toBeVisible();
         });
       } finally {
         if (packId) {
@@ -347,14 +347,14 @@ test.describe(
             await page.testSubj
               .locator('docsLoading')
               .waitFor({ state: 'visible' })
-              .catch(() => {});
+              .catch(() => { });
             await page.testSubj
               .locator('docsLoading')
               .waitFor({ state: 'hidden', timeout: 60_000 })
-              .catch(() => {});
+              .catch(() => { });
 
             // eslint-disable-next-line playwright/no-nth-methods -- first visible result in pack queries table
-            const viewInLensButton = page.testSubj.locator('viewInLens').first();
+            const viewInLensButton = page.locator('[aria-label="View in Lens"]').first();
             await viewInLensButton.waitFor({ state: 'visible', timeout: 30_000 });
             await viewInLensButton.click();
           });
@@ -401,7 +401,7 @@ test.describe(
             await pageObjects.packs.navigateToPackDetail(packId);
 
             // eslint-disable-next-line playwright/no-nth-methods -- first visible result in pack queries table
-            const discoverLink = page.testSubj.locator('viewInDiscover').first();
+            const discoverLink = page.locator('[aria-label="View in Discover"]').first();
             await discoverLink.waitFor({ state: 'visible', timeout: 30_000 });
 
             // Verify the href contains the pack action_id filter
@@ -509,7 +509,10 @@ test.describe(
           const maxWait = Date.now() + 300_000;
 
           while (lastResultsDate === '-' && Date.now() < maxWait) {
-            await page.testSubj.locator('docsLoading').waitFor({ state: 'hidden' });
+            await page.testSubj
+              .locator('docsLoading')
+              .waitFor({ state: 'hidden', timeout: 30_000 })
+              .catch(() => {});
             const packQueryResultsDateCells = page.locator(
               'tbody .euiTableRow > td:nth-child(5) > .euiTableCellContent'
             );
@@ -522,7 +525,8 @@ test.describe(
               await page.reload();
               await page.testSubj
                 .locator('docsLoading')
-                .waitFor({ state: 'hidden', timeout: 5_000 });
+                .waitFor({ state: 'hidden', timeout: 30_000 })
+                .catch(() => {});
             }
           }
         });
@@ -570,7 +574,7 @@ test.describe(
 
         await test.step('Open pack, select all queries and delete', async () => {
           await packs.navigateToPackDetail(packId);
-          await page.getByRole('button', { name: /^Edit$/ }).click();
+          await packs.clickEditPack();
 
           await expect(page.getByText(`Edit ${packName}`)).toBeVisible({ timeout: 15_000 });
           await page.testSubj.locator('checkboxSelectAll').click();
@@ -616,7 +620,7 @@ test.describe(
 
         await test.step('Open pack and add query', async () => {
           await packs.navigateToPackDetail(packId);
-          await page.getByRole('button', { name: /^Edit$/ }).click();
+          await packs.clickEditPack();
 
           await packs.clickAddQuery();
           await page.testSubj.locator('globalLoadingIndicator').waitFor({ state: 'hidden' });
@@ -687,7 +691,7 @@ test.describe(
           await packs.deleteAndConfirm('pack');
         });
       } finally {
-        await cleanupPack(kbnClient, packId).catch(() => {});
+        await cleanupPack(kbnClient, packId).catch(() => { });
       }
     });
   }

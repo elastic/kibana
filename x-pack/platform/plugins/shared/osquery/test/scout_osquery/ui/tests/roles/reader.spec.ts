@@ -53,10 +53,11 @@ test.describe('Reader - only READ', { tag: [...tags.stateful.classic] }, () => {
 
   test('should not be able to add nor run saved queries', async ({ page, pageObjects }) => {
     await pageObjects.savedQueries.navigate();
-    await expect(page.getByText(savedQueryName)).toBeVisible();
-    const addSavedQueryLink = page.getByRole('link', { name: 'Add saved query' });
-    await expect(addSavedQueryLink).toBeVisible({ timeout: 30_000 });
-    await expect(addSavedQueryLink).toHaveAttribute('aria-disabled', 'true');
+    await pageObjects.packs.ensureAllPacksVisible();
+    await expect(page.getByText(savedQueryName)).toBeVisible({ timeout: 15_000 });
+    const addSavedQueryButton = page.getByText('Add saved query');
+    await expect(addSavedQueryButton).toBeVisible({ timeout: 30_000 });
+    await expect(addSavedQueryButton).toBeDisabled();
     await expect(page.locator(`[aria-label="Run ${savedQueryName}"]`)).toBeDisabled();
 
     await pageObjects.savedQueries.clickEditSavedQuery(savedQueryName);
@@ -76,9 +77,10 @@ test.describe('Reader - only READ', { tag: [...tags.stateful.classic] }, () => {
   test('should not be able to play in live queries history', async ({ page, pageObjects }) => {
     await pageObjects.liveQuery.navigate();
     await expect(page.testSubj.locator('newLiveQueryButton')).toBeDisabled();
-    await expect(page.getByText(liveQueryQuery)).toBeVisible();
+    // eslint-disable-next-line playwright/no-nth-methods -- multiple rows may contain the same query text
+    await expect(page.getByText(liveQueryQuery).first()).toBeVisible({ timeout: 15_000 });
     await expect(page.locator(`[aria-label="Run ${savedQueryName}"]`)).not.toBeVisible();
-    await expect(page.getByLabel('Details')).toBeVisible();
+    await expect(page.getByLabel('Details').first()).toBeVisible();
   });
 
   test('should not be able to add nor edit packs', async ({ page, pageObjects }) => {
@@ -88,12 +90,13 @@ test.describe('Reader - only READ', { tag: [...tags.stateful.classic] }, () => {
     await packs.ensureAllPacksVisible();
 
     const toggle = page.locator(`[aria-label="${packName}"]`);
-    await toggle.waitFor({ state: 'visible', timeout: 15_000 });
+    await toggle.scrollIntoViewIfNeeded().catch(() => {});
+    await toggle.waitFor({ state: 'visible', timeout: 30_000 });
     await expect(toggle).toBeDisabled();
 
     await pageObjects.packs.navigateToPackDetail(packId);
     await expect(page.getByText(`${packName} details`)).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Edit' })).toBeDisabled();
+    await expect(page.testSubj.locator('edit-pack-button')).toBeDisabled();
     await expect(page.locator(`[aria-label="Run ${savedQueryName}"]`)).not.toBeVisible();
     await expect(page.locator(`[aria-label="Edit ${savedQueryName}"]`)).not.toBeVisible();
   });

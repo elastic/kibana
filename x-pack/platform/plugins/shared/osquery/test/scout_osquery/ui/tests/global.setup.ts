@@ -396,6 +396,59 @@ globalSetupHook(
     await kbnClient.request<any>({ method: 'POST', path: '/api/fleet/setup' });
     log.info('[osquery-setup] Fleet setup complete');
 
+    // ── 3b. Configure Fleet default output to point to ES on the Docker-accessible host
+    const dockerEsHost = `http://${host}:${esPort}`;
+    log.info(`[osquery-setup] Configuring Fleet default output to ${dockerEsHost}...`);
+    try {
+      // List existing outputs and find the default one
+      const { data: outputsResponse } = await kbnClient.request<{
+        items: Array<{ id: string; is_default: boolean; hosts?: string[]; is_preconfigured?: boolean }>;
+      }>({
+        method: 'GET',
+        path: '/api/fleet/outputs',
+      });
+
+      const defaultOutput = outputsResponse.items.find((o) => o.is_default);
+
+      if (defaultOutput) {
+        const currentHosts = defaultOutput.hosts ?? [];
+        if (currentHosts.includes(dockerEsHost)) {
+          log.info(
+            `[osquery-setup] Default output "${defaultOutput.id}" already points to ${dockerEsHost}`
+          );
+        } else if (defaultOutput.is_preconfigured) {
+          log.info(
+            `[osquery-setup] Default output "${defaultOutput.id}" is preconfigured with hosts=[${currentHosts}]. ` +
+              `Ensure --serverConfigSet osquery is used so the preconfigured output points to the Docker-accessible ES host.`
+          );
+        } else {
+          await kbnClient.request<any>({
+            method: 'PUT',
+            path: `/api/fleet/outputs/${defaultOutput.id}`,
+            body: { hosts: [dockerEsHost] },
+          });
+          log.info(`[osquery-setup] Updated output "${defaultOutput.id}" to ${dockerEsHost}`);
+        }
+      } else {
+        log.info('[osquery-setup] No default output found, creating one...');
+        await kbnClient.request<any>({
+          method: 'POST',
+          path: '/api/fleet/outputs',
+          body: {
+            id: 'es-default-output',
+            name: 'Default Output',
+            type: 'elasticsearch',
+            is_default: true,
+            is_default_monitoring: true,
+            hosts: [dockerEsHost],
+          },
+        });
+        log.info('[osquery-setup] Fleet output created');
+      }
+    } catch (e: any) {
+      log.info(`[osquery-setup] Fleet output configuration: ${e?.message?.slice(0, 200) || e}`);
+    }
+
     // ── 4–6. Start Fleet Server ────────────────────────────────────────
     let serviceToken = '';
     let fleetServerPolicyId = '';

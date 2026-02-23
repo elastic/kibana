@@ -50,6 +50,18 @@ export async function dismissAllToasts(page: ScoutPage): Promise<void> {
 }
 
 /**
+ * Dismiss any visible error dialogs/modals that may block UI interaction.
+ * Some Fleet pages show a "Failed to retrieve detection engine privileges" modal
+ * when the user lacks security solution privileges.
+ */
+export async function dismissErrorDialogs(page: ScoutPage): Promise<void> {
+  const closeButton = page.locator('.euiModal button[aria-label="Closes this modal window"]');
+  while (await closeButton.isVisible({ timeout: 2_000 }).catch(() => false)) {
+    await closeButton.click().catch(() => {});
+  }
+}
+
+/**
  * Poll the detection engine API until at least one alert exists for the given
  * rule, then navigate to the rule's alerts tab and wait for the expand-event
  * button to be visible.

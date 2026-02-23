@@ -30,6 +30,7 @@ node scripts/scout run-tests \
   --location local \
   --arch stateful \
   --domain classic \
+  --serverConfigSet osquery \
   --config "$SCOUT_CONFIG" \
   --kibanaInstallDir "$KIBANA_BUILD_LOCATION"
 status=$?

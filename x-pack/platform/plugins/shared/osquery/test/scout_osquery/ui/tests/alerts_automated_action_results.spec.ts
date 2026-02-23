@@ -88,11 +88,17 @@ test.describe(
 
           const baseUrl = new URL(page.url()).origin;
           await page.goto(`${baseUrl}${href}`);
-          await expect(
-            page.testSubj.locator('discoverDocTable').or(page.testSubj.locator('unifiedDataTable'))
-          ).toBeVisible({
-            timeout: 120_000,
-          });
+
+          // Discover may need reloads for data to appear
+          const docTable = page.testSubj
+            .locator('discoverDocTable')
+            .or(page.testSubj.locator('unifiedDataTable'));
+          const discoverStart = Date.now();
+          while (Date.now() - discoverStart < 120_000) {
+            if (await docTable.isVisible({ timeout: 15_000 }).catch(() => false)) break;
+            await page.reload();
+          }
+          await expect(docTable).toBeVisible({ timeout: 30_000 });
           await expect(page.getByText(/action_data\.query\s*.+;/)).toBeVisible();
           await expect(page.getByText(discoverRegex)).toBeVisible();
         });

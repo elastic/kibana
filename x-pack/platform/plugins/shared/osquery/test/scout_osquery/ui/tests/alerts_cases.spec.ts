@@ -214,12 +214,14 @@ test.describe(
         await expect(page.getByText('Select case')).toBeVisible({ timeout: 15_000 });
         await page.testSubj.locator(`cases-table-row-select-${caseId}`).click();
 
-        const viewCaseLink = page.getByRole('link', { name: 'View case' });
-        await viewCaseLink.waitFor({ state: 'visible', timeout: 60_000 });
-        await viewCaseLink.click();
+        // Wait briefly for the case association to complete, then navigate directly
+        // The toast may auto-dismiss before we can catch it
+        // eslint-disable-next-line playwright/no-wait-for-timeout -- brief pause for case attachment API
+        await page.waitForTimeout(3_000);
+        await page.gotoApp(`security/cases/${caseId}`);
         await expect(
           page.getByText(/attached Osquery results[\s]?[\d]+[\s]?second(?:s)? ago/)
-        ).toBeVisible();
+        ).toBeVisible({ timeout: 60_000 });
         // eslint-disable-next-line playwright/no-nth-methods -- first cell in results
         await expect(page.testSubj.locator('dataGridRowCell').first()).toBeVisible({
           timeout: 120_000,
