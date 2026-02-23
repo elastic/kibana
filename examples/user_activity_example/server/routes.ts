@@ -29,7 +29,7 @@ export function registerRoutes(router: IRouter, core: CoreSetup) {
       // Track the user action
       coreStart.userActivity.trackUserAction({
         event: {
-          // using `as any` because we don't want to add this action to the public docs 
+          // using `as any` because we don't want to add this action to the public docs
           action: 'example_button_click' as any,
           type: 'change',
         },
