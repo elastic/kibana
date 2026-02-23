@@ -6,6 +6,8 @@
  */
 
 import { createAlertEventsBatchBuilder } from './build_alert_events';
+import type { EsqlEsqlResult } from '@elastic/elasticsearch/lib/api/types';
+import { buildRecoveryAlertEvents, buildQueryRecoveryAlertEvents } from './build_alert_events';
 
 describe('createAlertEventsBatchBuilder', () => {
   beforeAll(() => {
@@ -52,5 +54,208 @@ describe('createAlertEventsBatchBuilder', () => {
 
     // Different grouping should produce different group_hash
     expect(doc1.group_hash).not.toEqual(doc2.group_hash);
+  });
+});
+
+describe('buildRecoveryAlertEvents', () => {
+  beforeAll(() => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2025-01-01T00:00:00.000Z'));
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
+  it('creates recovered events for active groups not in the breached set', () => {
+    const events = buildRecoveryAlertEvents({
+      ruleId: 'rule-123',
+      ruleVersion: 1,
+      activeGroupHashes: [{ group_hash: 'hash-a' }, { group_hash: 'hash-b' }],
+      breachedGroupHashes: new Set(['hash-a']),
+      scheduledTimestamp: '2024-12-31T23:59:00.000Z',
+    });
+
+    expect(events).toHaveLength(1);
+    expect(events[0]).toEqual({
+      '@timestamp': '2025-01-01T00:00:00.000Z',
+      scheduled_timestamp: '2024-12-31T23:59:00.000Z',
+      rule: { id: 'rule-123', version: 1 },
+      group_hash: 'hash-b',
+      data: {},
+      status: 'recovered',
+      source: 'internal',
+      type: 'signal',
+    });
+  });
+
+  it('returns empty array when all active groups are still breaching', () => {
+    const events = buildRecoveryAlertEvents({
+      ruleId: 'rule-123',
+      ruleVersion: 1,
+      activeGroupHashes: [{ group_hash: 'hash-a' }],
+      breachedGroupHashes: new Set(['hash-a']),
+      scheduledTimestamp: '2024-12-31T23:59:00.000Z',
+    });
+
+    expect(events).toEqual([]);
+  });
+
+  it('returns recovered events for all active groups when none are breaching', () => {
+    const events = buildRecoveryAlertEvents({
+      ruleId: 'rule-123',
+      ruleVersion: 1,
+      activeGroupHashes: [{ group_hash: 'hash-a' }, { group_hash: 'hash-b' }],
+      breachedGroupHashes: new Set(),
+      scheduledTimestamp: '2024-12-31T23:59:00.000Z',
+    });
+
+    expect(events).toHaveLength(2);
+    expect(events.map((e) => e.group_hash)).toEqual(['hash-a', 'hash-b']);
+    expect(events.every((e) => e.status === 'recovered')).toBe(true);
+  });
+
+  it('returns empty array when there are no active groups', () => {
+    const events = buildRecoveryAlertEvents({
+      ruleId: 'rule-123',
+      ruleVersion: 1,
+      activeGroupHashes: [],
+      breachedGroupHashes: new Set(['hash-a']),
+      scheduledTimestamp: '2024-12-31T23:59:00.000Z',
+    });
+
+    expect(events).toEqual([]);
+  });
+});
+
+describe('buildQueryRecoveryAlertEvents', () => {
+  beforeAll(() => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2025-01-01T00:00:00.000Z'));
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
+  it('creates recovered events for active groups matching the recovery query', () => {
+    const esqlResponse: EsqlEsqlResult = {
+      columns: [
+        { name: 'host.name', type: 'keyword' },
+        { name: 'status', type: 'keyword' },
+      ],
+      values: [['host-a', 'ok']],
+    };
+
+    // Build a breached event first to know the expected group_hash
+    const breachedEvents = buildAlertEventsFromEsqlResponse({
+      ruleId: 'rule-123',
+      ruleVersion: 1,
+      spaceId: 'default',
+      ruleAttributes: { grouping: { fields: ['host.name'] } },
+      esqlResponse: {
+        columns: [{ name: 'host.name', type: 'keyword' }],
+        values: [['host-a']],
+      },
+      scheduledTimestamp: '2024-12-31T23:59:00.000Z',
+    });
+
+    const activeGroupHash = breachedEvents[0].group_hash;
+
+    const events = buildQueryRecoveryAlertEvents({
+      ruleId: 'rule-123',
+      ruleVersion: 1,
+      spaceId: 'default',
+      ruleAttributes: { grouping: { fields: ['host.name'] } },
+      activeGroupHashes: [{ group_hash: activeGroupHash }],
+      esqlResponse,
+      scheduledTimestamp: '2024-12-31T23:59:00.000Z',
+    });
+
+    expect(events).toHaveLength(1);
+    expect(events[0]).toEqual({
+      '@timestamp': '2025-01-01T00:00:00.000Z',
+      scheduled_timestamp: '2024-12-31T23:59:00.000Z',
+      rule: { id: 'rule-123', version: 1 },
+      group_hash: activeGroupHash,
+      data: { 'host.name': 'host-a', status: 'ok' },
+      status: 'recovered',
+      source: 'internal',
+      type: 'signal',
+    });
+  });
+
+  it('returns empty array when recovery query returns no rows', () => {
+    const events = buildQueryRecoveryAlertEvents({
+      ruleId: 'rule-123',
+      ruleVersion: 1,
+      spaceId: 'default',
+      ruleAttributes: { grouping: { fields: ['host.name'] } },
+      activeGroupHashes: [{ group_hash: 'hash-a' }],
+      esqlResponse: { columns: [], values: [] },
+      scheduledTimestamp: '2024-12-31T23:59:00.000Z',
+    });
+
+    expect(events).toEqual([]);
+  });
+
+  it('ignores recovery query rows that do not match any active group', () => {
+    const esqlResponse: EsqlEsqlResult = {
+      columns: [{ name: 'host.name', type: 'keyword' }],
+      values: [['host-unknown']],
+    };
+
+    const events = buildQueryRecoveryAlertEvents({
+      ruleId: 'rule-123',
+      ruleVersion: 1,
+      spaceId: 'default',
+      ruleAttributes: { grouping: { fields: ['host.name'] } },
+      activeGroupHashes: [{ group_hash: 'hash-not-matching' }],
+      esqlResponse,
+      scheduledTimestamp: '2024-12-31T23:59:00.000Z',
+    });
+
+    expect(events).toEqual([]);
+  });
+
+  it('deduplicates when multiple recovery rows produce the same group hash', () => {
+    const esqlResponse: EsqlEsqlResult = {
+      columns: [
+        { name: 'host.name', type: 'keyword' },
+        { name: 'msg', type: 'keyword' },
+      ],
+      values: [
+        ['host-a', 'recovered-1'],
+        ['host-a', 'recovered-2'],
+      ],
+    };
+
+    const breachedEvents = buildAlertEventsFromEsqlResponse({
+      ruleId: 'rule-123',
+      ruleVersion: 1,
+      spaceId: 'default',
+      ruleAttributes: { grouping: { fields: ['host.name'] } },
+      esqlResponse: {
+        columns: [{ name: 'host.name', type: 'keyword' }],
+        values: [['host-a']],
+      },
+      scheduledTimestamp: '2024-12-31T23:59:00.000Z',
+    });
+
+    const activeGroupHash = breachedEvents[0].group_hash;
+
+    const events = buildQueryRecoveryAlertEvents({
+      ruleId: 'rule-123',
+      ruleVersion: 1,
+      spaceId: 'default',
+      ruleAttributes: { grouping: { fields: ['host.name'] } },
+      activeGroupHashes: [{ group_hash: activeGroupHash }],
+      esqlResponse,
+      scheduledTimestamp: '2024-12-31T23:59:00.000Z',
+    });
+
+    expect(events).toHaveLength(1);
+    expect(events[0].group_hash).toBe(activeGroupHash);
+    expect(events[0].data).toEqual({ 'host.name': 'host-a', msg: 'recovered-1' });
   });
 });

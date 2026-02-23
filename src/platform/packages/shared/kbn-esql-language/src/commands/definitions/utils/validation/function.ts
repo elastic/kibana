@@ -18,7 +18,9 @@ import {
   isParamLiteral,
 } from '../../../../ast/is';
 import { getLocationInfo } from '../../../registry/location';
-import type { ICommandCallbacks, ICommandContext, Location } from '../../../registry/types';
+import { isTimeseriesSourceCommand } from '../timeseries_check';
+import { Location } from '../../../registry/types';
+import type { ICommandCallbacks, ICommandContext } from '../../../registry/types';
 import type {
   ESQLAst,
   ESQLAstAllCommands,
@@ -233,7 +235,23 @@ class FunctionValidator {
    * Checks if the function is available in the current context
    */
   private get allowedHere(): boolean {
-    return this.definition?.locationsAvailable.includes(this.location.id) ?? false;
+    const locationId = this.location.id;
+
+    if (this.definition?.locationsAvailable.includes(locationId)) {
+      return true;
+    }
+
+    // TIME_SERIES_AGG functions are also allowed at the top level of STATS
+    // (not just nested inside agg functions) when the source command is TS
+    if (
+      this.definition?.locationsAvailable.includes(Location.STATS_TIMESERIES) &&
+      locationId === Location.STATS &&
+      isTimeseriesSourceCommand(this.ast)
+    ) {
+      return true;
+    }
+
+    return false;
   }
 
   /**
@@ -308,6 +326,14 @@ export function getPromqlFunctionArityCheck(
   return null;
 }
 
+/* Treats instant_vector as compatible with range_vector (implicit range selector). */
+function isPromqlParamTypeCompatible(
+  expected: PromQLFunctionParamType,
+  actual: PromQLFunctionParamType
+): boolean {
+  return expected === actual || (expected === 'range_vector' && actual === 'instant_vector');
+}
+
 /* Filters signatures compatible by arity and argument types. */
 export function getPromqlMatchingSignatures(
   signatures: PromQLSignature[],
@@ -320,7 +346,10 @@ export function getPromqlMatchingSignatures(
   const matchingArity = filterByMatchingArity(signatures, argTypes.length);
 
   return matchingArity.filter(({ params }) =>
-    argTypes.every((argType, idx) => params[idx]?.type === argType)
+    argTypes.every(
+      (argType, idx) =>
+        params[idx]?.type && argType && isPromqlParamTypeCompatible(params[idx]!.type, argType)
+    )
   );
 }
 
@@ -341,9 +370,14 @@ export function getPromqlSignatureMismatch(
     .slice(0, argCount)
     .map(({ name, type }) => `${name}=${type}`)
     .join(', ');
-  const mismatchIdx = argTypes.findIndex((argType, idx) => refParams[idx]?.type !== argType);
+  const mismatchIdx = argTypes.findIndex(
+    (argType, idx) =>
+      !refParams[idx]?.type ||
+      !argType ||
+      !isPromqlParamTypeCompatible(refParams[idx]!.type, argType)
+  );
 
-  return { required, mismatchIdx };
+  return mismatchIdx >= 0 ? { required, mismatchIdx } : null;
 }
 
 /* Filters signatures whose required/max param count includes argCount. */
