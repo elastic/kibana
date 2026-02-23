@@ -11,47 +11,47 @@ import type { ScoutPage, Locator } from '@kbn/scout';
 export class HostRiskTabPage {
   constructor(private readonly page: ScoutPage) {}
 
-  get riskDetailsNav(): Locator {
+  public get riskDetailsNav(): Locator {
     return this.page.testSubj.locator('navigation-hostRisk');
   }
 
-  get loadingSpinner(): Locator {
+  public get loadingSpinner(): Locator {
     return this.page.testSubj.locator('loading-spinner');
   }
 
-  get hostByRiskTableCell(): Locator {
+  public get hostByRiskTableCell(): Locator {
     return this.page.testSubj
       .locator('table-hostRisk-loading-false')
       .locator('.euiTableCellContent');
   }
 
-  get hostByRiskTableFilter(): Locator {
+  public get hostByRiskTableFilter(): Locator {
     return this.page.testSubj.locator('risk-filter-popoverButton');
   }
 
-  get hostByRiskTableFilterCritical(): Locator {
+  public get hostByRiskTableFilterCritical(): Locator {
     return this.page.testSubj.locator('risk-filter-item-Critical');
   }
 
-  get hostByRiskTablePerpageButton(): Locator {
+  public get hostByRiskTablePerpageButton(): Locator {
     return this.page.locator('[data-test-subj="loadingMoreSizeRowPopover"] button');
   }
 
-  get hostByRiskTablePerpageOptions(): Locator {
+  public get hostByRiskTablePerpageOptions(): Locator {
     return this.page.testSubj.locator('loadingMorePickSizeRow').locator('button');
   }
 
-  get hostByRiskTableNextPageButton(): Locator {
+  public get hostByRiskTableNextPageButton(): Locator {
     return this.page.testSubj
       .locator('numberedPagination')
       .locator('[data-test-subj="pagination-button-next"]');
   }
 
-  get hostByRiskTableHostnameCell(): Locator {
+  public get hostByRiskTableHostnameCell(): Locator {
     return this.page.testSubj.locator('cellActions-renderContent-host.name');
   }
 
-  get tableHeaderCellNodeRisk(): Locator {
+  public get tableHeaderCellNodeRisk(): Locator {
     return this.page.testSubj.locator('tableHeaderCell_node.risk_4');
   }
 
