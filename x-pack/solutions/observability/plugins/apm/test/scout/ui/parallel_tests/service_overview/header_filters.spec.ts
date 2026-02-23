@@ -9,7 +9,7 @@ import { expect } from '@kbn/scout-oblt/ui';
 import { tags } from '@kbn/scout-oblt';
 import { test } from '../../fixtures';
 
-test.describe.skip(
+test.describe(
   'Service overview - header filters',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
@@ -19,11 +19,11 @@ test.describe.skip(
 
     test('Filtering by transaction type - changes url when selecting different value', async ({
       page,
-      pageObjects: { dependencyDetailsPage },
+      pageObjects: { serviceDetailsPage, dependencyDetailsPage },
     }) => {
       await test.step('Navigate to service overview', async () => {
-        await dependencyDetailsPage.overviewTab.goToTab({
-          serviceName: dependencyDetailsPage.DEPENDENCY_NAME,
+        await serviceDetailsPage.goToPage({
+          serviceName: 'opbeans-node',
         });
       });
 
@@ -48,17 +48,17 @@ test.describe.skip(
 
     test('Filtering by searchbar - filters by transaction.name', async ({
       page,
-      pageObjects: { dependencyDetailsPage },
+      pageObjects: { serviceDetailsPage },
     }) => {
       await test.step('Navigate to opbeans-java service overview', async () => {
-        await dependencyDetailsPage.overviewTab.goToTab({
-          serviceName: dependencyDetailsPage.DEPENDENCY_NAME,
+        await serviceDetailsPage.dependenciesTab.goToTab({
+          serviceName: 'opbeans-java',
         });
       });
 
       await test.step('Verify service name is visible', async () => {
         await expect(page.getByTestId('apmMainTemplateHeaderServiceName')).toHaveText(
-          dependencyDetailsPage.DEPENDENCY_NAME
+          'opbeans-java'
         );
       });
 
