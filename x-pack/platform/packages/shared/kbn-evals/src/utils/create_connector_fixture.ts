@@ -10,13 +10,29 @@ import { v5 } from 'uuid';
 import type { HttpHandler } from '@kbn/core/public';
 import { isAxiosError } from 'axios';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { KbnClientRequesterError } from '@kbn/test';
 
 /**
  * When running locally, only UUIDs are allowed for non-preconfigured connectors.
  * We generate a deterministic UUID from the logical connector id so runs are stable/idempotent.
  */
 export function getConnectorIdAsUuid(connectorId: string) {
-  return v5(connectorId, v5.DNS);
+  // Important: use TEST_RUN_ID as part of the seed when available to avoid connector ID collisions
+  // between concurrently running eval processes/suites (which can delete each other's connectors).
+  const runSeed = process.env.TEST_RUN_ID ? `${process.env.TEST_RUN_ID}:${connectorId}` : connectorId;
+  return v5(runSeed, v5.DNS);
+}
+
+/**
+ * Returns the connector id to use at runtime.
+ * When `KBN_EVALS_SKIP_CONNECTOR_SETUP` is set, the original id is returned as-is
+ * (preconfigured connectors don't need UUID mapping).
+ * Otherwise, a deterministic UUID is generated.
+ */
+export function resolveConnectorId(connectorId: string): string {
+  return process.env.KBN_EVALS_SKIP_CONNECTOR_SETUP
+    ? connectorId
+    : getConnectorIdAsUuid(connectorId);
 }
 
 export async function createConnectorFixture({
@@ -30,6 +46,41 @@ export async function createConnectorFixture({
   log: ToolingLog;
   use: (connector: AvailableConnectorWithId) => Promise<void>;
 }) {
+  interface ConnectorGetResponse {
+    is_preconfigured?: boolean;
+  }
+
+  async function isPreconfiguredConnector(connectorId: string): Promise<boolean> {
+    try {
+      const res = (await fetch({
+        path: `/api/actions/connector/${encodeURIComponent(connectorId)}`,
+        method: 'GET',
+      })) as ConnectorGetResponse;
+
+      return res?.is_preconfigured === true;
+    } catch (error) {
+      const status = isAxiosError(error) ? error.status : (error as any)?.status;
+      if (status === 404) return false;
+      throw error;
+    }
+  }
+
+  if (process.env.KBN_EVALS_SKIP_CONNECTOR_SETUP) {
+    log.info(
+      `Skipping connector setup/teardown for: ${predefinedConnector.id} (KBN_EVALS_SKIP_CONNECTOR_SETUP is set)`
+    );
+    await use(predefinedConnector);
+    return;
+  }
+
+  // If this connector is already preconfigured in the Kibana instance (e.g. EIS-managed connectors),
+  // we should reuse it rather than creating/deleting a saved object connector.
+  if (await isPreconfiguredConnector(predefinedConnector.id)) {
+    log.info(`Reusing preconfigured connector: ${predefinedConnector.id}`);
+    await use(predefinedConnector);
+    return;
+  }
+
   // When running locally, the connectors we read from kibana.yml
   // are not configured in the kibana instance, so we install the
   // one for this test run. only UUIDs are allowed for non-preconfigured
@@ -47,7 +98,12 @@ export async function createConnectorFixture({
       path: `/api/actions/connector/${connectorIdAsUuid}`,
       method: 'DELETE',
     }).catch((error) => {
-      if (isAxiosError(error) && error.status === 404) {
+      // Depending on the HttpHandler implementation, we might get either an AxiosError or a
+      // KbnClientRequesterError. Either way, "not found" should be ignored for idempotency.
+      if (isAxiosError(error) && (error.status === 404 || error.response?.status === 404)) {
+        return;
+      }
+      if (error instanceof KbnClientRequesterError && error.message.includes('Status: 404')) {
         return;
       }
       throw error;

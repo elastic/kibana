@@ -7,8 +7,13 @@
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ToolSelection } from '@kbn/agent-builder-common';
-import { filterToolsBySelection } from '@kbn/agent-builder-common';
-import type { ToolProvider, ExecutableTool, ScopedRunner } from '@kbn/agent-builder-server';
+import { ToolType, filterToolsBySelection } from '@kbn/agent-builder-common';
+import type {
+  ToolProvider,
+  ExecutableTool,
+  ScopedRunner,
+  BuiltinToolDefinition,
+} from '@kbn/agent-builder-server';
 import type { AgentConfiguration } from '@kbn/agent-builder-common';
 import type { AttachmentsService, SkillsService } from '@kbn/agent-builder-server/runner';
 import type { IFileStore } from '@kbn/agent-builder-server/runner/filestore';
@@ -20,11 +25,10 @@ import type { ExperimentalFeatures } from '@kbn/agent-builder-server';
 import { createAttachmentTools } from '../../../tools/builtin/attachments';
 import { getStoreTools } from '../../../runner/store';
 import type { ProcessedConversation } from './prepare_conversation';
-import { builtinToolToExecutable } from './builtin_tool_to_executable';
 
 export const selectTools = async ({
   conversation,
-  previousDynamicToolIds,
+  previousDynamicToolIds = [],
   skills,
   request,
   toolProvider,
@@ -33,19 +37,19 @@ export const selectTools = async ({
   filestore,
   spaceId,
   runner,
-  experimentalFeatures,
+  experimentalFeatures = { filestore: false, skills: false },
 }: {
   conversation: ProcessedConversation;
-  previousDynamicToolIds: string[];
-  skills: SkillsService;
+  previousDynamicToolIds?: string[];
+  skills?: SkillsService;
   request: KibanaRequest;
   toolProvider: ToolProvider;
   attachmentsService: AttachmentsService;
-  filestore: IFileStore;
+  filestore?: IFileStore;
   agentConfiguration: AgentConfiguration;
   spaceId: string;
   runner: ScopedRunner;
-  experimentalFeatures: ExperimentalFeatures;
+  experimentalFeatures?: ExperimentalFeatures;
 }) => {
   const formatContext: AttachmentFormatContext = { request, spaceId };
 
@@ -70,7 +74,7 @@ export const selectTools = async ({
   });
 
   // create tools for filesystem (only if feature is enabled)
-  const filestoreTools = experimentalFeatures.filestore
+  const filestoreTools = experimentalFeatures.filestore && filestore
     ? getStoreTools({ filestore }).map((tool) => builtinToolToExecutable({ tool, runner }))
     : [];
 
@@ -101,17 +105,19 @@ export const selectTools = async ({
     request,
   });
 
-  const allSkills = await skills.list();
-  const dynamicInlineTools = (
-    await Promise.all(
-      allSkills
-        .filter((skill) => skill.getInlineTools !== undefined)
-        .map((skill) => skill.getInlineTools!())
+  const dynamicInlineTools = skills
+    ? (
+      await Promise.all(
+        skills
+          .list()
+          .filter((skill) => skill.getInlineTools !== undefined)
+          .map((skill) => skill.getInlineTools!())
+      )
     )
-  )
-    .flat()
-    .filter((tool) => previousDynamicToolIds.includes(tool.id))
-    .map((tool) => skills.convertSkillTool(tool));
+      .flat()
+      .filter((tool) => previousDynamicToolIds.includes(tool.id))
+      .map((tool) => skills.convertSkillTool(tool))
+    : [];
 
   return {
     staticTools: [...dedupedStaticTools.values()],
@@ -140,6 +146,44 @@ const createVersionedAttachmentTools = ({
     formatContext,
   });
   return builtinTools.map((tool) => builtinToolToExecutable({ tool, runner }));
+};
+
+/**
+ * Converts a builtin attachment tool to an executable tool that runs through the runner.
+ */
+const builtinToolToExecutable = ({
+  tool,
+  runner,
+}: {
+  tool: BuiltinToolDefinition;
+  runner: ScopedRunner;
+}): ExecutableTool => {
+  return {
+    id: tool.id,
+    type: ToolType.builtin,
+    description: tool.description,
+    tags: tool.tags,
+    configuration: {},
+    readonly: true,
+    getSchema: () => tool.schema,
+    execute: async (params) => {
+      return runner.runInternalTool({
+        ...params,
+        tool: {
+          id: tool.id,
+          type: ToolType.builtin,
+          description: tool.description,
+          tags: tool.tags,
+          configuration: {},
+          readonly: true,
+          confirmation: { askUser: 'never' },
+          isAvailable: async () => ({ status: 'available' as const }),
+          getSchema: () => tool.schema,
+          getHandler: () => tool.handler,
+        },
+      });
+    },
+  };
 };
 
 const getVersionedAttachmentBoundTools = async ({

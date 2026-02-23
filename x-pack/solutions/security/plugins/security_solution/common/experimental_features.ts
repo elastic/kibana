@@ -209,7 +209,18 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the Automatic Migration of Splunk dashboards in Security Solution
    */
-  splunkV2DashboardsEnabled: false,
+  splunkV2DashboardsEnabled: true,
+
+  /**
+   * Enables the Alert Grouping feature for automatically grouping related alerts into cases.
+   * When enabled, allows configuration of alert grouping workflows that:
+   * - Extract entities (IPs, hostnames, users, etc.) from alerts
+   * - Match alerts to existing cases based on shared observables
+   * - Create new cases for unmatched alert groups
+   * - Trigger Attack Discovery generation for case alerts
+   * Release: 9.x
+   */
+  alertGroupingEnabled: false,
 
   /**
    * Enables Detection Engine Health UI
@@ -220,6 +231,16 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables Rule Health UI
    */
   ruleHealthUIEnabled: false,
+
+  /**
+   * Enables the Automatic Troubleshooting Agent Builder skill
+   */
+  automaticTroubleshootingSkill: false,
+
+  /**
+   * Enables the new flyout using the EUI flyout system
+   */
+  newFlyoutSystemEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
