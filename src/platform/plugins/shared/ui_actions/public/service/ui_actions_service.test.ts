@@ -142,7 +142,11 @@ describe('UiActionsService', () => {
 
       service.registerActionAsync(ACTION_HELLO_WORLD, async () => helloWorldAction);
 
-      service.addTriggerActionAsync(ON_OPEN_PANEL_MENU, ACTION_HELLO_WORLD, async () => helloWorldAction);
+      service.addTriggerActionAsync(
+        ON_OPEN_PANEL_MENU,
+        ACTION_HELLO_WORLD,
+        async () => helloWorldAction
+      );
 
       const compatibleActions = await service.getTriggerCompatibleActions(ON_OPEN_PANEL_MENU, {
         hi: 'there',
@@ -246,7 +250,6 @@ describe('UiActionsService', () => {
       service1.registerActionAsync('action2', async () => testAction2);
       service1.addTriggerActionAsync(ON_OPEN_PANEL_MENU, 'action1', async () => testAction1);
 
-
       const service2 = service1.fork();
 
       expect(await service1.getTriggerActions(ON_OPEN_PANEL_MENU)).toHaveLength(1);
@@ -260,16 +263,18 @@ describe('UiActionsService', () => {
   });
 
   describe('registries', () => {
-    const ACTION_HELLO_WORLD = 'ACTION_HELLO_WORLD';
-
     test('can register action', async () => {
       const actions: ActionRegistry = new Map();
       const service = new UiActionsService({ actions });
 
-      service.registerActionAsync(ACTION_HELLO_WORLD, async () => ({
-        id: ACTION_HELLO_WORLD,
-        order: 13,
-      } as unknown as ActionDefinition));
+      service.registerActionAsync(
+        ACTION_HELLO_WORLD,
+        async () =>
+          ({
+            id: ACTION_HELLO_WORLD,
+            order: 13,
+          } as unknown as ActionDefinition)
+      );
 
       expect(await actions.get(ACTION_HELLO_WORLD)?.()).toMatchObject({
         id: ACTION_HELLO_WORLD,
@@ -332,7 +337,9 @@ describe('UiActionsService', () => {
       } as unknown as ActionDefinition;
 
       service.registerActionAsync(ACTION_HELLO_WORLD, async () => action);
-      expect(() => service.addTriggerActionAsync('i do not exist', ACTION_HELLO_WORLD, async ()=> action)).toThrowError(
+      expect(() =>
+        service.addTriggerActionAsync('i do not exist', ACTION_HELLO_WORLD, async () => action)
+      ).toThrowError(
         'No trigger [triggerId = i do not exist] exists, for attaching action [actionId = ACTION_HELLO_WORLD].'
       );
     });
@@ -346,9 +353,9 @@ describe('UiActionsService', () => {
       } as unknown as ActionDefinition;
 
       service.registerActionAsync(ACTION_HELLO_WORLD, async () => action);
-      expect(() => service.registerActionAsync(ACTION_HELLO_WORLD, async () => action)).toThrowError(
-        'Action [action.id = ACTION_HELLO_WORLD] already registered.'
-      );
+      expect(() =>
+        service.registerActionAsync(ACTION_HELLO_WORLD, async () => action)
+      ).toThrowError('Action [action.id = ACTION_HELLO_WORLD] already registered.');
     });
   });
 });

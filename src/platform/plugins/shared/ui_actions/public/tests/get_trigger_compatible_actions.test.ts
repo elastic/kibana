@@ -32,7 +32,11 @@ beforeEach(() => {
 
   uiActions.setup.registerActionAsync('test', async () => action as ActionDefinition);
 
-  uiActions.setup.addTriggerActionAsync(ON_OPEN_PANEL_MENU, 'test', async () => action as ActionDefinition);
+  uiActions.setup.addTriggerActionAsync(
+    ON_OPEN_PANEL_MENU,
+    'test',
+    async () => action as ActionDefinition
+  );
 });
 
 test('can register action', async () => {
