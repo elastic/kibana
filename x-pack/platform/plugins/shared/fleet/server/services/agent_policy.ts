@@ -1701,7 +1701,7 @@ class AgentPolicyService {
           })
           .then((response) => {
             if (!response) {
-              // Do not throw here even when throwOnAnyError is set — a null full policy
+              // Do not manually throw an error here even when throwOnAnyError is set — a null full policy
               // indicates a data inconsistency (e.g. missing package) that retrying
               // setup will not resolve. The policy is skipped silently.
               logger.warn(
