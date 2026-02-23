@@ -20,6 +20,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type { StreamQuery, Streams, System } from '@kbn/streams-schema';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useDebounceFn } from '@kbn/react-hooks';
+import { CodeEditor } from '@kbn/code-editor';
 import { UncontrolledStreamsAppSearchBar } from '../../../streams_app_search_bar/uncontrolled_streams_app_bar';
 import { PreviewDataSparkPlot } from '../common/preview_data_spark_plot';
 import { validateQuery } from '../common/validate_query';
@@ -50,6 +51,8 @@ export function ManualFlowForm({
   systems,
   dataViews,
 }: Props) {
+  const [isNativeEsql] = useState(() => !query.kql.query && !!query.esql?.query);
+
   const [touched, setTouched] = useState({
     title: false,
     feature: false,
@@ -57,21 +60,21 @@ export function ManualFlowForm({
     severity: false,
   });
 
-  // Debounced KQL query for preview chart API calls
-  const [debouncedKqlQuery, setDebouncedKqlQuery] = useState(query.kql.query);
+  const [debouncedQueryText, setDebouncedQueryText] = useState(
+    isNativeEsql ? (query.esql?.query ?? '') : query.kql.query
+  );
 
-  const { run: updateDebouncedKqlQuery } = useDebounceFn(
-    (kqlQuery: string) => setDebouncedKqlQuery(kqlQuery),
+  const { run: updateDebouncedQueryText } = useDebounceFn(
+    (text: string) => setDebouncedQueryText(text),
     DEBOUNCE_OPTIONS
   );
 
-  // Create a query object with debounced KQL for the preview chart
   const debouncedQuery = useMemo(
-    (): StreamQuery => ({
-      ...query,
-      kql: { query: debouncedKqlQuery },
-    }),
-    [query, debouncedKqlQuery]
+    (): StreamQuery =>
+      isNativeEsql
+        ? { ...query, esql: { query: debouncedQueryText } }
+        : { ...query, kql: { query: debouncedQueryText } },
+    [query, debouncedQueryText, isNativeEsql]
   );
 
   const validation = validateQuery(query);
@@ -198,30 +201,51 @@ export function ManualFlowForm({
             }
             {...(touched.kql && { ...validation.kql })}
           >
-            <UncontrolledStreamsAppSearchBar
-              query={
-                query.kql ? { language: 'kuery', ...query.kql } : { language: 'kuery', query: '' }
-              }
-              showQueryInput
-              showSubmitButton={false}
-              isDisabled={isSubmitting}
-              onQueryChange={(next) => {
-                // Immediately sync query state so it's always up-to-date for save
-                const nextKqlQuery = typeof next.query?.query === 'string' ? next.query.query : '';
-                setQuery({
-                  ...query,
-                  kql: { query: nextKqlQuery },
-                });
-                // Debounce the preview chart update
-                updateDebouncedKqlQuery(nextKqlQuery);
-                setTouched((prev) => ({ ...prev, kql: true }));
-              }}
-              placeholder={i18n.translate(
-                'xpack.streams.addSignificantEventFlyout.manualFlow.queryPlaceholder',
-                { defaultMessage: 'Enter query' }
-              )}
-              indexPatterns={dataViews}
-            />
+            {isNativeEsql ? (
+              <CodeEditor
+                languageId="esql"
+                value={query.esql?.query ?? ''}
+                height={80}
+                options={{
+                  minimap: { enabled: false },
+                  lineNumbers: 'off',
+                  scrollBeyondLastLine: false,
+                  wordWrap: 'on',
+                  readOnly: isSubmitting,
+                }}
+                onChange={(value) => {
+                  setQuery({ ...query, esql: { query: value } });
+                  updateDebouncedQueryText(value);
+                  setTouched((prev) => ({ ...prev, kql: true }));
+                }}
+              />
+            ) : (
+              <UncontrolledStreamsAppSearchBar
+                query={
+                  query.kql
+                    ? { language: 'kuery', ...query.kql }
+                    : { language: 'kuery', query: '' }
+                }
+                showQueryInput
+                showSubmitButton={false}
+                isDisabled={isSubmitting}
+                onQueryChange={(next) => {
+                  const nextKqlQuery =
+                    typeof next.query?.query === 'string' ? next.query.query : '';
+                  setQuery({
+                    ...query,
+                    kql: { query: nextKqlQuery },
+                  });
+                  updateDebouncedQueryText(nextKqlQuery);
+                  setTouched((prev) => ({ ...prev, kql: true }));
+                }}
+                placeholder={i18n.translate(
+                  'xpack.streams.addSignificantEventFlyout.manualFlow.queryPlaceholder',
+                  { defaultMessage: 'Enter query' }
+                )}
+                indexPatterns={dataViews}
+              />
+            )}
           </EuiFormRow>
         </EuiForm>
 

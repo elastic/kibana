@@ -9,7 +9,6 @@ import React, { useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCodeBlock,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -24,6 +23,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { CodeEditor } from '@kbn/code-editor';
 import { PreviewDataSparkPlot } from '../common/preview_data_spark_plot';
 import { validateQuery } from '../common/validate_query';
 import { UncontrolledStreamsAppSearchBar } from '../../../streams_app_search_bar/uncontrolled_streams_app_bar';
@@ -244,15 +244,22 @@ export function GeneratedEventPreview({
           {...(touched.kql && { ...validation.kql })}
         >
           {!query.kql.query && query.esql?.query ? (
-            <EuiCodeBlock
-              language="esql"
-              paddingSize="s"
-              fontSize="s"
-              isCopyable={false}
-              overflowHeight={80}
-            >
-              {query.esql.query}
-            </EuiCodeBlock>
+            <CodeEditor
+              languageId="esql"
+              value={query.esql.query}
+              height={80}
+              options={{
+                minimap: { enabled: false },
+                lineNumbers: 'off',
+                scrollBeyondLastLine: false,
+                wordWrap: 'on',
+                readOnly: !isEditing,
+              }}
+              onChange={(value) => {
+                setQuery({ ...query, esql: { query: value } });
+                setTouched((prev) => ({ ...prev, kql: true }));
+              }}
+            />
           ) : (
             <UncontrolledStreamsAppSearchBar
               query={

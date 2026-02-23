@@ -36,6 +36,7 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useMemo, useState } from 'react';
+import { CodeEditor } from '@kbn/code-editor';
 import type { SignificantEventItem } from '../../../../hooks/use_fetch_significant_events';
 import { InfoPanel } from '../../../info_panel';
 import { SparkPlot } from '../../../spark_plot';
@@ -112,18 +113,21 @@ export function QueryDetailsFlyout({
     setSeverityScore(item.query.severity_score);
   };
   const handleSaveQuery = async () => {
-    await onSave(
-      {
-        ...item.query,
-        title: title.trim(),
-        kql: {
-          ...item.query.kql,
-          query: query.trim(),
-        },
-        severity_score: severityScore,
-      },
-      item.stream_name
-    );
+    const updatedQuery = isNativeEsql(item)
+      ? {
+          ...item.query,
+          title: title.trim(),
+          esql: { query: query.trim() },
+          severity_score: severityScore,
+        }
+      : {
+          ...item.query,
+          title: title.trim(),
+          kql: { ...item.query.kql, query: query.trim() },
+          severity_score: severityScore,
+        };
+
+    await onSave(updatedQuery, item.stream_name);
     setIsEditMode(false);
   };
 
@@ -131,7 +135,7 @@ export function QueryDetailsFlyout({
     {
       title: QUERY_LABEL,
       description: (
-        <EuiCodeBlock language="kql" paddingSize="none" transparentBackground>
+        <EuiCodeBlock language={getQueryLanguage(item)} paddingSize="none" transparentBackground>
           {getDisplayQueryValue(item)}
         </EuiCodeBlock>
       ),
@@ -306,12 +310,29 @@ export function QueryDetailsFlyout({
                   />
                 </EuiFormRow>
                 <EuiFormRow label={QUERY_LABEL}>
-                  <EuiFieldText
-                    data-test-subj="queriesTableQueryDetailsFlyoutQueryInput"
-                    value={query}
-                    onChange={(event) => setQuery(event.target.value)}
-                    disabled={isSaving}
-                  />
+                  {isNativeEsql(item) ? (
+                    <CodeEditor
+                      languageId="esql"
+                      value={query}
+                      height={80}
+                      options={{
+                        minimap: { enabled: false },
+                        lineNumbers: 'off',
+                        scrollBeyondLastLine: false,
+                        wordWrap: 'on',
+                        readOnly: isSaving,
+                      }}
+                      onChange={setQuery}
+                      data-test-subj="queriesTableQueryDetailsFlyoutQueryInput"
+                    />
+                  ) : (
+                    <EuiFieldText
+                      data-test-subj="queriesTableQueryDetailsFlyoutQueryInput"
+                      value={query}
+                      onChange={(event) => setQuery(event.target.value)}
+                      disabled={isSaving}
+                    />
+                  )}
                 </EuiFormRow>
                 <EuiFormRow label={SEVERITY_LABEL}>
                   <SeveritySelector
@@ -372,7 +393,15 @@ export function QueryDetailsFlyout({
   );
 }
 
+function isNativeEsql(item: SignificantEventItem): boolean {
+  return !item.query.kql?.query && !!item.query.esql?.query;
+}
+
 function getQueryInputValue(item: SignificantEventItem) {
+  if (isNativeEsql(item)) {
+    return item.query.esql.query;
+  }
+
   if (!item.query.kql?.query) {
     return '';
   }
@@ -385,6 +414,10 @@ function getQueryInputValue(item: SignificantEventItem) {
 function getDisplayQueryValue(item: SignificantEventItem) {
   const queryText = getQueryInputValue(item);
   return queryText || DEFAULT_QUERY_PLACEHOLDER;
+}
+
+function getQueryLanguage(item: SignificantEventItem): 'esql' | 'kql' {
+  return isNativeEsql(item) ? 'esql' : 'kql';
 }
 
 const QUERY_INFORMATION_TITLE = i18n.translate(

@@ -86,13 +86,15 @@ export function PreviewDataSparkPlot({
   } = useKibana();
   const useUrl = share.url.locators.useUrl;
 
-  // Compute the ES|QL query client-side for the Discover link because
-  // query.esql.query is populated server-side on save and does not exist
-  // yet during creation or live editing.
-  const discoverEsqlQuery = useMemo(
-    () => (isQueryValid ? buildEsqlQuery(getIndexPatternsForStream(definition), query) : ''),
-    [definition, query, isQueryValid]
-  );
+  // For native ES|QL queries, use the stored query directly.
+  // For KQL queries, build the ES|QL from KQL + feature client-side
+  // (because esql.query is populated server-side on save and does not
+  // exist yet during creation or live editing).
+  const discoverEsqlQuery = useMemo(() => {
+    if (!isQueryValid) return '';
+    if (!query.kql.query && query.esql?.query) return query.esql.query;
+    return buildEsqlQuery(getIndexPatternsForStream(definition), query);
+  }, [definition, query, isQueryValid]);
 
   const discoverLink = useUrl<DiscoverAppLocatorParams>(
     () => ({
