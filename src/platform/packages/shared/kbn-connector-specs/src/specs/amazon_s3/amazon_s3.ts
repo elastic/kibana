@@ -68,7 +68,7 @@ export const AmazonS3: ConnectorSpec = {
         sensitive: false,
         widget: 'text',
         label: i18n.translate('core.kibanaConnectorSpecs.amazonS3.config.accessKeyId.label', {
-          defaultMessage: 'Access Key ID',
+          defaultMessage: 'AWS Access Key ID',
         }),
         helpText: i18n.translate('core.kibanaConnectorSpecs.amazonS3.config.accessKeyId.helpText', {
           defaultMessage: 'Your AWS Access Key ID',
