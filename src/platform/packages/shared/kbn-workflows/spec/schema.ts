@@ -218,12 +218,52 @@ export type DataSetStep = z.infer<typeof DataSetStepSchema>;
 // Fetcher configuration for HTTP request customization (shared across formats)
 export const FetcherConfigSchema = z
   .object({
-    skip_ssl_verification: z.boolean().optional(),
-    follow_redirects: z.boolean().optional(),
-    max_redirects: z.number().optional(),
-    keep_alive: z.boolean().optional(),
+    skip_ssl_verification: z
+      .boolean()
+      .optional()
+      .describe('Skip SSL/TLS certificate verification for the request'),
+    follow_redirects: z
+      .boolean()
+      .optional()
+      .describe('Whether to follow HTTP redirects. Defaults to true'),
+    max_redirects: z.number().optional().describe('Maximum number of redirects to follow'),
+    keep_alive: z.boolean().optional().describe('Enable HTTP keep-alive for connection reuse'),
   })
   .meta({ $id: 'fetcher', description: 'Fetcher configuration for HTTP request customization' })
+  .optional();
+
+// Extended fetcher config for the HTTP step only — adds proxy support
+export const HttpFetcherConfigSchema = z
+  .object({
+    skip_ssl_verification: z
+      .boolean()
+      .optional()
+      .describe('Skip SSL/TLS certificate verification for the request'),
+    follow_redirects: z
+      .boolean()
+      .optional()
+      .describe('Whether to follow HTTP redirects. Defaults to true'),
+    max_redirects: z.number().optional().describe('Maximum number of redirects to follow'),
+    keep_alive: z.boolean().optional().describe('Enable HTTP keep-alive for connection reuse'),
+    proxy_url: z
+      .string()
+      .optional()
+      .describe(
+        'HTTP or HTTPS proxy URL to route the request through (e.g. "http://proxy.example.com:8080")'
+      ),
+    proxy_username: z
+      .string()
+      .optional()
+      .describe('Username for authenticated proxy. Must be used together with proxy_password'),
+    proxy_password: z
+      .string()
+      .optional()
+      .describe('Password for authenticated proxy. Must be used together with proxy_username'),
+  })
+  .meta({
+    $id: 'http_fetcher',
+    description: 'Fetcher configuration for HTTP step requests, including proxy support',
+  })
   .optional();
 
 export const HttpStepSchema = BaseStepSchema.extend({
@@ -237,7 +277,7 @@ export const HttpStepSchema = BaseStepSchema.extend({
       .default({}),
     body: z.any().optional(),
     timeout: z.string().optional().default('30s'),
-    fetcher: FetcherConfigSchema,
+    fetcher: HttpFetcherConfigSchema,
   }),
 })
   .merge(StepWithIfConditionSchema)
