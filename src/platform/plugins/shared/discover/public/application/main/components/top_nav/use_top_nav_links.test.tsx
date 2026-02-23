@@ -266,8 +266,8 @@ describe('useTopNavLinks', () => {
   });
 
   describe('save as button', () => {
-    it('should disable save as button when session is not persisted', () => {
-      const appMenuConfig = setup({ persistedDiscoverSession: undefined });
+    it('should disable save as button when session is not persisted', async () => {
+      const appMenuConfig = await setup({ persistedDiscoverSession: undefined });
 
       const items = appMenuConfig.primaryActionItem?.splitButtonProps?.items;
       const saveAsItem = items?.find((item) => item.id === 'saveAs');
@@ -275,7 +275,7 @@ describe('useTopNavLinks', () => {
       expect(saveAsItem?.disableButton).toBe(true);
     });
 
-    it('should enable save as button when session is persisted', () => {
+    it('should enable save as button when session is persisted', async () => {
       const persistedSession = {
         id: 'test-session-id',
         title: 'Test Session',
@@ -285,7 +285,7 @@ describe('useTopNavLinks', () => {
         tabs: [],
         timeRestore: false,
       };
-      const appMenuConfig = setup({ persistedDiscoverSession: persistedSession });
+      const appMenuConfig = await setup({ persistedDiscoverSession: persistedSession });
 
       const items = appMenuConfig.primaryActionItem?.splitButtonProps?.items;
       const saveAsItem = items?.find((item) => item.id === 'saveAs');
