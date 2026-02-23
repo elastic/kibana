@@ -255,6 +255,27 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         }
       });
 
+      it('is idempotent when already disabled', async () => {
+        const delResponse = await supertestWithAdminScope
+          .delete(SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT)
+          .expect(200);
+        expect(delResponse.body).eql({});
+      });
+
+      it('is idempotent across consecutive deletes', async () => {
+        await supertestWithAdminScope.put(SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT).expect(200);
+
+        const firstDeleteResponse = await supertestWithAdminScope
+          .delete(SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT)
+          .expect(200);
+        expect(firstDeleteResponse.body).eql({});
+
+        const secondDeleteResponse = await supertestWithAdminScope
+          .delete(SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT)
+          .expect(200);
+        expect(secondDeleteResponse.body).eql({});
+      });
+
       it('with an admin', async () => {
         await supertestWithAdminScope.put(SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT).expect(200);
         const delResponse = await supertestWithAdminScope
