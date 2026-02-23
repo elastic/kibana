@@ -20,5 +20,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./agents.ts'));
     loadTestFile(require.resolve('./conversations.ts'));
     loadTestFile(require.resolve('./spaces.ts'));
+    loadTestFile(require.resolve('./rbac.ts'));
   });
 }
