@@ -46,6 +46,7 @@ const journeyTargetGroups: JourneyTargetGroups = {
   discover: ['many_fields_discover', 'many_fields_discover_esql'],
   maps: ['ecommerce_dashboard_map_only'],
   ml: ['aiops_log_rate_analysis', 'many_fields_transform', 'tsdb_logs_data_visualizer'],
+<<<<<<< HEAD
   esql: ['many_fields_discover_esql', 'web_logs_dashboard_esql'],
   streams: [
     'streams_listing_page',
@@ -55,6 +56,9 @@ const journeyTargetGroups: JourneyTargetGroups = {
     'streams_field_mapping',
     'streams_wired_hierarchy',
   ],
+=======
+  esql: ['many_fields_discover_esql', 'web_logs_dashboard_esql', 'many_fields_esql_editor'],
+>>>>>>> main
 };
 
 const readFilesRecursively = (dir: string, callback: Function) => {

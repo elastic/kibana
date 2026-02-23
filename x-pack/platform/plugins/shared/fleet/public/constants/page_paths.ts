@@ -31,6 +31,7 @@ export type DynamicPage =
   | 'integration_details_overview'
   | 'integration_details_policies'
   | 'integration_details_assets'
+  | 'integration_details_alerting'
   | 'integration_details_settings'
   | 'integration_details_custom'
   | 'integration_details_language_clients'
@@ -101,6 +102,7 @@ export const FLEET_ROUTING_PATHS = {
 
 export const INTEGRATIONS_SEARCH_QUERYPARAM = 'q';
 export const INTEGRATIONS_ONLY_AGENTLESS_QUERYPARAM = 'onlyAgentless';
+export const INTEGRATIONS_SHOW_DEPRECATED_QUERYPARAM = 'showDeprecated';
 export const INTEGRATIONS_ROUTING_PATHS = {
   integrations: '/:tabId',
   integrations_all: '/browse/:category?/:subcategory?',
@@ -111,6 +113,7 @@ export const INTEGRATIONS_ROUTING_PATHS = {
   integration_details_overview: '/detail/:pkgkey/overview',
   integration_details_policies: '/detail/:pkgkey/policies',
   integration_details_assets: '/detail/:pkgkey/assets',
+  integration_details_alerting: '/detail/:pkgkey/alerting',
   integration_details_settings: '/detail/:pkgkey/settings',
   integration_details_configs: '/detail/:pkgkey/configs',
   integration_details_custom: '/detail/:pkgkey/custom',
@@ -134,11 +137,13 @@ export const pagePathGetters: {
     category,
     subCategory,
     onlyAgentless,
+    showDeprecated,
   }: {
     searchTerm?: string;
     category?: string;
     subCategory?: string;
     onlyAgentless?: boolean;
+    showDeprecated?: boolean;
   }) => {
     const categoryPath =
       category && subCategory
@@ -152,6 +157,9 @@ export const pagePathGetters: {
     }
     if (onlyAgentless) {
       queryParams.set(INTEGRATIONS_ONLY_AGENTLESS_QUERYPARAM, 'true');
+    }
+    if (showDeprecated === true) {
+      queryParams.set(INTEGRATIONS_SHOW_DEPRECATED_QUERYPARAM, 'true');
     }
     const queryString = queryParams.toString();
     return [
@@ -193,6 +201,10 @@ export const pagePathGetters: {
   integration_details_assets: ({ pkgkey, integration, returnAppId, returnPath }) => {
     const qs = stringify({ integration, returnAppId, returnPath });
     return [INTEGRATIONS_BASE_PATH, `/detail/${pkgkey}/assets${qs ? `?${qs}` : ''}`];
+  },
+  integration_details_alerting: ({ pkgkey, integration, returnAppId, returnPath }) => {
+    const qs = stringify({ integration, returnAppId, returnPath });
+    return [INTEGRATIONS_BASE_PATH, `/detail/${pkgkey}/alerting${qs ? `?${qs}` : ''}`];
   },
   integration_details_settings: ({ pkgkey, integration, returnAppId, returnPath }) => {
     const qs = stringify({ integration, returnAppId, returnPath });

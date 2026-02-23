@@ -1,0 +1,784 @@
+{
+  "id": "@kbn/as-code-filters-transforms",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/as-code-filters-transforms",
+        "id": "def-common.FilterConversionError",
+        "type": "Class",
+        "tags": [],
+        "label": "FilterConversionError",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/as-code-filters-transforms",
+            "scope": "common",
+            "docId": "kibKbnAsCodeFiltersTransformsPluginApi",
+            "section": "def-common.FilterConversionError",
+            "text": "FilterConversionError"
+          },
+          " extends Error"
+        ],
+        "path": "src/platform/packages/shared/as-code/filters-transforms/src/errors.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/as-code-filters-transforms",
+            "id": "def-common.FilterConversionError.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/platform/packages/shared/as-code/filters-transforms/src/errors.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/as-code-filters-transforms",
+                "id": "def-common.FilterConversionError.Unnamed.$1",
+                "type": "string",
+                "tags": [],
+                "label": "message",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/as-code/filters-transforms/src/errors.ts",
+                "lineNumber": 11,
+                "columnNumber": 15,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/as-code-filters-transforms",
+                "id": "def-common.FilterConversionError.Unnamed.$2",
+                "type": "Unknown",
+                "tags": [],
+                "label": "originalFilter",
+                "description": [],
+                "signature": [
+                  "unknown"
+                ],
+                "path": "src/platform/packages/shared/as-code/filters-transforms/src/errors.ts",
+                "lineNumber": 11,
+                "columnNumber": 32,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/as-code-filters-transforms",
+        "id": "def-common.fromStoredFilter",
+        "type": "Function",
+        "tags": [],
+        "label": "fromStoredFilter",
+        "description": [
+          "\nConvert stored Filter (from saved objects/URL state) to AsCodeFilter\n\nUses type-first routing based on meta.type. Filters without meta.type are preserved\nas DSL to prevent data loss from incorrect parsing of complex queries.\n"
+        ],
+        "signature": [
+          "(storedFilter: unknown, logger: ",
+          {
+            "pluginId": "@kbn/logging",
+            "scope": "common",
+            "docId": "kibKbnLoggingPluginApi",
+            "section": "def-common.Logger",
+            "text": "Logger"
+          },
+          " | undefined) => ",
+          {
+            "pluginId": "@kbn/as-code-filters-schema",
+            "scope": "common",
+            "docId": "kibKbnAsCodeFiltersSchemaPluginApi",
+            "section": "def-common.AsCodeFilter",
+            "text": "AsCodeFilter"
+          },
+          " | undefined"
+        ],
+        "path": "src/platform/packages/shared/as-code/filters-transforms/src/from_stored_filter.ts",
+        "lineNumber": 46,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/as-code-filters-transforms",
+            "id": "def-common.fromStoredFilter.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "storedFilter",
+            "description": [
+              "The filter to convert (typically from saved object or URL state)"
+            ],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/platform/packages/shared/as-code/filters-transforms/src/from_stored_filter.ts",
+            "lineNumber": 55,
+            "columnNumber": 34,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/as-code-filters-transforms",
+            "id": "def-common.fromStoredFilter.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "logger",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "common",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-common.Logger",
+                "text": "Logger"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/as-code/filters-transforms/src/from_stored_filter.ts",
+            "lineNumber": 55,
+            "columnNumber": 57,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [
+          "AsCodeFilter with condition, group, or dsl format or undefined if conversion fails"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/as-code-filters-transforms",
+        "id": "def-common.fromStoredFilters",
+        "type": "Function",
+        "tags": [],
+        "label": "fromStoredFilters",
+        "description": [
+          "\nConvert array of stored filters to AsCode filters, filtering out conversion failures\n\nThis helper encapsulates the common pattern of converting an array of stored filters\nand filtering out any that fail to convert (return undefined).\n"
+        ],
+        "signature": [
+          "(filters: unknown[] | undefined, logger: ",
+          {
+            "pluginId": "@kbn/logging",
+            "scope": "common",
+            "docId": "kibKbnLoggingPluginApi",
+            "section": "def-common.Logger",
+            "text": "Logger"
+          },
+          " | undefined) => ",
+          {
+            "pluginId": "@kbn/as-code-filters-schema",
+            "scope": "common",
+            "docId": "kibKbnAsCodeFiltersSchemaPluginApi",
+            "section": "def-common.AsCodeFilter",
+            "text": "AsCodeFilter"
+          },
+          "[] | undefined"
+        ],
+        "path": "src/platform/packages/shared/as-code/filters-transforms/src/from_stored_filter.ts",
+        "lineNumber": 464,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/as-code-filters-transforms",
+            "id": "def-common.fromStoredFilters.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "filters",
+            "description": [
+              "Array of stored filters to convert"
+            ],
+            "signature": [
+              "unknown[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/as-code/filters-transforms/src/from_stored_filter.ts",
+            "lineNumber": 477,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/as-code-filters-transforms",
+            "id": "def-common.fromStoredFilters.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "logger",
+            "description": [
+              "Optional logger for conversion warnings"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "common",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-common.Logger",
+                "text": "Logger"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/as-code/filters-transforms/src/from_stored_filter.ts",
+            "lineNumber": 478,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [
+          "Array of successfully converted AsCode filters (undefined values filtered out), or undefined if input is undefined"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/as-code-filters-transforms",
+        "id": "def-common.isAsCodeFilter",
+        "type": "Function",
+        "tags": [],
+        "label": "isAsCodeFilter",
+        "description": [
+          "\nType guard to check if an AsCodeFilter has valid structure\nValidates that exactly one of condition, group, dsl, or spatial is present"
+        ],
+        "signature": [
+          "(filter: ",
+          {
+            "pluginId": "@kbn/as-code-filters-schema",
+            "scope": "common",
+            "docId": "kibKbnAsCodeFiltersSchemaPluginApi",
+            "section": "def-common.AsCodeFilter",
+            "text": "AsCodeFilter"
+          },
+          ") => boolean"
+        ],
+        "path": "src/platform/packages/shared/as-code/filters-transforms/src/type_guards.ts",
+        "lineNumber": 143,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/as-code-filters-transforms",
+            "id": "def-common.isAsCodeFilter.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "filter",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/as-code-filters-schema",
+                "scope": "common",
+                "docId": "kibKbnAsCodeFiltersSchemaPluginApi",
+                "section": "def-common.AsCodeFilter",
+                "text": "AsCodeFilter"
+              }
+            ],
+            "path": "src/platform/packages/shared/as-code/filters-transforms/src/type_guards.ts",
+            "lineNumber": 147,
+            "columnNumber": 32,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/as-code-filters-transforms",
+        "id": "def-common.isConditionFilter",
+        "type": "Function",
+        "tags": [],
+        "label": "isConditionFilter",
+        "description": [
+          "\nType guard to check if filter has a condition property"
+        ],
+        "signature": [
+          "(filter: ",
+          {
+            "pluginId": "@kbn/as-code-filters-schema",
+            "scope": "common",
+            "docId": "kibKbnAsCodeFiltersSchemaPluginApi",
+            "section": "def-common.AsCodeFilter",
+            "text": "AsCodeFilter"
+          },
+          ") => boolean"
+        ],
+        "path": "src/platform/packages/shared/as-code/filters-transforms/src/type_guards.ts",
+        "lineNumber": 93,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/as-code-filters-transforms",
+            "id": "def-common.isConditionFilter.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "filter",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/as-code-filters-schema",
+                "scope": "common",
+                "docId": "kibKbnAsCodeFiltersSchemaPluginApi",
+                "section": "def-common.AsCodeFilter",
+                "text": "AsCodeFilter"
+              }
+            ],
+            "path": "src/platform/packages/shared/as-code/filters-transforms/src/type_guards.ts",
+            "lineNumber": 96,
+            "columnNumber": 35,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/as-code-filters-transforms",
+        "id": "def-common.isDSLFilter",
+        "type": "Function",
+        "tags": [],
+        "label": "isDSLFilter",
+        "description": [
+          "\nType guard to check if filter has a dsl property"
+        ],
+        "signature": [
+          "(filter: ",
+          {
+            "pluginId": "@kbn/as-code-filters-schema",
+            "scope": "common",
+            "docId": "kibKbnAsCodeFiltersSchemaPluginApi",
+            "section": "def-common.AsCodeFilter",
+            "text": "AsCodeFilter"
+          },
+          ") => boolean"
+        ],
+        "path": "src/platform/packages/shared/as-code/filters-transforms/src/type_guards.ts",
+        "lineNumber": 119,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/as-code-filters-transforms",
+            "id": "def-common.isDSLFilter.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "filter",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/as-code-filters-schema",
+                "scope": "common",
+                "docId": "kibKbnAsCodeFiltersSchemaPluginApi",
+                "section": "def-common.AsCodeFilter",
+                "text": "AsCodeFilter"
+              }
+            ],
+            "path": "src/platform/packages/shared/as-code/filters-transforms/src/type_guards.ts",
+            "lineNumber": 122,
+            "columnNumber": 29,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/as-code-filters-transforms",
+        "id": "def-common.isGroupFilter",
+        "type": "Function",
+        "tags": [],
+        "label": "isGroupFilter",
+        "description": [
+          "\nType guard to check if filter has a group property"
+        ],
+        "signature": [
+          "(filter: ",
+          {
+            "pluginId": "@kbn/as-code-filters-schema",
+            "scope": "common",
+            "docId": "kibKbnAsCodeFiltersSchemaPluginApi",
+            "section": "def-common.AsCodeFilter",
+            "text": "AsCodeFilter"
+          },
+          ") => boolean"
+        ],
+        "path": "src/platform/packages/shared/as-code/filters-transforms/src/type_guards.ts",
+        "lineNumber": 112,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/as-code-filters-transforms",
+            "id": "def-common.isGroupFilter.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "filter",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/as-code-filters-schema",
+                "scope": "common",
+                "docId": "kibKbnAsCodeFiltersSchemaPluginApi",
+                "section": "def-common.AsCodeFilter",
+                "text": "AsCodeFilter"
+              }
+            ],
+            "path": "src/platform/packages/shared/as-code/filters-transforms/src/type_guards.ts",
+            "lineNumber": 115,
+            "columnNumber": 31,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/as-code-filters-transforms",
+        "id": "def-common.isRangeConditionFilter",
+        "type": "Function",
+        "tags": [],
+        "label": "isRangeConditionFilter",
+        "description": [
+          "\nType guard to check if a condition filter has a range operator\nRange filters are the only condition filters that can have a negate property"
+        ],
+        "signature": [
+          "(filter: ",
+          {
+            "pluginId": "@kbn/as-code-filters-schema",
+            "scope": "common",
+            "docId": "kibKbnAsCodeFiltersSchemaPluginApi",
+            "section": "def-common.AsCodeFilter",
+            "text": "AsCodeFilter"
+          },
+          ") => boolean"
+        ],
+        "path": "src/platform/packages/shared/as-code/filters-transforms/src/type_guards.ts",
+        "lineNumber": 100,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/as-code-filters-transforms",
+            "id": "def-common.isRangeConditionFilter.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "filter",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/as-code-filters-schema",
+                "scope": "common",
+                "docId": "kibKbnAsCodeFiltersSchemaPluginApi",
+                "section": "def-common.AsCodeFilter",
+                "text": "AsCodeFilter"
+              }
+            ],
+            "path": "src/platform/packages/shared/as-code/filters-transforms/src/type_guards.ts",
+            "lineNumber": 105,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/as-code-filters-transforms",
+        "id": "def-common.toStoredFilter",
+        "type": "Function",
+        "tags": [],
+        "label": "toStoredFilter",
+        "description": [
+          "\nConvert AsCodeFilter to stored Filter\n"
+        ],
+        "signature": [
+          "(filter: ",
+          {
+            "pluginId": "@kbn/as-code-filters-schema",
+            "scope": "common",
+            "docId": "kibKbnAsCodeFiltersSchemaPluginApi",
+            "section": "def-common.AsCodeFilter",
+            "text": "AsCodeFilter"
+          },
+          ", logger: ",
+          {
+            "pluginId": "@kbn/logging",
+            "scope": "common",
+            "docId": "kibKbnLoggingPluginApi",
+            "section": "def-common.Logger",
+            "text": "Logger"
+          },
+          " | undefined) => ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.Writable",
+            "text": "Writable"
+          },
+          "<Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+          {
+            "pluginId": "@kbn/es-query-constants",
+            "scope": "common",
+            "docId": "kibKbnEsQueryConstantsPluginApi",
+            "section": "def-common.FilterStateStore",
+            "text": "FilterStateStore"
+          },
+          "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: any; type?: string | undefined; index?: string | undefined; alias?: string | null | undefined; field?: string | undefined; disabled?: boolean | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; relation?: string | undefined; } & {}>; }>> | undefined"
+        ],
+        "path": "src/platform/packages/shared/as-code/filters-transforms/src/to_stored_filter.ts",
+        "lineNumber": 63,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/as-code-filters-transforms",
+            "id": "def-common.toStoredFilter.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "filter",
+            "description": [
+              "The AsCodeFilter to convert"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/as-code-filters-schema",
+                "scope": "common",
+                "docId": "kibKbnAsCodeFiltersSchemaPluginApi",
+                "section": "def-common.AsCodeFilter",
+                "text": "AsCodeFilter"
+              }
+            ],
+            "path": "src/platform/packages/shared/as-code/filters-transforms/src/to_stored_filter.ts",
+            "lineNumber": 70,
+            "columnNumber": 32,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/as-code-filters-transforms",
+            "id": "def-common.toStoredFilter.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "logger",
+            "description": [
+              "Optional logger for warnings"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "common",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-common.Logger",
+                "text": "Logger"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/as-code/filters-transforms/src/to_stored_filter.ts",
+            "lineNumber": 70,
+            "columnNumber": 54,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [
+          "StoredFilter or undefined if conversion fails"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/as-code-filters-transforms",
+        "id": "def-common.toStoredFilters",
+        "type": "Function",
+        "tags": [],
+        "label": "toStoredFilters",
+        "description": [
+          "\nConvert array of AsCode filters to stored filters, filtering out conversion failures\n\nThis helper encapsulates the common pattern of converting an array of AsCode filters\nand filtering out any that fail to convert (return undefined).\n"
+        ],
+        "signature": [
+          "(filters: ",
+          {
+            "pluginId": "@kbn/as-code-filters-schema",
+            "scope": "common",
+            "docId": "kibKbnAsCodeFiltersSchemaPluginApi",
+            "section": "def-common.AsCodeFilter",
+            "text": "AsCodeFilter"
+          },
+          "[] | undefined, logger: ",
+          {
+            "pluginId": "@kbn/logging",
+            "scope": "common",
+            "docId": "kibKbnLoggingPluginApi",
+            "section": "def-common.Logger",
+            "text": "Logger"
+          },
+          " | undefined) => ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.Writable",
+            "text": "Writable"
+          },
+          "<Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+          {
+            "pluginId": "@kbn/es-query-constants",
+            "scope": "common",
+            "docId": "kibKbnEsQueryConstantsPluginApi",
+            "section": "def-common.FilterStateStore",
+            "text": "FilterStateStore"
+          },
+          "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: any; type?: string | undefined; index?: string | undefined; alias?: string | null | undefined; field?: string | undefined; disabled?: boolean | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; relation?: string | undefined; } & {}>; }>>[] | undefined"
+        ],
+        "path": "src/platform/packages/shared/as-code/filters-transforms/src/to_stored_filter.ts",
+        "lineNumber": 319,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/as-code-filters-transforms",
+            "id": "def-common.toStoredFilters.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "filters",
+            "description": [
+              "Array of AsCode filters to convert"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/as-code-filters-schema",
+                "scope": "common",
+                "docId": "kibKbnAsCodeFiltersSchemaPluginApi",
+                "section": "def-common.AsCodeFilter",
+                "text": "AsCodeFilter"
+              },
+              "[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/as-code/filters-transforms/src/to_stored_filter.ts",
+            "lineNumber": 332,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/as-code-filters-transforms",
+            "id": "def-common.toStoredFilters.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "logger",
+            "description": [
+              "Optional logger for conversion warnings"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "common",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-common.Logger",
+                "text": "Logger"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/as-code/filters-transforms/src/to_stored_filter.ts",
+            "lineNumber": 333,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [
+          "Array of successfully converted stored filters (undefined values filtered out), or undefined if input is undefined"
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/as-code-filters-transforms",
+        "id": "def-common.StoredFilter",
+        "type": "Type",
+        "tags": [],
+        "label": "StoredFilter",
+        "description": [
+          "\nLocal type definition for stored filters\nInferred from the storedFilterSchema in @kbn/es-query-server"
+        ],
+        "signature": [
+          "{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+          {
+            "pluginId": "@kbn/es-query-constants",
+            "scope": "common",
+            "docId": "kibKbnEsQueryConstantsPluginApi",
+            "section": "def-common.FilterStateStore",
+            "text": "FilterStateStore"
+          },
+          "; }> | undefined; meta: Readonly<{ params?: any; key?: string | undefined; value?: any; type?: string | undefined; index?: string | undefined; alias?: string | null | undefined; field?: string | undefined; disabled?: boolean | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; relation?: string | undefined; } & {}>; }"
+        ],
+        "path": "src/platform/packages/shared/as-code/filters-transforms/src/types.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

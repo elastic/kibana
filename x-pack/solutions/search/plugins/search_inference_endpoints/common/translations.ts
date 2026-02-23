@@ -110,3 +110,24 @@ export const INFERENCE_ENDPOINTS_TABLE_CAPTION = i18n.translate(
     defaultMessage: 'Inference endpoints table',
   }
 );
+
+export const EMPTY_FILTER_MESSAGE = i18n.translate(
+  'xpack.searchInferenceEndpoints.filter.emptyMessage',
+  {
+    defaultMessage: 'No options',
+  }
+);
+
+export const GROUP_BY_NONE = i18n.translate(
+  'xpack.searchInferenceEndpoints.groupBy.options.none.label',
+  {
+    defaultMessage: 'None',
+  }
+);
+
+export const GROUP_BY_MODELS = i18n.translate(
+  'xpack.searchInferenceEndpoints.groupBy.options.models.label',
+  {
+    defaultMessage: 'Models',
+  }
+);
