@@ -74,6 +74,7 @@ AAD attributes are **not encrypted** but are cryptographically bound to the encr
 - Never change after creation (e.g., `createdAt`, `createdBy`, type identifiers)
 
 **EXCLUDE from AAD** — attributes that:
+- Are present in `attributesToEncrypt`
 - Can be changed by end users independently of encrypted data (e.g., display name, UI settings)
 - May be optional, absent, or calculated (e.g., statistics, `updatedAt`)
 - May be removed or refactored in the future (deprecated or experimental fields)
@@ -85,7 +86,7 @@ AAD attributes are **not encrypted** but are cryptographically bound to the encr
 
 ## Partial Update Safety
 
-**Critical:** Partial updates (`savedObjectsClient.update`) on ESOs must **never** modify encrypted attributes or AAD-included attributes. Doing so corrupts the object, making it permanently undecryptable.
+**Critical:** Partial updates (`savedObjectsClient.update` or `savedObjectsRepository.update`) on ESOs must **never** modify encrypted attributes or AAD-included attributes. Doing so corrupts the object, making it permanently undecryptable.
 
 **Required pattern:** Create a type-safe partial update helper that strips encrypted and AAD attributes:
 
@@ -116,7 +117,7 @@ export async function partiallyUpdateMyType(
 }
 ```
 
-**Flag if:** Any code calls `savedObjectsClient.update` on an ESO type without verifying that encrypted and AAD attributes are excluded from the update payload.
+**Flag if:** Any code calls `savedObjectsClient.update` or `savedObjectsRepository.update` on an ESO type without verifying that encrypted and AAD attributes are excluded from the update payload.
 
 ## Accessing Decrypted Data
 
