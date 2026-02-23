@@ -20,6 +20,7 @@ import type { WorkflowsExecutionEnginePluginStart } from '../../types';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger';
+import { isCancellableNode } from '../node_implementation';
 
 const createMockInit = (
   overrides: Partial<WorkflowExecuteStepImplInit> = {}
@@ -72,6 +73,7 @@ const createMockInit = (
 
   const workflowsExecutionEngine = {
     executeWorkflow: jest.fn().mockResolvedValue({ workflowExecutionId: 'child-exec-1' }),
+    cancelWorkflowExecution: jest.fn().mockResolvedValue(undefined),
   } as unknown as jest.Mocked<WorkflowsExecutionEnginePluginStart>;
 
   const workflowExecutionRepository = {
@@ -438,6 +440,61 @@ describe('WorkflowExecuteStepImpl', () => {
         'workflow-id': 'child-workflow-id',
         inputs: {},
       });
+    });
+  });
+
+  describe('onCancel()', () => {
+    it('should be detected as CancellableNode', () => {
+      const init = createMockInit();
+      const step = new WorkflowExecuteStepImpl(init);
+      expect(isCancellableNode(step)).toBe(true);
+    });
+
+    it('should cancel child workflow execution when step state has executionId', async () => {
+      const init = createMockInit();
+      (
+        init.stepExecutionRuntime as jest.Mocked<StepExecutionRuntime>
+      ).getCurrentStepState.mockReturnValue({
+        workflowId: 'child-workflow-id',
+        executionId: 'child-exec-1',
+        startedAt: '2024-01-01T00:00:00Z',
+        pollCount: 1,
+      });
+
+      const step = new WorkflowExecuteStepImpl(init);
+      await step.onCancel();
+
+      const engine =
+        init.workflowsExecutionEngine as jest.Mocked<WorkflowsExecutionEnginePluginStart>;
+      expect(engine.cancelWorkflowExecution).toHaveBeenCalledWith('child-exec-1', 'default');
+    });
+
+    it('should do nothing when step state is undefined', async () => {
+      const init = createMockInit();
+      (
+        init.stepExecutionRuntime as jest.Mocked<StepExecutionRuntime>
+      ).getCurrentStepState.mockReturnValue(undefined);
+
+      const step = new WorkflowExecuteStepImpl(init);
+      await step.onCancel();
+
+      const engine =
+        init.workflowsExecutionEngine as jest.Mocked<WorkflowsExecutionEnginePluginStart>;
+      expect(engine.cancelWorkflowExecution).not.toHaveBeenCalled();
+    });
+
+    it('should do nothing when step state has no executionId', async () => {
+      const init = createMockInit();
+      (
+        init.stepExecutionRuntime as jest.Mocked<StepExecutionRuntime>
+      ).getCurrentStepState.mockReturnValue({});
+
+      const step = new WorkflowExecuteStepImpl(init);
+      await step.onCancel();
+
+      const engine =
+        init.workflowsExecutionEngine as jest.Mocked<WorkflowsExecutionEnginePluginStart>;
+      expect(engine.cancelWorkflowExecution).not.toHaveBeenCalled();
     });
   });
 });

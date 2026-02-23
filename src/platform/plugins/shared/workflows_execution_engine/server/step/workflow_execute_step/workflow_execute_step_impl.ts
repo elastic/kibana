@@ -24,7 +24,7 @@ import type { WorkflowsExecutionEnginePluginStart } from '../../types';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger';
-import type { NodeImplementation } from '../node_implementation';
+import type { CancellableNode, NodeImplementation } from '../node_implementation';
 
 export interface WorkflowExecuteStepImplInit {
   node: WorkflowExecuteGraphNode | WorkflowExecuteAsyncGraphNode;
@@ -39,7 +39,7 @@ export interface WorkflowExecuteStepImplInit {
   workflowLogger: IWorkflowEventLogger;
 }
 
-export class WorkflowExecuteStepImpl implements NodeImplementation {
+export class WorkflowExecuteStepImpl implements NodeImplementation, CancellableNode {
   private syncExecutor: WorkflowExecuteSyncStrategy;
   private asyncExecutor: WorkflowExecuteAsyncStrategy;
 
@@ -150,6 +150,21 @@ export class WorkflowExecuteStepImpl implements NodeImplementation {
     } finally {
       await stepExecutionRuntime.flushEventLogs();
     }
+  }
+
+  async onCancel(): Promise<void> {
+    const state = this.init.stepExecutionRuntime.getCurrentStepState() as
+      | { executionId?: string }
+      | undefined;
+
+    if (!state?.executionId) {
+      return;
+    }
+
+    await this.init.workflowsExecutionEngine.cancelWorkflowExecution(
+      state.executionId,
+      this.init.spaceId
+    );
   }
 
   private async getWorkflow(workflowId: string): Promise<EsWorkflow | null> {
