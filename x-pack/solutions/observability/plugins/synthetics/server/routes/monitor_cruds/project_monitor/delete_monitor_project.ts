@@ -15,12 +15,13 @@ import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { getSavedObjectKqlFilter } from '../../common';
 import { validateSpaceId } from '../services/validate_space_id';
 
+const MAX_MONITORS_TO_DELETE = 500;
 export const deleteSyntheticsMonitorProjectRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'DELETE',
   path: SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE,
   validate: {
     body: schema.object({
-      monitors: schema.arrayOf(schema.string()),
+      monitors: schema.arrayOf(schema.string(), { maxSize: MAX_MONITORS_TO_DELETE }),
     }),
     params: schema.object({
       projectName: schema.string(),
@@ -31,7 +32,7 @@ export const deleteSyntheticsMonitorProjectRoute: SyntheticsRestApiRouteFactory 
     const { projectName } = request.params;
     const { monitors: monitorsToDelete } = request.body;
     const decodedProjectName = decodeURI(projectName);
-    if (monitorsToDelete.length > 500) {
+    if (monitorsToDelete.length > MAX_MONITORS_TO_DELETE) {
       return response.badRequest({
         body: {
           message: REQUEST_TOO_LARGE_DELETE,
@@ -50,7 +51,7 @@ export const deleteSyntheticsMonitorProjectRoute: SyntheticsRestApiRouteFactory 
 
     const { saved_objects: monitors } =
       await monitorConfigRepository.find<EncryptedSyntheticsMonitorAttributes>({
-        perPage: 500,
+        perPage: MAX_MONITORS_TO_DELETE,
         filter: deleteFilter,
         fields: [],
       });
@@ -71,6 +72,9 @@ export const REQUEST_TOO_LARGE_DELETE = i18n.translate(
   'xpack.synthetics.server.project.delete.tooLarge',
   {
     defaultMessage:
-      'Delete request payload is too large. Please send a max of 500 monitors to delete per request',
+      'Delete request payload is too large. Please send a max of {maxMonitorsToDelete} monitors to delete per request',
+    values: {
+      maxMonitorsToDelete: MAX_MONITORS_TO_DELETE,
+    },
   }
 );
