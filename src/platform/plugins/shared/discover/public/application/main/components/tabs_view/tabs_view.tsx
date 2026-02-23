@@ -62,10 +62,6 @@ export const TabsView = (props: SingleTabViewProps) => {
     setIsSwitchModesCalloutDismissed(true);
   }, [services.storage]);
 
-  const onClosePopoverOnly = useCallback(() => {
-    setIsTourStepOpen(false);
-  }, []);
-
   const areToursEnabled = services.notifications?.tours?.isEnabled() ?? true;
 
   const shouldShowSwitchModesTour =
@@ -86,7 +82,7 @@ export const TabsView = (props: SingleTabViewProps) => {
       setIsTourStepOpen(true);
     }, 500);
     return () => window.clearTimeout(timer);
-  }, [shouldShowSwitchModesTour, currentTabId]);
+  }, [shouldShowSwitchModesTour]);
 
   const onEvent: UnifiedTabsProps['onEBTEvent'] = useCallback(
     (event) => {
@@ -119,14 +115,13 @@ export const TabsView = (props: SingleTabViewProps) => {
     <>
       {shouldShowSwitchModesTour && (
         <EuiTourStep
-          key={currentTabId}
           anchor={`[data-test-subj="unifiedTabs_tabMenuBtn_${currentTabId}"]`}
           anchorPosition="leftUp"
           step={1}
           stepsTotal={1}
           isStepOpen={isTourStepOpen}
           onFinish={onCloseTourPermanently}
-          closePopover={onClosePopoverOnly}
+          closePopover={() => {}}
           title={i18n.translate('discover.tabsView.switchModesCalloutTitle', {
             defaultMessage: 'Switch modes per tab',
           })}
@@ -149,7 +144,7 @@ export const TabsView = (props: SingleTabViewProps) => {
               onClick={onCloseTourPermanently}
             >
               {i18n.translate('discover.tabsView.switchModesTourClose', {
-                defaultMessage: 'Close tour',
+                defaultMessage: 'Close',
               })}
             </EuiButtonEmpty>
           }
