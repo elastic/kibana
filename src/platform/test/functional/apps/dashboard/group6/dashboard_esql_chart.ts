@@ -114,6 +114,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await monacoEditor.setCodeEditorValue('from logstash-* | stats maxB = max(bytes)');
       await testSubjects.click('ESQLEditor-run-query-button');
       await header.waitUntilLoadingHasFinished();
+      // wait for Lens to re-render the suggestion with the new query results
+      await retry.try(async () => {
+        expect(await testSubjects.exists('mtrVis')).to.be(true);
+      });
 
       await testSubjects.click('applyFlyoutButton');
       await dashboard.waitForRenderComplete();
