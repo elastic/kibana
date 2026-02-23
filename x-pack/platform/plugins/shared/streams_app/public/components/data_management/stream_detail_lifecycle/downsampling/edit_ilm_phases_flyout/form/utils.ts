@@ -5,42 +5,7 @@
  * 2.0.
  */
 
-import type { StreamsTimeUnit } from '../../../helpers/format_size_units';
-import { splitSizeAndUnits, toMillis } from '../../../helpers/format_size_units';
-
-export function toMilliseconds(value: string, unit: StreamsTimeUnit): number {
-  if (value.trim() === '') return -1;
-  const resolvedValue = value.trim();
-  const ms = toMillis(`${resolvedValue}${unit}`);
-  return ms === undefined ? Number.NaN : ms;
-}
-
-export function parseInterval(
-  duration: string | undefined
-): { value: string; unit: StreamsTimeUnit } | undefined {
-  if (!duration) return;
-
-  // Preserve the original unit from ILM policies (e.g. `ms`, `micros`, `nanos`).
-  // Streams flyout only *offers* d/h/m/s by default, but can display and round-trip other units.
-  const { size, unit } = splitSizeAndUnits(duration);
-  if (!size || !unit) return;
-  if (toMillis(`1${unit}`) === undefined) return;
-  return { value: size, unit: unit as StreamsTimeUnit };
-}
-
-export function formatMillisecondsInUnit(ms: number, unit: string, precision = 2): string {
-  const multiplier = toMillis(`1${unit}`);
-  if (multiplier === undefined || multiplier === 0) {
-    return `${ms}ms`;
-  }
-
-  const valueInUnit = ms / multiplier;
-  const formatted =
-    Number.isFinite(valueInUnit) && Number.isInteger(valueInUnit)
-      ? String(valueInUnit)
-      : String(Number(valueInUnit.toFixed(precision)));
-  return `${formatted}${unit}`;
-}
+export { formatMillisecondsInUnit, parseInterval, toMilliseconds } from '../../shared';
 
 export function getRelativeBoundsInMs<P extends string>(
   orderedPhases: ReadonlyArray<P>,
