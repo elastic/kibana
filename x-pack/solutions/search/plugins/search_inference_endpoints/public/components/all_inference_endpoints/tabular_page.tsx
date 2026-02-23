@@ -18,6 +18,8 @@ import type {
 import type { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
 import { EisCloudConnectPromoCallout, EisPromotionalCallout } from '@kbn/search-api-panels';
 import { CLOUD_CONNECT_NAV_ID } from '@kbn/deeplinks-management/constants';
+
+import { docLinks } from '../../../common/doc_links';
 import {
   ENDPOINT,
   ENDPOINT_COPY_ID_ACTION_LABEL,
@@ -28,29 +30,44 @@ import {
   SERVICE_PROVIDER,
 } from '../../../common/translations';
 
-import { useTableData } from '../../hooks/use_table_data';
+import { useKibana } from '../../hooks/use_kibana';
 import { useEndpointActions } from '../../hooks/use_endpoint_actions';
-import type { FilterOptions } from './types';
-import { INFERENCE_ENDPOINTS_TABLE_PER_PAGE_VALUES } from './types';
+import { useFilteredInferenceEndpoints } from '../../hooks/use_filtered_endpoints';
+import { type FilterOptions, GroupByOptions } from '../../types';
+import { getModelId } from '../../utils/get_model_id';
+import { isEndpointPreconfigured } from '../../utils/preconfigured_endpoint_helper';
+import { EditInferenceFlyout } from '../edit_inference_endpoints/edit_inference_flyout';
 
 import { DEFAULT_FILTER_OPTIONS } from './constants';
 import { ServiceProviderFilter } from './filter/service_provider_filter';
 import { TaskTypeFilter } from './filter/task_type_filter';
 import { TableSearch } from './search/table_search';
+import { GroupBySelect } from './group_by_select';
 import { EndpointInfo } from './render_table_columns/render_endpoint/endpoint_info';
 import { Model } from './render_table_columns/render_model/model';
 import { ServiceProvider } from './render_table_columns/render_service_provider/service_provider';
 import { DeleteAction } from './render_table_columns/render_actions/actions/delete/delete_action';
-import { useKibana } from '../../hooks/use_kibana';
-import { getModelId } from '../../utils/get_model_id';
-import { isEndpointPreconfigured } from '../../utils/preconfigured_endpoint_helper';
-import { EditInferenceFlyout } from '../edit_inference_endpoints/edit_inference_flyout';
-import { docLinks } from '../../../common/doc_links';
+import { INFERENCE_ENDPOINTS_TABLE_PER_PAGE_VALUES } from './types';
+
 import { EndpointStats } from './endpoint_stats';
+import { GroupedEndpointsTables } from './grouped_endpoints/grouped_endpoints_tables';
 
 const searchContainerStyles = ({ euiTheme }: UseEuiTheme) => css`
   width: ${euiTheme.base * 25}px;
 `;
+
+const initializeGroupBy = (): GroupByOptions => {
+  const params = new URLSearchParams(window.location.search);
+  const groupByParam = params.get('groupBy') ?? '';
+
+  switch (groupByParam) {
+    case GroupByOptions.None:
+      return GroupByOptions.None;
+    case GroupByOptions.Model:
+    default:
+      return GroupByOptions.Model;
+  }
+};
 
 interface TabularPageProps {
   inferenceEndpoints: InferenceAPIConfigResponse[];
@@ -61,6 +78,7 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
     services: { cloud, application },
   } = useKibana();
   const [searchKey, setSearchKey] = useState('');
+  const [groupBy, setGroupBy] = useState<GroupByOptions>(initializeGroupBy);
   const [filterOptions, setFilterOptions] = useState<FilterOptions>(DEFAULT_FILTER_OPTIONS);
 
   const {
@@ -92,11 +110,12 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
     setFilterOptions((prev) => ({ ...prev, ...newFilterOptions }));
   }, []);
 
-  const tableData = useTableData(inferenceEndpoints, filterOptions, searchKey);
+  const tableData = useFilteredInferenceEndpoints(inferenceEndpoints, filterOptions, searchKey);
 
   const tableColumns = useMemo<Array<EuiBasicTableColumn<InferenceInferenceEndpointInfo>>>(
     () => [
       {
+        id: 'inference_id-column',
         field: 'inference_id',
         name: ENDPOINT,
         'data-test-subj': 'endpointCell',
@@ -115,6 +134,7 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
         width: '300px',
       },
       {
+        id: 'model-column',
         name: MODEL,
         'data-test-subj': 'modelCell',
         render: (endpointInfo: InferenceInferenceEndpointInfo) => {
@@ -124,6 +144,7 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
         width: '200px',
       },
       {
+        id: 'service-column',
         field: 'service',
         name: SERVICE_PROVIDER,
         'data-test-subj': 'providerCell',
@@ -211,27 +232,47 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
                   uniqueTaskTypes={uniqueProvidersAndTaskTypes.taskTypes}
                 />
               </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <GroupBySelect
+                  value={groupBy ?? GroupByOptions.None}
+                  onChange={(value) => {
+                    setGroupBy(value ?? GroupByOptions.None);
+                  }}
+                />
+              </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
         <EndpointStats endpoints={tableData} />
-        <EuiInMemoryTable
-          allowNeutralSort={false}
-          columns={tableColumns}
-          itemId="inference_id"
-          items={tableData}
-          pagination={{
-            pageSizeOptions: INFERENCE_ENDPOINTS_TABLE_PER_PAGE_VALUES,
-          }}
-          sorting={{
-            sort: {
-              field: 'inference_id',
-              direction: 'asc',
-            },
-          }}
-          data-test-subj="inferenceEndpointTable"
-          tableCaption={INFERENCE_ENDPOINTS_TABLE_CAPTION}
-        />
+        {groupBy === GroupByOptions.None ? (
+          <EuiInMemoryTable
+            allowNeutralSort={false}
+            columns={tableColumns}
+            itemId="inference_id"
+            items={tableData}
+            pagination={{
+              pageSizeOptions: INFERENCE_ENDPOINTS_TABLE_PER_PAGE_VALUES,
+            }}
+            sorting={{
+              sort: {
+                field: 'inference_id',
+                direction: 'asc',
+              },
+            }}
+            data-test-subj="inferenceEndpointTable"
+            tableCaption={INFERENCE_ENDPOINTS_TABLE_CAPTION}
+          />
+        ) : (
+          <EuiFlexItem>
+            <GroupedEndpointsTables
+              inferenceEndpoints={inferenceEndpoints}
+              groupBy={groupBy}
+              filterOptions={filterOptions}
+              searchKey={searchKey}
+              columns={tableColumns}
+            />
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
       {showDeleteAction && selectedInferenceEndpoint && (
         <DeleteAction

@@ -22,7 +22,7 @@ export const registerSkills = async (
 ): Promise<void> => {
   // await agentBuilder.skill.registerSkill(alertAnalysisSampleSkill);
   if (experimentalFeatures.automaticTroubleshootingSkill) {
-    agentBuilder.skills.register(
+    await agentBuilder.skills.register(
       createAutomaticTroubleshootingSkill(options.endpointAppContextService)
     );
   }
