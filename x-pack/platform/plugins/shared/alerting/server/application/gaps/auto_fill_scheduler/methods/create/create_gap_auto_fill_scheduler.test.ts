@@ -28,6 +28,7 @@ import { transformSavedObjectToGapAutoFillSchedulerResult } from '../../transfor
 import type { SavedObject, KibanaRequest } from '@kbn/core/server';
 import type { TaskInstanceWithId } from '@kbn/task-manager-plugin/server/task';
 import type { CreateGapAutoFillSchedulerParams } from './types';
+import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-server-mocks';
 
 const kibanaVersion = 'v8.0.0';
 const taskManager = taskManagerMock.createStart();
@@ -66,6 +67,8 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   isSystemAction: jest.fn(),
   connectorAdapterRegistry: new ConnectorAdapterRegistry(),
   uiSettings: uiSettingsServiceMock.createStartContract(),
+  featureFlags: coreFeatureFlagsMock.createStart(),
+  isServerless: false,
 };
 
 function getParams(

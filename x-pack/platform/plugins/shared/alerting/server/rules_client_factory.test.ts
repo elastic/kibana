@@ -16,6 +16,7 @@ import {
   savedObjectsRepositoryMock,
   uiSettingsServiceMock,
   securityServiceMock,
+  coreFeatureFlagsMock,
 } from '@kbn/core/server/mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
@@ -107,6 +108,8 @@ describe('RulesClientFactory', () => {
       getAlertIndicesAlias: jest.fn(),
       alertsService: null,
       shouldGrantUiam: false,
+      featureFlags: coreFeatureFlagsMock.createStart(),
+      isServerless: false,
     };
 
     rulesClientFactoryParams.actions = actionsMock.createStart();
