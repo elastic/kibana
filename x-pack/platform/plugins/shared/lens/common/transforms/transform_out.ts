@@ -35,6 +35,7 @@ export const getTransformOut = (
       transformTitlesOut<LensSerializedState>,
       (state: LensSerializedState) => transformDrilldownsOut(state, panelReferences)
     );
+    console.log('test');
 
     const state = transformsFlow(storedState);
 
