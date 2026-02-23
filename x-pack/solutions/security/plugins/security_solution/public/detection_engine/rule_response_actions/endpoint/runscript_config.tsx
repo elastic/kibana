@@ -38,7 +38,7 @@ interface ValidationState {
 
 const RUNSCRIPT_CONFIG_LABEL = i18n.translate(
   'xpack.securitySolution.endpoint.runscriptConfig.runscriptConfigurationLabel',
-  { defaultMessage: 'OS configuration' }
+  { defaultMessage: 'Operating system configuration' }
 );
 const RUNSCRIPT_CONFIG_REQUIRES_ONE_OS = i18n.translate(
   'xpack.securitySolution.endpoint.runscriptConfig.runscriptConfigurationHelp',

@@ -7,7 +7,7 @@
 
 import React, { memo, useCallback, useEffect, useMemo } from 'react';
 import type { EuiSuperSelectOption, EuiSuperSelectProps } from '@elastic/eui';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiSuperSelect } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSuperSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { EndpointScript } from '../../../../common/endpoint/types';
 import { useGetCustomScripts } from '../../hooks/custom_scripts/use_get_custom_scripts';
@@ -66,9 +66,18 @@ export const EndpointRunscriptScriptSelector = memo<EndpointRunscriptScriptSelec
       }
 
       if (isFetched && data?.length === 0) {
-        return i18n.translate(
-          'xpack.securitySolution.endpointRunscriptScriptSelector.noScriptsFound',
-          { defaultMessage: 'No scripts found' }
+        return (
+          <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
+            <EuiFlexItem>
+              {i18n.translate(
+                'xpack.securitySolution.endpointRunscriptScriptSelector.noScriptsFound',
+                { defaultMessage: 'No scripts found' }
+              )}
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiIcon type="warning" aria-hidden={true} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         );
       }
     }, [data?.length, error, isFetched]);
@@ -148,7 +157,6 @@ export const EndpointRunscriptScriptSelector = memo<EndpointRunscriptScriptSelec
         valueOfSelected={selectedScript}
         fullWidth
         isLoading={isLoading}
-        isInvalid={!!displayError}
         placeholder={displayError ? displayError : SELECT_INPUT_PLACEHOLDER}
         onChange={handleScriptSelectorOnChange}
         aria-label={SELECT_INPUT_PLACEHOLDER}
