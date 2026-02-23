@@ -1,0 +1,69 @@
+{
+  "id": "@kbn/cps-server-utils",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/cps-server-utils",
+        "id": "def-server.getSpaceNPRE",
+        "type": "Function",
+        "tags": [],
+        "label": "getSpaceNPRE",
+        "description": [],
+        "signature": [
+          "(spaceIdOrRequest: string | ",
+          "KibanaRequest",
+          "<unknown, unknown, unknown, any>) => string"
+        ],
+        "path": "src/platform/packages/shared/kbn-cps-server-utils/src/get_space_npre.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cps-server-utils",
+            "id": "def-server.getSpaceNPRE.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "spaceIdOrRequest",
+            "description": [],
+            "signature": [
+              "string | ",
+              "KibanaRequest",
+              "<unknown, unknown, unknown, any>"
+            ],
+            "path": "src/platform/packages/shared/kbn-cps-server-utils/src/get_space_npre.ts",
+            "lineNumber": 13,
+            "columnNumber": 30,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

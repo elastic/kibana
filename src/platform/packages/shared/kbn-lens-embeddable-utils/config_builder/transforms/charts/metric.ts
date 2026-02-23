@@ -374,10 +374,7 @@ function enrichConfigurationWithVisualizationProperties(
     }
 
     if (visualization.palette) {
-      const colorByValue = fromColorByValueLensStateToAPI(visualization.palette);
-      if (colorByValue?.range === 'absolute') {
-        primaryMetric.color = colorByValue;
-      }
+      primaryMetric.color = fromColorByValueLensStateToAPI(visualization.palette);
     }
 
     if (visualization.applyColorTo) {

@@ -167,7 +167,7 @@
         "label": "IEventLogClient",
         "description": [],
         "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
-        "lineNumber": 63,
+        "lineNumber": 64,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -193,7 +193,7 @@
               ">"
             ],
             "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
-            "lineNumber": 64,
+            "lineNumber": 65,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -209,7 +209,7 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
-                "lineNumber": 65,
+                "lineNumber": 66,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -226,7 +226,7 @@
                   "string[]"
                 ],
                 "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
-                "lineNumber": 66,
+                "lineNumber": 67,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -245,7 +245,7 @@
                   "> | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
-                "lineNumber": 67,
+                "lineNumber": 68,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -262,7 +262,7 @@
                   "string[] | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
-                "lineNumber": 68,
+                "lineNumber": 69,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -300,7 +300,7 @@
               ">"
             ],
             "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
-            "lineNumber": 70,
+            "lineNumber": 71,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -316,7 +316,7 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
-                "lineNumber": 71,
+                "lineNumber": 72,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -333,7 +333,7 @@
                   "string[]"
                 ],
                 "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
-                "lineNumber": 72,
+                "lineNumber": 73,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -356,7 +356,7 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
-                "lineNumber": 73,
+                "lineNumber": 74,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -373,7 +373,7 @@
                   "string | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
-                "lineNumber": 74,
+                "lineNumber": 75,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -392,7 +392,7 @@
                   "> | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
-                "lineNumber": 75,
+                "lineNumber": 76,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -422,7 +422,7 @@
               ">"
             ],
             "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
-            "lineNumber": 77,
+            "lineNumber": 78,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -438,7 +438,7 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
-                "lineNumber": 78,
+                "lineNumber": 79,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -455,7 +455,7 @@
                   "string[]"
                 ],
                 "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
-                "lineNumber": 79,
+                "lineNumber": 80,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -474,7 +474,7 @@
                   "> | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
-                "lineNumber": 80,
+                "lineNumber": 81,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -491,7 +491,7 @@
                   "string[] | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
-                "lineNumber": 81,
+                "lineNumber": 82,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -529,7 +529,7 @@
               ">"
             ],
             "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
-            "lineNumber": 83,
+            "lineNumber": 84,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -545,7 +545,7 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
-                "lineNumber": 84,
+                "lineNumber": 85,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -568,7 +568,7 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
-                "lineNumber": 85,
+                "lineNumber": 86,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -587,7 +587,7 @@
                   "> | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
-                "lineNumber": 86,
+                "lineNumber": 87,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -604,7 +604,7 @@
                   "(string | undefined)[] | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
-                "lineNumber": 87,
+                "lineNumber": 88,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -621,7 +621,7 @@
                   "boolean | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
-                "lineNumber": 88,
+                "lineNumber": 89,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -649,7 +649,7 @@
               ", \"data\">>"
             ],
             "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
-            "lineNumber": 90,
+            "lineNumber": 91,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -665,7 +665,7 @@
                   "{ _id: string; _index: string; }[]"
                 ],
                 "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
-                "lineNumber": 91,
+                "lineNumber": 92,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -689,7 +689,7 @@
               ">"
             ],
             "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
-            "lineNumber": 93,
+            "lineNumber": 94,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -705,7 +705,7 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
-                "lineNumber": 94,
+                "lineNumber": 95,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -722,7 +722,7 @@
                   "string[]"
                 ],
                 "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
-                "lineNumber": 95,
+                "lineNumber": 96,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -741,7 +741,7 @@
                   "> | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
-                "lineNumber": 96,
+                "lineNumber": 97,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -758,7 +758,7 @@
                   "string[] | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
-                "lineNumber": 97,
+                "lineNumber": 98,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -778,7 +778,7 @@
               "(pitId: string) => Promise<void>"
             ],
             "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
-            "lineNumber": 99,
+            "lineNumber": 100,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -794,7 +794,7 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
-                "lineNumber": 99,
+                "lineNumber": 100,
                 "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -814,7 +814,7 @@
               "() => Promise<void>"
             ],
             "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
-            "lineNumber": 100,
+            "lineNumber": 101,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -832,7 +832,7 @@
         "label": "IEventLogger",
         "description": [],
         "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
-        "lineNumber": 103,
+        "lineNumber": 104,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -850,7 +850,7 @@
               ", id?: string | undefined) => void"
             ],
             "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
-            "lineNumber": 104,
+            "lineNumber": 105,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -866,7 +866,7 @@
                   "IEvent"
                 ],
                 "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
-                "lineNumber": 104,
+                "lineNumber": 105,
                 "columnNumber": 12,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -883,7 +883,7 @@
                   "string | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
-                "lineNumber": 104,
+                "lineNumber": 105,
                 "columnNumber": 32,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -905,7 +905,7 @@
               ", startTime?: Date | undefined) => void"
             ],
             "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
-            "lineNumber": 105,
+            "lineNumber": 106,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -921,7 +921,7 @@
                   "IEvent"
                 ],
                 "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
-                "lineNumber": 105,
+                "lineNumber": 106,
                 "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -938,7 +938,7 @@
                   "Date | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
-                "lineNumber": 105,
+                "lineNumber": 106,
                 "columnNumber": 30,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -960,7 +960,7 @@
               ") => void"
             ],
             "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
-            "lineNumber": 106,
+            "lineNumber": 107,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -976,7 +976,7 @@
                   "IEvent"
                 ],
                 "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
-                "lineNumber": 106,
+                "lineNumber": 107,
                 "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1008,7 +1008,7 @@
               ">"
             ],
             "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
-            "lineNumber": 107,
+            "lineNumber": 108,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1034,7 +1034,7 @@
                   "; }[]"
                 ],
                 "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
-                "lineNumber": 108,
+                "lineNumber": 109,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1174,7 +1174,7 @@
             "label": "data",
             "description": [],
             "signature": [
-              "(Readonly<{ log?: Readonly<{ logger?: string | undefined; level?: string | undefined; } & {}> | undefined; error?: Readonly<{ id?: string | undefined; type?: string | undefined; message?: string | undefined; code?: string | undefined; stack_trace?: string | undefined; } & {}> | undefined; '@timestamp'?: string | undefined; message?: string | undefined; tags?: string[] | undefined; rule?: Readonly<{ id?: string | undefined; name?: string | undefined; license?: string | undefined; version?: string | undefined; description?: string | undefined; uuid?: string | undefined; category?: string | undefined; reference?: string | undefined; author?: string[] | undefined; ruleset?: string | undefined; } & {}> | undefined; kibana?: Readonly<{ task?: Readonly<{ id?: string | undefined; schedule_delay?: string | number | undefined; scheduled?: string | undefined; } & {}> | undefined; action?: Readonly<{ id?: string | undefined; name?: string | undefined; execution?: Readonly<{ source?: string | undefined; uuid?: string | undefined; gen_ai?: Readonly<{ usage?: Readonly<{ prompt_tokens?: string | number | undefined; completion_tokens?: string | number | undefined; total_tokens?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; usage?: Readonly<{ request_body_bytes?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; type_id?: string | undefined; } & {}> | undefined; version?: string | undefined; alert?: Readonly<{ rule?: Readonly<{ consumer?: string | undefined; revision?: string | number | undefined; gap?: Readonly<{ status?: string | undefined; range?: Readonly<{ gte?: string | undefined; lte?: string | undefined; } & {}> | undefined; updated_at?: string | undefined; filled_intervals?: Readonly<{ gte?: string | undefined; lte?: string | undefined; } & {}>[] | undefined; unfilled_intervals?: Readonly<{ gte?: string | undefined; lte?: string | undefined; } & {}>[] | undefined; in_progress_intervals?: Readonly<{ gte?: string | undefined; lte?: string | undefined; } & {}>[] | undefined; total_gap_duration_ms?: string | number | undefined; filled_duration_ms?: string | number | undefined; unfilled_duration_ms?: string | number | undefined; in_progress_duration_ms?: string | number | undefined; deleted?: boolean | undefined; failed_auto_fill_attempts?: string | number | undefined; } & {}> | undefined; execution?: Readonly<{ status?: string | undefined; uuid?: string | undefined; metrics?: Readonly<{ total_search_duration_ms?: string | number | undefined; total_indexing_duration_ms?: string | number | undefined; gap_range?: Readonly<{ gte?: string | undefined; lte?: string | undefined; } & {}> | undefined; number_of_triggered_actions?: string | number | undefined; number_of_generated_actions?: string | number | undefined; alert_counts?: Readonly<{ active?: string | number | undefined; new?: string | number | undefined; recovered?: string | number | undefined; } & {}> | undefined; number_of_delayed_alerts?: string | number | undefined; number_of_searches?: string | number | undefined; es_search_duration_ms?: string | number | undefined; execution_gap_duration_s?: string | number | undefined; frozen_indices_queried_count?: string | number | undefined; rule_type_run_duration_ms?: string | number | undefined; process_alerts_duration_ms?: string | number | undefined; trigger_actions_duration_ms?: string | number | undefined; process_rule_duration_ms?: string | number | undefined; claim_to_start_duration_ms?: string | number | undefined; persist_alerts_duration_ms?: string | number | undefined; prepare_rule_duration_ms?: string | number | undefined; total_run_duration_ms?: string | number | undefined; total_enrichment_duration_ms?: string | number | undefined; update_alerts_duration_ms?: string | number | undefined; } & {}> | undefined; status_order?: string | number | undefined; backfill?: Readonly<{ id?: string | undefined; start?: string | undefined; interval?: string | undefined; } & {}> | undefined; } & {}> | undefined; rule_type_id?: string | undefined; } & {}> | undefined; flapping?: boolean | undefined; uuid?: string | undefined; maintenance_window_ids?: string[] | undefined; deletion?: Readonly<{ num_deleted?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; alerting?: Readonly<{ status?: string | undefined; outcome?: string | undefined; summary?: Readonly<{ new?: Readonly<{ count?: string | number | undefined; } & {}> | undefined; recovered?: Readonly<{ count?: string | number | undefined; } & {}> | undefined; ongoing?: Readonly<{ count?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; instance_id?: string | undefined; action_group_id?: string | undefined; action_subgroup?: string | undefined; } & {}> | undefined; space_ids?: string[] | undefined; server_uuid?: string | undefined; saved_objects?: Readonly<{ id?: string | undefined; type?: string | undefined; namespace?: string | undefined; rel?: string | undefined; type_id?: string | undefined; space_agnostic?: boolean | undefined; } & {}>[] | undefined; user_api_key?: Readonly<{ id?: string | undefined; name?: string | undefined; } & {}> | undefined; gap_auto_fill?: Readonly<{ execution?: Readonly<{ start?: string | undefined; end?: string | undefined; status?: string | undefined; results?: Readonly<{ error?: string | undefined; status?: string | undefined; rule_id?: string | undefined; processed_gaps?: string | number | undefined; } & {}>[] | undefined; duration_ms?: string | number | undefined; rule_ids?: string[] | undefined; task_params?: Readonly<{ name?: string | undefined; interval?: string | undefined; num_retries?: string | number | undefined; gap_fill_range?: string | undefined; max_backfills?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; } & {}> | undefined; } & {}> | undefined; event?: Readonly<{ id?: string | undefined; type?: string[] | undefined; reason?: string | undefined; action?: string | undefined; start?: string | undefined; end?: string | undefined; original?: string | undefined; code?: string | undefined; outcome?: string | undefined; duration?: string | number | undefined; timezone?: string | undefined; severity?: string | number | undefined; category?: string[] | undefined; risk_score?: number | undefined; url?: string | undefined; created?: string | undefined; provider?: string | undefined; dataset?: string | undefined; kind?: string | undefined; hash?: string | undefined; ingested?: string | undefined; module?: string | undefined; reference?: string | undefined; risk_score_norm?: number | undefined; sequence?: string | number | undefined; } & {}> | undefined; user?: Readonly<{ id?: string | undefined; name?: string | undefined; } & {}> | undefined; ecs?: Readonly<{ version?: string | undefined; } & {}> | undefined; } & {}> & { _id: string; _index: string; _seq_no: number; _primary_term: number; })[]"
+              "(Readonly<{ log?: Readonly<{ logger?: string | undefined; level?: string | undefined; } & {}> | undefined; error?: Readonly<{ id?: string | undefined; type?: string | undefined; message?: string | undefined; code?: string | undefined; stack_trace?: string | undefined; } & {}> | undefined; '@timestamp'?: string | undefined; message?: string | undefined; tags?: string[] | undefined; rule?: Readonly<{ id?: string | undefined; name?: string | undefined; license?: string | undefined; version?: string | undefined; description?: string | undefined; uuid?: string | undefined; category?: string | undefined; reference?: string | undefined; author?: string[] | undefined; ruleset?: string | undefined; } & {}> | undefined; kibana?: Readonly<{ task?: Readonly<{ id?: string | undefined; schedule_delay?: string | number | undefined; scheduled?: string | undefined; } & {}> | undefined; action?: Readonly<{ id?: string | undefined; name?: string | undefined; execution?: Readonly<{ source?: string | undefined; uuid?: string | undefined; gen_ai?: Readonly<{ usage?: Readonly<{ prompt_tokens?: string | number | undefined; completion_tokens?: string | number | undefined; total_tokens?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; usage?: Readonly<{ request_body_bytes?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; type_id?: string | undefined; } & {}> | undefined; version?: string | undefined; alert?: Readonly<{ rule?: Readonly<{ consumer?: string | undefined; revision?: string | number | undefined; gap?: Readonly<{ range?: Readonly<{ lte?: string | undefined; gte?: string | undefined; } & {}> | undefined; status?: string | undefined; updated_at?: string | undefined; filled_intervals?: Readonly<{ lte?: string | undefined; gte?: string | undefined; } & {}>[] | undefined; unfilled_intervals?: Readonly<{ lte?: string | undefined; gte?: string | undefined; } & {}>[] | undefined; in_progress_intervals?: Readonly<{ lte?: string | undefined; gte?: string | undefined; } & {}>[] | undefined; total_gap_duration_ms?: string | number | undefined; filled_duration_ms?: string | number | undefined; unfilled_duration_ms?: string | number | undefined; in_progress_duration_ms?: string | number | undefined; deleted?: boolean | undefined; failed_auto_fill_attempts?: string | number | undefined; } & {}> | undefined; execution?: Readonly<{ metrics?: Readonly<{ total_search_duration_ms?: string | number | undefined; total_indexing_duration_ms?: string | number | undefined; gap_range?: Readonly<{ lte?: string | undefined; gte?: string | undefined; } & {}> | undefined; number_of_triggered_actions?: string | number | undefined; number_of_generated_actions?: string | number | undefined; alert_counts?: Readonly<{ active?: string | number | undefined; new?: string | number | undefined; recovered?: string | number | undefined; } & {}> | undefined; number_of_delayed_alerts?: string | number | undefined; number_of_searches?: string | number | undefined; es_search_duration_ms?: string | number | undefined; execution_gap_duration_s?: string | number | undefined; frozen_indices_queried_count?: string | number | undefined; rule_type_run_duration_ms?: string | number | undefined; process_alerts_duration_ms?: string | number | undefined; trigger_actions_duration_ms?: string | number | undefined; process_rule_duration_ms?: string | number | undefined; claim_to_start_duration_ms?: string | number | undefined; persist_alerts_duration_ms?: string | number | undefined; prepare_rule_duration_ms?: string | number | undefined; total_run_duration_ms?: string | number | undefined; total_enrichment_duration_ms?: string | number | undefined; update_alerts_duration_ms?: string | number | undefined; } & {}> | undefined; status?: string | undefined; uuid?: string | undefined; status_order?: string | number | undefined; backfill?: Readonly<{ id?: string | undefined; start?: string | undefined; interval?: string | undefined; } & {}> | undefined; } & {}> | undefined; rule_type_id?: string | undefined; } & {}> | undefined; flapping?: boolean | undefined; uuid?: string | undefined; maintenance_window_ids?: string[] | undefined; deletion?: Readonly<{ num_deleted?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; alerting?: Readonly<{ status?: string | undefined; outcome?: string | undefined; summary?: Readonly<{ new?: Readonly<{ count?: string | number | undefined; } & {}> | undefined; recovered?: Readonly<{ count?: string | number | undefined; } & {}> | undefined; ongoing?: Readonly<{ count?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; instance_id?: string | undefined; action_group_id?: string | undefined; action_subgroup?: string | undefined; } & {}> | undefined; space_ids?: string[] | undefined; server_uuid?: string | undefined; saved_objects?: Readonly<{ id?: string | undefined; type?: string | undefined; namespace?: string | undefined; rel?: string | undefined; type_id?: string | undefined; space_agnostic?: boolean | undefined; } & {}>[] | undefined; user_api_key?: Readonly<{ id?: string | undefined; name?: string | undefined; } & {}> | undefined; gap_auto_fill?: Readonly<{ execution?: Readonly<{ start?: string | undefined; end?: string | undefined; status?: string | undefined; results?: Readonly<{ error?: string | undefined; status?: string | undefined; rule_id?: string | undefined; processed_gaps?: string | number | undefined; } & {}>[] | undefined; duration_ms?: string | number | undefined; rule_ids?: string[] | undefined; task_params?: Readonly<{ name?: string | undefined; interval?: string | undefined; num_retries?: string | number | undefined; gap_fill_range?: string | undefined; max_backfills?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; } & {}> | undefined; } & {}> | undefined; event?: Readonly<{ id?: string | undefined; type?: string[] | undefined; reason?: string | undefined; action?: string | undefined; start?: string | undefined; end?: string | undefined; duration?: string | number | undefined; dataset?: string | undefined; code?: string | undefined; outcome?: string | undefined; timezone?: string | undefined; severity?: string | number | undefined; category?: string[] | undefined; risk_score?: number | undefined; url?: string | undefined; created?: string | undefined; provider?: string | undefined; hash?: string | undefined; ingested?: string | undefined; kind?: string | undefined; module?: string | undefined; original?: string | undefined; reference?: string | undefined; risk_score_norm?: number | undefined; sequence?: string | number | undefined; } & {}> | undefined; user?: Readonly<{ id?: string | undefined; name?: string | undefined; } & {}> | undefined; ecs?: Readonly<{ version?: string | undefined; } & {}> | undefined; } & {}> & { _id: string; _index: string; _seq_no: number; _primary_term: number; })[]"
             ],
             "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
             "lineNumber": 71,
@@ -1196,7 +1196,7 @@
         "label": "IEvent",
         "description": [],
         "signature": [
-          "DeepPartial<DeepWriteable<Readonly<{ log?: Readonly<{ logger?: string | undefined; level?: string | undefined; } & {}> | undefined; error?: Readonly<{ id?: string | undefined; type?: string | undefined; message?: string | undefined; code?: string | undefined; stack_trace?: string | undefined; } & {}> | undefined; '@timestamp'?: string | undefined; message?: string | undefined; tags?: string[] | undefined; rule?: Readonly<{ id?: string | undefined; name?: string | undefined; license?: string | undefined; version?: string | undefined; description?: string | undefined; uuid?: string | undefined; category?: string | undefined; reference?: string | undefined; author?: string[] | undefined; ruleset?: string | undefined; } & {}> | undefined; kibana?: Readonly<{ task?: Readonly<{ id?: string | undefined; schedule_delay?: string | number | undefined; scheduled?: string | undefined; } & {}> | undefined; action?: Readonly<{ id?: string | undefined; name?: string | undefined; execution?: Readonly<{ source?: string | undefined; uuid?: string | undefined; gen_ai?: Readonly<{ usage?: Readonly<{ prompt_tokens?: string | number | undefined; completion_tokens?: string | number | undefined; total_tokens?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; usage?: Readonly<{ request_body_bytes?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; type_id?: string | undefined; } & {}> | undefined; version?: string | undefined; alert?: Readonly<{ rule?: Readonly<{ consumer?: string | undefined; revision?: string | number | undefined; gap?: Readonly<{ status?: string | undefined; range?: Readonly<{ gte?: string | undefined; lte?: string | undefined; } & {}> | undefined; updated_at?: string | undefined; filled_intervals?: Readonly<{ gte?: string | undefined; lte?: string | undefined; } & {}>[] | undefined; unfilled_intervals?: Readonly<{ gte?: string | undefined; lte?: string | undefined; } & {}>[] | undefined; in_progress_intervals?: Readonly<{ gte?: string | undefined; lte?: string | undefined; } & {}>[] | undefined; total_gap_duration_ms?: string | number | undefined; filled_duration_ms?: string | number | undefined; unfilled_duration_ms?: string | number | undefined; in_progress_duration_ms?: string | number | undefined; deleted?: boolean | undefined; failed_auto_fill_attempts?: string | number | undefined; } & {}> | undefined; execution?: Readonly<{ status?: string | undefined; uuid?: string | undefined; metrics?: Readonly<{ total_search_duration_ms?: string | number | undefined; total_indexing_duration_ms?: string | number | undefined; gap_range?: Readonly<{ gte?: string | undefined; lte?: string | undefined; } & {}> | undefined; number_of_triggered_actions?: string | number | undefined; number_of_generated_actions?: string | number | undefined; alert_counts?: Readonly<{ active?: string | number | undefined; new?: string | number | undefined; recovered?: string | number | undefined; } & {}> | undefined; number_of_delayed_alerts?: string | number | undefined; number_of_searches?: string | number | undefined; es_search_duration_ms?: string | number | undefined; execution_gap_duration_s?: string | number | undefined; frozen_indices_queried_count?: string | number | undefined; rule_type_run_duration_ms?: string | number | undefined; process_alerts_duration_ms?: string | number | undefined; trigger_actions_duration_ms?: string | number | undefined; process_rule_duration_ms?: string | number | undefined; claim_to_start_duration_ms?: string | number | undefined; persist_alerts_duration_ms?: string | number | undefined; prepare_rule_duration_ms?: string | number | undefined; total_run_duration_ms?: string | number | undefined; total_enrichment_duration_ms?: string | number | undefined; update_alerts_duration_ms?: string | number | undefined; } & {}> | undefined; status_order?: string | number | undefined; backfill?: Readonly<{ id?: string | undefined; start?: string | undefined; interval?: string | undefined; } & {}> | undefined; } & {}> | undefined; rule_type_id?: string | undefined; } & {}> | undefined; flapping?: boolean | undefined; uuid?: string | undefined; maintenance_window_ids?: string[] | undefined; deletion?: Readonly<{ num_deleted?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; alerting?: Readonly<{ status?: string | undefined; outcome?: string | undefined; summary?: Readonly<{ new?: Readonly<{ count?: string | number | undefined; } & {}> | undefined; recovered?: Readonly<{ count?: string | number | undefined; } & {}> | undefined; ongoing?: Readonly<{ count?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; instance_id?: string | undefined; action_group_id?: string | undefined; action_subgroup?: string | undefined; } & {}> | undefined; space_ids?: string[] | undefined; server_uuid?: string | undefined; saved_objects?: Readonly<{ id?: string | undefined; type?: string | undefined; namespace?: string | undefined; rel?: string | undefined; type_id?: string | undefined; space_agnostic?: boolean | undefined; } & {}>[] | undefined; user_api_key?: Readonly<{ id?: string | undefined; name?: string | undefined; } & {}> | undefined; gap_auto_fill?: Readonly<{ execution?: Readonly<{ start?: string | undefined; end?: string | undefined; status?: string | undefined; results?: Readonly<{ error?: string | undefined; status?: string | undefined; rule_id?: string | undefined; processed_gaps?: string | number | undefined; } & {}>[] | undefined; duration_ms?: string | number | undefined; rule_ids?: string[] | undefined; task_params?: Readonly<{ name?: string | undefined; interval?: string | undefined; num_retries?: string | number | undefined; gap_fill_range?: string | undefined; max_backfills?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; } & {}> | undefined; } & {}> | undefined; event?: Readonly<{ id?: string | undefined; type?: string[] | undefined; reason?: string | undefined; action?: string | undefined; start?: string | undefined; end?: string | undefined; original?: string | undefined; code?: string | undefined; outcome?: string | undefined; duration?: string | number | undefined; timezone?: string | undefined; severity?: string | number | undefined; category?: string[] | undefined; risk_score?: number | undefined; url?: string | undefined; created?: string | undefined; provider?: string | undefined; dataset?: string | undefined; kind?: string | undefined; hash?: string | undefined; ingested?: string | undefined; module?: string | undefined; reference?: string | undefined; risk_score_norm?: number | undefined; sequence?: string | number | undefined; } & {}> | undefined; user?: Readonly<{ id?: string | undefined; name?: string | undefined; } & {}> | undefined; ecs?: Readonly<{ version?: string | undefined; } & {}> | undefined; } & {}>>> | undefined"
+          "DeepPartial<DeepWriteable<Readonly<{ log?: Readonly<{ logger?: string | undefined; level?: string | undefined; } & {}> | undefined; error?: Readonly<{ id?: string | undefined; type?: string | undefined; message?: string | undefined; code?: string | undefined; stack_trace?: string | undefined; } & {}> | undefined; '@timestamp'?: string | undefined; message?: string | undefined; tags?: string[] | undefined; rule?: Readonly<{ id?: string | undefined; name?: string | undefined; license?: string | undefined; version?: string | undefined; description?: string | undefined; uuid?: string | undefined; category?: string | undefined; reference?: string | undefined; author?: string[] | undefined; ruleset?: string | undefined; } & {}> | undefined; kibana?: Readonly<{ task?: Readonly<{ id?: string | undefined; schedule_delay?: string | number | undefined; scheduled?: string | undefined; } & {}> | undefined; action?: Readonly<{ id?: string | undefined; name?: string | undefined; execution?: Readonly<{ source?: string | undefined; uuid?: string | undefined; gen_ai?: Readonly<{ usage?: Readonly<{ prompt_tokens?: string | number | undefined; completion_tokens?: string | number | undefined; total_tokens?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; usage?: Readonly<{ request_body_bytes?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; type_id?: string | undefined; } & {}> | undefined; version?: string | undefined; alert?: Readonly<{ rule?: Readonly<{ consumer?: string | undefined; revision?: string | number | undefined; gap?: Readonly<{ range?: Readonly<{ lte?: string | undefined; gte?: string | undefined; } & {}> | undefined; status?: string | undefined; updated_at?: string | undefined; filled_intervals?: Readonly<{ lte?: string | undefined; gte?: string | undefined; } & {}>[] | undefined; unfilled_intervals?: Readonly<{ lte?: string | undefined; gte?: string | undefined; } & {}>[] | undefined; in_progress_intervals?: Readonly<{ lte?: string | undefined; gte?: string | undefined; } & {}>[] | undefined; total_gap_duration_ms?: string | number | undefined; filled_duration_ms?: string | number | undefined; unfilled_duration_ms?: string | number | undefined; in_progress_duration_ms?: string | number | undefined; deleted?: boolean | undefined; failed_auto_fill_attempts?: string | number | undefined; } & {}> | undefined; execution?: Readonly<{ metrics?: Readonly<{ total_search_duration_ms?: string | number | undefined; total_indexing_duration_ms?: string | number | undefined; gap_range?: Readonly<{ lte?: string | undefined; gte?: string | undefined; } & {}> | undefined; number_of_triggered_actions?: string | number | undefined; number_of_generated_actions?: string | number | undefined; alert_counts?: Readonly<{ active?: string | number | undefined; new?: string | number | undefined; recovered?: string | number | undefined; } & {}> | undefined; number_of_delayed_alerts?: string | number | undefined; number_of_searches?: string | number | undefined; es_search_duration_ms?: string | number | undefined; execution_gap_duration_s?: string | number | undefined; frozen_indices_queried_count?: string | number | undefined; rule_type_run_duration_ms?: string | number | undefined; process_alerts_duration_ms?: string | number | undefined; trigger_actions_duration_ms?: string | number | undefined; process_rule_duration_ms?: string | number | undefined; claim_to_start_duration_ms?: string | number | undefined; persist_alerts_duration_ms?: string | number | undefined; prepare_rule_duration_ms?: string | number | undefined; total_run_duration_ms?: string | number | undefined; total_enrichment_duration_ms?: string | number | undefined; update_alerts_duration_ms?: string | number | undefined; } & {}> | undefined; status?: string | undefined; uuid?: string | undefined; status_order?: string | number | undefined; backfill?: Readonly<{ id?: string | undefined; start?: string | undefined; interval?: string | undefined; } & {}> | undefined; } & {}> | undefined; rule_type_id?: string | undefined; } & {}> | undefined; flapping?: boolean | undefined; uuid?: string | undefined; maintenance_window_ids?: string[] | undefined; deletion?: Readonly<{ num_deleted?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; alerting?: Readonly<{ status?: string | undefined; outcome?: string | undefined; summary?: Readonly<{ new?: Readonly<{ count?: string | number | undefined; } & {}> | undefined; recovered?: Readonly<{ count?: string | number | undefined; } & {}> | undefined; ongoing?: Readonly<{ count?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; instance_id?: string | undefined; action_group_id?: string | undefined; action_subgroup?: string | undefined; } & {}> | undefined; space_ids?: string[] | undefined; server_uuid?: string | undefined; saved_objects?: Readonly<{ id?: string | undefined; type?: string | undefined; namespace?: string | undefined; rel?: string | undefined; type_id?: string | undefined; space_agnostic?: boolean | undefined; } & {}>[] | undefined; user_api_key?: Readonly<{ id?: string | undefined; name?: string | undefined; } & {}> | undefined; gap_auto_fill?: Readonly<{ execution?: Readonly<{ start?: string | undefined; end?: string | undefined; status?: string | undefined; results?: Readonly<{ error?: string | undefined; status?: string | undefined; rule_id?: string | undefined; processed_gaps?: string | number | undefined; } & {}>[] | undefined; duration_ms?: string | number | undefined; rule_ids?: string[] | undefined; task_params?: Readonly<{ name?: string | undefined; interval?: string | undefined; num_retries?: string | number | undefined; gap_fill_range?: string | undefined; max_backfills?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; } & {}> | undefined; } & {}> | undefined; event?: Readonly<{ id?: string | undefined; type?: string[] | undefined; reason?: string | undefined; action?: string | undefined; start?: string | undefined; end?: string | undefined; duration?: string | number | undefined; dataset?: string | undefined; code?: string | undefined; outcome?: string | undefined; timezone?: string | undefined; severity?: string | number | undefined; category?: string[] | undefined; risk_score?: number | undefined; url?: string | undefined; created?: string | undefined; provider?: string | undefined; hash?: string | undefined; ingested?: string | undefined; kind?: string | undefined; module?: string | undefined; original?: string | undefined; reference?: string | undefined; risk_score_norm?: number | undefined; sequence?: string | number | undefined; } & {}> | undefined; user?: Readonly<{ id?: string | undefined; name?: string | undefined; } & {}> | undefined; ecs?: Readonly<{ version?: string | undefined; } & {}> | undefined; } & {}>>> | undefined"
         ],
         "path": "x-pack/platform/plugins/shared/event_log/generated/schemas.ts",
         "lineNumber": 28,
@@ -1213,7 +1213,7 @@
         "label": "IValidatedEvent",
         "description": [],
         "signature": [
-          "Readonly<{ log?: Readonly<{ logger?: string | undefined; level?: string | undefined; } & {}> | undefined; error?: Readonly<{ id?: string | undefined; type?: string | undefined; message?: string | undefined; code?: string | undefined; stack_trace?: string | undefined; } & {}> | undefined; '@timestamp'?: string | undefined; message?: string | undefined; tags?: string[] | undefined; rule?: Readonly<{ id?: string | undefined; name?: string | undefined; license?: string | undefined; version?: string | undefined; description?: string | undefined; uuid?: string | undefined; category?: string | undefined; reference?: string | undefined; author?: string[] | undefined; ruleset?: string | undefined; } & {}> | undefined; kibana?: Readonly<{ task?: Readonly<{ id?: string | undefined; schedule_delay?: string | number | undefined; scheduled?: string | undefined; } & {}> | undefined; action?: Readonly<{ id?: string | undefined; name?: string | undefined; execution?: Readonly<{ source?: string | undefined; uuid?: string | undefined; gen_ai?: Readonly<{ usage?: Readonly<{ prompt_tokens?: string | number | undefined; completion_tokens?: string | number | undefined; total_tokens?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; usage?: Readonly<{ request_body_bytes?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; type_id?: string | undefined; } & {}> | undefined; version?: string | undefined; alert?: Readonly<{ rule?: Readonly<{ consumer?: string | undefined; revision?: string | number | undefined; gap?: Readonly<{ status?: string | undefined; range?: Readonly<{ gte?: string | undefined; lte?: string | undefined; } & {}> | undefined; updated_at?: string | undefined; filled_intervals?: Readonly<{ gte?: string | undefined; lte?: string | undefined; } & {}>[] | undefined; unfilled_intervals?: Readonly<{ gte?: string | undefined; lte?: string | undefined; } & {}>[] | undefined; in_progress_intervals?: Readonly<{ gte?: string | undefined; lte?: string | undefined; } & {}>[] | undefined; total_gap_duration_ms?: string | number | undefined; filled_duration_ms?: string | number | undefined; unfilled_duration_ms?: string | number | undefined; in_progress_duration_ms?: string | number | undefined; deleted?: boolean | undefined; failed_auto_fill_attempts?: string | number | undefined; } & {}> | undefined; execution?: Readonly<{ status?: string | undefined; uuid?: string | undefined; metrics?: Readonly<{ total_search_duration_ms?: string | number | undefined; total_indexing_duration_ms?: string | number | undefined; gap_range?: Readonly<{ gte?: string | undefined; lte?: string | undefined; } & {}> | undefined; number_of_triggered_actions?: string | number | undefined; number_of_generated_actions?: string | number | undefined; alert_counts?: Readonly<{ active?: string | number | undefined; new?: string | number | undefined; recovered?: string | number | undefined; } & {}> | undefined; number_of_delayed_alerts?: string | number | undefined; number_of_searches?: string | number | undefined; es_search_duration_ms?: string | number | undefined; execution_gap_duration_s?: string | number | undefined; frozen_indices_queried_count?: string | number | undefined; rule_type_run_duration_ms?: string | number | undefined; process_alerts_duration_ms?: string | number | undefined; trigger_actions_duration_ms?: string | number | undefined; process_rule_duration_ms?: string | number | undefined; claim_to_start_duration_ms?: string | number | undefined; persist_alerts_duration_ms?: string | number | undefined; prepare_rule_duration_ms?: string | number | undefined; total_run_duration_ms?: string | number | undefined; total_enrichment_duration_ms?: string | number | undefined; update_alerts_duration_ms?: string | number | undefined; } & {}> | undefined; status_order?: string | number | undefined; backfill?: Readonly<{ id?: string | undefined; start?: string | undefined; interval?: string | undefined; } & {}> | undefined; } & {}> | undefined; rule_type_id?: string | undefined; } & {}> | undefined; flapping?: boolean | undefined; uuid?: string | undefined; maintenance_window_ids?: string[] | undefined; deletion?: Readonly<{ num_deleted?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; alerting?: Readonly<{ status?: string | undefined; outcome?: string | undefined; summary?: Readonly<{ new?: Readonly<{ count?: string | number | undefined; } & {}> | undefined; recovered?: Readonly<{ count?: string | number | undefined; } & {}> | undefined; ongoing?: Readonly<{ count?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; instance_id?: string | undefined; action_group_id?: string | undefined; action_subgroup?: string | undefined; } & {}> | undefined; space_ids?: string[] | undefined; server_uuid?: string | undefined; saved_objects?: Readonly<{ id?: string | undefined; type?: string | undefined; namespace?: string | undefined; rel?: string | undefined; type_id?: string | undefined; space_agnostic?: boolean | undefined; } & {}>[] | undefined; user_api_key?: Readonly<{ id?: string | undefined; name?: string | undefined; } & {}> | undefined; gap_auto_fill?: Readonly<{ execution?: Readonly<{ start?: string | undefined; end?: string | undefined; status?: string | undefined; results?: Readonly<{ error?: string | undefined; status?: string | undefined; rule_id?: string | undefined; processed_gaps?: string | number | undefined; } & {}>[] | undefined; duration_ms?: string | number | undefined; rule_ids?: string[] | undefined; task_params?: Readonly<{ name?: string | undefined; interval?: string | undefined; num_retries?: string | number | undefined; gap_fill_range?: string | undefined; max_backfills?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; } & {}> | undefined; } & {}> | undefined; event?: Readonly<{ id?: string | undefined; type?: string[] | undefined; reason?: string | undefined; action?: string | undefined; start?: string | undefined; end?: string | undefined; original?: string | undefined; code?: string | undefined; outcome?: string | undefined; duration?: string | number | undefined; timezone?: string | undefined; severity?: string | number | undefined; category?: string[] | undefined; risk_score?: number | undefined; url?: string | undefined; created?: string | undefined; provider?: string | undefined; dataset?: string | undefined; kind?: string | undefined; hash?: string | undefined; ingested?: string | undefined; module?: string | undefined; reference?: string | undefined; risk_score_norm?: number | undefined; sequence?: string | number | undefined; } & {}> | undefined; user?: Readonly<{ id?: string | undefined; name?: string | undefined; } & {}> | undefined; ecs?: Readonly<{ version?: string | undefined; } & {}> | undefined; } & {}> | undefined"
+          "Readonly<{ log?: Readonly<{ logger?: string | undefined; level?: string | undefined; } & {}> | undefined; error?: Readonly<{ id?: string | undefined; type?: string | undefined; message?: string | undefined; code?: string | undefined; stack_trace?: string | undefined; } & {}> | undefined; '@timestamp'?: string | undefined; message?: string | undefined; tags?: string[] | undefined; rule?: Readonly<{ id?: string | undefined; name?: string | undefined; license?: string | undefined; version?: string | undefined; description?: string | undefined; uuid?: string | undefined; category?: string | undefined; reference?: string | undefined; author?: string[] | undefined; ruleset?: string | undefined; } & {}> | undefined; kibana?: Readonly<{ task?: Readonly<{ id?: string | undefined; schedule_delay?: string | number | undefined; scheduled?: string | undefined; } & {}> | undefined; action?: Readonly<{ id?: string | undefined; name?: string | undefined; execution?: Readonly<{ source?: string | undefined; uuid?: string | undefined; gen_ai?: Readonly<{ usage?: Readonly<{ prompt_tokens?: string | number | undefined; completion_tokens?: string | number | undefined; total_tokens?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; usage?: Readonly<{ request_body_bytes?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; type_id?: string | undefined; } & {}> | undefined; version?: string | undefined; alert?: Readonly<{ rule?: Readonly<{ consumer?: string | undefined; revision?: string | number | undefined; gap?: Readonly<{ range?: Readonly<{ lte?: string | undefined; gte?: string | undefined; } & {}> | undefined; status?: string | undefined; updated_at?: string | undefined; filled_intervals?: Readonly<{ lte?: string | undefined; gte?: string | undefined; } & {}>[] | undefined; unfilled_intervals?: Readonly<{ lte?: string | undefined; gte?: string | undefined; } & {}>[] | undefined; in_progress_intervals?: Readonly<{ lte?: string | undefined; gte?: string | undefined; } & {}>[] | undefined; total_gap_duration_ms?: string | number | undefined; filled_duration_ms?: string | number | undefined; unfilled_duration_ms?: string | number | undefined; in_progress_duration_ms?: string | number | undefined; deleted?: boolean | undefined; failed_auto_fill_attempts?: string | number | undefined; } & {}> | undefined; execution?: Readonly<{ metrics?: Readonly<{ total_search_duration_ms?: string | number | undefined; total_indexing_duration_ms?: string | number | undefined; gap_range?: Readonly<{ lte?: string | undefined; gte?: string | undefined; } & {}> | undefined; number_of_triggered_actions?: string | number | undefined; number_of_generated_actions?: string | number | undefined; alert_counts?: Readonly<{ active?: string | number | undefined; new?: string | number | undefined; recovered?: string | number | undefined; } & {}> | undefined; number_of_delayed_alerts?: string | number | undefined; number_of_searches?: string | number | undefined; es_search_duration_ms?: string | number | undefined; execution_gap_duration_s?: string | number | undefined; frozen_indices_queried_count?: string | number | undefined; rule_type_run_duration_ms?: string | number | undefined; process_alerts_duration_ms?: string | number | undefined; trigger_actions_duration_ms?: string | number | undefined; process_rule_duration_ms?: string | number | undefined; claim_to_start_duration_ms?: string | number | undefined; persist_alerts_duration_ms?: string | number | undefined; prepare_rule_duration_ms?: string | number | undefined; total_run_duration_ms?: string | number | undefined; total_enrichment_duration_ms?: string | number | undefined; update_alerts_duration_ms?: string | number | undefined; } & {}> | undefined; status?: string | undefined; uuid?: string | undefined; status_order?: string | number | undefined; backfill?: Readonly<{ id?: string | undefined; start?: string | undefined; interval?: string | undefined; } & {}> | undefined; } & {}> | undefined; rule_type_id?: string | undefined; } & {}> | undefined; flapping?: boolean | undefined; uuid?: string | undefined; maintenance_window_ids?: string[] | undefined; deletion?: Readonly<{ num_deleted?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; alerting?: Readonly<{ status?: string | undefined; outcome?: string | undefined; summary?: Readonly<{ new?: Readonly<{ count?: string | number | undefined; } & {}> | undefined; recovered?: Readonly<{ count?: string | number | undefined; } & {}> | undefined; ongoing?: Readonly<{ count?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; instance_id?: string | undefined; action_group_id?: string | undefined; action_subgroup?: string | undefined; } & {}> | undefined; space_ids?: string[] | undefined; server_uuid?: string | undefined; saved_objects?: Readonly<{ id?: string | undefined; type?: string | undefined; namespace?: string | undefined; rel?: string | undefined; type_id?: string | undefined; space_agnostic?: boolean | undefined; } & {}>[] | undefined; user_api_key?: Readonly<{ id?: string | undefined; name?: string | undefined; } & {}> | undefined; gap_auto_fill?: Readonly<{ execution?: Readonly<{ start?: string | undefined; end?: string | undefined; status?: string | undefined; results?: Readonly<{ error?: string | undefined; status?: string | undefined; rule_id?: string | undefined; processed_gaps?: string | number | undefined; } & {}>[] | undefined; duration_ms?: string | number | undefined; rule_ids?: string[] | undefined; task_params?: Readonly<{ name?: string | undefined; interval?: string | undefined; num_retries?: string | number | undefined; gap_fill_range?: string | undefined; max_backfills?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; } & {}> | undefined; } & {}> | undefined; event?: Readonly<{ id?: string | undefined; type?: string[] | undefined; reason?: string | undefined; action?: string | undefined; start?: string | undefined; end?: string | undefined; duration?: string | number | undefined; dataset?: string | undefined; code?: string | undefined; outcome?: string | undefined; timezone?: string | undefined; severity?: string | number | undefined; category?: string[] | undefined; risk_score?: number | undefined; url?: string | undefined; created?: string | undefined; provider?: string | undefined; hash?: string | undefined; ingested?: string | undefined; kind?: string | undefined; module?: string | undefined; original?: string | undefined; reference?: string | undefined; risk_score_norm?: number | undefined; sequence?: string | number | undefined; } & {}> | undefined; user?: Readonly<{ id?: string | undefined; name?: string | undefined; } & {}> | undefined; ecs?: Readonly<{ version?: string | undefined; } & {}> | undefined; } & {}> | undefined"
         ],
         "path": "x-pack/platform/plugins/shared/event_log/generated/schemas.ts",
         "lineNumber": 27,
@@ -1230,7 +1230,7 @@
         "label": "IValidatedEventInternalDocInfo",
         "description": [],
         "signature": [
-          "Readonly<{ log?: Readonly<{ logger?: string | undefined; level?: string | undefined; } & {}> | undefined; error?: Readonly<{ id?: string | undefined; type?: string | undefined; message?: string | undefined; code?: string | undefined; stack_trace?: string | undefined; } & {}> | undefined; '@timestamp'?: string | undefined; message?: string | undefined; tags?: string[] | undefined; rule?: Readonly<{ id?: string | undefined; name?: string | undefined; license?: string | undefined; version?: string | undefined; description?: string | undefined; uuid?: string | undefined; category?: string | undefined; reference?: string | undefined; author?: string[] | undefined; ruleset?: string | undefined; } & {}> | undefined; kibana?: Readonly<{ task?: Readonly<{ id?: string | undefined; schedule_delay?: string | number | undefined; scheduled?: string | undefined; } & {}> | undefined; action?: Readonly<{ id?: string | undefined; name?: string | undefined; execution?: Readonly<{ source?: string | undefined; uuid?: string | undefined; gen_ai?: Readonly<{ usage?: Readonly<{ prompt_tokens?: string | number | undefined; completion_tokens?: string | number | undefined; total_tokens?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; usage?: Readonly<{ request_body_bytes?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; type_id?: string | undefined; } & {}> | undefined; version?: string | undefined; alert?: Readonly<{ rule?: Readonly<{ consumer?: string | undefined; revision?: string | number | undefined; gap?: Readonly<{ status?: string | undefined; range?: Readonly<{ gte?: string | undefined; lte?: string | undefined; } & {}> | undefined; updated_at?: string | undefined; filled_intervals?: Readonly<{ gte?: string | undefined; lte?: string | undefined; } & {}>[] | undefined; unfilled_intervals?: Readonly<{ gte?: string | undefined; lte?: string | undefined; } & {}>[] | undefined; in_progress_intervals?: Readonly<{ gte?: string | undefined; lte?: string | undefined; } & {}>[] | undefined; total_gap_duration_ms?: string | number | undefined; filled_duration_ms?: string | number | undefined; unfilled_duration_ms?: string | number | undefined; in_progress_duration_ms?: string | number | undefined; deleted?: boolean | undefined; failed_auto_fill_attempts?: string | number | undefined; } & {}> | undefined; execution?: Readonly<{ status?: string | undefined; uuid?: string | undefined; metrics?: Readonly<{ total_search_duration_ms?: string | number | undefined; total_indexing_duration_ms?: string | number | undefined; gap_range?: Readonly<{ gte?: string | undefined; lte?: string | undefined; } & {}> | undefined; number_of_triggered_actions?: string | number | undefined; number_of_generated_actions?: string | number | undefined; alert_counts?: Readonly<{ active?: string | number | undefined; new?: string | number | undefined; recovered?: string | number | undefined; } & {}> | undefined; number_of_delayed_alerts?: string | number | undefined; number_of_searches?: string | number | undefined; es_search_duration_ms?: string | number | undefined; execution_gap_duration_s?: string | number | undefined; frozen_indices_queried_count?: string | number | undefined; rule_type_run_duration_ms?: string | number | undefined; process_alerts_duration_ms?: string | number | undefined; trigger_actions_duration_ms?: string | number | undefined; process_rule_duration_ms?: string | number | undefined; claim_to_start_duration_ms?: string | number | undefined; persist_alerts_duration_ms?: string | number | undefined; prepare_rule_duration_ms?: string | number | undefined; total_run_duration_ms?: string | number | undefined; total_enrichment_duration_ms?: string | number | undefined; update_alerts_duration_ms?: string | number | undefined; } & {}> | undefined; status_order?: string | number | undefined; backfill?: Readonly<{ id?: string | undefined; start?: string | undefined; interval?: string | undefined; } & {}> | undefined; } & {}> | undefined; rule_type_id?: string | undefined; } & {}> | undefined; flapping?: boolean | undefined; uuid?: string | undefined; maintenance_window_ids?: string[] | undefined; deletion?: Readonly<{ num_deleted?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; alerting?: Readonly<{ status?: string | undefined; outcome?: string | undefined; summary?: Readonly<{ new?: Readonly<{ count?: string | number | undefined; } & {}> | undefined; recovered?: Readonly<{ count?: string | number | undefined; } & {}> | undefined; ongoing?: Readonly<{ count?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; instance_id?: string | undefined; action_group_id?: string | undefined; action_subgroup?: string | undefined; } & {}> | undefined; space_ids?: string[] | undefined; server_uuid?: string | undefined; saved_objects?: Readonly<{ id?: string | undefined; type?: string | undefined; namespace?: string | undefined; rel?: string | undefined; type_id?: string | undefined; space_agnostic?: boolean | undefined; } & {}>[] | undefined; user_api_key?: Readonly<{ id?: string | undefined; name?: string | undefined; } & {}> | undefined; gap_auto_fill?: Readonly<{ execution?: Readonly<{ start?: string | undefined; end?: string | undefined; status?: string | undefined; results?: Readonly<{ error?: string | undefined; status?: string | undefined; rule_id?: string | undefined; processed_gaps?: string | number | undefined; } & {}>[] | undefined; duration_ms?: string | number | undefined; rule_ids?: string[] | undefined; task_params?: Readonly<{ name?: string | undefined; interval?: string | undefined; num_retries?: string | number | undefined; gap_fill_range?: string | undefined; max_backfills?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; } & {}> | undefined; } & {}> | undefined; event?: Readonly<{ id?: string | undefined; type?: string[] | undefined; reason?: string | undefined; action?: string | undefined; start?: string | undefined; end?: string | undefined; original?: string | undefined; code?: string | undefined; outcome?: string | undefined; duration?: string | number | undefined; timezone?: string | undefined; severity?: string | number | undefined; category?: string[] | undefined; risk_score?: number | undefined; url?: string | undefined; created?: string | undefined; provider?: string | undefined; dataset?: string | undefined; kind?: string | undefined; hash?: string | undefined; ingested?: string | undefined; module?: string | undefined; reference?: string | undefined; risk_score_norm?: number | undefined; sequence?: string | number | undefined; } & {}> | undefined; user?: Readonly<{ id?: string | undefined; name?: string | undefined; } & {}> | undefined; ecs?: Readonly<{ version?: string | undefined; } & {}> | undefined; } & {}> & { _id: string; _index: string; _seq_no: number; _primary_term: number; }"
+          "Readonly<{ log?: Readonly<{ logger?: string | undefined; level?: string | undefined; } & {}> | undefined; error?: Readonly<{ id?: string | undefined; type?: string | undefined; message?: string | undefined; code?: string | undefined; stack_trace?: string | undefined; } & {}> | undefined; '@timestamp'?: string | undefined; message?: string | undefined; tags?: string[] | undefined; rule?: Readonly<{ id?: string | undefined; name?: string | undefined; license?: string | undefined; version?: string | undefined; description?: string | undefined; uuid?: string | undefined; category?: string | undefined; reference?: string | undefined; author?: string[] | undefined; ruleset?: string | undefined; } & {}> | undefined; kibana?: Readonly<{ task?: Readonly<{ id?: string | undefined; schedule_delay?: string | number | undefined; scheduled?: string | undefined; } & {}> | undefined; action?: Readonly<{ id?: string | undefined; name?: string | undefined; execution?: Readonly<{ source?: string | undefined; uuid?: string | undefined; gen_ai?: Readonly<{ usage?: Readonly<{ prompt_tokens?: string | number | undefined; completion_tokens?: string | number | undefined; total_tokens?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; usage?: Readonly<{ request_body_bytes?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; type_id?: string | undefined; } & {}> | undefined; version?: string | undefined; alert?: Readonly<{ rule?: Readonly<{ consumer?: string | undefined; revision?: string | number | undefined; gap?: Readonly<{ range?: Readonly<{ lte?: string | undefined; gte?: string | undefined; } & {}> | undefined; status?: string | undefined; updated_at?: string | undefined; filled_intervals?: Readonly<{ lte?: string | undefined; gte?: string | undefined; } & {}>[] | undefined; unfilled_intervals?: Readonly<{ lte?: string | undefined; gte?: string | undefined; } & {}>[] | undefined; in_progress_intervals?: Readonly<{ lte?: string | undefined; gte?: string | undefined; } & {}>[] | undefined; total_gap_duration_ms?: string | number | undefined; filled_duration_ms?: string | number | undefined; unfilled_duration_ms?: string | number | undefined; in_progress_duration_ms?: string | number | undefined; deleted?: boolean | undefined; failed_auto_fill_attempts?: string | number | undefined; } & {}> | undefined; execution?: Readonly<{ metrics?: Readonly<{ total_search_duration_ms?: string | number | undefined; total_indexing_duration_ms?: string | number | undefined; gap_range?: Readonly<{ lte?: string | undefined; gte?: string | undefined; } & {}> | undefined; number_of_triggered_actions?: string | number | undefined; number_of_generated_actions?: string | number | undefined; alert_counts?: Readonly<{ active?: string | number | undefined; new?: string | number | undefined; recovered?: string | number | undefined; } & {}> | undefined; number_of_delayed_alerts?: string | number | undefined; number_of_searches?: string | number | undefined; es_search_duration_ms?: string | number | undefined; execution_gap_duration_s?: string | number | undefined; frozen_indices_queried_count?: string | number | undefined; rule_type_run_duration_ms?: string | number | undefined; process_alerts_duration_ms?: string | number | undefined; trigger_actions_duration_ms?: string | number | undefined; process_rule_duration_ms?: string | number | undefined; claim_to_start_duration_ms?: string | number | undefined; persist_alerts_duration_ms?: string | number | undefined; prepare_rule_duration_ms?: string | number | undefined; total_run_duration_ms?: string | number | undefined; total_enrichment_duration_ms?: string | number | undefined; update_alerts_duration_ms?: string | number | undefined; } & {}> | undefined; status?: string | undefined; uuid?: string | undefined; status_order?: string | number | undefined; backfill?: Readonly<{ id?: string | undefined; start?: string | undefined; interval?: string | undefined; } & {}> | undefined; } & {}> | undefined; rule_type_id?: string | undefined; } & {}> | undefined; flapping?: boolean | undefined; uuid?: string | undefined; maintenance_window_ids?: string[] | undefined; deletion?: Readonly<{ num_deleted?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; alerting?: Readonly<{ status?: string | undefined; outcome?: string | undefined; summary?: Readonly<{ new?: Readonly<{ count?: string | number | undefined; } & {}> | undefined; recovered?: Readonly<{ count?: string | number | undefined; } & {}> | undefined; ongoing?: Readonly<{ count?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; instance_id?: string | undefined; action_group_id?: string | undefined; action_subgroup?: string | undefined; } & {}> | undefined; space_ids?: string[] | undefined; server_uuid?: string | undefined; saved_objects?: Readonly<{ id?: string | undefined; type?: string | undefined; namespace?: string | undefined; rel?: string | undefined; type_id?: string | undefined; space_agnostic?: boolean | undefined; } & {}>[] | undefined; user_api_key?: Readonly<{ id?: string | undefined; name?: string | undefined; } & {}> | undefined; gap_auto_fill?: Readonly<{ execution?: Readonly<{ start?: string | undefined; end?: string | undefined; status?: string | undefined; results?: Readonly<{ error?: string | undefined; status?: string | undefined; rule_id?: string | undefined; processed_gaps?: string | number | undefined; } & {}>[] | undefined; duration_ms?: string | number | undefined; rule_ids?: string[] | undefined; task_params?: Readonly<{ name?: string | undefined; interval?: string | undefined; num_retries?: string | number | undefined; gap_fill_range?: string | undefined; max_backfills?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; } & {}> | undefined; } & {}> | undefined; event?: Readonly<{ id?: string | undefined; type?: string[] | undefined; reason?: string | undefined; action?: string | undefined; start?: string | undefined; end?: string | undefined; duration?: string | number | undefined; dataset?: string | undefined; code?: string | undefined; outcome?: string | undefined; timezone?: string | undefined; severity?: string | number | undefined; category?: string[] | undefined; risk_score?: number | undefined; url?: string | undefined; created?: string | undefined; provider?: string | undefined; hash?: string | undefined; ingested?: string | undefined; kind?: string | undefined; module?: string | undefined; original?: string | undefined; reference?: string | undefined; risk_score_norm?: number | undefined; sequence?: string | number | undefined; } & {}> | undefined; user?: Readonly<{ id?: string | undefined; name?: string | undefined; } & {}> | undefined; ecs?: Readonly<{ version?: string | undefined; } & {}> | undefined; } & {}> & { _id: string; _index: string; _seq_no: number; _primary_term: number; }"
         ],
         "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
         "lineNumber": 60,
@@ -1623,6 +1623,69 @@
               "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
               "lineNumber": 60,
               "columnNumber": 13,
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "eventLog",
+          "id": "def-server.IEventLogClientService.getClientWithRequestInSpace",
+          "type": "Function",
+          "tags": [],
+          "label": "getClientWithRequestInSpace",
+          "description": [],
+          "signature": [
+            "(request: ",
+            "KibanaRequest",
+            "<unknown, unknown, unknown, any>, spaceId: string) => ",
+            {
+              "pluginId": "eventLog",
+              "scope": "server",
+              "docId": "kibEventLogPluginApi",
+              "section": "def-server.IEventLogClient",
+              "text": "IEventLogClient"
+            }
+          ],
+          "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
+          "lineNumber": 61,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "eventLog",
+              "id": "def-server.IEventLogClientService.getClientWithRequestInSpace.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "request",
+              "description": [],
+              "signature": [
+                "KibanaRequest",
+                "<unknown, unknown, unknown, any>"
+              ],
+              "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
+              "lineNumber": 61,
+              "columnNumber": 31,
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            },
+            {
+              "parentPluginId": "eventLog",
+              "id": "def-server.IEventLogClientService.getClientWithRequestInSpace.$2",
+              "type": "string",
+              "tags": [],
+              "label": "spaceId",
+              "description": [],
+              "signature": [
+                "string"
+              ],
+              "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
+              "lineNumber": 61,
+              "columnNumber": 55,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true

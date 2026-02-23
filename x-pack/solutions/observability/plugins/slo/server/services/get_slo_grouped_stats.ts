@@ -8,6 +8,7 @@
 import type { estypes } from '@elastic/elasticsearch';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import {
+  ALL_VALUE,
   SLO_STATUS,
   apmTransactionDurationIndicatorTypeSchema,
   apmTransactionErrorRateIndicatorTypeSchema,
@@ -15,6 +16,7 @@ import {
   type GetSLOGroupedStatsResponse,
   type GroupedStatsResult,
 } from '@kbn/slo-schema';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { termsQuery, termQuery } from '@kbn/observability-plugin/server';
 import type { SLOSettings } from '../domain/models';
 import { typedSearch } from '../utils/queries';
@@ -27,6 +29,24 @@ interface SloTypeConfig {
   getFilters: (params: GetSLOGroupedStatsParams) => estypes.QueryDslQueryContainer[];
 }
 
+function environmentFilter(environment?: string): QueryDslQueryContainer[] {
+  if (!environment) {
+    return [];
+  }
+  return [
+    {
+      bool: {
+        should: [
+          { term: { 'service.environment': environment } },
+          { term: { 'service.environment': ALL_VALUE } },
+          { bool: { must_not: { exists: { field: 'service.environment' } } } },
+        ],
+        minimum_should_match: 1,
+      },
+    },
+  ];
+}
+
 const SLO_TYPE_CONFIG: Record<string, SloTypeConfig> = {
   apm: {
     groupByField: 'service.name',
@@ -37,7 +57,7 @@ const SLO_TYPE_CONFIG: Record<string, SloTypeConfig> = {
         apmTransactionErrorRateIndicatorTypeSchema.value
       ),
       ...termsQuery('service.name', ...(params.serviceNames ?? [])),
-      ...termQuery('service.environment', params.environment),
+      ...environmentFilter(params.environment),
     ],
   },
 };
