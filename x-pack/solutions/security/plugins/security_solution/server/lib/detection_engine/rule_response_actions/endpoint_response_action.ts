@@ -162,7 +162,7 @@ export const endpointResponseAction = async (
 
     case 'runscript':
       if (
-        endpointAppContextService.experimentalFeatures.responseActionsEndpointAutomatedRunScript
+        !endpointAppContextService.experimentalFeatures.responseActionsEndpointAutomatedRunScript
       ) {
         logger.debug(
           `${logMsgPrefix}: Endpoint runscript automated response action feature is not enabled`

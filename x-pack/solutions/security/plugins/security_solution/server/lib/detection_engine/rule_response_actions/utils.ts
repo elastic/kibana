@@ -164,7 +164,7 @@ export const getResponseActionDataFromAlert = (
     hostOsType,
     agentId: alert.agent.id ?? '',
     alertId: alert._id,
-    ruleId: alert.kibana.alert?.rule.uuid ?? '',
-    ruleName: alert.kibana.alert?.rule.name ?? '',
+    ruleId: alert.kibana?.alert?.rule.uuid ?? '',
+    ruleName: alert.kibana?.alert?.rule.name ?? '',
   };
 };
