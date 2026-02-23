@@ -541,6 +541,51 @@ function applyJsonDescription(jsonSchema: Record<string, any>, description?: str
 }
 
 /**
+ * Recursively add `additionalProperties: false` to object schema nodes that
+ * don't already have an `additionalProperties` setting.
+ *
+ * z4.toJSONSchema() only emits `additionalProperties: false` for .strict()
+ * objects. Plain z.object() schemas reject extra keys at runtime — this
+ * matches the @kbn/config-schema behaviour of always emitting it.
+ */
+function addAdditionalPropertiesFalse(node: Record<string, any>): Record<string, any> {
+  if (typeof node !== 'object' || node === null) return node;
+
+  if (
+    (node.type === 'object' || (!node.type && node.properties)) &&
+    !('additionalProperties' in node)
+  ) {
+    node = { ...node, additionalProperties: false };
+  }
+
+  if (node.properties && typeof node.properties === 'object') {
+    const newProps: Record<string, any> = {};
+    for (const [key, value] of Object.entries(node.properties)) {
+      newProps[key] =
+        typeof value === 'object' && value !== null
+          ? addAdditionalPropertiesFalse(value as Record<string, any>)
+          : value;
+    }
+    node = { ...node, properties: newProps };
+  }
+
+  for (const combiner of ['anyOf', 'oneOf', 'allOf'] as const) {
+    if (Array.isArray(node[combiner])) {
+      node = {
+        ...node,
+        [combiner]: node[combiner].map((branch: unknown) =>
+          typeof branch === 'object' && branch !== null
+            ? addAdditionalPropertiesFalse(branch as Record<string, any>)
+            : branch
+        ),
+      };
+    }
+  }
+
+  return node;
+}
+
+/**
  * Counter used to generate unique keys when hoisting `$defs` entries
  * from `z4.toJSONSchema()` into OpenAPI `components/schemas`.
  * Ensures no key collisions across multiple `convert()` calls.
@@ -739,6 +784,19 @@ export const convert = (schema: z.ZodTypeAny) => {
         value as Record<string, unknown>
       ) as OpenAPIV3.SchemaObject;
     }
+
+    // Ensure z.object() schemas carry `additionalProperties: false`.
+    // z4.toJSONSchema() only adds this for .strict() objects, but plain z.object()
+    // schemas reject extra keys at runtime — match the @kbn/config-schema behaviour.
+    processedSchema = addAdditionalPropertiesFalse(processedSchema);
+    for (const [key, value] of Object.entries(shared)) {
+      shared[key] = addAdditionalPropertiesFalse(
+        value as Record<string, any>
+      ) as OpenAPIV3.SchemaObject;
+    }
+
+    // Convert JSON Schema (OAS 3.1) constructs to OpenAPI 3.0 equivalents
+    processedSchema = jsonSchemaToOpenApi30(processedSchema);
 
     // Apply the same JSON-description post-processing as v3
     const description = (unwrapped as any).description;

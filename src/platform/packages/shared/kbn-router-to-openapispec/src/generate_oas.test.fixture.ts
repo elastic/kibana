@@ -25,7 +25,9 @@ export const sharedOas = {
       },
     },
   },
+  externalDocs: undefined,
   info: {
+    description: undefined,
     title: 'test',
     version: '99.99.99',
   },
@@ -412,13 +414,13 @@ export function createSharedZodSchema() {
   return z.object({
     string: z.string().max(10).min(1),
     maybeNumber: z.number().max(1000).min(1).optional(),
-    booleanDefault: z.boolean().describe('defaults to to true').default(true),
+    booleanDefault: z.boolean().default(true).describe('defaults to to true'),
     ipType: z.ipv4(),
     literalType: z.literal('literallythis'),
     record: z.record(z.string(), z.string()),
     union: z.union([
-      z.string().describe('Union string').max(1),
-      z.number().describe('Union number').min(0),
+      z.string().max(1).describe('Union string'),
+      z.number().min(0).describe('Union number'),
     ]),
     uri: z.string().url().default('prototest://something'),
   });
