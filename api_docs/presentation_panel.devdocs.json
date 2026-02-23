@@ -176,7 +176,7 @@
           "<ApiType, PropsType> | null>; }"
         ],
         "path": "src/platform/plugins/private/presentation_panel/public/panel_component/types.ts",
-        "lineNumber": 91,
+        "lineNumber": 96,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
