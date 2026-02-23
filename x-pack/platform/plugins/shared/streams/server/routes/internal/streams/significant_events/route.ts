@@ -6,7 +6,10 @@
  */
 import type { SignificantEventsGetResponse } from '@kbn/streams-schema';
 import {
+  buildEsqlQuery,
+  getIndexPatternsForStream,
   systemSchema,
+  type Streams,
   type SignificantEventsQueriesGenerationResult,
   type SignificantEventsQueriesGenerationTaskResult,
 } from '@kbn/streams-schema';
@@ -27,6 +30,34 @@ import { resolveConnectorId } from '../../../utils/resolve_connector_id';
 // Make sure strings are expected for input, but still converted to a
 // Date, without breaking the OpenAPI generator
 const dateFromString = z.string().transform((input) => new Date(input));
+
+/**
+ * Back-fills `esql.query` on task results for legacy tasks that were completed
+ * before the `esql.query` property was introduced. Without this, the client
+ * would receive queries without the required `esql.query` field.
+ */
+const ensureEsqlQuery = (
+  result: SignificantEventsQueriesGenerationTaskResult,
+  definition: Streams.all.Definition
+): SignificantEventsQueriesGenerationTaskResult => {
+  if (!('queries' in result)) {
+    return result;
+  }
+
+  const indices = getIndexPatternsForStream(definition);
+  return {
+    ...result,
+    queries: result.queries.map((query) => ({
+      ...query,
+      esql: query.esql ?? {
+        query: buildEsqlQuery(indices, {
+          kql: { query: query.kql },
+          feature: query.feature,
+        }),
+      },
+    })),
+  };
+};
 
 const significantEventsQueriesGenerationStatusRoute = createServerRoute({
   endpoint: 'GET /internal/streams/{name}/significant_events/_status',
@@ -55,14 +86,16 @@ const significantEventsQueriesGenerationStatusRoute = createServerRoute({
     });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
-    await streamsClient.ensureStream(params.path.name);
 
     const { name } = params.path;
+    const definition = await streamsClient.getStream(name);
 
-    return taskClient.getStatus<
+    const result = await taskClient.getStatus<
       SignificantEventsQueriesGenerationTaskParams,
       SignificantEventsQueriesGenerationResult
     >(getSignificantEventsQueriesGenerationTaskId(name));
+
+    return ensureEsqlQuery(result, definition);
   },
 });
 
@@ -111,9 +144,9 @@ const significantEventsQueriesGenerationTaskRoute = createServerRoute({
     });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
-    await streamsClient.ensureStream(params.path.name);
 
     const { name } = params.path;
+    const definition = await streamsClient.getStream(name);
     const { body } = params;
     const taskId = getSignificantEventsQueriesGenerationTaskId(name);
 
@@ -144,7 +177,7 @@ const significantEventsQueriesGenerationTaskRoute = createServerRoute({
           } as const)
         : ({ action: body.action } as const);
 
-    return handleTaskAction<
+    const result = await handleTaskAction<
       SignificantEventsQueriesGenerationTaskParams,
       SignificantEventsQueriesGenerationResult
     >({
@@ -152,6 +185,8 @@ const significantEventsQueriesGenerationTaskRoute = createServerRoute({
       taskId,
       ...actionParams,
     });
+
+    return ensureEsqlQuery(result, definition);
   },
 });
 
