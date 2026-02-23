@@ -20,7 +20,6 @@ import { useCreateDataView } from './use_create_dataview';
 import { useDatasetDetailsTelemetry } from './use_dataset_details_telemetry';
 import { useDatasetQualityDetailsState } from './use_dataset_quality_details_state';
 import { useEsqlRedirectLink } from './use_esql_redirect_link';
-import { useRedirectLink } from './use_redirect_link';
 import { useDatasetDetailsRedirectLinkTelemetry } from './use_redirect_link_telemetry';
 
 const openInLensText = i18n.translate('xpack.datasetQuality.details.chartOpenInLensText', {
@@ -157,35 +156,21 @@ export const useQualityIssuesDocsChart = () => {
     };
   }, [openInLensCallback]);
 
-  const esqlQuery = `FROM ${datasetDetails.rawName} METADATA _ignored | WHERE _ignored IS NOT NULL`;
+  const degradedEsqlQuery = `FROM ${datasetDetails.rawName} METADATA _ignored | WHERE _ignored IS NOT NULL`;
+  const failedEsqlQuery = `FROM ${datasetDetails.rawName}::failures`;
 
-  const { sendTelemetry: sendDegradedTelemetry } = useDatasetDetailsRedirectLinkTelemetry({
+  const esqlQuery = docsTrendChart === 'degraded' ? degradedEsqlQuery : failedEsqlQuery;
+
+  const { sendTelemetry } = useDatasetDetailsRedirectLinkTelemetry({
     query: { esql: esqlQuery },
     navigationSource: navigationSources.Chart,
   });
 
-  const { sendTelemetry: sendFailedTelemetry } = useDatasetDetailsRedirectLinkTelemetry({
-    query: { language: 'kuery', query: '' },
-    navigationSource: navigationSources.Chart,
-  });
-
-  const degradedRedirectLinkProps = useEsqlRedirectLink({
+  const redirectLinkProps = useEsqlRedirectLink({
     esqlQuery,
     timeRangeConfig: timeRange,
-    sendTelemetry: sendDegradedTelemetry,
+    sendTelemetry,
   });
-
-  const failedRedirectLinkProps = useRedirectLink({
-    dataStreamStat: datasetDetails.rawName,
-    query: { language: 'kuery', query: '' },
-    timeRangeConfig: timeRange,
-    breakdownField: breakdownDataViewField?.name,
-    sendTelemetry: sendFailedTelemetry,
-    selector: FAILURE_STORE_SELECTOR,
-  });
-
-  const redirectLinkProps =
-    docsTrendChart === 'degraded' ? degradedRedirectLinkProps : failedRedirectLinkProps;
 
   const extraActions: Action[] = [getOpenInLensAction];
 

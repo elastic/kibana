@@ -23,7 +23,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
-import { FAILURE_STORE_SELECTOR } from '../../../../common/constants';
 import { _IGNORED } from '../../../../common/es_fields';
 import {
   degradedFieldMessageIssueDoesNotExistInLatestIndex,
@@ -37,7 +36,6 @@ import {
   useDatasetQualityDetailsState,
   useEsqlRedirectLink,
   useQualityIssues,
-  useRedirectLink,
 } from '../../../hooks';
 import { NavigationSource } from '../../../services/telemetry';
 import DegradedFieldFlyout from './degraded_field';
@@ -70,35 +68,24 @@ export default function QualityIssueFlyout() {
 
   const isDegradedType = expandedDegradedField && expandedDegradedField.type === 'degraded';
 
-  const esqlQuery = isDegradedType
+  const degradedEsqlQuery = isDegradedType
     ? `FROM ${datasetDetails.rawName} METADATA ${_IGNORED} | WHERE MV_CONTAINS(${_IGNORED}, "${expandedDegradedField.name}")`
     : '';
 
-  const { sendTelemetry: sendDegradedTelemetry } = useDatasetDetailsRedirectLinkTelemetry({
+  const failedEsqlQuery = `FROM ${datasetDetails.rawName}::failures`;
+
+  const esqlQuery = isDegradedType ? degradedEsqlQuery : failedEsqlQuery;
+
+  const { sendTelemetry } = useDatasetDetailsRedirectLinkTelemetry({
     query: { esql: esqlQuery },
     navigationSource: NavigationSource.DegradedFieldFlyoutHeader,
   });
 
-  const { sendTelemetry: sendFailedTelemetry } = useDatasetDetailsRedirectLinkTelemetry({
-    query: { language: 'kuery', query: '' },
-    navigationSource: NavigationSource.DegradedFieldFlyoutHeader,
-  });
-
-  const degradedRedirectLinkProps = useEsqlRedirectLink({
+  const redirectLinkProps = useEsqlRedirectLink({
     esqlQuery,
     timeRangeConfig: timeRange,
-    sendTelemetry: sendDegradedTelemetry,
+    sendTelemetry,
   });
-
-  const failedRedirectLinkProps = useRedirectLink({
-    dataStreamStat: datasetDetails.rawName,
-    timeRangeConfig: timeRange,
-    query: { language: 'kuery', query: '' },
-    selector: FAILURE_STORE_SELECTOR,
-    sendTelemetry: sendFailedTelemetry,
-  });
-
-  const redirectLinkProps = isDegradedType ? degradedRedirectLinkProps : failedRedirectLinkProps;
 
   return (
     <EuiFlyout

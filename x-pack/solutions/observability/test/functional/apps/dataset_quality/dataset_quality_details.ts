@@ -261,7 +261,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
         });
       });
 
-      it('should go to discover for failed docs when the button next to breakdown selector is clicked', async () => {
+      it('should go to discover in ES|QL mode for failed docs when the button next to breakdown selector is clicked', async () => {
         await PageObjects.datasetQuality.navigateToDetails({
           dataStream: failedDataStreamName,
         });
@@ -278,10 +278,14 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
           PageObjects.datasetQuality.testSubjectSelectors.datasetQualityDetailsLinkToDiscover
         );
 
-        // Confirm dataset selector text in discover
+        // Confirm URL contains ES|QL query for failure store
         await retry.tryForTime(5000, async () => {
-          const datasetSelectorText = await PageObjects.discover.getCurrentDataViewId();
-          originalExpect(datasetSelectorText).toMatch(`${failedDataStreamName}::failures`);
+          const currentUrl = await browser.getCurrentUrl();
+          const decodedUrl = decodeURIComponent(currentUrl);
+
+          expect(currentUrl).to.contain('/app/discover');
+          expect(decodedUrl).to.contain('esql');
+          expect(decodedUrl).to.contain(`FROM ${failedDataStreamName}::failures`);
         });
       });
 
