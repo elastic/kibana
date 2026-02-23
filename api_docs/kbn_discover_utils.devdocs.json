@@ -24,9 +24,11 @@
         "type": "Class",
         "tags": [],
         "label": "AppMenuRegistry",
-        "description": [],
+        "description": [
+          "\nRegistry for managing AppMenuConfig items with Discover-specific types.\nAll run actions automatically receive DiscoverAppMenuRunActionParams with guaranteed onFinishAction."
+        ],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/app_menu_registry.ts",
-        "lineNumber": 24,
+        "lineNumber": 18,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -39,91 +41,57 @@
             "label": "CUSTOM_ITEMS_LIMIT",
             "description": [],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/app_menu_registry.ts",
-            "lineNumber": 25,
+            "lineNumber": 23,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.AppMenuRegistry.Unnamed",
+            "id": "def-common.AppMenuRegistry.registerCustomItem",
             "type": "Function",
             "tags": [],
-            "label": "Constructor",
-            "description": [],
+            "label": "registerCustomItem",
+            "description": [
+              "\nRegister a custom menu item."
+            ],
             "signature": [
-              "any"
+              "(item: ",
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.DiscoverAppMenuItemType",
+                "text": "DiscoverAppMenuItemType"
+              },
+              ") => void"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/app_menu_registry.ts",
-            "lineNumber": 38,
+            "lineNumber": 28,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/discover-utils",
-                "id": "def-common.AppMenuRegistry.Unnamed.$1",
-                "type": "Array",
+                "id": "def-common.AppMenuRegistry.registerCustomItem.$1",
+                "type": "CompoundType",
                 "tags": [],
-                "label": "primaryAndSecondaryActions",
-                "description": [],
+                "label": "item",
+                "description": [
+                  "The menu item to register"
+                ],
                 "signature": [
-                  "(",
                   {
                     "pluginId": "@kbn/discover-utils",
                     "scope": "common",
                     "docId": "kibKbnDiscoverUtilsPluginApi",
-                    "section": "def-common.AppMenuActionPrimary",
-                    "text": "AppMenuActionPrimary"
-                  },
-                  " | ",
-                  {
-                    "pluginId": "@kbn/discover-utils",
-                    "scope": "common",
-                    "docId": "kibKbnDiscoverUtilsPluginApi",
-                    "section": "def-common.AppMenuItemSecondary",
-                    "text": "AppMenuItemSecondary"
-                  },
-                  ")[]"
+                    "section": "def-common.DiscoverAppMenuItemType",
+                    "text": "DiscoverAppMenuItemType"
+                  }
                 ],
                 "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/app_menu_registry.ts",
-                "lineNumber": 38,
-                "columnNumber": 15,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.AppMenuRegistry.isActionRegistered",
-            "type": "Function",
-            "tags": [],
-            "label": "isActionRegistered",
-            "description": [],
-            "signature": [
-              "(appMenuItemId: string) => boolean"
-            ],
-            "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/app_menu_registry.ts",
-            "lineNumber": 43,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/discover-utils",
-                "id": "def-common.AppMenuRegistry.isActionRegistered.$1",
-                "type": "string",
-                "tags": [],
-                "label": "appMenuItemId",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/app_menu_registry.ts",
-                "lineNumber": 43,
+                "lineNumber": 32,
                 "columnNumber": 29,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -134,48 +102,232 @@
           },
           {
             "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.AppMenuRegistry.registerCustomAction",
+            "id": "def-common.AppMenuRegistry.registerCustomPopoverItem",
             "type": "Function",
             "tags": [],
-            "label": "registerCustomAction",
+            "label": "registerCustomPopoverItem",
             "description": [
-              "\nRegister a custom action to the app menu. It can be a simple action or a submenu with more actions and horizontal rules.\nNote: Only 2 top level custom actions are allowed to be rendered in the app menu. The rest will be ignored.\nA custom action can also open a flyout or a modal. For that, return your custom react node from action's `onClick` event and call `onFinishAction` when you're done."
+              "\nRegister a custom popover item under a parent menu item."
             ],
             "signature": [
-              "(appMenuItem: ",
+              "(parentId: string, popoverItem: ",
               {
                 "pluginId": "@kbn/discover-utils",
                 "scope": "common",
                 "docId": "kibKbnDiscoverUtilsPluginApi",
-                "section": "def-common.AppMenuItemCustom",
-                "text": "AppMenuItemCustom"
+                "section": "def-common.DiscoverAppMenuPopoverItem",
+                "text": "DiscoverAppMenuPopoverItem"
               },
               ") => void"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/app_menu_registry.ts",
-            "lineNumber": 60,
+            "lineNumber": 36,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/discover-utils",
-                "id": "def-common.AppMenuRegistry.registerCustomAction.$1",
+                "id": "def-common.AppMenuRegistry.registerCustomPopoverItem.$1",
+                "type": "string",
+                "tags": [],
+                "label": "parentId",
+                "description": [
+                  "The ID of the parent menu item"
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/app_menu_registry.ts",
+                "lineNumber": 41,
+                "columnNumber": 36,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/discover-utils",
+                "id": "def-common.AppMenuRegistry.registerCustomPopoverItem.$2",
                 "type": "CompoundType",
                 "tags": [],
-                "label": "appMenuItem",
-                "description": [],
+                "label": "popoverItem",
+                "description": [
+                  "The popover item to register"
+                ],
                 "signature": [
                   {
                     "pluginId": "@kbn/discover-utils",
                     "scope": "common",
                     "docId": "kibKbnDiscoverUtilsPluginApi",
-                    "section": "def-common.AppMenuItemCustom",
-                    "text": "AppMenuItemCustom"
+                    "section": "def-common.DiscoverAppMenuPopoverItem",
+                    "text": "DiscoverAppMenuPopoverItem"
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/app_menu_registry.ts",
-                "lineNumber": 66,
+                "lineNumber": 41,
+                "columnNumber": 54,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.AppMenuRegistry.registerItem",
+            "type": "Function",
+            "tags": [],
+            "label": "registerItem",
+            "description": [
+              "\nRegister a menu item."
+            ],
+            "signature": [
+              "(item: ",
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.DiscoverAppMenuItemType",
+                "text": "DiscoverAppMenuItemType"
+              },
+              ") => void"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/app_menu_registry.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/discover-utils",
+                "id": "def-common.AppMenuRegistry.registerItem.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "item",
+                "description": [
+                  "The menu item to register"
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/discover-utils",
+                    "scope": "common",
+                    "docId": "kibKbnDiscoverUtilsPluginApi",
+                    "section": "def-common.DiscoverAppMenuItemType",
+                    "text": "DiscoverAppMenuItemType"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/app_menu_registry.ts",
+                "lineNumber": 55,
+                "columnNumber": 23,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.AppMenuRegistry.registerItems",
+            "type": "Function",
+            "tags": [],
+            "label": "registerItems",
+            "description": [
+              "\nRegister multiple menu items at once."
+            ],
+            "signature": [
+              "(items: ",
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.DiscoverAppMenuItemType",
+                "text": "DiscoverAppMenuItemType"
+              },
+              "[]) => void"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/app_menu_registry.ts",
+            "lineNumber": 59,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/discover-utils",
+                "id": "def-common.AppMenuRegistry.registerItems.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "items",
+                "description": [
+                  "Array of menu items to register"
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/discover-utils",
+                    "scope": "common",
+                    "docId": "kibKbnDiscoverUtilsPluginApi",
+                    "section": "def-common.DiscoverAppMenuItemType",
+                    "text": "DiscoverAppMenuItemType"
+                  },
+                  "[]"
+                ],
+                "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/app_menu_registry.ts",
+                "lineNumber": 63,
+                "columnNumber": 24,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.AppMenuRegistry.setPrimaryActionItem",
+            "type": "Function",
+            "tags": [],
+            "label": "setPrimaryActionItem",
+            "description": [
+              "\nSet the primary action item for the app menu."
+            ],
+            "signature": [
+              "(item: ",
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.DiscoverAppMenuPrimaryActionItem",
+                "text": "DiscoverAppMenuPrimaryActionItem"
+              },
+              ") => void"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/app_menu_registry.ts",
+            "lineNumber": 67,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/discover-utils",
+                "id": "def-common.AppMenuRegistry.setPrimaryActionItem.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "item",
+                "description": [
+                  "The primary action item"
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/discover-utils",
+                    "scope": "common",
+                    "docId": "kibKbnDiscoverUtilsPluginApi",
+                    "section": "def-common.DiscoverAppMenuPrimaryActionItem",
+                    "text": "DiscoverAppMenuPrimaryActionItem"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/app_menu_registry.ts",
+                "lineNumber": 71,
                 "columnNumber": 31,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -186,82 +338,51 @@
           },
           {
             "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.AppMenuRegistry.registerCustomActionUnderSubmenu",
+            "id": "def-common.AppMenuRegistry.setSecondaryActionItem",
             "type": "Function",
             "tags": [],
-            "label": "registerCustomActionUnderSubmenu",
+            "label": "setSecondaryActionItem",
             "description": [
-              "\nRegister a custom action under a submenu. It can be an action or a horizontal rule.\nAny number of submenu actions can be registered and rendered.\nYou can also extend an existing submenu with more actions. For example, AppMenuActionType.alerts.\n`order` property is optional and can be used to control the order of actions in the submenu."
+              "\nSet the secondary action item for the app menu."
             ],
             "signature": [
-              "(submenuId: string, appMenuItem: ",
+              "(item: ",
               {
                 "pluginId": "@kbn/discover-utils",
                 "scope": "common",
                 "docId": "kibKbnDiscoverUtilsPluginApi",
-                "section": "def-common.AppMenuSubmenuActionCustom",
-                "text": "AppMenuSubmenuActionCustom"
-              },
-              " | ",
-              {
-                "pluginId": "@kbn/discover-utils",
-                "scope": "common",
-                "docId": "kibKbnDiscoverUtilsPluginApi",
-                "section": "def-common.AppMenuSubmenuHorizontalRule",
-                "text": "AppMenuSubmenuHorizontalRule"
+                "section": "def-common.DiscoverAppMenuSecondaryActionItem",
+                "text": "DiscoverAppMenuSecondaryActionItem"
               },
               ") => void"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/app_menu_registry.ts",
-            "lineNumber": 76,
+            "lineNumber": 75,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/discover-utils",
-                "id": "def-common.AppMenuRegistry.registerCustomActionUnderSubmenu.$1",
-                "type": "string",
-                "tags": [],
-                "label": "submenuId",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/app_menu_registry.ts",
-                "lineNumber": 85,
-                "columnNumber": 5,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "@kbn/discover-utils",
-                "id": "def-common.AppMenuRegistry.registerCustomActionUnderSubmenu.$2",
+                "id": "def-common.AppMenuRegistry.setSecondaryActionItem.$1",
                 "type": "CompoundType",
                 "tags": [],
-                "label": "appMenuItem",
-                "description": [],
+                "label": "item",
+                "description": [
+                  "The secondary action item"
+                ],
                 "signature": [
                   {
                     "pluginId": "@kbn/discover-utils",
                     "scope": "common",
                     "docId": "kibKbnDiscoverUtilsPluginApi",
-                    "section": "def-common.AppMenuSubmenuActionCustom",
-                    "text": "AppMenuSubmenuActionCustom"
-                  },
-                  " | ",
-                  {
-                    "pluginId": "@kbn/discover-utils",
-                    "scope": "common",
-                    "docId": "kibKbnDiscoverUtilsPluginApi",
-                    "section": "def-common.AppMenuSubmenuHorizontalRule",
-                    "text": "AppMenuSubmenuHorizontalRule"
+                    "section": "def-common.DiscoverAppMenuSecondaryActionItem",
+                    "text": "DiscoverAppMenuSecondaryActionItem"
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/app_menu_registry.ts",
-                "lineNumber": 86,
-                "columnNumber": 5,
+                "lineNumber": 79,
+                "columnNumber": 33,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -271,12 +392,85 @@
           },
           {
             "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.AppMenuRegistry.getSortedItems",
+            "id": "def-common.AppMenuRegistry.registerPopoverItem",
             "type": "Function",
             "tags": [],
-            "label": "getSortedItems",
+            "label": "registerPopoverItem",
             "description": [
-              "\nGet the resulting app menu items sorted by type and order."
+              "\nRegister a popover item for a specific parent menu item."
+            ],
+            "signature": [
+              "(parentId: string, popoverItem: ",
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.DiscoverAppMenuPopoverItem",
+                "text": "DiscoverAppMenuPopoverItem"
+              },
+              ") => void"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/app_menu_registry.ts",
+            "lineNumber": 83,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/discover-utils",
+                "id": "def-common.AppMenuRegistry.registerPopoverItem.$1",
+                "type": "string",
+                "tags": [],
+                "label": "parentId",
+                "description": [
+                  "The ID of the parent menu item"
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/app_menu_registry.ts",
+                "lineNumber": 88,
+                "columnNumber": 30,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/discover-utils",
+                "id": "def-common.AppMenuRegistry.registerPopoverItem.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "popoverItem",
+                "description": [
+                  "The popover item to register"
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/discover-utils",
+                    "scope": "common",
+                    "docId": "kibKbnDiscoverUtilsPluginApi",
+                    "section": "def-common.DiscoverAppMenuPopoverItem",
+                    "text": "DiscoverAppMenuPopoverItem"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/app_menu_registry.ts",
+                "lineNumber": 88,
+                "columnNumber": 48,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.AppMenuRegistry.getAppMenuConfig",
+            "type": "Function",
+            "tags": [],
+            "label": "getAppMenuConfig",
+            "description": [
+              "\nGet the complete AppMenuConfig.\nItems with registered popover items will have their items property populated."
             ],
             "signature": [
               "() => ",
@@ -284,13 +478,12 @@
                 "pluginId": "@kbn/discover-utils",
                 "scope": "common",
                 "docId": "kibKbnDiscoverUtilsPluginApi",
-                "section": "def-common.AppMenuItem",
-                "text": "AppMenuItem"
-              },
-              "[]"
+                "section": "def-common.DiscoverAppMenuConfig",
+                "text": "DiscoverAppMenuConfig"
+              }
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/app_menu_registry.ts",
-            "lineNumber": 120,
+            "lineNumber": 98,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1001,7 +1194,7 @@
             "section": "def-public.SourcesApiOptions",
             "text": "SourcesApiOptions"
           },
-          ", \"body\"> | undefined) => Promise<Readonly<{} & { error: string; transaction: string; span: string; metric: string; onboarding: string; sourcemap: string; }>>; getApmIndexSettings: (options?: Omit<",
+          ", \"body\"> | undefined) => Promise<Readonly<{} & { error: string; metric: string; transaction: string; span: string; onboarding: string; sourcemap: string; }>>; getApmIndexSettings: (options?: Omit<",
           {
             "pluginId": "apmSourcesAccess",
             "scope": "public",
@@ -1019,7 +1212,7 @@
             "section": "def-public.SourcesApiOptions",
             "text": "SourcesApiOptions"
           },
-          " & { body: Partial<Record<\"error\" | \"transaction\" | \"span\" | \"metric\" | \"onboarding\" | \"sourcemap\", string>>; }) => Promise<",
+          " & { body: Partial<Record<\"error\" | \"metric\" | \"transaction\" | \"span\" | \"onboarding\" | \"sourcemap\", string>>; }) => Promise<",
           "SavedObject",
           "<{}>>; } | undefined; }) => Promise<",
           {
@@ -1066,7 +1259,7 @@
                     "section": "def-public.SourcesApiOptions",
                     "text": "SourcesApiOptions"
                   },
-                  ", \"body\"> | undefined) => Promise<Readonly<{} & { error: string; transaction: string; span: string; metric: string; onboarding: string; sourcemap: string; }>>; getApmIndexSettings: (options?: Omit<",
+                  ", \"body\"> | undefined) => Promise<Readonly<{} & { error: string; metric: string; transaction: string; span: string; onboarding: string; sourcemap: string; }>>; getApmIndexSettings: (options?: Omit<",
                   {
                     "pluginId": "apmSourcesAccess",
                     "scope": "public",
@@ -1084,7 +1277,7 @@
                     "section": "def-public.SourcesApiOptions",
                     "text": "SourcesApiOptions"
                   },
-                  " & { body: Partial<Record<\"error\" | \"transaction\" | \"span\" | \"metric\" | \"onboarding\" | \"sourcemap\", string>>; }) => Promise<",
+                  " & { body: Partial<Record<\"error\" | \"metric\" | \"transaction\" | \"span\" | \"onboarding\" | \"sourcemap\", string>>; }) => Promise<",
                   "SavedObject",
                   "<{}>>; } | undefined"
                 ],
@@ -1389,6 +1582,43 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.escapeAndPreserveHighlightTags",
+        "type": "Function",
+        "tags": [],
+        "label": "escapeAndPreserveHighlightTags",
+        "description": [],
+        "signature": [
+          "(value: string) => string"
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/escape_preserve_highlight_tags.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.escapeAndPreserveHighlightTags.$1",
+            "type": "string",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/escape_preserve_highlight_tags.ts",
+            "lineNumber": 20,
+            "columnNumber": 48,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
           }
         ],
         "returnComment": [],
@@ -1854,6 +2084,57 @@
             "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/utils/get_available_resource_fields.ts",
             "lineNumber": 38,
             "columnNumber": 44,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.getAvailableTraceFields",
+        "type": "Function",
+        "tags": [],
+        "label": "getAvailableTraceFields",
+        "description": [],
+        "signature": [
+          "(traceDoc: ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.TraceFields",
+            "text": "TraceFields"
+          },
+          ") => (\"event.outcome\" | \"service.name\" | \"transaction.name\" | \"transaction.duration.us\" | \"span.duration.us\" | \"span.name\")[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/utils/get_available_trace_fields.ts",
+        "lineNumber": 22,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.getAvailableTraceFields.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "traceDoc",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.TraceFields",
+                "text": "TraceFields"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/utils/get_available_trace_fields.ts",
+            "lineNumber": 22,
+            "columnNumber": 41,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -3062,7 +3343,7 @@
             "tags": [],
             "label": "sort",
             "description": [
-              "two dimensional array [[fieldToSort, directionToSort]]\nor an array of objects [{fieldToSort: directionToSort}]"
+              "two dimensional array [[fieldToSort, directionToSort]]"
             ],
             "signature": [
               {
@@ -3764,7 +4045,7 @@
         "signature": [
           "({ logLevel, fallback, \"data-test-subj\": dataTestSubj, ...badgeProps }: Omit<",
           "EuiBadgeProps",
-          ", \"color\" | \"children\"> & { logLevel: {}; fallback?: React.ReactElement<any, string | React.JSXElementConstructor<any>> | undefined; }) => React.JSX.Element"
+          ", \"color\" | \"children\"> & { logLevel: {}; fallback?: React.ReactElement<any> | undefined; }) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/components/log_level_badge.tsx",
         "lineNumber": 21,
@@ -3893,7 +4174,7 @@
         "label": "usePager",
         "description": [],
         "signature": [
-          "({ initialPageSize, totalItems, }: { totalItems: number; initialPageSize: number; }) => { curPageIndex: number; pageSize: number; changePageIndex: (pageIndex: number) => void; changePageSize: (newPageSize: number) => void; totalPages: number; startIndex: number; hasNextPage: boolean; }"
+          "({ initialPageSize, initialPageIndex, totalItems, }: { totalItems: number; initialPageSize: number; initialPageIndex?: number | undefined; }) => { curPageIndex: number; pageSize: number; changePageIndex: (pageIndex: number) => void; changePageSize: (newPageSize: number) => void; totalPages: number; startIndex: number; hasNextPage: boolean; }"
         ],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/hooks/use_pager.ts",
         "lineNumber": 18,
@@ -3906,10 +4187,10 @@
             "id": "def-common.usePager.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  initialPageSize,\n  totalItems,\n}",
+            "label": "{\n  initialPageSize,\n  initialPageIndex = 0,\n  totalItems,\n}",
             "description": [],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/hooks/use_pager.ts",
-            "lineNumber": 21,
+            "lineNumber": 22,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
@@ -3922,7 +4203,7 @@
                 "label": "totalItems",
                 "description": [],
                 "path": "src/platform/packages/shared/kbn-discover-utils/src/hooks/use_pager.ts",
-                "lineNumber": 22,
+                "lineNumber": 23,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3935,7 +4216,23 @@
                 "label": "initialPageSize",
                 "description": [],
                 "path": "src/platform/packages/shared/kbn-discover-utils/src/hooks/use_pager.ts",
-                "lineNumber": 23,
+                "lineNumber": 24,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/discover-utils",
+                "id": "def-common.usePager.$1.initialPageIndex",
+                "type": "number",
+                "tags": [],
+                "label": "initialPageIndex",
+                "description": [],
+                "signature": [
+                  "number | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-discover-utils/src/hooks/use_pager.ts",
+                "lineNumber": 25,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -4107,802 +4404,6 @@
       },
       {
         "parentPluginId": "@kbn/discover-utils",
-        "id": "def-common.AppMenuActionBase",
-        "type": "Interface",
-        "tags": [],
-        "label": "AppMenuActionBase",
-        "description": [],
-        "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
-        "lineNumber": 62,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.AppMenuActionBase.id",
-            "type": "string",
-            "tags": [],
-            "label": "id",
-            "description": [],
-            "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
-            "lineNumber": 63,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.AppMenuActionBase.order",
-            "type": "number",
-            "tags": [],
-            "label": "order",
-            "description": [],
-            "signature": [
-              "number | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
-            "lineNumber": 64,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/discover-utils",
-        "id": "def-common.AppMenuActionCustom",
-        "type": "Interface",
-        "tags": [],
-        "label": "AppMenuActionCustom",
-        "description": [
-          "\nA custom menu action"
-        ],
-        "signature": [
-          {
-            "pluginId": "@kbn/discover-utils",
-            "scope": "common",
-            "docId": "kibKbnDiscoverUtilsPluginApi",
-            "section": "def-common.AppMenuActionCustom",
-            "text": "AppMenuActionCustom"
-          },
-          " extends ",
-          {
-            "pluginId": "@kbn/discover-utils",
-            "scope": "common",
-            "docId": "kibKbnDiscoverUtilsPluginApi",
-            "section": "def-common.AppMenuActionBase",
-            "text": "AppMenuActionBase"
-          }
-        ],
-        "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
-        "lineNumber": 83,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.AppMenuActionCustom.type",
-            "type": "string",
-            "tags": [],
-            "label": "type",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/discover-utils",
-                "scope": "common",
-                "docId": "kibKbnDiscoverUtilsPluginApi",
-                "section": "def-common.AppMenuActionType",
-                "text": "AppMenuActionType"
-              },
-              ".custom"
-            ],
-            "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
-            "lineNumber": 87,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.AppMenuActionCustom.controlProps",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "controlProps",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/discover-utils",
-                "scope": "common",
-                "docId": "kibKbnDiscoverUtilsPluginApi",
-                "section": "def-common.TopNavMenuData",
-                "text": "TopNavMenuData"
-              },
-              " & { onClick: ((params: ",
-              {
-                "pluginId": "@kbn/discover-utils",
-                "scope": "common",
-                "docId": "kibKbnDiscoverUtilsPluginApi",
-                "section": "def-common.AppMenuControlOnClickParams",
-                "text": "AppMenuControlOnClickParams"
-              },
-              ") => Promise<void | React.ReactNode>) | ((params: ",
-              {
-                "pluginId": "@kbn/discover-utils",
-                "scope": "common",
-                "docId": "kibKbnDiscoverUtilsPluginApi",
-                "section": "def-common.AppMenuControlOnClickParams",
-                "text": "AppMenuControlOnClickParams"
-              },
-              ") => void | React.ReactNode) | undefined; }"
-            ],
-            "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
-            "lineNumber": 88,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/discover-utils",
-        "id": "def-common.AppMenuActionPrimary",
-        "type": "Interface",
-        "tags": [],
-        "label": "AppMenuActionPrimary",
-        "description": [
-          "\nA primary menu action (with icon only)"
-        ],
-        "signature": [
-          {
-            "pluginId": "@kbn/discover-utils",
-            "scope": "common",
-            "docId": "kibKbnDiscoverUtilsPluginApi",
-            "section": "def-common.AppMenuActionPrimary",
-            "text": "AppMenuActionPrimary"
-          },
-          " extends ",
-          {
-            "pluginId": "@kbn/discover-utils",
-            "scope": "common",
-            "docId": "kibKbnDiscoverUtilsPluginApi",
-            "section": "def-common.AppMenuActionBase",
-            "text": "AppMenuActionBase"
-          }
-        ],
-        "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
-        "lineNumber": 98,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.AppMenuActionPrimary.type",
-            "type": "string",
-            "tags": [],
-            "label": "type",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/discover-utils",
-                "scope": "common",
-                "docId": "kibKbnDiscoverUtilsPluginApi",
-                "section": "def-common.AppMenuActionType",
-                "text": "AppMenuActionType"
-              },
-              ".primary"
-            ],
-            "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
-            "lineNumber": 102,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.AppMenuActionPrimary.controlProps",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "controlProps",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/discover-utils",
-                "scope": "common",
-                "docId": "kibKbnDiscoverUtilsPluginApi",
-                "section": "def-common.TopNavMenuData",
-                "text": "TopNavMenuData"
-              },
-              " & { onClick: ((params: ",
-              {
-                "pluginId": "@kbn/discover-utils",
-                "scope": "common",
-                "docId": "kibKbnDiscoverUtilsPluginApi",
-                "section": "def-common.AppMenuControlOnClickParams",
-                "text": "AppMenuControlOnClickParams"
-              },
-              ") => Promise<void | React.ReactNode>) | ((params: ",
-              {
-                "pluginId": "@kbn/discover-utils",
-                "scope": "common",
-                "docId": "kibKbnDiscoverUtilsPluginApi",
-                "section": "def-common.AppMenuControlOnClickParams",
-                "text": "AppMenuControlOnClickParams"
-              },
-              ") => void | React.ReactNode) | undefined; } & { iconType: ",
-              "IconType",
-              "; }"
-            ],
-            "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
-            "lineNumber": 103,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/discover-utils",
-        "id": "def-common.AppMenuActionSecondary",
-        "type": "Interface",
-        "tags": [],
-        "label": "AppMenuActionSecondary",
-        "description": [
-          "\nA secondary menu action"
-        ],
-        "signature": [
-          {
-            "pluginId": "@kbn/discover-utils",
-            "scope": "common",
-            "docId": "kibKbnDiscoverUtilsPluginApi",
-            "section": "def-common.AppMenuActionSecondary",
-            "text": "AppMenuActionSecondary"
-          },
-          " extends ",
-          {
-            "pluginId": "@kbn/discover-utils",
-            "scope": "common",
-            "docId": "kibKbnDiscoverUtilsPluginApi",
-            "section": "def-common.AppMenuActionBase",
-            "text": "AppMenuActionBase"
-          }
-        ],
-        "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
-        "lineNumber": 67,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.AppMenuActionSecondary.type",
-            "type": "string",
-            "tags": [],
-            "label": "type",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/discover-utils",
-                "scope": "common",
-                "docId": "kibKbnDiscoverUtilsPluginApi",
-                "section": "def-common.AppMenuActionType",
-                "text": "AppMenuActionType"
-              },
-              ".secondary"
-            ],
-            "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
-            "lineNumber": 71,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.AppMenuActionSecondary.controlProps",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "controlProps",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/discover-utils",
-                "scope": "common",
-                "docId": "kibKbnDiscoverUtilsPluginApi",
-                "section": "def-common.TopNavMenuData",
-                "text": "TopNavMenuData"
-              },
-              " & { onClick: ((params: ",
-              {
-                "pluginId": "@kbn/discover-utils",
-                "scope": "common",
-                "docId": "kibKbnDiscoverUtilsPluginApi",
-                "section": "def-common.AppMenuControlOnClickParams",
-                "text": "AppMenuControlOnClickParams"
-              },
-              ") => Promise<void | React.ReactNode>) | ((params: ",
-              {
-                "pluginId": "@kbn/discover-utils",
-                "scope": "common",
-                "docId": "kibKbnDiscoverUtilsPluginApi",
-                "section": "def-common.AppMenuControlOnClickParams",
-                "text": "AppMenuControlOnClickParams"
-              },
-              ") => void | React.ReactNode) | undefined; }"
-            ],
-            "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
-            "lineNumber": 72,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/discover-utils",
-        "id": "def-common.AppMenuActionSubmenuBase",
-        "type": "Interface",
-        "tags": [],
-        "label": "AppMenuActionSubmenuBase",
-        "description": [
-          "\nA menu action which opens a submenu with more actions"
-        ],
-        "signature": [
-          {
-            "pluginId": "@kbn/discover-utils",
-            "scope": "common",
-            "docId": "kibKbnDiscoverUtilsPluginApi",
-            "section": "def-common.AppMenuActionSubmenuBase",
-            "text": "AppMenuActionSubmenuBase"
-          },
-          "<T> extends ",
-          {
-            "pluginId": "@kbn/discover-utils",
-            "scope": "common",
-            "docId": "kibKbnDiscoverUtilsPluginApi",
-            "section": "def-common.AppMenuActionBase",
-            "text": "AppMenuActionBase"
-          }
-        ],
-        "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
-        "lineNumber": 114,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.AppMenuActionSubmenuBase.type",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "type",
-            "description": [],
-            "signature": [
-              "T extends ",
-              {
-                "pluginId": "@kbn/discover-utils",
-                "scope": "common",
-                "docId": "kibKbnDiscoverUtilsPluginApi",
-                "section": "def-common.AppMenuActionSecondary",
-                "text": "AppMenuActionSecondary"
-              },
-              " ? ",
-              {
-                "pluginId": "@kbn/discover-utils",
-                "scope": "common",
-                "docId": "kibKbnDiscoverUtilsPluginApi",
-                "section": "def-common.AppMenuActionType",
-                "text": "AppMenuActionType"
-              },
-              ".secondary : ",
-              {
-                "pluginId": "@kbn/discover-utils",
-                "scope": "common",
-                "docId": "kibKbnDiscoverUtilsPluginApi",
-                "section": "def-common.AppMenuActionType",
-                "text": "AppMenuActionType"
-              },
-              ".custom"
-            ],
-            "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
-            "lineNumber": 119,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.AppMenuActionSubmenuBase.label",
-            "type": "string",
-            "tags": [],
-            "label": "label",
-            "description": [],
-            "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
-            "lineNumber": 122,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.AppMenuActionSubmenuBase.description",
-            "type": "string",
-            "tags": [],
-            "label": "description",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
-            "lineNumber": 123,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.AppMenuActionSubmenuBase.testId",
-            "type": "string",
-            "tags": [],
-            "label": "testId",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
-            "lineNumber": 124,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.AppMenuActionSubmenuBase.actions",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "actions",
-            "description": [],
-            "signature": [
-              "T extends ",
-              {
-                "pluginId": "@kbn/discover-utils",
-                "scope": "common",
-                "docId": "kibKbnDiscoverUtilsPluginApi",
-                "section": "def-common.AppMenuActionSecondary",
-                "text": "AppMenuActionSecondary"
-              },
-              " ? (",
-              {
-                "pluginId": "@kbn/discover-utils",
-                "scope": "common",
-                "docId": "kibKbnDiscoverUtilsPluginApi",
-                "section": "def-common.AppMenuSubmenuActionSecondary",
-                "text": "AppMenuSubmenuActionSecondary"
-              },
-              " | ",
-              {
-                "pluginId": "@kbn/discover-utils",
-                "scope": "common",
-                "docId": "kibKbnDiscoverUtilsPluginApi",
-                "section": "def-common.AppMenuSubmenuActionCustom",
-                "text": "AppMenuSubmenuActionCustom"
-              },
-              " | ",
-              {
-                "pluginId": "@kbn/discover-utils",
-                "scope": "common",
-                "docId": "kibKbnDiscoverUtilsPluginApi",
-                "section": "def-common.AppMenuSubmenuHorizontalRule",
-                "text": "AppMenuSubmenuHorizontalRule"
-              },
-              ")[] : (",
-              {
-                "pluginId": "@kbn/discover-utils",
-                "scope": "common",
-                "docId": "kibKbnDiscoverUtilsPluginApi",
-                "section": "def-common.AppMenuSubmenuActionCustom",
-                "text": "AppMenuSubmenuActionCustom"
-              },
-              " | ",
-              {
-                "pluginId": "@kbn/discover-utils",
-                "scope": "common",
-                "docId": "kibKbnDiscoverUtilsPluginApi",
-                "section": "def-common.AppMenuSubmenuHorizontalRule",
-                "text": "AppMenuSubmenuHorizontalRule"
-              },
-              ")[]"
-            ],
-            "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
-            "lineNumber": 125,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/discover-utils",
-        "id": "def-common.AppMenuControlOnClickParams",
-        "type": "Interface",
-        "tags": [],
-        "label": "AppMenuControlOnClickParams",
-        "description": [],
-        "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
-        "lineNumber": 13,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.AppMenuControlOnClickParams.anchorElement",
-            "type": "Object",
-            "tags": [],
-            "label": "anchorElement",
-            "description": [],
-            "signature": [
-              "HTMLElement"
-            ],
-            "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
-            "lineNumber": 14,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.AppMenuControlOnClickParams.onFinishAction",
-            "type": "Function",
-            "tags": [],
-            "label": "onFinishAction",
-            "description": [],
-            "signature": [
-              "() => void"
-            ],
-            "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
-            "lineNumber": 15,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/discover-utils",
-        "id": "def-common.AppMenuSubmenuActionCustom",
-        "type": "Interface",
-        "tags": [],
-        "label": "AppMenuSubmenuActionCustom",
-        "description": [
-          "\nA custom submenu action"
-        ],
-        "signature": [
-          {
-            "pluginId": "@kbn/discover-utils",
-            "scope": "common",
-            "docId": "kibKbnDiscoverUtilsPluginApi",
-            "section": "def-common.AppMenuSubmenuActionCustom",
-            "text": "AppMenuSubmenuActionCustom"
-          },
-          " extends Omit<",
-          {
-            "pluginId": "@kbn/discover-utils",
-            "scope": "common",
-            "docId": "kibKbnDiscoverUtilsPluginApi",
-            "section": "def-common.AppMenuActionCustom",
-            "text": "AppMenuActionCustom"
-          },
-          ", \"controlProps\">"
-        ],
-        "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
-        "lineNumber": 91,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.AppMenuSubmenuActionCustom.controlProps",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "controlProps",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/discover-utils",
-                "scope": "common",
-                "docId": "kibKbnDiscoverUtilsPluginApi",
-                "section": "def-common.TopNavMenuData",
-                "text": "TopNavMenuData"
-              },
-              " & { onClick: ((params: ",
-              {
-                "pluginId": "@kbn/discover-utils",
-                "scope": "common",
-                "docId": "kibKbnDiscoverUtilsPluginApi",
-                "section": "def-common.AppMenuControlOnClickParams",
-                "text": "AppMenuControlOnClickParams"
-              },
-              ") => Promise<void | React.ReactNode>) | ((params: ",
-              {
-                "pluginId": "@kbn/discover-utils",
-                "scope": "common",
-                "docId": "kibKbnDiscoverUtilsPluginApi",
-                "section": "def-common.AppMenuControlOnClickParams",
-                "text": "AppMenuControlOnClickParams"
-              },
-              ") => void | React.ReactNode) | undefined; } & ControlWithOptionalIcon"
-            ],
-            "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
-            "lineNumber": 95,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/discover-utils",
-        "id": "def-common.AppMenuSubmenuActionSecondary",
-        "type": "Interface",
-        "tags": [],
-        "label": "AppMenuSubmenuActionSecondary",
-        "description": [
-          "\nA secondary submenu action"
-        ],
-        "signature": [
-          {
-            "pluginId": "@kbn/discover-utils",
-            "scope": "common",
-            "docId": "kibKbnDiscoverUtilsPluginApi",
-            "section": "def-common.AppMenuSubmenuActionSecondary",
-            "text": "AppMenuSubmenuActionSecondary"
-          },
-          " extends Omit<",
-          {
-            "pluginId": "@kbn/discover-utils",
-            "scope": "common",
-            "docId": "kibKbnDiscoverUtilsPluginApi",
-            "section": "def-common.AppMenuActionSecondary",
-            "text": "AppMenuActionSecondary"
-          },
-          ", \"controlProps\">"
-        ],
-        "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
-        "lineNumber": 75,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.AppMenuSubmenuActionSecondary.controlProps",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "controlProps",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/discover-utils",
-                "scope": "common",
-                "docId": "kibKbnDiscoverUtilsPluginApi",
-                "section": "def-common.TopNavMenuData",
-                "text": "TopNavMenuData"
-              },
-              " & { onClick: ((params: ",
-              {
-                "pluginId": "@kbn/discover-utils",
-                "scope": "common",
-                "docId": "kibKbnDiscoverUtilsPluginApi",
-                "section": "def-common.AppMenuControlOnClickParams",
-                "text": "AppMenuControlOnClickParams"
-              },
-              ") => Promise<void | React.ReactNode>) | ((params: ",
-              {
-                "pluginId": "@kbn/discover-utils",
-                "scope": "common",
-                "docId": "kibKbnDiscoverUtilsPluginApi",
-                "section": "def-common.AppMenuControlOnClickParams",
-                "text": "AppMenuControlOnClickParams"
-              },
-              ") => void | React.ReactNode) | undefined; } & ControlWithOptionalIcon"
-            ],
-            "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
-            "lineNumber": 80,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/discover-utils",
-        "id": "def-common.AppMenuSubmenuHorizontalRule",
-        "type": "Interface",
-        "tags": [],
-        "label": "AppMenuSubmenuHorizontalRule",
-        "description": [
-          "\nA horizontal rule between menu items"
-        ],
-        "signature": [
-          {
-            "pluginId": "@kbn/discover-utils",
-            "scope": "common",
-            "docId": "kibKbnDiscoverUtilsPluginApi",
-            "section": "def-common.AppMenuSubmenuHorizontalRule",
-            "text": "AppMenuSubmenuHorizontalRule"
-          },
-          " extends ",
-          {
-            "pluginId": "@kbn/discover-utils",
-            "scope": "common",
-            "docId": "kibKbnDiscoverUtilsPluginApi",
-            "section": "def-common.AppMenuActionBase",
-            "text": "AppMenuActionBase"
-          }
-        ],
-        "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
-        "lineNumber": 106,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.AppMenuSubmenuHorizontalRule.type",
-            "type": "string",
-            "tags": [],
-            "label": "type",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/discover-utils",
-                "scope": "common",
-                "docId": "kibKbnDiscoverUtilsPluginApi",
-                "section": "def-common.AppMenuActionType",
-                "text": "AppMenuActionType"
-              },
-              ".submenuHorizontalRule"
-            ],
-            "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
-            "lineNumber": 110,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.AppMenuSubmenuHorizontalRule.testId",
-            "type": "string",
-            "tags": [],
-            "label": "testId",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
-            "lineNumber": 111,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/discover-utils",
         "id": "def-common.DataTableRecord",
         "type": "Interface",
         "tags": [],
@@ -4987,6 +4488,206 @@
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
             "lineNumber": 47,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.DiscoverAppMenuConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "DiscoverAppMenuConfig",
+        "description": [
+          "\nDiscover-specific app menu config with typed menu items"
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
+        "lineNumber": 82,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.DiscoverAppMenuConfig.items",
+            "type": "Array",
+            "tags": [],
+            "label": "items",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.DiscoverAppMenuItemType",
+                "text": "DiscoverAppMenuItemType"
+              },
+              "[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
+            "lineNumber": 86,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.DiscoverAppMenuConfig.primaryActionItem",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "primaryActionItem",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.DiscoverAppMenuPrimaryActionItem",
+                "text": "DiscoverAppMenuPrimaryActionItem"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
+            "lineNumber": 87,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.DiscoverAppMenuConfig.secondaryActionItem",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "secondaryActionItem",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.DiscoverAppMenuSecondaryActionItem",
+                "text": "DiscoverAppMenuSecondaryActionItem"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
+            "lineNumber": 88,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.DiscoverAppMenuContext",
+        "type": "Interface",
+        "tags": [],
+        "label": "DiscoverAppMenuContext",
+        "description": [
+          "\nDiscover-specific context that's always available in app menu run actions"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.DiscoverAppMenuContext",
+            "text": "DiscoverAppMenuContext"
+          },
+          " extends Record<string, unknown>"
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
+        "lineNumber": 31,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.DiscoverAppMenuContext.onFinishAction",
+            "type": "Function",
+            "tags": [],
+            "label": "onFinishAction",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.DiscoverAppMenuContext.parentTestId",
+            "type": "string",
+            "tags": [],
+            "label": "parentTestId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.DiscoverAppMenuRunActionParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "DiscoverAppMenuRunActionParams",
+        "description": [
+          "\nTyped params for Discover app menu actions with guaranteed context"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.DiscoverAppMenuRunActionParams",
+            "text": "DiscoverAppMenuRunActionParams"
+          },
+          " extends ",
+          "AppMenuRunActionParams"
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
+        "lineNumber": 39,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.DiscoverAppMenuRunActionParams.context",
+            "type": "Object",
+            "tags": [],
+            "label": "context",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.DiscoverAppMenuContext",
+                "text": "DiscoverAppMenuContext"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
+            "lineNumber": 43,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5890,7 +5591,7 @@
                 "section": "def-common.RowControlRowProps",
                 "text": "RowControlRowProps"
               },
-              ") => React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+              ") => React.ReactElement<any>"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/components/custom_control_columns/types.ts",
             "lineNumber": 36,
@@ -5987,7 +5688,7 @@
             "label": "color",
             "description": [],
             "signature": [
-              "\"text\" | \"primary\" | \"neutral\" | \"success\" | \"accent\" | \"accentSecondary\" | \"warning\" | \"risk\" | \"danger\" | undefined"
+              "\"text\" | \"primary\" | \"success\" | \"warning\" | \"accent\" | \"accentSecondary\" | \"danger\" | \"neutral\" | \"risk\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/components/custom_control_columns/types.ts",
             "lineNumber": 22,
@@ -6060,7 +5761,7 @@
             "label": "iconType",
             "description": [],
             "signature": [
-              "string | React.ComponentType<{}>"
+              "string | React.ComponentType"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/components/custom_control_columns/types.ts",
             "lineNumber": 26,
@@ -6113,7 +5814,7 @@
             "label": "tooltipContent",
             "description": [],
             "signature": [
-              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+              "React.ReactNode"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/components/custom_control_columns/types.ts",
             "lineNumber": 29,
@@ -6362,131 +6063,6 @@
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
             "lineNumber": 186,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/discover-utils",
-        "id": "def-common.TopNavMenuData",
-        "type": "Interface",
-        "tags": [],
-        "label": "TopNavMenuData",
-        "description": [],
-        "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
-        "lineNumber": 18,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.TopNavMenuData.testId",
-            "type": "string",
-            "tags": [],
-            "label": "testId",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
-            "lineNumber": 19,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.TopNavMenuData.isLoading",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "isLoading",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
-            "lineNumber": 20,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.TopNavMenuData.label",
-            "type": "string",
-            "tags": [],
-            "label": "label",
-            "description": [],
-            "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
-            "lineNumber": 21,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.TopNavMenuData.description",
-            "type": "string",
-            "tags": [],
-            "label": "description",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
-            "lineNumber": 22,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.TopNavMenuData.href",
-            "type": "string",
-            "tags": [],
-            "label": "href",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
-            "lineNumber": 23,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.TopNavMenuData.tooltip",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "tooltip",
-            "description": [],
-            "signature": [
-              "string | (() => string | undefined) | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
-            "lineNumber": 24,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.TopNavMenuData.disableButton",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "disableButton",
-            "description": [],
-            "signature": [
-              "boolean | (() => boolean) | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
-            "lineNumber": 25,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6967,21 +6543,7 @@
         "label": "AppMenuActionId",
         "description": [],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
-        "lineNumber": 43,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/discover-utils",
-        "id": "def-common.AppMenuActionType",
-        "type": "Enum",
-        "tags": [],
-        "label": "AppMenuActionType",
-        "description": [],
-        "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
-        "lineNumber": 55,
+        "lineNumber": 19,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -7103,288 +6665,6 @@
         ],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/recommended_fields/apache_error_logs.ts",
         "lineNumber": 30,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/discover-utils",
-        "id": "def-common.AppMenuActionSubmenuCustom",
-        "type": "Type",
-        "tags": [],
-        "label": "AppMenuActionSubmenuCustom",
-        "description": [
-          "\nA menu action which opens a submenu with more custom actions"
-        ],
-        "signature": [
-          {
-            "pluginId": "@kbn/discover-utils",
-            "scope": "common",
-            "docId": "kibKbnDiscoverUtilsPluginApi",
-            "section": "def-common.AppMenuActionSubmenuBase",
-            "text": "AppMenuActionSubmenuBase"
-          },
-          "<",
-          {
-            "pluginId": "@kbn/discover-utils",
-            "scope": "common",
-            "docId": "kibKbnDiscoverUtilsPluginApi",
-            "section": "def-common.AppMenuActionCustom",
-            "text": "AppMenuActionCustom"
-          },
-          ">"
-        ],
-        "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
-        "lineNumber": 136,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/discover-utils",
-        "id": "def-common.AppMenuActionSubmenuSecondary",
-        "type": "Type",
-        "tags": [],
-        "label": "AppMenuActionSubmenuSecondary",
-        "description": [
-          "\nA menu action which opens a submenu with more secondary actions"
-        ],
-        "signature": [
-          {
-            "pluginId": "@kbn/discover-utils",
-            "scope": "common",
-            "docId": "kibKbnDiscoverUtilsPluginApi",
-            "section": "def-common.AppMenuActionSubmenuBase",
-            "text": "AppMenuActionSubmenuBase"
-          },
-          "<",
-          {
-            "pluginId": "@kbn/discover-utils",
-            "scope": "common",
-            "docId": "kibKbnDiscoverUtilsPluginApi",
-            "section": "def-common.AppMenuActionSecondary",
-            "text": "AppMenuActionSecondary"
-          },
-          ">"
-        ],
-        "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
-        "lineNumber": 132,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/discover-utils",
-        "id": "def-common.AppMenuControlProps",
-        "type": "Type",
-        "tags": [],
-        "label": "AppMenuControlProps",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "@kbn/discover-utils",
-            "scope": "common",
-            "docId": "kibKbnDiscoverUtilsPluginApi",
-            "section": "def-common.TopNavMenuData",
-            "text": "TopNavMenuData"
-          },
-          " & { onClick: ((params: ",
-          {
-            "pluginId": "@kbn/discover-utils",
-            "scope": "common",
-            "docId": "kibKbnDiscoverUtilsPluginApi",
-            "section": "def-common.AppMenuControlOnClickParams",
-            "text": "AppMenuControlOnClickParams"
-          },
-          ") => Promise<void | React.ReactNode>) | ((params: ",
-          {
-            "pluginId": "@kbn/discover-utils",
-            "scope": "common",
-            "docId": "kibKbnDiscoverUtilsPluginApi",
-            "section": "def-common.AppMenuControlOnClickParams",
-            "text": "AppMenuControlOnClickParams"
-          },
-          ") => void | React.ReactNode) | undefined; }"
-        ],
-        "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
-        "lineNumber": 28,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/discover-utils",
-        "id": "def-common.AppMenuControlWithIconProps",
-        "type": "Type",
-        "tags": [],
-        "label": "AppMenuControlWithIconProps",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "@kbn/discover-utils",
-            "scope": "common",
-            "docId": "kibKbnDiscoverUtilsPluginApi",
-            "section": "def-common.TopNavMenuData",
-            "text": "TopNavMenuData"
-          },
-          " & { onClick: ((params: ",
-          {
-            "pluginId": "@kbn/discover-utils",
-            "scope": "common",
-            "docId": "kibKbnDiscoverUtilsPluginApi",
-            "section": "def-common.AppMenuControlOnClickParams",
-            "text": "AppMenuControlOnClickParams"
-          },
-          ") => Promise<void | React.ReactNode>) | ((params: ",
-          {
-            "pluginId": "@kbn/discover-utils",
-            "scope": "common",
-            "docId": "kibKbnDiscoverUtilsPluginApi",
-            "section": "def-common.AppMenuControlOnClickParams",
-            "text": "AppMenuControlOnClickParams"
-          },
-          ") => void | React.ReactNode) | undefined; } & { iconType: ",
-          "IconType",
-          "; }"
-        ],
-        "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
-        "lineNumber": 35,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/discover-utils",
-        "id": "def-common.AppMenuItem",
-        "type": "Type",
-        "tags": [],
-        "label": "AppMenuItem",
-        "description": [
-          "\nA menu item can be primary, secondary or custom"
-        ],
-        "signature": [
-          {
-            "pluginId": "@kbn/discover-utils",
-            "scope": "common",
-            "docId": "kibKbnDiscoverUtilsPluginApi",
-            "section": "def-common.AppMenuActionPrimary",
-            "text": "AppMenuActionPrimary"
-          },
-          " | ",
-          {
-            "pluginId": "@kbn/discover-utils",
-            "scope": "common",
-            "docId": "kibKbnDiscoverUtilsPluginApi",
-            "section": "def-common.AppMenuItemSecondary",
-            "text": "AppMenuItemSecondary"
-          },
-          " | ",
-          {
-            "pluginId": "@kbn/discover-utils",
-            "scope": "common",
-            "docId": "kibKbnDiscoverUtilsPluginApi",
-            "section": "def-common.AppMenuItemCustom",
-            "text": "AppMenuItemCustom"
-          }
-        ],
-        "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
-        "lineNumber": 153,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/discover-utils",
-        "id": "def-common.AppMenuItemCustom",
-        "type": "Type",
-        "tags": [],
-        "label": "AppMenuItemCustom",
-        "description": [
-          "\nA custom menu item can have only a label or a submenu"
-        ],
-        "signature": [
-          {
-            "pluginId": "@kbn/discover-utils",
-            "scope": "common",
-            "docId": "kibKbnDiscoverUtilsPluginApi",
-            "section": "def-common.AppMenuActionCustom",
-            "text": "AppMenuActionCustom"
-          },
-          " | ",
-          {
-            "pluginId": "@kbn/discover-utils",
-            "scope": "common",
-            "docId": "kibKbnDiscoverUtilsPluginApi",
-            "section": "def-common.AppMenuActionSubmenuCustom",
-            "text": "AppMenuActionSubmenuCustom"
-          }
-        ],
-        "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
-        "lineNumber": 149,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/discover-utils",
-        "id": "def-common.AppMenuItemPrimary",
-        "type": "Type",
-        "tags": [],
-        "label": "AppMenuItemPrimary",
-        "description": [
-          "\nA primary menu item can only have an icon"
-        ],
-        "signature": [
-          {
-            "pluginId": "@kbn/discover-utils",
-            "scope": "common",
-            "docId": "kibKbnDiscoverUtilsPluginApi",
-            "section": "def-common.AppMenuActionPrimary",
-            "text": "AppMenuActionPrimary"
-          }
-        ],
-        "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
-        "lineNumber": 141,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/discover-utils",
-        "id": "def-common.AppMenuItemSecondary",
-        "type": "Type",
-        "tags": [],
-        "label": "AppMenuItemSecondary",
-        "description": [
-          "\nA secondary menu item can have only a label or a submenu"
-        ],
-        "signature": [
-          {
-            "pluginId": "@kbn/discover-utils",
-            "scope": "common",
-            "docId": "kibKbnDiscoverUtilsPluginApi",
-            "section": "def-common.AppMenuActionSecondary",
-            "text": "AppMenuActionSecondary"
-          },
-          " | ",
-          {
-            "pluginId": "@kbn/discover-utils",
-            "scope": "common",
-            "docId": "kibKbnDiscoverUtilsPluginApi",
-            "section": "def-common.AppMenuActionSubmenuSecondary",
-            "text": "AppMenuActionSubmenuSecondary"
-          }
-        ],
-        "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
-        "lineNumber": 145,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -7804,6 +7084,182 @@
         ],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/recommended_fields/default_logs.ts",
         "lineNumber": 21,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.DiscoverAppMenuItemType",
+        "type": "Type",
+        "tags": [],
+        "label": "DiscoverAppMenuItemType",
+        "description": [
+          "\nDiscover-specific menu item type with typed run action and items"
+        ],
+        "signature": [
+          "Omit<",
+          "AppMenuItemType",
+          ", \"run\" | \"items\"> & { run?: ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.DiscoverAppMenuRunAction",
+            "text": "DiscoverAppMenuRunAction"
+          },
+          " | undefined; items?: ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.DiscoverAppMenuPopoverItem",
+            "text": "DiscoverAppMenuPopoverItem"
+          },
+          "[] | undefined; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
+        "lineNumber": 60,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.DiscoverAppMenuPopoverItem",
+        "type": "Type",
+        "tags": [],
+        "label": "DiscoverAppMenuPopoverItem",
+        "description": [
+          "\nDiscover-specific popover item with typed run action"
+        ],
+        "signature": [
+          "Omit<",
+          "AppMenuPopoverItem",
+          ", \"run\"> & { run?: ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.DiscoverAppMenuRunAction",
+            "text": "DiscoverAppMenuRunAction"
+          },
+          " | undefined; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
+        "lineNumber": 53,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.DiscoverAppMenuPrimaryActionItem",
+        "type": "Type",
+        "tags": [],
+        "label": "DiscoverAppMenuPrimaryActionItem",
+        "description": [
+          "\nDiscover-specific primary action item with typed run action"
+        ],
+        "signature": [
+          "Omit<",
+          "AppMenuPrimaryActionItem",
+          ", \"run\"> & { run?: ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.DiscoverAppMenuRunAction",
+            "text": "DiscoverAppMenuRunAction"
+          },
+          " | undefined; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
+        "lineNumber": 68,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.DiscoverAppMenuRunAction",
+        "type": "Type",
+        "tags": [],
+        "label": "DiscoverAppMenuRunAction",
+        "description": [
+          "\nDiscover-specific run action that always receives DiscoverAppMenuRunActionParams"
+        ],
+        "signature": [
+          "(params: ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.DiscoverAppMenuRunActionParams",
+            "text": "DiscoverAppMenuRunActionParams"
+          },
+          ") => void | React.ReactNode | React.ReactElement<any> | Promise<void | React.ReactNode | React.ReactElement<any>>"
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
+        "lineNumber": 46,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.DiscoverAppMenuRunAction.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.DiscoverAppMenuRunActionParams",
+                "text": "DiscoverAppMenuRunActionParams"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.DiscoverAppMenuSecondaryActionItem",
+        "type": "Type",
+        "tags": [],
+        "label": "DiscoverAppMenuSecondaryActionItem",
+        "description": [
+          "\nDiscover-specific secondary action item with typed run action"
+        ],
+        "signature": [
+          "Omit<",
+          "AppMenuSecondaryActionItem",
+          ", \"run\"> & { run?: ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.DiscoverAppMenuRunAction",
+            "text": "DiscoverAppMenuRunAction"
+          },
+          " | undefined; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
+        "lineNumber": 75,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
