@@ -150,9 +150,7 @@ export class AnonymizationPlugin
       }
     };
     const alertsDataViewExists = async (namespace: string): Promise<boolean> => {
-      const client = core.savedObjects
-        .getUnsafeInternalClient()
-        .asScopedToNamespace(namespace);
+      const client = core.savedObjects.getUnsafeInternalClient().asScopedToNamespace(namespace);
       try {
         await client.get('index-pattern', getAlertsDataViewTargetId(namespace));
         return true;

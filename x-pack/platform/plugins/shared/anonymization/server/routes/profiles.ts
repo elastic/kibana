@@ -7,11 +7,10 @@
 
 import { schema } from '@kbn/config-schema';
 import type { IRouter, Logger } from '@kbn/core/server';
-import type {
-  FieldRule,
-  CreateAnonymizationProfileRequestBody,
-  UpdateAnonymizationProfileRequestBody,
-  FindAnonymizationProfilesRequestQuery,
+import type { FieldRule, FindAnonymizationProfilesRequestQuery } from '@kbn/anonymization-common';
+import {
+  createAnonymizationProfileRequestSchema,
+  updateAnonymizationProfileRequestSchema,
 } from '@kbn/anonymization-common';
 import {
   ANONYMIZATION_API_VERSION,
@@ -94,7 +93,11 @@ export const registerProfileRoutes = (router: IRouter, logger: Logger): void => 
       },
       async (context, request, response) => {
         try {
-          const body = request.body as CreateAnonymizationProfileRequestBody;
+          const parseResult = createAnonymizationProfileRequestSchema.safeParse(request.body);
+          if (!parseResult.success) {
+            return response.badRequest({ body: { message: parseResult.error.message } });
+          }
+          const body = parseResult.data;
           const validationError = validateFieldRules(body.rules.fieldRules);
           if (validationError) {
             return response.badRequest({ body: { message: validationError } });
@@ -270,7 +273,11 @@ export const registerProfileRoutes = (router: IRouter, logger: Logger): void => 
       },
       async (context, request, response) => {
         try {
-          const body = request.body as UpdateAnonymizationProfileRequestBody;
+          const parseResult = updateAnonymizationProfileRequestSchema.safeParse(request.body);
+          if (!parseResult.success) {
+            return response.badRequest({ body: { message: parseResult.error.message } });
+          }
+          const body = parseResult.data;
 
           if (body.rules?.fieldRules) {
             const validationError = validateFieldRules(body.rules.fieldRules);

@@ -217,6 +217,14 @@ export interface ChatCompleteResponse<
    * Model effectively used, as specified by the response
    */
   model?: string;
+  /**
+   * Optional metadata attached by inference runtime.
+   */
+  metadata?: {
+    anonymization?: {
+      replacementsId?: string;
+    };
+  };
 }
 
 /**

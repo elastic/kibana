@@ -45,6 +45,14 @@ export type ChatCompletionMessageEvent<TToolOptions extends ToolOptions = ToolOp
        */
       deanonymized_output?: { message: Message; deanonymizations: Deanonymization[] };
       /**
+       * Optional metadata attached by inference runtime.
+       */
+      metadata?: {
+        anonymization?: {
+          replacementsId?: string;
+        };
+      };
+      /**
        * Tool calls from the LLM
        */
       toolCalls: ToolCallOfToolOptions<TToolOptions>[];
@@ -104,6 +112,14 @@ export type ChatCompletionChunkEvent = InferenceTaskEventBase<
      * Optional deanonymized output metadata
      */
     deanonymized_output?: { message: Message; deanonymizations: Deanonymization[] };
+    /**
+     * Optional metadata attached by inference runtime.
+     */
+    metadata?: {
+      anonymization?: {
+        replacementsId?: string;
+      };
+    };
   }
 >;
 

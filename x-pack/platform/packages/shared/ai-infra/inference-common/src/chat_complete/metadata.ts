@@ -31,18 +31,11 @@ export interface ChatCompleteAnonymizationTarget {
   targetId: string;
 }
 
-export interface ChatCompleteAnonymizationScope {
-  scopeType: 'thread' | 'execution';
-  scopeId: string;
-}
-
 /**
  * Optional anonymization metadata consumers can pass so inference can resolve
- * field-based policy for a target and keep scope/profile context for runtime flows.
+ * field-based policy for a target.
  */
 export interface ChatCompleteAnonymizationMetadata {
   profileId?: string;
-  replacementsId?: string;
   target?: ChatCompleteAnonymizationTarget;
-  scope?: ChatCompleteAnonymizationScope;
 }

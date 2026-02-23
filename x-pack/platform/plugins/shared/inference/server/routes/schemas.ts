@@ -75,7 +75,6 @@ export const chatCompleteBaseSchema = schema.object({
       anonymization: schema.maybe(
         schema.object({
           profileId: schema.maybe(schema.string()),
-          replacementsId: schema.maybe(schema.string()),
           target: schema.maybe(
             schema.object({
               targetType: schema.oneOf([
@@ -84,12 +83,6 @@ export const chatCompleteBaseSchema = schema.object({
                 schema.literal('index'),
               ]),
               targetId: schema.string(),
-            })
-          ),
-          scope: schema.maybe(
-            schema.object({
-              scopeType: schema.oneOf([schema.literal('thread'), schema.literal('execution')]),
-              scopeId: schema.string(),
             })
           ),
         })

@@ -7,8 +7,13 @@
 
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ChatCompleteOptions, AnonymizationRule, ChatCompleteAnonymizationTarget } from '@kbn/inference-common';
+import type {
+  ChatCompleteOptions,
+  AnonymizationRule,
+  ChatCompleteAnonymizationTarget,
+} from '@kbn/inference-common';
 import type { EffectivePolicy } from '@kbn/anonymization-common';
+import { v4 as uuidv4 } from 'uuid';
 import {
   createInferenceRequestError,
   getConnectorFamily,
@@ -91,6 +96,8 @@ export function createChatCompleteCallbackApi({
   esClient,
   replacementsEncryptionKey,
   callbackManager,
+  saltPromise,
+  resolveEffectivePolicy,
 }: CreateChatCompleteApiOptions) {
   return (
     {
@@ -136,13 +143,14 @@ export function createChatCompleteCallbackApi({
 
           return from(
             (async () => {
-              const replacementsId = metadata?.anonymization?.replacementsId;
+              const salt = await saltPromise;
+              const effectivePolicy = await resolveEffectivePolicy?.(
+                metadata?.anonymization?.target
+              );
+              const replacementsId = uuidv4();
               const repo = new ReplacementsRepository(esClient, {
                 encryptionKey: replacementsEncryptionKey,
               });
-              const existingReplacements = replacementsId
-                ? await repo.get(namespace, replacementsId)
-                : null;
 
               const anonymization = await anonymizeMessages({
                 system,
@@ -150,31 +158,27 @@ export function createChatCompleteCallbackApi({
                 anonymizationRules,
                 regexWorker,
                 esClient,
-                knownReplacements: existingReplacements?.replacements ?? [],
+                salt: salt ?? undefined,
+                effectivePolicy,
+                knownReplacements: [],
               });
 
-              if (replacementsId) {
-                const replacements = anonymization.anonymizations.map(({ entity }) => ({
-                  anonymized: entity.mask,
-                  original: entity.value,
-                }));
+              const replacements = anonymization.anonymizations.map(({ entity }) => ({
+                anonymized: entity.mask,
+                original: entity.value,
+              }));
 
-                if (existingReplacements) {
-                  await repo.update(namespace, replacementsId, { replacements });
-                } else {
-                  await repo.create({
-                    id: replacementsId,
-                    namespace,
-                    createdBy: 'inference',
-                    replacements,
-                  });
-                }
-              }
+              await repo.create({
+                id: replacementsId,
+                namespace,
+                createdBy: 'inference',
+                replacements,
+              });
 
-              return anonymization;
+              return { anonymization, replacementsId, effectivePolicy };
             })()
           ).pipe(
-            switchMap((anonymization) => {
+            switchMap(({ anonymization, replacementsId, effectivePolicy }) => {
               const connector = executor.getConnector();
               const connectorType = connector.type;
               const inferenceAdapter = getInferenceAdapter(connectorType);
@@ -188,7 +192,11 @@ export function createChatCompleteCallbackApi({
                 );
               }
               const systemWithAnonymizationInstructions = anonymization.system
-                ? addAnonymizationInstruction(anonymization.system, anonymizationRules)
+                ? addAnonymizationInstruction(
+                    anonymization.system,
+                    anonymizationRules,
+                    effectivePolicy
+                  )
                 : system;
 
               return withChatCompleteSpan(
@@ -228,7 +236,7 @@ export function createChatCompleteCallbackApi({
                       })
                     );
                 }
-              ).pipe(deanonymizeMessage(anonymization));
+              ).pipe(deanonymizeMessage({ ...anonymization, replacementsId }));
             })
           );
         })

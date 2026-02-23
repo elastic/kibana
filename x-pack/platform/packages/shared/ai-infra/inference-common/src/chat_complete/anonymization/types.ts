@@ -79,6 +79,7 @@ export interface AnonymizationOutput {
   messages: Message[];
   anonymizations: Anonymization[];
   system?: string;
+  replacementsId?: string;
 }
 
 export interface DeanonymizationOutput {

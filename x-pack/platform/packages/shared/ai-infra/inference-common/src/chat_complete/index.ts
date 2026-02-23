@@ -67,7 +67,6 @@ export type {
   ConnectorTelemetryMetadata,
   ChatCompleteAnonymizationMetadata,
   ChatCompleteAnonymizationTarget,
-  ChatCompleteAnonymizationScope,
 } from './metadata';
 export {
   isChatCompletionChunkEvent,

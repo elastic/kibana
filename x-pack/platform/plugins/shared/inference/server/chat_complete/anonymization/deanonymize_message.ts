@@ -10,7 +10,7 @@ import { MessageRole } from '@kbn/inference-common';
 import type { ChatCompletionChunkEvent } from '@kbn/inference-common/src/chat_complete/events';
 import { ChatCompletionEventType } from '@kbn/inference-common/src/chat_complete/events';
 import type { OperatorFunction } from 'rxjs';
-import { mergeMap, filter, of, identity } from 'rxjs';
+import { mergeMap, filter, of, identity, map } from 'rxjs';
 import { deanonymize } from './deanonymize';
 
 export function deanonymizeMessage<T extends ChatCompletionEvent>(
@@ -21,8 +21,41 @@ export function deanonymizeMessage(
   anonymization: AnonymizationOutput
 ): OperatorFunction<ChatCompletionEvent, ChatCompletionEvent> {
   if (!anonymization.anonymizations.length) {
-    return identity;
+    if (!anonymization.replacementsId) {
+      return identity;
+    }
+
+    return (source$) =>
+      source$.pipe(
+        map((event) => {
+          if (
+            event.type !== ChatCompletionEventType.ChatCompletionChunk &&
+            event.type !== ChatCompletionEventType.ChatCompletionMessage
+          ) {
+            return event;
+          }
+
+          return {
+            ...event,
+            metadata: {
+              ...event.metadata,
+              anonymization: {
+                ...event.metadata?.anonymization,
+                replacementsId: anonymization.replacementsId,
+              },
+            },
+          };
+        })
+      );
   }
+
+  const metadata = anonymization.replacementsId
+    ? {
+        anonymization: {
+          replacementsId: anonymization.replacementsId,
+        },
+      }
+    : undefined;
 
   return (source$) => {
     return source$.pipe(
@@ -79,6 +112,7 @@ export function deanonymizeMessage(
             })),
             deanonymized_input: deanonymizedInput,
             deanonymized_output: deanonymizedOutput,
+            metadata,
           };
 
           // Create deanonymized message event
@@ -88,6 +122,7 @@ export function deanonymizeMessage(
             toolCalls: deanonymizedToolCalls,
             deanonymized_input: deanonymizedInput,
             deanonymized_output: deanonymizedOutput,
+            metadata,
           };
 
           // Emit new chunk first, then message

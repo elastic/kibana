@@ -75,6 +75,7 @@ describe('deanonymizeMessage', () => {
     const anonymizationOutput: AnonymizationOutput = {
       messages: [originalUserMessage],
       anonymizations: [anonymization],
+      replacementsId: 'replacements-123',
     } as AnonymizationOutput;
 
     const chunks = [chunkEvent(`Hi, I am`), chunkEvent(`${mask}.`)];
@@ -98,6 +99,8 @@ describe('deanonymizeMessage', () => {
     // Content should be deanonymized
     expect(deanonymizedChunk.content).toBe(`Hi, I am ${value}.`);
     expect(deanonymizedMessage.content).toBe(`Hi, I am ${value}.`);
+    expect(deanonymizedChunk.metadata?.anonymization?.replacementsId).toBe('replacements-123');
+    expect(deanonymizedMessage.metadata?.anonymization?.replacementsId).toBe('replacements-123');
 
     // Original mask must be gone
     expect(deanonymizedChunk.content).not.toContain(mask);

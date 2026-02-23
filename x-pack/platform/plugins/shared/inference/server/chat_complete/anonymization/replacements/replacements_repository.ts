@@ -106,9 +106,7 @@ export class ReplacementsRepository {
     };
   }
 
-  private deserializeOriginal(
-    replacement: EsReplacementsDocument['replacements'][number]
-  ): string {
+  private deserializeOriginal(replacement: EsReplacementsDocument['replacements'][number]): string {
     if (replacement.original_encrypted) {
       if (!this.encryptionKey) {
         throw new Error('Encrypted replacements found but encryption key is not configured');

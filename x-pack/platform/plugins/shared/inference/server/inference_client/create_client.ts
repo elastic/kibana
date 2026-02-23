@@ -24,6 +24,7 @@ import type { RegexWorkerService } from '../chat_complete/anonymization/regex_wo
 
 interface CreateClientOptions {
   request: KibanaRequest;
+  namespace?: string;
   actions: ActionsPluginStart;
   logger: Logger;
   anonymizationRulesPromise: Promise<AnonymizationRule[]>;
@@ -50,6 +51,7 @@ export function createClient(
   const {
     actions,
     request,
+    namespace,
     logger,
     anonymizationRulesPromise,
     esClient,
@@ -61,6 +63,7 @@ export function createClient(
   } = options;
   const client = createInferenceClient({
     request,
+    namespace: namespace ?? 'default',
     actions,
     logger: logger.get('client'),
     anonymizationRulesPromise,

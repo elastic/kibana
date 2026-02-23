@@ -38,6 +38,7 @@ describe('createChatCompleteApi', () => {
 
   let chatComplete: ChatCompleteAPI;
   const mockEsClient = {
+    index: jest.fn().mockResolvedValue({}),
     ml: {
       inferTrainedModel: jest.fn(),
     },
@@ -146,6 +147,11 @@ describe('createChatCompleteApi', () => {
 
       expect(response).toEqual({
         content: 'chunk-1chunk-2',
+        metadata: {
+          anonymization: {
+            replacementsId: expect.any(String),
+          },
+        },
         toolCalls: [],
       });
     });
@@ -174,6 +180,11 @@ describe('createChatCompleteApi', () => {
 
       expect(response).toEqual({
         content: 'chunk-1chunk-2',
+        metadata: {
+          anonymization: {
+            replacementsId: expect.any(String),
+          },
+        },
         toolCalls: [],
       });
     });
@@ -246,16 +257,31 @@ describe('createChatCompleteApi', () => {
       expect(events).toEqual([
         {
           content: 'chunk-1',
+          metadata: {
+            anonymization: {
+              replacementsId: expect.any(String),
+            },
+          },
           tool_calls: [],
           type: 'chatCompletionChunk',
         },
         {
           content: 'chunk-2',
+          metadata: {
+            anonymization: {
+              replacementsId: expect.any(String),
+            },
+          },
           tool_calls: [],
           type: 'chatCompletionChunk',
         },
         {
           content: 'chunk-1chunk-2',
+          metadata: {
+            anonymization: {
+              replacementsId: expect.any(String),
+            },
+          },
           toolCalls: [],
           type: 'chatCompletionMessage',
         },
@@ -293,11 +319,21 @@ describe('createChatCompleteApi', () => {
       expect(events).toEqual([
         {
           content: 'chunk-1',
+          metadata: {
+            anonymization: {
+              replacementsId: expect.any(String),
+            },
+          },
           tool_calls: [],
           type: 'chatCompletionChunk',
         },
         {
           content: 'chunk-2',
+          metadata: {
+            anonymization: {
+              replacementsId: expect.any(String),
+            },
+          },
           tool_calls: [],
           type: 'chatCompletionChunk',
         },
