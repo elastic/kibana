@@ -158,7 +158,6 @@ export class NodesFactory {
     return this.createGenericStepNode(stepExecutionRuntime);
   }
 
-  // Switch is good readable
   // eslint-disable-next-line complexity
   private createGenericStepNode(stepExecutionRuntime: StepExecutionRuntime): NodeImplementation {
     const node = stepExecutionRuntime.node;
