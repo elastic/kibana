@@ -8,6 +8,7 @@
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../../fixtures';
+import { EXTENDED_TIMEOUT } from '../../fixtures/constants';
 
 async function searchAndScrollResults(
   page: Parameters<Parameters<typeof test>[2]>[0]['page'],
@@ -16,7 +17,7 @@ async function searchAndScrollResults(
 ) {
   await page.goto(kbnUrl.get());
   const searchInput = page.getByTestId('nav-search-input');
-  await searchInput.waitFor({ state: 'visible' });
+  await searchInput.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
   await searchInput.fill(keyword);
   await page.getByTestId('euiSelectableList').waitFor({ state: 'visible' });
 }

@@ -8,6 +8,7 @@
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../../fixtures';
+import { EXTENDED_TIMEOUT } from '../../fixtures/constants';
 
 test.describe(
   'APM Onboarding',
@@ -51,7 +52,7 @@ test.describe(
       await page.getByText('Java').click();
       await expect(page.getByText('-javaagent')).toBeVisible();
 
-      await page.getByText('.NET').click();
+      await page.getByText('.NET', { exact: true }).click();
       await expect(page.getByText('Elastic.Apm.NetCoreAll')).toBeVisible();
 
       await page.getByText('PHP').click();
@@ -61,7 +62,9 @@ test.describe(
     test('check Agent Status when no data is present', async ({ page, kbnUrl }) => {
       await page.goto(`${kbnUrl.app('apm')}/onboarding`);
       await page.getByTestId('checkAgentStatus').click();
-      await expect(page.getByTestId('agentStatusWarningCallout')).toBeVisible();
+      await expect(page.getByTestId('agentStatusWarningCallout')).toBeVisible({
+        timeout: EXTENDED_TIMEOUT,
+      });
     });
 
     test('fails to create API key due to missing privileges', async ({

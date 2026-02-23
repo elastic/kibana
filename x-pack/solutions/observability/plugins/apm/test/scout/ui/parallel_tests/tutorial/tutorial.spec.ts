@@ -33,7 +33,7 @@ test.describe(
       await expect(page.getByRole('heading', { name: 'APM agents' })).toBeVisible();
       await expect(page.getByText('Java')).toBeVisible();
       await expect(page.getByText('RUM')).toBeVisible();
-      await expect(page.getByText('Node.js')).toBeVisible();
+      await expect(page.getByText('Node.js', { exact: true })).toBeVisible();
       await expect(page.getByText('Django')).toBeVisible();
       await expect(page.getByText('Flask')).toBeVisible();
       await expect(page.getByText('Ruby on Rails')).toBeVisible();
