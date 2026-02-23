@@ -98,7 +98,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
     varGroupSelections = {},
   }) => {
     const { docLinks } = useStartServices();
-    const { isAgentlessEnabled } = useAgentless();``
+    const { isAgentlessEnabled } = useAgentless();
     const { enableVarGroups } = ExperimentalFeaturesService.get();
 
     const pkgVarGroups =
