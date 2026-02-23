@@ -132,9 +132,9 @@
           "Page",
           "; }) => { byTestId(testId: string): string; waitForLoadingToFinish(): Promise<void>; assertText({ text }: { text: string; }): Promise<void>; fillByTestSubj(dataTestSubj: string, value: string): Promise<void>; selectByTestSubj(dataTestSubj: string, value: string): Promise<void>; checkByTestSubj(dataTestSubj: string, value: string): Promise<void>; clickByTestSubj(dataTestSubj: string): Promise<void>; findByTestSubj(dataTestSubj: string): Promise<",
           "ElementHandle",
-          "<SVGElement | HTMLElement>>; findByText(text: string): Promise<",
+          "<HTMLElement | SVGElement>>; findByText(text: string): Promise<",
           "ElementHandle",
-          "<SVGElement | HTMLElement>>; }"
+          "<HTMLElement | SVGElement>>; }"
         ],
         "path": "x-pack/solutions/observability/plugins/synthetics/e2e/page_objects/utils.tsx",
         "lineNumber": 10,
