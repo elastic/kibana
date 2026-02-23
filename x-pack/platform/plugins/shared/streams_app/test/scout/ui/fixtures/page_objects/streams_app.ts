@@ -39,6 +39,8 @@ export class StreamsApp {
   public readonly childQueryStreamCreatedSuccessToast;
   public readonly queryStreamUpdatedSuccessToast;
   public readonly queryStreamDetailsQueryViewerCodeBlock;
+  public readonly deleteQueryStreamModalInput;
+  public readonly queryStreamDeletedSuccessToast;
 
   constructor(private readonly page: ScoutPage) {
     this.processorFieldComboBox = new EuiComboBoxWrapper(
@@ -86,6 +88,10 @@ export class StreamsApp {
     this.queryStreamDetailsQueryViewerCodeBlock = this.page.getByTestId(
       'queryStreamDetailsQueryViewerCodeBlock'
     );
+    this.deleteQueryStreamModalInput = this.page.getByTestId(
+      'streamsAppDeleteStreamModalStreamNameInput'
+    );
+    this.queryStreamDeletedSuccessToast = this.page.getByText('Stream deleted');
   }
 
   async goto() {
@@ -1284,5 +1290,17 @@ export class StreamsApp {
 
   async clickQueryStreamDetailsEditQueryButton() {
     await this.page.getByTestId('queryStreamDetailsEditQueryButton').click();
+  }
+
+  async clickDeleteQueryStreamButton() {
+    await this.page.getByTestId('deleteQueryStreamButton').click();
+  }
+
+  async fillDeleteQueryStreamModalInput(value: string) {
+    await this.deleteQueryStreamModalInput.fill(value);
+  }
+
+  async clickDeleteQueryStreamModalDeleteButton() {
+    await this.page.getByTestId('streamsAppDeleteStreamModalDeleteButton').click();
   }
 }

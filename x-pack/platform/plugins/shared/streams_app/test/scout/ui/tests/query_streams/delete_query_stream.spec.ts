@@ -64,9 +64,21 @@ test.describe(
       });
     });
 
-    test('should support deleting an existing query stream', async () => {
-      // TODO - implement delete query stream test
-      expect(true).toBe(true); // Placeholder until test is implemented
+    test('should support deleting an existing query stream', async ({ pageObjects, esClient }) => {
+      await pageObjects.streams.clickStreamNameLink(QUERY_STREAM_NAME);
+      await pageObjects.streams.clickQueryStreamDetailsTab('advanced');
+      await pageObjects.streams.clickDeleteQueryStreamButton();
+      await pageObjects.streams.fillDeleteQueryStreamModalInput(QUERY_STREAM_NAME);
+      await pageObjects.streams.clickDeleteQueryStreamModalDeleteButton();
+      await expect(pageObjects.streams.queryStreamDeletedSuccessToast).toBeVisible();
+
+      // Verify the ES|QL view was deleted
+      await expect(
+        esClient.transport.request({
+          method: 'GET',
+          path: `/_query/view/${encodeURIComponent(ESQL_VIEW_NAME)}`,
+        })
+      ).rejects.toThrow(/resource_not_found_exception/);
     });
   }
 );
