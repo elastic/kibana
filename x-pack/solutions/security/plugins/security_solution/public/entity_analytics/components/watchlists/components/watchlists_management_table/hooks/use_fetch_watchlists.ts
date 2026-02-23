@@ -8,14 +8,10 @@
 import { useQuery } from '@kbn/react-query';
 import { useEntityAnalyticsRoutes } from '../../../../../api/api';
 
-export const useFetchWatchlistNames = () => {
-  const { fetchWatchlistNames } = useEntityAnalyticsRoutes();
-  return useQuery(
-    ['GET', 'FETCH_WATCHLIST_NAMES'],
-    ({ signal }) => fetchWatchlistNames({ signal }),
-    {
-      keepPreviousData: true,
-      refetchOnWindowFocus: false,
-    }
-  );
+export const useFetchWatchlists = () => {
+  const { fetchWatchlists } = useEntityAnalyticsRoutes();
+  return useQuery(['GET', 'FETCH_WATCHLISTS'], ({ signal }) => fetchWatchlists({ signal }), {
+    keepPreviousData: true,
+    refetchOnWindowFocus: false,
+  });
 };

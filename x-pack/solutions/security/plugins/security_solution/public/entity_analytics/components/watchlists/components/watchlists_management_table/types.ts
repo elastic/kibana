@@ -5,11 +5,6 @@
  * 2.0.
  */
 
-export interface WatchlistTableItemType
-  extends Record<string, string | string[] | number | undefined> {
-  watchlist: string;
-  number_of_users: number;
-  risk_score_weighting?: number;
-  source: string; // TODO update to enum (Integration | Index | CSV )
-  last_updated: string; // e.g. 1 hour ago
-}
+import type { WatchlistObject } from '../../../../../../common/api/entity_analytics/watchlists/management/common.gen';
+
+export type WatchlistTableItemType = WatchlistObject;
