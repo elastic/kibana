@@ -8,6 +8,7 @@
 import { createHash } from 'crypto';
 import { stableStringify } from '@kbn/std';
 
+import type { EsqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 import type { AlertEvent } from '../../resources/alert_events';
 import type { ActiveAlertGroupHash } from './queries';
@@ -133,6 +134,17 @@ export function buildRecoveryAlertEvents({
       source: 'internal',
       type: 'signal' as const,
     }));
+}
+
+function rowToDocument(
+  columns: EsqlQueryResponse['columns'],
+  row: unknown[]
+): Record<string, unknown> {
+  const doc: Record<string, unknown> = {};
+  for (let i = 0; i < columns.length; i++) {
+    doc[columns[i].name] = row[i];
+  }
+  return doc;
 }
 
 export interface BuildQueryRecoveryAlertEventsOpts {

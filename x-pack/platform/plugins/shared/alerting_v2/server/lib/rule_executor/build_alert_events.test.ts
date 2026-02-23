@@ -5,9 +5,28 @@
  * 2.0.
  */
 
-import { createAlertEventsBatchBuilder } from './build_alert_events';
-import type { EsqlEsqlResult } from '@elastic/elasticsearch/lib/api/types';
-import { buildRecoveryAlertEvents, buildQueryRecoveryAlertEvents } from './build_alert_events';
+import type { EsqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
+import {
+  createAlertEventsBatchBuilder,
+  buildRecoveryAlertEvents,
+  buildQueryRecoveryAlertEvents,
+} from './build_alert_events';
+import type { BuildAlertEventsBaseOpts } from './build_alert_events';
+
+function buildAlertEventsFromEsqlResponse(
+  opts: BuildAlertEventsBaseOpts & { esqlResponse: EsqlQueryResponse }
+) {
+  const { esqlResponse, ...baseOpts } = opts;
+  const buildBatch = createAlertEventsBatchBuilder(baseOpts);
+  const rows = (esqlResponse.values ?? []).map((row) => {
+    const record: Record<string, unknown> = {};
+    (esqlResponse.columns ?? []).forEach((col, i) => {
+      record[col.name] = row[i];
+    });
+    return record;
+  });
+  return buildBatch(rows);
+}
 
 describe('createAlertEventsBatchBuilder', () => {
   beforeAll(() => {
@@ -139,7 +158,7 @@ describe('buildQueryRecoveryAlertEvents', () => {
   });
 
   it('creates recovered events for active groups matching the recovery query', () => {
-    const esqlResponse: EsqlEsqlResult = {
+    const esqlResponse: EsqlQueryResponse = {
       columns: [
         { name: 'host.name', type: 'keyword' },
         { name: 'status', type: 'keyword' },
@@ -200,7 +219,7 @@ describe('buildQueryRecoveryAlertEvents', () => {
   });
 
   it('ignores recovery query rows that do not match any active group', () => {
-    const esqlResponse: EsqlEsqlResult = {
+    const esqlResponse: EsqlQueryResponse = {
       columns: [{ name: 'host.name', type: 'keyword' }],
       values: [['host-unknown']],
     };
@@ -219,7 +238,7 @@ describe('buildQueryRecoveryAlertEvents', () => {
   });
 
   it('deduplicates when multiple recovery rows produce the same group hash', () => {
-    const esqlResponse: EsqlEsqlResult = {
+    const esqlResponse: EsqlQueryResponse = {
       columns: [
         { name: 'host.name', type: 'keyword' },
         { name: 'msg', type: 'keyword' },
