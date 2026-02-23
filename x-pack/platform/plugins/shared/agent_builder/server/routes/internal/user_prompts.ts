@@ -131,7 +131,7 @@ export function registerInternalUserPromptsRoutes({
       },
       options: { access: 'internal' },
       security: {
-        authz: { requiredPrivileges: [apiPrivileges.manageAgentBuilder] },
+        authz: { requiredPrivileges: [apiPrivileges.manageUserPrompts] },
       },
     },
     wrapHandler(async (ctx, request, response) => {
@@ -175,7 +175,7 @@ export function registerInternalUserPromptsRoutes({
       },
       options: { access: 'internal' },
       security: {
-        authz: { requiredPrivileges: [apiPrivileges.manageAgentBuilder] },
+        authz: { requiredPrivileges: [apiPrivileges.manageUserPrompts] },
       },
     },
     wrapHandler(async (ctx, request, response) => {
@@ -216,7 +216,7 @@ export function registerInternalUserPromptsRoutes({
       },
       options: { access: 'internal' },
       security: {
-        authz: { requiredPrivileges: [apiPrivileges.manageAgentBuilder] },
+        authz: { requiredPrivileges: [apiPrivileges.manageUserPrompts] },
       },
     },
     wrapHandler(async (ctx, request, response) => {
@@ -259,7 +259,7 @@ export function registerInternalUserPromptsRoutes({
       },
       options: { access: 'internal' },
       security: {
-        authz: { requiredPrivileges: [apiPrivileges.manageAgentBuilder] },
+        authz: { requiredPrivileges: [apiPrivileges.manageUserPrompts] },
       },
     },
     wrapHandler(async (ctx, request, response) => {

@@ -20,12 +20,19 @@ export const AGENT_BUILDER_SHORT_TITLE = i18n.translate('xpack.agentBuilder.app.
 
 export const uiPrivileges = {
   show: 'show',
-  showManagement: 'showManagement',
-  manageTools: 'manageTools',
+  manageConnectors: 'manageConnectors',
   manageAgents: 'manageAgents',
+  manageTools: 'manageTools',
 };
 
 export const apiPrivileges = {
-  readAgentBuilder: 'read_agent_builder',
-  manageAgentBuilder: 'manage_agent_builder',
+  readAgentBuilder: `${AGENTBUILDER_FEATURE_ID}:read`,
+  manageUserPrompts: `${AGENTBUILDER_FEATURE_ID}:manageUserPrompts`,
+  manageAgents: `${AGENTBUILDER_FEATURE_ID}:manageAgents`,
+  manageTools: `${AGENTBUILDER_FEATURE_ID}:manageTools`,
 };
+
+export const subFeaturePrivilegeIds = {
+  manageAgents: 'manage_agents',
+  manageTools: 'manage_tools',
+} as const;
