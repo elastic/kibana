@@ -267,6 +267,48 @@ describe('EditIlmPhasesFlyout', () => {
       expect(valueInput.value).toBe('60');
       expect(unitSelect.value).toBe('d');
     });
+
+    it('prevents saving when cold min_age is cleared and clears the required error when value is set again', async () => {
+      const onSave = jest.fn();
+      renderFlyout(
+        {
+          initialPhases: {
+            hot: { name: 'hot', size_in_bytes: 0, rollover: {} },
+            warm: { name: 'warm', size_in_bytes: 0, min_age: '30d' },
+            cold: { name: 'cold', size_in_bytes: 0, min_age: '40d' },
+            frozen: {
+              name: 'frozen',
+              size_in_bytes: 0,
+              min_age: '50d',
+              searchable_snapshot: 'repo',
+            },
+          },
+          onSave,
+        },
+        { initialSelectedPhase: 'cold' }
+      );
+
+      await tick();
+
+      const coldPanel = withinPhase('cold');
+      fireEvent.change(coldPanel.getByTestId(`${DATA_TEST_SUBJ}MoveAfterValue`), {
+        target: { value: '' },
+      });
+
+      await waitFor(() => expect(screen.getByTestId(`${DATA_TEST_SUBJ}SaveButton`)).toBeDisabled());
+
+      fireEvent.click(screen.getByTestId(`${DATA_TEST_SUBJ}SaveButton`));
+      expect(onSave).toHaveBeenCalledTimes(0);
+
+      // Set a valid value again -> save should be enabled.
+      fireEvent.change(coldPanel.getByTestId(`${DATA_TEST_SUBJ}MoveAfterValue`), {
+        target: { value: '41' },
+      });
+
+      await waitFor(() =>
+        expect(screen.getByTestId(`${DATA_TEST_SUBJ}SaveButton`)).not.toBeDisabled()
+      );
+    });
   });
 
   describe('downsampling', () => {
