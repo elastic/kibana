@@ -11,6 +11,11 @@ import { apiPrivileges } from '../../common/features';
 export const AGENT_BUILDER_READ_SECURITY: RouteSecurity = {
   authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
 };
+
+export const AGENT_BUILDER_WRITE_SECURITY: RouteSecurity = {
+  authz: { requiredPrivileges: [apiPrivileges.writeAgentBuilder] },
+};
+
 export const MANAGE_AGENTS_SECURITY: RouteSecurity = {
   authz: { requiredPrivileges: [apiPrivileges.manageAgents] },
 };

@@ -21,6 +21,7 @@ import type {
 import { apiPrivileges } from '../../../common/features';
 import { internalApiPath } from '../../../common/constants';
 import { createClient } from '../../services/user_prompts';
+import { AGENT_BUILDER_READ_SECURITY, AGENT_BUILDER_WRITE_SECURITY } from '../route_security';
 
 export function registerInternalUserPromptsRoutes({
   router,
@@ -41,9 +42,7 @@ export function registerInternalUserPromptsRoutes({
         }),
       },
       options: { access: 'internal' },
-      security: {
-        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
-      },
+      security: AGENT_BUILDER_READ_SECURITY,
     },
     wrapHandler(async (ctx, request, response) => {
       const [coreStart] = await coreSetup.getStartServices();
@@ -87,9 +86,7 @@ export function registerInternalUserPromptsRoutes({
         }),
       },
       options: { access: 'internal' },
-      security: {
-        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
-      },
+      security: AGENT_BUILDER_READ_SECURITY,
     },
     wrapHandler(async (ctx, request, response) => {
       const [coreStart] = await coreSetup.getStartServices();
@@ -130,9 +127,7 @@ export function registerInternalUserPromptsRoutes({
         }),
       },
       options: { access: 'internal' },
-      security: {
-        authz: { requiredPrivileges: [apiPrivileges.manageUserPrompts] },
-      },
+      security: AGENT_BUILDER_WRITE_SECURITY,
     },
     wrapHandler(async (ctx, request, response) => {
       const [coreStart] = await coreSetup.getStartServices();
@@ -174,9 +169,7 @@ export function registerInternalUserPromptsRoutes({
         }),
       },
       options: { access: 'internal' },
-      security: {
-        authz: { requiredPrivileges: [apiPrivileges.manageUserPrompts] },
-      },
+      security: AGENT_BUILDER_WRITE_SECURITY,
     },
     wrapHandler(async (ctx, request, response) => {
       const [coreStart] = await coreSetup.getStartServices();
@@ -215,9 +208,7 @@ export function registerInternalUserPromptsRoutes({
         }),
       },
       options: { access: 'internal' },
-      security: {
-        authz: { requiredPrivileges: [apiPrivileges.manageUserPrompts] },
-      },
+      security: AGENT_BUILDER_WRITE_SECURITY,
     },
     wrapHandler(async (ctx, request, response) => {
       const [coreStart] = await coreSetup.getStartServices();
@@ -258,9 +249,7 @@ export function registerInternalUserPromptsRoutes({
         }),
       },
       options: { access: 'internal' },
-      security: {
-        authz: { requiredPrivileges: [apiPrivileges.manageUserPrompts] },
-      },
+      security: AGENT_BUILDER_WRITE_SECURITY,
     },
     wrapHandler(async (ctx, request, response) => {
       const [coreStart] = await coreSetup.getStartServices();

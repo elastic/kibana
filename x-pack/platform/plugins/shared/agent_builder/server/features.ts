@@ -32,7 +32,7 @@ export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }
         app: ['kibana', AGENTBUILDER_APP_ID],
         api: [
           apiPrivileges.readAgentBuilder,
-          apiPrivileges.manageUserPrompts,
+          apiPrivileges.writeAgentBuilder,
           ApiPrivileges.manage('llm_product_doc'),
         ],
         catalogue: [AGENTBUILDER_FEATURE_ID],
@@ -40,7 +40,7 @@ export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }
           all: [],
           read: [],
         },
-        ui: [uiPrivileges.show, uiPrivileges.manageConnectors],
+        ui: [uiPrivileges.show, uiPrivileges.write],
       },
       read: {
         app: ['kibana', AGENTBUILDER_APP_ID],

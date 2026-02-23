@@ -103,7 +103,7 @@ const manageConnectorsAriaLabel = i18n.translate(
 
 const ConnectorListFooter: React.FC = () => {
   const { manageConnectorsUrl } = useNavigation();
-  const { manageConnectors } = useUiPrivileges();
+  const { write: hasWritePrivilege } = useUiPrivileges();
   return (
     <EuiPopoverFooter paddingSize="s">
       <EuiFlexGroup responsive={false} justifyContent="spaceBetween" gutterSize="s">
@@ -114,7 +114,7 @@ const ConnectorListFooter: React.FC = () => {
             color="text"
             aria-label={manageConnectorsAriaLabel}
             href={manageConnectorsUrl}
-            disabled={!manageConnectors}
+            disabled={!hasWritePrivilege}
           >
             <FormattedMessage
               id="xpack.agentBuilder.conversationInput.agentSelector.manageAgents"
