@@ -9,7 +9,6 @@
 
 import Fsp from 'fs/promises';
 import Path from 'path';
-import { createRequire } from 'module';
 
 import { REPO_ROOT } from '@kbn/repo-info';
 
@@ -160,8 +159,7 @@ async function loadActionRegistries(): Promise<{
   readonly userActivityActions: Record<string, UserActivityActionDefinition>;
   readonly removedUserActivityActions: Record<string, RemovedUserActivityActionDefinition>;
 }> {
-  const require = createRequire(__filename);
-  const registryModule = require(ACTIONS_REGISTRY_FILE) as {
+  const registryModule = (await import(ACTIONS_REGISTRY_FILE)) as {
     userActivityActions: Record<string, UserActivityActionDefinition>;
     removedUserActivityActions: Record<string, RemovedUserActivityActionDefinition>;
   };
