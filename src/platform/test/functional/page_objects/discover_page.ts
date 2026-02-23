@@ -146,12 +146,14 @@ export class DiscoverPageObject extends FtrService {
     await this.testSubjects.missingOrFail('loadingSpinner', {
       timeout: this.defaultFindTimeout * 10,
     });
-    // TODO: Should we add a check for `discoverDataGridUpdating` too?
   }
 
   public async waitUntilTabIsLoaded() {
     await this.header.waitUntilLoadingHasFinished();
     await this.waitUntilSearchingHasFinished();
+    await this.testSubjects.missingOrFail('discoverDataGridUpdating', {
+      timeout: this.defaultFindTimeout * 10,
+    });
   }
 
   public async getColumnHeaders() {

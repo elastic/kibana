@@ -53,7 +53,10 @@ const parseColumnParts = (children: ReactNode): ParsedPart[] => {
  * @param children - React children containing `Column` declarative components.
  * @returns Array of EUI table columns ready for `EuiBasicTable`.
  */
-export const useColumns = (children: ReactNode): Array<EuiBasicTableColumn<ContentListItem>> => {
+export const useColumns = (
+  children: ReactNode,
+  onDelete?: (items: ContentListItem[]) => void
+): Array<EuiBasicTableColumn<ContentListItem>> => {
   const { item: itemConfig, isReadOnly, labels, supports } = useContentListConfig();
 
   return useMemo(() => {
@@ -63,6 +66,7 @@ export const useColumns = (children: ReactNode): Array<EuiBasicTableColumn<Conte
       isReadOnly,
       entityName: labels.entity,
       supports,
+      actions: { onDelete },
     };
 
     return parts
@@ -72,5 +76,5 @@ export const useColumns = (children: ReactNode): Array<EuiBasicTableColumn<Conte
     // parent render, so including them would defeat memoization. Re-running when context
     // deps change is sufficient.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [itemConfig, isReadOnly, labels.entity, supports]);
+  }, [itemConfig, isReadOnly, labels.entity, supports, onDelete]);
 };
