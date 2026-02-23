@@ -31,6 +31,7 @@ export type DynamicPage =
   | 'integration_details_overview'
   | 'integration_details_policies'
   | 'integration_details_assets'
+  | 'integration_details_alerting'
   | 'integration_details_settings'
   | 'integration_details_custom'
   | 'integration_details_language_clients'
@@ -112,6 +113,7 @@ export const INTEGRATIONS_ROUTING_PATHS = {
   integration_details_overview: '/detail/:pkgkey/overview',
   integration_details_policies: '/detail/:pkgkey/policies',
   integration_details_assets: '/detail/:pkgkey/assets',
+  integration_details_alerting: '/detail/:pkgkey/alerting',
   integration_details_settings: '/detail/:pkgkey/settings',
   integration_details_configs: '/detail/:pkgkey/configs',
   integration_details_custom: '/detail/:pkgkey/custom',
@@ -199,6 +201,10 @@ export const pagePathGetters: {
   integration_details_assets: ({ pkgkey, integration, returnAppId, returnPath }) => {
     const qs = stringify({ integration, returnAppId, returnPath });
     return [INTEGRATIONS_BASE_PATH, `/detail/${pkgkey}/assets${qs ? `?${qs}` : ''}`];
+  },
+  integration_details_alerting: ({ pkgkey, integration, returnAppId, returnPath }) => {
+    const qs = stringify({ integration, returnAppId, returnPath });
+    return [INTEGRATIONS_BASE_PATH, `/detail/${pkgkey}/alerting${qs ? `?${qs}` : ''}`];
   },
   integration_details_settings: ({ pkgkey, integration, returnAppId, returnPath }) => {
     const qs = stringify({ integration, returnAppId, returnPath });

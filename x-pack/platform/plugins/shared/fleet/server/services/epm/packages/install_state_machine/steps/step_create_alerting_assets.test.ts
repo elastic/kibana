@@ -208,9 +208,9 @@ describe('createInactivityMonitoringTemplate', () => {
     expect(internalSoClientMock.create).toHaveBeenCalledWith(
       'alerting_rule_template',
       expect.objectContaining({
-        name: '[Nginx] Inactivity monitoring',
+        name: '[Nginx] Idle data streams',
         ruleTypeId: '.es-query',
-        tags: [],
+        tags: ['Nginx'],
         schedule: { interval: '24h' },
         params: expect.objectContaining({
           searchType: 'esQuery',
