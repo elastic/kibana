@@ -12,6 +12,7 @@ import type { ESQLMessage, ESQLCommand, ESQLAstAllCommands } from '../../types';
 import type {
   ISuggestionItem,
   ICommandCallbacks,
+  ICommandContext,
   ESQLColumnData,
   ESQLCommandSummary,
   UnmappedFieldsStrategy,
@@ -23,7 +24,7 @@ import type {
  *
  * @template TContext The type of any additional context required by the methods.
  */
-export interface ICommandMethods<TContext = any> {
+export interface ICommandMethods<TContext = ICommandContext> {
   /**
    * Validates the given query string or AST snippet for the specific command.
    * @param command The parsed Abstract Syntax Tree for deeper semantic validation.

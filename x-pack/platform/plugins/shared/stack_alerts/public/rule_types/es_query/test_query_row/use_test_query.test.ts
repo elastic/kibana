@@ -160,4 +160,26 @@ describe('useTestQuery', () => {
       rows: [{ grouped: 'test' }],
     });
   });
+
+  test('resetTestQueryResponse clears all state', async () => {
+    const errorMsg = 'How dare you writing such a query';
+    const { result } = renderHook(useTestQuery, {
+      initialProps: () => Promise.reject({ message: errorMsg }),
+    });
+
+    await act(async () => {
+      await result.current.onTestQuery();
+    });
+    expect(result.current.testQueryError).toContain(errorMsg);
+
+    act(() => {
+      result.current.resetTestQueryResponse();
+    });
+
+    expect(result.current.testQueryLoading).toBe(false);
+    expect(result.current.testQueryError).toBe(null);
+    expect(result.current.testQueryWarning).toBe(null);
+    expect(result.current.testQueryResult).toBe(null);
+    expect(result.current.testQueryPreview).toBe(null);
+  });
 });
