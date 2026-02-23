@@ -321,14 +321,14 @@ export type ElasticsearchStep = z.infer<typeof ElasticsearchStepSchema>;
 
 // Kibana step meta options that control routing and debugging (not forwarded as HTTP params)
 export const KibanaStepMetaSchema = {
-  forceServerInfo: z
+  use_server_info: z
     .boolean()
     .optional()
-    .describe('Force using the server info URL (internal host:port) instead of the public URL'),
-  forceLocalhost: z
+    .describe('Use the server info URL (internal host:port) instead of the public URL'),
+  use_localhost: z
     .boolean()
     .optional()
-    .describe('Force using localhost:5601 instead of the configured URL'),
+    .describe('Use localhost:5601 instead of the configured URL'),
   debug: z
     .boolean()
     .optional()

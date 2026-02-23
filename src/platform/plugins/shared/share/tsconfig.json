@@ -7,8 +7,7 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
-    "test/**/*",
-    "../../../../../typings/emotion.d.ts"
+    "test/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
