@@ -6,9 +6,8 @@
  */
 
 import type { IRouter } from '@kbn/core/server';
-import { every, map, mapKeys, pick, reduce } from 'lodash';
+import { pick } from 'lodash';
 import type { Observable } from 'rxjs';
-import { lastValueFrom, zip } from 'rxjs';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
 import type {
@@ -18,18 +17,12 @@ import type {
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
 import { API_VERSIONS } from '../../../common/constants';
 import { PLUGIN_ID } from '../../../common';
-import { getActionResponses } from './utils';
-
-import type {
-  ActionDetailsRequestOptions,
-  ActionDetailsStrategyResponse,
-} from '../../../common/search_strategy';
-import { OsqueryQueries } from '../../../common/search_strategy';
 import {
   getLiveQueryDetailsRequestParamsSchema,
   getLiveQueryDetailsRequestQuerySchema,
 } from '../../../common/api';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import { fetchLiveQueryDetails } from '../../services';
 
 export const getLiveQueryDetailsRoute = (
   router: IRouter<DataRequestHandlerContext>,
@@ -70,38 +63,17 @@ export const getLiveQueryDetailsRoute = (
             : DEFAULT_SPACE_ID;
 
           const search = await context.search;
-          const { actionDetails } = await lastValueFrom(
-            search.search<ActionDetailsRequestOptions, ActionDetailsStrategyResponse>(
-              {
-                actionId: request.params.id,
-                factoryQueryType: OsqueryQueries.actionDetails,
-                spaceId,
-              },
-              { abortSignal, strategy: 'osquerySearchStrategy' }
-            )
-          );
-
-          const queries = actionDetails?._source?.queries;
-          const expirationDate = actionDetails?.fields?.expiration[0];
-
-          const expired = !expirationDate ? true : new Date(expirationDate) < new Date();
-
-          const responseData = await lastValueFrom(
-            zip(
-              ...map(queries, (query) =>
-                getActionResponses(search, query.action_id, query.agents?.length ?? 0)
-              )
-            )
-          );
-
-          const isCompleted = expired || (responseData && every(responseData, ['pending', 0]));
-          const agentByActionIdStatusMap = mapKeys(responseData, 'action_id');
+          const status = await fetchLiveQueryDetails(search, {
+            actionId: request.params.id,
+            spaceId,
+            abortSignal,
+          });
 
           return response.ok({
             body: {
               data: {
                 ...pick(
-                  actionDetails._source,
+                  status.actionDetails._source,
                   'action_id',
                   'expiration',
                   '@timestamp',
@@ -112,34 +84,19 @@ export const getLiveQueryDetailsRoute = (
                   'pack_name',
                   'prebuilt_pack'
                 ),
-                queries: reduce<
-                  {
-                    action_id: string;
-                    id: string;
-                    query: string;
-                    agents: string[];
-                    ecs_mapping?: unknown;
-                    version?: string;
-                    platform?: string;
-                    saved_query_id?: string;
-                  },
-                  Array<Record<string, unknown>>
-                >(
-                  actionDetails._source?.queries,
-                  (acc, query) => {
-                    const agentStatus = agentByActionIdStatusMap[query.action_id];
-
-                    acc.push({
-                      ...query,
-                      ...agentStatus,
-                      status: isCompleted || agentStatus?.pending === 0 ? 'completed' : 'running',
-                    });
-
-                    return acc;
-                  },
-                  [] as Array<Record<string, unknown>>
-                ),
-                status: isCompleted ? 'completed' : 'running',
+                queries: status.queries.map((query) => ({
+                  action_id: query.action_id,
+                  id: query.id,
+                  query: query.query,
+                  agents: query.agents,
+                  pending: query.pending,
+                  responded: query.responded,
+                  successful: query.successful,
+                  failed: query.failed,
+                  docs: query.docs,
+                  status: query.status,
+                })),
+                status: status.status === 'expired' ? 'completed' : status.status,
               },
             },
           });

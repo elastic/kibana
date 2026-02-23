@@ -51,7 +51,7 @@ export const enrollEndpointHost = async (): Promise<string | undefined> => {
       agentPolicyId: policyId,
       version,
       useClosestVersionMatch: false,
-      disk: '8G',
+      disk: '15G',
     });
 
     log.info(hostVm.info());

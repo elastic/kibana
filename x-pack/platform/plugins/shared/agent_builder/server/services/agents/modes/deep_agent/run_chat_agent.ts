@@ -18,7 +18,7 @@ import {
   addRoundCompleteEvent,
   extractRound,
   selectTools,
-  conversationToLangchainMessages,
+  convertPreviousRounds,
   prepareConversation,
   getConversationAttachmentsSystemMessages,
 } from '../utils';
@@ -92,15 +92,21 @@ export const runDeepAgentMode: RunChatAgentFn = async (
     context,
   });
 
-  const selectedTools = await selectTools({
+  const { staticTools, dynamicTools } = await selectTools({
     conversation: processedConversation,
+    previousDynamicToolIds: conversation?.state?.dynamic_tool_ids ?? [],
+    skills: context.skills,
     toolProvider,
     agentConfiguration,
     attachmentsService: attachments,
+    filestore: context.filestore,
     request,
+    experimentalFeatures: context.experimentalFeatures,
     spaceId: context.spaceId,
     runner: context.runner,
   });
+
+  const selectedTools = [...staticTools, ...dynamicTools];
 
   const { tools: langchainTools, idMappings: toolIdMapping } = await toolsToLangchain({
     tools: selectedTools,
@@ -129,7 +135,7 @@ export const runDeepAgentMode: RunChatAgentFn = async (
   const graphRecursionLimit = cycleLimit * 2 + 8;
 
   // Convert conversation to langchain messages
-  const conversationMessages = conversationToLangchainMessages({
+  const conversationMessages = await convertPreviousRounds({
     conversation: processedConversation,
   });
 

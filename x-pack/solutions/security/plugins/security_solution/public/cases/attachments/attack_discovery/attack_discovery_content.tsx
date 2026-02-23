@@ -6,23 +6,30 @@
  */
 
 import { EuiLoadingSpinner, EuiText } from '@elastic/eui';
+import { css } from '@emotion/react';
 import React, { useMemo } from 'react';
 import { useAssistantContext } from '@kbn/elastic-assistant';
-import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useFindAttackDiscoveries } from '../../../attack_discovery/pages/use_find_attack_discoveries';
 import { AttackDiscoveryTab } from '../../../attack_discovery/pages/results/attack_discovery_panel/tabs/attack_discovery_tab';
 import type { IAttackDiscoveryAttachmentProps } from './types';
 
+const containerCss = css`
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+`;
+
 const AttackDiscoveryContent = ({ externalReferenceMetadata }: IAttackDiscoveryAttachmentProps) => {
     const metadata = externalReferenceMetadata;
     const { assistantAvailability, http } = useAssistantContext();
-    const { to, from } = useGlobalTime();
 
+    // When querying by specific ID, don't use time range filter - the attack discovery
+    // may have been created outside the current global time range
     const { isLoading, data } = useFindAttackDiscoveries({
         ids: metadata?.attackDiscoveryAlertId ? [metadata.attackDiscoveryAlertId] : undefined,
         http,
-        start: from,
-        end: to,
         isAssistantEnabled: assistantAvailability.isAssistantEnabled,
     });
 
@@ -53,7 +60,11 @@ const AttackDiscoveryContent = ({ externalReferenceMetadata }: IAttackDiscoveryA
         );
     }
 
-    return <AttackDiscoveryTab attackDiscovery={attackDiscovery} />;
+    return (
+        <div css={containerCss}>
+            <AttackDiscoveryTab attackDiscovery={attackDiscovery} />
+        </div>
+    );
 };
 
 // eslint-disable-next-line import/no-default-export

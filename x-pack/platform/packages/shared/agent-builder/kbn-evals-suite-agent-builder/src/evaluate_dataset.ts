@@ -18,6 +18,7 @@ import {
   type TaskOutput,
   type GroundTruth,
   type RetrievedDoc,
+  createToolUsageOnlyEvaluator,
 } from '@kbn/evals';
 import type { EsClient } from '@kbn/scout';
 import type { ToolingLog } from '@kbn/tooling-log';
@@ -103,137 +104,8 @@ function configureExperiment({
     };
   };
 
-  // Auxiliary tools used for skill discovery - ignored by ToolUsageOnly evaluator
-  const AUXILIARY_DISCOVERY_TOOLS = new Set([
-    'grep',
-    'read_file',
-    'read_skill_tools',
-    'list_skills',
-  ]);
-
-  // Helper to get tool call steps with params from raw output
-  const getToolCallStepsWithParams = (
-    taskOutput: TaskOutput
-  ): Array<{ tool_id?: string; params?: Record<string, unknown>; results?: unknown[] }> => {
-    const rawOutput = taskOutput as {
-      steps?: Array<{
-        type?: string;
-        tool_id?: string;
-        tool_params?: Record<string, unknown>;
-        params?: Record<string, unknown>;
-        results?: unknown[];
-      }>;
-    };
-    const steps = rawOutput?.steps ?? [];
-
-    return steps
-      .filter((s) => s?.type === 'tool_call')
-      .map((s) => ({
-        tool_id: s.tool_id,
-        params: s.tool_params ?? s.params,
-        results: s.results,
-      }));
-  };
-
   const selectedEvaluators = selectEvaluators([
-    {
-      name: 'ToolUsageOnly',
-      kind: 'CODE' as const,
-      evaluate: async ({ output, metadata }) => {
-        const expectedOnlyToolId = getStringMeta(metadata, 'expectedOnlyToolId');
-        if (!expectedOnlyToolId) return { score: 1 };
-
-        const toolCalls = getToolCallStepsWithParams(output as TaskOutput);
-        if (toolCalls.length === 0) {
-          return { score: 0, metadata: { reason: 'No tool calls found', expectedOnlyToolId } };
-        }
-
-        // Filter out auxiliary discovery tools
-        const meaningfulToolCalls = toolCalls.filter(
-          (t) => !AUXILIARY_DISCOVERY_TOOLS.has(t.tool_id || '')
-        );
-
-        if (meaningfulToolCalls.length === 0) {
-          return {
-            score: 0,
-            metadata: { reason: 'Only auxiliary discovery tools found', expectedOnlyToolId },
-          };
-        }
-
-        // Check if invoke_skill was called with the expected skill/operation
-        const invokeSkillMatchesExpected = (toolCall: {
-          tool_id?: string;
-          params?: Record<string, unknown>;
-        }) => {
-          if (toolCall.tool_id !== 'invoke_skill') return false;
-          const params = toolCall.params as {
-            name?: string;
-            operation?: string;
-            params?: { operation?: string };
-          } | undefined;
-          if (!params?.name) return false;
-
-          // Extract the operation (could be at top level or nested in params)
-          const operation = params.operation || params.params?.operation;
-
-          // Extract the expected tool name and operation from expectedOnlyToolId
-          // e.g., platform.core.execute_esql -> tool: execute_esql
-          const expectedToolName = expectedOnlyToolId.split('.').pop() || '';
-
-          // Match skill namespace patterns (e.g., platform.search matches platform.core.search)
-          const expectedNamespace = expectedOnlyToolId.replace('.core.', '.');
-
-          // Direct skill name match
-          if (params.name === expectedNamespace || params.name === expectedOnlyToolId) {
-            return true;
-          }
-
-          // For platform.search skill that handles multiple operations:
-          // - If expecting platform.core.search and skill is platform.search with operation 'search', match
-          // - If expecting platform.core.execute_esql and skill is platform.search with operation 'execute_esql', match
-          if (params.name === 'platform.search') {
-            if (expectedToolName === 'search' && (!operation || operation === 'search')) {
-              return true;
-            }
-            if (expectedToolName === 'execute_esql' && operation === 'execute_esql') {
-              return true;
-            }
-          }
-
-          return false;
-        };
-
-        const usedToolIds = meaningfulToolCalls.map((t) => t.tool_id).filter(Boolean);
-        const hasExpectedDirect = usedToolIds.includes(expectedOnlyToolId);
-        const hasExpectedViaInvokeSkill = meaningfulToolCalls.some(invokeSkillMatchesExpected);
-        const hasExpected = hasExpectedDirect || hasExpectedViaInvokeSkill;
-
-        // For ES|QL, agent may call generate_esql before execute_esql - that's acceptable
-        // Check if the expected tool/operation was used (doesn't need to be the ONLY one)
-
-        // Debug: Log invoke_skill params for troubleshooting
-        const invokeSkillCalls = meaningfulToolCalls
-          .filter((t) => t.tool_id === 'invoke_skill')
-          .map((t) => ({
-            name: (t.params as { name?: string })?.name,
-            operation: (t.params as { operation?: string })?.operation,
-            nestedOp: (t.params as { params?: { operation?: string } })?.params?.operation,
-          }));
-
-        return {
-          score: hasExpected ? 1 : 0,
-          metadata: {
-            expectedOnlyToolId,
-            usedToolIds,
-            hasExpectedDirect,
-            hasExpectedViaInvokeSkill,
-            invokeSkillCalls,
-          },
-        };
-      },
-    },
-    // NOTE: DocVersionReleaseDate evaluator removed from defaults - only used by product_documentation tests
-    // Tests that need it should add it via custom evaluator config with metadata.requireVersionAndReleaseDate: true
+    createToolUsageOnlyEvaluator(),
     {
       name: 'TokenUsage',
       kind: 'CODE' as const,

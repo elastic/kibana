@@ -10,14 +10,12 @@ import { css } from '@emotion/react';
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { ConversationRound } from '@kbn/agent-builder-common';
-import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import { ConversationRoundStatus } from '@kbn/agent-builder-common';
 import { isConfirmationPrompt } from '@kbn/agent-builder-common/agents';
 import type {
   VersionedAttachment,
   Attachment,
-  AttachmentVersion,
 } from '@kbn/agent-builder-common/attachments';
 import { RoundInput } from './round_input';
 import { RoundThinking } from './round_thinking/round_thinking';

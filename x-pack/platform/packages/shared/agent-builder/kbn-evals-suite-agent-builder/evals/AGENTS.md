@@ -54,7 +54,7 @@ agentBuilder.skills.register(legacySkill);
 ### Impact on Evals
 
 - **`expectedOnlyToolId`** should match the **builtin tool IDs** from `getAllowedTools`, not the skill ID. For example, if skill `platform.search` exposes `platform.core.search`, use `expectedOnlyToolId: 'platform.core.search'`.
-- **`invoke_skill`** pattern remains the same — the agent calls skills via the `invoke_skill` meta-tool, which the ToolUsageOnly evaluator handles.
+- **Skill loading**: The agent discovers skills via the `filestore.read` tool by loading `SKILL.md` files. Once loaded, the skill's tools (from `getAllowedTools`) become available as regular builtin tools that the agent calls directly.
 - **Skill `content`** is the primary mechanism for controlling agent behavior. When tuning eval scores, update skill `content` markdown (response format instructions, WHEN TO USE sections, FORBIDDEN RESPONSES).
 - **Directory structure**: Skills must have a `basePath` matching `SkillsDirectoryStructure` in `type_definition.ts`. Available paths include `skills/platform`, `skills/security`, `skills/security/cases`, `skills/observability`, `skills/fleet`, `skills/ml`, `skills/osquery`, `skills/dashboards`, etc.
 
@@ -292,7 +292,7 @@ Before running any multi-model tuning, verify the spec follows this document’s
 - **Expected outputs**: describe *response content*, not tool usage or internal reasoning.
 - **Flexibility**: expected outputs should allow valid variation (ordering, counts, formatting).
 - **Metadata**: include `expectedOnlyToolId` where ToolUsageOnly is relevant.
-- **Tool call expectations**: account for `invoke_skill` indirection (don’t mis-diagnose ToolUsageOnly=0%).
+- **Tool call expectations**: the agent loads skills via `filestore.read` then calls builtin tools directly. The ToolUsageOnly evaluator filters out auxiliary discovery tools like `filestore.read` (don’t mis-diagnose ToolUsageOnly=0%).
 
 If it fails the above, fix those first—multi-model tuning won’t help if the evaluation design itself is brittle.
 
@@ -455,11 +455,11 @@ const SPEC_EVALUATORS = ['ToolUsageOnly', 'Relevance'];
 
 **Solution**: Write flexible expected outputs that allow acceptable variations.
 
-### 4. Agent Uses `invoke_skill` Instead of Direct Tool Calls
+### 4. Agent Loads Skills Before Using Tools
 
-**Problem**: The default agent calls skills via `invoke_skill` meta-tool, not direct tool calls. ToolUsageOnly may show 0% even when the agent successfully used the skill.
+**Problem**: The agent loads skills via `filestore.read` before calling builtin tools. ToolUsageOnly may show 0% if it counts the `filestore.read` call as the only tool usage.
 
-**Solution**: The ToolUsageOnly evaluator is configured to check `invoke_skill` params for the expected skill name. Example: if expecting `platform.core.search`, the agent may call `invoke_skill` with `params.name: "platform.search"` - this is valid.
+**Solution**: The ToolUsageOnly evaluator filters out auxiliary discovery tools (`filestore.read`, `grep`, `read_file`, `list_skills`, etc.). Only meaningful tool calls are evaluated. If expecting `platform.core.search`, the agent will first load the skill via `filestore.read`, then call `platform.core.search` directly - the evaluator correctly ignores the discovery step.
 
 ### 5. Auxiliary Discovery Tools Are Ignored
 
@@ -492,8 +492,8 @@ echo '{"connectorId":{"name":"...","actionTypeId":".bedrock","config":{...},"sec
 
 ### ToolUsageOnly: 0%
 
-1. Check if agent uses `invoke_skill` - this is normal behavior
-2. Verify `expectedOnlyToolId` matches the skill name pattern
+1. Check if agent loaded a skill via `filestore.read` before calling tools - this is normal behavior
+2. Verify `expectedOnlyToolId` matches the builtin tool ID from `getAllowedTools`
 3. Check tool calls in LangSmith traces
 
 ### Factuality: Low Score
@@ -988,3 +988,4 @@ Track significant updates to this document:
 | 2026-01-31 | Added "Improving ToolUsageOnly Scores" section - explicit tool references, strict skill content, FORBIDDEN RESPONSES |
 | 2026-02-01 | Added "Verify Tool Availability" insight - fixed Platform Index Explorer (listIndices instead of unavailable indexExplorer) |
 | 2026-02-13 | Added "Skill Architecture (SkillDefinition)" section documenting new `defineSkillType` pattern, `getAllowedTools`/`getInlineTools`, directory structure, registration API, and impact on evals |
+| 2026-02-18 | Removed outdated `invoke_skill` references throughout; updated to reflect current architecture where agent loads skills via `filestore.read` and calls builtin tools directly |

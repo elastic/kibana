@@ -49,6 +49,12 @@ export const extractAllStrings = (
   }
 };
 
+export interface ToolCallStep {
+  tool_id?: string;
+  params?: Record<string, unknown>;
+  results?: unknown[];
+}
+
 export const getToolCallSteps = (
   output: TaskOutput
 ): Array<{ tool_id?: string; results?: unknown[] }> => {
@@ -63,6 +69,38 @@ export const getToolCallSteps = (
     .filter((s) => s?.type === 'tool_call')
     .map((s) => ({ tool_id: s.tool_id, results: s.results }));
 };
+
+/**
+ * Extract tool-call steps together with their parameters from raw task output.
+ */
+export const getToolCallStepsWithParams = (taskOutput: TaskOutput): ToolCallStep[] => {
+  const rawOutput = taskOutput as {
+    steps?: Array<{
+      type?: string;
+      tool_id?: string;
+      tool_params?: Record<string, unknown>;
+      params?: Record<string, unknown>;
+      results?: unknown[];
+    }>;
+  };
+
+  return (rawOutput?.steps ?? [])
+    .filter((s) => s?.type === 'tool_call')
+    .map((s) => ({
+      tool_id: s.tool_id,
+      params: s.tool_params ?? s.params,
+      results: s.results,
+    }));
+};
+
+/** Auxiliary tools used for skill discovery — ignored by ToolUsageOnly evaluator */
+export const AUXILIARY_DISCOVERY_TOOLS = new Set([
+  'grep',
+  'read_file',
+  'read_skill_tools',
+  'list_skills',
+  'filestore.read',
+]);
 
 export const getFinalAssistantMessage = (output: TaskOutput): string => {
   const messages =

@@ -65,95 +65,95 @@ evaluate.describe(
     }
     });
 
-    evaluate('retrieves ES documentation', async ({ evaluateDataset }) => {
-      await evaluateDataset({
-        dataset: {
-          name: 'documentation: elasticsearch https',
-          description:
-            'Validates retrieve_elastic_doc usage for configuring HTTPS in Elasticsearch.',
-          examples: [
-            {
-              input: { question: 'How can I configure HTTPS in Elasticsearch?' },
-              output: {
-                criteria: [
-                  `Uses the ${RETRIEVE_ELASTIC_DOC_FUNCTION_NAME} function before answering the question about the Elastic stack`,
-                  'The response should contain guidance on configuring HTTPS for Elasticsearch based on the retrieved documentation',
-                  `Any additional information beyond the retrieved documentation must be factually accurate and relevant to the user's question`,
-                  'The response should mention Elasticsearch and HTTPS configuration steps consistent with the documentation',
-                ],
-              },
-              metadata: {},
-            },
-          ],
+evaluate('retrieves ES documentation', async ({ evaluateDataset }) => {
+  await evaluateDataset({
+    dataset: {
+      name: 'documentation: elasticsearch https',
+      description:
+        'Validates retrieve_elastic_doc usage for configuring HTTPS in Elasticsearch.',
+      examples: [
+        {
+          input: { question: 'How can I configure HTTPS in Elasticsearch?' },
+          output: {
+            criteria: [
+              `Uses the ${RETRIEVE_ELASTIC_DOC_FUNCTION_NAME} function before answering the question about the Elastic stack`,
+              'The response should contain guidance on configuring HTTPS for Elasticsearch based on the retrieved documentation',
+              `Any additional information beyond the retrieved documentation must be factually accurate and relevant to the user's question`,
+              'The response should mention Elasticsearch and HTTPS configuration steps consistent with the documentation',
+            ],
+          },
+          metadata: {},
         },
-      });
-    });
+      ],
+    },
+  });
+});
 
-    evaluate('retrieves Kibana documentation', async ({ evaluateDataset }) => {
-      await evaluateDataset({
-        dataset: {
-          name: 'documentation: kibana lens',
-          description: 'Validates retrieve_elastic_doc usage for Kibana Lens guidance.',
-          examples: [
-            {
-              input: {
-                question:
-                  'What is Kibana Lens and how do I create a bar chart visualization with it?',
-              },
-              output: {
-                criteria: [
-                  `Uses the ${RETRIEVE_ELASTIC_DOC_FUNCTION_NAME} function before answering the question about Kibana`,
-                  'The response should contain an accurate explanation of what Kibana Lens is and steps for creating a visualization',
-                  `Any additional information beyond the retrieved documentation must be factually accurate and relevant to the user's question`,
-                ],
-              },
-              metadata: {},
-            },
-          ],
+evaluate('retrieves Kibana documentation', async ({ evaluateDataset }) => {
+  await evaluateDataset({
+    dataset: {
+      name: 'documentation: kibana lens',
+      description: 'Validates retrieve_elastic_doc usage for Kibana Lens guidance.',
+      examples: [
+        {
+          input: {
+            question:
+              'What is Kibana Lens and how do I create a bar chart visualization with it?',
+          },
+          output: {
+            criteria: [
+              `Uses the ${RETRIEVE_ELASTIC_DOC_FUNCTION_NAME} function before answering the question about Kibana`,
+              'The response should contain an accurate explanation of what Kibana Lens is and steps for creating a visualization',
+              `Any additional information beyond the retrieved documentation must be factually accurate and relevant to the user's question`,
+            ],
+          },
+          metadata: {},
         },
-      });
-    });
+      ],
+    },
+  });
+});
 
-    evaluate('retrieves Observability documentation', async ({ evaluateDataset }) => {
-      await evaluateDataset({
-        dataset: {
-          name: 'documentation: observability nodejs apm',
-          description:
-            'Validates retrieve_elastic_doc usage for Observability APM instructions.',
-          examples: [
-            {
-              input: {
-                question:
-                  'How can I set up APM instrumentation for my Node.js service in Elastic Observability?',
-              },
-              output: {
-                criteria: [
-                  `Uses the ${RETRIEVE_ELASTIC_DOC_FUNCTION_NAME} function before answering the question about Observability`,
-                  'The response should contain instructions for setting up APM instrumentation based on the Observability docs',
-                  'The response should mention steps like installing the APM agent, configuring it with the service name and APM Server URL, etc.',
-                  `Any additional information beyond the retrieved documentation must be factually accurate and relevant to the user's question`,
-                ],
-              },
-              metadata: {},
-            },
-          ],
+evaluate('retrieves Observability documentation', async ({ evaluateDataset }) => {
+  await evaluateDataset({
+    dataset: {
+      name: 'documentation: observability nodejs apm',
+      description:
+        'Validates retrieve_elastic_doc usage for Observability APM instructions.',
+      examples: [
+        {
+          input: {
+            question:
+              'How can I set up APM instrumentation for my Node.js service in Elastic Observability?',
+          },
+          output: {
+            criteria: [
+              `Uses the ${RETRIEVE_ELASTIC_DOC_FUNCTION_NAME} function before answering the question about Observability`,
+              'The response should contain instructions for setting up APM instrumentation based on the Observability docs',
+              'The response should mention steps like installing the APM agent, configuring it with the service name and APM Server URL, etc.',
+              `Any additional information beyond the retrieved documentation must be factually accurate and relevant to the user's question`,
+            ],
+          },
+          metadata: {},
         },
-      });
-    });
+      ],
+    },
+  });
+});
 
-    evaluate.afterAll(async ({ kbnClient, log }) => {
-      log.info('Uninstalling Elastic documentation');
-      const { data: uninstallResponse } = await kbnClient.request<UninstallResponse>({
-        method: 'POST',
-        path: ELASTIC_DOCS_UNINSTALL_ALL_API_PATH,
-        body: { inferenceId },
-      });
+evaluate.afterAll(async ({ kbnClient, log }) => {
+  log.info('Uninstalling Elastic documentation');
+  const { data: uninstallResponse } = await kbnClient.request<UninstallResponse>({
+    method: 'POST',
+    path: ELASTIC_DOCS_UNINSTALL_ALL_API_PATH,
+    body: { inferenceId },
+  });
 
-      if (uninstallResponse.success) {
-        log.success('Uninstalled Elastic documentation');
-      } else {
-        log.error('Could not uninstall Elastic documentation');
-      }
-    });
+  if (uninstallResponse.success) {
+    log.success('Uninstalled Elastic documentation');
+  } else {
+    log.error('Could not uninstall Elastic documentation');
+  }
+});
   }
 );

@@ -105,9 +105,9 @@ export class KibanaPhoenixClient implements EvalsExecutorClient {
       if (!this.allowPhoenixDatasetDeleteRecreateFallback) {
         this.options.log.warning(
           `Phoenix dataset upsert failed for "${dataset.name}" (id: ${storedDataset.id}). ` +
-            `Refusing to delete+recreate without explicit opt-in. ` +
-            `To allow the destructive fallback (will wipe past experiments), set ` +
-            `KBN_EVALS_PHOENIX_ALLOW_DATASET_DELETE_RECREATE_FALLBACK=true.`
+          `Refusing to delete+recreate without explicit opt-in. ` +
+          `To allow the destructive fallback (will wipe past experiments), set ` +
+          `KBN_EVALS_PHOENIX_ALLOW_DATASET_DELETE_RECREATE_FALLBACK=true.`
         );
         this.options.log.debug(error);
         throw error;
@@ -187,51 +187,9 @@ export class KibanaPhoenixClient implements EvalsExecutorClient {
         trustUpstreamDataset,
       } = options;
 
-      const datasetId = trustUpstreamDataset
-        ? (await this.getDatasetByName(dataset.name)).id
-        : (await this.syncDataSet(dataset)).datasetId;
-
-      const experiments = await import('@arizeai/phoenix-client/experiments');
-
-      const ran = await experiments.runExperiment({
-        client: this.phoenixClient,
-        dataset: { datasetId },
-        experimentName: `Run ID: ${this.options.runId} - Dataset: ${dataset.name}`,
-        // Phoenix expects its own task/evaluator types. Keep the adapter boundary here.
-        task: task as any,
-        experimentMetadata: {
-          ...experimentMetadata,
-          model: this.options.model,
-          runId: this.options.runId,
-        },
-        setGlobalTracerProvider: false,
-        evaluators: evaluators.map((evaluator) => {
-          return {
-            name: evaluator.name,
-            kind: evaluator.kind,
-            evaluate: ({ input, output, expected, metadata: md }: any) => {
-              return evaluator.evaluate({
-                expected: expected ?? null,
-                input,
-                metadata: md ?? {},
-                output,
-              });
-            },
-          };
-        }) as any,
-        logger: {
-          error: this.options.log.error.bind(this.options.log),
-          info: this.options.log.info.bind(this.options.log),
-          log: this.options.log.info.bind(this.options.log),
-        },
-        repetitions: this.options.repetitions ?? 1,
-        concurrency,
-        trustUpstreamDataset,
-      } = options;
-
       // Phoenix can occasionally reset connections locally (e.g., container restart or transient overload).
       // Retry to avoid flaking the entire suite.
-      const ranExperiment = await pRetry(
+      const ran = await pRetry(
         async () => {
           const datasetId = trustUpstreamDataset
             ? (await this.getDatasetByName(dataset.name)).id
@@ -246,9 +204,9 @@ export class KibanaPhoenixClient implements EvalsExecutorClient {
             // Phoenix expects its own task/evaluator types. Keep the adapter boundary here.
             task: task as any,
             experimentMetadata: {
-              ...experimentMetadata,
               model: this.options.model,
               runId: this.options.runId,
+              ...experimentMetadata
             },
             setGlobalTracerProvider: false,
             evaluators: evaluators.map((evaluator) => {

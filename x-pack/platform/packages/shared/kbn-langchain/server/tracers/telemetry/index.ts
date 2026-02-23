@@ -6,3 +6,4 @@
  */
 
 export { TelemetryTracer } from './telemetry_tracer';
+export type { TelemetryParams, LangChainTracerFields } from './telemetry_tracer';

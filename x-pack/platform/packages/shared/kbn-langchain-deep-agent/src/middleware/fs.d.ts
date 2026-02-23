@@ -122,14 +122,14 @@ export declare function createFilesystemMiddleware(options?: FilesystemMiddlewar
     pattern: z3.ZodString;
     path: z3.ZodDefault<z3.ZodOptional<z3.ZodString>>;
 }, "strip", z3.ZodTypeAny, {
-    pattern: string;
     path: string;
+    pattern: string;
 }, {
     pattern: string;
     path?: string | undefined;
 }>, {
-    pattern: string;
     path: string;
+    pattern: string;
 }, {
     pattern: string;
     path?: string | undefined;
@@ -138,16 +138,16 @@ export declare function createFilesystemMiddleware(options?: FilesystemMiddlewar
     path: z3.ZodDefault<z3.ZodOptional<z3.ZodString>>;
     glob: z3.ZodNullable<z3.ZodOptional<z3.ZodString>>;
 }, "strip", z3.ZodTypeAny, {
-    pattern: string;
     path: string;
+    pattern: string;
     glob?: string | null | undefined;
 }, {
     pattern: string;
     path?: string | undefined;
     glob?: string | null | undefined;
 }>, {
-    pattern: string;
     path: string;
+    pattern: string;
     glob?: string | null | undefined;
 }, {
     pattern: string;

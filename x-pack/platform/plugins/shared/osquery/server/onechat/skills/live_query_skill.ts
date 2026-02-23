@@ -17,24 +17,23 @@ import { lastValueFrom } from 'rxjs';
 import { OSQUERY_INTEGRATION_NAME } from '../../../common/constants';
 import { Direction, OsqueryQueries } from '../../../common/search_strategy';
 import type {
-  ActionDetailsRequestOptions,
-  ActionDetailsStrategyResponse,
-  ResultsRequestOptions,
   ResultsStrategyResponse,
   ActionResultsRequestOptions,
   ActionResultsStrategyResponse,
 } from '../../../common/search_strategy';
 import { generateTablePaginationOptions } from '../../../common/utils/build_query';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
+import {
+  waitForQueryCompletion,
+  waitForResultsCount,
+  fetchLiveQueryResults,
+} from '../../services';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const osquerySchema = require('../../../public/common/schemas/osquery/v5.20.0.json');
 
 // Constants for polling configuration
-const POLL_INTERVAL_MS = 20000; // 5 seconds between polls
 const MAX_POLL_DURATION_MS = 5 * 60 * 1000; // 5 minutes maximum wait time
-
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const LIVE_QUERY_SKILL: Omit<Skill, 'tools'> = {
   namespace: 'osquery.live_query',
@@ -79,14 +78,16 @@ run_live_query({ query: "SELECT pid, name FROM processes", agent_ids: ["<agent_i
 
 ### Step 4: MANDATORY - Fetch Results (NEVER SKIP!)
 \`\`\`
-// Use the per-query action_id from queries[].action_id, NOT the parent action_id!
-// ALWAYS pass agentCount from the run_live_query response for proper polling!
-get_live_query_results({ actionId: "<queries[0].action_id>", agentCount: <queries[0].agent_count> })
+// Pass BOTH the parent action_id AND the per-query action_id!
+get_live_query_results({ 
+  liveQueryId: "<action_id>",           // Parent action ID for status checks
+  actionId: "<queries[0].action_id>"    // Per-query action ID for fetching results
+})
 \`\`\`
-- **CRITICAL: Use \`queries[].action_id\` from run_live_query response, NOT the parent \`action_id\`**
-- **CRITICAL: Pass \`agentCount\` from the response - this is required for proper completion detection!**
+- **CRITICAL: Pass \`liveQueryId\` (parent \`action_id\`) for status/completion checks**
+- **CRITICAL: Pass \`actionId\` (from \`queries[].action_id\`) for fetching actual results**
 - **You MUST call this to get actual query data**
-- **The tool automatically waits up to 5 minutes for all agents to respond** - no manual retry needed!
+- **The tool automatically waits up to 5 minutes for query completion** - no manual retry needed!
 - Check the **status** field in the response:
   - \`completed\` → All agents responded. Results are ready to analyze.
   - \`error\` → Query completed but some agents failed. Check the \`errors\` array for details.
@@ -118,9 +119,9 @@ Execute a live osquery SQL query against agents.
 
 ### get_live_query_results
 Fetch results from a live query execution.
-- **IMPORTANT: Use \`queries[].action_id\` from run_live_query, NOT the parent action_id**
-- **IMPORTANT: Pass \`agentCount\` from run_live_query response for proper completion detection**
-- Automatically polls for up to 5 minutes
+- **IMPORTANT: Pass \`liveQueryId\` (parent action_id) for status/completion checks**
+- **IMPORTANT: Pass \`actionId\` (from queries[].action_id) for fetching actual results**
+- Automatically waits for query completion, then fetches results
 - Returns actual query data with rows and columns
 - Includes error messages from failed queries
 
@@ -491,8 +492,8 @@ const createRunLiveQueryTool = (getOsqueryContext: GetOsqueryAppContextFn) => {
           queries: queryActionIds,
           message: `Live query dispatched successfully to ${agentCount} agent(s).`,
           next_step: primaryQueryActionId
-            ? `IMPORTANT: You MUST now call get_live_query_results with actionId "${primaryQueryActionId}" and agentCount ${primaryAgentCount} to fetch the actual results. Do NOT conclude your investigation without fetching and analyzing the results.`
-            : `IMPORTANT: This dispatched ${queryActionIds.length} queries to ${agentCount} agent(s). You MUST call get_live_query_results for each query action_id (with agentCount) to fetch results.`,
+            ? `IMPORTANT: You MUST now call get_live_query_results with BOTH parameters: liveQueryId="${osqueryAction.action_id}" (parent action_id for status checks) AND actionId="${primaryQueryActionId}" (per-query action_id for fetching results). Do NOT conclude your investigation without fetching and analyzing the results.`
+            : `IMPORTANT: This dispatched ${queryActionIds.length} queries to ${agentCount} agent(s). For each query, call get_live_query_results with liveQueryId="${osqueryAction.action_id}" and the corresponding actionId from queries[].action_id.`,
           error_handling: `If the results show errors (failed > 0), check the errors array. For "no such column" errors, use get_schema to verify the correct column names and retry with the correct query.`,
         });
       } catch (error: any) {
@@ -528,17 +529,16 @@ const createRunLiveQueryTool = (getOsqueryContext: GetOsqueryAppContextFn) => {
 
 /**
  * Creates a LangChain tool for fetching live query results by action ID.
- * This tool automatically polls for results until complete or timeout (5 minutes).
- *
- * IMPORTANT: The actionId must be the per-query action_id (from queries[].action_id),
- * NOT the parent live query action_id. The run_live_query tool returns these in the
- * queries array.
+ * This tool uses a two-phase approach:
+ * - Phase 1: Wait for query completion (status completed/expired)
+ * - Phase 2: Wait for results count to match reported docs
+ * - Phase 3: Fetch paginated results
  *
  * @internal
  */
 const createGetLiveQueryResultsTool = (getOsqueryContext: GetOsqueryAppContextFn) => {
   return tool(
-    async ({ actionId, agentCount, page, pageSize, sort, sortOrder, kuery, startDate, waitForResults = true }, config) => {
+    async ({ liveQueryId, actionId, page, pageSize, sort, sortOrder, kuery, startDate, waitForResults = true }, config) => {
       const onechatContext = getOneChatContext(config);
       if (!onechatContext) {
         throw new Error('OneChat context not available');
@@ -549,14 +549,27 @@ const createGetLiveQueryResultsTool = (getOsqueryContext: GetOsqueryAppContextFn
         throw new Error('Osquery context not available');
       }
 
-      const { request } = onechatContext;
+      const { request, spaceId: contextSpaceId } = onechatContext;
       const logger = osqueryContext.logFactory.get('get_live_query_results');
 
+      // Log entry with all parameters for debugging
+      logger.error(
+        `[get_live_query_results] ENTRY - liveQueryId: ${liveQueryId}, actionId: ${actionId}, ` +
+        `waitForResults: ${waitForResults}, page: ${page}, pageSize: ${pageSize}`
+      );
+
       const [, depsStart] = await osqueryContext.getStartServices();
+      logger.error(`[get_live_query_results] Got start services`);
 
+      // Get space ID
+      const space = await osqueryContext.service.getActiveSpace(request);
+      const spaceId = space?.id ?? contextSpaceId ?? DEFAULT_SPACE_ID;
+      logger.error(`[get_live_query_results] spaceId: ${spaceId}`);
+
+      // Get integration namespaces
       let integrationNamespaces: Record<string, string[]> = {};
-
       if (osqueryContext?.service?.getIntegrationNamespaces) {
+        logger.error(`[get_live_query_results] Getting integration namespaces...`);
         const spaceScopedClient = await createInternalSavedObjectsClientForSpaceId(
           osqueryContext,
           request
@@ -566,183 +579,152 @@ const createGetLiveQueryResultsTool = (getOsqueryContext: GetOsqueryAppContextFn
           spaceScopedClient,
           logger
         );
+        logger.error(`[get_live_query_results] Got namespaces: ${JSON.stringify(integrationNamespaces)}`);
       }
 
       const scopedSearch = depsStart.data.search.asScoped(request);
-
       const osqueryNamespaces = integrationNamespaces[OSQUERY_INTEGRATION_NAME];
       const namespacesOrUndefined =
         osqueryNamespaces && osqueryNamespaces.length > 0 ? osqueryNamespaces : undefined;
 
-      // This follows the same logic as get_live_query_results_route.ts:
-      // - actionId is the per-query action_id (queries[].action_id)
-      // - We query results using this action_id
-      // - We get action responses to determine completion status
-
-      const fetchResults = async () => {
-        // Get action responses (status) for this specific query action_id
-        // This matches getActionResponses from routes/live_query/utils.ts
-        const actionResultsRes = await lastValueFrom(
-          scopedSearch.search<ActionResultsRequestOptions, ActionResultsStrategyResponse>(
-            {
-              actionId: actionId,
-              factoryQueryType: OsqueryQueries.actionResults,
-              kuery: kuery ?? '',
-              pagination: generateTablePaginationOptions(0, 1000),
-              sort: {
-                direction: Direction.desc,
-                field: '@timestamp',
-              },
-              integrationNamespaces: namespacesOrUndefined,
-            },
-            { strategy: 'osquerySearchStrategy' }
-          )
-        );
-
-        // Parse aggregations (same as utils.ts getActionResponses)
-        const aggs = actionResultsRes.rawResponse?.aggregations as {
-          aggs?: {
-            responses_by_action_id?: {
-              doc_count?: number;
-              rows_count?: { value?: number };
-              responses?: { buckets?: Array<{ key: string; doc_count: number }> };
-            };
-          };
-        } | undefined;
-        const responseAgg = aggs?.aggs?.responses_by_action_id;
-        const totalResponded = responseAgg?.doc_count ?? 0;
-        const totalRowCount = responseAgg?.rows_count?.value ?? 0;
-        const aggsBuckets = responseAgg?.responses?.buckets;
-        const successful = aggsBuckets?.find((bucket) => bucket.key === 'success')?.doc_count ?? 0;
-        const failed = aggsBuckets?.find((bucket) => bucket.key === 'error')?.doc_count ?? 0;
-
-        // Get actual results data
-        const res = await lastValueFrom(
-          scopedSearch.search<ResultsRequestOptions, ResultsStrategyResponse>(
-            {
-              actionId: actionId,
-              factoryQueryType: OsqueryQueries.results,
-              kuery: kuery,
-              startDate: startDate,
-              pagination: generateTablePaginationOptions(page ?? 0, pageSize ?? 100),
-              sort: [
-                {
-                  direction: sortOrder ?? Direction.desc,
-                  field: sort ?? '@timestamp',
-                },
-              ],
-              integrationNamespaces: namespacesOrUndefined,
-            },
-            { strategy: 'osquerySearchStrategy' }
-          )
-        );
-
-        const hasQueryResults = res.edges && res.edges.length > 0;
-
-        // Determine expected agent count and pending
-        // IMPORTANT: If agentCount is not provided, we can't determine completion by pending count
-        // We must wait for actual results in that case
-        const expectedAgents = agentCount ?? 0;
-        const pending = expectedAgents > 0 ? Math.max(0, expectedAgents - totalResponded) : 0;
-
-        // Completion logic:
-        // 1. If we know the agent count: complete when all agents responded (pending === 0)
-        // 2. If we have actual query results: complete
-        // 3. If we don't know agent count and no results yet: NOT complete (keep polling)
-        let isCompleted = false;
-        if (expectedAgents > 0 && pending === 0) {
-          // All expected agents responded
-          isCompleted = true;
-        } else if (expectedAgents === 0 && totalResponded > 0 && (successful > 0 || failed > 0)) {
-          // No expected count provided, but we got responses with success/error status
-          isCompleted = true;
-        }
-        // Otherwise: not complete, keep polling
-
-        return {
-          res,
-          actionResultsRes,
-          agentsCount: expectedAgents > 0 ? expectedAgents : totalResponded,
-          totalResponded,
-          totalRowCount,
-          successful,
-          failed,
-          pending,
-          isCompleted,
-          hasQueryResults,
-        };
-      };
-
       const startTime = Date.now();
-      let pollCount = 0;
-      let lastResult: Awaited<ReturnType<typeof fetchResults>>;
+      let queryStatus: Awaited<ReturnType<typeof waitForQueryCompletion>> | undefined;
+      let expectedDocs = 0;
+      let queryInfo: { pending: number; responded: number; successful: number; failed: number; docs: number } | undefined;
 
+      // PHASE 1: Wait for query completion using the parent liveQueryId
+      if (waitForResults && liveQueryId) {
+        logger.error(`[Phase 1] START - Waiting for query completion using liveQueryId: ${liveQueryId}`);
+
+        try {
+          queryStatus = await waitForQueryCompletion(scopedSearch, {
+            actionId: liveQueryId,
+            spaceId,
+            pollIntervalMs: 20000, // 20 seconds
+            maxWaitMs: MAX_POLL_DURATION_MS,
+            integrationNamespaces: namespacesOrUndefined,
+            logger,
+          });
+
+          logger.error(
+            `[Phase 1] waitForQueryCompletion returned - status: ${queryStatus.status}, ` +
+            `isCompleted: ${queryStatus.isCompleted}, isExpired: ${queryStatus.isExpired}, ` +
+            `queries count: ${queryStatus.queries.length}`
+          );
+
+          // Find the specific query status for our actionId
+          const specificQuery = queryStatus.queries.find((q) => q.action_id === actionId);
+          if (specificQuery) {
+            expectedDocs = specificQuery.docs;
+            queryInfo = {
+              pending: specificQuery.pending,
+              responded: specificQuery.responded,
+              successful: specificQuery.successful,
+              failed: specificQuery.failed,
+              docs: specificQuery.docs,
+            };
+            logger.error(
+              `[Phase 1] Found specific query - pending: ${queryInfo.pending}, responded: ${queryInfo.responded}, ` +
+              `successful: ${queryInfo.successful}, failed: ${queryInfo.failed}, docs: ${queryInfo.docs}`
+            );
+          } else {
+            logger.error(
+              `[Phase 1] WARNING: Could not find query with action_id=${actionId} in queries: ${JSON.stringify(queryStatus.queries.map(q => q.action_id))}`
+            );
+          }
+
+          logger.error(
+            `[Phase 1] COMPLETE - Query status: ${queryStatus.status}, isCompleted: ${queryStatus.isCompleted}, ` +
+            `isExpired: ${queryStatus.isExpired}, expectedDocs: ${expectedDocs}`
+          );
+        } catch (error) {
+          logger.error(
+            `[Phase 1] FAILED - Error: ${error instanceof Error ? error.message : String(error)}, ` +
+            `Stack: ${error instanceof Error ? error.stack : 'no stack'}`
+          );
+          // Continue to try fetching results anyway
+        }
+      } else {
+        logger.error(`[Phase 1] SKIPPED - waitForResults: ${waitForResults}, liveQueryId: ${liveQueryId}`);
+      }
+
+      // PHASE 2: Wait for results count to match expected docs
+      let resultsCountMatched = false;
+      if (waitForResults && expectedDocs > 0) {
+        logger.error(`[Phase 2] START - Waiting for results count to match ${expectedDocs} docs`);
+
+        try {
+          const countResult = await waitForResultsCount(scopedSearch, {
+            actionId: liveQueryId ?? actionId,
+            queryActionId: actionId,
+            expectedCount: expectedDocs,
+            spaceId,
+            pollIntervalMs: 20000, // 20 seconds
+            maxWaitMs: MAX_POLL_DURATION_MS,
+            integrationNamespaces: namespacesOrUndefined,
+            logger,
+          });
+
+          resultsCountMatched = countResult.matched;
+          logger.error(
+            `[Phase 2] COMPLETE - Results count: ${countResult.totalCount}/${expectedDocs}, matched: ${resultsCountMatched}`
+          );
+        } catch (error) {
+          logger.error(
+            `[Phase 2] FAILED - Error: ${error instanceof Error ? error.message : String(error)}, ` +
+            `Stack: ${error instanceof Error ? error.stack : 'no stack'}`
+          );
+          // Continue to fetch whatever results are available
+        }
+      } else {
+        logger.error(`[Phase 2] SKIPPED - waitForResults: ${waitForResults}, expectedDocs: ${expectedDocs}`);
+      }
+
+      // PHASE 3: Fetch paginated results
+      logger.error(`[Phase 3] START - Fetching paginated results for actionId: ${actionId}`);
+
+      let results;
       try {
-        lastResult = await fetchResults();
+        results = await fetchLiveQueryResults(scopedSearch, {
+          actionId,
+          pagination: { page: page ?? 0, pageSize: pageSize ?? 100 },
+          sort: sort ? { field: sort, direction: (sortOrder as 'asc' | 'desc') ?? 'desc' } : undefined,
+          kuery,
+          startDate,
+          integrationNamespaces: namespacesOrUndefined,
+          logger,
+        });
+        logger.error(`[Phase 3] fetchLiveQueryResults returned - totalCount: ${results.totalCount}`);
       } catch (error) {
         logger.error(
-          `Initial fetch failed for action ${actionId}: ${error instanceof Error ? error.message : String(error)}`
+          `[Phase 3] fetchLiveQueryResults FAILED - Error: ${error instanceof Error ? error.message : String(error)}, ` +
+          `Stack: ${error instanceof Error ? error.stack : 'no stack'}`
         );
         throw error;
       }
 
-      while (waitForResults && !lastResult.isCompleted && (Date.now() - startTime) < MAX_POLL_DURATION_MS) {
-        pollCount++;
-        const elapsedSeconds = Math.round((Date.now() - startTime) / 1000);
-        const { pending, agentsCount, totalResponded } = lastResult;
-
-        logger.debug(
-          `[Poll ${pollCount}] Waiting for results... ${totalResponded}/${agentsCount} agents responded, ${pending} pending, hasResults: ${lastResult.hasQueryResults}. Elapsed: ${elapsedSeconds}s`
-        );
-
-        await sleep(POLL_INTERVAL_MS);
-
-        try {
-          lastResult = await fetchResults();
-        } catch (error) {
-          logger.error(
-            `Poll ${pollCount} failed for action ${actionId}: ${error instanceof Error ? error.message : String(error)}`
-          );
-          break;
-        }
-      }
-
-      const {
-        res,
-        actionResultsRes,
-        agentsCount,
-        totalResponded,
-        totalRowCount,
-        successful,
-        failed,
-        pending,
-        isCompleted,
-        hasQueryResults,
-      } = lastResult;
-
-      const completionReason =
-        (agentsCount > 0 && pending === 0) ? 'all_agents_responded' :
-          hasQueryResults ? 'has_query_results' :
-            successful > 0 ? 'successful_responses' :
-              (Date.now() - startTime) >= MAX_POLL_DURATION_MS ? 'timeout' : 'unknown';
-
-      logger.debug(
-        `Polling ended after ${pollCount} polls, ${Math.round((Date.now() - startTime) / 1000)}s. ` +
-        `Reason: ${completionReason}. ` +
-        `Stats: agentsCount=${agentsCount}, totalResponded=${totalResponded}, successful=${successful}, ` +
-        `failed=${failed}, pending=${pending}, hasQueryResults=${hasQueryResults}, isCompleted=${isCompleted}`
+      // Also fetch action results for error extraction
+      logger.error(`[Phase 3] Fetching action results for error extraction...`);
+      const actionResultsRes = await lastValueFrom(
+        scopedSearch.search<ActionResultsRequestOptions, ActionResultsStrategyResponse>(
+          {
+            actionId,
+            factoryQueryType: OsqueryQueries.actionResults,
+            kuery: kuery ?? '',
+            pagination: generateTablePaginationOptions(0, 1000),
+            sort: {
+              direction: Direction.desc,
+              field: '@timestamp',
+            },
+            integrationNamespaces: namespacesOrUndefined,
+          },
+          { strategy: 'osquerySearchStrategy' }
+        )
       );
 
-      const aggregations = {
-        totalRowCount,
-        totalResponded,
-        successful,
-        failed,
-        pending,
-        agentsCount,
-        hasQueryResults,
-      };
+      logger.error(`[Phase 3] Action results fetched - edges count: ${actionResultsRes.edges?.length ?? 0}`);
 
+      // Extract errors from action results
       const errors: Array<{ agent_id: string; error: string }> = [];
       if (actionResultsRes.edges && actionResultsRes.edges.length > 0) {
         for (const edge of actionResultsRes.edges) {
@@ -769,60 +751,82 @@ const createGetLiveQueryResultsTool = (getOsqueryContext: GetOsqueryAppContextFn
         }
       }
 
-      const hasErrors = failed > 0 || errors.length > 0;
-      let status: 'running' | 'completed' | 'error' | 'timeout';
-      if (isCompleted) {
+      // Build response
+      const elapsedMs = Date.now() - startTime;
+      const isCompleted = queryStatus?.isCompleted ?? false;
+      const isExpired = queryStatus?.isExpired ?? false;
+      const hasErrors = (queryInfo?.failed ?? 0) > 0 || errors.length > 0;
+
+      let status: 'running' | 'completed' | 'error' | 'timeout' | 'expired';
+      if (isExpired) {
+        status = 'expired';
+      } else if (isCompleted) {
         status = hasErrors ? 'error' : 'completed';
-      } else if ((Date.now() - startTime) >= MAX_POLL_DURATION_MS) {
+      } else if (elapsedMs >= MAX_POLL_DURATION_MS) {
         status = 'timeout';
       } else {
         status = 'running';
       }
 
-      const elapsedMs = Date.now() - startTime;
+      const aggregations = {
+        totalRowCount: results.totalCount,
+        totalResponded: queryInfo?.responded ?? 0,
+        successful: queryInfo?.successful ?? 0,
+        failed: queryInfo?.failed ?? 0,
+        pending: queryInfo?.pending ?? 0,
+        expectedDocs,
+        resultsCountMatched,
+      };
 
       const response: {
         data: ResultsStrategyResponse;
         aggregations: typeof aggregations;
         status: typeof status;
-        pollInfo: { pollCount: number; elapsedMs: number; maxWaitMs: number };
+        pollInfo: { elapsedMs: number; maxWaitMs: number };
         errors?: typeof errors;
         warning?: string;
       } = {
-        data: res,
+        data: results.data,
         aggregations,
         status,
         pollInfo: {
-          pollCount,
           elapsedMs,
           maxWaitMs: MAX_POLL_DURATION_MS,
         },
       };
 
       if (status === 'timeout') {
-        response.warning = `Query timed out after ${Math.round(elapsedMs / 1000)} seconds. ${pending} of ${agentsCount} agent(s) still haven't responded. Some agents may be offline or slow to respond.`;
+        response.warning = `Query timed out after ${Math.round(elapsedMs / 1000)} seconds. Some agents may still be responding.`;
+      } else if (status === 'expired') {
+        response.warning = `Query expired before all agents could respond.`;
       } else if (errors.length > 0) {
         response.errors = errors;
         response.warning = `Query failed on ${errors.length} agent(s). Check the errors array for details. Common causes include invalid column names - use get_schema to verify table/column names before retrying.`;
-      } else if (failed > 0) {
-        response.warning = `Query failed on ${failed} agent(s). Check the errors array for details.`;
+      } else if (!resultsCountMatched && expectedDocs > 0) {
+        response.warning = `Results count (${results.totalCount}) does not match expected docs (${expectedDocs}). Some results may still be indexing.`;
       }
+
+      logger.error(
+        `[get_live_query_results] EXIT - Completed after ${Math.round(elapsedMs / 1000)}s. Status: ${status}, ` +
+        `totalResults: ${results.totalCount}, expectedDocs: ${expectedDocs}, matched: ${resultsCountMatched}, ` +
+        `errors: ${errors.length}, isCompleted: ${isCompleted}, isExpired: ${isExpired}`
+      );
 
       return JSON.stringify(response);
     },
     {
       name: 'get_live_query_results',
-      description: 'Get results from a live osquery query action. IMPORTANT: Use the per-query action_id from queries[].action_id (returned by run_live_query), NOT the parent action_id. IMPORTANT: Always pass agentCount for proper completion detection. This tool automatically waits and polls for up to 5 minutes until all agents have responded.',
+      description: 'Get results from a live osquery query action. Pass liveQueryId (parent action_id) for status checks and actionId (per-query action_id from queries[].action_id) for fetching results. This tool automatically waits for query completion and result indexing.',
       schema: z.object({
-        actionId: z.string().describe('The per-query action ID from queries[].action_id (returned by run_live_query). Do NOT use the parent action_id.'),
-        agentCount: z.number().describe('Number of agents from run_live_query response (queries[].agent_count or agent_count). REQUIRED for proper completion detection - without it, the tool cannot know when all agents have responded.'),
+        liveQueryId: z.string().describe('The parent live query action_id (returned by run_live_query as action_id). Used for checking query completion status.'),
+        actionId: z.string().describe('The per-query action ID from queries[].action_id (returned by run_live_query). Used for fetching actual results.'),
         page: z.number().optional().describe('Page number (default: 0)'),
         pageSize: z.number().optional().describe('Number of results per page (default: 100)'),
         sort: z.string().optional().describe('Field to sort by (default: @timestamp)'),
         sortOrder: z.enum(['asc', 'desc']).optional().describe('Sort order (default: desc)'),
         kuery: z.string().optional().describe('KQL query to filter results'),
         startDate: z.string().optional().describe('Start date for filtering results'),
-        waitForResults: z.boolean().optional().describe('Whether to wait and poll for results until complete (default: true). Set to false to get immediate snapshot.'),
+        waitForResults: z.boolean().optional().describe('Whether to wait for query completion and results (default: true). Set to false to get immediate snapshot.'),
       }),
     }
   );

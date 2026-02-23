@@ -254,10 +254,8 @@ function formatTraceLinkInfo(traceLinkInfo: TraceLinkInfo): string {
 }
 
 export function createDefaultTerminalReporter(
-  options: { reportDisplayOptions?: ReportDisplayOptions; showLowScoreExplanations?: boolean } = {}
+  options: { reportDisplayOptions?: ReportDisplayOptions } = {}
 ): EvaluationReporter {
-  const { showLowScoreExplanations = true } = options;
-
   return async (scoreRepository: EvaluationScoreRepository, runId: string, log: SomeDevLog) => {
     const runStats = await scoreRepository.getStatsByRunId(runId);
 
@@ -276,23 +274,10 @@ export function createDefaultTerminalReporter(
     log.info(`\n\n${header.join('\n')}`);
     log.info(`\n${chalk.bold.blue('═══ EVALUATION RESULTS ═══')}\n${summaryTable}`);
 
-    // Display low score explanations if enabled
-    if (showLowScoreExplanations) {
-      const explanationsOutput = formatLowScoreExplanations(report.datasetScoresWithStats);
-      if (explanationsOutput) {
-        log.info(`\n${explanationsOutput}`);
-      }
-    }
-
     // Display LangSmith links if configured via environment variables
     const langsmithOutput = formatLangSmithLinks(runId);
     if (langsmithOutput) {
       log.info(`\n${langsmithOutput}`);
-    }
-
-    // Display trace link information if available (from experiment runs)
-    if (report.traceLinkInfo && report.traceLinkInfo.totalTraceCount > 0) {
-      log.info(`\n${formatTraceLinkInfo(report.traceLinkInfo)}`);
     }
   };
 }

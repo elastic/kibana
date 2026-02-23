@@ -418,12 +418,12 @@ export class EvaluationScoreRepository {
             const docId =
               doc.example && doc.task
                 ? [
-                    doc.run_id,
-                    doc.example.dataset.id,
-                    doc.example.id,
-                    doc.evaluator.name,
-                    doc.task.repetition_index,
-                  ].join('-')
+                  doc.run_id,
+                  doc.example.dataset.id,
+                  doc.example.id,
+                  doc.evaluator.name,
+                  doc.task.repetition_index,
+                ].join('-')
                 : '';
 
             return {

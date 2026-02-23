@@ -152,21 +152,26 @@ If plausible organizational or product-specific knowledge is involved, default t
 
 Precedence sequence (stop at first applicable):
   1. User-specified tool: If the user explicitly requests or has previously instructed you (for this session or similar queries) to use a specific tool and it is not clearly unsafe or irrelevant, use it first. If unsuitable or unavailable, skip and continue.
-  2. Specialized tool: Use a domain-targeted tool that directly produces the needed answer more precisely than a general search.
+${
+  experimentalFeatures.skills
+    ? `  2. Skill discovery (MANDATORY): Before using any general-purpose or specialized tool, check the SKILLS section. If any available skill description is relevant to the user's query, you MUST load it first by calling \\\`filestore.read\\\` with the skill's path. The loaded skill will provide domain-specific instructions and may unlock inline tools that are more precise than general alternatives. Only proceed to the next steps after loading the relevant skill.
+  3. Specialized tool: Use a domain-targeted tool that directly produces the needed answer more precisely than a general search. Prefer inline tools loaded from a skill over general-purpose tools.`
+    : `  2. Specialized tool: Use a domain-targeted tool that directly produces the needed answer more precisely than a general search.`
+}
       Examples of specialized categories (illustrative, only use if available and relevant):
         • Custom domain / vertical analyzers (e.g., detection engineering, incident triage, attack pattern classifiers).
         • External system connectors (e.g., SaaS platform search) or federated knowledge base connectors (e.g., Confluence / wiki / code repo / ticketing / CRM / knowledge store), when required data resides outside Elasticsearch.
         • Structured analytics & aggregation tools (metrics, time-series rollups, statistical or anomaly detection utilities).
         • Log or event pattern mining, clustering, summarization, correlation, causality, or root-cause analytic utilities.
-  3. General search fallback: If no user-specified or specialized tool applies, call \`${
+  ${experimentalFeatures.skills ? '4' : '3'}. General search fallback: If no user-specified${experimentalFeatures.skills ? ', skill,' : ''} or specialized tool applies, call \`${
     tools.search
   }\` (if available). **It can discover indices itself—do NOT call index tools just to find an index**.
-  4. Index inspection fallback: Use \`${tools.indexExplorer}\` or \`${
+  ${experimentalFeatures.skills ? '5' : '4'}. Index inspection fallback: Use \`${tools.indexExplorer}\` or \`${
     tools.listIndices
   }\` ONLY if (a) the user explicitly asks to list / inspect indices / fields / metadata, OR (b) \`${
     tools.search
   }\` is unavailable and structural discovery is necessary.
-  5. Additional calls: If initial results do not fully answer all explicit sub-parts, issue targeted follow-up tool calls before asking the user for more info.
+  ${experimentalFeatures.skills ? '6' : '5'}. Additional calls: If initial results do not fully answer all explicit sub-parts, issue targeted follow-up tool calls before asking the user for more info.
 Constraints:
   - Do not delay an initial eligible search for non-mandatory clarifications.
   - **Ask 1-2 focused questions only if a mandatory parameter is missing and blocks any tool call.**
@@ -180,9 +185,13 @@ Constraints:
     - If the query matches a category for bypassing research, your decision is made. Your only task is to respond in plain text to initiate the handover. Do not proceed to the next steps.
   Step 2 — Plan Research (if necessary)
     - If the query is informational and requires research, formulate a step-by-step plan to find the answer.
-    - Parse user intent, sub-questions, entities, constraints, etc.
+    - Parse user intent, sub-questions, entities, constraints, etc.${
+      experimentalFeatures.skills
+        ? `\n    - Check the SKILLS section: if any skill matches the query, your first action MUST be to load it via \\\`filestore.read\\\`.`
+        : ''
+    }
   Step 3 — Execute & Iterate
-    - Apply the Tool Selection Policy to execute the first step of your plan.
+    - Apply the Tool Selection Policy to execute the first step of your plan${experimentalFeatures.skills ? ' (skill loading takes priority)' : ''}.
     - After each tool call, review the gathered information.
     - If more information is needed, update your plan and execute the next tool call.
   Step 4 — Conclude Research

@@ -1,0 +1,446 @@
+---
+id: kibDevTutorialAgentBuilderUsageExamples
+slug: /kibana-dev-docs/tutorials/agent-builder/usage-examples
+title: Agent Builder Usage Examples
+description: Code examples for tools, agents, and attachments
+date: 2026-01-27
+tags: ['kibana', 'agent-builder', 'examples', 'tools', 'agents']
+---
+
+This guide provides practical code examples for working with the Agent Builder framework.
+
+## Registering Built-in Tools
+
+### Basic Tool Registration
+
+Register a tool in your plugin's setup method:
+
+```ts
+import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
+import { z } from '@kbn/zod';
+
+class MyPlugin {
+  setup(core: CoreSetup, { agentBuilder }: { agentBuilder: AgentBuilderPluginSetup }) {
+    agentBuilder.tools.register({
+      id: 'platform.examples.add_42',
+      type: ToolType.builtin,
+      description: 'Returns the sum of the input number and 42.',
+      tags: ['example', 'math'],
+      schema: z.object({
+        someNumber: z.number().describe('The number to add 42 to.'),
+      }),
+      handler: async ({ someNumber }) => {
+        return {
+          results: [
+            {
+              type: ToolResultType.other,
+              data: { value: 42 + someNumber },
+            },
+          ],
+        };
+      },
+    });
+  }
+}
+```
+
+### Tool with Scoped Services
+
+Access user-scoped services in your tool handler:
+
+```ts
+agentBuilder.tools.register({
+  id: 'platform.examples.search_indices',
+  type: ToolType.builtin,
+  description: 'Search across indices using the current user context',
+  tags: ['search'],
+  schema: z.object({
+    indexPattern: z.string().describe('Index pattern to search'),
+    query: z.string().describe('Search query'),
+  }),
+  handler: async ({ indexPattern, query }, { request, esClient, modelProvider, logger }) => {
+    // Use scoped Elasticsearch client
+    const searchResults = await esClient.asCurrentUser.search({
+      index: indexPattern,
+      query: {
+        query_string: { query },
+      },
+    });
+
+    // Optionally use model provider for processing
+    const model = await modelProvider.getDefaultModel();
+    const summary = await model.inferenceClient.chatComplete({
+      messages: [
+        {
+          role: 'user',
+          content: `Summarize these results: ${JSON.stringify(searchResults.hits.hits)}`,
+        },
+      ],
+    });
+
+    logger.debug(`Found ${searchResults.hits.total} results`);
+
+    return {
+      results: [
+        {
+          type: ToolResultType.other,
+          data: { summary: summary.choices[0].message.content },
+        },
+      ],
+    };
+  },
+});
+```
+
+### Tool with Progress Reporting
+
+Report progress during long-running operations:
+
+```ts
+agentBuilder.tools.register({
+  id: 'platform.examples.long_operation',
+  type: ToolType.builtin,
+  description: 'Performs a multi-step analysis',
+  tags: ['analysis'],
+  schema: z.object({
+    dataSource: z.string(),
+  }),
+  handler: async ({ dataSource }, { events, esClient }) => {
+    events.reportProgress('Fetching data...');
+    const data = await fetchData(dataSource, esClient);
+
+    events.reportProgress('Analyzing patterns...');
+    const patterns = await analyzePatterns(data);
+
+    events.reportProgress('Generating insights...');
+    const insights = await generateInsights(patterns);
+
+    events.reportProgress('Finalizing results...');
+
+    return {
+      results: [
+        { type: ToolResultType.other, data: { insights } },
+      ],
+    };
+  },
+});
+```
+
+### Tool with Multiple Result Types
+
+Return different result types for rich UI rendering:
+
+```ts
+agentBuilder.tools.register({
+  id: 'platform.examples.data_analysis',
+  type: ToolType.builtin,
+  description: 'Analyze data and return structured results',
+  tags: ['analysis'],
+  schema: z.object({
+    indexPattern: z.string(),
+  }),
+  handler: async ({ indexPattern }, { esClient }) => {
+    const esqlQuery = `FROM ${indexPattern} | STATS count=COUNT(*) BY category | SORT count DESC`;
+    const data = await executeEsql(esqlQuery, esClient);
+
+    return {
+      results: [
+        // Query result - displayed in thinking panel
+        { type: ToolResultType.query, data: { esql: esqlQuery } },
+        // Tabular data - can be rendered as visualization
+        { type: ToolResultType.tabular_data, data },
+        // Additional context
+        { type: ToolResultType.other, data: { summary: 'Analysis complete' } },
+      ],
+    };
+  },
+});
+```
+
+## Registering ES|QL Tools
+
+Create ES|QL-powered tools via the API:
+
+```
+POST kbn://api/agent_builder/tools
+{
+  "id": "my_cases_search",
+  "description": "Search for cases by various criteria",
+  "configuration": {
+    "query": "FROM my_cases | WHERE status == ?status AND priority >= ?min_priority | SORT created_at DESC | LIMIT ?limit",
+    "params": {
+      "status": {
+        "type": "keyword",
+        "description": "Case status (open, closed, pending)"
+      },
+      "min_priority": {
+        "type": "integer",
+        "description": "Minimum priority level (1-5)"
+      },
+      "limit": {
+        "type": "integer",
+        "description": "Maximum results to return"
+      }
+    }
+  },
+  "type": "esql",
+  "tags": ["cases", "search"]
+}
+```
+
+## Registering Index Search Tools
+
+Create an index search tool programmatically:
+
+```ts
+agentBuilderSetup.tools.register({
+  id: 'platform.core.knowledge_base',
+  type: ToolType.index_search,
+  description: 'Search the knowledge base for relevant documentation',
+  configuration: {
+    pattern: '.my_knowledge_base',
+  },
+});
+```
+
+## Registering Built-in Agents
+
+### Basic Agent Registration
+
+```ts
+agentBuilder.agents.register({
+  id: 'platform.core.dashboard',
+  name: 'Dashboard Agent',
+  description: 'Agent specialized in dashboard-related tasks',
+  avatar_icon: 'dashboardApp',
+  configuration: {
+    instructions: `You are a dashboard specialist assistant. Help users create, 
+modify, and understand dashboards. Always explain your actions clearly.`,
+    tools: [
+      {
+        tool_ids: [
+          'platform.dashboard.create_dashboard',
+          'platform.dashboard.edit_dashboard',
+          'platform.dashboard.list_dashboards',
+        ],
+      },
+    ],
+  },
+});
+```
+
+### Agent with Research and Answer Instructions
+
+Separate instructions for different phases:
+
+```ts
+agentBuilder.agents.register({
+  id: 'platform.core.data_analyst',
+  name: 'Data Analyst',
+  description: 'Agent for data analysis and visualization',
+  avatar_icon: 'visArea',
+  configuration: {
+    research: {
+      instructions: `During research phase:
+- Use ES|QL tools to query data efficiently
+- Gather statistics and patterns
+- Identify relevant fields and relationships
+- Document your findings for the answer phase`,
+    },
+    answer: {
+      instructions: `When answering:
+- Present findings in a clear, structured format
+- If tabular data is available, suggest appropriate visualizations
+- Explain any limitations or caveats in the data
+- Offer follow-up analysis suggestions`,
+    },
+    tools: [
+      {
+        tool_ids: [
+          'platform.core.esql_query',
+          'platform.core.index_search',
+          'platform.visualization.create',
+        ],
+      },
+    ],
+  },
+});
+```
+
+## Registering Attachment Types
+
+### Inline Attachment Type
+
+```ts
+import { z } from '@kbn/zod';
+import type { InlineAttachmentTypeDefinition } from '@kbn/agent-builder-server';
+
+const codeSnippetSchema = z.object({
+  language: z.string(),
+  code: z.string(),
+  filename: z.string().optional(),
+});
+
+const codeSnippetAttachment: InlineAttachmentTypeDefinition = {
+  id: 'code_snippet',
+  type: 'inline',
+  validate: (input) => {
+    const parseResult = codeSnippetSchema.safeParse(input);
+    if (parseResult.success) {
+      return { valid: true, data: parseResult.data };
+    }
+    return { valid: false, error: parseResult.error.message };
+  },
+  format: (input) => {
+    const header = input.filename 
+      ? `File: ${input.filename} (${input.language})`
+      : `Code (${input.language})`;
+    return {
+      type: 'text',
+      value: `${header}\n\`\`\`${input.language}\n${input.code}\n\`\`\``,
+    };
+  },
+};
+
+// Register in plugin setup
+agentBuilder.attachments.registerType(codeSnippetAttachment);
+```
+
+## Executing Tools
+
+### Basic Execution
+
+```ts
+const { result } = await agentBuilder.tools.execute({
+  toolId: 'platform.examples.add_42',
+  toolParams: { someNumber: 9000 },
+  request,
+});
+
+console.log(result); // { value: 9042 }
+```
+
+### Execution from Tool Definition
+
+```ts
+const tool = await agentBuilder.tools.registry.get({ 
+  toolId: 'platform.examples.add_42', 
+  request 
+});
+
+const { result } = await tool.execute({ 
+  toolParams: { someNumber: 100 } 
+});
+```
+
+### Error Handling
+
+```ts
+import { 
+  isToolNotFoundError,
+  isToolExecutionError,
+  AgentBuilderError 
+} from '@kbn/agent-builder-common';
+
+try {
+  const { result } = await agentBuilder.tools.execute({
+    toolId: 'my_tool',
+    toolParams: { data: 'test' },
+    request,
+  });
+} catch (e) {
+  if (isToolNotFoundError(e)) {
+    console.error(`Tool not found: ${e.meta.toolId}`);
+  } else if (isToolExecutionError(e)) {
+    console.error(`Execution failed: ${e.message}`);
+  } else if (e instanceof AgentBuilderError) {
+    console.error(`Agent Builder error: ${e.message}`, e.meta);
+  } else {
+    throw e;
+  }
+}
+```
+
+## Demo Scenarios
+
+### Setting Up a Demo Environment
+
+1. **Load sample data**: Use Kibana's sample data sets
+
+2. **Create demo tools**: Register tools that work with sample data:
+
+```ts
+agentBuilder.tools.register({
+  id: 'demo.ecommerce.top_products',
+  type: ToolType.builtin,
+  description: 'Get top selling products from the sample ecommerce data',
+  tags: ['demo', 'ecommerce'],
+  schema: z.object({
+    limit: z.number().default(10).describe('Number of products to return'),
+  }),
+  handler: async ({ limit }, { esClient }) => {
+    const results = await esClient.asCurrentUser.search({
+      index: 'kibana_sample_data_ecommerce',
+      size: 0,
+      aggs: {
+        top_products: {
+          terms: {
+            field: 'products.product_name.keyword',
+            size: limit,
+          },
+        },
+      },
+    });
+
+    return {
+      results: [{
+        type: ToolResultType.tabular_data,
+        data: results.aggregations?.top_products?.buckets || [],
+      }],
+    };
+  },
+});
+```
+
+3. **Create a demo agent**: Combine demo tools into a specialized agent:
+
+```ts
+agentBuilder.agents.register({
+  id: 'demo.ecommerce_analyst',
+  name: 'E-commerce Analyst',
+  description: 'Analyze sample e-commerce data',
+  avatar_icon: 'visGoal',
+  configuration: {
+    instructions: 'You help analyze e-commerce data from the sample dataset.',
+    tools: [{ tool_ids: ['demo.ecommerce.top_products'] }],
+  },
+});
+```
+
+## Best Practices
+
+### Tool Design
+
+1. **Clear descriptions**: Write descriptions that help the LLM understand when to use the tool
+2. **Typed parameters**: Use Zod schemas with `.describe()` for all parameters
+3. **Appropriate result types**: Return the correct `ToolResultType` for proper UI rendering
+4. **Progress reporting**: Use `events.reportProgress()` for operations taking > 2 seconds
+
+### Agent Design
+
+1. **Focused scope**: Design agents for specific domains
+2. **Clear instructions**: Provide unambiguous instructions for agent behavior
+3. **Tool selection**: Only include tools relevant to the agent's purpose
+4. **Separate phases**: Use research/answer instructions for complex workflows
+
+### Error Handling
+
+1. **Graceful failures**: Return informative error results rather than throwing
+2. **Type guards**: Use provided type guards for error handling
+3. **Logging**: Use the context logger for debugging
+
+## Related Documentation
+
+- <DocLink id="kibDevTutorialAgentBuilder" text="Agent Builder Overview" />
+- <DocLink id="kibDevTutorialAgentBuilderConfiguration" text="Configuration Reference" />
+- <DocLink id="kibDevTutorialAgentBuilderTroubleshooting" text="Troubleshooting Guide" />

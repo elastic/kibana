@@ -278,9 +278,9 @@ const runCli: RunFn = async ({ log, flags }) => {
         const vm = await createVm({
           type: vmType,
           name: vmName,
-          cpus: 1,
+          cpus: 2,
           memory: '1G',
-          disk: '8G',
+          disk: '15G',
           log,
         });
 

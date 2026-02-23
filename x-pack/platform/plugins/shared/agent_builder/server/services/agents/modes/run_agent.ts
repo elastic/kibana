@@ -16,8 +16,7 @@ import type {
 } from '@kbn/agent-builder-common';
 import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
 import type { AgentHandlerContext } from '@kbn/agent-builder-server';
-import { runDeepAgentMode } from './deep_agent';
-// import { runDefaultAgentMode } from './default';
+import { runDefaultAgentMode } from './default';
 
 export interface RunAgentParams {
   /**
@@ -80,8 +79,5 @@ export const runAgent = async (
   params: RunAgentParams,
   context: AgentHandlerContext
 ): Promise<RunAgentResponse> => {
-  return runDeepAgentMode(params, context).catch((error) => {
-    console.error(error);
-    throw error
-  })
+  return runDefaultAgentMode(params, context);
 };

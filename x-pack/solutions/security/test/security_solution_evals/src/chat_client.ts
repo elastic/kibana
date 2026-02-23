@@ -9,80 +9,75 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import type { HttpHandler } from '@kbn/core/public';
 import pRetry from 'p-retry';
 
-export type Messages = { message: string }[];
-
-export interface ErrorResponse {
-  error: {
-    message: string;
-    stack?: string;
-  };
-  type: string;
-}
-
-export interface Step {
-  [key: string]: unknown;
-}
-
-interface Options {
-  agentId: string;
-}
+type Messages = { message: string }[];
 
 interface ConverseFunctionParams {
   messages: Messages;
   conversationId?: string;
-  options: Options;
 }
 
-type ConverseFunction = (params: ConverseFunctionParams) => Promise<{
+export interface ModelUsageStats {
+  input_tokens?: number;
+  output_tokens?: number;
+  llm_calls?: number;
+  model?: string;
+  connector_id?: string;
+}
+
+export type ConverseResult = {
   conversationId?: string;
   messages: Messages;
-  errors: ErrorResponse[];
-  steps?: Step[];
-}>;
+  errors: Array<{ error: { message: string; stack?: string }; type: string }>;
+  steps?: Array<Record<string, unknown>>;
+  traceId?: string;
+  modelUsage?: ModelUsageStats;
+};
 
-export class SiemEntityAnalyticsEvaluationChatClient {
+type ConverseFunction = (params: ConverseFunctionParams) => Promise<ConverseResult>;
+
+export class EvaluationChatClient {
   constructor(
     private readonly fetch: HttpHandler,
     private readonly log: ToolingLog,
     private readonly connectorId: string
   ) {}
 
-  converse: ConverseFunction = async ({ messages, conversationId, options: { agentId } }) => {
-    this.log.info('Calling converse for ' + agentId);
+  converse: ConverseFunction = async ({ messages, conversationId }) => {
+    this.log.info('Calling converse');
 
-    const callConverseApi = async (): Promise<{
-      conversationId?: string;
-      messages: { message: string }[];
-      errors: ErrorResponse[];
-      steps?: Step[];
-    }> => {
-      // Use the Agent Builder API endpoint
-      const response: {
-        conversation_id: string;
-        trace_id?: string;
-        steps: Step[];
-        response: { message: string };
-      } = await this.fetch('/api/agent_builder/converse', {
+    const callConverseApi = async (): Promise<ConverseResult> => {
+      const response = await this.fetch('/api/agent_builder/converse', {
         method: 'POST',
         version: '2023-10-31',
         body: JSON.stringify({
-          agent_id: agentId,
           connector_id: this.connectorId,
           conversation_id: conversationId,
           input: messages[messages.length - 1].message,
         }),
       });
 
+      const chatResponse = response as {
+        conversation_id: string;
+        trace_id?: string;
+        steps: Array<Record<string, unknown>>;
+        response: { message: string };
+        model_usage?: ModelUsageStats;
+      };
+
       const {
         conversation_id: conversationIdFromResponse,
         response: latestResponse,
         steps,
-      } = response;
+        trace_id: traceId,
+        model_usage: modelUsage,
+      } = chatResponse;
 
       return {
         conversationId: conversationIdFromResponse,
         messages: [...messages, latestResponse],
         steps,
+        traceId,
+        modelUsage,
         errors: [],
       };
     };

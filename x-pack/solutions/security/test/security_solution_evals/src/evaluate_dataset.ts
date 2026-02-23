@@ -5,330 +5,156 @@
  * 2.0.
  */
 
-import type {
-  DefaultEvaluators,
-  EvalsExecutorClient,
-  EvaluationDataset,
-  Example,
-  EvaluationResult,
+import {
+  createQuantitativeCorrectnessEvaluators,
+  type DefaultEvaluators,
+  type EvalsExecutorClient,
+  type Example,
+  type EvaluationDataset,
+  type RanExperiment,
+  createQuantitativeGroundednessEvaluator,
+  selectEvaluators,
+  withEvaluatorSpan,
+  type ExperimentTask,
+  type TaskOutput,
 } from '@kbn/evals';
-import type {
-  SiemEntityAnalyticsEvaluationChatClient,
-  ErrorResponse,
-  Step,
-  Messages,
-} from './chat_client';
-
-interface ToolCallAssertion {
-  id: string;
-  criteria?: string[];
-}
+import type { ToolingLog } from '@kbn/tooling-log';
+import type { EvaluationChatClient } from './chat_client';
+import {
+  createToolUsageOnlyEvaluator,
+  createTokenUsageEvaluator,
+} from './evaluators';
 
 interface DatasetExample extends Example {
   input: {
     question: string;
   };
   output: {
-    criteria?: string[];
-    toolCalls?: ToolCallAssertion[];
+    expected?: string;
   };
   metadata?: {
-    query_intent?: string;
     [key: string]: unknown;
   };
 }
 
-/**
- * Task output for SIEM Entity Analytics chat evaluations.
- * Satisfies Phoenix's TaskOutput type (string | boolean | number | object | null).
- */
-interface ChatTaskOutput {
-  errors: ErrorResponse[];
-  messages: Messages;
-  steps?: Step[];
-}
+/** Default concurrency for running examples in parallel */
+const DEFAULT_CONCURRENCY = 3;
 
-function getEvalsConcurrency(): number {
-  const raw = process.env.SECURITY_SOLUTION_EVALS_CONCURRENCY;
-  const parsed = raw ? parseInt(raw, 10) : NaN;
-
-  if (Number.isFinite(parsed) && parsed > 0) {
-    return parsed;
-  }
-
-  // Default to modest concurrency; can be overridden via env var
-  return 4;
-}
-
-export type EvaluateDataset = ({
-  dataset: { name, description, examples },
-}: {
+export type EvaluateDataset = (options: {
   dataset: {
     name: string;
     description: string;
-    agentId: string;
     examples: DatasetExample[];
   };
+  /** Number of examples to run concurrently (default: 3) */
+  concurrency?: number;
 }) => Promise<void>;
 
-/**
- * Finds tool call steps for a specific tool ID.
- * @param toolId - The tool ID to search for
- * @param steps - The conversation steps to search
- * @returns Array of tool call steps matching the tool ID
- */
-function findToolCallSteps(toolId: string, steps: Step[]): Step[] {
-  return steps.filter(
-    (step) =>
-      (step as { type?: string; tool_id?: string }).type === 'tool_call' &&
-      (step as { type?: string; tool_id?: string }).tool_id === toolId
-  );
-}
+function configureExperiment({
+  evaluators,
+  chatClient,
+}: {
+  evaluators: DefaultEvaluators;
+  chatClient: EvaluationChatClient;
+}): {
+  task: ExperimentTask<DatasetExample, TaskOutput>;
+  evaluators: ReturnType<typeof selectEvaluators>;
+} {
+  const task: ExperimentTask<DatasetExample, TaskOutput> = async ({ input, output, metadata }) => {
+    const response = await chatClient.converse({
+      messages: [{ message: input.question }],
+    });
 
-/**
- * Evaluates main criteria from the expected output.
- */
-async function evaluateMainCriteria(
-  criteria: string[],
-  evaluators: DefaultEvaluators,
-  input: DatasetExample['input'],
-  output: ChatTaskOutput,
-  expected: DatasetExample['output'],
-  metadata: DatasetExample['metadata']
-): Promise<EvaluationResult> {
-  if (criteria.length === 0) {
+    // Running correctness and groundedness evaluators as part of the task since their respective quantitative evaluators need their output
+    // Wrap LLM judge calls in @kbn/evals spans and assign root context to prevent them from contributing to latency, token use and other metrics of the EvaluateExample span
+    const [correctnessResult, groundednessResult] = await Promise.all([
+      withEvaluatorSpan('CorrectnessAnalysis', {}, () =>
+        evaluators.correctnessAnalysis().evaluate({
+          input,
+          expected: output,
+          output: response,
+          metadata,
+        })
+      ),
+      withEvaluatorSpan('GroundednessAnalysis', {}, () =>
+        evaluators.groundednessAnalysis().evaluate({
+          input,
+          expected: output,
+          output: response,
+          metadata,
+        })
+      ),
+    ]);
+
     return {
-      score: 1,
-      label: 'PASS',
-      explanation: 'No main criteria specified.',
+      errors: response.errors,
+      messages: response.messages,
+      steps: response.steps,
+      traceId: response.traceId,
+      modelUsage: response.modelUsage,
+      correctnessAnalysis: correctnessResult?.metadata,
+      groundednessAnalysis: groundednessResult?.metadata,
     };
-  }
-
-  return evaluators.criteria(criteria).evaluate({ input, expected, output, metadata });
-}
-
-/**
- * Evaluates a tool call assertion with its specific criteria.
- * @param toolCallAssertion - The tool call assertion to evaluate
- * @param steps - The conversation steps to search for tool calls
- * @param evaluators - The evaluators to use for criteria evaluation
- * @param input - The input from the example
- * @param output - The chat output
- * @param metadata - The metadata from the example
- * @returns Evaluation result for the tool call
- */
-async function evaluateToolCallAssertion(
-  toolCallAssertion: ToolCallAssertion,
-  steps: Step[],
-  evaluators: DefaultEvaluators,
-  input: DatasetExample['input'],
-  output: ChatTaskOutput,
-  metadata: DatasetExample['metadata']
-): Promise<EvaluationResult> {
-  const toolCallSteps = findToolCallSteps(toolCallAssertion.id, steps);
-  const toolWasCalled = toolCallSteps.length > 0;
-
-  if (!toolWasCalled) {
-    return {
-      score: 0,
-      label: 'FAIL',
-      explanation: `Tool "${toolCallAssertion.id}" was not called during the conversation.`,
-    };
-  }
-
-  // If no specific criteria for this tool call, just check that it was called
-  if (!toolCallAssertion.criteria || toolCallAssertion.criteria.length === 0) {
-    return {
-      score: 1,
-      label: 'PASS',
-      explanation: `Tool "${toolCallAssertion.id}" was called during the conversation.`,
-    };
-  }
-
-  // Evaluate the specific criteria for this tool call
-  const toolCriteriaResult = await evaluators
-    .criteria(toolCallAssertion.criteria)
-    .evaluate({ input, expected: { criteria: toolCallAssertion.criteria }, output, metadata });
-
-  const toolCallExplanation = `Tool "${toolCallAssertion.id}" was called during the conversation.`;
-  const combinedExplanation = `${toolCallExplanation} ${toolCriteriaResult.explanation ?? ''}`;
-
-  return {
-    score: toolCriteriaResult.score ?? null,
-    label: toolCriteriaResult.label ?? 'PASS',
-    explanation: combinedExplanation,
   };
-}
 
-/**
- * Evaluates all tool call assertions and returns their results.
- */
-async function evaluateAllToolCalls(
-  toolCalls: ToolCallAssertion[],
-  steps: Step[],
-  evaluators: DefaultEvaluators,
-  input: DatasetExample['input'],
-  output: ChatTaskOutput,
-  metadata: DatasetExample['metadata']
-): Promise<EvaluationResult[]> {
-  const results: EvaluationResult[] = [];
+  const selectedEvaluators = selectEvaluators([
+    createToolUsageOnlyEvaluator(),
+    createTokenUsageEvaluator(),
+    // Core evaluators: Factuality, Relevance, Sequence Accuracy
+    ...createQuantitativeCorrectnessEvaluators(),
+    // Groundedness evaluator
+    createQuantitativeGroundednessEvaluator(),
+  ]);
 
-  for (const toolCallAssertion of toolCalls) {
-    const result = await evaluateToolCallAssertion(
-      toolCallAssertion,
-      steps,
-      evaluators,
-      input,
-      output,
-      metadata
-    );
-    results.push(result);
-  }
-
-  return results;
-}
-
-/**
- * Combines multiple evaluation results into a single result.
- * All results must pass for the overall result to pass.
- */
-function combineEvaluationResults(results: EvaluationResult[]): EvaluationResult {
-  const allPassed = results.every((result) => result.label === 'PASS' && (result.score ?? 0) > 0);
-
-  const scores = results.map((r) => r.score ?? 0).filter((s) => s !== null);
-  const averageScore = scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : 0;
-
-  const explanations = results.map((r) => r.explanation ?? '').filter((e) => e.length > 0);
-
-  return {
-    score: allPassed ? averageScore : 0,
-    label: allPassed ? 'PASS' : 'FAIL',
-    explanation: explanations.join(' '),
-  };
+  return { task, evaluators: selectedEvaluators };
 }
 
 export function createEvaluateDataset({
   evaluators,
   executorClient,
   chatClient,
+  log,
+  onExperimentComplete,
 }: {
   evaluators: DefaultEvaluators;
   executorClient: EvalsExecutorClient;
-  chatClient: SiemEntityAnalyticsEvaluationChatClient;
+  chatClient: EvaluationChatClient;
+  log: ToolingLog;
+  onExperimentComplete?: (experiment: RanExperiment) => Promise<void>;
 }): EvaluateDataset {
   return async function evaluateDataset({
-    dataset: { name, description, examples, agentId },
+    dataset: { name, description, examples },
+    concurrency = DEFAULT_CONCURRENCY,
   }: {
     dataset: {
       name: string;
       description: string;
       examples: DatasetExample[];
-      agentId: string;
     };
+    concurrency?: number;
   }) {
-    const concurrency = getEvalsConcurrency();
-
     const dataset = {
       name,
       description,
       examples,
     } satisfies EvaluationDataset;
 
-    await executorClient.runExperiment(
+    const { task, evaluators: selectedEvaluators } = configureExperiment({
+      evaluators,
+      chatClient,
+    });
+
+    const experiment = await executorClient.runExperiment(
       {
         dataset,
-        task: async ({ input }) => {
-          const response = await chatClient.converse({
-            messages: [{ message: input.question }],
-            options: { agentId },
-          });
-
-          return {
-            errors: response.errors,
-            messages: response.messages,
-            steps: response.steps,
-          };
-        },
-        // Local eval instances can be sensitive to bursty concurrency when suites get large.
-        // Keep this modest to reduce transient socket resets.
+        task,
         concurrency,
       },
-      [
-        createCriteriaEvaluator({
-          evaluators,
-        }),
-        createToolCallsEvaluator({
-          evaluators,
-        }),
-      ]
+      selectedEvaluators
     );
-  };
-}
 
-/**
- * Evaluator for main criteria (response quality, content, etc.).
- */
-export function createCriteriaEvaluator({ evaluators }: { evaluators: DefaultEvaluators }) {
-  return {
-    name: 'Criteria',
-    kind: 'LLM' as const,
-    evaluate: async ({
-      input,
-      output,
-      expected,
-      metadata,
-    }: {
-      input: DatasetExample['input'];
-      output: ChatTaskOutput;
-      expected: DatasetExample['output'];
-      metadata: DatasetExample['metadata'];
-    }) => {
-      const criteria = expected.criteria ?? [];
-      return evaluateMainCriteria(criteria, evaluators, input, output, expected, metadata);
-    },
-  };
-}
-
-/**
- * Evaluator for tool call assertions.
- * Checks that specified tools were called and evaluates their criteria.
- */
-export function createToolCallsEvaluator({ evaluators }: { evaluators: DefaultEvaluators }) {
-  return {
-    name: 'ToolCalls',
-    kind: 'LLM' as const,
-    evaluate: async ({
-      input,
-      output,
-      expected,
-      metadata,
-    }: {
-      input: DatasetExample['input'];
-      output: ChatTaskOutput;
-      expected: DatasetExample['output'];
-      metadata: DatasetExample['metadata'];
-    }) => {
-      const toolCalls = expected.toolCalls ?? [];
-      const steps = output.steps ?? [];
-
-      if (toolCalls.length === 0) {
-        return {
-          score: 1,
-          label: 'PASS',
-          explanation: 'No tool call assertions specified.',
-        };
-      }
-
-      const toolCallResults = await evaluateAllToolCalls(
-        toolCalls,
-        steps,
-        evaluators,
-        input,
-        output,
-        metadata
-      );
-
-      return combineEvaluationResults(toolCallResults);
-    },
+    if (onExperimentComplete) {
+      await onExperimentComplete(experiment);
+    }
   };
 }

@@ -31,12 +31,12 @@ import { registerSampleData } from './register_sample_data';
 
 export class AgentBuilderPlugin
   implements
-    Plugin<
-      AgentBuilderPluginSetup,
-      AgentBuilderPluginStart,
-      AgentBuilderSetupDependencies,
-      AgentBuilderStartDependencies
-    >
+  Plugin<
+    AgentBuilderPluginSetup,
+    AgentBuilderPluginStart,
+    AgentBuilderSetupDependencies,
+    AgentBuilderStartDependencies
+  >
 {
   private logger: Logger;
   // @ts-expect-error unused for now
@@ -162,5 +162,5 @@ export class AgentBuilderPlugin
     };
   }
 
-  stop() {}
+  stop() { }
 }

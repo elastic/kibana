@@ -18,32 +18,32 @@ export declare const AgentStateSchema: z3.ZodObject<{
         modified_at: z3.ZodString;
         description: z3.ZodOptional<z3.ZodString>;
     }, "strip", z3.ZodTypeAny, {
-        content: string[];
         created_at: string;
+        content: string[];
         modified_at: string;
         description?: string | undefined;
     }, {
-        content: string[];
         created_at: string;
+        content: string[];
         modified_at: string;
         description?: string | undefined;
     }>>, import("@langchain/core/utils/types").InteropZodType<Record<string, {
-        content: string[];
         created_at: string;
+        content: string[];
         modified_at: string;
         description?: string | undefined;
     } | null>>>;
 }, "strip", z3.ZodTypeAny, {
     files: Record<string, {
-        content: string[];
         created_at: string;
+        content: string[];
         modified_at: string;
         description?: string | undefined;
     }>;
 }, {
     files: Record<string, {
-        content: string[];
         created_at: string;
+        content: string[];
         modified_at: string;
         description?: string | undefined;
     }>;

@@ -31,6 +31,8 @@ export interface GetAnonymizedAlertsParams {
   replacements?: Replacements;
   size?: number;
   start?: DateMath | null;
+  /** If true, skips the workflow status filter (open/acknowledged) allowing alerts of any status */
+  allowAllWorkflowStatuses?: boolean;
 }
 
 export interface GetAnonymizedAlertsWithDeduplicationParams extends GetAnonymizedAlertsParams {
@@ -92,6 +94,7 @@ export const getAnonymizedAlerts = async ({
   replacements,
   size,
   start,
+  allowAllWorkflowStatuses,
 }: GetAnonymizedAlertsParams): Promise<string[]> => {
   if (alertsIndexPattern == null || size == null || sizeIsOutOfRange(size)) {
     return [];
@@ -104,6 +107,7 @@ export const getAnonymizedAlerts = async ({
     filter,
     size,
     start,
+    allowAllWorkflowStatuses,
   });
 
   const result = await esClient.search<SearchResponse>(query);

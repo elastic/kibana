@@ -46,6 +46,7 @@ export type {
 } from './src/types';
 export { withEvaluatorSpan, withTaskSpan, getCurrentTraceId } from './src/utils/tracing';
 export {
+  AUXILIARY_DISCOVERY_TOOLS,
   containsAllTerms,
   extractAllStrings,
   extractMaxSemver,
@@ -54,7 +55,9 @@ export {
   getFinalAssistantMessage,
   getStringMeta,
   getToolCallSteps,
+  getToolCallStepsWithParams,
   includesOneOf,
+  type ToolCallStep,
 } from './src/utils/evaluation_helpers';
 export {
   type EvaluationReporter,
@@ -102,6 +105,7 @@ export type {
 } from './src/utils/evaluation_stats';
 export { parseSelectedEvaluators, selectEvaluators } from './src/evaluators/filter';
 export { createSpanLatencyEvaluator } from './src/evaluators/trace_based';
+export { createToolUsageOnlyEvaluator } from './src/evaluators/tool_usage';
 export { getGitMetadata, type GitMetadata } from './src/utils/git_metadata';
 
 export {
