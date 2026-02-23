@@ -1174,7 +1174,7 @@
         "signature": [
           "(client: ",
           "ElasticsearchClient",
-          ", connectorId?: string | undefined, from?: number, size?: number, syncJobType?: \"all\" | \"content\" | \"access_control\", syncStatus?: ",
+          ", connectorId?: string | undefined, from?: number, size?: number, syncJobType?: \"content\" | \"all\" | \"access_control\", syncStatus?: ",
           {
             "pluginId": "@kbn/search-connectors",
             "scope": "common",
@@ -1282,7 +1282,7 @@
             "label": "syncJobType",
             "description": [],
             "signature": [
-              "\"all\" | \"content\" | \"access_control\""
+              "\"content\" | \"all\" | \"access_control\""
             ],
             "path": "src/platform/packages/shared/kbn-search-connectors/lib/fetch_sync_jobs.ts",
             "lineNumber": 21,
@@ -6273,7 +6273,7 @@
             "label": "rule",
             "description": [],
             "signature": [
-              "\"<\" | \">\" | \"regex\" | \"equals\" | \"contains\" | \"ends_with\" | \"starts_with\""
+              "\">\" | \"<\" | \"regex\" | \"equals\" | \"contains\" | \"ends_with\" | \"starts_with\""
             ],
             "path": "src/platform/packages/shared/kbn-search-connectors/types/connectors.ts",
             "lineNumber": 143,
@@ -7760,7 +7760,7 @@
             "section": "def-common.ConnectorFeatures",
             "text": "ConnectorFeatures"
           },
-          "; error: string | null; status: ",
+          "; error: string | null; description: string | null; language: string | null; status: ",
           {
             "pluginId": "@kbn/search-connectors",
             "scope": "common",
@@ -7768,7 +7768,7 @@
             "section": "def-common.ConnectorStatus",
             "text": "ConnectorStatus"
           },
-          "; description: string | null; configuration: ",
+          "; configuration: ",
           {
             "pluginId": "@kbn/search-connectors",
             "scope": "common",
@@ -7776,7 +7776,7 @@
             "section": "def-common.ConnectorConfiguration",
             "text": "ConnectorConfiguration"
           },
-          "; language: string | null; pipeline?: ",
+          "; pipeline?: ",
           {
             "pluginId": "@kbn/search-connectors",
             "scope": "common",
@@ -7784,7 +7784,7 @@
             "section": "def-common.IngestPipelineParams",
             "text": "IngestPipelineParams"
           },
-          " | null | undefined; deleted: boolean | null; index_name: string | null; api_key_id: string | null; api_key_secret_id: string | null; custom_scheduling: ",
+          " | null | undefined; deleted: boolean | null; index_name: string | null; last_seen: string | null; api_key_id: string | null; api_key_secret_id: string | null; custom_scheduling: ",
           {
             "pluginId": "@kbn/search-connectors",
             "scope": "common",
@@ -7808,7 +7808,7 @@
             "section": "def-common.SyncStatus",
             "text": "SyncStatus"
           },
-          " | null; last_deleted_document_count: number | null; last_incremental_sync_scheduled_at: string | null; last_indexed_document_count: number | null; last_seen: string | null; last_sync_error: string | null; last_sync_scheduled_at: string | null; last_sync_status: ",
+          " | null; last_deleted_document_count: number | null; last_incremental_sync_scheduled_at: string | null; last_indexed_document_count: number | null; last_sync_error: string | null; last_sync_scheduled_at: string | null; last_sync_status: ",
           {
             "pluginId": "@kbn/search-connectors",
             "scope": "common",
@@ -7958,7 +7958,7 @@
             "section": "def-common.IngestPipelineParams",
             "text": "IngestPipelineParams"
           },
-          " | null; service_type: string | null; }; error: string | null; status: ",
+          " | null; service_type: string | null; }; error: string | null; metadata: Record<string, unknown>; status: ",
           {
             "pluginId": "@kbn/search-connectors",
             "scope": "common",
@@ -7966,7 +7966,7 @@
             "section": "def-common.SyncStatus",
             "text": "SyncStatus"
           },
-          "; metadata: Record<string, unknown>; created_at: string; job_type: ",
+          "; created_at: string; job_type: ",
           {
             "pluginId": "@kbn/search-connectors",
             "scope": "common",
@@ -7974,7 +7974,7 @@
             "section": "def-common.SyncJobType",
             "text": "SyncJobType"
           },
-          "; started_at: string | null; completed_at: string | null; last_seen: string | null; cancelation_requested_at: string | null; canceled_at: string | null; deleted_document_count: number; indexed_document_count: number; indexed_document_volume: number; total_document_count: number | null; trigger_method: ",
+          "; last_seen: string | null; started_at: string | null; completed_at: string | null; cancelation_requested_at: string | null; canceled_at: string | null; deleted_document_count: number; indexed_document_count: number; indexed_document_volume: number; total_document_count: number | null; trigger_method: ",
           {
             "pluginId": "@kbn/search-connectors",
             "scope": "common",
@@ -8211,7 +8211,7 @@
         "label": "FilteringRuleRule",
         "description": [],
         "signature": [
-          "\"<\" | \">\" | \"regex\" | \"equals\" | \"contains\" | \"ends_with\" | \"starts_with\""
+          "\">\" | \"<\" | \"regex\" | \"equals\" | \"contains\" | \"ends_with\" | \"starts_with\""
         ],
         "path": "src/platform/packages/shared/kbn-search-connectors/types/connectors.ts",
         "lineNumber": 118,
