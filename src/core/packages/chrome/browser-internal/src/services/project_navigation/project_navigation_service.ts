@@ -48,16 +48,16 @@ interface StartDeps {
   history: History;
   prependBasePath: (path: string) => string;
   navLinks: ChromeNavLinks;
-  getDefaultRoute: () => string | undefined;
+  getUiSettingsHomeRoute: () => string | null;
   logger: Logger;
   chromeBreadcrumbs$: Observable<ChromeBreadcrumb[]>;
 }
 
 interface ParsedNavigation {
   id: SolutionId;
+  tree: ChromeProjectNavigationNode[];
   treeUI: NavigationTreeDefinitionUI;
   flattened: Record<string, ChromeProjectNavigationNode>;
-  homeHref?: string;
 }
 
 export class ProjectNavigationService {
@@ -66,8 +66,14 @@ export class ProjectNavigationService {
   constructor(private isServerless: boolean) {}
 
   public start(startDeps: StartDeps) {
-    const { chromeBreadcrumbs$, history, navLinks, logger, prependBasePath, getDefaultRoute } =
-      startDeps;
+    const {
+      chromeBreadcrumbs$,
+      history,
+      navLinks,
+      logger,
+      prependBasePath,
+      getUiSettingsHomeRoute,
+    } = startDeps;
 
     const currentNavSource$ = new BehaviorSubject<{
       id: SolutionId;
@@ -107,8 +113,8 @@ export class ProjectNavigationService {
             return {
               id: source.id,
               treeUI: navigationTreeUI,
+              tree: navigationTree,
               flattened: flattenNav(navigationTree),
-              homeHref: navigationTree.find((n) => n.renderAs === 'home')?.href,
             };
           }),
           catchError((err) => {
@@ -161,10 +167,10 @@ export class ProjectNavigationService {
 
     return {
       getProjectHome$: () => {
-        const defaultRoute = getDefaultRoute();
+        const defaultRoute = getUiSettingsHomeRoute();
         if (defaultRoute) return of(defaultRoute);
         return parsedNavigation$.pipe(
-          map((parsed) => parsed?.homeHref),
+          map((parsed) => parsed?.navigationTree.find((n) => n.renderAs === 'home')?.href),
           filter((home): home is string => home !== undefined),
           distinctUntilChanged()
         );

@@ -82,7 +82,7 @@ const setup = ({
     history,
     prependBasePath: (p) => p,
     navLinks: navLinksService,
-    getDefaultRoute: () => undefined,
+    getUiSettingsHomeRoute: () => undefined,
     logger,
     chromeBreadcrumbs$,
   });

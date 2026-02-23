@@ -153,7 +153,14 @@ export class ChromeService {
       history: application.history,
       prependBasePath: http.basePath.prepend,
       navLinks,
-      getDefaultRoute: () => uiSettings.get('defaultRoute'),
+      getUiSettingsHomeRoute: () => {
+        try {
+          return uiSettings.get('defaultRoute');
+        } catch (e) {
+          // In some cases, such as when the user is unauthenticated and gets a 403 when fetching uiSettings, we want to fail gracefully
+          return null;
+        }
+      },
       logger: this.logger,
       chromeBreadcrumbs$: state.breadcrumbs.classic.$,
     });
