@@ -193,10 +193,11 @@ EOF
       exit 1
     fi
 
-    # Sanity-check: EVALUATION_CONNECTOR_ID must match a generated connector id
-    if [[ -n "${EVALUATION_CONNECTOR_ID:-}" ]]; then
+    # Sanity-check: when the evaluation connector is expected to be LiteLLM-backed, it must match
+    # a generated LiteLLM connector id. (Non-LiteLLM evaluation connectors may be injected later.)
+    if [[ -n "${EVALUATION_CONNECTOR_ID:-}" ]] && [[ "${EVALUATION_CONNECTOR_ID}" == litellm-* ]]; then
       if ! node -e "const b=process.env.KIBANA_TESTING_AI_CONNECTORS||'';const s=Buffer.from(b,'base64').toString('utf8');const o=JSON.parse(s);const id=process.env.EVALUATION_CONNECTOR_ID;process.exit(Object.prototype.hasOwnProperty.call(o,id)?0:1);" ; then
-        echo "ERROR: EVALUATION_CONNECTOR_ID ($EVALUATION_CONNECTOR_ID) is not present in generated LiteLLM connectors."
+        echo "ERROR: EVALUATION_CONNECTOR_ID ($EVALUATION_CONNECTOR_ID) is not present in generated connectors."
         echo "Sample generated connector ids:"
         node -e "const b=process.env.KIBANA_TESTING_AI_CONNECTORS||'';const s=Buffer.from(b,'base64').toString('utf8');const o=JSON.parse(s);console.log(Object.keys(o).slice(0,20).join('\\n'));"
         exit 1
@@ -216,6 +217,9 @@ EOF
     if [[ -n "$TRACING_EXPORTERS_JSON" && "$TRACING_EXPORTERS_JSON" != "null" ]]; then
       export TRACING_EXPORTERS="$TRACING_EXPORTERS_JSON"
     fi
+
+    # Optional: GCS service account credentials for snapshot restoration (e.g. AI Insights)
+    export GCS_CREDENTIALS="$(jq -c '.gcsDatasetAccessCredentials // empty' <<<"$KBN_EVALS_CONFIG_JSON")"
   fi
 }
 

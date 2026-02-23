@@ -265,35 +265,11 @@ Expected one of:
         }),
         type: 'error',
       };
-    case 'promqlMissingParam':
+    case 'promqlInvalidParam':
       return {
-        message: i18n.translate('kbn-esql-language.esql.validation.promqlMissingParam', {
-          defaultMessage: '[PROMQL] Missing required param "{param}"',
-          values: { param: out.param },
-        }),
-        type: 'error',
-      };
-    case 'promqlMissingParamValue':
-      return {
-        message: i18n.translate('kbn-esql-language.esql.validation.promqlMissingParamValue', {
-          defaultMessage: '[PROMQL] Missing value for "{param}"',
-          values: { param: out.param },
-        }),
-        type: 'error',
-      };
-    case 'promqlInvalidDateParam':
-      return {
-        message: i18n.translate('kbn-esql-language.esql.validation.promqlInvalidDateParam', {
-          defaultMessage:
-            '[PROMQL] Invalid {param} value. Use ISO 8601 with Z (e.g. 2024-01-15T10:00:00Z) or ?_tstart/?_tend',
-          values: { param: out.param },
-        }),
-        type: 'error',
-      };
-    case 'promqlInvalidStepParam':
-      return {
-        message: i18n.translate('kbn-esql-language.esql.validation.promqlInvalidStepParam', {
-          defaultMessage: '[PROMQL] Invalid step value',
+        message: i18n.translate('kbn-esql-language.esql.validation.promqlInvalidParam', {
+          defaultMessage: '[PROMQL] {reason}',
+          values: { reason: out.reason },
         }),
         type: 'error',
       };
@@ -302,13 +278,6 @@ Expected one of:
         message: i18n.translate('kbn-esql-language.esql.validation.promqlMutuallyExclusiveParams', {
           defaultMessage: '[PROMQL] Parameters "{param1}" and "{param2}" are mutually exclusive',
           values: { param1: out.param1, param2: out.param2 },
-        }),
-        type: 'error',
-      };
-    case 'promqlInvalidBucketsParam':
-      return {
-        message: i18n.translate('kbn-esql-language.esql.validation.promqlInvalidBucketsParam', {
-          defaultMessage: '[PROMQL] Invalid buckets value. Must be a positive integer',
         }),
         type: 'error',
       };
