@@ -21,6 +21,8 @@ import { BadCRUDRequestError, EntityNotFoundError } from '../errors';
 import { getUpdatesEntitiesDataStreamName } from '../assets/updates_data_stream';
 import { validateAndTransformDoc } from './utils';
 
+const RETRY_ON_CONFLICT = 3;
+
 interface CRUDClientDependencies {
   logger: Logger;
   esClient: ElasticsearchClient;
@@ -74,19 +76,19 @@ export class CRUDClient {
       id: hashedId,
       doc: readyDoc,
       doc_as_upsert: true,
-      retry_on_conflict: 3,
+      retry_on_conflict: RETRY_ON_CONFLICT,
       refresh: 'wait_for',
     });
 
     switch (result as Result) {
       case 'created':
-        this.logger.debug(`Created entity ID ${hashedId}`);
+        this.logger.debug(`Created entity ID ${id}`);
         break;
       case 'updated':
-        this.logger.debug(`Updated entity ID ${hashedId}`);
+        this.logger.debug(`Updated entity ID ${id}`);
         break;
       case 'noop':
-        this.logger.debug(`Updated entity ID ${hashedId} (no change)`);
+        this.logger.debug(`Updated entity ID ${id} (no change)`);
         break;
     }
     return;
