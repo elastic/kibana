@@ -10,10 +10,9 @@
 import { isEmpty } from 'lodash';
 import React, { useMemo, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
-import { css } from '@emotion/react';
+
 import type { UseEuiTheme } from '@elastic/eui';
 import {
-  EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormControlButton,
@@ -23,15 +22,16 @@ import {
   EuiToolTip,
   htmlIdGenerator,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
+import type { OptionsListSelection } from '@kbn/controls-schemas';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
-import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { isCompressed } from '../../../../control_group/utils/is_compressed';
-import type { OptionsListSelection } from '../../../../../common/options_list/options_list_selections';
 import { MIN_POPOVER_WIDTH } from '../../../constants';
 import { useOptionsListContext } from '../options_list_context_provider';
-import { OptionsListPopover } from './options_list_popover';
 import { OptionsListStrings } from '../options_list_strings';
+import { OptionsListPopover } from './options_list_popover';
 
 const optionListControlStyles = {
   selectionWrapper: css({ overflow: 'hidden !important' }),
@@ -43,12 +43,12 @@ const optionListControlStyles = {
     }),
   validOption: ({ euiTheme }: UseEuiTheme) =>
     css({
-      color: euiTheme.colors.text,
-      fontWeight: euiTheme.font.weight.medium,
+      color: euiTheme.colors.textParagraph,
+      fontWeight: euiTheme.font.weight.regular,
     }),
   invalidOption: ({ euiTheme }: UseEuiTheme) =>
     css({
-      color: euiTheme.colors.warningText,
+      color: euiTheme.colors.textWarning,
       fontWeight: euiTheme.font.weight.medium,
     }),
   optionsListExistsFilter: ({ euiTheme }: UseEuiTheme) => css`
@@ -56,26 +56,34 @@ const optionListControlStyles = {
     font-weight: ${euiTheme.font.weight.medium};
   `,
   invalidSelectionsToken: css({ verticalAlign: 'text-bottom' }),
-  // temp. override until alignment is fixed on EUI side
-  filterButton: css`
-    .euiButtonEmpty__content {
-      justify-content: flex-end;
-    }
-  `,
+  filterButton: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      fontWeight: `${euiTheme.font.weight.regular} !important` as 'normal',
+      color: `${euiTheme.colors.textSubdued} !important`,
+      padding: `0 ${euiTheme.size.s}`,
+      blockSize: '100% !important',
+      boxShadow: 'none !important',
+      '&:hover:not(:focus)': {
+        outline: `none !important`,
+      },
+    }),
+  filterButtonText: css({
+    flexGrow: 1,
+    textAlign: 'left',
+  }),
   inputButtonOverride: css({
-    maxInlineSize: '100% !important',
-    borderRadius: 'inherit',
+    width: '100%',
+    height: '100%',
+    maxInlineSize: '100%',
   }),
   filterGroup: css`
-    padding: 0 !important;
+    width: 100%;
   `,
 };
 
 export const OptionsListControl = ({
-  controlPanelClassName,
   disableMultiValueEmptySelection = false,
 }: {
-  controlPanelClassName: string;
   disableMultiValueEmptySelection?: boolean;
 }) => {
   const popoverId = useMemo(() => htmlIdGenerator()(), []);
@@ -195,8 +203,9 @@ export const OptionsListControl = ({
   const button = (
     <EuiFormControlButton
       role="combobox"
+      isLoading={loading}
       compressed={isCompressed(componentApi)}
-      iconType={loading ? 'empty' : 'arrowDown'}
+      iconType={'arrowDown'}
       iconSide="right"
       value={hasSelections || existsSelected ? selectionDisplayNode : ''}
       placeholder={displaySettings.placeholder ?? OptionsListStrings.control.getPlaceholder()}
@@ -214,17 +223,16 @@ export const OptionsListControl = ({
   );
 
   return (
-    <EuiFilterGroup
-      fullWidth
-      compressed={isCompressed(componentApi)}
-      className={controlPanelClassName}
+    <div
+      className={'kbnGridLayout--hideDragHandle'}
       css={optionListControlStyles.filterGroup}
+      data-control-id={componentApi.uuid}
+      data-shared-item
     >
       <EuiInputPopover
         id={popoverId}
         ownFocus
         input={button}
-        hasArrow={false}
         repositionOnScroll
         isOpen={isPopoverOpen}
         panelPaddingSize="none"
@@ -241,6 +249,6 @@ export const OptionsListControl = ({
       >
         <OptionsListPopover disableMultiValueEmptySelection={disableMultiValueEmptySelection} />
       </EuiInputPopover>
-    </EuiFilterGroup>
+    </div>
   );
 };

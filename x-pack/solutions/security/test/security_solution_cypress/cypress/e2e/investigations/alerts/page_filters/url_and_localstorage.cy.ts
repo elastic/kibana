@@ -6,7 +6,7 @@
  */
 
 import { encode } from '@kbn/rison';
-import { DEFAULT_DETECTION_PAGE_FILTERS } from '@kbn/security-solution-plugin/common/constants';
+import type { FilterControlConfig } from '@kbn/alerts-ui-shared';
 import { formatPageFilterSearchParam } from '@kbn/security-solution-plugin/common/utils/format_page_filter_search_param';
 import { assertFilterControlsWithFilterObject } from '../../../../tasks/alerts_page_filters';
 import { getNewRule } from '../../../../objects/rule';
@@ -21,6 +21,36 @@ import { visitWithTimeRange } from '../../../../tasks/navigation';
 import { ALERTS_URL, CASES_URL } from '../../../../urls/navigation';
 import { selectPageFilterValue, waitForAlerts, waitForPageFilters } from '../../../../tasks/alerts';
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
+
+const DEFAULT_DETECTION_PAGE_FILTERS: FilterControlConfig[] = [
+  {
+    title: 'Status',
+    field_name: 'kibana.alert.workflow_status',
+    selected_options: ['open'],
+    persist: true,
+    display_settings: {
+      hide_action_bar: true,
+      hide_exists: true,
+    },
+  },
+  {
+    title: 'Severity',
+    field_name: 'kibana.alert.severity',
+    selected_options: [],
+    display_settings: {
+      hide_action_bar: true,
+      hide_exists: true,
+    },
+  },
+  {
+    title: 'User',
+    field_name: 'user.name',
+  },
+  {
+    title: 'Host',
+    field_name: 'host.name',
+  },
+];
 
 describe(
   `Alerts page filters - url and localstorage interactions`,
@@ -44,7 +74,7 @@ describe(
           return {
             ...filter,
             selectedOptions:
-              filter.title === 'Status' ? ['open', 'acknowledged'] : filter.selectedOptions,
+              filter.title === 'Status' ? ['open', 'acknowledged'] : filter.selected_options,
           };
         }
       );
@@ -63,8 +93,8 @@ describe(
       const CUSTOM_URL_FILTER = [
         {
           title: 'Process',
-          fieldName: 'process.name',
-          selectedOptions: ['testing123'],
+          field_name: 'process.name',
+          selected_options: ['testing123'],
         },
       ];
 
@@ -96,9 +126,11 @@ describe(
 
       const NEW_FILTERS = DEFAULT_DETECTION_PAGE_FILTERS.map((filter) => {
         return {
-          hideActionBar: false,
+          display_settings: {
+            hide_action_bar: false,
+          },
           ...filter,
-          selectedOptions: filter.title === 'Severity' ? ['high'] : filter.selectedOptions,
+          selected_options: filter.title === 'Severity' ? ['high'] : filter.selected_options,
         };
       });
       const expectedVal = encode(formatPageFilterSearchParam(NEW_FILTERS));

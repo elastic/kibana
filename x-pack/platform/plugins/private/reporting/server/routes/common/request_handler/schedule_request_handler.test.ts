@@ -25,7 +25,7 @@ import {
   createMockPluginStart,
   createMockReportingCore,
 } from '../../../test_helpers';
-import type { ReportingRequestHandlerContext, ReportingSetup } from '../../../types';
+import type { ReportingRequestHandlerContext, ReportingSetup, ReportingUser } from '../../../types';
 import { ScheduleRequestHandler } from './schedule_request_handler';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
@@ -141,7 +141,7 @@ describe('Handle request to schedule', () => {
 
     requestHandler = new ScheduleRequestHandler({
       reporting: reportingCore,
-      user: { username: 'testymcgee' },
+      user: { username: 'testymcgee' } as ReportingUser,
       context: mockContext,
       path: '/api/reporting/test/generate/pdf',
       // @ts-ignore
@@ -159,7 +159,7 @@ describe('Handle request to schedule', () => {
         schedule: { rrule: { freq: 1, interval: 2, tzid: 'UTC' } },
       });
 
-      const { id, created_at: _created_at, payload, ...snapObj } = report;
+      const { id, created_at, payload, ...snapObj } = report;
       expect(snapObj).toMatchInlineSnapshot(`
         Object {
           "created_by": "testymcgee",
@@ -248,7 +248,7 @@ describe('Handle request to schedule', () => {
         notification: { email: { to: ['a@b.com'] } },
       });
 
-      const { id, created_at: _created_at, payload, ...snapObj } = report;
+      const { id, created_at, payload, ...snapObj } = report;
       expect(snapObj).toMatchInlineSnapshot(`
         Object {
           "created_by": "testymcgee",
@@ -339,7 +339,7 @@ describe('Handle request to schedule', () => {
         },
       });
 
-      const { id, created_at: _created_at, payload, ...snapObj } = report;
+      const { id, created_at, payload, ...snapObj } = report;
       expect(snapObj).toMatchInlineSnapshot(`
         Object {
           "created_by": "testymcgee",
@@ -795,25 +795,48 @@ describe('Handle request to schedule', () => {
     });
 
     test('disallows invalid browser timezone', async () => {
-      expect(
-        await requestHandler.handleRequest({
-          exportTypeId: 'csv_searchsource',
-          jobParams: {
-            ...mockJobParams,
-            browserTimezone: 'America/Amsterdam',
+      const handler = new ScheduleRequestHandler({
+        reporting: reportingCore,
+        user: { username: 'testymcgee' } as ReportingUser,
+        context: mockContext,
+        path: '/api/reporting/test/generate/pdf',
+        req: {
+          ...mockRequest,
+          query: {},
+          params: { exportType: 'printablePdfV2' },
+          body: {
+            schedule: { rrule: { freq: 1, interval: 2, tzid: 'America/Amsterdam' } },
+            jobParams: rison.encode({
+              ...mockJobParams,
+              browserTimezone: 'America/Amsterdam',
+            }),
           },
-        })
-      ).toMatchInlineSnapshot(`
-        Object {
-          "body": "Invalid timezone \\"America/Amsterdam\\".",
-        }
-      `);
+        },
+        res: mockResponseFactory,
+        logger: mockLogger,
+      });
+      try {
+        await handler.getJobParams();
+      } catch (err) {
+        expect(err.statusCode).toBe(400);
+        expect(err.body).toMatchInlineSnapshot(`
+          "invalid params: [
+            {
+              \\"code\\": \\"custom\\",
+              \\"message\\": \\"Invalid timezone\\",
+              \\"path\\": [
+                \\"browserTimezone\\"
+              ]
+            }
+          ]"
+        `);
+      }
     });
 
-    test('disallows scheduling when user is "false"', async () => {
+    test('disallows scheduling when user is undefined', async () => {
       requestHandler = new ScheduleRequestHandler({
         reporting: reportingCore,
-        user: false,
+        user: undefined,
         context: mockContext,
         path: '/api/reporting/test/generate/pdf',
         // @ts-ignore

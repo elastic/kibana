@@ -17,6 +17,10 @@
     "@kbn/zod",
     "@kbn/zod-helpers",
     "@kbn/i18n",
-    "@kbn/esql-ast"
+    "@kbn/tinymath",
+    "@kbn/datemath",
+    "@kbn/esql-language",
+    "@kbn/tinymath",
+    "@kbn/grok-ui"
   ]
 }

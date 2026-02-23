@@ -28,6 +28,37 @@ describe('HeaderButtons', () => {
     expect(getByTestId('siemMigrationsSelectMigrationButton')).toBeInTheDocument();
   });
 
+  it('marks only the option with the selected migration id as selected when names are duplicated', () => {
+    const [first, second] = getMigrationsStatsMock();
+    const migrationsWithDuplicateNames = [
+      { ...first, name: 'Same name', id: '1' },
+      { ...second, name: 'Same name', id: '2' },
+    ];
+
+    const { getByTestId } = render(
+      <TestProviders>
+        <HeaderButtons
+          migrationType="dashboard"
+          migrationsStats={migrationsWithDuplicateNames}
+          selectedMigrationId="1"
+          onMigrationIdChange={onMigrationIdChange}
+        />
+      </TestProviders>
+    );
+
+    const siemMigrationsSelectMigrationButton = getByTestId('siemMigrationsSelectMigrationButton');
+    const comboBoxToggleListButton = within(siemMigrationsSelectMigrationButton).getByTestId(
+      'comboBoxToggleListButton'
+    );
+    fireEvent.click(comboBoxToggleListButton);
+
+    const option1 = getByTestId('migrationSelectionOption-1');
+    const option2 = getByTestId('migrationSelectionOption-2');
+
+    expect(option1).toHaveAttribute('aria-selected', 'true');
+    expect(option2).toHaveAttribute('aria-selected', 'false');
+  });
+
   it('calls onMigrationIdChange when a migration is selected', () => {
     const { getByTestId, getByText } = render(
       <TestProviders>
@@ -62,5 +93,21 @@ describe('HeaderButtons', () => {
       </TestProviders>
     );
     expect(getByTestId('addAnotherMigrationButton')).toBeInTheDocument();
+  });
+
+  it('should render the migration vendor badge', () => {
+    const { getByTestId } = render(
+      <TestProviders>
+        <HeaderButtons
+          migrationType="dashboard"
+          migrationsStats={getMigrationsStatsMock()}
+          selectedMigrationId="2"
+          onMigrationIdChange={onMigrationIdChange}
+        />
+      </TestProviders>
+    );
+
+    expect(getByTestId('migrationVendorBadge')).toBeInTheDocument();
+    expect(getByTestId('migrationVendorBadge')).toHaveTextContent('QRadar');
   });
 });

@@ -20,8 +20,8 @@ export interface AlertsPrivelegesState {
   hasIndexUpdateDelete: boolean | null;
   hasIndexMaintenance: boolean | null;
   hasIndexRead: boolean | null;
-  hasSiemCRUD: boolean;
-  hasSiemRead: boolean;
+  hasAlertsRead: boolean;
+  hasAlertsAll: boolean;
 }
 /**
  * Hook to get user privilege from
@@ -30,7 +30,10 @@ export interface AlertsPrivelegesState {
 export const useAlertsPrivileges = (): UseAlertsPrivelegesReturn => {
   const {
     detectionEnginePrivileges: { error, result, loading },
-    siemPrivileges: { crud: hasSiemCRUD, read: hasSiemRead },
+    // Rules privileges implicitly contain alerts privileges. Until we separate them out into dedicated privileges, we are using rules privileges to determine alerts privileges.
+    rulesPrivileges: {
+      rules: { read: hasAlertsRead, edit: hasAlertsAll },
+    },
   } = useUserPrivileges();
 
   const indexName = useMemo(() => {
@@ -50,8 +53,8 @@ export const useAlertsPrivileges = (): UseAlertsPrivelegesReturn => {
         hasIndexWrite: false,
         hasIndexUpdateDelete: false,
         hasIndexMaintenance: false,
-        hasSiemCRUD,
-        hasSiemRead,
+        hasAlertsRead,
+        hasAlertsAll,
       };
     }
 
@@ -68,8 +71,8 @@ export const useAlertsPrivileges = (): UseAlertsPrivelegesReturn => {
           result.index[indexName].index ||
           result.index[indexName].write,
         hasIndexUpdateDelete: result.index[indexName].write,
-        hasSiemCRUD,
-        hasSiemRead,
+        hasAlertsRead,
+        hasAlertsAll,
       };
     }
 
@@ -81,10 +84,10 @@ export const useAlertsPrivileges = (): UseAlertsPrivelegesReturn => {
       hasIndexWrite: null,
       hasIndexUpdateDelete: null,
       hasIndexMaintenance: null,
-      hasSiemCRUD: false,
-      hasSiemRead: false,
+      hasAlertsRead: false,
+      hasAlertsAll: false,
     };
-  }, [error, result, indexName, hasSiemCRUD, hasSiemRead]);
+  }, [error, result, indexName, hasAlertsRead, hasAlertsAll]);
 
   return { loading: loading ?? false, ...privileges };
 };

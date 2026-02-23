@@ -7,13 +7,13 @@
 
 import { i18n } from '@kbn/i18n';
 import { JsonCodeEditor } from '@kbn/unified-doc-viewer-plugin/public';
-import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
+import type { DocView, DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { DEFAULT_MARGIN_BOTTOM, getTabContentAvailableHeight } from './get_height';
 
 export const DOC_VIEW_JSON_ID = 'doc_view_json';
 
-export const docViewJson = {
+export const docViewJson: DocView = {
   id: DOC_VIEW_JSON_ID,
   title: i18n.translate(
     'xpack.streams.streamDetailView.managementTab.enrichment.simulationPlayground.docViews.json.jsonTitle',
@@ -22,7 +22,7 @@ export const docViewJson = {
     }
   ),
   order: 20,
-  component: JsonDocViewer,
+  render: (props) => <JsonDocViewer {...props} />,
 };
 
 function JsonDocViewer({ hit, decreaseAvailableHeightBy }: DocViewRenderProps) {

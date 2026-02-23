@@ -21,6 +21,8 @@ const transformEveryToFrequency = (frequency?: string) => {
       return Frequency.WEEKLY;
     case 'd':
       return Frequency.DAILY;
+    case 'h':
+      return Frequency.HOURLY;
     default:
       return;
   }

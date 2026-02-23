@@ -58,7 +58,6 @@ export async function bulkGetRules<Params extends RuleParams = never>(
   await pMap(
     chunk(params.ids, 100),
     async (ids) => {
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       const { saved_objects } = await bulkGetRulesSo({
         savedObjectsClient: context.unsecuredSavedObjectsClient,
         ids,

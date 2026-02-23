@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { expect } from '@kbn/scout/ui';
+import { tags } from '@kbn/scout';
 import { test } from '../../../fixtures';
 import { generateLogsData } from '../../../fixtures/generators';
 import {
@@ -18,7 +20,7 @@ import {
 
 test.describe(
   'Stream data retention - custom retention periods',
-  { tag: ['@ess', '@svlOblt'] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     test.beforeEach(async ({ apiServices, browserAuth, pageObjects }) => {
       await browserAuth.loginAsAdmin();
@@ -43,6 +45,9 @@ test.describe(
       await apiServices.streams.clearStreamChildren('logs');
     });
 
+    // Smoke test: Verifies the complete retention UI workflow
+    // Detailed retention value tests (7d, 30d, 90d, hours, etc.) are covered by API tests
+    // in test/scout/api/tests/lifecycle_retention.spec.ts
     test('should set and reset retention policy', async ({ page }) => {
       // Set a specific retention policy
       await openRetentionModal(page);
@@ -58,38 +63,7 @@ test.describe(
       await verifyRetentionDisplay(page, '∞');
     });
 
-    test('should set retention with days unit', async ({ page }) => {
-      await openRetentionModal(page);
-      await toggleInheritSwitch(page, false);
-      await setCustomRetention(page, '30', 'd');
-      await saveRetentionChanges(page);
-      await verifyRetentionDisplay(page, '30 days');
-    });
-
-    test('should set retention with hours unit', async ({ page }) => {
-      await openRetentionModal(page);
-      await toggleInheritSwitch(page, false);
-      await setCustomRetention(page, '24', 'h');
-      await saveRetentionChanges(page);
-      await verifyRetentionDisplay(page, '24 hours');
-    });
-
-    test('should set retention with minutes unit', async ({ page }) => {
-      await openRetentionModal(page);
-      await toggleInheritSwitch(page, false);
-      await setCustomRetention(page, '60', 'm');
-      await saveRetentionChanges(page);
-      await verifyRetentionDisplay(page, '60 minutes');
-    });
-
-    test('should set retention with seconds unit', async ({ page }) => {
-      await openRetentionModal(page);
-      await toggleInheritSwitch(page, false);
-      await setCustomRetention(page, '3600', 's');
-      await saveRetentionChanges(page);
-      await verifyRetentionDisplay(page, '3600 seconds');
-    });
-
+    // Smoke test: Verifies persistence across page refresh (UI-specific behavior)
     test('should persist retention value across page refresh', async ({ page, pageObjects }) => {
       await openRetentionModal(page);
       await toggleInheritSwitch(page, false);
@@ -104,6 +78,7 @@ test.describe(
       await verifyRetentionDisplay(page, '30 days');
     });
 
+    // Smoke test: Verifies classic stream retention UI workflow
     test('should set retention on classic stream', async ({
       page,
       pageObjects,
@@ -119,6 +94,38 @@ test.describe(
       await setCustomRetention(page, '7', 'd');
       await saveRetentionChanges(page);
       await verifyRetentionDisplay(page, '7 days');
+    });
+
+    test('should open DSL lifecycle phase popup and display phase details', async ({
+      page,
+      config,
+    }) => {
+      // Set a custom retention to have a DSL lifecycle with a delete phase
+      await openRetentionModal(page);
+      await toggleInheritSwitch(page, false);
+      await setCustomRetention(page, '30', 'd');
+      await saveRetentionChanges(page);
+
+      // DSL phase label differs: 'Hot' in stateful, 'Successful ingest' in serverless
+      // Click on the phase button using test ID
+      await page
+        .getByTestId(`lifecyclePhase-${config.serverless ? 'Successful ingest' : 'Hot'}-button`)
+        .click();
+
+      // Verify the popover opens and shows the expected content
+      await expect(
+        page.getByTestId(
+          `lifecyclePhase-${config.serverless ? 'Successful ingest' : 'Hot'}-popoverTitle`
+        )
+      ).toBeVisible();
+      await expect(
+        page.getByTestId(
+          `lifecyclePhase-${config.serverless ? 'Successful ingest' : 'Hot'}-popoverContent`
+        )
+      ).toBeVisible();
+
+      // Close the popover by pressing Escape
+      await page.keyboard.press('Escape');
     });
   }
 );

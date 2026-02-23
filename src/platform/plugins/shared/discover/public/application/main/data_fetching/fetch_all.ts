@@ -123,7 +123,8 @@ export function fetchAll(
         })
       : fetchDocuments(searchSource, params);
     const fetchType = isEsqlQuery ? 'fetchTextBased' : 'fetchDocuments';
-    const fetchAllRequestOnlyTracker = scopedEbtManager.trackPerformanceEvent(
+
+    const fetchAllRequestOnlyTracker = scopedEbtManager.trackQueryPerformanceEvent(
       'discoverFetchAllRequestsOnly'
     );
 
@@ -135,11 +136,19 @@ export function fetchAll(
     // Handle results of the individual queries and forward the results to the corresponding dataSubjects
     response
       .then(({ records, esqlQueryColumns, interceptedWarnings = [], esqlHeaderWarning }) => {
-        fetchAllRequestOnlyTracker.reportEvent({
-          meta: { fetchType },
-          key1: 'query_range_secs',
-          value1: queryRangeSeconds,
-        });
+        fetchAllRequestOnlyTracker.reportEvent(
+          {
+            queryRangeSeconds,
+            requests: params.inspectorAdapters.requests?.getRequestsSince(
+              fetchAllRequestOnlyTracker.startTime
+            ),
+          },
+          {
+            meta: {
+              fetchType,
+            },
+          }
+        );
 
         if (isEsqlQuery) {
           const fetchStatus =

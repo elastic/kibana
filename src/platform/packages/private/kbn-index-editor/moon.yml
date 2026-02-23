@@ -39,7 +39,7 @@ dependsOn:
   - '@kbn/file-upload-plugin'
   - '@kbn/react-kibana-context-common'
   - '@kbn/restorable-state'
-  - '@kbn/esql-ast'
+  - '@kbn/esql-language'
   - '@kbn/es-types'
   - '@kbn/esql-utils'
   - '@kbn/test-jest-helpers'

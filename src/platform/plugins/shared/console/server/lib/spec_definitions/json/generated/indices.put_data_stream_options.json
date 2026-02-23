@@ -29,7 +29,7 @@
     "patterns": [
       "_data_stream/{name}/_options"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/index.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-put-data-stream-options",
     "availability": {
       "stack": true,
       "serverless": true

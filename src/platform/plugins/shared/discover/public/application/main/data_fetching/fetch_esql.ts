@@ -30,6 +30,26 @@ interface EsqlErrorResponse {
   type: 'error';
 }
 
+export interface FetchEsqlParams {
+  query: Query | AggregateQuery;
+  inputQuery?: Query;
+  filters?: Filter[];
+  timeRange?: TimeRange;
+  dataView: DataView;
+  abortSignal?: AbortSignal;
+  inspectorAdapters: Adapters;
+  data: DataPublicPluginStart;
+  expressions: ExpressionsStart;
+  scopedProfilesManager: ScopedProfilesManager;
+  esqlVariables?: ESQLControlVariable[];
+  searchSessionId?: string;
+  projectRouting?: ProjectRouting;
+  inspectorConfig?: {
+    title: string;
+    description: string;
+  };
+}
+
 export function fetchEsql({
   query,
   inputQuery,
@@ -44,21 +64,8 @@ export function fetchEsql({
   esqlVariables,
   searchSessionId,
   projectRouting,
-}: {
-  query: Query | AggregateQuery;
-  inputQuery?: Query;
-  filters?: Filter[];
-  timeRange?: TimeRange;
-  dataView: DataView;
-  abortSignal?: AbortSignal;
-  inspectorAdapters: Adapters;
-  data: DataPublicPluginStart;
-  expressions: ExpressionsStart;
-  scopedProfilesManager: ScopedProfilesManager;
-  esqlVariables?: ESQLControlVariable[];
-  searchSessionId?: string;
-  projectRouting?: ProjectRouting;
-}): Promise<RecordsFetchResponse> {
+  inspectorConfig,
+}: FetchEsqlParams): Promise<RecordsFetchResponse> {
   const props = getTextBasedQueryStateToAstProps({
     query,
     inputQuery,
@@ -66,6 +73,7 @@ export function fetchEsql({
     timeRange,
     dataView,
     data,
+    inspectorConfig,
   });
   return textBasedQueryStateToAstWithValidation(props)
     .then((ast) => {
@@ -79,7 +87,9 @@ export function fetchEsql({
           },
           searchSessionId,
         });
-        abortSignal?.addEventListener('abort', contract.cancel);
+        abortSignal?.addEventListener('abort', (e) => {
+          contract.cancel((e.target as AbortSignal)?.reason);
+        });
         const execution = contract.getData();
         let finalData: DataTableRecord[] = [];
         let esqlQueryColumns: Datatable['columns'] | undefined;
@@ -144,6 +154,7 @@ export function getTextBasedQueryStateToAstProps({
   timeRange,
   dataView,
   data,
+  inspectorConfig,
 }: {
   query: Query | AggregateQuery;
   inputQuery?: Query;
@@ -151,6 +162,10 @@ export function getTextBasedQueryStateToAstProps({
   timeRange?: TimeRange;
   dataView: DataView;
   data: DataPublicPluginStart;
+  inspectorConfig?: {
+    title: string;
+    description: string;
+  };
 }) {
   return {
     filters,
@@ -158,11 +173,15 @@ export function getTextBasedQueryStateToAstProps({
     time: timeRange ?? data.query.timefilter.timefilter.getAbsoluteTime(),
     timeFieldName: dataView.timeFieldName,
     inputQuery,
-    titleForInspector: i18n.translate('discover.inspectorEsqlRequestTitle', {
-      defaultMessage: 'Table',
-    }),
-    descriptionForInspector: i18n.translate('discover.inspectorEsqlRequestDescription', {
-      defaultMessage: 'This request queries Elasticsearch to fetch results for the table.',
-    }),
+    titleForInspector:
+      inspectorConfig?.title ??
+      i18n.translate('discover.inspectorEsqlRequestTitle', {
+        defaultMessage: 'Table',
+      }),
+    descriptionForInspector:
+      inspectorConfig?.description ??
+      i18n.translate('discover.inspectorEsqlRequestDescription', {
+        defaultMessage: 'This request queries Elasticsearch to fetch results for the table.',
+      }),
   };
 }

@@ -170,10 +170,15 @@ export const performFind = async <T = unknown, A = unknown>(
       // If the user is unauthorized to find *anything* they requested, return an empty response
       return SavedObjectsUtils.createEmptyFindResponse<T, A>(options);
     }
-    if (authorizationResult?.status === 'partially_authorized') {
+    if (
+      authorizationResult?.status === 'fully_authorized' ||
+      authorizationResult?.status === 'partially_authorized'
+    ) {
       typeToNamespacesMap = new Map<string, string[]>();
       for (const [objType, entry] of authorizationResult.typeMap) {
         if (!entry.find) continue;
+        // Discard the types that the SO repository doesn't know about (typically hidden objects).
+        if (!allowedTypes.includes(objType)) continue;
         // This ensures that the query DSL can filter only for object types that the user is authorized to access for a given space
         const { authorizedSpaces, isGloballyAuthorized } = entry.find;
         typeToNamespacesMap.set(objType, isGloballyAuthorized ? namespaces : authorizedSpaces);

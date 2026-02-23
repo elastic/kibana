@@ -204,6 +204,65 @@ export default function geminiTest({ getService }: FtrProviderContext) {
             });
           });
       });
+
+      it('should return 400 Bad Request when creating the connector with external_account credentials', async () => {
+        const maliciousSecrets = {
+          credentialsJson: JSON.stringify({
+            type: 'external_account',
+            credential_source: {
+              file: '/etc/passwd',
+            },
+          }),
+        };
+
+        await supertest
+          .post('/api/actions/connector')
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name,
+            connector_type_id: connectorTypeId,
+            config,
+            secrets: maliciousSecrets,
+          })
+          .expect(400)
+          .then((resp: any) => {
+            expect(resp.body).to.eql({
+              statusCode: 400,
+              error: 'Bad Request',
+              message:
+                'error validating connector type secrets: Error configuring Google Gemini secrets: Error: Invalid credential type. Only "service_account" credentials are supported. Type was "external_account".',
+            });
+          });
+      });
+
+      it('should return 200 when creating the connector with valid service_account credentials', async () => {
+        const validSecrets = {
+          credentialsJson: JSON.stringify({
+            type: 'service_account',
+            project_id: 'test-project',
+            private_key_id: 'some_id',
+            private_key: '-----BEGIN PRIVATE KEY----------END PRIVATE KEY-----\n',
+            client_email: 'test@example.com',
+            client_id: '12345',
+            auth_uri: 'https://accounts.google.com/o/oauth2/auth',
+            token_uri: 'https://oauth2.googleapis.com/token',
+            auth_provider_x509_cert_url: 'https://www.googleapis.com/oauth2/v1/certs',
+            client_x509_cert_url:
+              'https://www.googleapis.com/robot/v1/metadata/x509/test%40example.com',
+          }),
+        };
+
+        await supertest
+          .post('/api/actions/connector')
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name,
+            connector_type_id: connectorTypeId,
+            config,
+            secrets: validSecrets,
+          })
+          .expect(200);
+      });
     });
 
     describe('executor', () => {

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import moment from 'moment';
 import type { ByteSizeValue } from '@kbn/config-schema';
 import type { IUiSettingsClient, Logger } from '@kbn/core/server';
 import { createEscapeValue } from '@kbn/data-plugin/common';
@@ -40,6 +41,7 @@ export interface CsvExportSettings {
   escapeValue: (value: string) => string;
   includeFrozen: boolean;
   maxConcurrentShardRequests: number;
+  maxRows: number;
 }
 
 export const getExportSettings = async (
@@ -53,16 +55,10 @@ export const getExportSettings = async (
   if (timezone) {
     setTimezone = timezone;
   } else {
-    // timezone in settings?
+    // try to get the timezone from the settings
     setTimezone = await client.get(UI_SETTINGS_DATEFORMAT_TZ);
-    if (setTimezone === 'Browser') {
-      // if `Browser`, hardcode it to 'UTC' so the export has data that makes sense
-      logger.warn(
-        `Kibana Advanced Setting "dateFormat:tz" is set to "Browser". Dates will be formatted as UTC to avoid ambiguity.`
-      );
-      setTimezone = 'UTC';
-    }
   }
+  setTimezone = moment.tz.zone(setTimezone)?.name ?? moment.tz.guess(true);
 
   // Advanced Settings that affect search export + CSV
   const [includeFrozen, separator, quoteValues] = await Promise.all([
@@ -117,5 +113,6 @@ export const getExportSettings = async (
     escapeFormulaValues,
     escapeValue,
     maxConcurrentShardRequests: config.maxConcurrentShardRequests,
+    maxRows: config.maxRows,
   };
 };

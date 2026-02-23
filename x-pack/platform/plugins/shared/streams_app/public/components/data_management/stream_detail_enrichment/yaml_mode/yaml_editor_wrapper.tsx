@@ -41,6 +41,8 @@ export const YamlEditorWrapper = () => {
   const dsl = useStreamEnrichmentSelector((state) => state.context.nextStreamlangDSL);
   const definition = useStreamEnrichmentSelector((state) => state.context.definition);
   const streamType = getStreamTypeFromDefinition(definition.stream);
+  const editorStreamType =
+    streamType === 'unknown' || streamType === 'query' ? undefined : streamType;
   const simulation = useSimulatorSelector((snapshot) => snapshot.context.simulation);
   const canSimulate = useStreamEnrichmentSelector(
     (state) => state.context.definition.privileges.simulate
@@ -109,7 +111,7 @@ export const YamlEditorWrapper = () => {
             canRunSimulation={canRunSimulation}
             additiveStepIds={additiveStepIds}
             simulationMode={simulationMode}
-            streamType={streamType === 'unknown' ? undefined : streamType}
+            streamType={editorStreamType}
             validationErrors={validationErrors}
           />
         </EuiPanel>
@@ -165,7 +167,7 @@ export const YamlEditorWrapper = () => {
               buttonContent={
                 <strong>
                   {i18n.translate(
-                    'xpack.streams.streamDetailView.managementTab.enrichment.validationErrors.title',
+                    'xpack.streams.streamDetailView.managementTab.enrichment.validationErrors.count',
                     {
                       defaultMessage:
                         '{count, plural, one {# validation error} other {# validation errors}}',

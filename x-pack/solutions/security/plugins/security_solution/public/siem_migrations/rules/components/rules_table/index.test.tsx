@@ -40,9 +40,6 @@ jest.mock('../../logic/use_start_migration');
 jest.mock('../../hooks/use_migration_rule_preview_flyout');
 jest.mock('../../hooks/use_start_rules_migration_modal');
 jest.mock('../../hooks/use_migration_rules_table_columns');
-jest.mock('../tours/translation_guide', () => ({
-  SiemTranslatedRulesTour: () => <div />,
-}));
 
 const mockRule = migrationRules[0];
 const mockMigrationStats = getRuleMigrationStatsMock();

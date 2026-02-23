@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { BoundInferenceClient } from '@kbn/inference-common';
+import { type BoundInferenceClient, MessageRole } from '@kbn/inference-common';
 import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
 import type { Streams, ProcessingSimulationResponse } from '@kbn/streams-schema';
 import type { StreamlangDSL, GrokProcessor, DissectProcessor } from '@kbn/streamlang';
@@ -13,8 +13,17 @@ import type { FlattenRecord } from '@kbn/streams-schema';
 import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
 import { isOtelStream } from '@kbn/streams-schema';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { i18n } from '@kbn/i18n';
 import { SuggestIngestPipelinePrompt } from './prompt';
 import { getPipelineDefinitionJsonSchema, pipelineDefinitionSchema } from './schema';
+
+export interface SuggestProcessingPipelineResult {
+  pipeline: StreamlangDSL | null;
+  metadata: {
+    stepsUsed: number;
+    maxSteps: number;
+  };
+}
 
 export async function suggestProcessingPipeline({
   definition,
@@ -36,10 +45,18 @@ export async function suggestProcessingPipeline({
   documents: FlattenRecord[];
   fieldsMetadataClient: IFieldsMetadataClient;
   esClient: ElasticsearchClient;
-}): Promise<StreamlangDSL | null> {
+}): Promise<SuggestProcessingPipelineResult> {
+  const effectiveMaxSteps = maxSteps ?? 10;
+
   // No need to involve reasoning if there are no sample documents
   if (documents.length === 0) {
-    return null;
+    return {
+      pipeline: null,
+      metadata: {
+        stepsUsed: 0,
+        maxSteps: effectiveMaxSteps,
+      },
+    };
   }
 
   // Collect metrics for the initial pipeline
@@ -74,7 +91,7 @@ export async function suggestProcessingPipeline({
     inferenceClient,
     prompt: SuggestIngestPipelinePrompt,
     input,
-    maxSteps,
+    maxSteps: effectiveMaxSteps,
     toolCallbacks: {
       simulate_pipeline: async (toolCall) => {
         // 1. Validate the pipeline schema
@@ -167,22 +184,43 @@ export async function suggestProcessingPipeline({
     abortSignal: signal,
   });
 
+  // Count assistant messages to determine steps used
+  const stepsUsed = response.input.filter(
+    (message) => message.role === MessageRole.Assistant
+  ).length;
+
+  const metadata = {
+    stepsUsed,
+    maxSteps: effectiveMaxSteps,
+  };
+
   // Check for empty toolCalls array (similar to #244335)
   if (!('toolCalls' in response) || response.toolCalls.length === 0) {
-    throw new Error('The LLM response did not contain any tool calls');
+    throw new Error(
+      i18n.translate('xpack.streams.ai.suggestProcessingPipeline.noToolCallsError', {
+        defaultMessage:
+          'Pipeline suggestions could not be generated from current log samples.\n\nTry fetching new sample data and re-running the suggestion.',
+      })
+    );
   }
 
   const commitPipeline = pipelineDefinitionSchema.safeParse(
     response.toolCalls[0].function.arguments.pipeline
   );
   if (!commitPipeline.success) {
-    return null;
+    return {
+      pipeline: null,
+      metadata,
+    };
   }
 
   // Add customIdentifier to each step for proper tracking in simulations
   const pipelineWithIdentifiers = addCustomIdentifiersToSteps(commitPipeline.data as StreamlangDSL);
 
-  return pipelineWithIdentifiers;
+  return {
+    pipeline: pipelineWithIdentifiers,
+    metadata,
+  };
 }
 
 /**

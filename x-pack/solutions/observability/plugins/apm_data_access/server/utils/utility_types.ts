@@ -10,7 +10,7 @@ import type { DedotObject } from '@kbn/utility-types';
 import type { ValuesType } from 'utility-types';
 import type { AgentName } from '@kbn/elastic-agent-utils';
 import type { EventOutcome, StatusCode } from '@kbn/apm-types/src/es_schemas/raw/fields';
-import type { ProcessorEvent } from '@kbn/observability-plugin/common';
+import type { ProcessorEvent } from '@kbn/apm-types-shared';
 
 const {
   CLOUD,
@@ -24,8 +24,8 @@ const {
   TIER,
   INDEX,
   DATA_STEAM_TYPE,
-  VALUE_OTEL_JVM_PROCESS_MEMORY_HEAP,
-  VALUE_OTEL_JVM_PROCESS_MEMORY_NON_HEAP,
+  VALUE_OTEL_JVM_MEMORY_TYPE_HEAP,
+  VALUE_OTEL_JVM_MEMORY_TYPE_NON_HEAP,
   SPAN_STACKTRACE,
   ...CONCRETE_FIELDS
 } = APM_EVENT_FIELDS_MAP;

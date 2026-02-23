@@ -7,7 +7,18 @@
 
 import path from 'path';
 
-const allowedExtensions = ['.txt', '.md', '.log', '.json', '.yml', '.yaml', '.csv', '.svg', '.png'];
+const allowedExtensions = [
+  '.txt',
+  '.md',
+  '.log',
+  '.json',
+  '.yml',
+  '.yaml',
+  '.csv',
+  '.svg',
+  '.png',
+  '.zip',
+];
 
 export function validateFileExtension(filePath: string) {
   const extension = path.extname(filePath).toLowerCase();

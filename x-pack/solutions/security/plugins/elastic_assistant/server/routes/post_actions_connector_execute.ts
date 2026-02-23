@@ -171,6 +171,7 @@ export const postActionsConnectorExecuteRoute = (
 
           onLlmResponse = async ({
             content,
+            refusal,
             traceData,
             isError,
             interruptValue,
@@ -185,6 +186,7 @@ export const postActionsConnectorExecuteRoute = (
                 conversationId,
                 conversationsDataClient,
                 messageContent: prunedContent,
+                messageRefusal: refusal,
                 replacements: latestReplacements,
                 isError,
                 traceData,

@@ -29,12 +29,10 @@ export function mappingFromFieldMap(
     });
 
   fields.forEach((field) => {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     const { name, required, array, multi_fields, ...rest } = field;
     const mapped = multi_fields
       ? {
           ...rest,
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           fields: multi_fields.reduce((acc, multi_field: MultiField) => {
             acc[multi_field.name] = {
               type: multi_field.type,

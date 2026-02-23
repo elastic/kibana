@@ -15,27 +15,29 @@ import type { LegacyMetricState } from './charts/legacy_metric';
 import { legacyMetricStateSchema } from './charts/legacy_metric';
 import type { GaugeState } from './charts/gauge';
 import { gaugeStateSchema } from './charts/gauge';
+import type { HeatmapState } from './charts/heatmap';
+import { heatmapStateSchema } from './charts/heatmap';
 import type { TagcloudState } from './charts/tagcloud';
 import { tagcloudStateSchema } from './charts/tagcloud';
-import { mosaicStateSchema } from './charts/mosaic';
-import { pieStateSchema } from './charts/pie';
-import { treemapStateSchema } from './charts/treemap';
-import { waffleStateSchema } from './charts/waffle';
+import type { XYState } from './charts/xy';
+import { xyStateSchema } from './charts/xy';
 import type { RegionMapState } from './charts/region_map';
 import { regionMapStateSchema } from './charts/region_map';
+import type { DatatableState } from './charts/datatable';
+import { datatableStateSchema } from './charts/datatable';
 import type {
   LensApiAllMetricOrFormulaOperations,
   LensApiStaticValueOperation,
 } from './metric_ops';
 import type { LensApiBucketOperations } from './bucket_ops';
-import { xyStateSchema } from './charts/xy';
-
-export const partitionStateSchema = schema.oneOf([
-  mosaicStateSchema,
-  pieStateSchema,
-  treemapStateSchema,
-  waffleStateSchema,
-]);
+import type { MosaicState } from './charts/mosaic';
+import { mosaicStateSchema } from './charts/mosaic';
+import type { TreemapState } from './charts/treemap';
+import { treemapStateSchema } from './charts/treemap';
+import type { WaffleState } from './charts/waffle';
+import { waffleStateSchema } from './charts/waffle';
+import type { PieState } from './charts/pie';
+import { pieStateSchema } from './charts/pie';
 
 /**
  * We need to break the type inference here to avoid exceeding the ts compiler serialization limit.
@@ -50,19 +52,29 @@ export const _lensApiStateSchema: any = schema.oneOf([
   legacyMetricStateSchema,
   xyStateSchema,
   gaugeStateSchema,
+  heatmapStateSchema,
   tagcloudStateSchema,
-  // disable for now to avoid type issues at the config builder root level
-  // TODO: enabled once transformations are available
-  // partitionStateSchema,
   regionMapStateSchema,
+  datatableStateSchema,
+  pieStateSchema,
+  mosaicStateSchema,
+  treemapStateSchema,
+  waffleStateSchema,
 ]);
 
 export type LensApiState =
   | MetricState
   | LegacyMetricState
   | GaugeState
+  | XYState
+  | HeatmapState
   | TagcloudState
-  | RegionMapState;
+  | RegionMapState
+  | DatatableState
+  | PieState
+  | MosaicState
+  | TreemapState
+  | WaffleState;
 
 export const lensApiStateSchema: Type<LensApiState> = _lensApiStateSchema;
 
@@ -70,10 +82,13 @@ export type { MetricState, metricStateSchemaNoESQL } from './charts/metric';
 export type { LegacyMetricState, legacyMetricStateSchemaNoESQL } from './charts/legacy_metric';
 export type { XYState } from './charts/xy';
 export type { GaugeState, gaugeStateSchemaNoESQL } from './charts/gauge';
+export type { HeatmapState, heatmapStateSchemaNoESQL } from './charts/heatmap';
 export type { TagcloudState, TagcloudStateNoESQL, TagcloudStateESQL } from './charts/tagcloud';
 export type { RegionMapState, RegionMapStateNoESQL, RegionMapStateESQL } from './charts/region_map';
+export type { DatatableState, DatatableStateNoESQL, DatatableStateESQL } from './charts/datatable';
 export { tagcloudStateSchema } from './charts/tagcloud';
 export { regionMapStateSchema } from './charts/region_map';
+export { datatableStateSchema } from './charts/datatable';
 
 export type {
   LensApiFieldMetricOrFormulaOperation,

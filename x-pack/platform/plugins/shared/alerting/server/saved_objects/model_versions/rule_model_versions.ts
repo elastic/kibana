@@ -14,6 +14,8 @@ import {
   rawRuleSchemaV5,
   rawRuleSchemaV6,
   rawRuleSchemaV7,
+  rawRuleSchemaV8,
+  rawRuleSchemaV9,
 } from '../schemas/raw_rule';
 
 export const ruleModelVersions: SavedObjectsModelVersionMap = {
@@ -81,6 +83,42 @@ export const ruleModelVersions: SavedObjectsModelVersionMap = {
     schemas: {
       forwardCompatibility: rawRuleSchemaV7.extends({}, { unknowns: 'ignore' }),
       create: rawRuleSchemaV7,
+    },
+  },
+  '8': {
+    changes: [
+      {
+        type: 'mappings_addition',
+        addedMappings: {
+          actions: {
+            properties: {
+              params: {
+                type: 'flattened',
+              },
+            },
+          },
+        },
+      },
+    ],
+    schemas: {
+      forwardCompatibility: rawRuleSchemaV8.extends({}, { unknowns: 'ignore' }),
+      create: rawRuleSchemaV8,
+    },
+  },
+  '9': {
+    changes: [
+      {
+        type: 'mappings_addition',
+        addedMappings: {
+          uiamApiKey: {
+            type: 'binary',
+          },
+        },
+      },
+    ],
+    schemas: {
+      forwardCompatibility: rawRuleSchemaV9.extends({}, { unknowns: 'ignore' }),
+      create: rawRuleSchemaV9,
     },
   },
 };

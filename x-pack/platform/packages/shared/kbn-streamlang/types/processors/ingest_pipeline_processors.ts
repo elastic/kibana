@@ -13,12 +13,20 @@ import type {
   RenameProcessor,
   SetProcessor,
   ManualIngestPipelineProcessor,
+  MathProcessor,
   AppendProcessor,
   ConvertProcessor,
   RemoveByPrefixProcessor,
   RemoveProcessor,
   DropDocumentProcessor,
   ReplaceProcessor,
+  RedactProcessor,
+  UppercaseProcessor,
+  TrimProcessor,
+  LowercaseProcessor,
+  JoinProcessor,
+  ConcatProcessor,
+  NetworkDirectionProcessor,
 } from '.';
 import type { Condition } from '../conditions';
 
@@ -92,6 +100,54 @@ export type IngestPipelineReplaceProcessor = RenameFieldsAndRemoveAction<
   { from: 'field'; to: 'target_field'; where: 'if' }
 >;
 
+// Redact
+export type IngestPipelineRedactProcessor = RenameFieldsAndRemoveAction<
+  RedactProcessor,
+  { from: 'field'; where: 'if' }
+>;
+
+// Math (uses script processor internally)
+export type IngestPipelineMathProcessor = RenameFieldsAndRemoveAction<
+  MathProcessor,
+  { where: 'if' }
+>;
+
+// Uppercase
+export type IngestPipelineUppercaseProcessor = RenameFieldsAndRemoveAction<
+  UppercaseProcessor,
+  { from: 'field'; to: 'target_field'; where: 'if' }
+>;
+
+// Lowercase
+export type IngestPipelineLowercaseProcessor = RenameFieldsAndRemoveAction<
+  LowercaseProcessor,
+  { from: 'field'; to: 'target_field'; where: 'if' }
+>;
+
+// Trim
+export type IngestPipelineTrimProcessor = RenameFieldsAndRemoveAction<
+  TrimProcessor,
+  { from: 'field'; to: 'target_field'; where: 'if' }
+>;
+
+// Join
+export type IngestPipelineJoinProcessor = RenameFieldsAndRemoveAction<
+  JoinProcessor,
+  { to: 'field'; where: 'if' }
+>;
+
+// Concat
+export type IngestPipelineConcatProcessor = RenameFieldsAndRemoveAction<
+  ConcatProcessor,
+  { to: 'field'; where: 'if' }
+>;
+
+// Network Direction
+export type IngestPipelineNetworkDirectionProcessor = RenameFieldsAndRemoveAction<
+  NetworkDirectionProcessor,
+  { where: 'if' }
+>;
+
 // Manual Ingest Pipeline (escape hatch)
 export type IngestPipelineManualIngestPipelineProcessor = RenameFieldsAndRemoveAction<
   ManualIngestPipelineProcessor,
@@ -103,6 +159,7 @@ export type IngestPipelineProcessor =
   | IngestPipelineDissectProcessor
   | IngestPipelineDateProcessor
   | IngestPipelineDropProcessor
+  | IngestPipelineMathProcessor
   | IngestPipelineRenameProcessor
   | IngestPipelineSetProcessor
   | IngestPipelineAppendProcessor
@@ -110,4 +167,11 @@ export type IngestPipelineProcessor =
   | IngestPipelineRemoveByPrefixProcessor
   | IngestPipelineRemoveProcessor
   | IngestPipelineReplaceProcessor
+  | IngestPipelineRedactProcessor
+  | IngestPipelineUppercaseProcessor
+  | IngestPipelineLowercaseProcessor
+  | IngestPipelineTrimProcessor
+  | IngestPipelineJoinProcessor
+  | IngestPipelineConcatProcessor
+  | IngestPipelineNetworkDirectionProcessor
   | IngestPipelineManualIngestPipelineProcessor;

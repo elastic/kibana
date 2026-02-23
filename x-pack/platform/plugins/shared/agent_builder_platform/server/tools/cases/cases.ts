@@ -6,11 +6,11 @@
  */
 
 import { z } from '@kbn/zod';
-import { platformCoreTools, ToolType } from '@kbn/onechat-common';
-import type { BuiltinToolDefinition } from '@kbn/onechat-server';
+import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
+import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { CoreSetup } from '@kbn/core/server';
 import type { Case, RelatedCase } from '@kbn/cases-plugin/common/types/domain';
-import type { CasesSearchRequest } from '@kbn/cases-plugin/common/types/api';
+import type { CasesFindRequest } from '@kbn/cases-plugin/common/types/api';
 import type { CasesClient } from '@kbn/cases-plugin/server/client';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { Logger } from '@kbn/logging';
@@ -354,7 +354,7 @@ Returns case details (id, title, description, status, severity, tags, assignees,
         }
 
         // Operation mode 3: Search cases
-        const searchParams: CasesSearchRequest = {
+        const searchParams: CasesFindRequest = {
           sortField: 'updatedAt',
           sortOrder: 'desc',
           perPage: 100,
@@ -362,8 +362,8 @@ Returns case details (id, title, description, status, severity, tags, assignees,
           ...(owner && { owner }),
           ...(search && { search }),
           ...(searchFields && searchFields.length > 0 && { searchFields }),
-          ...(severity && { severity: severity as CasesSearchRequest['severity'] }),
-          ...(status && { status: status as CasesSearchRequest['status'] }),
+          ...(severity && { severity: severity as CasesFindRequest['severity'] }),
+          ...(status && { status: status as CasesFindRequest['status'] }),
           ...(tags && tags.length > 0 && { tags }),
           ...(assignees && assignees.length > 0 && { assignees }),
           ...(reporters && reporters.length > 0 && { reporters }),

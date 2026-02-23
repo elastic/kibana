@@ -8,23 +8,17 @@
  */
 
 import { i18n } from '@kbn/i18n';
-
 import { schema } from '@kbn/config-schema';
 import type { UiSettingsParams } from '@kbn/core-ui-settings-common';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_AGENT, CHAT_EXPERIENCE_TITLE, CLASSIC_AI_ASSISTANT } from './translations';
 
-// Define the chatExperienceSetting with proper typing
 export const chatExperienceSetting: Omit<UiSettingsParams<AIChatExperience>, 'value'> = {
   name: CHAT_EXPERIENCE_TITLE,
   description: i18n.translate(
     'aiAssistantManagementSelection.preferredChatExperienceSettingDescription',
     {
-      defaultMessage: 'Choose which chat experience to use for everyone in this space. {link}',
-      values: {
-        // TODO: add the actual link when available
-        link: '<a href="" target="_blank" rel="noopener noreferrer" class="euiLink euiLink--primary">Learn more</a>',
-      },
+      defaultMessage: 'Choose which chat experience to use for all users in this space.',
     }
   ),
   schema: schema.oneOf(

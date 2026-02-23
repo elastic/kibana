@@ -6,11 +6,13 @@
  */
 
 import { renderHook } from '@testing-library/react';
+import { ProductFeatureSecurityKey } from '@kbn/security-solution-features/keys';
 import { useGapAutoFillCapabilities } from './use_gap_auto_fill_capabilities';
 
 const mockUseLicense = jest.fn();
 const mockUseUserPrivileges = jest.fn();
 const mockUseIsExperimentalFeatureEnabled = jest.fn();
+const mockUseProductFeatureKeys = jest.fn();
 
 jest.mock('../../../common/hooks/use_license', () => ({
   useLicense: () => mockUseLicense(),
@@ -24,16 +26,23 @@ jest.mock('../../../common/hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: () => mockUseIsExperimentalFeatureEnabled(),
 }));
 
+jest.mock('../../../common/hooks/use_product_feature_keys', () => ({
+  useProductFeatureKeys: () => mockUseProductFeatureKeys(),
+}));
+
 describe('useGapAutoFillCapabilities', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseUserPrivileges.mockReturnValue({
-      rulesPrivileges: { read: true, edit: true },
+      rulesPrivileges: { rules: { read: true, edit: true } },
     });
     mockUseLicense.mockReturnValue({
       isEnterprise: () => true,
     });
     mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+    mockUseProductFeatureKeys.mockReturnValue(
+      new Set<string>([ProductFeatureSecurityKey.ruleGapsAutoFill])
+    );
   });
 
   it('returns edit access when license and CRUD permissions are available', () => {
@@ -56,26 +65,26 @@ describe('useGapAutoFillCapabilities', () => {
     expect(result.current.canEditGapAutoFill).toBe(false);
   });
 
-  it('denies access when experimental feature flag is disabled', () => {
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
-
-    const { result } = renderHook(() => useGapAutoFillCapabilities());
-
-    expect(result.current.canAccessGapAutoFill).toBe(false);
-    expect(result.current.canEditGapAutoFill).toBe(false);
-  });
-
   it('denies edit rights when license is enterprise but user lacks CRUD', () => {
     mockUseLicense.mockReturnValue({
       isEnterprise: () => true,
     });
     mockUseUserPrivileges.mockReturnValue({
-      rulesPrivileges: { read: true, edit: false },
+      rulesPrivileges: { rules: { read: true, edit: false } },
     });
 
     const { result } = renderHook(() => useGapAutoFillCapabilities());
 
     expect(result.current.canAccessGapAutoFill).toBe(true);
+    expect(result.current.canEditGapAutoFill).toBe(false);
+  });
+
+  it('denies access when rule gaps auto-fill feature is disabled', () => {
+    mockUseProductFeatureKeys.mockReturnValue(new Set<string>());
+
+    const { result } = renderHook(() => useGapAutoFillCapabilities());
+
+    expect(result.current.canAccessGapAutoFill).toBe(false);
     expect(result.current.canEditGapAutoFill).toBe(false);
   });
 });

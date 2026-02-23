@@ -9,5 +9,4 @@
 
 export { readConfigFile } from './loader';
 export { getConfigFilePath, getConfigRootDir, loadServersConfig } from './utils';
-export { getScoutPlaywrightConfigs, DEFAULT_TEST_PATH_PATTERNS } from './discovery';
 export type { Config } from './config';

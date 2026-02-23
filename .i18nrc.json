@@ -79,7 +79,6 @@
     "interpreter": "src/legacy/core_plugins/interpreter",
     "imageEmbeddable": "src/platform/plugins/private/image_embeddable",
     "kbn": "src/legacy/core_plugins/kibana",
-    "kbn-esql-validation-autocomplete": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src",
     "kbnConfig": "src/platform/packages/shared/kbn-config/src",
     "kbnDocViews": "src/legacy/core_plugins/kbn_doc_views",
     "kibana_utils": "src/platform/plugins/shared/kibana_utils",
@@ -94,7 +93,7 @@
       "src/platform/packages/shared/kbn-management",
       "packages/kbn-management"
     ],
-    "metricsExperience": "src/platform/packages/shared/kbn-unified-metrics-grid/src",
+    "metricsExperience": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src",
     "monaco": "src/platform/packages/shared/kbn-monaco/src",
     "navigation": [
       "src/platform/plugins/shared/navigation",
@@ -182,7 +181,10 @@
     "visTypeVega": "src/platform/plugins/private/vis_types/vega",
     "visTypeVislib": "src/platform/plugins/private/vis_types/vislib",
     "visTypeXy": "src/platform/plugins/private/vis_types/xy",
-    "visualizations": "src/platform/plugins/shared/visualizations",
+    "visualizations": [
+      "src/platform/plugins/shared/visualizations",
+      "src/platform/packages/shared/kbn-visualization-listing-components"
+    ],
     "visualizationUiComponents": "src/platform/packages/shared/kbn-visualization-ui-components",
     "visualizationUtils": "src/platform/packages/shared/kbn-visualization-utils",
     "unifiedDocViewer": [

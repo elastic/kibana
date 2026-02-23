@@ -5,7 +5,6 @@
     "types": [
       "node",
       "cheerio",
-      "@emotion/react/types/css-prop",
       "@kbn/ambient-ui-types",
       "@kbn/ambient-ftr-types"
     ]
@@ -41,7 +40,6 @@
     "@kbn/std",
     "@kbn/test-subj-selector",
     "@kbn/rison",
-    "@kbn/controls-plugin",
     "@kbn/field-formats-plugin",
     "@kbn/axe-config",
     "@kbn/data-view-field-editor-plugin",
@@ -75,8 +73,10 @@
     "@kbn/controls-schemas",
     "@kbn/field-formats-common",
     "@kbn/ai-assistant-management-plugin",
-    "@kbn/core-chrome-navigation-tour",
     "@kbn/setup-node-env",
-    "@kbn/visualizations-common"
+    "@kbn/visualizations-common",
+    "@kbn/unified-data-table",
+    "@kbn/session-notifications-plugin",
+    "@kbn/ui-actions-plugin"
   ]
 }

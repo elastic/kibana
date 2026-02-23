@@ -5,30 +5,51 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo } from 'react';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { EuiDataGridRowHeightsOptions } from '@elastic/eui';
 import {
+  EuiBadge,
+  EuiButton,
   EuiFilterButton,
   EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSpacer,
   EuiLoadingSpinner,
+  EuiSpacer,
+  EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
-import { Sample } from '@kbn/grok-ui';
-import type { FlattenRecord, SampleDocument } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
-import { isEmpty } from 'lodash';
 import type { GrokProcessor } from '@kbn/streamlang';
 import { isActionBlock } from '@kbn/streamlang';
+import type { FlattenRecord, SampleDocument } from '@kbn/streams-schema';
+import { isEmpty } from 'lodash';
+import React, { useCallback, useEffect, useMemo } from 'react';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
+import {
+  useGrokExpressions,
+  GrokExpressionsProvider,
+  GrokSampleWithContext,
+  type DraftGrokExpression,
+  type FieldDefinition,
+} from '@kbn/grok-ui';
 import { useDocViewerSetup } from '../../../hooks/use_doc_viewer_setup';
 import { useDocumentExpansion } from '../../../hooks/use_document_expansion';
 import { useStreamDataViewFieldTypes } from '../../../hooks/use_stream_data_view_field_types';
 import { getPercentageFormatter } from '../../../util/formatters';
+import { MemoPreviewTable, PreviewFlyout, type PreviewTableMode } from '../shared';
+import { RowSelectionContext } from '../shared/preview_table';
+import { toDataTableRecordWithIndex } from '../stream_detail_routing/utils';
+import { DOC_VIEW_DIFF_ID, DocViewerContext } from './doc_viewer_diff';
+import {
+  NoPreviewDocumentsEmptyPrompt,
+  NoProcessingDataAvailableEmptyPrompt,
+} from './empty_prompts';
+import { useDataSourceSelector } from './state_management/data_source_state_machine';
+import { selectDraftProcessor } from './state_management/interactive_mode_machine/selectors';
 import type { PreviewDocsFilterOption } from './state_management/simulation_state_machine';
 import {
   getAllFieldsInOrder,
+  getOriginalSampleDocument,
   getSourceField,
   getTableColumns,
   previewDocsFilterOptions,
@@ -38,24 +59,14 @@ import {
   selectOriginalPreviewRecords,
   selectPreviewRecords,
 } from './state_management/simulation_state_machine/selectors';
+import { isStepUnderEdit } from './state_management/steps_state_machine';
 import {
   useSimulatorSelector,
   useStreamEnrichmentEvents,
   useStreamEnrichmentSelector,
 } from './state_management/stream_enrichment_state_machine';
-import { isStepUnderEdit } from './state_management/steps_state_machine';
 import { selectIsInteractiveMode } from './state_management/stream_enrichment_state_machine/selectors';
-import { DOC_VIEW_DIFF_ID, DocViewerContext } from './doc_viewer_diff';
-import {
-  NoPreviewDocumentsEmptyPrompt,
-  NoProcessingDataAvailableEmptyPrompt,
-} from './empty_prompts';
-import { PreviewFlyout, MemoPreviewTable, type PreviewTableMode } from '../shared';
-import { toDataTableRecordWithIndex } from '../stream_detail_routing/utils';
-import { RowSelectionContext } from '../shared/preview_table';
 import { getActiveDataSourceRef } from './state_management/stream_enrichment_state_machine/utils';
-import { useDataSourceSelector } from './state_management/data_source_state_machine';
-import { selectDraftProcessor } from './state_management/interactive_mode_machine/selectors';
 
 export const ProcessorOutcomePreview = () => {
   const samples = useSimulatorSelector((snapshot) => snapshot.context.samples);
@@ -105,25 +116,55 @@ const formatter = getPercentageFormatter();
 const formatRateToPercentage = (rate?: number) => (rate ? formatter.format(rate) : undefined);
 
 const PreviewDocumentsGroupBy = () => {
-  const { changePreviewDocsFilter } = useStreamEnrichmentEvents();
+  const { changePreviewDocsFilter, clearSimulationConditionFilter: clearConditionFilter } =
+    useStreamEnrichmentEvents();
 
   const previewDocsFilter = useSimulatorSelector((state) => state.context.previewDocsFilter);
-  const hasMetrics = useSimulatorSelector((state) => !!state.context.simulation?.documents_metrics);
-  const simulationFailedRate = useSimulatorSelector((state) =>
-    formatRateToPercentage(state.context.simulation?.documents_metrics.failed_rate)
+  const derivedDocumentMetrics = useSimulatorSelector((state) => {
+    const docs = state.context.simulation?.documents;
+    if (!docs) return undefined;
+
+    const selectedConditionId = state.context.selectedConditionId;
+    const filteredDocs = selectedConditionId
+      ? docs.filter((doc) => doc.processed_by?.includes(selectedConditionId) ?? false)
+      : docs;
+
+    const total = filteredDocs.length;
+    if (total === 0) return undefined;
+
+    const counts = filteredDocs.reduce((acc, doc) => {
+      acc[doc.status] = (acc[doc.status] ?? 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+
+    return {
+      failed_rate: (counts.failed ?? 0) / total,
+      partially_parsed_rate: (counts.partially_parsed ?? 0) / total,
+      skipped_rate: (counts.skipped ?? 0) / total,
+      parsed_rate: (counts.parsed ?? 0) / total,
+      dropped_rate: (counts.dropped ?? 0) / total,
+    };
+  });
+
+  const hasMetrics = Boolean(derivedDocumentMetrics);
+  const simulationFailedRate = formatRateToPercentage(derivedDocumentMetrics?.failed_rate);
+  const simulationSkippedRate = formatRateToPercentage(derivedDocumentMetrics?.skipped_rate);
+  const simulationPartiallyParsedRate = formatRateToPercentage(
+    derivedDocumentMetrics?.partially_parsed_rate
   );
-  const simulationSkippedRate = useSimulatorSelector((state) =>
-    formatRateToPercentage(state.context.simulation?.documents_metrics.skipped_rate)
-  );
-  const simulationPartiallyParsedRate = useSimulatorSelector((state) =>
-    formatRateToPercentage(state.context.simulation?.documents_metrics.partially_parsed_rate)
-  );
-  const simulationParsedRate = useSimulatorSelector((state) =>
-    formatRateToPercentage(state.context.simulation?.documents_metrics.parsed_rate)
-  );
-  const simulationDroppedRate = useSimulatorSelector((state) =>
-    formatRateToPercentage(state.context.simulation?.documents_metrics.dropped_rate)
-  );
+  const simulationParsedRate = formatRateToPercentage(derivedDocumentMetrics?.parsed_rate);
+  const simulationDroppedRate = formatRateToPercentage(derivedDocumentMetrics?.dropped_rate);
+  const selectedConditionId = useSimulatorSelector((state) => state.context.selectedConditionId);
+  const conditionPercentage = useSimulatorSelector((state) => {
+    const conditionId = state.context.selectedConditionId;
+    if (!conditionId) return 0;
+    const metrics = state.context.simulation?.processors_metrics?.[conditionId];
+    if (!metrics) return 0;
+    // Condition match rate is tracked via the simulation-only condition noop processor:
+    // it is skipped when the condition doesn't match.
+    const matchedRate = 1 - (metrics.skipped_rate ?? 0);
+    return Math.round(matchedRate * 100);
+  });
 
   const getFilterButtonPropsFor = (filter: PreviewDocsFilterOption) => ({
     isToggle: previewDocsFilter === filter,
@@ -134,55 +175,108 @@ const PreviewDocumentsGroupBy = () => {
   });
 
   return (
-    <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" wrap>
-      <EuiFilterGroup
-        compressed={true}
-        aria-label={i18n.translate(
-          'xpack.streams.streamDetailView.managementTab.enrichment.processor.outcomeControlsAriaLabel',
-          { defaultMessage: 'Filter for all, matching or unmatching previewed documents.' }
-        )}
-      >
-        <EuiFilterButton
-          {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_all.id)}
+    <EuiFlexGroup alignItems="center" justifyContent="flexStart" wrap gutterSize="m">
+      {selectedConditionId && (
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            onClick={clearConditionFilter}
+            iconType="cross"
+            iconSide="right"
+            size="s"
+            color="text"
+            data-test-subj="streamsAppConditionFilterButton"
+          >
+            <EuiFlexGroup alignItems="center" gutterSize="s">
+              <EuiText size="s">{selectedButtonLabel}</EuiText>
+              <EuiBadge data-test-subj="streamsAppConditionFilterSelectedBadge">
+                {`${conditionPercentage}%`}
+              </EuiBadge>
+            </EuiFlexGroup>
+          </EuiButton>
+        </EuiFlexItem>
+      )}
+      <EuiFlexItem grow={false}>
+        <EuiFilterGroup
+          compressed={true}
+          aria-label={i18n.translate(
+            'xpack.streams.streamDetailView.managementTab.enrichment.processor.outcomeControlsAriaLabel',
+            { defaultMessage: 'Filter for all, matching or unmatching previewed documents.' }
+          )}
         >
-          {previewDocsFilterOptions.outcome_filter_all.label}
-        </EuiFilterButton>
-        <EuiFilterButton
-          {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_parsed.id)}
-          badgeColor="success"
-          numActiveFilters={simulationParsedRate}
-        >
-          {previewDocsFilterOptions.outcome_filter_parsed.label}
-        </EuiFilterButton>
-        <EuiFilterButton
-          {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_partially_parsed.id)}
-          badgeColor="accent"
-          numActiveFilters={simulationPartiallyParsedRate}
-        >
-          {previewDocsFilterOptions.outcome_filter_partially_parsed.label}
-        </EuiFilterButton>
-        <EuiFilterButton
-          {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_skipped.id)}
-          badgeColor="accent"
-          numActiveFilters={simulationSkippedRate}
-        >
-          {previewDocsFilterOptions.outcome_filter_skipped.label}
-        </EuiFilterButton>
-        <EuiFilterButton
-          {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_failed.id)}
-          badgeColor="accent"
-          numActiveFilters={simulationFailedRate}
-        >
-          {previewDocsFilterOptions.outcome_filter_failed.label}
-        </EuiFilterButton>
-        <EuiFilterButton
-          {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_dropped.id)}
-          badgeColor="accent"
-          numActiveFilters={simulationDroppedRate}
-        >
-          {previewDocsFilterOptions.outcome_filter_dropped.label}
-        </EuiFilterButton>
-      </EuiFilterGroup>
+          <EuiToolTip
+            content={previewDocsFilterOptions.outcome_filter_all.tooltip}
+            key={previewDocsFilterOptions.outcome_filter_all.id}
+          >
+            <EuiFilterButton
+              {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_all.id)}
+            >
+              {previewDocsFilterOptions.outcome_filter_all.label}
+            </EuiFilterButton>
+          </EuiToolTip>
+          <EuiToolTip
+            content={previewDocsFilterOptions.outcome_filter_parsed.tooltip}
+            key={previewDocsFilterOptions.outcome_filter_parsed.id}
+          >
+            <EuiFilterButton
+              {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_parsed.id)}
+              badgeColor="success"
+              numActiveFilters={simulationParsedRate}
+            >
+              {previewDocsFilterOptions.outcome_filter_parsed.label}
+            </EuiFilterButton>
+          </EuiToolTip>
+          <EuiToolTip
+            content={previewDocsFilterOptions.outcome_filter_partially_parsed.tooltip}
+            key={previewDocsFilterOptions.outcome_filter_partially_parsed.id}
+          >
+            <EuiFilterButton
+              {...getFilterButtonPropsFor(
+                previewDocsFilterOptions.outcome_filter_partially_parsed.id
+              )}
+              badgeColor="accent"
+              numActiveFilters={simulationPartiallyParsedRate}
+            >
+              {previewDocsFilterOptions.outcome_filter_partially_parsed.label}
+            </EuiFilterButton>
+          </EuiToolTip>
+          <EuiToolTip
+            content={previewDocsFilterOptions.outcome_filter_skipped.tooltip}
+            key={previewDocsFilterOptions.outcome_filter_skipped.id}
+          >
+            <EuiFilterButton
+              {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_skipped.id)}
+              badgeColor="accent"
+              numActiveFilters={simulationSkippedRate}
+            >
+              {previewDocsFilterOptions.outcome_filter_skipped.label}
+            </EuiFilterButton>
+          </EuiToolTip>
+          <EuiToolTip
+            content={previewDocsFilterOptions.outcome_filter_failed.tooltip}
+            key={previewDocsFilterOptions.outcome_filter_failed.id}
+          >
+            <EuiFilterButton
+              {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_failed.id)}
+              badgeColor="accent"
+              numActiveFilters={simulationFailedRate}
+            >
+              {previewDocsFilterOptions.outcome_filter_failed.label}
+            </EuiFilterButton>
+          </EuiToolTip>
+          <EuiToolTip
+            content={previewDocsFilterOptions.outcome_filter_dropped.tooltip}
+            key={previewDocsFilterOptions.outcome_filter_dropped.id}
+          >
+            <EuiFilterButton
+              {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_dropped.id)}
+              badgeColor="accent"
+              numActiveFilters={simulationDroppedRate}
+            >
+              {previewDocsFilterOptions.outcome_filter_dropped.label}
+            </EuiFilterButton>
+          </EuiToolTip>
+        </EuiFilterGroup>
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };
@@ -220,19 +314,18 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
     const isInteractiveMode = selectIsInteractiveMode(state);
     if (!isInteractiveMode || !state.context.interactiveModeRef) return undefined;
 
-    const currentProcessorRef = state.context.interactiveModeRef
-      .getSnapshot()
-      .context.stepRefs.find(
-        (stepRef) =>
-          isActionBlock(stepRef.getSnapshot().context.step) &&
-          isStepUnderEdit(stepRef.getSnapshot())
-      );
+    const stepRefs = state.context.interactiveModeRef.getSnapshot().context.stepRefs;
 
-    if (!currentProcessorRef) return undefined;
+    for (const stepRef of stepRefs) {
+      const snapshot = stepRef.getSnapshot();
+      const step = snapshot.context.step;
 
-    const step = currentProcessorRef.getSnapshot().context.step;
+      if (isActionBlock(step) && isStepUnderEdit(snapshot)) {
+        return getSourceField(step);
+      }
+    }
 
-    if (isActionBlock(step)) return getSourceField(step);
+    return undefined;
   });
 
   const docViewsRegistry = useDocViewerSetup(true);
@@ -258,21 +351,30 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
         };
   });
 
-  const grokCollection = useStreamEnrichmentSelector(
-    (machineState) => machineState.context.grokCollection
-  );
+  // Get grok patterns from the draft processor
+  const grokPatterns =
+    draftProcessor?.processor &&
+    'action' in draftProcessor.processor &&
+    draftProcessor.processor.action === 'grok'
+      ? draftProcessor.processor.patterns
+      : [];
 
+  // Convert patterns to DraftGrokExpression instances for field analysis
+  // Kind of annoying we have to do this here when the Provider will also do this, but
+  // this will change when we allow grok expressions to overwrite the configured field in the UI.
+  const grokExpressions = useGrokExpressions(grokPatterns);
+
+  // NOTE: If a Grok expression attempts to overwrite the configured field (non-additive change)
+  // we defer to the standard preview table showing all columns
   const grokMode =
     draftProcessor?.processor &&
     'action' in draftProcessor.processor &&
     draftProcessor.processor.action === 'grok' &&
     !isEmpty(draftProcessor.processor.from) &&
-    // NOTE: If a Grok expression attempts to overwrite the configured field (non-additive change) we defer to the standard preview table showing all columns
-    !draftProcessor.resources?.grokExpressions.some((grokExpression) => {
-      if (draftProcessor.processor && !(draftProcessor.processor.action === 'grok')) return false;
-      const fieldName = draftProcessor.processor?.from;
+    !grokExpressions.some((grokExpression: DraftGrokExpression) => {
+      const fieldName = (draftProcessor.processor as GrokProcessor).from;
       return Array.from(grokExpression.getFields().values()).some(
-        (field) => field.name === fieldName
+        (field: FieldDefinition) => field.name === fieldName
       );
     });
 
@@ -405,19 +507,13 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
         ? (document: SampleDocument, columnId: string) => {
             const value = document[columnId];
             if (typeof value === 'string' && columnId === validGrokField) {
-              return (
-                <Sample
-                  grokCollection={grokCollection}
-                  draftGrokExpressions={draftProcessor.resources?.grokExpressions ?? []}
-                  sample={value}
-                />
-              );
+              return <GrokSampleWithContext sample={value} />;
             } else {
               return <>&nbsp;</>;
             }
           }
         : undefined,
-    [draftProcessor.resources?.grokExpressions, grokCollection, grokMode, validGrokField]
+    [grokMode, validGrokField]
   );
 
   const hits = useMemo(() => {
@@ -429,8 +525,7 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
 
   const docViewerContext = useMemo(
     () => ({
-      originalSample:
-        originalSamples && currentDoc ? originalSamples[currentDoc.index].document : undefined,
+      originalSample: getOriginalSampleDocument(originalSamples, currentDoc?.index),
     }),
     [currentDoc, originalSamples]
   );
@@ -458,7 +553,7 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
     [userSelectedViewMode, isViewModeForced, setViewMode]
   );
 
-  return (
+  const content = (
     <>
       <RowSelectionContext.Provider value={rowSelectionContextValue}>
         <MemoPreviewTable
@@ -489,6 +584,20 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
       </DocViewerContext.Provider>
     </>
   );
+
+  // Wrap with GrokExpressionsProvider when in grok mode to provide patterns to Sample components
+  return grokMode ? (
+    <GrokExpressionsProvider patterns={grokPatterns}>{content}</GrokExpressionsProvider>
+  ) : (
+    content
+  );
 };
 
 const staticRowHeightsOptions: EuiDataGridRowHeightsOptions = { defaultHeight: 'auto' };
+
+const selectedButtonLabel = i18n.translate(
+  'xpack.streams.streamDetailView.managementTab.enrichment.processor.conditionFilterSelectedBadge',
+  {
+    defaultMessage: 'Selected',
+  }
+);

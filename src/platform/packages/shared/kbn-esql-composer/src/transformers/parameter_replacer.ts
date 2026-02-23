@@ -13,9 +13,9 @@ import type {
   ESQLFunction,
   ESQLLiteral,
   ESQLParamLiteral,
-} from '@kbn/esql-ast';
-import { Builder, isColumn, isFunctionExpression, isParamLiteral } from '@kbn/esql-ast';
-import type { ESQLIdentifier, ESQLProperNode } from '@kbn/esql-ast/src/types';
+} from '@kbn/esql-language';
+import { Builder, isColumn, isFunctionExpression, isParamLiteral } from '@kbn/esql-language';
+import type { ESQLIdentifier, ESQLProperNode } from '@kbn/esql-language/src/types';
 import type { FieldValue, Params } from '../types';
 
 type ReplaceableNodes = ESQLParamLiteral | ESQLLiteral | ESQLColumn | ESQLFunction;

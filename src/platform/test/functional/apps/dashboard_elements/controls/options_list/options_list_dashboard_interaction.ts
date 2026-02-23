@@ -60,7 +60,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
-      await dashboardControls.deleteAllControls();
+      await dashboardControls.deleteAllPinnedControls();
       await dashboardPanelActions.removePanelByTitle('Rendering Test: animal sounds pie');
       await dashboard.clickQuickSave();
     });
@@ -70,14 +70,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await queryBar.setQuery('animal.keyword : "dog" error');
         await queryBar.submitQuery(); // quicker than clicking the submit button, but hides the time picker
         await header.waitUntilLoadingHasFinished();
-        await testSubjects.existOrFail('control-frame-error');
+        await dashboardControls.checkForControlErrorStatus(controlId, true);
       });
 
       it('Can recover from malformed query error', async () => {
         await queryBar.setQuery('animal.keyword : "dog"');
         await queryBar.submitQuery();
         await header.waitUntilLoadingHasFinished();
-        await testSubjects.missingOrFail('control-frame-error');
+        await dashboardControls.checkForControlErrorStatus(controlId, false);
       });
 
       it('Applies dashboard query to options list control', async () => {
@@ -287,7 +287,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         it('dashboard does not load with unsaved changes when changes are discarded', async () => {
           await dashboard.switchToEditMode();
-          await testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
+          await dashboard.ensureMissingUnsavedChangesNotification();
         });
       });
     });
@@ -317,7 +317,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           `emit(doc['sound.keyword'].value.substring(0, 1).toUpperCase())`
         );
         await returnToDashboard();
-        await dashboardControls.deleteAllControls();
+        await dashboardControls.deleteAllPinnedControls();
       });
 
       it('can create options list control on runtime field', async () => {
@@ -347,7 +347,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       after(async () => {
-        await dashboardControls.deleteAllControls();
+        await dashboardControls.deleteAllPinnedControls();
         await dashboard.clickQuickSave();
         await header.waitUntilLoadingHasFinished();
 

@@ -18,15 +18,15 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   useEuiTheme,
-  EuiButtonGroup,
   euiScreenReaderOnly,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { SampleDocument } from '@kbn/streams-schema';
 import ColumnHeaderTruncateContainer from '@kbn/unified-data-table/src/components/column_header_truncate_container';
 import { FieldIcon } from '@kbn/react-field';
-import React, { useMemo, useState, useCallback, createContext, useContext } from 'react';
+import React, { useMemo, useState, useCallback, createContext, useContext, useEffect } from 'react';
 import type {
   IgnoredField,
   DocumentWithIgnoredFields,
@@ -77,6 +77,35 @@ function RowSelectionButton({ rowIndex }: { rowIndex: number }) {
       color={selectedRowIndex === rowIndex ? 'primary' : 'text'}
     />
   );
+}
+
+function RowSelectionCell({
+  rowIndex,
+  setCellProps,
+  highlightColor,
+}: {
+  rowIndex: number;
+  setCellProps: (props: { style: React.CSSProperties }) => void;
+  highlightColor: string;
+}) {
+  const { selectedRowIndex } = useRowSelection();
+  const isSelected = selectedRowIndex === rowIndex;
+
+  useEffect(() => {
+    if (isSelected) {
+      setCellProps({
+        style: {
+          backgroundColor: highlightColor,
+        },
+      });
+    } else {
+      setCellProps({
+        style: {},
+      });
+    }
+  }, [isSelected, setCellProps, highlightColor]);
+
+  return <RowSelectionButton rowIndex={rowIndex} />;
 }
 
 export const MemoPreviewTable = React.memo(PreviewTable);
@@ -207,8 +236,8 @@ export function PreviewTable({
     return allColumns;
   }, [columnOrderHint, displayColumns, documents, mode]);
 
-  // Derive visibleColumns from canonical order
-  const visibleColumns = useMemo(() => {
+  // Derive default visible columns from canonical order
+  const defaultVisibleColumns = useMemo(() => {
     // In summary mode, only show summary column + explicitly enabled columns
     if (mode === 'summary') {
       if (!displayColumns || displayColumns.length === 0) {
@@ -231,21 +260,35 @@ export function PreviewTable({
     return filteredColumns;
   }, [canonicalColumnOrder, displayColumns, mode]);
 
+  // Track user-driven column visibility overrides (null = use defaults)
+  const [userVisibleColumns, setUserVisibleColumns] = useState<string[] | null>(null);
+
+  // Reset user overrides when mode changes so defaults are recalculated
+  useEffect(() => {
+    setUserVisibleColumns(null);
+  }, [mode]);
+
+  // Actual visible columns: user overrides take precedence over defaults
+  const visibleColumns = userVisibleColumns ?? defaultVisibleColumns;
+
   const summaryHasSiblings = useMemo(
     () => visibleColumns.some((column) => column !== SUMMARY_COLUMN_ID),
     [visibleColumns]
   );
 
-  const internalSetVisibleColumns = useMemo<((columns: string[]) => void) | undefined>(() => {
-    if (!setVisibleColumns) {
-      return undefined;
-    }
-    if (mode === 'summary') {
-      return (columns: string[]) =>
-        setVisibleColumns(columns.filter((column) => column !== SUMMARY_COLUMN_ID));
-    }
-    return setVisibleColumns;
-  }, [mode, setVisibleColumns]);
+  const setInternalSetVisibleColumns = useCallback(
+    (columns: string[]) => {
+      setUserVisibleColumns(columns);
+      if (setVisibleColumns) {
+        if (mode === 'summary') {
+          setVisibleColumns(columns.filter((column) => column !== SUMMARY_COLUMN_ID));
+        } else {
+          setVisibleColumns(columns);
+        }
+      }
+    },
+    [mode, setVisibleColumns]
+  );
 
   const sortingConfig = useMemo(() => {
     if (!sorting && !setSorting) {
@@ -280,23 +323,13 @@ export function PreviewTable({
         id: 'selection',
         width: 36,
         headerCellRender: () => null,
-        rowCellRender: ({ rowIndex, setCellProps }) => {
-          // eslint-disable-next-line react-hooks/rules-of-hooks
-          const { selectedRowIndex } = useRowSelection();
-
-          if (selectedRowIndex === rowIndex) {
-            setCellProps({
-              style: {
-                backgroundColor: theme.colors.highlight,
-              },
-            });
-          } else {
-            setCellProps({
-              style: {},
-            });
-          }
-          return <RowSelectionButton rowIndex={rowIndex} />;
-        },
+        rowCellRender: ({ rowIndex, setCellProps }) => (
+          <RowSelectionCell
+            rowIndex={rowIndex}
+            setCellProps={setCellProps}
+            highlightColor={theme.colors.highlight}
+          />
+        ),
       },
     ],
     [theme.colors.highlight]
@@ -411,21 +444,6 @@ export function PreviewTable({
           }
         `;
 
-      const viewModeOptions = [
-        {
-          id: 'columns' as const,
-          label: i18n.translate('xpack.streams.processorOutcomePreview.viewMode.columns', {
-            defaultMessage: 'Columns',
-          }),
-        },
-        {
-          id: 'summary' as const,
-          label: i18n.translate('xpack.streams.processorOutcomePreview.viewMode.summary', {
-            defaultMessage: 'Summary',
-          }),
-        },
-      ];
-
       return (
         <EuiFlexGroup
           responsive={false}
@@ -436,26 +454,35 @@ export function PreviewTable({
           className="euiDataGrid__controls"
         >
           <EuiFlexItem grow={false}>
-            {viewModeToggle && (
-              <EuiButtonGroup
-                legend={i18n.translate(
-                  'xpack.streams.processorOutcomePreview.viewModeToggle.legend',
-                  {
-                    defaultMessage: 'Preview view mode',
-                  }
+            <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
+              <EuiFlexItem grow={false}>
+                {viewModeToggle && (
+                  <EuiButtonEmpty
+                    data-test-subj="streamsAppPreviewTableViewModeToggle"
+                    size="xs"
+                    onClick={() => {
+                      if (viewModeToggle.currentMode === 'summary') {
+                        viewModeToggle.setViewMode('columns');
+                      } else {
+                        setUserVisibleColumns(null);
+                        viewModeToggle.setViewMode('summary');
+                      }
+                    }}
+                    iconType={viewModeToggle.currentMode === 'summary' ? 'eye' : 'eyeClosed'}
+                    color="text"
+                  >
+                    {i18n.translate('xpack.streams.processorOutcomePreview.viewMode.summary', {
+                      defaultMessage: 'Summary',
+                    })}
+                  </EuiButtonEmpty>
                 )}
-                options={viewModeOptions}
-                idSelected={viewModeToggle.currentMode}
-                onChange={(id) => viewModeToggle.setViewMode(id as PreviewTableMode)}
-                buttonSize="compressed"
-                isDisabled={viewModeToggle.isDisabled}
-              />
-            )}
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>{columnControl}</EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
             <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
-              <EuiFlexItem grow={false}>{columnControl}</EuiFlexItem>
               <EuiFlexItem grow={false}>{columnSortingControl}</EuiFlexItem>
               <EuiFlexItem grow={false}>{keyboardShortcutsControl}</EuiFlexItem>
               <EuiFlexItem grow={false}>{displayControl}</EuiFlexItem>
@@ -487,7 +514,7 @@ export function PreviewTable({
       columns={gridColumns}
       columnVisibility={{
         visibleColumns,
-        setVisibleColumns: internalSetVisibleColumns || (() => {}),
+        setVisibleColumns: setInternalSetVisibleColumns,
         canDragAndDropColumns: false,
       }}
       sorting={sortingConfig}

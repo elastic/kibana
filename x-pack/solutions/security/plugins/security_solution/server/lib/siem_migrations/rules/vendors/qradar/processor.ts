@@ -96,8 +96,6 @@ export class QRadarProcessor implements VendorProcessor<QRadarGetProcessor> {
         }
       }
 
-      logger.info(`Prepared Rules : ${JSON.stringify(rulesToUpdate, null, 2)}`);
-
       return rulesToUpdate;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);

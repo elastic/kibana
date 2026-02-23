@@ -19,8 +19,7 @@
   ],
   "kbn_references": [
     "@kbn/i18n",
-    "@kbn/esql-ast",
-    "@kbn/esql-validation-autocomplete",
+    "@kbn/esql-language",
     "@kbn/core",
     "@kbn/logging",
     "@kbn/babel-register",
@@ -43,6 +42,7 @@
     "@kbn/zod",
     "@kbn/inference-tracing",
     "@kbn/core-ui-settings-common",
-    "@kbn/setup-node-env"
+    "@kbn/setup-node-env",
+    "@kbn/es-errors",
   ]
 }

@@ -215,6 +215,7 @@ export function initRoutes(
               }),
             }),
           ]),
+          regenerateApiKey: schema.maybe(schema.boolean({ defaultValue: false })),
         }),
       },
     },
@@ -224,10 +225,11 @@ export function initRoutes(
       res: KibanaResponseFactory
     ): Promise<IKibanaResponse<any>> {
       const taskManager = await taskManagerStart;
-      const { taskIds, schedule } = req.body;
+      const { taskIds, schedule, regenerateApiKey } = req.body;
 
       const taskResult = await taskManager.bulkUpdateSchedules(taskIds, schedule, {
         request: req,
+        regenerateApiKey,
       });
 
       return res.ok({ body: taskResult });
@@ -725,6 +727,32 @@ export function initRoutes(
       return res.ok({
         body: node,
       });
+    }
+  );
+
+  router.post(
+    {
+      path: `/api/invalidate_api_key_task/run_soon`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization because it is used only for testing',
+        },
+      },
+      validate: {},
+    },
+    async function (
+      _: RequestHandlerContext,
+      __: KibanaRequest<any, any, any, any>,
+      res: KibanaResponseFactory
+    ): Promise<IKibanaResponse<any>> {
+      const taskId = 'invalidate_api_keys';
+      try {
+        const taskManager = await taskManagerStart;
+        return res.ok({ body: await taskManager.runSoon(taskId) });
+      } catch (err) {
+        return res.ok({ body: { id: taskId, error: `${err}` } });
+      }
     }
   );
 }

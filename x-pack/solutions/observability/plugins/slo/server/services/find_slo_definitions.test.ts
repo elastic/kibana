@@ -15,12 +15,12 @@ import * as computeHealth from '../domain/services/compute_health';
 import { FindSLODefinitions } from './find_slo_definitions';
 import { createSLO } from './fixtures/slo';
 import { createSLORepositoryMock } from './mocks';
-import type { SLORepository } from './slo_repository';
+import type { SLODefinitionRepository } from './slo_definition_repository';
 
 jest.spyOn(computeHealth, 'computeHealth');
 
 describe('FindSLODefinitions with Health validation', () => {
-  let mockRepository: jest.Mocked<SLORepository>;
+  let mockRepository: jest.Mocked<SLODefinitionRepository>;
   let findSLODefinitions: FindSLODefinitions;
   let mockScopedClusterClient: ScopedClusterClientMock;
   let mockLogger: jest.Mocked<Logger>;
@@ -54,11 +54,12 @@ describe('FindSLODefinitions with Health validation', () => {
         tags: 'tag1,tag2',
       });
 
-      expect(mockRepository.search).toHaveBeenCalledWith(
-        'some search',
-        { page: 2, perPage: 50 },
-        { includeOutdatedOnly: false, tags: ['tag1', 'tag2'] }
-      );
+      expect(mockRepository.search).toHaveBeenCalledWith({
+        search: 'some search',
+        pagination: { page: 2, perPage: 50 },
+        filters: { includeOutdatedOnly: false, tags: ['tag1', 'tag2'] },
+      });
+
       expect(computeHealth.computeHealth).not.toHaveBeenCalled();
     });
   });

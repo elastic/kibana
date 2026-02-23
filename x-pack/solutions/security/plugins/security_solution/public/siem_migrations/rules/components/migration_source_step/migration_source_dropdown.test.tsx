@@ -9,6 +9,13 @@ import { render, screen } from '@testing-library/react';
 import { MigrationSourceDropdown } from './migration_source_dropdown';
 import * as i18n from './translations';
 import { MigrationSource } from '../../../common/types';
+import { MIGRATION_VENDOR_DISPLAY_NAME } from '../../../common/constants';
+import { mocked } from 'jest-mock';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+
+jest.mock('../../../../common/hooks/use_experimental_features', () => ({
+  useIsExperimentalFeatureEnabled: jest.fn(),
+}));
 
 describe('MigrationSourceDropdown', () => {
   const mockSetMigrationSource = jest.fn();
@@ -20,24 +27,25 @@ describe('MigrationSourceDropdown', () => {
     migrationSourceOptions: [
       {
         value: MigrationSource.SPLUNK,
-        inputDisplay: <span>{i18n.MIGRATION_SOURCE_DROPDOWN_OPTION_SPLUNK}</span>,
+        inputDisplay: <span>{MIGRATION_VENDOR_DISPLAY_NAME[MigrationSource.SPLUNK]}</span>,
       },
       {
         value: MigrationSource.QRADAR,
-        inputDisplay: <span>{i18n.MIGRATION_SOURCE_DROPDOWN_OPTION_QRADAR}</span>,
+        inputDisplay: <span>{MIGRATION_VENDOR_DISPLAY_NAME[MigrationSource.QRADAR]}</span>,
       },
     ],
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mocked(useIsExperimentalFeatureEnabled).mockReturnValue(true);
   });
 
   it('renders with initial value', () => {
     render(<MigrationSourceDropdown {...defaultProps} />);
 
     const select = screen.getByTestId('migrationSourceDropdown');
-    expect(select.textContent).toContain(i18n.MIGRATION_SOURCE_DROPDOWN_OPTION_SPLUNK);
+    expect(select.textContent).toContain(MIGRATION_VENDOR_DISPLAY_NAME[MigrationSource.SPLUNK]);
   });
 
   it('disables the dropdown when disabled equals true', () => {
@@ -49,7 +57,13 @@ describe('MigrationSourceDropdown', () => {
 
   it('shows helper text when disabled', () => {
     render(<MigrationSourceDropdown {...defaultProps} disabled={true} />);
-
     expect(screen.getByText(i18n.MIGRATION_SOURCE_DROPDOWN_HELPER_TEXT)).toBeInTheDocument();
+  });
+
+  it('does not show helper text when feature flag is disabled', () => {
+    mocked(useIsExperimentalFeatureEnabled).mockReturnValue(false);
+
+    render(<MigrationSourceDropdown {...defaultProps} disabled={false} />);
+    expect(screen.queryByText(i18n.MIGRATION_SOURCE_DROPDOWN_HELPER_TEXT)).not.toBeInTheDocument();
   });
 });

@@ -62,7 +62,10 @@
     "@kbn/product-doc-base-plugin",
     "@kbn/inference-endpoint-plugin",
     "@kbn/spaces-utils",
-    "@kbn/usage-collection-plugin"
+    "@kbn/usage-collection-plugin",
+    "@kbn/ai-agent-confirmation-modal",
+    "@kbn/ai-assistant-management-plugin",
+    "@kbn/agent-builder-plugin"
   ],
   "exclude": ["target/**/*"]
 }

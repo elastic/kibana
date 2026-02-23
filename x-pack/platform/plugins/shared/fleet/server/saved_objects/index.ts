@@ -34,7 +34,13 @@ import {
   SPACE_SETTINGS_SAVED_OBJECT_TYPE,
 } from '../constants';
 
-import { SettingsSchemaV5, SettingsSchemaV6 } from '../types';
+import {
+  AgentPolicySchemaV3,
+  SettingsSchemaV5,
+  SettingsSchemaV6,
+  SettingsSchemaV7,
+  SettingsSchemaV8,
+} from '../types';
 
 import { migrateSyntheticsPackagePolicyToV8120 } from './migrations/synthetics/to_v8_12_0';
 
@@ -180,7 +186,9 @@ export const getSavedObjectTypes = (
             dynamic: false,
             properties: {},
           },
+          integration_knowledge_enabled: { type: 'boolean' },
           ssl_secret_storage_requirements_met: { type: 'boolean' },
+          download_source_auth_secret_storage_requirements_met: { type: 'boolean' },
         },
       },
       migrations: {
@@ -257,6 +265,34 @@ export const getSavedObjectTypes = (
             create: SettingsSchemaV6,
           },
         },
+        7: {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                integration_knowledge_enabled: { type: 'boolean' },
+              },
+            },
+          ],
+          schemas: {
+            forwardCompatibility: SettingsSchemaV7.extends({}, { unknowns: 'ignore' }),
+            create: SettingsSchemaV7,
+          },
+        },
+        8: {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                download_source_auth_secret_storage_requirements_met: { type: 'boolean' },
+              },
+            },
+          ],
+          schemas: {
+            forwardCompatibility: SettingsSchemaV8.extends({}, { unknowns: 'ignore' }),
+            create: SettingsSchemaV8,
+          },
+        },
       },
     },
     [LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE]: {
@@ -309,6 +345,7 @@ export const getSavedObjectTypes = (
           monitoring_http: { type: 'flattened', index: false },
           monitoring_diagnostics: { type: 'flattened', index: false },
           required_versions: { type: 'flattened', index: false },
+          has_agent_version_conditions: { type: 'boolean' },
         },
       },
       migrations: {
@@ -396,6 +433,20 @@ export const getSavedObjectTypes = (
             },
           ],
         },
+        '8': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                has_agent_version_conditions: { type: 'boolean' },
+              },
+            },
+          ],
+          schemas: {
+            forwardCompatibility: AgentPolicySchemaV3.extends({}, { unknowns: 'ignore' }),
+            create: AgentPolicySchemaV3.extends({}, { unknowns: 'ignore' }),
+          },
+        },
       },
     },
     [AGENT_POLICY_SAVED_OBJECT_TYPE]: {
@@ -445,6 +496,7 @@ export const getSavedObjectTypes = (
             properties: {},
           },
           required_versions: { type: 'flattened', index: false },
+          has_agent_version_conditions: { type: 'boolean' },
         },
       },
       modelVersions: {
@@ -465,6 +517,20 @@ export const getSavedObjectTypes = (
               },
             },
           ],
+        },
+        '3': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                has_agent_version_conditions: { type: 'boolean' },
+              },
+            },
+          ],
+          schemas: {
+            forwardCompatibility: AgentPolicySchemaV3.extends({}, { unknowns: 'ignore' }),
+            create: AgentPolicySchemaV3.extends({}, { unknowns: 'ignore' }),
+          },
         },
       },
     },
@@ -1483,6 +1549,37 @@ export const getSavedObjectTypes = (
             }),
           },
         },
+        3: {
+          changes: [
+            {
+              type: 'data_removal',
+              removedAttributePaths: ['packagePolicyCount'],
+            },
+          ],
+          schemas: {
+            forwardCompatibility: schema.object(
+              {
+                name: schema.string(),
+                namespace: schema.maybe(schema.string()),
+                cloudProvider: schema.string(),
+                accountType: schema.maybe(schema.string()),
+                vars: schema.any(),
+                created_at: schema.string(),
+                updated_at: schema.string(),
+              },
+              { unknowns: 'ignore' }
+            ),
+            create: schema.object({
+              name: schema.string(),
+              namespace: schema.maybe(schema.string()),
+              cloudProvider: schema.string(),
+              accountType: schema.maybe(schema.string()),
+              vars: schema.any(),
+              created_at: schema.string(),
+              updated_at: schema.string(),
+            }),
+          },
+        },
       },
     },
   };
@@ -1516,6 +1613,8 @@ export const OUTPUT_ENCRYPTED_FIELDS = new Set([
 
 export const FLEET_SERVER_HOST_ENCRYPTED_FIELDS = new Set([{ key: 'ssl' }]);
 
+export const DOWNLOAD_SOURCE_ENCRYPTED_FIELDS = new Set([{ key: 'ssl' }, { key: 'auth' }]);
+
 export function registerEncryptedSavedObjects(
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
 ) {
@@ -1543,7 +1642,7 @@ export function registerEncryptedSavedObjects(
   });
   encryptedSavedObjects.registerType({
     type: DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
-    attributesToEncrypt: new Set([{ key: 'ssl' }]),
+    attributesToEncrypt: DOWNLOAD_SOURCE_ENCRYPTED_FIELDS,
     // enforceRandomId allows to create an SO with an arbitrary id
     enforceRandomId: false,
   });

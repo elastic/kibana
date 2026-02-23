@@ -5,27 +5,9 @@
  * 2.0.
  */
 
-import { lazy } from 'react';
 import type { NavigationTreeDefinition, NodeDefinition } from '@kbn/core-chrome-browser';
 import { i18n } from '@kbn/i18n';
 import { DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
-
-const LazyIconBriefcase = lazy(() =>
-  import('@kbn/observability-nav-icons').then(({ iconBriefcase }) => ({ default: iconBriefcase }))
-);
-const LazyIconMl = lazy(() =>
-  import('@kbn/observability-nav-icons').then(({ iconProductMl }) => ({ default: iconProductMl }))
-);
-const LazyIconProductStreamsWired = lazy(() =>
-  import('@kbn/observability-nav-icons').then(({ iconProductStreamsWired }) => ({
-    default: iconProductStreamsWired,
-  }))
-);
-const LazyIconProductCloudInfra = lazy(() =>
-  import('@kbn/observability-nav-icons').then(({ iconProductCloudInfra }) => ({
-    default: iconProductCloudInfra,
-  }))
-);
 
 export function filterForFeatureAvailability(
   node: NodeDefinition,
@@ -41,10 +23,12 @@ export const createNavigationTree = ({
   streamsAvailable,
   overviewAvailable = true,
   isCasesAvailable = true,
+  showAiAssistant = true,
 }: {
   streamsAvailable?: boolean;
   overviewAvailable?: boolean;
   isCasesAvailable?: boolean;
+  showAiAssistant?: boolean;
 }): NavigationTreeDefinition => {
   return {
     body: [
@@ -64,12 +48,14 @@ export const createNavigationTree = ({
           defaultMessage: 'Discover',
         }),
         link: 'discover',
+        icon: 'productDiscover',
       },
       {
         title: i18n.translate('xpack.serverlessObservability.nav.dashboards', {
           defaultMessage: 'Dashboards',
         }),
         link: 'dashboards',
+        icon: 'productDashboard',
         getIsActive: ({ pathNameSerialized, prepend }) => {
           return pathNameSerialized.startsWith(prepend('/app/dashboards'));
         },
@@ -84,7 +70,7 @@ export const createNavigationTree = ({
       ...filterForFeatureAvailability(
         {
           link: 'observability-overview:cases' as const,
-          icon: LazyIconBriefcase,
+          icon: 'briefcase',
           children: [
             {
               link: 'observability-overview:cases_configure' as const,
@@ -106,7 +92,7 @@ export const createNavigationTree = ({
       ...filterForFeatureAvailability(
         {
           link: 'streams' as const,
-          icon: LazyIconProductStreamsWired,
+          icon: 'productStreamsWired',
         },
         streamsAvailable
       ),
@@ -175,7 +161,7 @@ export const createNavigationTree = ({
           defaultMessage: 'Infrastructure',
         }),
         renderAs: 'panelOpener',
-        icon: LazyIconProductCloudInfra,
+        icon: 'productCloudInfra',
         children: [
           {
             children: [
@@ -191,13 +177,23 @@ export const createNavigationTree = ({
           },
         ],
       },
-      {
-        link: 'observabilityAIAssistant',
-        title: i18n.translate('xpack.serverlessObservability.nav.aiAssistant', {
-          defaultMessage: 'AI Assistant',
-        }),
-        icon: 'sparkles',
-      },
+      ...filterForFeatureAvailability(
+        {
+          link: 'observabilityAIAssistant',
+          title: i18n.translate('xpack.serverlessObservability.nav.aiAssistant', {
+            defaultMessage: 'AI Assistant',
+          }),
+          icon: 'sparkles',
+        },
+        showAiAssistant
+      ),
+      ...filterForFeatureAvailability(
+        {
+          link: 'agent_builder',
+          icon: 'productAgent',
+        },
+        !showAiAssistant
+      ),
       ...filterForFeatureAvailability(
         {
           id: 'machine_learning-landing',
@@ -205,7 +201,7 @@ export const createNavigationTree = ({
           title: i18n.translate('xpack.serverlessObservability.nav.machineLearning', {
             defaultMessage: 'Machine Learning',
           }),
-          icon: LazyIconMl,
+          icon: 'productML',
           children: [
             {
               id: 'category-ml_overview',
@@ -216,6 +212,26 @@ export const createNavigationTree = ({
                 },
                 {
                   link: 'ml:dataVisualizer',
+                },
+                {
+                  link: 'ml:dataDrift',
+                  sideNavStatus: 'hidden',
+                },
+                {
+                  link: 'ml:dataDriftPage',
+                  sideNavStatus: 'hidden',
+                },
+                {
+                  link: 'ml:fileUpload',
+                  sideNavStatus: 'hidden',
+                },
+                {
+                  link: 'ml:indexDataVisualizer',
+                  sideNavStatus: 'hidden',
+                },
+                {
+                  link: 'ml:indexDataVisualizerPage',
+                  sideNavStatus: 'hidden',
                 },
               ],
             },
@@ -266,6 +282,10 @@ export const createNavigationTree = ({
                   ),
                 },
                 {
+                  link: 'ml:logRateAnalysisPage',
+                  sideNavStatus: 'hidden',
+                },
+                {
                   link: 'ml:logPatternAnalysis',
                   title: i18n.translate(
                     'xpack.serverlessObservability.nav.ml.aiops_labs.log_pattern_analysis',
@@ -275,6 +295,10 @@ export const createNavigationTree = ({
                   ),
                 },
                 {
+                  link: 'ml:logPatternAnalysisPage',
+                  sideNavStatus: 'hidden',
+                },
+                {
                   link: 'ml:changePointDetections',
                   title: i18n.translate(
                     'xpack.serverlessObservability.nav.ml.aiops_labs.change_point_detection',
@@ -282,6 +306,10 @@ export const createNavigationTree = ({
                       defaultMessage: 'Change point detection',
                     }
                   ),
+                },
+                {
+                  link: 'ml:changePointDetectionsPage',
+                  sideNavStatus: 'hidden',
                 },
               ],
             },
@@ -441,24 +469,25 @@ export const createNavigationTree = ({
             },
             overviewAvailable
           ),
-          ...filterForFeatureAvailability(
-            {
-              title: i18n.translate('xpack.serverlessObservability.nav.projectSettings.ai', {
-                defaultMessage: 'AI',
-              }),
-              children: [
-                {
-                  link: 'management:genAiSettings',
-                  breadcrumbStatus: 'hidden',
-                },
-                {
-                  link: 'management:observabilityAiAssistantManagement',
-                  breadcrumbStatus: 'hidden',
-                },
-              ],
-            },
-            overviewAvailable
-          ),
+          {
+            title: i18n.translate('xpack.serverlessObservability.nav.projectSettings.ai', {
+              defaultMessage: 'AI',
+            }),
+            children: [
+              {
+                link: 'management:genAiSettings' as const,
+                breadcrumbStatus: 'hidden' as const,
+              },
+              ...(showAiAssistant
+                ? [
+                    {
+                      link: 'management:observabilityAiAssistantManagement' as const,
+                      breadcrumbStatus: 'hidden' as const,
+                    },
+                  ]
+                : []),
+            ],
+          },
           {
             id: 'content',
             title: i18n.translate('xpack.serverlessObservability.nav.projectSettings.content', {

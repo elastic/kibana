@@ -104,6 +104,8 @@ dependsOn:
   - '@kbn/react-query'
   - '@kbn/core-ui-settings-browser-mocks'
   - '@kbn/management-settings-ids'
+  - '@kbn/agent-builder-plugin'
+  - '@kbn/cloud-plugin'
 tags:
   - plugin
   - prod

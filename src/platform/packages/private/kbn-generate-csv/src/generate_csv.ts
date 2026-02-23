@@ -56,6 +56,7 @@ interface Dependencies {
 export class CsvGenerator {
   private csvContainsFormulas = false;
   private maxSizeReached = false;
+  private maxRowsReached = false;
   private csvRowCount = 0;
 
   constructor(
@@ -67,7 +68,9 @@ export class CsvGenerator {
     private cancellationToken: CancellationToken,
     private logger: Logger,
     private stream: Writable,
-    private jobId: string
+    private isServerless: boolean = false,
+    private jobId: string,
+    private useInternalUser: boolean = false
   ) {}
   /*
    * Load field formats for each field in the list
@@ -266,6 +269,7 @@ export class CsvGenerator {
       ),
       createSearchSource(),
     ]);
+    searchSource.setField('timezone', settings.timezone);
 
     const { startedAt, retryAt } = this.taskInstanceFields;
     if (startedAt) {
@@ -306,7 +310,7 @@ export class CsvGenerator {
       }
     }
 
-    const { maxSizeBytes, bom, escapeFormulaValues, timezone } = settings;
+    const { maxSizeBytes, maxRows, bom, escapeFormulaValues, timezone } = settings;
     const indexPatternTitle = index.getIndexPattern();
     const builder = new MaxSizeStringBuilder(this.stream, byteSizeValueToNumber(maxSizeBytes), bom);
     const warnings: string[] = [];
@@ -327,7 +331,8 @@ export class CsvGenerator {
         settings,
         this.clients,
         abortController,
-        this.logger
+        this.logger,
+        this.useInternalUser
       );
       logger.debug('Using search strategy: scroll', { tags: [this.jobId] });
     } else {
@@ -337,7 +342,8 @@ export class CsvGenerator {
         settings,
         this.clients,
         abortController,
-        this.logger
+        this.logger,
+        this.useInternalUser
       );
       logger.debug('Using search strategy: pit', { tags: [this.jobId] });
     }
@@ -368,7 +374,9 @@ export class CsvGenerator {
           break;
         }
 
-        searchSource.setField('size', settings.scroll.size);
+        // override the scroll size if the maxRows limit is smaller
+        const size = Math.min(settings.scroll.size, maxRows);
+        searchSource.setField('size', size);
 
         let results: estypes.SearchResponse<unknown> | undefined;
         try {
@@ -435,6 +443,20 @@ export class CsvGenerator {
 
         // update iterator
         currentRecord += table.rows.length;
+
+        // stop generating the report if the
+        // current number of rows is >= the max row limit
+        if (currentRecord >= maxRows - 1) {
+          this.logger.warn(
+            `Your requested export includes ${totalRecords} rows, which has exceeded the recommended row limit (${maxRows}).${
+              this.isServerless
+                ? ''
+                : ' This limit can be configured in kibana.yml, but increasing it may impact performance.'
+            }`
+          );
+          this.maxRowsReached = true;
+          break;
+        }
       } while (totalRecords != null && currentRecord < totalRecords - 1);
 
       // Add warnings to be logged
@@ -464,7 +486,15 @@ export class CsvGenerator {
 
     logger.info(`Finished generating. Row count: ${this.csvRowCount}.`, { tags: [this.jobId] });
 
-    if (!this.maxSizeReached && this.csvRowCount !== totalRecords) {
+    if (this.maxRowsReached) {
+      warnings.push(
+        i18nTexts.csvMaxRowsWarning({
+          isServerless: this.isServerless,
+          maxRows,
+          expected: totalRecords ?? 0,
+        })
+      );
+    } else if (!this.maxSizeReached && !this.maxRowsReached && this.csvRowCount !== totalRecords) {
       logger.warn(
         `ES scroll returned ` +
           `${this.csvRowCount > (totalRecords ?? 0) ? 'more' : 'fewer'} total hits than expected!`,

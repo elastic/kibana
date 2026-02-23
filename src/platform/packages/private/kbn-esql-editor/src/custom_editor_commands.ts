@@ -8,11 +8,19 @@
  */
 
 import { monaco } from '@kbn/monaco';
-import { ESQLVariableType, type ESQLControlVariable, QuerySource } from '@kbn/esql-types';
-import { ControlTriggerSource } from '@kbn/esql-types';
+import {
+  ESQLVariableType,
+  QuerySource,
+  type ESQLControlsContext,
+  ControlTriggerSource,
+  type ESQLControlVariable,
+  type ESQLSourceResult,
+  type IndexAutocompleteItem,
+} from '@kbn/esql-types';
 import type { CoreStart } from '@kbn/core/public';
-import type { ESQLEditorDeps, ControlsContext } from './types';
+import type { ESQLEditorDeps } from './types';
 import type { ESQLEditorTelemetryService } from './telemetry/telemetry_service';
+import { IndicesBrowserOpenMode } from './resource_browser/types';
 
 export interface MonacoCommandDependencies {
   application?: CoreStart['application'];
@@ -21,8 +29,16 @@ export interface MonacoCommandDependencies {
   editorRef: React.RefObject<monaco.editor.IStandaloneCodeEditor>;
   getCurrentQuery: () => string;
   esqlVariables: React.RefObject<ESQLControlVariable[] | undefined>;
-  controlsContext: React.RefObject<ControlsContext | undefined>;
+  controlsContext: React.RefObject<ESQLControlsContext | undefined>;
   openTimePickerPopover: () => void;
+  openIndicesBrowser?: (options?: {
+    openedFrom?: IndicesBrowserOpenMode;
+    preloadedSources?: ESQLSourceResult[];
+    preloadedTimeSeriesSources?: IndexAutocompleteItem[];
+  }) => void;
+  openFieldsBrowser?: (options?: {
+    preloadedFields?: Array<{ name: string; type?: string }>;
+  }) => void;
 }
 
 const triggerControl = async (
@@ -32,10 +48,10 @@ const triggerControl = async (
   uiActions: ESQLEditorDeps['uiActions'],
   triggerSource: ControlTriggerSource,
   esqlVariables?: ESQLControlVariable[],
-  onSaveControl?: ControlsContext['onSaveControl'],
-  onCancelControl?: ControlsContext['onCancelControl']
+  onSaveControl?: ESQLControlsContext['onSaveControl'],
+  onCancelControl?: ESQLControlsContext['onCancelControl']
 ) => {
-  await uiActions.getTrigger('ESQL_CONTROL_TRIGGER').exec({
+  await uiActions.executeTriggerActions('ESQL_CONTROL_TRIGGER', {
     queryString,
     variableType,
     cursorPosition: position,
@@ -56,6 +72,8 @@ export const registerCustomCommands = (deps: MonacoCommandDependencies): monaco.
     esqlVariables,
     controlsContext,
     openTimePickerPopover,
+    openIndicesBrowser,
+    openFieldsBrowser,
   } = deps;
 
   const commandDisposables: monaco.IDisposable[] = [];
@@ -77,6 +95,66 @@ export const registerCustomCommands = (deps: MonacoCommandDependencies): monaco.
     })
   );
 
+  // Open indices browser command
+  if (openIndicesBrowser) {
+    commandDisposables.push(
+      monaco.editor.registerCommand('esql.indicesBrowser.open', (...args) => {
+        const [, payload] = args;
+        let preloadedSources: ESQLSourceResult[] | undefined;
+        let preloadedTimeSeriesSources: IndexAutocompleteItem[] | undefined;
+
+        if (payload?.sources) {
+          try {
+            preloadedSources = JSON.parse(payload.sources) as ESQLSourceResult[];
+          } catch {
+            preloadedSources = undefined;
+          }
+        }
+
+        if (payload?.timeSeriesSources) {
+          try {
+            preloadedTimeSeriesSources = JSON.parse(
+              payload.timeSeriesSources
+            ) as IndexAutocompleteItem[];
+          } catch {
+            preloadedTimeSeriesSources = undefined;
+          }
+        }
+
+        openIndicesBrowser({
+          openedFrom: IndicesBrowserOpenMode.Autocomplete,
+          preloadedSources,
+          preloadedTimeSeriesSources,
+        });
+      })
+    );
+  }
+
+  // Open fields browser command (triggered by the "Browse fields" autocomplete item)
+  if (openFieldsBrowser) {
+    commandDisposables.push(
+      monaco.editor.registerCommand('esql.fieldsBrowser.open', (...args) => {
+        const [, payload] = args;
+        let preloadedFields: Array<{ name: string; type?: string }> | undefined;
+
+        if (payload?.fields) {
+          try {
+            const parsed = JSON.parse(payload.fields) as unknown;
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              preloadedFields = parsed as Array<{ name: string; type?: string }>;
+            }
+          } catch {
+            preloadedFields = undefined;
+          }
+        }
+
+        openFieldsBrowser({
+          preloadedFields,
+        });
+      })
+    );
+  }
+
   // Accept recommended query command
   commandDisposables.push(
     monaco.editor.registerCommand('esql.recommendedQuery.accept', (...args) => {
@@ -97,9 +175,11 @@ export const registerCustomCommands = (deps: MonacoCommandDependencies): monaco.
   commandDisposables.push(
     monaco.editor.registerCommand('esql.multiCommands', (...args) => {
       const [, { commands }] = args;
-      const commandsToExecute: { id: string; payload?: unknown }[] = JSON.parse(commands);
+      const commandsToExecute: { id: string; payload?: unknown; arguments?: unknown[] }[] =
+        JSON.parse(commands);
       commandsToExecute.forEach((command) => {
-        editorRef.current?.trigger(undefined, command.id, command.payload ?? {});
+        const payload = command.payload ?? command.arguments?.[0] ?? {};
+        editorRef.current?.trigger(undefined, command.id, payload);
       });
     })
   );
@@ -160,8 +240,9 @@ export const registerCustomCommands = (deps: MonacoCommandDependencies): monaco.
 
 export const addEditorKeyBindings = (
   editor: monaco.editor.IStandaloneCodeEditor,
-  onQuerySubmit: (source: any) => void,
-  toggleVisor: () => void
+  onQuerySubmit: (source: QuerySource) => void,
+  toggleVisor: () => void,
+  onPrettifyQuery: () => void
 ) => {
   // Add editor key bindings
   editor.addCommand(
@@ -174,6 +255,14 @@ export const addEditorKeyBindings = (
     // eslint-disable-next-line no-bitwise
     monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyK,
     () => toggleVisor()
+  );
+
+  editor.addCommand(
+    // eslint-disable-next-line no-bitwise
+    monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyI,
+    () => {
+      onPrettifyQuery();
+    }
   );
 };
 

@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/naming-convention */
-
 import type { EuiCallOutProps } from '@elastic/eui';
 import {
   EuiBadge,
@@ -80,12 +78,10 @@ const ProcessorErrorMessage = ({ message }: { message: string }) => {
 export const ProcessorMetricBadges = ({
   detected_fields,
   failed_rate,
-  skipped_rate,
   parsed_rate,
 }: ProcessorMetricBadgesProps) => {
   const detectedFieldsCount = detected_fields.length;
   const parsedRate = parsed_rate > 0 ? formatter.format(parsed_rate) : null;
-  const skippedRate = skipped_rate > 0 ? formatter.format(skipped_rate) : null;
   const failedRate = failed_rate > 0 ? formatter.format(failed_rate) : null;
 
   return (
@@ -131,20 +127,6 @@ export const ProcessorMetricBadges = ({
                 </EuiFlexGroup>
               </EuiTextColor>
             </span>
-          </EuiToolTip>
-        </EuiFlexItem>
-      )}
-      {skippedRate && (
-        <EuiFlexItem>
-          <EuiToolTip
-            position="top"
-            content={i18n.translate('xpack.streams.processorMetricBadges.euiBadge.skippedRate', {
-              defaultMessage:
-                '{skippedRate} of the sampled documents were skipped due to the set condition',
-              values: { skippedRate },
-            })}
-          >
-            <EuiTextColor color="default">{skippedRate}</EuiTextColor>
           </EuiToolTip>
         </EuiFlexItem>
       )}

@@ -35,19 +35,6 @@ if (Number.isNaN(concurrency)) {
 const BASE_JOBS = 1;
 const MAX_JOBS = 500;
 
-function getScoutConfigGroupType(configPath: string): string | null {
-  // Match platform paths: x-pack/platform/... or src/platform/...
-  if (/^(x-pack|src)\/platform\//.test(configPath)) {
-    return 'platform';
-  }
-  // Match solution paths: x-pack/solutions/<solution>/plugins/...
-  const match = configPath.match(/^x-pack\/solutions\/([^/]+)\/plugins\//);
-  if (match) {
-    return match[1];
-  }
-  return null;
-}
-
 function getTestSuitesFromJson(json: string) {
   const fail = (errorMsg: string) => {
     console.error('+++ Invalid test config provided');
@@ -129,6 +116,7 @@ function getTestSuitesFromJson(json: string) {
 }
 
 const testSuites = getTestSuitesFromJson(configJson);
+const hasScoutSuites = testSuites.some((t) => t.type === 'scoutConfig' && t.count > 0);
 
 const totalJobs = testSuites.reduce((acc, t) => acc + t.count, BASE_JOBS);
 
@@ -159,6 +147,19 @@ steps.push({
   key: 'build',
   if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''",
 });
+
+if (hasScoutSuites) {
+  steps.push({
+    command: '.buildkite/scripts/steps/test/scout/discover_playwright_configs.sh',
+    label: 'Discover Scout Playwright configs',
+    agents: expandAgentQueue('n2-4-spot'),
+    key: 'scout_playwright_configs',
+    timeout_in_minutes: 30,
+    retry: {
+      automatic: [{ exit_status: '-1', limit: 3 }],
+    },
+  });
+}
 
 let suiteIndex = 0;
 for (const testSuite of testSuites) {
@@ -191,13 +192,12 @@ for (const testSuite of testSuites) {
 
   if (testSuite.type === 'scoutConfig') {
     const usesParallelWorkers = testSuite.scoutConfig.endsWith('parallel.playwright.config.ts');
-    const scoutConfigGroupType = getScoutConfigGroupType(testSuite.scoutConfig);
 
     steps.push({
-      command: `.buildkite/scripts/steps/test/scout_configs.sh`,
+      command: `.buildkite/scripts/steps/test/scout/flaky_configs.sh`,
       env: {
         SCOUT_CONFIG: testSuite.scoutConfig,
-        SCOUT_CONFIG_GROUP_TYPE: scoutConfigGroupType!,
+        SCOUT_REPORTER_ENABLED: 'true',
       },
       key: `${TestSuiteType.SCOUT}-${suiteIndex++}`,
       label: `${testSuite.scoutConfig}`,
@@ -206,7 +206,7 @@ for (const testSuite of testSuites) {
       concurrency_group: process.env.UUID,
       concurrency_method: 'eager',
       agents: expandAgentQueue(usesParallelWorkers ? 'n2-8-spot' : 'n2-4-spot'),
-      depends_on: 'build',
+      depends_on: hasScoutSuites ? ['build', 'scout_playwright_configs'] : 'build',
       timeout_in_minutes: 60,
       cancel_on_build_failing: true,
       retry: {

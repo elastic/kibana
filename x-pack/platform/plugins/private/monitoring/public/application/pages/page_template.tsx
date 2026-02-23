@@ -10,6 +10,7 @@ import type { FC, PropsWithChildren } from 'react';
 import React, { useContext, useState, useEffect, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { AutoOpsPromotionCallout } from '@kbn/autoops-promotion-callout';
 import { useTitle } from '../hooks/use_title';
 import { MonitoringToolbar } from '../../components/shared/toolbar';
@@ -28,6 +29,7 @@ import { SetupModeToggleButton } from '../../components/setup_mode/toggle_button
 import { HeaderActionMenuContext } from '../contexts/header_action_menu_context';
 import { HeaderMenuPortal } from '../../components/header_menu';
 import { Legacy } from '../../legacy_shims';
+import type { MonitoringStartServices } from '../../types';
 
 export interface TabMenuItem {
   id: string;
@@ -64,6 +66,17 @@ export const PageTemplate: FC<PropsWithChildren<PageTemplateProps>> = ({
   const [hasError, setHasError] = useState(false);
   const handleRequestError = useRequestErrorHandler();
   const { setHeaderActionMenu, theme$ } = useContext(HeaderActionMenuContext);
+  const { services } = useKibana<MonitoringStartServices>();
+  const learnMoreLink = services.docLinks.links.cloud.connectToAutoops;
+  const cloudConnectUrl = services.application.getUrlForApp('cloud_connect');
+  const handleConnectClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    services.application.navigateToApp('cloud_connect');
+  };
+  const hasCloudConnectPermission = Boolean(
+    services.application.capabilities.cloudConnect?.show ||
+      services.application.capabilities.cloudConnect?.configure
+  );
 
   const getPageDataResponseHandler = useCallback(
     (result: any) => {
@@ -114,8 +127,15 @@ export const PageTemplate: FC<PropsWithChildren<PageTemplateProps>> = ({
   };
 
   const { supported, enabled } = getSetupModeState();
+
+  // Check AutoOps connection status
+  const cloudConnectStatus = Legacy.shims.useCloudConnectStatus();
   const shouldShowAutoOpsPromotion =
-    showAutoOpsPromotion && !Legacy.shims.isCloud && Legacy.shims.hasEnterpriseLicense;
+    showAutoOpsPromotion &&
+    !Legacy.shims.isCloud &&
+    Legacy.shims.hasEnterpriseLicense &&
+    !cloudConnectStatus.isLoading &&
+    !cloudConnectStatus.isCloudConnectAutoopsEnabled;
 
   return (
     <EuiPageTemplate
@@ -135,7 +155,14 @@ export const PageTemplate: FC<PropsWithChildren<PageTemplateProps>> = ({
         )}
         <MonitoringToolbar pageTitle={pageTitle} onRefresh={onRefresh} />
         <EuiSpacer size="m" />
-        {shouldShowAutoOpsPromotion && <AutoOpsPromotionCallout />}
+        {shouldShowAutoOpsPromotion && (
+          <AutoOpsPromotionCallout
+            learnMoreLink={learnMoreLink}
+            cloudConnectUrl={cloudConnectUrl}
+            onConnectClick={handleConnectClick}
+            hasCloudConnectPermission={hasCloudConnectPermission}
+          />
+        )}
         <EuiSpacer size="m" />
         {tabs && (
           <EuiTabs size="l">

@@ -9,7 +9,7 @@ import React from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { load } from 'js-yaml';
-import { isEqual, omit } from 'lodash';
+import { isEqual, omit, pick } from 'lodash';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink } from '@elastic/eui';
@@ -46,11 +46,7 @@ import {
   useFleetStatus,
   sendCreatePackagePolicyForRq,
 } from '../../../../../hooks';
-import {
-  ExperimentalFeaturesService,
-  isVerificationError,
-  packageToPackagePolicy,
-} from '../../../../../services';
+import { isVerificationError, packageToPackagePolicy } from '../../../../../services';
 import type {
   CreatePackagePolicyResponse,
   NewPackagePolicyInput,
@@ -137,10 +133,7 @@ export const createAgentPolicyIfNeeded = async ({
     }
 
     // Skip policy creation for agentless as it's done through agentless_policies API
-    if (
-      ExperimentalFeaturesService.get().useAgentlessAPIInUI &&
-      newAgentPolicy.supports_agentless
-    ) {
+    if (newAgentPolicy.supports_agentless) {
       return;
     }
 
@@ -155,8 +148,8 @@ export const createAgentPolicyIfNeeded = async ({
 async function savePackagePolicy(pkgPolicy: CreatePackagePolicyRequest['body']) {
   const { policy, forceCreateNeeded } = await prepareInputPackagePolicyDataset(pkgPolicy);
 
-  // If agentless and feature enabled use new API
-  if (ExperimentalFeaturesService.get().useAgentlessAPIInUI && policy.supports_agentless) {
+  // If agentless use agentless policies API
+  if (policy.supports_agentless) {
     function formatPackage(pkg: NewPackagePolicy['package']) {
       return omit(pkg, 'title');
     }
@@ -291,6 +284,7 @@ export function useOnSubmit({
   setNewAgentPolicy,
   setSelectedPolicyTab,
   isAddIntegrationFlyout,
+  defaultPolicyData,
 }: {
   packageInfo?: PackageInfo;
   newAgentPolicy: NewAgentPolicy;
@@ -303,6 +297,7 @@ export function useOnSubmit({
   setNewAgentPolicy: (policy: NewAgentPolicy) => void;
   setSelectedPolicyTab: (tab: SelectedPolicyTab) => void;
   isAddIntegrationFlyout?: boolean;
+  defaultPolicyData?: Partial<NewPackagePolicy>;
 }) {
   const { notifications, docLinks } = useStartServices();
   const { spaceId } = useFleetStatus();
@@ -330,7 +325,7 @@ export function useOnSubmit({
   const [validationResults, setValidationResults] = useState<PackagePolicyValidationResults>();
   const [hasAgentPolicyError, setHasAgentPolicyError] = useState<boolean>(false);
 
-  const { isAgentlessIntegration, isAgentlessAgentPolicy } = useAgentless();
+  const { getAgentlessStatusForPackage, isAgentlessAgentPolicy } = useAgentless();
 
   const hasErrors = validationResults ? validationHasErrors(validationResults) : false;
 
@@ -426,6 +421,29 @@ export function useOnSubmit({
           integrationToEnable
         );
 
+        if (defaultPolicyData) {
+          Object.assign(
+            basePackagePolicy,
+            pick(
+              defaultPolicyData,
+              'name',
+              'description',
+              'namespace',
+              'policy_ids',
+              'output_id',
+              'cloud_connector_id',
+              'cloud_connector_name',
+              'inputs',
+              'vars',
+              'elasticsearch',
+              'overrides',
+              'supports_agentless',
+              'supports_cloud_connector',
+              'additional_datastreams_permissions'
+            )
+          );
+        }
+
         // Set the package policy with the fetched package
         updatePackagePolicy(basePackagePolicy);
         setIsInitialized(true);
@@ -447,6 +465,8 @@ export function useOnSubmit({
     integration,
     setIntegration,
     isAddIntegrationFlyout,
+    defaultPolicyData,
+    setSelectedPolicyTab,
   ]);
 
   useEffect(() => {
@@ -485,7 +505,8 @@ export function useOnSubmit({
   });
   const prevSetupTechnology = setupTechnologyRef.current;
   const isAgentlessSelected =
-    isAgentlessIntegration(packageInfo) && selectedSetupTechnology === SetupTechnology.AGENTLESS;
+    getAgentlessStatusForPackage(packageInfo).isAgentless &&
+    selectedSetupTechnology === SetupTechnology.AGENTLESS;
 
   const newInputs = useMemo(() => {
     return packagePolicy.inputs.map((input, i) => {
@@ -546,7 +567,8 @@ export function useOnSubmit({
         (agentCount !== 0 ||
           (agentPolicies.length === 0 && selectedPolicyTab !== SelectedPolicyTab.NEW)) &&
         !(
-          isAgentlessIntegration(packageInfo) || isAgentlessAgentPolicy(overrideCreatedAgentPolicy)
+          getAgentlessStatusForPackage(packageInfo).isAgentless ||
+          isAgentlessAgentPolicy(overrideCreatedAgentPolicy)
         ) &&
         formState !== 'CONFIRM'
       ) {
@@ -649,7 +671,8 @@ export function useOnSubmit({
         : packagePolicy.policy_ids;
 
       const shouldForceInstallOnAgentless =
-        isAgentlessAgentPolicy(createdPolicy) || isAgentlessIntegration(packageInfo);
+        isAgentlessAgentPolicy(createdPolicy) ||
+        getAgentlessStatusForPackage(packageInfo).isAgentless;
 
       const forceInstall = force || shouldForceInstallOnAgentless;
 
@@ -774,7 +797,7 @@ export function useOnSubmit({
       spaceId,
       hasErrors,
       agentCount,
-      isAgentlessIntegration,
+      getAgentlessStatusForPackage,
       packageInfo,
       selectedPolicyTab,
       packagePolicy,

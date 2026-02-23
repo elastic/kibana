@@ -28,6 +28,8 @@
         "label": "CategorizeFieldContext",
         "description": [],
         "path": "x-pack/platform/packages/private/ml/ui_actions/src/aiops/ui_actions.ts",
+        "lineNumber": 11,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -48,6 +50,8 @@
               }
             ],
             "path": "x-pack/platform/packages/private/ml/ui_actions/src/aiops/ui_actions.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -68,6 +72,8 @@
               }
             ],
             "path": "x-pack/platform/packages/private/ml/ui_actions/src/aiops/ui_actions.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -79,6 +85,8 @@
             "label": "originatingApp",
             "description": [],
             "path": "x-pack/platform/packages/private/ml/ui_actions/src/aiops/ui_actions.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -93,6 +101,8 @@
               "{ from: number; to: number; field?: { name: string; value: string; } | undefined; } | undefined"
             ],
             "path": "x-pack/platform/packages/private/ml/ui_actions/src/aiops/ui_actions.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -109,6 +119,8 @@
               ", \"shards\" | \"returnFocus\" | \"closeOnMouseup\"> | undefined"
             ],
             "path": "x-pack/platform/packages/private/ml/ui_actions/src/aiops/ui_actions.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -123,6 +135,8 @@
         "label": "CreateCategorizationADJobContext",
         "description": [],
         "path": "x-pack/platform/packages/private/ml/ui_actions/src/ml/ui_actions.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -143,6 +157,8 @@
               }
             ],
             "path": "x-pack/platform/packages/private/ml/ui_actions/src/ml/ui_actions.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -163,6 +179,8 @@
               }
             ],
             "path": "x-pack/platform/packages/private/ml/ui_actions/src/ml/ui_actions.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -177,6 +195,8 @@
               "QueryDslQueryContainer"
             ],
             "path": "x-pack/platform/packages/private/ml/ui_actions/src/ml/ui_actions.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -191,6 +211,8 @@
               "{ from: string; to: string; mode?: \"absolute\" | \"relative\" | undefined; }"
             ],
             "path": "x-pack/platform/packages/private/ml/ui_actions/src/ml/ui_actions.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -211,21 +233,8 @@
           "\"ACTION_CATEGORIZE_FIELD\""
         ],
         "path": "x-pack/platform/packages/private/ml/ui_actions/src/aiops/ui_actions.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/ml-ui-actions",
-        "id": "def-common.CATEGORIZE_FIELD_TRIGGER",
-        "type": "string",
-        "tags": [],
-        "label": "CATEGORIZE_FIELD_TRIGGER",
-        "description": [],
-        "signature": [
-          "\"CATEGORIZE_FIELD_TRIGGER\""
-        ],
-        "path": "x-pack/platform/packages/private/ml/ui_actions/src/aiops/ui_actions.ts",
+        "lineNumber": 23,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -241,74 +250,13 @@
           "\"createMLADCategorizationJobAction\""
         ],
         "path": "x-pack/platform/packages/private/ml/ui_actions/src/ml/ui_actions.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/ml-ui-actions",
-        "id": "def-common.CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_TRIGGER",
-        "type": "string",
-        "tags": [],
-        "label": "CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_TRIGGER",
-        "description": [],
-        "signature": [
-          "\"CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_TRIGGER\""
-        ],
-        "path": "x-pack/platform/packages/private/ml/ui_actions/src/ml/ui_actions.ts",
+        "lineNumber": 19,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
-    "objects": [
-      {
-        "parentPluginId": "@kbn/ml-ui-actions",
-        "id": "def-common.categorizeFieldTrigger",
-        "type": "Object",
-        "tags": [],
-        "label": "categorizeFieldTrigger",
-        "description": [],
-        "path": "x-pack/platform/packages/private/ml/ui_actions/src/aiops/ui_actions.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/ml-ui-actions",
-            "id": "def-common.categorizeFieldTrigger.id",
-            "type": "string",
-            "tags": [],
-            "label": "id",
-            "description": [],
-            "path": "x-pack/platform/packages/private/ml/ui_actions/src/aiops/ui_actions.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/ml-ui-actions",
-            "id": "def-common.categorizeFieldTrigger.title",
-            "type": "string",
-            "tags": [],
-            "label": "title",
-            "description": [],
-            "path": "x-pack/platform/packages/private/ml/ui_actions/src/aiops/ui_actions.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/ml-ui-actions",
-            "id": "def-common.categorizeFieldTrigger.description",
-            "type": "string",
-            "tags": [],
-            "label": "description",
-            "description": [],
-            "path": "x-pack/platform/packages/private/ml/ui_actions/src/aiops/ui_actions.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      }
-    ]
+    "objects": []
   }
 }

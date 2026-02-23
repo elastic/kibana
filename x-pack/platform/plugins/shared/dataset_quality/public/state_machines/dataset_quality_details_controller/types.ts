@@ -5,22 +5,15 @@
  * 2.0.
  */
 
-import type { DoneInvokeEvent } from 'xstate';
 import type { FailureStore, Streams } from '@kbn/streams-schema';
 import type {
   Dashboard,
-  DataStreamRolloverResponse,
   DataStreamSettings,
   DegradedFieldAnalysis,
-  DegradedFieldResponse,
   DegradedFieldValues,
-  FailedDocsDetails,
   FailedDocsError,
-  FailedDocsErrorsResponse,
-  NonAggregatableDatasets,
   QualityIssue,
   UpdateFieldLimitResponse,
-  UpdateFailureStoreResponse,
   DataStreamDetails,
 } from '../../../common/api_types';
 import type { IntegrationType } from '../../../common/data_stream_details';
@@ -63,6 +56,11 @@ export interface FieldLimit {
   error?: boolean;
 }
 
+export interface StreamsUrls {
+  processingUrl?: string;
+  schemaUrl?: string;
+}
+
 export interface WithDefaultControllerState {
   dataStream: string;
   qualityIssues: QualityIssuesTableConfig;
@@ -84,6 +82,7 @@ export interface WithDefaultControllerState {
   fieldLimit?: FieldLimit;
   view: DatasetQualityView;
   streamDefinition?: Streams.ingest.all.GetResponse;
+  streamsUrls?: StreamsUrls;
 }
 
 export interface WithDataStreamDetails {
@@ -160,6 +159,7 @@ export type DefaultDatasetQualityDetailsContext = Pick<
   | 'qualityIssuesChart'
   | 'view'
   | 'streamDefinition'
+  | 'streamsUrls'
 >;
 
 export type DatasetQualityDetailsControllerTypeState =
@@ -314,18 +314,6 @@ export type DatasetQualityDetailsControllerEvent =
       type: 'UPDATE_FAILURE_STORE';
       dataStreamsDetails: DataStreamDetailsWithFailureStoreConfig;
     }
-  | DoneInvokeEvent<NonAggregatableDatasets>
-  | DoneInvokeEvent<DataStreamDetailsWithFailureStoreConfig>
-  | DoneInvokeEvent<Error>
-  | DoneInvokeEvent<boolean>
-  | DoneInvokeEvent<FailedDocsDetails>
-  | DoneInvokeEvent<FailedDocsErrorsResponse>
-  | DoneInvokeEvent<DegradedFieldResponse>
-  | DoneInvokeEvent<DegradedFieldValues>
-  | DoneInvokeEvent<DataStreamSettings>
-  | DoneInvokeEvent<Dashboard[]>
-  | DoneInvokeEvent<DegradedFieldAnalysis>
-  | DoneInvokeEvent<UpdateFieldLimitResponse>
-  | DoneInvokeEvent<DataStreamRolloverResponse>
-  | DoneInvokeEvent<UpdateFailureStoreResponse>
-  | DoneInvokeEvent<IntegrationType>;
+  | {
+      type: 'TOGGLE_CURRENT_QUALITY_ISSUES';
+    };

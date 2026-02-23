@@ -7,12 +7,10 @@
 
 import expect from 'expect';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
-import { enablePrivmonSetting, disablePrivmonSetting } from '../../utils';
 import { PrivMonUtils, createIndexEntitySource } from './utils';
 
 export default ({ getService }: FtrProviderContext) => {
   const api = getService('entityAnalyticsApi');
-  const kibanaServer = getService('kibanaServer');
   const privMonUtils = PrivMonUtils(getService);
   const log = getService('log');
   const es = getService('es');
@@ -24,12 +22,7 @@ export default ({ getService }: FtrProviderContext) => {
       const entitySource = createIndexEntitySource(indexName, { name: 'PrivilegedUsers' });
       const entitySource2 = createIndexEntitySource(indexName2, { name: 'PrivilegedUsers2' });
 
-      beforeEach(async () => {
-        await enablePrivmonSetting(kibanaServer);
-      });
-
       afterEach(async () => {
-        await disablePrivmonSetting(kibanaServer);
         await es.indices.delete({ index: indexName }, { ignore: [404] });
         await es.indices.delete({ index: indexName2 }, { ignore: [404] });
         await api.deleteMonitoringEngine({ query: { data: true } });
@@ -41,14 +34,14 @@ export default ({ getService }: FtrProviderContext) => {
         expect(response.status).toBe(200);
         expect(response2.status).toBe(200);
         const sources = await api.listEntitySources({ query: {} });
-        const names = sources.body.map((s: any) => s.name);
+        const names = sources.body.sources.map((s: any) => s.name);
         // confirm sources have been created
         expect(names).toEqual(expect.arrayContaining(['PrivilegedUsers', 'PrivilegedUsers2']));
         // Try to create the same entity sources again
         await api.createEntitySource({ body: entitySource });
         await api.createEntitySource({ body: entitySource2 });
         const nonDuplicateSources = await api.listEntitySources({ query: {} });
-        const nonDuplicateNames = nonDuplicateSources.body.map((s: any) => s.name);
+        const nonDuplicateNames = nonDuplicateSources.body.sources.map((s: any) => s.name);
         // confirm duplicates have not been created
         expect(names.length).toBe(nonDuplicateNames.length);
       });

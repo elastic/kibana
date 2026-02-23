@@ -18,12 +18,12 @@ import {
 } from '../../../../../common/constants';
 import {
   ENRICHMENT_TYPES,
+  FEED_NAME,
   FIRST_SEEN,
   MATCHED_ATOMIC,
   MATCHED_FIELD,
   MATCHED_ID,
   MATCHED_TYPE,
-  FEED_NAME,
 } from '../../../../../common/cti/constants';
 
 const NESTED_OBJECT_VALUES_NOT_RENDERED = i18n.translate(
@@ -189,10 +189,23 @@ export const buildThreatDetailsItems = (enrichment: CtiEnrichment): ThreatDetail
         ? field.replace(`${DEFAULT_INDICATOR_SOURCE_PATH}`, 'indicator')
         : field;
 
-      let value = getFirstElement(enrichment[field]);
-      if (isObject(value)) {
-        value = NESTED_OBJECT_VALUES_NOT_RENDERED;
-      }
+      // Gather string values, ignoring nested objects/arrays
+      // TODO We should probably enhance this in the future to show all values, but
+      //  this will require more involved UI changes (like show a table or json view similar to the flyout)
+      const values: string[] = [];
+      const enrichmentValues = enrichment[field];
+      enrichmentValues.forEach((enrichmentValue) => {
+        // We show the string values as is, but for nested objects we show a message indicating
+        // that those values are not rendered here
+        if (typeof enrichmentValue === 'string') {
+          values.push(enrichmentValue);
+        } else if (isObject(enrichmentValue)) {
+          // We don't need to add the message more than once
+          if (!values.includes(NESTED_OBJECT_VALUES_NOT_RENDERED)) {
+            values.push(NESTED_OBJECT_VALUES_NOT_RENDERED);
+          }
+        }
+      });
 
-      return { title, description: { fieldName: field, value: value as string } };
+      return { title, description: { fieldName: field, value: values as string[] } };
     });

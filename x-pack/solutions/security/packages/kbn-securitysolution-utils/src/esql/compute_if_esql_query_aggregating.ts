@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type ESQLAstQueryExpression, parse } from '@kbn/esql-ast';
+import { type ESQLAstQueryExpression, parse } from '@kbn/esql-language';
 
 export const isAggregatingQuery = (astExpression: ESQLAstQueryExpression): boolean =>
   astExpression.commands.some((command) => command.name === 'stats');

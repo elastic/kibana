@@ -14,7 +14,7 @@ For general information about writing evaluation tests, configuration, and usage
 Start Scout server:
 
 ```bash
-node scripts/scout.js start-server --stateful
+node scripts/scout.js start-server --arch stateful --domain classic
 ```
 
 > The Scout server Kibana instance is accessible at <http://localhost:5620>. This may be useful if you want to query evaluation results for further analysis.
@@ -216,3 +216,7 @@ FROM .kibana-evaluations
     """
 }
 ```
+
+## AI Insights Evaluations
+
+For setup, prerequisites, and instructions on running AI Insights evaluations, see the [AI Insights README](./ai_insights/README.md).

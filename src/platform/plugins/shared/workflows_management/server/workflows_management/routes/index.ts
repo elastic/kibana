@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IRouter, Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 
 // Import all route registration functions
@@ -22,6 +22,7 @@ import { registerGetWorkflowExecutionLogsRoute } from './get_workflow_execution_
 import { registerGetWorkflowExecutionsRoute } from './get_workflow_executions';
 import { registerGetWorkflowJsonSchemaRoute } from './get_workflow_json_schema';
 import { registerGetWorkflowStatsRoute } from './get_workflow_stats';
+import { registerPostBulkCreateWorkflowsRoute } from './post_bulk_create_workflows';
 import { registerPostCancelWorkflowExecutionRoute } from './post_cancel_workflow_execution';
 import { registerPostCloneWorkflowRoute } from './post_clone_workflow';
 import { registerPostCreateWorkflowRoute } from './post_create_workflow';
@@ -31,10 +32,11 @@ import { registerPostTestStepRoute } from './post_test_step';
 import { registerPostTestWorkflowRoute } from './post_test_workflow';
 import { registerPutUpdateWorkflowRoute } from './put_update_workflow';
 import type { RouteDependencies } from './types';
+import type { WorkflowsRouter } from '../../types';
 import type { WorkflowsManagementApi } from '../workflows_management_api';
 
 export function defineRoutes(
-  router: IRouter,
+  router: WorkflowsRouter,
   api: WorkflowsManagementApi,
   logger: Logger,
   spaces: SpacesServiceStart
@@ -48,6 +50,7 @@ export function defineRoutes(
   registerGetConnectorsRoute(deps);
   registerPostSearchWorkflowsRoute(deps);
   registerPostCreateWorkflowRoute(deps);
+  registerPostBulkCreateWorkflowsRoute(deps);
   registerPutUpdateWorkflowRoute(deps);
   registerDeleteWorkflowByIdRoute(deps);
   registerDeleteWorkflowsBulkRoute(deps);

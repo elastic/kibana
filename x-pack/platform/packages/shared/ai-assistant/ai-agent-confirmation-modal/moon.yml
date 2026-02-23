@@ -20,6 +20,7 @@ project:
 dependsOn:
   - '@kbn/i18n'
   - '@kbn/i18n-react'
+  - '@kbn/doc-links'
 tags:
   - shared-browser
   - package

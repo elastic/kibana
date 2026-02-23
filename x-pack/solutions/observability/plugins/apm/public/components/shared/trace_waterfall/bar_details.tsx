@@ -23,7 +23,7 @@ import { TruncateWithTooltip } from '../truncate_with_tooltip';
 import { useTraceWaterfallContext } from './trace_waterfall_context';
 import { isFailureOrError } from './utils/is_failure_or_error';
 import type { TraceWaterfallItem } from './use_trace_waterfall';
-import { SpanLinksBadge } from './badges/span_links_badge';
+import { SpanLinksBadge, SyncBadge, ColdStartBadge } from './badges';
 
 const ORPHAN_TITLE = i18n.translate('xpack.apm.trace.barDetails.euiIconTip.orphanTitleLabel', {
   defaultMessage: 'Orphan',
@@ -52,6 +52,12 @@ export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: num
     }
   );
 
+  const compositePrefix = item.composite?.compressionStrategy === 'exact_match' ? 'x' : '';
+
+  const displayName = item.composite
+    ? `${item.composite.count}${compositePrefix} ${item.name}`
+    : item.name;
+
   return (
     <div
       css={css`
@@ -75,6 +81,11 @@ export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: num
           }
         `}
       >
+        {item.icon && (
+          <EuiFlexItem grow={false}>
+            <EuiIcon type={item.icon} data-test-subj="apmBarDetailsIcon" aria-hidden={true} />
+          </EuiFlexItem>
+        )}
         <EuiFlexItem
           grow={false}
           css={css`
@@ -82,13 +93,29 @@ export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: num
           `}
         >
           <EuiText css={{ overflow: 'hidden' }} size="s">
-            <TruncateWithTooltip content={item.name} text={item.name} />
+            <TruncateWithTooltip content={displayName} text={displayName} />
           </EuiText>
         </EuiFlexItem>
+        {item.serviceName && (
+          <EuiFlexItem grow={false}>
+            <EuiBadge
+              color="hollow"
+              iconType="dot"
+              data-test-subj="apmBarDetailsServiceNameBadge"
+              css={css`
+                & .euiBadge__icon {
+                  color: ${item.color};
+                }
+              `}
+            >
+              {item.serviceName}
+            </EuiBadge>
+          </EuiFlexItem>
+        )}
         <EuiFlexItem grow={false}>
-          <EuiText color="subdued" size="xs">
+          <EuiBadge color="hollow" iconType="clock">
             {asDuration(item.duration)}
-          </EuiText>
+          </EuiBadge>
         </EuiFlexItem>
         {item.status && itemStatusIsFailureOrError && (
           <EuiFlexItem grow={false}>
@@ -119,6 +146,7 @@ export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: num
                       docId: item.id,
                       errorCount,
                       errorDocId: errorCount > 1 ? undefined : item.errors[0].errorDocId,
+                      docIndex: errorCount > 1 ? undefined : item.errors[0].errorDocIndex,
                     });
                   }
                 }}
@@ -136,6 +164,7 @@ export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: num
                 color={theme.euiTheme.colors.danger}
                 size="s"
                 data-test-subj="apmBarDetailsErrorIcon"
+                aria-hidden={true}
               />
             )}
           </EuiFlexItem>
@@ -155,11 +184,13 @@ export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: num
             />
           </EuiFlexItem>
         ) : null}
+        <SyncBadge sync={item.sync} agentName={item.agentName} />
         <SpanLinksBadge
           outgoingCount={item.spanLinksCount.outgoing}
           incomingCount={item.spanLinksCount.incoming}
           id={item.id}
         />
+        {item.coldstart && <ColdStartBadge />}
       </EuiFlexGroup>
     </div>
   );

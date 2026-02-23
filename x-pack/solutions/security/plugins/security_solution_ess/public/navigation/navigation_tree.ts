@@ -5,23 +5,22 @@
  * 2.0.
  */
 
-import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
+import type { AppDeepLinkId, NavigationTreeDefinition } from '@kbn/core-chrome-browser';
+import { AIChatExperience } from '@kbn/ai-assistant-common';
 import {
-  ATTACKS_ALERTS_ALIGNMENT_ENABLED,
+  ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
   SecurityPageName,
 } from '@kbn/security-solution-navigation';
 import { i18nStrings, securityLink } from '@kbn/security-solution-navigation/links';
-import {
-  defaultNavigationTree,
-  LazyIconFindings,
-  LazyIconIntelligence,
-  LazyIconWorkflow,
-} from '@kbn/security-solution-navigation/navigation_tree';
+import { defaultNavigationTree } from '@kbn/security-solution-navigation/navigation_tree';
 import { STACK_MANAGEMENT_NAV_ID, DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
 import { type Services } from '../common/services';
 import { SOLUTION_NAME } from './translations';
 
-export const createNavigationTree = (services: Services): NavigationTreeDefinition => ({
+export const createNavigationTree = (
+  services: Services,
+  chatExperience: AIChatExperience = AIChatExperience.Classic
+): NavigationTreeDefinition => ({
   body: [
     {
       id: 'security_solution_home',
@@ -32,11 +31,11 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
     },
     {
       link: 'discover',
-      icon: 'discoverApp',
+      icon: 'productDiscover',
     },
     defaultNavigationTree.dashboards(),
     defaultNavigationTree.rules(),
-    services.featureFlags.getBooleanValue(ATTACKS_ALERTS_ALIGNMENT_ENABLED, false)
+    services.uiSettings.get(ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING, false)
       ? defaultNavigationTree.alertDetections()
       : {
           id: SecurityPageName.alerts,
@@ -44,11 +43,16 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
           link: securityLink(SecurityPageName.alerts),
         },
     {
-      // TODO: update icon from EUI
-      icon: LazyIconWorkflow,
       link: 'workflows',
-      badgeType: 'techPreview' as const,
     },
+    ...(chatExperience === AIChatExperience.Agent
+      ? [
+          {
+            icon: 'productAgent',
+            link: 'agent_builder' as AppDeepLinkId,
+          },
+        ]
+      : []),
     {
       id: SecurityPageName.attackDiscovery,
       icon: 'bolt',
@@ -56,8 +60,7 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
     },
     {
       id: SecurityPageName.cloudSecurityPostureFindings,
-      // TODO change this to the `bullseye` EUI icon when available
-      icon: LazyIconFindings,
+      icon: 'bullseye',
       link: securityLink(SecurityPageName.cloudSecurityPostureFindings),
     },
     defaultNavigationTree.cases(),
@@ -66,8 +69,7 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
     defaultNavigationTree.investigations(),
     {
       id: SecurityPageName.threatIntelligence,
-      // TODO change this to the `compute` EUI icon when available
-      icon: LazyIconIntelligence,
+      icon: 'processor',
       link: securityLink(SecurityPageName.threatIntelligence),
     },
     {
@@ -175,6 +177,15 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
               title: i18nStrings.stackManagementV2.home.title,
               breadcrumbStatus: 'hidden',
             },
+            // Only show Cloud Connect in on-prem deployments (not cloud)
+            ...(services.cloud?.isCloudEnabled
+              ? []
+              : [
+                  {
+                    id: 'cloud_connect' as const,
+                    link: 'cloud_connect' as const,
+                  },
+                ]),
             { link: 'monitoring' },
           ],
         },
@@ -242,7 +253,6 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
             { link: 'management:search_sessions' },
             { link: 'management:spaces' },
             { link: 'maps' },
-            { link: 'visualize' },
             { link: 'graph' },
             { link: 'canvas' },
             { link: 'management:settings' },

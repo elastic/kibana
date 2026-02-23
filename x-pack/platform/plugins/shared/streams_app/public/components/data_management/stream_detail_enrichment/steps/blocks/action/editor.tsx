@@ -6,90 +6,95 @@
  */
 
 import {
-  EuiFlexGroup,
-  EuiButtonEmpty,
   EuiButton,
-  EuiSpacer,
+  EuiButtonEmpty,
+  EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiForm,
   EuiHorizontalRule,
-  EuiFlexItem,
-  EuiCallOut,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { StreamlangProcessorDefinitionWithUIAttributes } from '@kbn/streamlang';
 import { isActionBlock } from '@kbn/streamlang';
-import { isEqual, isEmpty } from 'lodash';
-import React, { useState, useEffect, forwardRef } from 'react';
-import type { SubmitHandler } from 'react-hook-form';
-import { useForm, useWatch, FormProvider } from 'react-hook-form';
-import { useSelector } from '@xstate5/react';
-import { useDiscardConfirm } from '../../../../../../hooks/use_discard_confirm';
+import { useSelector } from '@xstate/react';
+import { isEmpty, isEqual } from 'lodash';
+import React, { forwardRef, useEffect, useState } from 'react';
+import type { DefaultValues, SubmitHandler } from 'react-hook-form';
+import { FormProvider, useForm, useWatch } from 'react-hook-form';
+import { useGrokCollection } from '@kbn/grok-ui';
 import type { ActionBlockProps } from '.';
+import { useDiscardConfirm } from '../../../../../../hooks/use_discard_confirm';
 import { selectPreviewRecords } from '../../../state_management/simulation_state_machine/selectors';
 import {
   useGetStreamEnrichmentState,
   useStreamEnrichmentSelector,
 } from '../../../state_management/stream_enrichment_state_machine';
-import { selectValidationErrors } from '../../../state_management/stream_enrichment_state_machine/selectors';
+import {
+  selectStreamType,
+  selectValidationErrors,
+} from '../../../state_management/stream_enrichment_state_machine/selectors';
 import type { ProcessorFormState } from '../../../types';
 import {
   convertFormStateToProcessor,
-  SPECIALISED_TYPES,
   getFormStateFromActionStep,
+  SPECIALISED_TYPES,
 } from '../../../utils';
 import { ConfigDrivenProcessorFields } from './config_driven/components/fields';
 import type { ConfigDrivenProcessorType } from './config_driven/types';
+import { ConvertProcessorForm } from './convert';
 import { DateProcessorForm } from './date';
 import { DissectProcessorForm } from './dissect';
+import { DropProcessorForm } from './drop_document';
 import { GrokProcessorForm } from './grok';
 import { ManualIngestPipelineProcessorForm } from './manual_ingest_pipeline';
+import { MathProcessorForm } from './math';
+import { ProcessorContextProvider } from './processor_context';
 import { ProcessorErrors } from './processor_metrics';
 import { ProcessorTypeSelector } from './processor_type_selector';
-import { SetProcessorForm } from './set';
 import { deleteProcessorPromptOptions, discardChangesPromptOptions } from './prompt_options';
-import { ConvertProcessorForm } from './convert';
 import { ReplaceProcessorForm } from './replace';
-import { DropProcessorForm } from './drop_document';
-import { ProcessorContextProvider } from './processor_context';
-import { selectStreamType } from '../../../state_management/stream_enrichment_state_machine/selectors';
+import { RedactProcessorForm } from './redact';
+import { SetProcessorForm } from './set';
+import { TransformStringProcessorForm } from './transform_string';
+import { ConcatProcessorForm } from './concat';
+import { JoinProcessorForm } from './join';
+import { NetworkDirectionProcessorForm } from './network_direction';
 
 export const ActionBlockEditor = forwardRef<HTMLDivElement, ActionBlockProps>((props, ref) => {
   const { processorMetrics, stepRef } = props;
 
   const getEnrichmentState = useGetStreamEnrichmentState();
 
-  const grokCollection = useStreamEnrichmentSelector((snapshot) => snapshot.context.grokCollection);
+  const { grokCollection } = useGrokCollection();
 
   const step = useSelector(stepRef, (snapshot) => snapshot.context.step);
 
   const [defaultValues] = useState(() =>
     getFormStateFromActionStep(
       selectPreviewRecords(getEnrichmentState().context.simulatorRef.getSnapshot().context),
-      { grokCollection },
+      { grokCollection: grokCollection! },
       step as StreamlangProcessorDefinitionWithUIAttributes
     )
   );
 
-  const typeValidationErrors = useStreamEnrichmentSelector((snapshot) => {
+  const validationErrors = useStreamEnrichmentSelector((snapshot) => {
     const errors = selectValidationErrors(snapshot.context);
     return errors.get(step.customIdentifier) || [];
   });
 
   const methods = useForm<ProcessorFormState>({
-    // TODO: See if this can be stricter, DeepPartial<ProcessorFormState> doesn't work
-    defaultValues: defaultValues as any,
+    defaultValues: defaultValues as DefaultValues<ProcessorFormState>,
     mode: 'onChange',
   });
 
   useEffect(() => {
     const { unsubscribe } = methods.watch((value) => {
-      const { processorDefinition, processorResources } = convertFormStateToProcessor(
-        value as ProcessorFormState
-      );
+      const { processorDefinition } = convertFormStateToProcessor(value as ProcessorFormState);
       stepRef.send({
         type: 'step.changeProcessor',
         step: processorDefinition,
-        resources: processorResources,
       });
     });
     return () => unsubscribe();
@@ -97,7 +102,12 @@ export const ActionBlockEditor = forwardRef<HTMLDivElement, ActionBlockProps>((p
 
   const isConfigured = useSelector(stepRef, (snapshot) => snapshot.matches('configured'));
   const canDelete = useSelector(stepRef, (snapshot) => snapshot.can({ type: 'step.delete' }));
-  const canSave = useSelector(stepRef, (snapshot) => snapshot.can({ type: 'step.save' }));
+  const canSaveStateMachine = useSelector(stepRef, (snapshot) =>
+    snapshot.can({ type: 'step.save' })
+  );
+
+  const hasConditionError = 'where' in methods.formState.errors;
+  const canSave = canSaveStateMachine && !hasConditionError;
 
   const hasStepChanges = useSelector(
     stepRef,
@@ -139,12 +149,20 @@ export const ActionBlockEditor = forwardRef<HTMLDivElement, ActionBlockProps>((p
                 <EuiSpacer size="m" />
                 {type === 'convert' && <ConvertProcessorForm />}
                 {type === 'replace' && <ReplaceProcessorForm />}
+                {type === 'redact' && <RedactProcessorForm />}
                 {type === 'date' && <DateProcessorForm />}
                 {type === 'grok' && <GrokProcessorForm />}
                 {type === 'dissect' && <DissectProcessorForm />}
                 {type === 'manual_ingest_pipeline' && <ManualIngestPipelineProcessorForm />}
                 {type === 'set' && <SetProcessorForm />}
                 {type === 'drop_document' && <DropProcessorForm />}
+                {type === 'math' && <MathProcessorForm />}
+                {type === 'uppercase' && <TransformStringProcessorForm />}
+                {type === 'lowercase' && <TransformStringProcessorForm />}
+                {type === 'trim' && <TransformStringProcessorForm />}
+                {type === 'concat' && <ConcatProcessorForm />}
+                {type === 'join' && <JoinProcessorForm />}
+                {type === 'network_direction' && <NetworkDirectionProcessorForm />}
                 {!SPECIALISED_TYPES.includes(type) && (
                   <ConfigDrivenProcessorFields type={type as ConfigDrivenProcessorType} />
                 )}
@@ -155,7 +173,7 @@ export const ActionBlockEditor = forwardRef<HTMLDivElement, ActionBlockProps>((p
               <EuiFlexItem grow={false}>
                 {canDelete && (
                   <EuiButton
-                    data-test-subj="streamsAppProcessorConfigurationButton"
+                    data-test-subj="streamsAppProcessorConfigurationDeleteButton"
                     data-stream-type={streamType}
                     color="danger"
                     onClick={handleDelete}
@@ -206,21 +224,21 @@ export const ActionBlockEditor = forwardRef<HTMLDivElement, ActionBlockProps>((p
                 </EuiFlexGroup>
               </EuiFlexItem>
             </EuiFlexGroup>
-            {typeValidationErrors.length > 0 && (
+            {validationErrors.length > 0 && (
               <>
                 <EuiSpacer size="m" />
                 <EuiCallOut
                   announceOnMount
                   title={i18n.translate(
-                    'xpack.streams.streamDetailView.managementTab.enrichment.typeValidationErrors.title',
-                    { defaultMessage: 'Type validation errors' }
+                    'xpack.streams.streamDetailView.managementTab.enrichment.validationErrors.title',
+                    { defaultMessage: 'Validation errors' }
                   )}
                   color="danger"
                   iconType="warning"
                   size="s"
                 >
                   <ul>
-                    {typeValidationErrors.map((error, index: number) => (
+                    {validationErrors.map((error, index: number) => (
                       <li key={index}>{error.message}</li>
                     ))}
                   </ul>

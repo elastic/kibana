@@ -5,7 +5,11 @@
       "filter_path": [],
       "human": "__flag__",
       "pretty": "__flag__",
-      "pipeline": ""
+      "pipeline": "",
+      "merge_type": [
+        "index",
+        "template"
+      ]
     },
     "methods": [
       "GET",

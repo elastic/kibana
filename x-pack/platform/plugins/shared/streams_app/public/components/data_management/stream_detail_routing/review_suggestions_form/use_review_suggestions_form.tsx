@@ -8,11 +8,12 @@
 import type { Condition } from '@kbn/streamlang';
 import { useState } from 'react';
 import { useAbortController } from '@kbn/react-hooks';
+import { isRequestAbortedError } from '@kbn/server-route-repository-client';
 import { lastValueFrom } from 'rxjs';
 import { isEmpty } from 'lodash';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
-import { showErrorToast } from '../../../../hooks/use_streams_app_fetch';
 import { useKibana } from '../../../../hooks/use_kibana';
+import { useFetchErrorToast } from '../../../../hooks/use_fetch_error_toast';
 import {
   useStreamsRoutingActorRef,
   useStreamsRoutingSelector,
@@ -34,13 +35,13 @@ export type UseReviewSuggestionsFormResult = ReturnType<typeof useReviewSuggesti
 
 export function useReviewSuggestionsForm() {
   const {
-    core: { notifications },
     dependencies: {
       start: {
         streams: { streamsRepositoryClient },
       },
     },
   } = useKibana();
+  const showFetchErrorToast = useFetchErrorToast();
   const streamName = useStreamsRoutingSelector(
     (snapshot) => snapshot.context.definition.stream.name
   );
@@ -69,8 +70,8 @@ export function useReviewSuggestionsForm() {
       );
       setSuggestions(response.partitions);
     } catch (error) {
-      if (error.name !== 'AbortError') {
-        showErrorToast(notifications, error);
+      if (!isRequestAbortedError(error)) {
+        showFetchErrorToast(error);
       }
     } finally {
       setIsLoadingSuggestions(false);

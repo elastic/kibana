@@ -287,6 +287,9 @@ export const ConnectorsTable: React.FC = () => {
           pageSize,
           totalItemCount: data?.connectors.length ?? 0,
         }}
+        tableCaption={i18n.translate('xpack.serverlessSearch.connectorsTable.tableCaption', {
+          defaultMessage: 'Connectors table',
+        })}
       />
     </>
   );

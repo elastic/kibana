@@ -20,10 +20,12 @@ import {
   EuiFlexGroup,
   EuiNotificationBadge,
   EuiIcon,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { AlertStatus } from '@kbn/rule-data-utils';
 import {
   ALERT_RULE_CATEGORY,
+  ALERT_RULE_NAME,
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_UUID,
   ALERT_STATUS,
@@ -37,6 +39,10 @@ import { css } from '@emotion/react';
 import { omit } from 'lodash';
 import { usePageReady } from '@kbn/ebt-tools';
 import moment from 'moment';
+import {
+  OBSERVABILITY_AGENT_ID,
+  OBSERVABILITY_ALERT_ATTACHMENT_TYPE_ID,
+} from '@kbn/observability-agent-builder-plugin/public';
 import { ObsCasesContext } from './components/obs_cases_context';
 import { RelatedAlerts } from './components/related_alerts/related_alerts';
 import type { AlertDetailsSource, TabId } from './types';
@@ -58,11 +64,10 @@ import { HeaderMenu } from '../overview/components/header_menu/header_menu';
 import { AlertOverview } from '../../components/alert_overview/alert_overview';
 import type { CustomThresholdRule } from '../../components/custom_threshold/components/types';
 import { AlertDetailContextualInsights } from './alert_details_contextual_insights';
-import { AlertAiInsight } from './alert_ai_insight';
 import { AlertHistoryChart } from './components/alert_history';
 import StaleAlert from './components/stale_alert';
 import { RelatedDashboards } from './components/related_dashboards';
-import { getAlertTitle } from '../../utils/format_alert_title';
+import { getAlertSubtitle } from '../../utils/format_alert_subtitle';
 import { AlertSubtitle } from './components/alert_subtitle';
 import { ProximalAlertsCallout } from './proximal_alerts_callout';
 import { useTabId } from './hooks/use_tab_id';
@@ -78,9 +83,6 @@ const defaultBreadcrumb = i18n.translate('xpack.observability.breadcrumbs.alertD
   defaultMessage: 'Alert details',
 });
 
-// avoiding circular dependency by having the attachment id here
-const OBSERVABILITY_ALERT_ATTACHMENT_TYPE_ID = 'observability.alert';
-
 export const LOG_DOCUMENT_COUNT_RULE_TYPE_ID = 'logs.alert.document.count';
 export const METRIC_THRESHOLD_ALERT_TYPE_ID = 'metrics.alert.threshold';
 export const METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID = 'metrics.alert.inventory.threshold';
@@ -95,10 +97,13 @@ export function AlertDetails() {
     http,
     triggersActionsUi: { ruleTypeRegistry },
     observabilityAIAssistant,
-    onechat,
+    agentBuilder,
     uiSettings,
     serverless,
+    observabilityAgentBuilder,
   } = services;
+
+  const AlertAiInsight = observabilityAgentBuilder?.getAlertAIInsight();
 
   const { ObservabilityPageTemplate, config } = usePluginContext();
   const { alertId } = useParams<AlertDetailsPathParams>();
@@ -115,6 +120,11 @@ export function AlertDetails() {
   const [ruleTypeModel, setRuleTypeModel] = useState<RuleTypeModel | null>(null);
 
   const ruleId = alertDetail?.formatted.fields[ALERT_RULE_UUID];
+  const ruleName = alertDetail?.formatted.fields[ALERT_RULE_NAME];
+  const ruleTypeBreached = alertDetail
+    ? getAlertSubtitle(alertDetail.formatted.fields[ALERT_RULE_CATEGORY])
+    : undefined;
+
   const { rule, refetch } = useFetchRule({
     ruleId: ruleId || '',
   });
@@ -174,30 +184,40 @@ export function AlertDetails() {
 
   // Configure agent builder global flyout with the current alert attachment
   useEffect(() => {
-    if (!onechat) return;
+    if (!agentBuilder) return;
     const alertUuid = alertDetail?.formatted.fields['kibana.alert.uuid'] as string | undefined;
 
     if (!alertUuid) {
       return;
     }
 
-    onechat.setConversationFlyoutActiveConfig({
+    agentBuilder.setConversationFlyoutActiveConfig({
       newConversation: true,
+      agentId: OBSERVABILITY_AGENT_ID,
       attachments: [
         {
           id: alertUuid,
           type: OBSERVABILITY_ALERT_ATTACHMENT_TYPE_ID,
           data: {
             alertId: alertUuid,
+            ...(ruleTypeBreached && {
+              attachmentLabel: i18n.translate(
+                'xpack.observability.alertDetails.alertAttachmentLabel',
+                {
+                  defaultMessage: '{ruleTypeBreached} alert',
+                  values: { ruleTypeBreached },
+                }
+              ),
+            }),
           },
         },
       ],
     });
 
     return () => {
-      onechat.clearConversationFlyoutActiveConfig();
+      agentBuilder.clearConversationFlyoutActiveConfig();
     };
-  }, [onechat, alertDetail]);
+  }, [agentBuilder, alertDetail, ruleTypeBreached]);
 
   useBreadcrumbs(
     [
@@ -209,9 +229,7 @@ export function AlertDetails() {
         deepLinkId: 'observability-overview:alerts',
       },
       {
-        text: alertDetail
-          ? getAlertTitle(alertDetail.formatted.fields[ALERT_RULE_CATEGORY])
-          : defaultBreadcrumb,
+        text: ruleTypeBreached ?? defaultBreadcrumb,
       },
     ],
     { serverless }
@@ -300,7 +318,12 @@ export function AlertDetails() {
           />
           <SourceBar alert={alertDetail.formatted} sources={sources} />
           <AlertDetailContextualInsights alert={alertDetail} />
-          <AlertAiInsight alert={alertDetail} />
+          {AlertAiInsight && (
+            <AlertAiInsight
+              alertId={alertDetail.formatted.fields['kibana.alert.uuid']}
+              alertTitle={ruleTypeBreached}
+            />
+          )}
           {rule && alertDetail.formatted && (
             <>
               <AlertDetailsAppSection
@@ -326,8 +349,12 @@ export function AlertDetails() {
         />
         <EuiSpacer size="l" />
         <AlertDetailContextualInsights alert={alertDetail} />
-        <EuiSpacer size="s" />
-        <AlertAiInsight alert={alertDetail} />
+        {AlertAiInsight && (
+          <AlertAiInsight
+            alertId={alertDetail.formatted.fields['kibana.alert.uuid']}
+            alertTitle={ruleTypeBreached}
+          />
+        )}
         <EuiSpacer size="l" />
         <AlertOverview alert={alertDetail.formatted} alertStatus={alertStatus} />
       </EuiPanel>
@@ -384,7 +411,7 @@ export function AlertDetails() {
           />
           {rule?.artifacts?.investigation_guide?.blob && (
             <EuiNotificationBadge color="success" css={{ marginLeft: '5px' }}>
-              <EuiIcon type="dot" size="s" />
+              <EuiIcon type="dot" size="s" aria-hidden={true} />
             </EuiNotificationBadge>
           )}
         </>
@@ -437,15 +464,31 @@ export function AlertDetails() {
   return (
     <ObservabilityPageTemplate
       pageHeader={{
-        pageTitle: alertDetail?.formatted ? (
-          <>
-            {getAlertTitle(alertDetail.formatted.fields[ALERT_RULE_CATEGORY])}
-            <EuiSpacer size="xs" />
-            <AlertSubtitle alert={alertDetail.formatted} />
-          </>
-        ) : (
-          <EuiLoadingSpinner />
-        ),
+        pageTitle:
+          alertDetail?.formatted && ruleName ? (
+            <>
+              <EuiToolTip content={ruleName}>
+                <span
+                  tabIndex={0}
+                  data-test-subj="alertDetailsPageTitle"
+                  css={css`
+                    display: -webkit-box;
+                    -webkit-line-clamp: 2;
+                    -webkit-box-orient: vertical;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    word-break: break-word;
+                  `}
+                >
+                  {ruleName}
+                </span>
+              </EuiToolTip>
+              <EuiSpacer size="xs" />
+              <AlertSubtitle alert={alertDetail.formatted} />
+            </>
+          ) : (
+            <EuiLoadingSpinner />
+          ),
         rightSideItems: [
           <HeaderActions
             alert={alertDetail?.formatted ?? null}

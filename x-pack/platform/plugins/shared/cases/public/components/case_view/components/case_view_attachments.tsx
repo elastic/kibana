@@ -13,6 +13,7 @@ import {
   EuiSelectable,
   EuiSpacer,
   EuiTitle,
+  EuiFieldSearch,
 } from '@elastic/eui';
 import type { PropsWithChildren } from 'react';
 import React, { useMemo } from 'react';
@@ -29,6 +30,7 @@ import {
   FILES_TAB,
   OBSERVABLES_TAB,
 } from '../translations';
+import { SEARCH_PLACEHOLDER } from '../../actions/translations';
 
 const translateTitle = (activeTab: CASE_VIEW_PAGE_TABS) => {
   switch (activeTab) {
@@ -57,12 +59,16 @@ const translateTitle = (activeTab: CASE_VIEW_PAGE_TABS) => {
 export const CaseViewAttachments = ({
   caseData,
   activeTab,
+  onSearch,
+  searchTerm,
   children,
 }: PropsWithChildren<{
   caseData: CaseUI;
   activeTab: CASE_VIEW_PAGE_TABS;
+  onSearch: (searchTerm: string) => void;
+  searchTerm?: string;
 }>) => {
-  const { tabs: caseViewTabs } = useCaseAttachmentTabs({ caseData, activeTab });
+  const { tabs: caseViewTabs } = useCaseAttachmentTabs({ caseData, activeTab, searchTerm });
   const { navigateToCaseView } = useCaseViewNavigation();
   const trackSubTabClick = useAttachmentsSubTabClickedEBT();
 
@@ -87,7 +93,14 @@ export const CaseViewAttachments = ({
   return (
     <>
       <EuiFlexItem grow={6}>
-        <CaseViewTabs caseData={caseData} activeTab={activeTab} />
+        <CaseViewTabs caseData={caseData} activeTab={activeTab} searchTerm={searchTerm} />
+        <EuiSpacer size="s" />
+        <EuiFieldSearch
+          placeholder={SEARCH_PLACEHOLDER}
+          onSearch={onSearch}
+          data-test-subj="cases-files-search"
+          fullWidth
+        />
         <EuiSpacer size="m" />
         <EuiFlexGroup direction="row" responsive={false} data-test-subj="case-view-attachments">
           <EuiFlexItem grow={1} css={{ minWidth: '18rem', maxWidth: '18rem' }}>

@@ -279,6 +279,7 @@ export class EnterpriseSearchPlugin implements Plugin {
       return plugins.navigation.addSolutionNavigation(
         getNavigationTreeDefinition({
           dynamicItems$: this.sideNavDynamicItems$,
+          isCloudEnabled: plugins.cloud?.isCloudEnabled,
         })
       );
     });

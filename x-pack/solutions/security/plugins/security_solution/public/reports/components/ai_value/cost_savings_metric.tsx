@@ -33,7 +33,9 @@ const WithMetricAnimation = ({ children }: { children: React.ReactNode }) => {
   // Apply animation to the metric value
   useMetricAnimation({
     animationDurationMs: 1500,
-    selector: '.echMetricText__value',
+    // Scope to this embeddable to avoid accidentally animating the first metric value on the page
+    // (e.g. "Real threats detected"), since `.echMetricText__value` is used by all Lens metric cards.
+    selector: '[data-test-subj="cost-savings-metric"] .echMetricText__value',
   });
 
   return <>{children}</>;

@@ -83,7 +83,7 @@ export const Page: FC = () => {
     }
 
     if (jobsExist === false) {
-      return <AnalyticsEmptyPrompt showDocsLink />;
+      return <AnalyticsEmptyPrompt showDocsLink iconSize="s" />;
     }
     return (
       <>
@@ -116,47 +116,17 @@ export const Page: FC = () => {
           setIsIdSelectorFlyoutVisible={setIsIdSelectorFlyoutVisible}
         />
       ) : null}
-      {jobId === undefined && modelId === undefined ? (
-        <MlPageHeader>
-          <PageTitle
-            title={
-              <FormattedMessage
-                data-test-subj="mlPageDataFrameAnalyticsMapTitle"
-                id="xpack.ml.dataframe.analyticsMap.title"
-                defaultMessage="Map for Analytics"
-              />
-            }
-          />
-        </MlPageHeader>
-      ) : null}
-      {jobId !== undefined && modelId === undefined ? (
-        <MlPageHeader>
-          <PageTitle
-            title={
-              <FormattedMessage
-                data-test-subj="mlPageDataFrameAnalyticsMapTitle"
-                id="xpack.ml.dataframe.analyticsMap.analyticsIdTitle"
-                defaultMessage="Map for job ID {jobId}"
-                values={{ jobId }}
-              />
-            }
-          />
-        </MlPageHeader>
-      ) : null}
-      {modelId !== undefined && jobId === undefined ? (
-        <MlPageHeader>
-          <PageTitle
-            title={
-              <FormattedMessage
-                data-test-subj="mlPageDataFrameAnalyticsMapTitle"
-                id="xpack.ml.dataframe.analyticsMap.modelIdTitle"
-                defaultMessage="Map for trained model ID {modelId}"
-                values={{ modelId }}
-              />
-            }
-          />
-        </MlPageHeader>
-      ) : null}
+      <MlPageHeader>
+        <PageTitle
+          title={
+            <FormattedMessage
+              data-test-subj="mlPageDataFrameAnalyticsMapTitle"
+              id="xpack.ml.dataframe.analyticsMap.title"
+              defaultMessage="Analytics map"
+            />
+          }
+        />
+      </MlPageHeader>
 
       <NodeAvailableWarning />
 

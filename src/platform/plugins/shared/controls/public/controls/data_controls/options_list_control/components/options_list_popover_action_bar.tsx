@@ -98,7 +98,7 @@ export const OptionsListPopoverActionBar = ({
     componentApi.totalCardinality$,
     componentApi.field$,
     componentApi.fieldName$,
-    componentApi.parentApi.allowExpensiveQueries$,
+    componentApi.allowExpensiveQueries$,
     componentApi.availableOptions$,
     componentApi.dataLoading$,
     componentApi.singleSelect$
@@ -266,7 +266,7 @@ export const OptionsListPopoverActionBar = ({
                   />
                 </EuiToolTip>
               </EuiFlexItem>
-              {!displaySettings.hideSort && (
+              {!displaySettings.hide_sort && (
                 <EuiFlexItem grow={false}>
                   <OptionsListPopoverSortingButton showOnlySelected={showOnlySelected} />
                 </EuiFlexItem>

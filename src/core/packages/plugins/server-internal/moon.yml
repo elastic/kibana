@@ -51,6 +51,7 @@ dependsOn:
   - '@kbn/core-di'
   - '@kbn/core-di-internal'
   - '@kbn/core-di-server'
+  - '@kbn/core-http-request-handler-context-server-internal'
 tags:
   - shared-server
   - package

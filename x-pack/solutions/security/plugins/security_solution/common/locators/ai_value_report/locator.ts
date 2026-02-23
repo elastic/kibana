@@ -8,15 +8,29 @@
 import { z } from '@kbn/zod';
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
 import { AI_VALUE_REPORT_LOCATOR } from '@kbn/deeplinks-analytics';
+import { encode } from '@kbn/rison';
 import { AI_VALUE_PATH, APP_UI_ID } from '../../constants';
 
-const AIValueReportParamsSchema = z.object({
-  timeRange: z.object({
-    to: z.string().nonempty(),
+const TimeRangeSchema = z.union([
+  z.object({
+    kind: z.literal('absolute'),
     from: z.string().nonempty(),
+    to: z.string().nonempty(),
   }),
-  insight: z.string().nonempty(),
-  reportDataHash: z.string().nonempty(),
+  z.object({
+    kind: z.literal('relative'),
+    fromStr: z.string().nonempty(),
+    toStr: z.string().nonempty(),
+  }),
+]);
+
+const AIValueReportParamsSchema = z.object({
+  timeRange: TimeRangeSchema,
+  // These are only required when rendering in export mode (e.g. for PDF generation).
+  // When a user clicks "Open ..." from Reporting, we intentionally omit these to avoid
+  // forcing the destination page into export mode UI.
+  insight: z.string().nonempty().optional(),
+  reportDataHash: z.string().nonempty().optional(),
 });
 
 export type AIValueReportParams = z.infer<typeof AIValueReportParamsSchema>;
@@ -29,9 +43,29 @@ export class AIValueReportLocatorDefinition implements LocatorDefinition<AIValue
   public readonly id = AI_VALUE_REPORT_LOCATOR;
 
   public readonly getLocation = async (params: AIValueReportParams) => {
+    // The Security Solution app initializes its date pickers from the `timerange` URL param.
+    // Encoding this into the URL ensures "Open ..." from Reporting preselects the time range.
+    const timerangeParam = encode({
+      valueReport: {
+        timerange:
+          params.timeRange.kind === 'absolute'
+            ? {
+                kind: 'absolute',
+                from: params.timeRange.from,
+                to: params.timeRange.to,
+              }
+            : {
+                kind: 'relative',
+                fromStr: params.timeRange.fromStr,
+                toStr: params.timeRange.toStr,
+              },
+        linkTo: [],
+      },
+    });
+
     return {
       app: APP_UI_ID,
-      path: AI_VALUE_PATH,
+      path: `${AI_VALUE_PATH}?timerange=${timerangeParam}`,
       state: params,
     };
   };

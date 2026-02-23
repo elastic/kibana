@@ -41,7 +41,6 @@ export default function searchSolutionNavigation({
     it('renders expected side nav items', async () => {
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Discover' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Dashboards' });
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'Playground' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Developer Tools' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Agents' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Machine Learning' });
@@ -79,9 +78,9 @@ export default function searchSolutionNavigation({
           pageTestSubject: 'agentBuilderWrapper',
         },
         {
-          link: { deepLinkId: 'searchPlayground' },
-          breadcrumbs: ['Build', 'Playground'],
-          pageTestSubject: 'playgroundsUnlicensed',
+          link: { deepLinkId: 'searchGettingStarted' },
+          breadcrumbs: ['Getting started'],
+          pageTestSubject: 'gettingStartedHeader',
         },
         {
           link: { deepLinkId: 'searchGettingStarted' },
@@ -116,7 +115,6 @@ export default function searchSolutionNavigation({
           'discover',
           'dashboards',
           'agent_builder',
-          'searchPlayground',
           'machine_learning',
           'search_getting_started',
           'dev_tools',

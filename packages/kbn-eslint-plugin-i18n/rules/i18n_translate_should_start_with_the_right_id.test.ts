@@ -11,6 +11,7 @@ import { RuleTester } from 'eslint';
 import {
   I18nTranslateShouldStartWithTheRightId,
   RULE_WARNING_MESSAGE,
+  NO_IDENTIFIER_MESSAGE,
 } from './i18n_translate_should_start_with_the_right_id';
 
 const tsTester = [
@@ -149,6 +150,22 @@ import { i18n } from '@kbn/i18n';
 function TestComponent() {
   const foo = i18n.translate('xpack.observability.testComponent.', { defaultMessage: '' });
 }`,
+  },
+  {
+    name: 'When a file is not in a known package or the package has no i18n identifier, it should report an error',
+    filename: '/some/fake/path/that/does/not/exist/test_component.ts',
+    code: `
+import { i18n } from '@kbn/i18n';
+
+function TestComponent() {
+  const foo = i18n.translate('some.id', { defaultMessage: 'test' });
+}`,
+    errors: [
+      {
+        line: 5,
+        message: NO_IDENTIFIER_MESSAGE.replace('APP_ID', 'Unknown package'),
+      },
+    ],
   },
 ];
 

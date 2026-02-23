@@ -21,6 +21,9 @@ import { cloneDeep, isArray, isEmpty, last, once } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import type { ILicense } from '@kbn/licensing-types';
+import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
+import { AIChatExperience } from '@kbn/ai-assistant-common';
+import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import { MessageRole, type Message } from '../../../common/types';
 import { ObservabilityAIAssistantChatServiceContext } from '../../context/observability_ai_assistant_chat_service_context';
 import { useAbortableAsync } from '../../hooks/use_abortable_async';
@@ -41,12 +44,6 @@ import { MissingCredentialsCallout } from '../missing_credentials_callout';
 import { InsightBase } from './insight_base';
 import { ActionsMenu } from './actions_menu';
 import { ObservabilityAIAssistantTelemetryEventType } from '../../analytics/telemetry_event_type';
-import { getElasticManagedLlmConnector } from '../../utils/get_elastic_managed_llm_connector';
-import { ElasticLlmTourCallout } from '../tour_callout/elastic_llm_tour_callout';
-import {
-  ElasticLlmCalloutKey,
-  useElasticLlmCalloutDismissed,
-} from '../../hooks/use_elastic_llm_callout_dismissed';
 
 function getLastMessageOfType(messages: Message[], role: MessageRole) {
   return last(messages.filter((msg) => msg.message.role === role));
@@ -56,12 +53,10 @@ function ChatContent({
   title: defaultTitle,
   initialMessages,
   connectorId,
-  setIsTourCalloutOpen,
 }: {
   title: string;
   initialMessages: Message[];
   connectorId: string;
-  setIsTourCalloutOpen: (isOpen: boolean) => void;
 }) {
   const service = useObservabilityAIAssistant();
   const chatService = useObservabilityAIAssistantChatService();
@@ -151,7 +146,6 @@ function ChatContent({
                 <StartChatButton
                   disabled={flyoutState.isOpen}
                   onClick={() => {
-                    setIsTourCalloutOpen(false);
                     service.conversations.openNewConversation({
                       messages,
                       title: defaultTitle,
@@ -253,11 +247,6 @@ export function Insight({
   const [isInsightOpen, setInsightOpen] = useState(false);
   const [hasOpened, setHasOpened] = useState(false);
   const [isPromptUpdated, setIsPromptUpdated] = useState(false);
-  const [isTourCalloutOpen, setIsTourCalloutOpen] = useState(true);
-  const [tourCalloutDismissed, setTourCalloutDismissed] = useElasticLlmCalloutDismissed(
-    ElasticLlmCalloutKey.TOUR_CALLOUT,
-    false
-  );
 
   const updateInitialMessages = useCallback(async () => {
     if (isArray(initialMessagesOrCallback)) {
@@ -369,9 +358,13 @@ export function Insight({
     },
   } = useKibana();
 
+  const [chatExperience] = useUiSetting$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE);
+  const isAgentChatExperienceEnabled = chatExperience === AIChatExperience.Agent;
+
   const license = useObservable<ILicense | null>(licensing.license$);
   const hasEnterpriseLicense = license?.hasAtLeast('enterprise');
-  if (isEmpty(connectors.connectors) || !hasEnterpriseLicense) {
+
+  if (isEmpty(connectors.connectors) || !hasEnterpriseLicense || isAgentChatExperienceEnabled) {
     return null;
   }
 
@@ -422,7 +415,6 @@ export function Insight({
           title={title}
           initialMessages={messages.messages}
           connectorId={connectors.selectedConnector}
-          setIsTourCalloutOpen={setIsTourCalloutOpen}
         />
       </>
     );
@@ -457,8 +449,6 @@ export function Insight({
     );
   }
 
-  const elasticManagedLlm = getElasticManagedLlmConnector(connectors.connectors);
-
   return (
     <InsightBase
       title={title}
@@ -470,29 +460,13 @@ export function Insight({
         setInsightOpen(isOpen);
       }}
       controls={
-        !!elasticManagedLlm && showElasticLlmCallout ? (
-          <ElasticLlmTourCallout
-            isOpen={!tourCalloutDismissed && isTourCalloutOpen}
-            zIndex={999}
-            dismissTour={() => setTourCalloutDismissed(true)}
-          >
-            <ActionsMenu
-              connectors={connectors}
-              onEditPrompt={() => {
-                setEditingPrompt(true);
-                setInsightOpen(true);
-              }}
-            />
-          </ElasticLlmTourCallout>
-        ) : (
-          <ActionsMenu
-            connectors={connectors}
-            onEditPrompt={() => {
-              setEditingPrompt(true);
-              setInsightOpen(true);
-            }}
-          />
-        )
+        <ActionsMenu
+          connectors={connectors}
+          onEditPrompt={() => {
+            setEditingPrompt(true);
+            setInsightOpen(true);
+          }}
+        />
       }
       loading={connectors.loading || chatService.loading}
       dataTestSubj={dataTestSubj}

@@ -23,7 +23,6 @@ dependsOn:
   - '@kbn/expression-xy-plugin'
   - '@kbn/expression-gauge-plugin'
   - '@kbn/expression-partition-vis-plugin'
-  - '@kbn/embeddable-enhanced-plugin'
   - '@kbn/expression-legacy-metric-vis-plugin'
   - '@kbn/expressions-plugin'
   - '@kbn/tinymath'
@@ -40,7 +39,6 @@ dependsOn:
   - '@kbn/esql-types'
   - '@kbn/inspector-plugin'
   - '@kbn/embeddable-plugin'
-  - '@kbn/presentation-containers'
   - '@kbn/interpreter'
   - '@kbn/data-plugin'
   - '@kbn/share-plugin'
@@ -67,6 +65,8 @@ dependsOn:
   - '@kbn/chart-icons'
   - '@kbn/alerts-ui-shared'
   - '@kbn/cps'
+  - '@kbn/kql'
+  - '@kbn/control-group-renderer'
 tags:
   - shared-common
   - package

@@ -26,7 +26,7 @@ import type {
   LensApiFieldMetricOrFormulaOperation,
 } from '../../schema';
 import type { LensAttributes } from '../../types';
-import { DEFAULT_LAYER_ID } from '../../types';
+import { DEFAULT_LAYER_ID } from '../../constants';
 import {
   addLayerColumn,
   buildDatasetState,
@@ -73,7 +73,7 @@ function getRegionMapDataset(
   adhocReferences: SavedObjectReference[] = [],
   layerId: string
 ): RegionMapState['dataset'] {
-  const dataset = buildDatasetState(layer, adHocDataViews, references, adhocReferences, layerId);
+  const dataset = buildDatasetState(layer, layerId, adHocDataViews, references, adhocReferences);
 
   if (!dataset || dataset.type == null) {
     throw new Error('Unsupported dataset type');

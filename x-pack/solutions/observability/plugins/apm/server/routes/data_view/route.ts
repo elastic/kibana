@@ -6,6 +6,7 @@
  */
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
 import type { CreateDataViewResponse } from './create_static_data_view';
 import { createOrUpdateStaticDataView } from './create_static_data_view';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
@@ -51,11 +52,13 @@ const staticDataViewRoute = createApmServerRoute({
 const dataViewTitleRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/data_view/index_pattern',
   security: { authz: { requiredPrivileges: ['apm'] } },
-  handler: async ({ getApmIndices }): Promise<{ apmDataViewIndexPattern: string }> => {
+  handler: async ({
+    getApmIndices,
+  }): Promise<{ apmDataViewIndexPattern: string; apmIndices: APMIndices }> => {
     const apmIndices = await getApmIndices();
     const apmDataViewIndexPattern = getApmDataViewIndexPattern(apmIndices);
 
-    return { apmDataViewIndexPattern };
+    return { apmDataViewIndexPattern, apmIndices };
   },
 });
 

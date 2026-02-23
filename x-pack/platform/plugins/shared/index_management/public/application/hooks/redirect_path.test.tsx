@@ -11,7 +11,7 @@ import { createMemoryHistory } from 'history';
 import { useRedirectPath } from './redirect_path';
 import { useKibana } from '..';
 
-const mockedUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
+const mockedUseKibana = jest.mocked(useKibana);
 jest.mock('..');
 
 describe('useRedirectPath', () => {
@@ -22,7 +22,7 @@ describe('useRedirectPath', () => {
       services: {
         application: mockStart.application,
       },
-    } as any);
+    } as unknown as ReturnType<typeof useKibana>);
   });
   it('should redirect to redirect path if a redirect path is specified in the url', () => {
     const history = createMemoryHistory();

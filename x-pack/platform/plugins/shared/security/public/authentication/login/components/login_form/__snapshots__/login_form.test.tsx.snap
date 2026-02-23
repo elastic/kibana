@@ -85,7 +85,7 @@ exports[`LoginForm renders as expected 1`] = `
               "extraSlow": "500ms",
               "fast": "150ms",
               "normal": "250ms",
-              "resistance": "cubic-bezier(.694, .0482, .335, 1)",
+              "resistance": "cubic-bezier(.32, .72, 0, 1)",
               "slow": "350ms",
             },
             "base": 16,
@@ -253,7 +253,9 @@ exports[`LoginForm renders as expected 1`] = `
                 "textAccentSecondary": "#16C5C0",
                 "textDanger": "#F6726A",
                 "textDisabled": "#6A7FA0",
+                "textGhost": "#FFFFFF",
                 "textHeading": "#E3E8F2",
+                "textInk": "#07101F",
                 "textInverse": "#07101F",
                 "textNeutral": "#37B8DC",
                 "textParagraph": "#CAD3E2",
@@ -434,7 +436,9 @@ exports[`LoginForm renders as expected 1`] = `
                 "textAccentSecondary": "#047471",
                 "textDanger": "#A71627",
                 "textDisabled": "#798EAF",
+                "textGhost": "#FFFFFF",
                 "textHeading": "#111C2C",
+                "textInk": "#07101F",
                 "textInverse": "#FFFFFF",
                 "textNeutral": "#0F658A",
                 "textParagraph": "#1D2A3E",
@@ -502,8 +506,6 @@ exports[`LoginForm renders as expected 1`] = `
                 "warning": "#FACB3D",
                 "warningText": "#825803",
               },
-              "ghost": "#FFFFFF",
-              "ink": "#07101F",
               "plainDark": "#07101F",
               "plainLight": "#FFFFFF",
             },
@@ -512,7 +514,7 @@ exports[`LoginForm renders as expected 1`] = `
                 "badgeBackground": Computed {
                   "computer": [Function],
                   "dependencies": Array [
-                    "colors.backgroundLightText",
+                    "colors.backgroundFilledText",
                   ],
                 },
                 "badgeBackgroundSubdued": Computed {
@@ -819,12 +821,6 @@ exports[`LoginForm renders as expected 1`] = `
                   ],
                 },
                 "skeletonBackgroundSkeletonMiddleHighContrast": "rgba(255,255,255, 0.3)",
-                "superDatePickerBackgroundSuccees": Computed {
-                  "computer": [Function],
-                  "dependencies": Array [
-                    "colors.backgroundBaseSuccess",
-                  ],
-                },
                 "switchBackgroundOff": Computed {
                   "computer": [Function],
                   "dependencies": Array [
@@ -932,6 +928,13 @@ exports[`LoginForm renders as expected 1`] = `
                     "colors.backgroundBaseHighlighted",
                   ],
                 },
+                "tourStepIndicatorActiveColor": Computed {
+                  "computer": [Function],
+                  "dependencies": Array [
+                    "colors.backgroundFilledSuccess",
+                  ],
+                },
+                "tourStepIndicatorInactiveColor": "#485975",
                 "treeViewItemBackgroundHover": Computed {
                   "computer": [Function],
                   "dependencies": Array [
@@ -943,7 +946,7 @@ exports[`LoginForm renders as expected 1`] = `
                 "badgeBackground": Computed {
                   "computer": [Function],
                   "dependencies": Array [
-                    "colors.backgroundLightText",
+                    "colors.backgroundFilledText",
                   ],
                 },
                 "badgeBackgroundSubdued": Computed {
@@ -1250,12 +1253,6 @@ exports[`LoginForm renders as expected 1`] = `
                   ],
                 },
                 "skeletonBackgroundSkeletonMiddleHighContrast": "rgba(72,89,117, 0.04)",
-                "superDatePickerBackgroundSuccees": Computed {
-                  "computer": [Function],
-                  "dependencies": Array [
-                    "colors.backgroundBaseSuccess",
-                  ],
-                },
                 "switchBackgroundOff": Computed {
                   "computer": [Function],
                   "dependencies": Array [
@@ -1363,6 +1360,13 @@ exports[`LoginForm renders as expected 1`] = `
                     "colors.backgroundBaseHighlighted",
                   ],
                 },
+                "tourStepIndicatorActiveColor": Computed {
+                  "computer": [Function],
+                  "dependencies": Array [
+                    "colors.backgroundFilledSuccess",
+                  ],
+                },
+                "tourStepIndicatorInactiveColor": "#A2B1C9",
                 "treeViewItemBackgroundHover": Computed {
                   "computer": [Function],
                   "dependencies": Array [
@@ -2302,6 +2306,10 @@ exports[`LoginForm renders as expected 1`] = `
             "overrides": Object {
               "HCM": Object {
                 "colors": Object {
+                  "DARK": Object {
+                    "textGhost": "#FFFFFF",
+                    "textInk": "#000000",
+                  },
                   "LIGHT": Object {
                     "severity": Object {
                       "danger": "#EE4C48",
@@ -2311,6 +2319,8 @@ exports[`LoginForm renders as expected 1`] = `
                       "unknown": "#798EAF",
                       "warning": "#AD7E00",
                     },
+                    "textGhost": "#FFFFFF",
+                    "textInk": "#000000",
                     "vis": Object {
                       "euiColorVis0": "#065B58",
                       "euiColorVis1": "#009E99",
@@ -2367,8 +2377,8 @@ exports[`LoginForm renders as expected 1`] = `
                       "euiColorVisWarning1": "#AD7E00",
                     },
                   },
-                  "ghost": "#FFFFFF",
-                  "ink": "#000000",
+                  "plainDark": "#000000",
+                  "plainLight": "#FFFFFF",
                 },
               },
             },
@@ -2504,72 +2514,80 @@ exports[`LoginForm renders as expected 1`] = `
           <EuiUtilityClasses />
         </EuiCacheProvider>
         <EuiComponentDefaultsProvider>
-          <LoginForm
-            http={
-              Object {
-                "addLoadingCountSource": [MockFunction],
-                "anonymousPaths": Object {
-                  "isAnonymous": [MockFunction],
-                  "register": [MockFunction],
-                },
-                "basePath": BasePath {
-                  "assetsHrefBase": "",
-                  "basePath": "",
-                  "get": [Function],
-                  "prepend": [Function],
-                  "publicBaseUrl": undefined,
-                  "remove": [Function],
-                  "serverBasePath": "",
-                },
-                "delete": [MockFunction],
-                "externalUrl": Object {
-                  "isInternalUrl": [MockFunction],
-                  "validateUrl": [MockFunction],
-                },
-                "fetch": [MockFunction],
-                "get": [MockFunction],
-                "getLoadingCount$": [MockFunction],
-                "head": [MockFunction],
-                "intercept": [MockFunction],
-                "options": [MockFunction],
-                "patch": [MockFunction],
-                "post": [MockFunction],
-                "put": [MockFunction],
-                "staticAssets": Object {
-                  "getPluginAssetHref": [MockFunction],
-                },
-              }
-            }
-            loginAssistanceMessage=""
-            notifications={
-              Object {
-                "showErrorDialog": [MockFunction],
-                "toasts": Object {
-                  "add": [MockFunction],
-                  "addDanger": [MockFunction],
-                  "addError": [MockFunction],
-                  "addInfo": [MockFunction],
-                  "addSuccess": [MockFunction],
-                  "addWarning": [MockFunction],
-                  "get$": [MockFunction],
-                  "remove": [MockFunction],
-                },
-              }
-            }
-            selector={
-              Object {
-                "enabled": false,
-                "providers": Array [
-                  Object {
-                    "name": "basic",
-                    "showInSelector": true,
-                    "type": "basic",
-                    "usesLoginForm": true,
+          <EuiFlyoutManager>
+            <LoginForm
+              http={
+                Object {
+                  "addLoadingCountSource": [MockFunction],
+                  "anonymousPaths": Object {
+                    "isAnonymous": [MockFunction],
+                    "register": [MockFunction],
                   },
-                ],
+                  "basePath": BasePath {
+                    "assetsHrefBase": "",
+                    "basePath": "",
+                    "get": [Function],
+                    "prepend": [Function],
+                    "publicBaseUrl": undefined,
+                    "remove": [Function],
+                    "serverBasePath": "",
+                  },
+                  "delete": [MockFunction],
+                  "externalUrl": Object {
+                    "isInternalUrl": [MockFunction],
+                    "validateUrl": [MockFunction],
+                  },
+                  "fetch": [MockFunction],
+                  "get": [MockFunction],
+                  "getLoadingCount$": [MockFunction],
+                  "head": [MockFunction],
+                  "intercept": [MockFunction],
+                  "options": [MockFunction],
+                  "patch": [MockFunction],
+                  "post": [MockFunction],
+                  "put": [MockFunction],
+                  "staticAssets": Object {
+                    "getPluginAssetHref": [MockFunction],
+                  },
+                }
               }
-            }
-          />
+              loginAssistanceMessage=""
+              notifications={
+                Object {
+                  "feedback": Object {
+                    "isEnabled": [MockFunction],
+                  },
+                  "showErrorDialog": [MockFunction],
+                  "toasts": Object {
+                    "add": [MockFunction],
+                    "addDanger": [MockFunction],
+                    "addError": [MockFunction],
+                    "addInfo": [MockFunction],
+                    "addSuccess": [MockFunction],
+                    "addWarning": [MockFunction],
+                    "get$": [MockFunction],
+                    "remove": [MockFunction],
+                  },
+                  "tours": Object {
+                    "isEnabled": [MockFunction],
+                  },
+                }
+              }
+              selector={
+                Object {
+                  "enabled": false,
+                  "providers": Array [
+                    Object {
+                      "name": "basic",
+                      "showInSelector": true,
+                      "type": "basic",
+                      "usesLoginForm": true,
+                    },
+                  ],
+                }
+              }
+            />
+          </EuiFlyoutManager>
         </EuiComponentDefaultsProvider>
       </EuiThemeProvider>
     </EuiSystemDefaultsProvider>

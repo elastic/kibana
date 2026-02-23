@@ -493,7 +493,10 @@ export class ScheduledReportsService {
     schedule,
   }: { id: string } & UpdateScheduledReportParams) {
     if (schedule) {
-      await this.taskManager.bulkUpdateSchedules([id], schedule, { request: this.request });
+      await this.taskManager.bulkUpdateSchedules([id], schedule, {
+        request: this.request,
+        regenerateApiKey: true,
+      });
     }
   }
 
@@ -682,8 +685,8 @@ export class ScheduledReportsService {
     updatedScheduledReportIds: Set<string>;
   }) {
     const resultFromUpdatingTasks = shouldEnable
-      ? await this.taskManager.bulkEnable(taskIdsToUpdate, false)
-      : await this.taskManager.bulkDisable(taskIdsToUpdate);
+      ? await this.taskManager.bulkEnable(taskIdsToUpdate, false, { request: this.request })
+      : await this.taskManager.bulkDisable(taskIdsToUpdate, false, { request: this.request });
 
     for (const error of resultFromUpdatingTasks.errors) {
       bulkErrors.push({

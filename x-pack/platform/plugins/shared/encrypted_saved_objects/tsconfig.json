@@ -20,10 +20,10 @@
     "@kbn/config",
     "@kbn/encrypted-saved-objects-shared",
     "@kbn/core-saved-objects-utils-server",
-    "@kbn/core-saved-objects-api-server-internal",
     "@kbn/core-root-server-internal",
     "@kbn/core-test-helpers-kbn-server",
     "@kbn/core-test-helpers-so-type-serializer",
+    "@kbn/std",
   ],
   "exclude": [
     "target/**/*",

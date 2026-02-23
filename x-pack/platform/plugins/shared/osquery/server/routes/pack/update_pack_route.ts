@@ -40,6 +40,7 @@ import type { PackSavedObject } from '../../common/types';
 import type { PackResponseData } from './types';
 import { updatePacksRequestBodySchema, updatePacksRequestParamsSchema } from '../../../common/api';
 import { getUserInfo } from '../../lib/get_user_info';
+import { escapeFilterValue } from '../utils/generate_copy_name';
 
 export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.versioned
@@ -87,7 +88,6 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         });
         const username = currentUser?.username ?? undefined;
 
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         const { name, description, queries, enabled, policy_ids, shards = {} } = request.body;
 
         const currentPackSO = await spaceScopedClient.get<{ name: string; enabled: boolean }>(
@@ -98,7 +98,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         if (name) {
           const conflictingEntries = await spaceScopedClient.find<PackSavedObject>({
             type: packSavedObjectType,
-            filter: `${packSavedObjectType}.attributes.name: "${name}"`,
+            filter: `${packSavedObjectType}.attributes.name: "${escapeFilterValue(name)}"`,
           });
 
           if (

@@ -53,7 +53,6 @@ export function fromTermsLensApiToLensState(
   options: LensApiTermsOperation,
   getMetricColumnIdByIndex: (index: number) => string | undefined
 ): TermsIndexPatternColumn {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   const { fields, size, increase_accuracy, includes, excludes, other_bucket, rank_by } = options;
 
   const [field, ...secondaryFields] = fields;
@@ -174,7 +173,7 @@ export function fromTermsLensStateToAPI(
           },
         }
       : {}),
-    ...(column.params.otherBucket != null
+    ...(column.params.otherBucket
       ? {
           other_bucket: {
             include_documents_without_field: Boolean(column.params.missingBucket),

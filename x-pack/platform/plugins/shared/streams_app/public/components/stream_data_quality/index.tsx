@@ -8,6 +8,7 @@
 import React from 'react';
 import type { Streams } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
+
 import { useKibana } from '../../hooks/use_kibana';
 import { useDatasetQualityController } from '../../hooks/use_dataset_quality_controller';
 

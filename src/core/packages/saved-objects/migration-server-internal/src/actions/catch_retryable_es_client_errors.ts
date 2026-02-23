@@ -47,10 +47,7 @@ export const catchRetryableEsClientErrors = (
 export const catchRetryableSearchPhaseExecutionException = (
   e: EsErrors.ResponseError
 ): Either.Either<RetryableEsClientError, never> => {
-  if (
-    e?.body?.error?.type === 'search_phase_execution_exception' &&
-    e?.body?.error?.caused_by?.reason?.includes('Search rejected due to missing shards')
-  ) {
+  if (e?.body?.error?.type === 'search_phase_execution_exception') {
     return Either.left({
       type: 'retryable_es_client_error' as const,
       message: e?.message,

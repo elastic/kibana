@@ -14,6 +14,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const log = getService('log');
   const browser = getService('browser');
+  const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'console', 'header']);
   const remoteEsArchiver = getService('remoteEsArchiver' as 'esArchiver');
 
@@ -44,7 +45,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.console.enterText(
           '\nGET ftr-remote:logstash-*/_search\n {\n "query": {\n "bool": {\n "must": [\n {"match": {"extension" : "jpg"} \n}\n]\n}\n}\n}'
         );
+
         await PageObjects.console.clickPlay();
+
+        await retry.waitFor('console response status badge to appear', async () => {
+          return await testSubjects.exists('consoleResponseStatusBadge');
+        });
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         await retry.try(async () => {

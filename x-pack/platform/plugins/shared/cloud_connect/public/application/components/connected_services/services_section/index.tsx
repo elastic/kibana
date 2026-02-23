@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { ServiceCard } from './details_card';
 import { DisableServiceModal } from './disable_service_modal';
 import { useServiceActions } from './use_service_actions';
+import { useCloudConnectedAppContext } from '../../../app_context';
 import type { CloudService, ServiceType } from '../../../../types';
 
 interface ServicesSectionProps {
@@ -21,13 +22,16 @@ interface ServicesSectionProps {
   };
   onServiceUpdate: (serviceKey: ServiceType, enabled: boolean) => void;
   subscription?: string;
+  currentLicenseType?: string;
 }
 
 export const ServicesSection: React.FC<ServicesSectionProps> = ({
   services,
   onServiceUpdate,
   subscription,
+  currentLicenseType,
 }) => {
+  const { autoEnablingEis } = useCloudConnectedAppContext();
   const {
     loadingService,
     disableModalService,
@@ -36,6 +40,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({
     showDisableModal,
     closeDisableModal,
     handleEnableServiceByUrl,
+    handleRotateServiceApiKey,
   } = useServiceActions({ onServiceUpdate, services });
 
   // Check if there's an active subscription (active or trial)
@@ -70,9 +75,12 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({
             defaultMessage: 'Elastic Inference Service',
           })
         ),
-      isLoading: loadingService === 'eis',
+      onRotateApiKey: services.eis?.enabled ? () => handleRotateServiceApiKey('eis') : undefined,
+      isLoading: loadingService === 'eis' || autoEnablingEis,
       subscriptionRequired: services.eis?.subscription?.required,
       hasActiveSubscription,
+      validLicenseTypes: services.eis?.support?.valid_license_types,
+      currentLicenseType,
     },
     {
       serviceKey: 'auto_ops',
@@ -89,7 +97,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({
       region: services.auto_ops?.config?.region_id ?? undefined,
       description: i18n.translate('xpack.cloudConnect.services.autoOps.description', {
         defaultMessage:
-          'Get instant cluster diagnostics, performance tips, and cost-saving recommendations—no extra management needed.',
+          'Simplify cluster management with real-time issue detection, performance recommendations, and resource utilization insights.',
       }),
       learnMoreUrl: services.auto_ops?.metadata?.documentation_url,
       serviceUrl: services.auto_ops?.metadata?.service_url,
@@ -108,41 +116,26 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({
       isLoading: loadingService === 'auto_ops',
       subscriptionRequired: services.auto_ops?.subscription?.required,
       hasActiveSubscription,
-    },
-    // Synthetics Service (hardcoded as coming soon)
-    {
-      serviceKey: 'synthetics',
-      title: i18n.translate('xpack.cloudConnect.services.synthetics.title', {
-        defaultMessage: 'Synthetics',
-      }),
-      enabled: false,
-      badge: i18n.translate('xpack.cloudConnect.services.comingSoon', {
-        defaultMessage: 'COMING SOON',
-      }),
-      description: i18n.translate('xpack.cloudConnect.services.synthetics.description', {
-        defaultMessage:
-          'Proactive, automated monitoring for apps and APIs—catch issues early, get deep diagnostics, and integrate easily.',
-      }),
-      isCardDisabled: true,
+      validLicenseTypes: services.auto_ops?.support?.valid_license_types,
+      currentLicenseType,
     },
   ];
 
-  // Sort service cards: enabled first, then disabled, coming soon always last
-  const enabledCards = allServiceCards.filter((card) => card.enabled && !card.isCardDisabled);
-  const disabledCards = allServiceCards.filter((card) => !card.enabled && !card.isCardDisabled);
-  const comingSoonCards = allServiceCards.filter((card) => card.isCardDisabled);
+  // Sort service cards: enabled first, then disabled
+  const enabledCards = allServiceCards.filter((card) => card.enabled);
+  const disabledCards = allServiceCards.filter((card) => !card.enabled);
 
-  const serviceCards = [...enabledCards, ...disabledCards, ...comingSoonCards];
+  const serviceCards = [...enabledCards, ...disabledCards];
 
   return (
     <>
       <EuiTitle size="xs">
-        <h2>
+        <h3>
           <FormattedMessage
             id="xpack.cloudConnect.connectedServices.services.title"
             defaultMessage="Services"
           />
-        </h2>
+        </h3>
       </EuiTitle>
       <EuiSpacer size="m" />
       {serviceCards.map((service, index) => (

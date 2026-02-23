@@ -11,24 +11,18 @@ import React from 'react';
 
 import {
   EuiBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiSpacer,
   EuiTable,
   EuiTableBody,
   EuiTableRow,
   EuiTableRowCell,
-  EuiButtonEmpty,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
-  EuiPagination,
-  EuiPopover,
+  EuiTablePagination,
+  htmlIdGenerator,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { Pager } from '@elastic/eui';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { MatchedItem, Tag } from '@kbn/data-views-plugin/public';
 import { INDEX_PATTERN_TYPE } from '@kbn/data-views-plugin/public';
 import { RollupDeprecationTooltip } from '@kbn/rollup';
@@ -42,7 +36,6 @@ export interface IndicesListProps {
 interface IndicesListState {
   page: number;
   perPage: number;
-  isPerPageControlOpen: boolean;
 }
 
 const PER_PAGE_INCREMENTS = [5, 10, 20, 50];
@@ -51,6 +44,7 @@ export const PER_PAGE_STORAGE_KEY = 'dataViews.previewPanel.indicesPerPage';
 export class IndicesList extends React.Component<IndicesListProps, IndicesListState> {
   pager: Pager;
   storage: Storage;
+  idGenerator = htmlIdGenerator();
 
   constructor(props: IndicesListProps) {
     super(props);
@@ -60,7 +54,6 @@ export class IndicesList extends React.Component<IndicesListProps, IndicesListSt
     this.state = {
       page: 0,
       perPage: this.storage.get(PER_PAGE_STORAGE_KEY) || PER_PAGE_INCREMENTS[1],
-      isPerPageControlOpen: false,
     };
 
     this.pager = new Pager(props.indices.length, this.state.perPage, this.state.page);
@@ -84,80 +77,28 @@ export class IndicesList extends React.Component<IndicesListProps, IndicesListSt
     this.pager.setItemsPerPage(perPage);
     this.setState({ perPage });
     this.resetPageTo0();
-    this.closePerPageControl();
     this.storage.set(PER_PAGE_STORAGE_KEY, perPage);
   };
 
-  openPerPageControl = () => {
-    this.setState({ isPerPageControlOpen: true });
-  };
-
-  closePerPageControl = () => {
-    this.setState({ isPerPageControlOpen: false });
-  };
-
-  renderPagination() {
-    const { perPage, page, isPerPageControlOpen } = this.state;
-
-    const button = (
-      <EuiButtonEmpty
-        size="s"
-        color="text"
-        iconType="arrowDown"
-        iconSide="right"
-        onClick={this.openPerPageControl}
-      >
-        <FormattedMessage
-          id="indexPatternEditor.pagingLabel"
-          defaultMessage="Rows per page: {perPage}"
-          values={{ perPage }}
-        />
-      </EuiButtonEmpty>
-    );
-
-    const items = PER_PAGE_INCREMENTS.map((increment) => {
-      return (
-        <EuiContextMenuItem
-          key={increment}
-          icon="empty"
-          onClick={() => this.onChangePerPage(increment)}
-        >
-          {increment}
-        </EuiContextMenuItem>
-      );
-    });
-
+  renderPagination(indicesTableId: string) {
+    const { perPage, page } = this.state;
     const pageCount = this.pager.getTotalPages();
 
-    const paginationControls =
-      pageCount > 1 ? (
-        <EuiFlexItem grow={false}>
-          <EuiPagination
-            pageCount={pageCount}
-            activePage={page}
-            onPageClick={this.onChangePage}
-            aria-label={i18n.translate('indexPatternEditor.pagination.ariaLabel', {
-              defaultMessage: 'Indices list pagination',
-            })}
-          />
-        </EuiFlexItem>
-      ) : null;
-
     return (
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiPopover
-            id="customizablePagination"
-            button={button}
-            isOpen={isPerPageControlOpen}
-            closePopover={this.closePerPageControl}
-            panelPaddingSize="none"
-          >
-            <EuiContextMenuPanel items={items} />
-          </EuiPopover>
-        </EuiFlexItem>
-        {paginationControls}
-      </EuiFlexGroup>
+      <EuiTablePagination
+        activePage={page}
+        itemsPerPage={perPage}
+        compressed={false}
+        itemsPerPageOptions={PER_PAGE_INCREMENTS}
+        onChangeItemsPerPage={(increment) => this.onChangePerPage(increment)}
+        onChangePage={(p) => this.onChangePage(p)}
+        pageCount={pageCount}
+        responsive={['xs', 's']}
+        aria-label={i18n.translate('indexPatternEditor.pagination.ariaLabel', {
+          defaultMessage: 'Indices list pagination',
+        })}
+        aria-controls={indicesTableId}
+      />
     );
   }
 
@@ -208,11 +149,12 @@ export class IndicesList extends React.Component<IndicesListProps, IndicesListSt
 
   render() {
     const { indices, query, isExactMatch, ...rest } = this.props;
+    const indicesTableId = this.idGenerator('indices-list-table');
 
     const paginatedIndices = indices.slice(this.pager.firstItemIndex, this.pager.lastItemIndex + 1);
     const rows = paginatedIndices.map((index, key) => {
       return (
-        <EuiTableRow key={key}>
+        <EuiTableRow data-test-subj="indicesListTableRow" key={key}>
           <EuiTableRowCell>{this.highlightIndexName(index.name, query)}</EuiTableRowCell>
           <EuiTableRowCell>
             {index.tags.map((tag: Tag) => {
@@ -237,11 +179,11 @@ export class IndicesList extends React.Component<IndicesListProps, IndicesListSt
 
     return (
       <div {...rest}>
-        <EuiTable responsiveBreakpoint={false} tableLayout="auto">
+        <EuiTable responsiveBreakpoint={false} tableLayout="auto" id={indicesTableId}>
           <EuiTableBody>{rows}</EuiTableBody>
         </EuiTable>
         <EuiSpacer size="m" />
-        {this.renderPagination()}
+        {this.renderPagination(indicesTableId)}
       </div>
     );
   }

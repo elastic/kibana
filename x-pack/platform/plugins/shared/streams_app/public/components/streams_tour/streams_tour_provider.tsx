@@ -153,15 +153,17 @@ export function StreamsTourProvider({ children }: StreamsTourProviderProps) {
     dependencies: {
       start: { share },
     },
+    core: { notifications },
   } = useKibana();
   const { features } = useStreamsPrivileges();
+  const isTourEnabled = notifications?.tours?.isEnabled() ?? true;
 
   const streamsLocator = useMemo(
     () =>
       share.url.locators.get<StreamsAppLocatorParams>(STREAMS_APP_LOCATOR_ID) as StreamsAppLocator,
     [share.url.locators]
   );
-  const attachmentsEnabled = features.attachments?.enabled ?? false;
+  const attachmentsEnabled = features.attachments.enabled;
 
   const [isCalloutDismissed = false, setCalloutDismissed] = useLocalStorage(
     STREAMS_TOUR_CALLOUT_DISMISSED_KEY,
@@ -219,15 +221,25 @@ export function StreamsTourProvider({ children }: StreamsTourProviderProps) {
 
   const tourStepProps = useMemo(
     () =>
-      createEnhancedTourStepProps(
-        baseTourStepProps,
-        stepsConfig,
-        actions,
-        tourState,
-        completeTour,
-        navigateToList
-      ),
-    [baseTourStepProps, stepsConfig, actions, tourState, completeTour, navigateToList]
+      isTourEnabled
+        ? createEnhancedTourStepProps(
+            baseTourStepProps,
+            stepsConfig,
+            actions,
+            tourState,
+            completeTour,
+            navigateToList
+          )
+        : [],
+    [
+      baseTourStepProps,
+      stepsConfig,
+      actions,
+      tourState,
+      completeTour,
+      navigateToList,
+      isTourEnabled,
+    ]
   );
 
   const getStepPropsByStepId = useCallback(

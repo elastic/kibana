@@ -8,7 +8,11 @@
 import { renderHook, act } from '@testing-library/react';
 import { useStartMigration } from './use_start_migration';
 import { useKibana } from '../../../common/lib/kibana';
-import { SiemMigrationRetryFilter } from '../../../../common/siem_migrations/constants';
+import {
+  SiemMigrationRetryFilter,
+  SiemMigrationTaskStatus,
+} from '../../../../common/siem_migrations/constants';
+import { MigrationSource } from '../../common/types';
 
 jest.mock('../../../common/lib/kibana');
 
@@ -16,6 +20,15 @@ const mockedUseKibana = useKibana as jest.Mock;
 const mockStartDashboardMigration = jest.fn();
 const mockAddSuccess = jest.fn();
 const mockAddError = jest.fn();
+const defaultMigrationStats = {
+  id: '1',
+  status: SiemMigrationTaskStatus.READY,
+  vendor: MigrationSource.SPLUNK,
+  name: 'Test Migration',
+  items: { total: 100, pending: 100, processing: 0, completed: 0, failed: 0 },
+  created_at: '2025-01-01T00:00:00Z',
+  last_updated_at: '2025-01-01T01:00:00Z',
+};
 
 describe('useStartMigration', () => {
   beforeEach(() => {
@@ -46,10 +59,15 @@ describe('useStartMigration', () => {
       const { result } = renderHook(() => useStartMigration(onSuccess));
 
       await act(async () => {
-        await result.current.startMigration('1');
+        await result.current.startMigration(defaultMigrationStats);
       });
 
-      expect(mockStartDashboardMigration).toHaveBeenCalledWith('1', undefined, undefined);
+      expect(mockStartDashboardMigration).toHaveBeenCalledWith({
+        migrationId: defaultMigrationStats.id,
+        vendor: defaultMigrationStats.vendor,
+        retry: undefined,
+        settings: undefined,
+      });
       expect(mockAddSuccess).toHaveBeenCalledWith('Migration started successfully.');
       expect(onSuccess).toHaveBeenCalled();
     });
@@ -60,10 +78,15 @@ describe('useStartMigration', () => {
       const { result } = renderHook(() => useStartMigration(onSuccess));
 
       await act(async () => {
-        await result.current.startMigration('1', SiemMigrationRetryFilter.FAILED);
+        await result.current.startMigration(defaultMigrationStats, SiemMigrationRetryFilter.FAILED);
       });
 
-      expect(mockStartDashboardMigration).toHaveBeenCalledWith('1', 'failed', undefined);
+      expect(mockStartDashboardMigration).toHaveBeenCalledWith({
+        migrationId: defaultMigrationStats.id,
+        vendor: defaultMigrationStats.vendor,
+        retry: 'failed',
+        settings: undefined,
+      });
       expect(mockAddSuccess).toHaveBeenCalledWith('Migration started successfully.');
       expect(onSuccess).toHaveBeenCalled();
     });
@@ -74,14 +97,18 @@ describe('useStartMigration', () => {
       const { result } = renderHook(() => useStartMigration(onSuccess));
 
       await act(async () => {
-        await result.current.startMigration('1', SiemMigrationRetryFilter.NOT_FULLY_TRANSLATED);
+        await result.current.startMigration(
+          defaultMigrationStats,
+          SiemMigrationRetryFilter.NOT_FULLY_TRANSLATED
+        );
       });
 
-      expect(mockStartDashboardMigration).toHaveBeenCalledWith(
-        '1',
-        'not_fully_translated',
-        undefined
-      );
+      expect(mockStartDashboardMigration).toHaveBeenCalledWith({
+        migrationId: defaultMigrationStats.id,
+        vendor: defaultMigrationStats.vendor,
+        retry: 'not_fully_translated',
+        settings: undefined,
+      });
       expect(mockAddSuccess).toHaveBeenCalledWith('Migration started successfully.');
       expect(onSuccess).toHaveBeenCalled();
     });
@@ -95,7 +122,7 @@ describe('useStartMigration', () => {
       const { result } = renderHook(() => useStartMigration());
 
       await act(async () => {
-        await result.current.startMigration('1');
+        await result.current.startMigration(defaultMigrationStats);
       });
 
       expect(mockAddError).toHaveBeenCalledWith(mockError, {

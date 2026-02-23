@@ -24,6 +24,8 @@
           ">"
         ],
         "path": "x-pack/solutions/security/packages/distribution-bar/src/distribution_bar.tsx",
+        "lineNumber": 162,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -39,6 +41,8 @@
               "P"
             ],
             "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 1109,
+            "columnNumber": 10,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -53,6 +57,8 @@
               "any"
             ],
             "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 1109,
+            "columnNumber": 20,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -71,6 +77,8 @@
           "DistributionBar component props"
         ],
         "path": "x-pack/solutions/security/packages/distribution-bar/src/distribution_bar.tsx",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -87,6 +95,8 @@
               "{ key: string; count: number; color: string; label?: React.ReactNode; isCurrentFilter?: boolean | undefined; filter?: (() => void) | undefined; reset?: ((event: React.MouseEvent<SVGElement, MouseEvent>) => void) | undefined; }[]"
             ],
             "path": "x-pack/solutions/security/packages/distribution-bar/src/distribution_bar.tsx",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -103,6 +113,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/solutions/security/packages/distribution-bar/src/distribution_bar.tsx",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -119,6 +131,8 @@
               "string | undefined"
             ],
             "path": "x-pack/solutions/security/packages/distribution-bar/src/distribution_bar.tsx",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }

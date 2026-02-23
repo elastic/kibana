@@ -138,17 +138,13 @@ describe('applyCriticalityModifier', () => {
 
       expect(result).toHaveLength(2);
       expect(result[0]).toEqual({
-        category_2_score: expect.any(Number),
-        category_2_count: 1,
-        criticality_level: 'high_impact',
-        criticality_modifier: 1.5,
+        type: 'asset_criticality',
+        modifier_value: 1.5,
+        metadata: {
+          criticality_level: 'high_impact',
+        },
       });
-      expect(result[1]).toEqual({
-        category_2_score: expect.any(Number),
-        category_2_count: 1,
-        criticality_level: undefined,
-        criticality_modifier: 1.5,
-      });
+      expect(result[1]).toBeUndefined();
     });
 
     it('should apply global weight when provided', async () => {
@@ -179,20 +175,6 @@ describe('applyCriticalityModifier', () => {
       // Verify that the calculation uses the original normalized score
       expect(mockGetCriticalityModifier).toHaveBeenCalledWith('high_impact');
     });
-
-    it('should calculate contribution score correctly', async () => {
-      const result = await applyCriticalityModifier({
-        page: mockPage,
-        deps: {
-          assetCriticalityService,
-          logger,
-        },
-      });
-
-      // Verify contribution score is calculated (should be greater than 0)
-      expect(result[0].category_2_score).toBeGreaterThan(0);
-      expect(result[0].category_2_score).toBeLessThan(100);
-    });
   });
 
   describe('without criticality records', () => {
@@ -210,60 +192,7 @@ describe('applyCriticalityModifier', () => {
         },
       });
 
-      expect(result).toEqual([
-        {
-          category_2_score: 0,
-          category_2_count: 0,
-        },
-        {
-          category_2_score: 0,
-          category_2_count: 0,
-        },
-      ]);
-    });
-  });
-
-  describe('with partial criticality records', () => {
-    beforeEach(() => {
-      assetCriticalityService.getCriticalitiesByIdentifiers.mockResolvedValue([
-        {
-          id_field: 'host.name',
-          id_value: 'test-host',
-          criticality_level: 'extreme_impact',
-          '@timestamp': '2023-01-01T00:00:00.000Z',
-          asset: {
-            criticality: 'extreme_impact',
-          },
-        },
-      ]);
-      mockGetCriticalityModifier.mockImplementation((level) => {
-        if (level === 'extreme_impact') return 2;
-        return undefined;
-      });
-    });
-
-    it('should apply modifier only to entities with criticality', async () => {
-      const result = await applyCriticalityModifier({
-        page: mockPage,
-        deps: {
-          assetCriticalityService,
-          logger,
-        },
-      });
-
-      // First bucket has criticality
-      expect(result[0]).toEqual({
-        category_2_score: expect.any(Number),
-        category_2_count: 1,
-        criticality_level: 'extreme_impact',
-        criticality_modifier: 2,
-      });
-
-      // Second bucket has no criticality
-      expect(result[1]).toEqual({
-        category_2_score: 0,
-        category_2_count: 0,
-      });
+      expect(result).toEqual([undefined, undefined]);
     });
   });
 
@@ -286,16 +215,7 @@ describe('applyCriticalityModifier', () => {
       expect(logger.warn).toHaveBeenCalledWith(
         expect.stringContaining('Error retrieving criticality')
       );
-      expect(result).toEqual([
-        {
-          category_2_score: 0,
-          category_2_count: 0,
-        },
-        {
-          category_2_score: 0,
-          category_2_count: 0,
-        },
-      ]);
+      expect(result).toEqual([undefined, undefined]);
     });
 
     it('should continue scoring when service fails', async () => {
@@ -344,10 +264,11 @@ describe('applyCriticalityModifier', () => {
       });
 
       expect(result[0]).toEqual({
-        category_2_score: expect.any(Number),
-        category_2_count: 1,
-        criticality_level: level,
-        criticality_modifier: modifier,
+        type: 'asset_criticality',
+        modifier_value: modifier,
+        metadata: {
+          criticality_level: level,
+        },
       });
     });
   });
@@ -402,10 +323,11 @@ describe('applyCriticalityModifier', () => {
         { id_field: 'user.name', id_value: 'test-user' },
       ]);
       expect(result[0]).toEqual({
-        category_2_score: expect.any(Number),
-        category_2_count: 1,
-        criticality_level: 'high_impact',
-        criticality_modifier: 1.5,
+        type: 'asset_criticality',
+        modifier_value: 1.5,
+        metadata: {
+          criticality_level: 'high_impact',
+        },
       });
     });
   });

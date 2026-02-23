@@ -37,6 +37,9 @@ export type SimulationError = BaseSimulationError &
         type: 'reserved_field_failure';
         processor_id: string;
       }
+    | {
+        type: 'validation_error';
+      }
   );
 
 export type DocSimulationStatus = 'parsed' | 'partially_parsed' | 'skipped' | 'failed' | 'dropped';
@@ -45,6 +48,7 @@ export interface SimulationDocReport {
   detected_fields: Array<{ processor_id: string; name: string }>;
   errors: SimulationError[];
   status: DocSimulationStatus;
+  processed_by: string[];
   value: FlattenRecord;
 }
 

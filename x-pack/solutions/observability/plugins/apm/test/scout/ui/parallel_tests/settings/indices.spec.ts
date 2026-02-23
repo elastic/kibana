@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout-oblt';
+import { tags } from '@kbn/scout-oblt';
+import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../../fixtures';
+import { waitForApmSettingsHeaderLink } from '../../fixtures/page_helpers';
 
-test.describe('Indices', { tag: ['@ess'] }, () => {
+test.describe('Indices', { tag: tags.stateful.classic }, () => {
   test('Viewer should not be able to modify settings', async ({
     pageObjects: { indicesPage },
     browserAuth,
@@ -41,7 +43,7 @@ test.describe('Indices', { tag: ['@ess'] }, () => {
     await expect(applyButton).toBeEnabled();
 
     await indicesPage.clickApplyChanges();
-    await page.waitForLoadingIndicatorHidden();
+    await waitForApmSettingsHeaderLink(page);
 
     await expect(await indicesPage.getErrorIndexInput()).toHaveValue(newErrorIndex);
   });

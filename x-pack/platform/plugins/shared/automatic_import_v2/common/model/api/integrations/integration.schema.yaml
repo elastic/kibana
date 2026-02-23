@@ -21,10 +21,14 @@ paths:
               type: object
               additionalProperties: false
               required:
+                - connectorId
                 - integrationId
                 - title
                 - description
               properties:
+                connectorId:
+                  description: The connector id
+                  $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
                 integrationId:
                   description: The integration id
                   $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
@@ -34,6 +38,9 @@ paths:
                 description:
                   description: The description of the integration
                   $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
+                langSmithOptions:
+                  description: The LangSmith tracing options
+                  $ref: "../../../model/common_attributes.schema.yaml#/components/schemas/LangSmithOptions"
                 logo:
                   description: The logo of the integration
                   $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
@@ -119,6 +126,9 @@ paths:
                   description: Integration logo image blob
                   $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
                   format: binary
+                langSmithOptions:
+                  description: The LangSmith tracing options
+                  $ref: "../../../model/common_attributes.schema.yaml#/components/schemas/LangSmithOptions"
                 dataStreams:
                   description: The data streams of the integration
                   type: array
@@ -206,3 +216,69 @@ paths:
           description: The integration is deleted.
         404:
           description: The integration is not found.
+  /internal/automatic_import/integrations/{integration_id}/approve:
+    post:
+      summary: Approves an existing integration.
+      operationId: ApproveAutoImportIntegration
+      x-codegen-enabled: true
+      x-internal: true
+      description: >-
+        Approves an integration by its id.
+      tags:
+        - Automatic Import Integrations
+      parameters:
+        - name: integration_id
+          in: path
+          required: true
+          description: The integration identifier
+          schema:
+            $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
+      requestBody:
+        required: true
+        additionalProperties: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApproveIntegrationRequest"
+      responses:
+        200:
+          description: Indicates integration has been approved successfully.
+        400:
+          description: >-
+            The request is invalid.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  error:
+                    description: The error message
+                    $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
+        404:
+          description: Indicates the integration id was not found.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  error:
+                    description: The error message
+                    $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
+
+components:
+  x-codegen-enabled: true
+  schemas:
+    ApproveIntegrationRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - version
+      properties:
+        version:
+          description: The version of the integration
+          $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
+        langSmithOptions:
+          description: The LangSmith tracing options
+          $ref: "../../../model/common_attributes.schema.yaml#/components/schemas/LangSmithOptions"

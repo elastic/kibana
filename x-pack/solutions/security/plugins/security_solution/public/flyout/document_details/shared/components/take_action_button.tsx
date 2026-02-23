@@ -8,7 +8,7 @@
 import type { FC } from 'react';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { EuiFlyout, useEuiTheme } from '@elastic/eui';
+import { EuiFlyout } from '@elastic/eui';
 import { find } from 'lodash/fp';
 import { useBasicDataFromDetailsData } from '../hooks/use_basic_data_from_details_data';
 import type { Status } from '../../../../../common/api/detection_engine';
@@ -53,12 +53,6 @@ interface AlertSummaryData {
  * Take action button in the panel footer
  */
 export const TakeActionButton: FC = () => {
-  const { euiTheme } = useEuiTheme();
-  const maskProps = useMemo(
-    () => ({ style: `z-index: ${(euiTheme.levels.flyout as number) + 4}` }), // we need this flyout to be above the timeline flyout (which has a z-index of 1003)
-    [euiTheme]
-  );
-
   const { closeFlyout } = useExpandableFlyoutApi();
   const { dataFormattedForFieldBrowser, dataAsNestedObject, refetchFlyoutData, scopeId } =
     useDocumentDetailsContext();
@@ -186,12 +180,7 @@ export const TakeActionButton: FC = () => {
         )}
 
       {isAddEventFilterModalOpen && dataAsNestedObject != null && (
-        <EventFiltersFlyout
-          data={dataAsNestedObject}
-          onCancel={closeAddEventFilterModal}
-          // EUI TODO: This z-index override of EuiOverlayMask is a workaround, and ideally should be resolved with a cleaner UI/UX flow long-term
-          maskProps={maskProps}
-        />
+        <EventFiltersFlyout data={dataAsNestedObject} onCancel={closeAddEventFilterModal} />
       )}
 
       {isOsqueryFlyoutOpenWithAgentId && dataAsNestedObject != null && (
@@ -204,8 +193,7 @@ export const TakeActionButton: FC = () => {
       )}
 
       {isHostIsolationPanelOpen && (
-        // EUI TODO: This z-index override of EuiOverlayMask is a workaround, and ideally should be resolved with a cleaner UI/UX flow long-term
-        <EuiFlyout onClose={showAlertDetails} size="m" maskProps={maskProps}>
+        <EuiFlyout onClose={showAlertDetails} size="m">
           <IsolateHostPanelHeader
             isolateAction={isolateAction}
             data={dataFormattedForFieldBrowser}

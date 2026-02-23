@@ -6,29 +6,29 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
-import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
-import type { Streams } from '@kbn/streams-schema';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { GrokCollection } from '@kbn/grok-ui';
+import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type {
+  FieldType,
   StreamlangConditionBlock,
-  StreamlangProcessorDefinition,
   StreamlangDSL,
+  StreamlangProcessorDefinition,
   StreamlangStepWithUIAttributes,
   StreamlangValidationError,
-  FieldType,
 } from '@kbn/streamlang';
-import type { StreamsTelemetryClient } from '../../../../../telemetry/client';
+import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
+import type { Streams } from '@kbn/streams-schema';
 import type { EnrichmentDataSource, EnrichmentUrlState } from '../../../../../../common/url_schema';
+import type { StreamsTelemetryClient } from '../../../../../telemetry/client';
+import type { MappedSchemaField } from '../../../schema_editor/types';
+import type { DataSourceActorRef, DataSourceToParentEvent } from '../data_source_state_machine';
+import type { InteractiveModeActorRef } from '../interactive_mode_machine';
 import type {
   PreviewDocsFilterOption,
   SimulationActorRef,
   SimulationContext,
 } from '../simulation_state_machine';
-import type { MappedSchemaField } from '../../../schema_editor/types';
-import type { DataSourceActorRef, DataSourceToParentEvent } from '../data_source_state_machine';
-import type { InteractiveModeActorRef } from '../interactive_mode_machine';
 import type { YamlModeActorRef } from '../yaml_mode_machine';
 
 export interface StreamPrivileges {
@@ -47,6 +47,7 @@ export interface StreamEnrichmentServiceDependencies {
 
 export interface StreamEnrichmentInput {
   definition: Streams.ingest.all.GetResponse;
+  grokCollection: GrokCollection;
 }
 
 export interface StreamEnrichmentContextType {
@@ -75,6 +76,12 @@ export interface StreamEnrichmentContextType {
   // Validation errors for processors (namespace, reserved fields, type mismatches)
   validationErrors: Map<string, StreamlangValidationError[]>;
   fieldTypesByProcessor: Map<string, Map<string, FieldType>>;
+  /**
+   * Tracks whether the current condition filter was applied automatically by the UI
+   * (e.g. right after creating a condition block). If set, some user actions (save/cancel
+   * processor edits) will clear the filter for convenience.
+   */
+  autoSelectedConditionId?: string;
 }
 
 export type StreamEnrichmentEvent =
@@ -105,6 +112,10 @@ export type StreamEnrichmentEvent =
   | { type: 'mode.resetSimulator' }
   | { type: 'simulation.reset' }
   | { type: 'simulation.updateSteps'; steps: StreamlangStepWithUIAttributes[] }
+  | { type: 'simulation.filterByConditionAuto'; conditionId: string }
+  | { type: 'simulation.filterByCondition'; conditionId: string }
+  | { type: 'simulation.clearConditionFilter' }
+  | { type: 'simulation.clearAutoConditionFilter' }
   // Step events forwarded to interactive mode machine
   | {
       type: 'step.addProcessor';
@@ -121,6 +132,12 @@ export type StreamEnrichmentEvent =
       options?: { parentId: StreamlangStepWithUIAttributes['parentId'] };
     }
   | { type: 'step.reorder'; stepId: string; direction: 'up' | 'down' }
+  | {
+      type: 'step.reorderByDragDrop';
+      sourceStepId: string;
+      targetStepId: string;
+      operation: 'before' | 'after' | 'inside';
+    }
   // YAML events forwarded to YAML mode machine
   | { type: 'yaml.contentChanged'; streamlangDSL: StreamlangDSL; yaml: string }
   | { type: 'yaml.runSimulation'; stepIdBreakpoint?: string }

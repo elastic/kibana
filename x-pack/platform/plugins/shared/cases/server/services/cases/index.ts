@@ -19,8 +19,12 @@ import type {
 } from '@kbn/core/server';
 
 import type { estypes } from '@elastic/elasticsearch';
-import { nodeBuilder } from '@kbn/es-query';
+import { nodeBuilder, toElasticsearchQuery } from '@kbn/es-query';
 
+import type {
+  SavedObjectsSearchOptions,
+  SavedObjectsSearchResponse,
+} from '@kbn/core-saved-objects-api-server';
 import type { Case, CaseStatuses, User } from '../../../common/types/domain';
 import { caseStatuses } from '../../../common/types/domain';
 import {
@@ -43,6 +47,7 @@ import {
   transformAttributesToESModel,
   transformUpdateResponseToExternalModel,
   transformFindResponseToExternalModel,
+  transformESModelToCase,
 } from './transform';
 import type { AttachmentService } from '../attachments';
 import type { AggregationBuilder, AggregationResponse } from '../../client/metrics/types';
@@ -77,6 +82,12 @@ import type {
 } from './types';
 import type { AttachmentTransformedAttributes } from '../../common/types/attachments';
 import { bulkDecodeSOAttributes } from '../utils';
+import {
+  DEFAULT_ATTACHMENT_SEARCH_FIELDS,
+  constructSearchQuery,
+  convertFindQueryParams,
+  mergeSearchQuery,
+} from './utils';
 
 const PartialCaseTransformedAttributesRt = getPartialCaseTransformedAttributesRt();
 
@@ -166,6 +177,44 @@ export class CasesService {
     return result.aggregations?.references.caseIds.buckets.map((b) => b.key) ?? [];
   }
 
+  public async getCaseIdsByAttachmentSearch(
+    namespaces: string[],
+    search?: string,
+    searchFields?: string[]
+  ): Promise<string[]> {
+    const attachmentSearchFields = searchFields?.filter((field) =>
+      DEFAULT_ATTACHMENT_SEARCH_FIELDS.includes(field)
+    );
+    if (!search || !attachmentSearchFields?.length) {
+      return [];
+    }
+
+    const response = await this.searchCases({
+      type: [CASE_COMMENT_SAVED_OBJECT],
+      namespaces,
+      query: {
+        bool: {
+          should: [
+            ...attachmentSearchFields.map((field) => ({
+              // use match instead of term to support non-keyword search for fields like comments
+              match: {
+                [field]: search,
+              },
+            })),
+          ],
+        },
+      },
+    });
+
+    const references = response?.hits?.hits?.map((hit) => hit?._source?.references).flat();
+    if (!references) {
+      return [];
+    }
+    return references
+      .filter((ref) => ref?.type === 'cases' && ref?.id !== undefined)
+      .map((ref) => ref?.id ?? '');
+  }
+
   /**
    * Returns a map of all cases.
    */
@@ -209,6 +258,81 @@ export class CasesService {
       page: cases.page,
       perPage: cases.per_page,
       total: cases.total,
+    };
+  }
+
+  /**
+   * Returns a map of all cases.
+   */
+  public async searchCasesGroupedByID({
+    caseOptions,
+    namespaces,
+  }: {
+    caseOptions: SavedObjectFindOptionsKueryNode;
+    namespaces: string[];
+  }): Promise<CasesMapWithPageInfo> {
+    const caseIdsByAttachmentSearch = await this.getCaseIdsByAttachmentSearch(
+      namespaces,
+      caseOptions.search,
+      caseOptions.searchFields
+    );
+    const searchQuery = constructSearchQuery({
+      search: caseOptions.search,
+      searchFields: caseOptions.searchFields,
+      caseIds: caseIdsByAttachmentSearch,
+    });
+
+    const filterQuery = caseOptions.filter ? toElasticsearchQuery(caseOptions.filter) : undefined;
+    const query = mergeSearchQuery(searchQuery, filterQuery);
+
+    const cases = await this.searchCases({
+      type: [CASE_SAVED_OBJECT],
+      namespaces,
+      query,
+      ...convertFindQueryParams(caseOptions),
+    });
+
+    const casesMap = cases?.hits?.hits?.reduce((accMap, caseInfo) => {
+      // Extract UUID from _id format: "cases:uuid"
+      if (caseInfo._id && caseInfo._id.startsWith(`${CASE_SAVED_OBJECT}:`)) {
+        const caseId = caseInfo._id.split(':')[1];
+        const caseData = caseInfo._source?.cases;
+        if (caseData) {
+          accMap.set(caseId, transformESModelToCase(caseId, caseData, caseInfo));
+        }
+      }
+      return accMap;
+    }, new Map<string, Case>());
+
+    // TODO: imported cases do not populate stats when importing
+    // Remove once https://github.com/elastic/kibana/issues/245939 is fixed
+    const commentTotals = await this.attachmentService.getter.getCaseAttatchmentStats({
+      caseIds: Array.from(casesMap.keys()),
+    });
+
+    const casesWithComments = new Map<string, Case>();
+    for (const [id, caseInfo] of casesMap.entries()) {
+      const { alerts, userComments, events } = commentTotals.get(id) ?? {
+        alerts: 0,
+        userComments: 0,
+        events: 0,
+      };
+
+      casesWithComments.set(id, {
+        ...caseInfo,
+        totalComment: userComments,
+        totalAlerts: alerts,
+        totalEvents: events,
+      });
+    }
+    const total =
+      typeof cases.hits.total === 'object' ? cases.hits.total.value ?? 0 : cases.hits.total ?? 0;
+
+    return {
+      casesMap: casesWithComments,
+      page: caseOptions.page ?? 1,
+      perPage: caseOptions.perPage ?? DEFAULT_PER_PAGE,
+      total,
     };
   }
 
@@ -384,6 +508,29 @@ export class CasesService {
       };
     } catch (error) {
       this.log.error(`Error on find cases: ${error}`);
+      throw error;
+    }
+  }
+
+  public async searchCases({
+    type,
+    namespaces,
+    query,
+    ...options
+  }: SavedObjectsSearchOptions): Promise<SavedObjectsSearchResponse> {
+    try {
+      this.log.debug(`Attempting to search cases`);
+      const cases = await this.unsecuredSavedObjectsClient.search({
+        type,
+        namespaces,
+        query,
+        seq_no_primary_term: true,
+        ...options,
+      });
+
+      return cases;
+    } catch (error) {
+      this.log.error(`Error on search cases: ${error}`);
       throw error;
     }
   }

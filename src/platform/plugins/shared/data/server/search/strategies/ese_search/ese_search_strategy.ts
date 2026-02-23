@@ -101,7 +101,10 @@ export const enhancedEsSearchStrategyProvider = (
   ) {
     const client = useInternalUser ? esClient.asInternalUser : esClient.asCurrentUser;
     const params = {
-      ...(await getDefaultAsyncSubmitParams(uiSettingsClient, searchConfig, options, isServerless)),
+      ...(await getDefaultAsyncSubmitParams(uiSettingsClient, searchConfig, options, {
+        isServerless,
+        isPit: request.params?.pit != null,
+      })),
       ...request.params,
     };
     const { body, headers, meta } = await client.asyncSearch.submit(params, {
@@ -168,7 +171,6 @@ export const enhancedEsSearchStrategyProvider = (
       throw new KbnSearchError(`"params.index" is required when performing a rollup search`, 400);
     }
 
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     const { ignore_unavailable, preference, ...params } = {
       ...querystring,
       ...request.params,

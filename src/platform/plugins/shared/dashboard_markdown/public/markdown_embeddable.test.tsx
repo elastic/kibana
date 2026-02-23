@@ -31,8 +31,9 @@ const renderEmbeddable = async (
   const factory = markdownEmbeddableFactory;
 
   const embeddable = await factory.buildEmbeddable({
+    initializeDrilldownsManager: jest.fn(),
     initialState: {
-      rawState: { content: '[click here](https://example.com)' },
+      content: '[click here](https://example.com)',
     },
     parentApi: parentApiStub,
     finalizeApi: (api) =>
@@ -60,13 +61,13 @@ describe('MarkdownEmbeddable', () => {
 
   it('renders markdown content as HTML', async () => {
     await renderEmbeddable({
-      initialState: { rawState: { content: '# Heading' } },
+      initialState: { content: '# Heading' },
     });
     expect(screen.getByRole('heading', { name: 'Heading' })).toBeInTheDocument();
   });
 
   it('uses default empty content when no initial content provided', async () => {
-    await renderEmbeddable({ initialState: { rawState: { content: '' } } });
+    await renderEmbeddable({ initialState: { content: '' } });
     expect(screen.getByTestId('markdownRenderer')).toHaveTextContent(/^$/);
   });
 
@@ -79,7 +80,7 @@ describe('MarkdownEmbeddable', () => {
 
   it('shows renderer in view mode, shows editor in edit mode', async () => {
     const { embeddable } = await renderEmbeddable({
-      initialState: { rawState: { content: 'HELLO' } },
+      initialState: { content: 'HELLO' },
     });
 
     expect(screen.getByTestId('markdownRenderer')).toBeInTheDocument();
@@ -97,7 +98,7 @@ describe('MarkdownEmbeddable', () => {
   describe('Discard button behavior', () => {
     it('removes panel when Discard clicked for new panel', async () => {
       const { embeddable, parentApi } = await renderEmbeddable({
-        initialState: { rawState: { content: 'HELLO' } },
+        initialState: { content: 'HELLO' },
       });
 
       await act(async () => {
@@ -110,7 +111,7 @@ describe('MarkdownEmbeddable', () => {
 
     it('does not remove panel if not new panel when Discard clicked', async () => {
       const { embeddable, parentApi } = await renderEmbeddable({
-        initialState: { rawState: { content: 'HELLO' } },
+        initialState: { content: 'HELLO' },
       });
       await act(async () => {
         await embeddable.api.onEdit({ isNewPanel: false });
@@ -123,7 +124,7 @@ describe('MarkdownEmbeddable', () => {
 
   it('saves content when Apply clicked', async () => {
     const { embeddable } = await renderEmbeddable({
-      initialState: { rawState: { content: 'HELLO' } },
+      initialState: { content: 'HELLO' },
     });
 
     await act(async () => {

@@ -39,9 +39,7 @@ export function validateChangesExistingType({ from, to }: ValidateChangesExistin
 
   // check that current changes don't define more than 1 new modelVersion
   if (to.modelVersions.length - from.modelVersions.length > 1) {
-    throw new Error(
-      `❌ The SO type '${name}' is defining two (or more) new model versions. Please refer to our troubleshooting guide: https://www.elastic.co/docs/extend/kibana/saved-objects#troubleshooting`
-    );
+    throw new Error(`❌ The SO type '${name}' is defining two (or more) new model versions.`);
   }
 
   // check that existing model versions have not been mutated
@@ -128,6 +126,13 @@ function validateLastModelVersion(name: string, mvs: ModelVersionSummary[]) {
   if (mv.schemas.create === false) {
     throw new Error(
       `❌ The new model version '${mv.version}' for SO type '${name}' is missing the 'create' schema definition.`
+    );
+  }
+  if (mvs.length === 1 && mv.changeTypes.length) {
+    // Do NOT allow changes in the first (initial) modelVersion, only schema additions.
+    // This guarantees rollback safety towards previous versions.
+    throw new Error(
+      `❌ The new model version '${mv.version}' for SO type '${name}' is defining mappings' changes. For backwards-compatibility reasons, the initial model version can only include schema definitions.`
     );
   }
 }

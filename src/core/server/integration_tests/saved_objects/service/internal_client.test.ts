@@ -81,12 +81,8 @@ describe('SavedObjects Internal Client Integration', () => {
   });
 
   afterAll(async () => {
-    if (root) {
-      await root.shutdown();
-    }
-    if (esServer) {
-      await esServer.stop();
-    }
+    await root?.shutdown();
+    await esServer?.stop();
   });
 
   describe('Basic Operations', () => {

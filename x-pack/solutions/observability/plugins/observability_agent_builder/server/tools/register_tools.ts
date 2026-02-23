@@ -5,38 +5,57 @@
  * 2.0.
  */
 
-import type { CoreSetup, Logger } from '@kbn/core/server';
-import { platformCoreTools } from '@kbn/onechat-common';
-import type { StaticToolRegistration } from '@kbn/onechat-server';
+import type { Logger } from '@kbn/core/server';
+import { platformCoreTools } from '@kbn/agent-builder-common';
+import type { StaticToolRegistration } from '@kbn/agent-builder-server';
 import type {
+  ObservabilityAgentBuilderCoreSetup,
   ObservabilityAgentBuilderPluginSetupDependencies,
-  ObservabilityAgentBuilderPluginStart,
-  ObservabilityAgentBuilderPluginStartDependencies,
 } from '../types';
-import {
-  OBSERVABILITY_GET_DATA_SOURCES_TOOL_ID,
-  createGetDataSourcesTool,
-} from './get_data_sources/get_data_sources';
+import type { ObservabilityAgentBuilderDataRegistry } from '../data_registry/data_registry';
 import {
   OBSERVABILITY_RUN_LOG_RATE_ANALYSIS_TOOL_ID,
   createRunLogRateAnalysisTool,
-} from './run_log_rate_analysis/run_log_rate_analysis';
+} from './run_log_rate_analysis/tool';
 import {
   OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID,
   createGetAnomalyDetectionJobsTool,
-} from './get_anomaly_detection_jobs/get_anomaly_detection_jobs';
-import { OBSERVABILITY_GET_ALERTS_TOOL_ID, createGetAlertsTool } from './get_alerts/get_alerts';
+} from './get_anomaly_detection_jobs/tool';
+import { OBSERVABILITY_GET_ALERTS_TOOL_ID, createGetAlertsTool } from './get_alerts/tool';
 import {
-  OBSERVABILITY_GET_LOG_CATEGORIES_TOOL_ID,
-  createGetLogCategoriesTool,
-} from './get_log_categories/get_log_categories';
+  OBSERVABILITY_GET_LOG_GROUPS_TOOL_ID,
+  createGetLogGroupsTool,
+} from './get_log_groups/tool';
+import { OBSERVABILITY_GET_HOSTS_TOOL_ID, createGetHostsTool } from './get_hosts/tool';
+import { createGetServicesTool, OBSERVABILITY_GET_SERVICES_TOOL_ID } from './get_services/tool';
 import {
-  OBSERVABILITY_GET_SERVICES_TOOL_ID,
-  OBSERVABILITY_GET_DOWNSTREAM_DEPENDENCIES_TOOL_ID,
-} from '../../common/constants';
+  createGetTraceMetricsTool,
+  OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
+} from './get_trace_metrics/tool';
+import {
+  createGetRuntimeMetricsTool,
+  OBSERVABILITY_GET_RUNTIME_METRICS_TOOL_ID,
+} from './get_runtime_metrics/tool';
+import {
+  OBSERVABILITY_GET_LOG_CHANGE_POINTS_TOOL_ID,
+  createGetLogChangePointsTool,
+} from './get_log_change_points/tool';
+import {
+  OBSERVABILITY_GET_METRIC_CHANGE_POINTS_TOOL_ID,
+  createGetMetricChangePointsTool,
+} from './get_metric_change_points/tool';
+import {
+  OBSERVABILITY_GET_TRACE_CHANGE_POINTS_TOOL_ID,
+  createGetTraceChangePointsTool,
+} from './get_trace_change_points/tool';
+import { OBSERVABILITY_GET_INDEX_INFO_TOOL_ID, createGetIndexInfoTool } from './get_index_info';
+import {
+  OBSERVABILITY_GET_SERVICE_TOPOLOGY_TOOL_ID,
+  createGetServiceTopologyTool,
+} from './get_service_topology/tool';
+import { OBSERVABILITY_GET_TRACES_TOOL_ID, createGetTracesTool } from './get_traces/tool';
 
 const PLATFORM_TOOL_IDS = [
-  platformCoreTools.search,
   platformCoreTools.listIndices,
   platformCoreTools.getIndexMapping,
   platformCoreTools.getDocumentById,
@@ -44,46 +63,53 @@ const PLATFORM_TOOL_IDS = [
 ];
 
 const OBSERVABILITY_TOOL_IDS = [
-  OBSERVABILITY_GET_DATA_SOURCES_TOOL_ID,
   OBSERVABILITY_RUN_LOG_RATE_ANALYSIS_TOOL_ID,
   OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID,
   OBSERVABILITY_GET_ALERTS_TOOL_ID,
-  OBSERVABILITY_GET_LOG_CATEGORIES_TOOL_ID,
-];
-
-// registered in the APM plugin
-const APM_TOOL_IDS = [
+  OBSERVABILITY_GET_LOG_GROUPS_TOOL_ID,
   OBSERVABILITY_GET_SERVICES_TOOL_ID,
-  OBSERVABILITY_GET_DOWNSTREAM_DEPENDENCIES_TOOL_ID,
+  OBSERVABILITY_GET_HOSTS_TOOL_ID,
+  OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
+  OBSERVABILITY_GET_TRACES_TOOL_ID,
+  OBSERVABILITY_GET_RUNTIME_METRICS_TOOL_ID,
+  OBSERVABILITY_GET_LOG_CHANGE_POINTS_TOOL_ID,
+  OBSERVABILITY_GET_METRIC_CHANGE_POINTS_TOOL_ID,
+  OBSERVABILITY_GET_TRACE_CHANGE_POINTS_TOOL_ID,
+  OBSERVABILITY_GET_INDEX_INFO_TOOL_ID,
+  OBSERVABILITY_GET_SERVICE_TOPOLOGY_TOOL_ID,
 ];
 
-export const OBSERVABILITY_AGENT_TOOL_IDS = [
-  ...PLATFORM_TOOL_IDS,
-  ...OBSERVABILITY_TOOL_IDS,
-  ...APM_TOOL_IDS,
-];
+export const OBSERVABILITY_AGENT_TOOL_IDS = [...PLATFORM_TOOL_IDS, ...OBSERVABILITY_TOOL_IDS];
 
 export async function registerTools({
   core,
   plugins,
+  dataRegistry,
   logger,
 }: {
-  core: CoreSetup<
-    ObservabilityAgentBuilderPluginStartDependencies,
-    ObservabilityAgentBuilderPluginStart
-  >;
+  core: ObservabilityAgentBuilderCoreSetup;
   plugins: ObservabilityAgentBuilderPluginSetupDependencies;
+  dataRegistry: ObservabilityAgentBuilderDataRegistry;
   logger: Logger;
 }) {
   const observabilityTools: StaticToolRegistration<any>[] = [
-    createGetDataSourcesTool({ core, plugins, logger }),
-    createRunLogRateAnalysisTool({ logger }),
+    createRunLogRateAnalysisTool({ core, logger }),
     createGetAnomalyDetectionJobsTool({ core, plugins, logger }),
     createGetAlertsTool({ core, logger }),
-    createGetLogCategoriesTool({ core, logger }),
+    createGetLogGroupsTool({ core, plugins, logger }),
+    createGetServicesTool({ core, plugins, dataRegistry, logger }),
+    createGetHostsTool({ core, logger, dataRegistry }),
+    createGetTraceMetricsTool({ core, plugins, logger }),
+    createGetTracesTool({ core, plugins, logger }),
+    createGetRuntimeMetricsTool({ core, plugins, logger }),
+    createGetLogChangePointsTool({ core, plugins, logger }),
+    createGetMetricChangePointsTool({ core, plugins, logger }),
+    createGetTraceChangePointsTool({ core, plugins, logger }),
+    createGetIndexInfoTool({ core, plugins, logger }),
+    createGetServiceTopologyTool({ core, plugins, dataRegistry, logger }),
   ];
 
   for (const tool of observabilityTools) {
-    plugins.onechat.tools.register(tool);
+    plugins.agentBuilder.tools.register(tool);
   }
 }

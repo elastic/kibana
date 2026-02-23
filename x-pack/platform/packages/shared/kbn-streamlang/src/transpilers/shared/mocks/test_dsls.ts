@@ -12,15 +12,58 @@ import type {
   DissectProcessor,
   GrokProcessor,
   ManualIngestPipelineProcessor,
+  MathProcessor,
   RenameProcessor,
   SetProcessor,
   DropDocumentProcessor,
   ReplaceProcessor,
+  UppercaseProcessor,
+  LowercaseProcessor,
+  TrimProcessor,
+  JoinProcessor,
+  ConcatProcessor,
+  NetworkDirectionProcessor,
 } from '../../../../types/processors';
 import type { StreamlangDSL } from '../../../../types/streamlang';
 
 export const comprehensiveTestDSL: StreamlangDSL = {
   steps: [
+    {
+      action: 'network_direction',
+      source_ip: 'source_ip',
+      destination_ip: 'destination_ip',
+      internal_networks: ['private'],
+    } as NetworkDirectionProcessor,
+    {
+      action: 'join',
+      from: ['field1', 'field2', 'field3'],
+      to: 'my_joined_field',
+      delimiter: ', ',
+    } as JoinProcessor,
+    {
+      action: 'concat',
+      from: [
+        { type: 'field', value: 'first_name' },
+        { type: 'literal', value: ' ' },
+        { type: 'field', value: 'last_name' },
+      ],
+      to: 'full_name',
+    } as ConcatProcessor,
+    {
+      action: 'uppercase',
+      from: 'message',
+      to: 'message_uppercase',
+    } as UppercaseProcessor,
+    {
+      action: 'lowercase',
+      from: 'message',
+      to: 'message_lowercase',
+    } as LowercaseProcessor,
+    {
+      action: 'trim',
+      from: 'message',
+      to: 'message_trimmed',
+    } as TrimProcessor,
     {
       action: 'drop_document',
       where: {
@@ -63,6 +106,18 @@ export const comprehensiveTestDSL: StreamlangDSL = {
       to: 'attributes.status',
       value: 'active',
     } as SetProcessor,
+    // Math processor - simple arithmetic
+    {
+      action: 'math',
+      expression: 'price * quantity',
+      to: 'total',
+    } as MathProcessor,
+    // Math processor - with dotted field paths
+    {
+      action: 'math',
+      expression: 'attributes.price * attributes.quantity + attributes.tax',
+      to: 'attributes.total',
+    } as MathProcessor,
     // Grok parsing
     {
       action: 'grok',

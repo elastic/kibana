@@ -16,9 +16,8 @@ paths:
              --header "Content-Type: application/json"
       x-labels: [ess, serverless]
       operationId: PostAttackDiscoveryGenerationsDismiss
-      x-state: Technical Preview; added in 9.2.0
       description: Dismisses an attack discovery generation for the current user, indicating that it's status should not be reported in the UI. This sets the generation's
-        status to "dismissed" and affects how the generation appears in subsequent queries. `Technical preview`
+        status to "dismissed" and affects how the generation appears in subsequent queries.
       summary: Dismiss an attack discovery generation
       parameters:
         - name: execution_uuid

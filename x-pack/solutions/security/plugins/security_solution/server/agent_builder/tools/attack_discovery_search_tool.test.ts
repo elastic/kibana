@@ -5,18 +5,19 @@
  * 2.0.
  */
 
-import { ToolResultType, type TabularDataResult, type ErrorResult } from '@kbn/onechat-common';
-import { executeEsql } from '@kbn/onechat-genai-utils';
+import { ToolResultType, type EsqlResults, type ErrorResult } from '@kbn/agent-builder-common';
+import { executeEsql } from '@kbn/agent-builder-genai-utils';
+import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
 import { createToolHandlerContext, createToolTestMocks } from '../__mocks__/test_helpers';
 import { attackDiscoverySearchTool } from './attack_discovery_search_tool';
 
-jest.mock('@kbn/onechat-genai-utils', () => ({
+jest.mock('@kbn/agent-builder-genai-utils', () => ({
   executeEsql: jest.fn(),
 }));
 
 describe('attackDiscoverySearchTool', () => {
   const { mockCore, mockLogger, mockEsClient, mockRequest } = createToolTestMocks();
-  const tool = attackDiscoverySearchTool(mockCore);
+  const tool = attackDiscoverySearchTool(mockCore, mockLogger);
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -86,6 +87,20 @@ describe('attackDiscoverySearchTool', () => {
       expect(callArgs.query).toContain('LIMIT 100');
     });
 
+    it('uses handler context spaceId in ES|QL index pattern', async () => {
+      (executeEsql as jest.Mock).mockResolvedValue({ columns: [], values: [] });
+
+      await tool.handler(
+        { alertIds: ['alert-1'] },
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger, { spaceId: 'custom-space' })
+      );
+
+      const callArgs = (executeEsql as jest.Mock).mock.calls[0][0];
+      expect(callArgs.query).toContain(
+        'FROM .alerts-security.attack.discovery.alerts-custom-space*'
+      );
+    });
+
     it('executes ES|QL query and returns tabular data', async () => {
       const mockEsqlResponse = {
         columns: [
@@ -99,17 +114,17 @@ describe('attackDiscoverySearchTool', () => {
       };
       (executeEsql as jest.Mock).mockResolvedValue(mockEsqlResponse);
 
-      const result = await tool.handler(
+      const result = (await tool.handler(
         { alertIds: ['alert-1'] },
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
-      );
+      )) as ToolHandlerStandardReturn;
 
       expect(result.results).toHaveLength(2);
       expect(result.results[0].type).toBe(ToolResultType.query);
-      const tabularResult = result.results[1] as TabularDataResult;
-      expect(tabularResult.type).toBe(ToolResultType.tabularData);
-      expect(tabularResult.data.columns).toEqual(mockEsqlResponse.columns);
-      expect(tabularResult.data.values).toEqual(mockEsqlResponse.values);
+      const esqlResult = result.results[1] as EsqlResults;
+      expect(esqlResult.type).toBe(ToolResultType.esqlResults);
+      expect(esqlResult.data.columns).toEqual(mockEsqlResponse.columns);
+      expect(esqlResult.data.values).toEqual(mockEsqlResponse.values);
     });
 
     it('limits results appropriately', async () => {
@@ -132,10 +147,10 @@ describe('attackDiscoverySearchTool', () => {
       const error = new Error('ES|QL query failed');
       (executeEsql as jest.Mock).mockRejectedValue(error);
 
-      const result = await tool.handler(
+      const result = (await tool.handler(
         { alertIds: ['alert-1'] },
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
-      );
+      )) as ToolHandlerStandardReturn;
 
       expect(result.results).toHaveLength(1);
       const errorResult = result.results[0] as ErrorResult;

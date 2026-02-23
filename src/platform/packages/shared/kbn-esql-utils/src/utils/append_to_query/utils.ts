@@ -6,13 +6,13 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { isColumn, isStringLiteral } from '@kbn/esql-ast';
+import { isColumn, isStringLiteral } from '@kbn/esql-language';
 import type {
   BinaryExpressionComparisonOperator,
   ESQLColumn,
   ESQLFunction,
   ESQLStringLiteral,
-} from '@kbn/esql-ast/src/types';
+} from '@kbn/esql-language/src/types';
 
 export type SupportedOperation = '+' | '-' | 'is_not_null' | 'is_null';
 
@@ -70,10 +70,15 @@ export function getSupportedOperators(): SupportedOperators[] {
 }
 
 /**
- * Escapes a string value for use in ES|QL queries by escaping backslashes and quotes
+ * Escapes a string value for use in ES|QL queries by escaping special characters
  */
 export function escapeStringValue(val: string): string {
-  return `"${val.replace(/\\/g, '\\\\').replace(/\"/g, '\\"')}"`;
+  return `"${val
+    .replace(/\\/g, '\\\\')
+    .replace(/\"/g, '\\"')
+    .replace(/\n/g, '\\n')
+    .replace(/\r/g, '\\r')
+    .replace(/\t/g, '\\t')}"`;
 }
 
 /**

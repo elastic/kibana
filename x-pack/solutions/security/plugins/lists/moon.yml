@@ -21,7 +21,6 @@ dependsOn:
   - '@kbn/core'
   - '@kbn/spaces-plugin'
   - '@kbn/security-plugin'
-  - '@kbn/unified-search-plugin'
   - '@kbn/securitysolution-io-ts-list-types'
   - '@kbn/securitysolution-list-constants'
   - '@kbn/securitysolution-list-hooks'
@@ -54,6 +53,7 @@ dependsOn:
   - '@kbn/core-http-server-utils'
   - '@kbn/react-query'
   - '@kbn/security-solution-features'
+  - '@kbn/kql'
 tags:
   - plugin
   - prod

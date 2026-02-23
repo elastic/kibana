@@ -29,6 +29,8 @@ import type {
 import { registerContentInsights } from '@kbn/content-management-content-insights-server';
 
 import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
+import { registerAccessControl } from '@kbn/content-management-access-control-server';
 import { tagSavedObjectTypeName } from '@kbn/saved-objects-tagging-plugin/common';
 import {
   initializeDashboardTelemetryTask,
@@ -47,6 +49,7 @@ import { registerRoutes, create, read, update, deleteDashboard } from './api';
 import { DashboardAppLocatorDefinition } from '../common/locator/locator';
 import { setKibanaServices } from './kibana_services';
 import { scanDashboards } from './scan_dashboards';
+import { registerDashboardDrilldown } from './dashboard_drilldown/register_dashboard_drilldown';
 
 interface SetupDeps {
   embeddable: EmbeddableSetup;
@@ -61,6 +64,7 @@ export interface StartDeps {
   usageCollection?: UsageCollectionStart;
   savedObjectsTagging?: SavedObjectTaggingStart;
   share?: SharePluginStart;
+  security?: SecurityPluginStart;
 }
 
 export class DashboardPlugin
@@ -123,6 +127,17 @@ export class DashboardPlugin
     core.uiSettings.register(getUISettings());
 
     registerRoutes(core.http);
+
+    void registerAccessControl({
+      http: core.http,
+      isAccessControlEnabled: core.savedObjects.isAccessControlEnabled(),
+      getStartServices: () =>
+        core.getStartServices().then(([_, { security }]) => ({
+          security,
+        })),
+    });
+
+    registerDashboardDrilldown(plugins.embeddable);
 
     return {};
   }

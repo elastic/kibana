@@ -6,13 +6,20 @@
  */
 
 import * as t from 'io-ts';
-import { apiPrivileges } from '@kbn/onechat-plugin/common/features';
+import type { ServerRouteRepository } from '@kbn/server-route-repository-utils';
+import { apiPrivileges } from '@kbn/agent-builder-plugin/common/features';
+import { observableIntoEventSourceStream } from '@kbn/sse-utils-server';
+import { getRequestAbortedSignal } from '@kbn/inference-plugin/server/routes/get_request_aborted_signal';
 import { generateErrorAiInsight } from './apm_error/generate_error_ai_insight';
 import { createObservabilityAgentBuilderServerRoute } from '../create_observability_agent_builder_server_route';
-import { getAlertAiInsight, type AlertDocForInsight } from './get_alert_ai_insights';
+import { getLogAiInsights } from './get_log_ai_insights';
+import {
+  getAlertAiInsight,
+  type AlertDocForInsight,
+} from './alert_ai_insights/generate_alert_ai_insight';
 import { getDefaultConnectorId } from '../../utils/get_default_connector_id';
 
-export function getObservabilityAgentBuilderAiInsightsRouteRepository() {
+export function getObservabilityAgentBuilderAiInsightsRouteRepository(): ServerRouteRepository {
   const getAlertAiInsightRoute = createObservabilityAgentBuilderServerRoute({
     endpoint: 'POST /internal/observability_agent_builder/ai_insights/alert',
     options: {
@@ -20,7 +27,7 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository() {
     },
     security: {
       authz: {
-        requiredPrivileges: [apiPrivileges.readOnechat],
+        requiredPrivileges: [apiPrivileges.readAgentBuilder],
       },
     },
     params: t.type({
@@ -28,37 +35,37 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository() {
         alertId: t.string,
       }),
     }),
-    handler: async ({
-      core,
-      dataRegistry,
-      logger,
-      request,
-      params,
-    }): Promise<{ summary: string; context: string }> => {
+    handler: async ({ core, plugins, dataRegistry, logger, request, params, response }) => {
       const { alertId } = params.body;
 
       const [coreStart, startDeps] = await core.getStartServices();
       const { inference, ruleRegistry } = startDeps;
 
-      const connectorId = await getDefaultConnectorId({ coreStart, inference, request });
+      const connectorId = await getDefaultConnectorId({ coreStart, inference, request, logger });
       const inferenceClient = inference.getClient({ request });
+      const connector = await inference.getConnectorById(connectorId, request);
 
       const alertsClient = await ruleRegistry.getRacClientWithRequest(request);
       const alertDoc = (await alertsClient.get({ id: alertId })) as AlertDocForInsight;
 
-      const { summary, context } = await getAlertAiInsight({
+      const result = await getAlertAiInsight({
+        core,
+        plugins,
         alertDoc,
         inferenceClient,
         connectorId,
+        connector,
         dataRegistry,
         request,
         logger,
       });
 
-      return {
-        summary,
-        context,
-      };
+      return response.ok({
+        body: observableIntoEventSourceStream(result.events$, {
+          logger,
+          signal: getRequestAbortedSignal(request),
+        }),
+      });
     },
   });
 
@@ -69,7 +76,7 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository() {
     },
     security: {
       authz: {
-        requiredPrivileges: [apiPrivileges.readOnechat],
+        requiredPrivileges: [apiPrivileges.readAgentBuilder],
       },
     },
     params: t.type({
@@ -81,16 +88,17 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository() {
         environment: t.union([t.string, t.undefined]),
       }),
     }),
-    handler: async ({ request, core, plugins, dataRegistry, params, logger }) => {
+    handler: async ({ request, core, plugins, dataRegistry, params, response, logger }) => {
       const { errorId, serviceName, start, end, environment = '' } = params.body;
 
       const [coreStart, startDeps] = await core.getStartServices();
       const { inference } = startDeps;
 
-      const connectorId = await getDefaultConnectorId({ coreStart, inference, request });
+      const connectorId = await getDefaultConnectorId({ coreStart, inference, request, logger });
       const inferenceClient = inference.getClient({ request, bindTo: { connectorId } });
+      const connector = await inference.getConnectorById(connectorId, request);
 
-      const { summary, context } = await generateErrorAiInsight({
+      const result = await generateErrorAiInsight({
         core,
         plugins,
         errorId,
@@ -98,20 +106,73 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository() {
         start,
         end,
         environment,
+        connector,
         dataRegistry,
         request,
         inferenceClient,
         logger,
       });
 
-      return {
-        context,
-        summary,
-      };
+      return response.ok({
+        body: observableIntoEventSourceStream(result.events$, {
+          logger,
+          signal: getRequestAbortedSignal(request),
+        }),
+      });
+    },
+  });
+
+  const logAiInsightsRoute = createObservabilityAgentBuilderServerRoute({
+    endpoint: 'POST /internal/observability_agent_builder/ai_insights/log',
+    options: {
+      access: 'internal',
+    },
+    security: {
+      authz: {
+        requiredPrivileges: [apiPrivileges.readAgentBuilder],
+      },
+    },
+    params: t.type({
+      body: t.type({
+        index: t.string,
+        id: t.string,
+      }),
+    }),
+    handler: async ({ request, core, params, response, logger, plugins }) => {
+      const { index, id } = params.body;
+
+      const [coreStart, startDeps] = await core.getStartServices();
+      const { inference } = startDeps;
+
+      const connectorId = await getDefaultConnectorId({ coreStart, inference, request });
+      const inferenceClient = inference.getClient({ request });
+      const connector = await inference.getConnectorById(connectorId, request);
+      const esClient = coreStart.elasticsearch.client.asScoped(request);
+
+      const result = await getLogAiInsights({
+        core,
+        plugins,
+        index,
+        id,
+        inferenceClient,
+        connectorId,
+        connector,
+        request,
+        esClient,
+        logger,
+      });
+
+      return response.ok({
+        body: observableIntoEventSourceStream(result.events$, {
+          logger,
+          signal: getRequestAbortedSignal(request),
+        }),
+      });
     },
   });
 
   return {
+    ...logAiInsightsRoute,
     ...errorAiInsightsRoute,
     ...getAlertAiInsightRoute,
   };

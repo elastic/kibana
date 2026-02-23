@@ -24,3 +24,21 @@ export * from './src/utilities';
 export { ACTION_METADATA_MAP, type ActionMetadata } from './src/actions/action_metadata';
 export { getJsonSchemaFromStreamlangSchema } from './src/schema/get_json_schema_from_streamlang_schema';
 export * from './src/validation';
+export {
+  validateMathExpression,
+  getMathExpressionLanguageDocSections,
+  extractFieldsFromMathExpression,
+  ALL_MATH_FUNCTIONS,
+  BOOLEAN_RETURNING_MATH_FUNCTIONS,
+  getMathFunctionDefinition,
+  getMathParameterNames,
+} from './src/transpilers/shared/math';
+export type { MathFunctionDefinition } from './src/transpilers/shared/math';
+export {
+  getAvailableGrokPatterns,
+  compileGrokPatternToRegex,
+  compileGrokPatternsToRegex,
+  isKnownGrokPattern,
+  BASE_GROK_PATTERNS,
+} from './types/utils/grok_to_regex';
+export type { CompiledRedactPattern } from './types/utils/grok_to_regex';

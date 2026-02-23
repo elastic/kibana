@@ -6,5 +6,4 @@
  */
 
 export { getWellKnownEmailServiceRoute } from './get_well_known_email_service';
-export { validSlackApiChannelsRoute } from './valid_slack_api_channels';
 export { getWebhookSecretHeadersKeyRoute } from './get_webhook_secret_headers_key';

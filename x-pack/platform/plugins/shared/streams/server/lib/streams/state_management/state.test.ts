@@ -8,7 +8,6 @@
 /* eslint-disable max-classes-per-file */
 
 import { State } from './state';
-import { GroupStream } from './streams/group_stream';
 import { ClassicStream } from './streams/classic_stream';
 import { WiredStream } from './streams/wired_stream';
 import * as streamFromDefinition from './stream_active_record/stream_from_definition';
@@ -23,6 +22,22 @@ import { ExecutionPlan } from './execution_plan/execution_plan';
 import type { Streams } from '@kbn/streams-schema';
 import type { LockManagerService } from '@kbn/lock-manager';
 
+const placeholderStreamDefinition: Streams.WiredStream.Definition = {
+  name: 'placeholder_stream',
+  description: 'You know, for testing',
+  updated_at: new Date().toISOString(),
+  ingest: {
+    lifecycle: { inherit: {} },
+    processing: { steps: [], updated_at: new Date().toISOString() },
+    settings: {},
+    wired: {
+      fields: {},
+      routing: [],
+    },
+    failure_store: { inherit: {} },
+  },
+};
+
 describe('State', () => {
   const searchMock = jest.fn();
   const storageClientMock = {
@@ -34,6 +49,7 @@ describe('State', () => {
       withLock: (_, cb) => cb(),
     } as LockManagerService,
     isDev: true,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } as any;
 
   it('loads the state and initializes the correct Stream class instances', async () => {
@@ -64,30 +80,19 @@ describe('State', () => {
         failure_store: { inherit: {} },
       },
     };
-    const groupStream: Streams.GroupStream.Definition = {
-      name: 'group_stream',
-      description: '',
-      updated_at: new Date().toISOString(),
-      group: {
-        metadata: {},
-        tags: [],
-        members: [],
-      },
-    };
 
     searchMock.mockImplementationOnce(() => ({
       hits: {
-        hits: [{ _source: wiredStream }, { _source: classicStream }, { _source: groupStream }],
-        total: { value: 3 },
+        hits: [{ _source: wiredStream }, { _source: classicStream }],
+        total: { value: 2 },
       },
     }));
 
     const currentState = await State.currentState(stateDependenciesMock);
 
-    expect(currentState.all().length).toEqual(3);
+    expect(currentState.all().length).toEqual(2);
     expect(currentState.get('wired_stream') instanceof WiredStream).toEqual(true);
     expect(currentState.get('classic_stream') instanceof ClassicStream).toEqual(true);
-    expect(currentState.get('group_stream') instanceof GroupStream).toEqual(true);
 
     const clonedState = currentState.clone();
     expect(clonedState.toPrintable()).toEqual(currentState.toPrintable());
@@ -97,7 +102,7 @@ describe('State', () => {
     searchMock.mockImplementationOnce(() => ({
       hits: {
         hits: [{ _source: { name: 'test_stream', unknown: {} } }],
-        total: { value: 3 },
+        total: { value: 1 },
       },
     }));
 
@@ -129,16 +134,7 @@ describe('State', () => {
           [
             {
               type: 'upsert',
-              definition: {
-                description: '',
-                name: 'whatever',
-                updated_at: new Date().toISOString(),
-                group: {
-                  metadata: {},
-                  tags: [],
-                  members: [],
-                },
-              },
+              definition: placeholderStreamDefinition,
             },
           ],
           stateDependenciesMock
@@ -164,16 +160,7 @@ describe('State', () => {
           [
             {
               type: 'upsert',
-              definition: {
-                description: '',
-                name: 'new_group_stream',
-                updated_at: new Date().toISOString(),
-                group: {
-                  metadata: {},
-                  tags: [],
-                  members: [],
-                },
-              },
+              definition: placeholderStreamDefinition,
             },
           ],
           stateDependenciesMock
@@ -199,16 +186,7 @@ describe('State', () => {
           [
             {
               type: 'upsert',
-              definition: {
-                name: 'stream_that_fails',
-                description: 'Something went wrong',
-                updated_at: new Date().toISOString(),
-                group: {
-                  metadata: {},
-                  tags: [],
-                  members: [],
-                },
-              },
+              definition: placeholderStreamDefinition,
             },
           ],
           stateDependenciesMock
@@ -263,7 +241,9 @@ describe('State', () => {
   });
 });
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function streamThatModifiesStartingState(name: string, stateDependenciesMock: any) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   class StartingStateModifyingStream extends StreamActiveRecord<any> {
     protected async doHandleUpsertChange(
       definition: Streams.all.Definition,
@@ -279,21 +259,27 @@ function streamThatModifiesStartingState(name: string, stateDependenciesMock: an
     protected doClone(): StreamActiveRecord<Streams.all.Definition> {
       return new StartingStateModifyingStream(this.definition, this.dependencies);
     }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     protected async doHandleDeleteChange(): Promise<any> {
       throw new Error('Method not implemented.');
     }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     protected async doValidateUpsertion(): Promise<any> {
       throw new Error('Method not implemented.');
     }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     protected async doValidateDeletion(): Promise<any> {
       throw new Error('Method not implemented.');
     }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     protected async doDetermineCreateActions(): Promise<any> {
       throw new Error('Method not implemented.');
     }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     protected async doDetermineUpdateActions(): Promise<any> {
       throw new Error('Method not implemented.');
     }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     protected async doDetermineDeleteActions(): Promise<any> {
       throw new Error('Method not implemented.');
     }
@@ -307,7 +293,9 @@ function streamThatModifiesStartingState(name: string, stateDependenciesMock: an
   );
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function streamThatCascadesTooMuch(stateDependenciesMock: any) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   class CascadingStream extends StreamActiveRecord<any> {
     protected async doHandleUpsertChange(
       definition: Streams.all.Definition,
@@ -318,16 +306,7 @@ function streamThatCascadesTooMuch(stateDependenciesMock: any) {
         cascadingChanges: [
           {
             type: 'upsert',
-            definition: {
-              name: 'and_another',
-              description: '',
-              updated_at: new Date().toISOString(),
-              group: {
-                metadata: {},
-                tags: [],
-                members: [],
-              },
-            },
+            definition: placeholderStreamDefinition,
           },
         ],
         changeStatus: 'unchanged',
@@ -337,21 +316,27 @@ function streamThatCascadesTooMuch(stateDependenciesMock: any) {
     protected doClone(): StreamActiveRecord<Streams.all.Definition> {
       return new CascadingStream(this.definition, this.dependencies);
     }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     protected async doHandleDeleteChange(): Promise<any> {
       throw new Error('Method not implemented.');
     }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     protected async doValidateUpsertion(): Promise<any> {
       throw new Error('Method not implemented.');
     }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     protected async doValidateDeletion(): Promise<any> {
       throw new Error('Method not implemented.');
     }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     protected async doDetermineCreateActions(): Promise<any> {
       throw new Error('Method not implemented.');
     }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     protected async doDetermineUpdateActions(): Promise<any> {
       throw new Error('Method not implemented.');
     }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     protected async doDetermineDeleteActions(): Promise<any> {
       throw new Error('Method not implemented.');
     }
@@ -365,7 +350,9 @@ function streamThatCascadesTooMuch(stateDependenciesMock: any) {
   );
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function failingStream(stateDependenciesMock: any) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   class FailingStream extends StreamActiveRecord<any> {
     protected async doHandleUpsertChange(): Promise<{
       cascadingChanges: StreamChange[];
@@ -376,6 +363,7 @@ function failingStream(stateDependenciesMock: any) {
         changeStatus: 'upserted',
       };
     }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     protected async doHandleDeleteChange(): Promise<any> {
       return {
         cascadingChanges: [],
@@ -423,6 +411,7 @@ function failingStream(stateDependenciesMock: any) {
 }
 
 function flowStream() {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   class FlowStream extends StreamActiveRecord<any> {
     protected async doHandleUpsertChange(
       definition: Streams.all.Definition
@@ -432,6 +421,7 @@ function flowStream() {
         changeStatus: definition.name === this.definition.name ? 'upserted' : this.changeStatus,
       };
     }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     protected async doHandleDeleteChange(target: string): Promise<any> {
       return {
         cascadingChanges: [],

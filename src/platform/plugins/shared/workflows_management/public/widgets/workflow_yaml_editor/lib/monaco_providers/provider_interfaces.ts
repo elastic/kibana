@@ -12,6 +12,10 @@
 import type YAML from 'yaml';
 import type { Scalar, YAMLMap } from 'yaml';
 import type { monaco } from '@kbn/monaco';
+import type {
+  ExecutionContext,
+  StepExecutionData,
+} from '../execution_context/build_execution_context';
 
 /**
  * Context information for hover providers
@@ -140,6 +144,10 @@ export interface MonacoConnectorHandler {
 export interface ProviderConfig {
   /** Function to get the current YAML document */
   getYamlDocument: () => YAML.Document | null;
+  /** Function to get the current execution context (for template expression hover) */
+  getExecutionContext?: () => ExecutionContext | null;
+  /** Lazily fetch a step's I/O data and merge into the execution context */
+  fetchStepExecutionData?: (stepId: string) => Promise<StepExecutionData | null>;
   /** Additional configuration options */
   options?: Record<string, any>;
 }

@@ -11,6 +11,7 @@ import type { IngestPipelineProcessor } from '../../../types/processors/ingest_p
 import type { StreamlangProcessorDefinition } from '../../../types/processors';
 import { conditionToPainless } from '../../conditions/condition_to_painless';
 import { processManualIngestPipelineProcessors } from './processors/manual_pipeline_processor';
+import { processMathProcessor } from './processors/math_processor';
 import {
   applyPreProcessing,
   processorFieldRenames,
@@ -20,6 +21,8 @@ import type { ActionToIngestType } from './processors/processor';
 import { processRemoveByPrefixProcessor } from './processors/remove_by_prefix_processor';
 
 import type { IngestPipelineTranspilationOptions } from '.';
+import { processJoinProcessor } from './processors/join_processor';
+import { processConcatProcessor } from './processors/concat_processor';
 
 export function convertStreamlangDSLActionsToIngestPipelineProcessors(
   actionSteps: StreamlangProcessorDefinition[],
@@ -66,6 +69,27 @@ export function convertStreamlangDSLActionsToIngestPipelineProcessors(
     if (action === 'remove_by_prefix') {
       return processRemoveByPrefixProcessor(
         processorWithCompiledConditions as Parameters<typeof processRemoveByPrefixProcessor>[0]
+      );
+    }
+
+    if (action === 'math') {
+      // Math processor outputs a script processor
+      return [
+        processMathProcessor(
+          processorWithCompiledConditions as Parameters<typeof processMathProcessor>[0]
+        ),
+      ];
+    }
+
+    if (action === 'join') {
+      return processJoinProcessor(
+        processorWithCompiledConditions as Parameters<typeof processJoinProcessor>[0]
+      );
+    }
+
+    if (action === 'concat') {
+      return processConcatProcessor(
+        processorWithCompiledConditions as Parameters<typeof processConcatProcessor>[0]
       );
     }
 

@@ -22,7 +22,6 @@ dependsOn:
   - '@kbn/core'
   - '@kbn/data-plugin'
   - '@kbn/discover-plugin'
-  - '@kbn/embeddable-plugin'
   - '@kbn/kibana-react-plugin'
   - '@kbn/management-plugin'
   - '@kbn/screenshot-mode-plugin'
@@ -85,6 +84,8 @@ dependsOn:
   - '@kbn/triggers-actions-ui-plugin'
   - '@kbn/alerting-types'
   - '@kbn/core-user-profile-browser-mocks'
+  - '@kbn/zod'
+  - '@kbn/deeplinks-analytics'
 tags:
   - plugin
   - prod

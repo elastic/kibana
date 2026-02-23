@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ProductName } from '@kbn/product-doc-common';
+import type { ProductName, ResourceType } from '@kbn/product-doc-common';
 import type { ProductInstallState, InstallationStatus } from '../install_status';
 
 export const INSTALLATION_STATUS_API_PATH = '/internal/product_doc_base/status';
@@ -17,6 +17,8 @@ export interface InstallationStatusResponse {
   inferenceId: string;
   overall: InstallationStatus;
   perProducts: Record<ProductName, ProductInstallState>;
+  /** Resource type for this installation status */
+  resourceType?: ResourceType;
 }
 
 export interface PerformInstallResponse {
@@ -35,4 +37,23 @@ export interface UninstallResponse {
 
 export interface ProductDocInstallParams {
   inferenceId: string | undefined;
+  /**
+   * Resource type to install/uninstall.
+   * - 'product_doc': Elastic product documentation (default)
+   * - 'security_labs': Elastic Security Labs content
+   */
+  resourceType?: ResourceType;
+}
+
+/**
+ * Security Labs specific installation status response.
+ */
+export interface SecurityLabsInstallStatusResponse {
+  inferenceId: string;
+  resourceType: 'security_labs';
+  status: InstallationStatus;
+  version?: string;
+  latestVersion?: string;
+  isUpdateAvailable?: boolean;
+  failureReason?: string;
 }

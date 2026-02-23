@@ -19,6 +19,7 @@ import {
 import { withSuspense } from '@kbn/shared-ux-utility';
 import type { LensSerializedState } from '@kbn/lens-plugin/public';
 import { getLensAttributesFromSuggestion } from '@kbn/visualization-utils';
+import { AbortReason } from '@kbn/kibana-utils-plugin/common';
 import {
   coreServices,
   dataService,
@@ -59,12 +60,12 @@ export const DashboardAppNoDataPage = ({
 
   useEffect(() => {
     return () => {
-      abortController?.abort();
+      abortController?.abort(AbortReason.CLEANUP);
     };
   }, [abortController]);
 
   const onTryESQL = useCallback(async () => {
-    abortController?.abort();
+    abortController?.abort(AbortReason.REPLACED);
     if (lensHelpersAsync.value) {
       const abc = new AbortController();
       const { dataViews } = dataService;
@@ -74,7 +75,7 @@ export const DashboardAppNoDataPage = ({
         query: `FROM ${indexName}`,
         http: coreServices.http,
       });
-      const esqlQuery = getInitialESQLQuery(dataView);
+      const esqlQuery = getInitialESQLQuery(dataView, true);
 
       try {
         const columns = await getESQLQueryColumns({
@@ -105,16 +106,14 @@ export const DashboardAppNoDataPage = ({
                 {
                   type: 'lens',
                   serializedState: {
-                    rawState: {
-                      attributes: getLensAttributesFromSuggestion({
-                        filters: [],
-                        query: {
-                          esql: esqlQuery,
-                        },
-                        suggestion,
-                        dataView,
-                      }),
-                    },
+                    attributes: getLensAttributesFromSuggestion({
+                      filters: [],
+                      query: {
+                        esql: esqlQuery,
+                      },
+                      suggestion,
+                      dataView,
+                    }),
                   },
                 },
               ],

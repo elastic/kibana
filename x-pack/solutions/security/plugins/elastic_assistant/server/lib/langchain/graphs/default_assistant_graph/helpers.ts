@@ -106,12 +106,14 @@ export const streamGraph = async ({
 
   const handleFinalContent = (args: {
     finalResponse: string;
+    refusal?: string;
     isError: boolean;
     interruptValue?: InterruptValue;
   }) => {
     if (onLlmResponse) {
       onLlmResponse({
         content: args.finalResponse,
+        refusal: args.refusal,
         interruptValue: args.interruptValue,
         traceData: {
           transactionId: streamingSpan?.transaction?.ids?.['transaction.id'],
@@ -151,7 +153,11 @@ export const streamGraph = async ({
           !data.output.lc_kwargs?.tool_calls?.length &&
           !didEnd
         ) {
-          handleFinalContent({ finalResponse: data.output.content, isError: false });
+          const refusal =
+            typeof data.output?.additional_kwargs?.refusal === 'string'
+              ? (data.output.additional_kwargs.refusal as string)
+              : undefined;
+          handleFinalContent({ finalResponse: data.output.content, refusal, isError: false });
         } else if (
           // This is the end of one model invocation but more message will follow as there are tool calls. If this chunk contains text content, add a newline separator to the stream to visually separate the chunks.
           event === 'on_chat_model_end' &&
@@ -234,10 +240,15 @@ export const invokeGraph = async ({
     const lastMessage = result.messages[result.messages.length - 1];
     const output = lastMessage.text;
     const conversationId = result.conversationId;
+    const refusal =
+      typeof lastMessage?.additional_kwargs?.refusal === 'string'
+        ? (lastMessage.additional_kwargs.refusal as string)
+        : undefined;
     if (onLlmResponse) {
       await onLlmResponse({
         content: output,
         traceData,
+        ...(refusal ? { refusal } : {}),
       });
     }
 

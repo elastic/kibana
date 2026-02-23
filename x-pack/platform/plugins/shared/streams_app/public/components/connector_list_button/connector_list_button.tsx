@@ -22,6 +22,7 @@ import React from 'react';
 import type { AIFeatures } from '../../hooks/use_ai_features';
 import { useAIFeatures } from '../../hooks/use_ai_features';
 import { EnableAIFeaturesLink } from '../enable_ai_features_link/enable_ai_features_link';
+import { ConnectorIcon } from './connector_icon';
 
 const SHOW_MORE_ARIA_LABEL = i18n.translate(
   'xpack.streams.connectorListButton.showMoreButtonLabel',
@@ -81,7 +82,7 @@ export function ConnectorListButtonBase({
                 onClick={togglePopover}
                 display="base"
                 size={buttonSize}
-                iconType="boxesVertical"
+                iconType="controlsHorizontal"
                 aria-label={SHOW_MORE_ARIA_LABEL}
               />
             }
@@ -98,7 +99,12 @@ export function ConnectorListButtonBase({
                     closePopover();
                   }}
                 >
-                  {connector.name}
+                  <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                    <EuiFlexItem grow={false}>
+                      <ConnectorIcon connectorName={connector.name} />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>{connector.name}</EuiFlexItem>
+                  </EuiFlexGroup>
                 </EuiContextMenuItem>
               ))}
             />

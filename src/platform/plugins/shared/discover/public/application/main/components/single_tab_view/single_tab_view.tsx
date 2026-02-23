@@ -10,7 +10,9 @@
 import React, { useEffect } from 'react';
 import { type IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import useLatest from 'react-use/lib/useLatest';
+import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
 import type { MainHistoryLocationState } from '../../../../../common';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -95,9 +97,11 @@ export const SingleTabView = ({
     async ({
       dataViewSpec,
       defaultUrlState,
+      esqlControls,
     }: {
       dataViewSpec?: DataViewSpec | undefined;
       defaultUrlState?: DiscoverAppState;
+      esqlControls?: ControlPanelsState<OptionsListESQLControlState>;
     } = {}) => {
       const stateContainer = getDiscoverStateContainer({
         tabId: currentTabId,
@@ -120,6 +124,7 @@ export const SingleTabView = ({
             stateContainer,
             customizationService,
             dataViewSpec,
+            esqlControls,
             defaultUrlState,
           },
         })
@@ -135,6 +140,7 @@ export const SingleTabView = ({
 
       initializeTab.current({
         dataViewSpec: historyLocationState?.dataViewSpec,
+        esqlControls: historyLocationState?.esqlControls,
         defaultUrlState: historyLocationState?.defaultState,
       });
     }
@@ -146,7 +152,7 @@ export const SingleTabView = ({
 
   if (currentTabInitializationState.initializationStatus === TabInitializationStatus.NoData) {
     return (
-      <HideTabsBar>
+      <HideTabsBar customizationContext={customizationContext}>
         <NoDataPage
           {...appInitializationState}
           onDataViewCreated={async (dataViewUnknown) => {

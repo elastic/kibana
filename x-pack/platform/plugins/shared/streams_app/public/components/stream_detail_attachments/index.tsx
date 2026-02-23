@@ -19,15 +19,20 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { usePerformanceContext } from '@kbn/ebt-tools';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { STREAMS_UI_PRIVILEGES } from '@kbn/streams-plugin/public';
-import type { Attachment } from '@kbn/streams-plugin/server/lib/streams/attachments/types';
-import type { Streams } from '@kbn/streams-schema';
-import React, { useMemo, useState } from 'react';
+import type {
+  Attachment,
+  AttachmentType,
+} from '@kbn/streams-plugin/server/lib/streams/attachments/types';
+import { Streams } from '@kbn/streams-schema';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { useAttachmentsApi } from '../../hooks/use_attachments_api';
 import { useAttachmentsFetch } from '../../hooks/use_attachments_fetch';
 import { useKibana } from '../../hooks/use_kibana';
+import { getStreamTypeFromDefinition } from '../../util/get_stream_type_from_definition';
 import { AddAttachmentFlyout } from './add_attachment_flyout';
 import { AttachmentDetailsFlyout } from './attachment_details_flyout';
 import {
@@ -39,18 +44,27 @@ import { AttachmentsTable } from './attachment_table';
 import { AttachmentsEmptyPrompt } from './attachments_empty_prompt';
 import { ConfirmAttachmentModal } from './confirm_attachment_modal';
 
-export function StreamDetailAttachments({
-  definition,
-}: {
-  definition: Streams.ingest.all.GetResponse;
-}) {
+const getCountByType = (attachments: Attachment[]): Record<AttachmentType, number> => {
+  return attachments.reduce<Record<AttachmentType, number>>(
+    (acc, attachment) => {
+      acc[attachment.type] += 1;
+      return acc;
+    },
+    { dashboard: 0, rule: 0, slo: 0 }
+  );
+};
+
+export function StreamDetailAttachments({ definition }: { definition: Streams.all.GetResponse }) {
   const [filters, setFilters] = useState<AttachmentFiltersState>(DEFAULT_ATTACHMENT_FILTERS);
   const [isSelectionPopoverOpen, setIsSelectionPopoverOpen] = useState(false);
 
   const [isAddAttachmentFlyoutOpen, setIsAddAttachmentFlyoutOpen] = useState(false);
   const [detailsAttachment, setDetailsAttachment] = useState<Attachment | null>(null);
 
-  const { core } = useKibana();
+  const {
+    core,
+    services: { telemetryClient },
+  } = useKibana();
   const {
     application: {
       capabilities: {
@@ -59,6 +73,8 @@ export function StreamDetailAttachments({
     },
     notifications,
   } = core;
+
+  const { onPageReady } = usePerformanceContext();
 
   const attachmentFilters = useMemo(
     () => ({
@@ -76,6 +92,27 @@ export function StreamDetailAttachments({
   const { addAttachments, removeAttachments } = useAttachmentsApi({
     name: definition.stream.name,
   });
+
+  // Telemetry for TTFMP (time to first meaningful paint)
+  useEffect(() => {
+    if (definition && !attachmentsFetch.loading) {
+      const streamType = getStreamTypeFromDefinition(definition.stream);
+      const processingStepsCount = Streams.ingest.all.Definition.is(definition.stream)
+        ? definition.stream.ingest.processing.steps.length
+        : 0;
+      onPageReady({
+        meta: {
+          description: `[ttfmp_streams_detail_attachments] streamType: ${streamType}`,
+        },
+        customMetrics: {
+          key1: 'attachment_count',
+          value1: attachmentsFetch.value?.attachments?.length ?? 0,
+          key2: 'processing_steps_count',
+          value2: processingStepsCount,
+        },
+      });
+    }
+  }, [definition, attachmentsFetch.loading, attachmentsFetch.value, onPageReady]);
 
   const [attachmentsToUnlink, setAttachmentsToUnlink] = useState<Attachment[]>([]);
   const linkedAttachments = useMemo(() => {
@@ -97,11 +134,30 @@ export function StreamDetailAttachments({
     setIsAddAttachmentFlyoutOpen(true);
   };
 
+  const handleViewDetails = useCallback(
+    (attachment: Attachment) => {
+      setDetailsAttachment(attachment);
+      telemetryClient.trackAttachmentFlyoutOpened({
+        stream_name: definition.stream.name,
+        attachment_type: attachment.type,
+        attachment_id: attachment.id,
+      });
+    },
+    [definition.stream.name, telemetryClient]
+  );
+
   const [{ loading: isLinkLoading }, handleLinkAttachments] = useAsyncFn(
     async (attachments: Attachment[]) => {
       await addAttachments(attachments);
       attachmentsFetch.refresh();
       setIsAddAttachmentFlyoutOpen(false);
+
+      telemetryClient.trackAttachmentLinked({
+        stream_name: definition.stream.name,
+        attachment_count: attachments.length,
+        count_by_type: getCountByType(attachments),
+      });
+
       notifications.toasts.addSuccess({
         title: i18n.translate('xpack.streams.attachments.addSuccess.title', {
           defaultMessage: 'Attachments added successfully',
@@ -120,7 +176,15 @@ export function StreamDetailAttachments({
         ),
       });
     },
-    [addAttachments, attachmentsFetch, notifications.toasts, definition.stream.name, core]
+    [
+      addAttachments,
+      attachmentsFetch,
+      notifications.toasts,
+      definition.stream.name,
+      core,
+      telemetryClient,
+      getCountByType,
+    ]
   );
 
   const [{ loading: isUnlinkLoading }, handleUnlinkAttachments] = useAsyncFn(
@@ -129,6 +193,13 @@ export function StreamDetailAttachments({
       attachmentsFetch.refresh();
       setSelectedAttachments([]);
       setIsSelectionPopoverOpen(false);
+
+      telemetryClient.trackAttachmentUnlinked({
+        stream_name: definition.stream.name,
+        attachment_count: attachments.length,
+        count_by_type: getCountByType(attachments),
+      });
+
       notifications.toasts.addSuccess({
         title: i18n.translate('xpack.streams.attachments.removeSuccess.title', {
           defaultMessage: 'Attachments removed',
@@ -147,7 +218,15 @@ export function StreamDetailAttachments({
         ),
       });
     },
-    [removeAttachments, attachmentsFetch, notifications.toasts, definition.stream.name, core]
+    [
+      removeAttachments,
+      attachmentsFetch,
+      notifications.toasts,
+      definition.stream.name,
+      core,
+      telemetryClient,
+      getCountByType,
+    ]
   );
 
   return (
@@ -288,7 +367,7 @@ export function StreamDetailAttachments({
                   ? (attachment) => setAttachmentsToUnlink([attachment])
                   : undefined
               }
-              onViewDetails={setDetailsAttachment}
+              onViewDetails={handleViewDetails}
               dataTestSubj="streamsAppStreamDetailAttachmentsTable"
               showActions
             />
@@ -308,6 +387,7 @@ export function StreamDetailAttachments({
       {detailsAttachment && (
         <AttachmentDetailsFlyout
           attachment={detailsAttachment}
+          streamName={definition.stream.name}
           onClose={() => setDetailsAttachment(null)}
           onUnlink={
             canLinkAttachments

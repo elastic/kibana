@@ -18,7 +18,13 @@ import type {
 import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
 import type { Adapters } from '@kbn/inspector-plugin/public';
 import type { Subscription } from 'rxjs';
-import { type Filter, FilterStateStore, type Query, type TimeRange } from '@kbn/es-query';
+import {
+  type Filter,
+  FilterStateStore,
+  type ProjectRouting,
+  type Query,
+  type TimeRange,
+} from '@kbn/es-query';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { DataView } from '@kbn/data-plugin/common';
 import type {
@@ -43,6 +49,7 @@ import {
   getTimeFilter,
   getToasts,
 } from '../../../kibana_services';
+import { initializeProjectRoutingManager } from '../../project_routing_manager';
 import { AppStateManager, startAppStateSyncing } from '../url_state';
 import { MapContainer } from '../../../connected_components/map_container';
 import { getIndexPatternsFromIds } from '../../../index_pattern_util';
@@ -98,12 +105,14 @@ export interface Props {
     query,
     timeFilters,
     searchSessionId,
+    projectRouting,
   }: {
     filters?: Filter[];
     query?: Query;
     timeFilters?: TimeRange;
     forceRefresh?: boolean;
     searchSessionId?: string;
+    projectRouting?: ProjectRouting;
   }) => void;
   timeFilters: TimeRange;
   isSaveDisabled: boolean;
@@ -126,6 +135,7 @@ export class MapApp extends React.Component<Props, State> {
   _globalSyncUnsubscribe: (() => void) | null = null;
   _globalSyncChangeMonitorSubscription: Subscription | null = null;
   _appSyncUnsubscribe: (() => void) | null = null;
+  _projectRoutingUnsubscribe: (() => void) | undefined = undefined;
   _appStateManager = new AppStateManager();
   _prevIndexPatternIds: string[] | null = null;
   _isMounted: boolean = false;
@@ -186,6 +196,13 @@ export class MapApp extends React.Component<Props, State> {
       this._updateFromGlobalState
     );
 
+    // Initialize project routing manager for CPS support
+    this._projectRoutingUnsubscribe = initializeProjectRoutingManager({
+      onProjectRoutingChange: (projectRouting) => {
+        this.props.setQuery({ projectRouting });
+      },
+    });
+
     // savedQuery must be fetched from savedQueryId
     // const initialSavedQuery = this._appStateManager.getAppState().savedQuery;
     // if (initialSavedQuery) {
@@ -220,6 +237,9 @@ export class MapApp extends React.Component<Props, State> {
     }
     if (this._globalSyncChangeMonitorSubscription) {
       this._globalSyncChangeMonitorSubscription.unsubscribe();
+    }
+    if (this._projectRoutingUnsubscribe) {
+      this._projectRoutingUnsubscribe();
     }
 
     this.props.onAppLeave((actions) => {

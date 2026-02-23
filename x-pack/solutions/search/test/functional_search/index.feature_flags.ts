@@ -13,7 +13,5 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     // Shared test file to close the global solution tour
     loadTestFile(require.resolve('./apps/shared/solution_tour'));
     // add tests that require feature flags, defined in config.feature_flags.ts
-    loadTestFile(require.resolve('./tests/agent_builder'));
-    loadTestFile(require.resolve('./tests/search_getting_started'));
   });
 };

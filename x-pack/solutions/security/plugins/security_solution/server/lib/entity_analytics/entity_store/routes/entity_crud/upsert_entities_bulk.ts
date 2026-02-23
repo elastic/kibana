@@ -15,8 +15,14 @@ import type { EntityAnalyticsRoutesDeps } from '../../../types';
 import { API_VERSIONS, APP_ID } from '../../../../../../common/constants';
 import { BadCRUDRequestError, EngineNotRunningError } from '../../errors';
 import { CapabilityNotEnabledError } from '../../errors/capability_not_enabled_error';
+import type { ITelemetryEventsSender } from '../../../../telemetry/sender';
+import { ENTITY_STORE_API_CALL_EVENT } from '../../../../telemetry/event_based/events';
 
-export const upsertEntitiesBulk = (router: EntityAnalyticsRoutesDeps['router'], logger: Logger) => {
+export const upsertEntitiesBulk = (
+  router: EntityAnalyticsRoutesDeps['router'],
+  telemetry: ITelemetryEventsSender,
+  logger: Logger
+) => {
   router.versioned
     .put({
       access: 'public',
@@ -49,9 +55,15 @@ export const upsertEntitiesBulk = (router: EntityAnalyticsRoutesDeps['router'], 
           await secSol
             .getEntityStoreCrudClient()
             .upsertEntitiesBulk(request.body.entities, request.query.force);
-
+          telemetry.reportEBT(ENTITY_STORE_API_CALL_EVENT, {
+            endpoint: request.route.path,
+          });
           return response.ok();
         } catch (error) {
+          telemetry.reportEBT(ENTITY_STORE_API_CALL_EVENT, {
+            endpoint: request.route.path,
+            error: (error as Error).message,
+          });
           if (
             error instanceof EngineNotRunningError ||
             error instanceof CapabilityNotEnabledError

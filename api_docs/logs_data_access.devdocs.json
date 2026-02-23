@@ -16,6 +16,8 @@
           "; }>>"
         ],
         "path": "x-pack/platform/plugins/shared/logs_data_access/public/hooks/use_log_sources.ts",
+        "lineNumber": 52,
+        "columnNumber": 15,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -31,6 +33,8 @@
               "P"
             ],
             "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 1109,
+            "columnNumber": 10,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -45,6 +49,8 @@
               "any"
             ],
             "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 1109,
+            "columnNumber": 20,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -62,6 +68,8 @@
           "({ isLoading, logSourcesValue, getUrlForApp, title }: { isLoading: boolean; logSourcesValue: string; getUrlForApp: (appId: string, options?: { path?: string | undefined; absolute?: boolean | undefined; deepLinkId?: string | undefined; } | undefined) => string; title?: string | undefined; }) => React.JSX.Element"
         ],
         "path": "x-pack/platform/plugins/shared/logs_data_access/public/components/logs_sources_setting.tsx",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -76,6 +84,8 @@
               "{ isLoading: boolean; logSourcesValue: string; getUrlForApp: (appId: string, options?: { path?: string | undefined; absolute?: boolean | undefined; deepLinkId?: string | undefined; } | undefined) => string; title?: string | undefined; }"
             ],
             "path": "x-pack/platform/plugins/shared/logs_data_access/public/components/logs_sources_setting.tsx",
+            "lineNumber": 17,
+            "columnNumber": 7,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -97,6 +107,8 @@
           "[]; combinedIndices: string; }"
         ],
         "path": "x-pack/platform/plugins/shared/logs_data_access/public/hooks/use_log_sources.ts",
+        "lineNumber": 52,
+        "columnNumber": 35,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -119,6 +131,8 @@
         "void"
       ],
       "path": "x-pack/platform/plugins/shared/logs_data_access/public/plugin.ts",
+      "lineNumber": 12,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "setup",
@@ -139,6 +153,8 @@
         "; }; }"
       ],
       "path": "x-pack/platform/plugins/shared/logs_data_access/public/plugin.ts",
+      "lineNumber": 13,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "start",
@@ -157,6 +173,8 @@
         "label": "LogsRatesMetrics",
         "description": [],
         "path": "x-pack/platform/plugins/shared/logs_data_access/server/services/get_logs_rates_service/index.ts",
+        "lineNumber": 29,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -168,6 +186,8 @@
             "label": "logRatePerMinute",
             "description": [],
             "path": "x-pack/platform/plugins/shared/logs_data_access/server/services/get_logs_rates_service/index.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -182,6 +202,8 @@
               "number | null"
             ],
             "path": "x-pack/platform/plugins/shared/logs_data_access/server/services/get_logs_rates_service/index.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -196,6 +218,8 @@
         "label": "LogsRatesServiceReturnType",
         "description": [],
         "path": "x-pack/platform/plugins/shared/logs_data_access/server/services/get_logs_rates_service/index.ts",
+        "lineNumber": 34,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -217,6 +241,8 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/logs_data_access/server/services/get_logs_rates_service/index.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -238,6 +264,8 @@
         "void"
       ],
       "path": "x-pack/platform/plugins/shared/logs_data_access/server/plugin.ts",
+      "lineNumber": 19,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "setup",
@@ -280,6 +308,8 @@
         ">; }; }; }"
       ],
       "path": "x-pack/platform/plugins/shared/logs_data_access/server/plugin.ts",
+      "lineNumber": 20,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "start",

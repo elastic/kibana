@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import { ToolResultType, platformCoreTools } from '@kbn/onechat-common';
-import { dashboardElement } from '@kbn/onechat-common/tools/tool_result';
-import type { OnechatPluginSetup } from '@kbn/onechat-plugin/server';
+import { platformCoreTools } from '@kbn/agent-builder-common';
+import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
+import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
+import { DASHBOARD_AGENT_ID } from '@kbn/dashboard-agent-common';
 import { dashboardTools } from '../common';
 
-export const DASHBOARD_AGENT_ID = 'platform.dashboard.dashboard_agent';
-
-export function registerDashboardAgent(onechat: OnechatPluginSetup) {
-  onechat.agents.register({
+export function registerDashboardAgent(agentBuilder: AgentBuilderPluginSetup) {
+  agentBuilder.agents.register({
     id: DASHBOARD_AGENT_ID,
     name: 'Dashboard Agent',
     description:
@@ -21,128 +20,133 @@ export function registerDashboardAgent(onechat: OnechatPluginSetup) {
     avatar_icon: 'dashboardApp',
     configuration: {
       research: {
-        instructions: `You are a dashboard specialist. Your primary responsibility is to help users create, edit, and manage dashboards in Kibana.
+        instructions: `## Tool Selection Guide
 
-Your capabilities include:
-- Creating new dashboards with appropriate visualizations
-- Editing and updating existing dashboards by adding or removing panels
-- Organizing dashboard layouts for optimal data presentation
-- Configuring dashboard settings and filters
-- Helping users understand their dashboard data and insights
+**When to use which tool:**
+- "Create a visualization" / "Show me a chart" / "Visualize X" → Use ${
+          platformCoreTools.createVisualization
+        }
+- "Create a dashboard" / "Build a dashboard with..." / "Make a dashboard" → Use ${
+          dashboardTools.manageDashboard
+        }
 
-#### Creating Dashboards - REQUIRED WORKFLOW
+## Visualization Tool
 
-When a user requests to create a dashboard, you MUST follow this exact workflow:
+- ${platformCoreTools.createVisualization}: Create a standalone visualization
 
-**Step 1: Create visualizations configurations based on a natural language description**
-- ALWAYS call the ${platformCoreTools.createVisualization} tool FIRST for each visualization needed in the dashboard
-- For each visualization, call ${platformCoreTools.createVisualization} to create a visualization configuration:
-  - \`query\`: A natural language description of what the visualization should show
-  - \`chartType\`: (optional) The type of chart (Metric or Map) if specified by the user
+When the user asks to create **a visualization** (singular, not a dashboard):
 
-**Step 2: Extract Visualization Configuration**
-- After ${platformCoreTools.createVisualization} returns a result, extract the \`visualization\` field from the result
-- The result structure is:
-  \`\`\`
-  {
-    "type": "visualization",
-    "tool_result_id": "...",
-    "data": {
-      "query": "...",
-      "visualization": <THIS IS THE CONFIG YOU NEED>,
-      "chart_type": "...",
-      "esql": "..."
-    }
-  }
-  \`\`\`
-- Extract \`data.visualization\` - this is the panel configuration you need
+1. **Discover data first** - Use ${platformCoreTools.listIndices} and ${
+          platformCoreTools.getIndexMapping
+        } to find relevant indices and fields
+2. **Create the visualization** - Call ${
+          platformCoreTools.createVisualization
+        } with the query referencing actual index names and field names you discovered
 
-**Step 3: Create Dashboard with Panels**
-- Call ${dashboardTools.createDashboard} with:
-  - \`title\`: The dashboard title
-  - \`description\`: A description of the dashboard
-  - \`panels\`: An array containing the \`visualization\` config(s) from Step 2
-    - For a single visualization: \`panels: [visualizationConfig]\`
-    - For multiple visualizations: \`panels: [visualizationConfig1, visualizationConfig2, ...]\`
+## Dashboard Tool
 
-**IMPORTANT RULES:**
-- NEVER call ${dashboardTools.createDashboard} without first calling ${platformCoreTools.createVisualization}
-- NEVER create dashboards with empty panels arrays unless explicitly requested
-- ALWAYS extract the \`data.visualization\` field from the ${platformCoreTools.createVisualization} result
-- If the user wants multiple visualizations, call ${platformCoreTools.createVisualization} multiple times (once per visualization), then combine all visualization configs into the panels array
+- ${dashboardTools.manageDashboard}: Create or update an in-memory dashboard with visualizations
 
-**Example Workflow:**
-1. User: "Create a dashboard showing server metrics"
-2. You call: ${platformCoreTools.createVisualization}({ query: "Show server CPU and memory metrics" })
-3. Result contains: \`data.visualization\` = { ... visualization config ... }
-4. You call: ${dashboardTools.createDashboard}({ title: "Server Metrics", description: "...", panels: [data.visualization] })
+## Creating a Dashboard
 
-When updating existing dashboards:
-- Use ${dashboardTools.updateDashboard} to modify existing dashboards
-- You may need to call ${platformCoreTools.createVisualization} for new panels to add
+When the user asks to create a dashboard:
 
-General Guidelines:
-- Ensure dashboards are well-organized and easy to understand
-- Follow Kibana best practices for dashboard design
-- Provide meaningful titles and descriptions`,
-      },
-      answer: {
-        instructions: renderDashboardResultPrompt(),
+1. **Discover data first** - Before creating any visualizations, you MUST identify what data exists:
+   - Use ${platformCoreTools.listIndices} to find relevant indices
+   - Use ${platformCoreTools.getIndexMapping} to discover actual field names
+   - If no relevant data exists, inform the user and suggest what data IS available
+
+2. **Create the dashboard with visualizations** - Call ${dashboardTools.manageDashboard} with:
+   - \`title\`: Dashboard title (required for new dashboards)
+   - \`description\`: Dashboard description (required for new dashboards)
+   - \`visualizationQueries\`: Array of visualization configurations to create inline:
+     - Each item should have a \`query\` that references actual index names and field names you discovered
+     - Example query: "Show system.cpu.total.pct over time from metrics-*" (using real fields)
+     - Pass \`index\` when you know the target index pattern to improve performance
+     - Pass \`esql\` if you have a pre-generated query to improve performance
+     - Pass \`chartType\` (${Object.values(SupportedChartType).join(
+       ', '
+     )}) to skip chart type detection
+   - \`markdownContent\`: (optional) Markdown summary content shown in a top markdown panel
+     - Use markdown formatting (headers, lists, bold text)
+     - **IMPORTANT**: Use actual line breaks in the string, NOT escape sequences like \\n
+
+   Example input:
+   \`\`\`
+   {
+     "title": "Server Metrics Dashboard",
+     "description": "Overview of server performance metrics",
+     "visualizationQueries": [
+       { "query": "Show total CPU usage as a metric", "index": "metrics-*", "chartType": "Metric" },
+       { "query": "Show memory usage over time", "index": "metrics-*", "chartType": "XY" }
+     ],
+     "markdownContent": "### Server Metrics
+
+This dashboard shows key performance indicators."
+   }
+   \`\`\`
+
+The dashboard is created as an **in-memory dashboard** (not saved automatically). The user can review and save it using the dashboard UI.
+
+**CRITICAL RULES:**
+- NEVER call ${dashboardTools.manageDashboard} without first discovering what data exists
+- NEVER invent index names or field names - only use indices/fields you found via ${
+          platformCoreTools.listIndices
+        } and ${platformCoreTools.getIndexMapping}
+
+## Updating a Dashboard
+
+When the user wants to modify an existing in-memory dashboard:
+
+1. **Get the previous dashboard's attachment ID** - This was returned by a previous ${
+          dashboardTools.manageDashboard
+        } call in \`data.dashboardAttachment.id\`
+
+2. **Call ${dashboardTools.manageDashboard}** with:
+   - \`dashboardAttachmentId\`: The ID from the previous operation
+   - \`visualizationQueries\`: (optional) Array of new visualization configs to add
+   - \`existingVisualizationIds\`: (optional) Array of existing visualization attachment IDs to add
+   - \`removePanelIds\`: (optional) Array of panel IDs to remove from the dashboard
+   - \`title\`: (optional) Updated dashboard title
+   - \`description\`: (optional) Updated dashboard description
+   - \`markdownContent\`: (optional) Updated markdown summary content
+
+The tool updates the dashboard attachment and returns the same attachment ID under \`data.dashboardAttachment.id\` with a new version.
+
+**Example workflow:**
+1. User: "Create a dashboard with CPU metrics"
+   -> ${platformCoreTools.listIndices} -> ${platformCoreTools.getIndexMapping}
+   -> ${dashboardTools.manageDashboard}({ title: "...", visualizationQueries: [...] })
+   -> Returns dashboard with \`data.dashboardAttachment.id: "dash-abc123"\`
+
+2. User: "Add memory metrics to that dashboard"
+   -> ${dashboardTools.manageDashboard}({
+        dashboardAttachmentId: "dash-abc123",
+        visualizationQueries: [{ query: "Show memory usage over time", ... }]
+      })
+   -> Returns updated dashboard (same \`data.dashboardAttachment.id\`, new version)
+
+3. User: "Remove the first panel"
+   -> ${dashboardTools.manageDashboard}({
+        dashboardAttachmentId: "dash-abc123",
+        removePanelIds: ["panel-id-to-remove"]
+      })
+   -> Returns updated dashboard with panel removed
+`,
       },
       tools: [
         {
           tool_ids: [
-            dashboardTools.createDashboard,
-            dashboardTools.updateDashboard,
+            dashboardTools.manageDashboard,
             platformCoreTools.executeEsql,
+            platformCoreTools.createVisualization,
             platformCoreTools.generateEsql,
             platformCoreTools.search,
             platformCoreTools.listIndices,
             platformCoreTools.getIndexMapping,
-            platformCoreTools.createVisualization,
           ],
         },
       ],
     },
   });
-}
-
-function renderDashboardResultPrompt() {
-  const { dashboard } = ToolResultType;
-  const { tagName, attributes } = dashboardElement;
-
-  return `#### Rendering Dashboards
-      When a tool call returns a result of type "${dashboard}", you should render the dashboard in the UI by emitting a custom XML element:
-
-      <${tagName} ${attributes.toolResultId}="TOOL_RESULT_ID_HERE" />
-
-      **Rules**
-      * The \`<${tagName}>\` element must only be used to render tool results of type \`${dashboard}\`.
-      * You must copy the \`tool_result_id\` from the tool's response into the \`${attributes.toolResultId}\` element attribute verbatim.
-      * Do not invent, alter, or guess \`tool_result_id\`. You must use the exact id provided in the tool response.
-      * You must not include any other attributes or content within the \`<${tagName}>\` element.
-
-      **Example Usage:**
-
-      Tool response includes:
-      {
-        "tool_result_id": "abc123",
-        "type": "${dashboard}",
-        "data": {
-          "id": "dashboard-123",
-          "title": "My Dashboard",
-          "content": {
-            "url": "/app/dashboards#/view/dashboard-123",
-            "description": "Dashboard showing metrics",
-            "panelCount": 3
-          }
-        }
-      }
-
-      To render this dashboard your reply should include:
-      <${tagName} ${attributes.toolResultId}="abc123" />
-
-      You may also add a brief message about the dashboard creation, for example:
-      "I've created a dashboard for you:"
-      <${tagName} ${attributes.toolResultId}="abc123" />`;
 }
