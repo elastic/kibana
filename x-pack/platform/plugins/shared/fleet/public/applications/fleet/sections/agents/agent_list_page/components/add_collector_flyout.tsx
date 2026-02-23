@@ -151,7 +151,7 @@ service:
               iconType={EuiLoadingSpinner}
               title={
                 <FormattedMessage
-                  id="xpack.fleet.agentEnrollment.loading.listening"
+                  id="xpack.fleet.agentEnrollment.loading.preparingOpAMPConfig"
                   defaultMessage="Preparing OpAMP configuration..."
                 />
               }
