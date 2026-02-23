@@ -58,6 +58,112 @@
       },
       {
         "parentPluginId": "@kbn/content-list-provider",
+        "id": "def-public.DeleteConfirmationComponent",
+        "type": "Function",
+        "tags": [],
+        "label": "DeleteConfirmationComponent",
+        "description": [
+          "\nPresentational confirmation modal for delete operations.\n\nStateless — all data and callbacks are provided via props.\nUse {@link DeleteConfirmationModal} for the connected version that\nreads from content list context."
+        ],
+        "signature": [
+          "({ items, entityName, entityNamePlural, isDeleting, error, onCancel, onConfirm, }: ",
+          {
+            "pluginId": "@kbn/content-list-provider",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderPluginApi",
+            "section": "def-public.DeleteConfirmationComponentProps",
+            "text": "DeleteConfirmationComponentProps"
+          },
+          ") => React.JSX.Element"
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/components/delete/delete_confirmation.component.tsx",
+        "lineNumber": 42,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-provider",
+            "id": "def-public.DeleteConfirmationComponent.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  items,\n  entityName,\n  entityNamePlural,\n  isDeleting,\n  error,\n  onCancel,\n  onConfirm,\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/content-list-provider",
+                "scope": "public",
+                "docId": "kibKbnContentListProviderPluginApi",
+                "section": "def-public.DeleteConfirmationComponentProps",
+                "text": "DeleteConfirmationComponentProps"
+              }
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/components/delete/delete_confirmation.component.tsx",
+            "lineNumber": 42,
+            "columnNumber": 45,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-provider",
+        "id": "def-public.DeleteConfirmationModal",
+        "type": "Function",
+        "tags": [],
+        "label": "DeleteConfirmationModal",
+        "description": [
+          "\nConnected confirmation modal for delete operations.\n\nReads `item.onDelete` and entity labels from the provider config, calls\n`refetch` on success, and manages `isDeleting`/`error` locally.\nDelegates rendering to {@link DeleteConfirmationComponent}.\n"
+        ],
+        "signature": [
+          "({ items, onClose }: ",
+          {
+            "pluginId": "@kbn/content-list-provider",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderPluginApi",
+            "section": "def-public.DeleteConfirmationModalProps",
+            "text": "DeleteConfirmationModalProps"
+          },
+          ") => React.JSX.Element"
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/components/delete/delete_confirmation.tsx",
+        "lineNumber": 44,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-provider",
+            "id": "def-public.DeleteConfirmationModal.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ items, onClose }",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/content-list-provider",
+                "scope": "public",
+                "docId": "kibKbnContentListProviderPluginApi",
+                "section": "def-public.DeleteConfirmationModalProps",
+                "text": "DeleteConfirmationModalProps"
+              }
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/components/delete/delete_confirmation.tsx",
+            "lineNumber": 44,
+            "columnNumber": 41,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-provider",
         "id": "def-public.useContentListConfig",
         "type": "Function",
         "tags": [
@@ -267,6 +373,67 @@
         "returnComment": [
           "The state context value including state, dispatch, and refetch."
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-provider",
+        "id": "def-public.useDeleteConfirmation",
+        "type": "Function",
+        "tags": [],
+        "label": "useDeleteConfirmation",
+        "description": [
+          "\nEncapsulates the open/close state for a {@link DeleteConfirmationModal}.\n\nConsumers call `requestDelete(items)` to open the modal and render\n`deleteModal` in their JSX. The modal handles confirmation, deletion\n(via the provider's `onDelete`), loading, and error display internally.\n"
+        ],
+        "signature": [
+          "(options?: ",
+          {
+            "pluginId": "@kbn/content-list-provider",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderPluginApi",
+            "section": "def-public.UseDeleteConfirmationOptions",
+            "text": "UseDeleteConfirmationOptions"
+          },
+          " | undefined) => ",
+          {
+            "pluginId": "@kbn/content-list-provider",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderPluginApi",
+            "section": "def-public.UseDeleteConfirmationReturn",
+            "text": "UseDeleteConfirmationReturn"
+          }
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/components/delete/use_delete_confirmation.tsx",
+        "lineNumber": 63,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-provider",
+            "id": "def-public.useDeleteConfirmation.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/content-list-provider",
+                "scope": "public",
+                "docId": "kibKbnContentListProviderPluginApi",
+                "section": "def-public.UseDeleteConfirmationOptions",
+                "text": "UseDeleteConfirmationOptions"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/components/delete/use_delete_confirmation.tsx",
+            "lineNumber": 64,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
         "initialIsOpen": false
       }
     ],
@@ -602,7 +769,7 @@
             "tags": [],
             "label": "onDelete",
             "description": [
-              "\nCallback invoked to delete one or more items.\nWhen provided, enables the delete action on rows.\nThe callback should handle the actual deletion and return a resolved promise on success."
+              "\nCallback invoked to delete one or more items.\nWhen provided, enables the delete action on rows and the bulk-delete flow.\nThe callback should handle the actual deletion and return a resolved promise on success."
             ],
             "signature": [
               "((items: ",
@@ -1025,6 +1192,215 @@
                 "isRequired": true
               }
             ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-provider",
+        "id": "def-public.DeleteConfirmationComponentProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "DeleteConfirmationComponentProps",
+        "description": [
+          "\nProps for the presentational {@link DeleteConfirmationComponent}."
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/components/delete/delete_confirmation.component.tsx",
+        "lineNumber": 15,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-provider",
+            "id": "def-public.DeleteConfirmationComponentProps.items",
+            "type": "Array",
+            "tags": [],
+            "label": "items",
+            "description": [
+              "Items being deleted."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/content-list-provider",
+                "scope": "public",
+                "docId": "kibKbnContentListProviderPluginApi",
+                "section": "def-public.ContentListItem",
+                "text": "ContentListItem"
+              },
+              "<Record<string, unknown>>[]"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/components/delete/delete_confirmation.component.tsx",
+            "lineNumber": 19,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-provider",
+            "id": "def-public.DeleteConfirmationComponentProps.entityName",
+            "type": "string",
+            "tags": [],
+            "label": "entityName",
+            "description": [
+              "Singular entity name (e.g., \"dashboard\")."
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/components/delete/delete_confirmation.component.tsx",
+            "lineNumber": 21,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-provider",
+            "id": "def-public.DeleteConfirmationComponentProps.entityNamePlural",
+            "type": "string",
+            "tags": [],
+            "label": "entityNamePlural",
+            "description": [
+              "Plural entity name (e.g., \"dashboards\")."
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/components/delete/delete_confirmation.component.tsx",
+            "lineNumber": 23,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-provider",
+            "id": "def-public.DeleteConfirmationComponentProps.isDeleting",
+            "type": "boolean",
+            "tags": [],
+            "label": "isDeleting",
+            "description": [
+              "Whether a delete operation is currently executing."
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/components/delete/delete_confirmation.component.tsx",
+            "lineNumber": 25,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-provider",
+            "id": "def-public.DeleteConfirmationComponentProps.error",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "error",
+            "description": [
+              "Error message from the last failed attempt, displayed inline."
+            ],
+            "signature": [
+              "string | null | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/components/delete/delete_confirmation.component.tsx",
+            "lineNumber": 27,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-provider",
+            "id": "def-public.DeleteConfirmationComponentProps.onCancel",
+            "type": "Function",
+            "tags": [],
+            "label": "onCancel",
+            "description": [
+              "Called when the user cancels."
+            ],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/components/delete/delete_confirmation.component.tsx",
+            "lineNumber": 29,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/content-list-provider",
+            "id": "def-public.DeleteConfirmationComponentProps.onConfirm",
+            "type": "Function",
+            "tags": [],
+            "label": "onConfirm",
+            "description": [
+              "Called when the user confirms."
+            ],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/components/delete/delete_confirmation.component.tsx",
+            "lineNumber": 31,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-provider",
+        "id": "def-public.DeleteConfirmationModalProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "DeleteConfirmationModalProps",
+        "description": [
+          "\nProps for the connected {@link DeleteConfirmationModal}."
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/components/delete/delete_confirmation.tsx",
+        "lineNumber": 17,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-provider",
+            "id": "def-public.DeleteConfirmationModalProps.items",
+            "type": "Array",
+            "tags": [],
+            "label": "items",
+            "description": [
+              "Items to delete."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/content-list-provider",
+                "scope": "public",
+                "docId": "kibKbnContentListProviderPluginApi",
+                "section": "def-public.ContentListItem",
+                "text": "ContentListItem"
+              },
+              "<Record<string, unknown>>[]"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/components/delete/delete_confirmation.tsx",
+            "lineNumber": 21,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-provider",
+            "id": "def-public.DeleteConfirmationModalProps.onClose",
+            "type": "Function",
+            "tags": [],
+            "label": "onClose",
+            "description": [
+              "Called when the modal should close (cancel or successful delete)."
+            ],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/components/delete/delete_confirmation.tsx",
+            "lineNumber": 23,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
             "returnComment": []
           }
         ],
@@ -2149,6 +2525,133 @@
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/sorting/use_content_list_sort.ts",
             "lineNumber": 25,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-provider",
+        "id": "def-public.UseDeleteConfirmationOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "UseDeleteConfirmationOptions",
+        "description": [
+          "\nOptions for {@link useDeleteConfirmation}."
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/components/delete/use_delete_confirmation.tsx",
+        "lineNumber": 15,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-provider",
+            "id": "def-public.UseDeleteConfirmationOptions.onClose",
+            "type": "Function",
+            "tags": [],
+            "label": "onClose",
+            "description": [
+              "\nCalled after the modal closes (cancel or successful delete).\nUse for side effects like clearing selection state."
+            ],
+            "signature": [
+              "(() => void) | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/components/delete/use_delete_confirmation.tsx",
+            "lineNumber": 19,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-provider",
+        "id": "def-public.UseDeleteConfirmationReturn",
+        "type": "Interface",
+        "tags": [],
+        "label": "UseDeleteConfirmationReturn",
+        "description": [
+          "\nReturn value of {@link useDeleteConfirmation}."
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/components/delete/use_delete_confirmation.tsx",
+        "lineNumber": 26,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-provider",
+            "id": "def-public.UseDeleteConfirmationReturn.requestDelete",
+            "type": "Function",
+            "tags": [],
+            "label": "requestDelete",
+            "description": [
+              "Trigger the delete confirmation modal for the given items."
+            ],
+            "signature": [
+              "(items: ",
+              {
+                "pluginId": "@kbn/content-list-provider",
+                "scope": "public",
+                "docId": "kibKbnContentListProviderPluginApi",
+                "section": "def-public.ContentListItem",
+                "text": "ContentListItem"
+              },
+              "<Record<string, unknown>>[]) => void"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/components/delete/use_delete_confirmation.tsx",
+            "lineNumber": 30,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/content-list-provider",
+                "id": "def-public.UseDeleteConfirmationReturn.requestDelete.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "items",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/content-list-provider",
+                    "scope": "public",
+                    "docId": "kibKbnContentListProviderPluginApi",
+                    "section": "def-public.ContentListItem",
+                    "text": "ContentListItem"
+                  },
+                  "<Record<string, unknown>>[]"
+                ],
+                "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/components/delete/use_delete_confirmation.tsx",
+                "lineNumber": 31,
+                "columnNumber": 19,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/content-list-provider",
+            "id": "def-public.UseDeleteConfirmationReturn.deleteModal",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "deleteModal",
+            "description": [
+              "The modal element to render, or `null` when inactive."
+            ],
+            "signature": [
+              "React.ReactNode"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/components/delete/use_delete_confirmation.tsx",
+            "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
