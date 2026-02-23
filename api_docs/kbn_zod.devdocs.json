@@ -17285,7 +17285,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "fatal",
-            "description": [],
+            "description": [
+              "/**\n * @deprecated\n *\n * Pass `fatal` into the params object instead:\n *\n * ```ts\n * z.string().custom((val) => val.length > 5, { fatal: false })\n * ```\n *\n */"
+            ],
             "signature": [
               "boolean | undefined"
             ],
@@ -17906,7 +17908,7 @@
         "label": "getParsedType",
         "description": [],
         "signature": [
-          "(data: any) => \"string\" | \"number\" | \"bigint\" | \"boolean\" | \"symbol\" | \"undefined\" | \"object\" | \"function\" | \"unknown\" | \"date\" | \"integer\" | \"float\" | \"map\" | \"set\" | \"array\" | \"promise\" | \"nan\" | \"null\" | \"void\" | \"never\""
+          "(data: any) => \"string\" | \"number\" | \"bigint\" | \"boolean\" | \"symbol\" | \"undefined\" | \"object\" | \"function\" | \"unknown\" | \"date\" | \"integer\" | \"float\" | \"map\" | \"never\" | \"set\" | \"array\" | \"promise\" | \"nan\" | \"null\" | \"void\""
         ],
         "path": "node_modules/zod/v3/helpers/util.d.cts",
         "lineNumber": 85,
@@ -19973,7 +19975,7 @@
             "label": "parsedType",
             "description": [],
             "signature": [
-              "\"string\" | \"number\" | \"bigint\" | \"boolean\" | \"symbol\" | \"undefined\" | \"object\" | \"function\" | \"unknown\" | \"date\" | \"integer\" | \"float\" | \"map\" | \"set\" | \"array\" | \"promise\" | \"nan\" | \"null\" | \"void\" | \"never\""
+              "\"string\" | \"number\" | \"bigint\" | \"boolean\" | \"symbol\" | \"undefined\" | \"object\" | \"function\" | \"unknown\" | \"date\" | \"integer\" | \"float\" | \"map\" | \"never\" | \"set\" | \"array\" | \"promise\" | \"nan\" | \"null\" | \"void\""
             ],
             "path": "node_modules/zod/v3/helpers/parseUtil.d.cts",
             "lineNumber": 27,
@@ -21502,7 +21504,7 @@
             "label": "validation",
             "description": [],
             "signature": [
-              "\"jwt\" | \"ip\" | \"date\" | \"base64\" | \"base64url\" | \"time\" | \"uuid\" | \"duration\" | \"url\" | \"email\" | \"cidr\" | \"emoji\" | \"nanoid\" | \"cuid\" | \"cuid2\" | \"ulid\" | \"datetime\" | \"regex\" | { includes: string; position?: number | undefined; } | { startsWith: string; } | { endsWith: string; }"
+              "\"jwt\" | \"ip\" | \"date\" | \"base64\" | \"base64url\" | \"duration\" | \"time\" | \"uuid\" | \"url\" | \"email\" | \"cidr\" | \"emoji\" | \"nanoid\" | \"cuid\" | \"cuid2\" | \"ulid\" | \"datetime\" | \"regex\" | { includes: string; position?: number | undefined; } | { startsWith: string; } | { endsWith: string; }"
             ],
             "path": "node_modules/zod/v3/ZodError.d.cts",
             "lineNumber": 83,
@@ -21555,7 +21557,7 @@
             "label": "expected",
             "description": [],
             "signature": [
-              "\"string\" | \"number\" | \"bigint\" | \"boolean\" | \"symbol\" | \"undefined\" | \"object\" | \"function\" | \"unknown\" | \"date\" | \"integer\" | \"float\" | \"map\" | \"set\" | \"array\" | \"promise\" | \"nan\" | \"null\" | \"void\" | \"never\""
+              "\"string\" | \"number\" | \"bigint\" | \"boolean\" | \"symbol\" | \"undefined\" | \"object\" | \"function\" | \"unknown\" | \"date\" | \"integer\" | \"float\" | \"map\" | \"never\" | \"set\" | \"array\" | \"promise\" | \"nan\" | \"null\" | \"void\""
             ],
             "path": "node_modules/zod/v3/ZodError.d.cts",
             "lineNumber": 37,
@@ -21571,7 +21573,7 @@
             "label": "received",
             "description": [],
             "signature": [
-              "\"string\" | \"number\" | \"bigint\" | \"boolean\" | \"symbol\" | \"undefined\" | \"object\" | \"function\" | \"unknown\" | \"date\" | \"integer\" | \"float\" | \"map\" | \"set\" | \"array\" | \"promise\" | \"nan\" | \"null\" | \"void\" | \"never\""
+              "\"string\" | \"number\" | \"bigint\" | \"boolean\" | \"symbol\" | \"undefined\" | \"object\" | \"function\" | \"unknown\" | \"date\" | \"integer\" | \"float\" | \"map\" | \"never\" | \"set\" | \"array\" | \"promise\" | \"nan\" | \"null\" | \"void\""
             ],
             "path": "node_modules/zod/v3/ZodError.d.cts",
             "lineNumber": 38,
@@ -24743,7 +24745,7 @@
         "label": "StringValidation",
         "description": [],
         "signature": [
-          "\"jwt\" | \"ip\" | \"date\" | \"base64\" | \"base64url\" | \"time\" | \"uuid\" | \"duration\" | \"url\" | \"email\" | \"cidr\" | \"emoji\" | \"nanoid\" | \"cuid\" | \"cuid2\" | \"ulid\" | \"datetime\" | \"regex\" | { includes: string; position?: number | undefined; } | { startsWith: string; } | { endsWith: string; }"
+          "\"jwt\" | \"ip\" | \"date\" | \"base64\" | \"base64url\" | \"duration\" | \"time\" | \"uuid\" | \"url\" | \"email\" | \"cidr\" | \"emoji\" | \"nanoid\" | \"cuid\" | \"cuid2\" | \"ulid\" | \"datetime\" | \"regex\" | { includes: string; position?: number | undefined; } | { startsWith: string; } | { endsWith: string; }"
         ],
         "path": "node_modules/zod/v3/ZodError.d.cts",
         "lineNumber": 73,
@@ -25155,10 +25157,10 @@
           " | ",
           "ZodBoolean",
           " | ",
-          "ZodUnion",
-          "<any> | ",
           "ZodAny",
           " | ",
+          "ZodUnion",
+          "<any> | ",
           "ZodUndefined",
           " | ",
           "ZodNull",
@@ -25289,7 +25291,7 @@
         "label": "ZodIssueCode",
         "description": [],
         "signature": [
-          "\"unrecognized_keys\" | \"custom\" | \"invalid_union\" | \"invalid_union_discriminator\" | \"invalid_arguments\" | \"invalid_return_type\" | \"invalid_string\" | \"not_multiple_of\" | \"invalid_literal\" | \"invalid_type\" | \"invalid_intersection_types\" | \"invalid_date\" | \"not_finite\" | \"too_big\" | \"too_small\" | \"invalid_enum_value\""
+          "\"custom\" | \"unrecognized_keys\" | \"invalid_union\" | \"invalid_union_discriminator\" | \"invalid_arguments\" | \"invalid_return_type\" | \"invalid_string\" | \"not_multiple_of\" | \"invalid_literal\" | \"invalid_type\" | \"invalid_intersection_types\" | \"invalid_date\" | \"not_finite\" | \"too_big\" | \"too_small\" | \"invalid_enum_value\""
         ],
         "path": "node_modules/zod/v3/ZodError.d.cts",
         "lineNumber": 30,
@@ -25424,7 +25426,7 @@
         "label": "ZodParsedType",
         "description": [],
         "signature": [
-          "\"string\" | \"number\" | \"bigint\" | \"boolean\" | \"symbol\" | \"undefined\" | \"object\" | \"function\" | \"unknown\" | \"date\" | \"integer\" | \"float\" | \"map\" | \"set\" | \"array\" | \"promise\" | \"nan\" | \"null\" | \"void\" | \"never\""
+          "\"string\" | \"number\" | \"bigint\" | \"boolean\" | \"symbol\" | \"undefined\" | \"object\" | \"function\" | \"unknown\" | \"date\" | \"integer\" | \"float\" | \"map\" | \"never\" | \"set\" | \"array\" | \"promise\" | \"nan\" | \"null\" | \"void\""
         ],
         "path": "node_modules/zod/v3/helpers/util.d.cts",
         "lineNumber": 84,
