@@ -44,10 +44,8 @@ test.describe(
         );
 
         // verify expected synthetic services are listed and save
-        await serviceGroupsPage.expectByText([
-          testData.SERVICE_SYNTH_GO,
-          testData.SERVICE_SYNTH_GO_2,
-        ]);
+        await expect(page.getByText(testData.SERVICE_SYNTH_GO)).toBeVisible();
+        await expect(page.getByText(testData.SERVICE_SYNTH_GO_2)).toBeVisible();
         await page.getByText('Save group').click();
 
         // Make sure the toast is visible and contains the correct text and then close it
@@ -70,10 +68,8 @@ test.describe(
       await test.step('opens service list when clicking on service group card', async () => {
         await page.getByTestId('serviceGroupCard').click();
         await expect(page.getByTestId('apmEditButtonEditGroupButton')).toBeVisible();
-        await serviceGroupsPage.expectByText([
-          testData.SERVICE_SYNTH_GO,
-          testData.SERVICE_SYNTH_GO_2,
-        ]);
+        await expect(page.getByText(testData.SERVICE_SYNTH_GO)).toBeVisible();
+        await expect(page.getByText(testData.SERVICE_SYNTH_GO_2)).toBeVisible();
       });
 
       await test.step('deletes the service group', async () => {

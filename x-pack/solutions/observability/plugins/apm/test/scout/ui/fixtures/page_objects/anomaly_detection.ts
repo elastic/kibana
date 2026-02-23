@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout-oblt/ui';
 import type { KibanaUrl, ScoutPage } from '@kbn/scout-oblt';
 import { EuiComboBoxWrapper } from '@kbn/scout-oblt';
 import { EXTENDED_TIMEOUT } from '../constants';
@@ -22,10 +21,6 @@ export class AnomalyDetectionPage {
     await this.page.getByRole('heading', { name: 'Settings', level: 1 }).waitFor();
   }
 
-  async getCreateJobButton() {
-    return this.page.testSubj.locator('apmJobsListCreateJobButton');
-  }
-
   getCreateJobButtonLocator() {
     return this.page.testSubj.locator('apmJobsListCreateJobButton');
   }
@@ -40,6 +35,7 @@ export class AnomalyDetectionPage {
   }
 
   async selectEnvironment(environmentName: string) {
+    // EuiComboBox in the anomaly detection form lacks a data-test-subj; using CSS as fallback
     const environmentComboBox = new EuiComboBoxWrapper(this.page, { locator: '.euiComboBox' });
     await environmentComboBox.setCustomMultiOption(environmentName);
     await this.page.keyboard.press('Escape');
@@ -55,7 +51,7 @@ export class AnomalyDetectionPage {
     await this.selectEnvironment(environmentName);
     await this.clickCreateJobsButton();
 
-    this.page.getByText('Anomaly detection jobs created');
+    await this.page.getByText('Anomaly detection jobs created').waitFor({ state: 'visible' });
   }
 
   async deleteMlJob() {
@@ -66,6 +62,6 @@ export class AnomalyDetectionPage {
     await allActionsButton.click();
     await this.page.testSubj.locator('mlActionButtonDeleteJob').click();
     await this.page.testSubj.locator('mlDeleteJobConfirmModalButton').click();
-    await expect(this.page.getByText('deleted successfully')).toBeVisible();
+    await this.page.getByText('deleted successfully').waitFor({ state: 'visible' });
   }
 }

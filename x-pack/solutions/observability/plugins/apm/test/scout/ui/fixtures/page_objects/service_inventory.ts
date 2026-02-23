@@ -13,7 +13,7 @@ export class ServiceInventoryPage {
   readonly servicesTable;
 
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
-    this.servicesTable = this.page.locator('.euiBasicTable');
+    this.servicesTable = this.page.getByTestId('allServices');
   }
 
   async gotoServiceInventory(overrides: { rangeFrom?: string; rangeTo?: string } = {}) {
@@ -23,7 +23,9 @@ export class ServiceInventoryPage {
         rangeTo: overrides.rangeTo ?? testData.END_DATE,
       })}`
     );
-    await this.page.testSubj.waitForSelector('apmUnifiedSearchBar', { timeout: EXTENDED_TIMEOUT });
+    await this.page.testSubj
+      .locator('apmUnifiedSearchBar')
+      .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
     await this.waitForServicesTableToLoad();
   }
 

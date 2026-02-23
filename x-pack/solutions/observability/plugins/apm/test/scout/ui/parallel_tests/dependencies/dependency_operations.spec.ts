@@ -33,7 +33,7 @@ test.describe(
       });
 
       await test.step('land on operations tab', async () => {
-        expect(page.url()).toContain(`/dependencies`);
+        await expect(page).toHaveURL(/\/dependencies/);
         await expect(dependencyDetailsPage.operationsTab.tab).toHaveAttribute(
           'aria-selected',
           'true'

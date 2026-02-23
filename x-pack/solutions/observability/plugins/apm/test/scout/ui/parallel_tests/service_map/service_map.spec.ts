@@ -22,7 +22,7 @@ test.describe(
       pageObjects: { serviceMapPage },
     }) => {
       await serviceMapPage.gotoWithDateSelected(testData.START_DATE, testData.END_DATE);
-      expect(page.url()).toContain('/app/apm/service-map');
+      await expect(page).toHaveURL(/\/app\/apm\/service-map/);
       await serviceMapPage.waitForServiceMapToLoad();
       await serviceMapPage.clickZoomIn();
       await serviceMapPage.centerServiceMapBtn.click();
@@ -34,7 +34,7 @@ test.describe(
         testData.START_DATE,
         testData.END_DATE
       );
-      expect(page.url()).toContain('/services/opbeans-java/service-map');
+      await expect(page).toHaveURL(/\/services\/opbeans-java\/service-map/);
       await serviceMapPage.waitForServiceMapToLoad();
       await serviceMapPage.clickZoomOut();
       await serviceMapPage.centerServiceMapBtn.click();

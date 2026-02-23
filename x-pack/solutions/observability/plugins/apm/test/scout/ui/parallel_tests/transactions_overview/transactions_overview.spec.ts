@@ -42,7 +42,7 @@ test.describe(
       const transactionTypeFilter = transactionsOverviewPage.getTransactionTypeFilter();
       await expect(transactionTypeFilter).toHaveValue('request');
 
-      expect(page.url()).toContain('transactionType=request');
+      await expect(page).toHaveURL(/transactionType=request/);
 
       // Change to 'Worker' type
       await transactionsOverviewPage.selectTransactionType('Worker');
@@ -52,7 +52,7 @@ test.describe(
       await page.getByTestId('overviewTab').click();
       await waitForApmSettingsHeaderLink(page);
 
-      expect(page.url()).toContain('transactionType=Worker');
+      await expect(page).toHaveURL(/transactionType=Worker/);
 
       // Verify transaction type is still 'Worker'
       await expect(transactionTypeFilter).toHaveValue('Worker');

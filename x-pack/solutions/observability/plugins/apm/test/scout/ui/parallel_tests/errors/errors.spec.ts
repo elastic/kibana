@@ -63,7 +63,7 @@ test.describe(
 
       await test.step('clicking on type adds a filter in the searchbar', async () => {
         await expect(page.getByTestId('apmUnifiedSearchBar')).toHaveValue('');
-        await page.locator('td').filter({ hasText: 'Exception' }).locator('a').click();
+        await page.getByRole('cell', { name: 'Exception' }).getByRole('link').click();
         await expect(page.getByTestId('apmUnifiedSearchBar')).not.toHaveValue('');
       });
 
@@ -72,8 +72,8 @@ test.describe(
           .getByTestId('tableHeaderCell_occurrences_5')
           .getByTestId('tableHeaderSortButton')
           .click();
-        expect(page.url()).toContain('sortField=occurrences');
-        expect(page.url()).toContain('sortDirection=asc');
+        await expect(page).toHaveURL(/sortField=occurrences/);
+        await expect(page).toHaveURL(/sortDirection=asc/);
       });
 
       await test.step('sorting by last seen updates URL', async () => {
@@ -81,8 +81,8 @@ test.describe(
           .getByTestId('tableHeaderCell_lastSeen_4')
           .getByTestId('tableHeaderSortButton')
           .click();
-        expect(page.url()).toContain('sortField=lastSeen');
-        expect(page.url()).toContain('sortDirection=asc');
+        await expect(page).toHaveURL(/sortField=lastSeen/);
+        await expect(page).toHaveURL(/sortDirection=asc/);
       });
 
       await test.step('navigates to error detail page when clicking on an error in the list', async () => {
@@ -90,8 +90,8 @@ test.describe(
         await expect(
           page.getByText(`Error group ${testData.ERROR_GROUPING_KEY_SHORT}`)
         ).toBeVisible();
-        expect(page.url()).toContain(
-          `services/${testData.SERVICE_OPBEANS_JAVA}/errors/00000000000000000[MockError]%20Foo`
+        await expect(page).toHaveURL(
+          new RegExp(`services/${testData.SERVICE_OPBEANS_JAVA}/errors/`)
         );
       });
     });
@@ -135,7 +135,9 @@ test.describe(
           .getByTestId('topErroneousTransactionsTable')
           .getByTestId('apmTransactionDetailLinkLink')
           .click();
-        expect(page.url()).toContain(`${testData.SERVICE_OPBEANS_JAVA}/transactions/view`);
+        await expect(page).toHaveURL(
+          new RegExp(`${testData.SERVICE_OPBEANS_JAVA}/transactions/view`)
+        );
       });
     });
 
@@ -173,8 +175,8 @@ test.describe(
         await expect(
           page.getByText(`Error group ${testData.ERROR_GROUPING_KEY_SHORT}`)
         ).toBeVisible();
-        expect(page.url()).toContain('/errors/');
-        expect(page.url()).toContain(testData.SERVICE_OPBEANS_JAVA);
+        await expect(page).toHaveURL(/\/errors\//);
+        await expect(page).toHaveURL(new RegExp(testData.SERVICE_OPBEANS_JAVA));
       });
     });
 

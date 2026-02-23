@@ -43,8 +43,7 @@ test.describe(
       });
 
       await test.step('Verify URL and filter value updated', async () => {
-        await page.waitForURL(/transactionType=Worker/);
-        expect(page.url()).toContain('transactionType=Worker');
+        await expect(page).toHaveURL(/transactionType=Worker/);
         await expect(serviceDetailsPage.overviewTab.getTransactionTypeFilter()).toHaveValue(
           'Worker'
         );
@@ -92,14 +91,9 @@ test.describe(
           }
         );
 
-        await page.waitForURL(
-          (url) => {
-            return url.toString().includes(encodeURIComponent(specialServiceName));
-          },
-          { timeout: EXTENDED_TIMEOUT }
-        );
-
-        expect(page.url()).toContain(encodeURIComponent(specialServiceName));
+        await expect(page).toHaveURL(new RegExp(encodeURIComponent(specialServiceName)), {
+          timeout: EXTENDED_TIMEOUT,
+        });
       });
     });
   }

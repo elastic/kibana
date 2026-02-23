@@ -13,7 +13,7 @@ export async function waitForTableToLoad(page: ScoutPage, idOrLocator: Locator |
 
   await table.waitFor({ timeout: EXTENDED_TIMEOUT });
 
-  await table.locator('div.euiBasicTable').waitFor();
+  await table.getByRole('table').waitFor();
 }
 
 export async function waitForChartToLoad(

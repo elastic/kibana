@@ -20,7 +20,7 @@ test.describe('Settings - Serverless', { tag: tags.serverless.observability.comp
   }) => {
     await indicesPage.goto();
 
-    await expect(page.getByRole('tab').locator('span').getByText('Indices')).toBeHidden();
+    await expect(page.getByRole('tab', { name: 'Indices' })).toBeHidden();
   });
 
   test('Viewer: The agent configuration settings page is not available in serverless', async ({
@@ -30,9 +30,7 @@ test.describe('Settings - Serverless', { tag: tags.serverless.observability.comp
   }) => {
     await browserAuth.loginAsViewer();
     await agentConfigurationsPage.goto();
-    await expect(
-      page.getByRole('tab').locator('span').getByText('Agent Configuration')
-    ).toBeHidden();
+    await expect(page.getByRole('tab', { name: 'Agent Configuration' })).toBeHidden();
   });
 
   test('Privileged User: The agent configuration settings page is not available in serverless', async ({
@@ -42,8 +40,6 @@ test.describe('Settings - Serverless', { tag: tags.serverless.observability.comp
   }) => {
     await browserAuth.loginAsPrivilegedUser();
     await agentConfigurationsPage.goto();
-    await expect(
-      page.getByRole('tab').locator('span').getByText('Agent Configuration')
-    ).toBeHidden();
+    await expect(page.getByRole('tab', { name: 'Agent Configuration' })).toBeHidden();
   });
 });

@@ -43,7 +43,7 @@ export class ErrorsPage {
   }
 
   async getSearchBar() {
-    await this.page.testSubj.waitForSelector('apmUnifiedSearchBar');
+    await this.page.testSubj.locator('apmUnifiedSearchBar').waitFor({ state: 'visible' });
   }
 
   async waitForErrorsTableToLoad() {

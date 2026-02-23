@@ -16,22 +16,23 @@ export class IndicesPage {
     return await waitForApmSettingsHeaderLink(this.page);
   }
 
-  async getErrorIndexInput() {
+  getErrorIndexInput() {
+    // Form input identified by name attribute; no data-test-subj available
     return this.page.locator('input[name="error"]');
   }
 
-  async getApplyChangesButton() {
+  getApplyChangesButton() {
     return this.page.getByText('Apply changes');
   }
 
   async setErrorIndex(value: string) {
-    const input = await this.getErrorIndexInput();
+    const input = this.getErrorIndexInput();
     await input.clear();
     await input.fill(value);
   }
 
   async clickApplyChanges() {
-    const button = await this.getApplyChangesButton();
+    const button = this.getApplyChangesButton();
     await button.click();
   }
 }

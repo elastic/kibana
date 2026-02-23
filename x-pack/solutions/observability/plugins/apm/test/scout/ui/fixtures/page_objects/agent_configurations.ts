@@ -5,13 +5,6 @@
  * 2.0.
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
-
 import type { KibanaUrl, ScoutPage } from '@kbn/scout-oblt';
 import { EuiComboBoxWrapper, EuiFieldTextWrapper } from '@kbn/scout-oblt';
 import { waitForApmMainContainer } from '../page_helpers';
@@ -100,9 +93,11 @@ export class AgentConfigurationsPage {
     await this.page.testSubj.locator('confirmModalConfirmButton').click();
   }
 
-  async checkConfigurationExists(serviceName: string, environment: string) {
-    const columnButtons = this.page.testSubj.locator('apmColumnsButton');
-    await columnButtons.getByText(serviceName).isVisible();
-    await columnButtons.getByText(environment).isVisible();
+  getConfigurationServiceName(serviceName: string) {
+    return this.page.testSubj.locator('apmColumnsButton').getByText(serviceName);
+  }
+
+  getConfigurationEnvironment(environment: string) {
+    return this.page.testSubj.locator('apmColumnsButton').getByText(environment);
   }
 }
