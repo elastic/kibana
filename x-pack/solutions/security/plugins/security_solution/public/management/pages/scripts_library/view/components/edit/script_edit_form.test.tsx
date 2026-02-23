@@ -242,6 +242,22 @@ describe('EndpointScriptEditForm', () => {
       const label = getByTestId(`test-${name}-row`).querySelector('.euiFormRow__labelWrapper');
       expect(label?.textContent).toEqual(expectedText);
     });
+
+    it('should show tooltip for requiresInput field', () => {
+      const { getByTestId } = renderResult;
+
+      const requiresInputDetailItem = getByTestId('test-requires-input-row');
+      const tooltipIcon = requiresInputDetailItem.querySelector('.euiToolTipAnchor');
+      expect(tooltipIcon).toBeInTheDocument();
+    });
+
+    it('should show tooltip for pathToExecutable field', () => {
+      const { getByTestId } = renderResult;
+
+      const pathToExecutableDetailItem = getByTestId('test-path-to-executable-row');
+      const tooltipIcon = pathToExecutableDetailItem.querySelector('.euiToolTipAnchor');
+      expect(tooltipIcon).toBeInTheDocument();
+    });
   });
 
   describe('Editing', () => {
@@ -287,6 +303,7 @@ describe('EndpointScriptEditForm', () => {
         );
         // shows real file picker after removing fake file picker
         expect(getByTestId('test-file-picker')).toBeInTheDocument();
+        expect(filePicker.querySelector('.euiText')?.textContent).toEqual('test_script.sh');
       });
     });
 

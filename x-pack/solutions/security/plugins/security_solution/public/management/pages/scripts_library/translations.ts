@@ -390,7 +390,7 @@ export const SCRIPT_LIBRARY_LABELS = Object.freeze({
             'xpack.securitySolution.scriptsLibrary.table.flyout.body.pathToExecutableTooltip',
             {
               defaultMessage:
-                'Enter the relative path to the main script inside the archive (zip/rar). Example: ./src/main.py',
+                'The relative path to the main script inside the archive (zip/rar). Example: ./src/main.py',
             }
           ),
         },
