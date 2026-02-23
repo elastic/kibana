@@ -11,6 +11,7 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { useDiscoverFieldForBreakdown } from './use_discover_field_for_breakdown';
 import type { Dimension } from '../../../../types';
+import { MAX_DIMENSIONS_SELECTIONS } from '../../../../common/constants';
 
 describe('useDiscoverFieldForBreakdown', () => {
   const mockOnDimensionsChange = jest.fn();
@@ -152,7 +153,7 @@ describe('useDiscoverFieldForBreakdown', () => {
       });
     });
 
-    it('replaces existing selection when MAX_DIMENSIONS_SELECTIONS is 1', async () => {
+    it('keeps existing selection order and appends new breakdown dimension', async () => {
       renderHook(() =>
         useDiscoverFieldForBreakdown(
           'service.name',
@@ -163,12 +164,11 @@ describe('useDiscoverFieldForBreakdown', () => {
       );
 
       await waitFor(() => {
-        expect(mockOnDimensionsChange).toHaveBeenCalledWith([serviceDimension]);
+        expect(mockOnDimensionsChange).toHaveBeenCalledWith([hostDimension, serviceDimension]);
       });
     });
 
-    it('prepends new dimension and slices to MAX_DIMENSIONS_SELECTIONS when replacing existing selection', async () => {
-      // When MAX_DIMENSIONS_SELECTIONS is 1, it always replaces the selection
+    it('keeps selection order stable when syncing multiple breakdown field changes', async () => {
       const { rerender } = renderHook(
         ({ breakdownField, selectedDimensions }) =>
           useDiscoverFieldForBreakdown(
@@ -186,8 +186,7 @@ describe('useDiscoverFieldForBreakdown', () => {
       );
 
       await waitFor(() => {
-        // With MAX_DIMENSIONS_SELECTIONS = 1, it replaces the selection
-        expect(mockOnDimensionsChange).toHaveBeenCalledWith([hostDimension]);
+        expect(mockOnDimensionsChange).toHaveBeenCalledWith([serviceDimension, hostDimension]);
       });
 
       mockOnDimensionsChange.mockClear();
@@ -198,8 +197,38 @@ describe('useDiscoverFieldForBreakdown', () => {
       });
 
       await waitFor(() => {
-        // Should replace with new dimension (MAX_DIMENSIONS_SELECTIONS = 1)
-        expect(mockOnDimensionsChange).toHaveBeenCalledWith([regionDimension]);
+        expect(mockOnDimensionsChange).toHaveBeenCalledWith([hostDimension, regionDimension]);
+      });
+    });
+
+    it('keeps most recent dimensions when at MAX_DIMENSIONS_SELECTIONS', async () => {
+      const dim2 = createDimension('dim2');
+      const dim3 = createDimension('dim3');
+      const dim4 = createDimension('dim4');
+      const dim5 = createDimension('dim5');
+      const dim6 = createDimension('dim6');
+      const selectedDimensionsAtMax = [hostDimension, serviceDimension, dim2, dim3, dim4];
+
+      // Guard to ensure this test adapts with any future constant changes.
+      expect(selectedDimensionsAtMax).toHaveLength(MAX_DIMENSIONS_SELECTIONS);
+
+      renderHook(() =>
+        useDiscoverFieldForBreakdown(
+          'dim6',
+          [...selectedDimensionsAtMax, dim5, dim6],
+          selectedDimensionsAtMax,
+          mockOnDimensionsChange
+        )
+      );
+
+      await waitFor(() => {
+        expect(mockOnDimensionsChange).toHaveBeenCalledWith([
+          serviceDimension,
+          dim2,
+          dim3,
+          dim4,
+          dim6,
+        ]);
       });
     });
   });

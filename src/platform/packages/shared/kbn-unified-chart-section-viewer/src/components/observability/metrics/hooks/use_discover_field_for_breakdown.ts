@@ -24,7 +24,10 @@ export function useDiscoverFieldForBreakdown(
     // Update selection
     if (matchingDimension) {
       onDimensionsChange(
-        [matchingDimension, ...selectedDimensions].slice(0, MAX_DIMENSIONS_SELECTIONS)
+        [
+          ...selectedDimensions.filter((dimension) => dimension.name !== matchingDimension.name),
+          matchingDimension,
+        ].slice(-MAX_DIMENSIONS_SELECTIONS)
       );
     }
   }, [breakdownField, dimensions, selectedDimensions, onDimensionsChange]);
