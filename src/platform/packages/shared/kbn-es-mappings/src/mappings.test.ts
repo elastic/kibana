@@ -63,8 +63,9 @@ describe('mappings', () => {
         "type": "flattened",
       }
     `);
-    expect(mappings.object({ properties: {} })).toMatchInlineSnapshot(`
+    expect(mappings.object({ dynamic: 'strict', properties: {} })).toMatchInlineSnapshot(`
       Object {
+        "dynamic": "strict",
         "properties": Object {},
         "type": "object",
       }
@@ -77,8 +78,9 @@ describe('mappings', () => {
       age: mappings.integer(),
     };
 
-    expect(mappings.object({ properties })).toMatchInlineSnapshot(`
+    expect(mappings.object({ dynamic: false, properties })).toMatchInlineSnapshot(`
       Object {
+        "dynamic": false,
         "properties": Object {
           "age": Object {
             "type": "integer",
