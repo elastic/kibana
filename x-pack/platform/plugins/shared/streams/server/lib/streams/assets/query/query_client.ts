@@ -69,9 +69,7 @@ function termsQuery<T extends string>(
     return [];
   }
 
-  const filteredValues = values.filter(
-    (value) => value !== undefined
-  ) as unknown as TermQueryFieldValue[];
+  const filteredValues = values.filter((value) => value !== undefined) as TermQueryFieldValue[];
 
   return [{ terms: { [field]: filteredValues } }];
 }
@@ -194,7 +192,8 @@ function toStorage(
     [QUERY_SEVERITY_SCORE]: query.severity_score,
     [QUERY_EVIDENCE]: query.evidence,
     [RULE_BACKED]: ruleBacked,
-  } as unknown as StoredQueryLink;
+    [RULE_ID]: link.rule_id,
+  } as StoredQueryLink;
 }
 
 function hasBreakingChange(currentQuery: StreamQuery, nextQuery: StreamQuery): boolean {
@@ -228,17 +227,6 @@ export class QueryClient {
   ) {}
 
   // ==================== Storage Operations ====================
-
-  async linkQuery(definition: Streams.all.Definition, link: QueryLinkRequest): Promise<QueryLink> {
-    const document = toStorage(definition, link);
-
-    await this.dependencies.storageClient.index({
-      id: document[ASSET_UUID],
-      document,
-    });
-
-    return toQueryLink(definition, link);
-  }
 
   async syncQueryList(
     definition: Streams.all.Definition,

@@ -86,6 +86,9 @@ export class QueryService {
             migrated = { ...migrated, [QUERY_ESQL_QUERY]: esqlQuery };
           }
 
+          // Back-fill rule_id for pre-existing documents using the KQL query as the hash
+          // input — this preserves the IDs of rules that were already created before rule_id
+          // was persisted. New documents use the compiled ESQL query instead (see toQueryLinkFromQuery).
           if (!(RULE_ID in migrated)) {
             const uuid = migrated[ASSET_UUID] as string;
             const kqlQuery = migrated[QUERY_KQL_BODY] as string;
