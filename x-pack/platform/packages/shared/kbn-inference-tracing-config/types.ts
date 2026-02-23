@@ -57,43 +57,10 @@ export interface InferenceTracingPhoenixExportConfig {
 }
 
 /**
- * Configuration schema for the Elasticsearch exporter.
- */
-export interface InferenceTracingElasticsearchExportConfig {
-  /**
-   * The Elasticsearch cluster URL.
-   */
-  cluster_url: string;
-  /**
-   * The API key for authenticating with Elasticsearch.
-   */
-  api_key?: string;
-  /**
-   * The username for basic auth with Elasticsearch.
-   */
-  username?: string;
-  /**
-   * The password for basic auth with Elasticsearch.
-   */
-  password?: string;
-  /**
-   * The index name where traces will be stored.
-   * Defaults to 'inference-traces'.
-   */
-  index_name?: string;
-  /**
-   * The delay in milliseconds before the exporter sends another
-   * batch of spans.
-   */
-  scheduled_delay: number;
-}
-
-/**
  * Configuration schema for inference tracing exporters.
  *
  * @internal
  */
 export type InferenceTracingExportConfig =
   | { langfuse: InferenceTracingLangfuseExportConfig }
-  | { phoenix: InferenceTracingPhoenixExportConfig }
-  | { elasticsearch: InferenceTracingElasticsearchExportConfig };
+  | { phoenix: InferenceTracingPhoenixExportConfig };

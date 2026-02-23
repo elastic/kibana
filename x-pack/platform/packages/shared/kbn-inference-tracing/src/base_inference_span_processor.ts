@@ -7,13 +7,14 @@
 
 import type { api } from '@elastic/opentelemetry-node/sdk';
 import { tracing } from '@elastic/opentelemetry-node/sdk';
+import type { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto';
 import { isInInferenceContext } from './is_in_inference_context';
 import { IS_ROOT_INFERENCE_SPAN_ATTRIBUTE_NAME } from './root_inference_span';
 
 export abstract class BaseInferenceSpanProcessor implements tracing.SpanProcessor {
   private delegate: tracing.SpanProcessor;
 
-  constructor(exporter: tracing.SpanExporter, scheduledDelayMillis: number) {
+  constructor(exporter: OTLPTraceExporter, scheduledDelayMillis: number) {
     this.delegate = new tracing.BatchSpanProcessor(exporter, {
       scheduledDelayMillis,
     });

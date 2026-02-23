@@ -48,23 +48,6 @@ import { withClient, type ScenarioReturnType } from '../../../../lib/utils/with_
 import type { ApmSynthtraceEsClient } from '../../../../lib/apm/client/apm_synthtrace_es_client';
 
 /**
- * Configuration for trace data ingestion.
- * Provides a unified interface for configuring how trace data is generated and indexed.
- */
-export interface TraceIngestionConfig {
-  /** Services to generate trace data for */
-  services: TraceMetricsServiceConfig[];
-  /** Interval between data points (e.g., '1m', '30s') */
-  interval?: string;
-  /** Number of events to generate per interval */
-  rate?: number;
-  /** Whether to generate span metrics aggregations */
-  generateMetrics?: boolean;
-  /** Custom index prefix for the generated data */
-  indexPrefix?: string;
-}
-
-/**
  * Configuration for a transaction within a service
  */
 export interface TraceMetricsTransactionConfig {

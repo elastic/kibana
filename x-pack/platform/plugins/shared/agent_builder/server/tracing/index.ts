@@ -8,10 +8,3 @@
 export { withAgentSpan } from './with_agent_span';
 export { withConverseSpan } from './with_converse_span';
 export { getCurrentTraceId } from './get_current_trace_id';
-export {
-  createTracer,
-  createTracerFactory,
-  getAgentBuilderTracer,
-  AGENT_BUILDER_TRACER_NAME,
-} from './create_tracer';
-export type { CreateTracerOptions } from './create_tracer';
