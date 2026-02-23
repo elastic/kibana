@@ -195,6 +195,46 @@ export default function ServiceSlos({ getService }: DeploymentAgnosticFtrProvide
       await sloApi.delete(stagingSlo.id, adminRoleAuthc);
     });
 
+    it('includes SLOs created with wildcard (*) environment when filtering by a specific environment', async () => {
+      const prodSlo = await sloApi.create(
+        createApmSloInput('Prod SLO', serviceName, 'production'),
+        adminRoleAuthc
+      );
+      const wildcardSlo = await sloApi.create(
+        createApmSloInput('All Envs SLO', serviceName, '*'),
+        adminRoleAuthc
+      );
+      const stagingSlo = await sloApi.create(
+        createApmSloInput('Staging SLO', serviceName, 'staging'),
+        adminRoleAuthc
+      );
+
+      const prodResponse = await getServiceSlos({ serviceName, environment: 'production' });
+
+      expect(prodResponse.status).to.be(200);
+      expect(prodResponse.body.results.length).to.be(2);
+      expect(prodResponse.body.total).to.be(2);
+
+      const foundProdSlo = prodResponse.body.results.find(
+        (slo: { id: string }) => slo.id === prodSlo.id
+      );
+      expect(foundProdSlo).to.be.ok();
+
+      const foundWildcardSlo = prodResponse.body.results.find(
+        (slo: { id: string }) => slo.id === wildcardSlo.id
+      );
+      expect(foundWildcardSlo).to.be.ok();
+
+      const foundStagingSlo = prodResponse.body.results.find(
+        (slo: { id: string }) => slo.id === stagingSlo.id
+      );
+      expect(foundStagingSlo).to.be(undefined);
+
+      await sloApi.delete(prodSlo.id, adminRoleAuthc);
+      await sloApi.delete(wildcardSlo.id, adminRoleAuthc);
+      await sloApi.delete(stagingSlo.id, adminRoleAuthc);
+    });
+
     it('returns status counts for the service', async () => {
       const createdSlo = await sloApi.create(
         createApmSloInput('Status Count Test SLO', serviceName),

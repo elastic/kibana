@@ -48,7 +48,7 @@
           ", {}>>"
         ],
         "path": "src/platform/plugins/shared/unified_search/public/index.ts",
-        "lineNumber": 34,
+        "lineNumber": 33,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -70,7 +70,7 @@
               }
             ],
             "path": "src/platform/plugins/shared/unified_search/public/index.ts",
-            "lineNumber": 35,
+            "lineNumber": 34,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -93,7 +93,7 @@
               }
             ],
             "path": "src/platform/plugins/shared/unified_search/public/index.ts",
-            "lineNumber": 36,
+            "lineNumber": 35,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -110,7 +110,7 @@
               "CoreStart"
             ],
             "path": "src/platform/plugins/shared/unified_search/public/index.ts",
-            "lineNumber": 37,
+            "lineNumber": 36,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -127,7 +127,7 @@
               "string"
             ],
             "path": "src/platform/plugins/shared/unified_search/public/index.ts",
-            "lineNumber": 38,
+            "lineNumber": 37,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -144,7 +144,7 @@
               "string"
             ],
             "path": "src/platform/plugins/shared/unified_search/public/index.ts",
-            "lineNumber": 39,
+            "lineNumber": 38,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -582,7 +582,7 @@
             "label": "props",
             "description": [],
             "signature": [
-              "{ onCancel?: (() => void) | undefined; refreshInterval?: number | undefined; query?: ",
+              "{ query?: ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -598,7 +598,7 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
-              "[] | undefined; indexPatterns?: ",
+              "[] | undefined; onCancel?: (() => void) | undefined; refreshInterval?: number | undefined; indexPatterns?: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -740,7 +740,15 @@
                 "section": "def-common.ESQLControlVariable",
                 "text": "ESQLControlVariable"
               },
-              "[]; onSaveControl: (controlState: Record<string, unknown>, updatedQuery: string) => Promise<void>; onCancelControl?: (() => void) | undefined; controlsWrapper: React.ReactNode; } | undefined; onOpenQueryInNewTab?: ((tabName: string, esqlQuery: string) => Promise<void>) | undefined; esqlEditorInitialState?: Partial<",
+              "[]; onSaveControl: (controlState: Record<string, unknown>, updatedQuery: string) => Promise<void>; onCancelControl?: (() => void) | undefined; controlsWrapper: React.ReactNode; } | undefined; esqlQueryStats?: ",
+              {
+                "pluginId": "@kbn/esql-types",
+                "scope": "common",
+                "docId": "kibKbnEsqlTypesPluginApi",
+                "section": "def-common.ESQLQueryStats",
+                "text": "ESQLQueryStats"
+              },
+              " | undefined; onOpenQueryInNewTab?: ((tabName: string, esqlQuery: string) => Promise<void>) | undefined; esqlEditorInitialState?: Partial<",
               {
                 "pluginId": "@kbn/esql-editor",
                 "scope": "public",
@@ -756,7 +764,7 @@
                 "section": "def-public.ESQLEditorRestorableState",
                 "text": "ESQLEditorRestorableState"
               },
-              ">) => void) | undefined; hasDirtyState?: boolean | undefined; useBackgroundSearchButton?: boolean | undefined; timeHistory?: ",
+              ">) => void) | undefined; hasDirtyState?: boolean | undefined; useBackgroundSearchButton?: boolean | undefined; enableResourceBrowser?: boolean | undefined; timeHistory?: ",
               {
                 "pluginId": "data",
                 "scope": "public",
@@ -2081,7 +2089,7 @@
           "SearchBarInjectedDeps"
         ],
         "path": "src/platform/plugins/shared/unified_search/public/search_bar/search_bar.tsx",
-        "lineNumber": 171,
+        "lineNumber": 177,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2126,23 +2134,6 @@
         ],
         "path": "src/platform/plugins/shared/unified_search/public/actions/constants.ts",
         "lineNumber": 11,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "unifiedSearch",
-        "id": "def-public.UPDATE_FILTER_REFERENCES_TRIGGER",
-        "type": "string",
-        "tags": [],
-        "label": "UPDATE_FILTER_REFERENCES_TRIGGER",
-        "description": [],
-        "signature": [
-          "\"UPDATE_FILTER_REFERENCES_TRIGGER\""
-        ],
-        "path": "src/platform/plugins/shared/unified_search/public/triggers/update_filter_references_trigger.ts",
-        "lineNumber": 13,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
