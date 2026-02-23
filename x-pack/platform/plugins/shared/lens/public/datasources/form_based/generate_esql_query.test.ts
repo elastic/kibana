@@ -6,8 +6,10 @@
  */
 
 import type { DateHistogramIndexPatternColumn } from '@kbn/lens-common';
-import { generateEsqlQuery } from './generate_esql_query';
+import { Parser, BasicPrettyPrinter } from '@kbn/esql-language';
 import { createCoreSetupMock } from '@kbn/core-lifecycle-browser-mocks/src/core_setup.mock';
+import type { EsqlQueryResult } from './generate_esql_query';
+import { type EsqlQuerySuccess, generateEsqlQuery } from './generate_esql_query';
 import { defaultUiSettingsGet } from './__mocks__/ui_settings';
 import {
   mockLayer,
@@ -15,6 +17,18 @@ import {
   mockIndexPatternWithoutTimeField,
   mockDateRange,
 } from './__mocks__/esql_query_mocks';
+
+const formatEsqlForAssertion = (query: string) => {
+  const { root } = Parser.parse(query);
+  return BasicPrettyPrinter.print(root, { multiline: false }).trim();
+};
+
+const expectGeneratedEsqlToMatch = (result: EsqlQueryResult, expectedEsqlQuery: string) => {
+  expect(result.success).toBe(true);
+  expect(formatEsqlForAssertion((result as EsqlQuerySuccess).esql)).toBe(
+    formatEsqlForAssertion(expectedEsqlQuery)
+  );
+};
 
 describe('generateEsqlQuery', () => {
   const { uiSettings } = createCoreSetupMock();
@@ -40,8 +54,8 @@ describe('generateEsqlQuery', () => {
           '2',
           {
             operationType: 'count',
-            sourceField: 'records',
-            label: 'Count',
+            sourceField: '__records__',
+            label: 'Count of records',
             dataType: 'number',
             isBucketed: false,
           },
@@ -54,14 +68,12 @@ describe('generateEsqlQuery', () => {
       new Date()
     );
 
-    expect(result).toEqual(
-      expect.objectContaining({
-        success: true,
-        esql: `FROM myIndexPattern
-  | WHERE order_date >= ?_tstart AND order_date <= ?_tend
-  | STATS bucket_0_0 = COUNT(*)
-        BY order_date = BUCKET(order_date, 30 minutes)`,
-      })
+    expectGeneratedEsqlToMatch(
+      result,
+      `FROM myIndexPattern
+      | WHERE order_date >= ?_tstart AND order_date <= ?_tend
+      | STATS \`Count of records\` = COUNT(*)
+        BY order_date = BUCKET(order_date, 30 minutes)`
     );
   });
 
@@ -130,7 +142,7 @@ describe('generateEsqlQuery', () => {
     });
   });
 
-  test('it should add a where condition to esql if timeField is set', () => {
+  it('should add a where condition to esql if timeField is set', () => {
     const result = generateEsqlQuery(
       [
         [
@@ -148,8 +160,8 @@ describe('generateEsqlQuery', () => {
           '2',
           {
             operationType: 'count',
-            sourceField: 'records',
-            label: 'Count',
+            sourceField: '__records__',
+            label: 'Count of records',
             dataType: 'number',
             isBucketed: false,
           },
@@ -162,14 +174,12 @@ describe('generateEsqlQuery', () => {
       new Date()
     );
 
-    expect(result).toEqual(
-      expect.objectContaining({
-        success: true,
-        esql: `FROM myIndexPattern
-  | WHERE order_date >= ?_tstart AND order_date <= ?_tend
-  | STATS bucket_0_0 = COUNT(*)
-        BY order_date = BUCKET(order_date, 30 minutes)`,
-      })
+    expectGeneratedEsqlToMatch(
+      result,
+      `FROM myIndexPattern
+        | WHERE order_date >= ?_tstart AND order_date <= ?_tend
+        | STATS \`Count of records\` = COUNT(*)
+          BY order_date = BUCKET(order_date, 30 minutes)`
     );
   });
 
@@ -191,8 +201,8 @@ describe('generateEsqlQuery', () => {
           '2',
           {
             operationType: 'count',
-            sourceField: 'records',
-            label: 'Count',
+            sourceField: '__records__',
+            label: 'Count of records',
             dataType: 'number',
             isBucketed: false,
           },
@@ -205,13 +215,11 @@ describe('generateEsqlQuery', () => {
       new Date()
     );
 
-    expect(result).toEqual(
-      expect.objectContaining({
-        success: true,
-        esql: `FROM myIndexPattern
-  | STATS bucket_0_0 = COUNT(*)
-        BY order_date = BUCKET(order_date, 30 minutes)`,
-      })
+    expectGeneratedEsqlToMatch(
+      result,
+      `FROM myIndexPattern
+      | STATS \`Count of records\` = COUNT(*)
+        BY order_date = BUCKET(order_date, 30 minutes)`
     );
   });
 
@@ -263,7 +271,7 @@ describe('generateEsqlQuery', () => {
     expect(result.success).toBe(true);
     if (result.success) {
       // Find the metric column in esAggsIdMap
-      const metricKey = Object.keys(result.esAggsIdMap).find((key) => key.startsWith('bucket_'));
+      const metricKey = Object.keys(result.esAggsIdMap).find((key) => key.startsWith('Sum of '));
       expect(metricKey).toBeDefined();
       const metricColumn = result.esAggsIdMap[metricKey!][0];
       expect(metricColumn.format).toEqual({
@@ -323,7 +331,7 @@ describe('generateEsqlQuery', () => {
     expect(result.success).toBe(true);
     if (result.success) {
       // Find the metric column in esAggsIdMap
-      const metricKey = Object.keys(result.esAggsIdMap).find((key) => key.startsWith('bucket_'));
+      const metricKey = Object.keys(result.esAggsIdMap).find((key) => key.startsWith('Average of'));
       expect(metricKey).toBeDefined();
       const metricColumn = result.esAggsIdMap[metricKey!][0];
       expect(metricColumn.format).toEqual({
@@ -353,8 +361,8 @@ describe('generateEsqlQuery', () => {
           '2',
           {
             operationType: 'count',
-            sourceField: 'records',
-            label: 'Count',
+            sourceField: '__records__',
+            label: 'Count of records',
             dataType: 'number',
             isBucketed: false,
             filter: {
@@ -371,14 +379,12 @@ describe('generateEsqlQuery', () => {
       new Date()
     );
 
-    expect(result).toEqual(
-      expect.objectContaining({
-        success: true,
-        esql: `FROM myIndexPattern
-  | WHERE order_date >= ?_tstart AND order_date <= ?_tend
-  | STATS bucket_0_0 = COUNT(*) WHERE KQL("geo.src:\\"US\\"")
-        BY order_date = BUCKET(order_date, 30 minutes)`,
-      })
+    expectGeneratedEsqlToMatch(
+      result,
+      `FROM myIndexPattern
+      | WHERE order_date >= ?_tstart AND order_date <= ?_tend
+      | STATS \`Count of records\` = COUNT(*) WHERE KQL("geo.src:\\"US\\"")
+        BY order_date = BUCKET(order_date, 30 minutes)`
     );
   });
 });

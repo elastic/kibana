@@ -5,11 +5,19 @@
  * 2.0.
  */
 
-import type { IndexPattern } from '@kbn/lens-common';
+import type { FormBasedLayer, IndexPattern, IndexPatternField } from '@kbn/lens-common';
 
-export const mockLayer = {
+export const mockLayer: FormBasedLayer = {
   indexPatternId: 'myIndexPattern',
-  columns: {},
+  columns: {
+    '2': {
+      operationType: 'count',
+      sourceField: 'records',
+      label: 'Count',
+      dataType: 'number',
+      isBucketed: false,
+    },
+  },
   columnOrder: [],
 };
 
@@ -17,19 +25,49 @@ export const mockIndexPattern = {
   title: 'myIndexPattern',
   timeFieldName: 'order_date',
   getFieldByName: (field: string) => {
-    if (field === 'records') return undefined;
-    return { name: field };
+    if (field === '__records__') return undefined;
+    return {
+      name: field,
+      displayName: 'Records',
+      type: 'document',
+    };
   },
   getFormatterForField: () => ({ convert: (v: unknown) => v }),
+  fields: [
+    {
+      displayName: 'Records',
+      customLabel: 'Records',
+      name: '___records___',
+      type: 'document',
+      aggregatable: true,
+      searchable: true,
+    },
+  ] satisfies IndexPatternField[],
 } as unknown as IndexPattern;
 
 export const mockIndexPatternWithoutTimeField = {
   title: 'myIndexPattern',
   getFieldByName: (field: string) => {
-    if (field === 'records') return undefined;
-    return { name: field };
+    if (field === 'records') {
+      return {
+        name: field,
+        displayName: 'Records',
+        type: 'document',
+      };
+    }
+    return undefined;
   },
   getFormatterForField: () => ({ convert: (v: unknown) => v }),
+  fields: [
+    {
+      displayName: 'Records',
+      customLabel: 'Records',
+      name: '___records___',
+      type: 'document',
+      aggregatable: true,
+      searchable: true,
+    },
+  ] satisfies IndexPatternField[],
 } as unknown as IndexPattern;
 
 export const mockDateRange = {
