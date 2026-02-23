@@ -180,6 +180,9 @@ export const useCascadeVirtualizer = <G extends GroupNode>({
   initialOffset,
   initialRect,
 }: CascadeVirtualizerProps<G>): CascadeVirtualizerReturnValue => {
+  const resolvedInitialOffset =
+    typeof initialOffset === 'function' ? initialOffset() : initialOffset;
+  const isRestoringScrollRef = useRef(resolvedInitialOffset != null);
   const virtualizedRowsSizeCacheRef = useRef<Map<number, number>>(new Map());
 
   const rangeExtractor = useCascadeVirtualizerRangeExtractor<G>({
@@ -215,7 +218,19 @@ export const useCascadeVirtualizer = <G extends GroupNode>({
         // but it not included in the type definition because it is marked as a private property,
         // see {@link https://github.com/TanStack/virtual/blob/v3.13.2/packages/virtual-core/src/index.ts#L360}
         virtualizedRowsSizeCacheRef.current = rowVirtualizerInstance.itemSizeCache;
-        // propagate virtualizer state changes
+
+        if (isRestoringScrollRef.current && rowVirtualizerInstance.range) {
+          const { startIndex, endIndex } = rowVirtualizerInstance.range;
+          const allMeasured = Array.from(
+            { length: endIndex - startIndex + 1 },
+            (_, i) => startIndex + i
+          ).every((idx) => virtualizedRowsSizeCacheRef.current.has(idx));
+
+          if (allMeasured) {
+            isRestoringScrollRef.current = false;
+          }
+        }
+
         onStateChange?.(rowVirtualizerInstance);
       },
     }),
@@ -233,11 +248,11 @@ export const useCascadeVirtualizer = <G extends GroupNode>({
 
   const virtualizerImpl = useVirtualizer(virtualizerOptions);
 
-  /**
-   * We don't want to adjust scroll position for rows
-   * that don't want to propagate size changes to the parent virtualizer.
-   */
   virtualizerImpl.shouldAdjustScrollPositionOnItemSizeChange = (item) => {
+    // we don't want to adjust the scroll position whilst restoring virtualizer state
+    if (isRestoringScrollRef.current) return false;
+    // otherwise we only want to adjust the scroll position for rows
+    // that haven opted not to propagate size changes to the parent virtualizer
     return !sizeChangePropagationPrevented(item.index);
   };
 
@@ -295,12 +310,19 @@ export const useVirtualizedRowScrollState = ({
 
   const getScrollMargin = useCallback(() => {
     const sizeCache = virtualizer.virtualizedRowsSizeCache;
+
     let margin = 0;
-    for (let i = 0; i < rowIndex; i++) {
+
+    for (
+      let i = virtualizer?.range?.startIndex ?? 0;
+      i < (virtualizer?.range?.endIndex ?? rowIndex);
+      i++
+    ) {
       margin += sizeCache.get(i) ?? 0;
     }
     return margin;
   }, [virtualizer, rowIndex]);
+
   const getScrollOffset = useCallback(() => virtualizer.scrollOffset ?? 0, [virtualizer]);
 
   return useMemo(
