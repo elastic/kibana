@@ -9,4 +9,3 @@
 
 export { TRACES } from './constants';
 export { simpleTrace } from './synthtrace/simple_trace';
-export { comprehensiveTrace, traceCorrelatedLogs } from './synthtrace/comprehensive_trace';
