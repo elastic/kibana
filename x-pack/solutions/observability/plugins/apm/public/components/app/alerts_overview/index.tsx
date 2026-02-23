@@ -12,6 +12,8 @@ import { EuiPanel, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import type { BoolQuery, Filter } from '@kbn/es-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ObservabilityAlertsTable } from '@kbn/observability-plugin/public';
+import { SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+import { ALL_VALUE } from '@kbn/slo-schema';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import {
   APM_ALERTING_CONSUMERS,
@@ -73,8 +75,23 @@ export function AlertsOverview() {
     if (isEnvironmentDefined(environment)) {
       filters.push({
         query: {
-          match_phrase: {
-            [SERVICE_ENVIRONMENT]: environment,
+          bool: {
+            should: [
+              { match_phrase: { [SERVICE_ENVIRONMENT]: environment } },
+              {
+                bool: {
+                  filter: [
+                    { term: { 'kibana.alert.rule.rule_type_id': SLO_BURN_RATE_RULE_TYPE_ID } },
+                  ],
+                  should: [
+                    { term: { [SERVICE_ENVIRONMENT]: ALL_VALUE } },
+                    { bool: { must_not: { exists: { field: SERVICE_ENVIRONMENT } } } },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
+            ],
+            minimum_should_match: 1,
           },
         },
         meta: {},

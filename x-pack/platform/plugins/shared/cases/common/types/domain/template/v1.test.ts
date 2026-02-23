@@ -22,6 +22,7 @@ describe('TemplateSchema', () => {
     definition: 'fields:\n  - name: test_field\n    type: keyword',
     templateVersion: 1,
     deletedAt: null,
+    author: 'test-user',
   };
 
   it('validates a valid template', () => {
@@ -208,6 +209,7 @@ describe('ParsedTemplateSchema', () => {
     },
     templateVersion: 2,
     deletedAt: null,
+    author: 'test-user',
     isLatest: true,
     latestVersion: 2,
   };

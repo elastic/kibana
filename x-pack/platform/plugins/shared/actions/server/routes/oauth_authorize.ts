@@ -59,13 +59,27 @@ export const oauthAuthorizeRoute = (
           // Check rate limit
           const currentUser = core.security.authc.getCurrentUser();
           if (!currentUser) {
-            throw new Error('User should be authenticated to initiate OAuth authorization.');
+            return res.unauthorized({
+              body: {
+                message: 'User should be authenticated to initiate OAuth authorization.',
+              },
+            });
           }
-          const username = currentUser.username;
-          oauthRateLimiter.log(username, 'authorize');
-          if (oauthRateLimiter.isRateLimited(username, 'authorize')) {
+          const { profile_uid } = currentUser;
+
+          if (!profile_uid) {
+            return res.customError({
+              statusCode: 500,
+              body: {
+                message: 'Unable to retrieve Kibana user profile ID.',
+              },
+            });
+          }
+
+          oauthRateLimiter.log(profile_uid, 'authorize');
+          if (oauthRateLimiter.isRateLimited(profile_uid, 'authorize')) {
             routeLogger.warn(
-              `OAuth authorize rate limit exceeded for user: ${username}, connector: ${connectorId}`
+              `OAuth authorize rate limit exceeded for user: ${profile_uid}, connector: ${connectorId}`
             );
             return res.customError({
               statusCode: 429,
@@ -102,12 +116,13 @@ export const oauthAuthorizeRoute = (
           const oauthConfig = await oauthService.getOAuthConfig(connectorId, namespace);
           const redirectUri = OAuthAuthorizationService.getRedirectUri(kibanaUrl);
 
-          // Validate and build return URL for post-OAuth redirect
+          // Validate return URL for post-OAuth redirect.
+          // When not provided, the callback route will render a self-contained
+          // HTML page instead of redirecting.
           const requestedReturnUrl = req.body?.returnUrl;
-          let kibanaReturnUrl: string;
+          let kibanaReturnUrl: string | undefined;
 
           if (requestedReturnUrl) {
-            // Security: Validate that returnUrl is same-origin to prevent open redirect attacks
             const returnUrlObj = new URL(requestedReturnUrl);
             const kibanaUrlObj = new URL(kibanaUrl);
 
@@ -119,9 +134,6 @@ export const oauthAuthorizeRoute = (
               });
             }
             kibanaReturnUrl = requestedReturnUrl;
-          } else {
-            // Default to connectors management page
-            kibanaReturnUrl = `${kibanaUrl}/app/management/insightsAndAlerting/triggersActionsConnectors/connectors`;
           }
 
           // Create OAuth state with PKCE
