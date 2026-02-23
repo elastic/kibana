@@ -8,7 +8,7 @@
 import pLimit from 'p-limit';
 import type { Logger } from '@kbn/core/server';
 import type { OAuthTokenResponse } from './request_oauth_token';
-import type { ConnectorTokenClientContract } from '../types';
+import type { ConnectorToken, ConnectorTokenClientContract } from '../types';
 
 // Per-connector locks to prevent concurrent token refreshes for the same connector
 const tokenRefreshLocks = new Map<string, ReturnType<typeof pLimit>>();
@@ -56,10 +56,11 @@ export const getStoredTokenWithRefresh = async ({
   forceRefresh = false,
   doRefresh,
 }: GetStoredTokenWithRefreshOpts): Promise<string | null> => {
+  // Acquire lock for this connector to prevent concurrent token refreshes
   const lock = getOrCreateLock(connectorId);
 
   return await lock(async () => {
-    // Re-fetch token inside lock — another request may have already refreshed it
+    // Re-fetch token inside lock - another request may have already refreshed it
     const { connectorToken, hasErrors } = await connectorTokenClient.get({
       connectorId,
       tokenType: 'access_token',
@@ -70,7 +71,7 @@ export const getStoredTokenWithRefresh = async ({
       return null;
     }
 
-    // No token found — user must authorize first
+    // No token found - user must authorize first
     if (!connectorToken) {
       logger.warn(
         `No access token found for connectorId: ${connectorId}. User must complete OAuth authorization flow.`
@@ -78,17 +79,20 @@ export const getStoredTokenWithRefresh = async ({
       return null;
     }
 
+    const token = connectorToken as ConnectorToken;
+
     // Check if access token is still valid (may have been refreshed by another request)
     const now = Date.now();
-    const expiresAt = connectorToken.expiresAt ? Date.parse(connectorToken.expiresAt) : Infinity;
+    const expiresAt = token.expiresAt ? Date.parse(token.expiresAt) : Infinity;
 
     if (!forceRefresh && expiresAt > now) {
+      // Token still valid
       logger.debug(`Using stored access token for connectorId: ${connectorId}`);
-      return connectorToken.token;
+      return token.token;
     }
 
-    // Access token expired — attempt refresh
-    if (!connectorToken.refreshToken) {
+    const refreshToken = typeof token.refreshToken === 'string' ? token.refreshToken : undefined;
+    if (!refreshToken) {
       logger.warn(
         `Access token expired and no refresh token available for connectorId: ${connectorId}. User must re-authorize.`
       );
@@ -96,23 +100,25 @@ export const getStoredTokenWithRefresh = async ({
     }
 
     // Check if the refresh token is expired
-    if (
-      connectorToken.refreshTokenExpiresAt &&
-      Date.parse(connectorToken.refreshTokenExpiresAt) <= now
-    ) {
+    if (token.refreshTokenExpiresAt && Date.parse(token.refreshTokenExpiresAt) <= now) {
       logger.warn(`Refresh token expired for connectorId: ${connectorId}. User must re-authorize.`);
       return null;
     }
 
+    // Refresh the token
     logger.debug(`Refreshing access token for connectorId: ${connectorId}`);
     try {
-      const tokenResult = await doRefresh(connectorToken.refreshToken);
+      const tokenResult = await doRefresh(refreshToken);
+
       const newAccessToken = `${tokenResult.tokenType} ${tokenResult.accessToken}`;
 
+      const updatedRefreshToken: string | undefined = tokenResult.refreshToken ?? refreshToken;
+
+      // Update stored token
       await connectorTokenClient.updateWithRefreshToken({
-        id: connectorToken.id!,
+        id: token.id!,
         token: newAccessToken,
-        refreshToken: tokenResult.refreshToken || connectorToken.refreshToken,
+        refreshToken: updatedRefreshToken,
         expiresIn: tokenResult.expiresIn,
         refreshTokenExpiresIn: tokenResult.refreshTokenExpiresIn,
         tokenType: 'access_token',

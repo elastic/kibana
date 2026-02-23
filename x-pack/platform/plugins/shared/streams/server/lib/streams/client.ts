@@ -133,7 +133,7 @@ export class StreamsClient {
         return { acknowledged: true, result: 'noop' };
       }
     } catch (error) {
-      if (error.name !== 'StreamsStatusConflictError') {
+      if (!(error instanceof StreamsStatusConflictError)) {
         throw error;
       }
     }
@@ -183,7 +183,7 @@ export class StreamsClient {
         return { acknowledged: true, result: 'noop' };
       }
     } catch (error) {
-      if (error.name !== 'StreamsStatusConflictError') {
+      if (!(error instanceof StreamsStatusConflictError)) {
         throw error;
       }
     }
@@ -681,7 +681,7 @@ export class StreamsClient {
       );
     } catch (e) {
       // if permissions are insufficient, we just return an empty list
-      if (e.statusCode === 403) {
+      if (e instanceof Error && 'statusCode' in e && e.statusCode === 403) {
         return [];
       }
       throw e;

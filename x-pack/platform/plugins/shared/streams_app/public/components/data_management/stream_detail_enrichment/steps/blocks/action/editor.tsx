@@ -18,7 +18,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { StreamlangProcessorDefinitionWithUIAttributes } from '@kbn/streamlang';
 import { isActionBlock } from '@kbn/streamlang';
-import { useSelector } from '@xstate5/react';
+import { useSelector } from '@xstate/react';
 import { isEmpty, isEqual } from 'lodash';
 import React, { forwardRef, useEffect, useState } from 'react';
 import type { DefaultValues, SubmitHandler } from 'react-hook-form';
@@ -60,6 +60,7 @@ import { SetProcessorForm } from './set';
 import { TransformStringProcessorForm } from './transform_string';
 import { ConcatProcessorForm } from './concat';
 import { JoinProcessorForm } from './join';
+import { NetworkDirectionProcessorForm } from './network_direction';
 
 export const ActionBlockEditor = forwardRef<HTMLDivElement, ActionBlockProps>((props, ref) => {
   const { processorMetrics, stepRef } = props;
@@ -203,6 +204,7 @@ export const ActionBlockEditor = forwardRef<HTMLDivElement, ActionBlockProps>((p
                 )}
                 {type === 'concat' && <ConcatProcessorForm />}
                 {type === 'join' && <JoinProcessorForm />}
+                {type === 'network_direction' && <NetworkDirectionProcessorForm />}
                 {!SPECIALISED_TYPES.includes(type) && (
                   <ConfigDrivenProcessorFields type={type as ConfigDrivenProcessorType} />
                 )}

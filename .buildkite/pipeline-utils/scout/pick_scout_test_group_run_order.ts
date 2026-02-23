@@ -32,6 +32,14 @@ if (process.env.SERVERLESS_TESTS_ONLY) {
   scoutExtraEnv.SERVERLESS_TESTS_ONLY = process.env.SERVERLESS_TESTS_ONLY;
 }
 
+if (process.env.UIAM_DOCKER_IMAGE) {
+  scoutExtraEnv.UIAM_DOCKER_IMAGE = process.env.UIAM_DOCKER_IMAGE;
+}
+
+if (process.env.UIAM_COSMOSDB_DOCKER_IMAGE) {
+  scoutExtraEnv.UIAM_COSMOSDB_DOCKER_IMAGE = process.env.UIAM_COSMOSDB_DOCKER_IMAGE;
+}
+
 export async function pickScoutTestGroupRunOrder(scoutConfigsPath: string) {
   const bk = new BuildkiteClient();
   const envFromlabels: Record<string, string> = collectEnvFromLabels();
