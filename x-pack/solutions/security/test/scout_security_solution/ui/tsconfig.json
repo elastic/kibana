@@ -14,7 +14,8 @@
     "@kbn/scout-security",
     "@kbn/scout",
     "@kbn/cloud-security-posture-common",
-    "@kbn/security-solution-plugin"
+    "@kbn/security-solution-plugin",
+    "@kbn/rison"
   ],
   "exclude": ["target/**/*"]
 }
