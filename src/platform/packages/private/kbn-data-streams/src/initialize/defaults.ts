@@ -8,6 +8,7 @@
  */
 
 import { defaultsDeep } from 'lodash';
+import type api from '@elastic/elasticsearch/lib/api/types';
 import type { AnyDataStreamDefinition, DataStreamDefinition } from '../types';
 
 /**
@@ -35,6 +36,50 @@ function validateMappings(def: AnyDataStreamDefinition): void {
   }
 }
 
+function getConfiguredIlmPolicyName(settings?: api.IndicesIndexSettings): string | undefined {
+  if (!settings) {
+    return undefined;
+  }
+
+  const settingsAsRecord = settings as Record<string, unknown>;
+  const flattenedName = settingsAsRecord['index.lifecycle.name'];
+  if (typeof flattenedName === 'string') {
+    return flattenedName;
+  }
+
+  const lifecycle = settingsAsRecord.lifecycle;
+  if (typeof lifecycle === 'object' && lifecycle !== null) {
+    const lifecycleName = (lifecycle as Record<string, unknown>).name;
+    if (typeof lifecycleName === 'string') {
+      return lifecycleName;
+    }
+  }
+
+  const flattenedLifecycle = settingsAsRecord['index.lifecycle'];
+  if (typeof flattenedLifecycle === 'object' && flattenedLifecycle !== null) {
+    const lifecycleName = (flattenedLifecycle as Record<string, unknown>).name;
+    if (typeof lifecycleName === 'string') {
+      return lifecycleName;
+    }
+  }
+
+  return undefined;
+}
+
+function validateIlmPolicy(def: AnyDataStreamDefinition): void {
+  if (!def.ilmPolicy) {
+    return;
+  }
+
+  const configuredPolicyName = getConfiguredIlmPolicyName(def.template?.settings);
+  if (configuredPolicyName && configuredPolicyName !== def.ilmPolicy.name) {
+    throw new Error(
+      `Data stream "${def.name}" has ILM policy "${def.ilmPolicy.name}" but template settings link to "${configuredPolicyName}". ` +
+        `Please align these values.`
+    );
+  }
+}
+
 /**
  * Do not change these defaults lightly... They are applied to all data streams and may
  * result in a large number of updated data streams when this code is released.
@@ -42,6 +87,7 @@ function validateMappings(def: AnyDataStreamDefinition): void {
 export function applyDefaults(def: AnyDataStreamDefinition): AnyDataStreamDefinition {
   // Validate that user mappings don't contain reserved keys
   validateMappings(def);
+  validateIlmPolicy(def);
 
   const defaultDataStreamDefinition: Partial<DataStreamDefinition<any, any>> = {
     hidden: true,
@@ -64,6 +110,7 @@ export function applyDefaults(def: AnyDataStreamDefinition): AnyDataStreamDefini
       },
       settings: {
         hidden: true,
+        ...(def.ilmPolicy ? { lifecycle: { name: def.ilmPolicy.name } } : {}),
       },
     },
   };

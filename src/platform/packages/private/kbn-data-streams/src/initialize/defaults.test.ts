@@ -100,6 +100,24 @@ describe('applyDefaults', () => {
       expect(result.template?.mappings?.dynamic).toBe(false);
       expect(result.template?.settings?.hidden).toBe(true);
     });
+
+    it('should default template lifecycle.name when ilmPolicy is provided', () => {
+      const dataStream = createTestDataStream({
+        ilmPolicy: {
+          name: 'test-ilm-policy',
+          policy: {
+            phases: {
+              hot: {
+                actions: {},
+              },
+            },
+          },
+        },
+      });
+      const result = applyDefaults(dataStream);
+
+      expect(result.template?.settings?.lifecycle?.name).toBe('test-ilm-policy');
+    });
   });
 
   describe('edge cases', () => {
@@ -135,6 +153,55 @@ describe('applyDefaults', () => {
       });
       // Should preserve user-provided priority
       expect(result.template?.priority).toBe(200);
+    });
+
+    it('should preserve explicit lifecycle.name when it matches ilmPolicy', () => {
+      const dataStream = createTestDataStream({
+        ilmPolicy: {
+          name: 'my-ilm-policy',
+          policy: {
+            phases: {
+              hot: {
+                actions: {},
+              },
+            },
+          },
+        },
+        template: {
+          settings: {
+            lifecycle: {
+              name: 'my-ilm-policy',
+            },
+          },
+        },
+      });
+
+      const result = applyDefaults(dataStream);
+      expect(result.template?.settings?.lifecycle?.name).toEqual('my-ilm-policy');
+    });
+
+    it('should throw when template lifecycle.name conflicts with ilmPolicy', () => {
+      const dataStream = createTestDataStream({
+        ilmPolicy: {
+          name: 'ilm-policy-a',
+          policy: {
+            phases: {
+              hot: {
+                actions: {},
+              },
+            },
+          },
+        },
+        template: {
+          settings: {
+            lifecycle: {
+              name: 'ilm-policy-b',
+            },
+          },
+        },
+      });
+
+      expect(() => applyDefaults(dataStream)).toThrow(/has ILM policy "ilm-policy-a"/);
     });
   });
 });

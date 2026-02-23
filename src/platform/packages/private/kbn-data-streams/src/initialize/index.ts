@@ -12,6 +12,7 @@ import type { Logger } from '@kbn/logging';
 import type { AnyDataStreamDefinition } from '../types';
 import { initializeDataStream } from './data_stream';
 import { initializeIndexTemplate } from './index_template';
+import { initializeIlmPolicy } from './ilm_policy';
 import { getExistingDataStream, getExistingIndexTemplate } from './exists_checks';
 
 /**
@@ -43,6 +44,12 @@ export async function initialize({
     dataStream.name
   );
 
+  const { uptoDate: ilmPolicyReady } = await initializeIlmPolicy({
+    logger,
+    dataStream,
+    elasticsearchClient,
+  });
+
   // The index template is created and updated in all cases except if the data stream does not exist and we will not create it now.
   const createIndexTemplateIfDoesntExist = existingDataStream ? true : !lazyCreation;
   // create the data stream only if not lazy.
@@ -66,6 +73,6 @@ export async function initialize({
   });
 
   return {
-    dataStreamReady: indexTemplateReady && dataStreamReady,
+    dataStreamReady: ilmPolicyReady && indexTemplateReady && dataStreamReady,
   };
 }

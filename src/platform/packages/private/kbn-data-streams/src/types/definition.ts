@@ -33,6 +33,17 @@ export interface DataStreamDefinition<
   hidden?: boolean;
 
   /**
+   * Optional ILM policy definition for stateful deployments.
+   *
+   * When provided, `@kbn/data-streams` will upsert this policy and, by default,
+   * link it to the backing indices through template settings (`lifecycle.name`).
+   */
+  ilmPolicy?: {
+    name: string;
+    policy: api.IlmPolicy;
+  };
+
+  /**
    * @remark Must be **incremented** in order to release a new version of the template definition.
    * @remark Must be greater than 0
    */
@@ -46,7 +57,7 @@ export interface DataStreamDefinition<
    *  - api.IndicesIndexTemplate
    *  - api.IndicesIndexTemplateSummary
    */
-  template: Pick<api.IndicesIndexTemplateSummary, 'aliases'> & {
+  template: Pick<api.IndicesIndexTemplateSummary, 'aliases' | 'lifecycle'> & {
     /** @default 100 */
     priority?: number;
 

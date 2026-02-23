@@ -36,11 +36,16 @@ describe('initialize - versioning logic', () => {
     },
   } satisfies MappingsDefinition;
 
-  const createTestDataStream = (version: number): DataStreamDefinition<typeof testMappings> => ({
+  const createTestDataStream = (
+    version: number,
+    overrides: Partial<DataStreamDefinition<typeof testMappings>> = {}
+  ): DataStreamDefinition<typeof testMappings> => ({
     name: 'test-data-stream',
     version,
+    ...overrides,
     template: {
       mappings: testMappings,
+      ...overrides.template,
     },
   });
 
@@ -590,6 +595,92 @@ describe('initialize - versioning logic', () => {
       expect(elasticsearchClient.indices.createDataStream).toHaveBeenCalledTimes(1);
       expect(elasticsearchClient.indices.createDataStream).toHaveBeenCalledWith({
         name: dataStream.name,
+      });
+    });
+
+    it('should upsert ILM policy and include template lifecycle when configured', async () => {
+      const dataStream = createTestDataStream(1, {
+        ilmPolicy: {
+          name: 'test-ilm-policy',
+          policy: {
+            phases: {
+              hot: {
+                actions: {},
+              },
+            },
+          },
+        },
+        template: {
+          lifecycle: {
+            data_retention: '30d',
+          },
+        },
+      });
+
+      // Mock: No index template exists
+      (elasticsearchClient.indices.getIndexTemplate as jest.Mock).mockImplementationOnce(() =>
+        Promise.reject(
+          new EsErrors.ResponseError({
+            statusCode: 404,
+            body: { error: { type: 'resource_not_found_exception' } },
+            warnings: [],
+            headers: {},
+            meta: {} as any,
+          })
+        )
+      );
+
+      // Mock: No data stream exists
+      (elasticsearchClient.indices.getDataStream as jest.Mock).mockImplementationOnce(() =>
+        Promise.reject(
+          new EsErrors.ResponseError({
+            statusCode: 404,
+            body: { error: { type: 'resource_not_found_exception' } },
+            warnings: [],
+            headers: {},
+            meta: {} as any,
+          })
+        )
+      );
+
+      // Mock: putLifecycle upsert
+      (elasticsearchClient.ilm.putLifecycle as jest.Mock).mockImplementationOnce(() =>
+        Promise.resolve({ acknowledged: true })
+      );
+
+      // Mock: putIndexTemplate for creation
+      (elasticsearchClient.indices.putIndexTemplate as jest.Mock).mockImplementationOnce(() =>
+        Promise.resolve({ acknowledged: true })
+      );
+
+      // Mock: createDataStream for creation
+      (elasticsearchClient.indices.createDataStream as jest.Mock).mockImplementationOnce(() =>
+        Promise.resolve({ acknowledged: true })
+      );
+
+      await initialize({
+        logger,
+        elasticsearchClient,
+        dataStream,
+        lazyCreation: false,
+      });
+
+      expect(elasticsearchClient.ilm.putLifecycle).toHaveBeenCalledWith({
+        name: 'test-ilm-policy',
+        policy: {
+          phases: {
+            hot: {
+              actions: {},
+            },
+          },
+        },
+      });
+
+      const createCall = (elasticsearchClient.indices.putIndexTemplate as jest.Mock).mock
+        .calls[0][0];
+      expect(createCall?.template?.settings?.lifecycle?.name).toBe('test-ilm-policy');
+      expect(createCall?.template?.lifecycle).toEqual({
+        data_retention: '30d',
       });
     });
   });

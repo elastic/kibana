@@ -127,6 +127,15 @@ Mapping updates will apply to the current write-index and your index template. T
 > !IMPORTANT
 > Mapping updates will only be applied once you INCREMENT the template version number in your data stream definition. As you update your definition it is highly recommended that you retain past definitions so that you can test your upgrade path before releasing new mappings.
 
+## Lifecycle management
+
+`@kbn/data-streams` supports both Elasticsearch lifecycle models:
+
+1. **ILM (stateful)**: Define `ilmPolicy` on the data stream definition. The package upserts the policy via ILM APIs and links it to backing indices through template settings (`lifecycle.name`).
+2. **Data stream lifecycle (DSL)**: Define `template.lifecycle` (for example `data_retention`) to configure data stream lifecycle behavior.
+
+For ILM, the policy itself is still a separate object in Elasticsearch; `template.lifecycle` is not an ILM policy definition.
+
 ### A note on backwards compatibility
 
 These tools assume that you will be introducing backwards compatible changes to your mappings. If you do not apply bwc mappings you will hit a runtime error initializing your client as it will try to update the current write index with your new mappings.
