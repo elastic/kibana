@@ -24,6 +24,7 @@ import type { UNSUPPORTED_ACTION_TYPES } from './constants';
 import type { OnUpdateFields } from '../case_view/types';
 import type { ExternalReferenceAttachmentTypeRegistry } from '../../client/attachment_framework/external_reference_registry';
 import type { PersistableStateAttachmentTypeRegistry } from '../../client/attachment_framework/persistable_state_registry';
+import type { UnifiedAttachmentTypeRegistry } from '../../client/attachment_framework/unified_attachment_registry';
 import type { CurrentUserProfile } from '../types';
 import type { UserActivityParams } from '../user_actions_activity_bar/types';
 
@@ -58,6 +59,7 @@ export interface UserActionBuilderArgs {
   currentUserProfile: CurrentUserProfile;
   externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
+  unifiedAttachmentTypeRegistry: UnifiedAttachmentTypeRegistry;
   caseConnectors: CaseConnectors;
   userAction: UserActionUI;
   attachments: AttachmentUI[];

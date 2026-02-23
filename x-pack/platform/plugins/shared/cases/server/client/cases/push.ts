@@ -8,6 +8,8 @@
 import Boom from '@hapi/boom';
 import { nodeBuilder } from '@kbn/es-query';
 import type { SavedObjectsFindResponse } from '@kbn/core/server';
+import { spaceIdToNamespace } from '@kbn/spaces-plugin/server/lib/utils/namespace';
+import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 
 import type { UserProfile } from '@kbn/security-plugin/common';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
@@ -66,10 +68,12 @@ function shouldCloseByPush(
 const changeAlertsStatusToClose = async (
   caseId: string,
   caseService: CasesClientArgs['services']['caseService'],
-  alertsService: CasesClientArgs['services']['alertsService']
+  alertsService: CasesClientArgs['services']['alertsService'],
+  namespaces: string[]
 ) => {
   const alertAttachments = (await caseService.getAllCaseComments({
     id: [caseId],
+    namespaces,
     options: {
       filter: nodeBuilder.is(`${CASE_COMMENT_SAVED_OBJECT}.attributes.type`, AttachmentType.alert),
     },
@@ -196,6 +200,7 @@ export const push = async (
       type: Operations.findConfigurations.savedObjectType,
     });
 
+    const namespaces = [spaceIdToNamespace(spaceId) ?? DEFAULT_NAMESPACE_STRING];
     /* Start of update case with push information */
     const [myCase, myCaseConfigure, comments] = await Promise.all([
       caseService.getCase({
@@ -204,6 +209,7 @@ export const push = async (
       caseConfigureService.find({ unsecuredSavedObjectsClient, options: { filter: ownerFilter } }),
       caseService.getAllCaseComments({
         id: caseId,
+        namespaces,
         options: {
           fields: [],
           page: 1,
@@ -290,7 +296,7 @@ export const push = async (
       });
 
       if (myCase.attributes.settings.syncAlerts) {
-        await changeAlertsStatusToClose(myCase.id, caseService, alertsService);
+        await changeAlertsStatusToClose(myCase.id, caseService, alertsService, namespaces);
       }
     }
 

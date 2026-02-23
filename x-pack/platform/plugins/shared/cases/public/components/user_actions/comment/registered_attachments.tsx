@@ -28,6 +28,7 @@ import type { AttachmentTypeRegistry } from '../../../../common/registry';
 import type { Attachment } from '../../../../common/types/domain';
 import type { UserActionBuilder, UserActionBuilderArgs } from '../types';
 import type { SnakeToCamelCase } from '../../../../common/types';
+import { LEGACY_TO_UNIFIED_MAP } from '../../../../common/constants/attachments';
 import {
   ATTACHMENT_NOT_REGISTERED_ERROR,
   DEFAULT_EVENT_ATTACHMENT_TITLE,
@@ -91,7 +92,9 @@ export const createRegisteredAttachmentUserActionBuilder = <
   handleDeleteComment,
 }: BuilderArgs<C, R>): ReturnType<UserActionBuilder> => ({
   build: () => {
-    const attachmentTypeId: string = getId();
+    const rawTypeId: string = getId();
+    // Translate legacy type (e.g. 'user') to unified ('comment') so registry lookup succeeds
+    const attachmentTypeId: string = LEGACY_TO_UNIFIED_MAP[rawTypeId] ?? rawTypeId;
     const isTypeRegistered = registry.has(attachmentTypeId);
 
     if (!isTypeRegistered) {

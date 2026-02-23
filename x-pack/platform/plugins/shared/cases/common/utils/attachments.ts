@@ -14,6 +14,11 @@ import type {
   UnifiedValueAttachmentPayload,
 } from '../types/domain';
 import { AttachmentType } from '../types/domain';
+import {
+  VALID_ATTACHMENT_TYPES,
+  LEGACY_TO_UNIFIED_MAP,
+  UNIFIED_TO_LEGACY_MAP,
+} from '../constants/attachments';
 
 /**
  * A type narrowing function for external reference attachments.
@@ -33,6 +38,11 @@ export const isCommentRequestTypePersistableState = (
   return context.type === AttachmentType.persistableState;
 };
 
+export const isLegacyCommentRequest = (
+  context: AttachmentRequest | UnifiedAttachmentPayload
+): context is AttachmentRequest => {
+  return Object.values(AttachmentType).includes(context.type as AttachmentType);
+};
 /**
  * A type narrowing function for  reference-based unified attachment.
  */
@@ -59,3 +69,35 @@ export const isUnifiedAttachmentRequest = (
 ): context is UnifiedAttachmentPayload => {
   return isUnifiedReferenceAttachmentRequest(context) || isUnifiedValueAttachmentRequest(context);
 };
+
+/**
+ * Converts a legacy attachment type to its unified type
+ */
+export function toUnifiedAttachmentType(type: string): string {
+  if (!VALID_ATTACHMENT_TYPES.has(type)) {
+    throw new Error(`Invalid attachment type: ${type}`);
+  }
+
+  const unified = LEGACY_TO_UNIFIED_MAP[type];
+  if (unified) {
+    return unified;
+  }
+  // If already unified or not migrated, return as-is
+  return type;
+}
+
+/**
+ * Converts a unified attachment type to its legacy form
+ */
+export function toLegacyAttachmentType(type: string): string {
+  if (!VALID_ATTACHMENT_TYPES.has(type)) {
+    throw new Error(`Invalid attachment type: ${type}`);
+  }
+
+  const legacy = UNIFIED_TO_LEGACY_MAP[type];
+  if (legacy) {
+    return legacy;
+  }
+  // If no legacy form exists, return as-is
+  return type;
+}

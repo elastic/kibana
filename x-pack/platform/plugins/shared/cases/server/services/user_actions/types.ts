@@ -26,6 +26,7 @@ import type {
   User,
   CaseAssignees,
   CaseCustomFields,
+  UnifiedAttachmentPayload,
 } from '../../../common/types/domain';
 import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
 import type {
@@ -328,6 +329,8 @@ export interface GetUsersResponse {
 export interface FindOptions extends UserActionFindRequest {
   caseId: string;
   filter?: KueryNode;
+  /** When true, Comments filter includes both attachment type "user" and "comment". When false, only "user". */
+  attachmentsFeatureEnabled?: boolean;
 }
 
 export type CommonUserActionArgs = CommonArguments;
@@ -366,7 +369,11 @@ export interface BulkCreateBulkUpdateCaseUserActions extends IndexRefresh {
 export interface BulkCreateAttachmentUserAction
   extends Omit<CommonUserActionArgs, 'owner'>,
     IndexRefresh {
-  attachments: Array<{ id: string; owner: string; attachment: AttachmentRequest }>;
+  attachments: Array<{
+    id: string;
+    owner: string;
+    attachment: AttachmentRequest | UnifiedAttachmentPayload;
+  }>;
 }
 
 export type CreateUserActionArgs<T extends keyof BuilderParameters> = {

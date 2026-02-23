@@ -8,7 +8,7 @@
 import * as rt from 'io-ts';
 import { jsonValueRt } from '../../../api';
 import { UserRt } from '../user/v1';
-import { AttachmentRt } from './v1';
+import { AttachmentAttributesRt, AttachmentRt } from './v1';
 
 /**
  * Payload for Reference-based Attachments
@@ -98,5 +98,11 @@ export type UnifiedAttachment = rt.TypeOf<typeof UnifiedAttachmentRt>;
 /**
  * Combined v1 legacy and v2 unified attachment types
  */
-export const CombinedAttachmentRt = rt.union([AttachmentRt, UnifiedAttachmentRt]);
-export type CombinedAttachment = rt.TypeOf<typeof CombinedAttachmentRt>;
+export const AttachmentRtV2 = rt.union([AttachmentRt, UnifiedAttachmentRt]);
+export const AttachmentAttributesRtV2 = rt.union([
+  AttachmentAttributesRt,
+  UnifiedAttachmentAttributesRt,
+]);
+
+export type AttachmentV2 = rt.TypeOf<typeof AttachmentRtV2>;
+export type AttachmentAttributesV2 = rt.TypeOf<typeof AttachmentAttributesRtV2>;

@@ -14,6 +14,8 @@ import type {
   SavedObjectsFindResult,
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
+import { spaceIdToNamespace } from '@kbn/spaces-plugin/server/lib/utils/namespace';
+import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { isEqual } from 'lodash';
 
 import { nodeBuilder } from '@kbn/es-query';
@@ -58,6 +60,7 @@ import type {
   User,
   CaseAssignees,
   AttachmentAttributes,
+  AttachmentAttributesV2,
   CustomFieldsConfiguration,
 } from '../../../common/types/domain';
 import { CasesPatchRequestRt } from '../../../common/types/api';
@@ -182,15 +185,18 @@ function getID(
 async function getAlertComments({
   casesToSync,
   caseService,
+  namespaces,
 }: {
   casesToSync: UpdateRequestWithOriginalCase[];
   caseService: CasesService;
-}): Promise<SavedObjectsFindResponse<AttachmentAttributes>> {
+  namespaces: string[];
+}): Promise<SavedObjectsFindResponse<AttachmentAttributesV2>> {
   const idsOfCasesToSync = casesToSync.map(({ updateReq }) => updateReq.id);
 
   // getAllCaseComments will by default get all the comments, unless page or perPage fields are set
   return caseService.getAllCaseComments({
     id: idsOfCasesToSync,
+    namespaces,
     options: {
       filter: nodeBuilder.is(`${CASE_COMMENT_SAVED_OBJECT}.attributes.type`, AttachmentType.alert),
     },
@@ -224,11 +230,13 @@ async function updateAlerts({
   casesWithStatusChangedAndSynced,
   caseService,
   alertsService,
+  namespaces,
 }: {
   casesWithSyncSettingChangedToOn: UpdateRequestWithOriginalCase[];
   casesWithStatusChangedAndSynced: UpdateRequestWithOriginalCase[];
   caseService: CasesService;
   alertsService: AlertService;
+  namespaces: string[];
 }) {
   /**
    * It's possible that a case ID can appear multiple times in each array. I'm intentionally placing the status changes
@@ -246,6 +254,7 @@ async function updateAlerts({
   const totalAlerts = await getAlertComments({
     casesToSync,
     caseService,
+    namespaces,
   });
 
   // create an array of requests that indicate the id, index, and status to update an alert
@@ -384,7 +393,9 @@ export const bulkUpdate = async (
     user,
     logger,
     authorization,
+    spaceId,
   } = clientArgs;
+  const namespaces = [spaceIdToNamespace(spaceId) ?? DEFAULT_NAMESPACE_STRING];
 
   try {
     const rawQuery = decodeWithExcessOrThrow(CasesPatchRequestRt)(cases);
@@ -514,6 +525,7 @@ export const bulkUpdate = async (
       casesWithSyncSettingChangedToOn,
       caseService,
       alertsService,
+      namespaces,
     });
 
     const commentsMap = await attachmentService.getter.getCaseAttatchmentStats({

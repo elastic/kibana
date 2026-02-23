@@ -12,7 +12,6 @@ import type {
 } from '@kbn/core/server';
 import { isEqual, uniqWith } from 'lodash';
 import type {
-  AttachmentAttributes,
   AttachmentAttributesNoSO,
   AttachmentPatchAttributes,
 } from '../../common/types/domain';
@@ -27,7 +26,8 @@ import type {
   AttachmentRequestAttributes,
   AttachmentTransformedAttributes,
   AttachmentSavedObjectTransformed,
-} from '../common/types/attachments';
+} from '../common/types/attachments_v1';
+import type { AttachmentAttributesV2 } from '../common/types/attachments_v2';
 import { isCommentRequestTypeExternalReferenceSO } from './type_guards';
 import { SOReferenceExtractor } from './so_reference_extractor';
 import type { OptionalAttributes } from './types';
@@ -71,10 +71,12 @@ const hasAttributes = <T>(savedObject: OptionalAttributes<T>): savedObject is Sa
 };
 
 export const injectAttachmentSOAttributesFromRefs = (
-  savedObject: SavedObject<AttachmentPersistedAttributes>,
+  savedObject: SavedObject<AttachmentPersistedAttributes | Record<string, unknown>>,
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry
 ): AttachmentSavedObjectTransformed => {
-  const soExtractor = getAttachmentSOExtractor(savedObject.attributes);
+  const soExtractor = getAttachmentSOExtractor(
+    savedObject.attributes as Partial<AttachmentRequestAttributes>
+  );
   const so = soExtractor.populateFieldsFromReferences<AttachmentTransformedAttributes>(savedObject);
   const injectedAttributes = injectPersistableReferencesToSO(so.attributes, so.references, {
     persistableStateAttachmentTypeRegistry,
@@ -115,11 +117,11 @@ interface ExtractionResults {
 }
 
 export const extractAttachmentSORefsFromAttributes = (
-  attributes: AttachmentAttributes | AttachmentPatchAttributes,
+  attributes: AttachmentAttributesV2 | AttachmentPatchAttributes | AttachmentPersistedAttributes,
   references: SavedObjectReference[],
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry
 ): ExtractionResults => {
-  const soExtractor = getAttachmentSOExtractor(attributes);
+  const soExtractor = getAttachmentSOExtractor(attributes as Partial<AttachmentRequestAttributes>);
 
   const {
     transformedFields,

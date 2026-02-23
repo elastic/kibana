@@ -18,14 +18,21 @@ import type {
   AttachmentPersistedAttributes,
   AttachmentTransformedAttributes,
   AttachmentSavedObjectTransformed,
-} from '../../../common/types/attachments';
-import { AttachmentTransformedAttributesRt } from '../../../common/types/attachments';
+} from '../../../common/types/attachments_v1';
+import { AttachmentTransformedAttributesRt } from '../../../common/types/attachments_v1';
 import {
+  CASE_ATTACHMENT_SAVED_OBJECT,
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   MAX_ALERTS_PER_CASE,
   MAX_DOCS_PER_PAGE,
 } from '../../../../common/constants';
+import {
+  getAttachmentTypeFromAttributes,
+  getAttachmentTypeTransformer,
+} from '../schema_transformer';
+import { resolveAttachmentSavedObjectType } from '../utils';
+import type { UnifiedAttachmentAttributes } from '../../../common/types/attachments_v2';
 import { buildFilter, combineFilters } from '../../../client/utils';
 import type {
   AttachmentTotals,
@@ -59,10 +66,48 @@ export class AttachmentGetter {
         `Attempting to retrieve attachments with ids: ${attachmentIds.join()}`
       );
 
-      const response =
+      // Try to get from both SO types (new SO first, then fallback to old SO)
+      // We need to try both because we don't know which SO type was used when creating
+      const newSORequests = attachmentIds.map((id) => ({
+        id,
+        type: CASE_ATTACHMENT_SAVED_OBJECT,
+      }));
+      const oldSORequests = attachmentIds.map((id) => ({
+        id,
+        type: CASE_COMMENT_SAVED_OBJECT,
+      }));
+
+      // Try new SO first
+      let response =
         await this.context.unsecuredSavedObjectsClient.bulkGet<AttachmentPersistedAttributes>(
-          attachmentIds.map((id) => ({ id, type: CASE_COMMENT_SAVED_OBJECT }))
+          newSORequests
         );
+
+      // For any errors or missing items, try old SO
+      const missingIds = response.saved_objects
+        .filter((so) => isSOError(so) || !so.attributes)
+        .map((so) => so.id);
+
+      if (missingIds.length > 0) {
+        const oldSOResponse =
+          await this.context.unsecuredSavedObjectsClient.bulkGet<AttachmentPersistedAttributes>(
+            oldSORequests.filter((req) => missingIds.includes(req.id))
+          );
+
+        // Merge results: use new SO results where available, fallback to old SO
+        const mergedResults = response.saved_objects.map((so) => {
+          if (isSOError(so) || !so.attributes) {
+            const oldSO = oldSOResponse.saved_objects.find((old) => old.id === so.id);
+            return oldSO || so;
+          }
+          return so;
+        });
+
+        response = {
+          ...response,
+          saved_objects: mergedResults,
+        };
+      }
 
       return this.transformAndDecodeBulkGetResponse(response);
     } catch (error) {
@@ -85,10 +130,27 @@ export class AttachmentGetter {
         // TODO: we should fix the return type of this bulkGet so that it can return errors
         validatedAttachments.push(so as AttachmentSavedObjectTransformed);
       } else {
-        const transformedAttachment = injectAttachmentAttributesAndHandleErrors(
+        let transformedAttachment = injectAttachmentAttributesAndHandleErrors(
           so,
           this.context.persistableStateAttachmentTypeRegistry
         );
+
+        if (so.type === CASE_ATTACHMENT_SAVED_OBJECT) {
+          const newAttributes = transformedAttachment.attributes;
+          const transformer = getAttachmentTypeTransformer(
+            getAttachmentTypeFromAttributes(newAttributes)
+          );
+          // TO-DO: get owner from case
+          const owner =
+            (newAttributes as { metadata?: { owner?: string } })?.metadata?.owner ??
+            'security_solution';
+          const oldSchemaAttributes = transformer.toOldSchema(newAttributes, owner);
+          transformedAttachment = {
+            ...transformedAttachment,
+            attributes: oldSchemaAttributes as AttachmentTransformedAttributes,
+          };
+        }
+
         const validatedAttributes = decodeOrThrow(AttachmentTransformedAttributesRt)(
           transformedAttachment.attributes
         );
@@ -108,29 +170,39 @@ export class AttachmentGetter {
         `Attempting to retrieve attachments associated with cases: [${caseIds}]`
       );
 
-      // We are intentionally not adding the type here because we only want to interact with the id and this function
-      // should not use the attributes
-      const finder = this.context.unsecuredSavedObjectsClient.createPointInTimeFinder<unknown>({
-        type: CASE_COMMENT_SAVED_OBJECT,
-        hasReference: caseIds.map((id) => ({ id, type: CASE_SAVED_OBJECT })),
-        sortField: 'created_at',
-        sortOrder: 'asc',
-        /**
-         * We only care about the ids so to reduce the data returned we should limit the fields in the response. Core
-         * doesn't support retrieving no fields (id would always be returned anyway) so to limit it we'll only request
-         * the owner even though we don't need it.
-         */
-        fields: ['owner'],
-        perPage: MAX_DOCS_PER_PAGE,
-      });
-
       const ids: string[] = [];
+      const caseReferences = caseIds.map((id) => ({ id, type: CASE_SAVED_OBJECT }));
 
-      for await (const attachmentSavedObject of finder.find()) {
+      // Query both SO types and merge results
+      const [oldSOFinder, newSOFinder] = await Promise.all([
+        this.context.unsecuredSavedObjectsClient.createPointInTimeFinder<unknown>({
+          type: CASE_COMMENT_SAVED_OBJECT,
+          hasReference: caseReferences,
+          sortField: 'created_at',
+          sortOrder: 'asc',
+          fields: ['owner'],
+          perPage: MAX_DOCS_PER_PAGE,
+        }),
+        this.context.unsecuredSavedObjectsClient.createPointInTimeFinder<unknown>({
+          type: CASE_ATTACHMENT_SAVED_OBJECT,
+          hasReference: caseReferences,
+          sortField: 'created_at',
+          sortOrder: 'asc',
+          perPage: MAX_DOCS_PER_PAGE,
+        }),
+      ]);
+
+      // Collect IDs from both SO types
+      for await (const attachmentSavedObject of oldSOFinder.find()) {
         ids.push(...attachmentSavedObject.saved_objects.map((attachment) => attachment.id));
       }
 
-      return ids;
+      for await (const attachmentSavedObject of newSOFinder.find()) {
+        ids.push(...attachmentSavedObject.saved_objects.map((attachment) => attachment.id));
+      }
+
+      // Remove duplicates (in case same ID exists in both, though it shouldn't)
+      return Array.from(new Set(ids));
     } catch (error) {
       this.context.log.error(
         `Error retrieving attachments associated with cases: [${caseIds}]: ${error}`
@@ -271,15 +343,40 @@ export class AttachmentGetter {
   public async get({ attachmentId }: GetAttachmentArgs): Promise<AttachmentSavedObjectTransformed> {
     try {
       this.context.log.debug(`Attempting to GET attachment ${attachmentId}`);
-      const res = await this.context.unsecuredSavedObjectsClient.get<AttachmentPersistedAttributes>(
-        CASE_COMMENT_SAVED_OBJECT,
+
+      const soType = await resolveAttachmentSavedObjectType(
+        this.context.unsecuredSavedObjectsClient,
         attachmentId
       );
+      if (soType === null) {
+        const error = new Error(`Attachment ${attachmentId} not found`) as Error & {
+          output?: { statusCode?: number };
+        };
+        error.output = { statusCode: 404 };
+        throw error;
+      }
 
-      const transformedAttachment = injectAttachmentSOAttributesFromRefs(
+      const res = await this.context.unsecuredSavedObjectsClient.get<
+        AttachmentPersistedAttributes | UnifiedAttachmentAttributes
+      >(soType, attachmentId);
+
+      let transformedAttachment = injectAttachmentSOAttributesFromRefs(
         res,
         this.context.persistableStateAttachmentTypeRegistry
       );
+
+      if (soType === CASE_ATTACHMENT_SAVED_OBJECT) {
+        const newAttributes = transformedAttachment.attributes;
+        const transformer = getAttachmentTypeTransformer(
+          getAttachmentTypeFromAttributes(newAttributes)
+        );
+        const owner = (newAttributes as { metadata?: { owner?: string } })?.metadata?.owner ?? '';
+        const oldSchemaAttributes = transformer.toOldSchema(newAttributes, owner);
+        transformedAttachment = {
+          ...transformedAttachment,
+          attributes: oldSchemaAttributes as AttachmentTransformedAttributes,
+        };
+      }
 
       const validatedAttributes = decodeOrThrow(AttachmentTransformedAttributesRt)(
         transformedAttachment.attributes

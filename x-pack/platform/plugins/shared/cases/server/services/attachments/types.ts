@@ -17,14 +17,17 @@ import type {
 import type { KueryNode } from '@kbn/es-query';
 import type { AttachmentType } from '../../../common';
 import type { AttachmentAttributes, AttachmentPatchAttributes } from '../../../common/types/domain';
+import type { AttachmentAttributesV2 } from '../../../common/types/domain/attachment/v2';
 import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
 import type { PartialField } from '../../types';
 import type { IndexRefresh } from '../types';
+import type { ConfigType } from '../../config';
 
 export interface ServiceContext {
   log: Logger;
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
+  config: ConfigType;
 }
 
 export interface AttachedToCaseArgs {
@@ -78,27 +81,31 @@ export interface DeleteAttachmentArgs extends IndexRefresh {
 }
 
 export interface CreateAttachmentArgs extends IndexRefresh {
-  attributes: AttachmentAttributes;
+  attributes: AttachmentAttributesV2;
   references: SavedObjectReference[];
   id: string;
+  owner: string;
 }
 
 export interface BulkCreateAttachments extends IndexRefresh {
   attachments: Array<{
-    attributes: AttachmentAttributes;
+    attributes: AttachmentAttributesV2;
     references: SavedObjectReference[];
     id: string;
   }>;
+  owner: string;
 }
 
 export interface UpdateArgs {
   attachmentId: string;
   updatedAttributes: AttachmentPatchAttributes;
   options?: Omit<SavedObjectsUpdateOptions<AttachmentAttributes>, 'upsert'>;
+  owner?: string;
 }
 
 export type UpdateAttachmentArgs = UpdateArgs;
 
 export interface BulkUpdateAttachmentArgs extends IndexRefresh {
   comments: UpdateArgs[];
+  owner?: string;
 }

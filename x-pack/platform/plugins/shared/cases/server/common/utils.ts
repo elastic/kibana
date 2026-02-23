@@ -16,6 +16,16 @@ import { flatMap, uniqWith, xorWith } from 'lodash';
 import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import type { LensEmbeddableStateWithType } from '@kbn/lens-plugin/server/embeddable/types';
+import {
+  isLegacyCommentRequest,
+  isUnifiedReferenceAttachmentRequest,
+} from '../../common/utils/attachments';
+import type {
+  AttachmentAttributesV2,
+  UnifiedAttachmentPayload,
+  UnifiedAttachmentAttributes,
+  UnifiedAttachment,
+} from '../../common/types/domain/attachment/v2';
 import type {
   ActionsAttachmentPayload,
   AlertAttachmentPayload,
@@ -54,7 +64,7 @@ import { dedupAssignees } from '../client/cases/utils';
 import type { CaseSavedObjectTransformed, CaseTransformedAttributes } from './types/case';
 import type {
   AttachmentRequest,
-  AttachmentsFindResponse,
+  AttachmentsFindResponseV2,
   CasePostRequest,
   CasesFindResponse,
 } from '../../common/types/api';
@@ -129,58 +139,77 @@ export const flattenCaseSavedObject = ({
   totalEvents = 0,
 }: {
   savedObject: CaseSavedObjectTransformed;
-  comments?: Array<SavedObject<AttachmentAttributes>>;
+  comments?: Array<SavedObject<AttachmentAttributesV2>>;
   totalComment?: number;
   totalAlerts?: number;
   totalEvents?: number;
-}): Case => ({
-  id: savedObject.id,
-  version: savedObject.version ?? '0',
-  comments: flattenCommentSavedObjects(comments),
-  totalComment,
-  totalAlerts,
-  totalEvents,
-  ...savedObject.attributes,
-});
+}): Case =>
+  ({
+    id: savedObject.id,
+    version: savedObject.version ?? '0',
+    comments: flattenCommentSavedObjects(comments),
+    totalComment,
+    totalAlerts,
+    totalEvents,
+    ...savedObject.attributes,
+  } as Case);
 
 export const transformComments = (
-  comments: SavedObjectsFindResponse<AttachmentAttributes>
-): AttachmentsFindResponse => ({
-  page: comments.page,
-  per_page: comments.per_page,
-  total: comments.total,
-  comments: flattenCommentSavedObjects(comments.saved_objects),
-});
+  comments: SavedObjectsFindResponse<AttachmentAttributesV2>
+): AttachmentsFindResponseV2 =>
+  ({
+    page: comments.page,
+    per_page: comments.per_page,
+    total: comments.total,
+    comments: flattenCommentSavedObjects(comments.saved_objects),
+  } as AttachmentsFindResponseV2);
 
 export const flattenCommentSavedObjects = (
-  savedObjects: Array<SavedObject<AttachmentAttributes>>
-): Attachment[] =>
-  savedObjects.reduce((acc: Attachment[], savedObject: SavedObject<AttachmentAttributes>) => {
-    acc.push(flattenCommentSavedObject(savedObject));
-    return acc;
-  }, []);
+  savedObjects: Array<SavedObject<AttachmentAttributesV2>>
+): Array<Attachment | UnifiedAttachment> =>
+  savedObjects.reduce<Array<Attachment | UnifiedAttachment>>(
+    (acc, savedObject: SavedObject<AttachmentAttributesV2>) => {
+      acc.push(flattenCommentSavedObject(savedObject));
+      return acc;
+    },
+    [] as Array<Attachment | UnifiedAttachment>
+  );
 
 export const flattenCommentSavedObject = (
-  savedObject: SavedObject<AttachmentAttributes>
-): Attachment => ({
-  id: savedObject.id,
-  version: savedObject.version ?? '0',
-  ...savedObject.attributes,
-});
+  savedObject: SavedObject<AttachmentAttributesV2>
+): Attachment | UnifiedAttachment =>
+  ({
+    id: savedObject.id,
+    version: savedObject.version ?? '0',
+    ...savedObject.attributes,
+  } as Attachment | UnifiedAttachment);
 
 export const getIDsAndIndicesAsArrays = (
-  comment: AlertAttachmentPayload | EventAttachmentPayload
+  comment: AlertAttachmentPayload | EventAttachmentPayload | UnifiedAttachmentPayload
 ): { ids: string[]; indices: string[] } => {
-  if (comment.type === AttachmentType.alert) {
+  if (isUnifiedReferenceAttachmentRequest(comment)) {
+    const indices = comment.metadata?.index as string[];
+    return {
+      ids: [comment.attachmentId],
+      indices,
+    };
+  }
+  if (isLegacyCommentRequest(comment) && comment.type === AttachmentType.alert) {
     return {
       ids: Array.isArray(comment.alertId) ? comment.alertId : [comment.alertId],
       indices: Array.isArray(comment.index) ? comment.index : [comment.index],
     };
   }
 
+  if (isLegacyCommentRequest(comment) && comment.type === AttachmentType.event) {
+    return {
+      ids: Array.isArray(comment.eventId) ? comment.eventId : [comment.eventId],
+      indices: Array.isArray(comment.index) ? comment.index : [comment.index],
+    };
+  }
   return {
-    ids: Array.isArray(comment.eventId) ? comment.eventId : [comment.eventId],
-    indices: Array.isArray(comment.index) ? comment.index : [comment.index],
+    ids: [],
+    indices: [],
   };
 };
 
@@ -225,6 +254,14 @@ type NewCommentArgs = AttachmentRequest & {
   profile_uid?: string;
 };
 
+type NewUnifiedCommentArgs = UnifiedAttachmentPayload & {
+  createdDate: string;
+  email?: string | null;
+  full_name?: string | null;
+  username?: string | null;
+  profile_uid?: string;
+};
+
 export const transformNewComment = ({
   createdDate,
   email,
@@ -232,7 +269,7 @@ export const transformNewComment = ({
   username,
   profile_uid: profileUid,
   ...comment
-}: NewCommentArgs): AttachmentAttributes => {
+}: NewCommentArgs | NewUnifiedCommentArgs): AttachmentAttributesV2 => {
   return {
     ...comment,
     created_at: createdDate,

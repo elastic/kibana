@@ -44,11 +44,13 @@ export interface GetCasesArgs {
 
 export interface FindCommentsArgs {
   id: string | string[];
+  namespaces: string[];
   options?: SavedObjectFindOptionsKueryNode;
 }
 
 export interface FindCaseCommentsArgs {
   id: string | string[];
+  namespaces: string[];
   options?: SavedObjectFindOptionsKueryNode;
 }
 

@@ -8,20 +8,23 @@
 import { SavedObjectsUtils } from '@kbn/core/server';
 
 import type { AttachmentRequest } from '../../../common/types/api';
-import { BulkCreateAttachmentsRequestRt } from '../../../common/types/api';
+import { BulkCreateAttachmentsRequestRtV2 } from '../../../common/types/api/attachment/v2';
 import type { Case } from '../../../common/types/domain';
+import type { UnifiedAttachmentPayload } from '../../../common/types/domain/attachment/v2';
 import { decodeWithExcessOrThrow } from '../../common/runtime_types';
 
 import { CaseCommentModel } from '../../common/models';
 import { createCaseError } from '../../common/error';
 import type { CasesClientArgs } from '..';
 
-import { decodeCommentRequest } from '../utils';
+import { decodeCombinedCommentRequest } from '../utils';
 import type { OwnerEntity } from '../../authorization';
 import { Operations } from '../../authorization';
 import type { BulkCreateArgs } from './types';
 import { validateRegisteredAttachments } from './validators';
 import { validateMaxUserActions } from '../../common/validators';
+import { getCaseOwner } from './utils';
+import { isLegacyCommentRequest } from '../../../common/utils/attachments';
 
 export const bulkCreate = async (
   args: BulkCreateArgs,
@@ -39,15 +42,20 @@ export const bulkCreate = async (
   } = clientArgs;
 
   try {
-    decodeWithExcessOrThrow(BulkCreateAttachmentsRequestRt)(attachments);
+    decodeWithExcessOrThrow(BulkCreateAttachmentsRequestRtV2)(attachments);
     await validateMaxUserActions({
       caseId,
       userActionService,
       userActionsToAdd: attachments.length,
     });
+    const caseOwner = await getCaseOwner(caseId, clientArgs);
 
     attachments.forEach((attachment) => {
-      decodeCommentRequest(attachment, externalReferenceAttachmentTypeRegistry);
+      decodeCombinedCommentRequest(
+        attachment,
+        externalReferenceAttachmentTypeRegistry,
+        unifiedAttachmentTypeRegistry
+      );
       validateRegisteredAttachments({
         query: attachment,
         persistableStateAttachmentTypeRegistry,
@@ -57,14 +65,17 @@ export const bulkCreate = async (
     });
 
     const [attachmentsWithIds, entities]: [
-      Array<{ id: string } & AttachmentRequest>,
+      Array<{ id: string } & (AttachmentRequest | UnifiedAttachmentPayload)>,
       OwnerEntity[]
-    ] = attachments.reduce<[Array<{ id: string } & AttachmentRequest>, OwnerEntity[]]>(
+    ] = attachments.reduce<
+      [Array<{ id: string } & (AttachmentRequest | UnifiedAttachmentPayload)>, OwnerEntity[]]
+    >(
       ([a, e], attachment) => {
         const savedObjectID = SavedObjectsUtils.generateId();
+        const owner = isLegacyCommentRequest(attachment) ? attachment.owner : caseOwner;
         return [
           [...a, { id: savedObjectID, ...attachment }],
-          [...e, { owner: attachment.owner, id: savedObjectID }],
+          [...e, { owner, id: savedObjectID }],
         ];
       },
       [[], []]
@@ -78,6 +89,7 @@ export const bulkCreate = async (
     const model = await CaseCommentModel.create(caseId, clientArgs);
     const updatedModel = await model.bulkCreate({
       attachments: attachmentsWithIds,
+      owner: caseOwner,
     });
 
     return await updatedModel.encodeWithComments();

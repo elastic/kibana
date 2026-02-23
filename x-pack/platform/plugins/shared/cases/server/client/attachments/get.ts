@@ -7,6 +7,8 @@
 
 import type { SavedObject } from '@kbn/core/server';
 
+import { spaceIdToNamespace } from '@kbn/spaces-plugin/server/lib/utils/namespace';
+import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import type {
   AlertAttachmentAttributes,
   Attachment,
@@ -123,6 +125,7 @@ export async function find(
     services: { attachmentService },
     logger,
     authorization,
+    spaceId,
   } = clientArgs;
 
   try {
@@ -133,7 +136,7 @@ export async function find(
 
     const filter = combineFilters([
       buildFilter({
-        filters: [AttachmentType.user],
+        filters: [AttachmentType.user, 'comment'],
         field: 'type',
         operator: 'or',
         type: CASE_COMMENT_SAVED_OBJECT,
@@ -141,8 +144,9 @@ export async function find(
       authorizationFilter,
     ]);
 
-    const theComments = await attachmentService.find({
-      options: {
+    const namespaces = [spaceIdToNamespace(spaceId) ?? DEFAULT_NAMESPACE_STRING];
+    const theComments = await attachmentService.findViaSearch(
+      {
         page: queryParams?.page ?? DEFAULT_PAGE,
         perPage: queryParams?.perPage ?? DEFAULT_PER_PAGE,
         ...(queryParams?.sortOrder && { sortOrder: queryParams?.sortOrder }),
@@ -150,11 +154,12 @@ export async function find(
         hasReference: { type: CASE_SAVED_OBJECT, id: caseID },
         filter,
       },
-    });
+      namespaces
+    );
 
     ensureSavedObjectsAreAuthorized(
       theComments.saved_objects.map((comment) => ({
-        owner: comment.attributes.owner,
+        owner: comment.attributes.owner ?? 'securitySolution',
         id: comment.id,
       }))
     );
@@ -224,8 +229,10 @@ export async function getAll(
       Operations.getAllComments
     );
 
+    const namespaces = [spaceIdToNamespace(clientArgs.spaceId) ?? DEFAULT_NAMESPACE_STRING];
     const comments = await caseService.getAllCaseComments({
       id: caseID,
+      namespaces,
       options: {
         filter,
         sortField: defaultSortField,

@@ -10,12 +10,15 @@ import Boom from '@hapi/boom';
 import { AttachmentPatchRequestRt } from '../../../common/types/api';
 import { CaseCommentModel } from '../../common/models';
 import { createCaseError } from '../../common/error';
-import { isCommentRequestTypeExternalReference } from '../../../common/utils/attachments';
+import {
+  isCommentRequestTypeExternalReference,
+  toUnifiedAttachmentType,
+} from '../../../common/utils/attachments';
 import type { Case } from '../../../common/types/domain';
 import { decodeWithExcessOrThrow } from '../../common/runtime_types';
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
 import type { CasesClientArgs } from '..';
-import { decodeCommentRequest } from '../utils';
+import { decodeCombinedCommentRequest } from '../utils';
 import { Operations } from '../../authorization';
 import type { UpdateArgs } from './types';
 import { validateMaxUserActions } from '../../common/validators';
@@ -34,6 +37,7 @@ export async function update(
     logger,
     authorization,
     externalReferenceAttachmentTypeRegistry,
+    unifiedAttachmentTypeRegistry,
   } = clientArgs;
 
   try {
@@ -48,7 +52,11 @@ export async function update(
       userActionsToAdd: 1,
     });
 
-    decodeCommentRequest(queryRestAttributes, externalReferenceAttachmentTypeRegistry);
+    decodeCombinedCommentRequest(
+      queryRestAttributes,
+      externalReferenceAttachmentTypeRegistry,
+      unifiedAttachmentTypeRegistry
+    );
 
     const myComment = await attachmentService.getter.get({
       attachmentId: queryCommentId,
@@ -65,7 +73,10 @@ export async function update(
 
     const model = await CaseCommentModel.create(caseID, clientArgs);
 
-    if (myComment.attributes.type !== queryRestAttributes.type) {
+    // Normalize both types before comparing (handles 'user' vs 'comment')
+    const savedType = toUnifiedAttachmentType(myComment.attributes.type);
+    const requestType = toUnifiedAttachmentType(queryRestAttributes.type);
+    if (savedType !== requestType) {
       throw Boom.badRequest(`You cannot change the type of the comment.`);
     }
 

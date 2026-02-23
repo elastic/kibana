@@ -9,8 +9,11 @@ import * as rt from 'io-ts';
 import { AttachmentRequestWithoutRefsRt } from '../../../api/attachment/v1';
 import { UserActionTypes } from '../action/v1';
 import { AttachmentPayloadRt } from '../../attachment/v1';
+import { UnifiedAttachmentPayloadRt } from '../../attachment/v2';
 
-export const CommentUserActionPayloadRt = rt.strict({ comment: AttachmentPayloadRt });
+export const CommentUserActionPayloadRt = rt.strict({
+  comment: rt.union([AttachmentPayloadRt, UnifiedAttachmentPayloadRt]),
+});
 
 export const CommentUserActionPayloadWithoutIdsRt = rt.strict({
   comment: AttachmentRequestWithoutRefsRt,
