@@ -17,6 +17,7 @@ import { useWaterfallFetcher } from '../transaction_details/use_waterfall_fetche
 import { useUnifiedWaterfallFetcher } from '../transaction_details/use_unified_waterfall_fetcher';
 import { WaterfallWithSummary } from '../transaction_details/waterfall_with_summary';
 import type { TransactionTab } from '../transaction_details/waterfall_with_summary/transaction_tabs';
+import { isPending } from '../../../hooks/use_fetcher';
 
 export function TraceExplorerWaterfall() {
   const history = useHistory();
@@ -127,9 +128,8 @@ export function TraceExplorerWaterfall() {
   );
 
   const isWaterfallLoading = waterfallFetchResult.useUnified
-    ? unifiedWaterfallFetchResult.status === FETCH_STATUS.LOADING &&
-      !unifiedWaterfallFetchResult.entryTransaction
-    : waterfallFetchResult.status === FETCH_STATUS.LOADING &&
+    ? isPending(unifiedWaterfallFetchResult.status) && !unifiedWaterfallFetchResult.entryTransaction
+    : isPending(waterfallFetchResult.status) &&
       !waterfallFetchResult.waterfall.entryWaterfallTransaction;
 
   return (
