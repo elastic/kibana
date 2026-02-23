@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { SummaryViewContent } from './summary_view_content';
+import { AttacksSummaryPanel } from './attacks_summary_panel';
 import { TestProviders } from '../../../../common/mock';
 
 jest.mock('./attacks_volume_panel/attacks_volume_panel', () => ({
@@ -19,17 +19,20 @@ jest.mock('./attacks_list_panel/attacks_list_panel', () => ({
   AttacksListPanel: () => <div data-test-subj="mock-attacks-list-panel" />,
 }));
 
-describe('<SummaryViewContent />', () => {
+describe('<AttacksSummaryPanel />', () => {
   const defaultProps = {
     filters: [],
     query: undefined,
     dataView: {} as DataView,
+    title: 'Summary',
+    isExpanded: true,
+    setIsExpanded: jest.fn(),
   };
 
   it('renders summary view content', () => {
     render(
       <TestProviders>
-        <SummaryViewContent {...defaultProps} />
+        <AttacksSummaryPanel {...defaultProps} />
       </TestProviders>
     );
 
@@ -39,7 +42,7 @@ describe('<SummaryViewContent />', () => {
   it('renders AttacksVolumePanel', () => {
     render(
       <TestProviders>
-        <SummaryViewContent {...defaultProps} />
+        <AttacksSummaryPanel {...defaultProps} />
       </TestProviders>
     );
 
@@ -49,7 +52,7 @@ describe('<SummaryViewContent />', () => {
   it('renders AttacksListPanel', () => {
     render(
       <TestProviders>
-        <SummaryViewContent {...defaultProps} />
+        <AttacksSummaryPanel {...defaultProps} />
       </TestProviders>
     );
 
