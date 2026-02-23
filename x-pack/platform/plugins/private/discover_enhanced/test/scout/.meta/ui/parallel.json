@@ -1,6 +1,5 @@
 {
-  "lastModified": "2026-02-06T14:35:07.931Z",
-  "sha1": "488aced1a94e02074aec4073cc1fcdf93552fc4e",
+  "sha1": "4f0c5c041e4229813210d3dea972cbae39b8f585",
   "tests": [
     {
       "id": "448e82090e00e69-f2cd2d3cdc77643",
@@ -31,6 +30,138 @@
         "file": "x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/parallel_tests/error_handling.spec.ts",
         "line": 31,
         "column": 12
+      }
+    },
+    {
+      "id": "96dc43247652ad2-5dffb57f64bb9de",
+      "title": "Metrics in Discover - Grid should render metrics grid with cards",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/parallel_tests/metrics_experience/grid.spec.ts",
+        "line": 37,
+        "column": 14
+      }
+    },
+    {
+      "id": "96dc43247652ad2-f2ef49ddfad8ddc",
+      "title": "Metrics in Discover - Grid should render grid with WHERE filter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/parallel_tests/metrics_experience/grid.spec.ts",
+        "line": 51,
+        "column": 14
+      }
+    },
+    {
+      "id": "96dc43247652ad2-67aeead5ce34d63",
+      "title": "Metrics in Discover - Grid should render grid with LIMIT",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/parallel_tests/metrics_experience/grid.spec.ts",
+        "line": 58,
+        "column": 14
+      }
+    },
+    {
+      "id": "96dc43247652ad2-d62abe4ab8aa5fe",
+      "title": "Metrics in Discover - Grid should render grid with SORT",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/parallel_tests/metrics_experience/grid.spec.ts",
+        "line": 65,
+        "column": 14
+      }
+    },
+    {
+      "id": "96dc43247652ad2-14688950b91de99",
+      "title": "Metrics in Discover - Grid should not render grid with FROM command",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/parallel_tests/metrics_experience/grid.spec.ts",
+        "line": 72,
+        "column": 14
+      }
+    },
+    {
+      "id": "96dc43247652ad2-02d09836901d31f",
+      "title": "Metrics in Discover - Grid should not render grid with STATS command",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/parallel_tests/metrics_experience/grid.spec.ts",
+        "line": 77,
+        "column": 14
       }
     },
     {

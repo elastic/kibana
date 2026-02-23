@@ -1,0 +1,18 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "react",
+      "@emotion/react/types/css-prop",
+      "@kbn/ambient-ui-types",
+      "@testing-library/jest-dom"
+    ]
+  },
+  "include": ["**/*.ts", "**/*.tsx"],
+  "exclude": ["target/**/*"],
+  "kbn_references": [
+    "@kbn/react-kibana-context-theme"
+  ]
+}
