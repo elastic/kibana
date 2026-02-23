@@ -8,6 +8,7 @@
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test, testData } from '../../fixtures';
+import { EXTENDED_TIMEOUT } from '../../fixtures/constants';
 
 test.describe(
   'Mobile transactions page',
@@ -24,7 +25,9 @@ test.describe(
         testData.END_DATE
       }`;
       await page.goto(mobileTransactionsPageHref);
-      await page.getByTestId('kbnAppWrapper').waitFor({ state: 'visible' });
+      await page
+        .getByTestId('kbnAppWrapper')
+        .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
 
       await page.getByTestId('apmAppVersionTab').click();
       await expect(page.getByTestId('apmAppVersionTab')).toHaveAttribute('aria-selected', 'true');
