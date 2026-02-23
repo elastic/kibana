@@ -45,7 +45,6 @@ describe('useVarGroupCloudConnector hook', () => {
 
     const { result } = renderHook(() =>
       useVarGroupCloudConnector({
-        enabled: true,
         varGroups: undefined,
         varGroupSelections: selections,
         updatePackagePolicy: mockUpdatePackagePolicy,
@@ -64,7 +63,6 @@ describe('useVarGroupCloudConnector hook', () => {
 
     const { result } = renderHook(() =>
       useVarGroupCloudConnector({
-        enabled: false,
         varGroups,
         varGroupSelections: selections,
         updatePackagePolicy: mockUpdatePackagePolicy,
@@ -82,7 +80,6 @@ describe('useVarGroupCloudConnector hook', () => {
 
     const { result } = renderHook(() =>
       useVarGroupCloudConnector({
-        enabled: true,
         varGroups,
         varGroupSelections: selections,
         updatePackagePolicy: mockUpdatePackagePolicy,
@@ -100,7 +97,6 @@ describe('useVarGroupCloudConnector hook', () => {
 
     const { result } = renderHook(() =>
       useVarGroupCloudConnector({
-        enabled: true,
         varGroups,
         varGroupSelections: selections,
         updatePackagePolicy: mockUpdatePackagePolicy,
@@ -119,7 +115,6 @@ describe('useVarGroupCloudConnector hook', () => {
 
     const { result } = renderHook(() =>
       useVarGroupCloudConnector({
-        enabled: true,
         varGroups,
         varGroupSelections: selections,
         updatePackagePolicy: mockUpdatePackagePolicy,
@@ -140,7 +135,6 @@ describe('useVarGroupCloudConnector hook', () => {
 
     const { result, rerender } = renderHook(() =>
       useVarGroupCloudConnector({
-        enabled: true,
         varGroups,
         varGroupSelections: selections,
         updatePackagePolicy: mockUpdatePackagePolicy,
@@ -163,7 +157,6 @@ describe('useVarGroupCloudConnector hook', () => {
 
     const { result, rerender } = renderHook(() =>
       useVarGroupCloudConnector({
-        enabled: true,
         varGroups,
         varGroupSelections: selections,
         updatePackagePolicy: mockUpdatePackagePolicy,
