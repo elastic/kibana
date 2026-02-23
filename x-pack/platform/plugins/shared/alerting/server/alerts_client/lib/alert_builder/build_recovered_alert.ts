@@ -99,7 +99,7 @@ export const buildRecoveredAlert = <
   const filteredAlertState = filterAlertState(alertState);
   const hasAlertState = Object.keys(filteredAlertState).length > 0;
 
-  // Preserve ALERT_MUTED from existing alert (materialized from rule SO)
+  // Preserve ALERT_MUTED from existing alert
   const alertMuted = get(alert, ALERT_MUTED);
 
   const alertUpdates = {
@@ -124,9 +124,7 @@ export const buildRecoveredAlert = <
     // Set latest match count, should be 0
     [ALERT_CONSECUTIVE_MATCHES]: legacyAlert.getActiveCount(),
     [ALERT_PENDING_RECOVERED_COUNT]: legacyAlert.getPendingRecoveredCount(),
-    // Preserve muted state from existing alert (materialized from rule SO).
-    // Snooze config lives on the rule SO, not on the doc, so no snooze fields
-    // need to be preserved or cleared here.
+    // Preserve muted state from existing alert
     ...(alertMuted !== undefined ? { [ALERT_MUTED]: alertMuted } : {}),
     // Set status to 'recovered'
     [ALERT_STATUS]: ALERT_STATUS_RECOVERED,
