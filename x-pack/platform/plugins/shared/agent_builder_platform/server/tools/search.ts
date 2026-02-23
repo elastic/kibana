@@ -49,6 +49,7 @@ Note:
       const results = await runSearchTool({
         nlQuery,
         index,
+        allowPatternTarget: true,
         esClient: esClient.asCurrentUser,
         model: await modelProvider.getDefaultModel(),
         events,

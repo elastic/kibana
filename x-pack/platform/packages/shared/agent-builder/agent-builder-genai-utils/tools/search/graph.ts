@@ -33,6 +33,8 @@ const StateAnnotation = Annotation.Root({
   targetPattern: Annotation<string | undefined>(),
   rowLimit: Annotation<number | undefined>(),
   customInstructions: Annotation<string | undefined>(),
+  /** When true, pattern targets (e.g. logs-*) search all matching indices. When false, a single index is chosen via index explorer. */
+  allowPatternTarget: Annotation<boolean>(),
   // inner
   indexIsValid: Annotation<boolean>(),
   searchTarget: Annotation<SearchTarget>(),
@@ -50,6 +52,14 @@ const StateAnnotation = Annotation.Root({
 
 export type StateType = typeof StateAnnotation.State;
 
+const isPatternTargetEnabled = (
+  state: StateType
+): state is StateType & { targetPattern: string } => {
+  return Boolean(
+    state.allowPatternTarget && state.targetPattern && isIndexPattern(state.targetPattern)
+  );
+};
+
 export const createSearchToolGraph = ({
   model,
   esClient,
@@ -61,10 +71,6 @@ export const createSearchToolGraph = ({
   logger: Logger;
   events: ToolEventEmitter;
 }) => {
-  const hasPatternTarget = (state: StateType) => {
-    return Boolean(state.targetPattern && isIndexPattern(state.targetPattern));
-  };
-
   const getTools = (state: StateType) => {
     const relevanceTool = createRelevanceSearchTool({ model, esClient, events, logger });
     const nlSearchTool = createNaturalLanguageSearchTool({
@@ -81,7 +87,7 @@ export const createSearchToolGraph = ({
   const selectAndValidateIndex = async (state: StateType) => {
     events?.reportProgress(progressMessages.selectingTarget());
 
-    if (state.targetPattern && isIndexPattern(state.targetPattern)) {
+    if (isPatternTargetEnabled(state)) {
       const sources = await listSearchSources({
         pattern: state.targetPattern,
         excludeIndicesRepresentedAsDatastream: true,
@@ -135,7 +141,7 @@ export const createSearchToolGraph = ({
     if (!state.indexIsValid) {
       return '__end__';
     }
-    return hasPatternTarget(state) ? 'get_nl_search_tool' : 'agent';
+    return isPatternTargetEnabled(state) ? 'get_nl_search_tool' : 'agent';
   };
 
   const callSearchAgent = async (state: StateType) => {
@@ -168,7 +174,7 @@ export const createSearchToolGraph = ({
   };
 
   const getNlSearchTool = async (state: StateType) => {
-    if (!hasPatternTarget(state)) {
+    if (!isPatternTargetEnabled(state)) {
       throw new Error('get_nl_search_tool should only be called for pattern targets');
     }
 
