@@ -253,10 +253,6 @@ export const IP_REPUTATION_LINKS_SETTING_DEFAULT = `[
 export const SHOW_RELATED_INTEGRATIONS_SETTING =
   'securitySolution:showRelatedIntegrations' as const;
 
-/** This Kibana Advanced Setting enables extended rule execution logging to Event Log */
-export const EXTENDED_RULE_EXECUTION_LOGGING_ENABLED_SETTING =
-  'securitySolution:extendedRuleExecutionLoggingEnabled' as const;
-
 /** This Kibana Advanced Setting sets minimum log level starting from which execution logs will be written to Event Log */
 export const EXTENDED_RULE_EXECUTION_LOGGING_MIN_LEVEL_SETTING =
   'securitySolution:extendedRuleExecutionLoggingMinLevel' as const;

@@ -277,6 +277,7 @@
     "@kbn/core-security-common",
     "@kbn/entity-store",
     "@kbn/workflows-extensions",
-    "@kbn/workflows-management-plugin"
+    "@kbn/workflows-management-plugin",
+    "@kbn/as-code-filters-transforms"
   ]
 }
