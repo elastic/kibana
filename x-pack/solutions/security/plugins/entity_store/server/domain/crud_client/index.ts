@@ -72,6 +72,7 @@ export class CRUDClient {
       doc: readyDoc,
       doc_as_upsert: true,
       retry_on_conflict: 3,
+      refresh: 'wait_for',
     });
 
     switch (result as Result) {
