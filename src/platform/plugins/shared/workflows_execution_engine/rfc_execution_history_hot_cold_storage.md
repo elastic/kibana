@@ -343,6 +343,8 @@ The migration task should provide visibility into its health and effectiveness. 
 - Surfacing migration task status (last run time, success/failure) in the Workflow Execution Manager UI or a health endpoint.
 - Alerting operators when the migration task has not run successfully within a configurable window, indicating potential issues with Task Manager or Elasticsearch availability.
 
+> **Note**: Once the System Workflows feature is delivered, the migration task could be replaced with a system workflow (e.g., `execution_history_migration_workflow`). This would give the migration process the same orchestration, observability, debugging, and retry capabilities that user-facing workflows have -- out of the box, with no custom task management code.
+
 ## Benefits and Trade-offs
 
 ### Benefits
