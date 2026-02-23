@@ -64,7 +64,7 @@ export const AttackEntitiesDetails: React.FC = memo(() => {
         <EuiTitle size="xs">
           <h3>
             <FormattedMessage
-              id="xpack.securitySolution.flyout.left.insights.entities.userDetailsTitle"
+              id="xpack.securitySolution.flyout.attackDetails.left.insights.entities.userDetailsTitle"
               defaultMessage="{userCount, plural, one {User} other {Users}}:"
               values={{ userCount: userNames.length }}
             />
@@ -88,7 +88,7 @@ export const AttackEntitiesDetails: React.FC = memo(() => {
         <EuiTitle size="xs">
           <h3>
             <FormattedMessage
-              id="xpack.securitySolution.flyout.left.insights.entities.hostDetailsTitle"
+              id="xpack.securitySolution.flyout.attackDetails.left.insights.entities.hostDetailsTitle"
               defaultMessage="{hostCount, plural, one {Host} other {Hosts}}:"
               values={{ hostCount: hostNames.length }}
             />
