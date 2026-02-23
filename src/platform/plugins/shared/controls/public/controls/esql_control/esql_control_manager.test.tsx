@@ -16,8 +16,12 @@ import { BehaviorSubject } from 'rxjs';
 const MOCK_VALUES_FROM_QUERY = ['option1', 'option2', 'option3', 'option4', 'option5'];
 
 jest.mock('./utils/get_esql_single_column_values', () => {
-  const fn = jest.fn(async () => ({ values: MOCK_VALUES_FROM_QUERY }));
-  (fn as any).isSuccess = () => true;
+  const fn = Object.assign(
+    jest.fn(async () => ({ values: MOCK_VALUES_FROM_QUERY })),
+    {
+      isSuccess: () => true,
+    }
+  );
   return { getESQLSingleColumnValues: fn };
 });
 
