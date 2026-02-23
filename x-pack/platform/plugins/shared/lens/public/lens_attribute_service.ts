@@ -49,7 +49,7 @@ export function getLensAttributeService(http: HttpStart): LensAttributesService 
       // TypeScript's excess property checking doesn't catch extra properties in spreads
       const attributes = ensureExactAttributes({
         ...attributesWithoutId,
-        state: attributesWithoutId.state as LensSavedObjectAttributes['state'],
+        state: attributesWithoutId.state satisfies LensSavedObjectAttributes['state'],
       });
 
       return {
