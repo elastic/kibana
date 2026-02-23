@@ -846,7 +846,6 @@ export function useOnSubmit({
       agentCount,
       agentPolicies,
       selectedPolicyTab,
-      isAgentlessIntegration,
       getAgentlessStatusForPackage,
       packageInfo,
       isAgentlessAgentPolicy,
