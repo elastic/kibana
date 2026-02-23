@@ -21,8 +21,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const log = getService('log');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/250420
-  describe.skip('dashboard add ES|QL chart', function () {
+  describe('dashboard add ES|QL chart', function () {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.importExport.load(
@@ -117,7 +116,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await header.waitUntilLoadingHasFinished();
 
       await testSubjects.click('applyFlyoutButton');
-      expect(await testSubjects.exists('mtrVis')).to.be(true);
+      await dashboard.waitForRenderComplete();
+      await retry.try(async () => {
+        expect(await testSubjects.exists('mtrVis')).to.be(true);
+      });
     });
 
     it('should add a second panel and remove when hitting cancel', async () => {
