@@ -133,7 +133,7 @@ export const getAssetCriticalityEsqlTool = (
   id: ENTITY_ANALYSIS_ASSET_CRITICALITY_INLINE_TOOL_ID,
   type: ToolType.builtin,
   schema: entityAnalyticsCommonSchema,
-  description: `Call this tool to get the asset criticality value for security host entities.`,
+  description: `Call this tool to get the asset criticality value for security entities (hosts, users, services, generic).`,
   handler: async (args, context) =>
     assetCriticalityDynamicInlineToolHandler(args as EntityAnalyticsCommonType, {
       ...context,

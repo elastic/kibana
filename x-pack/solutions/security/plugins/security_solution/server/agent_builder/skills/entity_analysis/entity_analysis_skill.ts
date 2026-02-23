@@ -27,8 +27,8 @@ export interface EntityAnalysisSkillsContext {
 
 export const getEntityAnalysisSkill = (ctx: EntityAnalysisSkillsContext) =>
   defineSkillType({
-    id: 'entity-analysis',
-    name: 'entity-analysis',
+    id: 'entity-analytics',
+    name: 'entity-analytics',
     basePath: 'skills/security/entities',
     description: `Guide to investigating security entities (hosts, users, services, generic). Analyze how an entity's risk score has changed over time (e.g. last 90 days), show the riskiest entity and its inputs, sort and rank the top security entities by risk scores, criticality, risk inputs and behaviors.`,
     content: `# Entity Analysis Guide

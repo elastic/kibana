@@ -4,7 +4,7 @@ Evaluation test suites for the SIEM Entity Analytics skill, built on top of [`@k
 
 ## Overview
 
-This test suite contains evaluation tests specifically for the SIEM Entity Analytics skill (`entity-analysis`), which provides entity analytics capabilities.
+This test suite contains evaluation tests specifically for the SIEM Entity Analytics skill (`entity-analytics`), which provides entity analytics capabilities.
 
 For general information about writing evaluation tests, configuration, and usage, see the main [`@kbn/evals` documentation](../../../../platform/packages/shared/kbn-evals/README.md).
 
