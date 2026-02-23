@@ -235,7 +235,7 @@ function getStatusComponents(agentUpgradeDetails?: AgentUpgradeDetails) {
     case 'UPG_ROLLBACK':
       return {
         Badge: (
-          <EuiBadge color="danger" iconType="returnKey">
+          <EuiBadge color="warning" iconType="returnKey">
             <FormattedMessage
               id="xpack.fleet.agentUpgradeStatusBadge.upgradeRolledBack"
               defaultMessage="Upgrade rolled back"
