@@ -114,7 +114,7 @@
           "\nPublic-facing contract for the attachment service."
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-        "lineNumber": 67,
+        "lineNumber": 92,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -144,7 +144,7 @@
               "<TAttachment>) => void"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-            "lineNumber": 71,
+            "lineNumber": 96,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -162,7 +162,7 @@
                   "string"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-                "lineNumber": 78,
+                "lineNumber": 103,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -188,7 +188,7 @@
                   "<TAttachment>"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-                "lineNumber": 79,
+                "lineNumber": 104,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -222,7 +222,7 @@
               "<TAttachment> | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-            "lineNumber": 82,
+            "lineNumber": 107,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -240,7 +240,7 @@
                   "string"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-                "lineNumber": 89,
+                "lineNumber": 114,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -274,7 +274,7 @@
           "<TAttachment>"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-        "lineNumber": 38,
+        "lineNumber": 57,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -292,7 +292,7 @@
               "(attachment: TAttachment) => string"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-            "lineNumber": 42,
+            "lineNumber": 61,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -308,7 +308,7 @@
                   "TAttachment"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-                "lineNumber": 45,
+                "lineNumber": 64,
                 "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -332,7 +332,7 @@
               ") | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-            "lineNumber": 46,
+            "lineNumber": 65,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -341,79 +341,109 @@
           },
           {
             "parentPluginId": "@kbn/agent-builder-browser",
-            "id": "def-common.AttachmentUIDefinition.renderContent",
+            "id": "def-common.AttachmentUIDefinition.onClick",
             "type": "Function",
             "tags": [],
-            "label": "renderContent",
+            "label": "onClick",
             "description": [
-              "\nRenders the attachment content in view mode.\nIf not provided, a default JSON renderer will be used by consumers."
+              "\nOptional custom click handler for attachment pills.\nWhen provided, pills will invoke this instead of the default behavior."
             ],
             "signature": [
-              "((props: ",
-              "AttachmentContentProps",
-              "<TAttachment>) => React.ReactNode) | undefined"
+              "((args: { attachment: TAttachment; version?: ",
+              "AttachmentVersion",
+              "<unknown> | undefined; }) => void) | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-            "lineNumber": 50,
+            "lineNumber": 69,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/agent-builder-browser",
-                "id": "def-common.AttachmentUIDefinition.renderContent.$1",
+                "id": "def-common.AttachmentUIDefinition.onClick.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "props",
+                "label": "args",
                 "description": [],
-                "signature": [
-                  "AttachmentContentProps",
-                  "<TAttachment>"
-                ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-                "lineNumber": 54,
+                "lineNumber": 73,
                 "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/agent-builder-browser",
+                    "id": "def-common.AttachmentUIDefinition.onClick.$1.attachment",
+                    "type": "Uncategorized",
+                    "tags": [],
+                    "label": "attachment",
+                    "description": [],
+                    "signature": [
+                      "TAttachment"
+                    ],
+                    "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
+                    "lineNumber": 73,
+                    "columnNumber": 22,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/agent-builder-browser",
+                    "id": "def-common.AttachmentUIDefinition.onClick.$1.version",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "version",
+                    "description": [],
+                    "signature": [
+                      "AttachmentVersion",
+                      "<unknown> | undefined"
+                    ],
+                    "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
+                    "lineNumber": 73,
+                    "columnNumber": 47,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
               }
             ],
             "returnComment": []
           },
           {
             "parentPluginId": "@kbn/agent-builder-browser",
-            "id": "def-common.AttachmentUIDefinition.renderEditor",
+            "id": "def-common.AttachmentUIDefinition.renderInlineContent",
             "type": "Function",
             "tags": [],
-            "label": "renderEditor",
+            "label": "renderInlineContent",
             "description": [
-              "\nRenders the attachment editor in edit mode.\nIf not provided, the attachment type is not editable."
+              "\nOptional custom content renderer for inline attachment display.\nWhen provided, attachments can be rendered inline in the conversation\nusing the <render_attachment> tag."
             ],
             "signature": [
               "((props: ",
-              "AttachmentEditorProps",
+              "AttachmentRenderProps",
               "<TAttachment>) => React.ReactNode) | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-            "lineNumber": 55,
+            "lineNumber": 74,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/agent-builder-browser",
-                "id": "def-common.AttachmentUIDefinition.renderEditor.$1",
+                "id": "def-common.AttachmentUIDefinition.renderInlineContent.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "props",
                 "description": [],
                 "signature": [
-                  "AttachmentEditorProps",
+                  "AttachmentRenderProps",
                   "<TAttachment>"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-                "lineNumber": 59,
-                "columnNumber": 19,
+                "lineNumber": 79,
+                "columnNumber": 26,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -423,21 +453,87 @@
           },
           {
             "parentPluginId": "@kbn/agent-builder-browser",
-            "id": "def-common.AttachmentUIDefinition.isEditable",
-            "type": "CompoundType",
+            "id": "def-common.AttachmentUIDefinition.renderCanvasContent",
+            "type": "Function",
             "tags": [],
-            "label": "isEditable",
+            "label": "renderCanvasContent",
             "description": [
-              "\nWhether this attachment type supports editing.\nDefaults to false if renderEditor is not provided."
+              "\nOptional custom content renderer for canvas mode (expanded flyout view).\nWhen provided, attachments can be opened in an expanded view via action buttons."
             ],
             "signature": [
-              "boolean | undefined"
+              "((props: ",
+              "AttachmentRenderProps",
+              "<TAttachment>) => React.ReactNode) | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-            "lineNumber": 60,
+            "lineNumber": 80,
             "columnNumber": 3,
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/agent-builder-browser",
+                "id": "def-common.AttachmentUIDefinition.renderCanvasContent.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "props",
+                "description": [],
+                "signature": [
+                  "AttachmentRenderProps",
+                  "<TAttachment>"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
+                "lineNumber": 84,
+                "columnNumber": 26,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-browser",
+            "id": "def-common.AttachmentUIDefinition.getActionButtons",
+            "type": "Function",
+            "tags": [],
+            "label": "getActionButtons",
+            "description": [
+              "\nOptional function to provide action buttons for inline-rendered attachments.\nButtons will appear alongside or below the rendered content."
+            ],
+            "signature": [
+              "((params: ",
+              "GetActionButtonsParams",
+              "<TAttachment>) => ",
+              "ActionButton",
+              "[]) | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
+            "lineNumber": 85,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/agent-builder-browser",
+                "id": "def-common.AttachmentUIDefinition.getActionButtons.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  "GetActionButtonsParams",
+                  "<TAttachment>"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
+                "lineNumber": 89,
+                "columnNumber": 23,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -576,7 +672,7 @@
                 "section": "def-common.ToolResult",
                 "text": "ToolResult"
               },
-              "<Record<string, unknown>>[]"
+              "[]"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/tools/contract.ts",
             "lineNumber": 18,
