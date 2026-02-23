@@ -658,31 +658,48 @@ describe('UiamService', () => {
       });
 
       const keys = [
-        { type: 'elasticsearch' as const, key: 'es-api-key-base64', endpoint: 'https://es.example.com' },
+        {
+          type: 'elasticsearch' as const,
+          key: 'es-api-key-base64',
+          endpoint: 'https://es.example.com',
+        },
       ];
 
       await expect(uiamService.convertApiKeys(keys)).resolves.toEqual(mockResponse);
 
       expect(fetchSpy).toHaveBeenCalledTimes(1);
-      expect(fetchSpy).toHaveBeenCalledWith(
-        'https://uiam.service/uiam/api/v1/api-keys/_convert',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
-          },
-          body: JSON.stringify({ keys }),
-          dispatcher: AGENT_MOCK,
-        }
-      );
+      expect(fetchSpy).toHaveBeenCalledWith('https://uiam.service/uiam/api/v1/api-keys/_convert', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
+        },
+        body: JSON.stringify({ keys }),
+        dispatcher: AGENT_MOCK,
+      });
     });
 
     it('properly calls UIAM service to convert multiple API keys', async () => {
       const mockResponse = {
         results: [
-          { status: 'success', id: 'key-1', key: 'essu_key_1', description: 'key 1', organization_id: 'org-1', internal: true, role_assignments: {}, creation_date: '2026-01-01T00:00:00Z', expiration_date: null },
-          { status: 'failed', code: 'ES_API_KEY_AUTHENTICATION_FAILED', message: 'Auth failed', resource: null, type: 'UNKNOWN' },
+          {
+            status: 'success',
+            id: 'key-1',
+            key: 'essu_key_1',
+            description: 'key 1',
+            organization_id: 'org-1',
+            internal: true,
+            role_assignments: {},
+            creation_date: '2026-01-01T00:00:00Z',
+            expiration_date: null,
+          },
+          {
+            status: 'failed',
+            code: 'ES_API_KEY_AUTHENTICATION_FAILED',
+            message: 'Auth failed',
+            resource: null,
+            type: 'UNKNOWN',
+          },
         ],
       };
 
@@ -699,18 +716,15 @@ describe('UiamService', () => {
       await expect(uiamService.convertApiKeys(keys)).resolves.toEqual(mockResponse);
 
       expect(fetchSpy).toHaveBeenCalledTimes(1);
-      expect(fetchSpy).toHaveBeenCalledWith(
-        'https://uiam.service/uiam/api/v1/api-keys/_convert',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
-          },
-          body: JSON.stringify({ keys }),
-          dispatcher: AGENT_MOCK,
-        }
-      );
+      expect(fetchSpy).toHaveBeenCalledWith('https://uiam.service/uiam/api/v1/api-keys/_convert', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
+        },
+        body: JSON.stringify({ keys }),
+        dispatcher: AGENT_MOCK,
+      });
     });
 
     it('throws error if conversion fails with 400 status code', async () => {
@@ -730,18 +744,15 @@ describe('UiamService', () => {
       );
 
       expect(fetchSpy).toHaveBeenCalledTimes(1);
-      expect(fetchSpy).toHaveBeenCalledWith(
-        'https://uiam.service/uiam/api/v1/api-keys/_convert',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
-          },
-          body: JSON.stringify({ keys }),
-          dispatcher: AGENT_MOCK,
-        }
-      );
+      expect(fetchSpy).toHaveBeenCalledWith('https://uiam.service/uiam/api/v1/api-keys/_convert', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
+        },
+        body: JSON.stringify({ keys }),
+        dispatcher: AGENT_MOCK,
+      });
     });
   });
 });

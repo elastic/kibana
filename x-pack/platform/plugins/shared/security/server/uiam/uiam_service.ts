@@ -75,7 +75,17 @@ export interface ConvertUiamApiKeysRequestBody {
  */
 export interface ConvertUiamApiKeysResponse {
   results: Array<
-    | { status: 'success'; id: string; key: string; description: string; organization_id: string; internal: boolean; role_assignments: Record<string, unknown>; creation_date: string; expiration_date: string | null }
+    | {
+        status: 'success';
+        id: string;
+        key: string;
+        description: string;
+        organization_id: string;
+        internal: boolean;
+        role_assignments: Record<string, unknown>;
+        creation_date: string;
+        expiration_date: string | null;
+      }
     | { status: 'failed'; code: string; message: string; resource: string | null; type: string }
   >;
 }

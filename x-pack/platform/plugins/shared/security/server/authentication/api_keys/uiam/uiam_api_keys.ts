@@ -164,9 +164,7 @@ export class UiamAPIKeys implements UiamAPIKeysType {
     }
 
     if (!this.elasticsearchPublicBaseUrl) {
-      throw new Error(
-        'Cannot convert API keys: elasticsearch.publicBaseUrl is not configured'
-      );
+      throw new Error('Cannot convert API keys: elasticsearch.publicBaseUrl is not configured');
     }
 
     this.logger.debug(`Trying to convert ${params.keys.length} API key(s)`);

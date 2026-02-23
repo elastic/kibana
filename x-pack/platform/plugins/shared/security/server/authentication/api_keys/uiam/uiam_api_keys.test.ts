@@ -317,9 +317,9 @@ describe('UiamAPIKeys', () => {
         uiam: mockUiam,
       });
 
-      await expect(
-        uiamApiKeysNoUrl.convert({ keys: [{ key: 'es-api-key' }] })
-      ).rejects.toThrow('Cannot convert API keys: elasticsearch.publicBaseUrl is not configured');
+      await expect(uiamApiKeysNoUrl.convert({ keys: [{ key: 'es-api-key' }] })).rejects.toThrow(
+        'Cannot convert API keys: elasticsearch.publicBaseUrl is not configured'
+      );
 
       expect(mockUiam.convertApiKeys).not.toHaveBeenCalled();
     });
@@ -357,8 +357,24 @@ describe('UiamAPIKeys', () => {
     it('injects the same publicBaseUrl endpoint for all keys', async () => {
       const mockResponse = {
         results: [
-          { status: 'success' as const, id: 'k1', key: 'essu_k1', description: 'key 1', organization_id: 'org-1', internal: true, role_assignments: {}, creation_date: '2026-01-01T00:00:00Z', expiration_date: null },
-          { status: 'failed' as const, code: 'ES_API_KEY_AUTHENTICATION_FAILED', message: 'Auth failed', resource: null, type: 'UNKNOWN' },
+          {
+            status: 'success' as const,
+            id: 'k1',
+            key: 'essu_k1',
+            description: 'key 1',
+            organization_id: 'org-1',
+            internal: true,
+            role_assignments: {},
+            creation_date: '2026-01-01T00:00:00Z',
+            expiration_date: null,
+          },
+          {
+            status: 'failed' as const,
+            code: 'ES_API_KEY_AUTHENTICATION_FAILED',
+            message: 'Auth failed',
+            resource: null,
+            type: 'UNKNOWN',
+          },
         ],
       };
       mockUiam.convertApiKeys.mockResolvedValue(mockResponse);
@@ -384,9 +400,7 @@ describe('UiamAPIKeys', () => {
         })
       ).rejects.toThrow('UIAM service error');
 
-      expect(logger.error).toHaveBeenCalledWith(
-        'Failed to convert API keys: UIAM service error'
-      );
+      expect(logger.error).toHaveBeenCalledWith('Failed to convert API keys: UIAM service error');
     });
   });
 

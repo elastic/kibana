@@ -16,7 +16,6 @@ import { isKibanaDistributable } from '@kbn/repo-info';
 import { readKeystore } from '../keystore/lib/read_keystore';
 import { compileConfigStack } from './compile_config_stack';
 import { getConfigFromFiles } from '@kbn/config';
-import { KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
 
 const DEV_MODE_PATH = '@kbn/cli-dev-mode';
 const DEV_MODE_SUPPORTED = canRequire(DEV_MODE_PATH);
