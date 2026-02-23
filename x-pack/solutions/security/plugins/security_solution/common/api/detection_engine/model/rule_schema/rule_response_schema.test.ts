@@ -40,7 +40,7 @@ describe('Rule response schema', () => {
 
     const result = RuleResponse.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(`""`);
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(`"type: Invalid input"`);
   });
 
   test('it should validate a type of "query" with a saved_id together', () => {
@@ -222,7 +222,7 @@ describe('investigation_fields', () => {
     const result = RuleResponse.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toEqual(
-      'investigation_fields.field_names: Array must contain at least 1 element(s)'
+      'investigation_fields.field_names: Too small: expected array to have >=1 items'
     );
   });
 

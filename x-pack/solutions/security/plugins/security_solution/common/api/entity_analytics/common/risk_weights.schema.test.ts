@@ -59,7 +59,9 @@ describe('risk weight schema', () => {
         const decoded = RiskScoreWeight.safeParse(payload) as ZodSafeParseError<object>;
 
         expect(decoded.success).toBeFalsy();
-        expect(stringifyZodError(decoded.error)).toContain('host: Required, user: Required');
+        expect(stringifyZodError(decoded.error)).toContain(
+          'host: Invalid input: expected number, received undefined, user: Invalid input: expected number, received undefined'
+        );
       });
 
       it('allows a single host weight', () => {
@@ -92,7 +94,7 @@ describe('risk weight schema', () => {
 
         expect(decoded.success).toBeFalsy();
         expect(stringifyZodError(decoded.error)).toContain(
-          `user: Number must be less than or equal to 1`
+          `user: Too big: expected number to be <=1`
         );
       });
 
@@ -121,7 +123,7 @@ describe('risk weight schema', () => {
 
         expect(decoded.success).toBeFalsy();
         expect(stringifyZodError(decoded.error)).toEqual(
-          'type: Invalid literal value, expected "global_identifier", host: Required, type: Invalid literal value, expected "global_identifier", type: Invalid literal value, expected "global_identifier", service: Required'
+          'type: Invalid input: expected "global_identifier", host: Invalid input: expected number, received undefined, type: Invalid input: expected "global_identifier", type: Invalid input: expected "global_identifier", service: Invalid input: expected number, received undefined'
         );
       });
 

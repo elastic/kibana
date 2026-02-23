@@ -85,16 +85,16 @@ describe('firstLastSeen search strategy', () => {
             Object {
               "fieldErrors": Object {
                 "factoryQueryType": Array [
-                  "Invalid literal value, expected \\"firstlastseen\\"",
+                  "Invalid input: expected \\"firstlastseen\\"",
                 ],
                 "field": Array [
-                  "Required",
+                  "Invalid input: expected string, received undefined",
                 ],
                 "order": Array [
-                  "Required",
+                  "Invalid option: expected one of \\"asc\\"|\\"desc\\"",
                 ],
                 "value": Array [
-                  "Required",
+                  "Invalid input: expected string, received undefined",
                 ],
               },
               "formErrors": Array [],

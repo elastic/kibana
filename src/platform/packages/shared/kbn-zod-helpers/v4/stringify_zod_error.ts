@@ -21,10 +21,14 @@ export function stringifyZodError(err: ZodError<any>) {
     const issue = issues.shift()!;
 
     // If the issue is an invalid union, we need to traverse all issues in the
-    // "unionErrors" array
+    // "errors" array. When errors is empty (e.g. no matching discriminator in a
+    // discriminated union), use the issue's own message instead.
     if (issue.code === 'invalid_union') {
-      issues.push(...issue.errors.flat());
-      continue;
+      if (issue.errors.length > 0) {
+        issues.push(...issue.errors.flat());
+        continue;
+      }
+      // Fall through to stringifyIssue for empty errors (no matching discriminator)
     }
 
     errorMessages.push(stringifyIssue(issue));

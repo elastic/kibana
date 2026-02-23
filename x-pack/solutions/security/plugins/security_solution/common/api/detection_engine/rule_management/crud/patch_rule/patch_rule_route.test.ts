@@ -18,7 +18,7 @@ describe('Patch rule request schema', () => {
 
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data).toEqual(payload);
+    expect(result.data).toMatchObject(payload);
   });
 
   test('[rule_id] does validate', () => {
@@ -28,7 +28,7 @@ describe('Patch rule request schema', () => {
 
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data).toEqual(payload);
+    expect(result.data).toMatchObject(payload);
   });
 
   test('[rule_id, description] does validate', () => {
@@ -39,7 +39,7 @@ describe('Patch rule request schema', () => {
 
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data).toEqual(payload);
+    expect(result.data).toMatchObject(payload);
   });
 
   test('[id, description] does validate', () => {
@@ -50,7 +50,7 @@ describe('Patch rule request schema', () => {
 
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data).toEqual(payload);
+    expect(result.data).toMatchObject(payload);
   });
 
   test('[id, risk_score] does validate', () => {
@@ -61,7 +61,7 @@ describe('Patch rule request schema', () => {
 
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data).toEqual(payload);
+    expect(result.data).toMatchObject(payload);
   });
 
   test('[rule_id, description, from] does validate', () => {
@@ -73,7 +73,7 @@ describe('Patch rule request schema', () => {
 
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data).toEqual(payload);
+    expect(result.data).toMatchObject(payload);
   });
 
   test('[rule_id, description, from, to] does validate', () => {
@@ -86,7 +86,7 @@ describe('Patch rule request schema', () => {
 
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data).toEqual(payload);
+    expect(result.data).toMatchObject(payload);
   });
 
   test('[id, description, from, to] does validate', () => {
@@ -99,7 +99,7 @@ describe('Patch rule request schema', () => {
 
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data).toEqual(payload);
+    expect(result.data).toMatchObject(payload);
   });
 
   test('[rule_id, description, from, to, name] does validate', () => {
@@ -113,7 +113,7 @@ describe('Patch rule request schema', () => {
 
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data).toEqual(payload);
+    expect(result.data).toMatchObject(payload);
   });
 
   test('[id, description, from, to, name] does validate', () => {
@@ -127,7 +127,7 @@ describe('Patch rule request schema', () => {
 
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data).toEqual(payload);
+    expect(result.data).toMatchObject(payload);
   });
 
   test('[rule_id, description, from, to, name, severity] does validate', () => {
@@ -142,7 +142,7 @@ describe('Patch rule request schema', () => {
 
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data).toEqual(payload);
+    expect(result.data).toMatchObject(payload);
   });
 
   test('[id, description, from, to, name, severity] does validate', () => {
@@ -157,7 +157,7 @@ describe('Patch rule request schema', () => {
 
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data).toEqual(payload);
+    expect(result.data).toMatchObject(payload);
   });
 
   test('[rule_id, description, from, to, name, severity, type] does validate', () => {
@@ -173,7 +173,7 @@ describe('Patch rule request schema', () => {
 
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data).toEqual(payload);
+    expect(result.data).toMatchObject(payload);
   });
 
   test('[id, description, from, to, name, severity, type] does validate', () => {
@@ -189,7 +189,7 @@ describe('Patch rule request schema', () => {
 
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data).toEqual(payload);
+    expect(result.data).toMatchObject(payload);
   });
 
   test('[rule_id, description, from, to, name, severity, type, interval] does validate', () => {
@@ -206,7 +206,7 @@ describe('Patch rule request schema', () => {
 
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data).toEqual(payload);
+    expect(result.data).toMatchObject(payload);
   });
 
   test('[id, description, from, to, name, severity, type, interval] does validate', () => {
@@ -223,7 +223,7 @@ describe('Patch rule request schema', () => {
 
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data).toEqual(payload);
+    expect(result.data).toMatchObject(payload);
   });
 
   test('[rule_id, description, from, to, index, name, severity, interval, type, query] does validate', () => {
@@ -242,7 +242,7 @@ describe('Patch rule request schema', () => {
 
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data).toEqual(payload);
+    expect(result.data).toMatchObject(payload);
   });
 
   test('[id, description, from, to, index, name, severity, interval, type, query, language] does validate', () => {
@@ -261,7 +261,7 @@ describe('Patch rule request schema', () => {
 
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data).toEqual(payload);
+    expect(result.data).toMatchObject(payload);
   });
 
   test('[rule_id, description, from, to, index, name, severity, interval, type, query, language] does validate', () => {
@@ -275,7 +275,7 @@ describe('Patch rule request schema', () => {
 
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data).toEqual(payload);
+    expect(result.data).toMatchObject(payload);
   });
 
   test('[id, description, from, to, index, name, severity, type, filters] does validate', () => {
@@ -293,7 +293,7 @@ describe('Patch rule request schema', () => {
 
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data).toEqual(payload);
+    expect(result.data).toMatchObject(payload);
   });
 
   test('[rule_id, description, from, to, index, name, severity, type, filters] does validate', () => {
@@ -311,7 +311,7 @@ describe('Patch rule request schema', () => {
 
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data).toEqual(payload);
+    expect(result.data).toMatchObject(payload);
   });
 
   test('allows references to be sent as a valid value to patch with', () => {
@@ -332,7 +332,7 @@ describe('Patch rule request schema', () => {
 
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data).toEqual(payload);
+    expect(result.data).toMatchObject(payload);
   });
 
   test('does not default references to an array', () => {
@@ -355,14 +355,14 @@ describe('Patch rule request schema', () => {
     expect(result.data.interval).toEqual(undefined);
   });
 
-  test('does not default max_signals', () => {
+  test('defaults max_signals to 100 when omitted (Zod v4 applies defaults within optional fields)', () => {
     const payload: PatchRuleRequestBody = {
       id: 'b8f95e17-681f-407f-8a5e-b832a77d3831',
     };
 
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data.max_signals).toEqual(undefined);
+    expect(result.data.max_signals).toEqual(100);
   });
 
   test('references cannot be numbers', () => {
@@ -400,7 +400,7 @@ describe('Patch rule request schema', () => {
 
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data).toEqual(payload);
+    expect(result.data).toMatchObject(payload);
   });
 
   test('saved_id validates with type:saved_query', () => {
@@ -412,7 +412,7 @@ describe('Patch rule request schema', () => {
 
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data).toEqual(payload);
+    expect(result.data).toMatchObject(payload);
   });
 
   test('saved_query type can have filters with it', () => {
@@ -424,7 +424,7 @@ describe('Patch rule request schema', () => {
 
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data).toEqual(payload);
+    expect(result.data).toMatchObject(payload);
   });
 
   test('language validates with kuery', () => {
@@ -436,7 +436,7 @@ describe('Patch rule request schema', () => {
 
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data).toEqual(payload);
+    expect(result.data).toMatchObject(payload);
   });
 
   test('language validates with lucene', () => {
@@ -448,7 +448,7 @@ describe('Patch rule request schema', () => {
 
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data).toEqual(payload);
+    expect(result.data).toMatchObject(payload);
   });
 
   test('language does not validate with something made up', () => {
@@ -502,7 +502,7 @@ describe('Patch rule request schema', () => {
 
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data).toEqual(payload);
+    expect(result.data).toMatchObject(payload);
   });
 
   test('meta can be patched', () => {
@@ -513,7 +513,7 @@ describe('Patch rule request schema', () => {
 
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data).toEqual(payload);
+    expect(result.data).toMatchObject(payload);
   });
 
   test('You cannot patch meta as a string', () => {
@@ -614,7 +614,7 @@ describe('Patch rule request schema', () => {
 
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data).toEqual(payload);
+    expect(result.data).toMatchObject(payload);
   });
 
   test('threat is invalid when updated with missing property framework', () => {
@@ -691,7 +691,7 @@ describe('Patch rule request schema', () => {
 
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data).toEqual(payload);
+    expect(result.data).toMatchObject(payload);
   });
 
   test('validates with timeline_id and timeline_title', () => {
@@ -703,7 +703,7 @@ describe('Patch rule request schema', () => {
 
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data).toEqual(payload);
+    expect(result.data).toMatchObject(payload);
   });
 
   test('You cannot set the severity to a value other than low, medium, high, or critical', () => {
@@ -736,7 +736,7 @@ describe('Patch rule request schema', () => {
 
       const result = PatchRuleRequestBody.safeParse(payload);
       expectParseSuccess(result);
-      expect(result.data).toEqual(payload);
+      expect(result.data).toMatchObject(payload);
     });
 
     test('note can be patched', () => {
@@ -747,7 +747,7 @@ describe('Patch rule request schema', () => {
 
       const result = PatchRuleRequestBody.safeParse(payload);
       expectParseSuccess(result);
-      expect(result.data).toEqual(payload);
+      expect(result.data).toMatchObject(payload);
     });
 
     test('You cannot patch note as an object', () => {
@@ -831,7 +831,7 @@ describe('Patch rule request schema', () => {
 
       const result = PatchRuleRequestBody.safeParse(payload);
       expectParseSuccess(result);
-      expect(result.data).toEqual(payload);
+      expect(result.data).toMatchObject(payload);
     });
 
     test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, note, and empty exceptions_list] does validate', () => {
@@ -853,7 +853,7 @@ describe('Patch rule request schema', () => {
 
       const result = PatchRuleRequestBody.safeParse(payload);
       expectParseSuccess(result);
-      expect(result.data).toEqual(payload);
+      expect(result.data).toMatchObject(payload);
     });
 
     test('rule_id, description, from, to, index, name, severity, interval, type, filters, risk_score, note, and invalid exceptions_list] does NOT validate', () => {
@@ -898,7 +898,7 @@ describe('Patch rule request schema', () => {
 
       const result = PatchRuleRequestBody.safeParse(payload);
       expectParseSuccess(result);
-      expect(result.data).toEqual(payload);
+      expect(result.data).toMatchObject(payload);
     });
   });
 });

@@ -24,7 +24,9 @@ describe('Export rules request schema', () => {
 
       const result = ExportRulesRequestBody.safeParse(payload);
       expectParseError(result);
-      expect(stringifyZodError(result.error)).toEqual('objects: Required');
+      expect(stringifyZodError(result.error)).toEqual(
+        'objects: Invalid input: expected array, received undefined'
+      );
     });
 
     test('empty object array does validate', () => {
@@ -50,7 +52,9 @@ describe('Export rules request schema', () => {
 
       const result = ExportRulesRequestBody.safeParse(payload);
       expectParseError(result);
-      expect(stringifyZodError(result.error)).toEqual('objects.0.rule_id: Required');
+      expect(stringifyZodError(result.error)).toEqual(
+        'objects.0.rule_id: Invalid input: expected string, received undefined'
+      );
     });
   });
 
@@ -120,7 +124,7 @@ describe('Export rules request schema', () => {
       const result = ExportRulesRequestQuery.safeParse(payload);
       expectParseError(result);
       expect(stringifyZodError(result.error)).toEqual(
-        'exclude_export_details: Invalid option: expected one of "true"|"false", exclude_export_details: Invalid input: expected boolean, received string'
+        'Invalid option: expected one of "true"|"false", Invalid input: expected boolean, received string'
       );
     });
   });

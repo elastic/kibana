@@ -154,7 +154,7 @@ describe('Find rules request schema', () => {
     const result = FindRulesRequestQuery.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toEqual(
-      "sort_order: Invalid option: expected one of 'asc'|'desc'"
+      'sort_order: Invalid option: expected one of "asc"|"desc"'
     );
   });
 });

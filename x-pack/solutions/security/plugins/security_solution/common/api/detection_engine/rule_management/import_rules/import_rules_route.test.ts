@@ -215,9 +215,7 @@ describe('Import rules schema', () => {
       };
       const result = ImportRulesResponse.safeParse(payload);
       expectParseError(result);
-      expect(stringifyZodError(result.error)).toEqual(
-        "Unrecognized key(s) in object: 'invalid_field'"
-      );
+      expect(stringifyZodError(result.error)).toEqual('Unrecognized key: "invalid_field"');
     });
 
     test('it should NOT validate an extra field in the second position of the errors array', () => {
@@ -242,9 +240,7 @@ describe('Import rules schema', () => {
       };
       const result = ImportRulesResponse.safeParse(payload);
       expectParseError(result);
-      expect(stringifyZodError(result.error)).toEqual(
-        "errors.1: Unrecognized key(s) in object: 'invalid_data'"
-      );
+      expect(stringifyZodError(result.error)).toEqual('errors.1: Unrecognized key: "invalid_data"');
     });
 
     test('it should validate an empty import response with a single connectors error', () => {
