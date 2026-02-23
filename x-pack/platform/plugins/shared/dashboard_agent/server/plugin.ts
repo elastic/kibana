@@ -7,6 +7,7 @@
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type {
   DashboardAgentSetupDependencies,
   DashboardAgentStartDependencies,
@@ -14,8 +15,6 @@ import type {
   DashboardAgentPluginStart,
 } from './types';
 import { registerSkills } from './skills';
-import { getIsDashboardAgentEnabled } from './utils/get_is_dashboard_agent_enabled';
-import { DASHBOARD_AGENT_FEATURE_FLAG } from '../common/constants';
 import { createDashboardAttachmentType } from './attachment_types';
 
 export class DashboardAgentPlugin
@@ -38,26 +37,32 @@ export class DashboardAgentPlugin
     setupDeps: DashboardAgentSetupDependencies
   ): DashboardAgentPluginSetup {
     this.logger.debug('Setting up Dashboard skills and tools');
-
-    getIsDashboardAgentEnabled(coreSetup)
-      .then(async (isDashboardAgentEnabled) => {
-        if (!isDashboardAgentEnabled) {
-          this.logger.debug(
-            `Skipping dashboard skill and tools registration because feature flag "${DASHBOARD_AGENT_FEATURE_FLAG}" is set to false`
-          );
-          return;
-        }
-
-        await this.registerToolsAndSkills(setupDeps);
-      })
-      .catch((error) => {
-        this.logger.error(`Error checking whether the dashboard agent is enabled: ${error}`);
-      });
+    this.registerToolsAndSkills(coreSetup, setupDeps).catch((error) => {
+      this.logger.error(`Error registering dashboard skill and tools: ${error}`);
+    });
 
     return {};
   }
 
-  private async registerToolsAndSkills(setupDeps: DashboardAgentSetupDependencies) {
+  private async registerToolsAndSkills(
+    coreSetup: CoreSetup<DashboardAgentStartDependencies, DashboardAgentPluginStart>,
+    setupDeps: DashboardAgentSetupDependencies
+  ) {
+    const [coreStart] = await coreSetup.getStartServices();
+    const uiSettingsClient = coreStart.uiSettings.asScopedToClient(
+      coreStart.savedObjects.getUnsafeInternalClient()
+    );
+    const experimentalFeaturesEnabled = await uiSettingsClient.get<boolean>(
+      AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID
+    );
+
+    if (!experimentalFeaturesEnabled) {
+      this.logger.debug(
+        `Skipping dashboard skill and tools registration because ui setting "${AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID}" is set to false`
+      );
+      return;
+    }
+
     // Register the dashboard attachment type
     setupDeps.agentBuilder.attachments.registerType(createDashboardAttachmentType() as any);
 
