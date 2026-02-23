@@ -8,10 +8,9 @@
  */
 import React, { Suspense } from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-import useAsync from 'react-use/lib/useAsync';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { helpLabel } from '@kbn/esql-editor';
-import { untilPluginStartServicesReady } from './kibana_services';
+import { getKibanaServices } from './kibana_services';
 
 const LazyESQLMenu = React.lazy(async () => {
   const module = await import('@kbn/esql-editor');
@@ -40,19 +39,19 @@ export const ESQLMenu: React.FC<{
   hideHistory?: boolean;
   onESQLDocsFlyoutVisibilityChanged?: (isOpen: boolean) => void;
 }> = (props) => {
-  const { loading, value: deps } = useAsync(untilPluginStartServicesReady, []);
+  const deps = getKibanaServices();
 
-  if (loading || !deps) {
-    return helpPopoverFallback;
+  const content = (
+    <Suspense fallback={helpPopoverFallback}>
+      <LazyESQLMenu {...props} />
+    </Suspense>
+  );
+
+  if (!deps) {
+    return content;
   }
 
-  return (
-    <KibanaContextProvider services={{ ...deps }}>
-      <Suspense fallback={helpPopoverFallback}>
-        <LazyESQLMenu {...props} />
-      </Suspense>
-    </KibanaContextProvider>
-  );
+  return <KibanaContextProvider services={{ ...deps }}>{content}</KibanaContextProvider>;
 };
 
 export const EsqlEditorActionsProvider: React.FC<{ children: React.ReactNode }> = ({
