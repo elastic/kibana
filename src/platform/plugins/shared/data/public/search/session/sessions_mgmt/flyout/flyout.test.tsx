@@ -70,6 +70,11 @@ const setup = () => {
 };
 
 describe('<Flyout />', () => {
+  it('render the title', () => {
+    setup();
+    expect(screen.getByText('Background searches')).toBeVisible();
+  });
+
   it('renders the table', () => {
     setup();
     expect(screen.getByTestId('searchSessionsMgmtUiTable')).toBeVisible();
