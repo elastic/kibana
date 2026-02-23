@@ -71,7 +71,7 @@ export default function QualityIssueFlyout() {
   const isDegradedType = expandedDegradedField && expandedDegradedField.type === 'degraded';
 
   const esqlQuery = isDegradedType
-    ? `FROM ${datasetDetails.rawName} METADATA ${_IGNORED} | WHERE ${_IGNORED} IS NOT NULL`
+    ? `FROM ${datasetDetails.rawName} METADATA ${_IGNORED} | WHERE MV_CONTAINS(${_IGNORED}, "${expandedDegradedField.name}")`
     : '';
 
   const { sendTelemetry: sendDegradedTelemetry } = useDatasetDetailsRedirectLinkTelemetry({

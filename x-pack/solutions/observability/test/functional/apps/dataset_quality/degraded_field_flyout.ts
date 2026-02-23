@@ -112,7 +112,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
         await PageObjects.datasetQuality.closeFlyout();
       });
 
-      it('should go to discover page in ES|QL mode when the open in discover button is clicked', async () => {
+      it('should go to discover page in ES|QL mode with field-specific filter when the open in discover button is clicked', async () => {
         await PageObjects.datasetQuality.navigateToDetails({
           dataStream: degradedDataStreamName,
           expandedDegradedField: 'test_field',
@@ -127,7 +127,8 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
           expect(currentUrl).to.contain('/app/discover');
           expect(decodedUrl).to.contain('esql');
           expect(decodedUrl).to.contain(`FROM ${degradedDataStreamName}`);
-          expect(decodedUrl).to.contain('_ignored IS NOT NULL');
+          expect(decodedUrl).to.contain('MV_CONTAINS(_ignored');
+          expect(decodedUrl).to.contain('test_field');
         });
       });
     });

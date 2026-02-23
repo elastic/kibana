@@ -283,9 +283,9 @@ test.describe(
       // Click the link to Discover in the flyout
       await page.getByTestId('datasetQualityDetailsDegradedFieldFlyoutTitleLinkToDiscover').click();
 
-      // Should navigate to Discover in ES|QL mode with _ignored query
+      // Should navigate to Discover in ES|QL mode with field-specific _ignored query
       await expect(page).toHaveURL(/.*\/app\/discover/);
-      await expect(page).toHaveURL(/.*esql.*FROM.*_ignored.*IS%20NOT%20NULL/);
+      await expect(page).toHaveURL(/.*esql.*FROM.*MV_CONTAINS.*_ignored.*log\.level/);
     });
 
     test('should edit failure store for wired streams', async ({ page }) => {
