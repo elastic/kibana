@@ -147,10 +147,18 @@ export function createChatCompleteCallbackApi({
               const effectivePolicy = await resolveEffectivePolicy?.(
                 metadata?.anonymization?.target
               );
-              const replacementsId = uuidv4();
+              const carriedReplacementsId = metadata?.anonymization?.replacementsId;
               const repo = new ReplacementsRepository(esClient, {
                 encryptionKey: replacementsEncryptionKey,
               });
+              let replacementsId = carriedReplacementsId ?? uuidv4();
+              let existingReplacements = carriedReplacementsId
+                ? await repo.get(namespace, carriedReplacementsId)
+                : null;
+              if (carriedReplacementsId && !existingReplacements) {
+                // Recover by allocating a new doc ID when caller carries a stale/unknown one.
+                replacementsId = uuidv4();
+              }
 
               const anonymization = await anonymizeMessages({
                 system,
@@ -160,7 +168,7 @@ export function createChatCompleteCallbackApi({
                 esClient,
                 salt: salt ?? undefined,
                 effectivePolicy,
-                knownReplacements: [],
+                knownReplacements: existingReplacements?.replacements ?? [],
               });
 
               const replacements = anonymization.anonymizations.map(({ entity }) => ({
@@ -168,12 +176,23 @@ export function createChatCompleteCallbackApi({
                 original: entity.value,
               }));
 
-              await repo.create({
-                id: replacementsId,
-                namespace,
-                createdBy: 'inference',
-                replacements,
-              });
+              if (existingReplacements) {
+                const updated = await repo.update(namespace, replacementsId, { replacements });
+                if (!updated) {
+                  // Document disappeared between get/update; recover with new doc.
+                  replacementsId = uuidv4();
+                  existingReplacements = null;
+                }
+              }
+
+              if (!existingReplacements) {
+                await repo.create({
+                  id: replacementsId,
+                  namespace,
+                  createdBy: 'inference',
+                  replacements,
+                });
+              }
 
               return { anonymization, replacementsId, effectivePolicy };
             })()

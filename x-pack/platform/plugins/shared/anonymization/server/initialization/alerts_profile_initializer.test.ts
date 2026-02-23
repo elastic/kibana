@@ -47,11 +47,37 @@ describe('ensureAlertsDataViewProfile', () => {
 
     expect(mockProfilesRepo.create).toHaveBeenCalledWith(
       expect.objectContaining({
-        name: 'Security Default Anonymization Profile',
+        name: 'Security Alerts Anonymization Profile',
         targetType: ALERTS_DATA_VIEW_TARGET_TYPE,
         targetId: getAlertsDataViewTargetId('default'),
         namespace: 'default',
         createdBy: 'system',
+      })
+    );
+  });
+
+  it('uses namespace-specific alerts data view target IDs', async () => {
+    (mockProfilesRepo.findByTarget as jest.Mock).mockResolvedValue(null);
+    (mockProfilesRepo.create as jest.Mock).mockResolvedValue({ id: 'test-id-security' });
+
+    await ensureAlertsDataViewProfile({
+      namespace: 'security',
+      profilesRepo: mockProfilesRepo,
+      saltService: mockSaltService,
+      logger,
+      checkDataViewExists,
+    });
+
+    expect(mockProfilesRepo.findByTarget).toHaveBeenCalledWith(
+      'security',
+      ALERTS_DATA_VIEW_TARGET_TYPE,
+      getAlertsDataViewTargetId('security')
+    );
+    expect(mockProfilesRepo.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        namespace: 'security',
+        targetId: 'security-solution-alert-security',
+        saltId: 'salt-security',
       })
     );
   });

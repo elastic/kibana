@@ -75,6 +75,7 @@ export const chatCompleteBaseSchema = schema.object({
       anonymization: schema.maybe(
         schema.object({
           profileId: schema.maybe(schema.string()),
+          replacementsId: schema.maybe(schema.string()),
           target: schema.maybe(
             schema.object({
               targetType: schema.oneOf([

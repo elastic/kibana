@@ -202,21 +202,23 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('alerts data view profile auto-initialization', () => {
-      it('finds the default alerts data view profile in default space', async () => {
+    describe('alerts data view profile bootstrap behavior', () => {
+      it('does not create the alerts profile before alerts data view exists in default space', async () => {
         const { body, status } = await supertest
           .get(
             `${PROFILES_API}/_find?target_type=data_view&target_id=${encodeURIComponent(
-              'security-solution-default'
+              'security-solution-alert-default'
             )}`
           )
           .set('elastic-api-version', API_VERSION);
 
         expect(status).to.be(200);
-        expect(body.total).to.be.greaterThan(0);
+        expect(body.total).to.be(0);
         expect(
-          body.data.some((p: { targetId: string }) => p.targetId === 'security-solution-default')
-        ).to.be(true);
+          body.data.some(
+            (p: { targetId: string }) => p.targetId === 'security-solution-alert-default'
+          )
+        ).to.be(false);
       });
     });
 
