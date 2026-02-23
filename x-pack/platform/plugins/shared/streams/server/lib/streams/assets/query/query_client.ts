@@ -515,15 +515,22 @@ export class QueryClient {
     const nextQueriesToCreate: QueryLink[] = [];
     const nextQueriesUpdatedWithBreakingChange: QueryLink[] = [];
     const nextQueriesUpdatedWithoutBreakingChange: QueryLink[] = [];
+    const allNextQueryLinks: QueryLink[] = [];
 
     for (const query of queries) {
       const currentLink = currentLinkByQueryId.get(query.id);
       if (!currentLink) {
-        nextQueriesToCreate.push(toQueryLinkFromQuery(query, stream));
+        const link = toQueryLinkFromQuery(query, stream);
+        nextQueriesToCreate.push(link);
+        allNextQueryLinks.push(link);
       } else if (hasBreakingChange(currentLink.query, query)) {
-        nextQueriesUpdatedWithBreakingChange.push(toQueryLinkFromQuery(query, stream));
+        const link = toQueryLinkFromQuery(query, stream);
+        nextQueriesUpdatedWithBreakingChange.push(link);
+        allNextQueryLinks.push(link);
       } else {
-        nextQueriesUpdatedWithoutBreakingChange.push({ ...currentLink, query });
+        const link = { ...currentLink, query };
+        nextQueriesUpdatedWithoutBreakingChange.push(link);
+        allNextQueryLinks.push(link);
       }
     }
 
@@ -541,11 +548,7 @@ export class QueryClient {
 
     await this.syncQueryList(
       definition,
-      [
-        ...nextQueriesToCreate,
-        ...nextQueriesUpdatedWithBreakingChange,
-        ...nextQueriesUpdatedWithoutBreakingChange,
-      ].map((link) => ({
+      allNextQueryLinks.map((link) => ({
         [ASSET_ID]: link[ASSET_ID],
         [ASSET_TYPE]: link[ASSET_TYPE],
         query: link.query,
