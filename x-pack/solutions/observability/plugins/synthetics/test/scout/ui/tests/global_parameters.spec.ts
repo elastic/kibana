@@ -11,15 +11,14 @@ import { test } from '../fixtures';
 
 test.describe('GlobalParameters', { tag: tags.stateful.classic }, () => {
   test.beforeAll(async ({ syntheticsServices }) => {
-    await syntheticsServices.cleanTestParams();
+    await syntheticsServices.deleteParams();
   });
 
   test.afterAll(async ({ syntheticsServices }) => {
-    await syntheticsServices.cleanTestParams();
+    await syntheticsServices.deleteParams();
   });
 
   test('creates, edits, searches, and deletes global parameters', async ({
-    pageObjects,
     page,
     browserAuth,
     kbnUrl,

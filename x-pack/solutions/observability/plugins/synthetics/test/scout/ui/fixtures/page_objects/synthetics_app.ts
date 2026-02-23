@@ -6,6 +6,7 @@
  */
 
 import type { ScoutPage, KibanaUrl, Locator } from '@kbn/scout-oblt';
+import { EuiComboBoxWrapper } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 
 enum FormMonitorType {
@@ -36,13 +37,11 @@ export class SyntheticsAppPage {
   async navigateToSettings() {
     await this.page.goto(this.kbnUrl.get('/app/synthetics/settings'));
     await this.page.testSubj.waitForSelector('createConnectorButton');
-    // await this.page.waitForSelector('h1:has-text("Settings")');
   }
 
   async navigateToAddMonitor() {
     await this.page.goto(this.kbnUrl.get('/app/synthetics/add-monitor'));
     await this.page.testSubj.waitForSelector('syntheticsMonitorConfigName');
-    // await this.waitForLoadingToFinish();
   }
 
   async navigateToStepDetails({
@@ -242,44 +241,32 @@ export class SyntheticsAppPage {
     }
   }
 
-  async deleteMonitors() {
-    if (!this.page.url().includes('monitors/management')) {
-      return;
-    }
-    await this.page.testSubj.locator('euiCollapsedItemActionsButton').first().click();
-    await this.page.click(`.euiContextMenuPanel [data-test-subj="syntheticsMonitorDeleteAction"]`, {
-      delay: 800,
-    });
+  async getMonitorRowLocator(monitorName: string) {
+    const monitorRow = this.page.locator(
+      `.euiTableRow:has([data-test-subj="syntheticsMonitorDetailsLinkLink"]:has-text("${monitorName}"))`
+    );
+    await expect(monitorRow).toBeVisible();
+    await monitorRow.scrollIntoViewIfNeeded();
+    return monitorRow;
+  }
+
+  async deleteMonitor(monitorName: string) {
+    const monitorRow = await this.getMonitorRowLocator(monitorName);
+    await monitorRow.locator('[data-test-subj="euiCollapsedItemActionsButton"]').click();
+    await this.page.testSubj.click('syntheticsMonitorDeleteAction');
     await expect(this.page.testSubj.locator('confirmModalTitleText')).toBeVisible();
-    await this.page.testSubj.click('confirmModalConfirmButton');
-    await this.page.testSubj.click('uptimeDeleteMonitorSuccess');
-    await this.page.testSubj.click('syntheticsRefreshButtonButton');
-    await this.page.testSubj.click('checkboxSelectAll');
-    await this.page.testSubj.click('syntheticsBulkOperationPopoverClickMeToLoadAContextMenuButton');
     await this.page.testSubj.click('confirmModalConfirmButton');
   }
 
   async navigateToEditMonitor(monitorName: string) {
-    const monitorRow = this.page.locator(
-      `.euiTableRowCell:has([data-test-subj="syntheticsMonitorDetailsLinkLink"]:has-text("${monitorName}"))`
-    );
-    await expect(monitorRow).toBeVisible();
-    await monitorRow.scrollIntoViewIfNeeded();
-    monitorRow.locator('data-test-subj="euiCollapsedItemActionsButton"').click();
+    const monitorRow = await this.getMonitorRowLocator(monitorName);
+    await monitorRow.locator('[data-test-subj="euiCollapsedItemActionsButton"]').click();
     await this.page.testSubj.click('syntheticsMonitorEditAction');
   }
 
   async adjustRows() {
     await this.page.testSubj.click('tablePaginationPopoverButton');
     await this.page.click('text="100 rows"');
-  }
-
-  async findMonitorConfiguration(monitorConfig: Record<string, string>) {
-    // for (const value of Object.values(monitorConfig)) {
-    //   await expect(this.page.getByText(value, { exact: true }).first()).toBeVisible({
-    //     timeout: 30_000,
-    //   });
-    // }
   }
 
   async findEditMonitorConfiguration(monitorEditDetails: Array<[string, string]>) {
@@ -295,6 +282,53 @@ export class SyntheticsAppPage {
 
   async goToRulesPage() {
     await this.page.goto(this.kbnUrl.get('/app/observability/alerts/rules'));
+  }
+
+  async navigateToAlertsPage() {
+    await this.page.testSubj.click('observability-nav-observability-overview-alerts');
+  }
+
+  async refreshOverview() {
+    await this.page.testSubj.click('syntheticsRefreshButtonButton');
+  }
+
+  async openAlertRulesMenu() {
+    await expect(this.page.testSubj.locator('syntheticsAlertsRulesButton')).toBeEnabled();
+    await this.page.testSubj.click('syntheticsAlertsRulesButton');
+  }
+
+  async openManageStatusRule() {
+    await this.openAlertRulesMenu();
+    await expect(this.page.testSubj.locator('manageStatusRuleName')).toBeVisible({
+      timeout: 30_000,
+    });
+    await this.page.testSubj.click('manageStatusRuleName');
+  }
+
+  async openManageTlsRule() {
+    await this.openAlertRulesMenu();
+    await this.page.testSubj.click('manageTlsRuleName');
+  }
+
+  async openCreateConnectorFlyout() {
+    await this.page.testSubj.click('createConnectorButton');
+    await this.page.testSubj.waitForSelector('create-connector-flyout');
+  }
+
+  async selectConnectorType(type: string) {
+    const card = this.page.testSubj.locator(`.${type}-card`);
+    await card.scrollIntoViewIfNeeded();
+    await card.click();
+  }
+
+  async saveConnectorInFlyout() {
+    await this.page.testSubj.click('create-connector-flyout-save-btn');
+  }
+
+  getDefaultConnectorsComboBox() {
+    return new EuiComboBoxWrapper(this.page, {
+      dataTestSubj: 'default-connectors-input-loaded',
+    });
   }
 
   isEuiFormFieldInValid(locator: Locator): Promise<boolean> {

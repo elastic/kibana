@@ -126,13 +126,7 @@ export const journeyStart = ({
   },
 });
 
-export const step1 = ({
-  name,
-  timestamp,
-  monitorId,
-  testRunId,
-  location,
-}: DocOverrides = {}) => ({
+export const step1 = ({ name, timestamp, monitorId, testRunId, location }: DocOverrides = {}) => ({
   ...getGeoData(location?.label),
   test_run_id: testRunId ?? 'c16b1614-7f48-4791-8f46-9ccf3a896e20',
   agent: {
@@ -189,13 +183,7 @@ export const step1 = ({
   },
 });
 
-export const step2 = ({
-  name,
-  timestamp,
-  monitorId,
-  testRunId,
-  location,
-}: DocOverrides = {}) => ({
+export const step2 = ({ name, timestamp, monitorId, testRunId, location }: DocOverrides = {}) => ({
   ...getGeoData(location?.label),
   test_run_id: testRunId ?? 'c16b1614-7f48-4791-8f46-9ccf3a896e20',
   agent: {

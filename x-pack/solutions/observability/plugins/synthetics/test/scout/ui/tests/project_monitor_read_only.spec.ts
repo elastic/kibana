@@ -14,11 +14,11 @@ test.describe('ProjectMonitorReadOnly', { tag: tags.stateful.classic }, () => {
   const monitorName = 'test-project-monitor';
 
   test.beforeAll(async ({ syntheticsServices }) => {
-    await syntheticsServices.cleanTestMonitors();
+    await syntheticsServices.deleteMonitors();
   });
 
   test.afterAll(async ({ syntheticsServices }) => {
-    await syntheticsServices.cleanTestMonitors();
+    await syntheticsServices.deleteMonitors();
   });
 
   test('project monitor is read-only and can be re-pushed', async ({
@@ -31,7 +31,7 @@ test.describe('ProjectMonitorReadOnly', { tag: tags.stateful.classic }, () => {
     let originalConfig: Record<string, unknown>;
 
     await test.step('setup: create project monitor via API', async () => {
-      await syntheticsServices.addTestMonitorProject(monitorName);
+      await syntheticsServices.addMonitorProject(monitorName);
       await browserAuth.loginAsAdmin();
       await pageObjects.syntheticsApp.navigateToMonitorManagement();
     });
@@ -51,7 +51,7 @@ test.describe('ProjectMonitorReadOnly', { tag: tags.stateful.classic }, () => {
     await test.step('save without changes preserves config', async () => {
       await pageObjects.syntheticsApp.confirmAndSave(true);
       const newConfig = (await syntheticsServices.getMonitor(monitorId)) as Record<string, unknown>;
-      expect(omit(newConfig, ['updated_at', 'created_at'])).toEqual(
+      expect(omit(newConfig, ['updated_at', 'created_at'])).toStrictEqual(
         omit({ ...originalConfig, hash: '', revision: 2 }, ['updated_at', 'created_at'])
       );
     });
@@ -64,12 +64,12 @@ test.describe('ProjectMonitorReadOnly', { tag: tags.stateful.classic }, () => {
     });
 
     await test.step('re-push overwrites changes', async () => {
-      await syntheticsServices.addTestMonitorProject(monitorName);
+      await syntheticsServices.addMonitorProject(monitorName);
       const repushedConfig = (await syntheticsServices.getMonitor(monitorId)) as Record<
         string,
         unknown
       >;
-      expect(omit(repushedConfig, ['updated_at', 'created_at'])).toEqual(
+      expect(omit(repushedConfig, ['updated_at', 'created_at'])).toStrictEqual(
         omit({ ...originalConfig, revision: 4 }, ['updated_at', 'created_at'])
       );
     });
@@ -78,9 +78,7 @@ test.describe('ProjectMonitorReadOnly', { tag: tags.stateful.classic }, () => {
       await pageObjects.syntheticsApp.navigateToEditMonitor(monitorName);
       await page.click('text="Delete monitor"');
       await page.testSubj.click('confirmModalConfirmButton');
-      await expect(
-        page.getByText(`Deleted "${monitorName}" monitor successfully.`)
-      ).toBeVisible();
+      await expect(page.getByText(`Deleted "${monitorName}" monitor successfully.`)).toBeVisible();
     });
   });
 });

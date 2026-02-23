@@ -34,15 +34,15 @@ test.describe('FilterMonitors', { tag: tags.stateful.classic }, () => {
 
     await test.step('create test monitors with tags', async () => {
       const common = { type: 'http', urls: 'https://www.google.com', locations: ['us_central'] };
-      await syntheticsServices.addTestMonitor('Test Filter Monitors 1 Tag', {
+      await syntheticsServices.addMonitor('Test Filter Monitors 1 Tag', {
         ...common,
         tags: [FIRST_TAG],
       });
-      await syntheticsServices.addTestMonitor('Test Filter Monitors 2 Tags', {
+      await syntheticsServices.addMonitor('Test Filter Monitors 2 Tags', {
         ...common,
         tags: [FIRST_TAG, SECOND_TAG],
       });
-      await page.testSubj.click('syntheticsRefreshButtonButton');
+      await pageObjects.syntheticsApp.refreshOverview();
     });
 
     await test.step('filter by tags with AND', async () => {

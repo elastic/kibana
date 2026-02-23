@@ -30,12 +30,12 @@ test.describe('OverviewCompactView', { tag: tags.stateful.classic }, () => {
     });
 
     await test.step('create test monitor via API', async () => {
-      await syntheticsServices.addTestMonitor('Test Overview Compact View Monitor', {
+      await syntheticsServices.addMonitor('Test Overview Compact View Monitor', {
         type: 'http',
         urls: 'https://www.google.com',
         locations: ['us_central'],
       });
-      await page.testSubj.click('syntheticsRefreshButtonButton');
+      await pageObjects.syntheticsApp.refreshOverview();
     });
 
     await test.step('switch to compact view', async () => {

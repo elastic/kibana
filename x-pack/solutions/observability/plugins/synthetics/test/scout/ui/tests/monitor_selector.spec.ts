@@ -15,15 +15,15 @@ test.describe('MonitorSelector', { tag: tags.stateful.classic }, () => {
   const testMonitor3 = 'Test monitor 3';
 
   test.beforeAll(async ({ syntheticsServices }) => {
-    await syntheticsServices.enableMonitorManagedViaApi();
-    await syntheticsServices.cleanTestMonitors();
-    await syntheticsServices.addTestMonitorSimple(testMonitor1);
-    await syntheticsServices.addTestMonitorSimple(testMonitor2);
-    await syntheticsServices.addTestMonitorSimple(testMonitor3);
+    await syntheticsServices.enable();
+    await syntheticsServices.deleteMonitors();
+    await syntheticsServices.addMonitorSimple(testMonitor1);
+    await syntheticsServices.addMonitorSimple(testMonitor2);
+    await syntheticsServices.addMonitorSimple(testMonitor3);
   });
 
   test.afterAll(async ({ syntheticsServices }) => {
-    await syntheticsServices.cleanTestMonitors();
+    await syntheticsServices.deleteMonitors();
   });
 
   test('navigates between monitors using the selector', async ({

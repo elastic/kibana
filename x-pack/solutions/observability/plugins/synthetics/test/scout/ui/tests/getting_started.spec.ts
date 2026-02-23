@@ -11,7 +11,7 @@ import { test } from '../fixtures';
 
 test.describe('GettingStarted', { tag: tags.stateful.classic }, () => {
   test.beforeAll(async ({ syntheticsServices }) => {
-    await syntheticsServices.cleanTestMonitors();
+    await syntheticsServices.deleteMonitors();
   });
 
   test('creates a basic monitor from getting started page', async ({

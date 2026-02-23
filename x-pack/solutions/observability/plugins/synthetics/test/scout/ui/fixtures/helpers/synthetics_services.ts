@@ -26,16 +26,19 @@ interface PrivateLocation {
 }
 
 export interface SyntheticsServicesFixture {
-  enableMonitorManagedViaApi: () => Promise<void>;
-  addTestMonitor: (
+  addMonitor: (
     name: string,
     data?: Record<string, any>,
     configId?: string,
     options?: { tls: { enabled: boolean } }
   ) => Promise<string>;
-  getMonitor: (monitorId: string) => Promise<any>;
-  deleteTestMonitorByQuery: (query: string) => Promise<void>;
-  addTestSummaryDocument: (params?: {
+  addMonitorProject: (
+    name: string,
+    projectName?: string,
+    config?: Record<string, unknown>
+  ) => Promise<void>;
+  addMonitorSimple: (name: string, params?: Record<string, any>) => Promise<void>;
+  addSummaryDocument: (params?: {
     monitorId?: string;
     docType?: 'summaryUp' | 'summaryDown' | 'journeyStart' | 'journeyEnd' | 'stepEnd';
     timestamp?: string;
@@ -49,35 +52,25 @@ export interface SyntheticsServicesFixture {
   }) => Promise<void>;
   cleanUp: () => Promise<void>;
   cleanUpAlerts: () => Promise<void>;
-  setupTestConnector: () => Promise<any>;
-  setupSettings: (connectorId?: string) => Promise<void>;
-  getPrivateLocations: () => Promise<PrivateLocation[]>;
+  deleteConnectors: () => Promise<void>;
+  deleteMonitorByQuery: (query: string) => Promise<void>;
+  deleteMonitors: () => Promise<void>;
+  deleteParams: () => Promise<void>;
+  deletePrivateLocations: () => Promise<void>;
+  deleteSettingsAndConnectors: () => Promise<void>;
+  enable: () => Promise<void>;
   ensurePrivateLocationExists: () => Promise<PrivateLocation>;
-  cleanTestMonitors: () => Promise<void>;
-  cleanPrivateLocations: () => Promise<void>;
-  cleanTestParams: () => Promise<void>;
-  cleanSettings: () => Promise<void>;
-  cleanConnectors: () => Promise<void>;
-  addTestMonitorSimple: (name: string, params?: Record<string, any>) => Promise<void>;
-  addTestMonitorProject: (
-    name: string,
-    projectName?: string,
-    config?: Record<string, unknown>
-  ) => Promise<void>;
+  getMonitor: (monitorId: string) => Promise<any>;
+  getPrivateLocations: () => Promise<PrivateLocation[]>;
+  setupConnector: () => Promise<any>;
+  setupSettings: (connectorId?: string) => Promise<void>;
 }
 
 function createSyntheticsServices(
   kbnClient: KbnClient,
   esClient: EsClient
 ): SyntheticsServicesFixture {
-  const enableMonitorManagedViaApi = async () => {
-    await kbnClient.request({
-      path: SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT,
-      method: 'PUT',
-    });
-  };
-
-  const addTestMonitor = async (
+  const addMonitor = async (
     name: string,
     data: Record<string, any> = { type: 'browser' },
     configId?: string,
@@ -101,35 +94,41 @@ function createSyntheticsServices(
     return (response.data as any).id;
   };
 
-  const getMonitor = async (monitorId: string) => {
-    const { data } = await kbnClient.request({
-      path:
-        SYNTHETICS_API_URLS.GET_SYNTHETICS_MONITOR.replace('{monitorId}', monitorId) +
-        '?internal=true',
-      method: 'GET',
+  const addMonitorProject = async (
+    name: string,
+    projectName = 'test-project',
+    config?: Record<string, unknown>
+  ) => {
+    await kbnClient.request({
+      path: SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace(
+        '{projectName}',
+        projectName
+      ),
+      method: 'PUT',
+      body: projectMonitorBrowser(name, config),
       headers: PUBLIC_API_HEADERS,
     });
-    return data;
   };
 
-  const deleteTestMonitorByQuery = async (query: string) => {
-    const { data } = await kbnClient.request({
+  const addMonitorSimple = async (
+    name: string,
+    params: Record<string, any> = { type: 'browser' }
+  ) => {
+    const testData = {
+      locations: [{ id: 'us_central', isServiceManaged: true }],
+      ...(params?.type !== 'browser' ? {} : defaultBrowserMonitorData),
+      ...(params || {}),
+      name,
+    };
+    await kbnClient.request({
       path: SYNTHETICS_API_URLS.SYNTHETICS_MONITORS,
-      query: { perPage: 10, page: 1, sortOrder: 'asc', sortField: 'name.keyword', query },
-      method: 'GET',
+      method: 'POST',
+      body: testData,
       headers: PUBLIC_API_HEADERS,
     });
-    const { monitors = [] } = data as any;
-    for (const monitor of monitors) {
-      await kbnClient.request({
-        path: `${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}/${monitor.config_id}`,
-        method: 'DELETE',
-        headers: PUBLIC_API_HEADERS,
-      });
-    }
   };
 
-  const addTestSummaryDocument = async ({
+  const addSummaryDocument = async ({
     docType = 'summaryUp',
     timestamp = new Date(Date.now()).toISOString(),
     monitorId,
@@ -189,6 +188,13 @@ function createSyntheticsServices(
     await esClient.index({ index, document });
   };
 
+  const cleanUp = async () => {
+    await kbnClient.savedObjects.clean({
+      types: ['synthetics-monitor', 'synthetics-monitor-multi-space', 'alert'],
+    });
+    await cleanUpAlerts();
+  };
+
   const cleanUpAlerts = async () => {
     const listOfIndices = await esClient.cat.indices({ format: 'json' });
     for (const index of listOfIndices) {
@@ -201,48 +207,62 @@ function createSyntheticsServices(
     }
   };
 
-  const cleanUp = async () => {
-    await kbnClient.savedObjects.clean({
-      types: ['synthetics-monitor', 'synthetics-monitor-multi-space', 'alert'],
+  const deleteConnectors = async () => {
+    const { data } = await kbnClient.request({
+      path: '/api/actions/connectors',
+      method: 'GET',
     });
-    await cleanUpAlerts();
+    for (const connector of data as any[]) {
+      await kbnClient.request({
+        path: `/api/actions/connector/${connector.id}`,
+        method: 'DELETE',
+      });
+    }
   };
 
-  const setupTestConnector = async () => {
-    const connector = await kbnClient.request({
-      path: '/api/actions/connector',
-      method: 'POST',
-      body: {
-        name: 'test index',
-        config: { index: 'test-index' },
-        secrets: {},
-        connector_type_id: '.index',
-      },
-    });
-    return connector.data as any;
-  };
-
-  const setupSettings = async (connectorId?: string) => {
-    await kbnClient.request({
-      path: '/api/synthetics/settings',
-      method: 'PUT',
-      body: {
-        certExpirationThreshold: 30,
-        certAgeThreshold: 730,
-        defaultConnectors: [connectorId],
-        defaultEmail: { to: [], cc: [], bcc: [] },
-        defaultStatusRuleEnabled: true,
-      },
-    });
-  };
-
-  const getPrivateLocations = async (): Promise<PrivateLocation[]> => {
-    const response = await kbnClient.request({
-      path: SYNTHETICS_API_URLS.PRIVATE_LOCATIONS,
+  const deleteMonitorByQuery = async (query: string) => {
+    const { data } = await kbnClient.request({
+      path: SYNTHETICS_API_URLS.SYNTHETICS_MONITORS,
+      query: { perPage: 10, page: 1, sortOrder: 'asc', sortField: 'name.keyword', query },
       method: 'GET',
       headers: PUBLIC_API_HEADERS,
     });
-    return response.data as PrivateLocation[];
+    const { monitors = [] } = data as any;
+    for (const monitor of monitors) {
+      await kbnClient.request({
+        path: `${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}/${monitor.config_id}`,
+        method: 'DELETE',
+        headers: PUBLIC_API_HEADERS,
+      });
+    }
+  };
+
+  const deleteMonitors = async () => {
+    await kbnClient.savedObjects.clean({
+      types: ['synthetics-monitor', 'synthetics-monitor-multi-space'],
+    });
+  };
+
+  const deleteParams = async () => {
+    await kbnClient.savedObjects.clean({ types: ['synthetics-param'] });
+  };
+
+  const deletePrivateLocations = async () => {
+    await kbnClient.savedObjects.clean({
+      types: ['synthetics-private-location', 'ingest-agent-policies', 'ingest-package-policies'],
+    });
+  };
+
+  const deleteSettingsAndConnectors = async () => {
+    await kbnClient.savedObjects.clean({ types: ['uptime-dynamic-settings'] });
+    await deleteConnectors();
+  };
+
+  const enable = async () => {
+    await kbnClient.request({
+      path: SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT,
+      method: 'PUT',
+    });
   };
 
   const ensurePrivateLocationExists = async (): Promise<PrivateLocation> => {
@@ -277,93 +297,73 @@ function createSyntheticsServices(
     return { id: location.id, label: location.label };
   };
 
-  const cleanTestMonitors = async () => {
-    await kbnClient.savedObjects.clean({
-      types: ['synthetics-monitor', 'synthetics-monitor-multi-space'],
-    });
-  };
-
-  const cleanPrivateLocations = async () => {
-    await kbnClient.savedObjects.clean({
-      types: ['synthetics-private-location', 'ingest-agent-policies', 'ingest-package-policies'],
-    });
-  };
-
-  const cleanTestParams = async () => {
-    await kbnClient.savedObjects.clean({ types: ['synthetics-param'] });
-  };
-
-  const cleanConnectors = async () => {
+  const getMonitor = async (monitorId: string) => {
     const { data } = await kbnClient.request({
-      path: '/api/actions/connectors',
+      path:
+        SYNTHETICS_API_URLS.GET_SYNTHETICS_MONITOR.replace('{monitorId}', monitorId) +
+        '?internal=true',
       method: 'GET',
+      headers: PUBLIC_API_HEADERS,
     });
-    for (const connector of data as any[]) {
-      await kbnClient.request({
-        path: `/api/actions/connector/${connector.id}`,
-        method: 'DELETE',
-      });
-    }
+    return data;
   };
 
-  const cleanSettings = async () => {
-    await kbnClient.savedObjects.clean({ types: ['uptime-dynamic-settings'] });
-    await cleanConnectors();
+  const getPrivateLocations = async (): Promise<PrivateLocation[]> => {
+    const response = await kbnClient.request({
+      path: SYNTHETICS_API_URLS.PRIVATE_LOCATIONS,
+      method: 'GET',
+      headers: PUBLIC_API_HEADERS,
+    });
+    return response.data as PrivateLocation[];
   };
 
-  const addTestMonitorSimple = async (
-    name: string,
-    params: Record<string, any> = { type: 'browser' }
-  ) => {
-    const testData = {
-      locations: [{ id: 'us_central', isServiceManaged: true }],
-      ...(params?.type !== 'browser' ? {} : defaultBrowserMonitorData),
-      ...(params || {}),
-      name,
-    };
-    await kbnClient.request({
-      path: SYNTHETICS_API_URLS.SYNTHETICS_MONITORS,
+  const setupConnector = async () => {
+    const connector = await kbnClient.request({
+      path: '/api/actions/connector',
       method: 'POST',
-      body: testData,
-      headers: PUBLIC_API_HEADERS,
+      body: {
+        name: 'test index',
+        config: { index: 'test-index' },
+        secrets: {},
+        connector_type_id: '.index',
+      },
     });
+    return connector.data as any;
   };
 
-  const addTestMonitorProject = async (
-    name: string,
-    projectName = 'test-project',
-    config?: Record<string, unknown>
-  ) => {
+  const setupSettings = async (connectorId?: string) => {
     await kbnClient.request({
-      path: SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace(
-        '{projectName}',
-        projectName
-      ),
+      path: '/api/synthetics/settings',
       method: 'PUT',
-      body: projectMonitorBrowser(name, config),
-      headers: PUBLIC_API_HEADERS,
+      body: {
+        certExpirationThreshold: 30,
+        certAgeThreshold: 730,
+        defaultConnectors: [connectorId],
+        defaultEmail: { to: [], cc: [], bcc: [] },
+        defaultStatusRuleEnabled: true,
+      },
     });
   };
 
   return {
-    enableMonitorManagedViaApi,
-    addTestMonitor,
-    getMonitor,
-    deleteTestMonitorByQuery,
-    addTestSummaryDocument,
+    addMonitor,
+    addMonitorProject,
+    addMonitorSimple,
+    addSummaryDocument,
     cleanUp,
     cleanUpAlerts,
-    setupTestConnector,
-    setupSettings,
-    getPrivateLocations,
+    deleteConnectors,
+    deleteMonitorByQuery,
+    deleteMonitors,
+    deleteParams,
+    deletePrivateLocations,
+    deleteSettingsAndConnectors,
+    enable,
     ensurePrivateLocationExists,
-    cleanTestMonitors,
-    cleanPrivateLocations,
-    cleanTestParams,
-    cleanSettings,
-    cleanConnectors,
-    addTestMonitorSimple,
-    addTestMonitorProject,
+    getMonitor,
+    getPrivateLocations,
+    setupConnector,
+    setupSettings,
   };
 }
 

@@ -30,11 +30,12 @@ test.describe('OverviewSaveLensVisualization', { tag: tags.stateful.classic }, (
     });
 
     await test.step('create test monitor via API', async () => {
-      await syntheticsServices.addTestMonitor(
-        'Test Overview Save Lens Visualization Monitor',
-        { type: 'http', urls: 'https://www.google.com', locations: ['us_central'] }
-      );
-      await page.testSubj.click('syntheticsRefreshButtonButton');
+      await syntheticsServices.addMonitor('Test Overview Save Lens Visualization Monitor', {
+        type: 'http',
+        urls: 'https://www.google.com',
+        locations: ['us_central'],
+      });
+      await pageObjects.syntheticsApp.refreshOverview();
     });
 
     await test.step('open save lens visualization', async () => {

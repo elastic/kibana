@@ -31,16 +31,16 @@ test.describe('DefaultStatusAlert', { tag: tags.stateful.classic }, () => {
     const firstCheckTime = new Date(Date.now()).toISOString();
 
     await test.step('setup: create monitor with connector and summary doc', async () => {
-      const connector = await syntheticsServices.setupTestConnector();
+      const connector = await syntheticsServices.setupConnector();
       await syntheticsServices.setupSettings(connector.id);
-      configId = await syntheticsServices.addTestMonitor('Test Monitor', {
+      configId = await syntheticsServices.addMonitor('Test Monitor', {
         type: 'http',
         urls: 'https://www.google.com',
         locations: [
           { id: 'us_central', label: 'North America - US Central', isServiceManaged: true },
         ],
       });
-      await syntheticsServices.addTestSummaryDocument({
+      await syntheticsServices.addSummaryDocument({
         timestamp: firstCheckTime,
         configId,
       });
@@ -52,10 +52,7 @@ test.describe('DefaultStatusAlert', { tag: tags.stateful.classic }, () => {
     });
 
     await test.step('edit default status alert rule schedule', async () => {
-      await page.testSubj.click('syntheticsAlertsRulesButton');
-
-      await expect(page.testSubj.locator('manageStatusRuleName')).toBeVisible({ timeout: 30_000 });
-      await page.testSubj.click('manageStatusRuleName');
+      await pageObjects.syntheticsApp.openManageStatusRule();
 
       await expect(page.testSubj.locator('editDefaultStatusRule')).toBeVisible({ timeout: 30_000 });
       await page.testSubj.click('editDefaultStatusRule');
@@ -89,7 +86,7 @@ test.describe('DefaultStatusAlert', { tag: tags.stateful.classic }, () => {
     });
 
     await test.step('set monitor status to down', async () => {
-      await syntheticsServices.addTestSummaryDocument({
+      await syntheticsServices.addSummaryDocument({
         docType: 'summaryDown',
         configId,
       });
@@ -105,7 +102,7 @@ test.describe('DefaultStatusAlert', { tag: tags.stateful.classic }, () => {
     });
 
     await test.step('verify alert is generated', async () => {
-      await page.testSubj.click('observability-nav-observability-overview-alerts');
+      await pageObjects.syntheticsApp.navigateToAlertsPage();
 
       const reasonMessage = getReasonMessage({
         name: 'Test Monitor',
@@ -123,7 +120,7 @@ test.describe('DefaultStatusAlert', { tag: tags.stateful.classic }, () => {
     });
 
     await test.step('recover alert by setting monitor to up', async () => {
-      await syntheticsServices.addTestSummaryDocument({ configId });
+      await syntheticsServices.addSummaryDocument({ configId });
 
       await expect(async () => {
         await page.testSubj.click('querySubmitButton');
@@ -132,7 +129,7 @@ test.describe('DefaultStatusAlert', { tag: tags.stateful.classic }, () => {
     });
 
     await test.step('second down generates another alert', async () => {
-      await syntheticsServices.addTestSummaryDocument({ docType: 'summaryDown', configId });
+      await syntheticsServices.addSummaryDocument({ docType: 'summaryDown', configId });
 
       await expect(async () => {
         await page.testSubj.click('querySubmitButton');
@@ -143,7 +140,7 @@ test.describe('DefaultStatusAlert', { tag: tags.stateful.classic }, () => {
     await test.step('adding another down monitor creates additional alert', async () => {
       const monitorId = uuidv4();
       const name = 'Test Monitor 2';
-      const configId2 = await syntheticsServices.addTestMonitor(name, {
+      const configId2 = await syntheticsServices.addMonitor(name, {
         type: 'http',
         urls: 'https://www.google.com',
         custom_heartbeat_id: monitorId,
@@ -151,7 +148,7 @@ test.describe('DefaultStatusAlert', { tag: tags.stateful.classic }, () => {
           { id: 'us_central', label: 'North America - US Central', isServiceManaged: true },
         ],
       });
-      await syntheticsServices.addTestSummaryDocument({
+      await syntheticsServices.addSummaryDocument({
         monitorId,
         docType: 'summaryDown',
         name,
@@ -165,7 +162,7 @@ test.describe('DefaultStatusAlert', { tag: tags.stateful.classic }, () => {
     });
 
     await test.step('deleting monitor recovers the alert', async () => {
-      await syntheticsServices.deleteTestMonitorByQuery('"Test Monitor 2"');
+      await syntheticsServices.deleteMonitorByQuery('"Test Monitor 2"');
 
       await page.testSubj.locator('queryInput').fill('kibana.alert.status : "recovered" ');
       await page.testSubj.click('querySubmitButton');

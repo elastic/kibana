@@ -14,13 +14,13 @@ test.describe('PrivateLocationsSettings', { tag: tags.stateful.classic }, () => 
   let locationId: string;
 
   test.beforeAll(async ({ syntheticsServices }) => {
-    await syntheticsServices.cleanPrivateLocations();
-    await syntheticsServices.cleanTestMonitors();
+    await syntheticsServices.deletePrivateLocations();
+    await syntheticsServices.deleteMonitors();
   });
 
   test.afterAll(async ({ syntheticsServices }) => {
-    await syntheticsServices.cleanPrivateLocations();
-    await syntheticsServices.cleanTestMonitors();
+    await syntheticsServices.deletePrivateLocations();
+    await syntheticsServices.deleteMonitors();
   });
 
   test('manages private locations lifecycle', async ({
@@ -63,9 +63,9 @@ test.describe('PrivateLocationsSettings', { tag: tags.stateful.classic }, () => 
     await test.step('verify and assign monitor', async () => {
       await page.click('text=Private Locations');
       const privateLocations = await syntheticsServices.getPrivateLocations();
-      expect(privateLocations.length).toBe(1);
+      expect(privateLocations).toHaveLength(1);
       locationId = privateLocations[0].id;
-      await syntheticsServices.addTestMonitorSimple('test-monitor', {
+      await syntheticsServices.addMonitorSimple('test-monitor', {
         locations: [privateLocations[0]],
         type: 'browser',
       });
@@ -100,13 +100,11 @@ test.describe('PrivateLocationsSettings', { tag: tags.stateful.classic }, () => 
       await page.testSubj.click('settings-page-link');
       await page.click('text=Private Locations');
       await expect(page.locator(`td:has-text("${NEW_LOCATION_LABEL}")`)).toBeVisible();
-      await expect(
-        page.locator(`[data-test-subj="deleteLocation-${locationId}"]`)
-      ).toBeDisabled();
+      await expect(page.locator(`[data-test-subj="deleteLocation-${locationId}"]`)).toBeDisabled();
     });
 
     await test.step('delete location after removing monitor', async () => {
-      await syntheticsServices.cleanTestMonitors();
+      await syntheticsServices.deleteMonitors();
       await page.click('text=Data Retention');
       await page.click('text=Private Locations');
       await page.click('[aria-label="Delete location"]');

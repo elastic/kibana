@@ -34,7 +34,7 @@ test.describe('CustomStatusAlert', { tag: tags.stateful.classic }, () => {
     });
 
     await test.step('create monitor and summary doc', async () => {
-      configId = await syntheticsServices.addTestMonitor(
+      configId = await syntheticsServices.addMonitor(
         'Test Monitor',
         {
           type: 'http',
@@ -43,16 +43,15 @@ test.describe('CustomStatusAlert', { tag: tags.stateful.classic }, () => {
         },
         configId
       );
-      await syntheticsServices.addTestSummaryDocument({
+      await syntheticsServices.addSummaryDocument({
         timestamp: firstCheckTime,
         configId,
       });
     });
 
     await test.step('create custom status rule', async () => {
-      await page.testSubj.click('syntheticsRefreshButtonButton');
-      await page.testSubj.click('syntheticsAlertsRulesButton');
-      await page.testSubj.click('manageStatusRuleName');
+      await pageObjects.syntheticsApp.refreshOverview();
+      await pageObjects.syntheticsApp.openManageStatusRule();
       await page.testSubj.click('createNewStatusRule');
 
       let requestMade = false;

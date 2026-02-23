@@ -15,18 +15,18 @@ test.describe('ManagementList', { tag: tags.stateful.classic }, () => {
   const testMonitor3 = 'Test monitor 3';
 
   test.beforeAll(async ({ syntheticsServices }) => {
-    await syntheticsServices.enableMonitorManagedViaApi();
-    await syntheticsServices.cleanTestMonitors();
-    await syntheticsServices.addTestMonitorSimple(testMonitor1);
-    await syntheticsServices.addTestMonitorSimple(testMonitor2);
-    await syntheticsServices.addTestMonitorSimple(testMonitor3, {
+    await syntheticsServices.enable();
+    await syntheticsServices.deleteMonitors();
+    await syntheticsServices.addMonitorSimple(testMonitor1);
+    await syntheticsServices.addMonitorSimple(testMonitor2);
+    await syntheticsServices.addMonitorSimple(testMonitor3, {
       type: 'browser',
       schedule: { unit: 'm', number: '5' },
     });
   });
 
   test.afterAll(async ({ syntheticsServices }) => {
-    await syntheticsServices.cleanTestMonitors();
+    await syntheticsServices.deleteMonitors();
   });
 
   test('displays management list with search and filters', async ({
@@ -74,6 +74,7 @@ test.describe('ManagementList', { tag: tags.stateful.classic }, () => {
 
     await test.step('filter by frequency', async () => {
       const frequencyFilter = page.locator('.euiFilterButton__text', { hasText: 'Frequency' });
+      // eslint-disable-next-line playwright/no-nth-methods
       const fiveMinOption = page.getByText('Every 5 minutes').first();
       await frequencyFilter.click();
       await fiveMinOption.click();

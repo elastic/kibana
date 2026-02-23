@@ -15,15 +15,15 @@ test.describe('MonitorDetailFlyout', { tag: tags.stateful.classic }, () => {
   let locationId: string;
 
   test.beforeAll(async ({ syntheticsServices }) => {
-    await syntheticsServices.enableMonitorManagedViaApi();
-    await syntheticsServices.cleanTestMonitors();
+    await syntheticsServices.enable();
+    await syntheticsServices.deleteMonitors();
     const location = await syntheticsServices.ensurePrivateLocationExists();
     locationLabel = location.label;
     locationId = location.id;
   });
 
   test.afterAll(async ({ syntheticsServices }) => {
-    await syntheticsServices.cleanTestMonitors();
+    await syntheticsServices.deleteMonitors();
   });
 
   test('creates HTTP monitor and opens detail flyout', async ({
@@ -57,7 +57,7 @@ test.describe('MonitorDetailFlyout', { tag: tags.stateful.classic }, () => {
 
     await test.step('cleanup monitors', async () => {
       await pageObjects.syntheticsApp.navigateToMonitorManagement();
-      await pageObjects.syntheticsApp.deleteMonitors();
+      await pageObjects.syntheticsApp.deleteMonitor(monitorName);
     });
   });
 });

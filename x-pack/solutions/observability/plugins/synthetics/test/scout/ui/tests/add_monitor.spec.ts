@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { v4 as uuidv4 } from 'uuid';
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../fixtures';
+import { monitorConfigurations } from '../fixtures/constants';
 
 enum FormMonitorType {
   SINGLE = 'single',
@@ -18,151 +18,28 @@ enum FormMonitorType {
   ICMP = 'icmp',
 }
 
-const apmServiceName = 'apmServiceName';
-
-const monitorConfigurations = (locationLabel: string) => {
-  const httpName = `http monitor ${uuidv4()}`;
-  const icmpName = `icmp monitor ${uuidv4()}`;
-  const tcpName = `tcp monitor ${uuidv4()}`;
-  const browserName = `browser monitor ${uuidv4()}`;
-  const browserRecorderName = `browser monitor recorder ${uuidv4()}`;
-
-  return {
-    [FormMonitorType.HTTP]: {
-      monitorType: FormMonitorType.HTTP,
-      monitorConfig: {
-        schedule: '3',
-        name: httpName,
-        url: 'https://elastic.co',
-        locations: [locationLabel],
-        apmServiceName,
-      },
-      monitorListDetails: {
-        location: locationLabel,
-        schedule: '3',
-        name: httpName,
-      },
-      monitorEditDetails: [
-        ['[data-test-subj=syntheticsMonitorConfigSchedule]', '3'],
-        ['[data-test-subj=syntheticsMonitorConfigName]', httpName],
-        ['[data-test-subj=syntheticsMonitorConfigURL]', 'https://elastic.co'],
-        ['[data-test-subj=syntheticsMonitorConfigAPMServiceName]', apmServiceName],
-      ] as Array<[string, string]>,
-    },
-    [FormMonitorType.TCP]: {
-      monitorType: FormMonitorType.TCP,
-      monitorConfig: {
-        schedule: '3',
-        name: tcpName,
-        host: 'smtp.gmail.com:587',
-        locations: [locationLabel],
-        apmServiceName,
-      },
-      monitorListDetails: {
-        location: locationLabel,
-        schedule: '3',
-        name: tcpName,
-      },
-      monitorEditDetails: [
-        ['[data-test-subj=syntheticsMonitorConfigSchedule]', '3'],
-        ['[data-test-subj=syntheticsMonitorConfigName]', tcpName],
-        ['[data-test-subj=syntheticsMonitorConfigHost]', 'smtp.gmail.com:587'],
-        ['[data-test-subj=syntheticsMonitorConfigAPMServiceName]', apmServiceName],
-      ] as Array<[string, string]>,
-    },
-    [FormMonitorType.ICMP]: {
-      monitorType: FormMonitorType.ICMP,
-      monitorConfig: {
-        schedule: '3',
-        name: icmpName,
-        host: '1.1.1.1',
-        locations: [locationLabel],
-        apmServiceName,
-      },
-      monitorListDetails: {
-        location: locationLabel,
-        schedule: '3',
-        name: icmpName,
-      },
-      monitorEditDetails: [
-        ['[data-test-subj=syntheticsMonitorConfigSchedule]', '3'],
-        ['[data-test-subj=syntheticsMonitorConfigName]', icmpName],
-        ['[data-test-subj=syntheticsMonitorConfigHost]', '1.1.1.1'],
-        ['[data-test-subj=syntheticsMonitorConfigAPMServiceName]', apmServiceName],
-      ] as Array<[string, string]>,
-    },
-    [FormMonitorType.MULTISTEP]: {
-      monitorType: FormMonitorType.MULTISTEP,
-      monitorConfig: {
-        schedule: '10',
-        name: browserName,
-        inlineScript: 'step("test step", () => {})',
-        locations: [locationLabel],
-        apmServiceName,
-      },
-      monitorListDetails: {
-        location: locationLabel,
-        schedule: '10',
-        name: browserName,
-      },
-      monitorEditDetails: [
-        ['[data-test-subj=syntheticsMonitorConfigSchedule]', '10'],
-        ['[data-test-subj=syntheticsMonitorConfigName]', browserName],
-        [
-          'div[data-test-subj="codeEditorContainer"][aria-label="JavaScript code editor"] .view-line',
-          'step("test step", () => {})',
-        ],
-        ['[data-test-subj=syntheticsMonitorConfigAPMServiceName]', apmServiceName],
-      ] as Array<[string, string]>,
-    },
-    [`${FormMonitorType.MULTISTEP}__recorder`]: {
-      monitorType: FormMonitorType.MULTISTEP,
-      monitorConfig: {
-        schedule: '10',
-        name: browserRecorderName,
-        recorderScript: 'step("test step", () => {})',
-        locations: [locationLabel],
-        apmServiceName: 'Sample APM Service',
-      },
-      monitorListDetails: {
-        location: locationLabel,
-        schedule: '10',
-        name: browserRecorderName,
-      },
-      monitorEditDetails: [
-        ['[data-test-subj=syntheticsMonitorConfigSchedule]', '10'],
-        ['[data-test-subj=syntheticsMonitorConfigName]', browserRecorderName],
-        [
-          'div[data-test-subj="codeEditorContainer"][aria-label="JavaScript code editor"] .view-line',
-          'step("test step", () => {})',
-        ],
-      ] as Array<[string, string]>,
-    },
-  };
-};
-
 test.describe('AddMonitor', { tag: tags.stateful.classic }, () => {
   let locationLabel: string;
   let configs: ReturnType<typeof monitorConfigurations>;
 
   test.beforeAll(async ({ syntheticsServices }) => {
-    await syntheticsServices.enableMonitorManagedViaApi();
-    await syntheticsServices.cleanTestMonitors();
+    await syntheticsServices.enable();
+    await syntheticsServices.deleteMonitors();
     const location = await syntheticsServices.ensurePrivateLocationExists();
     locationLabel = location.label;
     configs = monitorConfigurations(locationLabel);
   });
 
-  test.afterAll(async ({ syntheticsServices }) => {
-    await syntheticsServices.cleanTestMonitors();
+  test.afterEach(async ({ syntheticsServices }) => {
+    await syntheticsServices.deleteMonitors();
   });
 
   const monitorTypesToTest = [
     FormMonitorType.HTTP,
-    // FormMonitorType.TCP,
-    // FormMonitorType.ICMP,
-    // FormMonitorType.MULTISTEP,
-    // `${FormMonitorType.MULTISTEP}__recorder` as const,
+    FormMonitorType.TCP,
+    FormMonitorType.ICMP,
+    FormMonitorType.MULTISTEP,
+    `${FormMonitorType.MULTISTEP}__recorder` as const,
   ] as const;
 
   for (const monitorType of monitorTypesToTest) {
@@ -192,7 +69,12 @@ test.describe('AddMonitor', { tag: tags.stateful.classic }, () => {
         await expect(page.testSubj.locator('syntheticsMonitorDetailsLinkLink')).toHaveText(
           config.monitorListDetails.name
         );
-        // await pageObjects.syntheticsApp.findMonitorConfiguration(config.monitorListDetails);
+        await expect(
+          page.testSubj.locator('syntheticsMonitorListLocations').locator('a')
+        ).toHaveText(config.monitorListDetails.location);
+        await expect(
+          page.testSubj.locator('syntheticsMonitorListFrequency').locator('.euiText')
+        ).toHaveText(config.monitorListDetails.schedule);
       });
 
       await test.step(`edit ${monitorType} monitor`, async () => {
@@ -204,25 +86,26 @@ test.describe('AddMonitor', { tag: tags.stateful.classic }, () => {
         await pageObjects.syntheticsApp.findEditMonitorConfiguration(config.monitorEditDetails);
         await page.testSubj.click('syntheticsMonitorConfigSubmitButton');
         await expect(page.getByText('Monitor updated successfully.')).toBeVisible({
-          timeout: 60_000,
+          timeout: 20_000,
         });
       });
 
-      // await test.step('cannot save monitor with the same name', async () => {
-      //   await pageObjects.syntheticsApp.navigateToAddMonitor();
-      //   await pageObjects.syntheticsApp.createMonitor({
-      //     monitorConfig: config.monitorConfig,
-      //     monitorType: config.monitorType,
-      //   });
-      //   await expect(page.getByText('Monitor name already exists')).toBeVisible();
-      //   await page.testSubj.click('syntheticsMonitorConfigSubmitButton');
-      //   await page.click('text=Cancel');
-      // });
+      await test.step('cannot save monitor with the same name', async () => {
+        await pageObjects.syntheticsApp.navigateToAddMonitor();
+        await pageObjects.syntheticsApp.createMonitor({
+          monitorConfig: config.monitorConfig,
+          monitorType: config.monitorType,
+        });
+        await expect(page.getByText('Monitor name already exists')).toBeVisible();
+        await page.testSubj.click('syntheticsMonitorConfigSubmitButton');
+        await page.click('text=Cancel');
+      });
 
-      // await test.step('delete monitor', async () => {
-      //   await expect(page.getByText('Monitor')).toBeVisible();
-      //   await pageObjects.syntheticsApp.deleteMonitors();
-      // });
+      await test.step('delete monitor', async () => {
+        await pageObjects.syntheticsApp.navigateToMonitorManagement();
+        await pageObjects.syntheticsApp.deleteMonitor(monitorName);
+        await expect(page.testSubj.locator('syntheticsGettingStartedPage')).toBeVisible();
+      });
     });
   }
 });

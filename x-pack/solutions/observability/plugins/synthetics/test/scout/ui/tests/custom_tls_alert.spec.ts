@@ -33,7 +33,7 @@ test.describe('CustomTLSAlert', { tag: tags.stateful.classic }, () => {
     });
 
     await test.step('create monitor with TLS cert expiring tomorrow', async () => {
-      configId = await syntheticsServices.addTestMonitor(
+      configId = await syntheticsServices.addMonitor(
         'Test Monitor',
         {
           type: 'http',
@@ -45,7 +45,7 @@ test.describe('CustomTLSAlert', { tag: tags.stateful.classic }, () => {
       );
       const tomorrowDate = new Date();
       tomorrowDate.setDate(tomorrowDate.getDate() + 1);
-      await syntheticsServices.addTestSummaryDocument({
+      await syntheticsServices.addSummaryDocument({
         configId,
         tlsNotAfter: tomorrowDate.toISOString(),
         tlsNotBefore: new Date().toISOString(),
@@ -53,10 +53,8 @@ test.describe('CustomTLSAlert', { tag: tags.stateful.classic }, () => {
     });
 
     await test.step('open create TLS rule flyout', async () => {
-      await page.testSubj.click('syntheticsRefreshButtonButton');
-      await expect(page.testSubj.locator('syntheticsAlertsRulesButton')).toBeEnabled();
-      await page.testSubj.click('syntheticsAlertsRulesButton');
-      await page.testSubj.click('manageTlsRuleName');
+      await pageObjects.syntheticsApp.refreshOverview();
+      await pageObjects.syntheticsApp.openManageTlsRule();
       await page.testSubj.click('createNewTLSRule');
       await expect(page.testSubj.locator('addRuleFlyoutTitle')).toBeVisible();
     });
@@ -108,7 +106,7 @@ test.describe('CustomTLSAlert', { tag: tags.stateful.classic }, () => {
     });
 
     await test.step('verify alert fires', async () => {
-      await page.testSubj.click('observability-nav-observability-overview-alerts');
+      await pageObjects.syntheticsApp.navigateToAlertsPage();
 
       await expect(async () => {
         await page.testSubj.click('querySubmitButton');

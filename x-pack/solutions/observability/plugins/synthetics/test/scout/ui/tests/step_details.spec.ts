@@ -15,8 +15,8 @@ test.describe('StepDetailsPage', { tag: tags.stateful.classic }, () => {
 
   test.beforeAll(async ({ syntheticsServices }) => {
     await syntheticsServices.cleanUp();
-    await syntheticsServices.enableMonitorManagedViaApi();
-    await syntheticsServices.addTestMonitor(
+    await syntheticsServices.enable();
+    await syntheticsServices.addMonitor(
       'https://www.google.com',
       {
         type: 'browser',
@@ -29,14 +29,14 @@ test.describe('StepDetailsPage', { tag: tags.stateful.classic }, () => {
       },
       configId
     );
-    await syntheticsServices.addTestSummaryDocument({
+    await syntheticsServices.addSummaryDocument({
       docType: 'journeyStart',
       configId,
       testRunId: checkGroup,
       monitorId: configId,
       name: 'https://www.google.com',
     });
-    await syntheticsServices.addTestSummaryDocument({
+    await syntheticsServices.addSummaryDocument({
       docType: 'stepEnd',
       stepIndex: 1,
       configId,
@@ -44,7 +44,7 @@ test.describe('StepDetailsPage', { tag: tags.stateful.classic }, () => {
       monitorId: configId,
       name: 'https://www.google.com',
     });
-    await syntheticsServices.addTestSummaryDocument({
+    await syntheticsServices.addSummaryDocument({
       docType: 'journeyEnd',
       configId,
       testRunId: checkGroup,

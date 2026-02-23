@@ -14,7 +14,7 @@ test.describe('MonitorFormValidation', { tag: tags.stateful.classic }, () => {
   let locationLabel: string;
 
   test.beforeAll(async ({ syntheticsServices }) => {
-    await syntheticsServices.enableMonitorManagedViaApi();
+    await syntheticsServices.enable();
     const location = await syntheticsServices.ensurePrivateLocationExists();
     locationLabel = location.label;
   });
@@ -56,9 +56,7 @@ test.describe('MonitorFormValidation', { tag: tags.stateful.classic }, () => {
       await expect(page.getByText('Max redirects is invalid.')).toBeHidden();
 
       await page.testSubj.locator('syntheticsMonitorConfigTimeout').fill('-1');
-      await expect(
-        page.getByText('Timeout must be greater than or equal to 0.')
-      ).toBeVisible();
+      await expect(page.getByText('Timeout must be greater than or equal to 0.')).toBeVisible();
 
       await page.testSubj.click('syntheticsMonitorConfigSubmitButton');
       await expect(page.getByText('Please address the highlighted errors.')).toBeVisible();
