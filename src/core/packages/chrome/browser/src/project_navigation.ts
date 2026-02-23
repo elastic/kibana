@@ -273,8 +273,6 @@ export interface SolutionNavigationDefinition<LinkId extends AppDeepLinkId = App
   navigationTree$: Observable<NavigationTreeDefinition<LinkId>>;
   /** Optional icon for the solution navigation to render in the select dropdown. */
   icon?: IconType;
-  /** The page to navigate to when clicking on the Kibana (or custom) logo. */
-  homePage?: LinkId;
 }
 
 export type SolutionNavigationDefinitions = {

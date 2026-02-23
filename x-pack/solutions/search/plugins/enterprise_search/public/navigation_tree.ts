@@ -56,7 +56,6 @@ export const getNavigationTreeDefinition = ({
   isCloudEnabled?: boolean;
 }): AddSolutionNavigationArg => {
   return {
-    homePage: SEARCH_HOMEPAGE,
     icon,
     id: 'es',
     navigationTree$: dynamicItems$.pipe(
