@@ -29,6 +29,7 @@ import {
 } from '@kbn/streamlang';
 import type { RoutingStatus } from '@kbn/streams-schema';
 import debounce from 'lodash/debounce';
+import type { monaco } from '@kbn/monaco';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import useToggle from 'react-use/lib/useToggle';
 import yaml from 'yaml';
@@ -263,6 +264,14 @@ export function ConditionEditor(props: ConditionEditorProps) {
           height={200}
           languageId="yaml"
           value={syntaxEditorValue}
+          editorDidMount={(editor: monaco.editor.IStandaloneCodeEditor) => {
+            editor.onDidFocusEditorText(() => {
+              const model = editor.getModel();
+              if (model && model.getValue().trim() === '') {
+                editor.trigger('focus', 'editor.action.triggerSuggest', {});
+              }
+            });
+          }}
           onChange={(value) => {
             syntaxEditorValueRef.current = value;
             setSyntaxEditorValue(value);
@@ -281,6 +290,15 @@ export function ConditionEditor(props: ConditionEditorProps) {
             automaticLayout: true,
             tabSize: 2,
             insertSpaces: true,
+            quickSuggestions: {
+              other: true,
+              comments: false,
+              strings: true,
+            },
+            suggest: {
+              snippetsPreventQuickSuggestions: false,
+              showSnippets: true,
+            },
           }}
         />
       ) : conditionEditableInUi ? (
