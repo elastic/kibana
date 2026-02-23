@@ -30,7 +30,7 @@ class StandaloneSpecDefinitionsService {
     this.globalRules[parentNode] = rules;
   }
 
-  addEndpointDescription(endpoint, description = {}, docsLinkToApiReference = false) {
+  addEndpointDescription(endpoint, description = {}, isServerless = false) {
     let copiedDescription = {};
     if (this.endpoints[endpoint]) {
       copiedDescription = { ...this.endpoints[endpoint] };
@@ -56,8 +56,9 @@ class StandaloneSpecDefinitionsService {
       Object.assign(description.url_params, urlParamsDef);
     }
 
-    if (docsLinkToApiReference) {
-      description.documentation = 'https://www.elastic.co/docs/api';
+    if (isServerless) {
+      description.documentation =
+        description.documentation_serverless || 'https://www.elastic.co/docs/api';
     }
 
     Object.assign(copiedDescription, description);
