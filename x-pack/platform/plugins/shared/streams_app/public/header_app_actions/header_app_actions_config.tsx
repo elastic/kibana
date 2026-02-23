@@ -6,9 +6,72 @@
  */
 
 import React from 'react';
-import { EuiButtonIcon } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiHorizontalRule,
+  EuiIcon,
+  EuiKeyPadMenu,
+  EuiKeyPadMenuItem,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { ChromeHeaderAppActionsConfig } from '@kbn/core-chrome-browser';
+
+const noop = () => {};
+
+const overflowKeyPadCss = css`
+  justify-content: center;
+  padding-block: 8px;
+`;
+
+const overflowKeyPadItemCss = css`
+  width: 72px;
+  height: 64px;
+  min-width: 72px;
+  min-height: 48px;
+`;
+
+interface OverflowKeyPadSectionProps {
+  onShare?: () => void;
+}
+
+const OverflowKeyPadSection: React.FC<OverflowKeyPadSectionProps> = ({ onShare }) => (
+  <>
+    <EuiKeyPadMenu css={overflowKeyPadCss}>
+      <EuiKeyPadMenuItem
+        label={i18n.translate('xpack.streams.streamDetailHeaderAppActions.overflow.new', {
+          defaultMessage: 'New',
+        })}
+        onClick={noop}
+        css={overflowKeyPadItemCss}
+        data-test-subj="headerGlobalNav-overflowNew"
+      >
+        <EuiIcon type="plusInCircle" size="m" />
+      </EuiKeyPadMenuItem>
+      <EuiKeyPadMenuItem
+        label={i18n.translate('xpack.streams.streamDetailHeaderAppActions.overflow.favorite', {
+          defaultMessage: 'Favorite',
+        })}
+        onClick={noop}
+        css={overflowKeyPadItemCss}
+        data-test-subj="headerGlobalNav-overflowFavorite"
+      >
+        <EuiIcon type="star" size="m" />
+      </EuiKeyPadMenuItem>
+      <EuiKeyPadMenuItem
+        label={i18n.translate('xpack.streams.streamDetailHeaderAppActions.overflow.share', {
+          defaultMessage: 'Share',
+        })}
+        onClick={onShare ?? noop}
+        css={overflowKeyPadItemCss}
+        data-test-subj="headerGlobalNav-overflowShare"
+      >
+        <EuiIcon type="share" size="m" />
+      </EuiKeyPadMenuItem>
+    </EuiKeyPadMenu>
+    <EuiHorizontalRule margin="none" />
+  </>
+);
 
 export interface StreamsHeaderAppActionsConfigDeps {
   onSettings: () => void;
@@ -59,16 +122,17 @@ export function getStreamsHeaderAppActionsConfig(
 export interface StreamDetailHeaderAppActionsConfigDeps {
   onFeedback?: () => void;
   onPrimaryAction?: () => void;
+  onShare?: () => void;
 }
 
 /**
- * Header app actions config for the Stream detail view: overflow (Feedback)
- * and primary action button with Discover app icon.
+ * Header app actions config for the Stream detail view: overflow (New, Favorite, Share keypad;
+ * Docs; Feedback) and primary action button with Discover app icon.
  */
 export function getStreamDetailHeaderAppActionsConfig(
   deps: StreamDetailHeaderAppActionsConfigDeps = {}
 ): ChromeHeaderAppActionsConfig {
-  const { onFeedback = () => {}, onPrimaryAction = () => {} } = deps;
+  const { onFeedback = () => {}, onPrimaryAction = () => {}, onShare } = deps;
 
   return {
     overflowPanels: [
@@ -76,6 +140,14 @@ export function getStreamDetailHeaderAppActionsConfig(
         id: 0,
         title: '',
         items: [
+          { renderItem: () => <OverflowKeyPadSection onShare={onShare} />, key: 'keypad' },
+          {
+            name: i18n.translate('xpack.streams.streamDetailHeaderAppActions.docs', {
+              defaultMessage: 'Docs',
+            }),
+            icon: 'documentation',
+            onClick: noop,
+          },
           {
             name: i18n.translate('xpack.streams.streamDetailHeaderAppActions.feedback', {
               defaultMessage: 'Feedback',

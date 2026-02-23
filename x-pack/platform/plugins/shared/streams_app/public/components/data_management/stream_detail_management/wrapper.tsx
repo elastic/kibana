@@ -129,6 +129,7 @@ export function Wrapper({
         css={css`
           background: ${euiTheme.colors.backgroundBasePlain};
         `}
+        pageTitleProps={{ css: css`font-size: 1.4rem !important; line-height: 1.4rem !important;` }}
         pageTitle={
           <EuiFlexGroup
             direction="row"

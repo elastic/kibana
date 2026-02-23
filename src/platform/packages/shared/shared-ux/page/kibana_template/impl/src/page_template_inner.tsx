@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { css } from '@emotion/react';
 import type { FC } from 'react';
 import React from 'react';
 import classNames from 'classnames';
@@ -14,6 +15,11 @@ import { EuiPageTemplate } from '@elastic/eui';
 
 import { withSolutionNav } from '@kbn/shared-ux-page-solution-nav';
 import type { KibanaPageTemplateProps as Props } from '@kbn/shared-ux-page-kibana-template-types';
+
+const defaultPageTitleCss = css`
+  font-size: 1.4rem !important;
+  line-height: 1.4rem !important;
+`;
 
 const getClasses = (template?: string, className?: string) => {
   return classNames(
@@ -52,7 +58,14 @@ export const KibanaPageTemplateInner: FC<Props> = ({
       />
     );
   } else if (pageHeader) {
-    header = <EuiPageTemplate.Header {...pageHeader} />;
+    const mergedPageHeader = {
+      ...pageHeader,
+      pageTitleProps: {
+        ...pageHeader.pageTitleProps,
+        css: [defaultPageTitleCss, pageHeader.pageTitleProps?.css].filter(Boolean),
+      },
+    };
+    header = <EuiPageTemplate.Header {...mergedPageHeader} />;
   }
 
   // NOTE: with emptyPageBody, page contents are replaced entirely with the provided element
