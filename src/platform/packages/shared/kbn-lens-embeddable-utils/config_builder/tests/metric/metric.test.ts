@@ -15,6 +15,8 @@ import {
   breakdownMetricAttributes,
   complexMetricAttributes,
   breakdownMetricWithFormulaRefColumnsAttributes,
+  selectorColorByValueAttributes,
+  defaultColorByValueAttributes,
 } from './lens_state_config.mock';
 import {
   simpleMetricAPIAttributes,
@@ -36,6 +38,14 @@ describe('Metric', () => {
 
     it('should convert a breakdown-by metric', () => {
       validateConverter(breakdownMetricAttributes, metricStateSchema);
+    });
+
+    it('should convert a default color by value palette', () => {
+      validateConverter(defaultColorByValueAttributes, metricStateSchema);
+    });
+
+    it('should convert a selector color by value palette', () => {
+      validateConverter(selectorColorByValueAttributes, metricStateSchema);
     });
   });
   describe('validateAPIConverter', () => {

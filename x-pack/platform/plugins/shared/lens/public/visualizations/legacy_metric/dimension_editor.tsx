@@ -49,8 +49,8 @@ export function MetricDimensionEditor(
         ...defaultPaletteParams,
         stops: undefined,
         colorStops: undefined,
-        rangeMin: undefined,
-        rangeMax: undefined,
+        rangeMin: currentMinMax.min,
+        rangeMax: (currentMinMax.max * 3) / 4,
       },
     } satisfies PaletteOutput<CustomPaletteParams>);
 
@@ -106,14 +106,12 @@ export function MetricDimensionEditor(
                 ...activePalette,
                 params: {
                   ...activePalette.params,
-                  // align this initial computation with same format for default
-                  // palettes in the panel. This to avoid custom computation issue with metric
-                  // fake data range
-                  colorStops: stops.map((v, i, array) => ({
+                  // align this initial computation with same format for default palettes in the panel. This to avoid custom computation issue with metric fake data range
+                  stops: stops.map((v, i, array) => ({
                     ...v,
+                    // Note: these stops are the lower bound of the color stop for bwc. This is normally incorrect.
                     stop: currentMinMax.min + (i === 0 ? 0 : array[i - 1].stop),
                   })),
-                  stops,
                 },
               };
             }

@@ -113,6 +113,8 @@ export const colorByValueStepsSchema = schema.arrayOf(colorByValueStepSchema, {
 const colorByValueBaseSchema = schema.object({
   type: schema.literal('dynamic'),
 
+  palette: schema.maybe(schema.string({ meta: { description: 'The palette name to use.' } })),
+
   /**
    * Determines whether the range is interpreted as absolute or as a percentage of the data.
    */

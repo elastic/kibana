@@ -34,7 +34,8 @@ const API_TO_LEGACY_RANGE_NAMES: Record<'percentage' | 'absolute', 'percent' | '
 };
 
 export function fromColorByValueAPIToLensState(
-  config?: ColorByValueType
+  config?: ColorByValueType,
+  isLegacyMetric: boolean = false
 ): PaletteOutput<CustomPaletteParams> | undefined {
   if (!config) return;
 
@@ -45,6 +46,7 @@ export function fromColorByValueAPIToLensState(
       stop: lt ?? lte ?? null,
     })
   );
+
   const colorStops = config.steps.map(
     ({ gte, color }): ColorStop => ({
       color,
@@ -55,12 +57,15 @@ export function fromColorByValueAPIToLensState(
 
   const rangeMin = colorStops.at(0)?.stop ?? null;
   const rangeMax = stops.at(-1)?.stop ?? null;
+  const name = config.palette ?? 'custom';
+
+  const needsPaletteShift = isLegacyMetric || (config.palette && config.palette !== 'custom');
 
   return {
     type: 'palette',
-    name: 'custom',
+    name,
     params: {
-      name: 'custom',
+      name,
       progression: 'fixed', // to be removed
       reverse: false, // always applied to steps during transform
       // @ts-expect-error - This can be null
@@ -70,8 +75,15 @@ export function fromColorByValueAPIToLensState(
       rangeType: config.range
         ? API_TO_LEGACY_RANGE_NAMES[config.range]
         : API_TO_LEGACY_RANGE_NAMES.absolute,
-      stops,
-      colorStops,
+      stops: !needsPaletteShift
+        ? stops
+        : stops.map((stop, i) => ({
+            ...stop,
+            // value can be null
+            stop: i === 0 ? (rangeMin as number) : stops[i - 1].stop,
+          })),
+      // ignore colorStops when shifting palettes stops
+      ...(!needsPaletteShift && { colorStops }),
       continuity:
         rangeMin === null && rangeMax === null
           ? 'all'
@@ -87,13 +99,38 @@ export function fromColorByValueAPIToLensState(
 }
 
 export function fromColorByValueLensStateToAPI(
-  config: PaletteOutput<CustomPaletteParams> | undefined
+  config: PaletteOutput<CustomPaletteParams> | undefined,
+  isLegacyMetric: boolean = false
 ): ColorByValueType | undefined {
   const colorParams = config?.params;
 
   if (!colorParams) return;
 
-  const { stops: originalStops = [], rangeType, reverse } = colorParams;
+  const { rangeType, reverse } = colorParams;
+  let originalStops = colorParams.stops ?? [];
+  const baseColorConfig = {
+    type: 'dynamic',
+    range: rangeType
+      ? LEGACY_TO_API_RANGE_NAMES[rangeType]
+      : LENS_DEFAULT_COLOR_BY_VALUE_RANGE_TYPE,
+  } satisfies Partial<ColorByValueType>;
+
+  if (colorParams.name !== 'custom') {
+    // legacy non-custom color stops are incorrectly configured for bwc and "fixed" in client logic
+    // we need to return the incorrect stops to make it work as it does currently.
+    // see https://github.com/elastic/kibana/issues/251135
+
+    // All non-custom stops are wrong otherwise check first stop value
+    if (isLegacyMetric || colorParams.rangeMin === originalStops[0]?.stop) {
+      // @ts-expect-error - stop value can be null
+      originalStops = originalStops.map((stop, i) => ({
+        ...stop,
+        stop:
+          i === originalStops.length - 1 ? colorParams.rangeMax ?? null : originalStops[i + 1].stop,
+      }));
+    }
+  }
+
   const stops = !reverse
     ? originalStops
     : originalStops
@@ -105,10 +142,9 @@ export function fromColorByValueLensStateToAPI(
         }));
 
   return {
-    type: 'dynamic',
-    range: rangeType
-      ? LEGACY_TO_API_RANGE_NAMES[rangeType]
-      : LENS_DEFAULT_COLOR_BY_VALUE_RANGE_TYPE,
+    ...baseColorConfig,
+    // some default palette configs are correct
+    ...(colorParams.name !== 'custom' && { palette: colorParams.name }),
     steps: stops.map((step, i): ColorByValueStep => {
       const { stop: currentStop, color } = step;
       if (i === 0) {

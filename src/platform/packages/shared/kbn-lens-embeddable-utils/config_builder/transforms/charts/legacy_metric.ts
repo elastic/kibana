@@ -60,7 +60,7 @@ function buildVisualizationState(config: LegacyMetricState): LegacyMetricVisuali
     ...(layer.metric.apply_color_to && layer.metric.color
       ? {
           colorMode: layer.metric.apply_color_to === 'background' ? 'Background' : 'Labels',
-          palette: fromColorByValueAPIToLensState(layer.metric.color),
+          palette: fromColorByValueAPIToLensState(layer.metric.color, true),
         }
       : { colorMode: 'None' }),
   };
@@ -107,7 +107,7 @@ function reverseBuildVisualizationState(
       props.metric.apply_color_to =
         visualization.colorMode === 'Background' ? 'background' : 'value';
 
-      const colorByValue = fromColorByValueLensStateToAPI(visualization.palette);
+      const colorByValue = fromColorByValueLensStateToAPI(visualization.palette, true);
       if (colorByValue?.range === 'absolute') {
         props.metric.color = colorByValue;
       }

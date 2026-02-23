@@ -25,6 +25,14 @@ describe('Heatmap', () => {
     it('should convert a heatmap with dynamic colors', () => {
       validateConverter(dslMocks.withDynamicColors, heatmapStateSchema);
     });
+
+    it('should convert a default color by value palette', () => {
+      validateConverter(dslMocks.defaultColorByValueAttributes, heatmapStateSchema);
+    });
+
+    it('should convert a selector color by value palette', () => {
+      validateConverter(dslMocks.selectorColorByValueAttributes, heatmapStateSchema);
+    });
   });
 
   describe('ESQL', () => {
