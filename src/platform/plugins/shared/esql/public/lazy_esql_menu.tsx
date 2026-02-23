@@ -8,7 +8,9 @@
  */
 import React, { Suspense } from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { helpLabel } from '@kbn/esql-editor';
+import { getKibanaServices } from './kibana_services';
 
 const LazyESQLMenu = React.lazy(async () => {
   const module = await import('@kbn/esql-editor');
@@ -20,27 +22,37 @@ const LazyEsqlEditorActionsProvider = React.lazy(async () => {
   return { default: module.EsqlEditorActionsProvider };
 });
 
+const helpPopoverFallback = (
+  <EuiToolTip position="top" content={helpLabel} disableScreenReaderOutput>
+    <EuiButtonIcon
+      iconType="question"
+      size="xs"
+      aria-label={helpLabel}
+      data-test-subj="esql-help-popover-button"
+      color="text"
+      isDisabled
+    />
+  </EuiToolTip>
+);
+
 export const ESQLMenu: React.FC<{
   hideHistory?: boolean;
   onESQLDocsFlyoutVisibilityChanged?: (isOpen: boolean) => void;
-}> = (props) => (
-  <Suspense
-    fallback={
-      <EuiToolTip position="top" content={helpLabel} disableScreenReaderOutput>
-        <EuiButtonIcon
-          iconType="question"
-          size="xs"
-          aria-label={helpLabel}
-          data-test-subj="esql-help-popover-button"
-          color="text"
-          isDisabled
-        />
-      </EuiToolTip>
-    }
-  >
-    <LazyESQLMenu {...props} />
-  </Suspense>
-);
+}> = (props) => {
+  const deps = getKibanaServices();
+
+  const content = (
+    <Suspense fallback={helpPopoverFallback}>
+      <LazyESQLMenu {...props} />
+    </Suspense>
+  );
+
+  if (!deps) {
+    return content;
+  }
+
+  return <KibanaContextProvider services={{ ...deps }}>{content}</KibanaContextProvider>;
+};
 
 export const EsqlEditorActionsProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
