@@ -56,8 +56,8 @@ describe('calculateFlyoutContentHeight', () => {
     const mockElement = createMockElement(200);
     const result = calculateFlyoutContentHeight(mockElement);
 
-    // window.innerHeight (1000) - position.top (200) - DEFAULT_MARGIN_BOTTOM (32) = 768
-    expect(result).toBe(768);
+    // window.innerHeight (1000) - position.top (200) - DEFAULT_MARGIN_BOTTOM (16) = 784
+    expect(result).toBe(784);
   });
 
   it('calculates height correctly with custom marginBottom', () => {
@@ -85,8 +85,8 @@ describe('calculateFlyoutContentHeight', () => {
     const mockElement = createMockElement(0);
     const result = calculateFlyoutContentHeight(mockElement);
 
-    // window.innerHeight (800) - position.top (0) - DEFAULT_MARGIN_BOTTOM (32) = 768
-    expect(result).toBe(768);
+    // window.innerHeight (800) - position.top (0) - DEFAULT_MARGIN_BOTTOM (16) = 784
+    expect(result).toBe(784);
   });
 
   it('handles element positioned below viewport', () => {
@@ -99,8 +99,8 @@ describe('calculateFlyoutContentHeight', () => {
     const mockElement = createMockElement(500);
     const result = calculateFlyoutContentHeight(mockElement);
 
-    // window.innerHeight (800) - position.top (500) - DEFAULT_MARGIN_BOTTOM (32) = 268
-    expect(result).toBe(268);
+    // window.innerHeight (800) - position.top (500) - DEFAULT_MARGIN_BOTTOM (16) = 284
+    expect(result).toBe(284);
   });
 
   it('handles zero marginBottom', () => {
@@ -133,9 +133,9 @@ describe('calculateFlyoutContentHeight', () => {
 
   it('handles different window heights', () => {
     const testCases = [
-      { windowHeight: 500, elementTop: 100, expected: 368 }, // 500 - 100 - 32
-      { windowHeight: 1200, elementTop: 300, expected: 868 }, // 1200 - 300 - 32
-      { windowHeight: 800, elementTop: 400, expected: 368 }, // 800 - 400 - 32
+      { windowHeight: 500, elementTop: 100, expected: 384 }, // 500 - 100 - 16
+      { windowHeight: 1200, elementTop: 300, expected: 884 }, // 1200 - 300 - 16
+      { windowHeight: 800, elementTop: 400, expected: 384 }, // 800 - 400 - 16
     ];
 
     testCases.forEach(({ windowHeight, elementTop, expected }) => {
