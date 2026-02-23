@@ -65,8 +65,6 @@ export interface NotificationPolicy {
   };
   /** Target workflow to dispatch matched episodes to */
   workflowId: WorkflowId;
-  /** Encoded API key of the policy author, used to craft a fakeRequest at dispatch time */
-  apiKey?: string;
 }
 
 export interface MatchedPair {

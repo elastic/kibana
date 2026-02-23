@@ -44,7 +44,6 @@ export class FetchPoliciesStep implements DispatcherStep {
         id: doc.id,
         name: doc.attributes.name,
         workflowId: doc.attributes.workflow_id,
-        apiKey: doc.attributes.apiKey ?? undefined,
         matcher: undefined,
         groupBy: [],
         throttle: undefined,

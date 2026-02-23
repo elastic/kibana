@@ -5,95 +5,59 @@
  * 2.0.
  */
 
-import type { WorkflowDetailDto } from '@kbn/workflows';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 import {
   createDispatcherPipelineState,
   createNotificationGroup,
   createNotificationPolicy,
 } from '../fixtures/test_utils';
-import { createWorkflowsManagementApi } from '../fixtures/workflows_management_api.mock';
 import { DispatchStep } from './dispatch_step';
 
 describe('DispatchStep', () => {
   afterEach(() => jest.clearAllMocks());
 
-  it('dispatches workflows for groups with API keys', async () => {
-    const { loggerService } = createLoggerService();
-    const wfm = createWorkflowsManagementApi();
-    wfm.getWorkflow.mockResolvedValue({ id: 'workflow-1' } as unknown as WorkflowDetailDto);
-    const step = new DispatchStep(wfm, loggerService);
+  it('logs debug message for each dispatch group', async () => {
+    const { loggerService, mockLogger } = createLoggerService();
+    const step = new DispatchStep(loggerService);
 
-    const group = createNotificationGroup({ id: 'g1', policyId: 'p1' });
-    const policy = createNotificationPolicy({
-      id: 'p1',
-      apiKey: 'abc123',
-      workflowId: 'workflow-1',
-    });
+    const group1 = createNotificationGroup({ id: 'g1', policyId: 'p1' });
+    const group2 = createNotificationGroup({ id: 'g2', policyId: 'p2' });
+    const policy1 = createNotificationPolicy({ id: 'p1', workflowId: 'workflow-1' });
+    const policy2 = createNotificationPolicy({ id: 'p2', workflowId: 'workflow-2' });
 
     const state = createDispatcherPipelineState({
-      dispatch: [group],
-      policies: new Map([['p1', policy]]),
+      dispatch: [group1, group2],
+      policies: new Map([
+        ['p1', policy1],
+        ['p2', policy2],
+      ]),
     });
 
     const result = await step.execute(state);
 
     expect(result.type).toBe('continue');
-    expect(wfm.runWorkflow).toHaveBeenCalledTimes(1);
-    expect(wfm.runWorkflow).toHaveBeenCalledWith(
-      { id: 'workflow-1' } as unknown as WorkflowDetailDto,
-      'default',
-      group,
-      expect.any(Object)
-    );
-  });
-
-  it('skips dispatch when policy has no API key', async () => {
-    const { loggerService } = createLoggerService();
-    const wfm = createWorkflowsManagementApi();
-    const step = new DispatchStep(wfm, loggerService);
-
-    const group = createNotificationGroup({ id: 'g1', policyId: 'p1' });
-    const policy = createNotificationPolicy({ id: 'p1' });
-
-    const state = createDispatcherPipelineState({
-      dispatch: [group],
-      policies: new Map([['p1', policy]]),
-    });
-
-    const result = await step.execute(state);
-
-    expect(result.type).toBe('continue');
-    expect(wfm.runWorkflow).not.toHaveBeenCalled();
-  });
-
-  it('skips dispatch when policy is not found', async () => {
-    const { loggerService } = createLoggerService();
-    const wfm = createWorkflowsManagementApi();
-    const step = new DispatchStep(wfm, loggerService);
-
-    const group = createNotificationGroup({ id: 'g1', policyId: 'missing' });
-
-    const state = createDispatcherPipelineState({
-      dispatch: [group],
-      policies: new Map(),
-    });
-
-    const result = await step.execute(state);
-
-    expect(result.type).toBe('continue');
-    expect(wfm.runWorkflow).not.toHaveBeenCalled();
+    expect(mockLogger.debug).toHaveBeenCalledTimes(2);
   });
 
   it('continues with no-op when dispatch is empty', async () => {
-    const { loggerService } = createLoggerService();
-    const wfm = createWorkflowsManagementApi();
-    const step = new DispatchStep(wfm, loggerService);
+    const { loggerService, mockLogger } = createLoggerService();
+    const step = new DispatchStep(loggerService);
 
     const state = createDispatcherPipelineState({ dispatch: [] });
     const result = await step.execute(state);
 
     expect(result.type).toBe('continue');
-    expect(wfm.runWorkflow).not.toHaveBeenCalled();
+    expect(mockLogger.debug).not.toHaveBeenCalled();
+  });
+
+  it('continues when dispatch is undefined', async () => {
+    const { loggerService, mockLogger } = createLoggerService();
+    const step = new DispatchStep(loggerService);
+
+    const state = createDispatcherPipelineState({});
+    const result = await step.execute(state);
+
+    expect(result.type).toBe('continue');
+    expect(mockLogger.debug).not.toHaveBeenCalled();
   });
 });

@@ -365,7 +365,6 @@ describe('DispatcherService integration tests', () => {
       queryService,
       mockLoggerService,
       storageService,
-      undefined as any,
       mockRulesSoService,
       mockNpSoService
     );

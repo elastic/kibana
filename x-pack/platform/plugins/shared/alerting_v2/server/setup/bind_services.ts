@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PluginSetup, PluginStart } from '@kbn/core-di';
+import { PluginStart } from '@kbn/core-di';
 import { CoreStart, Request } from '@kbn/core-di-server';
 import type { ContainerModuleLoadOptions } from 'inversify';
 import { AlertActionsClient } from '../lib/alert_actions_client';
@@ -46,7 +46,7 @@ import {
 } from '../lib/services/task_run_scope_service/create_task_runner';
 import { UserService } from '../lib/services/user_service/user_service';
 import { NOTIFICATION_POLICY_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
-import type { AlertingServerSetupDependencies, AlertingServerStartDependencies } from '../types';
+import type { AlertingServerStartDependencies } from '../types';
 
 export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(AlertActionsClient).toSelf().inRequestScope();
@@ -137,9 +137,6 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
 
   bind(DispatcherServiceScopedToken)
     .toDynamicValue(({ get }) => {
-      const workflowsManagement = get(
-        PluginSetup<AlertingServerSetupDependencies['workflowsManagement']>('workflowsManagement')
-      );
       const queryService = get(QueryServiceScopedToken);
       const loggerService = get(LoggerServiceToken);
       const storageService = get(StorageServiceInternalToken);
@@ -150,7 +147,6 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
         queryService,
         loggerService,
         storageService,
-        workflowsManagement.management,
         rulesSoService,
         npSoService
       );
@@ -159,9 +155,6 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
 
   bind(DispatcherServiceInternalToken)
     .toDynamicValue(({ get }) => {
-      const workflowsManagement = get(
-        PluginSetup<AlertingServerSetupDependencies['workflowsManagement']>('workflowsManagement')
-      );
       const queryService = get(QueryServiceInternalToken);
       const loggerService = get(LoggerServiceToken);
       const storageService = get(StorageServiceInternalToken);
@@ -171,7 +164,6 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
         queryService,
         loggerService,
         storageService,
-        workflowsManagement.management,
         rulesSoService,
         npSoService
       );

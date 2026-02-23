@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 
 import type { UserProfileServiceStart } from '@kbn/core-user-profile-server';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
-import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import {
   NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
   type NotificationPolicySavedObjectAttributes,
@@ -27,19 +25,6 @@ describe('NotificationPolicyClient', () => {
   let mockSavedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
   let userService: UserService;
   let userProfile: jest.Mocked<UserProfileServiceStart>;
-  const mockRequest = httpServerMock.createKibanaRequest();
-  const mockSecurity = {
-    authc: {
-      apiKeys: {
-        grantAsInternalUser: jest.fn().mockResolvedValue({
-          id: 'api-key-id',
-          name: 'test-api-key',
-          api_key: 'test-api-key-secret',
-          encoded: 'dGVzdC1lbmNvZGVk',
-        }),
-      },
-    },
-  } as unknown as SecurityPluginStart;
 
   beforeAll(() => {
     jest.useFakeTimers().setSystemTime(new Date('2025-01-01T00:00:00.000Z'));
@@ -52,12 +37,7 @@ describe('NotificationPolicyClient', () => {
       createNotificationPolicySavedObjectService());
     ({ userService, userProfile } = createUserService());
 
-    client = new NotificationPolicyClient(
-      notificationPolicySavedObjectService,
-      userService,
-      mockRequest,
-      mockSecurity
-    );
+    client = new NotificationPolicyClient(notificationPolicySavedObjectService, userService);
 
     userProfile.getCurrent.mockResolvedValue(createUserProfile('elastic_profile_uid'));
 
@@ -107,7 +87,6 @@ describe('NotificationPolicyClient', () => {
           name: 'my-policy',
           description: 'my-policy description',
           workflow_id: 'my-workflow',
-          apiKey: 'YXBpLWtleS1pZDp0ZXN0LWFwaS1rZXktc2VjcmV0',
           createdBy: 'elastic_profile_uid',
           updatedBy: 'elastic_profile_uid',
           createdAt: '2025-01-01T00:00:00.000Z',
@@ -129,7 +108,6 @@ describe('NotificationPolicyClient', () => {
           updatedAt: '2025-01-01T00:00:00.000Z',
         })
       );
-      expect(res).not.toHaveProperty('apiKey');
     });
 
     it('creates a notification policy without custom id', async () => {
@@ -199,7 +177,6 @@ describe('NotificationPolicyClient', () => {
         name: 'test-policy',
         description: 'test-policy description',
         workflow_id: 'test-workflow',
-        apiKey: 'existing-encoded-key',
         createdBy: 'elastic_profile_uid',
         createdAt: '2025-01-01T00:00:00.000Z',
         updatedBy: 'elastic_profile_uid',
@@ -231,7 +208,6 @@ describe('NotificationPolicyClient', () => {
         updatedBy: existingAttributes.updatedBy,
         updatedAt: existingAttributes.updatedAt,
       });
-      expect(res).not.toHaveProperty('apiKey');
     });
 
     it('throws 404 when notification policy is not found', async () => {
@@ -256,7 +232,6 @@ describe('NotificationPolicyClient', () => {
         name: 'original-policy',
         description: 'original-policy description',
         workflow_id: 'original-workflow',
-        apiKey: 'old-encoded-key',
         createdBy: 'creator_profile_uid',
         createdAt: '2024-12-01T00:00:00.000Z',
         updatedBy: 'updater_profile_uid',
@@ -289,7 +264,6 @@ describe('NotificationPolicyClient', () => {
           name: 'updated-policy',
           description: 'original-policy description',
           workflow_id: 'updated-workflow',
-          apiKey: 'YXBpLWtleS1pZDp0ZXN0LWFwaS1rZXktc2VjcmV0',
           updatedBy: 'elastic_profile_uid',
           updatedAt: '2025-01-01T00:00:00.000Z',
           createdBy: 'creator_profile_uid',
@@ -308,7 +282,6 @@ describe('NotificationPolicyClient', () => {
           updatedAt: '2025-01-01T00:00:00.000Z',
         })
       );
-      expect(res).not.toHaveProperty('apiKey');
     });
 
     it('throws 404 when notification policy is not found', async () => {
@@ -334,7 +307,6 @@ describe('NotificationPolicyClient', () => {
         name: 'original-policy',
         description: 'original-policy description',
         workflow_id: 'original-workflow',
-        apiKey: 'old-encoded-key',
         createdBy: 'creator_profile_uid',
         createdAt: '2024-12-01T00:00:00.000Z',
         updatedBy: 'updater_profile_uid',
@@ -372,7 +344,6 @@ describe('NotificationPolicyClient', () => {
         name: 'policy-to-delete',
         description: 'policy-to-delete description',
         workflow_id: 'workflow-to-delete',
-        apiKey: 'encoded-key-to-delete',
         createdBy: 'elastic_profile_uid',
         createdAt: '2025-01-01T00:00:00.000Z',
         updatedBy: 'elastic_profile_uid',

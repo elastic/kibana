@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { WorkflowsManagementApi } from '@kbn/workflows-management-plugin/server/workflows_management/workflows_management_api';
 import { type LoggerServiceContract } from '../services/logger_service/logger_service';
 import type { NotificationPolicySavedObjectServiceContract } from '../services/notification_policy_saved_object_service/notification_policy_saved_object_service';
 import type { QueryServiceContract } from '../services/query_service/query_service';
@@ -37,7 +36,6 @@ export class DispatcherService implements DispatcherServiceContract {
     queryService: QueryServiceContract,
     logger: LoggerServiceContract,
     storageService: StorageServiceContract,
-    workflowsManagement: WorkflowsManagementApi,
     rulesSavedObjectService: RulesSavedObjectServiceContract,
     notificationPolicySavedObjectService: NotificationPolicySavedObjectServiceContract
   ) {
@@ -50,7 +48,7 @@ export class DispatcherService implements DispatcherServiceContract {
       new EvaluateMatchersStep(),
       new BuildGroupsStep(),
       new ApplyThrottlingStep(queryService, logger),
-      new DispatchStep(workflowsManagement, logger),
+      new DispatchStep(logger),
       new RecordActionsStep(storageService),
     ]);
   }

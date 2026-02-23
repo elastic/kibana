@@ -26,7 +26,6 @@ describe('FetchPoliciesStep', () => {
         attributes: {
           name: 'Policy 1',
           workflow_id: 'w1',
-          apiKey: 'key123',
         },
       },
     ] as any);
@@ -45,7 +44,6 @@ describe('FetchPoliciesStep', () => {
     if (result.type !== 'continue') return;
     expect(result.data?.policies?.size).toBe(1);
     expect(result.data?.policies?.get('p1')?.name).toBe('Policy 1');
-    expect(result.data?.policies?.get('p1')?.apiKey).toBe('key123');
     expect(mockService.bulkGetByIds).toHaveBeenCalledWith(['p1']);
   });
 

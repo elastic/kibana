@@ -14,8 +14,7 @@
       "features",
       "spaces",
       "data",
-      "security",
-      "workflowsManagement"
+      "security"
     ],
     "optionalPlugins": ["management"],
     "extraPublicDirs": []

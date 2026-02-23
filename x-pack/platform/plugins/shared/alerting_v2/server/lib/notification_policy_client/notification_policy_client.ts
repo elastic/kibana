@@ -6,15 +6,9 @@
  */
 
 import Boom from '@hapi/boom';
-import { PluginStart } from '@kbn/core-di';
-import { Request } from '@kbn/core-di-server';
-import type { KibanaRequest } from '@kbn/core-http-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
-import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { inject, injectable } from 'inversify';
-import { omit } from 'lodash';
 import { type NotificationPolicySavedObjectAttributes } from '../../saved_objects';
-import type { AlertingServerStartDependencies } from '../../types';
 import type { NotificationPolicySavedObjectServiceContract } from '../services/notification_policy_saved_object_service/notification_policy_saved_object_service';
 import { NotificationPolicySavedObjectService } from '../services/notification_policy_saved_object_service/notification_policy_saved_object_service';
 import type { UserServiceContract } from '../services/user_service/user_service';
@@ -30,10 +24,7 @@ export class NotificationPolicyClient {
   constructor(
     @inject(NotificationPolicySavedObjectService)
     private readonly notificationPolicySavedObjectService: NotificationPolicySavedObjectServiceContract,
-    @inject(UserService) private readonly userService: UserServiceContract,
-    @inject(Request) private readonly request: KibanaRequest,
-    @inject(PluginStart<AlertingServerStartDependencies['security']>('security'))
-    private readonly security: SecurityPluginStart
+    @inject(UserService) private readonly userService: UserServiceContract
   ) {}
 
   public async createNotificationPolicy(
@@ -41,13 +32,11 @@ export class NotificationPolicyClient {
   ): Promise<NotificationPolicyResponse> {
     const userProfileUid = await this.getUserProfileUid();
     const now = new Date().toISOString();
-    const apiKey = await this.generateApiKey(params.data.name);
 
     const attributes: NotificationPolicySavedObjectAttributes = {
       name: params.data.name,
       description: params.data.description,
       workflow_id: params.data.workflow_id,
-      apiKey,
       createdBy: userProfileUid,
       createdAt: now,
       updatedBy: userProfileUid,
@@ -60,7 +49,7 @@ export class NotificationPolicyClient {
         id: params.options?.id,
       });
 
-      return { id, version, ...omit(attributes, 'apiKey') };
+      return { id, version, ...attributes };
     } catch (e) {
       if (SavedObjectsErrorHelpers.isConflictError(e)) {
         const conflictId = params.options?.id ?? 'unknown';
@@ -73,7 +62,7 @@ export class NotificationPolicyClient {
   public async getNotificationPolicy({ id }: { id: string }): Promise<NotificationPolicyResponse> {
     try {
       const doc = await this.notificationPolicySavedObjectService.get(id);
-      return { id, version: doc.version, ...omit(doc.attributes, 'apiKey') };
+      return { id, version: doc.version, ...doc.attributes };
     } catch (e) {
       if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
         throw Boom.notFound(`Notification policy with id "${id}" not found`);
@@ -90,12 +79,9 @@ export class NotificationPolicyClient {
 
     const { attributes: existingAttrs } = await this.fetchRawNotificationPolicy(params.options.id);
 
-    const apiKey = await this.generateApiKey(params.data.name ?? existingAttrs.name);
-
     const nextAttrs: NotificationPolicySavedObjectAttributes = {
       ...existingAttrs,
       ...params.data,
-      apiKey,
       updatedBy: userProfileUid,
       updatedAt: now,
     };
@@ -107,7 +93,7 @@ export class NotificationPolicyClient {
         version: params.options.version,
       });
 
-      return { id: params.options.id, version: updated.version, ...omit(nextAttrs, 'apiKey') };
+      return { id: params.options.id, version: updated.version, ...nextAttrs };
     } catch (e) {
       if (SavedObjectsErrorHelpers.isConflictError(e)) {
         throw Boom.conflict(
@@ -140,16 +126,5 @@ export class NotificationPolicyClient {
 
   private async getUserProfileUid(): Promise<string | null> {
     return this.userService.getCurrentUserProfileUid();
-  }
-
-  private async generateApiKey(policyName: string): Promise<string | null> {
-    const result = await this.security.authc.apiKeys.grantAsInternalUser(this.request, {
-      name: `alerting_v2:notification_policy:${policyName}`,
-      role_descriptors: {},
-      metadata: { managed: true },
-    });
-
-    if (!result) return null;
-    return Buffer.from(`${result.id}:${result.api_key}`).toString('base64');
   }
 }
