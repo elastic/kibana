@@ -36,6 +36,7 @@
     "@kbn/core-http-server-utils",
     "@kbn/licensing-plugin",
     "@kbn/rrule",
+    "@kbn/response-ops-scheduling-types",
     "@kbn/logging-mocks",
     "@kbn/spaces-utils",
     "@kbn/licensing-types",

@@ -75,12 +75,16 @@ xpack.serverless.search.enabled: true
 ## Set the home route
 uiSettings.overrides.defaultRoute: /app/elasticsearch
 
+## Enable tech-preview pages
+uiSettings.overrides:
+  dataSources:enabled: false
+
 # Specify in telemetry the project type
 telemetry.labels.serverless: search
 
 # Alerts and LLM config
 xpack.actions.enabledActionTypes:
-  ['.email', '.index', '.slack', '.slack_api', '.jira', '.webhook', '.teams', '.gen-ai', '.bedrock', '.gemini', '.inference', '.mcp']
+  ['.email', '.index', '.slack', '.slack_api', '.jira', '.jira-cloud', '.webhook', '.teams', '.gen-ai', '.bedrock', '.gemini', '.inference', '.mcp', '.notion', '.github', '.google_drive', '.sharepoint-online']
 
 # Customize empty page state for analytics apps
 no_data_page.analyticsNoDataPageFlavor: 'serverless_search'

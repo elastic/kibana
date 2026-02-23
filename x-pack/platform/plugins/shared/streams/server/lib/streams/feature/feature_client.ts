@@ -8,8 +8,9 @@
 import { dateRangeQuery, termQuery, termsQuery } from '@kbn/es-query';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { IStorageClient } from '@kbn/storage-adapter';
-import type { Feature } from '@kbn/streams-schema';
+import type { BaseFeature, Feature } from '@kbn/streams-schema';
 import { isNotFoundError } from '@kbn/es-errors';
+import { isEqual } from 'lodash';
 import {
   STREAM_NAME,
   FEATURE_ID,
@@ -162,12 +163,25 @@ export class FeatureClient {
       return { hits: [], total: 0 };
     }
 
+    const filterClauses: QueryDslQueryContainer[] = [
+      ...termsQuery(STREAM_NAME, streams),
+      {
+        bool: {
+          should: [
+            { bool: { must_not: { exists: { field: FEATURE_EXPIRES_AT } } } },
+            ...dateRangeQuery(Date.now(), undefined, FEATURE_EXPIRES_AT),
+          ],
+          minimum_should_match: 1,
+        },
+      },
+    ];
+
     const featuresResponse = await this.clients.storageClient.search({
       size: 10_000,
       track_total_hits: true,
       query: {
         bool: {
-          filter: [{ terms: { [STREAM_NAME]: streams } }],
+          filter: filterClauses,
         },
       },
     });
@@ -203,6 +217,24 @@ export class FeatureClient {
 
     return operations.filter(
       (operation) => 'index' in operation || validDeleteIds.has(operation.delete.id)
+    );
+  }
+
+  findDuplicateFeature({
+    existingFeatures,
+    feature,
+  }: {
+    existingFeatures: Feature[];
+    feature: BaseFeature;
+  }): Feature | undefined {
+    const normalizedId = feature.id.toLowerCase();
+
+    return existingFeatures.find(
+      (existing) =>
+        (existing.type === feature.type &&
+          existing.subtype === feature.subtype &&
+          isEqual(existing.properties, feature.properties)) ||
+        existing.id.toLowerCase() === normalizedId
     );
   }
 }
