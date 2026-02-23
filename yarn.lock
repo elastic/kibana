@@ -5009,6 +5009,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/content-list-docs@link:src/platform/packages/shared/content-management/content_list/kbn-content-list-docs":
+  version "0.0.0"
+  uid ""
+
 "@kbn/content-list-footer@link:src/platform/packages/shared/content-management/content_list/kbn-content-list-footer":
   version "0.0.0"
   uid ""
