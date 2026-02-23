@@ -45,10 +45,6 @@ export const ProjectPickerContainer: React.FC<ProjectPickerContainerProps> = ({ 
 
   return (
     <ProjectPicker
-      defaultProjectRouting={{
-        value: cpsManager.getResolvedDefaultProjectRouting(),
-        name: cpsManager.getDefaultProjectRouting(),
-      }}
       projectRouting={projectRouting}
       onProjectRoutingChange={updateProjectRouting}
       fetchProjects={fetchProjects}

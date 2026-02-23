@@ -39,7 +39,6 @@ export interface ProjectPickerProps {
   totalProjectCount: number;
   isReadonly?: boolean;
   settingsComponent?: React.ReactNode;
-  defaultProjectRouting?: { value?: string; name?: string };
 }
 
 export const ProjectPicker = ({
@@ -49,7 +48,6 @@ export const ProjectPicker = ({
   totalProjectCount,
   isReadonly = false,
   settingsComponent,
-  defaultProjectRouting,
 }: ProjectPickerProps) => {
   const [showPopover, setShowPopover] = useState(false);
   const styles = useMemoCss(projectPickerStyles);
@@ -144,7 +142,6 @@ export const ProjectPicker = ({
           />
         )}
         <ProjectPickerContent
-          defaultProjectRouting={defaultProjectRouting}
           projectRouting={projectRouting}
           onProjectRoutingChange={onProjectRoutingChange}
           fetchProjects={fetchProjects}

@@ -146,7 +146,7 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
         updatedSpace.projectRouting &&
         updatedSpace.id === (await spacesManager.getActiveSpace()).id
       ) {
-        cps?.cpsManager?.updateResolvedDefaultProjectRouting(updatedSpace.projectRouting);
+        cps?.cpsManager?.updateDefaultProjectRouting(updatedSpace.projectRouting);
       }
     },
     [spacesManager, cps]

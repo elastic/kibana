@@ -30,11 +30,7 @@ import { strings } from './strings';
 import { useFetchProjects } from './use_fetch_projects';
 
 export interface ProjectPickerContentProps {
-  projectRouting?: ProjectRouting;
-  defaultProjectRouting?: {
-    value?: string;
-    name?: string;
-  };
+  projectRouting: ProjectRouting;
   onProjectRoutingChange: (projectRouting: ProjectRouting) => void;
   fetchProjects: (routing?: ProjectRouting) => Promise<ProjectsData | null>;
   isReadonly?: boolean;
@@ -53,40 +49,8 @@ const projectPickerOptions = [
   },
 ];
 
-/**
- * Maps a projectRouting value (which may be a named expression like `@kibana_space_default_default`)
- * to the stable option ID used by the button group.
- */
-const resolveSelectedOptionId = (
-  projectRouting: ProjectRouting | undefined,
-  defaultProjectRouting?: { value?: string; name?: string }
-): string => {
-  if (!projectRouting) {
-    return defaultProjectRouting?.value ?? PROJECT_ROUTING.ALL;
-  }
-  if (projectRouting === defaultProjectRouting?.name) {
-    return defaultProjectRouting.value ?? PROJECT_ROUTING.ALL;
-  }
-  return projectRouting;
-};
-
-/**
- * Maps a stable option ID back to the routing value to emit.
- * When the selected option matches the default, emits the named expression instead of the raw constant.
- */
-const resolveRoutingValue = (
-  optionId: string,
-  defaultProjectRouting?: { value?: string; name?: string }
-): string => {
-  if (optionId === defaultProjectRouting?.value && defaultProjectRouting?.name) {
-    return defaultProjectRouting.name;
-  }
-  return optionId;
-};
-
 export const ProjectPickerContent = ({
   projectRouting,
-  defaultProjectRouting,
   onProjectRoutingChange,
   fetchProjects,
   isReadonly = false,
@@ -121,7 +85,6 @@ export const ProjectPickerContent = ({
   }
 
   const projectsList = [originProject, ...linkedProjects];
-  const selectedOptionId = resolveSelectedOptionId(projectRouting, defaultProjectRouting);
 
   return (
     <EuiFlexGroup gutterSize="none" direction="column" responsive={false} css={styles.container}>
@@ -129,10 +92,10 @@ export const ProjectPickerContent = ({
         <EuiButtonGroup
           isFullWidth
           legend={strings.getProjectPickerButtonAriaLabel()}
-          idSelected={selectedOptionId}
+          idSelected={projectRouting ?? PROJECT_ROUTING.ALL}
           options={projectPickerOptions}
           onChange={(optionId: string) => {
-            onProjectRoutingChange(resolveRoutingValue(optionId, defaultProjectRouting));
+            onProjectRoutingChange(optionId);
           }}
           css={styles.buttonGroup}
           buttonSize="compressed"

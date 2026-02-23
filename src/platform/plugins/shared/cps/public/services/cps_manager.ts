@@ -33,8 +33,7 @@ export class CPSManager implements ICPSManager {
   private readonly logger: Logger;
   private readonly application: ApplicationStart;
   private projectFetcherPromise: Promise<ProjectFetcher> | null = null;
-  private defaultProjectRouting: ProjectRouting = undefined;
-  private defaultProjectRoutingValue: string = PROJECT_ROUTING.ALL;
+  private defaultProjectRouting: string = PROJECT_ROUTING.ALL;
   private totalProjectCount: number = 0;
   private readonly readyPromise: Promise<void>;
   private readonly projectRouting$ = new BehaviorSubject<ProjectRouting | undefined>(
@@ -94,14 +93,12 @@ export class CPSManager implements ICPSManager {
       const { spaceId } = getSpaceIdFromPath(basePath, this.http.basePath.serverBasePath);
 
       const projectRoutingName = getSpaceDefaultNpreName(spaceId);
-      const projectRouting = `@${projectRoutingName}`;
-      this.defaultProjectRouting = projectRouting;
 
       // init the current project routing to the space name
-      this.projectRouting$.next(projectRouting);
 
-      const projectRoutingValue = await this.fetchNpreOrDefault(projectRoutingName);
-      this.updateResolvedDefaultProjectRouting(projectRoutingValue);
+      const projectRouting = await this.fetchNpreOrDefault(projectRoutingName);
+      this.projectRouting$.next(projectRouting);
+      this.updateDefaultProjectRouting(projectRouting);
     } catch (error) {
       this.logger.warn('Failed to fetch default project routing for space', error);
     }
@@ -113,14 +110,6 @@ export class CPSManager implements ICPSManager {
    */
   public getDefaultProjectRouting(): ProjectRouting {
     return this.defaultProjectRouting;
-  }
-
-  /**
-   * Get the default project routing value from a global space setting.
-   * This is the fallback value used when no app-specific or saved value exists.
-   */
-  public getResolvedDefaultProjectRouting(): ProjectRouting {
-    return this.defaultProjectRoutingValue;
   }
 
   /**
@@ -140,11 +129,8 @@ export class CPSManager implements ICPSManager {
     }
   }
 
-  public updateResolvedDefaultProjectRouting(projectRoutingValue: string) {
-    this.defaultProjectRoutingValue = projectRoutingValue;
-    this.getProjectFetcher().then((projectFetcher) => {
-      projectFetcher.invalidateCache(this.defaultProjectRouting);
-    });
+  public updateDefaultProjectRouting(projectRouting: string) {
+    this.defaultProjectRouting = projectRouting;
   }
 
   /**

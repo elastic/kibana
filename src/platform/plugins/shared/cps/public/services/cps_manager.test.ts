@@ -9,7 +9,7 @@
 
 import { CPSManager } from './cps_manager';
 import type { ApplicationStart, HttpSetup } from '@kbn/core/public';
-import { ProjectRoutingAccess } from '@kbn/cps-utils';
+import { ProjectRoutingAccess, PROJECT_ROUTING } from '@kbn/cps-utils';
 import type { CPSProject, ProjectTagsResponse } from '@kbn/cps-utils';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { BehaviorSubject } from 'rxjs';
@@ -98,8 +98,10 @@ describe('CPSManager', () => {
       jest.clearAllMocks();
       const result = await cpsManager.fetchProjects();
 
+      // getProjectRouting() returns undefined here because initializeDefaultProjectRouting
+      // fetches the NPRE value (http.get returns undefined), so defaultProjectRouting = undefined
       expect(mockHttp.post).toHaveBeenCalledWith('/internal/cps/projects_tags', {
-        body: JSON.stringify({ project_routing: '@kibana_space_default_default' }),
+        body: JSON.stringify({}),
       });
       expect(result).toEqual({
         origin: mockOriginProject,
@@ -214,25 +216,23 @@ describe('CPSManager', () => {
     };
 
     describe('initializeDefaultProjectRouting', () => {
-      it('should initialize defaultProjectRouting to the space name even when value is undefined', async () => {
+      it('should initialize defaultProjectRouting to the fetched NPRE value (undefined when not set)', async () => {
         const manager = await createManagerWithProjectRouting(undefined);
 
         expect(mockHttp.get).toHaveBeenCalledWith(
           '/internal/cps/project_routing/kibana_space_default_default'
         );
-        expect(manager.getDefaultProjectRouting()).toBe('@kibana_space_default_default');
-        expect(manager.getResolvedDefaultProjectRouting()).toBe(undefined);
+        expect(manager.getDefaultProjectRouting()).toBeUndefined();
       });
 
-      it('should initialize defaultProjectRouting to the space name and store the value separately', async () => {
+      it('should initialize defaultProjectRouting to the fetched NPRE value', async () => {
         const spaceProjectRoutingValue = '_alias:_origin';
         const manager = await createManagerWithProjectRouting(spaceProjectRoutingValue);
 
         expect(mockHttp.get).toHaveBeenCalledWith(
           '/internal/cps/project_routing/kibana_space_default_default'
         );
-        expect(manager.getDefaultProjectRouting()).toBe('@kibana_space_default_default');
-        expect(manager.getResolvedDefaultProjectRouting()).toBe(spaceProjectRoutingValue);
+        expect(manager.getDefaultProjectRouting()).toBe(spaceProjectRoutingValue);
       });
 
       it('should initialize with the current space name', async () => {
@@ -259,14 +259,13 @@ describe('CPSManager', () => {
         expect(customMockHttp.get).toHaveBeenCalledWith(
           '/internal/cps/project_routing/kibana_space_test-space_default'
         );
-        expect(manager.getDefaultProjectRouting()).toBe('@kibana_space_test-space_default');
-        expect(manager.getResolvedDefaultProjectRouting()).toBe(spaceProjectRoutingValue);
+        expect(manager.getDefaultProjectRouting()).toBe(spaceProjectRoutingValue);
       });
 
-      it('should update current project routing to the space name after initialization', async () => {
+      it('should update current project routing to the resolved NPRE value after initialization', async () => {
         const manager = await createManagerWithProjectRouting('_alias:_origin');
 
-        expect(manager.getProjectRouting()).toBe('@kibana_space_default_default');
+        expect(manager.getProjectRouting()).toBe('_alias:_origin');
       });
 
       it('should handle fetch errors gracefully', async () => {
@@ -275,7 +274,7 @@ describe('CPSManager', () => {
         expect(mockHttp.get).toHaveBeenCalledWith(
           '/internal/cps/project_routing/kibana_space_default_default'
         );
-        expect(manager.getDefaultProjectRouting()).toBe(`@kibana_space_default_default`);
+        expect(manager.getDefaultProjectRouting()).toBe(PROJECT_ROUTING.ALL);
         expect(mockLogger.warn).toHaveBeenCalledWith(
           'Failed to fetch default project routing for space',
           expect.any(Error)
@@ -286,6 +285,17 @@ describe('CPSManager', () => {
 
   describe('getProjectRouting with different access levels', () => {
     const flushAsync = () => new Promise((resolve) => setTimeout(resolve, 0));
+
+    beforeEach(() => {
+      // Use a resolved NPRE value so defaultProjectRouting is populated for READONLY assertions
+      mockGetProjectRoutingAccess.mockReturnValue(ProjectRoutingAccess.EDITABLE);
+      mockHttp.get = jest.fn().mockResolvedValue('@kibana_space_default_default');
+      cpsManager = new CPSManager({
+        http: mockHttp,
+        logger: mockLogger,
+        application: mockApplication,
+      });
+    });
 
     const changeAccess = async (access: ProjectRoutingAccess) => {
       mockGetProjectRoutingAccess.mockReturnValue(access);

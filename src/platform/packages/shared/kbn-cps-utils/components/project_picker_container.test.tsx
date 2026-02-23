@@ -17,6 +17,7 @@ import type { ProjectRouting } from '@kbn/es-query';
 import type { CPSProject, ICPSManager } from '../types';
 import { ProjectRoutingAccess } from '../types';
 import { ProjectPickerContainer } from './project_picker_container';
+import { PROJECT_ROUTING } from '..';
 
 const mockOriginProject: CPSProject = {
   _id: 'origin-project',
@@ -54,10 +55,9 @@ describe('ProjectPickerContainer', () => {
       setProjectRouting: jest.fn(),
       getProjectPickerAccess: jest.fn(() => mockProjectPickerAccess$.getValue()),
       getProjectPickerAccess$: jest.fn(() => mockProjectPickerAccess$),
-      getDefaultProjectRouting: jest.fn(() => undefined),
+      getDefaultProjectRouting: jest.fn(() => PROJECT_ROUTING.ALL),
       getTotalProjectCount: jest.fn(() => 2),
-      getResolvedDefaultProjectRouting: jest.fn(() => '@kibana_space_default_default'),
-      updateResolvedDefaultProjectRouting: jest.fn(),
+      updateDefaultProjectRouting: jest.fn(),
       ...props.cpsManager,
     };
     return await act(async () => {
