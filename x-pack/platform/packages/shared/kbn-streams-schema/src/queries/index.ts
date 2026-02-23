@@ -34,8 +34,8 @@ export interface StreamQuery extends StreamQueryBase {
     query: string;
   };
   /**
-   * Full ES|QL query built from the stream indices, KQL query, and feature filter.
-   * Example: FROM stream,stream.* | WHERE KQL("message: error")
+   * Full ES|QL query. Either provided directly (native ES|QL from LLM) or
+   * built from the stream indices, KQL query, and feature filter (legacy).
    */
   esql: {
     query: string;
@@ -50,7 +50,12 @@ const streamQueryBaseSchema: z.Schema<StreamQueryBase> = z.object({
   title: NonEmptyString,
 });
 
-export type StreamQueryInput = Omit<StreamQuery, 'esql'>;
+export type StreamQueryInput = Omit<StreamQuery, 'esql'> & {
+  /** When provided, used as-is instead of being rebuilt from kql + feature. */
+  esql?: {
+    query: string;
+  };
+};
 
 export const streamQueryInputSchema: z.Schema<StreamQueryInput> = z.intersection(
   streamQueryBaseSchema,
@@ -65,6 +70,11 @@ export const streamQueryInputSchema: z.Schema<StreamQueryInput> = z.intersection
     kql: z.object({
       query: z.string(),
     }),
+    esql: z
+      .object({
+        query: z.string(),
+      })
+      .optional(),
     severity_score: z.number().optional(),
     evidence: z.array(z.string()).optional(),
   })
@@ -95,6 +105,11 @@ export const upsertStreamQueryRequestSchema = z.object({
   kql: z.object({
     query: z.string(),
   }),
+  esql: z
+    .object({
+      query: z.string(),
+    })
+    .optional(),
   severity_score: z.number().optional(),
   evidence: z.array(z.string()).optional(),
 });

@@ -9,6 +9,7 @@ import React, { useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCodeBlock,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -242,32 +243,44 @@ export function GeneratedEventPreview({
           }
           {...(touched.kql && { ...validation.kql })}
         >
-          <UncontrolledStreamsAppSearchBar
-            query={
-              query.kql ? { language: 'kuery', ...query.kql } : { language: 'kuery', query: '' }
-            }
-            onQueryChange={() => {
-              setTouched((prev) => ({ ...prev, kql: true }));
-            }}
-            onQuerySubmit={(next) => {
-              setQuery({
-                ...query,
-                kql: {
-                  query: typeof next.query?.query === 'string' ? next.query.query : '',
-                },
-              });
-              setTouched((prev) => ({ ...prev, kql: true }));
-            }}
-            showQueryInput
-            showSubmitButton={false}
-            isDisabled={!isEditing}
-            placeholder={i18n.translate(
-              'xpack.streams.addSignificantEventFlyout.generatedEventPreview.queryPlaceholder',
-              { defaultMessage: 'Enter query' }
-            )}
-            indexPatterns={dataViews}
-            submitOnBlur
-          />
+          {!query.kql.query && query.esql?.query ? (
+            <EuiCodeBlock
+              language="esql"
+              paddingSize="s"
+              fontSize="s"
+              isCopyable={false}
+              overflowHeight={80}
+            >
+              {query.esql.query}
+            </EuiCodeBlock>
+          ) : (
+            <UncontrolledStreamsAppSearchBar
+              query={
+                query.kql ? { language: 'kuery', ...query.kql } : { language: 'kuery', query: '' }
+              }
+              onQueryChange={() => {
+                setTouched((prev) => ({ ...prev, kql: true }));
+              }}
+              onQuerySubmit={(next) => {
+                setQuery({
+                  ...query,
+                  kql: {
+                    query: typeof next.query?.query === 'string' ? next.query.query : '',
+                  },
+                });
+                setTouched((prev) => ({ ...prev, kql: true }));
+              }}
+              showQueryInput
+              showSubmitButton={false}
+              isDisabled={!isEditing}
+              placeholder={i18n.translate(
+                'xpack.streams.addSignificantEventFlyout.generatedEventPreview.queryPlaceholder',
+                { defaultMessage: 'Enter query' }
+              )}
+              indexPatterns={dataViews}
+              submitOnBlur
+            />
+          )}
         </EuiFormRow>
       </EuiForm>
 

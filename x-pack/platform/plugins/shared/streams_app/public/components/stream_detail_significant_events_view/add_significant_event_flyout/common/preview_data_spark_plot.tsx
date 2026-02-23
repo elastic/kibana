@@ -58,6 +58,7 @@ export function PreviewDataSparkPlot({
     name: definition.name,
     feature: query.feature,
     kqlQuery: query.kql.query,
+    esqlQuery: query.esql?.query,
     timeRange: timeRange ?? timeState.asAbsoluteTimeRange,
     isQueryValid,
     noOfBuckets,

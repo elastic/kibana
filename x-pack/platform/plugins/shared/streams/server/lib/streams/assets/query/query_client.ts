@@ -12,6 +12,9 @@ import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { IStorageClient } from '@kbn/storage-adapter';
 import type { StreamQuery, StreamQueryInput, Streams } from '@kbn/streams-schema';
 import { buildEsqlQuery, getIndexPatternsForStream } from '@kbn/streams-schema';
+import { BasicPrettyPrinter, Builder, Parser } from '@kbn/esql-language';
+import type { ESQLCommand } from '@kbn/esql-language';
+import { conditionToESQLAst } from '@kbn/streamlang';
 import { isEqual, map, partition } from 'lodash';
 import objectHash from 'object-hash';
 import pLimit from 'p-limit';
@@ -103,7 +106,7 @@ function toQueryLink<TQueryLink extends QueryLinkRequest>(
     ...asset,
     query: {
       ...asset.query,
-      esql: { query: buildEsqlQuery(indices, asset.query) },
+      esql: asset.query.esql ?? { query: buildEsqlQuery(indices, asset.query) },
     },
     [ASSET_UUID]: getQueryLinkUuid(definition.name, asset),
     stream_name: definition.name,
@@ -197,7 +200,7 @@ function toStorage(
 
 function hasBreakingChange(currentQuery: StreamQuery, nextQuery: StreamQuery): boolean {
   return (
-    currentQuery.kql.query !== nextQuery.kql.query ||
+    currentQuery.esql.query !== nextQuery.esql.query ||
     !isEqual(currentQuery.feature, nextQuery.feature)
   );
 }
@@ -210,6 +213,53 @@ function toQueryLinkFromQuery(query: StreamQuery, stream: string): QueryLink {
     query,
     stream_name: stream,
   };
+}
+
+/**
+ * Builds the ES|QL query used by alerting rules. For native ES|QL queries
+ * (where kql is empty), the stored query is parsed and reconstructed with
+ * the authoritative stream indices, METADATA fields, and optional feature
+ * filter. For legacy KQL-based queries, delegates to buildEsqlQuery.
+ */
+function buildRuleEsqlQuery(indices: string[], query: StreamQuery): string {
+  if (!query.kql.query && query.esql.query) {
+    const { root } = Parser.parse(query.esql.query);
+    const whereCmd = root.commands.find(
+      (cmd): cmd is ESQLCommand => 'name' in cmd && cmd.name === 'where'
+    );
+
+    if (whereCmd?.args[0]) {
+      const fromCommand = Builder.command({
+        name: 'from',
+        args: [
+          Builder.expression.source.index(indices.join(',')),
+          Builder.option({
+            name: 'METADATA',
+            args: [
+              Builder.expression.column({ args: [Builder.identifier({ name: '_id' })] }),
+              Builder.expression.column({ args: [Builder.identifier('_source')] }),
+            ],
+          }),
+        ],
+      });
+
+      const whereCondition = query.feature?.filter
+        ? Builder.expression.func.binary('and', [
+            whereCmd.args[0],
+            conditionToESQLAst(query.feature.filter),
+          ])
+        : whereCmd.args[0];
+
+      const whereCommand = Builder.command({
+        name: 'where',
+        args: [whereCondition],
+      });
+
+      return BasicPrettyPrinter.print(Builder.expression.query([fromCommand, whereCommand]));
+    }
+  }
+
+  return buildEsqlQuery(indices, query, true);
 }
 
 export class QueryClient {
@@ -620,7 +670,7 @@ export class QueryClient {
           operation.index!.id,
           {
             ...operation.index!,
-            esql: { query: buildEsqlQuery(indices, operation.index!) },
+            esql: operation.index!.esql ?? { query: buildEsqlQuery(indices, operation.index!) },
           },
         ])
     );
@@ -641,7 +691,7 @@ export class QueryClient {
           toQueryLinkFromQuery(
             {
               ...operation.index!,
-              esql: {
+              esql: operation.index!.esql ?? {
                 query: buildEsqlQuery(indices, operation.index!),
               },
             },
@@ -783,7 +833,7 @@ export class QueryClient {
     const ruleId = getRuleIdFromQueryLink(query);
     const indices = getIndexPatternsForStream(definition);
 
-    const esqlQuery = buildEsqlQuery(indices, query.query, true);
+    const esqlQuery = buildRuleEsqlQuery(indices, query.query);
     return {
       data: {
         name: query.query.title,
@@ -809,7 +859,7 @@ export class QueryClient {
   private toUpdateRuleParams(query: QueryLink, definition: Streams.all.Definition) {
     const ruleId = getRuleIdFromQueryLink(query);
     const indices = getIndexPatternsForStream(definition);
-    const esqlQuery = buildEsqlQuery(indices, query.query, true);
+    const esqlQuery = buildRuleEsqlQuery(indices, query.query);
     return {
       id: ruleId,
       data: {

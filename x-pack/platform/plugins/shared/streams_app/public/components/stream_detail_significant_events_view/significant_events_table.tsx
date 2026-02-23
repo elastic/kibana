@@ -111,11 +111,12 @@ export function SignificantEventsTable({
         defaultMessage: 'Query',
       }),
       render: (query: StreamQuery) => {
-        if (!query.kql.query) {
+        const displayQuery = query.kql.query || query.esql.query;
+        if (!displayQuery) {
           return '--';
         }
 
-        return <EuiCodeBlock paddingSize="none">{JSON.stringify(query.kql.query)}</EuiCodeBlock>;
+        return <EuiCodeBlock paddingSize="none">{displayQuery}</EuiCodeBlock>;
       },
     },
     {

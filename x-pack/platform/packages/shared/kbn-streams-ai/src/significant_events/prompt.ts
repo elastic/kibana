@@ -78,7 +78,7 @@ export function createGenerateSignificantEventsPrompt({ systemPrompt }: { system
                 items: {
                   type: 'object',
                   properties: {
-                    kql: {
+                    esql: {
                       type: 'string',
                     },
                     title: {
@@ -106,7 +106,7 @@ export function createGenerateSignificantEventsPrompt({ systemPrompt }: { system
                       },
                     },
                   },
-                  required: ['kql', 'title', 'category', 'severity_score'],
+                  required: ['esql', 'title', 'category', 'severity_score'],
                 },
               },
             },

@@ -53,7 +53,9 @@ interface SignificantEventsGetResponse {
 type SignificantEventsPreviewResponse = Pick<
   SignificantEventsResponse,
   'occurrences' | 'change_points' | 'kql'
->;
+> & {
+  esql?: { query: string };
+};
 
 interface GeneratedSignificantEventQuery {
   title: string;

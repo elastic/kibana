@@ -157,7 +157,8 @@ export function SignificantEventsGeneratedTable({
         defaultMessage: 'Query',
       }),
       render: (_, item: StreamQuery) => {
-        return <EuiCodeBlock paddingSize="none">{JSON.stringify(item.kql?.query)}</EuiCodeBlock>;
+        const displayQuery = item.kql?.query || item.esql?.query || '';
+        return <EuiCodeBlock paddingSize="none">{displayQuery}</EuiCodeBlock>;
       },
     },
     {

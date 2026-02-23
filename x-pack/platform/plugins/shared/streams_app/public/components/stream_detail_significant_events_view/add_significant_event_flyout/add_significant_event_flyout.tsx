@@ -157,6 +157,7 @@ export function AddSignificantEventFlyout({
             const validation = validateQuery({
               title: nextQuery.title,
               kql: { query: nextQuery.kql },
+              esql: nextQuery.esql,
             });
             return validation.kql.isInvalid === false;
           })

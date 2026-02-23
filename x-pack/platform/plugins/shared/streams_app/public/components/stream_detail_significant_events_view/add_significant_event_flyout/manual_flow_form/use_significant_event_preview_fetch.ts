@@ -17,6 +17,7 @@ export function useSignificantEventPreviewFetch({
   name,
   feature,
   kqlQuery,
+  esqlQuery,
   timeRange,
   isQueryValid,
   noOfBuckets = 10,
@@ -24,6 +25,7 @@ export function useSignificantEventPreviewFetch({
   noOfBuckets?: number;
   name: string;
   kqlQuery: string;
+  esqlQuery?: string;
   feature?: Omit<System, 'description'>;
   timeRange: AbsoluteTimeRange;
   isQueryValid: boolean;
@@ -60,6 +62,7 @@ export function useSignificantEventPreviewFetch({
             body: {
               query: {
                 kql: { query: kqlQuery },
+                ...(esqlQuery ? { esql: { query: esqlQuery } } : {}),
                 feature,
               },
             },
@@ -76,6 +79,7 @@ export function useSignificantEventPreviewFetch({
       streams.streamsRepositoryClient,
       name,
       kqlQuery,
+      esqlQuery,
     ]
   );
 

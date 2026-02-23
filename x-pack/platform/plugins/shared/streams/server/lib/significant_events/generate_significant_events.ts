@@ -7,12 +7,10 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ChatCompletionTokenCount, InferenceClient } from '@kbn/inference-common';
-import {
-  buildEsqlQuery,
-  getIndexPatternsForStream,
-  type GeneratedSignificantEventQuery,
-  type Streams,
-  type System,
+import type {
+  GeneratedSignificantEventQuery,
+  Streams,
+  System,
 } from '@kbn/streams-schema';
 import { generateSignificantEvents } from '@kbn/streams-ai';
 import type { SignificantEventsToolUsage } from '@kbn/streams-ai';
@@ -76,13 +74,10 @@ export async function generateSignificantEventDefinitions(
   return {
     queries: queries.map((query) => ({
       title: query.title,
-      kql: query.kql,
+      kql: '',
       feature,
       esql: {
-        query: buildEsqlQuery(getIndexPatternsForStream(definition), {
-          kql: { query: query.kql },
-          feature,
-        }),
+        query: query.esql,
       },
       severity_score: query.severity_score,
       evidence: query.evidence,

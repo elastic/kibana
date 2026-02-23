@@ -46,6 +46,11 @@ const previewSignificantEventsRoute = createServerRoute({
         kql: z.object({
           query: z.string(),
         }),
+        esql: z
+          .object({
+            query: z.string(),
+          })
+          .optional(),
       }),
     }),
   }),

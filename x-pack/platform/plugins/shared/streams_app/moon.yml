@@ -29,6 +29,7 @@ dependsOn:
   - '@kbn/unified-search-plugin'
   - '@kbn/streams-schema'
   - '@kbn/es-query'
+  - '@kbn/esql-language'
   - '@kbn/zod'
   - '@kbn/share-plugin'
   - '@kbn/typed-react-router-config'
