@@ -25,7 +25,7 @@ test.describe(
       await expect(page.getByText('Flask')).toBeVisible();
       await expect(page.getByText('Ruby on Rails')).toBeVisible();
       await expect(page.getByText('Rack')).toBeVisible();
-      await expect(page.getByRole('tab', { name: 'Go' })).toBeVisible();
+      await expect(page.getByRole('tab', { name: 'Go', exact: true })).toBeVisible();
       await expect(page.getByText('Java')).toBeVisible();
       await expect(page.getByText('.NET')).toBeVisible();
       await expect(page.getByText('PHP')).toBeVisible();
@@ -45,7 +45,7 @@ test.describe(
       await page.getByText('Rack').click();
       await expect(page.getByText("gem 'elastic-apm'")).toBeVisible();
 
-      await page.getByRole('tab', { name: 'Go' }).click();
+      await page.getByRole('tab', { name: 'Go', exact: true }).click();
       await expect(page.getByText('go get go.elastic.co/apm')).toBeVisible();
 
       await page.getByText('Java').click();

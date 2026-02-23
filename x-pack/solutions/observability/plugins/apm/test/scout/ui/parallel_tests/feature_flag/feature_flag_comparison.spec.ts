@@ -22,7 +22,8 @@ test.describe(
       await browserAuth.loginAsPrivilegedUser();
       await uiSettings.set({ 'observability:enableComparisonByDefault': true });
       await page.goto(`${kbnUrl.app('apm')}/services`);
-      const comparisonCheckbox = page.getByTestId('comparisonCheckbox');
+      await page.getByTestId('comparisonSelect').waitFor({ state: 'visible' });
+      const comparisonCheckbox = page.locator('#comparison');
       await expect(comparisonCheckbox).toBeChecked();
       await expect(page.getByTestId('comparisonSelect')).not.toBeDisabled();
     });
@@ -36,7 +37,8 @@ test.describe(
       await browserAuth.loginAsPrivilegedUser();
       await uiSettings.set({ 'observability:enableComparisonByDefault': true });
       await page.goto(`${kbnUrl.app('apm')}/dependencies`);
-      const comparisonCheckbox = page.getByTestId('comparisonCheckbox');
+      await page.getByTestId('comparisonSelect').waitFor({ state: 'visible' });
+      const comparisonCheckbox = page.locator('#comparison');
       await expect(comparisonCheckbox).toBeChecked();
       await expect(page.getByTestId('comparisonSelect')).not.toBeDisabled();
     });
@@ -50,7 +52,8 @@ test.describe(
       await browserAuth.loginAsPrivilegedUser();
       await uiSettings.set({ 'observability:enableComparisonByDefault': true });
       await page.goto(`${kbnUrl.app('apm')}/service-map`);
-      const comparisonCheckbox = page.getByTestId('comparisonCheckbox');
+      await page.getByTestId('comparisonSelect').waitFor({ state: 'visible' });
+      const comparisonCheckbox = page.locator('#comparison');
       await expect(comparisonCheckbox).toBeChecked();
       await expect(page.getByTestId('comparisonSelect')).not.toBeDisabled();
     });
@@ -65,7 +68,8 @@ test.describe(
       await uiSettings.set({ 'observability:enableComparisonByDefault': false });
       try {
         await page.goto(`${kbnUrl.app('apm')}/services`);
-        const comparisonCheckbox = page.getByTestId('comparisonCheckbox');
+        await page.getByTestId('comparisonSelect').waitFor({ state: 'visible' });
+        const comparisonCheckbox = page.locator('#comparison');
         await expect(comparisonCheckbox).not.toBeChecked();
         await expect(page.getByTestId('comparisonSelect')).toBeDisabled();
       } finally {
@@ -83,10 +87,8 @@ test.describe(
       await uiSettings.set({ 'observability:enableComparisonByDefault': false });
       try {
         await page.goto(`${kbnUrl.app('apm')}/dependencies`);
-        await page.waitForResponse((res) =>
-          res.url().includes('/internal/apm/dependencies/top_dependencies')
-        );
-        const comparisonCheckbox = page.getByTestId('comparisonCheckbox');
+        await page.getByTestId('comparisonSelect').waitFor({ state: 'visible' });
+        const comparisonCheckbox = page.locator('#comparison');
         await expect(comparisonCheckbox).not.toBeChecked();
         await expect(page.getByTestId('comparisonSelect')).toBeDisabled();
       } finally {
@@ -104,7 +106,8 @@ test.describe(
       await uiSettings.set({ 'observability:enableComparisonByDefault': false });
       try {
         await page.goto(`${kbnUrl.app('apm')}/service-map`);
-        const comparisonCheckbox = page.getByTestId('comparisonCheckbox');
+        await page.getByTestId('comparisonSelect').waitFor({ state: 'visible' });
+        const comparisonCheckbox = page.locator('#comparison');
         await expect(comparisonCheckbox).not.toBeChecked();
         await expect(page.getByTestId('comparisonSelect')).toBeDisabled();
       } finally {

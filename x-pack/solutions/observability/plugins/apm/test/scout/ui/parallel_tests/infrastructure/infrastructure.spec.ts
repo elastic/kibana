@@ -27,7 +27,7 @@ test.describe(
         testData.END_DATE
       }`;
       await page.goto(goServiceInfraPageHref);
-      await expect(page.getByRole('heading', { name: 'Infrastructure' })).toBeVisible();
+      await expect(page.getByRole('tab', { name: 'Infrastructure' })).toBeVisible();
       await expect(page.getByText('Containers')).toBeVisible();
       await expect(page.getByText('Pods')).toBeVisible();
       await expect(page.getByText('Hosts')).toBeVisible();
@@ -40,7 +40,7 @@ test.describe(
         testData.END_DATE
       }`;
       await page.goto(javaServiceInfraPageHref);
-      await expect(page.getByRole('heading', { name: 'Infrastructure' })).toBeVisible();
+      await expect(page.getByRole('tab', { name: 'Infrastructure' })).toBeVisible();
       await expect(page.getByText('Hosts')).toBeVisible();
     });
 
@@ -54,7 +54,7 @@ test.describe(
         testData.END_DATE
       }`;
       await page.goto(nodeServiceInfraPageHref);
-      await expect(page.getByRole('heading', { name: 'Infrastructure' })).toBeVisible();
+      await expect(page.getByRole('tab', { name: 'Infrastructure' })).toBeVisible();
       await expect(page.getByText('No results match your search criteria.')).toBeVisible();
     });
   }

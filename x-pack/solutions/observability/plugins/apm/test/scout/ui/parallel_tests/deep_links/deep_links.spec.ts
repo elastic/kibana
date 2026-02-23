@@ -32,7 +32,7 @@ test.describe(
     for (const keyword of ['apm', 'applications']) {
       test(`contains all expected deep links for "${keyword}"`, async ({ page, kbnUrl }) => {
         await searchAndScrollResults(page, kbnUrl, keyword);
-        await expect(page.getByText('Applications')).toBeVisible();
+        await expect(page.getByText('Applications', { exact: true })).toBeVisible();
         await expect(page.getByText('Applications / Service inventory')).toBeVisible();
         await expect(page.getByText('Applications / Service groups')).toBeVisible();
 

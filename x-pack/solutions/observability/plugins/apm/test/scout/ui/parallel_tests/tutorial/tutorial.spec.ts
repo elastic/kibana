@@ -38,7 +38,7 @@ test.describe(
       await expect(page.getByText('Flask')).toBeVisible();
       await expect(page.getByText('Ruby on Rails')).toBeVisible();
       await expect(page.getByText('Rack')).toBeVisible();
-      await expect(page.getByText('Go')).toBeVisible();
+      await expect(page.getByText('Go', { exact: true })).toBeVisible();
       await expect(page.getByText('.NET')).toBeVisible();
       await expect(page.getByText('PHP')).toBeVisible();
     });
