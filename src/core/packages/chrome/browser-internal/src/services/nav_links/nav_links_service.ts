@@ -43,7 +43,8 @@ export class NavLinksService {
                 return navLinks;
               }, [])
           );
-        })
+        }),
+        takeUntil(this.stop$)
       )
       .subscribe((navlinks) => {
         navLinks$.next(navlinks);

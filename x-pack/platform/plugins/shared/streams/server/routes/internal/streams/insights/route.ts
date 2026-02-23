@@ -41,6 +41,10 @@ const insightsTaskRoute = createServerRoute({
         .describe(
           'Optional connector ID. If not provided, the default AI connector from settings will be used.'
         ),
+      streamNames: z
+        .array(z.string())
+        .describe('List of stream names to generate insights for.')
+        .optional(),
     }),
   }),
   handler: async ({
@@ -74,6 +78,7 @@ const insightsTaskRoute = createServerRoute({
 
                 return {
                   connectorId,
+                  streamNames: body.streamNames,
                 };
               })(),
               request,
