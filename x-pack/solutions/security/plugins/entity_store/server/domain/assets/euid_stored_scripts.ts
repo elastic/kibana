@@ -15,7 +15,7 @@ const storedScriptName: Record<EntityType, string> = {
   host: 'euid_host_entity',
   service: 'euid_service_entity',
   generic: 'euid_generic_entity',
-} as const;
+} as const satisfies Record<EntityType, string>;
 
 export async function installEuidStoredScripts({
   esClient,
