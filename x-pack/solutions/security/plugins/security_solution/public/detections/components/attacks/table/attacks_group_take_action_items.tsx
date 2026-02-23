@@ -28,11 +28,16 @@ interface AttacksGroupTakeActionItemsProps {
   attack: AttackDiscoveryAlert;
   /** Optional callback to close the containing popover menu */
   closePopover?: () => void;
+  onActionSuccess?: () => void;
+  /** Optional size for the context menu for flyout */
+  size?: 's' | 'm';
 }
 
 export function AttacksGroupTakeActionItems({
   attack,
   closePopover,
+  onActionSuccess,
+  size,
 }: AttacksGroupTakeActionItemsProps) {
   const invalidateAttackDiscoveriesCache = useInvalidateFindAttackDiscoveries();
   const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuery(), []);
@@ -57,7 +62,8 @@ export function AttacksGroupTakeActionItems({
   const onSuccess = useCallback(() => {
     invalidateAttackDiscoveriesCache();
     refetchQuery();
-  }, [invalidateAttackDiscoveriesCache, refetchQuery]);
+    onActionSuccess?.();
+  }, [invalidateAttackDiscoveriesCache, refetchQuery, onActionSuccess]);
 
   const { items: assignItems, panels: assignPanels } = useAttackAssigneesContextMenuItems({
     attacksWithAssignees,
@@ -132,5 +138,5 @@ export function AttacksGroupTakeActionItems({
     [workflowPanels, assignPanels, defaultPanel, tagsPanels]
   );
 
-  return <EuiContextMenu initialPanelId={defaultPanel.id} panels={panels} />;
+  return <EuiContextMenu size={size} initialPanelId={defaultPanel.id} panels={panels} />;
 }
