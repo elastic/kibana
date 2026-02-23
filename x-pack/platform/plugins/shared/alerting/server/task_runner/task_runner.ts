@@ -458,9 +458,7 @@ export class TaskRunner<
     // ALERT_MUTED on the AAD docs in the same execution.
     const alertUuidsToAutoUnmute: string[] = [];
     if (alertsToAutoUnmute.length > 0) {
-      const autoUnmuteInstanceIds = new Set(
-        alertsToAutoUnmute.map((a) => a.alertInstanceId)
-      );
+      const autoUnmuteInstanceIds = new Set(alertsToAutoUnmute.map((a) => a.alertInstanceId));
       const updatedSnoozedInstances = (rule.snoozedInstances ?? []).filter(
         (e) => !autoUnmuteInstanceIds.has(e.instanceId)
       );

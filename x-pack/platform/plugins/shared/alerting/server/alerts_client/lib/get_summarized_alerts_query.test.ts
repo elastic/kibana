@@ -16,8 +16,7 @@ import {
 } from './get_summarized_alerts_query';
 import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 
-const toFilterArray = (f: unknown): unknown[] =>
-  Array.isArray(f) ? f : f != null ? [f] : [];
+const toFilterArray = (f: unknown): unknown[] => (Array.isArray(f) ? f : f != null ? [f] : []);
 
 const hasAlertMutedFilter = (filter: unknown[]): boolean =>
   Array.isArray(filter) &&
@@ -73,9 +72,7 @@ describe('get_summarized_alerts_query', () => {
         maxAlertLimit: 100,
       });
 
-      const firstQuery = toFilterArray(
-        (queries[0] as SearchRequest).query?.bool?.filter
-      );
+      const firstQuery = toFilterArray((queries[0] as SearchRequest).query?.bool?.filter);
       const hasExcludedIds = firstQuery.some(
         (clause: unknown) =>
           typeof clause === 'object' &&

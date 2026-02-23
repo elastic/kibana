@@ -274,7 +274,7 @@ export const getExpectedQueryByTimeRange = ({
     },
     {
       bool: { must_not: { term: { 'kibana.alert.muted': true } } },
-    },
+    }
   );
   if (excludedAlertInstanceIds?.length) {
     filter.push({

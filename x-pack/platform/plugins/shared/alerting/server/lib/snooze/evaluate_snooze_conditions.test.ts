@@ -224,9 +224,7 @@ describe('evaluateSnoozeConditions', () => {
     it('evaluateSnoozeConditions many alerts in loop (snoozedInstances-style)', () => {
       const config: AlertSnoozeConfig = {
         expiresAt: new Date(Date.now() - 60000).toISOString(),
-        conditions: [
-          { type: 'severity_equals', field: 'kibana.alert.severity', value: 'low' },
-        ],
+        conditions: [{ type: 'severity_equals', field: 'kibana.alert.severity', value: 'low' }],
       };
       const runs = 300;
       const { meanMs } = runTimingLoop(() => {

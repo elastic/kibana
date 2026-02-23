@@ -85,17 +85,14 @@ export class PerAlertActionScheduler<
       context.ruleType.actionGroups.map((actionGroup) => [actionGroup.id, actionGroup.name])
     );
     this.mutedAlertIdsSet = new Set(context.rule.mutedInstanceIds);
-    this.snoozedInstancesMap = (context.rule.snoozedInstances ?? []).reduce(
-      (acc, e) => {
-        acc[e.instanceId] = {
-          expiresAt: e.expiresAt,
-          conditions: e.conditions,
-          conditionOperator: e.conditionOperator,
-        };
-        return acc;
-      },
-      {} as Record<string, SnoozedInstanceConfig>
-    );
+    this.snoozedInstancesMap = (context.rule.snoozedInstances ?? []).reduce((acc, e) => {
+      acc[e.instanceId] = {
+        expiresAt: e.expiresAt,
+        conditions: e.conditions,
+        conditionOperator: e.conditionOperator,
+      };
+      return acc;
+    }, {} as Record<string, SnoozedInstanceConfig>);
 
     const canGetSummarizedAlerts =
       !!context.ruleType.alerts && !!context.alertsClient.getSummarizedAlerts;
@@ -431,11 +428,7 @@ export class PerAlertActionScheduler<
    * even when the rule has no actions.
    */
   private evaluateAlertForAutoUnmute(
-    alert: Alert<
-      AlertInstanceState,
-      AlertInstanceContext,
-      ActionGroupIds | RecoveryActionGroupId
-    >
+    alert: Alert<AlertInstanceState, AlertInstanceContext, ActionGroupIds | RecoveryActionGroupId>
   ): void {
     const alertId = alert.getId();
     const result = this.evaluateSnoozeForAlert(alertId);
