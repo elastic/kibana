@@ -123,7 +123,7 @@ export function WaterfallWithSummary<TSample extends {}>({
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem grow={false}>
         <EuiFlexGroup alignItems="center">
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={false} css={{ flexShrink: 0 }}>
             <EuiTitle size="xs">
               <h5>
                 {i18n.translate('xpack.apm.transactionDetails.traceSampleTitle', {
