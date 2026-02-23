@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useReducer, useRef } from 'react';
-import { chunk, debounce } from 'lodash';
+import { debounce } from 'lodash';
 
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 
@@ -14,13 +14,11 @@ import {
   DEBOUNCE_INTERVAL,
   DEFAULT_PERCENTILE_THRESHOLD,
 } from '../../../../common/correlations/constants';
-import type { FieldValuePair } from '../../../../common/correlations/types';
-import { getPrioritizedFieldValuePairs } from '../../../../common/correlations/utils';
-import type {
-  LatencyCorrelation,
-  LatencyCorrelationsResponse,
-} from '../../../../common/correlations/latency_correlations/types';
-import { LatencyDistributionChartType } from '../../../../common/latency_distribution_chart_types';
+import {
+  CorrelationType,
+  type UnifiedCorrelationsResponse,
+} from '../../../../common/correlations/types';
+import type { LatencyCorrelationsResponse } from '../../../../common/correlations/latency_correlations/types';
 
 import { callApmApi } from '../../../services/rest/create_call_apm_api';
 
@@ -31,14 +29,6 @@ import {
   getReducer,
 } from './utils/analysis_hook_utils';
 import { useFetchParams } from './use_fetch_params';
-
-// Overall progress is a float from 0 to 1.
-const LOADED_OVERALL_HISTOGRAM = 0.05;
-const LOADED_FIELD_CANDIDATES = LOADED_OVERALL_HISTOGRAM + 0.05;
-const LOADED_FIELD_VALUE_PAIRS = LOADED_FIELD_CANDIDATES + 0.3;
-const LOADED_DONE = 1;
-const PROGRESS_STEP_FIELD_VALUE_PAIRS = 0.3;
-const PROGRESS_STEP_CORRELATIONS = 0.6;
 
 export function useLatencyCorrelations() {
   const fetchParams = useFetchParams();
@@ -71,178 +61,51 @@ export function useLatencyCorrelations() {
     setResponse.flush();
 
     try {
-      // `responseUpdate` will be enriched with additional data with subsequent
-      // calls to the overall histogram, field candidates, field value pairs, correlation results
-      // and histogram data for statistically significant results.
-      const responseUpdate: LatencyCorrelationsResponse = {
-        ccsWarning: false,
-      };
-
-      // Initial call to fetch the overall distribution for the log-log plot.
-      const {
-        overallHistogram,
-        totalDocCount,
-        percentileThresholdValue,
-        durationMin,
-        durationMax,
-      } = await callApmApi('POST /internal/apm/latency/overall_distribution/transactions', {
+      // Single unified API call that handles all steps internally
+      const unifiedResponse = (await callApmApi('POST /internal/apm/correlations/latency' as any, {
         signal: abortCtrl.current.signal,
         params: {
           body: {
+            correlationType: CorrelationType.TRANSACTION_DURATION,
             ...fetchParams,
             percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
-            chartType: LatencyDistributionChartType.latencyCorrelations,
           },
         },
-      });
-      responseUpdate.overallHistogram = overallHistogram;
-      responseUpdate.totalDocCount = totalDocCount;
-      responseUpdate.percentileThresholdValue = percentileThresholdValue;
+      })) as UnifiedCorrelationsResponse;
 
       if (abortCtrl.current.signal.aborted) {
         return;
       }
+
+      // Map unified response to LatencyCorrelationsResponse format
+      const responseUpdate: LatencyCorrelationsResponse = {
+        ccsWarning: unifiedResponse.ccsWarning,
+        overallHistogram: unifiedResponse.overallHistogram,
+        totalDocCount: unifiedResponse.totalDocCount,
+        percentileThresholdValue: unifiedResponse.percentileThresholdValue,
+        latencyCorrelations:
+          unifiedResponse.correlations.length > 0
+            ? getLatencyCorrelationsSortedByCorrelation(
+                unifiedResponse.correlations.filter(
+                  (c): c is typeof c & { correlation: number; ksTest: number } =>
+                    c.correlation !== undefined && c.ksTest !== undefined
+                ) as any
+              )
+            : unifiedResponse.fallbackResult
+            ? [
+                {
+                  ...unifiedResponse.fallbackResult,
+                  correlation: unifiedResponse.fallbackResult.correlation ?? 0,
+                  ksTest: unifiedResponse.fallbackResult.ksTest ?? 0,
+                  isFallbackResult: true,
+                } as any,
+              ]
+            : undefined,
+      };
 
       setResponse({
         ...responseUpdate,
-        loaded: LOADED_OVERALL_HISTOGRAM,
-      });
-      setResponse.flush();
-
-      const { fieldCandidates } = await callApmApi(
-        'GET /internal/apm/correlations/field_candidates/transactions',
-        {
-          signal: abortCtrl.current.signal,
-          params: {
-            query: fetchParams,
-          },
-        }
-      );
-
-      if (abortCtrl.current.signal.aborted) {
-        return;
-      }
-
-      setResponse({
-        loaded: LOADED_FIELD_CANDIDATES,
-      });
-      setResponse.flush();
-
-      const chunkSize = 10;
-      let chunkLoadCounter = 0;
-
-      const fieldValuePairs: FieldValuePair[] = [];
-      const fieldCandidateChunks = chunk(fieldCandidates, chunkSize);
-
-      for (const fieldCandidateChunk of fieldCandidateChunks) {
-        const fieldValuePairChunkResponse = await callApmApi(
-          'POST /internal/apm/correlations/field_value_pairs/transactions',
-          {
-            signal: abortCtrl.current.signal,
-            params: {
-              body: {
-                ...fetchParams,
-                fieldCandidates: fieldCandidateChunk,
-              },
-            },
-          }
-        );
-
-        if (fieldValuePairChunkResponse.fieldValuePairs.length > 0) {
-          fieldValuePairs.push(...fieldValuePairChunkResponse.fieldValuePairs);
-        }
-
-        if (abortCtrl.current.signal.aborted) {
-          return;
-        }
-
-        chunkLoadCounter++;
-        setResponse({
-          loaded:
-            LOADED_FIELD_CANDIDATES +
-            (chunkLoadCounter / fieldCandidateChunks.length) * PROGRESS_STEP_FIELD_VALUE_PAIRS,
-        });
-      }
-
-      if (abortCtrl.current.signal.aborted) {
-        return;
-      }
-
-      setResponse.flush();
-
-      chunkLoadCounter = 0;
-
-      const fieldsToSample = new Set<string>();
-      const latencyCorrelations: LatencyCorrelation[] = [];
-      const fieldValuePairChunks = chunk(getPrioritizedFieldValuePairs(fieldValuePairs), chunkSize);
-
-      const fallbackResults: LatencyCorrelation[] = [];
-      for (const fieldValuePairChunk of fieldValuePairChunks) {
-        const significantCorrelations = await callApmApi(
-          'POST /internal/apm/correlations/significant_correlations/transactions',
-          {
-            signal: abortCtrl.current.signal,
-            params: {
-              body: {
-                ...fetchParams,
-                durationMin,
-                durationMax,
-                fieldValuePairs: fieldValuePairChunk,
-              },
-            },
-          }
-        );
-
-        if (significantCorrelations.latencyCorrelations.length > 0) {
-          significantCorrelations.latencyCorrelations.forEach((d) => {
-            fieldsToSample.add(d.fieldName);
-          });
-          latencyCorrelations.push(...significantCorrelations.latencyCorrelations);
-          responseUpdate.latencyCorrelations = getLatencyCorrelationsSortedByCorrelation([
-            ...latencyCorrelations,
-          ]);
-        } else {
-          // If there's no correlation results that matches the criteria
-          // Consider the fallback results
-          if (significantCorrelations.fallbackResult) {
-            fallbackResults.push(significantCorrelations.fallbackResult);
-          }
-        }
-
-        chunkLoadCounter++;
-        setResponse({
-          ...responseUpdate,
-          loaded:
-            LOADED_FIELD_VALUE_PAIRS +
-            (chunkLoadCounter / fieldValuePairChunks.length) * PROGRESS_STEP_CORRELATIONS,
-        });
-
-        if (abortCtrl.current.signal.aborted) {
-          return;
-        }
-      }
-
-      if (latencyCorrelations.length === 0 && fallbackResults.length > 0) {
-        // Rank the fallback results and show at least one value
-        const sortedFallbackResults = fallbackResults
-          .filter((r) => r.correlation > 0)
-          .sort((a, b) => b.correlation - a.correlation);
-
-        responseUpdate.latencyCorrelations = sortedFallbackResults
-          .slice(0, 1)
-          .map((r) => ({ ...r, isFallbackResult: true }));
-        setResponse({
-          ...responseUpdate,
-          loaded:
-            LOADED_FIELD_VALUE_PAIRS +
-            (chunkLoadCounter / fieldValuePairChunks.length) * PROGRESS_STEP_CORRELATIONS,
-        });
-      }
-      setResponse.flush();
-
-      setResponse({
-        ...responseUpdate,
-        loaded: LOADED_DONE,
+        loaded: 1,
         isRunning: false,
       });
       setResponse.flush();

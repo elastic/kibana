@@ -29,6 +29,10 @@ import type { PValuesResponse } from './queries/fetch_p_values';
 import { fetchPValues } from './queries/fetch_p_values';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import type { TopValuesStats } from '../../../common/correlations/field_stats_types';
+import { CorrelationType } from '../../../common/correlations/types';
+import type { UnifiedCorrelationsResponse } from '../../../common/correlations/types';
+import { fetchLatencyCorrelations } from './queries/fetch_latency_correlation';
+import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
 
 const INVALID_LICENSE = i18n.translate('xpack.apm.correlations.license.text', {
   defaultMessage:
@@ -338,10 +342,109 @@ const pValuesTransactionsRoute = createApmServerRoute({
   },
 });
 
+const correlationTypeRt = t.union([
+  t.literal(CorrelationType.TRANSACTION_DURATION),
+  t.literal(CorrelationType.ERROR_RATE),
+  t.literal(CorrelationType.INFRASTRUCTURE_CPU),
+  t.literal(CorrelationType.INFRASTRUCTURE_MEMORY),
+  t.literal(CorrelationType.INFRASTRUCTURE_DISK),
+  t.literal(CorrelationType.INFRASTRUCTURE_NETWORK),
+]);
+
+const unifiedCorrelationsRoute = createApmServerRoute({
+  endpoint: 'POST /internal/apm/correlations/latency',
+  params: t.type({
+    body: t.intersection([
+      t.type({
+        correlationType: correlationTypeRt,
+      }),
+      t.partial({
+        serviceName: t.string,
+        transactionName: t.string,
+        transactionType: t.string,
+        fieldCandidates: t.array(t.string),
+        metricField: t.string,
+        durationMin: toNumberRt,
+        durationMax: toNumberRt,
+        percentileThreshold: toNumberRt,
+      }),
+      environmentRt,
+      kueryRt,
+      rangeRt,
+    ]),
+  }),
+  security: { authz: { requiredPrivileges: ['apm'] } },
+  handler: async (resources): Promise<UnifiedCorrelationsResponse> => {
+    const { context } = resources;
+    const { license } = await context.licensing;
+    if (!isActivePlatinumLicense(license)) {
+      throw Boom.forbidden(INVALID_LICENSE);
+    }
+
+    const apmEventClient = await getApmEventClient(resources);
+
+    const {
+      body: {
+        correlationType,
+        serviceName,
+        transactionName,
+        transactionType,
+        start,
+        end,
+        environment,
+        kuery,
+        fieldCandidates,
+        durationMin,
+        durationMax,
+        percentileThreshold,
+        // metricField is reserved for future infrastructure metrics support
+        metricField: _metricField,
+      },
+    } = resources.params;
+
+    // Determine if we should search aggregated transactions
+    const searchAggregatedTransactions = await getSearchTransactionsEvents({
+      config: resources.config,
+      apmEventClient,
+      kuery,
+      start,
+      end,
+    });
+
+    return fetchLatencyCorrelations({
+      apmEventClient,
+      correlationType,
+      start,
+      end,
+      environment,
+      kuery,
+      query: {
+        bool: {
+          filter: [
+            ...termQuery(SERVICE_NAME, serviceName),
+            ...termQuery(TRANSACTION_TYPE, transactionType),
+            ...termQuery(TRANSACTION_NAME, transactionName),
+          ],
+        },
+      },
+      fieldCandidates,
+      percentileThreshold,
+      durationMin,
+      durationMax,
+      config: {
+        apm: {
+          searchAggregatedTransactions,
+        },
+      },
+    });
+  },
+});
+
 export const correlationsRouteRepository = {
   ...fieldCandidatesTransactionsRoute,
   ...fieldValueStatsTransactionsRoute,
   ...fieldValuePairsTransactionsRoute,
   ...significantCorrelationsTransactionsRoute,
   ...pValuesTransactionsRoute,
+  ...unifiedCorrelationsRoute,
 };

@@ -37,3 +37,41 @@ export interface CommonCorrelationsQueryParams {
   environment: Environment;
   query: QueryDslQueryContainer;
 }
+
+export enum CorrelationType {
+  TRANSACTION_DURATION = 'transaction_duration',
+  ERROR_RATE = 'error_rate',
+  INFRASTRUCTURE_CPU = 'infrastructure_cpu',
+  INFRASTRUCTURE_MEMORY = 'infrastructure_memory',
+  INFRASTRUCTURE_DISK = 'infrastructure_disk',
+  INFRASTRUCTURE_NETWORK = 'infrastructure_network',
+}
+
+export interface UnifiedCorrelation {
+  fieldName: string;
+  fieldValue: string | number;
+  correlation?: number;
+  ksTest?: number;
+  pValue?: number | null;
+  score?: number;
+  normalizedScore?: number;
+  histogram?: HistogramItem[];
+  isFallbackResult?: boolean;
+  doc_count?: number;
+  bg_count?: number;
+  failurePercentage?: number;
+  successPercentage?: number;
+}
+
+export interface UnifiedCorrelationsResponse {
+  overallHistogram?: HistogramItem[];
+  errorHistogram?: HistogramItem[];
+  totalDocCount: number;
+  percentileThresholdValue?: number | null;
+  durationMin: number;
+  durationMax: number;
+  fieldCandidates: string[];
+  correlations: UnifiedCorrelation[];
+  ccsWarning: boolean;
+  fallbackResult?: UnifiedCorrelation;
+}
