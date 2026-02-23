@@ -16,7 +16,36 @@ const codeSchema = z.object({
   code: z.string().describe('The complete JavaScript code for the mini app.'),
 });
 
-const UPDATE_CODE_DESCRIPTION = `Replace the mini app's JavaScript code. The app instantly reloads with the new code.
+const strReplaceSchema = z.object({
+  old_string: z
+    .string()
+    .describe(
+      'The exact text to find in the code. Must match exactly including whitespace and indentation.'
+    ),
+  new_string: z.string().describe('The replacement text. Can be empty to delete the old_string.'),
+  replace_all: z
+    .boolean()
+    .optional()
+    .describe('If true, replace all occurrences. If false/omitted, replace only the first match.'),
+});
+
+const insertAtLineSchema = z.object({
+  line: z
+    .number()
+    .describe(
+      'The line number to insert at (1-indexed). The new code is inserted before this line.'
+    ),
+  code: z.string().describe('The code to insert.'),
+});
+
+const emptySchema = z.object({});
+
+const UPDATE_CODE_DESCRIPTION = `Replace the mini app's JavaScript code entirely. The app instantly reloads with the new code.
+
+Use this tool only when you need to rewrite the entire app from scratch. For incremental changes, prefer:
+- mini_app_str_replace: to modify specific parts of the code
+- mini_app_insert_at_line: to add new code at a specific location
+- mini_app_append_code: to add code at the end
 
 RULES:
 - Provide the COMPLETE code. This replaces everything.
@@ -30,6 +59,26 @@ RULES:
 
 const APPEND_CODE_DESCRIPTION =
   'Append JavaScript code to the existing mini app code. Useful for adding new functionality without replacing everything. The appended code runs after the existing code.';
+
+const GET_CODE_DESCRIPTION =
+  'Get the current JavaScript code of the mini app. Returns the full code as a string. Use this to inspect the current state before making targeted edits with mini_app_str_replace.';
+
+const STR_REPLACE_DESCRIPTION = `Replace specific text in the mini app's code. This is the PREFERRED way to make targeted edits.
+
+IMPORTANT:
+- old_string must match EXACTLY (including whitespace and indentation)
+- Include enough context in old_string to make it unique
+- If the match fails, use mini_app_get_code to see the exact current code
+- By default only the first match is replaced; set replace_all: true for all occurrences`;
+
+const INSERT_AT_LINE_DESCRIPTION = `Insert code at a specific line number. The new code is inserted BEFORE the specified line.
+
+Use this for:
+- Adding new functions or components
+- Inserting imports/setup code near the top
+- Adding code in the middle of the file
+
+Line numbers are 1-indexed (first line is 1).`;
 
 /**
  * Builds a comprehensive screen context description that teaches the agent
@@ -53,18 +102,40 @@ export const buildScreenContextDescription = ({
 
   parts.push(`CRITICAL INSTRUCTIONS FOR MODIFYING THIS MINI APP:`);
   parts.push(
-    `- To change the code, you MUST call the "mini_app_update_code" browser tool with the complete new code.`
+    `- Use the browser tools to modify code. Do NOT output code for the user to copy-paste.`
   );
   parts.push(
-    `- Do NOT output code in your response for the user to copy-paste. Always use the tool.`
+    `- When you call any code-modifying tool, the app instantly reloads with the new code.`
   );
-  parts.push(`- When you call the tool, the app instantly reloads with the new code.`);
+  parts.push(``);
+  parts.push(`AVAILABLE TOOLS (prefer targeted edits over full rewrites):`);
+  parts.push(
+    `- mini_app_get_code: Read the current code. Use this first if you need to understand the existing code.`
+  );
+  parts.push(
+    `- mini_app_str_replace: Replace specific text. PREFERRED for targeted edits. Requires exact match.`
+  );
+  parts.push(`- mini_app_insert_at_line: Insert code at a specific line number (1-indexed).`);
+  parts.push(`- mini_app_append_code: Add code at the end of the file.`);
+  parts.push(`- mini_app_update_code: Replace ALL code. Use only when rewriting from scratch.`);
+  parts.push(``);
+  parts.push(`WORKFLOW FOR EDITS:`);
+  parts.push(
+    `1. For small changes: Use mini_app_str_replace with enough context to match uniquely.`
+  );
+  parts.push(
+    `2. If str_replace fails (no match): Call mini_app_get_code to see exact current code, then retry.`
+  );
+  parts.push(
+    `3. For new functions/components: Use mini_app_insert_at_line to add in the right place.`
+  );
+  parts.push(
+    `4. Only use mini_app_update_code when creating a new app or doing a complete rewrite.`
+  );
   parts.push(``);
 
   parts.push(`ENVIRONMENT:`);
-  parts.push(
-    `- Mini apps run as JavaScript inside a sandboxed iframe with full DOM access.`
-  );
+  parts.push(`- Mini apps run as JavaScript inside a sandboxed iframe with full DOM access.`);
   parts.push(`- NO imports, NO module system, NO npm packages. Only use the globals provided.`);
   parts.push(
     `- Preact (lightweight React alternative) + htm (JSX-like tagged templates) are pre-loaded as globals.`
@@ -98,17 +169,23 @@ export const buildScreenContextDescription = ({
   parts.push(`Kibana.log.info/warn/error(...args)`);
   parts.push(``);
   parts.push(`Kibana.navigate(url) → Promise<{ navigated: boolean }>`);
-  parts.push(`  Request navigation to a Kibana URL or external link. The user will see a confirmation dialog.`);
+  parts.push(
+    `  Request navigation to a Kibana URL or external link. The user will see a confirmation dialog.`
+  );
   parts.push(`  For Kibana pages use paths like '/app/discover' or '/app/dashboards'.`);
   parts.push(`  For external links use full URLs like 'https://example.com'.`);
   parts.push(``);
 
   parts.push(`PREACT + HTM (RECOMMENDED for component-based UIs):`);
   parts.push(``);
-  parts.push(`The iframe has Preact and htm pre-loaded as globals. Use them for React-like component UIs.`);
+  parts.push(
+    `The iframe has Preact and htm pre-loaded as globals. Use them for React-like component UIs.`
+  );
   parts.push(``);
   parts.push(`IMPORTANT: The ONLY globals available are: window.preact, window.html`);
-  parts.push(`There is NO "preactHtm", NO "React", NO "ReactDOM". Do NOT try to import or require anything.`);
+  parts.push(
+    `There is NO "preactHtm", NO "React", NO "ReactDOM". Do NOT try to import or require anything.`
+  );
   parts.push(``);
   parts.push(`Available globals:`);
   parts.push(`  preact             - the Preact library object`);
@@ -146,9 +223,7 @@ export const buildScreenContextDescription = ({
     `      Kibana.esql.query({ query: 'FROM logs-* | LIMIT 100' }).then(r => setRows(r.rows));`
   );
   parts.push(`    }, []);`);
-  parts.push(
-    `    return html\`<ul>\${rows.map(r => html\`<li>\${r.message}</li>\`)}</ul>\`;`
-  );
+  parts.push(`    return html\`<ul>\${rows.map(r => html\`<li>\${r.message}</li>\`)}</ul>\`;`);
   parts.push(`  }`);
   parts.push(``);
   parts.push(`  // Children and composition work like React:`);
@@ -164,11 +239,13 @@ export const buildScreenContextDescription = ({
     `- Event handlers: use on-prefixed lowercase attrs: onClick, onInput, onChange, onSubmit`
   );
   parts.push(`- Spread props: html\`<div ...\${props} />\``);
-  parts.push(`- Lists: html\`<ul>\${items.map(i => html\`<li key=\${i.id}>\${i.name}</li>\`)}</ul>\``);
   parts.push(
-    `- Conditional rendering: html\`\${show ? html\`<\${Modal} />\` : null}\``
+    `- Lists: html\`<ul>\${items.map(i => html\`<li key=\${i.id}>\${i.name}</li>\`)}</ul>\``
   );
-  parts.push(`- Style objects: html\`<div style=\${{ color: 'red', fontSize: '16px' }}>text</div>\``);
+  parts.push(`- Conditional rendering: html\`\${show ? html\`<\${Modal} />\` : null}\``);
+  parts.push(
+    `- Style objects: html\`<div style=\${{ color: 'red', fontSize: '16px' }}>text</div>\``
+  );
   parts.push(``);
 
   parts.push(`DOM ACCESS (also available alongside Preact):`);
@@ -198,9 +275,7 @@ export const buildScreenContextDescription = ({
   parts.push(`    const [data, setData] = useState({ columns: [], rows: [] });`);
   parts.push(`    const [loading, setLoading] = useState(true);`);
   parts.push(`    useEffect(() => {`);
-  parts.push(
-    `      Kibana.esql.query({ query: 'FROM logs-* | LIMIT 100' })`
-  );
+  parts.push(`      Kibana.esql.query({ query: 'FROM logs-* | LIMIT 100' })`);
   parts.push(`        .then(r => { setData(r); setLoading(false); })`);
   parts.push(`        .catch(e => { Kibana.log.error(e.message); setLoading(false); });`);
   parts.push(`    }, []);`);
@@ -228,9 +303,7 @@ export const buildScreenContextDescription = ({
   parts.push(`    const [results, setResults] = useState([]);`);
   parts.push(`    const search = useCallback(async () => {`);
   parts.push(`      const { rows } = await Kibana.esql.query({`);
-  parts.push(
-    `        query: \\\`FROM my-index | WHERE name LIKE "*\\\${query}*" | LIMIT 20\\\``
-  );
+  parts.push(`        query: \\\`FROM my-index | WHERE name LIKE "*\\\${query}*" | LIMIT 20\\\``);
   parts.push(`      });`);
   parts.push(`      setResults(rows);`);
   parts.push(`    }, [query]);`);
@@ -239,9 +312,7 @@ export const buildScreenContextDescription = ({
     `      <div><input value=\${query} onInput=\${e => setQuery(e.target.value)} placeholder="Search..." />`
   );
   parts.push(`      <button onClick=\${search}>Search</button></div>`);
-  parts.push(
-    `      <ul>\${results.map(r => html\`<li>\${r.name}</li>\`)}</ul>\`;`
-  );
+  parts.push(`      <ul>\${results.map(r => html\`<li>\${r.name}</li>\`)}</ul>\`;`);
   parts.push(`  }`);
   parts.push(`  render(html\`<\${SearchApp} />\`, document.getElementById('root'));`);
   parts.push(`})();`);
@@ -265,7 +336,9 @@ export const buildScreenContextDescription = ({
   parts.push(`    const [count, setCount] = useState('-');`);
   parts.push(`    useEffect(() => {`);
   parts.push(`      const refresh = async () => {`);
-  parts.push(`        const { rowCount } = await Kibana.esql.query({ query: 'FROM logs-* | STATS count=COUNT(*)' });`);
+  parts.push(
+    `        const { rowCount } = await Kibana.esql.query({ query: 'FROM logs-* | STATS count=COUNT(*)' });`
+  );
   parts.push(`        setCount(rowCount);`);
   parts.push(`      };`);
   parts.push(`      refresh();`);
@@ -332,6 +405,17 @@ export const useAgentBuilder = ({
   const tools = useMemo(() => {
     return [
       {
+        id: 'mini_app_get_code',
+        description: GET_CODE_DESCRIPTION,
+        schema: emptySchema,
+        handler: () => {
+          const code = codeRef.current;
+          // eslint-disable-next-line no-console
+          console.log('[Mini Apps] Current code retrieved:', code.length, 'characters');
+          return code;
+        },
+      },
+      {
         id: 'mini_app_update_code',
         description: UPDATE_CODE_DESCRIPTION,
         schema: codeSchema,
@@ -346,6 +430,52 @@ export const useAgentBuilder = ({
         handler: ({ code }: { code: string }) => {
           const existing = codeRef.current;
           onUpdateCodeRef.current(existing ? `${existing}\n\n${code}` : code);
+        },
+      },
+      {
+        id: 'mini_app_str_replace',
+        description: STR_REPLACE_DESCRIPTION,
+        schema: strReplaceSchema,
+        handler: ({
+          old_string: oldString,
+          new_string: newString,
+          replace_all: replaceAll,
+        }: {
+          old_string: string;
+          new_string: string;
+          replace_all?: boolean;
+        }) => {
+          const existing = codeRef.current;
+          if (!existing.includes(oldString)) {
+            // eslint-disable-next-line no-console
+            console.error(
+              '[Mini Apps] str_replace failed: old_string not found in code. Use mini_app_get_code to see current code.'
+            );
+            return { success: false, error: 'old_string not found in code' };
+          }
+          const updated = replaceAll
+            ? existing.split(oldString).join(newString)
+            : existing.replace(oldString, newString);
+          onUpdateCodeRef.current(updated);
+          // eslint-disable-next-line no-console
+          console.log('[Mini Apps] Code updated via str_replace');
+          return { success: true };
+        },
+      },
+      {
+        id: 'mini_app_insert_at_line',
+        description: INSERT_AT_LINE_DESCRIPTION,
+        schema: insertAtLineSchema,
+        handler: ({ line, code }: { line: number; code: string }) => {
+          const existing = codeRef.current;
+          const lines = existing.split('\n');
+          const insertIndex = Math.max(0, Math.min(line - 1, lines.length));
+          lines.splice(insertIndex, 0, code);
+          const updated = lines.join('\n');
+          onUpdateCodeRef.current(updated);
+          // eslint-disable-next-line no-console
+          console.log(`[Mini Apps] Code inserted at line ${line}`);
+          return { success: true, inserted_at_line: insertIndex + 1 };
         },
       },
     ];
