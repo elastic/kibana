@@ -8,6 +8,7 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { mappings } from '@kbn/es-mappings';
 import { createIndexWithMappings } from './create_index';
 import {
   WORKFLOWS_EXECUTION_STATE_INDEX,
@@ -25,6 +26,20 @@ export async function createIndexes(options: CreateIndexesOptions): Promise<void
     esClient,
     indexName: WORKFLOWS_EXECUTION_STATE_INDEX,
     mappings: WORKFLOWS_EXECUTION_STATE_INDEX_MAPPINGS,
+    logger,
+  });
+  await createIndexWithMappings({
+    esClient,
+    indexName: '.workflows-migrate-executions-observability',
+    mappings: {
+      properties: {
+        '@timestamp': mappings.date(),
+        duration: mappings.long(),
+        workflowExecutionDuration: mappings.long(),
+        stepExecutionDuration: mappings.long(),
+        deleteDuration: mappings.long(),
+      },
+    },
     logger,
   });
 }

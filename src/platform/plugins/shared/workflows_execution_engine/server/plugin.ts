@@ -62,6 +62,8 @@ import type {
 } from './workflow_task_manager/types';
 import { WorkflowTaskManager } from './workflow_task_manager/workflow_task_manager';
 import { createIndexes, WORKFLOWS_EXECUTION_STATE_INDEX } from '../common';
+import { createIndex } from '@kbn/core/packages/saved-objects/migration-server-internal';
+import { createIndexWithMappings } from '../common/create_index';
 
 type SetupDependencies = Pick<ContextDependencies, 'cloudSetup'>;
 
@@ -273,21 +275,41 @@ export class WorkflowsExecutionEnginePlugin
                 );
                 const now = new Date();
 
-                await Promise.all([
-                  workflowExecutionRepository.reindexCompletedWorkflowExecutionsFrom({
-                    sourceIndex: WORKFLOWS_EXECUTION_STATE_INDEX,
-                    olderThan: now,
-                  }),
-                  stepExecutionRepository.reindexCompletedStepExecutionsFrom({
-                    sourceIndex: WORKFLOWS_EXECUTION_STATE_INDEX,
-                    olderThan: now,
-                  }),
+                const [workflowsMigration, stepsMigration] = await Promise.all([
+                  workflowExecutionRepository
+                    .reindexCompletedWorkflowExecutionsFrom({
+                      sourceIndex: WORKFLOWS_EXECUTION_STATE_INDEX,
+                      olderThan: now,
+                    })
+                    .then((response) => ({ response, duration: Date.now() - now.getTime() })),
+                  stepExecutionRepository
+                    .reindexCompletedStepExecutionsFrom({
+                      sourceIndex: WORKFLOWS_EXECUTION_STATE_INDEX,
+                      olderThan: now,
+                    })
+                    .then((response) => ({ response, duration: Date.now() - now.getTime() })),
                 ]);
 
                 const intervalMs = parseDuration(config.executionHistory.lifecycleInterval);
                 // Cleanup threshold is 2x the interval to ensure all data is migrated before cleanup
                 const cleanupOlderThan = new Date(now.getTime() - intervalMs * 2);
+
+                const nowDelete = Date.now();
                 await executionStateRepository.deleteTerminalExecutions(cleanupOlderThan);
+
+                coreStart.elasticsearch.client.asInternalUser.index({
+                  index: '.workflows-migrate-executions-observability',
+                  body: {
+                    type: 'workflow:migrate-executions',
+                    '@timestamp': now.toISOString(),
+                    duration: Date.now() - now.getTime(),
+                    workflowExecutionDuration: workflowsMigration.duration,
+                    stepExecutionDuration: stepsMigration.duration,
+                    deleteDuration: Date.now() - nowDelete,
+                    totalWorkflows: workflowsMigration.response.total,
+                    totalSteps: stepsMigration.response.total,
+                  },
+                });
                 logger.debug('Completed workflow/step execution migration and cleanup');
               } catch (error) {
                 logger.error(`Error during workflow/step execution migration: ${error}`);
@@ -443,6 +465,7 @@ export class WorkflowsExecutionEnginePlugin
                 createdAt: workflowCreatedAt.toISOString(),
                 executedBy,
                 triggeredBy: 'scheduled',
+                type: 'workflow',
                 // Store queue delay metrics for observability (only if enabled in config)
                 ...(this.config.collectQueueMetrics
                   ? {

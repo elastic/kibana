@@ -11,6 +11,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import { type EsWorkflowStepExecution, TerminalExecutionStatuses } from '@kbn/workflows';
 import type { StepExecutionDataStreamClient } from './data_stream';
 import { WORKFLOWS_STEP_EXECUTIONS_DATA_STREAM } from './data_stream';
+import { ReindexResponse } from '@elastic/elasticsearch/lib/api/types';
 
 export class StepExecutionRepository {
   constructor(
@@ -62,10 +63,10 @@ export class StepExecutionRepository {
   public async reindexCompletedStepExecutionsFrom(params: {
     sourceIndex: string;
     olderThan: Date;
-  }): Promise<void> {
+  }): Promise<ReindexResponse> {
     const { sourceIndex, olderThan } = params;
 
-    await this.esClient.reindex({
+    const response = await this.esClient.reindex({
       // wait_for_completion: false,
       wait_for_completion: true,
       conflicts: 'proceed',
@@ -86,5 +87,7 @@ export class StepExecutionRepository {
         source: "ctx._source['@timestamp'] = ctx._source.createdAt",
       },
     });
+
+    return response;
   }
 }

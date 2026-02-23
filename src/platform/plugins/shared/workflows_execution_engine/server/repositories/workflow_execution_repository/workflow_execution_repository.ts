@@ -12,6 +12,7 @@ import type { EsWorkflowExecution } from '@kbn/workflows';
 import { TerminalExecutionStatuses } from '@kbn/workflows';
 import { WORKFLOWS_EXECUTIONS_DATA_STREAM } from './constants';
 import type { WorkflowExecutionDataStreamClient } from './data_stream';
+import { ReindexResponse } from '@elastic/elasticsearch/lib/api/types';
 
 export class WorkflowExecutionRepository {
   constructor(
@@ -77,9 +78,9 @@ export class WorkflowExecutionRepository {
   public async reindexCompletedWorkflowExecutionsFrom(params: {
     sourceIndex: string;
     olderThan: Date;
-  }): Promise<void> {
+  }): Promise<ReindexResponse> {
     const { sourceIndex, olderThan } = params;
-    await this.esClient.reindex({
+    const response = await this.esClient.reindex({
       // wait_for_completion: false,
       wait_for_completion: true,
       conflicts: 'proceed',
@@ -100,5 +101,7 @@ export class WorkflowExecutionRepository {
         source: "ctx._source['@timestamp'] = ctx._source.createdAt",
       },
     });
+
+    return response;
   }
 }
