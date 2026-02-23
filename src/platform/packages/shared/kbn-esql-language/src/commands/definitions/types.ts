@@ -209,6 +209,7 @@ export enum PromQLFunctionDefinitionTypes {
   SCALAR = 'scalar',
   OPERATOR = 'operator',
   LABEL_MATCHING_OPERATOR = 'label_matching_operator',
+  SCALAR_CONVERSION = 'scalar_conversion',
 }
 
 export type PromQLFunctionParamType = 'instant_vector' | 'range_vector' | 'scalar' | 'string';
@@ -367,29 +368,15 @@ export interface ValidationErrors {
     message: string;
     type: { value: string; availableFields: string };
   };
-  promqlMissingParam: {
+  promqlInvalidParam: {
     message: string;
-    type: { param: string };
-  };
-  promqlMissingParamValue: {
-    message: string;
-    type: { param: string };
-  };
-  promqlInvalidDateParam: {
-    message: string;
-    type: { param: string };
-  };
-  promqlInvalidStepParam: {
-    message: string;
-    type: {};
+    type: {
+      reason: string;
+    };
   };
   promqlMutuallyExclusiveParams: {
     message: string;
     type: { param1: string; param2: string };
-  };
-  promqlInvalidBucketsParam: {
-    message: string;
-    type: {};
   };
   promqlMissingQuery: {
     message: string;
