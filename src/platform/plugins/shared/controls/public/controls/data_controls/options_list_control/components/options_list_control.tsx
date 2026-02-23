@@ -60,7 +60,10 @@ const optionListControlStyles = {
     css({
       fontWeight: `${euiTheme.font.weight.regular} !important` as 'normal',
       color: `${euiTheme.colors.textSubdued} !important`,
-      padding: `0 ${euiTheme.size.s}`,
+      padding: `0`,
+      '&.optionsList--pinned': {
+        padding: `0 ${euiTheme.size.s}`,
+      },
       blockSize: '100% !important',
       boxShadow: 'none !important',
       '&:hover:not(:focus)': {
@@ -78,6 +81,7 @@ const optionListControlStyles = {
   }),
   filterGroup: css`
     width: 100%;
+    height: 100%;
   `,
 };
 
@@ -229,10 +233,8 @@ export const OptionsListControl = ({
 
   return (
     <ConditionalLabelWrapper label={label} isPinned={isPinned}>
-      <EuiFilterGroup
+      <div
         className={'kbnGridLayout--hideDragHandle'}
-        fullWidth
-        compressed={isCompressed(componentApi)}
         css={optionListControlStyles.filterGroup}
         data-control-id={componentApi.uuid}
         data-shared-item
@@ -257,7 +259,7 @@ export const OptionsListControl = ({
         >
           <OptionsListPopover disableMultiValueEmptySelection={disableMultiValueEmptySelection} />
         </EuiInputPopover>
-      </EuiFilterGroup>
+      </div>
     </ConditionalLabelWrapper>
   );
 };
