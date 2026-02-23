@@ -73,5 +73,4 @@ describe('useSwitchModesTour', () => {
     expect(hook.result.current).not.toBeNull();
     expect(React.isValidElement(hook.result.current)).toBe(true);
   });
-
 });
