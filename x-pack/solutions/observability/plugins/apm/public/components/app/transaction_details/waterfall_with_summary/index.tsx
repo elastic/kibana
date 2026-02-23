@@ -25,7 +25,7 @@ import { TransactionTabs } from './transaction_tabs';
 import type { Environment } from '../../../../../common/environment_rt';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import type { WaterfallFetchResult } from '../use_waterfall_fetcher';
-import { OpenInDiscoverButton } from '../../../shared/links/discover_links/open_in_discover_button';
+import { OpenInDiscover } from '../../../shared/links/discover_links/open_in_discover';
 
 interface Props<TSample extends {}> {
   waterfallFetchResult: WaterfallFetchResult['waterfall'];
@@ -43,6 +43,9 @@ interface Props<TSample extends {}> {
   selectedSample?: TSample | null;
   logsTableConfig?: SavedSearchTableConfig;
   onLogsTableConfigChange?: (config: SavedSearchTableConfig) => void;
+  rangeFrom: string;
+  rangeTo: string;
+  traceId?: string;
 }
 
 export function WaterfallWithSummary<TSample extends {}>({
@@ -61,6 +64,9 @@ export function WaterfallWithSummary<TSample extends {}>({
   selectedSample,
   logsTableConfig,
   onLogsTableConfigChange,
+  rangeFrom,
+  rangeTo,
+  traceId,
 }: Props<TSample>) {
   const [sampleActivePage, setSampleActivePage] = useState(0);
 
@@ -153,7 +159,21 @@ export function WaterfallWithSummary<TSample extends {}>({
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <OpenInDiscoverButton dataTestSubj="apmWaterfallOpenInDiscoverButton" />
+                <OpenInDiscover
+                  variant="button"
+                  dataTestSubj="apmWaterfallOpenInDiscoverButton"
+                  indexType="traces"
+                  rangeFrom={rangeFrom}
+                  rangeTo={rangeTo}
+                  label={i18n.translate(
+                    'xpack.apm.transactionDetails.openFullTraceInDiscover.label',
+                    { defaultMessage: 'Open full trace in Discover' }
+                  )}
+                  queryParams={{
+                    traceId,
+                    sortDirection: 'ASC',
+                  }}
+                />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <TransactionActionMenu isLoading={isLoading} transaction={entryTransaction} />

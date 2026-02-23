@@ -12,6 +12,8 @@ import type { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { JOB_STATUS } from '@kbn/reporting-common';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 import { createMockReportingCore } from '../../../test_helpers';
+import type { ReportingUser } from '../../../types';
+
 import { jobsQueryFactory } from './jobs_query';
 
 const fakeRawRequest = {
@@ -20,6 +22,8 @@ const fakeRawRequest = {
   },
   path: '/',
 } as unknown as KibanaRequest;
+
+const mockUser = { username: 'somebody' } as ReportingUser;
 
 describe('jobsQuery', () => {
   let client: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
@@ -44,8 +48,8 @@ describe('jobsQuery', () => {
     });
 
     it('should pass parameters in the request body', async () => {
-      await jobsQuery.list(fakeRawRequest, { username: 'somebody' }, 1, 10, ['id1', 'id2']);
-      await jobsQuery.list(fakeRawRequest, { username: 'somebody' }, 1, 10, null);
+      await jobsQuery.list(fakeRawRequest, mockUser, 1, 10, ['id1', 'id2']);
+      await jobsQuery.list(fakeRawRequest, mockUser, 1, 10, null);
 
       expect(client.search).toHaveBeenCalledTimes(2);
 
@@ -88,9 +92,7 @@ describe('jobsQuery', () => {
     });
 
     it('should return reports list', async () => {
-      await expect(
-        jobsQuery.list(fakeRawRequest, { username: 'somebody' }, 0, 10, [])
-      ).resolves.toEqual(
+      await expect(jobsQuery.list(fakeRawRequest, mockUser, 0, 10, [])).resolves.toEqual(
         expect.arrayContaining([
           expect.objectContaining({ id: 'id1', jobtype: 'pdf' }),
           expect.objectContaining({ id: 'id2', jobtype: 'csv' }),
@@ -101,9 +103,7 @@ describe('jobsQuery', () => {
     it('should return an empty array when there are no hits', async () => {
       client.search.mockResponse({} as Awaited<ReturnType<ElasticsearchClient['search']>>);
 
-      await expect(
-        jobsQuery.list(fakeRawRequest, { username: 'somebody' }, 0, 10, [])
-      ).resolves.toHaveLength(0);
+      await expect(jobsQuery.list(fakeRawRequest, mockUser, 0, 10, [])).resolves.toHaveLength(0);
     });
 
     it('should reject if the report source is missing', async () => {
@@ -111,9 +111,9 @@ describe('jobsQuery', () => {
         set<Awaited<ReturnType<ElasticsearchClient['search']>>>({}, 'hits.hits', [{}])
       );
 
-      await expect(
-        jobsQuery.list(fakeRawRequest, { username: 'somebody' }, 0, 10, [])
-      ).rejects.toBeInstanceOf(Error);
+      await expect(jobsQuery.list(fakeRawRequest, mockUser, 0, 10, [])).rejects.toBeInstanceOf(
+        Error
+      );
     });
   });
 
@@ -123,7 +123,7 @@ describe('jobsQuery', () => {
     });
 
     it('should pass parameters in the request body', async () => {
-      await jobsQuery.count({ username: 'somebody' });
+      await jobsQuery.count(mockUser);
 
       expect(client.count).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -137,7 +137,7 @@ describe('jobsQuery', () => {
     });
 
     it('should return reports number', async () => {
-      await expect(jobsQuery.count({ username: 'somebody' })).resolves.toBe(10);
+      await expect(jobsQuery.count(mockUser)).resolves.toBe(10);
     });
   });
 
@@ -151,7 +151,7 @@ describe('jobsQuery', () => {
     });
 
     it('should pass parameters in the request body', async () => {
-      await jobsQuery.get({ username: 'somebody' }, 'id1');
+      await jobsQuery.get(mockUser, 'id1');
 
       expect(client.search).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -165,7 +165,7 @@ describe('jobsQuery', () => {
     });
 
     it('should return the report', async () => {
-      await expect(jobsQuery.get({ username: 'somebody' }, 'id1')).resolves.toEqual(
+      await expect(jobsQuery.get(mockUser, 'id1')).resolves.toEqual(
         expect.objectContaining({ id: 'id1', jobtype: 'pdf' })
       );
     });
@@ -173,11 +173,11 @@ describe('jobsQuery', () => {
     it('should return undefined when there is no report', async () => {
       client.search.mockResponse({} as Awaited<ReturnType<ElasticsearchClient['search']>>);
 
-      await expect(jobsQuery.get({ username: 'somebody' }, 'id1')).resolves.toBeUndefined();
+      await expect(jobsQuery.get(mockUser, 'id1')).resolves.toBeUndefined();
     });
 
     it('should return undefined when id is empty', async () => {
-      await expect(jobsQuery.get({ username: 'somebody' }, '')).resolves.toBeUndefined();
+      await expect(jobsQuery.get(mockUser, '')).resolves.toBeUndefined();
       expect(client.search).not.toHaveBeenCalled();
     });
   });

@@ -15,12 +15,8 @@ import type { ToolCallResultTransformer } from './create_result_transformer';
 import type { ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
-import type {
-  ProcessedAttachment,
-  ProcessedConversation,
-  ProcessedConversationRound,
-  ProcessedRoundInput,
-} from './prepare_conversation';
+import type { ProcessedAttachment, ProcessedRoundInput } from '@kbn/agent-builder-server';
+import type { ProcessedConversation, ProcessedConversationRound } from './prepare_conversation';
 
 describe('convertPreviousRounds', () => {
   const now = new Date().toISOString();

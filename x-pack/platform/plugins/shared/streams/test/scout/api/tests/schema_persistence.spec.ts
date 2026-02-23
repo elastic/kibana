@@ -6,23 +6,31 @@
  */
 
 import { expect } from '@kbn/scout/api';
+import { tags } from '@kbn/scout';
 import { streamsApiTest as apiTest } from '../fixtures';
 import { PUBLIC_API_HEADERS } from '../fixtures/constants';
 
 apiTest.describe(
   'Stream schema - field mapping persistence API (CRUD)',
-  { tag: ['@ess', '@svlOblt'] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     // Stream names must be exactly one level deep when forking from 'logs'
     const streamNamePrefix = 'logs.sp';
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    type ApiClient = any;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    type CookieHeader = any;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    type StreamResponse = any;
+
     // Helper to create a stream and get its definition
     async function createAndGetStream(
-      apiClient: any,
-      cookieHeader: any,
+      apiClient: ApiClient,
+      cookieHeader: CookieHeader,
       streamName: string,
       condition: { field: string; eq: string }
-    ): Promise<{ success: boolean; stream?: any; error?: string }> {
+    ): Promise<{ success: boolean; stream?: StreamResponse; error?: string }> {
       const forkResponse = await apiClient.post('api/streams/logs/_fork', {
         headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
         body: {
@@ -58,7 +66,7 @@ apiTest.describe(
     }
 
     // Helper to extract writeable ingest config
-    function getWriteableIngest(streamResponse: any): any {
+    function getWriteableIngest(streamResponse: StreamResponse): StreamResponse {
       const ingest = streamResponse.stream.ingest;
       const { updated_at: _, ...processingWithoutUpdatedAt } = ingest.processing || {};
       return {
