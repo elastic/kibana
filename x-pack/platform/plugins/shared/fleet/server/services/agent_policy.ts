@@ -123,7 +123,11 @@ import {
 
 import { bulkInstallPackages } from './epm/packages';
 import { getAgentsByKuery } from './agents';
-import { getPackagePolicySavedObjectType, packagePolicyService } from './package_policy';
+import {
+  getPackagePolicySavedObjectType,
+  packagePolicyService,
+  getCompiledVersionsForAgentPolicy,
+} from './package_policy';
 import { incrementPackagePolicyCopyName } from './package_policies';
 import { outputService } from './output';
 import { agentPolicyUpdateEventHandler } from './agent_policy_update';
@@ -143,7 +147,10 @@ import { isSpaceAwarenessEnabled } from './spaces/helpers';
 import { agentlessAgentService } from './agents/agentless_agent';
 import { scheduleDeployAgentPoliciesTask } from './agent_policies/deploy_agent_policies_task';
 import { getSpaceForAgentPolicy, getSpaceForAgentPolicySO } from './spaces/helpers';
-import { getVersionSpecificPolicies } from './utils/version_specific_policies';
+import {
+  getVersionSpecificPolicies,
+  getAgentVersionsForVersionSpecificPolicies,
+} from './utils/version_specific_policies';
 import { scheduleReassignAgentsToVersionSpecificPoliciesTask } from './agent_policies/reassign_agents_to_version_specific_policies_task';
 
 function normalizeKuery(savedObjectType: string, kuery: string) {
@@ -1733,11 +1740,23 @@ class AgentPolicyService {
         appContextService.getExperimentalFeatures().enableVersionSpecificPolicies &&
         policy.has_agent_version_conditions
       ) {
+        let agentVersionsToUse = options?.agentVersions;
+        if (!agentVersionsToUse) {
+          // Create/update path: merge default common versions with any extra versions already
+          // compiled in inputs_for_versions (e.g. 9.1 from an enrolled agent). Without this,
+          // agents on non-default versions would not receive a new .fleet-policies document
+          // when the agent policy is updated, and would be stuck on the old revision.
+          const [defaultVersions, extraVersions] = await Promise.all([
+            getAgentVersionsForVersionSpecificPolicies(),
+            getCompiledVersionsForAgentPolicy(soClient, policy.id),
+          ]);
+          agentVersionsToUse = [...new Set([...defaultVersions, ...extraVersions])];
+        }
         const versionSpecificPolicies = await getVersionSpecificPolicies(
           soClient,
           fleetServerPolicy,
           fullPolicy,
-          options?.agentVersions
+          agentVersionsToUse
         );
         fleetServerPolicies.push(...versionSpecificPolicies);
       }
