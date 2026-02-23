@@ -6916,10 +6916,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/flyout-ui@link:src/platform/packages/shared/kbn-flyout-ui":
-  version "0.0.0"
-  uid ""
-
 "@kbn/foo-plugin@link:x-pack/platform/test/ui_capabilities/common/plugins/foo_plugin":
   version "0.0.0"
   uid ""
@@ -8508,10 +8504,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/security-solution-common@link:src/platform/packages/shared/kbn-security-solution-common":
-  version "0.0.0"
-  uid ""
-
 "@kbn/security-solution-connectors@link:x-pack/solutions/security/packages/connectors":
   version "0.0.0"
   uid ""
@@ -8529,10 +8521,6 @@
   uid ""
 
 "@kbn/security-solution-fixtures-plugin@link:x-pack/platform/test/cases_api_integration/common/plugins/security_solution":
-  version "0.0.0"
-  uid ""
-
-"@kbn/security-solution-flyout@link:src/platform/packages/shared/kbn-security-solution-flyout":
   version "0.0.0"
   uid ""
 
