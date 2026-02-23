@@ -35,7 +35,7 @@ export const SuggestStreamPartitionsPrompt = createPrompt({
     tools: {
       get_stream_features: {
         description:
-          'Fetches extracted stream features for this stream. Features provide context about technologies, services, infrastructure, and schema patterns detected in the logs. Use this tool to understand what systems are present before designing partitions. Supports optional filtering by type, confidence, and limit.',
+          'Fetches entity features for this stream. Entity features identify services, applications, and logical components detected in the logs (e.g., API gateways, databases, microservices). Use this tool to understand what entities are present before designing partitions. Supports optional filtering by confidence and limit.',
         schema: {
           type: 'object',
           properties: {

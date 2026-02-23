@@ -8,13 +8,7 @@
 import { type Feature } from '@kbn/streams-schema';
 import { pick } from 'lodash';
 
-export const PARTITION_FEATURE_TOOL_TYPES = [
-  'infrastructure',
-  'technology',
-  'dependency',
-  'entity',
-  'schema',
-] as const;
+export const PARTITION_FEATURE_TOOL_TYPES = ['entity'] as const;
 
 export type PartitionFeatureToolType = (typeof PARTITION_FEATURE_TOOL_TYPES)[number];
 

@@ -120,14 +120,14 @@ describe('partitionStream features_tool', () => {
   describe('getFeatureQueryFromToolArgs', () => {
     it('should parse valid tool arguments', () => {
       const args = {
-        feature_types: ['technology', 'entity'],
+        feature_types: ['entity'],
         min_confidence: 80,
         limit: 10,
       };
 
       const result = getFeatureQueryFromToolArgs(args);
 
-      expect(result.featureTypes).toEqual(['technology', 'entity']);
+      expect(result.featureTypes).toEqual(['entity']);
       expect(result.minConfidence).toBe(80);
       expect(result.limit).toBe(10);
     });
@@ -153,12 +153,12 @@ describe('partitionStream features_tool', () => {
 
       const result = getFeatureQueryFromToolArgs(args);
 
-      expect(result.featureTypes).toEqual(['technology', 'entity']);
+      expect(result.featureTypes).toEqual(['entity']);
     });
 
     it('should return undefined for feature_types when no valid types remain', () => {
       const args = {
-        feature_types: ['invalid_type', 'another_invalid'],
+        feature_types: ['technology', 'infrastructure', 'invalid_type'],
       };
 
       const result = getFeatureQueryFromToolArgs(args);
@@ -193,23 +193,19 @@ describe('partitionStream features_tool', () => {
     });
 
     it('should deduplicate feature types', () => {
-      const result = resolveFeatureTypeFilters(['technology', 'entity', 'technology']);
-      expect(result).toEqual(['technology', 'entity']);
+      const result = resolveFeatureTypeFilters(['entity', 'entity']);
+      expect(result).toEqual(['entity']);
     });
 
     it('should pass through valid feature types', () => {
-      const result = resolveFeatureTypeFilters(['infrastructure', 'dependency', 'schema']);
-      expect(result).toEqual(['infrastructure', 'dependency', 'schema']);
+      const result = resolveFeatureTypeFilters(['entity']);
+      expect(result).toEqual(['entity']);
     });
   });
 
   describe('PARTITION_FEATURE_TOOL_TYPES', () => {
-    it('should include the expected feature types for partitioning', () => {
-      expect(PARTITION_FEATURE_TOOL_TYPES).toContain('infrastructure');
-      expect(PARTITION_FEATURE_TOOL_TYPES).toContain('technology');
-      expect(PARTITION_FEATURE_TOOL_TYPES).toContain('dependency');
-      expect(PARTITION_FEATURE_TOOL_TYPES).toContain('entity');
-      expect(PARTITION_FEATURE_TOOL_TYPES).toContain('schema');
+    it('should only include entity type for partitioning', () => {
+      expect(PARTITION_FEATURE_TOOL_TYPES).toEqual(['entity']);
     });
   });
 });
