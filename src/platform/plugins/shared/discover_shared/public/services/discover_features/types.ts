@@ -9,19 +9,19 @@
 
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { FunctionComponent, PropsWithChildren } from 'react';
+import type React from 'react';
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import type { Query, TimeRange } from '@kbn/es-query';
 import type {
-  SpanLinks,
   ErrorsByTraceId,
-  TraceRootSpan,
-  UnifiedSpanDocument,
   FocusedTraceWaterfallProps,
   FullTraceWaterfallProps,
+  SpanLinks,
+  TraceRootSpan,
+  UnifiedSpanDocument,
 } from '@kbn/apm-types';
 import type { HistogramItem, ProcessorEvent } from '@kbn/apm-types-shared';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type React from 'react';
 import type { IndicatorType } from '@kbn/slo-schema';
 import type { FeaturesRegistry } from '../../../common';
 
@@ -119,9 +119,15 @@ export interface SecuritySolutionAppWrapperFeature {
   getWrapper: () => Promise<() => FunctionComponent<PropsWithChildren<{}>>>;
 }
 
+export interface SecuritySolutionAlertFlyoutOverviewTabFeature {
+  id: 'security-solution-alert-flyout-overview-tab';
+  render: (hit: DataTableRecord) => JSX.Element;
+}
+
 export type SecuritySolutionFeature =
   | SecuritySolutionCellRendererFeature
-  | SecuritySolutionAppWrapperFeature;
+  | SecuritySolutionAppWrapperFeature
+  | SecuritySolutionAlertFlyoutOverviewTabFeature;
 
 /** ****************************************************************************************/
 
