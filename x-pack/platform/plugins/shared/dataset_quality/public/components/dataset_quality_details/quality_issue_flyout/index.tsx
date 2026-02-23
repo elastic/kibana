@@ -35,6 +35,7 @@ import {
 import {
   useDatasetDetailsRedirectLinkTelemetry,
   useDatasetQualityDetailsState,
+  useEsqlRedirectLink,
   useQualityIssues,
   useRedirectLink,
 } from '../../../hooks';
@@ -67,27 +68,37 @@ export default function QualityIssueFlyout() {
   const isUserViewingTheIssueOnLatestBackingIndex =
     dataStreamSettings?.lastBackingIndexName === fieldList?.indexFieldWasLastPresentIn;
 
-  const { sendTelemetry } = useDatasetDetailsRedirectLinkTelemetry({
-    query: { language: 'kuery', query: `${_IGNORED}: ${expandedDegradedField}` },
+  const isDegradedType = expandedDegradedField && expandedDegradedField.type === 'degraded';
+
+  const esqlQuery = isDegradedType
+    ? `FROM ${datasetDetails.rawName} METADATA ${_IGNORED} | WHERE ${_IGNORED} IS NOT NULL`
+    : '';
+
+  const { sendTelemetry: sendDegradedTelemetry } = useDatasetDetailsRedirectLinkTelemetry({
+    query: { esql: esqlQuery },
     navigationSource: NavigationSource.DegradedFieldFlyoutHeader,
   });
 
-  const redirectLinkProps = useRedirectLink({
+  const { sendTelemetry: sendFailedTelemetry } = useDatasetDetailsRedirectLinkTelemetry({
+    query: { language: 'kuery', query: '' },
+    navigationSource: NavigationSource.DegradedFieldFlyoutHeader,
+  });
+
+  const degradedRedirectLinkProps = useEsqlRedirectLink({
+    esqlQuery,
+    timeRangeConfig: timeRange,
+    sendTelemetry: sendDegradedTelemetry,
+  });
+
+  const failedRedirectLinkProps = useRedirectLink({
     dataStreamStat: datasetDetails.rawName,
     timeRangeConfig: timeRange,
-    query: {
-      language: 'kuery',
-      query:
-        expandedDegradedField && expandedDegradedField.type === 'degraded'
-          ? `${_IGNORED}: ${expandedDegradedField.name}`
-          : '',
-    },
-    selector:
-      expandedDegradedField && expandedDegradedField.type === 'failed'
-        ? FAILURE_STORE_SELECTOR
-        : undefined,
-    sendTelemetry,
+    query: { language: 'kuery', query: '' },
+    selector: FAILURE_STORE_SELECTOR,
+    sendTelemetry: sendFailedTelemetry,
   });
+
+  const redirectLinkProps = isDegradedType ? degradedRedirectLinkProps : failedRedirectLinkProps;
 
   return (
     <EuiFlyout
