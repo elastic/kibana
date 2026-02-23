@@ -9,7 +9,7 @@ applies_to:
 The user activity service records user actions in Kibana by writing structured log events. It helps you keep a durable record of *what happened*, *to what object*, and *by whom*.
 
 :::::{note}
-This feature is currently available only in **self-managed** deployments. It is not available in Elastic Cloud Hosted or Elastic Cloud Serverless.
+This feature is currently available only in **self-hosted** deployments. It is not available in Elastic Cloud Hosted or Elastic Cloud Serverless.
 :::::
 
 :::::{note}

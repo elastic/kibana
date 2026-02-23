@@ -42,6 +42,8 @@ export const userActivityActions = {
 
 When an action is removed, move it from `userActivityActions` to `removedUserActivityActions` and add `versionRemovedAt`.
 
+After adding an action, regenerate the docs snippet by running `node scripts/generate user-activity-actions-docs`. This updates the action list shown in the docs.
+
 ## Configuration
 
 Configure the service in `kibana.yml`:
