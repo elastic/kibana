@@ -53,7 +53,7 @@ describe('UiamAPIKeys', () => {
       logger,
       license: mockLicense,
       uiam: mockUiam,
-      elasticsearchHost: 'https://es.example.com:9200',
+      elasticsearchPublicBaseUrl: 'https://es.example.com',
     });
   });
 
@@ -310,16 +310,16 @@ describe('UiamAPIKeys', () => {
       expect(mockUiam.convertApiKeys).not.toHaveBeenCalled();
     });
 
-    it('throws when elasticsearchHost is not configured', async () => {
-      const uiamApiKeysNoHost = new UiamAPIKeys({
+    it('throws when elasticsearchPublicBaseUrl is not configured', async () => {
+      const uiamApiKeysNoUrl = new UiamAPIKeys({
         logger,
         license: mockLicense,
         uiam: mockUiam,
       });
 
       await expect(
-        uiamApiKeysNoHost.convert({ keys: [{ key: 'es-api-key' }] })
-      ).rejects.toThrow('Cannot convert API keys: elasticsearch.hosts is not configured');
+        uiamApiKeysNoUrl.convert({ keys: [{ key: 'es-api-key' }] })
+      ).rejects.toThrow('Cannot convert API keys: elasticsearch.publicBaseUrl is not configured');
 
       expect(mockUiam.convertApiKeys).not.toHaveBeenCalled();
     });
@@ -348,13 +348,13 @@ describe('UiamAPIKeys', () => {
 
       expect(result).toEqual(mockResponse);
       expect(mockUiam.convertApiKeys).toHaveBeenCalledWith([
-        { type: 'elasticsearch', key: 'es-api-key-base64', endpoint: 'https://es.example.com:9200' },
+        { type: 'elasticsearch', key: 'es-api-key-base64', endpoint: 'https://es.example.com' },
       ]);
       expect(logger.debug).toHaveBeenCalledWith('Trying to convert 1 API key(s)');
       expect(logger.debug).toHaveBeenCalledWith('API key(s) converted successfully');
     });
 
-    it('injects the same elasticsearch host endpoint for all keys', async () => {
+    it('injects the same publicBaseUrl endpoint for all keys', async () => {
       const mockResponse = {
         results: [
           { status: 'success' as const, id: 'k1', key: 'essu_k1', description: 'key 1', organization_id: 'org-1', internal: true, role_assignments: {}, creation_date: '2026-01-01T00:00:00Z', expiration_date: null },
@@ -369,8 +369,8 @@ describe('UiamAPIKeys', () => {
 
       expect(result).toEqual(mockResponse);
       expect(mockUiam.convertApiKeys).toHaveBeenCalledWith([
-        { type: 'elasticsearch', key: 'valid-key', endpoint: 'https://es.example.com:9200' },
-        { type: 'elasticsearch', key: 'invalid-key', endpoint: 'https://es.example.com:9200' },
+        { type: 'elasticsearch', key: 'valid-key', endpoint: 'https://es.example.com' },
+        { type: 'elasticsearch', key: 'invalid-key', endpoint: 'https://es.example.com' },
       ]);
     });
 

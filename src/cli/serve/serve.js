@@ -475,6 +475,12 @@ function tryConfigureServerlessSamlProvider(rawConfig, opts, extraCliOptions) {
     if (!_.has(rawConfig, 'xpack.cloud.projects_url')) {
       lodashSet(rawConfig, 'xpack.cloud.projects_url', '');
     }
+
+    // The UIAM service needs a network-accessible ES URL to validate API keys during conversion.
+    // In the local Docker setup, ES node "es01" is reachable on the "elastic" Docker network.
+    if (!_.has(rawConfig, 'elasticsearch.publicBaseUrl')) {
+      lodashSet(rawConfig, 'elasticsearch.publicBaseUrl', 'https://es01:9200');
+    }
   }
 
   return true;
