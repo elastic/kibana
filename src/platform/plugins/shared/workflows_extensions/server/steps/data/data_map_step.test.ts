@@ -579,6 +579,27 @@ describe('dataMapStepDefinition', () => {
       expect(result.output).toEqual([{ id: '1', meta: [] }]);
     });
 
+    it('should return empty array when $map items resolves to null', async () => {
+      const config = {
+        items: [{ id: '1', meta: null }],
+      };
+      const input = {
+        fields: {
+          id: '{{ item.id }}',
+          meta: {
+            $map: { items: '{{ item.meta }}', item: 'm' },
+            x: '{{ m.x }}',
+          },
+        },
+      };
+
+      const context = createMockContext(config, input);
+      const result = await dataMapStepDefinition.handler(context);
+
+      expect(result.error).toBeUndefined();
+      expect(result.output).toEqual([{ id: '1', meta: [] }]);
+    });
+
     it('should treat invalid $map value as literal nesting', async () => {
       const config = {
         items: [{ id: '1', tags: [{ label: 'a' }] }],

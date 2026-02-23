@@ -51,10 +51,6 @@ export interface MapDirectiveValue {
  *
  * Objects without `$map` are literal nesting: rendered with the current context.
  */
-// export type FieldsNode = { $map?: MapDirectiveValue } & {
-//   [key: string]: string | FieldsNode;
-// };
-
 export type FieldsNode =
   | ({
       [MAP_DIRECTIVE]?: MapDirectiveValue;

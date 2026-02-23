@@ -17,7 +17,7 @@ import { createServerStepDefinition } from '../../step_registry/types';
 
 const MAX_RECURSION_DEPTH = 10;
 
-export interface ProcessFieldsOptions {
+interface ProcessFieldsOptions {
   renderTemplate: <T>(value: T, additionalContext?: Record<string, unknown>) => T;
   bindings: Record<string, unknown>;
   depth?: number;
