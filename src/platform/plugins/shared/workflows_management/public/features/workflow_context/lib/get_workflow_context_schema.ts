@@ -12,6 +12,7 @@ import type { WorkflowOutput, WorkflowYaml } from '@kbn/workflows';
 import {
   AlertEventPropsSchema,
   BaseEventSchema,
+  buildZodSchemaFromFields,
   DynamicWorkflowContextSchema,
   isTriggerType,
 } from '@kbn/workflows';
@@ -111,13 +112,10 @@ function outputToSchema(field: WorkflowOutput): z.ZodType {
 function buildOutputsSchema(
   outputs: WorkflowOutput[] | undefined
 ): z.ZodObject<Record<string, z.ZodType>> {
-  const outputsObject: Record<string, z.ZodType> = {};
-  if (outputs && Array.isArray(outputs)) {
-    for (const output of outputs) {
-      outputsObject[output.name] = outputToSchema(output);
-    }
+  if (!outputs?.length) {
+    return z.object({});
   }
-  return Object.keys(outputsObject).length > 0 ? z.object(outputsObject) : z.object({});
+  return buildZodSchemaFromFields(outputs, { optionalIfNotRequired: false });
 }
 
 export function getWorkflowContextSchema(

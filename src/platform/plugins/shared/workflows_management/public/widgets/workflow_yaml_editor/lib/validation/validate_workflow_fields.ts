@@ -8,7 +8,7 @@
  */
 
 import type { LegacyWorkflowInput, WorkflowOutput } from '@kbn/workflows';
-import { z } from '@kbn/zod/v4';
+import { buildZodSchemaFromFields } from '@kbn/workflows';
 
 // Union type for fields that can be inputs or outputs
 type WorkflowField = LegacyWorkflowInput | WorkflowOutput;
@@ -20,55 +20,11 @@ export interface WorkflowFieldValidationError {
 }
 
 /**
- * Creates a Zod validator for workflow fields (inputs or outputs)
- * This function is shared between input and output validation
+ * Creates a Zod validator for workflow fields (inputs or outputs).
+ * Uses shared buildZodSchemaFromFields from @kbn/workflows.
  */
 export function makeWorkflowFieldsValidator(fields: WorkflowField[]) {
-  return z.object(
-    fields.reduce((acc, field) => {
-      switch (field.type) {
-        case 'string':
-          acc[field.name] = field.required ? z.string() : z.string().optional();
-          break;
-        case 'number':
-          acc[field.name] = field.required ? z.number() : z.number().optional();
-          break;
-        case 'boolean':
-          acc[field.name] = field.required ? z.boolean() : z.boolean().optional();
-          break;
-        case 'choice':
-          acc[field.name] = field.required
-            ? z.enum(field.options as [string, ...string[]])
-            : z.enum(field.options as [string, ...string[]]).optional();
-          break;
-        case 'array': {
-          const arraySchemas = [z.array(z.string()), z.array(z.number()), z.array(z.boolean())];
-          const { minItems, maxItems } = field as WorkflowField & {
-            minItems?: number;
-            maxItems?: number;
-          };
-          const applyConstraints = (
-            schema: z.ZodArray<z.ZodString | z.ZodNumber | z.ZodBoolean>
-          ) => {
-            let s = schema;
-            if (minItems != null) s = s.min(minItems);
-            if (maxItems != null) s = s.max(maxItems);
-            return s;
-          };
-          const arr = z.union(
-            arraySchemas.map(applyConstraints) as [
-              z.ZodArray<z.ZodString>,
-              z.ZodArray<z.ZodNumber>,
-              z.ZodArray<z.ZodBoolean>
-            ]
-          );
-          acc[field.name] = field.required ? arr : arr.optional();
-          break;
-        }
-      }
-      return acc;
-    }, {} as Record<string, z.ZodType>)
-  );
+  return buildZodSchemaFromFields(fields, { optionalIfNotRequired: true });
 }
 
 /**
@@ -117,7 +73,7 @@ export function validateWorkflowFields(
       let message = issue.message;
 
       // Remove "Invalid input: " prefix if present (Zod's default prefix)
-      message = message.replace(/^Invalid input:\s*/i, '');
+      message = message.replace(/^Invalid input:\s*/, '');
 
       const fieldDef = targetFields.find((f) => f.name === fieldName);
 

@@ -8,7 +8,7 @@
  */
 
 import { isMap, isPair, isScalar, isSeq } from 'yaml';
-import type { Document, Node, YAMLSeq } from 'yaml';
+import type { Document, Node, YAMLMap, YAMLSeq } from 'yaml';
 import type { monaco } from '@kbn/monaco';
 import type { WorkflowOutput } from '@kbn/workflows';
 import { getMonacoRangeFromYamlNode } from '../../../widgets/workflow_yaml_editor/lib/utils';
@@ -23,81 +23,121 @@ interface WorkflowOutputStepItem {
   model: monaco.editor.ITextModel;
 }
 
+function getStepType(stepNode: unknown): string | null {
+  if (!isMap(stepNode)) return null;
+  const typePair = stepNode.items.find(
+    (item) => isPair(item) && isScalar(item.key) && item.key.value === 'type'
+  );
+  if (typePair && isPair(typePair) && isScalar(typePair.value)) {
+    return String(typePair.value.value);
+  }
+  return null;
+}
+
+function findNestedStepsSequence(stepNode: unknown, key: 'steps' | 'else'): YAMLSeq | null {
+  if (!isMap(stepNode)) return null;
+  const pair = stepNode.items.find(
+    (item) => isPair(item) && isScalar(item.key) && item.key.value === key
+  );
+  if (pair && isPair(pair) && isSeq(pair.value)) {
+    return pair.value as YAMLSeq;
+  }
+  return null;
+}
+
+function collectWorkflowOutputStepFromNode(
+  stepNode: YAMLMap,
+  items: WorkflowOutputStepItem[],
+  model: monaco.editor.ITextModel
+): void {
+  const withPair = stepNode.items.find(
+    (item) => isPair(item) && isScalar(item.key) && item.key.value === 'with'
+  );
+
+  let withNode: Node | null = null;
+  const withValues: Record<string, unknown> = {};
+
+  if (withPair && isPair(withPair)) {
+    withNode = withPair.value as Node;
+
+    if (isMap(withPair.value)) {
+      withPair.value.items.forEach((item) => {
+        if (isPair(item) && isScalar(item.key)) {
+          const key = String(item.key.value);
+          let value: unknown = null;
+
+          if (isScalar(item.value)) {
+            value = item.value.value;
+          } else if (Array.isArray(item.value)) {
+            value = item.value;
+          } else if (isMap(item.value)) {
+            value = {};
+          }
+
+          withValues[key] = value;
+        }
+      });
+    }
+  }
+
+  const stepRange = stepNode.range;
+  const stepId = stepRange
+    ? `workflow-output-${stepRange[0]}-${stepRange[2]}`
+    : `workflow-output-${items.length}`;
+
+  items.push({
+    id: stepId,
+    yamlNode: stepNode,
+    withNode,
+    withValues,
+    model,
+  });
+}
+
 /**
- * Collects all workflow.output steps from the YAML document
+ * Recursively collects workflow.output steps from a steps sequence (including nested if/foreach).
+ */
+function collectFromStepsSequence(
+  stepsSeq: YAMLSeq,
+  model: monaco.editor.ITextModel,
+  items: WorkflowOutputStepItem[] = []
+): WorkflowOutputStepItem[] {
+  for (const stepNode of stepsSeq.items) {
+    if (isMap(stepNode)) {
+      const stepType = getStepType(stepNode);
+      if (stepType === 'workflow.output') {
+        collectWorkflowOutputStepFromNode(stepNode, items, model);
+      } else if (stepType === 'foreach' || stepType === 'if') {
+        const nestedSteps = findNestedStepsSequence(stepNode, 'steps');
+        if (nestedSteps) {
+          collectFromStepsSequence(nestedSteps, model, items);
+        }
+        if (stepType === 'if') {
+          const elseSteps = findNestedStepsSequence(stepNode, 'else');
+          if (elseSteps) {
+            collectFromStepsSequence(elseSteps, model, items);
+          }
+        }
+      }
+    }
+  }
+  return items;
+}
+
+/**
+ * Collects all workflow.output steps from the YAML document (top-level and nested in if/foreach).
  */
 function collectWorkflowOutputSteps(
   yamlDocument: Document,
   model: monaco.editor.ITextModel
 ): WorkflowOutputStepItem[] {
-  const items: WorkflowOutputStepItem[] = [];
   const stepsNode = yamlDocument.get('steps', true);
 
   if (!stepsNode || !isSeq(stepsNode)) {
-    return items;
+    return [];
   }
 
-  const stepsSeq = stepsNode as YAMLSeq;
-
-  for (const stepNode of stepsSeq.items) {
-    if (isMap(stepNode)) {
-      // Check if this is a workflow.output step
-      const typePair = stepNode.items.find(
-        (item) => isPair(item) && isScalar(item.key) && item.key.value === 'type'
-      );
-
-      if (typePair && isPair(typePair) && isScalar(typePair.value)) {
-        if (typePair.value.value === 'workflow.output') {
-          // Find the 'with' property
-          const withPair = stepNode.items.find(
-            (item) => isPair(item) && isScalar(item.key) && item.key.value === 'with'
-          );
-
-          let withNode: Node | null = null;
-          const withValues: Record<string, unknown> = {};
-
-          if (withPair && isPair(withPair)) {
-            withNode = withPair.value as Node;
-
-            // Extract values from the with block
-            if (isMap(withPair.value)) {
-              withPair.value.items.forEach((item) => {
-                if (isPair(item) && isScalar(item.key)) {
-                  const key = String(item.key.value);
-                  let value: unknown = null;
-
-                  if (isScalar(item.value)) {
-                    value = item.value.value;
-                  } else if (Array.isArray(item.value)) {
-                    value = item.value;
-                  } else if (isMap(item.value)) {
-                    value = {}; // Object
-                  }
-
-                  withValues[key] = value;
-                }
-              });
-            }
-          }
-
-          const stepRange = stepNode.range;
-          const stepId = stepRange
-            ? `workflow-output-${stepRange[0]}-${stepRange[2]}`
-            : `workflow-output-${items.length}`;
-
-          items.push({
-            id: stepId,
-            yamlNode: stepNode,
-            withNode,
-            withValues,
-            model,
-          });
-        }
-      }
-    }
-  }
-
-  return items;
+  return collectFromStepsSequence(stepsNode as YAMLSeq, model, []);
 }
 
 /**

@@ -8,50 +8,12 @@
  */
 
 import type { WorkflowOutput, WorkflowOutputStep } from '@kbn/workflows';
-import { ExecutionStatus } from '@kbn/workflows';
+import { buildZodSchemaFromFields, ExecutionStatus } from '@kbn/workflows';
 import type { WorkflowOutputGraphNode } from '@kbn/workflows/graph';
-import { z } from '@kbn/zod/v4';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger';
 import type { NodeImplementation } from '../node_implementation';
-
-/**
- * Creates a Zod validator for workflow outputs
- */
-function makeOutputValidator(outputs: WorkflowOutput[]) {
-  return z.object(
-    outputs.reduce((acc, output) => {
-      switch (output.type) {
-        case 'string':
-          acc[output.name] = output.required ? z.string() : z.string().optional();
-          break;
-        case 'number':
-          acc[output.name] = output.required ? z.number() : z.number().optional();
-          break;
-        case 'boolean':
-          acc[output.name] = output.required ? z.boolean() : z.boolean().optional();
-          break;
-        case 'choice':
-          acc[output.name] = output.required
-            ? z.enum(output.options as [string, ...string[]])
-            : z.enum(output.options as [string, ...string[]]).optional();
-          break;
-        case 'array': {
-          const { minItems, maxItems } = output;
-          // Create an array that accepts any primitive type (string, number, boolean)
-          let arr = z.array(z.union([z.string(), z.number(), z.boolean()]));
-          // Apply constraints
-          if (minItems != null) arr = arr.min(minItems);
-          if (maxItems != null) arr = arr.max(maxItems);
-          acc[output.name] = output.required ? arr : arr.optional();
-          break;
-        }
-      }
-      return acc;
-    }, {} as Record<string, z.ZodType>)
-  );
-}
 
 /**
  * Implements the workflow.output step which emits outputs and terminates workflow execution.
@@ -154,12 +116,14 @@ export class WorkflowOutputStepImpl implements NodeImplementation {
 
       // Validate outputs against declared schema if it exists
       if (declaredOutputs && declaredOutputs.length > 0) {
-        const validator = makeOutputValidator(declaredOutputs);
+        const validator = buildZodSchemaFromFields(declaredOutputs, {
+          optionalIfNotRequired: true,
+        });
         const validationResult = validator.safeParse(outputValues);
 
         if (!validationResult.success) {
           const errorMessages = validationResult.error.issues
-            .map((issue: z.ZodIssue) => {
+            .map((issue) => {
               const fieldName = (issue.path[0] as string) || '';
               return `${fieldName}: ${issue.message}`;
             })
@@ -172,12 +136,10 @@ export class WorkflowOutputStepImpl implements NodeImplementation {
             tags: ['workflow-output', 'validation-error'],
           });
 
-          // Fail the step with validation error
+          // Fail the step with validation error (failStep also sets workflow-level error via updateWorkflowExecution)
           this.stepExecutionRuntime.failStep(validationError);
           await this.stepExecutionRuntime.flushEventLogs();
 
-          // Mark workflow as failed
-          this.workflowExecutionRuntime.setWorkflowError(validationError);
           this.workflowExecutionRuntime.setWorkflowStatus(ExecutionStatus.FAILED);
           return;
         }
@@ -230,8 +192,7 @@ export class WorkflowOutputStepImpl implements NodeImplementation {
             },
           });
 
-          // Fail the step with the error
-          // Note: failStep() already sets the workflow error, so we don't need to call setWorkflowError() separately
+          // Fail the step with the error (failStep() calls updateWorkflowExecution({ error }), so workflow-level error is set there)
           this.stepExecutionRuntime.failStep(failureError);
           break;
         default:
@@ -267,11 +228,10 @@ export class WorkflowOutputStepImpl implements NodeImplementation {
         tags: ['workflow-output', 'error'],
       });
 
+      // failStep() sets workflow-level error via updateWorkflowExecution({ error })
       this.stepExecutionRuntime.failStep(errorObj);
       await this.stepExecutionRuntime.flushEventLogs();
 
-      // Mark workflow as failed
-      this.workflowExecutionRuntime.setWorkflowError(errorObj);
       this.workflowExecutionRuntime.setWorkflowStatus(ExecutionStatus.FAILED);
     }
   }

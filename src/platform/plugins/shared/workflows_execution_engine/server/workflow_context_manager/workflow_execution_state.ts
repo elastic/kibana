@@ -164,6 +164,7 @@ export class WorkflowExecutionState {
 
   private updateStep(step: Partial<EsWorkflowStepExecution>) {
     const existingStep = this.stepExecutions.get(step.id!);
+    // Filter out undefined only; null is intentional (e.g. output: null when a step fails) and must not be dropped
     const definedChanges = Object.fromEntries(
       Object.entries(step).filter(([, v]) => v !== undefined)
     ) as Partial<EsWorkflowStepExecution>;

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+export * from './spec/lib/build_zod_schema_from_fields';
 export * from './spec/lib/generate_yaml_schema_from_connectors';
 export * from './spec/lib/get_workflow_json_schema';
 export { getElasticsearchConnectors } from './spec/elasticsearch';
