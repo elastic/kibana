@@ -1035,6 +1035,48 @@ describe('dataMapStepDefinition', () => {
       expect(parseResult.success).toBe(true);
     });
 
+    it('should validate $map binding names when they are safe identifiers', () => {
+      const validInput = {
+        fields: {
+          tags: {
+            $map: { items: '{{ item.tags }}', item: 'tag_1', index: '_idx' },
+            value: '{{ tag_1.value }}',
+          },
+        },
+      };
+
+      const parseResult = dataMapStepDefinition.inputSchema.safeParse(validInput);
+      expect(parseResult.success).toBe(true);
+    });
+
+    it('should reject invalid $map.item binding names', () => {
+      const invalidInput = {
+        fields: {
+          tags: {
+            $map: { items: '{{ item.tags }}', item: 'tag-name' },
+            value: '{{ item.value }}',
+          },
+        },
+      };
+
+      const parseResult = dataMapStepDefinition.inputSchema.safeParse(invalidInput);
+      expect(parseResult.success).toBe(false);
+    });
+
+    it('should reject invalid $map.index binding names', () => {
+      const invalidInput = {
+        fields: {
+          tags: {
+            $map: { items: '{{ item.tags }}', index: '0index' },
+            value: '{{ item.value }}',
+          },
+        },
+      };
+
+      const parseResult = dataMapStepDefinition.inputSchema.safeParse(invalidInput);
+      expect(parseResult.success).toBe(false);
+    });
+
     it('should validate output schema as array', () => {
       const output = [
         { userId: 1, userName: 'Alice' },

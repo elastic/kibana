@@ -18,20 +18,29 @@ export const ConfigSchema = z.object({
 
 /** Reserved key that triggers array iteration in a nested field spec. */
 export const MAP_DIRECTIVE = '$map';
+const MAP_BINDING_IDENTIFIER_REGEX = /^[A-Za-z_][A-Za-z0-9_]*$/;
 
 /**
  * The value of the `$map` directive inside a nested field spec.
  *   - `items` (required): a Liquid template expression that resolves to an array
  *     (e.g. `"${{ item.tags }}"`). Rendered using the current context just like any other field.
  *   - `item` (optional): the variable name each element is bound to. Defaults to `"item"`.
+ *     Must match `[a-zA-Z_][a-zA-Z0-9_]*`.
  *   - `index` (optional): the variable name for the iteration index. Defaults to `"index"`.
+ *     Must match `[a-zA-Z_][a-zA-Z0-9_]*`.
  */
 export interface MapDirectiveValue {
   /** A Liquid template expression that resolves to an array (e.g. `"${{ item.tags }}"`). */
   items: string;
-  /** The variable name each element is bound to (e.g. `"tag"`). Defaults to `"item"`. */
+  /**
+   * The variable name each element is bound to (e.g. `"tag"`). Defaults to `"item"`.
+   * Must match `[a-zA-Z_][a-zA-Z0-9_]*`.
+   */
   item?: string;
-  /** The variable name for the iteration index (e.g. `"tag_index"`). Defaults to `"index"`. */
+  /**
+   * The variable name for the iteration index (e.g. `"tag_index"`). Defaults to `"index"`.
+   * Must match `[a-zA-Z_][a-zA-Z0-9_]*`.
+   */
   index?: string;
 }
 
@@ -65,8 +74,8 @@ const FieldsNodeSchema: z.ZodType<FieldsNode> = z.lazy(() =>
         [MAP_DIRECTIVE]: z
           .object({
             items: z.string(),
-            item: z.string().optional(),
-            index: z.string().optional(),
+            item: z.string().regex(MAP_BINDING_IDENTIFIER_REGEX).optional(),
+            index: z.string().regex(MAP_BINDING_IDENTIFIER_REGEX).optional(),
           })
           .optional(),
       })
