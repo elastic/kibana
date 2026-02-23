@@ -264,7 +264,7 @@
             "description": [],
             "signature": [
               "SavedSearchAttributes",
-              " & { references: ",
+              " & { references?: ",
               {
                 "pluginId": "@kbn/content-management-utils",
                 "scope": "server",
@@ -272,7 +272,7 @@
                 "section": "def-server.Reference",
                 "text": "Reference"
               },
-              "[]; }"
+              "[] | undefined; }"
             ],
             "path": "src/platform/plugins/shared/saved_search/public/service/to_saved_search.ts",
             "lineNumber": 22,
@@ -406,7 +406,7 @@
             "section": "def-common.DiscoverSession",
             "text": "DiscoverSession"
           },
-          ", \"tags\" | \"title\" | \"description\" | \"tabs\"> & Partial<Pick<",
+          ", \"tags\" | \"description\" | \"title\" | \"tabs\"> & Partial<Pick<",
           {
             "pluginId": "savedSearch",
             "scope": "common",
@@ -1008,7 +1008,7 @@
             "section": "def-common.VIEW_MODE",
             "text": "VIEW_MODE"
           },
-          " | undefined; hideAggregatedPreview?: boolean | undefined; rowHeight?: number | undefined; headerRowHeight?: number | undefined; timeRestore?: boolean | undefined; timeRange?: Readonly<{} & { from: string; to: string; }> | undefined; refreshInterval?: Readonly<{} & { value: number; pause: boolean; }> | undefined; rowsPerPage?: number | undefined; sampleSize?: number | undefined; breakdownField?: string | undefined; chartInterval?: string | undefined; density?: \"compact\" | \"normal\" | \"expanded\" | undefined; visContext?: Readonly<{} & { attributes: Record<string, any>; requestData: Readonly<{ breakdownField?: string | undefined; dataViewId?: string | undefined; timeField?: string | undefined; timeInterval?: string | undefined; } & {}>; suggestionType: string; }> | Readonly<{} & {}> | undefined; controlGroupJson?: string | undefined; hits?: number | undefined; } & { sort: string[] | string[][]; grid: Readonly<{ columns?: Record<string, Readonly<{ width?: number | undefined; } & {}>> | undefined; } & {}>; columns: string[]; hideChart: boolean; isTextBasedQuery: boolean; kibanaSavedObjectMeta: Readonly<{} & { searchSourceJSON: string; }>; }>; }"
+          " | undefined; hideAggregatedPreview?: boolean | undefined; rowHeight?: number | undefined; headerRowHeight?: number | undefined; timeRestore?: boolean | undefined; timeRange?: Readonly<{} & { from: string; to: string; }> | undefined; refreshInterval?: Readonly<{} & { value: number; pause: boolean; }> | undefined; rowsPerPage?: number | undefined; sampleSize?: number | undefined; breakdownField?: string | undefined; chartInterval?: string | undefined; density?: \"compact\" | \"normal\" | \"expanded\" | undefined; visContext?: Readonly<{} & { attributes: Record<string, any>; requestData: Readonly<{ breakdownField?: string | undefined; dataViewId?: string | undefined; timeField?: string | undefined; timeInterval?: string | undefined; } & {}>; suggestionType: string; }> | Readonly<{} & {}> | undefined; controlGroupJson?: string | undefined; hits?: number | undefined; } & { sort: string[] | string[][]; columns: string[]; grid: Readonly<{ columns?: Record<string, Readonly<{ width?: number | undefined; } & {}>> | undefined; } & {}>; hideChart: boolean; isTextBasedQuery: boolean; kibanaSavedObjectMeta: Readonly<{} & { searchSourceJSON: string; }>; }>; }"
         ],
         "path": "src/platform/plugins/shared/saved_search/server/saved_objects/schema.ts",
         "lineNumber": 228,
@@ -1033,7 +1033,7 @@
             "section": "def-common.VIEW_MODE",
             "text": "VIEW_MODE"
           },
-          " | undefined; readonly hideAggregatedPreview?: boolean | undefined; readonly rowHeight?: number | undefined; readonly headerRowHeight?: number | undefined; readonly timeRestore?: boolean | undefined; readonly timeRange?: Readonly<{} & { from: string; to: string; }> | undefined; readonly refreshInterval?: Readonly<{} & { value: number; pause: boolean; }> | undefined; readonly rowsPerPage?: number | undefined; readonly sampleSize?: number | undefined; readonly breakdownField?: string | undefined; readonly chartInterval?: string | undefined; readonly density?: \"compact\" | \"normal\" | \"expanded\" | undefined; readonly visContext?: Readonly<{} & { attributes: Record<string, any>; requestData: Readonly<{ breakdownField?: string | undefined; dataViewId?: string | undefined; timeField?: string | undefined; timeInterval?: string | undefined; } & {}>; suggestionType: string; }> | Readonly<{} & {}> | undefined; readonly controlGroupJson?: string | undefined; readonly hits?: number | undefined; readonly sort: string[] | string[][]; readonly grid: Readonly<{ columns?: Record<string, Readonly<{ width?: number | undefined; } & {}>> | undefined; } & {}>; readonly columns: string[]; readonly hideChart: boolean; readonly isTextBasedQuery: boolean; readonly kibanaSavedObjectMeta: Readonly<{} & { searchSourceJSON: string; }>; }"
+          " | undefined; readonly hideAggregatedPreview?: boolean | undefined; readonly rowHeight?: number | undefined; readonly headerRowHeight?: number | undefined; readonly timeRestore?: boolean | undefined; readonly timeRange?: Readonly<{} & { from: string; to: string; }> | undefined; readonly refreshInterval?: Readonly<{} & { value: number; pause: boolean; }> | undefined; readonly rowsPerPage?: number | undefined; readonly sampleSize?: number | undefined; readonly breakdownField?: string | undefined; readonly chartInterval?: string | undefined; readonly density?: \"compact\" | \"normal\" | \"expanded\" | undefined; readonly visContext?: Readonly<{} & { attributes: Record<string, any>; requestData: Readonly<{ breakdownField?: string | undefined; dataViewId?: string | undefined; timeField?: string | undefined; timeInterval?: string | undefined; } & {}>; suggestionType: string; }> | Readonly<{} & {}> | undefined; readonly controlGroupJson?: string | undefined; readonly hits?: number | undefined; readonly sort: string[] | string[][]; readonly columns: string[]; readonly grid: Readonly<{ columns?: Record<string, Readonly<{ width?: number | undefined; } & {}>> | undefined; } & {}>; readonly hideChart: boolean; readonly isTextBasedQuery: boolean; readonly kibanaSavedObjectMeta: Readonly<{} & { searchSourceJSON: string; }>; }"
         ],
         "path": "src/platform/plugins/shared/saved_search/server/saved_objects/schema.ts",
         "lineNumber": 225,
@@ -1058,7 +1058,7 @@
           "\nExtract tab attributes into a separate array since multiple tabs are supported"
         ],
         "signature": [
-          "(attributes: T, discoverSessionId: string | undefined) => T & { tabs: { id: string; label: string; attributes: Pick<Omit<T, \"title\" | \"description\">, Exclude<Exclude<keyof T, \"title\" | \"description\">, \"tabs\">>; }[]; }"
+          "(attributes: T, discoverSessionId: string | undefined) => T & { tabs: { id: string; label: string; attributes: Pick<Omit<T, \"description\" | \"title\">, Exclude<Exclude<keyof T, \"description\" | \"title\">, \"tabs\">>; }[]; }"
         ],
         "path": "src/platform/plugins/shared/saved_search/common/service/extract_tabs.ts",
         "lineNumber": 32,
@@ -1494,7 +1494,7 @@
         "label": "DiscoverSession",
         "description": [],
         "path": "src/platform/plugins/shared/saved_search/common/types.ts",
-        "lineNumber": 134,
+        "lineNumber": 135,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1507,7 +1507,7 @@
             "label": "id",
             "description": [],
             "path": "src/platform/plugins/shared/saved_search/common/types.ts",
-            "lineNumber": 135,
+            "lineNumber": 136,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1520,7 +1520,7 @@
             "label": "title",
             "description": [],
             "path": "src/platform/plugins/shared/saved_search/common/types.ts",
-            "lineNumber": 136,
+            "lineNumber": 137,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1533,7 +1533,7 @@
             "label": "description",
             "description": [],
             "path": "src/platform/plugins/shared/saved_search/common/types.ts",
-            "lineNumber": 137,
+            "lineNumber": 138,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1556,7 +1556,7 @@
               "[]"
             ],
             "path": "src/platform/plugins/shared/saved_search/common/types.ts",
-            "lineNumber": 138,
+            "lineNumber": 139,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1569,7 +1569,7 @@
             "label": "managed",
             "description": [],
             "path": "src/platform/plugins/shared/saved_search/common/types.ts",
-            "lineNumber": 139,
+            "lineNumber": 140,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1585,7 +1585,7 @@
               "string[] | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_search/common/types.ts",
-            "lineNumber": 140,
+            "lineNumber": 141,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1602,7 +1602,7 @@
               "[] | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_search/common/types.ts",
-            "lineNumber": 141,
+            "lineNumber": 142,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1618,7 +1618,7 @@
               "{ outcome?: \"exactMatch\" | \"aliasMatch\" | \"conflict\" | undefined; aliasTargetId?: string | undefined; aliasPurpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; errorJSON?: string | undefined; } | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_search/common/types.ts",
-            "lineNumber": 142,
+            "lineNumber": 143,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1634,7 +1634,7 @@
         "label": "DiscoverSessionTab",
         "description": [],
         "path": "src/platform/plugins/shared/saved_search/common/types.ts",
-        "lineNumber": 108,
+        "lineNumber": 109,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1647,7 +1647,7 @@
             "label": "id",
             "description": [],
             "path": "src/platform/plugins/shared/saved_search/common/types.ts",
-            "lineNumber": 109,
+            "lineNumber": 110,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1660,7 +1660,7 @@
             "label": "label",
             "description": [],
             "path": "src/platform/plugins/shared/saved_search/common/types.ts",
-            "lineNumber": 110,
+            "lineNumber": 111,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1683,7 +1683,7 @@
               "[]"
             ],
             "path": "src/platform/plugins/shared/saved_search/common/types.ts",
-            "lineNumber": 111,
+            "lineNumber": 112,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1699,7 +1699,7 @@
               "string[]"
             ],
             "path": "src/platform/plugins/shared/saved_search/common/types.ts",
-            "lineNumber": 112,
+            "lineNumber": 113,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1721,7 +1721,7 @@
               }
             ],
             "path": "src/platform/plugins/shared/saved_search/common/types.ts",
-            "lineNumber": 113,
+            "lineNumber": 114,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1734,7 +1734,7 @@
             "label": "hideChart",
             "description": [],
             "path": "src/platform/plugins/shared/saved_search/common/types.ts",
-            "lineNumber": 114,
+            "lineNumber": 115,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1747,7 +1747,7 @@
             "label": "isTextBasedQuery",
             "description": [],
             "path": "src/platform/plugins/shared/saved_search/common/types.ts",
-            "lineNumber": 115,
+            "lineNumber": 116,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1763,7 +1763,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_search/common/types.ts",
-            "lineNumber": 116,
+            "lineNumber": 117,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1873,7 +1873,7 @@
               " | undefined; }"
             ],
             "path": "src/platform/plugins/shared/saved_search/common/types.ts",
-            "lineNumber": 117,
+            "lineNumber": 118,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1896,7 +1896,7 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_search/common/types.ts",
-            "lineNumber": 118,
+            "lineNumber": 119,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1912,7 +1912,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_search/common/types.ts",
-            "lineNumber": 119,
+            "lineNumber": 120,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1928,7 +1928,7 @@
               "number | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_search/common/types.ts",
-            "lineNumber": 120,
+            "lineNumber": 121,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1944,7 +1944,7 @@
               "number | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_search/common/types.ts",
-            "lineNumber": 121,
+            "lineNumber": 122,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1960,7 +1960,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_search/common/types.ts",
-            "lineNumber": 122,
+            "lineNumber": 123,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1984,7 +1984,7 @@
               ", \"from\" | \"to\"> | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_search/common/types.ts",
-            "lineNumber": 123,
+            "lineNumber": 124,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2000,7 +2000,7 @@
               "Readonly<{} & { value: number; pause: boolean; }> | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_search/common/types.ts",
-            "lineNumber": 124,
+            "lineNumber": 125,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2016,7 +2016,7 @@
               "number | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_search/common/types.ts",
-            "lineNumber": 125,
+            "lineNumber": 126,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2032,7 +2032,7 @@
               "number | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_search/common/types.ts",
-            "lineNumber": 126,
+            "lineNumber": 127,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2048,7 +2048,7 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_search/common/types.ts",
-            "lineNumber": 127,
+            "lineNumber": 128,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2064,7 +2064,7 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_search/common/types.ts",
-            "lineNumber": 128,
+            "lineNumber": 129,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2087,7 +2087,7 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_search/common/types.ts",
-            "lineNumber": 129,
+            "lineNumber": 130,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2104,7 +2104,7 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_search/common/types.ts",
-            "lineNumber": 130,
+            "lineNumber": 131,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2120,7 +2120,7 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_search/common/types.ts",
-            "lineNumber": 131,
+            "lineNumber": 132,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2220,7 +2220,7 @@
           "[] | undefined; sharingSavedObjectProps?: { outcome?: \"exactMatch\" | \"aliasMatch\" | \"conflict\" | undefined; aliasTargetId?: string | undefined; aliasPurpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; errorJSON?: string | undefined; } | undefined; }"
         ],
         "path": "src/platform/plugins/shared/saved_search/common/types.ts",
-        "lineNumber": 86,
+        "lineNumber": 87,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2235,7 +2235,7 @@
         "description": [],
         "signature": [
           "SavedSearchAttributes",
-          " & { references: ",
+          " & { references?: ",
           {
             "pluginId": "@kbn/content-management-utils",
             "scope": "server",
@@ -2243,7 +2243,7 @@
             "section": "def-server.Reference",
             "text": "Reference"
           },
-          "[]; }"
+          "[] | undefined; }"
         ],
         "path": "src/platform/plugins/shared/saved_search/common/types.ts",
         "lineNumber": 79,
