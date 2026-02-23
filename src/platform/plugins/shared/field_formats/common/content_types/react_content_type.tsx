@@ -36,9 +36,28 @@ export const checkForMissingValueReact = (val: unknown): ReactNode | void => {
 
 const HTML_TAG_RE = /<[^>]+>/;
 
+const HTML_ENTITY_RE = /&(?:#\d+|#x[\da-fA-F]+|[a-zA-Z]+);/;
+
+/**
+ * Decodes HTML entities in a string that contains no HTML tags.
+ * Only invoked on tag-free strings, so a minimal set of common entities suffices.
+ */
+const decodeHTMLEntities = (html: string): string => {
+  if (!HTML_ENTITY_RE.test(html)) {
+    return html;
+  }
+  return html
+    .replaceAll('&amp;', '&')
+    .replaceAll('&lt;', '<')
+    .replaceAll('&gt;', '>')
+    .replaceAll('&quot;', '"')
+    .replaceAll('&#39;', "'")
+    .replaceAll('&#x27;', "'");
+};
+
 /**
  * Creates a fallback wrapper that converts HTML output to a ReactNode.
- * If the HTML contains no tags, uses text conversion (avoiding HTML entity issues).
+ * If the HTML contains no tags, decodes entities and returns plain text.
  * Otherwise wraps via dangerouslySetInnerHTML — identical to what consumers do today.
  */
 const createHtmlFallback = (format: IFieldFormat): ReactContextTypeConvert => {
@@ -46,9 +65,7 @@ const createHtmlFallback = (format: IFieldFormat): ReactContextTypeConvert => {
     const html: string = format.convert(value, 'html', options);
 
     if (!HTML_TAG_RE.test(html)) {
-      // Use text conversion to avoid HTML entities (e.g. &quot;) being rendered
-      // literally when React displays the string as a text node.
-      return format.convert(value, 'text', options);
+      return decodeHTMLEntities(html);
     }
 
     // eslint-disable-next-line react/no-danger
