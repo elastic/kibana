@@ -19,6 +19,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useQuery } from '@kbn/react-query';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
@@ -244,7 +245,9 @@ export const ManageIntegrationsTable: React.FC<{
       <EuiBasicTable
         items={integrations}
         columns={columns}
-        tableCaption="Manage created integrations"
+        tableCaption={i18n.translate('xpack.fleet.epmList.manageIntegrations.tableCaption', {
+          defaultMessage: 'Manage created integrations',
+        })}
         data-test-subj="manageIntegrationsTable"
       />
     </>
