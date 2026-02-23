@@ -34,7 +34,7 @@
             "type": "boolean"
           },
           "ref_id": {
-            "description": "The ID of the saved markdown object",
+            "description": "The unique identifier of the markdown panel.",
             "type": "string"
           },
           "title": {
