@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { tags } from '@kbn/scout';
+import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { spaceTest, tracesTestData } from '../../fixtures';
+import { TRACES } from '../../fixtures/traces_experience';
 
 spaceTest.describe(
   'Traces in Discover - Profile enablement',
@@ -21,11 +21,11 @@ spaceTest.describe(
       if (!config.serverless) {
         await scoutSpace.setSolutionView('oblt');
       }
-      await scoutSpace.savedObjects.load(tracesTestData.TRACES.KBN_ARCHIVE);
-      await scoutSpace.uiSettings.setDefaultIndex(tracesTestData.TRACES.DATA_VIEW_NAME);
+      await scoutSpace.savedObjects.load(TRACES.KBN_ARCHIVE);
+      await scoutSpace.uiSettings.setDefaultIndex(TRACES.DATA_VIEW_NAME);
       await scoutSpace.uiSettings.setDefaultTime({
-        from: tracesTestData.TRACES.DEFAULT_START_TIME,
-        to: tracesTestData.TRACES.DEFAULT_END_TIME,
+        from: TRACES.DEFAULT_START_TIME,
+        to: TRACES.DEFAULT_END_TIME,
       });
     });
 
@@ -53,7 +53,7 @@ spaceTest.describe(
       'should load Discover with trace data in ES|QL mode',
       async ({ page, pageObjects }) => {
         await spaceTest.step('run ES|QL query for traces', async () => {
-          await pageObjects.discover.writeEsqlQuery(tracesTestData.TRACES.ESQL_QUERY);
+          await pageObjects.discover.writeEsqlQuery(TRACES.ESQL_QUERY);
         });
 
         await spaceTest.step('verify Discover loaded with results', async () => {
