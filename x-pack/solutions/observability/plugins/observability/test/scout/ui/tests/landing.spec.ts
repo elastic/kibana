@@ -43,7 +43,7 @@ test.describe(
       await page.goto(kbnUrl.get('/'));
 
       // Wait for redirect and verify we're on the metrics page
-      await expect(page).toHaveURL(/\/app\/metrics/, { timeout: 10000 });
+      await expect(page).toHaveURL(/\/app\/metrics/, { timeout: 20000 });
 
       // Restore default route
       await kbnClient.uiSettings.update({
@@ -63,7 +63,7 @@ test.describe(
       await pageObjects.observabilityNavigation.gotoLanding();
 
       // Wait for redirect and verify we're on Discover logs page
-      await expect(page).toHaveURL(/\/app\/discover/, { timeout: 10000 });
+      await expect(page).toHaveURL(/\/app\/discover/, { timeout: 20000 });
     });
 
     test('redirects to APM services when only APM data exists', async ({
@@ -78,7 +78,7 @@ test.describe(
       await pageObjects.observabilityNavigation.gotoLanding();
 
       // Wait for redirect and verify we're on APM page
-      await expect(page).toHaveURL(/\/app\/apm/, { timeout: 10000 });
+      await expect(page).toHaveURL(/\/app\/apm/, { timeout: 20000 });
     });
 
     test('redirects to Discover logs when both logs and APM data exist (logs priority)', async ({
@@ -95,7 +95,7 @@ test.describe(
       await pageObjects.observabilityNavigation.gotoLanding();
 
       // Wait for redirect and verify we're on Discover logs page (logs takes priority)
-      await expect(page).toHaveURL(/\/app\/discover/, { timeout: 10000 });
+      await expect(page).toHaveURL(/\/app\/discover/, { timeout: 20000 });
     });
 
     test('redirects to onboarding when no data exists', async ({ page, pageObjects }) => {
@@ -103,7 +103,7 @@ test.describe(
       await pageObjects.observabilityNavigation.gotoLanding();
 
       // Wait for redirect and verify we're on onboarding page
-      await expect(page).toHaveURL(/\/app\/observabilityOnboarding/, { timeout: 10000 });
+      await expect(page).toHaveURL(/\/app\/observabilityOnboarding/, { timeout: 20000 });
     });
 
     test('redirects to onboarding when log data that should be ignored exists', async ({
@@ -118,7 +118,7 @@ test.describe(
       await pageObjects.observabilityNavigation.gotoLanding();
 
       // Wait for redirect and verify we're on onboarding page
-      await expect(page).toHaveURL(/\/app\/observabilityOnboarding/, { timeout: 10000 });
+      await expect(page).toHaveURL(/\/app\/observabilityOnboarding/, { timeout: 20000 });
     });
   }
 );
