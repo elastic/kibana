@@ -169,12 +169,12 @@ export const ConfirmAgentEnrollment: React.FunctionComponent<Props> = ({
         <EuiText>
           {isCollector ? (
             <FormattedMessage
-              id="xpack.fleet.agentEnrollment.loading.instructions.collector"
+              id="xpack.fleet.agentEnrollment.loading.instructionsCollector"
               defaultMessage="After the collector starts up, the Elastic Stack listens for the collector and monitoring will be available in Fleet."
             />
           ) : (
             <FormattedMessage
-              id="xpack.fleet.agentEnrollment.loading.instructions.agent"
+              id="xpack.fleet.agentEnrollment.loading.instructions"
               defaultMessage="After the agent starts up, the Elastic Stack listens for the agent and confirms the enrollment in Fleet. If you're having trouble connecting, check out the {link}."
               values={{
                 link: <TroubleshootLink />,
