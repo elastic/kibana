@@ -119,18 +119,40 @@ export const AmazonS3: ConnectorSpec = {
           secretAccessKey: string;
           region?: string;
         };
+        const typedInput = input as {
+          region?: string;
+          prefix?: string;
+        };
 
         try {
           const s3Client = createS3Client(config);
-          const command = new ListBucketsCommand({});
-          const response = await s3Client.send(command);
+          const objects: Array<{
+            region?: string;
+            name?: string;
+            creationDate?: string;
+          }> = [];
+          let continuationToken: string | undefined;
 
-          return {
-            buckets: (response.Buckets || []).map((bucket) => ({
-              name: bucket.Name,
-              creationDate: bucket.CreationDate?.toISOString(),
-            })),
-          };
+          // Recursively list all buckets using pagination
+          do {
+            const command = new ListBucketsCommand({
+                ContinuationToken: continuationToken,
+                Prefix: typedInput.prefix,
+            });
+            const response = await s3Client.send(command);
+            if (response.Buckets) {
+              objects.push(
+                ...response.Buckets.map((bucket) => ({
+                  region: bucket.BucketRegion,
+                  name: bucket.Name,
+                  creationDate: bucket.CreationDate?.toISOString(),
+                }))
+              );
+            }
+            continuationToken = response.ContinuationToken;
+          } while (continuationToken);
+
+          return objects;
         } catch (error: unknown) {
           ctx.log.error(`Failed to list S3 buckets: ${error}`);
           throwS3Error(error);
@@ -143,6 +165,7 @@ export const AmazonS3: ConnectorSpec = {
       isTool: true,
       input: z.object({
         bucket: z.string().min(1).describe('The name of the S3 bucket'),
+        prefix: z.string().optional().describe('The prefix to filter objects by'),
       }),
       handler: async (ctx, input) => {
         const config = ctx.config as {
@@ -152,6 +175,7 @@ export const AmazonS3: ConnectorSpec = {
         };
         const typedInput = input as {
           bucket: string;
+          prefix?: string;
         };
 
         try {
@@ -165,11 +189,12 @@ export const AmazonS3: ConnectorSpec = {
           let continuationToken: string | undefined;
           let isTruncated = true;
 
-          // Recursively list all objects using pagination
+          // list all objects using pagination
           while (isTruncated) {
             const command = new ListObjectsV2Command({
               Bucket: typedInput.bucket,
               ContinuationToken: continuationToken,
+              Prefix: typedInput.prefix,
             });
             const response = await s3Client.send(command);
 
