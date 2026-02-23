@@ -140,6 +140,74 @@ Eval suites can be triggered in PR CI by adding GitHub labels:
 - `evals:<suite-id>` (or the explicit `ciLabels` value from `evals.suites.json`)
 - `evals:all` to run **all** eval suites
 
+### CI labels: model selection + judge override
+
+Evals support optional PR labels for selecting which connector projects to run and (separately) which connector should be used for LLM-as-a-judge evaluators:
+
+- **Model selection**:
+  - `models:all` to opt into **all** available connector projects (LiteLLM + EIS)
+  - `models:<model-group>` to select one or more model groups
+    - LiteLLM model groups typically look like `llm-gateway/<model>`
+    - EIS model groups are expressed as `eis/<modelId>` (e.g. `models:eis/gpt-4.1`)
+- **Judge override**:
+  - `models:judge:<connector-id>` to override the connector id used for LLM-as-a-judge evaluators in CI.
+    This takes precedence over the Vault `evaluationConnectorId` fallback (env var overrides still apply in local runs).
+
+#### CI ops: create/update model + judge labels
+
+The helper script `scripts/create_models_labels.sh` is idempotent (safe to re-run) and supports targeting a specific repo.
+
+Update **all** model + judge labels (LiteLLM + EIS) using default discovery sources:
+
+```bash
+./scripts/create_models_labels.sh --repo elastic/kibana --update-all-labels
+```
+
+If you need to run only a subset:
+
+```bash
+# EIS model labels (models:eis/<modelId>)
+./scripts/create_models_labels.sh --repo elastic/kibana --from-eis-models-json
+
+# EIS judge labels (models:judge:eis/<modelId>)
+./scripts/create_models_labels.sh --repo elastic/kibana --judge-from-eis-models-json
+
+# LiteLLM model labels (models:<model-group>)
+./scripts/create_models_labels.sh --repo elastic/kibana --from-litellm-vault-config
+
+# LiteLLM judge labels (models:judge:<model-group>)
+./scripts/create_models_labels.sh --repo elastic/kibana --judge-from-litellm-vault-config
+```
+
+Create/update a specific judge override label:
+
+```bash
+./scripts/create_models_labels.sh --repo elastic/kibana \
+  --judge litellm-llm-gateway-gpt-4o
+```
+
+### CI telemetry: tagging EIS traffic
+
+When running evals against **EIS-backed models**, `@kbn/evals` can tag inference requests with:
+
+- **Header**: `X-Elastic-Product-Use-Case`
+- **Value**: `<pluginId>`
+
+This value is sent via `metadata.connectorTelemetry.pluginId` on inference API calls and is forwarded to the ES `_inference` request.
+
+By default, `@kbn/evals` sets this to `kbn_evals`.
+
+To override (rare), set:
+
+- **pluginId**: `KBN_EVALS_TELEMETRY_PLUGIN_ID`
+
+Example:
+
+```bash
+EVAL_SUITE_ID=agent-builder ...
+# -> X-Elastic-Product-Use-Case: kbn_evals
+```
+
 ### CI ops: sharing a Vault update command
 
 If you need to update the kbn-evals CI Vault config (and want an easy copy/paste command to share with @kibana-ops),
@@ -159,6 +227,46 @@ node x-pack/platform/packages/shared/kbn-evals/scripts/vault/get_command.js
 Share the output via a secure pastebin (for example `https://p.elstc.co`) and have ops run it.
 
 The Vault config supports an optional `tracingExporters` array that configures OTel trace exporters for the eval Playwright worker process in CI. This is exported as the `TRACING_EXPORTERS` environment variable. See `config.example.json` for the full schema and [Configuring Trace Exporters via Environment Variable](#configuring-trace-exporters-via-environment-variable) for usage details.
+
+To sync your local `config.json` from Vault (requires Vault auth):
+
+```bash
+node x-pack/platform/packages/shared/kbn-evals/scripts/vault/retrieve_secrets.js --vault ci-prod
+```
+
+### Local dev: EIS (CCM)
+
+To run eval suites against **EIS-backed models** locally, you need:
+
+- **EIS connectors** in `KIBANA_TESTING_AI_CONNECTORS` (so `@kbn/evals` can build Playwright projects)
+- **CCM enabled** on your test Elasticsearch cluster (so EIS inference endpoints exist)
+
+Recommended flow (Scout + evals CLI):
+
+```bash
+# 1) Provide the CCM API key (used to enable CCM on your test ES cluster)
+# (requires Vault auth)
+export KIBANA_EIS_CCM_API_KEY="$(vault read -field key secret/kibana-issues/dev/inference/kibana-eis-ccm)"
+
+# 2) Discover available EIS models (writes target/eis_models.json)
+node scripts/discover_eis_models.js
+
+# 3) Generate EIS connector payload for @kbn/evals (base64 JSON)
+export KIBANA_TESTING_AI_CONNECTORS="$(node x-pack/platform/packages/shared/kbn-evals/scripts/ci/generate_eis_connectors.js)"
+
+# 4) Pick a connector id to use for judge + project (example prints the first 30 ids)
+node -e "const o=JSON.parse(Buffer.from(process.env.KIBANA_TESTING_AI_CONNECTORS,'base64').toString('utf8'));console.log(Object.keys(o).slice(0,30).join('\\n'))"
+export EVALUATION_CONNECTOR_ID="eis-<model>"
+
+# 5) Start Scout (the evals config sets auto-preconfigure EIS connectors in Kibana from KIBANA_TESTING_AI_CONNECTORS)
+node scripts/scout.js start-server --arch stateful --domain classic --serverConfigSet evals_tracing
+
+# 6) Enable CCM on the *Scout* ES cluster and wait for EIS endpoints
+node x-pack/platform/packages/shared/kbn-evals/scripts/local_repros/enable_eis_ccm.js
+
+# 7) Run an eval suite against a single EIS connector project
+node scripts/evals run --suite <suite-id> --project "$EVALUATION_CONNECTOR_ID"
+```
 
 ### Local dev: LiteLLM (SSO)
 
