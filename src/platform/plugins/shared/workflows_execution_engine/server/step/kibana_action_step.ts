@@ -57,7 +57,12 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
     // Use rendered inputs if provided, otherwise fall back to raw step.with or configuration.with
     const stepWith = withInputs || this.step.with || (this.step as any).configuration?.with;
     // Extract meta params (not forwarded as HTTP request params)
-    const { use_server_info = false, use_localhost = false, debug = false, ...httpParams } = stepWith;
+    const {
+      use_server_info = false,
+      use_localhost = false,
+      debug = false,
+      ...httpParams
+    } = stepWith;
 
     if (use_server_info && use_localhost) {
       throw new Error(
