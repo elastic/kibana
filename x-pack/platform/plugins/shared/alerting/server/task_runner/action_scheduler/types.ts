@@ -117,6 +117,7 @@ export interface IActionScheduler<
   getActionsToSchedule(
     opts: GetActionsToScheduleOpts<State, Context, ActionGroupIds, RecoveryActionGroupId>
   ): Promise<ActionsToSchedule[]>;
+  getAlertsToAutoUnmute?(): AlertToAutoUnmute[];
 }
 
 export interface RuleUrl {
