@@ -58,6 +58,7 @@ export class WorkflowOutputStepImpl implements NodeImplementation {
           trimmed.endsWith('}}') &&
           // Ensure there's only one {{ }} pair (no literal text outside)
           trimmed.indexOf('{{') === 0 &&
+          trimmed.length >= 2 &&
           trimmed.lastIndexOf('}}') === trimmed.length - 2
         ) {
           // Convert to type-preserving syntax
