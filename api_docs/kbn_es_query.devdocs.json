@@ -689,7 +689,7 @@
             "tags": [],
             "label": "config",
             "description": [
-              "- an objects with query:allowLeadingWildcards and query:queryString:options UI\nsettings in form of { allowLeadingWildcards, queryStringOptions }\nconfig contains dateformat:tz"
+              "- an objects with query:allowLeadingWildcards and query:queryString:options UI"
             ],
             "signature": [
               {
@@ -1303,7 +1303,17 @@
           },
           ") => { query: (Record<string, any> & { query_string?: { query: string; fields?: string[] | undefined; } | undefined; }) | undefined; meta: { alias: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index: string; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: ",
           "FilterMetaParams",
-          " | undefined; value?: string | undefined; }; }"
+          " | undefined; value?: string | ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.RangeFilterParams",
+            "text": "RangeFilterParams"
+          },
+          " | ",
+          "PhraseFilterValue",
+          "[] | undefined; }; }"
         ],
         "path": "src/platform/packages/shared/kbn-es-query/src/filters/build_filters/query_string_filter.ts",
         "lineNumber": 43,
@@ -4796,7 +4806,17 @@
           },
           ") => { meta: { disabled: boolean; alias?: string | null | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: ",
           "FilterMetaParams",
-          " | undefined; value?: string | undefined; }; $state?: { store: ",
+          " | undefined; value?: string | ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.RangeFilterParams",
+            "text": "RangeFilterParams"
+          },
+          " | ",
+          "PhraseFilterValue",
+          "[] | undefined; }; $state?: { store: ",
           {
             "pluginId": "@kbn/es-query-constants",
             "scope": "common",
@@ -4861,7 +4881,17 @@
           },
           ") => { meta: { negate: boolean; alias?: string | null | undefined; disabled?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: ",
           "FilterMetaParams",
-          " | undefined; value?: string | undefined; }; $state?: { store: ",
+          " | undefined; value?: string | ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.RangeFilterParams",
+            "text": "RangeFilterParams"
+          },
+          " | ",
+          "PhraseFilterValue",
+          "[] | undefined; }; $state?: { store: ",
           {
             "pluginId": "@kbn/es-query-constants",
             "scope": "common",
@@ -6250,7 +6280,7 @@
           "\nAn interface for a latitude-longitude pair"
         ],
         "path": "src/platform/packages/shared/kbn-es-query/src/filters/build_filters/types.ts",
-        "lineNumber": 97,
+        "lineNumber": 102,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -6263,7 +6293,7 @@
             "label": "lat",
             "description": [],
             "path": "src/platform/packages/shared/kbn-es-query/src/filters/build_filters/types.ts",
-            "lineNumber": 102,
+            "lineNumber": 107,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6276,7 +6306,7 @@
             "label": "lon",
             "description": [],
             "path": "src/platform/packages/shared/kbn-es-query/src/filters/build_filters/types.ts",
-            "lineNumber": 103,
+            "lineNumber": 108,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6586,7 +6616,7 @@
           "\nAn enum of all types of filters supported by this package"
         ],
         "path": "src/platform/packages/shared/kbn-es-query/src/filters/build_filters/types.ts",
-        "lineNumber": 28,
+        "lineNumber": 33,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -6599,7 +6629,7 @@
         "tags": [],
         "label": "FilterStateStore",
         "description": [
-          "\n  Filter,\nAn enum to denote whether a filter is specific to an application's context or whether it should be applied globally."
+          "\nAn enum to denote whether a filter is specific to an application's context or whether it should be applied globally."
         ],
         "path": "src/platform/packages/shared/kbn-es-query-constants/src/constants.ts",
         "lineNumber": 10,
@@ -6621,7 +6651,7 @@
           "{ esql: string; }"
         ],
         "path": "src/platform/packages/shared/kbn-es-query/src/filters/build_filters/types.ts",
-        "lineNumber": 95,
+        "lineNumber": 100,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -6829,7 +6859,7 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-es-query/src/filters/build_filters/types.ts",
-        "lineNumber": 17,
+        "lineNumber": 22,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -6862,7 +6892,7 @@
           "; query?: Record<string, any> | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-es-query/src/filters/build_filters/types.ts",
-        "lineNumber": 80,
+        "lineNumber": 85,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -6878,10 +6908,20 @@
         "signature": [
           "{ alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: ",
           "FilterMetaParams",
-          " | undefined; value?: string | undefined; }"
+          " | undefined; value?: string | ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.RangeFilterParams",
+            "text": "RangeFilterParams"
+          },
+          " | ",
+          "PhraseFilterValue",
+          "[] | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-es-query/src/filters/build_filters/types.ts",
-        "lineNumber": 62,
+        "lineNumber": 67,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -7024,7 +7064,7 @@
           "{ query: string | { [key: string]: any; }; language: string; }"
         ],
         "path": "src/platform/packages/shared/kbn-es-query/src/filters/build_filters/types.ts",
-        "lineNumber": 89,
+        "lineNumber": 94,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -7541,7 +7581,7 @@
             "label": "range",
             "description": [],
             "signature": [
-              "(fieldName: string, operator: \"gte\" | \"lte\" | \"gt\" | \"lt\", value: string | number) => ",
+              "(fieldName: string, operator: \"lte\" | \"gt\" | \"gte\" | \"lt\", value: string | number) => ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -7581,7 +7621,7 @@
                 "label": "operator",
                 "description": [],
                 "signature": [
-                  "\"gte\" | \"lte\" | \"gt\" | \"lt\""
+                  "\"lte\" | \"gt\" | \"gte\" | \"lt\""
                 ],
                 "path": "src/platform/packages/shared/kbn-es-query/src/kuery/node_types/node_builder.ts",
                 "lineNumber": 29,

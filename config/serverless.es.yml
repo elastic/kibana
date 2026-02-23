@@ -75,6 +75,10 @@ xpack.serverless.search.enabled: true
 ## Set the home route
 uiSettings.overrides.defaultRoute: /app/elasticsearch
 
+## Enable tech-preview pages
+uiSettings.overrides:
+  dataSources:enabled: false
+
 # Specify in telemetry the project type
 telemetry.labels.serverless: search
 
