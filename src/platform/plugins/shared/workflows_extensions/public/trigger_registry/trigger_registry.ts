@@ -19,6 +19,8 @@ export class PublicTriggerRegistry {
   private readonly registry = new Map<string, PublicTriggerDefinition>();
   /** Definitions with conditionExamples/defaultCondition are validated async; they sit here until validation passes. */
   private readonly pending = new Map<string, PublicTriggerDefinition>();
+  /** Promises for in-flight KQL validations; whenReady() waits for these. */
+  private readonly pendingValidationPromises = new Set<Promise<void>>();
 
   /**
    * Register a trigger definition.
@@ -54,11 +56,15 @@ export class PublicTriggerRegistry {
     }
 
     this.pending.set(id, definition);
-    void this.validateAndPromote(id, definition);
+    const promise = this.validateAndPromote(id, definition);
+    this.pendingValidationPromises.add(promise);
+    promise.finally(() => {
+      this.pendingValidationPromises.delete(promise);
+    });
   }
 
-  private validateAndPromote(id: string, definition: PublicTriggerDefinition): void {
-    import('./validate_kql_conditions').then(
+  private validateAndPromote(id: string, definition: PublicTriggerDefinition): Promise<void> {
+    return import('./validate_kql_conditions').then(
       ({ validateKqlConditions }) => {
         if (!this.pending.has(id)) return;
 
@@ -88,6 +94,16 @@ export class PublicTriggerRegistry {
         console.error(`[workflows_extensions] Failed to validate trigger "${id}":`, err);
       }
     );
+  }
+
+  /**
+   * Resolves when all currently pending async KQL validations have completed.
+   * Consumers that need the full trigger list (e.g. actions menu) should await this
+   * after plugin start before reading getAllTriggerDefinitions().
+   */
+  public whenReady(): Promise<void> {
+    const promises = Array.from(this.pendingValidationPromises);
+    return promises.length > 0 ? Promise.all(promises).then(() => undefined) : Promise.resolve();
   }
 
   /**

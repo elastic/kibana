@@ -20,6 +20,7 @@ import {
 } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows/common/constants';
+import { untilPluginStartServicesReady } from '@kbn/workflows-extensions/public';
 import { TelemetryService } from './common/lib/telemetry/telemetry_service';
 import { triggerSchemas } from './trigger_schemas';
 import type {
@@ -126,6 +127,8 @@ export class WorkflowsPlugin
   ): Promise<WorkflowsServices> {
     // Get start services as specified in kibana.jsonc
     const [coreStart, depsStart] = await core.getStartServices();
+    // Wait for workflows_extensions trigger registry to be ready
+    await untilPluginStartServicesReady();
 
     const additionalServices: WorkflowsPublicPluginStartAdditionalServices = {
       storage: new Storage(localStorage),

@@ -27,3 +27,4 @@ export { createPublicStepDefinition } from './step_registry/types';
 export type { PublicTriggerDefinition } from './trigger_registry/types';
 export type { ConditionExample } from './trigger_registry/condition_examples_schema';
 export { conditionExamplesSchema } from './trigger_registry/condition_examples_schema';
+export { untilPluginStartServicesReady } from './kibana_services';

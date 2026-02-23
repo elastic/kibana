@@ -8,6 +8,7 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import { setStartServices } from './kibana_services';
 import { PublicStepRegistry } from './step_registry';
 import { registerInternalStepDefinitions } from './steps';
 import { PublicTriggerRegistry } from './trigger_registry';
@@ -51,6 +52,8 @@ export class WorkflowsExtensionsPublicPlugin
     _core: CoreStart,
     _plugins: WorkflowsExtensionsPublicPluginStartDeps
   ): WorkflowsExtensionsPublicPluginStart {
+    setStartServices(() => this.triggerRegistry.whenReady());
+
     return {
       getAllStepDefinitions: () => {
         return this.stepRegistry.getAll();
