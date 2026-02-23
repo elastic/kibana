@@ -70,7 +70,7 @@ The step's output is the JSON object provided by the human user. Subsequent step
 To resume a paused workflow:
 
 ```http
-POST /api/workflows/executions/{executionId}/resume
+POST /api/workflowExecutions/{executionId}/resume
 Content-Type: application/json
 
 {
