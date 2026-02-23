@@ -48,6 +48,12 @@ import type { ConfigSchema } from './config_schema';
 import { attackDiscoveryAlertFieldMap } from './lib/attack_discovery/schedules/fields';
 import { ATTACK_DISCOVERY_ALERTS_CONTEXT } from './lib/attack_discovery/schedules/constants';
 import { getAttackDiscoveryDataGeneratorRuleType } from './lib/attack_discovery/data_generator_rule/definition';
+import { alertGroupingSavedObjectTypes } from './lib/alert_grouping/persistence';
+import { getAlertGroupingTask, type AlertGroupingTask } from './lib/alert_grouping';
+import {
+  getDeduplicateAlertsStepDefinition,
+  getVectorizeAlertsStepDefinition,
+} from './lib/alert_grouping/workflow_steps';
 
 interface FeatureFlagDefinition {
   featureFlagName: string;
@@ -62,15 +68,16 @@ interface FeatureFlagDefinition {
 
 export class ElasticAssistantPlugin
   implements
-    Plugin<
-      ElasticAssistantPluginSetup,
-      ElasticAssistantPluginStart,
-      ElasticAssistantPluginSetupDependencies,
-      ElasticAssistantPluginStartDependencies
-    >
-{
+  Plugin<
+    ElasticAssistantPluginSetup,
+    ElasticAssistantPluginStart,
+    ElasticAssistantPluginSetupDependencies,
+    ElasticAssistantPluginStartDependencies
+  > {
   private readonly logger: Logger;
   private assistantService: AIAssistantService | undefined;
+  private adhocAttackDiscoveryDataClient: IRuleDataClient | undefined;
+  private alertGroupingTask: AlertGroupingTask | undefined;
   private pluginStop$: Subject<void>;
   private readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
   private readonly config: ConfigSchema;
@@ -111,10 +118,25 @@ export class ElasticAssistantPlugin
       pluginStop$: this.pluginStop$,
     });
 
-    const adhocAttackDiscoveryDataClient = this.initializeAttackDiscovery({
+    this.adhocAttackDiscoveryDataClient = this.initializeAttackDiscovery({
       core,
       plugins,
     });
+
+    // Register alert grouping task with Task Manager (must be before request context factory)
+    this.alertGroupingTask = getAlertGroupingTask(this.logger);
+    this.alertGroupingTask.setup({
+      taskManager: plugins.taskManager,
+      logger: this.logger,
+    });
+
+    // Register Attack Discovery attachment type with Cases plugin (server-side)
+    if (plugins.cases) {
+      const { ATTACK_DISCOVERY_ATTACHMENT_TYPE } = require('@kbn/cases-plugin/common');
+      plugins.cases.attachmentFramework.registerExternalReference({
+        id: ATTACK_DISCOVERY_ATTACHMENT_TYPE,
+      });
+    }
 
     const requestContextFactory = new RequestContextFactory({
       logger: this.logger,
@@ -122,7 +144,8 @@ export class ElasticAssistantPlugin
       plugins,
       kibanaVersion: this.kibanaVersion,
       assistantService: this.assistantService,
-      adhocAttackDiscoveryDataClient,
+      adhocAttackDiscoveryDataClient: this.adhocAttackDiscoveryDataClient,
+      alertGroupingTask: this.alertGroupingTask,
     });
 
     const router = core.http.createRouter<ElasticAssistantRequestHandlerContext>();
@@ -150,6 +173,18 @@ export class ElasticAssistantPlugin
     }
 
     registerRoutes(router, this.logger, this.config, enableDataGeneratorRoutes);
+
+    // Register alert grouping saved object types
+    alertGroupingSavedObjectTypes.forEach((soType) => core.savedObjects.registerType(soType));
+
+    // Register workflow steps for alert deduplication (Elastic Workflows integration)
+    if (plugins.workflowsExtensions) {
+      plugins.workflowsExtensions.registerStepDefinition(
+        getDeduplicateAlertsStepDefinition(core)
+      );
+      plugins.workflowsExtensions.registerStepDefinition(getVectorizeAlertsStepDefinition());
+      this.logger.info('Registered alert deduplication workflow steps');
+    }
 
     // The featureFlags service is not available in the core setup, so we need
     // to wait for the start services to be available to read the feature flags.
@@ -196,11 +231,25 @@ export class ElasticAssistantPlugin
         if (res?.total)
           this.logger.info(`Removed ${res.total} legacy quick prompts from AI Assistant`);
       })
-      .catch(() => {});
+      .catch(() => { });
+
+    // Start alert grouping task with dependencies
+    if (this.alertGroupingTask && plugins.taskManager) {
+      this.alertGroupingTask.start({
+        taskManager: plugins.taskManager,
+        getStartServices: async () => [core, plugins, {}] as any,
+        assistantService: this.assistantService!,
+        cases: plugins.cases,
+      });
+    }
 
     return {
       actions: plugins.actions,
       inference: plugins.inference,
+      // Expose assistantService for use by other plugins
+      assistantService: this.assistantService,
+      // Expose adhocAttackDiscoveryDataClient for use by other plugins
+      adhocAttackDiscoveryDataClient: this.adhocAttackDiscoveryDataClient,
       getRegisteredFeatures: (pluginName: string) => {
         return appContextService.getRegisteredFeatures(pluginName);
       },
