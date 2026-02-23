@@ -16,14 +16,19 @@ import type { ESQLFieldWithMetadata } from '@kbn/esql-types';
 import { FieldIcon } from '@kbn/react-field';
 import { getFieldIconType } from '@kbn/field-utils/src/components/field_select/utils';
 import type { HttpStart } from '@kbn/core/public';
-import type { TimeRange } from '@kbn/es-query';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { KibanaProject as SolutionId } from '@kbn/projects-solutions-groups';
-import type { ISearchGeneric } from '@kbn/search-types';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { BrowserPopoverWrapper } from '../browser_popover_wrapper';
 import { DataSourceSelectionChange } from '../types';
 import { FIELDS_BROWSER_I18N_KEYS } from './i18n';
 import { getFieldTypeLabel, getFieldTypeIconType } from './utils';
 import { useAllFields } from './use_all_fields';
+
+interface FieldsBrowserKibanaServices {
+  core: { http: HttpStart };
+  data: Pick<DataPublicPluginStart, 'search' | 'query'>;
+}
 
 interface FieldsBrowserProps {
   isOpen: boolean;
@@ -38,13 +43,7 @@ interface FieldsBrowserProps {
   simplifiedQuery: string;
   /** Full ES|QL query text used for fetching recommended fields. */
   fullQuery: string;
-  http?: HttpStart;
   activeSolutionId?: SolutionId;
-  /** Search service used by `getEsqlColumns` when fetching fields. */
-  search?: ISearchGeneric;
-  /** Time range provider used by `getEsqlColumns` when fetching fields. */
-  getTimeRange?: () => TimeRange;
-  signal?: AbortSignal;
   position?: { top?: number; left?: number };
 }
 
@@ -55,23 +54,29 @@ export const FieldsBrowser: React.FC<FieldsBrowserProps> = ({
   preloadedFields,
   simplifiedQuery,
   fullQuery,
-  http,
   activeSolutionId,
-  search,
-  getTimeRange,
-  signal,
   position,
 }) => {
+  const { services } = useKibana<FieldsBrowserKibanaServices>();
+  const getTimeRange = useCallback(
+    () => services.data.query.timefilter.timefilter.getTime(),
+    [services.data.query.timefilter.timefilter]
+  );
+  const abortController = useMemo(() => (isOpen ? new AbortController() : undefined), [isOpen]);
+  useEffect(() => {
+    return () => abortController?.abort();
+  }, [abortController]);
+
   const { allFields, recommendedFields, isLoading } = useAllFields({
     isOpen,
     preloadedFields,
     simplifiedQuery,
     fullQuery,
-    http,
+    http: services.core.http,
     activeSolutionId,
-    search,
+    search: services.data.search.search,
     getTimeRange,
-    signal,
+    signal: abortController?.signal,
   });
   const [searchValue, setSearchValue] = useState('');
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);

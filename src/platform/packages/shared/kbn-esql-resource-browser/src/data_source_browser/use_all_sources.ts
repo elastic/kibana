@@ -8,7 +8,11 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
-import type { ESQLCallbacks, ESQLSourceResult, IndicesAutocompleteResult } from '@kbn/esql-types';
+import type {
+  ESQLSourceResult,
+  IndexAutocompleteItem,
+  IndicesAutocompleteResult,
+} from '@kbn/esql-types';
 
 const normalizeTimeseriesIndices = ({
   indices,
@@ -26,15 +30,17 @@ const normalizeTimeseriesIndices = ({
 export interface UseAllSourcesParams {
   isOpen: boolean;
   preloadedSources?: ESQLSourceResult[];
-  esqlCallbacks?: Pick<ESQLCallbacks, 'getSources' | 'getTimeseriesIndices'>;
   isTimeseries: boolean;
+  getSources: () => Promise<ESQLSourceResult[]>;
+  getTimeseriesIndices: () => Promise<{ indices: IndexAutocompleteItem[] }>;
 }
 
 export const useAllSources = ({
   isOpen,
   preloadedSources,
-  esqlCallbacks,
   isTimeseries,
+  getSources,
+  getTimeseriesIndices,
 }: UseAllSourcesParams): { allSources: ESQLSourceResult[]; isLoading: boolean } => {
   const [allSources, setAllSources] = useState<ESQLSourceResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -59,11 +65,11 @@ export const useAllSources = ({
       setIsLoading(true);
       try {
         if (isTimeseries) {
-          const result = (await esqlCallbacks?.getTimeseriesIndices?.()) ?? { indices: [] };
+          const result = (await getTimeseriesIndices?.()) ?? { indices: [] };
           const normalized = normalizeTimeseriesIndices(result);
           if (isMountedRef.current) setAllSources(normalized);
         } else {
-          const fetched = (await esqlCallbacks?.getSources?.()) ?? [];
+          const fetched = (await getSources?.()) ?? [];
           if (isMountedRef.current) setAllSources(fetched);
         }
       } catch {
@@ -74,7 +80,7 @@ export const useAllSources = ({
     };
 
     fetchSources();
-  }, [esqlCallbacks, isTimeseries, isOpen, preloadedSources]);
+  }, [getSources, getTimeseriesIndices, isTimeseries, isOpen, preloadedSources]);
 
   return { allSources, isLoading };
 };

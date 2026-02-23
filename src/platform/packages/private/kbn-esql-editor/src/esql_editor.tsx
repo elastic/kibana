@@ -1452,7 +1452,6 @@ const ESQLEditorInternal = function ESQLEditor({
             isOpen={isDataSourceBrowserOpen}
             isTimeseries={isTimeseries}
             preloadedSources={preloadedSources}
-            esqlCallbacks={esqlCallbacks}
             selectedSources={selectedSources}
             position={dataSourceBrowserPosition}
             onSelect={handleDataSourceBrowserSelect}
@@ -1467,11 +1466,7 @@ const ESQLEditorInternal = function ESQLEditor({
             preloadedFields={preloadedFields}
             simplifiedQuery={simplifiedQuery}
             fullQuery={fullQuery}
-            http={core.http}
             activeSolutionId={activeSolutionId ?? undefined}
-            search={data.search.search}
-            getTimeRange={() => data.query.timefilter.timefilter.getTime()}
-            signal={abortControllerRef.current.signal}
             position={fieldsBrowserPosition}
             onSelect={handleFieldsBrowserSelect}
             onClose={() => setIsFieldsBrowserOpen(false)}

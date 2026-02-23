@@ -11,6 +11,7 @@ import React, { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import type { ESQLFieldWithMetadata } from '@kbn/esql-types';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { FieldsBrowser } from '../fields_browser';
 
 const mockFields: ESQLFieldWithMetadata[] = [
@@ -42,22 +43,36 @@ type Story = StoryObj<typeof FieldsBrowser>;
 
 const InteractiveWrapper = () => {
   const [isOpen, setIsOpen] = useState(true);
+  const services = {
+    core: {
+      // Not used by this story (we preload fields + do not pass activeSolutionId),
+      // but required by `useKibana`.
+      http: {} as any,
+    },
+    data: {
+      // Not used by this story (we preload fields), but required by `useKibana`.
+      search: { search: {} as any },
+      query: { timefilter: { timefilter: { getTime: () => ({ from: 'now-15m', to: 'now' }) } } },
+    },
+  };
 
   return (
-    <FieldsBrowser
-      isOpen={isOpen}
-      onClose={() => {
-        setIsOpen(false);
-        action('onClose')();
-      }}
-      onSelect={(fieldName, change) => {
-        action('onSelect')(fieldName, change);
-      }}
-      preloadedFields={mockFields.map((f) => ({ name: f.name, type: f.type }))}
-      simplifiedQuery="FROM index1, index2"
-      fullQuery="FROM index1, index2"
-      position={{ top: 100, left: 100 }}
-    />
+    <KibanaContextProvider services={services as any}>
+      <FieldsBrowser
+        isOpen={isOpen}
+        onClose={() => {
+          setIsOpen(false);
+          action('onClose')();
+        }}
+        onSelect={(fieldName, change) => {
+          action('onSelect')(fieldName, change);
+        }}
+        preloadedFields={mockFields.map((f) => ({ name: f.name, type: f.type }))}
+        simplifiedQuery="FROM index1, index2"
+        fullQuery="FROM index1, index2"
+        position={{ top: 100, left: 100 }}
+      />
+    </KibanaContextProvider>
   );
 };
 
