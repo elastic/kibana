@@ -32,7 +32,7 @@ const projectRouting = {
   type: ['keyword'],
   serverlessOnly: true,
   preview: true,
-  snapshotOnly: true,
+  snapshotOnly: false,
   description:
     'A project routing expression, used to define which projects to route the query to. Only supported if Cross-Project Search is enabled.',
   ignoreAsSuggestion: true,
@@ -42,7 +42,7 @@ const timeZone = {
   name: EsqlSettingNames.TIME_ZONE,
   type: ['keyword'],
   serverlessOnly: false,
-  preview: true,
+  preview: false,
   snapshotOnly: false,
   description:
     'The default timezone to be used in the query. Defaults to UTC, and overrides the `time_zone` request parameter. See [timezones](https://www.elastic.co/docs/reference/query-languages/esql/esql-rest#esql-timezones).',
