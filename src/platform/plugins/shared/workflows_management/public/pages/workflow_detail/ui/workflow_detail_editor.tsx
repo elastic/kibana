@@ -9,12 +9,12 @@
 
 import type { UseEuiTheme } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiText } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { css, type SerializedStyles } from '@emotion/react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
-import { monaco } from '@kbn/monaco';
+import { monaco, YAML_LANG_ID } from '@kbn/monaco';
 import type { StepContext } from '@kbn/workflows';
 import {
   WORKFLOWS_UI_EXECUTION_GRAPH_SETTING_ID,
@@ -28,14 +28,13 @@ import { ExecutionGraph } from '../../../features/debug_graph/execution_graph';
 import { TestStepModal } from '../../../features/run_workflow/ui/test_step_modal';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
-import { YamlEditor } from '../../../shared/ui';
 import type { ContextOverrideData } from '../../../shared/utils/build_step_context_override/build_step_context_override';
 import { GlobalWorkflowEditorStyles } from '../../../widgets/workflow_yaml_editor/styles/global_workflow_editor_styles';
 import {
-  getSplitViewLineTypes,
-  normalizeForDiff,
-} from '../../../widgets/workflow_yaml_editor/ui/decorations/build_merged_diff_lines';
-import type { DiffLineType } from '../../../widgets/workflow_yaml_editor/ui/decorations/build_merged_diff_lines';
+  useWorkflowsMonacoTheme,
+  WORKFLOWS_MONACO_EDITOR_THEME,
+} from '../../../widgets/workflow_yaml_editor/styles/use_workflows_monaco_theme';
+import { normalizeForDiff } from '../../../widgets/workflow_yaml_editor/ui/decorations/build_merged_diff_lines';
 
 const WorkflowYAMLEditor = React.lazy(() =>
   import('../../../widgets/workflow_yaml_editor').then((module) => ({
@@ -57,109 +56,103 @@ interface WorkflowDetailEditorProps {
   diffViewMode?: 'unified' | 'split';
 }
 
-const READ_ONLY_EDITOR_OPTIONS = {
+const READ_ONLY_DIFF_OPTIONS: monaco.editor.IEditorOptions = {
   readOnly: true,
   minimap: { enabled: false },
-  lineNumbers: 'on' as const,
-  glyphMargin: true,
+  lineNumbers: 'on',
   scrollBeyondLastLine: false,
-  wordWrap: 'on' as const,
+  wordWrap: 'on',
+  renderLineHighlight: 'none',
 };
 
-function applySplitDiffDecorations(
-  editor: monaco.editor.IStandaloneCodeEditor,
-  lineTypes: DiffLineType[],
-  highlightType: 'add' | 'remove'
-): monaco.editor.IEditorDecorationsCollection {
-  const model = editor.getModel();
-  if (!model || model.getLineCount() !== lineTypes.length) {
-    return editor.createDecorationsCollection([]);
-  }
-  const decorations: monaco.editor.IModelDeltaDecoration[] = [];
-  const className = highlightType === 'add' ? 'diff-line-added' : 'diff-line-removed';
-  const marginClassName =
-    highlightType === 'add' ? 'diff-line-added-margin' : 'diff-line-removed-margin';
-  const glyphClassName = highlightType === 'add' ? 'diff-glyph-added' : 'diff-glyph-removed';
-  for (let i = 0; i < lineTypes.length; i++) {
-    if (lineTypes[i] === highlightType) {
-      const lineNumber = i + 1;
-      const maxColumn = model.getLineMaxColumn(lineNumber);
-      decorations.push({
-        range: new monaco.Range(lineNumber, 1, lineNumber, maxColumn),
-        options: {
-          isWholeLine: true,
-          className,
-          marginClassName,
-          glyphMarginClassName: glyphClassName,
-        },
-      });
-    }
-  }
-  return editor.createDecorationsCollection(decorations);
-}
-
-function SplitDiffPaneEditor({
-  value,
-  lineTypes,
-  highlightType,
+/**
+ * Monaco's built-in diff editor (side-by-side, synced scrolling).
+ * Container is measured with ResizeObserver and given explicit dimensions so the editor renders.
+ */
+function MonacoSplitDiffEditor({
+  currentYaml,
+  previousYaml,
+  wrapperCss,
 }: {
-  value: string;
-  lineTypes: DiffLineType[];
-  highlightType: 'add' | 'remove';
+  currentYaml: string;
+  previousYaml: string;
+  wrapperCss?: ReturnType<typeof css>;
 }) {
-  const collectionRef = useRef<monaco.editor.IEditorDecorationsCollection | null>(null);
-  const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
-  const disposableRef = useRef<monaco.IDisposable | null>(null);
+  const measureRef = useRef<HTMLDivElement>(null);
+  const monacoContainerRef = useRef<HTMLDivElement>(null);
+  const diffEditorRef = useRef<monaco.editor.IStandaloneDiffEditor | null>(null);
+  const [size, setSize] = useState({ width: 0, height: 0 });
 
-  const tryApplyDecorations = useCallback(() => {
-    const editor = editorRef.current;
-    if (!editor || lineTypes.length === 0) return;
-    const model = editor.getModel();
-    if (!model || model.getLineCount() !== lineTypes.length) return;
-    if (collectionRef.current) {
-      collectionRef.current.clear();
-      collectionRef.current = null;
-    }
-    collectionRef.current = applySplitDiffDecorations(editor, lineTypes, highlightType);
-  }, [lineTypes, highlightType]);
+  useWorkflowsMonacoTheme();
 
   useEffect(() => {
-    tryApplyDecorations();
-  }, [tryApplyDecorations, value]);
-
-  const editorDidMount = useCallback(
-    (editor: monaco.editor.IStandaloneCodeEditor) => {
-      editorRef.current = editor;
-      tryApplyDecorations();
-      const model = editor.getModel();
-      if (model) {
-        disposableRef.current = model.onDidChangeContent(tryApplyDecorations);
-      }
-      setTimeout(tryApplyDecorations, 0);
-      setTimeout(tryApplyDecorations, 100);
-    },
-    [tryApplyDecorations]
-  );
-
-  const editorWillUnmount = useCallback(() => {
-    disposableRef.current?.dispose();
-    disposableRef.current = null;
-    if (collectionRef.current) {
-      collectionRef.current.clear();
-      collectionRef.current = null;
-    }
-    editorRef.current = null;
+    const el = measureRef.current;
+    if (!el) return;
+    const ro =
+      typeof ResizeObserver !== 'undefined'
+        ? new ResizeObserver((entries) => {
+            const entry = entries[0];
+            if (entry) {
+              const { width, height } = entry.contentRect;
+              setSize({ width: Math.floor(width), height: Math.floor(height) });
+            }
+          })
+        : null;
+    ro?.observe(el);
+    return () => ro?.disconnect();
   }, []);
 
+  useEffect(() => {
+    const container = monacoContainerRef.current;
+    if (!container || size.width <= 0 || size.height <= 0) return;
+
+    const original = monaco.editor.createModel(currentYaml, YAML_LANG_ID);
+    const modified = monaco.editor.createModel(previousYaml, YAML_LANG_ID);
+
+    if (!diffEditorRef.current) {
+      diffEditorRef.current = monaco.editor.createDiffEditor(container, {
+        automaticLayout: true,
+        theme: WORKFLOWS_MONACO_EDITOR_THEME,
+        readOnly: true,
+        renderSideBySide: true,
+        enableSplitViewResizing: true,
+      });
+    }
+
+    diffEditorRef.current.setModel({ original, modified });
+    diffEditorRef.current.updateOptions(READ_ONLY_DIFF_OPTIONS);
+    diffEditorRef.current.getOriginalEditor().updateOptions(READ_ONLY_DIFF_OPTIONS);
+    diffEditorRef.current.getModifiedEditor().updateOptions(READ_ONLY_DIFF_OPTIONS);
+
+    return () => {
+      original.dispose();
+      modified.dispose();
+    };
+  }, [currentYaml, previousYaml, size.width, size.height]);
+
+  useEffect(() => {
+    return () => {
+      diffEditorRef.current?.dispose();
+      diffEditorRef.current = null;
+    };
+  }, []);
+
+  const hasSize = size.width > 0 && size.height > 0;
+
   return (
-    <YamlEditor
-      value={value}
-      onChange={() => {}}
-      schemas={null}
-      options={READ_ONLY_EDITOR_OPTIONS}
-      editorDidMount={editorDidMount}
-      editorWillUnmount={editorWillUnmount}
-    />
+    <div
+      ref={measureRef}
+      css={wrapperCss ?? undefined}
+      data-test-subj="workflowMonacoDiffEditorWrapper"
+    >
+      {hasSize && (
+        <div
+          ref={monacoContainerRef}
+          style={{ width: size.width, height: size.height }}
+          data-test-subj="workflowMonacoDiffEditor"
+        />
+      )}
+    </div>
   );
 }
 
@@ -253,58 +246,52 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(
       diffOriginalValue !== '' &&
       diffViewMode === 'split';
 
-    const splitLineTypes = isSplitDiffView
-      ? getSplitViewLineTypes(diffOriginalValue, workflowYaml)
-      : null;
-
     return (
       <>
         {isSplitDiffView && <GlobalWorkflowEditorStyles />}
         <EuiFlexGroup gutterSize="none" style={{ height: '100%' }}>
           <EuiFlexItem css={styles.yamlEditor}>
-            {isSplitDiffView && splitLineTypes ? (
-              <EuiFlexGroup gutterSize="none" css={styles.splitDiffContainer} alignItems="stretch">
-                <EuiFlexItem grow={1} css={styles.splitDiffPane}>
-                  <div css={styles.splitDiffPaneLabelWrapper}>
-                    <div
-                      css={[styles.splitDiffPaneLabel, styles.splitDiffPaneLabelCurrent]}
-                      data-test-subj="workflowDiffSplitCurrentLabel"
-                    >
-                      <EuiText size="xs" css={styles.splitDiffPaneLabelText}>
-                        {i18n.translate('workflows.diffView.split.currentVersionLabel', {
-                          defaultMessage: 'Current version',
-                        })}
-                      </EuiText>
-                    </div>
-                  </div>
-                  <div css={styles.splitDiffEditor}>
-                    <SplitDiffPaneEditor
-                      value={normalizeForDiff(workflowYaml)}
-                      lineTypes={splitLineTypes.current}
-                      highlightType="add"
-                    />
-                  </div>
+            {isSplitDiffView ? (
+              <EuiFlexGroup
+                gutterSize="none"
+                css={styles.splitDiffContainer}
+                direction="column"
+                alignItems="stretch"
+              >
+                <EuiFlexItem grow={false}>
+                  <EuiFlexGroup gutterSize="none" css={styles.splitDiffLabelRow}>
+                    <EuiFlexItem grow={1} css={styles.splitDiffPaneLabelWrapper}>
+                      <div
+                        css={[styles.splitDiffPaneLabel, styles.splitDiffPaneLabelCurrent]}
+                        data-test-subj="workflowDiffSplitCurrentLabel"
+                      >
+                        <EuiText size="xs" css={styles.splitDiffPaneLabelText}>
+                          {i18n.translate('workflows.diffView.split.currentVersionLabel', {
+                            defaultMessage: 'Current version',
+                          })}
+                        </EuiText>
+                      </div>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={1} css={styles.splitDiffPaneLabelWrapper}>
+                      <div
+                        css={[styles.splitDiffPaneLabel, styles.splitDiffPaneLabelPrevious]}
+                        data-test-subj="workflowDiffSplitPreviousLabel"
+                      >
+                        <EuiText size="xs" css={styles.splitDiffPaneLabelText}>
+                          {i18n.translate('workflows.diffView.split.previousVersionLabel', {
+                            defaultMessage: 'Previous version',
+                          })}
+                        </EuiText>
+                      </div>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
                 </EuiFlexItem>
-                <EuiFlexItem grow={1} css={styles.splitDiffPane}>
-                  <div css={styles.splitDiffPaneLabelWrapper}>
-                    <div
-                      css={[styles.splitDiffPaneLabel, styles.splitDiffPaneLabelPrevious]}
-                      data-test-subj="workflowDiffSplitPreviousLabel"
-                    >
-                      <EuiText size="xs" css={styles.splitDiffPaneLabelText}>
-                        {i18n.translate('workflows.diffView.split.previousVersionLabel', {
-                          defaultMessage: 'Previous version',
-                        })}
-                      </EuiText>
-                    </div>
-                  </div>
-                  <div css={styles.splitDiffEditor}>
-                    <SplitDiffPaneEditor
-                      value={normalizeForDiff(diffOriginalValue)}
-                      lineTypes={splitLineTypes.original}
-                      highlightType="remove"
-                    />
-                  </div>
+                <EuiFlexItem grow={1} css={styles.splitDiffEditorWrapper}>
+                  <MonacoSplitDiffEditor
+                    currentYaml={normalizeForDiff(workflowYaml)}
+                    previousYaml={normalizeForDiff(diffOriginalValue)}
+                    wrapperCss={styles.splitDiffEditor as SerializedStyles}
+                  />
                 </EuiFlexItem>
               </EuiFlexGroup>
             ) : (
@@ -361,16 +348,16 @@ const componentStyles = {
         minWidth: 0,
       },
     }),
-  splitDiffPane: ({ euiTheme }: UseEuiTheme) =>
+  splitDiffLabelRow: ({ euiTheme }: UseEuiTheme) =>
     css({
-      display: 'flex',
-      flexDirection: 'column',
-      overflow: 'hidden',
-      borderRight: `1px solid ${euiTheme.colors.borderBasePlain}`,
-      '&:last-of-type': {
-        borderRight: 'none',
-      },
+      flexShrink: 0,
+      borderBottom: `1px solid ${euiTheme.colors.borderBasePlain}`,
     }),
+  splitDiffEditorWrapper: css({
+    flex: '1 1 0',
+    minHeight: 0,
+    overflow: 'hidden',
+  }),
   splitDiffPaneLabelWrapper: css({
     flex: '0 0 auto',
     display: 'flex',
@@ -402,7 +389,8 @@ const componentStyles = {
       color: euiTheme.colors.warningText,
     }),
   splitDiffEditor: css({
-    flex: 1,
+    width: '100%',
+    height: '100%',
     minHeight: 0,
     overflow: 'hidden',
   }),
