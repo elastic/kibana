@@ -6,11 +6,9 @@
  */
 
 import type { IScopedClusterClient, KibanaRequest, Logger } from '@kbn/core/server';
-import datemath from '@elastic/datemath';
 import { compact, isEmpty } from 'lodash';
 import moment from 'moment';
-import { SPAN_DESTINATION_SERVICE_RESOURCE, SPAN_DURATION } from '@kbn/apm-types';
-import { ApmDocumentType, getBucketSize, RollupInterval } from '@kbn/apm-data-access-plugin/common';
+import { SPAN_DESTINATION_SERVICE_RESOURCE } from '@kbn/apm-types';
 import type { ObservabilityAgentBuilderDataRegistry } from '../../../data_registry/data_registry';
 import type {
   ObservabilityAgentBuilderCoreSetup,
@@ -110,7 +108,6 @@ export const SIGNAL_FETCHERS: SignalFetcher[] = [
         kqlFilter,
         groupBy: 'transaction.name',
         latencyType: 'p95',
-        apmDataSource: undefined,
       });
 
       const changePoints = buckets.map((bucket) => {
@@ -133,12 +130,6 @@ export const SIGNAL_FETCHERS: SignalFetcher[] = [
     async fetch({ core, plugins, request, logger, serviceName, serviceEnvironment }, start, end) {
       if (!serviceName) return null;
 
-      const { bucketSize, intervalString } = getBucketSize({
-        start: datemath.parse(start)!.valueOf(),
-        end: datemath.parse(end)!.valueOf(),
-        numBuckets: 100,
-      });
-
       const buckets = await getTraceChangePoints({
         core,
         plugins,
@@ -149,12 +140,6 @@ export const SIGNAL_FETCHERS: SignalFetcher[] = [
         kqlFilter: `service.name: "${serviceName}" AND service.environment: "${serviceEnvironment}"`,
         groupBy: SPAN_DESTINATION_SERVICE_RESOURCE,
         latencyType: 'avg',
-        apmDataSource: {
-          documentType: ApmDocumentType.ServiceDestinationMetric,
-          rollupInterval: RollupInterval.OneMinute,
-          durationField: SPAN_DURATION,
-          bucketSize,
-        },
       });
       const changePoints = buckets.map((bucket) => {
         return {

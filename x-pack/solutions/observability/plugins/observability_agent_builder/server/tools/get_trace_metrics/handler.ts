@@ -22,7 +22,6 @@ import {
   getLatencyValue,
   getFailureRateAggregation,
   getThroughputAggregation,
-  getDurationField,
 } from '../../utils/trace_metrics_aggregations';
 
 export interface TraceMetricsItem {
@@ -97,11 +96,6 @@ export async function getToolHandler({
   const { rollupInterval, hasDurationSummaryField } = source;
   const documentType = source.documentType as DocumentType;
 
-  const durationField = getDurationField({
-    latencyAggregationType: latencyType,
-    hasDurationSummaryField,
-    documentType,
-  });
   const response = await apmEventClient.search('get_trace_metrics', {
     apm: {
       sources: [{ documentType, rollupInterval }],
@@ -125,7 +119,8 @@ export async function getToolHandler({
         aggs: {
           ...getLatencyAggregation({
             latencyAggregationType: latencyType,
-            durationField,
+            hasDurationSummaryField,
+            documentType,
           }),
           ...getFailureRateAggregation(documentType),
           ...getThroughputAggregation((endMs - startMs) / 1000 / 60),

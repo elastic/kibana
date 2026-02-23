@@ -5,6 +5,10 @@
  * 2.0.
  */
 import { ApmDocumentType } from '@kbn/apm-data-access-plugin/common';
+import {
+  SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
+  SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM,
+} from '@kbn/apm-types/es_fields';
 import { getDurationFieldForTransactions } from '@kbn/apm-data-access-plugin/server/utils';
 import { getOutcomeAggregation } from '@kbn/apm-data-access-plugin/server/utils';
 
@@ -15,7 +19,7 @@ export type DocumentType =
 
 export type LatencyAggregationType = 'avg' | 'p99' | 'p95';
 
-export function getDurationField({
+export function getLatencyAggregation({
   latencyAggregationType,
   hasDurationSummaryField,
   documentType,
@@ -27,17 +31,7 @@ export function getDurationField({
   // cant calculate percentile aggregation on transaction.duration.summary field
   const useDurationSummaryField =
     hasDurationSummaryField && latencyAggregationType !== 'p95' && latencyAggregationType !== 'p99';
-
-  return getDurationFieldForTransactions(documentType, useDurationSummaryField);
-}
-
-export function getLatencyAggregation({
-  latencyAggregationType,
-  durationField,
-}: {
-  latencyAggregationType: LatencyAggregationType;
-  durationField: string;
-}) {
+  const durationField = getDurationFieldForTransactions(documentType, useDurationSummaryField);
   return {
     latency: {
       ...(latencyAggregationType === 'avg'
@@ -52,12 +46,43 @@ export function getLatencyAggregation({
   };
 }
 
+export function getSpanLatencyAggregation() {
+  // Destination metrics store response time as sum/count; percentiles are not supported.
+  return {
+    latency_sum: {
+      sum: {
+        field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM,
+      },
+    },
+    latency_count: {
+      sum: {
+        field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
+      },
+    },
+    latency: {
+      bucket_script: {
+        buckets_path: {
+          sum: 'latency_sum',
+          count: 'latency_count',
+        },
+        script: {
+          source: 'params.count != null && params.count > 0 ? params.sum / params.count : null',
+        },
+      },
+    },
+  };
+}
+
+export type AggregationLatency =
+  | { value: number | null }
+  | { values: Record<string, number | null> };
+
 export function getLatencyValue({
   latencyAggregationType,
   aggregation,
 }: {
   latencyAggregationType: LatencyAggregationType;
-  aggregation: { value: number | null } | { values: Record<string, number | null> };
+  aggregation: AggregationLatency;
 }) {
   if ('value' in aggregation) {
     return aggregation.value;
@@ -107,6 +132,29 @@ export function getThroughputAggregation(durationAsMinutes: number) {
       bucket_script: {
         buckets_path: {
           count: '_count',
+        },
+        script: {
+          source: 'params.count != null ? params.count / params.durationAsMinutes : 0',
+          params: {
+            durationAsMinutes,
+          },
+        },
+      },
+    },
+  };
+}
+
+export function getSpanThroughputAggregation(durationAsMinutes: number) {
+  return {
+    throughput_count: {
+      sum: {
+        field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
+      },
+    },
+    throughput: {
+      bucket_script: {
+        buckets_path: {
+          count: 'throughput_count',
         },
         script: {
           source: 'params.count != null ? params.count / params.durationAsMinutes : 0',
