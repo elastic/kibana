@@ -80,6 +80,19 @@ export const getLifecycleValue = (
   return getRetentionPeriod(activeRetention as string);
 };
 
+/**
+ * In Elasticsearch, a data stream's lifecycle retention can be overridden by ILM
+ * when backing indices have `prefer_ilm` enabled and an ILM policy is configured.
+ * In that case, the effective retention is governed by the ILM policy.
+ */
+export const isIlmPreferred = (dataStream?: DataStream | null): boolean => {
+  // this doesn't make sense to me as preferILM looks like a setting on the data stream
+  return (
+    Boolean(dataStream?.ilmPolicyName) &&
+    Boolean(dataStream?.indices?.some(({ preferILM }) => preferILM))
+  );
+};
+
 export const isDataStreamFullyManagedByILM = (dataStream?: DataStream | null) => {
   return (
     dataStream?.nextGenerationManagedBy?.toLowerCase() === 'index lifecycle management' &&

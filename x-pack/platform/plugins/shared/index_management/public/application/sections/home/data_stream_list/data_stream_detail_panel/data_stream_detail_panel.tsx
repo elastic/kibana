@@ -50,12 +50,14 @@ import { ILM_PAGES_POLICY_EDIT } from '../../../../constants';
 import {
   isDataStreamFullyManagedByILM,
   isDataStreamFullyManagedByDSL,
+  isIlmPreferred,
 } from '../../../../lib/data_streams';
 import { useAppContext } from '../../../../app_context';
 import { DataStreamsBadges } from '../data_stream_badges';
 import { useIlmLocator } from '../../../../services/use_ilm_locator';
 import { StreamsPromotion } from './streams_promotion';
 import { INDEX_MANAGEMENT_LOCATOR_ID } from '../../../../..';
+import { DataRetentionValue } from '../data_retention_value';
 
 interface Detail {
   name: string;
@@ -396,10 +398,12 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
         }),
         content: (
           <ConditionalWrap
-            condition={isDataStreamFullyManagedByILM(dataStream)}
+            condition={isDataStreamFullyManagedByILM(dataStream) && !isIlmPreferred(dataStream)}
             wrap={(children) => <EuiTextColor color="subdued">{children}</EuiTextColor>}
           >
-            <>{getLifecycleValue(lifecycle)}</>
+            <>
+              <DataRetentionValue dataStream={dataStream} />
+            </>
           </ConditionalWrap>
         ),
         dataTestSubj: 'dataRetentionDetail',

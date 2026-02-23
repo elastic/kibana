@@ -28,7 +28,7 @@ import type { EuiContextMenuPanelItemDescriptor } from '@elastic/eui/src/compone
 import { MAX_DATA_RETENTION } from '../../../../../../common/constants';
 import { useAppContext } from '../../../../app_context';
 import type { DataStream } from '../../../../../../common/types';
-import { getLifecycleValue } from '../../../../lib/data_streams';
+import { isDataStreamFullyManagedByILM, isIlmPreferred } from '../../../../lib/data_streams';
 import type { UseRequestResponse } from '../../../../../shared_imports';
 import { reactRouterNavigate } from '../../../../../shared_imports';
 import { getDataStreamDetailsLink, getIndexListUri } from '../../../../services/routing';
@@ -37,13 +37,13 @@ import { DeleteDataStreamConfirmationModal } from '../delete_data_stream_confirm
 import { humanizeTimeStamp } from '../humanize_time_stamp';
 import { DataStreamsBadges } from '../data_stream_badges';
 import { ConditionalWrap } from '../data_stream_detail_panel';
-import { isDataStreamFullyManagedByILM } from '../../../../lib/data_streams';
 import { indexModeLabels } from '../../../../lib/index_mode_labels';
 import type { Filters } from '../../components';
 import { FilterListButton } from '../../components';
 import { type DataStreamFilterName } from '../data_stream_list';
 import { DataStreamActionsMenu } from '../data_stream_actions_menu';
 import { EditDataRetentionModal } from '../edit_data_retention_modal';
+import { DataRetentionValue } from '../data_retention_value';
 
 interface TableDataStream extends DataStream {
   isDataStreamFullyManagedByILM: boolean;
@@ -240,38 +240,44 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
     ),
     truncateText: true,
     sortable: true,
-    render: (lifecycle: DataStream['lifecycle'], dataStream) => (
-      <ConditionalWrap
-        condition={dataStream.isDataStreamFullyManagedByILM}
-        wrap={(children) => <EuiTextColor color="subdued">{children}</EuiTextColor>}
-      >
-        <>
-          {getLifecycleValue(lifecycle, INFINITE_AS_ICON)}
+    render: (_lifecycle: DataStream['lifecycle'], dataStream) => {
+      const ilmPreferred = isIlmPreferred(dataStream);
 
-          {lifecycle?.retention_determined_by === MAX_DATA_RETENTION && (
-            <>
-              {' '}
-              <EuiIconTip
-                content={i18n.translate(
-                  'xpack.idxMgmt.dataStreamList.table.usingEffectiveRetentionTooltip',
-                  {
-                    defaultMessage: `This data stream is using the maximum allowed data retention: [{effectiveRetention}].`,
-                    values: {
-                      effectiveRetention: lifecycle?.effective_retention,
-                    },
-                  }
-                )}
-                position="top"
-                type="info"
-                size="s"
-                color="subdued"
-                iconProps={{ 'data-test-subj': 'usingMaxRetention' }}
-              />
-            </>
-          )}
-        </>
-      </ConditionalWrap>
-    ),
+      return (
+        <ConditionalWrap
+          condition={dataStream.isDataStreamFullyManagedByILM && !ilmPreferred}
+          wrap={(children) => <EuiTextColor color="subdued">{children}</EuiTextColor>}
+        >
+          <>
+            <DataRetentionValue dataStream={dataStream} infiniteAsIcon={INFINITE_AS_ICON} />
+
+            {!ilmPreferred &&
+              dataStream.lifecycle?.retention_determined_by === MAX_DATA_RETENTION && (
+                <>
+                  {' '}
+                  <EuiIconTip
+                    content={i18n.translate(
+                      'xpack.idxMgmt.dataStreamList.table.usingEffectiveRetentionTooltip',
+                      {
+                        defaultMessage:
+                          'This data stream is using the maximum allowed data retention: [{effectiveRetention}].',
+                        values: {
+                          effectiveRetention: dataStream.lifecycle?.effective_retention,
+                        },
+                      }
+                    )}
+                    position="top"
+                    type="info"
+                    size="s"
+                    color="subdued"
+                    iconProps={{ 'data-test-subj': 'usingMaxRetention' }}
+                  />
+                </>
+              )}
+          </>
+        </ConditionalWrap>
+      );
+    },
   });
 
   columns.push({
