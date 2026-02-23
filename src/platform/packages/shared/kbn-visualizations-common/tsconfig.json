@@ -20,7 +20,10 @@
   ],
   "kbn_references": [
     "@kbn/i18n",
-    "@kbn/kibana-utils-plugin",
-    "@kbn/i18n-react"
+    "@kbn/expressions-plugin",
+    "@kbn/css-utils",
+    "@kbn/chart-expressions-common",
+    "@kbn/core",
+    "@kbn/safer-lodash-set"
   ]
 }
