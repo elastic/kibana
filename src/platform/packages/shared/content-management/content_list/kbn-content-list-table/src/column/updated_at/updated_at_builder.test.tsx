@@ -67,7 +67,12 @@ describe('updated at column builder', () => {
     it('forces sortable false when sorting is unsupported', () => {
       const context: ColumnBuilderContext = {
         ...defaultContext,
-        supports: { sorting: false, pagination: true, search: true, selection: true },
+        supports: {
+          sorting: false,
+          pagination: true,
+          search: true,
+          selection: true,
+        },
       };
 
       const result = buildUpdatedAtColumn({}, context);

@@ -48,6 +48,7 @@
     "@kbn/cloud",
     "@kbn/agent-builder-plugin",
     "@kbn/scout-search",
+    "@kbn/management-settings-ids",
   ],
   "exclude": [
     "target/**/*",

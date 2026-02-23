@@ -15,6 +15,7 @@ export interface EditIlmPhasesFlyoutProps {
   onSave: (next: IlmPolicyPhases) => void;
   onClose: () => void;
   isMetricsStream: boolean;
+  onChangeDebounceMs?: number;
   isSaving?: boolean;
   canCreateRepository?: boolean;
   searchableSnapshotRepositories?: string[];
