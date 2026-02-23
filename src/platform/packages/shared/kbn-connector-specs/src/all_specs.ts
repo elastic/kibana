@@ -20,4 +20,5 @@ export * from './specs/urlvoid/urlvoid';
 export * from './specs/virustotal/virustotal';
 export * from './specs/jina/jina_reader';
 export * from './specs/sharepoint_online/sharepoint_online';
+export * from './specs/slack/slack';
 export * from './specs/amazon_s3/amazon_s3';

@@ -61,7 +61,7 @@
           "MetricsExperienceRestorableState",
           ">, \"initialState\" | \"onInitialStateChange\"> & React.RefAttributes<never>, \"ref\"> & { ref?: ((instance: null) => void) | React.RefObject<never> | null | undefined; }, \"ref\"> & React.RefAttributes<{}>>"
         ],
-        "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/components/observability/metrics_experience/lazy_unified_metrics_experience_grid.tsx",
+        "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/components/observability/metrics/lazy_unified_metrics_experience_grid.tsx",
         "lineNumber": 14,
         "columnNumber": 14,
         "deprecated": false,
@@ -91,23 +91,6 @@
     "interfaces": [],
     "enums": [],
     "misc": [
-      {
-        "parentPluginId": "@kbn/unified-chart-section-viewer",
-        "id": "def-public.DataSource",
-        "type": "Type",
-        "tags": [],
-        "label": "DataSource",
-        "description": [],
-        "signature": [
-          "\"apm\" | \"otel\""
-        ],
-        "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/components/observability/traces/index.tsx",
-        "lineNumber": 22,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
       {
         "parentPluginId": "@kbn/unified-chart-section-viewer",
         "id": "def-public.UnifiedMetricsGridRestorableState",

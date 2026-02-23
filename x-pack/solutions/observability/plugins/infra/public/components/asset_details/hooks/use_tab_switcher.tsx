@@ -7,7 +7,7 @@
 
 import createContainer from 'constate';
 import { useLazyRef } from '../../../hooks/use_lazy_ref';
-import type { TabIds } from '../types';
+import { ContentTabIds, type TabIds } from '../types';
 import { useAssetDetailsUrlState } from './use_asset_details_url_state';
 
 interface TabSwitcherParams {
@@ -23,8 +23,10 @@ export function useTabSwitcher({ defaultActiveTabId }: TabSwitcherParams) {
   const renderedTabsSet = useLazyRef(() => new Set([activeTabId]));
 
   const showTab = (tabId: TabIds, options?: { scrollTo?: string }) => {
-    // On a tab click, mark the tab content as allowed to be rendered
-    renderedTabsSet.current.add(tabId);
+    // On a tab click, mark the tab content as allowed to be rendered except for the logs tab.
+    if (tabId !== ContentTabIds.LOGS) {
+      renderedTabsSet.current.add(tabId);
+    }
 
     setUrlState({
       tabId: options?.scrollTo ? `${tabId}#${options?.scrollTo}` : tabId,
