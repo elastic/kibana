@@ -16,6 +16,8 @@ import type {
   ManagedEntityDefinition,
 } from '../../../common/domain/definitions/entity_schema';
 
+const GENERIC_TYPE = 'generic' as EntityType;
+
 export function validateAndTransformDoc(
   entityType: EntityType,
   namespace: string,
@@ -94,7 +96,7 @@ function transformDocForUpsert(type: EntityType, data: Partial<Entity>): Record<
     ...data,
   };
 
-  if (type === 'generic') {
+  if (type === GENERIC_TYPE) {
     return doc;
   }
 
