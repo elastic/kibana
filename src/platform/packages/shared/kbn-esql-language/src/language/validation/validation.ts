@@ -235,7 +235,7 @@ function validateCommand(
   const context = {
     columns: references.columns,
     policies: references.policies,
-    sources: [...references.sources].map((source) => ({ name: source })),
+    sources: [...references.sources].map((source) => ({ name: source, hidden: false })),
     joinSources: references.joinIndices,
     timeSeriesSources: references.timeSeriesSources,
     views: references.views,

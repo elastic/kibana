@@ -5,7 +5,7 @@ mapped_pages:
 
 # Configuration service [configuration-service]
 
-{{kib}} provides `ConfigService` for plugin developers that want to support adjustable runtime behavior for their plugins. Plugins can only read their own configuration values, it is not possible to access the configuration values from {{kib}} Core or other plugins directly.
+The `ConfigService` in {{kib}} enables plugin developers to support adjustable runtime behavior. Plugins can only read their own configuration values; direct access to configuration values from {{kib}} Core or other plugins is not permitted.
 
 ::::{note}
 The Configuration service is only available server side.
@@ -19,10 +19,10 @@ const basePath = config.get('server.basePath');
 const basePath = core.http.basePath.get(request);
 ```
 
-To have access to your plugin config, you *should*:
+To access your plugin's configuration, you *should*:
 
-* Declare plugin-specific `configPath` (will fallback to plugin `id` if not specified) in your plugin definition.
-* Export schema validation for the config from plugin’s main file. Schema is mandatory. If a plugin reads from the config without schema declaration, `ConfigService` will throw an error.
+* Declare a plugin-specific `configPath` in your plugin definition (defaults to the plugin `id` if not specified).
+* Export a mandatory schema validation for the config from your plugin's main file. `ConfigService` will throw an error if a plugin reads from the config without schema declaration.
 
 **my_plugin/server/index.ts**
 
@@ -51,7 +51,7 @@ export class MyPlugin {
 }
 ```
 
-If your plugin also has a client-side part, you can also expose configuration properties to it using the configuration `exposeToBrowser` allow-list property.
+If your plugin has a client-side component, expose configuration properties using the `exposeToBrowser` allow-list.
 
 **my_plugin/server/index.ts**
 
@@ -91,7 +91,7 @@ export class MyPlugin implements Plugin<PluginSetup, PluginStart> {
   }
 ```
 
-All plugins are considered enabled by default. If you want to disable your plugin, you could declare the `enabled` flag in the plugin config. This is a special {{kib}} Platform key. {{kib}} reads its value and won’t create a plugin instance if `enabled: false`.
+Plugins are enabled by default. To disable a plugin, declare the special {{kib}} Platform `enabled` flag in its config. {{kib}} will not create a plugin instance if `enabled: false`.
 
 ```js
 export const config = {
@@ -101,7 +101,7 @@ export const config = {
 
 ## Handle plugin configuration deprecations [handle-plugin-configuration-deprecations]
 
-If your plugin has deprecated configuration keys, you can describe them using the `deprecations` config descriptor field. Deprecations are managed on a per-plugin basis, meaning you don’t need to specify the whole property path, but use the relative path from your plugin’s configuration root.
+To manage deprecated configuration keys, use the `deprecations` config descriptor field. Deprecations are handled per-plugin, using relative paths from the plugin's configuration root instead of full property paths.
 
 **my_plugin/server/index.ts**
 

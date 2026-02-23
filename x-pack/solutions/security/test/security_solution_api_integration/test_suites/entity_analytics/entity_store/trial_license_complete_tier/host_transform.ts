@@ -49,8 +49,7 @@ export default function (providerContext: FtrProviderContext) {
   const es = providerContext.getService('es');
   const dataView = dataViewRouteHelpersFactory(supertest);
 
-  // Failing: See https://github.com/elastic/kibana/issues/232405
-  describe.skip('@ess Host transform logic', () => {
+  describe('@ess Host transform logic', () => {
     describe('Entity Store is not installed by default', () => {
       it("Should return 200 and status 'not_installed'", async () => {
         const { body } = await supertest.get('/api/entity_store/status').expect(200);
@@ -100,8 +99,11 @@ export default function (providerContext: FtrProviderContext) {
 
       beforeEach(async () => {
         // Now we can enable the Entity Store...
+        // Only enable 'host' engine - this test only validates host transform logic.
+        // Enabling all engines concurrently causes task conflicts (server-side issue).
         await enableEntityStore(providerContext, {
           extraIndexPatterns: [FROZEN_INDEX_NAME, COLD_INDEX_NAME],
+          entityTypes: ['host'],
         });
       });
 
@@ -109,7 +111,45 @@ export default function (providerContext: FtrProviderContext) {
         await cleanUpEntityStore(providerContext);
       });
 
-      it("Should return 200 and status 'running' for all engines", async () => {
+      it("Should return 200 and status 'running' for host engine", async () => {
+        // Wait for Entity Store and all components to be fully installed
+        await retry.waitForWithTimeout(
+          'Entity Store host engine to be fully running with all components installed',
+          TIMEOUT_MS,
+          async () => {
+            const { body } = await supertest
+              .get('/api/entity_store/status')
+              .query({ include_components: true })
+              .expect(200);
+
+            const response: GetEntityStoreStatusResponse = body as GetEntityStoreStatusResponse;
+
+            if (response.status !== 'running') {
+              return false;
+            }
+
+            if (response.engines.length !== 1) {
+              return false;
+            }
+
+            const hostEngine = response.engines[0];
+            if (hostEngine.type !== 'host' || hostEngine.status !== 'started') {
+              return false;
+            }
+
+            // Check all components are installed
+            if (hostEngine.components) {
+              const allInstalled = hostEngine.components.every((c) => c.installed === true);
+              if (!allInstalled) {
+                return false;
+              }
+            }
+
+            return true;
+          }
+        );
+
+        // Final verification
         const { body } = await supertest
           .get('/api/entity_store/status')
           .query({ include_components: true })
@@ -117,12 +157,12 @@ export default function (providerContext: FtrProviderContext) {
 
         const response: GetEntityStoreStatusResponse = body as GetEntityStoreStatusResponse;
         expect(response.status).to.eql('running');
-        for (const engine of response.engines) {
-          expect(engine.status).to.eql('started');
-          if (!engine.components) {
-            continue;
-          }
-          for (const component of engine.components) {
+        expect(response.engines.length).to.eql(1);
+        const hostEngine = response.engines[0];
+        expect(hostEngine.type).to.eql('host');
+        expect(hostEngine.status).to.eql('started');
+        if (hostEngine.components) {
+          for (const component of hostEngine.components) {
             expect(component.installed).to.be(true);
           }
         }

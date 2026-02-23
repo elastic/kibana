@@ -14,6 +14,8 @@ import {
 } from '@kbn/streams-schema';
 import pLimit from 'p-limit';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
+import { createDefaultSignificantEventsToolUsage } from '@kbn/streams-ai';
+import { getErrorMessage } from '../../streams/errors/parse_error';
 import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
 import type { TaskContext } from '.';
 import type { TaskParams } from '../types';
@@ -54,18 +56,17 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
 
               const {
                 taskClient,
-                scopedClusterClient,
                 streamsClient,
                 inferenceClient,
                 soClient,
                 featureClient,
+                scopedClusterClient,
               } = await taskContext.getScopedClients({
                 request: runContext.fakeRequest,
               });
 
               try {
                 const stream = await streamsClient.getStream(streamName);
-                const { hits: features } = await featureClient.getFeatures(streamName);
 
                 const esClient = scopedClusterClient.asCurrentUser;
 
@@ -96,12 +97,12 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
                           end,
                           system,
                           sampleDocsSize,
-                          features,
                           systemPrompt: significantEventsPromptOverride,
                         },
                         {
                           inferenceClient,
                           esClient,
+                          featureClient,
                           logger: taskContext.logger.get('significant_events_generation'),
                           signal: runContext.abortController.signal,
                         }
@@ -122,6 +123,17 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
                     { queries: [], tokensUsed: { prompt: 0, completion: 0 } }
                   );
 
+                const toolUsage = resultsArray.reduce((acc, result) => {
+                  acc.get_stream_features.calls += result.toolUsage.get_stream_features.calls;
+                  acc.get_stream_features.failures += result.toolUsage.get_stream_features.failures;
+                  acc.get_stream_features.latency_ms +=
+                    result.toolUsage.get_stream_features.latency_ms;
+                  acc.add_queries.calls += result.toolUsage.add_queries.calls;
+                  acc.add_queries.failures += result.toolUsage.add_queries.failures;
+                  acc.add_queries.latency_ms += result.toolUsage.add_queries.latency_ms;
+                  return acc;
+                }, createDefaultSignificantEventsToolUsage());
+
                 taskContext.telemetry.trackSignificantEventsQueriesGenerated({
                   count: combinedResults.queries.length,
                   systems_count: systems?.length ?? 0,
@@ -129,6 +141,7 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
                   stream_type: getStreamTypeFromDefinition(stream),
                   input_tokens_used: combinedResults.tokensUsed.prompt,
                   output_tokens_used: combinedResults.tokensUsed.completion,
+                  tool_usage: toolUsage,
                 });
 
                 await taskClient.complete<
@@ -145,7 +158,7 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
 
                 const errorMessage = isInferenceProviderError(error)
                   ? formatInferenceProviderError(error, connector)
-                  : error.message;
+                  : getErrorMessage(error);
 
                 if (
                   errorMessage.includes('ERR_CANCELED') ||

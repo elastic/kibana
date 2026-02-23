@@ -424,6 +424,9 @@ export interface ValueFormatConfig {
 }
 
 export interface LensDocument {
+  /**
+   * savedObjectId must be required when the LensDocument is by ref
+   */
   savedObjectId?: string;
   type?: string; // what is this type for? It's always 'lens'
   title: string;
@@ -1194,6 +1197,11 @@ export interface SuggestionRequest<T = unknown> {
   activeData?: Record<string, Datatable>;
   allowMixed?: boolean;
   datasourceId?: string;
+  /**
+   * Optional query (e.g. ES|QL) passed when suggesting from context (e.g. Visualize Editor).
+   * Visualizations can use it to tailor suggestions (e.g. prefer line for time series).
+   */
+  query?: AggregateQuery;
 }
 
 /**
