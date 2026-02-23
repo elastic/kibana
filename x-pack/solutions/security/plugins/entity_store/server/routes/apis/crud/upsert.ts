@@ -11,7 +11,7 @@ import { z } from '@kbn/zod';
 import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS } from '../../constants';
 import type { EntityStorePluginRouter } from '../../../types';
 import { wrapMiddlewares } from '../../middleware';
-import { BadCRUDRequestError, EntityStoreNotInstalledError } from '../../../domain/errors';
+import { BadCRUDRequestError } from '../../../domain/errors';
 import { Entity } from '../../../../common/domain/definitions/entity.gen';
 import { EntityType } from '../../../../common/domain/definitions/entity_schema';
 
@@ -48,12 +48,9 @@ export function registerCRUDUpsert(router: EntityStorePluginRouter) {
       },
       wrapMiddlewares(async (ctx, req, res): Promise<IKibanaResponse> => {
         const entityStoreCtx = await ctx.entityStore;
-        const { logger, assetManager, crudClient } = entityStoreCtx;
+        const { logger, crudClient } = entityStoreCtx;
 
         logger.debug('CRUD Upsert api called');
-        if (!(await assetManager.isInstalled())) {
-          return res.customError({ statusCode: 503, body: new EntityStoreNotInstalledError() });
-        }
 
         try {
           await crudClient.upsertEntity(req.params.entityType, req.body, req.query.force);

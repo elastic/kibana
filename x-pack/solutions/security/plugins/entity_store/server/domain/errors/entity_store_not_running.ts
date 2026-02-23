@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-export class EntityStoreNotInstalledError extends Error {
+export class EntityStoreNotRunningError extends Error {
   constructor() {
-    super(`No EntityStore engine is running`);
+    super(`Entity Store has not been started`);
   }
 }

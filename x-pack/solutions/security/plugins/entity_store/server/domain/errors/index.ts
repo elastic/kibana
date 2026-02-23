@@ -7,5 +7,5 @@
 
 export { EntityNotFoundError } from './entity_not_found';
 export { DocumentVersionConflictError } from './document_version_conflict';
-export { EntityStoreNotInstalledError } from './entity_store_not_installed';
+export { EntityStoreNotRunningError } from './entity_store_not_running';
 export { BadCRUDRequestError } from './bad_crud_request_error';

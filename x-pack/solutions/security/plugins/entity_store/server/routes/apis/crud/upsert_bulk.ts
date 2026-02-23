@@ -12,7 +12,8 @@ import { EntityType } from '../../../../common/domain/definitions/entity_schema'
 import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS } from '../../constants';
 import type { EntityStorePluginRouter } from '../../../types';
 import { wrapMiddlewares } from '../../middleware';
-import { BadCRUDRequestError, EntityStoreNotInstalledError } from '../../../domain/errors';
+import { ENGINE_STATUS } from '../../../domain/constants';
+import { BadCRUDRequestError, EntityStoreNotRunningError } from '../../../domain/errors';
 import { Entity } from '../../../../common/domain/definitions/entity.gen';
 
 const bodySchema = z.object({
@@ -53,8 +54,9 @@ export function registerCRUDUpsertBulk(router: EntityStorePluginRouter) {
         const { logger, assetManager, crudClient } = entityStoreCtx;
 
         logger.debug('CRUD Upsert Bulk api called');
-        if (!(await assetManager.isInstalled())) {
-          return res.customError({ statusCode: 503, body: new EntityStoreNotInstalledError() });
+        const { engines } = await assetManager.getStatus();
+        if (engines.some((engine) => engine.status !== ENGINE_STATUS.STARTED)) {
+          return res.customError({ statusCode: 503, body: new EntityStoreNotRunningError() });
         }
 
         try {
