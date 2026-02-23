@@ -293,15 +293,21 @@ function buildVisualizationState(
   const primaryGroups = (config.group_by ?? []).map((_, index) =>
     getAccessorName('group_by', index)
   );
+
+  const { colorMapping, ...sharedState } = computeSharedPartitionLayerState(config);
+  const isLegacyColorMode = 'palette' in (colorMapping ?? {});
+  console.log('buildVisualizationState', { sharedState });
   if (isAPIPieChartLayer(config)) {
     return {
       shape: config.type,
+      ...(isLegacyColorMode && { ...colorMapping }),
       layers: [
         {
           metrics,
           primaryGroups,
           allowMultipleMetrics: shouldAllowMultipleMetrics(config),
-          ...computeSharedPartitionLayerState(config),
+          ...sharedState,
+          ...(!isLegacyColorMode && { ...colorMapping }),
           categoryDisplay: convertAPICategoryDisplayOption(config.label_position),
           ...getEmptySizeRatioFromDonutHoleOption(config.donut_hole),
         },
@@ -372,7 +378,7 @@ export function fromAPItoLensState(config: PartitionState): PartitionLensWithout
 
   const visualizationState = buildVisualizationState(config);
 
-  return {
+  const after = {
     visualizationType: 'lnsPie',
     ...getSharedChartAPIToLensState(config),
     state: {
@@ -383,6 +389,8 @@ export function fromAPItoLensState(config: PartitionState): PartitionLensWithout
     },
     references,
   };
+  console.log('fromAPItoLensState', { before: config, after });
+  return after;
 }
 
 export function fromLensStateToAPI(config: LensAttributes): PartitionState {
@@ -392,7 +400,7 @@ export function fromLensStateToAPI(config: LensAttributes): PartitionState {
   const layers = getDatasourceLayers(state);
   const layer = layers[visualizationState.layers[0].layerId];
 
-  return {
+  const after = {
     ...getSharedChartLensStateToAPI(config),
     ...buildVisualizationAPI(
       visualizationState,
@@ -402,6 +410,9 @@ export function fromLensStateToAPI(config: LensAttributes): PartitionState {
       config.state.internalReferences ?? []
     ),
   };
+  console.log('fromLensStateToAPI', { before: state, after });
+
+  return after;
 }
 
 function convertStateValueDisplayToAPI(
@@ -524,7 +535,7 @@ function convertLensStateToAPIGrouping(
   legacyPalette?: PaletteOutput
 ) {
   console.log('convertLensStateToAPIGrouping', { vizLayer });
-  const colorMapping = fromColorMappingLensStateToAPI(vizLayer.colorMapping, legacyPalette);
+  const colorMapping = fromColorMappingLensStateToAPI(vizLayer.colorMapping);
   if (isTextBasedLayer(layer)) {
     return groupByAccessors.map(
       (id, index) =>

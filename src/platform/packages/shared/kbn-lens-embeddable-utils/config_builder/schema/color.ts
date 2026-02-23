@@ -181,13 +181,6 @@ const colorCodeSchema = schema.object(
 
 const colorDefSchema = schema.oneOf([colorFromPaletteSchema, colorCodeSchema]);
 
-const legacyColorSchema = schema.object({
-  mode: schema.literal('legacy'),
-  palette: schema.string({
-    meta: { description: 'The palette name to use for color assignment.' },
-  }),
-});
-
 const categoricalColorMappingSchema = schema.object(
   {
     mode: schema.literal('categorical'),
@@ -236,10 +229,6 @@ export const colorMappingSchema = schema.oneOf(
      * Gradient color mapping: assigns a gradient of colors to a range of values.
      */
     gradientColorMappingSchema,
-    /**
-     * Legacy color mapping: assigns colorss from a legacy palette
-     */
-    legacyColorSchema,
   ],
   { meta: { id: 'colorMapping' } }
 );

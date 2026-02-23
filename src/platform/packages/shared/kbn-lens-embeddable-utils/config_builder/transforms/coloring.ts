@@ -68,8 +68,8 @@ export function fromColorByValueAPIToLensState(
 export function fromColorByValueLensStateToAPI(
   color: PaletteOutput<CustomPaletteParams> | undefined
 ): ColorByValueType | undefined {
-  console.log('fromColorByValueLensStateToAPI', color);
-  debugger;
+  // console.log('fromColorByValueLensStateToAPI', color);
+  // debugger;
   if (!color || !color.params) {
     return;
   }
@@ -144,7 +144,7 @@ export function fromStaticColorAPIToLensState(
 function fromColorLensStateToAPI(
   color: ColorMapping.CategoricalColor | ColorMapping.ColorCode
 ): ColorMappingColorDefType {
-  console.log({ color });
+  // console.log({ color });
   if (color.type === 'colorCode') {
     return {
       type: 'colorCode',
@@ -187,9 +187,9 @@ export function fromColorMappingLensStateToAPI(
   colorMapping: ColorMapping.Config | undefined,
   legacyPalette?: PaletteOutput
 ): ColorMappingType | undefined {
-  console.log('fromColorMappingLensStateToAPI', colorMapping);
-  if (legacyPalette) {
-    return { mode: 'legacy', palette: legacyPalette.name };
+  console.log('fromColorMappingLensStateToAPI', { colorMapping, legacyPalette });
+  if (legacyPalette && !colorMapping) {
+    return { mode: 'categorical', palette: `LEGACY_PALETTE_${legacyPalette.name}`, mapping: [] };
   }
   if (!colorMapping) {
     return;
@@ -301,8 +301,10 @@ export function fromColorMappingAPIToLensState(
   if (!colorMapping) {
     return;
   }
-  if (colorMapping.mode === 'legacy') {
-    return { palette: { type: 'palette', name: colorMapping.palette } };
+  if (colorMapping.palette.includes('LEGACY_PALETTE_')) {
+    return {
+      palette: { type: 'palette', name: colorMapping.palette.replace('LEGACY_PALETTE_', '') },
+    };
   }
   // debugger;
   const specialAssignments: ColorMapping.SpecialAssignment[] = [

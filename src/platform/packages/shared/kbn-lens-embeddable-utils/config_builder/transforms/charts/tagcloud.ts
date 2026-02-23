@@ -128,7 +128,12 @@ function getTagcloudTagBy(
     throw new Error('Tag accessor is missing in the visualization state');
   }
 
-  const color = fromColorMappingLensStateToAPI(visualization.colorMapping, visualization.palette);
+  let color: ColorMappingType | undefined;
+  if (visualization.palette) {
+    color = { mode: 'categorical', palette: visualization.palette.name, mapping: [] };
+  } else {
+    color = fromColorMappingLensStateToAPI(visualization.colorMapping);
+  }
 
   return {
     ...(isTextBasedLayer(layer)
@@ -226,7 +231,8 @@ export function fromAPItoLensState(
   const references = regularDataViews.length
     ? buildReferences({ [DEFAULT_LAYER_ID]: regularDataViews[0]?.id })
     : [];
-  const after = {
+  console.log({ config });
+  return {
     visualizationType: 'lnsTagcloud',
     ...getSharedChartAPIToLensState(config),
     references,
@@ -249,6 +255,7 @@ export function fromLensStateToAPI(
   const visualization = state.visualization as LensTagCloudState;
   const layers = getDatasourceLayers(state);
   const [layerId, layer] = getLensStateLayer(layers, visualization.layerId);
+  console.log(' fromLensStateToAPI', { state });
   const visualizationState = {
     ...getSharedChartLensStateToAPI(config),
     ...reverseBuildVisualizationState(
