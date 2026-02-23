@@ -35,7 +35,6 @@ export const validate = (
 
   messages.push(...validateCommandArguments(forkCommand, ast, context, callbacks));
 
-
   const allCommands = Walker.commands(ast);
   const forks = allCommands.filter(({ name }) => name === 'fork');
 
