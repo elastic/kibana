@@ -36,11 +36,12 @@ const DATA_STREAM_DATASET_VAR: RegistryVarsEntry = {
 const DATA_STREAM_USE_APM_VAR: RegistryVarsEntry = {
   name: USE_APM_VAR_NAME,
   type: 'bool',
-  title: 'Use APM Server',
+  title: 'Use Elastic APM',
   description: 'enables the apm collector and processor.',
   multi: false,
   required: false,
   show_user: true,
+  default: true,
 };
 
 export function packageHasNoPolicyTemplates(packageInfo: PackageInfo): boolean {
