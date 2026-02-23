@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-// export * from './exploratory_view';
-export type * from './step_duration.journey';
-// export * from './single_metric.journey';
+export { ExploratoryViewPage } from './exploratory_view';
