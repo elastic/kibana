@@ -8,7 +8,7 @@
  */
 
 import { isPromise } from '@kbn/std';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 interface State<T> {
   error?: Error;
@@ -110,14 +110,16 @@ export function useAbortableAsync<T>(
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps.concat(refreshId, clearValueOnNext));
 
+  const refresh = useCallback(() => {
+    setRefreshId((id) => id + 1);
+  }, []);
+
   return useMemo<AbortableAsyncState<T>>(() => {
     return {
       error,
       loading,
       value,
-      refresh: () => {
-        setRefreshId((id) => id + 1);
-      },
+      refresh,
     } as unknown as AbortableAsyncState<T>;
-  }, [error, value, loading]);
+  }, [error, value, loading, refresh]);
 }

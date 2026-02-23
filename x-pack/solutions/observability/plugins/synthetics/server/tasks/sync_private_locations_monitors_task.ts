@@ -25,6 +25,10 @@ import {
 import { DeployPrivateLocationMonitors } from './deploy_private_location_monitors';
 import { cleanUpDuplicatedPackagePolicies } from './clean_up_duplicate_policies';
 import type { HeartbeatConfig } from '../../common/runtime_types';
+import {
+  MIN_PRIVATE_LOCATIONS_SYNC_INTERVAL,
+  DYNAMIC_SETTINGS_DEFAULTS,
+} from '../../common/constants';
 import type { SyntheticsMonitorClient } from '../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { getPrivateLocations } from '../synthetics_service/get_private_locations';
 import type { SyntheticsServerSetup } from '../types';
@@ -32,7 +36,7 @@ import { getSyntheticsDynamicSettings } from '../saved_objects/synthetics_settin
 
 const TASK_TYPE = 'Synthetics:Sync-Private-Location-Monitors';
 export const PRIVATE_LOCATIONS_SYNC_TASK_ID = `${TASK_TYPE}-single-instance`;
-export const DEFAULT_TASK_SCHEDULE = '5m';
+export const DEFAULT_TASK_SCHEDULE = `${DYNAMIC_SETTINGS_DEFAULTS.privateLocationsSyncInterval}m`;
 
 export interface SyncTaskState extends Record<string, unknown> {
   lastStartedAt: string;
@@ -61,9 +65,9 @@ export class SyncPrivateLocationMonitorsTask {
   registerTaskDefinition(taskManager: TaskManagerSetupContract) {
     taskManager.registerTaskDefinitions({
       [TASK_TYPE]: {
-        title: 'Synthetics Sync Global Params Task',
+        title: 'Synthetics Sync Private Location Monitors Task',
         description:
-          'This task is executed so that we can sync private location monitors for example when global params are updated',
+          'This task syncs private location monitor package policies, handling maintenance window changes and cleaning up duplicate policies',
         timeout: '10m',
         maxAttempts: 1,
         createTaskRunner: ({ taskInstance }) => {
@@ -251,9 +255,19 @@ export class SyncPrivateLocationMonitorsTask {
       const soClient = savedObjects.createInternalRepository();
       const dynamicSettings = await getSyntheticsDynamicSettings(soClient);
       const { privateLocationsSyncInterval } = dynamicSettings;
-      if (privateLocationsSyncInterval && privateLocationsSyncInterval >= 3) {
+      if (
+        privateLocationsSyncInterval &&
+        privateLocationsSyncInterval >= MIN_PRIVATE_LOCATIONS_SYNC_INTERVAL
+      ) {
         this.debugLog(`Using configured sync interval: ${privateLocationsSyncInterval}m`);
         return `${privateLocationsSyncInterval}m`;
+      } else if (privateLocationsSyncInterval) {
+        this.debugLog(
+          `Configured sync interval ${privateLocationsSyncInterval}m is below minimum ${MIN_PRIVATE_LOCATIONS_SYNC_INTERVAL}m, using fallback: ${
+            (taskInstance.schedule as IntervalSchedule | undefined)?.interval ??
+            DEFAULT_TASK_SCHEDULE
+          }`
+        );
       }
     } catch (error) {
       this.debugLog(

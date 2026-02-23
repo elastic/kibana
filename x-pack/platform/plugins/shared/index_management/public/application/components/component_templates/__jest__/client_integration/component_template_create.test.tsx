@@ -93,7 +93,10 @@ describe('<ComponentTemplateCreate />', () => {
     });
   });
 
-  describe('Step: Review and submit', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/253349
+  // FLAKY: https://github.com/elastic/kibana/issues/253454
+  // FLAKY: https://github.com/elastic/kibana/issues/253535
+  describe.skip('Step: Review and submit', () => {
     const COMPONENT_TEMPLATE_NAME = 'comp-1';
     const SETTINGS = { number_of_shards: 1 };
     const ALIASES = { my_alias: {} };
