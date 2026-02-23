@@ -6,10 +6,9 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for generic e
   | WHERE ((entity.id IS NOT NULL AND entity.id != \\"\\"))
       AND @timestamp > TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
-  | SORT @timestamp ASC
-  | LIMIT 10000
   | EVAL recent.entity.EngineMetadata.UntypedId = entity.id
   | STATS
+    entity.EngineMetadata.FirstSeenLogInPage = MIN(@timestamp),
     recent.timestamp = MAX(@timestamp),
     recent.entity.name = LAST(TO_STRING(entity.name), @timestamp) WHERE entity.name IS NOT NULL,
  recent.entity.source = LAST(TO_STRING(entity.source), @timestamp) WHERE entity.source IS NOT NULL,
@@ -93,14 +92,13 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for generic e
  recent.entity.risk.calculated_score = LAST(entity.risk.calculated_score, @timestamp) WHERE entity.risk.calculated_score IS NOT NULL,
  recent.entity.risk.calculated_score_norm = LAST(entity.risk.calculated_score_norm, @timestamp) WHERE entity.risk.calculated_score_norm IS NOT NULL
     BY recent.entity.EngineMetadata.UntypedId
+  | SORT entity.EngineMetadata.FirstSeenLogInPage ASC, recent.entity.EngineMetadata.UntypedId ASC
+  
+  | LIMIT 10000
   | EVAL recent.entity.id = CONCAT(\\"generic:\\", recent.entity.EngineMetadata.UntypedId)
   | LOOKUP JOIN latest-index
       ON recent.entity.id == entity.id
-  | RENAME
-    recent.entity.id AS entity.id,
-    recent.entity.EngineMetadata.UntypedId AS entity.EngineMetadata.UntypedId
-  | EVAL
-    entity.name = COALESCE(recent.entity.name, entity.name),
+  | EVAL entity.name = COALESCE(recent.entity.name, entity.name),
  entity.source = COALESCE(recent.entity.source, entity.source),
  entity.type = COALESCE(recent.entity.type, entity.type),
  entity.sub_type = COALESCE(recent.entity.sub_type, entity.sub_type),
@@ -180,11 +178,14 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for generic e
  asset.business_unit = COALESCE(recent.asset.business_unit, asset.business_unit),
  entity.risk.calculated_level = COALESCE(recent.entity.risk.calculated_level, entity.risk.calculated_level),
  entity.risk.calculated_score = COALESCE(recent.entity.risk.calculated_score, entity.risk.calculated_score),
- entity.risk.calculated_score_norm = COALESCE(recent.entity.risk.calculated_score_norm, entity.risk.calculated_score_norm),
-    @timestamp = recent.timestamp,
- entity.name = CASE((entity.name IS NULL OR entity.name == \\"\\"), entity.EngineMetadata.UntypedId, entity.name),
+ entity.risk.calculated_score_norm = COALESCE(recent.entity.risk.calculated_score_norm, entity.risk.calculated_score_norm)
+  | EVAL @timestamp = recent.timestamp,
+ entity.name = CASE(entity.name IS NOT NULL AND entity.name != \\"\\", entity.name, recent.entity.EngineMetadata.UntypedId),
  entity.EngineMetadata.Type = \\"generic\\",
-    entity.hashedId = HASH(\\"MD5\\", entity.id)
+ entity.hashedId = HASH(\\"MD5\\", recent.entity.id)
+  | RENAME
+    recent.entity.id AS entity.id,
+    recent.entity.EngineMetadata.UntypedId AS entity.EngineMetadata.UntypedId
   | KEEP entity.name,
  entity.source,
  entity.type,
@@ -271,8 +272,8 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for generic e
  entity.name,
  entity.EngineMetadata.UntypedId,
  entity.hashedId,
- entity.EngineMetadata.Type
-  | SORT @timestamp ASC"
+ entity.EngineMetadata.Type,
+ entity.EngineMetadata.FirstSeenLogInPage"
 `;
 
 exports[`buildLogsExtractionEsqlQuery generates the expected query for host entity description 1`] = `
@@ -281,8 +282,6 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host enti
   | WHERE ((host.entity.id IS NOT NULL AND host.entity.id != \\"\\") OR (host.id IS NOT NULL AND host.id != \\"\\") OR (host.name IS NOT NULL AND host.name != \\"\\") OR (host.hostname IS NOT NULL AND host.hostname != \\"\\"))
       AND @timestamp > TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
-  | SORT @timestamp ASC
-  | LIMIT 10000
   | EVAL recent.entity.EngineMetadata.UntypedId = CASE((host.entity.id IS NOT NULL AND host.entity.id != \\"\\"), host.entity.id,
 (host.id IS NOT NULL AND host.id != \\"\\"), host.id,
 (host.name IS NOT NULL AND host.name != \\"\\" AND host.domain IS NOT NULL AND host.domain != \\"\\"), CONCAT(host.name, \\".\\", host.domain),
@@ -290,6 +289,7 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host enti
 (host.name IS NOT NULL AND host.name != \\"\\"), host.name,
 (host.hostname IS NOT NULL AND host.hostname != \\"\\"), host.hostname, NULL)
   | STATS
+    entity.EngineMetadata.FirstSeenLogInPage = MIN(@timestamp),
     recent.timestamp = MAX(@timestamp),
     recent.entity.name = LAST(TO_STRING(host.name), @timestamp) WHERE host.name IS NOT NULL,
  recent.host.entity.id = FIRST(TO_STRING(host.entity.id), @timestamp) WHERE host.entity.id IS NOT NULL,
@@ -338,14 +338,13 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host enti
  recent.entity.relationships.Owned_by = TOP(MV_DEDUPE(TO_STRING(host.entity.relationships.Owned_by)), 10) WHERE host.entity.relationships.Owned_by IS NOT NULL,
  recent.entity.relationships.Accessed_frequently_by = TOP(MV_DEDUPE(TO_STRING(host.entity.relationships.Accessed_frequently_by)), 10) WHERE host.entity.relationships.Accessed_frequently_by IS NOT NULL
     BY recent.entity.EngineMetadata.UntypedId
+  | SORT entity.EngineMetadata.FirstSeenLogInPage ASC, recent.entity.EngineMetadata.UntypedId ASC
+  
+  | LIMIT 10000
   | EVAL recent.entity.id = CONCAT(\\"host:\\", recent.entity.EngineMetadata.UntypedId)
   | LOOKUP JOIN latest-index
       ON recent.entity.id == entity.id
-  | RENAME
-    recent.entity.id AS entity.id,
-    recent.entity.EngineMetadata.UntypedId AS entity.EngineMetadata.UntypedId
-  | EVAL
-    entity.name = COALESCE(recent.entity.name, entity.name),
+  | EVAL entity.name = COALESCE(recent.entity.name, entity.name),
  host.entity.id = COALESCE(host.entity.id, recent.host.entity.id),
  host.name = MV_SLICE(MV_UNION(recent.host.name, host.name), 0, 9),
  host.domain = MV_SLICE(MV_UNION(recent.host.domain, host.domain), 0, 9),
@@ -390,12 +389,15 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host enti
  entity.relationships.Depends_on = MV_SLICE(MV_UNION(recent.entity.relationships.Depends_on, entity.relationships.Depends_on), 0, 9),
  entity.relationships.Dependent_of = MV_SLICE(MV_UNION(recent.entity.relationships.Dependent_of, entity.relationships.Dependent_of), 0, 9),
  entity.relationships.Owned_by = MV_SLICE(MV_UNION(recent.entity.relationships.Owned_by, entity.relationships.Owned_by), 0, 9),
- entity.relationships.Accessed_frequently_by = MV_SLICE(MV_UNION(recent.entity.relationships.Accessed_frequently_by, entity.relationships.Accessed_frequently_by), 0, 9),
-    @timestamp = recent.timestamp,
- entity.name = CASE((entity.name IS NULL OR entity.name == \\"\\"), entity.EngineMetadata.UntypedId, entity.name),
+ entity.relationships.Accessed_frequently_by = MV_SLICE(MV_UNION(recent.entity.relationships.Accessed_frequently_by, entity.relationships.Accessed_frequently_by), 0, 9)
+  | EVAL @timestamp = recent.timestamp,
+ entity.name = CASE(entity.name IS NOT NULL AND entity.name != \\"\\", entity.name, recent.entity.EngineMetadata.UntypedId),
  entity.EngineMetadata.Type = \\"host\\",
- entity.type = COALESCE(entity.type, \\"Host\\"),
-    entity.hashedId = HASH(\\"MD5\\", entity.id)
+ entity.hashedId = HASH(\\"MD5\\", recent.entity.id),
+ entity.type = COALESCE(entity.type, \\"Host\\")
+  | RENAME
+    recent.entity.id AS entity.id,
+    recent.entity.EngineMetadata.UntypedId AS entity.EngineMetadata.UntypedId
   | KEEP entity.name,
  host.entity.id,
  host.name,
@@ -447,8 +449,366 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host enti
  entity.name,
  entity.EngineMetadata.UntypedId,
  entity.hashedId,
- entity.EngineMetadata.Type
-  | SORT @timestamp ASC"
+ entity.EngineMetadata.Type,
+ entity.EngineMetadata.FirstSeenLogInPage"
+`;
+
+exports[`buildLogsExtractionEsqlQuery generates the expected query for host with pagination 1`] = `
+"FROM test-index-*
+    METADATA _index
+  | WHERE ((host.entity.id IS NOT NULL AND host.entity.id != \\"\\") OR (host.id IS NOT NULL AND host.id != \\"\\") OR (host.name IS NOT NULL AND host.name != \\"\\") OR (host.hostname IS NOT NULL AND host.hostname != \\"\\"))
+      AND @timestamp > TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
+      AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
+  | EVAL recent.entity.EngineMetadata.UntypedId = CASE((host.entity.id IS NOT NULL AND host.entity.id != \\"\\"), host.entity.id,
+(host.id IS NOT NULL AND host.id != \\"\\"), host.id,
+(host.name IS NOT NULL AND host.name != \\"\\" AND host.domain IS NOT NULL AND host.domain != \\"\\"), CONCAT(host.name, \\".\\", host.domain),
+(host.hostname IS NOT NULL AND host.hostname != \\"\\" AND host.domain IS NOT NULL AND host.domain != \\"\\"), CONCAT(host.hostname, \\".\\", host.domain),
+(host.name IS NOT NULL AND host.name != \\"\\"), host.name,
+(host.hostname IS NOT NULL AND host.hostname != \\"\\"), host.hostname, NULL)
+  | STATS
+    entity.EngineMetadata.FirstSeenLogInPage = MIN(@timestamp),
+    recent.timestamp = MAX(@timestamp),
+    recent.entity.name = LAST(TO_STRING(host.name), @timestamp) WHERE host.name IS NOT NULL,
+ recent.host.entity.id = FIRST(TO_STRING(host.entity.id), @timestamp) WHERE host.entity.id IS NOT NULL,
+ recent.host.name = TOP(MV_DEDUPE(TO_STRING(host.name)), 10) WHERE host.name IS NOT NULL,
+ recent.host.domain = TOP(MV_DEDUPE(TO_STRING(host.domain)), 10) WHERE host.domain IS NOT NULL,
+ recent.host.hostname = TOP(MV_DEDUPE(TO_STRING(host.hostname)), 10) WHERE host.hostname IS NOT NULL,
+ recent.host.id = TOP(MV_DEDUPE(TO_STRING(host.id)), 10) WHERE host.id IS NOT NULL,
+ recent.host.os.name = TOP(MV_DEDUPE(TO_STRING(host.os.name)), 10) WHERE host.os.name IS NOT NULL,
+ recent.host.os.type = TOP(MV_DEDUPE(TO_STRING(host.os.type)), 10) WHERE host.os.type IS NOT NULL,
+ recent.host.ip = TOP(MV_DEDUPE(TO_IP(host.ip)), 10) WHERE host.ip IS NOT NULL,
+ recent.host.mac = TOP(MV_DEDUPE(TO_STRING(host.mac)), 10) WHERE host.mac IS NOT NULL,
+ recent.host.type = TOP(MV_DEDUPE(TO_STRING(host.type)), 10) WHERE host.type IS NOT NULL,
+ recent.host.architecture = TOP(MV_DEDUPE(TO_STRING(host.architecture)), 10) WHERE host.architecture IS NOT NULL,
+ recent.entity.source = FIRST(TO_STRING(_index), @timestamp) WHERE _index IS NOT NULL,
+ recent.asset.id = LAST(TO_STRING(asset.id), @timestamp) WHERE asset.id IS NOT NULL,
+ recent.asset.name = LAST(TO_STRING(asset.name), @timestamp) WHERE asset.name IS NOT NULL,
+ recent.asset.owner = LAST(TO_STRING(asset.owner), @timestamp) WHERE asset.owner IS NOT NULL,
+ recent.asset.serial_number = LAST(TO_STRING(asset.serial_number), @timestamp) WHERE asset.serial_number IS NOT NULL,
+ recent.asset.model = LAST(TO_STRING(asset.model), @timestamp) WHERE asset.model IS NOT NULL,
+ recent.asset.vendor = LAST(TO_STRING(asset.vendor), @timestamp) WHERE asset.vendor IS NOT NULL,
+ recent.asset.environment = LAST(TO_STRING(asset.environment), @timestamp) WHERE asset.environment IS NOT NULL,
+ recent.asset.criticality = LAST(TO_STRING(asset.criticality), @timestamp) WHERE asset.criticality IS NOT NULL,
+ recent.asset.business_unit = LAST(TO_STRING(asset.business_unit), @timestamp) WHERE asset.business_unit IS NOT NULL,
+ recent.host.risk.calculated_level = LAST(TO_STRING(host.risk.calculated_level), @timestamp) WHERE host.risk.calculated_level IS NOT NULL,
+ recent.host.risk.calculated_score = LAST(host.risk.calculated_score, @timestamp) WHERE host.risk.calculated_score IS NOT NULL,
+ recent.host.risk.calculated_score_norm = LAST(host.risk.calculated_score_norm, @timestamp) WHERE host.risk.calculated_score_norm IS NOT NULL,
+ recent.entity.source = LAST(TO_STRING(host.entity.source), @timestamp) WHERE host.entity.source IS NOT NULL,
+ recent.entity.type = LAST(TO_STRING(host.entity.type), @timestamp) WHERE host.entity.type IS NOT NULL,
+ recent.entity.sub_type = LAST(TO_STRING(host.entity.sub_type), @timestamp) WHERE host.entity.sub_type IS NOT NULL,
+ recent.entity.url = LAST(TO_STRING(host.entity.url), @timestamp) WHERE host.entity.url IS NOT NULL,
+ recent.entity.attributes.Privileged = LAST(TO_BOOLEAN(host.entity.attributes.Privileged), @timestamp) WHERE host.entity.attributes.Privileged IS NOT NULL,
+ recent.entity.attributes.Asset = LAST(TO_BOOLEAN(host.entity.attributes.Asset), @timestamp) WHERE host.entity.attributes.Asset IS NOT NULL,
+ recent.entity.attributes.Managed = LAST(TO_BOOLEAN(host.entity.attributes.Managed), @timestamp) WHERE host.entity.attributes.Managed IS NOT NULL,
+ recent.entity.attributes.Mfa_enabled = LAST(TO_BOOLEAN(host.entity.attributes.Mfa_enabled), @timestamp) WHERE host.entity.attributes.Mfa_enabled IS NOT NULL,
+ recent.entity.lifecycle.First_seen = LAST(TO_DATETIME(host.entity.lifecycle.First_seen), @timestamp) WHERE host.entity.lifecycle.First_seen IS NOT NULL,
+ recent.entity.lifecycle.Last_activity = LAST(TO_DATETIME(host.entity.lifecycle.Last_activity), @timestamp) WHERE host.entity.lifecycle.Last_activity IS NOT NULL,
+ recent.entity.behaviors.Brute_force_victim = LAST(TO_BOOLEAN(host.entity.behaviors.Brute_force_victim), @timestamp) WHERE host.entity.behaviors.Brute_force_victim IS NOT NULL,
+ recent.entity.behaviors.New_country_login = LAST(TO_BOOLEAN(host.entity.behaviors.New_country_login), @timestamp) WHERE host.entity.behaviors.New_country_login IS NOT NULL,
+ recent.entity.behaviors.Used_usb_device = LAST(TO_BOOLEAN(host.entity.behaviors.Used_usb_device), @timestamp) WHERE host.entity.behaviors.Used_usb_device IS NOT NULL,
+ recent.entity.risk.calculated_level = LAST(TO_STRING(host.entity.risk.calculated_level), @timestamp) WHERE host.entity.risk.calculated_level IS NOT NULL,
+ recent.entity.risk.calculated_score = LAST(host.entity.risk.calculated_score, @timestamp) WHERE host.entity.risk.calculated_score IS NOT NULL,
+ recent.entity.risk.calculated_score_norm = LAST(host.entity.risk.calculated_score_norm, @timestamp) WHERE host.entity.risk.calculated_score_norm IS NOT NULL,
+ recent.entity.relationships.Communicates_with = TOP(MV_DEDUPE(TO_STRING(host.entity.relationships.Communicates_with)), 10) WHERE host.entity.relationships.Communicates_with IS NOT NULL,
+ recent.entity.relationships.Depends_on = TOP(MV_DEDUPE(TO_STRING(host.entity.relationships.Depends_on)), 10) WHERE host.entity.relationships.Depends_on IS NOT NULL,
+ recent.entity.relationships.Dependent_of = TOP(MV_DEDUPE(TO_STRING(host.entity.relationships.Dependent_of)), 10) WHERE host.entity.relationships.Dependent_of IS NOT NULL,
+ recent.entity.relationships.Owned_by = TOP(MV_DEDUPE(TO_STRING(host.entity.relationships.Owned_by)), 10) WHERE host.entity.relationships.Owned_by IS NOT NULL,
+ recent.entity.relationships.Accessed_frequently_by = TOP(MV_DEDUPE(TO_STRING(host.entity.relationships.Accessed_frequently_by)), 10) WHERE host.entity.relationships.Accessed_frequently_by IS NOT NULL
+    BY recent.entity.EngineMetadata.UntypedId
+  | SORT entity.EngineMetadata.FirstSeenLogInPage ASC, recent.entity.EngineMetadata.UntypedId ASC
+  | WHERE entity.EngineMetadata.FirstSeenLogInPage > TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\") 
+            OR (entity.EngineMetadata.FirstSeenLogInPage == TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\") 
+                AND recent.entity.EngineMetadata.UntypedId > \\"123\\")
+  | LIMIT 10000
+  | EVAL recent.entity.id = CONCAT(\\"host:\\", recent.entity.EngineMetadata.UntypedId)
+  | LOOKUP JOIN latest-index
+      ON recent.entity.id == entity.id
+  | EVAL entity.name = COALESCE(recent.entity.name, entity.name),
+ host.entity.id = COALESCE(host.entity.id, recent.host.entity.id),
+ host.name = MV_SLICE(MV_UNION(recent.host.name, host.name), 0, 9),
+ host.domain = MV_SLICE(MV_UNION(recent.host.domain, host.domain), 0, 9),
+ host.hostname = MV_SLICE(MV_UNION(recent.host.hostname, host.hostname), 0, 9),
+ host.id = MV_SLICE(MV_UNION(recent.host.id, host.id), 0, 9),
+ host.os.name = MV_SLICE(MV_UNION(recent.host.os.name, host.os.name), 0, 9),
+ host.os.type = MV_SLICE(MV_UNION(recent.host.os.type, host.os.type), 0, 9),
+ host.ip = MV_SLICE(MV_UNION(recent.host.ip, host.ip), 0, 9),
+ host.mac = MV_SLICE(MV_UNION(recent.host.mac, host.mac), 0, 9),
+ host.type = MV_SLICE(MV_UNION(recent.host.type, host.type), 0, 9),
+ host.architecture = MV_SLICE(MV_UNION(recent.host.architecture, host.architecture), 0, 9),
+ entity.source = COALESCE(entity.source, recent.entity.source),
+ asset.id = COALESCE(recent.asset.id, asset.id),
+ asset.name = COALESCE(recent.asset.name, asset.name),
+ asset.owner = COALESCE(recent.asset.owner, asset.owner),
+ asset.serial_number = COALESCE(recent.asset.serial_number, asset.serial_number),
+ asset.model = COALESCE(recent.asset.model, asset.model),
+ asset.vendor = COALESCE(recent.asset.vendor, asset.vendor),
+ asset.environment = COALESCE(recent.asset.environment, asset.environment),
+ asset.criticality = COALESCE(recent.asset.criticality, asset.criticality),
+ asset.business_unit = COALESCE(recent.asset.business_unit, asset.business_unit),
+ host.risk.calculated_level = COALESCE(recent.host.risk.calculated_level, host.risk.calculated_level),
+ host.risk.calculated_score = COALESCE(recent.host.risk.calculated_score, host.risk.calculated_score),
+ host.risk.calculated_score_norm = COALESCE(recent.host.risk.calculated_score_norm, host.risk.calculated_score_norm),
+ entity.source = COALESCE(recent.entity.source, entity.source),
+ entity.type = COALESCE(recent.entity.type, entity.type),
+ entity.sub_type = COALESCE(recent.entity.sub_type, entity.sub_type),
+ entity.url = COALESCE(recent.entity.url, entity.url),
+ entity.attributes.Privileged = COALESCE(recent.entity.attributes.Privileged, entity.attributes.Privileged),
+ entity.attributes.Asset = COALESCE(recent.entity.attributes.Asset, entity.attributes.Asset),
+ entity.attributes.Managed = COALESCE(recent.entity.attributes.Managed, entity.attributes.Managed),
+ entity.attributes.Mfa_enabled = COALESCE(recent.entity.attributes.Mfa_enabled, entity.attributes.Mfa_enabled),
+ entity.lifecycle.First_seen = COALESCE(recent.entity.lifecycle.First_seen, entity.lifecycle.First_seen),
+ entity.lifecycle.Last_activity = COALESCE(recent.entity.lifecycle.Last_activity, entity.lifecycle.Last_activity),
+ entity.behaviors.Brute_force_victim = COALESCE(recent.entity.behaviors.Brute_force_victim, entity.behaviors.Brute_force_victim),
+ entity.behaviors.New_country_login = COALESCE(recent.entity.behaviors.New_country_login, entity.behaviors.New_country_login),
+ entity.behaviors.Used_usb_device = COALESCE(recent.entity.behaviors.Used_usb_device, entity.behaviors.Used_usb_device),
+ entity.risk.calculated_level = COALESCE(recent.entity.risk.calculated_level, entity.risk.calculated_level),
+ entity.risk.calculated_score = COALESCE(recent.entity.risk.calculated_score, entity.risk.calculated_score),
+ entity.risk.calculated_score_norm = COALESCE(recent.entity.risk.calculated_score_norm, entity.risk.calculated_score_norm),
+ entity.relationships.Communicates_with = MV_SLICE(MV_UNION(recent.entity.relationships.Communicates_with, entity.relationships.Communicates_with), 0, 9),
+ entity.relationships.Depends_on = MV_SLICE(MV_UNION(recent.entity.relationships.Depends_on, entity.relationships.Depends_on), 0, 9),
+ entity.relationships.Dependent_of = MV_SLICE(MV_UNION(recent.entity.relationships.Dependent_of, entity.relationships.Dependent_of), 0, 9),
+ entity.relationships.Owned_by = MV_SLICE(MV_UNION(recent.entity.relationships.Owned_by, entity.relationships.Owned_by), 0, 9),
+ entity.relationships.Accessed_frequently_by = MV_SLICE(MV_UNION(recent.entity.relationships.Accessed_frequently_by, entity.relationships.Accessed_frequently_by), 0, 9)
+  | EVAL @timestamp = recent.timestamp,
+ entity.name = CASE(entity.name IS NOT NULL AND entity.name != \\"\\", entity.name, recent.entity.EngineMetadata.UntypedId),
+ entity.EngineMetadata.Type = \\"host\\",
+ entity.hashedId = HASH(\\"MD5\\", recent.entity.id),
+ entity.type = COALESCE(entity.type, \\"Host\\")
+  | RENAME
+    recent.entity.id AS entity.id,
+    recent.entity.EngineMetadata.UntypedId AS entity.EngineMetadata.UntypedId
+  | KEEP entity.name,
+ host.entity.id,
+ host.name,
+ host.domain,
+ host.hostname,
+ host.id,
+ host.os.name,
+ host.os.type,
+ host.ip,
+ host.mac,
+ host.type,
+ host.architecture,
+ entity.source,
+ asset.id,
+ asset.name,
+ asset.owner,
+ asset.serial_number,
+ asset.model,
+ asset.vendor,
+ asset.environment,
+ asset.criticality,
+ asset.business_unit,
+ host.risk.calculated_level,
+ host.risk.calculated_score,
+ host.risk.calculated_score_norm,
+ entity.source,
+ entity.type,
+ entity.sub_type,
+ entity.url,
+ entity.attributes.Privileged,
+ entity.attributes.Asset,
+ entity.attributes.Managed,
+ entity.attributes.Mfa_enabled,
+ entity.lifecycle.First_seen,
+ entity.lifecycle.Last_activity,
+ entity.behaviors.Brute_force_victim,
+ entity.behaviors.New_country_login,
+ entity.behaviors.Used_usb_device,
+ entity.risk.calculated_level,
+ entity.risk.calculated_score,
+ entity.risk.calculated_score_norm,
+ entity.relationships.Communicates_with,
+ entity.relationships.Depends_on,
+ entity.relationships.Dependent_of,
+ entity.relationships.Owned_by,
+ entity.relationships.Accessed_frequently_by,
+ @timestamp,
+ entity.id,
+ entity.name,
+ entity.EngineMetadata.UntypedId,
+ entity.hashedId,
+ entity.EngineMetadata.Type,
+ entity.EngineMetadata.FirstSeenLogInPage"
+`;
+
+exports[`buildLogsExtractionEsqlQuery generates the expected query for host with recoveryId 1`] = `
+"FROM test-index-*
+    METADATA _index
+  | WHERE ((host.entity.id IS NOT NULL AND host.entity.id != \\"\\") OR (host.id IS NOT NULL AND host.id != \\"\\") OR (host.name IS NOT NULL AND host.name != \\"\\") OR (host.hostname IS NOT NULL AND host.hostname != \\"\\"))
+      AND @timestamp >= TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
+      AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
+  | EVAL recent.entity.EngineMetadata.UntypedId = CASE((host.entity.id IS NOT NULL AND host.entity.id != \\"\\"), host.entity.id,
+(host.id IS NOT NULL AND host.id != \\"\\"), host.id,
+(host.name IS NOT NULL AND host.name != \\"\\" AND host.domain IS NOT NULL AND host.domain != \\"\\"), CONCAT(host.name, \\".\\", host.domain),
+(host.hostname IS NOT NULL AND host.hostname != \\"\\" AND host.domain IS NOT NULL AND host.domain != \\"\\"), CONCAT(host.hostname, \\".\\", host.domain),
+(host.name IS NOT NULL AND host.name != \\"\\"), host.name,
+(host.hostname IS NOT NULL AND host.hostname != \\"\\"), host.hostname, NULL)
+  | STATS
+    entity.EngineMetadata.FirstSeenLogInPage = MIN(@timestamp),
+    recent.timestamp = MAX(@timestamp),
+    recent.entity.name = LAST(TO_STRING(host.name), @timestamp) WHERE host.name IS NOT NULL,
+ recent.host.entity.id = FIRST(TO_STRING(host.entity.id), @timestamp) WHERE host.entity.id IS NOT NULL,
+ recent.host.name = TOP(MV_DEDUPE(TO_STRING(host.name)), 10) WHERE host.name IS NOT NULL,
+ recent.host.domain = TOP(MV_DEDUPE(TO_STRING(host.domain)), 10) WHERE host.domain IS NOT NULL,
+ recent.host.hostname = TOP(MV_DEDUPE(TO_STRING(host.hostname)), 10) WHERE host.hostname IS NOT NULL,
+ recent.host.id = TOP(MV_DEDUPE(TO_STRING(host.id)), 10) WHERE host.id IS NOT NULL,
+ recent.host.os.name = TOP(MV_DEDUPE(TO_STRING(host.os.name)), 10) WHERE host.os.name IS NOT NULL,
+ recent.host.os.type = TOP(MV_DEDUPE(TO_STRING(host.os.type)), 10) WHERE host.os.type IS NOT NULL,
+ recent.host.ip = TOP(MV_DEDUPE(TO_IP(host.ip)), 10) WHERE host.ip IS NOT NULL,
+ recent.host.mac = TOP(MV_DEDUPE(TO_STRING(host.mac)), 10) WHERE host.mac IS NOT NULL,
+ recent.host.type = TOP(MV_DEDUPE(TO_STRING(host.type)), 10) WHERE host.type IS NOT NULL,
+ recent.host.architecture = TOP(MV_DEDUPE(TO_STRING(host.architecture)), 10) WHERE host.architecture IS NOT NULL,
+ recent.entity.source = FIRST(TO_STRING(_index), @timestamp) WHERE _index IS NOT NULL,
+ recent.asset.id = LAST(TO_STRING(asset.id), @timestamp) WHERE asset.id IS NOT NULL,
+ recent.asset.name = LAST(TO_STRING(asset.name), @timestamp) WHERE asset.name IS NOT NULL,
+ recent.asset.owner = LAST(TO_STRING(asset.owner), @timestamp) WHERE asset.owner IS NOT NULL,
+ recent.asset.serial_number = LAST(TO_STRING(asset.serial_number), @timestamp) WHERE asset.serial_number IS NOT NULL,
+ recent.asset.model = LAST(TO_STRING(asset.model), @timestamp) WHERE asset.model IS NOT NULL,
+ recent.asset.vendor = LAST(TO_STRING(asset.vendor), @timestamp) WHERE asset.vendor IS NOT NULL,
+ recent.asset.environment = LAST(TO_STRING(asset.environment), @timestamp) WHERE asset.environment IS NOT NULL,
+ recent.asset.criticality = LAST(TO_STRING(asset.criticality), @timestamp) WHERE asset.criticality IS NOT NULL,
+ recent.asset.business_unit = LAST(TO_STRING(asset.business_unit), @timestamp) WHERE asset.business_unit IS NOT NULL,
+ recent.host.risk.calculated_level = LAST(TO_STRING(host.risk.calculated_level), @timestamp) WHERE host.risk.calculated_level IS NOT NULL,
+ recent.host.risk.calculated_score = LAST(host.risk.calculated_score, @timestamp) WHERE host.risk.calculated_score IS NOT NULL,
+ recent.host.risk.calculated_score_norm = LAST(host.risk.calculated_score_norm, @timestamp) WHERE host.risk.calculated_score_norm IS NOT NULL,
+ recent.entity.source = LAST(TO_STRING(host.entity.source), @timestamp) WHERE host.entity.source IS NOT NULL,
+ recent.entity.type = LAST(TO_STRING(host.entity.type), @timestamp) WHERE host.entity.type IS NOT NULL,
+ recent.entity.sub_type = LAST(TO_STRING(host.entity.sub_type), @timestamp) WHERE host.entity.sub_type IS NOT NULL,
+ recent.entity.url = LAST(TO_STRING(host.entity.url), @timestamp) WHERE host.entity.url IS NOT NULL,
+ recent.entity.attributes.Privileged = LAST(TO_BOOLEAN(host.entity.attributes.Privileged), @timestamp) WHERE host.entity.attributes.Privileged IS NOT NULL,
+ recent.entity.attributes.Asset = LAST(TO_BOOLEAN(host.entity.attributes.Asset), @timestamp) WHERE host.entity.attributes.Asset IS NOT NULL,
+ recent.entity.attributes.Managed = LAST(TO_BOOLEAN(host.entity.attributes.Managed), @timestamp) WHERE host.entity.attributes.Managed IS NOT NULL,
+ recent.entity.attributes.Mfa_enabled = LAST(TO_BOOLEAN(host.entity.attributes.Mfa_enabled), @timestamp) WHERE host.entity.attributes.Mfa_enabled IS NOT NULL,
+ recent.entity.lifecycle.First_seen = LAST(TO_DATETIME(host.entity.lifecycle.First_seen), @timestamp) WHERE host.entity.lifecycle.First_seen IS NOT NULL,
+ recent.entity.lifecycle.Last_activity = LAST(TO_DATETIME(host.entity.lifecycle.Last_activity), @timestamp) WHERE host.entity.lifecycle.Last_activity IS NOT NULL,
+ recent.entity.behaviors.Brute_force_victim = LAST(TO_BOOLEAN(host.entity.behaviors.Brute_force_victim), @timestamp) WHERE host.entity.behaviors.Brute_force_victim IS NOT NULL,
+ recent.entity.behaviors.New_country_login = LAST(TO_BOOLEAN(host.entity.behaviors.New_country_login), @timestamp) WHERE host.entity.behaviors.New_country_login IS NOT NULL,
+ recent.entity.behaviors.Used_usb_device = LAST(TO_BOOLEAN(host.entity.behaviors.Used_usb_device), @timestamp) WHERE host.entity.behaviors.Used_usb_device IS NOT NULL,
+ recent.entity.risk.calculated_level = LAST(TO_STRING(host.entity.risk.calculated_level), @timestamp) WHERE host.entity.risk.calculated_level IS NOT NULL,
+ recent.entity.risk.calculated_score = LAST(host.entity.risk.calculated_score, @timestamp) WHERE host.entity.risk.calculated_score IS NOT NULL,
+ recent.entity.risk.calculated_score_norm = LAST(host.entity.risk.calculated_score_norm, @timestamp) WHERE host.entity.risk.calculated_score_norm IS NOT NULL,
+ recent.entity.relationships.Communicates_with = TOP(MV_DEDUPE(TO_STRING(host.entity.relationships.Communicates_with)), 10) WHERE host.entity.relationships.Communicates_with IS NOT NULL,
+ recent.entity.relationships.Depends_on = TOP(MV_DEDUPE(TO_STRING(host.entity.relationships.Depends_on)), 10) WHERE host.entity.relationships.Depends_on IS NOT NULL,
+ recent.entity.relationships.Dependent_of = TOP(MV_DEDUPE(TO_STRING(host.entity.relationships.Dependent_of)), 10) WHERE host.entity.relationships.Dependent_of IS NOT NULL,
+ recent.entity.relationships.Owned_by = TOP(MV_DEDUPE(TO_STRING(host.entity.relationships.Owned_by)), 10) WHERE host.entity.relationships.Owned_by IS NOT NULL,
+ recent.entity.relationships.Accessed_frequently_by = TOP(MV_DEDUPE(TO_STRING(host.entity.relationships.Accessed_frequently_by)), 10) WHERE host.entity.relationships.Accessed_frequently_by IS NOT NULL
+    BY recent.entity.EngineMetadata.UntypedId
+  | SORT entity.EngineMetadata.FirstSeenLogInPage ASC, recent.entity.EngineMetadata.UntypedId ASC
+  | WHERE entity.EngineMetadata.FirstSeenLogInPage > TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\") 
+            OR (entity.EngineMetadata.FirstSeenLogInPage == TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\") 
+                AND recent.entity.EngineMetadata.UntypedId > \\"recover\\")
+  | LIMIT 10000
+  | EVAL recent.entity.id = CONCAT(\\"host:\\", recent.entity.EngineMetadata.UntypedId)
+  | LOOKUP JOIN latest-index
+      ON recent.entity.id == entity.id
+  | EVAL entity.name = COALESCE(recent.entity.name, entity.name),
+ host.entity.id = COALESCE(host.entity.id, recent.host.entity.id),
+ host.name = MV_SLICE(MV_UNION(recent.host.name, host.name), 0, 9),
+ host.domain = MV_SLICE(MV_UNION(recent.host.domain, host.domain), 0, 9),
+ host.hostname = MV_SLICE(MV_UNION(recent.host.hostname, host.hostname), 0, 9),
+ host.id = MV_SLICE(MV_UNION(recent.host.id, host.id), 0, 9),
+ host.os.name = MV_SLICE(MV_UNION(recent.host.os.name, host.os.name), 0, 9),
+ host.os.type = MV_SLICE(MV_UNION(recent.host.os.type, host.os.type), 0, 9),
+ host.ip = MV_SLICE(MV_UNION(recent.host.ip, host.ip), 0, 9),
+ host.mac = MV_SLICE(MV_UNION(recent.host.mac, host.mac), 0, 9),
+ host.type = MV_SLICE(MV_UNION(recent.host.type, host.type), 0, 9),
+ host.architecture = MV_SLICE(MV_UNION(recent.host.architecture, host.architecture), 0, 9),
+ entity.source = COALESCE(entity.source, recent.entity.source),
+ asset.id = COALESCE(recent.asset.id, asset.id),
+ asset.name = COALESCE(recent.asset.name, asset.name),
+ asset.owner = COALESCE(recent.asset.owner, asset.owner),
+ asset.serial_number = COALESCE(recent.asset.serial_number, asset.serial_number),
+ asset.model = COALESCE(recent.asset.model, asset.model),
+ asset.vendor = COALESCE(recent.asset.vendor, asset.vendor),
+ asset.environment = COALESCE(recent.asset.environment, asset.environment),
+ asset.criticality = COALESCE(recent.asset.criticality, asset.criticality),
+ asset.business_unit = COALESCE(recent.asset.business_unit, asset.business_unit),
+ host.risk.calculated_level = COALESCE(recent.host.risk.calculated_level, host.risk.calculated_level),
+ host.risk.calculated_score = COALESCE(recent.host.risk.calculated_score, host.risk.calculated_score),
+ host.risk.calculated_score_norm = COALESCE(recent.host.risk.calculated_score_norm, host.risk.calculated_score_norm),
+ entity.source = COALESCE(recent.entity.source, entity.source),
+ entity.type = COALESCE(recent.entity.type, entity.type),
+ entity.sub_type = COALESCE(recent.entity.sub_type, entity.sub_type),
+ entity.url = COALESCE(recent.entity.url, entity.url),
+ entity.attributes.Privileged = COALESCE(recent.entity.attributes.Privileged, entity.attributes.Privileged),
+ entity.attributes.Asset = COALESCE(recent.entity.attributes.Asset, entity.attributes.Asset),
+ entity.attributes.Managed = COALESCE(recent.entity.attributes.Managed, entity.attributes.Managed),
+ entity.attributes.Mfa_enabled = COALESCE(recent.entity.attributes.Mfa_enabled, entity.attributes.Mfa_enabled),
+ entity.lifecycle.First_seen = COALESCE(recent.entity.lifecycle.First_seen, entity.lifecycle.First_seen),
+ entity.lifecycle.Last_activity = COALESCE(recent.entity.lifecycle.Last_activity, entity.lifecycle.Last_activity),
+ entity.behaviors.Brute_force_victim = COALESCE(recent.entity.behaviors.Brute_force_victim, entity.behaviors.Brute_force_victim),
+ entity.behaviors.New_country_login = COALESCE(recent.entity.behaviors.New_country_login, entity.behaviors.New_country_login),
+ entity.behaviors.Used_usb_device = COALESCE(recent.entity.behaviors.Used_usb_device, entity.behaviors.Used_usb_device),
+ entity.risk.calculated_level = COALESCE(recent.entity.risk.calculated_level, entity.risk.calculated_level),
+ entity.risk.calculated_score = COALESCE(recent.entity.risk.calculated_score, entity.risk.calculated_score),
+ entity.risk.calculated_score_norm = COALESCE(recent.entity.risk.calculated_score_norm, entity.risk.calculated_score_norm),
+ entity.relationships.Communicates_with = MV_SLICE(MV_UNION(recent.entity.relationships.Communicates_with, entity.relationships.Communicates_with), 0, 9),
+ entity.relationships.Depends_on = MV_SLICE(MV_UNION(recent.entity.relationships.Depends_on, entity.relationships.Depends_on), 0, 9),
+ entity.relationships.Dependent_of = MV_SLICE(MV_UNION(recent.entity.relationships.Dependent_of, entity.relationships.Dependent_of), 0, 9),
+ entity.relationships.Owned_by = MV_SLICE(MV_UNION(recent.entity.relationships.Owned_by, entity.relationships.Owned_by), 0, 9),
+ entity.relationships.Accessed_frequently_by = MV_SLICE(MV_UNION(recent.entity.relationships.Accessed_frequently_by, entity.relationships.Accessed_frequently_by), 0, 9)
+  | EVAL @timestamp = recent.timestamp,
+ entity.name = CASE(entity.name IS NOT NULL AND entity.name != \\"\\", entity.name, recent.entity.EngineMetadata.UntypedId),
+ entity.EngineMetadata.Type = \\"host\\",
+ entity.hashedId = HASH(\\"MD5\\", recent.entity.id),
+ entity.type = COALESCE(entity.type, \\"Host\\")
+  | RENAME
+    recent.entity.id AS entity.id,
+    recent.entity.EngineMetadata.UntypedId AS entity.EngineMetadata.UntypedId
+  | KEEP entity.name,
+ host.entity.id,
+ host.name,
+ host.domain,
+ host.hostname,
+ host.id,
+ host.os.name,
+ host.os.type,
+ host.ip,
+ host.mac,
+ host.type,
+ host.architecture,
+ entity.source,
+ asset.id,
+ asset.name,
+ asset.owner,
+ asset.serial_number,
+ asset.model,
+ asset.vendor,
+ asset.environment,
+ asset.criticality,
+ asset.business_unit,
+ host.risk.calculated_level,
+ host.risk.calculated_score,
+ host.risk.calculated_score_norm,
+ entity.source,
+ entity.type,
+ entity.sub_type,
+ entity.url,
+ entity.attributes.Privileged,
+ entity.attributes.Asset,
+ entity.attributes.Managed,
+ entity.attributes.Mfa_enabled,
+ entity.lifecycle.First_seen,
+ entity.lifecycle.Last_activity,
+ entity.behaviors.Brute_force_victim,
+ entity.behaviors.New_country_login,
+ entity.behaviors.Used_usb_device,
+ entity.risk.calculated_level,
+ entity.risk.calculated_score,
+ entity.risk.calculated_score_norm,
+ entity.relationships.Communicates_with,
+ entity.relationships.Depends_on,
+ entity.relationships.Dependent_of,
+ entity.relationships.Owned_by,
+ entity.relationships.Accessed_frequently_by,
+ @timestamp,
+ entity.id,
+ entity.name,
+ entity.EngineMetadata.UntypedId,
+ entity.hashedId,
+ entity.EngineMetadata.Type,
+ entity.EngineMetadata.FirstSeenLogInPage"
 `;
 
 exports[`buildLogsExtractionEsqlQuery generates the expected query for service entity description 1`] = `
@@ -457,11 +817,10 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for service e
   | WHERE ((service.entity.id IS NOT NULL AND service.entity.id != \\"\\") OR (service.name IS NOT NULL AND service.name != \\"\\"))
       AND @timestamp > TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
-  | SORT @timestamp ASC
-  | LIMIT 10000
   | EVAL recent.entity.EngineMetadata.UntypedId = CASE((service.entity.id IS NOT NULL AND service.entity.id != \\"\\"), service.entity.id,
 (service.name IS NOT NULL AND service.name != \\"\\"), service.name, NULL)
   | STATS
+    entity.EngineMetadata.FirstSeenLogInPage = MIN(@timestamp),
     recent.timestamp = MAX(@timestamp),
     recent.entity.name = LAST(TO_STRING(service.name), @timestamp) WHERE service.name IS NOT NULL,
  recent.service.entity.id = FIRST(TO_STRING(service.entity.id), @timestamp) WHERE service.entity.id IS NOT NULL,
@@ -509,14 +868,13 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for service e
  recent.entity.relationships.Depends_on = TOP(MV_DEDUPE(TO_STRING(service.entity.relationships.Depends_on)), 10) WHERE service.entity.relationships.Depends_on IS NOT NULL,
  recent.entity.relationships.Dependent_of = TOP(MV_DEDUPE(TO_STRING(service.entity.relationships.Dependent_of)), 10) WHERE service.entity.relationships.Dependent_of IS NOT NULL
     BY recent.entity.EngineMetadata.UntypedId
+  | SORT entity.EngineMetadata.FirstSeenLogInPage ASC, recent.entity.EngineMetadata.UntypedId ASC
+  
+  | LIMIT 10000
   | EVAL recent.entity.id = CONCAT(\\"service:\\", recent.entity.EngineMetadata.UntypedId)
   | LOOKUP JOIN latest-index
       ON recent.entity.id == entity.id
-  | RENAME
-    recent.entity.id AS entity.id,
-    recent.entity.EngineMetadata.UntypedId AS entity.EngineMetadata.UntypedId
-  | EVAL
-    entity.name = COALESCE(recent.entity.name, entity.name),
+  | EVAL entity.name = COALESCE(recent.entity.name, entity.name),
  service.entity.id = COALESCE(service.entity.id, recent.service.entity.id),
  service.name = MV_SLICE(MV_UNION(recent.service.name, service.name), 0, 9),
  service.address = MV_SLICE(MV_UNION(recent.service.address, service.address), 0, 9),
@@ -560,12 +918,15 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for service e
  entity.risk.calculated_score_norm = COALESCE(recent.entity.risk.calculated_score_norm, entity.risk.calculated_score_norm),
  entity.relationships.Communicates_with = MV_SLICE(MV_UNION(recent.entity.relationships.Communicates_with, entity.relationships.Communicates_with), 0, 9),
  entity.relationships.Depends_on = MV_SLICE(MV_UNION(recent.entity.relationships.Depends_on, entity.relationships.Depends_on), 0, 9),
- entity.relationships.Dependent_of = MV_SLICE(MV_UNION(recent.entity.relationships.Dependent_of, entity.relationships.Dependent_of), 0, 9),
-    @timestamp = recent.timestamp,
- entity.name = CASE((entity.name IS NULL OR entity.name == \\"\\"), entity.EngineMetadata.UntypedId, entity.name),
+ entity.relationships.Dependent_of = MV_SLICE(MV_UNION(recent.entity.relationships.Dependent_of, entity.relationships.Dependent_of), 0, 9)
+  | EVAL @timestamp = recent.timestamp,
+ entity.name = CASE(entity.name IS NOT NULL AND entity.name != \\"\\", entity.name, recent.entity.EngineMetadata.UntypedId),
  entity.EngineMetadata.Type = \\"service\\",
- entity.type = COALESCE(entity.type, \\"Service\\"),
-    entity.hashedId = HASH(\\"MD5\\", entity.id)
+ entity.hashedId = HASH(\\"MD5\\", recent.entity.id),
+ entity.type = COALESCE(entity.type, \\"Service\\")
+  | RENAME
+    recent.entity.id AS entity.id,
+    recent.entity.EngineMetadata.UntypedId AS entity.EngineMetadata.UntypedId
   | KEEP entity.name,
  service.entity.id,
  service.name,
@@ -616,8 +977,8 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for service e
  entity.name,
  entity.EngineMetadata.UntypedId,
  entity.hashedId,
- entity.EngineMetadata.Type
-  | SORT @timestamp ASC"
+ entity.EngineMetadata.Type,
+ entity.EngineMetadata.FirstSeenLogInPage"
 `;
 
 exports[`buildLogsExtractionEsqlQuery generates the expected query for user entity description 1`] = `
@@ -626,8 +987,6 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for user enti
   | WHERE ((user.entity.id IS NOT NULL AND user.entity.id != \\"\\") OR (user.id IS NOT NULL AND user.id != \\"\\") OR (user.name IS NOT NULL AND user.name != \\"\\") OR (user.email IS NOT NULL AND user.email != \\"\\"))
       AND @timestamp > TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
-  | SORT @timestamp ASC
-  | LIMIT 10000
   | EVAL recent.entity.EngineMetadata.UntypedId = CASE((user.entity.id IS NOT NULL AND user.entity.id != \\"\\"), user.entity.id,
 (user.name IS NOT NULL AND user.name != \\"\\" AND host.entity.id IS NOT NULL AND host.entity.id != \\"\\"), CONCAT(user.name, \\"@\\", host.entity.id),
 (user.name IS NOT NULL AND user.name != \\"\\" AND host.id IS NOT NULL AND host.id != \\"\\"), CONCAT(user.name, \\"@\\", host.id),
@@ -637,6 +996,7 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for user enti
 (user.name IS NOT NULL AND user.name != \\"\\" AND user.domain IS NOT NULL AND user.domain != \\"\\"), CONCAT(user.name, \\"@\\", user.domain),
 (user.name IS NOT NULL AND user.name != \\"\\"), user.name, NULL)
   | STATS
+    entity.EngineMetadata.FirstSeenLogInPage = MIN(@timestamp),
     recent.timestamp = MAX(@timestamp),
     recent.entity.name = LAST(TO_STRING(user.name), @timestamp) WHERE user.name IS NOT NULL,
  recent.user.entity.id = FIRST(TO_STRING(user.entity.id), @timestamp) WHERE user.entity.id IS NOT NULL,
@@ -684,14 +1044,13 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for user enti
  recent.entity.relationships.Supervises = TOP(MV_DEDUPE(TO_STRING(user.entity.relationships.Supervises)), 10) WHERE user.entity.relationships.Supervises IS NOT NULL,
  recent.entity.relationships.Supervised_by = TOP(MV_DEDUPE(TO_STRING(user.entity.relationships.Supervised_by)), 10) WHERE user.entity.relationships.Supervised_by IS NOT NULL
     BY recent.entity.EngineMetadata.UntypedId
+  | SORT entity.EngineMetadata.FirstSeenLogInPage ASC, recent.entity.EngineMetadata.UntypedId ASC
+  
+  | LIMIT 10000
   | EVAL recent.entity.id = CONCAT(\\"user:\\", recent.entity.EngineMetadata.UntypedId)
   | LOOKUP JOIN latest-index
       ON recent.entity.id == entity.id
-  | RENAME
-    recent.entity.id AS entity.id,
-    recent.entity.EngineMetadata.UntypedId AS entity.EngineMetadata.UntypedId
-  | EVAL
-    entity.name = COALESCE(recent.entity.name, entity.name),
+  | EVAL entity.name = COALESCE(recent.entity.name, entity.name),
  user.entity.id = COALESCE(user.entity.id, recent.user.entity.id),
  user.domain = MV_SLICE(MV_UNION(recent.user.domain, user.domain), 0, 9),
  user.email = MV_SLICE(MV_UNION(recent.user.email, user.email), 0, 9),
@@ -735,12 +1094,15 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for user enti
  entity.relationships.Accesses_frequently = MV_SLICE(MV_UNION(recent.entity.relationships.Accesses_frequently, entity.relationships.Accesses_frequently), 0, 9),
  entity.relationships.Owns = MV_SLICE(MV_UNION(recent.entity.relationships.Owns, entity.relationships.Owns), 0, 9),
  entity.relationships.Supervises = MV_SLICE(MV_UNION(recent.entity.relationships.Supervises, entity.relationships.Supervises), 0, 9),
- entity.relationships.Supervised_by = MV_SLICE(MV_UNION(recent.entity.relationships.Supervised_by, entity.relationships.Supervised_by), 0, 9),
-    @timestamp = recent.timestamp,
- entity.name = CASE((entity.name IS NULL OR entity.name == \\"\\"), entity.EngineMetadata.UntypedId, entity.name),
+ entity.relationships.Supervised_by = MV_SLICE(MV_UNION(recent.entity.relationships.Supervised_by, entity.relationships.Supervised_by), 0, 9)
+  | EVAL @timestamp = recent.timestamp,
+ entity.name = CASE(entity.name IS NOT NULL AND entity.name != \\"\\", entity.name, recent.entity.EngineMetadata.UntypedId),
  entity.EngineMetadata.Type = \\"user\\",
- entity.type = COALESCE(entity.type, \\"Identity\\"),
-    entity.hashedId = HASH(\\"MD5\\", entity.id)
+ entity.hashedId = HASH(\\"MD5\\", recent.entity.id),
+ entity.type = COALESCE(entity.type, \\"Identity\\")
+  | RENAME
+    recent.entity.id AS entity.id,
+    recent.entity.EngineMetadata.UntypedId AS entity.EngineMetadata.UntypedId
   | KEEP entity.name,
  user.entity.id,
  user.domain,
@@ -791,6 +1153,6 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for user enti
  entity.name,
  entity.EngineMetadata.UntypedId,
  entity.hashedId,
- entity.EngineMetadata.Type
-  | SORT @timestamp ASC"
+ entity.EngineMetadata.Type,
+ entity.EngineMetadata.FirstSeenLogInPage"
 `;
