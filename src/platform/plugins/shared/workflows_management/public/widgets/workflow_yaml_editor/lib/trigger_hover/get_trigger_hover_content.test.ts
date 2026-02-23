@@ -54,7 +54,7 @@ describe('getTriggerHoverContent', () => {
     expect(result!.value).toContain('The action that triggered');
   });
 
-  it('returns content for custom trigger with condition examples', () => {
+  it('returns content for custom trigger with documentation', () => {
     const eventSchema = z.object({ severity: z.string() });
     const getTriggerDefinition = (id: string) =>
       id === 'alerts.severity_high'
@@ -63,10 +63,13 @@ describe('getTriggerHoverContent', () => {
             title: 'High severity alert',
             description: 'Fired when an alert has high severity.',
             eventSchema,
-            conditionExamples: [
-              { title: 'Exact severity', condition: 'event.severity == "high"' },
-              { title: 'Multiple severities', condition: 'event.severity in ["high", "critical"]' },
-            ],
+            documentation: {
+              details: 'Filter when this workflow runs using KQL on event properties.',
+              examples: [
+                '## Exact severity\n```yaml\ntriggers:\n  - type: alerts.severity_high\n    with:\n      condition: \'event.severity == "high"\'\n```',
+                '## Multiple severities\n```yaml\ntriggers:\n  - type: alerts.severity_high\n    with:\n      condition: \'event.severity in ["high", "critical"]\'\n```',
+              ],
+            },
           }
         : undefined;
 
@@ -75,15 +78,15 @@ describe('getTriggerHoverContent', () => {
       getTriggerDefinition('alerts.severity_high')
     );
     expect(result).not.toBeNull();
-    expect(result!.value).toContain('Examples');
-    expect(result!.value).toContain('Configuration');
+    expect(result!.value).toContain('**Summary**:');
+    expect(result!.value).toContain('Fired when an alert has high severity.');
+    expect(result!.value).toContain('**Description**:');
+    expect(result!.value).toContain('Filter when this workflow runs using KQL');
+    expect(result!.value).toContain('**Examples:**');
     expect(result!.value).toContain('Exact severity');
     expect(result!.value).toContain('Multiple severities');
-    expect(result!.value).toContain('add a condition (KQL) to filter when this workflow runs');
-    // Each example is title + YAML code block
     expect(result!.value).toContain('triggers:');
     expect(result!.value).toContain('type: alerts.severity_high');
-    expect(result!.value).toContain('with:');
     expect(result!.value).toContain('condition: \'event.severity == "high"\'');
     expect(result!.value).toContain('condition: \'event.severity in ["high", "critical"]\'');
   });

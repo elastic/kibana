@@ -20,7 +20,7 @@ const defaultDefinition: PublicTriggerDefinition<typeof eventSchema> = {
   eventSchema,
 };
 
-/** Waits for the async KQL validation chunk to run (used when testing triggers with conditionExamples/defaultCondition). */
+/** Waits for the async KQL validation chunk to run (used when testing triggers with snippets.condition). */
 async function waitForAsyncValidation(): Promise<void> {
   await import('./validate_kql_conditions');
   await new Promise((r) => setTimeout(r, 0));
@@ -59,42 +59,20 @@ describe('PublicTriggerRegistry', () => {
       }).toThrow('Trigger definition for "example.test_trigger" is already registered');
     });
 
-    it('should accept valid conditionExamples after async KQL validation', async () => {
+    it('should accept valid snippets.condition after async KQL validation', async () => {
       const definition: PublicTriggerDefinition = {
         ...defaultDefinition,
-        conditionExamples: [
-          { title: 'Message contains error', condition: 'event.message: *error*' },
-        ],
+        snippets: { condition: 'event.message: *test*' },
       };
       registry.register(definition);
       await waitForAsyncValidation();
-      expect(registry.get(triggerId)?.conditionExamples).toHaveLength(1);
+      expect(registry.get(triggerId)?.snippets?.condition).toBe('event.message: *test*');
     });
 
-    it('should not promote trigger when conditionExamples reference a field not in event schema', async () => {
+    it('should not promote trigger when snippets.condition references a field not in event schema', async () => {
       const definition: PublicTriggerDefinition = {
         ...defaultDefinition,
-        conditionExamples: [{ title: 'Bad', condition: 'event.unknown: "x"' }],
-      };
-      registry.register(definition);
-      await waitForAsyncValidation();
-      expect(registry.get(triggerId)).toBeUndefined();
-    });
-
-    it('should accept valid defaultCondition after async KQL validation', async () => {
-      const definition: PublicTriggerDefinition = {
-        ...defaultDefinition,
-        defaultCondition: 'event.message: *test*',
-      };
-      registry.register(definition);
-      await waitForAsyncValidation();
-      expect(registry.get(triggerId)?.defaultCondition).toBe('event.message: *test*');
-    });
-
-    it('should not promote trigger when defaultCondition references a field not in event schema', async () => {
-      const definition: PublicTriggerDefinition = {
-        ...defaultDefinition,
-        defaultCondition: 'event.unknown: "x"',
+        snippets: { condition: 'event.unknown: "x"' },
       };
       registry.register(definition);
       await waitForAsyncValidation();

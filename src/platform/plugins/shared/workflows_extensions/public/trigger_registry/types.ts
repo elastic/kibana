@@ -8,28 +8,52 @@
  */
 
 import type { z } from '@kbn/zod/v4';
-import type { ConditionExample } from './condition_examples_schema';
 import type { CommonTriggerDefinition } from '../../common';
 
 /**
+ * Documentation for a trigger (aligned with steps: details + generic examples).
+ */
+export interface TriggerDocumentation {
+  /**
+   * Detailed description with usage examples (markdown supported)
+   */
+  details?: string;
+  /**
+   * Usage examples as markdown strings (e.g. "## Title\n```yaml\n...").
+   * Shown in the YAML editor hover.
+   */
+  examples?: string[];
+}
+
+/**
+ * Pre-filled snippet values when the user adds this trigger from the UI.
+ */
+export interface TriggerSnippets {
+  /**
+   * KQL condition pre-filled in the trigger's `with.condition` when the user adds this
+   * trigger from the UI (actions menu or YAML autocomplete).
+   * Must be valid KQL and only reference properties from the event schema (validated at registration).
+   */
+  condition?: string;
+}
+
+/**
  * User-facing definition for a workflow trigger.
- * Used by the UI to display trigger information (title, description, icon, event schema, examples).
+ * Used by the UI to display trigger information (title, description, icon, event schema, documentation).
  * Extends the server contract (id + eventSchema) with UI-only fields.
  *
- * @example Valid definition with conditionExamples (event schema has severity and message)
+ * @example Definition with documentation and snippets (aligned with steps pattern)
  * {
  *   id: 'example.my_trigger',
  *   title: 'My Trigger',
  *   description: 'Fired when something happens.',
  *   eventSchema: z.object({ severity: z.string(), message: z.string() }),
- *   conditionExamples: [
- *     { title: 'High severity only', condition: 'event.severity: "high"' },
- *     { title: 'Any message', condition: 'event.message: *' },
- *   ],
+ *   documentation: {
+ *     details: 'Filter when this workflow runs using KQL on event properties.',
+ *     examples: ['## Match high severity\n```yaml\ntriggers:\n  - type: example.my_trigger\n    with:\n      condition: \'event.severity: "high"\'\n```'],
+ *   },
+ *   snippets: { condition: 'event.severity: "high"' },
  * }
- *
- * @example Invalid conditionExample (field not in event schema – will throw at registration)
- * conditionExamples: [{ title: 'Bad', condition: 'event.unknown: "x"' }]
  */
 export interface PublicTriggerDefinition<EventSchema extends z.ZodType = z.ZodType>
   extends CommonTriggerDefinition<EventSchema> {
@@ -51,15 +75,12 @@ export interface PublicTriggerDefinition<EventSchema extends z.ZodType = z.ZodTy
   icon?: React.ComponentType;
 
   /**
-   * KQL condition pre-filled in the trigger's `with.condition` when the user adds this
-   * trigger from the UI (actions menu or YAML autocomplete).
+   * Documentation (details + examples), aligned with step definitions.
    */
-  defaultCondition?: string;
+  documentation?: TriggerDocumentation;
 
   /**
-   * Example conditions for the `with` block.
-   * Each condition must be valid KQL and only reference properties from the event schema (see validateKqlAgainstSchema).
-   * Shown in the YAML editor hover to help users filter when the workflow runs.
+   * Pre-filled values for snippet insertion (e.g. with.condition).
    */
-  conditionExamples?: ConditionExample[];
+  snippets?: TriggerSnippets;
 }

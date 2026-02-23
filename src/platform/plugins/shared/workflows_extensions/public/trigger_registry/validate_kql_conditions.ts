@@ -18,7 +18,7 @@ import { EVENT_FIELD_PREFIX } from '../../common/trigger_registry/constants';
  * validateKqlAgainstSchema so callers can show detailed messages.
  *
  * This module is intended to be loaded dynamically (e.g. when a trigger with
- * conditionExamples or defaultCondition is registered) so that @kbn/workflows
+ * snippets.condition is registered) so that @kbn/workflows
  * and @kbn/es-query are not included in the page-load bundle.
  *
  * @param kqlConditions - Array of KQL condition strings to validate.

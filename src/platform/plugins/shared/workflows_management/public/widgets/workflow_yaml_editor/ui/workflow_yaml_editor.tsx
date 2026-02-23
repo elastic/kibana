@@ -500,7 +500,7 @@ export const WorkflowYAMLEditor = ({
           yamlDocumentCurrent,
           action.id,
           editor,
-          triggerDefinition?.defaultCondition
+          triggerDefinition?.snippets?.condition
         );
       } else {
         insertStepSnippet(model, yamlDocumentCurrent, action.id, cursorPosition, editor);

@@ -7,27 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { conditionExamplesSchema } from './condition_examples_schema';
 import type { PublicTriggerDefinition } from './types';
 
 /**
  * Registry for public-side workflow trigger definitions.
  * Stores UI-related information (title, description, icon, eventSchema) for triggers.
- * KQL validation for conditionExamples/defaultCondition runs in a dynamically loaded chunk.
+ * KQL validation for snippets.condition runs in a dynamically loaded chunk.
  */
 export class PublicTriggerRegistry {
   private readonly registry = new Map<string, PublicTriggerDefinition>();
-  /** Definitions with conditionExamples/defaultCondition are validated async; they sit here until validation passes. */
+  /** Definitions with snippets.condition are validated async; they sit here until validation passes. */
   private readonly pending = new Map<string, PublicTriggerDefinition>();
   /** Promises for in-flight KQL validations; whenReady() waits for these. */
   private readonly pendingValidationPromises = new Set<Promise<void>>();
 
   /**
    * Register a trigger definition.
-   * Validates conditionExamples shape synchronously; KQL validation runs asynchronously (dynamic import).
-   * Definitions with conditionExamples or defaultCondition appear in get/getAll after validation passes.
+   * Definitions with snippets.condition are validated asynchronously (KQL against event schema).
    * @param definition - The public trigger definition to register
-   * @throws Error if a trigger with the same ID is already registered, or if conditionExamples shape is invalid
+   * @throws Error if a trigger with the same ID is already registered
    */
   public register(definition: PublicTriggerDefinition): void {
     const id = String(definition.id);
@@ -36,19 +34,9 @@ export class PublicTriggerRegistry {
         `Trigger definition for "${id}" is already registered. Each trigger must have a unique identifier.`
       );
     }
-    if (definition.conditionExamples && definition.conditionExamples.length > 0) {
-      const parseResult = conditionExamplesSchema.safeParse(definition.conditionExamples);
-      if (!parseResult.success) {
-        const message = parseResult.error.issues.map((e) => e.message).join('; ');
-        throw new Error(
-          `Trigger "${id}" has invalid conditionExamples: ${message}. The trigger was not registered.`
-        );
-      }
-    }
 
-    const needsKqlValidation =
-      (definition.conditionExamples && definition.conditionExamples.length > 0) ||
-      (definition.defaultCondition !== undefined && definition.defaultCondition !== '');
+    const condition = definition.snippets?.condition;
+    const needsKqlValidation = condition !== undefined && condition !== '';
 
     if (!needsKqlValidation) {
       this.registry.set(id, definition);
@@ -68,15 +56,8 @@ export class PublicTriggerRegistry {
       ({ validateKqlConditions }) => {
         if (!this.pending.has(id)) return;
 
-        const conditionsToValidate: string[] = [];
-        if (definition.conditionExamples && definition.conditionExamples.length > 0) {
-          conditionsToValidate.push(...definition.conditionExamples.map((ex) => ex.condition));
-        }
-        if (definition.defaultCondition !== undefined && definition.defaultCondition !== '') {
-          conditionsToValidate.push(definition.defaultCondition);
-        }
-
-        const validation = validateKqlConditions(conditionsToValidate, definition.eventSchema);
+        const condition = definition.snippets?.condition ?? '';
+        const validation = validateKqlConditions([condition], definition.eventSchema);
         if (!validation.valid) {
           this.pending.delete(id);
           // eslint-disable-next-line no-console

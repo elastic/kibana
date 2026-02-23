@@ -116,32 +116,16 @@ function generateTriggerUsage(
     lines.push('');
   }
 
-  const conditionExamples = definition.conditionExamples;
-  const hasConditionExamples = conditionExamples && conditionExamples.length > 0;
-  if (hasConditionExamples && conditionExamples) {
+  const documentation = definition.documentation;
+  if (documentation?.examples && documentation.examples.length > 0) {
     lines.push(
-      i18n.translate('workflows.triggerHover.configurationHeading', {
-        defaultMessage: '**Configuration:**',
-      }),
-      i18n.translate('workflows.triggerHover.configurationDescription', {
-        defaultMessage:
-          '- In the `with` block, add a condition (KQL) to filter when this workflow runs using the event schema.',
-      })
-    );
-    lines.push(
-      '',
       i18n.translate('workflows.triggerHover.examplesHeading', {
-        defaultMessage: 'Examples:',
+        defaultMessage: '**Examples:**',
       })
     );
-    for (const example of conditionExamples) {
-      const yamlSnippet = `# ${example.title}
-triggers:
-  - type: ${triggerType}
-    with:
-      condition: '${example.condition}'
-`;
-      lines.push('```yaml', yamlSnippet, '```');
+    lines.push('');
+    for (const example of documentation.examples) {
+      lines.push(example);
       lines.push('');
     }
   }
@@ -171,8 +155,22 @@ function buildTriggerHoverFromDefinition(
     })
   );
   lines.push('');
-  lines.push(definition.description);
+  lines.push(
+    i18n.translate('workflows.triggerHover.summaryLabel', {
+      defaultMessage: '**Summary**: {description}',
+      values: { description: definition.description },
+    })
+  );
   lines.push('');
+  if (definition.documentation?.details) {
+    lines.push(
+      i18n.translate('workflows.triggerHover.descriptionLabel', {
+        defaultMessage: '**Description**: {description}',
+        values: { description: definition.documentation.details },
+      })
+    );
+    lines.push('');
+  }
 
   const eventProperties = getEventSchemaProperties(definition.eventSchema as z.ZodType);
   lines.push(generateTriggerUsage(definition, triggerType, eventProperties));

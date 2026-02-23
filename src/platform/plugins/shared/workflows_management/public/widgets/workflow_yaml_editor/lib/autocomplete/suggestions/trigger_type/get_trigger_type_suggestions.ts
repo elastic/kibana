@@ -52,7 +52,7 @@ export function getTriggerTypeSuggestions(
   matchingTriggerTypes.forEach((triggerType) => {
     const triggerDef = triggerSchemas.getTriggerDefinition(triggerType.type);
     const snippetText = generateTriggerSnippet(triggerType.type, {
-      defaultCondition: triggerDef?.defaultCondition,
+      defaultCondition: triggerDef?.snippets?.condition,
     });
 
     // Extended range for multi-line insertion
