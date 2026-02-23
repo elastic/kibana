@@ -111,7 +111,7 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
         await nodeImplementation.onCancel();
       } catch (onCancelError) {
         params.workflowLogger.logError(
-          'Failed to execute onCancel hook - continuing cancellation',
+          'Failed to execute onCancel hook - continuing execution',
           onCancelError instanceof Error ? onCancelError : new Error(String(onCancelError))
         );
       }
