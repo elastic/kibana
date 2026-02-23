@@ -61,16 +61,19 @@ function getConfigFromEnv(): AffectedPackagesConfig {
  * Check if changes require skipping filtering (e.g., infrastructure changes)
  */
 async function shouldSkipFiltering(): Promise<boolean> {
+  if (process.env.GITHUB_LABELS?.includes('ci:no-selective-tests')) {
+    return true;
+  }
+
   const criticalPaths = [
-    '.buildkite/',
     'scripts/jest.js',
-    'scripts/jest',
+    'scripts/jest_all.js',
     'package.json',
     'yarn.lock',
     'tsconfig.json',
     'tsconfig.base.json',
     '.moon/workspace.yml',
-    '.moon/tasks/',
+    '.moon/tasks/tag-jest-unit-tests.yml',
     'src/platform/packages/shared/kbn-test/',
   ];
 
