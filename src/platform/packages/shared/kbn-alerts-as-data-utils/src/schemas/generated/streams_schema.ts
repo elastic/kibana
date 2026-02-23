@@ -114,7 +114,7 @@ const StreamsAlertOptional = rt.partial({
   'kibana.alert.scheduled_action.group': schemaString,
   'kibana.alert.severity_improving': schemaBoolean,
   'kibana.alert.snooze.condition_operator': schemaString,
-  'kibana.alert.snooze.conditions': schemaUnknown,
+  'kibana.alert.snooze.conditions': schemaUnknownArray,
   'kibana.alert.snooze.expires_at': schemaDate,
   'kibana.alert.snooze.snapshot': schemaUnknown,
   'kibana.alert.start': schemaDate,

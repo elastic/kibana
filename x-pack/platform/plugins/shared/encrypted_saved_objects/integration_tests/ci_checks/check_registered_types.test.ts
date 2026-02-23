@@ -100,7 +100,9 @@ describe('checking changes on all registered encrypted SO types', () => {
       .filter((soType) => esoTypes.includes(soType.name));
 
     const modelVersionMap: string[] = sortBy(soTypestoCheck, 'name').flatMap((type, index) => {
-      const typeMigrationInfo = sortBy(extractMigrationInfo(type).modelVersions, 'version')
+      const typeMigrationInfo = sortBy(extractMigrationInfo(type).modelVersions, (mv) =>
+        Number(mv.version)
+      )
         .reverse()
         .map((mv) => `${type.name}|${mv.version}`);
 

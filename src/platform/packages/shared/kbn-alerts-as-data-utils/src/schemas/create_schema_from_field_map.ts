@@ -172,6 +172,9 @@ const generateSchemaLines = ({
           }
           lineWriter.dedentAndAddLine(`})`);
           lineWriter.dedentAndAddLine(`),`);
+        } else {
+          // object/nested array with no nested structure → unknown array
+          lineWriter.addLine(`${keyToWrite}: ${getSchemaDefinition('schemaUnknown', isArray)},`);
         }
         break;
       case 'keyword':
