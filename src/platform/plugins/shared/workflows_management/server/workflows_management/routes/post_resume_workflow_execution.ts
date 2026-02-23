@@ -10,7 +10,7 @@
 import { schema } from '@kbn/config-schema';
 import { WORKFLOW_ROUTE_OPTIONS } from './route_constants';
 import { handleRouteError } from './route_error_handlers';
-import { WORKFLOW_EXECUTION_CANCEL_SECURITY } from './route_security';
+import { WORKFLOW_EXECUTION_RESUME_SECURITY } from './route_security';
 import type { RouteDependencies } from './types';
 import { withLicenseCheck } from '../lib/with_license_check';
 
@@ -24,7 +24,7 @@ export function registerPostResumeWorkflowExecutionRoute({
     {
       path: '/api/workflowExecutions/{executionId}/resume',
       options: WORKFLOW_ROUTE_OPTIONS,
-      security: WORKFLOW_EXECUTION_CANCEL_SECURITY,
+      security: WORKFLOW_EXECUTION_RESUME_SECURITY,
       validate: {
         params: schema.object({
           executionId: schema.string(),
