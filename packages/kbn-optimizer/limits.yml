@@ -33,7 +33,6 @@ pageLoadAssetSize:
   customIntegrations: 51323
   dashboard: 20000
   dashboardAgent: 5135
-  dashboardEnhanced: 11651
   dashboardMarkdown: 4994
   data: 494550
   dataQuality: 11469
@@ -51,10 +50,9 @@ pageLoadAssetSize:
   discoverEnhanced: 5517
   discoverShared: 17308
   elasticAssistant: 338870
-  elasticAssistantSharedState: 27572
-  embeddable: 14545
+  elasticAssistantSharedState: 4881
+  embeddable: 16638
   embeddableAlertsTable: 6524
-  embeddableEnhanced: 4488
   enterpriseSearch: 37566
   entityStore: 71717
   esql: 19247
@@ -123,8 +121,8 @@ pageLoadAssetSize:
   newsfeed: 11369
   noDataPage: 1749
   observability: 107797
-  observabilityAgentBuilder: 7077
-  observabilityAIAssistant: 531533
+  observabilityAgentBuilder: 9172
+  observabilityAIAssistant: 61180
   observabilityAIAssistantApp: 18012
   observabilityAiAssistantManagement: 31738
   observabilityLogsExplorer: 4918
@@ -185,15 +183,15 @@ pageLoadAssetSize:
   timelines: 192134
   transform: 16515
   triggersActionsUi: 112000
-  uiActions: 114470
-  uiActionsEnhanced: 94618
+  uiActions: 35278
+  uiActionsEnhanced: 17373
   unifiedDocViewer: 14513
   unifiedSearch: 19500
   upgradeAssistant: 30483
   uptime: 48171
-  urlDrilldown: 18801
-  urlForwarding: 38792
-  usageCollection: 40346
+  urlDrilldown: 6812
+  urlForwarding: 7349
+  usageCollection: 5655
   ux: 8376
   visDefaultEditor: 35080
   visTypeGauge: 60647

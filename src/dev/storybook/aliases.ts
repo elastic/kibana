@@ -9,6 +9,8 @@
 
 export const storybookAliases = {
   ai_assistant: 'x-pack/platform/packages/shared/kbn-ai-assistant/.storybook',
+  alerting_v2_rule_form:
+    'x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/.storybook',
   apm: 'x-pack/solutions/observability/plugins/apm/.storybook',
   apm_ui_shared: 'src/platform/packages/shared/kbn-apm-ui-shared/.storybook',
   cases: 'src/platform/packages/shared/kbn-cases-components/.storybook',
@@ -24,7 +26,6 @@ export const storybookAliases = {
   classic_stream_flyout: 'x-pack/platform/packages/shared/kbn-classic-stream-flyout/.storybook',
   custom_icons: 'src/platform/packages/shared/kbn-custom-icons/.storybook',
   custom_integrations: 'src/platform/plugins/shared/custom_integrations/storybook',
-  dashboard_enhanced: 'x-pack/platform/plugins/shared/dashboard_enhanced/.storybook',
   dashboard: 'src/platform/plugins/shared/dashboard/.storybook',
   data: 'src/platform/plugins/shared/data/.storybook',
   discover: 'src/platform/plugins/shared/discover/.storybook',
@@ -53,6 +54,7 @@ export const storybookAliases = {
     'src/platform/packages/private/kbn-language-documentation/.storybook',
   lists: 'x-pack/solutions/security/plugins/lists/.storybook',
   management: 'src/platform/packages/shared/kbn-management/storybook/config',
+  metrics_data_access: 'x-pack/solutions/observability/plugins/metrics_data_access/.storybook',
   observability_ai_assistant_app:
     'x-pack/solutions/observability/plugins/observability_ai_assistant_app/.storybook',
   observability_ai_assistant:

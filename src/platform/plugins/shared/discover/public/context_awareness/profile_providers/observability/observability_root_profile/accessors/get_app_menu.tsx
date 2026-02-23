@@ -87,7 +87,7 @@ const registerCustomThresholdRuleAction = (
 ) => {
   if (!authorizedRuleTypeIds.includes(OBSERVABILITY_THRESHOLD_RULE_TYPE_ID)) return;
 
-  registry.registerPopoverItem(AppMenuActionId.alerts, {
+  const popoverItem = {
     id: 'custom-threshold-rule',
     order: 2,
     iconType: 'bell',
@@ -96,7 +96,7 @@ const registerCustomThresholdRuleAction = (
       defaultMessage: 'Create custom threshold rule',
     }),
 
-    run: ({ context: { onFinishAction } }) => {
+    run: ({ context: { onFinishAction } }: { context: { onFinishAction: () => void } }) => {
       const index = dataView?.toMinimalSpec();
       const { filters, query } = data.query.getState();
 
@@ -137,7 +137,12 @@ const registerCustomThresholdRuleAction = (
         />
       );
     },
-  });
+  };
+
+  // Register to legacy alerts menu
+  registry.registerPopoverItem(AppMenuActionId.alerts, popoverItem);
+  // Register to v2 rules menu's legacy submenu
+  registry.registerPopoverItem(AppMenuActionId.legacyRules, popoverItem);
 };
 
 const registerCreateSLOAction = (
@@ -150,7 +155,7 @@ const registerCreateSLOAction = (
   const hasSloPermission = application.capabilities.slo?.write;
 
   if (sloFeature && hasSloPermission) {
-    registry.registerPopoverItem(AppMenuActionId.alerts, {
+    const popoverItem = {
       id: 'create-slo',
       order: 3,
       label: i18n.translate('discover.observabilitySolution.appMenu.slo', {
@@ -158,7 +163,7 @@ const registerCreateSLOAction = (
       }),
       iconType: 'visGauge',
       testId: 'discoverAppMenuCreateSlo',
-      run: ({ context: { onFinishAction } }) => {
+      run: ({ context: { onFinishAction } }: { context: { onFinishAction: () => void } }) => {
         const index = dataView?.getIndexPattern();
         const timestampField = dataView?.timeFieldName;
         const { filters, query: kqlQuery } = data.query.getState();
@@ -184,6 +189,11 @@ const registerCreateSLOAction = (
           onClose: onFinishAction,
         });
       },
-    });
+    };
+
+    // Register to legacy alerts menu
+    registry.registerPopoverItem(AppMenuActionId.alerts, popoverItem);
+    // Register to v2 rules menu's legacy submenu
+    registry.registerPopoverItem(AppMenuActionId.legacyRules, popoverItem);
   }
 };

@@ -14,7 +14,6 @@ export interface CreateRuleParams {
   data: CreateRuleData;
   options?: { id?: string };
 }
-
 export interface FindRulesParams {
   page?: number;
   perPage?: number;
