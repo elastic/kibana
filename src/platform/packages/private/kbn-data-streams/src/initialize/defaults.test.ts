@@ -36,6 +36,7 @@ describe('applyDefaults', () => {
             properties: {
               '@timestamp': mappings.date(),
               kibana: mappings.object({
+                dynamic: false,
                 properties: {
                   custom_field: mappings.keyword(),
                 },

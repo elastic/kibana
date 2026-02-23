@@ -40,6 +40,7 @@ describe('Data streams initialize function', () => {
       '@timestamp': mappings.date(),
       mappedField: mappings.keyword(),
       nestedField: mappings.object({
+        dynamic: false,
         properties: {
           mappedFieldOptional: mappings.keyword(),
           mappedFieldRequired: mappings.keyword(),
