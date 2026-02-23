@@ -261,27 +261,31 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(
                 <EuiFlexItem grow={false}>
                   <EuiFlexGroup gutterSize="none" css={styles.splitDiffLabelRow}>
                     <EuiFlexItem grow={1} css={styles.splitDiffPaneLabelWrapper}>
-                      <div
-                        css={[styles.splitDiffPaneLabel, styles.splitDiffPaneLabelCurrent]}
-                        data-test-subj="workflowDiffSplitCurrentLabel"
-                      >
-                        <EuiText size="xs" css={styles.splitDiffPaneLabelText}>
-                          {i18n.translate('workflows.diffView.split.currentVersionLabel', {
-                            defaultMessage: 'Current version',
-                          })}
-                        </EuiText>
+                      <div css={styles.splitDiffPaneLabelInner}>
+                        <div
+                          css={[styles.splitDiffPaneLabel, styles.splitDiffPaneLabelCurrent]}
+                          data-test-subj="workflowDiffSplitCurrentLabel"
+                        >
+                          <EuiText size="xs" css={styles.splitDiffPaneLabelText}>
+                            {i18n.translate('workflows.diffView.split.currentVersionLabel', {
+                              defaultMessage: 'Current version',
+                            })}
+                          </EuiText>
+                        </div>
                       </div>
                     </EuiFlexItem>
                     <EuiFlexItem grow={1} css={styles.splitDiffPaneLabelWrapper}>
-                      <div
-                        css={[styles.splitDiffPaneLabel, styles.splitDiffPaneLabelPrevious]}
-                        data-test-subj="workflowDiffSplitPreviousLabel"
-                      >
-                        <EuiText size="xs" css={styles.splitDiffPaneLabelText}>
-                          {i18n.translate('workflows.diffView.split.previousVersionLabel', {
-                            defaultMessage: 'Previous version',
-                          })}
-                        </EuiText>
+                      <div css={styles.splitDiffPaneLabelInner}>
+                        <div
+                          css={[styles.splitDiffPaneLabel, styles.splitDiffPaneLabelPrevious]}
+                          data-test-subj="workflowDiffSplitPreviousLabel"
+                        >
+                          <EuiText size="xs" css={styles.splitDiffPaneLabelText}>
+                            {i18n.translate('workflows.diffView.split.previousVersionLabel', {
+                              defaultMessage: 'Previous version',
+                            })}
+                          </EuiText>
+                        </div>
                       </div>
                     </EuiFlexItem>
                   </EuiFlexGroup>
@@ -359,17 +363,22 @@ const componentStyles = {
     overflow: 'hidden',
   }),
   splitDiffPaneLabelWrapper: css({
-    flex: '0 0 auto',
-    display: 'flex',
-    justifyContent: 'center',
+    flex: '1 1 0',
+    minWidth: 0,
     padding: '10px 12px 8px',
     position: 'sticky',
     top: 0,
     zIndex: 1,
     backgroundColor: 'transparent',
   }),
+  splitDiffPaneLabelInner: css({
+    width: '100%',
+    display: 'flex',
+    justifyContent: 'center',
+  }),
   splitDiffPaneLabel: ({ euiTheme }: UseEuiTheme) =>
     css({
+      width: 'fit-content',
       padding: '6px 14px',
       borderRadius: euiTheme.border.radius.medium,
       boxShadow: '0 1px 3px rgba(0, 0, 0, 0.08)',
