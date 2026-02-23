@@ -29,10 +29,20 @@ export interface SloOverviewFlyoutStatusFilteredParams {
   statuses: string[];
 }
 
+export enum EmbeddedSloLocations {
+  ServiceInventoryTable = 'service_inventory_table',
+  ServiceDetailsBadge = 'service_details_badge',
+}
+
+export interface EmbeddedSloShownParams {
+  location: EmbeddedSloLocations;
+}
+
 export type TelemetryEventParams =
   | SearchQuerySubmittedParams
   | SloOverviewFlyoutSearchQueriedParams
   | SloOverviewFlyoutStatusFilteredParams
+  | EmbeddedSloShownParams
   | Record<string, never>;
 
 export interface ITelemetryClient {
@@ -40,6 +50,7 @@ export interface ITelemetryClient {
   reportSloOverviewFlyoutViewed(): void;
   reportSloOverviewFlyoutSearchQueried(params: SloOverviewFlyoutSearchQueriedParams): void;
   reportSloOverviewFlyoutStatusFiltered(params: SloOverviewFlyoutStatusFilteredParams): void;
+  reportEmbeddedSloShown(params: EmbeddedSloShownParams): void;
 }
 
 export enum TelemetryEventTypes {
@@ -47,6 +58,7 @@ export enum TelemetryEventTypes {
   SLO_OVERVIEW_FLYOUT_VIEWED = 'slo_overview_flyout_viewed',
   SLO_OVERVIEW_FLYOUT_SEARCH_QUERIED = 'slo_overview_flyout_search_queried',
   SLO_OVERVIEW_FLYOUT_STATUS_FILTERED = 'slo_overview_flyout_status_filtered',
+  EMBEDDED_SLO_SHOWN = 'embedded_slo_shown',
 }
 
 export interface TelemetryEvent {

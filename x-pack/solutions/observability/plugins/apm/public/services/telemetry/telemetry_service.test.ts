@@ -7,7 +7,7 @@
 import { coreMock } from '@kbn/core/server/mocks';
 import { apmTelemetryEventBasedTypes } from './telemetry_events';
 import { TelemetryService } from './telemetry_service';
-import { SearchQueryActions, TelemetryEventTypes } from './types';
+import { EmbeddedSloLocations, SearchQueryActions, TelemetryEventTypes } from './types';
 
 describe('TelemetryService', () => {
   const service = new TelemetryService();
@@ -37,6 +37,22 @@ describe('TelemetryService', () => {
         kueryFields: ['service.name', 'span.id'],
         action: SearchQueryActions.Submit,
         timerange: 'now-15h-now',
+      }
+    );
+  });
+
+  it('should report embedded SLO shown event with the properties', async () => {
+    const telemetry = service.start();
+
+    telemetry.reportEmbeddedSloShown({
+      location: EmbeddedSloLocations.ServiceInventoryTable,
+    });
+
+    expect(mockCoreStart.analytics.reportEvent).toHaveBeenCalledTimes(1);
+    expect(mockCoreStart.analytics.reportEvent).toHaveBeenCalledWith(
+      TelemetryEventTypes.EMBEDDED_SLO_SHOWN,
+      {
+        location: EmbeddedSloLocations.ServiceInventoryTable,
       }
     );
   });

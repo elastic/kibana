@@ -11,6 +11,7 @@ import type {
   SearchQuerySubmittedParams,
   SloOverviewFlyoutSearchQueriedParams,
   SloOverviewFlyoutStatusFilteredParams,
+  EmbeddedSloShownParams,
 } from './types';
 import { TelemetryEventTypes } from './types';
 
@@ -33,5 +34,9 @@ export class TelemetryClient implements ITelemetryClient {
     params: SloOverviewFlyoutStatusFilteredParams
   ) => {
     this.analytics.reportEvent(TelemetryEventTypes.SLO_OVERVIEW_FLYOUT_STATUS_FILTERED, params);
+  };
+
+  public reportEmbeddedSloShown = (params: EmbeddedSloShownParams): void => {
+    this.analytics.reportEvent(TelemetryEventTypes.EMBEDDED_SLO_SHOWN, params);
   };
 }
