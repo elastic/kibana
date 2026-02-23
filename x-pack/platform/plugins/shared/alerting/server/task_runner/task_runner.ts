@@ -344,6 +344,7 @@ export class TaskRunner<
           params: rule.params,
           muteAll: rule.muteAll,
           mutedInstanceIds: rule.mutedInstanceIds,
+          snoozedInstances: rule.snoozedInstances,
         },
         ruleType: this.ruleType as UntypedNormalizedRuleType,
         startedAt: this.taskInstance.startedAt,
