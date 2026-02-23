@@ -24,9 +24,9 @@ export const dashboardManagementSkill = defineSkillType({
 
 Use this skill when:
 - A user asks to create a dashboard with one or more visualizations.
-- A user asks to update an in-memory dashboard that was previously created by the agent.
-- A request includes dashboard panel management (add visualizations, add markdown, remove panels).
-- A user asks for a multi-panel overview of their data (e.g., "give me an overview of my logs").
+- A user asks to update an in-memory dashboard from a previous tool result.
+- A request includes ordered panel-management actions (add, remove, markdown, metadata updates).
+- A user asks for a multi-panel overview of their data.
 
 Do **not** use this skill when:
 - The user asks for a single chart or visualization without mentioning a dashboard.
@@ -51,7 +51,7 @@ This skill has access to the following tools. Each has a specific role in the da
   }**: Execute an ES|QL query and return results. Use to validate that data actually exists or to preview the data shape before building visualizations.
 - **${
     dashboardTools.manageDashboard
-  }**: Create or update an in-memory dashboard with panels. This is the primary tool for this skill.
+  }**: Create or update an in-memory dashboard via ordered \`operations[]\`. This is the primary tool for this skill.
 
 ## Core Instructions
 
@@ -79,30 +79,48 @@ This step is optional. Use it when the user's request involves complex aggregati
     platformCoreTools.executeEsql
   } to run the query and verify it returns data before passing it to the dashboard.
 
-You can pass the pre-generated ES|QL query as the \`esql\` field in \`visualizationQueries\` for higher quality visualizations.
+You can pass pre-generated ES|QL into \`add_generated_panels.items[].esql\` for higher quality visualizations.
 
 For straightforward requests (e.g., "show X over time"), skip this step and let the dashboard tool handle query generation internally.
 
-### Step 3: Create or update the dashboard
+### Step 3: Call \`${dashboardTools.manageDashboard}\` with operation payloads
+
+The tool contract is:
+
+\`\`\`json
+{
+  "dashboardAttachmentId": "optional-existing-id",
+  "operations": [
+    { "operation": "set_metadata", "title": "optional", "description": "optional" },
+    { "operation": "upsert_markdown", "markdownContent": "..." },
+    { "operation": "add_generated_panels", "items": [] },
+    { "operation": "add_panels_from_attachments", "attachmentIds": [] },
+    { "operation": "remove_panels", "panelIds": [] }
+  ]
+}
+\`\`\`
+
 
 #### Creating a new dashboard
 
-Call ${dashboardTools.manageDashboard} with:
-- \`title\` (**required**): a concise, descriptive title for the dashboard.
-- \`description\` (**required**): one sentence explaining what the dashboard shows.
-- \`visualizationQueries\` (**required**): an array of visualization requests. See "Writing Effective Visualization Queries" below.
-- \`markdownContent\` (**required for new dashboards**): a markdown-formatted summary panel placed at the top of the dashboard. Always include this when creating a new dashboard to set context for the user. **IMPORTANT**: Use actual line breaks in the string, NOT escape sequences like \\\\n.
+When creating a dashboard, include ordered operations such as:
+1. \`set_metadata\` to set title/description
+2. \`upsert_markdown\` to add a summary panel
+3. \`add_generated_panels\` with as many panels as needed to satisfy the user's intent and the available data
+
+If you omit metadata on a new dashboard, creation can fail.
 
 #### Updating an existing dashboard
 
 1. Extract the dashboard attachment ID from the previous tool result: look for \`data.dashboardAttachment.id\`.
 2. Call ${
     dashboardTools.manageDashboard
-  } with \`dashboardAttachmentId\` plus **only** the fields you need to change:
-   - \`visualizationQueries\`: add new LLM-generated visualizations.
-   - \`existingVisualizationIds\`: add visualization attachments that were already created earlier in the conversation. Pass their attachment IDs directly instead of regenerating them.
-   - \`removePanelIds\`: remove panels by their \`panelId\`. Find panel IDs in the previous result at \`data.dashboardAttachment.content.panels[].panelId\`.
-   - \`title\`, \`description\`, \`markdownContent\`: update dashboard metadata.
+  } with \`dashboardAttachmentId\` and an ordered \`operations[]\` list.
+3. Use:
+   - \`add_generated_panels\` to add new generated panels
+   - \`add_panels_from_attachments\` to add previously created attachments
+   - \`remove_panels\` to remove by \`panelId\`
+   - \`set_metadata\` / \`upsert_markdown\` for dashboard metadata and summary updates
 
 **Keeping the markdown summary in sync:** After adding or removing panels, the existing markdown summary panel may no longer reflect the current dashboard content. If the update changes the panel composition (new panels added or existing ones removed), check whether the markdown summary still accurately describes the dashboard. If it does not, ask the user whether they would like you to update the markdown summary to match the new dashboard state. Do not update it silently — let the user decide.
 
@@ -123,7 +141,7 @@ See \`./examples/tool-result-format\` for the complete result structure with exa
 
 ## Writing Effective Visualization Queries
 
-Each entry in the \`visualizationQueries\` array accepts:
+Each entry in \`add_generated_panels.items[]\` accepts:
 - \`query\` (**required**): a natural-language description of the visualization. This is sent to an LLM to generate the panel, so precision matters.
 - \`index\` (optional, recommended): the target index, alias, or data stream. Providing this avoids an extra index-discovery step during generation.
 - \`chartType\` (optional): one of ${Object.values(SupportedChartType).join(
@@ -161,7 +179,7 @@ A well-composed dashboard tells a coherent story about the data:
 2. **Lead with high-level metrics** (Metric or Gauge panels): total counts, averages, key performance indicators that give an at-a-glance summary.
 3. **Follow with time-series trends** (XY line/area panels): how the key metrics change over time.
 4. **Add breakdowns and distributions** (XY bar, Heatmap, Tagcloud panels): top-N rankings, categorical splits, and density views.
-5. **Include as many panels as are valuable for the underlying data.** Let the richness and diversity of the available fields drive the panel count. A dashboard with 12 well-chosen panels is better than one with 4 that leaves out important dimensions.
+5. **Include as many panels as are valuable for the underlying data and user intent.** Let the richness and diversity of the available fields drive the panel count instead of a fixed numeric target.
 6. **Every panel should serve a clear purpose.** Do not add panels just to fill space, but do not artificially limit the dashboard when more panels would provide genuine insight.
 
 When the user's request is vague (e.g., "create a dashboard for my logs"), compose a balanced set of panels covering:
@@ -190,52 +208,75 @@ Base panel selection on the fields actually available in the discovered index ma
      platformCoreTools.getIndexMapping
    } on \`logs-nginx.access-default\` → finds fields: \`http.response.status_code\`, \`url.path\`, \`source.ip\`, \`http.response.body.bytes\`, \`@timestamp\`
 
-2. **Compose a balanced dashboard** using discovered fields:
-   - Metric: total request count from nginx logs
-   - Metric: average CPU usage across hosts
-   - XY line: request volume over time
-   - XY bar: top 10 URL paths by request count
-   - XY line: CPU usage over time grouped by host
+2. **Compose a rich dashboard** using discovered fields:
+   - include overview metrics, trends, breakdowns, and distribution panels
+   - choose the panel count based on user intent; if intent is unclear, create a rich dashboard grounded in the available data
 
 3. **Call ${dashboardTools.manageDashboard}:**
    \`\`\`json
    {
-     "title": "Web Server Performance",
-     "description": "Overview of nginx request traffic and host CPU usage across production hosts",
-     "markdownContent": "### Web Server Performance\n\nThis dashboard combines nginx access logs with system CPU metrics.",
-     "visualizationQueries": [
+     "operations": [
        {
-         "query": "Show the total number of documents as a single metric",
-         "index": "logs-nginx.access-default",
-         "chartType": "${SupportedChartType.Metric}"
+         "operation": "set_metadata",
+         "title": "Web Server Performance",
+         "description": "Overview of nginx request traffic and host CPU usage across production hosts"
        },
        {
-         "query": "Show the average system.cpu.total.pct as a single metric",
-         "index": "metrics-system.cpu-default",
-         "chartType": "${SupportedChartType.Metric}"
+         "operation": "upsert_markdown",
+         "markdownContent": "### Web Server Performance\n\nThis dashboard combines nginx access logs with system CPU metrics."
        },
        {
-         "query": "Show document count over time as a line chart",
-         "index": "logs-nginx.access-default",
-         "chartType": "${SupportedChartType.XY}"
-       },
-       {
-         "query": "Show the top 10 url.path values by document count as a horizontal bar chart",
-         "index": "logs-nginx.access-default",
-         "chartType": "${SupportedChartType.XY}"
-       },
-       {
-         "query": "Show system.cpu.total.pct over time grouped by host.name as a line chart",
-         "index": "metrics-system.cpu-default",
-         "chartType": "${SupportedChartType.XY}"
+         "operation": "add_generated_panels",
+         "items": [
+           {
+             "query": "Show total request count as a metric",
+             "index": "logs-nginx.access-default",
+             "chartType": "${SupportedChartType.Metric}"
+           },
+           {
+             "query": "Show average system.cpu.total.pct as a metric",
+             "index": "metrics-system.cpu-default",
+             "chartType": "${SupportedChartType.Metric}"
+           },
+           {
+             "query": "Show request count over time",
+             "index": "logs-nginx.access-default",
+             "chartType": "${SupportedChartType.XY}"
+           },
+           {
+             "query": "Show 95th percentile of http.response.body.bytes over time",
+             "index": "logs-nginx.access-default",
+             "chartType": "${SupportedChartType.XY}"
+           },
+           {
+             "query": "Show top 10 url.path values by request count",
+             "index": "logs-nginx.access-default",
+             "chartType": "${SupportedChartType.XY}"
+           },
+           {
+             "query": "Show top source.ip values by request count",
+             "index": "logs-nginx.access-default",
+             "chartType": "${SupportedChartType.XY}"
+           },
+           {
+             "query": "Show system.cpu.total.pct over time grouped by host.name",
+             "index": "metrics-system.cpu-default",
+             "chartType": "${SupportedChartType.XY}"
+           },
+           {
+             "query": "Show top http.response.status_code values by request count",
+             "index": "logs-nginx.access-default",
+             "chartType": "${SupportedChartType.XY}"
+           }
+         ]
        }
      ]
    }
    \`\`\`
 
-4. **Report to user:** "I created a Web Server Performance dashboard with 6 panels: a markdown summary, total requests, average CPU, request volume over time, top URL paths, and CPU by host."
+4. **Report to user:** summarize panel set and mention any failures.
 
-### Example 2: Updating an existing dashboard
+### Example 2: Updating with ordered add + remove + markdown refresh
 
 **User request:** "Add a panel showing response sizes and remove the URL paths panel"
 
@@ -251,20 +292,29 @@ Base panel selection on the fields actually available in the discovered index ma
    \`\`\`json
    {
      "dashboardAttachmentId": "abc-123",
-     "visualizationQueries": [
+     "operations": [
+       { "operation": "remove_panels", "panelIds": ["panel-xyz"] },
        {
-         "query": "Show average http.response.body.bytes over time as a line chart",
-         "index": "logs-nginx.access-default",
-         "chartType": "${SupportedChartType.XY}"
+         "operation": "add_generated_panels",
+         "items": [
+           {
+             "query": "Show average http.response.body.bytes over time as a line chart",
+             "index": "logs-nginx.access-default",
+             "chartType": "${SupportedChartType.XY}"
+           }
+         ]
+       },
+       {
+         "operation": "upsert_markdown",
+         "markdownContent": "### Web Server Performance\n\nUpdated with response-size trend and refreshed panel composition."
        }
-     ],
-     "removePanelIds": ["panel-xyz"]
+     ]
    }
    \`\`\`
 
 4. **Report to user:** "I added a response size trend panel and removed the URL paths panel. The dashboard now has 5 panels."
 
-### Example 3: Adding an existing visualization to a dashboard
+### Example 3: Adding existing attachments to a dashboard
 
 **User request:** "Add the CPU chart you just made to the dashboard"
 
@@ -277,7 +327,12 @@ Base panel selection on the fields actually available in the discovered index ma
    \`\`\`json
    {
      "dashboardAttachmentId": "abc-123",
-     "existingVisualizationIds": ["viz-456"]
+     "operations": [
+       {
+         "operation": "add_panels_from_attachments",
+         "attachmentIds": ["viz-456"]
+       }
+     ]
    }
    \`\`\`
 
@@ -297,8 +352,8 @@ Base panel selection on the fields actually available in the discovered index ma
     SupportedChartType
   ).join(', ')}), choose the closest supported alternative and explain the substitution to the user.
 - **Very large dashboards:** If the data supports many dimensions, create as many panels as are valuable. However, if the user explicitly asks for a focused or compact dashboard, help them prioritize the most important panels.
-- **Reusing previously created visualizations:** When the user says "add the visualization you just created to the dashboard", use \`existingVisualizationIds\` with the visualization's attachment ID. Do not regenerate it via \`visualizationQueries\`.
-- **User asks to update a panel in place:** The tool does not support in-place panel editing. Instead, remove the old panel via \`removePanelIds\` and add a new one via \`visualizationQueries\` in the same call.
+- **Reusing previously created visualizations:** When the user says "add the visualization you just created to the dashboard", use \`add_panels_from_attachments\` with that attachment ID.
+- **User asks to update a panel in place:** Prefer ordered remove + add operations in the same call.
 
 See \`./examples/manage-dashboard-payloads\` for complete payload examples covering all scenarios.
 `,
@@ -312,63 +367,78 @@ See \`./examples/manage-dashboard-payloads\` for complete payload examples cover
 
 \`\`\`json
 {
-  "title": "Web Server Performance",
-  "description": "Overview of web server request traffic and host resource usage",
-  "markdownContent": "### Web Server Performance\n\nThis dashboard tracks nginx access logs and system metrics across all production hosts.",
-  "visualizationQueries": [
+  "operations": [
     {
-      "query": "Show the total number of documents as a single metric",
-      "index": "logs-nginx.access-default",
-      "chartType": "metric"
+      "operation": "set_metadata",
+      "title": "Web Server Performance",
+      "description": "Overview of web server request traffic and host resource usage"
     },
     {
-      "query": "Show average system.cpu.total.pct as a single metric",
-      "index": "metrics-system.cpu-default",
-      "chartType": "metric"
+      "operation": "upsert_markdown",
+      "markdownContent": "### Web Server Performance\n\nThis dashboard tracks nginx access logs and system metrics across all production hosts."
     },
     {
-      "query": "Show document count over time as a line chart",
-      "index": "logs-nginx.access-default",
-      "chartType": "xy"
-    },
-    {
-      "query": "Show the top 10 url.path values by document count as a horizontal bar chart",
-      "index": "logs-nginx.access-default",
-      "chartType": "xy"
-    },
-    {
-      "query": "Show system.cpu.total.pct over time grouped by host.name",
-      "index": "metrics-system.cpu-default",
-      "chartType": "xy"
+      "operation": "add_generated_panels",
+      "items": [
+        {
+          "query": "Show the total number of documents as a single metric",
+          "index": "logs-nginx.access-default",
+          "chartType": "metric"
+        },
+        {
+          "query": "Show average system.cpu.total.pct as a single metric",
+          "index": "metrics-system.cpu-default",
+          "chartType": "metric"
+        },
+        {
+          "query": "Show document count over time as a line chart",
+          "index": "logs-nginx.access-default",
+          "chartType": "xy"
+        }
+      ]
     }
   ]
 }
 \`\`\`
 
-## Update a dashboard — add and remove panels
+## Update a dashboard — ordered remove + add + markdown
 
 \`\`\`json
 {
   "dashboardAttachmentId": "abc-123",
-  "visualizationQueries": [
+  "operations": [
+    { "operation": "remove_panels", "panelIds": ["panel-xyz"] },
     {
-      "query": "Show average http.response.body.bytes over time",
-      "index": "logs-nginx.access-default",
-      "chartType": "xy"
+      "operation": "add_generated_panels",
+      "items": [
+        {
+          "query": "Show average http.response.body.bytes over time",
+          "index": "logs-nginx.access-default",
+          "chartType": "xy"
+        }
+      ]
+    },
+    {
+      "operation": "upsert_markdown",
+      "markdownContent": "### Updated Summary\n\nNow includes response-size trend."
     }
-  ],
-  "removePanelIds": ["panel-xyz"]
+  ]
 }
 \`\`\`
 
-## Update a dashboard — add an existing visualization attachment
+## Update a dashboard — add existing attachment panels
 
 Use this when the user wants to add a visualization that was already created earlier in the conversation.
 
 \`\`\`json
 {
   "dashboardAttachmentId": "abc-123",
-  "existingVisualizationIds": ["viz-attachment-456"]
+  "operations": [
+    {
+      "operation": "add_panels_from_attachments",
+      "attachmentIds": ["viz-attachment-456"]
+    }
+  ]
 }
 \`\`\`
 
@@ -377,8 +447,16 @@ Use this when the user wants to add a visualization that was already created ear
 \`\`\`json
 {
   "dashboardAttachmentId": "abc-123",
-  "title": "Web Server Performance (Production)",
-  "markdownContent": "### Updated Summary\n\nNow filtered to production hosts only."
+  "operations": [
+    {
+      "operation": "set_metadata",
+      "title": "Web Server Performance (Production)"
+    },
+    {
+      "operation": "upsert_markdown",
+      "markdownContent": "### Updated Summary\n\nNow filtered to production hosts only."
+    }
+  ]
 }
 \`\`\`
 `,
@@ -414,7 +492,7 @@ Use this when the user wants to add a visualization that was already created ear
 
 Key fields to remember:
 - \`data.dashboardAttachment.id\` — save this value. Pass it as \`dashboardAttachmentId\` in follow-up update calls.
-- \`data.dashboardAttachment.content.panels[].panelId\` — use these when the user asks to remove a specific panel via \`removePanelIds\`.
+- \`data.dashboardAttachment.content.panels[].panelId\` — use these when the user asks to remove a specific panel via \`remove_panels.panelIds\`.
 - \`data.version\` — increments with each update to the dashboard.
 - Panels with \`type: "generic"\` are non-visualization panels (e.g., markdown summary). Panels with \`type: "lens"\` are visualizations.
 

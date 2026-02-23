@@ -10,12 +10,7 @@ import type { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_re
 import type { ModelProvider, ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { buildVisualizationConfig } from '@kbn/agent-builder-genai-utils';
-import {
-  DASHBOARD_PANEL_ADDED_EVENT,
-  type AttachmentPanel,
-  type DashboardUiEvent,
-  type LensAttachmentPanel,
-} from '@kbn/dashboard-agent-common';
+import { type LensAttachmentPanel } from '@kbn/dashboard-agent-common';
 import { getErrorMessage, type VisualizationFailure } from './utils';
 
 export interface VisualizationQueryInput {
@@ -30,7 +25,7 @@ export const buildVisualizationsFromQueriesWithLLM = async ({
   modelProvider,
   esClient,
   events,
-  sendIncrementalEvents,
+  onPanelCreated,
   logger,
 }: {
   queries?: VisualizationQueryInput[];
@@ -38,10 +33,7 @@ export const buildVisualizationsFromQueriesWithLLM = async ({
   esClient: IScopedClusterClient;
   modelProvider: ModelProvider;
   events: ToolEventEmitter;
-  sendIncrementalEvents: (
-    panels: AttachmentPanel[],
-    eventType: DashboardUiEvent['data']['custom_event']
-  ) => void;
+  onPanelCreated?: (panel: LensAttachmentPanel) => void;
 }): Promise<{
   panels: LensAttachmentPanel[];
   failures: VisualizationFailure[];
@@ -80,7 +72,7 @@ export const buildVisualizationsFromQueriesWithLLM = async ({
       };
 
       panels.push(panelEntry);
-      sendIncrementalEvents([panelEntry], DASHBOARD_PANEL_ADDED_EVENT);
+      onPanelCreated?.(panelEntry);
 
       logger.debug(`Created lens visualization: ${panelEntry.panelId}`);
     } catch (error) {
