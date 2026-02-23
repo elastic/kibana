@@ -47,6 +47,7 @@ export interface DslStepsFlyoutArrayViewProps {
   setSelectedStepIndex: (index: number | undefined) => void;
   tabHasErrors: (stepPath: string) => boolean;
   pruneToStepPaths: (stepPaths: string[]) => void;
+  reindexErrorsAfterRemoval: (removedIndex: number) => void;
 }
 
 export const DslStepsFlyoutArrayView = ({
@@ -57,6 +58,7 @@ export const DslStepsFlyoutArrayView = ({
   setSelectedStepIndex,
   tabHasErrors,
   pruneToStepPaths,
+  reindexErrorsAfterRemoval,
 }: DslStepsFlyoutArrayViewProps) => {
   const { items, form } = arrayField;
   const { sectionStyles, headerStyles, headerNoStepsStyles } = useStyles();
@@ -291,6 +293,8 @@ export const DslStepsFlyoutArrayView = ({
     (stepIndex: number) => {
       const oldLength = items.length;
 
+      reindexErrorsAfterRemoval(stepIndex);
+
       const nextSteps = getCurrentSteps().filter((_, index) => index !== stepIndex);
       const payload: DslStepsFlyoutFormFieldUpdate = {
         _meta: { __dslStepsFlyout: true, downsampleSteps: nextSteps },
@@ -318,6 +322,7 @@ export const DslStepsFlyoutArrayView = ({
       form,
       getCurrentSteps,
       items.length,
+      reindexErrorsAfterRemoval,
       scheduleRevalidate,
       selectedStepIndex,
       setSelectedStepIndex,

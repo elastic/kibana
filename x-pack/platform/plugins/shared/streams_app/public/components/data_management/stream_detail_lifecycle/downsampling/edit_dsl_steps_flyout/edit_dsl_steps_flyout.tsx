@@ -89,7 +89,8 @@ export const EditDslStepsFlyout = ({
   const pendingOnChangeOutputRef = useRef<IngestStreamLifecycleDSL | null>(null);
   const pendingOnChangeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const { onStepFieldErrorsChange, tabHasErrors, pruneToStepPaths } = useDslStepsFlyoutTabErrors();
+  const { onStepFieldErrorsChange, tabHasErrors, pruneToStepPaths, reindexErrorsAfterRemoval } =
+    useDslStepsFlyoutTabErrors();
 
   useEffect(() => {
     const sub = form.subscribe(({ data }) => {
@@ -204,6 +205,7 @@ export const EditDslStepsFlyout = ({
                 setSelectedStepIndex={setSelectedStepIndex}
                 tabHasErrors={tabHasErrors}
                 pruneToStepPaths={pruneToStepPaths}
+                reindexErrorsAfterRemoval={reindexErrorsAfterRemoval}
               />
             )}
           </UseArray>

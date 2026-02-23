@@ -479,6 +479,45 @@ describe('EditDslStepsFlyout', () => {
       expect(panel.getByTestId(`${DATA_TEST_SUBJ}FixedIntervalValue`)).toHaveValue(3);
       expect(panel.getByTestId(`${DATA_TEST_SUBJ}FixedIntervalUnit`)).toHaveValue('h');
     });
+
+    it('does not keep stale tab errors when removing an invalid middle step', async () => {
+      const { onSave } = renderFlyout(
+        {
+          initialSteps: {
+            dsl: {
+              data_retention: '30d',
+              downsample: [
+                { after: '10d', fixed_interval: '1h' },
+                { after: '20d', fixed_interval: '2h' },
+                { after: '30d', fixed_interval: '3h' },
+              ],
+            },
+          },
+        },
+        { initialSelectedStepIndex: 1 }
+      );
+
+      await tick();
+
+      // Make step 2 invalid.
+      const step2Panel = withinStep(1);
+      fireEvent.change(step2Panel.getByTestId(`${DATA_TEST_SUBJ}FixedIntervalValue`), {
+        target: { value: '1.5' },
+      });
+
+      fireEvent.click(screen.getByTestId(`${DATA_TEST_SUBJ}SaveButton`));
+      await tick();
+      expect(onSave).toHaveBeenCalledTimes(0);
+      expect(getTab(2).querySelector('[data-euiicon-type="warning"]')).not.toBeNull();
+
+      // Remove step 2; step 3 shifts to step 2 and should not keep the stale warning icon.
+      fireEvent.click(screen.getByTestId(`${DATA_TEST_SUBJ}RemoveStepButton-step-2`));
+      await waitFor(() => expect(queryTab(3)).not.toBeInTheDocument());
+
+      await waitFor(() =>
+        expect(getTab(2).querySelector('[data-euiicon-type="warning"]')).toBeNull()
+      );
+    });
   });
 
   describe('onChange emission', () => {
