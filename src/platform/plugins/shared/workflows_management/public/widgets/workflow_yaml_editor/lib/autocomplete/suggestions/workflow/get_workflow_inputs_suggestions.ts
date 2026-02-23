@@ -121,8 +121,7 @@ export async function getWorkflowInputsSuggestions(
     return null;
   }
 
-  const isInputsMatchType =
-    (lineParseResult as { matchType?: string } | null)?.matchType === 'workflow-inputs';
+  const isInputsMatchType = lineParseResult?.matchType === 'workflow-inputs';
   const isInputsPath = autocompleteContext.isInWorkflowInputsContext;
 
   if (!isInputsMatchType && !isInputsPath) {
@@ -147,8 +146,8 @@ export async function getWorkflowInputsSuggestions(
   }
 
   const searchPrefix =
-    isInputsMatchType && lineParseResult
-      ? (lineParseResult as { fullKey?: string }).fullKey ?? ''
+    lineParseResult?.matchType === 'workflow-inputs' && lineParseResult
+      ? lineParseResult.fullKey ?? ''
       : extractInputKeyPrefix(lineUpToCursor);
   const lowerSearchPrefix = searchPrefix.toLowerCase();
   const required = schema.required ?? [];

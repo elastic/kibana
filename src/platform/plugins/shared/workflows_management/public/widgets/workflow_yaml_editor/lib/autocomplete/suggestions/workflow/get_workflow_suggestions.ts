@@ -82,8 +82,7 @@ export async function getWorkflowSuggestions(
 ): Promise<monaco.languages.CompletionItem[]> {
   const { focusedStepInfo, line, lineParseResult, range, workflows, model } = autocompleteContext;
 
-  const matchType = (lineParseResult as { matchType?: string } | null)?.matchType;
-  if (matchType !== 'workflow-id') {
+  if (lineParseResult?.matchType !== 'workflow-id') {
     return [];
   }
 
@@ -95,12 +94,11 @@ export async function getWorkflowSuggestions(
     return [];
   }
 
-  const parseResult = lineParseResult as { fullKey?: string; valueStartIndex?: number } | null;
-  const searchPrefix = parseResult?.fullKey ?? '';
+  const searchPrefix = lineParseResult.fullKey ?? '';
 
   const workflowSuggestions = getWorkflowsFromStore(workflows, searchPrefix);
 
-  const valueStartIndex = parseResult?.valueStartIndex;
+  const valueStartIndex = lineParseResult.valueStartIndex;
   const adjustedRange =
     valueStartIndex !== undefined
       ? {
