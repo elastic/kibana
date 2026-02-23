@@ -33,7 +33,7 @@ export const userActivityActions = {
   // ... existing actions ...
   archive_case: {
     description: 'Archive a case',
-    ownerTeam: '@elastic/kibana-security',
+    ownerTeam: '@elastic/kibana-cases',
     groupName: 'Cases',
     versionAddedAt: '9.3',
   },
