@@ -13,7 +13,9 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import {
   HeaderMenuPortal,
   InspectorContextProvider,
+  useObservabilityAgentDefault,
 } from '@kbn/observability-shared-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { Route } from '@kbn/shared-ux-router';
 import { RouteRenderer, RouterProvider } from '@kbn/typed-react-router-config';
 import React from 'react';
@@ -108,6 +110,8 @@ export function ApmAppRoot({
 }
 
 function MountApmHeaderActionMenu() {
+  useObservabilityAgentDefault(useKibana<ApmPluginStartDeps>().services.agentBuilder);
+
   const {
     appMountParameters: { setHeaderActionMenu, theme$ },
   } = useApmPluginContext();
