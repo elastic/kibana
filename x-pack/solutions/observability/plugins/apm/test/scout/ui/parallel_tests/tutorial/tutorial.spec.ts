@@ -19,7 +19,7 @@ test.describe(
 
     test('includes section for APM Server', async ({ page, kbnUrl }) => {
       await page.goto(`${kbnUrl.app('home')}#/tutorial/apm`);
-      await expect(page.getByText('APM Server')).toBeVisible();
+      await expect(page.getByRole('heading', { name: 'APM Server' })).toBeVisible();
       await expect(page.getByText('Linux DEB')).toBeVisible();
       await expect(page.getByText('Linux RPM')).toBeVisible();
       await expect(page.getByText('Other Linux')).toBeVisible();
@@ -30,7 +30,7 @@ test.describe(
 
     test('includes section for APM Agents', async ({ page, kbnUrl }) => {
       await page.goto(`${kbnUrl.app('home')}#/tutorial/apm`);
-      await expect(page.getByText('APM agents')).toBeVisible();
+      await expect(page.getByRole('heading', { name: 'APM agents' })).toBeVisible();
       await expect(page.getByText('Java')).toBeVisible();
       await expect(page.getByText('RUM')).toBeVisible();
       await expect(page.getByText('Node.js')).toBeVisible();

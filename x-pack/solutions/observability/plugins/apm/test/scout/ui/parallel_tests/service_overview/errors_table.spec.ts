@@ -24,7 +24,9 @@ test.describe(
         rangeFrom: testData.START_DATE,
         rangeTo: testData.END_DATE,
       });
-      await expect(page.getByText(testData.SERVICE_OPBEANS_JAVA)).toBeVisible();
+      await expect(page.getByTestId('apmMainTemplateHeaderServiceName')).toHaveText(
+        testData.SERVICE_OPBEANS_JAVA
+      );
       await expect(page.getByText(testData.ERROR_MESSAGE)).toBeVisible();
     });
 

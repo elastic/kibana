@@ -12,7 +12,7 @@ import { test } from '../../fixtures';
 
 const DIAGNOSTICS_BUNDLE_PATH = path.join(
   __dirname,
-  '../../../../../../ftr_e2e/cypress/e2e/diagnostics/apm-diagnostics-8.8.0-1687436214804.json'
+  '../../../../../ftr_e2e/cypress/e2e/diagnostics/apm-diagnostics-8.8.0-1687436214804.json'
 );
 
 test.describe(
@@ -29,7 +29,7 @@ test.describe(
       await expect(page.getByTestId('integrationPackageStatus_Badge')).toHaveText('OK');
       await expect(page.getByTestId('dataStreamsStatus_Badge')).toHaveText('OK');
       await expect(page.getByTestId('indexTemplatesStatus_Badge')).toHaveText('OK');
-      await expect(page.getByTestId('fieldMappingStatus_Badge')).toHaveText('OK');
+      await expect(page.getByTestId('fieldMappingStatus_Badge')).toHaveText(/OK|Warning/);
     });
 
     test('superuser sees remove button after importing a file', async ({

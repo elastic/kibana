@@ -28,7 +28,7 @@ test.describe(
       await page.waitForResponse((res) =>
         res.url().includes('/internal/apm/services/synth-dotnet/transactions/charts/coldstart_rate')
       );
-      await expect(page.getByText('Cold start rate')).toBeVisible();
+      await expect(page.getByRole('heading', { name: 'Cold start rate' })).toBeVisible();
       await expect(page.getByText('Time spent by span type')).not.toBeVisible();
     });
   }

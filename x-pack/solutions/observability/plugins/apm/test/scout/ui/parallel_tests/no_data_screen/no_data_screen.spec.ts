@@ -9,62 +9,40 @@ import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../../fixtures';
 
-async function setApmIndices(
-  kbnUrl: { get: () => string },
-  body: Record<string, string>,
-  auth: { username: string; password: string }
-) {
-  const url = `${kbnUrl.get()}/internal/apm-sources/settings/apm-indices/save`;
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'kbn-xsrf': 'e2e_test',
-      Authorization: 'Basic ' + Buffer.from(`${auth.username}:${auth.password}`).toString('base64'),
-    },
-    body: JSON.stringify(body),
-  });
-  if (!response.ok) {
-    throw new Error(`Failed to set APM indices: ${response.status} ${response.statusText}`);
-  }
-}
-
 test.describe(
   'No data screen - bypass on settings pages',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    const editorAuth = { username: 'editor', password: 'changeme' };
-
-    test.beforeAll(async ({ kbnUrl }) => {
-      await setApmIndices(
-        kbnUrl,
-        {
+    test.beforeAll(async ({ kbnClient }) => {
+      await kbnClient.request({
+        method: 'POST',
+        path: '/internal/apm-sources/settings/apm-indices/save',
+        body: {
           error: 'foo-*',
           onboarding: 'foo-*',
           span: 'foo-*',
           transaction: 'foo-*',
           metric: 'foo-*',
         },
-        editorAuth
-      );
+      });
     });
 
     test.beforeEach(async ({ browserAuth }) => {
       await browserAuth.loginAsPrivilegedUser();
     });
 
-    test.afterAll(async ({ kbnUrl }) => {
-      await setApmIndices(
-        kbnUrl,
-        {
+    test.afterAll(async ({ kbnClient }) => {
+      await kbnClient.request({
+        method: 'POST',
+        path: '/internal/apm-sources/settings/apm-indices/save',
+        body: {
           error: '',
           onboarding: '',
           span: '',
           transaction: '',
           metric: '',
         },
-        editorAuth
-      );
+      });
     });
 
     test('shows no data screen instead of service inventory', async ({ page, kbnUrl }) => {

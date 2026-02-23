@@ -9,45 +9,18 @@ import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../../fixtures';
 
-async function setAdvancedSetting(
-  kbnUrl: { get: () => string },
-  key: string,
-  value: string,
-  auth: { username: string; password: string }
-) {
-  const url = `${kbnUrl.get()}/internal/kibana/settings`;
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'kbn-xsrf': 'e2e_test',
-      Authorization: 'Basic ' + Buffer.from(`${auth.username}:${auth.password}`).toString('base64'),
-    },
-    body: JSON.stringify({ changes: { [key]: value } }),
-  });
-  if (!response.ok) {
-    throw new Error(`Failed to set ${key}: ${response.status} ${response.statusText}`);
-  }
-}
-
 test.describe(
   'Comparison feature flag',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    const editorAuth = { username: 'editor', password: 'changeme' };
-
     test('shows comparison enabled in services overview when feature is on', async ({
       page,
       kbnUrl,
       browserAuth,
+      uiSettings,
     }) => {
       await browserAuth.loginAsPrivilegedUser();
-      await setAdvancedSetting(
-        kbnUrl,
-        'observability:enableComparisonByDefault',
-        'true',
-        editorAuth
-      );
+      await uiSettings.set({ 'observability:enableComparisonByDefault': true });
       await page.goto(`${kbnUrl.app('apm')}/services`);
       const comparisonCheckbox = page.getByTestId('comparisonCheckbox');
       await expect(comparisonCheckbox).toBeChecked();
@@ -58,14 +31,10 @@ test.describe(
       page,
       kbnUrl,
       browserAuth,
+      uiSettings,
     }) => {
       await browserAuth.loginAsPrivilegedUser();
-      await setAdvancedSetting(
-        kbnUrl,
-        'observability:enableComparisonByDefault',
-        'true',
-        editorAuth
-      );
+      await uiSettings.set({ 'observability:enableComparisonByDefault': true });
       await page.goto(`${kbnUrl.app('apm')}/dependencies`);
       const comparisonCheckbox = page.getByTestId('comparisonCheckbox');
       await expect(comparisonCheckbox).toBeChecked();
@@ -76,14 +45,10 @@ test.describe(
       page,
       kbnUrl,
       browserAuth,
+      uiSettings,
     }) => {
       await browserAuth.loginAsPrivilegedUser();
-      await setAdvancedSetting(
-        kbnUrl,
-        'observability:enableComparisonByDefault',
-        'true',
-        editorAuth
-      );
+      await uiSettings.set({ 'observability:enableComparisonByDefault': true });
       await page.goto(`${kbnUrl.app('apm')}/service-map`);
       const comparisonCheckbox = page.getByTestId('comparisonCheckbox');
       await expect(comparisonCheckbox).toBeChecked();
@@ -94,26 +59,17 @@ test.describe(
       page,
       kbnUrl,
       browserAuth,
+      uiSettings,
     }) => {
       await browserAuth.loginAsPrivilegedUser();
-      await setAdvancedSetting(
-        kbnUrl,
-        'observability:enableComparisonByDefault',
-        'false',
-        editorAuth
-      );
+      await uiSettings.set({ 'observability:enableComparisonByDefault': false });
       try {
         await page.goto(`${kbnUrl.app('apm')}/services`);
         const comparisonCheckbox = page.getByTestId('comparisonCheckbox');
         await expect(comparisonCheckbox).not.toBeChecked();
         await expect(page.getByTestId('comparisonSelect')).toBeDisabled();
       } finally {
-        await setAdvancedSetting(
-          kbnUrl,
-          'observability:enableComparisonByDefault',
-          'true',
-          editorAuth
-        );
+        await uiSettings.set({ 'observability:enableComparisonByDefault': true });
       }
     });
 
@@ -121,14 +77,10 @@ test.describe(
       page,
       kbnUrl,
       browserAuth,
+      uiSettings,
     }) => {
       await browserAuth.loginAsPrivilegedUser();
-      await setAdvancedSetting(
-        kbnUrl,
-        'observability:enableComparisonByDefault',
-        'false',
-        editorAuth
-      );
+      await uiSettings.set({ 'observability:enableComparisonByDefault': false });
       try {
         await page.goto(`${kbnUrl.app('apm')}/dependencies`);
         await page.waitForResponse((res) =>
@@ -138,12 +90,7 @@ test.describe(
         await expect(comparisonCheckbox).not.toBeChecked();
         await expect(page.getByTestId('comparisonSelect')).toBeDisabled();
       } finally {
-        await setAdvancedSetting(
-          kbnUrl,
-          'observability:enableComparisonByDefault',
-          'true',
-          editorAuth
-        );
+        await uiSettings.set({ 'observability:enableComparisonByDefault': true });
       }
     });
 
@@ -151,26 +98,17 @@ test.describe(
       page,
       kbnUrl,
       browserAuth,
+      uiSettings,
     }) => {
       await browserAuth.loginAsPrivilegedUser();
-      await setAdvancedSetting(
-        kbnUrl,
-        'observability:enableComparisonByDefault',
-        'false',
-        editorAuth
-      );
+      await uiSettings.set({ 'observability:enableComparisonByDefault': false });
       try {
         await page.goto(`${kbnUrl.app('apm')}/service-map`);
         const comparisonCheckbox = page.getByTestId('comparisonCheckbox');
         await expect(comparisonCheckbox).not.toBeChecked();
         await expect(page.getByTestId('comparisonSelect')).toBeDisabled();
       } finally {
-        await setAdvancedSetting(
-          kbnUrl,
-          'observability:enableComparisonByDefault',
-          'true',
-          editorAuth
-        );
+        await uiSettings.set({ 'observability:enableComparisonByDefault': true });
       }
     });
   }

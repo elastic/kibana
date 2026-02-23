@@ -19,13 +19,13 @@ test.describe(
 
     test('includes section for APM Agents', async ({ page, kbnUrl }) => {
       await page.goto(`${kbnUrl.app('apm')}/onboarding`);
-      await expect(page.getByText('APM Agents')).toBeVisible();
-      await expect(page.getByText('Node.js')).toBeVisible();
+      await expect(page.getByRole('heading', { name: 'APM Agents' })).toBeVisible();
+      await expect(page.getByRole('tab', { name: 'Node.js' })).toBeVisible();
       await expect(page.getByText('Django')).toBeVisible();
       await expect(page.getByText('Flask')).toBeVisible();
       await expect(page.getByText('Ruby on Rails')).toBeVisible();
       await expect(page.getByText('Rack')).toBeVisible();
-      await expect(page.getByText('Go')).toBeVisible();
+      await expect(page.getByRole('tab', { name: 'Go' })).toBeVisible();
       await expect(page.getByText('Java')).toBeVisible();
       await expect(page.getByText('.NET')).toBeVisible();
       await expect(page.getByText('PHP')).toBeVisible();
@@ -45,7 +45,7 @@ test.describe(
       await page.getByText('Rack').click();
       await expect(page.getByText("gem 'elastic-apm'")).toBeVisible();
 
-      await page.getByText('Go').click();
+      await page.getByRole('tab', { name: 'Go' }).click();
       await expect(page.getByText('go get go.elastic.co/apm')).toBeVisible();
 
       await page.getByText('Java').click();
