@@ -18,11 +18,7 @@ test.describe(
       await browserAuth.loginAsViewer();
     });
 
-    test('should only load certain resources once', async ({
-      page,
-      kbnUrl,
-      pageObjects: { serviceDetailsPage },
-    }) => {
+    test('should only load certain resources once', async ({ page, kbnUrl }) => {
       const serviceOverviewHref = `${kbnUrl.app('apm')}/services/${
         testData.SERVICE_OPBEANS_JAVA
       }/overview?comparisonEnabled=true&environment=ENVIRONMENT_ALL&rangeFrom=${
@@ -35,15 +31,15 @@ test.describe(
 
       await page.route('**/internal/apm/has_data**', (route) => {
         hasDataRequests.push(route.request().url());
-        route.continue();
+        return route.continue();
       });
       await page.route('**/internal/apm/services/opbeans-java/metadata/icons**', (route) => {
         serviceIconsRequests.push(route.request().url());
-        route.continue();
+        return route.continue();
       });
       await page.route('**/apm/fleet/has_apm_policies**', (route) => {
         apmPoliciesRequests.push(route.request().url());
-        route.continue();
+        return route.continue();
       });
 
       await page.goto(serviceOverviewHref);

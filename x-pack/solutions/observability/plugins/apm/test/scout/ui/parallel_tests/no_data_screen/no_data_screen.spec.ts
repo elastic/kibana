@@ -30,54 +30,52 @@ async function setApmIndices(
 }
 
 test.describe(
-  'No data screen',
+  'No data screen - bypass on settings pages',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     const editorAuth = { username: 'editor', password: 'changeme' };
 
-    test.describe('bypass no data screen on settings pages', () => {
-      test.beforeAll(async ({ kbnUrl }) => {
-        await setApmIndices(
-          kbnUrl,
-          {
-            error: 'foo-*',
-            onboarding: 'foo-*',
-            span: 'foo-*',
-            transaction: 'foo-*',
-            metric: 'foo-*',
-          },
-          editorAuth
-        );
-      });
+    test.beforeAll(async ({ kbnUrl }) => {
+      await setApmIndices(
+        kbnUrl,
+        {
+          error: 'foo-*',
+          onboarding: 'foo-*',
+          span: 'foo-*',
+          transaction: 'foo-*',
+          metric: 'foo-*',
+        },
+        editorAuth
+      );
+    });
 
-      test.beforeEach(async ({ browserAuth }) => {
-        await browserAuth.loginAsPrivilegedUser();
-      });
+    test.beforeEach(async ({ browserAuth }) => {
+      await browserAuth.loginAsPrivilegedUser();
+    });
 
-      test('shows no data screen instead of service inventory', async ({ page, kbnUrl }) => {
-        await page.goto(`${kbnUrl.app('apm')}/`);
-        await expect(page.getByText('Add data')).toBeVisible();
-      });
+    test.afterAll(async ({ kbnUrl }) => {
+      await setApmIndices(
+        kbnUrl,
+        {
+          error: '',
+          onboarding: '',
+          span: '',
+          transaction: '',
+          metric: '',
+        },
+        editorAuth
+      );
+    });
 
-      test('shows settings page', async ({ page, kbnUrl }) => {
-        await page.goto(`${kbnUrl.app('apm')}/settings`);
-        await expect(page.getByText('Welcome to Elastic Observability!')).not.toBeVisible();
-        await expect(page.getByRole('heading', { name: 'Settings', level: 1 })).toBeVisible();
-      });
+    test('shows no data screen instead of service inventory', async ({ page, kbnUrl }) => {
+      await page.goto(`${kbnUrl.app('apm')}/`);
+      await expect(page.getByText('Add data')).toBeVisible();
+    });
 
-      test.afterAll(async ({ kbnUrl }) => {
-        await setApmIndices(
-          kbnUrl,
-          {
-            error: '',
-            onboarding: '',
-            span: '',
-            transaction: '',
-            metric: '',
-          },
-          editorAuth
-        );
-      });
+    test('shows settings page', async ({ page, kbnUrl }) => {
+      await page.goto(`${kbnUrl.app('apm')}/settings`);
+      await expect(page.getByText('Welcome to Elastic Observability!')).not.toBeVisible();
+      await expect(page.getByRole('heading', { name: 'Settings', level: 1 })).toBeVisible();
     });
   }
 );

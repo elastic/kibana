@@ -45,11 +45,7 @@ test.describe(
       await expect(page.getByText(testData.SERVICE_OPBEANS_NODE)).toBeVisible();
     });
 
-    test('navigates to service overview page with transaction type', async ({
-      page,
-      pageObjects: { serviceInventoryPage },
-      kbnUrl,
-    }) => {
+    test('navigates to service overview page with transaction type', async ({ page, kbnUrl }) => {
       const serviceInventoryHref = `${kbnUrl.app(
         'apm'
       )}/services?comparisonEnabled=true&environment=ENVIRONMENT_ALL&rangeFrom=${
