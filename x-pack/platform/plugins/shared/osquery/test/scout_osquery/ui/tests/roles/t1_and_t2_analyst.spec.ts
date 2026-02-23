@@ -120,7 +120,9 @@ roles.forEach(({ name, role }) => {
         await expect(page.getByText(liveQueryQuery).first()).toBeVisible({ timeout: 15_000 });
 
         // Scope to row containing the saved query - multiple rows have Run buttons
-        const savedQueryRow = page.locator('tbody tr').filter({ hasText: liveQueryQuery })
+        const savedQueryRow = page
+          .locator('tbody tr')
+          .filter({ hasText: liveQueryQuery })
           // eslint-disable-next-line playwright/no-nth-methods -- multiple matching rows; pick the first
           .first();
         const runQueryButton = savedQueryRow.getByRole('button', { name: 'Run query' });

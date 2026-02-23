@@ -98,6 +98,7 @@ test.describe(
             if (await docTable.isVisible({ timeout: 15_000 }).catch(() => false)) break;
             await page.reload();
           }
+
           await expect(docTable).toBeVisible({ timeout: 30_000 });
           await expect(page.getByText(/action_data\.query\s*.+;/)).toBeVisible();
           await expect(page.getByText(discoverRegex)).toBeVisible();

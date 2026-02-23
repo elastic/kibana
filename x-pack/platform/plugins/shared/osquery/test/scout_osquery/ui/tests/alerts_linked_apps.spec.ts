@@ -124,6 +124,7 @@ test.describe(
         // eslint-disable-next-line playwright/no-wait-for-timeout -- brief pause between checks
         await page.waitForTimeout(5_000);
       }
+
       await expect(resultsTable).toBeVisible({ timeout: 30_000 });
       // eslint-disable-next-line playwright/no-nth-methods -- first cell in results grid
       const dataCell = page.testSubj.locator('dataGridRowCell').first();
@@ -143,11 +144,11 @@ test.describe(
       // Close the osquery flyout using keyboard (Escape) to avoid portal intercept issues
       await page.keyboard.press('Escape');
       const flyout = page.testSubj.locator('flyout-body-osquery');
-      await flyout.waitFor({ state: 'hidden', timeout: 5_000 }).catch(() => { });
+      await flyout.waitFor({ state: 'hidden', timeout: 5_000 }).catch(() => {});
       const overlayMask = page.locator('.euiOverlayMask');
       if (await overlayMask.isVisible({ timeout: 2_000 }).catch(() => false)) {
         await page.keyboard.press('Escape');
-        await overlayMask.waitFor({ state: 'hidden', timeout: 5_000 }).catch(() => { });
+        await overlayMask.waitFor({ state: 'hidden', timeout: 5_000 }).catch(() => {});
       }
 
       // Also close the security solution flyout if it's still open

@@ -146,6 +146,7 @@ for (const testSpace of testSpaces) {
       } else {
         await page.goto(kbnUrl.get(`/s/${spaceId}/app/osquery/packs`));
       }
+
       await waitForPageReady(page);
 
       // Handle pagination - the pack may be on page 2 due to accumulated packs from previous runs
@@ -157,7 +158,7 @@ for (const testSpace of testSpaces) {
           await page.testSubj
             .locator('globalLoadingIndicator')
             .waitFor({ state: 'hidden', timeout: 1000 })
-            .catch(() => { });
+            .catch(() => {});
           if (await playButton.isVisible({ timeout: 2_000 }).catch(() => false)) {
             break;
           }

@@ -131,7 +131,7 @@ test.describe(
         await page.testSubj
           .locator('fleetSetupLoading')
           .waitFor({ state: 'hidden', timeout: 60_000 })
-          .catch(() => { });
+          .catch(() => {});
         await waitForPageReady(page);
         await expect(page.getByText(integrationName)).toBeVisible({ timeout: 60_000 });
         await expect(page.getByText(`version: ${oldVersion}`)).toBeVisible({
@@ -147,7 +147,7 @@ test.describe(
         await page.testSubj
           .locator('fleetSetupLoading')
           .waitFor({ state: 'hidden', timeout: 60_000 })
-          .catch(() => { });
+          .catch(() => {});
         await page.testSubj
           .locator('PackagePoliciesTableUpgradeButton')
           .waitFor({ state: 'visible', timeout: 60_000 });
@@ -191,7 +191,7 @@ test.describe(
       await page.testSubj
         .locator('fleetSetupLoading')
         .waitFor({ state: 'hidden', timeout: 60_000 })
-        .catch(() => { });
+        .catch(() => {});
       // Fleet search bar may use different test subjects across versions
       const searchBar = page.testSubj
         .locator('epmList.searchBar')
@@ -299,7 +299,7 @@ test.describe(
       await page.testSubj
         .locator('fleetSetupLoading')
         .waitFor({ state: 'hidden', timeout: 60_000 })
-        .catch(() => { });
+        .catch(() => {});
       await page.testSubj
         .locator('PackagePoliciesTableUpgradeButton')
         .waitFor({ state: 'visible', timeout: 60_000 });

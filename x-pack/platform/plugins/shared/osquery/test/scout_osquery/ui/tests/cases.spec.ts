@@ -93,6 +93,7 @@ test.describe('Add to Cases', { tag: [...tags.stateful.classic] }, () => {
             break;
           await page.reload();
         }
+
         await expect(page.getByText(liveQueryQuery)).toBeVisible({ timeout: 30_000 });
 
         // eslint-disable-next-line playwright/no-nth-methods -- first visible result
@@ -162,6 +163,7 @@ test.describe('Add to Cases', { tag: [...tags.stateful.classic] }, () => {
             break;
           await page.reload();
         }
+
         await expect(page.getByText('SELECT * FROM os_version;')).toBeVisible({ timeout: 30_000 });
 
         // eslint-disable-next-line playwright/no-nth-methods -- first visible result

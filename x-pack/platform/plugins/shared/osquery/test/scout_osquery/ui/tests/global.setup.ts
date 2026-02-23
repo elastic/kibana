@@ -402,7 +402,12 @@ globalSetupHook(
     try {
       // List existing outputs and find the default one
       const { data: outputsResponse } = await kbnClient.request<{
-        items: Array<{ id: string; is_default: boolean; hosts?: string[]; is_preconfigured?: boolean }>;
+        items: Array<{
+          id: string;
+          is_default: boolean;
+          hosts?: string[];
+          is_preconfigured?: boolean;
+        }>;
       }>({
         method: 'GET',
         path: '/api/fleet/outputs',
