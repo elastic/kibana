@@ -44,6 +44,9 @@ export const useNerRulesPanelState = ({
 
   const hasTrustedNerModel = trustedNerModelOptions.length > 0;
   const usesTrustedNerModelProvider = typeof listTrustedNerModels === 'function';
+  const hasSingleTrustedNerModel =
+    usesTrustedNerModelProvider && trustedNerModelOptions.length === 1;
+  const singleTrustedNerModel = hasSingleTrustedNerModel ? trustedNerModelOptions[0] : undefined;
   const showValidationErrors = Boolean(nerRulesError);
 
   useEffect(() => {
@@ -111,7 +114,7 @@ export const useNerRulesPanelState = ({
   );
 
   const addNerRule = useCallback(() => {
-    const modelId = nerDraft.modelId.trim();
+    const modelId = singleTrustedNerModel?.value ?? nerDraft.modelId.trim();
     if (!modelId) {
       return;
     }
@@ -131,8 +134,17 @@ export const useNerRulesPanelState = ({
         enabled: true,
       },
     ]);
-    setNerDraft({ modelId: '', allowedEntityClasses: DEFAULT_DRAFT_ALLOWED_ENTITIES });
-  }, [nerDraft.allowedEntityClasses, nerDraft.modelId, nerRules, onNerRulesChange]);
+    setNerDraft({
+      modelId: singleTrustedNerModel?.value ?? '',
+      allowedEntityClasses: DEFAULT_DRAFT_ALLOWED_ENTITIES,
+    });
+  }, [
+    nerDraft.allowedEntityClasses,
+    nerDraft.modelId,
+    nerRules,
+    onNerRulesChange,
+    singleTrustedNerModel,
+  ]);
 
   const setNerDraftModelId = useCallback((modelId: string) => {
     setNerDraft((draft) => ({ ...draft, modelId }));
@@ -144,9 +156,12 @@ export const useNerRulesPanelState = ({
 
   const updateRuleModelId = useCallback(
     (ruleId: string, modelId: string) => {
+      if (singleTrustedNerModel) {
+        return;
+      }
       updateNerRuleById(ruleId, (rule) => ({ ...rule, modelId }));
     },
-    [updateNerRuleById]
+    [singleTrustedNerModel, updateNerRuleById]
   );
 
   const updateRuleAllowedEntityClasses = useCallback(
@@ -186,12 +201,44 @@ export const useNerRulesPanelState = ({
     isTrustedNerModelsLoading ||
     (usesTrustedNerModelProvider && !hasTrustedNerModel);
 
+  useEffect(() => {
+    if (!singleTrustedNerModel) {
+      return;
+    }
+
+    setNerDraft((draft) =>
+      draft.modelId === singleTrustedNerModel.value
+        ? draft
+        : { ...draft, modelId: singleTrustedNerModel.value }
+    );
+
+    if (nerRules.length === 0) {
+      return;
+    }
+
+    const hasNonDefaultModel = nerRules.some(
+      (rule) => rule.modelId !== singleTrustedNerModel.value
+    );
+    if (!hasNonDefaultModel) {
+      return;
+    }
+
+    onNerRulesChange(
+      nerRules.map((rule) => ({
+        ...rule,
+        modelId: singleTrustedNerModel.value,
+      }))
+    );
+  }, [singleTrustedNerModel, nerRules, onNerRulesChange]);
+
   return {
     nerDraft,
     trustedNerModelOptions,
+    singleTrustedNerModel,
     trustedNerModelsError,
     isTrustedNerModelsLoading,
     usesTrustedNerModelProvider,
+    hasSingleTrustedNerModel,
     hasTrustedNerModel,
     isNerInputDisabled,
     showValidationErrors,
@@ -205,7 +252,7 @@ export const useNerRulesPanelState = ({
     getModelOptionsForRule,
     canAddRule:
       !isNerInputDisabled &&
-      nerDraft.modelId.trim().length > 0 &&
+      (Boolean(singleTrustedNerModel) || nerDraft.modelId.trim().length > 0) &&
       nerDraft.allowedEntityClasses.length > 0,
   };
 };

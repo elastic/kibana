@@ -25,6 +25,14 @@ For the section-level API (`AnonymizationProfilesSection`), hosts provide:
 
 Hosts are responsible for deriving these values from their capabilities/services context.
 
+### Trusted NER model behavior
+
+When `listTrustedNerModels` is provided:
+
+- `0` models: NER rule creation/editing is disabled and a warning is shown.
+- `1` model: the model is auto-applied and rendered read-only in the NER panel.
+- `>1` models: users can select a model from the dropdown (current behavior).
+
 ## Ownership boundaries
 
 Package-owned:

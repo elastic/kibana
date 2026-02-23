@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { NerRulesPanel } from './ner_rules_panel';
 import { useProfileFormContext } from '../../profile_form_context';
 
@@ -14,7 +14,7 @@ jest.mock('../../profile_form_context', () => ({
   useProfileFormContext: jest.fn(),
 }));
 
-const setContext = (overrides: Partial<ReturnType<typeof useProfileFormContext>> = {}) => {
+const setContext = (overrides = {}) => {
   const onNerRulesChange = jest.fn();
   jest.mocked(useProfileFormContext).mockReturnValue({
     nerRules: [
@@ -30,7 +30,7 @@ const setContext = (overrides: Partial<ReturnType<typeof useProfileFormContext>>
     isManageMode: true,
     isSubmitting: false,
     ...overrides,
-  } as unknown as ReturnType<typeof useProfileFormContext>);
+  });
 
   return { onNerRulesChange };
 };
@@ -44,21 +44,53 @@ describe('NerRulesPanel', () => {
     setContext();
     render(<NerRulesPanel />);
 
-    expect(screen.getByLabelText('NER model id')).toBeInTheDocument();
+    expect(screen.getByLabelText('Model id')).toBeInTheDocument();
     expect(screen.getByLabelText('Allowed entities')).toBeInTheDocument();
   });
 
-  it('uses trusted model provider options when available', async () => {
+  it('uses trusted model provider options when multiple models are available', async () => {
     setContext({
+      listTrustedNerModels: jest.fn().mockResolvedValue([
+        { id: 'trusted-ner-v1', label: 'trusted-ner-v1' },
+        { id: 'trusted-ner-v2', label: 'trusted-ner-v2' },
+      ]),
+    });
+    render(<NerRulesPanel />);
+
+    const modelSelect = await screen.findByLabelText('Model id');
+    expect(modelSelect).toBeInTheDocument();
+    expect(screen.getAllByRole('option', { name: 'trusted-ner-v1' }).length).toBeGreaterThan(0);
+    expect(screen.getAllByRole('option', { name: 'trusted-ner-v2' }).length).toBeGreaterThan(0);
+  });
+
+  it('shows read-only model name and auto-applies it when exactly one trusted model is available', async () => {
+    const { onNerRulesChange } = setContext({
+      nerRules: [
+        {
+          id: 'ner-1',
+          type: 'ner',
+          modelId: 'legacy-model',
+          allowedEntityClasses: ['PER', 'ORG'],
+          enabled: true,
+        },
+      ],
       listTrustedNerModels: jest
         .fn()
         .mockResolvedValue([{ id: 'trusted-ner-v1', label: 'trusted-ner-v1' }]),
     });
     render(<NerRulesPanel />);
 
-    const modelSelect = await screen.findByLabelText('NER model id');
-    expect(modelSelect).toBeInTheDocument();
-    expect(screen.getAllByRole('option', { name: 'trusted-ner-v1' }).length).toBeGreaterThan(0);
+    await waitFor(() => {
+      expect(onNerRulesChange).toHaveBeenCalledWith([
+        expect.objectContaining({
+          id: 'ner-1',
+          modelId: 'trusted-ner-v1',
+        }),
+      ]);
+    });
+
+    expect(screen.getAllByText('trusted-ner-v1').length).toBeGreaterThan(0);
+    expect(screen.queryByLabelText('New NER model id')).not.toBeInTheDocument();
   });
 
   it('toggles rule state through enabled/disabled button group', () => {
@@ -79,7 +111,9 @@ describe('NerRulesPanel', () => {
       '[data-test-subj="anonymizationProfilesNerRuleRemove"]'
     );
     expect(removeButton).toBeTruthy();
-    fireEvent.click(removeButton as Element);
+    if (removeButton) {
+      fireEvent.click(removeButton);
+    }
     expect(onNerRulesChange).toHaveBeenCalledWith([]);
   });
 
@@ -90,7 +124,7 @@ describe('NerRulesPanel', () => {
     expect(screen.getByText('No NER rules configured')).toBeInTheDocument();
     expect(
       screen.getByText(
-        'Use NER rules to detect named entities with a trusted model and allow only selected entity classes.'
+        'Use NER rules to detect named entities and allow only selected entity classes.'
       )
     ).toBeInTheDocument();
   });

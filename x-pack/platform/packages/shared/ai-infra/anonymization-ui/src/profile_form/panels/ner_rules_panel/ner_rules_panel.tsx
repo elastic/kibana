@@ -23,6 +23,7 @@ import {
   EuiText,
   EuiTextColor,
   EuiTitle,
+  EuiDescriptionList,
 } from '@elastic/eui';
 import { NER_ENTITY_CLASSES, type NerEntityClass, type NerRule } from '@kbn/anonymization-common';
 import { i18n } from '@kbn/i18n';
@@ -60,9 +61,11 @@ export const NerRulesPanel = () => {
   const {
     nerDraft,
     trustedNerModelOptions,
+    singleTrustedNerModel,
     trustedNerModelsError,
     isTrustedNerModelsLoading,
     usesTrustedNerModelProvider,
+    hasSingleTrustedNerModel,
     hasTrustedNerModel,
     isNerInputDisabled,
     showValidationErrors,
@@ -91,13 +94,20 @@ export const NerRulesPanel = () => {
         <EuiText size="xs">
           <EuiTextColor color="subdued">
             {i18n.translate('anonymizationUi.profiles.nerRules.header.modelId', {
-              defaultMessage: 'NER model id',
+              defaultMessage: 'Model',
             })}
           </EuiTextColor>
         </EuiText>
       ),
       render: (_value: string, rule: NerRule) => {
         const isInvalid = showValidationErrors && !rule.modelId.trim();
+        if (hasSingleTrustedNerModel && singleTrustedNerModel) {
+          return (
+            <EuiText size="s">
+              <p>{singleTrustedNerModel.text}</p>
+            </EuiText>
+          );
+        }
         if (usesTrustedNerModelProvider) {
           return (
             <EuiSelect
@@ -308,12 +318,31 @@ export const NerRulesPanel = () => {
       <EuiFlexGroup alignItems="flexEnd" gutterSize="s" responsive={false}>
         <EuiFlexItem>
           <EuiFormRow
-            label={i18n.translate('anonymizationUi.profiles.nerRules.create.modelIdLabel', {
-              defaultMessage: 'NER model id',
-            })}
+            label={
+              hasSingleTrustedNerModel
+                ? undefined
+                : i18n.translate('anonymizationUi.profiles.nerRules.create.modelIdLabel', {
+                    defaultMessage: 'Model id',
+                  })
+            }
             fullWidth
           >
-            {usesTrustedNerModelProvider ? (
+            {hasSingleTrustedNerModel && singleTrustedNerModel ? (
+              <EuiDescriptionList
+                compressed
+                listItems={[
+                  {
+                    title: i18n.translate(
+                      'anonymizationUi.profiles.nerRules.singleTrustedModel.title',
+                      {
+                        defaultMessage: 'Trusted NER model',
+                      }
+                    ),
+                    description: singleTrustedNerModel.text,
+                  },
+                ]}
+              />
+            ) : usesTrustedNerModelProvider ? (
               <EuiSelect
                 compressed
                 aria-label={i18n.translate(
@@ -415,13 +444,14 @@ export const NerRulesPanel = () => {
           <p>
             {i18n.translate('anonymizationUi.profiles.nerRules.emptyStateDescription', {
               defaultMessage:
-                'Use NER rules to detect named entities with a trusted model and allow only selected entity classes.',
+                'Use NER rules to detect named entities and allow only selected entity classes.',
             })}
           </p>
           <p>
             {i18n.translate('anonymizationUi.profiles.nerRules.emptyStateHint', {
-              defaultMessage:
-                'Add a model id, select allowed entity classes (for example PER, ORG, LOC), and keep the rule enabled.',
+              defaultMessage: hasSingleTrustedNerModel
+                ? 'A trusted NER model is configured by default. Select allowed entity classes (for example PER, ORG, LOC), then add and enable the rule.'
+                : 'Select a model id, choose allowed entity classes (for example PER, ORG, LOC), and keep the rule enabled.',
             })}
           </p>
         </EuiCallOut>
