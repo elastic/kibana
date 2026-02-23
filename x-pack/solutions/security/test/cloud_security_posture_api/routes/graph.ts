@@ -26,6 +26,7 @@ import { getEntitiesLatestIndexName } from '@kbn/cloud-security-posture-common/u
 import type { FtrProviderContext } from '../ftr_provider_context';
 import {
   result,
+  loadAlertArchive,
   dataViewRouteHelpersFactory,
   waitForEnrichPolicyCreated,
   executeEnrichPolicy,
@@ -225,9 +226,13 @@ export default function (providerContext: FtrProviderContext) {
     describe('Happy flows', () => {
       before(async () => {
         // security_alerts_ecs - contains ECS mappings for actor and target
-        await esArchiver.load(
-          'x-pack/solutions/security/test/cloud_security_posture_api/es_archives/security_alerts_ecs'
-        );
+        await loadAlertArchive({
+          es,
+          esArchiver,
+          logger,
+          archivePath:
+            'x-pack/solutions/security/test/cloud_security_posture_api/es_archives/security_alerts_ecs',
+        });
         await esArchiver.load(
           'x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_audit'
         );
@@ -3153,9 +3158,13 @@ export default function (providerContext: FtrProviderContext) {
         before(async () => {
           // security_alerts - contains ONLY legacy fields (actor.entity.id, target.entity.id)
           // Since we only query for new ECS fields, alerts without them won't be found
-          await esArchiver.load(
-            'x-pack/solutions/security/test/cloud_security_posture_api/es_archives/security_alerts'
-          );
+          await loadAlertArchive({
+            es,
+            esArchiver,
+            logger,
+            archivePath:
+              'x-pack/solutions/security/test/cloud_security_posture_api/es_archives/security_alerts',
+          });
           await esArchiver.load(
             'x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_audit'
           );

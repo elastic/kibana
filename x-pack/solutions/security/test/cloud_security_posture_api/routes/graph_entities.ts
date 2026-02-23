@@ -15,7 +15,7 @@ import type { Agent } from 'supertest';
 import type { EntitiesRequest } from '@kbn/cloud-security-posture-common/types/graph_entities/latest';
 import { getEntitiesLatestIndexName } from '@kbn/cloud-security-posture-common/utils/helpers';
 import type { FtrProviderContext } from '../ftr_provider_context';
-import { result, waitForEntityDataIndexed } from '../utils';
+import { result, loadAlertArchive, waitForEntityDataIndexed } from '../utils';
 import { CspSecurityCommonProvider } from './helper/user_roles_utilites';
 
 // eslint-disable-next-line import/no-default-export
@@ -141,13 +141,44 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     describe('Happy flows', () => {
+      const defaultSpaceIndex = getEntitiesLatestIndexName('default');
+
       before(async () => {
+        // Load the entity_store_v2 archive (targets 'entities-space' space index)
         await esArchiver.load(
           'x-pack/solutions/security/test/cloud_security_posture_api/es_archives/entity_store_v2'
         );
-        await esArchiver.load(
-          'x-pack/solutions/security/test/cloud_security_posture_api/es_archives/security_alerts_ecs'
-        );
+
+        // The entity_store_v2 archive creates its index for 'entities-space' space.
+        // The entities API uses LOOKUP JOIN, which requires the concrete index name
+        // (not an alias). Reindex the data into the default space index.
+        const archiveIndex = '.entities.v2.latest.security_entities-space';
+        const archiveSettings = await es.indices.getSettings({ index: archiveIndex });
+        const archiveMappings = await es.indices.getMapping({ index: archiveIndex });
+
+        await es.indices.create({
+          index: defaultSpaceIndex,
+          settings: {
+            index: {
+              mode: archiveSettings[archiveIndex]?.settings?.index?.mode ?? 'lookup',
+            },
+          },
+          mappings: archiveMappings[archiveIndex]?.mappings,
+        });
+
+        await es.reindex({
+          source: { index: archiveIndex },
+          dest: { index: defaultSpaceIndex },
+          refresh: true,
+        });
+
+        await loadAlertArchive({
+          es,
+          esArchiver,
+          logger,
+          archivePath:
+            'x-pack/solutions/security/test/cloud_security_posture_api/es_archives/security_alerts_ecs',
+        });
         await esArchiver.load(
           'x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_audit'
         );
@@ -156,23 +187,40 @@ export default function (providerContext: FtrProviderContext) {
           es,
           logger,
           retry,
-          entitiesIndex: getEntitiesLatestIndexName('default'),
-          expectedCount: 13,
+          entitiesIndex: defaultSpaceIndex,
+          expectedCount: 35,
         });
       });
 
       after(async () => {
+        // Delete the default-space entity index we created
+        try {
+          await es.indices.delete({ index: defaultSpaceIndex });
+        } catch (e) {
+          // Ignore if already deleted
+        }
+
         await esArchiver.unload(
           'x-pack/solutions/security/test/cloud_security_posture_api/es_archives/entity_store_v2'
         );
-        await esArchiver.unload(
-          'x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_audit'
-        );
+
+        // Using unload destroys index's alias of .alerts-security.alerts-default which causes a failure in other tests
+        // Instead we delete all alerts from the index
         await es.deleteByQuery({
           index: '.internal.alerts-*',
           query: { match_all: {} },
           conflicts: 'proceed',
         });
+
+        // Try to unload logs archive - might have been replaced by nested test suites
+        try {
+          await esArchiver.unload(
+            'x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_audit'
+          );
+        } catch (e) {
+          // Ignore if already unloaded or replaced by another archive
+          logger.debug(`Could not unload logs_gcp_audit: ${e.message}`);
+        }
       });
 
       it('should return entities for known entity IDs', async () => {

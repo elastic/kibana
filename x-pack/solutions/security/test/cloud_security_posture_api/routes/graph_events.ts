@@ -14,7 +14,7 @@ import { expect as expectExpect } from 'expect';
 import type { Agent } from 'supertest';
 import type { EventsRequest } from '@kbn/cloud-security-posture-common/types/graph_events/latest';
 import type { FtrProviderContext } from '../ftr_provider_context';
-import { result } from '../utils';
+import { result, loadAlertArchive } from '../utils';
 import { CspSecurityCommonProvider } from './helper/user_roles_utilites';
 
 // eslint-disable-next-line import/no-default-export
@@ -152,24 +152,36 @@ export default function (providerContext: FtrProviderContext) {
 
     describe('Happy flows', () => {
       before(async () => {
-        await esArchiver.load(
-          'x-pack/solutions/security/test/cloud_security_posture_api/es_archives/security_alerts_ecs'
-        );
+        await loadAlertArchive({
+          es,
+          esArchiver,
+          logger,
+          archivePath:
+            'x-pack/solutions/security/test/cloud_security_posture_api/es_archives/security_alerts_ecs',
+        });
         await esArchiver.load(
           'x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_audit'
         );
       });
 
       after(async () => {
+        // Using unload destroys index's alias of .alerts-security.alerts-default which causes a failure in other tests
+        // Instead we delete all alerts from the index
         await es.deleteByQuery({
           index: '.internal.alerts-*',
           query: { match_all: {} },
           conflicts: 'proceed',
         });
 
-        await esArchiver.unload(
-          'x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_audit'
-        );
+        // Try to unload logs archive - might have been replaced by nested test suites
+        try {
+          await esArchiver.unload(
+            'x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_audit'
+          );
+        } catch (e) {
+          // Ignore if already unloaded or replaced by another archive
+          logger.debug(`Could not unload logs_gcp_audit: ${e.message}`);
+        }
       });
 
       it('should return events for known document IDs', async () => {
@@ -190,13 +202,13 @@ export default function (providerContext: FtrProviderContext) {
         expectExpect(response.body.events).toContainEqual(
           expectExpect.objectContaining({
             id: '589e086d7ceec7d4b353340578bd607e96fbac7eab9e2926f110990be15122f1',
-            itemType: 'alert',
+            isAlert: true,
           })
         );
         expectExpect(response.body.events).toContainEqual(
           expectExpect.objectContaining({
             id: '1',
-            itemType: 'event',
+            isAlert: false,
           })
         );
         expect(response.body).not.to.have.property('messages');
