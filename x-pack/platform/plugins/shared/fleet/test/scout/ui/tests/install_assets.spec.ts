@@ -15,21 +15,21 @@ test.describe('Install assets', { tag: [...tags.stateful.classic] }, () => {
     await browserAuth.loginAsAdmin();
     await page.route('**/api/fleet/epm/packages/**/install**', (route) => {
       if (route.request().method() === 'POST') {
-        route.fulfill({
+        return route.fulfill({
           status: 200,
           body: JSON.stringify({
             items: [{ name: 'test-package', version: '1.0.0', status: 'installed' }],
           }),
         });
       } else {
-        route.continue();
+        return route.continue();
       }
     });
   });
 
   test('should show unverified package force-install modal', async ({ page }) => {
     await page.route('**/api/fleet/epm/packages/test-package/1.0.0**', (route) => {
-      route.fulfill({
+      return route.fulfill({
         status: 200,
         body: JSON.stringify({
           item: {

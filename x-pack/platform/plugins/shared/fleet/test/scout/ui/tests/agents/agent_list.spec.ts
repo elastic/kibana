@@ -53,20 +53,6 @@ test.describe('View agents list', { tag: [...tags.stateful.classic] }, () => {
     }
   });
 
-  test.afterAll(async ({ kbnClient, esClient }) => {
-    try {
-      await deleteDocsByQuery(
-        esClient,
-        '.fleet-agents',
-        { match_all: {} },
-        { ignoreUnavailable: true }
-      );
-      await cleanupAgentPolicies(kbnClient);
-    } catch {
-      // Ignore
-    }
-  });
-
   test.beforeEach(async ({ browserAuth, page }) => {
     await browserAuth.loginAsPrivilegedUser();
     await page.route('**/api/fleet/agents/setup', (route) =>
@@ -102,6 +88,20 @@ test.describe('View agents list', { tag: [...tags.stateful.classic] }, () => {
         }),
       })
     );
+  });
+
+  test.afterAll(async ({ kbnClient, esClient }) => {
+    try {
+      await deleteDocsByQuery(
+        esClient,
+        '.fleet-agents',
+        { match_all: {} },
+        { ignoreUnavailable: true }
+      );
+      await cleanupAgentPolicies(kbnClient);
+    } catch {
+      // Ignore
+    }
   });
 
   test('should filter based on agent id', async ({ page }) => {

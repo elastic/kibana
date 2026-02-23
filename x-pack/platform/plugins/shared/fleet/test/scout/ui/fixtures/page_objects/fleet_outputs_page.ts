@@ -71,7 +71,7 @@ export class FleetOutputsPage {
     await this.page.getByPlaceholder('Specify host').fill(hosts[0]);
   }
 
-  async addRemoteESOutput(name: string, hosts: string[]) {
+  async addRemoteESOutput(name: string, _hosts: string[]) {
     await this.getAddOutputButton().click();
     await this.getTypeInput().selectOption('remote_elasticsearch');
     await this.getNameInput().fill(name);

@@ -21,7 +21,7 @@ test.describe('Package policy', { tag: [...tags.stateful.classic] }, () => {
     await page.route('**/api/fleet/package_policies/**', (route) => route.continue());
     await page.route('**/api/fleet/agent_policies/policy-1**', (route) => {
       if (route.request().method() === 'GET') {
-        route.fulfill({
+        return route.fulfill({
           status: 200,
           body: JSON.stringify({
             item: {
@@ -34,7 +34,7 @@ test.describe('Package policy', { tag: [...tags.stateful.classic] }, () => {
           }),
         });
       } else {
-        route.continue();
+        return route.continue();
       }
     });
 

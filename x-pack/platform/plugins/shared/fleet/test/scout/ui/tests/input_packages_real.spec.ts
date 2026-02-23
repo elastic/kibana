@@ -26,7 +26,7 @@ test.describe('Input packages real', { tag: [...tags.stateful.classic] }, () => 
   test.beforeAll(async ({ kbnClient }) => {
     try {
       await installTestPackageFromZip(kbnClient, INPUT_TEST_PACKAGE);
-    } catch (e) {
+    } catch {
       test.skip(
         true,
         `Test package ${INPUT_TEST_PACKAGE}.zip not found - run from Fleet Cypress env`
@@ -37,6 +37,10 @@ test.describe('Input packages real', { tag: [...tags.stateful.classic] }, () => 
     });
   });
 
+  test.beforeEach(async ({ browserAuth }) => {
+    await browserAuth.loginAsAdmin();
+  });
+
   test.afterAll(async ({ kbnClient }) => {
     try {
       await cleanupAgentPolicies(kbnClient);
@@ -44,10 +48,6 @@ test.describe('Input packages real', { tag: [...tags.stateful.classic] }, () => 
     } catch {
       // Ignore
     }
-  });
-
-  test.beforeEach(async ({ browserAuth }) => {
-    await browserAuth.loginAsAdmin();
   });
 
   test('should create package policy for input package', async ({ page }) => {

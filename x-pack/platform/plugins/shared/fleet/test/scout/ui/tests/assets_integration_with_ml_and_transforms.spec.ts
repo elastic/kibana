@@ -22,16 +22,16 @@ test.describe(
       await installTestPackage(kbnClient, LMD_PACKAGE, 'latest');
     });
 
+    test.beforeEach(async ({ browserAuth }) => {
+      await browserAuth.loginAsAdmin();
+    });
+
     test.afterAll(async ({ kbnClient }) => {
       try {
         await uninstallTestPackage(kbnClient, LMD_PACKAGE);
       } catch {
         // Ignore
       }
-    });
-
-    test.beforeEach(async ({ browserAuth }) => {
-      await browserAuth.loginAsAdmin();
     });
 
     test('should display integration assets including ML and transforms', async ({ page }) => {

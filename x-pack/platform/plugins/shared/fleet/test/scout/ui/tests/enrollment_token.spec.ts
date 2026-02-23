@@ -17,16 +17,16 @@ test.describe('Enrollment token page', { tag: [...tags.stateful.classic] }, () =
     await createAgentPolicy(kbnClient, 'Agent policy 1', { id: 'agent-policy-1' });
   });
 
+  test.beforeEach(async ({ browserAuth }) => {
+    await browserAuth.loginAsPrivilegedUser();
+  });
+
   test.afterAll(async ({ kbnClient }) => {
     try {
       await cleanupAgentPolicies(kbnClient);
     } catch {
       // Ignore
     }
-  });
-
-  test.beforeEach(async ({ browserAuth }) => {
-    await browserAuth.loginAsPrivilegedUser();
   });
 
   test('Create new Token', async ({ pageObjects }) => {

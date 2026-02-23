@@ -20,72 +20,49 @@ import { POLICY_EDITOR } from '../common/selectors';
 const INPUT_TEST_PACKAGE = 'input_package-1.0.0';
 const INTEGRATION_TEST_PACKAGE = 'logs_integration-1.0.0';
 
-test.describe(
-  'Package policy pipelines and mappings - Input package',
-  { tag: [...tags.stateful.classic] },
-  () => {
-    test.beforeEach(async ({ browserAuth }) => {
-      await browserAuth.loginAsAdmin();
+test.describe('Package policy pipelines and mappings', { tag: [...tags.stateful.classic] }, () => {
+  test.beforeEach(async ({ browserAuth }) => {
+    await browserAuth.loginAsAdmin();
+  });
+
+  test('should show pipelines and mappings for input package', async ({ page, kbnClient }) => {
+    test.skip(true, 'Requires input_package-1.0.0.zip from Fleet Cypress packages');
+
+    try {
+      await installTestPackageFromZip(kbnClient, INPUT_TEST_PACKAGE);
+    } catch {
+      test.skip(true, `Requires ${INPUT_TEST_PACKAGE}.zip`);
+    }
+    await createAgentPolicy(kbnClient, 'Test input package policy', {
+      id: 'test-input-package-policy',
     });
 
-    test.beforeAll(async ({ kbnClient }) => {
-      try {
-        await installTestPackageFromZip(kbnClient, INPUT_TEST_PACKAGE);
-      } catch {
-        test.skip(true, `Requires ${INPUT_TEST_PACKAGE}.zip`);
-      }
-      await createAgentPolicy(kbnClient, 'Test input package policy', {
-        id: 'test-input-package-policy',
-      });
-    });
-
-    test.afterAll(async ({ kbnClient }) => {
-      try {
-        await cleanupAgentPolicies(kbnClient);
-        await uninstallTestPackage(kbnClient, INPUT_TEST_PACKAGE);
-      } catch {
-        // Ignore
-      }
-    });
-
-    test('should show pipelines and mappings for input package', async ({ page }) => {
-      test.skip(true, 'Requires input_package-1.0.0.zip from Fleet Cypress packages');
-
+    try {
       await page.goto(`/app/integrations/detail/${INPUT_TEST_PACKAGE}/policies`);
       await expect(page.testSubj.locator(POLICY_EDITOR.INSPECT_PIPELINES_BTN)).toBeVisible();
-    });
-  }
-);
+    } finally {
+      await cleanupAgentPolicies(kbnClient);
+      await uninstallTestPackage(kbnClient, INPUT_TEST_PACKAGE);
+    }
+  });
 
-test.describe(
-  'Package policy pipelines and mappings - Integration package',
-  { tag: [...tags.stateful.classic] },
-  () => {
-    test.beforeEach(async ({ browserAuth }) => {
-      await browserAuth.loginAsAdmin();
-    });
+  test('should show pipelines and mappings for integration package', async ({
+    page,
+    kbnClient,
+  }) => {
+    test.skip(true, 'Requires logs_integration-1.0.0.zip from Fleet Cypress packages');
 
-    test.beforeAll(async ({ kbnClient }) => {
-      try {
-        await installTestPackageFromZip(kbnClient, INTEGRATION_TEST_PACKAGE);
-      } catch {
-        test.skip(true, `Requires ${INTEGRATION_TEST_PACKAGE}.zip`);
-      }
-    });
+    try {
+      await installTestPackageFromZip(kbnClient, INTEGRATION_TEST_PACKAGE);
+    } catch {
+      test.skip(true, `Requires ${INTEGRATION_TEST_PACKAGE}.zip`);
+    }
 
-    test.afterAll(async ({ kbnClient }) => {
-      try {
-        await uninstallTestPackage(kbnClient, INTEGRATION_TEST_PACKAGE);
-      } catch {
-        // Ignore
-      }
-    });
-
-    test('should show pipelines and mappings for integration package', async ({ page }) => {
-      test.skip(true, 'Requires logs_integration-1.0.0.zip from Fleet Cypress packages');
-
+    try {
       await page.goto(`/app/integrations/detail/${INTEGRATION_TEST_PACKAGE}/policies`);
       await expect(page.testSubj.locator(POLICY_EDITOR.INSPECT_PIPELINES_BTN)).toBeVisible();
-    });
-  }
-);
+    } finally {
+      await uninstallTestPackage(kbnClient, INTEGRATION_TEST_PACKAGE);
+    }
+  });
+});

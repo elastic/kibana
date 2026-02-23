@@ -18,7 +18,7 @@ test.describe('Integrations mock', { tag: [...tags.stateful.classic] }, () => {
   test('should verify upgrade package and policy flow', async ({ page }) => {
     await page.route('**/api/fleet/epm/packages**', (route) => {
       if (route.request().method() === 'GET' && route.request().url().includes('nginx')) {
-        route.fulfill({
+        return route.fulfill({
           status: 200,
           body: JSON.stringify({
             item: {
@@ -30,7 +30,7 @@ test.describe('Integrations mock', { tag: [...tags.stateful.classic] }, () => {
           }),
         });
       } else {
-        route.continue();
+        return route.continue();
       }
     });
 

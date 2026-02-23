@@ -30,105 +30,79 @@ function getPolicyRow(page: ScoutPage, policyId: string) {
     .locator('..');
 }
 
-test.describe(
-  'Uninstall token page - with existing policies',
-  { tag: [...tags.stateful.classic] },
-  () => {
-    test.beforeAll(async ({ kbnClient }) => {
+test.describe('Uninstall token page', { tag: [...tags.stateful.classic] }, () => {
+  test.beforeAll(async ({ kbnClient }) => {
+    await cleanupAgentPolicies(kbnClient);
+    await generatePolicies(kbnClient);
+  });
+
+  test.beforeEach(async ({ browserAuth }) => {
+    await browserAuth.loginAsPrivilegedUser();
+  });
+
+  test.afterAll(async ({ kbnClient }) => {
+    try {
       await cleanupAgentPolicies(kbnClient);
-      await generatePolicies(kbnClient);
-    });
+    } catch {
+      // Ignore
+    }
+  });
 
-    test.afterAll(async ({ kbnClient }) => {
-      try {
-        await cleanupAgentPolicies(kbnClient);
-      } catch {
-        // Ignore
-      }
-    });
+  test('should show token by clicking on the eye button', async ({ page }) => {
+    await page.goto('/app/fleet/uninstall-tokens');
+    const row = getPolicyRow(page, TARGET_POLICY_ID);
+    const tokenField = row.locator(page.testSubj.locator(UNINSTALL_TOKENS.TOKEN_FIELD));
+    const showHideButton = row.locator(
+      page.testSubj.locator(UNINSTALL_TOKENS.SHOW_HIDE_TOKEN_BUTTON)
+    );
 
-    test.beforeEach(async ({ browserAuth }) => {
-      await browserAuth.loginAsPrivilegedUser();
-    });
+    await expect(tokenField).toContainText('••••••••••••••••••••••••••••••••');
+    await showHideButton.click();
+    await expect(tokenField).not.toContainText('••••••••••••••••••••••••••••••••');
+  });
 
-    test('should show token by clicking on the eye button', async ({ page }) => {
-      await page.goto('/app/fleet/uninstall-tokens');
-      const row = getPolicyRow(page, TARGET_POLICY_ID);
-      const tokenField = row.locator(page.testSubj.locator(UNINSTALL_TOKENS.TOKEN_FIELD));
-      const showHideButton = row.locator(
-        page.testSubj.locator(UNINSTALL_TOKENS.SHOW_HIDE_TOKEN_BUTTON)
-      );
+  test("should show flyout by clicking on 'View uninstall command' button", async ({
+    pageObjects,
+  }) => {
+    const { uninstallTokens } = pageObjects;
+    await uninstallTokens.navigateTo();
+    await uninstallTokens.openUninstallCommandFlyout(TARGET_POLICY_ID);
+    await expect(uninstallTokens.getUninstallCommandFlyout()).toBeVisible();
+    await expect(
+      uninstallTokens
+        .getUninstallCommandFlyout()
+        .getByText(/sudo elastic-agent uninstall --uninstall-token/)
+    ).toBeVisible();
+  });
 
-      await expect(tokenField).toContainText('••••••••••••••••••••••••••••••••');
-      await showHideButton.click();
-      await expect(tokenField).not.toContainText('••••••••••••••••••••••••••••••••');
+  test('should filter for policy ID by partial match', async ({ pageObjects }) => {
+    const { uninstallTokens } = pageObjects;
+    await uninstallTokens.navigateTo();
+    await expect(uninstallTokens.getPolicyIdTableField()).toHaveCount(3, {
+      timeout: 10_000,
     });
+    await uninstallTokens.getPolicyIdSearchInput().fill('licy-300');
+    await expect(uninstallTokens.getPolicyIdTableField()).toHaveCount(1);
+  });
 
-    test("should show flyout by clicking on 'View uninstall command' button", async ({
-      pageObjects,
-    }) => {
-      const { uninstallTokens } = pageObjects;
-      await uninstallTokens.navigateTo();
-      await uninstallTokens.openUninstallCommandFlyout(TARGET_POLICY_ID);
-      await expect(uninstallTokens.getUninstallCommandFlyout()).toBeVisible();
-      await expect(
-        uninstallTokens
-          .getUninstallCommandFlyout()
-          .getByText(/sudo elastic-agent uninstall --uninstall-token/)
-      ).toBeVisible();
+  test('should filter for policy name by partial match', async ({ pageObjects }) => {
+    const { uninstallTokens } = pageObjects;
+    await uninstallTokens.navigateTo();
+    await expect(uninstallTokens.getPolicyIdTableField()).toHaveCount(3, {
+      timeout: 10_000,
     });
+    await uninstallTokens.getPolicyIdSearchInput().fill('Agent 200');
+    await expect(uninstallTokens.getPolicyIdTableField()).toHaveCount(1);
+  });
 
-    test('should filter for policy ID by partial match', async ({ pageObjects }) => {
-      const { uninstallTokens } = pageObjects;
-      await uninstallTokens.navigateTo();
-      await expect(uninstallTokens.getPolicyIdTableField()).toHaveCount(3, {
-        timeout: 10_000,
-      });
-      await uninstallTokens.getPolicyIdSearchInput().fill('licy-300');
-      await expect(uninstallTokens.getPolicyIdTableField()).toHaveCount(1);
-    });
-
-    test('should filter for policy name by partial match', async ({ pageObjects }) => {
-      const { uninstallTokens } = pageObjects;
-      await uninstallTokens.navigateTo();
-      await expect(uninstallTokens.getPolicyIdTableField()).toHaveCount(3, {
-        timeout: 10_000,
-      });
-      await uninstallTokens.getPolicyIdSearchInput().fill('Agent 200');
-      await expect(uninstallTokens.getPolicyIdTableField()).toHaveCount(1);
-    });
-  }
-);
-
-test.describe(
-  'Uninstall token page - with removed policies',
-  { tag: [...tags.stateful.classic] },
-  () => {
-    test.beforeAll(async ({ kbnClient }) => {
-      await cleanupAgentPolicies(kbnClient);
-      await generatePolicies(kbnClient);
-      await cleanupAgentPolicies(kbnClient);
-    });
-
-    test.afterAll(async ({ kbnClient }) => {
-      try {
-        await cleanupAgentPolicies(kbnClient);
-      } catch {
-        // Ignore
-      }
-    });
-
-    test.beforeEach(async ({ browserAuth }) => {
-      await browserAuth.loginAsPrivilegedUser();
-    });
-
-    test('should not be able to filter for policy name by partial match', async ({
-      pageObjects,
-    }) => {
-      const { uninstallTokens } = pageObjects;
-      await uninstallTokens.navigateTo();
-      await uninstallTokens.getPolicyIdSearchInput().fill('Agent 200');
-      await expect(uninstallTokens.getPolicyIdTableField()).toHaveCount(0);
-    });
-  }
-);
+  test('should not filter for policy name by partial match when policies are removed', async ({
+    kbnClient,
+    pageObjects,
+  }) => {
+    await cleanupAgentPolicies(kbnClient);
+    const { uninstallTokens } = pageObjects;
+    await uninstallTokens.navigateTo();
+    await uninstallTokens.getPolicyIdSearchInput().fill('Agent 200');
+    await expect(uninstallTokens.getPolicyIdTableField()).toHaveCount(0);
+  });
+});
