@@ -31,9 +31,9 @@ test.describe(
       await expect(page.getByRole('tab', { name: 'Infrastructure' })).toBeVisible({
         timeout: EXTENDED_TIMEOUT,
       });
-      await expect(page.getByText('Containers')).toBeVisible();
-      await expect(page.getByText('Pods')).toBeVisible();
-      await expect(page.getByText('Hosts')).toBeVisible();
+      await expect(page.getByRole('tab', { name: 'Containers' })).toBeVisible();
+      await expect(page.getByRole('tab', { name: 'Pods' })).toBeVisible();
+      await expect(page.getByRole('tab', { name: 'Hosts' })).toBeVisible();
     });
 
     test('when only host names are returned shows only Hosts tab', async ({ page, kbnUrl }) => {
@@ -46,7 +46,7 @@ test.describe(
       await expect(page.getByRole('tab', { name: 'Infrastructure' })).toBeVisible({
         timeout: EXTENDED_TIMEOUT,
       });
-      await expect(page.getByText('Hosts')).toBeVisible();
+      await expect(page.getByRole('tab', { name: 'Hosts' })).toBeVisible();
     });
 
     test('when none infrastructure attributes are returned shows no data message', async ({

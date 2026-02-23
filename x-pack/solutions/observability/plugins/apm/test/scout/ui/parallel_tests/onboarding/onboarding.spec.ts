@@ -50,7 +50,7 @@ test.describe(
       await expect(page.getByText('go get go.elastic.co/apm')).toBeVisible();
 
       await page.getByText('Java').click();
-      await expect(page.getByText('-javaagent')).toBeVisible();
+      await expect(page.getByText('-javaagent', { exact: true })).toBeVisible();
 
       await page.getByText('.NET', { exact: true }).click();
       await expect(page.getByText('Elastic.Apm.NetCoreAll')).toBeVisible();

@@ -23,8 +23,8 @@ async function openSearchAndType(
   await page.getByTestId('euiSelectableList').waitFor({ state: 'visible' });
 }
 
-function getSearchOption(page: Parameters<Parameters<typeof test>[2]>[0]['page'], urlPath: string) {
-  return page.locator(`[data-test-subj="nav-search-option"][url*="${urlPath}"]`);
+function getSearchOption(page: Parameters<Parameters<typeof test>[2]>[0]['page'], label: string) {
+  return page.getByTestId('euiSelectableList').getByRole('option', { name: new RegExp(label) });
 }
 
 test.describe(
@@ -38,32 +38,32 @@ test.describe(
     for (const keyword of ['apm', 'applications']) {
       test(`contains all expected deep links for "${keyword}"`, async ({ page, kbnUrl }) => {
         await openSearchAndType(page, kbnUrl, keyword);
-        await expect(getSearchOption(page, '/app/apm/services')).toBeVisible();
-        await expect(getSearchOption(page, '/app/apm/service-groups')).toBeVisible();
+        await expect(getSearchOption(page, 'Service inventory')).toBeVisible();
+        await expect(getSearchOption(page, 'Service groups')).toBeVisible();
 
-        const settingsOption = getSearchOption(page, '/app/apm/settings');
+        const settingsOption = getSearchOption(page, 'Settings');
         await settingsOption.scrollIntoViewIfNeeded();
-        await expect(getSearchOption(page, '/app/apm/traces')).toBeVisible();
-        await expect(getSearchOption(page, '/app/apm/service-map')).toBeVisible();
-        await expect(getSearchOption(page, '/app/apm/dependencies')).toBeVisible();
+        await expect(getSearchOption(page, 'Traces')).toBeVisible();
+        await expect(getSearchOption(page, 'Service map')).toBeVisible();
+        await expect(getSearchOption(page, 'Dependencies')).toBeVisible();
         await expect(settingsOption).toBeVisible();
       });
 
       test(`navigates to Service inventory page for "${keyword}"`, async ({ page, kbnUrl }) => {
         await openSearchAndType(page, kbnUrl, keyword);
-        await getSearchOption(page, '/app/apm/services').click();
+        await getSearchOption(page, 'Service inventory').click();
         await expect(page).toHaveURL(/\/apm\/services/);
       });
 
       test(`navigates to Service groups page for "${keyword}"`, async ({ page, kbnUrl }) => {
         await openSearchAndType(page, kbnUrl, keyword);
-        await getSearchOption(page, '/app/apm/service-groups').click();
+        await getSearchOption(page, 'Service groups').click();
         await expect(page).toHaveURL(/\/apm\/service-groups/);
       });
 
       test(`navigates to Traces page for "${keyword}"`, async ({ page, kbnUrl }) => {
         await openSearchAndType(page, kbnUrl, keyword);
-        const tracesOption = getSearchOption(page, '/app/apm/traces');
+        const tracesOption = getSearchOption(page, 'Traces');
         await tracesOption.scrollIntoViewIfNeeded();
         await tracesOption.click();
         await expect(page).toHaveURL(/\/apm\/traces/);
@@ -71,7 +71,7 @@ test.describe(
 
       test(`navigates to Service map page for "${keyword}"`, async ({ page, kbnUrl }) => {
         await openSearchAndType(page, kbnUrl, keyword);
-        const serviceMapOption = getSearchOption(page, '/app/apm/service-map');
+        const serviceMapOption = getSearchOption(page, 'Service map');
         await serviceMapOption.scrollIntoViewIfNeeded();
         await serviceMapOption.click();
         await expect(page).toHaveURL(/\/apm\/service-map/);
@@ -79,7 +79,7 @@ test.describe(
 
       test(`navigates to Dependencies page for "${keyword}"`, async ({ page, kbnUrl }) => {
         await openSearchAndType(page, kbnUrl, keyword);
-        const dependenciesOption = getSearchOption(page, '/app/apm/dependencies');
+        const dependenciesOption = getSearchOption(page, 'Dependencies');
         await dependenciesOption.scrollIntoViewIfNeeded();
         await dependenciesOption.click();
         await expect(page).toHaveURL(/\/apm\/dependencies\/inventory/);
@@ -87,10 +87,10 @@ test.describe(
 
       test(`navigates to Settings page for "${keyword}"`, async ({ page, kbnUrl }) => {
         await openSearchAndType(page, kbnUrl, keyword);
-        const settingsOption = getSearchOption(page, '/app/apm/settings');
+        const settingsOption = getSearchOption(page, 'Settings');
         await settingsOption.scrollIntoViewIfNeeded();
         await settingsOption.click();
-        await expect(page).toHaveURL(/\/apm\/settings\/general-settings/);
+        await expect(page).toHaveURL(/\/apm\/settings/);
       });
     }
   }

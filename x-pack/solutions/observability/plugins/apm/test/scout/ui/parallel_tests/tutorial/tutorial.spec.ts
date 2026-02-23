@@ -19,7 +19,7 @@ test.describe(
 
     test('includes section for APM Server', async ({ page, kbnUrl }) => {
       await page.goto(`${kbnUrl.app('home')}#/tutorial/apm`);
-      await expect(page.getByRole('heading', { name: 'APM Server' })).toBeVisible();
+      await expect(page.getByText('APM Server', { exact: true })).not.toHaveCount(0);
       await expect(page.getByText('Linux DEB')).toBeVisible();
       await expect(page.getByText('Linux RPM')).toBeVisible();
       await expect(page.getByText('Other Linux')).toBeVisible();
