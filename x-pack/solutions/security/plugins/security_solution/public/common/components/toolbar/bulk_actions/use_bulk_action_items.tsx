@@ -7,6 +7,7 @@
 
 import { useMemo, useCallback } from 'react';
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import { useBulkClosingReasonItems } from '@kbn/response-ops-alerts-table';
 import type { AlertTableContextMenuItem } from '../../../../detections/components/alerts_table/types';
 import { FILTER_ACKNOWLEDGED, FILTER_CLOSED, FILTER_OPEN } from '../../../../../common/types';
 import type {
@@ -23,7 +24,7 @@ import { APM_USER_INTERACTIONS } from '../../../lib/apm/constants';
 import type { AlertWorkflowStatus } from '../../../types';
 import type { OnUpdateAlertStatusError, OnUpdateAlertStatusSuccess } from './types';
 import { useAlertCloseInfoModal } from '../../../../detections/hooks/use_alert_close_info_modal';
-import { useBulkAlertClosingReasonItems } from './use_bulk_alert_closing_reason_items';
+import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 
 export interface BulkActionsProps {
   eventIds: string[];
@@ -51,6 +52,7 @@ export const useBulkActionItems = ({
   const { addSuccess, addError, addWarning } = useAppToasts();
   const { startTransaction } = useStartTransaction();
   const { promptAlertCloseConfirmation } = useAlertCloseInfoModal();
+  const { hasIndexWrite } = useAlertsPrivileges();
 
   const onAlertStatusUpdateSuccess = useCallback(
     (updated: number, conflicts: number, newStatus: AlertWorkflowStatus) => {
@@ -152,7 +154,8 @@ export const useBulkActionItems = ({
   );
 
   const { item: alertClosingReasonItem, panels: alertClosingReasonPanels } =
-    useBulkAlertClosingReasonItems({
+    useBulkClosingReasonItems({
+      isEnabled: hasIndexWrite ?? false,
       onSubmitCloseReason({ reason }) {
         onClickUpdate(FILTER_CLOSED as AlertWorkflowStatus, reason);
       },

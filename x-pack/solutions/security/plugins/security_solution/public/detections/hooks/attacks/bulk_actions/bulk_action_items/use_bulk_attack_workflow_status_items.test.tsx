@@ -6,6 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react';
+import { ALERT_CLOSING_REASON_PANEL_ID } from '@kbn/response-ops-alerts-table';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React from 'react';
 
@@ -85,9 +86,15 @@ describe('useBulkAttackWorkflowStatusItems', () => {
     expect(openItem).toBeUndefined();
   });
 
-  it('should return empty panels array', () => {
+  it('should return closing reason panel', () => {
     const { result } = renderHook(() => useBulkAttackWorkflowStatusItems(), { wrapper });
 
-    expect(result.current.panels).toEqual([]);
+    expect(result.current.panels).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: ALERT_CLOSING_REASON_PANEL_ID,
+        }),
+      ])
+    );
   });
 });

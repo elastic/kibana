@@ -9,6 +9,7 @@ import type {
   BulkActionsConfig,
   BulkActionsPanelConfig,
 } from '@kbn/response-ops-alerts-table/types';
+import { useBulkClosingReasonItems } from '@kbn/response-ops-alerts-table';
 import { useCallback, useMemo } from 'react';
 import type { Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
@@ -24,7 +25,6 @@ import * as i18n from '../translations';
 import { buildTimeRangeFilter } from '../../components/alerts_table/helpers';
 import { useAlertsPrivileges } from '../../containers/detection_engine/alerts/use_alerts_privileges';
 import { useAlertCloseInfoModal } from '../use_alert_close_info_modal';
-import { useBulkAlertClosingReasonItems } from '../../../common/components/toolbar/bulk_actions/use_bulk_alert_closing_reason_items';
 
 export interface UseBulkAlertActionItemsArgs {
   /* Table ID for which this hook is being used */
@@ -171,7 +171,8 @@ export const useBulkAlertActionItems = ({
   );
 
   const { item: alertClosingReasonItem, panels: alertClosingReasonPanels } =
-    useBulkAlertClosingReasonItems({
+    useBulkClosingReasonItems({
+      isEnabled: hasIndexWrite ?? false,
       onSubmitCloseReason({
         reason,
         alertItems,

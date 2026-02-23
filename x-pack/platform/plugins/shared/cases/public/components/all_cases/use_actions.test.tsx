@@ -120,6 +120,43 @@ describe('useActions', () => {
     });
   });
 
+  it('changes the status of the case to closed with closing reason', async () => {
+    const updateCasesSpy = jest.spyOn(api, 'updateCases');
+
+    const { result } = renderHook(() => useActions({ disableActions: false }), {
+      wrapper: TestProviders,
+    });
+
+    const comp = result.current.actions!.render(basicCase) as React.ReactElement;
+    renderWithTestingProviders(comp);
+
+    await user.click(screen.getByTestId(`case-action-popover-button-${basicCase.id}`));
+    await waitForEuiPopoverOpen();
+
+    await user.click(screen.getByTestId(`case-action-status-panel-${basicCase.id}`));
+    await waitForEuiContextMenuPanelTransition();
+
+    await user.click(screen.getByTestId('cases-bulk-action-status-closed'));
+    await waitForEuiContextMenuPanelTransition();
+
+    await user.click(screen.getByText('Close without reason'));
+    await user.click(screen.getByRole('button', { name: 'Close' }));
+
+    await waitFor(() => {
+      expect(updateCasesSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          cases: [
+            expect.objectContaining({
+              id: basicCase.id,
+              status: CaseStatuses.closed,
+              version: basicCase.version,
+            }),
+          ],
+        })
+      );
+    });
+  });
+
   it('change the severity of the case', async () => {
     const updateCasesSpy = jest.spyOn(api, 'updateCases');
 

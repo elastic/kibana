@@ -13,6 +13,8 @@ import type {
 } from '@elastic/eui';
 import { EuiButtonIcon, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { CaseStatuses } from '@kbn/cases-components';
+import { useBulkClosingReasonItems } from '@kbn/response-ops-alerts-table';
 import type { CaseUI } from '../../containers/types';
 import { useDeleteAction } from '../actions/delete/use_delete_action';
 import { ConfirmDeleteCaseModal } from '../confirm_delete_case';
@@ -83,6 +85,7 @@ const ActionColumnComponent: React.FC<{ theCase: CaseUI; disableActions: boolean
     onActionSuccess: refreshCases,
   });
 
+  const { panels: closingReasonPanels } = useBulkClosingReasonItems();
   const canDelete = deleteAction.canDelete;
   const canUpdate = statusAction.canUpdateStatus;
   const canAssign = permissions.assign;
@@ -157,6 +160,18 @@ const ActionColumnComponent: React.FC<{ theCase: CaseUI; disableActions: boolean
         title: i18n.STATUS,
         items: statusAction.getActions([theCase]),
       });
+      if (closingReasonPanels.length > 0) {
+        const closingReasonPanel = closingReasonPanels[0];
+        panelsToBuild.push({
+          ...closingReasonPanel,
+          content: closingReasonPanel.renderContent({
+            alertItems: [],
+            closePopoverMenu: () =>
+              statusAction.handleUpdateCaseStatus([theCase], CaseStatuses.closed),
+            setIsBulkActionsLoading: () => {},
+          }),
+        });
+      }
     }
     if (severityAction.canUpdateSeverity) {
       panelsToBuild.push({
@@ -168,6 +183,7 @@ const ActionColumnComponent: React.FC<{ theCase: CaseUI; disableActions: boolean
 
     return panelsToBuild;
   }, [
+    closingReasonPanels,
     assigneesAction,
     canDelete,
     canAssign,

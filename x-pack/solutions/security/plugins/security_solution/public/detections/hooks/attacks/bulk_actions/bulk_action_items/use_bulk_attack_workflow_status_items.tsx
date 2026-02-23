@@ -7,6 +7,7 @@
 
 import { useCallback, useMemo } from 'react';
 import type { BulkActionsConfig } from '@kbn/response-ops-alerts-table/types';
+import { useBulkClosingReasonItems } from '@kbn/response-ops-alerts-table';
 import type { TimelineItem } from '@kbn/timelines-plugin/common';
 import type { AlertWorkflowStatus } from '../../../../../common/types';
 import type { AlertClosingReason } from '../../../../../../common/types';
@@ -14,7 +15,6 @@ import { FILTER_ACKNOWLEDGED, FILTER_CLOSED, FILTER_OPEN } from '../../../../../
 import { useAttacksPrivileges } from '../use_attacks_privileges';
 import { extractRelatedDetectionAlertIds } from '../utils/extract_related_detection_alert_ids';
 import { useApplyAttackWorkflowStatus } from '../apply_actions/use_apply_attack_workflow_status';
-import { useBulkAlertClosingReasonItems } from '../../../../../common/components/toolbar/bulk_actions/use_bulk_alert_closing_reason_items';
 import * as i18n from '../translations';
 import type { AttackContentPanelConfig, BulkAttackActionItems } from '../types';
 
@@ -72,7 +72,10 @@ export const useBulkAttackWorkflowStatusItems = ({
   );
 
   const { item: alertClosingReasonItem, panels: alertClosingReasonPanels } =
-    useBulkAlertClosingReasonItems({ onSubmitCloseReason });
+    useBulkClosingReasonItems({
+      isEnabled: hasIndexWrite ?? false,
+      onSubmitCloseReason,
+    });
 
   const workflowStatusItems: BulkActionsConfig[] = useMemo(() => {
     // Return empty array if user doesn't have required permissions or data is still loading
