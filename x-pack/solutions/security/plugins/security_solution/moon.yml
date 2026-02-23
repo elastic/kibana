@@ -194,7 +194,6 @@ dependsOn:
   - '@kbn/core-i18n-browser'
   - '@kbn/core-theme-browser'
   - '@kbn/automatic-import-plugin'
-  - '@kbn/avc-banner'
   - '@kbn/config'
   - '@kbn/openapi-common'
   - '@kbn/securitysolution-lists-common'
