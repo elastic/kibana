@@ -217,7 +217,13 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInDiscoverActionProp
 
   if (buttonType === ViewResultsActionButtonType.button) {
     return (
-      <EuiButtonEmpty size="xs" iconType="lensApp" onClick={handleClick} isDisabled={!logsDataView}>
+      <EuiButtonEmpty
+        size="xs"
+        iconType="lensApp"
+        onClick={handleClick}
+        isDisabled={!logsDataView}
+        data-test-subj="viewInLens"
+      >
         {VIEW_IN_LENS}
       </EuiButtonEmpty>
     );
@@ -230,6 +236,7 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInDiscoverActionProp
         isDisabled={!logsDataView}
         onClick={handleClick}
         aria-label={VIEW_IN_LENS}
+        data-test-subj="viewInLens"
       />
     </EuiToolTip>
   );
@@ -306,6 +313,7 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
         href={discoverUrl}
         target="_blank"
         isDisabled={!logsDataView}
+        data-test-subj="viewInDiscover"
       >
         {VIEW_IN_DISCOVER}
       </EuiButtonEmpty>
@@ -320,6 +328,7 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
         href={discoverUrl}
         target="_blank"
         isDisabled={!logsDataView}
+        data-test-subj="viewInDiscover"
       />
     </EuiToolTip>
   );

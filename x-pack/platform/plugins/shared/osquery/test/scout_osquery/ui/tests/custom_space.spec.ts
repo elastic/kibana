@@ -129,7 +129,12 @@ for (const testSpace of testSpaces) {
       }
 
       await expect(docTable).toBeVisible({ timeout: 30_000 });
-      await expect(page.testSubj.locator('discoverDocTable').getByText('action_data')).toBeVisible({
+
+      const actionDataColumn = page.testSubj
+        .locator('discoverDocTable')
+        .getByText('action_data')
+        .first(); // eslint-disable-line playwright/no-nth-methods -- multiple columns contain 'action_data' substring
+      await expect(actionDataColumn).toBeVisible({
         timeout: 30_000,
       });
     });

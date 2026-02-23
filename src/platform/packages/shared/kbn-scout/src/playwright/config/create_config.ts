@@ -32,7 +32,11 @@ export function createPlaywrightConfig(options: ScoutPlaywrightOptions): Playwri
   const scoutDefaultProjects: PlaywrightTestConfig<ScoutTestOptions>['projects'] = [
     {
       name: 'local',
-      use: { ...devices['Desktop Chrome'], configName: 'local' },
+      use: {
+        ...devices['Desktop Chrome'],
+        viewport: { width: 1920, height: 1080 },
+        configName: 'local',
+      },
     },
     {
       name: 'ech',
@@ -43,7 +47,11 @@ export function createPlaywrightConfig(options: ScoutPlaywrightOptions): Playwri
         // TODO: remove when we find a way to run "no data" tests without being affected by others
         '**/no_data_*.spec.ts',
       ],
-      use: { ...devices['Desktop Chrome'], configName: 'cloud_ech' },
+      use: {
+        ...devices['Desktop Chrome'],
+        viewport: { width: 1920, height: 1080 },
+        configName: 'cloud_ech',
+      },
     },
     {
       name: 'mki',
@@ -51,7 +59,11 @@ export function createPlaywrightConfig(options: ScoutPlaywrightOptions): Playwri
         // TODO: remove when we find a way to run "no data" tests without being affected by others
         '**/no_data_*.spec.ts',
       ],
-      use: { ...devices['Desktop Chrome'], configName: 'cloud_mki' },
+      use: {
+        ...devices['Desktop Chrome'],
+        viewport: { width: 1920, height: 1080 },
+        configName: 'cloud_mki',
+      },
     },
   ];
 
