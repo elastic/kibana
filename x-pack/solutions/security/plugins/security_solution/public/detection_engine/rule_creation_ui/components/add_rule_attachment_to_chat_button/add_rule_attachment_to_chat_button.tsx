@@ -16,7 +16,6 @@ import type {
   ScheduleStepRule,
 } from '../../../common/types';
 import { useAgentBuilderAttachment } from '../../../../agent_builder/hooks/use_agent_builder_attachment';
-import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
 import { SecurityAgentBuilderAttachments } from '../../../../../common/constants';
 import { NewAgentBuilderAttachment } from '../../../../agent_builder/components/new_agent_builder_attachment';
 import { RULE_EXPLORATION_ATTACHMENT_PROMPT } from '../../../../agent_builder/components/prompts';
@@ -52,8 +51,6 @@ export const AddRuleAttachmentToChatButton: React.FC<AddRuleAttachmentToChatButt
   pathway,
   ...props
 }) => {
-  const { isAgentChatExperienceEnabled } = useAgentBuilderAvailability();
-
   const {
     defineStepData,
     aboutStepData,
@@ -103,10 +100,6 @@ export const AddRuleAttachmentToChatButton: React.FC<AddRuleAttachmentToChatButt
   ]);
 
   const { openAgentBuilderFlyout } = useAgentBuilderAttachment(ruleAttachment);
-
-  if (!isAgentChatExperienceEnabled) {
-    return null;
-  }
 
   return (
     <NewAgentBuilderAttachment

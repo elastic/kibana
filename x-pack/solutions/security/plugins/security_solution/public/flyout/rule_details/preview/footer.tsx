@@ -16,15 +16,14 @@ import { AddRuleAttachmentToChatButton } from '../../../detection_engine/rule_cr
 import { useAgentBuilderAvailability } from '../../../agent_builder/hooks/use_agent_builder_availability';
 
 interface PreviewFooterProps {
-  ruleId: string;
   rule: RuleResponse;
 }
 
 /**
  * Footer in rule preview panel
  */
-export const PreviewFooter = memo(({ ruleId, rule }: PreviewFooterProps) => {
-  const href = useRuleDetailsLink({ ruleId });
+export const PreviewFooter = memo(({ rule }: PreviewFooterProps) => {
+  const href = useRuleDetailsLink({ ruleId: rule.id });
   const { isAgentChatExperienceEnabled } = useAgentBuilderAvailability();
 
   if (!href && !isAgentChatExperienceEnabled) {
@@ -34,9 +33,11 @@ export const PreviewFooter = memo(({ ruleId, rule }: PreviewFooterProps) => {
   return (
     <FlyoutFooter data-test-subj={RULE_PREVIEW_FOOTER_TEST_ID}>
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-        <EuiFlexItem grow={false}>
-          <AddRuleAttachmentToChatButton rule={rule} pathway="alerts_flyout_rule_summary" />
-        </EuiFlexItem>
+        {isAgentChatExperienceEnabled ? (
+          <EuiFlexItem grow={false}>
+            <AddRuleAttachmentToChatButton rule={rule} pathway="alerts_flyout_rule_summary" />
+          </EuiFlexItem>
+        ) : null}
         <EuiFlexItem grow={false}>
           {href ? (
             <EuiLink

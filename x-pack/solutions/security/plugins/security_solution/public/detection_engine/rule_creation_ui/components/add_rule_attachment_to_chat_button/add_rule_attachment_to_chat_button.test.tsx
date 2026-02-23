@@ -22,7 +22,6 @@ import type {
 } from '../../../common/types';
 import type { RuleResponse } from '../../../../../common/api/detection_engine';
 
-const mockUseAgentBuilderAvailability = jest.fn();
 const mockOpenAgentBuilderFlyout = jest.fn();
 const mockUseAgentBuilderAttachment = jest.fn();
 const mockFormatRule = jest.fn();
@@ -41,10 +40,6 @@ const aboutStepDataMock = {} as AboutStepRule;
 const scheduleStepDataMock = {} as ScheduleStepRule;
 const actionsStepDataMock = {} as ActionsStepRule;
 const actionTypeRegistryMock = {} as ActionTypeRegistryContract;
-
-jest.mock('../../../../agent_builder/hooks/use_agent_builder_availability', () => ({
-  useAgentBuilderAvailability: () => mockUseAgentBuilderAvailability(),
-}));
 
 jest.mock('../../../../agent_builder/hooks/use_agent_builder_attachment', () => ({
   useAgentBuilderAttachment: (attachment: unknown) => {
@@ -71,15 +66,6 @@ jest.mock('../../pages/rule_creation/helpers', () => ({
 describe('AddRuleAttachmentToChatButton', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseAgentBuilderAvailability.mockReturnValue({ isAgentChatExperienceEnabled: true });
-  });
-
-  it('does not render when agent chat experience is disabled', () => {
-    mockUseAgentBuilderAvailability.mockReturnValue({ isAgentChatExperienceEnabled: false });
-
-    render(<AddRuleAttachmentToChatButton rule={ruleResponseMock} pathway="rule_details" />);
-
-    expect(screen.queryByTestId('newAgentBuilderAttachmentMock')).not.toBeInTheDocument();
   });
 
   it('captures attachment call with expected params', () => {

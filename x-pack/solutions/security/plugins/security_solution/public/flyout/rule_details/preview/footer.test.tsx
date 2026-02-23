@@ -20,7 +20,7 @@ jest.mock('../../../agent_builder/hooks/use_agent_builder_availability');
 const renderRulePreviewFooter = () =>
   render(
     <TestProviders>
-      <PreviewFooter ruleId="ruleid" rule={{} as RuleResponse} />
+      <PreviewFooter rule={{ id: 'ruleid' } as RuleResponse} />
     </TestProviders>
   );
 

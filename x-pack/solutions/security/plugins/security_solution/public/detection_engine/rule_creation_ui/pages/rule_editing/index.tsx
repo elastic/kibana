@@ -76,6 +76,7 @@ import { usePrebuiltRuleCustomizationUpsellingMessage } from '../../../rule_mana
 import { useRuleUpdateCallout } from '../../../rule_management/hooks/use_rule_update_callout';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { AddRuleAttachmentToChatButton } from '../../components/add_rule_attachment_to_chat_button';
+import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
 
 const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
   const { addSuccess } = useAppToasts();
@@ -84,6 +85,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
   const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
     useListsConfig();
   const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
+  const { isAgentChatExperienceEnabled } = useAgentBuilderAvailability();
   const { application, triggersActionsUi } = useKibana().services;
   const { navigateToApp } = application;
 
@@ -545,14 +547,16 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
                         setIsRulePreviewVisible={setIsRulePreviewVisible}
                         togglePanel={togglePanel}
                         addToChatButton={
-                          <AddRuleAttachmentToChatButton
-                            defineStepData={defineStepData}
-                            aboutStepData={aboutStepData}
-                            scheduleStepData={scheduleStepData}
-                            actionsStepData={actionsStepData}
-                            actionTypeRegistry={triggersActionsUi.actionTypeRegistry}
-                            pathway="rule_editing"
-                          />
+                          isAgentChatExperienceEnabled ? (
+                            <AddRuleAttachmentToChatButton
+                              defineStepData={defineStepData}
+                              aboutStepData={aboutStepData}
+                              scheduleStepData={scheduleStepData}
+                              actionsStepData={actionsStepData}
+                              actionTypeRegistry={triggersActionsUi.actionTypeRegistry}
+                              pathway="rule_editing"
+                            />
+                          ) : null
                         }
                       />
                       {isRulesCustomizationEnabled && upgradeCallout}
