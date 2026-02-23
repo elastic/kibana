@@ -15,6 +15,11 @@ export const EXTENDED_TIMEOUT = 45000;
 export const SERVICE_OPBEANS_NODE = 'opbeans-node';
 export const SERVICE_OPBEANS_JAVA = 'opbeans-java';
 export const SERVICE_OPBEANS_RUM = 'opbeans-rum';
+
+export const SERVICE_MAP_KUERY_OPBEANS_JAVA = 'service.name: "opbeans-java"';
+export const SERVICE_MAP_KUERY_OPBEANS = 'service.name: opbeans*';
+export const DEPENDENCY_POSTGRESQL = 'postgresql';
+export const EDGE_OPBEANS_JAVA_TO_POSTGRESQL = `${SERVICE_OPBEANS_JAVA}~>${DEPENDENCY_POSTGRESQL}`;
 export const SERVICE_GO = 'service-go';
 export const SERVICE_NODE = 'service-node';
 export const OPBEANS_JAVA_INSTANCE = 'opbeans-java-prod-1';
@@ -29,6 +34,7 @@ export const EDOT_INSTANCE_ID = 'da7a8507-53be-421c-8d77-984f12397213';
 export const EDOT_TRANSACTION_NAME = 'oteldemo.AdServiceEdotSynth/GetAds';
 export const EDOT_ERROR_MESSAGE = '[ResponseError] index_not_found_exception';
 
+export const SERVICE_AWS_LAMBDA = 'synth-python';
 export const SERVICE_MOBILE_ANDROID = 'synth-android';
 export const SERVICE_MOBILE_IOS = 'synth-ios';
 export const SERVICE_SYNTH_GO = 'synth-go-1';
@@ -47,6 +53,8 @@ export const SPAN_LINKS_START_DATE = '2022-01-01T00:00:00.000Z';
 export const SPAN_LINKS_END_DATE = '2022-01-01T00:15:00.000Z';
 export const SPAN_LINKS_PRODUCER_INTERNAL_ONLY_END = '2022-01-01T00:01:00.000Z';
 export const SERVICE_SPAN_LINKS_PRODUCER_INTERNAL_ONLY = 'zzz-producer-internal-only';
+export const SERVICE_SPAN_LINKS_PRODUCER_EXTERNAL_ONLY = 'zzz-producer-external-only';
+export const SERVICE_SPAN_LINKS_PRODUCER_CONSUMER = 'zzz-producer-consumer';
 export const SERVICE_SPAN_LINKS_CONSUMER_MULTIPLE = 'zzz-consumer-multiple';
 
 // APM-specific role definitions matching authentication.ts
