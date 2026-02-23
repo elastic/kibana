@@ -694,7 +694,7 @@ describe('bulkDelete', () => {
     });
 
     test('logs audit event when authentication failed', async () => {
-      authorization.ensureAuthorized.mockImplementation(() => {
+      authorization.bulkEnsureAuthorized.mockImplementation(() => {
         throw new Error('Unauthorized');
       });
       unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({

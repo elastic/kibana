@@ -23,7 +23,13 @@ import {
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { isSchema, recursiveRecord, Streams } from '@kbn/streams-schema';
+import {
+  isSchema,
+  recursiveRecord,
+  Streams,
+  isNamespacedEcsField,
+  isOtelReservedField,
+} from '@kbn/streams-schema';
 import type { SubmitHandler } from 'react-hook-form';
 import { FormProvider, useController, useForm, useFormContext, useWatch } from 'react-hook-form';
 import { CodeEditor } from '@kbn/code-editor';
@@ -125,7 +131,7 @@ export const AddFieldFlyout = ({ onAddField, onClose }: AddFieldFlyoutProps) => 
           <EuiButton
             data-test-subj="streamsAppSchemaEditorAddFieldButton"
             onClick={methods.handleSubmit(handleSubmit)}
-            isDisabled={methods.formState.isSubmitted && !methods.formState.isValid}
+            isDisabled={!methods.formState.isValid}
           >
             {i18n.translate('xpack.streams.schemaEditor.addFieldFlyout.addButtonLabel', {
               defaultMessage: 'Add field',
@@ -149,6 +155,8 @@ export const FieldNameSelector = () => {
     source: ['ecs', 'otel'],
   });
 
+  const isWiredStream = Streams.WiredStream.Definition.is(stream);
+
   const { field, fieldState } = useController<SchemaField, 'name'>({
     name: 'name',
     rules: {
@@ -161,6 +169,28 @@ export const FieldNameSelector = () => {
             'xpack.streams.schemaEditor.addFieldFlyout.fieldNameAlreadyExistsError',
             { defaultMessage: 'A field with this name already exists.' }
           );
+        }
+        if (isWiredStream) {
+          if (!isNamespacedEcsField(name)) {
+            return i18n.translate(
+              'xpack.streams.schemaEditor.addFieldFlyout.fieldNameNotNamespacedError',
+              {
+                defaultMessage:
+                  "Field {fieldName} is not allowed to be defined as it doesn't match the namespaced ECS or OTel schema.",
+                values: { fieldName: name },
+              }
+            );
+          }
+          if (isOtelReservedField(name)) {
+            return i18n.translate(
+              'xpack.streams.schemaEditor.addFieldFlyout.fieldNameOtelReservedError',
+              {
+                defaultMessage:
+                  'Field {fieldName} is an automatic alias of another field because of OTel compatibility mode.',
+                values: { fieldName: name },
+              }
+            );
+          }
         }
         return true;
       },
