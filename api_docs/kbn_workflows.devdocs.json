@@ -8534,7 +8534,7 @@
           "\"workflows:executionStatsBar:enabled\""
         ],
         "path": "src/platform/packages/shared/kbn-workflows/common/constants.ts",
-        "lineNumber": 25,
+        "lineNumber": 26,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -8956,6 +8956,23 @@
         ],
         "path": "src/platform/packages/shared/kbn-workflows/common/constants.ts",
         "lineNumber": 18,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows",
+        "id": "def-common.WORKFLOWS_UI_SHOW_EXECUTOR_SETTING_ID",
+        "type": "string",
+        "tags": [],
+        "label": "WORKFLOWS_UI_SHOW_EXECUTOR_SETTING_ID",
+        "description": [],
+        "signature": [
+          "\"workflows:ui:showExecutor:enabled\""
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows/common/constants.ts",
+        "lineNumber": 21,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
