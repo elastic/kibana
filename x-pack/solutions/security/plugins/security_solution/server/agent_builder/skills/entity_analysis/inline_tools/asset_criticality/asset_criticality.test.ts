@@ -20,7 +20,7 @@ describe('QUERY_FNS', () => {
   describe('queryAssetCriticality', () => {
     it('should query and format response correctly', async () => {
       const query = `FROM asset-criticality-index
-  | WHERE criticality_level IS NOT NULL AND criticality_level != "deleted"
+  | WHERE criticality_level IS NOT NULL AND criticality_level != "deleted" AND id_field == "host.name"
   | EVAL numerical_level = CASE(criticality_level == "low_impact", 1, criticality_level == "medium_impact", 2, criticality_level == "high_impact", 3, criticality_level == "extreme_impact", 4)
   | KEEP @timestamp, criticality_level, id_field, id_value, numerical_level
   | SORT numerical_level DESC, id_value ASC
@@ -76,7 +76,7 @@ describe('QUERY_FNS', () => {
     });
 
     it('should use limit if defined', async () => {
-      await queryAssetCriticality({ entityType: 'user', index, esClient, limit: 20 });
+      await queryAssetCriticality({ entityType: 'generic', index, esClient, limit: 20 });
 
       expect(esClient.esql.query).toHaveBeenCalledWith({
         query: `FROM asset-criticality-index
@@ -94,7 +94,7 @@ describe('QUERY_FNS', () => {
 
       expect(esClient.esql.query).toHaveBeenCalledWith({
         query: `FROM asset-criticality-index
-  | WHERE criticality_level IS NOT NULL AND criticality_level != "deleted" AND id_value == "user-123"
+  | WHERE criticality_level IS NOT NULL AND criticality_level != "deleted" AND id_value == "user-123" AND id_field == "user.name"
   | EVAL numerical_level = CASE(criticality_level == "low_impact", 1, criticality_level == "medium_impact", 2, criticality_level == "high_impact", 3, criticality_level == "extreme_impact", 4)
   | KEEP @timestamp, criticality_level, id_field, id_value, numerical_level
   | SORT numerical_level DESC, id_value ASC

@@ -19,6 +19,7 @@ import {
 // if they use controlled queries that we author and maintain.
 export const FF_DYNAMICALLY_GENERATE_ESQL = false;
 
+const ENTITY_RISK_SCORE_SIGNFICANT_CHANGE_THRESHOLD = 20; // Define a threshold for significant risk score change
 export interface EntityAnalysisSkillsContext {
   getStartServices: EntityAnalyticsRoutesDeps['getStartServices'];
   kibanaVersion: string;
@@ -49,7 +50,7 @@ Use this skill when:
 
 ### 2. Analyze risk score changes over time
 - Use the 'security.entity_analysis.risk_score' tool to analyze how an entity's risk score has changed over a specified time interval (e.g., last 30, 60, 90 days)
-- Look for significant increases in risk score (e.g., greater than 20 points) to identify entities that may require further investigation
+- Look for significant increases in risk score (e.g., greater than ${ENTITY_RISK_SCORE_SIGNFICANT_CHANGE_THRESHOLD} points) to identify entities that may require further investigation
 
 ### 3. Retrieve asset criticality levels
 - Use the 'security.entity_analysis.asset_criticality' tool to get the asset criticality level for a specific entity
@@ -93,7 +94,7 @@ Steps:
 1. Use the 'security.entity_analysis.risk_score' tool with a time interval of '30d' to analyze Cielo39's risk score changes with host entityType
 2. When no results are returned, use the 'security.entity_analysis.risk_score' tool again to analyze Cielo39's risk score changes with user entityType
 3. When no results are returned, use the 'security.entity_analysis.risk_score' tool again to analyze Cielo39's risk score changes with service entityType
-4. When results are returned, determine if the change in risk score is significant (e.g., greater than 20 points).
+4. When results are returned, determine if the change in risk score is significant (e.g., greater than ${ENTITY_RISK_SCORE_SIGNFICANT_CHANGE_THRESHOLD} points).
 5. Present the findings in a concise format showing the previous risk score, current risk score, and whether the change is significant.
 
 ## Important dependencies
@@ -106,7 +107,7 @@ Steps:
 - Risk levels: Critical (highest), High, Moderate, Low, Unknown
 - An entity is considered risky if its normalized score is above 80
 - Higher scores indicate greater risk to the organization
-- A change in risk score greater than 20 points over an interval is considered significant
+- A change in risk score greater than ${ENTITY_RISK_SCORE_SIGNFICANT_CHANGE_THRESHOLD} points over an interval is considered significant
 - Document your analysis process and reasoning clearly
 - Avoid listing noisy raw data; highlight the most relevant signals
 - Offer a short explanation of why the score is considered high or low

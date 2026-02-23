@@ -12,6 +12,7 @@ import { getToolResultId } from '@kbn/agent-builder-server';
 import type { SkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { asyncForEach } from '@kbn/std';
+import { EntityTypeToIdentifierField } from '../../../../../../common/entity_analytics/types';
 import { getAssetCriticalityIndex } from '../../../../../../common/entity_analytics/asset_criticality';
 import { IdentifierType } from '../../../../../../common/api/entity_analytics/common/common.gen';
 import type { EntityType } from '../../../../../../common/api/entity_analytics';
@@ -59,12 +60,14 @@ type BuildEsqlQueryOpts = AssetCriticalityType & {
 
 export const queryAssetCriticality = async (opts: BuildEsqlQueryOpts) => {
   const entityLimit = opts.limit || DEFAULT_LIMIT;
+  const entityType =
+    opts.entityType !== 'generic' ? EntityTypeToIdentifierField[opts.entityType] : undefined;
   const entityId = opts.entityId ? escapeEsqlString(opts.entityId) : null;
 
   const query = `FROM ${opts.index}
   | WHERE criticality_level IS NOT NULL AND criticality_level != "deleted"${
     entityId ? ` AND id_value == "${entityId}"` : ''
-  }
+  }${entityType ? ` AND id_field == "${entityType}"` : ''}
   | EVAL numerical_level = CASE(criticality_level == "low_impact", 1, criticality_level == "medium_impact", 2, criticality_level == "high_impact", 3, criticality_level == "extreme_impact", 4)
   | KEEP @timestamp, criticality_level, id_field, id_value, numerical_level
   | SORT numerical_level DESC, id_value ASC
