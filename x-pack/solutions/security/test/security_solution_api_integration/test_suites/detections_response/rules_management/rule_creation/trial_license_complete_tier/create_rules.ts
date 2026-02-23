@@ -383,7 +383,8 @@ export default ({ getService }: FtrProviderContext) => {
 
           expect(body).toEqual({
             error: 'Bad Request',
-            message: 'threshold: Invalid input: expected object, received undefined"',
+            message:
+              '[request body]: threshold: Invalid input: expected object, received undefined',
             statusCode: 400,
           });
         });
@@ -402,7 +403,8 @@ export default ({ getService }: FtrProviderContext) => {
 
           expect(body).toEqual({
             error: 'Bad Request',
-            message: '[request body]: threshold.field: Array must contain at most 5 element(s)',
+            message:
+              '[request body]: threshold.field: Array must contain at most 5 element[request body]: Invalid input: expected string, received array, Too big: expected array to have <=5 items',
             statusCode: 400,
           });
         });

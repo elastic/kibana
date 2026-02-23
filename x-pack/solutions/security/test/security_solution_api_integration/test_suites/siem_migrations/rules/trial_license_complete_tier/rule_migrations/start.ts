@@ -143,7 +143,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
         });
         expect((response.body as unknown as SiemMigrationsAPIErrorResponse).message).to.eql(
-          '[request body]: settings.connector_id: Required'
+          '[request body]: settings.connector_id: Invalid input: expected string, received undefined'
         );
       });
 

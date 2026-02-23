@@ -110,7 +110,7 @@ export const getScheduleNotFoundError = (scheduleId: string) => {
 export const getScheduleBadRequestError = (attributeName: string) => {
   return {
     error: 'Bad Request',
-    message: `[request body]: ${attributeName}: Invalid input: expected string, received undefined`,
+    message: `[request body]: ${attributeName}: Invalid input`,
     statusCode: 400,
   };
 };

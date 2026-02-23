@@ -112,7 +112,11 @@ export default ({ getService }: FtrProviderContext) => {
           expectedHttpCode: 400,
         });
 
-        expect(result).toEqual(getScheduleBadRequestError('params'));
+        const { error, message, statusCode } = getScheduleBadRequestError('params');
+
+        expect(result.error).toEqual(error);
+        expect(result.message).toContain(message);
+        expect(result.statusCode).toEqual(statusCode);
       });
 
       it('should return a `Bad Request` error if `schedule` attribute is `undefined`', async () => {

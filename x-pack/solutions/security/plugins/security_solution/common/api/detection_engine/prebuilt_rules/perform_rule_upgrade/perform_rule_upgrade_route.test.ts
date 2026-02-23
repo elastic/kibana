@@ -33,7 +33,7 @@ describe('Perform Rule Upgrade Route Schemas', () => {
         const result = PickVersionValues.safeParse(value);
         expectParseError(result);
         expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-          "Invalid option: expected one of 'BASE'|'CURRENT'|'TARGET'|'MERGED'"
+          'Invalid option: expected one of "BASE"|"CURRENT"|"TARGET"|"MERGED"'
         );
       });
     });
@@ -94,7 +94,7 @@ describe('Perform Rule Upgrade Route Schemas', () => {
         const result = RuleFieldsToUpgrade.safeParse(input);
         expectParseError(result);
         expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-          `"references: Unrecognized key(s) in object: 'resolved_value'"`
+          `references: Unrecognized key: "resolved_value"`
         );
       });
 
@@ -125,7 +125,7 @@ describe('Perform Rule Upgrade Route Schemas', () => {
         const result = RuleFieldsToUpgrade.safeParse(input);
         expectParseError(result);
         expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-          `"Unrecognized key(s) in object: 'unknown_field'"`
+          `Unrecognized key: "unknown_field"`
         );
       });
 
@@ -157,7 +157,7 @@ describe('Perform Rule Upgrade Route Schemas', () => {
         const result = RuleFieldsToUpgrade.safeParse(input);
         expectParseError(result);
         expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-          `"Unrecognized key(s) in object: 'type', 'rule_id', 'version', 'author', 'license', 'concurrent_searches', 'items_per_search'"`
+          `Unrecognized keys: "type", "rule_id", "version", "author", "license", "concurrent_searches", "items_per_search"`
         );
       });
     });
@@ -203,7 +203,7 @@ describe('Perform Rule Upgrade Route Schemas', () => {
       const result = RuleUpgradeSpecifier.safeParse(specifierWithFields);
       expectParseError(result);
       expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-        `"fields: Unrecognized key(s) in object: 'unknown_field'"`
+        `fields: Unrecognized key: "unknown_field"`
       );
     });
 
@@ -220,7 +220,7 @@ describe('Perform Rule Upgrade Route Schemas', () => {
       const result = RuleUpgradeSpecifier.safeParse(specifierWithFields);
       expectParseError(result);
       expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-        `"fields.name: Unrecognized key(s) in object: 'resolved_value'"`
+        `fields.name: Unrecognized key: "resolved_value"`
       );
     });
 
@@ -257,7 +257,7 @@ describe('Perform Rule Upgrade Route Schemas', () => {
       const result = UpgradeSpecificRulesRequest.safeParse(invalid);
       expectParseError(result);
       expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-        `"mode: Invalid literal value, expected \\"SPECIFIC_RULES\\""`
+        `mode: Invalid input: expected "SPECIFIC_RULES"`
       );
     });
 
@@ -265,7 +265,9 @@ describe('Perform Rule Upgrade Route Schemas', () => {
       const invalid = { ...validRequest, rules: undefined };
       const result = UpgradeSpecificRulesRequest.safeParse(invalid);
       expectParseError(result);
-      expect(stringifyZodError(result.error)).toMatchInlineSnapshot(`"rules: Required"`);
+      expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+        `rules: Invalid input: expected array, received undefined`
+      );
     });
   });
 
@@ -320,9 +322,7 @@ describe('Perform Rule Upgrade Route Schemas', () => {
       const invalid = { mode: 'INVALID_MODE' };
       const result = PerformRuleUpgradeRequestBody.safeParse(invalid);
       expectParseError(result);
-      expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-        `"mode: Invalid discriminator value. Expected 'ALL_RULES' | 'SPECIFIC_RULES'"`
-      );
+      expect(stringifyZodError(result.error)).toMatchInlineSnapshot(`mode: Invalid input`);
     });
   });
 
@@ -355,7 +355,9 @@ describe('Perform Rule Upgrade Route Schemas', () => {
         );
         const result = PerformRuleUpgradeResponseBody.safeParse(invalidResponse);
         expectParseError(result);
-        expect(stringifyZodError(result.error)).toMatchInlineSnapshot(`"${deletedProp}: Required"`);
+        expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+          `"${deletedProp}: Invalid input: expected object, received undefined"`
+        );
       });
     });
   });

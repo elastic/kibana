@@ -217,7 +217,7 @@ export default ({ getService }: FtrProviderContext): void => {
               400
             )
           ).toMatchObject({
-            message: '[request body]: page: Expected number, received string',
+            message: '[request body]: page: Invalid input: expected number, received string',
           });
 
           expect(
