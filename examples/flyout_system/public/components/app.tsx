@@ -16,7 +16,6 @@ import { BrowserRouter as Router } from '@kbn/shared-ux-router';
 
 import { FlyoutWithComponent } from './_flyout_with_component';
 import { FlyoutWithOverlays } from './_flyout_with_overlays';
-import { ParentChildSessionBug } from './_parent_child_session_bug';
 
 interface AppDeps {
   basename: string;
@@ -41,10 +40,6 @@ const AppContent: React.FC<AppContentDeps> = ({ overlays, rendering }) => {
       grow={false}
     >
       <EuiPageTemplate.Header iconType="logoElastic" pageTitle="Flyout System Example" />
-
-      <EuiPageTemplate.Section grow={false} alignment="top">
-        <ParentChildSessionBug overlays={overlays} />
-      </EuiPageTemplate.Section>
 
       <EuiPageTemplate.Section grow={false} alignment="top">
         <FlyoutWithComponent />

@@ -52,7 +52,6 @@ const setup = () => {
   render(
     <IntlProvider>
       <Flyout
-        flyoutId="test"
         onClose={onClose}
         api={api}
         config={mockConfig}
