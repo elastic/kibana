@@ -1089,7 +1089,7 @@
             "section": "def-common.DuplicateExceptionListProps",
             "text": "DuplicateExceptionListProps"
           },
-          ", \"http\" | \"signal\">"
+          ", \"signal\" | \"http\">"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-list-types/src/typescript_types/index.ts",
         "lineNumber": 35,
@@ -3180,7 +3180,7 @@
         "label": "CreateListItemSchema",
         "description": [],
         "signature": [
-          "{ list_id: string; value: string; } & { id?: string | undefined; meta?: { [key: string]: unknown; } | undefined; refresh?: \"true\" | \"false\" | \"wait_for\" | undefined; }"
+          "{ list_id: string; value: string; } & { id?: string | undefined; meta?: { [key: string]: unknown; } | undefined; refresh?: \"false\" | \"true\" | \"wait_for\" | undefined; }"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-list-types/src/request/create_list_item_schema/index.ts",
         "lineNumber": 27,
@@ -3197,7 +3197,7 @@
         "label": "CreateListItemSchemaDecoded",
         "description": [],
         "signature": [
-          "{ list_id: string; value: string; id: string | undefined; meta: { [key: string]: unknown; } | undefined; refresh: \"true\" | \"false\" | \"wait_for\" | undefined; }"
+          "{ list_id: string; value: string; id: string | undefined; meta: { [key: string]: unknown; } | undefined; refresh: \"false\" | \"true\" | \"wait_for\" | undefined; }"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-list-types/src/request/create_list_item_schema/index.ts",
         "lineNumber": 28,
@@ -3452,7 +3452,7 @@
         "label": "DeleteListItemSchema",
         "description": [],
         "signature": [
-          "{ value: string | undefined; } & { id?: string | undefined; list_id?: string | undefined; refresh?: \"true\" | \"false\" | undefined; }"
+          "{ value: string | undefined; } & { id?: string | undefined; list_id?: string | undefined; refresh?: \"false\" | \"true\" | undefined; }"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-list-types/src/request/delete_list_item_schema/index.ts",
         "lineNumber": 25,
@@ -3469,7 +3469,7 @@
         "label": "DeleteListItemSchemaDecoded",
         "description": [],
         "signature": [
-          "{ value: string | undefined; id: string | undefined; list_id: string | undefined; refresh: \"true\" | \"false\" | undefined; }"
+          "{ value: string | undefined; id: string | undefined; list_id: string | undefined; refresh: \"false\" | \"true\" | undefined; }"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-list-types/src/request/delete_list_item_schema/index.ts",
         "lineNumber": 26,
@@ -3588,7 +3588,7 @@
         "label": "DuplicateExceptionListQuerySchema",
         "description": [],
         "signature": [
-          "{ list_id: string; namespace_type: \"single\" | \"agnostic\" | undefined; include_expired_exceptions: \"true\" | \"false\" | undefined; }"
+          "{ list_id: string; namespace_type: \"single\" | \"agnostic\" | undefined; include_expired_exceptions: \"false\" | \"true\" | undefined; }"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-list-types/src/request/duplicate_exception_list_query_schema/index.ts",
         "lineNumber": 23,
@@ -3605,7 +3605,7 @@
         "label": "DuplicateExceptionListQuerySchemaDecoded",
         "description": [],
         "signature": [
-          "Omit<{ list_id: string; namespace_type: \"single\" | \"agnostic\"; include_expired_exceptions: \"true\" | \"false\" | undefined; }, \"namespace_type\"> & { namespace_type: \"single\" | \"agnostic\"; }"
+          "Omit<{ list_id: string; namespace_type: \"single\" | \"agnostic\"; include_expired_exceptions: \"false\" | \"true\" | undefined; }, \"namespace_type\"> & { namespace_type: \"single\" | \"agnostic\"; }"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-list-types/src/request/duplicate_exception_list_query_schema/index.ts",
         "lineNumber": 28,
@@ -3979,7 +3979,7 @@
         "label": "ExportExceptionListQuerySchema",
         "description": [],
         "signature": [
-          "{ id: string; list_id: string; namespace_type: \"single\" | \"agnostic\" | undefined; include_expired_exceptions: \"true\" | \"false\" | undefined; }"
+          "{ id: string; list_id: string; namespace_type: \"single\" | \"agnostic\" | undefined; include_expired_exceptions: \"false\" | \"true\" | undefined; }"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-list-types/src/request/export_exception_list_query_schema/index.ts",
         "lineNumber": 25,
@@ -4557,7 +4557,7 @@
         "label": "ImportListItemQuerySchema",
         "description": [],
         "signature": [
-          "{ deserializer: string | undefined; list_id: string | undefined; serializer: string | undefined; type: \"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\" | \"shape\" | undefined; refresh: \"true\" | \"false\" | \"wait_for\" | undefined; }"
+          "{ deserializer: string | undefined; list_id: string | undefined; serializer: string | undefined; type: \"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\" | \"shape\" | undefined; refresh: \"false\" | \"true\" | \"wait_for\" | undefined; }"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-list-types/src/request/import_list_item_query_schema/index.ts",
         "lineNumber": 21,
@@ -4574,7 +4574,7 @@
         "label": "ImportListItemQuerySchemaEncoded",
         "description": [],
         "signature": [
-          "{ deserializer?: string | undefined; list_id?: string | undefined; serializer?: string | undefined; type?: \"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\" | \"shape\" | undefined; refresh?: \"true\" | \"false\" | \"wait_for\" | undefined; }"
+          "{ deserializer?: string | undefined; list_id?: string | undefined; serializer?: string | undefined; type?: \"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\" | \"shape\" | undefined; refresh?: \"false\" | \"true\" | \"wait_for\" | undefined; }"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-list-types/src/request/import_list_item_query_schema/index.ts",
         "lineNumber": 24,
@@ -5305,7 +5305,7 @@
         "label": "PatchListItemSchema",
         "description": [],
         "signature": [
-          "{ id: string; } & { _version?: string | undefined; meta?: { [key: string]: unknown; } | undefined; value?: string | undefined; refresh?: \"true\" | \"false\" | undefined; }"
+          "{ id: string; } & { _version?: string | undefined; meta?: { [key: string]: unknown; } | undefined; value?: string | undefined; refresh?: \"false\" | \"true\" | undefined; }"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-list-types/src/request/patch_list_item_schema/index.ts",
         "lineNumber": 26,
@@ -5322,7 +5322,7 @@
         "label": "PatchListItemSchemaDecoded",
         "description": [],
         "signature": [
-          "{ id: string; _version: string | undefined; meta: { [key: string]: unknown; } | undefined; value: string | undefined; refresh: \"true\" | \"false\" | undefined; }"
+          "{ id: string; _version: string | undefined; meta: { [key: string]: unknown; } | undefined; value: string | undefined; refresh: \"false\" | \"true\" | undefined; }"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-list-types/src/request/patch_list_item_schema/index.ts",
         "lineNumber": 27,
@@ -5611,7 +5611,7 @@
         "label": "Refresh",
         "description": [],
         "signature": [
-          "\"true\" | \"false\""
+          "\"false\" | \"true\""
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-list-types/src/common/refresh/index.ts",
         "lineNumber": 16,
@@ -5628,7 +5628,7 @@
         "label": "RefreshWithWaitFor",
         "description": [],
         "signature": [
-          "\"true\" | \"false\" | \"wait_for\""
+          "\"false\" | \"true\" | \"wait_for\""
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-list-types/src/common/refresh/index.ts",
         "lineNumber": 17,
@@ -6036,7 +6036,7 @@
         "label": "UpdateExceptionListItemSchemaDecoded",
         "description": [],
         "signature": [
-          "Omit<{ description: string; entries: ({ field: string; operator: \"included\" | \"excluded\"; type: \"match\"; value: string; } | { field: string; operator: \"included\" | \"excluded\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\" | \"shape\"; }; operator: \"included\" | \"excluded\"; type: \"list\"; } | { field: string; operator: \"included\" | \"excluded\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"included\" | \"excluded\"; type: \"match\"; value: string; } | { field: string; operator: \"included\" | \"excluded\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"included\" | \"excluded\"; type: \"exists\"; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"included\" | \"excluded\"; type: \"wildcard\"; value: string; })[]; name: string; type: \"simple\"; _version: string | undefined; comments: ({ comment: string; } & { id?: string | undefined; })[] | undefined; expire_time: string | undefined; id: string | undefined; item_id: string | undefined; meta: { [key: string]: unknown; } | undefined; namespace_type: \"single\" | \"agnostic\" | undefined; os_types: (\"windows\" | \"linux\" | \"macos\")[] | undefined; tags: string[] | undefined; }, \"entries\" | \"tags\" | \"comments\" | \"expire_time\" | \"namespace_type\" | \"os_types\"> & { comments: ({ comment: string; } & { id?: string | undefined; })[]; tags: string[]; entries: ({ value: string; type: \"match\"; operator: \"included\" | \"excluded\"; field: string; } | { value: string[]; type: \"match_any\"; operator: \"included\" | \"excluded\"; field: string; } | { type: \"list\"; list: { id: string; type: \"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\" | \"shape\"; }; operator: \"included\" | \"excluded\"; field: string; } | { type: \"exists\"; operator: \"included\" | \"excluded\"; field: string; } | { type: \"nested\"; entries: ({ value: string; type: \"match\"; operator: \"included\" | \"excluded\"; field: string; } | { value: string[]; type: \"match_any\"; operator: \"included\" | \"excluded\"; field: string; } | { type: \"exists\"; operator: \"included\" | \"excluded\"; field: string; })[]; field: string; } | { value: string; type: \"wildcard\"; operator: \"included\" | \"excluded\"; field: string; })[]; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; expire_time: string | undefined; }"
+          "Omit<{ description: string; entries: ({ field: string; operator: \"included\" | \"excluded\"; type: \"match\"; value: string; } | { field: string; operator: \"included\" | \"excluded\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\" | \"shape\"; }; operator: \"included\" | \"excluded\"; type: \"list\"; } | { field: string; operator: \"included\" | \"excluded\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"included\" | \"excluded\"; type: \"match\"; value: string; } | { field: string; operator: \"included\" | \"excluded\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"included\" | \"excluded\"; type: \"exists\"; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"included\" | \"excluded\"; type: \"wildcard\"; value: string; })[]; name: string; type: \"simple\"; _version: string | undefined; comments: ({ comment: string; } & { id?: string | undefined; })[] | undefined; expire_time: string | undefined; id: string | undefined; item_id: string | undefined; meta: { [key: string]: unknown; } | undefined; namespace_type: \"single\" | \"agnostic\" | undefined; os_types: (\"windows\" | \"linux\" | \"macos\")[] | undefined; tags: string[] | undefined; }, \"entries\" | \"tags\" | \"comments\" | \"expire_time\" | \"namespace_type\" | \"os_types\"> & { comments: ({ comment: string; } & { id?: string | undefined; })[]; tags: string[]; entries: ({ value: string; type: \"match\"; field: string; operator: \"included\" | \"excluded\"; } | { value: string[]; type: \"match_any\"; field: string; operator: \"included\" | \"excluded\"; } | { type: \"list\"; list: { id: string; type: \"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\" | \"shape\"; }; field: string; operator: \"included\" | \"excluded\"; } | { type: \"exists\"; field: string; operator: \"included\" | \"excluded\"; } | { type: \"nested\"; entries: ({ value: string; type: \"match\"; field: string; operator: \"included\" | \"excluded\"; } | { value: string[]; type: \"match_any\"; field: string; operator: \"included\" | \"excluded\"; } | { type: \"exists\"; field: string; operator: \"included\" | \"excluded\"; })[]; field: string; } | { value: string; type: \"wildcard\"; field: string; operator: \"included\" | \"excluded\"; })[]; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; expire_time: string | undefined; }"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-list-types/src/request/update_exception_list_item_schema/index.ts",
         "lineNumber": 57,

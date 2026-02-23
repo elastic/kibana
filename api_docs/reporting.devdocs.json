@@ -60,7 +60,7 @@
         }
       ],
       "path": "x-pack/platform/plugins/private/reporting/server/types.ts",
-      "lineNumber": 50,
+      "lineNumber": 65,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
