@@ -12,6 +12,7 @@ import { AlertConsumers, getRulesAppDetailsRoute } from '@kbn/rule-data-utils';
 import { useLocation, useParams, useHistory } from 'react-router-dom';
 import { useKibana } from '../../../common/lib/kibana';
 import { getAlertingSectionBreadcrumb } from '../../lib/breadcrumb';
+import { useSetBreadcrumbs } from '../../hooks/use_set_breadcrumbs';
 import { getCurrentDocTitle } from '../../lib/doc_title';
 import { RuleTemplateError } from './components/rule_template_error';
 import { CenterJustifiedSpinner } from '../../components/center_justified_spinner';
@@ -32,9 +33,9 @@ export const RuleFormRoute = () => {
     contentManagement,
     uiActions,
     chrome,
-    setBreadcrumbs,
     ...startServices
   } = useKibana().services;
+  const setBreadcrumbs = useSetBreadcrumbs();
   const { getUrlForApp } = application;
 
   const location = useLocation<{ returnApp?: string; returnPath?: string }>();

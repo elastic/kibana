@@ -38,6 +38,7 @@ import {
   hasManageApiKeysCapability,
 } from '../../../lib/capabilities';
 import { getRulesBreadcrumbWithHref } from '../../../lib/breadcrumb';
+import { useSetBreadcrumbs } from '../../../hooks/use_set_breadcrumbs';
 import { getCurrentDocTitle } from '../../../lib/doc_title';
 import type {
   Rule,
@@ -97,7 +98,6 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
   const {
     application,
     ruleTypeRegistry,
-    setBreadcrumbs,
     chrome,
     http,
     i18n: i18nStart,
@@ -106,6 +106,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
     notifications: { toasts },
   } = useKibana().services;
   const { capabilities, getUrlForApp } = application;
+  const setBreadcrumbs = useSetBreadcrumbs();
 
   const [rulesToDelete, setRulesToDelete] = useState<string[]>([]);
   const [rulesToUpdateAPIKey, setRulesToUpdateAPIKey] = useState<string[]>([]);
