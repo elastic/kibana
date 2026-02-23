@@ -16,7 +16,7 @@ import {
 } from '@kbn/agent-builder-common/tools/custom_rendering';
 import type { AttachmentsService } from '../../../../../../services';
 import { createTagParser } from './utils';
-import { AttachmentWithActions } from '../attachment_with_actions';
+import { InlineAttachmentWithActions } from '../attachments/inline_attachment_with_actions';
 
 /**
  * Parser for <render_attachment> tags in markdown.
@@ -89,7 +89,7 @@ export const createRenderAttachmentRenderer = ({
     }
 
     return (
-      <AttachmentWithActions
+      <InlineAttachmentWithActions
         attachment={{
           id: attachment.id,
           type: attachment.type,
