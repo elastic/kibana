@@ -16,6 +16,7 @@ import type {
   PerformUpdateResponse,
   UninstallResponse,
   SecurityLabsInstallStatusResponse,
+  OpenAPISpecInstallStatusResponse,
 } from '../../common/http_api/installation';
 import {
   INSTALLATION_STATUS_API_PATH,
@@ -84,11 +85,27 @@ export const registerInstallationRoutes = ({
           },
         });
       }
+      const openApiSpecStatus = await documentationManager.getOpenApiSpecStatus({
+        inferenceId,
+      });
+      const openApiSpecStatusResponse: OpenAPISpecInstallStatusResponse = {
+        inferenceId,
+        resourceType: ResourceTypes.openapiSpec,
+        status: openApiSpecStatus.status,
+        version: openApiSpecStatus.version,
+        latestVersion: openApiSpecStatus.latestVersion,
+        isUpdateAvailable: openApiSpecStatus.isUpdateAvailable,
+        failureReason: openApiSpecStatus.failureReason,
+      };
+      if (resourceType === ResourceTypes.openapiSpec) {
+        return res.ok({ body: openApiSpecStatusResponse });
+      }
 
       // Default: product documentation status
       const installStatus = await installClient.getInstallationStatus({
         inferenceId,
       });
+      // installStatus[ResourceTypes.openapiSpec] = openApiSpecStatus;
       const { status: overallStatus } = await documentationManager.getStatus({
         inferenceId,
       });
@@ -99,6 +116,7 @@ export const registerInstallationRoutes = ({
           perProducts: installStatus,
           overall: overallStatus,
           resourceType: ResourceTypes.productDoc,
+          openApiStatus: openApiSpecStatusResponse,
         },
       });
     }
