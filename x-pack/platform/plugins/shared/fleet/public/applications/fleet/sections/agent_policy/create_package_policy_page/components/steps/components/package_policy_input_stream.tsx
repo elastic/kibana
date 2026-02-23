@@ -24,6 +24,7 @@ import {
   EuiButtonEmpty,
   useIsWithinMinBreakpoint,
   EuiAccordion,
+  EuiIconTip,
 } from '@elastic/eui';
 import { useRouteMatch } from 'react-router-dom';
 
@@ -235,6 +236,27 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
     const isBiggerScreen = useIsWithinMinBreakpoint('xxl');
     const flexWidth = isBiggerScreen ? 7 : 5;
 
+    // Stream-level deprecation (must be after all hooks)
+    const isDeprecatedStream = !!packageInputStream.deprecated;
+    const hasDeprecatedVars = (packageInputStream.vars || []).some((v) => !!v.deprecated);
+    const showStreamDeprecationIcon = isDeprecatedStream || hasDeprecatedVars;
+    const streamDeprecationTooltip = isDeprecatedStream
+      ? packageInputStream.deprecated?.description ||
+        i18n.translate('xpack.fleet.createPackagePolicy.stepConfigure.deprecatedStreamTooltip', {
+          defaultMessage: 'This data stream is deprecated.',
+        })
+      : i18n.translate(
+          'xpack.fleet.createPackagePolicy.stepConfigure.deprecatedStreamVarsTooltip',
+          {
+            defaultMessage: 'This data stream contains deprecated variables.',
+          }
+        );
+
+    // Hide deprecated streams entirely on new installations
+    if (!isEditPage && isDeprecatedStream) {
+      return null;
+    }
+
     return (
       <>
         <EuiFlexGrid
@@ -253,18 +275,34 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                 >
                   {packageInfo.type !== 'input' && shouldShowStreamsToggles && (
                     <EuiFlexItem grow={false}>
-                      <EuiSwitch
-                        data-test-subj="streamOptions.switch"
-                        label={packageInputStream.title}
-                        disabled={packagePolicyInputStream.keep_enabled}
-                        checked={packagePolicyInputStream.enabled}
-                        onChange={(e) => {
-                          const enabled = e.target.checked;
-                          updatePackagePolicyInputStream({
-                            enabled,
-                          });
-                        }}
-                      />
+                      <EuiFlexGroup alignItems="center" gutterSize="s">
+                        <EuiFlexItem grow={false}>
+                          <EuiSwitch
+                            data-test-subj="streamOptions.switch"
+                            label={packageInputStream.title}
+                            disabled={packagePolicyInputStream.keep_enabled}
+                            checked={packagePolicyInputStream.enabled}
+                            onChange={(e) => {
+                              const enabled = e.target.checked;
+                              updatePackagePolicyInputStream({
+                                enabled,
+                              });
+                            }}
+                          />
+                        </EuiFlexItem>
+                        {showStreamDeprecationIcon && (
+                          <EuiFlexItem grow={false}>
+                            <span data-test-subj="streamOptions.deprecatedIcon">
+                              <EuiIconTip
+                                type="warning"
+                                color="warning"
+                                position="top"
+                                content={streamDeprecationTooltip}
+                              />
+                            </span>
+                          </EuiFlexItem>
+                        )}
+                      </EuiFlexGroup>
                     </EuiFlexItem>
                   )}
                   {packageInputStream.data_stream.release &&

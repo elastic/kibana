@@ -947,7 +947,7 @@ describe('xy_suggestions', () => {
     expect((suggestions[0].state.layers[0] as XYDataLayerConfig).seriesType).toEqual('line');
   });
 
-  test('suggests bar if changeType is initial and date column is involved', () => {
+  test('suggests line if changeType is initial and date column is involved for formBased datasource', () => {
     const currentState: XYState = {
       legend: { isVisible: true, position: 'bottom' },
       valueLabels: 'hide',
@@ -973,6 +973,43 @@ describe('xy_suggestions', () => {
       },
       state: currentState,
       keptLayerIds: ['first'],
+      datasourceId: 'formBased',
+    });
+
+    expect(suggestions).toHaveLength(1);
+
+    expect(suggestions[0].hide).toEqual(false);
+    expect(suggestions[0].state.preferredSeriesType).toEqual('line');
+    expect((suggestions[0].state.layers[0] as XYDataLayerConfig).seriesType).toEqual('line');
+  });
+
+  test('suggests bar_stacked if changeType is initial and date column is involved for textBased datasource', () => {
+    const currentState: XYState = {
+      legend: { isVisible: true, position: 'bottom' },
+      valueLabels: 'hide',
+      fittingFunction: 'None',
+      preferredSeriesType: 'bar_stacked',
+      layers: [
+        {
+          accessors: [],
+          layerId: 'first',
+          layerType: LayerTypes.DATA,
+          seriesType: 'bar_stacked',
+          splitAccessors: undefined,
+          xAccessor: '',
+        },
+      ],
+    };
+    const suggestions = getSuggestions({
+      table: {
+        isMultiRow: true,
+        columns: [numCol('price'), dateCol('date')],
+        layerId: 'first',
+        changeType: 'initial',
+      },
+      state: currentState,
+      keptLayerIds: ['first'],
+      datasourceId: 'textBased',
     });
 
     expect(suggestions).toHaveLength(1);
@@ -1553,11 +1590,11 @@ describe('xy_suggestions', () => {
       expect(suggestions[0].state.preferredSeriesType).toBe('bar_stacked');
     });
 
-    test('suggests bar_stacked when no query is passed (changeType initial with date)', () => {
+    test('suggests bar_stacked when no query is passed (changeType initial with string)', () => {
       const suggestions = getSuggestions({
         table: {
           isMultiRow: true,
-          columns: [numCol('col0'), dateCol('step')],
+          columns: [numCol('col0'), strCol('category')],
           layerId: 'first',
           changeType: 'initial',
         },
