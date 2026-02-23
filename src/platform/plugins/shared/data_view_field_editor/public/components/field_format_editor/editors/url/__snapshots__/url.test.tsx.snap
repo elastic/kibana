@@ -331,9 +331,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
                   class="euiTableCellContent emotion-euiTableCellContent-wrapText"
                 >
                   <div>
-                    <span>
-                      converted url for john
-                    </span>
+                    converted url for john
                   </div>
                 </div>
               </td>
@@ -357,9 +355,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
                   class="euiTableCellContent emotion-euiTableCellContent-wrapText"
                 >
                   <div>
-                    <span>
-                      converted url for /some/pathname/asset.png
-                    </span>
+                    converted url for /some/pathname/asset.png
                   </div>
                 </div>
               </td>
@@ -383,9 +379,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
                   class="euiTableCellContent emotion-euiTableCellContent-wrapText"
                 >
                   <div>
-                    <span>
-                      converted url for 1234
-                    </span>
+                    converted url for 1234
                   </div>
                 </div>
               </td>
