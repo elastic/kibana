@@ -46,7 +46,7 @@ exports[`CalendarListsHeader renders header 1`] = `
                 data-euiicon-type="refresh"
               />
               <span
-                class="eui-textTruncate euiButtonEmpty__text"
+                class="eui-textTruncate euiButtonEmpty__text css-1ryezsz-s"
               >
                 Refresh
               </span>
