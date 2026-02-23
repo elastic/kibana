@@ -209,7 +209,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the Automatic Migration of Splunk dashboards in Security Solution
    */
-  splunkV2DashboardsEnabled: false,
+  splunkV2DashboardsEnabled: true,
 
   /**
    * Enables Detection Engine Health UI
@@ -225,6 +225,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the Automatic Troubleshooting Agent Builder skill
    */
   automaticTroubleshootingSkill: false,
+
+  /**
+   * Enables the new flyout using the EUI flyout system
+   */
+  newFlyoutSystemEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
