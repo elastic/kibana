@@ -177,7 +177,7 @@ describe('GroupBySelect', () => {
       expect(options.length).toBeGreaterThan(0);
     });
 
-    // Find and click the "Models" option
+    // Find and click the "Service" option
     const options = document.querySelectorAll('[role="option"]');
     const serviceOption = Array.from(options).find((option) =>
       option.textContent?.includes('Service')

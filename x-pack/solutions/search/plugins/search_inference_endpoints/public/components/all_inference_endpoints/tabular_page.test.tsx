@@ -432,7 +432,7 @@ describe('When the tabular page is loaded', () => {
       window.history.pushState({}, '', '/');
     });
 
-    it('should display accordions with tables for model groups', () => {
+    it('should display accordions with tables for service groups', () => {
       const groupAccordions = screen.getAllByTestId(/-accordion$/);
       expect(groupAccordions).toHaveLength(3);
       const groupTables = screen.getAllByTestId(/-table$/);
