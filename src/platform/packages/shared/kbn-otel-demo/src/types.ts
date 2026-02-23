@@ -10,7 +10,14 @@
 /**
  * Supported demo environment types
  */
-export type DemoType = 'otel-demo' | 'online-boutique';
+export type DemoType =
+  | 'otel-demo'
+  | 'online-boutique'
+  | 'bank-of-anthos'
+  | 'quarkus-super-heroes'
+  | 'aws-retail-store'
+  | 'kubepay'
+  | 'rust-k8s-demo';
 
 /**
  * Service configuration for a microservice in the demo
