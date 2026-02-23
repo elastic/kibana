@@ -5,18 +5,24 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiBadge,
   EuiBasicTable,
+  EuiButtonIcon,
   EuiCallOut,
+  EuiConfirmModal,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
   EuiEmptyPrompt,
   EuiFlexItem,
   EuiFlexGroup,
   EuiLink,
   EuiLoadingSpinner,
+  EuiPopover,
   EuiSpacer,
   EuiText,
+  EuiTextColor,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -61,12 +67,146 @@ function getStatusDisplay(status: string): {
   }
 }
 
+const ManageIntegrationActions: React.FC<{
+  integration: CreatedIntegrationRow;
+  onEdit: (integrationId: string) => void;
+  onDelete: (integrationId: string) => Promise<void>;
+}> = ({ integration, onEdit, onDelete }) => {
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const closePopover = useCallback(() => setIsPopoverOpen(false), []);
+  const togglePopover = useCallback(() => setIsPopoverOpen((prev) => !prev), []);
+
+  const openDeleteConfirm = useCallback(() => {
+    setIsPopoverOpen(false);
+    setShowDeleteConfirm(true);
+  }, []);
+
+  const handleConfirmDelete = useCallback(async () => {
+    setIsDeleting(true);
+    try {
+      await onDelete(integration.integrationId);
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteConfirm(false);
+    }
+  }, [onDelete, integration.integrationId]);
+
+  return (
+    <>
+      <EuiPopover
+        anchorPosition="downRight"
+        panelPaddingSize="none"
+        button={
+          <EuiButtonIcon
+            iconType="boxesVertical"
+            aria-label={i18n.translate(
+              'xpack.fleet.epmList.manageIntegrations.actions.openMenuLabel',
+              { defaultMessage: 'Open actions menu' }
+            )}
+            onClick={togglePopover}
+            data-test-subj="manageIntegrationActionsBtn"
+          />
+        }
+        isOpen={isPopoverOpen}
+        closePopover={closePopover}
+      >
+        <EuiContextMenuPanel
+          size="s"
+          items={[
+            <EuiContextMenuItem key="review" icon="checkInCircleFilled" onClick={closePopover}>
+              <FormattedMessage
+                id="xpack.fleet.epmList.manageIntegrations.actions.reviewApprove"
+                defaultMessage="Review & Approve"
+              />
+            </EuiContextMenuItem>,
+            <EuiContextMenuItem key="download" icon="download" onClick={closePopover}>
+              <FormattedMessage
+                id="xpack.fleet.epmList.manageIntegrations.actions.downloadZip"
+                defaultMessage="Download .zip package"
+              />
+            </EuiContextMenuItem>,
+            <EuiContextMenuItem
+              key="edit"
+              icon="pencil"
+              onClick={() => {
+                closePopover();
+                onEdit(integration.integrationId);
+              }}
+            >
+              <FormattedMessage
+                id="xpack.fleet.epmList.manageIntegrations.actions.edit"
+                defaultMessage="Edit"
+              />
+            </EuiContextMenuItem>,
+            <EuiContextMenuItem
+              key="delete"
+              icon="trash"
+              color="danger"
+              onClick={openDeleteConfirm}
+            >
+              <EuiTextColor color="danger">
+                <FormattedMessage
+                  id="xpack.fleet.epmList.manageIntegrations.actions.delete"
+                  defaultMessage="Delete"
+                />
+              </EuiTextColor>
+            </EuiContextMenuItem>,
+          ]}
+        />
+      </EuiPopover>
+      {showDeleteConfirm && (
+        <EuiConfirmModal
+          aria-label={i18n.translate(
+            'xpack.fleet.epmList.manageIntegrations.actions.deleteConfirmAriaLabel',
+            { defaultMessage: 'Confirm delete integration' }
+          )}
+          title={i18n.translate(
+            'xpack.fleet.epmList.manageIntegrations.actions.deleteConfirmTitle',
+            {
+              defaultMessage: 'Delete integration',
+            }
+          )}
+          onCancel={() => setShowDeleteConfirm(false)}
+          onConfirm={handleConfirmDelete}
+          cancelButtonText={i18n.translate(
+            'xpack.fleet.epmList.manageIntegrations.actions.deleteConfirmCancel',
+            { defaultMessage: 'Cancel' }
+          )}
+          confirmButtonText={
+            isDeleting
+              ? i18n.translate(
+                  'xpack.fleet.epmList.manageIntegrations.actions.deleteConfirmDeleting',
+                  { defaultMessage: 'Deleting…' }
+                )
+              : i18n.translate(
+                  'xpack.fleet.epmList.manageIntegrations.actions.deleteConfirmButton',
+                  { defaultMessage: 'Delete' }
+                )
+          }
+          buttonColor="danger"
+          isLoading={isDeleting}
+        >
+          <FormattedMessage
+            id="xpack.fleet.epmList.manageIntegrations.actions.deleteConfirmBody"
+            defaultMessage='Are you sure you want to delete the integration "{name}"? This action cannot be undone.'
+            values={{ name: integration.title }}
+          />
+        </EuiConfirmModal>
+      )}
+    </>
+  );
+};
+
 export const ManageIntegrationsTable: React.FC<{
   integrations: CreatedIntegrationRow[];
   isLoading: boolean;
   isError: boolean;
-}> = ({ integrations, isLoading, isError }) => {
-  const { application, userProfile: userProfileService } = useStartServices();
+  onRefetch: () => void;
+}> = ({ integrations, isLoading, isError, onRefetch }) => {
+  const { application, http, notifications, userProfile: userProfileService } = useStartServices();
 
   const uniqueProfileUids = useMemo(() => {
     const uids = integrations
@@ -96,6 +236,49 @@ export const ManageIntegrationsTable: React.FC<{
     }
   );
 
+  const goToEditIntegration = useCallback(
+    (integrationId: string) => {
+      application.navigateToApp('automaticImportVTwo', {
+        path: `/edit/${integrationId}`,
+      });
+    },
+    [application]
+  );
+
+  const getEditIntegrationHref = useCallback(
+    (integrationId: string) =>
+      application.getUrlForApp('automaticImportVTwo', {
+        path: `/edit/${integrationId}`,
+      }),
+    [application]
+  );
+
+  const deleteIntegration = useCallback(
+    async (integrationId: string) => {
+      try {
+        await http.delete(
+          `/api/automatic_import_v2/integrations/${encodeURIComponent(integrationId)}`,
+          { version: '1' }
+        );
+        notifications.toasts.addSuccess({
+          title: i18n.translate(
+            'xpack.fleet.epmList.manageIntegrations.actions.deleteSuccessTitle',
+            { defaultMessage: 'Integration deleted' }
+          ),
+        });
+        onRefetch();
+      } catch (error) {
+        notifications.toasts.addError(error as Error, {
+          title: i18n.translate('xpack.fleet.epmList.manageIntegrations.actions.deleteErrorTitle', {
+            defaultMessage: 'Failed to delete integration',
+          }),
+        });
+        throw error;
+      }
+    },
+    [http, notifications, onRefetch]
+  );
+
   const columns = useMemo<Array<EuiBasicTableColumn<CreatedIntegrationRow>>>(
     () => [
       {
@@ -118,13 +301,7 @@ export const ManageIntegrationsTable: React.FC<{
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiLink
-                href={application.getUrlForApp('automaticImportVTwo', {
-                  path: `/edit/${item.integrationId}`,
-                })}
-              >
-                {title}
-              </EuiLink>
+              <EuiLink href={getEditIntegrationHref(item.integrationId)}>{title}</EuiLink>
             </EuiFlexItem>
           </EuiFlexGroup>
         ),
@@ -208,8 +385,24 @@ export const ManageIntegrationsTable: React.FC<{
           );
         },
       },
+      {
+        name: (
+          <FormattedMessage
+            id="xpack.fleet.epmList.manageIntegrations.table.actions"
+            defaultMessage="Actions"
+          />
+        ),
+        width: '80px',
+        render: (item: CreatedIntegrationRow) => (
+          <ManageIntegrationActions
+            integration={item}
+            onEdit={goToEditIntegration}
+            onDelete={deleteIntegration}
+          />
+        ),
+      },
     ],
-    [application, userProfiles]
+    [getEditIntegrationHref, goToEditIntegration, deleteIntegration, userProfiles]
   );
 
   if (isLoading) {

@@ -48,6 +48,7 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
     integrations,
     isLoading: isLoadingCreatedIntegrations,
     isError: isCreatedIntegrationsError,
+    refetch: refetchCreatedIntegrations,
   } = useGetAllIntegrationsHook();
   const hasCreatedIntegrations = integrations.length > 0;
   const isManageIntegrationsView = useMemo(() => {
@@ -164,6 +165,7 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
                 integrations={integrations}
                 isLoading={isLoadingCreatedIntegrations}
                 isError={isCreatedIntegrationsError}
+                onRefetch={refetchCreatedIntegrations}
               />
             ) : filteredCards.length === 0 && !isLoading ? (
               <NoDataPrompt />
