@@ -8,6 +8,7 @@
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { getMcpToolType, listMcpTools, getNamedMcpTools } from './tool_type';
 
 jest.mock('@n8n/json-schema-to-zod', () => ({
@@ -25,10 +26,7 @@ describe('MCP tool_type', () => {
     get: jest.Mock;
   };
   let mockRequest: KibanaRequest;
-  let mockLogger: {
-    debug: jest.Mock;
-    error: jest.Mock;
-  };
+  let mockLogger: MockedLogger;
 
   const testConfig = {
     connector_id: 'test-connector-id',
@@ -70,10 +68,7 @@ describe('MCP tool_type', () => {
 
     mockRequest = {} as KibanaRequest;
 
-    mockLogger = {
-      debug: jest.fn(),
-      error: jest.fn(),
-    };
+    mockLogger = loggerMock.create();
   });
 
   describe('listMcpTools', () => {
@@ -158,7 +153,7 @@ describe('MCP tool_type', () => {
         request: mockRequest,
         connectorId: 'test-connector-id',
         toolNames: ['test_tool'],
-        logger: mockLogger as any,
+        logger: mockLogger,
       });
 
       expect(result).toEqual([{ name: 'test_tool', description: 'Test tool description' }]);
@@ -177,7 +172,7 @@ describe('MCP tool_type', () => {
           request: mockRequest,
           connectorId: 'test-connector-id',
           toolNames: ['test_tool'],
-          logger: mockLogger as any,
+          logger: mockLogger,
         })
       ).rejects.toThrow('Streamable HTTP error: missing required Authorization header');
       expect(mockLogger.error).toHaveBeenCalled();
