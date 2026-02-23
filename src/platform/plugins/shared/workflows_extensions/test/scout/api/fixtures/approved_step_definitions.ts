@@ -45,6 +45,14 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string 
     handlerHash: '16c3b3d67e68e77e66ed68869790a4388423a5b4b5aa8a194035f3ff52192836',
   },
   {
+    id: 'data.filter',
+    handlerHash: 'f6a53444546e8f37cb75771c3efb2b4db672062e285b4b9f3df468db03bf2358',
+  },
+  {
+    id: 'data.find',
+    handlerHash: '087b86ab7afb9649c84fdc6687b3909549c7bc957b4f9d66092c635e39a06389',
+  },
+  {
     id: 'data.map',
     handlerHash: '6e795a15958a869b328bc8a19836958eafaf088fad7a20a377617fff453dc513',
   },
