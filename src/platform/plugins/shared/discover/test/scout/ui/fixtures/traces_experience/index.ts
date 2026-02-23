@@ -9,4 +9,4 @@
 
 export { TRACES, RICH_TRACE, MINIMAL_TRACE, PRODUCER_TRACE } from './constants';
 export { simpleTrace } from './synthtrace/simple_trace';
-export { richTrace, traceCorrelatedLogs } from './synthtrace/rich_trace';
+export { richTrace, traceCorrelatedLogs } from './synthtrace/complete_traces_experience';
