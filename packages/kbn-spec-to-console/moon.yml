@@ -23,6 +23,12 @@ tags:
   - dev
   - group-undefined
   - jest-unit-tests
+fileGroups:
+  src:
+    - lib/**/*
+    - bin/**/*
+    - index.js
+    - jest.config.js
 tasks:
   jest:
     args:

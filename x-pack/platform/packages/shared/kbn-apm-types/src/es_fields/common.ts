@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export * from './src/es_fields/apm';
-export * from './src/es_fields/otel';
-export * from './src/es_fields/common';
+export const ERROR_MESSAGE = 'error.message';
