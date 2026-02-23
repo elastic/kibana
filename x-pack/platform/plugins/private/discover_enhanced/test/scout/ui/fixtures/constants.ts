@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { tags } from '@kbn/scout';
+import { tags, type KibanaRole } from '@kbn/scout';
 
 export const LOGSTASH_DEFAULT_START_TIME = '2015-09-19T06:31:44.000Z';
 export const LOGSTASH_DEFAULT_END_TIME = '2015-09-23T18:31:44.000Z';
@@ -80,4 +80,24 @@ export const KBN_ARCHIVES = {
 export const METRICS_EXPERIENCE_TAGS = [
   ...tags.stateful.all,
   ...tags.serverless.observability.complete,
+  ...tags.serverless.security.complete,
 ];
+
+export const METRICS_EXPERIENCE_VIEWER_ROLE: KibanaRole = {
+  elasticsearch: {
+    cluster: [],
+    indices: [
+      {
+        names: ['kibana_sample_data_logstsdb', 'test-metrics-*'],
+        privileges: ['read', 'view_index_metadata'],
+      },
+    ],
+  },
+  kibana: [
+    {
+      base: ['read'],
+      feature: {},
+      spaces: ['*'],
+    },
+  ],
+};

@@ -50,7 +50,7 @@ spaceTest.describe(
     });
 
     spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
-      await browserAuth.loginAsViewer();
+      await browserAuth.loginAsMetricsViewer();
       await pageObjects.discover.goto();
     });
 
@@ -139,8 +139,7 @@ spaceTest.describe(
         await expect(metricsExperience.grid).toBeVisible();
 
         await spaceTest.step('select first dimension as breakdown', async () => {
-          await metricsExperience.breakdownSelector.button.click();
-          await metricsExperience.breakdownSelector.getOption(FIRST_DIMENSION).click();
+          await metricsExperience.breakdownSelector.selectDimension(FIRST_DIMENSION);
           await expect(
             metricsExperience.breakdownSelector.getButtonWithSelectedDimension(FIRST_DIMENSION)
           ).toBeVisible();
@@ -149,8 +148,7 @@ spaceTest.describe(
         });
 
         await spaceTest.step('switch to second dimension and verify grid updates', async () => {
-          await metricsExperience.breakdownSelector.button.click();
-          await metricsExperience.breakdownSelector.getOption(SECOND_DIMENSION).click();
+          await metricsExperience.breakdownSelector.selectDimension(SECOND_DIMENSION);
           await expect(
             metricsExperience.breakdownSelector.getButtonWithSelectedDimension(SECOND_DIMENSION)
           ).toBeVisible();

@@ -6,7 +6,7 @@
  */
 
 import type { Locator, PageObjects, ScoutPage } from '@kbn/scout';
-import { KibanaCodeEditorWrapper } from '@kbn/scout';
+import { EuiSelectableWrapper, KibanaCodeEditorWrapper } from '@kbn/scout';
 import { METRICS_FLYOUT_DIMENSION_ITEM_DATA_TEST_SUBJ } from '../constants';
 
 interface PaginationLocators {
@@ -63,11 +63,18 @@ interface BreakdownSelector {
   readonly selectable: Locator;
   getOption(dimensionName: string): Locator;
   getButtonWithSelectedDimension(dimensionName: string): Locator;
+  selectDimension(dimensionName: string): Promise<void>;
 }
 
 function createBreakdownSelector(page: ScoutPage): BreakdownSelector {
+  const selectableWrapper = new EuiSelectableWrapper(
+    page,
+    'metricsExperienceBreakdownSelectorSelectable'
+  );
+  const button = page.testSubj.locator('metricsExperienceBreakdownSelectorButton');
+
   return {
-    button: page.testSubj.locator('metricsExperienceBreakdownSelectorButton'),
+    button,
     search: page.testSubj.locator('metricsExperienceBreakdownSelectorSelectorSearch'),
     selectable: page.testSubj.locator('metricsExperienceBreakdownSelectorSelectable'),
     getOption: (dimensionName: string) =>
@@ -76,6 +83,14 @@ function createBreakdownSelector(page: ScoutPage): BreakdownSelector {
       page.locator(
         `[data-test-subj="metricsExperienceBreakdownSelectorButton"][data-selected-value*="${dimensionName}"]`
       ),
+    selectDimension: async (dimensionName: string) => {
+      const selectable = page.testSubj.locator('metricsExperienceBreakdownSelectorSelectable');
+      if (!(await selectable.isVisible())) {
+        await button.click();
+        await selectable.waitFor({ state: 'visible' });
+      }
+      await selectableWrapper.searchAndSelectFirst(dimensionName);
+    },
   };
 }
 
