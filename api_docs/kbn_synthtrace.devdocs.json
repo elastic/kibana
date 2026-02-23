@@ -350,6 +350,92 @@
       },
       {
         "parentPluginId": "@kbn/synthtrace",
+        "id": "def-server.cleanupOtelJvmMetrics",
+        "type": "Function",
+        "tags": [],
+        "label": "cleanupOtelJvmMetrics",
+        "description": [
+          "\nCleans up OTel JVM metrics documents from Elasticsearch."
+        ],
+        "signature": [
+          "({\n  esClient,\n  services = DEFAULT_OTEL_SERVICES,\n}: { esClient: ",
+          "default",
+          "; services?: ",
+          {
+            "pluginId": "@kbn/synthtrace",
+            "scope": "server",
+            "docId": "kibKbnSynthtracePluginApi",
+            "section": "def-server.OtelJvmServiceConfig",
+            "text": "OtelJvmServiceConfig"
+          },
+          "[] | undefined; }) => Promise<void>"
+        ],
+        "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_runtime_metrics/runtime_metrics.ts",
+        "lineNumber": 281,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.cleanupOtelJvmMetrics.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  esClient,\n  services = DEFAULT_OTEL_SERVICES,\n}",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_runtime_metrics/runtime_metrics.ts",
+            "lineNumber": 287,
+            "columnNumber": 4,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/synthtrace",
+                "id": "def-server.cleanupOtelJvmMetrics.$1.esClient",
+                "type": "Object",
+                "tags": [],
+                "label": "esClient",
+                "description": [],
+                "signature": [
+                  "default"
+                ],
+                "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_runtime_metrics/runtime_metrics.ts",
+                "lineNumber": 288,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/synthtrace",
+                "id": "def-server.cleanupOtelJvmMetrics.$1.services",
+                "type": "Array",
+                "tags": [],
+                "label": "services",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/synthtrace",
+                    "scope": "server",
+                    "docId": "kibKbnSynthtracePluginApi",
+                    "section": "def-server.OtelJvmServiceConfig",
+                    "text": "OtelJvmServiceConfig"
+                  },
+                  "[] | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_runtime_metrics/runtime_metrics.ts",
+                "lineNumber": 289,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/synthtrace",
         "id": "def-server.createApmAnomalyDetectionJob",
         "type": "Function",
         "tags": [],
@@ -500,9 +586,7 @@
         "type": "Function",
         "tags": [],
         "label": "createLogSequence",
-        "description": [
-          "\nCreates a sequence of correlated log events with shared fields.\nReduces boilerplate in API tests by applying common fields to all logs.\n"
-        ],
+        "description": [],
         "signature": [
           "({\n  service,\n  correlation,\n  logs,\n  defaults = {},\n}: { service: string; correlation: Record<string, string>; logs: ",
           {
@@ -517,13 +601,13 @@
             "pluginId": "@kbn/synthtrace",
             "scope": "server",
             "docId": "kibKbnSynthtracePluginApi",
-            "section": "def-server.CorrelatedLogEvent",
-            "text": "CorrelatedLogEvent"
+            "section": "def-server.LogEntry",
+            "text": "LogEntry"
           },
           "[]"
         ],
-        "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_correlated_logs/correlated_logs.ts",
-        "lineNumber": 264,
+        "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_traces/traces.ts",
+        "lineNumber": 181,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -535,8 +619,8 @@
             "tags": [],
             "label": "{\n  service,\n  correlation,\n  logs,\n  defaults = {},\n}",
             "description": [],
-            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_correlated_logs/correlated_logs.ts",
-            "lineNumber": 306,
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_traces/traces.ts",
+            "lineNumber": 186,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
@@ -550,8 +634,8 @@
                 "description": [
                   "Service name (maps to service.name)"
                 ],
-                "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_correlated_logs/correlated_logs.ts",
-                "lineNumber": 307,
+                "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_traces/traces.ts",
+                "lineNumber": 187,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -568,8 +652,8 @@
                 "signature": [
                   "{ [x: string]: string; }"
                 ],
-                "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_correlated_logs/correlated_logs.ts",
-                "lineNumber": 309,
+                "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_traces/traces.ts",
+                "lineNumber": 189,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -593,8 +677,8 @@
                   },
                   "[]"
                 ],
-                "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_correlated_logs/correlated_logs.ts",
-                "lineNumber": 311,
+                "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_traces/traces.ts",
+                "lineNumber": 191,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -611,8 +695,8 @@
                 "signature": [
                   "Record<string, unknown> | undefined"
                 ],
-                "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_correlated_logs/correlated_logs.ts",
-                "lineNumber": 313,
+                "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_traces/traces.ts",
+                "lineNumber": 193,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -727,6 +811,251 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/synthtrace",
+        "id": "def-server.generateAllLogGroupsData",
+        "type": "Function",
+        "tags": [],
+        "label": "generateAllLogGroupsData",
+        "description": [
+          "\nGenerates all data for the get_log_groups tool:\n- Regular log categories (nonExceptionLogGroups)\n- APM error groups (spanExceptionGroups)\n- OTel log exceptions (logExceptionGroups)"
+        ],
+        "signature": [
+          "({\n  range,\n  apmEsClient,\n  logsEsClient,\n  logCategoriesServiceName = 'payment-service',\n  apmServices = DEFAULT_ERROR_SERVICES,\n  logExceptionServices = DEFAULT_LOG_EXCEPTION_SERVICES,\n}: { range: ",
+          {
+            "pluginId": "@kbn/synthtrace-client",
+            "scope": "common",
+            "docId": "kibKbnSynthtraceClientPluginApi",
+            "section": "def-common.Timerange",
+            "text": "Timerange"
+          },
+          "; apmEsClient: ",
+          {
+            "pluginId": "@kbn/synthtrace",
+            "scope": "server",
+            "docId": "kibKbnSynthtracePluginApi",
+            "section": "def-server.ApmSynthtraceEsClient",
+            "text": "ApmSynthtraceEsClient"
+          },
+          "; logsEsClient: ",
+          {
+            "pluginId": "@kbn/synthtrace",
+            "scope": "server",
+            "docId": "kibKbnSynthtracePluginApi",
+            "section": "def-server.LogsSynthtraceEsClient",
+            "text": "LogsSynthtraceEsClient"
+          },
+          "; logCategoriesServiceName?: string | undefined; apmServices?: ",
+          {
+            "pluginId": "@kbn/synthtrace",
+            "scope": "server",
+            "docId": "kibKbnSynthtracePluginApi",
+            "section": "def-server.ErrorServiceConfig",
+            "text": "ErrorServiceConfig"
+          },
+          "[] | undefined; logExceptionServices?: ",
+          {
+            "pluginId": "@kbn/synthtrace",
+            "scope": "server",
+            "docId": "kibKbnSynthtracePluginApi",
+            "section": "def-server.LogExceptionServiceConfig",
+            "text": "LogExceptionServiceConfig"
+          },
+          "[] | undefined; }) => ({ client: ",
+          "SynthtraceEsClient",
+          "<",
+          {
+            "pluginId": "@kbn/synthtrace-client",
+            "scope": "common",
+            "docId": "kibKbnSynthtraceClientPluginApi",
+            "section": "def-common.ApmFields",
+            "text": "ApmFields"
+          },
+          ">; generator: ",
+          "SynthGenerator",
+          "<",
+          {
+            "pluginId": "@kbn/synthtrace-client",
+            "scope": "common",
+            "docId": "kibKbnSynthtraceClientPluginApi",
+            "section": "def-common.ApmFields",
+            "text": "ApmFields"
+          },
+          ">; } | { client: ",
+          "SynthtraceEsClient",
+          "<",
+          {
+            "pluginId": "@kbn/synthtrace-client",
+            "scope": "common",
+            "docId": "kibKbnSynthtraceClientPluginApi",
+            "section": "def-common.LogDocument",
+            "text": "LogDocument"
+          },
+          ">; generator: ",
+          "SynthGenerator",
+          "<",
+          {
+            "pluginId": "@kbn/synthtrace-client",
+            "scope": "common",
+            "docId": "kibKbnSynthtraceClientPluginApi",
+            "section": "def-common.LogDocument",
+            "text": "LogDocument"
+          },
+          ">; })[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_log_groups/log_groups.ts",
+        "lineNumber": 523,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.generateAllLogGroupsData.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  range,\n  apmEsClient,\n  logsEsClient,\n  logCategoriesServiceName = 'payment-service',\n  apmServices = DEFAULT_ERROR_SERVICES,\n  logExceptionServices = DEFAULT_LOG_EXCEPTION_SERVICES,\n}",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_log_groups/log_groups.ts",
+            "lineNumber": 536,
+            "columnNumber": 4,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/synthtrace",
+                "id": "def-server.generateAllLogGroupsData.$1.range",
+                "type": "Object",
+                "tags": [],
+                "label": "range",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/synthtrace-client",
+                    "scope": "common",
+                    "docId": "kibKbnSynthtraceClientPluginApi",
+                    "section": "def-common.Timerange",
+                    "text": "Timerange"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_log_groups/log_groups.ts",
+                "lineNumber": 537,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/synthtrace",
+                "id": "def-server.generateAllLogGroupsData.$1.apmEsClient",
+                "type": "Object",
+                "tags": [],
+                "label": "apmEsClient",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/synthtrace",
+                    "scope": "server",
+                    "docId": "kibKbnSynthtracePluginApi",
+                    "section": "def-server.ApmSynthtraceEsClient",
+                    "text": "ApmSynthtraceEsClient"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_log_groups/log_groups.ts",
+                "lineNumber": 538,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/synthtrace",
+                "id": "def-server.generateAllLogGroupsData.$1.logsEsClient",
+                "type": "Object",
+                "tags": [],
+                "label": "logsEsClient",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/synthtrace",
+                    "scope": "server",
+                    "docId": "kibKbnSynthtracePluginApi",
+                    "section": "def-server.LogsSynthtraceEsClient",
+                    "text": "LogsSynthtraceEsClient"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_log_groups/log_groups.ts",
+                "lineNumber": 539,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/synthtrace",
+                "id": "def-server.generateAllLogGroupsData.$1.logCategoriesServiceName",
+                "type": "string",
+                "tags": [],
+                "label": "logCategoriesServiceName",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_log_groups/log_groups.ts",
+                "lineNumber": 540,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/synthtrace",
+                "id": "def-server.generateAllLogGroupsData.$1.apmServices",
+                "type": "Array",
+                "tags": [],
+                "label": "apmServices",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/synthtrace",
+                    "scope": "server",
+                    "docId": "kibKbnSynthtracePluginApi",
+                    "section": "def-server.ErrorServiceConfig",
+                    "text": "ErrorServiceConfig"
+                  },
+                  "[] | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_log_groups/log_groups.ts",
+                "lineNumber": 541,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/synthtrace",
+                "id": "def-server.generateAllLogGroupsData.$1.logExceptionServices",
+                "type": "Array",
+                "tags": [],
+                "label": "logExceptionServices",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/synthtrace",
+                    "scope": "server",
+                    "docId": "kibKbnSynthtracePluginApi",
+                    "section": "def-server.LogExceptionServiceConfig",
+                    "text": "LogExceptionServiceConfig"
+                  },
+                  "[] | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_log_groups/log_groups.ts",
+                "lineNumber": 542,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           }
         ],
         "returnComment": [],
@@ -1193,161 +1522,13 @@
       },
       {
         "parentPluginId": "@kbn/synthtrace",
-        "id": "def-server.generateCorrelatedLogsData",
+        "id": "def-server.generateCycleTopologyData",
         "type": "Function",
         "tags": [],
-        "label": "generateCorrelatedLogsData",
-        "description": [
-          "\nGenerates correlated log data.\n"
-        ],
-        "signature": [
-          "({\n  range,\n  logsEsClient,\n  logs,\n}: { range: ",
-          {
-            "pluginId": "@kbn/synthtrace-client",
-            "scope": "common",
-            "docId": "kibKbnSynthtraceClientPluginApi",
-            "section": "def-common.Timerange",
-            "text": "Timerange"
-          },
-          "; logsEsClient: ",
-          {
-            "pluginId": "@kbn/synthtrace",
-            "scope": "server",
-            "docId": "kibKbnSynthtracePluginApi",
-            "section": "def-server.LogsSynthtraceEsClient",
-            "text": "LogsSynthtraceEsClient"
-          },
-          "; logs?: ",
-          {
-            "pluginId": "@kbn/synthtrace",
-            "scope": "server",
-            "docId": "kibKbnSynthtracePluginApi",
-            "section": "def-server.CorrelatedLogEvent",
-            "text": "CorrelatedLogEvent"
-          },
-          "[] | undefined; }) => { client: ",
-          "SynthtraceEsClient",
-          "<",
-          {
-            "pluginId": "@kbn/synthtrace-client",
-            "scope": "common",
-            "docId": "kibKbnSynthtraceClientPluginApi",
-            "section": "def-common.LogDocument",
-            "text": "LogDocument"
-          },
-          ">; generator: ",
-          "SynthGenerator",
-          "<",
-          {
-            "pluginId": "@kbn/synthtrace-client",
-            "scope": "common",
-            "docId": "kibKbnSynthtraceClientPluginApi",
-            "section": "def-common.LogDocument",
-            "text": "LogDocument"
-          },
-          ">; }"
-        ],
-        "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_correlated_logs/correlated_logs.ts",
-        "lineNumber": 60,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/synthtrace",
-            "id": "def-server.generateCorrelatedLogsData.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{\n  range,\n  logsEsClient,\n  logs,\n}",
-            "description": [],
-            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_correlated_logs/correlated_logs.ts",
-            "lineNumber": 71,
-            "columnNumber": 4,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/synthtrace",
-                "id": "def-server.generateCorrelatedLogsData.$1.range",
-                "type": "Object",
-                "tags": [],
-                "label": "range",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/synthtrace-client",
-                    "scope": "common",
-                    "docId": "kibKbnSynthtraceClientPluginApi",
-                    "section": "def-common.Timerange",
-                    "text": "Timerange"
-                  }
-                ],
-                "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_correlated_logs/correlated_logs.ts",
-                "lineNumber": 72,
-                "columnNumber": 3,
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/synthtrace",
-                "id": "def-server.generateCorrelatedLogsData.$1.logsEsClient",
-                "type": "Object",
-                "tags": [],
-                "label": "logsEsClient",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/synthtrace",
-                    "scope": "server",
-                    "docId": "kibKbnSynthtracePluginApi",
-                    "section": "def-server.LogsSynthtraceEsClient",
-                    "text": "LogsSynthtraceEsClient"
-                  }
-                ],
-                "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_correlated_logs/correlated_logs.ts",
-                "lineNumber": 73,
-                "columnNumber": 3,
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/synthtrace",
-                "id": "def-server.generateCorrelatedLogsData.$1.logs",
-                "type": "Array",
-                "tags": [],
-                "label": "logs",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/synthtrace",
-                    "scope": "server",
-                    "docId": "kibKbnSynthtracePluginApi",
-                    "section": "def-server.CorrelatedLogEvent",
-                    "text": "CorrelatedLogEvent"
-                  },
-                  "[] | undefined"
-                ],
-                "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_correlated_logs/correlated_logs.ts",
-                "lineNumber": 74,
-                "columnNumber": 3,
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/synthtrace",
-        "id": "def-server.generateDependenciesData",
-        "type": "Function",
-        "tags": [],
-        "label": "generateDependenciesData",
+        "label": "generateCycleTopologyData",
         "description": [],
         "signature": [
-          "({\n  range,\n  apmEsClient,\n  serviceName,\n  environment,\n  agentName,\n  transactionName,\n  dependencies,\n}: { range: ",
+          "({\n  range,\n  apmEsClient,\n}: { range: ",
           {
             "pluginId": "@kbn/synthtrace-client",
             "scope": "common",
@@ -1363,7 +1544,7 @@
             "section": "def-server.ApmSynthtraceEsClient",
             "text": "ApmSynthtraceEsClient"
           },
-          "; serviceName: string; environment: string; agentName: string; transactionName: string; dependencies: DependencyConfig[]; }) => { client: ",
+          "; }) => { client: ",
           "SynthtraceEsClient",
           "<",
           {
@@ -1385,28 +1566,28 @@
           },
           ">; }"
         ],
-        "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_downstream_dependencies/dependencies.ts",
-        "lineNumber": 49,
+        "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_service_topology/topology_cycle.ts",
+        "lineNumber": 51,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/synthtrace",
-            "id": "def-server.generateDependenciesData.$1",
+            "id": "def-server.generateCycleTopologyData.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  range,\n  apmEsClient,\n  serviceName,\n  environment,\n  agentName,\n  transactionName,\n  dependencies,\n}",
+            "label": "{\n  range,\n  apmEsClient,\n}",
             "description": [],
-            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_downstream_dependencies/dependencies.ts",
-            "lineNumber": 57,
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_service_topology/topology_cycle.ts",
+            "lineNumber": 54,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/synthtrace",
-                "id": "def-server.generateDependenciesData.$1.range",
+                "id": "def-server.generateCycleTopologyData.$1.range",
                 "type": "Object",
                 "tags": [],
                 "label": "range",
@@ -1420,15 +1601,15 @@
                     "text": "Timerange"
                   }
                 ],
-                "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_downstream_dependencies/dependencies.ts",
-                "lineNumber": 58,
+                "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_service_topology/topology_cycle.ts",
+                "lineNumber": 55,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
               {
                 "parentPluginId": "@kbn/synthtrace",
-                "id": "def-server.generateDependenciesData.$1.apmEsClient",
+                "id": "def-server.generateCycleTopologyData.$1.apmEsClient",
                 "type": "Object",
                 "tags": [],
                 "label": "apmEsClient",
@@ -1442,76 +1623,304 @@
                     "text": "ApmSynthtraceEsClient"
                   }
                 ],
-                "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_downstream_dependencies/dependencies.ts",
-                "lineNumber": 59,
+                "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_service_topology/topology_cycle.ts",
+                "lineNumber": 56,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
-              },
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/synthtrace",
+        "id": "def-server.generateElasticApmJvmMetrics",
+        "type": "Function",
+        "tags": [],
+        "label": "generateElasticApmJvmMetrics",
+        "description": [
+          "\nGenerates Elastic APM JVM metrics data.\nUses native Elastic APM field paths: jvm.memory.heap.*, system.process.cpu.*, etc."
+        ],
+        "signature": [
+          "({\n  range,\n  apmEsClient,\n  services = DEFAULT_ELASTIC_APM_SERVICES,\n}: { range: ",
+          {
+            "pluginId": "@kbn/synthtrace-client",
+            "scope": "common",
+            "docId": "kibKbnSynthtraceClientPluginApi",
+            "section": "def-common.Timerange",
+            "text": "Timerange"
+          },
+          "; apmEsClient: ",
+          {
+            "pluginId": "@kbn/synthtrace",
+            "scope": "server",
+            "docId": "kibKbnSynthtracePluginApi",
+            "section": "def-server.ApmSynthtraceEsClient",
+            "text": "ApmSynthtraceEsClient"
+          },
+          "; services?: ",
+          {
+            "pluginId": "@kbn/synthtrace",
+            "scope": "server",
+            "docId": "kibKbnSynthtracePluginApi",
+            "section": "def-server.ElasticApmJvmServiceConfig",
+            "text": "ElasticApmJvmServiceConfig"
+          },
+          "[] | undefined; }) => { client: ",
+          "SynthtraceEsClient",
+          "<",
+          {
+            "pluginId": "@kbn/synthtrace-client",
+            "scope": "common",
+            "docId": "kibKbnSynthtraceClientPluginApi",
+            "section": "def-common.ApmFields",
+            "text": "ApmFields"
+          },
+          ">; generator: ",
+          "SynthGenerator",
+          "<",
+          {
+            "pluginId": "@kbn/synthtrace-client",
+            "scope": "common",
+            "docId": "kibKbnSynthtraceClientPluginApi",
+            "section": "def-common.ApmFields",
+            "text": "ApmFields"
+          },
+          ">; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_runtime_metrics/runtime_metrics.ts",
+        "lineNumber": 93,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.generateElasticApmJvmMetrics.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  range,\n  apmEsClient,\n  services = DEFAULT_ELASTIC_APM_SERVICES,\n}",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_runtime_metrics/runtime_metrics.ts",
+            "lineNumber": 101,
+            "columnNumber": 4,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
               {
                 "parentPluginId": "@kbn/synthtrace",
-                "id": "def-server.generateDependenciesData.$1.serviceName",
-                "type": "string",
+                "id": "def-server.generateElasticApmJvmMetrics.$1.range",
+                "type": "Object",
                 "tags": [],
-                "label": "serviceName",
-                "description": [],
-                "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_downstream_dependencies/dependencies.ts",
-                "lineNumber": 60,
-                "columnNumber": 3,
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/synthtrace",
-                "id": "def-server.generateDependenciesData.$1.environment",
-                "type": "string",
-                "tags": [],
-                "label": "environment",
-                "description": [],
-                "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_downstream_dependencies/dependencies.ts",
-                "lineNumber": 61,
-                "columnNumber": 3,
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/synthtrace",
-                "id": "def-server.generateDependenciesData.$1.agentName",
-                "type": "string",
-                "tags": [],
-                "label": "agentName",
-                "description": [],
-                "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_downstream_dependencies/dependencies.ts",
-                "lineNumber": 62,
-                "columnNumber": 3,
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/synthtrace",
-                "id": "def-server.generateDependenciesData.$1.transactionName",
-                "type": "string",
-                "tags": [],
-                "label": "transactionName",
-                "description": [],
-                "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_downstream_dependencies/dependencies.ts",
-                "lineNumber": 63,
-                "columnNumber": 3,
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/synthtrace",
-                "id": "def-server.generateDependenciesData.$1.dependencies",
-                "type": "Array",
-                "tags": [],
-                "label": "dependencies",
+                "label": "range",
                 "description": [],
                 "signature": [
-                  "DependencyConfig[]"
+                  {
+                    "pluginId": "@kbn/synthtrace-client",
+                    "scope": "common",
+                    "docId": "kibKbnSynthtraceClientPluginApi",
+                    "section": "def-common.Timerange",
+                    "text": "Timerange"
+                  }
                 ],
-                "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_downstream_dependencies/dependencies.ts",
-                "lineNumber": 64,
+                "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_runtime_metrics/runtime_metrics.ts",
+                "lineNumber": 102,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/synthtrace",
+                "id": "def-server.generateElasticApmJvmMetrics.$1.apmEsClient",
+                "type": "Object",
+                "tags": [],
+                "label": "apmEsClient",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/synthtrace",
+                    "scope": "server",
+                    "docId": "kibKbnSynthtracePluginApi",
+                    "section": "def-server.ApmSynthtraceEsClient",
+                    "text": "ApmSynthtraceEsClient"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_runtime_metrics/runtime_metrics.ts",
+                "lineNumber": 103,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/synthtrace",
+                "id": "def-server.generateElasticApmJvmMetrics.$1.services",
+                "type": "Array",
+                "tags": [],
+                "label": "services",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/synthtrace",
+                    "scope": "server",
+                    "docId": "kibKbnSynthtracePluginApi",
+                    "section": "def-server.ElasticApmJvmServiceConfig",
+                    "text": "ElasticApmJvmServiceConfig"
+                  },
+                  "[] | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_runtime_metrics/runtime_metrics.ts",
+                "lineNumber": 104,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/synthtrace",
+        "id": "def-server.generateErrorGroupsData",
+        "type": "Function",
+        "tags": [],
+        "label": "generateErrorGroupsData",
+        "description": [
+          "\nGenerates APM error data for error groups testing.\nThese will appear in `spanExceptionGroups` response."
+        ],
+        "signature": [
+          "({\n  range,\n  apmEsClient,\n  services,\n}: { range: ",
+          {
+            "pluginId": "@kbn/synthtrace-client",
+            "scope": "common",
+            "docId": "kibKbnSynthtraceClientPluginApi",
+            "section": "def-common.Timerange",
+            "text": "Timerange"
+          },
+          "; apmEsClient: ",
+          {
+            "pluginId": "@kbn/synthtrace",
+            "scope": "server",
+            "docId": "kibKbnSynthtracePluginApi",
+            "section": "def-server.ApmSynthtraceEsClient",
+            "text": "ApmSynthtraceEsClient"
+          },
+          "; services: ",
+          {
+            "pluginId": "@kbn/synthtrace",
+            "scope": "server",
+            "docId": "kibKbnSynthtracePluginApi",
+            "section": "def-server.ErrorServiceConfig",
+            "text": "ErrorServiceConfig"
+          },
+          "[]; }) => { client: ",
+          "SynthtraceEsClient",
+          "<",
+          {
+            "pluginId": "@kbn/synthtrace-client",
+            "scope": "common",
+            "docId": "kibKbnSynthtraceClientPluginApi",
+            "section": "def-common.ApmFields",
+            "text": "ApmFields"
+          },
+          ">; generator: ",
+          "SynthGenerator",
+          "<",
+          {
+            "pluginId": "@kbn/synthtrace-client",
+            "scope": "common",
+            "docId": "kibKbnSynthtraceClientPluginApi",
+            "section": "def-common.ApmFields",
+            "text": "ApmFields"
+          },
+          ">; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_log_groups/log_groups.ts",
+        "lineNumber": 402,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.generateErrorGroupsData.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  range,\n  apmEsClient,\n  services,\n}",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_log_groups/log_groups.ts",
+            "lineNumber": 410,
+            "columnNumber": 4,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/synthtrace",
+                "id": "def-server.generateErrorGroupsData.$1.range",
+                "type": "Object",
+                "tags": [],
+                "label": "range",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/synthtrace-client",
+                    "scope": "common",
+                    "docId": "kibKbnSynthtraceClientPluginApi",
+                    "section": "def-common.Timerange",
+                    "text": "Timerange"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_log_groups/log_groups.ts",
+                "lineNumber": 411,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/synthtrace",
+                "id": "def-server.generateErrorGroupsData.$1.apmEsClient",
+                "type": "Object",
+                "tags": [],
+                "label": "apmEsClient",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/synthtrace",
+                    "scope": "server",
+                    "docId": "kibKbnSynthtracePluginApi",
+                    "section": "def-server.ApmSynthtraceEsClient",
+                    "text": "ApmSynthtraceEsClient"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_log_groups/log_groups.ts",
+                "lineNumber": 412,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/synthtrace",
+                "id": "def-server.generateErrorGroupsData.$1.services",
+                "type": "Array",
+                "tags": [],
+                "label": "services",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/synthtrace",
+                    "scope": "server",
+                    "docId": "kibKbnSynthtracePluginApi",
+                    "section": "def-server.ErrorServiceConfig",
+                    "text": "ErrorServiceConfig"
+                  },
+                  "[]"
+                ],
+                "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_log_groups/log_groups.ts",
+                "lineNumber": 413,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1622,6 +2031,297 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/synthtrace",
+        "id": "def-server.generateGetTracesApmDataset",
+        "type": "Function",
+        "tags": [],
+        "label": "generateGetTracesApmDataset",
+        "description": [],
+        "signature": [
+          "({\n  range,\n  apmEsClient,\n  traces,\n}: { range: ",
+          {
+            "pluginId": "@kbn/synthtrace-client",
+            "scope": "common",
+            "docId": "kibKbnSynthtraceClientPluginApi",
+            "section": "def-common.Timerange",
+            "text": "Timerange"
+          },
+          "; apmEsClient: ",
+          {
+            "pluginId": "@kbn/synthtrace",
+            "scope": "server",
+            "docId": "kibKbnSynthtracePluginApi",
+            "section": "def-server.ApmSynthtraceEsClient",
+            "text": "ApmSynthtraceEsClient"
+          },
+          "; traces: ",
+          {
+            "pluginId": "@kbn/synthtrace",
+            "scope": "server",
+            "docId": "kibKbnSynthtracePluginApi",
+            "section": "def-server.GetTracesScenarioConfig",
+            "text": "GetTracesScenarioConfig"
+          },
+          "[]; }) => { client: ",
+          "SynthtraceEsClient",
+          "<",
+          {
+            "pluginId": "@kbn/synthtrace-client",
+            "scope": "common",
+            "docId": "kibKbnSynthtraceClientPluginApi",
+            "section": "def-common.ApmFields",
+            "text": "ApmFields"
+          },
+          ">; generator: ",
+          "SynthGenerator",
+          "<",
+          {
+            "pluginId": "@kbn/synthtrace-client",
+            "scope": "common",
+            "docId": "kibKbnSynthtraceClientPluginApi",
+            "section": "def-common.ApmFields",
+            "text": "ApmFields"
+          },
+          ">; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_traces/traces.ts",
+        "lineNumber": 204,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.generateGetTracesApmDataset.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  range,\n  apmEsClient,\n  traces,\n}",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_traces/traces.ts",
+            "lineNumber": 208,
+            "columnNumber": 4,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/synthtrace",
+                "id": "def-server.generateGetTracesApmDataset.$1.range",
+                "type": "Object",
+                "tags": [],
+                "label": "range",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/synthtrace-client",
+                    "scope": "common",
+                    "docId": "kibKbnSynthtraceClientPluginApi",
+                    "section": "def-common.Timerange",
+                    "text": "Timerange"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_traces/traces.ts",
+                "lineNumber": 209,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/synthtrace",
+                "id": "def-server.generateGetTracesApmDataset.$1.apmEsClient",
+                "type": "Object",
+                "tags": [],
+                "label": "apmEsClient",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/synthtrace",
+                    "scope": "server",
+                    "docId": "kibKbnSynthtracePluginApi",
+                    "section": "def-server.ApmSynthtraceEsClient",
+                    "text": "ApmSynthtraceEsClient"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_traces/traces.ts",
+                "lineNumber": 210,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/synthtrace",
+                "id": "def-server.generateGetTracesApmDataset.$1.traces",
+                "type": "Array",
+                "tags": [],
+                "label": "traces",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/synthtrace",
+                    "scope": "server",
+                    "docId": "kibKbnSynthtracePluginApi",
+                    "section": "def-server.GetTracesScenarioConfig",
+                    "text": "GetTracesScenarioConfig"
+                  },
+                  "[]"
+                ],
+                "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_traces/traces.ts",
+                "lineNumber": 211,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/synthtrace",
+        "id": "def-server.generateGetTracesLogsData",
+        "type": "Function",
+        "tags": [],
+        "label": "generateGetTracesLogsData",
+        "description": [],
+        "signature": [
+          "({\n  range,\n  logsEsClient,\n  config,\n}: { range: ",
+          {
+            "pluginId": "@kbn/synthtrace-client",
+            "scope": "common",
+            "docId": "kibKbnSynthtraceClientPluginApi",
+            "section": "def-common.Timerange",
+            "text": "Timerange"
+          },
+          "; logsEsClient: ",
+          {
+            "pluginId": "@kbn/synthtrace",
+            "scope": "server",
+            "docId": "kibKbnSynthtracePluginApi",
+            "section": "def-server.LogsSynthtraceEsClient",
+            "text": "LogsSynthtraceEsClient"
+          },
+          "; config: ",
+          {
+            "pluginId": "@kbn/synthtrace",
+            "scope": "server",
+            "docId": "kibKbnSynthtracePluginApi",
+            "section": "def-server.GetTracesScenarioConfig",
+            "text": "GetTracesScenarioConfig"
+          },
+          "; }) => { client: ",
+          "SynthtraceEsClient",
+          "<",
+          {
+            "pluginId": "@kbn/synthtrace-client",
+            "scope": "common",
+            "docId": "kibKbnSynthtraceClientPluginApi",
+            "section": "def-common.LogDocument",
+            "text": "LogDocument"
+          },
+          ">; generator: ",
+          "SynthGenerator",
+          "<",
+          {
+            "pluginId": "@kbn/synthtrace-client",
+            "scope": "common",
+            "docId": "kibKbnSynthtraceClientPluginApi",
+            "section": "def-common.LogDocument",
+            "text": "LogDocument"
+          },
+          ">; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_traces/traces.ts",
+        "lineNumber": 268,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.generateGetTracesLogsData.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  range,\n  logsEsClient,\n  config,\n}",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_traces/traces.ts",
+            "lineNumber": 272,
+            "columnNumber": 4,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/synthtrace",
+                "id": "def-server.generateGetTracesLogsData.$1.range",
+                "type": "Object",
+                "tags": [],
+                "label": "range",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/synthtrace-client",
+                    "scope": "common",
+                    "docId": "kibKbnSynthtraceClientPluginApi",
+                    "section": "def-common.Timerange",
+                    "text": "Timerange"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_traces/traces.ts",
+                "lineNumber": 273,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/synthtrace",
+                "id": "def-server.generateGetTracesLogsData.$1.logsEsClient",
+                "type": "Object",
+                "tags": [],
+                "label": "logsEsClient",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/synthtrace",
+                    "scope": "server",
+                    "docId": "kibKbnSynthtracePluginApi",
+                    "section": "def-server.LogsSynthtraceEsClient",
+                    "text": "LogsSynthtraceEsClient"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_traces/traces.ts",
+                "lineNumber": 274,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/synthtrace",
+                "id": "def-server.generateGetTracesLogsData.$1.config",
+                "type": "Object",
+                "tags": [],
+                "label": "config",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/synthtrace",
+                    "scope": "server",
+                    "docId": "kibKbnSynthtracePluginApi",
+                    "section": "def-server.GetTracesScenarioConfig",
+                    "text": "GetTracesScenarioConfig"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_traces/traces.ts",
+                "lineNumber": 275,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           }
         ],
         "returnComment": [],
@@ -1813,10 +2513,10 @@
         "tags": [],
         "label": "generateLogCategoriesData",
         "description": [
-          "\nGenerates log data with various categories/patterns for a service.\nCan be used both by CLI (via default export) and by API tests (via direct import)."
+          "\nGenerates log data with various categories/patterns for a service.\nThese will appear in `nonExceptionLogGroups` response."
         ],
         "signature": [
-          "({\n  range,\n  logsEsClient,\n  serviceName,\n}: { range: ",
+          "({\n  range,\n  logsEsClient,\n  serviceName,\n  serviceEnvironment = 'production',\n}: { range: ",
           {
             "pluginId": "@kbn/synthtrace-client",
             "scope": "common",
@@ -1832,7 +2532,7 @@
             "section": "def-server.LogsSynthtraceEsClient",
             "text": "LogsSynthtraceEsClient"
           },
-          "; serviceName: string; }) => { client: ",
+          "; serviceName: string; serviceEnvironment?: string | undefined; }) => { client: ",
           "SynthtraceEsClient",
           "<",
           {
@@ -1854,8 +2554,8 @@
           },
           ">; }"
         ],
-        "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_log_categories/log_categories.ts",
-        "lineNumber": 45,
+        "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_log_groups/log_groups.ts",
+        "lineNumber": 73,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1865,10 +2565,10 @@
             "id": "def-server.generateLogCategoriesData.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  range,\n  logsEsClient,\n  serviceName,\n}",
+            "label": "{\n  range,\n  logsEsClient,\n  serviceName,\n  serviceEnvironment = 'production',\n}",
             "description": [],
-            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_log_categories/log_categories.ts",
-            "lineNumber": 53,
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_log_groups/log_groups.ts",
+            "lineNumber": 82,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
@@ -1889,8 +2589,8 @@
                     "text": "Timerange"
                   }
                 ],
-                "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_log_categories/log_categories.ts",
-                "lineNumber": 54,
+                "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_log_groups/log_groups.ts",
+                "lineNumber": 83,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1911,8 +2611,8 @@
                     "text": "LogsSynthtraceEsClient"
                   }
                 ],
-                "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_log_categories/log_categories.ts",
-                "lineNumber": 55,
+                "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_log_groups/log_groups.ts",
+                "lineNumber": 84,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1924,8 +2624,24 @@
                 "tags": [],
                 "label": "serviceName",
                 "description": [],
-                "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_log_categories/log_categories.ts",
-                "lineNumber": 56,
+                "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_log_groups/log_groups.ts",
+                "lineNumber": 85,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/synthtrace",
+                "id": "def-server.generateLogCategoriesData.$1.serviceEnvironment",
+                "type": "string",
+                "tags": [],
+                "label": "serviceEnvironment",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_log_groups/log_groups.ts",
+                "lineNumber": 86,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2042,6 +2758,154 @@
                 ],
                 "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_log_change_points/log_change_points.ts",
                 "lineNumber": 65,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/synthtrace",
+        "id": "def-server.generateLogExceptionGroupsData",
+        "type": "Function",
+        "tags": [],
+        "label": "generateLogExceptionGroupsData",
+        "description": [
+          "\nGenerates OTel log exception data for log exception groups testing.\nThese represent exceptions logged via OTel semantic conventions (event.name: \"exception\").\nThese will appear in `logExceptionGroups` response."
+        ],
+        "signature": [
+          "({\n  range,\n  logsEsClient,\n  services,\n}: { range: ",
+          {
+            "pluginId": "@kbn/synthtrace-client",
+            "scope": "common",
+            "docId": "kibKbnSynthtraceClientPluginApi",
+            "section": "def-common.Timerange",
+            "text": "Timerange"
+          },
+          "; logsEsClient: ",
+          {
+            "pluginId": "@kbn/synthtrace",
+            "scope": "server",
+            "docId": "kibKbnSynthtracePluginApi",
+            "section": "def-server.LogsSynthtraceEsClient",
+            "text": "LogsSynthtraceEsClient"
+          },
+          "; services: ",
+          {
+            "pluginId": "@kbn/synthtrace",
+            "scope": "server",
+            "docId": "kibKbnSynthtracePluginApi",
+            "section": "def-server.LogExceptionServiceConfig",
+            "text": "LogExceptionServiceConfig"
+          },
+          "[]; }) => { client: ",
+          "SynthtraceEsClient",
+          "<",
+          {
+            "pluginId": "@kbn/synthtrace-client",
+            "scope": "common",
+            "docId": "kibKbnSynthtraceClientPluginApi",
+            "section": "def-common.LogDocument",
+            "text": "LogDocument"
+          },
+          ">; generator: ",
+          "SynthGenerator",
+          "<",
+          {
+            "pluginId": "@kbn/synthtrace-client",
+            "scope": "common",
+            "docId": "kibKbnSynthtraceClientPluginApi",
+            "section": "def-common.LogDocument",
+            "text": "LogDocument"
+          },
+          ">; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_log_groups/log_groups.ts",
+        "lineNumber": 474,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.generateLogExceptionGroupsData.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  range,\n  logsEsClient,\n  services,\n}",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_log_groups/log_groups.ts",
+            "lineNumber": 483,
+            "columnNumber": 4,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/synthtrace",
+                "id": "def-server.generateLogExceptionGroupsData.$1.range",
+                "type": "Object",
+                "tags": [],
+                "label": "range",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/synthtrace-client",
+                    "scope": "common",
+                    "docId": "kibKbnSynthtraceClientPluginApi",
+                    "section": "def-common.Timerange",
+                    "text": "Timerange"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_log_groups/log_groups.ts",
+                "lineNumber": 484,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/synthtrace",
+                "id": "def-server.generateLogExceptionGroupsData.$1.logsEsClient",
+                "type": "Object",
+                "tags": [],
+                "label": "logsEsClient",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/synthtrace",
+                    "scope": "server",
+                    "docId": "kibKbnSynthtracePluginApi",
+                    "section": "def-server.LogsSynthtraceEsClient",
+                    "text": "LogsSynthtraceEsClient"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_log_groups/log_groups.ts",
+                "lineNumber": 485,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/synthtrace",
+                "id": "def-server.generateLogExceptionGroupsData.$1.services",
+                "type": "Array",
+                "tags": [],
+                "label": "services",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/synthtrace",
+                    "scope": "server",
+                    "docId": "kibKbnSynthtracePluginApi",
+                    "section": "def-server.LogExceptionServiceConfig",
+                    "text": "LogExceptionServiceConfig"
+                  },
+                  "[]"
+                ],
+                "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_log_groups/log_groups.ts",
+                "lineNumber": 486,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2176,6 +3040,154 @@
                 ],
                 "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/run_log_rate_analysis/log_rate_analysis_spike.ts",
                 "lineNumber": 79,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/synthtrace",
+        "id": "def-server.generateLogsData",
+        "type": "Function",
+        "tags": [],
+        "label": "generateLogsData",
+        "description": [
+          "\nGenerates log data.\n"
+        ],
+        "signature": [
+          "({\n  range,\n  logsEsClient,\n  logs,\n}: { range: ",
+          {
+            "pluginId": "@kbn/synthtrace-client",
+            "scope": "common",
+            "docId": "kibKbnSynthtraceClientPluginApi",
+            "section": "def-common.Timerange",
+            "text": "Timerange"
+          },
+          "; logsEsClient: ",
+          {
+            "pluginId": "@kbn/synthtrace",
+            "scope": "server",
+            "docId": "kibKbnSynthtracePluginApi",
+            "section": "def-server.LogsSynthtraceEsClient",
+            "text": "LogsSynthtraceEsClient"
+          },
+          "; logs: ",
+          {
+            "pluginId": "@kbn/synthtrace",
+            "scope": "server",
+            "docId": "kibKbnSynthtracePluginApi",
+            "section": "def-server.LogEntry",
+            "text": "LogEntry"
+          },
+          "[]; }) => { client: ",
+          "SynthtraceEsClient",
+          "<",
+          {
+            "pluginId": "@kbn/synthtrace-client",
+            "scope": "common",
+            "docId": "kibKbnSynthtraceClientPluginApi",
+            "section": "def-common.LogDocument",
+            "text": "LogDocument"
+          },
+          ">; generator: ",
+          "SynthGenerator",
+          "<",
+          {
+            "pluginId": "@kbn/synthtrace-client",
+            "scope": "common",
+            "docId": "kibKbnSynthtraceClientPluginApi",
+            "section": "def-common.LogDocument",
+            "text": "LogDocument"
+          },
+          ">; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_traces/traces.ts",
+        "lineNumber": 147,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.generateLogsData.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  range,\n  logsEsClient,\n  logs,\n}",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_traces/traces.ts",
+            "lineNumber": 158,
+            "columnNumber": 4,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/synthtrace",
+                "id": "def-server.generateLogsData.$1.range",
+                "type": "Object",
+                "tags": [],
+                "label": "range",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/synthtrace-client",
+                    "scope": "common",
+                    "docId": "kibKbnSynthtraceClientPluginApi",
+                    "section": "def-common.Timerange",
+                    "text": "Timerange"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_traces/traces.ts",
+                "lineNumber": 159,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/synthtrace",
+                "id": "def-server.generateLogsData.$1.logsEsClient",
+                "type": "Object",
+                "tags": [],
+                "label": "logsEsClient",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/synthtrace",
+                    "scope": "server",
+                    "docId": "kibKbnSynthtracePluginApi",
+                    "section": "def-server.LogsSynthtraceEsClient",
+                    "text": "LogsSynthtraceEsClient"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_traces/traces.ts",
+                "lineNumber": 160,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/synthtrace",
+                "id": "def-server.generateLogsData.$1.logs",
+                "type": "Array",
+                "tags": [],
+                "label": "logs",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/synthtrace",
+                    "scope": "server",
+                    "docId": "kibKbnSynthtracePluginApi",
+                    "section": "def-server.LogEntry",
+                    "text": "LogEntry"
+                  },
+                  "[]"
+                ],
+                "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_traces/traces.ts",
+                "lineNumber": 161,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2452,6 +3464,102 @@
       },
       {
         "parentPluginId": "@kbn/synthtrace",
+        "id": "def-server.generateOtelJvmMetricsDocs",
+        "type": "Function",
+        "tags": [],
+        "label": "generateOtelJvmMetricsDocs",
+        "description": [
+          "\nGenerates OTel stable semconv JVM metrics documents for direct ES indexing.\nThis is needed because synthtrace doesn't have native OTel metrics support.\n"
+        ],
+        "signature": [
+          "({\n  startMs,\n  endMs,\n  services = DEFAULT_OTEL_SERVICES,\n}: { startMs: number; endMs: number; services?: ",
+          {
+            "pluginId": "@kbn/synthtrace",
+            "scope": "server",
+            "docId": "kibKbnSynthtracePluginApi",
+            "section": "def-server.OtelJvmServiceConfig",
+            "text": "OtelJvmServiceConfig"
+          },
+          "[] | undefined; }) => { index: string; doc: Record<string, unknown>; }[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_runtime_metrics/runtime_metrics.ts",
+        "lineNumber": 184,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.generateOtelJvmMetricsDocs.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  startMs,\n  endMs,\n  services = DEFAULT_OTEL_SERVICES,\n}",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_runtime_metrics/runtime_metrics.ts",
+            "lineNumber": 197,
+            "columnNumber": 4,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/synthtrace",
+                "id": "def-server.generateOtelJvmMetricsDocs.$1.startMs",
+                "type": "number",
+                "tags": [],
+                "label": "startMs",
+                "description": [],
+                "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_runtime_metrics/runtime_metrics.ts",
+                "lineNumber": 198,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/synthtrace",
+                "id": "def-server.generateOtelJvmMetricsDocs.$1.endMs",
+                "type": "number",
+                "tags": [],
+                "label": "endMs",
+                "description": [],
+                "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_runtime_metrics/runtime_metrics.ts",
+                "lineNumber": 199,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/synthtrace",
+                "id": "def-server.generateOtelJvmMetricsDocs.$1.services",
+                "type": "Array",
+                "tags": [],
+                "label": "services",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/synthtrace",
+                    "scope": "server",
+                    "docId": "kibKbnSynthtracePluginApi",
+                    "section": "def-server.OtelJvmServiceConfig",
+                    "text": "OtelJvmServiceConfig"
+                  },
+                  "[] | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_runtime_metrics/runtime_metrics.ts",
+                "lineNumber": 200,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [
+          "Array of documents ready for ES bulk indexing"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/synthtrace",
         "id": "def-server.generateSyntheticAlerts",
         "type": "Function",
         "tags": [],
@@ -2590,6 +3698,121 @@
       },
       {
         "parentPluginId": "@kbn/synthtrace",
+        "id": "def-server.generateTopologyData",
+        "type": "Function",
+        "tags": [],
+        "label": "generateTopologyData",
+        "description": [],
+        "signature": [
+          "({\n  range,\n  apmEsClient,\n}: { range: ",
+          {
+            "pluginId": "@kbn/synthtrace-client",
+            "scope": "common",
+            "docId": "kibKbnSynthtraceClientPluginApi",
+            "section": "def-common.Timerange",
+            "text": "Timerange"
+          },
+          "; apmEsClient: ",
+          {
+            "pluginId": "@kbn/synthtrace",
+            "scope": "server",
+            "docId": "kibKbnSynthtracePluginApi",
+            "section": "def-server.ApmSynthtraceEsClient",
+            "text": "ApmSynthtraceEsClient"
+          },
+          "; }) => { client: ",
+          "SynthtraceEsClient",
+          "<",
+          {
+            "pluginId": "@kbn/synthtrace-client",
+            "scope": "common",
+            "docId": "kibKbnSynthtraceClientPluginApi",
+            "section": "def-common.ApmFields",
+            "text": "ApmFields"
+          },
+          ">; generator: ",
+          "SynthGenerator",
+          "<",
+          {
+            "pluginId": "@kbn/synthtrace-client",
+            "scope": "common",
+            "docId": "kibKbnSynthtraceClientPluginApi",
+            "section": "def-common.ApmFields",
+            "text": "ApmFields"
+          },
+          ">; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_service_topology/topology.ts",
+        "lineNumber": 92,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.generateTopologyData.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  range,\n  apmEsClient,\n}",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_service_topology/topology.ts",
+            "lineNumber": 95,
+            "columnNumber": 4,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/synthtrace",
+                "id": "def-server.generateTopologyData.$1.range",
+                "type": "Object",
+                "tags": [],
+                "label": "range",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/synthtrace-client",
+                    "scope": "common",
+                    "docId": "kibKbnSynthtraceClientPluginApi",
+                    "section": "def-common.Timerange",
+                    "text": "Timerange"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_service_topology/topology.ts",
+                "lineNumber": 96,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/synthtrace",
+                "id": "def-server.generateTopologyData.$1.apmEsClient",
+                "type": "Object",
+                "tags": [],
+                "label": "apmEsClient",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/synthtrace",
+                    "scope": "server",
+                    "docId": "kibKbnSynthtracePluginApi",
+                    "section": "def-server.ApmSynthtraceEsClient",
+                    "text": "ApmSynthtraceEsClient"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_service_topology/topology.ts",
+                "lineNumber": 97,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/synthtrace",
         "id": "def-server.generateTraceChangePointsData",
         "type": "Function",
         "tags": [],
@@ -2694,6 +3917,121 @@
                 ],
                 "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_trace_change_points/trace_change_points.ts",
                 "lineNumber": 57,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/synthtrace",
+        "id": "def-server.generateTraceIsolationData",
+        "type": "Function",
+        "tags": [],
+        "label": "generateTraceIsolationData",
+        "description": [],
+        "signature": [
+          "({\n  range,\n  apmEsClient,\n}: { range: ",
+          {
+            "pluginId": "@kbn/synthtrace-client",
+            "scope": "common",
+            "docId": "kibKbnSynthtraceClientPluginApi",
+            "section": "def-common.Timerange",
+            "text": "Timerange"
+          },
+          "; apmEsClient: ",
+          {
+            "pluginId": "@kbn/synthtrace",
+            "scope": "server",
+            "docId": "kibKbnSynthtracePluginApi",
+            "section": "def-server.ApmSynthtraceEsClient",
+            "text": "ApmSynthtraceEsClient"
+          },
+          "; }) => { client: ",
+          "SynthtraceEsClient",
+          "<",
+          {
+            "pluginId": "@kbn/synthtrace-client",
+            "scope": "common",
+            "docId": "kibKbnSynthtraceClientPluginApi",
+            "section": "def-common.ApmFields",
+            "text": "ApmFields"
+          },
+          ">; generator: ",
+          "SynthGenerator",
+          "<",
+          {
+            "pluginId": "@kbn/synthtrace-client",
+            "scope": "common",
+            "docId": "kibKbnSynthtraceClientPluginApi",
+            "section": "def-common.ApmFields",
+            "text": "ApmFields"
+          },
+          ">; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_service_topology/topology_trace_isolation.ts",
+        "lineNumber": 75,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.generateTraceIsolationData.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  range,\n  apmEsClient,\n}",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_service_topology/topology_trace_isolation.ts",
+            "lineNumber": 78,
+            "columnNumber": 4,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/synthtrace",
+                "id": "def-server.generateTraceIsolationData.$1.range",
+                "type": "Object",
+                "tags": [],
+                "label": "range",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/synthtrace-client",
+                    "scope": "common",
+                    "docId": "kibKbnSynthtraceClientPluginApi",
+                    "section": "def-common.Timerange",
+                    "text": "Timerange"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_service_topology/topology_trace_isolation.ts",
+                "lineNumber": 79,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/synthtrace",
+                "id": "def-server.generateTraceIsolationData.$1.apmEsClient",
+                "type": "Object",
+                "tags": [],
+                "label": "apmEsClient",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/synthtrace",
+                    "scope": "server",
+                    "docId": "kibKbnSynthtracePluginApi",
+                    "section": "def-server.ApmSynthtraceEsClient",
+                    "text": "ApmSynthtraceEsClient"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_service_topology/topology_trace_isolation.ts",
+                "lineNumber": 80,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2900,6 +4238,118 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/synthtrace",
+        "id": "def-server.indexOtelJvmMetrics",
+        "type": "Function",
+        "tags": [],
+        "label": "indexOtelJvmMetrics",
+        "description": [
+          "\nIndexes OTel JVM metrics documents directly to Elasticsearch.\nUsed by tests and the CLI bootstrap phase."
+        ],
+        "signature": [
+          "({\n  esClient,\n  startMs,\n  endMs,\n  services = DEFAULT_OTEL_SERVICES,\n}: { esClient: ",
+          "default",
+          "; startMs: number; endMs: number; services?: ",
+          {
+            "pluginId": "@kbn/synthtrace",
+            "scope": "server",
+            "docId": "kibKbnSynthtracePluginApi",
+            "section": "def-server.OtelJvmServiceConfig",
+            "text": "OtelJvmServiceConfig"
+          },
+          "[] | undefined; }) => Promise<void>"
+        ],
+        "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_runtime_metrics/runtime_metrics.ts",
+        "lineNumber": 255,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.indexOtelJvmMetrics.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  esClient,\n  startMs,\n  endMs,\n  services = DEFAULT_OTEL_SERVICES,\n}",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_runtime_metrics/runtime_metrics.ts",
+            "lineNumber": 264,
+            "columnNumber": 4,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/synthtrace",
+                "id": "def-server.indexOtelJvmMetrics.$1.esClient",
+                "type": "Object",
+                "tags": [],
+                "label": "esClient",
+                "description": [],
+                "signature": [
+                  "default"
+                ],
+                "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_runtime_metrics/runtime_metrics.ts",
+                "lineNumber": 265,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/synthtrace",
+                "id": "def-server.indexOtelJvmMetrics.$1.startMs",
+                "type": "number",
+                "tags": [],
+                "label": "startMs",
+                "description": [],
+                "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_runtime_metrics/runtime_metrics.ts",
+                "lineNumber": 266,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/synthtrace",
+                "id": "def-server.indexOtelJvmMetrics.$1.endMs",
+                "type": "number",
+                "tags": [],
+                "label": "endMs",
+                "description": [],
+                "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_runtime_metrics/runtime_metrics.ts",
+                "lineNumber": 267,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/synthtrace",
+                "id": "def-server.indexOtelJvmMetrics.$1.services",
+                "type": "Array",
+                "tags": [],
+                "label": "services",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/synthtrace",
+                    "scope": "server",
+                    "docId": "kibKbnSynthtracePluginApi",
+                    "section": "def-server.OtelJvmServiceConfig",
+                    "text": "OtelJvmServiceConfig"
+                  },
+                  "[] | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_runtime_metrics/runtime_metrics.ts",
+                "lineNumber": 268,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           }
         ],
         "returnComment": [],
@@ -3197,60 +4647,445 @@
       },
       {
         "parentPluginId": "@kbn/synthtrace",
-        "id": "def-server.CorrelatedLogEvent",
+        "id": "def-server.ElasticApmJvmServiceConfig",
         "type": "Interface",
         "tags": [],
-        "label": "CorrelatedLogEvent",
-        "description": [
-          "\nA log event with any fields. Minimal required field is `message`.\nAll other fields (severity, correlation IDs, service info) are optional."
-        ],
-        "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_correlated_logs/correlated_logs.ts",
-        "lineNumber": 41,
+        "label": "ElasticApmJvmServiceConfig",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_runtime_metrics/runtime_metrics.ts",
+        "lineNumber": 63,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/synthtrace",
-            "id": "def-server.CorrelatedLogEvent.message",
+            "id": "def-server.ElasticApmJvmServiceConfig.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_runtime_metrics/runtime_metrics.ts",
+            "lineNumber": 64,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.ElasticApmJvmServiceConfig.environment",
+            "type": "string",
+            "tags": [],
+            "label": "environment",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_runtime_metrics/runtime_metrics.ts",
+            "lineNumber": 65,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.ElasticApmJvmServiceConfig.instanceName",
+            "type": "string",
+            "tags": [],
+            "label": "instanceName",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_runtime_metrics/runtime_metrics.ts",
+            "lineNumber": 66,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.ElasticApmJvmServiceConfig.hostName",
+            "type": "string",
+            "tags": [],
+            "label": "hostName",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_runtime_metrics/runtime_metrics.ts",
+            "lineNumber": 67,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.ElasticApmJvmServiceConfig.cpuPercent",
+            "type": "number",
+            "tags": [],
+            "label": "cpuPercent",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_runtime_metrics/runtime_metrics.ts",
+            "lineNumber": 68,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.ElasticApmJvmServiceConfig.heapMemoryUsed",
+            "type": "number",
+            "tags": [],
+            "label": "heapMemoryUsed",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_runtime_metrics/runtime_metrics.ts",
+            "lineNumber": 69,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.ElasticApmJvmServiceConfig.heapMemoryMax",
+            "type": "number",
+            "tags": [],
+            "label": "heapMemoryMax",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_runtime_metrics/runtime_metrics.ts",
+            "lineNumber": 70,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.ElasticApmJvmServiceConfig.nonHeapMemoryUsed",
+            "type": "number",
+            "tags": [],
+            "label": "nonHeapMemoryUsed",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_runtime_metrics/runtime_metrics.ts",
+            "lineNumber": 71,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.ElasticApmJvmServiceConfig.nonHeapMemoryMax",
+            "type": "number",
+            "tags": [],
+            "label": "nonHeapMemoryMax",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_runtime_metrics/runtime_metrics.ts",
+            "lineNumber": 72,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.ElasticApmJvmServiceConfig.threadCount",
+            "type": "number",
+            "tags": [],
+            "label": "threadCount",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_runtime_metrics/runtime_metrics.ts",
+            "lineNumber": 73,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.ElasticApmJvmServiceConfig.gcTime",
+            "type": "number",
+            "tags": [],
+            "label": "gcTime",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_runtime_metrics/runtime_metrics.ts",
+            "lineNumber": 74,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/synthtrace",
+        "id": "def-server.ErrorConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "ErrorConfig",
+        "description": [
+          "\nConfiguration for an error type within a service"
+        ],
+        "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_log_groups/log_groups.ts",
+        "lineNumber": 179,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.ErrorConfig.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_log_groups/log_groups.ts",
+            "lineNumber": 183,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.ErrorConfig.message",
             "type": "string",
             "tags": [],
             "label": "message",
             "description": [],
-            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_correlated_logs/correlated_logs.ts",
-            "lineNumber": 46,
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_log_groups/log_groups.ts",
+            "lineNumber": 184,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/synthtrace",
-            "id": "def-server.CorrelatedLogEvent.timestamp",
+            "id": "def-server.ErrorConfig.culprit",
+            "type": "string",
+            "tags": [],
+            "label": "culprit",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_log_groups/log_groups.ts",
+            "lineNumber": 185,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.ErrorConfig.handled",
+            "type": "boolean",
+            "tags": [],
+            "label": "handled",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_log_groups/log_groups.ts",
+            "lineNumber": 186,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.ErrorConfig.rate",
             "type": "number",
             "tags": [],
-            "label": "'@timestamp'",
+            "label": "rate",
             "description": [],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_log_groups/log_groups.ts",
+            "lineNumber": 187,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.ErrorConfig.stacktrace",
+            "type": "Array",
+            "tags": [],
+            "label": "stacktrace",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/synthtrace-client",
+                "scope": "common",
+                "docId": "kibKbnSynthtraceClientPluginApi",
+                "section": "def-common.APMStacktrace",
+                "text": "APMStacktrace"
+              },
+              "[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_log_groups/log_groups.ts",
+            "lineNumber": 188,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.ErrorConfig.downstreamServiceResource",
+            "type": "string",
+            "tags": [],
+            "label": "downstreamServiceResource",
+            "description": [
+              "Optional downstream dependency for failed outbound span generation."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_log_groups/log_groups.ts",
+            "lineNumber": 189,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.ErrorConfig.spanName",
+            "type": "string",
+            "tags": [],
+            "label": "spanName",
+            "description": [
+              "Optional span name for downstream dependency."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_log_groups/log_groups.ts",
+            "lineNumber": 191,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.ErrorConfig.spanType",
+            "type": "string",
+            "tags": [],
+            "label": "spanType",
+            "description": [
+              "Optional span type for downstream dependency."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_log_groups/log_groups.ts",
+            "lineNumber": 193,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.ErrorConfig.spanSubtype",
+            "type": "string",
+            "tags": [],
+            "label": "spanSubtype",
+            "description": [
+              "Optional span subtype for downstream dependency."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_log_groups/log_groups.ts",
+            "lineNumber": 195,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.ErrorConfig.spanDuration",
+            "type": "number",
+            "tags": [],
+            "label": "spanDuration",
+            "description": [
+              "Optional span duration (ms) for downstream dependency."
+            ],
             "signature": [
               "number | undefined"
             ],
-            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_correlated_logs/correlated_logs.ts",
-            "lineNumber": 47,
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_log_groups/log_groups.ts",
+            "lineNumber": 197,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/synthtrace",
+        "id": "def-server.ErrorServiceConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "ErrorServiceConfig",
+        "description": [
+          "\nConfiguration for a service to generate error data"
+        ],
+        "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_log_groups/log_groups.ts",
+        "lineNumber": 201,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.ErrorServiceConfig.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_log_groups/log_groups.ts",
+            "lineNumber": 205,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/synthtrace",
-            "id": "def-server.CorrelatedLogEvent.Unnamed",
-            "type": "IndexSignature",
+            "id": "def-server.ErrorServiceConfig.environment",
+            "type": "string",
             "tags": [],
-            "label": "[key: string]: unknown",
+            "label": "environment",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_log_groups/log_groups.ts",
+            "lineNumber": 206,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.ErrorServiceConfig.agentName",
+            "type": "string",
+            "tags": [],
+            "label": "agentName",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_log_groups/log_groups.ts",
+            "lineNumber": 207,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.ErrorServiceConfig.transactionName",
+            "type": "string",
+            "tags": [],
+            "label": "transactionName",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_log_groups/log_groups.ts",
+            "lineNumber": 208,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.ErrorServiceConfig.errors",
+            "type": "Array",
+            "tags": [],
+            "label": "errors",
             "description": [],
             "signature": [
-              "[key: string]:  unknown"
+              {
+                "pluginId": "@kbn/synthtrace",
+                "scope": "server",
+                "docId": "kibKbnSynthtracePluginApi",
+                "section": "def-server.ErrorConfig",
+                "text": "ErrorConfig"
+              },
+              "[]"
             ],
-            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_correlated_logs/correlated_logs.ts",
-            "lineNumber": 48,
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_log_groups/log_groups.ts",
+            "lineNumber": 209,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3396,6 +5231,148 @@
       },
       {
         "parentPluginId": "@kbn/synthtrace",
+        "id": "def-server.GetTracesScenarioConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "GetTracesScenarioConfig",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_traces/traces.ts",
+        "lineNumber": 79,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.GetTracesScenarioConfig.traceId",
+            "type": "string",
+            "tags": [],
+            "label": "traceId",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_traces/traces.ts",
+            "lineNumber": 80,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.GetTracesScenarioConfig.serviceName",
+            "type": "string",
+            "tags": [],
+            "label": "serviceName",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_traces/traces.ts",
+            "lineNumber": 81,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.GetTracesScenarioConfig.environment",
+            "type": "string",
+            "tags": [],
+            "label": "environment",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_traces/traces.ts",
+            "lineNumber": 82,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.GetTracesScenarioConfig.transactionName",
+            "type": "string",
+            "tags": [],
+            "label": "transactionName",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_traces/traces.ts",
+            "lineNumber": 83,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.GetTracesScenarioConfig.transactionType",
+            "type": "string",
+            "tags": [],
+            "label": "transactionType",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_traces/traces.ts",
+            "lineNumber": 84,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.GetTracesScenarioConfig.duration",
+            "type": "number",
+            "tags": [],
+            "label": "duration",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_traces/traces.ts",
+            "lineNumber": 85,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.GetTracesScenarioConfig.outcome",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "outcome",
+            "description": [],
+            "signature": [
+              "\"success\" | \"failure\""
+            ],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_traces/traces.ts",
+            "lineNumber": 86,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.GetTracesScenarioConfig.error",
+            "type": "Object",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              "{ message: string; type: string; } | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_traces/traces.ts",
+            "lineNumber": 87,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.GetTracesScenarioConfig.children",
+            "type": "Array",
+            "tags": [],
+            "label": "children",
+            "description": [],
+            "signature": [
+              "SpanConfig[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_traces/traces.ts",
+            "lineNumber": 91,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/synthtrace",
         "id": "def-server.InfraSynthtraceEsClient",
         "type": "Interface",
         "tags": [],
@@ -3436,11 +5413,9 @@
         "type": "Interface",
         "tags": [],
         "label": "LogEntry",
-        "description": [
-          "\nA minimal log entry for use with createLogSequence.\nOnly requires message; all other fields are optional."
-        ],
-        "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_correlated_logs/correlated_logs.ts",
-        "lineNumber": 51,
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_traces/traces.ts",
+        "lineNumber": 94,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3452,8 +5427,24 @@
             "tags": [],
             "label": "message",
             "description": [],
-            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_correlated_logs/correlated_logs.ts",
-            "lineNumber": 56,
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_traces/traces.ts",
+            "lineNumber": 95,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.LogEntry.timestamp",
+            "type": "number",
+            "tags": [],
+            "label": "'@timestamp'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_traces/traces.ts",
+            "lineNumber": 96,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3468,8 +5459,148 @@
             "signature": [
               "[key: string]:  unknown"
             ],
-            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_correlated_logs/correlated_logs.ts",
-            "lineNumber": 57,
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_traces/traces.ts",
+            "lineNumber": 97,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/synthtrace",
+        "id": "def-server.LogExceptionConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "LogExceptionConfig",
+        "description": [
+          "\nConfiguration for an OTel log exception"
+        ],
+        "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_log_groups/log_groups.ts",
+        "lineNumber": 294,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.LogExceptionConfig.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_log_groups/log_groups.ts",
+            "lineNumber": 298,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.LogExceptionConfig.message",
+            "type": "string",
+            "tags": [],
+            "label": "message",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_log_groups/log_groups.ts",
+            "lineNumber": 299,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.LogExceptionConfig.rate",
+            "type": "number",
+            "tags": [],
+            "label": "rate",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_log_groups/log_groups.ts",
+            "lineNumber": 300,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.LogExceptionConfig.stacktrace",
+            "type": "string",
+            "tags": [],
+            "label": "stacktrace",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_log_groups/log_groups.ts",
+            "lineNumber": 301,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/synthtrace",
+        "id": "def-server.LogExceptionServiceConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "LogExceptionServiceConfig",
+        "description": [
+          "\nConfiguration for a service that emits exceptions via logs (OTel format)"
+        ],
+        "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_log_groups/log_groups.ts",
+        "lineNumber": 304,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.LogExceptionServiceConfig.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_log_groups/log_groups.ts",
+            "lineNumber": 308,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.LogExceptionServiceConfig.environment",
+            "type": "string",
+            "tags": [],
+            "label": "environment",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_log_groups/log_groups.ts",
+            "lineNumber": 309,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.LogExceptionServiceConfig.exceptions",
+            "type": "Array",
+            "tags": [],
+            "label": "exceptions",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/synthtrace",
+                "scope": "server",
+                "docId": "kibKbnSynthtracePluginApi",
+                "section": "def-server.LogExceptionConfig",
+                "text": "LogExceptionConfig"
+              },
+              "[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_log_groups/log_groups.ts",
+            "lineNumber": 310,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3980,6 +6111,181 @@
       },
       {
         "parentPluginId": "@kbn/synthtrace",
+        "id": "def-server.OtelJvmServiceConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "OtelJvmServiceConfig",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_runtime_metrics/runtime_metrics.ts",
+        "lineNumber": 138,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.OtelJvmServiceConfig.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_runtime_metrics/runtime_metrics.ts",
+            "lineNumber": 139,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.OtelJvmServiceConfig.environment",
+            "type": "string",
+            "tags": [],
+            "label": "environment",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_runtime_metrics/runtime_metrics.ts",
+            "lineNumber": 140,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.OtelJvmServiceConfig.instanceName",
+            "type": "string",
+            "tags": [],
+            "label": "instanceName",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_runtime_metrics/runtime_metrics.ts",
+            "lineNumber": 141,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.OtelJvmServiceConfig.hostName",
+            "type": "string",
+            "tags": [],
+            "label": "hostName",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_runtime_metrics/runtime_metrics.ts",
+            "lineNumber": 142,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.OtelJvmServiceConfig.ingestPath",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "ingestPath",
+            "description": [],
+            "signature": [
+              "\"apm_server\" | \"native\""
+            ],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_runtime_metrics/runtime_metrics.ts",
+            "lineNumber": 143,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.OtelJvmServiceConfig.cpuUtilization",
+            "type": "number",
+            "tags": [],
+            "label": "cpuUtilization",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_runtime_metrics/runtime_metrics.ts",
+            "lineNumber": 144,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.OtelJvmServiceConfig.heapMemoryUsed",
+            "type": "number",
+            "tags": [],
+            "label": "heapMemoryUsed",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_runtime_metrics/runtime_metrics.ts",
+            "lineNumber": 145,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.OtelJvmServiceConfig.heapMemoryLimit",
+            "type": "number",
+            "tags": [],
+            "label": "heapMemoryLimit",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_runtime_metrics/runtime_metrics.ts",
+            "lineNumber": 146,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.OtelJvmServiceConfig.nonHeapMemoryUsed",
+            "type": "number",
+            "tags": [],
+            "label": "nonHeapMemoryUsed",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_runtime_metrics/runtime_metrics.ts",
+            "lineNumber": 147,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.OtelJvmServiceConfig.nonHeapMemoryLimit",
+            "type": "number",
+            "tags": [],
+            "label": "nonHeapMemoryLimit",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_runtime_metrics/runtime_metrics.ts",
+            "lineNumber": 148,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.OtelJvmServiceConfig.threadCount",
+            "type": "number",
+            "tags": [],
+            "label": "threadCount",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_runtime_metrics/runtime_metrics.ts",
+            "lineNumber": 149,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.OtelJvmServiceConfig.gcDurationSeconds",
+            "type": "number",
+            "tags": [],
+            "label": "gcDurationSeconds",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_runtime_metrics/runtime_metrics.ts",
+            "lineNumber": 150,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/synthtrace",
         "id": "def-server.SynthtraceClients",
         "type": "Interface",
         "tags": [],
@@ -4339,6 +6645,154 @@
     "misc": [
       {
         "parentPluginId": "@kbn/synthtrace",
+        "id": "def-server.DEFAULT_ELASTIC_APM_SERVICES",
+        "type": "Array",
+        "tags": [],
+        "label": "DEFAULT_ELASTIC_APM_SERVICES",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/synthtrace",
+            "scope": "server",
+            "docId": "kibKbnSynthtracePluginApi",
+            "section": "def-server.ElasticApmJvmServiceConfig",
+            "text": "ElasticApmJvmServiceConfig"
+          },
+          "[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_runtime_metrics/runtime_metrics.ts",
+        "lineNumber": 77,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/synthtrace",
+        "id": "def-server.DEFAULT_ERROR_SERVICES",
+        "type": "Array",
+        "tags": [],
+        "label": "DEFAULT_ERROR_SERVICES",
+        "description": [
+          "\nDefault service configurations for testing error groups.\nThese will appear in `spanExceptionGroups` response."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/synthtrace",
+            "scope": "server",
+            "docId": "kibKbnSynthtracePluginApi",
+            "section": "def-server.ErrorServiceConfig",
+            "text": "ErrorServiceConfig"
+          },
+          "[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_log_groups/log_groups.ts",
+        "lineNumber": 216,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/synthtrace",
+        "id": "def-server.DEFAULT_LOG_EXCEPTION_SERVICES",
+        "type": "Array",
+        "tags": [],
+        "label": "DEFAULT_LOG_EXCEPTION_SERVICES",
+        "description": [
+          "\nDefault OTel log exception services for testing.\nThese will appear in `logExceptionGroups` response."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/synthtrace",
+            "scope": "server",
+            "docId": "kibKbnSynthtracePluginApi",
+            "section": "def-server.LogExceptionServiceConfig",
+            "text": "LogExceptionServiceConfig"
+          },
+          "[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_log_groups/log_groups.ts",
+        "lineNumber": 317,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/synthtrace",
+        "id": "def-server.DEFAULT_LOGS",
+        "type": "Array",
+        "tags": [],
+        "label": "DEFAULT_LOGS",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/synthtrace",
+            "scope": "server",
+            "docId": "kibKbnSynthtracePluginApi",
+            "section": "def-server.LogEntry",
+            "text": "LogEntry"
+          },
+          "[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_traces/traces.ts",
+        "lineNumber": 139,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/synthtrace",
+        "id": "def-server.DEFAULT_OTEL_SERVICES",
+        "type": "Array",
+        "tags": [],
+        "label": "DEFAULT_OTEL_SERVICES",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/synthtrace",
+            "scope": "server",
+            "docId": "kibKbnSynthtracePluginApi",
+            "section": "def-server.OtelJvmServiceConfig",
+            "text": "OtelJvmServiceConfig"
+          },
+          "[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_runtime_metrics/runtime_metrics.ts",
+        "lineNumber": 153,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/synthtrace",
+        "id": "def-server.DEFAULT_TRACE_CONFIGS",
+        "type": "Array",
+        "tags": [],
+        "label": "DEFAULT_TRACE_CONFIGS",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/synthtrace",
+            "scope": "server",
+            "docId": "kibKbnSynthtracePluginApi",
+            "section": "def-server.GetTracesScenarioConfig",
+            "text": "GetTracesScenarioConfig"
+          },
+          "[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_traces/traces.ts",
+        "lineNumber": 100,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/synthtrace",
         "id": "def-server.GetClientsReturn",
         "type": "Type",
         "tags": [],
@@ -4432,6 +6886,23 @@
       },
       {
         "parentPluginId": "@kbn/synthtrace",
+        "id": "def-server.OtelIngestPath",
+        "type": "Type",
+        "tags": [],
+        "label": "OtelIngestPath",
+        "description": [],
+        "signature": [
+          "\"apm_server\" | \"native\""
+        ],
+        "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_runtime_metrics/runtime_metrics.ts",
+        "lineNumber": 136,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/synthtrace",
         "id": "def-server.SyntheticsSynthtraceEsClient",
         "type": "Type",
         "tags": [],
@@ -4492,6 +6963,142 @@
       }
     ],
     "objects": [
+      {
+        "parentPluginId": "@kbn/synthtrace",
+        "id": "def-server.API_GATEWAY_SERVICE",
+        "type": "Object",
+        "tags": [],
+        "label": "API_GATEWAY_SERVICE",
+        "description": [],
+        "signature": [
+          "{ readonly serviceName: \"api-gateway\"; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_service_topology/topology_trace_isolation.ts",
+        "lineNumber": 45,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/synthtrace",
+        "id": "def-server.BATCH_WORKER_SERVICE",
+        "type": "Object",
+        "tags": [],
+        "label": "BATCH_WORKER_SERVICE",
+        "description": [],
+        "signature": [
+          "{ readonly serviceName: \"batch-worker\"; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_service_topology/topology_trace_isolation.ts",
+        "lineNumber": 59,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/synthtrace",
+        "id": "def-server.CHECKOUT_SERVICE",
+        "type": "Object",
+        "tags": [],
+        "label": "CHECKOUT_SERVICE",
+        "description": [],
+        "signature": [
+          "{ readonly serviceName: \"checkout-service\"; readonly resource: \"checkout-proxy:5050\"; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_service_topology/topology.ts",
+        "lineNumber": 59,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/synthtrace",
+        "id": "def-server.CYCLE_SERVICE_A",
+        "type": "Object",
+        "tags": [],
+        "label": "CYCLE_SERVICE_A",
+        "description": [],
+        "signature": [
+          "{ readonly serviceName: \"cycle-service-a\"; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_service_topology/topology_cycle.ts",
+        "lineNumber": 42,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/synthtrace",
+        "id": "def-server.CYCLE_SERVICE_B",
+        "type": "Object",
+        "tags": [],
+        "label": "CYCLE_SERVICE_B",
+        "description": [],
+        "signature": [
+          "{ readonly serviceName: \"cycle-service-b\"; readonly resource: \"cycle-b-lb:8080\"; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_service_topology/topology_cycle.ts",
+        "lineNumber": 46,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/synthtrace",
+        "id": "def-server.FRONTEND_SERVICE",
+        "type": "Object",
+        "tags": [],
+        "label": "FRONTEND_SERVICE",
+        "description": [],
+        "signature": [
+          "{ readonly serviceName: \"frontend\"; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_service_topology/topology.ts",
+        "lineNumber": 55,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/synthtrace",
+        "id": "def-server.KAFKA_CONSUMER_SERVICE",
+        "type": "Object",
+        "tags": [],
+        "label": "KAFKA_CONSUMER_SERVICE",
+        "description": [],
+        "signature": [
+          "{ readonly serviceName: \"kafka-consumer\"; readonly resource: \"kafka-broker:9092\"; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_service_topology/topology_trace_isolation.ts",
+        "lineNumber": 54,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/synthtrace",
+        "id": "def-server.KAFKA_DEPENDENCY",
+        "type": "Object",
+        "tags": [],
+        "label": "KAFKA_DEPENDENCY",
+        "description": [],
+        "signature": [
+          "{ readonly resource: \"kafka\"; readonly spanType: \"messaging\"; readonly spanSubtype: \"kafka\"; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_service_topology/topology.ts",
+        "lineNumber": 86,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/synthtrace",
         "id": "def-server.LOG_CHANGE_POINTS_ANALYSIS_SPIKE_WINDOW",
@@ -4696,6 +7303,108 @@
             "trackAdoption": false
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/synthtrace",
+        "id": "def-server.PAYMENT_SERVICE",
+        "type": "Object",
+        "tags": [],
+        "label": "PAYMENT_SERVICE",
+        "description": [],
+        "signature": [
+          "{ readonly serviceName: \"payment-service\"; readonly resource: \"payment-lb:3000\"; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_service_topology/topology_trace_isolation.ts",
+        "lineNumber": 49,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/synthtrace",
+        "id": "def-server.POSTGRES_DB",
+        "type": "Object",
+        "tags": [],
+        "label": "POSTGRES_DB",
+        "description": [],
+        "signature": [
+          "{ readonly resource: \"postgres:5432\"; readonly spanType: \"db\"; readonly spanSubtype: \"postgresql\"; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_service_topology/topology_trace_isolation.ts",
+        "lineNumber": 63,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/synthtrace",
+        "id": "def-server.POSTGRES_DEPENDENCY",
+        "type": "Object",
+        "tags": [],
+        "label": "POSTGRES_DEPENDENCY",
+        "description": [],
+        "signature": [
+          "{ readonly resource: \"postgres\"; readonly spanType: \"db\"; readonly spanSubtype: \"postgresql\"; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_service_topology/topology.ts",
+        "lineNumber": 74,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/synthtrace",
+        "id": "def-server.RECOMMENDATION_SERVICE",
+        "type": "Object",
+        "tags": [],
+        "label": "RECOMMENDATION_SERVICE",
+        "description": [],
+        "signature": [
+          "{ readonly serviceName: \"recommendation-service\"; readonly resource: \"recommendation-lb:8080\"; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_service_topology/topology.ts",
+        "lineNumber": 69,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/synthtrace",
+        "id": "def-server.REDIS_DB",
+        "type": "Object",
+        "tags": [],
+        "label": "REDIS_DB",
+        "description": [],
+        "signature": [
+          "{ readonly resource: \"redis:6379\"; readonly spanType: \"db\"; readonly spanSubtype: \"redis\"; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_service_topology/topology_trace_isolation.ts",
+        "lineNumber": 69,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/synthtrace",
+        "id": "def-server.REDIS_DEPENDENCY",
+        "type": "Object",
+        "tags": [],
+        "label": "REDIS_DEPENDENCY",
+        "description": [],
+        "signature": [
+          "{ readonly resource: \"redis\"; readonly spanType: \"db\"; readonly spanSubtype: \"redis\"; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_service_topology/topology.ts",
+        "lineNumber": 80,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {

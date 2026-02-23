@@ -15,3 +15,12 @@ responses:
                 title: General Greeting
                 created_at: "2025-09-19T17:45:39.554Z"
                 updated_at: "2025-09-19T17:45:39.554Z"
+x-codeSamples:
+- lang: curl
+  source: |
+    curl \
+      -X GET "${KIBANA_URL}/api/agent_builder/conversations" \
+      -H "Authorization: ApiKey ${API_KEY}"
+- lang: Console
+  source: |
+    GET kbn://api/agent_builder/conversations

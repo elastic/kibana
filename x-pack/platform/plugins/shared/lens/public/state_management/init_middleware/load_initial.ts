@@ -43,25 +43,34 @@ export const getFromPreloaded = async ({
   history?: History<unknown>;
 }): Promise<PersistedDoc | undefined> => {
   const { notifications, spaces, attributeService } = lensServices;
-  let doc: LensDocument;
 
   try {
-    const docFromSavedObject = await (initialInput.savedObjectId
+    // If we already have the attributes for a by reference visualization, avoid loading from the library
+    const docFromSavedObject = await (initialInput.savedObjectId && !initialInput.attributes
       ? attributeService.loadFromLibrary(initialInput.savedObjectId)
       : undefined);
+
     if (!docFromSavedObject) {
+      const { attributes } = initialInput;
+
+      if (!attributes) {
+        throw new Error('Missing attributes');
+      }
+
       return {
-        // @TODO: it would be nice to address this type checks once for all
         doc: {
-          ...initialInput.attributes,
+          ...attributes,
           type: LENS_EMBEDDABLE_TYPE,
-        } as LensDocument,
+          ...(initialInput.savedObjectId ? { savedObjectId: initialInput.savedObjectId } : {}),
+        },
         sharingSavedObjectProps: {
           outcome: 'exactMatch',
         },
         managed: false,
       };
     }
+
+    // By ref - use docFromSavedObject
     const { sharingSavedObjectProps, attributes, managed } = docFromSavedObject;
     if (spaces && sharingSavedObjectProps?.outcome === 'aliasMatch' && history) {
       // We found this object by a legacy URL alias from its old ID; redirect the user to the page with its new ID, preserving any URL hash
@@ -77,14 +86,13 @@ export const getFromPreloaded = async ({
         }),
       });
     }
-    doc = {
-      ...initialInput,
-      ...attributes,
-      type: LENS_EMBEDDABLE_TYPE,
-    };
 
     return {
-      doc,
+      doc: {
+        ...attributes,
+        type: LENS_EMBEDDABLE_TYPE,
+        savedObjectId: initialInput.savedObjectId,
+      },
       sharingSavedObjectProps: {
         aliasTargetId: sharingSavedObjectProps?.aliasTargetId,
         outcome: sharingSavedObjectProps?.outcome,
