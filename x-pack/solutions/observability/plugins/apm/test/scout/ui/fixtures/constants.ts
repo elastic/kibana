@@ -34,6 +34,7 @@ export const EDOT_INSTANCE_ID = 'da7a8507-53be-421c-8d77-984f12397213';
 export const EDOT_TRANSACTION_NAME = 'oteldemo.AdServiceEdotSynth/GetAds';
 export const EDOT_ERROR_MESSAGE = '[ResponseError] index_not_found_exception';
 
+export const SERVICE_AWS_LAMBDA = 'synth-python';
 export const SERVICE_MOBILE_ANDROID = 'synth-android';
 export const SERVICE_MOBILE_IOS = 'synth-ios';
 export const SERVICE_SYNTH_GO = 'synth-go-1';
