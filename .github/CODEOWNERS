@@ -69,7 +69,6 @@ packages/kbn-extract-plugin-translations @elastic/kibana-core
 packages/kbn-failed-test-reporter-cli @elastic/kibana-operations @elastic/appex-qa
 packages/kbn-find-used-node-modules @elastic/kibana-operations
 packages/kbn-generate @elastic/kibana-operations
-packages/kbn-generate/src/commands/user_activity_actions_docs_command.ts @elastic/kibana-core
 packages/kbn-generate-console-definitions @elastic/kibana-management
 packages/kbn-import-locator @elastic/kibana-operations
 packages/kbn-json-ast @elastic/kibana-operations
