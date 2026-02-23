@@ -8,4 +8,4 @@
  */
 
 export const WORKFLOWS_STEP_EXECUTIONS_DATA_STREAM =
-  '.workflows-execution-data-stream-step-executions';
+  '.workflows-step-executions-history-data-stream';

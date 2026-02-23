@@ -7,4 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const WORKFLOWS_EXECUTIONS_DATA_STREAM = '.workflows-execution-data-stream-executions';
+export const WORKFLOWS_EXECUTIONS_DATA_STREAM = '.workflows-executions-history-data-stream';
