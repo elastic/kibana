@@ -6,7 +6,11 @@
  */
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import type { InferenceClient, ChatCompletionEvent } from '@kbn/inference-common';
+import type {
+  InferenceClient,
+  ChatCompletionEvent,
+  InferenceConnector,
+} from '@kbn/inference-common';
 import { MessageRole } from '@kbn/inference-common';
 import dedent from 'dedent';
 import moment from 'moment';
@@ -47,6 +51,7 @@ interface GetAlertAiInsightParams {
   alertDoc: AlertDocForInsight;
   inferenceClient: InferenceClient;
   connectorId: string;
+  connector: InferenceConnector;
   dataRegistry: ObservabilityAgentBuilderDataRegistry;
   request: KibanaRequest;
   logger: Logger;
@@ -58,6 +63,7 @@ export async function getAlertAiInsight({
   alertDoc,
   inferenceClient,
   connectorId,
+  connector,
   dataRegistry,
   request,
   logger,
@@ -82,7 +88,7 @@ export async function getAlertAiInsight({
     signalDescriptions,
   });
 
-  return createAiInsightResult(context, events$);
+  return createAiInsightResult(context, connector, events$);
 }
 
 async function fetchAlertContext({
