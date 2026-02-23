@@ -5,15 +5,10 @@
  * 2.0.
  */
 
-import type { Logger, IScopedClusterClient } from '@kbn/core/server';
 import type { EventsResponse } from '@kbn/cloud-security-posture-common/types/graph_events/v1';
 import { fetchEvents } from './fetch';
 import { parseEventRecords } from './parse';
-
-interface DocumentDetailsContextServices {
-  logger: Logger;
-  esClient: IScopedClusterClient;
-}
+import type { DocumentDetailsContextServices } from '../graph/types';
 
 export interface GetEventsParams {
   services: DocumentDetailsContextServices;

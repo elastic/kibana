@@ -5,15 +5,10 @@
  * 2.0.
  */
 
-import type { Logger, IScopedClusterClient } from '@kbn/core/server';
 import type { EntitiesResponse } from '@kbn/cloud-security-posture-common/types/graph_entities/v1';
 import { fetchEntities } from './fetch';
 import { parseEntityRecords } from './parse';
-
-interface DocumentDetailsContextServices {
-  logger: Logger;
-  esClient: IScopedClusterClient;
-}
+import type { DocumentDetailsContextServices } from '../graph/types';
 
 export interface GetEntitiesParams {
   services: DocumentDetailsContextServices;

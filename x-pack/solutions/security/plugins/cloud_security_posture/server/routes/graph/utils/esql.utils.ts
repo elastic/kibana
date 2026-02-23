@@ -305,5 +305,11 @@ export const buildEntityEnrichment = (
 
   return `// No enrichment available - use null values
 | EVAL actorEntityName = TO_STRING(null)
-| EVAL targetEntityName = TO_STRING(null)`;
+| EVAL actorEntityType = TO_STRING(null)
+| EVAL actorEntitySubType = TO_STRING(null)
+| EVAL actorHostIp = TO_STRING(null)
+| EVAL targetEntityName = TO_STRING(null)
+| EVAL targetEntityType = TO_STRING(null)
+| EVAL targetEntitySubType = TO_STRING(null)
+| EVAL targetHostIp = TO_STRING(null)`;
 };
