@@ -133,26 +133,36 @@ export const ControlPanel = ({
             css={styles.formControl}
             prepend={
               <>
-                <DragHandle
-                  isEditable={isEditable}
-                  controlTitle={panelLabel}
-                  {...attributes}
-                  {...listeners}
-                />
-
                 {api?.CustomPrependComponent ? (
-                  <api.CustomPrependComponent />
+                  <>
+                    <DragHandle
+                      isEditable={isEditable}
+                      controlTitle={panelTitle || defaultPanelTitle}
+                      className="controlFrame__dragHandle"
+                      {...attributes}
+                      {...listeners}
+                    />
+                    <api.CustomPrependComponent />
+                  </>
                 ) : (
-                  <EuiToolTip
-                    content={panelLabel}
-                    anchorProps={{ className: 'eui-textTruncate', css: styles.tooltipStyles }}
+                  <DragHandle
+                    isEditable={isEditable}
+                    controlTitle={panelLabel}
+                    className="controlFrame__dragHandle"
+                    {...attributes}
+                    {...listeners}
                   >
-                    <EuiFormLabel className="controlPanel--label">
-                      <span css={styles.prependWrapperStyles} ref={prependWrapperRef}>
-                        {panelLabel}
-                      </span>
-                    </EuiFormLabel>
-                  </EuiToolTip>
+                    <EuiToolTip
+                      content={panelLabel}
+                      anchorProps={{ className: 'eui-textTruncate', css: styles.tooltipStyles }}
+                    >
+                      <EuiFormLabel className="controlPanel--label">
+                        <span css={styles.prependWrapperStyles} ref={prependWrapperRef}>
+                          {panelLabel}
+                        </span>
+                      </EuiFormLabel>
+                    </EuiToolTip>
+                  </DragHandle>
                 )}
               </>
             }

@@ -28,6 +28,7 @@ import { TrackingService } from './telemetry/tracking_service';
 import { registerTelemetryCollector } from './telemetry/telemetry_collector';
 import { AnalyticsService } from './telemetry';
 import { registerSampleData } from './register_sample_data';
+import { registerBeforeAgentWorkflowsHook } from './hooks/agent_workflows/register_before_agent_workflows_hook';
 import { registerTaskDefinitions } from './services/execution';
 
 export class AgentBuilderPlugin
@@ -104,21 +105,29 @@ export class AgentBuilderPlugin
 
     registerAgentBuilderHandlerContext({ coreSetup });
 
+    const getInternalServices = () => {
+      const services = this.serviceManager.internalStart;
+      if (!services) {
+        throw new Error('getInternalServices called before service init');
+      }
+      return services;
+    };
+
     const router = coreSetup.http.createRouter<AgentBuilderHandlerContext>();
     registerRoutes({
       router,
       coreSetup,
       logger: this.logger,
       pluginsSetup: setupDeps,
-      getInternalServices: () => {
-        const services = this.serviceManager.internalStart;
-        if (!services) {
-          throw new Error('getInternalServices called before service init');
-        }
-        return services;
-      },
+      getInternalServices,
       trackingService: this.trackingService,
       analyticsService: this.analyticsService,
+    });
+
+    registerBeforeAgentWorkflowsHook(serviceSetups, {
+      workflowsManagement: setupDeps.workflowsManagement,
+      logger: this.logger,
+      getInternalServices,
     });
 
     return {
@@ -141,7 +150,7 @@ export class AgentBuilderPlugin
   }
 
   start(
-    { elasticsearch, security, uiSettings, savedObjects, dataStreams }: CoreStart,
+    { elasticsearch, security, uiSettings, savedObjects, dataStreams, featureFlags }: CoreStart,
     { inference, spaces, actions, taskManager }: AgentBuilderStartDependencies
   ): AgentBuilderPluginStart {
     const startServices = this.serviceManager.startServices({
@@ -153,13 +162,14 @@ export class AgentBuilderPlugin
       actions,
       uiSettings,
       savedObjects,
+      featureFlags,
       dataStreams,
       taskManager,
       trackingService: this.trackingService,
       analyticsService: this.analyticsService,
     });
 
-    const { tools, agents, runnerFactory } = startServices;
+    const { tools, agents, skills, runnerFactory } = startServices;
     const runner = runnerFactory.getRunner();
 
     if (this.home) {
@@ -172,6 +182,10 @@ export class AgentBuilderPlugin
       tools: {
         getRegistry: ({ request }) => tools.getRegistry({ request }),
         execute: runner.runTool.bind(runner),
+      },
+      skills: {
+        register: skills.registerSkill.bind(skills),
+        unregister: skills.unregisterSkill.bind(skills),
       },
     };
   }

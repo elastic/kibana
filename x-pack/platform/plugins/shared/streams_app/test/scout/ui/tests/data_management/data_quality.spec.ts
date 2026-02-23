@@ -277,8 +277,10 @@ test.describe(
       // Click on the expand button for log.level
       await logLevelRow.locator('button[aria-label="Expand"]').click();
 
-      // Flyout should be visible
-      await expect(page.getByTestId('datasetQualityDetailsDegradedFieldFlyout')).toBeVisible();
+      // Flyout should be visible and show the degraded field name
+      const flyout = page.getByTestId('datasetQualityDetailsDegradedFieldFlyout');
+      await expect(flyout).toBeVisible();
+      await expect(flyout).toContainText('log.level');
 
       // Click the link to Discover in the flyout
       await page.getByTestId('datasetQualityDetailsDegradedFieldFlyoutTitleLinkToDiscover').click();
