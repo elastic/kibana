@@ -20,6 +20,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { Condition, RangeCondition } from '@kbn/streamlang';
 import {
   type FilterCondition,
+  getConditionMonacoSchemaConfig,
   getFilterOperator,
   getFilterValue,
   isArrayOperator,
@@ -30,6 +31,7 @@ import type { RoutingStatus } from '@kbn/streams-schema';
 import debounce from 'lodash/debounce';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import useToggle from 'react-use/lib/useToggle';
+import yaml from 'yaml';
 import { useKibana } from '../../../hooks/use_kibana';
 import {
   alwaysToEmptyEquals,
@@ -40,6 +42,7 @@ import {
 } from '../../../util/condition';
 import type { Suggestion } from './autocomplete_selector';
 import { AutocompleteSelector } from './autocomplete_selector';
+import { conditionYamlService } from './condition_yaml_service';
 import { OperatorSelector } from './operator_selector';
 import { RangeInput } from './range_input';
 
@@ -72,8 +75,24 @@ export function ConditionEditor(props: ConditionEditorProps) {
 
   const [usingSyntaxEditor, toggleSyntaxEditor] = useToggle(!conditionEditableInUi);
 
-  const serializedCondition = useMemo(() => JSON.stringify(condition, null, 2), [condition]);
+  const serializedCondition = useMemo(() => yaml.stringify(condition), [condition]);
   const [syntaxEditorValue, setSyntaxEditorValue] = useState(serializedCondition);
+
+  const schemas = useMemo(() => {
+    const schemaConfig = getConditionMonacoSchemaConfig();
+    return schemaConfig ? [schemaConfig] : [];
+  }, []);
+
+  useEffect(() => {
+    conditionYamlService.register(schemas).catch((error) => {
+      // eslint-disable-next-line no-console
+      console.warn('Failed to configure condition schema validation:', error);
+    });
+
+    return () => {
+      conditionYamlService.release();
+    };
+  }, [schemas]);
   const syntaxEditorValueRef = useRef(syntaxEditorValue);
   const lastSyncedSerializedConditionRef = useRef(serializedCondition);
   const prevUsingSyntaxEditorRef = useRef(usingSyntaxEditor);
@@ -173,7 +192,7 @@ export function ConditionEditor(props: ConditionEditorProps) {
       return;
     }
     try {
-      const parsed = JSON.parse(currentValue) as Condition;
+      const parsed = yaml.parse(currentValue) as Condition;
       debouncedEmitConditionChange.cancel();
       handleConditionChange(parsed);
     } catch (error: unknown) {
@@ -242,13 +261,13 @@ export function ConditionEditor(props: ConditionEditorProps) {
         <CodeEditor
           dataTestSubj="streamsAppConditionEditorCodeEditor"
           height={200}
-          languageId="json"
+          languageId="yaml"
           value={syntaxEditorValue}
           onChange={(value) => {
             syntaxEditorValueRef.current = value;
             setSyntaxEditorValue(value);
             try {
-              const parsed = JSON.parse(value) as Condition;
+              const parsed = yaml.parse(value) as Condition;
               reportValidityChange(true);
               debouncedEmitConditionChange(parsed);
             } catch (error: unknown) {
@@ -260,6 +279,8 @@ export function ConditionEditor(props: ConditionEditorProps) {
           options={{
             readOnly: status === 'disabled',
             automaticLayout: true,
+            tabSize: 2,
+            insertSpaces: true,
           }}
         />
       ) : conditionEditableInUi ? (
@@ -271,8 +292,8 @@ export function ConditionEditor(props: ConditionEditorProps) {
           valueSuggestions={valueSuggestions}
         />
       ) : (
-        <EuiCodeBlock language="json" paddingSize="m" isCopyable>
-          {JSON.stringify(condition, null, 2)}
+        <EuiCodeBlock language="yaml" paddingSize="m" isCopyable>
+          {yaml.stringify(condition)}
         </EuiCodeBlock>
       )}
     </EuiFormRow>
