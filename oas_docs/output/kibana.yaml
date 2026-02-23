@@ -64105,7 +64105,8 @@ paths:
                         - additionalProperties: {}
                           type: object
                           properties: {}
-                        - type: object
+                        - additionalProperties: false
+                          type: object
                           properties:
                             stream:
                               additionalProperties: {}
@@ -64126,7 +64127,8 @@ paths:
                                 updated_at: {}
                           required:
                             - stream
-                        - type: object
+                        - additionalProperties: false
+                          type: object
                           properties:
                             dashboards:
                               items:
@@ -64203,7 +64205,8 @@ paths:
                             - dashboards
                             - rules
                             - queries
-                        - type: object
+                        - additionalProperties: false
+                          type: object
                           properties:
                             stream:
                               additionalProperties: {}
@@ -64227,7 +64230,8 @@ paths:
                         - additionalProperties: {}
                           type: object
                           properties: {}
-                        - type: object
+                        - additionalProperties: false
+                          type: object
                           properties:
                             stream:
                               additionalProperties: {}
@@ -64248,7 +64252,8 @@ paths:
                                 updated_at: {}
                           required:
                             - stream
-                        - type: object
+                        - additionalProperties: false
+                          type: object
                           properties:
                             dashboards:
                               items:
@@ -64325,7 +64330,8 @@ paths:
                             - dashboards
                             - rules
                             - queries
-                        - type: object
+                        - additionalProperties: false
+                          type: object
                           properties:
                             stream:
                               additionalProperties: {}
@@ -64346,15 +64352,18 @@ paths:
                                 updated_at: {}
                           required:
                             - stream
-                        - type: object
+                        - additionalProperties: false
+                          type: object
                           properties: {}
-                        - type: object
+                        - additionalProperties: false
+                          type: object
                           properties: {}
                     - allOf:
                         - additionalProperties: {}
                           type: object
                           properties: {}
-                        - type: object
+                        - additionalProperties: false
+                          type: object
                           properties:
                             stream:
                               additionalProperties: {}
@@ -64375,7 +64384,8 @@ paths:
                                 updated_at: {}
                           required:
                             - stream
-                        - type: object
+                        - additionalProperties: false
+                          type: object
                           properties:
                             dashboards:
                               items:
@@ -64452,7 +64462,8 @@ paths:
                             - dashboards
                             - rules
                             - queries
-                        - type: object
+                        - additionalProperties: false
+                          type: object
                           properties:
                             stream:
                               additionalProperties: {}
@@ -64476,7 +64487,8 @@ paths:
                         - additionalProperties: {}
                           type: object
                           properties: {}
-                        - type: object
+                        - additionalProperties: false
+                          type: object
                           properties:
                             stream:
                               additionalProperties: {}
@@ -64497,7 +64509,8 @@ paths:
                                 updated_at: {}
                           required:
                             - stream
-                        - type: object
+                        - additionalProperties: false
+                          type: object
                           properties:
                             dashboards:
                               items:
@@ -64574,7 +64587,8 @@ paths:
                             - dashboards
                             - rules
                             - queries
-                        - type: object
+                        - additionalProperties: false
+                          type: object
                           properties:
                             stream:
                               additionalProperties: {}
@@ -64595,15 +64609,18 @@ paths:
                                 updated_at: {}
                           required:
                             - stream
-                        - type: object
+                        - additionalProperties: false
+                          type: object
                           properties: {}
-                        - type: object
+                        - additionalProperties: false
+                          type: object
                           properties: {}
                 - allOf:
                     - additionalProperties: {}
                       type: object
                       properties: {}
-                    - type: object
+                    - additionalProperties: false
+                      type: object
                       properties:
                         stream:
                           additionalProperties: {}
@@ -64624,7 +64641,8 @@ paths:
                             updated_at: {}
                       required:
                         - stream
-                    - type: object
+                    - additionalProperties: false
+                      type: object
                       properties:
                         dashboards:
                           items:
@@ -64701,7 +64719,8 @@ paths:
                         - dashboards
                         - rules
                         - queries
-                    - type: object
+                    - additionalProperties: false
+                      type: object
                       properties:
                         stream:
                           additionalProperties: {}
@@ -64722,13 +64741,15 @@ paths:
                             updated_at: {}
                       required:
                         - stream
-                    - type: object
+                    - additionalProperties: false
+                      type: object
                       properties:
                         stream:
                           additionalProperties: {}
                           type: object
                           properties:
                             query:
+                              additionalProperties: false
                               type: object
                               properties:
                                 esql:
@@ -64778,6 +64799,7 @@ paths:
         content:
           application/json:
             schema:
+              additionalProperties: false
               type: object
               properties:
                 status:
@@ -64786,6 +64808,7 @@ paths:
                     - disabled
                   type: string
                 stream:
+                  additionalProperties: false
                   type: object
                   properties:
                     name:
@@ -64867,16 +64890,19 @@ paths:
         content:
           application/json:
             schema:
+              additionalProperties: false
               type: object
               properties:
                 ingest:
                   anyOf:
                     - allOf:
-                        - type: object
+                        - additionalProperties: false
+                          type: object
                           properties:
                             failure_store:
                               anyOf:
-                                - type: object
+                                - additionalProperties: false
+                                  type: object
                                   properties:
                                     inherit:
                                       additionalProperties: false
@@ -64884,7 +64910,8 @@ paths:
                                       properties: {}
                                   required:
                                     - inherit
-                                - type: object
+                                - additionalProperties: false
+                                  type: object
                                   properties:
                                     disabled:
                                       additionalProperties: false
@@ -64893,12 +64920,15 @@ paths:
                                   required:
                                     - disabled
                                 - anyOf:
-                                    - type: object
+                                    - additionalProperties: false
+                                      type: object
                                       properties:
                                         lifecycle:
+                                          additionalProperties: false
                                           type: object
                                           properties:
                                             enabled:
+                                              additionalProperties: false
                                               type: object
                                               properties:
                                                 data_retention:
@@ -64909,9 +64939,11 @@ paths:
                                             - enabled
                                       required:
                                         - lifecycle
-                                    - type: object
+                                    - additionalProperties: false
+                                      type: object
                                       properties:
                                         lifecycle:
+                                          additionalProperties: false
                                           type: object
                                           properties:
                                             disabled:
@@ -64924,9 +64956,11 @@ paths:
                                         - lifecycle
                             lifecycle:
                               anyOf:
-                                - type: object
+                                - additionalProperties: false
+                                  type: object
                                   properties:
                                     dsl:
+                                      additionalProperties: false
                                       type: object
                                       properties:
                                         data_retention:
@@ -64951,9 +64985,11 @@ paths:
                                           type: array
                                   required:
                                     - dsl
-                                - type: object
+                                - additionalProperties: false
+                                  type: object
                                   properties:
                                     ilm:
+                                      additionalProperties: false
                                       type: object
                                       properties:
                                         policy:
@@ -64964,7 +65000,8 @@ paths:
                                         - policy
                                   required:
                                     - ilm
-                                - type: object
+                                - additionalProperties: false
+                                  type: object
                                   properties:
                                     inherit:
                                       additionalProperties: false
@@ -64973,6 +65010,7 @@ paths:
                                   required:
                                     - inherit
                             processing:
+                              additionalProperties: false
                               type: object
                               properties:
                                 steps:
@@ -64983,9 +65021,11 @@ paths:
                               required:
                                 - steps
                             settings:
+                              additionalProperties: false
                               type: object
                               properties:
                                 index.number_of_replicas:
+                                  additionalProperties: false
                                   type: object
                                   properties:
                                     value:
@@ -64993,6 +65033,7 @@ paths:
                                   required:
                                     - value
                                 index.number_of_shards:
+                                  additionalProperties: false
                                   type: object
                                   properties:
                                     value:
@@ -65000,6 +65041,7 @@ paths:
                                   required:
                                     - value
                                 index.refresh_interval:
+                                  additionalProperties: false
                                   type: object
                                   properties:
                                     value:
@@ -65015,9 +65057,11 @@ paths:
                             - processing
                             - settings
                             - failure_store
-                        - type: object
+                        - additionalProperties: false
+                          type: object
                           properties:
                             wired:
+                              additionalProperties: false
                               type: object
                               properties:
                                 fields:
@@ -65088,11 +65132,13 @@ paths:
                           required:
                             - wired
                     - allOf:
-                        - type: object
+                        - additionalProperties: false
+                          type: object
                           properties:
                             failure_store:
                               anyOf:
-                                - type: object
+                                - additionalProperties: false
+                                  type: object
                                   properties:
                                     inherit:
                                       additionalProperties: false
@@ -65100,7 +65146,8 @@ paths:
                                       properties: {}
                                   required:
                                     - inherit
-                                - type: object
+                                - additionalProperties: false
+                                  type: object
                                   properties:
                                     disabled:
                                       additionalProperties: false
@@ -65109,12 +65156,15 @@ paths:
                                   required:
                                     - disabled
                                 - anyOf:
-                                    - type: object
+                                    - additionalProperties: false
+                                      type: object
                                       properties:
                                         lifecycle:
+                                          additionalProperties: false
                                           type: object
                                           properties:
                                             enabled:
+                                              additionalProperties: false
                                               type: object
                                               properties:
                                                 data_retention:
@@ -65125,9 +65175,11 @@ paths:
                                             - enabled
                                       required:
                                         - lifecycle
-                                    - type: object
+                                    - additionalProperties: false
+                                      type: object
                                       properties:
                                         lifecycle:
+                                          additionalProperties: false
                                           type: object
                                           properties:
                                             disabled:
@@ -65140,9 +65192,11 @@ paths:
                                         - lifecycle
                             lifecycle:
                               anyOf:
-                                - type: object
+                                - additionalProperties: false
+                                  type: object
                                   properties:
                                     dsl:
+                                      additionalProperties: false
                                       type: object
                                       properties:
                                         data_retention:
@@ -65167,9 +65221,11 @@ paths:
                                           type: array
                                   required:
                                     - dsl
-                                - type: object
+                                - additionalProperties: false
+                                  type: object
                                   properties:
                                     ilm:
+                                      additionalProperties: false
                                       type: object
                                       properties:
                                         policy:
@@ -65180,7 +65236,8 @@ paths:
                                         - policy
                                   required:
                                     - ilm
-                                - type: object
+                                - additionalProperties: false
+                                  type: object
                                   properties:
                                     inherit:
                                       additionalProperties: false
@@ -65189,6 +65246,7 @@ paths:
                                   required:
                                     - inherit
                             processing:
+                              additionalProperties: false
                               type: object
                               properties:
                                 steps:
@@ -65199,9 +65257,11 @@ paths:
                               required:
                                 - steps
                             settings:
+                              additionalProperties: false
                               type: object
                               properties:
                                 index.number_of_replicas:
+                                  additionalProperties: false
                                   type: object
                                   properties:
                                     value:
@@ -65209,6 +65269,7 @@ paths:
                                   required:
                                     - value
                                 index.number_of_shards:
+                                  additionalProperties: false
                                   type: object
                                   properties:
                                     value:
@@ -65216,6 +65277,7 @@ paths:
                                   required:
                                     - value
                                 index.refresh_interval:
+                                  additionalProperties: false
                                   type: object
                                   properties:
                                     value:
@@ -65231,9 +65293,11 @@ paths:
                             - processing
                             - settings
                             - failure_store
-                        - type: object
+                        - additionalProperties: false
+                          type: object
                           properties:
                             classic:
+                              additionalProperties: false
                               type: object
                               properties:
                                 field_overrides:
@@ -65353,9 +65417,11 @@ paths:
         content:
           application/json:
             schema:
+              additionalProperties: false
               type: object
               properties:
                 query:
+                  additionalProperties: false
                   type: object
                   properties:
                     esql:
@@ -65400,6 +65466,7 @@ paths:
         content:
           application/json:
             schema:
+              additionalProperties: false
               type: object
               properties:
                 description:
@@ -65450,6 +65517,7 @@ paths:
         content:
           multipart/form-data:
             schema:
+              additionalProperties: false
               type: object
               properties:
                 content: {}
@@ -65528,6 +65596,7 @@ paths:
         content:
           application/json:
             schema:
+              additionalProperties: false
               type: object
               properties:
                 operations:
@@ -65687,6 +65756,7 @@ paths:
         content:
           application/json:
             schema:
+              additionalProperties: false
               type: object
               properties:
                 evidence:
@@ -65694,6 +65764,7 @@ paths:
                     type: string
                   type: array
                 feature:
+                  additionalProperties: false
                   type: object
                   properties:
                     filter:
@@ -65711,6 +65782,7 @@ paths:
                     - filter
                     - type
                 kql:
+                  additionalProperties: false
                   type: object
                   properties:
                     query:
@@ -65840,9 +65912,11 @@ paths:
         content:
           application/json:
             schema:
+              additionalProperties: false
               type: object
               properties:
                 system:
+                  additionalProperties: false
                   type: object
                   properties:
                     description:
@@ -65911,12 +65985,15 @@ paths:
         content:
           application/json:
             schema:
+              additionalProperties: false
               type: object
               properties:
                 query:
+                  additionalProperties: false
                   type: object
                   properties:
                     feature:
+                      additionalProperties: false
                       type: object
                       properties:
                         filter:
@@ -65932,6 +66009,7 @@ paths:
                         - filter
                         - type
                     kql:
+                      additionalProperties: false
                       type: object
                       properties:
                         query:
@@ -66082,6 +66160,7 @@ paths:
                         id: rule-456
                         type: rule
             schema:
+              additionalProperties: false
               type: object
               properties:
                 operations:
@@ -77188,7 +77267,8 @@ components:
     Kibana_HTTP_APIs__zod_v4_0___schema0:
       anyOf:
         - anyOf:
-            - description: A condition that compares a field to a value or range using an operator as the key.
+            - additionalProperties: false
+              description: A condition that compares a field to a value or range using an operator as the key.
               type: object
               properties:
                 contains:
@@ -77250,6 +77330,7 @@ components:
                     - type: boolean
                   description: Inequality comparison value.
                 range:
+                  additionalProperties: false
                   description: Range comparison values.
                   type: object
                   properties:
@@ -77285,7 +77366,8 @@ components:
                   description: Starts-with comparison value.
               required:
                 - field
-            - description: A condition that checks for the existence or non-existence of a field.
+            - additionalProperties: false
+              description: A condition that checks for the existence or non-existence of a field.
               type: object
               properties:
                 exists:
@@ -77298,7 +77380,8 @@ components:
               required:
                 - field
           description: A basic filter condition, either unary or binary.
-        - description: A logical AND that groups multiple conditions.
+        - additionalProperties: false
+          description: A logical AND that groups multiple conditions.
           type: object
           properties:
             and:
@@ -77308,7 +77391,8 @@ components:
               type: array
           required:
             - and
-        - description: A logical OR that groups multiple conditions.
+        - additionalProperties: false
+          description: A logical OR that groups multiple conditions.
           type: object
           properties:
             or:
@@ -77318,7 +77402,8 @@ components:
               type: array
           required:
             - or
-        - description: A logical NOT that negates a condition.
+        - additionalProperties: false
+          description: A logical NOT that negates a condition.
           type: object
           properties:
             not:
@@ -77326,7 +77411,8 @@ components:
               description: A condition that negates another condition.
           required:
             - not
-        - description: A condition that always evaluates to false.
+        - additionalProperties: false
+          description: A condition that always evaluates to false.
           type: object
           properties:
             never:
@@ -77336,7 +77422,8 @@ components:
               properties: {}
           required:
             - never
-        - description: A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.
+        - additionalProperties: false
+          description: A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.
           type: object
           properties:
             always:
@@ -77350,7 +77437,8 @@ components:
     Kibana_HTTP_APIs__zod_v4_1___schema0:
       anyOf:
         - anyOf:
-            - description: A condition that compares a field to a value or range using an operator as the key.
+            - additionalProperties: false
+              description: A condition that compares a field to a value or range using an operator as the key.
               type: object
               properties:
                 contains:
@@ -77412,6 +77500,7 @@ components:
                     - type: boolean
                   description: Inequality comparison value.
                 range:
+                  additionalProperties: false
                   description: Range comparison values.
                   type: object
                   properties:
@@ -77447,7 +77536,8 @@ components:
                   description: Starts-with comparison value.
               required:
                 - field
-            - description: A condition that checks for the existence or non-existence of a field.
+            - additionalProperties: false
+              description: A condition that checks for the existence or non-existence of a field.
               type: object
               properties:
                 exists:
@@ -77460,7 +77550,8 @@ components:
               required:
                 - field
           description: A basic filter condition, either unary or binary.
-        - description: A logical AND that groups multiple conditions.
+        - additionalProperties: false
+          description: A logical AND that groups multiple conditions.
           type: object
           properties:
             and:
@@ -77470,7 +77561,8 @@ components:
               type: array
           required:
             - and
-        - description: A logical OR that groups multiple conditions.
+        - additionalProperties: false
+          description: A logical OR that groups multiple conditions.
           type: object
           properties:
             or:
@@ -77480,7 +77572,8 @@ components:
               type: array
           required:
             - or
-        - description: A logical NOT that negates a condition.
+        - additionalProperties: false
+          description: A logical NOT that negates a condition.
           type: object
           properties:
             not:
@@ -77488,7 +77581,8 @@ components:
               description: A condition that negates another condition.
           required:
             - not
-        - description: A condition that always evaluates to false.
+        - additionalProperties: false
+          description: A condition that always evaluates to false.
           type: object
           properties:
             never:
@@ -77498,7 +77592,8 @@ components:
               properties: {}
           required:
             - never
-        - description: A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.
+        - additionalProperties: false
+          description: A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.
           type: object
           properties:
             always:
@@ -77512,7 +77607,8 @@ components:
     Kibana_HTTP_APIs__zod_v4_2___schema0:
       anyOf:
         - anyOf:
-            - description: Grok processor - Extract fields from text using grok patterns
+            - additionalProperties: false
+              description: Grok processor - Extract fields from text using grok patterns
               type: object
               properties:
                 action:
@@ -77555,7 +77651,8 @@ components:
                 - action
                 - from
                 - patterns
-            - description: Dissect processor - Extract fields from text using a lightweight, delimiter-based parser
+            - additionalProperties: false
+              description: Dissect processor - Extract fields from text using a lightweight, delimiter-based parser
               type: object
               properties:
                 action:
@@ -77594,7 +77691,8 @@ components:
                 - action
                 - from
                 - pattern
-            - description: Date processor - Parse dates from strings using one or more expected formats
+            - additionalProperties: false
+              description: Date processor - Parse dates from strings using one or more expected formats
               type: object
               properties:
                 action:
@@ -77645,7 +77743,8 @@ components:
                 - action
                 - from
                 - formats
-            - type: object
+            - additionalProperties: false
+              type: object
               properties:
                 action:
                   enum:
@@ -77666,7 +77765,8 @@ components:
                   description: Conditional expression controlling whether this processor runs
               required:
                 - action
-            - type: object
+            - additionalProperties: false
+              type: object
               properties:
                 action:
                   enum:
@@ -77698,7 +77798,8 @@ components:
                 - action
                 - expression
                 - to
-            - description: Rename processor - Change a field name and optionally its location
+            - additionalProperties: false
+              description: Rename processor - Change a field name and optionally its location
               type: object
               properties:
                 action:
@@ -77736,7 +77837,8 @@ components:
                 - action
                 - from
                 - to
-            - description: Set processor - Assign a literal or copied value to a field (mutually exclusive inputs)
+            - additionalProperties: false
+              description: Set processor - Assign a literal or copied value to a field (mutually exclusive inputs)
               type: object
               properties:
                 action:
@@ -77772,7 +77874,8 @@ components:
               required:
                 - action
                 - to
-            - description: Append processor - Append one or more values to an existing or new array field
+            - additionalProperties: false
+              description: Append processor - Append one or more values to an existing or new array field
               type: object
               properties:
                 action:
@@ -77808,7 +77911,8 @@ components:
                 - action
                 - to
                 - value
-            - description: Remove by prefix processor - Remove a field and all nested fields matching the prefix
+            - additionalProperties: false
+              description: Remove by prefix processor - Remove a field and all nested fields matching the prefix
               type: object
               properties:
                 action:
@@ -77832,7 +77936,8 @@ components:
               required:
                 - action
                 - from
-            - description: Remove processor - Delete one or more fields from the document
+            - additionalProperties: false
+              description: Remove processor - Delete one or more fields from the document
               type: object
               properties:
                 action:
@@ -77862,7 +77967,8 @@ components:
               required:
                 - action
                 - from
-            - type: object
+            - additionalProperties: false
+              type: object
               properties:
                 action:
                   enum:
@@ -77899,7 +78005,8 @@ components:
                 - from
                 - pattern
                 - replacement
-            - description: Redact processor - Mask sensitive data using Grok patterns
+            - additionalProperties: false
+              description: Redact processor - Mask sensitive data using Grok patterns
               type: object
               properties:
                 action:
@@ -77949,7 +78056,8 @@ components:
                 - action
                 - from
                 - patterns
-            - type: object
+            - additionalProperties: false
+              type: object
               properties:
                 action:
                   enum:
@@ -77979,7 +78087,8 @@ components:
               required:
                 - action
                 - from
-            - type: object
+            - additionalProperties: false
+              type: object
               properties:
                 action:
                   enum:
@@ -78009,7 +78118,8 @@ components:
               required:
                 - action
                 - from
-            - type: object
+            - additionalProperties: false
+              type: object
               properties:
                 action:
                   enum:
@@ -78039,7 +78149,8 @@ components:
               required:
                 - action
                 - from
-            - type: object
+            - additionalProperties: false
+              type: object
               properties:
                 action:
                   enum:
@@ -78076,7 +78187,8 @@ components:
                 - from
                 - delimiter
                 - to
-            - description: Convert processor - Change the data type of a field value (integer, long, double, boolean, or string)
+            - additionalProperties: false
+              description: Convert processor - Change the data type of a field value (integer, long, double, boolean, or string)
               type: object
               properties:
                 action:
@@ -78120,7 +78232,8 @@ components:
                 - action
                 - from
                 - type
-            - type: object
+            - additionalProperties: false
+              type: object
               properties:
                 action:
                   enum:
@@ -78177,7 +78290,8 @@ components:
                 - from
                 - to
             - allOf:
-                - type: object
+                - additionalProperties: false
+                  type: object
                   properties:
                     action:
                       enum:
@@ -78212,7 +78326,8 @@ components:
                     - source_ip
                     - destination_ip
                 - anyOf:
-                    - type: object
+                    - additionalProperties: false
+                      type: object
                       properties:
                         internal_networks:
                           items:
@@ -78220,14 +78335,16 @@ components:
                           type: array
                       required:
                         - internal_networks
-                    - type: object
+                    - additionalProperties: false
+                      type: object
                       properties:
                         internal_networks_field:
                           minLength: 1
                           type: string
                       required:
                         - internal_networks_field
-            - description: Manual ingest pipeline wrapper around native Elasticsearch processors
+            - additionalProperties: false
+              description: Manual ingest pipeline wrapper around native Elasticsearch processors
               type: object
               properties:
                 action:
@@ -78266,12 +78383,14 @@ components:
               required:
                 - action
                 - processors
-        - type: object
+        - additionalProperties: false
+          type: object
           properties:
             condition:
               allOf:
                 - $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_2___schema1'
-                - type: object
+                - additionalProperties: false
+                  type: object
                   properties:
                     steps:
                       items:
@@ -78286,7 +78405,8 @@ components:
     Kibana_HTTP_APIs__zod_v4_2___schema1:
       anyOf:
         - anyOf:
-            - description: A condition that compares a field to a value or range using an operator as the key.
+            - additionalProperties: false
+              description: A condition that compares a field to a value or range using an operator as the key.
               type: object
               properties:
                 contains:
@@ -78348,6 +78468,7 @@ components:
                     - type: boolean
                   description: Inequality comparison value.
                 range:
+                  additionalProperties: false
                   description: Range comparison values.
                   type: object
                   properties:
@@ -78383,7 +78504,8 @@ components:
                   description: Starts-with comparison value.
               required:
                 - field
-            - description: A condition that checks for the existence or non-existence of a field.
+            - additionalProperties: false
+              description: A condition that checks for the existence or non-existence of a field.
               type: object
               properties:
                 exists:
@@ -78396,7 +78518,8 @@ components:
               required:
                 - field
           description: A basic filter condition, either unary or binary.
-        - description: A logical AND that groups multiple conditions.
+        - additionalProperties: false
+          description: A logical AND that groups multiple conditions.
           type: object
           properties:
             and:
@@ -78406,7 +78529,8 @@ components:
               type: array
           required:
             - and
-        - description: A logical OR that groups multiple conditions.
+        - additionalProperties: false
+          description: A logical OR that groups multiple conditions.
           type: object
           properties:
             or:
@@ -78416,7 +78540,8 @@ components:
               type: array
           required:
             - or
-        - description: A logical NOT that negates a condition.
+        - additionalProperties: false
+          description: A logical NOT that negates a condition.
           type: object
           properties:
             not:
@@ -78424,7 +78549,8 @@ components:
               description: A condition that negates another condition.
           required:
             - not
-        - description: A condition that always evaluates to false.
+        - additionalProperties: false
+          description: A condition that always evaluates to false.
           type: object
           properties:
             never:
@@ -78434,7 +78560,8 @@ components:
               properties: {}
           required:
             - never
-        - description: A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.
+        - additionalProperties: false
+          description: A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.
           type: object
           properties:
             always:
@@ -78468,9 +78595,11 @@ components:
       type: object
     Kibana_HTTP_APIs__zod_v4_3___schema0:
       anyOf:
-        - type: object
+        - additionalProperties: false
+          type: object
           properties:
             objects:
+              additionalProperties: false
               type: object
               properties:
                 all:
@@ -78481,9 +78610,11 @@ components:
                 - all
           required:
             - objects
-        - type: object
+        - additionalProperties: false
+          type: object
           properties:
             objects:
+              additionalProperties: false
               type: object
               properties:
                 mappings:
@@ -78517,7 +78648,8 @@ components:
     Kibana_HTTP_APIs__zod_v4_4___schema0:
       anyOf:
         - anyOf:
-            - description: A condition that compares a field to a value or range using an operator as the key.
+            - additionalProperties: false
+              description: A condition that compares a field to a value or range using an operator as the key.
               type: object
               properties:
                 contains:
@@ -78579,6 +78711,7 @@ components:
                     - type: boolean
                   description: Inequality comparison value.
                 range:
+                  additionalProperties: false
                   description: Range comparison values.
                   type: object
                   properties:
@@ -78614,7 +78747,8 @@ components:
                   description: Starts-with comparison value.
               required:
                 - field
-            - description: A condition that checks for the existence or non-existence of a field.
+            - additionalProperties: false
+              description: A condition that checks for the existence or non-existence of a field.
               type: object
               properties:
                 exists:
@@ -78627,7 +78761,8 @@ components:
               required:
                 - field
           description: A basic filter condition, either unary or binary.
-        - description: A logical AND that groups multiple conditions.
+        - additionalProperties: false
+          description: A logical AND that groups multiple conditions.
           type: object
           properties:
             and:
@@ -78637,7 +78772,8 @@ components:
               type: array
           required:
             - and
-        - description: A logical OR that groups multiple conditions.
+        - additionalProperties: false
+          description: A logical OR that groups multiple conditions.
           type: object
           properties:
             or:
@@ -78647,7 +78783,8 @@ components:
               type: array
           required:
             - or
-        - description: A logical NOT that negates a condition.
+        - additionalProperties: false
+          description: A logical NOT that negates a condition.
           type: object
           properties:
             not:
@@ -78655,7 +78792,8 @@ components:
               description: A condition that negates another condition.
           required:
             - not
-        - description: A condition that always evaluates to false.
+        - additionalProperties: false
+          description: A condition that always evaluates to false.
           type: object
           properties:
             never:
@@ -78665,7 +78803,8 @@ components:
               properties: {}
           required:
             - never
-        - description: A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.
+        - additionalProperties: false
+          description: A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.
           type: object
           properties:
             always:
@@ -78679,7 +78818,8 @@ components:
     Kibana_HTTP_APIs__zod_v4_5___schema0:
       anyOf:
         - anyOf:
-            - description: A condition that compares a field to a value or range using an operator as the key.
+            - additionalProperties: false
+              description: A condition that compares a field to a value or range using an operator as the key.
               type: object
               properties:
                 contains:
@@ -78741,6 +78881,7 @@ components:
                     - type: boolean
                   description: Inequality comparison value.
                 range:
+                  additionalProperties: false
                   description: Range comparison values.
                   type: object
                   properties:
@@ -78776,7 +78917,8 @@ components:
                   description: Starts-with comparison value.
               required:
                 - field
-            - description: A condition that checks for the existence or non-existence of a field.
+            - additionalProperties: false
+              description: A condition that checks for the existence or non-existence of a field.
               type: object
               properties:
                 exists:
@@ -78789,7 +78931,8 @@ components:
               required:
                 - field
           description: A basic filter condition, either unary or binary.
-        - description: A logical AND that groups multiple conditions.
+        - additionalProperties: false
+          description: A logical AND that groups multiple conditions.
           type: object
           properties:
             and:
@@ -78799,7 +78942,8 @@ components:
               type: array
           required:
             - and
-        - description: A logical OR that groups multiple conditions.
+        - additionalProperties: false
+          description: A logical OR that groups multiple conditions.
           type: object
           properties:
             or:
@@ -78809,7 +78953,8 @@ components:
               type: array
           required:
             - or
-        - description: A logical NOT that negates a condition.
+        - additionalProperties: false
+          description: A logical NOT that negates a condition.
           type: object
           properties:
             not:
@@ -78817,7 +78962,8 @@ components:
               description: A condition that negates another condition.
           required:
             - not
-        - description: A condition that always evaluates to false.
+        - additionalProperties: false
+          description: A condition that always evaluates to false.
           type: object
           properties:
             never:
@@ -78827,7 +78973,8 @@ components:
               properties: {}
           required:
             - never
-        - description: A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.
+        - additionalProperties: false
+          description: A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.
           type: object
           properties:
             always:
@@ -78841,7 +78988,8 @@ components:
     Kibana_HTTP_APIs__zod_v4_6___schema0:
       anyOf:
         - anyOf:
-            - description: A condition that compares a field to a value or range using an operator as the key.
+            - additionalProperties: false
+              description: A condition that compares a field to a value or range using an operator as the key.
               type: object
               properties:
                 contains:
@@ -78903,6 +79051,7 @@ components:
                     - type: boolean
                   description: Inequality comparison value.
                 range:
+                  additionalProperties: false
                   description: Range comparison values.
                   type: object
                   properties:
@@ -78938,7 +79087,8 @@ components:
                   description: Starts-with comparison value.
               required:
                 - field
-            - description: A condition that checks for the existence or non-existence of a field.
+            - additionalProperties: false
+              description: A condition that checks for the existence or non-existence of a field.
               type: object
               properties:
                 exists:
@@ -78951,7 +79101,8 @@ components:
               required:
                 - field
           description: A basic filter condition, either unary or binary.
-        - description: A logical AND that groups multiple conditions.
+        - additionalProperties: false
+          description: A logical AND that groups multiple conditions.
           type: object
           properties:
             and:
@@ -78961,7 +79112,8 @@ components:
               type: array
           required:
             - and
-        - description: A logical OR that groups multiple conditions.
+        - additionalProperties: false
+          description: A logical OR that groups multiple conditions.
           type: object
           properties:
             or:
@@ -78971,7 +79123,8 @@ components:
               type: array
           required:
             - or
-        - description: A logical NOT that negates a condition.
+        - additionalProperties: false
+          description: A logical NOT that negates a condition.
           type: object
           properties:
             not:
@@ -78979,7 +79132,8 @@ components:
               description: A condition that negates another condition.
           required:
             - not
-        - description: A condition that always evaluates to false.
+        - additionalProperties: false
+          description: A condition that always evaluates to false.
           type: object
           properties:
             never:
@@ -78989,7 +79143,8 @@ components:
               properties: {}
           required:
             - never
-        - description: A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.
+        - additionalProperties: false
+          description: A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.
           type: object
           properties:
             always:
@@ -79003,7 +79158,8 @@ components:
     Kibana_HTTP_APIs__zod_v4_7___schema0:
       anyOf:
         - anyOf:
-            - description: A condition that compares a field to a value or range using an operator as the key.
+            - additionalProperties: false
+              description: A condition that compares a field to a value or range using an operator as the key.
               type: object
               properties:
                 contains:
@@ -79065,6 +79221,7 @@ components:
                     - type: boolean
                   description: Inequality comparison value.
                 range:
+                  additionalProperties: false
                   description: Range comparison values.
                   type: object
                   properties:
@@ -79100,7 +79257,8 @@ components:
                   description: Starts-with comparison value.
               required:
                 - field
-            - description: A condition that checks for the existence or non-existence of a field.
+            - additionalProperties: false
+              description: A condition that checks for the existence or non-existence of a field.
               type: object
               properties:
                 exists:
@@ -79113,7 +79271,8 @@ components:
               required:
                 - field
           description: A basic filter condition, either unary or binary.
-        - description: A logical AND that groups multiple conditions.
+        - additionalProperties: false
+          description: A logical AND that groups multiple conditions.
           type: object
           properties:
             and:
@@ -79123,7 +79282,8 @@ components:
               type: array
           required:
             - and
-        - description: A logical OR that groups multiple conditions.
+        - additionalProperties: false
+          description: A logical OR that groups multiple conditions.
           type: object
           properties:
             or:
@@ -79133,7 +79293,8 @@ components:
               type: array
           required:
             - or
-        - description: A logical NOT that negates a condition.
+        - additionalProperties: false
+          description: A logical NOT that negates a condition.
           type: object
           properties:
             not:
@@ -79141,7 +79302,8 @@ components:
               description: A condition that negates another condition.
           required:
             - not
-        - description: A condition that always evaluates to false.
+        - additionalProperties: false
+          description: A condition that always evaluates to false.
           type: object
           properties:
             never:
@@ -79151,7 +79313,8 @@ components:
               properties: {}
           required:
             - never
-        - description: A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.
+        - additionalProperties: false
+          description: A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.
           type: object
           properties:
             always:
