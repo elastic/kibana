@@ -63,7 +63,8 @@
     "@kbn/core-application-browser-mocks",
     "@kbn/cps",
     "@kbn/cps-utils",
-    "@kbn/std"
+    "@kbn/std",
+    "@kbn/css-utils"
   ],
   "exclude": ["target/**/*"]
 }
