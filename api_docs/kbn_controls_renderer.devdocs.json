@@ -5,101 +5,29 @@
     "functions": [
       {
         "parentPluginId": "@kbn/controls-renderer",
-        "id": "def-public.apiHasPrependWrapperRef",
-        "type": "Function",
-        "tags": [],
-        "label": "apiHasPrependWrapperRef",
-        "description": [],
-        "signature": [
-          "(api: unknown) => api is ",
-          {
-            "pluginId": "@kbn/controls-renderer",
-            "scope": "public",
-            "docId": "kibKbnControlsRendererPluginApi",
-            "section": "def-public.HasPrependWrapperRef",
-            "text": "HasPrependWrapperRef"
-          }
-        ],
-        "path": "src/platform/packages/private/kbn-controls-renderer/src/utils.ts",
-        "lineNumber": 19,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/controls-renderer",
-            "id": "def-public.apiHasPrependWrapperRef.$1",
-            "type": "Unknown",
-            "tags": [],
-            "label": "api",
-            "description": [],
-            "signature": [
-              "unknown"
-            ],
-            "path": "src/platform/packages/private/kbn-controls-renderer/src/utils.ts",
-            "lineNumber": 19,
-            "columnNumber": 41,
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/controls-renderer",
-        "id": "def-public.apiPublishesControlsLayout",
-        "type": "Function",
-        "tags": [],
-        "label": "apiPublishesControlsLayout",
-        "description": [],
-        "signature": [
-          "(api: unknown) => api is ",
-          {
-            "pluginId": "@kbn/controls-renderer",
-            "scope": "public",
-            "docId": "kibKbnControlsRendererPluginApi",
-            "section": "def-public.PublishesControlsLayout",
-            "text": "PublishesControlsLayout"
-          }
-        ],
-        "path": "src/platform/packages/private/kbn-controls-renderer/src/utils.ts",
-        "lineNumber": 12,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/controls-renderer",
-            "id": "def-public.apiPublishesControlsLayout.$1",
-            "type": "Unknown",
-            "tags": [],
-            "label": "api",
-            "description": [],
-            "signature": [
-              "unknown"
-            ],
-            "path": "src/platform/packages/private/kbn-controls-renderer/src/utils.ts",
-            "lineNumber": 12,
-            "columnNumber": 44,
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/controls-renderer",
         "id": "def-public.ControlsRenderer",
         "type": "Function",
         "tags": [],
         "label": "ControlsRenderer",
         "description": [],
         "signature": [
-          "({ parentApi }: { parentApi: ",
+          "({ controls: controlState, onControlsChanged, parentApi, }: { controls: ",
+          {
+            "pluginId": "@kbn/controls-renderer",
+            "scope": "public",
+            "docId": "kibKbnControlsRendererPluginApi",
+            "section": "def-public.ControlsLayout",
+            "text": "ControlsLayout"
+          },
+          "; onControlsChanged: (controls: ",
+          {
+            "pluginId": "@kbn/controls-renderer",
+            "scope": "public",
+            "docId": "kibKbnControlsRendererPluginApi",
+            "section": "def-public.ControlsLayout",
+            "text": "ControlsLayout"
+          },
+          ") => void; parentApi: ",
           {
             "pluginId": "@kbn/controls-renderer",
             "scope": "public",
@@ -110,7 +38,7 @@
           "; }) => React.JSX.Element | null"
         ],
         "path": "src/platform/packages/private/kbn-controls-renderer/src/controls_renderer.tsx",
-        "lineNumber": 36,
+        "lineNumber": 38,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -120,14 +48,86 @@
             "id": "def-public.ControlsRenderer.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ parentApi }",
+            "label": "{\n  controls: controlState,\n  onControlsChanged,\n  parentApi,\n}",
             "description": [],
             "path": "src/platform/packages/private/kbn-controls-renderer/src/controls_renderer.tsx",
-            "lineNumber": 36,
-            "columnNumber": 49,
+            "lineNumber": 42,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
+              {
+                "parentPluginId": "@kbn/controls-renderer",
+                "id": "def-public.ControlsRenderer.$1.controls",
+                "type": "Object",
+                "tags": [],
+                "label": "controls",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/controls-renderer",
+                    "scope": "public",
+                    "docId": "kibKbnControlsRendererPluginApi",
+                    "section": "def-public.ControlsLayout",
+                    "text": "ControlsLayout"
+                  }
+                ],
+                "path": "src/platform/packages/private/kbn-controls-renderer/src/controls_renderer.tsx",
+                "lineNumber": 43,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/controls-renderer",
+                "id": "def-public.ControlsRenderer.$1.onControlsChanged",
+                "type": "Function",
+                "tags": [],
+                "label": "onControlsChanged",
+                "description": [],
+                "signature": [
+                  "(controls: ",
+                  {
+                    "pluginId": "@kbn/controls-renderer",
+                    "scope": "public",
+                    "docId": "kibKbnControlsRendererPluginApi",
+                    "section": "def-public.ControlsLayout",
+                    "text": "ControlsLayout"
+                  },
+                  ") => void"
+                ],
+                "path": "src/platform/packages/private/kbn-controls-renderer/src/controls_renderer.tsx",
+                "lineNumber": 44,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/controls-renderer",
+                    "id": "def-public.ControlsRenderer.$1.onControlsChanged.$1",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "controls",
+                    "description": [],
+                    "signature": [
+                      {
+                        "pluginId": "@kbn/controls-renderer",
+                        "scope": "public",
+                        "docId": "kibKbnControlsRendererPluginApi",
+                        "section": "def-public.ControlsLayout",
+                        "text": "ControlsLayout"
+                      }
+                    ],
+                    "path": "src/platform/packages/private/kbn-controls-renderer/src/controls_renderer.tsx",
+                    "lineNumber": 44,
+                    "columnNumber": 23,
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "isRequired": true
+                  }
+                ],
+                "returnComment": []
+              },
               {
                 "parentPluginId": "@kbn/controls-renderer",
                 "id": "def-public.ControlsRenderer.$1.parentApi",
@@ -138,42 +138,42 @@
                 "signature": [
                   "Pick<",
                   {
-                    "pluginId": "@kbn/presentation-containers",
-                    "scope": "public",
-                    "docId": "kibKbnPresentationContainersPluginApi",
-                    "section": "def-public.PresentationContainer",
+                    "pluginId": "@kbn/presentation-publishing",
+                    "scope": "common",
+                    "docId": "kibKbnPresentationPublishingPluginApi",
+                    "section": "def-common.PresentationContainer",
                     "text": "PresentationContainer"
                   },
-                  "<unknown>, \"children$\" | \"addNewPanel\" | \"replacePanel\"> & Partial<",
+                  "<unknown>, \"children$\" | \"addNewPanel\" | \"replacePanel\" | \"removePanel\"> & Partial<",
                   {
                     "pluginId": "@kbn/presentation-publishing",
-                    "scope": "public",
+                    "scope": "common",
                     "docId": "kibKbnPresentationPublishingPluginApi",
-                    "section": "def-public.PublishesUnifiedSearch",
+                    "section": "def-common.PublishesUnifiedSearch",
                     "text": "PublishesUnifiedSearch"
                   },
                   "> & ",
                   {
                     "pluginId": "@kbn/presentation-publishing",
-                    "scope": "public",
+                    "scope": "common",
                     "docId": "kibKbnPresentationPublishingPluginApi",
-                    "section": "def-public.PublishesViewMode",
+                    "section": "def-common.PublishesViewMode",
                     "text": "PublishesViewMode"
                   },
                   " & ",
                   {
-                    "pluginId": "@kbn/presentation-containers",
-                    "scope": "public",
-                    "docId": "kibKbnPresentationContainersPluginApi",
-                    "section": "def-public.HasSerializedChildState",
+                    "pluginId": "@kbn/presentation-publishing",
+                    "scope": "common",
+                    "docId": "kibKbnPresentationPublishingPluginApi",
+                    "section": "def-common.HasSerializedChildState",
                     "text": "HasSerializedChildState"
                   },
                   "<object> & Partial<",
                   {
                     "pluginId": "@kbn/presentation-publishing",
-                    "scope": "public",
+                    "scope": "common",
                     "docId": "kibKbnPresentationPublishingPluginApi",
-                    "section": "def-public.PublishesDisabledActionIds",
+                    "section": "def-common.PublishesDisabledActionIds",
                     "text": "PublishesDisabledActionIds"
                   },
                   "> & { registerChildApi: (api: ",
@@ -184,15 +184,11 @@
                     "section": "def-public.DefaultEmbeddableApi",
                     "text": "DefaultEmbeddableApi"
                   },
-                  "<object>) => void; layout$: ",
-                  "BehaviorSubject",
-                  "<",
-                  "ControlsLayout",
-                  ">; isCompressed?: (() => boolean) | undefined; }"
+                  "<object>) => void; isCompressed?: (() => boolean) | undefined; }"
                 ],
                 "path": "src/platform/packages/private/kbn-controls-renderer/src/controls_renderer.tsx",
-                "lineNumber": 36,
-                "columnNumber": 51,
+                "lineNumber": 45,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -206,64 +202,37 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/controls-renderer",
-        "id": "def-public.HasPrependWrapperRef",
+        "id": "def-public.ControlsLayout",
         "type": "Interface",
         "tags": [],
-        "label": "HasPrependWrapperRef",
+        "label": "ControlsLayout",
         "description": [],
         "path": "src/platform/packages/private/kbn-controls-renderer/src/types.ts",
-        "lineNumber": 52,
+        "lineNumber": 29,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/controls-renderer",
-            "id": "def-public.HasPrependWrapperRef.prependWrapperRef",
+            "id": "def-public.ControlsLayout.controls",
             "type": "Object",
             "tags": [],
-            "label": "prependWrapperRef",
+            "label": "controls",
             "description": [],
             "signature": [
-              "React.RefObject<HTMLDivElement>"
+              "{ [id: string]: ",
+              {
+                "pluginId": "@kbn/controls-schemas",
+                "scope": "server",
+                "docId": "kibKbnControlsSchemasPluginApi",
+                "section": "def-server.PinnedControlLayoutState",
+                "text": "PinnedControlLayoutState"
+              },
+              "; }"
             ],
             "path": "src/platform/packages/private/kbn-controls-renderer/src/types.ts",
-            "lineNumber": 53,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/controls-renderer",
-        "id": "def-public.PublishesControlsLayout",
-        "type": "Interface",
-        "tags": [],
-        "label": "PublishesControlsLayout",
-        "description": [],
-        "path": "src/platform/packages/private/kbn-controls-renderer/src/types.ts",
-        "lineNumber": 35,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/controls-renderer",
-            "id": "def-public.PublishesControlsLayout.layout$",
-            "type": "Object",
-            "tags": [],
-            "label": "layout$",
-            "description": [],
-            "signature": [
-              "BehaviorSubject",
-              "<",
-              "ControlsLayout",
-              ">"
-            ],
-            "path": "src/platform/packages/private/kbn-controls-renderer/src/types.ts",
-            "lineNumber": 36,
+            "lineNumber": 30,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -284,42 +253,42 @@
         "signature": [
           "Pick<",
           {
-            "pluginId": "@kbn/presentation-containers",
-            "scope": "public",
-            "docId": "kibKbnPresentationContainersPluginApi",
-            "section": "def-public.PresentationContainer",
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PresentationContainer",
             "text": "PresentationContainer"
           },
-          "<unknown>, \"children$\" | \"addNewPanel\" | \"replacePanel\"> & Partial<",
+          "<unknown>, \"children$\" | \"addNewPanel\" | \"replacePanel\" | \"removePanel\"> & Partial<",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
+            "scope": "common",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishesUnifiedSearch",
+            "section": "def-common.PublishesUnifiedSearch",
             "text": "PublishesUnifiedSearch"
           },
           "> & ",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
+            "scope": "common",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishesViewMode",
+            "section": "def-common.PublishesViewMode",
             "text": "PublishesViewMode"
           },
           " & ",
           {
-            "pluginId": "@kbn/presentation-containers",
-            "scope": "public",
-            "docId": "kibKbnPresentationContainersPluginApi",
-            "section": "def-public.HasSerializedChildState",
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.HasSerializedChildState",
             "text": "HasSerializedChildState"
           },
           "<object> & Partial<",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
+            "scope": "common",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishesDisabledActionIds",
+            "section": "def-common.PublishesDisabledActionIds",
             "text": "PublishesDisabledActionIds"
           },
           "> & { registerChildApi: (api: ",
@@ -330,14 +299,10 @@
             "section": "def-public.DefaultEmbeddableApi",
             "text": "DefaultEmbeddableApi"
           },
-          "<object>) => void; layout$: ",
-          "BehaviorSubject",
-          "<",
-          "ControlsLayout",
-          ">; isCompressed?: (() => boolean) | undefined; }"
+          "<object>) => void; isCompressed?: (() => boolean) | undefined; }"
         ],
         "path": "src/platform/packages/private/kbn-controls-renderer/src/types.ts",
-        "lineNumber": 39,
+        "lineNumber": 35,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
