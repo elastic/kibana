@@ -10,7 +10,7 @@
 import type { Document } from 'yaml';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { collectTriggerConditionItems } from './collect_trigger_condition_items';
-import { validateTriggerConditionsForWorkflow } from '../../../../common/lib/validate_trigger_conditions_for_workflow';
+import { validateTriggerConditionsForWorkflow } from '../../../../common/lib/validate_triggers';
 import { triggerSchemas } from '../../../trigger_schemas';
 import type { YamlValidationResult } from '../model/types';
 

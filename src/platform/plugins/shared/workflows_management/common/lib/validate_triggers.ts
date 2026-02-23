@@ -69,3 +69,21 @@ export function validateTriggerConditionsForWorkflow(
     errors,
   };
 }
+
+export interface TriggerDefinitionForValidateTriggers {
+  id: string;
+  eventSchema: z.ZodType;
+}
+
+/**
+ * Centralized validation of all triggers in workflow YAML (conditions and any other criteria).
+ * Use this from the service layer; it delegates to validateTriggerConditionsForWorkflow.
+ */
+export function validateTriggers(
+  workflow: WorkflowYaml,
+  triggerDefinitions: TriggerDefinitionForValidateTriggers[]
+): { valid: boolean; errors: TriggerConditionValidationError[] } {
+  const getTriggerDefinition = (triggerType: string) =>
+    triggerDefinitions.find((d) => d.id === triggerType);
+  return validateTriggerConditionsForWorkflow(workflow, getTriggerDefinition);
+}

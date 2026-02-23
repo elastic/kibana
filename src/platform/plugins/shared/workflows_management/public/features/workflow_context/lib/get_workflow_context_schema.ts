@@ -31,27 +31,32 @@ export type WorkflowDefinitionForContext =
         | Array<{ name: string; type: string; [key: string]: unknown }>;
     });
 
+function isZodObject(schema: z.ZodType): schema is z.ZodObject<z.ZodRawShape> {
+  return typeof schema === 'object' && schema !== null && 'shape' in schema;
+}
+
 /**
  * Build event schema from workflow triggers: base (spaceId) + alert props when present + custom trigger event schemas.
  * Custom trigger event schemas are resolved via the triggerSchemas singleton (same pattern as stepSchemas for steps).
+ * Uses shape spread instead of deprecated Zod v4 .merge().
  */
 function buildEventSchemaFromTriggers(triggers: Array<{ type?: string }>): z.ZodType {
   const hasAlertTrigger = triggers.some((trigger) => trigger.type === 'alert');
   let eventSchema: z.ZodType = hasAlertTrigger
-    ? BaseEventSchema.merge(AlertEventPropsSchema)
+    ? z.object({
+        ...(BaseEventSchema as z.ZodObject<z.ZodRawShape>).shape,
+        ...(AlertEventPropsSchema as z.ZodObject<z.ZodRawShape>).shape,
+      })
     : BaseEventSchema;
   for (const trigger of triggers) {
     const type = trigger?.type;
     if (typeof type === 'string' && !isTriggerType(type)) {
       const def = triggerSchemas.getTriggerDefinition(type);
-      const hasMerge =
-        def?.eventSchema &&
-        'merge' in def.eventSchema &&
-        typeof (def.eventSchema as { merge?: unknown }).merge === 'function';
-      if (hasMerge) {
-        eventSchema = (eventSchema as z.ZodObject<z.ZodRawShape>).merge(
-          def.eventSchema as z.ZodObject<z.ZodRawShape>
-        );
+      if (def?.eventSchema && isZodObject(eventSchema) && isZodObject(def.eventSchema)) {
+        eventSchema = z.object({
+          ...eventSchema.shape,
+          ...def.eventSchema.shape,
+        });
       }
     }
   }

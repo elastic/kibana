@@ -173,9 +173,7 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
       return r && absolutePosition >= r[0] && absolutePosition <= r[2];
     });
     const typeValueNode = triggerAtPosition?.typePair?.value;
-    const range = typeValueNode
-      ? getMonacoRangeFromYamlNode(model, typeValueNode as import('yaml').Node)
-      : null;
+    const range = typeValueNode ? getMonacoRangeFromYamlNode(model, typeValueNode) : null;
     return { contents: [triggerHoverContent], range: range ?? undefined };
   }
 
@@ -209,7 +207,7 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
       if (!triggerType && triggerAtPosition) {
         triggerType = triggerAtPosition.triggerType;
       }
-      const typeValueNode = triggerAtPosition?.typePair?.value as import('yaml').Node | undefined;
+      const typeValueNode = triggerAtPosition?.typePair?.value ?? undefined;
       if (triggerType && typeValueNode?.range) {
         const [start, , end] = typeValueNode.range;
         if (absolutePosition >= start && absolutePosition <= end) {
