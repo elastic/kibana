@@ -77,9 +77,10 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
     isAgentlessSelected = false,
   }) => {
     const { docLinks, cloud } = useStartServices();
-    const { enableVarGroups, enableCloudConnectorVarGroups } = ExperimentalFeaturesService.get();
+    const { enableVarGroups } = ExperimentalFeaturesService.get();
 
-    const varGroups = enableVarGroups ? packageInfo.var_groups : undefined;
+    const varGroups =
+      enableVarGroups && packageInfo.var_groups ? packageInfo.var_groups : undefined;
 
     // Form show/hide states
     const [isShowingAdvanced, setIsShowingAdvanced] = useState<boolean>(noAdvancedToggle);
@@ -93,7 +94,6 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
         packagePolicy,
       });
 
-    // Cloud connector state from var_group selections (gated by feature flag)
     const {
       isSelected: isCloudConnectorSelected,
       cloudProvider,
@@ -101,7 +101,6 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
       cloudConnectorVars,
       handleCloudConnectorUpdate,
     } = useVarGroupCloudConnector({
-      enabled: enableCloudConnectorVarGroups,
       varGroups,
       varGroupSelections,
       updatePackagePolicy,

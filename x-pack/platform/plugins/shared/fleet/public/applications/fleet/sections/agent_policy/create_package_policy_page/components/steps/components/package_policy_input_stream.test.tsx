@@ -183,7 +183,6 @@ describe('PackagePolicyInputStreamConfig', () => {
   beforeEach(() => {
     jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
       enableVarGroups: true,
-      enableCloudConnectorVarGroups: false,
     } as any);
     testRenderer = createFleetTestRendererMock();
     mockUpdatePackagePolicyInputStream = jest.fn();

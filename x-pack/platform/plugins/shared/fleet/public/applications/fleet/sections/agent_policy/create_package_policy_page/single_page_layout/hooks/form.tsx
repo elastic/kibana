@@ -318,7 +318,7 @@ export function useOnSubmit({
   const confirmForceInstall = useConfirmForceInstall();
   const spaceSettings = useSpaceSettingsContext();
   const { canUseMultipleAgentPolicies } = useMultipleAgentPolicies();
-  const { enableVarGroups, enableCloudConnectorVarGroups } = ExperimentalFeaturesService.get();
+  const { enableVarGroups } = ExperimentalFeaturesService.get();
   const varGroups = enableVarGroups ? packageInfo?.var_groups : undefined;
 
   // only used to store the resulting package policy once saved
@@ -726,7 +726,7 @@ export function useOnSubmit({
             policy_ids: agentPolicyIdToSave,
             force: forceInstall,
           },
-          enableCloudConnectorVarGroups ? varGroups : undefined
+          varGroups
         );
 
         if (data?.item.package) {
@@ -851,7 +851,6 @@ export function useOnSubmit({
       updatePackagePolicy,
       notifications.toasts,
       docLinks.links.fleet.agentlessIntegrations,
-      enableCloudConnectorVarGroups,
       varGroups,
       hasFleetAddAgentsPrivileges,
       spaceId,

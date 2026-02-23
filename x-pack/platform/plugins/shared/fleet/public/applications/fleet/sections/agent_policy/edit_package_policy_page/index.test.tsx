@@ -253,7 +253,6 @@ describe('edit package policy page', () => {
   beforeEach(() => {
     jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
       enableVarGroups: true,
-      enableCloudConnectorVarGroups: false,
     } as any);
     testRenderer = createFleetTestRendererMock();
     lastStepConfigureProps = undefined;
