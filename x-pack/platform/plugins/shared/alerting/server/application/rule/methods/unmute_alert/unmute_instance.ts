@@ -44,6 +44,15 @@ async function unmuteInstanceWithOCC(
     ruleId
   );
 
+  const mutedInstanceIds = attributes.mutedInstanceIds || [];
+  const snoozedInstances = attributes.snoozedInstances ?? [];
+  const isSimpleMute = mutedInstanceIds.includes(alertInstanceId);
+  const isConditionalSnooze = snoozedInstances.some((e) => e.instanceId === alertInstanceId);
+  const auditAction =
+    attributes.muteAll || isSimpleMute
+      ? RuleAuditAction.UNMUTE_ALERT
+      : RuleAuditAction.UNSNOOZE_ALERT;
+
   try {
     await context.authorization.ensureAuthorized({
       ruleTypeId: attributes.alertTypeId,
@@ -57,7 +66,7 @@ async function unmuteInstanceWithOCC(
   } catch (error) {
     context.auditLogger?.log(
       ruleAuditEvent({
-        action: RuleAuditAction.UNMUTE_ALERT,
+        action: auditAction,
         savedObject: { type: RULE_SAVED_OBJECT_TYPE, id: ruleId, name: attributes.name },
         error,
       })
@@ -67,7 +76,7 @@ async function unmuteInstanceWithOCC(
 
   context.auditLogger?.log(
     ruleAuditEvent({
-      action: RuleAuditAction.UNMUTE_ALERT,
+      action: auditAction,
       outcome: 'unknown',
       savedObject: { type: RULE_SAVED_OBJECT_TYPE, id: ruleId, name: attributes.name },
     })
@@ -75,10 +84,13 @@ async function unmuteInstanceWithOCC(
 
   context.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
 
-  const mutedInstanceIds = attributes.mutedInstanceIds || [];
-  if (!attributes.muteAll && mutedInstanceIds.includes(alertInstanceId)) {
-    const indices = context.getAlertIndicesAlias([attributes.alertTypeId], context.spaceId);
+  if (attributes.muteAll) {
+    return;
+  }
 
+  const indices = context.getAlertIndicesAlias([attributes.alertTypeId], context.spaceId);
+
+  if (isSimpleMute) {
     await updateRuleSo({
       savedObjectsClient: context.unsecuredSavedObjectsClient,
       savedObjectsUpdateOptions: { version },
@@ -91,9 +103,35 @@ async function unmuteInstanceWithOCC(
     });
 
     if (indices && indices.length > 0) {
-      await context.alertsService?.unmuteAlertInstance({
+      await context.alertsService?.clearSnoozeAndUnmuteAlertInstances({
         ruleId,
-        alertInstanceId,
+        alertInstanceIds: [alertInstanceId],
+        indices,
+        logger: context.logger,
+      });
+    }
+  } else if (isConditionalSnooze) {
+    // Cancel conditional snooze: remove from snoozedInstances on rule SO and
+    // clear ALERT_MUTED + snooze fields on the AAD doc.
+    const updatedSnoozedInstances = snoozedInstances.filter(
+      (e) => e.instanceId !== alertInstanceId
+    );
+
+    await updateRuleSo({
+      savedObjectsClient: context.unsecuredSavedObjectsClient,
+      savedObjectsUpdateOptions: { version },
+      id: ruleId,
+      updateRuleAttributes: updateMeta(context, {
+        snoozedInstances: updatedSnoozedInstances,
+        updatedBy: await context.getUserName(),
+        updatedAt: new Date().toISOString(),
+      }),
+    });
+
+    if (indices && indices.length > 0) {
+      await context.alertsService?.clearSnoozeAndUnmuteAlertInstances({
+        ruleId,
+        alertInstanceIds: [alertInstanceId],
         indices,
         logger: context.logger,
       });
