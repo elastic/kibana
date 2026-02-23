@@ -15,38 +15,47 @@ export interface UseCheckAlertAttachmentsProps {
   getAttachments?: GetAttachments;
 }
 
-function hasDocumentId<T>(
-  arg: T
-): arg is T & { alertId?: string[] | string; eventId?: string | string[] } {
-  const candidate = arg as unknown;
+interface DocumentReference {
+  alertId?: string[] | string;
+  eventId?: string | string[];
+  externalReferenceId?: string | string[];
+}
 
-  if (candidate === null || typeof candidate !== 'object') {
+export const hasDocReferences = <T>(arg: T): arg is T & DocumentReference => {
+  if (arg === null || typeof arg !== 'object') {
     return false;
   }
 
-  const hasAlertId =
-    'alertId' in candidate &&
-    (Array.isArray(candidate.alertId) || typeof candidate.alertId === 'string');
+  const candidate = arg as DocumentReference;
+  const idFields = ['alertId', 'eventId', 'externalReferenceId'] as const;
 
-  const hasEventId =
-    'eventId' in candidate &&
-    (Array.isArray(candidate.eventId) || typeof candidate.eventId === 'string');
+  for (const fieldName of idFields) {
+    if (
+      fieldName in candidate &&
+      (Array.isArray(candidate[fieldName]) || typeof candidate[fieldName] === 'string')
+    ) {
+      return true;
+    }
+  }
 
-  return hasAlertId || hasEventId;
-}
+  return false;
+};
 
 export const useCheckDocumentAttachments = ({
   cases,
   getAttachments,
 }: UseCheckAlertAttachmentsProps): { disabledCases: Set<string>; isLoading: boolean } => {
-  const selectedDocuments = (getAttachments?.({ theCase: undefined }) ?? [])
-    .filter(hasDocumentId)
-    .map(({ alertId, eventId }) => [alertId, eventId])
-    .flatMap((arrayOrString) => arrayOrString)
-    .filter(Boolean) as string[];
+  const selectedDocumentIds = (getAttachments?.({ theCase: undefined }) ?? [])
+    .filter(hasDocReferences)
+    .flatMap(({ alertId, eventId, externalReferenceId }) =>
+      [alertId, eventId, externalReferenceId].flat()
+    )
+    .filter(
+      (reference): reference is string => typeof reference === 'string' && reference.length > 0
+    );
 
   const { data, isFetching } = useFindCasesContainingAllSelectedDocuments(
-    selectedDocuments,
+    selectedDocumentIds,
     cases.map(({ id }) => id)
   );
 
