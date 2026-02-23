@@ -105,6 +105,25 @@ export const GET_CASE_STEP_DOCUMENTATION_DETAILS = i18n.translate(
   }
 );
 
+export const FIND_CASES_STEP_LABEL = i18n.translate('xpack.cases.workflowSteps.findCases.label', {
+  defaultMessage: 'Find cases',
+});
+
+export const FIND_CASES_STEP_DESCRIPTION = i18n.translate(
+  'xpack.cases.workflowSteps.findCases.description',
+  {
+    defaultMessage: 'Searches and filters cases',
+  }
+);
+
+export const FIND_CASES_STEP_DOCUMENTATION_DETAILS = i18n.translate(
+  'xpack.cases.workflowSteps.findCases.documentation.details',
+  {
+    defaultMessage:
+      'This step searches cases and returns matching results, including pagination metadata and case status counters.',
+  }
+);
+
 export const TEMPLATE_CAN_BE_USED_MESSAGE = (template: string) =>
   i18n.translate('xpack.cases.workflowSteps.shared.templateCanBeUsedMessage', {
     defaultMessage: 'Template "{template}" can be used to prefill case attributes.',

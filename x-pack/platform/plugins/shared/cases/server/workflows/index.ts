@@ -14,6 +14,7 @@ import { createCaseStepDefinition } from './steps/create_case';
 // import { createCaseFromTemplateStepDefinition } from './steps/create_case_from_template';
 import { updateCaseStepDefinition } from './steps/update_case';
 import { addCommentStepDefinition } from './steps/add_comment';
+import { findCasesStepDefinition } from './steps/find_cases';
 
 export function registerCaseWorkflowSteps(
   workflowsExtensions: CasesServerSetupDependencies['workflowsExtensions'],
@@ -29,4 +30,5 @@ export function registerCaseWorkflowSteps(
   // workflowsExtensions.registerStepDefinition(createCaseFromTemplateStepDefinition(getCasesClient));
   workflowsExtensions.registerStepDefinition(updateCaseStepDefinition(getCasesClient));
   workflowsExtensions.registerStepDefinition(addCommentStepDefinition(getCasesClient));
+  workflowsExtensions.registerStepDefinition(findCasesStepDefinition(getCasesClient));
 }

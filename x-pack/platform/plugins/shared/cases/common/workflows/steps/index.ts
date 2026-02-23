@@ -11,6 +11,7 @@ import { createCaseStepCommonDefinition } from './create_case';
 import { createCaseFromTemplateStepCommonDefinition } from './create_case_from_template';
 import { updateCaseStepCommonDefinition } from './update_case';
 import { addCommentStepCommonDefinition } from './add_comment';
+import { findCasesStepCommonDefinition } from './find_cases';
 
 export { GetCaseStepTypeId, getCaseStepCommonDefinition } from './get_case';
 export { CreateCaseStepTypeId, createCaseStepCommonDefinition } from './create_case';
@@ -20,6 +21,7 @@ export {
 } from './create_case_from_template';
 export { UpdateCaseStepTypeId, updateCaseStepCommonDefinition } from './update_case';
 export { AddCommentStepTypeId, addCommentStepCommonDefinition } from './add_comment';
+export { FindCasesStepTypeId, findCasesStepCommonDefinition } from './find_cases';
 
 export const casesWorkflowSteps: ReadonlyArray<CommonStepDefinition> = Object.freeze([
   getCaseStepCommonDefinition,
@@ -27,6 +29,7 @@ export const casesWorkflowSteps: ReadonlyArray<CommonStepDefinition> = Object.fr
   createCaseFromTemplateStepCommonDefinition,
   updateCaseStepCommonDefinition,
   addCommentStepCommonDefinition,
+  findCasesStepCommonDefinition,
 ]);
 
 export const registerCasesWorkflowStep = (

@@ -92,4 +92,8 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string 
     id: 'cases.createCaseFromTemplate',
     handlerHash: 'efb5c5a442f9e8cda4ae04f5fb6c2ae075008caac1b34f58c4da30cc36b28cc6',
   },
+  {
+    id: 'cases.findCases',
+    handlerHash: 'cabe45a548e2c4eaaa23759314f496a3077a59638c23afee8391a8bf318aade7',
+  },
 ];

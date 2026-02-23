@@ -10,6 +10,7 @@ import { createCreateCaseStepDefinition } from './create_case';
 // import { createCreateCaseFromTemplateStepDefinition } from './create_case_from_template';
 import { createUpdateCaseStepDefinition } from './update_case';
 import { addCommentStepDefinition } from './add_comment';
+import { findCasesStepDefinition } from './find_cases';
 import type { CasesPublicSetupDependencies } from '../types';
 
 export function registerCasesSteps(
@@ -25,4 +26,5 @@ export function registerCasesSteps(
   // workflowsExtensions.registerStepDefinition(createCreateCaseFromTemplateStepDefinition());
   workflowsExtensions.registerStepDefinition(createUpdateCaseStepDefinition());
   workflowsExtensions.registerStepDefinition(addCommentStepDefinition);
+  workflowsExtensions.registerStepDefinition(findCasesStepDefinition);
 }
