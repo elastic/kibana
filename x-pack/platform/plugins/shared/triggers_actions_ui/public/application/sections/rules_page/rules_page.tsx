@@ -25,6 +25,7 @@ import { RulesListDocLink } from '../rules_list/components/rules_list_doc_link';
 import { RulesPageTemplate } from './rules_page_template';
 import { useKibana } from '../../../common/lib/kibana';
 import { getAlertingSectionBreadcrumb, getRulesBreadcrumbWithHref } from '../../lib/breadcrumb';
+import { useSetBreadcrumbs } from '../../hooks/use_set_breadcrumbs';
 import { CreateRuleButton } from '../rules_list/components/create_rule_button';
 import { getCurrentDocTitle } from '../../lib/doc_title';
 import { NON_SIEM_CONSUMERS } from '../alerts_search_bar/constants';
@@ -39,12 +40,12 @@ const RulesPage = () => {
   const location = useLocation();
   const {
     chrome: { docTitle },
-    setBreadcrumbs,
     application: { navigateToApp, getUrlForApp, isAppRegistered },
     http,
     notifications: { toasts },
     ruleTypeRegistry,
   } = useKibana().services;
+  const setBreadcrumbs = useSetBreadcrumbs();
 
   const { authorizedToReadAnyRules, authorizedToCreateAnyRules } = useGetRuleTypesPermissions({
     http,
