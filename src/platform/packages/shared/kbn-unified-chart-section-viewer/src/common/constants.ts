@@ -20,7 +20,7 @@ export const METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ = 'metricsExperienceBreak
 export const METRICS_GRID_PAGINATION_DATA_TEST_SUBJ = 'metricsExperienceGridPagination';
 
 // Selection limits
-export const MAX_DIMENSIONS_SELECTIONS = 1;
+export const MAX_DIMENSIONS_SELECTIONS = 5;
 export const PAGE_SIZE = 20;
 
 // Debounce time for dimensions selector
