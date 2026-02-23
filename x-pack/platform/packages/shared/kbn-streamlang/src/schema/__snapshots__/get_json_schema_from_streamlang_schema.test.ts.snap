@@ -51,6 +51,7 @@ Object {
                 "patterns": Object {
                   "description": "Grok patterns applied in order to extract fields",
                   "items": Object {
+                    "description": "A non-empty string.",
                     "minLength": 1,
                     "type": "string",
                   },
@@ -151,6 +152,7 @@ Object {
                 "formats": Object {
                   "description": "Accepted input date formats, tried in order",
                   "items": Object {
+                    "description": "A non-empty string.",
                     "minLength": 1,
                     "type": "string",
                   },
@@ -256,6 +258,7 @@ Object {
                   "type": "string",
                 },
                 "expression": Object {
+                  "description": "A non-empty string.",
                   "minLength": 1,
                   "type": "string",
                 },
@@ -630,6 +633,7 @@ Object {
                 "patterns": Object {
                   "description": "Grok patterns to match sensitive data (for example, \\"%{IP:client}\\", \\"%{EMAILADDRESS:email}\\")",
                   "items": Object {
+                    "description": "A non-empty string.",
                     "minLength": 1,
                     "type": "string",
                   },
@@ -1012,6 +1016,93 @@ Object {
               ],
               "title": "Concat",
               "type": "object",
+            },
+            Object {
+              "allOf": Array [
+                Object {
+                  "additionalProperties": false,
+                  "properties": Object {
+                    "action": Object {
+                      "const": "network_direction",
+                      "type": "string",
+                    },
+                    "customIdentifier": Object {
+                      "description": "Custom identifier to correlate this processor across outputs",
+                      "minLength": 1,
+                      "type": "string",
+                    },
+                    "description": Object {
+                      "description": "Human-readable notes about this processor step",
+                      "type": "string",
+                    },
+                    "destination_ip": Object {
+                      "minLength": 1,
+                      "type": "string",
+                    },
+                    "ignore_failure": Object {
+                      "description": "Continue pipeline execution if this processor fails",
+                      "type": "boolean",
+                    },
+                    "ignore_missing": Object {
+                      "type": "boolean",
+                    },
+                    "source_ip": Object {
+                      "minLength": 1,
+                      "type": "string",
+                    },
+                    "target_field": Object {
+                      "minLength": 1,
+                      "type": "string",
+                    },
+                    "where": Object {
+                      "allOf": Array [
+                        Object {
+                          "$ref": "#/definitions/__schema1",
+                        },
+                      ],
+                      "description": "Conditional expression controlling whether this processor runs",
+                    },
+                  },
+                  "required": Array [
+                    "action",
+                    "source_ip",
+                    "destination_ip",
+                  ],
+                  "type": "object",
+                },
+                Object {
+                  "anyOf": Array [
+                    Object {
+                      "additionalProperties": false,
+                      "properties": Object {
+                        "internal_networks": Object {
+                          "items": Object {
+                            "type": "string",
+                          },
+                          "type": "array",
+                        },
+                      },
+                      "required": Array [
+                        "internal_networks",
+                      ],
+                      "type": "object",
+                    },
+                    Object {
+                      "additionalProperties": false,
+                      "properties": Object {
+                        "internal_networks_field": Object {
+                          "minLength": 1,
+                          "type": "string",
+                        },
+                      },
+                      "required": Array [
+                        "internal_networks_field",
+                      ],
+                      "type": "object",
+                    },
+                  ],
+                },
+              ],
             },
             Object {
               "additionalProperties": false,
