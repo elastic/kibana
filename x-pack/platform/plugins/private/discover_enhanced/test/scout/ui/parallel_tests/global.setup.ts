@@ -6,18 +6,27 @@
  */
 
 import { globalSetupHook } from '@kbn/scout';
-import { testData } from '../fixtures';
+import { testData, createMetricsTestIndexIfNeeded } from '../fixtures';
 
-globalSetupHook('Ingest data to Elasticsearch', async ({ esArchiver, log }) => {
+globalSetupHook('Ingest data to Elasticsearch', async ({ esArchiver, esClient, log }) => {
   // add archives to load, if needed
   const archives = [
     testData.ES_ARCHIVES.LOGSTASH,
     testData.ES_ARCHIVES.NO_TIME_FIELD,
     testData.ES_ARCHIVES.ECOMMERCE,
+    testData.ES_ARCHIVES.TSDB_LOGS,
   ];
 
-  log.debug('[setup] loading test data (only if indexes do not exist)...');
+  log.debug('[setup] loading ES archives (only if indices do not exist)...');
   for (const archive of archives) {
     await esArchiver.loadIfNeeded(archive);
   }
+
+  log.debug('[setup] loading metrics test index (only if it does not exist)...');
+  const created = await createMetricsTestIndexIfNeeded(esClient);
+  log.debug(
+    created
+      ? '[setup] metrics test index created successfully'
+      : '[setup] metrics test index already exists, skipping'
+  );
 });

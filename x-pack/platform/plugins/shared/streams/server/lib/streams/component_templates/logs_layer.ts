@@ -4,7 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+/**
+ * ## IMPORTANT TODO ##
+ * This file imports @elastic/ecs directly, which imports all ECS fields into the bundle.
+ * This should be migrated to using the unified fields metadata plugin instead.
+ * See https://github.com/elastic/kibana/tree/main/x-pack/platform/plugins/shared/fields_metadata for more details.
+ */
+// eslint-disable-next-line no-restricted-imports
 import { EcsFlat } from '@elastic/ecs';
 import type {
   IndicesIndexSettings,
@@ -87,7 +93,7 @@ export const baseFields: FieldDefinition = {
   },
 };
 
-// Priorities match the order in NAMESPACE_PREFIXES (kbn-streamlang/src/validation/validate_streamlang.ts)
+// Priorities match the order in NAMESPACE_PREFIXES (kbn-streamlang/src/validation/constants.ts)
 export const NAMESPACE_PRIORITIES: Record<string, number> = {
   'body.structured.': 10,
   'attributes.': 20,

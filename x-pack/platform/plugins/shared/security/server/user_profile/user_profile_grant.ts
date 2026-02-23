@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { ClientAuthentication } from '@kbn/security-plugin-types-server';
+
 /**
  * Represents a union of all possible user profile grant types.
  */
@@ -36,5 +38,5 @@ export interface AccessTokenUserProfileGrant {
 export interface UiamAccessTokenUserProfileGrant {
   readonly type: 'uiamAccessToken';
   readonly accessToken: string;
-  readonly sharedSecret: string;
+  readonly clientAuthentication: ClientAuthentication;
 }

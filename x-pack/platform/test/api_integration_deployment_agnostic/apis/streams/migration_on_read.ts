@@ -140,6 +140,7 @@ const expectedStreamsResponse: Streams.ClassicStream.Definition = {
   name: TEST_STREAM_NAME,
   description: '',
   updated_at: new Date(0).toISOString(),
+  query_streams: [],
   ingest: {
     lifecycle: {
       ilm: {
@@ -159,6 +160,7 @@ const expectedWiredStreamsResponse: Streams.WiredStream.Definition = {
   name: WIRED_STREAM_NAME,
   description: '',
   updated_at: new Date(0).toISOString(),
+  query_streams: [],
   ingest: {
     lifecycle: {
       ilm: {
@@ -206,6 +208,9 @@ const expectedQueriesResponse = {
       id: '12345',
       title: 'Test',
       kql: { query: 'atest' },
+      esql: {
+        query: `FROM ${TEST_STREAM_NAME},${TEST_STREAM_NAME}.* | WHERE KQL("atest")`,
+      },
     },
   ],
 };

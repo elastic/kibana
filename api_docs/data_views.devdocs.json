@@ -308,7 +308,7 @@
                 "tags": [],
                 "label": "includeFields",
                 "description": [
-                  "Whether or not to include the `fields` list as part of this spec. If not included, the list\nwill be fetched from Elasticsearch when instantiating a new Data View with this spec."
+                  "Whether or not to include the `fields` list as part of this spec. If not included, the list"
                 ],
                 "signature": [
                   "boolean"
@@ -1178,7 +1178,7 @@
                 "section": "def-common.SerializableRecord",
                 "text": "SerializableRecord"
               },
-              "> | undefined; esTypes?: string[] | undefined; searchable: boolean; aggregatable: boolean; isNull?: boolean | undefined; readFromDocValues?: boolean | undefined; indexed?: boolean | undefined; customLabel?: string | undefined; customDescription?: string | undefined; runtimeField?: ",
+              "> | undefined; esTypes?: string[] | undefined; searchable: boolean; aggregatable: boolean; isNull?: boolean | undefined; isComputedColumn?: boolean | undefined; readFromDocValues?: boolean | undefined; indexed?: boolean | undefined; customLabel?: string | undefined; customDescription?: string | undefined; runtimeField?: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -1851,6 +1851,21 @@
           },
           {
             "parentPluginId": "dataViews",
+            "id": "def-public.DataViewField.isComputedColumn",
+            "type": "boolean",
+            "tags": [],
+            "label": "isComputedColumn",
+            "description": [
+              "\nReturns true if the field is not part of the index and is a computed column"
+            ],
+            "path": "src/platform/plugins/shared/data_views/common/fields/data_view_field.ts",
+            "lineNumber": 342,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dataViews",
             "id": "def-public.DataViewField.isSubtypeNested",
             "type": "Function",
             "tags": [],
@@ -1862,7 +1877,7 @@
               "() => boolean"
             ],
             "path": "src/platform/plugins/shared/data_views/common/fields/data_view_field.ts",
-            "lineNumber": 342,
+            "lineNumber": 349,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1882,7 +1897,7 @@
               "() => boolean"
             ],
             "path": "src/platform/plugins/shared/data_views/common/fields/data_view_field.ts",
-            "lineNumber": 349,
+            "lineNumber": 356,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1910,7 +1925,7 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/data_views/common/fields/data_view_field.ts",
-            "lineNumber": 357,
+            "lineNumber": 364,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1938,7 +1953,7 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/data_views/common/fields/data_view_field.ts",
-            "lineNumber": 365,
+            "lineNumber": 372,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1958,7 +1973,7 @@
               "() => void"
             ],
             "path": "src/platform/plugins/shared/data_views/common/fields/data_view_field.ts",
-            "lineNumber": 373,
+            "lineNumber": 380,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1986,7 +2001,7 @@
               " | undefined; customLabel: string | undefined; customDescription: string | undefined; defaultFormatter: string | undefined; }"
             ],
             "path": "src/platform/plugins/shared/data_views/common/fields/data_view_field.ts",
-            "lineNumber": 381,
+            "lineNumber": 388,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2021,7 +2036,7 @@
               }
             ],
             "path": "src/platform/plugins/shared/data_views/common/fields/data_view_field.ts",
-            "lineNumber": 404,
+            "lineNumber": 411,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2045,7 +2060,7 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/data_views/common/fields/data_view_field.ts",
-                "lineNumber": 409,
+                "lineNumber": 416,
                 "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2069,7 +2084,7 @@
               "() => boolean"
             ],
             "path": "src/platform/plugins/shared/data_views/common/fields/data_view_field.ts",
-            "lineNumber": 444,
+            "lineNumber": 451,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3462,7 +3477,7 @@
             "signature": [
               "(core: ",
               "CoreStart",
-              ", { fieldFormats, contentManagement }: ",
+              ", { fieldFormats, contentManagement, cps }: ",
               {
                 "pluginId": "dataViews",
                 "scope": "public",
@@ -3507,7 +3522,7 @@
                 "id": "def-public.DataViewsPublicPlugin.start.$2",
                 "type": "Object",
                 "tags": [],
-                "label": "{ fieldFormats, contentManagement }",
+                "label": "{ fieldFormats, contentManagement, cps }",
                 "description": [],
                 "signature": [
                   {
@@ -3539,7 +3554,7 @@
               "() => void"
             ],
             "path": "src/platform/plugins/shared/data_views/public/plugin.ts",
-            "lineNumber": 115,
+            "lineNumber": 121,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -4360,7 +4375,7 @@
                 "section": "def-common.GetFieldsOptions",
                 "text": "GetFieldsOptions"
               },
-              ", \"allowNoIndex\" | \"pattern\"> | undefined) => Promise<",
+              ", \"pattern\" | \"allowNoIndex\"> | undefined) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -4425,7 +4440,7 @@
                     "section": "def-common.GetFieldsOptions",
                     "text": "GetFieldsOptions"
                   },
-                  ", \"allowNoIndex\" | \"pattern\"> | undefined"
+                  ", \"pattern\" | \"allowNoIndex\"> | undefined"
                 ],
                 "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
                 "lineNumber": 624,
@@ -4568,9 +4583,7 @@
                 "type": "Array",
                 "tags": [],
                 "label": "fields",
-                "description": [
-                  ": FieldSpec[]"
-                ],
+                "description": [],
                 "signature": [
                   {
                     "pluginId": "dataViews",
@@ -4594,9 +4607,7 @@
                 "type": "Object",
                 "tags": [],
                 "label": "fieldAttrs",
-                "description": [
-                  ": FieldAttrs"
-                ],
+                "description": [],
                 "signature": [
                   "FieldAttrsAsObject",
                   " | undefined"
@@ -5413,9 +5424,7 @@
                 "type": "string",
                 "tags": [],
                 "label": "indexPatternId",
-                "description": [
-                  ": Id of kibana Index Pattern to delete"
-                ],
+                "description": [],
                 "signature": [
                   "string"
                 ],
@@ -5540,7 +5549,9 @@
                     "type": "CompoundType",
                     "tags": [],
                     "label": "refreshFields",
-                    "description": [],
+                    "description": [
+                      "- If true, will refresh the fields of the default data view"
+                    ],
                     "signature": [
                       "boolean | undefined"
                     ],
@@ -5703,7 +5714,7 @@
           }
         ],
         "path": "src/platform/plugins/shared/data_views/public/data_views_service_public.ts",
-        "lineNumber": 44,
+        "lineNumber": 45,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -5719,7 +5730,7 @@
               "() => boolean"
             ],
             "path": "src/platform/plugins/shared/data_views/public/data_views_service_public.ts",
-            "lineNumber": 49,
+            "lineNumber": 50,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -5734,7 +5745,7 @@
             "label": "getIndices",
             "description": [],
             "signature": [
-              "(props: { pattern: string; showAllIndices?: boolean | undefined; isRollupIndex: (indexName: string) => boolean; }) => Promise<",
+              "(props: { pattern: string; showAllIndices?: boolean | undefined; isRollupIndex: (indexName: string) => boolean; projectRouting?: string | undefined; }) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "public",
@@ -5745,7 +5756,7 @@
               "[]>"
             ],
             "path": "src/platform/plugins/shared/data_views/public/data_views_service_public.ts",
-            "lineNumber": 51,
+            "lineNumber": 52,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -5759,10 +5770,10 @@
                 "label": "props",
                 "description": [],
                 "signature": [
-                  "{ pattern: string; showAllIndices?: boolean | undefined; isRollupIndex: (indexName: string) => boolean; }"
+                  "{ pattern: string; showAllIndices?: boolean | undefined; isRollupIndex: (indexName: string) => boolean; projectRouting?: string | undefined; }"
                 ],
                 "path": "src/platform/plugins/shared/data_views/public/data_views_service_public.ts",
-                "lineNumber": 51,
+                "lineNumber": 52,
                 "columnNumber": 23,
                 "deprecated": false,
                 "trackAdoption": false
@@ -5786,7 +5797,7 @@
               }
             ],
             "path": "src/platform/plugins/shared/data_views/public/data_views_service_public.ts",
-            "lineNumber": 56,
+            "lineNumber": 58,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5799,7 +5810,7 @@
             "label": "scriptedFieldsEnabled",
             "description": [],
             "path": "src/platform/plugins/shared/data_views/public/data_views_service_public.ts",
-            "lineNumber": 59,
+            "lineNumber": 61,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5817,7 +5828,7 @@
               "any"
             ],
             "path": "src/platform/plugins/shared/data_views/public/data_views_service_public.ts",
-            "lineNumber": 61,
+            "lineNumber": 63,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -5841,7 +5852,7 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/data_views/public/data_views_service_public.ts",
-                "lineNumber": 66,
+                "lineNumber": 68,
                 "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5861,7 +5872,7 @@
               "() => boolean"
             ],
             "path": "src/platform/plugins/shared/data_views/public/data_views_service_public.ts",
-            "lineNumber": 76,
+            "lineNumber": 78,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -5883,7 +5894,7 @@
               ">"
             ],
             "path": "src/platform/plugins/shared/data_views/public/data_views_service_public.ts",
-            "lineNumber": 80,
+            "lineNumber": 82,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -5901,7 +5912,7 @@
                   "string[]"
                 ],
                 "path": "src/platform/plugins/shared/data_views/public/data_views_service_public.ts",
-                "lineNumber": 85,
+                "lineNumber": 87,
                 "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6693,7 +6704,7 @@
           "\nData views public setup dependencies"
         ],
         "path": "src/platform/plugins/shared/data_views/public/types.ts",
-        "lineNumber": 78,
+        "lineNumber": 79,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -6717,7 +6728,7 @@
               }
             ],
             "path": "src/platform/plugins/shared/data_views/public/types.ts",
-            "lineNumber": 82,
+            "lineNumber": 83,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6743,7 +6754,7 @@
               "[]) => void; has: (id: string) => boolean; }"
             ],
             "path": "src/platform/plugins/shared/data_views/public/types.ts",
-            "lineNumber": 86,
+            "lineNumber": 87,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6767,7 +6778,7 @@
               }
             ],
             "path": "src/platform/plugins/shared/data_views/public/types.ts",
-            "lineNumber": 90,
+            "lineNumber": 91,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6785,7 +6796,7 @@
           "\nData views public start dependencies"
         ],
         "path": "src/platform/plugins/shared/data_views/public/types.ts",
-        "lineNumber": 96,
+        "lineNumber": 97,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -6819,7 +6830,7 @@
               "; }"
             ],
             "path": "src/platform/plugins/shared/data_views/public/types.ts",
-            "lineNumber": 100,
+            "lineNumber": 101,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6843,7 +6854,32 @@
               }
             ],
             "path": "src/platform/plugins/shared/data_views/public/types.ts",
-            "lineNumber": 104,
+            "lineNumber": 105,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.DataViewsPublicStartDependencies.cps",
+            "type": "Object",
+            "tags": [],
+            "label": "cps",
+            "description": [
+              "\nCPS plugin (optional)"
+            ],
+            "signature": [
+              {
+                "pluginId": "cps",
+                "scope": "public",
+                "docId": "kibCpsPluginApi",
+                "section": "def-public.CPSPluginStart",
+                "text": "CPSPluginStart"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/plugins/shared/data_views/public/types.ts",
+            "lineNumber": 109,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6935,7 +6971,7 @@
             "label": "getIndices",
             "description": [],
             "signature": [
-              "(props: { pattern: string; showAllIndices?: boolean | undefined; isRollupIndex: (indexName: string) => boolean; }) => Promise<",
+              "(props: { pattern: string; showAllIndices?: boolean | undefined; isRollupIndex: (indexName: string) => boolean; projectRouting?: string | undefined; }) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "public",
@@ -7028,6 +7064,22 @@
                       }
                     ],
                     "returnComment": []
+                  },
+                  {
+                    "parentPluginId": "dataViews",
+                    "id": "def-public.DataViewsServicePublicDeps.getIndices.$1.projectRouting",
+                    "type": "string",
+                    "tags": [],
+                    "label": "projectRouting",
+                    "description": [],
+                    "signature": [
+                      "string | undefined"
+                    ],
+                    "path": "src/platform/plugins/shared/data_views/public/data_views_service_public.ts",
+                    "lineNumber": 37,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               }
@@ -7045,7 +7097,7 @@
               "() => boolean"
             ],
             "path": "src/platform/plugins/shared/data_views/public/data_views_service_public.ts",
-            "lineNumber": 39,
+            "lineNumber": 40,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -7060,7 +7112,7 @@
             "label": "scriptedFieldsEnabled",
             "description": [],
             "path": "src/platform/plugins/shared/data_views/public/data_views_service_public.ts",
-            "lineNumber": 40,
+            "lineNumber": 41,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -7076,7 +7128,7 @@
               "HttpSetup"
             ],
             "path": "src/platform/plugins/shared/data_views/public/data_views_service_public.ts",
-            "lineNumber": 41,
+            "lineNumber": 42,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -7092,7 +7144,7 @@
         "label": "HasDataViewsResponse",
         "description": [],
         "path": "src/platform/plugins/shared/data_views/public/types.ts",
-        "lineNumber": 73,
+        "lineNumber": 74,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -7105,7 +7157,7 @@
             "label": "hasDataView",
             "description": [],
             "path": "src/platform/plugins/shared/data_views/public/types.ts",
-            "lineNumber": 74,
+            "lineNumber": 75,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -7118,7 +7170,7 @@
             "label": "hasUserDataView",
             "description": [],
             "path": "src/platform/plugins/shared/data_views/public/types.ts",
-            "lineNumber": 75,
+            "lineNumber": 76,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -7674,7 +7726,7 @@
         "label": "IndicesViaSearchResponse",
         "description": [],
         "path": "src/platform/plugins/shared/data_views/public/types.ts",
-        "lineNumber": 69,
+        "lineNumber": 70,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -7687,7 +7739,7 @@
             "label": "total",
             "description": [],
             "path": "src/platform/plugins/shared/data_views/public/types.ts",
-            "lineNumber": 70,
+            "lineNumber": 71,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -7703,7 +7755,7 @@
         "label": "MatchedItem",
         "description": [],
         "path": "src/platform/plugins/shared/data_views/public/types.ts",
-        "lineNumber": 142,
+        "lineNumber": 148,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -7716,7 +7768,7 @@
             "label": "name",
             "description": [],
             "path": "src/platform/plugins/shared/data_views/public/types.ts",
-            "lineNumber": 143,
+            "lineNumber": 149,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -7739,7 +7791,7 @@
               "[]"
             ],
             "path": "src/platform/plugins/shared/data_views/public/types.ts",
-            "lineNumber": 144,
+            "lineNumber": 150,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -7757,7 +7809,7 @@
               "[] | undefined; data_stream?: string | undefined; mode?: string | undefined; }"
             ],
             "path": "src/platform/plugins/shared/data_views/public/types.ts",
-            "lineNumber": 145,
+            "lineNumber": 151,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -7972,7 +8024,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "options",
-                "description": [],
+                "description": [
+                  "- client options"
+                ],
                 "path": "src/platform/plugins/shared/data_views/common/types.ts",
                 "lineNumber": 294,
                 "columnNumber": 14,
@@ -8059,7 +8113,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "options",
-                "description": [],
+                "description": [
+                  "- client options"
+                ],
                 "path": "src/platform/plugins/shared/data_views/common/types.ts",
                 "lineNumber": 304,
                 "columnNumber": 14,
@@ -8254,7 +8310,7 @@
         "label": "Tag",
         "description": [],
         "path": "src/platform/plugins/shared/data_views/public/types.ts",
-        "lineNumber": 183,
+        "lineNumber": 189,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -8267,7 +8323,7 @@
             "label": "name",
             "description": [],
             "path": "src/platform/plugins/shared/data_views/public/types.ts",
-            "lineNumber": 184,
+            "lineNumber": 190,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8280,7 +8336,7 @@
             "label": "key",
             "description": [],
             "path": "src/platform/plugins/shared/data_views/public/types.ts",
-            "lineNumber": 185,
+            "lineNumber": 191,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8293,7 +8349,7 @@
             "label": "color",
             "description": [],
             "path": "src/platform/plugins/shared/data_views/public/types.ts",
-            "lineNumber": 186,
+            "lineNumber": 192,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8327,7 +8383,7 @@
         "label": "INDEX_PATTERN_TYPE",
         "description": [],
         "path": "src/platform/plugins/shared/data_views/public/types.ts",
-        "lineNumber": 19,
+        "lineNumber": 20,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -8436,7 +8492,7 @@
           " | undefined; allowNoIndex?: boolean | undefined; namespaces?: string[] | undefined; name?: string | undefined; allowHidden?: boolean | undefined; managed?: boolean | undefined; }"
         ],
         "path": "src/platform/plugins/shared/data_views/common/types.ts",
-        "lineNumber": 497,
+        "lineNumber": 502,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -8475,7 +8531,7 @@
             "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
-          "> | undefined; esTypes?: string[] | undefined; searchable: boolean; aggregatable: boolean; isNull?: boolean | undefined; readFromDocValues?: boolean | undefined; indexed?: boolean | undefined; customLabel?: string | undefined; customDescription?: string | undefined; runtimeField?: ",
+          "> | undefined; esTypes?: string[] | undefined; searchable: boolean; aggregatable: boolean; isNull?: boolean | undefined; isComputedColumn?: boolean | undefined; readFromDocValues?: boolean | undefined; indexed?: boolean | undefined; customLabel?: string | undefined; customDescription?: string | undefined; runtimeField?: ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -8628,7 +8684,7 @@
         "\nData plugin public Setup contract"
       ],
       "path": "src/platform/plugins/shared/data_views/public/types.ts",
-      "lineNumber": 110,
+      "lineNumber": 115,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -8644,7 +8700,7 @@
             "() => void"
           ],
           "path": "src/platform/plugins/shared/data_views/public/types.ts",
-          "lineNumber": 114,
+          "lineNumber": 119,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -8672,7 +8728,7 @@
         }
       ],
       "path": "src/platform/plugins/shared/data_views/public/types.ts",
-      "lineNumber": 135,
+      "lineNumber": 141,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -8988,7 +9044,7 @@
                 "tags": [],
                 "label": "includeFields",
                 "description": [
-                  "Whether or not to include the `fields` list as part of this spec. If not included, the list\nwill be fetched from Elasticsearch when instantiating a new Data View with this spec."
+                  "Whether or not to include the `fields` list as part of this spec. If not included, the list"
                 ],
                 "signature": [
                   "boolean"
@@ -10906,7 +10962,7 @@
                 "section": "def-common.GetFieldsOptions",
                 "text": "GetFieldsOptions"
               },
-              ", \"allowNoIndex\" | \"pattern\"> | undefined) => Promise<",
+              ", \"pattern\" | \"allowNoIndex\"> | undefined) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -10971,7 +11027,7 @@
                     "section": "def-common.GetFieldsOptions",
                     "text": "GetFieldsOptions"
                   },
-                  ", \"allowNoIndex\" | \"pattern\"> | undefined"
+                  ", \"pattern\" | \"allowNoIndex\"> | undefined"
                 ],
                 "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
                 "lineNumber": 624,
@@ -11114,9 +11170,7 @@
                 "type": "Array",
                 "tags": [],
                 "label": "fields",
-                "description": [
-                  ": FieldSpec[]"
-                ],
+                "description": [],
                 "signature": [
                   {
                     "pluginId": "dataViews",
@@ -11140,9 +11194,7 @@
                 "type": "Object",
                 "tags": [],
                 "label": "fieldAttrs",
-                "description": [
-                  ": FieldAttrs"
-                ],
+                "description": [],
                 "signature": [
                   "FieldAttrsAsObject",
                   " | undefined"
@@ -11959,9 +12011,7 @@
                 "type": "string",
                 "tags": [],
                 "label": "indexPatternId",
-                "description": [
-                  ": Id of kibana Index Pattern to delete"
-                ],
+                "description": [],
                 "signature": [
                   "string"
                 ],
@@ -12086,7 +12136,9 @@
                     "type": "CompoundType",
                     "tags": [],
                     "label": "refreshFields",
-                    "description": [],
+                    "description": [
+                      "- If true, will refresh the fields of the default data view"
+                    ],
                     "signature": [
                       "boolean | undefined"
                     ],
@@ -13394,7 +13446,7 @@
             "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
-          "> | undefined; esTypes?: string[] | undefined; searchable: boolean; aggregatable: boolean; isNull?: boolean | undefined; readFromDocValues?: boolean | undefined; indexed?: boolean | undefined; customLabel?: string | undefined; customDescription?: string | undefined; runtimeField?: ",
+          "> | undefined; esTypes?: string[] | undefined; searchable: boolean; aggregatable: boolean; isNull?: boolean | undefined; isComputedColumn?: boolean | undefined; readFromDocValues?: boolean | undefined; indexed?: boolean | undefined; customLabel?: string | undefined; customDescription?: string | undefined; runtimeField?: ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -15090,10 +15142,6 @@
                 "path": "x-pack/platform/plugins/shared/dataset_quality/public/rule_types/degraded_docs/rule_form/rule_form.tsx"
               },
               {
-                "plugin": "timelines",
-                "path": "x-pack/platform/plugins/shared/timelines/server/search_strategy/index_fields/index.ts"
-              },
-              {
                 "plugin": "graph",
                 "path": "x-pack/platform/plugins/private/graph/public/state_management/datasource.test.ts"
               },
@@ -15160,6 +15208,10 @@
               {
                 "plugin": "enterpriseSearch",
                 "path": "x-pack/solutions/search/plugins/enterprise_search/public/applications/analytics/components/analytics_collection_view/analytics_collection_explore_table_formulas.ts"
+              },
+              {
+                "plugin": "timelines",
+                "path": "x-pack/solutions/security/plugins/timelines/server/search_strategy/index_fields/index.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -17903,7 +17955,7 @@
                 "tags": [],
                 "label": "includeFields",
                 "description": [
-                  "Whether or not to include the `fields` list as part of this spec. If not included, the list\nwill be fetched from Elasticsearch when instantiating a new Data View with this spec."
+                  "Whether or not to include the `fields` list as part of this spec. If not included, the list"
                 ],
                 "signature": [
                   "boolean"
@@ -18773,7 +18825,7 @@
                 "section": "def-common.SerializableRecord",
                 "text": "SerializableRecord"
               },
-              "> | undefined; esTypes?: string[] | undefined; searchable: boolean; aggregatable: boolean; isNull?: boolean | undefined; readFromDocValues?: boolean | undefined; indexed?: boolean | undefined; customLabel?: string | undefined; customDescription?: string | undefined; runtimeField?: ",
+              "> | undefined; esTypes?: string[] | undefined; searchable: boolean; aggregatable: boolean; isNull?: boolean | undefined; isComputedColumn?: boolean | undefined; readFromDocValues?: boolean | undefined; indexed?: boolean | undefined; customLabel?: string | undefined; customDescription?: string | undefined; runtimeField?: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -19446,6 +19498,21 @@
           },
           {
             "parentPluginId": "dataViews",
+            "id": "def-common.DataViewField.isComputedColumn",
+            "type": "boolean",
+            "tags": [],
+            "label": "isComputedColumn",
+            "description": [
+              "\nReturns true if the field is not part of the index and is a computed column"
+            ],
+            "path": "src/platform/plugins/shared/data_views/common/fields/data_view_field.ts",
+            "lineNumber": 342,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dataViews",
             "id": "def-common.DataViewField.isSubtypeNested",
             "type": "Function",
             "tags": [],
@@ -19457,7 +19524,7 @@
               "() => boolean"
             ],
             "path": "src/platform/plugins/shared/data_views/common/fields/data_view_field.ts",
-            "lineNumber": 342,
+            "lineNumber": 349,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -19477,7 +19544,7 @@
               "() => boolean"
             ],
             "path": "src/platform/plugins/shared/data_views/common/fields/data_view_field.ts",
-            "lineNumber": 349,
+            "lineNumber": 356,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -19505,7 +19572,7 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/data_views/common/fields/data_view_field.ts",
-            "lineNumber": 357,
+            "lineNumber": 364,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -19533,7 +19600,7 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/data_views/common/fields/data_view_field.ts",
-            "lineNumber": 365,
+            "lineNumber": 372,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -19553,7 +19620,7 @@
               "() => void"
             ],
             "path": "src/platform/plugins/shared/data_views/common/fields/data_view_field.ts",
-            "lineNumber": 373,
+            "lineNumber": 380,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -19581,7 +19648,7 @@
               " | undefined; customLabel: string | undefined; customDescription: string | undefined; defaultFormatter: string | undefined; }"
             ],
             "path": "src/platform/plugins/shared/data_views/common/fields/data_view_field.ts",
-            "lineNumber": 381,
+            "lineNumber": 388,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -19616,7 +19683,7 @@
               }
             ],
             "path": "src/platform/plugins/shared/data_views/common/fields/data_view_field.ts",
-            "lineNumber": 404,
+            "lineNumber": 411,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -19640,7 +19707,7 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/data_views/common/fields/data_view_field.ts",
-                "lineNumber": 409,
+                "lineNumber": 416,
                 "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -19664,7 +19731,7 @@
               "() => boolean"
             ],
             "path": "src/platform/plugins/shared/data_views/common/fields/data_view_field.ts",
-            "lineNumber": 444,
+            "lineNumber": 451,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -21628,7 +21695,7 @@
                 "section": "def-common.GetFieldsOptions",
                 "text": "GetFieldsOptions"
               },
-              ", \"allowNoIndex\" | \"pattern\"> | undefined) => Promise<",
+              ", \"pattern\" | \"allowNoIndex\"> | undefined) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -21693,7 +21760,7 @@
                     "section": "def-common.GetFieldsOptions",
                     "text": "GetFieldsOptions"
                   },
-                  ", \"allowNoIndex\" | \"pattern\"> | undefined"
+                  ", \"pattern\" | \"allowNoIndex\"> | undefined"
                 ],
                 "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
                 "lineNumber": 624,
@@ -21836,9 +21903,7 @@
                 "type": "Array",
                 "tags": [],
                 "label": "fields",
-                "description": [
-                  ": FieldSpec[]"
-                ],
+                "description": [],
                 "signature": [
                   {
                     "pluginId": "dataViews",
@@ -21862,9 +21927,7 @@
                 "type": "Object",
                 "tags": [],
                 "label": "fieldAttrs",
-                "description": [
-                  ": FieldAttrs"
-                ],
+                "description": [],
                 "signature": [
                   "FieldAttrsAsObject",
                   " | undefined"
@@ -22681,9 +22744,7 @@
                 "type": "string",
                 "tags": [],
                 "label": "indexPatternId",
-                "description": [
-                  ": Id of kibana Index Pattern to delete"
-                ],
+                "description": [],
                 "signature": [
                   "string"
                 ],
@@ -22808,7 +22869,9 @@
                     "type": "CompoundType",
                     "tags": [],
                     "label": "refreshFields",
-                    "description": [],
+                    "description": [
+                      "- If true, will refresh the fields of the default data view"
+                    ],
                     "signature": [
                       "boolean | undefined"
                     ],
@@ -24132,7 +24195,7 @@
                 "signature": [
                   "Pick<",
                   "Toast",
-                  ", \"prefix\" | \"onError\" | \"security\" | \"defaultValue\" | \"color\" | \"suppressHydrationWarning\" | \"className\" | \"lang\" | \"style\" | \"role\" | \"tabIndex\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-braillelabel\" | \"aria-brailleroledescription\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colindextext\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-description\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowindextext\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"children\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChange\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onErrorCapture\" | \"onKeyDown\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onResize\" | \"onResizeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClick\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerLeave\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"data-test-subj\" | \"css\" | \"onClose\" | \"defaultChecked\" | \"suppressContentEditableWarning\" | \"accessKey\" | \"autoFocus\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"hidden\" | \"nonce\" | \"slot\" | \"spellCheck\" | \"translate\" | \"radioGroup\" | \"about\" | \"content\" | \"datatype\" | \"inlist\" | \"property\" | \"rel\" | \"resource\" | \"rev\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"unselectable\" | \"inputMode\" | \"is\" | \"iconType\" | \"toastLifeTimeMs\"> & { title?: string | ",
+                  ", \"prefix\" | \"onError\" | \"security\" | \"defaultValue\" | \"color\" | \"hidden\" | \"onClose\" | \"className\" | \"aria-label\" | \"data-test-subj\" | \"css\" | \"defaultChecked\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"autoFocus\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"lang\" | \"nonce\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"content\" | \"datatype\" | \"inlist\" | \"property\" | \"rel\" | \"resource\" | \"rev\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-braillelabel\" | \"aria-brailleroledescription\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colindextext\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-description\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowindextext\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"children\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChange\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onErrorCapture\" | \"onKeyDown\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onResize\" | \"onResizeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClick\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerLeave\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"iconType\" | \"toastLifeTimeMs\"> & { title?: string | ",
                   "MountPoint",
                   "<HTMLElement> | undefined; text?: string | ",
                   "MountPoint",
@@ -25209,7 +25272,9 @@
                     "type": "CompoundType",
                     "tags": [],
                     "label": "refreshFields",
-                    "description": [],
+                    "description": [
+                      "- If true, will refresh the fields of the default data view"
+                    ],
                     "signature": [
                       "boolean | undefined"
                     ],
@@ -25274,7 +25339,7 @@
                 "section": "def-common.GetFieldsOptions",
                 "text": "GetFieldsOptions"
               },
-              ", \"allowNoIndex\" | \"pattern\"> | undefined) => Promise<",
+              ", \"pattern\" | \"allowNoIndex\"> | undefined) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -25339,7 +25404,7 @@
                     "section": "def-common.GetFieldsOptions",
                     "text": "GetFieldsOptions"
                   },
-                  ", \"allowNoIndex\" | \"pattern\"> | undefined"
+                  ", \"pattern\" | \"allowNoIndex\"> | undefined"
                 ],
                 "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
                 "lineNumber": 258,
@@ -26687,7 +26752,7 @@
         "label": "HasDataService",
         "description": [],
         "path": "src/platform/plugins/shared/data_views/common/types.ts",
-        "lineNumber": 577,
+        "lineNumber": 582,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -26703,7 +26768,7 @@
               "() => Promise<boolean>"
             ],
             "path": "src/platform/plugins/shared/data_views/common/types.ts",
-            "lineNumber": 578,
+            "lineNumber": 583,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -26721,7 +26786,7 @@
               "() => Promise<boolean>"
             ],
             "path": "src/platform/plugins/shared/data_views/common/types.ts",
-            "lineNumber": 579,
+            "lineNumber": 584,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -26739,7 +26804,7 @@
               "() => Promise<boolean>"
             ],
             "path": "src/platform/plugins/shared/data_views/common/types.ts",
-            "lineNumber": 580,
+            "lineNumber": 585,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -27686,7 +27751,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "options",
-                "description": [],
+                "description": [
+                  "- client options"
+                ],
                 "path": "src/platform/plugins/shared/data_views/common/types.ts",
                 "lineNumber": 294,
                 "columnNumber": 14,
@@ -27773,7 +27840,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "options",
-                "description": [],
+                "description": [
+                  "- client options"
+                ],
                 "path": "src/platform/plugins/shared/data_views/common/types.ts",
                 "lineNumber": 304,
                 "columnNumber": 14,
@@ -28912,7 +28981,7 @@
           "; }"
         ],
         "path": "src/platform/plugins/shared/data_views/common/types.ts",
-        "lineNumber": 495,
+        "lineNumber": 500,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -29059,7 +29128,7 @@
             "section": "def-common.GetFieldsOptions",
             "text": "GetFieldsOptions"
           },
-          ", \"allowNoIndex\" | \"pattern\"> | undefined) => Promise<",
+          ", \"pattern\" | \"allowNoIndex\"> | undefined) => Promise<",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -29311,7 +29380,7 @@
           " | undefined; allowNoIndex?: boolean | undefined; namespaces?: string[] | undefined; name?: string | undefined; allowHidden?: boolean | undefined; managed?: boolean | undefined; }"
         ],
         "path": "src/platform/plugins/shared/data_views/common/types.ts",
-        "lineNumber": 497,
+        "lineNumber": 502,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -29429,7 +29498,7 @@
             "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
-          "> | undefined; esTypes?: string[] | undefined; searchable: boolean; aggregatable: boolean; isNull?: boolean | undefined; readFromDocValues?: boolean | undefined; indexed?: boolean | undefined; customLabel?: string | undefined; customDescription?: string | undefined; runtimeField?: ",
+          "> | undefined; esTypes?: string[] | undefined; searchable: boolean; aggregatable: boolean; isNull?: boolean | undefined; isComputedColumn?: boolean | undefined; readFromDocValues?: boolean | undefined; indexed?: boolean | undefined; customLabel?: string | undefined; customDescription?: string | undefined; runtimeField?: ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -29670,7 +29739,7 @@
             "signature": [
               "Pick<",
               "Toast",
-              ", \"prefix\" | \"onError\" | \"security\" | \"defaultValue\" | \"color\" | \"suppressHydrationWarning\" | \"className\" | \"lang\" | \"style\" | \"role\" | \"tabIndex\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-braillelabel\" | \"aria-brailleroledescription\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colindextext\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-description\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowindextext\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"children\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChange\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onErrorCapture\" | \"onKeyDown\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onResize\" | \"onResizeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClick\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerLeave\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"data-test-subj\" | \"css\" | \"onClose\" | \"defaultChecked\" | \"suppressContentEditableWarning\" | \"accessKey\" | \"autoFocus\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"hidden\" | \"nonce\" | \"slot\" | \"spellCheck\" | \"translate\" | \"radioGroup\" | \"about\" | \"content\" | \"datatype\" | \"inlist\" | \"property\" | \"rel\" | \"resource\" | \"rev\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"unselectable\" | \"inputMode\" | \"is\" | \"iconType\" | \"toastLifeTimeMs\"> & { title?: string | ",
+              ", \"prefix\" | \"onError\" | \"security\" | \"defaultValue\" | \"color\" | \"hidden\" | \"onClose\" | \"className\" | \"aria-label\" | \"data-test-subj\" | \"css\" | \"defaultChecked\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"autoFocus\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"lang\" | \"nonce\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"content\" | \"datatype\" | \"inlist\" | \"property\" | \"rel\" | \"resource\" | \"rev\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-braillelabel\" | \"aria-brailleroledescription\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colindextext\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-description\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowindextext\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"children\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChange\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onErrorCapture\" | \"onKeyDown\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onResize\" | \"onResizeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClick\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerLeave\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"iconType\" | \"toastLifeTimeMs\"> & { title?: string | ",
               "MountPoint",
               "<HTMLElement> | undefined; text?: string | ",
               "MountPoint",
@@ -29827,7 +29896,7 @@
           "{ value: string; clientId?: string | number | undefined; }"
         ],
         "path": "src/platform/plugins/shared/data_views/common/types.ts",
-        "lineNumber": 572,
+        "lineNumber": 577,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

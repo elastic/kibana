@@ -10,8 +10,8 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { RuleForm, useRuleTemplate } from '@kbn/response-ops-rule-form';
 import { AlertConsumers, getRuleDetailsRoute, getRulesAppDetailsRoute } from '@kbn/rule-data-utils';
 import { useLocation, useParams, useHistory } from 'react-router-dom';
-import useObservable from 'react-use/lib/useObservable';
 import { useKibana } from '../../../common/lib/kibana';
+import { getIsExperimentalFeatureEnabled } from '../../../common/get_experimental_features';
 import { getAlertingSectionBreadcrumb } from '../../lib/breadcrumb';
 import { getCurrentDocTitle } from '../../lib/doc_title';
 import { RuleTemplateError } from './components/rule_template_error';
@@ -36,9 +36,8 @@ export const RuleFormRoute = () => {
     setBreadcrumbs,
     ...startServices
   } = useKibana().services;
-  const { currentAppId$, navigateToApp, getUrlForApp } = application;
-  const currentAppId = useObservable(currentAppId$, undefined);
-  const isInRulesApp = currentAppId === 'rules';
+  const { navigateToApp, getUrlForApp } = application;
+  const useUnifiedRulesPage = getIsExperimentalFeatureEnabled('unifiedRulesPage');
 
   const location = useLocation<{ returnApp?: string; returnPath?: string }>();
   const history = useHistory();
@@ -70,7 +69,7 @@ export const RuleFormRoute = () => {
   // Set breadcrumb and page title
   useEffect(() => {
     const rulesBreadcrumb = getAlertingSectionBreadcrumb('rules', true);
-    const breadcrumbHref = isInRulesApp
+    const breadcrumbHref = useUnifiedRulesPage
       ? getUrlForApp('rules', { path: '/' })
       : getUrlForApp('management', { path: 'insightsAndAlerting/triggersActions/rules' });
 
@@ -88,7 +87,7 @@ export const RuleFormRoute = () => {
       chrome.docTitle.change(getCurrentDocTitle('createRule'));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ruleTypeId, templateId, id, getUrlForApp, isInRulesApp]);
+  }, [ruleTypeId, templateId, id, getUrlForApp, useUnifiedRulesPage]);
 
   if (isLoadingRuleTemplate) {
     return <CenterJustifiedSpinner />;
@@ -121,29 +120,26 @@ export const RuleFormRoute = () => {
         id={id}
         ruleTypeId={ruleTypeId}
         onCancel={() => {
-          if (isInRulesApp) {
-            // Use history.push when in rules app
-            // Use returnPath if available, otherwise default to root
+          if (useUnifiedRulesPage) {
             history.push(returnPath || '/');
           } else if (returnApp && returnPath) {
-            // Navigate to other apps using navigateToApp
             navigateToApp(returnApp, { path: returnPath });
           } else {
-            // Default: navigate to management app rules list
             navigateToApp('management', {
               path: `insightsAndAlerting/triggersActions/rules`,
             });
           }
         }}
         onSubmit={(ruleId) => {
-          if (isInRulesApp) {
-            // Navigate to rule details page in the rules app using history.push
-            history.push(getRulesAppDetailsRoute(ruleId));
+          if (useUnifiedRulesPage) {
+            if (id && returnPath) {
+              history.push(returnPath);
+            } else {
+              history.push(getRulesAppDetailsRoute(ruleId));
+            }
           } else if (returnApp && returnPath) {
-            // Navigate back to the original app/path for other apps
             navigateToApp(returnApp, { path: returnPath });
           } else {
-            // Default: navigate to management app rule details (existing behavior)
             navigateToApp('management', {
               path: `insightsAndAlerting/triggersActions/${getRuleDetailsRoute(ruleId)}`,
             });

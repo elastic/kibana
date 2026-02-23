@@ -8,19 +8,20 @@
  */
 
 import React from 'react';
-import { v4 as uuidV4 } from 'uuid';
 import { render } from 'react-dom';
+import { v4 as uuidV4 } from 'uuid';
+
+import { EuiFlyout, getFlyoutManagerStore, type EuiFlyoutMenuProps } from '@elastic/eui';
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
-import type { ThemeServiceStart } from '@kbn/core-theme-browser';
-import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { OverlayRef } from '@kbn/core-mount-utils-browser';
 import type {
   OverlaySystemFlyoutOpenOptions,
   OverlaySystemFlyoutStart,
 } from '@kbn/core-overlays-browser';
+import type { ThemeServiceStart } from '@kbn/core-theme-browser';
+import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { EuiFlyout } from '@elastic/eui';
 import { SystemFlyoutRef } from './system_flyout_ref';
 
 interface SystemFlyoutStartDeps {
@@ -53,6 +54,7 @@ export class SystemFlyoutService {
         content: React.ReactElement,
         { session = 'start', title, ...options }: OverlaySystemFlyoutOpenOptions = {}
       ): OverlayRef => {
+        const { flyoutMenuProps } = options;
         const flyoutId = `system-flyout-${uuidV4()}`;
 
         // Create a container for this flyout within the main React tree
@@ -75,8 +77,43 @@ export class SystemFlyoutService {
           flyoutRef.close();
         };
 
-        // Render the flyout content using EuiFlyout with session="start"
-        // This ensures full EUI Flyout System integration as a new MAIN flyout.
+        // title and other flyoutMenuProps: flyoutMenuProps.title takes precedence over top-level title
+        let mergedFlyoutMenuProps: EuiFlyoutMenuProps | undefined;
+        if (title || flyoutMenuProps) {
+          mergedFlyoutMenuProps = { title, ...flyoutMenuProps };
+        }
+
+        // Subscribe to EUI flyout manager store to detect cascade closes
+        // This ensures child flyouts close when their parent closes, even across separate React roots
+        if (session !== 'never') {
+          // Use the EUI flyout ID (from options.id) for store lookups, not our internal container ID
+          const euiFlyoutId = options.id || flyoutId;
+
+          const { subscribeToEvents } = getFlyoutManagerStore();
+
+          const unsubscribe = subscribeToEvents((event) => {
+            if (event.type !== 'CLOSE_SESSION') {
+              return;
+            }
+
+            const { mainFlyoutId, childFlyoutId } = event.session;
+            const shouldClose = euiFlyoutId === mainFlyoutId || euiFlyoutId === childFlyoutId;
+
+            if (shouldClose && !flyoutRef.isClosed) {
+              flyoutRef.close();
+              unsubscribe();
+              this.activeFlyouts.delete(flyoutId);
+            }
+          });
+
+          // Clean up subscription when flyout closes normally
+          flyoutRef.onClose.then(() => {
+            unsubscribe();
+          });
+        }
+
+        // Render the flyout content using EuiFlyout with session management
+        // This ensures full EUI Flyout System integration
         render(
           <KibanaRenderContextProvider
             analytics={analytics}
@@ -86,7 +123,7 @@ export class SystemFlyoutService {
           >
             <EuiFlyout
               {...options}
-              flyoutMenuProps={{ title }}
+              flyoutMenuProps={mergedFlyoutMenuProps}
               session={session}
               onClose={onCloseFlyout}
               aria-label={options['aria-label']}

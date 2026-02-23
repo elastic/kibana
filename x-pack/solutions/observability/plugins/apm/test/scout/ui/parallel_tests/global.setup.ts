@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { globalSetupHook } from '@kbn/scout-oblt';
+import { globalSetupHook, tags } from '@kbn/scout-oblt';
 import type { ApmFields, SynthtraceGenerator } from '@kbn/synthtrace-client';
 import { opbeans } from '../fixtures/synthtrace/opbeans';
 import { servicesDataFromTheLast24Hours } from '../fixtures/synthtrace/last_24_hours';
@@ -14,21 +14,15 @@ import { generateSpanStacktraceData } from '../fixtures/synthtrace/generate_span
 import { otelSendotlp } from '../fixtures/synthtrace/otel_sendotlp';
 import { adserviceEdot } from '../fixtures/synthtrace/adservice_edot';
 import { mobileServices } from '../fixtures/synthtrace/mobile_services';
+import { awsLambda } from '../fixtures/synthtrace/aws_lambda';
 import { testData } from '../fixtures';
 import { serviceDataWithRecentErrors } from '../fixtures/synthtrace/recent_errors';
 
-globalSetupHook.setTimeout(2 * 60 * 1000); // 2 minutes
-
 globalSetupHook(
   'Ingest data to Elasticsearch',
-  { tag: ['@ess', '@svlOblt'] },
-  async ({ apmSynthtraceEsClient, apiServices, log, config, esClient, kbnClient }) => {
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+  async ({ apmSynthtraceEsClient, apiServices, log, config, esClient }) => {
     const startTime = Date.now();
-
-    // disable solution tour on ECH
-    if (config.isCloud && !config.serverless) {
-      await kbnClient.uiSettings.update({ showSpaceSolutionTour: false });
-    }
     if (!config.isCloud) {
       await apiServices.fleet.internal.setup();
       log.info('Fleet infrastructure setup completed');
@@ -76,6 +70,14 @@ globalSetupHook(
     });
     await apmSynthtraceEsClient.index(mobileData);
     log.info('Mobile services data indexed');
+
+    // Generate AWS Lambda service data for cold start chart tests
+    const awsLambdaData = awsLambda({
+      from: new Date(testData.START_DATE).getTime(),
+      to: new Date(testData.END_DATE).getTime(),
+    });
+    await apmSynthtraceEsClient.index(awsLambdaData);
+    log.info('AWS Lambda service data indexed');
 
     log.info('Cleaning up APM ML indices before running the APM tests');
     const jobs = await esClient.ml.getJobs();

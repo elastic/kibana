@@ -27,7 +27,9 @@ import { emitFilterToggle, isFilterActiveForScope } from '../../filters/filter_s
  */
 export const useEntityNodeExpandPopover = (
   scopeId: string,
-  onOpenEventPreview?: (node: NodeViewModel) => void
+  onOpenEventPreview?: (node: NodeViewModel) => void,
+  expandedEntityIds?: Set<string>,
+  onToggleEntityRelationships?: (node: NodeProps, action: 'show' | 'hide') => void
 ) => {
   const itemsFn = useCallback(
     (node: NodeProps) => {
@@ -43,6 +45,8 @@ export const useEntityNodeExpandPopover = (
         isFilterActive: (field, value) => isFilterActiveForScope(scopeId, field, value),
         toggleFilter: (field, value, action) => emitFilterToggle(scopeId, field, value, action),
         shouldRender: {
+          // Entity relationships only for single-entity mode when full feature set is active
+          showEntityRelationships: isSingleEntity && onOpenEventPreview !== undefined,
           // Filter actions only for single-entity mode
           showActionsByEntity: isSingleEntity,
           showActionsOnEntity: isSingleEntity,
@@ -51,18 +55,22 @@ export const useEntityNodeExpandPopover = (
           showEntityDetails:
             (isSingleEntity || isGroupedEntities) && onOpenEventPreview !== undefined,
         },
+        // Entity relationships state
+        isEntityRelationshipsExpanded: expandedEntityIds?.has(node.id) ?? false,
+        onToggleEntityRelationships: onToggleEntityRelationships
+          ? (action) => onToggleEntityRelationships(node, action)
+          : undefined,
+        showEntityRelationshipsDisabled: !isEnriched || !onToggleEntityRelationships,
         // Disable entity details if not enriched (single-entity mode)
         showEntityDetailsDisabled: isSingleEntity && !isEnriched,
       });
     },
-    [scopeId, onOpenEventPreview]
+    [scopeId, onOpenEventPreview, expandedEntityIds, onToggleEntityRelationships]
   );
 
-  const entityNodeExpandPopover = useNodeExpandPopover({
+  return useNodeExpandPopover({
     id: 'entity-node-expand-popover',
     itemsFn,
     testSubject: GRAPH_NODE_EXPAND_POPOVER_TEST_ID,
   });
-
-  return entityNodeExpandPopover;
 };

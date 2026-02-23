@@ -14,6 +14,7 @@ import type {
   AttachmentVersionRef,
 } from '../attachments';
 import type { PromptRequest, PromptResponse, PromptStorageState } from '../agents/prompts';
+import type { RuntimeAgentConfigurationOverrides } from '../agents/definition';
 import type { RoundState } from './round_state';
 
 /**
@@ -198,6 +199,8 @@ export interface ConversationRound {
   model_usage: RoundModelUsageStats;
   /** when tracing is enabled, contains the traceId associated with this round */
   trace_id?: string | string[];
+  /** Runtime configuration overrides that were applied to this round */
+  configuration_overrides?: RuntimeAgentConfigurationOverrides;
 }
 
 export interface RoundModelUsageStats {
@@ -259,6 +262,13 @@ export interface Conversation {
  */
 export interface ConversationInternalState {
   prompt?: PromptStorageState;
+  /**
+   * Dynamic tool IDs that were added during conversation rounds.
+   * These tools are persisted across rounds so they remain available.
+   */
+  dynamic_tool_ids?: string[];
 }
 
 export type ConversationWithoutRounds = Omit<Conversation, 'rounds'>;
+
+export type ConversationAction = 'regenerate';

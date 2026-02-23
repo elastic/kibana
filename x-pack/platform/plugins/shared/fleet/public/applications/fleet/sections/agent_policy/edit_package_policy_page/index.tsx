@@ -40,13 +40,17 @@ import {
   EuiButtonWithTooltip,
   DevtoolsRequestFlyoutButton,
 } from '../../../components';
-import { ConfirmDeployAgentPolicyModal } from '../components';
+import { ConfirmDeployAgentPolicyModal, IncompatibleAgentVersionCallout } from '../components';
 import { CreatePackagePolicySinglePageLayout } from '../create_package_policy_page/single_page_layout/components';
 import type { EditPackagePolicyFrom } from '../create_package_policy_page/types';
 import {
   StepConfigurePackagePolicy,
   StepDefinePackagePolicy,
 } from '../create_package_policy_page/components';
+import {
+  computeDefaultVarGroupSelections,
+  type VarGroupSelection,
+} from '../create_package_policy_page/services';
 import type { AgentPolicy, PackagePolicyEditExtensionComponentProps } from '../../../types';
 import { pkgKeyFromPackageInfo } from '../../../services';
 
@@ -67,6 +71,7 @@ import { UpgradeStatusCallout } from './components';
 import { usePackagePolicyWithRelatedData, useHistoryBlock } from './hooks';
 import { getNewSecrets } from './utils';
 import { usePackagePolicySteps } from './hooks';
+import { useIncompatibleAgentVersionStatus } from '../../../hooks/use_incompatible_agent_version_status';
 
 export const EditPackagePolicyPage = memo(() => {
   const {
@@ -147,6 +152,14 @@ export const EditPackagePolicyForm = memo<{
     [existingAgentPolicies, isAgentlessAgentPolicy, packageInfo, isAgentlessIntegration]
   );
 
+  // Derive var_group_selections from policy for edit mode
+  const varGroupSelections = useMemo((): VarGroupSelection => {
+    if (packagePolicy.var_group_selections) {
+      return packagePolicy.var_group_selections;
+    }
+    return computeDefaultVarGroupSelections(packageInfo?.var_groups, hasAgentlessAgentPolicy);
+  }, [packagePolicy.var_group_selections, packageInfo?.var_groups, hasAgentlessAgentPolicy]);
+
   const canWriteIntegrationPolicies = useAuthz().integrations.writeIntegrationPolicies;
   useSetIsReadOnly(!canWriteIntegrationPolicies);
   const newSecrets = useMemo(() => {
@@ -200,6 +213,15 @@ export const EditPackagePolicyForm = memo<{
     [agentPoliciesToRemove]
   );
 
+  const selectedExistingPolicies = useMemo(() => {
+    return existingAgentPolicies.filter((existingPolicy) =>
+      agentPolicies.find((policy) => policy.id === existingPolicy.id)
+    );
+  }, [agentPolicies, existingAgentPolicies]);
+  const incompatibleAgentVersion = useIncompatibleAgentVersionStatus(
+    packageInfo,
+    selectedExistingPolicies
+  );
   // Retrieve agent count
   const [agentCount, setAgentCount] = useState<number>(0);
   const [impactedAgentCount, setImpactedAgentCount] = useState<number>(0);
@@ -436,6 +458,7 @@ export const EditPackagePolicyForm = memo<{
               validationResults={validationResults}
               submitAttempted={formState === 'INVALID'}
               isEditPage={true}
+              isAgentlessSelected={hasAgentlessAgentPolicy}
             />
           )}
 
@@ -448,6 +471,8 @@ export const EditPackagePolicyForm = memo<{
               validationResults={validationResults}
               submitAttempted={formState === 'INVALID'}
               isEditPage={true}
+              isAgentlessSelected={hasAgentlessAgentPolicy}
+              varGroupSelections={varGroupSelections}
             />
           )}
 
@@ -475,16 +500,18 @@ export const EditPackagePolicyForm = memo<{
       ) : null,
     [
       agentPolicies,
+      extensionView,
+      formState,
+      handleExtensionViewOnChange,
+      hasAgentlessAgentPolicy,
+      originalPackagePolicy,
       packageInfo,
       packagePolicy,
-      updatePackagePolicy,
-      validationResults,
-      formState,
-      originalPackagePolicy,
-      extensionView,
-      handleExtensionViewOnChange,
       selectedTab,
       tabsViews,
+      updatePackagePolicy,
+      validationResults,
+      varGroupSelections,
     ]
   );
 
@@ -575,6 +602,15 @@ export const EditPackagePolicyForm = memo<{
                 <EuiSpacer size="m" />
               </>
             ) : null}
+            {incompatibleAgentVersion.status !== 'NONE' && (
+              <>
+                <IncompatibleAgentVersionCallout
+                  incompatibility={incompatibleAgentVersion.status}
+                  versionCondition={incompatibleAgentVersion.versionCondition}
+                />
+                <EuiSpacer size="m" />
+              </>
+            )}
             {isUpgrade && upgradeDryRunData && (
               <>
                 <UpgradeStatusCallout dryRunData={upgradeDryRunData} newSecrets={newSecrets} />

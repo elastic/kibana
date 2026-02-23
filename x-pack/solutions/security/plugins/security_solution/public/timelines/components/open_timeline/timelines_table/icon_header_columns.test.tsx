@@ -8,16 +8,13 @@
 import { cloneDeep, omit } from 'lodash/fp';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
-import { ThemeProvider } from 'styled-components';
 
 import { mockTimelineResults } from '../../../../common/mock/timeline_results';
 import type { TimelinesTableProps } from '.';
 import { TimelinesTable } from '.';
 import type { OpenTimelineResult } from '../types';
 import { getMockTimelinesTableProps } from './mocks';
-import { getMockTheme } from '../../../../common/lib/kibana/kibana_react.mock';
-
-const mockTheme = getMockTheme({ eui: { euiColorMediumShade: '#ece' } });
+import { TestProvidersComponent } from '../../../../common/mock';
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -30,9 +27,9 @@ describe('#getActionsColumns', () => {
 
   test('it renders the pinned events header icon', () => {
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
+      <TestProvidersComponent>
         <TimelinesTable {...getMockTimelinesTableProps(mockResults)} />
-      </ThemeProvider>
+      </TestProvidersComponent>
     );
 
     expect(wrapper.find('[data-test-subj="pinned-event-header-icon"]').exists()).toBe(true);
@@ -44,9 +41,9 @@ describe('#getActionsColumns', () => {
       ...getMockTimelinesTableProps(with6Events),
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
+      <TestProvidersComponent>
         <TimelinesTable {...testProps} />
-      </ThemeProvider>
+      </TestProvidersComponent>
     );
 
     expect(wrapper.find('[data-test-subj="pinned-event-count"]').text()).toEqual('6');
@@ -54,9 +51,9 @@ describe('#getActionsColumns', () => {
 
   test('it renders the notes count header icon', () => {
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
+      <TestProvidersComponent>
         <TimelinesTable {...getMockTimelinesTableProps(mockResults)} />
-      </ThemeProvider>
+      </TestProvidersComponent>
     );
 
     expect(wrapper.find('[data-test-subj="notes-count-header-icon"]').exists()).toBe(true);
@@ -68,9 +65,9 @@ describe('#getActionsColumns', () => {
       ...getMockTimelinesTableProps(with4Notes),
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
+      <TestProvidersComponent>
         <TimelinesTable {...testProps} />
-      </ThemeProvider>
+      </TestProvidersComponent>
     );
 
     expect(wrapper.find('[data-test-subj="notes-count"]').text()).toEqual('4');
@@ -78,9 +75,9 @@ describe('#getActionsColumns', () => {
 
   test('it renders the favorites header icon', () => {
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
+      <TestProvidersComponent>
         <TimelinesTable {...getMockTimelinesTableProps(mockResults)} />
-      </ThemeProvider>
+      </TestProvidersComponent>
     );
 
     expect(wrapper.find('[data-test-subj="favorites-header-icon"]').exists()).toBe(true);
@@ -92,9 +89,9 @@ describe('#getActionsColumns', () => {
       ...getMockTimelinesTableProps(undefinedFavorite),
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
+      <TestProvidersComponent>
         <TimelinesTable {...testProps} />
-      </ThemeProvider>
+      </TestProvidersComponent>
     );
 
     expect(wrapper.find('[data-test-subj="favorite-starEmpty-star"]').exists()).toBe(true);
@@ -106,9 +103,9 @@ describe('#getActionsColumns', () => {
       ...getMockTimelinesTableProps(nullFavorite),
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
+      <TestProvidersComponent>
         <TimelinesTable {...testProps} />
-      </ThemeProvider>
+      </TestProvidersComponent>
     );
 
     expect(wrapper.find('[data-test-subj="favorite-starEmpty-star"]').exists()).toBe(true);
@@ -120,9 +117,9 @@ describe('#getActionsColumns', () => {
       ...getMockTimelinesTableProps(emptyFavorite),
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
+      <TestProvidersComponent>
         <TimelinesTable {...testProps} />
-      </ThemeProvider>
+      </TestProvidersComponent>
     );
 
     expect(wrapper.find('[data-test-subj="favorite-starEmpty-star"]').exists()).toBe(true);
@@ -145,9 +142,9 @@ describe('#getActionsColumns', () => {
       ...getMockTimelinesTableProps(favorite),
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
+      <TestProvidersComponent>
         <TimelinesTable {...testProps} />
-      </ThemeProvider>
+      </TestProvidersComponent>
     );
 
     expect(wrapper.find('[data-test-subj="favorite-starFilled-star"]').exists()).toBe(true);
@@ -174,9 +171,9 @@ describe('#getActionsColumns', () => {
       ...getMockTimelinesTableProps(favorite),
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
+      <TestProvidersComponent>
         <TimelinesTable {...testProps} />
-      </ThemeProvider>
+      </TestProvidersComponent>
     );
 
     expect(wrapper.find('[data-test-subj="favorite-starFilled-star"]').exists()).toBe(true);

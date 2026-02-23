@@ -201,6 +201,31 @@ describe('ServiceCard', () => {
       });
     });
 
+    it('should call onRotateApiKey when Rotate API key is clicked in popover', async () => {
+      const onRotateApiKey = jest.fn();
+      renderWithIntl(
+        <ServiceCard
+          {...defaultProps}
+          enabled={true}
+          serviceUrl="https://example.com"
+          onRotateApiKey={onRotateApiKey}
+        />
+      );
+
+      const moreActionsButton = screen.getByRole('button', { name: /more actions/i });
+      await userEvent.click(moreActionsButton);
+
+      const rotateMenuItem = await screen.findByRole('button', { name: /rotate api key/i });
+      await userEvent.click(rotateMenuItem);
+
+      expect(onRotateApiKey).toHaveBeenCalledTimes(1);
+
+      // Popover should close after clicking
+      await waitFor(() => {
+        expect(screen.queryByText(/rotate api key/i)).not.toBeInTheDocument();
+      });
+    });
+
     it('should call onOpen when Open button is clicked', async () => {
       const onOpen = jest.fn();
       renderWithIntl(

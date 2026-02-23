@@ -17,7 +17,7 @@ import { useDatePickerContext } from '../hooks/use_date_picker';
 import { extractRangeFromChartFilterEvent } from './chart_utils';
 import { useReloadRequestTimeContext } from '../../../hooks/use_reload_request_time';
 
-export type ChartProps = Pick<LensChartProps, 'overrides'> & {
+export type ChartProps = Pick<LensChartProps, 'overrides' | 'dataTestSubj'> & {
   id: string;
   queryField: string;
   dateRange: TimeRange;
@@ -34,6 +34,7 @@ export const Chart = ({
   entityId,
   lensAttributes,
   dataView,
+  dataTestSubj,
 }: ChartProps) => {
   const { setDateRange } = useDatePickerContext();
   const { reloadRequestTime } = useReloadRequestTimeContext();
@@ -90,6 +91,7 @@ export const Chart = ({
       overrides={overrides}
       onBrushEnd={handleBrushEnd}
       onFilter={handleFilter}
+      dataTestSubj={dataTestSubj}
     />
   );
 };

@@ -445,6 +445,9 @@ export class ForecastsTable extends Component {
           compressed={true}
           items={forecasts}
           columns={columns}
+          tableCaption={i18n.translate('xpack.ml.jobsList.jobDetails.forecastsTable.tableCaption', {
+            defaultMessage: 'Forecasts run on this job',
+          })}
           pagination={{
             pageSizeOptions: [5, 10, 25],
           }}

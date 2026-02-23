@@ -14,7 +14,7 @@ import type { AIFeatures } from '../../hooks/use_ai_features';
 import { useStreamSystemsApi } from '../../hooks/use_stream_systems_api';
 import { useTaskPolling } from '../../hooks/use_task_polling';
 import { StreamSystemsFlyout } from '../stream_detail_systems/stream_systems/stream_systems_flyout';
-import { ConnectorListButton } from '../connector_list_button/connector_list_button';
+import { ConnectorListButtonBase } from '../connector_list_button/connector_list_button';
 
 interface SystemIdentificationControlProps {
   definition: Streams.all.Definition;
@@ -45,7 +45,12 @@ export function SystemIdentificationControl({
   useEffect(() => {
     getTask();
   }, [getTask]);
-  useTaskPolling(task, getSystemIdentificationStatus, getTask);
+  const { cancelTask, isCancellingTask } = useTaskPolling({
+    task,
+    onPoll: getSystemIdentificationStatus,
+    onRefresh: getTask,
+    onCancel: cancelSystemIdentificationTask,
+  });
 
   const flyout = isFlyoutVisible && (
     <StreamSystemsFlyout
@@ -87,7 +92,8 @@ export function SystemIdentificationControl({
   }
 
   const triggerButton = (
-    <ConnectorListButton
+    <ConnectorListButtonBase
+      aiFeatures={aiFeatures}
       buttonProps={{
         size: 'm',
         iconType: 'sparkles',
@@ -118,13 +124,13 @@ export function SystemIdentificationControl({
     return triggerButton;
   }
 
-  if (task.status === 'in_progress') {
+  if (task.status === 'in_progress' && !isCancellingTask) {
     return (
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiButton
             iconType="sparkle"
-            iconSide="right"
+            iconSide="left"
             isLoading={true}
             data-test-subj="system_identification_identify_systems_button"
           >
@@ -139,11 +145,7 @@ export function SystemIdentificationControl({
         <EuiFlexItem>
           <EuiButtonEmpty
             data-test-subj="system_identification_cancel_system_identification_button"
-            onClick={() => {
-              cancelSystemIdentificationTask().then(() => {
-                getTask();
-              });
-            }}
+            onClick={cancelTask}
           >
             {i18n.translate(
               'xpack.streams.streamDetailView.cancelSystemIdentificationButtonLabel',
@@ -157,13 +159,14 @@ export function SystemIdentificationControl({
     );
   }
 
-  if (task.status === 'being_canceled') {
+  if (isCancellingTask) {
     return (
-      <ConnectorListButton
+      <ConnectorListButtonBase
+        aiFeatures={aiFeatures}
         buttonProps={{
           size: 'm',
           iconType: 'sparkles',
-          iconSide: 'right',
+          iconSide: 'left',
           isDisabled: true,
           isLoading: true,
           'data-test-subj': 'system_identification_identify_systems_button',

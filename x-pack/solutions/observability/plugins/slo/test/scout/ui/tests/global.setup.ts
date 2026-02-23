@@ -5,17 +5,13 @@
  * 2.0.
  */
 
-import { globalSetupHook } from '@kbn/scout-oblt';
+import { globalSetupHook, tags } from '@kbn/scout-oblt';
 
 globalSetupHook(
   'Setup environment for SLO tests',
-  { tag: ['@ess', '@svlOblt'] },
-  async ({ kbnClient, log, config, sloData }) => {
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+  async ({ sloData }) => {
     await sloData.generateSloData();
     await sloData.addSLO();
-    log.debug('[setup] Disabling solution tour...');
-    if (config.isCloud && !config.serverless) {
-      await kbnClient.uiSettings.update({ showSpaceSolutionTour: false });
-    }
   }
 );

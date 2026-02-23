@@ -72,7 +72,8 @@ export function buildElasticsearchRequest(
     }
 
     // Build body and query parameters
-    const body: Record<string, unknown> = {};
+    let body: Record<string, unknown> = {};
+    let bulkBody: Array<Record<string, unknown>> | undefined;
     const queryParams: Record<string, string> = {};
 
     for (const [key, value] of Object.entries(params)) {
@@ -105,11 +106,21 @@ export function buildElasticsearchRequest(
       }
     }
 
+    if (stepType === 'elasticsearch.index' && 'document' in params) {
+      body = params.document as Record<string, unknown>;
+    }
+
+    if (stepType === 'elasticsearch.bulk' && 'operations' in params) {
+      bulkBody = buildBulkBody(params.operations as Array<Record<string, unknown>>);
+      body = {};
+    }
+
     const result: RequestOptions = {
       method,
       path: `/${selectedPattern}`,
       body: Object.keys(body).length > 0 ? body : undefined,
       query: Object.keys(queryParams).length > 0 ? queryParams : undefined,
+      bulkBody: bulkBody ?? undefined,
     };
 
     // console.log('DEBUG - Final request:', JSON.stringify(result, null, 2));
@@ -165,4 +176,24 @@ function selectBestPattern(patterns: string[], params: Record<string, unknown>):
   }
 
   return bestPattern;
+}
+
+const OPERATION_TYPES = ['index', 'create', 'update', 'delete'];
+function buildBulkBody(operations: Array<Record<string, unknown>>): Array<Record<string, unknown>> {
+  // check if all operations are documents, not operation rows like index, create, update, delete
+  const isDocuments = operations.every(
+    (operation) => !Object.keys(operation).every((key) => OPERATION_TYPES.includes(key))
+  );
+  // backward compatibility with the old format
+  if (isDocuments) {
+    return operations.flatMap((doc) => {
+      return [
+        {
+          index: {},
+        },
+        doc,
+      ];
+    });
+  }
+  return operations;
 }

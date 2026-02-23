@@ -17,6 +17,8 @@ import {
   GRAPH_NODE_POPOVER_SHOW_ACTIONS_ON_ITEM_ID,
   GRAPH_NODE_POPOVER_SHOW_RELATED_ITEM_ID,
   GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID,
+  GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID,
+  GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_TOOLTIP_ID,
 } from '../../test_ids';
 import {
   __clearEmittedFilterEvents,
@@ -32,6 +34,8 @@ jest.mock('../../filters/filter_store', () => {
     isFilterActiveForScope: jest.fn(() => false),
   };
 });
+
+const mockOnToggleEntityRelationships = jest.fn();
 
 const mockIsFilterActiveForScope = isFilterActiveForScope as jest.MockedFunction<
   typeof isFilterActiveForScope
@@ -160,23 +164,28 @@ describe('useEntityNodeExpandPopover', () => {
       expect(capturedItemsFn).not.toBeNull();
       const items = capturedItemsFn!(node);
 
-      expect(items).toHaveLength(5); // 4 items + 1 separator
+      // 6 items: entity relationships, actions by, actions on, related, separator, entity details
+      expect(items).toHaveLength(6);
       expect(items[0]).toMatchObject({
         type: 'item',
-        testSubject: GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID,
+        testSubject: GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID,
       });
       expect(items[1]).toMatchObject({
         type: 'item',
-        testSubject: GRAPH_NODE_POPOVER_SHOW_ACTIONS_ON_ITEM_ID,
+        testSubject: GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID,
       });
       expect(items[2]).toMatchObject({
         type: 'item',
-        testSubject: GRAPH_NODE_POPOVER_SHOW_RELATED_ITEM_ID,
+        testSubject: GRAPH_NODE_POPOVER_SHOW_ACTIONS_ON_ITEM_ID,
       });
       expect(items[3]).toMatchObject({
-        type: 'separator',
+        type: 'item',
+        testSubject: GRAPH_NODE_POPOVER_SHOW_RELATED_ITEM_ID,
       });
       expect(items[4]).toMatchObject({
+        type: 'separator',
+      });
+      expect(items[5]).toMatchObject({
         type: 'item',
         testSubject: GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID,
         disabled: false,
@@ -431,6 +440,236 @@ describe('useEntityNodeExpandPopover', () => {
       }
 
       expect(mockOnOpenEventPreview).toHaveBeenCalledWith(node.data);
+    });
+  });
+
+  describe('entity relationships', () => {
+    it('should render "Show entity relationships" item for enriched single-entity node', () => {
+      const node = createMockNode('single-entity', 'user', true);
+      renderHook(() =>
+        useEntityNodeExpandPopover(
+          scopeId,
+          mockOnOpenEventPreview,
+          new Set(),
+          mockOnToggleEntityRelationships
+        )
+      );
+
+      expect(capturedItemsFn).not.toBeNull();
+      const items = capturedItemsFn!(node);
+
+      const relationshipsItem = items.find(
+        (item) =>
+          item.type === 'item' &&
+          item.testSubject === GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID
+      );
+
+      expect(relationshipsItem).toBeDefined();
+      expect(relationshipsItem).toMatchObject({
+        type: 'item',
+        testSubject: GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID,
+        disabled: false,
+      });
+      if (relationshipsItem?.type === 'item') {
+        expect(relationshipsItem.label).toContain('Show entity relationships');
+      }
+    });
+
+    it('should disable "Show entity relationships" when entity is not enriched', () => {
+      const node = createMockNode('single-entity', 'user', false);
+      renderHook(() =>
+        useEntityNodeExpandPopover(
+          scopeId,
+          mockOnOpenEventPreview,
+          new Set(),
+          mockOnToggleEntityRelationships
+        )
+      );
+
+      expect(capturedItemsFn).not.toBeNull();
+      const items = capturedItemsFn!(node);
+
+      const relationshipsItem = items.find(
+        (item) =>
+          item.type === 'item' &&
+          item.testSubject === GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID
+      );
+
+      expect(relationshipsItem).toMatchObject({
+        type: 'item',
+        testSubject: GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID,
+        disabled: true,
+        showToolTip: true,
+      });
+      if (relationshipsItem?.type === 'item') {
+        expect(relationshipsItem.toolTipText).toBe('Entity relationships not available');
+        expect(relationshipsItem.toolTipProps).toMatchObject({
+          position: 'bottom',
+          'data-test-subj': GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_TOOLTIP_ID,
+        });
+      }
+    });
+
+    it('should disable "Show entity relationships" when onToggleEntityRelationships is not provided', () => {
+      const node = createMockNode('single-entity', 'user', true);
+      renderHook(() =>
+        useEntityNodeExpandPopover(
+          scopeId,
+          mockOnOpenEventPreview,
+          new Set(),
+          undefined // No toggle callback
+        )
+      );
+
+      expect(capturedItemsFn).not.toBeNull();
+      const items = capturedItemsFn!(node);
+
+      const relationshipsItem = items.find(
+        (item) =>
+          item.type === 'item' &&
+          item.testSubject === GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID
+      );
+
+      expect(relationshipsItem).toMatchObject({
+        disabled: true,
+        showToolTip: true,
+      });
+    });
+
+    it('should show "Hide entity relationships" when entity ID is in expandedEntityIds', () => {
+      const node = createMockNode('single-entity', 'user', true);
+      const expandedEntityIds = new Set([node.id]);
+
+      renderHook(() =>
+        useEntityNodeExpandPopover(
+          scopeId,
+          mockOnOpenEventPreview,
+          expandedEntityIds,
+          mockOnToggleEntityRelationships
+        )
+      );
+
+      expect(capturedItemsFn).not.toBeNull();
+      const items = capturedItemsFn!(node);
+
+      const relationshipsItem = items.find(
+        (item) =>
+          item.type === 'item' &&
+          item.testSubject === GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID
+      );
+
+      expect(relationshipsItem).toBeDefined();
+      if (relationshipsItem?.type === 'item') {
+        expect(relationshipsItem.label).toContain('Hide entity relationships');
+        expect(relationshipsItem.disabled).toBe(false);
+      }
+    });
+
+    it('should show "Show entity relationships" when entity ID is not in expandedEntityIds', () => {
+      const node = createMockNode('single-entity', 'user', true);
+      const expandedEntityIds = new Set(['other-entity-id']);
+
+      renderHook(() =>
+        useEntityNodeExpandPopover(
+          scopeId,
+          mockOnOpenEventPreview,
+          expandedEntityIds,
+          mockOnToggleEntityRelationships
+        )
+      );
+
+      expect(capturedItemsFn).not.toBeNull();
+      const items = capturedItemsFn!(node);
+
+      const relationshipsItem = items.find(
+        (item) =>
+          item.type === 'item' &&
+          item.testSubject === GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID
+      );
+
+      expect(relationshipsItem).toBeDefined();
+      if (relationshipsItem?.type === 'item') {
+        expect(relationshipsItem.label).toContain('Show entity relationships');
+      }
+    });
+
+    it('should not render "Show entity relationships" for grouped-entities mode', () => {
+      const node = createMockNode('grouped-entities', 'user', true);
+      renderHook(() =>
+        useEntityNodeExpandPopover(
+          scopeId,
+          mockOnOpenEventPreview,
+          new Set(),
+          mockOnToggleEntityRelationships
+        )
+      );
+
+      expect(capturedItemsFn).not.toBeNull();
+      const items = capturedItemsFn!(node);
+
+      const relationshipsItem = items.find(
+        (item) =>
+          item.type === 'item' &&
+          item.testSubject === GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID
+      );
+
+      expect(relationshipsItem).toBeUndefined();
+    });
+
+    it('should call onToggleEntityRelationships with correct action when clicked', () => {
+      const node = createMockNode('single-entity', 'user', true);
+      renderHook(() =>
+        useEntityNodeExpandPopover(
+          scopeId,
+          mockOnOpenEventPreview,
+          new Set(),
+          mockOnToggleEntityRelationships
+        )
+      );
+
+      expect(capturedItemsFn).not.toBeNull();
+      const items = capturedItemsFn!(node);
+
+      const relationshipsItem = items.find(
+        (item) =>
+          item.type === 'item' &&
+          item.testSubject === GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID
+      );
+
+      expect(relationshipsItem).toBeDefined();
+      if (relationshipsItem?.type === 'item' && relationshipsItem.onClick) {
+        relationshipsItem.onClick();
+        expect(mockOnToggleEntityRelationships).toHaveBeenCalledWith(node, 'show');
+      }
+    });
+
+    it('should call onToggleEntityRelationships with hide action when entity is expanded', () => {
+      const node = createMockNode('single-entity', 'user', true);
+      const expandedEntityIds = new Set([node.id]);
+
+      renderHook(() =>
+        useEntityNodeExpandPopover(
+          scopeId,
+          mockOnOpenEventPreview,
+          expandedEntityIds,
+          mockOnToggleEntityRelationships
+        )
+      );
+
+      expect(capturedItemsFn).not.toBeNull();
+      const items = capturedItemsFn!(node);
+
+      const relationshipsItem = items.find(
+        (item) =>
+          item.type === 'item' &&
+          item.testSubject === GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID
+      );
+
+      expect(relationshipsItem).toBeDefined();
+      if (relationshipsItem?.type === 'item' && relationshipsItem.onClick) {
+        relationshipsItem.onClick();
+        expect(mockOnToggleEntityRelationships).toHaveBeenCalledWith(node, 'hide');
+      }
     });
   });
 });

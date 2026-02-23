@@ -25,9 +25,12 @@ import {
   ES_SECONDARY_AUTH_HEADER,
   AUTHORIZATION_HEADER,
   getDefaultHeaders,
+  ES_SECONDARY_CLIENT_AUTH_HEADER,
+  ES_CLIENT_AUTHENTICATION_HEADER,
 } from './headers';
 import { AgentManager } from './agent_manager';
 import { duration } from 'moment';
+import { securityServiceMock } from '@kbn/core-security-server-mocks';
 
 const createConfig = (
   parts: Partial<ElasticsearchClientConfig> = {}
@@ -63,8 +66,11 @@ describe('ClusterClient', () => {
   let client: ElasticsearchClient;
 
   const mockTransport = { mockTransport: true };
+  const mockOnRequestHandler = jest.fn();
+  let mockOnRequestHandlerFactory: jest.Mock;
 
   beforeEach(() => {
+    mockOnRequestHandlerFactory = jest.fn().mockReturnValue(mockOnRequestHandler);
     logger = loggingSystemMock.createLogger();
     internalClient = createClient();
     scopedClient = createClient();
@@ -100,6 +106,7 @@ describe('ClusterClient', () => {
       getExecutionContext: getExecutionContextMock,
       agentFactoryProvider,
       kibanaVersion,
+      onRequestHandlerFactory: mockOnRequestHandlerFactory,
     });
 
     expect(configureClientMock).toHaveBeenCalledTimes(2);
@@ -109,6 +116,7 @@ describe('ClusterClient', () => {
       kibanaVersion,
       type: 'custom-type',
       getExecutionContext: getExecutionContextMock,
+      onRequest: mockOnRequestHandler,
     });
     expect(configureClientMock).toHaveBeenCalledWith(config, {
       logger,
@@ -117,6 +125,7 @@ describe('ClusterClient', () => {
       type: 'custom-type',
       getExecutionContext: getExecutionContextMock,
       scoped: true,
+      onRequest: mockOnRequestHandler,
     });
   });
 
@@ -129,6 +138,7 @@ describe('ClusterClient', () => {
         authHeaders,
         agentFactoryProvider,
         kibanaVersion,
+        onRequestHandlerFactory: mockOnRequestHandlerFactory,
       });
 
       expect(clusterClient.asInternalUser).toBe(internalClient);
@@ -144,6 +154,7 @@ describe('ClusterClient', () => {
         authHeaders,
         agentFactoryProvider,
         kibanaVersion,
+        onRequestHandlerFactory: mockOnRequestHandlerFactory,
       });
       const request = httpServerMock.createKibanaRequest();
 
@@ -173,6 +184,7 @@ describe('ClusterClient', () => {
         authHeaders,
         agentFactoryProvider,
         kibanaVersion,
+        onRequestHandlerFactory: mockOnRequestHandlerFactory,
       });
       const request = httpServerMock.createKibanaRequest();
 
@@ -203,6 +215,7 @@ describe('ClusterClient', () => {
         getUnauthorizedErrorHandler,
         agentFactoryProvider,
         kibanaVersion,
+        onRequestHandlerFactory: mockOnRequestHandlerFactory,
       });
       const request = httpServerMock.createKibanaRequest();
 
@@ -212,8 +225,10 @@ describe('ClusterClient', () => {
 
       expect(createTransportMock).toHaveBeenCalledTimes(1);
       expect(createTransportMock).toHaveBeenCalledWith({
+        scoped: true,
         getExecutionContext,
         getUnauthorizedErrorHandler: expect.any(Function),
+        onRequest: mockOnRequestHandler,
       });
     });
 
@@ -229,6 +244,7 @@ describe('ClusterClient', () => {
         getUnauthorizedErrorHandler,
         agentFactoryProvider,
         kibanaVersion,
+        onRequestHandlerFactory: mockOnRequestHandlerFactory,
       });
       const request = httpServerMock.createKibanaRequest();
 
@@ -237,8 +253,10 @@ describe('ClusterClient', () => {
 
       expect(createTransportMock).toHaveBeenCalledTimes(1);
       expect(createTransportMock).toHaveBeenCalledWith({
+        scoped: true,
         getExecutionContext,
         getUnauthorizedErrorHandler: expect.any(Function),
+        onRequest: mockOnRequestHandler,
       });
 
       const { getUnauthorizedErrorHandler: getHandler } = createTransportMock.mock.calls[0][0];
@@ -255,6 +273,101 @@ describe('ClusterClient', () => {
       });
     });
 
+    it('calls onRequestHandlerFactory with null request for asInternalUser', () => {
+      new ClusterClient({
+        config: createConfig(),
+        logger,
+        type: 'custom-type',
+        authHeaders,
+        agentFactoryProvider,
+        kibanaVersion,
+        onRequestHandlerFactory: mockOnRequestHandlerFactory,
+      });
+
+      // Factory called once; the same handler is shared by asInternalUser and rootScopedClient
+      expect(mockOnRequestHandlerFactory).toHaveBeenCalledTimes(1);
+      expect(mockOnRequestHandlerFactory).toHaveBeenCalledWith({
+        projectRouting: 'origin-only',
+      });
+    });
+
+    it('calls onRequestHandlerFactory with the scoped request and opts when asScoped is accessed', () => {
+      const getExecutionContext = jest.fn();
+      const clusterClient = new ClusterClient({
+        config: createConfig(),
+        logger,
+        type: 'custom-type',
+        authHeaders,
+        getExecutionContext,
+        agentFactoryProvider,
+        kibanaVersion,
+        onRequestHandlerFactory: mockOnRequestHandlerFactory,
+      });
+      const request = httpServerMock.createKibanaRequest();
+      const opts = { projectRouting: 'space' as const };
+
+      mockOnRequestHandlerFactory.mockClear();
+
+      const scopedClusterClient = clusterClient.asScoped(request, opts);
+      client = scopedClusterClient.asCurrentUser;
+
+      expect(mockOnRequestHandlerFactory).toHaveBeenCalledTimes(1);
+      // When projectRouting is 'space', the request itself becomes the projectRouting value.
+      expect(mockOnRequestHandlerFactory).toHaveBeenCalledWith({ projectRouting: request });
+      expect(createTransportMock).toHaveBeenCalledWith(
+        expect.objectContaining({ onRequest: mockOnRequestHandler })
+      );
+    });
+
+    it('passes the handler produced by the factory to `createTransport`', () => {
+      const getExecutionContext = jest.fn();
+      const clusterClient = new ClusterClient({
+        config: createConfig(),
+        logger,
+        type: 'custom-type',
+        authHeaders,
+        getExecutionContext,
+        agentFactoryProvider,
+        kibanaVersion,
+        onRequestHandlerFactory: mockOnRequestHandlerFactory,
+      });
+      const request = httpServerMock.createKibanaRequest();
+
+      const scopedClusterClient = clusterClient.asScoped(request);
+      client = scopedClusterClient.asCurrentUser;
+
+      expect(createTransportMock).toHaveBeenCalledTimes(1);
+      expect(createTransportMock).toHaveBeenCalledWith({
+        scoped: true,
+        getExecutionContext,
+        getUnauthorizedErrorHandler: expect.any(Function),
+        onRequest: mockOnRequestHandler,
+      });
+    });
+
+    it('passes the Transport class (with onRequest in its closure) to child()', () => {
+      const clusterClient = new ClusterClient({
+        config: createConfig(),
+        logger,
+        type: 'custom-type',
+        authHeaders,
+        agentFactoryProvider,
+        kibanaVersion,
+        onRequestHandlerFactory: mockOnRequestHandlerFactory,
+      });
+      const request = httpServerMock.createKibanaRequest();
+
+      const scopedClusterClient = clusterClient.asScoped(request);
+      client = scopedClusterClient.asCurrentUser;
+
+      // The Transport class produced by createTransport is passed to child().
+      // The ES client's child() stores it in kInitialOptions so it propagates
+      // automatically to any further child() calls on the scoped client.
+      expect(scopedClient.child).toHaveBeenCalledWith(
+        expect.objectContaining({ Transport: mockTransport })
+      );
+    });
+
     it('returns a distinct scoped cluster client on each call', () => {
       const clusterClient = new ClusterClient({
         config: createConfig(),
@@ -263,6 +376,7 @@ describe('ClusterClient', () => {
         authHeaders,
         agentFactoryProvider,
         kibanaVersion,
+        onRequestHandlerFactory: mockOnRequestHandlerFactory,
       });
       const request = httpServerMock.createKibanaRequest();
 
@@ -292,6 +406,7 @@ describe('ClusterClient', () => {
         authHeaders,
         agentFactoryProvider,
         kibanaVersion,
+        onRequestHandlerFactory: mockOnRequestHandlerFactory,
       });
       const request = httpServerMock.createKibanaRequest({
         headers: {
@@ -328,6 +443,7 @@ describe('ClusterClient', () => {
         authHeaders,
         agentFactoryProvider,
         kibanaVersion,
+        onRequestHandlerFactory: mockOnRequestHandlerFactory,
       });
       const request = httpServerMock.createKibanaRequest({});
 
@@ -364,6 +480,7 @@ describe('ClusterClient', () => {
         authHeaders,
         agentFactoryProvider,
         kibanaVersion,
+        onRequestHandlerFactory: mockOnRequestHandlerFactory,
       });
       const request = httpServerMock.createKibanaRequest({
         headers: {
@@ -405,6 +522,7 @@ describe('ClusterClient', () => {
         authHeaders,
         agentFactoryProvider,
         kibanaVersion,
+        onRequestHandlerFactory: mockOnRequestHandlerFactory,
       });
       const request = httpServerMock.createKibanaRequest({});
 
@@ -436,6 +554,7 @@ describe('ClusterClient', () => {
         authHeaders,
         agentFactoryProvider,
         kibanaVersion,
+        onRequestHandlerFactory: mockOnRequestHandlerFactory,
       });
       const request = httpServerMock.createKibanaRequest({
         kibanaRequestState: {
@@ -479,6 +598,7 @@ describe('ClusterClient', () => {
         authHeaders,
         agentFactoryProvider,
         kibanaVersion,
+        onRequestHandlerFactory: mockOnRequestHandlerFactory,
       });
       const request = httpServerMock.createKibanaRequest({});
 
@@ -516,6 +636,7 @@ describe('ClusterClient', () => {
         authHeaders,
         agentFactoryProvider,
         kibanaVersion,
+        onRequestHandlerFactory: mockOnRequestHandlerFactory,
       });
       const request = httpServerMock.createKibanaRequest({
         headers: { foo: 'request' },
@@ -555,6 +676,7 @@ describe('ClusterClient', () => {
         authHeaders,
         agentFactoryProvider,
         kibanaVersion,
+        onRequestHandlerFactory: mockOnRequestHandlerFactory,
       });
       const request = httpServerMock.createKibanaRequest();
 
@@ -588,6 +710,7 @@ describe('ClusterClient', () => {
         authHeaders,
         agentFactoryProvider,
         kibanaVersion,
+        onRequestHandlerFactory: mockOnRequestHandlerFactory,
       });
       const request = httpServerMock.createKibanaRequest({
         headers: { [headerKey]: 'foo' },
@@ -624,6 +747,7 @@ describe('ClusterClient', () => {
         authHeaders,
         agentFactoryProvider,
         kibanaVersion,
+        onRequestHandlerFactory: mockOnRequestHandlerFactory,
       });
       const request = httpServerMock.createKibanaRequest({
         headers: { foo: 'request' },
@@ -662,6 +786,7 @@ describe('ClusterClient', () => {
         authHeaders,
         agentFactoryProvider,
         kibanaVersion,
+        onRequestHandlerFactory: mockOnRequestHandlerFactory,
       });
       const request = {
         headers: {
@@ -697,6 +822,7 @@ describe('ClusterClient', () => {
         authHeaders,
         agentFactoryProvider,
         kibanaVersion,
+        onRequestHandlerFactory: mockOnRequestHandlerFactory,
       });
       const request = {
         headers: {
@@ -716,6 +842,121 @@ describe('ClusterClient', () => {
         })
       );
     });
+
+    it('does not specify client authentication for non-UIAM credentials even if in UIAM mode', () => {
+      const config = createConfig({
+        requestHeadersWhitelist: ['authorization'],
+      });
+      authHeaders.get.mockReturnValue({ [AUTHORIZATION_HEADER]: 'Bearer yes' });
+
+      const clusterClient = new ClusterClient({
+        config,
+        logger,
+        type: 'custom-type',
+        authHeaders,
+        security: securityServiceMock.createInternalSetup(),
+        agentFactoryProvider,
+        kibanaVersion,
+        onRequestHandlerFactory: mockOnRequestHandlerFactory,
+      });
+      const request = httpServerMock.createKibanaRequest({
+        headers: { [AUTHORIZATION_HEADER]: 'Bearer override' },
+      });
+
+      const scopedClusterClient = clusterClient.asScoped(request);
+      // trigger client instantiation via getter
+      client = scopedClusterClient.asCurrentUser;
+
+      expect(scopedClient.child).toHaveBeenCalledTimes(1);
+      expect(scopedClient.child).toHaveBeenCalledWith(
+        expect.objectContaining({
+          headers: {
+            ...defaultHeaders,
+            [AUTHORIZATION_HEADER]: 'Bearer yes',
+            'x-opaque-id': expect.any(String),
+          },
+        })
+      );
+      expect(scopedClient.child).toHaveBeenCalledWith(
+        expect.not.objectContaining({
+          headers: { [ES_CLIENT_AUTHENTICATION_HEADER]: 'some-shared-secret' },
+        })
+      );
+    });
+
+    it('does not specify client authentication for UIAM credentials in real requests even if in UIAM mode', () => {
+      const config = createConfig({
+        requestHeadersWhitelist: ['authorization'],
+      });
+      authHeaders.get.mockReturnValue({ [AUTHORIZATION_HEADER]: 'Bearer essu_dev_yes' });
+
+      const clusterClient = new ClusterClient({
+        config,
+        logger,
+        type: 'custom-type',
+        authHeaders,
+        security: securityServiceMock.createInternalSetup(),
+        agentFactoryProvider,
+        kibanaVersion,
+        onRequestHandlerFactory: mockOnRequestHandlerFactory,
+      });
+      const request = httpServerMock.createKibanaRequest({
+        headers: { [AUTHORIZATION_HEADER]: 'Bearer override' },
+      });
+
+      const scopedClusterClient = clusterClient.asScoped(request);
+      // trigger client instantiation via getter
+      client = scopedClusterClient.asCurrentUser;
+
+      expect(scopedClient.child).toHaveBeenCalledTimes(1);
+      expect(scopedClient.child).toHaveBeenCalledWith(
+        expect.objectContaining({
+          headers: {
+            ...defaultHeaders,
+            [AUTHORIZATION_HEADER]: 'Bearer essu_dev_yes',
+            'x-opaque-id': expect.any(String),
+          },
+        })
+      );
+      expect(scopedClient.child).toHaveBeenCalledWith(
+        expect.not.objectContaining({
+          headers: { [ES_CLIENT_AUTHENTICATION_HEADER]: 'some-shared-secret' },
+        })
+      );
+    });
+
+    it('specifies client authentication for UIAM credentials in fake requests if in UIAM mode ', () => {
+      const config = createConfig({ requestHeadersWhitelist: ['authorization'] });
+
+      const clusterClient = new ClusterClient({
+        config,
+        logger,
+        type: 'custom-type',
+        authHeaders,
+        security: securityServiceMock.createInternalSetup(),
+        agentFactoryProvider,
+        kibanaVersion,
+        onRequestHandlerFactory: mockOnRequestHandlerFactory,
+      });
+      const fakeRequest = httpServerMock.createFakeKibanaRequest({
+        headers: { [AUTHORIZATION_HEADER]: 'Bearer essu_dev_yes' },
+      });
+
+      const scopedClusterClient = clusterClient.asScoped(fakeRequest);
+      // trigger client instantiation via getter
+      client = scopedClusterClient.asCurrentUser;
+
+      expect(scopedClient.child).toHaveBeenCalledTimes(1);
+      expect(scopedClient.child).toHaveBeenCalledWith(
+        expect.objectContaining({
+          headers: {
+            ...defaultHeaders,
+            [AUTHORIZATION_HEADER]: 'Bearer essu_dev_yes',
+            [ES_CLIENT_AUTHENTICATION_HEADER]: 'some-shared-secret',
+          },
+        })
+      );
+    });
   });
 
   describe('#asScoped().asSecondaryAuthUser', () => {
@@ -727,6 +968,7 @@ describe('ClusterClient', () => {
         authHeaders,
         agentFactoryProvider,
         kibanaVersion,
+        onRequestHandlerFactory: mockOnRequestHandlerFactory,
       });
       const request = httpServerMock.createKibanaRequest();
 
@@ -755,6 +997,7 @@ describe('ClusterClient', () => {
         authHeaders,
         agentFactoryProvider,
         kibanaVersion,
+        onRequestHandlerFactory: mockOnRequestHandlerFactory,
       });
       const request = httpServerMock.createKibanaRequest();
 
@@ -773,7 +1016,7 @@ describe('ClusterClient', () => {
         requestHeadersWhitelist: ['foo'],
       });
       authHeaders.get.mockReturnValue({
-        [AUTHORIZATION_HEADER]: 'yes',
+        [AUTHORIZATION_HEADER]: 'Bearer yes',
       });
 
       const clusterClient = new ClusterClient({
@@ -783,6 +1026,7 @@ describe('ClusterClient', () => {
         authHeaders,
         agentFactoryProvider,
         kibanaVersion,
+        onRequestHandlerFactory: mockOnRequestHandlerFactory,
       });
       const request = httpServerMock.createKibanaRequest({
         headers: {
@@ -798,12 +1042,12 @@ describe('ClusterClient', () => {
       expect(internalClient.child).toHaveBeenCalledTimes(1);
       expect(internalClient.child).toHaveBeenCalledWith(
         expect.objectContaining({
-          headers: { ...defaultHeaders, [ES_SECONDARY_AUTH_HEADER]: 'yes' },
+          headers: { ...defaultHeaders, [ES_SECONDARY_AUTH_HEADER]: 'Bearer yes' },
         })
       );
       expect(internalClient.child).toHaveBeenCalledWith(
         expect.not.objectContaining({
-          headers: { [AUTHORIZATION_HEADER]: 'yes' },
+          headers: { [AUTHORIZATION_HEADER]: 'Bearer yes' },
         })
       );
     });
@@ -821,6 +1065,7 @@ describe('ClusterClient', () => {
         authHeaders,
         agentFactoryProvider,
         kibanaVersion,
+        onRequestHandlerFactory: mockOnRequestHandlerFactory,
       });
       const request = httpServerMock.createKibanaRequest({
         headers: {
@@ -847,7 +1092,7 @@ describe('ClusterClient', () => {
         requestHeadersWhitelist: ['authorization'],
       });
       authHeaders.get.mockReturnValue({
-        [AUTHORIZATION_HEADER]: 'foo',
+        [AUTHORIZATION_HEADER]: 'Bearer foo',
       });
 
       const clusterClient = new ClusterClient({
@@ -857,6 +1102,7 @@ describe('ClusterClient', () => {
         authHeaders,
         agentFactoryProvider,
         kibanaVersion,
+        onRequestHandlerFactory: mockOnRequestHandlerFactory,
       });
       const request = httpServerMock.createKibanaRequest({});
 
@@ -869,7 +1115,7 @@ describe('ClusterClient', () => {
         expect.objectContaining({
           headers: {
             ...defaultHeaders,
-            [ES_SECONDARY_AUTH_HEADER]: 'foo',
+            [ES_SECONDARY_AUTH_HEADER]: 'Bearer foo',
             foo: 'bar',
             hello: 'dolly',
           },
@@ -880,7 +1126,7 @@ describe('ClusterClient', () => {
     it('does not add the x-opaque-id header based on the request id', () => {
       const config = createConfig();
       authHeaders.get.mockReturnValue({
-        [AUTHORIZATION_HEADER]: 'foo',
+        [AUTHORIZATION_HEADER]: 'Bearer foo',
       });
 
       const clusterClient = new ClusterClient({
@@ -890,6 +1136,7 @@ describe('ClusterClient', () => {
         authHeaders,
         agentFactoryProvider,
         kibanaVersion,
+        onRequestHandlerFactory: mockOnRequestHandlerFactory,
       });
       const request = httpServerMock.createKibanaRequest({
         kibanaRequestState: {
@@ -918,7 +1165,7 @@ describe('ClusterClient', () => {
         requestHeadersWhitelist: ['authorization', 'foo'],
       });
       authHeaders.get.mockReturnValue({
-        [AUTHORIZATION_HEADER]: 'will_not_be_used',
+        [AUTHORIZATION_HEADER]: 'Bearer will_not_be_used',
       });
 
       const clusterClient = new ClusterClient({
@@ -928,10 +1175,11 @@ describe('ClusterClient', () => {
         authHeaders,
         agentFactoryProvider,
         kibanaVersion,
+        onRequestHandlerFactory: mockOnRequestHandlerFactory,
       });
       const request = {
         headers: {
-          [AUTHORIZATION_HEADER]: 'yes',
+          [AUTHORIZATION_HEADER]: 'Bearer yes',
           hello: 'dolly',
         },
       };
@@ -943,7 +1191,7 @@ describe('ClusterClient', () => {
       expect(internalClient.child).toHaveBeenCalledTimes(1);
       expect(internalClient.child).toHaveBeenCalledWith(
         expect.objectContaining({
-          headers: expect.objectContaining({ [ES_SECONDARY_AUTH_HEADER]: 'yes' }),
+          headers: expect.objectContaining({ [ES_SECONDARY_AUTH_HEADER]: 'Bearer yes' }),
         })
       );
     });
@@ -953,7 +1201,7 @@ describe('ClusterClient', () => {
         requestHeadersWhitelist: ['authorization', 'foo'],
       });
       authHeaders.get.mockReturnValue({
-        [AUTHORIZATION_HEADER]: 'will_not_be_used',
+        [AUTHORIZATION_HEADER]: 'Bearer will_not_be_used',
       });
 
       const clusterClient = new ClusterClient({
@@ -963,11 +1211,12 @@ describe('ClusterClient', () => {
         authHeaders,
         agentFactoryProvider,
         kibanaVersion,
+        onRequestHandlerFactory: mockOnRequestHandlerFactory,
       });
 
       const request = httpServerMock.createFakeKibanaRequest({
         headers: {
-          authorization: 'fake_request_auth',
+          authorization: 'Bearer fake_request_auth',
         },
       });
 
@@ -1000,6 +1249,7 @@ describe('ClusterClient', () => {
         authHeaders,
         agentFactoryProvider,
         kibanaVersion,
+        onRequestHandlerFactory: mockOnRequestHandlerFactory,
       });
       const request = {
         headers: {
@@ -1016,6 +1266,81 @@ describe('ClusterClient', () => {
         `"asSecondaryAuthUser called from a client scoped to a request without 'authorization' header."`
       );
     });
+
+    it('does not specify secondary client authentication for non-UIAM credentials even if in UIAM mode', () => {
+      const config = createConfig({ requestHeadersWhitelist: ['foo'] });
+      authHeaders.get.mockReturnValue({ [AUTHORIZATION_HEADER]: 'Bearer yes' });
+
+      const clusterClient = new ClusterClient({
+        config,
+        logger,
+        type: 'custom-type',
+        authHeaders,
+        security: securityServiceMock.createInternalSetup(),
+        agentFactoryProvider,
+        kibanaVersion,
+        onRequestHandlerFactory: mockOnRequestHandlerFactory,
+      });
+      const request = httpServerMock.createKibanaRequest({ headers: { foo: 'bar' } });
+
+      const scopedClusterClient = clusterClient.asScoped(request);
+      // trigger client instantiation via getter
+      client = scopedClusterClient.asSecondaryAuthUser;
+
+      expect(internalClient.child).toHaveBeenCalledTimes(1);
+      expect(internalClient.child).toHaveBeenCalledWith(
+        expect.objectContaining({
+          headers: { ...defaultHeaders, [ES_SECONDARY_AUTH_HEADER]: 'Bearer yes' },
+        })
+      );
+      expect(internalClient.child).toHaveBeenCalledWith(
+        expect.not.objectContaining({
+          headers: { [ES_SECONDARY_CLIENT_AUTH_HEADER]: 'some-shared-secret' },
+        })
+      );
+      expect(internalClient.child).toHaveBeenCalledWith(
+        expect.not.objectContaining({
+          headers: { [AUTHORIZATION_HEADER]: 'Bearer yes' },
+        })
+      );
+    });
+
+    it('specifies secondary client authentication for UIAM credentials if in UIAM mode', () => {
+      const config = createConfig({ requestHeadersWhitelist: ['foo'] });
+      authHeaders.get.mockReturnValue({ [AUTHORIZATION_HEADER]: 'Bearer essu_dev_yes' });
+
+      const clusterClient = new ClusterClient({
+        config,
+        logger,
+        type: 'custom-type',
+        authHeaders,
+        security: securityServiceMock.createInternalSetup(),
+        agentFactoryProvider,
+        kibanaVersion,
+        onRequestHandlerFactory: mockOnRequestHandlerFactory,
+      });
+      const request = httpServerMock.createKibanaRequest({ headers: { foo: 'bar' } });
+
+      const scopedClusterClient = clusterClient.asScoped(request);
+      // trigger client instantiation via getter
+      client = scopedClusterClient.asSecondaryAuthUser;
+
+      expect(internalClient.child).toHaveBeenCalledTimes(1);
+      expect(internalClient.child).toHaveBeenCalledWith(
+        expect.objectContaining({
+          headers: {
+            ...defaultHeaders,
+            [ES_SECONDARY_AUTH_HEADER]: 'Bearer essu_dev_yes',
+            [ES_SECONDARY_CLIENT_AUTH_HEADER]: 'some-shared-secret',
+          },
+        })
+      );
+      expect(internalClient.child).toHaveBeenCalledWith(
+        expect.not.objectContaining({
+          headers: { [AUTHORIZATION_HEADER]: 'Bearer essu_dev_yes' },
+        })
+      );
+    });
   });
 
   describe('#close', () => {
@@ -1027,6 +1352,7 @@ describe('ClusterClient', () => {
         authHeaders,
         agentFactoryProvider,
         kibanaVersion,
+        onRequestHandlerFactory: mockOnRequestHandlerFactory,
       });
 
       await clusterClient.close();
@@ -1045,6 +1371,7 @@ describe('ClusterClient', () => {
         authHeaders,
         agentFactoryProvider,
         kibanaVersion,
+        onRequestHandlerFactory: mockOnRequestHandlerFactory,
       });
 
       let internalClientClosed = false;
@@ -1090,6 +1417,7 @@ describe('ClusterClient', () => {
         authHeaders,
         agentFactoryProvider,
         kibanaVersion,
+        onRequestHandlerFactory: mockOnRequestHandlerFactory,
       });
 
       internalClient.close.mockRejectedValue(new Error('error closing client'));
@@ -1107,6 +1435,7 @@ describe('ClusterClient', () => {
         authHeaders,
         agentFactoryProvider,
         kibanaVersion,
+        onRequestHandlerFactory: mockOnRequestHandlerFactory,
       });
 
       await clusterClient.close();

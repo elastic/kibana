@@ -54,22 +54,6 @@ describe('updateSavedSearch', () => {
     jest.clearAllMocks();
   });
 
-  it('should set visContext from initialInternalState', async () => {
-    const savedSearch = {
-      ...savedSearchMock,
-      searchSource: savedSearchMock.searchSource.createCopy(),
-    };
-    updateSavedSearch({
-      savedSearch,
-      dataView: undefined,
-      initialInternalState: { visContext: { foo: 'bar' } },
-      appState: undefined,
-      globalState: undefined,
-      services: discoverServiceMock,
-    });
-    expect(savedSearch.visContext).toEqual({ foo: 'bar' });
-  });
-
   it('should set query and filters from appState and globalState', async () => {
     const savedSearch = {
       ...savedSearchMock,
@@ -80,7 +64,6 @@ describe('updateSavedSearch', () => {
     updateSavedSearch({
       savedSearch,
       dataView: undefined,
-      initialInternalState: undefined,
       globalState,
       services: discoverServiceMock,
       appState: {
@@ -101,7 +84,6 @@ describe('updateSavedSearch', () => {
     updateSavedSearch({
       savedSearch,
       dataView: undefined,
-      initialInternalState: undefined,
       globalState: {
         ...globalState,
         timeRange: {
@@ -130,7 +112,6 @@ describe('updateSavedSearch', () => {
     updateSavedSearch({
       savedSearch,
       dataView: undefined,
-      initialInternalState: undefined,
       globalState: {
         ...globalState,
         timeRange: {
@@ -159,7 +140,6 @@ describe('updateSavedSearch', () => {
     updateSavedSearch({
       savedSearch,
       dataView: undefined,
-      initialInternalState: undefined,
       globalState,
       services: discoverServiceMock,
       appState: {
@@ -178,7 +158,6 @@ describe('updateSavedSearch', () => {
     updateSavedSearch({
       savedSearch,
       dataView: undefined,
-      initialInternalState: undefined,
       globalState,
       services: discoverServiceMock,
       appState: {
@@ -197,7 +176,6 @@ describe('updateSavedSearch', () => {
     updateSavedSearch({
       savedSearch,
       dataView: undefined,
-      initialInternalState: undefined,
       globalState,
       services: discoverServiceMock,
       appState: {
@@ -216,7 +194,6 @@ describe('updateSavedSearch', () => {
     updateSavedSearch({
       savedSearch,
       dataView: undefined,
-      initialInternalState: undefined,
       globalState,
       services: discoverServiceMock,
       appState: {
@@ -240,7 +217,6 @@ describe('updateSavedSearch', () => {
     updateSavedSearch({
       savedSearch,
       dataView: undefined,
-      initialInternalState: undefined,
       appState: undefined,
       globalState,
       services: discoverServiceMock,

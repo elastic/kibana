@@ -326,9 +326,7 @@
                 "type": "Any",
                 "tags": [],
                 "label": "from",
-                "description": [
-                  "- optional object to read values from,\n used when initializing"
-                ],
+                "description": [],
                 "signature": [
                   "any"
                 ],
@@ -2906,7 +2904,7 @@
           ">"
         ],
         "path": "src/platform/plugins/shared/data/public/plugin.ts",
-        "lineNumber": 45,
+        "lineNumber": 44,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2922,7 +2920,7 @@
               "any"
             ],
             "path": "src/platform/plugins/shared/data/public/plugin.ts",
-            "lineNumber": 59,
+            "lineNumber": 58,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2939,7 +2937,7 @@
                   "<Readonly<{} & { search: Readonly<{} & { asyncSearch: Readonly<{ pollInterval?: number | undefined; } & { waitForCompletion: moment.Duration; keepAlive: moment.Duration; batchedReduceSize: number; }>; aggs: Readonly<{} & { shardDelay: Readonly<{} & { enabled: boolean; }>; }>; sessions: Readonly<{} & { enabled: boolean; management: Readonly<{} & { refreshInterval: moment.Duration; maxSessions: number; refreshTimeout: moment.Duration; expiresSoonWarning: moment.Duration; }>; notTouchedTimeout: moment.Duration; maxUpdateRetries: number; defaultExpiration: moment.Duration; }>; }>; query: Readonly<{} & { timefilter: Readonly<{} & { minRefreshInterval: number; }>; }>; enableUiSettingsValidations: boolean; }>>"
                 ],
                 "path": "src/platform/plugins/shared/data/public/plugin.ts",
-                "lineNumber": 59,
+                "lineNumber": 58,
                 "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2980,7 +2978,7 @@
               }
             ],
             "path": "src/platform/plugins/shared/data/public/plugin.ts",
-            "lineNumber": 69,
+            "lineNumber": 68,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3007,7 +3005,7 @@
                   ">"
                 ],
                 "path": "src/platform/plugins/shared/data/public/plugin.ts",
-                "lineNumber": 70,
+                "lineNumber": 69,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3024,7 +3022,7 @@
                   "DataSetupDependencies"
                 ],
                 "path": "src/platform/plugins/shared/data/public/plugin.ts",
-                "lineNumber": 71,
+                "lineNumber": 70,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3055,7 +3053,7 @@
               }
             ],
             "path": "src/platform/plugins/shared/data/public/plugin.ts",
-            "lineNumber": 139,
+            "lineNumber": 136,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3071,7 +3069,7 @@
                   "CoreStart"
                 ],
                 "path": "src/platform/plugins/shared/data/public/plugin.ts",
-                "lineNumber": 140,
+                "lineNumber": 137,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3088,7 +3086,7 @@
                   "DataStartDependencies"
                 ],
                 "path": "src/platform/plugins/shared/data/public/plugin.ts",
-                "lineNumber": 141,
+                "lineNumber": 138,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3108,7 +3106,7 @@
               "() => void"
             ],
             "path": "src/platform/plugins/shared/data/public/plugin.ts",
-            "lineNumber": 228,
+            "lineNumber": 225,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3515,7 +3513,7 @@
                 "tags": [],
                 "label": "overwriteType",
                 "description": [
-                  "If `false` is passed in it will disable the overwrite, otherwise\nthe passed in value will be used as the data view type for this search source."
+                  "If `false` is passed in it will disable the overwrite, otherwise"
                 ],
                 "signature": [
                   "string | false | undefined"
@@ -3570,9 +3568,7 @@
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "field",
-                "description": [
-                  ": field name"
-                ],
+                "description": [],
                 "signature": [
                   "K"
                 ],
@@ -3589,9 +3585,7 @@
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "value",
-                "description": [
-                  ": value for the field"
-                ],
+                "description": [],
                 "signature": [
                   {
                     "pluginId": "data",
@@ -3644,9 +3638,7 @@
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "field",
-                "description": [
-                  ": field name"
-                ],
+                "description": [],
                 "signature": [
                   "K"
                 ],
@@ -5427,7 +5419,7 @@
           "<any> | undefined) => boolean"
         ],
         "path": "src/platform/plugins/shared/data/common/search/utils.ts",
-        "lineNumber": 29,
+        "lineNumber": 30,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -5450,7 +5442,7 @@
               "<any> | undefined"
             ],
             "path": "src/platform/plugins/shared/data/common/search/utils.ts",
-            "lineNumber": 29,
+            "lineNumber": 30,
             "columnNumber": 35,
             "deprecated": false,
             "trackAdoption": false,
@@ -9894,23 +9886,6 @@
       },
       {
         "parentPluginId": "data",
-        "id": "def-public.APPLY_FILTER_TRIGGER",
-        "type": "string",
-        "tags": [],
-        "label": "APPLY_FILTER_TRIGGER",
-        "description": [],
-        "signature": [
-          "\"FILTER_TRIGGER\""
-        ],
-        "path": "src/platform/plugins/shared/data/public/triggers/apply_filter_trigger.ts",
-        "lineNumber": 13,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
         "id": "def-public.ES_SEARCH_STRATEGY",
         "type": "string",
         "tags": [],
@@ -13083,7 +13058,7 @@
                 "tags": [],
                 "label": "includeFields",
                 "description": [
-                  "Whether or not to include the `fields` list as part of this spec. If not included, the list\nwill be fetched from Elasticsearch when instantiating a new Data View with this spec."
+                  "Whether or not to include the `fields` list as part of this spec. If not included, the list"
                 ],
                 "signature": [
                   "boolean"
@@ -14765,7 +14740,7 @@
                 "section": "def-common.GetFieldsOptions",
                 "text": "GetFieldsOptions"
               },
-              ", \"allowNoIndex\" | \"pattern\"> | undefined) => Promise<",
+              ", \"pattern\" | \"allowNoIndex\"> | undefined) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -14830,7 +14805,7 @@
                     "section": "def-common.GetFieldsOptions",
                     "text": "GetFieldsOptions"
                   },
-                  ", \"allowNoIndex\" | \"pattern\"> | undefined"
+                  ", \"pattern\" | \"allowNoIndex\"> | undefined"
                 ],
                 "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
                 "lineNumber": 624,
@@ -14973,9 +14948,7 @@
                 "type": "Array",
                 "tags": [],
                 "label": "fields",
-                "description": [
-                  ": FieldSpec[]"
-                ],
+                "description": [],
                 "signature": [
                   {
                     "pluginId": "dataViews",
@@ -14999,9 +14972,7 @@
                 "type": "Object",
                 "tags": [],
                 "label": "fieldAttrs",
-                "description": [
-                  ": FieldAttrs"
-                ],
+                "description": [],
                 "signature": [
                   "FieldAttrsAsObject",
                   " | undefined"
@@ -15818,9 +15789,7 @@
                 "type": "string",
                 "tags": [],
                 "label": "indexPatternId",
-                "description": [
-                  ": Id of kibana Index Pattern to delete"
-                ],
+                "description": [],
                 "signature": [
                   "string"
                 ],
@@ -15945,7 +15914,9 @@
                     "type": "CompoundType",
                     "tags": [],
                     "label": "refreshFields",
-                    "description": [],
+                    "description": [
+                      "- If true, will refresh the fields of the default data view"
+                    ],
                     "signature": [
                       "boolean | undefined"
                     ],
@@ -16566,7 +16537,7 @@
         "label": "search",
         "description": [],
         "path": "src/platform/plugins/shared/data/server/index.ts",
-        "lineNumber": 73,
+        "lineNumber": 74,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -16579,7 +16550,7 @@
             "label": "aggs",
             "description": [],
             "path": "src/platform/plugins/shared/data/server/index.ts",
-            "lineNumber": 74,
+            "lineNumber": 75,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -16602,7 +16573,7 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/data/server/index.ts",
-                "lineNumber": 75,
+                "lineNumber": 76,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -16618,7 +16589,7 @@
                   "(interval: string, shouldForceFixed?: boolean | undefined) => Interval"
                 ],
                 "path": "src/platform/plugins/shared/data/server/index.ts",
-                "lineNumber": 76,
+                "lineNumber": 77,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -16673,7 +16644,7 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/data/server/index.ts",
-                "lineNumber": 77,
+                "lineNumber": 78,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -16689,7 +16660,7 @@
                   "(interval: string) => moment.Duration | null"
                 ],
                 "path": "src/platform/plugins/shared/data/server/index.ts",
-                "lineNumber": 78,
+                "lineNumber": 79,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -16721,7 +16692,7 @@
                   "(maxBucketCount: number, duration: number) => moment.Duration"
                 ],
                 "path": "src/platform/plugins/shared/data/server/index.ts",
-                "lineNumber": 79,
+                "lineNumber": 80,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -18133,7 +18104,7 @@
                 "tags": [],
                 "label": "includeFields",
                 "description": [
-                  "Whether or not to include the `fields` list as part of this spec. If not included, the list\nwill be fetched from Elasticsearch when instantiating a new Data View with this spec."
+                  "Whether or not to include the `fields` list as part of this spec. If not included, the list"
                 ],
                 "signature": [
                   "boolean"
@@ -19067,7 +19038,7 @@
                 "section": "def-common.SerializableRecord",
                 "text": "SerializableRecord"
               },
-              "> | undefined; esTypes?: string[] | undefined; searchable: boolean; aggregatable: boolean; isNull?: boolean | undefined; readFromDocValues?: boolean | undefined; indexed?: boolean | undefined; customLabel?: string | undefined; customDescription?: string | undefined; runtimeField?: ",
+              "> | undefined; esTypes?: string[] | undefined; searchable: boolean; aggregatable: boolean; isNull?: boolean | undefined; isComputedColumn?: boolean | undefined; readFromDocValues?: boolean | undefined; indexed?: boolean | undefined; customLabel?: string | undefined; customDescription?: string | undefined; runtimeField?: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -19740,6 +19711,21 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-common.DataViewField.isComputedColumn",
+            "type": "boolean",
+            "tags": [],
+            "label": "isComputedColumn",
+            "description": [
+              "\nReturns true if the field is not part of the index and is a computed column"
+            ],
+            "path": "src/platform/plugins/shared/data_views/common/fields/data_view_field.ts",
+            "lineNumber": 342,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-common.DataViewField.isSubtypeNested",
             "type": "Function",
             "tags": [],
@@ -19751,7 +19737,7 @@
               "() => boolean"
             ],
             "path": "src/platform/plugins/shared/data_views/common/fields/data_view_field.ts",
-            "lineNumber": 342,
+            "lineNumber": 349,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -19771,7 +19757,7 @@
               "() => boolean"
             ],
             "path": "src/platform/plugins/shared/data_views/common/fields/data_view_field.ts",
-            "lineNumber": 349,
+            "lineNumber": 356,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -19799,7 +19785,7 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/data_views/common/fields/data_view_field.ts",
-            "lineNumber": 357,
+            "lineNumber": 364,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -19827,7 +19813,7 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/data_views/common/fields/data_view_field.ts",
-            "lineNumber": 365,
+            "lineNumber": 372,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -19847,7 +19833,7 @@
               "() => void"
             ],
             "path": "src/platform/plugins/shared/data_views/common/fields/data_view_field.ts",
-            "lineNumber": 373,
+            "lineNumber": 380,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -19875,7 +19861,7 @@
               " | undefined; customLabel: string | undefined; customDescription: string | undefined; defaultFormatter: string | undefined; }"
             ],
             "path": "src/platform/plugins/shared/data_views/common/fields/data_view_field.ts",
-            "lineNumber": 381,
+            "lineNumber": 388,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -19910,7 +19896,7 @@
               }
             ],
             "path": "src/platform/plugins/shared/data_views/common/fields/data_view_field.ts",
-            "lineNumber": 404,
+            "lineNumber": 411,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -19934,7 +19920,7 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/data_views/common/fields/data_view_field.ts",
-                "lineNumber": 409,
+                "lineNumber": 416,
                 "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -19958,7 +19944,7 @@
               "() => boolean"
             ],
             "path": "src/platform/plugins/shared/data_views/common/fields/data_view_field.ts",
-            "lineNumber": 444,
+            "lineNumber": 451,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -20847,7 +20833,7 @@
                 "section": "def-common.GetFieldsOptions",
                 "text": "GetFieldsOptions"
               },
-              ", \"allowNoIndex\" | \"pattern\"> | undefined) => Promise<",
+              ", \"pattern\" | \"allowNoIndex\"> | undefined) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -20912,7 +20898,7 @@
                     "section": "def-common.GetFieldsOptions",
                     "text": "GetFieldsOptions"
                   },
-                  ", \"allowNoIndex\" | \"pattern\"> | undefined"
+                  ", \"pattern\" | \"allowNoIndex\"> | undefined"
                 ],
                 "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
                 "lineNumber": 624,
@@ -21055,9 +21041,7 @@
                 "type": "Array",
                 "tags": [],
                 "label": "fields",
-                "description": [
-                  ": FieldSpec[]"
-                ],
+                "description": [],
                 "signature": [
                   {
                     "pluginId": "dataViews",
@@ -21081,9 +21065,7 @@
                 "type": "Object",
                 "tags": [],
                 "label": "fieldAttrs",
-                "description": [
-                  ": FieldAttrs"
-                ],
+                "description": [],
                 "signature": [
                   "FieldAttrsAsObject",
                   " | undefined"
@@ -21900,9 +21882,7 @@
                 "type": "string",
                 "tags": [],
                 "label": "indexPatternId",
-                "description": [
-                  ": Id of kibana Index Pattern to delete"
-                ],
+                "description": [],
                 "signature": [
                   "string"
                 ],
@@ -22027,7 +22007,9 @@
                     "type": "CompoundType",
                     "tags": [],
                     "label": "refreshFields",
-                    "description": [],
+                    "description": [
+                      "- If true, will refresh the fields of the default data view"
+                    ],
                     "signature": [
                       "boolean | undefined"
                     ],
@@ -25036,7 +25018,7 @@
           "; }"
         ],
         "path": "src/platform/plugins/shared/data_views/common/types.ts",
-        "lineNumber": 495,
+        "lineNumber": 500,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -25166,7 +25148,7 @@
             "section": "def-common.GetFieldsOptions",
             "text": "GetFieldsOptions"
           },
-          ", \"allowNoIndex\" | \"pattern\"> | undefined) => Promise<",
+          ", \"pattern\" | \"allowNoIndex\"> | undefined) => Promise<",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -25418,7 +25400,7 @@
           " | undefined; allowNoIndex?: boolean | undefined; namespaces?: string[] | undefined; name?: string | undefined; allowHidden?: boolean | undefined; managed?: boolean | undefined; }"
         ],
         "path": "src/platform/plugins/shared/data_views/common/types.ts",
-        "lineNumber": 497,
+        "lineNumber": 502,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -25520,7 +25502,7 @@
             "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
-          "> | undefined; esTypes?: string[] | undefined; searchable: boolean; aggregatable: boolean; isNull?: boolean | undefined; readFromDocValues?: boolean | undefined; indexed?: boolean | undefined; customLabel?: string | undefined; customDescription?: string | undefined; runtimeField?: ",
+          "> | undefined; esTypes?: string[] | undefined; searchable: boolean; aggregatable: boolean; isNull?: boolean | undefined; isComputedColumn?: boolean | undefined; readFromDocValues?: boolean | undefined; indexed?: boolean | undefined; customLabel?: string | undefined; customDescription?: string | undefined; runtimeField?: ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -25711,7 +25693,7 @@
           "{ query: string | { [key: string]: any; }; language: string; }"
         ],
         "path": "src/platform/packages/shared/kbn-es-query/src/filters/build_filters/types.ts",
-        "lineNumber": 89,
+        "lineNumber": 94,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -25838,7 +25820,7 @@
           "{ value: string; clientId?: string | number | undefined; }"
         ],
         "path": "src/platform/plugins/shared/data_views/common/types.ts",
-        "lineNumber": 572,
+        "lineNumber": 577,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

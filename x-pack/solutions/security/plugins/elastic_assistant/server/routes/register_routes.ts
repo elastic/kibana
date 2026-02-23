@@ -58,11 +58,13 @@ import { deleteAllConversationsRoute } from './user_conversations/delete_all_rou
 import { suggestUsersRoute } from './users/suggest';
 import { updateAnonymizationFieldsRoute } from './test_internal/update_anonymization_fields_route';
 import { getMissingIndexPrivilegesInternalRoute } from './attack_discovery/privileges/get_missing_privileges';
+import { createAttackDiscoveryAlertsRoute } from './test_internal/create_attack_discovery_alerts_route';
 
 export const registerRoutes = (
   router: ElasticAssistantPluginRouter,
   logger: Logger,
-  config: ConfigSchema
+  config: ConfigSchema,
+  enableDataGeneratorRoutes = false
 ) => {
   /** PUBLIC */
   // Chat
@@ -159,4 +161,7 @@ export const registerRoutes = (
 
   // Test Internal
   updateAnonymizationFieldsRoute(router);
+  if (enableDataGeneratorRoutes) {
+    createAttackDiscoveryAlertsRoute(router);
+  }
 };

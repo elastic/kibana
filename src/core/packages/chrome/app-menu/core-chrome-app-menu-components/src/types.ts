@@ -122,17 +122,17 @@ interface AppMenuItemBase {
 
 type AppMenuLinkItem = AppMenuItemBase & {
   /**
-   * The HTML href attribute for the item. Only used if `run` and `items` are not provided.
+   * The HTML href attribute for the item. Only used if `items` is not provided.
    */
   href: string;
   /**
-   * The HTML target attribute for the item. Only used if `run` and `items` are not provided.
+   * The HTML target attribute for the item. Only used if `items` is not provided.
    */
   target: string;
   /**
-   * Function to run when the item is clicked. Only used if `items` and `href` is not provided.
+   * Function to run when the item is clicked. Only used if `items` is not provided.
    */
-  run?: never;
+  run?: AppMenuRunAction;
   /**
    * Sub-items to show in a popover when the item is clicked. Only used if `run` and `href` is not provided.
    */
@@ -151,15 +151,15 @@ type AppMenuLinkItem = AppMenuItemBase & {
 
 type AppMenuButtonItem = AppMenuItemBase & {
   /**
-   * The HTML href attribute for the item. Only used if `run` and `items` are not provided.
+   * The HTML href attribute for the item. Only used if `items` is not provided.
    */
-  href?: never;
+  href?: string;
   /**
-   * The HTML target attribute for the item. Only used if `run` and `items` are not provided.
+   * The HTML target attribute for the item. Only used if `items` is not provided.
    */
-  target?: never;
+  target?: string;
   /**
-   * Function to run when the item is clicked. Only used if `items` and `href` is not provided.
+   * Function to run when the item is clicked. Only used if `items` is not provided.
    */
   run: AppMenuRunAction;
   /**
@@ -180,15 +180,15 @@ type AppMenuButtonItem = AppMenuItemBase & {
 
 type AppMenuItemWithPopover = AppMenuItemBase & {
   /**
-   * The HTML href attribute for the item. Only used if `run` and `items` are not provided.
+   * The HTML href attribute for the item. Only used if `items` is not provided.
    */
   href?: never;
   /**
-   * The HTML target attribute for the item. Only used if `run` and `items` are not provided.
+   * The HTML target attribute for the item. Only used if `items` is not provided.
    */
   target?: never;
   /**
-   * Function to run when the item is clicked. Only used if `items` and `href` is not provided.
+   * Function to run when the item is clicked. Only used if `items` is not provided.
    */
   run?: never;
   /**

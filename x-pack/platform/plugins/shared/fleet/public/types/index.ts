@@ -107,6 +107,8 @@ export type {
   RegistryStream,
   RegistryStreamWithDataStream,
   RegistryPolicyTemplate,
+  RegistryVarGroup,
+  RegistryVarGroupOption,
   PackageList,
   PackageListItem,
   PackagesGroupedByStatus,
@@ -155,9 +157,11 @@ export type {
   CreateCloudConnectorRequest,
   CloudConnectorVars,
   CloudProvider,
+  AccountType,
   CloudConnectorSecretVar,
   AwsCloudConnectorVars,
   CloudConnectorSecretReference,
+  ComponentHealth,
 } from '../../common/types';
 export {
   entries,

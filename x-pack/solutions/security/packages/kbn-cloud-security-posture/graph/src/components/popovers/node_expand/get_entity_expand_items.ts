@@ -17,6 +17,8 @@ import {
   GRAPH_NODE_POPOVER_SHOW_RELATED_ITEM_ID,
   GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID,
   GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_TOOLTIP_ID,
+  GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID,
+  GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_TOOLTIP_ID,
 } from '../../test_ids';
 import { RELATED_ENTITY } from '../../../common/constants';
 
@@ -63,6 +65,8 @@ export const getTargetFieldFromNamespace = (sourceNamespace: string | undefined)
  * All items default to false - consumers must explicitly enable the items they want.
  */
 export interface EntityExpandShouldRender {
+  /** Show "Show entity relationships" toggle (entity store relationships) */
+  showEntityRelationships?: boolean;
   /** Show "Show this entity's actions" filter toggle */
   showActionsByEntity?: boolean;
   /** Show "Show actions done to this entity" filter toggle */
@@ -104,6 +108,12 @@ export interface GetEntityExpandItemsOptions {
   shouldRender: EntityExpandShouldRender;
   /** Whether entity details should be disabled (shown but not clickable). Defaults to false. */
   showEntityDetailsDisabled?: boolean;
+  /** Whether entity relationships is currently expanded (controls show/hide label) */
+  isEntityRelationshipsExpanded?: boolean;
+  /** Callback to toggle entity relationships on/off */
+  onToggleEntityRelationships?: (action: 'show' | 'hide') => void;
+  /** Whether entity relationships should be disabled. Defaults to false. */
+  showEntityRelationshipsDisabled?: boolean;
 }
 
 const DISABLED_TOOLTIP = i18n.translate(
@@ -129,6 +139,9 @@ export const getEntityExpandItems = (
     toggleFilter,
     shouldRender,
     showEntityDetailsDisabled = false,
+    isEntityRelationshipsExpanded = false,
+    onToggleEntityRelationships,
+    showEntityRelationshipsDisabled = false,
   } = options;
 
   // Derive ECS field names from source namespace
@@ -136,6 +149,42 @@ export const getEntityExpandItems = (
   const targetField = getTargetFieldFromNamespace(sourceNamespace);
 
   const items: Array<ItemExpandPopoverListItemProps | SeparatorExpandPopoverListItemProps> = [];
+
+  // Entity relationships item (shown first, before filter actions)
+  if (shouldRender.showEntityRelationships) {
+    items.push({
+      type: 'item',
+      iconType: 'cluster',
+      testSubject: GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID,
+      label: isEntityRelationshipsExpanded
+        ? i18n.translate(
+            'securitySolutionPackages.csp.graph.graphNodeExpandPopover.hideEntityRelationships',
+            { defaultMessage: 'Hide entity relationships' }
+          )
+        : i18n.translate(
+            'securitySolutionPackages.csp.graph.graphNodeExpandPopover.showEntityRelationships',
+            { defaultMessage: 'Show entity relationships' }
+          ),
+      disabled: showEntityRelationshipsDisabled,
+      onClick: () => {
+        onToggleEntityRelationships?.(isEntityRelationshipsExpanded ? 'hide' : 'show');
+        onClose?.();
+      },
+      showToolTip: showEntityRelationshipsDisabled,
+      toolTipText: showEntityRelationshipsDisabled
+        ? i18n.translate(
+            'securitySolutionPackages.csp.graph.graphNodeExpandPopover.entityRelationshipsNotAvailable',
+            { defaultMessage: 'Entity relationships not available' }
+          )
+        : undefined,
+      toolTipProps: showEntityRelationshipsDisabled
+        ? {
+            position: 'bottom',
+            'data-test-subj': GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_TOOLTIP_ID,
+          }
+        : undefined,
+    });
+  }
 
   // Filter action items
   if (shouldRender.showActionsByEntity) {

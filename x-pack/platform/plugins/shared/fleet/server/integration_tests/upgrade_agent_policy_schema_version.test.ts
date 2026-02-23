@@ -126,6 +126,8 @@ describe('upgrade agent policy schema version', () => {
           attributes: {
             schema_version: FLEET_AGENT_POLICIES_SCHEMA_VERSION,
             revision: 1,
+            name: 'policy-1',
+            namespace: 'default',
           },
         },
         // out-of-date schema_version
@@ -135,6 +137,8 @@ describe('upgrade agent policy schema version', () => {
           attributes: {
             schema_version: '0.0.1',
             revision: 1,
+            name: 'policy-2',
+            namespace: 'default',
           },
         },
         // missing schema_version
@@ -143,6 +147,8 @@ describe('upgrade agent policy schema version', () => {
           id: uuidv4(),
           attributes: {
             revision: 1,
+            name: 'policy-3',
+            namespace: 'default',
           },
         },
       ]);

@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ThemeProvider, css } from '@emotion/react';
+import { css } from '@emotion/react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { EuiListGroup, EuiHorizontalRule } from '@elastic/eui';
 import type {
@@ -20,6 +20,7 @@ import { GlobalStylesStorybookDecorator } from '../../../../.storybook/decorator
 import { GraphPopover } from './graph_popover';
 import { useGraphPopoverState } from './use_graph_popover_state';
 import { PopoverListItem } from './popover_list_item';
+import { isLabelNode } from '../../utils';
 
 export default {
   title: 'Components/Graph Components/Graph Popovers',
@@ -76,6 +77,8 @@ const useExpandButtonPopover = () => {
     closePopover();
   }, [closePopover]);
 
+  const isLabel = selectedNode.current?.data && isLabelNode(selectedNode.current.data);
+
   // eslint-disable-next-line react/display-name
   const PopoverComponent = memo(() => (
     <GraphPopover
@@ -86,19 +89,42 @@ const useExpandButtonPopover = () => {
       closePopover={closePopoverHandler}
     >
       <EuiListGroup color="primary" gutterSize="none" bordered={false} flush={true}>
-        <PopoverListItem
-          iconType="visTagCloud"
-          label="Explore related entities"
-          onClick={() => {}}
-        />
-        <PopoverListItem iconType="users" label="Show actions by this entity" onClick={() => {}} />
-        <PopoverListItem
-          iconType="storage"
-          label="Show actions on this entity"
-          onClick={() => {}}
-        />
-        <EuiHorizontalRule margin="xs" />
-        <PopoverListItem iconType="expand" label="View entity details" onClick={() => {}} />
+        {isLabel ? (
+          <>
+            <PopoverListItem
+              iconType="visTagCloud"
+              label="Show related entities"
+              onClick={() => {}}
+            />
+            <EuiHorizontalRule margin="xs" />
+            <PopoverListItem iconType="expand" label="Show entity details" onClick={() => {}} />
+          </>
+        ) : (
+          <>
+            <PopoverListItem
+              iconType="graphApp"
+              label="Show entity relationships"
+              onClick={() => {}}
+            />
+            <PopoverListItem
+              iconType="indexRuntime"
+              label="Show this entity's actions"
+              onClick={() => {}}
+            />
+            <PopoverListItem
+              iconType="indexFlush"
+              label="Show actions done to this entity"
+              onClick={() => {}}
+            />
+            <PopoverListItem
+              iconType="logstashQueue"
+              label="Show related events"
+              onClick={() => {}}
+            />
+            <EuiHorizontalRule margin="xs" />
+            <PopoverListItem iconType="expand" label="Show entity details" onClick={() => {}} />
+          </>
+        )}
       </EuiListGroup>
     </GraphPopover>
   ));
@@ -204,7 +230,7 @@ const Template = () => {
   );
 
   return (
-    <ThemeProvider theme={{ darkMode: false }}>
+    <>
       <Graph
         css={css`
           height: 100%;
@@ -216,7 +242,7 @@ const Template = () => {
         isLocked={isPopoverOpen}
       />
       {popovers?.map((popover) => popover.Popover && <popover.Popover key={popover.id} />)}
-    </ThemeProvider>
+    </>
   );
 };
 

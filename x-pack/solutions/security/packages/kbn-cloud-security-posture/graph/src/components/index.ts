@@ -30,6 +30,7 @@ export type {
   GroupNodeViewModel,
   LabelNodeViewModel,
   EntityNodeViewModel,
+  RelationshipNodeViewModel,
   NodeProps,
 } from './types';
 export {

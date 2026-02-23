@@ -154,12 +154,47 @@ describe('Grouping', () => {
     );
     expect(screen.getByTestId('null-group-icon')).toBeInTheDocument();
 
-    let lastGroup = screen.getAllByTestId('grouping-accordion').at(-1);
+    const lastGroup = screen.getAllByTestId('grouping-accordion').at(-1);
     fireEvent.click(within(lastGroup!).getByTestId('take-action-button'));
 
-    expect(takeActionItems).toHaveBeenCalledWith(getNullGroupFilter('host.name'), 2);
+    expect((takeActionItems.mock.lastCall as any[])?.[0]).toEqual(getNullGroupFilter('host.name'));
+    expect((takeActionItems.mock.lastCall as any[])?.[1]).toEqual(2);
+    expect((takeActionItems.mock.lastCall as any[])?.[2]).toMatchInlineSnapshot(`
+      Object {
+        "alertsCount": Object {
+          "value": 11,
+        },
+        "doc_count": 11,
+        "hostTags": Object {
+          "buckets": Array [],
+          "doc_count_error_upper_bound": 0,
+          "sum_other_doc_count": 0,
+        },
+        "hostsCountAggregation": Object {
+          "value": 11,
+        },
+        "isNullGroup": true,
+        "key": Array [
+          "-",
+        ],
+        "key_as_string": "-",
+        "selectedGroup": "host.name",
+        "severitiesSubAggregation": Object {
+          "buckets": Array [
+            Object {
+              "doc_count": 11,
+              "key": "low",
+            },
+          ],
+          "doc_count_error_upper_bound": 0,
+          "sum_other_doc_count": 0,
+        },
+        "usersCountAggregation": Object {
+          "value": 11,
+        },
+      }
+    `);
 
-    lastGroup = screen.getAllByTestId('grouping-accordion').at(-1);
     fireEvent.click(within(lastGroup!).getByTestId('group-panel-toggle'));
 
     expect(renderChildComponent).toHaveBeenCalledWith(
