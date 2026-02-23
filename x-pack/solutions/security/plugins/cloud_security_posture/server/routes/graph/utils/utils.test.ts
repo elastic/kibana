@@ -8,7 +8,11 @@
 import type { Logger } from '@kbn/core/server';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { getEntitiesLatestIndexName } from '@kbn/cloud-security-posture-common/utils/helpers';
-import { transformEntityTypeToIconAndShape, checkIfEntitiesIndexLookupMode } from './utils';
+import {
+  transformEntityTypeToIconAndShape,
+  checkIfEntitiesIndexLookupMode,
+  compareConnectorNodes,
+} from './utils';
 
 describe('utils', () => {
   describe('transformEntityTypeToIconAndShape', () => {
@@ -177,6 +181,45 @@ describe('utils', () => {
       expect(esClient.asInternalUser.indices.getSettings).toHaveBeenCalledWith({
         index: indexName,
       });
+    });
+  });
+
+  describe('compareConnectorNodes', () => {
+    it('should sort relationship nodes before label nodes', () => {
+      const rel = { shape: 'relationship', label: 'Owns' };
+      const lbl = { shape: 'label', label: 'Action' };
+
+      expect(compareConnectorNodes(rel, lbl)).toBe(-1);
+      expect(compareConnectorNodes(lbl, rel)).toBe(1);
+    });
+
+    it('should sort alphabetically within the same shape type', () => {
+      const a = { shape: 'relationship', label: 'Accesses frequently' };
+      const b = { shape: 'relationship', label: 'Owns' };
+
+      expect(compareConnectorNodes(a, b)).toBeLessThan(0);
+      expect(compareConnectorNodes(b, a)).toBeGreaterThan(0);
+    });
+
+    it('should return 0 for identical nodes', () => {
+      const node = { shape: 'label', label: 'Same' };
+
+      expect(compareConnectorNodes(node, node)).toBe(0);
+    });
+
+    it('should handle undefined values', () => {
+      expect(compareConnectorNodes(undefined, undefined)).toBe(0);
+      expect(
+        compareConnectorNodes({ shape: 'relationship', label: 'Owns' }, undefined)
+      ).toBeGreaterThan(0);
+      expect(compareConnectorNodes(undefined, { shape: 'label', label: 'Action' })).toBeLessThan(0);
+    });
+
+    it('should treat missing label as empty string', () => {
+      const a = { shape: 'label' };
+      const b = { shape: 'label', label: 'Action' };
+
+      expect(compareConnectorNodes(a, b)).toBeLessThan(0);
     });
   });
 });
