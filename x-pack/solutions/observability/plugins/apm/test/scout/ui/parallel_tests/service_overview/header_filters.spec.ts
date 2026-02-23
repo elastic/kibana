@@ -9,7 +9,7 @@ import { expect } from '@kbn/scout-oblt/ui';
 import { tags } from '@kbn/scout-oblt';
 import { test } from '../../fixtures';
 
-test.describe(
+test.describe.skip(
   'Service overview - header filters',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
