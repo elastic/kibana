@@ -113,7 +113,7 @@ class KbnClientExtended extends KbnClient {
 export const createRuntimeServices = async ({
   kibanaUrl: _kibanaUrl,
   elasticsearchUrl,
-  fleetServerUrl = 'https://localhost:8220',
+  fleetServerUrl: _fleetServerUrl,
   username: _username,
   password: _password,
   spaceId,
@@ -125,6 +125,7 @@ export const createRuntimeServices = async ({
   useCertForSsl = false,
 }: CreateRuntimeServicesOptions): Promise<RuntimeServices> => {
   const kibanaUrl = spaceId ? buildUrlWithSpaceId(_kibanaUrl, spaceId) : _kibanaUrl;
+  const fleetServerUrl = _fleetServerUrl || 'https://localhost:8220';
   let username = _username;
   let password = _password;
   let esUsername = _esUsername;
@@ -146,7 +147,7 @@ export const createRuntimeServices = async ({
     if (isServerlessEs) {
       log?.warning(
         'Creating Security Superuser is not supported in current environment.\nES is running in serverless mode. ' +
-          'Will use username [system_indices_superuser] instead.'
+        'Will use username [system_indices_superuser] instead.'
       );
 
       username = 'system_indices_superuser';
@@ -319,8 +320,7 @@ export const createKbnClient = ({
 
   if (log) {
     log.verbose(
-      `Creating Kibana client with URL: ${clientOptions.url} ${
-        apiKey ? ` + ApiKey: ${apiKey}` : ''
+      `Creating Kibana client with URL: ${clientOptions.url} ${apiKey ? ` + ApiKey: ${apiKey}` : ''
       }`
     );
   }

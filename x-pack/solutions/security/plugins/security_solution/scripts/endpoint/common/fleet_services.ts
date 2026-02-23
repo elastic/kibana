@@ -340,8 +340,7 @@ export const waitForHostToEnroll = async (
   if (!found) {
     throw Object.assign(
       new Error(
-        `Timed out waiting for host [${hostname}] to show up in Fleet. Waited ${
-          timeoutMs / 1000
+        `Timed out waiting for host [${hostname}] to show up in Fleet. Waited ${timeoutMs / 1000
         } seconds`
       ),
       { agentId, hostname }
@@ -353,6 +352,76 @@ export const waitForHostToEnroll = async (
 
   // Workaround for united metadata sometimes being unable to find docs in .fleet-agents index. This
   // seems to be a timing issue with the index refresh.
+  await esClient?.search({
+    index: AGENTS_INDEX,
+  });
+
+  return found;
+};
+
+/**
+ * Like waitForHostToEnroll(), but accepts multiple possible hostnames and waits for *any* of them.
+ * Useful when the enrolled hostname might be FQDN vs shortname (cloud-init / distro differences).
+ */
+export const waitForHostToEnrollAny = async (
+  kbnClient: KbnClient,
+  log: ToolingLog,
+  hostnames: string[],
+  timeoutMs: number = 30000,
+  esClient: Client | undefined = undefined
+): Promise<Agent> => {
+  const candidates = (hostnames || []).map((h) => h.trim()).filter(Boolean);
+  if (!candidates.length) {
+    throw new Error(`waitForHostToEnrollAny requires at least one hostname candidate`);
+  }
+
+  log.info(`Waiting for host to enroll with fleet (candidates: ${candidates.join(', ')})`);
+
+  const started = new Date();
+  const hasTimedOut = (): boolean => {
+    const elapsedTime = Date.now() - started.getTime();
+    return elapsedTime > timeoutMs;
+  };
+  let found: Agent | undefined;
+  let agentId: string | undefined;
+
+  const kuery = `(${candidates
+    .map((h) => `local_metadata.host.hostname.keyword : "${h.replaceAll('"', '\\"')}"`)
+    .join(' or ')})`;
+
+  while (!found && !hasTimedOut()) {
+    found = await retryOnError(
+      async () =>
+        fetchFleetAgents(kbnClient, {
+          perPage: 1,
+          kuery,
+          showInactive: false,
+        }).then((response) => {
+          agentId = response.items[0]?.id;
+          return response.items.filter((agent) => agent.status === 'online')[0];
+        }),
+      RETRYABLE_TRANSIENT_ERRORS
+    );
+
+    if (!found) {
+      await new Promise((r) => setTimeout(r, 2000));
+    }
+  }
+
+  if (!found) {
+    throw Object.assign(
+      new Error(
+        `Timed out waiting for host to show up in Fleet. Waited ${timeoutMs / 1000} seconds. Candidates: ${candidates.join(
+          ', '
+        )}`
+      ),
+      { agentId, hostnames: candidates }
+    );
+  }
+
+  log.debug(`Host enrolled with fleet (matched one of: ${candidates.join(', ')})`);
+  log.verbose(found);
+
   await esClient?.search({
     index: AGENTS_INDEX,
   });
@@ -564,11 +633,40 @@ export const getAgentVersionMatchingCurrentStack = async (
 };
 
 // Generates a file name using system arch and an agent version.
-export const getAgentFileName = (agentVersion: string): string => {
-  const downloadArch =
-    { arm64: 'arm64', x64: 'x86_64' }[process.arch as string] ??
-    `UNSUPPORTED_ARCHITECTURE_${process.arch}`;
-  return `elastic-agent-${agentVersion}-linux-${downloadArch}`;
+// For Multipass VMs, the architecture matches the host architecture (e.g., Apple Silicon uses ARM64 VMs).
+// For Vagrant VMs, they are typically x86_64.
+export const getAgentFileName = (
+  agentVersion: string,
+  /**
+   * Backwards-compatible argument:
+   * - when one of: linux/windows/darwin => treated as target OS
+   * - otherwise treated as target architecture (e.g. x86_64/arm64)
+   */
+  osOrArch?: string,
+  arch?: 'auto' | 'x86_64' | 'arm64'
+): string => {
+  const isOs = osOrArch === 'linux' || osOrArch === 'windows' || osOrArch === 'darwin';
+  const targetOs = (isOs ? osOrArch : 'linux') as 'linux' | 'windows' | 'darwin';
+
+  // Determine architecture
+  let downloadArch: string;
+  const archOverride = isOs ? arch : (osOrArch as string | undefined);
+
+  if (archOverride && archOverride !== 'auto') {
+    downloadArch = archOverride;
+  } else {
+    // Use host machine architecture
+    downloadArch =
+      { arm64: 'arm64', x64: 'x86_64' }[process.arch as string] ??
+      `UNSUPPORTED_ARCHITECTURE_${process.arch}`;
+  }
+
+  // macOS uses 'aarch64' instead of 'arm64' in Elastic Agent filenames
+  if (targetOs === 'darwin' && downloadArch === 'arm64') {
+    downloadArch = 'aarch64';
+  }
+
+  return `elastic-agent-${agentVersion}-${targetOs}-${downloadArch}`;
 };
 
 interface ElasticArtifactSearchResponse {
@@ -597,7 +695,7 @@ interface GetAgentDownloadUrlResponse {
 }
 
 /**
- * Retrieves the download URL to the Linux installation package for a given version of the Elastic Agent
+ * Retrieves the download URL to the installation package for a given version of the Elastic Agent
  * @param version
  * @param closestMatch
  * @param log
@@ -609,15 +707,28 @@ export const getAgentDownloadUrl = async (
    * is less than or equal to the `version` provided
    */
   closestMatch: boolean = false,
-  log?: ToolingLog
+  log?: ToolingLog,
+  /**
+   * Backwards-compatible argument:
+   * - when one of: linux/windows/darwin => treated as target OS
+   * - otherwise treated as target architecture (e.g. x86_64/arm64)
+   */
+  targetArchOrOs?: string,
+  arch?: 'auto' | 'x86_64' | 'arm64'
 ): Promise<GetAgentDownloadUrlResponse> => {
   const agentVersion = closestMatch ? await getLatestAgentDownloadVersion(version, log) : version;
 
-  const fileNameWithoutExtension = getAgentFileName(agentVersion);
-  const agentFile = `${fileNameWithoutExtension}.tar.gz`;
+  const isOs =
+    targetArchOrOs === 'linux' || targetArchOrOs === 'windows' || targetArchOrOs === 'darwin';
+  const targetOs = (isOs ? targetArchOrOs : 'linux') as 'linux' | 'windows' | 'darwin';
+  const targetArch = isOs ? arch : (targetArchOrOs as string | undefined);
+
+  const fileNameWithoutExtension = getAgentFileName(agentVersion, targetOs, targetArch as any);
+  const fileExtension = targetOs === 'windows' ? '.zip' : '.tar.gz';
+  const agentFile = `${fileNameWithoutExtension}${fileExtension}`;
   const artifactSearchUrl = `https://artifacts-api.elastic.co/v1/search/${agentVersion}/${agentFile}`;
 
-  log?.verbose(`Retrieving elastic agent download URL from:\n    ${artifactSearchUrl}`);
+  log?.verbose(`Retrieving elastic agent download URL for ${targetOs} from:\n    ${artifactSearchUrl}`);
 
   const searchResult: ElasticArtifactSearchResponse = await pRetry(
     async () => {
@@ -850,7 +961,24 @@ export const enrollHostVmWithFleet = async ({
   }
 
   const agentVersion = version || (await getAgentVersionMatchingCurrentStack(kbnClient));
-  const agentUrlInfo = await getAgentDownloadUrl(agentVersion, closestVersionMatch, log);
+
+  const platform: 'linux' | 'windows' | 'darwin' =
+    hostVm.platform ?? (hostVm.type === 'utm' ? 'windows' : 'linux');
+
+  // Determine target architecture based on host machine architecture by default.
+  // - Multipass VMs: typically match host architecture (Apple Silicon => arm64)
+  // - UTM Windows VMs: often arm64 on Apple Silicon, otherwise x86_64 (user can override by changing host arch)
+  const hostArch = process.arch;
+  const defaultArch: 'auto' | 'x86_64' | 'arm64' =
+    hostArch === 'arm64' ? 'arm64' : hostArch === 'x64' ? 'x86_64' : 'auto';
+
+  const agentUrlInfo = await getAgentDownloadUrl(
+    agentVersion,
+    closestVersionMatch,
+    log,
+    platform,
+    defaultArch
+  );
 
   const agentDownload: DownloadAndStoreAgentResponse = useAgentCache
     ? await downloadAndStoreAgent(agentUrlInfo.url)
@@ -858,30 +986,50 @@ export const enrollHostVmWithFleet = async ({
 
   log.info(`Installing Elastic Agent`);
 
-  // For multipass, we need to place the Agent archive in the VM - either mounting local cache
-  // directory or downloading it directly from inside of the VM.
-  // For Vagrant, the archive is already in the VM - it was done during VM creation.
-  if (hostVm.type === 'multipass') {
-    if (useAgentCache) {
-      const hostVmDownloadsDir = '/home/ubuntu/_agent_downloads';
+  // For multipass linux, we can mount local cache directory or download it directly from inside of the VM.
+  // For other VM types/platforms, we default to downloading directly in the VM.
+  if (platform === 'linux' && hostVm.type === 'multipass' && useAgentCache) {
+    const hostVmDownloadsDir = '/home/ubuntu/_agent_downloads';
 
-      log.debug(
-        `Mounting agents download cache directory [${agentDownload.directory}] to Host VM at [${hostVmDownloadsDir}]`
-      );
-      const downloadsMount = await hostVm.mount(agentDownload.directory, hostVmDownloadsDir);
+    log.debug(
+      `Mounting agents download cache directory [${agentDownload.directory}] to Host VM at [${hostVmDownloadsDir}]`
+    );
+    const downloadsMount = await hostVm.mount(agentDownload.directory, hostVmDownloadsDir);
 
-      log.debug(`Extracting download archive on host VM`);
-      await hostVm.exec(`tar -zxf ${downloadsMount.hostDir}/${agentDownload.filename}`);
+    log.debug(`Extracting download archive on host VM`);
+    await hostVm.exec(`tar -zxf ${downloadsMount.hostDir}/${agentDownload.filename}`);
 
-      await downloadsMount.unmount();
-    } else {
-      log.debug(`Downloading Elastic Agent to host VM`);
-      await hostVm.exec(`curl -L ${agentDownload.url} -o ${agentDownload.filename}`);
+    await downloadsMount.unmount();
+  } else if (platform === 'linux') {
+    log.debug(`Downloading Elastic Agent to host VM`);
+    await hostVm.exec(`curl -L ${agentDownload.url} -o ${agentUrlInfo.fileName}`, { shell: true });
 
-      log.debug(`Extracting download archive on host VM`);
-      await hostVm.exec(`tar -zxf ${agentDownload.filename}`);
-      await hostVm.exec(`rm -f ${agentDownload.filename}`);
-    }
+    log.debug(`Extracting download archive on host VM`);
+    await hostVm.exec(`tar -zxf ${agentUrlInfo.fileName}`, { shell: true });
+    await hostVm.exec(`rm -f ${agentUrlInfo.fileName}`, { shell: true });
+  } else if (platform === 'windows') {
+    const downloadPath = `C:\\\\Users\\\\Public\\\\${agentUrlInfo.fileName}`;
+    const extractBase = `C:\\\\Users\\\\Public`;
+    const extractedDir = `C:\\\\Users\\\\Public\\\\${agentUrlInfo.dirName}`;
+
+    log.debug(`Downloading Elastic Agent to Windows VM`);
+    await hostVm.exec(
+      [
+        `$ProgressPreference = 'SilentlyContinue'`,
+        `Invoke-WebRequest -Uri "${agentDownload.url}" -OutFile "${downloadPath}"`,
+      ].join('; ')
+    );
+
+    log.debug(`Extracting download archive on Windows VM`);
+    await hostVm.exec(
+      [
+        `if (Test-Path "${extractedDir}") { Remove-Item -Recurse -Force "${extractedDir}" }`,
+        `Expand-Archive -Path "${downloadPath}" -DestinationPath "${extractBase}" -Force`,
+        `Remove-Item -Force "${downloadPath}"`,
+      ].join('; ')
+    );
+  } else {
+    throw new Error(`Unsupported platform for agent enrollment: ${platform}`);
   }
 
   const policyId = agentPolicyId || (await getOrCreateDefaultAgentPolicy({ kbnClient, log })).id;
@@ -890,30 +1038,93 @@ export const enrollHostVmWithFleet = async ({
     fetchAgentPolicyEnrollmentKey(kbnClient, policyId),
   ]);
 
-  const agentEnrollCommand = [
-    'sudo',
+  if (!fleetServerUrl) {
+    throw new Error(`Unable to determine Fleet Server URL (no Fleet Server hosts configured)`);
+  }
+  if (!enrollmentToken) {
+    throw new Error(`Unable to determine enrollment token for policy [${policyId}]`);
+  }
 
-    `./${agentUrlInfo.dirName}/elastic-agent`,
+  // For UTM/Windows (and some cloned images), the OS hostname/computername may not match the VM name.
+  // Detect it and use it as the primary Fleet query key.
+  const detectedHostname = await (async (): Promise<string | undefined> => {
+    try {
+      if (platform === 'windows') {
+        const { stdout } = await hostVm.exec('$env:COMPUTERNAME');
+        return stdout.trim();
+      }
+      const { stdout } = await hostVm.exec('hostname', { shell: true });
+      return stdout.trim();
+    } catch {
+      return undefined;
+    }
+  })();
 
-    'install',
+  const hostnameCandidates = [
+    // often used for Multipass
+    hostVm.name,
+    // actual in-guest hostname/computername
+    detectedHostname,
+  ]
+    .map((h) => (h || '').trim())
+    .filter(Boolean);
 
-    '--insecure',
+  // Quick connectivity sanity check from the VM to Fleet Server.
+  // This helps distinguish hostname mismatch from network/reachability issues.
+  try {
+    const u = new URL(fleetServerUrl);
+    const port = Number(u.port || (u.protocol === 'https:' ? 443 : 80));
+    log.info(`Fleet Server URL: ${fleetServerUrl}`);
 
-    '--force',
-
-    '--url',
-    fleetServerUrl,
-
-    '--enrollment-token',
-    enrollmentToken,
-  ].join(' ');
+    if (platform === 'windows') {
+      await hostVm.exec(
+        `Test-NetConnection -ComputerName "${u.hostname}" -Port ${port} | Format-List`
+      );
+    } else {
+      await hostVm.exec(
+        `bash -lc 'timeout 5 bash -c \"</dev/tcp/${u.hostname}/${port}\" && echo TCP_OK || echo TCP_FAIL'`,
+        { shell: true }
+      );
+    }
+  } catch (e) {
+    log.warning(`Fleet Server connectivity check failed (continuing): ${(e as Error).message}`);
+  }
 
   log.info(`Enrolling Elastic Agent with Fleet`);
-  log.verbose('Enrollment command:', agentEnrollCommand);
 
-  await hostVm.exec(agentEnrollCommand);
+  if (platform === 'windows') {
+    const agentExe = `C:\\\\Users\\\\Public\\\\${agentUrlInfo.dirName}\\\\elastic-agent.exe`;
+    const enrollCmd = [
+      `& "${agentExe}"`,
+      'install',
+      '--insecure',
+      '--force',
+      '--url',
+      `"${fleetServerUrl}"`,
+      '--enrollment-token',
+      `"${enrollmentToken}"`,
+    ].join(' ');
+    log.debug('Enrollment command (Windows):', enrollCmd);
+    await hostVm.exec(enrollCmd);
+  } else {
+    // Build command as separate parts to avoid quoting issues with enrollment token
+    const agentEnrollCommand = [
+      'sudo',
+      `./${agentUrlInfo.dirName}/elastic-agent`,
+      'install',
+      '--insecure',
+      '--force',
+      '--url',
+      fleetServerUrl,
+      '--enrollment-token',
+      enrollmentToken,
+    ].join(' ');
 
-  return waitForHostToEnroll(kbnClient, log, hostVm.name, timeoutMs);
+    log.debug('Enrollment command (Linux):', agentEnrollCommand);
+    await hostVm.exec(agentEnrollCommand, { shell: true });
+  }
+
+  return waitForHostToEnrollAny(kbnClient, log, hostnameCandidates, timeoutMs);
 };
 
 interface CreateAgentPolicyOptions {

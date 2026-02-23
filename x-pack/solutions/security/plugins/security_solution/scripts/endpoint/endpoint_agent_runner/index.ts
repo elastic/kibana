@@ -20,6 +20,7 @@ const runSetupAll: RunFn = async (cliContext) => {
   const fleetServerUrl = cliContext.flags.fleetServerUrl as string;
   const version = cliContext.flags.version as string;
   const policy = cliContext.flags.policy as string;
+  const includeOsquery = Boolean(cliContext.flags.includeOsquery);
   const log = cliContext.log;
 
   createToolingLogger.setDefaultLogLevelFromCliFlags(cliContext.flags);
@@ -33,6 +34,7 @@ const runSetupAll: RunFn = async (cliContext) => {
     apiKey,
     version,
     policy,
+    includeOsquery,
     log,
     spaceId,
   });
@@ -60,6 +62,7 @@ export const cli = () => {
           'apiKey',
           'spaceId',
         ],
+        boolean: ['includeOsquery'],
         default: {
           kibanaUrl: 'http://127.0.0.1:5601',
           elasticUrl: 'http://127.0.0.1:9200',
@@ -69,6 +72,7 @@ export const cli = () => {
           version: '',
           policy: '',
           spaceId: '',
+          includeOsquery: false,
         },
         help: `
         --version           Optional. The version of the Agent to use for enrolling the new host.
@@ -84,6 +88,7 @@ export const cli = () => {
                             and 'password' arguments are ignored.
         --spaceId           Optional. The space id where the host should be added to in kibana. The
                             space will be created if it does not exist. Default: default space.
+        --includeOsquery    Optional. When set, ensures Osquery Manager integration is installed on the agent policy.
         --kibanaUrl         Optional. The url to Kibana (Default: http://127.0.0.1:5601)
         --elasticUrl        Optional. The url to Elasticsearch (Default: http://127.0.0.1:9200)
       `,
