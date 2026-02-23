@@ -332,4 +332,51 @@ describe('MapPopover', () => {
     renderPopover();
     expect(screen.queryByTestId('serviceMapPopoverContent')).not.toBeInTheDocument();
   });
+
+  describe('accessibility', () => {
+    it('service node popover content has accessible structure', () => {
+      const serviceNode: ServiceMapNode = {
+        id: 'opbeans-java',
+        type: 'service',
+        position: { x: 100, y: 100 },
+        data: {
+          id: 'opbeans-java',
+          label: 'opbeans-java',
+          isService: true,
+          agentName: 'java',
+        } as ServiceNodeData,
+      };
+
+      renderPopover({ selectedNode: serviceNode });
+
+      const content = screen.getByTestId('serviceMapPopoverContent');
+      expect(content).toBeInTheDocument();
+
+      const heading = screen.getByTestId('serviceMapPopoverTitle');
+      expect(heading).toBeInTheDocument();
+      expect(heading.tagName).toBe('H3');
+      expect(heading).toHaveTextContent('opbeans-java');
+    });
+
+    it('dependency node popover content has accessible heading', () => {
+      const dependencyNode: ServiceMapNode = {
+        id: '>postgresql',
+        type: 'dependency',
+        position: { x: 200, y: 200 },
+        data: {
+          id: '>postgresql',
+          label: 'postgresql',
+          isService: false,
+        } as DependencyNodeData,
+      };
+
+      renderPopover({ selectedNode: dependencyNode });
+
+      const content = screen.getByTestId('serviceMapPopoverContent');
+      expect(content).toBeInTheDocument();
+      const heading = screen.getByTestId('serviceMapPopoverTitle');
+      expect(heading.tagName).toBe('H3');
+      expect(heading).toHaveTextContent('postgresql');
+    });
+  });
 });
