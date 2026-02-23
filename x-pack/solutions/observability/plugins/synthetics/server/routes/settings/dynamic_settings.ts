@@ -14,7 +14,12 @@ import {
 import type { SyntheticsRestApiRouteFactory } from '../types';
 import type { DynamicSettings } from '../../../common/runtime_types';
 import type { DynamicSettingsAttributes } from '../../runtime_types/settings';
-import { SYNTHETICS_API_URLS } from '../../../common/constants';
+import {
+  SYNTHETICS_API_URLS,
+  MIN_PRIVATE_LOCATIONS_SYNC_INTERVAL,
+  MAX_PRIVATE_LOCATIONS_SYNC_INTERVAL,
+} from '../../../common/constants';
+import { runSynPrivateLocationMonitorsTaskSoon } from '../../tasks/sync_private_locations_monitors_task';
 
 export const createGetDynamicSettingsRoute: SyntheticsRestApiRouteFactory<
   DynamicSettings
@@ -37,14 +42,23 @@ export const createPostDynamicSettingsRoute: SyntheticsRestApiRouteFactory = () 
     body: DynamicSettingsSchema,
   },
   writeAccess: true,
-  handler: async ({ savedObjectsClient, request }): Promise<DynamicSettingsAttributes> => {
+  handler: async ({ savedObjectsClient, request, server }): Promise<DynamicSettingsAttributes> => {
     const newSettings = request.body;
     const prevSettings = await getSyntheticsDynamicSettings(savedObjectsClient);
+
+    const syncIntervalChanged =
+      newSettings.privateLocationsSyncInterval != null &&
+      newSettings.privateLocationsSyncInterval !== prevSettings.privateLocationsSyncInterval;
 
     const attr = await setSyntheticsDynamicSettings(savedObjectsClient, {
       ...prevSettings,
       ...newSettings,
     } as DynamicSettingsAttributes);
+
+    // Trigger the sync task immediately so the new interval takes effect right away
+    if (syncIntervalChanged) {
+      void runSynPrivateLocationMonitorsTaskSoon({ server });
+    }
 
     return fromSettingsAttribute(attr as DynamicSettingsAttributes);
   },
@@ -60,6 +74,8 @@ export const fromSettingsAttribute = (
     defaultEmail: attr.defaultEmail,
     defaultStatusRuleEnabled: attr.defaultStatusRuleEnabled ?? true,
     defaultTLSRuleEnabled: attr.defaultTLSRuleEnabled ?? true,
+    privateLocationsSyncInterval:
+      attr.privateLocationsSyncInterval ?? MIN_PRIVATE_LOCATIONS_SYNC_INTERVAL,
   };
 };
 
@@ -87,6 +103,13 @@ export const DynamicSettingsSchema = schema.object({
       to: schema.arrayOf(schema.string()),
       cc: schema.maybe(schema.arrayOf(schema.string())),
       bcc: schema.maybe(schema.arrayOf(schema.string())),
+    })
+  ),
+  privateLocationsSyncInterval: schema.maybe(
+    schema.number({
+      min: MIN_PRIVATE_LOCATIONS_SYNC_INTERVAL,
+      max: MAX_PRIVATE_LOCATIONS_SYNC_INTERVAL,
+      validate: validateInteger,
     })
   ),
 });
