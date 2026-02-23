@@ -41,12 +41,11 @@ const OPAMP_POLICY_ID = 'opamp';
 export const OPAMP_POLICY_NAME = 'OpAMP';
 
 async function fetchOpampPolicy(): Promise<any | null> {
-  try {
-    const res = await sendGetOneAgentPolicy(OPAMP_POLICY_ID);
-    return res?.data?.item || null;
-  } catch {
-    return null;
+  const res = await sendGetOneAgentPolicy(OPAMP_POLICY_ID);
+  if (res?.error?.message) {
+    throw new Error(res.error.message);
   }
+  return res?.data?.item || null;
 }
 
 async function createOpampPolicyWithHook(): Promise<any> {
@@ -65,6 +64,9 @@ async function fetchEnrollmentTokenWithHook(policyId: string): Promise<any[]> {
     perPage: 1,
     kuery: `policy_id:"${policyId}"`,
   });
+  if (res?.error?.message) {
+    throw new Error(res.error.message);
+  }
   return res?.data?.items || [];
 }
 
@@ -140,7 +142,12 @@ service:
             />
           </p>
           {token && defaultFleetServerHost ? (
-            <EuiCodeBlock isCopyable language="yaml" paddingSize="m">
+            <EuiCodeBlock
+              isCopyable
+              language="yaml"
+              paddingSize="m"
+              data-test-subj="opampConfigYaml"
+            >
               {opampConfig}
             </EuiCodeBlock>
           ) : loading ? (
@@ -210,13 +217,7 @@ service:
       <EuiFlyoutBody>
         {error ? (
           <EuiText color="danger">
-            <p>
-              <FormattedMessage
-                id="xpack.fleet.addCollectorFlyout.error"
-                defaultMessage="{errorMsg}"
-                values={{ errorMsg: error }}
-              />
-            </p>
+            <p>{error}</p>
           </EuiText>
         ) : (
           <EuiSteps steps={steps} firstStepNumber={1} />
