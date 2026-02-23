@@ -16,6 +16,7 @@ import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import type { RunningQuery } from '../../../common/types';
 import { QueryDetailFlyout } from './query_detail_flyout';
+import { RunTimeFilter } from './run_time_filter';
 
 interface RunningQueriesTableProps {
   queries: RunningQuery[];
@@ -27,6 +28,8 @@ export const RunningQueriesTable: React.FC<RunningQueriesTableProps> = ({
   onCancelQuery,
 }) => {
   const [selectedQuery, setSelectedQuery] = useState<RunningQuery | null>(null);
+  const [runTimeValue, setRunTimeValue] = useState<number | null>(null);
+  const [runTimeUnit, setRunTimeUnit] = useState('m');
 
   const closeFlyout = useCallback(() => setSelectedQuery(null), []);
 
@@ -37,6 +40,15 @@ export const RunningQueriesTable: React.FC<RunningQueriesTableProps> = ({
     },
     [onCancelQuery]
   );
+
+  const filteredQueries = useMemo(() => {
+    if (runTimeValue === null) return queries;
+    const sinceMs = moment()
+      .subtract(runTimeValue, runTimeUnit as moment.unitOfTime.DurationConstructor)
+      .valueOf();
+    return queries.filter((q) => q.startTime >= sinceMs);
+  }, [queries, runTimeValue, runTimeUnit]);
+
   const columns: Array<EuiBasicTableColumn<RunningQuery>> = useMemo(
     () => [
       {
@@ -108,8 +120,35 @@ export const RunningQueriesTable: React.FC<RunningQueriesTableProps> = ({
 
   const uniqueSources = useMemo(() => [...new Set(queries.map((q) => q.source))], [queries]);
 
+  const runTimeValueRef = React.useRef(runTimeValue);
+  runTimeValueRef.current = runTimeValue;
+  const runTimeUnitRef = React.useRef(runTimeUnit);
+  runTimeUnitRef.current = runTimeUnit;
+  const handleRunTimeChange = useCallback((v: number | null, u: string) => {
+    setRunTimeValue(v);
+    setRunTimeUnit(u);
+  }, []);
+  const handleRunTimeChangeRef = React.useRef(handleRunTimeChange);
+  handleRunTimeChangeRef.current = handleRunTimeChange;
+
+  const RunTimeFilterCustom = useMemo(
+    () => () =>
+      (
+        <RunTimeFilter
+          value={runTimeValueRef.current}
+          unit={runTimeUnitRef.current}
+          onChange={(v, u) => handleRunTimeChangeRef.current(v, u)}
+        />
+      ),
+    []
+  );
+
   const searchFilters: SearchFilterConfig[] = useMemo(
     () => [
+      {
+        type: 'custom_component',
+        component: RunTimeFilterCustom,
+      },
       {
         type: 'field_value_selection',
         field: 'queryType',
@@ -133,13 +172,13 @@ export const RunningQueriesTable: React.FC<RunningQueriesTableProps> = ({
         options: uniqueSources.map((source) => ({ value: source, name: source })),
       },
     ],
-    [uniqueSources]
+    [uniqueSources, RunTimeFilterCustom]
   );
 
   return (
     <>
       <EuiInMemoryTable
-        items={queries}
+        items={filteredQueries}
         columns={columns}
         search={{
           box: {

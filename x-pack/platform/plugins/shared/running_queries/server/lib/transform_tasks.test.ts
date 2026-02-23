@@ -51,11 +51,9 @@ describe('extractSource', () => {
   });
 
   it('handles multiple semicolon-separated segments', () => {
-    expect(
-      extractSource(
-        'fb299124;kibana:application:discover:new;application:discover:new'
-      )
-    ).toBe('discover');
+    expect(extractSource('fb299124;kibana:application:discover:new;application:discover:new')).toBe(
+      'discover'
+    );
   });
 
   it('decodes URI-encoded names', () => {

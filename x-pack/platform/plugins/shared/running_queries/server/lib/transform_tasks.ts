@@ -93,9 +93,7 @@ export function parseEsqlDescription(description: string): { indices: number; qu
   const query = description;
 
   const fromMatch = /^\s*FROM\s+([^|]+)/i.exec(query);
-  const indices = fromMatch
-    ? fromMatch[1].split(',').filter((s) => s.trim().length > 0).length
-    : 0;
+  const indices = fromMatch ? fromMatch[1].split(',').filter((s) => s.trim().length > 0).length : 0;
 
   return { indices, query };
 }

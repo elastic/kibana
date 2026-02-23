@@ -68,11 +68,7 @@ export const QueryDetailFlyout: React.FC<QueryDetailFlyoutProps> = ({
   onStopQuery,
 }) => {
   return (
-    <EuiFlyout
-      onClose={onClose}
-      size="m"
-      maxWidth={691}
-    >
+    <EuiFlyout onClose={onClose} size="m" maxWidth={691}>
       <EuiFlyoutBody>
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
