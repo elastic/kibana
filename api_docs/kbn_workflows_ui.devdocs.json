@@ -512,7 +512,7 @@
             "label": "checked",
             "description": [],
             "signature": [
-              "\"off\" | \"on\" | undefined"
+              "\"on\" | \"off\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-workflows-ui/src/components/workflow_selector/workflow_utils.tsx",
             "lineNumber": 26,
@@ -528,7 +528,7 @@
             "label": "prepend",
             "description": [],
             "signature": [
-              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+              "React.ReactNode"
             ],
             "path": "src/platform/packages/shared/kbn-workflows-ui/src/components/workflow_selector/workflow_utils.tsx",
             "lineNumber": 27,
@@ -544,7 +544,7 @@
             "label": "append",
             "description": [],
             "signature": [
-              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+              "React.ReactNode"
             ],
             "path": "src/platform/packages/shared/kbn-workflows-ui/src/components/workflow_selector/workflow_utils.tsx",
             "lineNumber": 28,

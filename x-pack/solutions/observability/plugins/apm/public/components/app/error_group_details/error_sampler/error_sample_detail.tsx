@@ -261,7 +261,7 @@ export function ErrorSampleDetails({
                     },
                   })}
                 >
-                  <EuiIcon type="merge" />
+                  <EuiIcon type="merge" aria-hidden={true} />
                   <TransactionLinkName>{transaction.transaction.name}</TransactionLinkName>
                 </TransactionDetailLink>
               </EuiToolTip>
@@ -368,17 +368,20 @@ export function ErrorSampleDetailTabContent({
 }) {
   const codeLanguage = error?.service.language?.name;
   const exceptions = error?.error.exception || [];
+  const hasExceptions = exceptions.length > 0;
   const logStackframes = error?.error.log?.stacktrace;
-  const isPlaintextException =
-    !!error.error.stack_trace && exceptions.length === 1 && !exceptions[0].stacktrace;
+  const isPlaintextException = hasExceptions
+    ? !!error.error.stack_trace && exceptions.length === 1 && !exceptions[0].stacktrace
+    : !!error.error.stack_trace;
+
   switch (currentTab.key) {
     case ErrorTabKey.LogStackTrace:
       return <Stacktrace stackframes={logStackframes} codeLanguage={codeLanguage} />;
     case ErrorTabKey.ExceptionStacktrace:
       return isPlaintextException ? (
         <PlaintextStacktrace
-          message={exceptions[0].message}
-          type={exceptions[0]?.type}
+          message={hasExceptions ? exceptions[0].message : undefined}
+          type={hasExceptions ? exceptions[0].type : undefined}
           stacktrace={error?.error.stack_trace}
           codeLanguage={codeLanguage}
         />
