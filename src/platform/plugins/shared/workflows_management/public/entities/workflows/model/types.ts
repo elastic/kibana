@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { LegacyWorkflowInput } from '@kbn/workflows';
+import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
 
 /**
  * Map of workflow IDs to workflow details
@@ -17,7 +17,7 @@ export interface WorkflowsMap {
   [workflowId: string]: {
     id: string;
     name: string;
-    inputs?: LegacyWorkflowInput[];
+    inputsSchema?: JsonModelSchemaType;
   };
 }
 

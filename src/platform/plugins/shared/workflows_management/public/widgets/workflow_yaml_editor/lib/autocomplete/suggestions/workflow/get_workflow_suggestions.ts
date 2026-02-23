@@ -8,7 +8,7 @@
  */
 
 import { monaco } from '@kbn/monaco';
-import type { LegacyWorkflowInput } from '@kbn/workflows';
+import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
 import {
   buildInsertTextAndEdits,
   checkExistingInputs,
@@ -17,6 +17,10 @@ import {
 import type { WorkflowsResponse } from '../../../../../../entities/workflows/model/types';
 import type { ExtendedAutocompleteContext } from '../../context/autocomplete.types';
 
+type WorkflowSuggestionsContext = ExtendedAutocompleteContext & {
+  workflows: WorkflowsResponse;
+};
+
 /**
  * Gets workflows from Redux store and filters by search prefix
  * Similar to how connectors work - uses pre-loaded data
@@ -24,7 +28,7 @@ import type { ExtendedAutocompleteContext } from '../../context/autocomplete.typ
 function getWorkflowsFromStore(
   workflows: WorkflowsResponse,
   searchPrefix?: string
-): Array<{ id: string; name: string; inputs?: LegacyWorkflowInput[] }> {
+): Array<{ id: string; name: string; inputsSchema?: JsonModelSchemaType }> {
   if (!workflows.workflows) {
     return [];
   }
@@ -52,13 +56,13 @@ function getWorkflowsFromStore(
  * (3) Workflow has inputs, step already has inputs → same plus note that we will not modify existing inputs.
  */
 function buildDocumentation(
-  workflow: { id: string; name: string; inputs?: LegacyWorkflowInput[] },
+  workflow: { id: string; name: string; inputsSchema?: JsonModelSchemaType },
   hasInputs: boolean,
   existingInputsState: 'none' | 'empty' | 'has-content'
 ): string {
   let documentation = `Workflow: ${workflow.name}`;
-  if (hasInputs && workflow.inputs) {
-    const inputNames = workflow.inputs.map((input) => input.name).join(', ');
+  if (hasInputs && workflow.inputsSchema?.properties) {
+    const inputNames = Object.keys(workflow.inputsSchema.properties).join(', ');
     documentation += `\n\nInputs: ${inputNames}`;
     if (existingInputsState === 'has-content') {
       documentation += '\n\nNote: Inputs already exist in this step and will not be modified.';
@@ -74,7 +78,7 @@ function buildDocumentation(
  * Uses pre-loaded workflows from Redux (like connectors)
  */
 export async function getWorkflowSuggestions(
-  autocompleteContext: ExtendedAutocompleteContext
+  autocompleteContext: WorkflowSuggestionsContext
 ): Promise<monaco.languages.CompletionItem[]> {
   const { focusedStepInfo, line, lineParseResult, range, workflows, model } = autocompleteContext;
 
@@ -90,16 +94,16 @@ export async function getWorkflowSuggestions(
     return [];
   }
 
-  const searchPrefix = lineParseResult?.fullKey || '';
+  const searchPrefix = lineParseResult.fullKey ?? '';
 
   const workflowSuggestions = getWorkflowsFromStore(workflows, searchPrefix);
 
-  const workflowParseResult = lineParseResult?.matchType === 'workflow-id' ? lineParseResult : null;
+  const valueStartIndex = lineParseResult.valueStartIndex;
   const adjustedRange =
-    workflowParseResult && 'valueStartIndex' in workflowParseResult
+    valueStartIndex !== undefined
       ? {
           ...range,
-          startColumn: workflowParseResult.valueStartIndex + 1,
+          startColumn: valueStartIndex + 1,
           endColumn: line.length + 1,
         }
       : range;
@@ -107,21 +111,17 @@ export async function getWorkflowSuggestions(
   const suggestions: monaco.languages.CompletionItem[] = [];
 
   for (const workflow of workflowSuggestions) {
-    const hasInputs = Boolean(workflow.inputs && workflow.inputs.length > 0);
+    const hasInputs = Boolean(
+      workflow.inputsSchema?.properties && Object.keys(workflow.inputsSchema.properties).length > 0
+    );
     const existingInputsState = checkExistingInputs(focusedStepInfo);
-
-    // If inputs are empty, get their range and indentation for replacement
     const emptyInputsInfo =
       existingInputsState === 'empty' ? getEmptyInputsRangeAndIndent(focusedStepInfo, model) : null;
-
-    // Generate insert text, additional edits, and insert rules
     const { insertText, additionalTextEdits, insertTextRules } = buildInsertTextAndEdits(
       workflow,
       existingInputsState,
       emptyInputsInfo
     );
-
-    // Build documentation
     const documentation = buildDocumentation(workflow, hasInputs, existingInputsState);
 
     suggestions.push({

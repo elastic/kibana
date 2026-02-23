@@ -7,25 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { JSONSchema7 } from 'json-schema';
 import YAML, { isMap, isPair, isScalar } from 'yaml';
 import { monaco } from '@kbn/monaco';
-import type { LegacyWorkflowInput } from '@kbn/workflows';
-import { getInputPlaceholderValue } from './workflow_input_placeholder';
+import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
+import { getPlaceholderForProperty } from './workflow_input_placeholder';
 import type { StepInfo } from '../../../../../../entities/workflows/store/workflow_detail/utils/build_workflow_lookup';
 import { getIndentLevelFromLineNumber } from '../../../get_indent_level';
 import { getMonacoRangeFromYamlNode, getMonacoRangeFromYamlRange } from '../../../utils';
 
 /**
- * Generates the input value for a single input
+ * Generates the input value for a single input from its JSON Schema property
  * @param useSnippetPlaceholders - if true, uses snippet placeholders for tab navigation (for insertion)
  *                                  if false, uses actual values (for replacement)
  */
 function getInputValue(
-  input: LegacyWorkflowInput,
+  propSchema: JSONSchema7,
   index: number,
   useSnippetPlaceholders: boolean
 ): string {
-  const value = getInputPlaceholderValue(input);
+  const value = getPlaceholderForProperty(propSchema);
   if (useSnippetPlaceholders) {
     return `\${${index + 1}:${value}}`;
   }
@@ -33,23 +34,25 @@ function getInputValue(
 }
 
 /**
- * Generates input lines (key-value pairs) for a workflow
- * @param inputs - The workflow inputs to generate content for
+ * Generates input lines (key-value pairs) for a workflow from its inputs JSON Schema
+ * @param inputsSchema - The workflow inputs schema (properties + required)
  * @param useSnippetPlaceholders - Whether to use snippet placeholders for tab navigation
  * @param indentPrefix - The indentation prefix for each input line (e.g., "    " for 4 spaces)
  */
 export function generateInputLines(
-  inputs: LegacyWorkflowInput[] | undefined,
+  inputsSchema: JsonModelSchemaType | undefined,
   useSnippetPlaceholders: boolean,
   indentPrefix: string
 ): string[] {
-  if (!inputs || inputs.length === 0) {
+  const properties = inputsSchema?.properties;
+  if (!properties || Object.keys(properties).length === 0) {
     return [];
   }
 
-  return inputs.map((input, index) => {
-    const value = getInputValue(input, index, useSnippetPlaceholders);
-    return `${indentPrefix}${input.name}: ${value}`;
+  return Object.entries(properties).map(([name, propSchema], index) => {
+    const prop = propSchema as JSONSchema7;
+    const value = getInputValue(prop, index, useSnippetPlaceholders);
+    return `${indentPrefix}${name}: ${value}`;
   });
 }
 
@@ -58,11 +61,11 @@ export function generateInputLines(
  * Used when replacing empty inputs: {}
  */
 export function generateInputsContent(
-  inputs: LegacyWorkflowInput[] | undefined,
+  inputsSchema: JsonModelSchemaType | undefined,
   inputsIndentLevel: number
 ): string {
   const inputIndent = ' '.repeat(inputsIndentLevel + 2);
-  const inputLines = generateInputLines(inputs, false, inputIndent);
+  const inputLines = generateInputLines(inputsSchema, false, inputIndent);
   // Start with newline so when replacing {}, the content appears on new lines
   // End with newline so the next property (like await:) appears on a new line
   return inputLines.length > 0 ? `\n${inputLines.join('\n')}\n` : '';
@@ -73,8 +76,8 @@ export function generateInputsContent(
  * Returns empty string if workflow has no inputs
  * The snippet is designed to be inserted after workflow-id on the same indentation level
  */
-export function generateInputsSnippet(inputs: LegacyWorkflowInput[] | undefined): string {
-  const inputLines = generateInputLines(inputs, true, '  ');
+export function generateInputsSnippet(inputsSchema: JsonModelSchemaType | undefined): string {
+  const inputLines = generateInputLines(inputsSchema, true, '  ');
   // inputs: is at the same indentation level as workflow-id:
   // Monaco will maintain the base indentation automatically, no leading spaces needed
   return inputLines.length > 0 ? `\ninputs:\n${inputLines.join('\n')}` : '';
@@ -158,7 +161,7 @@ export function checkExistingInputs(
  * Builds insert text and additional text edits for workflow completion
  */
 export function buildInsertTextAndEdits(
-  workflow: { id: string; name: string; inputs?: LegacyWorkflowInput[] },
+  workflow: { id: string; name: string; inputsSchema?: JsonModelSchemaType },
   existingInputsState: 'none' | 'empty' | 'has-content',
   emptyInputsInfo: { range: monaco.Range; indentLevel: number } | null
 ): {
@@ -167,11 +170,13 @@ export function buildInsertTextAndEdits(
   insertTextRules: monaco.languages.CompletionItemInsertTextRule;
 } {
   const workflowId = workflow.id;
-  const hasInputs = Boolean(workflow.inputs && workflow.inputs.length > 0);
+  const hasInputs = Boolean(
+    workflow.inputsSchema?.properties && Object.keys(workflow.inputsSchema.properties).length > 0
+  );
 
   // If inputs are empty, replace them using additionalTextEdits
-  if (existingInputsState === 'empty' && hasInputs && workflow.inputs && emptyInputsInfo) {
-    const inputsContent = generateInputsContent(workflow.inputs, emptyInputsInfo.indentLevel);
+  if (existingInputsState === 'empty' && hasInputs && workflow.inputsSchema && emptyInputsInfo) {
+    const inputsContent = generateInputsContent(workflow.inputsSchema, emptyInputsInfo.indentLevel);
     return {
       insertText: workflowId,
       additionalTextEdits: [
@@ -185,8 +190,8 @@ export function buildInsertTextAndEdits(
   }
 
   // If inputs don't exist and workflow has inputs, include them in the snippet
-  if (existingInputsState === 'none' && hasInputs && workflow.inputs) {
-    const inputsSnippet = generateInputsSnippet(workflow.inputs);
+  if (existingInputsState === 'none' && hasInputs && workflow.inputsSchema) {
+    const inputsSnippet = generateInputsSnippet(workflow.inputsSchema);
     return {
       insertText: `${workflowId}${inputsSnippet}`,
       insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,

@@ -7,39 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { LegacyWorkflowInput } from '@kbn/workflows';
-// WorkflowInputChoiceSchema is needed as a value for typeof, not just as a type
-// eslint-disable-next-line @typescript-eslint/consistent-type-imports
-import { WorkflowInputChoiceSchema } from '@kbn/workflows';
-import type { z } from '@kbn/zod/v4';
-
-type WorkflowInputChoice = z.infer<typeof WorkflowInputChoiceSchema>;
+import type { JSONSchema7 } from 'json-schema';
+import { generateSampleFromJsonSchema } from '../../../../../../../common/lib/generate_sample_from_json_schema';
 
 /**
- * Returns the placeholder value for a workflow input based on its type and default.
- * Single source of truth for type→value mapping; callers wrap for snippet or insert text.
+ * Returns the placeholder value for a workflow input property based on its JSON Schema.
+ * Single source of truth for autocomplete insert text; used by suggestions and scaffolding.
  */
-export function getInputPlaceholderValue(input: LegacyWorkflowInput): string {
-  if (input.default !== undefined) {
-    return JSON.stringify(input.default);
+export function getPlaceholderForProperty(propSchema: JSONSchema7): string {
+  const sample = generateSampleFromJsonSchema(propSchema);
+  if (sample === undefined) {
+    return '""';
   }
-  switch (input.type) {
-    case 'string':
-      return '""';
-    case 'number':
-      return '0';
-    case 'boolean':
-      return 'false';
-    case 'choice': {
-      const choiceInput = input as WorkflowInputChoice;
-      if (choiceInput.options && choiceInput.options.length > 0) {
-        return JSON.stringify(choiceInput.options[0]);
-      }
-      return '""';
-    }
-    case 'array':
-      return '[]';
-    default:
-      return '""';
-  }
+  return typeof sample === 'string' ? `"${sample}"` : JSON.stringify(sample);
 }
