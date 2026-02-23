@@ -8,16 +8,12 @@
  */
 
 import type { ICPSManager } from '@kbn/cps-utils';
-import { ProjectRoutingAccess } from '@kbn/cps-utils';
 import type { ProjectRouting } from '@kbn/es-query';
-import { sanitizeProjectRoutingForES } from '@kbn/es-query';
 import type { ISearchOptions } from '@kbn/search-types';
 
 export function getProjectRouting(
   overrideValue: ProjectRouting,
   cpsManager?: ICPSManager
 ): ISearchOptions['projectRouting'] {
-  return cpsManager && cpsManager.getProjectPickerAccess() !== ProjectRoutingAccess.DISABLED
-    ? sanitizeProjectRoutingForES(overrideValue ?? cpsManager.getProjectRouting())
-    : undefined;
+  return cpsManager ? overrideValue ?? cpsManager.getProjectRouting() : undefined;
 }
