@@ -400,6 +400,7 @@ export class AlertsClient {
       const result = await this.esClient.search<ParsedTechnicalFields, TAggregations>({
         index: index ?? '.alerts-*',
         ignore_unavailable: true,
+        expand_wildcards: ['open', 'hidden'],
         ...queryBody,
         seq_no_primary_term: true,
       });

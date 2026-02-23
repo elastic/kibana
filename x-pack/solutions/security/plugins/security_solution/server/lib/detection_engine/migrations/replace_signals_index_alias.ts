@@ -48,6 +48,7 @@ export const replaceSignalsIndexAlias = async ({
           index: newIndex,
           alias: legacySiemSignalsAlias,
           is_write_index: false,
+          is_hidden: true,
         },
       },
     ],
