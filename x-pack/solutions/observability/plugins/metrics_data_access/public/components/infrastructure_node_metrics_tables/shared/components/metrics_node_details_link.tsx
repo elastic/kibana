@@ -46,7 +46,7 @@ function getDiscoverEsqlQueryForNode(
   indexPattern: string
 ): string {
   const from = indexPattern || DEFAULT_METRICS_INDEX;
-  const baseQuery = `TS "${escapeEsqlStringLiteral(from)}"`;
+  const baseQuery = `FROM "${escapeEsqlStringLiteral(from)}"`;
 
   switch (nodeType) {
     case 'container': {
@@ -131,7 +131,6 @@ export const MetricsNodeDetailsLink = ({
     nodeType,
     id,
     label,
-    isOtel,
     metricsIndices,
     getAssetDetailUrl,
   ]);

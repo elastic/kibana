@@ -83,7 +83,7 @@ export function useTabs({
         filter: [{ terms: { [k8sFilterFields]: podNames } }],
       },
     }),
-    [podNames]
+    [podNames, k8sFilterFields]
   );
   const containersFilter = useMemo(
     () => ({
