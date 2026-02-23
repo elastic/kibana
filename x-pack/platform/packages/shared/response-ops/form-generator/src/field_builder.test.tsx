@@ -249,7 +249,7 @@ describe('Field Builder', () => {
         const schema = z.enum(['a', 'b']).optional();
         const path = 'field';
 
-        const field = getFieldFromSchema({ schema, path, formConfig });
+        const field = getFieldFromSchema({ schema, path, formConfig, meta });
         const result = field.validate(createValidationArg(undefined, path));
 
         expect(result).toBeUndefined();
@@ -259,7 +259,7 @@ describe('Field Builder', () => {
         const schema = z.enum(['a', 'b']).optional();
         const path = 'field';
 
-        const field = getFieldFromSchema({ schema, path, formConfig });
+        const field = getFieldFromSchema({ schema, path, formConfig, meta });
         const result = field.validate(createValidationArg(null, path));
 
         expect(result).toBeUndefined();
@@ -269,7 +269,7 @@ describe('Field Builder', () => {
         const schema = z.enum(['a', 'b']).optional();
         const path = 'field';
 
-        const field = getFieldFromSchema({ schema, path, formConfig });
+        const field = getFieldFromSchema({ schema, path, formConfig, meta });
         const result = field.validate(createValidationArg('', path));
 
         expect(result).toBeUndefined();
@@ -279,7 +279,7 @@ describe('Field Builder', () => {
         const schema = z.enum(['a', 'b']).optional();
         const path = 'field';
 
-        const field = getFieldFromSchema({ schema, path, formConfig });
+        const field = getFieldFromSchema({ schema, path, formConfig, meta });
         const result = field.validate(createValidationArg('invalid', path)) as ValidationError;
 
         expect(result?.message).toContain('Invalid option: expected one of "a"|"b"');
@@ -289,7 +289,7 @@ describe('Field Builder', () => {
         const schema = z.enum(['a', 'b']).optional();
         const path = 'field';
 
-        const field = getFieldFromSchema({ schema, path, formConfig });
+        const field = getFieldFromSchema({ schema, path, formConfig, meta });
         const result = field.validate(createValidationArg('a', path));
 
         expect(result).toBeUndefined();
@@ -299,7 +299,7 @@ describe('Field Builder', () => {
         const schema = z.enum(['a', 'b']);
         const path = 'field';
 
-        const field = getFieldFromSchema({ schema, path, formConfig });
+        const field = getFieldFromSchema({ schema, path, formConfig, meta });
         const result = field.validate(createValidationArg(undefined, path)) as ValidationError;
 
         expect(result?.message).toContain('Invalid option: expected one of "a"|"b"');
@@ -309,7 +309,7 @@ describe('Field Builder', () => {
         const schema = z.number().optional();
         const path = 'field';
 
-        const field = getFieldFromSchema({ schema, path, formConfig });
+        const field = getFieldFromSchema({ schema, path, formConfig, meta });
         const result = field.validate(createValidationArg(0, path));
 
         expect(result).toBeUndefined();
@@ -319,7 +319,7 @@ describe('Field Builder', () => {
         const schema = z.boolean().optional();
         const path = 'field';
 
-        const field = getFieldFromSchema({ schema, path, formConfig });
+        const field = getFieldFromSchema({ schema, path, formConfig, meta });
         const result = field.validate(createValidationArg(false, path));
 
         expect(result).toBeUndefined();
