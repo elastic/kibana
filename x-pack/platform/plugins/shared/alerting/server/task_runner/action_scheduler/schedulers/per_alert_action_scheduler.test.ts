@@ -13,7 +13,13 @@ import { alertingEventLoggerMock } from '../../../lib/alerting_event_logger/aler
 import { RuleRunMetricsStore } from '../../../lib/rule_run_metrics_store';
 import { mockAAD } from '../../fixtures';
 import { PerAlertActionScheduler } from './per_alert_action_scheduler';
-import { getRule, getRuleType, getDefaultSchedulerContext, generateAlert } from '../test_fixtures';
+import {
+  getRule,
+  getRuleType,
+  getDefaultSchedulerContext,
+  generateAlert,
+  generateRecoveredAlert,
+} from '../test_fixtures';
 import type { SanitizedRuleAction } from '@kbn/alerting-types';
 import { ALERT_STATUS_DELAYED, ALERT_UUID } from '@kbn/rule-data-utils';
 import { Alert } from '../../../alert';
@@ -1496,6 +1502,62 @@ describe('Per-Alert Action Scheduler', () => {
 
       // @ts-expect-error private variable
       expect(scheduler.skippedAlerts).toEqual({ '2': { reason: 'delayed' } });
+    });
+  });
+
+  describe('micro-benchmarks', () => {
+    // Regression guard: run this suite on main and on this branch and compare timings;
+    // no code-path toggling needed for before/after comparison.
+    const runTimingLoop = async <T>(
+      fn: () => Promise<T>,
+      iterations: number
+    ): Promise<{ meanMs: number; medianMs: number }> => {
+      const times: number[] = [];
+      for (let i = 0; i < iterations; i++) {
+        const start = performance.now();
+        await fn();
+        times.push(performance.now() - start);
+      }
+      times.sort((a, b) => a - b);
+      const meanMs = times.reduce((s, t) => s + t, 0) / times.length;
+      const medianMs = times[Math.floor(times.length / 2)] ?? 0;
+      return { meanMs, medianMs };
+    };
+
+    it('getActionsToSchedule with many alerts and snoozedInstances (regression guard)', async () => {
+      const activeCount = 100;
+      const recoveredCount = 20;
+      const snoozedCount = 10;
+      const activeAlerts = Array.from({ length: activeCount }, (_, i) =>
+        generateAlert({ id: i + 1, activeCount: 1 })
+      ).reduce((acc, a) => ({ ...acc, ...a }), {});
+      const recoveredAlerts = Array.from({ length: recoveredCount }, (_, i) =>
+        generateRecoveredAlert({ id: activeCount + i + 1 })
+      ).reduce((acc, a) => ({ ...acc, ...a }), {});
+      const snoozedInstances = Array.from({ length: snoozedCount }, (_, i) => ({
+        instanceId: String(i + 1),
+        expiresAt: new Date(Date.now() + 60_000).toISOString(),
+      }));
+      alertsClient.getSummarizedAlerts.mockResolvedValue({
+        all: { total: 0, data: [], count: 0 },
+        new: { total: 0, data: [], count: 0 },
+        ongoing: { total: 0, data: [], count: 0 },
+        recovered: { total: 0, data: [], count: 0 },
+      });
+
+      const scheduler = new PerAlertActionScheduler({
+        ...getSchedulerContext(),
+        rule: { ...rule, snoozedInstances },
+      });
+      const { meanMs } = await runTimingLoop(
+        () =>
+          scheduler.getActionsToSchedule({
+            activeAlerts,
+            recoveredAlerts,
+          }),
+        5
+      );
+      expect(meanMs).toBeLessThan(2000);
     });
   });
 });
