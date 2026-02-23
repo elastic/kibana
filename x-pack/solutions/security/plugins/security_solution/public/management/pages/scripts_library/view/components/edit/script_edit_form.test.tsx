@@ -67,6 +67,12 @@ describe('EndpointScriptEditForm', () => {
     ]);
   });
 
+  it('does not call onChange on initial render', () => {
+    render();
+
+    expect(onChangeMock).not.toHaveBeenCalled();
+  });
+
   it('calls onChange when form values are changed', () => {
     render();
 
@@ -319,7 +325,7 @@ describe('EndpointScriptEditForm', () => {
       const euiFormErrorText = filePickerRow.querySelector('.euiFormErrorText');
       expect(euiFormErrorText?.textContent).toEqual('A script file is required.');
       expect(onChangeMock).toHaveBeenNthCalledWith(
-        2,
+        1,
         expect.objectContaining({
           script: expect.objectContaining({
             file: undefined,

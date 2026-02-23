@@ -349,11 +349,13 @@ export const EndpointScriptEditForm = memo<EndpointScriptEditFormProps>(
     );
 
     useEffect(() => {
-      onChange({
-        script: draftScript,
-        hasFormChanged,
-        isValid: hasValidFormData,
-      });
+      if (hasFormChanged) {
+        onChange({
+          script: draftScript,
+          hasFormChanged,
+          isValid: hasValidFormData,
+        });
+      }
     }, [draftScript, hasFormChanged, hasValidFormData, onChange]);
 
     return (
