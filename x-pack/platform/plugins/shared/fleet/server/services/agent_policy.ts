@@ -1704,12 +1704,21 @@ class AgentPolicyService {
               // Do not throw here even when throwOnAnyError is set — a null full policy
               // indicates a data inconsistency (e.g. missing package) that retrying
               // setup will not resolve. The policy is skipped silently.
-              logger.debug(
-                `Unable to retrieve FULL agent policy for [${agentPolicyId}] - Deployment will not be done for this policy`
+              logger.warn(
+                `Unable to retrieve full agent policy for [${agentPolicyId}] - policy will not be deployed`
               );
             }
 
             return response;
+          })
+          .catch((err: Error) => {
+            // An exception from getFullAgentPolicy is a data inconsistency (e.g. a
+            // missing package or broken reference) that a retry will not fix. Log it
+            // as a warning and skip this policy rather than failing the whole deployment.
+            logger.warn(
+              `Error retrieving full agent policy for [${agentPolicyId}], skipping deployment: ${err.message}`
+            );
+            return null;
           }),
       {
         concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_20,
@@ -1761,12 +1770,6 @@ class AgentPolicyService {
           .join(', ')}`
     );
 
-    if (fleetServerPolicies.length === 0) {
-      logger.debug('No policies to deploy, skipping bulk write');
-      t.end();
-      return;
-    }
-
     const fleetServerPoliciesBulkBody = fleetServerPolicies.flatMap((fleetServerPolicy) => [
       {
         index: {
@@ -1779,37 +1782,43 @@ class AgentPolicyService {
       fleetServerPolicy,
     ]);
 
-    const bulkResponse = await esClient
-      .bulk({
-        index: AGENT_POLICY_INDEX,
-        operations: fleetServerPoliciesBulkBody,
-        refresh: 'wait_for',
-      })
-      .catch(catchAndSetErrorStackTrace.withMessage('ES bulk operation failed'));
+    // Skip the bulk write if there is nothing to index — an empty bulk request
+    // is rejected by Elasticsearch with a 400. Agentless handling below still runs.
+    if (fleetServerPoliciesBulkBody.length > 0) {
+      const bulkResponse = await esClient
+        .bulk({
+          index: AGENT_POLICY_INDEX,
+          operations: fleetServerPoliciesBulkBody,
+          refresh: 'wait_for',
+        })
+        .catch(catchAndSetErrorStackTrace.withMessage('ES bulk operation failed'));
 
-    logger.debug(`Bulk update against index [${AGENT_POLICY_INDEX}] with deployment updates done`);
+      logger.debug(
+        `Bulk update against index [${AGENT_POLICY_INDEX}] with deployment updates done`
+      );
 
-    if (bulkResponse.errors) {
-      const erroredDocuments = bulkResponse.items.reduce((acc, item) => {
-        const value: BulkResponseItem | undefined = item.index;
-        if (!value || !value.error) {
+      if (bulkResponse.errors) {
+        const erroredDocuments = bulkResponse.items.reduce((acc, item) => {
+          const value: BulkResponseItem | undefined = item.index;
+          if (!value || !value.error) {
+            return acc;
+          }
+
+          acc.push(value);
           return acc;
+        }, [] as BulkResponseItem[]);
+
+        const errorMessage = `Failed to index documents with ids ${erroredDocuments
+          .map((doc) => doc._id)
+          .join(', ')} during policy deployment: ${erroredDocuments
+          .map((doc) => doc.error?.reason)
+          .join(', ')}`;
+
+        logger.error(errorMessage);
+
+        if (options?.throwOnAnyError) {
+          throw new Error(errorMessage);
         }
-
-        acc.push(value);
-        return acc;
-      }, [] as BulkResponseItem[]);
-
-      const errorMessage = `Failed to index documents with ids ${erroredDocuments
-        .map((doc) => doc._id)
-        .join(', ')} during policy deployment: ${erroredDocuments
-        .map((doc) => doc.error?.reason)
-        .join(', ')}`;
-
-      logger.error(errorMessage);
-
-      if (options?.throwOnAnyError) {
-        throw new Error(errorMessage);
       }
     }
 

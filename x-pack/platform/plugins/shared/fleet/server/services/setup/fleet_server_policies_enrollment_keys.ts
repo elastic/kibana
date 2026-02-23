@@ -61,12 +61,14 @@ export async function ensureAgentPoliciesFleetServerKeysAndPolicies({
     return;
   }
 
-  // Fleet server policies must be deployed synchronously so that the fleet server
-  // agent can read its policy from ES before setup completes. Deferring these to
-  // the async task risks the agent starting before the policy document exists.
+  // Preconfigured fleet server policies must be deployed synchronously so that
+  // the fleet server agent can read its policy from ES before setup completes.
+  // Scoped to preconfigured policies only (cloud / self-managed setups owned by
+  // Kibana) to avoid risk for user-created fleet server policies whose data may
+  // be in an unexpected state.
   const fleetServerPoliciesById = new Map(
     agentPolicies
-      .filter((p) => p.is_default_fleet_server || p.has_fleet_server)
+      .filter((p) => (p.is_default_fleet_server || p.has_fleet_server) && p.is_preconfigured)
       .map((p) => [p.id, p])
   );
 
