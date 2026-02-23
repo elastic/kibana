@@ -16,9 +16,11 @@ import {
   withEvaluatorSpan,
   createSpanLatencyEvaluator,
   createRagEvaluators,
-  type GroundTruth,
   type ExperimentTask,
   type TaskOutput,
+  type GroundTruth,
+  type RetrievedDoc,
+  createToolUsageOnlyEvaluator,
 } from '@kbn/evals';
 import type { EsClient } from '@kbn/scout';
 import type { ToolingLog } from '@kbn/tooling-log';
@@ -31,7 +33,7 @@ import {
   getStringMeta,
   getToolCallSteps,
 } from '@kbn/evals';
-import type { AgentBuilderEvaluationChatClient } from './chat_client';
+import type { AgentBuilderEvaluationChatClient, ConverseResult } from './chat_client';
 import { extractSearchRetrievedDocs } from './rag_extractor';
 
 interface DatasetExample extends Example {
@@ -47,14 +49,17 @@ interface DatasetExample extends Example {
   };
 }
 
-export type EvaluateDataset = ({
-  dataset: { name, description, examples },
-}: {
+/** Default concurrency for running examples in parallel */
+const DEFAULT_CONCURRENCY = 3;
+
+export type EvaluateDataset = (options: {
   dataset: {
     name: string;
     description: string;
     examples: DatasetExample[];
   };
+  /** Number of examples to run concurrently (default: 3) */
+  concurrency?: number;
 }) => Promise<void>;
 
 export type EvaluateExternalDataset = (datasetName: string) => Promise<void>;
@@ -62,12 +67,10 @@ export type EvaluateExternalDataset = (datasetName: string) => Promise<void>;
 function configureExperiment({
   evaluators,
   chatClient,
-  traceEsClient,
   log,
 }: {
   evaluators: DefaultEvaluators;
   chatClient: AgentBuilderEvaluationChatClient;
-  traceEsClient: EsClient;
   log: ToolingLog;
 }): {
   task: ExperimentTask<DatasetExample, TaskOutput>;
@@ -106,6 +109,7 @@ function configureExperiment({
       messages: response.messages,
       steps: response.steps,
       traceId: response.traceId,
+      modelUsage: response.modelUsage,
       correctnessAnalysis: correctnessResult?.metadata,
       groundednessAnalysis: groundednessResult?.metadata,
     };
@@ -120,75 +124,50 @@ function configureExperiment({
   });
 
   const selectedEvaluators = selectEvaluators([
+    createToolUsageOnlyEvaluator(),
     {
-      name: 'ToolUsageOnly',
+      name: 'TokenUsage',
       kind: 'CODE' as const,
-      evaluate: async ({ output, metadata }) => {
-        const expectedOnlyToolId = getStringMeta(metadata, 'expectedOnlyToolId');
-        if (!expectedOnlyToolId) return { score: 1 };
-
-        const toolCalls = getToolCallSteps(output as TaskOutput);
-        if (toolCalls.length === 0) {
-          return { score: 0, metadata: { reason: 'No tool calls found', expectedOnlyToolId } };
-        }
-
-        const usedToolIds = toolCalls.map((t) => t.tool_id).filter(Boolean);
-        const hasExpected = usedToolIds.includes(expectedOnlyToolId);
-        const allExpected = usedToolIds.every((id) => id === expectedOnlyToolId);
-
-        return {
-          score: hasExpected && allExpected ? 1 : 0,
-          metadata: { expectedOnlyToolId, usedToolIds },
+      evaluate: async ({ output }) => {
+        const taskOutput = output as TaskOutput & {
+          modelUsage?: ConverseResult['modelUsage'];
         };
-      },
-    },
-    {
-      name: 'DocVersionReleaseDate',
-      kind: 'CODE' as const,
-      evaluate: async ({ output, metadata }) => {
-        if (!getBooleanMeta(metadata, 'requireVersionAndReleaseDate')) return { score: 1 };
+        const modelUsage = taskOutput.modelUsage;
 
-        const expectedOnlyToolId = getStringMeta(metadata, 'expectedOnlyToolId');
-        const toolCalls = getToolCallSteps(output as TaskOutput);
-        const matching = expectedOnlyToolId
-          ? toolCalls.filter((t) => t.tool_id === expectedOnlyToolId)
-          : toolCalls;
+        // Extract token metrics from model_usage (direct from API response)
+        const inputTokens = modelUsage?.input_tokens ?? 0;
+        const outputTokens = modelUsage?.output_tokens ?? 0;
+        const totalTokens = inputTokens + outputTokens;
+        const llmCalls = modelUsage?.llm_calls ?? 0;
 
-        const strings: string[] = [];
-        for (const call of matching) {
-          extractAllStrings(call.results, strings);
-        }
-        const toolText = strings.join('\n');
+        // Calculate cost estimate (default pricing: $0.003/1K input, $0.015/1K output)
+        const inputPricePer1K = 0.003;
+        const outputPricePer1K = 0.015;
+        const estimatedCost =
+          (inputTokens / 1000) * inputPricePer1K + (outputTokens / 1000) * outputPricePer1K;
 
-        const maxVersion = extractMaxSemver(toolText);
-        const releaseDate = maxVersion
-          ? extractReleaseDateNearVersion(toolText, maxVersion)
-          : undefined;
-        const answer = getFinalAssistantMessage(output as TaskOutput);
-
-        const hasVersion = Boolean(maxVersion) && answer.includes(maxVersion!);
-        const hasDate = Boolean(releaseDate) && answer.includes(releaseDate!);
-
+        // Return totalTokens as the score so it shows actual numbers in the report
         return {
-          score: hasVersion && hasDate ? 1 : 0,
+          score: totalTokens,
           metadata: {
-            extracted: { maxVersion, releaseDate },
-            answerPreview: answer.slice(0, 500),
+            source: 'direct',
+            inputTokens,
+            outputTokens,
+            totalTokens,
+            llmCalls,
+            model: modelUsage?.model,
+            connectorId: modelUsage?.connector_id,
+            estimatedCostUsd: Math.round(estimatedCost * 10000) / 10000,
           },
         };
       },
     },
+    // NOTE: Trace-based evaluators (inputTokens, outputTokens, cachedTokens) removed
+    // They require APM tracing infrastructure. Use TokenUsage evaluator above instead.
+    // Core evaluators: Factuality, Relevance, Sequence Accuracy
     ...createQuantitativeCorrectnessEvaluators(),
+    // Groundedness evaluator
     createQuantitativeGroundednessEvaluator(),
-    ...ragEvaluators,
-    ...Object.values({
-      ...evaluators.traceBasedEvaluators,
-      latency: createSpanLatencyEvaluator({
-        traceEsClient,
-        log,
-        spanName: 'Converse',
-      }),
-    }),
   ]);
 
   return { task, evaluators: selectedEvaluators };
@@ -198,23 +177,24 @@ export function createEvaluateDataset({
   evaluators,
   phoenixClient,
   chatClient,
-  traceEsClient,
   log,
 }: {
   evaluators: DefaultEvaluators;
   phoenixClient: EvalsExecutorClient;
   chatClient: AgentBuilderEvaluationChatClient;
-  traceEsClient: EsClient;
   log: ToolingLog;
 }): EvaluateDataset {
   return async function evaluateDataset({
     dataset: { name, description, examples },
+    concurrency = DEFAULT_CONCURRENCY,
   }: {
     dataset: {
       name: string;
       description: string;
       examples: DatasetExample[];
     };
+    /** Number of examples to run concurrently (default: 3) */
+    concurrency?: number;
   }) {
     const dataset = {
       name,
@@ -225,7 +205,6 @@ export function createEvaluateDataset({
     const { task, evaluators: selectedEvaluators } = configureExperiment({
       evaluators,
       chatClient,
-      traceEsClient,
       log,
     });
 
@@ -233,6 +212,7 @@ export function createEvaluateDataset({
       {
         dataset,
         task,
+        concurrency,
       },
       selectedEvaluators
     );
@@ -243,20 +223,17 @@ export function createEvaluateExternalDataset({
   evaluators,
   phoenixClient,
   chatClient,
-  traceEsClient,
   log,
 }: {
   evaluators: DefaultEvaluators;
   phoenixClient: EvalsExecutorClient;
   chatClient: AgentBuilderEvaluationChatClient;
-  traceEsClient: EsClient;
   log: ToolingLog;
 }): EvaluateExternalDataset {
   return async function evaluateExternalDataset(datasetName: string) {
     const { task, evaluators: selectedEvaluators } = configureExperiment({
       evaluators,
       chatClient,
-      traceEsClient,
       log,
     });
 

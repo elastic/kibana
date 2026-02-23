@@ -5,7 +5,19 @@
  * 2.0.
  */
 
+import type { Skill } from '@kbn/agent-builder-common/skills';
 import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
+
+export interface SkillsServiceSetup {
+  register(skill: Skill): void;
+}
+
+export interface SkillsServiceStart {
+  /**
+   * Get all registered skills.
+   */
+  getAllSkills(): Skill[];
+}
 
 export interface SkillServiceSetup {
   /**

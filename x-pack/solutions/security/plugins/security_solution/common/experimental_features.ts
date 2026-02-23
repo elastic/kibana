@@ -212,6 +212,17 @@ export const allowedExperimentalValues = Object.freeze({
   splunkV2DashboardsEnabled: true,
 
   /**
+   * Enables the Alert Grouping feature for automatically grouping related alerts into cases.
+   * When enabled, allows configuration of alert grouping workflows that:
+   * - Extract entities (IPs, hostnames, users, etc.) from alerts
+   * - Match alerts to existing cases based on shared observables
+   * - Create new cases for unmatched alert groups
+   * - Trigger Attack Discovery generation for case alerts
+   * Release: 9.x
+   */
+  alertGroupingEnabled: false,
+
+  /**
    * Enables Detection Engine Health UI
    */
   deHealthUIEnabled: false,

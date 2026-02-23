@@ -17,6 +17,7 @@ import { registerDashboardAgent } from './register_agent';
 import { manageDashboardTool } from './tools';
 import { getIsDashboardAgentEnabled } from './utils/get_is_dashboard_agent_enabled';
 import { DASHBOARD_AGENT_FEATURE_FLAG } from '../common/constants';
+import { registerSkills } from './skills/register_skills';
 import { createDashboardAttachmentType } from './attachment_types';
 
 export class DashboardAgentPlugin
@@ -72,6 +73,9 @@ export class DashboardAgentPlugin
 
     // Register the dashboard agent
     registerDashboardAgent(setupDeps.agentBuilder);
+
+    // Register the dashboards skill (built-in) so agents can discover and invoke the dashboard tools via /skills.
+    await registerSkills(setupDeps);
   }
 
   start(

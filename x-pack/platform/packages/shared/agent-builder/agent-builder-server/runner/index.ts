@@ -38,6 +38,12 @@ export type {
   LlmDescriptionHandler,
 } from './tool_provider';
 export type {
+  SkillProvider,
+  SkillProviderHasOptions,
+  SkillProviderGetOptions,
+  SkillProviderListOptions,
+} from './skill_provider';
+export type { 
   ModelProvider,
   ScopedModel,
   ModelProviderStats,

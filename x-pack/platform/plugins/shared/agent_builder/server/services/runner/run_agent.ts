@@ -14,6 +14,8 @@ import type {
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import { withAgentSpan } from '../../tracing';
+import { registryToProvider } from '../tools/utils';
+import { serviceToProvider as skillsServiceToProvider } from '../skills/utils';
 import { createAgentHandler } from '../agents/modes/create_handler';
 import {
   createAgentEventEmitter,
@@ -41,6 +43,7 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     modelProvider,
     toolsService,
     attachmentsService,
+    skillsService,
     resultStore,
     attachmentStateManager,
     logger,
@@ -77,6 +80,10 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     toolProvider: createToolProvider({
       registry: toolRegistry,
       runner: manager.getRunner(),
+      request,
+    }),
+    skillProvider: skillsServiceToProvider({
+      skillsService,
       request,
     }),
     resultStore,

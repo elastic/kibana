@@ -28,6 +28,7 @@ import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import type { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { InferenceServerSetup, InferenceServerStart } from '@kbn/inference-plugin/server';
+import type { SLOServerStart } from '@kbn/slo-plugin/server';
 import type { ObservabilityAgentBuilderDataRegistry } from './data_registry/data_registry';
 
 export interface ObservabilityAgentBuilderPluginSetup {
@@ -57,6 +58,7 @@ export interface ObservabilityAgentBuilderPluginStartDependencies {
   inference: InferenceServerStart;
   ml?: MlPluginStart;
   spaces?: SpacesPluginStart;
+  slo?: SLOServerStart;
 }
 
 export type ObservabilityAgentBuilderCoreSetup = CoreSetup<

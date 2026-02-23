@@ -18,7 +18,13 @@ jest.mock('../utils/tracing', () => ({
 import { ModelFamily, ModelProvider } from '@kbn/inference-common';
 import type { Model } from '@kbn/inference-common';
 import type { SomeDevLog } from '@kbn/some-dev-log';
-import type { EvaluationDataset, Evaluator, RanExperiment } from '../types';
+import type {
+  EvaluationDataset,
+  Evaluator,
+  RanExperiment,
+  ImprovementSuggestionAnalysisResult,
+} from '../types';
+import type { ImprovementSuggestionsService } from '../utils/improvement_suggestions';
 import { getCurrentTraceId, withEvaluatorSpan, withTaskSpan } from '../utils/tracing';
 import { KibanaEvalsClient } from './client';
 
@@ -156,9 +162,18 @@ describe('KibanaEvalsClient', () => {
         expect.objectContaining({
           input: expect.any(Object),
           output: expect.any(Object),
+          evalThreadId: expect.any(String),
         })
       );
+      // Verify evalThreadId is a valid UUID format
+      expect(run.evalThreadId).toMatch(
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+      );
     });
+
+    // Verify each evalThreadId is unique
+    const evalThreadIds = runEntries.map((r) => r.evalThreadId);
+    expect(new Set(evalThreadIds).size).toBe(evalThreadIds.length);
 
     expect(exp.evaluationRuns).toHaveLength(4 * evaluators.length);
     expect(exp.evaluationRuns.map((r) => r.name).sort()).toEqual([

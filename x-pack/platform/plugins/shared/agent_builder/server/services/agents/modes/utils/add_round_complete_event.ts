@@ -69,6 +69,7 @@ export const addRoundCompleteEvent = ({
   stateManager,
   attachmentStateManager,
   configurationOverrides,
+  roundId,
 }: {
   pendingRound: ConversationRound | undefined;
   userInput: RoundInput;
@@ -79,6 +80,8 @@ export const addRoundCompleteEvent = ({
   attachmentStateManager: AttachmentStateManager;
   endTime?: Date;
   configurationOverrides?: RuntimeAgentConfigurationOverrides;
+  /** Pre-generated round ID (used to link attachments created during this round) */
+  roundId?: string;
 }): OperatorFunction<SourceEvents, SourceEvents | RoundCompleteEvent> => {
   return (events$) => {
     const shared$ = events$.pipe(share());
@@ -107,6 +110,7 @@ export const addRoundCompleteEvent = ({
                 modelProvider,
                 attachmentRefs,
                 configurationOverrides,
+                roundId
               });
 
           round.state = buildRoundState({ round, events, stateManager });
@@ -248,6 +252,7 @@ const createRound = ({
   modelProvider,
   attachmentRefs,
   configurationOverrides,
+  roundId,
 }: {
   events: SourceEvents[];
   input: RoundInput;
@@ -256,6 +261,8 @@ const createRound = ({
   modelProvider: ModelProvider;
   attachmentRefs: AttachmentVersionRef[];
   configurationOverrides?: RuntimeAgentConfigurationOverrides;
+  /** Pre-generated round ID (if not provided, a new one will be generated) */
+  roundId?: string;
 }): ConversationRound => {
   const toolResults = events.filter(isToolResultEvent);
   const toolProgressions = events.filter(isToolProgressEvent);
@@ -299,7 +306,7 @@ const createRound = ({
     : timeToLastToken;
 
   const round: ConversationRound = {
-    id: uuidv4(),
+    id: roundId ?? uuidv4(),
     status: promptRequest
       ? ConversationRoundStatus.awaitingPrompt
       : ConversationRoundStatus.completed,
@@ -317,9 +324,9 @@ const createRound = ({
     model_usage: getModelUsage(modelProvider.getUsageStats()),
     response: lastMessage
       ? {
-          message: lastMessage.message_content,
-          structured_output: lastMessage.structured_output,
-        }
+        message: lastMessage.message_content,
+        structured_output: lastMessage.structured_output,
+      }
       : { message: '' },
     configuration_overrides: configurationOverrides,
   };
@@ -381,12 +388,14 @@ const buildRoundState = ({
   events: SourceEvents[];
   stateManager: ConversationStateManager;
 }): RoundState | undefined => {
-  const finalGraphState = events.find(isFinalStateEvent)!.data.state;
+  const finalStateEvent = events.find(isFinalStateEvent);
   const promptRequestEvents = events.filter(isPromptRequestEvent).map((event) => event.data);
 
-  if (promptRequestEvents.length === 0) {
+  if (!finalStateEvent || promptRequestEvents.length === 0) {
     return undefined;
   }
+
+  const finalGraphState = finalStateEvent.data.state;
 
   const promptRequest = promptRequestEvents[0];
   const toolCallId = promptRequest.source.tool_call_id;

@@ -44,6 +44,8 @@
       "@kbn/ai-assistant-icon/*": ["x-pack/platform/packages/shared/ai-assistant/icon/*"],
       "@kbn/ai-assistant-management-plugin": ["src/platform/plugins/shared/ai_assistant_management/selection"],
       "@kbn/ai-assistant-management-plugin/*": ["src/platform/plugins/shared/ai_assistant_management/selection/*"],
+      "@kbn/ai-infra-common": ["x-pack/packages/ai-infra/ai-infra-common"],
+      "@kbn/ai-infra-common/*": ["x-pack/packages/ai-infra/ai-infra-common/*"],
       "@kbn/ai-security-labs-content": ["x-pack/solutions/security/packages/ai-security-labs-content"],
       "@kbn/ai-security-labs-content/*": ["x-pack/solutions/security/packages/ai-security-labs-content/*"],
       "@kbn/ai-tools": ["x-pack/platform/packages/shared/kbn-ai-tools"],
@@ -250,6 +252,8 @@
       "@kbn/coloring/*": ["src/platform/packages/shared/kbn-coloring/*"],
       "@kbn/config": ["src/platform/packages/shared/kbn-config"],
       "@kbn/config/*": ["src/platform/packages/shared/kbn-config/*"],
+      "@kbn/config-loader": ["src/config"],
+      "@kbn/config-loader/*": ["src/config/*"],
       "@kbn/config-mocks": ["src/platform/packages/private/kbn-config-mocks"],
       "@kbn/config-mocks/*": ["src/platform/packages/private/kbn-config-mocks/*"],
       "@kbn/config-schema": ["src/platform/packages/shared/kbn-config-schema"],
@@ -1412,6 +1416,8 @@
       "@kbn/kubernetes-security-plugin/*": ["x-pack/solutions/security/plugins/kubernetes_security/*"],
       "@kbn/langchain": ["x-pack/platform/packages/shared/kbn-langchain"],
       "@kbn/langchain/*": ["x-pack/platform/packages/shared/kbn-langchain/*"],
+      "@kbn/langchain-deep-agent": ["x-pack/platform/packages/shared/kbn-langchain-deep-agent"],
+      "@kbn/langchain-deep-agent/*": ["x-pack/platform/packages/shared/kbn-langchain-deep-agent/*"],
       "@kbn/langgraph-checkpoint-saver": ["x-pack/platform/packages/shared/kbn-langgraph-checkpoint-saver"],
       "@kbn/langgraph-checkpoint-saver/*": ["x-pack/platform/packages/shared/kbn-langgraph-checkpoint-saver/*"],
       "@kbn/language-documentation": ["src/platform/packages/private/kbn-language-documentation"],
@@ -2348,6 +2354,8 @@
       "@kbn/test-subj-selector/*": ["src/platform/packages/shared/kbn-test-subj-selector/*"],
       "@kbn/test-suites-security-solution-apis": ["x-pack/solutions/security/test/security_solution_api_integration"],
       "@kbn/test-suites-security-solution-apis/*": ["x-pack/solutions/security/test/security_solution_api_integration/*"],
+      "@kbn/test-suites-security-solution-evals": ["x-pack/solutions/security/test/security_solution_evals"],
+      "@kbn/test-suites-security-solution-evals/*": ["x-pack/solutions/security/test/security_solution_evals/*"],
       "@kbn/test-suites-src": ["src/platform/test"],
       "@kbn/test-suites-src/*": ["src/platform/test/*"],
       "@kbn/test-suites-xpack-observability": ["x-pack/solutions/observability/test"],
@@ -2629,7 +2637,7 @@
     "esModuleInterop": true,
     // Resolve modules in the same way as Node.js. Aka make `require` works the
     // same in TypeScript as it does in Node.js.
-    "moduleResolution": "node",
+    "moduleResolution": "nodenext",
     // "resolveJsonModule" allows for importing, extracting types from and generating .json files.
     "resolveJsonModule": true,
     // Disallow inconsistently-cased references to the same file.

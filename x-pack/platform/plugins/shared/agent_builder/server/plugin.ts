@@ -33,12 +33,12 @@ import { registerTaskDefinitions } from './services/execution';
 
 export class AgentBuilderPlugin
   implements
-    Plugin<
-      AgentBuilderPluginSetup,
-      AgentBuilderPluginStart,
-      AgentBuilderSetupDependencies,
-      AgentBuilderStartDependencies
-    >
+  Plugin<
+    AgentBuilderPluginSetup,
+    AgentBuilderPluginStart,
+    AgentBuilderSetupDependencies,
+    AgentBuilderStartDependencies
+  >
 {
   private logger: Logger;
   // @ts-expect-error unused for now
@@ -146,6 +146,9 @@ export class AgentBuilderPlugin
       skills: {
         register: serviceSetups.skills.registerSkill.bind(serviceSetups.skills),
       },
+      skill: {
+        registerSkill: serviceSetups.skill.registerSkill.bind(serviceSetups.skill),
+      },
     };
   }
 
@@ -190,5 +193,5 @@ export class AgentBuilderPlugin
     };
   }
 
-  stop() {}
+  stop() { }
 }

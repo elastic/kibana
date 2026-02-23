@@ -8,7 +8,7 @@
 import { EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useConversation, useConversationRounds } from '../../../hooks/use_conversation';
+import { useConversation, useConversationRounds, useConversationAttachments } from '../../../hooks/use_conversation';
 import { RoundLayout } from './round_layout';
 
 const CONVERSATION_ROUNDS_ID = 'agentBuilderConversationRoundsContainer';
@@ -22,6 +22,7 @@ export const ConversationRounds: React.FC<ConversationRoundsProps> = ({
 }) => {
   const { conversation } = useConversation();
   const conversationRounds = useConversationRounds();
+  const conversationAttachments = useConversationAttachments();
 
   return (
     <EuiFlexGroup

@@ -3,7 +3,9 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "exclude": ["target/**/*"],
+  "exclude": [
+    "target/**/*"
+  ],
   "include": [
     // add all the folders contains files to be compiled
     "common/**/*",
@@ -18,20 +20,17 @@
   "kbn_references": [
     "@kbn/core",
     // add references to other TypeScript projects the plugin depends on
-
     // requiredPlugins from ./kibana.json
     "@kbn/data-plugin",
     "@kbn/navigation-plugin",
     "@kbn/fleet-plugin",
-
     // optionalPlugins from ./kibana.json
     "@kbn/cases-plugin",
-
+    "@kbn/agent-builder-plugin",
     // requiredBundles from ./kibana.json
     "@kbn/es-ui-shared-plugin",
     "@kbn/kibana-react-plugin",
     "@kbn/kibana-utils-plugin",
-
     // packages
     "@kbn/config-schema",
     "@kbn/es-query",

@@ -15,6 +15,7 @@ export { evictInternalEvents } from './evict_internal_events';
 export {
   prepareAttachmentPresentation,
   getAttachmentSystemPrompt,
+  getConversationAttachmentsSystemMessages,
   type AttachmentPresentation,
   type AttachmentPresentationMode,
   type AttachmentPresentationConfig,

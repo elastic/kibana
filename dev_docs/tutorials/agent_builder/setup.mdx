@@ -1,0 +1,177 @@
+---
+id: kibDevTutorialAgentBuilderSetup
+slug: /kibana-dev-docs/tutorials/agent-builder/setup
+title: Agent Builder Setup Guide
+description: Set up Agent Builder for local development
+date: 2026-01-27
+tags: ['kibana', 'agent-builder', 'setup', 'development']
+---
+
+This guide covers setting up the Agent Builder framework for local development.
+
+## Prerequisites
+
+Before starting, ensure you have:
+
+1. A working Kibana development environment (see <DocLink id="kibDevTutorialSetupDevEnv" />)
+2. Elasticsearch running locally or remotely
+3. An LLM connector configured (OpenAI, Azure OpenAI, Bedrock, Gemini, etc.)
+
+## Starting Kibana with Agent Builder
+
+Agent Builder is enabled by default. Start Kibana with:
+
+```bash
+yarn start
+```
+
+For verbose logging specific to Agent Builder:
+
+```bash
+yarn start --verbose
+```
+
+## Setting Up an LLM Connector
+
+Agent Builder requires an LLM connector to function. You have several options:
+
+### Option 1: Create via UI
+
+1. Navigate to **Management > Stack Management > Connectors**
+2. Click **Create connector**
+3. Select your LLM provider (OpenAI, Azure OpenAI, Bedrock, Gemini, etc.)
+4. Fill in the required credentials
+5. Save the connector
+
+### Option 2: Configure via Dev Console
+
+Find your connector ID and set it as the default:
+
+```
+GET kbn://api/actions/connectors
+
+POST kbn://internal/kibana/settings
+{
+   "changes": {
+      "genAiSettings:defaultAIConnector": "<connector-id>"
+   }
+}
+```
+
+### Option 3: Preconfigure in kibana.yml
+
+Add preconfigured connectors to `config/kibana.dev.yml`:
+
+```yaml
+# Azure OpenAI Example
+xpack.actions.preconfigured:
+  myOpenAI:
+    actionTypeId: .gen-ai
+    name: GPT-4
+    config:
+      apiUrl: https://your-resource.openai.azure.com/openai/deployments/gpt-4/chat/completions?api-version=2024-02-01
+      apiProvider: Azure OpenAI
+    secrets:
+      apiKey: <your-api-key>
+
+# AWS Bedrock Example
+  myBedrock:
+    actionTypeId: .bedrock
+    config:
+      apiUrl: https://bedrock-runtime.us-east-1.amazonaws.com
+      defaultModel: anthropic.claude-3-sonnet-20240229-v1:0
+    name: Claude 3 Sonnet
+    secrets:
+      accessKey: <your-access-key>
+      secret: <your-secret-key>
+
+# Google Gemini Example
+  myGemini:
+    name: Gemini Pro
+    actionTypeId: .gemini
+    config:
+      apiUrl: https://us-central1-aiplatform.googleapis.com
+      defaultModel: gemini-pro
+      gcpRegion: us-central1
+      gcpProjectID: <your-project-id>
+    secrets:
+      credentialsJson: '<service-account-json>'
+```
+
+## Setting the Default LLM
+
+### Via UI
+
+Navigate to **Management > GenAI Settings** and select your default AI connector.
+
+### Via Configuration
+
+Add to `config/kibana.dev.yml`:
+
+```yaml
+feature_flags.overrides.aiAssistant.defaultLlmSettingEnabled: true
+```
+
+## Running with Example Plugins
+
+To include example plugins for testing:
+
+```bash
+yarn start --run-examples
+```
+
+## Verifying Installation
+
+1. Start Kibana and log in
+2. Navigate to the Agent Builder UI (if available in your deployment)
+3. Create a simple tool via the API:
+
+```
+POST kbn://api/agent_builder/tools
+{
+  "id": "test_tool",
+  "description": "A test tool",
+  "configuration": {
+    "query": "FROM logs-* | LIMIT 1",
+    "params": {}
+  },
+  "type": "esql",
+  "tags": ["test"]
+}
+```
+
+4. Verify the tool was created:
+
+```
+GET kbn://api/agent_builder/tools/test_tool
+```
+
+## Development Tips
+
+### Hot Reloading
+
+Kibana automatically reloads when you make changes. For server-side changes to Agent Builder tools or agents, restart the server.
+
+### Debug Logging
+
+Enable debug logging for Agent Builder components:
+
+```yaml
+logging:
+  loggers:
+    - name: plugins.agentBuilder
+      level: debug
+    - name: actions
+      level: debug
+    - name: tools
+      level: debug
+```
+
+### Using VS Code
+
+For debugging, see <DocLink id="kibDevTutorialDebugging" /> for VS Code configuration.
+
+## Next Steps
+
+- <DocLink id="kibDevTutorialAgentBuilderConfiguration" text="Configure tracing and MCP servers" />
+- <DocLink id="kibDevTutorialAgentBuilderUsageExamples" text="Learn how to register tools and agents" />

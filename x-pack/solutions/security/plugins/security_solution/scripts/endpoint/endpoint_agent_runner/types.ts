@@ -17,6 +17,10 @@ export interface StartRuntimeServicesOptions {
   apiKey?: string;
   version?: string;
   policy?: string;
+  /**
+   * When true, the runner ensures the agent policy includes the Osquery Manager integration.
+   */
+  includeOsquery?: boolean;
   log?: ToolingLog;
   asSuperuser?: boolean;
 }

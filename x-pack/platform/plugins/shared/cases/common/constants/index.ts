@@ -12,6 +12,7 @@ export * from './files';
 export * from './application';
 export * from './observables';
 export { LENS_ATTACHMENT_TYPE } from './visualizations';
+export { ATTACK_DISCOVERY_ATTACHMENT_TYPE } from './attack_discovery';
 
 /**
  * Cases connector limits.

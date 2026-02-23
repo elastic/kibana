@@ -1,0 +1,58 @@
+---
+id: kibDevTutorialAgentBuilder
+slug: /kibana-dev-docs/tutorials/agent-builder
+title: Agent Builder Framework
+description: Comprehensive documentation for the Agent Builder framework
+date: 2026-01-27
+tags: ['kibana', 'agent-builder', 'ai', 'tools', 'agents']
+---
+
+The **Agent Builder** framework provides APIs to create and interact with AI agents, tools, and attachments in Kibana. It enables developers to build intelligent assistants that can perform complex tasks using various tool types.
+
+## Overview
+
+The Agent Builder plugin exposes APIs to interact with primitives including:
+
+- **Tools**: Agent-friendly functions with metadata for AI understanding
+- **Agents**: Built-in or user-defined AI agents with specific capabilities
+- **Attachments**: Context providers for agent conversations
+- **MCP Server**: Standardized interface for external MCP clients
+- **A2A Server**: Agent-to-Agent communication protocol
+
+## Packages
+
+The framework is organized into four main packages:
+
+| Package | Description |
+|---------|-------------|
+| `@kbn/agent-builder-common` | Types and utilities shared between browser and server |
+| `@kbn/agent-builder-server` | Server-specific types and utilities |
+| `@kbn/agent-builder-browser` | Browser-specific types and utilities |
+| `@kbn/agent-builder-genai-utils` | Server-side utilities for built-in tools and agents |
+
+## Tool Types
+
+Agent Builder supports multiple tool types:
+
+| Type | Description |
+|------|-------------|
+| `builtin` | Code tools that execute arbitrary functions (platform only) |
+| `esql` | Tools defined by templated ES\|QL queries |
+| `index_search` | Agentic search tools scoped to index patterns |
+| `workflow` | Tools that execute workflows |
+| `mcp` | Tools provided by external MCP servers |
+
+## Quick Links
+
+<DocLink id="kibDevTutorialAgentBuilderSetup" text="Setup Guide" /> - Get started with local development
+
+<DocLink id="kibDevTutorialAgentBuilderConfiguration" text="Configuration Reference" /> - Configure LLM connectors, tracing, and MCP servers
+
+<DocLink id="kibDevTutorialAgentBuilderTroubleshooting" text="Troubleshooting" /> - Solve common issues
+
+<DocLink id="kibDevTutorialAgentBuilderUsageExamples" text="Usage Examples" /> - Code examples for tools, agents, and attachments
+
+## Related Resources
+
+- [Agent Builder README](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/agent_builder/README.md)
+- [Contributor Guide](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/agent_builder/CONTRIBUTOR_GUIDE.md)

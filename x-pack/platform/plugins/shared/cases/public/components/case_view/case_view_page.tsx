@@ -25,6 +25,7 @@ import { useOnUpdateField } from './use_on_update_field';
 import { CaseViewSimilarCases } from './components/case_view_similar_cases';
 import { CaseViewEvents } from './components/case_view_events';
 import { CaseViewAttachments } from './components/case_view_attachments';
+import { CaseViewAttackDiscoveries } from './components/case_view_attack_discoveries';
 import { filterCaseAttachmentsBySearchTerm } from './components/helpers';
 
 const getActiveTabId = (tabId?: string) => {
@@ -40,6 +41,7 @@ const ATTACHMENT_TABS = [
   CASE_VIEW_PAGE_TABS.EVENTS,
   CASE_VIEW_PAGE_TABS.FILES,
   CASE_VIEW_PAGE_TABS.OBSERVABLES,
+  CASE_VIEW_PAGE_TABS.ATTACK_DISCOVERIES,
 ];
 
 export const CaseViewPage = React.memo<CaseViewPageProps>(
@@ -179,6 +181,9 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
                     searchTerm={searchTerm}
                     onUpdateField={onUpdateField}
                   />
+                )}
+                {activeTabId === CASE_VIEW_PAGE_TABS.ATTACK_DISCOVERIES && (
+                  <CaseViewAttackDiscoveries caseData={caseData} />
                 )}
               </>
             </CaseViewAttachments>

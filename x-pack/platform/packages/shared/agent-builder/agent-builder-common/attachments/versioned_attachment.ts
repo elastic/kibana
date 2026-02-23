@@ -50,6 +50,10 @@ export interface VersionedAttachment<
   readonly?: boolean;
   /** The client-provided ID if this attachment was created with one (e.g., via flyout configuration) */
   client_id?: string;
+  /** ID of the round that created this attachment (for agent-created attachments) */
+  created_in_round_id?: string;
+  /** Timestamp when attachment was deleted */
+  deleted_at?: string;
   /**
    * Origin/reference info for attachments created from external sources (e.g., saved objects).
    * Undefined for by-value attachments.
@@ -125,6 +129,8 @@ export interface VersionedAttachmentInput<
   description?: string;
   /** Whether the attachment should be hidden */
   hidden?: boolean;
+  /** ID of the round that created this attachment (for agent-created attachments) */
+  created_in_round_id?: string;
   /** Whether the attachment should be read-only */
   readonly?: boolean;
 }
@@ -170,6 +176,8 @@ export const versionedAttachmentSchema = z.object({
   hidden: z.boolean().optional(),
   readonly: z.boolean().optional(),
   client_id: z.string().optional(),
+  created_in_round_id: z.string().optional(),
+  deleted_at: z.string().optional(),
   origin: z.unknown().optional(),
 });
 
@@ -180,6 +188,7 @@ export const versionedAttachmentInputSchema = z.object({
   origin: z.unknown().optional(),
   description: z.string().optional(),
   hidden: z.boolean().optional(),
+  created_in_round_id: z.string().optional(),
   readonly: z.boolean().optional(),
 });
 

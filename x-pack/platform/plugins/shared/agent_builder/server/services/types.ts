@@ -21,6 +21,7 @@ import type { HooksServiceSetup, HooksServiceStart } from '@kbn/agent-builder-se
 import type { ToolsServiceSetup, ToolsServiceStart } from './tools';
 import type { RunnerFactory } from './runner';
 import type { AgentsServiceSetup, AgentsServiceStart } from './agents';
+import type { SkillsServiceSetup, SkillsServiceStart } from './skills';
 import type { ConversationService } from './conversation';
 import type { AttachmentServiceSetup, AttachmentServiceStart } from './attachments';
 import type { SkillServiceSetup, SkillServiceStart } from './skills';
@@ -33,15 +34,17 @@ export interface InternalSetupServices {
   tools: ToolsServiceSetup;
   agents: AgentsServiceSetup;
   attachments: AttachmentServiceSetup;
+  skills: SkillsServiceSetup;
+  skill: SkillServiceSetup;
   hooks: HooksServiceSetup;
-  skills: SkillServiceSetup;
 }
 
 export interface InternalStartServices {
   tools: ToolsServiceStart;
   agents: AgentsServiceStart;
   attachments: AttachmentServiceStart;
-  skills: SkillServiceStart;
+  skills: SkillsServiceStart;
+  skill: SkillServiceStart;
   conversations: ConversationService;
   runnerFactory: RunnerFactory;
   hooks: HooksServiceStart;

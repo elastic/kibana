@@ -161,10 +161,10 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
   if (isToolHandlerStandardReturn(toolReturn)) {
     const resultsWithIds = toolReturn.results.map<ToolResult>(
       (result) =>
-        ({
-          ...result,
-          tool_result_id: result.tool_result_id ?? getToolResultId(),
-        } as ToolResult)
+      ({
+        ...result,
+        tool_result_id: result.tool_result_id ?? getToolResultId(),
+      } as ToolResult)
     );
     runToolReturn = { results: resultsWithIds };
   } else {
@@ -252,5 +252,16 @@ export const createToolHandlerContext = async <TParams = Record<string, unknown>
     toolManager,
     filestore,
     events: createToolEventEmitter({ eventHandler: onEvent, context: manager.context }),
+    // Expose attachment management to tools/skills
+    attachments: {
+      add: async (params) => {
+        const attachment = await attachmentStateManager.add(params);
+        return {
+          id: attachment.id,
+          type: attachment.type,
+          current_version: attachment.current_version,
+        };
+      },
+    },
   };
 };

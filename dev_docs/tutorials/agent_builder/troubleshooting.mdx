@@ -1,0 +1,306 @@
+---
+id: kibDevTutorialAgentBuilderTroubleshooting
+slug: /kibana-dev-docs/tutorials/agent-builder/troubleshooting
+title: Agent Builder Troubleshooting Guide
+description: Solutions for common Agent Builder issues
+date: 2026-01-27
+tags: ['kibana', 'agent-builder', 'troubleshooting', 'debugging']
+---
+
+This guide covers common issues and their solutions when working with the Agent Builder framework.
+
+## LLM Connection Issues
+
+### No LLM Connector Configured
+
+**Symptom**: Agent Builder operations fail with connector-related errors.
+
+**Solution**:
+1. Verify you have an LLM connector configured
+2. Check the connector in **Management > Connectors**
+3. Set a default connector:
+
+```
+POST kbn://internal/kibana/settings
+{
+   "changes": {
+      "genAiSettings:defaultAIConnector": "<connector-id>"
+   }
+}
+```
+
+### Connector Authentication Failures
+
+**Symptom**: 401 or 403 errors when calling LLM.
+
+**Solutions**:
+- **Azure OpenAI**: Verify API key and endpoint URL
+- **AWS Bedrock**: Check IAM credentials and permissions for Bedrock
+- **Google Gemini**: Ensure service account has Vertex AI permissions
+
+### Rate Limiting
+
+**Symptom**: 429 errors from LLM provider.
+
+**Solutions**:
+- Implement backoff in your tool handlers
+- Consider using a higher-tier API plan
+- Configure rate limits in your connector if supported
+
+## Tool Registration Issues
+
+### Tool Not Found
+
+**Symptom**: `ToolNotFoundError` when executing a tool.
+
+**Solution**: Verify the tool is registered and accessible:
+
+```ts
+import { isToolNotFoundError } from '@kbn/agent-builder-common';
+
+try {
+  const { result } = await agentBuilder.tools.execute({
+    toolId: 'my_tool',
+    toolParams: { someNumber: 9000 },
+    request,
+  });
+} catch (e) {
+  if (isToolNotFoundError(e)) {
+    // Handle tool not found
+    console.error(`Tool ${e.meta.toolId} not found`);
+  }
+}
+```
+
+### Built-in Tool Not in Allow List
+
+**Symptom**: Kibana fails to start with an error about tool not being in the allow list.
+
+**Solution**: Add your tool's ID to the `AGENT_BUILDER_BUILTIN_TOOLS` array in:
+`x-pack/platform/packages/shared/agent-builder/agent-builder-server/allow_lists.ts`
+
+### Namespace Collision
+
+**Symptom**: Error about tool ID conflicting with protected namespaces.
+
+**Solution**: 
+1. For platform tools, use a protected namespace (e.g., `platform.core.*`)
+2. Register new protected namespaces in:
+   `x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/namespaces.ts`
+
+## Agent Registration Issues
+
+### Agent Not Found
+
+**Symptom**: Agent execution fails with agent not found error.
+
+**Solution**: Verify agent registration:
+
+```ts
+// Check if agent exists
+const agent = await agentBuilder.agents.registry.get({ 
+  agentId: 'my_agent', 
+  request 
+});
+```
+
+### Agent Not in Allow List
+
+**Symptom**: Kibana fails to start with an error about agent not being in the allow list.
+
+**Solution**: Add your agent's ID to the `AGENT_BUILDER_BUILTIN_AGENTS` array in:
+`x-pack/platform/packages/shared/agent-builder/agent-builder-server/allow_lists.ts`
+
+## Execution Issues
+
+### Tool Timeout
+
+**Symptom**: Tool execution times out.
+
+**Solutions**:
+- Check if the underlying operation (ES query, API call) is slow
+- Use progress reporting to indicate long operations:
+
+```ts
+handler: async ({}, { events }) => {
+  events.reportProgress('Starting long operation...');
+  // ... long operation
+  events.reportProgress('Processing results...');
+  // ... more work
+}
+```
+
+### Invalid Tool Parameters
+
+**Symptom**: Tool fails with schema validation errors.
+
+**Solution**: Ensure parameters match the tool's schema:
+
+```ts
+// Tool definition
+schema: z.object({
+  someNumber: z.number().describe('The number to process'),
+  optionalField: z.string().optional(),
+}),
+
+// Correct usage
+const { result } = await agentBuilder.tools.execute({
+  toolId: 'my_tool',
+  toolParams: { someNumber: 42 }, // matches schema
+  request,
+});
+```
+
+### ES|QL Tool Query Errors
+
+**Symptom**: ES|QL tool fails with query errors.
+
+**Solutions**:
+1. Validate your ES|QL query syntax
+2. Ensure parameter placeholders use correct syntax (`?param_name`)
+3. Verify the index pattern exists and is accessible
+
+```json
+POST kbn://api/agent_builder/tools
+{
+  "id": "my_esql_tool",
+  "description": "Query logs",
+  "configuration": {
+    "query": "FROM logs-* | WHERE level == ?level | LIMIT 10",
+    "params": {
+      "level": {
+        "type": "keyword",
+        "description": "Log level to filter"
+      }
+    }
+  },
+  "type": "esql"
+}
+```
+
+## Tracing Issues
+
+### Traces Not Appearing in Phoenix
+
+**Symptom**: No traces visible in Phoenix UI.
+
+**Solutions**:
+1. Verify Phoenix is running: `docker ps | grep phoenix`
+2. Check configuration in `kibana.dev.yml`:
+
+```yaml
+telemetry.enabled: true
+telemetry.tracing.enabled: true
+telemetry.tracing.exporters.phoenix.base_url: http://localhost:6006/
+```
+
+3. Ensure ports 6006 and 4317 are accessible
+4. Check Kibana logs for tracing errors
+
+### Incomplete Traces
+
+**Symptom**: Traces appear but are missing spans.
+
+**Solution**: Ensure all async operations are properly awaited in tool handlers.
+
+## MCP Server Issues
+
+### Claude Desktop Connection Fails
+
+**Symptom**: Claude Desktop cannot connect to Agent Builder MCP server.
+
+**Solutions**:
+1. Verify Kibana is running and accessible
+2. Check the MCP endpoint: `curl http://localhost:5601/api/agent_builder/mcp`
+3. Ensure API key is correctly formatted:
+
+```json
+{
+  "mcpServers": {
+    "elastic": {
+      "command": "npx",
+      "args": [
+        "mcp-remote",
+        "http://localhost:5601/api/agent_builder/mcp",
+        "--header",
+        "Authorization:ApiKey <base64-encoded-key>"
+      ]
+    }
+  }
+}
+```
+
+### MCP Tools Not Visible
+
+**Symptom**: MCP client connects but doesn't see tools.
+
+**Solution**: Verify tools are registered and the user has appropriate permissions.
+
+## Performance Issues
+
+### Slow Tool Execution
+
+**Solutions**:
+1. Enable detailed logging to identify bottlenecks
+2. Use the scoped ES client efficiently:
+
+```ts
+handler: async ({ indexPattern }, { esClient }) => {
+  // Use bulk operations where possible
+  const results = await esClient.asCurrentUser.search({
+    index: indexPattern,
+    size: 100, // Limit result size
+  });
+}
+```
+
+3. Cache expensive computations where appropriate
+
+### High Memory Usage
+
+**Solutions**:
+1. Stream large results instead of loading into memory
+2. Use pagination for large datasets
+3. Limit the scope of index patterns
+
+## Debugging Tips
+
+### Enable Debug Logging
+
+```yaml
+logging:
+  loggers:
+    - name: plugins.agentBuilder
+      level: debug
+    - name: plugins.elasticAssistant.service
+      level: debug
+```
+
+### Use VS Code Debugger
+
+1. Start Kibana with `yarn debug`
+2. Attach VS Code debugger (see <DocLink id="kibDevTutorialDebugging" />)
+3. Set breakpoints in tool handlers
+
+### Inspect Tool Context
+
+```ts
+handler: async (params, context) => {
+  console.log('Request:', context.request);
+  console.log('ES Client available:', !!context.esClient);
+  console.log('Model Provider available:', !!context.modelProvider);
+  // ... rest of handler
+}
+```
+
+## Getting Help
+
+If you're still stuck:
+
+1. Search existing issues in the [Kibana GitHub repository](https://github.com/elastic/kibana/issues)
+2. Check the `#ai-infra` Slack channel (for Elastic employees)
+3. Create a detailed bug report with:
+   - Kibana version
+   - Configuration (redact secrets)
+   - Error messages
+   - Steps to reproduce

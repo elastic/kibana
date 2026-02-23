@@ -139,6 +139,7 @@ import {
 } from '../common/entity_analytics/risk_engine';
 import { isEndpointPackageV2 } from '../common/endpoint/utils/package_v2';
 import { assistantTools } from './assistant/tools';
+import { getAlertTriageSkill, getEntityAnalyticsSkill } from './assistant/skills';
 import { turnOffAgentPolicyFeatures } from './endpoint/migrations/turn_off_agent_policy_features';
 import { getCriblPackagePolicyPostCreateOrUpdateCallback } from './security_integrations';
 import { scheduleEntityAnalyticsMigration } from './lib/entity_analytics/migrations';
@@ -243,7 +244,8 @@ export class Plugin implements ISecuritySolutionPlugin {
   private registerAgentBuilderAttachmentsAndTools(
     agentBuilder: SecuritySolutionPluginSetupDependencies['agentBuilder'],
     core: SecuritySolutionPluginCoreSetupDependencies,
-    logger: Logger
+    logger: Logger,
+    plugins: SecuritySolutionPluginSetupDependencies
   ): void {
     if (!agentBuilder) {
       return;
@@ -252,7 +254,13 @@ export class Plugin implements ISecuritySolutionPlugin {
     const experimentalFeatures = this.config.experimentalFeatures;
     const endpointAppContextService = this.endpointAppContextService;
 
-    registerTools(agentBuilder, core, logger, experimentalFeatures).catch((error) => {
+    registerTools(
+      agentBuilder,
+      core,
+      logger,
+      plugins,
+      experimentalFeatures
+    ).catch((error) => {
       this.logger.error(`Error registering security tools: ${error}`);
     });
     registerAttachments(agentBuilder).catch((error) => {
@@ -632,7 +640,7 @@ export class Plugin implements ISecuritySolutionPlugin {
 
         this.siemMigrationsService.setup({ esClusterClient: coreStart.elasticsearch.client });
       })
-      .catch(() => {}); // it shouldn't reject, but just in case
+      .catch(() => { }); // it shouldn't reject, but just in case
 
     setIsElasticCloudDeployment(plugins.cloud.isCloudEnabled ?? false);
 
@@ -682,7 +690,13 @@ export class Plugin implements ISecuritySolutionPlugin {
       this.logger.warn('Task Manager not available, health diagnostic task not registered.');
     }
 
-    this.registerAgentBuilderAttachmentsAndTools(plugins.agentBuilder, core, this.logger);
+    // Register legacy skills with agentBuilder (custom tools - not yet migrated to SkillDefinition)
+    if (plugins.agentBuilder) {
+      plugins.agentBuilder.skills.register(getAlertTriageSkill());
+      plugins.agentBuilder.skills.register(getEntityAnalyticsSkill());
+    }
+
+    this.registerAgentBuilderAttachmentsAndTools(plugins.agentBuilder, core, this.logger, plugins);
 
     return {
       setProductFeaturesConfigurator:
@@ -807,7 +821,7 @@ export class Plugin implements ISecuritySolutionPlugin {
 
           // Ensure policies have backing DOT indices (We don't need to `await` this.
           // It can run in the background)
-          ensureIndicesExistsForPolicies(this.endpointAppContextService).catch(() => {});
+          ensureIndicesExistsForPolicies(this.endpointAppContextService).catch(() => { });
 
           // Migrate endpoint data if space awareness is enabled
           // (We don't need to `await` this. It can run in the background)
@@ -815,7 +829,7 @@ export class Plugin implements ISecuritySolutionPlugin {
             logger.error(e);
           });
         })
-        .catch(() => {});
+        .catch(() => { });
 
       // License related start
       licenseService.start(this.licensing$);
@@ -839,7 +853,7 @@ export class Plugin implements ISecuritySolutionPlugin {
           taskManager: plugins.taskManager,
           esClient: core.elasticsearch.client.asInternalUser,
         })
-        .catch(() => {}); // it shouldn't refuse, but just in case
+        .catch(() => { }); // it shouldn't refuse, but just in case
     }
 
     const uiSettingsClient = core.uiSettings.asScopedToClient(
@@ -870,7 +884,7 @@ export class Plugin implements ISecuritySolutionPlugin {
         packageService,
         queryConfig
       )
-      .catch(() => {});
+      .catch(() => { });
 
     if (this.config.cdn?.url && this.config.cdn?.publicKey) {
       const cdnConfig: CdnConfig = {
@@ -878,10 +892,10 @@ export class Plugin implements ISecuritySolutionPlugin {
         pubKey: this.config.cdn.publicKey,
       };
       this.logger.info('Starting artifact service with custom CDN config');
-      artifactService.start(this.telemetryReceiver, cdnConfig).catch(() => {});
+      artifactService.start(this.telemetryReceiver, cdnConfig).catch(() => { });
     } else {
       this.logger.info('Starting artifact service with default CDN config');
-      artifactService.start(this.telemetryReceiver).catch(() => {});
+      artifactService.start(this.telemetryReceiver).catch(() => { });
     }
 
     this.asyncTelemetryEventsSender.start(plugins.telemetry);
@@ -897,7 +911,7 @@ export class Plugin implements ISecuritySolutionPlugin {
         esClient: core.elasticsearch.client.asInternalUser,
         registerDefendInsightsCallback: plugins.elasticAssistant.registerCallback,
       })
-      .catch(() => {});
+      .catch(() => { });
 
     const endpointPkgInstallationPromise = this.endpointContext.service
       .getInternalFleetServices()
@@ -915,7 +929,7 @@ export class Plugin implements ISecuritySolutionPlugin {
           await this.checkMetadataTransformsTask?.start({ taskManager: plugins.taskManager });
         }
       })
-      .catch(() => {}); // it shouldn't reject, but just in case
+      .catch(() => { }); // it shouldn't reject, but just in case
 
     if (registerIngestCallback) {
       registerIngestCallback(
@@ -984,12 +998,12 @@ export class Plugin implements ISecuritySolutionPlugin {
 
   public stop() {
     this.logger.debug('Stopping plugin');
-    this.asyncTelemetryEventsSender.stop().catch(() => {});
+    this.asyncTelemetryEventsSender.stop().catch(() => { });
     this.telemetryEventsSender.stop();
     this.endpointAppContextService.stop();
     this.policyWatcher?.stop();
     this.telemetryWatcher?.stop();
-    this.completeExternalResponseActionsTask.stop().catch(() => {});
+    this.completeExternalResponseActionsTask.stop().catch(() => { });
     this.siemMigrationsService.stop();
     securityWorkflowInsightsService.stop();
     licenseService.stop();

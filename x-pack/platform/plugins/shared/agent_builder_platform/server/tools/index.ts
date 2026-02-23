@@ -24,6 +24,18 @@ import { executeEsqlTool } from './execute_esql';
 import { searchTool } from './search';
 import { createVisualizationTool } from './create_visualization';
 import { getWorkflowExecutionStatusTool } from './get_workflow_execution_status';
+import { listWorkflowsTool } from './list_workflows';
+import { getWorkflowTool } from './get_workflow';
+import { runWorkflowTool } from './run_workflow';
+import { getWorkflowExecutionLogsTool } from './get_workflow_execution_logs';
+import { savedObjectsTool } from './saved_objects/saved_objects';
+import { dataViewsTool } from './data_views/data_views';
+import { alertingRulesTool } from './alerting/alerting_rules';
+import { connectorsTool } from './connectors/connectors';
+import { uiSettingsTool } from './ui_settings';
+import { spacesTool } from './spaces';
+import { privilegesTool } from './privileges';
+import { tagsTool } from './tags/tags';
 
 export const registerTools = ({
   coreSetup,
@@ -46,11 +58,23 @@ export const registerTools = ({
     productDocumentationTool(coreSetup),
     integrationKnowledgeTool(coreSetup),
     casesTool(coreSetup),
+    savedObjectsTool({ coreSetup }),
+    dataViewsTool({ coreSetup }),
+    alertingRulesTool({ coreSetup }),
+    connectorsTool({ coreSetup }),
+    uiSettingsTool({ coreSetup }),
+    spacesTool({ coreSetup }),
+    privilegesTool({ coreSetup }),
+    tagsTool({ coreSetup }),
   ];
 
   if (setupDeps.workflowsManagement) {
     tools.push(
-      getWorkflowExecutionStatusTool({ workflowsManagement: setupDeps.workflowsManagement })
+      getWorkflowExecutionStatusTool({ workflowsManagement: setupDeps.workflowsManagement }),
+      listWorkflowsTool({ workflowsManagement: setupDeps.workflowsManagement }),
+      getWorkflowTool({ workflowsManagement: setupDeps.workflowsManagement }),
+      runWorkflowTool({ workflowsManagement: setupDeps.workflowsManagement }),
+      getWorkflowExecutionLogsTool({ workflowsManagement: setupDeps.workflowsManagement })
     );
   }
 

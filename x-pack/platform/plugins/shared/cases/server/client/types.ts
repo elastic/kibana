@@ -32,6 +32,7 @@ import type { UnifiedAttachmentTypeRegistry } from '../attachment_framework/unif
 import type { LicensingService } from '../services/licensing';
 import type { NotificationService } from '../services/notifications/types';
 import type { User } from '../common/types/user';
+import type { AttackDiscoveryIntegrationService } from '../services/attack_discovery_integration';
 
 export interface CasesServices {
   alertsService: AlertService;
@@ -42,6 +43,7 @@ export interface CasesServices {
   attachmentService: AttachmentService;
   licensingService: LicensingService;
   notificationService: NotificationService;
+  attackDiscoveryIntegrationService?: AttackDiscoveryIntegrationService;
   templatesService: TemplatesService;
 }
 

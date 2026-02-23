@@ -212,18 +212,18 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
 
       const executorClient = usePhoenixExecutor
         ? new KibanaPhoenixClient({
-            config: getPhoenixConfig(),
-            log,
-            model,
-            runId: process.env.TEST_RUN_ID!,
-            repetitions,
-          })
+          config: getPhoenixConfig(),
+          log,
+          model,
+          runId: process.env.TEST_RUN_ID!,
+          repetitions,
+        })
         : new KibanaEvalsClient({
-            log,
-            model,
-            runId: process.env.TEST_RUN_ID!,
-            repetitions,
-          });
+          log,
+          model,
+          runId: process.env.TEST_RUN_ID!,
+          repetitions,
+        });
 
       const currentRunId = process.env.TEST_RUN_ID;
       await use(executorClient);
@@ -268,7 +268,7 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
     async ({ executorClient }, use) => {
       await use(executorClient);
     },
-    { scope: 'worker' },
+    { scope: 'test' },
   ],
   evaluators: [
     async ({ log, inferenceClient, evaluationConnector, traceEsClient }, use) => {
@@ -356,10 +356,23 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
     { scope: 'worker' },
   ],
   repetitions: [
-    async ({}, use, testInfo) => {
+    async ({ }, use, testInfo) => {
       // Get repetitions from test options (set in playwright config)
       const repetitions = (testInfo.project.use as any).repetitions || 1;
       await use(repetitions);
+    },
+    { scope: 'worker' },
+  ],
+  evaluationAnalysisService: [
+    async ({ esClient, log }, use) => {
+      const evaluationsEsClient = process.env.EVALUATIONS_ES_URL
+        ? createEsClientForTesting({
+          esUrl: process.env.EVALUATIONS_ES_URL,
+        })
+        : esClient;
+      const scoreRepository = new EvaluationScoreRepository(evaluationsEsClient, log);
+      const helper = new EvaluationAnalysisService(scoreRepository, log);
+      await use(helper);
     },
     { scope: 'worker' },
   ],

@@ -41,6 +41,7 @@
       "ingestPipelines",
       "automaticImport",
       "alerting",
+      "onechat",
       "sloShared",
       "reporting"
     ],

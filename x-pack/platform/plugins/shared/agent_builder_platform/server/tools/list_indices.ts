@@ -21,6 +21,12 @@ const listIndicesSchema = z.object({
       - Should only be used if you are certain of a specific index pattern to filter on. *Do not try to guess*.
       - Defaults to '*' to match all indices.`
     ),
+  includeKibanaIndices: z
+    .boolean()
+    .optional()
+    .describe(
+      '(optional) Include Kibana/system indices (dot-prefixed). Defaults to false.'
+    ),
 });
 
 export const listIndicesTool = (): BuiltinToolDefinition<typeof listIndicesSchema> => {
@@ -31,10 +37,15 @@ export const listIndicesTool = (): BuiltinToolDefinition<typeof listIndicesSchem
 
 The 'pattern' optional parameter is an index pattern which can be used to filter resources.
 This parameter should only be used when you already know of a specific pattern to filter on,
-e.g. if the user provided one. Otherwise, do not try to invent or guess a pattern.`,
+e.g. if the user provided one. Otherwise, do not try to invent or guess a pattern.
+
+The 'includeKibanaIndices' optional parameter can be used to include Kibana/system indices (dot-prefixed).
+This is *off* by default and should only be enabled when you intentionally need to target system resources.`,
     schema: listIndicesSchema,
-    handler: async ({ pattern }, { esClient, logger }) => {
-      logger.debug(`list indices tool called with pattern: ${pattern}`);
+    handler: async ({ pattern, includeKibanaIndices = false }, { esClient, logger }) => {
+      logger.debug(
+        `list indices tool called with pattern: ${pattern}, includeKibanaIndices: ${includeKibanaIndices}`
+      );
       const {
         indices,
         data_streams: dataStreams,
@@ -43,7 +54,7 @@ e.g. if the user provided one. Otherwise, do not try to invent or guess a patter
       } = await listSearchSources({
         pattern,
         includeHidden: false,
-        includeKibanaIndices: false,
+        includeKibanaIndices,
         excludeIndicesRepresentedAsAlias: false,
         excludeIndicesRepresentedAsDatastream: true,
         esClient: esClient.asCurrentUser,

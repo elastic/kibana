@@ -14,6 +14,7 @@ import { ResourceTypes } from '@kbn/product-doc-common';
 import type { RetrieveDocumentationResultDoc } from '@kbn/llm-tasks-plugin/server';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
 import { securityTool } from './constants';
+import { otherResult } from '@kbn/agent-builder-genai-utils/tools/utils/results';
 
 const securityLabsSearchSchema = z.object({
   query: z

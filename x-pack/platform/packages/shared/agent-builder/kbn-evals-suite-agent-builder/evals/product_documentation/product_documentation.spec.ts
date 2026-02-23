@@ -5,10 +5,16 @@
  * 2.0.
  */
 
+/**
+ * Product Documentation Skill Evaluations
+ *
+ * Tests the DEFAULT agent's ability to use the product_documentation tool.
+ * Uses the default agent (elastic-ai-agent) to test the real user experience.
+ */
+import { createHash } from 'node:crypto';
 import { tags } from '@kbn/scout';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import { platformCoreTools } from '@kbn/agent-builder-common';
-import { createHash } from 'crypto';
 import { evaluate as base } from '../../src/evaluate';
 import type { EvaluateDataset } from '../../src/evaluate_dataset';
 import { createEvaluateDataset } from '../../src/evaluate_dataset';
@@ -25,18 +31,16 @@ const inferenceId = defaultInferenceEndpoints.ELSER;
 const ELASTIC_DOCS_INSTALLATION_STATUS_API_PATH = '/internal/product_doc_base/status';
 const ELASTIC_DOCS_INSTALL_ALL_API_PATH = '/internal/product_doc_base/install';
 const ELASTIC_DOCS_UNINSTALL_ALL_API_PATH = '/internal/product_doc_base/uninstall';
-
 const AGENTS_API_BASE_PATH = '/api/agent_builder/agents';
 
 const evaluate = base.extend<{ evaluateDataset: EvaluateDataset }, {}>({
   evaluateDataset: [
-    ({ chatClient, evaluators, phoenixClient, traceEsClient, log }, use) => {
+    ({ chatClient, evaluators, phoenixClient, log }, use) => {
       use(
         createEvaluateDataset({
           chatClient,
           evaluators,
           phoenixClient,
-          traceEsClient,
           log,
         })
       );
@@ -47,7 +51,7 @@ const evaluate = base.extend<{ evaluateDataset: EvaluateDataset }, {}>({
 
 evaluate.describe(
   'AgentBuilder product documentation tool',
-  { tag: tags.serverless.observability.complete },
+  { tag: ['@svlOblt', ...tags.serverless.observability.complete] },
   () => {
     let installedBySuite = false;
     let productDocAgentId: string | undefined;
@@ -55,9 +59,7 @@ evaluate.describe(
     evaluate.beforeAll(async ({ fetch, log, connector }) => {
       // Ensure Elastic documentation is installed
       const status = (await fetch(
-        `${ELASTIC_DOCS_INSTALLATION_STATUS_API_PATH}?inferenceId=${encodeURIComponent(
-          inferenceId
-        )}`
+        `${ELASTIC_DOCS_INSTALLATION_STATUS_API_PATH}?inferenceId=${encodeURIComponent(inferenceId)}`
       )) as InstallationStatusResponse;
 
       if (status.overall === 'installed') {
@@ -126,8 +128,7 @@ evaluate.describe(
           log.debug(`Deleted eval agent: ${productDocAgentId}`);
         } catch (e) {
           log.warning(
-            `Failed to delete eval agent "${productDocAgentId}": ${
-              e instanceof Error ? e.message : String(e)
+            `Failed to delete eval agent "${productDocAgentId}": ${e instanceof Error ? e.message : String(e)
             }`
           );
         }
@@ -142,8 +143,7 @@ evaluate.describe(
           log.debug('Uninstalled Elastic documentation');
         } catch (e) {
           log.warning(
-            `Failed to uninstall Elastic documentation: ${
-              e instanceof Error ? e.message : String(e)
+            `Failed to uninstall Elastic documentation: ${e instanceof Error ? e.message : String(e)
             }`
           );
         }
@@ -151,7 +151,48 @@ evaluate.describe(
     });
 
     evaluate(
-      'uses product documentation tool for Elastic docs questions',
+      'uses product documentation tool for Elastic docs questions (default agent)',
+      async ({ evaluateDataset }) => {
+        await evaluateDataset({
+          dataset: {
+            name: 'agent builder: product-documentation-tool',
+            description:
+              'Base evals for Agent Builder product documentation tool: tool-only usage + grounding constraints.',
+            examples: [
+              {
+                input: {
+                  question: 'What is the latest version of Elasticsearch and when was it released?',
+                },
+                output: {
+                  expected: `Provides version and release date from product docs, or states info unavailable.`,
+                },
+                metadata: {
+                  expectedOnlyToolId: platformCoreTools.productDocumentation,
+                  requireVersionAndReleaseDate: true,
+                  product: 'elasticsearch',
+                },
+              },
+              {
+                input: {
+                  question:
+                    'Explain the relationship between Elasticsearch, Kibana, and Logstash, using only information obtained from the product documentation tool. If the tool response does not provide sufficient information, explicitly state that in the answer.',
+                },
+                output: {
+                  expected: `Explains the Elastic Stack components from product docs, or states docs insufficient.`,
+                },
+                metadata: {
+                  expectedOnlyToolId: platformCoreTools.productDocumentation,
+                  product: 'kibana',
+                },
+              },
+            ],
+          },
+        });
+      }
+    );
+
+    evaluate(
+      'uses product documentation tool for Elastic docs questions (dedicated agent)',
       async ({ evaluateDataset }) => {
         if (!productDocAgentId) {
           throw new Error('Expected productDocAgentId to be set in beforeAll');

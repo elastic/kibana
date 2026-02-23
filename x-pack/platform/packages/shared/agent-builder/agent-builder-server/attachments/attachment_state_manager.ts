@@ -332,6 +332,7 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
       active: true,
       ...(input.description && { description: input.description }),
       ...(input.hidden !== undefined && { hidden: input.hidden }),
+      ...(input.created_in_round_id && { created_in_round_id: input.created_in_round_id }),
       readonly: input.readonly ?? this.getDefaultReadonly(input.type),
       ...(input.origin !== undefined && { origin: input.origin }),
     };

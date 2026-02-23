@@ -48,6 +48,13 @@ import { createDataViews } from './create_data_views';
 import { registerFeatures } from './utils/register_features';
 import { CASE_ATTACHMENT_TYPE_ID } from '../common/constants';
 import { createActionService } from './handlers/action/create_action_service';
+import {
+  getOsquerySkill,
+  getLiveQuerySkill,
+  getPacksSkill,
+  getSavedQueriesSkill,
+  getStatusSkill,
+} from './onechat/skills';
 
 export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginStart> {
   private readonly logger: Logger;
@@ -57,6 +64,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
   private readonly telemetryEventsSender: TelemetryEventsSender;
   private licenseSubscription: Subscription | null = null;
   private createActionService: ReturnType<typeof createActionService> | null = null;
+  private osqueryAppContext: OsqueryAppContext | null = null;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.context = initializerContext;
@@ -85,6 +93,9 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       licensing: plugins.licensing,
     };
 
+    // Store context for use by skills
+    this.osqueryAppContext = osqueryContext;
+
     initSavedObjects(core.savedObjects);
 
     // TODO: We do not pass so client here.
@@ -108,6 +119,17 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
     this.telemetryEventsSender.setup(this.telemetryReceiver, plugins.taskManager, core.analytics);
 
     plugins.cases?.attachmentFramework.registerExternalReference({ id: CASE_ATTACHMENT_TYPE_ID });
+
+    // Register AgentBuilder skills if available
+    if (plugins.agentBuilder) {
+      const getOsqueryContext = () => this.osqueryAppContext;
+
+      plugins.agentBuilder.skills.register(getOsquerySkill(getOsqueryContext));
+      plugins.agentBuilder.skills.register(getLiveQuerySkill(getOsqueryContext));
+      plugins.agentBuilder.skills.register(getPacksSkill(getOsqueryContext));
+      plugins.agentBuilder.skills.register(getSavedQueriesSkill(getOsqueryContext));
+      plugins.agentBuilder.skills.register(getStatusSkill(getOsqueryContext));
+    }
 
     return {
       createActionService: this.createActionService,

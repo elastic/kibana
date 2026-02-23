@@ -68,6 +68,7 @@
       "entityStore"
     ],
     "optionalPlugins": [
+      "onechat",
       "encryptedSavedObjects",
       "fleet",
       "ml",

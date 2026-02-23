@@ -48,9 +48,7 @@ export function createPlaywrightEvalsConfig({
     );
   }
 
-  const evaluationConnector = connectors.find(
-    (connector) => connector.id === evaluationConnectorId
-  );
+  const evaluationConnector = connectors.find((c) => c.id === evaluationConnectorId);
 
   if (!evaluationConnector) {
     throw new Error(
@@ -76,7 +74,7 @@ export function createPlaywrightEvalsConfig({
             use: {
               ...project.use,
               connector,
-              evaluationConnector,
+              evaluationConnector: evaluationConnector ?? connector,
               repetitions: experimentRepetitions,
             },
           };
@@ -89,8 +87,8 @@ export function createPlaywrightEvalsConfig({
     // some reports write to disk, which we don't need
     reporter: Array.isArray(reporter)
       ? reporter.filter(([name]) => {
-          return name !== 'html' && name !== 'json';
-        })
+        return name !== 'html' && name !== 'json';
+      })
       : reporter,
     use: {
       serversConfigDir: (use as ScoutTestOptions).serversConfigDir,

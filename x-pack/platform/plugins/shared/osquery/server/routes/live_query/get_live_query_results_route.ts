@@ -6,8 +6,6 @@
  */
 
 import type { IRouter } from '@kbn/core/server';
-import { map } from 'lodash';
-import { lastValueFrom, zip } from 'rxjs';
 import type { Observable } from 'rxjs';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
@@ -22,15 +20,6 @@ import {
   OSQUERY_INTEGRATION_NAME,
 } from '../../../common/constants';
 import { PLUGIN_ID } from '../../../common';
-import type {
-  ActionDetailsRequestOptions,
-  ActionDetailsStrategyResponse,
-  ResultsRequestOptions,
-  ResultsStrategyResponse,
-} from '../../../common/search_strategy';
-import { Direction, OsqueryQueries } from '../../../common/search_strategy';
-import { generateTablePaginationOptions } from '../../../common/utils/build_query';
-import { getActionResponses } from './utils';
 import {
   getLiveQueryResultsRequestParamsSchema,
   getLiveQueryResultsRequestQuerySchema,
@@ -38,6 +27,7 @@ import {
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { buildIndexNameWithNamespace } from '../../utils/build_index_name_with_namespace';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
+import { fetchLiveQueryDetails, fetchLiveQueryResults } from '../../services';
 
 export const getLiveQueryResultsRoute = (
   router: IRouter<DataRequestHandlerContext>,
@@ -131,65 +121,42 @@ export const getLiveQueryResultsRoute = (
           }
 
           const search = await context.search;
-          const { actionDetails } = await lastValueFrom(
-            search.search<ActionDetailsRequestOptions, ActionDetailsStrategyResponse>(
-              {
-                actionId: request.params.id,
-                kuery: request.query.kuery,
-                factoryQueryType: OsqueryQueries.actionDetails,
-                spaceId,
-              },
-              { abortSignal, strategy: 'osquerySearchStrategy' }
-            )
-          );
 
-          if (!actionDetails) {
+          // Verify the action exists by fetching details
+          const status = await fetchLiveQueryDetails(search, {
+            actionId: request.params.id,
+            spaceId,
+            abortSignal,
+            integrationNamespaces: integrationNamespaces[OSQUERY_INTEGRATION_NAME],
+          });
+
+          if (!status.actionDetails) {
             return response.notFound({ body: { message: 'Action not found' } });
           }
-
-          const queries = actionDetails?._source?.queries;
 
           const osqueryNamespaces = integrationNamespaces[OSQUERY_INTEGRATION_NAME];
           const namespacesOrUndefined =
             osqueryNamespaces && osqueryNamespaces.length > 0 ? osqueryNamespaces : undefined;
 
-          await lastValueFrom(
-            zip(
-              ...map(queries, (query) =>
-                getActionResponses(
-                  search,
-                  query.action_id,
-                  query.agents?.length ?? 0,
-                  namespacesOrUndefined
-                )
-              )
-            )
-          );
-          const res = await lastValueFrom(
-            search.search<ResultsRequestOptions, ResultsStrategyResponse>(
-              {
-                actionId: request.params.actionId,
-                factoryQueryType: OsqueryQueries.results,
-                kuery: request.query.kuery,
-                startDate: request.query.startDate,
-                pagination: generateTablePaginationOptions(
-                  request.query.page ?? 0,
-                  request.query.pageSize ?? 100
-                ),
-                sort: [
-                  {
-                    direction: request.query.sortOrder ?? Direction.desc,
-                    field: request.query.sort ?? '@timestamp',
-                  },
-                ],
-                integrationNamespaces: namespacesOrUndefined,
-              },
-              { abortSignal, strategy: 'osquerySearchStrategy' }
-            )
-          );
+          // Fetch results using the service
+          const results = await fetchLiveQueryResults(search, {
+            actionId: request.params.actionId,
+            pagination: {
+              page: request.query.page ?? 0,
+              pageSize: request.query.pageSize ?? 100,
+            },
+            sort: {
+              field: request.query.sort ?? '@timestamp',
+              direction: (request.query.sortOrder as 'asc' | 'desc') ?? 'desc',
+            },
+            kuery: request.query.kuery,
+            startDate: request.query.startDate,
+            abortSignal,
+            integrationNamespaces: namespacesOrUndefined,
+          });
 
           return response.ok({
-            body: { data: res },
+            body: { data: results.data },
           });
         } catch (e) {
           return response.customError({

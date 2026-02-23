@@ -50,6 +50,10 @@ import {
 } from './get_trace_change_points/tool';
 import { OBSERVABILITY_GET_INDEX_INFO_TOOL_ID, createGetIndexInfoTool } from './get_index_info';
 import {
+  OBSERVABILITY_ANALYZE_LATENCY_BOTTLENECKS_TOOL_ID,
+  createAnalyzeLatencyBottlenecksTool,
+} from './analyze_latency_bottlenecks/tool';
+import {
   OBSERVABILITY_GET_SERVICE_TOPOLOGY_TOOL_ID,
   createGetServiceTopologyTool,
 } from './get_service_topology/tool';
@@ -76,6 +80,7 @@ const OBSERVABILITY_TOOL_IDS = [
   OBSERVABILITY_GET_METRIC_CHANGE_POINTS_TOOL_ID,
   OBSERVABILITY_GET_TRACE_CHANGE_POINTS_TOOL_ID,
   OBSERVABILITY_GET_INDEX_INFO_TOOL_ID,
+  OBSERVABILITY_ANALYZE_LATENCY_BOTTLENECKS_TOOL_ID,
   OBSERVABILITY_GET_SERVICE_TOPOLOGY_TOOL_ID,
 ];
 
@@ -106,6 +111,7 @@ export async function registerTools({
     createGetMetricChangePointsTool({ core, plugins, logger }),
     createGetTraceChangePointsTool({ core, plugins, logger }),
     createGetIndexInfoTool({ core, plugins, logger }),
+    createAnalyzeLatencyBottlenecksTool({ core, plugins, logger }),
     createGetServiceTopologyTool({ core, plugins, dataRegistry, logger }),
   ];
 

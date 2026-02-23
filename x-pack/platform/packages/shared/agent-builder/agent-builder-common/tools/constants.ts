@@ -27,15 +27,29 @@ export const platformCoreTools = {
   executeEsql: platformCoreTool('execute_esql'),
   createVisualization: platformCoreTool('create_visualization'),
   getWorkflowExecutionStatus: platformCoreTool('get_workflow_execution_status'),
+  listWorkflows: platformCoreTool('list_workflows'),
+  getWorkflow: platformCoreTool('get_workflow'),
+  runWorkflow: platformCoreTool('run_workflow'),
+  getWorkflowExecutionLogs: platformCoreTool('get_workflow_execution_logs'),
   productDocumentation: platformCoreTool('product_documentation'),
   cases: platformCoreTool('cases'),
   integrationKnowledge: platformCoreTool('integration_knowledge'),
+  savedObjects: platformCoreTool('saved_objects'),
+  dataViews: platformCoreTool('data_views'),
+  alertingRules: platformCoreTool('alerting_rules'),
+  connectors: platformCoreTool('connectors'),
+  uiSettings: platformCoreTool('ui_settings'),
+  spaces: platformCoreTool('spaces'),
+  privileges: platformCoreTool('privileges'),
+  tags: platformCoreTool('tags'),
   // Attachment tools
   attachmentRead: platformCoreTool('attachment_read'),
   attachmentUpdate: platformCoreTool('attachment_update'),
   attachmentAdd: platformCoreTool('attachment_add'),
   attachmentList: platformCoreTool('attachment_list'),
   attachmentDiff: platformCoreTool('attachment_diff'),
+  // Skill tools
+  readSkillTools: platformCoreTool('read_skill_tools'),
 } as const;
 
 export const filestoreTools = {

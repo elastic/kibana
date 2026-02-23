@@ -5,6 +5,18 @@
  * 2.0.
  */
 
+export {
+  EVALS_CLI_FLAG_OPTIONS,
+  VALID_MODES,
+  VALID_OUTPUT_FORMATS,
+  parseMode,
+  parseOutputFormat,
+  parseEvalsCliFlags,
+  isValidMode,
+  isValidOutputFormat,
+  type EvalsCliArgs,
+  type OutputFormat,
+} from './flags';
 import { RunWithCommands } from '@kbn/dev-cli-runner';
 import { listSuitesCmd } from './commands/list';
 import { runSuiteCmd } from './commands/run';

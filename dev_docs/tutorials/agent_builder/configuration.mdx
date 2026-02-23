@@ -1,0 +1,246 @@
+---
+id: kibDevTutorialAgentBuilderConfiguration
+slug: /kibana-dev-docs/tutorials/agent-builder/configuration
+title: Agent Builder Configuration Reference
+description: Complete reference for Agent Builder configuration options
+date: 2026-01-27
+tags: ['kibana', 'agent-builder', 'configuration', 'tracing', 'mcp']
+---
+
+This guide covers all configuration options for the Agent Builder framework.
+
+## LLM Connector Configuration
+
+Agent Builder supports multiple LLM providers through Kibana's connector system.
+
+### Supported Providers
+
+| Provider | Action Type ID | Description |
+|----------|---------------|-------------|
+| Azure OpenAI | `.gen-ai` | OpenAI models via Azure |
+| OpenAI | `.gen-ai` | Direct OpenAI API |
+| AWS Bedrock | `.bedrock` | Claude and other models via AWS |
+| Google Gemini | `.gemini` | Gemini models via Vertex AI |
+| Inference API | `.inference` | Elastic Inference Service |
+
+### Azure OpenAI Configuration
+
+```yaml
+xpack.actions.preconfigured:
+  azureOpenAI:
+    actionTypeId: .gen-ai
+    name: GPT-4o
+    config:
+      apiUrl: https://<resource>.openai.azure.com/openai/deployments/<deployment>/chat/completions?api-version=2024-02-01
+      apiProvider: Azure OpenAI
+    secrets:
+      apiKey: <your-api-key>
+```
+
+### AWS Bedrock Configuration
+
+```yaml
+xpack.actions.preconfigured:
+  bedrock:
+    actionTypeId: .bedrock
+    config:
+      apiUrl: https://bedrock-runtime.<region>.amazonaws.com
+      defaultModel: anthropic.claude-3-5-sonnet-20240620-v1:0
+    name: Claude 3.5 Sonnet
+    secrets:
+      accessKey: <aws-access-key>
+      secret: <aws-secret-key>
+```
+
+### Google Gemini Configuration
+
+```yaml
+xpack.actions.preconfigured:
+  gemini:
+    name: Gemini Pro
+    actionTypeId: .gemini
+    config:
+      apiUrl: https://<region>-aiplatform.googleapis.com
+      defaultModel: gemini-pro
+      gcpRegion: <region>
+      gcpProjectID: <project-id>
+    secrets:
+      credentialsJson: '<service-account-credentials-json>'
+```
+
+## Tracing Configuration
+
+Agent Builder agents are compatible with Kibana inference tracing for debugging and monitoring.
+
+### Phoenix Tracing (Local Development)
+
+Phoenix is an open-source tool for tracing LLM applications.
+
+#### Start Phoenix Server
+
+```bash
+docker run -p 6006:6006 -p 4317:4317 -i -t arizephoenix/phoenix:latest
+```
+
+#### Configure Kibana
+
+Add to `config/kibana.dev.yml`:
+
+```yaml
+telemetry.enabled: true
+telemetry.tracing.enabled: true
+
+telemetry.tracing.exporters.phoenix.base_url: http://localhost:6006/
+telemetry.tracing.exporters.phoenix.public_url: http://localhost:6006/
+telemetry.tracing.exporters.phoenix.project_name: agent-builder-dev
+```
+
+#### Using Environment Variables
+
+Alternatively, set environment variables before starting Kibana:
+
+```bash
+export PHOENIX_BASE_URL="http://localhost:6006"
+export PHOENIX_PUBLIC_URL="http://localhost:6006"
+export PHOENIX_PROJECT_NAME="agent-builder-dev"
+```
+
+### Cloud Tracing
+
+For cloud-hosted Phoenix instances:
+
+```yaml
+telemetry.enabled: true
+telemetry.tracing.enabled: true
+
+telemetry.tracing.exporters.phoenix.base_url: https://<phoenix-host>
+telemetry.tracing.exporters.phoenix.public_url: https://<phoenix-host>
+telemetry.tracing.exporters.phoenix.project_name: <your-project>
+telemetry.tracing.exporters.phoenix.api_key: <your-api-key>
+```
+
+## MCP Server Configuration
+
+The MCP (Model Context Protocol) server provides a standardized interface for external MCP clients to access Agent Builder tools.
+
+### Endpoint
+
+The MCP server is available at: `/api/agent_builder/mcp`
+
+### Claude Desktop Integration
+
+Configure Claude Desktop to connect to Agent Builder:
+
+```json
+{
+  "mcpServers": {
+    "elastic": {
+      "command": "npx",
+      "args": [
+        "mcp-remote",
+        "http://localhost:5601/api/agent_builder/mcp",
+        "--header",
+        "Authorization:${AUTH_HEADER}"
+      ],
+      "env": {
+        "AUTH_HEADER": "ApiKey <your-api-key>"
+      }
+    }
+  }
+}
+```
+
+### Generating API Keys
+
+1. Navigate to **Management > Stack Management > API Keys**
+2. Create a new API key with appropriate permissions
+3. Use the encoded API key in the `Authorization` header
+
+## A2A Server Configuration
+
+The A2A (Agent-to-Agent) server enables agent-to-agent collaboration following the A2A protocol.
+
+### Agent Cards
+
+Agent cards are exposed at: `GET /api/agent_builder/a2a/{agentId}.json`
+
+### Protocol Endpoint
+
+The A2A protocol endpoint is: `POST /api/agent_builder/a2a/{agentId}`
+
+## Logging Configuration
+
+Enable detailed logging for debugging:
+
+```yaml
+logging:
+  appenders:
+    custom_console:
+      type: console
+      layout:
+        type: pattern
+        highlight: true
+        pattern: "[%date][%level][%logger] %message %meta"
+  root:
+    appenders: [custom_console]
+    level: warn
+  loggers:
+    - name: plugins.agentBuilder
+      level: debug
+    - name: plugins.agentBuilderPlatform
+      level: debug
+    - name: actions
+      level: debug
+    - name: tools
+      level: debug
+```
+
+## Feature Flags
+
+Enable experimental features:
+
+```yaml
+# Enable default LLM settings UI
+feature_flags.overrides.aiAssistant.defaultLlmSettingEnabled: true
+```
+
+## Serverless Configuration
+
+Agent Builder has specific configurations for serverless deployments:
+
+### Security Serverless
+
+```yaml
+xpack.agentBuilder:
+  # Agent Builder configuration for security serverless
+```
+
+### Observability Serverless
+
+Agent Builder is categorized under observability:
+
+```yaml
+agentBuilder.category: observability
+```
+
+### Enterprise Search Serverless
+
+```yaml
+agentBuilder.category: enterpriseSearch
+```
+
+## Security and Permissions
+
+### Feature Privileges
+
+Agent Builder exposes feature privileges:
+
+- `feature_agentBuilder.all` - Full access to Agent Builder
+- `feature_agentBuilder.read` - Read-only access
+
+These are automatically included in appropriate roles.
+
+## Related Documentation
+
+- <DocLink id="kibDevTutorialAgentBuilderSetup" text="Setup Guide" />
+- <DocLink id="kibDevTutorialAgentBuilderTroubleshooting" text="Troubleshooting Guide" />

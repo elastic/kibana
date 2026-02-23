@@ -15,4 +15,5 @@ export { OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID } from './get_trace_metrics/too
 export { OBSERVABILITY_GET_TRACES_TOOL_ID } from './get_traces/tool';
 export { OBSERVABILITY_GET_RUNTIME_METRICS_TOOL_ID } from './get_runtime_metrics/tool';
 export { OBSERVABILITY_GET_INDEX_INFO_TOOL_ID } from './get_index_info';
+export { OBSERVABILITY_ANALYZE_LATENCY_BOTTLENECKS_TOOL_ID } from './analyze_latency_bottlenecks/tool';
 export { OBSERVABILITY_GET_SERVICE_TOPOLOGY_TOOL_ID } from './get_service_topology/tool';

@@ -21,6 +21,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.observability}.run_log_rate_analysis`,
   `${internalNamespaces.observability}.get_log_groups`,
   `${internalNamespaces.observability}.get_alerts`,
+  `${internalNamespaces.observability}.get_slos`,
   `${internalNamespaces.observability}.get_services`,
   `${internalNamespaces.observability}.get_hosts`,
   `${internalNamespaces.observability}.get_trace_metrics`,
@@ -28,6 +29,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.observability}.get_metric_change_points`,
   `${internalNamespaces.observability}.get_index_info`,
   `${internalNamespaces.observability}.get_trace_change_points`,
+  `${internalNamespaces.observability}.analyze_latency_bottlenecks`,
   `${internalNamespaces.observability}.get_service_topology`,
   `${internalNamespaces.observability}.get_traces`,
   `${internalNamespaces.observability}.get_runtime_metrics`,
@@ -36,6 +38,10 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   'platform.dashboard.manage_dashboard',
   // Security Solution
   `${internalNamespaces.security}.entity_risk_score`,
+  `${internalNamespaces.security}.cases`,
+  `${internalNamespaces.security}.detection_rules`,
+  `${internalNamespaces.security}.exception_lists`,
+  `${internalNamespaces.security}.timelines`,
   `${internalNamespaces.security}.create_detection_rule`,
   `${internalNamespaces.security}.attack_discovery_search`,
   `${internalNamespaces.security}.security_labs_search`,
@@ -56,10 +62,72 @@ export const AGENT_BUILDER_BUILTIN_AGENTS = [
 
 export type AgentBuilderBuiltinAgent = (typeof AGENT_BUILDER_BUILTIN_AGENTS)[number];
 
+/**
+ * This is a manually maintained list of all built-in skills registered in Agent Builder.
+ * The intention is to force a code review from the Agent Builder team when any team adds a new skill.
+ */
+export const AGENT_BUILDER_BUILTIN_SKILLS = [
+  'security.get_alerts',
+  'security.alert_triage',
+  'platform.search',
+  'platform.dashboards',
+  'platform.visualization',
+  'platform.saved_objects',
+  'platform.data_views',
+  'platform.alerting_rules',
+  'platform.connectors_actions',
+  'platform.workflows',
+  'platform.workflows_logs',
+  'platform.workflow_generation',
+  'platform.cases',
+  'platform.spaces',
+  'platform.tags',
+  'platform.ui_settings',
+  'platform.privileges',
+  'platform.generate_esql',
+  'security.cases',
+  'security.detection_rules',
+  'security.timelines',
+  'security.exception_lists',
+  'security.attack_discovery',
+  'security.endpoint_readonly',
+  'security.network',
+  'security.threat_intel',
+  'security.alert_suppression_readonly',
+  'security.rule_exceptions_preview',
+  'security.endpoint_response_actions_readonly',
+  'security.forensics_analytics',
+  'observability.alerts',
+  'observability.alerts_execution',
+  'observability.apm',
+  'observability.cases',
+  'observability.logs',
+  'observability.metrics',
+  'observability.slos',
+  'observability.slo_readonly',
+  'observability.synthetics',
+  'fleet.agents',
+  'fleet.integrations',
+  'ml.jobs_anomaly_detection',
+  'ml.data_frame_analytics',
+  `${internalNamespaces.security}.entity_analytics`,
+  'osquery.entrypoint',
+  'osquery.live_query',
+  'osquery.packs',
+  'osquery.saved_queries',
+  'osquery.status',
+] as const;
+
+export type AgentBuilderBuiltinSkill = (typeof AGENT_BUILDER_BUILTIN_SKILLS)[number];
+
 export const isAllowedBuiltinTool = (toolName: string) => {
   return (AGENT_BUILDER_BUILTIN_TOOLS as readonly string[]).includes(toolName);
 };
 
 export const isAllowedBuiltinAgent = (agentName: string) => {
   return (AGENT_BUILDER_BUILTIN_AGENTS as readonly string[]).includes(agentName);
+};
+
+export const isAllowedBuiltinSkill = (skillId: string) => {
+  return (AGENT_BUILDER_BUILTIN_SKILLS as readonly string[]).includes(skillId);
 };

@@ -13,6 +13,12 @@ import type {
 import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
 import type { CasesServerStart } from '@kbn/cases-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { AlertingPluginStart } from '@kbn/alerting-plugin/server';
+import type { ActionsPluginStart } from '@kbn/actions-plugin/server';
+import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
+import type { DataViewsServiceStart } from '@kbn/data-views-plugin/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
 
 export interface PluginSetupDependencies {
   workflowsManagement?: WorkflowsServerPluginSetup;
@@ -23,11 +29,17 @@ export interface PluginStartDependencies {
   agentBuilder: AgentBuilderPluginStart;
   llmTasks?: LlmTasksPluginStart;
   cases?: CasesServerStart;
+  alerting?: AlertingPluginStart;
+  actions?: ActionsPluginStart;
+  savedObjects?: SavedObjectsServiceStart;
+  dataViews?: DataViewsServiceStart;
+  security?: SecurityPluginStart;
+  savedObjectsTagging?: SavedObjectTaggingStart;
   spaces?: SpacesPluginStart;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface AgentBuilderPlatformPluginSetup {}
+export interface AgentBuilderPlatformPluginSetup { }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface AgentBuilderPlatformPluginStart {}
+export interface AgentBuilderPlatformPluginStart { }

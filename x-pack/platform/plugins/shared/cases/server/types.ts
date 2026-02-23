@@ -37,6 +37,7 @@ import type { ExternalReferenceAttachmentTypeRegistry } from './attachment_frame
 import type { PersistableStateAttachmentTypeRegistry } from './attachment_framework/persistable_state_registry';
 import type { UnifiedAttachmentTypeRegistry } from './attachment_framework/unified_attachment_registry';
 import type { ConfigType } from './config';
+import type { AttackDiscoveryIntegrationService } from './services/attack_discovery_integration';
 
 export interface CasesServerSetupDependencies {
   alerting: AlertingServerSetup;
@@ -103,6 +104,16 @@ export interface CasesServerStart {
 export interface CasesServerSetup {
   attachmentFramework: AttachmentFramework;
   config: ConfigType;
+  /**
+   * Registers an attack discovery integration service factory.
+   * This allows plugins (like Security Solution) to provide attack discovery integration
+   * that will be used when alerts are attached to cases.
+   *
+   * @param factory - Factory function that creates the attack discovery integration service
+   */
+  registerAttackDiscoveryIntegrationService: (
+    factory: (params: { getRequest: () => KibanaRequest }) => AttackDiscoveryIntegrationService
+  ) => void;
 }
 
 export type PartialField<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;

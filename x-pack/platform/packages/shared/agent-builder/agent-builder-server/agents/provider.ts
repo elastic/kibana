@@ -27,6 +27,7 @@ import type {
   AttachmentsService,
   PromptManager,
   ConversationStateManager,
+  SkillProvider,
   SkillsService,
   ToolManager,
 } from '../runner';
@@ -92,6 +93,10 @@ export interface AgentHandlerContext {
    * Tool provider that can be used to list or execute tools.
    */
   toolProvider: ToolProvider;
+  /**
+   * Skill provider that can be used to list or get skills.
+   */
+  skillProvider: SkillProvider;
   /**
    * Tool registry for accessing internal tool definitions.
    * Used for features like tool-specific result summarization.

@@ -10,13 +10,17 @@ import { v5 } from 'uuid';
 import type { HttpHandler } from '@kbn/core/public';
 import { isAxiosError } from 'axios';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { KbnClientRequesterError } from '@kbn/test';
 
 /**
  * When running locally, only UUIDs are allowed for non-preconfigured connectors.
  * We generate a deterministic UUID from the logical connector id so runs are stable/idempotent.
  */
 export function getConnectorIdAsUuid(connectorId: string) {
-  return v5(connectorId, v5.DNS);
+  // Important: use TEST_RUN_ID as part of the seed when available to avoid connector ID collisions
+  // between concurrently running eval processes/suites (which can delete each other's connectors).
+  const runSeed = process.env.TEST_RUN_ID ? `${process.env.TEST_RUN_ID}:${connectorId}` : connectorId;
+  return v5(runSeed, v5.DNS);
 }
 
 /**
@@ -94,7 +98,12 @@ export async function createConnectorFixture({
       path: `/api/actions/connector/${connectorIdAsUuid}`,
       method: 'DELETE',
     }).catch((error) => {
-      if (isAxiosError(error) && error.status === 404) {
+      // Depending on the HttpHandler implementation, we might get either an AxiosError or a
+      // KbnClientRequesterError. Either way, "not found" should be ignored for idempotency.
+      if (isAxiosError(error) && (error.status === 404 || error.response?.status === 404)) {
+        return;
+      }
+      if (error instanceof KbnClientRequesterError && error.message.includes('Status: 404')) {
         return;
       }
       throw error;

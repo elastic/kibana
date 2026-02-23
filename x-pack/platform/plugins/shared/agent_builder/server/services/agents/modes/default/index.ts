@@ -6,3 +6,5 @@
  */
 
 export { runDefaultAgentMode } from './run_chat_agent';
+export { createSkillAwareAgentGraph } from './skill_aware_graph';
+export type { SkillAwareGraphParams } from './skill_aware_graph';

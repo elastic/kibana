@@ -26,14 +26,22 @@ import type {
 export type SkillsDirectoryStructure = Directory<{
   skills: Directory<{
     platform: FileDirectory<{}>;
+    dashboards: FileDirectory;
     observability: FileDirectory<{}>;
     security: FileDirectory<{
       alerts: FileDirectory<{
         rules: FileDirectory;
       }>;
+      cases: FileDirectory;
+      endpoints: FileDirectory;
       entities: FileDirectory<{}>;
       endpoint: FileDirectory<{}>;
+      network: FileDirectory;
+      'threat-intel': FileDirectory;
     }>;
+    fleet: FileDirectory;
+    ml: FileDirectory;
+    osquery: FileDirectory;
     search: FileDirectory<{}>;
   }>;
 }>;

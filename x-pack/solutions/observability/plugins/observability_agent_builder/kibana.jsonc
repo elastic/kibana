@@ -1,7 +1,9 @@
 {
   "type": "plugin",
   "id": "@kbn/observability-agent-builder-plugin",
-  "owner": ["@elastic/obs-ai-team"],
+  "owner": [
+    "@elastic/obs-ai-team"
+  ],
   "group": "observability",
   "visibility": "private",
   "plugin": {
@@ -21,8 +23,14 @@
       "discoverShared",
       "licensing"
     ],
-    "optionalPlugins": ["ml", "spaces"],
-    "requiredBundles": ["kibanaReact", "kibanaUtils"],
+    "optionalPlugins": [
+      "ml",
+      "spaces"
+    ],
+    "requiredBundles": [
+      "kibanaReact",
+      "kibanaUtils"
+    ],
     "extraPublicDirs": []
   }
 }

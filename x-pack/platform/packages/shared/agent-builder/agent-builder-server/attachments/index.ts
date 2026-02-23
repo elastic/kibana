@@ -12,6 +12,10 @@ export type {
   AttachmentValidationResult,
   AgentFormattedAttachment,
   AttachmentFormatContext,
+  AttachmentComponentDefinition,
+  AttachmentComponentProps,
+  EntityRecognitionConfig,
+  EntityRecognitionResolverContext,
   AttachmentResolveContext,
 } from './type_definition';
 export type {

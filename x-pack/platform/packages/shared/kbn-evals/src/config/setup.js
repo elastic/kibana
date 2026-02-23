@@ -11,6 +11,11 @@ import Path from 'path';
 // these child processes.
 const requireArg = Path.join(__dirname, './require_init_apm.js');
 
+// Kibana tooling treats Node.js process warnings as fatal and will terminate the process.
+// Node emits a warning when both FORCE_COLOR and NO_COLOR are set; Playwright can set FORCE_COLOR,
+// and some environments set NO_COLOR by default. Ensure we don't set both.
+delete process.env.NO_COLOR;
+
 process.env.NODE_OPTIONS = [process.env.NODE_OPTIONS, `--require ${requireArg}`]
   .filter(Boolean)
   .join(' ');

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+export { SkillsService } from './skills_service';
+export type { SkillsServiceSetup, SkillsServiceStart } from './types';
 export { createSkillRegistry, type SkillRegistry } from './skill_registry';
 export { type SkillService, createSkillService } from './skill_service';
 export type { SkillServiceSetup, SkillServiceStart } from './types';

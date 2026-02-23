@@ -29,7 +29,7 @@ import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
 import type { ToolsServiceSetup, ToolRegistry } from './services/tools';
 import type { AttachmentServiceSetup } from './services/attachments';
-import type { SkillServiceSetup } from './services/skills';
+import type { SkillsServiceSetup, SkillServiceSetup } from './services/skills';
 
 export interface AgentBuilderSetupDependencies {
   cloud?: CloudSetup;
@@ -60,7 +60,7 @@ export interface AttachmentsSetup {
   registerType: AttachmentServiceSetup['registerType'];
 }
 
-export interface SkillsSetup {
+export interface SkillSetup {
   /**
    * Register a skill to be available in agentBuilder.
    */
@@ -115,6 +115,16 @@ export interface AgentsSetup {
 }
 
 /**
+ * Built-in skills service's setup contract (for registering skills via skills.register).
+ */
+export interface SkillsSetup {
+  /**
+   * Register a built-in skill to be available in agentBuilder.
+   */
+  register: SkillsServiceSetup['register'];
+}
+
+/**
  * Setup contract of the agentBuilder plugin.
  */
 export interface AgentBuilderPluginSetup {
@@ -127,17 +137,21 @@ export interface AgentBuilderPluginSetup {
    */
   tools: ToolsSetup;
   /**
+   * Skills setup contract, can be used to register built-in skills.
+   */
+  skills: SkillsSetup;
+  /**
    * Attachments setup contract, which can be used to register attachment types.
    */
   attachments: AttachmentsSetup;
   /**
+   * Skill setup contract, which can be used to register skills via skill.registerSkill.
+   */
+  skill: SkillSetup;
+  /**
    * Hooks setup contract, which can be used to register lifecycle event hooks.
    */
   hooks: HooksServiceSetup;
-  /**
-   * Skills setup contract, which can be used to register skills.
-   */
-  skills: SkillsSetup;
 }
 
 /**

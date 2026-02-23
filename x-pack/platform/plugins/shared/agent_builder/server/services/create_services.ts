@@ -14,6 +14,7 @@ import type {
 } from './types';
 import { ToolsService } from './tools';
 import { AgentsService } from './agents';
+import { SkillsService } from './skills';
 import { RunnerFactoryImpl } from './runner';
 import { ConversationServiceImpl } from './conversation';
 import { type AttachmentService, createAttachmentService } from './attachments';
@@ -26,8 +27,9 @@ interface ServiceInstances {
   tools: ToolsService;
   agents: AgentsService;
   attachments: AttachmentService;
+  skills: SkillsService;
+  skill: SkillService;
   hooks: HooksService;
-  skills: SkillService;
 }
 
 export class ServiceManager {
@@ -40,16 +42,18 @@ export class ServiceManager {
       tools: new ToolsService(),
       agents: new AgentsService(),
       attachments: createAttachmentService(),
+      skills: new SkillsService(),
+      skill: createSkillService(),
       hooks: new HooksService(),
-      skills: createSkillService(),
     };
 
     this.internalSetup = {
       tools: this.services.tools.setup({ logger, workflowsManagement }),
       agents: this.services.agents.setup({ logger }),
       attachments: this.services.attachments.setup(),
+      skills: this.services.skills.setup({ logger }),
+      skill: this.services.skill.setup(),
       hooks: this.services.hooks.setup({ logger }),
-      skills: this.services.skills.setup(),
     };
 
     return this.internalSetup;
@@ -83,7 +87,8 @@ export class ServiceManager {
     };
 
     const attachments = this.services.attachments.start();
-    const skillsServiceStart = this.services.skills.start();
+    const skills = this.services.skills.start();
+    const skillServiceStart = this.services.skill.start();
 
     const tools = this.services.tools.start({
       getRunner,
@@ -118,7 +123,8 @@ export class ServiceManager {
       toolsService: tools,
       agentsService: agents,
       attachmentsService: attachments,
-      skillServiceStart: skillsServiceStart,
+      skillsService: skills,
+      skillServiceStart,
       trackingService,
       hooks,
     });
@@ -167,7 +173,8 @@ export class ServiceManager {
       tools,
       agents,
       attachments,
-      skills: skillsServiceStart,
+      skills,
+      skill: skillServiceStart,
       conversations,
       runnerFactory,
       auditLogService,
