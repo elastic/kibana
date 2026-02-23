@@ -417,7 +417,7 @@ export const useIlmLifecycleSummary = ({
       }
 
       // Pass the policy phases to the flyout. The flyout deserializer normalizes
-      // both flattened and ES actions-based phase shapes.
+      // the phases into form state defaults.
       dispatchUi({
         type: 'openEditFlyout',
         payload: {
