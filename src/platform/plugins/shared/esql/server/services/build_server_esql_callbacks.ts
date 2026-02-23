@@ -8,33 +8,26 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { ESQLCallbacks, ResolveIndexResponse } from '@kbn/esql-types';
-import type { KibanaProject as SolutionId } from '@kbn/projects-solutions-groups';
+import type { ESQLCallbacks } from '@kbn/esql-types';
 import { EsqlService } from './esql_service';
-import type { ESQLExtensionsRegistry } from '../extensions_registry';
 
 interface BuildServerESQLCallbacksOptions {
   client: ElasticsearchClient;
-  extensionsRegistry?: ESQLExtensionsRegistry;
-  activeSolutionId?: SolutionId;
 }
 
 /**
- * Builds ESQLCallbacks for server-side usage, using the Elasticsearch client
- * directly instead of going through Kibana HTTP routes.
+ * Builds the ESQLCallbacks required by the ES|QL validation API
+ * ({@link validateQuery} from @kbn/esql-language) for server-side usage.
  *
- * This produces the same ESQLCallbacks shape that the client-side callbacks
- * (in @kbn/esql-utils) produce, but backed by the ES client for use in
- * server-side contexts like NL-to-ES|QL, validation, or agent workflows.
+ * Uses the Elasticsearch client directly instead of going through
+ * Kibana HTTP routes, unlike the client-side callbacks in @kbn/esql-utils.
  */
 export const buildServerESQLCallbacks = ({
   client,
-  extensionsRegistry,
-  activeSolutionId,
 }: BuildServerESQLCallbacksOptions): ESQLCallbacks => {
   const service = new EsqlService({ client });
 
-  const callbacks: ESQLCallbacks = {
+  return {
     getSources: async () => {
       return service.getAllIndices('all');
     },
@@ -56,7 +49,7 @@ export const buildServerESQLCallbacks = ({
       }
     },
 
-    getJoinIndices: async (cacheOptions) => {
+    getJoinIndices: async () => {
       return service.getIndicesByIndexMode('lookup');
     },
 
@@ -76,34 +69,4 @@ export const buildServerESQLCallbacks = ({
       return service.getInferenceEndpoints(taskType);
     },
   };
-
-  if (extensionsRegistry && activeSolutionId) {
-    callbacks.getEditorExtensions = async (queryString: string) => {
-      const [localSources, ccsSources] = (await Promise.all([
-        client.indices.resolveIndex({ name: '*', expand_wildcards: 'open' }),
-        client.indices.resolveIndex({ name: '*:*', expand_wildcards: 'open' }),
-      ])) as [ResolveIndexResponse, ResolveIndexResponse];
-
-      const sources: ResolveIndexResponse = {
-        indices: [...(localSources.indices ?? []), ...(ccsSources.indices ?? [])],
-        aliases: [...(localSources.aliases ?? []), ...(ccsSources.aliases ?? [])],
-        data_streams: [...(localSources.data_streams ?? []), ...(ccsSources.data_streams ?? [])],
-      };
-
-      return {
-        recommendedQueries: extensionsRegistry.getRecommendedQueries(
-          queryString,
-          sources,
-          activeSolutionId
-        ),
-        recommendedFields: extensionsRegistry.getRecommendedFields(
-          queryString,
-          sources,
-          activeSolutionId
-        ),
-      };
-    };
-  }
-
-  return callbacks;
 };
