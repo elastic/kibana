@@ -70,7 +70,6 @@ export default function createRegisteredRuleTypeTests({ getService }: FtrProvide
         'apm.transaction_error_rate',
         'attack-discovery',
         'datasetQuality.degradedDocs',
-        'security.attack_discovery.data_generator',
       ];
 
       expect(

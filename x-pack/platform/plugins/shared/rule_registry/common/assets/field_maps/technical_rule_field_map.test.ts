@@ -323,6 +323,26 @@ it('matches snapshot', () => {
         "required": false,
         "type": "boolean",
       },
+      "kibana.alert.snooze.condition_operator": Object {
+        "array": false,
+        "required": false,
+        "type": "keyword",
+      },
+      "kibana.alert.snooze.conditions": Object {
+        "array": true,
+        "required": false,
+        "type": "object",
+      },
+      "kibana.alert.snooze.expires_at": Object {
+        "array": false,
+        "required": false,
+        "type": "date",
+      },
+      "kibana.alert.snooze.snapshot": Object {
+        "array": false,
+        "required": false,
+        "type": "object",
+      },
       "kibana.alert.start": Object {
         "array": false,
         "required": false,

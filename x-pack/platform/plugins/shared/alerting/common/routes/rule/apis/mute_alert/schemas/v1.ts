@@ -53,7 +53,7 @@ const muteAlertBodyConditionSchema = schema.object({
   ),
 });
 
-export const muteAlertBodySchema = schema.maybe(
+export const muteAlertBodySchema = schema.nullable(
   schema.object({
     expires_at: schema.maybe(
       schema.string({
