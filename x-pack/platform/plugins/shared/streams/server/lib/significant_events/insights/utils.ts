@@ -8,12 +8,12 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { omit } from 'lodash';
 import type { Condition } from '@kbn/streamlang';
-import type { Insight } from '@kbn/streams-schema';
+import type { InsightCore } from '@kbn/streams-schema';
 import type { Query } from '../../../../common/queries';
 import { getRuleIdFromQueryLink } from '../../streams/assets/query/helpers/query';
 import { parseError } from '../../streams/errors/parse_error';
 import { SecurityError } from '../../streams/errors/security_error';
-import { SUBMIT_INSIGHTS_TOOL_NAME, parseInsightsWithErrors } from './schema';
+import { SUBMIT_INSIGHTS_TOOL_NAME, parseInsightsWithErrors } from './client/insight_tool';
 
 export interface QueryData {
   title: string;
@@ -35,7 +35,7 @@ const CURRENT_WINDOW_MINUTES = 15;
 export function extractInsightsFromResponse(
   response: { toolCalls?: Array<{ function: { name: string; arguments: unknown } }> },
   logger: Logger
-): Insight[] {
+): InsightCore[] {
   if (!response.toolCalls || response.toolCalls.length === 0) {
     logger.warn('LLM response has no tool calls');
     return [];

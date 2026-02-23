@@ -5,26 +5,75 @@
  * 2.0.
  */
 
+import { z } from '@kbn/zod';
 import type { ChatCompletionTokenCount } from '@kbn/inference-common';
 
-export type InsightImpactLevel = 'critical' | 'high' | 'medium' | 'low';
+/** Impact severity level for an insight (display label). */
+export const insightImpactLevelSchema = z.enum(['critical', 'high', 'medium', 'low']);
+export type InsightImpactLevel = z.infer<typeof insightImpactLevelSchema>;
 
-interface InsightEvidence {
-  streamName: string;
-  queryTitle: string;
-  featureName?: string;
-  eventCount: number;
+/** Numeric impact level for sorting: 0 = critical, 1 = high, 2 = medium, 3 = low. */
+export const INSIGHT_IMPACT_LEVEL_MAP: Record<InsightImpactLevel, number> = {
+  critical: 0,
+  high: 1,
+  medium: 2,
+  low: 3,
+};
+
+export const insightImpactLevelNumericSchema = z.number().int().min(0).max(3);
+export type InsightImpactLevelNumeric = z.infer<typeof insightImpactLevelNumericSchema>;
+
+export function getImpactLevel(impact: InsightImpactLevel): InsightImpactLevelNumeric {
+  return INSIGHT_IMPACT_LEVEL_MAP[impact];
 }
 
-export interface Insight {
-  title: string;
-  description: string;
-  impact: InsightImpactLevel;
-  evidence: InsightEvidence[];
-  recommendations: string[];
-}
+/** Evidence item supporting an insight (stream, query, event count). */
+export const insightEvidenceSchema = z.object({
+  streamName: z.string(),
+  queryTitle: z.string(),
+  featureName: z.string().optional(),
+  eventCount: z.number(),
+});
+export type InsightEvidence = z.infer<typeof insightEvidenceSchema>;
 
-export interface InsightsResult {
-  insights: Insight[];
+/** User evaluation of an insight (helpful / not helpful). */
+export const insightUserEvaluationSchema = z.enum(['helpful', 'not_helpful']);
+export type InsightUserEvaluation = z.infer<typeof insightUserEvaluationSchema>;
+
+/**
+ * Core insight schema for LLM output (and submit_insights tool);
+ * includes field descriptions for LLM guidance. Excludes id, generatedAt, userEvaluation.
+ */
+export const insightCoreSchema = z.object({
+  title: z.string().describe('Short, actionable title summarizing the insight'),
+  description: z.string().describe('Detailed explanation of what is happening and why it matters'),
+  impact: insightImpactLevelSchema.describe(
+    'Severity level: critical (service down), high (degraded), medium (potential issue), low (informational)'
+  ),
+  evidence: z
+    .array(insightEvidenceSchema)
+    .describe('Evidence supporting this insight from streams and queries'),
+  recommendations: z
+    .array(z.string())
+    .describe('Actionable steps to investigate or resolve the issue'),
+});
+export type InsightCore = z.infer<typeof insightCoreSchema>;
+
+/**
+ * Canonical insight schema (API and storage): core fields plus id, generatedAt, impactLevel, userEvaluation.
+ * impactLevel is the numeric value for sorting (0=critical .. 3=low); impact is the display label.
+ */
+export const insightSchema = insightCoreSchema.and(
+  z.object({
+    id: z.string(),
+    generatedAt: z.string(),
+    impactLevel: insightImpactLevelNumericSchema,
+    userEvaluation: insightUserEvaluationSchema.optional(),
+  })
+);
+export type Insight = z.infer<typeof insightSchema>;
+
+export interface GenerateInsightsResult {
+  insights: InsightCore[];
   tokensUsed: ChatCompletionTokenCount;
 }
