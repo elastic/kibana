@@ -217,9 +217,7 @@ describe('fields_parser', () => {
       const result = categorizeFields({ ...baseParams, dataViewFieldMap, columns });
 
       expect(result.metricFields).toHaveLength(3);
-      console.log('result.metricFields', result.metricFields);
-      const names = result.metricFields.map((f) => f.name).sort();
-      expect(names).toEqual(['metric.counter', 'metric.gauge', 'metric.histogram']);
+      expect(result.metricFiel).toEqual(['metric.counter', 'metric.gauge', 'metric.histogram']);
     });
 
     describe('sorting', () => {
