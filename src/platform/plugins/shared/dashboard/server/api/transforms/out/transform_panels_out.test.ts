@@ -29,8 +29,9 @@ describe('transformPanelsOut', () => {
     ]);
 
     const panels = transformPanelsOut(panelsJSON, []);
+    expect(panels).toBeDefined();
     expect(panels).toHaveLength(1);
-    expect(panels[0]).toMatchObject({
+    expect(panels![0]).toMatchObject({
       type: 'DASHBOARD_MARKDOWN',
       uid: 'panel-1',
     });
