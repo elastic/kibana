@@ -34,15 +34,18 @@ export async function loadSkillTools({
     const inlineExecutableTools = inlineTools.map((tool) => skillsService.convertSkillTool(tool));
 
     const allowedTools = skill.getAllowedTools?.() ?? [];
+    const registryToolIds = (await skill.getRegistryTools?.()) ?? [];
+    const allToolIds = [...new Set([...allowedTools, ...registryToolIds])];
 
-    // For user-created skills, getAllowedTools() returns tool IDs from the tool registry.
-    // For built-in skills, it returns built-in tool type identifiers.
-    // Both are resolved via pickTools.
-    const registryExecutableTools = await pickTools({
-      toolProvider,
-      selection: [{ tool_ids: allowedTools }],
-      request,
-    });
+    if (allToolIds.length > 25) {
+      throw new Error(
+        `Skill '${skill.id}' returned ${allToolIds.length} registry tools, exceeding the 25-tool limit.`
+      );
+    }
+    const registryExecutableTools =
+      allToolIds.length > 0
+        ? await pickTools({ toolProvider, selection: [{ tool_ids: allToolIds }], request })
+        : [];
 
     await toolManager.addTools(
       {

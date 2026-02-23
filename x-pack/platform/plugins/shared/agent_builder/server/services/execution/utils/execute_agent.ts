@@ -76,8 +76,8 @@ export const executeAgent$ = ({
         () => {
           observer.complete();
         },
-        (err) => {
-          observer.error(err);
+        (error) => {
+          observer.error(error);
         }
       );
 

@@ -89,11 +89,17 @@ export interface AgentConfiguration {
   tools: ToolSelection[];
 
   /**
+  /**
    * List of skills exposed to the agent.
    * When undefined or empty, the agent has no skills assigned.
    * Use `[{ skill_ids: ['*'] }]` to assign all built-in skills.
    */
   skills?: SkillSelection[];
+
+  /**
+   * Optional list of workflow IDs. When set, these workflows run before the agent is executed.
+   */
+  workflow_ids?: string[];
 
   /**
    * Custom configuration for the research step of the agent.

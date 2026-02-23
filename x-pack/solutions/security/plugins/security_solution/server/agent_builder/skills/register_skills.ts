@@ -54,6 +54,7 @@ export const registerSkills = async (
     agentBuilder.skill.registerSkill(SECURITY_ENDPOINT_RESPONSE_ACTIONS_READONLY_SKILL),
   ]);
 
+
   if (experimentalFeatures.automaticTroubleshootingSkill) {
     await agentBuilder.skills.register(
       createAutomaticTroubleshootingSkill(options.endpointAppContextService)

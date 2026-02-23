@@ -13,10 +13,13 @@ import {
   EuiContextMenuPanel,
   EuiTitle,
   EuiSpacer,
+  EuiIcon,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
+import { DATA_SOURCES_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
+import { DATA_SOURCES_APP_ID } from '@kbn/deeplinks-data-sources';
 import { css } from '@emotion/react';
 import { useIsAgentReadOnly } from '../../../hooks/agents/use_is_agent_read_only';
 import { useNavigation } from '../../../hooks/use_navigation';
@@ -33,6 +36,7 @@ import { useHasConnectorsAllPrivileges } from '../../../hooks/use_has_connectors
 import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
 import { useExperimentalFeatures } from '../../../hooks/use_experimental_features';
 import { RobotIcon } from '../../common/icons/robot';
+
 
 const fullscreenLabels = {
   actions: i18n.translate('xpack.agentBuilder.conversationActions.actions', {
@@ -73,6 +77,9 @@ const fullscreenLabels = {
   }),
   skills: i18n.translate('xpack.agentBuilder.conversationActions.skills', {
     defaultMessage: 'View all skills',
+  }),
+  sources: i18n.translate('xpack.agentBuilder.conversationActions.sources', {
+    defaultMessage: 'View all sources',
   }),
   rename: i18n.translate('xpack.agentBuilder.conversationActions.rename', {
     defaultMessage: 'Rename',
@@ -129,10 +136,11 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onRenameCo
   const { manageAgents } = useUiPrivileges();
 
   const {
-    services: { application },
+    services: { application, uiSettings },
   } = useKibana();
   const hasAccessToGenAiSettings = useHasConnectorsAllPrivileges();
   const isExperimentalFeaturesEnabled = useExperimentalFeatures();
+  const isDataSourcesEnabled = uiSettings.get<boolean>(DATA_SOURCES_ENABLED_SETTING_ID, false);
 
   const closePopover = () => {
     setIsPopoverOpen(false);
@@ -209,7 +217,7 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onRenameCo
     />,
     <EuiContextMenuItem
       key="agents"
-      icon={<RobotIcon />}
+      icon={<EuiIcon type="productAgent" />}
       onClick={closePopover}
       href={createAgentBuilderUrl(appPaths.agents.list)}
       data-test-subj="agentBuilderActionsAgents"
@@ -235,6 +243,19 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onRenameCo
             data-test-subj="agentBuilderActionsSkills"
           >
             {fullscreenLabels.skills}
+          </EuiContextMenuItem>,
+        ]
+      : []),
+    ...(isDataSourcesEnabled
+      ? [
+          <EuiContextMenuItem
+            key="sources"
+            icon="plugs"
+            onClick={closePopover}
+            href={application.getUrlForApp(DATA_SOURCES_APP_ID)}
+            data-test-subj="agentBuilderActionsSources"
+          >
+            {fullscreenLabels.sources}
           </EuiContextMenuItem>,
         ]
       : []),
