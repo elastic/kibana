@@ -11,6 +11,7 @@ import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default ({ getService, getPageObjects }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
+  const comboBox = getService('comboBox');
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
   const supertest = getService('supertest');
@@ -83,11 +84,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       await testSubjects.setValue('ruleDetailsNameInput', 'test custom threshold rule', {
         clearWithKeyboard: true,
       });
-      const ruleDetailsTagsInput = await find.byCssSelector(
-        '[data-test-subj="ruleDetailsTagsInput"] [data-test-subj="comboBoxSearchInput"]'
-      );
-      await ruleDetailsTagsInput.type('tag1');
-      await ruleDetailsTagsInput.pressKeys(Key.ENTER);
+      await comboBox.setCustom('ruleDetailsTagsInput', 'tag1');
       await retry.waitFor('tag to be selected', async () => {
         const ruleDetailsTags = await testSubjects.find('ruleDetailsTagsInput');
         return (await ruleDetailsTags.getVisibleText()).includes('tag1');
