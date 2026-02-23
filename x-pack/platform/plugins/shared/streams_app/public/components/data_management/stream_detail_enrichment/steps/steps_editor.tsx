@@ -262,6 +262,12 @@ export const StepsEditor = React.memo(() => {
   const isNoSuggestionsFound = useInteractiveModeSelector((snapshot) =>
     snapshot.matches({ pipelineSuggestion: 'noSuggestionsFound' })
   );
+  const isSuggestionFailed = useInteractiveModeSelector((snapshot) =>
+    snapshot.matches({ pipelineSuggestion: 'suggestionFailed' })
+  );
+  const suggestionError = useInteractiveModeSelector(
+    (snapshot) => snapshot.context.suggestionError
+  );
 
   // Pipeline suggestion events
   const { suggestPipeline, clearSuggestedSteps, cancelSuggestion, acceptSuggestion } =
@@ -322,6 +328,54 @@ export const StepsEditor = React.memo(() => {
                       'The AI assistant was unable to generate pipeline suggestions for your data. You can try again.',
                   }
                 )}
+              </p>
+              <EuiSpacer size="s" />
+              <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
+                <EuiFlexItem grow={false}>
+                  <GenerateSuggestionButton
+                    aiFeatures={aiFeatures}
+                    iconType="refresh"
+                    size="s"
+                    onClick={(connectorId) =>
+                      suggestPipeline({ connectorId, streamName: stream.name })
+                    }
+                    isLoading={false}
+                  >
+                    {i18n.translate('xpack.streams.stepsEditor.tryAgainButtonLabel', {
+                      defaultMessage: 'Try again',
+                    })}
+                  </GenerateSuggestionButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiCallOut>
+          </div>
+        </NoStepsEmptyPrompt>
+      );
+    }
+
+    if (isSuggestionFailed) {
+      return (
+        <NoStepsEmptyPrompt canUsePipelineSuggestions={!!canUsePipelineSuggestions}>
+          <div css={{ maxWidth: 400, margin: '0 auto', textAlign: 'left' }}>
+            <EuiCallOut
+              announceOnMount
+              title={i18n.translate(
+                'xpack.streams.streamDetailView.managementTab.enrichment.pipelineSuggestion.failedTitle',
+                { defaultMessage: 'Failed to generate suggestions' }
+              )}
+              color="warning"
+              size="s"
+              onDismiss={() => clearSuggestedSteps()}
+            >
+              <p>
+                {suggestionError ||
+                  i18n.translate(
+                    'xpack.streams.streamDetailView.managementTab.enrichment.pipelineSuggestion.failedDescription',
+                    {
+                      defaultMessage:
+                        'Something went wrong while generating pipeline suggestions. You can try again.',
+                    }
+                  )}
               </p>
               <EuiSpacer size="s" />
               <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">

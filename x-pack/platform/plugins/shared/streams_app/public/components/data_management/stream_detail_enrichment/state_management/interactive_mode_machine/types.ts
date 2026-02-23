@@ -70,6 +70,8 @@ export interface InteractiveModeContext {
   selectedConditionId?: string;
   // Shared grok collection for pattern definitions
   grokCollection: GrokCollection;
+  // Error message from failed pipeline suggestion task
+  suggestionError?: string;
 }
 
 export interface InteractiveModeInput {

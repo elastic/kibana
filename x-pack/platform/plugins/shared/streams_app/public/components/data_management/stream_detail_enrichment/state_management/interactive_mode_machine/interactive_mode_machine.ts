@@ -390,6 +390,10 @@ export const interactiveModeMachine = setup({
       suggestedPipeline: params.pipeline,
     })),
     clearSuggestion: assign({ suggestedPipeline: undefined }),
+    storeSuggestionError: assign((_, params: { error: string }) => ({
+      suggestionError: params.error,
+    })),
+    clearSuggestionError: assign({ suggestionError: undefined }),
     setSuggestionPollingDeadline: assign({
       suggestionPollingDeadline: () => Date.now() + PIPELINE_SUGGESTION_MAX_POLLING_TIME_MS,
     }),
@@ -452,6 +456,7 @@ export const interactiveModeMachine = setup({
       suggestedPipeline: undefined,
       suggestionPollingDeadline: undefined,
       grokCollection: input.grokCollection,
+      suggestionError: undefined,
     };
   },
   type: 'parallel',
@@ -523,24 +528,24 @@ export const interactiveModeMachine = setup({
                 actions: [{ type: 'setSuggestionPollingDeadline' }],
               },
               {
-                // Handle pre-existing failed task: show error toast and acknowledge/remove it
-                guard: ({ event }) => event.output.type === 'failed',
-                target: 'idle',
+                // Handle pre-existing failed task: show warning callout in UI
+                guard: ({ context, event }) =>
+                  event.output.type === 'failed' && context.initialStepRefs.length === 0,
+                target: 'suggestionFailed',
                 actions: [
                   {
-                    type: 'notifySuggestionFailure',
+                    type: 'storeSuggestionError',
                     params: ({ event }) => {
                       const output = event.output as { type: 'failed'; error: string };
-                      return {
-                        event: { error: new Error(output.error) },
-                      };
+                      return { error: output.error };
                     },
                   },
-                  {
-                    type: 'acknowledgeSuggestionTask',
-                    params: ({ context }) => ({ streamName: context.streamName }),
-                  },
                 ],
+              },
+              {
+                // Handle pre-existing failed task when stream already has steps: just go to idle
+                guard: ({ event }) => event.output.type === 'failed',
+                target: 'idle',
               },
               {
                 // For 'none', 'being_canceled', or when stream already has steps - go to idle
@@ -584,12 +589,17 @@ export const interactiveModeMachine = setup({
                 target: 'noSuggestionsFound',
               },
               {
-                target: 'idle',
+                target: 'suggestionFailed',
                 actions: [
                   { type: 'clearSuggestionPollingDeadline' },
                   {
-                    type: 'notifySuggestionFailure',
-                    params: ({ event }: { event: { error: unknown } }) => ({ event }),
+                    type: 'storeSuggestionError',
+                    params: ({ event }: { event: { error: unknown } }) => ({
+                      error:
+                        event.error instanceof Error
+                          ? event.error.message
+                          : 'Failed to generate pipeline suggestion',
+                    }),
                   },
                 ],
               },
@@ -635,19 +645,16 @@ export const interactiveModeMachine = setup({
               },
               {
                 guard: ({ event }) => event.output.status === TaskStatus.Failed,
-                target: 'idle',
+                target: 'suggestionFailed',
                 actions: [
                   { type: 'clearSuggestionPollingDeadline' },
                   {
-                    type: 'notifySuggestionFailure',
+                    type: 'storeSuggestionError',
                     params: ({ event }) => ({
-                      event: {
-                        error: new Error(
-                          event.output.status === TaskStatus.Failed
-                            ? event.output.error
-                            : 'Pipeline suggestion task failed'
-                        ),
-                      },
+                      error:
+                        event.output.status === TaskStatus.Failed
+                          ? event.output.error
+                          : 'Pipeline suggestion task failed',
                     }),
                   },
                 ],
@@ -670,12 +677,17 @@ export const interactiveModeMachine = setup({
               },
             ],
             onError: {
-              target: 'idle',
+              target: 'suggestionFailed',
               actions: [
                 { type: 'clearSuggestionPollingDeadline' },
                 {
-                  type: 'notifySuggestionFailure',
-                  params: ({ event }: { event: { error: unknown } }) => ({ event }),
+                  type: 'storeSuggestionError',
+                  params: ({ event }: { event: { error: unknown } }) => ({
+                    error:
+                      event.error instanceof Error
+                        ? event.error.message
+                        : 'Failed to check pipeline suggestion status',
+                  }),
                 },
               ],
             },
@@ -686,13 +698,13 @@ export const interactiveModeMachine = setup({
             [PIPELINE_SUGGESTION_POLLING_INTERVAL_MS]: [
               {
                 guard: 'suggestionPollingTimedOut',
-                target: 'idle',
+                target: 'suggestionFailed',
                 actions: [
                   { type: 'clearSuggestionPollingDeadline' },
                   {
-                    type: 'notifySuggestionFailure',
+                    type: 'storeSuggestionError',
                     params: () => ({
-                      event: { error: new Error('Pipeline suggestion timed out') },
+                      error: 'Pipeline suggestion timed out',
                     }),
                   },
                 ],
@@ -713,6 +725,24 @@ export const interactiveModeMachine = setup({
                   type: 'acknowledgeSuggestionTask',
                   params: ({ context }) => ({ streamName: context.streamName }),
                 },
+              ],
+            },
+          },
+        },
+        suggestionFailed: {
+          on: {
+            'suggestion.generate': {
+              target: 'submittingSuggestionTask',
+              actions: [{ type: 'clearSuggestionError' }],
+            },
+            'suggestion.dismiss': {
+              target: 'idle',
+              actions: [
+                {
+                  type: 'acknowledgeSuggestionTask',
+                  params: ({ context }) => ({ streamName: context.streamName }),
+                },
+                { type: 'clearSuggestionError' },
               ],
             },
           },

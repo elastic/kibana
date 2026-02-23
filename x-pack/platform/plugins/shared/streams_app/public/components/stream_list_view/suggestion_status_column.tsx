@@ -100,9 +100,9 @@ export function SuggestionStatusColumn({
     });
   };
 
-  const getBadgeColor = (): 'primary' | 'danger' => {
+  const getBadgeColor = (): 'primary' | 'warning' => {
     if (failedCount > 0 && availableCount === 0) {
-      return 'danger';
+      return 'warning';
     }
     return 'primary';
   };

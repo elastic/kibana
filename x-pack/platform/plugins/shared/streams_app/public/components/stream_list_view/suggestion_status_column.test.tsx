@@ -149,7 +149,7 @@ describe('SuggestionStatusColumn', () => {
   });
 
   describe('Failed Badge Display', () => {
-    it('should show red badge with failed count', () => {
+    it('should show warning (yellow) badge with failed count', () => {
       renderWithProviders(
         <SuggestionStatusColumn
           streamName="test-stream"
