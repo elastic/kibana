@@ -501,6 +501,28 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
     ),
   });
 
+  const addToChatButton = useMemo(
+    () =>
+      isAgentChatExperienceEnabled ? (
+        <AddRuleAttachmentToChatButton
+          defineStepData={defineStepData}
+          aboutStepData={aboutStepData}
+          scheduleStepData={scheduleStepData}
+          actionsStepData={actionsStepData}
+          actionTypeRegistry={triggersActionsUi.actionTypeRegistry}
+          pathway="rule_editing"
+        />
+      ) : null,
+    [
+      isAgentChatExperienceEnabled,
+      defineStepData,
+      aboutStepData,
+      scheduleStepData,
+      actionsStepData,
+      triggersActionsUi.actionTypeRegistry,
+    ]
+  );
+
   const verifyRuleDefinitionForPreview = useCallback(
     () => defineStepForm.validate(),
     [defineStepForm]
@@ -546,18 +568,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
                         isRulePreviewVisible={isRulePreviewVisible}
                         setIsRulePreviewVisible={setIsRulePreviewVisible}
                         togglePanel={togglePanel}
-                        addToChatButton={
-                          isAgentChatExperienceEnabled ? (
-                            <AddRuleAttachmentToChatButton
-                              defineStepData={defineStepData}
-                              aboutStepData={aboutStepData}
-                              scheduleStepData={scheduleStepData}
-                              actionsStepData={actionsStepData}
-                              actionTypeRegistry={triggersActionsUi.actionTypeRegistry}
-                              pathway="rule_editing"
-                            />
-                          ) : null
-                        }
+                        addToChatButton={addToChatButton}
                       />
                       {isRulesCustomizationEnabled && upgradeCallout}
                       {invalidSteps.length > 0 && (
