@@ -80,7 +80,7 @@ const getHighlightedMessage = (
     // Use EUI's makeHighContrastColor utility to calculate appropriate text color
     // This function automatically determines the best contrasting color based on WCAG standards
     const textColor = makeHighContrastColor(
-      isDarkTheme ? euiTheme.colors.ghost : euiTheme.colors.ink, // preferred foreground color
+      isDarkTheme ? euiTheme.colors.textGhost : euiTheme.colors.textInk, // preferred foreground color
       4.5 // WCAG AA contrast ratio (default in EUI)
     )(bgColor);
 
