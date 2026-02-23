@@ -210,10 +210,7 @@ export async function getAffectedPackages(
 
     return packages;
   } catch (error) {
-    console.error(
-      `Failed to get affected packages using ${fullConfig.strategy} strategy:`,
-      error
-    );
+    console.error(`Failed to get affected packages using ${fullConfig.strategy} strategy:`, error);
     throw error;
   }
 }
