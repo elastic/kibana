@@ -50,6 +50,9 @@ export class CRUDClient {
     this.namespace = deps.namespace;
   }
 
+  // upsertEntity takes a single entity and tries to either create or update
+  // (if an entity with the same EUID already exists) it directly in the LATEST
+  // index. This is considered a single synchronous upsert.
   public async upsertEntity(entityType: EntityType, doc: Entity, force: boolean): Promise<void> {
     const id = getEuidFromObject(entityType, doc);
     if (id === undefined) {
@@ -89,6 +92,10 @@ export class CRUDClient {
     return;
   }
 
+  // upsertEntitiesBulk takes one or more entities and creates documents in
+  // UPDATES index for log extraction task to pick up. This will result in
+  // appropriate Entities being created or updated on next log extraction run.
+  // This is considered a bulk asynchronous upsert.
   public async upsertEntitiesBulk(
     objects: BulkObject[],
     force: boolean
