@@ -14,11 +14,19 @@
  *   version: 2026-02-10
  */
 
+import type { ZodTypeDef } from '@kbn/zod';
 import { z } from '@kbn/zod';
+import {
+  requiredOptional,
+  isValidDateMath,
+  isNonEmptyString,
+  ArrayFromString,
+  BooleanFromString,
+} from '@kbn/zod-helpers';
 
 import {
   ReplacementsSetResponse,
-  ReplacementsScopeType,
+  ErrorResponse,
   DeanonymizeRequest,
   DeanonymizeResponse,
   ImportReplacementsRequest,
@@ -52,22 +60,6 @@ export type GetAnonymizationReplacementsResponse = z.infer<
   typeof GetAnonymizationReplacementsResponse
 >;
 export const GetAnonymizationReplacementsResponse = ReplacementsSetResponse;
-export type GetAnonymizationReplacementsByScopeRequestQuery = z.infer<
-  typeof GetAnonymizationReplacementsByScopeRequestQuery
->;
-export const GetAnonymizationReplacementsByScopeRequestQuery = z.object({
-  type: ReplacementsScopeType,
-  id: z.string(),
-  profile_id: z.string(),
-});
-export type GetAnonymizationReplacementsByScopeRequestQueryInput = z.input<
-  typeof GetAnonymizationReplacementsByScopeRequestQuery
->;
-
-export type GetAnonymizationReplacementsByScopeResponse = z.infer<
-  typeof GetAnonymizationReplacementsByScopeResponse
->;
-export const GetAnonymizationReplacementsByScopeResponse = ReplacementsSetResponse;
 
 export type ImportAnonymizationReplacementsRequestBody = z.infer<
   typeof ImportAnonymizationReplacementsRequestBody

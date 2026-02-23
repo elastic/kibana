@@ -7,12 +7,7 @@
 
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type {
-  ChatCompleteOptions,
-  AnonymizationRule,
-  ChatCompleteAnonymizationTarget,
-} from '@kbn/inference-common';
-import type { EffectivePolicy } from '@kbn/anonymization-common';
+import type { ChatCompleteOptions, AnonymizationRule } from '@kbn/inference-common';
 import {
   createInferenceRequestError,
   getConnectorFamily,
@@ -42,6 +37,7 @@ import { anonymizeMessages } from './anonymization/anonymize_messages';
 import { deanonymizeMessage } from './anonymization/deanonymize_message';
 import { addAnonymizationInstruction } from './anonymization/add_anonymization_instruction';
 import type { RegexWorkerService } from './anonymization/regex_worker_service';
+import { ReplacementsRepository } from './anonymization/replacements/replacements_repository';
 
 interface CreateChatCompleteApiOptions {
   request: KibanaRequest;
@@ -50,16 +46,8 @@ interface CreateChatCompleteApiOptions {
   anonymizationRulesPromise: Promise<AnonymizationRule[]>;
   regexWorker: RegexWorkerService;
   esClient: ElasticsearchClient;
+  replacementsEncryptionKey?: string;
   callbackManager?: InferenceCallbackManager;
-  /** Promise resolving per-space salt for deterministic tokenization (from AnonymizationPolicyService). */
-  saltPromise?: Promise<string | undefined>;
-  /**
-   * Resolves effective field policy for a request-scoped target when provided
-   * by consumer metadata.
-   */
-  resolveEffectivePolicy?: (
-    target?: ChatCompleteAnonymizationTarget
-  ) => Promise<EffectivePolicy | undefined>;
 }
 
 type CreateChatCompleteApiOptionsKey =
@@ -94,9 +82,8 @@ export function createChatCompleteCallbackApi({
   anonymizationRulesPromise,
   regexWorker,
   esClient,
+  replacementsEncryptionKey,
   callbackManager,
-  saltPromise,
-  resolveEffectivePolicy,
 }: CreateChatCompleteApiOptions) {
   return (
     {
@@ -112,11 +99,10 @@ export function createChatCompleteCallbackApi({
       forkJoin({
         executor: from(getInferenceExecutor({ connectorId, request, actions })),
         anonymizationRules: from(anonymizationRulesPromise),
-        salt: from(saltPromise ?? Promise.resolve(undefined)),
       })
     )
       .pipe(
-        switchMap(({ executor, anonymizationRules, salt }) => {
+        switchMap(({ executor, anonymizationRules }) => {
           const {
             system,
             messages: givenMessages,
@@ -142,82 +128,102 @@ export function createChatCompleteCallbackApi({
           });
 
           return from(
-            resolveEffectivePolicy?.(metadata?.anonymization?.target) ?? Promise.resolve(undefined)
+            (async () => {
+              const replacementsId = metadata?.anonymization?.replacementsId;
+              const namespace = request.getSavedObjectsClient().getCurrentNamespace() ?? 'default';
+              const repo = new ReplacementsRepository(esClient, {
+                encryptionKey: replacementsEncryptionKey,
+              });
+              const existingReplacements = replacementsId
+                ? await repo.get(namespace, replacementsId)
+                : null;
+
+              const anonymization = await anonymizeMessages({
+                system,
+                messages,
+                anonymizationRules,
+                regexWorker,
+                esClient,
+                knownReplacements: existingReplacements?.replacements ?? [],
+              });
+
+              if (replacementsId) {
+                const replacements = anonymization.anonymizations.map(({ entity }) => ({
+                  anonymized: entity.mask,
+                  original: entity.value,
+                }));
+
+                if (existingReplacements) {
+                  await repo.update(namespace, replacementsId, { replacements });
+                } else {
+                  await repo.create({
+                    id: replacementsId,
+                    namespace,
+                    createdBy: 'inference',
+                    replacements,
+                  });
+                }
+              }
+
+              return anonymization;
+            })()
           ).pipe(
-            switchMap((effectivePolicy) =>
-              from(
-                anonymizeMessages({
-                  system,
-                  messages,
-                  anonymizationRules,
-                  regexWorker,
-                  esClient,
-                  salt: salt ?? undefined,
-                  effectivePolicy,
-                })
-              ).pipe(
-                switchMap((anonymization) => {
-                  const connector = executor.getConnector();
-                  const connectorType = connector.type;
-                  const inferenceAdapter = getInferenceAdapter(connectorType);
+            switchMap((anonymization) => {
+              const connector = executor.getConnector();
+              const connectorType = connector.type;
+              const inferenceAdapter = getInferenceAdapter(connectorType);
 
-                  if (!inferenceAdapter) {
-                    return throwError(() =>
-                      createInferenceRequestError(
-                        `Adapter for type ${connectorType} not implemented`,
-                        400
-                      )
-                    );
-                  }
-                  const systemWithAnonymizationInstructions = anonymization.system
-                    ? addAnonymizationInstruction(
-                        anonymization.system,
-                        anonymizationRules,
-                        effectivePolicy
-                      )
-                    : system;
+              if (!inferenceAdapter) {
+                return throwError(() =>
+                  createInferenceRequestError(
+                    `Adapter for type ${connectorType} not implemented`,
+                    400
+                  )
+                );
+              }
+              const systemWithAnonymizationInstructions = anonymization.system
+                ? addAnonymizationInstruction(anonymization.system, anonymizationRules)
+                : system;
 
-                  return withChatCompleteSpan(
-                    {
+              return withChatCompleteSpan(
+                {
+                  system: systemWithAnonymizationInstructions,
+                  messages: anonymization.messages,
+                  tools,
+                  toolChoice,
+                  model: {
+                    id: modelName ?? getConnectorDefaultModel(connector),
+                    family: getConnectorFamily(connector),
+                    provider: getConnectorProvider(connector),
+                  },
+                  ...metadata?.attributes,
+                },
+                () => {
+                  return inferenceAdapter
+                    .chatComplete({
                       system: systemWithAnonymizationInstructions,
+                      executor,
                       messages: anonymization.messages,
-                      tools,
                       toolChoice,
-                      model: {
-                        id: modelName ?? getConnectorDefaultModel(connector),
-                        family: getConnectorFamily(connector),
-                        provider: getConnectorProvider(connector),
-                      },
-                      ...metadata?.attributes,
-                    },
-                    () => {
-                      return inferenceAdapter
-                        .chatComplete({
-                          system: systemWithAnonymizationInstructions,
-                          executor,
-                          messages: anonymization.messages,
-                          toolChoice,
-                          tools,
-                          temperature,
-                          logger,
-                          functionCalling,
-                          modelName,
-                          abortSignal,
-                          metadata,
-                          timeout,
-                          stream,
-                        })
-                        .pipe(
-                          chunksIntoMessage({
-                            toolOptions: { toolChoice, tools },
-                            logger,
-                          })
-                        );
-                    }
-                  ).pipe(deanonymizeMessage(anonymization));
-                })
-              )
-            )
+                      tools,
+                      temperature,
+                      logger,
+                      functionCalling,
+                      modelName,
+                      abortSignal,
+                      metadata,
+                      timeout,
+                      stream,
+                    })
+                    .pipe(
+                      chunksIntoMessage({
+                        toolOptions: { toolChoice, tools },
+                        logger,
+                      })
+                    );
+                }
+              ).pipe(deanonymizeMessage(anonymization));
+            })
           );
         })
       )

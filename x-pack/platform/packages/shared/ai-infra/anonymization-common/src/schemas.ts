@@ -203,22 +203,19 @@ export const tokenSourceEntrySchema = tokenSourceEntryBaseSchema.refine(
 export const replacementsSetSchema = z.object({
   /** UUID for the mapping set. */
   id: z.string(),
-  /** Scope type: `thread` or `execution`. */
-  scopeType: z.enum(['thread', 'execution']),
-  /** Thread ID or execution ID. */
-  scopeId: z.string(),
-  /** Anonymization profile used. */
-  profileId: z.string(),
-  /** Map of token → original value. */
-  tokenToOriginal: z.record(z.string(), z.string()),
-  /** Array of token source entries. */
-  tokenSources: z.array(tokenSourceEntrySchema),
+  /** Space identifier. */
+  namespace: z.string(),
+  /** Array of replacements (`anonymized` token to original value). */
+  replacements: z.array(
+    z.object({
+      anonymized: z.string(),
+      original: z.string(),
+    })
+  ),
   /** Creation timestamp. */
   createdAt: z.string(),
   /** Last modified timestamp. */
   updatedAt: z.string(),
   /** Username/service identity. */
   createdBy: z.string(),
-  /** Space identifier. */
-  namespace: z.string(),
 });

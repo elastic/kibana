@@ -42,6 +42,7 @@ export interface ChatCompleteAnonymizationScope {
  */
 export interface ChatCompleteAnonymizationMetadata {
   profileId?: string;
+  replacementsId?: string;
   target?: ChatCompleteAnonymizationTarget;
   scope?: ChatCompleteAnonymizationScope;
 }

@@ -24,20 +24,14 @@ export default function ({ getService }: FtrProviderContext) {
       const id = `test-${Date.now()}-${Math.random().toString(36).slice(2)}`;
       const doc = {
         id,
-        scope_type: 'execution',
-        scope_id: `exec-${id}`,
-        profile_id: 'profile-test',
-        token_to_original: {
-          HOST_NAME_ABC123: 'my-server-01',
-          USER_NAME_DEF456: 'alice',
-        },
-        token_sources: [
+        replacements: [
           {
-            token: 'HOST_NAME_ABC123',
-            pointer: '/kibana.alert.host.name',
-            entity_class: 'HOST_NAME',
-            source_type: 'test',
-            source_id: id,
+            anonymized: 'HOST_NAME_ABC123',
+            original: 'my-server-01',
+          },
+          {
+            anonymized: 'USER_NAME_DEF456',
+            original: 'alice',
           },
         ],
         created_at: new Date().toISOString(),
@@ -68,22 +62,11 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(status).to.be(200);
         expect(body.id).to.be(id);
-        expect(body.tokenToOriginal).to.have.property('HOST_NAME_ABC123', 'my-server-01');
-        expect(body.tokenToOriginal).to.have.property('USER_NAME_DEF456', 'alice');
-      });
-
-      it('resolves replacements by scope', async () => {
-        const scopeId = `scope-${Date.now()}`;
-        const { id } = await createReplacementsDoc({ scope_id: scopeId });
-
-        const { body, status } = await supertest
-          .get(`${REPLACEMENTS_API}/_by_scope?type=execution&id=${scopeId}&profile_id=profile-test`)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', API_VERSION);
-
-        expect(status).to.be(200);
-        expect(body.id).to.be(id);
-        expect(body.scopeId).to.be(scopeId);
+        expect(body.namespace).to.be('default');
+        expect(body.replacements).to.eql([
+          { anonymized: 'HOST_NAME_ABC123', original: 'my-server-01' },
+          { anonymized: 'USER_NAME_DEF456', original: 'alice' },
+        ]);
       });
 
       it('deanonymizes text using stored replacements', async () => {
@@ -129,13 +112,10 @@ export default function ({ getService }: FtrProviderContext) {
     describe('import and merge', () => {
       it('imports compatible replacements successfully', async () => {
         const source = await createReplacementsDoc({
-          scope_id: 'exec-source',
-          token_to_original: { HOST_NAME_SOURCE: 'source-host' },
+          replacements: [{ anonymized: 'HOST_NAME_SOURCE', original: 'source-host' }],
         });
         const dest = await createReplacementsDoc({
-          scope_id: 'thread-dest',
-          scope_type: 'thread',
-          token_to_original: { USER_NAME_DEST: 'dest-user' },
+          replacements: [{ anonymized: 'USER_NAME_DEST', original: 'dest-user' }],
         });
 
         const { body, status } = await supertest
@@ -151,36 +131,12 @@ export default function ({ getService }: FtrProviderContext) {
         expect(body.merged).to.be(true);
       });
 
-      it('rejects import when profile_id differs', async () => {
+      it('rejects import on anonymized token conflict', async () => {
         const source = await createReplacementsDoc({
-          scope_id: 'exec-src-incomp',
-          profile_id: 'profile-A',
+          replacements: [{ anonymized: 'SHARED_TOKEN', original: 'value-from-source' }],
         });
         const dest = await createReplacementsDoc({
-          scope_id: 'thread-dest-incomp',
-          profile_id: 'profile-B',
-        });
-
-        const { status } = await supertest
-          .post(`${REPLACEMENTS_API}/_import`)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', API_VERSION)
-          .send({
-            sourceId: source.id,
-            destinationId: dest.id,
-          });
-
-        expect(status).to.be(409);
-      });
-
-      it('rejects import on token_to_original conflict', async () => {
-        const source = await createReplacementsDoc({
-          scope_id: 'exec-src-conflict',
-          token_to_original: { SHARED_TOKEN: 'value-from-source' },
-        });
-        const dest = await createReplacementsDoc({
-          scope_id: 'thread-dest-conflict',
-          token_to_original: { SHARED_TOKEN: 'different-value-in-dest' },
+          replacements: [{ anonymized: 'SHARED_TOKEN', original: 'different-value-in-dest' }],
         });
 
         const { status } = await supertest

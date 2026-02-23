@@ -54,10 +54,7 @@ export type UpdateAnonymizationProfileRequest = z.infer<
 >;
 export type FindAnonymizationProfilesQuery = z.infer<typeof findAnonymizationProfilesQuerySchema>;
 
-/**
- * A replacements set: persisted token→original mappings scoped to a
- * thread or execution within a space.
- */
+/** A replacements set persisted per namespace. */
 export type ReplacementsSet = z.infer<typeof replacementsSetSchema>;
 
 /**

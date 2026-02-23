@@ -9,7 +9,6 @@ import { schema } from '@kbn/config-schema';
 import type { IRouter, Logger } from '@kbn/core/server';
 import {
   replaceTokensWithOriginals,
-  type GetAnonymizationReplacementsByScopeRequestQuery,
   type DeanonymizeWithReplacementsRequestBody,
   type ImportAnonymizationReplacementsRequestBody,
 } from '@kbn/anonymization-common';
@@ -63,76 +62,12 @@ export const registerReplacementsRoutes = (
           return response.ok({
             body: {
               id: replacements.id,
-              tokenToOriginal: replacements.tokenToOriginal,
-              scopeType: replacements.scopeType,
-              scopeId: replacements.scopeId,
-              profileId: replacements.profileId,
+              namespace: replacements.namespace,
+              replacements: replacements.replacements,
             },
           });
         } catch (err) {
           logger.error(`Failed to resolve replacements: ${err.message}`);
-          return response.customError({
-            body: { message: err.message },
-            statusCode: err.statusCode ?? 500,
-          });
-        }
-      }
-    );
-
-  // GET /internal/inference/anonymization/replacements/_by_scope — Resolve by scope
-  router.versioned
-    .get({
-      access: 'internal',
-      path: `${REPLACEMENTS_API_BASE}/_by_scope`,
-      security: {
-        authz: {
-          requiredPrivileges: [apiPrivileges.readAnonymization],
-        },
-      },
-    })
-    .addVersion(
-      {
-        version: API_VERSION,
-        validate: {
-          request: {
-            query: schema.object({
-              type: schema.oneOf([schema.literal('thread'), schema.literal('execution')]),
-              id: schema.string(),
-              profile_id: schema.string(),
-            }),
-          },
-        },
-      },
-      async (context, request, response) => {
-        try {
-          const query = request.query as GetAnonymizationReplacementsByScopeRequestQuery;
-          const coreContext = await context.core;
-          const namespace = coreContext.savedObjects.client.getCurrentNamespace() ?? 'default';
-          const esClient = coreContext.elasticsearch.client.asInternalUser;
-
-          const repo = new ReplacementsRepository(esClient, options);
-          const replacements = await repo.findByScope(
-            namespace,
-            query.type,
-            query.id,
-            query.profile_id
-          );
-
-          if (!replacements) {
-            return response.notFound({ body: { message: 'Replacements set not found' } });
-          }
-
-          return response.ok({
-            body: {
-              id: replacements.id,
-              tokenToOriginal: replacements.tokenToOriginal,
-              scopeType: replacements.scopeType,
-              scopeId: replacements.scopeId,
-              profileId: replacements.profileId,
-            },
-          });
-        } catch (err) {
-          logger.error(`Failed to resolve replacements by scope: ${err.message}`);
           return response.customError({
             body: { message: err.message },
             statusCode: err.statusCode ?? 500,
@@ -180,7 +115,7 @@ export const registerReplacementsRoutes = (
 
           const deanonymizedText = replaceTokensWithOriginals(
             body.text,
-            replacements.tokenToOriginal
+            repo.toTokenToOriginalMap(replacements)
           );
 
           return response.ok({ body: { text: deanonymizedText } });

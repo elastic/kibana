@@ -39,13 +39,6 @@ components:
         - updated_at
       example: created_at
 
-    ReplacementsScopeType:
-      type: string
-      enum:
-        - thread
-        - execution
-      example: thread
-
     FieldRule:
       type: object
       required:
@@ -249,28 +242,29 @@ components:
       type: object
       required:
         - id
-        - tokenToOriginal
-        - scopeType
-        - scopeId
-        - profileId
+        - namespace
+        - replacements
       properties:
         id:
           type: string
           example: replacements-1
-        tokenToOriginal:
-          type: object
-          additionalProperties:
-            type: string
-          example:
-            HOST_NAME_abc123: server-1
-        scopeType:
-          $ref: '#/components/schemas/ReplacementsScopeType'
-        scopeId:
+        namespace:
           type: string
-          example: thread-1
-        profileId:
-          type: string
-          example: profile-1
+          example: default
+        replacements:
+          type: array
+          items:
+            type: object
+            required:
+              - anonymized
+              - original
+            properties:
+              anonymized:
+                type: string
+                example: HOST_NAME_abc123
+              original:
+                type: string
+                example: server-1
 
     DeanonymizeRequest:
       type: object

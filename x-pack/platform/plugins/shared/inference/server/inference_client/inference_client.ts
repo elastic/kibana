@@ -36,6 +36,7 @@ export function createInferenceClient({
   callbacks,
   saltPromise,
   resolveEffectivePolicy,
+  replacementsEncryptionKey,
 }: {
   request: KibanaRequest;
   logger: Logger;
@@ -48,6 +49,7 @@ export function createInferenceClient({
   resolveEffectivePolicy?: (
     target?: ChatCompleteAnonymizationTarget
   ) => Promise<EffectivePolicy | undefined>;
+  replacementsEncryptionKey?: string;
 }): InferenceClient {
   const callbackManager = createCallbackManager(callbacks);
 
@@ -61,6 +63,7 @@ export function createInferenceClient({
     callbackManager,
     saltPromise,
     resolveEffectivePolicy,
+    replacementsEncryptionKey,
   });
 
   const chatComplete = createChatCompleteApi({

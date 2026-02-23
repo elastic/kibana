@@ -8,36 +8,16 @@
 import { createCipheriv, createDecipheriv, createHash, randomBytes } from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type {
-  ReplacementsSet,
-  TokenSourceEntry,
-  AnonymizationEntityClass,
-  TokenSourceType,
-} from '@kbn/anonymization-common';
+import type { ReplacementsSet } from '@kbn/anonymization-common';
 import { ANONYMIZATION_REPLACEMENTS_INDEX } from './replacements_index';
 
 /** ES document shape for replacements. */
 interface EsReplacementsDocument {
   id: string;
-  scope_type: string;
-  scope_id: string;
-  profile_id: string;
-  token_to_original?: Record<string, string>;
-  token_to_original_encrypted?: Record<string, string>;
-  token_sources: Array<{
-    token: string;
-    pointer: string;
-    entity_class: string;
-    source_type: string;
-    source_id: string;
-    source_ref?: Record<string, string | number | boolean>;
-    span_start?: number;
-    span_end?: number;
-    field?: string;
-    field_ref?: string;
-    rule_type?: string;
-    rule_id?: string;
-    first_seen_at?: string;
+  replacements: Array<{
+    anonymized: string;
+    original?: string;
+    original_encrypted?: string;
   }>;
   created_at: string;
   updated_at: string;
@@ -46,24 +26,25 @@ interface EsReplacementsDocument {
 }
 
 interface CreateReplacementsParams {
-  scopeType: 'thread' | 'execution';
-  scopeId: string;
-  profileId: string;
-  tokenToOriginal: Record<string, string>;
-  tokenSources: TokenSourceEntry[];
+  id?: string;
+  replacements: Array<{
+    anonymized: string;
+    original: string;
+  }>;
   namespace: string;
   createdBy: string;
 }
 
 interface UpdateReplacementsParams {
-  /** New token→original mappings to merge into the existing set. */
-  tokenToOriginal: Record<string, string>;
-  /** New token sources to append (deduped). */
-  tokenSources: TokenSourceEntry[];
+  /** New replacements to merge into the existing set. */
+  replacements: Array<{
+    anonymized: string;
+    original: string;
+  }>;
 }
 
-/** Maximum number of token source entries per replacements set. */
-const MAX_TOKEN_SOURCES = 10000;
+/** Maximum number of replacement entries per replacements set. */
+const MAX_REPLACEMENTS = 10000;
 const ENCRYPTION_VERSION = 'v1';
 
 /**
@@ -113,46 +94,65 @@ export class ReplacementsRepository {
     return decrypted.toString('utf8');
   }
 
-  private serializeTokenMap(
-    tokenToOriginal: Record<string, string>
-  ): Pick<EsReplacementsDocument, 'token_to_original' | 'token_to_original_encrypted'> {
+  private serializeOriginal(
+    original: string
+  ): Pick<EsReplacementsDocument['replacements'][number], 'original' | 'original_encrypted'> {
     if (!this.encryptionKey) {
-      return { token_to_original: tokenToOriginal };
+      return { original };
     }
 
     return {
-      token_to_original_encrypted: Object.fromEntries(
-        Object.entries(tokenToOriginal).map(([token, original]) => [
-          token,
-          this.encryptValue(this.encryptionKey as string, original),
-        ])
-      ),
+      original_encrypted: this.encryptValue(this.encryptionKey as string, original),
     };
   }
 
-  private deserializeTokenMap(doc: EsReplacementsDocument): Record<string, string> {
-    if (doc.token_to_original_encrypted) {
+  private deserializeOriginal(
+    replacement: EsReplacementsDocument['replacements'][number]
+  ): string {
+    if (replacement.original_encrypted) {
       if (!this.encryptionKey) {
         throw new Error('Encrypted replacements found but encryption key is not configured');
       }
-
-      return Object.fromEntries(
-        Object.entries(doc.token_to_original_encrypted).map(([token, encrypted]) => [
-          token,
-          this.decryptValue(this.encryptionKey as string, encrypted),
-        ])
-      );
+      return this.decryptValue(this.encryptionKey as string, replacement.original_encrypted);
     }
 
-    return doc.token_to_original ?? {};
+    return replacement.original ?? '';
   }
 
-  private sourceRefKey(sourceRef?: Record<string, string | number | boolean>): string {
-    if (!sourceRef) {
-      return '';
+  private setStatusCode(error: Error, statusCode: number): Error & { statusCode: number } {
+    const withStatus = error as Error & { statusCode: number };
+    withStatus.statusCode = statusCode;
+    return withStatus;
+  }
+
+  private dedupeAndValidate(
+    replacements: Array<{ anonymized: string; original: string }>
+  ): Array<{ anonymized: string; original: string }> {
+    const byToken = new Map<string, string>();
+
+    for (const replacement of replacements) {
+      const existing = byToken.get(replacement.anonymized);
+      if (existing !== undefined && existing !== replacement.original) {
+        throw this.setStatusCode(
+          new Error(
+            `Cannot store replacements: anonymized token "${replacement.anonymized}" maps to multiple originals`
+          ),
+          409
+        );
+      }
+      byToken.set(replacement.anonymized, replacement.original);
     }
-    const sortedEntries = Object.entries(sourceRef).sort(([a], [b]) => a.localeCompare(b));
-    return JSON.stringify(sortedEntries);
+
+    return [...byToken.entries()].map(([anonymized, original]) => ({
+      anonymized,
+      original,
+    }));
+  }
+
+  toTokenToOriginalMap(replacements: ReplacementsSet): Record<string, string> {
+    return Object.fromEntries(
+      replacements.replacements.map((replacement) => [replacement.anonymized, replacement.original])
+    );
   }
 
   /**
@@ -160,28 +160,14 @@ export class ReplacementsRepository {
    */
   async create(params: CreateReplacementsParams): Promise<ReplacementsSet> {
     const now = new Date().toISOString();
-    const id = uuidv4();
+    const id = params.id ?? uuidv4();
+    const replacements = this.dedupeAndValidate(params.replacements).slice(0, MAX_REPLACEMENTS);
 
     const doc: EsReplacementsDocument = {
       id,
-      scope_type: params.scopeType,
-      scope_id: params.scopeId,
-      profile_id: params.profileId,
-      ...this.serializeTokenMap(params.tokenToOriginal),
-      token_sources: params.tokenSources.slice(0, MAX_TOKEN_SOURCES).map((s) => ({
-        token: s.token,
-        pointer: s.pointer,
-        entity_class: s.entityClass,
-        source_type: s.sourceType,
-        source_id: s.sourceId,
-        source_ref: s.sourceRef,
-        span_start: s.spanStart,
-        span_end: s.spanEnd,
-        field: s.field,
-        field_ref: s.fieldRef,
-        rule_type: s.ruleType,
-        rule_id: s.ruleId,
-        first_seen_at: s.firstSeenAt,
+      replacements: replacements.map((replacement) => ({
+        anonymized: replacement.anonymized,
+        ...this.serializeOriginal(replacement.original),
       })),
       created_at: now,
       updated_at: now,
@@ -224,55 +210,8 @@ export class ReplacementsRepository {
   }
 
   /**
-   * Finds a replacements set by scope within a namespace.
-   */
-  async findByScope(
-    namespace: string,
-    scopeType: string,
-    scopeId: string,
-    profileId: string
-  ): Promise<ReplacementsSet | null> {
-    const result = await this.esClient.search<EsReplacementsDocument>({
-      index: ANONYMIZATION_REPLACEMENTS_INDEX,
-      query: {
-        bool: {
-          must: [
-            { term: { namespace } },
-            { term: { scope_type: scopeType } },
-            { term: { scope_id: scopeId } },
-            { term: { profile_id: profileId } },
-          ],
-        },
-      },
-      size: 1,
-    });
-
-    const doc = result.hits.hits[0]?._source;
-    return doc ? this.toReplacementsSet(doc) : null;
-  }
-
-  /**
-   * Gets or creates a replacements set for a scope.
-   * If one already exists, returns it. Otherwise creates a new one.
-   */
-  async getOrCreate(params: CreateReplacementsParams): Promise<ReplacementsSet> {
-    const existing = await this.findByScope(
-      params.namespace,
-      params.scopeType,
-      params.scopeId,
-      params.profileId
-    );
-
-    if (existing) {
-      return existing;
-    }
-
-    return this.create(params);
-  }
-
-  /**
-   * Updates an existing replacements set by merging in new mappings and sources.
-   * Deduplicates token sources.
+   * Updates an existing replacements set by merging in new replacement mappings.
+   * Deduplicates by anonymized token and rejects conflicting mappings.
    */
   async update(
     namespace: string,
@@ -286,48 +225,18 @@ export class ReplacementsRepository {
 
     const now = new Date().toISOString();
 
-    // Merge token_to_original (new mappings added, existing preserved)
-    const mergedTokenToOriginal = {
-      ...existing.tokenToOriginal,
-      ...params.tokenToOriginal,
-    };
-
-    // Deduplicate token_sources
-    const existingSourceKeys = new Set(
-      existing.tokenSources.map(
-        (s) =>
-          `${s.sourceType}:${s.sourceId}:${this.sourceRefKey(s.sourceRef)}:${s.pointer}:${s.token}`
-      )
-    );
-
-    const newSources = params.tokenSources.filter(
-      (s) =>
-        !existingSourceKeys.has(
-          `${s.sourceType}:${s.sourceId}:${this.sourceRefKey(s.sourceRef)}:${s.pointer}:${s.token}`
-        )
-    );
-
-    const mergedSources = [...existing.tokenSources, ...newSources].slice(0, MAX_TOKEN_SOURCES);
+    const mergedReplacements = this.dedupeAndValidate([
+      ...existing.replacements,
+      ...params.replacements,
+    ]).slice(0, MAX_REPLACEMENTS);
 
     await this.esClient.update({
       index: ANONYMIZATION_REPLACEMENTS_INDEX,
       id: replacementsId,
       doc: {
-        ...this.serializeTokenMap(mergedTokenToOriginal),
-        token_sources: mergedSources.map((s) => ({
-          token: s.token,
-          pointer: s.pointer,
-          entity_class: s.entityClass,
-          source_type: s.sourceType,
-          source_id: s.sourceId,
-          source_ref: s.sourceRef,
-          span_start: s.spanStart,
-          span_end: s.spanEnd,
-          field: s.field,
-          field_ref: s.fieldRef,
-          rule_type: s.ruleType,
-          rule_id: s.ruleId,
-          first_seen_at: s.firstSeenAt,
+        replacements: mergedReplacements.map((replacement) => ({
+          anonymized: replacement.anonymized,
+          ...this.serializeOriginal(replacement.original),
         })),
         updated_at: now,
       },
@@ -338,11 +247,8 @@ export class ReplacementsRepository {
   }
 
   /**
-   * Imports/merges replacements from a source scope into a destination scope.
-   *
-   * Compatibility checks:
-   * - `profile_id` must match between source and destination
-   * - `token_to_original` conflicts (same token, different original) are rejected
+   * Imports/merges replacements from a source set into a destination set.
+   * Rejects conflicting anonymized->original mappings.
    */
   async importReplacements(
     namespace: string,
@@ -353,36 +259,11 @@ export class ReplacementsRepository {
     const destination = await this.get(namespace, destinationId);
 
     if (!source || !destination) {
-      const err = new Error('Source or destination replacements set not found');
-      (err as any).statusCode = 404;
-      throw err;
+      throw this.setStatusCode(new Error('Source or destination replacements set not found'), 404);
     }
 
-    // Check profile compatibility
-    if (source.profileId !== destination.profileId) {
-      const err = new Error(
-        `Cannot import replacements: profile_id mismatch (source: ${source.profileId}, destination: ${destination.profileId})`
-      );
-      (err as any).statusCode = 409;
-      throw err;
-    }
-
-    // Check for token_to_original conflicts
-    for (const [token, originalValue] of Object.entries(source.tokenToOriginal)) {
-      const existingOriginal = destination.tokenToOriginal[token];
-      if (existingOriginal !== undefined && existingOriginal !== originalValue) {
-        const err = new Error(
-          `Cannot import replacements: token_to_original conflict for token "${token}"`
-        );
-        (err as any).statusCode = 409;
-        throw err;
-      }
-    }
-
-    // Merge
     const result = await this.update(namespace, destinationId, {
-      tokenToOriginal: source.tokenToOriginal,
-      tokenSources: source.tokenSources,
+      replacements: source.replacements,
     });
 
     return result!;
@@ -392,31 +273,18 @@ export class ReplacementsRepository {
    * Converts an ES document to the public ReplacementsSet type.
    */
   private toReplacementsSet(doc: EsReplacementsDocument): ReplacementsSet {
+    const replacements = (doc.replacements ?? []).map((replacement) => ({
+      anonymized: replacement.anonymized,
+      original: this.deserializeOriginal(replacement),
+    }));
+
     return {
       id: doc.id,
-      scopeType: doc.scope_type as 'thread' | 'execution',
-      scopeId: doc.scope_id,
-      profileId: doc.profile_id,
-      tokenToOriginal: this.deserializeTokenMap(doc),
-      tokenSources: (doc.token_sources ?? []).map((s) => ({
-        token: s.token,
-        pointer: s.pointer,
-        entityClass: s.entity_class as AnonymizationEntityClass,
-        sourceType: s.source_type as TokenSourceType,
-        sourceId: s.source_id,
-        sourceRef: s.source_ref,
-        spanStart: s.span_start,
-        spanEnd: s.span_end,
-        field: s.field,
-        fieldRef: s.field_ref,
-        ruleType: s.rule_type,
-        ruleId: s.rule_id,
-        firstSeenAt: s.first_seen_at,
-      })),
+      namespace: doc.namespace,
+      replacements,
       createdAt: doc.created_at,
       updatedAt: doc.updated_at,
       createdBy: doc.created_by,
-      namespace: doc.namespace,
     };
   }
 }

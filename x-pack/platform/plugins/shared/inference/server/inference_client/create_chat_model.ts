@@ -35,6 +35,7 @@ export interface CreateChatModelOptions {
     target?: ChatCompleteAnonymizationTarget
   ) => Promise<EffectivePolicy | undefined>;
   callbacks?: InferenceCallbacks;
+  replacementsEncryptionKey?: string;
 }
 
 export const createChatModel = async ({
@@ -49,6 +50,7 @@ export const createChatModel = async ({
   saltPromise,
   resolveEffectivePolicy,
   callbacks,
+  replacementsEncryptionKey,
 }: CreateChatModelOptions): Promise<InferenceChatModel> => {
   const client = createClient({
     actions,
@@ -60,6 +62,7 @@ export const createChatModel = async ({
     saltPromise,
     resolveEffectivePolicy,
     callbacks,
+    replacementsEncryptionKey,
   });
   const connector = await getConnectorById({ connectorId, actions, request });
   return new InferenceChatModel({

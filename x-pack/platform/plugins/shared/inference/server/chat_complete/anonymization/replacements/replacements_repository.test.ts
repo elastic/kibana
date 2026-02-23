@@ -27,24 +27,20 @@ describe('ReplacementsRepository', () => {
     });
 
     await repo.create({
-      scopeType: 'execution',
-      scopeId: 'scope-1',
-      profileId: 'profile-1',
-      tokenToOriginal: {
-        TOKEN_A: 'original-a',
-      },
-      tokenSources: [],
+      replacements: [{ anonymized: 'TOKEN_A', original: 'original-a' }],
       namespace: 'default',
       createdBy: 'test',
     });
 
     const payload = (esClient.index as jest.Mock).mock.calls[0][0].document as {
-      token_to_original?: Record<string, string>;
-      token_to_original_encrypted?: Record<string, string>;
+      replacements: Array<{
+        anonymized: string;
+        original_encrypted?: string;
+      }>;
     };
 
-    expect(payload.token_to_original).toBeUndefined();
-    expect(payload.token_to_original_encrypted?.TOKEN_A).toContain('v1:');
+    expect(payload.replacements[0].anonymized).toBe('TOKEN_A');
+    expect(payload.replacements[0].original_encrypted).toContain('v1:');
   });
 
   it('decrypts encrypted token mappings on read', async () => {
@@ -53,13 +49,7 @@ describe('ReplacementsRepository', () => {
     });
 
     await repo.create({
-      scopeType: 'execution',
-      scopeId: 'scope-2',
-      profileId: 'profile-2',
-      tokenToOriginal: {
-        TOKEN_A: 'original-a',
-      },
-      tokenSources: [],
+      replacements: [{ anonymized: 'TOKEN_A', original: 'original-a' }],
       namespace: 'default',
       createdBy: 'test',
     });
@@ -74,6 +64,65 @@ describe('ReplacementsRepository', () => {
 
     const result = await repo.get('default', createdDoc.id as string);
 
-    expect(result?.tokenToOriginal).toEqual({ TOKEN_A: 'original-a' });
+    expect(result?.replacements).toEqual([{ anonymized: 'TOKEN_A', original: 'original-a' }]);
+  });
+
+  it('rejects conflicting anonymized mappings on update', async () => {
+    const repo = new ReplacementsRepository(esClient, {
+      encryptionKey: 'test-encryption-key',
+    });
+    const id = 'replacements-1';
+
+    (esClient.get as jest.Mock).mockResolvedValue({
+      _source: {
+        id,
+        replacements: [{ anonymized: 'TOKEN_A', original: 'original-a' }],
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        created_by: 'test',
+        namespace: 'default',
+      },
+    });
+
+    await expect(
+      repo.update('default', id, {
+        replacements: [{ anonymized: 'TOKEN_A', original: 'different-original' }],
+      })
+    ).rejects.toThrow('Cannot store replacements');
+  });
+
+  it('deduplicates identical anonymized mappings on update', async () => {
+    const repo = new ReplacementsRepository(esClient, {
+      encryptionKey: 'test-encryption-key',
+    });
+    const id = 'replacements-2';
+
+    (esClient.get as jest.Mock)
+      .mockResolvedValueOnce({
+        _source: {
+          id,
+          replacements: [{ anonymized: 'TOKEN_A', original: 'original-a' }],
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          created_by: 'test',
+          namespace: 'default',
+        },
+      })
+      .mockResolvedValueOnce({
+        _source: {
+          id,
+          replacements: [{ anonymized: 'TOKEN_A', original: 'original-a' }],
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          created_by: 'test',
+          namespace: 'default',
+        },
+      });
+
+    const result = await repo.update('default', id, {
+      replacements: [{ anonymized: 'TOKEN_A', original: 'original-a' }],
+    });
+
+    expect(result?.replacements).toHaveLength(1);
   });
 });

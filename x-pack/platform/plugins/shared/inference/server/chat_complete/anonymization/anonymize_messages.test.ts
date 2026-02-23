@@ -437,4 +437,42 @@ describe('anonymizeMessages', () => {
     ];
     expect(content).toEqual(expected);
   });
+
+  it('applies known replacements across all messages in the request', async () => {
+    const messages: Message[] = [
+      { role: MessageRole.User, content: 'Alice opened the incident' },
+      { role: MessageRole.Assistant, content: 'Alice triaged the incident' },
+      { role: MessageRole.User, content: 'Alice shared follow-up details' },
+    ];
+
+    const result = await anonymizeMessages({
+      messages,
+      anonymizationRules: [disabledRule],
+      regexWorker,
+      esClient: mockEsClient,
+      knownReplacements: [{ anonymized: 'USER_NAME_abc123', original: 'Alice' }],
+    });
+
+    expect((result.messages[0] as UserMessage).content).toContain('USER_NAME_abc123');
+    expect((result.messages[1] as AssistantMessage).content).toContain('USER_NAME_abc123');
+    expect((result.messages[2] as UserMessage).content).toContain('USER_NAME_abc123');
+  });
+
+  it('runs known replacements before regex/NER anonymization', async () => {
+    const result = await anonymizeMessages({
+      messages: [{ role: MessageRole.User, content: 'Alice alice@example.com' }],
+      anonymizationRules: [regexRule],
+      regexWorker,
+      esClient: mockEsClient,
+      knownReplacements: [{ anonymized: 'USER_NAME_abc123', original: 'Alice' }],
+    });
+
+    const content = (result.messages[0] as UserMessage).content;
+    expect(content).toContain('USER_NAME_abc123');
+    expect(content).toContain('EMAIL_');
+    expect(content).not.toContain('alice@example.com');
+    expect(result.anonymizations.some((entry) => entry.rule.type === 'ReplacementMemory')).toBe(
+      true
+    );
+  });
 });

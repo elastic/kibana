@@ -14,7 +14,15 @@
  *   version: 2026-02-10
  */
 
+import type { ZodTypeDef } from '@kbn/zod';
 import { z } from '@kbn/zod';
+import {
+  requiredOptional,
+  isValidDateMath,
+  isNonEmptyString,
+  ArrayFromString,
+  BooleanFromString,
+} from '@kbn/zod-helpers';
 
 export type ErrorResponse = z.infer<typeof ErrorResponse>;
 export const ErrorResponse = z.object({
@@ -39,52 +47,19 @@ export const ProfileSortField = z.enum(['created_at', 'name', 'updated_at']);
 export type ProfileSortFieldEnum = typeof ProfileSortField.enum;
 export const ProfileSortFieldEnum = ProfileSortField.enum;
 
-export type ReplacementsScopeType = z.infer<typeof ReplacementsScopeType>;
-export const ReplacementsScopeType = z.enum(['thread', 'execution']);
-export type ReplacementsScopeTypeEnum = typeof ReplacementsScopeType.enum;
-export const ReplacementsScopeTypeEnum = ReplacementsScopeType.enum;
-
 export type FieldRule = z.infer<typeof FieldRule>;
 export const FieldRule = z.object({
   field: z.string(),
   allowed: z.boolean(),
   anonymized: z.boolean(),
-  entityClass: z
-    .enum([
-      'PER',
-      'ORG',
-      'LOC',
-      'MISC',
-      'HOST_NAME',
-      'USER_NAME',
-      'IP',
-      'EMAIL',
-      'CLOUD_ACCOUNT',
-      'ENTITY_NAME',
-      'RESOURCE_NAME',
-      'RESOURCE_ID',
-    ])
-    .optional(),
+  entityClass: z.string().optional(),
 });
 
 export type RegexRule = z.infer<typeof RegexRule>;
 export const RegexRule = z.object({
   id: z.string(),
   type: z.literal('regex'),
-  entityClass: z.enum([
-    'PER',
-    'ORG',
-    'LOC',
-    'MISC',
-    'HOST_NAME',
-    'USER_NAME',
-    'IP',
-    'EMAIL',
-    'CLOUD_ACCOUNT',
-    'ENTITY_NAME',
-    'RESOURCE_NAME',
-    'RESOURCE_ID',
-  ]),
+  entityClass: z.string(),
   pattern: z.string(),
   enabled: z.boolean(),
 });
@@ -93,8 +68,8 @@ export type NerRule = z.infer<typeof NerRule>;
 export const NerRule = z.object({
   id: z.string(),
   type: z.literal('ner'),
-  modelId: z.string().optional(),
-  allowedEntityClasses: z.array(z.enum(['PER', 'ORG', 'LOC', 'MISC'])),
+  modelId: z.string(),
+  allowedEntityClasses: z.array(z.string()),
   enabled: z.boolean(),
 });
 
@@ -148,10 +123,13 @@ export const FindProfilesResponse = z.object({
 export type ReplacementsSetResponse = z.infer<typeof ReplacementsSetResponse>;
 export const ReplacementsSetResponse = z.object({
   id: z.string(),
-  tokenToOriginal: z.object({}).catchall(z.string()),
-  scopeType: ReplacementsScopeType,
-  scopeId: z.string(),
-  profileId: z.string(),
+  namespace: z.string(),
+  replacements: z.array(
+    z.object({
+      anonymized: z.string(),
+      original: z.string(),
+    })
+  ),
 });
 
 export type DeanonymizeRequest = z.infer<typeof DeanonymizeRequest>;

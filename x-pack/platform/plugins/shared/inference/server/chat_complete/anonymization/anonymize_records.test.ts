@@ -428,4 +428,22 @@ describe('anonymizeRecords', () => {
     expect(result.records[0].content).toContain('EMAIL_');
     expect(result.anonymizations.some((entry) => entry.rule.type === 'RegExp')).toBe(true);
   });
+
+  it('applies known replacements before regex processing', async () => {
+    const input = [{ content: 'Alice and alice@example.com' }];
+
+    const result = await anonymizeRecords({
+      input,
+      anonymizationRules: [regexRule],
+      regexWorker,
+      esClient: mockEsClient,
+      knownReplacements: [{ anonymized: 'USER_NAME_abc123', original: 'Alice' }],
+    });
+
+    expect(result.records[0].content).toContain('USER_NAME_abc123');
+    expect(result.records[0].content).toContain('EMAIL_');
+    expect(result.anonymizations.some((entry) => entry.rule.type === 'ReplacementMemory')).toBe(
+      true
+    );
+  });
 });

@@ -35,6 +35,7 @@ interface CreateClientOptions {
   resolveEffectivePolicy?: (
     target?: ChatCompleteAnonymizationTarget
   ) => Promise<EffectivePolicy | undefined>;
+  replacementsEncryptionKey?: string;
 }
 
 interface BoundCreateClientOptions extends CreateClientOptions {
@@ -56,6 +57,7 @@ export function createClient(
     callbacks,
     saltPromise,
     resolveEffectivePolicy,
+    replacementsEncryptionKey,
   } = options;
   const client = createInferenceClient({
     request,
@@ -67,6 +69,7 @@ export function createClient(
     callbacks,
     saltPromise,
     resolveEffectivePolicy,
+    replacementsEncryptionKey,
   });
   if ('bindTo' in options) {
     return bindClient(client, options.bindTo);

@@ -133,6 +133,78 @@ const applyFieldPolicy = ({
   };
 };
 
+const parseEntityClassFromToken = (token: string): string => {
+  const parts = token.split('_');
+  if (parts.length <= 1) {
+    return 'ENTITY_NAME';
+  }
+
+  return parts.slice(0, -1).join('_');
+};
+
+const applyKnownReplacements = ({
+  state,
+  knownReplacements,
+}: {
+  state: AnonymizationState;
+  knownReplacements?: Array<{ anonymized: string; original: string }>;
+}): AnonymizationState => {
+  if (!knownReplacements?.length) {
+    return state;
+  }
+
+  const orderedReplacements = [...knownReplacements].sort(
+    (left, right) => right.original.length - left.original.length
+  );
+  const records = state.records.map((record) => ({ ...record }));
+  const appliedTokens = new Set<string>();
+
+  records.forEach((record) => {
+    Object.entries(record).forEach(([recordKey, value]) => {
+      if (typeof value !== 'string' || value.length === 0) {
+        return;
+      }
+
+      let next = value;
+      for (const replacement of orderedReplacements) {
+        if (
+          replacement.original &&
+          replacement.original !== replacement.anonymized &&
+          next.includes(replacement.original)
+        ) {
+          appliedTokens.add(replacement.anonymized);
+          next = next.split(replacement.original).join(replacement.anonymized);
+        }
+      }
+
+      record[recordKey] = next;
+    });
+  });
+
+  const replacementsByToken = new Map(
+    knownReplacements.map((replacement) => [replacement.anonymized, replacement])
+  );
+
+  const replacementAnonymizations = [...appliedTokens]
+    .map((token) => replacementsByToken.get(token))
+    .filter((replacement): replacement is { anonymized: string; original: string } =>
+      Boolean(replacement)
+    )
+    .map((replacement) => ({
+      rule: { type: 'ReplacementMemory' },
+      entity: {
+        class_name: parseEntityClassFromToken(replacement.anonymized),
+        value: replacement.original,
+        mask: replacement.anonymized,
+      },
+    }));
+
+  return {
+    records,
+    anonymizations: [...state.anonymizations, ...replacementAnonymizations],
+  };
+};
+
 export async function anonymizeRecords<T extends Record<string, string | undefined>>({
   input,
   anonymizationRules,
@@ -140,6 +212,7 @@ export async function anonymizeRecords<T extends Record<string, string | undefin
   esClient,
   salt,
   effectivePolicy,
+  knownReplacements,
 }: {
   input: T[];
   anonymizationRules: AnonymizationRule[];
@@ -147,6 +220,7 @@ export async function anonymizeRecords<T extends Record<string, string | undefin
   esClient: ElasticsearchClient;
   salt?: string;
   effectivePolicy?: EffectivePolicy;
+  knownReplacements?: Array<{ anonymized: string; original: string }>;
 }): Promise<AnonymizationState>;
 
 export async function anonymizeRecords({
@@ -156,6 +230,7 @@ export async function anonymizeRecords({
   esClient,
   salt,
   effectivePolicy,
+  knownReplacements,
 }: {
   input: Array<Record<string, string>>;
   anonymizationRules: AnonymizationRule[];
@@ -163,6 +238,7 @@ export async function anonymizeRecords({
   esClient: ElasticsearchClient;
   salt?: string;
   effectivePolicy?: EffectivePolicy;
+  knownReplacements?: Array<{ anonymized: string; original: string }>;
 }): Promise<AnonymizationState> {
   let state: AnonymizationState = {
     records: input.concat(),
@@ -173,6 +249,11 @@ export async function anonymizeRecords({
     state,
     effectivePolicy,
     salt,
+  });
+
+  state = applyKnownReplacements({
+    state,
+    knownReplacements,
   });
 
   const [regexRules, nerRules] = partition(

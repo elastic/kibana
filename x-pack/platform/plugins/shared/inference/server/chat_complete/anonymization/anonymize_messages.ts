@@ -21,6 +21,7 @@ export async function anonymizeMessages({
   esClient,
   salt,
   effectivePolicy,
+  knownReplacements,
 }: {
   system?: string | undefined;
   messages: Message[];
@@ -29,11 +30,13 @@ export async function anonymizeMessages({
   esClient: ElasticsearchClient;
   salt?: string;
   effectivePolicy?: EffectivePolicy;
+  knownReplacements?: Array<{ anonymized: string; original: string }>;
 }): Promise<AnonymizationOutput> {
   const rules = anonymizationRules.filter((rule) => rule.enabled);
   const hasEffectivePolicy = Boolean(effectivePolicy && Object.keys(effectivePolicy).length > 0);
+  const hasKnownReplacements = Boolean(knownReplacements?.length);
 
-  if (!rules.length && !hasEffectivePolicy) {
+  if (!rules.length && !hasEffectivePolicy && !hasKnownReplacements) {
     return {
       messages,
       anonymizations: [],
@@ -54,6 +57,7 @@ export async function anonymizeMessages({
     esClient,
     salt,
     effectivePolicy,
+    knownReplacements,
   });
 
   const anonymizedMessages = messages.map((original, index) => {

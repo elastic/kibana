@@ -36,49 +36,6 @@ paths:
               schema:
                 $ref: '../common_attributes.schema.yaml#/components/schemas/ErrorResponse'
 
-  /api/inference/anonymization/replacements/_by_scope:
-    get:
-      x-codegen-enabled: true
-      x-labels: [ess, serverless]
-      operationId: GetAnonymizationReplacementsByScope
-      summary: Resolve replacements by scope
-      tags: [Anonymization API]
-      parameters:
-        - in: query
-          name: type
-          required: true
-          schema:
-            $ref: '../common_attributes.schema.yaml#/components/schemas/ReplacementsScopeType'
-        - in: query
-          name: id
-          required: true
-          schema:
-            type: string
-        - in: query
-          name: profile_id
-          required: true
-          schema:
-            type: string
-      responses:
-        200:
-          description: Successfully retrieved replacements set.
-          content:
-            application/json:
-              schema:
-                $ref: '../common_attributes.schema.yaml#/components/schemas/ReplacementsSetResponse'
-        404:
-          description: Replacements set was not found.
-          content:
-            application/json:
-              schema:
-                $ref: '../common_attributes.schema.yaml#/components/schemas/ErrorResponse'
-        500:
-          description: Server error.
-          content:
-            application/json:
-              schema:
-                $ref: '../common_attributes.schema.yaml#/components/schemas/ErrorResponse'
-
   /api/inference/anonymization/replacements/_deanonymize:
     post:
       x-codegen-enabled: true

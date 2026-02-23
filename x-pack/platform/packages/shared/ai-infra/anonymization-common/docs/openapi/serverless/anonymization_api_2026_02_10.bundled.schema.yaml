@@ -220,48 +220,6 @@ paths:
       tags:
         - Anonymization API
         - Anonymization API
-  /api/inference/anonymization/replacements/_by_scope:
-    get:
-      operationId: GetAnonymizationReplacementsByScope
-      parameters:
-        - in: query
-          name: type
-          required: true
-          schema:
-            $ref: '#/components/schemas/ReplacementsScopeType'
-        - in: query
-          name: id
-          required: true
-          schema:
-            type: string
-        - in: query
-          name: profile_id
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ReplacementsSetResponse'
-          description: Successfully retrieved replacements set.
-        '404':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-          description: Replacements set was not found.
-        '500':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-          description: Server error.
-      summary: Resolve replacements by scope
-      tags:
-        - Anonymization API
-        - Anonymization API
   /api/inference/anonymization/replacements/_deanonymize:
     post:
       operationId: DeanonymizeWithReplacements
@@ -617,38 +575,33 @@ components:
         - entityClass
         - pattern
         - enabled
-    ReplacementsScopeType:
-      enum:
-        - thread
-        - execution
-      example: thread
-      type: string
     ReplacementsSetResponse:
       type: object
       properties:
         id:
           example: replacements-1
           type: string
-        profileId:
-          example: profile-1
+        namespace:
+          example: default
           type: string
-        scopeId:
-          example: thread-1
-          type: string
-        scopeType:
-          $ref: '#/components/schemas/ReplacementsScopeType'
-        tokenToOriginal:
-          additionalProperties:
-            type: string
-          example:
-            HOST_NAME_abc123: server-1
-          type: object
+        replacements:
+          items:
+            type: object
+            properties:
+              anonymized:
+                example: HOST_NAME_abc123
+                type: string
+              original:
+                example: server-1
+                type: string
+            required:
+              - anonymized
+              - original
+          type: array
       required:
         - id
-        - tokenToOriginal
-        - scopeType
-        - scopeId
-        - profileId
+        - namespace
+        - replacements
     SortOrder:
       enum:
         - asc
