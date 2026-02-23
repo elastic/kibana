@@ -785,21 +785,13 @@ const ESQLEditorInternal = function ESQLEditor({
         color: 'text',
       };
     }
-    if (code !== codeWhenSubmitted) {
-      return {
-        label: i18n.translate('esqlEditor.query.runQuery', {
-          defaultMessage: 'Run query',
-        }),
-        color: 'success',
-      };
-    }
     return {
       label: i18n.translate('esqlEditor.query.searchLabel', {
         defaultMessage: 'Search',
       }),
       color: 'primary',
     };
-  }, [allowQueryCancellation, code, codeWhenSubmitted, isLoading]);
+  }, [allowQueryCancellation, isLoading]);
 
   const parseMessages = useCallback(
     async (options?: { invalidateColumnsCache?: boolean }) => {
@@ -1145,8 +1137,8 @@ const ESQLEditorInternal = function ESQLEditor({
           <EuiFlexItem grow={false}>
             <EuiToolTip
               position="top"
-              content={i18n.translate('esqlEditor.query.runQuery', {
-                defaultMessage: 'Run query',
+              content={i18n.translate('esqlEditor.query.searchLabel', {
+                defaultMessage: 'Search',
               })}
             >
               <EuiButton
