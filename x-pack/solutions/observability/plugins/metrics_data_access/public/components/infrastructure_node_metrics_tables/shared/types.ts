@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
+import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import type { CoreProvidersProps } from '../../../apps/common_providers';
 import type { MetricsDataClient } from '../../../lib/metrics_client';
 

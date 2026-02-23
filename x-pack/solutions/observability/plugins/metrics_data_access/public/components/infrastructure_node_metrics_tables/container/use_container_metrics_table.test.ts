@@ -120,7 +120,10 @@ describe('useContainerMetricsTable hook', () => {
 
     const filterClauseWithEventModuleFilter = {
       bool: {
-        filter: [{ term: { 'event.dataset': 'kubeletstatsreceiver.otel' } }, { ...filterClauseDsl }],
+        filter: [
+          { term: { 'event.dataset': 'kubeletstatsreceiver.otel' } },
+          { ...filterClauseDsl },
+        ],
       },
     };
 
@@ -178,7 +181,6 @@ describe('useContainerMetricsTable hook', () => {
         isOtel: false,
       })
     );
-
 
     expect(useInfrastructureNodeMetricsMock).toHaveBeenCalledWith(
       expect.objectContaining({

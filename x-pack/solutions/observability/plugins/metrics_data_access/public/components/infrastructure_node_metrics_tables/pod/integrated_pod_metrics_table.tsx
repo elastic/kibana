@@ -13,11 +13,16 @@ import { usePodMetricsTable } from './use_pod_metrics_table';
 
 function HookedPodMetricsTable({
   timerange,
-filterClauseDsl,
+  filterClauseDsl,
   metricsClient,
   isOtel,
 }: UseNodeMetricsTableOptions) {
-  const podMetricsTableProps = usePodMetricsTable({ timerange, filterClauseDsl, metricsClient, isOtel });
+  const podMetricsTableProps = usePodMetricsTable({
+    timerange,
+    filterClauseDsl,
+    metricsClient,
+    isOtel,
+  });
   return (
     <PodMetricsTable
       {...podMetricsTableProps}

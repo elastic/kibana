@@ -60,11 +60,8 @@ export function useTabs({
     [start, end]
   );
 
-  const k8sFilterFields = useMemo(
-    () => (isOtel ? 'k8s.pod.name' : KUBERNETES_POD_NAME),
-    [isOtel]
-  );
-  
+  const k8sFilterFields = useMemo(() => (isOtel ? 'k8s.pod.name' : KUBERNETES_POD_NAME), [isOtel]);
+
   const hostsFilter = useMemo(
     (): QueryDslQueryContainer => ({
       bool: {
@@ -87,7 +84,6 @@ export function useTabs({
       },
     }),
     [podNames]
-
   );
   const containersFilter = useMemo(
     () => ({

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
+import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import type { MetricsQueryOptions } from '../shared';
 import { createMetricByFieldLookup, makeUnpackMetric, metricsToApiOptions } from '../shared';
 import {
@@ -23,9 +23,9 @@ type ContainerMetricsFieldEcs =
   | typeof ECS_CONTAINER_MEMORY_USAGE_BYTES;
 
 const containerMetricsQueryConfigEcs: MetricsQueryOptions<ContainerMetricsFieldEcs> = {
-  sourceFilter: { 
-    term: { 
-      'event.dataset': 'kubernetes.container'
+  sourceFilter: {
+    term: {
+      'event.dataset': 'kubernetes.container',
     },
   },
   groupByField: 'container.id',
@@ -48,9 +48,9 @@ type ContainerMetricsFieldSemconvDocker =
 
 const containerMetricsQueryConfigSemconvDocker: MetricsQueryOptions<ContainerMetricsFieldSemconvDocker> =
   {
-    sourceFilter: { 
-      term: { 
-        'event.dataset': 'dockerstatsreceiver.otel'
+    sourceFilter: {
+      term: {
+        'event.dataset': 'dockerstatsreceiver.otel',
       },
     },
     groupByField: 'container.id',
@@ -73,8 +73,8 @@ type ContainerMetricsFieldSemconvK8s =
 
 const containerMetricsQueryConfigSemconvK8s: MetricsQueryOptions<ContainerMetricsFieldSemconvK8s> =
   {
-    sourceFilter: { 
-      term: { 
+    sourceFilter: {
+      term: {
         'event.dataset': 'kubeletstatsreceiver.otel',
       },
     },
@@ -109,7 +109,11 @@ export const unpackMetricSemconvK8s = makeUnpackMetric(metricByFieldSemconvK8s);
 /** @deprecated Use metricByFieldEcs for ECS; use unpack from getUnpackMetricsForSchema for transform */
 export const metricByField = metricByFieldEcs;
 
-export function getOptionsForSchema(isOtel: boolean, isK8sContainer?: boolean, filterClauseDsl?: QueryDslQueryContainer) {
+export function getOptionsForSchema(
+  isOtel: boolean,
+  isK8sContainer?: boolean,
+  filterClauseDsl?: QueryDslQueryContainer
+) {
   if (isOtel) {
     return isK8sContainer
       ? metricsToApiOptions(containerMetricsQueryConfigSemconvK8s, filterClauseDsl)

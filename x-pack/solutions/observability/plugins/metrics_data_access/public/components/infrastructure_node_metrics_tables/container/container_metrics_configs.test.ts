@@ -97,7 +97,7 @@ describe('container_metrics_configs', () => {
         bool: {
           filter: [{ term: { 'container.id': 'abc-123' } }],
         },
-      }
+      };
 
       const filterClauseWithEventModuleFilter = {
         bool: {
@@ -115,11 +115,14 @@ describe('container_metrics_configs', () => {
         bool: {
           filter: [{ term: { 'container.id': 'abc-123' } }],
         },
-      }
+      };
 
       const filterClauseWithEventModuleFilter = {
         bool: {
-          filter: [{ term: { 'event.dataset': 'dockerstatsreceiver.otel' } }, { ...filterClauseDsl }],
+          filter: [
+            { term: { 'event.dataset': 'dockerstatsreceiver.otel' } },
+            { ...filterClauseDsl },
+          ],
         },
       };
 
@@ -136,10 +139,13 @@ describe('container_metrics_configs', () => {
       };
       const filterClauseWithEventModuleFilter = {
         bool: {
-          filter: [{ term: { 'event.dataset': 'kubeletstatsreceiver.otel' } }, { ...filterClauseDsl }],
+          filter: [
+            { term: { 'event.dataset': 'kubeletstatsreceiver.otel' } },
+            { ...filterClauseDsl },
+          ],
         },
       };
-      
+
       const { options } = getOptionsForSchema(true, true, filterClauseDsl);
 
       expect(options.filterQuery).toBe(JSON.stringify(filterClauseWithEventModuleFilter));

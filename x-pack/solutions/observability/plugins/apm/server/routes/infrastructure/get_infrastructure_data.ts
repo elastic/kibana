@@ -36,7 +36,6 @@ export const getInfrastructureData = async ({
   start: number;
   end: number;
 }) => {
-
   const isOtel = Boolean(agentName && hasOpenTelemetryPrefix(agentName));
   const k8sFilterField = isOtel ? KUBERNETES_POD_NAME_OTEL : KUBERNETES_POD_NAME;
 
@@ -46,42 +45,42 @@ export const getInfrastructureData = async ({
       apm: {
         events: [ProcessorEvent.metric],
       },
-      body :{
-      track_total_hits: false,
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            ...termQuery(SERVICE_NAME, serviceName),
-            ...rangeQuery(start, end),
-            ...environmentQuery(environment),
-            ...kqlQuery(kuery),
-          ],
-        },
-      },
-      aggs: {
-        containerIds: {
-          terms: {
-            field: CONTAINER_ID,
-            size: 500,
+      body: {
+        track_total_hits: false,
+        size: 0,
+        query: {
+          bool: {
+            filter: [
+              ...termQuery(SERVICE_NAME, serviceName),
+              ...rangeQuery(start, end),
+              ...environmentQuery(environment),
+              ...kqlQuery(kuery),
+            ],
           },
         },
-        hostNames: {
-          terms: {
-            field: HOST_NAME,
-            size: 500,
+        aggs: {
+          containerIds: {
+            terms: {
+              field: CONTAINER_ID,
+              size: 500,
+            },
           },
-        },
-        podNames: {
-          terms: {
-            field: k8sFilterField,
-            size: 500,
+          hostNames: {
+            terms: {
+              field: HOST_NAME,
+              size: 500,
+            },
+          },
+          podNames: {
+            terms: {
+              field: k8sFilterField,
+              size: 500,
+            },
           },
         },
       },
     },
-  },
-  { skipProcessorEventFilter: true }
+    { skipProcessorEventFilter: true }
   );
 
   let containerIds: string[] =
@@ -120,7 +119,7 @@ export const getInfrastructureData = async ({
           },
         },
       },
-    { skipProcessorEventFilter: true }
+      { skipProcessorEventFilter: true }
     );
     containerIds =
       containersByPodResponse.aggregations?.containerIds?.buckets.map(

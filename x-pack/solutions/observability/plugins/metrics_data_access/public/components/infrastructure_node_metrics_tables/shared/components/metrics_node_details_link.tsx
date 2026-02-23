@@ -85,7 +85,6 @@ export const MetricsNodeDetailsLink = ({
   const { share } = useKibanaContextForPlugin().services;
   const { getAssetDetailUrl } = useAssetDetailsRedirect();
 
-
   const redirectToDiscover = isOtel && nodeType !== 'host';
 
   const linkProps = useMemo(() => {

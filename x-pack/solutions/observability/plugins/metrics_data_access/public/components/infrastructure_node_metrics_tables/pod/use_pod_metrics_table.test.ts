@@ -68,10 +68,13 @@ describe('usePodMetricsTable hook', () => {
         filter: [{ term: { 'container.id': 'gke-edge-oblt-pool-1-9a60016d-lgg9' } }],
       },
     };
-    
+
     const filterClauseWithEventModuleFilter = {
       bool: {
-        filter: [{ term: { 'event.dataset': 'kubeletstatsreceiver.otel' } }, { ...filterClauseDsl }],
+        filter: [
+          { term: { 'event.dataset': 'kubeletstatsreceiver.otel' } },
+          { ...filterClauseDsl },
+        ],
       },
     };
 
@@ -110,13 +113,12 @@ describe('usePodMetricsTable hook', () => {
         filter: [{ term: { 'container.id': 'gke-edge-oblt-pool-1-9a60016d-lgg9' } }],
       },
     };
-    
+
     const filterClauseWithEventModuleFilter = {
       bool: {
         filter: [{ term: { 'event.dataset': 'kubernetes.pod' } }, { ...filterClauseDsl }],
       },
     };
-
 
     // include this to prevent rendering error in test
     useInfrastructureNodeMetricsMock.mockReturnValue({

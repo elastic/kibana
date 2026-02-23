@@ -29,7 +29,7 @@ export function createLazyContainerMetricsTable(core: CoreStart, metricsClient: 
           core={core}
           metricsClient={metricsClient}
           sourceId={sourceId || 'default'}
-          timerange={timerange} 
+          timerange={timerange}
           filterClauseDsl={filterClauseDsl}
           isOtel={isOtel}
           isK8sContainer={isK8sContainer}

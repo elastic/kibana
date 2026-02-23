@@ -75,7 +75,6 @@ describe('useHostMetricsTable hook', () => {
   });
 
   it('should call useInfrastructureNodeMetrics with OTEL/semconv metrics when isOtel is true', () => {
-
     const filterClauseDsl = {
       bool: {
         filter: [{ term: { 'host.name': 'gke-edge-oblt-pool-1-9a60016d-lgg9' } }],

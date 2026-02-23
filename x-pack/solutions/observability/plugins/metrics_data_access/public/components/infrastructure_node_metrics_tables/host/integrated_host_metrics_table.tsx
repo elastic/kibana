@@ -11,7 +11,6 @@ import { HostMetricsTable } from './host_metrics_table';
 import { useHostMetricsTable } from './use_host_metrics_table';
 import type { IntegratedNodeMetricsTableProps } from '../shared';
 
-
 type HookedHostMetricsTableProps = Pick<
   IntegratedNodeMetricsTableProps,
   'timerange' | 'filterClauseDsl' | 'isOtel' | 'metricsClient'
@@ -23,7 +22,12 @@ function HookedHostMetricsTable({
   metricsClient,
   isOtel,
 }: HookedHostMetricsTableProps) {
-  const hostMetricsTableProps = useHostMetricsTable({ timerange, filterClauseDsl, metricsClient, isOtel });
+  const hostMetricsTableProps = useHostMetricsTable({
+    timerange,
+    filterClauseDsl,
+    metricsClient,
+    isOtel,
+  });
   return (
     <HostMetricsTable
       {...hostMetricsTableProps}
