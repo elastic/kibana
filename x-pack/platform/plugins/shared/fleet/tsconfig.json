@@ -130,5 +130,8 @@
     "@kbn/reporting-common",
     "@kbn/reporting-plugin",
     "@kbn/user-profile-components"
+    "@kbn/css-utils",
+    "@kbn/rison",
+    "@kbn/rule-data-utils"
   ]
 }
