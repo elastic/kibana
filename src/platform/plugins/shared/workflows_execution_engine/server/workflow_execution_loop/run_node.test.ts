@@ -296,7 +296,7 @@ describe('runNode', () => {
 
       expect(mockOnCancel).toHaveBeenCalled();
       expect(workflowLogger.logError).toHaveBeenCalledWith(
-        'Failed to execute onCancel hook - continuing cancellation',
+        'Failed to execute onCancel hook - continuing execution',
         onCancelError
       );
     });
@@ -315,7 +315,7 @@ describe('runNode', () => {
       await runNode(mockParams);
 
       expect(workflowLogger.logError).toHaveBeenCalledWith(
-        'Failed to execute onCancel hook - continuing cancellation',
+        'Failed to execute onCancel hook - continuing execution',
         syncError
       );
     });
