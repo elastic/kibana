@@ -6,8 +6,9 @@
  */
 
 import { Logger, OnSetup, PluginSetup } from '@kbn/core-di';
-import { CoreSetup } from '@kbn/core-di-server';
+import { CoreSetup, PluginInitializer } from '@kbn/core-di-server';
 import type { ContainerModuleLoadOptions } from 'inversify';
+import type { PluginConfig } from '../config';
 import { registerFeaturePrivileges } from '../lib/security/privileges';
 import { TaskDefinition } from '../lib/services/task_run_scope_service/create_task_runner';
 import { registerSavedObjects } from '../saved_objects';
@@ -15,6 +16,7 @@ import { registerSavedObjects } from '../saved_objects';
 export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
   bind(OnSetup).toConstantValue((container) => {
     const logger = container.get(Logger);
+    const config = container.get(PluginInitializer('config')).get<PluginConfig>();
 
     registerFeaturePrivileges(container.get(PluginSetup('features')));
 
@@ -22,6 +24,13 @@ export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
       savedObjects: container.get(CoreSetup('savedObjects')),
       logger,
     });
+
+    // Register capabilities based on config
+    container.get(CoreSetup('capabilities')).registerProvider(() => ({
+      alertingVTwo: {
+        uiEnabled: config.ui.enabled,
+      },
+    }));
 
     // Trigger task registration via onActivation callbacks
     container.getAll(TaskDefinition);
