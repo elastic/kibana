@@ -129,12 +129,9 @@ Mapping updates will apply to the current write-index and your index template. T
 
 ## Lifecycle management
 
-`@kbn/data-streams` supports both Elasticsearch lifecycle models:
+`@kbn/data-streams` supports data stream lifecycle (DSL) through index template lifecycle settings.
 
-1. **ILM (stateful)**: Define `ilmPolicy` on the data stream definition. The package upserts the policy via ILM APIs and links it to backing indices through template settings (`lifecycle.name`).
-2. **Data stream lifecycle (DSL)**: Define `template.lifecycle` (for example `data_retention`) to configure data stream lifecycle behavior.
-
-For ILM, the policy itself is still a separate object in Elasticsearch; `template.lifecycle` is not an ILM policy definition.
+Define `template.lifecycle` (for example `data_retention`) to configure data stream lifecycle behavior when the data stream is created or updated.
 
 ### A note on backwards compatibility
 
