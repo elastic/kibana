@@ -89,33 +89,28 @@ function assertOnlyNonForcedAttributesInReq(fields: Record<string, EntityField>)
 }
 
 function transformDocForUpsert(type: EntityType, data: Partial<Entity>): Record<string, unknown> {
-  const now = new Date().toISOString();
-  if (type === 'generic') {
-    return {
-      '@timestamp': now,
-      ...data,
-    };
-  }
-
-  // Get host, user, service field
-  const typeData = (data[type as keyof typeof data] || {}) as Record<string, unknown>;
-
-  // Force name to be picked by the store
-  typeData.name = data.entity?.id;
-  // Nest entity under type data
-  typeData.entity = data.entity;
-
   const doc: Record<string, unknown> = {
-    '@timestamp': now,
+    '@timestamp': new Date().toISOString(),
     ...data,
   };
 
+  if (type === 'generic') {
+    return doc;
+  }
+
+  const typeKey = type as keyof typeof doc;
+  if (!doc[typeKey] || typeof doc[typeKey] !== 'object') {
+    doc[typeKey] = {};
+  }
+  const typeDoc = doc[typeKey] as Record<string, unknown>;
+
+  if (!typeDoc.name) {
+    typeDoc.name = data.entity?.id;
+  }
+  typeDoc.entity = data.entity;
+
   // Remove entity from root
   delete doc.entity;
-
-  // override the host, user service
-  // field with the built value
-  doc[type as keyof typeof doc] = typeData;
 
   return doc;
 }

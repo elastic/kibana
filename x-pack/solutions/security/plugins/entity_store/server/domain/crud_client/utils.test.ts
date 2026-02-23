@@ -66,7 +66,7 @@ describe('crud_client utils', () => {
     );
   });
 
-  it('transformDocForUpsert: nests entity under typed field and rewrites name', () => {
+  it('transformDocForUpsert: nests entity under typed field and preserves name', () => {
     mockGetEntityDefinition.mockReturnValue(createDefinition('host', [createField('host.name')]));
 
     const doc: Entity = {
@@ -78,7 +78,7 @@ describe('crud_client utils', () => {
     expect(result).toEqual(expect.objectContaining({ '@timestamp': expect.any(String) }));
     expect(result).not.toHaveProperty('entity');
     expect(result).toHaveProperty('host.entity.id', 'entity-host');
-    expect(result).toHaveProperty('host.name', 'entity-host');
+    expect(result).toHaveProperty('host.name', 'original-host-name');
   });
 
   it('getFieldDescriptions: ignores identity source fields from validation', () => {
