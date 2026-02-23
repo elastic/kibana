@@ -137,7 +137,7 @@ export const ControlPanel = ({
                   <>
                     <DragHandle
                       isEditable={isEditable}
-                      controlTitle={panelTitle || defaultPanelTitle}
+                      controlTitle={panelLabel}
                       className="controlFrame__dragHandle"
                       {...attributes}
                       {...listeners}
