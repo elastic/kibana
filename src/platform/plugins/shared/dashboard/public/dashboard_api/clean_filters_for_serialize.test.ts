@@ -9,7 +9,7 @@
 
 import type { Filter } from '@kbn/es-query';
 import { cleanFiltersForSerialize } from './clean_filters_for_serialize';
-import type { DashboardFilter } from '../server';
+import type { DashboardFilter } from '../../server';
 
 describe('cleanFiltersForSerialize', () => {
   test('should return undefined if filters is not provided', () => {
