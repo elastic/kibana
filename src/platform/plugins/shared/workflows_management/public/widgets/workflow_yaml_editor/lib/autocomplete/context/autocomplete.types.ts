@@ -52,6 +52,7 @@ export interface AutocompleteContext {
   // dynamic connector types
   dynamicConnectorTypes: Record<string, ConnectorTypeInfo> | null;
   workflows: WorkflowsResponse;
+  currentWorkflowId: string | null;
   workflowDefinition: WorkflowYaml | null;
 }
 

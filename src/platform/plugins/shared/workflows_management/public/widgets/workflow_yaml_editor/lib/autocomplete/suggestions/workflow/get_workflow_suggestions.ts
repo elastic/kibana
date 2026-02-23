@@ -27,6 +27,7 @@ type WorkflowSuggestionsContext = ExtendedAutocompleteContext & {
  */
 function getWorkflowsFromStore(
   workflows: WorkflowsResponse,
+  currentWorkflowId: string | null,
   searchPrefix?: string
 ): Array<{ id: string; name: string; inputsSchema?: JsonModelSchemaType }> {
   if (!workflows.workflows) {
@@ -37,6 +38,9 @@ function getWorkflowsFromStore(
   const lowerSearchPrefix = searchPrefix?.toLowerCase() || '';
 
   const filtered = allWorkflows.filter((workflow) => {
+    if (workflow.id === currentWorkflowId) {
+      return false;
+    }
     if (!lowerSearchPrefix) {
       return true;
     }
@@ -80,7 +84,8 @@ function buildDocumentation(
 export async function getWorkflowSuggestions(
   autocompleteContext: WorkflowSuggestionsContext
 ): Promise<monaco.languages.CompletionItem[]> {
-  const { focusedStepInfo, line, lineParseResult, range, workflows, model } = autocompleteContext;
+  const { focusedStepInfo, line, lineParseResult, range, workflows, currentWorkflowId, model } =
+    autocompleteContext;
 
   if (lineParseResult?.matchType !== 'workflow-id') {
     return [];
@@ -96,7 +101,7 @@ export async function getWorkflowSuggestions(
 
   const searchPrefix = lineParseResult.fullKey ?? '';
 
-  const workflowSuggestions = getWorkflowsFromStore(workflows, searchPrefix);
+  const workflowSuggestions = getWorkflowsFromStore(workflows, currentWorkflowId, searchPrefix);
 
   const valueStartIndex = lineParseResult.valueStartIndex;
   const adjustedRange =

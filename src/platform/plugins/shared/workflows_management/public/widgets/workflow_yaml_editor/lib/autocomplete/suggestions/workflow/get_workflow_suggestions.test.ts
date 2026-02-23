@@ -159,4 +159,15 @@ describe('getWorkflowSuggestions', () => {
     const result = await getWorkflowSuggestions(makeContext({ focusedStepInfo: null }));
     expect(result).toHaveLength(2);
   });
+
+  it('excludes the current workflow from suggestions to prevent recursion', async () => {
+    const result = await getWorkflowSuggestions(makeContext({ currentWorkflowId: 'wf-alpha' }));
+    expect(result).toHaveLength(1);
+    expect(result[0].label).toBe('Beta Workflow (id: wf-beta)');
+  });
+
+  it('returns all workflows when currentWorkflowId is null', async () => {
+    const result = await getWorkflowSuggestions(makeContext({ currentWorkflowId: null }));
+    expect(result).toHaveLength(2);
+  });
 });
