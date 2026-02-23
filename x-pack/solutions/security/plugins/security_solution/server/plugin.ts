@@ -753,7 +753,6 @@ export class Plugin implements ISecuritySolutionPlugin {
     core: SecuritySolutionPluginCoreStartDependencies,
     plugins: SecuritySolutionPluginStartDependencies
   ): SecuritySolutionPluginStart {
-
     const { config, logger, productFeaturesService } = this;
 
     this.ruleMonitoringService.start(core, plugins);
