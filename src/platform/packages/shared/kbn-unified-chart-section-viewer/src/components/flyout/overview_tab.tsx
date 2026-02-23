@@ -83,7 +83,7 @@ export const OverviewTab = ({ metric, description }: OverviewTabProps) => {
           <EuiFlexItem
             grow={false}
             css={css`
-              min-width: 180px;
+              min-width: ${euiTheme.base * 11.25}px;
             `}
           >
             <EuiText size="xs">
@@ -94,7 +94,7 @@ export const OverviewTab = ({ metric, description }: OverviewTabProps) => {
         </EuiFlexGroup>
       ),
     }),
-    []
+    [euiTheme.base]
   );
 
   // Create description list items
