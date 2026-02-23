@@ -17,7 +17,7 @@ globalSetupHook('Ingest data to Elasticsearch', async ({ esArchiver, esClient, l
     testData.ES_ARCHIVES.TSDB_LOGS,
   ];
 
-  log.debug('[setup] loading ES archives (only if indexes do not exist)...');
+  log.debug('[setup] loading ES archives (only if indices do not exist)...');
   for (const archive of archives) {
     await esArchiver.loadIfNeeded(archive);
   }

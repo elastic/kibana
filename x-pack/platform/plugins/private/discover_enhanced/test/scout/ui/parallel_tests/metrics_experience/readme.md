@@ -4,22 +4,6 @@ Scout UI tests for the Metrics in Discover feature.
 
 We follow Scout Best Practices for test structure and conventions.
 
-## Key decisions
-
-- **Tests close to Discover**: We keep tests in `discover_enhanced` because Metrics in Discover is part of the Discover experience and reuses the existing Scout config, fixtures, and setup. If needed, we can split in the future.
-- **Feature subfolder** (`metrics_experience/`): Groups related specs together.
-- **Page object** (`MetricsExperiencePage`): Centralized locators and actions. Reusable across future specs (flyout, charts, breakdown). Avoids duplicating selectors.
-- **`spaceTest` for parallel isolation**: Each spec runs in its own Kibana space, enabling `workers: 2` without conflicts.
-- **`test.step()` for multi-step flows**: Groups related assertions within a single test. Note: steps are NOT visible in the Scout dashboard; only suite/test titles appear.
-- **Global setup for data**: ES archives and the dynamic test index are loaded in `global.setup.ts`, not in individual specs. This prevents stability issues when parallel tests create/delete indexes or ingest data against the same ES instance.
-- **Tags**: Tests are tagged with `METRICS_EXPERIENCE_TAGS` (`stateful.all` + `serverless.observability.complete`).
-  - TODO: add `serverless.security.complete` 
-
-## Reference PRs
-
-- [PR #252738](https://github.com/elastic/kibana/pull/252738): Scout setup, grid activation tests
-- [PR #253076](https://github.com/elastic/kibana/pull/253076): Grid navigation (pagination, search)
-
 ## Folder structure
 
 ```
