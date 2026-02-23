@@ -123,6 +123,73 @@ function assertOptionalNonEmptyString(obj, path) {
   }
 }
 
+function validateGcsCredentials(config) {
+  const gcsCreds = config.gcsDatasetAccessCredentials;
+  if (gcsCreds === undefined || gcsCreds === null) return;
+
+  if (typeof gcsCreds !== 'object' || Array.isArray(gcsCreds)) {
+    die(
+      'Invalid kbn-evals CI config: "gcsDatasetAccessCredentials" must be an object when provided'
+    );
+  }
+
+  const requiredFields = [
+    'type',
+    'project_id',
+    'private_key_id',
+    'private_key',
+    'client_email',
+    'client_id',
+    'auth_uri',
+    'token_uri',
+  ];
+  for (const field of requiredFields) {
+    assertNonEmptyString(config, `gcsDatasetAccessCredentials.${field}`);
+  }
+}
+
+function validateTracingEs(config) {
+  const tracingEs = config.tracingEs;
+  if (tracingEs === undefined || tracingEs === null) return;
+
+  if (typeof tracingEs !== 'object' || Array.isArray(tracingEs)) {
+    die('Invalid kbn-evals CI config: "tracingEs" must be an object when provided');
+  }
+  assertNonEmptyString(config, 'tracingEs.url');
+  assertNonEmptyString(config, 'tracingEs.apiKey');
+}
+
+function validateTracingExporters(config) {
+  const tracingExporters = config.tracingExporters;
+  if (tracingExporters === undefined || tracingExporters === null) return;
+
+  if (!Array.isArray(tracingExporters) || tracingExporters.length === 0) {
+    die('Invalid kbn-evals CI config: "tracingExporters" must be a non-empty array when provided');
+  }
+  const allowedKeys = new Set(['http', 'grpc', 'phoenix', 'langfuse']);
+  for (let i = 0; i < tracingExporters.length; i++) {
+    const entry = tracingExporters[i];
+    if (!entry || typeof entry !== 'object' || Array.isArray(entry)) {
+      die(`Invalid kbn-evals CI config: "tracingExporters[${i}]" must be an object`);
+    }
+    const keys = Object.keys(entry);
+    if (keys.length !== 1) {
+      die(
+        `Invalid kbn-evals CI config: "tracingExporters[${i}]" must have exactly one key (one of: ${[
+          ...allowedKeys,
+        ].join(', ')})`
+      );
+    }
+    if (!allowedKeys.has(keys[0])) {
+      die(
+        `Invalid kbn-evals CI config: "tracingExporters[${i}]" has unknown key "${
+          keys[0]
+        }" (allowed: ${[...allowedKeys].join(', ')})`
+      );
+    }
+  }
+}
+
 function validateConfigShape(config) {
   if (!config || typeof config !== 'object' || Array.isArray(config)) {
     die('Invalid kbn-evals CI config: root must be a JSON object');
@@ -139,47 +206,9 @@ function validateConfigShape(config) {
   assertOptionalNonEmptyString(config, 'litellm.teamId');
   assertOptionalNonEmptyString(config, 'litellm.teamName');
 
-  // Optional tracingEs block (if present, require both fields)
-  const tracingEs = config.tracingEs;
-  if (tracingEs !== undefined && tracingEs !== null) {
-    if (!tracingEs || typeof tracingEs !== 'object' || Array.isArray(tracingEs)) {
-      die('Invalid kbn-evals CI config: "tracingEs" must be an object when provided');
-    }
-    assertNonEmptyString(config, 'tracingEs.url');
-    assertNonEmptyString(config, 'tracingEs.apiKey');
-  }
-
-  // Optional tracingExporters array (supports http, grpc, phoenix, langfuse exporters)
-  const tracingExporters = config.tracingExporters;
-  if (tracingExporters !== undefined && tracingExporters !== null) {
-    if (!Array.isArray(tracingExporters) || tracingExporters.length === 0) {
-      die(
-        'Invalid kbn-evals CI config: "tracingExporters" must be a non-empty array when provided'
-      );
-    }
-    const allowedKeys = new Set(['http', 'grpc', 'phoenix', 'langfuse']);
-    for (let i = 0; i < tracingExporters.length; i++) {
-      const entry = tracingExporters[i];
-      if (!entry || typeof entry !== 'object' || Array.isArray(entry)) {
-        die(`Invalid kbn-evals CI config: "tracingExporters[${i}]" must be an object`);
-      }
-      const keys = Object.keys(entry);
-      if (keys.length !== 1) {
-        die(
-          `Invalid kbn-evals CI config: "tracingExporters[${i}]" must have exactly one key (one of: ${[
-            ...allowedKeys,
-          ].join(', ')})`
-        );
-      }
-      if (!allowedKeys.has(keys[0])) {
-        die(
-          `Invalid kbn-evals CI config: "tracingExporters[${i}]" has unknown key "${
-            keys[0]
-          }" (allowed: ${[...allowedKeys].join(', ')})`
-        );
-      }
-    }
-  }
+  validateGcsCredentials(config);
+  validateTracingEs(config);
+  validateTracingExporters(config);
 }
 
 async function readStdin() {
