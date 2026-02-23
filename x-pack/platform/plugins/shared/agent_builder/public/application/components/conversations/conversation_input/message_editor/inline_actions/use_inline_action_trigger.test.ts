@@ -9,10 +9,18 @@ import { renderHook, act } from '@testing-library/react';
 import { useInlineActionTrigger } from './use_inline_action_trigger';
 import * as triggerMatcherModule from './trigger_matcher';
 
-jest.mock('./trigger_matcher', () => ({
-  ...jest.requireActual('./trigger_matcher'),
-  getTextBeforeCursor: jest.fn(),
-}));
+jest.mock('./trigger_matcher', () => {
+  const actual = jest.requireActual('./trigger_matcher');
+  const { TriggerId } = jest.requireActual('./types');
+  return {
+    ...actual,
+    getTextBeforeCursor: jest.fn(),
+    matchTrigger: actual.createMatchTrigger([
+      { id: TriggerId.Attachment, sequence: '@' },
+      { id: TriggerId.Prompt, sequence: '/p' },
+    ]),
+  };
+});
 
 const mockGetTextBeforeCursor = triggerMatcherModule.getTextBeforeCursor as jest.MockedFunction<
   typeof triggerMatcherModule.getTextBeforeCursor
