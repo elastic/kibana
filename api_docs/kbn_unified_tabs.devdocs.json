@@ -131,7 +131,7 @@
         "label": "TabbedContent",
         "description": [],
         "signature": [
-          "({ items: managedItems, selectedItemId: managedSelectedItemId, recentlyClosedItems, unsavedItemIds, maxItemsCount, services, hideTabsBar, renderContent, createItem, onChanged, tabContentIdOverride, onClearRecentlyClosed, getPreviewData, onEBTEvent, customNewTabButton, disableCloseButton, disableInlineLabelEditing, disableDragAndDrop, disableTabsBarMenu, }: ",
+          "({ items: managedItems, selectedItemId: managedSelectedItemId, recentlyClosedItems, unsavedItemIds, maxItemsCount, services, hideTabsBar, renderContent, createItem, onChanged, tabContentIdOverride, onClearRecentlyClosed, getPreviewData, onEBTEvent, customNewTabButton, disableCloseButton, disableInlineLabelEditing, disableDragAndDrop, disableTabsBarMenu, appendRight, getAdditionalTabMenuItems, }: ",
           {
             "pluginId": "@kbn/unified-tabs",
             "scope": "public",
@@ -142,7 +142,7 @@
           ") => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-unified-tabs/src/components/tabbed_content/tabbed_content.tsx",
-        "lineNumber": 70,
+        "lineNumber": 89,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -152,7 +152,7 @@
             "id": "def-public.TabbedContent.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  items: managedItems,\n  selectedItemId: managedSelectedItemId,\n  recentlyClosedItems,\n  unsavedItemIds,\n  maxItemsCount = MAX_ITEMS_COUNT,\n  services,\n  hideTabsBar = false,\n  renderContent,\n  createItem,\n  onChanged,\n  tabContentIdOverride,\n  onClearRecentlyClosed,\n  getPreviewData,\n  onEBTEvent,\n  customNewTabButton,\n  disableCloseButton = false,\n  disableInlineLabelEditing = false,\n  disableDragAndDrop = false,\n  disableTabsBarMenu = false,\n}",
+            "label": "{\n  items: managedItems,\n  selectedItemId: managedSelectedItemId,\n  recentlyClosedItems,\n  unsavedItemIds,\n  maxItemsCount = MAX_ITEMS_COUNT,\n  services,\n  hideTabsBar = false,\n  renderContent,\n  createItem,\n  onChanged,\n  tabContentIdOverride,\n  onClearRecentlyClosed,\n  getPreviewData,\n  onEBTEvent,\n  customNewTabButton,\n  disableCloseButton = false,\n  disableInlineLabelEditing = false,\n  disableDragAndDrop = false,\n  disableTabsBarMenu = false,\n  appendRight,\n  getAdditionalTabMenuItems,\n}",
             "description": [],
             "signature": [
               {
@@ -164,7 +164,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-unified-tabs/src/components/tabbed_content/tabbed_content.tsx",
-            "lineNumber": 70,
+            "lineNumber": 89,
             "columnNumber": 61,
             "deprecated": false,
             "trackAdoption": false,
@@ -252,7 +252,7 @@
           ", \"disableCloseButton\" | \"disableInlineLabelEditing\" | \"disableDragAndDrop\" | \"unsavedItemIds\" | \"maxItemsCount\" | \"onClearRecentlyClosed\" | \"disableTabsBarMenu\">"
         ],
         "path": "src/platform/packages/shared/kbn-unified-tabs/src/components/tabbed_content/tabbed_content.tsx",
-        "lineNumber": 39,
+        "lineNumber": 41,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -275,7 +275,7 @@
               "[]"
             ],
             "path": "src/platform/packages/shared/kbn-unified-tabs/src/components/tabbed_content/tabbed_content.tsx",
-            "lineNumber": 50,
+            "lineNumber": 52,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -291,7 +291,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-tabs/src/components/tabbed_content/tabbed_content.tsx",
-            "lineNumber": 51,
+            "lineNumber": 53,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -308,7 +308,7 @@
               "[]"
             ],
             "path": "src/platform/packages/shared/kbn-unified-tabs/src/components/tabbed_content/tabbed_content.tsx",
-            "lineNumber": 52,
+            "lineNumber": 54,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -324,7 +324,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-tabs/src/components/tabbed_content/tabbed_content.tsx",
-            "lineNumber": 53,
+            "lineNumber": 55,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -340,7 +340,7 @@
               "TabsServices"
             ],
             "path": "src/platform/packages/shared/kbn-unified-tabs/src/components/tabbed_content/tabbed_content.tsx",
-            "lineNumber": 54,
+            "lineNumber": 56,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -356,7 +356,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-tabs/src/components/tabbed_content/tabbed_content.tsx",
-            "lineNumber": 55,
+            "lineNumber": 57,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -380,7 +380,7 @@
               ") => React.ReactNode) | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-tabs/src/components/tabbed_content/tabbed_content.tsx",
-            "lineNumber": 56,
+            "lineNumber": 58,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -402,7 +402,7 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-unified-tabs/src/components/tabbed_content/tabbed_content.tsx",
-                "lineNumber": 56,
+                "lineNumber": 58,
                 "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -429,7 +429,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-unified-tabs/src/components/tabbed_content/tabbed_content.tsx",
-            "lineNumber": 57,
+            "lineNumber": 59,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -444,10 +444,10 @@
             "label": "customNewTabButton",
             "description": [],
             "signature": [
-              "React.ReactElement<any, string | React.JSXElementConstructor<any>> | undefined"
+              "React.ReactElement<any> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-tabs/src/components/tabbed_content/tabbed_content.tsx",
-            "lineNumber": 58,
+            "lineNumber": 60,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -465,7 +465,7 @@
               ") => void"
             ],
             "path": "src/platform/packages/shared/kbn-unified-tabs/src/components/tabbed_content/tabbed_content.tsx",
-            "lineNumber": 59,
+            "lineNumber": 61,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -481,7 +481,7 @@
                   "TabbedContentState"
                 ],
                 "path": "src/platform/packages/shared/kbn-unified-tabs/src/components/tabbed_content/tabbed_content.tsx",
-                "lineNumber": 59,
+                "lineNumber": 61,
                 "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -517,7 +517,7 @@
               ") | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-tabs/src/components/tabbed_content/tabbed_content.tsx",
-            "lineNumber": 60,
+            "lineNumber": 62,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -539,7 +539,7 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-unified-tabs/src/components/tabbed_content/tabbed_content.tsx",
-                "lineNumber": 60,
+                "lineNumber": 62,
                 "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -567,7 +567,7 @@
               ") => void"
             ],
             "path": "src/platform/packages/shared/kbn-unified-tabs/src/components/tabbed_content/tabbed_content.tsx",
-            "lineNumber": 61,
+            "lineNumber": 63,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -589,7 +589,7 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-unified-tabs/src/components/tabbed_content/tabbed_content.tsx",
-                "lineNumber": 61,
+                "lineNumber": 63,
                 "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -609,10 +609,86 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-tabs/src/components/tabbed_content/tabbed_content.tsx",
-            "lineNumber": 62,
+            "lineNumber": 64,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-tabs",
+            "id": "def-public.TabbedContentProps.appendRight",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "appendRight",
+            "description": [],
+            "signature": [
+              "React.ReactNode"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-tabs/src/components/tabbed_content/tabbed_content.tsx",
+            "lineNumber": 65,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-tabs",
+            "id": "def-public.TabbedContentProps.getAdditionalTabMenuItems",
+            "type": "Function",
+            "tags": [],
+            "label": "getAdditionalTabMenuItems",
+            "description": [
+              "Optional function to provide additional menu items for tabs"
+            ],
+            "signature": [
+              "((item: ",
+              {
+                "pluginId": "@kbn/unified-tabs",
+                "scope": "public",
+                "docId": "kibKbnUnifiedTabsPluginApi",
+                "section": "def-public.TabItem",
+                "text": "TabItem"
+              },
+              ") => ",
+              {
+                "pluginId": "@kbn/unified-tabs",
+                "scope": "public",
+                "docId": "kibKbnUnifiedTabsPluginApi",
+                "section": "def-public.TabMenuItem",
+                "text": "TabMenuItem"
+              },
+              "[]) | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-tabs/src/components/tabbed_content/tabbed_content.tsx",
+            "lineNumber": 66,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/unified-tabs",
+                "id": "def-public.TabbedContentProps.getAdditionalTabMenuItems.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "item",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/unified-tabs",
+                    "scope": "public",
+                    "docId": "kibKbnUnifiedTabsPluginApi",
+                    "section": "def-public.TabItem",
+                    "text": "TabItem"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-unified-tabs/src/components/tabbed_content/tabbed_content.tsx",
+                "lineNumber": 67,
+                "columnNumber": 32,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -700,6 +776,77 @@
             ],
             "path": "src/platform/packages/shared/kbn-unified-tabs/src/types.ts",
             "lineNumber": 19,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/unified-tabs",
+        "id": "def-public.TabMenuItemWithClick",
+        "type": "Interface",
+        "tags": [],
+        "label": "TabMenuItemWithClick",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-unified-tabs/src/types.ts",
+        "lineNumber": 53,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/unified-tabs",
+            "id": "def-public.TabMenuItemWithClick.datatestsubj",
+            "type": "string",
+            "tags": [],
+            "label": "'data-test-subj'",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-unified-tabs/src/types.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-tabs",
+            "id": "def-public.TabMenuItemWithClick.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-unified-tabs/src/types.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-tabs",
+            "id": "def-public.TabMenuItemWithClick.label",
+            "type": "string",
+            "tags": [],
+            "label": "label",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-unified-tabs/src/types.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-tabs",
+            "id": "def-public.TabMenuItemWithClick.onClick",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "onClick",
+            "description": [],
+            "signature": [
+              "(() => void) | null"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-tabs/src/types.ts",
+            "lineNumber": 57,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -986,7 +1133,32 @@
         "initialIsOpen": false
       }
     ],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/unified-tabs",
+        "id": "def-public.TabMenuItem",
+        "type": "Type",
+        "tags": [],
+        "label": "TabMenuItem",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/unified-tabs",
+            "scope": "public",
+            "docId": "kibKbnUnifiedTabsPluginApi",
+            "section": "def-public.TabMenuItemWithClick",
+            "text": "TabMenuItemWithClick"
+          },
+          " | \"divider\""
+        ],
+        "path": "src/platform/packages/shared/kbn-unified-tabs/src/types.ts",
+        "lineNumber": 60,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   },
   "server": {
