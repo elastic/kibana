@@ -42,7 +42,10 @@ export function createCasesStepHandler<
   TOutputCase extends WorkflowStepCaseResult = WorkflowStepCaseResult
 >(
   getCasesClient: (request: KibanaRequest) => Promise<CasesClient>,
-  operation: (client: CasesClient, input: TInput, config: TConfig) => Promise<TOutputCase>
+  operation: (client: CasesClient, input: TInput, config: TConfig) => Promise<TOutputCase>,
+  options?: {
+    onError?: (error: unknown, input: TInput, config: TConfig) => Error;
+  }
 ) {
   return async (context: StepHandlerContext) => {
     try {
@@ -67,6 +70,12 @@ export function createCasesStepHandler<
         },
       };
     } catch (error) {
+      if (options?.onError) {
+        return {
+          error: options.onError(error, context.input as TInput, context.config as TConfig),
+        };
+      }
+
       return { error };
     }
   };

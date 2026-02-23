@@ -13,14 +13,14 @@ import {
 } from '../../bundled-types.gen';
 import { CasesStepBaseConfigSchema } from './shared';
 
-export const UpdateCaseStepTypeId = 'cases.updateCase';
+export const UpdateCasesStepTypeId = 'cases.updateCases';
 
 const UpdateFieldsSchema = UpdateCaseRequestSchema.shape.cases.element.omit({
   id: true,
   version: true,
 });
 
-export const InputSchema = z.object({
+const CaseUpdateSchema = z.object({
   case_id: z.string().min(1, 'case_id is required'),
   version: z.string().min(1).optional(),
   updates: UpdateFieldsSchema.refine((updates) => Object.keys(updates).length > 0, {
@@ -28,21 +28,25 @@ export const InputSchema = z.object({
   }),
 });
 
-export const OutputSchema = z.object({
-  case: CaseResponsePropertiesSchema,
+export const InputSchema = z.object({
+  cases: z.array(CaseUpdateSchema).min(1).max(100),
 });
 
-export type UpdateCaseStepInputSchema = typeof InputSchema;
-export type UpdateCaseStepOutputSchema = typeof OutputSchema;
+export const OutputSchema = z.object({
+  cases: z.array(CaseResponsePropertiesSchema).max(100),
+});
 
-export type UpdateCaseStepInput = z.infer<typeof InputSchema>;
-export type UpdateCaseStepOutput = z.infer<typeof OutputSchema>;
+export type UpdateCasesStepInputSchema = typeof InputSchema;
+export type UpdateCasesStepOutputSchema = typeof OutputSchema;
 
-export const updateCaseStepCommonDefinition: CommonStepDefinition<
-  UpdateCaseStepInputSchema,
-  UpdateCaseStepOutputSchema
+export type UpdateCasesStepInput = z.infer<typeof InputSchema>;
+export type UpdateCasesStepOutput = z.infer<typeof OutputSchema>;
+
+export const updateCasesStepCommonDefinition: CommonStepDefinition<
+  UpdateCasesStepInputSchema,
+  UpdateCasesStepOutputSchema
 > = {
-  id: UpdateCaseStepTypeId,
+  id: UpdateCasesStepTypeId,
   inputSchema: InputSchema,
   outputSchema: OutputSchema,
   configSchema: CasesStepBaseConfigSchema,

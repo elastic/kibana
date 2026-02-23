@@ -10,6 +10,8 @@ import { getCaseStepCommonDefinition } from './get_case';
 import { createCaseStepCommonDefinition } from './create_case';
 import { createCaseFromTemplateStepCommonDefinition } from './create_case_from_template';
 import { updateCaseStepCommonDefinition } from './update_case';
+import { updateCasesStepCommonDefinition } from './update_cases';
+import { setCustomFieldStepCommonDefinition } from './set_custom_field';
 import { addCommentStepCommonDefinition } from './add_comment';
 import { findCasesStepCommonDefinition } from './find_cases';
 
@@ -20,6 +22,8 @@ export {
   createCaseFromTemplateStepCommonDefinition,
 } from './create_case_from_template';
 export { UpdateCaseStepTypeId, updateCaseStepCommonDefinition } from './update_case';
+export { UpdateCasesStepTypeId, updateCasesStepCommonDefinition } from './update_cases';
+export { SetCustomFieldStepTypeId, setCustomFieldStepCommonDefinition } from './set_custom_field';
 export { AddCommentStepTypeId, addCommentStepCommonDefinition } from './add_comment';
 export { FindCasesStepTypeId, findCasesStepCommonDefinition } from './find_cases';
 
@@ -28,6 +32,8 @@ export const casesWorkflowSteps: ReadonlyArray<CommonStepDefinition> = Object.fr
   createCaseStepCommonDefinition,
   createCaseFromTemplateStepCommonDefinition,
   updateCaseStepCommonDefinition,
+  updateCasesStepCommonDefinition,
+  setCustomFieldStepCommonDefinition,
   addCommentStepCommonDefinition,
   findCasesStepCommonDefinition,
 ]);

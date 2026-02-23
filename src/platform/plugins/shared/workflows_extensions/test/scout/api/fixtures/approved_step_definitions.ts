@@ -78,7 +78,11 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string 
   },
   {
     id: 'cases.updateCase',
-    handlerHash: 'efb5c5a442f9e8cda4ae04f5fb6c2ae075008caac1b34f58c4da30cc36b28cc6',
+    handlerHash: 'ed3de42bf5f21bb99f37e2a6f1bd2bd7d5a7996349aeccdae02675f3cbc26bb3',
+  },
+  {
+    id: 'cases.updateCases',
+    handlerHash: '781709007f2253eebc3f0ad415bd85fed0bd5eb70f4858d995cdb5ba4414d548',
   },
   {
     id: 'cases.getCase',
@@ -95,5 +99,9 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string 
   {
     id: 'cases.findCases',
     handlerHash: 'cabe45a548e2c4eaaa23759314f496a3077a59638c23afee8391a8bf318aade7',
+  },
+  {
+    id: 'cases.setCustomField',
+    handlerHash: '431ba5f5bfa3dbc3d799234d4c466f53d44b36793e5d951a976cd76d2dfd1b05',
   },
 ];

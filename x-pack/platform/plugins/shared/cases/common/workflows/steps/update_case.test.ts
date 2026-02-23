@@ -27,6 +27,16 @@ describe('update_case common step definition', () => {
     ).toBe(true);
   });
 
+  it('accepts valid update case input with version', () => {
+    expect(
+      InputSchema.safeParse({
+        case_id: 'case-1',
+        version: 'WzQ3LDFd',
+        updates: { title: 'Updated title' },
+      }).success
+    ).toBe(true);
+  });
+
   it('rejects update case input without updates', () => {
     expect(
       InputSchema.safeParse({

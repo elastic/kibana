@@ -37,6 +37,16 @@ export const createUpdateCaseStepDefinition = () => {
       status: "in-progress"
       severity: "high"
 \`\`\``,
+        `## Update case with explicit version
+\`\`\`yaml
+- name: update_case_with_version
+  type: ${UpdateCaseStepTypeId}
+  with:
+    case_id: "abc-123-def-456"
+    version: "WzQ3LDFd"
+    updates:
+      title: "Updated with explicit optimistic concurrency version"
+\`\`\``,
       ],
     },
     actionsMenuGroup: ActionsMenuGroup.kibana,

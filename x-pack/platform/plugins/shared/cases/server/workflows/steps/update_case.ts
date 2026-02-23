@@ -15,29 +15,46 @@ import { CasePatchRequestRt } from '../../../common/types/api';
 import { decodeWithExcessOrThrow } from '../../common/runtime_types';
 import type { CasesClient } from '../../client';
 import { createCasesStepHandler, normalizeCaseStepUpdatesForBulkPatch } from './utils';
+import { UPDATE_CASE_FAILED_MESSAGE } from './translations';
 
 export const updateCaseStepDefinition = (
   getCasesClient: (request: KibanaRequest) => Promise<CasesClient>
 ) =>
   createServerStepDefinition({
     ...updateCaseStepCommonDefinition,
-    handler: createCasesStepHandler(getCasesClient, async (client, input: UpdateCaseStepInput) => {
-      const theCase = await client.cases.get({
-        id: input.case_id,
-        includeComments: false,
-      });
-      const normalizedCasePatch = decodeWithExcessOrThrow(CasePatchRequestRt)({
-        id: input.case_id,
-        version: theCase.version,
-        ...normalizeCaseStepUpdatesForBulkPatch(input.updates),
-      });
+    handler: createCasesStepHandler(
+      getCasesClient,
+      async (client, input: UpdateCaseStepInput) => {
+        const version =
+          input.version ??
+          (
+            await client.cases.get({
+              id: input.case_id,
+              includeComments: false,
+            })
+          ).version;
 
-      const updatedCases = await client.cases.bulkUpdate({
-        cases: [normalizedCasePatch],
-      });
+        const normalizedCasePatch = decodeWithExcessOrThrow(CasePatchRequestRt)({
+          id: input.case_id,
+          version,
+          ...normalizeCaseStepUpdatesForBulkPatch(input.updates),
+        });
 
-      const updatedCase = updatedCases.find((updated) => updated.id === input.case_id);
+        const updatedCases = await client.cases.bulkUpdate({
+          cases: [normalizedCasePatch],
+        });
 
-      return updateCaseStepCommonDefinition.outputSchema.shape.case.parse(updatedCase);
-    }),
+        const updatedCase = updatedCases.find((updated) => updated.id === input.case_id);
+        if (!updatedCase) {
+          throw new Error(UPDATE_CASE_FAILED_MESSAGE(input.case_id));
+        }
+
+        return updateCaseStepCommonDefinition.outputSchema.shape.case.parse(updatedCase);
+      },
+      {
+        onError: (_error, input: UpdateCaseStepInput) => {
+          return new Error(UPDATE_CASE_FAILED_MESSAGE(input.case_id));
+        },
+      }
+    ),
   });

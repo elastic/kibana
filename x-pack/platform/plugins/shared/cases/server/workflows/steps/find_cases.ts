@@ -29,7 +29,11 @@ export const findCasesStepDefinition = (
         const casesClient = await getCasesClient(request);
         const input = context.input as FindCasesStepInput;
 
-        const findRequest: CasesFindRequestWithCustomFields = input;
+        const findRequest: CasesFindRequestWithCustomFields = {
+          ...input,
+          status: input.status as CasesFindRequestWithCustomFields['status'],
+          severity: input.severity as CasesFindRequestWithCustomFields['severity'],
+        };
         const response: CasesFindResponse = await casesClient.cases.find(findRequest);
         const output: FindCasesStepOutput =
           findCasesStepCommonDefinition.outputSchema.parse(response);

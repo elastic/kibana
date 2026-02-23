@@ -64,7 +64,51 @@ export const UPDATE_CASE_STEP_DOCUMENTATION_DETAILS = i18n.translate(
   'xpack.cases.workflowSteps.updateCase.documentation.details',
   {
     defaultMessage:
-      'This step first fetches the case to retrieve the latest version and then applies the requested updates.',
+      'This step updates a case using the provided fields. If a version is provided, it is used directly. Otherwise, the step fetches the case to resolve the latest version before updating.',
+  }
+);
+
+export const UPDATE_CASES_STEP_LABEL = i18n.translate(
+  'xpack.cases.workflowSteps.updateCases.label',
+  {
+    defaultMessage: 'Update cases',
+  }
+);
+
+export const UPDATE_CASES_STEP_DESCRIPTION = i18n.translate(
+  'xpack.cases.workflowSteps.updateCases.description',
+  {
+    defaultMessage: 'Updates multiple cases in one step',
+  }
+);
+
+export const UPDATE_CASES_STEP_DOCUMENTATION_DETAILS = i18n.translate(
+  'xpack.cases.workflowSteps.updateCases.documentation.details',
+  {
+    defaultMessage:
+      'This step updates multiple cases at once. Each case can provide a version directly or let the step fetch the latest version before applying updates.',
+  }
+);
+
+export const SET_CUSTOM_FIELD_STEP_LABEL = i18n.translate(
+  'xpack.cases.workflowSteps.setCustomField.label',
+  {
+    defaultMessage: 'Set case custom field',
+  }
+);
+
+export const SET_CUSTOM_FIELD_STEP_DESCRIPTION = i18n.translate(
+  'xpack.cases.workflowSteps.setCustomField.description',
+  {
+    defaultMessage: 'Sets a single custom field value on an existing case',
+  }
+);
+
+export const SET_CUSTOM_FIELD_STEP_DOCUMENTATION_DETAILS = i18n.translate(
+  'xpack.cases.workflowSteps.setCustomField.documentation.details',
+  {
+    defaultMessage:
+      'This step updates one custom field on a case by field name. Use `field_name` to select the field key and `value` to set the new value.',
   }
 );
 
@@ -146,4 +190,16 @@ export const CASE_NOT_FOUND_MESSAGE = (caseId: string) =>
   i18n.translate('xpack.cases.workflowSteps.shared.caseNotFoundMessage', {
     defaultMessage: 'Case "{caseId}" was not found.',
     values: { caseId },
+  });
+
+export const CUSTOM_FIELD_CAN_BE_USED_MESSAGE = (fieldName: string) =>
+  i18n.translate('xpack.cases.workflowSteps.shared.customFieldCanBeUsedMessage', {
+    defaultMessage: 'Custom field "{fieldName}" can be updated by this step.',
+    values: { fieldName },
+  });
+
+export const CUSTOM_FIELD_NOT_FOUND_MESSAGE = (fieldName: string) =>
+  i18n.translate('xpack.cases.workflowSteps.shared.customFieldNotFoundMessage', {
+    defaultMessage: 'Custom field "{fieldName}" was not found in case configuration.',
+    values: { fieldName },
   });

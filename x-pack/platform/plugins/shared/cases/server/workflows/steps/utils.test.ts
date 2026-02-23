@@ -107,4 +107,21 @@ describe('createCasesStepHandler', () => {
 
     expect(result).toEqual({ error: operationError });
   });
+
+  it('maps errors via onError callback when provided', async () => {
+    const operationError = new Error('operation failed');
+    const operation = jest.fn().mockRejectedValue(operationError);
+    const getCasesClient = jest.fn().mockResolvedValue({
+      cases: { push: jest.fn() },
+    });
+
+    const handler = createCasesStepHandler(getCasesClient, operation, {
+      onError: () => new Error('mapped error'),
+    });
+    const result = await handler(createContext());
+
+    expect(result).toEqual({
+      error: new Error('mapped error'),
+    });
+  });
 });
