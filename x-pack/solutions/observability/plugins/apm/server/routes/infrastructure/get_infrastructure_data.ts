@@ -7,7 +7,7 @@
 
 import { rangeQuery, kqlQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { termQuery, termsQuery } from '@kbn/es-query';
+import { termQuery } from '@kbn/es-query';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import {
   SERVICE_NAME,
@@ -102,7 +102,12 @@ export const getInfrastructureData = async ({
             filter: [
               ...rangeQuery(start, end),
               ...kqlQuery(kuery),
-              ...termsQuery(k8sFilterField, podNames),
+              {
+                bool: {
+                  should: podNames.map((pod) => ({ term: { [k8sFilterField]: pod } })),
+                  minimum_should_match: 1,
+                },
+              },
             ],
           },
         },
