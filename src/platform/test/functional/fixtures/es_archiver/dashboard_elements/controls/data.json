@@ -1,7 +1,7 @@
 {
   "type": "doc",
   "value": {
-    "id": "control-chaining-cat-no-name",
+    "id": "control-chaining-cat",
     "index": "animals-cats-2018-01-01",
     "source": {
       "@timestamp": "2018-01-01T16:00:00.000Z",
@@ -13,7 +13,7 @@
 {
   "type": "doc",
   "value": {
-    "id": "control-chaining-dog-with-name",
+    "id": "control-chaining-dog",
     "index": "animals-dogs-2018-01-01",
     "source": {
       "@timestamp": "2018-01-01T16:00:00.000Z",

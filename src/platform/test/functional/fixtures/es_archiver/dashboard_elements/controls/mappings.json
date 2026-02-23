@@ -15,27 +15,6 @@
             }
           },
           "type": "text"
-        },
-        "name": {
-          "fields": {
-            "keyword": {
-              "ignore_above": 256,
-              "type": "keyword"
-            }
-          },
-          "type": "text"
-        },
-        "sound": {
-          "fields": {
-            "keyword": {
-              "ignore_above": 256,
-              "type": "keyword"
-            }
-          },
-          "type": "text"
-        },
-        "weightLbs": {
-          "type": "long"
         }
       }
     },
@@ -57,15 +36,6 @@
         "@timestamp": {
           "type": "date"
         },
-        "animal": {
-          "fields": {
-            "keyword": {
-              "ignore_above": 256,
-              "type": "keyword"
-            }
-          },
-          "type": "text"
-        },
         "name": {
           "fields": {
             "keyword": {
@@ -83,9 +53,6 @@
             }
           },
           "type": "text"
-        },
-        "weightLbs": {
-          "type": "long"
         }
       }
     },
