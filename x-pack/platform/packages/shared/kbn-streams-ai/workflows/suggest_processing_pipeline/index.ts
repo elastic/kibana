@@ -7,20 +7,15 @@
 
 import { type BoundInferenceClient, MessageRole } from '@kbn/inference-common';
 import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
-import type { Streams, ProcessingSimulationResponse, Feature } from '@kbn/streams-schema';
+import type { Streams, ProcessingSimulationResponse } from '@kbn/streams-schema';
 import type { StreamlangDSL, GrokProcessor, DissectProcessor } from '@kbn/streamlang';
 import type { FlattenRecord } from '@kbn/streams-schema';
 import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
 import { isOtelStream } from '@kbn/streams-schema';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { SuggestIngestPipelinePrompt, SUGGEST_PIPELINE_FEATURE_TOOL_TYPES } from './prompt';
+import { SuggestIngestPipelinePrompt } from './prompt';
 import { getPipelineDefinitionJsonSchema, pipelineDefinitionSchema } from './schema';
-import {
-  getFeatureQueryFromToolArgs,
-  resolveFeatureTypeFilters,
-  toFeatureForLlmContext,
-} from './features_tool';
 
 export interface SuggestProcessingPipelineResult {
   pipeline: StreamlangDSL | null;
@@ -40,7 +35,6 @@ export async function suggestProcessingPipeline({
   documents,
   fieldsMetadataClient,
   esClient,
-  getFeatures,
 }: {
   definition: Streams.ingest.all.Definition;
   inferenceClient: BoundInferenceClient;
@@ -51,11 +45,6 @@ export async function suggestProcessingPipeline({
   documents: FlattenRecord[];
   fieldsMetadataClient: IFieldsMetadataClient;
   esClient: ElasticsearchClient;
-  getFeatures(params?: {
-    type?: string[];
-    minConfidence?: number;
-    limit?: number;
-  }): Promise<Feature[]>;
 }): Promise<SuggestProcessingPipelineResult> {
   const effectiveMaxSteps = maxSteps ?? 10;
 
@@ -95,7 +84,6 @@ export async function suggestProcessingPipeline({
     pipeline_schema: JSON.stringify(getPipelineDefinitionJsonSchema(pipelineDefinitionSchema)),
     initial_dataset_analysis: JSON.stringify(simulationMetrics),
     parsing_processor: parsingProcessor ? JSON.stringify(parsingProcessor) : undefined,
-    available_feature_types: SUGGEST_PIPELINE_FEATURE_TOOL_TYPES.join(', '),
   };
 
   // Invoke the reasoning agent to suggest the ingest pipeline
@@ -105,36 +93,6 @@ export async function suggestProcessingPipeline({
     input,
     maxSteps: effectiveMaxSteps,
     toolCallbacks: {
-      get_stream_features: async (toolCall) => {
-        try {
-          const { featureTypes, minConfidence, limit } = getFeatureQueryFromToolArgs(
-            toolCall.function.arguments
-          );
-          const typeFilters = resolveFeatureTypeFilters(featureTypes);
-          const features = await getFeatures({
-            type: typeFilters,
-            minConfidence,
-            limit,
-          });
-          const llmFeatures = features.map(toFeatureForLlmContext);
-
-          return {
-            response: {
-              features: llmFeatures,
-              count: llmFeatures.length,
-            },
-          };
-        } catch (error) {
-          const errorMessage = error instanceof Error ? error.message : String(error);
-          return {
-            response: {
-              features: [],
-              count: 0,
-              error: errorMessage,
-            },
-          };
-        }
-      },
       simulate_pipeline: async (toolCall) => {
         // 1. Validate the pipeline schema
         const pipeline = pipelineDefinitionSchema.safeParse(toolCall.function.arguments.pipeline);
