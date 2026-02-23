@@ -40,8 +40,8 @@ test.describe('Home page A11y', { tag: [...tags.stateful.classic] }, () => {
   });
 
   test.beforeEach(async ({ browserAuth, page }) => {
-    await browserAuth.loginAsAdmin();
     await mockFleetSetupEndpoints(page);
+    await browserAuth.loginAsAdmin();
   });
 
   test.afterAll(async ({ kbnClient }) => {

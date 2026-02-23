@@ -17,8 +17,8 @@ test.describe('Fleet startup', { tag: [...tags.stateful.classic] }, () => {
   });
 
   test.beforeEach(async ({ browserAuth, page }) => {
-    await browserAuth.loginAsPrivilegedUser();
     await mockFleetSetupEndpoints(page);
+    await browserAuth.loginAsPrivilegedUser();
   });
 
   test('should create agent policy with System integration', async ({ page }) => {

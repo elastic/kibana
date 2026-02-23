@@ -55,8 +55,8 @@ test.describe('View agents list', { tag: [...tags.stateful.classic] }, () => {
   });
 
   test.beforeEach(async ({ browserAuth, page }) => {
-    await browserAuth.loginAsPrivilegedUser();
     await mockFleetSetupEndpoints(page);
+    await browserAuth.loginAsPrivilegedUser();
     await page.route('**/api/fleet/agents_status', (route) =>
       route.fulfill({
         status: 200,

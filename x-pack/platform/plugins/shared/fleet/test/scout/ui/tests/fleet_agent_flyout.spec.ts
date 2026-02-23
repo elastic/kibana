@@ -29,8 +29,8 @@ test.describe('Add agent flyout', { tag: [...tags.stateful.classic] }, () => {
   });
 
   test.beforeEach(async ({ browserAuth, page }) => {
-    await browserAuth.loginAsPrivilegedUser();
     await mockFleetSetupEndpoints(page);
+    await browserAuth.loginAsPrivilegedUser();
   });
 
   test.afterAll(async ({ kbnClient, esClient }) => {

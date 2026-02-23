@@ -36,8 +36,8 @@ test.describe('Space aware policies creation', { tag: [...tags.stateful.classic]
   });
 
   test.beforeEach(async ({ browserAuth, page }) => {
-    await browserAuth.loginAsAdmin();
     await mockFleetSetupEndpoints(page);
+    await browserAuth.loginAsAdmin();
     await page.route('**/api/fleet/agent_policies**', (route) => route.continue());
     await page.route('**/internal/fleet/agent_policies_spaces**', (route) => route.continue());
   });

@@ -12,8 +12,8 @@ import { createAgentPolicy, mockFleetSetupEndpoints } from '../common/api_helper
 
 test.describe('Package policy', { tag: [...tags.stateful.classic] }, () => {
   test.beforeEach(async ({ browserAuth, page }) => {
-    await browserAuth.loginAsAdmin();
     await mockFleetSetupEndpoints(page);
+    await browserAuth.loginAsAdmin();
   });
 
   test('should edit package policy', async ({ page, kbnClient }) => {
