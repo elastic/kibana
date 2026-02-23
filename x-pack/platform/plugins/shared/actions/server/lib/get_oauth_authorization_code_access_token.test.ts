@@ -108,7 +108,10 @@ describe('getOAuthAuthorizationCodeAccessToken', () => {
 
   describe('requestOAuthRefreshToken argument wiring', () => {
     beforeEach(() => {
-      connectorTokenClient.get.mockResolvedValue({ hasErrors: false, connectorToken: expiredToken });
+      connectorTokenClient.get.mockResolvedValue({
+        hasErrors: false,
+        connectorToken: expiredToken,
+      });
       (requestOAuthRefreshToken as jest.Mock).mockResolvedValue(refreshResponse);
     });
 

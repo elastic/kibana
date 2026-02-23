@@ -89,7 +89,10 @@ describe('getStoredTokenWithRefresh', () => {
     });
 
     it('returns the stored token without calling doRefresh when it has not expired', async () => {
-      connectorTokenClient.get.mockResolvedValueOnce({ hasErrors: false, connectorToken: validToken });
+      connectorTokenClient.get.mockResolvedValueOnce({
+        hasErrors: false,
+        connectorToken: validToken,
+      });
 
       const result = await getStoredTokenWithRefresh(baseOpts);
 
@@ -143,7 +146,10 @@ describe('getStoredTokenWithRefresh', () => {
     });
 
     it('calls doRefresh with the stored refresh token when the access token is expired', async () => {
-      connectorTokenClient.get.mockResolvedValueOnce({ hasErrors: false, connectorToken: expiredToken });
+      connectorTokenClient.get.mockResolvedValueOnce({
+        hasErrors: false,
+        connectorToken: expiredToken,
+      });
       doRefresh.mockResolvedValueOnce(refreshResponse);
 
       await getStoredTokenWithRefresh(baseOpts);
@@ -152,7 +158,10 @@ describe('getStoredTokenWithRefresh', () => {
     });
 
     it('returns the refreshed token formatted as "tokenType accessToken"', async () => {
-      connectorTokenClient.get.mockResolvedValueOnce({ hasErrors: false, connectorToken: expiredToken });
+      connectorTokenClient.get.mockResolvedValueOnce({
+        hasErrors: false,
+        connectorToken: expiredToken,
+      });
       doRefresh.mockResolvedValueOnce(refreshResponse);
 
       const result = await getStoredTokenWithRefresh(baseOpts);
@@ -161,7 +170,10 @@ describe('getStoredTokenWithRefresh', () => {
     });
 
     it('persists the refreshed token and the new refresh token from the response', async () => {
-      connectorTokenClient.get.mockResolvedValueOnce({ hasErrors: false, connectorToken: expiredToken });
+      connectorTokenClient.get.mockResolvedValueOnce({
+        hasErrors: false,
+        connectorToken: expiredToken,
+      });
       doRefresh.mockResolvedValueOnce(refreshResponse);
 
       await getStoredTokenWithRefresh(baseOpts);
@@ -177,7 +189,10 @@ describe('getStoredTokenWithRefresh', () => {
     });
 
     it('falls back to the existing refresh token when the response omits one', async () => {
-      connectorTokenClient.get.mockResolvedValueOnce({ hasErrors: false, connectorToken: expiredToken });
+      connectorTokenClient.get.mockResolvedValueOnce({
+        hasErrors: false,
+        connectorToken: expiredToken,
+      });
       doRefresh.mockResolvedValueOnce({ ...refreshResponse, refreshToken: undefined });
 
       await getStoredTokenWithRefresh(baseOpts);
@@ -190,7 +205,10 @@ describe('getStoredTokenWithRefresh', () => {
 
   describe('forceRefresh', () => {
     it('bypasses the expiry check and refreshes a still-valid token', async () => {
-      connectorTokenClient.get.mockResolvedValueOnce({ hasErrors: false, connectorToken: validToken });
+      connectorTokenClient.get.mockResolvedValueOnce({
+        hasErrors: false,
+        connectorToken: validToken,
+      });
       doRefresh.mockResolvedValueOnce(refreshResponse);
 
       const result = await getStoredTokenWithRefresh({ ...baseOpts, forceRefresh: true });
@@ -202,7 +220,10 @@ describe('getStoredTokenWithRefresh', () => {
 
   describe('error handling', () => {
     it('returns null and logs an error when doRefresh throws', async () => {
-      connectorTokenClient.get.mockResolvedValueOnce({ hasErrors: false, connectorToken: expiredToken });
+      connectorTokenClient.get.mockResolvedValueOnce({
+        hasErrors: false,
+        connectorToken: expiredToken,
+      });
       doRefresh.mockRejectedValueOnce(new Error('upstream auth failed'));
 
       const result = await getStoredTokenWithRefresh(baseOpts);
@@ -214,9 +235,14 @@ describe('getStoredTokenWithRefresh', () => {
     });
 
     it('returns null and logs an error when persisting the refreshed token fails', async () => {
-      connectorTokenClient.get.mockResolvedValueOnce({ hasErrors: false, connectorToken: expiredToken });
+      connectorTokenClient.get.mockResolvedValueOnce({
+        hasErrors: false,
+        connectorToken: expiredToken,
+      });
       doRefresh.mockResolvedValueOnce(refreshResponse);
-      connectorTokenClient.updateWithRefreshToken.mockRejectedValueOnce(new Error('DB write failed'));
+      connectorTokenClient.updateWithRefreshToken.mockRejectedValueOnce(
+        new Error('DB write failed')
+      );
 
       const result = await getStoredTokenWithRefresh(baseOpts);
 
