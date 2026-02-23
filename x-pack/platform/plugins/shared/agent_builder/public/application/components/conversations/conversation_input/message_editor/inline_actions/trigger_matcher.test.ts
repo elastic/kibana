@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { matchTrigger, getTextBeforeCursor } from './trigger_matcher';
+import { createMatchTrigger, getTextBeforeCursor } from './trigger_matcher';
+import { TriggerId } from './types';
+
+const matchTrigger = createMatchTrigger([
+  { id: TriggerId.Attachment, sequence: '@' },
+  { id: TriggerId.Prompt, sequence: '/p' },
+]);
 
 describe('matchTrigger', () => {
   describe('single-character triggers', () => {
