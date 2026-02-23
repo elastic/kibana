@@ -39,8 +39,7 @@ export const formSerializer = (formData: MCPInternalConnectorForm): ConnectorFor
   const secretHeaders = toHeadersRecord(headers, HeaderFieldType.SECRET);
 
   const serverUrl = formData.config?.serverUrl ?? '';
-  const credential =
-    formData.secrets?.token ?? formData.secrets?.apiKey ?? '';
+  const credential = formData.secrets?.token ?? formData.secrets?.apiKey ?? '';
 
   // For ApiKeyInUrl: keep template URL in config (don't store credential in config) so GET/edit
   // don't expose the secret. Store credential in secrets only; executor resolves URL at runtime.

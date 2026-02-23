@@ -86,7 +86,9 @@ describe('serialization utils', () => {
 
       const result = formSerializer(formData);
 
-      expect(result.config?.serverUrl).toBe(`https://mcp.example.com/${API_KEY_URL_PLACEHOLDER}/v2/mcp`);
+      expect(result.config?.serverUrl).toBe(
+        `https://mcp.example.com/${API_KEY_URL_PLACEHOLDER}/v2/mcp`
+      );
       expect(result.config?.hasAuth).toBe(true);
     });
 
