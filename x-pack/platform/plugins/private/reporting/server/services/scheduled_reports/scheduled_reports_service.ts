@@ -493,7 +493,10 @@ export class ScheduledReportsService {
     schedule,
   }: { id: string } & UpdateScheduledReportParams) {
     if (schedule) {
-      await this.taskManager.bulkUpdateSchedules([id], schedule, { request: this.request });
+      await this.taskManager.bulkUpdateSchedules([id], schedule, {
+        request: this.request,
+        regenerateApiKey: true,
+      });
     }
   }
 

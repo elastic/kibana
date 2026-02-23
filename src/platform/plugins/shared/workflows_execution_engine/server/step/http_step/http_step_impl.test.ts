@@ -131,6 +131,7 @@ describe('HttpStepImpl', () => {
           id: '{{userId}}',
         },
         fetcher: undefined,
+        timeout: '30s',
       });
     });
 
@@ -191,7 +192,7 @@ describe('HttpStepImpl', () => {
         url: 'https://api.example.com/data',
         method: 'GET',
         headers: {},
-        timeout: 30000,
+        timeout: '30s',
       };
 
       const result = await (httpStep as any)._run(input);
@@ -223,7 +224,7 @@ describe('HttpStepImpl', () => {
         url: 'https://api.example.com/data',
         method: 'GET',
         headers: {},
-        timeout: 30000,
+        timeout: '30s',
       };
 
       await (httpStep as any)._run(input);
@@ -274,7 +275,7 @@ describe('HttpStepImpl', () => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: { name: 'John Doe' },
-        timeout: 30000,
+        timeout: '30s',
       };
 
       await (httpStep as any)._run(input);
@@ -651,6 +652,257 @@ describe('HttpStepImpl', () => {
           httpsAgent: expect.anything(),
         })
       );
+    });
+
+    it('should apply proxy_url option', async () => {
+      const input = {
+        url: 'https://api.example.com/users',
+        method: 'GET',
+        headers: {},
+        fetcher: {
+          proxy_url: 'http://corporate-proxy.example.com:8080',
+        },
+      };
+
+      (mockedAxios as any).mockResolvedValueOnce({ status: 200, data: { success: true } });
+
+      await (httpStep as any)._run(input);
+
+      expect(mockedAxios).toHaveBeenCalledWith(
+        expect.objectContaining({
+          proxy: {
+            protocol: 'http',
+            host: 'corporate-proxy.example.com',
+            port: 8080,
+          },
+        })
+      );
+    });
+
+    it('should apply proxy_url with authentication', async () => {
+      const input = {
+        url: 'https://api.example.com/users',
+        method: 'GET',
+        headers: {},
+        fetcher: {
+          proxy_url: 'http://proxy.internal:3128',
+          proxy_username: 'proxyuser',
+          proxy_password: 'proxypass',
+        },
+      };
+
+      (mockedAxios as any).mockResolvedValueOnce({ status: 200, data: { success: true } });
+
+      await (httpStep as any)._run(input);
+
+      expect(mockedAxios).toHaveBeenCalledWith(
+        expect.objectContaining({
+          proxy: {
+            protocol: 'http',
+            host: 'proxy.internal',
+            port: 3128,
+            auth: {
+              username: 'proxyuser',
+              password: 'proxypass',
+            },
+          },
+        })
+      );
+    });
+
+    it('should not include proxy auth when only username is provided', async () => {
+      const input = {
+        url: 'https://api.example.com/users',
+        method: 'GET',
+        headers: {},
+        fetcher: {
+          proxy_url: 'http://proxy.internal:3128',
+          proxy_username: 'proxyuser',
+        },
+      };
+
+      (mockedAxios as any).mockResolvedValueOnce({ status: 200, data: { success: true } });
+
+      await (httpStep as any)._run(input);
+
+      expect(mockedAxios).toHaveBeenCalledWith(
+        expect.objectContaining({
+          proxy: {
+            protocol: 'http',
+            host: 'proxy.internal',
+            port: 3128,
+          },
+        })
+      );
+    });
+
+    it('should default proxy port to 443 for https proxy_url', async () => {
+      const input = {
+        url: 'https://api.example.com/users',
+        method: 'GET',
+        headers: {},
+        fetcher: {
+          proxy_url: 'https://secure-proxy.example.com',
+        },
+      };
+
+      (mockedAxios as any).mockResolvedValueOnce({ status: 200, data: { success: true } });
+
+      await (httpStep as any)._run(input);
+
+      expect(mockedAxios).toHaveBeenCalledWith(
+        expect.objectContaining({
+          proxy: {
+            protocol: 'https',
+            host: 'secure-proxy.example.com',
+            port: 443,
+          },
+        })
+      );
+    });
+
+    it('should combine proxy with skip_ssl_verification', async () => {
+      const input = {
+        url: 'https://api.example.com/users',
+        method: 'GET',
+        headers: {},
+        fetcher: {
+          proxy_url: 'http://proxy.internal:8080',
+          skip_ssl_verification: true,
+        },
+      };
+
+      (mockedAxios as any).mockResolvedValueOnce({ status: 200, data: { success: true } });
+
+      await (httpStep as any)._run(input);
+
+      expect(mockedAxios).toHaveBeenCalledWith(
+        expect.objectContaining({
+          proxy: {
+            protocol: 'http',
+            host: 'proxy.internal',
+            port: 8080,
+          },
+          httpsAgent: expect.objectContaining({
+            options: expect.objectContaining({
+              rejectUnauthorized: false,
+            }),
+          }),
+        })
+      );
+    });
+
+    it('should not set proxy when proxy_url is not provided', async () => {
+      const input = {
+        url: 'https://api.example.com/users',
+        method: 'GET',
+        headers: {},
+        fetcher: {
+          skip_ssl_verification: true,
+        },
+      };
+
+      (mockedAxios as any).mockResolvedValueOnce({ status: 200, data: { success: true } });
+
+      await (httpStep as any)._run(input);
+
+      const calledConfig = (mockedAxios as any).mock.calls[0][0];
+      expect(calledConfig.proxy).toBeUndefined();
+    });
+  });
+
+  describe('timeout', () => {
+    it('should apply timeout from input as axios timeout in milliseconds', async () => {
+      const input = {
+        url: 'https://api.example.com/users',
+        method: 'GET',
+        headers: {},
+        timeout: '30s',
+      };
+
+      (mockedAxios as any).mockResolvedValueOnce({ status: 200, data: { success: true } });
+
+      await (httpStep as any)._run(input);
+
+      expect(mockedAxios).toHaveBeenCalledWith(
+        expect.objectContaining({
+          timeout: 30000,
+        })
+      );
+    });
+
+    it('should apply custom timeout value', async () => {
+      const input = {
+        url: 'https://api.example.com/users',
+        method: 'GET',
+        headers: {},
+        timeout: '5s',
+      };
+
+      (mockedAxios as any).mockResolvedValueOnce({ status: 200, data: { success: true } });
+
+      await (httpStep as any)._run(input);
+
+      expect(mockedAxios).toHaveBeenCalledWith(
+        expect.objectContaining({
+          timeout: 5000,
+        })
+      );
+    });
+
+    it('should apply timeout in minutes', async () => {
+      const input = {
+        url: 'https://api.example.com/users',
+        method: 'GET',
+        headers: {},
+        timeout: '2m',
+      };
+
+      (mockedAxios as any).mockResolvedValueOnce({ status: 200, data: { success: true } });
+
+      await (httpStep as any)._run(input);
+
+      expect(mockedAxios).toHaveBeenCalledWith(
+        expect.objectContaining({
+          timeout: 120000,
+        })
+      );
+    });
+
+    it('should not set timeout when not provided', async () => {
+      const input = {
+        url: 'https://api.example.com/users',
+        method: 'GET',
+        headers: {},
+      };
+
+      (mockedAxios as any).mockResolvedValueOnce({ status: 200, data: { success: true } });
+
+      await (httpStep as any)._run(input);
+
+      const calledConfig = (mockedAxios as any).mock.calls[0][0];
+      expect(calledConfig.timeout).toBeUndefined();
+    });
+
+    it('should handle ECONNABORTED timeout error cleanly', async () => {
+      const input = {
+        url: 'https://api.example.com/users',
+        method: 'GET',
+        headers: {},
+        timeout: '1s',
+      };
+
+      const timeoutError = new Error('timeout of 1000ms exceeded') as any;
+      timeoutError.code = 'ECONNABORTED';
+      timeoutError.isAxiosError = true;
+      (mockedAxios as any).mockRejectedValueOnce(timeoutError);
+      (axios.isAxiosError as unknown as jest.Mock).mockReturnValue(true);
+
+      const result = await (httpStep as any)._run(input);
+
+      expect(result.error).toBeInstanceOf(ExecutionError);
+      expect(result.error.type).toBe('HttpRequestTimeout');
+      expect(result.error.message).toBe('timeout of 1000ms exceeded');
     });
   });
 });
