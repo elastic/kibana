@@ -8,14 +8,11 @@
  */
 
 import type { SerializedTitles } from '@kbn/presentation-publishing-schemas';
-import type { MarkdownByReferenceState, MarkdownByValueState } from '..';
-import type { MarkdownAttributes } from '../markdown_saved_object';
+import type { MarkdownByValueState } from '..';
 
-type StoredMarkdownByReferenceState = Omit<MarkdownByReferenceState, 'ref_id'> & SerializedTitles;
+type StoredMarkdownByReferenceState = SerializedTitles;
 
-type StoredMarkdownByValueState = Omit<MarkdownByValueState, 'attributes'> & {
-  attributes: MarkdownAttributes;
-} & SerializedTitles;
+type StoredMarkdownByValueState = MarkdownByValueState & SerializedTitles;
 
 export type StoredMarkdownEmbeddableState =
   | StoredMarkdownByReferenceState
