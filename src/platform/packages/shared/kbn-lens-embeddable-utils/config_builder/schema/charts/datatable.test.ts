@@ -294,6 +294,24 @@ describe('Datatable Schema', () => {
       expect(() => datatableStateSchema.validate(input)).toThrow();
     });
 
+    it('throws on empty metrics for non-esql', () => {
+      const input: DatatableWithoutDefaultsConfig = {
+        ...baseDatatableConfig,
+        metrics: [],
+        rows: [
+          {
+            operation: 'date_histogram',
+            field: '@timestamp',
+            suggested_interval: '1d',
+            use_original_time_range: true,
+            include_empty_rows: true,
+          },
+        ],
+      };
+
+      expect(() => datatableStateSchema.validate(input)).toThrow();
+    });
+
     it('throws on empty rows', () => {
       const input: DatatableWithoutDefaultsConfig = {
         ...baseDatatableConfig,
@@ -447,6 +465,58 @@ describe('Datatable Schema', () => {
           },
         ],
         rows: [{ operation: 'terms', fields: ['geo.dest'], size: 10 }],
+      };
+
+      expect(() => datatableStateSchema.validate(input)).toThrow();
+    });
+
+    it('throws when esql datatable has no metrics and no rows', () => {
+      const input: Omit<DatatableWithoutDefaultsConfig, 'metrics' | 'rows'> = {
+        type: 'datatable',
+        dataset: {
+          type: 'esql',
+          query: 'FROM my-index | LIMIT 100',
+        },
+      };
+
+      expect(() => datatableStateSchema.validate(input)).toThrow(
+        'Datatable must have at least one column'
+      );
+    });
+
+    it('throws on empty metrics array for esql', () => {
+      const input: DatatableWithoutDefaultsConfig = {
+        type: 'datatable',
+        dataset: {
+          type: 'esql',
+          query: 'FROM my-index | LIMIT 100',
+        },
+        metrics: [],
+        rows: [
+          {
+            operation: 'value',
+            column: 'location',
+          },
+        ],
+      };
+
+      expect(() => datatableStateSchema.validate(input)).toThrow();
+    });
+
+    it('throws on empty rows array for esql', () => {
+      const input: DatatableWithoutDefaultsConfig = {
+        type: 'datatable',
+        dataset: {
+          type: 'esql',
+          query: 'FROM my-index | LIMIT 100',
+        },
+        metrics: [
+          {
+            operation: 'value',
+            column: 'bytes',
+          },
+        ],
+        rows: [],
       };
 
       expect(() => datatableStateSchema.validate(input)).toThrow();
@@ -764,6 +834,45 @@ describe('Datatable Schema', () => {
           {
             operation: 'value',
             column: 'api',
+          },
+        ],
+      };
+
+      const validated = datatableStateSchema.validate(input);
+      expect(validated).toEqual({ ...defaultValues, ...input });
+    });
+
+    it('allows no metrics when using esql', () => {
+      const input: Omit<DatatableWithoutDefaultsConfig, 'metrics'> = {
+        type: 'datatable',
+        title: 'Datatable',
+        description: 'ESQL table without metrics',
+        dataset: {
+          type: 'esql',
+          query: 'FROM my-index | LIMIT 100',
+        },
+        rows: [
+          {
+            operation: 'value',
+            column: 'location',
+            alignment: 'right',
+            apply_color_to: 'value',
+            visible: true,
+            click_filter: true,
+            collapse_by: 'avg',
+            color: {
+              mode: 'categorical',
+              palette: 'palette_name',
+              mapping: [
+                {
+                  values: ['value1', 'value2', 'value3'],
+                  color: {
+                    type: 'colorCode',
+                    value: '#000000',
+                  },
+                },
+              ],
+            },
           },
         ],
       };

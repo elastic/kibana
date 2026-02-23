@@ -121,4 +121,8 @@ export class SidebarStateService {
   getCurrentAppId(): SidebarAppId | null {
     return this.currentAppId$.getValue();
   }
+
+  stop() {
+    window.removeEventListener('resize', this.handleWindowResize);
+  }
 }
