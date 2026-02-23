@@ -602,10 +602,10 @@
         "label": "FeatureFeedbackButton",
         "description": [],
         "signature": [
-          "({ formUrl, \"data-test-subj\": dts, onClickCapture, defaultButton, kibanaVersion, isCloudEnv, isServerlessEnv, sanitizedPath, nodeType, surveyButtonText, }: FeatureFeedbackButtonProps) => React.JSX.Element"
+          "({ formUrl, \"data-test-subj\": dts, onClickCapture, defaultButton, kibanaVersion, isCloudEnv, isServerlessEnv, sanitizedPath, nodeType, surveyButtonText, }: FeatureFeedbackButtonProps) => React.JSX.Element | null"
         ],
         "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/feature_feedback_button/feature_feedback_button.tsx",
-        "lineNumber": 92,
+        "lineNumber": 94,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -621,7 +621,7 @@
               "FeatureFeedbackButtonProps"
             ],
             "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/feature_feedback_button/feature_feedback_button.tsx",
-            "lineNumber": 92,
+            "lineNumber": 94,
             "columnNumber": 39,
             "deprecated": false,
             "trackAdoption": false,
@@ -725,15 +725,7 @@
             "section": "def-public.UiActionsPublicStart",
             "text": "UiActionsPublicStart"
           },
-          "; triggerId: ",
-          {
-            "pluginId": "observabilityShared",
-            "scope": "common",
-            "docId": "kibObservabilitySharedPluginApi",
-            "section": "def-common.ObservabilityTriggerId",
-            "text": "ObservabilityTriggerId"
-          },
-          "; context: Record<string, any>; }) => Promise<",
+          "; triggerId: string; context: Record<string, any>; }) => Promise<",
           {
             "pluginId": "observabilityShared",
             "scope": "public",
@@ -744,7 +736,7 @@
           "[]>"
         ],
         "path": "x-pack/solutions/observability/plugins/observability_shared/public/services/get_context_menu_items_from_actions.ts",
-        "lineNumber": 17,
+        "lineNumber": 16,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -757,7 +749,7 @@
             "label": "{\n  uiActions,\n  triggerId,\n  context,\n}",
             "description": [],
             "path": "x-pack/solutions/observability/plugins/observability_shared/public/services/get_context_menu_items_from_actions.ts",
-            "lineNumber": 21,
+            "lineNumber": 20,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
@@ -770,17 +762,15 @@
                 "label": "uiActions",
                 "description": [],
                 "signature": [
-                  "{ readonly registerTrigger: (trigger: ",
+                  "{ readonly getTrigger: (triggerId: string) => ",
                   {
-                    "pluginId": "@kbn/ui-actions-browser",
-                    "scope": "common",
-                    "docId": "kibKbnUiActionsBrowserPluginApi",
-                    "section": "def-common.Trigger",
+                    "pluginId": "uiActions",
+                    "scope": "public",
+                    "docId": "kibUiActionsPluginApi",
+                    "section": "def-public.Trigger",
                     "text": "Trigger"
                   },
-                  ") => void; readonly hasTrigger: (triggerId: string) => boolean; readonly getTrigger: (triggerId: string) => ",
-                  "TriggerContract",
-                  "<object>; readonly registerAction: <Context extends object>(definition: ",
+                  "; readonly registerAction: <Context extends object>(definition: ",
                   {
                     "pluginId": "uiActions",
                     "scope": "public",
@@ -852,12 +842,12 @@
                     "section": "def-public.FrequentCompatibilityChangeAction",
                     "text": "FrequentCompatibilityChangeAction"
                   },
-                  "<object>[]>; readonly executeTriggerActions: (triggerId: string, context: object) => Promise<void>; readonly clear: () => void; readonly fork: () => ",
+                  "<object>[]>; readonly executeTriggerActions: (triggerId: string, context: object, alwaysShowPopup?: boolean | undefined) => Promise<void>; readonly clear: () => void; readonly fork: () => ",
                   "UiActionsService",
                   "; }"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability_shared/public/services/get_context_menu_items_from_actions.ts",
-                "lineNumber": 22,
+                "lineNumber": 21,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -865,21 +855,12 @@
               {
                 "parentPluginId": "observabilityShared",
                 "id": "def-public.getContextMenuItemsFromActions.$1.triggerId",
-                "type": "Enum",
+                "type": "string",
                 "tags": [],
                 "label": "triggerId",
                 "description": [],
-                "signature": [
-                  {
-                    "pluginId": "observabilityShared",
-                    "scope": "common",
-                    "docId": "kibObservabilitySharedPluginApi",
-                    "section": "def-common.ObservabilityTriggerId",
-                    "text": "ObservabilityTriggerId"
-                  }
-                ],
                 "path": "x-pack/solutions/observability/plugins/observability_shared/public/services/get_context_menu_items_from_actions.ts",
-                "lineNumber": 23,
+                "lineNumber": 22,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -895,7 +876,7 @@
                   "{ [x: string]: any; }"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability_shared/public/services/get_context_menu_items_from_actions.ts",
-                "lineNumber": 24,
+                "lineNumber": 23,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -919,7 +900,7 @@
           " | undefined; }) => string"
         ],
         "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/feature_feedback_button/feature_feedback_button.tsx",
-        "lineNumber": 38,
+        "lineNumber": 40,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -932,7 +913,7 @@
             "label": "{\n  formUrl,\n  kibanaVersion,\n  sanitizedPath,\n  isCloudEnv,\n  isServerlessEnv,\n  nodeType,\n}",
             "description": [],
             "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/feature_feedback_button/feature_feedback_button.tsx",
-            "lineNumber": 45,
+            "lineNumber": 47,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
@@ -945,7 +926,7 @@
                 "label": "formUrl",
                 "description": [],
                 "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/feature_feedback_button/feature_feedback_button.tsx",
-                "lineNumber": 46,
+                "lineNumber": 48,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -961,7 +942,7 @@
                   "string | undefined"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/feature_feedback_button/feature_feedback_button.tsx",
-                "lineNumber": 47,
+                "lineNumber": 49,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -977,7 +958,7 @@
                   "string | undefined"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/feature_feedback_button/feature_feedback_button.tsx",
-                "lineNumber": 48,
+                "lineNumber": 50,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -993,7 +974,7 @@
                   "string | undefined"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/feature_feedback_button/feature_feedback_button.tsx",
-                "lineNumber": 49,
+                "lineNumber": 51,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1009,7 +990,7 @@
                   "string | undefined"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/feature_feedback_button/feature_feedback_button.tsx",
-                "lineNumber": 50,
+                "lineNumber": 52,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1025,7 +1006,7 @@
                   "boolean | undefined"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/feature_feedback_button/feature_feedback_button.tsx",
-                "lineNumber": 51,
+                "lineNumber": 53,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1041,7 +1022,7 @@
                   "boolean | undefined"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/feature_feedback_button/feature_feedback_button.tsx",
-                "lineNumber": 52,
+                "lineNumber": 54,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1058,7 +1039,7 @@
                   " | undefined"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/feature_feedback_button/feature_feedback_button.tsx",
-                "lineNumber": 53,
+                "lineNumber": 55,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1145,7 +1126,7 @@
                 "label": "children",
                 "description": [],
                 "signature": [
-                  "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+                  "React.ReactNode"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability_shared/public/contexts/inspector/inspector_context.tsx",
                 "lineNumber": 36,
@@ -1382,7 +1363,7 @@
           "CommonProps",
           " & Omit<React.HTMLAttributes<HTMLUListElement>, \"color\"> & { bordered?: boolean | undefined; flush?: boolean | undefined; gutterSize?: \"m\" | \"none\" | \"s\" | undefined; listItems?: ",
           "EuiListGroupItemProps",
-          "[] | undefined; color?: \"text\" | \"primary\" | \"subdued\" | undefined; size?: \"m\" | \"s\" | \"l\" | \"xs\" | undefined; maxWidth?: boolean | ",
+          "[] | undefined; color?: \"text\" | \"primary\" | \"subdued\" | undefined; size?: \"m\" | \"s\" | \"xs\" | \"l\" | undefined; maxWidth?: boolean | ",
           "Property",
           ".MaxWidth<string | number> | undefined; showToolTips?: boolean | undefined; wrapText?: boolean | undefined; ariaLabelledby?: string | undefined; }) => React.JSX.Element"
         ],
@@ -1404,7 +1385,7 @@
               "CommonProps",
               " & Omit<React.HTMLAttributes<HTMLUListElement>, \"color\"> & { bordered?: boolean | undefined; flush?: boolean | undefined; gutterSize?: \"m\" | \"none\" | \"s\" | undefined; listItems?: ",
               "EuiListGroupItemProps",
-              "[] | undefined; color?: \"text\" | \"primary\" | \"subdued\" | undefined; size?: \"m\" | \"s\" | \"l\" | \"xs\" | undefined; maxWidth?: boolean | ",
+              "[] | undefined; color?: \"text\" | \"primary\" | \"subdued\" | undefined; size?: \"m\" | \"s\" | \"xs\" | \"l\" | undefined; maxWidth?: boolean | ",
               "Property",
               ".MaxWidth<string | number> | undefined; showToolTips?: boolean | undefined; wrapText?: boolean | undefined; ariaLabelledby?: string | undefined; }"
             ],
@@ -1475,7 +1456,7 @@
                 "label": "children",
                 "description": [],
                 "signature": [
-                  "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+                  "React.ReactNode"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/section/section.tsx",
                 "lineNumber": 33,
@@ -1526,7 +1507,7 @@
                 "label": "children",
                 "description": [],
                 "signature": [
-                  "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+                  "React.ReactNode"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/section/section.tsx",
                 "lineNumber": 22,
@@ -3840,7 +3821,7 @@
             "label": "prependChildren",
             "description": [],
             "signature": [
-              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+              "React.ReactNode"
             ],
             "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/tags_list/tags_list.tsx",
             "lineNumber": 28,
@@ -4240,7 +4221,7 @@
             "section": "def-public.KibanaPageTemplateProps",
             "text": "KibanaPageTemplateProps"
           },
-          ", \"children\" | \"data-test-subj\" | \"paddingSize\" | \"pageHeader\" | \"restrictWidth\" | \"isEmptyState\" | \"noDataConfig\"> & { showSolutionNav?: boolean | undefined; isPageDataLoaded?: boolean | undefined; pageSectionProps?: ",
+          ", \"data-test-subj\" | \"children\" | \"paddingSize\" | \"pageHeader\" | \"restrictWidth\" | \"isEmptyState\" | \"noDataConfig\"> & { showSolutionNav?: boolean | undefined; isPageDataLoaded?: boolean | undefined; pageSectionProps?: ",
           "EuiPageSectionProps",
           " | undefined; bottomBar?: React.ReactNode; bottomBarProps?: ",
           "_EuiPageBottomBarProps",
@@ -4262,10 +4243,10 @@
         "description": [],
         "signature": [
           "EuiContextMenuItemProps",
-          " & { children: React.ReactElement<any, string | React.JSXElementConstructor<any>>; }"
+          " & { children: React.ReactElement<any>; }"
         ],
         "path": "x-pack/solutions/observability/plugins/observability_shared/public/services/get_context_menu_items_from_actions.ts",
-        "lineNumber": 13,
+        "lineNumber": 12,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -4323,7 +4304,7 @@
             "section": "def-public.KibanaPageTemplateProps",
             "text": "KibanaPageTemplateProps"
           },
-          ", \"children\" | \"data-test-subj\" | \"paddingSize\" | \"pageHeader\" | \"restrictWidth\" | \"isEmptyState\" | \"noDataConfig\"> & { showSolutionNav?: boolean | undefined; isPageDataLoaded?: boolean | undefined; pageSectionProps?: ",
+          ", \"data-test-subj\" | \"children\" | \"paddingSize\" | \"pageHeader\" | \"restrictWidth\" | \"isEmptyState\" | \"noDataConfig\"> & { showSolutionNav?: boolean | undefined; isPageDataLoaded?: boolean | undefined; pageSectionProps?: ",
           "EuiPageSectionProps",
           " | undefined; bottomBar?: React.ReactNode; bottomBarProps?: ",
           "_EuiPageBottomBarProps",
@@ -4466,11 +4447,11 @@
           "DisambiguateSet",
           "<React.ButtonHTMLAttributes<HTMLButtonElement>, Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, \"href\">> & Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, \"href\">) | (",
           "DisambiguateSet",
-          "<Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, \"href\">, React.ButtonHTMLAttributes<HTMLButtonElement>> & React.ButtonHTMLAttributes<HTMLButtonElement>))), \"color\" | \"target\" | \"onClick\" | \"rel\"> & { size?: \"m\" | \"s\" | \"l\" | \"xs\" | undefined; color?: \"text\" | \"primary\" | \"subdued\" | undefined; label: React.ReactNode; isActive?: boolean | undefined; isDisabled?: boolean | undefined; href?: string | undefined; rel?: string | undefined; target?: string | undefined; external?: boolean | undefined; iconType?: ",
+          "<Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, \"href\">, React.ButtonHTMLAttributes<HTMLButtonElement>> & React.ButtonHTMLAttributes<HTMLButtonElement>))), \"color\" | \"rel\" | \"onClick\" | \"target\"> & { size?: \"m\" | \"s\" | \"xs\" | \"l\" | undefined; color?: \"text\" | \"primary\" | \"subdued\" | undefined; label: React.ReactNode; isActive?: boolean | undefined; isDisabled?: boolean | undefined; href?: string | undefined; rel?: string | undefined; target?: string | undefined; external?: boolean | undefined; iconType?: ",
           "IconType",
           " | undefined; iconProps?: Omit<",
           "EuiIconProps",
-          ", \"type\"> | undefined; icon?: React.ReactElement<any, string | React.JSXElementConstructor<any>> | undefined; showToolTip?: boolean | undefined; extraAction?: ",
+          ", \"type\"> | undefined; icon?: React.ReactElement<any> | undefined; showToolTip?: boolean | undefined; extraAction?: ",
           "EuiListGroupItemExtraActionProps",
           " | undefined; onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; wrapText?: boolean | undefined; buttonRef?: React.Ref<HTMLButtonElement> | undefined; toolTipText?: string | undefined; toolTipProps?: Partial<",
           "EuiToolTipProps",
@@ -7247,20 +7228,6 @@
       },
       {
         "parentPluginId": "observabilityShared",
-        "id": "def-common.ObservabilityTriggerId",
-        "type": "Enum",
-        "tags": [],
-        "label": "ObservabilityTriggerId",
-        "description": [],
-        "path": "x-pack/solutions/observability/plugins/observability_shared/common/trigger_ids.ts",
-        "lineNumber": 8,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observabilityShared",
         "id": "def-common.SupportedEntityTypes",
         "type": "Enum",
         "tags": [],
@@ -8337,7 +8304,7 @@
           "\"https://ela.st/explorer-feedback\""
         ],
         "path": "x-pack/solutions/observability/plugins/observability_shared/common/index.ts",
-        "lineNumber": 180,
+        "lineNumber": 179,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -8354,7 +8321,7 @@
           "\"https://ela.st/logs-onboarding-feedback\""
         ],
         "path": "x-pack/solutions/observability/plugins/observability_shared/common/index.ts",
-        "lineNumber": 179,
+        "lineNumber": 178,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
