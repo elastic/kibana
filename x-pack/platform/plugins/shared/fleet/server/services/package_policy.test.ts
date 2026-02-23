@@ -283,6 +283,7 @@ jest.mock('./utils/version_specific_policies', () => ({
 }));
 
 jest.mock('./agent_policies/package_policies_to_agent_inputs', () => ({
+  ...jest.requireActual('./agent_policies/package_policies_to_agent_inputs'),
   recompileInputsWithAgentVersion: jest.fn().mockResolvedValue([]),
 }));
 
