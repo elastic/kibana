@@ -11,6 +11,19 @@ import { MessageEditor } from './message_editor';
 import type { MessageEditorInstance } from './use_message_editor';
 import { TriggerId } from './inline_actions';
 
+// TODO: Remove once the inline actions feature is no longer behind the experimental feature flag
+jest.mock('../../../../hooks/use_kibana', () => ({
+  useKibana: () => ({
+    services: {
+      settings: {
+        client: {
+          get: () => true,
+        },
+      },
+    },
+  }),
+}));
+
 jest.mock('./inline_actions/cursor_rect', () => ({
   getRectAtOffset: () => ({
     left: 100,
