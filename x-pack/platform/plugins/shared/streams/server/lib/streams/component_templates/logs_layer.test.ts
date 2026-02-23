@@ -6,9 +6,18 @@
  */
 
 import type { InheritedFieldDefinition, Streams } from '@kbn/streams-schema';
+import { otelReservedFields } from '@kbn/streams-schema';
 import { addAliasesForNamespacedFields, baseMappings, baseFields } from './logs_layer';
 
 describe('logs_layer', () => {
+  describe('baseMappings and otelReservedFields sync', () => {
+    it('should have baseMappings keys match otelReservedFields', () => {
+      const baseMappingsKeys = Object.keys(baseMappings).sort();
+      const reservedFieldsSorted = [...otelReservedFields].sort();
+
+      expect(baseMappingsKeys).toEqual(reservedFieldsSorted);
+    });
+  });
   describe('addAliasesForNamespacedFields', () => {
     let mockStreamDefinition: Streams.WiredStream.Definition;
     let mockInheritedFields: InheritedFieldDefinition;
