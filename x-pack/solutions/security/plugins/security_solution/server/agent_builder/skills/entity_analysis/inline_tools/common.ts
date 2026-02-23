@@ -68,7 +68,7 @@ export const bootstrapCommonServices = async ({
   };
 };
 
-const getGeneralSecuritySolutionMessage = async (entityType: EntityType, indexPatterns: string) => {
+const getGeneralSecuritySolutionMessage = (entityType: EntityType, indexPatterns: string) => {
   return `
 If you believe that the current information and index mappings are not enough to answer the user's question, you must not generate an ESQL query.
 Always try querying the most appropriate domain index when available.

@@ -82,7 +82,7 @@ Steps:
 1. Use the 'security.entity_analysis.risk_score' tool to get the top N hosts sorted by their normalized risk scores.
 2. Use the 'security.entity_analysis.asset_criticality' tool to get the asset criticality levels for these hosts
 3. Filter the results to only show hosts that have a criticality level of "high_impact" or "extreme_impact"
-3. Present the results in a table format showing entity ID, risk score, risk level, and asset criticality level
+4. Present the results in a table format showing entity ID, risk score, risk level, and asset criticality level
 
 
 ### Example 4: Risk Score History
@@ -93,8 +93,8 @@ Steps:
 1. Use the 'security.entity_analysis.risk_score' tool with a time interval of '30d' to analyze Cielo39's risk score changes with host entityType
 2. When no results are returned, use the 'security.entity_analysis.risk_score' tool again to analyze Cielo39's risk score changes with user entityType
 3. When no results are returned, use the 'security.entity_analysis.risk_score' tool again to analyze Cielo39's risk score changes with service entityType
-2. When results are returned, determine if the change in risk score is significant (e.g., greater than 20 points).
-3. Present the findings in a concise format showing the previous risk score, current risk score, and whether the change is significant.
+4. When results are returned, determine if the change in risk score is significant (e.g., greater than 20 points).
+5. Present the findings in a concise format showing the previous risk score, current risk score, and whether the change is significant.
 
 ## Important dependencies
 - Risk score questions require the **Risk Engine** to be enabled and risk indices to exist.
@@ -106,7 +106,7 @@ Steps:
 - Risk levels: Critical (highest), High, Moderate, Low, Unknown
 - An entity is considered risky if its normalized score is above 80
 - Higher scores indicate greater risk to the organization
-- A change in risk score greater than 20 points over an internval is considered significant
+- A change in risk score greater than 20 points over an interval is considered significant
 - Document your analysis process and reasoning clearly
 - Avoid listing noisy raw data; highlight the most relevant signals
 - Offer a short explanation of why the score is considered high or low
