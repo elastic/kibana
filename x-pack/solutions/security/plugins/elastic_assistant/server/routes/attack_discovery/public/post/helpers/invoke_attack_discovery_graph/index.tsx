@@ -43,6 +43,7 @@ export const invokeAttackDiscoveryGraph = async ({
   savedObjectsClient,
   size,
   start,
+  allowAllWorkflowStatuses,
 }: {
   actionsClient: PublicMethodsOf<ActionsClient>;
   alertsIndexPattern: string;
@@ -60,6 +61,8 @@ export const invokeAttackDiscoveryGraph = async ({
   savedObjectsClient: SavedObjectsClientContract;
   start?: string;
   size: number;
+  /** If true, skips the workflow status filter (open/acknowledged) allowing alerts of any status */
+  allowAllWorkflowStatuses?: boolean;
 }): Promise<{
   anonymizedAlerts: Document[];
   attackDiscoveries: AttackDiscovery[] | null;
@@ -121,6 +124,7 @@ export const invokeAttackDiscoveryGraph = async ({
     replacements: latestReplacements,
     size,
     start,
+    allowAllWorkflowStatuses,
   });
 
   logger?.debug(() => 'invokeAttackDiscoveryGraph: invoking the Attack discovery graph');

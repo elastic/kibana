@@ -9,6 +9,9 @@ import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
 import { createRuleAttachmentType } from './rule';
 import { createAlertAttachmentType } from './alert';
 import { createEntityAttachmentType } from './entity';
+import { createAttackDiscoveryAttachmentType } from './attack_discovery';
+import { createCaseAttachmentType } from './case';
+import { createTimelineAttachmentType } from './timeline';
 
 /**
  * Registers all security agent builder attachments with the agentBuilder plugin
@@ -17,4 +20,7 @@ export const registerAttachments = async (agentBuilder: AgentBuilderPluginSetup)
   agentBuilder.attachments.registerType(createAlertAttachmentType());
   agentBuilder.attachments.registerType(createEntityAttachmentType());
   agentBuilder.attachments.registerType(createRuleAttachmentType());
+  agentBuilder.attachments.registerType(createAttackDiscoveryAttachmentType());
+  agentBuilder.attachments.registerType(createCaseAttachmentType());
+  agentBuilder.attachments.registerType(createTimelineAttachmentType());
 };

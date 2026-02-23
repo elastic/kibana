@@ -5,13 +5,24 @@
  * 2.0.
  */
 
-import { AttachmentType } from '@kbn/cases-plugin/common';
+import {
+  AttachmentType,
+  ExternalReferenceStorageType,
+  ATTACK_DISCOVERY_ATTACHMENT_TYPE,
+} from '@kbn/cases-plugin/common';
 import type { CaseAttachmentWithoutOwner } from '@kbn/cases-plugin/public/types';
 import { useAssistantContext } from '@kbn/elastic-assistant';
-import { getOriginalAlertIds, type Replacements } from '@kbn/elastic-assistant-common';
+import {
+  ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX,
+  getOriginalAlertIds,
+  type Replacements,
+  type AttackDiscovery,
+  type AttackDiscoveryAlert,
+} from '@kbn/elastic-assistant-common';
 import React, { useCallback, useMemo } from 'react';
 
 import { useKibana } from '../../../../../common/lib/kibana';
+import { useSpaceId } from '../../../../../common/hooks/use_space_id';
 import * as i18n from './translations';
 
 interface Props {
@@ -30,14 +41,17 @@ export const useAddToNewCase = ({
     alertIds,
     markdownComments,
     replacements,
+    attackDiscoveries,
   }: {
     alertIds: string[];
     markdownComments: string[];
     replacements?: Replacements;
+    attackDiscoveries?: Array<AttackDiscovery | AttackDiscoveryAlert>;
   }) => void;
 } => {
   const { cases } = useKibana().services;
   const { alertsIndexPattern } = useAssistantContext();
+  const spaceId = useSpaceId();
 
   const createCaseFlyout = cases.hooks.useCasesAddToNewCaseFlyout({
     initialValue: {
@@ -52,11 +66,13 @@ export const useAddToNewCase = ({
       headerContent,
       markdownComments,
       replacements,
+      attackDiscoveries,
     }: {
       alertIds: string[];
       headerContent?: React.ReactNode;
       markdownComments: string[];
       replacements?: Replacements;
+      attackDiscoveries?: Array<AttackDiscovery | AttackDiscoveryAlert>;
     }) => {
       const userCommentAttachments = markdownComments.map<CaseAttachmentWithoutOwner>((x) => ({
         comment: x,
@@ -74,14 +90,44 @@ export const useAddToNewCase = ({
         type: AttachmentType.alert,
       }));
 
-      const attachments = [...userCommentAttachments, ...alertAttachments];
+      // Attach attack discoveries as external reference attachments
+      // Only attach AttackDiscoveryAlert types (which have an id and are persisted as alerts)
+      const attackDiscoveryAttachments: CaseAttachmentWithoutOwner[] =
+        attackDiscoveries && spaceId
+          ? attackDiscoveries
+            .filter((ad) => ad.id != null && 'generationUuid' in ad)
+            .map<CaseAttachmentWithoutOwner>((attackDiscovery) => {
+              const alert = attackDiscovery as AttackDiscoveryAlert;
+              return {
+                type: AttachmentType.externalReference,
+                externalReferenceId: alert.id,
+                externalReferenceStorage: {
+                  type: ExternalReferenceStorageType.elasticSearchDoc,
+                },
+                externalReferenceAttachmentTypeId: ATTACK_DISCOVERY_ATTACHMENT_TYPE,
+                externalReferenceMetadata: {
+                  attackDiscoveryAlertId: alert.id,
+                  index: `${ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX}-${spaceId}`,
+                  generationUuid: alert.generationUuid,
+                  title: alert.title,
+                  timestamp: alert.timestamp,
+                },
+              };
+            })
+          : [];
+
+      const attachments = [
+        ...userCommentAttachments,
+        ...alertAttachments,
+        ...attackDiscoveryAttachments,
+      ];
 
       createCaseFlyout.open({
         attachments,
         headerContent,
       });
     },
-    [alertsIndexPattern, createCaseFlyout]
+    [alertsIndexPattern, createCaseFlyout, spaceId]
   );
 
   const headerContent = useMemo(
@@ -94,16 +140,24 @@ export const useAddToNewCase = ({
       alertIds,
       markdownComments,
       replacements,
+      attackDiscoveries,
     }: {
       alertIds: string[];
       markdownComments: string[];
       replacements?: Replacements;
+      attackDiscoveries?: Array<AttackDiscovery | AttackDiscoveryAlert>;
     }) => {
       if (onClick) {
         onClick();
       }
 
-      openCreateCaseFlyout({ alertIds, headerContent, markdownComments, replacements });
+      openCreateCaseFlyout({
+        alertIds,
+        headerContent,
+        markdownComments,
+        replacements,
+        attackDiscoveries,
+      });
     },
     [headerContent, onClick, openCreateCaseFlyout]
   );

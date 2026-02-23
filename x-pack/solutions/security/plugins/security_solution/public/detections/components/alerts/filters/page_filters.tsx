@@ -13,7 +13,6 @@ import { AlertFilterControls } from '@kbn/alerts-ui-shared/src/alert_filter_cont
 import { useHistory } from 'react-router-dom';
 import { SECURITY_SOLUTION_RULE_TYPE_IDS } from '@kbn/securitysolution-rules';
 import type { DataView, DataViewSpec } from '@kbn/data-plugin/common';
-import { convertCamelCasedKeysToSnakeCase } from '@kbn/presentation-publishing';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useKibana } from '../../../../common/lib/kibana';
 import { DEFAULT_ALERTS_INDEX } from '../../../../../common/constants';
@@ -24,30 +23,30 @@ import { SECURITY_ALERT_DATA_VIEW } from '../../../constants';
 export const DEFAULT_DETECTION_PAGE_FILTERS: FilterControlConfig[] = [
   {
     title: 'Status',
-    field_name: 'kibana.alert.workflow_status',
-    selected_options: ['open'],
-    display_settings: {
-      hide_action_bar: true,
-      hide_exists: true,
+    fieldName: 'kibana.alert.workflow_status',
+    selectedOptions: ['open'],
+    displaySettings: {
+      hideActionBar: true,
+      hideExists: true,
     },
     persist: true,
   },
   {
     title: 'Severity',
-    field_name: 'kibana.alert.severity',
-    selected_options: [],
-    display_settings: {
-      hide_action_bar: true,
-      hide_exists: true,
+    fieldName: 'kibana.alert.severity',
+    selectedOptions: [],
+    displaySettings: {
+      hideActionBar: true,
+      hideExists: true,
     },
   },
   {
     title: 'User',
-    field_name: 'user.name',
+    fieldName: 'user.name',
   },
   {
     title: 'Host',
-    field_name: 'host.name',
+    fieldName: 'host.name',
   },
 ];
 
@@ -82,10 +81,10 @@ export const PageFilters = memo(({ dataView, ...props }: PageFiltersProps) => {
       }),
     [history]
   );
-  const filterControlsUrlState = useMemo(() => {
-    const pageFilters = urlStorage.get<FilterControlConfig[] | undefined>(URL_PARAM_KEY.pageFilter);
-    return pageFilters ? pageFilters.map(convertCamelCasedKeysToSnakeCase) : undefined;
-  }, [urlStorage]);
+  const filterControlsUrlState = useMemo(
+    () => urlStorage.get<FilterControlConfig[] | undefined>(URL_PARAM_KEY.pageFilter) ?? undefined,
+    [urlStorage]
+  );
 
   const setFilterControlsUrlState = useCallback(
     (newFilterControls: FilterControlConfig[]) => {
