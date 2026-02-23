@@ -171,13 +171,14 @@ export class UrlFormat extends FieldFormat {
     }
   }
 
-  textConvert: TextContextTypeConvert = (value: string) => {
+  textConvert: TextContextTypeConvert = (value: unknown) => {
     const missing = this.checkForMissingValueText(value);
     if (missing) {
       return missing;
     }
 
-    return this.formatLabel(value);
+    const stringValue = String(value);
+    return this.formatLabel(stringValue);
   };
 
   htmlConvert: HtmlContextTypeConvert = () => {
@@ -186,7 +187,7 @@ export class UrlFormat extends FieldFormat {
     );
   };
 
-  reactConvert: ReactContextTypeConvert = (rawValue: string, options = {}) => {
+  reactConvert: ReactContextTypeConvert = (rawValue: unknown, options = {}) => {
     const missing = checkForMissingValueReact(rawValue);
     if (missing) {
       return missing;
@@ -195,9 +196,9 @@ export class UrlFormat extends FieldFormat {
     const { field, hit } = options;
     const { parsedUrl } = this._params;
 
-    // Note: We don't escape for React since React handles escaping automatically
-    const url = this.formatUrl(rawValue);
-    const label = this.formatLabel(rawValue, url);
+    const stringValue = String(rawValue);
+    const url = this.formatUrl(stringValue);
+    const label = this.formatLabel(stringValue, url);
 
     switch (this.param('type')) {
       case 'audio':

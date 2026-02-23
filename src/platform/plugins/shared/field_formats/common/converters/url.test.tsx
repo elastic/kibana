@@ -27,6 +27,24 @@ describe('UrlFormat', () => {
       expect(link?.textContent).toBe('http://elastic.co');
     });
 
+    test('handles numeric values by converting to string', () => {
+      const url = new UrlFormat({});
+      const result = url.convertToReact(0);
+      const { container } = render(<>{result}</>);
+
+      expect(container.textContent).toBe('0');
+    });
+
+    test('handles numeric values with url template', () => {
+      const url = new UrlFormat({ urlTemplate: 'http://example.com/{{value}}' });
+      const result = url.convertToReact(123);
+      const { container } = render(<>{result}</>);
+
+      const link = container.querySelector('a');
+      expect(link?.getAttribute('href')).toBe('http://example.com/123');
+      expect(link?.textContent).toBe('http://example.com/123');
+    });
+
     test('outputs a mailto: link when URL starts with mailto:', () => {
       const url = new UrlFormat({});
       const result = url.convertToReact('mailto:test@example.com');
@@ -80,6 +98,16 @@ describe('UrlFormat', () => {
       expect(url.convert(null, TEXT_CONTEXT_TYPE)).toBe('(null)');
       expect(url.convert(undefined, TEXT_CONTEXT_TYPE)).toBe('(null)');
       expect(url.convert('', TEXT_CONTEXT_TYPE)).toBe('(blank)');
+    });
+  });
+
+  describe('handles numeric values', () => {
+    test('text context converts number to string', () => {
+      const url = new UrlFormat({});
+
+      expect(url.convert(0, TEXT_CONTEXT_TYPE)).toBe('0');
+      expect(url.convert(123, TEXT_CONTEXT_TYPE)).toBe('123');
+      expect(url.convert(-456, TEXT_CONTEXT_TYPE)).toBe('-456');
     });
   });
 
