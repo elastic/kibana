@@ -7,13 +7,16 @@
 import { coreMock } from '@kbn/core/server/mocks';
 import { apmTelemetryEventBasedTypes } from './telemetry_events';
 import { TelemetryService } from './telemetry_service';
-import { EmbeddedSloLocations, SearchQueryActions, TelemetryEventTypes } from './types';
+import { SearchQueryActions, TelemetryEventTypes } from './types';
 
 describe('TelemetryService', () => {
   const service = new TelemetryService();
-
   const mockCoreStart = coreMock.createSetup();
-  service.setup({ analytics: mockCoreStart.analytics });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    service.setup({ analytics: mockCoreStart.analytics });
+  });
 
   it('should register all events', () => {
     expect(mockCoreStart.analytics.registerEventType).toHaveBeenCalledTimes(
@@ -44,16 +47,12 @@ describe('TelemetryService', () => {
   it('should report embedded SLO shown event with the properties', async () => {
     const telemetry = service.start();
 
-    telemetry.reportEmbeddedSloShown({
-      location: EmbeddedSloLocations.ServiceInventoryTable,
-    });
+    telemetry.reportEmbeddedSloShown();
 
     expect(mockCoreStart.analytics.reportEvent).toHaveBeenCalledTimes(1);
     expect(mockCoreStart.analytics.reportEvent).toHaveBeenCalledWith(
       TelemetryEventTypes.EMBEDDED_SLO_SHOWN,
-      {
-        location: EmbeddedSloLocations.ServiceInventoryTable,
-      }
+      {}
     );
   });
 });

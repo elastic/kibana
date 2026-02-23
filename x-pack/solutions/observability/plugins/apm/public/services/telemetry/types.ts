@@ -29,28 +29,17 @@ export interface SloOverviewFlyoutStatusFilteredParams {
   statuses: string[];
 }
 
-export enum EmbeddedSloLocations {
-  ServiceInventoryTable = 'service_inventory_table',
-  ServiceDetailsBadge = 'service_details_badge',
-}
-
-export interface EmbeddedSloShownParams {
-  location: EmbeddedSloLocations;
-}
-
 export type TelemetryEventParams =
   | SearchQuerySubmittedParams
   | SloOverviewFlyoutSearchQueriedParams
-  | SloOverviewFlyoutStatusFilteredParams
-  | EmbeddedSloShownParams
-  | Record<string, never>;
+  | SloOverviewFlyoutStatusFilteredParams;
 
 export interface ITelemetryClient {
   reportSearchQuerySubmitted(params: SearchQuerySubmittedParams): void;
   reportSloOverviewFlyoutViewed(): void;
   reportSloOverviewFlyoutSearchQueried(params: SloOverviewFlyoutSearchQueriedParams): void;
   reportSloOverviewFlyoutStatusFiltered(params: SloOverviewFlyoutStatusFilteredParams): void;
-  reportEmbeddedSloShown(params: EmbeddedSloShownParams): void;
+  reportEmbeddedSloShown(): void;
 }
 
 export enum TelemetryEventTypes {
@@ -61,7 +50,21 @@ export enum TelemetryEventTypes {
   EMBEDDED_SLO_SHOWN = 'embedded_slo_shown',
 }
 
-export interface TelemetryEvent {
-  eventType: TelemetryEventTypes;
-  schema: RootSchema<TelemetryEventParams> | Record<string, never>;
-}
+export type TelemetryEvent =
+  | {
+      eventType: TelemetryEventTypes.SEARCH_QUERY_SUBMITTED;
+      schema: RootSchema<SearchQuerySubmittedParams>;
+    }
+  | { eventType: TelemetryEventTypes.EMBEDDED_SLO_SHOWN; schema: {} }
+  | {
+      eventType: TelemetryEventTypes.SLO_OVERVIEW_FLYOUT_VIEWED;
+      schema: {};
+    }
+  | {
+      eventType: TelemetryEventTypes.SLO_OVERVIEW_FLYOUT_SEARCH_QUERIED;
+      schema: RootSchema<SloOverviewFlyoutSearchQueriedParams>;
+    }
+  | {
+      eventType: TelemetryEventTypes.SLO_OVERVIEW_FLYOUT_STATUS_FILTERED;
+      schema: RootSchema<SloOverviewFlyoutStatusFilteredParams>;
+    };

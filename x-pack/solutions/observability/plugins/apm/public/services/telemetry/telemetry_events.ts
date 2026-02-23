@@ -66,14 +66,7 @@ const sloOverviewFlyoutStatusFilteredEventType: TelemetryEvent = {
 
 const embeddedSloShownEventType: TelemetryEvent = {
   eventType: TelemetryEventTypes.EMBEDDED_SLO_SHOWN,
-  schema: {
-    location: {
-      type: 'keyword',
-      _meta: {
-        description: 'The location (within Kibana UI) where the embedded SLO view was shown',
-      },
-    },
-  },
+  schema: {},
 };
 
 export const apmTelemetryEventBasedTypes = [

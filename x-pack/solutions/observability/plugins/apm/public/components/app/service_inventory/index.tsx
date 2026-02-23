@@ -11,7 +11,6 @@ import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { EmbeddedSloLocations } from '../../../services/telemetry';
 import { ApmDocumentType } from '../../../../common/document_type';
 import type { ServiceListItem } from '../../../../common/service_inventory';
 import type { ServiceInventoryFieldName } from '../../../../common/service_inventory';
@@ -298,7 +297,7 @@ export function ServiceInventory() {
 
   useEffect(() => {
     if (hasSlos) {
-      telemetry.reportEmbeddedSloShown({ location: EmbeddedSloLocations.ServiceInventoryTable });
+      telemetry.reportEmbeddedSloShown();
     }
   }, [hasSlos, telemetry]);
 
