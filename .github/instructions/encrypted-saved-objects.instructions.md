@@ -233,7 +233,7 @@ In Serverless, both the current and previous Kibana versions may run simultaneou
 
 Some changes require **2 Serverless releases**:
 
-**Adding a new non-encrypted AAD attribute:**
+**Adding a new AAD attribute:**
 1. **Release 1:** Add the attribute to `attributesToIncludeInAAD` in the registration. Do NOT populate or use the attribute yet.
 2. **Release 2:** Implement a model version with `createModelVersion` to backfill and start using the attribute.
 
@@ -243,7 +243,9 @@ Some changes require **2 Serverless releases**:
 
 ### `forwardCompatibility` schema
 
-Set `unknowns: 'ignore'` in the `forwardCompatibility` schema when the previous version should drop unknown fields. This supports hierarchical AAD — when subfields of an AAD attribute are added or removed, the previous version can still successfully construct AAD and decrypt.
+Set `unknowns: 'ignore'` in the `forwardCompatibility` schema when the previous version should drop unknown fields. This is helpful if the additional fields are not compatible or problematic in the previous version.
+
+During model version transformation, decryption occurs BEFORE the `forwardCompatibility` schema is applied. This supports hierarchical AAD — when subfields of an AAD attribute are added or removed, the previous version can still successfully construct AAD, ensuring objects can be decrypted before being adapted for the previous version. 
 
 ## Quick Change Reference
 
