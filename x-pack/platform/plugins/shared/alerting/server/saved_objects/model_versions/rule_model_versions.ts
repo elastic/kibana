@@ -123,7 +123,33 @@ export const ruleModelVersions: SavedObjectsModelVersionMap = {
     },
   },
   '10': {
-    changes: [],
+    changes: [
+      {
+        type: 'mappings_addition',
+        addedMappings: {
+          snoozedInstances: {
+            type: 'nested',
+            properties: {
+              instanceId: { type: 'keyword' },
+              expiresAt: {
+                type: 'date',
+                format: 'strict_date_optional_time||epoch_millis',
+              },
+              conditions: {
+                type: 'nested',
+                properties: {
+                  type: { type: 'keyword' },
+                  field: { type: 'keyword' },
+                  value: { type: 'keyword' },
+                  snapshotValue: { type: 'keyword' },
+                },
+              },
+              conditionOperator: { type: 'keyword' },
+            },
+          },
+        },
+      },
+    ],
     schemas: {
       forwardCompatibility: rawRuleSchemaV10.extends({}, { unknowns: 'ignore' }),
       create: rawRuleSchemaV10,
