@@ -114,8 +114,7 @@ export class DataViewsPublicPlugin
         getIndices({
           ...props,
           http: core.http,
-          projectRouting:
-            'projectRouting' in props ? props.projectRouting : cps?.cpsManager?.getProjectRouting(),
+          projectRouting: cps?.cpsManager?.getProjectRouting(props.projectRouting),
         }),
       getRollupsEnabled: () => this.rollupsEnabled,
       scriptedFieldsEnabled: config.scriptedFieldsEnabled === false ? false : true, // accounting for null value

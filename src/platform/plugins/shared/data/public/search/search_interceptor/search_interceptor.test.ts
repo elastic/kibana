@@ -2247,7 +2247,11 @@ describe('SearchInterceptor', () => {
       access: ProjectRoutingAccess = ProjectRoutingAccess.EDITABLE
     ): ICPSManager =>
       ({
-        getProjectRouting: jest.fn().mockReturnValue(projectRouting),
+        getProjectRouting: jest
+          .fn()
+          .mockImplementation(
+            (passedProjectRouting?: string) => passedProjectRouting ?? projectRouting
+          ),
         getProjectPickerAccess: jest.fn().mockReturnValue(access),
       } as unknown as ICPSManager);
 
