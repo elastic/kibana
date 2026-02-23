@@ -96,6 +96,22 @@ const createEntityNode = ({
         : 'globe',
   } as NodeViewModel);
 
+const createRelationshipStoryNode = ({
+  id,
+  label,
+  isOrigin = false,
+}: {
+  id: string;
+  label: string;
+  isOrigin?: boolean;
+}): NodeViewModel =>
+  ({
+    id,
+    shape: 'relationship',
+    label,
+    isOrigin,
+  } as NodeViewModel);
+
 const createLabelNode = ({
   id,
   isOrigin = false,
@@ -178,6 +194,55 @@ export const SingleOriginEvent: Story = {
 
       createEdge({ id: 'node3ToOriginEvent', source: 'node3', target: 'originEvent' }),
       createEdge({ id: 'originEventToNode4', source: 'originEvent', target: 'node4' }),
+    ],
+  },
+};
+
+export const SingleOriginEntity: Story = {
+  args: {
+    title: 'Single Origin Entity',
+    description:
+      'Graph with one origin entity that has two relationship nodes to two targets. Each target has another relationship to a further target. Relationship nodes connected to the origin entity are marked as origin for centering.',
+    nodes: [
+      // Origin entity
+      createEntityNode({ id: 'originEntity', shape: 'ellipse' }),
+
+      // First-level targets
+      createEntityNode({ id: 'target1', shape: 'hexagon' }),
+      createEntityNode({ id: 'target2', shape: 'rectangle' }),
+
+      // Second-level targets
+      createEntityNode({ id: 'target1a', shape: 'diamond' }),
+      createEntityNode({ id: 'target2a', shape: 'pentagon' }),
+
+      // Relationship nodes from origin entity (marked as origin for centering)
+      createRelationshipStoryNode({ id: 'rel-owns', label: 'Owns', isOrigin: true }),
+      createRelationshipStoryNode({
+        id: 'rel-communicates',
+        label: 'Communicates with',
+        isOrigin: true,
+      }),
+
+      createRelationshipStoryNode({ id: 'rel-depends', label: 'Depends on' }),
+      createRelationshipStoryNode({ id: 'rel-supervises', label: 'Supervises' }),
+    ],
+    edges: [
+      // Origin entity -> relationship nodes
+      createEdge({ id: 'origin-to-owns', source: 'originEntity', target: 'rel-owns' }),
+      createEdge({
+        id: 'origin-to-communicates',
+        source: 'originEntity',
+        target: 'rel-communicates',
+      }),
+
+      createEdge({ id: 'owns-to-target1', source: 'rel-owns', target: 'target1' }),
+      createEdge({ id: 'communicates-to-target2', source: 'rel-communicates', target: 'target2' }),
+
+      createEdge({ id: 'target1-to-depends', source: 'target1', target: 'rel-depends' }),
+      createEdge({ id: 'target2-to-supervises', source: 'target2', target: 'rel-supervises' }),
+
+      createEdge({ id: 'depends-to-target1a', source: 'rel-depends', target: 'target1a' }),
+      createEdge({ id: 'supervises-to-target2a', source: 'rel-supervises', target: 'target2a' }),
     ],
   },
 };

@@ -1,0 +1,1995 @@
+{
+  "id": "@kbn/content-list-table",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/content-list-table",
+        "id": "def-public.ContentListTable",
+        "type": "Function",
+        "tags": [],
+        "label": "ContentListTable",
+        "description": [],
+        "signature": [
+          "(({ title, tableLayout, compressed, emptyState: customEmptyState, children, filter, \"data-test-subj\": dataTestSubj, }: ",
+          {
+            "pluginId": "@kbn/content-list-table",
+            "scope": "public",
+            "docId": "kibKbnContentListTablePluginApi",
+            "section": "def-public.ContentListTableProps",
+            "text": "ContentListTableProps"
+          },
+          ") => React.JSX.Element) & { Column: any; Action: any; }"
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/content_list_table.tsx",
+        "lineNumber": 170,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-table",
+            "id": "def-public.ContentListTable.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "__0",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/content-list-table",
+                "scope": "public",
+                "docId": "kibKbnContentListTablePluginApi",
+                "section": "def-public.ContentListTableProps",
+                "text": "ContentListTableProps"
+              }
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/content_list_table.tsx",
+            "lineNumber": 111,
+            "columnNumber": 36,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-table",
+        "id": "def-public.EmptyState",
+        "type": "Function",
+        "tags": [],
+        "label": "EmptyState",
+        "description": [
+          "\nDefault empty state component for when there are no items.  We will expect to iterate/replace this component."
+        ],
+        "signature": [
+          "({ title, body }: ",
+          {
+            "pluginId": "@kbn/content-list-table",
+            "scope": "public",
+            "docId": "kibKbnContentListTablePluginApi",
+            "section": "def-public.EmptyStateProps",
+            "text": "EmptyStateProps"
+          },
+          ") => React.JSX.Element"
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/empty_state/empty_state.tsx",
+        "lineNumber": 29,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-table",
+            "id": "def-public.EmptyState.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ title, body }",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/content-list-table",
+                "scope": "public",
+                "docId": "kibKbnContentListTablePluginApi",
+                "section": "def-public.EmptyStateProps",
+                "text": "EmptyStateProps"
+              }
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/empty_state/empty_state.tsx",
+            "lineNumber": 29,
+            "columnNumber": 28,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-table",
+        "id": "def-public.getRowId",
+        "type": "Function",
+        "tags": [],
+        "label": "getRowId",
+        "description": [
+          "\nGet a stable row ID for EuiBasicTable's `itemId` prop.\n"
+        ],
+        "signature": [
+          "(id: string) => string"
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/content_list_table.tsx",
+        "lineNumber": 70,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-table",
+            "id": "def-public.getRowId.$1",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [
+              "- The item's ID."
+            ],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/content_list_table.tsx",
+            "lineNumber": 70,
+            "columnNumber": 26,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "A stable row ID string."
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-table",
+        "id": "def-public.NameCell",
+        "type": "Function",
+        "tags": [],
+        "label": "NameCell",
+        "description": [
+          "\nDefault rich renderer for the name column that includes:\n- Clickable title (with href or onClick).\n- Description (if available and showDescription is true).\n\nMemoized to prevent unnecessary re-renders when parent table re-renders."
+        ],
+        "signature": [
+          "React.NamedExoticComponent<",
+          {
+            "pluginId": "@kbn/content-list-table",
+            "scope": "public",
+            "docId": "kibKbnContentListTablePluginApi",
+            "section": "def-public.NameCellProps",
+            "text": "NameCellProps"
+          },
+          "> & { readonly type: ({ item, showDescription }: ",
+          {
+            "pluginId": "@kbn/content-list-table",
+            "scope": "public",
+            "docId": "kibKbnContentListTablePluginApi",
+            "section": "def-public.NameCellProps",
+            "text": "NameCellProps"
+          },
+          ") => React.JSX.Element; }"
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/name/name_cell.tsx",
+        "lineNumber": 34,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-table",
+            "id": "def-public.NameCell.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 630,
+            "columnNumber": 10,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-table",
+        "id": "def-public.UpdatedAtCell",
+        "type": "Function",
+        "tags": [],
+        "label": "UpdatedAtCell",
+        "description": [
+          "\nCell renderer for the `UpdatedAt` column.\n\nDisplays the last updated timestamp with the following formatting:\n- Within the last 7 days: locale-aware relative time via `FormattedRelative`\n  from `@kbn/i18n-react` (e.g., \"2 hours ago\"). Auto-updates as time passes.\n- Older than 7 days: abbreviated absolute date (e.g., \"Jan 5, 2025\").\n- Missing value: dash with tooltip \"Last updated unknown\".\n\nA tooltip always shows the full date and time (e.g., \"January 5, 2025 3:42 PM\").\n\nMemoized to prevent unnecessary re-renders when parent table re-renders."
+        ],
+        "signature": [
+          "React.NamedExoticComponent<",
+          {
+            "pluginId": "@kbn/content-list-table",
+            "scope": "public",
+            "docId": "kibKbnContentListTablePluginApi",
+            "section": "def-public.UpdatedAtCellProps",
+            "text": "UpdatedAtCellProps"
+          },
+          "> & { readonly type: ({ updatedAt }: ",
+          {
+            "pluginId": "@kbn/content-list-table",
+            "scope": "public",
+            "docId": "kibKbnContentListTablePluginApi",
+            "section": "def-public.UpdatedAtCellProps",
+            "text": "UpdatedAtCellProps"
+          },
+          ") => React.JSX.Element; }"
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/updated_at/updated_at_cell.tsx",
+        "lineNumber": 42,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-table",
+            "id": "def-public.UpdatedAtCell.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 630,
+            "columnNumber": 10,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-table",
+        "id": "def-public.useSelection",
+        "type": "Function",
+        "tags": [],
+        "label": "useSelection",
+        "description": [
+          "\nHook to integrate content list selection with `EuiBasicTable`.\n\nBridges the provider's selection state with `EuiBasicTable`'s `selection` prop\nusing **controlled mode** (`selected`). This ensures programmatic selection\nchanges (e.g., clearing after delete) are reflected in the table checkboxes.\n"
+        ],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "@kbn/content-list-table",
+            "scope": "public",
+            "docId": "kibKbnContentListTablePluginApi",
+            "section": "def-public.UseSelectionReturn",
+            "text": "UseSelectionReturn"
+          }
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/hooks/use_selection.ts",
+        "lineNumber": 38,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [
+          "Object containing the `selection` prop for `EuiBasicTable`."
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/content-list-table",
+        "id": "def-public.ActionNamespace",
+        "type": "Interface",
+        "tags": [],
+        "label": "ActionNamespace",
+        "description": [
+          "\nNamespace interface for `Action` sub-components.\n\nThe base `Action` accepts {@link ActionProps}; pre-built actions\nare properties (e.g., `Action.Edit`, `Action.Delete`)."
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/action/types.ts",
+        "lineNumber": 60,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-table",
+            "id": "def-public.ActionNamespace.Unnamed",
+            "type": "Any",
+            "tags": [],
+            "label": "Unnamed",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/action/types.ts",
+            "lineNumber": 67,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-table",
+            "id": "def-public.ActionNamespace.Edit",
+            "type": "Function",
+            "tags": [],
+            "label": "Edit",
+            "description": [],
+            "signature": [
+              "(props: ",
+              {
+                "pluginId": "@kbn/content-list-table",
+                "scope": "public",
+                "docId": "kibKbnContentListTablePluginApi",
+                "section": "def-public.EditActionProps",
+                "text": "EditActionProps"
+              },
+              ") => React.ReactNode"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/action/types.ts",
+            "lineNumber": 68,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/content-list-table",
+                "id": "def-public.ActionNamespace.Edit.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "props",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/content-list-table",
+                    "scope": "public",
+                    "docId": "kibKbnContentListTablePluginApi",
+                    "section": "def-public.EditActionProps",
+                    "text": "EditActionProps"
+                  }
+                ],
+                "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/action/types.ts",
+                "lineNumber": 68,
+                "columnNumber": 10,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/content-list-table",
+            "id": "def-public.ActionNamespace.Delete",
+            "type": "Function",
+            "tags": [],
+            "label": "Delete",
+            "description": [],
+            "signature": [
+              "(props: ",
+              {
+                "pluginId": "@kbn/content-list-table",
+                "scope": "public",
+                "docId": "kibKbnContentListTablePluginApi",
+                "section": "def-public.DeleteActionProps",
+                "text": "DeleteActionProps"
+              },
+              ") => React.ReactNode"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/action/types.ts",
+            "lineNumber": 69,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/content-list-table",
+                "id": "def-public.ActionNamespace.Delete.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "props",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/content-list-table",
+                    "scope": "public",
+                    "docId": "kibKbnContentListTablePluginApi",
+                    "section": "def-public.DeleteActionProps",
+                    "text": "DeleteActionProps"
+                  }
+                ],
+                "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/action/types.ts",
+                "lineNumber": 69,
+                "columnNumber": 12,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-table",
+        "id": "def-public.ActionProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "ActionProps",
+        "description": [
+          "\nProps for the `Action` component (custom actions).\n\nCustom actions are identified by `props.id` and provide their own\nbehavior. Pre-built actions (like `Action.Edit`) have dedicated\npreset components with their own props interfaces."
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/action/types.ts",
+        "lineNumber": 28,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-table",
+            "id": "def-public.ActionProps.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [
+              "Unique identifier for the action."
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/action/types.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-table",
+            "id": "def-public.ActionProps.name",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "name",
+            "description": [
+              "Display name for the action (shown in menu and tooltip)."
+            ],
+            "signature": [
+              "string | ((item: ",
+              {
+                "pluginId": "@kbn/content-list-provider",
+                "scope": "public",
+                "docId": "kibKbnContentListProviderPluginApi",
+                "section": "def-public.ContentListItem",
+                "text": "ContentListItem"
+              },
+              "<Record<string, unknown>>) => React.ReactNode)"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/action/types.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-table",
+            "id": "def-public.ActionProps.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [
+              "Accessible description for the action."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/action/types.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-table",
+            "id": "def-public.ActionProps.icon",
+            "type": "string",
+            "tags": [],
+            "label": "icon",
+            "description": [
+              "Icon type (EUI icon name)."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/action/types.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-table",
+            "id": "def-public.ActionProps.type",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "type",
+            "description": [
+              "Render type: `'icon'` (compact) or `'button'` (full)."
+            ],
+            "signature": [
+              "\"icon\" | \"button\" | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/action/types.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-table",
+            "id": "def-public.ActionProps.color",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "color",
+            "description": [
+              "Icon/button color (matches EUI button color palette)."
+            ],
+            "signature": [
+              "\"text\" | \"primary\" | \"success\" | \"warning\" | \"accent\" | \"accentSecondary\" | \"danger\" | \"neutral\" | \"risk\" | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/action/types.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-table",
+            "id": "def-public.ActionProps.onClick",
+            "type": "Function",
+            "tags": [],
+            "label": "onClick",
+            "description": [
+              "Click handler."
+            ],
+            "signature": [
+              "((item: ",
+              {
+                "pluginId": "@kbn/content-list-provider",
+                "scope": "public",
+                "docId": "kibKbnContentListProviderPluginApi",
+                "section": "def-public.ContentListItem",
+                "text": "ContentListItem"
+              },
+              "<Record<string, unknown>>) => void) | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/action/types.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/content-list-table",
+                "id": "def-public.ActionProps.onClick.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "item",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/content-list-provider",
+                    "scope": "public",
+                    "docId": "kibKbnContentListProviderPluginApi",
+                    "section": "def-public.ContentListItem",
+                    "text": "ContentListItem"
+                  },
+                  "<Record<string, unknown>>"
+                ],
+                "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/action/types.ts",
+                "lineNumber": 49,
+                "columnNumber": 14,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/content-list-table",
+            "id": "def-public.ActionProps.href",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "href",
+            "description": [
+              "Link href (string or function returning href per item)."
+            ],
+            "signature": [
+              "string | ((item: ",
+              {
+                "pluginId": "@kbn/content-list-provider",
+                "scope": "public",
+                "docId": "kibKbnContentListProviderPluginApi",
+                "section": "def-public.ContentListItem",
+                "text": "ContentListItem"
+              },
+              "<Record<string, unknown>>) => string) | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/action/types.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-table",
+            "id": "def-public.ActionProps.enabled",
+            "type": "Function",
+            "tags": [],
+            "label": "enabled",
+            "description": [
+              "Whether the action is enabled for a given item."
+            ],
+            "signature": [
+              "((item: ",
+              {
+                "pluginId": "@kbn/content-list-provider",
+                "scope": "public",
+                "docId": "kibKbnContentListProviderPluginApi",
+                "section": "def-public.ContentListItem",
+                "text": "ContentListItem"
+              },
+              "<Record<string, unknown>>) => boolean) | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/action/types.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/content-list-table",
+                "id": "def-public.ActionProps.enabled.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "item",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/content-list-provider",
+                    "scope": "public",
+                    "docId": "kibKbnContentListProviderPluginApi",
+                    "section": "def-public.ContentListItem",
+                    "text": "ContentListItem"
+                  },
+                  "<Record<string, unknown>>"
+                ],
+                "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/action/types.ts",
+                "lineNumber": 53,
+                "columnNumber": 14,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/content-list-table",
+            "id": "def-public.ActionProps.available",
+            "type": "Function",
+            "tags": [],
+            "label": "available",
+            "description": [
+              "Whether the action is available (visible) for a given item."
+            ],
+            "signature": [
+              "((item: ",
+              {
+                "pluginId": "@kbn/content-list-provider",
+                "scope": "public",
+                "docId": "kibKbnContentListProviderPluginApi",
+                "section": "def-public.ContentListItem",
+                "text": "ContentListItem"
+              },
+              "<Record<string, unknown>>) => boolean) | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/action/types.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/content-list-table",
+                "id": "def-public.ActionProps.available.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "item",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/content-list-provider",
+                    "scope": "public",
+                    "docId": "kibKbnContentListProviderPluginApi",
+                    "section": "def-public.ContentListItem",
+                    "text": "ContentListItem"
+                  },
+                  "<Record<string, unknown>>"
+                ],
+                "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/action/types.ts",
+                "lineNumber": 55,
+                "columnNumber": 16,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/content-list-table",
+            "id": "def-public.ActionProps.datatestsubj",
+            "type": "string",
+            "tags": [],
+            "label": "'data-test-subj'",
+            "description": [
+              "Test subject for testing."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/action/types.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-table",
+        "id": "def-public.ActionsColumnProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "ActionsColumnProps",
+        "description": [
+          "\nProps for the `Column.Actions` preset component.\n\nThese are the declarative attributes consumers pass in JSX. The actions builder\nreads them directly from the parsed attributes."
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/actions/actions_builder.tsx",
+        "lineNumber": 25,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-table",
+            "id": "def-public.ActionsColumnProps.width",
+            "type": "string",
+            "tags": [],
+            "label": "width",
+            "description": [
+              "Column width (CSS value like `'100px'`)."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/actions/actions_builder.tsx",
+            "lineNumber": 32,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-table",
+            "id": "def-public.ActionsColumnProps.columnTitle",
+            "type": "string",
+            "tags": [],
+            "label": "columnTitle",
+            "description": [
+              "Custom column title. Defaults to `'Actions'`."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/actions/actions_builder.tsx",
+            "lineNumber": 34,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-table",
+            "id": "def-public.ActionsColumnProps.children",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "children",
+            "description": [
+              "\nAction children.\n\nWhen provided, only the specified actions are rendered in the given order.\nWhen omitted, actions are determined automatically from the provider config\n(e.g., edit is shown if `getEditUrl` or `onEdit` is configured, delete is\nshown if `onDelete` is configured)."
+            ],
+            "signature": [
+              "React.ReactNode"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/actions/actions_builder.tsx",
+            "lineNumber": 36,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-table",
+        "id": "def-public.ColumnNamespace",
+        "type": "Interface",
+        "tags": [],
+        "label": "ColumnNamespace",
+        "description": [
+          "\nNamespace interface for `Column` sub-components.\n\nThe base `Column` accepts {@link ColumnProps}; pre-built columns\nare properties (e.g., `Column.Name`, `Column.Actions`)."
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/part.ts",
+        "lineNumber": 47,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-table",
+            "id": "def-public.ColumnNamespace.Unnamed",
+            "type": "Any",
+            "tags": [],
+            "label": "Unnamed",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/part.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-table",
+            "id": "def-public.ColumnNamespace.Name",
+            "type": "Function",
+            "tags": [],
+            "label": "Name",
+            "description": [],
+            "signature": [
+              "(props: ",
+              {
+                "pluginId": "@kbn/content-list-table",
+                "scope": "public",
+                "docId": "kibKbnContentListTablePluginApi",
+                "section": "def-public.NameColumnProps",
+                "text": "NameColumnProps"
+              },
+              ") => React.ReactNode"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/part.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/content-list-table",
+                "id": "def-public.ColumnNamespace.Name.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "props",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/content-list-table",
+                    "scope": "public",
+                    "docId": "kibKbnContentListTablePluginApi",
+                    "section": "def-public.NameColumnProps",
+                    "text": "NameColumnProps"
+                  }
+                ],
+                "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/part.ts",
+                "lineNumber": 55,
+                "columnNumber": 10,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/content-list-table",
+            "id": "def-public.ColumnNamespace.UpdatedAt",
+            "type": "Function",
+            "tags": [],
+            "label": "UpdatedAt",
+            "description": [],
+            "signature": [
+              "(props: ",
+              {
+                "pluginId": "@kbn/content-list-table",
+                "scope": "public",
+                "docId": "kibKbnContentListTablePluginApi",
+                "section": "def-public.UpdatedAtColumnProps",
+                "text": "UpdatedAtColumnProps"
+              },
+              ") => React.ReactNode"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/part.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/content-list-table",
+                "id": "def-public.ColumnNamespace.UpdatedAt.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "props",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/content-list-table",
+                    "scope": "public",
+                    "docId": "kibKbnContentListTablePluginApi",
+                    "section": "def-public.UpdatedAtColumnProps",
+                    "text": "UpdatedAtColumnProps"
+                  }
+                ],
+                "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/part.ts",
+                "lineNumber": 56,
+                "columnNumber": 15,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/content-list-table",
+            "id": "def-public.ColumnNamespace.Actions",
+            "type": "Function",
+            "tags": [],
+            "label": "Actions",
+            "description": [],
+            "signature": [
+              "(props: ",
+              {
+                "pluginId": "@kbn/content-list-table",
+                "scope": "public",
+                "docId": "kibKbnContentListTablePluginApi",
+                "section": "def-public.ActionsColumnProps",
+                "text": "ActionsColumnProps"
+              },
+              ") => React.ReactNode"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/part.ts",
+            "lineNumber": 57,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/content-list-table",
+                "id": "def-public.ColumnNamespace.Actions.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "props",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/content-list-table",
+                    "scope": "public",
+                    "docId": "kibKbnContentListTablePluginApi",
+                    "section": "def-public.ActionsColumnProps",
+                    "text": "ActionsColumnProps"
+                  }
+                ],
+                "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/part.ts",
+                "lineNumber": 57,
+                "columnNumber": 13,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-table",
+        "id": "def-public.ColumnProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "ColumnProps",
+        "description": [
+          "\nProps for the `Column` component (custom columns).\n\nCustom columns are identified by `props.id` and provide their own\n`render` function. Pre-built columns (like `Column.Name`) have\ndedicated preset components with their own props interfaces."
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/part.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-table",
+            "id": "def-public.ColumnProps.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [
+              "Unique identifier for the column."
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/part.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-table",
+            "id": "def-public.ColumnProps.name",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "name",
+            "description": [
+              "Display name for the column header."
+            ],
+            "signature": [
+              "React.ReactNode"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/part.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-table",
+            "id": "def-public.ColumnProps.width",
+            "type": "string",
+            "tags": [],
+            "label": "width",
+            "description": [
+              "Column width (CSS value like `'200px'` or `'40%'`)."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/part.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-table",
+            "id": "def-public.ColumnProps.sortable",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "sortable",
+            "description": [
+              "Whether the column is sortable."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/part.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-table",
+            "id": "def-public.ColumnProps.field",
+            "type": "string",
+            "tags": [],
+            "label": "field",
+            "description": [
+              "\nOptional field name to use for sorting and/or value lookup.\n\nDefaults to the column `id` when omitted."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/part.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-table",
+            "id": "def-public.ColumnProps.datatestsubj",
+            "type": "string",
+            "tags": [],
+            "label": "'data-test-subj'",
+            "description": [
+              "Optional test subject for the column header/cells."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/part.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-table",
+            "id": "def-public.ColumnProps.render",
+            "type": "Function",
+            "tags": [],
+            "label": "render",
+            "description": [
+              "Render function for the column cells."
+            ],
+            "signature": [
+              "(item: ",
+              {
+                "pluginId": "@kbn/content-list-provider",
+                "scope": "public",
+                "docId": "kibKbnContentListProviderPluginApi",
+                "section": "def-public.ContentListItem",
+                "text": "ContentListItem"
+              },
+              "<Record<string, unknown>>) => React.ReactNode"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/part.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/content-list-table",
+                "id": "def-public.ColumnProps.render.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "item",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/content-list-provider",
+                    "scope": "public",
+                    "docId": "kibKbnContentListProviderPluginApi",
+                    "section": "def-public.ContentListItem",
+                    "text": "ContentListItem"
+                  },
+                  "<Record<string, unknown>>"
+                ],
+                "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/part.ts",
+                "lineNumber": 44,
+                "columnNumber": 12,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-table",
+        "id": "def-public.ContentListTableProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "ContentListTableProps",
+        "description": [
+          "\nProps for ContentListTable component."
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/content_list_table.tsx",
+        "lineNumber": 23,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-table",
+            "id": "def-public.ContentListTableProps.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [
+              "Accessible title for the table (used as table caption for screen readers)."
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/content_list_table.tsx",
+            "lineNumber": 27,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-table",
+            "id": "def-public.ContentListTableProps.tableLayout",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "tableLayout",
+            "description": [
+              "Table layout mode."
+            ],
+            "signature": [
+              "\"fixed\" | \"auto\" | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/content_list_table.tsx",
+            "lineNumber": 29,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-table",
+            "id": "def-public.ContentListTableProps.compressed",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "compressed",
+            "description": [
+              "Compressed table style."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/content_list_table.tsx",
+            "lineNumber": 31,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-table",
+            "id": "def-public.ContentListTableProps.emptyState",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "emptyState",
+            "description": [
+              "\nCustom empty state component.\nIf not provided, uses default empty state."
+            ],
+            "signature": [
+              "React.ReactNode"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/content_list_table.tsx",
+            "lineNumber": 33,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-table",
+            "id": "def-public.ContentListTableProps.children",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "children",
+            "description": [
+              "\nColumn components as children.\nIf no children provided, defaults to Name column."
+            ],
+            "signature": [
+              "React.ReactNode"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/content_list_table.tsx",
+            "lineNumber": 38,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-table",
+            "id": "def-public.ContentListTableProps.filter",
+            "type": "Function",
+            "tags": [],
+            "label": "filter",
+            "description": [
+              "\nOptional filter function to filter items from the provider.\nUseful when multiple tables share a single provider but display different subsets.\n\n**Important:** This function should be memoized (e.g., with `useCallback`) to prevent\nunnecessary re-filtering on every render.\n"
+            ],
+            "signature": [
+              "((item: ",
+              {
+                "pluginId": "@kbn/content-list-provider",
+                "scope": "public",
+                "docId": "kibKbnContentListProviderPluginApi",
+                "section": "def-public.ContentListItem",
+                "text": "ContentListItem"
+              },
+              "<Record<string, unknown>>) => boolean) | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/content_list_table.tsx",
+            "lineNumber": 43,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/content-list-table",
+                "id": "def-public.ContentListTableProps.filter.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "item",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/content-list-provider",
+                    "scope": "public",
+                    "docId": "kibKbnContentListProviderPluginApi",
+                    "section": "def-public.ContentListItem",
+                    "text": "ContentListItem"
+                  },
+                  "<Record<string, unknown>>"
+                ],
+                "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/content_list_table.tsx",
+                "lineNumber": 59,
+                "columnNumber": 13,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/content-list-table",
+            "id": "def-public.ContentListTableProps.datatestsubj",
+            "type": "string",
+            "tags": [],
+            "label": "'data-test-subj'",
+            "description": [
+              "Test subject for testing."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/content_list_table.tsx",
+            "lineNumber": 60,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-table",
+        "id": "def-public.DeleteActionProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "DeleteActionProps",
+        "description": [
+          "\nProps for the `Action.Delete` preset component."
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/action/types.ts",
+        "lineNumber": 80,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-table",
+            "id": "def-public.DeleteActionProps.label",
+            "type": "string",
+            "tags": [],
+            "label": "label",
+            "description": [
+              "Custom label for the delete action. Defaults to `'Delete'`."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/action/types.ts",
+            "lineNumber": 84,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-table",
+        "id": "def-public.EditActionProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "EditActionProps",
+        "description": [
+          "\nProps for the `Action.Edit` preset component."
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/action/types.ts",
+        "lineNumber": 72,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-table",
+            "id": "def-public.EditActionProps.label",
+            "type": "string",
+            "tags": [],
+            "label": "label",
+            "description": [
+              "Custom label for the edit action. Defaults to `'Edit'`."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/action/types.ts",
+            "lineNumber": 76,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-table",
+        "id": "def-public.EmptyStateProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "EmptyStateProps",
+        "description": [],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/empty_state/empty_state.tsx",
+        "lineNumber": 15,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-table",
+            "id": "def-public.EmptyStateProps.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [
+              "\nCustom title for the empty state."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/empty_state/empty_state.tsx",
+            "lineNumber": 16,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-table",
+            "id": "def-public.EmptyStateProps.body",
+            "type": "string",
+            "tags": [],
+            "label": "body",
+            "description": [
+              "\nCustom body text for the empty state."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/empty_state/empty_state.tsx",
+            "lineNumber": 20,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-table",
+        "id": "def-public.NameCellProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "NameCellProps",
+        "description": [],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/name/name_cell.tsx",
+        "lineNumber": 17,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-table",
+            "id": "def-public.NameCellProps.item",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "item",
+            "description": [],
+            "signature": [
+              "Record<string, unknown> & { id: string; title: string; description?: string | undefined; type?: string | undefined; updatedAt?: Date | undefined; }"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/name/name_cell.tsx",
+            "lineNumber": 18,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-table",
+            "id": "def-public.NameCellProps.showDescription",
+            "type": "CompoundType",
+            "tags": [
+              "default"
+            ],
+            "label": "showDescription",
+            "description": [
+              "\nWhether to show the description.\n"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/name/name_cell.tsx",
+            "lineNumber": 19,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-table",
+        "id": "def-public.NameColumnProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "NameColumnProps",
+        "description": [
+          "\nProps for the `Column.Name` preset component.\n\nThese are the declarative attributes consumers pass in JSX. The name builder\nreads them directly from the parsed attributes."
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/name/name_builder.tsx",
+        "lineNumber": 25,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-table",
+            "id": "def-public.NameColumnProps.width",
+            "type": "string",
+            "tags": [],
+            "label": "width",
+            "description": [
+              "Column width (CSS value like `'200px'` or `'40%'`)."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/name/name_builder.tsx",
+            "lineNumber": 32,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-table",
+            "id": "def-public.NameColumnProps.columnTitle",
+            "type": "string",
+            "tags": [],
+            "label": "columnTitle",
+            "description": [
+              "Custom column title. Defaults to `'Name'`."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/name/name_builder.tsx",
+            "lineNumber": 34,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-table",
+            "id": "def-public.NameColumnProps.sortable",
+            "type": "CompoundType",
+            "tags": [
+              "default"
+            ],
+            "label": "sortable",
+            "description": [
+              "\nWhether the column is sortable.\n"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/name/name_builder.tsx",
+            "lineNumber": 36,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-table",
+            "id": "def-public.NameColumnProps.showDescription",
+            "type": "CompoundType",
+            "tags": [
+              "default"
+            ],
+            "label": "showDescription",
+            "description": [
+              "\nWhether to show the description.\n"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/name/name_builder.tsx",
+            "lineNumber": 42,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-table",
+            "id": "def-public.NameColumnProps.render",
+            "type": "Function",
+            "tags": [],
+            "label": "render",
+            "description": [
+              "Custom render function (overrides default rendering)."
+            ],
+            "signature": [
+              "((item: ",
+              {
+                "pluginId": "@kbn/content-list-provider",
+                "scope": "public",
+                "docId": "kibKbnContentListProviderPluginApi",
+                "section": "def-public.ContentListItem",
+                "text": "ContentListItem"
+              },
+              "<Record<string, unknown>>) => React.ReactNode) | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/name/name_builder.tsx",
+            "lineNumber": 48,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/content-list-table",
+                "id": "def-public.NameColumnProps.render.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "item",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/content-list-provider",
+                    "scope": "public",
+                    "docId": "kibKbnContentListProviderPluginApi",
+                    "section": "def-public.ContentListItem",
+                    "text": "ContentListItem"
+                  },
+                  "<Record<string, unknown>>"
+                ],
+                "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/name/name_builder.tsx",
+                "lineNumber": 49,
+                "columnNumber": 13,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-table",
+        "id": "def-public.UpdatedAtCellProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "UpdatedAtCellProps",
+        "description": [],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/updated_at/updated_at_cell.tsx",
+        "lineNumber": 16,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-table",
+            "id": "def-public.UpdatedAtCellProps.updatedAt",
+            "type": "Object",
+            "tags": [],
+            "label": "updatedAt",
+            "description": [
+              "The `updatedAt` value from the content list item."
+            ],
+            "signature": [
+              "Date | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/updated_at/updated_at_cell.tsx",
+            "lineNumber": 17,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-table",
+        "id": "def-public.UpdatedAtColumnProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "UpdatedAtColumnProps",
+        "description": [
+          "\nProps for the `Column.UpdatedAt` preset component.\n\nThese are the declarative attributes consumers pass in JSX. The builder\nreads them directly from the parsed attributes."
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/updated_at/updated_at_builder.tsx",
+        "lineNumber": 24,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-table",
+            "id": "def-public.UpdatedAtColumnProps.width",
+            "type": "string",
+            "tags": [],
+            "label": "width",
+            "description": [
+              "Column width (CSS value like `'150px'` or `'20%'`)."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/updated_at/updated_at_builder.tsx",
+            "lineNumber": 31,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-table",
+            "id": "def-public.UpdatedAtColumnProps.columnTitle",
+            "type": "string",
+            "tags": [],
+            "label": "columnTitle",
+            "description": [
+              "Custom column title. Defaults to `'Last updated'`."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/updated_at/updated_at_builder.tsx",
+            "lineNumber": 33,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-table",
+            "id": "def-public.UpdatedAtColumnProps.sortable",
+            "type": "CompoundType",
+            "tags": [
+              "default"
+            ],
+            "label": "sortable",
+            "description": [
+              "\nWhether the column is sortable.\n"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/updated_at/updated_at_builder.tsx",
+            "lineNumber": 35,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-table",
+        "id": "def-public.UseSelectionReturn",
+        "type": "Interface",
+        "tags": [],
+        "label": "UseSelectionReturn",
+        "description": [
+          "\nReturn type for the {@link useSelection} hook."
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/hooks/use_selection.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-table",
+            "id": "def-public.UseSelectionReturn.selection",
+            "type": "Object",
+            "tags": [],
+            "label": "selection",
+            "description": [
+              "\nSelection configuration for `EuiBasicTable`'s `selection` prop.\nReturns `undefined` when selection is not supported (e.g., read-only mode)."
+            ],
+            "signature": [
+              "EuiTableSelectionType",
+              "<",
+              {
+                "pluginId": "@kbn/content-list-provider",
+                "scope": "public",
+                "docId": "kibKbnContentListProviderPluginApi",
+                "section": "def-public.ContentListItem",
+                "text": "ContentListItem"
+              },
+              "<Record<string, unknown>>> | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/hooks/use_selection.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/content-list-table",
+        "id": "def-public.Action",
+        "type": "Any",
+        "tags": [],
+        "label": "Action",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/content_list_table.tsx",
+        "lineNumber": 165,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-table",
+        "id": "def-public.ActionsColumn",
+        "type": "Any",
+        "tags": [],
+        "label": "ActionsColumn",
+        "description": [
+          "\nActions column specification component for `ContentListTable`.\n\nThis is a declarative component that doesn't render anything.\nIt specifies the Actions column configuration as React children.\nAction children control which row actions are displayed and in what order.\n"
+        ],
+        "signature": [
+          "any"
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/actions/actions_builder.tsx",
+        "lineNumber": 165,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-table",
+        "id": "def-public.Column",
+        "type": "Any",
+        "tags": [],
+        "label": "Column",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/content_list_table.tsx",
+        "lineNumber": 158,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-table",
+        "id": "def-public.DeleteAction",
+        "type": "Any",
+        "tags": [],
+        "label": "DeleteAction",
+        "description": [
+          "\nDelete action preset component for `ContentListTable`.\n\nThis is a declarative component that doesn't render anything.\nIt specifies the delete action (with confirmation) within a `Column.Actions` context.\n"
+        ],
+        "signature": [
+          "any"
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/action/part.ts",
+        "lineNumber": 117,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-table",
+        "id": "def-public.EditAction",
+        "type": "Any",
+        "tags": [],
+        "label": "EditAction",
+        "description": [
+          "\nEdit action preset component for `ContentListTable`.\n\nThis is a declarative component that doesn't render anything.\nIt specifies the edit action within a `Column.Actions` context.\n"
+        ],
+        "signature": [
+          "any"
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/action/part.ts",
+        "lineNumber": 97,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-table",
+        "id": "def-public.NameColumn",
+        "type": "Any",
+        "tags": [],
+        "label": "NameColumn",
+        "description": [
+          "\nName column specification component for `ContentListTable`.\n\nThis is a declarative component that doesn't render anything.\nIt's used to specify the Name column configuration as React children.\n"
+        ],
+        "signature": [
+          "any"
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/name/name_builder.tsx",
+        "lineNumber": 119,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-table",
+        "id": "def-public.UpdatedAtColumn",
+        "type": "Any",
+        "tags": [],
+        "label": "UpdatedAtColumn",
+        "description": [
+          "\nUpdatedAt column specification component for `ContentListTable`.\n\nThis is a declarative component that doesn't render anything.\nIt's used to specify the UpdatedAt column configuration as React children.\n"
+        ],
+        "signature": [
+          "any"
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/updated_at/updated_at_builder.tsx",
+        "lineNumber": 102,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}
