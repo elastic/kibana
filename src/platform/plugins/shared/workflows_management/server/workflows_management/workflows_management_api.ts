@@ -36,11 +36,16 @@ import type {
 import type { z } from '@kbn/zod/v4';
 import type {
   SearchWorkflowExecutionsParams,
+  ValidateWorkflowResponse,
+  WorkflowDiagnostic,
+  WorkflowDiagnosticSeverity,
   WorkflowsService,
 } from './workflows_management_service';
 import { WorkflowValidationError } from '../../common/lib/errors';
 import { validateStepNameUniqueness } from '../../common/lib/validate_step_names';
 import { parseWorkflowYamlToJSON, stringifyWorkflowDefinition } from '../../common/lib/yaml';
+
+export type { ValidateWorkflowResponse, WorkflowDiagnostic, WorkflowDiagnosticSeverity };
 
 export interface GetWorkflowsParams {
   triggerType?: 'schedule' | 'event' | 'manual';
@@ -457,6 +462,14 @@ export class WorkflowsManagementApi {
       request
     );
     return getWorkflowJsonSchema(zodSchema);
+  }
+
+  public async validateWorkflow(
+    yaml: string,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<ValidateWorkflowResponse> {
+    return this.workflowsService.validateWorkflow(yaml, spaceId, request);
   }
 
   private isStepExecution(params: StepLogsParams | ExecutionLogsParams): params is StepLogsParams {

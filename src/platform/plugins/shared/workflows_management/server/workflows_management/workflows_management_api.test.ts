@@ -27,6 +27,7 @@ describe('WorkflowsManagementApi', () => {
       getWorkflow: jest.fn(),
       getWorkflowZodSchema: jest.fn(),
       createWorkflow: jest.fn(),
+      validateWorkflow: jest.fn(),
     } as any;
 
     mockGetWorkflowsExecutionEngine = jest.fn();
@@ -564,6 +565,41 @@ steps:
           mockRequest
         );
       });
+    });
+  });
+
+  describe('validateWorkflow', () => {
+    it('should delegate to workflowsService.validateWorkflow', async () => {
+      const expectedResult = { valid: true, diagnostics: [] };
+      mockWorkflowsService.validateWorkflow.mockResolvedValue(expectedResult);
+
+      const result = await api.validateWorkflow('name: Test', 'default', mockRequest);
+
+      expect(mockWorkflowsService.validateWorkflow).toHaveBeenCalledWith(
+        'name: Test',
+        'default',
+        mockRequest
+      );
+      expect(result).toBe(expectedResult);
+    });
+
+    it('should pass through diagnostics from service', async () => {
+      const expectedResult = {
+        valid: false,
+        diagnostics: [
+          { severity: 'error' as const, message: 'Required', source: 'schema', path: ['name'] },
+        ],
+      };
+      mockWorkflowsService.validateWorkflow.mockResolvedValue(expectedResult);
+
+      const result = await api.validateWorkflow('invalid: yaml', 'my-space', mockRequest);
+
+      expect(mockWorkflowsService.validateWorkflow).toHaveBeenCalledWith(
+        'invalid: yaml',
+        'my-space',
+        mockRequest
+      );
+      expect(result).toEqual(expectedResult);
     });
   });
 });

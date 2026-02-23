@@ -68,8 +68,13 @@ import {
   WorkflowConflictError,
   WorkflowValidationError,
 } from '../../common/lib/errors';
-
 import { validateStepNameUniqueness } from '../../common/lib/validate_step_names';
+import type {
+  ValidateWorkflowResponse,
+  WorkflowDiagnostic,
+  WorkflowDiagnosticSeverity,
+} from '../../common/lib/validate_workflow_yaml';
+import { validateWorkflowYaml } from '../../common/lib/validate_workflow_yaml';
 import { parseWorkflowYamlToJSON, updateWorkflowYamlFields } from '../../common/lib/yaml';
 import { getWorkflowZodSchema } from '../../common/schema';
 import { getAuthenticatedUser } from '../lib/get_user';
@@ -80,6 +85,9 @@ import type { WorkflowTaskScheduler } from '../tasks/workflow_task_scheduler';
 import type { WorkflowsServerPluginStartDeps } from '../types';
 
 const DEFAULT_PAGE_SIZE = 100;
+
+export type { ValidateWorkflowResponse, WorkflowDiagnostic, WorkflowDiagnosticSeverity };
+
 export interface SearchWorkflowExecutionsParams {
   workflowId: string;
   statuses?: ExecutionStatus[];
@@ -1382,6 +1390,15 @@ export class WorkflowsService {
       return { config: { taskType: connector.config?.taskType } };
     }
     return undefined;
+  }
+
+  public async validateWorkflow(
+    yaml: string,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<ValidateWorkflowResponse> {
+    const zodSchema = await this.getWorkflowZodSchema({ loose: false }, spaceId, request);
+    return validateWorkflowYaml(yaml, zodSchema);
   }
 
   public async getWorkflowZodSchema(
