@@ -231,6 +231,16 @@ export const promqlRangeSelectorItem: ISuggestionItem = withAutoSuggest({
   category: SuggestionCategory.PROMQL_METRIC_QUALIFIER,
 });
 
+export const promqlOpenParensCompleteItem: ISuggestionItem = withAutoSuggest({
+  label: '()',
+  text: '($0) ',
+  asSnippet: true,
+  kind: 'Snippet',
+  detail: i18n.translate('kbn-esql-language.esql.autocomplete.promql.addFunctionArguments', {
+    defaultMessage: 'Add function arguments',
+  }),
+});
+
 export const byCompleteItem: ISuggestionItem = withAutoSuggest({
   label: 'BY',
   text: 'BY ',
@@ -629,14 +639,12 @@ export function createResourceBrowserSuggestion(options: {
 }
 
 export function createIndicesBrowserSuggestion(
-  rangeToReplace?: { start: number; end: number },
-  filterText?: string,
-  insertText?: string,
-  commandArgs?: Record<string, string>
+  commandArgs?: Record<string, string>,
+  innerText?: string
 ): ISuggestionItem {
   return createResourceBrowserSuggestion({
     label: i18n.translate('kbn-esql-language.esql.autocomplete.indicesBrowser.suggestionLabel', {
-      defaultMessage: 'Browse indices',
+      defaultMessage: 'Browse data sources',
     }),
     description: i18n.translate(
       'kbn-esql-language.esql.autocomplete.indicesBrowser.suggestionDescription',
@@ -645,10 +653,15 @@ export function createIndicesBrowserSuggestion(
       }
     ),
     commandId: 'esql.indicesBrowser.open',
-    rangeToReplace,
-    filterText,
-    insertText,
     commandArgs,
+    rangeToReplace: innerText
+      ? {
+          start: 0,
+          end: innerText.length + 1,
+        }
+      : undefined,
+    filterText: innerText,
+    insertText: innerText,
   });
 }
 

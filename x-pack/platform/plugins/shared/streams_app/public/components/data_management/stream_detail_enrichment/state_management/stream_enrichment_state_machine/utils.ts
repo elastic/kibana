@@ -129,6 +129,7 @@ export function getUpsertFields(context: StreamEnrichmentContextType): FieldDefi
 }
 
 export const spawnDataSource = <
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   TAssignArgs extends AssignArgs<StreamEnrichmentContextType, any, any, any>
 >(
   dataSource: EnrichmentDataSource,
