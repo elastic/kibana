@@ -12,6 +12,21 @@ import { render, screen } from '@testing-library/react';
 import { act } from 'react-dom/test-utils';
 import { BehaviorSubject } from 'rxjs';
 
+// Mock createRoot to track roots for cleanup in concurrent mode
+const mockRoots: Array<{ unmount: jest.Mock }> = [];
+jest.mock('react-dom/client', () => ({
+  createRoot: jest.fn((container: HTMLElement) => {
+    const { createRoot: actualCreateRoot } = jest.requireActual('react-dom/client');
+    const root = actualCreateRoot(container);
+    const mockRoot = {
+      render: (element: React.ReactNode) => root.render(element),
+      unmount: jest.fn(() => root.unmount()),
+    };
+    mockRoots.push(mockRoot);
+    return mockRoot;
+  }),
+}));
+
 jest.mock('@kbn/react-kibana-context-render', () => ({
   KibanaRenderContextProvider: jest.fn(({ children }) => (
     <div data-test-subj="kibana-render-context">{children}</div>
@@ -74,6 +89,14 @@ describe('RenderingService', () => {
     rendering = new RenderingService();
   });
 
+  afterEach(() => {
+    // Unmount all roots created during the test to prevent async updates after test completion
+    act(() => {
+      mockRoots.forEach((root) => root.unmount());
+    });
+    mockRoots.length = 0;
+  });
+
   describe('renderCore', () => {
     const startService = () => {
       return rendering.start({
@@ -87,9 +110,11 @@ describe('RenderingService', () => {
       });
     };
 
-    it('renders application service into provided DOM element', () => {
+    it('renders application service into provided DOM element', async () => {
       const service = startService();
-      service.renderCore({ chrome, application, overlays, featureFlags }, targetDomElement);
+      await act(async () => {
+        service.renderCore({ chrome, application, overlays, featureFlags }, targetDomElement);
+      });
       expect(targetDomElement.querySelector('div.kbnAppWrapper')).toMatchInlineSnapshot(`
         <div
           class="kbnAppWrapper kbnAppWrapper--hiddenChrome"
@@ -105,11 +130,13 @@ describe('RenderingService', () => {
       `);
     });
 
-    it('adds the `kbnAppWrapper--hiddenChrome` class to the AppWrapper when chrome is hidden', () => {
+    it('adds the `kbnAppWrapper--hiddenChrome` class to the AppWrapper when chrome is hidden', async () => {
       const isVisible$ = new BehaviorSubject(true);
       chrome.getIsVisible$.mockReturnValue(isVisible$);
       const service = startService();
-      service.renderCore({ chrome, application, overlays, featureFlags }, targetDomElement);
+      await act(async () => {
+        service.renderCore({ chrome, application, overlays, featureFlags }, targetDomElement);
+      });
 
       const appWrapper = targetDomElement.querySelector('div.kbnAppWrapper')!;
       expect(appWrapper.className).toEqual('kbnAppWrapper');
@@ -126,9 +153,11 @@ describe('RenderingService', () => {
       expect(targetDomElement.querySelector('div.kbnAppWrapper')).toBeDefined();
     });
 
-    it('renders the banner UI', () => {
+    it('renders the banner UI', async () => {
       const service = startService();
-      service.renderCore({ chrome, application, overlays, featureFlags }, targetDomElement);
+      await act(async () => {
+        service.renderCore({ chrome, application, overlays, featureFlags }, targetDomElement);
+      });
       expect(targetDomElement.querySelector('#globalBannerList')).toMatchInlineSnapshot(`
                 <div
                   id="globalBannerList"

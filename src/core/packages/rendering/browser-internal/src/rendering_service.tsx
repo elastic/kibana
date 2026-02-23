@@ -29,7 +29,6 @@ import { getLayoutDebugFlag } from '@kbn/core-chrome-layout-feature-flags';
 import { GridLayout } from '@kbn/core-chrome-layout/layouts/grid';
 import { GlobalRedirectAppLink } from '@kbn/global-redirect-app-links';
 import type { CoreEnv } from '@kbn/core-base-browser-internal';
-// eslint-disable-next-line @kbn/eslint/module_migration
 import { createRoot } from 'react-dom/client';
 
 export interface RenderingServiceContextDeps {
