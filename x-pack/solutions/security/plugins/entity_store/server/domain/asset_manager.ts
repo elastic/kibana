@@ -49,6 +49,7 @@ import {
 } from './assets/component_templates';
 import { getUpdatesEntitiesDataStreamName } from './assets/updates_data_stream';
 import type { LogsExtractionClient } from './logs_extraction_client';
+import { installEuidStoredScripts, deleteEuidStoredScripts } from './assets/euid_stored_scripts';
 
 interface AssetManagerDependencies {
   logger: Logger;
@@ -97,6 +98,11 @@ export class AssetManager {
         taskManager: this.taskManager,
         namespace: this.namespace,
         request,
+      });
+
+      await installEuidStoredScripts({
+        esClient: this.esClient,
+        logger: this.logger,
       });
     } catch (error) {
       this.logger.error('Error during entity store init:', error);
@@ -160,6 +166,10 @@ export class AssetManager {
           logger: this.logger.get(type),
           definition,
           namespace: this.namespace,
+        }),
+        deleteEuidStoredScripts({
+          esClient: this.esClient,
+          logger: this.logger,
         }),
       ]);
       this.logger.get(type).debug(`Uninstalled definition: ${type}`);
