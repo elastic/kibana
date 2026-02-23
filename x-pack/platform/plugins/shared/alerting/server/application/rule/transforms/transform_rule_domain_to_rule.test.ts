@@ -143,6 +143,7 @@ describe('transformRuleDomainToRule', () => {
       updatedBy: 'user',
       apiKey: MOCK_API_KEY,
       apiKeyOwner: 'user',
+      uiamApiKey: 'uiam-api-key',
       flapping: {
         lookBackWindow: 20,
         statusChangeThreshold: 20,
