@@ -172,12 +172,12 @@ describe('WorkflowDetailHeader', () => {
     expect(result.getByTestId('runWorkflowHeaderButton')).toBeDisabled();
   });
 
-  it('disables run workflow button when yaml has validation errors', () => {
+  it('enables run workflow button when yaml has validation errors', () => {
     const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />, {
       isValid: true,
       hasYamlSchemaValidationErrors: true,
     });
-    expect(result.getByTestId('runWorkflowHeaderButton')).toBeDisabled();
+    expect(result.getByTestId('runWorkflowHeaderButton')).toBeEnabled();
   });
 
   it('disables enabled toggle when yaml has validation errors', () => {
