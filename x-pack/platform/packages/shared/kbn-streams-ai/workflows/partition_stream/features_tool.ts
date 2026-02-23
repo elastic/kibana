@@ -28,7 +28,9 @@ export const getFeatureQueryFromToolArgs = createGetFeatureQueryFromToolArgs(
   PARTITION_FEATURE_TOOL_TYPES
 );
 
-export const partitionStreamFeaturesTool = createGetStreamFeaturesTool(PARTITION_FEATURE_TOOL_TYPES);
+export const partitionStreamFeaturesTool = createGetStreamFeaturesTool(
+  PARTITION_FEATURE_TOOL_TYPES
+);
 
 export { resolveFeatureTypeFilters, toFeatureForLlmContext };
 export type { GetStreamFeaturesInput, GetStreamFeaturesQuery, LlmFeature };
