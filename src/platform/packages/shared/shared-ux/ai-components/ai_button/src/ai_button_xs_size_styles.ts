@@ -19,7 +19,7 @@ import { useEuiFontSize, useEuiTheme } from '@elastic/eui';
 
 export const useAiButtonXsSizeCss = (): SerializedStyles => {
   const { euiTheme } = useEuiTheme();
-  const { fontSize, lineHeight } = useEuiFontSize('xs', { unit: 'px' });
+  const { fontSize, lineHeight } = useEuiFontSize('xs');
 
   return useMemo(
     () => css`
