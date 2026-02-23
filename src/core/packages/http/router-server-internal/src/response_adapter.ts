@@ -173,7 +173,7 @@ function getErrorMessage(payload?: ResponseError): string {
 }
 
 function isStreamOrBuffer(payload: ResponseError): payload is stream.Stream | Buffer {
-  return Buffer.isBuffer(payload) || stream.isReadable(payload as stream.Readable);
+  return Buffer.isBuffer(payload) || stream.isReadable(payload as stream.Readable) === true;
 }
 
 function getErrorAttributes(payload?: ResponseError): ResponseErrorAttributes | undefined {
