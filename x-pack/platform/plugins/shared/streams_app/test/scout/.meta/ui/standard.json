@@ -1,6 +1,5 @@
 {
-  "lastModified": "2026-02-10T11:18:09.022Z",
-  "sha1": "32c18c66737d0c09c9fa8b33dad1ed671695748c",
+  "sha1": "e0593e1a8a240c8a051787cfc3673beebb73a9d1",
   "tests": [
     {
       "id": "3cc9409cebf2cef-744ce32675c025c",
@@ -66,6 +65,32 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/attachments/attachments.spec.ts",
         "line": 201,
+        "column": 7
+      }
+    },
+    {
+      "id": "ca5617d2526fece-4f1df209bb20bf0",
+      "title": "Advanced tab with basic license should NOT show enterprise features on wired stream Advanced tab with basic license",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_advanced/license_basic.spec.ts",
+        "line": 34,
+        "column": 7
+      }
+    },
+    {
+      "id": "ca5617d2526fece-6a2b3b1f642b875",
+      "title": "Advanced tab with basic license should NOT show enterprise features on classic stream Advanced tab with basic license",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_advanced/license_basic.spec.ts",
+        "line": 76,
         "column": 7
       }
     },
@@ -358,6 +383,90 @@
       }
     },
     {
+      "id": "8be2eb5bc283463-302be79bda1e5b6",
+      "title": "Stream data processing - condition filtering and match rate should display condition match rate badge on WHERE blocks",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/condition_filtering.spec.ts",
+        "line": 34,
+        "column": 9
+      }
+    },
+    {
+      "id": "8be2eb5bc283463-61f2cb157ba13e7",
+      "title": "Stream data processing - condition filtering and match rate should show 0% match rate when condition matches no documents",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/condition_filtering.spec.ts",
+        "line": 55,
+        "column": 9
+      }
+    },
+    {
+      "id": "8be2eb5bc283463-4dc2c601572dd30",
+      "title": "Stream data processing - condition filtering and match rate should show 100% match rate when condition matches all documents",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/condition_filtering.spec.ts",
+        "line": 73,
+        "column": 9
+      }
+    },
+    {
+      "id": "8be2eb5bc283463-63178d57f373ece",
+      "title": "Stream data processing - condition filtering and match rate should show selected documents percentage when editing processor under a condition",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/condition_filtering.spec.ts",
+        "line": 91,
+        "column": 9
+      }
+    },
+    {
+      "id": "8be2eb5bc283463-3a996c31b556da5",
+      "title": "Stream data processing - condition filtering and match rate should maintain match rate badge after saving condition",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/condition_filtering.spec.ts",
+        "line": 118,
+        "column": 9
+      }
+    },
+    {
+      "id": "8be2eb5bc283463-c5f7103f798c76a",
+      "title": "Stream data processing - condition filtering and match rate should show match rate badge for nested conditions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/condition_filtering.spec.ts",
+        "line": 140,
+        "column": 9
+      }
+    },
+    {
       "id": "f13bd8d34bc433f-7338c587a1d041e",
       "title": "Stream data processing - creating steps should not show Technical Preview badge when AI suggestions are unavailable",
       "expectedStatus": "passed",
@@ -385,7 +494,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/create_steps.spec.ts",
-        "line": 45,
+        "line": 52,
         "column": 9
       }
     },
@@ -401,7 +510,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/create_steps.spec.ts",
-        "line": 56,
+        "line": 63,
         "column": 9
       }
     },
@@ -417,7 +526,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/create_steps.spec.ts",
-        "line": 64,
+        "line": 71,
         "column": 9
       }
     },
@@ -433,7 +542,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/create_steps.spec.ts",
-        "line": 86,
+        "line": 93,
         "column": 9
       }
     },
@@ -449,7 +558,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/create_steps.spec.ts",
-        "line": 105,
+        "line": 112,
         "column": 9
       }
     },
@@ -465,7 +574,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/create_steps.spec.ts",
-        "line": 128,
+        "line": 135,
         "column": 9
       }
     },
@@ -481,7 +590,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/create_steps.spec.ts",
-        "line": 144,
+        "line": 151,
         "column": 9
       }
     },
@@ -497,7 +606,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/create_steps.spec.ts",
-        "line": 164,
+        "line": 171,
         "column": 9
       }
     },
@@ -513,7 +622,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/create_steps.spec.ts",
-        "line": 180,
+        "line": 187,
         "column": 9
       }
     },
@@ -529,7 +638,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/create_steps.spec.ts",
-        "line": 195,
+        "line": 202,
         "column": 9
       }
     },
@@ -1806,6 +1915,34 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/ilm_policy_retention.spec.ts",
         "line": 109,
+        "column": 7
+      }
+    },
+    {
+      "id": "6ff035a70002742-a5e4366c29b6f4c",
+      "title": "Stream data retention - ILM policy should delete a downsampling step from an ILM policy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/ilm_policy_retention.spec.ts",
+        "line": 131,
+        "column": 7
+      }
+    },
+    {
+      "id": "6ff035a70002742-1bd0048c87dbda0",
+      "title": "Stream data retention - ILM policy should create a new policy when deleting a downsampling step",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/ilm_policy_retention.spec.ts",
+        "line": 207,
         "column": 7
       }
     },

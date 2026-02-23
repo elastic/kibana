@@ -40,6 +40,7 @@ import { wrapTitleWithDeprecated } from '../../../components/utils';
 
 import { InstallationVersionStatus } from './installation_version_status';
 import { DisabledWrapperTooltip } from './disabled_wrapper_tooltip';
+import { AlertsCell } from './alerts_cell';
 import { DashboardsCell } from './dashboards_cell';
 
 function wrapActionWithDisabledTooltip(
@@ -196,6 +197,12 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
               defaultMessage: 'Dashboards',
             }),
             render: (item: InstalledPackageUIPackageListItem) => <DashboardsCell package={item} />,
+          },
+          {
+            name: i18n.translate('xpack.fleet.epmInstalledIntegrations.rulesColumnTitle', {
+              defaultMessage: 'Rules',
+            }),
+            render: (item: InstalledPackageUIPackageListItem) => <AlertsCell package={item} />,
           },
           {
             name: i18n.translate(

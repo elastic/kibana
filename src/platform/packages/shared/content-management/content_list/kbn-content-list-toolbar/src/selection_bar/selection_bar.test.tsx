@@ -26,7 +26,6 @@ const mockItems: ContentListItem[] = [
 const SelectionBarWithSetup = ({ itemsToSelect }: { itemsToSelect: ContentListItem[] }) => {
   const { setSelection, selectedCount } = useContentListSelection();
 
-  // Select items on first render.
   React.useEffect(() => {
     setSelection(itemsToSelect);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -47,12 +46,17 @@ describe('SelectionBar', () => {
     })
   );
 
-  const createWrapper = () => {
+  const mockOnDelete = jest.fn(async () => {});
+
+  const createWrapper = (options?: { withOnDelete?: boolean }) => {
+    const { withOnDelete = true } = options ?? {};
+
     return ({ children }: { children: React.ReactNode }) => (
       <ContentListProvider
         id="test-list"
         labels={{ entity: 'dashboard', entityPlural: 'dashboards' }}
         dataSource={{ findItems: mockFindItems }}
+        item={withOnDelete ? { onDelete: mockOnDelete } : undefined}
       >
         {children}
       </ContentListProvider>
@@ -100,7 +104,6 @@ describe('SelectionBar', () => {
     await waitFor(() => {
       const button = screen.getByTestId('contentListSelectionBar-deleteButton');
       expect(button).toBeInTheDocument();
-      // EUI uses Emotion CSS-in-JS; check for `danger` in the class string.
       expect(button.className).toContain('danger');
     });
   });
@@ -116,6 +119,19 @@ describe('SelectionBar', () => {
     expect(container.innerHTML).toBe('');
   });
 
+  it('returns null when `onDelete` is not configured even with selected items', async () => {
+    const Wrapper = createWrapper({ withOnDelete: false });
+    const { container } = render(
+      <Wrapper>
+        <SelectionBarWithSetup itemsToSelect={[mockItems[0], mockItems[1]]} />
+      </Wrapper>
+    );
+
+    await waitFor(() => {
+      expect(container.innerHTML).toBe('');
+    });
+  });
+
   it('has the correct test subject on the button', async () => {
     const Wrapper = createWrapper();
     render(
@@ -129,7 +145,7 @@ describe('SelectionBar', () => {
     });
   });
 
-  it('clears the selection when the delete button is clicked', async () => {
+  it('opens the confirmation modal when the delete button is clicked', async () => {
     const Wrapper = createWrapper();
     render(
       <Wrapper>
@@ -137,16 +153,39 @@ describe('SelectionBar', () => {
       </Wrapper>
     );
 
-    // Wait for the button to appear.
     await waitFor(() => {
       expect(screen.getByTestId('contentListSelectionBar-deleteButton')).toBeInTheDocument();
     });
 
-    // Click the delete button.
     fireEvent.click(screen.getByTestId('contentListSelectionBar-deleteButton'));
 
-    // The selection is cleared, so `SelectionBarWithSetup` renders null.
     await waitFor(() => {
+      expect(screen.getByTestId('contentListDeleteConfirmation')).toBeInTheDocument();
+    });
+  });
+
+  it('clears the selection and closes the modal on cancel', async () => {
+    const Wrapper = createWrapper();
+    render(
+      <Wrapper>
+        <SelectionBarWithSetup itemsToSelect={[mockItems[0], mockItems[1]]} />
+      </Wrapper>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('contentListSelectionBar-deleteButton')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId('contentListSelectionBar-deleteButton'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('contentListDeleteConfirmation')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId('confirmModalCancelButton'));
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('contentListDeleteConfirmation')).not.toBeInTheDocument();
       expect(screen.queryByTestId('contentListSelectionBar-deleteButton')).not.toBeInTheDocument();
     });
   });

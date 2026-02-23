@@ -9,6 +9,7 @@ import React from 'react';
 import type { SerializedStyles } from '@emotion/react';
 import type { IlmPolicyPhases, PhaseName } from '@kbn/streams-schema';
 import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 
 import type { IlmPhasesFlyoutFormInternal } from '../form';
@@ -58,48 +59,51 @@ export const PhasePanel = ({
   const showSearchableSnapshotSectionForCold =
     canCreateRepository || searchableSnapshotRepositories.length > 0;
 
+  const downsampleEnabledPath = `_meta.${phase}.downsampleEnabled`;
+  useFormData({
+    form,
+    watch: isHotPhase || isWarmPhase || isColdPhase ? downsampleEnabledPath : undefined,
+  });
+  const isDownsampleEnabled = Boolean(form.getFields()[downsampleEnabledPath]?.value);
+
   return (
-    <div hidden={isHidden}>
+    <div hidden={isHidden} data-test-subj={`${dataTestSubj}Panel-${phase}`}>
       <PhaseFieldsMount phase={phase} />
 
-      <EuiFlexGroup
-        direction="column"
-        gutterSize="m"
-        responsive={false}
-        css={sectionStyles}
-        data-test-subj={`${dataTestSubj}Panel-${phase}`}
-      >
-        {!isHotPhase && (
-          <EuiFlexItem grow={false}>
-            <MinAgeField
-              phaseName={phase}
-              dataTestSubj={dataTestSubj}
-              timeUnitOptions={TIME_UNIT_OPTIONS}
-            />
-          </EuiFlexItem>
-        )}
+      {(!isHotPhase || !isDownsampleEnabled) && (
+        <EuiFlexGroup direction="column" gutterSize="m" responsive={false} css={sectionStyles}>
+          {!isHotPhase && (
+            <EuiFlexItem grow={false}>
+              <MinAgeField
+                phaseName={phase}
+                dataTestSubj={dataTestSubj}
+                timeUnitOptions={TIME_UNIT_OPTIONS}
+              />
+            </EuiFlexItem>
+          )}
 
-        {(isHotPhase || isWarmPhase || isColdPhase) && (
-          <EuiFlexItem grow={false}>
-            <ReadOnlyToggleField
-              form={form}
-              phaseName={phase}
-              dataTestSubj={dataTestSubj}
-              allowedPhases={READONLY_ALLOWED_PHASES}
-            />
-          </EuiFlexItem>
-        )}
+          {(isHotPhase || isWarmPhase || isColdPhase) && !isDownsampleEnabled && (
+            <EuiFlexItem grow={false}>
+              <ReadOnlyToggleField
+                form={form}
+                phaseName={phase}
+                dataTestSubj={dataTestSubj}
+                allowedPhases={READONLY_ALLOWED_PHASES}
+              />
+            </EuiFlexItem>
+          )}
 
-        {isDeletePhase && (
-          <EuiFlexItem grow={false}>
-            <DeleteSearchableSnapshotToggleField
-              form={form}
-              phaseName={phase}
-              dataTestSubj={dataTestSubj}
-            />
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
+          {isDeletePhase && (
+            <EuiFlexItem grow={false}>
+              <DeleteSearchableSnapshotToggleField
+                form={form}
+                phaseName={phase}
+                dataTestSubj={dataTestSubj}
+              />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      )}
 
       {(isHotPhase || isWarmPhase || isColdPhase) && (
         <>
