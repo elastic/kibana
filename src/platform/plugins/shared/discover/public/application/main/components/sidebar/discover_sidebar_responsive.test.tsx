@@ -231,7 +231,8 @@ async function renderComponent(
     .fn()
     .mockImplementation(() => stateContainer.getCurrentTab().appState);
 
-  const component = (
+  const user = userEvent.setup();
+  const result = render(
     <DiscoverTestProvider
       services={mockedServices}
       stateContainer={stateContainer}
@@ -243,9 +244,6 @@ async function renderComponent(
       <DiscoverSidebarResponsive {...props} />
     </DiscoverTestProvider>
   );
-
-  const user = userEvent.setup();
-  const result = render(component);
 
   await act(async () => {
     await nextTick();
@@ -297,9 +295,7 @@ describe('discover responsive sidebar', function () {
       undefined
     );
 
-    expect(
-      await screen.findByTestId('fieldListGroupedAvailableFields-countLoading')
-    ).toBeInTheDocument();
+    expect(screen.getByTestId('fieldListGroupedAvailableFields-countLoading')).toBeInTheDocument();
     expect(screen.queryByTestId('fieldListGroupedAvailableFields-count')).not.toBeInTheDocument();
 
     expect(result.container.querySelector('.euiProgress')).not.toBeNull();
@@ -635,7 +631,7 @@ describe('discover responsive sidebar', function () {
     );
     const addFieldButton = screen.getByTestId('dataView-add-field_btn');
     await user.click(addFieldButton);
-    await waitFor(() => expect(services.dataViewFieldEditor.openEditor).toHaveBeenCalledTimes(1));
+    expect(services.dataViewFieldEditor.openEditor).toHaveBeenCalledTimes(1);
   });
 
   it('should render "Edit field" button', async () => {
@@ -645,7 +641,7 @@ describe('discover responsive sidebar', function () {
     await user.click(within(availableFields).getByTestId('field-bytes'));
     const editFieldButton = await screen.findByTestId('discoverFieldListPanelEdit-bytes');
     await user.click(editFieldButton);
-    await waitFor(() => expect(services.dataViewFieldEditor.openEditor).toHaveBeenCalledTimes(1));
+    expect(services.dataViewFieldEditor.openEditor).toHaveBeenCalledTimes(1);
   });
 
   it('should not render Add/Edit field buttons in viewer mode', async () => {
