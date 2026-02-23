@@ -76,6 +76,7 @@ import {
   AddIntegrationButton,
   EditIntegrationButton,
 } from './components';
+import { AlertingPage } from './alerting';
 import { AssetsPage } from './assets';
 import { OverviewPage } from './overview';
 import { PackagePoliciesPage } from './policies';
@@ -93,6 +94,7 @@ export type DetailViewPanelName =
   | 'overview'
   | 'policies'
   | 'assets'
+  | 'alerting'
   | 'settings'
   | 'custom'
   | 'api-reference'
@@ -699,6 +701,21 @@ export function Detail() {
       });
     }
 
+    if (isInstalled && packageInfo.type === 'integration') {
+      tabs.push({
+        id: 'alerting',
+        name: (
+          <FormattedMessage
+            id="xpack.fleet.epm.packageDetailsNav.packageAlertingLinkText"
+            defaultMessage="Alerting"
+          />
+        ),
+        isSelected: panel === 'alerting',
+        'data-test-subj': `tab-alerting`,
+        href: getHref('integration_details_alerting', pathValues),
+      });
+    }
+
     if (canReadPackageSettings) {
       tabs.push({
         id: 'settings',
@@ -861,6 +878,9 @@ export function Detail() {
           </Route>
           <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_assets}>
             <AssetsPage packageInfo={packageInfo} refetchPackageInfo={refetchPackageInfo} />
+          </Route>
+          <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_alerting}>
+            <AlertingPage packageInfo={packageInfo} refetchPackageInfo={refetchPackageInfo} />
           </Route>
           <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_configs}>
             <Configs packageInfo={packageInfo} />

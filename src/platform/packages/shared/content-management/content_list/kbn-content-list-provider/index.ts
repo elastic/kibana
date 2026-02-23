@@ -26,8 +26,13 @@ export type {
 // Hooks.
 export { useContentListItems, useContentListState } from './src/state';
 export type { ContentListQueryData } from './src/state';
-export { useContentListSort, useContentListSearch } from './src/features';
+export { useContentListSort, useContentListSearch, useContentListSelection } from './src/features';
 export { useContentListPagination } from './src/features';
+export {
+  DeleteConfirmationModal,
+  DeleteConfirmationComponent,
+  useDeleteConfirmation,
+} from './src/features';
 
 // State.
 export { CONTENT_LIST_ACTIONS, DEFAULT_FILTERS } from './src/state';
@@ -46,6 +51,11 @@ export type {
   UseContentListPaginationReturn,
   SearchConfig,
   UseContentListSearchReturn,
+  UseContentListSelectionReturn,
+  DeleteConfirmationModalProps,
+  DeleteConfirmationComponentProps,
+  UseDeleteConfirmationOptions,
+  UseDeleteConfirmationReturn,
 } from './src/features';
 export type {
   ActiveFilters,
