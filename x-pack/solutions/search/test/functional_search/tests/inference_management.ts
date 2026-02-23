@@ -44,21 +44,73 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     describe('endpoint tabular view', () => {
-      it('is loaded successfully', async () => {
-        await pageObjects.searchInferenceManagementPage.InferenceTabularPage.expectHeaderToBeExist();
-        await pageObjects.searchInferenceManagementPage.InferenceTabularPage.expectTabularViewToBeLoaded();
-      });
+      describe('group by', () => {
+        it('defaults to group by models', async () => {
+          await pageObjects.searchInferenceManagementPage.InferenceTabularPage.expectGroupBySelection(
+            'Models'
+          );
+          await pageObjects.searchInferenceManagementPage.InferenceTabularPage.expectGroupByViewToBeDisplayed();
+          await pageObjects.searchInferenceManagementPage.InferenceTabularPage.expectGroupByTable(
+            'elastic'
+          );
+        });
 
-      it('displays model column with model ids', async () => {
-        await pageObjects.searchInferenceManagementPage.InferenceTabularPage.expectModelColumnToBeDisplayed();
-      });
+        it('can switch to group by none', async () => {
+          await pageObjects.searchInferenceManagementPage.InferenceTabularPage.selectGroupByOption(
+            'none'
+          );
+          await pageObjects.searchInferenceManagementPage.InferenceTabularPage.expectGroupBySelection(
+            'None'
+          );
+          await pageObjects.searchInferenceManagementPage.InferenceTabularPage.expectTabularViewToBeLoaded();
+        });
 
-      it('can search by model name', async () => {
-        await pageObjects.searchInferenceManagementPage.InferenceTabularPage.expectSearchByModelName();
+        it('can collapse group accordions', async () => {
+          const modelGroup = 'elastic';
+          await pageObjects.searchInferenceManagementPage.InferenceTabularPage.expectGroupByViewToBeDisplayed();
+          await pageObjects.searchInferenceManagementPage.InferenceTabularPage.expectGroupByAccordionsToBeOpen(
+            modelGroup
+          );
+          await pageObjects.searchInferenceManagementPage.InferenceTabularPage.toggleGroupByAccordion(
+            modelGroup
+          );
+          await pageObjects.searchInferenceManagementPage.InferenceTabularPage.expectGroupByAccordionsToBeClosed(
+            modelGroup
+          );
+          await pageObjects.searchInferenceManagementPage.InferenceTabularPage.toggleGroupByAccordion(
+            modelGroup
+          );
+          await pageObjects.searchInferenceManagementPage.InferenceTabularPage.expectGroupByAccordionsToBeOpen(
+            modelGroup
+          );
+        });
       });
+      describe('group by None', () => {
+        beforeEach(async () => {
+          await pageObjects.searchInferenceManagementPage.InferenceTabularPage.expectGroupBySelection(
+            'Models'
+          );
+          await pageObjects.searchInferenceManagementPage.InferenceTabularPage.selectGroupByOption(
+            'none'
+          );
+        });
 
-      it('preconfigured endpoints can not be deleted', async () => {
-        await pageObjects.searchInferenceManagementPage.InferenceTabularPage.expectPreconfiguredEndpointsCannotBeDeleted();
+        it('is loaded successfully', async () => {
+          await pageObjects.searchInferenceManagementPage.InferenceTabularPage.expectHeaderToBeExist();
+          await pageObjects.searchInferenceManagementPage.InferenceTabularPage.expectTabularViewToBeLoaded();
+        });
+
+        it('displays model column with model ids', async () => {
+          await pageObjects.searchInferenceManagementPage.InferenceTabularPage.expectModelColumnToBeDisplayed();
+        });
+
+        it('can search by model name', async () => {
+          await pageObjects.searchInferenceManagementPage.InferenceTabularPage.expectSearchByModelName();
+        });
+
+        it('preconfigured endpoints can not be deleted', async () => {
+          await pageObjects.searchInferenceManagementPage.InferenceTabularPage.expectPreconfiguredEndpointsCannotBeDeleted();
+        });
       });
 
       it('displays endpoint stats bar with counts', async () => {
