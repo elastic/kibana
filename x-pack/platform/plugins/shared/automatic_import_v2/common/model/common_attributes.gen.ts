@@ -129,6 +129,7 @@ export const TaskStatus = z.enum([
   'approved',
   'failed',
   'cancelled',
+  'deleting',
 ]);
 export type TaskStatusEnum = typeof TaskStatus.enum;
 export const TaskStatusEnum = TaskStatus.enum;

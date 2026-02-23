@@ -65,7 +65,6 @@ import type {
   ContentManagementPublicStart,
 } from '@kbn/content-management-plugin/public';
 import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
-import type { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
 
 import { css, injectGlobal } from '@emotion/css';
 import { VisualizeConstants, VISUALIZE_EMBEDDABLE_TYPE } from '@kbn/visualizations-common';
@@ -178,7 +177,6 @@ export interface VisualizationsStartDeps {
   contentManagement: ContentManagementPublicStart;
   serverless?: ServerlessPluginStart;
   noDataPage?: NoDataPagePluginStart;
-  embeddableEnhanced?: EmbeddableEnhancedPluginStart;
 }
 
 const styles = {
@@ -478,11 +476,11 @@ export class VisualizationsPlugin
     expressions.registerFunction(xyDimensionExpressionFunction);
     embeddable.registerReactEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, async () => {
       const {
-        plugins: { embeddable: embeddableStart, embeddableEnhanced: embeddableEnhancedStart },
+        plugins: { embeddable: embeddableStart },
       } = start();
 
       const { getVisualizeEmbeddableFactory } = await import('./embeddable/embeddable_module');
-      return getVisualizeEmbeddableFactory({ embeddableStart, embeddableEnhancedStart });
+      return getVisualizeEmbeddableFactory({ embeddableStart });
     });
     embeddable.registerAddFromLibraryType<VisualizationSavedObjectAttributes>({
       onAdd: async (container, savedObject) => {

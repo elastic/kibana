@@ -63,25 +63,35 @@ export const DataLifecycleSummary = ({
   const phaseColumnSpans = getPhaseColumnSpans(phases, timelineSegments);
 
   return (
-    <EuiPanel hasShadow={false} hasBorder grow paddingSize="s">
-      <EuiFlexGroup
-        direction="column"
-        gutterSize="s"
-        justifyContent="spaceBetween"
-        css={{ height: '100%' }}
-      >
+    <EuiPanel
+      hasShadow={false}
+      hasBorder
+      grow={false}
+      paddingSize="s"
+      css={{ height: '100%', borderTopLeftRadius: '0', borderBottomLeftRadius: '0' }}
+    >
+      <EuiFlexGroup direction="column" gutterSize="s" css={{ height: '100%' }}>
         <EuiPanel hasShadow={false} hasBorder={false} paddingSize="s" grow={false}>
-          <EuiText>
-            <h5 data-test-subj="dataLifecycleSummary-title">
-              {i18n.translate('xpack.streams.streamDetailLifecycle.dataLifecycle', {
-                defaultMessage: 'Data lifecycle',
-              })}
-            </h5>
-          </EuiText>
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiText>
+                <h5 data-test-subj="dataLifecycleSummary-title">
+                  {i18n.translate('xpack.streams.streamDetailLifecycle.dataLifecycle', {
+                    defaultMessage: 'Data lifecycle',
+                  })}
+                </h5>
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiPanel>
 
         <EuiPanel grow hasShadow={false} hasBorder={false} paddingSize="s">
-          <EuiFlexGroup direction="column" justifyContent="center" css={{ height: '100%' }}>
+          <EuiFlexGroup
+            direction="column"
+            gutterSize="none"
+            justifyContent="center"
+            css={{ height: '100%' }}
+          >
             {showSkeleton ? (
               <EuiSkeletonRectangle
                 width="100%"

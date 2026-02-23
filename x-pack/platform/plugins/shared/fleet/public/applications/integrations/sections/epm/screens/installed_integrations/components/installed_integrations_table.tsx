@@ -14,6 +14,7 @@ import {
   type CriteriaWithPagination,
   EuiText,
   EuiSpacer,
+  EuiIconTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -35,8 +36,11 @@ import {
   useRollbackAvailablePackages,
 } from '../hooks/use_rollback_available';
 
+import { wrapTitleWithDeprecated } from '../../../components/utils';
+
 import { InstallationVersionStatus } from './installation_version_status';
 import { DisabledWrapperTooltip } from './disabled_wrapper_tooltip';
+import { AlertsCell } from './alerts_cell';
 import { DashboardsCell } from './dashboards_cell';
 
 function wrapActionWithDisabledTooltip(
@@ -142,6 +146,7 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
               const url = getHref('integration_details_overview', {
                 pkgkey: `${item.name}-${item.installationInfo!.version}`,
               });
+              const isDeprecated = !!item?.deprecated;
 
               return (
                 <EuiLink href={url}>
@@ -158,8 +163,22 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
                       data-test-subj={`installedIntegrationsTable.integrationNameColumn.${item.name}`}
                       grow={false}
                     >
-                      {item.title}
+                      {wrapTitleWithDeprecated({ title: item.title, deprecated: isDeprecated })}
                     </EuiFlexItem>
+                    {isDeprecated && (
+                      <EuiFlexItem grow={false}>
+                        <EuiIconTip
+                          type="warning"
+                          color="warning"
+                          content={i18n.translate(
+                            'xpack.fleet.installedIntegrations.deprecatedTooltip',
+                            {
+                              defaultMessage: 'This integration is deprecated',
+                            }
+                          )}
+                        />
+                      </EuiFlexItem>
+                    )}
                   </EuiFlexGroup>
                 </EuiLink>
               );
@@ -178,6 +197,12 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
               defaultMessage: 'Dashboards',
             }),
             render: (item: InstalledPackageUIPackageListItem) => <DashboardsCell package={item} />,
+          },
+          {
+            name: i18n.translate('xpack.fleet.epmInstalledIntegrations.rulesColumnTitle', {
+              defaultMessage: 'Rules',
+            }),
+            render: (item: InstalledPackageUIPackageListItem) => <AlertsCell package={item} />,
           },
           {
             name: i18n.translate(
