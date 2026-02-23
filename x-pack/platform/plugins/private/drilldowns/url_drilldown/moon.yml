@@ -29,9 +29,7 @@ dependsOn:
   - '@kbn/es-query'
   - '@kbn/monaco'
   - '@kbn/std'
-  - '@kbn/core-ui-settings-browser-mocks'
   - '@kbn/core-ui-settings-browser'
-  - '@kbn/core-theme-browser-mocks'
   - '@kbn/presentation-publishing'
   - '@kbn/config-schema'
 tags:

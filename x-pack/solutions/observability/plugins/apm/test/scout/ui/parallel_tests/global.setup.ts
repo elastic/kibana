@@ -14,6 +14,7 @@ import { generateSpanStacktraceData } from '../fixtures/synthtrace/generate_span
 import { otelSendotlp } from '../fixtures/synthtrace/otel_sendotlp';
 import { adserviceEdot } from '../fixtures/synthtrace/adservice_edot';
 import { mobileServices } from '../fixtures/synthtrace/mobile_services';
+import { awsLambda } from '../fixtures/synthtrace/aws_lambda';
 import { testData } from '../fixtures';
 import { serviceDataWithRecentErrors } from '../fixtures/synthtrace/recent_errors';
 
@@ -69,6 +70,14 @@ globalSetupHook(
     });
     await apmSynthtraceEsClient.index(mobileData);
     log.info('Mobile services data indexed');
+
+    // Generate AWS Lambda service data for cold start chart tests
+    const awsLambdaData = awsLambda({
+      from: new Date(testData.START_DATE).getTime(),
+      to: new Date(testData.END_DATE).getTime(),
+    });
+    await apmSynthtraceEsClient.index(awsLambdaData);
+    log.info('AWS Lambda service data indexed');
 
     log.info('Cleaning up APM ML indices before running the APM tests');
     const jobs = await esClient.ml.getJobs();
