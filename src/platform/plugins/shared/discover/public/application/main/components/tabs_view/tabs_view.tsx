@@ -66,7 +66,10 @@ export const TabsView = (props: SingleTabViewProps) => {
     setIsTourStepOpen(false);
   }, []);
 
+  const areToursEnabled = services.notifications?.tours?.isEnabled() ?? true;
+
   const shouldShowSwitchModesTour =
+    areToursEnabled &&
     services.uiSettings.get(ENABLE_ESQL) &&
     !isSwitchModesCalloutDismissed &&
     !hideTabsBar &&
