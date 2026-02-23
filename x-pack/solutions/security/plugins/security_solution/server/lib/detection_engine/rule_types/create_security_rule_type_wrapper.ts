@@ -513,6 +513,8 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   createdSignals,
                   createdSignalsCount: createdSignals.length,
                   suppressedAlertsCount: runResult.suppressedAlertsCount,
+                  totalEventsFound:
+                    (result.totalEventsFound ?? 0) + (runResult.totalEventsFound ?? 0),
                   errors: result.errors.concat(runResult.errors),
                   searchAfterTimes: result.searchAfterTimes.concat(runResult.searchAfterTimes),
                   state: runResult.state,
@@ -544,7 +546,27 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               (action) => !actions.isActionTypeEnabled(action.actionTypeId)
             );
 
+            if (result.totalEventsFound != null) {
+              ruleExecutionLogger.info(`Found matching events: ${result.totalEventsFound}`);
+            }
+            const suppressedAlertsCount = result.suppressedAlertsCount ?? 0;
+            if (suppressedAlertsCount > 0) {
+              ruleExecutionLogger.info(`Alerts suppressed: ${suppressedAlertsCount}`);
+            }
+
             const createdSignalsCount = result.createdSignals.length;
+
+            if (result.totalEventsFound != null && result.totalEventsFound > 0) {
+              const unaccountedEvents =
+                result.totalEventsFound - createdSignalsCount - suppressedAlertsCount;
+              if (unaccountedEvents > 0) {
+                ruleExecutionLogger.info(
+                  `Events that did not result in alerts: ${unaccountedEvents}\nThis is typically because alerts for these events already exist from a previous rule execution, or events were excluded by value list exceptions. This number doesn't include suppressed alerts.`
+                );
+              }
+            }
+
+            ruleExecutionLogger.info(`Alerts created: ${createdSignalsCount}`);
 
             agent.setCustomContext({ [SECURITY_NUM_ALERTS_CREATED]: createdSignalsCount });
 
@@ -589,8 +611,8 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               });
             } else if (!(result.warningMessages.length > 0) && !(wrapperWarnings.length > 0)) {
               ruleExecutionLogger.debug('Security Rule execution completed');
-              ruleExecutionLogger.info(
-                `Alerts created: ${createdSignalsCount}\nFinished indexing ${createdSignalsCount} alerts into "${ruleDataClient.indexNameWithNamespace(
+              ruleExecutionLogger.debug(
+                `Indexed ${createdSignalsCount} alerts into "${ruleDataClient.indexNameWithNamespace(
                   spaceId
                 )}".${
                   !isEmpty(tuples)

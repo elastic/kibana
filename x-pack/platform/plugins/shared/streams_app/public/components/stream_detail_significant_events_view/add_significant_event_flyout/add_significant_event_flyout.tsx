@@ -22,7 +22,7 @@ import {
 import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type { SignificantEventsQueriesGenerationTaskResult } from '@kbn/streams-schema';
-import { TaskStatus, type StreamQueryKql, type Streams, type System } from '@kbn/streams-schema';
+import { TaskStatus, type StreamQuery, type Streams, type System } from '@kbn/streams-schema';
 import { streamQuerySchema } from '@kbn/streams-schema';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { css } from '@emotion/css';
@@ -50,7 +50,7 @@ interface Props {
   definition: Streams.all.GetResponse;
   onSave: (data: SaveData) => Promise<void>;
   systems: System[];
-  query?: StreamQueryKql;
+  query?: StreamQuery;
   initialFlow?: Flow;
   initialSelectedSystems: System[];
   refreshSystems: () => void;
@@ -91,13 +91,13 @@ export function AddSignificantEventFlyout({
     isEditMode ? 'manual' : initialFlow
   );
   const flowRef = useRef<Flow | undefined>(selectedFlow);
-  const [queries, setQueries] = useState<StreamQueryKql[]>([{ ...defaultQuery(), ...query }]);
+  const [queries, setQueries] = useState<StreamQuery[]>([{ ...defaultQuery(), ...query }]);
   const [canSave, setCanSave] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [selectedSystems, setSelectedSystems] = useState<System[]>(initialSelectedSystems);
 
-  const [generatedQueries, setGeneratedQueries] = useState<StreamQueryKql[]>([]);
+  const [generatedQueries, setGeneratedQueries] = useState<StreamQuery[]>([]);
 
   const [task, setTask] = useState<SignificantEventsQueriesGenerationTaskResult>(defaultTask);
   const [isGettingTaskStatus, { on: gettingTaskStatus, off: stoppedGettingTaskStatus }] =
@@ -163,6 +163,7 @@ export function AddSignificantEventFlyout({
           .map((nextQuery) => ({
             id: v4(),
             kql: { query: nextQuery.kql },
+            esql: nextQuery.esql,
             title: nextQuery.title,
             feature: nextQuery.feature,
             severity_score: nextQuery.severity_score,
@@ -297,7 +298,7 @@ export function AddSignificantEventFlyout({
                       <ManualFlowForm
                         isSubmitting={isSubmitting}
                         isEditMode={isEditMode}
-                        setQuery={(next: StreamQueryKql) => setQueries([next])}
+                        setQuery={(next: StreamQuery) => setQueries([next])}
                         query={queries[0]}
                         setCanSave={(next: boolean) => {
                           setCanSave(next);
@@ -323,7 +324,7 @@ export function AddSignificantEventFlyout({
                       }}
                       stopGeneration={cancelTask}
                       definition={definition.stream}
-                      setQueries={(next: StreamQueryKql[]) => {
+                      setQueries={(next: StreamQuery[]) => {
                         setQueries(next);
                       }}
                       setCanSave={(next: boolean) => {

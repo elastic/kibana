@@ -335,7 +335,7 @@
           "\nPublic-facing interface\nApps should use this interface to build job params. The browserTimezone and version\nfields become automatically provided by Reporting"
         ],
         "signature": [
-          "{ title: string; objectType: string; columns?: string[] | undefined; forceNow?: string | undefined; layout?: { id?: ",
+          "{ columns?: string[] | undefined; title: string; objectType: string; forceNow?: string | undefined; layout?: { id?: ",
           {
             "pluginId": "screenshotting",
             "scope": "common",
