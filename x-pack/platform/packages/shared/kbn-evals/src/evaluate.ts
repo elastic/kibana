@@ -20,6 +20,7 @@ import type { DefaultEvaluators, EvaluationSpecificWorkerFixtures } from './type
 import { mapToEvaluationScoreDocuments, exportEvaluations } from './utils/report_model_score';
 import { createDefaultTerminalReporter } from './utils/reporting/evaluation_reporter';
 import { createConnectorFixture, resolveConnectorId } from './utils/create_connector_fixture';
+import { wrapInferenceClientWithEisConnectorTelemetry } from './utils/wrap_inference_client_with_connector_telemetry';
 import { createCorrectnessAnalysisEvaluator } from './evaluators/correctness';
 import { EvaluationScoreRepository } from './utils/score_repository';
 import { createGroundednessAnalysisEvaluator } from './evaluators/groundedness';
@@ -106,9 +107,10 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
           connectorId: connector.id,
         },
       });
+      const wrappedInferenceClient = wrapInferenceClientWithEisConnectorTelemetry(inferenceClient);
       log.serviceLoaded?.('inferenceClient');
 
-      await use(inferenceClient);
+      await use(wrappedInferenceClient);
     },
     { scope: 'worker' },
   ],
