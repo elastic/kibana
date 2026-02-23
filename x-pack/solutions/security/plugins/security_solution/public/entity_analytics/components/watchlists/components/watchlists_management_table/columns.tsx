@@ -38,13 +38,13 @@ const getWatchlistColumn = (): EuiBasicTableColumn<WatchlistTableItemType> =>
         : getEmptyTagValue(),
   } as EuiBasicTableColumn<WatchlistTableItemType>);
 
-const getNumberOfUsersColumn = (): EuiBasicTableColumn<WatchlistTableItemType> =>
+const getNumberOfEntitiesColumn = (): EuiBasicTableColumn<WatchlistTableItemType> =>
   ({
     field: 'users.length', // TODO: update this function when data is available
     name: (
       <FormattedMessage
         id="xpack.securitySolution.entityAnalytics.watchlistsManagement.table.column.numberOfUsers"
-        defaultMessage="Number of Users"
+        defaultMessage="Number of Entities"
       />
     ),
     render: (value: number | undefined) => (typeof value === 'number' ? value : getEmptyTagValue()),
@@ -132,7 +132,7 @@ export const buildWatchlistsManagementTableColumns = (
   euiTheme: EuiThemeComputed
 ): Array<EuiBasicTableColumn<WatchlistTableItemType>> => [
   getWatchlistColumn(),
-  getNumberOfUsersColumn(),
+  getNumberOfEntitiesColumn(),
   getRiskScoreWeightingColumn(),
   getSourceColumn(),
   getCreatedByColumn(),

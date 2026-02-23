@@ -12,34 +12,88 @@ import {
   EuiBasicTable,
   EuiHorizontalRule,
   EuiSpacer,
+  EuiCallOut,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { InspectButton, InspectButtonContainer } from '../../../../../common/components/inspect';
+import { useGlobalTime } from '../../../../../common/containers/use_global_time';
+import { useQueryInspector } from '../../../../../common/components/page/manage_query';
 import { useWatchlistsTableData } from './hooks/use_watchlists_table_data';
 import { buildWatchlistsManagementTableColumns } from './columns';
 
 export const WATCHLISTS_MANAGEMENT_TABLE_ID = 'watchlistsManagementTableId';
+export const WATCHLISTS_MANAGEMENT_TABLE_QUERY_ID = 'watchlistsManagementTableQueryId';
 
 export const WatchlistsManagementTable: React.FC<{ spaceId: string }> = ({ spaceId }) => {
+  const { setQuery, deleteQuery } = useGlobalTime();
   const { euiTheme } = useEuiTheme();
   const columns = buildWatchlistsManagementTableColumns(euiTheme);
-  const { visibleRecords, isLoading, hasError } = useWatchlistsTableData(spaceId, 0, true);
+  const { visibleRecords, isLoading, hasError, refetch, inspect } = useWatchlistsTableData(
+    spaceId,
+    0,
+    true
+  );
+
+  useQueryInspector({
+    deleteQuery,
+    inspect,
+    refetch,
+    setQuery,
+    queryId: WATCHLISTS_MANAGEMENT_TABLE_QUERY_ID,
+    loading: isLoading,
+  });
+
   return (
-    <EuiFlexGroup direction="column">
-      <EuiFlexItem>
-        <EuiSpacer size="s" />
-        <EuiHorizontalRule margin="none" />
-        <EuiSpacer size="m" />
-        <EuiBasicTable
-          id={WATCHLISTS_MANAGEMENT_TABLE_ID}
-          tableCaption={i18n.translate(
-            'xpack.securitySolution.entityAnalytics.watchlists.watchlistsManagementTable.tableCaption',
-            { defaultMessage: 'Watchlists management table' }
+    <InspectButtonContainer>
+      <EuiFlexGroup direction="column">
+        <EuiFlexItem>
+          <EuiSpacer size="s" />
+          <EuiHorizontalRule margin="none" />
+          <EuiSpacer size="m" />
+          {hasError && (
+            <EuiCallOut
+              announceOnMount
+              title={i18n.translate(
+                'xpack.securitySolution.entityAnalytics.watchlists.watchlistsManagementTable.error',
+                {
+                  defaultMessage:
+                    'There was an error retrieving watchlists. Results may be incomplete.',
+                }
+              )}
+              color="danger"
+              iconType="error"
+            />
           )}
-          loading={isLoading}
-          items={visibleRecords || []}
-          columns={columns}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+          <EuiFlexGroup justifyContent="flexEnd">
+            <EuiFlexItem grow={false}>
+              <InspectButton queryId={WATCHLISTS_MANAGEMENT_TABLE_QUERY_ID} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          {visibleRecords.length > 0 ? (
+            <EuiBasicTable
+              id={WATCHLISTS_MANAGEMENT_TABLE_ID}
+              tableCaption={i18n.translate(
+                'xpack.securitySolution.entityAnalytics.watchlists.watchlistsManagementTable.tableCaption',
+                { defaultMessage: 'Watchlists management table' }
+              )}
+              loading={isLoading}
+              items={visibleRecords || []}
+              columns={columns}
+            />
+          ) : (
+            !isLoading && (
+              <EuiText size="s" color="subdued" textAlign="center">
+                <FormattedMessage
+                  id="xpack.securitySolution.entityAnalytics.watchlists.watchlistsManagementTable.noData"
+                  defaultMessage="No watchlists found"
+                />
+              </EuiText>
+            )
+          )}
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </InspectButtonContainer>
   );
 };
