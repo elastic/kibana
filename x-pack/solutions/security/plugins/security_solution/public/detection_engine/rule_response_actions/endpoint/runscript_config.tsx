@@ -190,134 +190,132 @@ export const RunscriptConfig = memo<RunscriptConfigProps>(
 );
 RunscriptConfig.displayName = 'RunscriptConfig';
 
-export interface AutomatedRunScriptConfigurationProps {
+interface AutomatedRunScriptConfigurationProps {
   field: FieldHook<AutomatedRunScriptConfig>;
   onChange: (validationState: ValidationState) => void;
   'data-test-subj'?: string;
 }
 
-export const AutomatedRunScriptConfiguration = memo<AutomatedRunScriptConfigurationProps>(
-  (props) => {
-    const { field, onChange, 'data-test-subj': dataTestSubj } = props;
-    const { onChange: fieldOnChange, value } = field;
-    const getTestId = useTestIdGenerator(dataTestSubj);
-    const userHasRunScriptAuthz = useUserPrivileges().endpointPrivileges.canWriteExecuteOperations;
+const AutomatedRunScriptConfiguration = memo<AutomatedRunScriptConfigurationProps>((props) => {
+  const { field, onChange, 'data-test-subj': dataTestSubj } = props;
+  const { onChange: fieldOnChange, value } = field;
+  const getTestId = useTestIdGenerator(dataTestSubj);
+  const userHasRunScriptAuthz = useUserPrivileges().endpointPrivileges.canWriteExecuteOperations;
 
-    // Why are we checking that `field.value` is actually a RunScript configuration?
-    // There is an issue with the form framework (`es-ui-shared-plugin/static/forms/*`) when removing items (response actions)
-    // from the form. The `<UseField>` component does not properly handle the removal of items from the form when an item
-    // that precedes the current one is removed - the form data becomes invalid and seems to inherit properties from
-    // the removed item and drops other runscript specific form data.
-    // Example:
-    // If we have a `kill-process` response action (item 0) followed by a `runscript` response action (item 1), when
-    // the `kill-process` action is removed from the form, the `runscript` form data is dropped and the form becomes
-    // invalid, causing the entire page to crash.
-    // The work-around here, after having no luck finding a solution, is to check the `value` and if it is not a runscript
-    // config, then initialize it in `useEffect()` further below. NOTE however, that the prior form values will be lost ☹️
-    const valueIsRunScriptConfig = useMemo(() => {
-      return value.linux && value.macos && value.windows;
-    }, [value]);
+  // Why are we checking that `field.value` is actually a RunScript configuration?
+  // There is an issue with the form framework (`es-ui-shared-plugin/static/forms/*`) when removing items (response actions)
+  // from the form. The `<UseField>` component does not properly handle the removal of items from the form when an item
+  // that precedes the current one is removed - the form data becomes invalid and seems to inherit properties from
+  // the removed item and drops other runscript specific form data.
+  // Example:
+  // If we have a `kill-process` response action (item 0) followed by a `runscript` response action (item 1), when
+  // the `kill-process` action is removed from the form, the `runscript` form data is dropped and the form becomes
+  // invalid, causing the entire page to crash.
+  // The work-around here, after having no luck finding a solution, is to check the `value` and if it is not a runscript
+  // config, then initialize it in `useEffect()` further below. NOTE however, that the prior form values will be lost ☹️
+  const valueIsRunScriptConfig = useMemo(() => {
+    return value.linux && value.macos && value.windows;
+  }, [value]);
 
-    type RunscriptOsValidationState = Record<SupportedHostOsType, ValidationState>;
-    const [osValidationState, setOsValidationState] = useState<RunscriptOsValidationState>({
-      linux: { isValid: true },
-      macos: { isValid: true },
-      windows: { isValid: true },
-    });
+  type RunscriptOsValidationState = Record<SupportedHostOsType, ValidationState>;
+  const [osValidationState, setOsValidationState] = useState<RunscriptOsValidationState>({
+    linux: { isValid: true },
+    macos: { isValid: true },
+    windows: { isValid: true },
+  });
 
-    const emitUseFieldChange = useCallback(
-      (newValue: AutomatedRunScriptConfig) => {
-        const event = new Event('change', {
-          bubbles: true,
-        }) as unknown as React.ChangeEvent<HTMLInputElement>;
+  const emitUseFieldChange = useCallback(
+    (newValue: AutomatedRunScriptConfig) => {
+      const event = new Event('change', {
+        bubbles: true,
+      }) as unknown as React.ChangeEvent<HTMLInputElement>;
 
-        Object.defineProperty(event, 'target', {
-          writable: false,
-          value: { value: newValue, name: field.path },
-        });
+      Object.defineProperty(event, 'target', {
+        writable: false,
+        value: { value: newValue, name: field.path },
+      });
 
-        fieldOnChange(event);
-      },
-      [field.path, fieldOnChange]
-    );
+      fieldOnChange(event);
+    },
+    [field.path, fieldOnChange]
+  );
 
-    useEffect(() => {
-      if (!valueIsRunScriptConfig) {
-        emitUseFieldChange(getDefaultRunScriptConfiguration());
-      }
-    }, [emitUseFieldChange, valueIsRunScriptConfig]);
-
-    if (!userHasRunScriptAuthz || !valueIsRunScriptConfig) {
-      return null;
+  useEffect(() => {
+    if (!valueIsRunScriptConfig) {
+      emitUseFieldChange(getDefaultRunScriptConfiguration());
     }
+  }, [emitUseFieldChange, valueIsRunScriptConfig]);
 
-    return (
-      <EuiFormRow
-        fullWidth
-        label={RUNSCRIPT_CONFIG_LABEL}
-        helpText={RUNSCRIPT_CONFIG_REQUIRES_ONE_OS}
-        data-test-subj={dataTestSubj}
-      >
-        <EuiText size="s">
-          {(['linux', 'macos', 'windows'] as Array<keyof AutomatedRunScriptConfig>).map(
-            (osType, index) => {
-              return (
-                <div key={osType}>
-                  <EuiSpacer size="m" />
-
-                  <RunScriptOsTypeConfig
-                    key={osType}
-                    platform={osType}
-                    showFieldLabels={index === 0}
-                    config={value[osType]}
-                    data-test-subj={getTestId(osType)}
-                    onChange={({ updatedConfig, isValid, errors }) => {
-                      const updatedValidationState: RunscriptOsValidationState = {
-                        ...osValidationState,
-                        [osType]: { isValid, errors },
-                      };
-
-                      setOsValidationState(updatedValidationState);
-                      onChange({
-                        isValid: Object.values(updatedValidationState).every(
-                          ({ isValid: isOsValueValid }) => isOsValueValid
-                        ),
-                        errors: Object.entries(updatedValidationState).reduce(
-                          (acc, [platform, osValidationResult]) => {
-                            if (!osValidationResult.isValid) {
-                              acc.push(
-                                ...(osValidationResult.errors ?? []).map(
-                                  (errorMessage) =>
-                                    `${
-                                      OS_TITLES[platform as keyof typeof OS_TITLES]
-                                    }: ${errorMessage}`
-                                )
-                              );
-                            }
-
-                            return acc;
-                          },
-                          [] as string[]
-                        ),
-                      });
-                      emitUseFieldChange({
-                        ...value,
-                        [osType]: updatedConfig,
-                      });
-                    }}
-                  />
-                </div>
-              );
-            }
-          )}
-        </EuiText>
-      </EuiFormRow>
-    );
+  if (!userHasRunScriptAuthz || !valueIsRunScriptConfig) {
+    return null;
   }
-);
+
+  return (
+    <EuiFormRow
+      fullWidth
+      label={RUNSCRIPT_CONFIG_LABEL}
+      helpText={RUNSCRIPT_CONFIG_REQUIRES_ONE_OS}
+      data-test-subj={dataTestSubj}
+    >
+      <EuiText size="s">
+        {(['linux', 'macos', 'windows'] as Array<keyof AutomatedRunScriptConfig>).map(
+          (osType, index) => {
+            return (
+              <div key={osType}>
+                <EuiSpacer size="m" />
+
+                <RunScriptOsTypeConfig
+                  key={osType}
+                  platform={osType}
+                  showFieldLabels={index === 0}
+                  config={value[osType]}
+                  data-test-subj={getTestId(osType)}
+                  onChange={({ updatedConfig, isValid, errors }) => {
+                    const updatedValidationState: RunscriptOsValidationState = {
+                      ...osValidationState,
+                      [osType]: { isValid, errors },
+                    };
+
+                    setOsValidationState(updatedValidationState);
+                    onChange({
+                      isValid: Object.values(updatedValidationState).every(
+                        ({ isValid: isOsValueValid }) => isOsValueValid
+                      ),
+                      errors: Object.entries(updatedValidationState).reduce(
+                        (acc, [platform, osValidationResult]) => {
+                          if (!osValidationResult.isValid) {
+                            acc.push(
+                              ...(osValidationResult.errors ?? []).map(
+                                (errorMessage) =>
+                                  `${
+                                    OS_TITLES[platform as keyof typeof OS_TITLES]
+                                  }: ${errorMessage}`
+                              )
+                            );
+                          }
+
+                          return acc;
+                        },
+                        [] as string[]
+                      ),
+                    });
+                    emitUseFieldChange({
+                      ...value,
+                      [osType]: updatedConfig,
+                    });
+                  }}
+                />
+              </div>
+            );
+          }
+        )}
+      </EuiText>
+    </EuiFormRow>
+  );
+});
 AutomatedRunScriptConfiguration.displayName = 'AutomatedRunScriptConfiguration';
 
-export interface RunScriptOsTypeConfigProps {
+interface RunScriptOsTypeConfigProps {
   'data-test-subj'?: string;
   platform: SupportedHostOsType;
   config: EndpointRunScriptActionRequestParams;
@@ -333,6 +331,7 @@ export interface RunScriptOsTypeConfigProps {
 /** @private */
 const RunScriptOsTypeConfig = memo<RunScriptOsTypeConfigProps>(
   ({ config, onChange, 'data-test-subj': dataTestSubj, platform, showFieldLabels = true }) => {
+    const getTestId = useTestIdGenerator(dataTestSubj);
     const [scriptSelected, setSelectedScript] = useState<EndpointScript | undefined>(undefined);
 
     interface OsConfigValidationResult extends ValidationState {
@@ -502,6 +501,7 @@ const RunScriptOsTypeConfig = memo<RunScriptOsTypeConfigProps>(
               osType={platform}
               onChange={scriptSelectionOnChangeHandler}
               onScriptsLoaded={scriptSelectionOnScriptsLoadedHandler}
+              data-test-subj={getTestId('scriptSelector')}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -511,11 +511,6 @@ const RunScriptOsTypeConfig = memo<RunScriptOsTypeConfigProps>(
           <EuiFormRow
             label={showFieldLabels ? SCRIPT_ARGUMENTS_LABEL : undefined}
             fullWidth
-            labelAppend={
-              showFieldLabels && !scriptSelected?.requiresInput ? (
-                <EuiText size="xs">{OPTIONAL_FIELD_LABEL}</EuiText>
-              ) : undefined
-            }
             helpText={
               !currentValidationState.arguments.errors && scriptSelected?.requiresInput
                 ? SCRIPT_ARGUMENTS_REQUIRED_HELP_TEXT
@@ -526,11 +521,12 @@ const RunScriptOsTypeConfig = memo<RunScriptOsTypeConfigProps>(
           >
             <EuiFieldText
               isInvalid={!currentValidationState.arguments.isValid}
-              name="scriptParms"
+              name="scriptParams"
               disabled={!scriptSelected}
               value={config.scriptInput}
               fullWidth
               onChange={scriptParamsOnChangeHandler}
+              data-test-subj={getTestId('scriptParams')}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -576,6 +572,7 @@ const RunScriptOsTypeConfig = memo<RunScriptOsTypeConfigProps>(
               fullWidth
               onChange={scriptTimeoutOnChangeHandler}
               value={config.timeout ?? ''}
+              data-test-subj={getTestId('timeout')}
             />
           </EuiFormRow>
         </EuiFlexItem>

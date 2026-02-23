@@ -45,7 +45,7 @@ export const EndpointRunscriptScriptSelector = memo<EndpointRunscriptScriptSelec
   ({ osType, selectedScriptId, onChange, onScriptsLoaded, 'data-test-subj': dataTestSubj }) => {
     const hasAuthz = useUserPrivileges().endpointPrivileges.canWriteExecuteOperations;
     const getTestId = useTestIdGenerator(dataTestSubj);
-    const { data, isLoading, isFetched, error } = useGetCustomScripts<EndpointScript>(
+    const { data, isFetching, isFetched, error } = useGetCustomScripts<EndpointScript>(
       'endpoint',
       { osType },
       {
@@ -107,7 +107,7 @@ export const EndpointRunscriptScriptSelector = memo<EndpointRunscriptScriptSelec
           value: script.meta!,
           inputDisplay: (
             <EuiFlexGroup responsive={false} wrap={false} gutterSize="xs" alignItems="center">
-              <EuiFlexItem>{script.name}</EuiFlexItem>
+              <EuiFlexItem data-test-subj={getTestId('selectedScript')}>{script.name}</EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButtonIcon
                   iconType="crossInCircle"
@@ -120,9 +120,10 @@ export const EndpointRunscriptScriptSelector = memo<EndpointRunscriptScriptSelec
             </EuiFlexGroup>
           ),
           dropdownDisplay: script.name,
+          'data-test-subj': getTestId('option'),
         };
       });
-    }, [clearCurrentSelectionHandler, data]);
+    }, [clearCurrentSelectionHandler, data, getTestId]);
 
     const handleScriptSelectorOnChange = useCallback<
       Required<EuiSuperSelectProps<EndpointScript>>['onChange']
@@ -156,7 +157,7 @@ export const EndpointRunscriptScriptSelector = memo<EndpointRunscriptScriptSelec
         data-test-subj={getTestId()}
         valueOfSelected={selectedScript}
         fullWidth
-        isLoading={isLoading}
+        isLoading={isFetching}
         placeholder={displayError ? displayError : SELECT_INPUT_PLACEHOLDER}
         onChange={handleScriptSelectorOnChange}
         aria-label={SELECT_INPUT_PLACEHOLDER}
