@@ -50,7 +50,7 @@ spaceTest.describe(
 
     spaceTest('should render grid with WHERE filter', async ({ pageObjects }) => {
       await pageObjects.metricsExperience.runEsqlQuery(
-        `${testData.ESQL_QUERIES.TS_TSDB_LOGS} | WHERE @timestamp > NOW() - 1 DAY`
+        `${testData.ESQL_QUERIES.TS_TSDB_LOGS} | WHERE @timestamp > "${testData.TSDB_LOGS_DEFAULT_END_TIME}" - 100 DAYS`
       );
       await expect(pageObjects.metricsExperience.grid).toBeVisible();
     });

@@ -11,9 +11,10 @@ import type { ApmSynthtraceEsClient, LogsSynthtraceEsClient } from '@kbn/synthtr
 import {
   generateGetTracesApmDataset,
   DEFAULT_TRACE_CONFIGS,
-  generateCorrelatedLogsData,
+  DEFAULT_LOGS,
+  generateLogsData,
   createLogSequence,
-  type CorrelatedLogEvent,
+  type LogEntry,
 } from '@kbn/synthtrace';
 import type { OtherResult } from '@kbn/agent-builder-common';
 import { OBSERVABILITY_GET_TRACES_TOOL_ID } from '@kbn/observability-agent-builder-plugin/server/tools';
@@ -37,10 +38,10 @@ async function indexCorrelatedLogs({
   logs,
 }: {
   logsEsClient: LogsSynthtraceEsClient;
-  logs: CorrelatedLogEvent[];
+  logs: LogEntry[];
 }): Promise<void> {
   const range = timerange('now-5m', 'now');
-  const { client, generator } = generateCorrelatedLogsData({ range, logsEsClient, logs });
+  const { client, generator } = generateLogsData({ range, logsEsClient, logs });
   await client.index(generator);
 }
 
@@ -86,7 +87,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       before(async () => {
         const { traceId, serviceName, environment } = DEFAULT_TRACE_CONFIGS[0];
 
-        const correlatedLogs = createLogSequence({
+        const logs = createLogSequence({
           service: serviceName,
           correlation: {
             'trace.id': traceId,
@@ -95,17 +96,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           defaults: {
             'service.environment': environment,
           },
-          logs: [
-            { 'log.level': 'info', message: 'Checkout request received' },
-            { 'log.level': 'debug', message: 'Calling downstream cart service' },
-            { 'log.level': 'error', message: 'Database query failed: timeout' },
-            { 'log.level': 'warn', message: 'Retrying operation' },
-            { 'log.level': 'info', message: 'Checkout completed' },
-          ],
+          logs: DEFAULT_LOGS,
         });
         await indexCorrelatedLogs({
           logsEsClient: logsSynthtraceEsClient,
-          logs: correlatedLogs,
+          logs,
         });
       });
 

@@ -28,5 +28,15 @@
         }
       }
     }
-  ]
+  ],
+  "gcsDatasetAccessCredentials": {
+    "type": "service_account",
+    "project_id": "REDACTED",
+    "private_key_id": "REDACTED",
+    "private_key": "REDACTED",
+    "client_email": "REDACTED",
+    "client_id": "REDACTED",
+    "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+    "token_uri": "https://oauth2.googleapis.com/token"
+  }
 }

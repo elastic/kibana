@@ -1,0 +1,37 @@
+version: '1'
+name: 'sources.slack.send_message'
+description: 'Send a message to a Slack public channel by channel conversation ID (C...). Actions and inputs: sendMessage (channel, text, optional thread_ts, optional unfurl_links, optional unfurl_media). Use sources.slack.find first to resolve a channel name (e.g. "#general") into a channel id (C...). Requires chat:write and access to the channel.'
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: channel
+    type: string
+    description: 'Public channel name or conversation ID to send the message to (e.g. #general or C123...).'
+  - name: text
+    type: string
+    description: 'Message text.'
+  - name: thread_ts
+    type: string
+    required: false
+    description: 'Optional thread timestamp to reply in a thread.'
+  - name: unfurl_links
+    type: boolean
+    required: false
+    description: 'If true, enable unfurling of primarily text-based content.'
+  - name: unfurl_media
+    type: boolean
+    required: false
+    description: 'If true, enable unfurling of media content.'
+steps:
+  - name: send-message
+    type: slack2.sendMessage
+    connector-id: <%= slack2-stack-connector-id %>
+    with:
+      channel: "${{inputs.channel}}"
+      text: "${{inputs.text}}"
+      threadTs: "${{inputs.thread_ts}}"
+      unfurlLinks: ${{inputs.unfurl_links}}
+      unfurlMedia: ${{inputs.unfurl_media}}
+
