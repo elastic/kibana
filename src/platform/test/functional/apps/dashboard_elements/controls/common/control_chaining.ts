@@ -35,7 +35,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader', 'animals']);
 
       /* start by adding some incomplete data so that we can test `exists` query */
-      await esArchiver.loadIfNeeded(
+      await esArchiver.load(
         'src/platform/test/functional/fixtures/es_archiver/dashboard_elements/controls'
       );
 
