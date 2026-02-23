@@ -94,8 +94,7 @@ export function MaybeViewTraceLink({
   const rootTransaction = rootWaterfallTransaction.doc;
   const isRoot = transaction.transaction.id === rootWaterfallTransaction.id;
   const nextEnvironment = getNextEnvironmentUrlParam({
-    requestedEnvironment:
-      rootTransaction.service?.environment ?? ENVIRONMENT_NOT_DEFINED.value,
+    requestedEnvironment: rootTransaction.service?.environment ?? ENVIRONMENT_NOT_DEFINED.value,
     currentEnvironmentUrlParam: environment,
   });
 

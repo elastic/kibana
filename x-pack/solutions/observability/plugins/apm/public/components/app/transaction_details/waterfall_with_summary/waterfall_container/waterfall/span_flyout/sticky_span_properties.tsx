@@ -54,8 +54,7 @@ export function StickySpanProperties({ span, transaction }: Props) {
   const trackEvent = useUiTracker();
 
   const nextEnvironment = getNextEnvironmentUrlParam({
-    requestedEnvironment:
-      transaction?.service?.environment ?? ENVIRONMENT_NOT_DEFINED.value,
+    requestedEnvironment: transaction?.service?.environment ?? ENVIRONMENT_NOT_DEFINED.value,
     currentEnvironmentUrlParam: environment,
   });
 
