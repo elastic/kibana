@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type { FtrProviderContext } from '../../../ftr_provider_context';
+import type { CreateIntegrationSideCardButtonProps } from './create_integration_card_button';
 
-export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('management', function () {
-    loadTestFile(require.resolve('./get_list'));
-  });
-}
+export type CreateIntegrationSideCardButtonComponent =
+  React.ComponentType<CreateIntegrationSideCardButtonProps>;

@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import '@emotion/react';
-import type { UseEuiTheme } from '@elastic/eui';
+/**
+ * Project routing expression that restricts requests to the origin project only.
+ */
+export const PROJECT_ROUTING_ORIGIN = '_alias:_origin';
 
-declare module '@emotion/react' {
-  // eslint-disable-next-line @typescript-eslint/no-empty-interface
-  export interface Theme extends UseEuiTheme {}
-}
+/**
+ * Project routing expression that allows requests across all projects.
+ */
+export const PROJECT_ROUTING_ALL = '_alias:*';
