@@ -74,6 +74,7 @@ export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: num
           position: absolute;
           right: 0;
           max-width: 100%;
+          overflow-x: auto;
           margin-top: ${theme.euiTheme.size.xxs};
           & > div:last-child {
             margin-right: ${theme.euiTheme.size.s};
@@ -86,18 +87,13 @@ export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: num
             <EuiIcon type={item.icon} data-test-subj="apmBarDetailsIcon" aria-hidden={true} />
           </EuiFlexItem>
         )}
-        <EuiFlexItem
-          grow={false}
-          css={css`
-            min-width: 0;
-          `}
-        >
-          <EuiText css={{ overflow: 'hidden' }} size="s">
+        <EuiFlexItem grow={false}>
+          <EuiText css={{ overflow: 'hidden', whiteSpace: 'nowrap' }} size="s">
             <TruncateWithTooltip content={displayName} text={displayName} />
           </EuiText>
         </EuiFlexItem>
         {item.serviceName && (
-          <EuiFlexItem grow={false} style={{ minWidth: '15%', maxWidth: '30%' }}>
+          <EuiFlexItem grow={false} style={{ maxWidth: '30%', flexShrink: 0 }}>
             <EuiBadge
               color="hollow"
               iconType="dot"

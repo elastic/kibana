@@ -82,6 +82,7 @@ const ItemText = styled.span`
   align-items: center;
   height: ${({ theme }) => theme.euiTheme.size.l};
   max-width: 100%;
+  overflow-x: auto;
 
   /* add margin to all direct descendants */
   & > * {
@@ -211,8 +212,8 @@ function ServiceNameBadge({ item, color }: { item: IWaterfallSpanOrTransaction; 
       color="hollow"
       iconType="dot"
       css={css`
-        min-width: 15%;
         max-width: 30%;
+        flex-shrink: 0;
         & .euiBadge__icon {
           color: ${color};
         }
