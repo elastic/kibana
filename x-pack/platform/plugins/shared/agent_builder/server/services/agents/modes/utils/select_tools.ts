@@ -28,7 +28,7 @@ import type { ProcessedConversation } from './prepare_conversation';
 
 export const selectTools = async ({
   conversation,
-  previousDynamicToolIds,
+  previousDynamicToolIds = [],
   skills,
   request,
   toolProvider,
@@ -37,19 +37,19 @@ export const selectTools = async ({
   filestore,
   spaceId,
   runner,
-  experimentalFeatures,
+  experimentalFeatures = { filestore: false, skills: false },
 }: {
   conversation: ProcessedConversation;
-  previousDynamicToolIds: string[];
-  skills: SkillsService;
+  previousDynamicToolIds?: string[];
+  skills?: SkillsService;
   request: KibanaRequest;
   toolProvider: ToolProvider;
   attachmentsService: AttachmentsService;
-  filestore: IFileStore;
+  filestore?: IFileStore;
   agentConfiguration: AgentConfiguration;
   spaceId: string;
   runner: ScopedRunner;
-  experimentalFeatures: ExperimentalFeatures;
+  experimentalFeatures?: ExperimentalFeatures;
 }) => {
   const formatContext: AttachmentFormatContext = { request, spaceId };
 
@@ -74,7 +74,7 @@ export const selectTools = async ({
   });
 
   // create tools for filesystem (only if feature is enabled)
-  const filestoreTools = experimentalFeatures.filestore
+  const filestoreTools = experimentalFeatures.filestore && filestore
     ? getStoreTools({ filestore }).map((tool) => builtinToolToExecutable({ tool, runner }))
     : [];
 
@@ -105,17 +105,19 @@ export const selectTools = async ({
     request,
   });
 
-  const dynamicInlineTools = (
-    await Promise.all(
-      skills
-        .list()
-        .filter((skill) => skill.getInlineTools !== undefined)
-        .map((skill) => skill.getInlineTools!())
+  const dynamicInlineTools = skills
+    ? (
+      await Promise.all(
+        skills
+          .list()
+          .filter((skill) => skill.getInlineTools !== undefined)
+          .map((skill) => skill.getInlineTools!())
+      )
     )
-  )
-    .flat()
-    .filter((tool) => previousDynamicToolIds.includes(tool.id))
-    .map((tool) => skills.convertSkillTool(tool));
+      .flat()
+      .filter((tool) => previousDynamicToolIds.includes(tool.id))
+      .map((tool) => skills.convertSkillTool(tool))
+    : [];
 
   return {
     staticTools: [...dedupedStaticTools.values()],

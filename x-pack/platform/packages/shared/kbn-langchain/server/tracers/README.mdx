@@ -1,29 +1,39 @@
-### Tracing LangChain Retrievers, LLMs, Chains, and Tools using Elastic APM and LangSmith
+# LangChain Tracers
 
-This document describes how to trace LangChain retrievers, LLMs, chains, and tools using Elastic APM and LangSmith.
+This package provides tracers for monitoring and debugging LangChain retrievers, LLMs, chains, and tools within Kibana.
 
-If the `assistantModelEvaluation` experimental feature flag is enabled, and an APM server is configured, messages that have a corresponding trace will have an additional `View APM trace` action in the message title bar:
+## Available Tracers
 
-<p align="center">
-  <img width="500" src="https://github.com/elastic/kibana/assets/2946766/e0b372ee-139a-4eed-8b09-f01dd88c72b0" />
-</p> 
+| Tracer | Purpose | Configuration |
+|--------|---------|---------------|
+| `APMTracer` | Elastic APM integration for distributed tracing | Kibana APM settings |
+| `TelemetryTracer` | Event-based telemetry for usage analytics | Analytics service setup |
+| `LangChainTracer` (LangSmith) | LangSmith integration for LLM observability | Environment variables or session storage |
 
-Viewing the trace you can see a breakdown of the time spent in each retriever, llm, chain, and tool:
-<p align="center">
-  <img width="500" src="https://github.com/elastic/kibana/assets/2946766/f7cbd4bc-207c-4c88-a032-70a8de4f9b9a" />
-</p> 
+## APMTracer
 
-The Evaluation interface has been updated to support adding additional metadata like `Project Name`, `Run Name`, and pulling test datasets from LangSmith. Predictions can now also be run without having to run an Evaluation, so datasets can quickly be run for manual analysis.
+The `APMTracer` integrates with Elastic APM to provide distributed tracing of LangChain operations. It creates spans for retrievers, LLMs, chains, and tools, allowing you to visualize the execution flow in APM.
 
-<p align="center">
-  <img width="500" src="https://github.com/elastic/kibana/assets/2946766/acebf719-29fd-4fcc-aef1-99fd00ca800a" />
-</p> 
+### Usage
 
+```typescript
+import { APMTracer } from '@kbn/langchain/server/tracers';
 
-<p align="center">
-  <img width="500" src="https://github.com/elastic/kibana/assets/2946766/7081d993-cbe0-4465-a734-ff9be14d7d0d" />
-</p> 
+const tracer = new APMTracer(
+  { projectName: 'my-project', exampleId: 'optional-example-id' },
+  logger
+);
 
+// Pass to LangChain callbacks
+const result = await chain.invoke(input, { callbacks: [tracer] });
+```
+
+### Traced Operations
+
+- `onRetrieverStart/End/Error` - Document retrieval operations
+- `onLLMStart/End/Error` - LLM invocations
+- `onChainStart/End/Error` - Chain executions
+- `onToolStart/End/Error` - Tool calls
 
 ### Configuring APM
 
@@ -33,7 +43,7 @@ First, enable the `assistantModelEvaluation` experimental feature flag by adding
 xpack.securitySolution.enableExperimental: [ 'assistantModelEvaluation' ]
 ```
 
-Next, you'll need an APM server to collect the traces. You can either [follow the documentation for installing](https://www.elastic.co/guide/en/apm/guide/current/installing.html) the released artifact, or [run from source](https://github.com/elastic/apm-server#apm-server-development) and set up using the [quickstart guide provided](https://www.elastic.co/guide/en/apm/guide/current/apm-quick-start.html) (be sure to install the APM Server integration to ensure the necessary indices are created! In dev environments you must click `Display beta integrations` on main Integrations page to ensure the latest package is installed.).  Once your APM server is running, add your APM server configuration to your `kibana.dev.yml` as well using the following:
+Next, you'll need an APM server to collect the traces. You can either [follow the documentation for installing](https://www.elastic.co/guide/en/apm/guide/current/installing.html) the released artifact, or [run from source](https://github.com/elastic/apm-server#apm-server-development) and set up using the [quickstart guide provided](https://www.elastic.co/guide/en/apm/guide/current/apm-quick-start.html) (be sure to install the APM Server integration to ensure the necessary indices are created! In dev environments you must click `Display beta integrations` on main Integrations page to ensure the latest package is installed.). Once your APM server is running, add your APM server configuration to your `kibana.dev.yml` as well using the following:
 
 ```
 # APM
@@ -54,7 +64,95 @@ If using a remote APM Server/Kibana instance for viewing traces, you can set the
 >  If connecting to a cloud APM server (like our [ai-assistant apm deployment](https://ai-assistant-apm-do-not-delete.kb.us-central1.gcp.cloud.es.io/)), follow [these steps](https://www.elastic.co/guide/en/apm/guide/current/api-key.html#create-an-api-key) to create an API key, and then set it via `apiKey` and also set your `serverUrl` as shown in the APM Integration details within fleet.
 
 > [!NOTE]
->  If you're an Elastic developer running Kibana from source, you can just enable APM as above, and _not_ include a `serverUrl`, and your traces will be sent to the https://kibana-cloud-apm.elastic.dev cluster. 
+>  If you're an Elastic developer running Kibana from source, you can just enable APM as above, and _not_ include a `serverUrl`, and your traces will be sent to the https://kibana-cloud-apm.elastic.dev cluster.
+
+### Viewing Traces
+
+If the `assistantModelEvaluation` experimental feature flag is enabled, and an APM server is configured, messages that have a corresponding trace will have an additional `View APM trace` action in the message title bar:
+
+<p align="center">
+  <img width="500" src="https://github.com/elastic/kibana/assets/2946766/e0b372ee-139a-4eed-8b09-f01dd88c72b0" />
+</p>
+
+Viewing the trace you can see a breakdown of the time spent in each retriever, llm, chain, and tool:
+
+<p align="center">
+  <img width="500" src="https://github.com/elastic/kibana/assets/2946766/f7cbd4bc-207c-4c88-a032-70a8de4f9b9a" />
+</p>
+
+## TelemetryTracer
+
+The `TelemetryTracer` provides event-based telemetry for tracking LangChain usage analytics. It reports events to Kibana's analytics service for monitoring assistant interactions.
+
+### Usage
+
+```typescript
+import { TelemetryTracer } from '@kbn/langchain/server/tracers';
+
+const tracer = new TelemetryTracer(
+  {
+    elasticTools: ['tool1', 'tool2'], // List of known Elastic tool names
+    telemetry: analyticsService,
+    telemetryParams: {
+      assistantStreamingEnabled: true,
+      actionTypeId: '.gen-ai',
+      isEnabledKnowledgeBase: true,
+      eventType: 'invoke_assistant',
+      model: 'gpt-4',
+    },
+  },
+  logger
+);
+
+// Pass to LangChain callbacks
+const result = await chain.invoke(input, { callbacks: [tracer] });
+```
+
+### Tracked Events
+
+- **`invoke_assistant`** - Emitted on chain completion with:
+  - Duration in milliseconds
+  - Tools invoked (with counts)
+  - Model and configuration details
+  - Knowledge base status
+
+- **`invoke_assistant_error`** - Emitted on tool errors with:
+  - Error message and location
+  - Action type and model info
+  - Configuration state
+
+### Telemetry Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `assistantStreamingEnabled` | `boolean` | Whether streaming is enabled |
+| `actionTypeId` | `string` | The connector action type ID |
+| `isEnabledKnowledgeBase` | `boolean` | Whether knowledge base is active |
+| `eventType` | `string` | The telemetry event type to report |
+| `model` | `string` (optional) | The LLM model being used |
+
+## LangSmith Tracer
+
+The LangSmith tracer integrates with [LangSmith](https://docs.smith.langchain.com/) for LLM observability and testing.
+
+### Usage
+
+```typescript
+import { getLangSmithTracer, isLangSmithEnabled } from '@kbn/langchain/server/tracers';
+
+// Check if LangSmith is enabled
+if (isLangSmithEnabled()) {
+  const tracers = getLangSmithTracer({
+    apiKey: 'your-api-key', // Optional, reads from env if not provided
+    projectName: 'my-project',
+    exampleId: 'optional-dataset-example-id',
+    logger,
+  });
+
+  // Pass to LangChain callbacks
+  const result = await chain.invoke(input, { callbacks: tracers });
+}
+```
 
 ### Configuring LangSmith
 
@@ -70,3 +168,30 @@ export LANGCHAIN_PROJECT="8.12 ESQL Query Generation"
 
 If wanting to configure LangSmith in cloud or other environments where you may not have the ability to set env vars, you can set the `LangSmith Project` and `LangSmith API Key` values in session storage as outlined in https://github.com/elastic/kibana/pull/180227.
 
+### Dataset Integration
+
+The Evaluation interface supports adding additional metadata like `Project Name`, `Run Name`, and pulling test datasets from LangSmith. Predictions can now also be run without having to run an Evaluation, so datasets can quickly be run for manual analysis.
+
+<p align="center">
+  <img width="500" src="https://github.com/elastic/kibana/assets/2946766/acebf719-29fd-4fcc-aef1-99fd00ca800a" />
+</p>
+
+<p align="center">
+  <img width="500" src="https://github.com/elastic/kibana/assets/2946766/7081d993-cbe0-4465-a734-ff9be14d7d0d" />
+</p>
+
+## Combining Multiple Tracers
+
+You can use multiple tracers simultaneously by passing them all to the callbacks array:
+
+```typescript
+import { APMTracer, TelemetryTracer, getLangSmithTracer } from '@kbn/langchain/server/tracers';
+
+const tracers = [
+  new APMTracer({ projectName: 'my-project' }, logger),
+  new TelemetryTracer({ elasticTools, telemetry, telemetryParams }, logger),
+  ...getLangSmithTracer({ apiKey, projectName, logger }),
+];
+
+const result = await chain.invoke(input, { callbacks: tracers });
+```
