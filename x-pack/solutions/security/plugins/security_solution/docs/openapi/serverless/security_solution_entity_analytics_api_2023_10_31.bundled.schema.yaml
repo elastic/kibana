@@ -666,6 +666,190 @@ paths:
         Entity Analytics privileged user monitoring experience
       tags:
         - Security Entity Analytics API
+  /api/entity_analytics/watchlists:
+    post:
+      operationId: CreateWatchlist
+      requestBody:
+        content:
+          application/json:
+            examples:
+              CreateWatchlistRequest:
+                summary: Create watchlist request
+                value:
+                  description: High risk vendor watchlist
+                  managed: false
+                  name: High Risk Vendors
+                  riskModifier: 1.5
+            schema:
+              type: object
+              properties:
+                description:
+                  description: Description of the watchlist
+                  type: string
+                managed:
+                  description: Indicates if the watchlist is managed by the system
+                  type: boolean
+                name:
+                  description: Unique name for the watchlist
+                  type: string
+                riskModifier:
+                  description: Risk score modifier associated with the watchlist
+                  type: number
+              required:
+                - name
+                - description
+                - riskModifier
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                CreateWatchlistResponse:
+                  summary: Created watchlist
+                  value:
+                    createdAt: '2026-01-28T12:00:00.000Z'
+                    description: High risk vendor watchlist
+                    id: watchlist-123
+                    managed: false
+                    name: High Risk Vendors
+                    riskModifier: 1.5
+                    updatedAt: '2026-01-28T12:00:00.000Z'
+              schema:
+                $ref: '#/components/schemas/WatchlistObject'
+          description: Watchlist created successfully
+      summary: Create a new watchlist
+      tags:
+        - Security Entity Analytics API
+      x-state: Technical Preview
+  /api/entity_analytics/watchlists/{id}:
+    get:
+      operationId: GetWatchlist
+      parameters:
+        - description: Unique ID of the watchlist
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                GetWatchlistResponse:
+                  summary: Watchlist details
+                  value:
+                    createdAt: '2026-01-28T12:00:00.000Z'
+                    description: High risk vendor watchlist
+                    id: watchlist-123
+                    managed: false
+                    name: High Risk Vendors
+                    riskModifier: 1.5
+                    updatedAt: '2026-02-18T12:00:00.000Z'
+              schema:
+                $ref: '#/components/schemas/WatchlistObject'
+          description: Watchlist details
+      summary: Get a watchlist by ID
+      tags:
+        - Security Entity Analytics API
+      x-state: Technical Preview
+    put:
+      operationId: UpdateWatchlist
+      parameters:
+        - description: The ID of the watchlist to update
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              UpdateWatchlistRequest:
+                summary: Update watchlist request
+                value:
+                  description: High risk vendor watchlist
+                  managed: false
+                  name: High Risk Vendors
+                  riskModifier: 1.5
+            schema:
+              type: object
+              properties:
+                description:
+                  description: Description of the watchlist
+                  type: string
+                managed:
+                  description: Indicates if the watchlist is managed by the system
+                  type: boolean
+                name:
+                  description: Unique name of the watchlist
+                  type: string
+                riskModifier:
+                  description: Risk score modifier associated with the watchlist
+                  type: number
+              required:
+                - name
+                - description
+                - riskModifier
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                UpdateWatchlistResponse:
+                  summary: Updated watchlist
+                  value:
+                    createdAt: '2026-01-28T12:00:00.000Z'
+                    description: High risk vendor watchlist
+                    id: watchlist-123
+                    managed: false
+                    name: High Risk Vendors
+                    riskModifier: 1.5
+                    updatedAt: '2026-02-18T12:00:00.000Z'
+              schema:
+                $ref: '#/components/schemas/WatchlistObject'
+          description: Watchlist updated successfully
+      summary: Update an existing watchlist
+      tags:
+        - Security Entity Analytics API
+      x-state: Technical Preview
+  /api/entity_analytics/watchlists/list:
+    get:
+      operationId: ListWatchlists
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                ListWatchlistsResponse:
+                  summary: List of watchlists
+                  value:
+                    - createdAt: '2026-01-28T12:00:00.000Z'
+                      description: High risk vendor watchlist
+                      id: watchlist-123
+                      managed: false
+                      name: High Risk Vendors
+                      riskModifier: 1.5
+                      updatedAt: '2026-02-18T12:00:00.000Z'
+                    - createdAt: '2026-01-10T09:30:00.000Z'
+                      description: Privileged user monitoring watchlist
+                      id: watchlist-456
+                      managed: true
+                      name: Privileged Accounts
+                      riskModifier: 2
+                      updatedAt: '2026-02-01T15:45:00.000Z'
+              schema:
+                items:
+                  $ref: '#/components/schemas/WatchlistObject'
+                type: array
+          description: List of watchlists
+      summary: List all watchlists
+      tags:
+        - Security Entity Analytics API
+      x-state: Technical Preview
   /api/entity_store/enable:
     post:
       operationId: InitEntityStore
@@ -2579,6 +2763,44 @@ components:
             name:
               description: The name of the user.
               type: string
+    WatchlistObject:
+      example:
+        createdAt: '2026-01-28T12:00:00.000Z'
+        description: High risk vendor watchlist
+        id: watchlist-123
+        managed: false
+        name: High Risk Vendors
+        riskModifier: 1.5
+        updatedAt: '2026-02-18T12:00:00.000Z'
+      type: object
+      properties:
+        createdAt:
+          description: Timestamp indicating when the watchlist was created
+          format: date-time
+          type: string
+        description:
+          description: Description of the watchlist
+          type: string
+        id:
+          description: The unique ID of the watchlist
+          type: string
+        managed:
+          description: Indicates if the watchlist is managed by the system
+          type: boolean
+        name:
+          description: The name of the watchlist
+          type: string
+        riskModifier:
+          description: Risk score modifier associated with the watchlist
+          type: number
+        updatedAt:
+          description: Timestamp indicating when the watchlist was last updated
+          format: date-time
+          type: string
+      required:
+        - name
+        - riskModifier
+        - managed
   securitySchemes:
     BasicAuth:
       scheme: basic

@@ -7,8 +7,11 @@
 
 import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
 import { isInferenceProviderError } from '@kbn/inference-common';
-import type { IdentifyFeaturesResult } from '@kbn/streams-schema';
-import { isComputedFeature, type BaseFeature } from '@kbn/streams-schema';
+import {
+  type IdentifyFeaturesResult,
+  type BaseFeature,
+  isComputedFeature,
+} from '@kbn/streams-schema';
 import { identifyFeatures, generateAllComputedFeatures } from '@kbn/streams-ai';
 import { getSampleDocuments } from '@kbn/ai-tools/src/tools/describe_dataset/get_sample_documents';
 import { v4 as uuid, v5 as uuidv5 } from 'uuid';
@@ -103,13 +106,13 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                   ...computedFeatures,
                 ];
 
-                const { hits: existingFeatures } = await featureClient.getFeatures(stream.name, {
-                  id: identifiedFeatures.map(({ id }) => id),
-                });
-
+                const { hits: existingFeatures } = await featureClient.getFeatures(stream.name);
                 const now = Date.now();
                 const features = identifiedFeatures.map((feature) => {
-                  const existing = existingFeatures.find(({ id }) => id === feature.id);
+                  const existing = featureClient.findDuplicateFeature({
+                    existingFeatures,
+                    feature,
+                  });
                   if (existing) {
                     taskContext.logger.debug(
                       `Overwriting feature with id [${
