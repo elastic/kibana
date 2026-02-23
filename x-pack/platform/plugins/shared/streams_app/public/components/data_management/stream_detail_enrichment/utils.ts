@@ -13,6 +13,7 @@ import type {
   JoinProcessor,
   LowercaseProcessor,
   MathProcessor,
+  NetworkDirectionProcessor,
   ProcessorType,
   RedactProcessor,
   ReplaceProcessor,
@@ -34,7 +35,7 @@ import { isConditionBlock } from '@kbn/streamlang/types/streamlang';
 import type { FlattenRecord } from '@kbn/streams-schema';
 import { Streams, isSchema, type FieldDefinition } from '@kbn/streams-schema';
 import type { IngestUpsertRequest } from '@kbn/streams-schema/src/models/ingest';
-import { countBy, isEmpty, mapValues, orderBy } from 'lodash';
+import { countBy, isEmpty, mapValues, omit, orderBy } from 'lodash';
 import type { EnrichmentDataSource } from '../../../../common/url_schema';
 import type { StreamEnrichmentContextType } from './state_management/stream_enrichment_state_machine/types';
 import { configDrivenProcessors } from './steps/blocks/action/config_driven';
@@ -55,6 +56,7 @@ import type {
   LowercaseFormState,
   ManualIngestPipelineFormState,
   MathFormState,
+  NetworkDirectionFormState,
   ProcessorFormState,
   RedactFormState,
   ReplaceFormState,
@@ -81,6 +83,7 @@ export const SPECIALISED_TYPES = [
   'trim',
   'join',
   'concat',
+  'network_direction',
 ];
 
 interface FormStateDependencies {
@@ -291,6 +294,17 @@ const defaultConcatProcessorFormState = (): ConcatFormState => ({
   where: ALWAYS_CONDITION,
 });
 
+const defaultNetworkDirectionProcessorFormState = (): NetworkDirectionFormState => ({
+  action: 'network_direction' as const,
+  source_ip: '',
+  destination_ip: '',
+  internal_networks: [],
+  target_field: 'attributes.network.direction',
+  ignore_failure: true,
+  ignore_missing: true,
+  where: ALWAYS_CONDITION,
+});
+
 const configDrivenDefaultFormStates = mapValues(
   configDrivenProcessors,
   (config) => () => config.defaultFormState
@@ -317,6 +331,7 @@ const defaultProcessorFormStateByType: Record<
   set: defaultSetProcessorFormState,
   join: defaultJoinProcessorFormState,
   concat: defaultConcatProcessorFormState,
+  network_direction: defaultNetworkDirectionProcessorFormState,
   ...configDrivenDefaultFormStates,
 };
 
@@ -349,6 +364,24 @@ export const getFormStateFromActionStep = (
       ...structuredClone(restStep),
       patterns: patterns.map((pattern) => ({ value: pattern })),
     };
+  }
+
+  if (step.action === 'network_direction') {
+    const clone: NetworkDirectionFormState = structuredClone({
+      ...omit(step, 'internal_networks', 'internal_networks_field'),
+    });
+
+    if ('internal_networks' in step) {
+      clone.internal_networks = step.internal_networks?.map((internalNetwork) => ({
+        value: internalNetwork,
+      }));
+    }
+
+    if ('internal_networks_field' in step) {
+      clone.internal_networks_field = step.internal_networks_field;
+    }
+
+    return clone;
   }
 
   if (
@@ -674,6 +707,29 @@ export const convertFormStateToProcessor = (
           description,
           where: 'where' in formState ? formState.where : undefined,
         } as ConcatProcessor,
+      };
+    }
+
+    if (formState.action === 'network_direction') {
+      const { source_ip, destination_ip, target_field, ignore_failure, ignore_missing } = formState;
+
+      return {
+        processorDefinition: {
+          action: 'network_direction',
+          source_ip,
+          destination_ip,
+          internal_networks:
+            'internal_networks' in formState
+              ? formState.internal_networks?.map((internalNetwork) => internalNetwork.value)
+              : undefined,
+          internal_networks_field:
+            'internal_networks_field' in formState ? formState.internal_networks_field : undefined,
+          target_field,
+          ignore_failure,
+          ignore_missing,
+          description,
+          where: 'where' in formState ? formState.where : undefined,
+        } as NetworkDirectionProcessor,
       };
     }
 
