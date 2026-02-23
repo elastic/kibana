@@ -120,6 +120,14 @@ export const SchemaEditorFlyout = ({
     (nextField.description ?? undefined) !== (field.description ?? undefined);
   const isInheritedDescriptionOnlyEditing =
     isDescriptionOnlyEditing && field.status === 'inherited';
+  // For wired streams, unmapped fields can have description-only changes without selecting a type
+  const isUnmappedDescriptionOnlyChange =
+    isEditing &&
+    streamType === 'wired' &&
+    field.status === 'unmapped' &&
+    !field.type &&
+    !nextField.type &&
+    hasDescriptionChanged;
 
   const onValidate = ({
     isValid,
@@ -245,7 +253,10 @@ export const SchemaEditorFlyout = ({
               data-test-subj="streamsAppSchemaEditorFieldStageButton"
               disabled={
                 // In description-only mode, we don't require a valid field type
-                (!isDescriptionOnlyEditing && !hasValidFieldType) ||
+                // For wired streams, unmapped fields can have description-only changes
+                (!isDescriptionOnlyEditing &&
+                  !isUnmappedDescriptionOnlyChange &&
+                  !hasValidFieldType) ||
                 !isValidAdvancedFieldMappings ||
                 // For inherited fields in description-only mode, require description change
                 (isInheritedDescriptionOnlyEditing && !hasDescriptionChanged) ||
@@ -270,6 +281,17 @@ export const SchemaEditorFlyout = ({
                     }
 
                     // For doc-only fields (status: 'unmapped' without type), return minimal payload
+                    return {
+                      name: nextField.name,
+                      parent: stagedParent,
+                      status: 'unmapped',
+                      description: nextField.description,
+                    } as SchemaField;
+                  }
+
+                  // For wired streams, unmapped fields can have description-only changes
+                  // without selecting a type - stage as doc-only override
+                  if (isUnmappedDescriptionOnlyChange) {
                     return {
                       name: nextField.name,
                       parent: stagedParent,

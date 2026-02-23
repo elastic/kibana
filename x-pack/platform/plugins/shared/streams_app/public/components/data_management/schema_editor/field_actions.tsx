@@ -143,12 +143,12 @@ export const FieldActionsCell = ({ field }: { field: SchemaField }) => {
         break;
       case 'unmapped':
         actions = [viewFieldAction];
-        // Only show "Map field" if the parent doesn't have a real ES mapping (type !== 'unmapped')
+        // Only show "Edit field" if the parent doesn't have a real ES mapping (type !== 'unmapped')
         // If the parent has a real mapping, the child can't map it differently
         if (!hasRealMappingInParent) {
           actions.push({
-            name: i18n.translate('xpack.streams.actions.mapFieldLabel', {
-              defaultMessage: 'Map field',
+            name: i18n.translate('xpack.streams.actions.editFieldLabel', {
+              defaultMessage: 'Edit field',
             }),
             onClick: () => openFlyout({ isEditingByDefault: true }),
           });

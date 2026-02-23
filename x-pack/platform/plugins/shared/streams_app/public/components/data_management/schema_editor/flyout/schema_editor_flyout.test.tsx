@@ -256,7 +256,7 @@ describe('SchemaEditorFlyout (description-only restrictions)', () => {
     });
 
     it('shows type selector for unmapped fields when isDescriptionOnlyMode is false (default)', async () => {
-      // When opening via "Map field" action (isDescriptionOnlyMode defaults to false),
+      // When opening via "Edit field" action (isDescriptionOnlyMode defaults to false),
       // the type selector should be visible so users can map the field
       const unmappedField: SchemaField = {
         name: 'attributes.unmapped_field',
@@ -269,6 +269,76 @@ describe('SchemaEditorFlyout (description-only restrictions)', () => {
 
       // Type selector should be visible for wired streams when mapping a field
       expect(screen.getByTestId('streamsAppFieldFormTypeSelect')).toBeInTheDocument();
+    });
+
+    it('allows staging description-only changes for unmapped fields without selecting a type', async () => {
+      // When opening an unmapped field via "Edit field" action and the user
+      // only adds a description without selecting a type, they should be able
+      // to stage the changes as a doc-only override
+      const unmappedField: SchemaField = {
+        name: 'attributes.unmapped_field',
+        parent: 'logs.test',
+        status: 'unmapped',
+        // No description, no type - this is a detected field from ES
+      };
+
+      const { onStage, stream } = renderFlyout({ field: unmappedField });
+
+      // Type selector should be visible initially
+      expect(screen.getByTestId('streamsAppFieldFormTypeSelect')).toBeInTheDocument();
+
+      // Add a description without selecting a type
+      const descriptionTextArea = screen.getByTestId('streamsAppFieldSummaryDescriptionTextArea');
+      await user.type(descriptionTextArea, 'field documentation');
+
+      // Stage button should be enabled because description was added (even without type)
+      const stageButton = screen.getByTestId('streamsAppSchemaEditorFieldStageButton');
+      expect(stageButton).toBeEnabled();
+      await user.click(stageButton);
+
+      // Verify the staged field has status 'unmapped' (doc-only override)
+      expect(onStage).toHaveBeenCalledTimes(1);
+      const stagedField = onStage.mock.calls[0][0] as SchemaField;
+      expect(stagedField).toEqual({
+        name: 'attributes.unmapped_field',
+        parent: stream.name,
+        status: 'unmapped',
+        description: 'field documentation',
+      });
+      // Should NOT have a type property
+      expect(stagedField).not.toHaveProperty('type');
+    });
+
+    it('keeps status as unmapped when only description is changed for unmapped fields', async () => {
+      // When an unmapped field already has a description and the user edits it,
+      // the status should remain 'unmapped'
+      const unmappedFieldWithDescription: SchemaField = {
+        name: 'attributes.documented_field',
+        parent: 'logs.test',
+        status: 'unmapped',
+        description: 'existing description',
+      };
+
+      const { onStage, stream } = renderFlyout({ field: unmappedFieldWithDescription });
+
+      // Update the description
+      const descriptionTextArea = screen.getByTestId('streamsAppFieldSummaryDescriptionTextArea');
+      await user.clear(descriptionTextArea);
+      await user.type(descriptionTextArea, 'updated description');
+
+      const stageButton = screen.getByTestId('streamsAppSchemaEditorFieldStageButton');
+      expect(stageButton).toBeEnabled();
+      await user.click(stageButton);
+
+      // Verify the staged field maintains status 'unmapped'
+      expect(onStage).toHaveBeenCalledTimes(1);
+      const stagedField = onStage.mock.calls[0][0] as SchemaField;
+      expect(stagedField).toEqual({
+        name: 'attributes.documented_field',
+        parent: stream.name,
+        status: 'unmapped',
+        description: 'updated description',
+      });
     });
   });
 

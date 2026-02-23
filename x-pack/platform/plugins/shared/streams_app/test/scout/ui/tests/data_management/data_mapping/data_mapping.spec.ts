@@ -157,7 +157,7 @@ test.describe(
 
       // Open the field actions menu
       await pageObjects.streams.openFieldActionsMenu();
-      await pageObjects.streams.clickFieldAction('Map field');
+      await pageObjects.streams.clickFieldAction('Edit field');
 
       // Verify the flyout opens and set field mapping type
       await pageObjects.streams.expectFieldFlyoutOpen();
@@ -199,7 +199,7 @@ test.describe(
 
       // Open the field actions menu
       await pageObjects.streams.openFieldActionsMenu();
-      await pageObjects.streams.clickFieldAction('Map field');
+      await pageObjects.streams.clickFieldAction('Edit field');
 
       // Verify the flyout opens and set field mapping type
       await pageObjects.streams.expectFieldFlyoutOpen();
