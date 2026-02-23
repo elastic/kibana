@@ -33,7 +33,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     describe('transaction_duration without data', () => {
       it('handles the empty state', async () => {
         const unifiedResponse = await apmApiClient.readUser({
-          endpoint: 'POST /internal/apm/correlations',
+          endpoint: 'POST /internal/apm/correlations/latency' as any,
           params: {
             body: {
               ...getOptions(),
@@ -48,7 +48,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           `Expected status to be '200', got '${unifiedResponse.status}'`
         );
 
-        const response: UnifiedCorrelationsResponse = unifiedResponse.body;
+        const response = unifiedResponse.body as UnifiedCorrelationsResponse;
 
         expect(response.percentileThresholdValue).to.be(undefined);
         expect(response.overallHistogram).to.be(undefined);
@@ -61,7 +61,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     describe('error_rate without data', () => {
       it('handles the empty state', async () => {
         const unifiedResponse = await apmApiClient.readUser({
-          endpoint: 'POST /internal/apm/correlations',
+          endpoint: 'POST /internal/apm/correlations/latency' as any,
           params: {
             body: {
               ...getOptions(),
@@ -76,7 +76,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           `Expected status to be '200', got '${unifiedResponse.status}'`
         );
 
-        const response: UnifiedCorrelationsResponse = unifiedResponse.body;
+        const response = unifiedResponse.body as UnifiedCorrelationsResponse;
 
         expect(response.percentileThresholdValue).to.be(undefined);
         expect(response.overallHistogram).to.be(undefined);
@@ -97,7 +97,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       it('runs unified query and returns results matching legacy endpoint', async () => {
         const unifiedResponse = await apmApiClient.readUser({
-          endpoint: 'POST /internal/apm/correlations',
+          endpoint: 'POST /internal/apm/correlations/latency' as any,
           params: {
             body: {
               ...getOptions(),
@@ -112,7 +112,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           `Expected status to be '200', got '${unifiedResponse.status}'`
         );
 
-        const response: UnifiedCorrelationsResponse = unifiedResponse.body;
+        const response = unifiedResponse.body as UnifiedCorrelationsResponse;
 
         // Verify field candidates (should match legacy endpoint: 81 candidates)
         expect(response.fieldCandidates.length).to.eql(
@@ -172,7 +172,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       it('runs unified query and returns results matching legacy endpoint', async () => {
         const unifiedResponse = await apmApiClient.readUser({
-          endpoint: 'POST /internal/apm/correlations',
+          endpoint: 'POST /internal/apm/correlations/latency' as any,
           params: {
             body: {
               ...getOptions(),
@@ -187,7 +187,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           `Expected status to be '200', got '${unifiedResponse.status}'`
         );
 
-        const response: UnifiedCorrelationsResponse = unifiedResponse.body;
+        const response = unifiedResponse.body as UnifiedCorrelationsResponse;
 
         // Verify field candidates (should match legacy endpoint: 80 candidates after filtering EVENT_OUTCOME)
         expect(response.fieldCandidates.length).to.eql(

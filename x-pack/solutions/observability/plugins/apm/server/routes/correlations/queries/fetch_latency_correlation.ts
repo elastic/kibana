@@ -67,7 +67,7 @@ export async function fetchLatencyCorrelations({
   // so we don't search aggregated transactions for correlations
   const searchAggregatedTransactions = false;
 
-  // Step 1: Get overall distribution
+  // Get overall distribution
   const overallDistribution = await getOverallLatencyDistribution({
     chartType,
     apmEventClient,
@@ -109,7 +109,7 @@ export async function fetchLatencyCorrelations({
     errorHistogram = errorDistribution.overallHistogram;
   }
 
-  // Step 2: Get field candidates (if not provided)
+  // Get field candidates (if not provided)
   let fieldCandidates: string[];
   if (providedFieldCandidates && providedFieldCandidates.length > 0) {
     fieldCandidates = providedFieldCandidates;
@@ -131,26 +131,9 @@ export async function fetchLatencyCorrelations({
     }
   }
 
-  // Step 3: Get field value pairs (with internal chunking)
+  // Get field value pairs (with internal chunking)
+  // Note: For error_rate, we skip this step and process field candidates directly
   const fieldValuePairs: FieldValuePair[] = [];
-  const fieldCandidateChunks = chunk(fieldCandidates, CHUNK_SIZE);
-
-  for (const fieldCandidateChunk of fieldCandidateChunks) {
-    const fieldValuePairResponse = await fetchFieldValuePairs({
-      apmEventClient,
-      eventType: ProcessorEvent.transaction,
-      start,
-      end,
-      environment,
-      kuery,
-      query,
-      fieldCandidates: fieldCandidateChunk,
-    });
-
-    if (fieldValuePairResponse.fieldValuePairs.length > 0) {
-      fieldValuePairs.push(...fieldValuePairResponse.fieldValuePairs);
-    }
-  }
 
   // Step 4: Get correlations (with internal chunking)
   let correlations: UnifiedCorrelation[] = [];
@@ -159,18 +142,13 @@ export async function fetchLatencyCorrelations({
 
   if (correlationType === CorrelationType.ERROR_RATE) {
     // For error_rate, use p-values approach
-    const prioritizedFieldValuePairs = getPrioritizedFieldValuePairs(fieldValuePairs);
-    const fieldValuePairChunks = chunk(prioritizedFieldValuePairs, CHUNK_SIZE);
+    // Process field candidates directly (not field value pairs) to match legacy behavior
+    const fieldCandidateChunks = chunk(fieldCandidates, CHUNK_SIZE);
 
     const allFailedCorrelations: UnifiedCorrelation[] = [];
     let bestFallback: UnifiedCorrelation | undefined;
 
-    for (const fieldValuePairChunk of fieldValuePairChunks) {
-      // Convert field value pairs to field candidates for p-values
-      const fieldCandidatesChunk = Array.from(
-        new Set(fieldValuePairChunk.map((pair) => pair.fieldName))
-      );
-
+    for (const fieldCandidatesChunk of fieldCandidateChunks) {
       const pValuesResponse = await fetchPValues({
         apmEventClient,
         start,
@@ -208,6 +186,26 @@ export async function fetchLatencyCorrelations({
     fallbackResult = bestFallback;
   } else {
     // For transaction_duration, use significant correlations approach
+    // Get field value pairs (with internal chunking)
+    const fieldCandidateChunks = chunk(fieldCandidates, CHUNK_SIZE);
+
+    for (const fieldCandidateChunk of fieldCandidateChunks) {
+      const fieldValuePairResponse = await fetchFieldValuePairs({
+        apmEventClient,
+        eventType: ProcessorEvent.transaction,
+        start,
+        end,
+        environment,
+        kuery,
+        query,
+        fieldCandidates: fieldCandidateChunk,
+      });
+
+      if (fieldValuePairResponse.fieldValuePairs.length > 0) {
+        fieldValuePairs.push(...fieldValuePairResponse.fieldValuePairs);
+      }
+    }
+
     const prioritizedFieldValuePairs = getPrioritizedFieldValuePairs(fieldValuePairs);
     const fieldValuePairChunks = chunk(prioritizedFieldValuePairs, CHUNK_SIZE);
 
@@ -227,8 +225,13 @@ export async function fetchLatencyCorrelations({
         fieldValuePairs: fieldValuePairChunk,
       });
 
-      if (significantCorrelationsResponse.latencyCorrelations.length > 0) {
-        allLatencyCorrelations.push(...significantCorrelationsResponse.latencyCorrelations);
+      // Only include correlations that have histograms (already filtered by fetchSignificantCorrelations)
+      // This ensures we only get correlations that passed the correlation and ksTest thresholds
+      const validCorrelations = significantCorrelationsResponse.latencyCorrelations.filter(
+        (c) => c && 'histogram' in c && c.histogram !== undefined
+      );
+      if (validCorrelations.length > 0) {
+        allLatencyCorrelations.push(...validCorrelations);
       }
 
       if (significantCorrelationsResponse.fallbackResult) {
@@ -255,7 +258,40 @@ export async function fetchLatencyCorrelations({
       }
     }
 
-    correlations = allLatencyCorrelations;
+    // Deduplicate by fieldName + fieldValue combination
+    // fetchSignificantCorrelations already filters to only include correlations with histograms
+    // (which means they passed correlation and ksTest thresholds)
+    const correlationMap = new Map<string, UnifiedCorrelation>();
+    for (const correlation of allLatencyCorrelations) {
+      // Ensure correlation has required fields and histogram
+      if (
+        correlation.correlation !== undefined &&
+        correlation.ksTest !== undefined &&
+        'histogram' in correlation &&
+        correlation.histogram !== undefined
+      ) {
+        const key = `${correlation.fieldName}:${correlation.fieldValue}`;
+        const existing = correlationMap.get(key);
+        if (!existing || (correlation.correlation ?? 0) > (existing.correlation ?? 0)) {
+          correlationMap.set(key, correlation);
+        }
+      }
+    }
+
+    // Sort by correlation descending, then by fieldName, then by fieldValue
+    correlations = Array.from(correlationMap.values()).sort((a, b) => {
+      const aCorr = a.correlation ?? 0;
+      const bCorr = b.correlation ?? 0;
+      if (bCorr !== aCorr) {
+        return bCorr - aCorr;
+      }
+      if (a.fieldName !== b.fieldName) {
+        return a.fieldName.localeCompare(b.fieldName);
+      }
+      const aVal = String(a.fieldValue);
+      const bVal = String(b.fieldValue);
+      return aVal.localeCompare(bVal);
+    });
     fallbackResult = bestFallback;
   }
 
