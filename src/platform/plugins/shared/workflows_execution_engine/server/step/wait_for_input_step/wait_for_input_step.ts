@@ -47,6 +47,15 @@ export class WaitForInputStepImpl implements NodeImplementation {
       );
 
       this.stepExecutionRuntime.finishStep(resumeInput);
+
+      // Clear resumeInput from context to prevent affecting subsequent waitForInput steps
+      this.stepExecutionRuntime.updateWorkflowExecution({
+        context: {
+          ...this.workflowRuntime.getWorkflowExecution().context,
+          resumeInput: undefined,
+        },
+      });
+
       this.workflowRuntime.navigateToNextNode();
       return;
     }
