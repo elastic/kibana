@@ -10,7 +10,7 @@ import { act, fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import userEvent from '@testing-library/user-event';
-import type { FilterCondition } from '@kbn/streamlang';
+import type { Condition, FilterCondition } from '@kbn/streamlang';
 
 import { ConditionEditor } from './condition_editor';
 import type { Suggestion } from './autocomplete_selector';
@@ -54,6 +54,7 @@ const renderWithIntl = (component: React.ReactElement) => {
 
 describe('ConditionEditor', () => {
   const mockOnConditionChange = jest.fn();
+  const mockOnValidityChange = jest.fn();
 
   const defaultFieldSuggestions: Suggestion[] = [
     { name: 'status', type: 'keyword' },
@@ -77,6 +78,7 @@ describe('ConditionEditor', () => {
           condition={{ field: 'severity_text', eq: 'info' }}
           status="enabled"
           onConditionChange={mockOnConditionChange}
+          onValidityChange={mockOnValidityChange}
         />
       );
 
@@ -90,6 +92,7 @@ describe('ConditionEditor', () => {
           condition={{ field: 'severity_text', eq: 'info' }}
           status="enabled"
           onConditionChange={mockOnConditionChange}
+          onValidityChange={mockOnValidityChange}
         />
       );
 
@@ -105,6 +108,7 @@ describe('ConditionEditor', () => {
           condition={{ field: 'severity_text', eq: 'info' }}
           status="disabled"
           onConditionChange={mockOnConditionChange}
+          onValidityChange={mockOnValidityChange}
         />
       );
 
@@ -121,6 +125,7 @@ describe('ConditionEditor', () => {
           condition={{ field: 'severity_text', eq: 'info' }}
           status="enabled"
           onConditionChange={mockOnConditionChange}
+          onValidityChange={mockOnValidityChange}
         />
       );
 
@@ -154,6 +159,7 @@ describe('ConditionEditor', () => {
           condition={{ field: 'severity_text', eq: 'info' }}
           status="enabled"
           onConditionChange={mockOnConditionChange}
+          onValidityChange={mockOnValidityChange}
         />
       );
 
@@ -187,6 +193,7 @@ describe('ConditionEditor', () => {
           condition={{ field: 'severity_text', eq: 'info' }}
           status="enabled"
           onConditionChange={mockOnConditionChange}
+          onValidityChange={mockOnValidityChange}
         />
       );
 
@@ -210,6 +217,7 @@ describe('ConditionEditor', () => {
           condition={{ field: 'severity_text', eq: 'info' }}
           status="enabled"
           onConditionChange={mockOnConditionChange}
+          onValidityChange={mockOnValidityChange}
         />
       );
 
@@ -242,6 +250,119 @@ describe('ConditionEditor', () => {
           condition={invalidCondition}
           status="enabled"
           onConditionChange={mockOnConditionChange}
+          onValidityChange={mockOnValidityChange}
+        />
+      );
+
+      expect(
+        screen.getByText(/The condition is invalid or in unrecognized format/i)
+      ).toBeInTheDocument();
+    });
+
+    it('should NOT call onConditionChange when JSON parsing fails in syntax editor', async () => {
+      const user = userEvent.setup();
+      renderWithProviders(
+        <ConditionEditor
+          condition={{ field: 'severity_text', eq: 'info' }}
+          status="enabled"
+          onConditionChange={mockOnConditionChange}
+          onValidityChange={mockOnValidityChange}
+        />
+      );
+
+      // Toggle to syntax editor
+      const switchButton = screen.getByTestId('streamsAppConditionEditorSwitch');
+      await user.click(switchButton);
+
+      // Clear any previous calls from initialization
+      mockOnConditionChange.mockClear();
+
+      const codeEditor = screen.getByTestId('streamsAppConditionEditorCodeEditor');
+
+      // Clear the editor to simulate empty/invalid JSON
+      await user.clear(codeEditor);
+
+      // Verify onConditionChange was NOT called when JSON is invalid
+      // This prevents overriding user's partial input while typing
+      expect(mockOnConditionChange).not.toHaveBeenCalled();
+    });
+
+    it('should NOT call onConditionChange when syntax editor contains invalid JSON', async () => {
+      const user = userEvent.setup();
+      renderWithProviders(
+        <ConditionEditor
+          condition={{ field: 'severity_text', eq: 'info' }}
+          status="enabled"
+          onConditionChange={mockOnConditionChange}
+          onValidityChange={mockOnValidityChange}
+        />
+      );
+
+      // Toggle to syntax editor
+      const switchButton = screen.getByTestId('streamsAppConditionEditorSwitch');
+      await user.click(switchButton);
+
+      // Clear any previous calls from initialization
+      mockOnConditionChange.mockClear();
+
+      const codeEditor = screen.getByTestId('streamsAppConditionEditorCodeEditor');
+
+      // Type invalid JSON
+      await user.clear(codeEditor);
+      await user.type(codeEditor, '{{invalid');
+
+      // Verify onConditionChange was NOT called when JSON is invalid
+      // This prevents overriding user's partial input while typing
+      expect(mockOnConditionChange).not.toHaveBeenCalled();
+    });
+
+    it('should call onConditionChange when syntax editor contains valid JSON', async () => {
+      jest.useFakeTimers();
+      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+      renderWithProviders(
+        <ConditionEditor
+          condition={{ field: 'severity_text', eq: 'info' }}
+          status="enabled"
+          onConditionChange={mockOnConditionChange}
+          onValidityChange={mockOnValidityChange}
+        />
+      );
+
+      // Toggle to syntax editor
+      const switchButton = screen.getByTestId('streamsAppConditionEditorSwitch');
+      await user.click(switchButton);
+
+      // Clear any previous calls from initialization
+      mockOnConditionChange.mockClear();
+
+      const codeEditor = screen.getByTestId('streamsAppConditionEditorCodeEditor');
+
+      // Set valid JSON via fireEvent.change (userEvent.type types character by character which is problematic)
+      const validJson = JSON.stringify({ field: 'test', eq: 'value' }, null, 2);
+      fireEvent.change(codeEditor, { target: { value: validJson } });
+
+      // Wait for debounce to complete
+      act(() => {
+        jest.advanceTimersByTime(400);
+      });
+
+      // Verify onConditionChange was called with the parsed JSON
+      expect(mockOnConditionChange).toHaveBeenCalled();
+      expect(mockOnConditionChange).toHaveBeenCalledWith({ field: 'test', eq: 'value' });
+
+      jest.useRealTimers();
+    });
+
+    it('should show error message when condition becomes invalid via syntax editor', () => {
+      // Render with an invalid condition (simulating what happens after the fix)
+      const invalidCondition = {} as Condition;
+
+      renderWithProviders(
+        <ConditionEditor
+          condition={invalidCondition}
+          status="enabled"
+          onConditionChange={mockOnConditionChange}
+          onValidityChange={mockOnValidityChange}
         />
       );
 
@@ -263,6 +384,7 @@ describe('ConditionEditor', () => {
           condition={condition}
           status="enabled"
           onConditionChange={jest.fn()}
+          onValidityChange={jest.fn()}
           fieldSuggestions={defaultFieldSuggestions}
           valueSuggestions={defaultValueSuggestions}
         />
@@ -283,6 +405,7 @@ describe('ConditionEditor', () => {
           condition={condition}
           status="enabled"
           onConditionChange={jest.fn()}
+          onValidityChange={jest.fn()}
           fieldSuggestions={defaultFieldSuggestions}
           valueSuggestions={defaultValueSuggestions}
         />
@@ -302,6 +425,7 @@ describe('ConditionEditor', () => {
           condition={condition}
           status="enabled"
           onConditionChange={jest.fn()}
+          onValidityChange={jest.fn()}
           fieldSuggestions={defaultFieldSuggestions}
           valueSuggestions={defaultValueSuggestions}
         />
@@ -321,6 +445,7 @@ describe('ConditionEditor', () => {
           condition={condition}
           status="enabled"
           onConditionChange={jest.fn()}
+          onValidityChange={jest.fn()}
           fieldSuggestions={defaultFieldSuggestions}
           valueSuggestions={defaultValueSuggestions}
         />
@@ -340,6 +465,7 @@ describe('ConditionEditor', () => {
           condition={condition}
           status="enabled"
           onConditionChange={jest.fn()}
+          onValidityChange={jest.fn()}
           fieldSuggestions={defaultFieldSuggestions}
           valueSuggestions={defaultValueSuggestions}
         />
@@ -351,6 +477,91 @@ describe('ConditionEditor', () => {
         'https://www.elastic.co/guide/en/elasticsearch/reference/current/common-options.html#date-math'
       );
       expect(link).toHaveAttribute('target', '_blank');
+    });
+  });
+
+  describe('Validity plumbing', () => {
+    it('should report invalid JSON without changing the condition', async () => {
+      const user = userEvent.setup();
+      renderWithProviders(
+        <ConditionEditor
+          condition={{ field: 'severity_text', eq: 'info' }}
+          status="enabled"
+          onConditionChange={mockOnConditionChange}
+          onValidityChange={mockOnValidityChange}
+        />
+      );
+
+      await user.click(screen.getByTestId('streamsAppConditionEditorSwitch'));
+
+      const editor = screen.getByTestId('streamsAppConditionEditorCodeEditor');
+      await user.clear(editor);
+      await user.paste('{');
+
+      expect(mockOnConditionChange).not.toHaveBeenCalled();
+      expect(mockOnValidityChange).toHaveBeenLastCalledWith(false);
+    });
+
+    it('should not clobber local syntax text on rerender while JSON is invalid', async () => {
+      const user = userEvent.setup();
+      const { rerender } = renderWithProviders(
+        <ConditionEditor
+          condition={{ field: 'severity_text', eq: 'info' }}
+          status="enabled"
+          onConditionChange={mockOnConditionChange}
+          onValidityChange={mockOnValidityChange}
+        />
+      );
+
+      await user.click(screen.getByTestId('streamsAppConditionEditorSwitch'));
+
+      const editor = screen.getByTestId('streamsAppConditionEditorCodeEditor');
+      await user.clear(editor);
+      await user.paste('{');
+
+      rerender(
+        <I18nProvider>
+          <ConditionEditor
+            condition={{ field: 'severity_text', eq: 'info' }}
+            status="enabled"
+            onConditionChange={mockOnConditionChange}
+            onValidityChange={mockOnValidityChange}
+          />
+        </I18nProvider>
+      );
+
+      expect(screen.getByTestId('streamsAppConditionEditorCodeEditor')).toHaveValue('{');
+    });
+
+    it('should report valid JSON and update condition on parse', async () => {
+      jest.useFakeTimers();
+      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+      renderWithProviders(
+        <ConditionEditor
+          condition={{ field: 'severity_text', eq: 'info' }}
+          status="enabled"
+          onConditionChange={mockOnConditionChange}
+          onValidityChange={mockOnValidityChange}
+        />
+      );
+
+      await user.click(screen.getByTestId('streamsAppConditionEditorSwitch'));
+
+      const editor = screen.getByTestId('streamsAppConditionEditorCodeEditor');
+
+      // Use fireEvent.change to set valid JSON directly
+      const validJson = '{"field":"severity_text","eq":"warn"}';
+      fireEvent.change(editor, { target: { value: validJson } });
+
+      // Wait for debounce to complete
+      act(() => {
+        jest.advanceTimersByTime(400);
+      });
+
+      expect(mockOnConditionChange).toHaveBeenCalledWith({ field: 'severity_text', eq: 'warn' });
+      expect(mockOnValidityChange).toHaveBeenLastCalledWith(true);
+
+      jest.useRealTimers();
     });
   });
 });
