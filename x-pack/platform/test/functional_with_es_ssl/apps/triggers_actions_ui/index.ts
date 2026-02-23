@@ -9,7 +9,6 @@ import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ loadTestFile }: FtrProviderContext) => {
   describe('Actions and Triggers app', function () {
-    loadTestFile(require.resolve('./home_page'));
     loadTestFile(require.resolve('./alert_create_flyout'));
     loadTestFile(require.resolve('./connectors'));
     loadTestFile(require.resolve('./logs_list'));
