@@ -419,6 +419,8 @@ export const blocklistFormSelectors = {
     cy.getByTestSubj('euiToastHeader__title').contains(expectedTitle);
   },
   validateRenderedCondition: (expectedCondition: RegExp) => {
+    // Wait for flyout to close (after create/update) before looking for the card
+    cy.getByTestSubj('blocklistPage-flyout').should('not.exist');
     cy.getByTestSubj('blocklistPage-card')
       .first()
       .within(() => {
@@ -429,6 +431,8 @@ export const blocklistFormSelectors = {
       });
   },
   deleteBlocklistItem: () => {
+    // Wait for list to load and card to appear
+    cy.getByTestSubj('blocklistPage-card').should('exist');
     cy.getByTestSubj('blocklistPage-card')
       .first()
       .within(() => {

@@ -255,7 +255,7 @@ export default ({ getService }: FtrProviderContext): void => {
               400
             )
           ).toMatchObject({
-            message: '[request body]: per_page: Expected number, received string',
+            message: '[request body]: per_page: Invalid input: expected number, received string',
           });
 
           expect(

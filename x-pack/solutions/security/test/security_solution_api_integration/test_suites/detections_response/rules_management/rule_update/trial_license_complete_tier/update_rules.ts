@@ -465,7 +465,7 @@ export default ({ getService }: FtrProviderContext) => {
           expect(body).to.eql({
             error: 'Bad Request',
             message:
-              '[request body]: threshold.field: Array must contain at most 5 element[request body]: Invalid input: expected string, received array, Too big: expected array to have <=5 items',
+              '[request body]: Invalid input: expected string, received array, Too big: expected array to have <=5 items',
             statusCode: 400,
           });
         });

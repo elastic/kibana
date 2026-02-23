@@ -152,7 +152,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
         expect(response.body).toEqual({
           error: 'Bad Request',
-          message: '[request body]: Expected array, received null',
+          message: '[request body]: Invalid input: expected array, received null',
           statusCode: 400,
         });
       });

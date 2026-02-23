@@ -146,7 +146,8 @@ export const createSharedExceptionList = (
   }
 
   if (submit) {
-    cy.get(CREATE_SHARED_EXCEPTION_LIST_BTN).first().click();
+    // { force: true }: Element can be covered by overlay (e.g. "See the..." link)
+    cy.get(CREATE_SHARED_EXCEPTION_LIST_BTN).first().click({ force: true });
   }
 };
 
@@ -234,7 +235,8 @@ export const linkSharedListToRulesFromListDetails = (numberOfRules: number) => {
 };
 
 export const saveLinkedRules = () => {
-  cy.get(MANAGE_RULES_SAVE).first().click();
+  // { force: true }: Element can be covered by overlay (e.g. "See the..." link)
+  cy.get(MANAGE_RULES_SAVE).first().click({ force: true });
 };
 
 export const validateSharedListLinkedRules = (

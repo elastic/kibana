@@ -32,7 +32,11 @@ import type { RuleResponse } from '@kbn/security-solution-plugin/common/api/dete
 import { createSupertestErrorLogger } from '../../../../edr_workflows/utils';
 import { ROLE } from '../../../../../config/services/security_solution_edr_workflows_roles_users';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
-import { createUserAndRole, deleteUserAndRole } from '../../../../../config/services/common';
+import {
+  createUserAndRole,
+  deleteUserAndRole,
+  deleteAndReCreateUserRole,
+} from '../../../../../config/services/common';
 import {
   getSimpleRule,
   getSimpleRuleOutput,
@@ -285,7 +289,7 @@ export default ({ getService }: FtrProviderContext) => {
         const role = ROLES.rules_read_exceptions_all;
 
         beforeEach(async () => {
-          await createUserAndRole(getService, role);
+          await deleteAndReCreateUserRole(getService, role);
         });
 
         afterEach(async () => {
