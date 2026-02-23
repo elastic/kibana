@@ -9,7 +9,7 @@ import { expect } from '@kbn/scout/ui';
 import { tags } from '@kbn/scout';
 
 import { test } from '../fixtures';
-import { installTestPackage, uninstallTestPackage } from '../common/api_helpers';
+import { setupFleetServer, installTestPackage, uninstallTestPackage } from '../common/api_helpers';
 import { ASSETS_PAGE } from '../common/selectors';
 
 const LMD_PACKAGE = 'lmd';
@@ -18,7 +18,8 @@ test.describe(
   'Assets integration with ML and transforms',
   { tag: [...tags.stateful.classic] },
   () => {
-    test.beforeAll(async ({ kbnClient }) => {
+    test.beforeAll(async ({ kbnClient, esClient }) => {
+      await setupFleetServer(kbnClient, esClient);
       await installTestPackage(kbnClient, LMD_PACKAGE, 'latest');
     });
 

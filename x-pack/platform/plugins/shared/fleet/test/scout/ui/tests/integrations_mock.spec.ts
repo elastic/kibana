@@ -9,9 +9,13 @@ import { expect } from '@kbn/scout/ui';
 import { tags } from '@kbn/scout';
 
 import { test } from '../fixtures';
-import { mockFleetSetupEndpoints } from '../common/api_helpers';
+import { setupFleetServer, mockFleetSetupEndpoints } from '../common/api_helpers';
 
 test.describe('Integrations mock', { tag: [...tags.stateful.classic] }, () => {
+  test.beforeAll(async ({ kbnClient, esClient }) => {
+    await setupFleetServer(kbnClient, esClient);
+  });
+
   test.beforeEach(async ({ browserAuth, page }) => {
     await mockFleetSetupEndpoints(page);
     await browserAuth.loginAsAdmin();

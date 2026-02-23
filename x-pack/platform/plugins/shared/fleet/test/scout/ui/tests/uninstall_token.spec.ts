@@ -11,6 +11,7 @@ import { tags } from '@kbn/scout';
 
 import { test } from '../fixtures';
 import {
+  setupFleetServer,
   createAgentPolicy,
   cleanupAgentPolicies,
   mockFleetSetupEndpoints,
@@ -35,7 +36,8 @@ function getPolicyRow(page: ScoutPage, policyId: string) {
 }
 
 test.describe('Uninstall token page', { tag: [...tags.stateful.classic] }, () => {
-  test.beforeAll(async ({ kbnClient }) => {
+  test.beforeAll(async ({ kbnClient, esClient }) => {
+    await setupFleetServer(kbnClient, esClient);
     await cleanupAgentPolicies(kbnClient);
     await generatePolicies(kbnClient);
   });

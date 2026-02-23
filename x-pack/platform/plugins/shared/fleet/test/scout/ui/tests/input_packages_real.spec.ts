@@ -9,6 +9,7 @@ import { tags } from '@kbn/scout';
 
 import { test } from '../fixtures';
 import {
+  setupFleetServer,
   installTestPackageFromZip,
   uninstallTestPackage,
   createAgentPolicy,
@@ -23,7 +24,8 @@ import {
 const INPUT_TEST_PACKAGE = 'input_package-1.0.0';
 
 test.describe('Input packages real', { tag: [...tags.stateful.classic] }, () => {
-  test.beforeAll(async ({ kbnClient }) => {
+  test.beforeAll(async ({ kbnClient, esClient }) => {
+    await setupFleetServer(kbnClient, esClient);
     try {
       await installTestPackageFromZip(kbnClient, INPUT_TEST_PACKAGE);
     } catch {

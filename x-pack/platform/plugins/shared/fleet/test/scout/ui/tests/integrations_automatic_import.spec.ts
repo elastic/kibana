@@ -9,9 +9,14 @@ import { expect } from '@kbn/scout/ui';
 import { tags } from '@kbn/scout';
 
 import { test } from '../fixtures';
+import { setupFleetServer } from '../common/api_helpers';
 import { ASSISTANT_BUTTON, UPLOAD_PACKAGE_LINK } from '../common/selectors';
 
 test.describe('Integrations automatic import', { tag: [...tags.stateful.classic] }, () => {
+  test.beforeAll(async ({ kbnClient, esClient }) => {
+    await setupFleetServer(kbnClient, esClient);
+  });
+
   test.beforeEach(async ({ browserAuth }) => {
     await browserAuth.loginAsAdmin();
   });

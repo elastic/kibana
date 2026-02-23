@@ -10,6 +10,7 @@ import { tags } from '@kbn/scout';
 
 import { test } from '../fixtures';
 import {
+  setupFleetServer,
   createAgentPolicy,
   createDownloadSource,
   cleanupAgentPolicies,
@@ -25,6 +26,10 @@ import {
 } from '../common/selectors';
 
 test.describe('Agent binary download source section', { tag: [...tags.stateful.classic] }, () => {
+  test.beforeAll(async ({ kbnClient, esClient }) => {
+    await setupFleetServer(kbnClient, esClient);
+  });
+
   test.beforeEach(async ({ kbnClient, browserAuth }) => {
     await browserAuth.loginAsAdmin();
     await cleanupDownloadSources(kbnClient);

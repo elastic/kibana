@@ -17,6 +17,10 @@ import {
 import { AGENT_FLYOUT, AGENT_POLICY_DETAILS_PAGE } from '../common/selectors';
 
 test.describe('Edit agent policy', { tag: [...tags.stateful.classic] }, () => {
+  test.beforeAll(async ({ kbnClient, esClient }) => {
+    await setupFleetServer(kbnClient, esClient);
+  });
+
   test.beforeEach(async ({ browserAuth, page }) => {
     await mockFleetSetupEndpoints(page);
     await browserAuth.loginAsPrivilegedUser();

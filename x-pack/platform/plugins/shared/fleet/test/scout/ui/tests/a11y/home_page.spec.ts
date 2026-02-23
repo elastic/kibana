@@ -13,7 +13,7 @@ import {
   createAgentPolicy,
   deleteAgentPolicy,
   cleanupAgentPolicies,
-  setFleetServerHost,
+  setupFleetServer,
   unenrollAgents,
   mockFleetSetupEndpoints,
 } from '../../common/api_helpers';
@@ -35,8 +35,8 @@ import {
 test.describe('Home page A11y', { tag: [...tags.stateful.classic] }, () => {
   let policyIdA11y: string;
 
-  test.beforeAll(async ({ kbnClient }) => {
-    await setFleetServerHost(kbnClient, 'https://fleetserver:8220');
+  test.beforeAll(async ({ kbnClient, esClient }) => {
+    await setupFleetServer(kbnClient, esClient);
   });
 
   test.beforeEach(async ({ browserAuth, page }) => {

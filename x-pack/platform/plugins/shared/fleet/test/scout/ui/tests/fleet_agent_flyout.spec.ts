@@ -10,7 +10,7 @@ import { tags } from '@kbn/scout';
 
 import { test } from '../fixtures';
 import {
-  setFleetServerHost,
+  setupFleetServer,
   createAgentPolicy,
   createAgentDoc,
   insertDocs,
@@ -22,7 +22,7 @@ import { AGENT_FLYOUT } from '../common/selectors';
 
 test.describe('Add agent flyout', { tag: [...tags.stateful.classic] }, () => {
   test.beforeAll(async ({ kbnClient, esClient }) => {
-    await setFleetServerHost(kbnClient);
+    await setupFleetServer(kbnClient, esClient);
     const policy = await createAgentPolicy(kbnClient, `Scout test policy ${Date.now()}`);
     const agentDoc = createAgentDoc('scout-agent-1', policy.id as string, 'online', '8.1.0');
     await insertDocs(esClient, '.fleet-agents', [agentDoc]);

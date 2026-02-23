@@ -10,6 +10,7 @@ import { tags } from '@kbn/scout';
 
 import { test } from '../fixtures';
 import {
+  setupFleetServer,
   createAgentPolicy,
   cleanupAgentPolicies,
   mockFleetSetupEndpoints,
@@ -17,7 +18,8 @@ import {
 import { ENROLLMENT_TOKENS } from '../common/selectors';
 
 test.describe('Enrollment token page', { tag: [...tags.stateful.classic] }, () => {
-  test.beforeAll(async ({ kbnClient }) => {
+  test.beforeAll(async ({ kbnClient, esClient }) => {
+    await setupFleetServer(kbnClient, esClient);
     await createAgentPolicy(kbnClient, 'Agent policy 1', { id: 'agent-policy-1' });
   });
 

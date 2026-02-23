@@ -10,6 +10,7 @@ import { tags } from '@kbn/scout';
 
 import { test } from '../../fixtures';
 import {
+  setupFleetServer,
   enableSpaceAwareness,
   createSpace,
   cleanupAgentPolicies,
@@ -28,7 +29,8 @@ const POLICY_NAME = 'Policy 1 space test';
 const NO_AGENT_POLICIES = 'No agent policies';
 
 test.describe('Space aware policies creation', { tag: [...tags.stateful.classic] }, () => {
-  test.beforeAll(async ({ kbnClient }) => {
+  test.beforeAll(async ({ kbnClient, esClient }) => {
+    await setupFleetServer(kbnClient, esClient);
     await enableSpaceAwareness(kbnClient);
     await createSpace(kbnClient, 'test', 'Test');
     await cleanupAgentPolicies(kbnClient);

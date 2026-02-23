@@ -8,9 +8,17 @@
 import { tags } from '@kbn/scout';
 
 import { test } from '../fixtures';
-import { createAgentPolicy, mockFleetSetupEndpoints } from '../common/api_helpers';
+import {
+  setupFleetServer,
+  createAgentPolicy,
+  mockFleetSetupEndpoints,
+} from '../common/api_helpers';
 
 test.describe('Package policy', { tag: [...tags.stateful.classic] }, () => {
+  test.beforeAll(async ({ kbnClient, esClient }) => {
+    await setupFleetServer(kbnClient, esClient);
+  });
+
   test.beforeEach(async ({ browserAuth, page }) => {
     await mockFleetSetupEndpoints(page);
     await browserAuth.loginAsAdmin();
