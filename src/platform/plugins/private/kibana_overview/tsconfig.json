@@ -5,8 +5,7 @@
   },
   "include": [
     "public/**/*",
-    "common/**/*",
-    "../../../../../typings/emotion.d.ts"
+    "common/**/*"
   ],
   "kbn_references": [
     "@kbn/core",

@@ -219,6 +219,204 @@ describe('StepConfigurePackage', () => {
     expect(await renderResult.queryByText('Collect logs from Nginx instances')).toBeInTheDocument();
     expect(await renderResult.queryByText('Some agentless input')).not.toBeInTheDocument();
   });
+
+  it('should hide deprecated inputs on new installations', async () => {
+    packageInfo.policy_templates = [
+      {
+        name: 'nginx',
+        title: 'Nginx logs and metrics',
+        description: 'Collect logs and metrics from Nginx instances',
+        inputs: [
+          {
+            type: 'logfile',
+            title: 'Collect logs from Nginx instances',
+            description: 'Collecting Nginx access and error logs',
+          },
+          {
+            type: 'deprecated-input',
+            title: 'Deprecated input type',
+            description: 'This input is deprecated',
+            deprecated: {
+              description: 'Use the new input instead',
+            },
+          },
+        ],
+        multiple: true,
+      },
+    ];
+    packagePolicy.inputs.push({
+      type: 'deprecated-input',
+      policy_template: 'nginx',
+      enabled: true,
+      streams: [],
+      deprecated: {
+        description: 'Use the new input instead',
+      },
+    });
+
+    render();
+
+    await waitFor(async () => {
+      expect(
+        await renderResult.findByText('Collect logs from Nginx instances')
+      ).toBeInTheDocument();
+    });
+    expect(renderResult.queryByText('Deprecated input type')).not.toBeInTheDocument();
+  });
+
+  it('should show deprecated inputs on edit page', async () => {
+    packageInfo.policy_templates = [
+      {
+        name: 'nginx',
+        title: 'Nginx logs and metrics',
+        description: 'Collect logs and metrics from Nginx instances',
+        inputs: [
+          {
+            type: 'logfile',
+            title: 'Collect logs from Nginx instances',
+            description: 'Collecting Nginx access and error logs',
+          },
+          {
+            type: 'deprecated-input',
+            title: 'Deprecated input type',
+            description: 'This input is deprecated',
+            deprecated: {
+              description: 'Use the new input instead',
+            },
+          },
+        ],
+        multiple: true,
+      },
+    ];
+    packagePolicy.inputs.push({
+      type: 'deprecated-input',
+      policy_template: 'nginx',
+      enabled: true,
+      streams: [],
+      deprecated: {
+        description: 'Use the new input instead',
+      },
+    });
+
+    const editPackagePolicy = { ...packagePolicy, supports_agentless: false };
+    const validationResults = validatePackagePolicy(editPackagePolicy, packageInfo, load);
+    renderResult = testRenderer.render(
+      <StepConfigurePackagePolicy
+        packageInfo={packageInfo}
+        packagePolicy={editPackagePolicy}
+        updatePackagePolicy={mockUpdatePackagePolicy}
+        validationResults={validationResults}
+        submitAttempted={false}
+        isEditPage={true}
+      />
+    );
+
+    await waitFor(async () => {
+      expect(
+        await renderResult.findByText('Collect logs from Nginx instances')
+      ).toBeInTheDocument();
+    });
+    expect(renderResult.queryByText('Deprecated input type')).toBeInTheDocument();
+  });
+
+  it('should hide input when all its streams are deprecated on new installations', async () => {
+    packageInfo.data_streams = [
+      {
+        type: 'logs',
+        dataset: 'nginx.access',
+        title: 'Nginx access logs',
+        release: 'experimental',
+        ingest_pipeline: 'default',
+        streams: [
+          {
+            input: 'logfile',
+            vars: [
+              {
+                name: 'paths',
+                type: 'text',
+                title: 'Paths',
+                multi: true,
+                required: true,
+                show_user: true,
+                default: ['/var/log/nginx/access.log*'],
+              },
+            ],
+            template_path: 'stream.yml.hbs',
+            title: 'Nginx access logs',
+            description: 'Collect Nginx access logs',
+            enabled: true,
+            deprecated: {
+              description: 'This stream is deprecated.',
+            },
+          },
+        ],
+        package: 'nginx',
+        path: 'access',
+      },
+    ];
+
+    render();
+
+    await waitFor(async () => {
+      expect(renderResult.queryByText('Collect logs from Nginx instances')).not.toBeInTheDocument();
+    });
+  });
+
+  it('should show input when all its streams are deprecated on edit page', async () => {
+    packageInfo.data_streams = [
+      {
+        type: 'logs',
+        dataset: 'nginx.access',
+        title: 'Nginx access logs',
+        release: 'experimental',
+        ingest_pipeline: 'default',
+        streams: [
+          {
+            input: 'logfile',
+            vars: [
+              {
+                name: 'paths',
+                type: 'text',
+                title: 'Paths',
+                multi: true,
+                required: true,
+                show_user: true,
+                default: ['/var/log/nginx/access.log*'],
+              },
+            ],
+            template_path: 'stream.yml.hbs',
+            title: 'Nginx access logs',
+            description: 'Collect Nginx access logs',
+            enabled: true,
+            deprecated: {
+              description: 'This stream is deprecated.',
+            },
+          },
+        ],
+        package: 'nginx',
+        path: 'access',
+      },
+    ];
+
+    const editPackagePolicy = { ...packagePolicy, supports_agentless: false };
+    const validationResults = validatePackagePolicy(editPackagePolicy, packageInfo, load);
+    renderResult = testRenderer.render(
+      <StepConfigurePackagePolicy
+        packageInfo={packageInfo}
+        packagePolicy={editPackagePolicy}
+        updatePackagePolicy={mockUpdatePackagePolicy}
+        validationResults={validationResults}
+        submitAttempted={false}
+        isEditPage={true}
+      />
+    );
+
+    await waitFor(async () => {
+      expect(
+        await renderResult.findByText('Collect logs from Nginx instances')
+      ).toBeInTheDocument();
+    });
+  });
 });
 
 describe('isInputCompatibleWithVarGroupSelections', () => {
