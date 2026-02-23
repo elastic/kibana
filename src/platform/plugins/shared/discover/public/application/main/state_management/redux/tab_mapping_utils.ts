@@ -32,6 +32,7 @@ export const fromSavedObjectTabToTabState = ({
     filters: tab.serializedSearchSource.filter,
     grid: tab.grid,
     hideChart: tab.hideChart,
+    hideDataTable: tab.hideDataTable,
     dataSource: createDataSource({
       query: tab.serializedSearchSource.query,
       dataView: tab.serializedSearchSource.index,
@@ -134,6 +135,7 @@ export const fromTabStateToSavedObjectTab = ({
     columns: tab.appState.columns ?? [],
     grid: tab.appState.grid ?? {},
     hideChart: tab.appState.hideChart ?? false,
+    hideDataTable: tab.appState.hideDataTable,
     isTextBasedQuery: isOfAggregateQueryType(tab.appState.query),
     usesAdHocDataView: isObject(tab.initialInternalState?.serializedSearchSource?.index),
     serializedSearchSource: tab.initialInternalState?.serializedSearchSource ?? {},

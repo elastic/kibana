@@ -172,6 +172,7 @@ function getDefaultAppState({
     interval: 'auto',
     filters: cloneDeep(persistedTab?.serializedSearchSource.filter),
     hideChart: chartHidden,
+    hideDataTable: undefined,
     viewMode: undefined,
     hideAggregatedPreview: undefined,
     savedQuery: undefined,
@@ -189,6 +190,9 @@ function getDefaultAppState({
   }
   if (persistedTab?.hideChart !== undefined) {
     defaultState.hideChart = persistedTab.hideChart;
+  }
+  if (persistedTab?.hideDataTable !== undefined) {
+    defaultState.hideDataTable = persistedTab.hideDataTable;
   }
   if (persistedTab?.rowHeight !== undefined) {
     defaultState.rowHeight = persistedTab.rowHeight;
