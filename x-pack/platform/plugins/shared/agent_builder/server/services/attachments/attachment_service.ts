@@ -47,6 +47,9 @@ export class AttachmentServiceImpl implements AttachmentService {
       getMergedTypeDefinition: (type) => {
         return this.attachmentTypeRegistry.getMerged(type);
       },
+      getRegisteredTypeIds: () => {
+        return this.attachmentTypeRegistry.list().map((def) => def.id);
+      },
     };
   }
 }

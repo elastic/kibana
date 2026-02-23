@@ -11,6 +11,9 @@ import {
   GET_ALERTS_SKILL,
   SECURITY_LABS_SEARCH_SKILL,
 } from '../../assistant/skills';
+import type { ExperimentalFeatures } from '../../../common/experimental_features';
+import type { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
+import { createAutomaticTroubleshootingSkill } from './automatic_troubleshooting';
 import { SECURITY_ALERT_SUPPRESSION_READONLY_SKILL } from './security_alert_suppression_readonly_skill';
 import { SECURITY_ATTACK_DISCOVERY_SKILL } from './security_attack_discovery_skill';
 import { SECURITY_CASES_SKILL } from './security_cases_skill';
@@ -27,7 +30,13 @@ import { SECURITY_TIMELINES_SKILL } from './security_timelines_skill';
  * Registers all security agent builder skills with the agentBuilder plugin
  * using the new SkillDefinition-based registration API.
  */
-export const registerSkills = async (agentBuilder: AgentBuilderPluginSetup): Promise<void> => {
+export const registerSkills = async (
+  agentBuilder: AgentBuilderPluginSetup,
+  experimentalFeatures: ExperimentalFeatures,
+  options: {
+    endpointAppContextService: EndpointAppContextService;
+  }
+): Promise<void> => {
   await Promise.all([
     agentBuilder.skill.registerSkill(GET_ALERTS_SKILL),
     agentBuilder.skill.registerSkill(FORENSICS_ANALYTICS_SKILL),
@@ -44,4 +53,10 @@ export const registerSkills = async (agentBuilder: AgentBuilderPluginSetup): Pro
     agentBuilder.skill.registerSkill(SECURITY_RULE_EXCEPTIONS_PREVIEW_SKILL),
     agentBuilder.skill.registerSkill(SECURITY_ENDPOINT_RESPONSE_ACTIONS_READONLY_SKILL),
   ]);
+
+  if (experimentalFeatures.automaticTroubleshootingSkill) {
+    await agentBuilder.skills.register(
+      createAutomaticTroubleshootingSkill(options.endpointAppContextService)
+    );
+  }
 };

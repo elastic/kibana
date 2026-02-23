@@ -45,6 +45,7 @@ export type {
   EvalTraceCorrelation,
 } from './src/types';
 export { withEvaluatorSpan, withTaskSpan, getCurrentTraceId } from './src/utils/tracing';
+export { withRetry, type RetryOptions } from './src/utils/retry_utils';
 export {
   AUXILIARY_DISCOVERY_TOOLS,
   containsAllTerms,
@@ -121,6 +122,7 @@ export type {
   GroundTruthExtractor,
   RetrievedDoc,
 } from './src/evaluators/rag/types';
+export { createEsqlEquivalenceEvaluator } from './src/evaluators/esql';
 
 export {
   createToolSelectionEvaluator,

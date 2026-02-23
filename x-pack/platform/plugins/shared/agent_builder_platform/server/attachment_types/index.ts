@@ -14,6 +14,7 @@ import { createWorkflowDraftAttachmentType } from './workflow_draft';
 import { createWorkflowAttachmentType } from './workflow';
 import { createSavedObjectAttachmentType } from './saved_object';
 import { createVisualizationRefAttachmentType } from './visualization_ref';
+import { createVisualizationAttachmentType } from './visualization';
 import type {
   AgentBuilderPlatformPluginStart,
   PluginSetupDependencies,
@@ -29,7 +30,7 @@ export const registerAttachmentTypes = ({
 }) => {
   const { agentBuilder } = setupDeps;
 
-  const attachmentTypes: AttachmentTypeDefinition<any, any>[] = [
+  const attachmentTypes: AttachmentTypeDefinition<any, any, any>[] = [
     createTextAttachmentType(),
     createScreenContextAttachmentType(),
     createEsqlAttachmentType(),
@@ -37,6 +38,7 @@ export const registerAttachmentTypes = ({
     createWorkflowAttachmentType(),
     createSavedObjectAttachmentType(),
     createVisualizationRefAttachmentType(),
+    createVisualizationAttachmentType(),
   ];
 
   attachmentTypes.forEach((attachmentType) => {

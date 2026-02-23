@@ -33,6 +33,7 @@ import type {
 } from '../runner';
 import type { IFileStore } from '../runner/filestore';
 import type { AttachmentStateManager } from '../attachments';
+import type { AgentBuilderHooks } from '../hooks/types';
 import type { ToolRegistry } from '../tools';
 
 export type AgentHandlerFn = (
@@ -141,6 +142,10 @@ export interface AgentHandlerContext {
    * Logger scoped to this execution
    */
   logger: Logger;
+  /**
+   * Hooks service for agent lifecycle interception.
+   */
+  hooks: AgentBuilderHooks;
   /**
    * File store to access data from the agent's virtual filesystem
    */

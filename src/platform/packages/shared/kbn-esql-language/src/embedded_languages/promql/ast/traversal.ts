@@ -8,7 +8,7 @@
  */
 
 import { isPromqlNode } from './is';
-import type { PromQLAstNode, PromQLAstQueryExpression, PromQLPositionResult } from '../types';
+import type { PromQLAstNode } from '../types';
 
 export function* childrenOfPromqlNode(node: PromQLAstNode): Iterable<PromQLAstNode> {
   if (!isPromqlNode(node)) {
@@ -45,116 +45,4 @@ export function* childrenOfPromqlNode(node: PromQLAstNode): Iterable<PromQLAstNo
     yield* node.args;
     return;
   }
-}
-
-/** Finds the deepest node at a given offset within a PromQL AST.*/
-export function findPromqlAstPosition(
-  root: PromQLAstQueryExpression,
-  offset: number
-): PromQLPositionResult {
-  const result: PromQLPositionResult = {
-    node: undefined,
-    parent: undefined,
-  };
-
-  if (!root.expression) {
-    return result;
-  }
-
-  traverseForPosition(root.expression, root, offset, result);
-
-  return result;
-}
-
-function traverseForPosition(
-  node: PromQLAstNode,
-  parent: PromQLAstNode,
-  offset: number,
-  result: PromQLPositionResult
-): void {
-  if (!isPromqlNode(node)) {
-    return;
-  }
-
-  if (node.location.min <= offset && node.location.max >= offset) {
-    result.node = node;
-    result.parent = parent;
-
-    for (const child of childrenOfPromqlNode(node)) {
-      traverseForPosition(child, node, offset, result);
-    }
-  }
-}
-
-/** Collects metrics, selector labels, and breakdown labels from a PromQL expression. */
-export function collectMetricsAndLabels(expression: PromQLAstNode): {
-  metrics: Set<string>;
-  labels: Set<string>;
-  breakdownLabels: Set<string>;
-} {
-  const metrics = new Set<string>();
-  const labels = new Set<string>();
-  const breakdownLabels = new Set<string>();
-  const stack: PromQLAstNode[] = [expression];
-
-  while (stack.length > 0) {
-    const node = stack.pop()!;
-
-    if (node.type === 'selector') {
-      const { metric, labelMap } = node;
-
-      if (metric?.name) {
-        metrics.add(metric.name);
-      }
-
-      for (const label of labelMap?.args ?? []) {
-        if (label.labelName?.name) {
-          labels.add(label.labelName.name);
-        }
-      }
-    }
-
-    if (node.type === 'function' && node.grouping) {
-      for (const label of node.grouping.args) {
-        if (label.name) {
-          breakdownLabels.add(label.name);
-        }
-      }
-    }
-
-    for (const child of childrenOfPromqlNode(node)) {
-      stack.push(child);
-    }
-  }
-
-  return { metrics, labels, breakdownLabels };
-}
-
-/** Finds a PromQL expression node within ES|QL wrapper structures (parens, binary expressions). */
-export function findPromqlExpression(node: unknown): PromQLAstQueryExpression | undefined {
-  if (!node || typeof node !== 'object') {
-    return undefined;
-  }
-
-  if (isPromqlNode(node)) {
-    return node as PromQLAstQueryExpression;
-  }
-
-  const { child, args } = node as { child?: unknown; args?: unknown[] };
-
-  if (child) {
-    return findPromqlExpression(child);
-  }
-
-  if (args) {
-    for (const arg of args) {
-      const found = findPromqlExpression(Array.isArray(arg) ? arg[0] : arg);
-
-      if (found) {
-        return found;
-      }
-    }
-  }
-
-  return undefined;
 }

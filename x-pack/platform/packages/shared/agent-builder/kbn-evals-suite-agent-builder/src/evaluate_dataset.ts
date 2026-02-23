@@ -14,6 +14,8 @@ import {
   createQuantitativeGroundednessEvaluator,
   selectEvaluators,
   withEvaluatorSpan,
+  createSpanLatencyEvaluator,
+  createRagEvaluators,
   type ExperimentTask,
   type TaskOutput,
   type GroundTruth,
@@ -22,8 +24,17 @@ import {
 } from '@kbn/evals';
 import type { EsClient } from '@kbn/scout';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { getStringMeta } from '@kbn/evals';
+import {
+  extractAllStrings,
+  extractMaxSemver,
+  extractReleaseDateNearVersion,
+  getBooleanMeta,
+  getFinalAssistantMessage,
+  getStringMeta,
+  getToolCallSteps,
+} from '@kbn/evals';
 import type { AgentBuilderEvaluationChatClient, ConverseResult } from './chat_client';
+import { extractSearchRetrievedDocs } from './rag_extractor';
 
 interface DatasetExample extends Example {
   input: {
@@ -103,6 +114,14 @@ function configureExperiment({
       groundednessAnalysis: groundednessResult?.metadata,
     };
   };
+
+  const ragEvaluators = createRagEvaluators({
+    k: 10,
+    relevanceThreshold: 1,
+    extractRetrievedDocs: extractSearchRetrievedDocs,
+    extractGroundTruth: (referenceOutput: DatasetExample['output']) =>
+      referenceOutput?.groundTruth ?? {},
+  });
 
   const selectedEvaluators = selectEvaluators([
     createToolUsageOnlyEvaluator(),

@@ -264,6 +264,7 @@ export interface EvaluationSpecificWorkerFixtures {
   reportDisplayOptions: ReportDisplayOptions;
   reportModelScore: EvaluationReporter;
   traceEsClient: EsClient;
+  evaluationsEsClient: EsClient;
 }
 
 export interface EvaluationWorkerFixtures extends ScoutWorkerFixtures {

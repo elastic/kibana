@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { defer, from, ReplaySubject } from 'rxjs';
+import { ReplaySubject } from 'rxjs';
 
 import type { CoreContext } from '@kbn/core-base-browser-internal';
 import type { InternalInjectedMetadataStart } from '@kbn/core-injected-metadata-browser-internal';
@@ -113,12 +113,6 @@ export class ChromeService {
     const state = createChromeState({
       application,
       docLinks,
-      feedbackDeps: {
-        isEnabled$: defer(() =>
-          from(getNotifications().then((notifications) => notifications.feedback.isEnabled()))
-        ),
-        urlParams$: defer(() => projectNavigation.getFeedbackUrlParams$()),
-      },
     });
 
     // 2. Setup side effects (body classes, fullscreen changes, system color mode)
@@ -237,8 +231,10 @@ export class ChromeService {
   }
 
   public stop() {
+    this.navControls.stop();
     this.navLinks.stop();
     this.projectNavigation.stop();
+    this.sidebar.stop();
     this.stop$.next();
   }
 }

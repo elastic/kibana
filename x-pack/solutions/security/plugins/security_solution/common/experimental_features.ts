@@ -107,11 +107,6 @@ export const allowedExperimentalValues = Object.freeze({
   storeGapsInEventLogEnabled: true,
 
   /**
-   * Enables scheduling gap fills for rules
-   */
-  bulkFillRuleGapsEnabled: true,
-
-  /**
    * Adds a new option to filter descendants of a process for Management / Trusted Apps
    */
   filterProcessDescendantsForTrustedAppsEnabled: true,
@@ -214,7 +209,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the Automatic Migration of Splunk dashboards in Security Solution
    */
-  splunkV2DashboardsEnabled: false,
+  splunkV2DashboardsEnabled: true,
 
   /**
    * Enables the Alert Grouping feature for automatically grouping related alerts into cases.
@@ -226,6 +221,26 @@ export const allowedExperimentalValues = Object.freeze({
    * Release: 9.x
    */
   alertGroupingEnabled: false,
+
+  /**
+   * Enables Detection Engine Health UI
+   */
+  deHealthUIEnabled: false,
+
+  /**
+   * Enables Rule Health UI
+   */
+  ruleHealthUIEnabled: false,
+
+  /**
+   * Enables the Automatic Troubleshooting Agent Builder skill
+   */
+  automaticTroubleshootingSkill: false,
+
+  /**
+   * Enables the new flyout using the EUI flyout system
+   */
+  newFlyoutSystemEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

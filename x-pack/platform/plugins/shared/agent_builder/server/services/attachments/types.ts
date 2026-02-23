@@ -44,4 +44,5 @@ export interface AttachmentServiceStart {
    * Get the merged type definition (with all extensions applied).
    */
   getMergedTypeDefinition(type: string): MergedAttachmentTypeDefinition | undefined;
+  getRegisteredTypeIds(): string[];
 }

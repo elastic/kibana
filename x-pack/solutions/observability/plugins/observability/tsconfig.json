@@ -136,7 +136,6 @@
     "@kbn/core-http-browser-mocks",
     "@kbn/discover-utils",
     "@kbn/deeplinks-management",
-    "@kbn/observability-nav-icons",
     "@kbn/react-query",
     "@kbn/content-management-utils",
     "@kbn/maintenance-windows-plugin",
