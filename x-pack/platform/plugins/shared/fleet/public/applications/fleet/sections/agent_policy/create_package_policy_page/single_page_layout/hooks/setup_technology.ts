@@ -91,7 +91,9 @@ export function useSetupTechnology({
   integrationToEnable?: string;
   hideAgentlessSelector?: boolean;
 }) {
-  const { isAgentlessEnabled, isAgentlessDefault } = useAgentless();
+  const { isAgentlessEnabled } = useAgentless();
+
+  const isAgentlessDefault = true; // TODO TEMP until PR is merged
 
   // this is a placeholder for the new agent-BASED policy that will be used when the user switches from agentless to agent-based and back
   const orginalAgentPolicyRef = useRef<NewAgentPolicy>({ ...newAgentPolicy });

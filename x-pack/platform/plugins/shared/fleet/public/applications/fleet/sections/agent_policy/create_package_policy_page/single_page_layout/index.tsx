@@ -99,6 +99,7 @@ import { PostInstallGoogleCloudShellModal } from './components/cloud_security_po
 import { PostInstallAzureArmTemplateModal } from './components/cloud_security_posture/post_install_azure_arm_template_modal';
 import { RootPrivilegesCallout } from './root_callout';
 import { useAgentless } from './hooks/setup_technology';
+import { title } from 'vega-lite/build/channeldef';
 
 export const StepsWithLessPadding = styled(EuiSteps)`
   .euiStep__content {
@@ -495,6 +496,33 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       )
     ) : undefined;
 
+  const setupTechnologySelector = useMemo(() => {
+    if (!addIntegrationFlyoutProps && isAgentlessIntegration(packageInfo)) {
+      return (
+        <SetupTechnologySelector
+          disabled={false}
+          allowedSetupTechnologies={allowedSetupTechnologies}
+          setupTechnology={selectedSetupTechnology}
+          onSetupTechnologyChange={handleSetupTechnologyChange}
+          isAgentlessDefault={isAgentlessDefault}
+          // TODO Put this behind a feature flag
+          showBetaBadge={!isAgentlessDefault}
+          useCheckableCards={isAgentlessDefault}
+          hideTitle={isAgentlessDefault}
+        />
+      );
+    }
+    return null;
+  }, [
+    packageInfo,
+    isAgentlessIntegration,
+    addIntegrationFlyoutProps,
+    allowedSetupTechnologies,
+    selectedSetupTechnology,
+    handleSetupTechnologyChange,
+    isAgentlessDefault,
+  ]);
+
   const stepConfigurePackagePolicy = useMemo(
     () =>
       isPackageInfoLoading || !isInitialized ? (
@@ -514,21 +542,8 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
             isAgentlessSelected={isAgentlessSelected}
           />
 
-          {/* Show SetupTechnologySelector for all agentless integrations, including extension views */}
-          {!isAddIntegrationFlyout && isAgentlessIntegration(packageInfo) && (
-            <SetupTechnologySelector
-              disabled={false}
-              allowedSetupTechnologies={allowedSetupTechnologies}
-              setupTechnology={selectedSetupTechnology}
-              onSetupTechnologyChange={(value: SetupTechnology) => {
-                handleSetupTechnologyChange(value);
-                // agentless doesn't need system integration
-                setWithSysMonitoring(value === SetupTechnology.AGENT_BASED);
-              }}
-              isAgentlessDefault={isAgentlessDefault}
-              showBetaBadge={!isAgentlessDefault}
-            />
-          )}
+          {/* Show SetupTechnologySelector for all agentless integrations, including extension views, if agentless is default display as a separate step  */}
+          {!isAgentlessDefault && setupTechnologySelector}
 
           {/* Only show the out-of-box configuration step if a UI extension is NOT registered */}
           {!extensionView && (
@@ -568,16 +583,12 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       validationResults,
       formState,
       extensionView,
-      isAgentlessIntegration,
-      isAgentlessDefault,
-      selectedSetupTechnology,
       integrationToEnable,
       isAgentlessSelected,
       handleExtensionViewOnChange,
-      handleSetupTechnologyChange,
-      allowedSetupTechnologies,
-      isAddIntegrationFlyout,
       varGroupSelections,
+      setupTechnologySelector,
+      isAgentlessDefault,
     ]
   );
 
@@ -606,6 +617,20 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       headingElement: 'h2',
       status: !pkgName ? 'disabled' : undefined,
     },
+    ...(isAgentlessDefault && setupTechnologySelector
+      ? [
+          {
+            title: i18n.translate(
+              'xpack.fleet.createPackagePolicy.stepSelectSetupTechnologyTitle',
+              {
+                defaultMessage: 'Deployment',
+              }
+            ),
+            children: setupTechnologySelector,
+            headingElement: 'h2',
+          },
+        ]
+      : []),
     ...(selectedSetupTechnology !== SetupTechnology.AGENTLESS && !addIntegrationFlyoutProps
       ? [
           {
