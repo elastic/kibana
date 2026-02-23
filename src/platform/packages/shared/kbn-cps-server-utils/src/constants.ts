@@ -7,22 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Headers, KibanaRequest } from '@kbn/core-http-server';
+/**
+ * Project routing expression that restricts requests to the origin project only.
+ */
+export const PROJECT_ROUTING_ORIGIN = '_alias:_origin';
 
 /**
- * Fake request object created manually by Kibana plugins.
- * @public
+ * Project routing expression that allows requests across all projects.
  */
-export interface FakeRequest {
-  /** Headers used for authentication against Elasticsearch */
-  headers: Headers;
-}
-
-/**
- A user credentials container.
- * It accommodates the necessary auth credentials to impersonate the current user.
- *
- * @public
- * See {@link KibanaRequest}.
- */
-export type ScopeableRequest = KibanaRequest | FakeRequest;
+export const PROJECT_ROUTING_ALL = '_alias:*';
