@@ -13,6 +13,7 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
+  EuiConfirmModal,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
@@ -38,6 +39,7 @@ import { useMiniAppsContext } from '../context';
 import { useMiniAppBrowserTools, type MiniAppScreenState } from '../hooks/use_browser_tools';
 import { useAgentBuilder } from '../hooks/use_agent_builder';
 import { PREACT_PRELUDE_SCRIPTS } from '../runtime/preact_libs';
+import { useNavigateConfirmation } from '../hooks/use_navigate_confirmation';
 
 const sectionContentCss = css({
   display: 'flex',
@@ -76,6 +78,9 @@ export const MiniAppRunner: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [runtimeState, setRuntimeState] = useState<RuntimeState>('idle');
   const [runtimeError, setRuntimeError] = useState<Error | null>(null);
+
+  const { confirmation, onNavigate, confirmNavigation, cancelNavigation } =
+    useNavigateConfirmation(coreStart.application);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const bridgeRef = useRef<ScriptPanelBridge | null>(null);
@@ -250,6 +255,7 @@ export const MiniAppRunner: React.FC = () => {
       setContent,
       setError,
       onLog: handleLog,
+      onNavigate,
     });
 
     const bridge = createScriptPanelBridge({
@@ -282,6 +288,7 @@ export const MiniAppRunner: React.FC = () => {
     handleLog,
     handleStateChange,
     handleError,
+    onNavigate,
   ]);
 
   // Effect to handle resize events
@@ -413,6 +420,33 @@ export const MiniAppRunner: React.FC = () => {
           style={{ display: runtimeState === 'loading' ? 'none' : 'block' }}
         />
       </EuiPageTemplate.Section>
+
+      {confirmation.isVisible && (
+        <EuiConfirmModal
+          aria-label="Navigate away confirmation"
+          title={i18n.translate('miniApps.runner.navigateConfirmTitle', {
+            defaultMessage: 'Navigate away?',
+          })}
+          onCancel={cancelNavigation}
+          onConfirm={confirmNavigation}
+          cancelButtonText={i18n.translate('miniApps.runner.navigateCancel', {
+            defaultMessage: 'Stay',
+          })}
+          confirmButtonText={i18n.translate('miniApps.runner.navigateConfirm', {
+            defaultMessage: 'Navigate',
+          })}
+        >
+          <p>
+            <FormattedMessage
+              id="miniApps.runner.navigateConfirmBody"
+              defaultMessage="This mini app wants to navigate to:"
+            />
+          </p>
+          <p>
+            <strong>{confirmation.url}</strong>
+          </p>
+        </EuiConfirmModal>
+      )}
     </>
   );
 };

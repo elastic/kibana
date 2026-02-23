@@ -97,6 +97,11 @@ export const buildScreenContextDescription = ({
   parts.push(`Kibana.panel.onResize(cb) → unsubscribe fn`);
   parts.push(`Kibana.log.info/warn/error(...args)`);
   parts.push(``);
+  parts.push(`Kibana.navigate(url) → Promise<{ navigated: boolean }>`);
+  parts.push(`  Request navigation to a Kibana URL or external link. The user will see a confirmation dialog.`);
+  parts.push(`  For Kibana pages use paths like '/app/discover' or '/app/dashboards'.`);
+  parts.push(`  For external links use full URLs like 'https://example.com'.`);
+  parts.push(``);
 
   parts.push(`PREACT + HTM (RECOMMENDED for component-based UIs):`);
   parts.push(``);

@@ -10,7 +10,9 @@
 import { schema } from '@kbn/config-schema';
 import type { IRouter, Logger } from '@kbn/core/server';
 import { MINI_APPS_API_BASE, MINI_APP_SAVED_OBJECT_TYPE } from '../../common';
-import type { MiniAppAttributes, MiniApp } from '../../common';
+import type { MiniAppAttributes, MiniApp, MiniAppVersion } from '../../common';
+
+const MAX_VERSIONS = 50;
 
 export function registerUpdateMiniAppRoute(router: IRouter, logger: Logger) {
   router.put(
@@ -28,17 +30,17 @@ export function registerUpdateMiniAppRoute(router: IRouter, logger: Logger) {
         body: schema.object({
           name: schema.maybe(schema.string({ minLength: 1, maxLength: 255 })),
           script_code: schema.maybe(schema.string()),
+          version_message: schema.maybe(schema.string({ maxLength: 500 })),
         }),
       },
     },
     async (context, request, response) => {
       try {
         const { id } = request.params;
-        const { name, script_code } = request.body;
+        const { name, script_code, version_message } = request.body;
         const coreContext = await context.core;
         const savedObjectsClient = coreContext.savedObjects.client;
 
-        // Get existing mini app to merge with updates
         const existing = await savedObjectsClient.get<MiniAppAttributes>(
           MINI_APP_SAVED_OBJECT_TYPE,
           id
@@ -49,11 +51,24 @@ export function registerUpdateMiniAppRoute(router: IRouter, logger: Logger) {
           updated_at: now,
         };
 
+        // When script_code changes, snapshot the old version
+        if (script_code !== undefined && script_code !== existing.attributes.script_code) {
+          const versions: MiniAppVersion[] = [...(existing.attributes.versions ?? [])];
+          versions.push({
+            script_code: existing.attributes.script_code,
+            saved_at: existing.attributes.updated_at ?? existing.attributes.created_at,
+            message: version_message,
+          });
+          // Cap version history
+          if (versions.length > MAX_VERSIONS) {
+            versions.splice(0, versions.length - MAX_VERSIONS);
+          }
+          updatedAttributes.versions = versions;
+          updatedAttributes.script_code = script_code;
+        }
+
         if (name !== undefined) {
           updatedAttributes.name = name;
-        }
-        if (script_code !== undefined) {
-          updatedAttributes.script_code = script_code;
         }
 
         await savedObjectsClient.update<MiniAppAttributes>(
@@ -62,7 +77,6 @@ export function registerUpdateMiniAppRoute(router: IRouter, logger: Logger) {
           updatedAttributes
         );
 
-        // Fetch the updated object to return complete data
         const updated = await savedObjectsClient.get<MiniAppAttributes>(
           MINI_APP_SAVED_OBJECT_TYPE,
           id
@@ -74,6 +88,7 @@ export function registerUpdateMiniAppRoute(router: IRouter, logger: Logger) {
           script_code: updated.attributes.script_code,
           created_at: updated.attributes.created_at ?? existing.attributes.created_at,
           updated_at: updated.attributes.updated_at,
+          versions: updated.attributes.versions ?? [],
         };
 
         return response.ok({ body: miniApp });

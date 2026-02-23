@@ -14,15 +14,25 @@ import {
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiCallOut,
+  EuiConfirmModal,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutHeader,
   EuiForm,
   EuiFormRow,
+  EuiModal,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
   EuiPageTemplate,
   EuiSpacer,
   EuiLoadingSpinner,
   EuiResizableContainer,
+  EuiText,
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
@@ -41,10 +51,12 @@ import {
   type LogEntry,
   type RuntimeState,
 } from '@kbn/script-panel/public';
-import type { MiniApp } from '../../common';
+import type { MiniApp, MiniAppVersion } from '../../common';
 import { useMiniAppsContext } from '../context';
 import { useAgentBuilder } from '../hooks/use_agent_builder';
 import { PREACT_PRELUDE_SCRIPTS } from '../runtime/preact_libs';
+import { useNavigateConfirmation } from '../hooks/use_navigate_confirmation';
+import { useDraftStorage } from '../hooks/use_draft_storage';
 
 const DEFAULT_SCRIPT = `// Welcome to Mini Apps!
 // Use Kibana.render.setContent() to display content
@@ -91,13 +103,6 @@ const previewToolbarCss = css({
   borderBottom: '1px solid #d3dae6',
 });
 
-const iframeContainerCss = css({
-  flex: '1 1 0',
-  minHeight: 0,
-  position: 'relative',
-  overflow: 'hidden',
-});
-
 const consoleToolbarCss = css({
   display: 'flex',
   alignItems: 'center',
@@ -142,6 +147,9 @@ export const MiniAppEditor: React.FC = () => {
   const isEditing = Boolean(id);
 
   const { apiClient, history, coreStart, depsStart, agentBuilder } = useMiniAppsContext();
+  const { confirmation, onNavigate, confirmNavigation, cancelNavigation } = useNavigateConfirmation(
+    coreStart.application
+  );
   const [loading, setLoading] = useState(isEditing);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState<EditorFormState>({
@@ -149,6 +157,10 @@ export const MiniAppEditor: React.FC = () => {
     script_code: DEFAULT_SCRIPT,
   });
   const [errors, setErrors] = useState<{ name?: string }>({});
+  const savedFormRef = useRef<EditorFormState | null>(null);
+
+  // Draft storage
+  const { loadDraft, saveDraft, discardDraft } = useDraftStorage(id);
 
   // Preview state
   const [previewState, setPreviewState] = useState<RuntimeState>('idle');
@@ -158,6 +170,12 @@ export const MiniAppEditor: React.FC = () => {
   const bridgeRef = useRef<ScriptPanelBridge | null>(null);
   const panelSizeRef = useRef<PanelSize>({ width: 0, height: 0 });
   const consoleEndRef = useRef<HTMLDivElement>(null);
+
+  // Version history
+  const [versions, setVersions] = useState<MiniAppVersion[]>([]);
+  const [showVersionHistory, setShowVersionHistory] = useState(false);
+  const [showSaveMessageModal, setShowSaveMessageModal] = useState(false);
+  const [saveMessage, setSaveMessage] = useState('');
 
   // Undo stack for agent code changes
   const [agentUndoStack, setAgentUndoStack] = useState<string[]>([]);
@@ -195,15 +213,17 @@ export const MiniAppEditor: React.FC = () => {
   });
 
   useEffect(() => {
-    if (isEditing && id) {
-      const loadMiniApp = async () => {
+    const init = async () => {
+      let serverForm: EditorFormState | null = null;
+
+      if (isEditing && id) {
         try {
           setLoading(true);
           const miniApp = await apiClient.get(id);
-          setForm({
-            name: miniApp.name,
-            script_code: miniApp.script_code,
-          });
+          serverForm = { name: miniApp.name, script_code: miniApp.script_code };
+          savedFormRef.current = serverForm;
+          setForm(serverForm);
+          setVersions(miniApp.versions ?? []);
         } catch (error) {
           coreStart.notifications.toasts.addError(error as Error, {
             title: i18n.translate('miniApps.editor.loadError', {
@@ -211,13 +231,53 @@ export const MiniAppEditor: React.FC = () => {
             }),
           });
           history.push('/');
+          return;
         } finally {
           setLoading(false);
         }
-      };
-      loadMiniApp();
+      }
+
+      // Check for a draft and restore it if it differs from server version
+      const draft = loadDraft();
+      if (draft) {
+        const base = serverForm ?? { name: '', script_code: DEFAULT_SCRIPT };
+        const draftDiffers = draft.name !== base.name || draft.script_code !== base.script_code;
+        if (draftDiffers) {
+          setForm({ name: draft.name, script_code: draft.script_code });
+          coreStart.notifications.toasts.addInfo(
+            i18n.translate('miniApps.editor.draftRestored', {
+              defaultMessage: 'Unsaved draft restored. Use "Discard draft" to revert.',
+            })
+          );
+        } else {
+          discardDraft();
+        }
+      }
+    };
+    init();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, isEditing]);
+
+  // Auto-save draft on form changes
+  useEffect(() => {
+    if (!loading) {
+      saveDraft(form.name, form.script_code);
     }
-  }, [id, isEditing, apiClient, coreStart.notifications.toasts, history]);
+  }, [form.name, form.script_code, loading, saveDraft]);
+
+  const isDraftDirty =
+    savedFormRef.current !== null &&
+    (form.name !== savedFormRef.current.name ||
+      form.script_code !== savedFormRef.current.script_code);
+
+  const handleDiscardDraft = useCallback(() => {
+    discardDraft();
+    if (savedFormRef.current) {
+      setForm(savedFormRef.current);
+    } else {
+      setForm({ name: '', script_code: DEFAULT_SCRIPT });
+    }
+  }, [discardDraft]);
 
   const handleNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setForm((prev) => ({ ...prev, name: e.target.value }));
@@ -245,46 +305,86 @@ export const MiniAppEditor: React.FC = () => {
     return Object.keys(newErrors).length === 0;
   }, [form.name]);
 
-  const handleSave = useCallback(async () => {
-    if (!validate()) return;
+  const doSave = useCallback(
+    async (versionMessage?: string) => {
+      if (!validate()) return;
 
-    try {
-      setSaving(true);
-      let savedApp: MiniApp;
+      try {
+        setSaving(true);
+        let savedApp: MiniApp;
 
-      if (isEditing && id) {
-        savedApp = await apiClient.update(id, {
-          name: form.name,
-          script_code: form.script_code,
+        if (isEditing && id) {
+          savedApp = await apiClient.update(id, {
+            name: form.name,
+            script_code: form.script_code,
+            version_message: versionMessage || undefined,
+          });
+          setVersions(savedApp.versions ?? []);
+          coreStart.notifications.toasts.addSuccess(
+            i18n.translate('miniApps.editor.updateSuccess', {
+              defaultMessage: 'Mini app updated successfully',
+            })
+          );
+        } else {
+          savedApp = await apiClient.create({
+            name: form.name,
+            script_code: form.script_code,
+          });
+          coreStart.notifications.toasts.addSuccess(
+            i18n.translate('miniApps.editor.createSuccess', {
+              defaultMessage: 'Mini app created successfully',
+            })
+          );
+        }
+
+        discardDraft();
+        savedFormRef.current = { name: form.name, script_code: form.script_code };
+        history.push(`/run/${savedApp.id}`);
+      } catch (error) {
+        coreStart.notifications.toasts.addError(error as Error, {
+          title: i18n.translate('miniApps.editor.saveError', {
+            defaultMessage: 'Failed to save mini app',
+          }),
         });
-        coreStart.notifications.toasts.addSuccess(
-          i18n.translate('miniApps.editor.updateSuccess', {
-            defaultMessage: 'Mini app updated successfully',
-          })
-        );
-      } else {
-        savedApp = await apiClient.create({
-          name: form.name,
-          script_code: form.script_code,
-        });
-        coreStart.notifications.toasts.addSuccess(
-          i18n.translate('miniApps.editor.createSuccess', {
-            defaultMessage: 'Mini app created successfully',
-          })
-        );
+      } finally {
+        setSaving(false);
       }
+    },
+    [
+      validate,
+      isEditing,
+      id,
+      apiClient,
+      form,
+      coreStart.notifications.toasts,
+      history,
+      discardDraft,
+    ]
+  );
 
-      history.push(`/run/${savedApp.id}`);
-    } catch (error) {
-      coreStart.notifications.toasts.addError(error as Error, {
-        title: i18n.translate('miniApps.editor.saveError', {
-          defaultMessage: 'Failed to save mini app',
-        }),
-      });
-    } finally {
-      setSaving(false);
+  const handleSave = useCallback(async () => {
+    if (isEditing) {
+      setShowSaveMessageModal(true);
+    } else {
+      doSave();
     }
-  }, [validate, isEditing, id, apiClient, form, coreStart.notifications.toasts, history]);
+  }, [isEditing, doSave]);
+
+  const handleSaveWithMessage = useCallback(() => {
+    setShowSaveMessageModal(false);
+    doSave(saveMessage);
+    setSaveMessage('');
+  }, [doSave, saveMessage]);
+
+  const handleCancelSaveMessage = useCallback(() => {
+    setShowSaveMessageModal(false);
+    setSaveMessage('');
+  }, []);
+
+  const handleRestoreVersion = useCallback((version: MiniAppVersion) => {
+    setForm((prev) => ({ ...prev, script_code: version.script_code }));
+    setShowVersionHistory(false);
+  }, []);
 
   const handleCancel = useCallback(() => {
     history.push('/');
@@ -332,6 +432,7 @@ export const MiniAppEditor: React.FC = () => {
       setContent: () => {},
       setError: (message: string) => setPreviewError(message),
       onLog: (entry: LogEntry) => setPreviewLogs((prev) => [...prev, entry]),
+      onNavigate,
     });
 
     const bridge = createScriptPanelBridge({
@@ -352,7 +453,14 @@ export const MiniAppEditor: React.FC = () => {
       setPreviewError(err.message);
       setPreviewState('error');
     });
-  }, [form.script_code, depsStart.data, depsStart.expressions, getPanelSize, destroyBridge]);
+  }, [
+    form.script_code,
+    depsStart.data,
+    depsStart.expressions,
+    getPanelSize,
+    destroyBridge,
+    onNavigate,
+  ]);
 
   // Auto-run preview after agent code updates
   useEffect(() => {
@@ -417,6 +525,31 @@ export const MiniAppEditor: React.FC = () => {
         pageTitle={pageTitle}
         rightSideItems={[
           <EuiFlexGroup key="actions" gutterSize="s" responsive={false} alignItems="center">
+            {isDraftDirty && (
+              <EuiFlexItem grow={false}>
+                <EuiBadge color="warning">
+                  <FormattedMessage
+                    id="miniApps.editor.draftBadge"
+                    defaultMessage="Unsaved changes"
+                  />
+                </EuiBadge>
+              </EuiFlexItem>
+            )}
+            {isDraftDirty && (
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  onClick={handleDiscardDraft}
+                  iconType="cross"
+                  color="danger"
+                  size="s"
+                >
+                  <FormattedMessage
+                    id="miniApps.editor.discardDraftButton"
+                    defaultMessage="Discard draft"
+                  />
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            )}
             {agentUndoStack.length > 0 && (
               <EuiFlexItem grow={false}>
                 <EuiToolTip
@@ -440,6 +573,21 @@ export const MiniAppEditor: React.FC = () => {
                     </EuiBadge>
                   </EuiButton>
                 </EuiToolTip>
+              </EuiFlexItem>
+            )}
+            {isEditing && versions.length > 0 && (
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  onClick={() => setShowVersionHistory(true)}
+                  iconType="clock"
+                  size="s"
+                >
+                  <FormattedMessage
+                    id="miniApps.editor.versionHistoryButton"
+                    defaultMessage="History ({count})"
+                    values={{ count: versions.length }}
+                  />
+                </EuiButtonEmpty>
               </EuiFlexItem>
             )}
             <EuiFlexItem grow={false}>
@@ -710,6 +858,138 @@ export const MiniAppEditor: React.FC = () => {
           )}
         </EuiResizableContainer>
       </EuiPageTemplate.Section>
+
+      {confirmation.isVisible && (
+        <EuiConfirmModal
+          aria-label="Navigate away confirmation"
+          title={i18n.translate('miniApps.editor.navigateConfirmTitle', {
+            defaultMessage: 'Navigate away?',
+          })}
+          onCancel={cancelNavigation}
+          onConfirm={confirmNavigation}
+          cancelButtonText={i18n.translate('miniApps.editor.navigateCancel', {
+            defaultMessage: 'Stay',
+          })}
+          confirmButtonText={i18n.translate('miniApps.editor.navigateConfirm', {
+            defaultMessage: 'Navigate',
+          })}
+        >
+          <p>
+            <FormattedMessage
+              id="miniApps.editor.navigateConfirmBody"
+              defaultMessage="This mini app wants to navigate to:"
+            />
+          </p>
+          <p>
+            <strong>{confirmation.url}</strong>
+          </p>
+        </EuiConfirmModal>
+      )}
+
+      {showSaveMessageModal && (
+        <EuiModal onClose={handleCancelSaveMessage} aria-label="Save mini app">
+          <EuiModalHeader>
+            <EuiModalHeaderTitle>
+              <FormattedMessage
+                id="miniApps.editor.saveMessageTitle"
+                defaultMessage="Save mini app"
+              />
+            </EuiModalHeaderTitle>
+          </EuiModalHeader>
+          <EuiModalBody>
+            <EuiFormRow
+              label={i18n.translate('miniApps.editor.saveMessageLabel', {
+                defaultMessage: 'Version note (optional)',
+              })}
+              helpText={i18n.translate('miniApps.editor.saveMessageHelp', {
+                defaultMessage: 'Describe what changed in this version',
+              })}
+            >
+              <EuiFieldText
+                value={saveMessage}
+                onChange={(e) => setSaveMessage(e.target.value)}
+                placeholder={i18n.translate('miniApps.editor.saveMessagePlaceholder', {
+                  defaultMessage: 'e.g. Added histogram chart',
+                })}
+                data-test-subj="miniAppSaveMessageInput"
+              />
+            </EuiFormRow>
+          </EuiModalBody>
+          <EuiModalFooter>
+            <EuiButtonEmpty onClick={handleCancelSaveMessage}>
+              <FormattedMessage id="miniApps.editor.saveMessageCancel" defaultMessage="Cancel" />
+            </EuiButtonEmpty>
+            <EuiButton onClick={handleSaveWithMessage} fill isLoading={saving}>
+              <FormattedMessage id="miniApps.editor.saveMessageConfirm" defaultMessage="Save" />
+            </EuiButton>
+          </EuiModalFooter>
+        </EuiModal>
+      )}
+
+      {showVersionHistory && (
+        <EuiFlyout
+          onClose={() => setShowVersionHistory(false)}
+          size="s"
+          aria-label="Version history"
+        >
+          <EuiFlyoutHeader hasBorder>
+            <EuiTitle size="m">
+              <h2>
+                <FormattedMessage
+                  id="miniApps.editor.versionHistoryTitle"
+                  defaultMessage="Version history"
+                />
+              </h2>
+            </EuiTitle>
+          </EuiFlyoutHeader>
+          <EuiFlyoutBody>
+            {[...versions].reverse().map((version, idx) => (
+              <div
+                key={idx}
+                css={css({
+                  padding: '12px 0',
+                  borderBottom: '1px solid #d3dae6',
+                })}
+              >
+                <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s">
+                  <EuiFlexItem>
+                    <EuiText size="s">
+                      <strong>{new Date(version.saved_at).toLocaleString()}</strong>
+                    </EuiText>
+                    {version.message && (
+                      <EuiText size="xs" color="subdued">
+                        {version.message}
+                      </EuiText>
+                    )}
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      size="s"
+                      onClick={() => handleRestoreVersion(version)}
+                      iconType="editorUndo"
+                    >
+                      <FormattedMessage
+                        id="miniApps.editor.restoreVersionButton"
+                        defaultMessage="Restore"
+                      />
+                    </EuiButton>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </div>
+            ))}
+            {versions.length === 0 && (
+              <EuiText color="subdued" size="s">
+                <p>
+                  <FormattedMessage
+                    id="miniApps.editor.noVersions"
+                    defaultMessage="No previous versions yet. Versions are created each time you save."
+                  />
+                </p>
+              </EuiText>
+            )}
+          </EuiFlyoutBody>
+        </EuiFlyout>
+      )}
     </>
   );
 };

@@ -53,7 +53,8 @@ export type CapabilityMethod =
   | 'render.setError'
   | 'log.info'
   | 'log.warn'
-  | 'log.error';
+  | 'log.error'
+  | 'navigate.to';
 
 /**
  * Input types for each capability method

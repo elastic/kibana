@@ -31,6 +31,7 @@ export const miniAppSavedObjectType: SavedObjectsType = {
       script_code: { type: 'text', index: false },
       created_at: { type: 'date' },
       updated_at: { type: 'date' },
+      versions: { type: 'object', enabled: false },
     },
   },
   migrations: () => {

@@ -17,6 +17,7 @@ export {
 export type {
   MiniAppAttributes,
   MiniApp,
+  MiniAppVersion,
   CreateMiniAppRequest,
   UpdateMiniAppRequest,
 } from './types';

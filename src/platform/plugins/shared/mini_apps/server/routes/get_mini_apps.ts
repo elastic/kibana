@@ -40,6 +40,7 @@ export function registerGetMiniAppsRoute(router: IRouter, logger: Logger) {
           script_code: so.attributes.script_code,
           created_at: so.attributes.created_at,
           updated_at: so.attributes.updated_at,
+          versions: [],
         }));
 
         return response.ok({ body: { items: miniApps, total: result.total } });

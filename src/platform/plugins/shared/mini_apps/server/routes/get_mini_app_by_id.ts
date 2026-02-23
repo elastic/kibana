@@ -44,6 +44,7 @@ export function registerGetMiniAppByIdRoute(router: IRouter, logger: Logger) {
           script_code: savedObject.attributes.script_code,
           created_at: savedObject.attributes.created_at,
           updated_at: savedObject.attributes.updated_at,
+          versions: savedObject.attributes.versions ?? [],
         };
 
         return response.ok({ body: miniApp });

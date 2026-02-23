@@ -173,7 +173,20 @@ const generateRuntimeCode = (config: SandboxConfig): string => `
         var args = Array.prototype.slice.call(arguments);
         sendRequest('log.error', { args: args });
       }
-    })
+    }),
+
+    /**
+     * Request navigation to a Kibana URL or path.
+     * The host will show a confirmation dialog before navigating.
+     * @param {string} url - The URL or path to navigate to
+     * @returns {Promise<{navigated: boolean}>} Whether navigation was accepted
+     */
+    navigate: function(url) {
+      if (typeof url !== 'string' || !url.trim()) {
+        return Promise.reject(new Error('navigate requires a non-empty url string'));
+      }
+      return sendRequest('navigate.to', { url: url });
+    }
   });
 
   // Intercept console methods so output is forwarded to the host

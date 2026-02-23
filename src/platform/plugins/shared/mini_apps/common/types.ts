@@ -8,6 +8,15 @@
  */
 
 /**
+ * A saved snapshot of a mini app's code at a point in time.
+ */
+export interface MiniAppVersion {
+  script_code: string;
+  saved_at: string;
+  message?: string;
+}
+
+/**
  * Attributes stored in the mini-app saved object
  */
 export interface MiniAppAttributes {
@@ -15,6 +24,7 @@ export interface MiniAppAttributes {
   script_code: string;
   created_at: string;
   updated_at: string;
+  versions?: MiniAppVersion[];
 }
 
 /**
@@ -26,6 +36,7 @@ export interface MiniApp {
   script_code: string;
   created_at: string;
   updated_at: string;
+  versions: MiniAppVersion[];
 }
 
 /**
@@ -42,4 +53,6 @@ export interface CreateMiniAppRequest {
 export interface UpdateMiniAppRequest {
   name?: string;
   script_code?: string;
+  /** Optional message describing what changed in this version */
+  version_message?: string;
 }

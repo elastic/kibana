@@ -40,6 +40,7 @@ export function registerCreateMiniAppRoute(router: IRouter, logger: Logger) {
           script_code,
           created_at: now,
           updated_at: now,
+          versions: [],
         };
 
         const savedObject = await savedObjectsClient.create<MiniAppAttributes>(
@@ -53,6 +54,7 @@ export function registerCreateMiniAppRoute(router: IRouter, logger: Logger) {
           script_code: savedObject.attributes.script_code,
           created_at: savedObject.attributes.created_at,
           updated_at: savedObject.attributes.updated_at,
+          versions: [],
         };
 
         return response.ok({ body: miniApp });

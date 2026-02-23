@@ -22,6 +22,8 @@ export interface CapabilitiesOptions {
   setError: (message: string) => void;
   /** Callback for captured logs */
   onLog?: (entry: LogEntry) => void;
+  /** Callback for navigation requests from the iframe. Returns true if navigation was accepted. */
+  onNavigate?: (url: string) => Promise<boolean>;
 }
 
 /**
@@ -29,7 +31,7 @@ export interface CapabilitiesOptions {
  * These handlers implement the host side of the RPC bridge.
  */
 export const createCapabilityHandlers = (options: CapabilitiesOptions): CapabilityHandlers => {
-  const { esqlExecutor, getPanelSize, setContent, setError, onLog } = options;
+  const { esqlExecutor, getPanelSize, setContent, setError, onLog, onNavigate } = options;
 
   // Create log handler factory
   const createLogHandler = (level: LogEntry['level']) => {
@@ -108,6 +110,22 @@ export const createCapabilityHandlers = (options: CapabilitiesOptions): Capabili
      * Log error message (captured by host).
      */
     'log.error': createLogHandler('error'),
+
+    /**
+     * Request navigation to a URL. The host will prompt the user for confirmation.
+     * Returns { navigated: true } if accepted, { navigated: false } if denied.
+     */
+    'navigate.to': async (params: { url: string }) => {
+      const { url } = params;
+      if (typeof url !== 'string' || !url.trim()) {
+        throw new Error('navigate.to requires a non-empty url string');
+      }
+      if (onNavigate) {
+        const accepted = await onNavigate(url);
+        return { navigated: accepted };
+      }
+      return { navigated: false };
+    },
   };
 };
 

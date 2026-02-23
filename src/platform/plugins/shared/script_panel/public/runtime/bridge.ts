@@ -372,6 +372,7 @@ export class ScriptPanelBridge {
       'log.info',
       'log.warn',
       'log.error',
+      'navigate.to',
     ];
     return allowedMethods.includes(method as CapabilityMethod);
   }
