@@ -1750,7 +1750,7 @@ class AgentPolicyService {
             getAgentVersionsForVersionSpecificPolicies(),
             getCompiledVersionsForAgentPolicy(soClient, policy.id),
           ]);
-          agentVersionsToUse = [...new Set([defaultVersions, extraVersions])];
+          agentVersionsToUse = [...new Set([...defaultVersions, ...extraVersions])];
         }
         const versionSpecificPolicies = await getVersionSpecificPolicies(
           soClient,
