@@ -38,6 +38,7 @@ interface AddCollectorFlyoutProps {
 }
 
 const OPAMP_POLICY_ID = 'opamp';
+export const OPAMP_POLICY_NAME = 'OpAMP';
 
 async function fetchOpampPolicy(): Promise<any | null> {
   try {
@@ -50,7 +51,7 @@ async function fetchOpampPolicy(): Promise<any | null> {
 
 async function createOpampPolicyWithHook(): Promise<any> {
   return sendCreateAgentPolicyForRq({
-    name: 'OpAMP',
+    name: OPAMP_POLICY_NAME,
     id: OPAMP_POLICY_ID,
     namespace: 'default',
     description: 'Agent policy for OpAMP collectors',
