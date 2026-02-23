@@ -139,6 +139,7 @@ Object {
           "type": "null",
         },
       ],
+      "default": "webhook-authentication-basic",
     },
     "ca": Object {
       "type": "string",
@@ -4392,6 +4393,7 @@ Object {
           "type": "null",
         },
       ],
+      "default": "webhook-authentication-basic",
     },
     "ca": Object {
       "type": "string",

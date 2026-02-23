@@ -115,6 +115,7 @@ describe('Serverless upgrade and rollback checks', () => {
           const { $schema, ...rest } = z.toJSONSchema(schema as z.ZodType, {
             unrepresentable: 'any',
             io: 'input',
+            reused: 'ref',
           }) as Record<string, unknown>;
           jsonSchema = rest;
         } else {

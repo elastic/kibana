@@ -849,7 +849,7 @@ describe('Handler', () => {
 
       expect(result.body).toEqual({
         error: 'Bad Request',
-        message: expect.stringMatching(/Expected number, received string/),
+        message: expect.stringMatching(/Invalid input: expected number, received string/),
         statusCode: 400,
       });
 
