@@ -91,6 +91,11 @@ export const fromSavedObjectTabToSearchSource = async ({
   return services.data.search.searchSource.create(tab.serializedSearchSource);
 };
 
+/**
+ * @deprecated Prefer using `fromSavedObjectTabToSearchSource` to get only the search source,
+ * or `fromSavedObjectTabToTabState` to get the tab state. This function creates a full
+ * SavedSearch object which is often unnecessary and couples code to the legacy SavedSearch type.
+ */
 export const fromSavedObjectTabToSavedSearch = async ({
   tab,
   discoverSession,
@@ -189,6 +194,10 @@ export const fromTabStateToSavedObjectTab = ({
   };
 };
 
+/**
+ * @deprecated Prefer using `fromTabStateToSavedObjectTab` which works directly with TabState.
+ * This function converts from SavedSearch which couples code to the legacy SavedSearch type.
+ */
 export const fromSavedSearchToSavedObjectTab = ({
   tab,
   savedSearch,
