@@ -141,7 +141,7 @@ class SkillServiceImpl implements SkillService {
           this.skillFullPaths.add(fullPath);
           this.skills.set(skill.id, skill);
         });
-        this.mutationQueue = op.catch(() => { });
+        this.mutationQueue = op.catch(() => {});
         return op;
       },
       unregisterSkill: (skillId) => {
@@ -156,7 +156,7 @@ class SkillServiceImpl implements SkillService {
           this.skills.delete(skillId);
           return true;
         });
-        this.mutationQueue = op.catch(() => { });
+        this.mutationQueue = op.catch(() => {});
         return op;
       },
     };
