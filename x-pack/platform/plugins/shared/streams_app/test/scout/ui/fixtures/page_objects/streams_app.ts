@@ -37,6 +37,8 @@ export class StreamsApp {
   public readonly queryStreamFlyoutSaveButton;
   public readonly queryStreamCreatedSuccessToast;
   public readonly childQueryStreamCreatedSuccessToast;
+  public readonly queryStreamUpdatedSuccessToast;
+  public readonly queryStreamDetailsQueryViewerCodeBlock;
 
   constructor(private readonly page: ScoutPage) {
     this.processorFieldComboBox = new EuiComboBoxWrapper(
@@ -80,6 +82,10 @@ export class StreamsApp {
     );
     this.queryStreamCreatedSuccessToast = this.page.getByText('Query stream created successfully');
     this.childQueryStreamCreatedSuccessToast = this.page.getByText('Query stream created');
+    this.queryStreamUpdatedSuccessToast = this.page.getByText('Query stream updated successfully');
+    this.queryStreamDetailsQueryViewerCodeBlock = this.page.getByTestId(
+      'queryStreamDetailsQueryViewerCodeBlock'
+    );
   }
 
   async goto() {
@@ -1266,5 +1272,17 @@ export class StreamsApp {
 
   async clickQueryStreamFormCreateButton() {
     await this.page.getByTestId('streamsAppQueryStreamFormCreateButton').click();
+  }
+
+  async clickQueryStreamLink(streamName: string) {
+    await this.page.getByTestId(`streamsAppQueryStreamEntryButton-${streamName}`).click();
+  }
+
+  async clickQueryStreamDetailsTab(tabName: string) {
+    await this.page.getByTestId(`queryStreamDetails-${tabName}-tab`).click();
+  }
+
+  async clickQueryStreamDetailsEditQueryButton() {
+    await this.page.getByTestId('queryStreamDetailsEditQueryButton').click();
   }
 }
