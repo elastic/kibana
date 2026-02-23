@@ -7,12 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import type { FC } from 'react';
-import type { UseEuiTheme } from '@elastic/eui';
-import { useEuiTheme } from '@elastic/eui';
 import type { ProfileProviderServices } from '../../profile_provider_services';
 import { SparklineChart } from './sparkline_chart';
+import { useContainerStyle } from './use_container_style';
 
 interface Props {
   services: ProfileProviderServices;
@@ -27,11 +26,7 @@ export const SparklineCellRenderer: FC<Props> = ({
   isDetails,
   defaultRowHeight,
 }) => {
-  const { euiTheme } = useEuiTheme();
-  const containerStyle = useMemo(
-    () => getContainerStyle(euiTheme, defaultRowHeight),
-    [euiTheme, defaultRowHeight]
-  );
+  const containerStyle = useContainerStyle(defaultRowHeight);
 
   return (
     <div css={containerStyle}>
@@ -57,27 +52,4 @@ export function getSparklineCellRenderer(
       defaultRowHeight={defaultRowHeight}
     />
   );
-}
-
-function getContainerStyle(euiTheme: UseEuiTheme['euiTheme'], defaultRowHeight?: number) {
-  // the keywords are slightly larger than the default text height,
-  // so they need to be adjusted to fit within the row height while
-  // not truncating the bottom of the text
-  let rowHeight = 2;
-  if (defaultRowHeight === undefined) {
-    rowHeight = 2;
-  } else if (defaultRowHeight < 2) {
-    rowHeight = 1;
-  } else {
-    rowHeight = Math.floor(defaultRowHeight / 1.5);
-  }
-
-  return {
-    display: '-webkit-box',
-    WebkitBoxOrient: 'vertical' as const,
-    WebkitLineClamp: rowHeight,
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    transform: `translateY(calc(${euiTheme.size.m} / 4))`, // we apply this transform so that the component appears vertically centered
-  };
 }
