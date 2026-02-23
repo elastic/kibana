@@ -49,23 +49,30 @@ describe('FormattedValue', () => {
       expect(screen.getByTestId('react-output')).toHaveTextContent('test-value');
     });
 
-    it('wraps React output in a span with className', () => {
+    it('passes className to reactConvert via options for formatter to apply', () => {
       const format = createMockFormat({
-        reactConvert: (val) => <span>{String(val)}</span>,
+        reactConvert: (val, options) => (
+          <span className={options?.className} data-test-subj="output">
+            {String(val)}
+          </span>
+        ),
       });
 
       const { container } = render(
         <FormattedValue fieldFormat={format} value="test" className="custom-class" />
       );
 
-      const wrapper = container.firstChild as HTMLElement;
-      expect(wrapper.tagName).toBe('SPAN');
-      expect(wrapper).toHaveClass('custom-class');
+      const span = container.querySelector('span');
+      expect(span).toHaveClass('custom-class');
     });
 
-    it('applies data-test-subj to wrapper', () => {
+    it('passes data-test-subj to reactConvert via options for formatter to apply', () => {
       const format = createMockFormat({
-        reactConvert: (val) => <span>{String(val)}</span>,
+        reactConvert: (val, options) => (
+          <span data-test-subj={options?.['data-test-subj'] ?? 'default-test-subj'}>
+            {String(val)}
+          </span>
+        ),
       });
 
       render(<FormattedValue fieldFormat={format} value="test" data-test-subj="my-test-subj" />);

@@ -161,7 +161,11 @@ export const FormattedValue: FC<FormattedValueProps> = memo(
   ({ fieldFormat, value, options = {}, className, 'data-test-subj': dataTestSubj }) => {
     const formattedContent = useMemo<ReactNode>(() => {
       // Try React rendering first (preferred path)
-      const reactResult = fieldFormat.convertToReact(value, { ...options, className });
+      const reactResult = fieldFormat.convertToReact(value, {
+        ...options,
+        className,
+        'data-test-subj': dataTestSubj,
+      });
       if (reactResult !== undefined) {
         return reactResult;
       }
@@ -187,16 +191,6 @@ export const FormattedValue: FC<FormattedValueProps> = memo(
       }
     }, [fieldFormat, value, options, className, dataTestSubj]);
 
-    // If React rendering was used directly, wrap in span for consistent structure
-    if (fieldFormat.hasReactSupport()) {
-      return (
-        <span className={className} data-test-subj={dataTestSubj}>
-          {formattedContent}
-        </span>
-      );
-    }
-
-    // Legacy adapter already renders the span
     return <>{formattedContent}</>;
   }
 );

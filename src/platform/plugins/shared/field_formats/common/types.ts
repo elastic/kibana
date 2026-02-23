@@ -54,6 +54,11 @@ export interface ReactContextTypeOptions extends HtmlContextTypeOptions {
    * Optional CSS class name to apply to the root element
    */
   className?: string;
+
+  /**
+   * Optional test subject for E2E testing
+   */
+  'data-test-subj'?: string;
 }
 
 /**
