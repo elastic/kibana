@@ -23,12 +23,13 @@ dependsOn:
   - '@kbn/esql-language'
   - '@kbn/esql-types'
 tags:
-  - is-webpack-built
+  - shared-common
   - package
   - prod
   - group-platform
   - shared
   - jest-unit-tests
+  - is-webpack-built
 fileGroups:
   src:
     - src/**/*
