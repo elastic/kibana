@@ -18,8 +18,8 @@ import type {
 import { getValueColumn } from '../../columns/esql_column';
 import type {
   DataLayerType,
-  AnnotationLayerType,
   ReferenceLineLayerType,
+  AnnotationLayerByValueType,
 } from '../../../schema/charts/xy';
 import { addLayerColumn, generateLayer } from '../../utils';
 import {
@@ -95,8 +95,8 @@ function buildDataLayer(layer: DataLayerType, i: number): XYDataLayerConfig {
   };
 }
 
-function buildAnnotationLayer(
-  layer: AnnotationLayerType,
+function buildByValueAnnotationLayer(
+  layer: AnnotationLayerByValueType,
   i: number,
   dataViewId: string
 ): XYAnnotationLayerConfig {
@@ -193,13 +193,14 @@ export function buildXYLayer(
   i: number,
   dataViewId: string
 ): XYLayerConfig | undefined {
-  if (!isAPIXYLayer(layer)) {
+  if (!isAPIXYLayer(layer) || 'group_id' in layer) {
+    // TODO - support by-reference annotation layers (will have group_id)
     return;
   }
 
   // now enrich the layer based on its type
   if (isAPIAnnotationLayer(layer)) {
-    return buildAnnotationLayer(layer, i, dataViewId);
+    return buildByValueAnnotationLayer(layer, i, dataViewId);
   }
   if (isAPIReferenceLineLayer(layer)) {
     return buildReferenceLineLayer(layer, i);

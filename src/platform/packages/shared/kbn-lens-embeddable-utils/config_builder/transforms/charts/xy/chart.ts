@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { XYState as XYLensState } from '@kbn/lens-common';
+import type { XYState as XYLensState, XYPersistedState } from '@kbn/lens-common';
 import type { AxisExtentConfig } from '@kbn/expression-xy-plugin/common';
 import type { SavedObjectReference } from '@kbn/core/server';
 import type { Writable } from '@kbn/utility-types';
@@ -164,7 +164,7 @@ export function buildVisualizationState(
 }
 
 export function buildVisualizationAPI(
-  config: XYLensState,
+  config: XYPersistedState | XYLensState,
   layers: Record<string, DataSourceStateLayer>,
   adHocDataViews: Record<string, unknown>,
   references: SavedObjectReference[],
@@ -190,7 +190,9 @@ export function buildVisualizationAPI(
   };
 }
 
-function convertFittingToAPIFormat(config: XYLensState): Pick<XYState, 'fitting'> | {} {
+function convertFittingToAPIFormat(
+  config: XYLensState | XYPersistedState
+): Pick<XYState, 'fitting'> | {} {
   const fittingOptions = {
     ...(config.fittingFunction ? { type: config.fittingFunction.toLowerCase() } : {}),
     ...(config.emphasizeFitting ? { dotted: config.emphasizeFitting } : {}),
@@ -247,7 +249,9 @@ function convertXExtent(extent: AxisExtentConfig | undefined): {
   return {};
 }
 
-function convertAxisSettingsToAPIFormat(config: XYLensState): Pick<XYState, 'axis'> | {} {
+function convertAxisSettingsToAPIFormat(
+  config: XYLensState | XYPersistedState
+): Pick<XYState, 'axis'> | {} {
   const axis: EditableAxisType = {};
 
   const xAxis: XAxisType = stripUndefined({
@@ -356,7 +360,7 @@ function convertAxisSettingsToAPIFormat(config: XYLensState): Pick<XYState, 'axi
 }
 
 function buildXYLayerAPI(
-  visualization: XYLensState,
+  visualization: XYLensState | XYPersistedState,
   layers: Record<string, DataSourceStateLayer>,
   adHocDataViews: Record<string, unknown>,
   references: SavedObjectReference[],

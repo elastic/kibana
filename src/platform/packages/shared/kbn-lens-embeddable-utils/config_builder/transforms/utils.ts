@@ -548,7 +548,7 @@ function extraQueryFromAPIState(state: LensApiState): { esql: string } | Query |
   if ('layers' in state && Array.isArray(state.layers)) {
     // pick only the first one for now
     const esqlLayer = state.layers.find(
-      (layer): layer is LayerTypeESQL => layer.dataset?.type === 'esql'
+      (layer): layer is LayerTypeESQL => 'dataset' in layer && layer.dataset?.type === 'esql'
     );
     if (esqlLayer && 'query' in esqlLayer.dataset) {
       return { esql: esqlLayer.dataset.query };

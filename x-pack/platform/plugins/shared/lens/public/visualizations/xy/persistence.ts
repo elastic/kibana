@@ -8,74 +8,31 @@
 import type { Reference } from '@kbn/content-management-utils';
 import { EVENT_ANNOTATION_GROUP_TYPE } from '@kbn/event-annotation-common';
 
-import type { AnnotationGroups } from '@kbn/lens-common';
-import { LENS_LAYER_TYPES } from '@kbn/lens-common';
-import type {
-  XYLayerConfig,
-  XYDataLayerConfig,
-  XYReferenceLineLayerConfig,
-  XYState,
-  XYAnnotationLayerConfig,
-  XYByReferenceAnnotationLayerConfig,
-  XYByValueAnnotationLayerConfig,
-} from './types';
-import { isAnnotationsLayer, isByReferenceAnnotationsLayer } from './visualization_helpers';
+import {
+  isPersistedAnnotationsLayer,
+  isPersistedByReferenceAnnotationsLayer,
+  isPersistedByValueAnnotationsLayer,
+  type AnnotationGroups,
+  type XYPersistedByReferenceAnnotationLayerConfig,
+  type XYPersistedLayerConfig,
+  type XYPersistedLinkedByValueAnnotationLayerConfig,
+  type XYPersistedState,
+} from '@kbn/lens-common';
 import { nonNullable } from '../../utils';
 import { annotationLayerHasUnsavedChanges } from './state_helpers';
-
-const isPersistedByReferenceAnnotationsLayer = (
-  layer: XYPersistedAnnotationLayerConfig
-): layer is XYPersistedByReferenceAnnotationLayerConfig =>
-  isPersistedAnnotationsLayer(layer) && layer.persistanceType === 'byReference';
+import type {
+  XYAnnotationLayerConfig,
+  XYByReferenceAnnotationLayerConfig,
+  XYLayerConfig,
+  XYState,
+} from './types';
+import { isAnnotationsLayer, isByReferenceAnnotationsLayer } from './visualization_helpers';
 
 /**
- * This is the type of hybrid layer we get after the user has made a change to
- * a by-reference annotation layer and saved the visualization without
- * first saving the changes to the library annotation layer.
+ * Converts persisted state to runtime state.
  *
- * We maintain the link to the library annotation group, but allow the users
- * changes (persisted in the visualization state) to override the attributes in
- * the library version until the user
- * - saves the changes to the library annotation group
- * - reverts the changes
- * - unlinks the layer from the library annotation group
+ * Injects references to produce a fully formed XYState that can be used by the visualization.
  */
-export type XYPersistedLinkedByValueAnnotationLayerConfig = Omit<
-  XYPersistedByValueAnnotationLayerConfig,
-  'persistanceType'
-> &
-  Omit<XYPersistedByReferenceAnnotationLayerConfig, 'persistanceType'> & {
-    persistanceType: 'linked';
-  };
-
-export type XYPersistedByValueAnnotationLayerConfig = Omit<
-  XYByValueAnnotationLayerConfig,
-  'indexPatternId' | 'hide' | 'simpleView'
-> & { persistanceType?: 'byValue'; hide?: boolean; simpleView?: boolean }; // props made optional for backwards compatibility since this is how the existing saved objects are
-
-export type XYPersistedByReferenceAnnotationLayerConfig = Pick<
-  XYByValueAnnotationLayerConfig,
-  'layerId' | 'layerType'
-> & {
-  persistanceType: 'byReference';
-  annotationGroupRef: string;
-};
-
-export type XYPersistedAnnotationLayerConfig =
-  | XYPersistedByReferenceAnnotationLayerConfig
-  | XYPersistedByValueAnnotationLayerConfig
-  | XYPersistedLinkedByValueAnnotationLayerConfig;
-
-export type XYPersistedLayerConfig =
-  | XYDataLayerConfig
-  | XYReferenceLineLayerConfig
-  | XYPersistedAnnotationLayerConfig;
-
-export type XYPersistedState = Omit<XYState, 'layers'> & {
-  layers: XYPersistedLayerConfig[];
-  valuesInLegend?: boolean;
-};
-
 export function convertPersistedState(
   state: XYPersistedState,
   annotationGroups?: AnnotationGroups,
@@ -84,6 +41,12 @@ export function convertPersistedState(
   return structuredClone(injectReferences(state, annotationGroups, references));
 }
 
+/**
+ * Converts runtime state to persisted state.
+ *
+ * @param state The runtime XYState to convert.
+ * @returns An object containing the persistable state and any references.
+ */
 export function convertToPersistable(state: XYState) {
   const persistableState: XYPersistedState = state;
   const references: Reference[] = [];
@@ -160,17 +123,6 @@ export function convertToPersistable(state: XYState) {
     state: { ...persistableState, layers: persistableLayers },
   };
 }
-
-export const isPersistedAnnotationsLayer = (
-  layer: XYPersistedLayerConfig
-): layer is XYPersistedAnnotationLayerConfig =>
-  layer.layerType === LENS_LAYER_TYPES.ANNOTATIONS && !('indexPatternId' in layer);
-
-export const isPersistedByValueAnnotationsLayer = (
-  layer: XYPersistedLayerConfig
-): layer is XYPersistedByValueAnnotationLayerConfig =>
-  isPersistedAnnotationsLayer(layer) &&
-  (layer.persistanceType === 'byValue' || !layer.persistanceType);
 
 function getLayerReferenceName(layerId: string) {
   return `xy-visualization-layer-${layerId}`;

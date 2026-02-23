@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TypedLensSerializedState, XYState as XYStateLens } from '@kbn/lens-common';
+import type { TypedLensSerializedState, XYPersistedState } from '@kbn/lens-common';
 import type { XYState } from '../../schema';
 import {
   getSharedChartLensStateToAPI,
@@ -66,7 +66,7 @@ export function fromAPItoLensState(config: XYState): XYLensWithoutQueryAndFilter
 
 export function fromLensStateToAPI(config: LensAttributes): XYState {
   const { state } = config;
-  const visualizationState = state.visualization as XYStateLens;
+  const visualizationState = state.visualization as XYPersistedState;
   const layers = getDatasourceLayers(state);
 
   return {

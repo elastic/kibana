@@ -122,7 +122,9 @@ export interface ValidXYDataLayerConfig extends XYDataLayerConfig {
 
 export type ValidLayer = ValidXYDataLayerConfig | XYReferenceLineLayerConfig;
 
-// Persisted parts of the state
+/**
+ * Runtime state... use XYPersistedLayerConfig for persisted state (i.e. what gets saved in the saved object)
+ */
 export interface XYState {
   preferredSeriesType: SeriesType;
   legend: LegendConfig;

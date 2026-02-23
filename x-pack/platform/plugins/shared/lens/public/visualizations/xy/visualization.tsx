@@ -42,6 +42,7 @@ import type {
   AnnotationGroups,
   FormBasedPersistedState,
   VisualizationInfo,
+  XYPersistedState,
 } from '@kbn/lens-common';
 import { generateId } from '../../id_generator';
 import {
@@ -123,7 +124,6 @@ import { LayerSettings } from './layer_settings';
 import { IgnoredGlobalFiltersEntries } from '../../shared_components/ignore_global_filter';
 import { getColorMappingTelemetryEvents } from '../../lens_ui_telemetry/color_telemetry_helpers';
 import { getLegendStatsTelemetryEvents } from './legend_stats_telemetry_helpers';
-import type { XYPersistedState } from './persistence';
 import { convertPersistedState, convertToPersistable } from './persistence';
 import { shouldDisplayTable } from '../../shared_components/legend/legend_settings';
 import {
