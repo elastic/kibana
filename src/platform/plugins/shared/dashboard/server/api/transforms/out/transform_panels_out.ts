@@ -38,7 +38,7 @@ export function transformPanelsOut(
     const { sectionId } = panel.gridData;
     if (sectionId) {
       if (!sectionsMap[sectionId]) {
-        logger.warn(`Panel references non-existent section "${sectionId}", treating as top-level`);
+        logger?.warn(`Panel references non-existent section "${sectionId}", treating as top-level`);
         topLevelPanels.push(
           transformPanelProperties(panel, panelReferences, containerReferences)
         );
