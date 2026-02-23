@@ -666,7 +666,7 @@ describe('discover responsive sidebar', function () {
     };
     const { user } = await renderComponent(propsWithPicker, {}, services);
     // open flyout
-    await user.click(await screen.findByTestId('discover-sidebar-fields-button'));
+    await user.click(screen.getByTestId('discover-sidebar-fields-button'));
 
     // open data view picker
     await user.click(await screen.findByTestId('dataView-switch-link'));
@@ -679,7 +679,7 @@ describe('discover responsive sidebar', function () {
     const createDataViewButton = screen.getByTestId('dataview-create-new');
     await user.click(createDataViewButton);
     expect(services.dataViewEditor.openEditor).toHaveBeenCalled();
-  });
+  }, 5000);
 
   it('should not render buttons in data view picker when in viewer mode', async () => {
     const services = createMockServices();
@@ -694,7 +694,7 @@ describe('discover responsive sidebar', function () {
     };
     const { user } = await renderComponent(propsWithPicker, {}, services);
     // open flyout
-    await user.click(await screen.findByTestId('discover-sidebar-fields-button'));
+    await user.click(screen.getByTestId('discover-sidebar-fields-button'));
 
     // open data view picker
     await user.click(await screen.findByTestId('dataView-switch-link'));
@@ -720,7 +720,7 @@ describe('discover responsive sidebar', function () {
         undefined
       );
 
-      await user.click(await screen.findByTestId('discover-sidebar-fields-button'));
+      await user.click(screen.getByTestId('discover-sidebar-fields-button'));
 
       expect(screen.queryByTestId('custom-data-view-picker')).not.toBeInTheDocument();
     });
@@ -739,7 +739,7 @@ describe('discover responsive sidebar', function () {
         undefined
       );
 
-      await user.click(await screen.findByTestId('discover-sidebar-fields-button'));
+      await user.click(screen.getByTestId('discover-sidebar-fields-button'));
 
       expect(await screen.findByTestId('custom-data-view-picker')).toBeInTheDocument();
     });
