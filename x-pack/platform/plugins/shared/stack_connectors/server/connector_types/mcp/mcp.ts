@@ -29,7 +29,12 @@ import {
   UnauthorizedError,
 } from '@kbn/mcp-client';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/usage';
-import { MCP_CLIENT_VERSION, MAX_RETRIES } from '@kbn/connector-schemas/mcp/constants';
+import {
+  API_KEY_URL_PLACEHOLDER,
+  MCPAuthType,
+  MCP_CLIENT_VERSION,
+  MAX_RETRIES,
+} from '@kbn/connector-schemas/mcp';
 import { buildHeadersFromSecrets } from './auth_helpers';
 import { retryWithRecovery, type RetryOptions } from './retry_utils';
 
@@ -61,12 +66,18 @@ export const listToolsCache = new LRUCache<string, ListToolsResponse>({
 export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConnectorSecrets> {
   private mcpClient: McpClient;
   private authHeaders: Record<string, string>;
+  /** Resolved server URL (template + credential for ApiKeyInUrl); used for client and cache key. */
+  private readonly resolvedServerUrl: string;
 
   constructor(params: ServiceParams<MCPConnectorConfig, MCPConnectorSecrets>) {
     super(params);
 
     // Build auth headers from secrets based on authType
     this.authHeaders = buildHeadersFromSecrets(this.secrets, this.config);
+
+    // Resolve server URL: for ApiKeyInUrl with placeholder, substitute credential at runtime so
+    // the secret is never stored in config (avoids exposing it on GET/edit).
+    this.resolvedServerUrl = this.getResolvedServerUrl();
 
     // Merge non-secret headers from config with auth headers (auth headers take precedence)
     const headers: Record<string, string> = {
@@ -80,17 +91,34 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
       // Use default reconnection options from McpClient
     };
 
-    // Create client details using connector ID and server URL
+    // Create client details using connector ID and resolved server URL
     const clientDetails: ClientDetails = {
       name: `kibana-mcp-connector-${this.connector.id}`,
       version: MCP_CLIENT_VERSION,
-      url: this.config.serverUrl,
+      url: this.resolvedServerUrl,
     };
 
     // Initialize the single MCP Client instance for this connector
     this.mcpClient = new McpClient(this.logger, clientDetails, clientOptions);
 
     this.registerSubActions();
+  }
+
+  /**
+   * Returns the server URL used for the MCP client. For ApiKeyInUrl with template + secret,
+   * substitutes the placeholder so the credential is never stored in config.
+   */
+  private getResolvedServerUrl(): string {
+    const { serverUrl, authType } = this.config;
+    if (
+      authType === MCPAuthType.ApiKeyInUrl &&
+      typeof serverUrl === 'string' &&
+      serverUrl.includes(API_KEY_URL_PLACEHOLDER)
+    ) {
+      const credential = this.secrets?.token ?? this.secrets?.apiKey ?? '';
+      return credential ? serverUrl.split(API_KEY_URL_PLACEHOLDER).join(credential) : serverUrl;
+    }
+    return serverUrl ?? '';
   }
 
   private registerSubActions() {
@@ -119,7 +147,7 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
    */
   private getListToolsCacheKey(): string {
     const configHash = hash({
-      serverUrl: this.config.serverUrl,
+      serverUrl: this.resolvedServerUrl,
       headers: this.config.headers,
       hasAuth: this.config.hasAuth,
       authType: this.config.authType,

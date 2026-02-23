@@ -16,7 +16,8 @@ function buildSerializedResult(
   formData: MCPInternalConnectorForm,
   configHeaders: Record<string, string> | undefined,
   secretHeaders: Record<string, string> | undefined,
-  configOverrides?: Partial<{ serverUrl: string; hasAuth: boolean }>
+  configOverrides?: Partial<{ serverUrl: string; hasAuth: boolean }>,
+  secretsOverrides?: Partial<ConnectorFormSchema['secrets']>
 ): ConnectorFormSchema {
   return {
     ...formData,
@@ -27,6 +28,7 @@ function buildSerializedResult(
     },
     secrets: {
       secretHeaders: isEmpty(secretHeaders) ? undefined : secretHeaders,
+      ...secretsOverrides,
     },
   };
 }
@@ -40,16 +42,21 @@ export const formSerializer = (formData: MCPInternalConnectorForm): ConnectorFor
   const credential =
     formData.secrets?.token ?? formData.secrets?.apiKey ?? '';
 
+  // For ApiKeyInUrl: keep template URL in config (don't store credential in config) so GET/edit
+  // don't expose the secret. Store credential in secrets only; executor resolves URL at runtime.
   if (
     formData.config?.authType === MCPAuthType.ApiKeyInUrl &&
     typeof serverUrl === 'string' &&
     serverUrl.includes(API_KEY_URL_PLACEHOLDER) &&
     credential
   ) {
-    return buildSerializedResult(formData, configHeaders, secretHeaders, {
-      serverUrl: serverUrl.split(API_KEY_URL_PLACEHOLDER).join(credential),
-      hasAuth: false,
-    });
+    return buildSerializedResult(
+      formData,
+      configHeaders,
+      secretHeaders,
+      undefined, // keep config as-is: template URL, hasAuth true, authType ApiKeyInUrl
+      { token: credential as string }
+    );
   }
 
   return buildSerializedResult(formData, configHeaders, secretHeaders);
