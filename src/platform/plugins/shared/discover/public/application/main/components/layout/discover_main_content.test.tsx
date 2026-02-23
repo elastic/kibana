@@ -65,6 +65,10 @@ const mountComponent = async ({
     ? { esql: 'from *' }
     : { query: '', language: 'kuery' };
 
+  const { stateContainer } = await toolkit.initializeSingleTab({
+    tabId: toolkit.getCurrentTab().id,
+  });
+
   toolkit.internalState.dispatch(
     internalStateActions.updateAppState({
       tabId: toolkit.getCurrentTab().id,
@@ -78,10 +82,6 @@ const mountComponent = async ({
       },
     })
   );
-
-  const { stateContainer } = await toolkit.initializeSingleTab({
-    tabId: toolkit.getCurrentTab().id,
-  });
 
   stateContainer.dataState.data$.documents$.next({
     fetchStatus: FetchStatus.COMPLETE,
@@ -159,7 +159,7 @@ describe('Discover main content component', () => {
       const component = await mountComponent({ isChartAvailable: true, hideChart: true });
       expect(component.find(PanelsToggle).prop('isChartAvailable')).toBe(true);
       expect(component.find(PanelsToggle).prop('renderedFor')).toBe('tabs');
-      expect(component.find(EuiHorizontalRule).exists()).toBe(false);
+      expect(component.find(EuiHorizontalRule).exists()).toBe(true);
     });
 
     it('should include PanelsToggle when chart is not available', async () => {

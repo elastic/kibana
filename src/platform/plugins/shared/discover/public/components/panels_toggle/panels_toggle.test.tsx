@@ -23,7 +23,11 @@ describe('Panels toggle component', () => {
     isChartAvailable,
     renderedFor,
     hideChart,
-  }: Omit<PanelsToggleProps, 'stateContainer'> & { hideChart: boolean }) => {
+    hideDataTable = false,
+  }: Omit<PanelsToggleProps, 'stateContainer'> & {
+    hideChart: boolean;
+    hideDataTable?: boolean;
+  }) => {
     const toolkit = getDiscoverInternalStateMock();
 
     await toolkit.initializeTabs();
@@ -32,7 +36,7 @@ describe('Panels toggle component', () => {
     toolkit.internalState.dispatch(
       internalStateActions.setAppState({
         tabId: toolkit.getCurrentTab().id,
-        appState: { hideChart },
+        appState: { hideChart, hideDataTable },
       })
     );
 
@@ -115,7 +119,8 @@ describe('Panels toggle component', () => {
       expect(findTestSubject(component, 'dscShowSidebarButton').exists()).toBe(false);
       expect(findTestSubject(component, 'dscHideHistogramButton').exists()).toBe(false);
       expect(findTestSubject(component, 'dscShowHistogramButton').exists()).toBe(false);
-      expect(findTestSubject(component, 'dscHideTableButton').exists()).toBe(true);
+      expect(findTestSubject(component, 'dscHideTableButton').exists()).toBe(false);
+      expect(findTestSubject(component, 'dscShowTableButton').exists()).toBe(false);
     });
 
     it('should render correctly when sidebar is hidden and histogram is visible', async () => {
@@ -133,6 +138,7 @@ describe('Panels toggle component', () => {
       expect(findTestSubject(component, 'dscHideHistogramButton').exists()).toBe(false);
       expect(findTestSubject(component, 'dscShowHistogramButton').exists()).toBe(false);
       expect(findTestSubject(component, 'dscHideTableButton').exists()).toBe(true);
+      expect(findTestSubject(component, 'dscShowTableButton').exists()).toBe(false);
     });
 
     it('should render correctly when sidebar is hidden and histogram is visible but chart is not available', async () => {
@@ -149,7 +155,8 @@ describe('Panels toggle component', () => {
       expect(findTestSubject(component, 'dscShowSidebarButton').exists()).toBe(true);
       expect(findTestSubject(component, 'dscHideHistogramButton').exists()).toBe(false);
       expect(findTestSubject(component, 'dscShowHistogramButton').exists()).toBe(false);
-      expect(findTestSubject(component, 'dscHideTableButton').exists()).toBe(true);
+      expect(findTestSubject(component, 'dscHideTableButton').exists()).toBe(false);
+      expect(findTestSubject(component, 'dscShowTableButton').exists()).toBe(false);
     });
 
     it('should render correctly when sidebar is visible and histogram is hidden', async () => {
@@ -164,8 +171,9 @@ describe('Panels toggle component', () => {
         sidebarToggleState$,
       });
       expect(findTestSubject(component, 'dscShowSidebarButton').exists()).toBe(false);
-      expect(findTestSubject(component, 'dscShowHistogramButton').exists()).toBe(true);
-      expect(findTestSubject(component, 'dscShowTableButton').exists()).toBe(true);
+      expect(findTestSubject(component, 'dscShowHistogramButton').exists()).toBe(false); // it was moved to its own component and should not be rendered inside panels toggle when histogram is hidden
+      expect(findTestSubject(component, 'dscShowTableButton').exists()).toBe(false);
+      expect(findTestSubject(component, 'dscHideTableButton').exists()).toBe(true);
     });
 
     it('should render correctly when sidebar is visible and histogram is hidden but chart is not available', async () => {
@@ -180,9 +188,10 @@ describe('Panels toggle component', () => {
         sidebarToggleState$,
       });
       expect(findTestSubject(component, 'dscShowSidebarButton').exists()).toBe(false);
-      expect(findTestSubject(component, 'dscShowHistogramButton').exists()).toBe(true);
+      expect(findTestSubject(component, 'dscShowHistogramButton').exists()).toBe(false); // it was moved to its own component and should not be rendered inside panels toggle when histogram is hidden
       expect(findTestSubject(component, 'dscHideHistogramButton').exists()).toBe(false);
-      expect(findTestSubject(component, 'dscShowTableButton').exists()).toBe(true);
+      expect(findTestSubject(component, 'dscShowTableButton').exists()).toBe(false);
+      expect(findTestSubject(component, 'dscHideTableButton').exists()).toBe(false);
     });
 
     it('should render correctly when sidebar is hidden and histogram is hidden', async () => {
@@ -196,9 +205,10 @@ describe('Panels toggle component', () => {
         renderedFor: 'tabs',
         sidebarToggleState$,
       });
-      expect(findTestSubject(component, 'dscShowSidebarButton').exists()).toBe(true);
-      expect(findTestSubject(component, 'dscShowHistogramButton').exists()).toBe(true);
-      expect(findTestSubject(component, 'dscShowTableButton').exists()).toBe(true);
+      expect(findTestSubject(component, 'dscShowSidebarButton').exists()).toBe(false);
+      expect(findTestSubject(component, 'dscShowHistogramButton').exists()).toBe(false); // it was moved to its own component and should not be rendered inside panels toggle when histogram is hidden
+      expect(findTestSubject(component, 'dscShowTableButton').exists()).toBe(false);
+      expect(findTestSubject(component, 'dscHideTableButton').exists()).toBe(true);
     });
 
     it('should render correctly when sidebar is hidden and histogram is hidden but chart is not available', async () => {
@@ -213,9 +223,61 @@ describe('Panels toggle component', () => {
         sidebarToggleState$,
       });
       expect(findTestSubject(component, 'dscShowSidebarButton').exists()).toBe(true);
-      expect(findTestSubject(component, 'dscShowHistogramButton').exists()).toBe(true);
+      expect(findTestSubject(component, 'dscShowHistogramButton').exists()).toBe(false); // it was moved to its own component and should not be rendered inside panels toggle when histogram is hidden
       expect(findTestSubject(component, 'dscHideHistogramButton').exists()).toBe(false);
+      expect(findTestSubject(component, 'dscShowTableButton').exists()).toBe(false);
+      expect(findTestSubject(component, 'dscHideTableButton').exists()).toBe(false);
+    });
+
+    it('should render correctly when table is hidden and chart is available', async () => {
+      const sidebarToggleState$ = new BehaviorSubject<SidebarToggleState>({
+        isCollapsed: false,
+        toggle: jest.fn(),
+      });
+      const component = await mountComponent({
+        hideChart: false,
+        hideDataTable: true,
+        isChartAvailable: true,
+        renderedFor: 'tabs',
+        sidebarToggleState$,
+      });
       expect(findTestSubject(component, 'dscShowTableButton').exists()).toBe(true);
+      expect(findTestSubject(component, 'dscHideTableButton').exists()).toBe(false);
+      expect(findTestSubject(component, 'dscShowHistogramButton').exists()).toBe(false);
+      expect(findTestSubject(component, 'dscHideHistogramButton').exists()).toBe(false);
+    });
+
+    it('should render correctly when table is hidden and chart is available with collapsed sidebar', async () => {
+      const sidebarToggleState$ = new BehaviorSubject<SidebarToggleState>({
+        isCollapsed: true,
+        toggle: jest.fn(),
+      });
+      const component = await mountComponent({
+        hideChart: false,
+        hideDataTable: true,
+        isChartAvailable: true,
+        renderedFor: 'tabs',
+        sidebarToggleState$,
+      });
+      expect(findTestSubject(component, 'dscShowTableButton').exists()).toBe(true);
+      expect(findTestSubject(component, 'dscHideTableButton').exists()).toBe(false);
+      expect(findTestSubject(component, 'dscShowSidebarButton').exists()).toBe(false);
+    });
+
+    it('should render correctly when table is hidden and chart is not available', async () => {
+      const sidebarToggleState$ = new BehaviorSubject<SidebarToggleState>({
+        isCollapsed: false,
+        toggle: jest.fn(),
+      });
+      const component = await mountComponent({
+        hideChart: false,
+        hideDataTable: true,
+        isChartAvailable: false,
+        renderedFor: 'tabs',
+        sidebarToggleState$,
+      });
+      expect(findTestSubject(component, 'dscShowTableButton').exists()).toBe(false);
+      expect(findTestSubject(component, 'dscHideTableButton').exists()).toBe(false);
     });
   });
 });
