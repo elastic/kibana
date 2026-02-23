@@ -49,6 +49,18 @@ export interface SnoozedInstanceConfig {
   conditionOperator?: 'any' | 'all';
 }
 
+export interface SnoozedInstanceEntry {
+  instanceId: string;
+  expiresAt?: string;
+  conditions?: Array<{
+    type: string;
+    field: string;
+    value?: string;
+    snapshotValue?: string;
+  }>;
+  conditionOperator?: 'any' | 'all';
+}
+
 export interface AlertRuleData {
   consumer: string;
   executionId: string;
@@ -61,7 +73,7 @@ export interface AlertRuleData {
   alertDelay: number;
   muteAll: boolean;
   mutedInstanceIds: string[];
-  snoozedInstances?: Record<string, SnoozedInstanceConfig>;
+  snoozedInstances?: SnoozedInstanceEntry[];
 }
 
 export interface AlertRule {

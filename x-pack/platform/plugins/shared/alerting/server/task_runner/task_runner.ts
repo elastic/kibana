@@ -481,6 +481,11 @@ export class TaskRunner<
         });
       }
 
+      // Persist the updated snoozedInstances to the rule SO. If this fails,
+      // the entry remains and the scheduler will re-evaluate and retry on the
+      // next execution. The AAD doc may be temporarily inconsistent (ALERT_MUTED
+      // cleared by updatePersistedAlerts below, but rule SO still has the entry),
+      // which self-heals when the next build sets ALERT_MUTED from the rule SO.
       try {
         const esClient = this.context.elasticsearch.client.asInternalUser;
         await partiallyUpdateRuleWithEs(esClient, rule.id, {

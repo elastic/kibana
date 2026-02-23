@@ -502,6 +502,29 @@ describe('buildNewAlert', () => {
       expect((result as Record<string, unknown>)[ALERT_MUTED]).toBe(true);
     });
 
+    test('should set ALERT_MUTED to true when alert is in snoozedInstances', () => {
+      const legacyAlert = new LegacyAlert<{}, {}, 'default'>('alert-A');
+      legacyAlert.scheduleActions('default');
+
+      const result = buildNewAlert<{}, {}, {}, 'default', 'recovered'>({
+        legacyAlert,
+        rule: alertRule,
+        ruleData: {
+          ...ruleData,
+          snoozedInstances: [
+            {
+              instanceId: 'alert-A',
+              expiresAt: new Date(Date.now() + 3600000).toISOString(),
+            },
+          ],
+        },
+        timestamp: '2023-03-28T12:27:28.159Z',
+        kibanaVersion: '8.9.0',
+      });
+
+      expect((result as Record<string, unknown>)[ALERT_MUTED]).toBe(true);
+    });
+
     test('should set ALERT_MUTED to false when alert instance ID is not in mutedInstanceIds', () => {
       const legacyAlert = new LegacyAlert<{}, {}, 'default'>('alert-A');
       legacyAlert.scheduleActions('default');

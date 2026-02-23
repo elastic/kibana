@@ -166,6 +166,9 @@ async function muteInstanceWithOCC(
       }
     } else if (!mutedInstanceIds.includes(alertInstanceId)) {
       // Simple mute: add to mutedInstanceIds on the rule SO and set kibana.alert.muted on the doc.
+      // Note: if the alert is already in snoozedInstances, the simple mute is additive.
+      // The alert will be muted by both mechanisms; explicit unsnooze is required to remove
+      // the conditional snooze, and unmute to remove the simple mute.
       mutedInstanceIds.push(alertInstanceId);
 
       await updateRuleSo({
