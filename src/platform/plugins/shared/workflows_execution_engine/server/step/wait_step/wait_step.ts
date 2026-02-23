@@ -38,10 +38,4 @@ export class WaitStepImpl implements NodeImplementation {
     );
     this.workflowRuntime.navigateToNextNode();
   }
-
-  async onCancel(): Promise<void> {
-    this.workflowLogger.logDebug(
-      `Cancelled waiting for ${this.node.configuration.with.duration} in step ${this.node.id}`
-    );
-  }
 }
