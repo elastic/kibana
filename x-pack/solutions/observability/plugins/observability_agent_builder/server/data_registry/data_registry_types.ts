@@ -185,24 +185,6 @@ export interface ObservabilityAgentBuilderDataRegistryTypes {
     transactionType?: string;
   }) => Promise<ServiceSummary>;
 
-  apmExitSpanChangePoints: (params: {
-    request: KibanaRequest;
-    serviceName: string;
-    serviceEnvironment: string;
-    start: string;
-    end: string;
-  }) => Promise<ChangePointGrouping[]>;
-
-  apmServiceChangePoints: (params: {
-    request: KibanaRequest;
-    serviceName: string;
-    serviceEnvironment: string;
-    transactionType?: string;
-    transactionName?: string;
-    start: string;
-    end: string;
-  }) => Promise<ChangePointGrouping[]>;
-
   servicesItems: (params: {
     request: KibanaRequest;
     environment?: string;

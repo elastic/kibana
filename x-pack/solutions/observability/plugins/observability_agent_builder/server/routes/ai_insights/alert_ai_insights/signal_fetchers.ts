@@ -6,8 +6,11 @@
  */
 
 import type { IScopedClusterClient, KibanaRequest, Logger } from '@kbn/core/server';
+import datemath from '@elastic/datemath';
 import { compact, isEmpty } from 'lodash';
 import moment from 'moment';
+import { SPAN_DESTINATION_SERVICE_RESOURCE, SPAN_DURATION } from '@kbn/apm-types';
+import { ApmDocumentType, getBucketSize, RollupInterval } from '@kbn/apm-data-access-plugin/common';
 import type { ObservabilityAgentBuilderDataRegistry } from '../../../data_registry/data_registry';
 import type {
   ObservabilityAgentBuilderCoreSetup,
@@ -17,6 +20,7 @@ import { getToolHandler as getLogGroups } from '../../../tools/get_log_groups/ha
 import { getToolHandler as getRuntimeMetrics } from '../../../tools/get_runtime_metrics/handler';
 import { getToolHandler as getHosts } from '../../../tools/get_hosts/handler';
 import { getToolHandler as getServices } from '../../../tools/get_services/handler';
+import { getTraceChangePoints } from '../../../tools/get_trace_change_points/handler';
 import { getServiceTopology } from '../../../tools/get_service_topology/get_service_topology';
 
 export interface SignalFetcherDeps {
@@ -75,21 +79,50 @@ export const SIGNAL_FETCHERS: SignalFetcher[] = [
     description: 'sudden shifts in throughput/latency/failure rate — shows when problems started',
     startOffsetMinutes: 6 * 60,
     async fetch(
-      { dataRegistry, request, serviceName, serviceEnvironment, transactionType, transactionName },
-      start,
-      end
-    ) {
-      if (!serviceName) return null;
-      const data = await dataRegistry.getData('apmServiceChangePoints', {
+      {
+        core,
+        plugins,
         request,
+        logger,
         serviceName,
         serviceEnvironment,
         transactionType,
         transactionName,
+      },
+      start,
+      end
+    ) {
+      if (!serviceName) return null;
+      let kqlFilter = `service.name: "${serviceName}" AND service.environment: "${serviceEnvironment}"`;
+      if (transactionType) {
+        kqlFilter += ` AND transaction.type: "${transactionType}"`;
+      }
+      if (transactionName) {
+        kqlFilter += ` AND transaction.name: "${transactionName}"`;
+      }
+      const buckets = await getTraceChangePoints({
+        core,
+        plugins,
+        request,
+        logger,
         start,
         end,
+        kqlFilter,
+        groupBy: 'transaction.name',
+        latencyType: 'p95',
+        apmDataSource: undefined,
       });
-      return isEmpty(data) ? null : data;
+
+      const changePoints = buckets.map((bucket) => {
+        return {
+          key: bucket.key,
+          doc_count: bucket.doc_count,
+          changes_latency: bucket.changes_latency,
+          changes_throughput: bucket.changes_throughput,
+          changes_failure_rate: bucket.changes_failure_rate,
+        };
+      });
+      return isEmpty(changePoints) ? null : changePoints;
     },
   },
   {
@@ -97,16 +130,42 @@ export const SIGNAL_FETCHERS: SignalFetcher[] = [
     description:
       'sudden shifts in throughput/latency/failure rate of downstream dependencies — shows when problems started',
     startOffsetMinutes: 6 * 60,
-    async fetch({ dataRegistry, request, serviceName, serviceEnvironment }, start, end) {
+    async fetch({ core, plugins, request, logger, serviceName, serviceEnvironment }, start, end) {
       if (!serviceName) return null;
-      const data = await dataRegistry.getData('apmExitSpanChangePoints', {
+
+      const { bucketSize, intervalString } = getBucketSize({
+        start: datemath.parse(start)!.valueOf(),
+        end: datemath.parse(end)!.valueOf(),
+        numBuckets: 100,
+      });
+
+      const buckets = await getTraceChangePoints({
+        core,
+        plugins,
         request,
-        serviceName,
-        serviceEnvironment,
+        logger,
         start,
         end,
+        kqlFilter: `service.name: "${serviceName}" AND service.environment: "${serviceEnvironment}"`,
+        groupBy: SPAN_DESTINATION_SERVICE_RESOURCE,
+        latencyType: 'avg',
+        apmDataSource: {
+          documentType: ApmDocumentType.ServiceDestinationMetric,
+          rollupInterval: RollupInterval.OneMinute,
+          durationField: SPAN_DURATION,
+          bucketSize,
+        },
       });
-      return isEmpty(data) ? null : data;
+      const changePoints = buckets.map((bucket) => {
+        return {
+          key: bucket.key,
+          doc_count: bucket.doc_count,
+          changes_latency: bucket.changes_latency,
+          changes_throughput: bucket.changes_throughput,
+          changes_failure_rate: bucket.changes_failure_rate,
+        };
+      });
+      return isEmpty(changePoints) ? null : changePoints;
     },
   },
   {

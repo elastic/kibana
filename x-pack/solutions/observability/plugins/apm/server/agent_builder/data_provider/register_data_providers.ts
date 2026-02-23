@@ -19,7 +19,6 @@ import { getConnectionStats } from '../../lib/connections/get_connection_stats';
 import { getServicesItems } from '../../routes/services/get_services/get_services_items';
 import { ApmDocumentType } from '../../../common/document_type';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
-import { getExitSpanChangePoints, getServiceChangePoints } from './get_change_points';
 import { buildApmToolResources } from '../utils/build_apm_tool_resources';
 import type { APMPluginSetupDependencies, APMPluginStartDependencies } from '../../types';
 
@@ -61,46 +60,6 @@ export function registerDataProviders({
           end,
           'transaction.type': transactionType,
         },
-      });
-    }
-  );
-
-  observabilityAgentBuilder.registerDataProvider(
-    'apmExitSpanChangePoints',
-    async ({ request, serviceName, serviceEnvironment, start, end }) => {
-      const { apmEventClient } = await buildApmToolResources({ core, plugins, request });
-
-      return getExitSpanChangePoints({
-        apmEventClient,
-        serviceName,
-        serviceEnvironment,
-        start,
-        end,
-      });
-    }
-  );
-
-  observabilityAgentBuilder.registerDataProvider(
-    'apmServiceChangePoints',
-    async ({
-      request,
-      serviceName,
-      serviceEnvironment,
-      transactionType,
-      transactionName,
-      start,
-      end,
-    }) => {
-      const { apmEventClient } = await buildApmToolResources({ core, plugins, request });
-
-      return getServiceChangePoints({
-        apmEventClient,
-        serviceName,
-        serviceEnvironment,
-        transactionType,
-        transactionName,
-        start,
-        end,
       });
     }
   );

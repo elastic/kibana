@@ -15,7 +15,7 @@ export type DocumentType =
 
 export type LatencyAggregationType = 'avg' | 'p99' | 'p95';
 
-export function getLatencyAggregation({
+export function getDurationField({
   latencyAggregationType,
   hasDurationSummaryField,
   documentType,
@@ -27,7 +27,17 @@ export function getLatencyAggregation({
   // cant calculate percentile aggregation on transaction.duration.summary field
   const useDurationSummaryField =
     hasDurationSummaryField && latencyAggregationType !== 'p95' && latencyAggregationType !== 'p99';
-  const durationField = getDurationFieldForTransactions(documentType, useDurationSummaryField);
+
+  return getDurationFieldForTransactions(documentType, useDurationSummaryField);
+}
+
+export function getLatencyAggregation({
+  latencyAggregationType,
+  durationField,
+}: {
+  latencyAggregationType: LatencyAggregationType;
+  durationField: string;
+}) {
   return {
     latency: {
       ...(latencyAggregationType === 'avg'
@@ -59,7 +69,7 @@ export function getLatencyValue({
   return null;
 }
 
-export function getFailureRateAggregation(documentType: DocumentType) {
+export function getFailureRateAggregation(documentType: ApmDocumentType) {
   const calculateFailedTransactionRate =
     'params.successful_or_failed != null && params.successful_or_failed > 0 ? (params.successful_or_failed - params.success) / params.successful_or_failed : 0';
   return {

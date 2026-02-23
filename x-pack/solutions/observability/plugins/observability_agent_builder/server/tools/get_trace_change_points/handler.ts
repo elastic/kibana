@@ -8,6 +8,7 @@ import type { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
 import type { ChangePointType } from '@kbn/es-types/src';
 import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/types';
 import { intervalToSeconds } from '@kbn/apm-data-access-plugin/common/utils/get_preferred_bucket_size_and_data_source';
+import type { ApmDocumentType, RollupInterval } from '@kbn/apm-data-access-plugin/common';
 import type {
   ObservabilityAgentBuilderPluginSetupDependencies,
   ObservabilityAgentBuilderPluginStart,
@@ -20,6 +21,7 @@ import { getPreferredDocumentSource } from '../../utils/get_preferred_document_s
 import type { ChangePointDetails } from '../../utils/get_change_points';
 import {
   type LatencyAggregationType,
+  getDurationField,
   type DocumentType,
   getLatencyAggregation,
   getLatencyValue,
@@ -61,7 +63,7 @@ function getChangePointsAggs(bucketsPath: string) {
   return changePointAggs;
 }
 
-export async function getToolHandler({
+export async function getTraceChangePoints({
   core,
   plugins,
   request,
@@ -71,6 +73,7 @@ export async function getToolHandler({
   kqlFilter,
   groupBy,
   latencyType = 'avg',
+  apmDataSource,
 }: {
   core: CoreSetup<
     ObservabilityAgentBuilderPluginStartDependencies,
@@ -84,7 +87,15 @@ export async function getToolHandler({
   kqlFilter?: string;
   groupBy: string;
   latencyType: LatencyAggregationType | undefined;
-}): Promise<BucketChangePoints[]> {
+  apmDataSource:
+    | {
+        documentType: ApmDocumentType;
+        rollupInterval: RollupInterval;
+        bucketSize: number;
+        durationField: string;
+      }
+    | undefined;
+}) {
   const { apmEventClient, apmDataAccessServices } = await buildApmResources({
     core,
     plugins,
@@ -94,18 +105,34 @@ export async function getToolHandler({
 
   const startMs = parseDatemath(start);
   const endMs = parseDatemath(end);
-  const source = await getPreferredDocumentSource({
-    apmDataAccessServices,
-    start: startMs,
-    end: endMs,
-    groupBy,
-    kqlFilter,
-  });
 
-  const { rollupInterval, hasDurationSummaryField } = source;
-  const documentType = source.documentType as DocumentType;
-  const bucketSizeInSeconds = intervalToSeconds(rollupInterval);
+  let documentType: ApmDocumentType;
+  let rollupInterval: RollupInterval;
+  let bucketSizeInSeconds: number;
+  let durationField: string;
+  if (!apmDataSource) {
+    const source = await getPreferredDocumentSource({
+      apmDataAccessServices,
+      start: startMs,
+      end: endMs,
+      groupBy,
+      kqlFilter,
+    });
+    documentType = source.documentType;
+    rollupInterval = source.rollupInterval;
+    bucketSizeInSeconds = intervalToSeconds(source.rollupInterval);
 
+    durationField = getDurationField({
+      latencyAggregationType: latencyType,
+      hasDurationSummaryField: source.hasDurationSummaryField,
+      documentType: source.documentType as DocumentType,
+    });
+  } else {
+    documentType = apmDataSource.documentType;
+    rollupInterval = apmDataSource.rollupInterval;
+    bucketSizeInSeconds = apmDataSource.bucketSize;
+    durationField = apmDataSource.durationField;
+  }
   const response = await apmEventClient.search('get_trace_change_points', {
     apm: {
       sources: [{ documentType, rollupInterval }],
@@ -137,8 +164,7 @@ export async function getToolHandler({
             aggs: {
               ...getLatencyAggregation({
                 latencyAggregationType: latencyType,
-                hasDurationSummaryField,
-                documentType,
+                durationField,
               }),
               ...getFailureRateAggregation(documentType),
               ...getThroughputAggregation(bucketSizeInSeconds / 60),
@@ -151,8 +177,45 @@ export async function getToolHandler({
       },
     },
   });
+  return response.aggregations?.groups?.buckets ?? [];
+}
 
-  const buckets = response.aggregations?.groups?.buckets ?? [];
+export async function getToolHandler({
+  core,
+  plugins,
+  request,
+  logger,
+  start,
+  end,
+  kqlFilter,
+  groupBy,
+  latencyType = 'avg',
+}: {
+  core: CoreSetup<
+    ObservabilityAgentBuilderPluginStartDependencies,
+    ObservabilityAgentBuilderPluginStart
+  >;
+  plugins: ObservabilityAgentBuilderPluginSetupDependencies;
+  request: KibanaRequest;
+  logger: Logger;
+  start: string;
+  end: string;
+  kqlFilter?: string;
+  groupBy: string;
+  latencyType: LatencyAggregationType | undefined;
+}): Promise<BucketChangePoints[]> {
+  const buckets = await getTraceChangePoints({
+    core,
+    plugins,
+    request,
+    logger,
+    start,
+    end,
+    kqlFilter,
+    groupBy,
+    latencyType,
+    apmDataSource: undefined,
+  });
 
   const changePoints = buckets.map((bucket) => {
     const timeSeries = bucket.time_series.buckets.map((tsBucket) => {
