@@ -19,7 +19,7 @@ import { createCriteriaEvaluator } from './evaluators/criteria';
 import type { DefaultEvaluators, EvaluationSpecificWorkerFixtures } from './types';
 import { mapToEvaluationScoreDocuments, exportEvaluations } from './utils/report_model_score';
 import { createDefaultTerminalReporter } from './utils/reporting/evaluation_reporter';
-import { createConnectorFixture, getConnectorIdAsUuid } from './utils/create_connector_fixture';
+import { createConnectorFixture, resolveConnectorId } from './utils/create_connector_fixture';
 import { createCorrectnessAnalysisEvaluator } from './evaluators/correctness';
 import { EvaluationScoreRepository } from './utils/score_repository';
 import { createGroundednessAnalysisEvaluator } from './evaluators/groundedness';
@@ -85,9 +85,7 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
         testInfo.project.use as Pick<EvaluationTestOptions, 'evaluationConnector'>
       ).evaluationConnector;
 
-      const evaluationConnectorUuid = getConnectorIdAsUuid(predefinedConnector.id);
-
-      if (evaluationConnectorUuid !== connector.id) {
+      if (resolveConnectorId(predefinedConnector.id) !== connector.id) {
         await createConnectorFixture({ predefinedConnector, fetch, log, use });
       } else {
         // If the evaluation connector is the same as the main connector, reuse it
