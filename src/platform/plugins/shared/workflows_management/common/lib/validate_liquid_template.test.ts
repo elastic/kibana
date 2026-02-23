@@ -23,6 +23,21 @@ describe('validateLiquidTemplate (common)', () => {
       expect(validateLiquidTemplate('Hello {% if condition %}world{% endif %}')).toEqual([]);
     });
 
+    it('should return empty array for complex valid template', () => {
+      const yamlString = `
+        Hello {{ user.name | capitalize }}
+        {% if user.isActive %}
+          Welcome back!
+        {% else %}
+          Please activate your account
+        {% endif %}
+        {% for item in items %}
+          - {{ item.title }}
+        {% endfor %}
+      `;
+      expect(validateLiquidTemplate(yamlString)).toEqual([]);
+    });
+
     it('should return empty array for empty string', () => {
       expect(validateLiquidTemplate('')).toEqual([]);
     });
@@ -47,6 +62,12 @@ describe('validateLiquidTemplate (common)', () => {
       expect(result[0].message).toContain('not closed');
     });
 
+    it('should return errors for unclosed tag expressions', () => {
+      const result = validateLiquidTemplate('Hello {% unclosed world');
+      expect(result).toHaveLength(1);
+      expect(result[0].message).toContain('not closed');
+    });
+
     it('should return errors for unknown tag', () => {
       const result = validateLiquidTemplate('Hello {% unknownTag %} world');
       expect(result).toHaveLength(1);
@@ -67,6 +88,49 @@ describe('validateLiquidTemplate (common)', () => {
       expect(result[0]).toHaveProperty('startColumn');
       expect(result[0]).toHaveProperty('endLine');
       expect(result[0]).toHaveProperty('endColumn');
+    });
+
+    it('should remove line and column numbers from customer-facing messages', () => {
+      const result = validateLiquidTemplate('Hello {{ name | unknownFilter }} world');
+      expect(result).toHaveLength(1);
+      expect(result[0].message).not.toContain('line:');
+      expect(result[0].message).not.toContain('col:');
+    });
+  });
+
+  describe('position conversion', () => {
+    it('should convert offset to line/column correctly for single line', () => {
+      const result = validateLiquidTemplate('Hello {{ name | unknownFilter }} world');
+      expect(result).toHaveLength(1);
+      expect(result[0].startLine).toBe(1);
+      expect(result[0].startColumn).toBeGreaterThan(1);
+      expect(result[0].endLine).toBe(1);
+      expect(result[0].endColumn).toBeGreaterThan(result[0].startColumn);
+    });
+
+    it('should convert offset to line/column correctly for multi-line', () => {
+      const yamlString = `Line 1
+Line 2 with {{ error | unknownFilter }} here
+Line 3`;
+
+      const result = validateLiquidTemplate(yamlString);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].startLine).toBe(2);
+      expect(result[0].endLine).toBe(2);
+    });
+
+    it('should handle position at the beginning of text', () => {
+      const result = validateLiquidTemplate('{{ name | unknownFilter }} at start');
+      expect(result).toHaveLength(1);
+      expect(result[0].startLine).toBe(1);
+    });
+
+    it('should handle position at the end of text', () => {
+      const result = validateLiquidTemplate('at end {{ name | unknownFilter }}');
+      expect(result).toHaveLength(1);
+      expect(result[0].startLine).toBe(1);
+      expect(result[0].startColumn).toBeGreaterThan(1);
     });
   });
 });
