@@ -17,6 +17,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
+import { ExperimentalFeaturesService } from '../../../../services';
 import { useIsFirstTimeAgentUserQuery } from '../../../../../integrations/sections/epm/screens/detail/hooks';
 
 import type { Agent, AgentPolicy } from '../../../../types';
@@ -57,6 +58,7 @@ export interface SearchAndFilterBarProps {
   refreshAgents: (args?: { refreshTags?: boolean }) => void;
   onClickAddAgent: () => void;
   onClickAddFleetServer: () => void;
+  onClickAddCollector: () => void;
   agentsOnCurrentPage: Agent[];
   onClickAgentActivity: () => void;
   shouldShowAgentActivityTour?: boolean;
@@ -90,6 +92,7 @@ export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps
   refreshAgents,
   onClickAddAgent,
   onClickAddFleetServer,
+  onClickAddCollector,
   agentsOnCurrentPage,
   onClickAgentActivity,
   shouldShowAgentActivityTour,
@@ -100,7 +103,7 @@ export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps
   unsupportedPrivilegeLevelChangeAgents,
 }) => {
   const authz = useAuthz();
-
+  const { enableOpAMP } = ExperimentalFeaturesService.get();
   const { isFirstTimeAgentUser, isLoading: isFirstTimeAgentUserLoading } =
     useIsFirstTimeAgentUserQuery();
   const { cloud } = useStartServices();
@@ -149,23 +152,42 @@ export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps
               </EuiFlexItem>
             ) : null}
             {authz.fleet.addAgents ? (
-              <EuiFlexItem grow={false}>
-                <EuiToolTip
-                  content={
-                    <FormattedMessage
-                      id="xpack.fleet.agentList.addAgentButton.tooltip"
-                      defaultMessage="Add Elastic Agents to your hosts to collect data and send it to the Elastic Stack"
-                    />
-                  }
-                >
-                  <EuiButton fill onClick={onClickAddAgent} data-test-subj="addAgentButton">
-                    <FormattedMessage
-                      id="xpack.fleet.agentList.addButton"
-                      defaultMessage="Add agent"
-                    />
-                  </EuiButton>
-                </EuiToolTip>
-              </EuiFlexItem>
+              <>
+                <EuiFlexItem grow={false}>
+                  <EuiToolTip
+                    content={
+                      <FormattedMessage
+                        id="xpack.fleet.agentList.addAgentButton.tooltip"
+                        defaultMessage="Add Elastic Agents to your hosts to collect data and send it to the Elastic Stack"
+                      />
+                    }
+                  >
+                    <EuiButton fill onClick={onClickAddAgent} data-test-subj="addAgentButton">
+                      <FormattedMessage
+                        id="xpack.fleet.agentList.addButton"
+                        defaultMessage="Add agent"
+                      />
+                    </EuiButton>
+                  </EuiToolTip>
+                </EuiFlexItem>
+                {enableOpAMP && (
+                  <EuiFlexItem grow={false}>
+                    <EuiToolTip content="Monitor an OTel collector in Fleet with OpAMP.">
+                      <EuiButton
+                        fill
+                        color="accent"
+                        onClick={onClickAddCollector}
+                        data-test-subj="addCollectorButton"
+                      >
+                        <FormattedMessage
+                          id="xpack.fleet.agentList.addCollectorButton"
+                          defaultMessage="Add collector"
+                        />
+                      </EuiButton>
+                    </EuiToolTip>
+                  </EuiFlexItem>
+                )}
+              </>
             ) : null}
           </EuiFlexGroup>
         </EuiFlexGroup>
