@@ -21,6 +21,7 @@ const config: ReturnType<typeof createPlaywrightConfig> = {
     runGlobalSetup: true,
   }),
   timeout: 300_000,
+  retries: process.env.CI ? 1 : 0,
   ...(parallelJobCount && parallelJobIndex !== undefined
     ? {
         shard: {
