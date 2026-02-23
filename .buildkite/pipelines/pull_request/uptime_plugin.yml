@@ -13,8 +13,6 @@ steps:
       - linting_with_types
       - check_types
     timeout_in_minutes: 60
-    artifact_paths:
-      - 'x-pack/solutions/observability/plugins/synthetics/e2e/.journeys/**/*'
     retry:
       automatic:
         - exit_status: '-1'

@@ -127,7 +127,6 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       GITHUB_PR_LABELS.includes('ci:synthetics-runner-suites') ||
       ALL_UI_TEST_SUITES
     ) {
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/synthetics_plugin.yml'));
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/uptime_plugin.yml'));
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/ux_plugin_e2e.yml'));
     }

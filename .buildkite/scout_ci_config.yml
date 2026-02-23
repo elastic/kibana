@@ -34,6 +34,7 @@ plugins:
     - spaces
     - streams
     - streams_app
+    - synthetics
     - transform
     - workflows_extensions
     - workflows_management
