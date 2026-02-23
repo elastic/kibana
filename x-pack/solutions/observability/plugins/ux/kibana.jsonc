@@ -27,6 +27,7 @@
       "apm"
     ],
     "optionalPlugins": [
+      "agentBuilder",
       "cloud",
       "usageCollection",
       "taskManager",
