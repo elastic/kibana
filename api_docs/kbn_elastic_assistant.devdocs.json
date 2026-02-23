@@ -115,7 +115,7 @@
           ">"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/index.tsx",
-        "lineNumber": 658,
+        "lineNumber": 655,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -362,9 +362,9 @@
         "signature": [
           "(http: ",
           "HttpSetup",
-          ", prompts: { create?: { name: string; content: string; promptType: \"system\" | \"quick\"; consumer?: string | undefined; color?: string | undefined; categories?: string[] | undefined; isDefault?: boolean | undefined; isNewConversationDefault?: boolean | undefined; }[] | undefined; update?: { id: string; consumer?: string | undefined; color?: string | undefined; content?: string | undefined; categories?: string[] | undefined; isDefault?: boolean | undefined; isNewConversationDefault?: boolean | undefined; }[] | undefined; delete?: { ids?: string[] | undefined; query?: string | undefined; } | undefined; }, toasts?: ",
+          ", prompts: { create?: { name: string; content: string; promptType: \"system\" | \"quick\"; consumer?: string | undefined; color?: string | undefined; categories?: string[] | undefined; isDefault?: boolean | undefined; isNewConversationDefault?: boolean | undefined; }[] | undefined; update?: { id: string; consumer?: string | undefined; color?: string | undefined; content?: string | undefined; categories?: string[] | undefined; isDefault?: boolean | undefined; isNewConversationDefault?: boolean | undefined; }[] | undefined; delete?: { query?: string | undefined; ids?: string[] | undefined; } | undefined; }, toasts?: ",
           "IToasts",
-          " | undefined) => Promise<{ attributes: { results: { skipped: { id: string; skip_reason: \"PROMPT_FIELD_NOT_MODIFIED\"; name?: string | undefined; }[]; created: { id: string; name: string; content: string; promptType: \"system\" | \"quick\"; namespace?: string | undefined; consumer?: string | undefined; timestamp?: string | undefined; color?: string | undefined; createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; users?: { id?: string | undefined; name?: string | undefined; }[] | undefined; categories?: string[] | undefined; isDefault?: boolean | undefined; isNewConversationDefault?: boolean | undefined; }[]; updated: { id: string; name: string; content: string; promptType: \"system\" | \"quick\"; namespace?: string | undefined; consumer?: string | undefined; timestamp?: string | undefined; color?: string | undefined; createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; users?: { id?: string | undefined; name?: string | undefined; }[] | undefined; categories?: string[] | undefined; isDefault?: boolean | undefined; isNewConversationDefault?: boolean | undefined; }[]; deleted: string[]; }; summary: { skipped: number; total: number; succeeded: number; failed: number; }; errors?: { message: string; status_code: number; prompts: { id: string; name?: string | undefined; }[]; err_code?: string | undefined; }[] | undefined; }; message?: string | undefined; success?: boolean | undefined; status_code?: number | undefined; prompts_count?: number | undefined; } | { success: false; }>"
+          " | undefined) => Promise<{ attributes: { results: { skipped: { id: string; skip_reason: \"PROMPT_FIELD_NOT_MODIFIED\"; name?: string | undefined; }[]; created: { id: string; name: string; content: string; promptType: \"system\" | \"quick\"; namespace?: string | undefined; consumer?: string | undefined; timestamp?: string | undefined; color?: string | undefined; createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; users?: { id?: string | undefined; name?: string | undefined; }[] | undefined; categories?: string[] | undefined; isDefault?: boolean | undefined; isNewConversationDefault?: boolean | undefined; }[]; updated: { id: string; name: string; content: string; promptType: \"system\" | \"quick\"; namespace?: string | undefined; consumer?: string | undefined; timestamp?: string | undefined; color?: string | undefined; createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; users?: { id?: string | undefined; name?: string | undefined; }[] | undefined; categories?: string[] | undefined; isDefault?: boolean | undefined; isNewConversationDefault?: boolean | undefined; }[]; deleted: string[]; }; summary: { total: number; skipped: number; succeeded: number; failed: number; }; errors?: { message: string; status_code: number; prompts: { id: string; name?: string | undefined; }[]; err_code?: string | undefined; }[] | undefined; }; message?: string | undefined; success?: boolean | undefined; status_code?: number | undefined; prompts_count?: number | undefined; } | { success: false; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/api/prompts/bulk_update_prompts.ts",
         "lineNumber": 19,
@@ -397,7 +397,7 @@
             "label": "prompts",
             "description": [],
             "signature": [
-              "{ create?: { name: string; content: string; promptType: \"system\" | \"quick\"; consumer?: string | undefined; color?: string | undefined; categories?: string[] | undefined; isDefault?: boolean | undefined; isNewConversationDefault?: boolean | undefined; }[] | undefined; update?: { id: string; consumer?: string | undefined; color?: string | undefined; content?: string | undefined; categories?: string[] | undefined; isDefault?: boolean | undefined; isNewConversationDefault?: boolean | undefined; }[] | undefined; delete?: { ids?: string[] | undefined; query?: string | undefined; } | undefined; }"
+              "{ create?: { name: string; content: string; promptType: \"system\" | \"quick\"; consumer?: string | undefined; color?: string | undefined; categories?: string[] | undefined; isDefault?: boolean | undefined; isNewConversationDefault?: boolean | undefined; }[] | undefined; update?: { id: string; consumer?: string | undefined; color?: string | undefined; content?: string | undefined; categories?: string[] | undefined; isDefault?: boolean | undefined; isNewConversationDefault?: boolean | undefined; }[] | undefined; delete?: { query?: string | undefined; ids?: string[] | undefined; } | undefined; }"
             ],
             "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/api/prompts/bulk_update_prompts.ts",
             "lineNumber": 21,
@@ -720,7 +720,7 @@
         "label": "getNewSelectedPromptContext",
         "description": [],
         "signature": [
-          "({\n  anonymizationFields,\n  promptContext,\n}: { anonymizationFields?: { page: number; data: { id: string; field: string; namespace?: string | undefined; timestamp?: string | undefined; createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; allowed?: boolean | undefined; anonymized?: boolean | undefined; }[]; perPage: number; total: number; all?: { id: string; field: string; namespace?: string | undefined; timestamp?: string | undefined; createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; allowed?: boolean | undefined; anonymized?: boolean | undefined; }[] | undefined; aggregations?: { field_status?: { buckets?: { allowed?: { doc_count: number; } | undefined; anonymized?: { doc_count: number; } | undefined; denied?: { doc_count: number; } | undefined; } | undefined; } | undefined; } | undefined; } | undefined; promptContext: ",
+          "({\n  anonymizationFields,\n  promptContext,\n}: { anonymizationFields?: { page: number; total: number; data: { id: string; field: string; namespace?: string | undefined; timestamp?: string | undefined; createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; allowed?: boolean | undefined; anonymized?: boolean | undefined; }[]; perPage: number; all?: { id: string; field: string; namespace?: string | undefined; timestamp?: string | undefined; createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; allowed?: boolean | undefined; anonymized?: boolean | undefined; }[] | undefined; aggregations?: { field_status?: { buckets?: { allowed?: { doc_count: number; } | undefined; anonymized?: { doc_count: number; } | undefined; denied?: { doc_count: number; } | undefined; } | undefined; } | undefined; } | undefined; } | undefined; promptContext: ",
           {
             "pluginId": "@kbn/elastic-assistant",
             "scope": "public",
@@ -759,7 +759,7 @@
                 "label": "anonymizationFields",
                 "description": [],
                 "signature": [
-                  "{ page: number; data: { id: string; field: string; namespace?: string | undefined; timestamp?: string | undefined; createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; allowed?: boolean | undefined; anonymized?: boolean | undefined; }[]; perPage: number; total: number; all?: { id: string; field: string; namespace?: string | undefined; timestamp?: string | undefined; createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; allowed?: boolean | undefined; anonymized?: boolean | undefined; }[] | undefined; aggregations?: { field_status?: { buckets?: { allowed?: { doc_count: number; } | undefined; anonymized?: { doc_count: number; } | undefined; denied?: { doc_count: number; } | undefined; } | undefined; } | undefined; } | undefined; } | undefined"
+                  "{ page: number; total: number; data: { id: string; field: string; namespace?: string | undefined; timestamp?: string | undefined; createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; allowed?: boolean | undefined; anonymized?: boolean | undefined; }[]; perPage: number; all?: { id: string; field: string; namespace?: string | undefined; timestamp?: string | undefined; createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; allowed?: boolean | undefined; anonymized?: boolean | undefined; }[] | undefined; aggregations?: { field_status?: { buckets?: { allowed?: { doc_count: number; } | undefined; anonymized?: { doc_count: number; } | undefined; denied?: { doc_count: number; } | undefined; } | undefined; } | undefined; } | undefined; } | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/data_anonymization/get_new_selected_prompt_context/index.ts",
                 "lineNumber": 19,
@@ -1173,7 +1173,9 @@
             "type": "string",
             "tags": [],
             "label": "category",
-            "description": [],
+            "description": [
+              "/**\n   * The category of data, e.g. `alert | alerts | event | events | string`\n   *\n   * `category` helps the assistant display the most relevant user prompts\n   */"
+            ],
             "signature": [
               "string"
             ],
@@ -1190,7 +1192,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "conversationTitle",
-            "description": [],
+            "description": [
+              "/**\n   * optionally automatically add this context to a specific conversation when the assistant is displayed\n   */"
+            ],
             "signature": [
               "string | null"
             ],
@@ -1207,7 +1211,9 @@
             "type": "string",
             "tags": [],
             "label": "description",
-            "description": [],
+            "description": [
+              "/**\n   * The assistant will display this **short**, static description\n   * in the context pill\n   */"
+            ],
             "signature": [
               "string"
             ],
@@ -1224,7 +1230,9 @@
             "type": "Function",
             "tags": [],
             "label": "getPromptContext",
-            "description": [],
+            "description": [
+              "/**\n   * The assistant will invoke this function to retrieve the context data,\n   * which will be included in a prompt (e.g. the contents of an alert or an event)\n   */"
+            ],
             "signature": [
               "() => Promise<string> | Promise<Record<string, string[]>>"
             ],
@@ -1241,7 +1249,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "id",
-            "description": [],
+            "description": [
+              "/**\n   * Optionally provide a unique identifier for this prompt context, or accept the uuid default.\n   */"
+            ],
             "signature": [
               "string | null"
             ],
@@ -1258,7 +1268,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "suggestedUserPrompt",
-            "description": [],
+            "description": [
+              "/**\n   * An optional user prompt that's filled in, but not sent, when the Elastic AI Assistant opens\n   */"
+            ],
             "signature": [
               "string | null | undefined"
             ],
@@ -1275,7 +1287,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "tooltip",
-            "description": [],
+            "description": [
+              "/**\n   * The assistant will display this tooltip when the user hovers over the context pill\n   */"
+            ],
             "signature": [
               "React.ReactNode"
             ],
@@ -1292,7 +1306,9 @@
             "type": "boolean",
             "tags": [],
             "label": "isAssistantEnabled",
-            "description": [],
+            "description": [
+              "/** Required to identify the availability of the Assistant for the current license level */"
+            ],
             "signature": [
               "boolean"
             ],
@@ -1309,7 +1325,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "replacements",
-            "description": [],
+            "description": [
+              "/**\n   * Optionally provide a map of replacements associated with the context, i.e. replacements for an attack discovery that's provided as context\n   */"
+            ],
             "signature": [
               "objectOutputType",
               "<{}, ",
@@ -2503,7 +2521,7 @@
             "section": "def-public.ClientMessage",
             "text": "ClientMessage"
           },
-          " extends Omit<{ timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; id?: string | undefined; user?: { id?: string | undefined; name?: string | undefined; } | undefined; metadata?: { contentReferences?: ",
+          " extends Omit<{ timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; id?: string | undefined; metadata?: { contentReferences?: ",
           "objectOutputType",
           "<{}, ",
           "ZodUnion",
@@ -2571,7 +2589,7 @@
           "ZodTypeAny",
           ", { from: string; to: string; }, { from: string; to: string; }>>; }, \"strip\", ",
           "ZodTypeAny",
-          ", { id: string; type: \"EsqlQuery\"; label: string; query: string; timerange?: { from: string; to: string; } | undefined; }, { id: string; type: \"EsqlQuery\"; label: string; query: string; timerange?: { from: string; to: string; } | undefined; }>, ",
+          ", { id: string; type: \"EsqlQuery\"; query: string; label: string; timerange?: { from: string; to: string; } | undefined; }, { id: string; type: \"EsqlQuery\"; query: string; label: string; timerange?: { from: string; to: string; } | undefined; }>, ",
           "ZodObject",
           "<{ id: ",
           "ZodString",
@@ -2585,7 +2603,7 @@
           "ZodString",
           "; }, \"strip\", ",
           "ZodTypeAny",
-          ", { id: string; type: \"Href\"; href: string; label?: string | undefined; }, { id: string; type: \"Href\"; href: string; label?: string | undefined; }>]>, \"strip\"> | undefined; interruptValue?: { type: \"SELECT_OPTION\"; options: { value: string; label: string; buttonColor?: \"text\" | \"primary\" | \"neutral\" | \"success\" | \"accent\" | \"accentSecondary\" | \"warning\" | \"risk\" | \"danger\" | undefined; }[]; description: string; threadId: string; expired?: boolean | undefined; } | { type: \"INPUT_TEXT\"; threadId: string; description?: string | undefined; placeholder?: string | undefined; expired?: boolean | undefined; } | undefined; interruptResumeValue?: { value: string; type: \"SELECT_OPTION\"; } | { value: string; type: \"INPUT_TEXT\"; } | undefined; } | undefined; isError?: boolean | undefined; refusal?: string | undefined; reader?: ",
+          ", { id: string; type: \"Href\"; href: string; label?: string | undefined; }, { id: string; type: \"Href\"; href: string; label?: string | undefined; }>]>, \"strip\"> | undefined; interruptValue?: { type: \"SELECT_OPTION\"; options: { value: string; label: string; buttonColor?: \"text\" | \"primary\" | \"success\" | \"warning\" | \"accent\" | \"accentSecondary\" | \"danger\" | \"neutral\" | \"risk\" | undefined; }[]; description: string; threadId: string; expired?: boolean | undefined; } | { type: \"INPUT_TEXT\"; threadId: string; description?: string | undefined; placeholder?: string | undefined; expired?: boolean | undefined; } | undefined; interruptResumeValue?: { value: string; type: \"SELECT_OPTION\"; } | { value: string; type: \"INPUT_TEXT\"; } | undefined; } | undefined; user?: { id?: string | undefined; name?: string | undefined; } | undefined; isError?: boolean | undefined; refusal?: string | undefined; reader?: ",
           "objectOutputType",
           "<{}, ",
           "ZodUnknown",
@@ -2743,7 +2761,7 @@
             "label": "button",
             "description": [],
             "signature": [
-              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+              "React.ReactNode"
             ],
             "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/use_conversation/helpers.ts",
             "lineNumber": 20,
@@ -2980,11 +2998,11 @@
             "label": "update",
             "description": [],
             "signature": [
-              "Record<string, { id: string; title?: string | undefined; category?: \"assistant\" | \"insights\" | undefined; users?: { id?: string | undefined; name?: string | undefined; }[] | undefined; replacements?: ",
+              "Record<string, { id: string; title?: string | undefined; category?: \"insights\" | \"assistant\" | undefined; users?: { id?: string | undefined; name?: string | undefined; }[] | undefined; replacements?: ",
               "objectOutputType",
               "<{}, ",
               "ZodString",
-              ", \"strip\"> | undefined; apiConfig?: { connectorId: string; actionTypeId: string; provider?: \"Other\" | \"OpenAI\" | \"Azure OpenAI\" | undefined; model?: string | undefined; defaultSystemPromptId?: string | undefined; } | undefined; messages?: { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; id?: string | undefined; user?: { id?: string | undefined; name?: string | undefined; } | undefined; metadata?: { contentReferences?: ",
+              ", \"strip\"> | undefined; apiConfig?: { connectorId: string; actionTypeId: string; provider?: \"Other\" | \"OpenAI\" | \"Azure OpenAI\" | undefined; model?: string | undefined; defaultSystemPromptId?: string | undefined; } | undefined; messages?: { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; id?: string | undefined; metadata?: { contentReferences?: ",
               "objectOutputType",
               "<{}, ",
               "ZodUnion",
@@ -3052,7 +3070,7 @@
               "ZodTypeAny",
               ", { from: string; to: string; }, { from: string; to: string; }>>; }, \"strip\", ",
               "ZodTypeAny",
-              ", { id: string; type: \"EsqlQuery\"; label: string; query: string; timerange?: { from: string; to: string; } | undefined; }, { id: string; type: \"EsqlQuery\"; label: string; query: string; timerange?: { from: string; to: string; } | undefined; }>, ",
+              ", { id: string; type: \"EsqlQuery\"; query: string; label: string; timerange?: { from: string; to: string; } | undefined; }, { id: string; type: \"EsqlQuery\"; query: string; label: string; timerange?: { from: string; to: string; } | undefined; }>, ",
               "ZodObject",
               "<{ id: ",
               "ZodString",
@@ -3066,7 +3084,7 @@
               "ZodString",
               "; }, \"strip\", ",
               "ZodTypeAny",
-              ", { id: string; type: \"Href\"; href: string; label?: string | undefined; }, { id: string; type: \"Href\"; href: string; label?: string | undefined; }>]>, \"strip\"> | undefined; interruptValue?: { type: \"SELECT_OPTION\"; options: { value: string; label: string; buttonColor?: \"text\" | \"primary\" | \"neutral\" | \"success\" | \"accent\" | \"accentSecondary\" | \"warning\" | \"risk\" | \"danger\" | undefined; }[]; description: string; threadId: string; expired?: boolean | undefined; } | { type: \"INPUT_TEXT\"; threadId: string; description?: string | undefined; placeholder?: string | undefined; expired?: boolean | undefined; } | undefined; interruptResumeValue?: { value: string; type: \"SELECT_OPTION\"; } | { value: string; type: \"INPUT_TEXT\"; } | undefined; } | undefined; isError?: boolean | undefined; refusal?: string | undefined; reader?: ",
+              ", { id: string; type: \"Href\"; href: string; label?: string | undefined; }, { id: string; type: \"Href\"; href: string; label?: string | undefined; }>]>, \"strip\"> | undefined; interruptValue?: { type: \"SELECT_OPTION\"; options: { value: string; label: string; buttonColor?: \"text\" | \"primary\" | \"success\" | \"warning\" | \"accent\" | \"accentSecondary\" | \"danger\" | \"neutral\" | \"risk\" | undefined; }[]; description: string; threadId: string; expired?: boolean | undefined; } | { type: \"INPUT_TEXT\"; threadId: string; description?: string | undefined; placeholder?: string | undefined; expired?: boolean | undefined; } | undefined; interruptResumeValue?: { value: string; type: \"SELECT_OPTION\"; } | { value: string; type: \"INPUT_TEXT\"; } | undefined; } | undefined; user?: { id?: string | undefined; name?: string | undefined; } | undefined; isError?: boolean | undefined; refusal?: string | undefined; reader?: ",
               "objectOutputType",
               "<{}, ",
               "ZodUnknown",
@@ -3086,11 +3104,11 @@
             "label": "create",
             "description": [],
             "signature": [
-              "Record<string, { title: string; id?: string | undefined; category?: \"assistant\" | \"insights\" | undefined; replacements?: ",
+              "Record<string, { title: string; id?: string | undefined; category?: \"insights\" | \"assistant\" | undefined; replacements?: ",
               "objectOutputType",
               "<{}, ",
               "ZodString",
-              ", \"strip\"> | undefined; apiConfig?: { connectorId: string; actionTypeId: string; provider?: \"Other\" | \"OpenAI\" | \"Azure OpenAI\" | undefined; model?: string | undefined; defaultSystemPromptId?: string | undefined; } | undefined; messages?: { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; id?: string | undefined; user?: { id?: string | undefined; name?: string | undefined; } | undefined; metadata?: { contentReferences?: ",
+              ", \"strip\"> | undefined; apiConfig?: { connectorId: string; actionTypeId: string; provider?: \"Other\" | \"OpenAI\" | \"Azure OpenAI\" | undefined; model?: string | undefined; defaultSystemPromptId?: string | undefined; } | undefined; messages?: { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; id?: string | undefined; metadata?: { contentReferences?: ",
               "objectOutputType",
               "<{}, ",
               "ZodUnion",
@@ -3158,7 +3176,7 @@
               "ZodTypeAny",
               ", { from: string; to: string; }, { from: string; to: string; }>>; }, \"strip\", ",
               "ZodTypeAny",
-              ", { id: string; type: \"EsqlQuery\"; label: string; query: string; timerange?: { from: string; to: string; } | undefined; }, { id: string; type: \"EsqlQuery\"; label: string; query: string; timerange?: { from: string; to: string; } | undefined; }>, ",
+              ", { id: string; type: \"EsqlQuery\"; query: string; label: string; timerange?: { from: string; to: string; } | undefined; }, { id: string; type: \"EsqlQuery\"; query: string; label: string; timerange?: { from: string; to: string; } | undefined; }>, ",
               "ZodObject",
               "<{ id: ",
               "ZodString",
@@ -3172,7 +3190,7 @@
               "ZodString",
               "; }, \"strip\", ",
               "ZodTypeAny",
-              ", { id: string; type: \"Href\"; href: string; label?: string | undefined; }, { id: string; type: \"Href\"; href: string; label?: string | undefined; }>]>, \"strip\"> | undefined; interruptValue?: { type: \"SELECT_OPTION\"; options: { value: string; label: string; buttonColor?: \"text\" | \"primary\" | \"neutral\" | \"success\" | \"accent\" | \"accentSecondary\" | \"warning\" | \"risk\" | \"danger\" | undefined; }[]; description: string; threadId: string; expired?: boolean | undefined; } | { type: \"INPUT_TEXT\"; threadId: string; description?: string | undefined; placeholder?: string | undefined; expired?: boolean | undefined; } | undefined; interruptResumeValue?: { value: string; type: \"SELECT_OPTION\"; } | { value: string; type: \"INPUT_TEXT\"; } | undefined; } | undefined; isError?: boolean | undefined; refusal?: string | undefined; reader?: ",
+              ", { id: string; type: \"Href\"; href: string; label?: string | undefined; }, { id: string; type: \"Href\"; href: string; label?: string | undefined; }>]>, \"strip\"> | undefined; interruptValue?: { type: \"SELECT_OPTION\"; options: { value: string; label: string; buttonColor?: \"text\" | \"primary\" | \"success\" | \"warning\" | \"accent\" | \"accentSecondary\" | \"danger\" | \"neutral\" | \"risk\" | undefined; }[]; description: string; threadId: string; expired?: boolean | undefined; } | { type: \"INPUT_TEXT\"; threadId: string; description?: string | undefined; placeholder?: string | undefined; expired?: boolean | undefined; } | undefined; interruptResumeValue?: { value: string; type: \"SELECT_OPTION\"; } | { value: string; type: \"INPUT_TEXT\"; } | undefined; } | undefined; user?: { id?: string | undefined; name?: string | undefined; } | undefined; isError?: boolean | undefined; refusal?: string | undefined; reader?: ",
               "objectOutputType",
               "<{}, ",
               "ZodUnknown",
@@ -3332,7 +3350,7 @@
               "\nThe Elastic AI Assistant will display this tooltip when the user hovers over the context pill"
             ],
             "signature": [
-              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+              "React.ReactNode"
             ],
             "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/prompt_context/types.ts",
             "lineNumber": 69,
@@ -3531,7 +3549,7 @@
           " | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/connectorland/connector_selector/index.tsx",
-        "lineNumber": 54,
+        "lineNumber": 55,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3860,7 +3878,7 @@
           "\nThis interface is used to pass a default or base set of contexts to the Elastic AI Assistant when\ninitializing it. This is used to provide 'category' options when users create Quick Prompts.\nAlso, useful for collating all of a solutions' prompts in one place.\n\ne.g. see Security Solution's x-pack/solutions/security/plugins/security_solution/public/assistant/prompt_contexts/index.tsx"
         ],
         "signature": [
-          "{ tooltip: React.ReactNode; description: string; category: string; replacements?: ",
+          "{ description: string; category: string; tooltip: React.ReactNode; replacements?: ",
           "objectOutputType",
           "<{}, ",
           "ZodString",
