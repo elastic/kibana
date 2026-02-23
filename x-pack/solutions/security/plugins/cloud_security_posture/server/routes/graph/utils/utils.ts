@@ -55,3 +55,16 @@ export const compareConnectorNodes = (
   const labelB = b?.label ?? '';
   return labelA.localeCompare(labelB);
 };
+
+/**
+ * Normalizes a value to an array of strings.
+ * ESQL returns single values as scalars but multi-value fields as arrays.
+ * This utility handles both cases uniformly.
+ *
+ * @param value - The value to normalize (string, string[], null, or undefined)
+ * @returns An array of strings, or undefined if the input was null/undefined
+ */
+export const normalizeToArray = (value?: string | string[] | null): string[] | undefined => {
+  if (value === undefined || value === null) return undefined;
+  return Array.isArray(value) ? value : [value];
+};

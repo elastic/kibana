@@ -19,7 +19,8 @@ export type EntitiesResponse = Omit<TypeOf<typeof entitiesResponseSchema>, 'mess
 };
 export type EntityItem = TypeOf<typeof entityItemSchema>;
 
-export enum ApiMessageCode {
-  // @ts-expect-error upgrade typescript v5.9.3
-  ReachedNodesLimit = REACHED_NODES_LIMIT,
-}
+// Use const object instead of enum to avoid isolatedModules issues with computed values
+export const ApiMessageCode = {
+  ReachedNodesLimit: REACHED_NODES_LIMIT,
+} as const;
+export type ApiMessageCode = (typeof ApiMessageCode)[keyof typeof ApiMessageCode];

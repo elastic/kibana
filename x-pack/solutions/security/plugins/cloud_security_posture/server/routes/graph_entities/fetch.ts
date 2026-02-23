@@ -130,6 +130,8 @@ ${entityFieldHintCases},
     "entity"
   )
 | EVAL timestamp = TO_STRING(\`@timestamp\`)
+| EVAL sourceIps = source.ip
+| EVAL sourceCountryCodes = source.geo.country_iso_code
 ${
   isLookupIndexAvailable
     ? buildSingleEntityLookupJoinEsql(lookupIndexName)
@@ -141,7 +143,9 @@ ${
   entitySubType = MIN(entitySubType),
   hostIp = MIN(hostIp),
   availableInEntityStore = MAX(availableInEntityStore),
-  timestamp = MAX(timestamp)
+  timestamp = MAX(timestamp),
+  sourceIps = MV_DEDUPE(VALUES(sourceIps)),
+  sourceCountryCodes = MV_DEDUPE(VALUES(sourceCountryCodes))
     BY entityId
 | LIMIT ${limit}`;
 };

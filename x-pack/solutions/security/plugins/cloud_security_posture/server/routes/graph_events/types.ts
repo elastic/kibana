@@ -17,8 +17,10 @@ export interface EventRecord {
   isAlert?: boolean | null;
   actorEntityId?: string | null;
   actorEcsParentField?: string | null;
+  actorEntityName?: string | null;
   targetEntityId?: string | null;
   targetEcsParentField?: string | null;
+  targetEntityName?: string | null;
   sourceIps?: string[] | string | null;
   sourceCountryCodes?: string[] | string | null;
 }

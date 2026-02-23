@@ -145,8 +145,10 @@ ${buildSourceMetadataEvals()}
   isAlert = MAX(isAlert),
   actorEntityId = MIN(actorEntityId),
   actorEcsParentField = MIN(actorEcsParentField),
+  actorEntityName = MIN(actorEntityName),
   targetEntityId = MIN(targetEntityId),
   targetEcsParentField = MIN(targetEcsParentField),
+  targetEntityName = MIN(targetEntityName),
   sourceIps = MV_DEDUPE(VALUES(sourceIps)),
   sourceCountryCodes = MV_DEDUPE(VALUES(sourceCountryCodes))
     BY docId

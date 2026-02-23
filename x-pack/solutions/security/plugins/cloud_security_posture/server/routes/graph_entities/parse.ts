@@ -11,7 +11,7 @@ import type {
   EntitiesResponse,
 } from '@kbn/cloud-security-posture-common/types/graph_entities/v1';
 import type { EntityRecord } from './types';
-import { transformEntityTypeToIconAndShape } from '../graph/utils';
+import { transformEntityTypeToIconAndShape, normalizeToArray } from '../graph/utils';
 
 /**
  * Parses entity records into EntityItem response.
@@ -47,6 +47,8 @@ export const parseEntityRecords = (
         ...(icon ? { icon } : {}),
         availableInEntityStore: record.availableInEntityStore ?? false,
         host: record.hostIp ? { ip: record.hostIp } : undefined,
+        ips: normalizeToArray(record.sourceIps),
+        countryCodes: normalizeToArray(record.sourceCountryCodes),
       };
     } else {
       // Entity not found - create minimal fallback record

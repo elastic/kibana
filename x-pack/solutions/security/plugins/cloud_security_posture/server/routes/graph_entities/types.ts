@@ -17,4 +17,6 @@ export interface EntityRecord {
   ecsParentField?: string | null;
   availableInEntityStore?: boolean | null;
   timestamp?: string | null;
+  sourceIps?: string[] | string | null;
+  sourceCountryCodes?: string[] | string | null;
 }
