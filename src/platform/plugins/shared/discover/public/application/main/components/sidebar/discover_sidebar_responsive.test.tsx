@@ -655,7 +655,8 @@ describe('discover responsive sidebar', function () {
     expect(services.dataViewEditor.userPermissions.editDataView).toHaveBeenCalled();
   });
 
-  it('should render buttons in data view picker correctly', async () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/217005
+  it.skip('should render buttons in data view picker correctly', async () => {
     const services = createMockServices();
     const propsWithPicker: TestWrapperProps = {
       ...props,
@@ -681,7 +682,8 @@ describe('discover responsive sidebar', function () {
     expect(services.dataViewEditor.openEditor).toHaveBeenCalled();
   }, 5000);
 
-  it('should not render buttons in data view picker when in viewer mode', async () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/254625
+  it.skip('should not render buttons in data view picker when in viewer mode', async () => {
     const services = createMockServices();
     services.dataViewEditor.userPermissions.editDataView = jest.fn(() => false);
     services.dataViewFieldEditor.userPermissions.editIndexPattern = jest.fn(() => false);
