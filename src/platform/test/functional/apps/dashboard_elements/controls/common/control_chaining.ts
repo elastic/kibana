@@ -19,6 +19,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const security = getService('security');
   const esArchiver = getService('esArchiver');
+  const es = getService('es');
   const { dashboard, dashboardControls, timePicker } = getPageObjects([
     'dashboardControls',
     'timePicker',
@@ -71,9 +72,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
-      await esArchiver.unload(
-        'src/platform/test/functional/fixtures/es_archiver/dashboard_elements/controls'
-      );
+      await es.delete({ index: 'animals-cats-2018-01-01', id: 'control-chaining-cat' });
+      await es.delete({ index: 'animals-dogs-2018-01-01', id: 'control-chaining-dog' });
       await security.testUser.restoreDefaults();
     });
 
