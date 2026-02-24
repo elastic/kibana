@@ -141,7 +141,6 @@ dependsOn:
   - '@kbn/react-kibana-context-common'
   - '@kbn/control-group-renderer'
   - '@kbn/unified-tabs'
-  - '@kbn/esql-language'
   - '@kbn/cps'
   - '@kbn/kql'
   - '@kbn/core-base-browser-mocks'
