@@ -28,41 +28,37 @@ describe('UserAvatarTip', () => {
         }}
       />
     );
-    expect(container).toMatchInlineSnapshot(`
-      <div>
-        <span
-          class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
-          id="generated-id-wrapper"
-        >
-          <div
-            aria-label="Delighted Nightingale (delighted_nightingale@elastic.co)"
-            class="euiAvatar euiAvatar--m euiAvatar--user emotion-euiAvatar-user-m-uppercase-plain"
-            role="img"
-            style="background-image: url(https://source.unsplash.com/64x64/?cat);"
-            title="Delighted Nightingale (delighted_nightingale@elastic.co)"
-          />
-        </span>
-      </div>
+    expect(container.children[0]).toMatchInlineSnapshot(`
+      <span
+        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+        id="generated-id-wrapper"
+      >
+        <div
+          aria-label="Delighted Nightingale (delighted_nightingale@elastic.co)"
+          class="euiAvatar euiAvatar--m euiAvatar--user emotion-euiAvatar-user-m-uppercase-plain"
+          role="img"
+          style="background-image: url(https://source.unsplash.com/64x64/?cat);"
+          title="Delighted Nightingale (delighted_nightingale@elastic.co)"
+        />
+      </span>
     `);
   });
 
   it('should not render UserToolTip when user is not set', () => {
     const { container } = render(<UserAvatarTip />);
-    expect(container).toMatchInlineSnapshot(`
-      <div>
-        <div
-          aria-label=""
-          class="euiAvatar euiAvatar--m euiAvatar--user emotion-euiAvatar-user-m-uppercase"
-          role="img"
-          style="background-color: rgb(236, 241, 249); color: rgb(0, 0, 0);"
-          title=""
+    expect(container.children[0]).toMatchInlineSnapshot(`
+      <div
+        aria-label=""
+        class="euiAvatar euiAvatar--m euiAvatar--user emotion-euiAvatar-user-m-uppercase"
+        role="img"
+        style="background-color: rgb(236, 241, 249); color: rgb(0, 0, 0);"
+        title=""
+      >
+        <span
+          aria-hidden="true"
         >
-          <span
-            aria-hidden="true"
-          >
-            ?
-          </span>
-        </div>
+          ?
+        </span>
       </div>
     `);
   });

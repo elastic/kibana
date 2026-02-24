@@ -32,17 +32,15 @@ describe('UserToolTip', () => {
         <button>Toggle</button>
       </UserToolTip>
     );
-    expect(container).toMatchInlineSnapshot(`
-      <div>
-        <span
-          class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
-          id="generated-id-wrapper"
-        >
-          <button>
-            Toggle
-          </button>
-        </span>
-      </div>
+    expect(container.children[0]).toMatchInlineSnapshot(`
+      <span
+        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+        id="generated-id-wrapper"
+      >
+        <button>
+          Toggle
+        </button>
+      </span>
     `);
   });
 });

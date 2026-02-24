@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import React from 'react';
 
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -59,37 +59,9 @@ const userProfiles: UserProfile[] = [
 ];
 
 describe('UserProfilesPopover', () => {
-  it('should render EuiPopover and UserProfilesSelectable correctly', () => {
+  it('should render popover with title and user options when open', () => {
     const [firstOption, secondOption] = userProfiles;
-    const { container } = render(
-      <IntlProvider locale="en">
-        <UserProfilesPopover
-          title="Title"
-          button={<button>Toggle</button>}
-          closePopover={jest.fn()}
-          selectableProps={{
-            selectedOptions: [firstOption],
-            defaultOptions: [secondOption],
-          }}
-        />
-      </IntlProvider>
-    );
-    expect(container).toMatchInlineSnapshot(`
-      <div>
-        <div
-          class="euiPopover emotion-euiPopover-inline-block"
-        >
-          <button>
-            Toggle
-          </button>
-        </div>
-      </div>
-    `);
-  });
-
-  it('should render popover with search input when open', async () => {
-    const [firstOption, secondOption] = userProfiles;
-    const { container } = render(
+    render(
       <IntlProvider locale="en">
         <UserProfilesPopover
           title="Title"
@@ -104,16 +76,10 @@ describe('UserProfilesPopover', () => {
       </IntlProvider>
     );
 
-    expect(container).toMatchInlineSnapshot(`
-      <div>
-        <div
-          class="euiPopover euiPopover-isOpen emotion-euiPopover-inline-block"
-        >
-          <button>
-            Toggle
-          </button>
-        </div>
-      </div>
-    `);
+    expect(screen.getByText('Toggle')).toBeInTheDocument();
+    expect(screen.getByText('Title')).toBeInTheDocument();
+    expect(screen.getByText('Delighted Nightingale')).toBeInTheDocument();
+    expect(screen.getByText('Damaged Raccoon')).toBeInTheDocument();
+    expect(document.querySelector('[id^="searchInput"]')).toBeInTheDocument();
   });
 });
