@@ -72,6 +72,7 @@ describe('reportMetrics', () => {
       referencedDeprecations: {},
       unreferencedDeprecations: {},
       adoptionTrackedAPIs: {},
+      unnamedExports: {},
     };
 
     allPluginStats = {
@@ -82,6 +83,7 @@ describe('reportMetrics', () => {
         isAnyType: [],
         noReferences: [],
         paramDocMismatches: [],
+        missingReturns: [],
         missingExports: 0,
         deprecatedAPIsReferencedCount: 0,
         unreferencedDeprecatedApisCount: 0,
@@ -94,6 +96,7 @@ describe('reportMetrics', () => {
         eslintDisableLineCount: 0,
         eslintDisableFileCount: 0,
         enzymeImportCount: 0,
+        unnamedExports: [],
       },
     };
   });

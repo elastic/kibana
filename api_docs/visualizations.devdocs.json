@@ -7210,7 +7210,7 @@
             "label": "applyFilter",
             "description": [],
             "signature": [
-              "\"FILTER_TRIGGER\""
+              "\"on_apply_filter\""
             ],
             "path": "src/platform/plugins/shared/visualizations/public/embeddable/events.ts",
             "lineNumber": 29,
@@ -7226,7 +7226,7 @@
             "label": "brush",
             "description": [],
             "signature": [
-              "\"SELECT_RANGE_TRIGGER\""
+              "\"on_select_range\""
             ],
             "path": "src/platform/plugins/shared/visualizations/public/embeddable/events.ts",
             "lineNumber": 30,
@@ -7242,7 +7242,7 @@
             "label": "filter",
             "description": [],
             "signature": [
-              "\"VALUE_CLICK_TRIGGER\""
+              "\"on_click_value\""
             ],
             "path": "src/platform/plugins/shared/visualizations/public/embeddable/events.ts",
             "lineNumber": 31,
@@ -7274,7 +7274,7 @@
             "label": "tableRowContextMenuClick",
             "description": [],
             "signature": [
-              "\"ROW_CLICK_TRIGGER\""
+              "\"on_click_row\""
             ],
             "path": "src/platform/plugins/shared/visualizations/public/embeddable/events.ts",
             "lineNumber": 33,

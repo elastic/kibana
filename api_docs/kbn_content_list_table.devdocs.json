@@ -22,7 +22,7 @@
           ") => React.JSX.Element) & { Column: any; Action: any; }"
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/content_list_table.tsx",
-        "lineNumber": 161,
+        "lineNumber": 170,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -45,7 +45,7 @@
               }
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/content_list_table.tsx",
-            "lineNumber": 107,
+            "lineNumber": 111,
             "columnNumber": 36,
             "deprecated": false,
             "trackAdoption": false
@@ -119,7 +119,7 @@
           "(id: string) => string"
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/content_list_table.tsx",
-        "lineNumber": 66,
+        "lineNumber": 70,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -137,7 +137,7 @@
               "string"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/content_list_table.tsx",
-            "lineNumber": 66,
+            "lineNumber": 70,
             "columnNumber": 26,
             "deprecated": false,
             "trackAdoption": false,
@@ -299,7 +299,7 @@
           "\nNamespace interface for `Action` sub-components.\n\nThe base `Action` accepts {@link ActionProps}; pre-built actions\nare properties (e.g., `Action.Edit`, `Action.Delete`)."
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/action/types.ts",
-        "lineNumber": 64,
+        "lineNumber": 60,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -315,7 +315,7 @@
               "any"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/action/types.ts",
-            "lineNumber": 71,
+            "lineNumber": 67,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -339,7 +339,7 @@
               ") => React.ReactNode"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/action/types.ts",
-            "lineNumber": 72,
+            "lineNumber": 68,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -361,7 +361,7 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/action/types.ts",
-                "lineNumber": 72,
+                "lineNumber": 68,
                 "columnNumber": 10,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -389,7 +389,7 @@
               ") => React.ReactNode"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/action/types.ts",
-            "lineNumber": 73,
+            "lineNumber": 69,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -411,7 +411,7 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/action/types.ts",
-                "lineNumber": 73,
+                "lineNumber": 69,
                 "columnNumber": 12,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -433,7 +433,7 @@
           "\nProps for the `Action` component (custom actions).\n\nCustom actions are identified by `props.id` and provide their own\nbehavior. Pre-built actions (like `Action.Edit`) have dedicated\npreset components with their own props interfaces."
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/action/types.ts",
-        "lineNumber": 32,
+        "lineNumber": 28,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -448,7 +448,7 @@
               "Unique identifier for the action."
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/action/types.ts",
-            "lineNumber": 40,
+            "lineNumber": 36,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -474,7 +474,7 @@
               "<Record<string, unknown>>) => React.ReactNode)"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/action/types.ts",
-            "lineNumber": 42,
+            "lineNumber": 38,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -492,7 +492,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/action/types.ts",
-            "lineNumber": 44,
+            "lineNumber": 40,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -510,7 +510,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/action/types.ts",
-            "lineNumber": 46,
+            "lineNumber": 42,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -528,7 +528,7 @@
               "\"icon\" | \"button\" | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/action/types.ts",
-            "lineNumber": 48,
+            "lineNumber": 44,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -546,7 +546,7 @@
               "\"text\" | \"primary\" | \"success\" | \"warning\" | \"accent\" | \"accentSecondary\" | \"danger\" | \"neutral\" | \"risk\" | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/action/types.ts",
-            "lineNumber": 50,
+            "lineNumber": 46,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -572,7 +572,7 @@
               "<Record<string, unknown>>) => void) | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/action/types.ts",
-            "lineNumber": 52,
+            "lineNumber": 48,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -595,7 +595,7 @@
                   "<Record<string, unknown>>"
                 ],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/action/types.ts",
-                "lineNumber": 53,
+                "lineNumber": 49,
                 "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -625,7 +625,7 @@
               "<Record<string, unknown>>) => string) | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/action/types.ts",
-            "lineNumber": 54,
+            "lineNumber": 50,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -651,7 +651,7 @@
               "<Record<string, unknown>>) => boolean) | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/action/types.ts",
-            "lineNumber": 56,
+            "lineNumber": 52,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -674,7 +674,7 @@
                   "<Record<string, unknown>>"
                 ],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/action/types.ts",
-                "lineNumber": 57,
+                "lineNumber": 53,
                 "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -704,7 +704,7 @@
               "<Record<string, unknown>>) => boolean) | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/action/types.ts",
-            "lineNumber": 58,
+            "lineNumber": 54,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -727,7 +727,7 @@
                   "<Record<string, unknown>>"
                 ],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/action/types.ts",
-                "lineNumber": 59,
+                "lineNumber": 55,
                 "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -749,7 +749,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/action/types.ts",
-            "lineNumber": 60,
+            "lineNumber": 56,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1199,7 +1199,7 @@
           "\nProps for ContentListTable component."
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/content_list_table.tsx",
-        "lineNumber": 19,
+        "lineNumber": 23,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1214,7 +1214,7 @@
               "Accessible title for the table (used as table caption for screen readers)."
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/content_list_table.tsx",
-            "lineNumber": 23,
+            "lineNumber": 27,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1232,7 +1232,7 @@
               "\"fixed\" | \"auto\" | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/content_list_table.tsx",
-            "lineNumber": 25,
+            "lineNumber": 29,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1250,7 +1250,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/content_list_table.tsx",
-            "lineNumber": 27,
+            "lineNumber": 31,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1268,7 +1268,7 @@
               "React.ReactNode"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/content_list_table.tsx",
-            "lineNumber": 29,
+            "lineNumber": 33,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1286,7 +1286,7 @@
               "React.ReactNode"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/content_list_table.tsx",
-            "lineNumber": 34,
+            "lineNumber": 38,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1312,7 +1312,7 @@
               "<Record<string, unknown>>) => boolean) | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/content_list_table.tsx",
-            "lineNumber": 39,
+            "lineNumber": 43,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1335,7 +1335,7 @@
                   "<Record<string, unknown>>"
                 ],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/content_list_table.tsx",
-                "lineNumber": 55,
+                "lineNumber": 59,
                 "columnNumber": 13,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1357,7 +1357,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/content_list_table.tsx",
-            "lineNumber": 56,
+            "lineNumber": 60,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1375,7 +1375,7 @@
           "\nProps for the `Action.Delete` preset component."
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/action/types.ts",
-        "lineNumber": 84,
+        "lineNumber": 80,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1393,7 +1393,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/action/types.ts",
-            "lineNumber": 88,
+            "lineNumber": 84,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1411,7 +1411,7 @@
           "\nProps for the `Action.Edit` preset component."
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/action/types.ts",
-        "lineNumber": 76,
+        "lineNumber": 72,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1429,7 +1429,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/action/types.ts",
-            "lineNumber": 80,
+            "lineNumber": 76,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1855,7 +1855,7 @@
           "any"
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/content_list_table.tsx",
-        "lineNumber": 156,
+        "lineNumber": 165,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1874,7 +1874,7 @@
           "any"
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/actions/actions_builder.tsx",
-        "lineNumber": 169,
+        "lineNumber": 165,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1891,7 +1891,7 @@
           "any"
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/content_list_table.tsx",
-        "lineNumber": 149,
+        "lineNumber": 158,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
