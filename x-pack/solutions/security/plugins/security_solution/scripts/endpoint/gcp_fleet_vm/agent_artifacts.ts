@@ -25,13 +25,36 @@ const getSnapshotLatestJsonUrl = (minorLine: string): string =>
 
 const getSnapshotManifestUrl = async (version: string): Promise<string> => {
   const minorLine = getMinorLine(version);
-  const { data } = await axios.get<{ manifest_url: string }>(getSnapshotLatestJsonUrl(minorLine), {
-    timeout: 10_000,
-  });
-  if (!data?.manifest_url) {
-    throw new Error(`Snapshot latest JSON did not include manifest_url for ${minorLine}`);
+  try {
+    const { data } = await axios.get<{ manifest_url: string }>(getSnapshotLatestJsonUrl(minorLine), {
+      timeout: 10_000,
+    });
+    if (data?.manifest_url) {
+      return data.manifest_url;
+    }
+  } catch (e) {
+    // Fall through to DRA staging below
   }
-  return data.manifest_url;
+
+  // Fallback: DRA staging (artifacts-staging.elastic.co) for versions not yet on snapshots.elastic.co
+  const draLatestUrl = `https://artifacts-staging.elastic.co/dra/${minorLine}.json`;
+  try {
+    const { data } = await axios.get<{ manifest_url: string }>(draLatestUrl, {
+      timeout: 10_000,
+    });
+    if (data?.manifest_url) {
+      return data.manifest_url;
+    }
+  } catch {
+    // Fall through to error
+  }
+
+  throw new Error(
+    `Unable to find snapshot manifest for ${minorLine}. Tried:\n` +
+      `  - ${getSnapshotLatestJsonUrl(minorLine)}\n` +
+      `  - ${draLatestUrl}\n` +
+      `Try specifying --version with an older available snapshot (e.g. the previous minor).`
+  );
 };
 
 const getSnapshotAgentFilename = (version: string, platform: ElasticAgentPlatform): string => {

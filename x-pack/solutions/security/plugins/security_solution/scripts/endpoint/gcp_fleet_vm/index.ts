@@ -18,26 +18,9 @@ import {
 import type { GcpFleetVmConfig } from './types';
 import { cleanupGcpFleetVm, deployCalderaAgentToExistingUbuntuVms, provisionGcpFleetVm } from './provisioner';
 import { getPreferredLocalTailscaleHost } from './tailscale';
+import { toGcpNameToken, truncateGcpName } from './gcloud';
 
 const redact = (value: string | undefined) => (value ? '<redacted>' : '');
-
-const toGcpNameToken = (raw: string): string => {
-    // GCE instance naming: lowercase letters, digits and hyphens; must start with a letter.
-    // We keep it short-ish and stable.
-    const cleaned = raw
-        .toLowerCase()
-        .replace(/[^a-z0-9-]/g, '-')
-        .replace(/-+/g, '-')
-        .replace(/^-+/, '')
-        .replace(/-+$/, '');
-    return cleaned.match(/^[a-z]/) ? cleaned : `u-${cleaned || 'user'}`;
-};
-
-const truncateGcpName = (raw: string, maxLen: number): string => {
-    // GCE names must be <= 63 chars. We truncate and avoid trailing '-'.
-    if (raw.length <= maxLen) return raw;
-    return raw.slice(0, maxLen).replace(/-+$/, '');
-};
 
 const runProvisioning: RunFn = async (cliContext) => {
     createToolingLogger.setDefaultLogLevelFromCliFlags(cliContext.flags);
@@ -147,6 +130,10 @@ const runProvisioning: RunFn = async (cliContext) => {
             truncateGcpName(`${usernameToken}-${runToken}-kbn-gcp-agent`, 45),
         cleanup: Boolean(cliContext.flags.cleanup),
         cleanupAll: Boolean(cliContext.flags.cleanupAll),
+        insecureFleetEnroll: cliContext.flags.insecureFleetEnroll !== false,
+        osqueryOnlyAgentCount: cliContext.flags.osqueryOnlyAgentCount
+            ? Number(cliContext.flags.osqueryOnlyAgentCount)
+            : 0,
     };
 
     const configForLogs = {
@@ -165,8 +152,8 @@ const runProvisioning: RunFn = async (cliContext) => {
         }
 
         if (config.cleanup) {
-            log.info(`Cleanup requested; deleting GCP VMs...`);
-            await cleanupGcpFleetVm(log, config, ctx);
+            log.info(`Cleanup requested; deleting GCP VMs and revoking enrollment keys...`);
+            await cleanupGcpFleetVm(log, config, ctx, kbnClient);
         } else {
             log.info(`Use --cleanup to delete the created VMs.`);
         }
@@ -200,13 +187,14 @@ Optionally deploy Caldera agents (sandcat) to the same VMs.
                 'agentMachineType',
                 'ubuntuAgentCount',
                 'windowsAgentCount',
+                'osqueryOnlyAgentCount',
                 'tailscaleAuthKey',
                 'localTailscaleHostname',
                 'calderaUrl',
                 'calderaTargetUbuntuVms',
                 'namePrefix',
             ],
-            boolean: ['cleanup', 'cleanupAll', 'enableCaldera', 'enableInvokeAtomic', 'deployCalderaToExistingUbuntu'],
+            boolean: ['cleanup', 'cleanupAll', 'enableCaldera', 'enableInvokeAtomic', 'deployCalderaToExistingUbuntu', 'insecureFleetEnroll'],
             default: {
                 kibanaUrl: 'http://127.0.0.1:5601',
                 elasticUrl: 'http://127.0.0.1:9200',
@@ -221,8 +209,10 @@ Optionally deploy Caldera agents (sandcat) to the same VMs.
                 fleetServerPort: '8220',
                 ubuntuAgentCount: '1',
                 windowsAgentCount: '0',
+                osqueryOnlyAgentCount: '0',
                 enableCaldera: false,
                 enableInvokeAtomic: false,
+                insecureFleetEnroll: true,
                 deployCalderaToExistingUbuntu: false,
                 cleanup: false,
                 cleanupAll: false,
@@ -238,6 +228,7 @@ Optionally deploy Caldera agents (sandcat) to the same VMs.
   --agentMachineType         Agent VM machine type (default: e2-medium)
   --ubuntuAgentCount         Number of Ubuntu agent VMs (default: 1)
   --windowsAgentCount        Number of Windows agent VMs (default: 0)
+  --osqueryOnlyAgentCount    Number of Ubuntu agent VMs with Osquery-only policy (default: 0)
   --tailscaleAuthKey         Tailscale auth key (or set TS_AUTHKEY env var) (required)
   --localTailscaleHostname   Optional: your local Tailscale MagicDNS hostname (or set TS_HOSTNAME)
 
@@ -246,6 +237,7 @@ Optionally deploy Caldera agents (sandcat) to the same VMs.
   --calderaUrl               Caldera URL (default: derived from local Tailscale IP + :8888)
   --deployCalderaToExistingUbuntu  Deploy Caldera sandcat to existing Ubuntu VM(s) and exit
   --calderaTargetUbuntuVms   Comma-separated list of existing Ubuntu VM names (used with --deployCalderaToExistingUbuntu)
+  --insecureFleetEnroll      Use --insecure for agent enrollment (default: true, set --no-insecureFleetEnroll for TLS verification)
 
   --namePrefix               Prefix for agent VM names (default: <username>-<random>-kbn-gcp-agent)
   --kibanaUrl                Kibana URL (default: http://127.0.0.1:5601)

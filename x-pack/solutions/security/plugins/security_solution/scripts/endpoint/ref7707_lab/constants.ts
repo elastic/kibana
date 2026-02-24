@@ -26,4 +26,18 @@ export const REF7707_DOMAINS: string[] = [
 
 export const DEFAULT_WEB_PORT = 8080;
 
+/**
+ * Real-world-like domain variants (`.com` TLD) for detection rules and browser history injection.
+ * These are NOT resolved by lab DNS -- they exist purely to trigger detection rules and
+ * to be injected into browser history for forensic investigation demos.
+ */
+export const REF7707_DEMO_DOMAINS: string[] = [
+    'poster.checkponit.com',
+    'support.fortineat.com',
+    'update.hobiter.com',
+    'support.vmphere.com',
+    'cloud.autodiscovar.com',
+    'digert.ictnsc.com',
+];
+
 

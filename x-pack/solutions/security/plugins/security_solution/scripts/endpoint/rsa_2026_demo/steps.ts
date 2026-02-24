@@ -132,7 +132,7 @@ export const stepEndpoints = async (
   logger.info('Provisioning endpoints');
 
   return logger.indent(4, async () => {
-    const vmType = process.env.CI ? 'vagrant' : 'multipass';
+    const vmType = config.vmType;
     const endpoints: ProvisionedEndpoint[] = [];
 
     // Find existing VMs

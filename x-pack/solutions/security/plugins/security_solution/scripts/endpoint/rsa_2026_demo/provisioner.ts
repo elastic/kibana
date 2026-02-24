@@ -129,17 +129,30 @@ export const provisionRsa2026Demo = async (
         if (stepsToRun.includes('endpoints')) {
           throw new Error('Endpoints must be created before GUI setup');
         }
-        const vmType = process.env.CI ? 'vagrant' : 'multipass';
-        const existingVms = await findVm(vmType, /^rsa-2026-/, logger);
-        if (existingVms.data.length === 0) {
-          throw new Error('No existing endpoints found. Please run endpoints step first.');
+        const vmType = config.vmType;
+        if (vmType === 'gcp' && config.gcpVmNames) {
+          context.endpoints = config.gcpVmNames
+            .split(',')
+            .map((s) => s.trim())
+            .filter(Boolean)
+            .map((hostname) => ({
+              hostname,
+              agentId: 'unknown',
+              hostVm: getHostVmClient(hostname, vmType, undefined, logger),
+              policyType: (hostname.includes('defend-osquery') ? 'defend-osquery' : 'osquery-only') as const,
+            }));
+        } else {
+          const existingVms = await findVm(vmType, /^rsa-2026-/, logger);
+          if (existingVms.data.length === 0) {
+            throw new Error('No existing endpoints found. Please run endpoints step first.');
+          }
+          context.endpoints = existingVms.data.map((hostname) => ({
+            hostname,
+            agentId: 'unknown',
+            hostVm: getHostVmClient(hostname, vmType, undefined, logger),
+            policyType: hostname.includes('defend-osquery') ? 'defend-osquery' : 'osquery-only',
+          }));
         }
-        context.endpoints = existingVms.data.map((hostname) => ({
-          hostname,
-          agentId: 'unknown',
-          hostVm: getHostVmClient(hostname, vmType, undefined, logger),
-          policyType: hostname.includes('defend-osquery') ? 'defend-osquery' : 'osquery-only',
-        }));
       }
 
       await stepGui(context.endpoints, logger, config);
@@ -148,23 +161,33 @@ export const provisionRsa2026Demo = async (
     // Step 5: Browser History (requires endpoints)
     if (stepsToRun.includes('browser-history')) {
       if (context.endpoints.length === 0) {
-        // If endpoints weren't created in this run, try to find existing ones
         if (stepsToRun.includes('endpoints')) {
           throw new Error('Endpoints must be created before browser history');
         }
-        // Try to find existing endpoints
-        const vmType = process.env.CI ? 'vagrant' : 'multipass';
-        const existingVms = await findVm(vmType, /^rsa-2026-/, logger);
-        if (existingVms.data.length === 0) {
-          throw new Error('No existing endpoints found. Please run endpoints step first.');
+        const vmType = config.vmType;
+        if (vmType === 'gcp' && config.gcpVmNames) {
+          context.endpoints = config.gcpVmNames
+            .split(',')
+            .map((s) => s.trim())
+            .filter(Boolean)
+            .map((hostname) => ({
+              hostname,
+              agentId: 'unknown',
+              hostVm: getHostVmClient(hostname, vmType, undefined, logger),
+              policyType: (hostname.includes('defend-osquery') ? 'defend-osquery' : 'osquery-only') as const,
+            }));
+        } else {
+          const existingVms = await findVm(vmType, /^rsa-2026-/, logger);
+          if (existingVms.data.length === 0) {
+            throw new Error('No existing endpoints found. Please run endpoints step first.');
+          }
+          context.endpoints = existingVms.data.map((hostname) => ({
+            hostname,
+            agentId: 'unknown',
+            hostVm: getHostVmClient(hostname, vmType, undefined, logger),
+            policyType: hostname.includes('defend-osquery') ? 'defend-osquery' : 'osquery-only',
+          }));
         }
-        // Reconstruct endpoints from existing VMs
-        context.endpoints = existingVms.data.map((hostname) => ({
-          hostname,
-          agentId: 'unknown',
-          hostVm: getHostVmClient(hostname, vmType, undefined, logger),
-          policyType: hostname.includes('defend-osquery') ? 'defend-osquery' : 'osquery-only',
-        }));
       }
       await stepBrowserHistory(context.endpoints, logger, config);
     }
@@ -271,7 +294,7 @@ export const cleanupRsa2026Demo = async (
     // Destroy VMs
     // If this run did not have endpoints in context, fall back to persisted VM names
     if (context.endpoints.length === 0 && persistedState?.vmNames?.length) {
-      const vmType = process.env.CI ? 'vagrant' : 'multipass';
+      const vmType = context.config.vmType;
       context.endpoints = persistedState.vmNames.map((hostname) => ({
         hostname,
         agentId: 'unknown',

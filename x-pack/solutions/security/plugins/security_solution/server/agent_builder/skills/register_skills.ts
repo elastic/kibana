@@ -6,6 +6,7 @@
  */
 
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
+import type { OsqueryPluginSetup } from '@kbn/osquery-plugin/server';
 import {
   FORENSICS_ANALYTICS_SKILL,
   GET_ALERTS_SKILL,
@@ -22,6 +23,7 @@ import { SECURITY_ENDPOINT_RESPONSE_ACTIONS_READONLY_SKILL } from './security_en
 import { SECURITY_ENDPOINT_READONLY_SKILL } from './security_endpoint_readonly_skill';
 import { SECURITY_EXCEPTION_LISTS_SKILL } from './security_exception_lists_skill';
 import { SECURITY_NETWORK_SKILL } from './security_network_skill';
+import { createSecurityOsquerySkill } from './security_osquery_skill';
 import { SECURITY_RULE_EXCEPTIONS_PREVIEW_SKILL } from './security_rule_exceptions_preview_skill';
 import { SECURITY_THREAT_INTEL_SKILL } from './security_threat_intel_skill';
 import { SECURITY_TIMELINES_SKILL } from './security_timelines_skill';
@@ -35,8 +37,14 @@ export const registerSkills = async (
   experimentalFeatures: ExperimentalFeatures,
   options: {
     endpointAppContextService: EndpointAppContextService;
+    osquerySetup?: OsqueryPluginSetup;
   }
 ): Promise<void> => {
+  const osquerySkill = createSecurityOsquerySkill({
+    endpointAppContextService: options.endpointAppContextService,
+    osquerySetup: options.osquerySetup,
+  });
+
   await Promise.all([
     agentBuilder.skill.registerSkill(GET_ALERTS_SKILL),
     agentBuilder.skill.registerSkill(FORENSICS_ANALYTICS_SKILL),
@@ -48,6 +56,7 @@ export const registerSkills = async (
     agentBuilder.skill.registerSkill(SECURITY_ATTACK_DISCOVERY_SKILL),
     agentBuilder.skill.registerSkill(SECURITY_ENDPOINT_READONLY_SKILL),
     agentBuilder.skill.registerSkill(SECURITY_NETWORK_SKILL),
+    agentBuilder.skill.registerSkill(osquerySkill),
     agentBuilder.skill.registerSkill(SECURITY_THREAT_INTEL_SKILL),
     agentBuilder.skill.registerSkill(SECURITY_ALERT_SUPPRESSION_READONLY_SKILL),
     agentBuilder.skill.registerSkill(SECURITY_RULE_EXCEPTIONS_PREVIEW_SKILL),

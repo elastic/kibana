@@ -108,8 +108,8 @@ export const selectTools = async ({
   const dynamicInlineTools = skills
     ? (
       await Promise.all(
-        skills
-          .list()
+        (await skills
+          .list())
           .filter((skill) => skill.getInlineTools !== undefined)
           .map((skill) => skill.getInlineTools!())
       )

@@ -45,6 +45,8 @@ const runProvisioning: RunFn = async (cliContext) => {
         enableGui: Boolean(cliContext.flags.enableGui),
         vmGuiUser: cliContext.flags.vmGuiUser as string,
         vmGuiPassword: cliContext.flags.vmGuiPassword as string,
+        vmType: (cliContext.flags.vmType as string) as Rsa2026DemoConfig['vmType'] || undefined,
+        gcpVmNames: cliContext.flags.gcpVmNames as string || undefined,
     };
 
     try {
@@ -115,6 +117,8 @@ export const cli = () => {
                 'virustotalApiKey',
                 'vmGuiUser',
                 'vmGuiPassword',
+                'vmType',
+                'gcpVmNames',
                 'steps',
             ],
             boolean: ['cleanup', 'cleanupAll', 'createDetectionRule', 'createWorkflow', 'enableGui'],
@@ -151,6 +155,8 @@ export const cli = () => {
         --enableGui                Install XFCE + XRDP on Multipass VMs (default: true)
         --vmGuiUser                VM GUI user (default: ubuntu)
         --vmGuiPassword            VM GUI password (default: changeme)
+        --vmType                   VM manager: multipass, vagrant, utm, or gcp (default: multipass, CI: vagrant)
+        --gcpVmNames               Comma-separated GCP VM names for browser-history step (only for --vmType=gcp)
         --cleanup                  Clean up all provisioned resources after completion
         --cleanupAll               Also delete Kibana/Fleet artifacts created by the script (agent policies, rule, workflows, connectors)
         --version                  Agent version to use (default: stack version)

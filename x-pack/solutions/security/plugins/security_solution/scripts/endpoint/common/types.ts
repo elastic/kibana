@@ -34,7 +34,7 @@ export interface HostVm {
   start: () => void;
 }
 
-export type SupportedVmManager = 'multipass' | 'vagrant' | 'utm';
+export type SupportedVmManager = 'multipass' | 'vagrant' | 'utm' | 'gcp';
 export interface HostVmExecResponse {
   stdout: string;
   stderr: string;

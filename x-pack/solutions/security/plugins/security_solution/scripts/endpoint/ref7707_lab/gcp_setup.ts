@@ -19,21 +19,7 @@ import type { GcpFleetVmConfig } from '../gcp_fleet_vm/types';
 import { provisionGcpFleetVm } from '../gcp_fleet_vm/provisioner';
 import { addNetworkPacketCaptureDnsIntegrationToAgentPolicy } from './services/add_network_packet_capture_dns_integration';
 import { provisionRef7707GcpInfra } from './gcp_infra';
-
-const toGcpNameToken = (raw: string): string => {
-    const cleaned = raw
-        .toLowerCase()
-        .replace(/[^a-z0-9-]/g, '-')
-        .replace(/-+/g, '-')
-        .replace(/^-+/, '')
-        .replace(/-+$/, '');
-    return cleaned.match(/^[a-z]/) ? cleaned : `u-${cleaned || 'user'}`;
-};
-
-const truncateGcpName = (raw: string, maxLen: number): string => {
-    if (raw.length <= maxLen) return raw;
-    return raw.slice(0, maxLen).replace(/-+$/, '');
-};
+import { toGcpNameToken, truncateGcpName } from '../gcp_fleet_vm/gcloud';
 
 const logNextCommand = (log: ToolingLog, cmd: string) => {
     log.info(`[ref7707] next: run Caldera operation:`);
@@ -118,6 +104,7 @@ const runSetup: RunFn = async ({ log, flags }) => {
             namePrefix: namePrefix || truncateGcpName(`${usernameToken}-${runToken}-kbn-gcp-agent`, 45),
             cleanup: false,
             cleanupAll: false,
+            insecureFleetEnroll: true,
         };
 
         log.info(`[ref7707] provisioning Fleet Server + agent VMs on GCP`);

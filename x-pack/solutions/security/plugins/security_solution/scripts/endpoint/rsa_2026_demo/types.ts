@@ -8,7 +8,7 @@
 import type { KbnClient } from '@kbn/test';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { Client } from '@elastic/elasticsearch';
-import type { HostVm } from '../common/types';
+import type { HostVm, SupportedVmManager } from '../common/types';
 
 export interface Rsa2026DemoConfig {
     /** Number of endpoints with Elastic Defend + Osquery (default: 1 for local dev, 5 for production) */
@@ -36,6 +36,11 @@ export interface Rsa2026DemoConfig {
     vmGuiUser?: string;
     /** Password to use for GUI login (default: changeme) */
     vmGuiPassword?: string;
+
+    /** VM manager to use: multipass, vagrant, utm, or gcp (default: multipass, CI: vagrant) */
+    vmType: SupportedVmManager;
+    /** Comma-separated list of existing GCP VM names to target for browser-history step (only for vmType=gcp) */
+    gcpVmNames?: string;
 }
 
 export interface ProvisionedEndpoint {

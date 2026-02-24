@@ -10,18 +10,8 @@ import { run } from '@kbn/dev-cli-runner';
 import pRetry from 'p-retry';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils';
-import { gcloud, gcloudInstanceExists, gcloudSsh } from '../gcp_fleet_vm/gcloud';
-
-const REF7707_WEB_PORT = 8080;
-
-const REF7707_LAB_DOMAINS: string[] = [
-    'poster.checkponit.lab',
-    'support.fortineat.lab',
-    'update.hobiter.lab',
-    'support.vmphere.lab',
-    'cloud.autodiscovar.lab',
-    'digert.ictnsc.lab',
-];
+import { gcloud, gcloudAddLabels, gcloudInstanceExists, gcloudSsh, GCP_REQUIRED_LABELS } from '../gcp_fleet_vm/gcloud';
+import { REF7707_DOMAINS as REF7707_LAB_DOMAINS, DEFAULT_WEB_PORT as REF7707_WEB_PORT } from './constants';
 
 const createUbuntuInstance = async ({
     log,
@@ -38,7 +28,6 @@ const createUbuntuInstance = async ({
     machineType: string;
     startupScript: string;
 }): Promise<void> => {
-    // Use Ubuntu LTS public image; match the rest of the gcp_fleet_vm defaults.
     await gcloud(log, [
         'compute',
         'instances',
@@ -60,6 +49,7 @@ const createUbuntuInstance = async ({
         `startup-script=${startupScript}`,
         '--quiet',
     ]);
+    await gcloudAddLabels({ log, project, zone, instance: name, labels: GCP_REQUIRED_LABELS });
 };
 
 const runRemoteBashScript = async ({

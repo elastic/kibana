@@ -96,7 +96,7 @@ const runOp: RunFn = async ({ log, flags }) => {
     createToolingLogger.setDefaultLogLevelFromCliFlags(flags);
 
     const calderaUrl = (flags.calderaUrl as string) || 'http://127.0.0.1:8888';
-    const calderaApiKey = (flags.calderaApiKey as string) || '';
+    const calderaApiKey = (flags.calderaApiKey as string) || process.env.CALDERA_API_KEY || '';
     const group = (flags.group as string) || 'ref7707';
     const domain = (flags.domain as string) || REF7707_DOMAINS[0];
     const webPort = flags.webPort ? Number(flags.webPort) : DEFAULT_WEB_PORT;
@@ -105,7 +105,7 @@ const runOp: RunFn = async ({ log, flags }) => {
     const waitMs = flags.waitMs ? Number(flags.waitMs) : 10 * 60 * 1000;
 
     if (!calderaApiKey) {
-        throw new Error(`--calderaApiKey is required`);
+        throw new Error(`--calderaApiKey is required (or set CALDERA_API_KEY env var)`);
     }
 
     const { adversaryId, abilityIds } = await ensureRef7707CalderaPack({

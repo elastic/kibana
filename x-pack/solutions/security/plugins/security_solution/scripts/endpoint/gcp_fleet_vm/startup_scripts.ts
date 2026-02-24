@@ -16,12 +16,14 @@ export const ubuntuFleetServerStartupScript = (opts: {
     fleetServerPolicyId: string;
     fleetServiceToken: string;
     agentDownloadUrl: string;
+    insecure?: boolean;
 }) => {
     const TS_AUTHKEY_B64 = b64(opts.tailscaleAuthKey);
     const ES_URL_B64 = b64(opts.elasticsearchUrl);
     const POLICY_B64 = b64(opts.fleetServerPolicyId);
     const SERVICE_TOKEN_B64 = b64(opts.fleetServiceToken);
     const AGENT_URL_B64 = b64(opts.agentDownloadUrl);
+    const insecureFlag = opts.insecure !== false ? '\n  --insecure \\' : '';
 
     return `#!/usr/bin/env bash
 set -euo pipefail
@@ -63,8 +65,7 @@ log "Installing Elastic Agent as Fleet Server"
   --fleet-server-service-token="\${FLEET_SERVER_SERVICE_TOKEN}" \
   --fleet-server-policy="\${FLEET_SERVER_POLICY}" \
   --fleet-server-port=8220 \
-  --install-servers \
-  --insecure \
+  --install-servers \\${insecureFlag}
   --force
 
 log "Fleet Server install complete"
@@ -79,12 +80,14 @@ export const ubuntuElasticAgentStartupScript = (opts: {
     enableCaldera: boolean;
     calderaUrl?: string;
     enableInvokeAtomic?: boolean;
+    insecure?: boolean;
 }) => {
     const TS_AUTHKEY_B64 = b64(opts.tailscaleAuthKey);
     const FLEET_URL_B64 = b64(opts.fleetServerUrl);
     const ENROLLMENT_B64 = b64(opts.enrollmentToken);
     const AGENT_URL_B64 = b64(opts.agentDownloadUrl);
     const CALDERA_URL_B64 = b64(opts.calderaUrl ?? '');
+    const insecureFlag = opts.insecure !== false ? '\n  --insecure \\' : '';
 
     return `#!/usr/bin/env bash
 set -euo pipefail
@@ -120,8 +123,7 @@ cd "\${DIR}"
 log "Installing Elastic Agent"
 ./elastic-agent install \
   --url="\${FLEET_URL}" \
-  --enrollment-token="\${ENROLLMENT_TOKEN}" \
-  --insecure \
+  --enrollment-token="\${ENROLLMENT_TOKEN}" \\${insecureFlag}
   --force
 
 if [[ "${opts.enableCaldera ? 'true' : 'false'}" == "true" ]]; then
@@ -231,12 +233,14 @@ export const windowsElasticAgentStartupScriptPs1 = (opts: {
     enableCaldera: boolean;
     calderaUrl?: string;
     enableInvokeAtomic?: boolean;
+    insecure?: boolean;
 }) => {
     const TS_AUTHKEY_B64 = b64(opts.tailscaleAuthKey);
     const FLEET_URL_B64 = b64(opts.fleetServerUrl);
     const ENROLLMENT_B64 = b64(opts.enrollmentToken);
     const AGENT_URL_B64 = b64(opts.agentDownloadUrl);
     const CALDERA_URL_B64 = b64(opts.calderaUrl ?? '');
+    const insecureArg = opts.insecure !== false ? ',\n  "--insecure"' : '';
 
     return `
 $ErrorActionPreference = "Stop"
@@ -265,8 +269,7 @@ Log "Installing Elastic Agent"
 Start-Process -FilePath ".\\elastic-agent.exe" -Wait -ArgumentList @(
   "install",
   "--url=$FLEET_URL",
-  "--enrollment-token=$ENROLLMENT_TOKEN",
-  "--insecure",
+  "--enrollment-token=$ENROLLMENT_TOKEN"${insecureArg},
   "--force"
 )
 

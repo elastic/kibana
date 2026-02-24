@@ -54,6 +54,13 @@ export interface GcpFleetVmConfig {
     /** Delete created VMs (and optionally Fleet artifacts) */
     cleanup: boolean;
     cleanupAll: boolean;
+
+    /**
+     * Skip TLS verification when enrolling agents (`--insecure` flag).
+     * Defaults to `true` for lab/demo use where Fleet Server uses self-signed certs.
+     * Set to `false` when using properly signed certs.
+     */
+    insecureFleetEnroll: boolean;
 }
 
 export interface DeployCalderaToExistingUbuntuConfig {

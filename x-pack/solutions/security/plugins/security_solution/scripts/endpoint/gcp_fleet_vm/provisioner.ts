@@ -14,6 +14,7 @@ import execa from 'execa';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { KbnClient } from '@kbn/test';
 import type {
+    GetEnrollmentAPIKeysResponse,
     GetOutputsResponse,
     PostEnrollmentAPIKeyRequest,
     PostEnrollmentAPIKeyResponse,
@@ -34,6 +35,7 @@ import {
     cleanupAndAddFleetServerHostSettings,
 } from '../common/fleet_server/fleet_server_services';
 import {
+    addEndpointIntegrationToAgentPolicy,
     createAgentPolicy,
     createIntegrationPolicy,
     ensureFleetSetup,
@@ -49,9 +51,13 @@ import {
 import {
     assertGcloudAvailable,
     gcloud,
+    gcloudAddLabels,
     gcloudDeleteInstance,
     gcloudInstanceExists,
     gcloudSsh,
+    GCP_REQUIRED_LABELS,
+    redactSecrets,
+    toGcpNameToken,
 } from './gcloud';
 import { assertTailscaleAvailable, getLocalTailscaleIpv4, getLocalTailscaleMagicDnsName } from './tailscale';
 import {
@@ -67,15 +73,6 @@ import type {
 } from './types';
 import { resolveElasticAgentDownloadUrl } from './agent_artifacts';
 
-const redactSecrets = (s: string) =>
-    s
-        // coarse base64-ish / token-ish redaction
-        .replace(/([A-Za-z0-9+/]{16,}={0,2})/g, '<redacted>')
-        // tailscale auth keys
-        .replace(/tskey-[A-Za-z0-9_-]+/g, '<redacted>')
-        // elastic-agent enrollment tokens can be long
-        .replace(/([A-Za-z0-9_-]{24,})/g, '<redacted>');
-
 const writeTempFile = (baseName: string, content: string) => {
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'kbn-gcp-fleet-vm-'));
     const filePath = path.join(dir, baseName);
@@ -86,16 +83,6 @@ const writeTempFile = (baseName: string, content: string) => {
 const docker = async (log: ToolingLog, args: string[]) => {
     log.debug(`Running docker: docker ${args.join(' ')}`);
     return execa('docker', args);
-};
-
-const toGcpNameToken = (raw: string): string => {
-    const cleaned = raw
-        .toLowerCase()
-        .replace(/[^a-z0-9-]/g, '-')
-        .replace(/-+/g, '-')
-        .replace(/^-+/, '')
-        .replace(/-+$/, '');
-    return cleaned.match(/^[a-z]/) ? cleaned : `u-${cleaned || 'user'}`;
 };
 
 const ensureDockerAvailable = async (log: ToolingLog) => {
@@ -400,11 +387,14 @@ const createUbuntuInstance = async ({
             'ubuntu-os-cloud',
             '--metadata-from-file',
             `startup-script=${filePath}`,
+            '--boot-disk-size',
+            '30GB',
             '--quiet',
         ]);
     } finally {
         fs.rmSync(dir, { recursive: true, force: true });
     }
+    await gcloudAddLabels({ log, project, zone, instance: name, labels: GCP_REQUIRED_LABELS });
 };
 
 const createWindowsInstance = async ({
@@ -446,6 +436,7 @@ const createWindowsInstance = async ({
     } finally {
         fs.rmSync(dir, { recursive: true, force: true });
     }
+    await gcloudAddLabels({ log, project, zone, instance: name, labels: GCP_REQUIRED_LABELS });
 };
 
 const fetchFleetServerTailscaleIpv4 = async (cfg: GcpFleetVmConfig, log: ToolingLog) => {
@@ -589,6 +580,36 @@ const validateFleetServerVmHealthy = async (cfg: GcpFleetVmConfig, log: ToolingL
     }
 };
 
+const validateAgentVmStartupComplete = async (
+    cfg: Pick<GcpFleetVmConfig, 'gcpProject' | 'gcpZone'>,
+    log: ToolingLog,
+    vmName: string
+): Promise<boolean> => {
+    try {
+        const out = await gcloudSsh({
+            log,
+            project: cfg.gcpProject,
+            zone: cfg.gcpZone,
+            instance: vmName,
+            command: [
+                'set -euo pipefail',
+                'echo "--- tailscale ---"',
+                'sudo tailscale status >/dev/null 2>&1 && echo "tailscale:up" || echo "tailscale:down"',
+                'echo "--- elastic-agent ---"',
+                'sudo systemctl is-active --quiet elastic-agent && echo "agent:active" || echo "agent:inactive"',
+            ].join(' ; '),
+        });
+        const tsUp = out.includes('tailscale:up');
+        const agentActive = out.includes('agent:active');
+        if (!tsUp) log.warning(`[${vmName}] Tailscale is not up yet`);
+        if (!agentActive) log.warning(`[${vmName}] Elastic Agent is not active yet`);
+        return tsUp && agentActive;
+    } catch (e) {
+        log.warning(`[${vmName}] startup health check failed: ${e}`);
+        return false;
+    }
+};
+
 export const provisionGcpFleetVm = async (
     kbnClient: KbnClient,
     log: ToolingLog,
@@ -599,6 +620,15 @@ export const provisionGcpFleetVm = async (
 
     const localTsIp = await getLocalTailscaleIpv4();
     const localTsHostname = config.localTailscaleHostname || (await getLocalTailscaleMagicDnsName());
+
+    const totalVmCount = config.ubuntuAgentCount + config.windowsAgentCount + config.osqueryOnlyAgentCount + 1;
+    if (totalVmCount > 1 && config.tailscaleAuthKey.includes('tskey-auth-') && !config.tailscaleAuthKey.includes('CNTRL')) {
+        log.warning(
+            `You are provisioning ${totalVmCount} VMs but the Tailscale auth key may be single-use (ephemeral). ` +
+            `If enrollment fails on the second VM, use a reusable auth key from https://login.tailscale.com/admin/settings/keys`
+        );
+    }
+
     const elasticsearchOutputUrl = toTailscaleReachableUrl(config.elasticUrl, {
         tailscaleIp: localTsIp,
         tailscaleHostname: localTsHostname,
@@ -644,6 +674,15 @@ export const provisionGcpFleetVm = async (
         name: 'GCP VM agents',
     });
     const enrollmentToken = await createEnrollmentApiKey(kbnClient, agentPolicy.id);
+
+    // Ensure the main workload policy has Elastic Defend (EDR Complete) + Osquery Manager
+    await addEndpointIntegrationToAgentPolicy({
+        kbnClient,
+        log,
+        agentPolicyId: agentPolicy.id,
+        name: 'Elastic Defend - GCP VM agents',
+    });
+    await ensureOsqueryIntegrationOnPolicy(kbnClient, log, agentPolicy.id);
 
     // Create (or reuse) Osquery-only policy if osqueryOnlyAgentCount > 0
     let osqueryOnlyPolicy: { id: string; name: string } | undefined;
@@ -717,6 +756,7 @@ export const provisionGcpFleetVm = async (
                         fleetServerPolicyId,
                         fleetServiceToken: serviceToken,
                         agentDownloadUrl: linuxAgentUrl,
+                        insecure: config.insecureFleetEnroll,
                     }),
                 });
             }
@@ -734,6 +774,7 @@ export const provisionGcpFleetVm = async (
                     fleetServerPolicyId,
                     fleetServiceToken: serviceToken,
                     agentDownloadUrl: linuxAgentUrl,
+                    insecure: config.insecureFleetEnroll,
                 }),
             });
         }
@@ -783,115 +824,147 @@ export const provisionGcpFleetVm = async (
 
     const agentVms: ProvisionedGcpVm[] = [];
 
-    // 4) Ubuntu agent VMs
+    // 4) Ubuntu agent VMs (created in parallel for speed)
+    const ubuntuVmCreationPromises: Array<Promise<void>> = [];
     for (let i = 0; i < config.ubuntuAgentCount; i++) {
         const name = `${config.namePrefix}-ubuntu-${i + 1}`;
         agentVms.push({ name, os: 'ubuntu' });
-        const exists = await gcloudInstanceExists({
-            log,
-            project: config.gcpProject,
-            zone: config.gcpZone,
-            instance: name,
-        });
-        if (exists) {
-            log.info(`Ubuntu agent VM [${name}] already exists; reusing (skipping create).`);
-            continue;
-        }
-        log.info(`Provisioning Ubuntu agent VM [${name}]`);
-        await createUbuntuInstance({
-            log,
-            project: config.gcpProject,
-            zone: config.gcpZone,
-            name,
-            machineType: config.agentMachineType,
-            startupScript: ubuntuElasticAgentStartupScript({
-                tailscaleAuthKey: config.tailscaleAuthKey,
-                fleetServerUrl,
-                enrollmentToken,
-                agentDownloadUrl: linuxAgentUrl,
-                enableCaldera: config.enableCaldera,
-                calderaUrl,
-                enableInvokeAtomic: config.enableInvokeAtomic,
-            }),
-        });
+        ubuntuVmCreationPromises.push(
+            (async () => {
+                const exists = await gcloudInstanceExists({
+                    log,
+                    project: config.gcpProject,
+                    zone: config.gcpZone,
+                    instance: name,
+                });
+                if (exists) {
+                    log.info(`Ubuntu agent VM [${name}] already exists; reusing (skipping create).`);
+                    return;
+                }
+                log.info(`Provisioning Ubuntu agent VM [${name}]`);
+                await createUbuntuInstance({
+                    log,
+                    project: config.gcpProject,
+                    zone: config.gcpZone,
+                    name,
+                    machineType: config.agentMachineType,
+                    startupScript: ubuntuElasticAgentStartupScript({
+                        tailscaleAuthKey: config.tailscaleAuthKey,
+                        fleetServerUrl,
+                        enrollmentToken,
+                        agentDownloadUrl: linuxAgentUrl,
+                        enableCaldera: config.enableCaldera,
+                        calderaUrl,
+                        enableInvokeAtomic: config.enableInvokeAtomic,
+                        insecure: config.insecureFleetEnroll,
+                    }),
+                });
+            })()
+        );
     }
 
-    // 5) Windows agent VMs
+    // 5) Windows agent VMs (created in parallel for speed)
+    const windowsVmCreationPromises: Array<Promise<void>> = [];
     for (let i = 0; i < config.windowsAgentCount; i++) {
         const name = `${config.namePrefix}-windows-${i + 1}`;
         agentVms.push({ name, os: 'windows' });
-        const exists = await gcloudInstanceExists({
-            log,
-            project: config.gcpProject,
-            zone: config.gcpZone,
-            instance: name,
-        });
-        if (exists) {
-            log.info(`Windows agent VM [${name}] already exists; reusing (skipping create).`);
-            continue;
-        }
-        log.info(`Provisioning Windows agent VM [${name}]`);
-        await createWindowsInstance({
-            log,
-            project: config.gcpProject,
-            zone: config.gcpZone,
-            name,
-            machineType: config.agentMachineType,
-            startupScriptPs1: windowsElasticAgentStartupScriptPs1({
-                tailscaleAuthKey: config.tailscaleAuthKey,
-                fleetServerUrl,
-                enrollmentToken,
-                agentDownloadUrl: windowsAgentUrl,
-                enableCaldera: config.enableCaldera,
-                calderaUrl,
-                enableInvokeAtomic: config.enableInvokeAtomic,
-            }),
-        });
+        windowsVmCreationPromises.push(
+            (async () => {
+                const exists = await gcloudInstanceExists({
+                    log,
+                    project: config.gcpProject,
+                    zone: config.gcpZone,
+                    instance: name,
+                });
+                if (exists) {
+                    log.info(`Windows agent VM [${name}] already exists; reusing (skipping create).`);
+                    return;
+                }
+                log.info(`Provisioning Windows agent VM [${name}]`);
+                await createWindowsInstance({
+                    log,
+                    project: config.gcpProject,
+                    zone: config.gcpZone,
+                    name,
+                    machineType: config.agentMachineType,
+                    startupScriptPs1: windowsElasticAgentStartupScriptPs1({
+                        tailscaleAuthKey: config.tailscaleAuthKey,
+                        fleetServerUrl,
+                        enrollmentToken,
+                        agentDownloadUrl: windowsAgentUrl,
+                        enableCaldera: config.enableCaldera,
+                        calderaUrl,
+                        enableInvokeAtomic: config.enableInvokeAtomic,
+                        insecure: config.insecureFleetEnroll,
+                    }),
+                });
+            })()
+        );
     }
 
-    // 5.5) Osquery-only Ubuntu agent VMs (separate policy, Osquery only, with Caldera sandcat)
+    // 5.5) Osquery-only Ubuntu agent VMs (created in parallel)
     const osqueryOnlyVms: ProvisionedGcpVm[] = [];
+    const osqueryVmCreationPromises: Array<Promise<void>> = [];
     if (config.osqueryOnlyAgentCount > 0 && osqueryOnlyEnrollmentToken) {
         for (let i = 0; i < config.osqueryOnlyAgentCount; i++) {
             const name = `${config.namePrefix}-osquery-${i + 1}`;
             osqueryOnlyVms.push({ name, os: 'ubuntu' });
-            const exists = await gcloudInstanceExists({
-                log,
-                project: config.gcpProject,
-                zone: config.gcpZone,
-                instance: name,
-            });
-            if (exists) {
-                log.info(`Osquery-only agent VM [${name}] already exists; reusing (skipping create).`);
-                continue;
-            }
-            log.info(`Provisioning Osquery-only agent VM [${name}]`);
-            await createUbuntuInstance({
-                log,
-                project: config.gcpProject,
-                zone: config.gcpZone,
-                name,
-                machineType: config.agentMachineType,
-                startupScript: ubuntuElasticAgentStartupScript({
-                    tailscaleAuthKey: config.tailscaleAuthKey,
-                    fleetServerUrl,
-                    enrollmentToken: osqueryOnlyEnrollmentToken,
-                    agentDownloadUrl: linuxAgentUrl,
-                    // Always deploy Caldera sandcat on Osquery-only VMs when Caldera is enabled
-                    enableCaldera: config.enableCaldera,
-                    calderaUrl,
-                    enableInvokeAtomic: config.enableInvokeAtomic,
-                }),
-            });
+            osqueryVmCreationPromises.push(
+                (async () => {
+                    const exists = await gcloudInstanceExists({
+                        log,
+                        project: config.gcpProject,
+                        zone: config.gcpZone,
+                        instance: name,
+                    });
+                    if (exists) {
+                        log.info(`Osquery-only agent VM [${name}] already exists; reusing (skipping create).`);
+                        return;
+                    }
+                    log.info(`Provisioning Osquery-only agent VM [${name}]`);
+                    await createUbuntuInstance({
+                        log,
+                        project: config.gcpProject,
+                        zone: config.gcpZone,
+                        name,
+                        machineType: config.agentMachineType,
+                        startupScript: ubuntuElasticAgentStartupScript({
+                            tailscaleAuthKey: config.tailscaleAuthKey,
+                            fleetServerUrl,
+                            enrollmentToken: osqueryOnlyEnrollmentToken,
+                            agentDownloadUrl: linuxAgentUrl,
+                            enableCaldera: config.enableCaldera,
+                            calderaUrl,
+                            enableInvokeAtomic: config.enableInvokeAtomic,
+                            insecure: config.insecureFleetEnroll,
+                        }),
+                    });
+                })()
+            );
         }
     }
 
+    // Wait for all VM creations to complete in parallel
+    await Promise.all([...ubuntuVmCreationPromises, ...windowsVmCreationPromises, ...osqueryVmCreationPromises]);
+
     // 6) Wait for all agents to enroll
     for (const vm of agentVms) {
-        await waitForHostToEnroll(kbnClient, log, vm.name, 900_000);
+        try {
+            await waitForHostToEnroll(kbnClient, log, vm.name, 900_000);
+        } catch (e) {
+            log.warning(`Agent [${vm.name}] did not enroll in time. Running diagnostics...`);
+            await validateAgentVmStartupComplete(config, log, vm.name);
+            throw e;
+        }
     }
     for (const vm of osqueryOnlyVms) {
-        await waitForHostToEnroll(kbnClient, log, vm.name, 900_000);
+        try {
+            await waitForHostToEnroll(kbnClient, log, vm.name, 900_000);
+        } catch (e) {
+            log.warning(`Agent [${vm.name}] did not enroll in time. Running diagnostics...`);
+            await validateAgentVmStartupComplete(config, log, vm.name);
+            throw e;
+        }
     }
 
     // 6.1) If Caldera is enabled, validate sandcat is running on Ubuntu agent VMs.
@@ -952,7 +1025,8 @@ export const provisionGcpFleetVm = async (
 export const cleanupGcpFleetVm = async (
     log: ToolingLog,
     cfg: Pick<GcpFleetVmConfig, 'gcpProject' | 'gcpZone'>,
-    ctx: Pick<GcpFleetVmContext, 'fleetServerVm' | 'agentVms'>
+    ctx: Pick<GcpFleetVmContext, 'fleetServerVm' | 'agentVms' | 'agentPolicyId' | 'fleetServerPolicyId' | 'osqueryOnlyPolicyId'>,
+    kbnClient?: KbnClient
 ): Promise<void> => {
     log.info(`Cleaning up GCP VMs`);
     const toDelete = [ctx.fleetServerVm, ...ctx.agentVms];
@@ -969,6 +1043,40 @@ export const cleanupGcpFleetVm = async (
             });
         } catch (e) {
             log.warning(`Failed to delete VM [${vm.name}]: ${e}`);
+        }
+    }
+
+    if (kbnClient) {
+        const policyIds = [
+            ctx.agentPolicyId,
+            ctx.fleetServerPolicyId,
+            ctx.osqueryOnlyPolicyId,
+        ].filter(Boolean) as string[];
+
+        for (const policyId of policyIds) {
+            try {
+                const { data } = await kbnClient.request<GetEnrollmentAPIKeysResponse>({
+                    method: 'GET',
+                    path: enrollmentAPIKeyRouteService.getListPath(),
+                    headers: { 'elastic-api-version': API_VERSIONS.public.v1 },
+                    query: { kuery: `policy_id: "${policyId}"` },
+                });
+
+                for (const key of data.items ?? []) {
+                    try {
+                        await kbnClient.request({
+                            method: 'DELETE',
+                            path: enrollmentAPIKeyRouteService.getDeletePath(key.id),
+                            headers: { 'elastic-api-version': API_VERSIONS.public.v1 },
+                        });
+                        log.info(`Revoked enrollment key [${key.id}] for policy [${policyId}]`);
+                    } catch (e) {
+                        log.warning(`Failed to revoke enrollment key [${key.id}]: ${e}`);
+                    }
+                }
+            } catch (e) {
+                log.warning(`Failed to list enrollment keys for policy [${policyId}]: ${e}`);
+            }
         }
     }
 };

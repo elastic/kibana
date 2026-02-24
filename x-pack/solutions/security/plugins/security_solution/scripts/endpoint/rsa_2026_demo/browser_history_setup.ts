@@ -34,6 +34,15 @@ const uploadTextFileToVm = async (
 };
 
 /**
+ * Resolve the VM username for browser history file paths.
+ * GCP and Multipass Ubuntu VMs use 'ubuntu' as the default user.
+ */
+const resolveVmUsername = (configUsername: string): string => {
+    if (!configUsername || configUsername === 'elastic') return 'ubuntu';
+    return configUsername;
+};
+
+/**
  * Installs Chrome/Chromium browser on the VM
  */
 const installChromiumOrChrome = async (hostVm: HostVm, log: ToolingLog): Promise<void> => {
@@ -116,7 +125,7 @@ const injectChromeHistory = async (
 
     // Ubuntu VMs typically use 'ubuntu' as the default user
     // Map common usernames to 'ubuntu' for VM operations
-    const vmUsername = (username === 'patryk' || username === 'elastic' || !username) ? 'ubuntu' : username;
+    const vmUsername = resolveVmUsername(username);
     // Check if Chrome or Chromium is installed.
     // Use `|| true` so we can check `stdout` without failing the whole step.
     const chromiumCheck = await hostVm.exec('which chromium-browser || true', { silent: true });
@@ -208,7 +217,7 @@ const injectFirefoxHistory = async (
 
     // Ubuntu VMs typically use 'ubuntu' as the default user
     // Map common usernames to 'ubuntu' for VM operations
-    const vmUsername = (username === 'patryk' || username === 'elastic' || !username) ? 'ubuntu' : username;
+    const vmUsername = resolveVmUsername(username);
     // Find Firefox profile directory
     const firefoxProfilesDir = `/home/${vmUsername}/.mozilla/firefox`;
     await hostVm.exec(`mkdir -p ${firefoxProfilesDir}`, { silent: true });

@@ -6,6 +6,8 @@
  */
 
 import { readFile, writeFile, unlink } from 'fs/promises';
+import { homedir } from 'os';
+import { join } from 'path';
 
 export interface Rsa2026DemoStateV1 {
   version: 1;
@@ -18,7 +20,7 @@ export interface Rsa2026DemoStateV1 {
   connectorIds: string[];
 }
 
-export const DEFAULT_RSA_2026_STATE_FILE = '/tmp/rsa_2026_demo_state.json';
+export const DEFAULT_RSA_2026_STATE_FILE = join(homedir(), '.kbn-rsa-2026-demo-state.json');
 
 const unique = (values: string[]) => Array.from(new Set(values.filter(Boolean)));
 
@@ -61,7 +63,7 @@ export const saveRsa2026DemoState = async (
     connectorIds: unique(state.connectorIds),
   };
 
-  await writeFile(stateFile, `${JSON.stringify(normalized, null, 2)}\n`, 'utf-8');
+  await writeFile(stateFile, `${JSON.stringify(normalized, null, 2)}\n`, { encoding: 'utf-8', mode: 0o600 });
 };
 
 export const updateRsa2026DemoState = async (

@@ -18,6 +18,7 @@ export const DEFAULT_CONFIG: Rsa2026DemoConfig = {
     enableGui: true,
     vmGuiUser: 'ubuntu',
     vmGuiPassword: 'changeme',
+    vmType: process.env.CI ? 'vagrant' : 'multipass',
 };
 
 export const PRODUCTION_CONFIG: Rsa2026DemoConfig = {

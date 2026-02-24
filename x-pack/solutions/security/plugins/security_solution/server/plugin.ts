@@ -139,7 +139,8 @@ import {
 } from '../common/entity_analytics/risk_engine';
 import { isEndpointPackageV2 } from '../common/endpoint/utils/package_v2';
 import { assistantTools } from './assistant/tools';
-import { getAlertTriageSkill, getEntityAnalyticsSkill } from './assistant/skills';
+// TODO: Re-import after migrating legacy skills to SkillDefinition format
+// import { getAlertTriageSkill, getEntityAnalyticsSkill } from './assistant/skills';
 import { turnOffAgentPolicyFeatures } from './endpoint/migrations/turn_off_agent_policy_features';
 import { getCriblPackagePolicyPostCreateOrUpdateCallback } from './security_integrations';
 import { scheduleEntityAnalyticsMigration } from './lib/entity_analytics/migrations';
@@ -271,6 +272,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     });
     registerSkills(agentBuilder, experimentalFeatures, {
       endpointAppContextService,
+      osquerySetup: plugins.osquery,
     }).catch((error) => {
       this.logger.error(`Error registering security skills: ${error}`);
     });
@@ -690,11 +692,8 @@ export class Plugin implements ISecuritySolutionPlugin {
       this.logger.warn('Task Manager not available, health diagnostic task not registered.');
     }
 
-    // Register legacy skills with agentBuilder (custom tools - not yet migrated to SkillDefinition)
-    if (plugins.agentBuilder) {
-      plugins.agentBuilder.skills.register(getAlertTriageSkill());
-      plugins.agentBuilder.skills.register(getEntityAnalyticsSkill());
-    }
+    // TODO: Migrate legacy skills (getAlertTriageSkill, getEntityAnalyticsSkill) to SkillDefinition format.
+    // They currently use the old Skill type with LangChain tools, which is incompatible with registerSkill.
 
     this.registerAgentBuilderAttachmentsAndTools(plugins.agentBuilder, core, this.logger, plugins);
 

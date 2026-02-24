@@ -6,6 +6,7 @@
  */
 
 import type { ToolIdMapping } from '@kbn/agent-builder-genai-utils/langchain';
+import { sanitizeToolId } from '@kbn/agent-builder-genai-utils/langchain';
 import type { ConversationRound } from '@kbn/agent-builder-common';
 import { isToolCallStep } from '@kbn/agent-builder-common';
 import type { ProcessedConversationRound } from './prepare_conversation';
@@ -23,7 +24,7 @@ export const roundToActions = ({
 
   const toolCalls = round.steps.filter(isToolCallStep);
   toolCalls.forEach((toolCall, index) => {
-    const toolName = toolIdMapping.get(toolCall.tool_id) ?? toolCall.tool_id;
+    const toolName = toolIdMapping.get(toolCall.tool_id) ?? sanitizeToolId(toolCall.tool_id);
     actions.push(
       toolCallAction([
         {

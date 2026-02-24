@@ -1091,7 +1091,192 @@ export const getHostVmClient = (
     return createUtmHostVmClient(hostname, 'windows', log);
   }
 
+  if (type === 'gcp') {
+    return createGcpHostVmClient(hostname, { log });
+  }
+
   return createMultipassHostVmClient(hostname, log);
+};
+
+interface CreateGcpHostVmClientOptions {
+  gcpProject?: string;
+  gcpZone?: string;
+  log?: ToolingLog;
+}
+
+/**
+ * Creates a HostVm client that executes commands on a GCP VM via `gcloud compute ssh`.
+ */
+export const createGcpHostVmClient = (
+  name: string,
+  {
+    gcpProject = 'elastic-security-dev',
+    gcpZone = 'us-central1-a',
+    log = createToolingLogger(),
+  }: CreateGcpHostVmClientOptions = {}
+): HostVm => {
+  const exec = async (
+    command: string,
+    options?: { silent?: boolean }
+  ): Promise<HostVmExecResponse> => {
+    try {
+      const execResponse = await execa(
+        'gcloud',
+        [
+          'compute',
+          'ssh',
+          name,
+          '--project',
+          gcpProject,
+          '--zone',
+          gcpZone,
+          '--quiet',
+          '--command',
+          command,
+        ],
+        { maxBuffer: MAX_BUFFER }
+      );
+      log.verbose(
+        `exec response from GCP host [${name}] for command [${command}]:\n${dump(execResponse)}`
+      );
+      return {
+        stdout: execResponse.stdout,
+        stderr: execResponse.stderr,
+        exitCode: execResponse.exitCode,
+      };
+    } catch (e: unknown) {
+      if (!options?.silent) {
+        log.error(dump(e));
+      }
+      const err = e as { stdout?: string; stderr?: string; exitCode?: number };
+      return {
+        stdout: err.stdout ?? '',
+        stderr: err.stderr ?? '',
+        exitCode: err.exitCode ?? 1,
+      };
+    }
+  };
+
+  const destroy = async (): Promise<void> => {
+    await execa('gcloud', [
+      'compute',
+      'instances',
+      'delete',
+      name,
+      '--project',
+      gcpProject,
+      '--zone',
+      gcpZone,
+      '--quiet',
+    ]);
+    log.verbose(`GCP VM [${name}] was destroyed successfully`);
+  };
+
+  const info = () => {
+    return `VM created on GCP.
+  VM Name: ${name}
+  Project: ${gcpProject}
+  Zone: ${gcpZone}
+
+  Shell access: ${chalk.cyan(`gcloud compute ssh ${name} --project=${gcpProject} --zone=${gcpZone}`)}
+  Delete VM:    ${chalk.cyan(`gcloud compute instances delete ${name} --project=${gcpProject} --zone=${gcpZone} --quiet`)}
+`;
+  };
+
+  const unmount = async (_: string) => {
+    throw new Error('VM action `unmount` not supported for GCP');
+  };
+  const mount = async (_: string, __: string) => {
+    throw new Error('VM action `mount` not supported for GCP');
+  };
+
+  const start = async () => {
+    await execa('gcloud', [
+      'compute',
+      'instances',
+      'start',
+      name,
+      '--project',
+      gcpProject,
+      '--zone',
+      gcpZone,
+    ]);
+  };
+
+  const stop = async () => {
+    await execa('gcloud', [
+      'compute',
+      'instances',
+      'stop',
+      name,
+      '--project',
+      gcpProject,
+      '--zone',
+      gcpZone,
+    ]);
+  };
+
+  const upload: HostVm['upload'] = async (localFilePath, destFilePath) => {
+    await execa('gcloud', [
+      'compute',
+      'scp',
+      localFilePath,
+      `${name}:${destFilePath}`,
+      '--project',
+      gcpProject,
+      '--zone',
+      gcpZone,
+      '--quiet',
+    ]);
+    log.verbose(`Uploaded file to GCP VM [${name}]: ${localFilePath} -> ${destFilePath}`);
+
+    return {
+      filePath: destFilePath,
+      delete: async () => exec(`rm ${destFilePath}`),
+    };
+  };
+
+  const download: HostVm['download'] = async (vmFilePath: string, localFilePath: string) => {
+    const localFileAbsolutePath = path.resolve(localFilePath);
+    await execa('gcloud', [
+      'compute',
+      'scp',
+      `${name}:${vmFilePath}`,
+      localFileAbsolutePath,
+      '--project',
+      gcpProject,
+      '--zone',
+      gcpZone,
+      '--quiet',
+    ]);
+    log.verbose(`Downloaded file from GCP VM [${name}]: ${vmFilePath} -> ${localFileAbsolutePath}`);
+
+    return {
+      filePath: localFileAbsolutePath,
+      delete: async () => {
+        return deleteFile(localFileAbsolutePath).then(() => ({
+          stdout: 'success',
+          stderr: '',
+          exitCode: 0,
+        }));
+      },
+    };
+  };
+
+  return {
+    type: 'gcp',
+    name,
+    exec,
+    destroy,
+    info,
+    mount,
+    unmount,
+    transfer: upload,
+    upload,
+    download,
+    start,
+    stop,
+  };
 };
 
 /**
@@ -1173,6 +1358,32 @@ export const findVm = async (
       });
 
     return { data };
+  }
+
+  if (type === 'gcp') {
+    const raw = (
+      await execa('gcloud', [
+        'compute',
+        'instances',
+        'list',
+        '--project',
+        'elastic-security-dev',
+        '--format',
+        'json(name,status)',
+      ])
+    ).stdout;
+    const instances = JSON.parse(raw) as Array<{ name: string; status: string }>;
+    const running = instances.filter((i) => i.status === 'RUNNING');
+
+    return {
+      data: running
+        .map((i) => i.name)
+        .filter((vmName) => {
+          if (!name) return true;
+          if (typeof name === 'string') return vmName === name;
+          return name.test(vmName);
+        }),
+    };
   }
 
   throw new Error(`findVm() does not yet have support for [${type}]`);

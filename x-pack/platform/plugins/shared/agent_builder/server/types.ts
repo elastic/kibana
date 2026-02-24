@@ -117,6 +117,13 @@ export interface AgentsSetup {
 /**
  * Setup contract of the agentBuilder plugin.
  */
+export interface SkillSetup {
+  /**
+   * Register a skill to be available in agentBuilder.
+   */
+  registerSkill: SkillServiceSetup['registerSkill'];
+}
+
 export interface AgentBuilderPluginSetup {
   /**
    * Agents setup contract, which can be used to register built-in agents.
@@ -138,6 +145,10 @@ export interface AgentBuilderPluginSetup {
    * Skills setup contract, which can be used to register skills.
    */
   skills: SkillsSetup;
+  /**
+   * Skill setup contract, which can be used to register individual skills.
+   */
+  skill: SkillSetup;
 }
 
 /**

@@ -9,15 +9,7 @@ import type { KbnClient } from '@kbn/test';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { createRule, findRules } from '../common/detection_rules_services';
 import { prefixedOutputLogger } from '../common/utils';
-
-const REF7707_DOMAINS = [
-    'poster.checkponit.com',
-    'support.fortineat.com',
-    'update.hobiter.com',
-    'support.vmphere.com',
-    'cloud.autodiscovar.com',
-    'digert.ictnsc.com',
-];
+import { REF7707_DEMO_DOMAINS, REF7707_DOMAINS } from '../ref7707_lab/constants';
 
 /**
  * Creates a detection rule for monitoring malicious domains from Elastic Security Labs report REF7707
@@ -45,7 +37,8 @@ export const createDetectionRule = async (
         }
 
         // Build KQL query for malicious domains
-        const domainList = REF7707_DOMAINS.map((d) => `"${d}"`).join(' or ');
+        const allDomains = [...new Set([...REF7707_DEMO_DOMAINS, ...REF7707_DOMAINS])];
+        const domainList = allDomains.map((d) => `"${d}"`).join(' or ');
         const kqlQuery = `dns.question.name: (${domainList}) or destination.domain: (${domainList}) or url.domain: (${domainList})`;
 
         logger.verbose(`KQL Query: ${kqlQuery}`);
