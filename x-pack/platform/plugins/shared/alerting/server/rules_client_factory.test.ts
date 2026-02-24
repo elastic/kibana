@@ -320,7 +320,10 @@ describe('RulesClientFactory', () => {
       securityPluginStart,
       shouldGrantUiam: true,
     });
-    await factory.create(mockRouter.createKibanaRequest(), savedObjectsService);
+    const requestWithUiam = mockRouter.createKibanaRequest({
+      headers: { authorization: 'ApiKey essu_uiam_api_key' },
+    });
+    await factory.create(requestWithUiam, savedObjectsService);
     const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
 
     const uiamApiKeys = {
@@ -354,7 +357,10 @@ describe('RulesClientFactory', () => {
       securityPluginStart,
       shouldGrantUiam: true,
     });
-    await factory.create(mockRouter.createKibanaRequest(), savedObjectsService);
+    const requestWithUiam = mockRouter.createKibanaRequest({
+      headers: { authorization: 'ApiKey essu_uiam_api_key' },
+    });
+    await factory.create(requestWithUiam, savedObjectsService);
     const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
 
     const uiamApiKeys = {
@@ -383,7 +389,10 @@ describe('RulesClientFactory', () => {
       securityPluginStart,
       shouldGrantUiam: true,
     });
-    await factory.create(mockRouter.createKibanaRequest(), savedObjectsService);
+    const requestWithUiam = mockRouter.createKibanaRequest({
+      headers: { authorization: 'ApiKey essu_uiam_api_key' },
+    });
+    await factory.create(requestWithUiam, savedObjectsService);
     const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
 
     const uiamApiKeys = {
@@ -421,7 +430,10 @@ describe('RulesClientFactory', () => {
       securityPluginStart,
       shouldGrantUiam: true,
     });
-    await factory.create(mockRouter.createKibanaRequest(), savedObjectsService);
+    const requestWithUiam = mockRouter.createKibanaRequest({
+      headers: { authorization: 'ApiKey essu_uiam_api_key' },
+    });
+    await factory.create(requestWithUiam, savedObjectsService);
     const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
 
     const uiamError = new Error('UIAM service unavailable');
@@ -510,7 +522,10 @@ describe('RulesClientFactory', () => {
       securityPluginStart,
       shouldGrantUiam: true,
     });
-    await factory.create(mockRouter.createKibanaRequest(), savedObjectsService);
+    const requestWithUiam = mockRouter.createKibanaRequest({
+      headers: { authorization: 'ApiKey essu_uiam_api_key' },
+    });
+    await factory.create(requestWithUiam, savedObjectsService);
     const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
 
     const uiamApiKeys = {
