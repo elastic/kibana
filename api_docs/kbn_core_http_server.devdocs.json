@@ -1069,7 +1069,7 @@
               "The headers associated with the request."
             ],
             "signature": [
-              "{ date?: string | string[] | undefined; from?: string | string[] | undefined; origin?: string | string[] | undefined; warning?: string | string[] | undefined; location?: string | string[] | undefined; allow?: string | string[] | undefined; range?: string | string[] | undefined; authorization?: string | string[] | undefined; host?: string | string[] | undefined; etag?: string | string[] | undefined; expires?: string | string[] | undefined; accept?: string | string[] | undefined; \"accept-encoding\"?: string | string[] | undefined; \"accept-language\"?: string | string[] | undefined; \"accept-patch\"?: string | string[] | undefined; \"accept-ranges\"?: string | string[] | undefined; \"access-control-allow-credentials\"?: string | string[] | undefined; \"access-control-allow-headers\"?: string | string[] | undefined; \"access-control-allow-methods\"?: string | string[] | undefined; \"access-control-allow-origin\"?: string | string[] | undefined; \"access-control-expose-headers\"?: string | string[] | undefined; \"access-control-max-age\"?: string | string[] | undefined; \"access-control-request-headers\"?: string | string[] | undefined; \"access-control-request-method\"?: string | string[] | undefined; age?: string | string[] | undefined; \"alt-svc\"?: string | string[] | undefined; \"cache-control\"?: string | string[] | undefined; connection?: string | string[] | undefined; \"content-disposition\"?: string | string[] | undefined; \"content-encoding\"?: string | string[] | undefined; \"content-language\"?: string | string[] | undefined; \"content-length\"?: string | string[] | undefined; \"content-location\"?: string | string[] | undefined; \"content-range\"?: string | string[] | undefined; \"content-type\"?: string | string[] | undefined; cookie?: string | string[] | undefined; expect?: string | string[] | undefined; forwarded?: string | string[] | undefined; \"if-match\"?: string | string[] | undefined; \"if-modified-since\"?: string | string[] | undefined; \"if-none-match\"?: string | string[] | undefined; \"if-unmodified-since\"?: string | string[] | undefined; \"last-modified\"?: string | string[] | undefined; pragma?: string | string[] | undefined; \"proxy-authenticate\"?: string | string[] | undefined; \"proxy-authorization\"?: string | string[] | undefined; \"public-key-pins\"?: string | string[] | undefined; referer?: string | string[] | undefined; \"retry-after\"?: string | string[] | undefined; \"sec-fetch-site\"?: string | string[] | undefined; \"sec-fetch-mode\"?: string | string[] | undefined; \"sec-fetch-user\"?: string | string[] | undefined; \"sec-fetch-dest\"?: string | string[] | undefined; \"sec-websocket-accept\"?: string | string[] | undefined; \"sec-websocket-extensions\"?: string | string[] | undefined; \"sec-websocket-key\"?: string | string[] | undefined; \"sec-websocket-protocol\"?: string | string[] | undefined; \"sec-websocket-version\"?: string | string[] | undefined; \"set-cookie\"?: string | string[] | undefined; \"strict-transport-security\"?: string | string[] | undefined; tk?: string | string[] | undefined; trailer?: string | string[] | undefined; \"transfer-encoding\"?: string | string[] | undefined; upgrade?: string | string[] | undefined; \"user-agent\"?: string | string[] | undefined; vary?: string | string[] | undefined; via?: string | string[] | undefined; \"www-authenticate\"?: string | string[] | undefined; } & { [header: string]: string | string[] | undefined; }"
+              "{ date?: string | string[] | undefined; range?: string | string[] | undefined; from?: string | string[] | undefined; allow?: string | string[] | undefined; warning?: string | string[] | undefined; location?: string | string[] | undefined; authorization?: string | string[] | undefined; host?: string | string[] | undefined; etag?: string | string[] | undefined; expires?: string | string[] | undefined; origin?: string | string[] | undefined; accept?: string | string[] | undefined; \"accept-encoding\"?: string | string[] | undefined; \"accept-language\"?: string | string[] | undefined; \"accept-patch\"?: string | string[] | undefined; \"accept-ranges\"?: string | string[] | undefined; \"access-control-allow-credentials\"?: string | string[] | undefined; \"access-control-allow-headers\"?: string | string[] | undefined; \"access-control-allow-methods\"?: string | string[] | undefined; \"access-control-allow-origin\"?: string | string[] | undefined; \"access-control-expose-headers\"?: string | string[] | undefined; \"access-control-max-age\"?: string | string[] | undefined; \"access-control-request-headers\"?: string | string[] | undefined; \"access-control-request-method\"?: string | string[] | undefined; age?: string | string[] | undefined; \"alt-svc\"?: string | string[] | undefined; \"cache-control\"?: string | string[] | undefined; connection?: string | string[] | undefined; \"content-disposition\"?: string | string[] | undefined; \"content-encoding\"?: string | string[] | undefined; \"content-language\"?: string | string[] | undefined; \"content-length\"?: string | string[] | undefined; \"content-location\"?: string | string[] | undefined; \"content-range\"?: string | string[] | undefined; \"content-type\"?: string | string[] | undefined; cookie?: string | string[] | undefined; expect?: string | string[] | undefined; forwarded?: string | string[] | undefined; \"if-match\"?: string | string[] | undefined; \"if-modified-since\"?: string | string[] | undefined; \"if-none-match\"?: string | string[] | undefined; \"if-unmodified-since\"?: string | string[] | undefined; \"last-modified\"?: string | string[] | undefined; pragma?: string | string[] | undefined; \"proxy-authenticate\"?: string | string[] | undefined; \"proxy-authorization\"?: string | string[] | undefined; \"public-key-pins\"?: string | string[] | undefined; referer?: string | string[] | undefined; \"retry-after\"?: string | string[] | undefined; \"sec-fetch-site\"?: string | string[] | undefined; \"sec-fetch-mode\"?: string | string[] | undefined; \"sec-fetch-user\"?: string | string[] | undefined; \"sec-fetch-dest\"?: string | string[] | undefined; \"sec-websocket-accept\"?: string | string[] | undefined; \"sec-websocket-extensions\"?: string | string[] | undefined; \"sec-websocket-key\"?: string | string[] | undefined; \"sec-websocket-protocol\"?: string | string[] | undefined; \"sec-websocket-version\"?: string | string[] | undefined; \"set-cookie\"?: string | string[] | undefined; \"strict-transport-security\"?: string | string[] | undefined; tk?: string | string[] | undefined; trailer?: string | string[] | undefined; \"transfer-encoding\"?: string | string[] | undefined; upgrade?: string | string[] | undefined; \"user-agent\"?: string | string[] | undefined; vary?: string | string[] | undefined; via?: string | string[] | undefined; \"www-authenticate\"?: string | string[] | undefined; } & { [header: string]: string | string[] | undefined; }"
             ],
             "path": "src/core/packages/http/server/src/router/raw_request.ts",
             "lineNumber": 20,
@@ -1750,7 +1750,7 @@
                 "tags": [],
                 "label": "cookieOptions",
                 "description": [
-                  "{@link SessionStorageCookieOptions } - options to configure created cookie session storage."
+                  "{@link SessionStorageCookieOptions} - options to configure created cookie session storage."
                 ],
                 "signature": [
                   "SessionStorageCookieOptions",
@@ -1793,7 +1793,7 @@
                 "tags": [],
                 "label": "handler",
                 "description": [
-                  "{@link OnPreRoutingHandler } - function to call."
+                  "{@link OnPreRoutingHandler} - function to call."
                 ],
                 "signature": [
                   "OnPreRoutingHandler"
@@ -1835,7 +1835,7 @@
                 "tags": [],
                 "label": "handler",
                 "description": [
-                  "{@link OnPreRoutingHandler } - function to call."
+                  "{@link OnPreRoutingHandler} - function to call."
                 ],
                 "signature": [
                   "OnPreAuthHandler"
@@ -1877,7 +1877,7 @@
                 "tags": [],
                 "label": "handler",
                 "description": [
-                  "{@link AuthenticationHandler } - function to perform authentication."
+                  "{@link AuthenticationHandler} - function to perform authentication."
                 ],
                 "signature": [
                   "AuthenticationHandler"
@@ -1919,7 +1919,7 @@
                 "tags": [],
                 "label": "handler",
                 "description": [
-                  "{@link OnPostAuthHandler } - function to call."
+                  "{@link OnPostAuthHandler} - function to call."
                 ],
                 "signature": [
                   "OnPostAuthHandler"
@@ -1961,7 +1961,7 @@
                 "tags": [],
                 "label": "handler",
                 "description": [
-                  "{@link OnPreResponseHandler } - function to call."
+                  "{@link OnPreResponseHandler} - function to call."
                 ],
                 "signature": [
                   "OnPreResponseHandler"
@@ -2668,7 +2668,7 @@
                 "tags": [],
                 "label": "provider",
                 "description": [
-                  "- A {@link IContextProvider } to be called each time a new context is created."
+                  "- A {@link IContextProvider} to be called each time a new context is created."
                 ],
                 "signature": [
                   "IContextProvider",
@@ -3211,7 +3211,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "options",
-                "description": [],
+                "description": [
+                  "- The options may contain the following fields: rejectUnauthorized, requestCert (See tls.createServer() for details)."
+                ],
                 "path": "src/core/packages/http/server/src/router/socket.ts",
                 "lineNumber": 42,
                 "columnNumber": 24,
@@ -3775,30 +3777,6 @@
                 "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule_templates/apis/find/find_rule_template_route.ts"
               },
               {
-                "plugin": "@kbn/test-suites-xpack-platform",
-                "path": "x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators/server/jira_simulation.ts"
-              },
-              {
-                "plugin": "@kbn/test-suites-xpack-platform",
-                "path": "x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators/server/jira_simulation.ts"
-              },
-              {
-                "plugin": "@kbn/test-suites-xpack-platform",
-                "path": "x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators/server/resilient_simulation.ts"
-              },
-              {
-                "plugin": "@kbn/test-suites-xpack-platform",
-                "path": "x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators/server/tines_simulation.ts"
-              },
-              {
-                "plugin": "@kbn/test-suites-xpack-platform",
-                "path": "x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators/server/tines_simulation.ts"
-              },
-              {
-                "plugin": "@kbn/test-suites-xpack-platform",
-                "path": "x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators/server/tines_simulation.ts"
-              },
-              {
                 "plugin": "ruleRegistry",
                 "path": "x-pack/platform/plugins/shared/rule_registry/server/routes/get_alert_by_id.ts"
               },
@@ -3821,6 +3799,70 @@
               {
                 "plugin": "productDocBase",
                 "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/routes/installation.ts"
+              },
+              {
+                "plugin": "reporting",
+                "path": "x-pack/platform/plugins/private/reporting/server/routes/internal/deprecations/deprecations.ts"
+              },
+              {
+                "plugin": "reporting",
+                "path": "x-pack/platform/plugins/private/reporting/server/routes/internal/diagnostic/browser.ts"
+              },
+              {
+                "plugin": "reporting",
+                "path": "x-pack/platform/plugins/private/reporting/server/routes/internal/health/health.ts"
+              },
+              {
+                "plugin": "reporting",
+                "path": "x-pack/platform/plugins/private/reporting/server/routes/internal/management/jobs.ts"
+              },
+              {
+                "plugin": "reporting",
+                "path": "x-pack/platform/plugins/private/reporting/server/routes/internal/management/jobs.ts"
+              },
+              {
+                "plugin": "reporting",
+                "path": "x-pack/platform/plugins/private/reporting/server/routes/internal/management/jobs.ts"
+              },
+              {
+                "plugin": "reporting",
+                "path": "x-pack/platform/plugins/private/reporting/server/routes/internal/management/jobs.ts"
+              },
+              {
+                "plugin": "reporting",
+                "path": "x-pack/platform/plugins/private/reporting/server/routes/internal/scheduled_reports/list/index.ts"
+              },
+              {
+                "plugin": "reporting",
+                "path": "x-pack/platform/plugins/private/reporting/server/routes/public/generate_from_jobparams.ts"
+              },
+              {
+                "plugin": "reporting",
+                "path": "x-pack/platform/plugins/private/reporting/server/routes/public/jobs.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators/server/jira_simulation.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators/server/jira_simulation.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators/server/resilient_simulation.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators/server/tines_simulation.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators/server/tines_simulation.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators/server/tines_simulation.ts"
               },
               {
                 "plugin": "globalSearch",
@@ -3884,15 +3926,27 @@
               },
               {
                 "plugin": "indexManagement",
+                "path": "x-pack/platform/plugins/shared/index_management/server/routes/api/indices/register_documents_sample_route.ts"
+              },
+              {
+                "plugin": "indexManagement",
+                "path": "x-pack/platform/plugins/shared/index_management/server/routes/api/indices/indices_get.ts"
+              },
+              {
+                "plugin": "indexManagement",
+                "path": "x-pack/platform/plugins/shared/index_management/server/routes/api/indices/indices_stats.ts"
+              },
+              {
+                "plugin": "indexManagement",
+                "path": "x-pack/platform/plugins/shared/index_management/server/routes/api/indices/register_user_status_route.ts"
+              },
+              {
+                "plugin": "indexManagement",
                 "path": "x-pack/platform/plugins/shared/index_management/server/routes/api/inference_models/register_get_route.ts"
               },
               {
                 "plugin": "indexManagement",
                 "path": "x-pack/platform/plugins/shared/index_management/server/routes/api/mapping/register_mapping_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/platform/plugins/shared/index_management/server/routes/api/mapping/register_user_status_route.ts"
               },
               {
                 "plugin": "indexManagement",
@@ -3936,6 +3990,10 @@
               },
               {
                 "plugin": "crossClusterReplication",
+                "path": "x-pack/platform/plugins/private/cross_cluster_replication/server/routes/api/follower_index/register_get_follower_info.ts"
+              },
+              {
+                "plugin": "crossClusterReplication",
                 "path": "x-pack/platform/plugins/private/cross_cluster_replication/server/routes/api/cross_cluster_replication/register_permissions_route.ts"
               },
               {
@@ -3953,6 +4011,10 @@
               {
                 "plugin": "indexLifecycleManagement",
                 "path": "x-pack/platform/plugins/private/index_lifecycle_management/server/routes/api/policies/register_fetch_route.ts"
+              },
+              {
+                "plugin": "indexLifecycleManagement",
+                "path": "x-pack/platform/plugins/private/index_lifecycle_management/server/routes/api/policies/register_explain_route.ts"
               },
               {
                 "plugin": "indexLifecycleManagement",
@@ -3996,46 +4058,6 @@
               },
               {
                 "plugin": "reporting",
-                "path": "x-pack/platform/plugins/private/reporting/server/routes/internal/deprecations/deprecations.ts"
-              },
-              {
-                "plugin": "reporting",
-                "path": "x-pack/platform/plugins/private/reporting/server/routes/internal/diagnostic/browser.ts"
-              },
-              {
-                "plugin": "reporting",
-                "path": "x-pack/platform/plugins/private/reporting/server/routes/internal/health/health.ts"
-              },
-              {
-                "plugin": "reporting",
-                "path": "x-pack/platform/plugins/private/reporting/server/routes/internal/management/jobs.ts"
-              },
-              {
-                "plugin": "reporting",
-                "path": "x-pack/platform/plugins/private/reporting/server/routes/internal/management/jobs.ts"
-              },
-              {
-                "plugin": "reporting",
-                "path": "x-pack/platform/plugins/private/reporting/server/routes/internal/management/jobs.ts"
-              },
-              {
-                "plugin": "reporting",
-                "path": "x-pack/platform/plugins/private/reporting/server/routes/internal/management/jobs.ts"
-              },
-              {
-                "plugin": "reporting",
-                "path": "x-pack/platform/plugins/private/reporting/server/routes/internal/scheduled_reports/list/index.ts"
-              },
-              {
-                "plugin": "reporting",
-                "path": "x-pack/platform/plugins/private/reporting/server/routes/public/generate_from_jobparams.ts"
-              },
-              {
-                "plugin": "reporting",
-                "path": "x-pack/platform/plugins/private/reporting/server/routes/public/jobs.ts"
-              },
-              {
-                "plugin": "reporting",
                 "path": "x-pack/platform/plugins/private/reporting/server/test_helpers/create_mock_reportingplugin.ts"
               },
               {
@@ -4045,6 +4067,10 @@
               {
                 "plugin": "rollup",
                 "path": "x-pack/platform/plugins/private/rollup/server/routes/api/indices/register_validate_index_pattern_route.ts"
+              },
+              {
+                "plugin": "rollup",
+                "path": "x-pack/platform/plugins/private/rollup/server/routes/api/indices/register_get_index_caps.ts"
               },
               {
                 "plugin": "rollup",
@@ -4195,6 +4221,10 @@
                 "path": "src/platform/plugins/shared/workflows_extensions/server/routes/get_step_definitions.ts"
               },
               {
+                "plugin": "workflowsExtensions",
+                "path": "src/platform/plugins/shared/workflows_extensions/server/routes/get_trigger_definitions.ts"
+              },
+              {
                 "plugin": "workflowsManagement",
                 "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/routes/get_connectors.ts"
               },
@@ -4275,6 +4305,14 @@
                 "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/tools.ts"
               },
               {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/user_prompts.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/user_prompts.ts"
+              },
+              {
                 "plugin": "cloudConnect",
                 "path": "x-pack/platform/plugins/shared/cloud_connect/server/routes/authenticate.ts"
               },
@@ -4337,6 +4375,10 @@
               {
                 "plugin": "dataCatalog",
                 "path": "x-pack/platform/plugins/shared/data_catalog/server/routes.ts"
+              },
+              {
+                "plugin": "dataSources",
+                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.ts"
               },
               {
                 "plugin": "dataSources",
@@ -4609,6 +4651,10 @@
               {
                 "plugin": "esql",
                 "path": "src/platform/plugins/shared/esql/server/routes/get_timeseries_indices.ts"
+              },
+              {
+                "plugin": "esql",
+                "path": "src/platform/plugins/shared/esql/server/routes/get_views.ts"
               },
               {
                 "plugin": "esql",
@@ -4941,10 +4987,6 @@
               {
                 "plugin": "cloudSecurityPosture",
                 "path": "x-pack/solutions/security/plugins/cloud_security_posture/server/routes/vulnerabilities_dashboard/vulnerabilities_dashboard.ts"
-              },
-              {
-                "plugin": "workplaceAIApp",
-                "path": "x-pack/solutions/workplaceai/plugins/workplace_ai_app/server/routes/ears/fetch_secrets.ts"
               },
               {
                 "plugin": "workplaceAIApp",
@@ -5333,6 +5375,34 @@
               {
                 "plugin": "alerting",
                 "path": "x-pack/platform/plugins/shared/alerting/server/routes/get_rule_state.test.ts"
+              },
+              {
+                "plugin": "dataSources",
+                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.test.ts"
+              },
+              {
+                "plugin": "dataSources",
+                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.test.ts"
+              },
+              {
+                "plugin": "dataSources",
+                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.test.ts"
+              },
+              {
+                "plugin": "dataSources",
+                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.test.ts"
+              },
+              {
+                "plugin": "dataSources",
+                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.test.ts"
+              },
+              {
+                "plugin": "dataSources",
+                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.test.ts"
+              },
+              {
+                "plugin": "dataSources",
+                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.test.ts"
               },
               {
                 "plugin": "dataSources",
@@ -5981,6 +6051,10 @@
               {
                 "plugin": "savedObjectsManagement",
                 "path": "src/platform/plugins/shared/saved_objects_management/server/routes/index.test.ts"
+              },
+              {
+                "plugin": "console",
+                "path": "src/platform/plugins/shared/console/server/routes/api/console/es_config/index.test.ts"
               },
               {
                 "plugin": "console",
@@ -6799,6 +6873,70 @@
                 "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/bulk_unmute_alerts/bulk_unmute_alerts_route.ts"
               },
               {
+                "plugin": "ruleRegistry",
+                "path": "x-pack/platform/plugins/shared/rule_registry/server/routes/get_alerts_group_aggregations.ts"
+              },
+              {
+                "plugin": "ruleRegistry",
+                "path": "x-pack/platform/plugins/shared/rule_registry/server/routes/update_alert_by_id.ts"
+              },
+              {
+                "plugin": "ruleRegistry",
+                "path": "x-pack/platform/plugins/shared/rule_registry/server/routes/bulk_update_alerts.ts"
+              },
+              {
+                "plugin": "ruleRegistry",
+                "path": "x-pack/platform/plugins/shared/rule_registry/server/routes/find.ts"
+              },
+              {
+                "plugin": "ruleRegistry",
+                "path": "x-pack/platform/plugins/shared/rule_registry/server/routes/get_alert_summary.ts"
+              },
+              {
+                "plugin": "ruleRegistry",
+                "path": "x-pack/platform/plugins/shared/rule_registry/server/routes/bulk_update_tags.ts"
+              },
+              {
+                "plugin": "inference",
+                "path": "x-pack/platform/plugins/shared/inference/server/routes/chat_complete.ts"
+              },
+              {
+                "plugin": "inference",
+                "path": "x-pack/platform/plugins/shared/inference/server/routes/chat_complete.ts"
+              },
+              {
+                "plugin": "inference",
+                "path": "x-pack/platform/plugins/shared/inference/server/routes/prompt.ts"
+              },
+              {
+                "plugin": "inference",
+                "path": "x-pack/platform/plugins/shared/inference/server/routes/prompt.ts"
+              },
+              {
+                "plugin": "productDocBase",
+                "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/routes/installation.ts"
+              },
+              {
+                "plugin": "productDocBase",
+                "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/routes/installation.ts"
+              },
+              {
+                "plugin": "productDocBase",
+                "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/routes/installation.ts"
+              },
+              {
+                "plugin": "reporting",
+                "path": "x-pack/platform/plugins/private/reporting/server/routes/internal/generate/generate_from_jobparams.ts"
+              },
+              {
+                "plugin": "reporting",
+                "path": "x-pack/platform/plugins/private/reporting/server/routes/internal/scheduled_reports/create/index.ts"
+              },
+              {
+                "plugin": "reporting",
+                "path": "x-pack/platform/plugins/private/reporting/server/routes/public/generate_from_jobparams.ts"
+              },
+              {
                 "plugin": "@kbn/test-suites-xpack-platform",
                 "path": "x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators/server/pagerduty_simulation.ts"
               },
@@ -6853,58 +6991,6 @@
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
                 "path": "x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators/server/tines_simulation.ts"
-              },
-              {
-                "plugin": "ruleRegistry",
-                "path": "x-pack/platform/plugins/shared/rule_registry/server/routes/get_alerts_group_aggregations.ts"
-              },
-              {
-                "plugin": "ruleRegistry",
-                "path": "x-pack/platform/plugins/shared/rule_registry/server/routes/update_alert_by_id.ts"
-              },
-              {
-                "plugin": "ruleRegistry",
-                "path": "x-pack/platform/plugins/shared/rule_registry/server/routes/bulk_update_alerts.ts"
-              },
-              {
-                "plugin": "ruleRegistry",
-                "path": "x-pack/platform/plugins/shared/rule_registry/server/routes/find.ts"
-              },
-              {
-                "plugin": "ruleRegistry",
-                "path": "x-pack/platform/plugins/shared/rule_registry/server/routes/get_alert_summary.ts"
-              },
-              {
-                "plugin": "ruleRegistry",
-                "path": "x-pack/platform/plugins/shared/rule_registry/server/routes/bulk_update_tags.ts"
-              },
-              {
-                "plugin": "inference",
-                "path": "x-pack/platform/plugins/shared/inference/server/routes/chat_complete.ts"
-              },
-              {
-                "plugin": "inference",
-                "path": "x-pack/platform/plugins/shared/inference/server/routes/chat_complete.ts"
-              },
-              {
-                "plugin": "inference",
-                "path": "x-pack/platform/plugins/shared/inference/server/routes/prompt.ts"
-              },
-              {
-                "plugin": "inference",
-                "path": "x-pack/platform/plugins/shared/inference/server/routes/prompt.ts"
-              },
-              {
-                "plugin": "productDocBase",
-                "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/routes/installation.ts"
-              },
-              {
-                "plugin": "productDocBase",
-                "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/routes/installation.ts"
-              },
-              {
-                "plugin": "productDocBase",
-                "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/routes/installation.ts"
               },
               {
                 "plugin": "globalSearch",
@@ -7023,6 +7109,10 @@
                 "path": "x-pack/platform/plugins/private/cross_cluster_replication/server/routes/api/follower_index/register_create_route.ts"
               },
               {
+                "plugin": "feedback",
+                "path": "x-pack/platform/plugins/private/feedback/server/routes/send_feedback.ts"
+              },
+              {
                 "plugin": "graph",
                 "path": "x-pack/platform/plugins/private/graph/server/routes/search.ts"
               },
@@ -7097,18 +7187,6 @@
               {
                 "plugin": "reindexService",
                 "path": "x-pack/platform/plugins/private/reindex_service/server/src/routes/batch_reindex_indices.ts"
-              },
-              {
-                "plugin": "reporting",
-                "path": "x-pack/platform/plugins/private/reporting/server/routes/internal/generate/generate_from_jobparams.ts"
-              },
-              {
-                "plugin": "reporting",
-                "path": "x-pack/platform/plugins/private/reporting/server/routes/internal/scheduled_reports/create/index.ts"
-              },
-              {
-                "plugin": "reporting",
-                "path": "x-pack/platform/plugins/private/reporting/server/routes/public/generate_from_jobparams.ts"
               },
               {
                 "plugin": "reporting",
@@ -7204,6 +7282,10 @@
               },
               {
                 "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/routes/post_bulk_create_workflows.ts"
+              },
+              {
+                "plugin": "workflowsManagement",
                 "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/routes/post_cancel_workflow_execution.ts"
               },
               {
@@ -7243,8 +7325,24 @@
                 "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/conversations.ts"
               },
               {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/user_prompts.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/user_prompts.ts"
+              },
+              {
                 "plugin": "cloudConnect",
                 "path": "x-pack/platform/plugins/shared/cloud_connect/server/routes/authenticate.ts"
+              },
+              {
+                "plugin": "cloudConnect",
+                "path": "x-pack/platform/plugins/shared/cloud_connect/server/routes/rotate_api_key.ts"
+              },
+              {
+                "plugin": "cloudConnect",
+                "path": "x-pack/platform/plugins/shared/cloud_connect/server/routes/rotate_api_key.ts"
               },
               {
                 "plugin": "contentConnectors",
@@ -7453,6 +7551,30 @@
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
                 "path": "x-pack/platform/test/security_api_integration/plugins/user_profiles_consumer/server/init_routes.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/security_functional/plugins/test_endpoints/server/init_routes.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/security_functional/plugins/test_endpoints/server/init_routes.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/security_functional/plugins/test_endpoints/server/init_routes.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/security_functional/plugins/test_endpoints/server/init_routes.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/security_functional/plugins/test_endpoints/server/init_routes.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/security_functional/plugins/test_endpoints/server/init_routes.ts"
               },
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
@@ -7868,7 +7990,15 @@
               },
               {
                 "plugin": "workplaceAIApp",
-                "path": "x-pack/solutions/workplaceai/plugins/workplace_ai_app/server/routes/ears/start_oauth.ts"
+                "path": "x-pack/solutions/workplaceai/plugins/workplace_ai_app/server/routes/ears/exchange_code.ts"
+              },
+              {
+                "plugin": "workplaceAIApp",
+                "path": "x-pack/solutions/workplaceai/plugins/workplace_ai_app/server/routes/ears/refresh_token.ts"
+              },
+              {
+                "plugin": "workplaceAIApp",
+                "path": "x-pack/solutions/workplaceai/plugins/workplace_ai_app/server/routes/ears/revoke_token.ts"
               },
               {
                 "plugin": "ftrApis",
@@ -8131,6 +8261,18 @@
                 "path": "src/core/packages/http/server-internal/src/http_server.test.ts"
               },
               {
+                "plugin": "feedback",
+                "path": "x-pack/platform/plugins/private/feedback/server/routes/send_feedback.test.ts"
+              },
+              {
+                "plugin": "feedback",
+                "path": "x-pack/platform/plugins/private/feedback/server/routes/send_feedback.test.ts"
+              },
+              {
+                "plugin": "feedback",
+                "path": "x-pack/platform/plugins/private/feedback/server/routes/send_feedback.test.ts"
+              },
+              {
                 "plugin": "actions",
                 "path": "x-pack/platform/plugins/shared/actions/server/routes/get_global_execution_kpi.test.ts"
               },
@@ -8157,6 +8299,14 @@
               {
                 "plugin": "alerting",
                 "path": "x-pack/platform/plugins/shared/alerting/server/routes/update_flapping_settings.test.ts"
+              },
+              {
+                "plugin": "dataSources",
+                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.test.ts"
+              },
+              {
+                "plugin": "dataSources",
+                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.test.ts"
               },
               {
                 "plugin": "dataSources",
@@ -8692,6 +8842,10 @@
               },
               {
                 "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/snooze/external/snooze_rule_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
                 "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/snooze/internal/snooze_rule_route.test.ts"
               },
               {
@@ -8937,6 +9091,14 @@
               {
                 "plugin": "cloudConnect",
                 "path": "x-pack/platform/plugins/shared/cloud_connect/server/routes/authenticate.test.ts"
+              },
+              {
+                "plugin": "cloudConnect",
+                "path": "x-pack/platform/plugins/shared/cloud_connect/server/routes/rotate_api_key.test.ts"
+              },
+              {
+                "plugin": "cloudConnect",
+                "path": "x-pack/platform/plugins/shared/cloud_connect/server/routes/rotate_api_key.test.ts"
               },
               {
                 "plugin": "encryptedSavedObjects",
@@ -9219,6 +9381,14 @@
                 "path": "x-pack/platform/plugins/shared/alerting/server/routes/gaps/apis/gap_auto_fill_schedule/update/update_auto_fill_scheduler_route.ts"
               },
               {
+                "plugin": "reporting",
+                "path": "x-pack/platform/plugins/private/reporting/server/routes/internal/deprecations/deprecations.ts"
+              },
+              {
+                "plugin": "reporting",
+                "path": "x-pack/platform/plugins/private/reporting/server/routes/internal/scheduled_reports/update/index.ts"
+              },
+              {
                 "plugin": "@kbn/test-suites-xpack-platform",
                 "path": "x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators/server/jira_simulation.ts"
               },
@@ -9288,14 +9458,6 @@
               },
               {
                 "plugin": "reporting",
-                "path": "x-pack/platform/plugins/private/reporting/server/routes/internal/deprecations/deprecations.ts"
-              },
-              {
-                "plugin": "reporting",
-                "path": "x-pack/platform/plugins/private/reporting/server/routes/internal/scheduled_reports/update/index.ts"
-              },
-              {
-                "plugin": "reporting",
                 "path": "x-pack/platform/plugins/private/reporting/server/test_helpers/create_mock_reportingplugin.ts"
               },
               {
@@ -9349,6 +9511,10 @@
               {
                 "plugin": "workflowsManagement",
                 "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/routes/put_update_workflow.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/user_prompts.ts"
               },
               {
                 "plugin": "cloudConnect",
@@ -9811,16 +9977,16 @@
                 "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/bulk_disable/bulk_disable_rules_route.ts"
               },
               {
-                "plugin": "@kbn/test-suites-xpack-platform",
-                "path": "x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators/server/resilient_simulation.ts"
-              },
-              {
                 "plugin": "reporting",
                 "path": "x-pack/platform/plugins/private/reporting/server/routes/internal/scheduled_reports/bulk_disable/index.ts"
               },
               {
                 "plugin": "reporting",
                 "path": "x-pack/platform/plugins/private/reporting/server/routes/internal/scheduled_reports/bulk_enable/index.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators/server/resilient_simulation.ts"
               },
               {
                 "plugin": "reporting",
@@ -10139,12 +10305,28 @@
                 "path": "x-pack/platform/plugins/shared/alerting/server/routes/gaps/apis/gap_auto_fill_schedule/delete/delete_auto_fill_scheduler_route.ts"
               },
               {
+                "plugin": "reporting",
+                "path": "x-pack/platform/plugins/private/reporting/server/routes/internal/management/jobs.ts"
+              },
+              {
+                "plugin": "reporting",
+                "path": "x-pack/platform/plugins/private/reporting/server/routes/internal/scheduled_reports/bulk_delete/index.ts"
+              },
+              {
+                "plugin": "reporting",
+                "path": "x-pack/platform/plugins/private/reporting/server/routes/public/jobs.ts"
+              },
+              {
                 "plugin": "indexManagement",
                 "path": "x-pack/platform/plugins/shared/index_management/server/routes/api/component_templates/register_delete_route.ts"
               },
               {
                 "plugin": "indexManagement",
                 "path": "x-pack/platform/plugins/shared/index_management/server/routes/api/enrich_policies/register_delete_route.ts"
+              },
+              {
+                "plugin": "indexManagement",
+                "path": "x-pack/platform/plugins/shared/index_management/server/routes/api/indices/register_delete_document_route.ts"
               },
               {
                 "plugin": "remoteClusters",
@@ -10161,18 +10343,6 @@
               {
                 "plugin": "logstash",
                 "path": "x-pack/platform/plugins/private/logstash/server/routes/pipeline/delete.ts"
-              },
-              {
-                "plugin": "reporting",
-                "path": "x-pack/platform/plugins/private/reporting/server/routes/internal/management/jobs.ts"
-              },
-              {
-                "plugin": "reporting",
-                "path": "x-pack/platform/plugins/private/reporting/server/routes/internal/scheduled_reports/bulk_delete/index.ts"
-              },
-              {
-                "plugin": "reporting",
-                "path": "x-pack/platform/plugins/private/reporting/server/routes/public/jobs.ts"
               },
               {
                 "plugin": "reporting",
@@ -10205,6 +10375,10 @@
               {
                 "plugin": "workflowsManagement",
                 "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/routes/delete_workflows_bulk.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/user_prompts.ts"
               },
               {
                 "plugin": "cloudConnect",
@@ -10353,6 +10527,10 @@
               {
                 "plugin": "cloudConnect",
                 "path": "x-pack/platform/plugins/shared/cloud_connect/server/routes/clusters.test.ts"
+              },
+              {
+                "plugin": "dataSources",
+                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.test.ts"
               },
               {
                 "plugin": "dataSources",
@@ -10897,7 +11075,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "- {@link HttpResponseOptions } configures HTTP response headers, error message and other error details to pass to the client"
+                  "- {@link HttpResponseOptions} configures HTTP response headers, error message and other error details to pass to the client"
                 ],
                 "signature": [
                   "ErrorHttpResponseOptions",
@@ -10942,7 +11120,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "- {@link HttpResponseOptions } configures HTTP response headers, error message and other error details to pass to the client"
+                  "- {@link HttpResponseOptions} configures HTTP response headers, error message and other error details to pass to the client"
                 ],
                 "signature": [
                   "ErrorHttpResponseOptions",
@@ -10987,7 +11165,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "- {@link HttpResponseOptions } configures HTTP response headers, error message and other error details to pass to the client"
+                  "- {@link HttpResponseOptions} configures HTTP response headers, error message and other error details to pass to the client"
                 ],
                 "signature": [
                   "ErrorHttpResponseOptions",
@@ -11032,7 +11210,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "- {@link HttpResponseOptions } configures HTTP response headers, error message and other error details to pass to the client"
+                  "- {@link HttpResponseOptions} configures HTTP response headers, error message and other error details to pass to the client"
                 ],
                 "signature": [
                   "ErrorHttpResponseOptions",
@@ -11077,7 +11255,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "- {@link HttpResponseOptions } configures HTTP response headers, error message and other error details to pass to the client"
+                  "- {@link HttpResponseOptions} configures HTTP response headers, error message and other error details to pass to the client"
                 ],
                 "signature": [
                   "ErrorHttpResponseOptions",
@@ -11122,7 +11300,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "- {@link HttpResponseOptions } configures HTTP response headers, error message and other error details to pass to the client"
+                  "- {@link HttpResponseOptions} configures HTTP response headers, error message and other error details to pass to the client"
                 ],
                 "signature": [
                   "ErrorHttpResponseOptions",
@@ -11169,7 +11347,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "- {@link CustomHttpResponseOptions } configures HTTP response headers, error message and other error details to pass to the client"
+                  "- {@link CustomHttpResponseOptions} configures HTTP response headers, error message and other error details to pass to the client"
                 ],
                 "signature": [
                   "CustomHttpResponseOptions",
@@ -11232,7 +11410,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "- {@link HttpResponseOptions } configures HTTP response body & headers."
+                  "- {@link HttpResponseOptions} configures HTTP response body & headers."
                 ],
                 "signature": [
                   "HttpResponseOptions",
@@ -11293,7 +11471,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "- {@link RedirectResponseOptions } configures HTTP response body & headers.\nExpects `location` header to be set."
+                  "- {@link RedirectResponseOptions} configures HTTP response body & headers."
                 ],
                 "signature": [
                   "RedirectResponseOptions"
@@ -11325,7 +11503,7 @@
           "<Params, Query, Body, Method>"
         ],
         "path": "src/core/packages/http/server/src/router/request.ts",
-        "lineNumber": 102,
+        "lineNumber": 103,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -11340,7 +11518,7 @@
               "\nA identifier to identify this request.\n"
             ],
             "path": "src/core/packages/http/server/src/router/request.ts",
-            "lineNumber": 112,
+            "lineNumber": 113,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -11355,7 +11533,7 @@
               "\nA UUID to identify this request.\n"
             ],
             "path": "src/core/packages/http/server/src/router/request.ts",
-            "lineNumber": 122,
+            "lineNumber": 123,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -11373,7 +11551,7 @@
               "URL"
             ],
             "path": "src/core/packages/http/server/src/router/request.ts",
-            "lineNumber": 131,
+            "lineNumber": 132,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -11409,7 +11587,7 @@
               "<Method>>; readonly routePath?: string | undefined; }"
             ],
             "path": "src/core/packages/http/server/src/router/request.ts",
-            "lineNumber": 134,
+            "lineNumber": 135,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -11424,10 +11602,10 @@
               "\nReadonly copy of incoming request headers."
             ],
             "signature": [
-              "{ date?: string | string[] | undefined; from?: string | string[] | undefined; origin?: string | string[] | undefined; warning?: string | string[] | undefined; location?: string | string[] | undefined; allow?: string | string[] | undefined; range?: string | string[] | undefined; authorization?: string | string[] | undefined; host?: string | string[] | undefined; etag?: string | string[] | undefined; expires?: string | string[] | undefined; accept?: string | string[] | undefined; \"accept-encoding\"?: string | string[] | undefined; \"accept-language\"?: string | string[] | undefined; \"accept-patch\"?: string | string[] | undefined; \"accept-ranges\"?: string | string[] | undefined; \"access-control-allow-credentials\"?: string | string[] | undefined; \"access-control-allow-headers\"?: string | string[] | undefined; \"access-control-allow-methods\"?: string | string[] | undefined; \"access-control-allow-origin\"?: string | string[] | undefined; \"access-control-expose-headers\"?: string | string[] | undefined; \"access-control-max-age\"?: string | string[] | undefined; \"access-control-request-headers\"?: string | string[] | undefined; \"access-control-request-method\"?: string | string[] | undefined; age?: string | string[] | undefined; \"alt-svc\"?: string | string[] | undefined; \"cache-control\"?: string | string[] | undefined; connection?: string | string[] | undefined; \"content-disposition\"?: string | string[] | undefined; \"content-encoding\"?: string | string[] | undefined; \"content-language\"?: string | string[] | undefined; \"content-length\"?: string | string[] | undefined; \"content-location\"?: string | string[] | undefined; \"content-range\"?: string | string[] | undefined; \"content-type\"?: string | string[] | undefined; cookie?: string | string[] | undefined; expect?: string | string[] | undefined; forwarded?: string | string[] | undefined; \"if-match\"?: string | string[] | undefined; \"if-modified-since\"?: string | string[] | undefined; \"if-none-match\"?: string | string[] | undefined; \"if-unmodified-since\"?: string | string[] | undefined; \"last-modified\"?: string | string[] | undefined; pragma?: string | string[] | undefined; \"proxy-authenticate\"?: string | string[] | undefined; \"proxy-authorization\"?: string | string[] | undefined; \"public-key-pins\"?: string | string[] | undefined; referer?: string | string[] | undefined; \"retry-after\"?: string | string[] | undefined; \"sec-fetch-site\"?: string | string[] | undefined; \"sec-fetch-mode\"?: string | string[] | undefined; \"sec-fetch-user\"?: string | string[] | undefined; \"sec-fetch-dest\"?: string | string[] | undefined; \"sec-websocket-accept\"?: string | string[] | undefined; \"sec-websocket-extensions\"?: string | string[] | undefined; \"sec-websocket-key\"?: string | string[] | undefined; \"sec-websocket-protocol\"?: string | string[] | undefined; \"sec-websocket-version\"?: string | string[] | undefined; \"set-cookie\"?: string | string[] | undefined; \"strict-transport-security\"?: string | string[] | undefined; tk?: string | string[] | undefined; trailer?: string | string[] | undefined; \"transfer-encoding\"?: string | string[] | undefined; upgrade?: string | string[] | undefined; \"user-agent\"?: string | string[] | undefined; vary?: string | string[] | undefined; via?: string | string[] | undefined; \"www-authenticate\"?: string | string[] | undefined; } & { [header: string]: string | string[] | undefined; }"
+              "{ date?: string | string[] | undefined; range?: string | string[] | undefined; from?: string | string[] | undefined; allow?: string | string[] | undefined; warning?: string | string[] | undefined; location?: string | string[] | undefined; authorization?: string | string[] | undefined; host?: string | string[] | undefined; etag?: string | string[] | undefined; expires?: string | string[] | undefined; origin?: string | string[] | undefined; accept?: string | string[] | undefined; \"accept-encoding\"?: string | string[] | undefined; \"accept-language\"?: string | string[] | undefined; \"accept-patch\"?: string | string[] | undefined; \"accept-ranges\"?: string | string[] | undefined; \"access-control-allow-credentials\"?: string | string[] | undefined; \"access-control-allow-headers\"?: string | string[] | undefined; \"access-control-allow-methods\"?: string | string[] | undefined; \"access-control-allow-origin\"?: string | string[] | undefined; \"access-control-expose-headers\"?: string | string[] | undefined; \"access-control-max-age\"?: string | string[] | undefined; \"access-control-request-headers\"?: string | string[] | undefined; \"access-control-request-method\"?: string | string[] | undefined; age?: string | string[] | undefined; \"alt-svc\"?: string | string[] | undefined; \"cache-control\"?: string | string[] | undefined; connection?: string | string[] | undefined; \"content-disposition\"?: string | string[] | undefined; \"content-encoding\"?: string | string[] | undefined; \"content-language\"?: string | string[] | undefined; \"content-length\"?: string | string[] | undefined; \"content-location\"?: string | string[] | undefined; \"content-range\"?: string | string[] | undefined; \"content-type\"?: string | string[] | undefined; cookie?: string | string[] | undefined; expect?: string | string[] | undefined; forwarded?: string | string[] | undefined; \"if-match\"?: string | string[] | undefined; \"if-modified-since\"?: string | string[] | undefined; \"if-none-match\"?: string | string[] | undefined; \"if-unmodified-since\"?: string | string[] | undefined; \"last-modified\"?: string | string[] | undefined; pragma?: string | string[] | undefined; \"proxy-authenticate\"?: string | string[] | undefined; \"proxy-authorization\"?: string | string[] | undefined; \"public-key-pins\"?: string | string[] | undefined; referer?: string | string[] | undefined; \"retry-after\"?: string | string[] | undefined; \"sec-fetch-site\"?: string | string[] | undefined; \"sec-fetch-mode\"?: string | string[] | undefined; \"sec-fetch-user\"?: string | string[] | undefined; \"sec-fetch-dest\"?: string | string[] | undefined; \"sec-websocket-accept\"?: string | string[] | undefined; \"sec-websocket-extensions\"?: string | string[] | undefined; \"sec-websocket-key\"?: string | string[] | undefined; \"sec-websocket-protocol\"?: string | string[] | undefined; \"sec-websocket-version\"?: string | string[] | undefined; \"set-cookie\"?: string | string[] | undefined; \"strict-transport-security\"?: string | string[] | undefined; tk?: string | string[] | undefined; trailer?: string | string[] | undefined; \"transfer-encoding\"?: string | string[] | undefined; upgrade?: string | string[] | undefined; \"user-agent\"?: string | string[] | undefined; vary?: string | string[] | undefined; via?: string | string[] | undefined; \"www-authenticate\"?: string | string[] | undefined; } & { [header: string]: string | string[] | undefined; }"
             ],
             "path": "src/core/packages/http/server/src/router/request.ts",
-            "lineNumber": 137,
+            "lineNumber": 138,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -11442,7 +11620,7 @@
               "\nWhether or not the request is a \"system request\" rather than an application-level request.\nCan be set on the client using the `HttpFetchOptions#asSystemRequest` option."
             ],
             "path": "src/core/packages/http/server/src/router/request.ts",
-            "lineNumber": 144,
+            "lineNumber": 145,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -11457,7 +11635,7 @@
               "\nAllows identifying requests that were created using a {@link FakeRawRequest}\nEven if the API facade is the same, fake requests have some stubbed functionalities."
             ],
             "path": "src/core/packages/http/server/src/router/request.ts",
-            "lineNumber": 150,
+            "lineNumber": 151,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -11475,7 +11653,7 @@
               "Record<string, boolean> | undefined"
             ],
             "path": "src/core/packages/http/server/src/router/request.ts",
-            "lineNumber": 156,
+            "lineNumber": 157,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -11492,7 +11670,7 @@
               "\nAn internal request has access to internal routes."
             ],
             "path": "src/core/packages/http/server/src/router/request.ts",
-            "lineNumber": 162,
+            "lineNumber": 163,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -11507,7 +11685,7 @@
               "\nThe HTTP version sent by the client."
             ],
             "path": "src/core/packages/http/server/src/router/request.ts",
-            "lineNumber": 168,
+            "lineNumber": 169,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -11525,7 +11703,7 @@
               "\"http1\" | \"http2\""
             ],
             "path": "src/core/packages/http/server/src/router/request.ts",
-            "lineNumber": 173,
+            "lineNumber": 174,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -11543,7 +11721,7 @@
               "IKibanaSocket"
             ],
             "path": "src/core/packages/http/server/src/router/request.ts",
-            "lineNumber": 178,
+            "lineNumber": 179,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -11561,7 +11739,7 @@
               "KibanaRequestEvents"
             ],
             "path": "src/core/packages/http/server/src/router/request.ts",
-            "lineNumber": 184,
+            "lineNumber": 185,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -11579,7 +11757,7 @@
               "KibanaRequestAuth"
             ],
             "path": "src/core/packages/http/server/src/router/request.ts",
-            "lineNumber": 190,
+            "lineNumber": 191,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -11598,7 +11776,7 @@
               " | undefined"
             ],
             "path": "src/core/packages/http/server/src/router/request.ts",
-            "lineNumber": 196,
+            "lineNumber": 197,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -11616,7 +11794,7 @@
               "string | undefined"
             ],
             "path": "src/core/packages/http/server/src/router/request.ts",
-            "lineNumber": 201,
+            "lineNumber": 202,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -11634,7 +11812,7 @@
               "Params"
             ],
             "path": "src/core/packages/http/server/src/router/request.ts",
-            "lineNumber": 206,
+            "lineNumber": 207,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -11652,7 +11830,7 @@
               "Query"
             ],
             "path": "src/core/packages/http/server/src/router/request.ts",
-            "lineNumber": 211,
+            "lineNumber": 212,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -11670,7 +11848,7 @@
               "Body"
             ],
             "path": "src/core/packages/http/server/src/router/request.ts",
-            "lineNumber": 216,
+            "lineNumber": 217,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -11688,7 +11866,7 @@
           "\nAuth status for this request."
         ],
         "path": "src/core/packages/http/server/src/router/request.ts",
-        "lineNumber": 93,
+        "lineNumber": 94,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -11703,7 +11881,7 @@
               "true if the request has been successfully authenticated, false otherwise."
             ],
             "path": "src/core/packages/http/server/src/router/request.ts",
-            "lineNumber": 98,
+            "lineNumber": 99,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -11721,7 +11899,7 @@
           "\nRequest events."
         ],
         "path": "src/core/packages/http/server/src/router/request.ts",
-        "lineNumber": 72,
+        "lineNumber": 73,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -11740,7 +11918,7 @@
               "<void>"
             ],
             "path": "src/core/packages/http/server/src/router/request.ts",
-            "lineNumber": 77,
+            "lineNumber": 78,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -11759,7 +11937,7 @@
               "<void>"
             ],
             "path": "src/core/packages/http/server/src/router/request.ts",
-            "lineNumber": 82,
+            "lineNumber": 83,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -11781,7 +11959,7 @@
           "<Method>"
         ],
         "path": "src/core/packages/http/server/src/router/request.ts",
-        "lineNumber": 61,
+        "lineNumber": 62,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -11794,7 +11972,7 @@
             "label": "path",
             "description": [],
             "path": "src/core/packages/http/server/src/router/request.ts",
-            "lineNumber": 66,
+            "lineNumber": 67,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -11810,7 +11988,7 @@
               "Method"
             ],
             "path": "src/core/packages/http/server/src/router/request.ts",
-            "lineNumber": 67,
+            "lineNumber": 68,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -11832,7 +12010,7 @@
               " | undefined; }"
             ],
             "path": "src/core/packages/http/server/src/router/request.ts",
-            "lineNumber": 68,
+            "lineNumber": 69,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -11848,7 +12026,7 @@
               "string | undefined"
             ],
             "path": "src/core/packages/http/server/src/router/request.ts",
-            "lineNumber": 69,
+            "lineNumber": 70,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -11993,6 +12171,22 @@
             "description": [],
             "path": "src/core/packages/http/server/src/router/request.ts",
             "lineNumber": 48,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-server.KibanaRequestState.redactedSessionId",
+            "type": "string",
+            "tags": [],
+            "label": "redactedSessionId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/core/packages/http/server/src/router/request.ts",
+            "lineNumber": 49,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -12146,7 +12340,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "- {@link HttpResponseOptions } configures HTTP response body & headers."
+                  "- {@link HttpResponseOptions} configures HTTP response body & headers."
                 ],
                 "signature": [
                   "HttpResponseOptions",
@@ -12195,7 +12389,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "- {@link HttpResponseOptions } configures HTTP response body & headers."
+                  "- {@link HttpResponseOptions} configures HTTP response body & headers."
                 ],
                 "signature": [
                   "HttpResponseOptions",
@@ -12244,7 +12438,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "- {@link HttpResponseOptions } configures HTTP response body & headers."
+                  "- {@link HttpResponseOptions} configures HTTP response body & headers."
                 ],
                 "signature": [
                   "HttpResponseOptions",
@@ -12289,7 +12483,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "- {@link HttpResponseOptions } configures HTTP response body & headers."
+                  "- {@link HttpResponseOptions} configures HTTP response body & headers."
                 ],
                 "signature": [
                   "HttpResponseOptions",
@@ -12334,7 +12528,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "- {@link HttpResponseOptions } configures HTTP response body & headers."
+                  "- {@link HttpResponseOptions} configures HTTP response body & headers."
                 ],
                 "signature": [
                   "HttpResponseOptions",
@@ -15201,7 +15395,7 @@
           "\nReturn type from a function to validate cookie contents."
         ],
         "path": "src/core/packages/http/server/src/session_storage.ts",
-        "lineNumber": 69,
+        "lineNumber": 85,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -15216,7 +15410,7 @@
               "\nWhether the cookie is valid or not."
             ],
             "path": "src/core/packages/http/server/src/session_storage.ts",
-            "lineNumber": 74,
+            "lineNumber": 90,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -15234,7 +15428,7 @@
               "string | undefined"
             ],
             "path": "src/core/packages/http/server/src/session_storage.ts",
-            "lineNumber": 78,
+            "lineNumber": 94,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -15256,7 +15450,7 @@
           "<T>"
         ],
         "path": "src/core/packages/http/server/src/session_storage.ts",
-        "lineNumber": 12,
+        "lineNumber": 27,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -15274,7 +15468,7 @@
               "() => Promise<T | null>"
             ],
             "path": "src/core/packages/http/server/src/session_storage.ts",
-            "lineNumber": 17,
+            "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -15291,10 +15485,12 @@
               "\nPuts current session value into the session storage."
             ],
             "signature": [
-              "(sessionValue: T) => void"
+              "(sessionValue: T, options?: ",
+              "SessionStorageSetOptions",
+              " | undefined) => void"
             ],
             "path": "src/core/packages/http/server/src/session_storage.ts",
-            "lineNumber": 22,
+            "lineNumber": 37,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -15312,11 +15508,31 @@
                   "T"
                 ],
                 "path": "src/core/packages/http/server/src/session_storage.ts",
-                "lineNumber": 26,
+                "lineNumber": 42,
                 "columnNumber": 7,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-http-server",
+                "id": "def-server.SessionStorage.set.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [
+                  "- optional overrides for cookie attributes"
+                ],
+                "signature": [
+                  "SessionStorageSetOptions",
+                  " | undefined"
+                ],
+                "path": "src/core/packages/http/server/src/session_storage.ts",
+                "lineNumber": 42,
+                "columnNumber": 24,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -15334,7 +15550,7 @@
               "() => void"
             ],
             "path": "src/core/packages/http/server/src/session_storage.ts",
-            "lineNumber": 28,
+            "lineNumber": 44,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -15358,7 +15574,7 @@
           "<T>"
         ],
         "path": "src/core/packages/http/server/src/session_storage.ts",
-        "lineNumber": 41,
+        "lineNumber": 57,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -15373,7 +15589,7 @@
               "\nName of the session cookie."
             ],
             "path": "src/core/packages/http/server/src/session_storage.ts",
-            "lineNumber": 46,
+            "lineNumber": 62,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -15388,7 +15604,7 @@
               "\nA key used to encrypt a cookie's value. Should be at least 32 characters long."
             ],
             "path": "src/core/packages/http/server/src/session_storage.ts",
-            "lineNumber": 50,
+            "lineNumber": 66,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -15407,7 +15623,7 @@
               "SessionCookieValidationResult"
             ],
             "path": "src/core/packages/http/server/src/session_storage.ts",
-            "lineNumber": 54,
+            "lineNumber": 70,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -15423,7 +15639,7 @@
                   "T | T[]"
                 ],
                 "path": "src/core/packages/http/server/src/session_storage.ts",
-                "lineNumber": 57,
+                "lineNumber": 73,
                 "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -15442,7 +15658,7 @@
               "\nFlag indicating whether the cookie should be sent only via a secure connection."
             ],
             "path": "src/core/packages/http/server/src/session_storage.ts",
-            "lineNumber": 58,
+            "lineNumber": 74,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -15460,7 +15676,7 @@
               "\"None\" | \"Strict\" | \"Lax\" | undefined"
             ],
             "path": "src/core/packages/http/server/src/session_storage.ts",
-            "lineNumber": 62,
+            "lineNumber": 78,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -15482,7 +15698,7 @@
           "<T>"
         ],
         "path": "src/core/packages/http/server/src/session_storage.ts",
-        "lineNumber": 34,
+        "lineNumber": 50,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -15502,7 +15718,7 @@
               "<T>"
             ],
             "path": "src/core/packages/http/server/src/session_storage.ts",
-            "lineNumber": 38,
+            "lineNumber": 54,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -15519,7 +15735,7 @@
                   "<unknown, unknown, unknown, any>"
                 ],
                 "path": "src/core/packages/http/server/src/session_storage.ts",
-                "lineNumber": 38,
+                "lineNumber": 54,
                 "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -15527,6 +15743,60 @@
               }
             ],
             "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-http-server",
+        "id": "def-server.SessionStorageSetOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "SessionStorageSetOptions",
+        "description": [
+          "\nOptional overrides for cookie attributes when setting or clearing session cookies."
+        ],
+        "path": "src/core/packages/http/server/src/session_storage.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-server.SessionStorageSetOptions.isSecure",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isSecure",
+            "description": [
+              "\nOptional override for the isSecure cookie attribute."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/core/packages/http/server/src/session_storage.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-server.SessionStorageSetOptions.sameSite",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "sameSite",
+            "description": [
+              "\nOptional override for the sameSite cookie attribute."
+            ],
+            "signature": [
+              "\"None\" | \"Strict\" | \"Lax\" | undefined"
+            ],
+            "path": "src/core/packages/http/server/src/session_storage.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -15856,26 +16126,6 @@
                 "path": "src/platform/plugins/shared/dashboard/server/api/read/register_read_route.ts"
               },
               {
-                "plugin": "telemetry",
-                "path": "src/platform/plugins/shared/telemetry/server/routes/telemetry_config.ts"
-              },
-              {
-                "plugin": "telemetry",
-                "path": "src/platform/plugins/shared/telemetry/server/routes/telemetry_config.ts"
-              },
-              {
-                "plugin": "telemetry",
-                "path": "src/platform/plugins/shared/telemetry/server/routes/telemetry_last_reported.ts"
-              },
-              {
-                "plugin": "fieldsMetadata",
-                "path": "x-pack/platform/plugins/shared/fields_metadata/server/routes/fields_metadata/find_fields_metadata.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/services/security/fleet_router.ts"
-              },
-              {
                 "plugin": "lens",
                 "path": "x-pack/platform/plugins/shared/lens/server/api/routes/visualizations/get.ts"
               },
@@ -15906,6 +16156,26 @@
               {
                 "plugin": "maps",
                 "path": "x-pack/platform/plugins/shared/maps/server/routes.ts"
+              },
+              {
+                "plugin": "telemetry",
+                "path": "src/platform/plugins/shared/telemetry/server/routes/telemetry_config.ts"
+              },
+              {
+                "plugin": "telemetry",
+                "path": "src/platform/plugins/shared/telemetry/server/routes/telemetry_config.ts"
+              },
+              {
+                "plugin": "telemetry",
+                "path": "src/platform/plugins/shared/telemetry/server/routes/telemetry_last_reported.ts"
+              },
+              {
+                "plugin": "fieldsMetadata",
+                "path": "x-pack/platform/plugins/shared/fields_metadata/server/routes/fields_metadata/find_fields_metadata.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/security/fleet_router.ts"
               },
               {
                 "plugin": "@kbn/core",
@@ -16022,6 +16292,10 @@
               {
                 "plugin": "automaticImportVTwo",
                 "path": "x-pack/platform/plugins/shared/automatic_import_v2/server/routes/integrations_route.ts"
+              },
+              {
+                "plugin": "automaticImportVTwo",
+                "path": "x-pack/platform/plugins/shared/automatic_import_v2/server/routes/data_stream_routes.ts"
               },
               {
                 "plugin": "ml",
@@ -16258,10 +16532,6 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/platform/plugins/shared/ml/server/routes/system.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/platform/plugins/shared/ml/server/routes/management.ts"
               },
               {
                 "plugin": "ml",
@@ -16705,6 +16975,14 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/watchlists/management/routes/get.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/watchlists/management/routes/list.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/siem_migrations/rules/api/get.ts"
               },
               {
@@ -16785,6 +17063,10 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/siem_readiness/routes/get_readiness_pipelines.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/metadata/index.ts"
               },
               {
@@ -16834,6 +17116,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/protection_updates_note/index.ts"
+              },
+              {
+                "plugin": "entityStore",
+                "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/status.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -17088,6 +17374,10 @@
                 "path": "x-pack/solutions/security/plugins/cloud_security_posture/server/routes/benchmarks/benchmarks.test.ts"
               },
               {
+                "plugin": "cloudSecurityPosture",
+                "path": "x-pack/solutions/security/plugins/cloud_security_posture/server/routes/compliance_dashboard/compliance_dashboard.test.ts"
+              },
+              {
                 "plugin": "elasticAssistant",
                 "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/attack_discovery/privileges/get_missing_privileges.test.ts"
               },
@@ -17126,7 +17416,7 @@
                   "RouteConfig",
                   "<unknown, unknown, unknown, Method>, \"validate\" | \"options\"> & { options?: Pick<",
                   "RouteConfigOptions",
-                  "<Method>, \"tags\" | \"timeout\" | \"body\" | \"authRequired\" | \"xsrfRequired\" | \"excludeFromOAS\" | \"excludeFromRateLimiter\" | \"httpResource\" | \"availability\"> | undefined; access: ",
+                  "<Method>, \"tags\" | \"timeout\" | \"body\" | \"availability\" | \"authRequired\" | \"xsrfRequired\" | \"excludeFromOAS\" | \"excludeFromRateLimiter\" | \"httpResource\"> | undefined; access: ",
                   "RouteAccess",
                   "; security?: ",
                   "RouteSecurity",
@@ -17199,6 +17489,10 @@
                 "path": "src/platform/plugins/shared/dashboard/server/api/update/register_update_route.ts"
               },
               {
+                "plugin": "lens",
+                "path": "x-pack/platform/plugins/shared/lens/server/api/routes/visualizations/update.ts"
+              },
+              {
                 "plugin": "telemetry",
                 "path": "src/platform/plugins/shared/telemetry/server/routes/telemetry_user_has_seen_notice.ts"
               },
@@ -17209,10 +17503,6 @@
               {
                 "plugin": "fleet",
                 "path": "x-pack/platform/plugins/shared/fleet/server/services/security/fleet_router.ts"
-              },
-              {
-                "plugin": "lens",
-                "path": "x-pack/platform/plugins/shared/lens/server/api/routes/visualizations/update.ts"
               },
               {
                 "plugin": "@kbn/core",
@@ -17257,6 +17547,10 @@
               {
                 "plugin": "automaticImportVTwo",
                 "path": "x-pack/platform/plugins/shared/automatic_import_v2/server/routes/integrations_route.ts"
+              },
+              {
+                "plugin": "automaticImportVTwo",
+                "path": "x-pack/platform/plugins/shared/automatic_import_v2/server/routes/data_stream_routes.ts"
               },
               {
                 "plugin": "ml",
@@ -17404,6 +17698,10 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/watchlists/management/routes/update.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/siem_migrations/rules/api/create.ts"
               },
               {
@@ -17412,11 +17710,19 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/routes/data_generator/register_data_generator_routes.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/install_prebuilt_rules_and_timelines/install_prebuilt_rules_and_timelines_route.ts"
               },
               {
                 "plugin": "entityStore",
                 "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/stop.ts"
+              },
+              {
+                "plugin": "entityStore",
+                "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/start.ts"
               },
               {
                 "plugin": "@kbn/core",
@@ -17469,7 +17775,7 @@
                   "RouteConfig",
                   "<unknown, unknown, unknown, Method>, \"validate\" | \"options\"> & { options?: Pick<",
                   "RouteConfigOptions",
-                  "<Method>, \"tags\" | \"timeout\" | \"body\" | \"authRequired\" | \"xsrfRequired\" | \"excludeFromOAS\" | \"excludeFromRateLimiter\" | \"httpResource\" | \"availability\"> | undefined; access: ",
+                  "<Method>, \"tags\" | \"timeout\" | \"body\" | \"availability\" | \"authRequired\" | \"xsrfRequired\" | \"excludeFromOAS\" | \"excludeFromRateLimiter\" | \"httpResource\"> | undefined; access: ",
                   "RouteAccess",
                   "; security?: ",
                   "RouteSecurity",
@@ -17567,6 +17873,10 @@
               },
               {
                 "plugin": "data",
+                "path": "src/platform/plugins/shared/data/server/search/routes/session.ts"
+              },
+              {
+                "plugin": "data",
                 "path": "src/platform/plugins/shared/data/server/search/routes/search.ts"
               },
               {
@@ -17610,6 +17920,18 @@
                 "path": "src/platform/plugins/shared/kql/server/autocomplete/value_suggestions_route.ts"
               },
               {
+                "plugin": "lens",
+                "path": "x-pack/platform/plugins/shared/lens/server/api/routes/visualizations/create.ts"
+              },
+              {
+                "plugin": "maps",
+                "path": "x-pack/platform/plugins/shared/maps/server/data_indexing/indexing_routes.ts"
+              },
+              {
+                "plugin": "maps",
+                "path": "x-pack/platform/plugins/shared/maps/server/data_indexing/indexing_routes.ts"
+              },
+              {
                 "plugin": "telemetry",
                 "path": "src/platform/plugins/shared/telemetry/server/routes/telemetry_force_send.ts"
               },
@@ -17632,18 +17954,6 @@
               {
                 "plugin": "fleet",
                 "path": "x-pack/platform/plugins/shared/fleet/server/services/security/fleet_router.ts"
-              },
-              {
-                "plugin": "lens",
-                "path": "x-pack/platform/plugins/shared/lens/server/api/routes/visualizations/create.ts"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/platform/plugins/shared/maps/server/data_indexing/indexing_routes.ts"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/platform/plugins/shared/maps/server/data_indexing/indexing_routes.ts"
               },
               {
                 "plugin": "@kbn/core",
@@ -17828,6 +18138,10 @@
               {
                 "plugin": "automaticImport",
                 "path": "x-pack/platform/plugins/shared/automatic_import/server/routes/analyze_api_route.ts"
+              },
+              {
+                "plugin": "automaticImportVTwo",
+                "path": "x-pack/platform/plugins/shared/automatic_import_v2/server/routes/integrations_route.ts"
               },
               {
                 "plugin": "automaticImportVTwo",
@@ -18163,11 +18477,19 @@
               },
               {
                 "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/server/routes/saved_query/copy_saved_query_route.ts"
+              },
+              {
+                "plugin": "osquery",
                 "path": "x-pack/platform/plugins/shared/osquery/server/routes/fleet_wrapper/get_bulk_agent_details.ts"
               },
               {
                 "plugin": "osquery",
                 "path": "x-pack/platform/plugins/shared/osquery/server/routes/pack/create_pack_route.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/server/routes/pack/copy_pack_route.ts"
               },
               {
                 "plugin": "osquery",
@@ -18340,6 +18662,10 @@
               {
                 "plugin": "elasticAssistant",
                 "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/test_internal/update_anonymization_fields_route.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/test_internal/create_attack_discovery_alerts_route.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -18563,6 +18889,10 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/watchlists/management/routes/create.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/siem_migrations/rules/api/start.ts"
               },
               {
@@ -18628,6 +18958,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/asset_inventory/routes/install_data_view.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/siem_readiness/routes/get_mitre_data_indices_docs_count.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -18731,7 +19065,11 @@
               },
               {
                 "plugin": "entityStore",
-                "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/install.ts"
+                "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/install/index.ts"
+              },
+              {
+                "plugin": "entityStore",
+                "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/force_log_extraction.ts"
               },
               {
                 "plugin": "entityStore",
@@ -18856,7 +19194,7 @@
                   "RouteConfig",
                   "<unknown, unknown, unknown, Method>, \"validate\" | \"options\"> & { options?: Pick<",
                   "RouteConfigOptions",
-                  "<Method>, \"tags\" | \"timeout\" | \"body\" | \"authRequired\" | \"xsrfRequired\" | \"excludeFromOAS\" | \"excludeFromRateLimiter\" | \"httpResource\" | \"availability\"> | undefined; access: ",
+                  "<Method>, \"tags\" | \"timeout\" | \"body\" | \"availability\" | \"authRequired\" | \"xsrfRequired\" | \"excludeFromOAS\" | \"excludeFromRateLimiter\" | \"httpResource\"> | undefined; access: ",
                   "RouteAccess",
                   "; security?: ",
                   "RouteSecurity",
@@ -18987,7 +19325,7 @@
                   "RouteConfig",
                   "<unknown, unknown, unknown, Method>, \"validate\" | \"options\"> & { options?: Pick<",
                   "RouteConfigOptions",
-                  "<Method>, \"tags\" | \"timeout\" | \"body\" | \"authRequired\" | \"xsrfRequired\" | \"excludeFromOAS\" | \"excludeFromRateLimiter\" | \"httpResource\" | \"availability\"> | undefined; access: ",
+                  "<Method>, \"tags\" | \"timeout\" | \"body\" | \"availability\" | \"authRequired\" | \"xsrfRequired\" | \"excludeFromOAS\" | \"excludeFromRateLimiter\" | \"httpResource\"> | undefined; access: ",
                   "RouteAccess",
                   "; security?: ",
                   "RouteSecurity",
@@ -19060,16 +19398,16 @@
                 "path": "src/platform/plugins/shared/dashboard/server/api/delete/register_delete_route.ts"
               },
               {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/services/security/fleet_router.ts"
-              },
-              {
                 "plugin": "lens",
                 "path": "x-pack/platform/plugins/shared/lens/server/api/routes/visualizations/delete.ts"
               },
               {
                 "plugin": "maps",
                 "path": "x-pack/platform/plugins/shared/maps/server/data_indexing/indexing_routes.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/security/fleet_router.ts"
               },
               {
                 "plugin": "@kbn/core",
@@ -19322,7 +19660,7 @@
                   "RouteConfig",
                   "<unknown, unknown, unknown, Method>, \"validate\" | \"options\"> & { options?: Pick<",
                   "RouteConfigOptions",
-                  "<Method>, \"tags\" | \"timeout\" | \"body\" | \"authRequired\" | \"xsrfRequired\" | \"excludeFromOAS\" | \"excludeFromRateLimiter\" | \"httpResource\" | \"availability\"> | undefined; access: ",
+                  "<Method>, \"tags\" | \"timeout\" | \"body\" | \"availability\" | \"authRequired\" | \"xsrfRequired\" | \"excludeFromOAS\" | \"excludeFromRateLimiter\" | \"httpResource\"> | undefined; access: ",
                   "RouteAccess",
                   "; security?: ",
                   "RouteSecurity",
@@ -19469,7 +19807,7 @@
               "RouteConfigOptions",
               "<",
               "RouteMethod",
-              ">, \"tags\" | \"timeout\" | \"body\" | \"authRequired\" | \"xsrfRequired\" | \"excludeFromOAS\" | \"excludeFromRateLimiter\" | \"httpResource\" | \"availability\"> | undefined; security: ",
+              ">, \"tags\" | \"timeout\" | \"body\" | \"availability\" | \"authRequired\" | \"xsrfRequired\" | \"excludeFromOAS\" | \"excludeFromRateLimiter\" | \"httpResource\"> | undefined; security: ",
               "RouteSecurity",
               "; description?: string | undefined; summary?: string | undefined; access: ",
               "RouteAccess",
@@ -19703,7 +20041,7 @@
           ">"
         ],
         "path": "src/core/packages/http/server/src/router/request.ts",
-        "lineNumber": 222,
+        "lineNumber": 223,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -20091,7 +20429,7 @@
           "\nHttp request headers to read."
         ],
         "signature": [
-          "{ date?: string | string[] | undefined; from?: string | string[] | undefined; origin?: string | string[] | undefined; warning?: string | string[] | undefined; location?: string | string[] | undefined; allow?: string | string[] | undefined; range?: string | string[] | undefined; authorization?: string | string[] | undefined; host?: string | string[] | undefined; etag?: string | string[] | undefined; expires?: string | string[] | undefined; accept?: string | string[] | undefined; \"accept-encoding\"?: string | string[] | undefined; \"accept-language\"?: string | string[] | undefined; \"accept-patch\"?: string | string[] | undefined; \"accept-ranges\"?: string | string[] | undefined; \"access-control-allow-credentials\"?: string | string[] | undefined; \"access-control-allow-headers\"?: string | string[] | undefined; \"access-control-allow-methods\"?: string | string[] | undefined; \"access-control-allow-origin\"?: string | string[] | undefined; \"access-control-expose-headers\"?: string | string[] | undefined; \"access-control-max-age\"?: string | string[] | undefined; \"access-control-request-headers\"?: string | string[] | undefined; \"access-control-request-method\"?: string | string[] | undefined; age?: string | string[] | undefined; \"alt-svc\"?: string | string[] | undefined; \"cache-control\"?: string | string[] | undefined; connection?: string | string[] | undefined; \"content-disposition\"?: string | string[] | undefined; \"content-encoding\"?: string | string[] | undefined; \"content-language\"?: string | string[] | undefined; \"content-length\"?: string | string[] | undefined; \"content-location\"?: string | string[] | undefined; \"content-range\"?: string | string[] | undefined; \"content-type\"?: string | string[] | undefined; cookie?: string | string[] | undefined; expect?: string | string[] | undefined; forwarded?: string | string[] | undefined; \"if-match\"?: string | string[] | undefined; \"if-modified-since\"?: string | string[] | undefined; \"if-none-match\"?: string | string[] | undefined; \"if-unmodified-since\"?: string | string[] | undefined; \"last-modified\"?: string | string[] | undefined; pragma?: string | string[] | undefined; \"proxy-authenticate\"?: string | string[] | undefined; \"proxy-authorization\"?: string | string[] | undefined; \"public-key-pins\"?: string | string[] | undefined; referer?: string | string[] | undefined; \"retry-after\"?: string | string[] | undefined; \"sec-fetch-site\"?: string | string[] | undefined; \"sec-fetch-mode\"?: string | string[] | undefined; \"sec-fetch-user\"?: string | string[] | undefined; \"sec-fetch-dest\"?: string | string[] | undefined; \"sec-websocket-accept\"?: string | string[] | undefined; \"sec-websocket-extensions\"?: string | string[] | undefined; \"sec-websocket-key\"?: string | string[] | undefined; \"sec-websocket-protocol\"?: string | string[] | undefined; \"sec-websocket-version\"?: string | string[] | undefined; \"set-cookie\"?: string | string[] | undefined; \"strict-transport-security\"?: string | string[] | undefined; tk?: string | string[] | undefined; trailer?: string | string[] | undefined; \"transfer-encoding\"?: string | string[] | undefined; upgrade?: string | string[] | undefined; \"user-agent\"?: string | string[] | undefined; vary?: string | string[] | undefined; via?: string | string[] | undefined; \"www-authenticate\"?: string | string[] | undefined; } & { [header: string]: string | string[] | undefined; }"
+          "{ date?: string | string[] | undefined; range?: string | string[] | undefined; from?: string | string[] | undefined; allow?: string | string[] | undefined; warning?: string | string[] | undefined; location?: string | string[] | undefined; authorization?: string | string[] | undefined; host?: string | string[] | undefined; etag?: string | string[] | undefined; expires?: string | string[] | undefined; origin?: string | string[] | undefined; accept?: string | string[] | undefined; \"accept-encoding\"?: string | string[] | undefined; \"accept-language\"?: string | string[] | undefined; \"accept-patch\"?: string | string[] | undefined; \"accept-ranges\"?: string | string[] | undefined; \"access-control-allow-credentials\"?: string | string[] | undefined; \"access-control-allow-headers\"?: string | string[] | undefined; \"access-control-allow-methods\"?: string | string[] | undefined; \"access-control-allow-origin\"?: string | string[] | undefined; \"access-control-expose-headers\"?: string | string[] | undefined; \"access-control-max-age\"?: string | string[] | undefined; \"access-control-request-headers\"?: string | string[] | undefined; \"access-control-request-method\"?: string | string[] | undefined; age?: string | string[] | undefined; \"alt-svc\"?: string | string[] | undefined; \"cache-control\"?: string | string[] | undefined; connection?: string | string[] | undefined; \"content-disposition\"?: string | string[] | undefined; \"content-encoding\"?: string | string[] | undefined; \"content-language\"?: string | string[] | undefined; \"content-length\"?: string | string[] | undefined; \"content-location\"?: string | string[] | undefined; \"content-range\"?: string | string[] | undefined; \"content-type\"?: string | string[] | undefined; cookie?: string | string[] | undefined; expect?: string | string[] | undefined; forwarded?: string | string[] | undefined; \"if-match\"?: string | string[] | undefined; \"if-modified-since\"?: string | string[] | undefined; \"if-none-match\"?: string | string[] | undefined; \"if-unmodified-since\"?: string | string[] | undefined; \"last-modified\"?: string | string[] | undefined; pragma?: string | string[] | undefined; \"proxy-authenticate\"?: string | string[] | undefined; \"proxy-authorization\"?: string | string[] | undefined; \"public-key-pins\"?: string | string[] | undefined; referer?: string | string[] | undefined; \"retry-after\"?: string | string[] | undefined; \"sec-fetch-site\"?: string | string[] | undefined; \"sec-fetch-mode\"?: string | string[] | undefined; \"sec-fetch-user\"?: string | string[] | undefined; \"sec-fetch-dest\"?: string | string[] | undefined; \"sec-websocket-accept\"?: string | string[] | undefined; \"sec-websocket-extensions\"?: string | string[] | undefined; \"sec-websocket-key\"?: string | string[] | undefined; \"sec-websocket-protocol\"?: string | string[] | undefined; \"sec-websocket-version\"?: string | string[] | undefined; \"set-cookie\"?: string | string[] | undefined; \"strict-transport-security\"?: string | string[] | undefined; tk?: string | string[] | undefined; trailer?: string | string[] | undefined; \"transfer-encoding\"?: string | string[] | undefined; upgrade?: string | string[] | undefined; \"user-agent\"?: string | string[] | undefined; vary?: string | string[] | undefined; via?: string | string[] | undefined; \"www-authenticate\"?: string | string[] | undefined; } & { [header: string]: string | string[] | undefined; }"
         ],
         "path": "src/core/packages/http/server/src/router/headers.ts",
         "lineNumber": 46,
@@ -20297,7 +20635,7 @@
           " | undefined; }"
         ],
         "path": "src/core/packages/http/server/src/router/request.ts",
-        "lineNumber": 51,
+        "lineNumber": 52,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -20355,7 +20693,7 @@
           "\nSet of well-known HTTP headers."
         ],
         "signature": [
-          "\"date\" | \"from\" | \"origin\" | \"warning\" | \"location\" | \"allow\" | \"range\" | \"authorization\" | \"host\" | \"etag\" | \"expires\" | \"accept\" | \"accept-encoding\" | \"accept-language\" | \"accept-patch\" | \"accept-ranges\" | \"access-control-allow-credentials\" | \"access-control-allow-headers\" | \"access-control-allow-methods\" | \"access-control-allow-origin\" | \"access-control-expose-headers\" | \"access-control-max-age\" | \"access-control-request-headers\" | \"access-control-request-method\" | \"age\" | \"alt-svc\" | \"cache-control\" | \"connection\" | \"content-disposition\" | \"content-encoding\" | \"content-language\" | \"content-length\" | \"content-location\" | \"content-range\" | \"content-type\" | \"cookie\" | \"expect\" | \"forwarded\" | \"if-match\" | \"if-modified-since\" | \"if-none-match\" | \"if-unmodified-since\" | \"last-modified\" | \"pragma\" | \"proxy-authenticate\" | \"proxy-authorization\" | \"public-key-pins\" | \"referer\" | \"retry-after\" | \"sec-fetch-site\" | \"sec-fetch-mode\" | \"sec-fetch-user\" | \"sec-fetch-dest\" | \"sec-websocket-accept\" | \"sec-websocket-extensions\" | \"sec-websocket-key\" | \"sec-websocket-protocol\" | \"sec-websocket-version\" | \"set-cookie\" | \"strict-transport-security\" | \"tk\" | \"trailer\" | \"transfer-encoding\" | \"upgrade\" | \"user-agent\" | \"vary\" | \"via\" | \"www-authenticate\""
+          "\"date\" | \"range\" | \"from\" | \"allow\" | \"warning\" | \"location\" | \"authorization\" | \"host\" | \"etag\" | \"expires\" | \"origin\" | \"accept\" | \"accept-encoding\" | \"accept-language\" | \"accept-patch\" | \"accept-ranges\" | \"access-control-allow-credentials\" | \"access-control-allow-headers\" | \"access-control-allow-methods\" | \"access-control-allow-origin\" | \"access-control-expose-headers\" | \"access-control-max-age\" | \"access-control-request-headers\" | \"access-control-request-method\" | \"age\" | \"alt-svc\" | \"cache-control\" | \"connection\" | \"content-disposition\" | \"content-encoding\" | \"content-language\" | \"content-length\" | \"content-location\" | \"content-range\" | \"content-type\" | \"cookie\" | \"expect\" | \"forwarded\" | \"if-match\" | \"if-modified-since\" | \"if-none-match\" | \"if-unmodified-since\" | \"last-modified\" | \"pragma\" | \"proxy-authenticate\" | \"proxy-authorization\" | \"public-key-pins\" | \"referer\" | \"retry-after\" | \"sec-fetch-site\" | \"sec-fetch-mode\" | \"sec-fetch-user\" | \"sec-fetch-dest\" | \"sec-websocket-accept\" | \"sec-websocket-extensions\" | \"sec-websocket-key\" | \"sec-websocket-protocol\" | \"sec-websocket-version\" | \"set-cookie\" | \"strict-transport-security\" | \"tk\" | \"trailer\" | \"transfer-encoding\" | \"upgrade\" | \"user-agent\" | \"vary\" | \"via\" | \"www-authenticate\""
         ],
         "path": "src/core/packages/http/server/src/router/headers.ts",
         "lineNumber": 40,
@@ -21183,7 +21521,7 @@
           "\nHttp response headers to set."
         ],
         "signature": [
-          "Record<string, string | string[]> | Record<\"date\" | \"from\" | \"origin\" | \"warning\" | \"location\" | \"allow\" | \"range\" | \"authorization\" | \"host\" | \"etag\" | \"expires\" | \"accept\" | \"accept-encoding\" | \"accept-language\" | \"accept-patch\" | \"accept-ranges\" | \"access-control-allow-credentials\" | \"access-control-allow-headers\" | \"access-control-allow-methods\" | \"access-control-allow-origin\" | \"access-control-expose-headers\" | \"access-control-max-age\" | \"access-control-request-headers\" | \"access-control-request-method\" | \"age\" | \"alt-svc\" | \"cache-control\" | \"connection\" | \"content-disposition\" | \"content-encoding\" | \"content-language\" | \"content-length\" | \"content-location\" | \"content-range\" | \"content-type\" | \"cookie\" | \"expect\" | \"forwarded\" | \"if-match\" | \"if-modified-since\" | \"if-none-match\" | \"if-unmodified-since\" | \"last-modified\" | \"pragma\" | \"proxy-authenticate\" | \"proxy-authorization\" | \"public-key-pins\" | \"referer\" | \"retry-after\" | \"sec-fetch-site\" | \"sec-fetch-mode\" | \"sec-fetch-user\" | \"sec-fetch-dest\" | \"sec-websocket-accept\" | \"sec-websocket-extensions\" | \"sec-websocket-key\" | \"sec-websocket-protocol\" | \"sec-websocket-version\" | \"set-cookie\" | \"strict-transport-security\" | \"tk\" | \"trailer\" | \"transfer-encoding\" | \"upgrade\" | \"user-agent\" | \"vary\" | \"via\" | \"www-authenticate\", string | string[]>"
+          "Record<string, string | string[]> | Record<\"date\" | \"range\" | \"from\" | \"allow\" | \"warning\" | \"location\" | \"authorization\" | \"host\" | \"etag\" | \"expires\" | \"origin\" | \"accept\" | \"accept-encoding\" | \"accept-language\" | \"accept-patch\" | \"accept-ranges\" | \"access-control-allow-credentials\" | \"access-control-allow-headers\" | \"access-control-allow-methods\" | \"access-control-allow-origin\" | \"access-control-expose-headers\" | \"access-control-max-age\" | \"access-control-request-headers\" | \"access-control-request-method\" | \"age\" | \"alt-svc\" | \"cache-control\" | \"connection\" | \"content-disposition\" | \"content-encoding\" | \"content-language\" | \"content-length\" | \"content-location\" | \"content-range\" | \"content-type\" | \"cookie\" | \"expect\" | \"forwarded\" | \"if-match\" | \"if-modified-since\" | \"if-none-match\" | \"if-unmodified-since\" | \"last-modified\" | \"pragma\" | \"proxy-authenticate\" | \"proxy-authorization\" | \"public-key-pins\" | \"referer\" | \"retry-after\" | \"sec-fetch-site\" | \"sec-fetch-mode\" | \"sec-fetch-user\" | \"sec-fetch-dest\" | \"sec-websocket-accept\" | \"sec-websocket-extensions\" | \"sec-websocket-key\" | \"sec-websocket-protocol\" | \"sec-websocket-version\" | \"set-cookie\" | \"strict-transport-security\" | \"tk\" | \"trailer\" | \"transfer-encoding\" | \"upgrade\" | \"user-agent\" | \"vary\" | \"via\" | \"www-authenticate\", string | string[]>"
         ],
         "path": "src/core/packages/http/server/src/router/headers.ts",
         "lineNumber": 54,
@@ -21729,7 +22067,7 @@
           "RouteConfig",
           "<unknown, unknown, unknown, Method>, \"validate\" | \"options\"> & { options?: Pick<",
           "RouteConfigOptions",
-          "<Method>, \"tags\" | \"timeout\" | \"body\" | \"authRequired\" | \"xsrfRequired\" | \"excludeFromOAS\" | \"excludeFromRateLimiter\" | \"httpResource\" | \"availability\"> | undefined; access: ",
+          "<Method>, \"tags\" | \"timeout\" | \"body\" | \"availability\" | \"authRequired\" | \"xsrfRequired\" | \"excludeFromOAS\" | \"excludeFromRateLimiter\" | \"httpResource\"> | undefined; access: ",
           "RouteAccess",
           "; security?: ",
           "RouteSecurity",
@@ -21781,7 +22119,7 @@
               "RouteConfig",
               "<unknown, unknown, unknown, Method>, \"validate\" | \"options\"> & { options?: Pick<",
               "RouteConfigOptions",
-              "<Method>, \"tags\" | \"timeout\" | \"body\" | \"authRequired\" | \"xsrfRequired\" | \"excludeFromOAS\" | \"excludeFromRateLimiter\" | \"httpResource\" | \"availability\"> | undefined; access: ",
+              "<Method>, \"tags\" | \"timeout\" | \"body\" | \"availability\" | \"authRequired\" | \"xsrfRequired\" | \"excludeFromOAS\" | \"excludeFromRateLimiter\" | \"httpResource\"> | undefined; access: ",
               "RouteAccess",
               "; security?: ",
               "RouteSecurity",

@@ -15,12 +15,8 @@ import {
   sanitizeToolId,
 } from '@kbn/agent-builder-genai-utils/langchain';
 import { generateXmlTree, type XmlNode } from '@kbn/agent-builder-genai-utils/tools/utils';
-import type {
-  ProcessedAttachment,
-  ProcessedConversation,
-  ProcessedConversationRound,
-  ProcessedRoundInput,
-} from './prepare_conversation';
+import type { ProcessedAttachment, ProcessedRoundInput } from '@kbn/agent-builder-server';
+import type { ProcessedConversation, ProcessedConversationRound } from './prepare_conversation';
 import type { ToolCallResultTransformer } from './create_result_transformer';
 
 export interface ConversationToLangchainOptions {

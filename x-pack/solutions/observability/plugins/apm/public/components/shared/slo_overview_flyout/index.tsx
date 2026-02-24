@@ -9,6 +9,8 @@ import type { EuiBasicTableColumn, EuiSelectableOption } from '@elastic/eui';
 import {
   EuiBadge,
   EuiBasicTable,
+  EuiButton,
+  EuiEmptyPrompt,
   EuiFilterGroup,
   EuiFilterButton,
   EuiPopover,
@@ -35,19 +37,24 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import numeral from '@elastic/numeral';
 import React, { useCallback, useMemo, useState } from 'react';
+import useDebounce from 'react-use/lib/useDebounce';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { AgentIcon } from '@kbn/custom-icons';
-import type { SloTabId, SloListLocatorParams } from '@kbn/deeplinks-observability';
-import { ALERTS_TAB_ID, sloListLocatorID } from '@kbn/deeplinks-observability';
+import type { SloTabId } from '@kbn/deeplinks-observability';
+import { ALERTS_TAB_ID } from '@kbn/deeplinks-observability';
 import type { AgentName } from '@kbn/elastic-agent-utils';
 import type { ApmPluginStartDeps } from '../../../plugin';
 import { useApmRouter } from '../../../hooks/use_apm_router';
-import { useApmParams } from '../../../hooks/use_apm_params';
+import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { useFetcher, isPending } from '../../../hooks/use_fetcher';
-import { APM_SLO_INDICATOR_TYPES } from '../../../../common/slo_indicator_types';
-import { SERVICE_NAME } from '../../../../common/es_fields/apm';
+import { useManageSlosUrl } from '../../../hooks/use_manage_slos_url';
+import {
+  APM_SLO_INDICATOR_TYPES,
+  type ApmIndicatorType,
+} from '../../../../common/slo_indicator_types';
+import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 
 type SloStatusFilter = 'VIOLATED' | 'DEGRADING' | 'HEALTHY' | 'NO_DATA';
 
@@ -98,29 +105,45 @@ const STATUS_PRIORITY: Record<string, number> = {
   NO_DATA: 1,
   HEALTHY: 0,
 };
+const SEARCH_DEBOUNCE_MS = 300;
+const ITEMS_PER_PAGE_OPTIONS = [10, 25, 50];
 
 export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
   const flyoutTitleId = useGeneratedHtmlId({ prefix: 'sloOverviewFlyout' });
   const { euiTheme } = useEuiTheme();
-  const { uiSettings, slo: sloPlugin, share } = useKibana<ApmPluginStartDeps>().services;
+  const { uiSettings, slo: sloPlugin } = useKibana<ApmPluginStartDeps>().services;
   const { link } = useApmRouter();
-  const { query } = useApmParams('/services');
+  const { query } = useAnyOfApmParams('/services', '/services/{serviceName}');
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
+  useDebounce(
+    () => {
+      setDebouncedSearchQuery(searchQuery);
+      setPage(0);
+    },
+    SEARCH_DEBOUNCE_MS,
+    [searchQuery]
+  );
   const [selectedStatuses, setSelectedStatuses] = useState<SloStatusFilter[]>([]);
   const [isStatusPopoverOpen, setIsStatusPopoverOpen] = useState(false);
   const [selectedSloId, setSelectedSloId] = useState<string | null>(null);
   const [selectedSloTabId, setSelectedSloTabId] = useState<SloTabId | undefined>(undefined);
   const [page, setPage] = useState(0);
   const [perPage, setPerPage] = useState(10);
+  const minItemsPerPage = ITEMS_PER_PAGE_OPTIONS[0];
   const percentFormat = uiSettings?.get('format:percent:defaultPattern') ?? '0.00%';
   const { environment } = query;
 
   const kqlQuery = useMemo(() => {
-    const trimmed = searchQuery.trim();
+    const trimmed = debouncedSearchQuery.trim();
     return trimmed || undefined;
-  }, [searchQuery]);
+  }, [debouncedSearchQuery]);
 
-  const { data, status: fetchStatus } = useFetcher(
+  const {
+    data,
+    status: fetchStatus,
+    refetch,
+  } = useFetcher(
     (callApmApi) => {
       return callApmApi('GET /internal/apm/services/{serviceName}/slos', {
         params: {
@@ -202,41 +225,7 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
     });
   }, [sloData, activeAlerts]);
 
-  const sloAppUrl = useMemo(() => {
-    const sloListLocator = share?.url.locators.get<SloListLocatorParams>(sloListLocatorID);
-    if (!sloListLocator) return undefined;
-
-    return sloListLocator.getRedirectUrl({
-      filters: [
-        {
-          meta: {
-            alias: null,
-            disabled: false,
-            key: SERVICE_NAME,
-            negate: false,
-            params: { query: serviceName },
-            type: 'phrase',
-          },
-          query: {
-            match_phrase: { [SERVICE_NAME]: serviceName },
-          },
-        },
-        {
-          meta: {
-            alias: null,
-            disabled: false,
-            key: 'slo.indicator.type',
-            negate: false,
-            params: [...APM_SLO_INDICATOR_TYPES],
-            type: 'phrases',
-          },
-          query: {
-            terms: { 'slo.indicator.type': [...APM_SLO_INDICATOR_TYPES] },
-          },
-        },
-      ],
-    });
-  }, [share?.url.locators, serviceName]);
+  const sloAppUrl = useManageSlosUrl({ serviceName });
 
   const serviceOverviewUrl = useMemo(() => {
     return link('/services/{serviceName}/overview', {
@@ -263,7 +252,6 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
 
   const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
-    setPage(0);
   }, []);
 
   const handleSloClick = useCallback((sloId: string) => {
@@ -279,6 +267,38 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
     setSelectedSloId(null);
     setSelectedSloTabId(undefined);
   }, []);
+
+  const [createSloFlyoutOpen, setCreateSloFlyoutOpen] = useState(false);
+
+  const openCreateSloFlyout = useCallback(() => {
+    setCreateSloFlyoutOpen(true);
+  }, []);
+
+  const closeCreateSloFlyout = useCallback(() => {
+    setCreateSloFlyoutOpen(false);
+    refetch();
+  }, [refetch]);
+
+  const defaultIndicatorType: ApmIndicatorType = 'sli.apm.transactionDuration';
+
+  const CreateSloFlyout = createSloFlyoutOpen
+    ? sloPlugin?.getCreateSLOFormFlyout({
+        initialValues: {
+          name: `APM SLO for ${serviceName}`,
+          indicator: {
+            type: defaultIndicatorType,
+            params: {
+              service: serviceName,
+              environment: environment === ENVIRONMENT_ALL.value ? '*' : environment,
+            },
+          },
+        },
+        onClose: closeCreateSloFlyout,
+        formSettings: {
+          allowedIndicatorTypes: [...APM_SLO_INDICATOR_TYPES],
+        },
+      })
+    : null;
 
   const handlePageChange = useCallback((newPage: number) => {
     setPage(newPage);
@@ -356,7 +376,7 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
                 fontWeight: euiTheme.font.weight.regular,
               }}
             >
-              <EuiIcon type="expand" color="subdued" />
+              <EuiIcon type="expand" color="subdued" aria-hidden={true} />
               {name}
             </EuiLink>
           </EuiToolTip>
@@ -389,23 +409,28 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
 
   const activeFiltersCount = selectedStatuses.length;
 
+  const flyoutTitle = i18n.translate('xpack.apm.sloOverviewFlyout.title', {
+    defaultMessage: 'SLOs',
+  });
+
   return (
     <EuiFlyout
       onClose={onClose}
       aria-labelledby={flyoutTitleId}
       // we need this hardcoded size as S is too small and M is too large
-      size="550px"
+      size={620}
       ownFocus={false}
       session="start"
       resizable
+      flyoutMenuProps={{
+        title: flyoutTitle,
+      }}
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
           <h2 id={flyoutTitleId}>
             <EuiLink href={sloAppUrl} target="_blank" data-test-subj="sloOverviewFlyoutSloLink">
-              {i18n.translate('xpack.apm.sloOverviewFlyout.title', {
-                defaultMessage: 'SLOs',
-              })}
+              {flyoutTitle}
             </EuiLink>
           </h2>
         </EuiTitle>
@@ -573,18 +598,47 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
           })}
           rowHeader="name"
           noItemsMessage={
-            isLoading
-              ? i18n.translate('xpack.apm.sloOverviewFlyout.loading', {
-                  defaultMessage: 'Loading SLOs...',
-                })
-              : i18n.translate('xpack.apm.sloOverviewFlyout.noSlos', {
-                  defaultMessage: 'No SLOs found for this service',
-                })
+            isLoading ? (
+              i18n.translate('xpack.apm.sloOverviewFlyout.loading', {
+                defaultMessage: 'Loading SLOs...',
+              })
+            ) : (
+              <EuiEmptyPrompt
+                title={
+                  <h3>
+                    {i18n.translate('xpack.apm.sloOverviewFlyout.emptyState.title', {
+                      defaultMessage: 'No SLOs (APM)',
+                    })}
+                  </h3>
+                }
+                titleSize="xxs"
+                body={
+                  <EuiText size="xs" textAlign="center" color="subdued">
+                    {i18n.translate('xpack.apm.sloOverviewFlyout.emptyState.description', {
+                      defaultMessage:
+                        'Create an SLO to track your application reliability and performance over time. Define a metric, set a target, and monitor how your service meets expectations',
+                    })}
+                  </EuiText>
+                }
+                actions={
+                  <EuiButton
+                    data-test-subj="sloOverviewFlyoutCreateSloButton"
+                    onClick={openCreateSloFlyout}
+                    size="s"
+                  >
+                    {i18n.translate('xpack.apm.sloOverviewFlyout.emptyState.createSlo', {
+                      defaultMessage: 'Create SLO',
+                    })}
+                  </EuiButton>
+                }
+                data-test-subj="sloOverviewFlyoutEmptyState"
+              />
+            )
           }
           data-test-subj="sloOverviewFlyoutTable"
         />
 
-        {totalSlos > perPage && (
+        {totalSlos > minItemsPerPage && (
           <>
             <EuiSpacer size="m" />
             <EuiTablePagination
@@ -592,7 +646,7 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
               activePage={page}
               onChangePage={handlePageChange}
               itemsPerPage={perPage}
-              itemsPerPageOptions={[10, 25, 50]}
+              itemsPerPageOptions={ITEMS_PER_PAGE_OPTIONS}
               onChangeItemsPerPage={handlePerPageChange}
               data-test-subj="sloOverviewFlyoutPagination"
             />
@@ -609,6 +663,7 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
           initialTabId={selectedSloTabId}
         />
       )}
+      {CreateSloFlyout}
     </EuiFlyout>
   );
 }

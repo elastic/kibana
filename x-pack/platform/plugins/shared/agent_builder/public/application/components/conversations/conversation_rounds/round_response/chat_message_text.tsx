@@ -22,32 +22,48 @@ import {
 } from '@elastic/eui';
 import { type PluggableList } from 'unified';
 import type { ConversationRoundStep } from '@kbn/agent-builder-common';
+import type {
+  VersionedAttachment,
+  AttachmentVersionRef,
+} from '@kbn/agent-builder-common/attachments';
 import {
   visualizationElement,
-  dashboardElement,
+  renderAttachmentElement,
 } from '@kbn/agent-builder-common/tools/custom_rendering';
 import { useAgentBuilderServices } from '../../../../hooks/use_agent_builder_service';
 import {
   Cursor,
   esqlLanguagePlugin,
   createVisualizationRenderer,
-  createDashboardRenderer,
   loadingCursorPlugin,
   visualizationTagParser,
-  dashboardTagParser,
+  renderAttachmentTagParser,
+  createRenderAttachmentRenderer,
 } from './markdown_plugins';
 import { useStepsFromPrevRounds } from '../../../../hooks/use_conversation';
+import { useConversationContext } from '../../../../context/conversation/conversation_context';
+import { CanvasProvider } from './attachments/canvas_context';
+import { CanvasFlyout } from './attachments/canvas_flyout';
 
 interface Props {
   content: string;
   steps: ConversationRoundStep[];
+  conversationAttachments?: VersionedAttachment[];
+  attachmentRefs?: AttachmentVersionRef[];
+  conversationId?: string;
 }
 
 /**
  * Component handling markdown support to the assistant's responses.
  * Also handles "loading" state by appending the blinking cursor.
  */
-export function ChatMessageText({ content, steps: stepsFromCurrentRound }: Props) {
+export function ChatMessageText({
+  content,
+  steps: stepsFromCurrentRound,
+  conversationAttachments,
+  attachmentRefs,
+  conversationId,
+}: Props) {
   const { euiTheme } = useEuiTheme();
 
   const containerClassName = css`
@@ -63,8 +79,9 @@ export function ChatMessageText({ content, steps: stepsFromCurrentRound }: Props
     }
   `;
 
-  const { startDependencies } = useAgentBuilderServices();
+  const { attachmentsService, startDependencies } = useAgentBuilderServices();
   const stepsFromPrevRounds = useStepsFromPrevRounds();
+  const { isEmbeddedContext: isSidebar } = useConversationContext();
 
   const { parsingPluginList, processingPluginList } = useMemo(() => {
     const parsingPlugins = getDefaultEuiMarkdownParsingPlugins();
@@ -130,9 +147,12 @@ export function ChatMessageText({ content, steps: stepsFromCurrentRound }: Props
         stepsFromCurrentRound,
         stepsFromPrevRounds,
       }),
-      [dashboardElement.tagName]: createDashboardRenderer({
-        stepsFromCurrentRound,
-        stepsFromPrevRounds,
+      [renderAttachmentElement.tagName]: createRenderAttachmentRenderer({
+        conversationAttachments,
+        attachmentRefs,
+        conversationId,
+        isSidebar,
+        attachmentsService,
       }),
     };
 
@@ -141,22 +161,34 @@ export function ChatMessageText({ content, steps: stepsFromCurrentRound }: Props
         loadingCursorPlugin,
         esqlLanguagePlugin,
         visualizationTagParser,
-        dashboardTagParser,
+        renderAttachmentTagParser,
         ...parsingPlugins,
       ],
       processingPluginList: processingPlugins,
     };
-  }, [startDependencies, stepsFromCurrentRound, stepsFromPrevRounds]);
+  }, [
+    startDependencies,
+    stepsFromCurrentRound,
+    stepsFromPrevRounds,
+    conversationAttachments,
+    attachmentRefs,
+    conversationId,
+    isSidebar,
+    attachmentsService,
+  ]);
 
   return (
-    <EuiText size="m" className={containerClassName}>
-      <EuiMarkdownFormat
-        textSize="m"
-        parsingPluginList={parsingPluginList}
-        processingPluginList={processingPluginList}
-      >
-        {content}
-      </EuiMarkdownFormat>
-    </EuiText>
+    <CanvasProvider>
+      <EuiText size="m" className={containerClassName}>
+        <EuiMarkdownFormat
+          textSize="m"
+          parsingPluginList={parsingPluginList}
+          processingPluginList={processingPluginList}
+        >
+          {content}
+        </EuiMarkdownFormat>
+      </EuiText>
+      <CanvasFlyout attachmentsService={attachmentsService} />
+    </CanvasProvider>
   );
 }

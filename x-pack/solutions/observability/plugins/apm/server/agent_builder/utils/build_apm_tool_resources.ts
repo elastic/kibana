@@ -5,28 +5,23 @@
  * 2.0.
  */
 
-import type {
-  CoreSetup,
-  KibanaRequest,
-  Logger,
-  SavedObjectsClientContract,
-} from '@kbn/core/server';
+import type { CoreSetup, KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { ApmDataAccessServices } from '@kbn/apm-data-access-plugin/server';
 import { firstValueFrom } from 'rxjs';
 import type { APMPluginSetupDependencies, APMPluginStartDependencies } from '../../types';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
-import { getRandomSampler } from '../../lib/helpers/get_random_sampler';
 import type { MinimalApmPluginRequestHandlerContext } from '../../routes/typings';
 import { getMlClient } from '../../lib/helpers/get_ml_client';
 import type { MinimalAPMRouteHandlerResources } from '../../routes/apm_routes/register_apm_server_routes';
 import { getApmAlertsClient } from '../../lib/helpers/get_apm_alerts_client';
 import type { ApmAlertsClient } from '../../lib/helpers/get_apm_alerts_client';
+import { getRandomSamplerSeed } from '../../lib/helpers/get_random_sampler';
 
 export interface ApmToolResources {
   apmEventClient: Awaited<ReturnType<typeof getApmEventClient>>;
   apmDataAccessServices: ApmDataAccessServices;
-  randomSampler: Awaited<ReturnType<typeof getRandomSampler>>;
+  randomSamplerSeed: number;
   mlClient: Awaited<ReturnType<typeof getMlClient>>;
   apmAlertsClient: ApmAlertsClient;
   esClient: IScopedClusterClient;
@@ -38,13 +33,11 @@ export async function buildApmToolResources({
   plugins,
   request,
   esClient,
-  logger,
 }: {
   core: CoreSetup<APMPluginStartDependencies>;
   plugins: APMPluginSetupDependencies;
   request: KibanaRequest;
   esClient?: IScopedClusterClient;
-  logger: Logger;
 }): Promise<ApmToolResources> {
   const [coreStart, pluginStart] = await core.getStartServices();
   const esScoped = esClient ?? coreStart.elasticsearch.client.asScoped(request);
@@ -91,11 +84,7 @@ export async function buildApmToolResources({
     },
   });
 
-  const randomSamplerPromise = getRandomSampler({
-    coreStart,
-    request,
-    probability: 1,
-  });
+  const randomSamplerSeed = getRandomSamplerSeed(coreStart, request);
 
   const mlClientPromise = getMlClient({
     plugins: pluginsAdapter,
@@ -109,9 +98,8 @@ export async function buildApmToolResources({
     request,
   });
 
-  const [apmEventClient, randomSampler, mlClient, apmAlertsClient] = await Promise.all([
+  const [apmEventClient, mlClient, apmAlertsClient] = await Promise.all([
     apmEventClientPromise,
-    randomSamplerPromise,
     mlClientPromise,
     apmAlertsClientPromise,
   ]);
@@ -121,7 +109,7 @@ export async function buildApmToolResources({
   return {
     apmEventClient,
     apmDataAccessServices,
-    randomSampler,
+    randomSamplerSeed,
     mlClient,
     apmAlertsClient,
     esClient: esScoped,

@@ -19,7 +19,7 @@ import { COMMON_HEADERS } from '../constants';
 
 const transformIds = ['bulk_delete_test_1', 'bulk_delete_test_2'];
 
-apiTest.describe('bulk delete', { tag: tags.ESS_ONLY }, () => {
+apiTest.describe('bulk delete', { tag: tags.stateful.all }, () => {
   const destinationIndices = transformIds.map(generateDestIndex);
   let transformManagerCookieHeader: CookieHeader;
 
