@@ -49,16 +49,6 @@ export const DraggableItem = ({ item, index, toggleItemVisibility }: Props) => {
     toggleItemVisibility(item.id);
   }, [item.id, toggleItemVisibility]);
 
-  const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        handleToggle();
-      }
-    },
-    [handleToggle]
-  );
-
   const panelCss = css`
     padding-left: ${euiTheme.size.s};
     padding-right: ${euiTheme.size.s};
@@ -86,17 +76,12 @@ export const DraggableItem = ({ item, index, toggleItemVisibility }: Props) => {
     }
   `;
 
-  const clickableCellCss = css`
+  const dragAreaCss = css`
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    width: 100%;
+    flex: 1;
     min-width: 0;
-    cursor: pointer;
-
-    .euiSwitch {
-      pointer-events: none;
-    }
+    cursor: grab;
   `;
 
   const switchAriaLabel = i18n.translate(
@@ -131,9 +116,10 @@ export const DraggableItem = ({ item, index, toggleItemVisibility }: Props) => {
           ]}
         >
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem grow={true} style={{ minWidth: 0 }}>
               <div
                 {...provided.dragHandleProps}
+                css={dragAreaCss}
                 aria-label={i18n.translate(
                   'core.ui.chrome.sideNavigation.customizeNavigation.dragHandleAriaLabel',
                   {
@@ -142,19 +128,7 @@ export const DraggableItem = ({ item, index, toggleItemVisibility }: Props) => {
                   }
                 )}
               >
-                <EuiIcon type="grab" color="subdued" aria-hidden={true} />
-              </div>
-            </EuiFlexItem>
-            <EuiFlexItem grow={true} style={{ minWidth: 0 }}>
-              <div
-                role="switch"
-                aria-checked={!item.hidden}
-                aria-label={switchAriaLabel}
-                tabIndex={0}
-                onClick={handleToggle}
-                onKeyDown={handleKeyDown}
-                css={clickableCellCss}
-              >
+                <EuiIcon type="grab" color="subdued" aria-hidden={true} css={css`flex-shrink: 0; margin-right: ${euiTheme.size.s};`} />
                 {item.icon && (
                   <EuiIcon
                     type={item.icon}
@@ -165,15 +139,16 @@ export const DraggableItem = ({ item, index, toggleItemVisibility }: Props) => {
                 <EuiText size="s" css={css`flex: 1; min-width: 0;`}>
                   {item.title}
                 </EuiText>
-                <EuiSwitch
-                  compressed
-                  label={switchAriaLabel}
-                  showLabel={false}
-                  checked={!item.hidden}
-                  onChange={handleToggle}
-                  css={css`flex-shrink: 0;`}
-                />
               </div>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiSwitch
+                compressed
+                label={switchAriaLabel}
+                showLabel={false}
+                checked={!item.hidden}
+                onChange={handleToggle}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPanel>
