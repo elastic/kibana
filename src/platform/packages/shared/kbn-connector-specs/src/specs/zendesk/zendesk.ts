@@ -44,7 +44,7 @@ export const ZendeskConnector: ConnectorSpec = {
             },
             username: {
               label: i18n.translate('core.kibanaConnectorSpecs.zendesk.auth.username.label', {
-                defaultMessage: 'Username (append /token for API token)',
+                defaultMessage: 'Username',
               }),
               helpText: i18n.translate('core.kibanaConnectorSpecs.zendesk.auth.username.helpText', {
                 defaultMessage:
