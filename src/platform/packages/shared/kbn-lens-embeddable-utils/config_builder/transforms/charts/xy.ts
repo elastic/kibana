@@ -52,11 +52,18 @@ export function fromAPItoLensState(config: XYState): XYLensWithoutQueryAndFilter
     ...internalReferences.map((ref) => [ref.name.replace(LENS_LAYER_SUFFIX, ''), ref.id]),
   ]);
 
-  const references: SavedObjectReference[] = [];
+  const annotationGroupReferences: SavedObjectReference[] = [];
 
-  const visualizationState = buildVisualizationState(config, dataViewLayerToIdMap, references);
+  const visualizationState = buildVisualizationState(
+    config,
+    dataViewLayerToIdMap,
+    annotationGroupReferences
+  );
 
-  references.push(...(regularDataViews.length ? buildReferences(regularDataViewsMap) : []));
+  const references = [
+    ...annotationGroupReferences,
+    ...(regularDataViews.length ? buildReferences(regularDataViewsMap) : []),
+  ];
 
   return {
     visualizationType: 'lnsXY',

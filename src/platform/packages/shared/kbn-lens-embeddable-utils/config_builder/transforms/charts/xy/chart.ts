@@ -149,11 +149,16 @@ type LayerToDataView = Record<string, string>;
 export function buildVisualizationState(
   config: XYState,
   usedDataViews: LayerToDataView,
-  references: SavedObjectReference[]
+  annotationGroupReferences: SavedObjectReference[]
 ): XYPersistedState {
   const layers = config.layers
     .map((layer, index) =>
-      buildXYLayer(layer, index, usedDataViews[getIdForLayer(layer, index)], references)
+      buildXYLayer(
+        layer,
+        index,
+        usedDataViews[getIdForLayer(layer, index)],
+        annotationGroupReferences
+      )
     )
     .filter(nonNullable);
   return {

@@ -195,7 +195,7 @@ export function buildXYLayer(
   layer: unknown,
   i: number,
   dataViewId: string,
-  references: SavedObjectReference[]
+  annotationGroupReferences: SavedObjectReference[]
 ): XYPersistedLayerConfig | undefined {
   if (!isAPIXYLayer(layer)) {
     return;
@@ -207,7 +207,7 @@ export function buildXYLayer(
       // TODO: support linked by-value annotation layers as well
       const layerId = getIdForLayer(layer, i);
 
-      references.push({
+      annotationGroupReferences.push({
         name: `ref-${layerId}`,
         type: EVENT_ANNOTATION_GROUP_TYPE,
         id: layer.group_id,
