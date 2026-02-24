@@ -71,9 +71,35 @@ export async function partitionStream({
 
   // No need to involve reasoning if there are no sample documents
   if (initialClusters.every((cluster) => cluster.clustering.sampled === 0)) {
+    // If there are enabled child conditions, we need to determine whether:
+    // - All data is already partitioned (all_data_partitioned), or
+    // - There are simply no samples in the time range (no_samples)
+    // We do this by querying again without exclusions
+    if (enabledChildConditions.length > 0) {
+      const clustersWithoutExclusion = await clusterLogs({
+        esClient,
+        start,
+        end,
+        index: definition.name,
+        logger,
+        partitions: [],
+        excludeConditions: [],
+        size: 1000,
+      });
+
+      const hasAnySamplesWithoutExclusion =
+        clustersWithoutExclusion.length > 0 &&
+        clustersWithoutExclusion.some((cluster) => cluster.clustering.sampled > 0);
+
+      return {
+        partitions: [],
+        reason: hasAnySamplesWithoutExclusion ? 'all_data_partitioned' : 'no_samples',
+      };
+    }
+
     return {
       partitions: [],
-      reason: enabledChildConditions.length > 0 ? 'all_data_partitioned' : 'no_samples',
+      reason: 'no_samples',
     };
   }
 
