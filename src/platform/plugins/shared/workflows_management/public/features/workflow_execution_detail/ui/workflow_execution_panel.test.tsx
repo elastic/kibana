@@ -18,6 +18,8 @@ import { mockCapabilities } from '../../../hooks/__mocks__/use_capabilities';
 import { useCapabilities } from '../../../hooks/use_capabilities';
 import { TestWrapper } from '../../../shared/test_utils';
 
+jest.mock('../../../hooks/use_capabilities');
+
 // Mock child components
 jest.mock('./cancel_execution_button', () => ({
   CancelExecutionButton: ({ executionId }: { executionId: string }) => (
@@ -26,8 +28,6 @@ jest.mock('./cancel_execution_button', () => ({
     </div>
   ),
 }));
-
-jest.mock('../../../hooks/use_capabilities');
 
 jest.mock('./workflow_step_execution_tree', () => ({
   WorkflowStepExecutionTree: ({
