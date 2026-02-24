@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiSpacer, EuiWindowEvent } from '@elastic/eui';
+import { EuiPageSection, EuiSpacer, EuiWindowEvent } from '@elastic/eui';
 // import { EuiHorizontalRule } from '@elastic/eui'; // used by page header
 import styled from '@emotion/styled';
 import { noop } from 'lodash/fp';
@@ -127,7 +127,8 @@ export const AlertsPageContent = memo(
           noPadding={globalFullScreen}
           data-test-subj={SECURITY_SOLUTION_PAGE_WRAPPER_TEST_ID}
         >
-          <Display show={!globalFullScreen}>
+          <EuiPageSection paddingSize="m" component="div" grow>
+            <Display show={!globalFullScreen}>
             {/* Page header commented out
             <HeaderPage title={PAGE_TITLE}>
               <HeaderSection />
@@ -157,13 +158,14 @@ export const AlertsPageContent = memo(
             />
             <EuiSpacer />
           </Display>
-          <TableSection
-            assignees={assignees}
-            dataView={dataView}
-            dataViewSpec={oldSourcererDataViewSpec}
-            pageFilters={pageFilters}
-            statusFilter={statusFilter}
-          />
+            <TableSection
+              assignees={assignees}
+              dataView={dataView}
+              dataViewSpec={oldSourcererDataViewSpec}
+              pageFilters={pageFilters}
+              statusFilter={statusFilter}
+            />
+          </EuiPageSection>
         </SecuritySolutionPageWrapper>
       </StyledFullHeightContainer>
     );
