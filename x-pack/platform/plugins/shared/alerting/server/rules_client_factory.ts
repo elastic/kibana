@@ -262,18 +262,14 @@ export class RulesClientFactory {
           });
         } catch (err) {
           // if the ES API key creation failed, we need to invalidate the UIAM API key
-          if (createUiamApiKeyResult) {
-            await invalidateUiamApiKey(createUiamApiKeyResult?.id);
-          }
+          await invalidateUiamApiKey(createUiamApiKeyResult?.id);
           // rethrow the error to be handled by the caller
           throw err;
         }
 
         // if we created a UIAM API key but the ES API key creation failed, we need to invalidate the UIAM API key
         if (!createEsAPIKeyResult) {
-          if (createUiamApiKeyResult) {
-            await invalidateUiamApiKey(createUiamApiKeyResult?.id);
-          }
+          await invalidateUiamApiKey(createUiamApiKeyResult?.id);
           return { apiKeysEnabled: false };
         }
 
