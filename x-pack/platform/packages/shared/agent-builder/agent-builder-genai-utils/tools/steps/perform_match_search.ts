@@ -76,10 +76,14 @@ const buildSearchRequest = ({
 };
 
 /**
- * Builds the query for a CCS target. When all fields are regular text types,
- * uses a single multi_match for simplicity. When any field is semantic_text,
- * falls back to a bool/should with individual match queries per field because
- * multi_match does not support semantic_text (elastic/search-team#11226).
+ * Builds the query for a CCS target using a bool/should with one match clause
+ * per searchable field.
+ *
+ * We cannot use multi_match here because it does not support semantic_text
+ * fields (elastic/search-team#11226), and _field_caps (our mapping source for
+ * CCS) reports semantic_text fields as "text", making them indistinguishable.
+ * Individual match queries work correctly with both regular text and
+ * semantic_text fields.
  */
 const buildCcsQuery = ({
   term,
@@ -88,18 +92,6 @@ const buildCcsQuery = ({
   term: string;
   fields: MappingField[];
 }): Record<string, unknown> => {
-  const hasSemanticTextField = fields.some((f) => f.type === 'semantic_text');
-
-  if (!hasSemanticTextField) {
-    return {
-      multi_match: {
-        query: term,
-        fields: fields.map((f) => f.path),
-        type: 'best_fields',
-      },
-    };
-  }
-
   return {
     bool: {
       should: fields.map((f) => ({ match: { [f.path]: term } })),
