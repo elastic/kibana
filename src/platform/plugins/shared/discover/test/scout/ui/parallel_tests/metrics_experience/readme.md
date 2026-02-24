@@ -7,18 +7,21 @@ We follow Scout Best Practices for test structure and conventions.
 ## Folder structure
 
 ```
-discover_enhanced/test/scout/ui/
-├── fixtures/                        # Shared across all discover_enhanced tests
-│   ├── constants.ts                 # Time ranges, queries, data views, tags
-│   ├── page_objects/
-│   │   └── metrics_experience.ts    # Page object for metrics UI
-│   └── generators/
-│       └── metrics_tsdb_index.ts    # Dynamic TSDB index creation
-├── parallel_tests/
-│   ├── global.setup.ts              # Loads archives + creates test index
-│   └── metrics_experience/          # Feature subfolder (you are here)
-│       ├── grid.spec.ts             # Grid activation/command compatibility
-│       └── grid.navigation.spec.ts  # Pagination and search
+discover/test/scout/ui/
+├── metrics_experience_parallel.playwright.config.ts
+├── fixtures/
+│   └── metrics_experience/
+│       ├── index.ts                     # spaceTest extension with MetricsExperiencePage
+│       ├── constants.ts                 # Time ranges, queries, data views, tags
+│       ├── page_objects/
+│       │   └── metrics_experience.ts    # Page object for metrics UI
+│       └── generators/
+│           └── metrics_tsdb_index.ts    # Dynamic TSDB index creation
+└── parallel_tests/
+    └── metrics_experience/              # Feature subfolder (you are here)
+        ├── global.setup.ts              # Loads archives + creates test index
+        ├── grid.spec.ts                 # Grid activation/command compatibility
+        └── grid.navigation.spec.ts      # Pagination and search
 ```
 
 ## Data strategy
@@ -48,7 +51,7 @@ When adding or modifying tests, run the flaky test runner to verify stability be
 For the metrics experience tests:
 
 ```
-/flaky scoutConfig:x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/parallel.playwright.config.ts:30
+/flaky scoutConfig:src/platform/plugins/shared/discover/test/scout/ui/metrics_experience_parallel.playwright.config.ts:30
 ```
 
 25-30 runs is considered safe to call tests "stable". See [example in PR #253076](https://github.com/elastic/kibana/pull/253076#issuecomment-3913203928) where 30/30 runs passed.
@@ -69,7 +72,7 @@ Then, in another terminal, run the tests:
 
 ```bash
 npx playwright test \
-  x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/parallel_tests/metrics_experience/ \
-  --config x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/parallel.playwright.config.ts \
+  src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/ \
+  --config src/platform/plugins/shared/discover/test/scout/ui/metrics_experience_parallel.playwright.config.ts \
   --project local --trace on
 ```

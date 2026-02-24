@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 /**
@@ -20,13 +22,12 @@ import {
   PAGINATION,
   DEFAULT_TIME_RANGE,
   DEFAULT_CONFIG,
-} from '../../fixtures';
+} from '../../fixtures/metrics_experience';
 
 const { PAGE_SIZE, TOTAL_PAGES, LAST_PAGE_CARDS } = PAGINATION;
 
 const SEARCH_METRIC_NAME = DEFAULT_CONFIG.metrics[0].name;
 
-// Sort metrics alphabetically to match UI display order
 const SORTED_METRICS = [...DEFAULT_CONFIG.metrics].sort((a, b) => a.name.localeCompare(b.name));
 const FIRST_CARD_PAGE_1 = `${SORTED_METRICS[0].name}-0`;
 const FIRST_CARD_PAGE_2 = `${SORTED_METRICS[PAGE_SIZE].name}-0`;
@@ -39,7 +40,6 @@ spaceTest.describe(
   },
   () => {
     spaceTest.beforeAll(async ({ scoutSpace }) => {
-      // Load TSDB_LOGS for the data view (required by selectTextBaseLang)
       await scoutSpace.savedObjects.load(testData.KBN_ARCHIVES.TSDB_LOGS);
       await scoutSpace.uiSettings.setDefaultIndex(testData.DATA_VIEW_NAME.TSDB_LOGS);
       await scoutSpace.uiSettings.setDefaultTime(DEFAULT_TIME_RANGE);
