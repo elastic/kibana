@@ -14,15 +14,18 @@ import type {
   ESQLCommandOption,
   ESQLSingleAstItem,
 } from '../../../types';
-import type { ICommandCallbacks, ICommandContext, ISuggestionItem } from '../types';
-import { onCompleteItem, pipeCompleteItem, withCompleteItem } from '../complete_items';
 import type { MapParameters } from '../../definitions/utils/autocomplete/map_expression';
 import { getCommandMapExpressionSuggestions } from '../../definitions/utils/autocomplete/map_expression';
 import {
   columnExists,
+  getFunctionsSuggestions,
   getFieldsSuggestions,
+  getLiteralsSuggestions,
   handleFragment,
 } from '../../definitions/utils/autocomplete/helpers';
+import { onCompleteItem, pipeCompleteItem, withCompleteItem } from '../complete_items';
+import type { ICommandCallbacks, ICommandContext, ISuggestionItem } from '../types';
+import { Location } from '../types';
 
 enum MmrPosition {
   AFTER_MMR_KEYWORD = 'after_mmr_keyword',
@@ -50,6 +53,23 @@ async function getDiversifyFieldSuggestions(
   callbacks?: ICommandCallbacks,
   context?: ICommandContext
 ): Promise<ISuggestionItem[]> {
+  const controlAndLiteralSuggestions = getLiteralsSuggestions(['dense_vector'], Location.MMR, {
+    includeDateLiterals: false,
+    includeCompatibleLiterals: true,
+    addComma: false,
+    advanceCursorAndOpenSuggestions: false,
+    supportsControls: true,
+    variables: context?.variables,
+  });
+
+  const functionSuggestions = getFunctionsSuggestions({
+    location: Location.MMR,
+    types: ['dense_vector'],
+    options: {},
+    context,
+    callbacks,
+  });
+
   if (!callbacks?.getByType) {
     const contextField = context?.columns?.keys().next().value as string | undefined;
     const label = contextField || 'field';
@@ -61,6 +81,8 @@ async function getDiversifyFieldSuggestions(
         detail: 'Example field',
         sortText: '1',
       },
+      ...controlAndLiteralSuggestions,
+      ...functionSuggestions,
     ];
   }
 
@@ -77,12 +99,15 @@ async function getDiversifyFieldSuggestions(
   return handleFragment(
     innerText,
     (fragment) => columnExists(fragment, context),
-    (_fragment, rangeToReplace) =>
-      filteredFieldSuggestions.map((suggestion) => ({
+    (_fragment, rangeToReplace) => [
+      ...filteredFieldSuggestions.map((suggestion) => ({
         ...suggestion,
         rangeToReplace,
       })),
-    () => []
+      ...controlAndLiteralSuggestions,
+      ...functionSuggestions,
+    ],
+    () => [...controlAndLiteralSuggestions, ...functionSuggestions]
   );
 }
 
@@ -175,7 +200,25 @@ export async function autocomplete(
 
   switch (position) {
     case MmrPosition.AFTER_MMR_KEYWORD:
-      return [queryVectorSuggestion, onCompleteItem];
+      return [
+        queryVectorSuggestion,
+        ...getLiteralsSuggestions(['dense_vector'], Location.MMR, {
+          includeDateLiterals: false,
+          includeCompatibleLiterals: true,
+          addComma: false,
+          advanceCursorAndOpenSuggestions: false,
+          supportsControls: true,
+          variables: context?.variables,
+        }),
+        ...getFunctionsSuggestions({
+          location: Location.MMR,
+          types: ['dense_vector'],
+          options: {},
+          context,
+          callbacks,
+        }),
+        onCompleteItem,
+      ];
 
     case MmrPosition.AFTER_QUERY_VECTOR:
       return [onCompleteItem];

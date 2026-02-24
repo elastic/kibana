@@ -7,11 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { mockContext, getMockCallbacks } from '../../../__tests__/commands/context_fixtures';
-import { autocomplete } from './autocomplete';
+import {
+  expectSuggestions,
+  getFunctionSignaturesByReturnType,
+  suggest,
+} from '../../../__tests__/commands/autocomplete';
 import { onCompleteItem, pipeCompleteItem, withCompleteItem } from '../complete_items';
-import { expectSuggestions, suggest } from '../../../__tests__/commands/autocomplete';
-import type { ICommandCallbacks } from '../types';
-import type { ESQLColumnData } from '../types';
+import type { ESQLColumnData, ICommandCallbacks } from '../types';
+import { Location } from '../types';
+import { autocomplete } from './autocomplete';
 
 const buildContextWithDenseVector = () => {
   const columns = new Map<string, ESQLColumnData>(mockContext.columns);
@@ -41,15 +45,29 @@ const expectMmrSuggestions = (
   );
 };
 
+const expectMmrSuggestionsContains = async (
+  query: string,
+  expectedSuggestions: string[],
+  mockCallbacks?: ICommandCallbacks,
+  context = mockContext,
+  offset?: number
+) => {
+  const results = await suggest(query, context, 'mmr', mockCallbacks, autocomplete, offset);
+  const texts = results.map((result) => result.text);
+
+  expect(texts).toEqual(expect.arrayContaining(expectedSuggestions));
+};
+
 describe('MMR Autocomplete', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('suggests query vector and ON after MMR keyword', async () => {
-    await expectMmrSuggestions('FROM a | MMR ', [
+  it('suggests query vector, dense-vector functions and ON after MMR keyword', async () => {
+    await expectMmrSuggestionsContains('FROM a | MMR ', [
       '[${0:0.1}, ${1:0.2}]::dense_vector ',
       onCompleteItem.text,
+      ...getFunctionSignaturesByReturnType(Location.MMR, 'dense_vector', { scalar: true }),
     ]);
   });
 
@@ -57,7 +75,7 @@ describe('MMR Autocomplete', () => {
     await expectMmrSuggestions('FROM a | MMR [0.1, 0.2]::dense_vector ', [onCompleteItem.text]);
   });
 
-  it('suggests dense vector fields after ON', async () => {
+  it('suggests dense vector fields and dense-vector functions after ON', async () => {
     const context = buildContextWithDenseVector();
     const mockCallbacks = getMockCallbacks();
     (mockCallbacks.getByType as jest.Mock).mockResolvedValue([
@@ -65,7 +83,15 @@ describe('MMR Autocomplete', () => {
       { label: 'missingDense', text: 'missingDense ' },
     ]);
 
-    await expectMmrSuggestions('FROM a | MMR ON ', ['denseField '], mockCallbacks, context);
+    await expectMmrSuggestionsContains(
+      'FROM a | MMR ON ',
+      [
+        'denseField ',
+        ...getFunctionSignaturesByReturnType(Location.MMR, 'dense_vector', { scalar: true }),
+      ],
+      mockCallbacks,
+      context
+    );
   });
 
   it('suggests LIMIT after field', async () => {
