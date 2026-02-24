@@ -25,12 +25,7 @@ export const getAllSuggestionsAggregationBuilder: () => OptionsListSuggestionAgg
   () => allSuggestionsAggregationBuilder;
 
 const allSuggestionsAggregationBuilder: OptionsListSuggestionAggregationBuilder = {
-  buildAggregation: ({
-    fieldName,
-    fieldSpec,
-    sort,
-    size,
-  }: OptionsListRequestBody) => {
+  buildAggregation: ({ fieldName, fieldSpec, sort, size }: OptionsListRequestBody) => {
     const suggestionsAgg: { suggestions: any; unique_terms: any } = {
       suggestions: {
         terms: {
@@ -83,9 +78,7 @@ const allSuggestionsAggregationBuilder: OptionsListSuggestionAggregationBuilder 
       totalCardinality:
         get(
           rawEsResult,
-          `aggregations.${
-            subTypeNested ? 'nestedSuggestions.unique_terms' : 'unique_terms'
-          }.value`
+          `aggregations.${subTypeNested ? 'nestedSuggestions.unique_terms' : 'unique_terms'}.value`
         ) ?? 0,
     };
   },

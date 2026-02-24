@@ -55,7 +55,7 @@ describe('options list type-specific search queries', () => {
         const optionsListRequestBodyMock: OptionsListRequestBody = {
           size: 10,
           searchString: 'cooool',
-  
+
           fieldName: 'coolTestField.keyword',
           sort: { by: '_key', direction: 'desc' },
           fieldSpec: { type: 'string' } as unknown as FieldSpec,
@@ -102,7 +102,7 @@ describe('options list type-specific search queries', () => {
           size: 10,
           searchString: 'c',
           searchTechnique: 'wildcard',
-  
+
           fieldName: 'coolTestField.keyword',
           sort: { by: '_key', direction: 'desc' },
           fieldSpec: { type: 'string' } as unknown as FieldSpec,
@@ -149,7 +149,7 @@ describe('options list type-specific search queries', () => {
           size: 10,
           searchString: '.c?o&o[l*',
           searchTechnique: 'wildcard',
-  
+
           fieldName: 'coolTestField.keyword',
           sort: { by: '_key', direction: 'desc' },
           fieldSpec: { type: 'string' } as unknown as FieldSpec,
@@ -195,7 +195,7 @@ describe('options list type-specific search queries', () => {
         const optionsListRequestBodyMock: OptionsListRequestBody = {
           size: 10,
           searchString: 'cooool',
-  
+
           fieldName: 'coolNestedField',
           sort: { by: '_count', direction: 'asc' },
           fieldSpec: {
@@ -253,7 +253,7 @@ describe('options list type-specific search queries', () => {
         const optionsListRequestBodyMock: OptionsListRequestBody = {
           size: 10,
           fieldName: 'clientip',
-  
+
           sort: { by: '_key', direction: 'asc' },
           searchString: '1.a.2.b.3.z',
           fieldSpec: { type: 'ip' } as unknown as FieldSpec,
@@ -268,7 +268,7 @@ describe('options list type-specific search queries', () => {
         const optionsListRequestBodyMock: OptionsListRequestBody = {
           size: 10,
           fieldName: 'clientip',
-  
+
           searchString: '41.77.243.255',
           sort: { by: '_count', direction: 'asc' },
           fieldSpec: { type: 'ip' } as unknown as FieldSpec,
@@ -316,7 +316,7 @@ describe('options list type-specific search queries', () => {
         const optionsListRequestBodyMock: OptionsListRequestBody = {
           size: 10,
           fieldName: 'clientip',
-  
+
           sort: { by: '_key', direction: 'asc' },
           fieldSpec: { type: 'ip' } as unknown as FieldSpec,
           searchString: 'f688:fb50:6433:bba2:604:f2c:194a:d3c5',
@@ -365,7 +365,7 @@ describe('options list type-specific search queries', () => {
           size: 10,
           fieldName: 'clientip',
           searchString: '41.77',
-  
+
           fieldSpec: { type: 'ip' } as unknown as FieldSpec,
         };
         const suggestionAggBuilder = getSearchSuggestionsAggregationBuilder(
@@ -413,7 +413,7 @@ describe('options list type-specific search queries', () => {
           size: 10,
           fieldName: 'clientip',
           searchString: 'cdb6:',
-  
+
           sort: { by: '_count', direction: 'desc' },
           fieldSpec: { type: 'ip' } as unknown as FieldSpec,
         };
@@ -463,7 +463,7 @@ describe('options list type-specific search queries', () => {
         const optionsListRequestBodyMock: OptionsListRequestBody = {
           size: 10,
           fieldName: 'bytes',
-  
+
           sort: { by: '_key', direction: 'asc' },
           searchString: '123a',
           fieldSpec: { type: 'number' } as unknown as FieldSpec,

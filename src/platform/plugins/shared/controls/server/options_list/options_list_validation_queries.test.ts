@@ -41,7 +41,6 @@ describe('options list queries', () => {
       const optionsListRequestBodyMock: OptionsListRequestBody = {
         size: 10,
         fieldName: 'coolTestField',
-
       };
       expect(
         validationAggBuilder.buildAggregation(optionsListRequestBodyMock)
@@ -151,7 +150,7 @@ describe('options list queries', () => {
         validationAggBuilder.parse(rawSearchResponseMock, {
           size: 10,
           fieldName: 'coolTestField',
-  
+
           fieldSpec: { type: 'string' } as FieldSpec,
         })
       ).toMatchInlineSnapshot(`
@@ -187,7 +186,6 @@ describe('options list queries', () => {
             subType: { nested: { path: 'path.to.nested' } },
           } as unknown as FieldSpec,
           fieldName: 'coolTestField',
-  
         })
       ).toMatchInlineSnapshot(`
         Array [

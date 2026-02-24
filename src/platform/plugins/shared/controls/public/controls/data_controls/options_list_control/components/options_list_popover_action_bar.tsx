@@ -171,9 +171,7 @@ export const OptionsListPopoverActionBar = ({
             }}
             value={searchString}
             data-test-subj="optionsList-control-search-input"
-            placeholder={OptionsListStrings.popover.getSearchPlaceholder(
-              defaultSearchTechnique
-            )}
+            placeholder={OptionsListStrings.popover.getSearchPlaceholder(defaultSearchTechnique)}
             aria-label={OptionsListStrings.popover.getSearchAriaLabel(fieldName)}
           />
         </EuiFormRow>
