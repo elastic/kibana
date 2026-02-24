@@ -1,444 +1,560 @@
 [
-  {
+ {
+  "type": "object",
+  "description": "Markdown embeddable schema",
+  "properties": {
+   "content": {
+    "type": "string"
+   },
+   "description": {
+    "type": "string"
+   },
+   "hide_title": {
+    "type": "boolean"
+   },
+   "title": {
+    "type": "string"
+   }
+  },
+  "additionalProperties": false,
+  "required": [
+   "content"
+  ]
+ },
+ {
+  "description": "SLO Overview embeddable schema",
+  "anyOf": [
+   {
     "type": "object",
-    "description": "Markdown embeddable schema",
+    "description": "SLO Single Overview embeddable schema",
     "properties": {
-      "content": {
-        "type": "string"
-      },
-      "description": {
-        "type": "string"
-      },
-      "hide_title": {
-        "type": "boolean"
-      },
-      "title": {
-        "type": "string"
+     "slo_id": {
+      "type": "string",
+      "description": "The ID of the SLO"
+     },
+     "slo_instance_id": {
+      "type": "string",
+      "description": "ID of the SLO instance. Set when the SLO uses group_by; identifies which instance to show. SLOs without group_by have * as the instance ID."
+     },
+     "remote_name": {
+      "type": "string",
+      "description": "The name of the remote SLO"
+     },
+     "show_all_group_by_instances": {
+      "type": "boolean"
+     },
+     "overview_mode": {
+      "type": "string",
+      "enum": [
+       "single"
+      ]
+     },
+     "drilldowns": {
+      "type": "array",
+      "maxItems": 100,
+      "items": {
+       "type": "object",
+       "properties": {
+        "encode_url": {
+         "type": "boolean",
+         "description": "When true, URL is escaped using percent encoding",
+         "default": true
+        },
+        "open_in_new_tab": {
+         "type": "boolean",
+         "default": true
+        },
+        "url": {
+         "type": "string",
+         "description": "Templated Url. Variables documented at https://www.elastic.co/docs/explore-analyze/dashboards/drilldowns#url-template-variable"
+        },
+        "label": {
+         "type": "string"
+        },
+        "trigger": {
+         "type": "string",
+         "enum": [
+          "on_open_panel_menu"
+         ]
+        },
+        "type": {
+         "type": "string",
+         "enum": [
+          "url_drilldown"
+         ]
+        }
+       },
+       "additionalProperties": false,
+       "required": [
+        "url",
+        "label",
+        "trigger",
+        "type"
+       ]
       }
+     },
+     "description": {
+      "type": "string"
+     },
+     "hide_title": {
+      "type": "boolean"
+     },
+     "title": {
+      "type": "string"
+     }
     },
     "additionalProperties": false,
-    "required": ["content"]
-  },
-  {
-    "description": "SLO Overview embeddable schema with drilldowns",
-    "anyOf": [
-      {
-        "type": "object",
-        "properties": {
-          "drilldowns": {
-            "type": "array",
-            "maxItems": 100,
-            "items": {
-              "type": "object",
-              "properties": {},
-              "additionalProperties": true
-            }
-          },
-          "slo_id": {
-            "description": "The ID of the SLO",
-            "type": "string"
-          },
-          "slo_instance_id": {
-            "description": "ID of the SLO instance. Set when the SLO uses group_by; identifies which instance to show. SLOs without group_by have * as the instance ID.",
-            "type": "string"
-          },
-          "remote_name": {
-            "description": "The name of the remote SLO",
-            "type": "string"
-          },
-          "show_all_group_by_instances": {
-            "type": "boolean"
-          },
-          "overview_mode": {
-            "type": "string",
-            "enum": [
-              "single"
-            ]
-          },
-          "description": {
-            "type": "string"
-          },
-          "hide_title": {
-            "type": "boolean"
-          },
-          "title": {
-            "type": "string"
-          }
-        },
-        "additionalProperties": false,
-        "required": [
-          "slo_id",
-          "overview_mode"
-        ]
-      },
-      {
-        "type": "object",
-        "properties": {
-          "drilldowns": {
-            "type": "array",
-            "maxItems": 100,
-            "items": {
-              "type": "object",
-              "properties": {},
-              "additionalProperties": true
-            }
-          },
-          "group_filters": {
-          "type": "object",
-          "properties": {
-            "group_by": {
-              "type": "string",
-              "enum": [
-                "slo.tags",
-                "status",
-                "slo.indicator.type"
-              ]
-            },
-            "groups": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            },
-            "filters": {
-              "type": "array",
-              "items": {
-                "anyOf": [
-                  {
-                    "$ref": "#/components/schemas/@kbn/as-code-filters-schema_asCodeConditionFilterSchema"
-                  },
-                  {
-                    "$ref": "#/components/schemas/@kbn/as-code-filters-schema_asCodeGroupFilterSchema"
-                  },
-                  {
-                    "$ref": "#/components/schemas/@kbn/as-code-filters-schema_asCodeDSLFilterSchema"
-                  },
-                  {
-                    "$ref": "#/components/schemas/@kbn/as-code-filters-schema_asCodeSpatialFilterSchema"
-                  }
-                ],
-                "description": "A filter which can be a condition, group, DSL, or spatial"
-              }
-            },
-            "kql_query": {
-            "type": "string"
-            }
-          },
-          "additionalProperties": false,
-          "required": [
-            "group_by"
-          ]
-          },
-          "overview_mode": {
-            "type": "string",
-            "enum": [
-              "groups"
-            ]
-          },
-          "description": {
-            "type": "string"
-          },
-          "hide_title": {
-            "type": "boolean"
-          },
-          "title": {
-            "type": "string"
-          }
-        },
-        "additionalProperties": false,
-        "required": [
-          "overview_mode"
-        ]
-      }
+    "required": [
+     "slo_id",
+     "overview_mode"
     ]
-  },
-  {
+   },
+   {
     "type": "object",
-    "description": "Synthetics stats overview embeddable schema",
+    "description": "SLO Group Overview embeddable schema",
     "properties": {
-      "description": {
-        "type": "string"
-      },
-      "hide_title": {
-        "type": "boolean"
-      },
-      "title": {
-        "type": "string"
-      },
-      "drilldowns": {
-        "type": "array",
-        "maxItems": 100,
-        "items": {
-          "type": "object",
-          "properties": {
-            "encode_url": {
-              "type": "boolean",
-              "description": "When true, URL is escaped using percent encoding",
-              "default": true
-            },
-            "open_in_new_tab": {
-              "type": "boolean",
-              "default": true
-            },
-            "url": {
-              "type": "string",
-              "description": "Templated Url. Variables documented at https://www.elastic.co/docs/explore-analyze/dashboards/drilldowns#url-template-variable"
-            },
-            "label": {
-              "type": "string"
-            },
-            "trigger": {
-              "type": "string",
-              "enum": ["on_open_panel_menu"]
-            },
-            "type": {
-              "type": "string",
-              "enum": ["url_drilldown"]
-            }
-          },
-          "additionalProperties": false,
-          "required": ["url", "label", "trigger", "type"]
-        }
-      },
-      "filters": {
-        "type": "object",
-        "properties": {
-          "projects": {
-            "type": "array",
-            "description": "Filter by project",
-            "maxItems": 100,
-            "items": {
-              "type": "object",
-              "properties": {
-                "label": {
-                  "type": "string",
-                  "description": "Display label for the filter option"
-                },
-                "value": {
-                  "type": "string",
-                  "description": "Value for the filter option"
-                }
-              },
-              "additionalProperties": false,
-              "required": ["label", "value"]
-            }
-          },
-          "tags": {
-            "type": "array",
-            "description": "Filter by tags",
-            "maxItems": 100,
-            "items": {
-              "type": "object",
-              "properties": {
-                "label": {
-                  "type": "string",
-                  "description": "Display label for the filter option"
-                },
-                "value": {
-                  "type": "string",
-                  "description": "Value for the filter option"
-                }
-              },
-              "additionalProperties": false,
-              "required": ["label", "value"]
-            }
-          },
-          "monitor_ids": {
-            "type": "array",
-            "description": "Filter by monitor IDs",
-            "maxItems": 5000,
-            "items": {
-              "type": "object",
-              "properties": {
-                "label": {
-                  "type": "string",
-                  "description": "Display label for the filter option"
-                },
-                "value": {
-                  "type": "string",
-                  "description": "Value for the filter option"
-                }
-              },
-              "additionalProperties": false,
-              "required": ["label", "value"]
-            }
-          },
-          "monitor_types": {
-            "type": "array",
-            "description": "Filter by monitor types",
-            "maxItems": 10,
-            "items": {
-              "type": "object",
-              "properties": {
-                "label": {
-                  "type": "string",
-                  "description": "Display label for the filter option"
-                },
-                "value": {
-                  "type": "string",
-                  "description": "Value for the filter option"
-                }
-              },
-              "additionalProperties": false,
-              "required": ["label", "value"]
-            }
-          },
-          "locations": {
-            "type": "array",
-            "description": "Filter by monitor locations",
-            "maxItems": 100,
-            "items": {
-              "type": "object",
-              "properties": {
-                "label": {
-                  "type": "string",
-                  "description": "Display label for the filter option"
-                },
-                "value": {
-                  "type": "string",
-                  "description": "Value for the filter option"
-                }
-              },
-              "additionalProperties": false,
-              "required": ["label", "value"]
-            }
-          }
-        },
-        "additionalProperties": false
-      }
-    },
-    "additionalProperties": false
-  },
-  {
-    "type": "object",
-    "description": "Synthetics monitors embeddable schema",
-    "properties": {
-      "filters": {
-        "type": "object",
-        "properties": {
-          "projects": {
-            "type": "array",
-            "description": "Filter by project",
-            "maxItems": 100,
-            "items": {
-              "type": "object",
-              "properties": {
-                "label": {
-                  "type": "string",
-                  "description": "Display label for the filter option"
-                },
-                "value": {
-                  "type": "string",
-                  "description": "Value for the filter option"
-                }
-              },
-              "additionalProperties": false,
-              "required": ["label", "value"]
-            }
-          },
-          "tags": {
-            "type": "array",
-            "description": "Filter by tags",
-            "maxItems": 100,
-            "items": {
-              "type": "object",
-              "properties": {
-                "label": {
-                  "type": "string",
-                  "description": "Display label for the filter option"
-                },
-                "value": {
-                  "type": "string",
-                  "description": "Value for the filter option"
-                }
-              },
-              "additionalProperties": false,
-              "required": ["label", "value"]
-            }
-          },
-          "monitor_ids": {
-            "type": "array",
-            "description": "Filter by monitor IDs",
-            "maxItems": 5000,
-            "items": {
-              "type": "object",
-              "properties": {
-                "label": {
-                  "type": "string",
-                  "description": "Display label for the filter option"
-                },
-                "value": {
-                  "type": "string",
-                  "description": "Value for the filter option"
-                }
-              },
-              "additionalProperties": false,
-              "required": ["label", "value"]
-            }
-          },
-          "monitor_types": {
-            "type": "array",
-            "description": "Filter by monitor types",
-            "maxItems": 10,
-            "items": {
-              "type": "object",
-              "properties": {
-                "label": {
-                  "type": "string",
-                  "description": "Display label for the filter option"
-                },
-                "value": {
-                  "type": "string",
-                  "description": "Value for the filter option"
-                }
-              },
-              "additionalProperties": false,
-              "required": ["label", "value"]
-            }
-          },
-          "locations": {
-            "type": "array",
-            "description": "Filter by monitor locations",
-            "maxItems": 100,
-            "items": {
-              "type": "object",
-              "properties": {
-                "label": {
-                  "type": "string",
-                  "description": "Display label for the filter option"
-                },
-                "value": {
-                  "type": "string",
-                  "description": "Value for the filter option"
-                }
-              },
-              "additionalProperties": false,
-              "required": ["label", "value"]
-            }
-          }
-        },
-        "additionalProperties": false
-      },
-      "view": {
-        "description": "View mode for the monitors embeddable (defaults to cardView)",
+     "group_filters": {
+      "type": "object",
+      "properties": {
+       "group_by": {
         "type": "string",
-        "enum": ["cardView", "compactView"]
-      },
-      "description": {
+        "enum": [
+         "slo.tags",
+         "status",
+         "slo.indicator.type"
+        ]
+       },
+       "groups": {
+        "type": "array",
+        "items": {
+         "type": "string"
+        }
+       },
+       "filters": {
+        "type": "array",
+        "items": {
+         "description": "A filter which can be a condition, group, DSL, or spatial",
+         "anyOf": [
+          {
+           "$ref": "#/components/schemas/@kbn/as-code-filters-schema_asCodeConditionFilterSchema"
+          },
+          {
+           "$ref": "#/components/schemas/@kbn/as-code-filters-schema_asCodeGroupFilterSchema"
+          },
+          {
+           "$ref": "#/components/schemas/@kbn/as-code-filters-schema_asCodeDSLFilterSchema"
+          },
+          {
+           "$ref": "#/components/schemas/@kbn/as-code-filters-schema_asCodeSpatialFilterSchema"
+          }
+         ]
+        }
+       },
+       "kql_query": {
         "type": "string"
+       }
       },
-      "hide_title": {
-        "type": "boolean"
-      },
-      "title": {
-        "type": "string"
+      "additionalProperties": false,
+      "required": [
+       "group_by"
+      ]
+     },
+     "overview_mode": {
+      "type": "string",
+      "enum": [
+       "groups"
+      ]
+     },
+     "drilldowns": {
+      "type": "array",
+      "maxItems": 100,
+      "items": {
+       "type": "object",
+       "properties": {
+        "encode_url": {
+         "type": "boolean",
+         "description": "When true, URL is escaped using percent encoding",
+         "default": true
+        },
+        "open_in_new_tab": {
+         "type": "boolean",
+         "default": true
+        },
+        "url": {
+         "type": "string",
+         "description": "Templated Url. Variables documented at https://www.elastic.co/docs/explore-analyze/dashboards/drilldowns#url-template-variable"
+        },
+        "label": {
+         "type": "string"
+        },
+        "trigger": {
+         "type": "string",
+         "enum": [
+          "on_open_panel_menu"
+         ]
+        },
+        "type": {
+         "type": "string",
+         "enum": [
+          "url_drilldown"
+         ]
+        }
+       },
+       "additionalProperties": false,
+       "required": [
+        "url",
+        "label",
+        "trigger",
+        "type"
+       ]
       }
+     },
+     "description": {
+      "type": "string"
+     },
+     "hide_title": {
+      "type": "boolean"
+     },
+     "title": {
+      "type": "string"
+     }
+    },
+    "additionalProperties": false,
+    "required": [
+     "overview_mode"
+    ]
+   }
+  ]
+ },
+ {
+  "type": "object",
+  "description": "Synthetics stats overview embeddable schema",
+  "properties": {
+   "description": {
+    "type": "string"
+   },
+   "hide_title": {
+    "type": "boolean"
+   },
+   "title": {
+    "type": "string"
+   },
+   "drilldowns": {
+    "type": "array",
+    "maxItems": 100,
+    "items": {
+     "type": "object",
+     "properties": {
+      "encode_url": {
+       "type": "boolean",
+       "description": "When true, URL is escaped using percent encoding",
+       "default": true
+      },
+      "open_in_new_tab": {
+       "type": "boolean",
+       "default": true
+      },
+      "url": {
+       "type": "string",
+       "description": "Templated Url. Variables documented at https://www.elastic.co/docs/explore-analyze/dashboards/drilldowns#url-template-variable"
+      },
+      "label": {
+       "type": "string"
+      },
+      "trigger": {
+       "type": "string",
+       "enum": [
+        "on_open_panel_menu"
+       ]
+      },
+      "type": {
+       "type": "string",
+       "enum": [
+        "url_drilldown"
+       ]
+      }
+     },
+     "additionalProperties": false,
+     "required": [
+      "url",
+      "label",
+      "trigger",
+      "type"
+     ]
+    }
+   },
+   "filters": {
+    "type": "object",
+    "properties": {
+     "projects": {
+      "type": "array",
+      "description": "Filter by project",
+      "maxItems": 100,
+      "items": {
+       "type": "object",
+       "properties": {
+        "label": {
+         "type": "string",
+         "description": "Display label for the filter option"
+        },
+        "value": {
+         "type": "string",
+         "description": "Value for the filter option"
+        }
+       },
+       "additionalProperties": false,
+       "required": [
+        "label",
+        "value"
+       ]
+      }
+     },
+     "tags": {
+      "type": "array",
+      "description": "Filter by tags",
+      "maxItems": 100,
+      "items": {
+       "type": "object",
+       "properties": {
+        "label": {
+         "type": "string",
+         "description": "Display label for the filter option"
+        },
+        "value": {
+         "type": "string",
+         "description": "Value for the filter option"
+        }
+       },
+       "additionalProperties": false,
+       "required": [
+        "label",
+        "value"
+       ]
+      }
+     },
+     "monitor_ids": {
+      "type": "array",
+      "description": "Filter by monitor IDs",
+      "maxItems": 5000,
+      "items": {
+       "type": "object",
+       "properties": {
+        "label": {
+         "type": "string",
+         "description": "Display label for the filter option"
+        },
+        "value": {
+         "type": "string",
+         "description": "Value for the filter option"
+        }
+       },
+       "additionalProperties": false,
+       "required": [
+        "label",
+        "value"
+       ]
+      }
+     },
+     "monitor_types": {
+      "type": "array",
+      "description": "Filter by monitor types",
+      "maxItems": 10,
+      "items": {
+       "type": "object",
+       "properties": {
+        "label": {
+         "type": "string",
+         "description": "Display label for the filter option"
+        },
+        "value": {
+         "type": "string",
+         "description": "Value for the filter option"
+        }
+       },
+       "additionalProperties": false,
+       "required": [
+        "label",
+        "value"
+       ]
+      }
+     },
+     "locations": {
+      "type": "array",
+      "description": "Filter by monitor locations",
+      "maxItems": 100,
+      "items": {
+       "type": "object",
+       "properties": {
+        "label": {
+         "type": "string",
+         "description": "Display label for the filter option"
+        },
+        "value": {
+         "type": "string",
+         "description": "Value for the filter option"
+        }
+       },
+       "additionalProperties": false,
+       "required": [
+        "label",
+        "value"
+       ]
+      }
+     }
     },
     "additionalProperties": false
+   }
   },
-  {
+  "additionalProperties": false
+ },
+ {
+  "type": "object",
+  "description": "Synthetics monitors embeddable schema",
+  "properties": {
+   "filters": {
     "type": "object",
-    "properties": {},
-    "additionalProperties": true
-  }
+    "properties": {
+     "projects": {
+      "type": "array",
+      "description": "Filter by project",
+      "maxItems": 100,
+      "items": {
+       "type": "object",
+       "properties": {
+        "label": {
+         "type": "string",
+         "description": "Display label for the filter option"
+        },
+        "value": {
+         "type": "string",
+         "description": "Value for the filter option"
+        }
+       },
+       "additionalProperties": false,
+       "required": [
+        "label",
+        "value"
+       ]
+      }
+     },
+     "tags": {
+      "type": "array",
+      "description": "Filter by tags",
+      "maxItems": 100,
+      "items": {
+       "type": "object",
+       "properties": {
+        "label": {
+         "type": "string",
+         "description": "Display label for the filter option"
+        },
+        "value": {
+         "type": "string",
+         "description": "Value for the filter option"
+        }
+       },
+       "additionalProperties": false,
+       "required": [
+        "label",
+        "value"
+       ]
+      }
+     },
+     "monitor_ids": {
+      "type": "array",
+      "description": "Filter by monitor IDs",
+      "maxItems": 5000,
+      "items": {
+       "type": "object",
+       "properties": {
+        "label": {
+         "type": "string",
+         "description": "Display label for the filter option"
+        },
+        "value": {
+         "type": "string",
+         "description": "Value for the filter option"
+        }
+       },
+       "additionalProperties": false,
+       "required": [
+        "label",
+        "value"
+       ]
+      }
+     },
+     "monitor_types": {
+      "type": "array",
+      "description": "Filter by monitor types",
+      "maxItems": 10,
+      "items": {
+       "type": "object",
+       "properties": {
+        "label": {
+         "type": "string",
+         "description": "Display label for the filter option"
+        },
+        "value": {
+         "type": "string",
+         "description": "Value for the filter option"
+        }
+       },
+       "additionalProperties": false,
+       "required": [
+        "label",
+        "value"
+       ]
+      }
+     },
+     "locations": {
+      "type": "array",
+      "description": "Filter by monitor locations",
+      "maxItems": 100,
+      "items": {
+       "type": "object",
+       "properties": {
+        "label": {
+         "type": "string",
+         "description": "Display label for the filter option"
+        },
+        "value": {
+         "type": "string",
+         "description": "Value for the filter option"
+        }
+       },
+       "additionalProperties": false,
+       "required": [
+        "label",
+        "value"
+       ]
+      }
+     }
+    },
+    "additionalProperties": false
+   },
+   "view": {
+    "description": "View mode for the monitors embeddable (defaults to cardView)",
+    "type": "string",
+    "enum": [
+     "cardView",
+     "compactView"
+    ]
+   },
+   "description": {
+    "type": "string"
+   },
+   "hide_title": {
+    "type": "boolean"
+   },
+   "title": {
+    "type": "string"
+   }
+  },
+  "additionalProperties": false
+ },
+ {
+  "type": "object",
+  "properties": {},
+  "additionalProperties": true
+ }
 ]
