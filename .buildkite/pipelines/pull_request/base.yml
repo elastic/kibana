@@ -90,14 +90,29 @@ steps:
           limit: 3
 
   - command: .buildkite/scripts/steps/typecheck/check_types.sh
-    label: 'Check Types'
+    label: 'Check Types highmem-4'
     agents:
-      machineType: c4d-standard-4
+      machineType: c4d-highmem-4
       diskType: hyperdisk-balanced
       preemptible: true
       spotZones: us-central1-c,us-central1-a
       diskSizeGb: 105
     key: check_types
+    timeout_in_minutes: 60
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
+
+  - command: .buildkite/scripts/steps/typecheck/check_types.sh
+    label: 'Check Types standard-8'
+    agents:
+      machineType: c4d-standard-8
+      diskType: hyperdisk-balanced
+      preemptible: true
+      spotZones: us-central1-c,us-central1-a
+      diskSizeGb: 105
+    key: check_types2
     timeout_in_minutes: 60
     retry:
       automatic:
