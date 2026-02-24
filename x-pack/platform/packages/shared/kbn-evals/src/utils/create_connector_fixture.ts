@@ -37,18 +37,6 @@ export function resolveConnectorId(connectorId: string): string {
     : getConnectorIdAsUuid(connectorId);
 }
 
-/**
- * Returns the connector id to use at runtime.
- * When `KBN_EVALS_SKIP_CONNECTOR_SETUP` is set, the original id is returned as-is
- * (preconfigured connectors don't need UUID mapping).
- * Otherwise, a deterministic UUID is generated.
- */
-export function resolveConnectorId(connectorId: string): string {
-  return process.env.KBN_EVALS_SKIP_CONNECTOR_SETUP
-    ? connectorId
-    : getConnectorIdAsUuid(connectorId);
-}
-
 export async function createConnectorFixture({
   predefinedConnector,
   fetch,
