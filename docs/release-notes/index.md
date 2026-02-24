@@ -334,6 +334,10 @@ For the Elastic Security 9.3.0 release information, refer to [Elastic Security S
 
 ## 9.2.6 [kibana-9.2.6-release-notes]
 
+:::{important}
+The 9.2.6 release contains fixes for potential security vulnerabilities. Check our [security advisory](https://discuss.elastic.co/c/announcements/security-announcements/31) for more details.
+:::
+
 ### Features and enhancements [kibana-9.2.6-features-enhancements]
 
 **Elastic Security solution**:
