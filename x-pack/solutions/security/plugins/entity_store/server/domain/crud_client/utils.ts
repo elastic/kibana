@@ -18,7 +18,7 @@ import type {
 
 const GENERIC_TYPE = 'generic' as EntityType;
 
-export function validateAndTransformDoc(
+export function validateAndTransformDocForUpsert(
   entityType: EntityType,
   namespace: string,
   doc: Entity,

@@ -19,7 +19,7 @@ import { getEuidFromObject } from '../../../common/domain/euid';
 import { getLatestEntitiesIndexName } from '../assets/latest_index';
 import { BadCRUDRequestError, EntityNotFoundError } from '../errors';
 import { getUpdatesEntitiesDataStreamName } from '../assets/updates_data_stream';
-import { validateAndTransformDoc } from './utils';
+import { validateAndTransformDocForUpsert } from './utils';
 
 const RETRY_ON_CONFLICT = 3;
 
@@ -69,7 +69,7 @@ export class CRUDClient {
       doc.entity.id = id;
     }
 
-    const readyDoc = validateAndTransformDoc(entityType, this.namespace, doc, force);
+    const readyDoc = validateAndTransformDocForUpsert(entityType, this.namespace, doc, force);
 
     const { result } = await this.esClient.update({
       index: getLatestEntitiesIndexName(this.namespace),
@@ -106,7 +106,7 @@ export class CRUDClient {
 
     this.logger.debug(`Preparing ${objects.length} entities for bulk upsert`);
     for (const { type: entityType, doc } of objects) {
-      const readyDoc = validateAndTransformDoc(entityType, this.namespace, doc, force);
+      const readyDoc = validateAndTransformDocForUpsert(entityType, this.namespace, doc, force);
       operations.push({ create: {} }, readyDoc);
     }
 

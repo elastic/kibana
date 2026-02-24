@@ -13,7 +13,7 @@ import {
 } from '../../../common/domain/definitions/entity_schema';
 import { getEntityDefinition } from '../../../common/domain/definitions/registry';
 import { BadCRUDRequestError } from '../errors';
-import { validateAndTransformDoc } from './utils';
+import { validateAndTransformDocForUpsert } from './utils';
 
 jest.mock('../../../common/domain/definitions/registry');
 
@@ -50,13 +50,13 @@ describe('crud_client utils', () => {
     jest.clearAllMocks();
   });
 
-  it('validateAndTransformDoc: returns generic document with timestamp', () => {
+  it('validateAndTransformDocForUpsert: returns generic document with timestamp', () => {
     mockGetEntityDefinition.mockReturnValue(createDefinition('generic', []));
 
     const doc: Entity = {
       entity: { id: 'entity-generic' },
     };
-    const result = validateAndTransformDoc('generic', 'default', doc, true);
+    const result = validateAndTransformDocForUpsert('generic', 'default', doc, true);
 
     expect(result).toEqual(
       expect.objectContaining({
@@ -73,7 +73,7 @@ describe('crud_client utils', () => {
       entity: { id: 'entity-host' },
       host: { name: 'original-host-name' },
     };
-    const result = validateAndTransformDoc('host', 'default', doc, false);
+    const result = validateAndTransformDocForUpsert('host', 'default', doc, false);
 
     expect(result).toEqual(expect.objectContaining({ '@timestamp': expect.any(String) }));
     expect(result).not.toHaveProperty('entity');
@@ -89,7 +89,7 @@ describe('crud_client utils', () => {
       host: { name: 'identity-host' },
     };
 
-    expect(() => validateAndTransformDoc('host', 'default', doc, false)).not.toThrow();
+    expect(() => validateAndTransformDocForUpsert('host', 'default', doc, false)).not.toThrow();
   });
 
   it('assertOnlyNonForcedAttributesInReq: allows updates for allowAPIUpdate fields', () => {
@@ -105,7 +105,7 @@ describe('crud_client utils', () => {
         },
       },
     };
-    const result = validateAndTransformDoc('generic', 'default', doc, false);
+    const result = validateAndTransformDocForUpsert('generic', 'default', doc, false);
 
     expect(result).toHaveProperty('entity.attributes.privileged', true);
   });
@@ -122,7 +122,7 @@ describe('crud_client utils', () => {
       },
     };
 
-    expect(() => validateAndTransformDoc('generic', 'default', doc, false)).toThrow(
+    expect(() => validateAndTransformDocForUpsert('generic', 'default', doc, false)).toThrow(
       new BadCRUDRequestError(
         'The following attributes are not allowed to be updated: [entity.attributes.managed]'
       )
@@ -143,14 +143,14 @@ describe('crud_client utils', () => {
       },
     };
 
-    expect(() => validateAndTransformDoc('generic', 'default', doc, false)).toThrow(
+    expect(() => validateAndTransformDocForUpsert('generic', 'default', doc, false)).toThrow(
       new BadCRUDRequestError(
         'The following attributes are not allowed to be updated without forcing it (?force=true): entity.attributes.managed'
       )
     );
   });
 
-  it('validateAndTransformDoc: bypasses validation when force=true', () => {
+  it('validateAndTransformDocForUpsert: bypasses validation when force=true', () => {
     mockGetEntityDefinition.mockReturnValue(
       createDefinition('generic', [createField('entity.attributes.managed', false)])
     );
@@ -164,6 +164,6 @@ describe('crud_client utils', () => {
       },
     };
 
-    expect(() => validateAndTransformDoc('generic', 'default', doc, true)).not.toThrow();
+    expect(() => validateAndTransformDocForUpsert('generic', 'default', doc, true)).not.toThrow();
   });
 });
