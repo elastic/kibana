@@ -139,11 +139,7 @@ export const OverviewTab = ({ metric, description }: OverviewTabProps) => {
     () =>
       paginatedDimensions.map((dimension: Dimension) => {
         return {
-          label: (
-            <EuiText size="s">
-              <FieldNameWithIcon name={dimension.name} type={dimension.type} />
-            </EuiText>
-          ),
+          label: <FieldNameWithIcon name={dimension.name} type={dimension.type} />,
         };
       }),
     [paginatedDimensions]
