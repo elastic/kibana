@@ -237,7 +237,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
       isMounted.current = false;
     };
   }, []);
-  const [flyoutHeaderName, setFlyoutHeaderName] = useState<string>('Search a connector');
+  const [flyoutHeaderName, setFlyoutHeaderName] = useState<string>('Select a connector');
   useEffect(() => {
     if (actionType) {
       if (!actionType.name.toLowerCase().includes('connector')) {
@@ -252,7 +252,10 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
       onClose={onClose}
       data-test-subj="create-connector-flyout"
       aria-label={i18n.translate('xpack.triggersActionsUI.createConnectorFlyout', {
-        defaultMessage: flyoutHeaderName,
+        defaultMessage: '{headerName} flyout',
+        values: {
+          headerName: flyoutHeaderName,
+        },
       })}
     >
       <FlyoutHeader
