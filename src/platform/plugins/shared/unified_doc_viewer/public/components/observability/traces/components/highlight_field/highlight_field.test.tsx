@@ -18,9 +18,7 @@ describe('HighlightField', () => {
   });
 
   it('renders the formattedValue when provided', () => {
-    const { container } = render(
-      <HighlightField formattedValue={<b>Formatted Value</b>} />
-    );
+    const { container } = render(<HighlightField formattedValue={<b>Formatted Value</b>} />);
     expect(container.querySelector('b')).toHaveTextContent('Formatted Value');
   });
 
