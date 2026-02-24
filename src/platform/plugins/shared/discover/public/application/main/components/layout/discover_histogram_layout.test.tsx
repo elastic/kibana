@@ -142,7 +142,8 @@ describe('Discover histogram layout component', () => {
       expect(screen.queryByTestId('dscPanelsToggleInHistogram')).toBeInTheDocument();
       expect(screen.queryByTestId('dscPanelsToggleInPage')).toBeInTheDocument();
       await user.click(screen.getByTestId('dscHideHistogramButton'));
-      expect(screen.queryByTestId('dscPanelsToggleInHistogram')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('dscPanelsToggleInHistogram')).toBeInTheDocument();
+      expect(screen.queryByTestId('dscShowHistogramButton')).toBeInTheDocument();
       expect(screen.queryByTestId('dscPanelsToggleInPage')).toBeInTheDocument();
     });
   });
