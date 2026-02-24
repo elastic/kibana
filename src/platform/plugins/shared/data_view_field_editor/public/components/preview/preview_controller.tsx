@@ -495,7 +495,7 @@ export class PreviewController {
     if (format?.id) {
       const formatter = this.deps.fieldFormats.getInstance(format.id, format.params);
       if (formatter) {
-        return formatter.getConverterFor('html')(value) ?? JSON.stringify(value);
+        return formatter.getConverterFor('react')(value) ?? JSON.stringify(value);
       }
     }
 
@@ -503,7 +503,7 @@ export class PreviewController {
       const fieldType = castEsToKbnFieldTypeName(type);
       const defaultFormatterForType = this.deps.fieldFormats.getDefaultInstance(fieldType);
       if (defaultFormatterForType) {
-        return defaultFormatterForType.getConverterFor('html')(value) ?? JSON.stringify(value);
+        return defaultFormatterForType.getConverterFor('react')(value) ?? JSON.stringify(value);
       }
     }
 

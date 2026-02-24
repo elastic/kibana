@@ -47,7 +47,7 @@ export const createFieldFormatter = (
       return DISPLAY_EMPTY_VALUE;
     }
     return fieldType !== 'number' || isNumber(value) || !shouldSkipFormatting
-      ? fieldFormat.convert(value, contextType)
+      ? fieldFormat.convert(value, contextType ?? 'text')
       : value;
   };
 };
