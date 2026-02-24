@@ -120,6 +120,7 @@ export interface ConstructorOptions {
   ) => Promise<AxiosInstance>;
   spaces?: SpacesServiceSetup;
   isESOCanEncrypt: boolean;
+  authorizationCodeEnabled?: boolean;
 }
 
 export interface ActionsClientContext {
@@ -145,6 +146,7 @@ export interface ActionsClientContext {
   ) => Promise<AxiosInstance>;
   spaces?: SpacesServiceSetup;
   isESOCanEncrypt: boolean;
+  authorizationCodeEnabled?: boolean;
 }
 
 export class ActionsClient {
@@ -171,6 +173,7 @@ export class ActionsClient {
     getAxiosInstanceWithAuth,
     spaces,
     isESOCanEncrypt,
+    authorizationCodeEnabled = false,
   }: ConstructorOptions) {
     this.context = {
       logger,
@@ -193,6 +196,7 @@ export class ActionsClient {
       getAxiosInstanceWithAuth,
       spaces,
       isESOCanEncrypt,
+      authorizationCodeEnabled,
     };
   }
 
@@ -432,6 +436,9 @@ export class ActionsClient {
         throw Boom.badRequest(`Failed to retrieve access token`);
       }
     } else if (type === 'authorization_code') {
+      if (!this.context.authorizationCodeEnabled) {
+        throw Boom.badRequest('OAuth authorization code flow is not enabled');
+      }
       const tokenOpts = options as OAuthAuthorizationCodeParams;
       try {
         accessToken = await getOAuthAuthorizationCodeAccessToken({

@@ -118,14 +118,17 @@ export const App = ({ deps }: { deps: TriggersAndActionsUiServices }) => {
 
 export const AppWithoutRouter = ({ sectionsRegex }: { sectionsRegex: string }) => {
   const {
-    actions: { validateEmailAddresses, enabledEmailServices },
+    actions: { validateEmailAddresses, enabledEmailServices, authorizationCodeEnabled },
     application: { navigateToApp },
     isServerless,
   } = useKibana().services;
 
   return (
     <ConnectorProvider
-      value={{ services: { validateEmailAddresses, enabledEmailServices }, isServerless }}
+      value={{
+        services: { validateEmailAddresses, enabledEmailServices, authorizationCodeEnabled },
+        isServerless,
+      }}
     >
       <Routes>
         <Route

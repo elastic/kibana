@@ -328,8 +328,12 @@ export class ActionsPlugin
     this.security = plugins.security;
     this.spaces = plugins.spaces;
 
+    const authorizationCodeEnabled =
+      this.actionsConfig.auth?.oauth_authorization_code.enabled ?? false;
     this.authTypeRegistry = new AuthTypeRegistry();
-    registerAuthTypes(this.authTypeRegistry);
+    registerAuthTypes(this.authTypeRegistry, {
+      authorizationCodeEnabled,
+    });
 
     setupSavedObjects(
       core.savedObjects,
@@ -401,8 +405,9 @@ export class ActionsPlugin
       });
     }
 
-    // Initialize OAuth state cleanup task
-    initializeOAuthStateCleanupTask(this.logger, plugins.taskManager, core);
+    if (authorizationCodeEnabled) {
+      initializeOAuthStateCleanupTask(this.logger, plugins.taskManager, core);
+    }
 
     const subActionFramework = createSubActionConnectorFramework({
       actionTypeRegistry,
@@ -427,6 +432,7 @@ export class ActionsPlugin
       logger: this.logger,
       core,
       oauthRateLimiter,
+      authorizationCodeEnabled,
     });
 
     return {
@@ -526,6 +532,8 @@ export class ActionsPlugin
       unsecuredSavedObjectsClient: SavedObjectsClientContract;
       spaceId?: string;
     }) => {
+      const authorizationCodeEnabled =
+        this.actionsConfig.auth?.oauth_authorization_code.enabled ?? false;
       return new ActionsClient({
         logger,
         unsecuredSavedObjectsClient,
@@ -560,6 +568,7 @@ export class ActionsPlugin
         spaces: this.spaces?.spacesService,
         isESOCanEncrypt: isESOCanEncrypt!,
         encryptedSavedObjectsClient,
+        authorizationCodeEnabled,
       });
     };
 
@@ -680,7 +689,11 @@ export class ActionsPlugin
     this.eventLogService!.isEsContextReady()
       .then(() => {
         scheduleActionsTelemetry(this.telemetryLogger, plugins.taskManager);
-        scheduleOAuthStateCleanupTask(this.logger, plugins.taskManager);
+        const authorizationCodeEnabled =
+          this.actionsConfig.auth?.oauth_authorization_code.enabled ?? false;
+        if (authorizationCodeEnabled) {
+          scheduleOAuthStateCleanupTask(this.logger, plugins.taskManager);
+        }
       })
       .catch(() => {});
 
@@ -833,6 +846,7 @@ export class ActionsPlugin
       logger,
       getAxiosInstanceWithAuthHelper,
       spaces,
+      actionsConfig,
     } = this;
 
     return async function actionsRouteHandlerContext(context, request) {
@@ -842,6 +856,8 @@ export class ActionsPlugin
       const coreContext = await context.core;
       const inMemoryConnectors = getInMemoryConnectors();
 
+      const authorizationCodeEnabled =
+        actionsConfig.auth?.oauth_authorization_code.enabled ?? false;
       return {
         getActionsClient: () => {
           if (isESOCanEncrypt !== true) {
@@ -890,6 +906,7 @@ export class ActionsPlugin
             spaces: spaces?.spacesService,
             isESOCanEncrypt: isESOCanEncrypt!,
             encryptedSavedObjectsClient,
+            authorizationCodeEnabled,
           });
         },
         listTypes: (featureId?: string) => {

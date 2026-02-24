@@ -54,13 +54,16 @@ export const RulesPageApp = ({ deps }: { deps: TriggersAndActionsUiServices }) =
 
 const AppWithoutRouter = () => {
   const {
-    actions: { validateEmailAddresses, enabledEmailServices },
+    actions: { validateEmailAddresses, enabledEmailServices, authorizationCodeEnabled },
     isServerless,
   } = useKibana().services;
 
   return (
     <ConnectorProvider
-      value={{ services: { validateEmailAddresses, enabledEmailServices }, isServerless }}
+      value={{
+        services: { validateEmailAddresses, enabledEmailServices, authorizationCodeEnabled },
+        isServerless,
+      }}
     >
       <PerformanceContextProvider>
         <Routes>
