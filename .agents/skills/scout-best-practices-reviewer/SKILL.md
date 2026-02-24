@@ -1,6 +1,6 @@
 ---
 name: scout-best-practices-reviewer
-description: Review Scout UI/API tests and FTR → Scout migrations for best practices, reuse, and parity.
+description: Review Scout UI/API tests (including Scout test migrations) for best practices, reuse, and parity.
 ---
 
 # Scout Best Practices Reviewer
