@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { createVisualizationTool } from './create_visualization';
+export { registerSkills } from './register_skills';
+export { dashboardManagementSkill } from './dashboard_management_skill';
