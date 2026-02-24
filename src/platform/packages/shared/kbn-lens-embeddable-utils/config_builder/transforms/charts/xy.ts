@@ -80,7 +80,6 @@ export function fromAPItoLensState(config: XYState): XYLensWithoutQueryAndFilter
 
 export function fromLensStateToAPI(config: LensAttributes): XYState {
   const { state } = config;
-  // TODO — casting shouldn't be necessary, the config type should be updated to reflect that the visualization state is in persisted format
   const visualizationState = state.visualization as XYPersistedState;
   const layers = getDatasourceLayers(state);
 
