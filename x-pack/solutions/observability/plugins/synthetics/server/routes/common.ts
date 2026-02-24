@@ -10,7 +10,7 @@ import { schema } from '@kbn/config-schema';
 import { isEmpty } from 'lodash';
 import { escapeQuotes } from '@kbn/es-query';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
-import { useLogicalAndFields } from '../../common/constants';
+import { MAX_FILTER_VALUES_PER_REQUEST, useLogicalAndFields } from '../../common/constants';
 import type { RouteContext } from './types';
 import { MonitorSortFieldSchema } from '../../common/runtime_types/monitor_management/sort_field';
 import { getAllLocations } from '../synthetics_service/get_all_locations';
@@ -18,7 +18,7 @@ import type { PrivateLocation, ServiceLocation } from '../../common/runtime_type
 import { syntheticsMonitorAttributes } from '../../common/types/saved_objects';
 
 const StringOrArraySchema = schema.maybe(
-  schema.oneOf([schema.string(), schema.arrayOf(schema.string())])
+  schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { maxSize: MAX_FILTER_VALUES_PER_REQUEST })])
 );
 
 const UseLogicalAndFieldLiterals = useLogicalAndFields.map((f) => schema.literal(f)) as [
@@ -37,7 +37,7 @@ const CommonQuerySchema = {
   monitorQueryIds: StringOrArraySchema,
   showFromAllSpaces: schema.maybe(schema.boolean()),
   useLogicalAndFor: schema.maybe(
-    schema.oneOf([schema.string(), schema.arrayOf(schema.oneOf(UseLogicalAndFieldLiterals))])
+    schema.oneOf([schema.string(), schema.arrayOf(schema.oneOf(UseLogicalAndFieldLiterals), { maxSize: MAX_FILTER_VALUES_PER_REQUEST })])
   ),
 };
 
@@ -47,7 +47,7 @@ export const QuerySchema = schema.object({
   perPage: schema.maybe(schema.number()),
   sortField: MonitorSortFieldSchema,
   sortOrder: schema.maybe(schema.oneOf([schema.literal('desc'), schema.literal('asc')])),
-  searchAfter: schema.maybe(schema.arrayOf(schema.string())),
+  searchAfter: schema.maybe(schema.arrayOf(schema.string(), { maxSize: MAX_FILTER_VALUES_PER_REQUEST })),
   internal: schema.maybe(
     schema.boolean({
       defaultValue: false,
