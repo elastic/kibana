@@ -121,8 +121,7 @@ export class AssetManager {
         namespace: this.namespace,
         error: getErrorMessage(error),
       });
-      this.logger.error('Error during entity store init');
-      this.logger.error(error);
+      this.logger.error('Error during entity store init:', error);
       throw error;
     }
   }
