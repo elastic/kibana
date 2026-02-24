@@ -22,9 +22,9 @@ export interface PerformMatchSearchResponse {
 
 /**
  * Builds the search request body. For local indices, uses the RRF retriever
- * for best relevance ranking. For CCS targets, falls back to multi_match
- * because the simplified RRF retriever syntax does not support cross-cluster
- * index patterns.
+ * for best relevance ranking. For CCS targets, falls back to a query-based
+ * approach because the simplified RRF retriever syntax does not support
+ * cross-cluster index patterns.
  */
 const buildSearchRequest = ({
   index,
@@ -47,40 +47,19 @@ const buildSearchRequest = ({
   };
 
   // CCS fallback: the simplified RRF retriever syntax does not support
-  // cross-cluster index patterns, so we use a multi_match query instead.
-  // semantic_text fields are excluded because multi_match does not support them.
+  // cross-cluster index patterns, so we use a query-based approach instead.
   if (isCcsTarget(index)) {
-    const multiMatchFields = fields.filter((f) => f.type !== 'semantic_text');
-    if (multiMatchFields.length === 0) {
-      throw new Error(
-        `No multi_match-compatible fields available for CCS target "${index}". ` +
-          'All searchable fields are semantic_text, which multi_match does not support.'
-      );
-    }
-
-    const ccsHighlightConfig = {
-      ...highlightConfig,
-      fields: multiMatchFields.reduce(
-        (memo, field) => ({ ...memo, [field.path]: {} }),
-        {} as Record<string, Record<string, never>>
-      ),
-    };
-
     return {
       index,
       size,
-      query: {
-        multi_match: {
-          query: term,
-          fields: multiMatchFields.map((field) => field.path),
-          type: 'best_fields',
-        },
-      },
-      highlight: ccsHighlightConfig,
+      query: buildCcsQuery({ term, fields }),
+      highlight: highlightConfig,
     };
   }
 
   // Local indices: use the RRF retriever for optimal relevance ranking
+  // TODO: once multi_match supports semantic_text (elastic/search-team#11226),
+  // consider unifying local and CCS paths.
   // should replace `any` with `SearchRequest` type when the simplified retriever syntax is supported in @elastic/elasticsearch
   return {
     index,
@@ -93,6 +72,39 @@ const buildSearchRequest = ({
       },
     },
     highlight: highlightConfig,
+  };
+};
+
+/**
+ * Builds the query for a CCS target. When all fields are regular text types,
+ * uses a single multi_match for simplicity. When any field is semantic_text,
+ * falls back to a bool/should with individual match queries per field because
+ * multi_match does not support semantic_text (elastic/search-team#11226).
+ */
+const buildCcsQuery = ({
+  term,
+  fields,
+}: {
+  term: string;
+  fields: MappingField[];
+}): Record<string, unknown> => {
+  const hasSemanticTextField = fields.some((f) => f.type === 'semantic_text');
+
+  if (!hasSemanticTextField) {
+    return {
+      multi_match: {
+        query: term,
+        fields: fields.map((f) => f.path),
+        type: 'best_fields',
+      },
+    };
+  }
+
+  return {
+    bool: {
+      should: fields.map((f) => ({ match: { [f.path]: term } })),
+      minimum_should_match: 1,
+    },
   };
 };
 

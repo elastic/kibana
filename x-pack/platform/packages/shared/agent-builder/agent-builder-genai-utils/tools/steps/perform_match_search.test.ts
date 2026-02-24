@@ -28,8 +28,26 @@ const semanticField = (path: string): MappingField => ({
 });
 
 describe('performMatchSearch', () => {
-  describe('CCS targets (multi_match path)', () => {
-    it('excludes semantic_text fields from the multi_match query', async () => {
+  describe('CCS targets', () => {
+    it('uses multi_match when no fields are semantic_text', async () => {
+      const esClient = createMockEsClient();
+      const logger = createMockLogger();
+
+      await performMatchSearch({
+        term: 'test query',
+        index: 'remote_cluster:my-index',
+        fields: [textField('title'), textField('body')],
+        size: 10,
+        esClient,
+        logger,
+      });
+
+      const searchCall = (esClient.search as jest.Mock).mock.calls[0][0];
+      expect(searchCall.query.multi_match).toBeDefined();
+      expect(searchCall.query.multi_match.fields).toEqual(['title', 'body']);
+    });
+
+    it('falls back to bool/should with per-field match queries when semantic_text fields are present', async () => {
       const esClient = createMockEsClient();
       const logger = createMockLogger();
 
@@ -43,11 +61,16 @@ describe('performMatchSearch', () => {
       });
 
       const searchCall = (esClient.search as jest.Mock).mock.calls[0][0];
-      expect(searchCall.query.multi_match.fields).toEqual(['title', 'body']);
-      expect(searchCall.query.multi_match.fields).not.toContain('embedding');
+      expect(searchCall.query.bool).toBeDefined();
+      expect(searchCall.query.bool.should).toEqual([
+        { match: { title: 'test query' } },
+        { match: { embedding: 'test query' } },
+        { match: { body: 'test query' } },
+      ]);
+      expect(searchCall.query.bool.minimum_should_match).toBe(1);
     });
 
-    it('excludes semantic_text fields from highlight config', async () => {
+    it('includes all fields in highlight config even when using bool/should fallback', async () => {
       const esClient = createMockEsClient();
       const logger = createMockLogger();
 
@@ -61,24 +84,29 @@ describe('performMatchSearch', () => {
       });
 
       const searchCall = (esClient.search as jest.Mock).mock.calls[0][0];
-      expect(Object.keys(searchCall.highlight.fields)).toEqual(['title']);
-      expect(searchCall.highlight.fields).not.toHaveProperty('embedding');
+      expect(Object.keys(searchCall.highlight.fields)).toEqual(
+        expect.arrayContaining(['title', 'embedding'])
+      );
     });
 
-    it('throws when all fields are semantic_text', async () => {
+    it('uses bool/should when all fields are semantic_text', async () => {
       const esClient = createMockEsClient();
       const logger = createMockLogger();
 
-      await expect(
-        performMatchSearch({
-          term: 'test query',
-          index: 'remote_cluster:my-index',
-          fields: [semanticField('embedding'), semanticField('vector')],
-          size: 10,
-          esClient,
-          logger,
-        })
-      ).rejects.toThrow(/No multi_match-compatible fields available for CCS target/);
+      await performMatchSearch({
+        term: 'test query',
+        index: 'remote_cluster:my-index',
+        fields: [semanticField('embedding'), semanticField('vector')],
+        size: 10,
+        esClient,
+        logger,
+      });
+
+      const searchCall = (esClient.search as jest.Mock).mock.calls[0][0];
+      expect(searchCall.query.bool.should).toEqual([
+        { match: { embedding: 'test query' } },
+        { match: { vector: 'test query' } },
+      ]);
     });
   });
 
