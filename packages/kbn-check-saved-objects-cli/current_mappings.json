@@ -301,6 +301,88 @@
       }
     }
   },
+  "alert-grouping-execution": {
+    "dynamic": false,
+    "properties": {
+      "completedAt": {
+        "type": "date"
+      },
+      "error": {
+        "type": "text"
+      },
+      "isDryRun": {
+        "type": "boolean"
+      },
+      "metrics": {
+        "type": "text"
+      },
+      "spaceId": {
+        "type": "keyword"
+      },
+      "startedAt": {
+        "type": "date"
+      },
+      "status": {
+        "type": "keyword"
+      },
+      "triggeredBy": {
+        "type": "keyword"
+      },
+      "workflowId": {
+        "type": "keyword"
+      }
+    }
+  },
+  "alert-grouping-workflow": {
+    "dynamic": false,
+    "properties": {
+      "alertFilter": {
+        "type": "text"
+      },
+      "apiConfig": {
+        "type": "text"
+      },
+      "attackDiscoveryConfig": {
+        "type": "text"
+      },
+      "caseTemplate": {
+        "type": "text"
+      },
+      "createdAt": {
+        "type": "date"
+      },
+      "createdBy": {
+        "type": "keyword"
+      },
+      "description": {
+        "type": "text"
+      },
+      "enabled": {
+        "type": "boolean"
+      },
+      "groupingConfig": {
+        "type": "text"
+      },
+      "name": {
+        "type": "text"
+      },
+      "schedule": {
+        "type": "text"
+      },
+      "spaceId": {
+        "type": "keyword"
+      },
+      "tags": {
+        "type": "keyword"
+      },
+      "updatedAt": {
+        "type": "date"
+      },
+      "updatedBy": {
+        "type": "keyword"
+      }
+    }
+  },
   "alerting_rule_template": {
     "dynamic": false,
     "properties": {
@@ -412,6 +494,20 @@
     "dynamic": false,
     "properties": {}
   },
+  "attack-discovery-batch-cache": {
+    "dynamic": false,
+    "properties": {
+      "batchSize": {
+        "type": "integer"
+      },
+      "connectorId": {
+        "type": "keyword"
+      },
+      "updatedAt": {
+        "type": "date"
+      }
+    }
+  },
   "background-task-node": {
     "dynamic": false,
     "properties": {
@@ -499,6 +595,44 @@
       },
       "template_key": {
         "type": "keyword"
+      }
+    }
+  },
+  "case-trigger": {
+    "dynamic": false,
+    "properties": {
+      "action": {
+        "type": "text"
+      },
+      "conditions": {
+        "type": "text"
+      },
+      "createdAt": {
+        "type": "date"
+      },
+      "createdBy": {
+        "type": "keyword"
+      },
+      "description": {
+        "type": "text"
+      },
+      "enabled": {
+        "type": "boolean"
+      },
+      "eventType": {
+        "type": "keyword"
+      },
+      "lastTriggered": {
+        "type": "date"
+      },
+      "name": {
+        "type": "text"
+      },
+      "spaceId": {
+        "type": "keyword"
+      },
+      "triggerCount": {
+        "type": "integer"
       }
     }
   },
