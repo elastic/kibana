@@ -8,6 +8,7 @@
  */
 import { ControlTriggerSource, ESQLVariableType, type ESQLCallbacks } from '@kbn/esql-types';
 import type { LicenseType } from '@kbn/licensing-types';
+import { EsqlQuery } from '@elastic/esql';
 import type {
   ESQLColumn,
   ESQLAstItem,
@@ -15,7 +16,6 @@ import type {
   ESQLFunction,
   ESQLAstAllCommands,
 } from '../../types';
-import { EsqlQuery } from '../../composer';
 import { esqlCommandRegistry } from '../../commands';
 import { isHeaderCommand, Walker } from '../../ast';
 import { parse } from '../../parser';
