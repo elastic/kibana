@@ -31,4 +31,10 @@ export const TasksConfig: Record<EntityStoreTaskType, EntityStoreTaskConfig> = {
     type: 'entity_store:v2:history_snapshot_task',
     timeout: '30m',
   },
+  [EntityStoreTaskType.enum.storeUsage]: {
+    title: 'Entity Store - Store Usage Task',
+    type: 'entity_store:v2:store_usage_task',
+    timeout: '25s',
+    interval: '1h',
+  },
 };
