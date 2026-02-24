@@ -60,13 +60,6 @@ Output **only** the applicable markdown tables below. Sort findings by priority:
 
 Offer to generate the updated code, fully incorporating the suggested improvements and resolving any parity gaps.
 
-## Reference
-
-Open only what you need:
-
-- Scout best practices: `docs/extend/scout/best-practices.md`
-- Scout docs: `docs/extend/scout` (especially `fixtures.md`, `api-services.md`, `page-objects.md`)
-
 ### Quick checklist (details live in `docs/extend/scout/best-practices.md`)
 
 - **Reuse-first**: prefer existing `pageObjects`, fixtures, and `apiServices`; if adding helpers/page objects, place them in the right scope (plugin vs solution vs `@kbn/scout`) and register via fixtures.
