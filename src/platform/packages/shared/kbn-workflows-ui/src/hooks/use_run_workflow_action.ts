@@ -10,6 +10,7 @@
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useMutation, type UseMutationOptions } from '@kbn/react-query';
 import type { RunWorkflowCommand, RunWorkflowResponseDto } from '@kbn/workflows';
+import type { WorkflowTriggerTab } from '@kbn/workflows-management-plugin/public/features/run_workflow/ui/types';
 import type { HttpError } from './types';
 
 export type RunWorkflowActionParams = RunWorkflowCommand & {
@@ -19,7 +20,7 @@ export type RunWorkflowActionParams = RunWorkflowCommand & {
    * Optional client-only trigger source used for telemetry.
    * Not sent to the server.
    */
-  triggerTab?: 'manual' | 'alert' | 'index';
+  triggerTab?: WorkflowTriggerTab;
 };
 
 /**
