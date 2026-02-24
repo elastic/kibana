@@ -6,6 +6,7 @@ plugins:
     - console
     - dashboard
     - discover_enhanced
+    - exploratory_view
     - index_management
     - infra
     - maps
