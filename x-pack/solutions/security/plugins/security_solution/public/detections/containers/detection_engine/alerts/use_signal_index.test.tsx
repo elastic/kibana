@@ -11,9 +11,7 @@ import * as api from './api';
 import { useAppToastsMock } from '../../../../common/hooks/use_app_toasts.mock';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { sourcererSelectors } from '../../../../common/store';
-import {
-  signalIndexNameSelector,
-} from '../../../../data_view_manager/redux/selectors';
+import { signalIndexNameSelector } from '../../../../data_view_manager/redux/selectors';
 
 jest.mock('./api');
 jest.mock('../../../../common/hooks/use_app_toasts');

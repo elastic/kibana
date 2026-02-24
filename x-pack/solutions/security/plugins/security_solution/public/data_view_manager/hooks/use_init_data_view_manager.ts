@@ -55,10 +55,7 @@ export const useInitDataViewManager = () => {
     'createDataViewSelectedListener'
   );
 
-  const {
-    loading: loadingSignalIndex,
-    signalIndexName,
-  } = useUserInfo();
+  const { loading: loadingSignalIndex, signalIndexName } = useUserInfo();
 
   const onSignalIndexUpdated = useCallback(() => {
     if (!loadingSignalIndex && signalIndexName != null) {
