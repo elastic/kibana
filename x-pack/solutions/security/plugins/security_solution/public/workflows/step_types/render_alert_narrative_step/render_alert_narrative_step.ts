@@ -22,18 +22,18 @@ const outputSchema = z.object({
   message: z.string(),
 });
 
-export const getAlertTimelineStringStepDefinition: PublicStepDefinition = {
-  id: 'security.getAlertTimelineString',
+export const renderAlertNarrativeStepDefinition: PublicStepDefinition = {
+  id: 'security.renderAlertNarrative',
   inputSchema,
   outputSchema,
-  label: i18n.translate('xpack.securitySolution.workflows.steps.getAlertTimelineString.label', {
-    defaultMessage: 'Get Alert Timeline String',
+  label: i18n.translate('xpack.securitySolution.workflows.steps.renderAlertNarrative.label', {
+    defaultMessage: 'Render Alert Narrative',
   }),
   description: i18n.translate(
-    'xpack.securitySolution.workflows.steps.getAlertTimelineString.description',
+    'xpack.securitySolution.workflows.steps.renderAlertNarrative.description',
     {
       defaultMessage:
-        'Generate a Timeline-like English string for an alert (based on common alert + process fields)',
+        'Render a human-readable narrative string for an alert based on its event, process, network, and host fields',
     }
   ),
   icon: React.lazy(() =>
@@ -47,17 +47,17 @@ export const getAlertTimelineStringStepDefinition: PublicStepDefinition = {
   ),
   documentation: {
     details: i18n.translate(
-      'xpack.securitySolution.workflows.steps.getAlertTimelineString.documentation.details',
+      'xpack.securitySolution.workflows.steps.renderAlertNarrative.documentation.details',
       {
         defaultMessage:
-          'Fetches the alert from Elasticsearch and produces a Timeline-like plain-English string that summarizes the event and (when present) associated process context. The output is designed for use in workflows (e.g., notes, summaries, LLM prompts).',
+          'Fetches the alert from Elasticsearch and renders a plain-English narrative string that summarizes the event and (when present) associated process context. The output is designed for use in workflows (e.g., notes, summaries, LLM prompts).',
       }
     ),
     examples: [
-      `## Generate a timeline-like string for an alert
+      `## Render an alert narrative
 \`\`\`yaml
-- name: get_timeline_string
-  type: security.getAlertTimelineString
+- name: render_alert_narrative
+  type: security.renderAlertNarrative
   with:
     alertId: "{{ variables.alert_id }}"
     alertIndex: "{{ variables.alert_index }}"

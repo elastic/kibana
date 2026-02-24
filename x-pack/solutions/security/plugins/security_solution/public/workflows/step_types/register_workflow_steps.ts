@@ -6,8 +6,8 @@
  */
 
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
-import { getAlertTimelineStringStepDefinition } from './get_alert_timeline_string_step';
-import { getRelatedAlertsStepDefinition } from './get_related_alerts_step';
+import { renderAlertNarrativeStepDefinition } from './render_alert_narrative_step';
+import { buildAlertEntityGraphStepDefinition } from './build_alert_entity_graph_step';
 
 /**
  * Registers all security workflow steps with the workflowsExtensions plugin
@@ -15,6 +15,6 @@ import { getRelatedAlertsStepDefinition } from './get_related_alerts_step';
 export const registerWorkflowSteps = (
   workflowsExtensions: WorkflowsExtensionsPublicPluginSetup
 ): void => {
-  workflowsExtensions.registerStepDefinition(getAlertTimelineStringStepDefinition);
-  workflowsExtensions.registerStepDefinition(getRelatedAlertsStepDefinition);
+  workflowsExtensions.registerStepDefinition(renderAlertNarrativeStepDefinition);
+  workflowsExtensions.registerStepDefinition(buildAlertEntityGraphStepDefinition);
 };

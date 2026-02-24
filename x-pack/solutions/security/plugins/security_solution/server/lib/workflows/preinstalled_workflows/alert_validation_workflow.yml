@@ -429,7 +429,7 @@ steps:
           # (host, user, process, IP, etc.) with the seed alert. Scores edges
           # by field weight to surface the most relevant connections.
           - name: get_related_alerts
-            type: security.getRelatedAlerts
+            type: security.buildAlertEntityGraph
             with:
               alertId: "{{foreach.item._id}}"
               alertIndex: "{{foreach.item._index}}"
@@ -504,7 +504,7 @@ steps:
             foreach: "{{ steps.get_related_alerts.output.alerts_sorted | json }}"
             steps:
               - name: get_related_alert_timeline_string
-                type: security.getAlertTimelineString
+                type: security.renderAlertNarrative
                 with:
                   alertId: "{{ foreach.item.alert_id }}"
                   alertIndex: "{{ foreach.item.alert_index }}"
@@ -521,7 +521,7 @@ steps:
                   
           # Timeline string for the seed alert (used as an LLM attachment label).
           - name: get_seed_timeline_string
-            type: security.getAlertTimelineString
+            type: security.renderAlertNarrative
             with:
               alertId: "{{ foreach.item._id }}"
               alertIndex: "{{ foreach.item._index }}"

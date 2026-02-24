@@ -148,18 +148,18 @@ const outputSchema = z.object({
     .optional(),
 });
 
-export const getRelatedAlertsStepDefinition: PublicStepDefinition = {
-  id: 'security.getRelatedAlerts',
+export const buildAlertEntityGraphStepDefinition: PublicStepDefinition = {
+  id: 'security.buildAlertEntityGraph',
   inputSchema,
   outputSchema,
-  label: i18n.translate('xpack.securitySolution.workflows.steps.getRelatedAlerts.label', {
-    defaultMessage: 'Get Related Alerts',
+  label: i18n.translate('xpack.securitySolution.workflows.steps.buildAlertEntityGraph.label', {
+    defaultMessage: 'Build Alert Entity Graph',
   }),
   description: i18n.translate(
-    'xpack.securitySolution.workflows.steps.getRelatedAlerts.description',
+    'xpack.securitySolution.workflows.steps.buildAlertEntityGraph.description',
     {
       defaultMessage:
-        'Build a graph of alerts related by shared entities (or score threshold) within an expanding time window',
+        'Build a graph of alerts correlated by shared entities (e.g. host, user, service) via BFS traversal within an expanding time window',
     }
   ),
   icon: React.lazy(() =>
@@ -173,17 +173,17 @@ export const getRelatedAlertsStepDefinition: PublicStepDefinition = {
   ),
   documentation: {
     details: i18n.translate(
-      'xpack.securitySolution.workflows.steps.getRelatedAlerts.documentation.details',
+      'xpack.securitySolution.workflows.steps.buildAlertEntityGraph.documentation.details',
       {
         defaultMessage:
-          'Recursively discovers alerts related by shared entities (e.g. host, user, service) within a configurable, expanding time window and returns a nodes/edges graph. Relatedness is controlled by a score threshold (min_entity_score + per-field score overrides; sums per-label scores).',
+          'Recursively discovers alerts correlated by shared entities (e.g. host, user, service) within a configurable, expanding time window and returns a nodes/edges graph. Correlation is controlled by a score threshold (min_entity_score + per-field score overrides; sums per-label scores).',
       }
     ),
     examples: [
-      `## Get related alerts graph
+      `## Build alert entity graph
 \`\`\`yaml
-- name: get_related
-  type: security.getRelatedAlerts
+- name: build_alert_entity_graph
+  type: security.buildAlertEntityGraph
   with:
     alertId: "{{ variables.alert_id }}"
     alertIndex: "{{ variables.alert_index }}"

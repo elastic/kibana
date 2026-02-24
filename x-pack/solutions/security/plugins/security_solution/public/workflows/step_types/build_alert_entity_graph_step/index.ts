@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { getAlertTimelineStringStepDefinition } from './get_alert_timeline_string_step';
+export { buildAlertEntityGraphStepDefinition } from './build_alert_entity_graph_step';

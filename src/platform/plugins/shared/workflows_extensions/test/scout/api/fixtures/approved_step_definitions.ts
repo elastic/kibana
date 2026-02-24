@@ -61,11 +61,11 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string 
     handlerHash: '2bdde599ac1b8f38faecbd72a2d17a3d7b2740b874e047e92e9c30ba0ff01a4f',
   },
   {
-    id: 'security.getAlertTimelineString',
+    id: 'security.renderAlertNarrative',
     handlerHash: '46234ab4e74122540d4cdb2771778aec0b2f9cc59ef540365d9a66c1af99a13e',
   },
   {
-    id: 'security.getRelatedAlerts',
+    id: 'security.buildAlertEntityGraph',
     handlerHash: '4b26df19ccd25d04a19c40327956cd316266242e41769ee3764e8d76739c6773',
   },
 ];

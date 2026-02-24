@@ -9,7 +9,7 @@ import {
   buildAlertTimelineString,
   buildCombinedTimelineString,
   buildProcessTimelineString,
-} from './get_alert_timeline_string_step';
+} from './render_alert_narrative_step';
 
 describe('buildAlertTimelineString', () => {
   it('generates a Timeline-like string similar to the alert row renderer', () => {

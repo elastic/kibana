@@ -323,8 +323,8 @@ const getAlertSource = async ({
   return (response as { _source?: Source })._source ?? {};
 };
 
-export const getAlertTimelineStringStepDefinition = createServerStepDefinition({
-  id: 'security.getAlertTimelineString',
+export const renderAlertNarrativeStepDefinition = createServerStepDefinition({
+  id: 'security.renderAlertNarrative',
   inputSchema,
   outputSchema,
   handler: async (context) => {

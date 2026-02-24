@@ -21,7 +21,7 @@ const DEFAULT_ENTITY_FIELD_CONFIG: EntityFieldConfig[] = DEFAULT_ENTITY_FIELDS.m
   field,
 }));
 
-export const getRelatedAlertsInputSchema = z.object({
+export const buildAlertEntityGraphInputSchema = z.object({
   alertId: z.string().describe('The alert ID to find related alerts for'),
   alertIndex: z.string().describe('The alert index'),
   entity_fields: z
@@ -124,7 +124,7 @@ export const getRelatedAlertsInputSchema = z.object({
     .describe('Whether to include the seed alert as a node in the output graph. Default: true'),
 });
 
-const inputSchema = getRelatedAlertsInputSchema;
+const inputSchema = buildAlertEntityGraphInputSchema;
 
 const outputSchema = z.object({
   nodes: z.array(z.object({ id: z.string() })),
@@ -156,8 +156,8 @@ const outputSchema = z.object({
     .optional(),
 });
 
-export const getRelatedAlertsStepDefinition = createServerStepDefinition({
-  id: 'security.getRelatedAlerts',
+export const buildAlertEntityGraphStepDefinition = createServerStepDefinition({
+  id: 'security.buildAlertEntityGraph',
   inputSchema,
   outputSchema,
   handler: async (context) => {

@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { getRelatedAlertsStepDefinition } from './get_related_alerts_step';
+export { renderAlertNarrativeStepDefinition } from './render_alert_narrative_step';

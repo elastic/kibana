@@ -22,9 +22,9 @@ jest.mock('./time_window', () => ({
 }));
 
 import {
-  getRelatedAlertsInputSchema,
-  getRelatedAlertsStepDefinition,
-} from './get_related_alerts_step';
+  buildAlertEntityGraphInputSchema,
+  buildAlertEntityGraphStepDefinition,
+} from './build_alert_entity_graph_step';
 import { buildRelatedAlertsGraph } from './graph_builder';
 import { parseTimeWindowToMs } from './time_window';
 
@@ -51,7 +51,7 @@ const createMockContext = (input: Record<string, unknown>) => ({
   },
   abortSignal: new AbortController().signal,
   stepId: 'test-step',
-  stepType: 'security.getRelatedAlerts',
+  stepType: 'security.buildAlertEntityGraph',
 });
 
 const GRAPH_RESULT: RelatedAlertsGraphOutput = {
@@ -82,14 +82,14 @@ const GRAPH_RESULT: RelatedAlertsGraphOutput = {
   },
 };
 
-describe('getRelatedAlerts step', () => {
+describe('buildAlertEntityGraph step', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   describe('input schema', () => {
     it('coerces numeric strings and applies defaults', () => {
-      const parsed = getRelatedAlertsInputSchema.parse({
+      const parsed = buildAlertEntityGraphInputSchema.parse({
         alertId: 'abc',
         alertIndex: '.internal.alerts-security.alerts-default-000001',
         max_alerts: '20',
@@ -103,14 +103,14 @@ describe('getRelatedAlerts step', () => {
     });
 
     it('rejects NaN/Infinity so downstream queries cannot emit empty terms', () => {
-      const badNaN = getRelatedAlertsInputSchema.safeParse({
+      const badNaN = buildAlertEntityGraphInputSchema.safeParse({
         alertId: 'abc',
         alertIndex: '.internal.alerts-security.alerts-default-000001',
         max_terms_per_query: NaN,
       });
       expect(badNaN.success).toBe(false);
 
-      const badInfinity = getRelatedAlertsInputSchema.safeParse({
+      const badInfinity = buildAlertEntityGraphInputSchema.safeParse({
         alertId: 'abc',
         alertIndex: '.internal.alerts-security.alerts-default-000001',
         page_size: Infinity,
@@ -119,7 +119,7 @@ describe('getRelatedAlerts step', () => {
     });
 
     it('applies default entity_fields when not provided', () => {
-      const parsed = getRelatedAlertsInputSchema.parse({
+      const parsed = buildAlertEntityGraphInputSchema.parse({
         alertId: 'abc',
         alertIndex: '.alerts-idx',
       });
@@ -131,7 +131,7 @@ describe('getRelatedAlerts step', () => {
     });
 
     it('applies all numeric defaults', () => {
-      const parsed = getRelatedAlertsInputSchema.parse({
+      const parsed = buildAlertEntityGraphInputSchema.parse({
         alertId: 'abc',
         alertIndex: '.alerts-idx',
       });
@@ -151,12 +151,12 @@ describe('getRelatedAlerts step', () => {
     it('passes parsed input to buildRelatedAlertsGraph and returns the result', async () => {
       mockBuildGraph.mockResolvedValue(GRAPH_RESULT);
 
-      const input = getRelatedAlertsInputSchema.parse({
+      const input = buildAlertEntityGraphInputSchema.parse({
         alertId: 'alert-1',
         alertIndex: '.alerts-security.alerts-default',
       });
       const context = createMockContext(input);
-      const result = await getRelatedAlertsStepDefinition.handler(context as never);
+      const result = await buildAlertEntityGraphStepDefinition.handler(context as never);
 
       expect(result.error).toBeUndefined();
       expect(result.output).toEqual(GRAPH_RESULT);
@@ -177,12 +177,12 @@ describe('getRelatedAlerts step', () => {
     it('uses the concrete internal index when alertIndex starts with .internal', async () => {
       mockBuildGraph.mockResolvedValue(GRAPH_RESULT);
 
-      const input = getRelatedAlertsInputSchema.parse({
+      const input = buildAlertEntityGraphInputSchema.parse({
         alertId: 'alert-1',
         alertIndex: '.internal.alerts-security.alerts-default-000001',
       });
       const context = createMockContext(input);
-      await getRelatedAlertsStepDefinition.handler(context as never);
+      await buildAlertEntityGraphStepDefinition.handler(context as never);
 
       const params = mockBuildGraph.mock.calls[0][0];
       expect(params.searchIndex).toBe('.internal.alerts-security.alerts-default-000001');
@@ -191,12 +191,12 @@ describe('getRelatedAlerts step', () => {
     it('uses the public alias when alertIndex is not internal', async () => {
       mockBuildGraph.mockResolvedValue(GRAPH_RESULT);
 
-      const input = getRelatedAlertsInputSchema.parse({
+      const input = buildAlertEntityGraphInputSchema.parse({
         alertId: 'alert-1',
         alertIndex: '.alerts-security.alerts-default',
       });
       const context = createMockContext(input);
-      await getRelatedAlertsStepDefinition.handler(context as never);
+      await buildAlertEntityGraphStepDefinition.handler(context as never);
 
       const params = mockBuildGraph.mock.calls[0][0];
       expect(params.searchIndex).toBe('.alerts-security.alerts-default');
@@ -205,13 +205,13 @@ describe('getRelatedAlerts step', () => {
     it('passes the scoped ES client to buildRelatedAlertsGraph', async () => {
       mockBuildGraph.mockResolvedValue(GRAPH_RESULT);
 
-      const input = getRelatedAlertsInputSchema.parse({
+      const input = buildAlertEntityGraphInputSchema.parse({
         alertId: 'a',
         alertIndex: '.idx',
       });
       const context = createMockContext(input);
       const expectedEsClient = context.contextManager.getScopedEsClient();
-      await getRelatedAlertsStepDefinition.handler(context as never);
+      await buildAlertEntityGraphStepDefinition.handler(context as never);
 
       expect(mockBuildGraph.mock.calls[0][0].esClient).toBe(expectedEsClient);
     });
@@ -219,14 +219,14 @@ describe('getRelatedAlerts step', () => {
     it('parses seed_window and expand_window through parseTimeWindowToMs', async () => {
       mockBuildGraph.mockResolvedValue(GRAPH_RESULT);
 
-      const input = getRelatedAlertsInputSchema.parse({
+      const input = buildAlertEntityGraphInputSchema.parse({
         alertId: 'a',
         alertIndex: '.idx',
         seed_window: '24h',
         expand_window: '2h',
       });
       const context = createMockContext(input);
-      await getRelatedAlertsStepDefinition.handler(context as never);
+      await buildAlertEntityGraphStepDefinition.handler(context as never);
 
       expect(mockParseWindow).toHaveBeenCalledWith('24h');
       expect(mockParseWindow).toHaveBeenCalledWith('2h');
@@ -239,7 +239,7 @@ describe('getRelatedAlerts step', () => {
     it('passes custom entity_fields and extracts field scores and aliases', async () => {
       mockBuildGraph.mockResolvedValue(GRAPH_RESULT);
 
-      const input = getRelatedAlertsInputSchema.parse({
+      const input = buildAlertEntityGraphInputSchema.parse({
         alertId: 'a',
         alertIndex: '.idx',
         entity_fields: [
@@ -252,7 +252,7 @@ describe('getRelatedAlerts step', () => {
         ],
       });
       const context = createMockContext(input);
-      await getRelatedAlertsStepDefinition.handler(context as never);
+      await buildAlertEntityGraphStepDefinition.handler(context as never);
 
       const params = mockBuildGraph.mock.calls[0][0];
       expect(params.entityFields).toContain('host.name');
@@ -267,14 +267,14 @@ describe('getRelatedAlerts step', () => {
     it('passes ignore_entities and min_entity_score to buildRelatedAlertsGraph', async () => {
       mockBuildGraph.mockResolvedValue(GRAPH_RESULT);
 
-      const input = getRelatedAlertsInputSchema.parse({
+      const input = buildAlertEntityGraphInputSchema.parse({
         alertId: 'a',
         alertIndex: '.idx',
         ignore_entities: [{ field: 'user.name', values: ['root', 'SYSTEM'] }],
         min_entity_score: 5,
       });
       const context = createMockContext(input);
-      await getRelatedAlertsStepDefinition.handler(context as never);
+      await buildAlertEntityGraphStepDefinition.handler(context as never);
 
       const params = mockBuildGraph.mock.calls[0][0];
       expect(params.ignoreEntities).toEqual([{ field: 'user.name', values: ['root', 'SYSTEM'] }]);
@@ -284,7 +284,7 @@ describe('getRelatedAlerts step', () => {
     it('uses the correct space-aware index from context', async () => {
       mockBuildGraph.mockResolvedValue(GRAPH_RESULT);
 
-      const input = getRelatedAlertsInputSchema.parse({
+      const input = buildAlertEntityGraphInputSchema.parse({
         alertId: 'a',
         alertIndex: '.alerts-security.alerts-custom-space',
       });
@@ -292,7 +292,7 @@ describe('getRelatedAlerts step', () => {
       context.contextManager.getContext.mockReturnValue({
         workflow: { spaceId: 'custom-space' },
       });
-      await getRelatedAlertsStepDefinition.handler(context as never);
+      await buildAlertEntityGraphStepDefinition.handler(context as never);
 
       const params = mockBuildGraph.mock.calls[0][0];
       expect(params.searchIndex).toBe('.alerts-security.alerts-custom-space');
@@ -301,12 +301,12 @@ describe('getRelatedAlerts step', () => {
     it('returns an error when buildRelatedAlertsGraph throws', async () => {
       mockBuildGraph.mockRejectedValue(new Error('graph build failed'));
 
-      const input = getRelatedAlertsInputSchema.parse({
+      const input = buildAlertEntityGraphInputSchema.parse({
         alertId: 'a',
         alertIndex: '.idx',
       });
       const context = createMockContext(input);
-      const result = await getRelatedAlertsStepDefinition.handler(context as never);
+      const result = await buildAlertEntityGraphStepDefinition.handler(context as never);
 
       expect(result.error).toBeDefined();
       expect(result.error!.message).toBe('graph build failed');
