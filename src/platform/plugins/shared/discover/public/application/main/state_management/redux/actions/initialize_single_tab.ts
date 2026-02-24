@@ -236,6 +236,7 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
       persistedTab,
       dataView,
       services,
+      defaultProfileEsqlQuery: getState().defaultProfileEsqlQuery,
     });
 
     const savedSearch = updateSavedSearch({
