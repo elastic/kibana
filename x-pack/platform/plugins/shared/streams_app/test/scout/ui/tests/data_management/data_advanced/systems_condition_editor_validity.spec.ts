@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../../../fixtures';
@@ -17,15 +18,8 @@ test.describe(
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     test.beforeAll(async ({ kbnClient }) => {
-      // Systems APIs are gated behind this UI setting in the test environment.
-      await kbnClient.request({
-        path: '/api/kibana/settings',
-        method: 'POST',
-        body: {
-          changes: {
-            'observability:streamsEnableSignificantEvents': true,
-          },
-        },
+      await kbnClient.uiSettings.update({
+        [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: true,
       });
 
       await kbnClient.request({
@@ -52,6 +46,10 @@ test.describe(
         body: {
           operations: [{ delete: { system: { name: SYSTEM_NAME } } }],
         },
+      });
+
+      await kbnClient.uiSettings.update({
+        [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: false,
       });
     });
 
