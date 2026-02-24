@@ -172,7 +172,7 @@ describe('BackgroundSearchNotifier', () => {
 
         // Then
         expect(mockSetInProgressSessionIds).toHaveBeenCalledWith([]);
-        expect(coreStartMock.notifications.toasts.addDanger).toHaveBeenCalledTimes(1);
+        expect(coreStartMock.notifications.toasts.addDanger).toHaveBeenCalledTimes(2);
         expect(coreStartMock.notifications.toasts.addSuccess).not.toHaveBeenCalled();
       });
     });

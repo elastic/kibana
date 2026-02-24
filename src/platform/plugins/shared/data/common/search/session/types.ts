@@ -125,7 +125,7 @@ export interface SearchSessionStatusesResponse {
    */
   sessions: Record<
     string,
-    Pick<SearchSessionSavedObjectAttributes, 'name' | 'restoreState' | 'locatorId'>
+    Pick<SearchSessionSavedObjectAttributes, 'name' | 'restoreState' | 'locatorId' | 'appId'>
   >;
   /**
    * Map containing calculated statuses of search sessions

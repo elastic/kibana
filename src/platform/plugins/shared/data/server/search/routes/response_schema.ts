@@ -68,6 +68,7 @@ export const searchSessionStatusesSchema = schema.object({
       name: schema.maybe(schema.string()),
       restoreState: schema.maybe(serializeableSchema),
       locatorId: schema.maybe(schema.string()),
+      appId: schema.maybe(schema.string()),
     })
   ),
   statuses: schema.recordOf(schema.string(), status),

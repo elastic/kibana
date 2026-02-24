@@ -408,6 +408,7 @@ export class SearchSessionService implements ISearchSessionService {
         name: session.attributes.name,
         restoreState: session.attributes.restoreState,
         locatorId: session.attributes.locatorId,
+        appId: session.attributes.appId,
       };
     });
 

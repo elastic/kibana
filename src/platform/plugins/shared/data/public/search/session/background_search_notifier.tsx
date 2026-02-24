@@ -25,11 +25,13 @@ import { getInProgressSessionIds, setInProgressSessionIds } from './in_progress_
 import type { LocatorsStart } from './sessions_mgmt/types';
 import { getRestoreUrl } from './get_session_redirect_url';
 
-interface SessionNotificationInfo {
-  id: string;
-  name: string;
+type SessionNotificationInfo = Omit<
+  SearchSessionStatusesResponse['sessions'][string],
+  'restoreState'
+> & {
   restoreUrl?: string;
-}
+  id: string;
+};
 
 export class BackgroundSearchNotifier {
   private pollingSubscription?: Subscription;
@@ -112,6 +114,7 @@ export class BackgroundSearchNotifier {
     return {
       id: sessionId,
       name,
+      appId: sessionData?.appId,
       restoreUrl: getRestoreUrl({
         locators: this.locators,
         locatorId: sessionData?.locatorId,
@@ -138,15 +141,12 @@ export class BackgroundSearchNotifier {
     for (const completedSession of completedSessions) {
       this.core.notifications.toasts.addSuccess({
         title: i18n.translate('data.search.sessions.backgroundSearch.completedToastTitle', {
-          defaultMessage: 'Background search completed: {sessionName}',
-          values: {
-            sessionName: completedSession.name,
-          },
+          defaultMessage: 'Background search completed',
         }),
         text: toMountPoint(
           <FormattedMessage
             id="data.search.sessions.backgroundSearch.completedToastText"
-            defaultMessage="<link>Open background search</link>"
+            defaultMessage='"{name}" is completed. <link>Open in {appId}.</link>'
             values={{
               link: (chunks: React.ReactNode) => (
                 <EuiLink
@@ -156,6 +156,8 @@ export class BackgroundSearchNotifier {
                   {chunks}
                 </EuiLink>
               ),
+              appId: completedSession.appId,
+              name: completedSession.name,
             }}
           />,
           this.core
@@ -163,20 +165,17 @@ export class BackgroundSearchNotifier {
       });
     }
 
-    if (failedSessions.length > 0) {
+    for (const failedSession of failedSessions) {
       this.core.notifications.toasts.addDanger({
         title: i18n.translate('data.search.sessions.backgroundSearch.failedToastTitle', {
-          defaultMessage:
-            '{count, plural, one {Background search failed} other {Failed {count} background searches}}',
-          values: {
-            count: failedSessions.length,
-          },
+          defaultMessage: 'Background search failed',
         }),
         text: toMountPoint(
           <FormattedMessage
             id="data.search.sessions.backgroundSearch.failedToastText"
-            defaultMessage="<link>View background searches</link>"
+            defaultMessage='There was a problem with "{name}". <link>Go to management area.</link>'
             values={{
+              name: failedSession.name,
               link: (chunks: React.ReactNode) => (
                 <EuiLink href={managementUrl} data-test-subj="backgroundSearchFailedToastLink">
                   {chunks}
