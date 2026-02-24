@@ -89,21 +89,21 @@ export class AssetManager {
     logExtractionParams?: LogExtractionBodyParams
   ) {
     try {
-      await Promise.all(
-        entityTypes.map((type) => this.initEntity(request, type, logExtractionParams))
-      );
+      await Promise.all([
+        ...entityTypes.map((type) => this.initEntity(request, type, logExtractionParams)),
 
-      await scheduleEntityMaintainerTasks({
-        logger: this.logger,
-        taskManager: this.taskManager,
-        namespace: this.namespace,
-        request,
-      });
+        scheduleEntityMaintainerTasks({
+          logger: this.logger,
+          taskManager: this.taskManager,
+          namespace: this.namespace,
+          request,
+        }),
 
-      await installEuidStoredScripts({
-        esClient: this.esClient,
-        logger: this.logger,
-      });
+        installEuidStoredScripts({
+          esClient: this.esClient,
+          logger: this.logger,
+        }),
+      ]);
     } catch (error) {
       this.logger.error('Error during entity store init:', error);
       throw error;
