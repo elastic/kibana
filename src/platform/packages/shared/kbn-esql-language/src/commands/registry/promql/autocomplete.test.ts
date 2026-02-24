@@ -18,7 +18,10 @@ import {
   promqlLabelSelectorItem,
   promqlRangeSelectorItem,
 } from '../complete_items';
-import { getPromqlFunctionSuggestions } from '../../definitions/utils/promql';
+import {
+  getPromqlFunctionSuggestions,
+  getPromqlOperatorSuggestions,
+} from '../../definitions/utils/promql';
 import { ESQL_NUMBER_TYPES, ESQL_STRING_TYPES } from '../../definitions/types';
 import { getPromqlParam, PROMQL_PARAM_NAMES } from './utils';
 import { TIME_SYSTEM_PARAMS } from '../../definitions/utils/literals';
@@ -28,6 +31,7 @@ import type { ICommandCallbacks, ICommandContext } from '../types';
 const promqlParamItems = getPromqlParamKeySuggestions();
 const promqlParamTexts = promqlParamItems.map(({ text }) => text);
 const promqlFunctionSuggestions = getPromqlFunctionSuggestions();
+const promqlOperatorLabels = getPromqlOperatorSuggestions().map(({ label }) => label);
 const promqlFunctionLabels = promqlFunctionSuggestions.map(({ label }) => label);
 const promqlFunctionWrappedTexts = promqlFunctionSuggestions
   .slice(0, 1)
@@ -83,21 +87,20 @@ const expectPromqlSuggestions = async (
 };
 
 describe('after PROMQL keyword', () => {
-  test('suggests params but not column when required params missing', async () => {
+  test('suggests all after PROMQL keyword without params', async () => {
     (mockCallbacks.getSuggestedUserDefinedColumnName as jest.Mock).mockReturnValue('col0');
 
     await expectPromqlSuggestions(
       'PROMQL ',
       {
-        textsContain: promqlParamTexts,
-        textsNotContain: ['col0 = '],
-        labelsNotContain: promqlFunctionLabels,
+        textsContain: [...promqlParamTexts, 'col0 = '],
+        labelsContain: promqlFunctionLabels,
       },
       mockCallbacks
     );
   });
 
-  test('suggests column when all required params are present', async () => {
+  test('suggests column when params are present', async () => {
     (mockCallbacks.getSuggestedUserDefinedColumnName as jest.Mock).mockReturnValue('col0');
 
     await expectPromqlSuggestions(
@@ -465,6 +468,23 @@ describe('inside query', () => {
     });
   });
 
+  test('suggests operators after complete expression inside aggregation', async () => {
+    const query = 'PROMQL step="5m" sum(rate(doubleField[5m]) ';
+
+    await expectPromqlSuggestions(query, {
+      labelsContain: promqlOperatorLabels,
+    });
+  });
+
+  test('suggests operands (not operators) after binary operator inside aggregation', async () => {
+    const query = 'PROMQL step="5m" sum(rate(doubleField[5m]) * ';
+
+    await expectPromqlSuggestions(query, {
+      labelsContain: ['rate', 'sum', 'avg'],
+      labelsNotContain: promqlOperatorLabels,
+    });
+  });
+
   test('excludes user-defined columns from field suggestions', async () => {
     await expectPromqlSuggestions('PROMQL sum( ', {
       labelsNotContain: ['var0', 'col0'],
@@ -473,6 +493,22 @@ describe('inside query', () => {
 });
 
 describe('aggregation functions (by clause)', () => {
+  test('suggests by after aggregation name before opening paren', async () => {
+    await expectPromqlSuggestions('PROMQL sum ', {
+      textsContain: [promqlByCompleteItem.text, '($0) '],
+      textsNotContain: [pipeCompleteItem.text],
+    });
+  });
+
+  test('suggests expression items in second paren of pre-grouping form', async () => {
+    const numericFields = getFieldNamesByType(ESQL_NUMBER_TYPES, true);
+
+    await expectPromqlSuggestions('PROMQL sum by (keywordField) (', {
+      labelsContain: ['abs', 'avg', ...numericFields],
+      labelsNotContain: [promqlByCompleteItem.label],
+    });
+  });
+
   test('suggests by and pipe when cursor is at end of aggregation without space', async () => {
     await expectPromqlSuggestions('PROMQL sum(rate(http_requests_total[5m]))', {
       textsContain: [promqlByCompleteItem.text, pipeCompleteItem.text],
@@ -574,6 +610,19 @@ describe('aggregation functions (by clause)', () => {
     await expectPromqlSuggestions('PROMQL sum(rate(http_requests[5m])) by (job) ', {
       textsNotContain: [promqlByCompleteItem.text],
       textsContain: [pipeCompleteItem.text],
+    });
+  });
+
+  test('does not suggest by after complete pre-grouped aggregation', async () => {
+    await expectPromqlSuggestions('PROMQL sum by (keywordField) (rate(doubleField[5m])) ', {
+      textsNotContain: [promqlByCompleteItem.text],
+      textsContain: [pipeCompleteItem.text],
+    });
+  });
+
+  test('wrapped aggregation functions keep cursor inside parens (pre-grouped form)', async () => {
+    await expectPromqlSuggestions('PROMQL sum by (keywordField) ', {
+      textsContain: ['(avg $0) '],
     });
   });
 
@@ -722,6 +771,62 @@ describe('after query (pipe suggestions)', () => {
       textsNotContain: [pipeCompleteItem.text],
     });
   });
+
+  test('suggests RHS operand items after arithmetic operator at query boundary', async () => {
+    const numericFields = getFieldNamesByType(ESQL_NUMBER_TYPES, true);
+    const query = 'PROMQL step="5m" (sum(rate(doubleField[5m]))) + ';
+
+    await expectPromqlSuggestions(
+      query,
+      {
+        labelsContain: ['abs', ...numericFields],
+        textsContain: ['${0:0}'],
+        textsNotContain: [pipeCompleteItem.text, promqlByCompleteItem.text],
+      },
+      mockCallbacks
+    );
+  });
+
+  test('suggests RHS operand items after operator following selector with labels', async () => {
+    const numericFields = getFieldNamesByType(ESQL_NUMBER_TYPES, true);
+    const query = 'PROMQL step="5m" quantile(0, doubleField{label!~"value"} * ';
+
+    await expectPromqlSuggestions(
+      query,
+      {
+        labelsContain: numericFields,
+        textsContain: ['${0:0}'],
+      },
+      mockCallbacks
+    );
+  });
+
+  test('suggests RHS operand items after minus operator', async () => {
+    const numericFields = getFieldNamesByType(ESQL_NUMBER_TYPES, true);
+    const query = 'PROMQL step="5m" quantile(0, doubleField - ';
+
+    await expectPromqlSuggestions(
+      query,
+      {
+        labelsContain: numericFields,
+        textsContain: ['${0:0}'],
+      },
+      mockCallbacks
+    );
+  });
+
+  test('suggests label selector after metric name in RHS of operator', async () => {
+    const query =
+      'PROMQL index=tsdb_index step="5m" sum(quantile(0.9, doubleField{label!~"value"} * doubleField ';
+
+    await expectPromqlSuggestions(
+      query,
+      {
+        textsContain: [promqlLabelSelectorItem.text],
+      },
+      mockCallbacks
+    );
+  });
 });
 
 describe('param value suggestions', () => {
@@ -772,8 +877,8 @@ describe('index= suggestions', () => {
   const contextWithSources: ICommandContext = {
     ...mockContext,
     timeSeriesSources: [
-      { name: 'metrics', mode: 'time_series', aliases: [] },
-      { name: 'logs-tsdb', mode: 'time_series', aliases: [] },
+      { name: 'metrics', mode: 'Timeseries', aliases: [] },
+      { name: 'logs-tsdb', mode: 'Timeseries', aliases: [] },
     ],
   };
 

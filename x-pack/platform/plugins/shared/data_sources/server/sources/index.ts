@@ -9,6 +9,7 @@ import { notionDataSource } from './notion';
 import { githubDataSource } from './github';
 import { googleDriveDataSource } from './google_drive';
 import { sharepointOnlineDataSource } from './sharepoint_online';
+import { slackDataSource } from './slack';
 import { jiraDataSource } from './jira-cloud';
 import { salesforceDataSource } from './salesforce';
 
@@ -17,6 +18,7 @@ export function registerDataSources(dataCatalog: DataCatalogPluginSetup) {
   dataCatalog.register(githubDataSource);
   dataCatalog.register(googleDriveDataSource);
   dataCatalog.register(sharepointOnlineDataSource);
+  dataCatalog.register(slackDataSource);
   dataCatalog.register(jiraDataSource);
   dataCatalog.register(salesforceDataSource);
 }
