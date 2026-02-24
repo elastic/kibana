@@ -39,7 +39,9 @@ export {
 export {
   keepFields,
   namespacePrefixes,
+  otelReservedFields,
   isNamespacedEcsField,
+  isOtelReservedField,
   getRegularEcsField,
 } from './src/helpers/namespaced_ecs';
 export { getAdvancedParameters } from './src/helpers/get_advanced_parameters';
@@ -81,12 +83,12 @@ export {
 
 export {
   type StreamQuery,
-  type StreamQueryKql,
+  type StreamQueryInput,
   type QueriesGetResponse,
   type QueriesOccurrencesGetResponse,
   upsertStreamQueryRequestSchema,
-  streamQueryKqlSchema,
   streamQuerySchema,
+  streamQueryInputSchema,
 } from './src/queries';
 
 export {
