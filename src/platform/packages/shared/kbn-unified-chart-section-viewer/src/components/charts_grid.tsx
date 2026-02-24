@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { EuiFocusTrap } from '@elastic/eui';
 import { cx } from '@emotion/css';
 import { css } from '@emotion/react';
@@ -39,6 +39,7 @@ export const ChartsGrid = ({
   onKeyDown,
 }: React.PropsWithChildren<ChartsGridProps>) => {
   const { metricsGridId, setMetricsGridWrapper, styles } = useMetricsGridFullScreen({ prefix: id });
+  const metricsGridRef = useRef<HTMLDivElement>(null);
 
   const restrictBodyClass = styles[METRICS_GRID_RESTRICT_BODY_CLASS];
   const metricsGridFullScreenClass = styles[METRICS_GRID_FULL_SCREEN_CLASS];
@@ -61,6 +62,8 @@ export const ChartsGrid = ({
   return (
     <EuiFocusTrap
       disabled={!isFullscreen}
+      // Using callback because useGeneratedHtmlId produces IDs with ':' which breaks CSS selectors
+      initialFocus={() => metricsGridRef.current as HTMLElement}
       css={css`
         height: ${isComponentVisible ? '100%' : 0};
         visibility: ${isComponentVisible ? 'visible' : 'hidden'};
@@ -76,7 +79,9 @@ export const ChartsGrid = ({
         css={fullHeightCss}
       >
         <div
+          ref={metricsGridRef}
           id={metricsGridId}
+          tabIndex={-1}
           data-test-subj="metricsExperienceGrid"
           className={cx(METRICS_GRID_CLASS, {
             [METRICS_GRID_FULL_SCREEN_CLASS]: isFullscreen,
