@@ -33,4 +33,5 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
+    - '!.storybook/**/*'
 tasks: {}
