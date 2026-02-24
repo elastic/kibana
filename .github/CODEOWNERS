@@ -1592,6 +1592,7 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/solutions/observability/plugins/observability/server/features/cases_v1.ts @elastic/actionable-obs-team
 /x-pack/solutions/observability/plugins/observability/server/features/cases_v2.ts @elastic/actionable-obs-team
 /x-pack/solutions/observability/plugins/observability/server/features/cases_v3.ts @elastic/actionable-obs-team
+/x-pack/solutions/observability/plugins/observability/server/lib/annotations @elastic/actionable-obs-team
 /x-pack/solutions/observability/plugins/observability/server/lib/rules @elastic/actionable-obs-team
 /x-pack/solutions/observability/plugins/observability/server/routes/alerts @elastic/actionable-obs-team
 /x-pack/solutions/observability/plugins/observability/server/routes/rules @elastic/actionable-obs-team
