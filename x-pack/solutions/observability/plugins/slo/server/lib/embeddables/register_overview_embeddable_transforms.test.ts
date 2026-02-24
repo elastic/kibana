@@ -136,8 +136,12 @@ describe('registerOverviewEmbeddableTransforms', () => {
             groups: ['healthy', 'degraded'],
             filters: [
               {
-                meta: { type: 'term', index: 'slo' },
-                query: { term: { 'slo.id': 'test-slo' } },
+                type: 'condition' as const,
+                condition: {
+                  field: 'slo.id',
+                  operator: 'is' as const,
+                  value: 'test-slo',
+                },
               },
             ],
             kql_query: 'slo.name: "test"',
@@ -160,8 +164,12 @@ describe('registerOverviewEmbeddableTransforms', () => {
         if ('group_filters' in result && result.group_filters) {
           expect(result.group_filters.filters).toHaveLength(1);
           expect(result.group_filters.filters?.[0]).toMatchObject({
-            meta: { type: 'term', index: 'slo' },
-            query: { term: { 'slo.id': 'test-slo' } },
+            type: 'condition',
+            condition: {
+              field: 'slo.id',
+              operator: 'is',
+              value: 'test-slo',
+            },
           });
         }
       });
