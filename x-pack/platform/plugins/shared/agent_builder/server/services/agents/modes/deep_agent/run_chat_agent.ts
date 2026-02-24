@@ -223,7 +223,9 @@ export const runDeepAgentMode: RunChatAgentFn = async (
         agentId,
         runId,
         // Include conversation_id as thread_id for LangSmith thread tracking
-        ...(conversation?.id ? { thread_id: conversation.id, conversation_id: conversation.id } : {}),
+        ...(conversation?.id
+          ? { thread_id: conversation.id, conversation_id: conversation.id }
+          : {}),
       },
       recursionLimit: graphRecursionLimit,
       callbacks: [],

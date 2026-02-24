@@ -15,7 +15,6 @@ import type {
   ObservableTypeKey,
   ExtractedEntity,
   AlertCluster,
-  CrossHostLink,
   ClusteringResult,
 } from '../../types';
 import {
@@ -42,20 +41,20 @@ import {
 
 /** MITRE ATT&CK tactic ordering for kill chain display */
 const TACTIC_ORDER: Record<string, number> = {
-  'Reconnaissance': 0,
+  Reconnaissance: 0,
   'Resource Development': 1,
   'Initial Access': 2,
-  'Execution': 3,
-  'Persistence': 4,
+  Execution: 3,
+  Persistence: 4,
   'Privilege Escalation': 5,
   'Defense Evasion': 6,
   'Credential Access': 7,
-  'Discovery': 8,
+  Discovery: 8,
   'Lateral Movement': 9,
-  'Collection': 10,
+  Collection: 10,
   'Command and Control': 11,
-  'Exfiltration': 12,
-  'Impact': 13,
+  Exfiltration: 12,
+  Impact: 13,
 };
 
 /**
@@ -91,10 +90,7 @@ export interface WorkflowExecutorDependencies {
     relevantAlertIds: string[];
   }>;
   /** Function to detach alerts from a case */
-  detachAlertsFromCase?: (
-    caseId: string,
-    alertIds: string[]
-  ) => Promise<void>;
+  detachAlertsFromCase?: (caseId: string, alertIds: string[]) => Promise<void>;
   /**
    * Function to analyze if two Attack Discoveries describe the same attack.
    * Returns a similarity score (0-1) and a reason if they should be merged.
@@ -111,18 +107,11 @@ export interface WorkflowExecutorDependencies {
    * Function to merge two cases.
    * Moves all alerts, observables, and comments from source case to target case.
    */
-  mergeCases?: (
-    sourceCaseId: string,
-    targetCaseId: string,
-    mergeReason: string
-  ) => Promise<void>;
+  mergeCases?: (sourceCaseId: string, targetCaseId: string, mergeReason: string) => Promise<void>;
   /**
    * Function to add a comment to a case.
    */
-  addCommentToCase?: (
-    caseId: string,
-    comment: string
-  ) => Promise<void>;
+  addCommentToCase?: (caseId: string, comment: string) => Promise<void>;
   /**
    * Tier 4: LLM-based classification of alert clusters.
    * Takes a cluster description with alert summaries and returns a classification label
@@ -373,7 +362,11 @@ export class AlertGroupingWorkflowExecutor {
       for (const alertId of entity.alertIds) {
         const existing = this.state.alertEntities.get(alertId) ?? [];
         // Check if entity already exists for this alert
-        if (!existing.some((e) => e.type === entity.type && e.normalizedValue === entity.normalizedValue)) {
+        if (
+          !existing.some(
+            (e) => e.type === entity.type && e.normalizedValue === entity.normalizedValue
+          )
+        ) {
           existing.push(entity);
           this.state.alertEntities.set(alertId, existing);
         }
@@ -476,9 +469,7 @@ export class AlertGroupingWorkflowExecutor {
         cluster.llmClassification = result.classification;
         cluster.llmDescription = result.description;
 
-        this.logger.debug(
-          `Cluster ${cluster.id} classified (LLM) as: "${result.classification}"`
-        );
+        this.logger.debug(`Cluster ${cluster.id} classified (LLM) as: "${result.classification}"`);
 
         if (result.suggestedSplits && result.suggestedSplits.length > 1) {
           this.logger.info(
@@ -487,7 +478,9 @@ export class AlertGroupingWorkflowExecutor {
           this.applySplitSuggestions(cluster, result.suggestedSplits);
         }
       } catch (error) {
-        this.logger.error(`LLM classification failed for cluster ${cluster.id}, falling back to static: ${error}`);
+        this.logger.error(
+          `LLM classification failed for cluster ${cluster.id}, falling back to static: ${error}`
+        );
         // Fall back to static for this cluster
         const { classification, description } = this.staticAnalysis.classifyCluster(cluster);
         cluster.llmClassification = classification;
@@ -506,9 +499,7 @@ export class AlertGroupingWorkflowExecutor {
       cluster.llmClassification = classification;
       cluster.llmDescription = description;
 
-      this.logger.debug(
-        `Cluster ${cluster.id} classified (static) as: "${classification}"`
-      );
+      this.logger.debug(`Cluster ${cluster.id} classified (static) as: "${classification}"`);
     }
   }
 
@@ -516,13 +507,11 @@ export class AlertGroupingWorkflowExecutor {
    * Build a human-readable cluster description for the LLM.
    */
   private buildClusterDescription(cluster: AlertCluster): string {
-    const orderedTactics = cluster.tactics.sort(
-      (a, b) => {
-        const orderA = TACTIC_ORDER[a] ?? 99;
-        const orderB = TACTIC_ORDER[b] ?? 99;
-        return orderA - orderB;
-      }
-    );
+    const orderedTactics = cluster.tactics.sort((a, b) => {
+      const orderA = TACTIC_ORDER[a] ?? 99;
+      const orderB = TACTIC_ORDER[b] ?? 99;
+      return orderA - orderB;
+    });
 
     return [
       `Host: ${cluster.hostName}`,
@@ -534,7 +523,9 @@ export class AlertGroupingWorkflowExecutor {
         ? `Key processes: ${cluster.processTrees.map((p) => p.executable).join(', ')}`
         : '',
       cluster.crossHostLinks.length > 0
-        ? `Cross-host links: ${cluster.crossHostLinks.map((l) => `${l.sourceHost} → ${l.targetHost} (${l.linkType})`).join(', ')}`
+        ? `Cross-host links: ${cluster.crossHostLinks
+            .map((l) => `${l.sourceHost} → ${l.targetHost} (${l.linkType})`)
+            .join(', ')}`
         : '',
     ]
       .filter(Boolean)
@@ -581,9 +572,7 @@ export class AlertGroupingWorkflowExecutor {
     // Create new sub-clusters from suggestions
     for (let i = 0; i < suggestions.length; i++) {
       const suggestion = suggestions[i];
-      const subAlerts = (cluster.alerts ?? []).filter((a) =>
-        suggestion.alertIds.includes(a._id)
-      );
+      const subAlerts = (cluster.alerts ?? []).filter((a) => suggestion.alertIds.includes(a._id));
 
       if (subAlerts.length === 0) continue;
 
@@ -710,13 +699,18 @@ export class AlertGroupingWorkflowExecutor {
         .join(' → ');
 
       const clusterExplanation = isNewCase
-        ? `New cluster: ${cluster.description}. Kill chain: ${tacticChain}` +
-          (cluster.llmClassification ? `. LLM classification: ${cluster.llmClassification}` : '') +
-          (cluster.crossHostLinks.length > 0
-            ? `. Cross-host links: ${cluster.crossHostLinks.map((l) => `${l.sourceHost}↔${l.targetHost}`).join(', ')}`
-            : '')
-        : `Matched to existing case "${bestMatch!.caseTitle}" (score: ${(bestMatch!.matchScore * 100).toFixed(1)}%). ` +
-          `Cluster: ${cluster.description}`;
+        ? `New cluster: ${cluster.description}. Kill chain: ${tacticChain}${
+            cluster.llmClassification ? `. LLM classification: ${cluster.llmClassification}` : ''
+          }${
+            cluster.crossHostLinks.length > 0
+              ? `. Cross-host links: ${cluster.crossHostLinks
+                  .map((l) => `${l.sourceHost}↔${l.targetHost}`)
+                  .join(', ')}`
+              : ''
+          }`
+        : `Matched to existing case "${bestMatch!.caseTitle}" (score: ${(
+            bestMatch!.matchScore * 100
+          ).toFixed(1)}%). ` + `Cluster: ${cluster.description}`;
 
       // Create a grouping decision for every alert in the cluster
       for (const alertId of cluster.alertIds) {
@@ -761,9 +755,7 @@ export class AlertGroupingWorkflowExecutor {
    * Original per-alert grouping (fallback when clustering is disabled).
    */
   private async makePerAlertGroupingDecisions(): Promise<void> {
-    const matchingService = CaseMatchingService.withConfig(
-      this.state.config.groupingConfig
-    );
+    const matchingService = CaseMatchingService.withConfig(this.state.config.groupingConfig);
 
     const groupingDecisions: GroupingDecision[] = [];
     const alertsPerCase = new Map<string, number>();
@@ -814,8 +806,16 @@ export class AlertGroupingWorkflowExecutor {
         }));
         const matchedTypes = [...new Set(matchedObservablesDetail.map((mo) => mo.type))];
         const explanation = isPendingCase
-          ? `Matched to pending case "${bestMatch.caseTitle}" (score: ${(bestMatch.matchScore * 100).toFixed(1)}%) via ${matchedObservablesDetail.length} shared entities: ${matchedTypes.join(', ')}`
-          : `Matched to existing case "${bestMatch.caseTitle}" (score: ${(bestMatch.matchScore * 100).toFixed(1)}%) via ${matchedObservablesDetail.length} shared entities: ${matchedTypes.join(', ')}`;
+          ? `Matched to pending case "${bestMatch.caseTitle}" (score: ${(
+              bestMatch.matchScore * 100
+            ).toFixed(1)}%) via ${
+              matchedObservablesDetail.length
+            } shared entities: ${matchedTypes.join(', ')}`
+          : `Matched to existing case "${bestMatch.caseTitle}" (score: ${(
+              bestMatch.matchScore * 100
+            ).toFixed(1)}%) via ${
+              matchedObservablesDetail.length
+            } shared entities: ${matchedTypes.join(', ')}`;
 
         groupingDecisions.push({
           alertId: alert._id,
@@ -893,7 +893,9 @@ export class AlertGroupingWorkflowExecutor {
 
         alertsPerCase.set(pendingCaseId, 1);
         const entityTypes = [...new Set(entities.map((e) => e.type))];
-        const explanation = `No matching case found. Creating new case with ${entities.length} entities: ${entityTypes.join(', ')}`;
+        const explanation = `No matching case found. Creating new case with ${
+          entities.length
+        } entities: ${entityTypes.join(', ')}`;
 
         groupingDecisions.push({
           alertId: alert._id,
@@ -1054,7 +1056,7 @@ export class AlertGroupingWorkflowExecutor {
     for (const [pendingCaseId, decisions] of decisionsByPendingCase) {
       try {
         const template = this.state.config.caseTemplate ?? {};
-        
+
         // Collect all unique entities from all alerts in this group
         const entitySet = new Set<string>();
         const allEntities: ExtractedEntity[] = [];
@@ -1081,7 +1083,8 @@ export class AlertGroupingWorkflowExecutor {
           : this.formatCaseTitle(template.titleTemplate, primaryEntity);
         const description = matchingCluster
           ? this.formatClusterDescription(matchingCluster)
-          : (template.descriptionTemplate ?? 'Automatically grouped alerts based on shared entities.');
+          : template.descriptionTemplate ??
+            'Automatically grouped alerts based on shared entities.';
 
         const observables = allEntities.map((e) => ({
           typeKey: e.type,
@@ -1105,7 +1108,7 @@ export class AlertGroupingWorkflowExecutor {
         }
 
         this.state.metrics.casesCreated++;
-        
+
         this.logger.debug(
           `Created case ${newCase.id} for ${allAlertIds.length} alerts with ${allEntities.length} unique entities`
         );
@@ -1139,10 +1142,7 @@ export class AlertGroupingWorkflowExecutor {
    * Format a case title based on cluster metadata.
    * Uses the classification label (from LLM or static analysis) when available.
    */
-  private formatClusterCaseTitle(
-    _template: string | undefined,
-    cluster: AlertCluster
-  ): string {
+  private formatClusterCaseTitle(_template: string | undefined, cluster: AlertCluster): string {
     if (cluster.llmClassification) {
       return `${cluster.llmClassification} on ${cluster.hostName} (${cluster.alertIds.length} alerts)`;
     }
@@ -1287,7 +1287,9 @@ export class AlertGroupingWorkflowExecutor {
 
       for (const decision of attachedAlerts) {
         if (!relevantAlerts.has(decision.alertId)) {
-          const reason = `Alert was not part of the discovered attack pattern. Entities: ${decision.entities.map((e) => `${e.type}:${e.normalizedValue}`).join(', ')}`;
+          const reason = `Alert was not part of the discovered attack pattern. Entities: ${decision.entities
+            .map((e) => `${e.type}:${e.normalizedValue}`)
+            .join(', ')}`;
 
           alertsToRemove.push({
             caseId,
@@ -1373,9 +1375,7 @@ export class AlertGroupingWorkflowExecutor {
 
     // Update grouping decisions to mark removed alerts
     for (const removed of alertsToRemove) {
-      const decision = this.state.groupingDecisions.find(
-        (d) => d.alertId === removed.alertId
-      );
+      const decision = this.state.groupingDecisions.find((d) => d.alertId === removed.alertId);
       if (decision) {
         decision.explanation = `REMOVED: ${removed.reason}. Original: ${decision.explanation}`;
       }
@@ -1450,16 +1450,13 @@ export class AlertGroupingWorkflowExecutor {
       return;
     }
 
-    const similarityThreshold =
-      this.state.config.groupingConfig.mergeThreshold ?? 0.7;
+    const similarityThreshold = this.state.config.groupingConfig.mergeThreshold ?? 0.7;
 
     // Build similarity inputs for each created case from its cluster
     const caseClusterMap = new Map<string, AlertCluster>();
     for (const cluster of this.clusteringResult.clusters) {
       const alertInCluster = cluster.alertIds[0];
-      const decision = this.state.groupingDecisions.find(
-        (d) => d.alertId === alertInCluster
-      );
+      const decision = this.state.groupingDecisions.find((d) => d.alertId === alertInCluster);
       if (decision?.caseId) {
         caseClusterMap.set(decision.caseId, cluster);
       }
@@ -1485,8 +1482,18 @@ export class AlertGroupingWorkflowExecutor {
         const case1Title = this.getCaseTitle(caseId1);
         const case2Title = this.getCaseTitle(caseId2);
 
-        const input1 = this.staticAnalysis.buildSimilarityInput(caseId1, case1Title, cluster1, alerts1);
-        const input2 = this.staticAnalysis.buildSimilarityInput(caseId2, case2Title, cluster2, alerts2);
+        const input1 = this.staticAnalysis.buildSimilarityInput(
+          caseId1,
+          case1Title,
+          cluster1,
+          alerts1
+        );
+        const input2 = this.staticAnalysis.buildSimilarityInput(
+          caseId2,
+          case2Title,
+          cluster2,
+          alerts2
+        );
 
         return this.staticAnalysis.computeCaseSimilarity(input1, input2, similarityThreshold);
       },
@@ -1552,7 +1559,9 @@ export class AlertGroupingWorkflowExecutor {
             );
           }
         } catch (error) {
-          this.logger.error(`Failed to analyze similarity between ${caseId1} and ${caseId2}: ${error}`);
+          this.logger.error(
+            `Failed to analyze similarity between ${caseId1} and ${caseId2}: ${error}`
+          );
         }
       }
     }
@@ -1583,7 +1592,9 @@ export class AlertGroupingWorkflowExecutor {
         });
         this.state.metrics.casesMerged++;
       } catch (error) {
-        this.logger.error(`Failed to merge case ${merge.sourceCaseId} into ${merge.targetCaseId}: ${error}`);
+        this.logger.error(
+          `Failed to merge case ${merge.sourceCaseId} into ${merge.targetCaseId}: ${error}`
+        );
         this.state.errors.push(`Failed to merge cases: ${error}`);
       }
     }

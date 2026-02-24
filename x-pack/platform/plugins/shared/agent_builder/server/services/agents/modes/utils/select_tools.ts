@@ -74,9 +74,10 @@ export const selectTools = async ({
   });
 
   // create tools for filesystem (only if feature is enabled)
-  const filestoreTools = experimentalFeatures.filestore && filestore
-    ? getStoreTools({ filestore }).map((tool) => builtinToolToExecutable({ tool, runner }))
-    : [];
+  const filestoreTools =
+    experimentalFeatures.filestore && filestore
+      ? getStoreTools({ filestore }).map((tool) => builtinToolToExecutable({ tool, runner }))
+      : [];
 
   // pick tools from provider (from agent config and attachment-type tools)
   const staticRegistryTools = await pickTools({
@@ -107,16 +108,15 @@ export const selectTools = async ({
 
   const dynamicInlineTools = skills
     ? (
-      await Promise.all(
-        (await skills
-          .list())
-          .filter((skill) => skill.getInlineTools !== undefined)
-          .map((skill) => skill.getInlineTools!())
+        await Promise.all(
+          (await skills.list())
+            .filter((skill) => skill.getInlineTools !== undefined)
+            .map((skill) => skill.getInlineTools!())
+        )
       )
-    )
-      .flat()
-      .filter((tool) => previousDynamicToolIds.includes(tool.id))
-      .map((tool) => skills.convertSkillTool(tool))
+        .flat()
+        .filter((tool) => previousDynamicToolIds.includes(tool.id))
+        .map((tool) => skills.convertSkillTool(tool))
     : [];
 
   return {

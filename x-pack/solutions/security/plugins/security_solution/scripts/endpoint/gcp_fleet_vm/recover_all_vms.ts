@@ -7,10 +7,10 @@
 
 import type { RunFn } from '@kbn/dev-cli-runner';
 import { run } from '@kbn/dev-cli-runner';
-import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils';
 import type { ToolingLog } from '@kbn/tooling-log';
 import execa from 'execa';
 import pLimit from 'p-limit';
+import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils';
 import { gcloud, gcloudSsh } from './gcloud';
 
 interface GcpVmInfo {
@@ -127,8 +127,7 @@ const repairTailscale = async (
       project,
       zone,
       instance: vmName,
-      command:
-        'sudo tailscale status 2>&1 | head -5 || echo "TAILSCALE_ERROR"',
+      command: 'sudo tailscale status 2>&1 | head -5 || echo "TAILSCALE_ERROR"',
     });
 
     const needsReauth =
@@ -177,10 +176,7 @@ const repairTailscale = async (
       command: 'sudo tailscale status 2>&1 | head -3',
     });
 
-    if (
-      verifyResult.includes('Logged out') ||
-      verifyResult.includes('NeedsLogin')
-    ) {
+    if (verifyResult.includes('Logged out') || verifyResult.includes('NeedsLogin')) {
       log.error(`[${vmName}] Tailscale re-auth failed`);
       return 'failed';
     }
@@ -274,8 +270,7 @@ const runRecovery: RunFn = async ({ log, flags }) => {
   const gcpProject = (flags.gcpProject as string) || process.env.GCP_PROJECT || '';
   const gcpZone = (flags.gcpZone as string) || 'us-central1-a';
   const vmFilter = (flags.vmFilter as string) || '';
-  const tailscaleAuthKey =
-    (flags.tailscaleAuthKey as string) || process.env.TS_AUTHKEY || '';
+  const tailscaleAuthKey = (flags.tailscaleAuthKey as string) || process.env.TS_AUTHKEY || '';
   const kibanaUrl = (flags.kibanaUrl as string) || 'http://127.0.0.1:5601';
   const username = (flags.username as string) || 'elastic';
   const password = (flags.password as string) || 'changeme';
@@ -297,7 +292,10 @@ const runRecovery: RunFn = async ({ log, flags }) => {
   let filter = vmFilter;
   if (!filter) {
     const { stdout: whoami } = await execa('whoami');
-    const username = whoami.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+    const username = whoami
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9]/g, '');
     filter = `name~"^${username}-"`;
     log.info(`No --vmFilter provided, using default: ${filter}`);
   }
@@ -373,12 +371,7 @@ const runRecovery: RunFn = async ({ log, flags }) => {
 
           // Step 2: Restart Elastic Agent (if Tailscale is ok)
           if (!skipAgentRestart && result.tailscaleStatus !== 'failed') {
-            result.agentStatus = await restartElasticAgent(
-              log,
-              gcpProject,
-              vm.zone,
-              vm.name
-            );
+            result.agentStatus = await restartElasticAgent(log, gcpProject, vm.zone, vm.name);
           }
         } catch (e) {
           result.error = String(e);
@@ -413,15 +406,12 @@ const runRecovery: RunFn = async ({ log, flags }) => {
       (a) => a.local_metadata?.host?.hostname === result.vmName
     );
     const fleetStatus = fleetAgent?.status || 'not found';
-    const statusIcon =
-      fleetStatus === 'online'
-        ? '✅'
-        : fleetStatus === 'offline'
-          ? '❌'
-          : '⚠️';
+    const statusIcon = fleetStatus === 'online' ? '✅' : fleetStatus === 'offline' ? '❌' : '⚠️';
 
     log.info(
-      `  ${statusIcon} ${result.vmName.padEnd(35)} | Tailscale: ${result.tailscaleStatus.padEnd(10)} | Agent: ${result.agentStatus.padEnd(10)} | Fleet: ${fleetStatus}`
+      `  ${statusIcon} ${result.vmName.padEnd(35)} | Tailscale: ${result.tailscaleStatus.padEnd(
+        10
+      )} | Agent: ${result.agentStatus.padEnd(10)} | Fleet: ${fleetStatus}`
     );
     if (result.error) {
       log.info(`     Error: ${result.error}`);

@@ -19,7 +19,6 @@ import type {
   WorkflowExecutionMetrics,
   WorkflowExecutionStatus,
   CaseTriggerConfig,
-  BatchSizeCache,
 } from '../types';
 import {
   ALERT_GROUPING_WORKFLOW_SO_TYPE,
@@ -126,12 +125,17 @@ export class WorkflowDataClient {
    * Create a new workflow
    */
   async createWorkflow(
-    config: Omit<AlertGroupingWorkflowConfig, 'id' | 'createdAt' | 'createdBy' | 'updatedAt' | 'spaceId'>
+    config: Omit<
+      AlertGroupingWorkflowConfig,
+      'id' | 'createdAt' | 'createdBy' | 'updatedAt' | 'spaceId'
+    >
   ): Promise<AlertGroupingWorkflowConfig> {
     // Check workflow limit
     const existingCount = await this.countWorkflows();
     if (existingCount >= MAX_WORKFLOWS_PER_SPACE) {
-      throw new Error(`Maximum number of workflows (${MAX_WORKFLOWS_PER_SPACE}) reached for this space`);
+      throw new Error(
+        `Maximum number of workflows (${MAX_WORKFLOWS_PER_SPACE}) reached for this space`
+      );
     }
 
     const id = uuidv4();
@@ -196,7 +200,9 @@ export class WorkflowDataClient {
    */
   async updateWorkflow(
     id: string,
-    updates: Partial<Omit<AlertGroupingWorkflowConfig, 'id' | 'createdAt' | 'createdBy' | 'spaceId'>>
+    updates: Partial<
+      Omit<AlertGroupingWorkflowConfig, 'id' | 'createdAt' | 'createdBy' | 'spaceId'>
+    >
   ): Promise<AlertGroupingWorkflowConfig | null> {
     const existing = await this.getWorkflow(id);
     if (!existing) {
@@ -407,7 +413,7 @@ export class WorkflowDataClient {
    */
   async deleteExecutionHistory(workflowId: string): Promise<void> {
     const { executions } = await this.findExecutions(workflowId, { perPage: 1000 });
-    
+
     if (executions.length > 0) {
       await Promise.all(
         executions.map((execution) =>
@@ -430,7 +436,9 @@ export class WorkflowDataClient {
     // Check trigger limit
     const existingCount = await this.countTriggers();
     if (existingCount >= MAX_TRIGGERS_PER_SPACE) {
-      throw new Error(`Maximum number of triggers (${MAX_TRIGGERS_PER_SPACE}) reached for this space`);
+      throw new Error(
+        `Maximum number of triggers (${MAX_TRIGGERS_PER_SPACE}) reached for this space`
+      );
     }
 
     const id = uuidv4();

@@ -8,12 +8,12 @@
 import { z } from '@kbn/zod';
 import { tool } from '@langchain/core/tools';
 import type { Skill } from '@kbn/agent-builder-common/skills';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
+import { lastValueFrom } from 'rxjs';
 import type { GetOsqueryAppContextFn } from './utils';
 import { getOneChatContext } from './utils';
 import { createActionHandler } from '../../handlers/action/create_action_handler';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
 import { getUserInfo } from '../../lib/get_user_info';
-import { lastValueFrom } from 'rxjs';
 import { OSQUERY_INTEGRATION_NAME } from '../../../common/constants';
 import { Direction, OsqueryQueries } from '../../../common/search_strategy';
 import type {
@@ -23,11 +23,7 @@ import type {
 } from '../../../common/search_strategy';
 import { generateTablePaginationOptions } from '../../../common/utils/build_query';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
-import {
-  waitForQueryCompletion,
-  waitForResultsCount,
-  fetchLiveQueryResults,
-} from '../../services';
+import { waitForQueryCompletion, waitForResultsCount, fetchLiveQueryResults } from '../../services';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const osquerySchema = require('../../../public/common/schemas/osquery/v5.20.0.json');
@@ -197,8 +193,8 @@ Common error types:
  * Creates a LangChain tool for listing/searching osquery-enabled agents.
  * @internal
  */
-const createGetAgentsTool = (getOsqueryContext: GetOsqueryAppContextFn) => {
-  return tool(
+const createGetAgentsTool = (getOsqueryContext: GetOsqueryAppContextFn) =>
+  tool(
     async ({ hostname, agentId, status, platform, perPage = 100 }, config) => {
       const onechatContext = getOneChatContext(config);
       if (!onechatContext) {
@@ -243,13 +239,11 @@ const createGetAgentsTool = (getOsqueryContext: GetOsqueryAppContextFn) => {
       const kuery = kueryParts.length > 0 ? kueryParts.join(' AND ') : undefined;
 
       try {
-        const result = await agentService
-          .asInternalScopedUser(spaceId)
-          .listAgents({
-            perPage: Math.min(perPage, 100),
-            kuery,
-            showInactive: false,
-          });
+        const result = await agentService.asInternalScopedUser(spaceId).listAgents({
+          perPage: Math.min(perPage, 100),
+          kuery,
+          showInactive: false,
+        });
 
         const agents = result.agents.map((agent) => ({
           id: agent.id,
@@ -263,9 +257,10 @@ const createGetAgentsTool = (getOsqueryContext: GetOsqueryAppContextFn) => {
         return JSON.stringify({
           total: result.total,
           agents,
-          message: agents.length > 0
-            ? `Found ${agents.length} agent(s). Use the 'id' field when running queries (not hostname).`
-            : 'No agents found matching the criteria.',
+          message:
+            agents.length > 0
+              ? `Found ${agents.length} agent(s). Use the 'id' field when running queries (not hostname).`
+              : 'No agents found matching the criteria.',
         });
       } catch (error: any) {
         throw new Error(`Failed to fetch agents: ${error.message}`);
@@ -273,24 +268,30 @@ const createGetAgentsTool = (getOsqueryContext: GetOsqueryAppContextFn) => {
     },
     {
       name: 'get_agents',
-      description: 'List or search for osquery-enabled agents. Use this to find agent IDs by hostname before running queries. IMPORTANT: run_live_query requires agent IDs, not hostnames.',
+      description:
+        'List or search for osquery-enabled agents. Use this to find agent IDs by hostname before running queries. IMPORTANT: run_live_query requires agent IDs, not hostnames.',
       schema: z.object({
         hostname: z.string().optional().describe('Search by hostname (partial match supported)'),
         agentId: z.string().optional().describe('Search by specific agent ID'),
-        status: z.enum(['online', 'offline', 'inactive', 'unenrolling']).optional().describe('Filter by agent status (default: all)'),
+        status: z
+          .enum(['online', 'offline', 'inactive', 'unenrolling'])
+          .optional()
+          .describe('Filter by agent status (default: all)'),
         platform: z.enum(['windows', 'darwin', 'linux']).optional().describe('Filter by platform'),
-        perPage: z.number().optional().describe('Number of results to return (default: 100, max: 100)'),
+        perPage: z
+          .number()
+          .optional()
+          .describe('Number of results to return (default: 100, max: 100)'),
       }),
     }
   );
-};
 
 /**
  * Creates a LangChain tool for browsing osquery table schemas.
  * @internal
  */
-const createGetSchemaTool = (getOsqueryContext: GetOsqueryAppContextFn) => {
-  return tool(
+const createGetSchemaTool = (getOsqueryContext: GetOsqueryAppContextFn) =>
+  tool(
     async ({ table }, config) => {
       const onechatContext = getOneChatContext(config);
       if (!onechatContext) {
@@ -304,6 +305,7 @@ const createGetSchemaTool = (getOsqueryContext: GetOsqueryAppContextFn) => {
           description: t.description,
           columns_count: t.columns?.length ?? 0,
         }));
+
         return JSON.stringify({ tables, total: tables.length });
       }
 
@@ -316,30 +318,48 @@ const createGetSchemaTool = (getOsqueryContext: GetOsqueryAppContextFn) => {
       return JSON.stringify({
         table: tableSchema.name,
         description: tableSchema.description,
-        columns: tableSchema.columns?.map((col: any) => ({
-          name: col.name,
-          type: col.type,
-          description: col.description,
-        })) ?? [],
+        columns:
+          tableSchema.columns?.map((col: any) => ({
+            name: col.name,
+            type: col.type,
+            description: col.description,
+          })) ?? [],
       });
     },
     {
       name: 'get_schema',
       description: 'Get osquery table schema. Pass null or omit table to list all tables.',
       schema: z.object({
-        table: z.string().nullable().optional().describe('Table name to get schema for. Omit or pass null to list all tables.'),
+        table: z
+          .string()
+          .nullable()
+          .optional()
+          .describe('Table name to get schema for. Omit or pass null to list all tables.'),
       }),
     }
   );
-};
 
 /**
  * Creates a LangChain tool for running live osquery queries.
  * @internal
  */
-const createRunLiveQueryTool = (getOsqueryContext: GetOsqueryAppContextFn) => {
-  return tool(
-    async ({ query, queries, saved_query_id, pack_id, agent_ids, agent_all, agent_platforms, agent_policy_ids, timeout, ecs_mapping }, config) => {
+const createRunLiveQueryTool = (getOsqueryContext: GetOsqueryAppContextFn) =>
+  tool(
+    async (
+      {
+        query,
+        queries,
+        saved_query_id,
+        pack_id,
+        agent_ids,
+        agent_all,
+        agent_platforms,
+        agent_policy_ids,
+        timeout,
+        ecs_mapping,
+      },
+      config
+    ) => {
       const onechatContext = getOneChatContext(config);
       if (!onechatContext) {
         throw new Error('OneChat context not available');
@@ -360,10 +380,7 @@ const createRunLiveQueryTool = (getOsqueryContext: GetOsqueryAppContextFn) => {
         capabilityPath: 'osquery.*',
       });
 
-      const isInvalid = !(
-        writeLiveQueries ||
-        (runSavedQueries && (saved_query_id || pack_id))
-      );
+      const isInvalid = !(writeLiveQueries || (runSavedQueries && (saved_query_id || pack_id)));
 
       if (isInvalid) {
         throw new Error('Insufficient permissions to run live queries');
@@ -382,108 +399,123 @@ const createRunLiveQueryTool = (getOsqueryContext: GetOsqueryAppContextFn) => {
       const spaceIdValue = space?.id ?? spaceId ?? DEFAULT_SPACE_ID;
 
       // Validate agent_ids if provided (not using agent_all, agent_platforms, or agent_policy_ids)
-      if (agent_ids && agent_ids.length > 0 && !agent_all && !agent_platforms?.length && !agent_policy_ids?.length) {
+      if (
+        agent_ids &&
+        agent_ids.length > 0 &&
+        !agent_all &&
+        !agent_platforms?.length &&
+        !agent_policy_ids?.length
+      ) {
         const agentService = osqueryContext.service.getAgentService();
         if (agentService) {
           try {
             // Look up agents by IDs to validate they exist
             const agentIdFilter = agent_ids.map((id) => `_id:"${id}"`).join(' OR ');
-            const result = await agentService
-              .asInternalScopedUser(spaceIdValue)
-              .listAgents({
-                perPage: agent_ids.length,
-                kuery: agentIdFilter,
-                showInactive: true,
-              });
+            const result = await agentService.asInternalScopedUser(spaceIdValue).listAgents({
+              perPage: agent_ids.length,
+              kuery: agentIdFilter,
+              showInactive: true,
+            });
 
             const foundIds = new Set(result.agents.map((a) => a.id));
             const notFoundIds = agent_ids.filter((id) => !foundIds.has(id));
 
             if (notFoundIds.length > 0) {
               // Check if these look like hostnames instead of agent IDs
-              const looksLikeHostname = notFoundIds.some((id) =>
-                !id.includes('-') || id.length < 30 || /^[a-zA-Z]/.test(id)
+              const looksLikeHostname = notFoundIds.some(
+                (id) => !id.includes('-') || id.length < 30 || /^[a-zA-Z]/.test(id)
               );
 
               if (looksLikeHostname) {
                 throw new Error(
                   `Agent ID(s) not found: ${notFoundIds.join(', ')}. ` +
-                  `These look like hostnames, not agent IDs. ` +
-                  `Use get_agents({ hostname: "..." }) to find the correct agent ID first.`
+                    `These look like hostnames, not agent IDs. ` +
+                    `Use get_agents({ hostname: "..." }) to find the correct agent ID first.`
                 );
               }
 
               throw new Error(
                 `Agent ID(s) not found: ${notFoundIds.join(', ')}. ` +
-                `Use get_agents() to find valid agent IDs.`
+                  `Use get_agents() to find valid agent IDs.`
               );
             }
 
             // Check for offline agents
             const offlineAgents = result.agents.filter((a) => a.status !== 'online');
             if (offlineAgents.length > 0) {
-              const offlineInfo = offlineAgents.map((a) => `${a.id} (${a.local_metadata?.host?.hostname ?? 'unknown'}: ${a.status})`);
-              osqueryContext.logFactory.get('live_query').error(
-                `Some targeted agents are not online: ${offlineInfo.join(', ')}. Query will be sent but may not receive responses.`
+              const offlineInfo = offlineAgents.map(
+                (a) => `${a.id} (${a.local_metadata?.host?.hostname ?? 'unknown'}: ${a.status})`
               );
+              osqueryContext.logFactory
+                .get('live_query')
+                .error(
+                  `Some targeted agents are not online: ${offlineInfo.join(
+                    ', '
+                  )}. Query will be sent but may not receive responses.`
+                );
             }
           } catch (error: any) {
             if (error.message.includes('Agent ID(s) not found')) {
               throw error;
             }
+
             // Log but don't block on validation errors
-            osqueryContext.logFactory.get('live_query').error(
-              `Could not validate agent IDs: ${error.message}`
-            );
+            osqueryContext.logFactory
+              .get('live_query')
+              .error(`Could not validate agent IDs: ${error.message}`);
           }
         }
       }
 
       // Prepare parameters
       const params: any = {
-        agent_ids: agent_ids,
-        agent_all: agent_all,
-        agent_platforms: agent_platforms,
-        agent_policy_ids: agent_policy_ids,
-        timeout: timeout,
-        ecs_mapping: ecs_mapping,
+        agent_ids,
+        agent_all,
+        agent_platforms,
+        agent_policy_ids,
+        timeout,
+        ecs_mapping,
       };
 
       if (query) {
         params.query = query;
       }
+
       if (queries) {
         params.queries = queries;
       }
+
       if (saved_query_id) {
         params.saved_query_id = saved_query_id;
       }
+
       if (pack_id) {
         params.pack_id = pack_id;
       }
 
       try {
-        const { response: osqueryAction } = await createActionHandler(
-          osqueryContext,
-          params,
-          {
-            metadata: { currentUser: username },
-            space: { id: spaceIdValue },
-          }
-        );
+        const { response: osqueryAction } = await createActionHandler(osqueryContext, params, {
+          metadata: { currentUser: username },
+          space: { id: spaceIdValue },
+        });
 
         // Extract per-query action_ids - these are needed to fetch results
         const agentCount = osqueryAction.agents?.length ?? 0;
-        const queryActionIds = osqueryAction.queries?.map((q: { action_id: string; id?: string; query?: string; agents?: string[] }) => ({
-          action_id: q.action_id,
-          query_id: q.id,
-          query: q.query,
-          agent_count: q.agents?.length ?? agentCount,
-        })) ?? [];
+        const queryActionIds =
+          osqueryAction.queries?.map(
+            (q: { action_id: string; id?: string; query?: string; agents?: string[] }) => ({
+              action_id: q.action_id,
+              query_id: q.id,
+              query: q.query,
+              agent_count: q.agents?.length ?? agentCount,
+            })
+          ) ?? [];
 
         // For single query, provide the query action_id directly
-        const primaryQueryActionId = queryActionIds.length === 1 ? queryActionIds[0].action_id : null;
-        const primaryAgentCount = queryActionIds.length === 1 ? queryActionIds[0].agent_count : agentCount;
+        const primaryQueryActionId =
+          queryActionIds.length === 1 ? queryActionIds[0].action_id : null;
+        const primaryAgentCount =
+          queryActionIds.length === 1 ? queryActionIds[0].agent_count : agentCount;
 
         return JSON.stringify({
           action_id: osqueryAction.action_id,
@@ -502,30 +534,43 @@ const createRunLiveQueryTool = (getOsqueryContext: GetOsqueryAppContextFn) => {
     },
     {
       name: 'run_live_query',
-      description: 'Run a live osquery query against one or more agents. IMPORTANT: agent_ids must be actual agent IDs (UUIDs), not hostnames. Use get_agents() first to find agent IDs by hostname. Returns an action ID that can be used to fetch results.',
+      description:
+        'Run a live osquery query against one or more agents. IMPORTANT: agent_ids must be actual agent IDs (UUIDs), not hostnames. Use get_agents() first to find agent IDs by hostname. Returns an action ID that can be used to fetch results.',
       schema: z.object({
         query: z.string().optional().describe('Single osquery SQL query string'),
-        queries: z.array(z.object({
-          query: z.string(),
-          id: z.string().optional(),
-          interval: z.number().optional(),
-          timeout: z.number().optional(),
-          snapshot: z.boolean().optional(),
-          removed: z.boolean().optional(),
-          ecs_mapping: z.record(z.any()).optional(),
-        })).optional().describe('Array of queries to execute'),
+        queries: z
+          .array(
+            z.object({
+              query: z.string(),
+              id: z.string().optional(),
+              interval: z.number().optional(),
+              timeout: z.number().optional(),
+              snapshot: z.boolean().optional(),
+              removed: z.boolean().optional(),
+              ecs_mapping: z.record(z.any()).optional(),
+            })
+          )
+          .optional()
+          .describe('Array of queries to execute'),
         saved_query_id: z.string().optional().describe('ID of a saved query to run'),
         pack_id: z.string().optional().describe('ID of a pack to run'),
-        agent_ids: z.array(z.string()).optional().describe('Agent IDs (UUIDs) to target. Use get_agents() to find IDs by hostname. Do NOT pass hostnames here.'),
+        agent_ids: z
+          .array(z.string())
+          .optional()
+          .describe(
+            'Agent IDs (UUIDs) to target. Use get_agents() to find IDs by hostname. Do NOT pass hostnames here.'
+          ),
         agent_all: z.boolean().optional().describe('Run query on all agents (use with caution)'),
-        agent_platforms: z.array(z.string()).optional().describe('Filter by platform (windows, darwin, linux)'),
+        agent_platforms: z
+          .array(z.string())
+          .optional()
+          .describe('Filter by platform (windows, darwin, linux)'),
         agent_policy_ids: z.array(z.string()).optional().describe('Filter by agent policy IDs'),
         timeout: z.number().optional().describe('Query timeout in seconds'),
         ecs_mapping: z.record(z.any()).optional().describe('ECS field mapping for query results'),
       }),
     }
   );
-};
 
 /**
  * Creates a LangChain tool for fetching live query results by action ID.
@@ -536,9 +581,22 @@ const createRunLiveQueryTool = (getOsqueryContext: GetOsqueryAppContextFn) => {
  *
  * @internal
  */
-const createGetLiveQueryResultsTool = (getOsqueryContext: GetOsqueryAppContextFn) => {
-  return tool(
-    async ({ liveQueryId, actionId, page, pageSize, sort, sortOrder, kuery, startDate, waitForResults = true }, config) => {
+const createGetLiveQueryResultsTool = (getOsqueryContext: GetOsqueryAppContextFn) =>
+  tool(
+    async (
+      {
+        liveQueryId,
+        actionId,
+        page,
+        pageSize,
+        sort,
+        sortOrder,
+        kuery,
+        startDate,
+        waitForResults = true,
+      },
+      config
+    ) => {
       const onechatContext = getOneChatContext(config);
       if (!onechatContext) {
         throw new Error('OneChat context not available');
@@ -555,7 +613,7 @@ const createGetLiveQueryResultsTool = (getOsqueryContext: GetOsqueryAppContextFn
       // Log entry with all parameters for debugging
       logger.error(
         `[get_live_query_results] ENTRY - liveQueryId: ${liveQueryId}, actionId: ${actionId}, ` +
-        `waitForResults: ${waitForResults}, page: ${page}, pageSize: ${pageSize}`
+          `waitForResults: ${waitForResults}, page: ${page}, pageSize: ${pageSize}`
       );
 
       const [, depsStart] = await osqueryContext.getStartServices();
@@ -579,7 +637,9 @@ const createGetLiveQueryResultsTool = (getOsqueryContext: GetOsqueryAppContextFn
           spaceScopedClient,
           logger
         );
-        logger.error(`[get_live_query_results] Got namespaces: ${JSON.stringify(integrationNamespaces)}`);
+        logger.error(
+          `[get_live_query_results] Got namespaces: ${JSON.stringify(integrationNamespaces)}`
+        );
       }
 
       const scopedSearch = depsStart.data.search.asScoped(request);
@@ -590,11 +650,15 @@ const createGetLiveQueryResultsTool = (getOsqueryContext: GetOsqueryAppContextFn
       const startTime = Date.now();
       let queryStatus: Awaited<ReturnType<typeof waitForQueryCompletion>> | undefined;
       let expectedDocs = 0;
-      let queryInfo: { pending: number; responded: number; successful: number; failed: number; docs: number } | undefined;
+      let queryInfo:
+        | { pending: number; responded: number; successful: number; failed: number; docs: number }
+        | undefined;
 
       // PHASE 1: Wait for query completion using the parent liveQueryId
       if (waitForResults && liveQueryId) {
-        logger.error(`[Phase 1] START - Waiting for query completion using liveQueryId: ${liveQueryId}`);
+        logger.error(
+          `[Phase 1] START - Waiting for query completion using liveQueryId: ${liveQueryId}`
+        );
 
         try {
           queryStatus = await waitForQueryCompletion(scopedSearch, {
@@ -608,8 +672,8 @@ const createGetLiveQueryResultsTool = (getOsqueryContext: GetOsqueryAppContextFn
 
           logger.error(
             `[Phase 1] waitForQueryCompletion returned - status: ${queryStatus.status}, ` +
-            `isCompleted: ${queryStatus.isCompleted}, isExpired: ${queryStatus.isExpired}, ` +
-            `queries count: ${queryStatus.queries.length}`
+              `isCompleted: ${queryStatus.isCompleted}, isExpired: ${queryStatus.isExpired}, ` +
+              `queries count: ${queryStatus.queries.length}`
           );
 
           // Find the specific query status for our actionId
@@ -625,27 +689,32 @@ const createGetLiveQueryResultsTool = (getOsqueryContext: GetOsqueryAppContextFn
             };
             logger.error(
               `[Phase 1] Found specific query - pending: ${queryInfo.pending}, responded: ${queryInfo.responded}, ` +
-              `successful: ${queryInfo.successful}, failed: ${queryInfo.failed}, docs: ${queryInfo.docs}`
+                `successful: ${queryInfo.successful}, failed: ${queryInfo.failed}, docs: ${queryInfo.docs}`
             );
           } else {
             logger.error(
-              `[Phase 1] WARNING: Could not find query with action_id=${actionId} in queries: ${JSON.stringify(queryStatus.queries.map(q => q.action_id))}`
+              `[Phase 1] WARNING: Could not find query with action_id=${actionId} in queries: ${JSON.stringify(
+                queryStatus.queries.map((q) => q.action_id)
+              )}`
             );
           }
 
           logger.error(
             `[Phase 1] COMPLETE - Query status: ${queryStatus.status}, isCompleted: ${queryStatus.isCompleted}, ` +
-            `isExpired: ${queryStatus.isExpired}, expectedDocs: ${expectedDocs}`
+              `isExpired: ${queryStatus.isExpired}, expectedDocs: ${expectedDocs}`
           );
         } catch (error) {
           logger.error(
-            `[Phase 1] FAILED - Error: ${error instanceof Error ? error.message : String(error)}, ` +
-            `Stack: ${error instanceof Error ? error.stack : 'no stack'}`
+            `[Phase 1] FAILED - Error: ${
+              error instanceof Error ? error.message : String(error)
+            }, ` + `Stack: ${error instanceof Error ? error.stack : 'no stack'}`
           );
           // Continue to try fetching results anyway
         }
       } else {
-        logger.error(`[Phase 1] SKIPPED - waitForResults: ${waitForResults}, liveQueryId: ${liveQueryId}`);
+        logger.error(
+          `[Phase 1] SKIPPED - waitForResults: ${waitForResults}, liveQueryId: ${liveQueryId}`
+        );
       }
 
       // PHASE 2: Wait for results count to match expected docs
@@ -671,13 +740,16 @@ const createGetLiveQueryResultsTool = (getOsqueryContext: GetOsqueryAppContextFn
           );
         } catch (error) {
           logger.error(
-            `[Phase 2] FAILED - Error: ${error instanceof Error ? error.message : String(error)}, ` +
-            `Stack: ${error instanceof Error ? error.stack : 'no stack'}`
+            `[Phase 2] FAILED - Error: ${
+              error instanceof Error ? error.message : String(error)
+            }, ` + `Stack: ${error instanceof Error ? error.stack : 'no stack'}`
           );
           // Continue to fetch whatever results are available
         }
       } else {
-        logger.error(`[Phase 2] SKIPPED - waitForResults: ${waitForResults}, expectedDocs: ${expectedDocs}`);
+        logger.error(
+          `[Phase 2] SKIPPED - waitForResults: ${waitForResults}, expectedDocs: ${expectedDocs}`
+        );
       }
 
       // PHASE 3: Fetch paginated results
@@ -688,17 +760,22 @@ const createGetLiveQueryResultsTool = (getOsqueryContext: GetOsqueryAppContextFn
         results = await fetchLiveQueryResults(scopedSearch, {
           actionId,
           pagination: { page: page ?? 0, pageSize: pageSize ?? 100 },
-          sort: sort ? { field: sort, direction: (sortOrder as 'asc' | 'desc') ?? 'desc' } : undefined,
+          sort: sort
+            ? { field: sort, direction: (sortOrder as 'asc' | 'desc') ?? 'desc' }
+            : undefined,
           kuery,
           startDate,
           integrationNamespaces: namespacesOrUndefined,
           logger,
         });
-        logger.error(`[Phase 3] fetchLiveQueryResults returned - totalCount: ${results.totalCount}`);
+        logger.error(
+          `[Phase 3] fetchLiveQueryResults returned - totalCount: ${results.totalCount}`
+        );
       } catch (error) {
         logger.error(
-          `[Phase 3] fetchLiveQueryResults FAILED - Error: ${error instanceof Error ? error.message : String(error)}, ` +
-          `Stack: ${error instanceof Error ? error.stack : 'no stack'}`
+          `[Phase 3] fetchLiveQueryResults FAILED - Error: ${
+            error instanceof Error ? error.message : String(error)
+          }, ` + `Stack: ${error instanceof Error ? error.stack : 'no stack'}`
         );
         throw error;
       }
@@ -722,7 +799,9 @@ const createGetLiveQueryResultsTool = (getOsqueryContext: GetOsqueryAppContextFn
         )
       );
 
-      logger.error(`[Phase 3] Action results fetched - edges count: ${actionResultsRes.edges?.length ?? 0}`);
+      logger.error(
+        `[Phase 3] Action results fetched - edges count: ${actionResultsRes.edges?.length ?? 0}`
+      );
 
       // Extract errors from action results
       const errors: Array<{ agent_id: string; error: string }> = [];
@@ -734,10 +813,13 @@ const createGetLiveQueryResultsTool = (getOsqueryContext: GetOsqueryAppContextFn
           const errorFromSource = source?.error as string | undefined;
           const errorFromFields = fields?.error?.[0] as string | undefined;
           const errorFromKeyword = fields?.['error.keyword']?.[0] as string | undefined;
-          const actionResponse = source?.action_response as { osquery?: { error?: string } } | undefined;
+          const actionResponse = source?.action_response as
+            | { osquery?: { error?: string } }
+            | undefined;
           const errorFromActionResponse = actionResponse?.osquery?.error;
 
-          const errorMsg = errorFromSource || errorFromFields || errorFromKeyword || errorFromActionResponse;
+          const errorMsg =
+            errorFromSource || errorFromFields || errorFromKeyword || errorFromActionResponse;
 
           if (errorMsg) {
             const agentId =
@@ -796,7 +878,9 @@ const createGetLiveQueryResultsTool = (getOsqueryContext: GetOsqueryAppContextFn
       };
 
       if (status === 'timeout') {
-        response.warning = `Query timed out after ${Math.round(elapsedMs / 1000)} seconds. Some agents may still be responding.`;
+        response.warning = `Query timed out after ${Math.round(
+          elapsedMs / 1000
+        )} seconds. Some agents may still be responding.`;
       } else if (status === 'expired') {
         response.warning = `Query expired before all agents could respond.`;
       } else if (errors.length > 0) {
@@ -807,37 +891,52 @@ const createGetLiveQueryResultsTool = (getOsqueryContext: GetOsqueryAppContextFn
       }
 
       logger.error(
-        `[get_live_query_results] EXIT - Completed after ${Math.round(elapsedMs / 1000)}s. Status: ${status}, ` +
-        `totalResults: ${results.totalCount}, expectedDocs: ${expectedDocs}, matched: ${resultsCountMatched}, ` +
-        `errors: ${errors.length}, isCompleted: ${isCompleted}, isExpired: ${isExpired}`
+        `[get_live_query_results] EXIT - Completed after ${Math.round(
+          elapsedMs / 1000
+        )}s. Status: ${status}, ` +
+          `totalResults: ${results.totalCount}, expectedDocs: ${expectedDocs}, matched: ${resultsCountMatched}, ` +
+          `errors: ${errors.length}, isCompleted: ${isCompleted}, isExpired: ${isExpired}`
       );
 
       return JSON.stringify(response);
     },
     {
       name: 'get_live_query_results',
-      description: 'Get results from a live osquery query action. Pass liveQueryId (parent action_id) for status checks and actionId (per-query action_id from queries[].action_id) for fetching results. This tool automatically waits for query completion and result indexing.',
+      description:
+        'Get results from a live osquery query action. Pass liveQueryId (parent action_id) for status checks and actionId (per-query action_id from queries[].action_id) for fetching results. This tool automatically waits for query completion and result indexing.',
       schema: z.object({
-        liveQueryId: z.string().describe('The parent live query action_id (returned by run_live_query as action_id). Used for checking query completion status.'),
-        actionId: z.string().describe('The per-query action ID from queries[].action_id (returned by run_live_query). Used for fetching actual results.'),
+        liveQueryId: z
+          .string()
+          .describe(
+            'The parent live query action_id (returned by run_live_query as action_id). Used for checking query completion status.'
+          ),
+        actionId: z
+          .string()
+          .describe(
+            'The per-query action ID from queries[].action_id (returned by run_live_query). Used for fetching actual results.'
+          ),
         page: z.number().optional().describe('Page number (default: 0)'),
         pageSize: z.number().optional().describe('Number of results per page (default: 100)'),
         sort: z.string().optional().describe('Field to sort by (default: @timestamp)'),
         sortOrder: z.enum(['asc', 'desc']).optional().describe('Sort order (default: desc)'),
         kuery: z.string().optional().describe('KQL query to filter results'),
         startDate: z.string().optional().describe('Start date for filtering results'),
-        waitForResults: z.boolean().optional().describe('Whether to wait for query completion and results (default: true). Set to false to get immediate snapshot.'),
+        waitForResults: z
+          .boolean()
+          .optional()
+          .describe(
+            'Whether to wait for query completion and results (default: true). Set to false to get immediate snapshot.'
+          ),
       }),
     }
   );
-};
 
 /**
  * Creates a LangChain tool for fetching aggregated action results across agents.
  * @internal
  */
-const createGetActionResultsTool = (getOsqueryContext: GetOsqueryAppContextFn) => {
-  return tool(
+const createGetActionResultsTool = (getOsqueryContext: GetOsqueryAppContextFn) =>
+  tool(
     async ({ actionId, agentIds, page, pageSize, sort, sortOrder, kuery, startDate }, config) => {
       const onechatContext = getOneChatContext(config);
       if (!onechatContext) {
@@ -873,11 +972,11 @@ const createGetActionResultsTool = (getOsqueryContext: GetOsqueryAppContextFn) =
       const res = await lastValueFrom(
         scopedSearch.search<ActionResultsRequestOptions, ActionResultsStrategyResponse>(
           {
-            actionId: actionId,
+            actionId,
             factoryQueryType: OsqueryQueries.actionResults,
             agentIds: parsedAgentIds,
-            kuery: kuery,
-            startDate: startDate,
+            kuery,
+            startDate,
             pagination:
               parsedAgentIds.length > 0
                 ? generateTablePaginationOptions(0, parsedAgentIds.length)
@@ -894,7 +993,17 @@ const createGetActionResultsTool = (getOsqueryContext: GetOsqueryAppContextFn) =
         )
       );
 
-      const aggs = res.rawResponse?.aggregations as { aggs?: { responses_by_action_id?: { doc_count?: number; rows_count?: { value?: number }; responses?: { buckets?: Array<{ key: string; doc_count: number }> } } } } | undefined;
+      const aggs = res.rawResponse?.aggregations as
+        | {
+            aggs?: {
+              responses_by_action_id?: {
+                doc_count?: number;
+                rows_count?: { value?: number };
+                responses?: { buckets?: Array<{ key: string; doc_count: number }> };
+              };
+            };
+          }
+        | undefined;
       const responseAgg = aggs?.aggs?.responses_by_action_id;
       const totalResponded = responseAgg?.doc_count ?? 0;
       const totalRowCount = responseAgg?.rows_count?.value ?? 0;
@@ -931,7 +1040,6 @@ const createGetActionResultsTool = (getOsqueryContext: GetOsqueryAppContextFn) =
       }),
     }
   );
-};
 
 /**
  * Creates the Osquery Live Query skill for running queries, fetching results, and browsing schemas.
@@ -944,15 +1052,13 @@ const createGetActionResultsTool = (getOsqueryContext: GetOsqueryAppContextFn) =
  * @param getOsqueryContext - Factory function that returns the OsqueryAppContext at runtime.
  * @returns A Skill object containing all live query related tools.
  */
-export const getLiveQuerySkill = (getOsqueryContext: GetOsqueryAppContextFn): Skill => {
-  return {
-    ...LIVE_QUERY_SKILL,
-    tools: [
-      createGetAgentsTool(getOsqueryContext),
-      createGetSchemaTool(getOsqueryContext),
-      createRunLiveQueryTool(getOsqueryContext),
-      createGetLiveQueryResultsTool(getOsqueryContext),
-      createGetActionResultsTool(getOsqueryContext),
-    ],
-  };
-};
+export const getLiveQuerySkill = (getOsqueryContext: GetOsqueryAppContextFn): Skill => ({
+  ...LIVE_QUERY_SKILL,
+  tools: [
+    createGetAgentsTool(getOsqueryContext),
+    createGetSchemaTool(getOsqueryContext),
+    createRunLiveQueryTool(getOsqueryContext),
+    createGetLiveQueryResultsTool(getOsqueryContext),
+    createGetActionResultsTool(getOsqueryContext),
+  ],
+});

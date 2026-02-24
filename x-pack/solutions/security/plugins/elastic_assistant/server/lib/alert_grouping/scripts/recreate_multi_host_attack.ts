@@ -247,7 +247,12 @@ function buildSourceEvent(
   const source: Record<string, unknown> = {
     '@timestamp': timestamp.toISOString(),
     event: {
-      action: category === 'process' ? ['exec'] : category === 'file' ? ['modification'] : ['connection_attempted'],
+      action:
+        category === 'process'
+          ? ['exec']
+          : category === 'file'
+          ? ['modification']
+          : ['connection_attempted'],
       agent_id_status: 'verified',
       category: [category],
       created: timestamp.toISOString(),
@@ -363,7 +368,10 @@ function buildAlertSource(
   const hostId = getHostId(spec.host);
 
   // Copy process fields from source event for consistency
-  const srcProcess = (sourceEvent.source as Record<string, unknown>).process as Record<string, unknown>;
+  const srcProcess = (sourceEvent.source as Record<string, unknown>).process as Record<
+    string,
+    unknown
+  >;
 
   return {
     '@timestamp': timestamp.toISOString(),
@@ -394,8 +402,12 @@ function buildAlertSource(
       entity_id: (srcProcess?.entity_id as string) ?? randomUUID().replace(/-/g, '').slice(0, 22),
       parent: {
         name: 'bash',
-        pid: ((srcProcess?.parent as Record<string, unknown>)?.pid as number) ?? 100 + Math.floor(Math.random() * 900),
-        entity_id: ((srcProcess?.parent as Record<string, unknown>)?.entity_id as string) ?? randomUUID().replace(/-/g, '').slice(0, 22),
+        pid:
+          ((srcProcess?.parent as Record<string, unknown>)?.pid as number) ??
+          100 + Math.floor(Math.random() * 900),
+        entity_id:
+          ((srcProcess?.parent as Record<string, unknown>)?.entity_id as string) ??
+          randomUUID().replace(/-/g, '').slice(0, 22),
       },
     },
     user: { name: 'root', id: '0' },
@@ -741,11 +753,7 @@ function generateAttackSpecs(host1: string, host2: string, host3: string): Alert
     techniqueName: 'Scheduled Task/Job',
     techniqueId: 'T1053',
     processName: 'bash',
-    processArgs: [
-      'bash',
-      '-c',
-      "echo '*/10 * * * * root /tmp/.exfil' > /etc/cron.d/data_sync",
-    ],
+    processArgs: ['bash', '-c', "echo '*/10 * * * * root /tmp/.exfil' > /etc/cron.d/data_sync"],
     description: `Cron-based persistence on ${host2} for data exfiltration`,
   });
 
@@ -991,9 +999,7 @@ async function checkCluster(client: ESClient): Promise<boolean> {
     console.log(`  Nodes:   ${health.number_of_nodes ?? '?'}`);
     return true;
   }
-  console.error(
-    `  ERROR: Cluster returned ${status}: ${JSON.stringify(body).slice(0, 200)}`
-  );
+  console.error(`  ERROR: Cluster returned ${status}: ${JSON.stringify(body).slice(0, 200)}`);
   return false;
 }
 
@@ -1015,23 +1021,35 @@ async function bulkIndex(
     lines.push(JSON.stringify({ index: { _index: index, _id: id } }));
     lines.push(JSON.stringify(source));
   }
-  const bulkBody = lines.join('\n') + '\n';
+  const bulkBody = `${lines.join('\n')}\n`;
 
-  const { status, body } = await client.post('/_bulk?refresh=true', bulkBody, 'application/x-ndjson');
+  const { status, body } = await client.post(
+    '/_bulk?refresh=true',
+    bulkBody,
+    'application/x-ndjson'
+  );
 
   if ((status !== 200 && status !== 201) || typeof body !== 'object' || body === null) {
-    console.error(`  ERROR: Bulk request failed (${status}): ${JSON.stringify(body).slice(0, 500)}`);
+    console.error(
+      `  ERROR: Bulk request failed (${status}): ${JSON.stringify(body).slice(0, 500)}`
+    );
     return 0;
   }
 
-  const result = body as { items?: Array<{ index?: { _id: string; status: number; error?: { type: string; reason: string } } }> };
+  const result = body as {
+    items?: Array<{
+      index?: { _id: string; status: number; error?: { type: string; reason: string } };
+    }>;
+  };
   const items = result.items ?? [];
   let errors = 0;
   for (const item of items) {
     if (item.index?.error) {
       errors++;
       if (errors <= 3) {
-        console.error(`  ERROR: ${item.index.error.type}: ${item.index.error.reason.slice(0, 200)}`);
+        console.error(
+          `  ERROR: ${item.index.error.type}: ${item.index.error.reason.slice(0, 200)}`
+        );
       }
     }
   }
@@ -1073,7 +1091,8 @@ async function injectAlerts(
   // Group source events by type for reporting
   const byType: Record<string, number> = {};
   for (const evt of allSourceEvents) {
-    const ds = (evt.source.data_stream as Record<string, unknown>)?.dataset as string ?? 'unknown';
+    const ds =
+      ((evt.source.data_stream as Record<string, unknown>)?.dataset as string) ?? 'unknown';
     byType[ds] = (byType[ds] ?? 0) + 1;
   }
 
@@ -1102,7 +1121,9 @@ async function cleanupAlerts(client: ESClient, dryRun: boolean): Promise<number>
   );
 
   if (countStatus !== 200) {
-    console.error(`  ERROR: Count failed (${countStatus}): ${JSON.stringify(countBody).slice(0, 200)}`);
+    console.error(
+      `  ERROR: Count failed (${countStatus}): ${JSON.stringify(countBody).slice(0, 200)}`
+    );
   } else {
     const count = ((countBody as Record<string, unknown>).count as number) ?? 0;
     console.log(`  Found ${count} previously injected multi-host attack alerts`);
@@ -1132,10 +1153,9 @@ async function cleanupAlerts(client: ESClient, dryRun: boolean): Promise<number>
   ];
 
   for (const idx of eventIndices) {
-    const { status: evtCountStatus, body: evtCountBody } = await client.post(
-      `/${idx}/_count`,
-      { query: { term: { tags: SOURCE_EVENT_TAG } } }
-    );
+    const { status: evtCountStatus, body: evtCountBody } = await client.post(`/${idx}/_count`, {
+      query: { term: { tags: SOURCE_EVENT_TAG } },
+    });
 
     if (evtCountStatus !== 200) continue;
 
@@ -1184,14 +1204,19 @@ async function verifyInjection(client: ESClient): Promise<void> {
   const count = typeof total === 'object' ? (total as Record<string, unknown>).value : total;
   console.log(`  Total alerts: ${count}`);
 
-  const aggs = (body as Record<string, unknown>).aggregations as Record<string, unknown> | undefined;
+  const aggs = (body as Record<string, unknown>).aggregations as
+    | Record<string, unknown>
+    | undefined;
   if (!aggs) return;
 
   const minTs = (aggs.min_ts as Record<string, unknown>)?.value_as_string ?? '?';
   const maxTs = (aggs.max_ts as Record<string, unknown>)?.value_as_string ?? '?';
   console.log(`  Time range: ${minTs} → ${maxTs}`);
 
-  type Bucket = { key: string; doc_count: number };
+  interface Bucket {
+    key: string;
+    doc_count: number;
+  }
   const printBuckets = (label: string, field: string) => {
     const buckets = ((aggs[field] as Record<string, unknown>)?.buckets ?? []) as Bucket[];
     if (buckets.length === 0) return;
@@ -1223,7 +1248,8 @@ function printSummary(docs: PreparedAlert[]): void {
         : 'unknown';
     const rule = (source['kibana.alert.rule.name'] as string) ?? 'unknown';
     const severity = (source['kibana.alert.severity'] as string) ?? 'unknown';
-    const threats = (source['kibana.alert.rule.threat'] as Array<{ tactic: { name: string } }>) ?? [];
+    const threats =
+      (source['kibana.alert.rule.threat'] as Array<{ tactic: { name: string } }>) ?? [];
 
     byHost[host] = (byHost[host] ?? 0) + 1;
     byRule[rule] = (byRule[rule] ?? 0) + 1;
@@ -1234,7 +1260,8 @@ function printSummary(docs: PreparedAlert[]): void {
 
     totalSourceEvents += sourceEvents.length;
     for (const evt of sourceEvents) {
-      const ds = (evt.source.data_stream as Record<string, unknown>)?.dataset as string ?? 'unknown';
+      const ds =
+        ((evt.source.data_stream as Record<string, unknown>)?.dataset as string) ?? 'unknown';
       byEventType[ds] = (byEventType[ds] ?? 0) + 1;
     }
   }
@@ -1392,7 +1419,9 @@ async function main(): Promise<void> {
   }
 
   console.log(`\n── Multi-Host Attack Alert Generator ──`);
-  console.log(`  Hosts: ${args.host1} (attack origin), ${args.host2} (lateral target), ${args.host3} (noise)`);
+  console.log(
+    `  Hosts: ${args.host1} (attack origin), ${args.host2} (lateral target), ${args.host3} (noise)`
+  );
 
   // Generate alerts
   const prepared = prepareAlerts(args);
@@ -1444,10 +1473,17 @@ async function main(): Promise<void> {
   }
 
   // Inject
-  const { alertsInjected, eventsInjected } = await injectAlerts(client, prepared, args.index, args.dryRun);
+  const { alertsInjected, eventsInjected } = await injectAlerts(
+    client,
+    prepared,
+    args.index,
+    args.dryRun
+  );
 
   if (!args.dryRun) {
-    console.log(`\n  Successfully injected: ${alertsInjected}/${prepared.length} alerts, ${eventsInjected} source events`);
+    console.log(
+      `\n  Successfully injected: ${alertsInjected}/${prepared.length} alerts, ${eventsInjected} source events`
+    );
   }
 
   // Verify
@@ -1461,7 +1497,9 @@ async function main(): Promise<void> {
   if (!args.dryRun && alertsInjected > 0) {
     console.log(`\nTo clean up later:`);
     console.log(
-      `  npx tsx recreate_multi_host_attack.ts --es-url ${args.esUrl} ${args.apiKey ? '--api-key <key>' : '-u elastic -p changeme'} --cleanup`
+      `  npx tsx recreate_multi_host_attack.ts --es-url ${args.esUrl} ${
+        args.apiKey ? '--api-key <key>' : '-u elastic -p changeme'
+      } --cleanup`
     );
   }
 }

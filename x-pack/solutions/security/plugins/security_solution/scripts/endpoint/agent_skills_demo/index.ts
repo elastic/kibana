@@ -1,6 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
  * 2.0.
  */
 
@@ -26,7 +33,7 @@ const runDemo: RunFn = async (cliContext) => {
     cleanup: Boolean(cliContext.flags.cleanup),
     runPlaywrightUi: Boolean(cliContext.flags.runPlaywrightUi),
     showBrowser: Boolean(cliContext.flags.showBrowser),
-      multipassImage: cliContext.flags.multipassImage as string,
+    multipassImage: cliContext.flags.multipassImage as string,
     teardownVm: cliContext.flags.teardownVm as string,
     log: cliContext.log,
   });
@@ -98,5 +105,3 @@ export const cli = () => {
     },
   });
 };
-
-

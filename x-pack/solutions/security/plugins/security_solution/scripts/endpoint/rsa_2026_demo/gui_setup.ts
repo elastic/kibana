@@ -36,14 +36,18 @@ export const setupGui = async (
     for (const endpoint of endpoints) {
       // Only supported on Multipass in this demo (CI/vagrant is typically headless).
       if (endpoint.hostVm.type !== 'multipass') {
-        logger.info(`Skipping GUI setup for non-multipass VM: ${endpoint.hostname} (${endpoint.hostVm.type})`);
+        logger.info(
+          `Skipping GUI setup for non-multipass VM: ${endpoint.hostname} (${endpoint.hostVm.type})`
+        );
         continue;
       }
 
       logger.info(`Installing GUI (XFCE + XRDP) on ${endpoint.hostname}`);
 
       // Ensure user exists (on Multipass Ubuntu, `ubuntu` is present).
-      await endpoint.hostVm.exec(`id -u ${vmUser} >/dev/null 2>&1 || sudo useradd -m -s /bin/bash ${vmUser}`);
+      await endpoint.hostVm.exec(
+        `id -u ${vmUser} >/dev/null 2>&1 || sudo useradd -m -s /bin/bash ${vmUser}`
+      );
 
       // Set password for RDP login
       await endpoint.hostVm.exec(`echo "${vmUser}:${vmPassword}" | sudo chpasswd`);
@@ -51,12 +55,17 @@ export const setupGui = async (
       // Install packages (idempotent)
       // If a previous apt/dpkg run was interrupted (common when disk ran out), recover first.
       await endpoint.hostVm.exec('sudo dpkg --configure -a || true', { silent: true });
-      await endpoint.hostVm.exec('sudo DEBIAN_FRONTEND=noninteractive apt-get -f install -y || true', {
-        silent: true,
-      });
+      await endpoint.hostVm.exec(
+        'sudo DEBIAN_FRONTEND=noninteractive apt-get -f install -y || true',
+        {
+          silent: true,
+        }
+      );
       await endpoint.hostVm.exec('sudo apt-get clean || true', { silent: true });
 
-      await endpoint.hostVm.exec('sudo DEBIAN_FRONTEND=noninteractive apt-get update', { silent: true });
+      await endpoint.hostVm.exec('sudo DEBIAN_FRONTEND=noninteractive apt-get update', {
+        silent: true,
+      });
       await endpoint.hostVm.exec(
         // `xorgxrdp` is required for the Xorg backend; without it, RDP often results in a black screen.
         'sudo DEBIAN_FRONTEND=noninteractive apt-get install -y xfce4 xfce4-goodies xrdp xorgxrdp xserver-xorg-legacy dbus-x11 xorg',
@@ -65,20 +74,20 @@ export const setupGui = async (
 
       // Allow XRDP sessions to start Xorg. Default "console" can cause /dev/tty0 permission errors.
       await endpoint.hostVm.exec(
-        "sudo bash -lc \"if [ -f /etc/X11/Xwrapper.config ]; then sed -i.bak 's/^allowed_users=.*/allowed_users=anybody/' /etc/X11/Xwrapper.config; fi\"",
+        'sudo bash -lc "if [ -f /etc/X11/Xwrapper.config ]; then sed -i.bak \'s/^allowed_users=.*/allowed_users=anybody/\' /etc/X11/Xwrapper.config; fi"',
         { silent: true }
       );
 
       // On Ubuntu, `xorgxrdp` ships its config at /etc/X11/xrdp/xorg.conf. Ensure sesman points to it.
       await endpoint.hostVm.exec(
-        "sudo bash -lc \"if [ -f /etc/xrdp/sesman.ini ]; then sed -i.bak 's|^param=xrdp/xorg.conf$|param=/etc/X11/xrdp/xorg.conf|g' /etc/xrdp/sesman.ini; fi\"",
+        'sudo bash -lc "if [ -f /etc/xrdp/sesman.ini ]; then sed -i.bak \'s|^param=xrdp/xorg.conf$|param=/etc/X11/xrdp/xorg.conf|g\' /etc/xrdp/sesman.ini; fi"',
         { silent: true }
       );
 
       // Multipass VMs often don't expose /dev/dri/* render nodes. The default xorgxrdp config references one,
       // which can cause Xorg startup failures (black screen).
       await endpoint.hostVm.exec(
-        "sudo bash -lc \"if [ -f /etc/X11/xrdp/xorg.conf ] && [ ! -e /dev/dri/renderD128 ]; then sed -i.bak '/Option \\\"DRMDevice\\\"/d; /Option \\\"DRI3\\\"/d' /etc/X11/xrdp/xorg.conf; fi\"",
+        'sudo bash -lc "if [ -f /etc/X11/xrdp/xorg.conf ] && [ ! -e /dev/dri/renderD128 ]; then sed -i.bak \'/Option \\"DRMDevice\\"/d; /Option \\"DRI3\\"/d\' /etc/X11/xrdp/xorg.conf; fi"',
         { silent: true }
       );
 
@@ -86,7 +95,9 @@ export const setupGui = async (
       await endpoint.hostVm.exec(
         `sudo -u ${vmUser} bash -lc "printf '%s\\n' startxfce4 > /home/${vmUser}/.xsession"`
       );
-      await endpoint.hostVm.exec(`sudo chown ${vmUser}:${vmUser} /home/${vmUser}/.xsession`, { silent: true });
+      await endpoint.hostVm.exec(`sudo chown ${vmUser}:${vmUser} /home/${vmUser}/.xsession`, {
+        silent: true,
+      });
 
       // Ensure xrdp can read certs
       await endpoint.hostVm.exec('sudo adduser xrdp ssl-cert || true', { silent: true });
@@ -116,5 +127,3 @@ export const setupGui = async (
     }
   });
 };
-
-

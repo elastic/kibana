@@ -1,13 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
  * 2.0.
  */
 
 import type { AgentSkillsDemoContext } from '../types';
 import { fetchAgentPolicy, waitForHostToEnroll } from '../../common/fleet_services';
 
-export const assertDefaultScenarioPreconditions = async (ctx: AgentSkillsDemoContext): Promise<void> => {
+export const assertDefaultScenarioPreconditions = async (
+  ctx: AgentSkillsDemoContext
+): Promise<void> => {
   const { kbnClient, log, agentPolicyId } = ctx;
 
   log.info('Validating demo preconditions (default scenario)');
@@ -19,11 +28,15 @@ export const assertDefaultScenarioPreconditions = async (ctx: AgentSkillsDemoCon
   const hasOsquery = integrations.some((p) => p.package?.name === 'osquery_manager');
 
   if (!hasEndpoint) {
-    throw new Error(`Agent policy [${agentPolicyId}] is missing the Elastic Defend (endpoint) integration`);
+    throw new Error(
+      `Agent policy [${agentPolicyId}] is missing the Elastic Defend (endpoint) integration`
+    );
   }
 
   if (!hasOsquery) {
-    throw new Error(`Agent policy [${agentPolicyId}] is missing the Osquery Manager (osquery_manager) integration`);
+    throw new Error(
+      `Agent policy [${agentPolicyId}] is missing the Osquery Manager (osquery_manager) integration`
+    );
   }
 
   if (ctx.vmName) {
@@ -38,5 +51,3 @@ export const assertDefaultScenarioPreconditions = async (ctx: AgentSkillsDemoCon
     log.warning('No VM name captured; skipping Fleet enrollment validation by hostname');
   }
 };
-
-

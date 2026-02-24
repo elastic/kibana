@@ -22,12 +22,12 @@ export default {
     ...(Array.isArray(baseConfig.reporter) ? baseConfig.reporter : []),
     ...(enableHtmlReport
       ? [
-        ['html', { open: 'never', outputFolder: reportDir }] as const,
-        [
-          Path.join(__dirname, './src/eval_html_reporter.ts'),
-          { outputFolder: reportDir },
-        ] as const,
-      ]
+          ['html', { open: 'never', outputFolder: reportDir }] as const,
+          [
+            Path.join(__dirname, './src/eval_html_reporter.ts'),
+            { outputFolder: reportDir },
+          ] as const,
+        ]
       : []),
   ],
 };

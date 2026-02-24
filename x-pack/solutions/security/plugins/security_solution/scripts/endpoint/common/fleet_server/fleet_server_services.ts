@@ -155,9 +155,9 @@ export const startFleetServer = async ({
     const serviceToken = isServerless
       ? ''
       : await pRetry(async () => generateFleetServiceToken(kbnClient, logger), {
-        retries: 2,
-        forever: false,
-      });
+          retries: 2,
+          forever: false,
+        });
     const startedFleetServer = await startFleetServerWithDocker({
       kbnClient,
       logger,
@@ -310,7 +310,11 @@ const startFleetServerWithDocker = async ({
 
       // If the output is configured to a local address, make sure it is reachable from inside Docker.
       // This also covers stale configs from previous runs that may have used bridge/tunnel interfaces.
-      if (isLocalhost(esURL.hostname) || localIps.includes(esURL.hostname) || isPrivateIpv4(esURL.hostname)) {
+      if (
+        isLocalhost(esURL.hostname) ||
+        localIps.includes(esURL.hostname) ||
+        isPrivateIpv4(esURL.hostname)
+      ) {
         esURL.hostname = localhostRealIp;
       }
 
@@ -332,27 +336,31 @@ const startFleetServerWithDocker = async ({
         // with a stale local bridge/tunnel IP and never enroll.
         await updateFleetElasticsearchOutputHostNames(kbnClient, log);
         esURL = new URL(await getFleetElasticsearchOutputHost(kbnClient));
-        if (isLocalhost(esURL.hostname) || localIps.includes(esURL.hostname) || isPrivateIpv4(esURL.hostname)) {
+        if (
+          isLocalhost(esURL.hostname) ||
+          localIps.includes(esURL.hostname) ||
+          isPrivateIpv4(esURL.hostname)
+        ) {
           esURL.hostname = localhostRealIp;
         }
 
         const dockerArgs = isServerless
           ? getFleetServerStandAloneDockerArgs({
-            containerName,
-            hostname,
-            port,
-            esUrl: esURL.toString(),
-            agentVersion,
-          })
+              containerName,
+              hostname,
+              port,
+              esUrl: esURL.toString(),
+              agentVersion,
+            })
           : getFleetServerManagedDockerArgs({
-            containerName,
-            hostname,
-            port,
-            serviceToken,
-            policyId,
-            agentVersion,
-            esUrl: esURL.toString(),
-          });
+              containerName,
+              hostname,
+              port,
+              serviceToken,
+              policyId,
+              agentVersion,
+              esUrl: esURL.toString(),
+            });
 
         await execa('docker', ['kill', containerName])
           .then(() => {
@@ -401,31 +409,31 @@ const startFleetServerWithDocker = async ({
 
         fleetServerVersionInfo = isServerless
           ? (
-            await execa
-              .command(`docker exec ${containerName} /usr/bin/fleet-server --version`)
-              .catch((err) => {
+              await execa
+                .command(`docker exec ${containerName} /usr/bin/fleet-server --version`)
+                .catch((err) => {
+                  log.verbose(
+                    `Failed to retrieve fleet-server (serverless/standalone) version information from running instance.`,
+                    err
+                  );
+                  return { stdout: 'Unable to retrieve version information (serverless)' };
+                })
+            ).stdout
+          : (
+              await execa('docker', [
+                'exec',
+                containerName,
+                '/bin/bash',
+                '-c',
+                '/usr/share/elastic-agent/elastic-agent version',
+              ]).catch((err) => {
                 log.verbose(
-                  `Failed to retrieve fleet-server (serverless/standalone) version information from running instance.`,
+                  `Failed to retrieve agent version information from running instance.`,
                   err
                 );
-                return { stdout: 'Unable to retrieve version information (serverless)' };
+                return { stdout: 'Unable to retrieve version information' };
               })
-          ).stdout
-          : (
-            await execa('docker', [
-              'exec',
-              containerName,
-              '/bin/bash',
-              '-c',
-              '/usr/share/elastic-agent/elastic-agent version',
-            ]).catch((err) => {
-              log.verbose(
-                `Failed to retrieve agent version information from running instance.`,
-                err
-              );
-              return { stdout: 'Unable to retrieve version information' };
-            })
-          ).stdout;
+            ).stdout;
       } catch (error) {
         if (retryAttempt < 1) {
           retryAttempt++;
@@ -647,8 +655,9 @@ const addFleetServerHostToFleetSettings = async (
             error.response.status === 403 &&
             ((error.response?.data?.message as string) ?? '').includes('disabled')
           ) {
-            log.error(`Attempt to update fleet server host URL in fleet failed with [403: ${error.response.data.message
-              }].
+            log.error(`Attempt to update fleet server host URL in fleet failed with [403: ${
+              error.response.data.message
+            }].
 
   ${chalk.red('Are you running this utility against a Serverless project?')}
   If so, the following entry should be added to your local
@@ -726,7 +735,9 @@ export const cleanupAndAddFleetServerHostSettings = async (
             .catch(catchAxiosErrorFormatAndThrow);
           log.info(`Successfully removed invalid Fleet Server host entry: ${fleetServerEntry.id}`);
         } catch (error) {
-          log.warning(`Failed to remove invalid Fleet Server host entry ${fleetServerEntry.id}: ${error}`);
+          log.warning(
+            `Failed to remove invalid Fleet Server host entry ${fleetServerEntry.id}: ${error}`
+          );
         }
       }
     }
@@ -761,7 +772,11 @@ export const updateFleetElasticsearchOutputHostNames = async (
             let needsUpdating = false;
             const updatedHosts: Output['hosts'] = [];
 
-            log.info(`Checking Elasticsearch output [${output.name} (id: ${id})] with hosts: ${output.hosts.join(', ')}`);
+            log.info(
+              `Checking Elasticsearch output [${
+                output.name
+              } (id: ${id})] with hosts: ${output.hosts.join(', ')}`
+            );
 
             for (const host of output.hosts) {
               try {
@@ -804,7 +819,11 @@ export const updateFleetElasticsearchOutputHostNames = async (
                 hosts: updatedHosts,
               };
 
-              log.info(`Updating Fleet Settings for Output [${output.name} (id: ${id})] with hosts: ${updatedHosts.join(', ')}`);
+              log.info(
+                `Updating Fleet Settings for Output [${
+                  output.name
+                } (id: ${id})] with hosts: ${updatedHosts.join(', ')}`
+              );
 
               await kbnClient
                 .request<GetOneOutputResponse>({
@@ -815,7 +834,9 @@ export const updateFleetElasticsearchOutputHostNames = async (
                 })
                 .catch(catchAxiosErrorFormatAndThrow);
 
-              log.info(`Successfully updated Fleet Settings for Output [${output.name} (id: ${id})]`);
+              log.info(
+                `Successfully updated Fleet Settings for Output [${output.name} (id: ${id})]`
+              );
             } else {
               log.info(`No update needed for Elasticsearch output [${output.name} (id: ${id})]`);
             }

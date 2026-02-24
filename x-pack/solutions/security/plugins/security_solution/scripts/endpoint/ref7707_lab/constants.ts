@@ -16,12 +16,12 @@
  * These domains are resolved by the lab DNS server (`dns-vm`) to `web-vm`.
  */
 export const REF7707_DOMAINS: string[] = [
-    'poster.checkponit.lab',
-    'support.fortineat.lab',
-    'update.hobiter.lab',
-    'support.vmphere.lab',
-    'cloud.autodiscovar.lab',
-    'digert.ictnsc.lab',
+  'poster.checkponit.lab',
+  'support.fortineat.lab',
+  'update.hobiter.lab',
+  'support.vmphere.lab',
+  'cloud.autodiscovar.lab',
+  'digert.ictnsc.lab',
 ];
 
 export const DEFAULT_WEB_PORT = 8080;
@@ -32,12 +32,10 @@ export const DEFAULT_WEB_PORT = 8080;
  * to be injected into browser history for forensic investigation demos.
  */
 export const REF7707_DEMO_DOMAINS: string[] = [
-    'poster.checkponit.com',
-    'support.fortineat.com',
-    'update.hobiter.com',
-    'support.vmphere.com',
-    'cloud.autodiscovar.com',
-    'digert.ictnsc.com',
+  'poster.checkponit.com',
+  'support.fortineat.com',
+  'update.hobiter.com',
+  'support.vmphere.com',
+  'cloud.autodiscovar.com',
+  'digert.ictnsc.com',
 ];
-
-

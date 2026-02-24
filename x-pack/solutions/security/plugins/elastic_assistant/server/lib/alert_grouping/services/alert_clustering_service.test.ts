@@ -188,9 +188,7 @@ describe('AlertClusteringService', () => {
           kibana: {
             alert: {
               rule: {
-                threat: [
-                  { tactic: { name: 'Execution' }, technique: [{ id: 'T1059' }] },
-                ],
+                threat: [{ tactic: { name: 'Execution' }, technique: [{ id: 'T1059' }] }],
               },
             },
           },
@@ -199,9 +197,7 @@ describe('AlertClusteringService', () => {
           kibana: {
             alert: {
               rule: {
-                threat: [
-                  { tactic: { name: 'Persistence' }, technique: [{ id: 'T1543' }] },
-                ],
+                threat: [{ tactic: { name: 'Persistence' }, technique: [{ id: 'T1543' }] }],
               },
             },
           },
@@ -248,8 +244,16 @@ describe('AlertClusteringService', () => {
       // Create a large cluster with many tactics - should NOT split because tacticSubGrouping is not enabled
       const alerts: Array<{ _id: string; _index: string; _source: Record<string, unknown> }> = [];
       for (let i = 0; i < 250; i++) {
-        const tactic = ['Execution', 'Persistence', 'Privilege Escalation', 'Defense Evasion',
-          'Credential Access', 'Discovery', 'Lateral Movement', 'Exfiltration'][i % 8];
+        const tactic = [
+          'Execution',
+          'Persistence',
+          'Privilege Escalation',
+          'Defense Evasion',
+          'Credential Access',
+          'Discovery',
+          'Lateral Movement',
+          'Exfiltration',
+        ][i % 8];
         alerts.push(
           makeAlert(`a${i}`, 'host-1', `2026-02-06T09:${String(i % 60).padStart(2, '0')}:00Z`, {
             kibana: {

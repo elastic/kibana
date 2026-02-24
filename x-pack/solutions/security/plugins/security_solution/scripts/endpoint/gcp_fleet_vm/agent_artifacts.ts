@@ -26,9 +26,12 @@ const getSnapshotLatestJsonUrl = (minorLine: string): string =>
 const getSnapshotManifestUrl = async (version: string): Promise<string> => {
   const minorLine = getMinorLine(version);
   try {
-    const { data } = await axios.get<{ manifest_url: string }>(getSnapshotLatestJsonUrl(minorLine), {
-      timeout: 10_000,
-    });
+    const { data } = await axios.get<{ manifest_url: string }>(
+      getSnapshotLatestJsonUrl(minorLine),
+      {
+        timeout: 10_000,
+      }
+    );
     if (data?.manifest_url) {
       return data.manifest_url;
     }
@@ -104,5 +107,3 @@ export const resolveElasticAgentDownloadUrl = async (
   // Release builds: use artifacts.elastic.co
   return getReleaseAgentUrl(version, platform);
 };
-
-

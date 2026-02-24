@@ -1,14 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
  * 2.0.
  */
 
 import type { RunFn } from '@kbn/dev-cli-runner';
 import { run } from '@kbn/dev-cli-runner';
-import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils';
 import type { ToolingLog } from '@kbn/tooling-log';
 import pRetry from 'p-retry';
+import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils';
 import { gcloudInstanceExists, gcloudSsh } from './gcloud';
 
 const runSsh = async ({
@@ -40,7 +47,12 @@ const runRepair: RunFn = async ({ log, flags }) => {
   if (!gcpZone) throw new Error(`--gcpZone is required`);
   if (!vmName) throw new Error(`--vmName is required`);
 
-  const exists = await gcloudInstanceExists({ log, project: gcpProject, zone: gcpZone, instance: vmName });
+  const exists = await gcloudInstanceExists({
+    log,
+    project: gcpProject,
+    zone: gcpZone,
+    instance: vmName,
+  });
   if (!exists) {
     throw new Error(`GCP instance not found: ${vmName} (project=${gcpProject}, zone=${gcpZone})`);
   }
@@ -114,7 +126,9 @@ const runRepair: RunFn = async ({ log, flags }) => {
 
   // Give Fleet a moment to show the agent back online
   log.info(`[gcp][repair] waiting briefly for Fleet to reflect VM online`);
-  await pRetry(async () => undefined, { retries: 6, minTimeout: 2000, maxTimeout: 5000 }).catch(() => undefined);
+  await pRetry(async () => undefined, { retries: 6, minTimeout: 2000, maxTimeout: 5000 }).catch(
+    () => undefined
+  );
 };
 
 export const cli = () => {
@@ -140,5 +154,3 @@ Prints diagnostics (tailscale + elastic-agent logs).
     },
   });
 };
-
-

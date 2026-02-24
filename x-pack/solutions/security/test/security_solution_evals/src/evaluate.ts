@@ -117,8 +117,9 @@ export const evaluate = base.extend<
   // Override connector fixtures so parallel workers do NOT contend on a single deterministic connector id.
   connector: [
     async ({ fetch, log, spaceId }, use, testInfo) => {
-      const predefinedConnector = (testInfo.project.use as unknown as { connector: AvailableConnectorWithId })
-        .connector;
+      const predefinedConnector = (
+        testInfo.project.use as unknown as { connector: AvailableConnectorWithId }
+      ).connector;
 
       // Create (or reuse) a persistent connector saved object for this eval run.
       //
@@ -261,7 +262,7 @@ export const evaluate = base.extend<
     },
   ],
   reportModelScore: [
-    async ({ }, use) => {
+    async ({}, use) => {
       await use(createDefaultTerminalReporter());
     },
     { scope: 'worker' },
@@ -334,7 +335,9 @@ export const evaluate = base.extend<
                 );
               } catch (err) {
                 log.warning(
-                  `Failed to attach example data: ${err instanceof Error ? err.message : String(err)}`
+                  `Failed to attach example data: ${
+                    err instanceof Error ? err.message : String(err)
+                  }`
                 );
               }
             }

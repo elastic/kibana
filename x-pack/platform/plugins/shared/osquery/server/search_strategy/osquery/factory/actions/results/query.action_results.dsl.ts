@@ -37,30 +37,30 @@ export const buildActionResultsQuery = ({
   const timeRangeFilter: estypes.QueryDslQueryContainer[] =
     startDate && !isEmpty(startDate)
       ? [
-        {
-          range: {
-            started_at: {
-              gte: startDate,
-              lte: moment(startDate).clone().add(30, 'minutes').toISOString(),
+          {
+            range: {
+              started_at: {
+                gte: startDate,
+                lte: moment(startDate).clone().add(30, 'minutes').toISOString(),
+              },
             },
           },
-        },
-      ]
+        ]
       : [];
 
   const agentIdsFilter: estypes.QueryDslQueryContainer[] =
     agentIds && agentIds.length > 0
       ? [
-        {
-          bool: {
-            should: [
-              { terms: { 'agent.id': agentIds } },
-              { terms: { agent_id: agentIds } },
-            ] as estypes.QueryDslQueryContainer[],
-            minimum_should_match: 1,
+          {
+            bool: {
+              should: [
+                { terms: { 'agent.id': agentIds } },
+                { terms: { agent_id: agentIds } },
+              ] as estypes.QueryDslQueryContainer[],
+              minimum_should_match: 1,
+            },
           },
-        },
-      ]
+        ]
       : [];
 
   const filterQuery: estypes.QueryDslQueryContainer[] = [

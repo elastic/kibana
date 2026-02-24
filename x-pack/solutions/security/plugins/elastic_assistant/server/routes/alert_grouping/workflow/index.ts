@@ -5,5 +5,9 @@
  * 2.0.
  */
 
-export { registerWorkflowCrudRoutes, ALERT_GROUPING_WORKFLOW_BASE, ALERT_GROUPING_WORKFLOW_BY_ID } from './crud_routes';
+export {
+  registerWorkflowCrudRoutes,
+  ALERT_GROUPING_WORKFLOW_BASE,
+  ALERT_GROUPING_WORKFLOW_BY_ID,
+} from './crud_routes';
 export { registerWorkflowExecutionRoutes } from './execution_routes';

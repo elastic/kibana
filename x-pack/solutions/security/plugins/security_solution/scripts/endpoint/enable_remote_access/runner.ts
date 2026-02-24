@@ -1,6 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
  * 2.0.
  */
 
@@ -19,9 +26,7 @@ export interface RunEnableRemoteAccessOptions {
 
 const setUbuntuPassword = async (vmName: string, password: string, log: ToolingLog) => {
   const vm = createMultipassHostVmClient(vmName, log);
-  await vm.exec(
-    `bash -lc "echo ubuntu:${password} | sudo chpasswd && sudo passwd -S ubuntu"`
-  );
+  await vm.exec(`bash -lc "echo ubuntu:${password} | sudo chpasswd && sudo passwd -S ubuntu"`);
 };
 
 const enableSshPasswordAuth = async (vmName: string, log: ToolingLog) => {
@@ -53,7 +58,9 @@ const enableRdpXfce = async (vmName: string, log: ToolingLog) => {
   await vm.exec(`bash -lc "ss -lntp | egrep ':(22|3389)\\b' || true"`, { silent: true });
 };
 
-export const runEnableRemoteAccess = async (options: RunEnableRemoteAccessOptions): Promise<void> => {
+export const runEnableRemoteAccess = async (
+  options: RunEnableRemoteAccessOptions
+): Promise<void> => {
   const log = options.log ?? createToolingLogger();
   const filter = options.multipassNameFilter ? new RegExp(options.multipassNameFilter) : undefined;
 
@@ -90,5 +97,3 @@ export const runEnableRemoteAccess = async (options: RunEnableRemoteAccessOption
     }
   });
 };
-
-

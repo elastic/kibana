@@ -273,23 +273,26 @@ When triaging an alert, ask yourself:
 Remember: Effective triage balances thoroughness with efficiency, ensuring real threats are identified while maintaining operational velocity.`,
 };
 
-
 /**
  * Creates a LangChain DynamicStructuredTool for adding notes to alerts.
  * This is used in skills which require LangChain tools.
  */
 export const createAddAlertNoteLangChainTool = () => {
-  return tool(({ alertId, note }) => {
-    console.log(`Note ${note} been added to alert: ${alertId}`);
-    return "Note added"
-  }, {
-    name: 'add_alert_note',
-    description: 'Add a note to an alert to document triage decisions, investigation findings, or other relevant information',
-    schema: z.object({
-      alertId: z.string().describe('The ID of the alert to add a note to'),
-      note: z.string().describe('The note content to add to the alert'),
-    }),
-  })
+  return tool(
+    ({ alertId, note }) => {
+      console.log(`Note ${note} been added to alert: ${alertId}`);
+      return 'Note added';
+    },
+    {
+      name: 'add_alert_note',
+      description:
+        'Add a note to an alert to document triage decisions, investigation findings, or other relevant information',
+      schema: z.object({
+        alertId: z.string().describe('The ID of the alert to add a note to'),
+        note: z.string().describe('The note content to add to the alert'),
+      }),
+    }
+  );
 };
 
 export const getAlertTriageSkill = (): Skill => {
@@ -300,4 +303,4 @@ export const getAlertTriageSkill = (): Skill => {
     ...ALERT_TRIAGE_SKILL,
     tools: [addAlertNoteLangChainTool],
   };
-}
+};

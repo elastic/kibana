@@ -43,9 +43,7 @@ export const loadRsa2026DemoState = async (
       workflowIds: unique(parsed.workflowIds ?? []),
       connectorIds: unique(parsed.connectorIds ?? []),
     };
-  } catch {
-    return;
-  }
+  } catch {}
 };
 
 export const saveRsa2026DemoState = async (
@@ -63,7 +61,10 @@ export const saveRsa2026DemoState = async (
     connectorIds: unique(state.connectorIds),
   };
 
-  await writeFile(stateFile, `${JSON.stringify(normalized, null, 2)}\n`, { encoding: 'utf-8', mode: 0o600 });
+  await writeFile(stateFile, `${JSON.stringify(normalized, null, 2)}\n`, {
+    encoding: 'utf-8',
+    mode: 0o600,
+  });
 };
 
 export const updateRsa2026DemoState = async (
@@ -89,7 +90,10 @@ export const updateRsa2026DemoState = async (
     vmNames: unique([...(current.vmNames ?? []), ...(patch.vmNames ?? [])]),
     agentIds: unique([...(current.agentIds ?? []), ...(patch.agentIds ?? [])]),
     agentPolicyIds: unique([...(current.agentPolicyIds ?? []), ...(patch.agentPolicyIds ?? [])]),
-    detectionRuleIds: unique([...(current.detectionRuleIds ?? []), ...(patch.detectionRuleIds ?? [])]),
+    detectionRuleIds: unique([
+      ...(current.detectionRuleIds ?? []),
+      ...(patch.detectionRuleIds ?? []),
+    ]),
     workflowIds: unique([...(current.workflowIds ?? []), ...(patch.workflowIds ?? [])]),
     connectorIds: unique([...(current.connectorIds ?? []), ...(patch.connectorIds ?? [])]),
   };
@@ -107,5 +111,3 @@ export const deleteRsa2026DemoState = async (
     // ignore
   }
 };
-
-

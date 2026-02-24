@@ -31,13 +31,7 @@
 
 import { execSync } from 'child_process';
 import { resolve } from 'path';
-import {
-  ESClient,
-  KibanaClient,
-  parseConnectionArgs,
-  checkCluster,
-  type ConnectionArgs,
-} from './es_client';
+import { ESClient, KibanaClient, parseConnectionArgs, checkCluster } from './es_client';
 
 const SCRIPT_DIR = __dirname;
 const INJECTED_TAG = 'demo-recreated';
@@ -54,7 +48,12 @@ function run(scriptName: string, extraArgs: string, esArgs: string): string {
   const cmd = `npx tsx ${resolve(SCRIPT_DIR, scriptName)} ${esArgs} ${extraArgs}`;
   console.log(`    $ ${scriptName} ${extraArgs.replace(/--password \S+/, '--password ***')}`);
   try {
-    return execSync(cmd, { encoding: 'utf-8', maxBuffer: 50 * 1024 * 1024, timeout: 600_000, cwd: SCRIPT_DIR });
+    return execSync(cmd, {
+      encoding: 'utf-8',
+      maxBuffer: 50 * 1024 * 1024,
+      timeout: 600_000,
+      cwd: SCRIPT_DIR,
+    });
   } catch (err) {
     const e = err as { stdout?: string; stderr?: string; message?: string };
     console.error(`    FAILED: ${e.message?.split('\n')[0]?.slice(0, 150) ?? 'unknown'}`);
@@ -62,41 +61,65 @@ function run(scriptName: string, extraArgs: string, esArgs: string): string {
   }
 }
 
-async function createSpace(kibana: KibanaClient, space: { id: string; name: string; color: string }): Promise<void> {
+async function createSpace(
+  kibana: KibanaClient,
+  space: { id: string; name: string; color: string }
+): Promise<void> {
   const { status } = await kibana.post('/api/spaces/space', {
-    id: space.id, name: space.name, color: space.color, disabledFeatures: [],
+    id: space.id,
+    name: space.name,
+    color: space.color,
+    disabledFeatures: [],
   });
-  console.log(status === 200 || status === 201
-    ? `  + ${space.name} (${space.id})`
-    : status === 409 ? `  = ${space.name} already exists` : `  ! Failed to create ${space.id} (${status})`);
+  console.log(
+    status === 200 || status === 201
+      ? `  + ${space.name} (${space.id})`
+      : status === 409
+      ? `  = ${space.name} already exists`
+      : `  ! Failed to create ${space.id} (${status})`
+  );
 }
 
 async function resetAlerts(es: ESClient): Promise<void> {
-  const { body } = await es.post('/.alerts-security.alerts-*/_update_by_query?refresh=true&conflicts=proceed', {
-    query: { term: { tags: INJECTED_TAG } },
-    script: {
-      source: `
+  const { body } = await es.post(
+    '/.alerts-security.alerts-*/_update_by_query?refresh=true&conflicts=proceed',
+    {
+      query: { term: { tags: INJECTED_TAG } },
+      script: {
+        source: `
         ctx._source['kibana.alert.workflow_status'] = 'open';
         ctx._source['kibana.alert.workflow_tags'] = [];
         ctx._source['kibana.alert.case_ids'] = [];
         ctx._source['kibana.alert.status'] = 'active';
       `,
-      lang: 'painless',
-    },
-  });
-  const updated = typeof body === 'object' && body !== null ? ((body as Record<string, unknown>).updated as number) ?? 0 : 0;
+        lang: 'painless',
+      },
+    }
+  );
+  const updated =
+    typeof body === 'object' && body !== null
+      ? ((body as Record<string, unknown>).updated as number) ?? 0
+      : 0;
   console.log(`  Reset ${updated} alerts to open/fresh state`);
 }
 
 async function deleteCasesInSpace(kibana: KibanaClient, spaceId: string): Promise<number> {
-  const spaceKbn = new KibanaClient({ baseUrl: (kibana as any).baseUrl, user: (kibana as any).user, password: (kibana as any).password, spaceId });
+  const spaceKbn = new KibanaClient({
+    baseUrl: (kibana as any).baseUrl,
+    user: (kibana as any).user,
+    password: (kibana as any).password,
+    spaceId,
+  });
   // Actually we need the raw baseUrl. Let's just use the main kibana with manual space prefix.
   const { status, body } = await kibana.get(`/s/${spaceId}/api/cases/_find?perPage=100`);
   if (status !== 200 || typeof body !== 'object' || body === null) return 0;
   const cases = ((body as Record<string, unknown>).cases ?? []) as Array<Record<string, unknown>>;
   for (const c of cases) {
     const cid = c.id as string;
-    await kibana.request('DELETE', `/s/${spaceId}/api/cases?ids=${encodeURIComponent(`["${cid}"]`)}`);
+    await kibana.request(
+      'DELETE',
+      `/s/${spaceId}/api/cases?ids=${encodeURIComponent(`["${cid}"]`)}`
+    );
   }
   return cases.length;
 }
@@ -113,28 +136,43 @@ async function runAG(
   const details: string[] = [];
 
   // Create workflow
-  const { status: wfSt, body: wfBd } = await kibana.post(`/s/${spaceId}/api/security/alert_grouping/workflow`, {
-    name: 'demo-ag', description: 'Demo AG', enabled: true,
-    schedule: { interval: '5m' },
-    alertFilter: {
-      alertsIndexPattern: '.alerts-security.alerts-default',
-      excludeTags: ['llm-triaged'], includeStatuses: ['open'], maxAlertsPerRun: 200,
-    },
-    groupingConfig: {
-      strategy: 'temporal',
-      entityTypes: [
-        { type: 'host.name', sourceFields: ['host.name'], weight: 1, required: true },
-        { type: 'user.name', sourceFields: ['user.name'], weight: 0.5 },
-        { type: 'process.name', sourceFields: ['process.name'], weight: 0.3 },
-      ],
-      threshold: 0.3, timeWindow: '4h', createNewCaseIfNoMatch: true,
-      maxAlertsPerCase: 200, mergeSimilarCases: true, mergeThreshold: 0.7,
-    },
-    attackDiscoveryConfig: {
-      enabled: true, mode: 'full', triggerOnAlertCount: 1,
-      attachToCase: true, validateAlertRelevance: true, enableCaseMerging: true,
-    },
-  });
+  const { status: wfSt, body: wfBd } = await kibana.post(
+    `/s/${spaceId}/api/security/alert_grouping/workflow`,
+    {
+      name: 'demo-ag',
+      description: 'Demo AG',
+      enabled: true,
+      schedule: { interval: '5m' },
+      alertFilter: {
+        alertsIndexPattern: '.alerts-security.alerts-default',
+        excludeTags: ['llm-triaged'],
+        includeStatuses: ['open'],
+        maxAlertsPerRun: 200,
+      },
+      groupingConfig: {
+        strategy: 'temporal',
+        entityTypes: [
+          { type: 'host.name', sourceFields: ['host.name'], weight: 1, required: true },
+          { type: 'user.name', sourceFields: ['user.name'], weight: 0.5 },
+          { type: 'process.name', sourceFields: ['process.name'], weight: 0.3 },
+        ],
+        threshold: 0.3,
+        timeWindow: '4h',
+        createNewCaseIfNoMatch: true,
+        maxAlertsPerCase: 200,
+        mergeSimilarCases: true,
+        mergeThreshold: 0.7,
+      },
+      attackDiscoveryConfig: {
+        enabled: true,
+        mode: 'full',
+        triggerOnAlertCount: 1,
+        attachToCase: true,
+        validateAlertRelevance: true,
+        enableCaseMerging: true,
+      },
+    }
+  );
 
   let wfId = '';
   if (wfSt === 200 || wfSt === 201) {
@@ -145,18 +183,26 @@ async function runAG(
     const data = ((lb as Record<string, unknown>)?.data ?? []) as Array<Record<string, unknown>>;
     wfId = data.length > 0 ? (data[0].id as string) : '';
     if (wfId) console.log(`    Reusing workflow: ${wfId}`);
-    else { console.error('    No workflow!'); return { durationMs: Date.now() - t0, cases: 0, ads: 0, details }; }
+    else {
+      console.error('    No workflow!');
+      return { durationMs: Date.now() - t0, cases: 0, ads: 0, details };
+    }
   }
 
   // Run grouping
-  const { body: runBd } = await kibana.post(`/s/${spaceId}/api/security/alert_grouping/workflow/${wfId}/_run`, {
-    time_range: { start: 'now-24h', end: 'now' },
-  });
+  const { body: runBd } = await kibana.post(
+    `/s/${spaceId}/api/security/alert_grouping/workflow/${wfId}/_run`,
+    {
+      time_range: { start: 'now-24h', end: 'now' },
+    }
+  );
   const m = ((runBd as Record<string, unknown>)?.metrics ?? {}) as Record<string, unknown>;
   console.log(`    Grouped: ${m.casesCreated ?? 0} cases, ${m.alertsProcessed ?? 0} alerts`);
 
   // Fetch cases and run AD
-  const { body: cb } = await kibana.get(`/s/${spaceId}/api/cases/_find?perPage=100&sortField=createdAt&sortOrder=asc`);
+  const { body: cb } = await kibana.get(
+    `/s/${spaceId}/api/cases/_find?perPage=100&sortField=createdAt&sortOrder=asc`
+  );
   const cases = ((cb as Record<string, unknown>)?.cases ?? []) as Array<Record<string, unknown>>;
   let adsTotal = 0;
 
@@ -174,13 +220,17 @@ async function runAG(
     const adMs = Date.now() - adT0;
 
     if (adSt === 200 && typeof adBd === 'object' && adBd !== null) {
-      const ads = ((adBd as Record<string, unknown>).attack_discoveries ?? []) as Array<Record<string, unknown>>;
+      const ads = ((adBd as Record<string, unknown>).attack_discoveries ?? []) as Array<
+        Record<string, unknown>
+      >;
       const kept = (adBd as Record<string, unknown>).alerts_in_discoveries ?? 0;
       const rej = (adBd as Record<string, unknown>).alerts_rejected ?? 0;
       if (ads.length > 0) {
         adsTotal++;
         const adTitle = (ads[0].title as string)?.slice(0, 60) ?? '';
-        console.log(`      ✓ "${adTitle}" — kept ${kept}, rejected ${rej} (${(adMs / 1000).toFixed(1)}s)`);
+        console.log(
+          `      ✓ "${adTitle}" — kept ${kept}, rejected ${rej} (${(adMs / 1000).toFixed(1)}s)`
+        );
         details.push(`${title}: AD="${adTitle}", kept=${kept}, rejected=${rej}`);
       } else {
         console.log(`      ○ No discovery (${(adMs / 1000).toFixed(1)}s)`);
@@ -220,7 +270,11 @@ async function runTP(
       details.push(trimmed);
       console.log(`    ${trimmed}`);
     }
-    if (trimmed.includes('Alerts processed') || trimmed.includes('Classifications') || trimmed.includes('Cases created')) {
+    if (
+      trimmed.includes('Alerts processed') ||
+      trimmed.includes('Classifications') ||
+      trimmed.includes('Cases created')
+    ) {
       console.log(`    ${trimmed}`);
     }
   }
@@ -245,28 +299,43 @@ async function runHybrid(
   const t0 = Date.now();
 
   // Create workflow
-  const { status: wfSt, body: wfBd } = await kibana.post(`/s/${spaceId}/api/security/alert_grouping/workflow`, {
-    name: 'demo-hybrid', description: 'Demo Hybrid', enabled: true,
-    schedule: { interval: '5m' },
-    alertFilter: {
-      alertsIndexPattern: '.alerts-security.alerts-default',
-      excludeTags: ['llm-triaged'], includeStatuses: ['open'], maxAlertsPerRun: 200,
-    },
-    groupingConfig: {
-      strategy: 'temporal',
-      entityTypes: [
-        { type: 'host.name', sourceFields: ['host.name'], weight: 1, required: true },
-        { type: 'user.name', sourceFields: ['user.name'], weight: 0.5 },
-        { type: 'process.name', sourceFields: ['process.name'], weight: 0.3 },
-      ],
-      threshold: 0.3, timeWindow: '4h', createNewCaseIfNoMatch: true,
-      maxAlertsPerCase: 200, mergeSimilarCases: true, mergeThreshold: 0.7,
-    },
-    attackDiscoveryConfig: {
-      enabled: true, mode: 'full', triggerOnAlertCount: 1,
-      attachToCase: true, validateAlertRelevance: true, enableCaseMerging: true,
-    },
-  });
+  const { status: wfSt, body: wfBd } = await kibana.post(
+    `/s/${spaceId}/api/security/alert_grouping/workflow`,
+    {
+      name: 'demo-hybrid',
+      description: 'Demo Hybrid',
+      enabled: true,
+      schedule: { interval: '5m' },
+      alertFilter: {
+        alertsIndexPattern: '.alerts-security.alerts-default',
+        excludeTags: ['llm-triaged'],
+        includeStatuses: ['open'],
+        maxAlertsPerRun: 200,
+      },
+      groupingConfig: {
+        strategy: 'temporal',
+        entityTypes: [
+          { type: 'host.name', sourceFields: ['host.name'], weight: 1, required: true },
+          { type: 'user.name', sourceFields: ['user.name'], weight: 0.5 },
+          { type: 'process.name', sourceFields: ['process.name'], weight: 0.3 },
+        ],
+        threshold: 0.3,
+        timeWindow: '4h',
+        createNewCaseIfNoMatch: true,
+        maxAlertsPerCase: 200,
+        mergeSimilarCases: true,
+        mergeThreshold: 0.7,
+      },
+      attackDiscoveryConfig: {
+        enabled: true,
+        mode: 'full',
+        triggerOnAlertCount: 1,
+        attachToCase: true,
+        validateAlertRelevance: true,
+        enableCaseMerging: true,
+      },
+    }
+  );
 
   let wfId = '';
   if (wfSt === 200 || wfSt === 201) {
@@ -292,11 +361,21 @@ async function runHybrid(
   const details: string[] = [];
   for (const line of output.split('\n')) {
     const trimmed = line.trim();
-    if (trimmed.startsWith('→') || trimmed.includes('MALICIOUS') || trimmed.includes('UNKNOWN') || trimmed.includes('BENIGN')) {
+    if (
+      trimmed.startsWith('→') ||
+      trimmed.includes('MALICIOUS') ||
+      trimmed.includes('UNKNOWN') ||
+      trimmed.includes('BENIGN')
+    ) {
       details.push(trimmed);
       console.log(`    ${trimmed}`);
     }
-    if (trimmed.includes('Cases:') || trimmed.includes('Classifications') || trimmed.includes('AD triggered') || trimmed.includes('Discoveries')) {
+    if (
+      trimmed.includes('Cases:') ||
+      trimmed.includes('Classifications') ||
+      trimmed.includes('AD triggered') ||
+      trimmed.includes('Discoveries')
+    ) {
       console.log(`    ${trimmed}`);
     }
   }
@@ -320,7 +399,9 @@ async function cleanup(es: ESClient, kibana: KibanaClient, esArgs: string): Prom
   const n0 = await deleteCasesInSpace(kibana, 'default');
   if (n0 > 0) console.log(`  default: deleted ${n0} cases`);
 
-  await es.post('/.alerts-security.alerts-*/_delete_by_query?refresh=true', { query: { term: { tags: INJECTED_TAG } } });
+  await es.post('/.alerts-security.alerts-*/_delete_by_query?refresh=true', {
+    query: { term: { tags: INJECTED_TAG } },
+  });
   console.log(`  Deleted demo alerts`);
   run('recreate_endpoint_events.ts', '--cleanup', esArgs);
   console.log(`  Deleted endpoint events`);
@@ -338,11 +419,26 @@ async function main(): Promise<void> {
   const connectorId = args.extra['connector-id'] ?? '';
   const doCleanup = args.flags.has('cleanup');
 
-  if (!args.esUrl) { console.error('--es-url required'); process.exit(1); }
-  if (!args.kibanaUrl) { args.kibanaUrl = args.esUrl.replace(/:\d+/, ':5601'); }
+  if (!args.esUrl) {
+    console.error('--es-url required');
+    process.exit(1);
+  }
+  if (!args.kibanaUrl) {
+    args.kibanaUrl = args.esUrl.replace(/:\d+/, ':5601');
+  }
 
-  const es = new ESClient({ baseUrl: args.esUrl, apiKey: args.apiKey, user: args.user, password: args.password });
-  const kibana = new KibanaClient({ baseUrl: args.kibanaUrl!, apiKey: args.apiKey, user: args.user, password: args.password });
+  const es = new ESClient({
+    baseUrl: args.esUrl,
+    apiKey: args.apiKey,
+    user: args.user,
+    password: args.password,
+  });
+  const kibana = new KibanaClient({
+    baseUrl: args.kibanaUrl!,
+    apiKey: args.apiKey,
+    user: args.user,
+    password: args.password,
+  });
 
   // ES-only args for scripts that don't accept --kibana-url
   const esArgParts: string[] = [`--es-url ${args.esUrl}`];
@@ -364,8 +460,14 @@ async function main(): Promise<void> {
 
   await checkCluster(es);
 
-  if (doCleanup) { await cleanup(es, kibana, esArgs); return; }
-  if (!connectorId) { console.error('--connector-id required'); process.exit(1); }
+  if (doCleanup) {
+    await cleanup(es, kibana, esArgs);
+    return;
+  }
+  if (!connectorId) {
+    console.error('--connector-id required');
+    process.exit(1);
+  }
 
   const T0 = Date.now();
 
@@ -410,16 +512,33 @@ async function main(): Promise<void> {
   console.log(`  ┌──────────────────┬──────────┬───────┬──────┐`);
   console.log(`  │ Approach         │ Duration │ Cases │  ADs │`);
   console.log(`  ├──────────────────┼──────────┼───────┼──────┤`);
-  console.log(`  │ Alert Grouping   │ ${String(Math.round(agResult.durationMs / 1000)).padStart(6)}s │ ${String(agResult.cases).padStart(5)} │ ${String(agResult.ads).padStart(4)} │`);
-  console.log(`  │ Triage Prompt    │ ${String(Math.round(tpResult.durationMs / 1000)).padStart(6)}s │ ${String(tpResult.cases).padStart(5)} │  N/A │`);
-  console.log(`  │ Hybrid           │ ${String(Math.round(hybridResult.durationMs / 1000)).padStart(6)}s │ ${String(hybridResult.cases).padStart(5)} │ ${String(hybridResult.ads).padStart(4)} │`);
+  console.log(
+    `  │ Alert Grouping   │ ${String(Math.round(agResult.durationMs / 1000)).padStart(
+      6
+    )}s │ ${String(agResult.cases).padStart(5)} │ ${String(agResult.ads).padStart(4)} │`
+  );
+  console.log(
+    `  │ Triage Prompt    │ ${String(Math.round(tpResult.durationMs / 1000)).padStart(
+      6
+    )}s │ ${String(tpResult.cases).padStart(5)} │  N/A │`
+  );
+  console.log(
+    `  │ Hybrid           │ ${String(Math.round(hybridResult.durationMs / 1000)).padStart(
+      6
+    )}s │ ${String(hybridResult.cases).padStart(5)} │ ${String(hybridResult.ads).padStart(4)} │`
+  );
   console.log(`  └──────────────────┴──────────┴───────┴──────┘`);
   console.log(`\n  View results in Kibana:`);
   console.log(`    Alert Grouping: ${args.kibanaUrl}/s/ag-demo/app/security/cases`);
   console.log(`    Triage Prompt:  ${args.kibanaUrl}/s/tp-demo/app/security/cases`);
   console.log(`    Hybrid:         ${args.kibanaUrl}/s/hybrid-demo/app/security/cases`);
   console.log(`\n  Cleanup:`);
-  console.log(`    npx tsx demo_setup.ts ${esArgs} --kibana-url ${args.kibanaUrl} --connector-id ${connectorId} --cleanup`);
+  console.log(
+    `    npx tsx demo_setup.ts ${esArgs} --kibana-url ${args.kibanaUrl} --connector-id ${connectorId} --cleanup`
+  );
 }
 
-main().catch((err) => { console.error('Fatal:', err); process.exit(1); });
+main().catch((err) => {
+  console.error('Fatal:', err);
+  process.exit(1);
+});

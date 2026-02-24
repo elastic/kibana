@@ -16,7 +16,7 @@ import type {
   ClusteringResult,
   ProcessNode,
 } from '../types';
-import { EntityExtractionService } from './entity_extraction_service';
+import type { EntityExtractionService } from './entity_extraction_service';
 
 /** Default lateral movement MITRE technique IDs */
 const DEFAULT_LATERAL_MOVEMENT_TECHNIQUES = [
@@ -37,20 +37,20 @@ const DEFAULT_LATERAL_MOVEMENT_TECHNIQUES = [
 
 /** MITRE ATT&CK kill chain ordering for tactic sub-grouping */
 const TACTIC_KILL_CHAIN_ORDER: Record<string, number> = {
-  'Reconnaissance': 0,
+  Reconnaissance: 0,
   'Resource Development': 1,
   'Initial Access': 2,
-  'Execution': 3,
-  'Persistence': 4,
+  Execution: 3,
+  Persistence: 4,
   'Privilege Escalation': 5,
   'Defense Evasion': 6,
   'Credential Access': 7,
-  'Discovery': 8,
+  Discovery: 8,
   'Lateral Movement': 9,
-  'Collection': 10,
+  Collection: 10,
   'Command and Control': 11,
-  'Exfiltration': 12,
-  'Impact': 13,
+  Exfiltration: 12,
+  Impact: 13,
 };
 
 interface AlertWithMetadata {
@@ -121,7 +121,9 @@ export class AlertClusteringService {
     // Stage 1: Host-primary grouping
     const hostGroups = this.groupByHost(enrichedAlerts);
     metrics.uniqueHosts = hostGroups.size;
-    this.logger.debug(`Stage 1: Grouped ${alerts.length} alerts into ${hostGroups.size} host groups`);
+    this.logger.debug(
+      `Stage 1: Grouped ${alerts.length} alerts into ${hostGroups.size} host groups`
+    );
 
     // Stage 2: Temporal clustering within each host group
     let clusters = this.temporalClustering(hostGroups);
@@ -133,23 +135,17 @@ export class AlertClusteringService {
     // Stage 3: Tactic chain annotation and sub-grouping
     clusters = this.tacticChainSubGrouping(clusters, enrichedAlerts);
     metrics.tacticSubGroups = clusters.length - hostGroups.size - metrics.temporalSplits;
-    this.logger.debug(
-      `Stage 3: Tactic sub-grouping produced ${clusters.length} clusters`
-    );
+    this.logger.debug(`Stage 3: Tactic sub-grouping produced ${clusters.length} clusters`);
 
     // Stage 4: Process tree correlation
     const processCorrelations = this.processTreeCorrelation(clusters, enrichedAlerts);
     metrics.processTreeCorrelations = processCorrelations;
-    this.logger.debug(
-      `Stage 4: Found ${processCorrelations} process tree correlations`
-    );
+    this.logger.debug(`Stage 4: Found ${processCorrelations} process tree correlations`);
 
     // Stage 5: Cross-host correlation
     const crossHostLinks = this.crossHostCorrelation(clusters, enrichedAlerts);
     metrics.crossHostLinksFound = crossHostLinks.length;
-    this.logger.debug(
-      `Stage 5: Found ${crossHostLinks.length} cross-host links`
-    );
+    this.logger.debug(`Stage 5: Found ${crossHostLinks.length} cross-host links`);
 
     // Attach cross-host links to relevant clusters
     for (const link of crossHostLinks) {
@@ -194,7 +190,8 @@ export class AlertClusteringService {
     return alerts.map((alert) => {
       const source = alert._source;
       const hostName = (get('host.name', source) as string | undefined) ?? 'unknown';
-      const timestamp = (get('@timestamp', source) as string | undefined) ?? new Date().toISOString();
+      const timestamp =
+        (get('@timestamp', source) as string | undefined) ?? new Date().toISOString();
       const mitre = mitreMetadata.get(alert._id) ?? { tactics: [], techniques: [] };
       const entities = alertEntities.get(alert._id) ?? [];
       const processNode = processNodeByAlertId.get(alert._id);
@@ -407,18 +404,13 @@ export class AlertClusteringService {
    * Groups tactics into early-stage (Recon→Execution), mid-stage (Persistence→Discovery),
    * and late-stage (Lateral Movement→Impact).
    */
-  private splitByTacticPhase(
-    cluster: AlertCluster,
-    alerts: AlertWithMetadata[]
-  ): AlertCluster[] {
+  private splitByTacticPhase(cluster: AlertCluster, alerts: AlertWithMetadata[]): AlertCluster[] {
     const earlyStage: AlertWithMetadata[] = []; // Kill chain positions 0-3
     const midStage: AlertWithMetadata[] = []; // Kill chain positions 4-8
     const lateStage: AlertWithMetadata[] = []; // Kill chain positions 9-13
 
     for (const alert of alerts) {
-      const maxPhase = Math.max(
-        ...alert.tactics.map((t) => TACTIC_KILL_CHAIN_ORDER[t] ?? 6)
-      );
+      const maxPhase = Math.max(...alert.tactics.map((t) => TACTIC_KILL_CHAIN_ORDER[t] ?? 6));
 
       if (maxPhase <= 3) {
         earlyStage.push(alert);
@@ -442,11 +434,7 @@ export class AlertClusteringService {
 
     let counter = 0;
     return phases.map((phase) => {
-      const subCluster = this.createCluster(
-        counter++,
-        cluster.hostName,
-        phase.alerts
-      );
+      const subCluster = this.createCluster(counter++, cluster.hostName, phase.alerts);
       subCluster.id = `${cluster.id}-${phase.label}`;
       return subCluster;
     });
@@ -471,10 +459,21 @@ export class AlertClusteringService {
     }
 
     const excludedProcesses = new Set(
-      (this.config.processTree?.excludedProcesses ?? [
-        'bash', 'sh', 'dash', 'zsh', 'fish', 'cmd.exe', 'powershell.exe',
-        'sshd', 'systemd', 'init', 'launchd',
-      ]).map((p) => p.toLowerCase())
+      (
+        this.config.processTree?.excludedProcesses ?? [
+          'bash',
+          'sh',
+          'dash',
+          'zsh',
+          'fish',
+          'cmd.exe',
+          'powershell.exe',
+          'sshd',
+          'systemd',
+          'init',
+          'launchd',
+        ]
+      ).map((p) => p.toLowerCase())
     );
 
     let correlations = 0;
@@ -572,8 +571,9 @@ export class AlertClusteringService {
             confidence: Math.min(0.9, 0.5 + temporalMatches.length * 0.1),
             alertIds: temporalMatches.flatMap(([a, b]) => [a._id, b._id]),
             description:
-              `Lateral movement techniques detected on both hosts within ${crossHostConfig?.timeWindowMinutes ?? 5}min: ` +
-              `${temporalMatches.length} temporal matches`,
+              `Lateral movement techniques detected on both hosts within ${
+                crossHostConfig?.timeWindowMinutes ?? 5
+              }min: ` + `${temporalMatches.length} temporal matches`,
           });
         }
       }
@@ -619,8 +619,7 @@ export class AlertClusteringService {
                 linkType: 'temporal_tactic_match',
                 confidence: Math.min(0.7, 0.3 + hosts.size * 0.05),
                 alertIds: groupAlerts.map((a) => a._id),
-                description:
-                  `Same detection rule triggered simultaneously on ${hosts.size} hosts (selective correlation)`,
+                description: `Same detection rule triggered simultaneously on ${hosts.size} hosts (selective correlation)`,
               });
             }
           }
@@ -665,10 +664,7 @@ export class AlertClusteringService {
   /**
    * Find network-based links between hosts using source/destination IP correlation.
    */
-  private findNetworkLinks(
-    alerts: AlertWithMetadata[],
-    clusters: AlertCluster[]
-  ): CrossHostLink[] {
+  private findNetworkLinks(alerts: AlertWithMetadata[], clusters: AlertCluster[]): CrossHostLink[] {
     const links: CrossHostLink[] = [];
 
     // Build host -> IP mapping
@@ -734,11 +730,7 @@ export class AlertClusteringService {
   /**
    * Create an AlertCluster from a set of enriched alerts.
    */
-  private createCluster(
-    id: number,
-    hostName: string,
-    alerts: AlertWithMetadata[]
-  ): AlertCluster {
+  private createCluster(id: number, hostName: string, alerts: AlertWithMetadata[]): AlertCluster {
     const sortedByTime = [...alerts].sort(
       (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
     );

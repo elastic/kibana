@@ -142,9 +142,7 @@ export const evictStaleLeaders = (
 
   // Filter by age
   let filtered = leaders.filter((leader) => {
-    const timestamp =
-      (leader['@timestamp'] as string) ??
-      (leader['kibana.alert.start'] as string);
+    const timestamp = (leader['@timestamp'] as string) ?? (leader['kibana.alert.start'] as string);
     if (!timestamp) return true; // Keep leaders without timestamps
     const leaderTime = new Date(timestamp).getTime();
     return now - leaderTime < maxAgeMs;

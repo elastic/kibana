@@ -12,15 +12,15 @@ import type { CalderaAbilityTemplate } from './ref7707_abilities';
 import { REF7707_CALDERA_ABILITIES } from './ref7707_abilities';
 
 export interface EnsureRef7707CalderaPackOptions {
-    calderaUrl: string;
-    calderaApiKey: string;
-    log: ToolingLog;
-    domain: string;
-    webPort: number;
-    /** Optional: DNS server IP to target explicitly (recommended for GCP, avoids changing VM resolvers). */
-    dnsIp?: string;
-    /** Optional: Web server IP to use for curl --resolve (recommended for GCP, avoids changing VM resolvers). */
-    webIp?: string;
+  calderaUrl: string;
+  calderaApiKey: string;
+  log: ToolingLog;
+  domain: string;
+  webPort: number;
+  /** Optional: DNS server IP to target explicitly (recommended for GCP, avoids changing VM resolvers). */
+  dnsIp?: string;
+  /** Optional: Web server IP to use for curl --resolve (recommended for GCP, avoids changing VM resolvers). */
+  webIp?: string;
 }
 
 /**
@@ -29,96 +29,98 @@ export interface EnsureRef7707CalderaPackOptions {
  * This is intentionally tolerant to "already exists" behavior differences across Caldera deployments.
  */
 export const ensureRef7707CalderaPack = async ({
-    calderaUrl,
-    calderaApiKey,
-    log,
-    domain,
-    webPort,
-    dnsIp,
-    webIp,
+  calderaUrl,
+  calderaApiKey,
+  log,
+  domain,
+  webPort,
+  dnsIp,
+  webIp,
 }: EnsureRef7707CalderaPackOptions): Promise<{
-    abilityIds: string[];
-    adversaryId?: string;
+  abilityIds: string[];
+  adversaryId?: string;
 }> => {
-    const client = new CalderaClient({ calderaUrl, apiKey: calderaApiKey });
+  const client = new CalderaClient({ calderaUrl, apiKey: calderaApiKey });
 
-    if (!(await client.healthCheck())) {
-        throw new Error(`Caldera health check failed at ${calderaUrl} (is it running / reachable?)`);
-    }
+  if (!(await client.healthCheck())) {
+    throw new Error(`Caldera health check failed at ${calderaUrl} (is it running / reachable?)`);
+  }
 
-    const abilityIds: string[] = [];
+  const abilityIds: string[] = [];
 
-    const replaceTokens = (cmd: string): string => {
-        return cmd
-            .replaceAll('#{domain}', domain)
-            .replaceAll('"#{domain}"', `"${domain}"`)
-            .replaceAll('#{web_port}', String(webPort))
-            .replaceAll('"#{web_port}"', `"${String(webPort)}"`)
-            .replaceAll('#{dns_ip}', dnsIp ?? '')
-            .replaceAll('"#{dns_ip}"', `"${dnsIp ?? ''}"`)
-            .replaceAll('#{web_ip}', webIp ?? '')
-            .replaceAll('"#{web_ip}"', `"${webIp ?? ''}"`);
+  const replaceTokens = (cmd: string): string => {
+    return cmd
+      .replaceAll('#{domain}', domain)
+      .replaceAll('"#{domain}"', `"${domain}"`)
+      .replaceAll('#{web_port}', String(webPort))
+      .replaceAll('"#{web_port}"', `"${String(webPort)}"`)
+      .replaceAll('#{dns_ip}', dnsIp ?? '')
+      .replaceAll('"#{dns_ip}"', `"${dnsIp ?? ''}"`)
+      .replaceAll('#{web_ip}', webIp ?? '')
+      .replaceAll('"#{web_ip}"', `"${webIp ?? ''}"`);
+  };
+
+  const toCalderaAbilityPayload = (tmpl: CalderaAbilityTemplate, abilityId: string) => {
+    return {
+      ability_id: abilityId,
+      name: `${tmpl.name} [${domain}]`,
+      description: tmpl.description,
+      tactic: tmpl.tactic,
+      technique: tmpl.technique,
+      // Caldera expects `executors` array entries (platform + executor name + command).
+      executors: tmpl.executors.map((e) => ({
+        platform: e.platform,
+        name: e.name,
+        command: replaceTokens(e.command),
+        ...(e.timeout ? { timeout: e.timeout } : {}),
+      })),
     };
+  };
 
-    const toCalderaAbilityPayload = (tmpl: CalderaAbilityTemplate, abilityId: string) => {
-        return {
-            ability_id: abilityId,
-            name: `${tmpl.name} [${domain}]`,
-            description: tmpl.description,
-            tactic: tmpl.tactic,
-            technique: tmpl.technique,
-            // Caldera expects `executors` array entries (platform + executor name + command).
-            executors: tmpl.executors.map((e) => ({
-                platform: e.platform,
-                name: e.name,
-                command: replaceTokens(e.command),
-                ...(e.timeout ? { timeout: e.timeout } : {}),
-            })),
-        };
-    };
+  // Create per-run abilities with domain/port embedded so we don't depend on Caldera sources/facts.
+  for (const tmpl of REF7707_CALDERA_ABILITIES) {
+    const abilityId = randomUUID();
+    const ability = toCalderaAbilityPayload(tmpl, abilityId);
 
-    // Create per-run abilities with domain/port embedded so we don't depend on Caldera sources/facts.
-    for (const tmpl of REF7707_CALDERA_ABILITIES) {
-        const abilityId = randomUUID();
-        const ability = toCalderaAbilityPayload(tmpl, abilityId);
-
-        try {
-            await client.createAbility(ability);
-            log.info(`[caldera] created ability: ${ability.name} (${abilityId})`);
-            abilityIds.push(abilityId);
-        } catch (e: any) {
-            log.warning(
-                `[caldera] ability create may have failed (skipping): ${abilityId} - ${e?.message ?? e}`
-            );
-        }
-    }
-
-    const adversaryPayload = {
-        name: 'REF7707 Lab (benign chain)',
-        description:
-            'Benign REF7707-like chain: DNS -> download -> execution -> persistence (multi-platform). Generated by Kibana ref7707_lab tooling.',
-        atomic_ordering: abilityIds,
-    };
-
-    let adversaryId: string | undefined;
     try {
-        const created = await client.createAdversary(adversaryPayload);
-        adversaryId = created?.adversary_id;
-        log.info(`[caldera] created adversary: ${adversaryPayload.name}${adversaryId ? ` (${adversaryId})` : ''}`);
+      await client.createAbility(ability);
+      log.info(`[caldera] created ability: ${ability.name} (${abilityId})`);
+      abilityIds.push(abilityId);
     } catch (e: any) {
-        log.warning(`[caldera] adversary create may have failed (continuing): ${e?.message ?? e}`);
+      log.warning(
+        `[caldera] ability create may have failed (skipping): ${abilityId} - ${e?.message ?? e}`
+      );
     }
+  }
 
-    if (!adversaryId) {
-        const adversaries = await client.getAdversaries();
-        const existing = adversaries.find((a) => a?.name === adversaryPayload.name);
-        if (existing?.adversary_id) {
-            adversaryId = existing.adversary_id;
-            log.info(`[caldera] using existing adversary: ${adversaryPayload.name} (${adversaryId})`);
-        }
+  const adversaryPayload = {
+    name: 'REF7707 Lab (benign chain)',
+    description:
+      'Benign REF7707-like chain: DNS -> download -> execution -> persistence (multi-platform). Generated by Kibana ref7707_lab tooling.',
+    atomic_ordering: abilityIds,
+  };
+
+  let adversaryId: string | undefined;
+  try {
+    const created = await client.createAdversary(adversaryPayload);
+    adversaryId = created?.adversary_id;
+    log.info(
+      `[caldera] created adversary: ${adversaryPayload.name}${
+        adversaryId ? ` (${adversaryId})` : ''
+      }`
+    );
+  } catch (e: any) {
+    log.warning(`[caldera] adversary create may have failed (continuing): ${e?.message ?? e}`);
+  }
+
+  if (!adversaryId) {
+    const adversaries = await client.getAdversaries();
+    const existing = adversaries.find((a) => a?.name === adversaryPayload.name);
+    if (existing?.adversary_id) {
+      adversaryId = existing.adversary_id;
+      log.info(`[caldera] using existing adversary: ${adversaryPayload.name} (${adversaryId})`);
     }
+  }
 
-    return { abilityIds, adversaryId };
+  return { abilityIds, adversaryId };
 };
-
-

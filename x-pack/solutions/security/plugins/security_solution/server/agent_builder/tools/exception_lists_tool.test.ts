@@ -119,5 +119,3 @@ describe('exceptionListsTool', () => {
     expect(exceptionsClient.createExceptionListItem).not.toHaveBeenCalled();
   });
 });
-
-

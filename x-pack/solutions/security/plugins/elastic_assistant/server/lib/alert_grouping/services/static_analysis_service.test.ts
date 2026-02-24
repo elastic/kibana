@@ -6,10 +6,7 @@
  */
 
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
-import {
-  StaticAnalysisService,
-  type CaseSimilarityInput,
-} from './static_analysis_service';
+import { StaticAnalysisService, type CaseSimilarityInput } from './static_analysis_service';
 import { ObservableTypeKey } from '../types';
 import type { AlertCluster, ExtractedEntity } from '../types';
 
@@ -490,10 +487,7 @@ describe('StaticAnalysisService', () => {
       expect(input.caseTitle).toBe('Test Case');
       expect(input.entities).toEqual(cluster.entities);
       expect(input.techniques).toEqual(cluster.techniques);
-      expect(input.ruleNames).toEqual([
-        'Suspicious Script Execution',
-        'Masquerading Detected',
-      ]);
+      expect(input.ruleNames).toEqual(['Suspicious Script Execution', 'Masquerading Detected']);
       expect(input.earliestTimestamp).toBe('2025-01-15T10:00:00Z');
       expect(input.latestTimestamp).toBe('2025-01-15T12:00:00Z');
       expect(input.hostNames).toEqual(['host-1']);

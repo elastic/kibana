@@ -7,13 +7,12 @@
 
 import type { Logger } from '@kbn/logging';
 
-import {
+import type {
+  ObservableTypeKey,
   type ExtractedEntity,
   type GroupingConfig,
   type CaseMatch,
-  type EntityTypeConfig,
   GroupingStrategy,
-  ObservableTypeKey,
   DEFAULT_ENTITY_TYPE_CONFIGS,
 } from '../types';
 
@@ -52,13 +51,7 @@ export class CaseMatchingService {
   private readonly logger: Logger;
   private readonly groupingConfig: GroupingConfig;
 
-  constructor({
-    logger,
-    groupingConfig,
-  }: {
-    logger: Logger;
-    groupingConfig: GroupingConfig;
-  }) {
+  constructor({ logger, groupingConfig }: { logger: Logger; groupingConfig: GroupingConfig }) {
     this.logger = logger;
     this.groupingConfig = groupingConfig;
   }
@@ -81,9 +74,7 @@ export class CaseMatchingService {
       // Check time proximity if configured
       if (timeProximityMs !== null && alertTimestamp) {
         if (!this.isWithinTimeProximity(alertTimestamp, caseData, timeProximityMs)) {
-          this.logger.debug(
-            `Case ${caseData.id} excluded due to time proximity constraint`
-          );
+          this.logger.debug(`Case ${caseData.id} excluded due to time proximity constraint`);
           continue;
         }
       }
@@ -107,8 +98,9 @@ export class CaseMatchingService {
     });
 
     this.logger.debug(
-      `Found ${matches.length} matching cases for ${entities.length} entities` +
-        (timeProximityMs ? ` (with ${this.groupingConfig.timeProximityWindow} time window)` : '')
+      `Found ${matches.length} matching cases for ${entities.length} entities${
+        timeProximityMs ? ` (with ${this.groupingConfig.timeProximityWindow} time window)` : ''
+      }`
     );
 
     return matches;
@@ -174,8 +166,8 @@ export class CaseMatchingService {
     const caseTime = caseData.updatedAt
       ? new Date(caseData.updatedAt).getTime()
       : caseData.createdAt
-        ? new Date(caseData.createdAt).getTime()
-        : Date.now();
+      ? new Date(caseData.createdAt).getTime()
+      : Date.now();
 
     const timeDiff = Math.abs(alertTime - caseTime);
     return timeDiff <= timeProximityMs;
@@ -184,10 +176,7 @@ export class CaseMatchingService {
   /**
    * Evaluate if a case matches the entities based on the grouping strategy
    */
-  private evaluateCaseMatch(
-    entities: ExtractedEntity[],
-    caseData: CaseData
-  ): CaseMatch | null {
+  private evaluateCaseMatch(entities: ExtractedEntity[], caseData: CaseData): CaseMatch | null {
     const matchedObservables: CaseMatch['matchedObservables'] = [];
 
     // Build observable lookup by type and value
@@ -217,11 +206,7 @@ export class CaseMatchingService {
     }
 
     // Calculate match score based on strategy
-    const matchScore = this.calculateMatchScore(
-      entities,
-      matchedObservables,
-      caseData
-    );
+    const matchScore = this.calculateMatchScore(entities, matchedObservables, caseData);
 
     // Check if match meets threshold based on strategy
     if (!this.meetsMatchThreshold(matchScore, matchedObservables, entities)) {
@@ -308,9 +293,7 @@ export class CaseMatchingService {
     }
 
     // Score is based on number of matched entities
-    const uniqueMatchedEntities = new Set(
-      matchedObservables.map((m) => `${m.type}:${m.value}`)
-    );
+    const uniqueMatchedEntities = new Set(matchedObservables.map((m) => `${m.type}:${m.value}`));
 
     return Math.min(1, uniqueMatchedEntities.size / entities.length);
   }
@@ -438,7 +421,9 @@ export class CaseMatchingService {
     }
 
     this.logger.debug(
-      `Grouped ${alertEntities.size} alerts into ${grouping.size - (grouping.has('__unmatched__') ? 1 : 0)} cases, ${unmatchedAlerts.length} unmatched`
+      `Grouped ${alertEntities.size} alerts into ${
+        grouping.size - (grouping.has('__unmatched__') ? 1 : 0)
+      } cases, ${unmatchedAlerts.length} unmatched`
     );
 
     return grouping;
@@ -475,20 +460,13 @@ export class CaseMatchingService {
    * Calculate entity overlap between two cases
    * Convenience method that converts case observables to entities
    */
-  public calculateCaseEntityOverlap(
-    caseA: CaseData,
-    caseB: CaseData
-  ): number {
+  public calculateCaseEntityOverlap(caseA: CaseData, caseB: CaseData): number {
     if (caseA.observables.length === 0 || caseB.observables.length === 0) {
       return 0;
     }
 
-    const setA = new Set(
-      caseA.observables.map((o) => `${o.typeKey}:${o.value.toLowerCase()}`)
-    );
-    const setB = new Set(
-      caseB.observables.map((o) => `${o.typeKey}:${o.value.toLowerCase()}`)
-    );
+    const setA = new Set(caseA.observables.map((o) => `${o.typeKey}:${o.value.toLowerCase()}`));
+    const setB = new Set(caseB.observables.map((o) => `${o.typeKey}:${o.value.toLowerCase()}`));
 
     let overlapCount = 0;
     for (const key of setA) {
@@ -570,9 +548,7 @@ export class CaseMatchingService {
   /**
    * Create a new case matching service with custom grouping config
    */
-  public static withConfig(
-    groupingConfig?: Partial<GroupingConfig>
-  ): CaseMatchingService {
+  public static withConfig(groupingConfig?: Partial<GroupingConfig>): CaseMatchingService {
     const defaultConfig: GroupingConfig = {
       strategy: GroupingStrategy.Weighted,
       entityTypes: DEFAULT_ENTITY_TYPE_CONFIGS,

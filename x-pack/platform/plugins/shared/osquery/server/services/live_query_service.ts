@@ -139,20 +139,21 @@ export const fetchLiveQueryDetails = async (
 
   // 3. Fetch action responses for each query
   const queries = actionDetails._source?.queries ?? [];
-  const responseData = queries.length > 0
-    ? await lastValueFrom(
-      zip(
-        ...map(queries, (query) =>
-          getActionResponses(
-            search,
-            query.action_id,
-            query.agents?.length ?? 0,
-            integrationNamespaces
+  const responseData =
+    queries.length > 0
+      ? await lastValueFrom(
+          zip(
+            ...map(queries, (query) =>
+              getActionResponses(
+                search,
+                query.action_id,
+                query.agents?.length ?? 0,
+                integrationNamespaces
+              )
+            )
           )
         )
-      )
-    )
-    : [];
+      : [];
 
   // 4. Calculate completion status
   const isCompleted = isExpired || (responseData.length > 0 && every(responseData, ['pending', 0]));
@@ -178,7 +179,7 @@ export const fetchLiveQueryDetails = async (
       successful: agentStatus.successful,
       failed: agentStatus.failed,
       docs: agentStatus.docs,
-      status: (isCompleted || agentStatus.pending === 0) ? 'completed' : 'running',
+      status: isCompleted || agentStatus.pending === 0 ? 'completed' : 'running',
     };
   });
 
@@ -212,8 +213,8 @@ export const fetchLiveQueryResults = async (
 
   logger?.error(
     `[fetchLiveQueryResults] Querying with actionId: ${actionId}, ` +
-    `integrationNamespaces: ${JSON.stringify(integrationNamespaces)}, ` +
-    `pagination: page=${pagination.page}, pageSize=${pagination.pageSize}`
+      `integrationNamespaces: ${JSON.stringify(integrationNamespaces)}, ` +
+      `pagination: page=${pagination.page}, pageSize=${pagination.pageSize}`
   );
 
   const res = await lastValueFrom(
@@ -238,8 +239,9 @@ export const fetchLiveQueryResults = async (
   const totalCount = typeof rawTotal === 'number' ? rawTotal : rawTotal?.value ?? 0;
 
   logger?.error(
-    `[fetchLiveQueryResults] Query returned totalCount: ${totalCount}, edges: ${res.edges?.length ?? 0}, ` +
-    `rawTotal: ${JSON.stringify(rawTotal)}`
+    `[fetchLiveQueryResults] Query returned totalCount: ${totalCount}, edges: ${
+      res.edges?.length ?? 0
+    }, ` + `rawTotal: ${JSON.stringify(rawTotal)}`
   );
 
   return {
@@ -268,7 +270,7 @@ export const waitForQueryCompletion = async (
 
   logger?.error(
     `[waitForQueryCompletion] ENTRY - actionId: ${actionId}, spaceId: ${spaceId}, ` +
-    `pollIntervalMs: ${pollIntervalMs}, maxWaitMs: ${maxWaitMs}`
+      `pollIntervalMs: ${pollIntervalMs}, maxWaitMs: ${maxWaitMs}`
   );
 
   const startTime = Date.now();
@@ -289,7 +291,9 @@ export const waitForQueryCompletion = async (
       });
     } catch (error) {
       logger?.error(
-        `[waitForQueryCompletion] Poll ${pollCount} FAILED - Error: ${error instanceof Error ? error.message : String(error)}`
+        `[waitForQueryCompletion] Poll ${pollCount} FAILED - Error: ${
+          error instanceof Error ? error.message : String(error)
+        }`
       );
       throw error;
     }
@@ -301,15 +305,16 @@ export const waitForQueryCompletion = async (
 
     logger?.error(
       `[waitForQueryCompletion] Poll ${pollCount}: status=${status.status}, isCompleted=${status.isCompleted}, ` +
-      `isExpired=${status.isExpired}, responded=${respondedCount}, pending=${pendingCount}, docs=${docsCount}. ` +
-      `Elapsed: ${elapsedSeconds}s`
+        `isExpired=${status.isExpired}, responded=${respondedCount}, pending=${pendingCount}, docs=${docsCount}. ` +
+        `Elapsed: ${elapsedSeconds}s`
     );
 
     if (status.isCompleted || status.isExpired) {
       logger?.error(
         `[waitForQueryCompletion] COMPLETED after ${pollCount} polls, ${elapsedSeconds}s. ` +
-        `Status: ${status.status}, responded: ${respondedCount}, pending: ${pendingCount}, docs: ${docsCount}`
+          `Status: ${status.status}, responded: ${respondedCount}, pending: ${pendingCount}, docs: ${docsCount}`
       );
+
       return status;
     }
 
@@ -320,7 +325,7 @@ export const waitForQueryCompletion = async (
   // Timeout - return current status
   logger?.error(
     `[waitForQueryCompletion] TIMEOUT after ${Math.round((Date.now() - startTime) / 1000)}s ` +
-    `and ${pollCount} polls for action ${actionId}. Fetching final status...`
+      `and ${pollCount} polls for action ${actionId}. Fetching final status...`
   );
 
   return fetchLiveQueryDetails(search, {
@@ -351,12 +356,15 @@ export const waitForResultsCount = async (
 
   logger?.error(
     `[waitForResultsCount] ENTRY - queryActionId: ${queryActionId}, expectedCount: ${expectedCount}, ` +
-    `pollIntervalMs: ${pollIntervalMs}, maxWaitMs: ${maxWaitMs}`
+      `pollIntervalMs: ${pollIntervalMs}, maxWaitMs: ${maxWaitMs}`
   );
 
   // If expected count is 0, return immediately
   if (expectedCount <= 0) {
-    logger?.error(`[waitForResultsCount] Expected count is ${expectedCount}, returning immediately`);
+    logger?.error(
+      `[waitForResultsCount] Expected count is ${expectedCount}, returning immediately`
+    );
+
     return { matched: true, totalCount: 0 };
   }
 
@@ -379,7 +387,9 @@ export const waitForResultsCount = async (
       });
     } catch (error) {
       logger?.error(
-        `[waitForResultsCount] Poll ${pollCount} FAILED - Error: ${error instanceof Error ? error.message : String(error)}`
+        `[waitForResultsCount] Poll ${pollCount} FAILED - Error: ${
+          error instanceof Error ? error.message : String(error)
+        }`
       );
       throw error;
     }
@@ -392,8 +402,9 @@ export const waitForResultsCount = async (
     if (results.totalCount >= expectedCount) {
       logger?.error(
         `[waitForResultsCount] MATCHED after ${pollCount} polls, ${elapsedSeconds}s. ` +
-        `Got ${results.totalCount}/${expectedCount} docs`
+          `Got ${results.totalCount}/${expectedCount} docs`
       );
+
       return { matched: true, totalCount: results.totalCount };
     }
 
@@ -413,7 +424,7 @@ export const waitForResultsCount = async (
 
   logger?.error(
     `[waitForResultsCount] TIMEOUT after ${Math.round((Date.now() - startTime) / 1000)}s ` +
-    `and ${pollCount} polls. Got ${finalResults.totalCount}/${expectedCount} docs`
+      `and ${pollCount} polls. Got ${finalResults.totalCount}/${expectedCount} docs`
   );
 
   return { matched: false, totalCount: finalResults.totalCount };

@@ -196,7 +196,9 @@ export const registerWorkflowCrudRoutes = (
                   workflow.schedule.interval,
                   spaceId
                 );
-                logger.info(`Scheduled workflow ${workflow.id} with interval ${workflow.schedule.interval}`);
+                logger.info(
+                  `Scheduled workflow ${workflow.id} with interval ${workflow.schedule.interval}`
+                );
               } catch (scheduleError) {
                 logger.warn(`Failed to schedule workflow ${workflow.id}: ${scheduleError}`);
               }
@@ -374,7 +376,9 @@ export const registerWorkflowCrudRoutes = (
                 logger.info(`Unscheduled workflow ${workflow.id}`);
               }
             } catch (scheduleError) {
-              logger.warn(`Failed to update workflow schedule for ${workflow.id}: ${scheduleError}`);
+              logger.warn(
+                `Failed to update workflow schedule for ${workflow.id}: ${scheduleError}`
+              );
             }
           }
 
@@ -455,7 +459,9 @@ export const registerWorkflowCrudRoutes = (
               await alertGroupingTask.unscheduleWorkflow(request.params.workflow_id, spaceId);
               logger.info(`Unscheduled workflow ${request.params.workflow_id}`);
             } catch (scheduleError) {
-              logger.warn(`Failed to unschedule workflow ${request.params.workflow_id}: ${scheduleError}`);
+              logger.warn(
+                `Failed to unschedule workflow ${request.params.workflow_id}: ${scheduleError}`
+              );
             }
           }
 
@@ -536,7 +542,12 @@ export const registerWorkflowCrudRoutes = (
           const result = await dataClient.findWorkflows({
             page: request.query.page,
             perPage: request.query.per_page,
-            enabled: request.query.status === 'enabled' ? true : request.query.status === 'disabled' ? false : undefined,
+            enabled:
+              request.query.status === 'enabled'
+                ? true
+                : request.query.status === 'disabled'
+                ? false
+                : undefined,
           });
 
           return response.ok({

@@ -26,6 +26,3 @@ Provides read-only guidance for data frame analytics: what each analysis type do
 - Do not stop/close jobs.\n
 `,
 });
-
-
-

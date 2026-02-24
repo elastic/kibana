@@ -55,7 +55,12 @@ describe('live_query_service', () => {
       const mockActionDetails = {
         _source: {
           queries: [
-            { action_id: 'query-1', id: 'q1', query: 'SELECT * FROM processes', agents: ['agent-1', 'agent-2'] },
+            {
+              action_id: 'query-1',
+              id: 'q1',
+              query: 'SELECT * FROM processes',
+              agents: ['agent-1', 'agent-2'],
+            },
           ],
         },
         fields: {
@@ -93,7 +98,12 @@ describe('live_query_service', () => {
       const mockActionDetails = {
         _source: {
           queries: [
-            { action_id: 'query-1', id: 'q1', query: 'SELECT * FROM processes', agents: ['agent-1', 'agent-2'] },
+            {
+              action_id: 'query-1',
+              id: 'q1',
+              query: 'SELECT * FROM processes',
+              agents: ['agent-1', 'agent-2'],
+            },
           ],
         },
         fields: {
@@ -129,7 +139,12 @@ describe('live_query_service', () => {
       const mockActionDetails = {
         _source: {
           queries: [
-            { action_id: 'query-1', id: 'q1', query: 'SELECT * FROM processes', agents: ['agent-1'] },
+            {
+              action_id: 'query-1',
+              id: 'q1',
+              query: 'SELECT * FROM processes',
+              agents: ['agent-1'],
+            },
           ],
         },
         fields: {
@@ -270,6 +285,7 @@ describe('live_query_service', () => {
       let callCount = 0;
       mockGetActionResponses.mockImplementation(() => {
         callCount++;
+
         return of({
           action_id: 'query-1',
           docs: callCount === 1 ? 5 : 10,
@@ -373,6 +389,7 @@ describe('live_query_service', () => {
       let callCount = 0;
       mockSearch.mockImplementation(() => {
         callCount++;
+
         return of({ edges: [], totalCount: callCount === 1 ? 5 : 10 });
       });
 

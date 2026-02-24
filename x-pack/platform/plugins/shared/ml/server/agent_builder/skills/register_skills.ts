@@ -9,12 +9,11 @@ import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
 import { ML_ANOMALY_DETECTION_JOBS_SKILL } from './ml_anomaly_detection_jobs_skill';
 import { ML_DATA_FRAME_ANALYTICS_SKILL } from './ml_data_frame_analytics_skill';
 
-export const registerAgentBuilderSkills = async (agentBuilder: AgentBuilderPluginSetup): Promise<void> => {
+export const registerAgentBuilderSkills = async (
+  agentBuilder: AgentBuilderPluginSetup
+): Promise<void> => {
   await Promise.all([
     agentBuilder.skill.registerSkill(ML_ANOMALY_DETECTION_JOBS_SKILL),
     agentBuilder.skill.registerSkill(ML_DATA_FRAME_ANALYTICS_SKILL),
   ]);
 };
-
-
-

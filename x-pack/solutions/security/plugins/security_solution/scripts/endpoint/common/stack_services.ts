@@ -147,7 +147,7 @@ export const createRuntimeServices = async ({
     if (isServerlessEs) {
       log?.warning(
         'Creating Security Superuser is not supported in current environment.\nES is running in serverless mode. ' +
-        'Will use username [system_indices_superuser] instead.'
+          'Will use username [system_indices_superuser] instead.'
       );
 
       username = 'system_indices_superuser';
@@ -320,7 +320,8 @@ export const createKbnClient = ({
 
   if (log) {
     log.verbose(
-      `Creating Kibana client with URL: ${clientOptions.url} ${apiKey ? ` + ApiKey: ${apiKey}` : ''
+      `Creating Kibana client with URL: ${clientOptions.url} ${
+        apiKey ? ` + ApiKey: ${apiKey}` : ''
       }`
     );
   }

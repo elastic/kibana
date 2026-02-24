@@ -120,15 +120,11 @@ describe('CaseMatchingService Integration Tests', () => {
       });
 
       // Existing case tracking lateral movement
-      const lateralMovementCase = createCase(
-        'case-lateral',
-        'Lateral Movement Investigation',
-        [
-          { typeKey: ObservableTypeKey.User, value: 'admin' },
-          { typeKey: ObservableTypeKey.Hostname, value: 'dc-01' },
-          { typeKey: ObservableTypeKey.Hostname, value: 'fileserver-01' },
-        ]
-      );
+      const lateralMovementCase = createCase('case-lateral', 'Lateral Movement Investigation', [
+        { typeKey: ObservableTypeKey.User, value: 'admin' },
+        { typeKey: ObservableTypeKey.Hostname, value: 'dc-01' },
+        { typeKey: ObservableTypeKey.Hostname, value: 'fileserver-01' },
+      ]);
 
       // New alert showing same user on a new host
       const newHostAlert: ExtractedEntity[] = [
@@ -141,7 +137,9 @@ describe('CaseMatchingService Integration Tests', () => {
 
       // Should match based on the shared user
       expect(matches.length).toBe(1);
-      expect(matches[0].matchedObservables.some((e) => e.type === ObservableTypeKey.User)).toBe(true);
+      expect(matches[0].matchedObservables.some((e) => e.type === ObservableTypeKey.User)).toBe(
+        true
+      );
     });
 
     it('should correctly identify cases that should NOT match', () => {
@@ -290,9 +288,9 @@ describe('CaseMatchingService Integration Tests', () => {
       );
 
       // case-c should not be mergeable with others
-      expect(
-        mergeablePairs.some((p) => p.caseId1 === 'case-c' || p.caseId2 === 'case-c')
-      ).toBe(false);
+      expect(mergeablePairs.some((p) => p.caseId1 === 'case-c' || p.caseId2 === 'case-c')).toBe(
+        false
+      );
     });
 
     it('should calculate accurate entity overlap', () => {

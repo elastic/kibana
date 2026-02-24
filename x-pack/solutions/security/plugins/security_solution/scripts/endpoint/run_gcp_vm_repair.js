@@ -8,5 +8,3 @@
 
 require('@kbn/setup-node-env');
 require('./gcp_fleet_vm/repair_vm').cli();
-
-

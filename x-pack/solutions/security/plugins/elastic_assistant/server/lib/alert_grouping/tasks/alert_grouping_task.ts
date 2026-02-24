@@ -252,7 +252,7 @@ export class AlertGroupingTask {
 
       // Get default connector from UI settings if not configured
       let connectorId = workflow.apiConfig?.connectorId;
-      let actionTypeId = workflow.apiConfig?.actionTypeId;
+      const actionTypeId = workflow.apiConfig?.actionTypeId;
 
       if (!connectorId) {
         connectorId = await this.getDefaultConnectorId(coreStart, spaceId);
@@ -260,7 +260,9 @@ export class AlertGroupingTask {
 
       // Get cases client if available
       const casesClient = this.cases
-        ? this.cases.getCasesClientWithRequest({ headers: {} } as any) as unknown as CasesClientLike
+        ? (this.cases.getCasesClientWithRequest({
+            headers: {},
+          } as any) as unknown as CasesClientLike)
         : undefined;
 
       // Execute workflow

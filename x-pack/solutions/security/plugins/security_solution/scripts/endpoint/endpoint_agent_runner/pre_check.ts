@@ -46,10 +46,10 @@ const checkVmRunner = async () => {
     log.verbose(err);
     throw new Error(
       `Multipass is not usable on this machine right now.\n\n` +
-      `Common causes:\n` +
-      `- Multipass is not installed (install from: https://multipass.run)\n` +
-      `- Multipass is installed but the daemon/socket is not running (e.g. 'cannot connect to the multipass socket')\n\n` +
-      `Original error: ${err.message}\n`
+        `Common causes:\n` +
+        `- Multipass is not installed (install from: https://multipass.run)\n` +
+        `- Multipass is installed but the daemon/socket is not running (e.g. 'cannot connect to the multipass socket')\n\n` +
+        `Original error: ${err.message}\n`
     );
   }
 };

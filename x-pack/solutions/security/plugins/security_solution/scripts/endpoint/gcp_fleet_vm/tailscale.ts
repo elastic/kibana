@@ -47,8 +47,9 @@ export const getPreferredLocalTailscaleHost = async (
   log: ToolingLog
 ): Promise<{ hostname?: string; ip: string }> => {
   await assertTailscaleAvailable(log);
-  const [hostname, ip] = await Promise.all([getLocalTailscaleMagicDnsName(), getLocalTailscaleIpv4()]);
+  const [hostname, ip] = await Promise.all([
+    getLocalTailscaleMagicDnsName(),
+    getLocalTailscaleIpv4(),
+  ]);
   return { hostname, ip };
 };
-
-

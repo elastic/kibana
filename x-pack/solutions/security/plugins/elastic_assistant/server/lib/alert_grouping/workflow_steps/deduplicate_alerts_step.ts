@@ -144,14 +144,8 @@ export const getDeduplicateAlertsStepDefinition = (
         const existingState = await loadLeaderState(esClient, workflowId, spaceId, stateIndex);
         if (existingState) {
           clustering.loadLeaders(existingState);
-          clustering.leaders = evictStaleLeaders(
-            clustering.leaders,
-            maxLeaderAgeHours,
-            maxLeaders
-          );
-          context.logger.info(
-            `Loaded ${clustering.leaders.length} leaders from previous run`
-          );
+          clustering.leaders = evictStaleLeaders(clustering.leaders, maxLeaderAgeHours, maxLeaders);
+          context.logger.info(`Loaded ${clustering.leaders.length} leaders from previous run`);
         }
 
         // Step 6: Run clustering loop
@@ -164,24 +158,25 @@ export const getDeduplicateAlertsStepDefinition = (
         }
 
         // Step 7: Evict stale leaders after clustering
-        clustering.leaders = evictStaleLeaders(
-          clustering.leaders,
-          maxLeaderAgeHours,
-          maxLeaders
-        );
+        clustering.leaders = evictStaleLeaders(clustering.leaders, maxLeaderAgeHours, maxLeaders);
 
         // Step 8: Save updated leader state
-        await saveLeaderState(esClient, workflowId, spaceId, clustering.serializeLeaders(), {
-          totalClusters: clustering.leaders.length,
-          totalLlmCalls: clustering.llmCalls,
-        }, stateIndex);
+        await saveLeaderState(
+          esClient,
+          workflowId,
+          spaceId,
+          clustering.serializeLeaders(),
+          {
+            totalClusters: clustering.leaders.length,
+            totalLlmCalls: clustering.llmCalls,
+          },
+          stateIndex
+        );
 
         // Step 9: Build output
         // Only include leaders that were created/updated in this run
         const newLeaders = clustering.leaders.slice(leadersBeforeClustering);
-        const updatedLeaders = clustering.leaders.filter(
-          (l) => (l.followers?.length ?? 0) > 0
-        );
+        const updatedLeaders = clustering.leaders.filter((l) => (l.followers?.length ?? 0) > 0);
         const relevantLeaders = [...new Set([...newLeaders, ...updatedLeaders])];
 
         const totalFollowers = relevantLeaders.reduce(
@@ -202,10 +197,10 @@ export const getDeduplicateAlertsStepDefinition = (
 
         context.logger.info(
           `Dedup complete: ${metrics.alertsProcessed} processed, ` +
-          `${metrics.alertsDeduplicated} deduplicated, ` +
-          `${metrics.clustersFormed} clusters, ` +
-          `${metrics.llmCalls} LLM calls, ` +
-          `${metrics.durationMs}ms`
+            `${metrics.alertsDeduplicated} deduplicated, ` +
+            `${metrics.clustersFormed} clusters, ` +
+            `${metrics.llmCalls} LLM calls, ` +
+            `${metrics.durationMs}ms`
         );
 
         return {

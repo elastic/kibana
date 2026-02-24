@@ -5,5 +5,11 @@
  * 2.0.
  */
 
-export { postBatchedAttackDiscoveryRoute, ATTACK_DISCOVERY_BATCHED } from './post_batched_attack_discovery';
-export { postIncrementalAttackDiscoveryRoute, ATTACK_DISCOVERY_INCREMENTAL } from './post_incremental_attack_discovery';
+export {
+  postBatchedAttackDiscoveryRoute,
+  ATTACK_DISCOVERY_BATCHED,
+} from './post_batched_attack_discovery';
+export {
+  postIncrementalAttackDiscoveryRoute,
+  ATTACK_DISCOVERY_INCREMENTAL,
+} from './post_incremental_attack_discovery';

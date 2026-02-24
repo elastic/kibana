@@ -17,7 +17,14 @@ import { performChecks } from '../../helpers';
 import { buildResponse } from '../../../lib/build_response';
 import type { ElasticAssistantRequestHandlerContext } from '../../../types';
 import { hasReadWriteAttackDiscoveryAlertsPrivileges } from '../helpers/index_privileges';
-import { BatchProcessor, AttackDiscoveryMergeService, type AlertForProcessing, type BatchProcessingConfig, type BatchProcessingResult, DEFAULT_BATCH_CONFIG } from '../../../lib/attack_discovery/batch_processing';
+import {
+  BatchProcessor,
+  AttackDiscoveryMergeService,
+  type AlertForProcessing,
+  type BatchProcessingConfig,
+  type BatchProcessingResult,
+  DEFAULT_BATCH_CONFIG,
+} from '../../../lib/attack_discovery/batch_processing';
 import { generateAttackDiscoveries } from '../helpers/generate_discoveries';
 
 const ROUTE_HANDLER_TIMEOUT = 30 * 60 * 1000; // 30 minutes for batched processing
@@ -46,13 +53,15 @@ const BatchedAttackDiscoveryRequestBody = z.object({
   langSmithApiKey: z.string().optional(),
   langSmithProject: z.string().optional(),
   // Batched processing options
-  batchConfig: z.object({
-    batchSize: z.number().min(10).max(500).optional(),
-    maxAlerts: z.number().min(1).optional(),
-    parallelBatches: z.number().min(1).max(5).optional(),
-    mergeStrategy: z.enum(['simple', 'llm', 'hierarchical']).optional(),
-    deduplicateAlerts: z.boolean().optional(),
-  }).optional(),
+  batchConfig: z
+    .object({
+      batchSize: z.number().min(10).max(500).optional(),
+      maxAlerts: z.number().min(1).optional(),
+      parallelBatches: z.number().min(1).max(5).optional(),
+      mergeStrategy: z.enum(['simple', 'llm', 'hierarchical']).optional(),
+      deduplicateAlerts: z.boolean().optional(),
+    })
+    .optional(),
 });
 
 type BatchedAttackDiscoveryRequest = z.infer<typeof BatchedAttackDiscoveryRequestBody>;
@@ -162,7 +171,8 @@ export const postBatchedAttackDiscoveryRoute = (
             maxAlerts: batchConfig.maxAlerts,
             parallelBatches: batchConfig.parallelBatches ?? DEFAULT_BATCH_CONFIG.parallelBatches,
             mergeStrategy: batchConfig.mergeStrategy ?? DEFAULT_BATCH_CONFIG.mergeStrategy,
-            deduplicateAlerts: batchConfig.deduplicateAlerts ?? DEFAULT_BATCH_CONFIG.deduplicateAlerts,
+            deduplicateAlerts:
+              batchConfig.deduplicateAlerts ?? DEFAULT_BATCH_CONFIG.deduplicateAlerts,
           };
 
           // Create merge service
@@ -224,7 +234,9 @@ export const postBatchedAttackDiscoveryRoute = (
 
           // Start batched processing in background
           logger.info(
-            `Starting batched Attack Discovery generation ${executionUuid} with config: ${JSON.stringify(batchProcessingConfig)}`
+            `Starting batched Attack Discovery generation ${executionUuid} with config: ${JSON.stringify(
+              batchProcessingConfig
+            )}`
           );
 
           // First, fetch all matching alerts to get their IDs
@@ -266,9 +278,7 @@ export const postBatchedAttackDiscoveryRoute = (
               execution_uuid: executionUuid,
               status: 'started',
               total_alerts: alertsForProcessing.length,
-              batch_count: Math.ceil(
-                alertsForProcessing.length / batchProcessingConfig.batchSize
-              ),
+              batch_count: Math.ceil(alertsForProcessing.length / batchProcessingConfig.batchSize),
             },
           });
         } catch (err) {

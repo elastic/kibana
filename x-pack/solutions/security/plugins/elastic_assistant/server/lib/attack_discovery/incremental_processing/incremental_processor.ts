@@ -14,7 +14,11 @@ import type {
   IncrementalProcessingResult,
   DeltaAlertResult,
 } from './types';
-import { BatchProcessor, type AlertForProcessing, AttackDiscoveryMergeService, type AttackDiscoveryResult } from '../batch_processing';
+import type {
+  AttackDiscoveryMergeService,
+  type AlertForProcessing,
+  type AttackDiscoveryResult,
+} from '../batch_processing';
 
 /**
  * Function type for generating Attack Discovery from alerts
@@ -48,10 +52,7 @@ export class IncrementalProcessor {
   /**
    * Identify delta (new, unprocessed) alerts
    */
-  identifyDeltaAlerts(
-    allAlertIds: string[],
-    processedAlertIds: string[]
-  ): DeltaAlertResult {
+  identifyDeltaAlerts(allAlertIds: string[], processedAlertIds: string[]): DeltaAlertResult {
     const processedSet = new Set(processedAlertIds);
     const newAlerts = allAlertIds.filter((id) => !processedSet.has(id));
     const processedAlerts = allAlertIds.filter((id) => processedSet.has(id));
@@ -108,7 +109,9 @@ export class IncrementalProcessor {
     startTime: number,
     now: string
   ): Promise<IncrementalProcessingResult> {
-    this.logger.info(`Starting full Attack Discovery generation for ${request.newAlerts.length} alerts`);
+    this.logger.info(
+      `Starting full Attack Discovery generation for ${request.newAlerts.length} alerts`
+    );
 
     const discoveries = await this.generateDiscovery(request.newAlerts);
 
@@ -159,7 +162,7 @@ export class IncrementalProcessor {
     now: string
   ): Promise<IncrementalProcessingResult> {
     const existingDiscovery = request.existingDiscovery!;
-    
+
     this.logger.info(
       `Processing delta of ${request.newAlerts.length} new alerts for existing discovery ${existingDiscovery.id}`
     );
@@ -218,10 +221,7 @@ export class IncrementalProcessor {
     const updatedDiscovery: IncrementalAttackDiscovery = {
       ...mergedResult,
       processedAlertIds: [
-        ...new Set([
-          ...existingDiscovery.processedAlertIds,
-          ...request.newAlerts.map((a) => a.id),
-        ]),
+        ...new Set([...existingDiscovery.processedAlertIds, ...request.newAlerts.map((a) => a.id)]),
       ],
       isIncremental: true,
       parentDiscoveryId: existingDiscovery.parentDiscoveryId ?? existingDiscovery.id,
@@ -252,7 +252,7 @@ export class IncrementalProcessor {
     now: string
   ): Promise<IncrementalProcessingResult> {
     const existingDiscovery = request.existingDiscovery!;
-    
+
     this.logger.info(
       `Enhancing existing discovery ${existingDiscovery.id} with ${request.newAlerts.length} new alerts`
     );

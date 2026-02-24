@@ -9,12 +9,10 @@
 
 require('@kbn/setup-node-env');
 try {
-    const mod = require('./gcp_fleet_vm/index');
-    mod.cli();
+  const mod = require('./gcp_fleet_vm');
+  mod.cli();
 } catch (error) {
-    console.error('Error loading or running CLI:');
-    console.error(error);
-    process.exit(1);
+  console.error('Error loading or running CLI:');
+  console.error(error);
+  process.exit(1);
 }
-
-

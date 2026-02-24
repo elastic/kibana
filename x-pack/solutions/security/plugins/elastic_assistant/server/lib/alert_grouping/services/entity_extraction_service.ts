@@ -53,8 +53,8 @@ export class EntityExtractionService {
     this.excludedUsersSet = new Set(
       (this.exclusions.excludedUsers ?? []).map((u) => u.toLowerCase())
     );
-    this.excludedPathPrefixes = (this.exclusions.excludedPathPrefixes ?? []).map(
-      (p) => p.toLowerCase()
+    this.excludedPathPrefixes = (this.exclusions.excludedPathPrefixes ?? []).map((p) =>
+      p.toLowerCase()
     );
     this.excludedPathsSet = new Set(
       (this.exclusions.excludedPaths ?? []).map((p) => p.toLowerCase())
@@ -142,9 +142,7 @@ export class EntityExtractionService {
       entitiesByType[type] = entities.filter((e) => e.type === type);
     }
 
-    this.logger.debug(
-      `Extracted ${entities.length} unique entities from ${alerts.length} alerts`
-    );
+    this.logger.debug(`Extracted ${entities.length} unique entities from ${alerts.length} alerts`);
 
     return {
       alertsProcessed: alerts.length,
@@ -194,10 +192,7 @@ export class EntityExtractionService {
   /**
    * Normalize and validate a value based on entity type
    */
-  private normalizeAndValidateValue(
-    value: unknown,
-    type: ObservableTypeKey
-  ): string | null {
+  private normalizeAndValidateValue(value: unknown, type: ObservableTypeKey): string | null {
     if (value == null) {
       return null;
     }
@@ -324,8 +319,9 @@ export class EntityExtractionService {
    */
   private validateHostname(value: string): string | null {
     // Basic hostname validation
-    const hostnameRegex = /^[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?)*$/;
-    
+    const hostnameRegex =
+      /^[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?)*$/;
+
     if (hostnameRegex.test(value) && value.length <= 253) {
       // Exclude generic hostnames
       const lowerValue = value.toLowerCase();
@@ -348,7 +344,7 @@ export class EntityExtractionService {
     }
 
     const domainRegex = /^([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$/;
-    
+
     if (domainRegex.test(value) && value.length <= 253) {
       return value.toLowerCase();
     }
@@ -361,7 +357,7 @@ export class EntityExtractionService {
   private validateEmail(value: string): string | null {
     // Basic email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    
+
     if (emailRegex.test(value) && value.length <= 254) {
       return value.toLowerCase();
     }
@@ -389,7 +385,7 @@ export class EntityExtractionService {
    */
   private validateFileHash(value: string): string | null {
     const lowerValue = value.toLowerCase();
-    
+
     // MD5: 32 hex chars
     if (/^[a-f0-9]{32}$/.test(lowerValue)) {
       return lowerValue;
@@ -402,7 +398,7 @@ export class EntityExtractionService {
     if (/^[a-f0-9]{64}$/.test(lowerValue)) {
       return lowerValue;
     }
-    
+
     return null;
   }
 
@@ -570,7 +566,11 @@ export class EntityExtractionService {
       const threats = get('kibana.alert.rule.threat', source) as
         | Array<{
             tactic?: { name?: string; id?: string };
-            technique?: Array<{ name?: string; id?: string; subtechnique?: Array<{ id?: string }> }>;
+            technique?: Array<{
+              name?: string;
+              id?: string;
+              subtechnique?: Array<{ id?: string }>;
+            }>;
           }>
         | undefined;
 
@@ -654,7 +654,7 @@ export class EntityExtractionService {
   ): EntityExtractionService {
     // Merge custom configs with defaults
     const mergedConfigs = [...DEFAULT_ENTITY_TYPE_CONFIGS];
-    
+
     for (const customConfig of customConfigs) {
       const existingIndex = mergedConfigs.findIndex((c) => c.type === customConfig.type);
       if (existingIndex >= 0) {
@@ -662,9 +662,10 @@ export class EntityExtractionService {
         mergedConfigs[existingIndex] = {
           ...mergedConfigs[existingIndex],
           ...customConfig,
-          sourceFields: customConfig.sourceFields.length > 0 
-            ? customConfig.sourceFields 
-            : mergedConfigs[existingIndex].sourceFields,
+          sourceFields:
+            customConfig.sourceFields.length > 0
+              ? customConfig.sourceFields
+              : mergedConfigs[existingIndex].sourceFields,
         };
       } else {
         // Add new config

@@ -48,10 +48,7 @@ export const wildmatch = (searchString: string, pattern: string): boolean => {
  * An exception pattern is a list of (field, wildcardPattern) tuples.
  * All patterns must match for the exception to apply.
  */
-export const exceptionlistMatch = (
-  alert: AlertDocument,
-  exception: ExceptionPattern
-): boolean => {
+export const exceptionlistMatch = (alert: AlertDocument, exception: ExceptionPattern): boolean => {
   for (const [key, pattern] of exception) {
     let v = getVal(alert, key);
     if (v == null) {
@@ -83,11 +80,7 @@ export const exceptionlistMatch = (
 /**
  * Verify that an exception pattern matches ALL alerts in a set for a specific field.
  */
-const exceptionQaAlerts = (
-  alerts: AlertDocument[],
-  field: string,
-  pattern: string
-): boolean => {
+const exceptionQaAlerts = (alerts: AlertDocument[], field: string, pattern: string): boolean => {
   for (const alert of alerts) {
     if (!exceptionlistMatch(alert, [[field, pattern]])) {
       return false;
@@ -218,7 +211,6 @@ export const generateMatchPattern = (
 
     let pattern = '*';
 
-    // eslint-disable-next-line no-constant-condition
     while (true) {
       // Find next common substring
       const shortestLen = shortestStringLen(values);
@@ -230,20 +222,17 @@ export const generateMatchPattern = (
       }
 
       // Add the substring to the pattern
-      pattern += substr + '*';
+      pattern += `${substr}*`;
 
       // Replace the found substring in all values with null bytes
       // so it won't be found again in subsequent iterations
-      const substrRegex = new RegExp(
-        substr.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'),
-        'i'
-      );
+      const substrRegex = new RegExp(substr.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
       values = values.map((v) => v.replace(substrRegex, '\x00'.repeat(substr.length)));
     }
 
     // Normalize consecutive wildcards
     if (pattern.length > 256) {
-      pattern = pattern.slice(0, 256) + '*';
+      pattern = `${pattern.slice(0, 256)}*`;
     }
     while (pattern.includes('**')) {
       pattern = pattern.replace(/\*\*/g, '*');

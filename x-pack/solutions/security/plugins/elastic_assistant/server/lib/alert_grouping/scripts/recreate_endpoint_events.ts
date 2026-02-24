@@ -87,10 +87,9 @@ async function cleanupEvents(client: ESClient, dryRun: boolean): Promise<number>
   let totalDeleted = 0;
 
   for (const index of indices) {
-    const { status: countStatus, body: countBody } = await client.post(
-      `/${index}/_count`,
-      { query: { term: { tags: INJECTED_TAG } } }
-    );
+    const { status: countStatus, body: countBody } = await client.post(`/${index}/_count`, {
+      query: { term: { tags: INJECTED_TAG } },
+    });
 
     const count =
       countStatus === 200 && typeof countBody === 'object' && countBody !== null
@@ -137,10 +136,10 @@ async function main(): Promise<void> {
     const type = idx.includes('process')
       ? 'process'
       : idx.includes('network')
-        ? 'network'
-        : idx.includes('file')
-          ? 'file'
-          : 'other';
+      ? 'network'
+      : idx.includes('file')
+      ? 'file'
+      : 'other';
     byType[type] = (byType[type] ?? 0) + 1;
   }
   console.log(

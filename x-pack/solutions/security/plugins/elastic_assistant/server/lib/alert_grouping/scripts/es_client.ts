@@ -43,7 +43,12 @@ export class ESClient {
   private readonly baseUrl: string;
   private readonly headers: Record<string, string>;
 
-  constructor({ baseUrl, apiKey, user, password }: {
+  constructor({
+    baseUrl,
+    apiKey,
+    user,
+    password,
+  }: {
     baseUrl: string;
     apiKey?: string;
     user?: string;
@@ -121,7 +126,13 @@ export class KibanaClient {
   private readonly headers: Record<string, string>;
   private readonly spacePrefix: string;
 
-  constructor({ baseUrl, apiKey, user, password, spaceId }: {
+  constructor({
+    baseUrl,
+    apiKey,
+    user,
+    password,
+    spaceId,
+  }: {
     baseUrl: string;
     apiKey?: string;
     user?: string;
@@ -292,7 +303,10 @@ export function parseConnectionArgs(argv: string[]): ConnectionArgs & {
         result.dryRun = true;
         break;
       default:
-        if (arg.startsWith('--no-') || (arg.startsWith('--') && !argv[i + 1]?.startsWith('--') === false)) {
+        if (
+          arg.startsWith('--no-') ||
+          (arg.startsWith('--') && !argv[i + 1]?.startsWith('--') === false)
+        ) {
           if (arg.startsWith('--') && i + 1 < argv.length && !argv[i + 1].startsWith('--')) {
             result.extra[arg.replace(/^--/, '')] = next();
           } else {
@@ -354,7 +368,7 @@ export async function bulkInject(
       lines.push(JSON.stringify(source));
     }
 
-    const bulkBody = lines.join('\n') + '\n';
+    const bulkBody = `${lines.join('\n')}\n`;
     const { status, body } = await client.post(
       '/_bulk?refresh=true',
       bulkBody,
@@ -362,7 +376,9 @@ export async function bulkInject(
     );
 
     if ((status !== 200 && status !== 201) || typeof body !== 'object' || body === null) {
-      console.error(`  ERROR: Bulk request failed (${status}): ${JSON.stringify(body).slice(0, 500)}`);
+      console.error(
+        `  ERROR: Bulk request failed (${status}): ${JSON.stringify(body).slice(0, 500)}`
+      );
       continue;
     }
 
@@ -374,7 +390,9 @@ export async function bulkInject(
       if (item.index?.error) {
         errors++;
         if (errors <= 2) {
-          console.error(`  ERROR: ${item.index.error.type}: ${item.index.error.reason.slice(0, 200)}`);
+          console.error(
+            `  ERROR: ${item.index.error.type}: ${item.index.error.reason.slice(0, 200)}`
+          );
         }
       }
     }
@@ -382,7 +400,11 @@ export async function bulkInject(
     totalSuccess += items.length - errors;
 
     if (docs.length > BATCH_SIZE) {
-      console.log(`  Batch ${Math.floor(offset / BATCH_SIZE) + 1}: ${items.length - errors}/${batch.length} ok`);
+      console.log(
+        `  Batch ${Math.floor(offset / BATCH_SIZE) + 1}: ${items.length - errors}/${
+          batch.length
+        } ok`
+      );
     }
   }
 

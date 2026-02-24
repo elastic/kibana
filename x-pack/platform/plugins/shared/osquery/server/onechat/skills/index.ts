@@ -40,4 +40,3 @@ export { getPacksSkill } from './packs_skill';
 export { getSavedQueriesSkill } from './saved_queries_skill';
 export { getStatusSkill } from './status_skill';
 export type { GetOsqueryAppContextFn } from './utils';
-

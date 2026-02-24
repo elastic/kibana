@@ -83,12 +83,11 @@ export const getDefaultAttackDiscoveryGraph = ({
       allowAllWorkflowStatuses,
     });
 
-    logger?.error('index pattern: ' + JSON.stringify(alertsIndexPattern));
+    logger?.error(`index pattern: ${JSON.stringify(alertsIndexPattern)}`);
 
-    logger?.error('anonymizationFields: ' + JSON.stringify(anonymizationFields));
+    logger?.error(`anonymizationFields: ${JSON.stringify(anonymizationFields)}`);
 
-    logger?.error('filter: ' + JSON.stringify(filter));
-
+    logger?.error(`filter: ${JSON.stringify(filter)}`);
 
     const generationSchema = getAttackDiscoveriesGenerationSchema(prompts);
 

@@ -140,7 +140,9 @@ export class AttackDiscoveryMergeService {
     const combinedAlertIds = [...new Set([...a.alertIds, ...b.alertIds])];
 
     // Combine MITRE tactics
-    const combinedTactics = [...new Set([...(a.mitreAttackTactics ?? []), ...(b.mitreAttackTactics ?? [])])];
+    const combinedTactics = [
+      ...new Set([...(a.mitreAttackTactics ?? []), ...(b.mitreAttackTactics ?? [])]),
+    ];
 
     // Use higher risk score
     const riskScore = Math.max(a.riskScore ?? 0, b.riskScore ?? 0);
@@ -169,7 +171,10 @@ export class AttackDiscoveryMergeService {
     const normalizedPrimary = primary.toLowerCase().replace(/\s+/g, ' ');
     const normalizedSecondary = secondary.toLowerCase().replace(/\s+/g, ' ');
 
-    if (normalizedPrimary.includes(normalizedSecondary) || normalizedSecondary.includes(normalizedPrimary)) {
+    if (
+      normalizedPrimary.includes(normalizedSecondary) ||
+      normalizedSecondary.includes(normalizedPrimary)
+    ) {
       return primary.length >= secondary.length ? primary : secondary;
     }
 
@@ -180,7 +185,7 @@ export class AttackDiscoveryMergeService {
       return combined;
     }
 
-    return primary.slice(0, maxLength - 3) + '...';
+    return `${primary.slice(0, maxLength - 3)}...`;
   }
 
   /**
@@ -204,7 +209,10 @@ export class AttackDiscoveryMergeService {
     // Truncate secondary to fit
     const availableLength = maxLength - primary.length - 50; // Buffer for separator
     if (availableLength > 100) {
-      return `${primary}\n\n---\n\n**Additional Analysis:**\n\n${secondary.slice(0, availableLength)}...`;
+      return `${primary}\n\n---\n\n**Additional Analysis:**\n\n${secondary.slice(
+        0,
+        availableLength
+      )}...`;
     }
 
     // Just return primary if we can't fit additional info

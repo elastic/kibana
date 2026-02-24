@@ -8,12 +8,11 @@
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import chalk from 'chalk';
 import type { Model } from '@kbn/inference-common';
-import type { EvaluationScoreRepository, EvaluationExplanation } from '../score_repository';
+import type { EvaluationScoreRepository } from '../score_repository';
 import type { DatasetScoreWithStats } from '../evaluation_stats';
 import { createTable } from './report_table';
 import type { ReportDisplayOptions, TraceLinkInfo } from '../../types';
 import {
-  formatReportData,
   generateTraceUrl,
   generateLangSmithTraceUrl,
   generateLangSmithProjectUrl,
@@ -75,7 +74,9 @@ function formatLowScoreExplanations(datasetScoresWithStats: DatasetScoreWithStat
 
           for (const exp of displayExplanations) {
             const scoreStr =
-              exp.score !== null ? chalk.red(`${(exp.score * 100).toFixed(0)}%`) : chalk.gray('N/A');
+              exp.score !== null
+                ? chalk.red(`${(exp.score * 100).toFixed(0)}%`)
+                : chalk.gray('N/A');
 
             datasetLowScores.push(chalk.gray(`     ─────────────────────────────────────`));
 
@@ -117,7 +118,9 @@ function formatLowScoreExplanations(datasetScoresWithStats: DatasetScoreWithStat
           if (explanations.length > MAX_EXPLANATIONS_PER_EVALUATOR) {
             datasetLowScores.push(
               chalk.gray(
-                `     ... and ${explanations.length - MAX_EXPLANATIONS_PER_EVALUATOR} more low-scoring examples`
+                `     ... and ${
+                  explanations.length - MAX_EXPLANATIONS_PER_EVALUATOR
+                } more low-scoring examples`
               )
             );
           }
@@ -209,8 +212,7 @@ function formatTraceLinkInfo(traceLinkInfo: TraceLinkInfo): string {
   }
 
   if (traceLinkInfo.langsmith) {
-    const langsmithBase =
-      traceLinkInfo.langsmith.baseUrl || 'https://smith.langchain.com';
+    const langsmithBase = traceLinkInfo.langsmith.baseUrl || 'https://smith.langchain.com';
     lines.push(chalk.gray(`Trace viewer (LangSmith): ${langsmithBase}`));
     if (traceLinkInfo.langsmith.projectId) {
       lines.push(chalk.gray(`LangSmith Project: ${traceLinkInfo.langsmith.projectId}`));

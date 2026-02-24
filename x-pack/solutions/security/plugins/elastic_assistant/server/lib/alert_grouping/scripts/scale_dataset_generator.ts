@@ -229,7 +229,11 @@ async function main(): Promise<void> {
 
   const expectedAlerts = alertDocs.length * copies;
   const expectedEvents = eventDocs.length * copies;
-  console.log(`\n  Expected output: ${expectedAlerts} alerts + ${expectedEvents} events = ${expectedAlerts + expectedEvents} total`);
+  console.log(
+    `\n  Expected output: ${expectedAlerts} alerts + ${expectedEvents} events = ${
+      expectedAlerts + expectedEvents
+    } total`
+  );
 
   // Time shift: move latest alert to "now", then offset each copy
   const baseTimeShiftMs = computeTimeShiftMs(alertDocs);
@@ -261,7 +265,9 @@ async function main(): Promise<void> {
     byHost[host] = (byHost[host] ?? 0) + 1;
   }
   console.log(`\n  Hosts (${Object.keys(byHost).length}):`);
-  for (const [host, count] of Object.entries(byHost).sort((a, b) => a[0].localeCompare(b[0])).slice(0, 10)) {
+  for (const [host, count] of Object.entries(byHost)
+    .sort((a, b) => a[0].localeCompare(b[0]))
+    .slice(0, 10)) {
     console.log(`    ${host}: ${count}`);
   }
   if (Object.keys(byHost).length > 10) {
@@ -274,7 +280,7 @@ async function main(): Promise<void> {
       ...allAlerts.map((d) => JSON.stringify({ _id: d.id, _index: d.index, _source: d.source })),
       ...allEvents.map((d) => JSON.stringify({ _id: d.id, _index: d.index, _source: d.source })),
     ];
-    writeFileSync(outputFile, lines.join('\n') + '\n');
+    writeFileSync(outputFile, `${lines.join('\n')}\n`);
     console.log(`\n  Written to ${outputFile}`);
     process.exit(0);
   }

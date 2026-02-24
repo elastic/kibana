@@ -76,7 +76,7 @@ export const registerExtractEntitiesRoute = (
 
         try {
           const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-          
+
           const {
             alert_ids: alertIds,
             filter,
@@ -87,7 +87,7 @@ export const registerExtractEntitiesRoute = (
 
           // Build query
           const mustClauses: object[] = [];
-          
+
           if (alertIds && alertIds.length > 0) {
             mustClauses.push({
               ids: { values: alertIds },
@@ -98,9 +98,8 @@ export const registerExtractEntitiesRoute = (
             mustClauses.push(filter);
           }
 
-          const query = mustClauses.length > 0 
-            ? { bool: { must: mustClauses } }
-            : { match_all: {} };
+          const query =
+            mustClauses.length > 0 ? { bool: { must: mustClauses } } : { match_all: {} };
 
           // Fetch alerts
           const searchResponse = await esClient.search<Record<string, unknown>>({

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
+import type { MockedLogger } from '@kbn/logging-mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 import { CaseMatchingService } from './case_matching_service';
 import { ObservableTypeKey, GroupingStrategy } from '../types';
 import type { ExtractedEntity } from '../types';
@@ -53,9 +54,7 @@ describe('CaseMatchingService', () => {
 
   describe('findMatchingCases', () => {
     it('should find cases with matching observables', () => {
-      const entities: ExtractedEntity[] = [
-        createEntity(ObservableTypeKey.IPv4, '192.168.1.100'),
-      ];
+      const entities: ExtractedEntity[] = [createEntity(ObservableTypeKey.IPv4, '192.168.1.100')];
 
       const cases: CaseData[] = [
         createCase('case-1', [{ typeKey: ObservableTypeKey.IPv4, value: '192.168.1.100' }]),
@@ -138,9 +137,7 @@ describe('CaseMatchingService', () => {
     });
 
     it('should handle empty cases array', () => {
-      const entities: ExtractedEntity[] = [
-        createEntity(ObservableTypeKey.IPv4, '192.168.1.100'),
-      ];
+      const entities: ExtractedEntity[] = [createEntity(ObservableTypeKey.IPv4, '192.168.1.100')];
 
       const matches = service.findMatchingCases(entities, []);
 
@@ -235,9 +232,7 @@ describe('CaseMatchingService', () => {
           { typeKey: ObservableTypeKey.IPv4, value: '192.168.1.100' },
           { typeKey: ObservableTypeKey.Hostname, value: 'workstation-01' },
         ]),
-        createCase('case-3', [
-          { typeKey: ObservableTypeKey.IPv4, value: '10.0.0.1' },
-        ]),
+        createCase('case-3', [{ typeKey: ObservableTypeKey.IPv4, value: '10.0.0.1' }]),
       ];
 
       const mergeablePairs = service.findMergeableCasesByObservables(cases, 0.5);

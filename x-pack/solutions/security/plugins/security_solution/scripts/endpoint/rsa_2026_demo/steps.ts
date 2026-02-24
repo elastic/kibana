@@ -16,7 +16,7 @@ import {
 } from '../common/fleet_server/fleet_server_services';
 import { getLocalhostRealIp } from '../common/network_services';
 import { prefixedOutputLogger } from '../common/utils';
-import type { ProvisioningContext, Rsa2026DemoConfig } from './types';
+import type { Rsa2026DemoConfig, ProvisionedEndpoint } from './types';
 import { setupPolicies } from './policy_setup';
 import { setupBrowserHistory } from './browser_history_setup';
 import { setupGui } from './gui_setup';
@@ -25,7 +25,6 @@ import { createVirusTotalWorkflow } from './workflow_setup';
 import { findVm, getHostVmClient } from '../common/vm_services';
 import { createAndEnrollEndpointHost } from '../common/endpoint_host_services';
 import { fetchFleetAgents } from '../common/fleet_services';
-import type { ProvisionedEndpoint } from './types';
 
 export type ProvisioningStep =
   | 'fleet-server'
@@ -62,7 +61,9 @@ export const stepFleetServer = async (
     }
 
     // Clean up invalid Fleet Server host entries and ensure correct one is set
-    logger.info(`Cleaning up Fleet Server host settings and ensuring correct URL: ${fleetServerUrl}`);
+    logger.info(
+      `Cleaning up Fleet Server host settings and ensuring correct URL: ${fleetServerUrl}`
+    );
     await cleanupAndAddFleetServerHostSettings(kbnClient, logger, fleetServerUrl);
 
     // Ensure Fleet Server is deployed and running
@@ -137,7 +138,9 @@ export const stepEndpoints = async (
 
     // Find existing VMs
     const existingVms = await findVm(vmType, /^rsa-2026-/, logger);
-    logger.info(`Found ${existingVms.data.length} existing RSA 2026 VMs: ${existingVms.data.join(', ')}`);
+    logger.info(
+      `Found ${existingVms.data.length} existing RSA 2026 VMs: ${existingVms.data.join(', ')}`
+    );
 
     // Get list of enrolled agents to match with VMs
     const agentMap = new Map<string, { id: string; hostname: string }>();
@@ -160,7 +163,9 @@ export const stepEndpoints = async (
     // Create or reuse Defend+Osquery endpoints
     for (let i = 0; i < config.defendOsqueryCount; i++) {
       const hostname = `rsa-2026-defend-osquery-${i + 1}`;
-      logger.info(`Processing endpoint ${i + 1}/${config.defendOsqueryCount} with Defend+Osquery: ${hostname}`);
+      logger.info(
+        `Processing endpoint ${i + 1}/${config.defendOsqueryCount} with Defend+Osquery: ${hostname}`
+      );
 
       if (existingVms.data.includes(hostname)) {
         logger.info(`Reusing existing VM: ${hostname}`);
@@ -176,8 +181,12 @@ export const stepEndpoints = async (
           });
           logger.info(`Reused endpoint: ${hostname} (agent: ${agent.id})`);
         } else {
-          logger.warning(`VM ${hostname} exists but agent not found in Fleet. Will skip this endpoint.`);
-          logger.info(`To re-enroll, you can manually enroll the agent or delete the VM and rerun this step.`);
+          logger.warning(
+            `VM ${hostname} exists but agent not found in Fleet. Will skip this endpoint.`
+          );
+          logger.info(
+            `To re-enroll, you can manually enroll the agent or delete the VM and rerun this step.`
+          );
           // Still add it to the list so browser history can be set up later
           endpoints.push({
             hostname,
@@ -188,7 +197,11 @@ export const stepEndpoints = async (
         }
       } else {
         logger.info(`Creating new endpoint: ${hostname}`);
-        const { hostname: newHostname, agentId, hostVm } = await createAndEnrollEndpointHost({
+        const {
+          hostname: newHostname,
+          agentId,
+          hostVm,
+        } = await createAndEnrollEndpointHost({
           kbnClient,
           log: logger,
           agentPolicyId: policyIds.defendOsquery,
@@ -208,7 +221,9 @@ export const stepEndpoints = async (
     // Create or reuse Osquery-only endpoints
     for (let i = 0; i < config.osqueryOnlyCount; i++) {
       const hostname = `rsa-2026-osquery-only-${i + 1}`;
-      logger.info(`Processing endpoint ${i + 1}/${config.osqueryOnlyCount} with Osquery only: ${hostname}`);
+      logger.info(
+        `Processing endpoint ${i + 1}/${config.osqueryOnlyCount} with Osquery only: ${hostname}`
+      );
 
       if (existingVms.data.includes(hostname)) {
         logger.info(`Reusing existing VM: ${hostname}`);
@@ -224,8 +239,12 @@ export const stepEndpoints = async (
           });
           logger.info(`Reused endpoint: ${hostname} (agent: ${agent.id})`);
         } else {
-          logger.warning(`VM ${hostname} exists but agent not found in Fleet. Will skip this endpoint.`);
-          logger.info(`To re-enroll, you can manually enroll the agent or delete the VM and rerun this step.`);
+          logger.warning(
+            `VM ${hostname} exists but agent not found in Fleet. Will skip this endpoint.`
+          );
+          logger.info(
+            `To re-enroll, you can manually enroll the agent or delete the VM and rerun this step.`
+          );
           // Still add it to the list so browser history can be set up later
           endpoints.push({
             hostname,
@@ -236,7 +255,11 @@ export const stepEndpoints = async (
         }
       } else {
         logger.info(`Creating new endpoint: ${hostname}`);
-        const { hostname: newHostname, agentId, hostVm } = await createAndEnrollEndpointHost({
+        const {
+          hostname: newHostname,
+          agentId,
+          hostVm,
+        } = await createAndEnrollEndpointHost({
           kbnClient,
           log: logger,
           agentPolicyId: policyIds.osqueryOnly,
@@ -333,4 +356,3 @@ export const stepWorkflow = async (
     return await createVirusTotalWorkflow(esClient, kbnClient, logger, virustotalApiKey);
   });
 };
-

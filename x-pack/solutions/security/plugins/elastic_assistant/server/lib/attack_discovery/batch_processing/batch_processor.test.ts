@@ -5,8 +5,14 @@
  * 2.0.
  */
 
-import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
-import { BatchProcessor, type AlertForProcessing, type AttackDiscoveryResult, type BatchProcessingConfig, DEFAULT_BATCH_CONFIG } from './index';
+import type { MockedLogger } from '@kbn/logging-mocks';
+import { loggerMock } from '@kbn/logging-mocks';
+import {
+  BatchProcessor,
+  type AlertForProcessing,
+  type AttackDiscoveryResult,
+  DEFAULT_BATCH_CONFIG,
+} from '.';
 
 describe('BatchProcessor', () => {
   let logger: MockedLogger;
@@ -32,7 +38,10 @@ describe('BatchProcessor', () => {
 
     mockProcessBatch = jest.fn().mockImplementation((alerts: AlertForProcessing[]) => {
       return Promise.resolve([
-        createDiscovery(`discovery-${alerts[0].id}`, alerts.map((a) => a.id)),
+        createDiscovery(
+          `discovery-${alerts[0].id}`,
+          alerts.map((a) => a.id)
+        ),
       ]);
     });
 
@@ -53,11 +62,7 @@ describe('BatchProcessor', () => {
 
   describe('process', () => {
     it('should process alerts in batches', async () => {
-      const alerts = [
-        createAlert('alert-1'),
-        createAlert('alert-2'),
-        createAlert('alert-3'),
-      ];
+      const alerts = [createAlert('alert-1'), createAlert('alert-2'), createAlert('alert-3')];
 
       const customProcessor = new BatchProcessor({
         logger,
@@ -111,7 +116,8 @@ describe('BatchProcessor', () => {
     });
 
     it('should handle batch processing errors gracefully', async () => {
-      const failingProcessor = jest.fn()
+      const failingProcessor = jest
+        .fn()
         .mockResolvedValueOnce([createDiscovery('discovery-1', ['alert-1'])])
         .mockRejectedValueOnce(new Error('Batch processing failed'));
 

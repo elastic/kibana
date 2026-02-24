@@ -1,10 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
  * 2.0.
  */
 
 import type { ToolingLog } from '@kbn/tooling-log';
+import type { KbnClient } from '@kbn/test';
 import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils';
 import { createRuntimeServices } from '../common/stack_services';
 import {
@@ -12,7 +20,6 @@ import {
   startFleetServerIfNecessary,
   updateFleetElasticsearchOutputHostNames,
 } from '../common/fleet_server/fleet_server_services';
-import type { KbnClient } from '@kbn/test';
 import { fetchAgentPolicyEnrollmentKey, fetchFleetAgents } from '../common/fleet_services';
 import { findVm, createMultipassHostVmClient } from '../common/vm_services';
 
@@ -113,13 +120,17 @@ export const runUpdateFleetHostIp = async (options: RunUpdateFleetHostIpOptions)
 
   // 3) Update multipass VMs by re-enrolling agents (works even if they were stuck on an old/unreachable Fleet URL).
   if (options.updateMultipassAgents) {
-    const filter = options.multipassNameFilter ? new RegExp(options.multipassNameFilter) : undefined;
+    const filter = options.multipassNameFilter
+      ? new RegExp(options.multipassNameFilter)
+      : undefined;
     const { data: vms } = await findVm('multipass');
 
     const targetVms = filter ? vms.filter((name) => filter.test(name)) : vms;
 
     if (targetVms.length === 0) {
-      log.warning(`No multipass VMs found${filter ? ` matching [${filter}]` : ''}. Nothing to update.`);
+      log.warning(
+        `No multipass VMs found${filter ? ` matching [${filter}]` : ''}. Nothing to update.`
+      );
       return;
     }
 
@@ -137,7 +148,9 @@ export const runUpdateFleetHostIp = async (options: RunUpdateFleetHostIpOptions)
 
           const enrollmentToken = await fetchAgentPolicyEnrollmentKey(kbnClient, agentPolicyId);
           if (!enrollmentToken) {
-            log.warning(`Skipping VM [${vmName}] (no enrollment token found for policy [${agentPolicyId}])`);
+            log.warning(
+              `Skipping VM [${vmName}] (no enrollment token found for policy [${agentPolicyId}])`
+            );
             continue;
           }
 
@@ -150,5 +163,3 @@ export const runUpdateFleetHostIp = async (options: RunUpdateFleetHostIpOptions)
     });
   }
 };
-
-

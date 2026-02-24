@@ -261,11 +261,7 @@ export const SkillForm: React.FC<SkillFormProps> = ({
             <EuiLoadingSpinner size="xxl" />
           </EuiFlexGroup>
         ) : (
-          <EuiForm
-            component="form"
-            onSubmit={handleSubmit}
-            data-test-subj="agentBuilderSkillForm"
-          >
+          <EuiForm component="form" onSubmit={handleSubmit} data-test-subj="agentBuilderSkillForm">
             {/* Section: Skill identity */}
             <EuiSpacer size="l" />
             <EuiFlexGroup
@@ -280,21 +276,17 @@ export const SkillForm: React.FC<SkillFormProps> = ({
                     <EuiIcon type="bullseye" />
                     <EuiTitle size="xs">
                       <h2 id="skill-identity-section-title">
-                        {i18n.translate(
-                          'xpack.agentBuilder.skills.form.identityTitle',
-                          { defaultMessage: 'Skill identity' }
-                        )}
+                        {i18n.translate('xpack.agentBuilder.skills.form.identityTitle', {
+                          defaultMessage: 'Skill identity',
+                        })}
                       </h2>
                     </EuiTitle>
                   </EuiFlexGroup>
                   <EuiText size="s" color="subdued">
-                    {i18n.translate(
-                      'xpack.agentBuilder.skills.form.identityDescription',
-                      {
-                        defaultMessage:
-                          'Define the skill\'s unique identifier and display name. The ID is used to reference the skill in configurations.',
-                      }
-                    )}
+                    {i18n.translate('xpack.agentBuilder.skills.form.identityDescription', {
+                      defaultMessage:
+                        "Define the skill's unique identifier and display name. The ID is used to reference the skill in configurations.",
+                    })}
                   </EuiText>
                   <EuiSpacer size="s" />
                   <EuiPanel paddingSize="m" hasBorder={false} hasShadow={false} color="subdued">
@@ -351,10 +343,9 @@ export const SkillForm: React.FC<SkillFormProps> = ({
                       isInvalid={!!idError}
                       disabled={isViewMode}
                       data-test-subj="agentBuilderSkillFormIdInput"
-                      placeholder={i18n.translate(
-                        'xpack.agentBuilder.skills.form.idPlaceholder',
-                        { defaultMessage: 'Enter skill ID' }
-                      )}
+                      placeholder={i18n.translate('xpack.agentBuilder.skills.form.idPlaceholder', {
+                        defaultMessage: 'Enter skill ID',
+                      })}
                     />
                   </EuiFormRow>
                 )}
@@ -370,10 +361,9 @@ export const SkillForm: React.FC<SkillFormProps> = ({
                     isInvalid={!!nameError}
                     disabled={isViewMode}
                     data-test-subj="agentBuilderSkillFormNameInput"
-                    placeholder={i18n.translate(
-                      'xpack.agentBuilder.skills.form.namePlaceholder',
-                      { defaultMessage: 'Enter skill name' }
-                    )}
+                    placeholder={i18n.translate('xpack.agentBuilder.skills.form.namePlaceholder', {
+                      defaultMessage: 'Enter skill name',
+                    })}
                   />
                 </EuiFormRow>
 
@@ -413,21 +403,17 @@ export const SkillForm: React.FC<SkillFormProps> = ({
                     <EuiIcon type="document" />
                     <EuiTitle size="xs">
                       <h2 id="skill-instructions-section-title">
-                        {i18n.translate(
-                          'xpack.agentBuilder.skills.form.instructionsTitle',
-                          { defaultMessage: 'Instructions' }
-                        )}
+                        {i18n.translate('xpack.agentBuilder.skills.form.instructionsTitle', {
+                          defaultMessage: 'Instructions',
+                        })}
                       </h2>
                     </EuiTitle>
                   </EuiFlexGroup>
                   <EuiText size="s" color="subdued">
-                    {i18n.translate(
-                      'xpack.agentBuilder.skills.form.instructionsDescription',
-                      {
-                        defaultMessage:
-                          'Write the markdown instructions that define what this skill does and how agents should use it. This is the core content of the skill.',
-                      }
-                    )}
+                    {i18n.translate('xpack.agentBuilder.skills.form.instructionsDescription', {
+                      defaultMessage:
+                        'Write the markdown instructions that define what this skill does and how agents should use it. This is the core content of the skill.',
+                    })}
                   </EuiText>
                 </EuiFlexGroup>
               </EuiFlexItem>
@@ -448,8 +434,7 @@ export const SkillForm: React.FC<SkillFormProps> = ({
                     placeholder={i18n.translate(
                       'xpack.agentBuilder.skills.form.contentPlaceholder',
                       {
-                        defaultMessage:
-                          'Write markdown instructions for the skill...',
+                        defaultMessage: 'Write markdown instructions for the skill...',
                       }
                     )}
                   />
@@ -472,21 +457,17 @@ export const SkillForm: React.FC<SkillFormProps> = ({
                     <EuiIcon type="wrench" />
                     <EuiTitle size="xs">
                       <h2 id="skill-tools-section-title">
-                        {i18n.translate(
-                          'xpack.agentBuilder.skills.form.toolsTitle',
-                          { defaultMessage: 'Associated tools' }
-                        )}
+                        {i18n.translate('xpack.agentBuilder.skills.form.toolsTitle', {
+                          defaultMessage: 'Associated tools',
+                        })}
                       </h2>
                     </EuiTitle>
                   </EuiFlexGroup>
                   <EuiText size="s" color="subdued">
-                    {i18n.translate(
-                      'xpack.agentBuilder.skills.form.toolsDescription',
-                      {
-                        defaultMessage:
-                          'Select tools that this skill requires. When an agent uses this skill, these tools will be available to it. A maximum of 5 tools can be associated with a skill.',
-                      }
-                    )}
+                    {i18n.translate('xpack.agentBuilder.skills.form.toolsDescription', {
+                      defaultMessage:
+                        'Select tools that this skill requires. When an agent uses this skill, these tools will be available to it. A maximum of 5 tools can be associated with a skill.',
+                    })}
                   </EuiText>
                 </EuiFlexGroup>
               </EuiFlexItem>
@@ -501,10 +482,9 @@ export const SkillForm: React.FC<SkillFormProps> = ({
                     }
                     isDisabled={isViewMode}
                     data-test-subj="agentBuilderSkillFormToolIdsInput"
-                    placeholder={i18n.translate(
-                      'xpack.agentBuilder.skills.form.toolsPlaceholder',
-                      { defaultMessage: 'Select tools' }
-                    )}
+                    placeholder={i18n.translate('xpack.agentBuilder.skills.form.toolsPlaceholder', {
+                      defaultMessage: 'Select tools',
+                    })}
                   />
                 </EuiFormRow>
               </EuiFlexItem>

@@ -6,13 +6,7 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import type {
-  AlertCluster,
-  ExtractedEntity,
-  ObservableTypeKey,
-  ProcessNode,
-  CrossHostLink,
-} from '../types';
+import type { AlertCluster, ExtractedEntity } from '../types';
 
 // ============================================================
 // MITRE ATT&CK Tactic ordering and classification rules
@@ -85,8 +79,18 @@ const CLASSIFICATION_RULES: ClassificationRule[] = [
     minTacticMatches: 1,
     requiredTactics: ['Lateral Movement'],
     signalTechniques: [
-      'T1021', 'T1021.001', 'T1021.002', 'T1021.004', 'T1021.006',
-      'T1072', 'T1080', 'T1210', 'T1534', 'T1550', 'T1563', 'T1570',
+      'T1021',
+      'T1021.001',
+      'T1021.002',
+      'T1021.004',
+      'T1021.006',
+      'T1072',
+      'T1080',
+      'T1210',
+      'T1534',
+      'T1550',
+      'T1563',
+      'T1570',
     ],
     descriptionTemplate:
       'Lateral movement detected from {host} with {alertCount} alerts. ' +
@@ -280,9 +284,7 @@ export class StaticAnalysisService {
       if (matchingTactics.length < rule.minTacticMatches) continue;
 
       // Check signal techniques for stronger confidence
-      const matchingTechniques = (rule.signalTechniques ?? []).filter((t) =>
-        techniqueSet.has(t)
-      );
+      const matchingTechniques = (rule.signalTechniques ?? []).filter((t) => techniqueSet.has(t));
 
       // If we have tactic match, classify
       const orderedTactics = this.orderTactics(tactics);
@@ -293,7 +295,9 @@ export class StaticAnalysisService {
 
       this.logger.debug(
         `Cluster ${cluster.id} classified as "${rule.label}" ` +
-          `(tactics: ${matchingTactics.join(', ')}, techniques: ${matchingTechniques.length} signal matches)`
+          `(tactics: ${matchingTactics.join(', ')}, techniques: ${
+            matchingTechniques.length
+          } signal matches)`
       );
 
       return { classification: rule.label, description };
@@ -378,14 +382,8 @@ export class StaticAnalysisService {
     mergeThreshold = 0.7
   ): DeterministicSimilarityResult {
     const entityOverlap = this.computeEntityOverlap(case1.entities, case2.entities);
-    const techniqueOverlap = this.jaccard(
-      new Set(case1.techniques),
-      new Set(case2.techniques)
-    );
-    const ruleOverlap = this.jaccard(
-      new Set(case1.ruleNames),
-      new Set(case2.ruleNames)
-    );
+    const techniqueOverlap = this.jaccard(new Set(case1.techniques), new Set(case2.techniques));
+    const ruleOverlap = this.jaccard(new Set(case1.ruleNames), new Set(case2.ruleNames));
     const temporalProximity = this.computeTemporalProximity(
       case1.earliestTimestamp,
       case1.latestTimestamp,
@@ -394,10 +392,7 @@ export class StaticAnalysisService {
     );
 
     const similarity =
-      entityOverlap * 0.4 +
-      techniqueOverlap * 0.25 +
-      ruleOverlap * 0.2 +
-      temporalProximity * 0.15;
+      entityOverlap * 0.4 + techniqueOverlap * 0.25 + ruleOverlap * 0.2 + temporalProximity * 0.15;
 
     const shouldMerge = similarity >= mergeThreshold;
 
@@ -417,7 +412,9 @@ export class StaticAnalysisService {
     }
 
     const reason = shouldMerge
-      ? `Cases should be merged: ${parts.join(', ')}. Overall similarity: ${(similarity * 100).toFixed(1)}%.`
+      ? `Cases should be merged: ${parts.join(', ')}. Overall similarity: ${(
+          similarity * 100
+        ).toFixed(1)}%.`
       : `Cases are distinct (similarity: ${(similarity * 100).toFixed(1)}%). ` +
         `Strongest signal: ${parts[0] ?? 'none above threshold'}.`;
 
@@ -448,11 +445,7 @@ export class StaticAnalysisService {
     alerts: Array<{ _id: string; _source: Record<string, unknown> }>
   ): CaseSimilarityInput {
     const ruleNames = [
-      ...new Set(
-        alerts
-          .map((a) => a._source['kibana.alert.rule.name'] as string)
-          .filter(Boolean)
-      ),
+      ...new Set(alerts.map((a) => a._source['kibana.alert.rule.name'] as string).filter(Boolean)),
     ];
 
     return {
@@ -473,15 +466,11 @@ export class StaticAnalysisService {
 
   /** Order tactics by MITRE kill chain position */
   private orderTactics(tactics: string[]): string[] {
-    return [...new Set(tactics)].sort(
-      (a, b) => (TACTIC_ORDER[a] ?? 99) - (TACTIC_ORDER[b] ?? 99)
-    );
+    return [...new Set(tactics)].sort((a, b) => (TACTIC_ORDER[a] ?? 99) - (TACTIC_ORDER[b] ?? 99));
   }
 
   /** Derive case severity from cluster metadata */
-  private deriveSeverity(
-    cluster: AlertCluster
-  ): 'low' | 'medium' | 'high' | 'critical' {
+  private deriveSeverity(cluster: AlertCluster): 'low' | 'medium' | 'high' | 'critical' {
     const tacticSet = new Set(cluster.tactics);
 
     // Critical: Impact or Exfiltration tactics present
@@ -606,7 +595,9 @@ export class StaticAnalysisService {
       lines.push('', '**Cross-Host Links**:');
       for (const link of cluster.crossHostLinks) {
         lines.push(
-          `- ${link.sourceHost} ↔ ${link.targetHost}: ${link.description} (confidence: ${(link.confidence * 100).toFixed(0)}%)`
+          `- ${link.sourceHost} ↔ ${link.targetHost}: ${link.description} (confidence: ${(
+            link.confidence * 100
+          ).toFixed(0)}%)`
         );
       }
     }
@@ -617,10 +608,7 @@ export class StaticAnalysisService {
   }
 
   /** Compute weighted entity overlap between two entity sets */
-  private computeEntityOverlap(
-    entities1: ExtractedEntity[],
-    entities2: ExtractedEntity[]
-  ): number {
+  private computeEntityOverlap(entities1: ExtractedEntity[], entities2: ExtractedEntity[]): number {
     const set1 = new Set(entities1.map((e) => `${e.type}:${e.normalizedValue}`));
     const set2 = new Set(entities2.map((e) => `${e.type}:${e.normalizedValue}`));
 

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
+import type { MockedLogger } from '@kbn/logging-mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 import { EntityExtractionService } from './entity_extraction_service';
 import { ObservableTypeKey, DEFAULT_ENTITY_TYPE_CONFIGS } from '../types';
 

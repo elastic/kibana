@@ -33,10 +33,7 @@ export interface BaseVmCreateOptions {
   memory?: string;
 }
 
-type CreateVmOptions =
-  | CreateMultipassVmOptions
-  | CreateVagrantVmOptions
-  | CreateUtmVmOptions;
+type CreateVmOptions = CreateMultipassVmOptions | CreateVagrantVmOptions | CreateUtmVmOptions;
 
 /**
  * Creates a new VM
@@ -106,14 +103,23 @@ const createMultipassVm = async ({
 }: CreateMultipassVmOptions): Promise<HostVm> => {
   log.info(`Creating VM [${name}] using multipass`);
 
-  const baseArgs = ['launch', '--name', name, '--disk', disk, '--cpus', String(cpus), '--memory', memory];
+  const baseArgs = [
+    'launch',
+    '--name',
+    name,
+    '--disk',
+    disk,
+    '--cpus',
+    String(cpus),
+    '--memory',
+    memory,
+  ];
   const imageArgs = image ? [image] : [];
 
   const tryLaunch = async (useBridged: boolean) => {
     const bridgedArgs: string[] = [];
     if (useBridged) {
-      const chosen =
-        bridgedNetwork || (await getDefaultMultipassBridgedNetwork());
+      const chosen = bridgedNetwork || (await getDefaultMultipassBridgedNetwork());
       if (chosen) {
         // Ensure `--bridged` uses a real interface on this host.
         // If this fails (permissions/unsupported), we still fall back to non-bridged launch.
@@ -700,7 +706,8 @@ export const getMultipassVmCountNotice = async (threshold: number = 1): Promise<
 
   if (totalVMs > threshold) {
     const vmDetails: string[] = [];
-    if (listOfMultipassVMs.data.length > 0) vmDetails.push(`${listOfMultipassVMs.data.length} Multipass`);
+    if (listOfMultipassVMs.data.length > 0)
+      vmDetails.push(`${listOfMultipassVMs.data.length} Multipass`);
     if (listOfUtmVMs.data.length > 0) vmDetails.push(`${listOfUtmVMs.data.length} UTM`);
 
     const viewCommands: string[] = [];
@@ -851,8 +858,7 @@ const createVagrantVm = async ({
       stdio: ['inherit', 'inherit', 'pipe'],
     });
     // eslint-disable-next-line no-empty
-  } catch (e) { }
-
+  } catch (e) {}
 
   if (memory || cpus || disk) {
     log.warning(
@@ -1178,8 +1184,12 @@ export const createGcpHostVmClient = (
   Project: ${gcpProject}
   Zone: ${gcpZone}
 
-  Shell access: ${chalk.cyan(`gcloud compute ssh ${name} --project=${gcpProject} --zone=${gcpZone}`)}
-  Delete VM:    ${chalk.cyan(`gcloud compute instances delete ${name} --project=${gcpProject} --zone=${gcpZone} --quiet`)}
+  Shell access: ${chalk.cyan(
+    `gcloud compute ssh ${name} --project=${gcpProject} --zone=${gcpZone}`
+  )}
+  Delete VM:    ${chalk.cyan(
+    `gcloud compute instances delete ${name} --project=${gcpProject} --zone=${gcpZone} --quiet`
+  )}
 `;
   };
 
@@ -1313,18 +1323,18 @@ export const findVm = async (
       data: !name
         ? list.list.map((vmEntry) => vmEntry.name)
         : list.list.reduce((acc, vmEntry) => {
-          if (typeof name === 'string') {
-            if (vmEntry.name === name) {
-              acc.push(vmEntry.name);
+            if (typeof name === 'string') {
+              if (vmEntry.name === name) {
+                acc.push(vmEntry.name);
+              }
+            } else {
+              if (name.test(vmEntry.name)) {
+                acc.push(vmEntry.name);
+              }
             }
-          } else {
-            if (name.test(vmEntry.name)) {
-              acc.push(vmEntry.name);
-            }
-          }
 
-          return acc;
-        }, [] as string[]),
+            return acc;
+          }, [] as string[]),
     };
   }
 

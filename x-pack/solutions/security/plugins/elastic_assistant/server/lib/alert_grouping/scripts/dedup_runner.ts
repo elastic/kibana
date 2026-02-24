@@ -48,12 +48,7 @@
 import { writeFileSync } from 'fs';
 import { randomUUID } from 'crypto';
 
-import {
-  ESClient,
-  KibanaClient,
-  parseConnectionArgs,
-  checkCluster,
-} from './es_client';
+import { ESClient, KibanaClient, parseConnectionArgs, checkCluster } from './es_client';
 
 import {
   HybridClustering,
@@ -107,9 +102,7 @@ async function fetchAlerts(
   const { ruleName, ageHours, maxAlerts, indexPattern } = options;
   const index = indexPattern ?? '.alerts-security.alerts-*';
 
-  const must: unknown[] = [
-    { range: { '@timestamp': { gte: `now-${ageHours}h` } } },
-  ];
+  const must: unknown[] = [{ range: { '@timestamp': { gte: `now-${ageHours}h` } } }];
 
   if (ruleName) {
     must.push({
@@ -123,7 +116,9 @@ async function fetchAlerts(
     });
   }
 
-  console.log(`\n  Querying ${index} (last ${ageHours}h${ruleName ? `, rule="${ruleName}"` : ''})...`);
+  console.log(
+    `\n  Querying ${index} (last ${ageHours}h${ruleName ? `, rule="${ruleName}"` : ''})...`
+  );
 
   const { status, body } = await es.post(`/${index}/_search`, {
     size: maxAlerts,
@@ -137,8 +132,12 @@ async function fetchAlerts(
   }
 
   const result = body as Record<string, unknown>;
-  const hits = ((result.hits as Record<string, unknown>)?.hits ?? []) as Array<Record<string, unknown>>;
-  const total = ((result.hits as Record<string, unknown>)?.total as Record<string, unknown>)?.value ?? hits.length;
+  const hits = ((result.hits as Record<string, unknown>)?.hits ?? []) as Array<
+    Record<string, unknown>
+  >;
+  const total =
+    ((result.hits as Record<string, unknown>)?.total as Record<string, unknown>)?.value ??
+    hits.length;
 
   console.log(`  Found ${total} alerts, fetched ${hits.length}`);
 
@@ -190,22 +189,16 @@ const getAlertSummary = (alert: AlertDocument): string => {
 // Create LLM invoke function via Kibana connector
 // ============================================================
 
-function createKibanaLLMInvoke(
-  kibana: KibanaClient,
-  connectorId: string
-): LLMInvokeFn {
+function createKibanaLLMInvoke(kibana: KibanaClient, connectorId: string): LLMInvokeFn {
   return async (_system: string, prompt: string): Promise<string> => {
-    const { status, body } = await kibana.post(
-      `/api/actions/connector/${connectorId}/_execute`,
-      {
-        params: {
-          subAction: 'invokeAI',
-          subActionParams: {
-            messages: [{ role: 'user' as const, content: prompt }],
-          },
+    const { status, body } = await kibana.post(`/api/actions/connector/${connectorId}/_execute`, {
+      params: {
+        subAction: 'invokeAI',
+        subActionParams: {
+          messages: [{ role: 'user' as const, content: prompt }],
         },
-      }
-    );
+      },
+    });
 
     if (status !== 200 || typeof body !== 'object' || body === null) {
       throw new Error(`LLM call failed (${status}): ${JSON.stringify(body).slice(0, 200)}`);
@@ -241,10 +234,7 @@ const CLUSTER_ID_FIELD = 'kibana.alert.cluster.id';
  * Required because the alerts index uses `dynamic: false`, so new fields
  * are stored in _source but not indexed unless explicitly mapped.
  */
-async function ensureClusterIdMapping(
-  es: ESClient,
-  indices: Set<string>
-): Promise<void> {
+async function ensureClusterIdMapping(es: ESClient, indices: Set<string>): Promise<void> {
   for (const index of indices) {
     const { status, body } = await es.request('PUT', `/${index}/_mapping`, {
       properties: {
@@ -266,7 +256,10 @@ async function ensureClusterIdMapping(
 
     if (status !== 200) {
       console.warn(
-        `  WARN: Failed to update mapping for ${index} (${status}): ${JSON.stringify(body).slice(0, 200)}`
+        `  WARN: Failed to update mapping for ${index} (${status}): ${JSON.stringify(body).slice(
+          0,
+          200
+        )}`
       );
     }
   }
@@ -295,20 +288,22 @@ async function bulkUpdateClusterIds(
       lines.push(JSON.stringify({ doc: { [CLUSTER_ID_FIELD]: clusterId } }));
     }
 
-    const bulkBody = lines.join('\n') + '\n';
-    const { status, body } = await es.post(
-      '/_bulk?refresh=true',
-      bulkBody,
-      'application/x-ndjson'
-    );
+    const bulkBody = `${lines.join('\n')}\n`;
+    const { status, body } = await es.post('/_bulk?refresh=true', bulkBody, 'application/x-ndjson');
 
     if ((status !== 200 && status !== 201) || typeof body !== 'object' || body === null) {
-      console.error(`  ERROR: Bulk update failed (${status}): ${JSON.stringify(body).slice(0, 500)}`);
+      console.error(
+        `  ERROR: Bulk update failed (${status}): ${JSON.stringify(body).slice(0, 500)}`
+      );
       totalFailed += batch.length;
       continue;
     }
 
-    const result = body as { items?: Array<{ update?: { _id: string; status: number; error?: { type: string; reason: string } } }> };
+    const result = body as {
+      items?: Array<{
+        update?: { _id: string; status: number; error?: { type: string; reason: string } };
+      }>;
+    };
     const items = result.items ?? [];
     let batchFailed = 0;
 
@@ -316,7 +311,9 @@ async function bulkUpdateClusterIds(
       if (item.update?.error) {
         batchFailed++;
         if (batchFailed <= 2) {
-          console.error(`  ERROR: ${item.update.error.type}: ${item.update.error.reason.slice(0, 200)}`);
+          console.error(
+            `  ERROR: ${item.update.error.type}: ${item.update.error.reason.slice(0, 200)}`
+          );
         }
       }
     }
@@ -325,7 +322,11 @@ async function bulkUpdateClusterIds(
     totalFailed += batchFailed;
 
     if (updates.length > BATCH_SIZE) {
-      console.log(`  Batch ${Math.floor(offset / BATCH_SIZE) + 1}: ${items.length - batchFailed}/${batch.length} ok`);
+      console.log(
+        `  Batch ${Math.floor(offset / BATCH_SIZE) + 1}: ${items.length - batchFailed}/${
+          batch.length
+        } ok`
+      );
     }
   }
 
@@ -393,7 +394,8 @@ async function main(): Promise<void> {
   const outputFile = args.extra.output;
   const indexPattern = args.extra['index-pattern'] ?? '';
   const showGroups = args.extra['show-groups'] === 'true' || process.argv.includes('--show-groups');
-  const updateAlerts = args.extra['update-alerts'] === 'true' || process.argv.includes('--update-alerts');
+  const updateAlerts =
+    args.extra['update-alerts'] === 'true' || process.argv.includes('--update-alerts');
   const dryRun = args.dryRun;
 
   if (!args.esUrl) {
@@ -404,7 +406,9 @@ async function main(): Promise<void> {
     args.kibanaUrl = args.esUrl.replace(/:\d+/, ':5601');
   }
   if (!connectorId && !dryRun) {
-    console.error('ERROR: --connector-id is required (or use --dry-run for vector-only clustering)');
+    console.error(
+      'ERROR: --connector-id is required (or use --dry-run for vector-only clustering)'
+    );
     process.exit(1);
   }
 
@@ -527,8 +531,8 @@ async function main(): Promise<void> {
     if ((i + 1) % 100 === 0) {
       console.log(
         `  Progress: ${i + 1}/${enrichedAlerts.length} alerts, ` +
-        `${clustering.leaders.length} clusters, ` +
-        `${clustering.llmCalls} LLM calls`
+          `${clustering.leaders.length} clusters, ` +
+          `${clustering.llmCalls} LLM calls`
       );
     }
   }
@@ -543,7 +547,11 @@ async function main(): Promise<void> {
   console.log(`  Total alerts:    ${alerts.length}`);
   console.log(`  Unique alerts:   ${uniqueAlerts.length}`);
   console.log(`  Total clusters:  ${clustering.leaders.length}`);
-  console.log(`  Matched:         ${matchedCount} (${((matchedCount / alerts.length) * 100).toFixed(1)}% reduction)`);
+  console.log(
+    `  Matched:         ${matchedCount} (${((matchedCount / alerts.length) * 100).toFixed(
+      1
+    )}% reduction)`
+  );
   console.log(`  LLM calls:       ${clustering.llmCalls}`);
   console.log(`  Cluster time:    ${(clusterDurationMs / 1000).toFixed(1)}s`);
   console.log(`  Total time:      ${(totalDurationMs / 1000).toFixed(1)}s`);
@@ -552,9 +560,7 @@ async function main(): Promise<void> {
   console.log(`\n  Per-rule breakdown:`);
   const ruleGroupSummary: DeduplicationReport['ruleGroups'] = [];
   for (const [rule] of ruleGroups) {
-    const ruleLeaders = clustering.leaders.filter(
-      (l) => getRuleName(l) === rule
-    );
+    const ruleLeaders = clustering.leaders.filter((l) => getRuleName(l) === rule);
     console.log(`    ${rule}: ${ruleLeaders.length} clusters`);
     ruleGroupSummary.push({
       ruleName: rule,
@@ -577,7 +583,11 @@ async function main(): Promise<void> {
     const exceptionCount = leader.exceptions?.length ?? 0;
     const clusterUUID = randomUUID();
 
-    console.log(`\n  Cluster #${i + 1} [${clusterUUID}]: ${rule} (${followerCount} alerts, ${exceptionCount} exceptions)`);
+    console.log(
+      `\n  Cluster #${
+        i + 1
+      } [${clusterUUID}]: ${rule} (${followerCount} alerts, ${exceptionCount} exceptions)`
+    );
     if (commonFields.length > 0) {
       console.log(`    Common fields: ${commonFields.join(', ')}`);
     }

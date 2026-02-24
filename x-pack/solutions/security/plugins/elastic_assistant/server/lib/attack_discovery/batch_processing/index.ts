@@ -6,5 +6,10 @@
  */
 
 export * from './types';
-export { BatchProcessor, type AlertForProcessing, type BatchProcessorFn, type MergeDiscoveriesFn } from './batch_processor';
+export {
+  BatchProcessor,
+  type AlertForProcessing,
+  type BatchProcessorFn,
+  type MergeDiscoveriesFn,
+} from './batch_processor';
 export { AttackDiscoveryMergeService, type LLMCallFn } from './merge_service';

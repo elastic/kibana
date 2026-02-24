@@ -114,5 +114,3 @@ describe('casesTool', () => {
     });
   });
 });
-
-

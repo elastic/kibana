@@ -8,6 +8,7 @@
 import { z } from '@kbn/zod';
 import { tool } from '@langchain/core/tools';
 import type { Skill } from '@kbn/agent-builder-common/skills';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
 import type { GetOsqueryAppContextFn } from './utils';
 import { getOneChatContext } from './utils';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
@@ -15,7 +16,6 @@ import { savedQuerySavedObjectType } from '../../../common/types';
 import type { SavedQuerySavedObject } from '../../common/types';
 import { convertECSMappingToObject } from '../../routes/utils';
 import { getInstalledSavedQueriesMap } from '../../routes/saved_query/utils';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
 
 const SAVED_QUERIES_SKILL: Omit<Skill, 'tools'> = {
   namespace: 'osquery.saved_queries',
@@ -48,8 +48,8 @@ Show the query details from tool results: name, ID, SQL, platform, description.
  * @returns A LangChain tool configured for listing saved queries
  * @internal
  */
-const createListSavedQueriesTool = (getOsqueryContext: GetOsqueryAppContextFn) => {
-  return tool(
+const createListSavedQueriesTool = (getOsqueryContext: GetOsqueryAppContextFn) =>
+  tool(
     async ({ page, pageSize, sort, sortOrder }, config) => {
       const onechatContext = getOneChatContext(config);
       if (!onechatContext) {
@@ -127,7 +127,6 @@ const createListSavedQueriesTool = (getOsqueryContext: GetOsqueryAppContextFn) =
       }),
     }
   );
-};
 
 /**
  * Creates a LangChain tool for retrieving a specific saved query by ID.
@@ -136,8 +135,8 @@ const createListSavedQueriesTool = (getOsqueryContext: GetOsqueryAppContextFn) =
  * @returns A LangChain tool configured for getting saved query details
  * @internal
  */
-const createGetSavedQueryTool = (getOsqueryContext: GetOsqueryAppContextFn) => {
-  return tool(
+const createGetSavedQueryTool = (getOsqueryContext: GetOsqueryAppContextFn) =>
+  tool(
     async ({ saved_query_id }, config) => {
       const onechatContext = getOneChatContext(config);
       if (!onechatContext) {
@@ -202,7 +201,6 @@ const createGetSavedQueryTool = (getOsqueryContext: GetOsqueryAppContextFn) => {
       }),
     }
   );
-};
 
 /**
  * Creates the Saved Queries skill for listing and retrieving saved osquery queries.
@@ -233,14 +231,10 @@ const createGetSavedQueryTool = (getOsqueryContext: GetOsqueryAppContextFn) => {
  *
  * @see {@link getLiveQuerySkill} for running saved queries and browsing table schemas
  */
-export const getSavedQueriesSkill = (getOsqueryContext: GetOsqueryAppContextFn): Skill => {
-  return {
-    ...SAVED_QUERIES_SKILL,
-    tools: [createListSavedQueriesTool(getOsqueryContext), createGetSavedQueryTool(getOsqueryContext)],
-  };
-};
-
-
-
-
-
+export const getSavedQueriesSkill = (getOsqueryContext: GetOsqueryAppContextFn): Skill => ({
+  ...SAVED_QUERIES_SKILL,
+  tools: [
+    createListSavedQueriesTool(getOsqueryContext),
+    createGetSavedQueryTool(getOsqueryContext),
+  ],
+});

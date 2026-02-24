@@ -1,3 +1,10 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 /**
  * Agent Skills demo UI flow powered by Playwright.
  *
@@ -68,7 +75,10 @@ async function closeToastsIfVisible() {
     const count = await closeButtons.count();
     for (let i = 0; i < count; i++) {
       // eslint-disable-next-line no-await-in-loop
-      await closeButtons.nth(i).click().catch(() => {});
+      await closeButtons
+        .nth(i)
+        .click()
+        .catch(() => {});
     }
   }
 }
@@ -77,7 +87,10 @@ async function waitForKibanaToSettle() {
   // Kibana often shows this loading screen on app navigation.
   const loading = page.getByText('Loading Elastic');
   if (await loading.count()) {
-    await loading.first().waitFor({ state: 'hidden', timeout: 60_000 }).catch(() => {});
+    await loading
+      .first()
+      .waitFor({ state: 'hidden', timeout: 60_000 })
+      .catch(() => {});
   }
   await closeToastsIfVisible();
 }
@@ -90,7 +103,9 @@ await page.getByRole('textbox', { name: 'Username' }).fill(KIBANA_USERNAME);
 await page.getByRole('textbox', { name: 'Password' }).fill(KIBANA_PASSWORD);
 await page.getByRole('button', { name: 'Log in' }).click();
 
-await page.waitForFunction(() => !window.location.pathname.startsWith('/login'), null, { timeout: 60_000 });
+await page.waitForFunction(() => !window.location.pathname.startsWith('/login'), null, {
+  timeout: 60_000,
+});
 
 // If Kibana shows the space selector, pick Default so we can enter the app.
 const currentPathname = new URL(page.url()).pathname;
@@ -103,7 +118,9 @@ if (currentPathname === '/spaces/space_selector') {
 
 // Navigate to Fleet Agent details if available, otherwise to Fleet app.
 if (DEMO_AGENT_ID) {
-  const agentDetailsUrl = `${KIBANA_URL}${basePath}/app/fleet/agents/${encodeURIComponent(DEMO_AGENT_ID)}`;
+  const agentDetailsUrl = `${KIBANA_URL}${basePath}/app/fleet/agents/${encodeURIComponent(
+    DEMO_AGENT_ID
+  )}`;
   await page.goto(agentDetailsUrl, { waitUntil: 'domcontentloaded' });
 } else {
   await page.goto(`${KIBANA_URL}${basePath}/app/fleet/agents`, { waitUntil: 'domcontentloaded' });
@@ -181,7 +198,10 @@ if (DEMO_AGENT_ID) {
     await page.locator('[data-test-subj="agentBuilderConversationInputSubmitButton"]').click();
 
     // Wait for a response round to appear (doesn't assert content to avoid flakiness).
-    await page.locator('[data-test-subj="agentBuilderRoundResponse"]').first().waitFor({ timeout: 180_000 });
+    await page
+      .locator('[data-test-subj="agentBuilderRoundResponse"]')
+      .first()
+      .waitFor({ timeout: 180_000 });
   }
 }
 
@@ -209,5 +229,3 @@ if (process.env.SHOW) {
 }
 
 await browser.close();
-
-

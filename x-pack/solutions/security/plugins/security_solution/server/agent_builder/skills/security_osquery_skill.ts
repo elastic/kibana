@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
-import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
+import type { SkillDefinition, BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 import { ToolResultType, ToolType } from '@kbn/agent-builder-common/tools';
 import { z } from '@kbn/zod';
@@ -212,10 +211,7 @@ const createGetAgentsTool = (
       .optional()
       .describe('Filter by agent status'),
     platform: z.enum(['windows', 'darwin', 'linux']).optional().describe('Filter by platform'),
-    perPage: z
-      .number()
-      .optional()
-      .describe('Number of results (default: 100, max: 100)'),
+    perPage: z.number().optional().describe('Number of results (default: 100, max: 100)'),
   }),
   handler: async ({ hostname, agentId, status, platform, perPage = 100 }, { spaceId, logger }) => {
     try {
@@ -283,16 +279,18 @@ const createGetAgentsTool = (
   },
 });
 
-const createGetTableSchemaTool = (
-  osquerySetup: OsqueryPluginSetup
-): BuiltinSkillBoundedTool => ({
+const createGetTableSchemaTool = (osquerySetup: OsqueryPluginSetup): BuiltinSkillBoundedTool => ({
   id: 'security.osquery.get_table_schema',
   type: ToolType.builtin,
   description:
     'Discover columns and types for any osquery table. ALWAYS use before querying custom or Elastic-specific tables (e.g., elastic_browser_history) to avoid "no such column" errors.',
   schema: z.object({
-    tableName: z.string().describe('The osquery table name (e.g., "elastic_browser_history", "processes")'),
-    agentId: z.string().describe('Agent ID (UUID) to query schema from. Use osquery_get_agents to find IDs first.'),
+    tableName: z
+      .string()
+      .describe('The osquery table name (e.g., "elastic_browser_history", "processes")'),
+    agentId: z
+      .string()
+      .describe('Agent ID (UUID) to query schema from. Use osquery_get_agents to find IDs first.'),
   }),
   handler: async ({ tableName, agentId }, { esClient, spaceId, logger }) => {
     try {
@@ -305,8 +303,7 @@ const createGetTableSchemaTool = (
         { space: { id: spaceId } }
       );
 
-      const queryActionId =
-        osqueryAction.queries?.[0]?.action_id ?? osqueryAction.action_id;
+      const queryActionId = osqueryAction.queries?.[0]?.action_id ?? osqueryAction.action_id;
 
       const startTime = Date.now();
       const schemaTimeoutMs = 30_000;
@@ -332,16 +329,18 @@ const createGetTableSchemaTool = (
           const errors = await fetchActionErrors(esClient, queryActionId);
           if (errors.length > 0) {
             return {
-              results: [{
-                type: ToolResultType.other,
-                data: {
-                  message: JSON.stringify({
-                    table: sanitized,
-                    status: 'error',
-                    errors,
-                  }),
+              results: [
+                {
+                  type: ToolResultType.other,
+                  data: {
+                    message: JSON.stringify({
+                      table: sanitized,
+                      status: 'error',
+                      errors,
+                    }),
+                  },
                 },
-              }],
+              ],
             };
           }
         }
@@ -357,43 +356,50 @@ const createGetTableSchemaTool = (
         query: { bool: { filter: [{ term: { action_id: queryActionId } }] } },
       });
 
-      const columns = searchResponse.hits.hits.map((hit) => {
-        const source = (hit._source as Record<string, unknown>)?.osquery as Record<string, unknown> | undefined;
-        return {
-          name: source?.name,
-          type: source?.type,
-        };
-      }).filter((col) => col.name);
+      const columns = searchResponse.hits.hits
+        .map((hit) => {
+          const source = (hit._source as Record<string, unknown>)?.osquery as
+            | Record<string, unknown>
+            | undefined;
+          return {
+            name: source?.name,
+            type: source?.type,
+          };
+        })
+        .filter((col) => col.name);
 
       return {
-        results: [{
-          type: ToolResultType.other,
-          data: {
-            message: JSON.stringify({
-              table: sanitized,
-              columns,
-              message: columns.length > 0
-                ? `Table "${sanitized}" has ${columns.length} columns. Use ONLY these column names in your queries.`
-                : `No schema found for table "${sanitized}". The table may not exist on this agent.`,
-            }),
+        results: [
+          {
+            type: ToolResultType.other,
+            data: {
+              message: JSON.stringify({
+                table: sanitized,
+                columns,
+                message:
+                  columns.length > 0
+                    ? `Table "${sanitized}" has ${columns.length} columns. Use ONLY these column names in your queries.`
+                    : `No schema found for table "${sanitized}". The table may not exist on this agent.`,
+              }),
+            },
           },
-        }],
+        ],
       };
     } catch (error) {
       logger.error(`osquery get_table_schema error: ${error.message}`);
       return {
-        results: [{
-          type: ToolResultType.error,
-          data: { message: `Error fetching table schema: ${error.message}` },
-        }],
+        results: [
+          {
+            type: ToolResultType.error,
+            data: { message: `Error fetching table schema: ${error.message}` },
+          },
+        ],
       };
     }
   },
 });
 
-const createRunLiveQueryTool = (
-  osquerySetup: OsqueryPluginSetup
-): BuiltinSkillBoundedTool => ({
+const createRunLiveQueryTool = (osquerySetup: OsqueryPluginSetup): BuiltinSkillBoundedTool => ({
   id: 'security.osquery.run_live_query',
   type: ToolType.builtin,
   description:
@@ -427,8 +433,7 @@ const createRunLiveQueryTool = (
           })
         ) ?? [];
 
-      const primaryQueryActionId =
-        queryActionIds.length === 1 ? queryActionIds[0].action_id : null;
+      const primaryQueryActionId = queryActionIds.length === 1 ? queryActionIds[0].action_id : null;
 
       return {
         results: [
@@ -473,10 +478,7 @@ const fetchActionErrors = async (
     size: 100,
     query: {
       bool: {
-        filter: [
-          { term: { action_id: actionId } },
-          { exists: { field: 'error' } },
-        ],
+        filter: [{ term: { action_id: actionId } }, { exists: { field: 'error' } }],
       },
     },
   });
@@ -582,11 +584,7 @@ const createGetResultsTool = (): BuiltinSkillBoundedTool => ({
 
       const errors = await fetchActionErrors(esClient, actionId);
 
-      const status = settled
-        ? errors.length > 0
-          ? 'error'
-          : 'completed'
-        : 'timeout';
+      const status = settled ? (errors.length > 0 ? 'error' : 'completed') : 'timeout';
 
       return {
         results: [
@@ -600,7 +598,9 @@ const createGetResultsTool = (): BuiltinSkillBoundedTool => ({
                 errors: errors.length > 0 ? errors : undefined,
                 warning:
                   status === 'timeout'
-                    ? `Query timed out after ${Math.round((Date.now() - startTime) / 1000)}s. Some agents may not have responded.`
+                    ? `Query timed out after ${Math.round(
+                        (Date.now() - startTime) / 1000
+                      )}s. Some agents may not have responded.`
                     : undefined,
               }),
             },

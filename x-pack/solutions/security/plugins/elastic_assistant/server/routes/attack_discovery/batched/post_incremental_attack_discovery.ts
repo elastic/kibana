@@ -17,8 +17,14 @@ import { performChecks } from '../../helpers';
 import { buildResponse } from '../../../lib/build_response';
 import type { ElasticAssistantRequestHandlerContext } from '../../../types';
 import { hasReadWriteAttackDiscoveryAlertsPrivileges } from '../helpers/index_privileges';
-import { AttackDiscoveryMergeService, type AttackDiscoveryResult } from '../../../lib/attack_discovery/batch_processing';
-import { IncrementalProcessor, type IncrementalAttackDiscovery } from '../../../lib/attack_discovery/incremental_processing';
+import {
+  AttackDiscoveryMergeService,
+  type AttackDiscoveryResult,
+} from '../../../lib/attack_discovery/batch_processing';
+import {
+  IncrementalProcessor,
+  type IncrementalAttackDiscovery,
+} from '../../../lib/attack_discovery/incremental_processing';
 import { generateAttackDiscoveries } from '../helpers/generate_discoveries';
 
 const ROUTE_HANDLER_TIMEOUT = 15 * 60 * 1000; // 15 minutes for incremental processing
@@ -48,21 +54,23 @@ const IncrementalAttackDiscoveryRequestBody = z.object({
   langSmithProject: z.string().optional(),
   // Incremental processing options
   existingDiscoveryId: z.string().optional(),
-  existingDiscovery: z.object({
-    id: z.string(),
-    title: z.string(),
-    summaryMarkdown: z.string(),
-    detailsMarkdown: z.string().optional(),
-    entitySummaryMarkdown: z.string().optional(),
-    alertIds: z.array(z.string()),
-    mitreAttackTactics: z.array(z.string()).optional(),
-    riskScore: z.number().optional(),
-    processedAlertIds: z.array(z.string()),
-    isIncremental: z.boolean(),
-    lastUpdatedAt: z.string(),
-    updateCount: z.number(),
-    originalCreatedAt: z.string(),
-  }).optional(),
+  existingDiscovery: z
+    .object({
+      id: z.string(),
+      title: z.string(),
+      summaryMarkdown: z.string(),
+      detailsMarkdown: z.string().optional(),
+      entitySummaryMarkdown: z.string().optional(),
+      alertIds: z.array(z.string()),
+      mitreAttackTactics: z.array(z.string()).optional(),
+      riskScore: z.number().optional(),
+      processedAlertIds: z.array(z.string()),
+      isIncremental: z.boolean(),
+      lastUpdatedAt: z.string(),
+      updateCount: z.number(),
+      originalCreatedAt: z.string(),
+    })
+    .optional(),
   newAlertIds: z.array(z.string()),
   mode: z.enum(['enhance', 'delta', 'full']).default('delta'),
   // Optional: case context for case-scoped incremental updates
@@ -206,7 +214,9 @@ export const postIncrementalAttackDiscoveryRoute = (
           const mergeService = new AttackDiscoveryMergeService({ logger });
 
           // Create generate function that wraps the existing discovery graph
-          const generateDiscovery = async (alerts: Array<{ id: string; content: string }>): Promise<AttackDiscoveryResult[]> => {
+          const generateDiscovery = async (
+            alerts: Array<{ id: string; content: string }>
+          ): Promise<AttackDiscoveryResult[]> => {
             const result = await generateAttackDiscoveries({
               actionsClient,
               config: {

@@ -46,9 +46,9 @@ Report ONLY information from the tool results:
  * @returns A LangChain tool configured for status checking
  * @internal
  */
-const createGetStatusTool = (getOsqueryContext: GetOsqueryAppContextFn) => {
-  return tool(
-    async ({ }, config) => {
+const createGetStatusTool = (getOsqueryContext: GetOsqueryAppContextFn) =>
+  tool(
+    async ({}, config) => {
       const onechatContext = getOneChatContext(config);
       if (!onechatContext) {
         throw new Error('OneChat context not available');
@@ -90,10 +90,10 @@ const createGetStatusTool = (getOsqueryContext: GetOsqueryAppContextFn) => {
         install_status: packageInfo ? 'installed' : 'not_installed',
         package_info: packageInfo
           ? {
-            name: packageInfo.name,
-            version: packageInfo.version,
-            install_version: packageInfo.install_version,
-          }
+              name: packageInfo.name,
+              version: packageInfo.version,
+              install_version: packageInfo.install_version,
+            }
           : null,
         package_policies_count: osqueryPackagePolicyIdsWithinCurrentSpace.length,
       });
@@ -104,7 +104,6 @@ const createGetStatusTool = (getOsqueryContext: GetOsqueryAppContextFn) => {
       schema: z.object({}),
     }
   );
-};
 
 /**
  * Creates the Status skill for checking osquery integration availability.
@@ -136,14 +135,7 @@ const createGetStatusTool = (getOsqueryContext: GetOsqueryAppContextFn) => {
  *
  * @see {@link getLiveQuerySkill} for running queries when status is available
  */
-export const getStatusSkill = (getOsqueryContext: GetOsqueryAppContextFn): Skill => {
-  return {
-    ...STATUS_SKILL,
-    tools: [createGetStatusTool(getOsqueryContext)],
-  };
-};
-
-
-
-
-
+export const getStatusSkill = (getOsqueryContext: GetOsqueryAppContextFn): Skill => ({
+  ...STATUS_SKILL,
+  tools: [createGetStatusTool(getOsqueryContext)],
+});

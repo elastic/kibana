@@ -64,9 +64,7 @@ export const resolveConnectorId = async (
     }
 
     const allConnectors = await inference.getConnectorList(request);
-    const connector = allConnectors.find(
-      (c) => c.name === nameOrId || c.connectorId === nameOrId
-    );
+    const connector = allConnectors.find((c) => c.name === nameOrId || c.connectorId === nameOrId);
 
     return connector?.connectorId ?? null;
   } catch {

@@ -353,28 +353,28 @@ const createGetRiskScoreTimeSeriesTool = () => {
         entityType === 'user'
           ? 'user.name'
           : entityType === 'host'
-            ? 'host.name'
-            : entityType === 'service'
-              ? 'service.name'
-              : 'entity.name';
+          ? 'host.name'
+          : entityType === 'service'
+          ? 'service.name'
+          : 'entity.name';
 
       const scoreField =
         entityType === 'user'
           ? 'user.risk.calculated_score_norm'
           : entityType === 'host'
-            ? 'host.risk.calculated_score_norm'
-            : entityType === 'service'
-              ? 'service.risk.calculated_score_norm'
-              : 'entity.risk.calculated_score_norm';
+          ? 'host.risk.calculated_score_norm'
+          : entityType === 'service'
+          ? 'service.risk.calculated_score_norm'
+          : 'entity.risk.calculated_score_norm';
 
       const levelField =
         entityType === 'user'
           ? 'user.risk.calculated_level'
           : entityType === 'host'
-            ? 'host.risk.calculated_level'
-            : entityType === 'service'
-              ? 'service.risk.calculated_level'
-              : 'entity.risk.calculated_level';
+          ? 'host.risk.calculated_level'
+          : entityType === 'service'
+          ? 'service.risk.calculated_level'
+          : 'entity.risk.calculated_level';
 
       const esqlQuery = `FROM ${timeSeriesIndex}
 | WHERE @timestamp >= "${quote(startIso)}"

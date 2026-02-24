@@ -32,12 +32,7 @@
  */
 
 import { writeFileSync } from 'fs';
-import {
-  ESClient,
-  KibanaClient,
-  parseConnectionArgs,
-  checkCluster,
-} from './es_client';
+import { ESClient, KibanaClient, parseConnectionArgs, checkCluster } from './es_client';
 
 // ── Types ──
 
@@ -63,8 +58,21 @@ interface Alert {
 interface TriageContext {
   relatedAlerts: Array<{ id: string; ruleName: string; timestamp: string; severity: string }>;
   ruleFrequency: number;
-  processTree: Array<{ timestamp: string; processName: string; pid: number; parentName: string; commandLine: string; user: string }>;
-  networkActivity: Array<{ timestamp: string; processName: string; destIp: string; destPort: number; direction: string }>;
+  processTree: Array<{
+    timestamp: string;
+    processName: string;
+    pid: number;
+    parentName: string;
+    commandLine: string;
+    user: string;
+  }>;
+  networkActivity: Array<{
+    timestamp: string;
+    processName: string;
+    destIp: string;
+    destPort: number;
+    direction: string;
+  }>;
   fileActivity: Array<{ timestamp: string; processName: string; filePath: string; action: string }>;
 }
 
@@ -104,9 +112,7 @@ async function fetchNextAlert(es: ESClient, filterTag?: string): Promise<Alert |
     query: {
       bool: {
         must,
-        must_not: [
-          { term: { 'kibana.alert.workflow_tags': 'llm-triaged' } },
-        ],
+        must_not: [{ term: { 'kibana.alert.workflow_tags': 'llm-triaged' } }],
       },
     },
     sort: [{ '@timestamp': 'asc' }],
@@ -114,8 +120,10 @@ async function fetchNextAlert(es: ESClient, filterTag?: string): Promise<Alert |
 
   if (status !== 200 || typeof body !== 'object' || body === null) return null;
 
-  const hits = ((body as Record<string, unknown>).hits as Record<string, unknown>)
-    ?.hits as Array<Record<string, unknown>> ?? [];
+  const hits =
+    (((body as Record<string, unknown>).hits as Record<string, unknown>)?.hits as Array<
+      Record<string, unknown>
+    >) ?? [];
 
   if (hits.length === 0) return null;
 
@@ -140,7 +148,9 @@ async function fetchNextAlert(es: ESClient, filterTag?: string): Promise<Alert |
     processName: (proc.name as string) ?? '',
     commandLine: (proc.command_line as string) ?? '',
     parentProcess: (parent.name as string) ?? '',
-    tactics: threat.map((t) => ((t.tactic as Record<string, unknown>)?.name as string) ?? '').filter(Boolean),
+    tactics: threat
+      .map((t) => ((t.tactic as Record<string, unknown>)?.name as string) ?? '')
+      .filter(Boolean),
     techniques: threat.flatMap((t) => {
       const techs = (t.technique ?? []) as Array<Record<string, unknown>>;
       return techs.map((tech) => (tech.id as string) ?? '').filter(Boolean);
@@ -194,7 +204,14 @@ async function gatherContext(es: ESClient, alert: Alert): Promise<TriageContext>
           ],
         },
       },
-      _source: ['@timestamp', 'process.name', 'process.pid', 'process.parent.name', 'process.command_line', 'user.name'],
+      _source: [
+        '@timestamp',
+        'process.name',
+        'process.pid',
+        'process.parent.name',
+        'process.command_line',
+        'user.name',
+      ],
       sort: [{ '@timestamp': 'asc' }],
     }),
 
@@ -209,7 +226,13 @@ async function gatherContext(es: ESClient, alert: Alert): Promise<TriageContext>
           ],
         },
       },
-      _source: ['@timestamp', 'process.name', 'destination.ip', 'destination.port', 'network.direction'],
+      _source: [
+        '@timestamp',
+        'process.name',
+        'destination.ip',
+        'destination.port',
+        'network.direction',
+      ],
       sort: [{ '@timestamp': 'asc' }],
     }),
 
@@ -231,8 +254,8 @@ async function gatherContext(es: ESClient, alert: Alert): Promise<TriageContext>
 
   const extractHits = (resp: { status: number; body: unknown }) => {
     if (resp.status !== 200 || typeof resp.body !== 'object' || resp.body === null) return [];
-    return (((resp.body as Record<string, unknown>).hits as Record<string, unknown>)
-      ?.hits ?? []) as Array<Record<string, unknown>>;
+    return (((resp.body as Record<string, unknown>).hits as Record<string, unknown>)?.hits ??
+      []) as Array<Record<string, unknown>>;
   };
 
   const relatedHits = extractHits(relatedResp);
@@ -240,9 +263,12 @@ async function gatherContext(es: ESClient, alert: Alert): Promise<TriageContext>
   const networkHits = extractHits(networkResp);
   const fileHits = extractHits(fileResp);
 
-  const freqAggs = typeof freqResp.body === 'object' && freqResp.body !== null
-    ? (freqResp.body as Record<string, unknown>).aggregations as Record<string, unknown> | undefined
-    : undefined;
+  const freqAggs =
+    typeof freqResp.body === 'object' && freqResp.body !== null
+      ? ((freqResp.body as Record<string, unknown>).aggregations as
+          | Record<string, unknown>
+          | undefined)
+      : undefined;
   const ruleFrequency = ((freqAggs?.count as Record<string, unknown>)?.value as number) ?? 0;
 
   return {
@@ -300,21 +326,44 @@ async function gatherContext(es: ESClient, alert: Alert): Promise<TriageContext>
 // ── LLM Classification ──
 
 function buildClassificationPrompt(alert: Alert, context: TriageContext): string {
-  const relatedSection = context.relatedAlerts.length > 0
-    ? `Related alerts on same agent (${context.relatedAlerts.length}):\n${context.relatedAlerts.map((a) => `  - ${a.timestamp}: ${a.ruleName} (${a.severity})`).join('\n')}`
-    : 'No related alerts found on same agent.';
+  const relatedSection =
+    context.relatedAlerts.length > 0
+      ? `Related alerts on same agent (${context.relatedAlerts.length}):\n${context.relatedAlerts
+          .map((a) => `  - ${a.timestamp}: ${a.ruleName} (${a.severity})`)
+          .join('\n')}`
+      : 'No related alerts found on same agent.';
 
-  const processSection = context.processTree.length > 0
-    ? `Process tree (${context.processTree.length} events):\n${context.processTree.slice(0, 15).map((p) => `  - ${p.timestamp}: ${p.parentName} → ${p.processName} (pid ${p.pid}): ${p.commandLine.slice(0, 120)}`).join('\n')}`
-    : 'No process tree data available.';
+  const processSection =
+    context.processTree.length > 0
+      ? `Process tree (${context.processTree.length} events):\n${context.processTree
+          .slice(0, 15)
+          .map(
+            (p) =>
+              `  - ${p.timestamp}: ${p.parentName} → ${p.processName} (pid ${
+                p.pid
+              }): ${p.commandLine.slice(0, 120)}`
+          )
+          .join('\n')}`
+      : 'No process tree data available.';
 
-  const networkSection = context.networkActivity.length > 0
-    ? `Network activity (${context.networkActivity.length} events):\n${context.networkActivity.slice(0, 10).map((n) => `  - ${n.timestamp}: ${n.processName} → ${n.destIp}:${n.destPort} (${n.direction})`).join('\n')}`
-    : 'No network activity data available.';
+  const networkSection =
+    context.networkActivity.length > 0
+      ? `Network activity (${context.networkActivity.length} events):\n${context.networkActivity
+          .slice(0, 10)
+          .map(
+            (n) =>
+              `  - ${n.timestamp}: ${n.processName} → ${n.destIp}:${n.destPort} (${n.direction})`
+          )
+          .join('\n')}`
+      : 'No network activity data available.';
 
-  const fileSection = context.fileActivity.length > 0
-    ? `File activity (${context.fileActivity.length} events):\n${context.fileActivity.slice(0, 10).map((f) => `  - ${f.timestamp}: ${f.processName}: ${f.action} ${f.filePath}`).join('\n')}`
-    : 'No file activity data available.';
+  const fileSection =
+    context.fileActivity.length > 0
+      ? `File activity (${context.fileActivity.length} events):\n${context.fileActivity
+          .slice(0, 10)
+          .map((f) => `  - ${f.timestamp}: ${f.processName}: ${f.action} ${f.filePath}`)
+          .join('\n')}`
+      : 'No file activity data available.';
 
   return `You are an Elastic Security alert triage analyst. Analyze this alert and all gathered context, then provide a classification.
 
@@ -370,22 +419,19 @@ async function classifyAlert(
 ): Promise<{ classification: Classification; tokens: { input: number; output: number } }> {
   const prompt = buildClassificationPrompt(alert, context);
 
-  const { status, body } = await kibana.post(
-    `/api/actions/connector/${connectorId}/_execute`,
-    {
-      params: {
-        subAction: 'invokeAI',
-        subActionParams: {
-          messages: [
-            {
-              role: 'user' as const,
-              content: prompt,
-            },
-          ],
-        },
+  const { status, body } = await kibana.post(`/api/actions/connector/${connectorId}/_execute`, {
+    params: {
+      subAction: 'invokeAI',
+      subActionParams: {
+        messages: [
+          {
+            role: 'user' as const,
+            content: prompt,
+          },
+        ],
       },
-    }
-  );
+    },
+  });
 
   if (status !== 200 || typeof body !== 'object' || body === null) {
     console.error(`  LLM call failed (${status}): ${JSON.stringify(body).slice(0, 200)}`);
@@ -409,10 +455,21 @@ async function classifyAlert(
   const message = (data?.message as string) ?? '';
 
   // Extract token usage
-  const usage = (data?.usage as Record<string, unknown>) ?? (data?.usageMetadata as Record<string, unknown>) ?? {};
+  const usage =
+    (data?.usage as Record<string, unknown>) ??
+    (data?.usageMetadata as Record<string, unknown>) ??
+    {};
   const tokens = {
-    input: (usage.input_tokens as number) ?? (usage.prompt_tokens as number) ?? (usage.promptTokenCount as number) ?? 0,
-    output: (usage.output_tokens as number) ?? (usage.completion_tokens as number) ?? (usage.candidatesTokenCount as number) ?? 0,
+    input:
+      (usage.input_tokens as number) ??
+      (usage.prompt_tokens as number) ??
+      (usage.promptTokenCount as number) ??
+      0,
+    output:
+      (usage.output_tokens as number) ??
+      (usage.completion_tokens as number) ??
+      (usage.candidatesTokenCount as number) ??
+      0,
   };
 
   // Parse the JSON response
@@ -485,7 +542,14 @@ async function createCase(
     connector: { id: 'none', name: 'none', type: '.none', fields: null },
     settings: { syncAlerts: true },
     owner: 'securitySolution',
-    severity: alert.severity === 'critical' ? 'critical' : alert.severity === 'high' ? 'high' : alert.severity === 'medium' ? 'medium' : 'low',
+    severity:
+      alert.severity === 'critical'
+        ? 'critical'
+        : alert.severity === 'high'
+        ? 'high'
+        : alert.severity === 'medium'
+        ? 'medium'
+        : 'low',
   });
 
   if (status !== 200 || typeof body !== 'object' || body === null) {
@@ -524,10 +588,7 @@ async function addCaseComment(
 
 // ── Alert Acknowledgment ──
 
-async function acknowledgeAlerts(
-  es: ESClient,
-  alertIds: string[]
-): Promise<number> {
+async function acknowledgeAlerts(es: ESClient, alertIds: string[]): Promise<number> {
   if (alertIds.length === 0) return 0;
 
   const { status, body } = await es.post(
@@ -631,12 +692,19 @@ async function main(): Promise<void> {
     alertsProcessed++;
     console.log(`[${alertsProcessed}] ${alert.ruleName}`);
     console.log(`    Host: ${alert.hostName} | User: ${alert.userName} | ${alert.timestamp}`);
-    console.log(`    Process: ${alert.parentProcess} → ${alert.processName}: ${alert.commandLine.slice(0, 80)}`);
+    console.log(
+      `    Process: ${alert.parentProcess} → ${alert.processName}: ${alert.commandLine.slice(
+        0,
+        80
+      )}`
+    );
 
     // Step 2: Gather context
     console.log(`    Gathering context...`);
     const context = await gatherContext(es, alert);
-    console.log(`    Related alerts: ${context.relatedAlerts.length} | Process events: ${context.processTree.length} | Network: ${context.networkActivity.length} | Files: ${context.fileActivity.length} | Rule freq: ${context.ruleFrequency}`);
+    console.log(
+      `    Related alerts: ${context.relatedAlerts.length} | Process events: ${context.processTree.length} | Network: ${context.networkActivity.length} | Files: ${context.fileActivity.length} | Rule freq: ${context.ruleFrequency}`
+    );
 
     // Step 3: Classify via LLM
     let classification: Classification;
@@ -662,7 +730,11 @@ async function main(): Promise<void> {
       totalOutputTokens += tokens.output;
     }
 
-    console.log(`    → ${classification.classification.toUpperCase()} (score: ${classification.confidenceScore})`);
+    console.log(
+      `    → ${classification.classification.toUpperCase()} (score: ${
+        classification.confidenceScore
+      })`
+    );
     console.log(`    → ${classification.summary.slice(0, 120)}`);
     if (tokens.input > 0) {
       console.log(`    → Tokens: ${tokens.input} in / ${tokens.output} out`);
@@ -687,19 +759,27 @@ async function main(): Promise<void> {
 
         // Add classification comment
         const commentBody = [
-          `**Triage Classification: ${classification.classification.toUpperCase()}** (confidence: ${classification.confidenceScore}/100)`,
+          `**Triage Classification: ${classification.classification.toUpperCase()}** (confidence: ${
+            classification.confidenceScore
+          }/100)`,
           '',
           classification.summary,
           '',
           classification.attackChain ? `**Attack Chain:** ${classification.attackChain}` : '',
           classification.iocs.length > 0 ? `**IOCs:** ${classification.iocs.join(', ')}` : '',
-          classification.mitreTactics.length > 0 ? `**MITRE Tactics:** ${classification.mitreTactics.join(', ')}` : '',
-          classification.remediationSteps.length > 0 ? `**Remediation:** ${classification.remediationSteps.join('; ')}` : '',
+          classification.mitreTactics.length > 0
+            ? `**MITRE Tactics:** ${classification.mitreTactics.join(', ')}`
+            : '',
+          classification.remediationSteps.length > 0
+            ? `**Remediation:** ${classification.remediationSteps.join('; ')}`
+            : '',
           '',
           `**Context:** ${context.relatedAlerts.length} related alerts, ${context.processTree.length} process events, ${context.networkActivity.length} network events`,
           '',
           classification.analystNotes ? `**Notes:** ${classification.analystNotes}` : '',
-        ].filter(Boolean).join('\n');
+        ]
+          .filter(Boolean)
+          .join('\n');
 
         await addCaseComment(kibana, caseId, commentBody);
       }
@@ -709,7 +789,9 @@ async function main(): Promise<void> {
     const allAlertIds = [alert.id, ...context.relatedAlerts.map((a) => a.id)];
     if (!dryRun) {
       const acked = await acknowledgeAlerts(es, allAlertIds);
-      console.log(`    Acknowledged ${acked} alerts (primary + ${context.relatedAlerts.length} related)`);
+      console.log(
+        `    Acknowledged ${acked} alerts (primary + ${context.relatedAlerts.length} related)`
+      );
     }
 
     const durationMs = Date.now() - startTime;
@@ -737,11 +819,19 @@ async function main(): Promise<void> {
   console.log(`\n── Triage Summary ──`);
   console.log(`  Alerts processed:     ${results.length}`);
   console.log(`  Total duration:       ${(totalDurationMs / 1000).toFixed(1)}s`);
-  console.log(`  Avg per alert:        ${results.length > 0 ? (totalDurationMs / results.length / 1000).toFixed(1) : 0}s`);
-  console.log(`  Classifications:      benign=${classifications.benign} unknown=${classifications.unknown} malicious=${classifications.malicious}`);
+  console.log(
+    `  Avg per alert:        ${
+      results.length > 0 ? (totalDurationMs / results.length / 1000).toFixed(1) : 0
+    }s`
+  );
+  console.log(
+    `  Classifications:      benign=${classifications.benign} unknown=${classifications.unknown} malicious=${classifications.malicious}`
+  );
   console.log(`  Total input tokens:   ${totalInputTokens.toLocaleString()}`);
   console.log(`  Total output tokens:  ${totalOutputTokens.toLocaleString()}`);
-  console.log(`  Cases created/joined: ${new Set(results.map((r) => r.caseId).filter(Boolean)).size}`);
+  console.log(
+    `  Cases created/joined: ${new Set(results.map((r) => r.caseId).filter(Boolean)).size}`
+  );
 
   if (outputFile) {
     const report = {

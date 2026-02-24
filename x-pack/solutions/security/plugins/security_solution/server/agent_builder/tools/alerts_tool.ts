@@ -10,10 +10,6 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { runSearchTool } from '@kbn/agent-builder-genai-utils/tools';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
-import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_resource_availability';
-import { DEFAULT_ALERTS_INDEX, ESSENTIAL_ALERT_FIELDS } from '../../../common/constants';
-import { securityTool } from './constants';
-import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
 import { otherResult } from '@kbn/agent-builder-genai-utils/tools/utils/results';
 import {
   ALERT_WORKFLOW_REASON,
@@ -21,6 +17,10 @@ import {
   ALERT_WORKFLOW_STATUS_UPDATED_AT,
   ALERT_WORKFLOW_USER,
 } from '@kbn/rule-data-utils';
+import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_resource_availability';
+import { DEFAULT_ALERTS_INDEX, ESSENTIAL_ALERT_FIELDS } from '../../../common/constants';
+import { securityTool } from './constants';
+import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
 
 const MAX_ALERT_IDS = 1000;
 
@@ -48,7 +48,9 @@ const setWorkflowStatusSchema = z
   .object({
     operation: z
       .literal('set_workflow_status')
-      .describe('Set kibana.alert.workflow_status for one or more alerts (write). Requires confirm: true.'),
+      .describe(
+        'Set kibana.alert.workflow_status for one or more alerts (write). Requires confirm: true.'
+      ),
     alertIds: z
       .array(z.string().min(1))
       .min(1)
@@ -79,7 +81,9 @@ const acknowledgeSchema = z
   .object({
     operation: z
       .literal('acknowledge')
-      .describe('Convenience operation to set kibana.alert.workflow_status="acknowledged" (write). Requires confirm: true.'),
+      .describe(
+        'Convenience operation to set kibana.alert.workflow_status="acknowledged" (write). Requires confirm: true.'
+      ),
     alertIds: z
       .array(z.string().min(1))
       .min(1)
@@ -106,13 +110,16 @@ const alertsSchema = z.union([searchSchema, setWorkflowStatusSchema, acknowledge
 
 export const SECURITY_ALERTS_TOOL_ID = securityTool('alerts');
 
-type ParsedTimeRange = { gte: string; lte: string };
-type ParsedStructuredQuery = {
+interface ParsedTimeRange {
+  gte: string;
+  lte: string;
+}
+interface ParsedStructuredQuery {
   hosts: string[];
   users: string[];
   hashes: Array<{ value: string; alg: 'md5' | 'sha1' | 'sha256' }>;
   timeRange?: ParsedTimeRange;
-};
+}
 
 const extractAlertIdLookup = (nlQuery: string): string | undefined => {
   // Detect "get alert by id" intent and avoid misclassifying the id as a file hash.
@@ -144,13 +151,17 @@ const parseStructuredAlertQuery = (nlQuery: string): ParsedStructuredQuery | und
   const hashes: ParsedStructuredQuery['hashes'] = [];
 
   // Host extraction (very conservative)
-  const hostMatches = nlQuery.matchAll(/\bhost(?:\.name)?\s+(?:is\s+)?["']?([A-Za-z0-9._-]+)["']?/gi);
+  const hostMatches = nlQuery.matchAll(
+    /\bhost(?:\.name)?\s+(?:is\s+)?["']?([A-Za-z0-9._-]+)["']?/gi
+  );
   for (const m of hostMatches) {
     if (m[1]) hosts.push(m[1]);
   }
 
   // User extraction (very conservative)
-  const userMatches = nlQuery.matchAll(/\buser(?:\.name)?\s+(?:is\s+)?["']?([A-Za-z0-9._-]+)["']?/gi);
+  const userMatches = nlQuery.matchAll(
+    /\buser(?:\.name)?\s+(?:is\s+)?["']?([A-Za-z0-9._-]+)["']?/gi
+  );
   for (const m of userMatches) {
     if (m[1]) users.push(m[1]);
   }
@@ -248,22 +259,15 @@ export const alertsTool = (
         return getAgentBuilderResourceAvailability({ core, request, logger });
       },
     },
-    handler: async (
-      params,
-      { request, esClient, modelProvider, spaceId, events }
-    ) => {
+    handler: async (params, { request, esClient, modelProvider, spaceId, events }) => {
       const asAny = params as Record<string, unknown>;
 
       // Determine the index to use: either explicitly provided or based on the current space
       const searchIndex =
-        (asAny?.index as string | undefined) ??
-        `${DEFAULT_ALERTS_INDEX}-${spaceId}`;
+        (asAny?.index as string | undefined) ?? `${DEFAULT_ALERTS_INDEX}-${spaceId}`;
 
       // WRITE: set workflow status / acknowledge
-      if (
-        asAny?.operation === 'set_workflow_status' ||
-        asAny?.operation === 'acknowledge'
-      ) {
+      if (asAny?.operation === 'set_workflow_status' || asAny?.operation === 'acknowledge') {
         const confirm = asAny?.confirm;
         if (confirm !== true) {
           return {
@@ -284,7 +288,9 @@ export const alertsTool = (
 
         const status =
           asAny?.operation === 'acknowledge' ? 'acknowledged' : (asAny?.status as string);
-        const alertIds: string[] = Array.isArray(asAny?.alertIds) ? (asAny.alertIds as string[]) : [];
+        const alertIds: string[] = Array.isArray(asAny?.alertIds)
+          ? (asAny.alertIds as string[])
+          : [];
         const reason: string | undefined =
           status === 'closed' ? (asAny?.reason as string | undefined) : undefined;
 
@@ -415,7 +421,9 @@ export const alertsTool = (
       const enhancedQuery = enhanceQueryForAlerts(nlQuery, searchIndex, isCount);
 
       logger.debug(
-        `alerts tool called with query: ${nlQuery}, index: ${searchIndex}, isCount: ${isCount ?? false}`
+        `alerts tool called with query: ${nlQuery}, index: ${searchIndex}, isCount: ${
+          isCount ?? false
+        }`
       );
       const results = await runSearchTool({
         nlQuery: enhancedQuery,

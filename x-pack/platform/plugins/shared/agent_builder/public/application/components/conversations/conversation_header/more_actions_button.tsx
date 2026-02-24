@@ -35,8 +35,6 @@ import { DeleteConversationModal } from '../delete_conversation_modal';
 import { useHasConnectorsAllPrivileges } from '../../../hooks/use_has_connectors_all_privileges';
 import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
 import { useExperimentalFeatures } from '../../../hooks/use_experimental_features';
-import { RobotIcon } from '../../common/icons/robot';
-
 
 const fullscreenLabels = {
   actions: i18n.translate('xpack.agentBuilder.conversationActions.actions', {

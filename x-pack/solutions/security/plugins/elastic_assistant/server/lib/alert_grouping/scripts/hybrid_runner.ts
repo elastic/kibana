@@ -26,12 +26,7 @@
  */
 
 import { writeFileSync } from 'fs';
-import {
-  ESClient,
-  KibanaClient,
-  parseConnectionArgs,
-  checkCluster,
-} from './es_client';
+import { ESClient, KibanaClient, parseConnectionArgs, checkCluster } from './es_client';
 
 // ── Types ──
 
@@ -76,8 +71,18 @@ interface HybridReport {
   completedAt: string;
   stages: {
     grouping: { durationMs: number; casesCreated: number; alertsProcessed: number };
-    classification: { durationMs: number; llmCalls: number; inputTokens: number; outputTokens: number };
-    attackDiscovery: { durationMs: number; llmCalls: number; casesWithAd: number; casesSkipped: number };
+    classification: {
+      durationMs: number;
+      llmCalls: number;
+      inputTokens: number;
+      outputTokens: number;
+    };
+    attackDiscovery: {
+      durationMs: number;
+      llmCalls: number;
+      casesWithAd: number;
+      casesSkipped: number;
+    };
   };
   totalDurationMs: number;
   totalTokens: { input: number; output: number };
@@ -161,39 +166,81 @@ async function enrichCaseWithAlertContext(
     query: { term: { 'kibana.alert.case_ids': caseInfo.id } },
     sort: [{ 'kibana.alert.risk_score': 'desc' }],
     _source: [
-      '@timestamp', 'kibana.alert.rule.name', 'kibana.alert.severity',
-      'kibana.alert.risk_score', 'kibana.alert.reason',
-      'host.name', 'user.name', 'agent.id',
-      'process.name', 'process.command_line', 'process.parent.name',
+      '@timestamp',
+      'kibana.alert.rule.name',
+      'kibana.alert.severity',
+      'kibana.alert.risk_score',
+      'kibana.alert.reason',
+      'host.name',
+      'user.name',
+      'agent.id',
+      'process.name',
+      'process.command_line',
+      'process.parent.name',
       'kibana.alert.rule.threat',
     ],
   });
 
   if (status !== 200 || typeof body !== 'object' || body === null) {
-    return { representativeAlert: null, relatedAlerts: [], hostNames: [], ruleNames: [], tactics: [], processTree: [], networkActivity: [] };
+    return {
+      representativeAlert: null,
+      relatedAlerts: [],
+      hostNames: [],
+      ruleNames: [],
+      tactics: [],
+      processTree: [],
+      networkActivity: [],
+    };
   }
 
-  const hits = (((body as Record<string, unknown>).hits as Record<string, unknown>)?.hits ?? []) as Array<Record<string, unknown>>;
+  const hits = (((body as Record<string, unknown>).hits as Record<string, unknown>)?.hits ??
+    []) as Array<Record<string, unknown>>;
   if (hits.length === 0) {
-    return { representativeAlert: null, relatedAlerts: [], hostNames: [], ruleNames: [], tactics: [], processTree: [], networkActivity: [] };
+    return {
+      representativeAlert: null,
+      relatedAlerts: [],
+      hostNames: [],
+      ruleNames: [],
+      tactics: [],
+      processTree: [],
+      networkActivity: [],
+    };
   }
 
   const representativeAlert = hits[0]._source as Record<string, unknown>;
-  const hostNames = [...new Set(hits.map((h) => {
-    const src = h._source as Record<string, unknown>;
-    return ((src.host as Record<string, unknown>)?.name as string) ?? '';
-  }).filter(Boolean))];
+  const hostNames = [
+    ...new Set(
+      hits
+        .map((h) => {
+          const src = h._source as Record<string, unknown>;
+          return ((src.host as Record<string, unknown>)?.name as string) ?? '';
+        })
+        .filter(Boolean)
+    ),
+  ];
 
-  const ruleNames = [...new Set(hits.map((h) => {
-    const src = h._source as Record<string, unknown>;
-    return (src['kibana.alert.rule.name'] as string) ?? '';
-  }).filter(Boolean))];
+  const ruleNames = [
+    ...new Set(
+      hits
+        .map((h) => {
+          const src = h._source as Record<string, unknown>;
+          return (src['kibana.alert.rule.name'] as string) ?? '';
+        })
+        .filter(Boolean)
+    ),
+  ];
 
-  const tactics = [...new Set(hits.flatMap((h) => {
-    const src = h._source as Record<string, unknown>;
-    const threat = (src['kibana.alert.rule.threat'] ?? []) as Array<Record<string, unknown>>;
-    return threat.map((t) => ((t.tactic as Record<string, unknown>)?.name as string) ?? '').filter(Boolean);
-  }))];
+  const tactics = [
+    ...new Set(
+      hits.flatMap((h) => {
+        const src = h._source as Record<string, unknown>;
+        const threat = (src['kibana.alert.rule.threat'] ?? []) as Array<Record<string, unknown>>;
+        return threat
+          .map((t) => ((t.tactic as Record<string, unknown>)?.name as string) ?? '')
+          .filter(Boolean);
+      })
+    ),
+  ];
 
   const relatedAlerts = hits.slice(1).map((h) => {
     const src = h._source as Record<string, unknown>;
@@ -245,7 +292,8 @@ async function enrichCaseWithAlertContext(
 
     const extractHits = (resp: { status: number; body: unknown }) => {
       if (resp.status !== 200 || typeof resp.body !== 'object' || resp.body === null) return [];
-      return (((resp.body as Record<string, unknown>).hits as Record<string, unknown>)?.hits ?? []) as Array<Record<string, unknown>>;
+      return (((resp.body as Record<string, unknown>).hits as Record<string, unknown>)?.hits ??
+        []) as Array<Record<string, unknown>>;
     };
 
     processTree = extractHits(procResp).map((h) => {
@@ -271,7 +319,15 @@ async function enrichCaseWithAlertContext(
     });
   }
 
-  return { representativeAlert, relatedAlerts, hostNames, ruleNames, tactics, processTree, networkActivity };
+  return {
+    representativeAlert,
+    relatedAlerts,
+    hostNames,
+    ruleNames,
+    tactics,
+    processTree,
+    networkActivity,
+  };
 }
 
 // ── Stage 2: Classification ──
@@ -284,21 +340,35 @@ function buildCaseClassificationPrompt(
   const repRule = rep ? (rep['kibana.alert.rule.name'] as string) ?? '' : '';
   const repReason = rep ? ((rep['kibana.alert.reason'] as string) ?? '').slice(0, 300) : '';
   const repProcess = rep ? ((rep.process as Record<string, unknown>)?.name as string) ?? '' : '';
-  const repCmd = rep ? ((rep.process as Record<string, unknown>)?.command_line as string) ?? '' : '';
+  const repCmd = rep
+    ? ((rep.process as Record<string, unknown>)?.command_line as string) ?? ''
+    : '';
   const repUser = rep ? ((rep.user as Record<string, unknown>)?.name as string) ?? '' : '';
   const repSeverity = rep ? (rep['kibana.alert.severity'] as string) ?? '' : '';
 
-  const relatedSection = context.relatedAlerts.length > 0
-    ? `Other alerts in this case (${context.relatedAlerts.length}):\n${context.relatedAlerts.slice(0, 20).map((a) => `  - ${a.timestamp}: ${a.ruleName} (${a.severity})`).join('\n')}`
-    : 'No other alerts in this case.';
+  const relatedSection =
+    context.relatedAlerts.length > 0
+      ? `Other alerts in this case (${context.relatedAlerts.length}):\n${context.relatedAlerts
+          .slice(0, 20)
+          .map((a) => `  - ${a.timestamp}: ${a.ruleName} (${a.severity})`)
+          .join('\n')}`
+      : 'No other alerts in this case.';
 
-  const processSection = context.processTree.length > 0
-    ? `Process activity:\n${context.processTree.slice(0, 10).map((p) => `  - ${p.parentName} → ${p.processName}: ${p.commandLine.slice(0, 100)}`).join('\n')}`
-    : 'No process data available.';
+  const processSection =
+    context.processTree.length > 0
+      ? `Process activity:\n${context.processTree
+          .slice(0, 10)
+          .map((p) => `  - ${p.parentName} → ${p.processName}: ${p.commandLine.slice(0, 100)}`)
+          .join('\n')}`
+      : 'No process data available.';
 
-  const networkSection = context.networkActivity.length > 0
-    ? `Network activity:\n${context.networkActivity.slice(0, 8).map((n) => `  - ${n.processName} → ${n.destIp}:${n.destPort}`).join('\n')}`
-    : 'No network data available.';
+  const networkSection =
+    context.networkActivity.length > 0
+      ? `Network activity:\n${context.networkActivity
+          .slice(0, 8)
+          .map((n) => `  - ${n.processName} → ${n.destIp}:${n.destPort}`)
+          .join('\n')}`
+      : 'No network data available.';
 
   return `You are an Elastic Security triage analyst. You are reviewing a CASE containing grouped alerts, not a single alert.
 Classify this case and determine if Attack Discovery analysis is warranted.
@@ -353,17 +423,14 @@ async function classifyCase(
 ): Promise<{ classification: CaseClassification; tokens: { input: number; output: number } }> {
   const prompt = buildCaseClassificationPrompt(caseInfo, context);
 
-  const { status, body } = await kibana.post(
-    `/api/actions/connector/${connectorId}/_execute`,
-    {
-      params: {
-        subAction: 'invokeAI',
-        subActionParams: {
-          messages: [{ role: 'user' as const, content: prompt }],
-        },
+  const { status, body } = await kibana.post(`/api/actions/connector/${connectorId}/_execute`, {
+    params: {
+      subAction: 'invokeAI',
+      subActionParams: {
+        messages: [{ role: 'user' as const, content: prompt }],
       },
-    }
-  );
+    },
+  });
 
   if (status !== 200 || typeof body !== 'object' || body === null) {
     console.error(`  LLM call failed (${status})`);
@@ -386,10 +453,21 @@ async function classifyCase(
   const data = result.data as Record<string, unknown> | undefined;
   const message = (data?.message as string) ?? '';
 
-  const usage = (data?.usage as Record<string, unknown>) ?? (data?.usageMetadata as Record<string, unknown>) ?? {};
+  const usage =
+    (data?.usage as Record<string, unknown>) ??
+    (data?.usageMetadata as Record<string, unknown>) ??
+    {};
   const tokens = {
-    input: (usage.input_tokens as number) ?? (usage.prompt_tokens as number) ?? (usage.promptTokenCount as number) ?? 0,
-    output: (usage.output_tokens as number) ?? (usage.completion_tokens as number) ?? (usage.candidatesTokenCount as number) ?? 0,
+    input:
+      (usage.input_tokens as number) ??
+      (usage.prompt_tokens as number) ??
+      (usage.promptTokenCount as number) ??
+      0,
+    output:
+      (usage.output_tokens as number) ??
+      (usage.completion_tokens as number) ??
+      (usage.candidatesTokenCount as number) ??
+      0,
   };
 
   try {
@@ -397,7 +475,9 @@ async function classifyCase(
     if (jsonMatch) {
       return { classification: JSON.parse(jsonMatch[0]) as CaseClassification, tokens };
     }
-  } catch { /* fall through */ }
+  } catch {
+    /* fall through */
+  }
 
   return {
     classification: {
@@ -534,8 +614,14 @@ async function main(): Promise<void> {
     caseInfo.hostNames = context.hostNames;
     caseInfo.ruleNames = context.ruleNames;
     caseInfo.tactics = context.tactics;
-    console.log(`    Hosts: ${context.hostNames.join(', ')} | Rules: ${context.ruleNames.length} | Tactics: ${context.tactics.join(', ')}`);
-    console.log(`    Process events: ${context.processTree.length} | Network: ${context.networkActivity.length}`);
+    console.log(
+      `    Hosts: ${context.hostNames.join(', ')} | Rules: ${
+        context.ruleNames.length
+      } | Tactics: ${context.tactics.join(', ')}`
+    );
+    console.log(
+      `    Process events: ${context.processTree.length} | Network: ${context.networkActivity.length}`
+    );
 
     // Classify
     const classStart = Date.now();
@@ -544,9 +630,14 @@ async function main(): Promise<void> {
 
     if (dryRun) {
       classification = {
-        classification: 'unknown', confidenceScore: 50,
-        summary: '[DRY RUN]', attackChain: '', iocs: [],
-        mitreTactics: [], remediationSteps: [], analystNotes: '',
+        classification: 'unknown',
+        confidenceScore: 50,
+        summary: '[DRY RUN]',
+        attackChain: '',
+        iocs: [],
+        mitreTactics: [],
+        remediationSteps: [],
+        analystNotes: '',
       };
     } else {
       console.log(`    Classifying via LLM...`);
@@ -560,7 +651,11 @@ async function main(): Promise<void> {
     totalClassInputTokens += classTokens.input;
     totalClassOutputTokens += classTokens.output;
 
-    console.log(`    → ${classification.classification.toUpperCase()} (score: ${classification.confidenceScore})`);
+    console.log(
+      `    → ${classification.classification.toUpperCase()} (score: ${
+        classification.confidenceScore
+      })`
+    );
     console.log(`    → ${classification.summary.slice(0, 120)}`);
     if (classTokens.input > 0) {
       console.log(`    → Tokens: ${classTokens.input} in / ${classTokens.output} out`);
@@ -571,11 +666,15 @@ async function main(): Promise<void> {
       await kibana.post(`/api/cases/${caseInfo.id}/comments`, {
         type: 'user',
         comment: [
-          `**Hybrid Triage: ${classification.classification.toUpperCase()}** (confidence: ${classification.confidenceScore}/100)`,
+          `**Hybrid Triage: ${classification.classification.toUpperCase()}** (confidence: ${
+            classification.confidenceScore
+          }/100)`,
           '',
           classification.summary,
           classification.analystNotes ? `\n**Notes:** ${classification.analystNotes}` : '',
-        ].filter(Boolean).join('\n'),
+        ]
+          .filter(Boolean)
+          .join('\n'),
         owner: 'securitySolution',
       });
     }
@@ -607,16 +706,21 @@ async function main(): Promise<void> {
   let casesSkipped = 0;
 
   for (const result of caseResults) {
-    const isBenign = result.classification.classification === 'benign'
-      && result.classification.confidenceScore >= adThreshold;
+    const isBenign =
+      result.classification.classification === 'benign' &&
+      result.classification.confidenceScore >= adThreshold;
 
     if (isBenign) {
-      console.log(`\n  [${result.caseTitle}] SKIPPED — benign (${result.classification.confidenceScore})`);
+      console.log(
+        `\n  [${result.caseTitle}] SKIPPED — benign (${result.classification.confidenceScore})`
+      );
       casesSkipped++;
       continue;
     }
 
-    console.log(`\n  [${result.caseTitle}] → Running AD (${result.classification.classification}, score ${result.classification.confidenceScore})`);
+    console.log(
+      `\n  [${result.caseTitle}] → Running AD (${result.classification.classification}, score ${result.classification.confidenceScore})`
+    );
 
     if (dryRun) {
       console.log(`    [DRY RUN] Would trigger AD`);
@@ -662,14 +766,28 @@ async function main(): Promise<void> {
   console.log(`\n── Hybrid Triage Summary ──`);
   console.log(`  Total duration:       ${(totalDurationMs / 1000).toFixed(1)}s`);
   console.log(`  ── Stage 1 (Grouping):       ${(groupingResult.durationMs / 1000).toFixed(1)}s`);
-  console.log(`  ── Stage 2 (Classification): ${(classificationDurationMs / 1000).toFixed(1)}s (${classLlmCalls} LLM calls)`);
-  console.log(`  ── Stage 3 (AD):             ${(adDurationMs / 1000).toFixed(1)}s (${adLlmCalls} AD runs)`);
+  console.log(
+    `  ── Stage 2 (Classification): ${(classificationDurationMs / 1000).toFixed(
+      1
+    )}s (${classLlmCalls} LLM calls)`
+  );
+  console.log(
+    `  ── Stage 3 (AD):             ${(adDurationMs / 1000).toFixed(1)}s (${adLlmCalls} AD runs)`
+  );
   console.log(`  Cases:                ${caseResults.length}`);
-  console.log(`  Classifications:      benign=${classifications.benign} unknown=${classifications.unknown} malicious=${classifications.malicious}`);
+  console.log(
+    `  Classifications:      benign=${classifications.benign} unknown=${classifications.unknown} malicious=${classifications.malicious}`
+  );
   console.log(`  AD triggered:         ${casesWithAd} cases`);
   console.log(`  AD skipped (benign):  ${casesSkipped} cases`);
-  console.log(`  Classification tokens: ${totalClassInputTokens} in / ${totalClassOutputTokens} out`);
-  console.log(`  Total LLM calls:      ${classLlmCalls + adLlmCalls} (${classLlmCalls} classification + ${adLlmCalls} AD)`);
+  console.log(
+    `  Classification tokens: ${totalClassInputTokens} in / ${totalClassOutputTokens} out`
+  );
+  console.log(
+    `  Total LLM calls:      ${
+      classLlmCalls + adLlmCalls
+    } (${classLlmCalls} classification + ${adLlmCalls} AD)`
+  );
 
   const report: HybridReport = {
     startedAt,

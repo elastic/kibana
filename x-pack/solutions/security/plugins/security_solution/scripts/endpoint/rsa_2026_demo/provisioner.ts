@@ -53,8 +53,10 @@ export const provisionRsa2026Demo = async (
   const logger = prefixedOutputLogger('provisionRsa2026Demo()', log);
 
   logger.info('Starting RSA 2026 demo provisioning');
-  logger.info(`Configuration: ${config.defendOsqueryCount} Defend+Osquery, ${config.osqueryOnlyCount} Osquery-only endpoints`);
-  
+  logger.info(
+    `Configuration: ${config.defendOsqueryCount} Defend+Osquery, ${config.osqueryOnlyCount} Osquery-only endpoints`
+  );
+
   if (steps && steps.length > 0) {
     logger.info(`Running specific steps: ${steps.join(', ')}`);
   } else {
@@ -139,7 +141,9 @@ export const provisionRsa2026Demo = async (
               hostname,
               agentId: 'unknown',
               hostVm: getHostVmClient(hostname, vmType, undefined, logger),
-              policyType: (hostname.includes('defend-osquery') ? 'defend-osquery' : 'osquery-only') as const,
+              policyType: (hostname.includes('defend-osquery')
+                ? 'defend-osquery'
+                : 'osquery-only') as const,
             }));
         } else {
           const existingVms = await findVm(vmType, /^rsa-2026-/, logger);
@@ -174,7 +178,9 @@ export const provisionRsa2026Demo = async (
               hostname,
               agentId: 'unknown',
               hostVm: getHostVmClient(hostname, vmType, undefined, logger),
-              policyType: (hostname.includes('defend-osquery') ? 'defend-osquery' : 'osquery-only') as const,
+              policyType: (hostname.includes('defend-osquery')
+                ? 'defend-osquery'
+                : 'osquery-only') as const,
             }));
         } else {
           const existingVms = await findVm(vmType, /^rsa-2026-/, logger);
@@ -509,7 +515,9 @@ export const cleanupRsa2026Demo = async (
           .then((r) => r.data as unknown);
 
         const connectors: Array<{ id: string; name: string; connector_type_id: string }> =
-          Array.isArray(connectorsResponse) ? connectorsResponse : (connectorsResponse as any)?.data ?? [];
+          Array.isArray(connectorsResponse)
+            ? connectorsResponse
+            : (connectorsResponse as any)?.data ?? [];
 
         const vtConnectors =
           connectors.filter(
@@ -559,12 +567,18 @@ export const cleanupRsa2026Demo = async (
 
       // Best-effort: delete any additional RSA demo policies if they exist (useful when policies were created in a different run)
       try {
-        const list = await fetchAgentPolicyList(context.kbnClient, { perPage: 100, withAgentCount: true });
+        const list = await fetchAgentPolicyList(context.kbnClient, {
+          perPage: 100,
+          withAgentCount: true,
+        });
         for (const item of list.items) {
           if (!item.name?.startsWith('RSA 2026 -')) {
             continue;
           }
-          if (item.id === context.policyIds.defendOsquery || item.id === context.policyIds.osqueryOnly) {
+          if (
+            item.id === context.policyIds.defendOsquery ||
+            item.id === context.policyIds.osqueryOnly
+          ) {
             continue;
           }
           if (deleted.policies.has(item.id)) {
@@ -593,4 +607,3 @@ export const cleanupRsa2026Demo = async (
     }
   });
 };
-

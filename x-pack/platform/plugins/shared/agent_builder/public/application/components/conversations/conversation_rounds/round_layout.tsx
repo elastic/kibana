@@ -13,10 +13,7 @@ import type { ConversationRound } from '@kbn/agent-builder-common';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import { ConversationRoundStatus } from '@kbn/agent-builder-common';
 import { isConfirmationPrompt } from '@kbn/agent-builder-common/agents';
-import type {
-  VersionedAttachment,
-  Attachment,
-} from '@kbn/agent-builder-common/attachments';
+import type { VersionedAttachment, Attachment } from '@kbn/agent-builder-common/attachments';
 import { RoundInput } from './round_input';
 import { RoundThinking } from './round_thinking/round_thinking';
 import { RoundResponse } from './round_response/round_response';
@@ -202,9 +199,7 @@ const ConversationAttachmentsList: React.FC<{
 
   // Filter to only show active attachments created in this round
   const roundAttachments = useMemo(() => {
-    return attachments.filter(
-      (att) => !att.deleted_at && att.created_in_round_id === roundId
-    );
+    return attachments.filter((att) => !att.deleted_at && att.created_in_round_id === roundId);
   }, [attachments, roundId]);
 
   if (roundAttachments.length === 0) {

@@ -114,9 +114,7 @@ export class BatchProcessor {
     if (this.getCachedBatchSize && this.connectorId) {
       const cachedSize = await this.getCachedBatchSize(this.connectorId);
       if (cachedSize && cachedSize < this.currentBatchSize) {
-        this.logger.info(
-          `Using cached batch size ${cachedSize} for connector ${this.connectorId}`
-        );
+        this.logger.info(`Using cached batch size ${cachedSize} for connector ${this.connectorId}`);
         this.currentBatchSize = cachedSize;
       }
     }
@@ -124,9 +122,7 @@ export class BatchProcessor {
     // Limit total alerts if configured
     let alertsToProcess = alerts;
     if (this.config.maxTotalAlerts > 0 && alerts.length > this.config.maxTotalAlerts) {
-      this.logger.info(
-        `Limiting alerts from ${alerts.length} to ${this.config.maxTotalAlerts}`
-      );
+      this.logger.info(`Limiting alerts from ${alerts.length} to ${this.config.maxTotalAlerts}`);
       alertsToProcess = alerts.slice(0, this.config.maxTotalAlerts);
     }
 

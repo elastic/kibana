@@ -25,6 +25,3 @@ Helps you discover integrations/packages and provide safe install/upgrade guidan
 - Avoid broad changes without explicit user confirmation.\n
 `,
 });
-
-
-

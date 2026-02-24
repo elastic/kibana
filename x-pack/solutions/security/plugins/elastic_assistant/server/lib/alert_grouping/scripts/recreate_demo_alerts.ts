@@ -37,8 +37,7 @@
 
 import { readFileSync } from 'fs';
 import { randomUUID } from 'crypto';
-import { resolve, dirname } from 'path';
-import { fileURLToPath } from 'url';
+import { resolve } from 'path';
 
 // ── Constants ──
 
@@ -381,7 +380,7 @@ async function injectAlerts(
     lines.push(JSON.stringify({ index: { _index: index, _id: id } }));
     lines.push(JSON.stringify(source));
   }
-  const bulkBody = lines.join('\n') + '\n';
+  const bulkBody = `${lines.join('\n')}\n`;
 
   const { status, body } = await client.post(
     '/_bulk?refresh=true',
@@ -390,7 +389,9 @@ async function injectAlerts(
   );
 
   if ((status !== 200 && status !== 201) || typeof body !== 'object' || body === null) {
-    console.error(`  ERROR: Bulk request failed (${status}): ${JSON.stringify(body).slice(0, 500)}`);
+    console.error(
+      `  ERROR: Bulk request failed (${status}): ${JSON.stringify(body).slice(0, 500)}`
+    );
     return 0;
   }
 
@@ -416,18 +417,24 @@ async function injectAlerts(
   return items.length - errors;
 }
 
-async function cleanupAlerts(client: ESClient, dryRun: boolean, tag: string = INJECTED_TAG): Promise<number> {
+async function cleanupAlerts(
+  client: ESClient,
+  dryRun: boolean,
+  tag: string = INJECTED_TAG
+): Promise<number> {
   const { status: countStatus, body: countBody } = await client.post(
     '/.alerts-security.alerts-*/_count',
     { query: { term: { tags: tag } } }
   );
 
   if (countStatus !== 200) {
-    console.error(`  ERROR: Count failed (${countStatus}): ${JSON.stringify(countBody).slice(0, 200)}`);
+    console.error(
+      `  ERROR: Count failed (${countStatus}): ${JSON.stringify(countBody).slice(0, 200)}`
+    );
     return 0;
   }
 
-  const count = (countBody as Record<string, unknown>).count as number ?? 0;
+  const count = ((countBody as Record<string, unknown>).count as number) ?? 0;
   console.log(`  Found ${count} previously injected alerts (tag: '${tag}')`);
 
   if (count === 0) return 0;
@@ -443,7 +450,9 @@ async function cleanupAlerts(client: ESClient, dryRun: boolean, tag: string = IN
   );
 
   if (delStatus !== 200) {
-    console.error(`  ERROR: Delete failed (${delStatus}): ${JSON.stringify(delBody).slice(0, 200)}`);
+    console.error(
+      `  ERROR: Delete failed (${delStatus}): ${JSON.stringify(delBody).slice(0, 200)}`
+    );
     return 0;
   }
 
@@ -472,7 +481,9 @@ async function verifyInjection(client: ESClient): Promise<void> {
   });
 
   if (status === 200 && typeof body === 'object' && body !== null) {
-    const aggs = (body as Record<string, unknown>).aggregations as Record<string, unknown> | undefined;
+    const aggs = (body as Record<string, unknown>).aggregations as
+      | Record<string, unknown>
+      | undefined;
     if (aggs) {
       const minTs = (aggs.min_ts as Record<string, unknown>)?.value_as_string ?? '?';
       const maxTs = (aggs.max_ts as Record<string, unknown>)?.value_as_string ?? '?';
@@ -747,12 +758,8 @@ async function main(): Promise<void> {
   // ── Check index ──
   const indexExists = await checkAlertIndex(client);
   if (!indexExists) {
-    console.warn(
-      `\n  WARNING: .alerts-security.alerts-* not found on the target cluster.`
-    );
-    console.warn(
-      `  Ensure at least one detection rule has executed to create the alert index.`
-    );
+    console.warn(`\n  WARNING: .alerts-security.alerts-* not found on the target cluster.`);
+    console.warn(`  Ensure at least one detection rule has executed to create the alert index.`);
     if (!args.dryRun) {
       console.warn('  Proceeding anyway...');
     }

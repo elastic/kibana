@@ -26,6 +26,3 @@ Helps you troubleshoot Fleet agent health and common states (offline, unhealthy,
 - Do not delete agents or policies.\n
 `,
 });
-
-
-

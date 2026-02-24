@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import type { z } from '@kbn/zod';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import { platformCoreTools } from '@kbn/agent-builder-common';
@@ -137,9 +137,7 @@ An attack discovery is attached showing a potential attack chain detected from s
     // React component for visual preview (lazy-loaded)
     component: {
       render: () =>
-        import('../public/components/attack_discovery_viewer').then(
-          (m) => m.AttackDiscoveryViewer
-        ),
+        import('../public/components/attack_discovery_viewer').then((m) => m.AttackDiscoveryViewer),
       displayMode: 'expanded',
       minHeight: 400,
     },
@@ -192,7 +190,11 @@ const formatAttackDiscoveryData = (data: AttackDiscoveryAttachmentData): string 
   if (attackDiscovery.alertIds && attackDiscovery.alertIds.length > 0) {
     parts.push('### Related Alerts');
     parts.push(`${attackDiscovery.alertIds.length} alerts associated with this discovery`);
-    parts.push(`Alert IDs: ${attackDiscovery.alertIds.slice(0, 5).join(', ')}${attackDiscovery.alertIds.length > 5 ? '...' : ''}`);
+    parts.push(
+      `Alert IDs: ${attackDiscovery.alertIds.slice(0, 5).join(', ')}${
+        attackDiscovery.alertIds.length > 5 ? '...' : ''
+      }`
+    );
     parts.push('');
   }
 

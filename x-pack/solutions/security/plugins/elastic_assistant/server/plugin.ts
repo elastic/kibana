@@ -68,12 +68,13 @@ interface FeatureFlagDefinition {
 
 export class ElasticAssistantPlugin
   implements
-  Plugin<
-    ElasticAssistantPluginSetup,
-    ElasticAssistantPluginStart,
-    ElasticAssistantPluginSetupDependencies,
-    ElasticAssistantPluginStartDependencies
-  > {
+    Plugin<
+      ElasticAssistantPluginSetup,
+      ElasticAssistantPluginStart,
+      ElasticAssistantPluginSetupDependencies,
+      ElasticAssistantPluginStartDependencies
+    >
+{
   private readonly logger: Logger;
   private assistantService: AIAssistantService | undefined;
   private adhocAttackDiscoveryDataClient: IRuleDataClient | undefined;
@@ -179,9 +180,7 @@ export class ElasticAssistantPlugin
 
     // Register workflow steps for alert deduplication (Elastic Workflows integration)
     if (plugins.workflowsExtensions) {
-      plugins.workflowsExtensions.registerStepDefinition(
-        getDeduplicateAlertsStepDefinition(core)
-      );
+      plugins.workflowsExtensions.registerStepDefinition(getDeduplicateAlertsStepDefinition(core));
       plugins.workflowsExtensions.registerStepDefinition(getVectorizeAlertsStepDefinition());
       this.logger.info('Registered alert deduplication workflow steps');
     }
@@ -231,7 +230,7 @@ export class ElasticAssistantPlugin
         if (res?.total)
           this.logger.info(`Removed ${res.total} legacy quick prompts from AI Assistant`);
       })
-      .catch(() => { });
+      .catch(() => {});
 
     // Start alert grouping task with dependencies
     if (this.alertGroupingTask && plugins.taskManager) {

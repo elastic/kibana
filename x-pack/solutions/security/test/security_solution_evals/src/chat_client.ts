@@ -24,14 +24,14 @@ export interface ModelUsageStats {
   connector_id?: string;
 }
 
-export type ConverseResult = {
+export interface ConverseResult {
   conversationId?: string;
   messages: Messages;
   errors: Array<{ error: { message: string; stack?: string }; type: string }>;
   steps?: Array<Record<string, unknown>>;
   traceId?: string;
   modelUsage?: ModelUsageStats;
-};
+}
 
 type ConverseFunction = (params: ConverseFunctionParams) => Promise<ConverseResult>;
 

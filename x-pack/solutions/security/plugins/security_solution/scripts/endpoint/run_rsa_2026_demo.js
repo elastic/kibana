@@ -9,11 +9,10 @@
 
 require('@kbn/setup-node-env');
 try {
-  const mod = require('./rsa_2026_demo/index');
+  const mod = require('./rsa_2026_demo');
   mod.cli();
 } catch (error) {
   console.error('Error loading or running CLI:');
   console.error(error);
   process.exit(1);
 }
-

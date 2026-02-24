@@ -168,9 +168,9 @@ describe('case_operations helpers', () => {
     });
 
     it('should not call bulkDelete when no matching alerts found', async () => {
-      mockCasesClient.attachments.getAll = jest.fn().mockResolvedValue([
-        { id: 'att-1', type: 'user' },
-      ]);
+      mockCasesClient.attachments.getAll = jest
+        .fn()
+        .mockResolvedValue([{ id: 'att-1', type: 'user' }]);
 
       await detachAlertsFromCase(mockCasesClient, logger, 'case-1', ['alert-1']);
 

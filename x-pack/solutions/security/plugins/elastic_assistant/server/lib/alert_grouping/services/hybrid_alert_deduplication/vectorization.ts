@@ -123,10 +123,7 @@ const ENDSWITH_FIELDS_TO_SKIP = ['.pid', '.entity_id', '_time', '.id'];
  * Recursively extract (field, value) leaf pairs from an alert document,
  * excluding known noisy or non-discriminative fields.
  */
-export const getFieldsFromAlert = (
-  data: unknown,
-  parentKey?: string
-): Array<[string, unknown]> => {
+export const getFieldsFromAlert = (data: unknown, parentKey?: string): Array<[string, unknown]> => {
   const items: Array<[string, unknown]> = [];
 
   if (data != null && typeof data === 'object' && !Array.isArray(data)) {
@@ -135,7 +132,11 @@ export const getFieldsFromAlert = (
       const newKey = parentKey ? `${parentKey}.${key}` : key;
 
       // Skip non-ECS capitalized keys (e.g., "Events", "Responses")
-      if (key[0] === key[0].toUpperCase() && key[0] !== key[0].toLowerCase() && !NON_ECS_TO_KEEP.has(key)) {
+      if (
+        key[0] === key[0].toUpperCase() &&
+        key[0] !== key[0].toLowerCase() &&
+        !NON_ECS_TO_KEEP.has(key)
+      ) {
         continue;
       }
 
@@ -187,10 +188,7 @@ export const getFieldsFromAlert = (
  *
  * This approach works for any kind of ECS data without requiring a fixed schema.
  */
-export const getGenericAlertFeatureVector = (
-  alert: AlertDocument,
-  weighted = false
-): number[] => {
+export const getGenericAlertFeatureVector = (alert: AlertDocument, weighted = false): number[] => {
   const fieldSizeKnown = 32; // buckets per known field
   const fieldSize = 8; // buckets per unknown field
   const unknownVectorCount = 8; // number of slots for unknown fields

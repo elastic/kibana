@@ -59,8 +59,9 @@ export const attackDiscoverySearchTool = (
         } catch (error) {
           return {
             status: 'unavailable',
-            reason: `Failed to check attack discovery index availability: ${error instanceof Error ? error.message : 'Unknown error'
-              }`,
+            reason: `Failed to check attack discovery index availability: ${
+              error instanceof Error ? error.message : 'Unknown error'
+            }`,
           };
         }
       },

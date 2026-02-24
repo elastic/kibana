@@ -15,10 +15,11 @@ import { getSavedQueriesSkill } from './saved_queries_skill';
 import { getStatusSkill } from './status_skill';
 
 const OSQUERY_SKILL: Omit<Skill, 'tools'> = {
-    namespace: 'osquery.entrypoint',
-    name: 'Osquery (Entrypoint)',
-    description: 'Single entrypoint for Osquery: status, schema, packs, saved queries, live queries, and results',
-    content: `# Osquery
+  namespace: 'osquery.entrypoint',
+  name: 'Osquery (Entrypoint)',
+  description:
+    'Single entrypoint for Osquery: status, schema, packs, saved queries, live queries, and results',
+  content: `# Osquery
 
 ## WHEN TO USE THIS TOOL (REQUIRED)
 
@@ -161,14 +162,12 @@ For modifications, direct users to Kibana UI: Stack Management > Osquery.`,
  * Collects all tools from individual osquery skills for delegation.
  * @internal
  */
-const getDelegatedTools = (getOsqueryContext: GetOsqueryAppContextFn) => {
-    return [
-        ...getStatusSkill(getOsqueryContext).tools,
-        ...getLiveQuerySkill(getOsqueryContext).tools, // Includes get_agents, get_schema, run_live_query, get_live_query_results, get_action_results
-        ...getPacksSkill(getOsqueryContext).tools,
-        ...getSavedQueriesSkill(getOsqueryContext).tools,
-    ];
-};
+const getDelegatedTools = (getOsqueryContext: GetOsqueryAppContextFn) => [
+  ...getStatusSkill(getOsqueryContext).tools,
+  ...getLiveQuerySkill(getOsqueryContext).tools, // Includes get_agents, get_schema, run_live_query, get_live_query_results, get_action_results
+  ...getPacksSkill(getOsqueryContext).tools,
+  ...getSavedQueriesSkill(getOsqueryContext).tools,
+];
 
 /**
  * Creates the unified Osquery skill that serves as a single entrypoint for all osquery operations.
@@ -203,138 +202,142 @@ const getDelegatedTools = (getOsqueryContext: GetOsqueryAppContextFn) => {
  * @see {@link getStatusSkill} for standalone status functionality
  */
 export const getOsquerySkill = (getOsqueryContext: GetOsqueryAppContextFn): Skill => {
-    const delegatedTools = getDelegatedTools(getOsqueryContext);
+  const delegatedTools = getDelegatedTools(getOsqueryContext);
 
-    const OSQUERY_TOOL = tool(
-        async (input: unknown, config) => {
-            const asAny = input as any;
-            const { operation, params, ...rest } = asAny ?? {};
-            const toolParams = ((params ?? rest) ?? {}) as Record<string, unknown>;
+  const OSQUERY_TOOL = tool(
+    async (input: unknown, config) => {
+      const asAny = input as any;
+      const { operation, params, ...rest } = asAny ?? {};
+      const toolParams = (params ?? rest ?? {}) as Record<string, unknown>;
 
-            const operationToToolName: Record<string, string> = {
-                get_status: 'get_status',
-                get_agents: 'get_agents',
-                get_schema: 'get_schema',
-                list_packs: 'list_packs',
-                get_pack: 'get_pack',
-                list_saved_queries: 'list_saved_queries',
-                get_saved_query: 'get_saved_query',
-                run_live_query: 'run_live_query',
-                get_live_query_results: 'get_live_query_results',
-                get_action_results: 'get_action_results',
-            };
+      const operationToToolName: Record<string, string> = {
+        get_status: 'get_status',
+        get_agents: 'get_agents',
+        get_schema: 'get_schema',
+        list_packs: 'list_packs',
+        get_pack: 'get_pack',
+        list_saved_queries: 'list_saved_queries',
+        get_saved_query: 'get_saved_query',
+        run_live_query: 'run_live_query',
+        get_live_query_results: 'get_live_query_results',
+        get_action_results: 'get_action_results',
+      };
 
-            const toolName = operationToToolName[String(operation)];
-            if (!toolName) {
-                throw new Error(`Unsupported osquery operation "${String(operation)}"`);
-            }
+      const toolName = operationToToolName[String(operation)];
+      if (!toolName) {
+        throw new Error(`Unsupported osquery operation "${String(operation)}"`);
+      }
 
-            if (toolName === 'run_live_query') {
-                const confirm = toolParams.confirm;
-                if (confirm !== true) {
-                    return JSON.stringify({
-                        error: {
-                            message:
-                                'Running a live Osquery query is a potentially disruptive operation. Ask for explicit user confirmation and pass confirm: true.',
-                        },
-                    });
-                }
-                // confirm is a router-only safety gate; underlying tool does not accept it.
-                delete toolParams.confirm;
-                delete toolParams.confirmReason;
-            }
-
-            const delegated = delegatedTools.find((t) => t.name === toolName);
-            if (!delegated) {
-                throw new Error(`Osquery tool "${toolName}" is not available`);
-            }
-
-            // Delegate execution while preserving LangChain config (including configurable.onechat)
-            const result = await (delegated as any).invoke(toolParams, config);
-            return typeof result === 'string' ? result : JSON.stringify(result);
-        },
-        {
-            name: 'osquery',
-            description:
-                'Single entrypoint for Osquery operations. Use operation to select behavior; pass either {operation, params:{...}} or flattened {operation, ...}.',
-            schema: z.discriminatedUnion('operation', [
-                z
-                    .object({
-                        operation: z.literal('get_status'),
-                        params: z.object({}).passthrough().optional(),
-                    })
-                    .passthrough(),
-                z
-                    .object({
-                        operation: z.literal('get_agents'),
-                        params: z.object({}).passthrough().optional(),
-                    })
-                    .passthrough(),
-                z
-                    .object({
-                        operation: z.literal('get_schema'),
-                        params: z.object({}).passthrough().optional(),
-                    })
-                    .passthrough(),
-                z
-                    .object({
-                        operation: z.literal('list_packs'),
-                        params: z.object({}).passthrough().optional(),
-                    })
-                    .passthrough(),
-                z
-                    .object({
-                        operation: z.literal('get_pack'),
-                        params: z.object({}).passthrough().optional(),
-                    })
-                    .passthrough(),
-                z
-                    .object({
-                        operation: z.literal('list_saved_queries'),
-                        params: z.object({}).passthrough().optional(),
-                    })
-                    .passthrough(),
-                z
-                    .object({
-                        operation: z.literal('get_saved_query'),
-                        params: z.object({}).passthrough().optional(),
-                    })
-                    .passthrough(),
-                z
-                    .object({
-                        operation: z.literal('run_live_query'),
-                        params: z
-                            .object({
-                                confirm: z
-                                    .boolean()
-                                    .describe('REQUIRED. Must be true to run a live query (side-effecting).'),
-                                confirmReason: z
-                                    .string()
-                                    .optional()
-                                    .describe('Optional reason why this live query is necessary (for audit/traceability).'),
-                            })
-                            .passthrough()
-                            .optional(),
-                    })
-                    .passthrough(),
-                z
-                    .object({
-                        operation: z.literal('get_live_query_results'),
-                        params: z.object({}).passthrough().optional(),
-                    })
-                    .passthrough(),
-                z
-                    .object({
-                        operation: z.literal('get_action_results'),
-                        params: z.object({}).passthrough().optional(),
-                    })
-                    .passthrough(),
-            ]),
+      if (toolName === 'run_live_query') {
+        const confirm = toolParams.confirm;
+        if (confirm !== true) {
+          return JSON.stringify({
+            error: {
+              message:
+                'Running a live Osquery query is a potentially disruptive operation. Ask for explicit user confirmation and pass confirm: true.',
+            },
+          });
         }
-    );
 
-    return {
-        ...OSQUERY_SKILL,
-        tools: [OSQUERY_TOOL],
-    };
+        // confirm is a router-only safety gate; underlying tool does not accept it.
+        delete toolParams.confirm;
+        delete toolParams.confirmReason;
+      }
+
+      const delegated = delegatedTools.find((t) => t.name === toolName);
+      if (!delegated) {
+        throw new Error(`Osquery tool "${toolName}" is not available`);
+      }
+
+      // Delegate execution while preserving LangChain config (including configurable.onechat)
+      const result = await (delegated as any).invoke(toolParams, config);
+
+      return typeof result === 'string' ? result : JSON.stringify(result);
+    },
+    {
+      name: 'osquery',
+      description:
+        'Single entrypoint for Osquery operations. Use operation to select behavior; pass either {operation, params:{...}} or flattened {operation, ...}.',
+      schema: z.discriminatedUnion('operation', [
+        z
+          .object({
+            operation: z.literal('get_status'),
+            params: z.object({}).passthrough().optional(),
+          })
+          .passthrough(),
+        z
+          .object({
+            operation: z.literal('get_agents'),
+            params: z.object({}).passthrough().optional(),
+          })
+          .passthrough(),
+        z
+          .object({
+            operation: z.literal('get_schema'),
+            params: z.object({}).passthrough().optional(),
+          })
+          .passthrough(),
+        z
+          .object({
+            operation: z.literal('list_packs'),
+            params: z.object({}).passthrough().optional(),
+          })
+          .passthrough(),
+        z
+          .object({
+            operation: z.literal('get_pack'),
+            params: z.object({}).passthrough().optional(),
+          })
+          .passthrough(),
+        z
+          .object({
+            operation: z.literal('list_saved_queries'),
+            params: z.object({}).passthrough().optional(),
+          })
+          .passthrough(),
+        z
+          .object({
+            operation: z.literal('get_saved_query'),
+            params: z.object({}).passthrough().optional(),
+          })
+          .passthrough(),
+        z
+          .object({
+            operation: z.literal('run_live_query'),
+            params: z
+              .object({
+                confirm: z
+                  .boolean()
+                  .describe('REQUIRED. Must be true to run a live query (side-effecting).'),
+                confirmReason: z
+                  .string()
+                  .optional()
+                  .describe(
+                    'Optional reason why this live query is necessary (for audit/traceability).'
+                  ),
+              })
+              .passthrough()
+              .optional(),
+          })
+          .passthrough(),
+        z
+          .object({
+            operation: z.literal('get_live_query_results'),
+            params: z.object({}).passthrough().optional(),
+          })
+          .passthrough(),
+        z
+          .object({
+            operation: z.literal('get_action_results'),
+            params: z.object({}).passthrough().optional(),
+          })
+          .passthrough(),
+      ]),
+    }
+  );
+
+  return {
+    ...OSQUERY_SKILL,
+    tools: [OSQUERY_TOOL],
+  };
 };

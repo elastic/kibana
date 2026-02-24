@@ -340,7 +340,8 @@ export const waitForHostToEnroll = async (
   if (!found) {
     throw Object.assign(
       new Error(
-        `Timed out waiting for host [${hostname}] to show up in Fleet. Waited ${timeoutMs / 1000
+        `Timed out waiting for host [${hostname}] to show up in Fleet. Waited ${
+          timeoutMs / 1000
         } seconds`
       ),
       { agentId, hostname }
@@ -411,9 +412,9 @@ export const waitForHostToEnrollAny = async (
   if (!found) {
     throw Object.assign(
       new Error(
-        `Timed out waiting for host to show up in Fleet. Waited ${timeoutMs / 1000} seconds. Candidates: ${candidates.join(
-          ', '
-        )}`
+        `Timed out waiting for host to show up in Fleet. Waited ${
+          timeoutMs / 1000
+        } seconds. Candidates: ${candidates.join(', ')}`
       ),
       { agentId, hostnames: candidates }
     );
@@ -728,7 +729,9 @@ export const getAgentDownloadUrl = async (
   const agentFile = `${fileNameWithoutExtension}${fileExtension}`;
   const artifactSearchUrl = `https://artifacts-api.elastic.co/v1/search/${agentVersion}/${agentFile}`;
 
-  log?.verbose(`Retrieving elastic agent download URL for ${targetOs} from:\n    ${artifactSearchUrl}`);
+  log?.verbose(
+    `Retrieving elastic agent download URL for ${targetOs} from:\n    ${artifactSearchUrl}`
+  );
 
   const searchResult: ElasticArtifactSearchResponse = await pRetry(
     async () => {

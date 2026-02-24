@@ -11,21 +11,21 @@ const b64 = (s: string) => Buffer.from(s, 'utf8').toString('base64');
 // These scripts are generated into a temp directory and NOT committed into the repo.
 
 export const ubuntuFleetServerStartupScript = (opts: {
-    tailscaleAuthKey: string;
-    elasticsearchUrl: string;
-    fleetServerPolicyId: string;
-    fleetServiceToken: string;
-    agentDownloadUrl: string;
-    insecure?: boolean;
+  tailscaleAuthKey: string;
+  elasticsearchUrl: string;
+  fleetServerPolicyId: string;
+  fleetServiceToken: string;
+  agentDownloadUrl: string;
+  insecure?: boolean;
 }) => {
-    const TS_AUTHKEY_B64 = b64(opts.tailscaleAuthKey);
-    const ES_URL_B64 = b64(opts.elasticsearchUrl);
-    const POLICY_B64 = b64(opts.fleetServerPolicyId);
-    const SERVICE_TOKEN_B64 = b64(opts.fleetServiceToken);
-    const AGENT_URL_B64 = b64(opts.agentDownloadUrl);
-    const insecureFlag = opts.insecure !== false ? '\n  --insecure \\' : '';
+  const TS_AUTHKEY_B64 = b64(opts.tailscaleAuthKey);
+  const ES_URL_B64 = b64(opts.elasticsearchUrl);
+  const POLICY_B64 = b64(opts.fleetServerPolicyId);
+  const SERVICE_TOKEN_B64 = b64(opts.fleetServiceToken);
+  const AGENT_URL_B64 = b64(opts.agentDownloadUrl);
+  const insecureFlag = opts.insecure !== false ? '\n  --insecure \\' : '';
 
-    return `#!/usr/bin/env bash
+  return `#!/usr/bin/env bash
 set -euo pipefail
 
 log() { echo "[gcp_fleet_vm] $*"; }
@@ -73,23 +73,23 @@ log "Fleet Server install complete"
 };
 
 export const ubuntuElasticAgentStartupScript = (opts: {
-    tailscaleAuthKey: string;
-    fleetServerUrl: string;
-    enrollmentToken: string;
-    agentDownloadUrl: string;
-    enableCaldera: boolean;
-    calderaUrl?: string;
-    enableInvokeAtomic?: boolean;
-    insecure?: boolean;
+  tailscaleAuthKey: string;
+  fleetServerUrl: string;
+  enrollmentToken: string;
+  agentDownloadUrl: string;
+  enableCaldera: boolean;
+  calderaUrl?: string;
+  enableInvokeAtomic?: boolean;
+  insecure?: boolean;
 }) => {
-    const TS_AUTHKEY_B64 = b64(opts.tailscaleAuthKey);
-    const FLEET_URL_B64 = b64(opts.fleetServerUrl);
-    const ENROLLMENT_B64 = b64(opts.enrollmentToken);
-    const AGENT_URL_B64 = b64(opts.agentDownloadUrl);
-    const CALDERA_URL_B64 = b64(opts.calderaUrl ?? '');
-    const insecureFlag = opts.insecure !== false ? '\n  --insecure \\' : '';
+  const TS_AUTHKEY_B64 = b64(opts.tailscaleAuthKey);
+  const FLEET_URL_B64 = b64(opts.fleetServerUrl);
+  const ENROLLMENT_B64 = b64(opts.enrollmentToken);
+  const AGENT_URL_B64 = b64(opts.agentDownloadUrl);
+  const CALDERA_URL_B64 = b64(opts.calderaUrl ?? '');
+  const insecureFlag = opts.insecure !== false ? '\n  --insecure \\' : '';
 
-    return `#!/usr/bin/env bash
+  return `#!/usr/bin/env bash
 set -euo pipefail
 
 log() { echo "[gcp_fleet_vm] $*"; }
@@ -226,23 +226,23 @@ log "Agent VM setup complete"
 };
 
 export const windowsElasticAgentStartupScriptPs1 = (opts: {
-    tailscaleAuthKey: string;
-    fleetServerUrl: string;
-    enrollmentToken: string;
-    agentDownloadUrl: string;
-    enableCaldera: boolean;
-    calderaUrl?: string;
-    enableInvokeAtomic?: boolean;
-    insecure?: boolean;
+  tailscaleAuthKey: string;
+  fleetServerUrl: string;
+  enrollmentToken: string;
+  agentDownloadUrl: string;
+  enableCaldera: boolean;
+  calderaUrl?: string;
+  enableInvokeAtomic?: boolean;
+  insecure?: boolean;
 }) => {
-    const TS_AUTHKEY_B64 = b64(opts.tailscaleAuthKey);
-    const FLEET_URL_B64 = b64(opts.fleetServerUrl);
-    const ENROLLMENT_B64 = b64(opts.enrollmentToken);
-    const AGENT_URL_B64 = b64(opts.agentDownloadUrl);
-    const CALDERA_URL_B64 = b64(opts.calderaUrl ?? '');
-    const insecureArg = opts.insecure !== false ? ',\n  "--insecure"' : '';
+  const TS_AUTHKEY_B64 = b64(opts.tailscaleAuthKey);
+  const FLEET_URL_B64 = b64(opts.fleetServerUrl);
+  const ENROLLMENT_B64 = b64(opts.enrollmentToken);
+  const AGENT_URL_B64 = b64(opts.agentDownloadUrl);
+  const CALDERA_URL_B64 = b64(opts.calderaUrl ?? '');
+  const insecureArg = opts.insecure !== false ? ',\n  "--insecure"' : '';
 
-    return `
+  return `
 $ErrorActionPreference = "Stop"
 function Log($msg) { Write-Output "[gcp_fleet_vm] $msg" }
 
@@ -320,5 +320,3 @@ if ("${opts.enableInvokeAtomic ? 'true' : 'false'}" -eq "true") {
 Log "Windows agent VM setup complete"
 `.trim();
 };
-
-

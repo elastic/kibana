@@ -7,7 +7,7 @@
 
 import type { Logger } from '@kbn/logging';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
-import { WorkflowDataClient, CASE_TRIGGER_SO_TYPE, DEFAULT_DEBOUNCE_SECONDS } from '../persistence';
+import { WorkflowDataClient, DEFAULT_DEBOUNCE_SECONDS } from '../persistence';
 import type { CaseTriggerConfig } from '../types';
 
 /**
@@ -129,9 +129,7 @@ export class CaseEventTriggerService {
     event: CaseEvent,
     onTrigger: (request: TriggerActionRequest) => Promise<void>
   ): Promise<void> {
-    this.logger.debug(
-      `Handling case event: type=${event.type}, caseId=${event.caseId}`
-    );
+    this.logger.debug(`Handling case event: type=${event.type}, caseId=${event.caseId}`);
 
     // Get triggers configured for this case
     const triggers = await this.getTriggersForCase(event.caseId);
@@ -142,9 +140,7 @@ export class CaseEventTriggerService {
     }
 
     // Filter triggers that match this event type
-    const matchingTriggers = triggers.filter((trigger) =>
-      this.triggerMatchesEvent(trigger, event)
-    );
+    const matchingTriggers = triggers.filter((trigger) => this.triggerMatchesEvent(trigger, event));
 
     if (matchingTriggers.length === 0) {
       this.logger.debug(
@@ -215,9 +211,7 @@ export class CaseEventTriggerService {
         // Execute the trigger
         await this.executeTrigger(pendingTrigger, trigger, onTrigger);
       } catch (error) {
-        this.logger.error(
-          `Failed to execute trigger for case ${event.caseId}: ${error}`
-        );
+        this.logger.error(`Failed to execute trigger for case ${event.caseId}: ${error}`);
       } finally {
         // Clean up
         this.pendingTriggers.delete(triggerKey);
@@ -242,11 +236,7 @@ export class CaseEventTriggerService {
     );
 
     // Aggregate event data
-    const alertIds = [
-      ...new Set(
-        pending.events.flatMap((e) => e.data.alertIds ?? [])
-      ),
-    ];
+    const alertIds = [...new Set(pending.events.flatMap((e) => e.data.alertIds ?? []))];
 
     const request: TriggerActionRequest = {
       action: pending.action,

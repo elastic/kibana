@@ -233,10 +233,7 @@ interface RunStatsAggregations {
 export function parseScoreDocuments(
   documents: EvaluationScoreDocument[]
 ): import('./evaluation_stats').DatasetScoreWithStats[] {
-  const datasetMap = new Map<
-    string,
-    import('./evaluation_stats').DatasetScoreWithStats
-  >();
+  const datasetMap = new Map<string, import('./evaluation_stats').DatasetScoreWithStats>();
 
   for (const doc of documents) {
     const evaluator = doc.evaluator;
@@ -333,7 +330,7 @@ const EVALUATIONS_DATA_STREAM_ALIAS = 'kibana-evaluations';
 const EVALUATIONS_DATA_STREAM_WILDCARD = 'kibana-evaluations*';
 const EVALUATIONS_DATA_STREAM_TEMPLATE = 'kibana-evaluations-template';
 export class EvaluationScoreRepository {
-  constructor(private readonly esClient: EsClient, private readonly log: SomeDevLog) { }
+  constructor(private readonly esClient: EsClient, private readonly log: SomeDevLog) {}
 
   private async ensureIndexTemplate(): Promise<void> {
     const templateBody = {
@@ -528,17 +525,18 @@ export class EvaluationScoreRepository {
           onDocument: (doc) => {
             const suiteIdPart = doc.suite?.id ?? 'unknown-suite';
             const taskModelIdPart = doc.task?.model.id ?? 'unknown';
-            const docId = doc.example && doc.task
-              ? [
-                doc.run_id,
-                suiteIdPart,
-                taskModelIdPart,
-                doc.example.dataset.id,
-                doc.example.id,
-                doc.evaluator.name,
-                doc.task.repetition_index,
-              ].join('-')
-              : '';
+            const docId =
+              doc.example && doc.task
+                ? [
+                    doc.run_id,
+                    suiteIdPart,
+                    taskModelIdPart,
+                    doc.example.dataset.id,
+                    doc.example.id,
+                    doc.evaluator.name,
+                    doc.task.repetition_index,
+                  ].join('-')
+                : '';
 
             return {
               // Data streams only allow create operations. Use deterministic document IDs so:
@@ -549,7 +547,9 @@ export class EvaluationScoreRepository {
                 _id:
                   doc.example && doc.task
                     ? docId
-                    : `${doc.environment.hostname}-${doc.model?.id ?? 'unknown'}-${doc.experiment_id}-${doc.dataset?.id}-${doc.evaluator.name}-${timestamp}`,
+                    : `${doc.environment.hostname}-${doc.model?.id ?? 'unknown'}-${
+                        doc.experiment_id
+                      }-${doc.dataset?.id}-${doc.evaluator.name}-${timestamp}`,
               },
             };
           },
@@ -771,8 +771,10 @@ export class EvaluationScoreRepository {
 
       return {
         stats,
-        taskModel: firstDoc.task?.model ?? firstDoc.model ?? { id: 'unknown', family: '', provider: '' },
-        evaluatorModel: firstDoc.evaluator?.model ?? firstDoc.evaluator_model ?? { id: 'unknown', family: '', provider: '' },
+        taskModel: firstDoc.task?.model ??
+          firstDoc.model ?? { id: 'unknown', family: '', provider: '' },
+        evaluatorModel: firstDoc.evaluator?.model ??
+          firstDoc.evaluator_model ?? { id: 'unknown', family: '', provider: '' },
         totalRepetitions: firstDoc.run_metadata?.total_repetitions ?? 1,
       };
     } catch (error) {

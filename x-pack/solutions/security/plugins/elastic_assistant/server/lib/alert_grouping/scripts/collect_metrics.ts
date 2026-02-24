@@ -20,12 +20,7 @@
  */
 
 import { writeFileSync } from 'fs';
-import {
-  ESClient,
-  KibanaClient,
-  parseConnectionArgs,
-  checkCluster,
-} from './es_client';
+import { ESClient, KibanaClient, parseConnectionArgs, checkCluster } from './es_client';
 
 interface CaseMetrics {
   id: string;
@@ -108,13 +103,8 @@ async function collectCases(kibana: KibanaClient): Promise<CaseMetrics[]> {
   }));
 }
 
-async function collectCaseAlerts(
-  kibana: KibanaClient,
-  caseId: string
-): Promise<string[]> {
-  const { status, body } = await kibana.get(
-    `/api/cases/${caseId}/comments?perPage=100`
-  );
+async function collectCaseAlerts(kibana: KibanaClient, caseId: string): Promise<string[]> {
+  const { status, body } = await kibana.get(`/api/cases/${caseId}/comments?perPage=100`);
 
   if (status !== 200 || typeof body !== 'object' || body === null) {
     return [];
@@ -157,8 +147,10 @@ async function collectAttackDiscoveries(es: ESClient): Promise<AttackDiscoveryMe
     return [];
   }
 
-  const hits = ((body as Record<string, unknown>).hits as Record<string, unknown>)
-    ?.hits as Array<Record<string, unknown>> ?? [];
+  const hits =
+    (((body as Record<string, unknown>).hits as Record<string, unknown>)?.hits as Array<
+      Record<string, unknown>
+    >) ?? [];
 
   return hits.map((hit) => {
     const src = hit._source as Record<string, unknown>;
@@ -197,7 +189,9 @@ async function collectTokenUsage(es: ESClient): Promise<TokenUsageMetrics> {
     return { totalInputTokens: 0, totalOutputTokens: 0, totalTokens: 0, callCount: 0 };
   }
 
-  const aggs = (body as Record<string, unknown>).aggregations as Record<string, unknown> | undefined;
+  const aggs = (body as Record<string, unknown>).aggregations as
+    | Record<string, unknown>
+    | undefined;
   if (!aggs) {
     return { totalInputTokens: 0, totalOutputTokens: 0, totalTokens: 0, callCount: 0 };
   }
@@ -239,7 +233,9 @@ async function collectAlertStats(es: ESClient): Promise<ComparisonReport['alerts
     return { total: 0, open: 0, acknowledged: 0, withCases: 0, withLlmTriagedTag: 0 };
   }
 
-  const aggs = (body as Record<string, unknown>).aggregations as Record<string, unknown> | undefined;
+  const aggs = (body as Record<string, unknown>).aggregations as
+    | Record<string, unknown>
+    | undefined;
   if (!aggs) {
     return { total: 0, open: 0, acknowledged: 0, withCases: 0, withLlmTriagedTag: 0 };
   }
@@ -255,9 +251,9 @@ async function collectAlertStats(es: ESClient): Promise<ComparisonReport['alerts
     total: ((aggs.total as Record<string, unknown>)?.value as number) ?? 0,
     open: openCount,
     acknowledged: ackCount,
-    withCases: (
-      (aggs.with_cases as Record<string, unknown>)?.non_empty as Record<string, unknown>
-    )?.doc_count as number ?? 0,
+    withCases:
+      (((aggs.with_cases as Record<string, unknown>)?.non_empty as Record<string, unknown>)
+        ?.doc_count as number) ?? 0,
     withLlmTriagedTag: ((aggs.with_llm_tag as Record<string, unknown>)?.doc_count as number) ?? 0,
   };
 }

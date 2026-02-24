@@ -8,13 +8,13 @@
 import { z } from '@kbn/zod';
 import { tool } from '@langchain/core/tools';
 import type { Skill } from '@kbn/agent-builder-common/skills';
+import { filter, map } from 'lodash';
+import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import type { GetOsqueryAppContextFn } from './utils';
 import { getOneChatContext } from './utils';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
 import { packSavedObjectType } from '../../../common/types';
 import type { PackSavedObject } from '../../common/types';
-import { filter, map } from 'lodash';
-import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import { convertSOQueriesToPack } from '../../routes/pack/utils';
 import { convertShardsToObject } from '../../routes/utils';
 
@@ -49,8 +49,8 @@ Show pack details from tool results: name, ID, queries, enabled status.
  * @returns A LangChain tool configured for listing packs
  * @internal
  */
-const createListPacksTool = (getOsqueryContext: GetOsqueryAppContextFn) => {
-  return tool(
+const createListPacksTool = (getOsqueryContext: GetOsqueryAppContextFn) =>
+  tool(
     async ({ page, pageSize, sort, sortOrder }, config) => {
       const onechatContext = getOneChatContext(config);
       if (!onechatContext) {
@@ -113,7 +113,6 @@ const createListPacksTool = (getOsqueryContext: GetOsqueryAppContextFn) => {
       }),
     }
   );
-};
 
 /**
  * Creates a LangChain tool for retrieving a specific osquery pack by ID.
@@ -122,8 +121,8 @@ const createListPacksTool = (getOsqueryContext: GetOsqueryAppContextFn) => {
  * @returns A LangChain tool configured for getting pack details
  * @internal
  */
-const createGetPackTool = (getOsqueryContext: GetOsqueryAppContextFn) => {
-  return tool(
+const createGetPackTool = (getOsqueryContext: GetOsqueryAppContextFn) =>
+  tool(
     async ({ pack_id }, config) => {
       const onechatContext = getOneChatContext(config);
       if (!onechatContext) {
@@ -142,8 +141,10 @@ const createGetPackTool = (getOsqueryContext: GetOsqueryAppContextFn) => {
         request
       );
 
-      const { attributes, references, id, ...rest } =
-        await spaceScopedClient.get<PackSavedObject>(packSavedObjectType, pack_id);
+      const { attributes, references, id, ...rest } = await spaceScopedClient.get<PackSavedObject>(
+        packSavedObjectType,
+        pack_id
+      );
 
       const policyIds = map(
         filter(references, ['type', LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE]),
@@ -178,7 +179,6 @@ const createGetPackTool = (getOsqueryContext: GetOsqueryAppContextFn) => {
       }),
     }
   );
-};
 
 /**
  * Creates the Packs skill for listing and retrieving osquery packs.
@@ -208,14 +208,7 @@ const createGetPackTool = (getOsqueryContext: GetOsqueryAppContextFn) => {
  *
  * @see {@link getLiveQuerySkill} for running pack queries
  */
-export const getPacksSkill = (getOsqueryContext: GetOsqueryAppContextFn): Skill => {
-  return {
-    ...PACKS_SKILL,
-    tools: [createListPacksTool(getOsqueryContext), createGetPackTool(getOsqueryContext)],
-  };
-};
-
-
-
-
-
+export const getPacksSkill = (getOsqueryContext: GetOsqueryAppContextFn): Skill => ({
+  ...PACKS_SKILL,
+  tools: [createListPacksTool(getOsqueryContext), createGetPackTool(getOsqueryContext)],
+});

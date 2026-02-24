@@ -18,7 +18,9 @@ describe('AlertGroupingWorkflowExecutor Integration Tests', () => {
   let logger: MockedLogger;
   let mockDependencies: WorkflowExecutorDependencies;
 
-  const createMockConfig = (overrides?: Partial<AlertGroupingWorkflowConfig>): AlertGroupingWorkflowConfig => ({
+  const createMockConfig = (
+    overrides?: Partial<AlertGroupingWorkflowConfig>
+  ): AlertGroupingWorkflowConfig => ({
     id: 'test-workflow-001',
     name: 'Test Alert Grouping Workflow',
     description: 'Integration test workflow',
@@ -118,11 +120,7 @@ describe('AlertGroupingWorkflowExecutor Integration Tests', () => {
   describe('End-to-end workflow execution', () => {
     it('should execute complete workflow in dry-run mode', async () => {
       const config = createMockConfig();
-      const executor = new AlertGroupingWorkflowExecutor(
-        config,
-        mockDependencies,
-        true
-      );
+      const executor = new AlertGroupingWorkflowExecutor(config, mockDependencies, true);
 
       const result = await executor.execute();
 
@@ -143,11 +141,7 @@ describe('AlertGroupingWorkflowExecutor Integration Tests', () => {
 
     it('should execute complete workflow and create cases', async () => {
       const config = createMockConfig();
-      const executor = new AlertGroupingWorkflowExecutor(
-        config,
-        mockDependencies,
-        false
-      );
+      const executor = new AlertGroupingWorkflowExecutor(config, mockDependencies, false);
 
       const result = await executor.execute();
 
@@ -182,11 +176,7 @@ describe('AlertGroupingWorkflowExecutor Integration Tests', () => {
       ]);
 
       const config = createMockConfig();
-      const executor = new AlertGroupingWorkflowExecutor(
-        config,
-        mockDependencies,
-        false
-      );
+      const executor = new AlertGroupingWorkflowExecutor(config, mockDependencies, false);
 
       const result = await executor.execute();
 
@@ -207,11 +197,7 @@ describe('AlertGroupingWorkflowExecutor Integration Tests', () => {
       });
 
       const config = createMockConfig();
-      const executor = new AlertGroupingWorkflowExecutor(
-        config,
-        mockDependencies,
-        false
-      );
+      const executor = new AlertGroupingWorkflowExecutor(config, mockDependencies, false);
 
       const result = await executor.execute();
 
@@ -230,11 +216,7 @@ describe('AlertGroupingWorkflowExecutor Integration Tests', () => {
       );
 
       const config = createMockConfig();
-      const executor = new AlertGroupingWorkflowExecutor(
-        config,
-        mockDependencies,
-        false
-      );
+      const executor = new AlertGroupingWorkflowExecutor(config, mockDependencies, false);
 
       const result = await executor.execute();
 
@@ -250,11 +232,7 @@ describe('AlertGroupingWorkflowExecutor Integration Tests', () => {
       );
 
       const config = createMockConfig();
-      const executor = new AlertGroupingWorkflowExecutor(
-        config,
-        mockDependencies,
-        false
-      );
+      const executor = new AlertGroupingWorkflowExecutor(config, mockDependencies, false);
 
       const result = await executor.execute();
 
@@ -268,11 +246,7 @@ describe('AlertGroupingWorkflowExecutor Integration Tests', () => {
       // Alerts 1 and 2 share IP, hostname, and user
       // Alert 3 is different
       const config = createMockConfig();
-      const executor = new AlertGroupingWorkflowExecutor(
-        config,
-        mockDependencies,
-        true
-      );
+      const executor = new AlertGroupingWorkflowExecutor(config, mockDependencies, true);
 
       const result = await executor.execute();
 
@@ -293,11 +267,7 @@ describe('AlertGroupingWorkflowExecutor Integration Tests', () => {
         },
       });
 
-      const executor = new AlertGroupingWorkflowExecutor(
-        config,
-        mockDependencies,
-        true
-      );
+      const executor = new AlertGroupingWorkflowExecutor(config, mockDependencies, true);
 
       const result = await executor.execute();
 
@@ -315,11 +285,7 @@ describe('AlertGroupingWorkflowExecutor Integration Tests', () => {
         },
       });
 
-      const executor = new AlertGroupingWorkflowExecutor(
-        config,
-        mockDependencies,
-        false
-      );
+      const executor = new AlertGroupingWorkflowExecutor(config, mockDependencies, false);
 
       await executor.execute();
 
@@ -334,11 +300,7 @@ describe('AlertGroupingWorkflowExecutor Integration Tests', () => {
         },
       });
 
-      const executor = new AlertGroupingWorkflowExecutor(
-        config,
-        mockDependencies,
-        false
-      );
+      const executor = new AlertGroupingWorkflowExecutor(config, mockDependencies, false);
 
       await executor.execute();
 
@@ -350,11 +312,7 @@ describe('AlertGroupingWorkflowExecutor Integration Tests', () => {
   describe('Metrics tracking', () => {
     it('should track comprehensive execution metrics', async () => {
       const config = createMockConfig();
-      const executor = new AlertGroupingWorkflowExecutor(
-        config,
-        mockDependencies,
-        false
-      );
+      const executor = new AlertGroupingWorkflowExecutor(config, mockDependencies, false);
 
       const startTime = Date.now();
       const result = await executor.execute();

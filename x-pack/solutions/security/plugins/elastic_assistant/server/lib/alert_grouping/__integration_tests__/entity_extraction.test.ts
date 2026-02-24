@@ -75,7 +75,9 @@ describe('EntityExtractionService Integration Tests', () => {
 
       // Should extract hostname
       const hostnames = result.entities.filter((e) => e.type === ObservableTypeKey.Hostname);
-      expect(hostnames.some((h) => h.normalizedValue.toLowerCase() === 'desktop-abc123')).toBe(true);
+      expect(hostnames.some((h) => h.normalizedValue.toLowerCase() === 'desktop-abc123')).toBe(
+        true
+      );
 
       // Should extract username
       const users = result.entities.filter((e) => e.type === ObservableTypeKey.User);

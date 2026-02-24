@@ -173,7 +173,9 @@ export class FileReporter {
     const minutes = Math.floor(elapsed / 60000) % 60;
     const hours = Math.floor(elapsed / 3600000);
 
-    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}.${ms.toString().padStart(3, '0')}`;
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds
+      .toString()
+      .padStart(2, '0')}.${ms.toString().padStart(3, '0')}`;
   }
 
   // ─────────────────────────────────────────────────────────────────────────────
@@ -400,7 +402,9 @@ export class FileReporter {
         case 'section':
           lines.push('');
           lines.push(
-            `${LINE_CHAR}${LINE_CHAR} ${section.content} ${LINE_CHAR.repeat(Math.max(0, LINE_WIDTH - section.content.length - 4))}`
+            `${LINE_CHAR}${LINE_CHAR} ${section.content} ${LINE_CHAR.repeat(
+              Math.max(0, LINE_WIDTH - section.content.length - 4)
+            )}`
           );
           break;
         case 'subsection':
@@ -447,7 +451,11 @@ export class FileReporter {
     for (const table of this.reportData.tables ?? []) {
       lines.push('');
       if (table.title) {
-        lines.push(`${LINE_CHAR}${LINE_CHAR} ${table.title} ${LINE_CHAR.repeat(LINE_WIDTH - table.title.length - 4)}`);
+        lines.push(
+          `${LINE_CHAR}${LINE_CHAR} ${table.title} ${LINE_CHAR.repeat(
+            LINE_WIDTH - table.title.length - 4
+          )}`
+        );
       }
       lines.push(this.formatTableAsText(table));
     }
@@ -526,9 +534,7 @@ export class FileReporter {
 
       // Data rows
       for (const row of table.rows) {
-        const values = table.columns.map((col) =>
-          this.escapeCsvValue(String(row[col.key] ?? ''))
-        );
+        const values = table.columns.map((col) => this.escapeCsvValue(String(row[col.key] ?? '')));
         lines.push(values.join(','));
       }
 

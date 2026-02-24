@@ -9,7 +9,12 @@
 export * from './types';
 
 // Services
-export { EntityExtractionService, CaseMatchingService, type CaseData, type CaseObservable } from './services';
+export {
+  EntityExtractionService,
+  CaseMatchingService,
+  type CaseData,
+  type CaseObservable,
+} from './services';
 
 // Persistence
 export { WorkflowDataClient } from './persistence';

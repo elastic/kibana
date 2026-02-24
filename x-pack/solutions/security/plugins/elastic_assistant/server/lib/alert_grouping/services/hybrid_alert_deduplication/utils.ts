@@ -14,12 +14,7 @@
  * Ported from https://github.com/elastic/alert-clustering
  */
 
-import {
-  RULE_FIELDS,
-  TRIAGE_FIELDS,
-  ENTITY_FIELDS,
-  LOW_QUALITY_ENTITIES,
-} from './types';
+import { RULE_FIELDS, TRIAGE_FIELDS, ENTITY_FIELDS, LOW_QUALITY_ENTITIES } from './types';
 import type { AlertDocument, EnrichedAlert, EntityStats } from './types';
 
 // ============================================================
@@ -183,7 +178,7 @@ export const displayAlert = (alert: EnrichedAlert, commonFields?: string[]): str
     const val = getVal(alert, field);
     if (val != null) {
       let valStr = String(val);
-      if (valStr.length > 256) valStr = valStr.slice(0, 256) + '....';
+      if (valStr.length > 256) valStr = `${valStr.slice(0, 256)}....`;
       output += `   ${field}: ${valStr}\n`;
     }
   }

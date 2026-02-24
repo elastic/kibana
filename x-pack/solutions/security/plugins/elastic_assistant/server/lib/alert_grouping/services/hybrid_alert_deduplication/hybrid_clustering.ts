@@ -25,12 +25,7 @@
 
 import type { Logger } from '@kbn/logging';
 
-import type {
-  AlertDocument,
-  EnrichedAlert,
-  HybridClusteringConfig,
-  LLMInvokeFn,
-} from './types';
+import type { AlertDocument, EnrichedAlert, HybridClusteringConfig, LLMInvokeFn } from './types';
 import { getVal, getEntityStats, updateEntityStats } from './utils';
 import { cosineDistance } from './vectorization';
 import { exceptionlistMatch, generateMatchPattern } from './pattern_generation';
@@ -132,10 +127,8 @@ export class HybridClustering {
    */
   private unrelatedAlerts(alert1: AlertDocument, alert2: AlertDocument): boolean {
     // Different rule names → never cluster
-    const ruleName1 =
-      getVal(alert1, 'rule.name') ?? getVal(alert1, 'kibana.alert.rule.name');
-    const ruleName2 =
-      getVal(alert2, 'rule.name') ?? getVal(alert2, 'kibana.alert.rule.name');
+    const ruleName1 = getVal(alert1, 'rule.name') ?? getVal(alert1, 'kibana.alert.rule.name');
+    const ruleName2 = getVal(alert2, 'rule.name') ?? getVal(alert2, 'kibana.alert.rule.name');
 
     if (ruleName1 !== ruleName2) {
       return true;
@@ -239,10 +232,7 @@ export class HybridClustering {
 
       if (response?.duplicate) {
         // Generate pattern to match on similarities
-        const exception = generateMatchPattern(
-          [leader, alert],
-          response.common_fields
-        );
+        const exception = generateMatchPattern([leader, alert], response.common_fields);
 
         if (exception) {
           if (!leader.exceptions) leader.exceptions = [];
@@ -264,9 +254,7 @@ export class HybridClustering {
         leader.followers.push(alert);
 
         if (this.debugging && this.rankCutoff && i !== 0) {
-          this.logger.warn(
-            `Sub-optimal vector ordering found! Match at rank ${i} instead of 0`
-          );
+          this.logger.warn(`Sub-optimal vector ordering found! Match at rank ${i} instead of 0`);
         }
 
         return leader;

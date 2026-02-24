@@ -14,11 +14,10 @@ import { ATTACK_DISCOVERY_API_ACTION_ALL } from '@kbn/security-solution-features
 
 import { buildResponse } from '../../../lib/build_response';
 import type { ElasticAssistantRequestHandlerContext } from '../../../types';
-import {
+import type {
+  CaseEventType,
   ObservableAutoExtractor,
   CaseEventTriggerService,
-  CaseEventType,
-  TriggerAction,
   type CaseEvent,
   type TriggerActionRequest,
 } from '../../../lib/alert_grouping/cases';
@@ -35,10 +34,14 @@ const ALERT_GROUPING_CASE_BASE = '/api/security/alert_grouping/cases';
 const ExtractObservablesRequestBody = z.object({
   alertIds: z.array(z.string()).min(1),
   alertsIndexPattern: z.string().default('.alerts-security.alerts-default'),
-  existingObservables: z.array(z.object({
-    typeKey: z.string(),
-    value: z.string(),
-  })).optional(),
+  existingObservables: z
+    .array(
+      z.object({
+        typeKey: z.string(),
+        value: z.string(),
+      })
+    )
+    .optional(),
   entityTypes: z.array(z.string()).optional(),
   maxObservablesPerType: z.number().min(1).max(100).optional(),
 });
@@ -85,13 +88,15 @@ const NotifyCaseEventRequestBody = z.object({
     'case_updated',
     'case_closed',
   ]),
-  data: z.object({
-    alertIds: z.array(z.string()).optional(),
-    observableIds: z.array(z.string()).optional(),
-    previousStatus: z.string().optional(),
-    newStatus: z.string().optional(),
-    userId: z.string().optional(),
-  }).catchall(z.unknown()),
+  data: z
+    .object({
+      alertIds: z.array(z.string()).optional(),
+      observableIds: z.array(z.string()).optional(),
+      previousStatus: z.string().optional(),
+      newStatus: z.string().optional(),
+      userId: z.string().optional(),
+    })
+    .catchall(z.unknown()),
 });
 
 const NotifyCaseEventParams = z.object({
@@ -173,9 +178,7 @@ export const registerCaseObservableExtractionRoute = (
             maxObservablesPerType,
           } = request.body;
 
-          logger.debug(
-            `Extracting observables for case ${caseId} from ${alertIds.length} alerts`
-          );
+          logger.debug(`Extracting observables for case ${caseId} from ${alertIds.length} alerts`);
 
           // Fetch alerts
           const alertsResponse = await esClient.search({
@@ -215,7 +218,9 @@ export const registerCaseObservableExtractionRoute = (
           // Extract observables
           const result = extractor.extractObservablesFromAlerts(
             alerts,
-            existingObservablesFormatted as Parameters<typeof extractor.extractObservablesFromAlerts>[1]
+            existingObservablesFormatted as Parameters<
+              typeof extractor.extractObservablesFromAlerts
+            >[1]
           );
 
           return response.ok({
@@ -581,7 +586,8 @@ export const registerCaseAttackDiscoveryRoute = (
           }
 
           const { case_id: caseId } = request.params;
-          const { connectorId, actionTypeId, alertsIndexPattern, attachToCase, updateCaseDetails } = request.body;
+          const { connectorId, actionTypeId, alertsIndexPattern, attachToCase, updateCaseDetails } =
+            request.body;
 
           // Get Cases client
           const casesPlugin = assistantContext.getCases();
@@ -689,8 +695,10 @@ export const registerCaseAttackDiscoveryRoute = (
           // Generate Attack Discovery
           // Use very wide date range to ensure we get all alerts regardless of age
           // The default query uses now-24h which may miss older alerts
-          logger.info(`Calling generateAttackDiscoveries for case ${caseId} with ${alertIds.length} alerts`);
-          
+          logger.info(
+            `Calling generateAttackDiscoveries for case ${caseId} with ${alertIds.length} alerts`
+          );
+
           const result = await generateAttackDiscoveries({
             actionsClient,
             config: {
@@ -715,13 +723,15 @@ export const registerCaseAttackDiscoveryRoute = (
           });
 
           // Log the result for debugging
-          logger.info(`generateAttackDiscoveries result for case ${caseId}: ${JSON.stringify({
-            hasResult: !!result,
-            attackDiscoveriesCount: result?.attackDiscoveries?.length ?? 0,
-            attackDiscoveriesIsNull: result?.attackDiscoveries === null,
-            anonymizedAlertsCount: result?.anonymizedAlerts?.length ?? 0,
-            firstDiscoveryTitle: result?.attackDiscoveries?.[0]?.title ?? 'none',
-          })}`);
+          logger.info(
+            `generateAttackDiscoveries result for case ${caseId}: ${JSON.stringify({
+              hasResult: !!result,
+              attackDiscoveriesCount: result?.attackDiscoveries?.length ?? 0,
+              attackDiscoveriesIsNull: result?.attackDiscoveries === null,
+              anonymizedAlertsCount: result?.anonymizedAlerts?.length ?? 0,
+              firstDiscoveryTitle: result?.attackDiscoveries?.[0]?.title ?? 'none',
+            })}`
+          );
 
           // Process results
           const discoveries = result?.attackDiscoveries ?? [];
@@ -762,10 +772,12 @@ export const registerCaseAttackDiscoveryRoute = (
             if (shouldUpdateTitle || shouldUpdateDescription) {
               try {
                 const updatePayload: { title?: string; description?: string } = {};
-                
+
                 if (shouldUpdateTitle && primaryDiscovery.title) {
                   updatePayload.title = primaryDiscovery.title;
-                  logger.info(`Updating case ${caseId} title from "${theCase.title}" to "${primaryDiscovery.title}"`);
+                  logger.info(
+                    `Updating case ${caseId} title from "${theCase.title}" to "${primaryDiscovery.title}"`
+                  );
                 }
 
                 if (shouldUpdateDescription && primaryDiscovery.summaryMarkdown) {
@@ -775,11 +787,13 @@ export const registerCaseAttackDiscoveryRoute = (
 
                 if (Object.keys(updatePayload).length > 0) {
                   await casesClient.cases.bulkUpdate({
-                    cases: [{
-                      id: caseId,
-                      version: theCase.version,
-                      ...updatePayload,
-                    }],
+                    cases: [
+                      {
+                        id: caseId,
+                        version: theCase.version,
+                        ...updatePayload,
+                      },
+                    ],
                   });
                   caseUpdated = true;
                   logger.info(`Case ${caseId} updated with Attack Discovery details`);
@@ -797,7 +811,7 @@ export const registerCaseAttackDiscoveryRoute = (
             try {
               // Get the Attack Discovery data client to create alert documents
               const adDataClient = await assistantContext.getAttackDiscoveryDataClient();
-              
+
               if (!adDataClient) {
                 logger.warn(`Attack Discovery data client not available for case ${caseId}`);
               } else {
@@ -811,7 +825,12 @@ export const registerCaseAttackDiscoveryRoute = (
                 }
 
                 const generationUuid = `case-${caseId}-${Date.now()}`;
-                let alertsToAttach: Array<{ id: string; backingIndex?: string; title?: string; timestamp?: string }> = [];
+                let alertsToAttach: Array<{
+                  id: string;
+                  backingIndex?: string;
+                  title?: string;
+                  timestamp?: string;
+                }> = [];
 
                 // Try to create Attack Discovery alert documents
                 try {
@@ -832,12 +851,16 @@ export const registerCaseAttackDiscoveryRoute = (
                       withReplacements: false,
                     },
                   });
-                  logger.info(`Created ${createdAlerts.length} Attack Discovery alerts for case ${caseId}`);
+                  logger.info(
+                    `Created ${createdAlerts.length} Attack Discovery alerts for case ${caseId}`
+                  );
                   alertsToAttach = createdAlerts;
                 } catch (createErr) {
                   // If creation failed (likely version conflict), try to find existing alerts
-                  logger.warn(`Failed to create AD alerts, trying to find existing ones: ${createErr}`);
-                  
+                  logger.warn(
+                    `Failed to create AD alerts, trying to find existing ones: ${createErr}`
+                  );
+
                   try {
                     // Find existing AD alerts by searching with the security alert IDs that were part of these discoveries
                     // This is more reliable than title search since the LLM can generate different titles
@@ -855,10 +878,12 @@ export const registerCaseAttackDiscoveryRoute = (
                       },
                       logger,
                     });
-                    
+
                     if (existingAlerts?.data && existingAlerts.data.length > 0) {
-                      logger.info(`Found ${existingAlerts.data.length} existing Attack Discovery alerts for case ${caseId}`);
-                      alertsToAttach = existingAlerts.data.map(alert => ({
+                      logger.info(
+                        `Found ${existingAlerts.data.length} existing Attack Discovery alerts for case ${caseId}`
+                      );
+                      alertsToAttach = existingAlerts.data.map((alert) => ({
                         id: alert.id,
                         backingIndex: alert.backingIndex,
                         title: alert.title,
@@ -873,15 +898,27 @@ export const registerCaseAttackDiscoveryRoute = (
                 }
 
                 // Now attach each alert to the case as an external reference attachment
-                logger.info(`Attempting to attach ${alertsToAttach.length} AD alerts to case ${caseId}`);
+                logger.info(
+                  `Attempting to attach ${alertsToAttach.length} AD alerts to case ${caseId}`
+                );
                 if (alertsToAttach.length > 0) {
-                  const { ATTACK_DISCOVERY_ATTACHMENT_TYPE, ExternalReferenceStorageType, AttachmentType } = await import('@kbn/cases-plugin/common');
+                  const {
+                    ATTACK_DISCOVERY_ATTACHMENT_TYPE,
+                    ExternalReferenceStorageType,
+                    AttachmentType,
+                  } = await import('@kbn/cases-plugin/common');
 
-                  logger.info(`Using ATTACK_DISCOVERY_ATTACHMENT_TYPE: ${ATTACK_DISCOVERY_ATTACHMENT_TYPE}, ExternalReferenceStorageType: ${JSON.stringify(ExternalReferenceStorageType)}, AttachmentType.externalReference: ${AttachmentType.externalReference}`);
-                  
+                  logger.info(
+                    `Using ATTACK_DISCOVERY_ATTACHMENT_TYPE: ${ATTACK_DISCOVERY_ATTACHMENT_TYPE}, ExternalReferenceStorageType: ${JSON.stringify(
+                      ExternalReferenceStorageType
+                    )}, AttachmentType.externalReference: ${AttachmentType.externalReference}`
+                  );
+
                   for (const alert of alertsToAttach) {
                     try {
-                      logger.info(`Attaching AD alert ${alert.id} with title "${alert.title}" to case ${caseId}`);
+                      logger.info(
+                        `Attaching AD alert ${alert.id} with title "${alert.title}" to case ${caseId}`
+                      );
                       await casesClient.attachments.add({
                         caseId,
                         comment: {
@@ -902,16 +939,22 @@ export const registerCaseAttackDiscoveryRoute = (
                         },
                       });
                       attachedCount++;
-                      logger.info(`Successfully attached Attack Discovery alert ${alert.id} to case ${caseId}`);
+                      logger.info(
+                        `Successfully attached Attack Discovery alert ${alert.id} to case ${caseId}`
+                      );
                     } catch (attachErr) {
                       // Check if already attached
                       const errMsg = String(attachErr);
                       logger.error(`Attachment error for ${alert.id}: ${errMsg}`);
                       if (errMsg.includes('already attached') || errMsg.includes('duplicate')) {
-                        logger.info(`Attack Discovery alert ${alert.id} already attached to case ${caseId}`);
+                        logger.info(
+                          `Attack Discovery alert ${alert.id} already attached to case ${caseId}`
+                        );
                         attachedCount++;
                       } else {
-                        logger.error(`Failed to attach Attack Discovery alert ${alert.id} to case ${caseId}: ${attachErr}`);
+                        logger.error(
+                          `Failed to attach Attack Discovery alert ${alert.id} to case ${caseId}: ${attachErr}`
+                        );
                       }
                     }
                   }
@@ -920,7 +963,9 @@ export const registerCaseAttackDiscoveryRoute = (
                 }
               }
             } catch (err) {
-              logger.error(`Failed to process Attack Discovery attachments for case ${caseId}: ${err}`);
+              logger.error(
+                `Failed to process Attack Discovery attachments for case ${caseId}: ${err}`
+              );
             }
           }
 
@@ -934,7 +979,7 @@ export const registerCaseAttackDiscoveryRoute = (
           if (rejectedAlertIds.length > 0 && discoveries.length > 0) {
             logger.info(
               `Rejecting ${rejectedAlertIds.length} alerts from case ${caseId} ` +
-              `(not referenced by any Attack Discovery)`
+                `(not referenced by any Attack Discovery)`
             );
 
             // 1. Detach rejected alerts from the case
@@ -943,8 +988,12 @@ export const registerCaseAttackDiscoveryRoute = (
               const allAttachments = await casesClient.attachments.getAll({
                 caseID: caseId,
               });
-              const alertAttachments = (allAttachments as Array<{ id: string; type: string; alertId?: string }>)
-                .filter((att) => att.type === 'alert' && att.alertId && rejectedAlertIds.includes(att.alertId));
+              const alertAttachments = (
+                allAttachments as Array<{ id: string; type: string; alertId?: string }>
+              ).filter(
+                (att) =>
+                  att.type === 'alert' && att.alertId && rejectedAlertIds.includes(att.alertId)
+              );
 
               for (const att of alertAttachments) {
                 try {
@@ -954,10 +1003,14 @@ export const registerCaseAttackDiscoveryRoute = (
                   });
                   alertsDetached++;
                 } catch (detachErr) {
-                  logger.warn(`Failed to detach alert attachment ${att.id} from case ${caseId}: ${detachErr}`);
+                  logger.warn(
+                    `Failed to detach alert attachment ${att.id} from case ${caseId}: ${detachErr}`
+                  );
                 }
               }
-              logger.info(`Detached ${alertsDetached} rejected alert attachments from case ${caseId}`);
+              logger.info(
+                `Detached ${alertsDetached} rejected alert attachments from case ${caseId}`
+              );
             } catch (detachErr) {
               logger.warn(`Failed to detach rejected alerts from case ${caseId}: ${detachErr}`);
             }
@@ -984,7 +1037,7 @@ export const registerCaseAttackDiscoveryRoute = (
               });
               logger.info(
                 `Removed 'llm-triaged' tag from ${rejectedAlertIdsForUpdate.length} rejected alerts ` +
-                `so they can be re-grouped in the next alert grouping round`
+                  `so they can be re-grouped in the next alert grouping round`
               );
             } catch (tagErr) {
               logger.warn(`Failed to remove llm-triaged tag from rejected alerts: ${tagErr}`);
@@ -1006,10 +1059,7 @@ export const registerCaseAttackDiscoveryRoute = (
                   size: rejectedAlertIds.length,
                   body: {
                     query: { terms: { _id: rejectedAlertIds } },
-                    _source: [
-                      'kibana.alert.rule.name',
-                      '@timestamp',
-                    ],
+                    _source: ['kibana.alert.rule.name', '@timestamp'],
                   },
                 });
 
@@ -1035,10 +1085,15 @@ export const registerCaseAttackDiscoveryRoute = (
 
               // Build a markdown table with clickable alert links
               const alertRows = rejectedAlertDetails.map((alert) => {
-                const alertLink = `/app/security/alerts/redirect/${alert.id}?index=${encodeURIComponent(alert.index)}&timestamp=${encodeURIComponent(alert.timestamp)}`;
-                const shortId = alert.id.length > 12
-                  ? `${alert.id.substring(0, 8)}...${alert.id.substring(alert.id.length - 4)}`
-                  : alert.id;
+                const alertLink = `/app/security/alerts/redirect/${
+                  alert.id
+                }?index=${encodeURIComponent(alert.index)}&timestamp=${encodeURIComponent(
+                  alert.timestamp
+                )}`;
+                const shortId =
+                  alert.id.length > 12
+                    ? `${alert.id.substring(0, 8)}...${alert.id.substring(alert.id.length - 4)}`
+                    : alert.id;
                 const formattedTime = alert.timestamp
                   ? new Date(alert.timestamp).toLocaleString('en-US', {
                       month: 'short',
@@ -1061,8 +1116,7 @@ export const registerCaseAttackDiscoveryRoute = (
                 `has been removed so they can be re-processed in the next alert grouping round ` +
                 `and potentially form their own case.\n\n` +
                 `| Alert | Rule | Timestamp |\n` +
-                `|-------|------|----------|\n` +
-                alertRows.join('\n');
+                `|-------|------|----------|\n${alertRows.join('\n')}`;
 
               await casesClient.attachments.add({
                 caseId,
@@ -1079,8 +1133,8 @@ export const registerCaseAttackDiscoveryRoute = (
 
           logger.info(
             `Attack Discovery for case ${caseId}: generated ${discoveries.length} discoveries, ` +
-            `${alertsInDiscoveries.size}/${alertIds.length} alerts referenced, ` +
-            `${attachedCount} attached to case, ${alertsDetached} alerts rejected/detached`
+              `${alertsInDiscoveries.size}/${alertIds.length} alerts referenced, ` +
+              `${attachedCount} attached to case, ${alertsDetached} alerts rejected/detached`
           );
 
           return response.ok({

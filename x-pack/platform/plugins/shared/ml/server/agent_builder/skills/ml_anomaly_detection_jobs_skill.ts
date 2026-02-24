@@ -26,6 +26,3 @@ Provides read-only guidance for discovering anomaly detection jobs, understandin
 - Do not delete jobs.\n
 `,
 });
-
-
-

@@ -148,10 +148,7 @@ export class ObservableAutoExtractor {
 
       // Check max per type limit
       const currentCount = countsPerType[entity.type] ?? 0;
-      if (
-        this.config.maxObservablesPerType &&
-        currentCount >= this.config.maxObservablesPerType
-      ) {
+      if (this.config.maxObservablesPerType && currentCount >= this.config.maxObservablesPerType) {
         continue;
       }
 

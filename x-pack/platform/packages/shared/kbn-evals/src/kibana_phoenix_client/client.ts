@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import pLimit from 'p-limit';
 import pRetry from 'p-retry';
 import type { PhoenixClient } from '@arizeai/phoenix-client';
 import { createClient } from '@arizeai/phoenix-client';
@@ -105,9 +104,9 @@ export class KibanaPhoenixClient implements EvalsExecutorClient {
       if (!this.allowPhoenixDatasetDeleteRecreateFallback) {
         this.options.log.warning(
           `Phoenix dataset upsert failed for "${dataset.name}" (id: ${storedDataset.id}). ` +
-          `Refusing to delete+recreate without explicit opt-in. ` +
-          `To allow the destructive fallback (will wipe past experiments), set ` +
-          `KBN_EVALS_PHOENIX_ALLOW_DATASET_DELETE_RECREATE_FALLBACK=true.`
+            `Refusing to delete+recreate without explicit opt-in. ` +
+            `To allow the destructive fallback (will wipe past experiments), set ` +
+            `KBN_EVALS_PHOENIX_ALLOW_DATASET_DELETE_RECREATE_FALLBACK=true.`
         );
         this.options.log.debug(error);
         throw error;
@@ -206,7 +205,7 @@ export class KibanaPhoenixClient implements EvalsExecutorClient {
             experimentMetadata: {
               model: this.options.model,
               runId: this.options.runId,
-              ...experimentMetadata
+              ...experimentMetadata,
             },
             setGlobalTracerProvider: false,
             evaluators: evaluators.map((evaluator) => {

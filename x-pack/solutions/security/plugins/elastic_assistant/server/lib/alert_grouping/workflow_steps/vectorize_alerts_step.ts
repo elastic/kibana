@@ -8,10 +8,7 @@
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 
 import { vectorizeAlertsStepCommonDefinition } from '../../../../common/workflow_steps';
-import {
-  getGenericAlertFeatureVector,
-  getVal,
-} from '../services/hybrid_alert_deduplication';
+import { getGenericAlertFeatureVector, getVal } from '../services/hybrid_alert_deduplication';
 import type { AlertDocument } from '../services/hybrid_alert_deduplication';
 
 /**

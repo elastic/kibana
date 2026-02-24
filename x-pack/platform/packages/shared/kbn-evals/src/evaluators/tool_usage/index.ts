@@ -13,10 +13,7 @@ import {
 } from '../../utils/evaluation_helpers';
 
 /** Acceptable general-purpose tools that can substitute for a specialized tool. */
-const ACCEPTABLE_ALTERNATIVES = new Set([
-  'platform.core.search',
-  'platform.core.execute_esql',
-]);
+const ACCEPTABLE_ALTERNATIVES = new Set(['platform.core.search', 'platform.core.execute_esql']);
 
 /**
  * Check whether an invoke_skill call matches the expected tool identifier.
@@ -90,8 +87,7 @@ export const createToolUsageOnlyEvaluator = (): Evaluator => ({
     const hasAcceptableAlternative = usedToolIds.some((id) =>
       ACCEPTABLE_ALTERNATIVES.has(id as string)
     );
-    const hasExpected =
-      hasExpectedDirect || hasExpectedViaInvokeSkill || hasAcceptableAlternative;
+    const hasExpected = hasExpectedDirect || hasExpectedViaInvokeSkill || hasAcceptableAlternative;
 
     const invokeSkillCalls = meaningfulToolCalls
       .filter((t) => t.tool_id === 'invoke_skill')

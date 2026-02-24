@@ -12,17 +12,11 @@ import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
  * Safely extracts OneChat context from LangChain tool config.
  * Skill-tools receive context via config.configurable.onechat
  */
-export const getOneChatContext = (config: any): Omit<ToolHandlerContext, 'resultStore'> | null => {
-  return (config as any)?.configurable?.onechat ?? null;
-};
+export const getOneChatContext = (config: any): Omit<ToolHandlerContext, 'resultStore'> | null =>
+  (config as any)?.configurable?.onechat ?? null;
 
 /**
  * Type for a function that returns OsqueryAppContext.
  * This allows skills to access Osquery services at runtime.
  */
 export type GetOsqueryAppContextFn = () => OsqueryAppContext | null;
-
-
-
-
-

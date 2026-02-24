@@ -19,7 +19,9 @@ import { KbnClientRequesterError } from '@kbn/test';
 export function getConnectorIdAsUuid(connectorId: string) {
   // Important: use TEST_RUN_ID as part of the seed when available to avoid connector ID collisions
   // between concurrently running eval processes/suites (which can delete each other's connectors).
-  const runSeed = process.env.TEST_RUN_ID ? `${process.env.TEST_RUN_ID}:${connectorId}` : connectorId;
+  const runSeed = process.env.TEST_RUN_ID
+    ? `${process.env.TEST_RUN_ID}:${connectorId}`
+    : connectorId;
   return v5(runSeed, v5.DNS);
 }
 

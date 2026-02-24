@@ -121,13 +121,19 @@ export class ConsoleReporter {
     const minutes = Math.floor(elapsed / 60000) % 60;
     const hours = Math.floor(elapsed / 3600000);
 
-    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}.${ms.toString().padStart(3, '0')}`;
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds
+      .toString()
+      .padStart(2, '0')}.${ms.toString().padStart(3, '0')}`;
   }
 
   /**
    * Pad string to width with specified alignment
    */
-  private padString(str: string, width: number, align: 'left' | 'right' | 'center' = 'left'): string {
+  private padString(
+    str: string,
+    width: number,
+    align: 'left' | 'right' | 'center' = 'left'
+  ): string {
     const strLen = str.length;
     if (strLen >= width) return str.substring(0, width);
 
@@ -278,7 +284,10 @@ export class ConsoleReporter {
   /**
    * Write multiple key-value pairs
    */
-  keyValues(items: Array<{ key: string; value: string | number | boolean | undefined }>, indent = 0): void {
+  keyValues(
+    items: Array<{ key: string; value: string | number | boolean | undefined }>,
+    indent = 0
+  ): void {
     const maxKeyLen = Math.max(...items.map((i) => i.key.length));
     for (const item of items) {
       const prefix = '  '.repeat(indent);

@@ -27,7 +27,10 @@ import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
 import { type MlPluginSetup } from '@kbn/ml-plugin/server';
 import type { StructuredToolInterface } from '@langchain/core/tools';
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import type { TaskManagerSetupContract, TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import type {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
 import type {
   PostAttackDiscoveryGenerateRequestBody,
   DefendInsightsPostRequestBody,
@@ -58,7 +61,10 @@ import type {
   PublicFrameworkAlertsService,
 } from '@kbn/alerting-plugin/server';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
-import type { IRuleDataClient, RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
+import type {
+  IRuleDataClient,
+  RuleRegistryPluginSetupContract,
+} from '@kbn/rule-registry-plugin/server';
 import type { CheckPrivileges, SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
@@ -77,7 +83,7 @@ import { CallbackIds } from './services/app_context';
 import type { AIAssistantDataClient } from './ai_assistant_data_clients';
 import type { DefendInsightsDataClient } from './lib/defend_insights/persistence';
 import type { AttackDiscoveryScheduleDataClient } from './lib/attack_discovery/schedules/data_client';
-import { AIAssistantService } from './ai_assistant_service';
+import type { AIAssistantService } from './ai_assistant_service';
 
 export const PLUGIN_ID = 'elasticAssistant' as const;
 export { CallbackIds };

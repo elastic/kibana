@@ -84,10 +84,12 @@ const ExecutionIdParamsSchema = z.object({
 const RunWorkflowRequestSchema = z.object({
   dry_run: z.boolean().optional(),
   max_alerts: z.number().optional(),
-  time_range: z.object({
-    start: z.string(),
-    end: z.string(),
-  }).optional(),
+  time_range: z
+    .object({
+      start: z.string(),
+      end: z.string(),
+    })
+    .optional(),
   exclude_tags: z.array(z.string()).optional(),
   include_statuses: z.array(z.enum(['open', 'acknowledged', 'closed'])).optional(),
   skip_attack_discovery: z.boolean().optional(),
@@ -461,9 +463,7 @@ export const registerWorkflowExecutionRoutes = (
                     relevantAlertIds: Array.from(relevantAlertIds),
                   };
                 } catch (error) {
-                  logger.error(
-                    `Failed to generate Attack Discovery for case ${caseId}: ${error}`
-                  );
+                  logger.error(`Failed to generate Attack Discovery for case ${caseId}: ${error}`);
                   // On error, return all alerts as relevant to avoid incorrectly removing them
                   return {
                     attackDiscoveryId: null,
@@ -480,9 +480,7 @@ export const registerWorkflowExecutionRoutes = (
               analyzeAttackDiscoverySimilarity: async (adId1, adId2) => {
                 const adConfig = config.attackDiscoveryConfig;
                 if (!adConfig?.enabled) {
-                  logger.debug(
-                    'Attack Discovery disabled, skipping similarity analysis'
-                  );
+                  logger.debug('Attack Discovery disabled, skipping similarity analysis');
                   return {
                     similarity: 0,
                     shouldMerge: false,
@@ -564,12 +562,14 @@ export const registerWorkflowExecutionRoutes = (
                   }
 
                   // Extract attack discovery details for comparison
-                  const ad1Summary = ad1.attackDiscoveries
-                    ?.map((d) => `Title: ${d.title}\nSummary: ${d.summaryMarkdown}`)
-                    .join('\n\n') ?? 'No attack discoveries';
-                  const ad2Summary = ad2.attackDiscoveries
-                    ?.map((d) => `Title: ${d.title}\nSummary: ${d.summaryMarkdown}`)
-                    .join('\n\n') ?? 'No attack discoveries';
+                  const ad1Summary =
+                    ad1.attackDiscoveries
+                      ?.map((d) => `Title: ${d.title}\nSummary: ${d.summaryMarkdown}`)
+                      .join('\n\n') ?? 'No attack discoveries';
+                  const ad2Summary =
+                    ad2.attackDiscoveries
+                      ?.map((d) => `Title: ${d.title}\nSummary: ${d.summaryMarkdown}`)
+                      .join('\n\n') ?? 'No attack discoveries';
 
                   // Use LLM to analyze similarity
                   const similarityPrompt = `You are a security analyst comparing two Attack Discovery reports to determine if they describe the same attack or incident.
@@ -656,11 +656,13 @@ Only respond with the JSON object, no other text.`;
                   throw new Error('Cases client not available');
                 }
 
-                const sourceCase = await typedCasesClient.cases.get({ id: sourceCaseId }) as {
+                const sourceCase = (await typedCasesClient.cases.get({ id: sourceCaseId })) as {
                   version: string;
                   observables?: Array<{ typeKey: string; value: string; description?: string }>;
                 };
-                const sourceAttachments = await typedCasesClient.attachments.getAll({ caseID: sourceCaseId });
+                const sourceAttachments = await typedCasesClient.attachments.getAll({
+                  caseID: sourceCaseId,
+                });
 
                 // Move alert attachments to target case
                 const alertAttachments = sourceAttachments.filter((a) => a.type === 'alert');
@@ -682,7 +684,11 @@ Only respond with the JSON object, no other text.`;
                   for (const obs of sourceCase.observables) {
                     try {
                       await typedCasesClient.cases.addObservable(targetCaseId, {
-                        observable: { typeKey: obs.typeKey, value: obs.value, description: obs.description ?? null },
+                        observable: {
+                          typeKey: obs.typeKey,
+                          value: obs.value,
+                          description: obs.description ?? null,
+                        },
                       });
                     } catch (err) {
                       logger.debug(`Could not copy observable: ${err}`);
@@ -693,7 +699,9 @@ Only respond with the JSON object, no other text.`;
                 await addCommentToCase(typedCasesClient, targetCaseId, mergeReason);
 
                 await typedCasesClient.cases.update({
-                  cases: [{ id: sourceCaseId, version: sourceCase.version, status: 'closed' as const }],
+                  cases: [
+                    { id: sourceCaseId, version: sourceCase.version, status: 'closed' as const },
+                  ],
                 });
                 await addCommentToCase(
                   typedCasesClient,
@@ -752,9 +760,7 @@ Only respond with the JSON object, no other text.`;
                         },
                       });
 
-                      const responseData = executeResult.data as
-                        | { message?: string }
-                        | undefined;
+                      const responseData = executeResult.data as { message?: string } | undefined;
                       const responseText = responseData?.message ?? '';
 
                       // Try to parse JSON from response

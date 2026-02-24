@@ -20,10 +20,7 @@ import {
 } from '@kbn/evals';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { EvaluationChatClient } from './chat_client';
-import {
-  createToolUsageOnlyEvaluator,
-  createTokenUsageEvaluator,
-} from './evaluators';
+import { createToolUsageOnlyEvaluator, createTokenUsageEvaluator } from './evaluators';
 
 interface DatasetExample extends Example {
   input: {

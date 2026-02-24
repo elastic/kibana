@@ -134,12 +134,11 @@ export const clusterLLM = async (
   }
 
   // Build the prompt
-  const prompt =
+  const prompt = `${
     PROMPT_HEADER +
     PROMPT_BODY +
-    alerts.map((alert) => JSON.stringify(cleanupAlertFields(alert))).join('\n') +
-    '\n' +
-    PROMPT_FOOTER;
+    alerts.map((alert) => JSON.stringify(cleanupAlertFields(alert))).join('\n')
+  }\n${PROMPT_FOOTER}`;
 
   logger.debug(`Sending ${alerts.length} alerts to LLM for comparison`);
 

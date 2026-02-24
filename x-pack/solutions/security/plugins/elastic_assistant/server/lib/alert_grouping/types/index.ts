@@ -169,17 +169,49 @@ export interface EntityExclusionConfig {
  */
 export const DEFAULT_ENTITY_EXCLUSIONS: EntityExclusionConfig = {
   excludedUsers: [
-    'root', 'system', 'nobody', 'www-data', 'daemon', 'bin', 'sys',
-    'sync', 'games', 'man', 'lp', 'mail', 'news', 'uucp', 'proxy',
-    'backup', 'list', 'irc', 'gnats', 'sshd', 'systemd-network',
-    'systemd-resolve', 'messagebus', 'systemd-timesync', 'ntp',
-    'local_service', 'network_service', 'local service', 'network service',
-    'nt authority\\system', 'nt authority\\local service', 'nt authority\\network service',
+    'root',
+    'system',
+    'nobody',
+    'www-data',
+    'daemon',
+    'bin',
+    'sys',
+    'sync',
+    'games',
+    'man',
+    'lp',
+    'mail',
+    'news',
+    'uucp',
+    'proxy',
+    'backup',
+    'list',
+    'irc',
+    'gnats',
+    'sshd',
+    'systemd-network',
+    'systemd-resolve',
+    'messagebus',
+    'systemd-timesync',
+    'ntp',
+    'local_service',
+    'network_service',
+    'local service',
+    'network service',
+    'nt authority\\system',
+    'nt authority\\local service',
+    'nt authority\\network service',
   ],
   excludedPathPrefixes: [
-    '/usr/bin/', '/usr/sbin/', '/bin/', '/sbin/',
-    '/usr/lib/', '/usr/local/bin/', '/usr/local/sbin/',
-    'c:\\windows\\system32\\', 'c:\\windows\\syswow64\\',
+    '/usr/bin/',
+    '/usr/sbin/',
+    '/bin/',
+    '/sbin/',
+    '/usr/lib/',
+    '/usr/local/bin/',
+    '/usr/local/sbin/',
+    'c:\\windows\\system32\\',
+    'c:\\windows\\syswow64\\',
   ],
   excludedPaths: [],
 };
@@ -710,11 +742,7 @@ export interface CrossHostLink {
   /** Target host name */
   targetHost: string;
   /** Type of link detected */
-  linkType:
-    | 'temporal_tactic_match'
-    | 'network_connection'
-    | 'shared_ioc'
-    | 'lateral_movement_rule';
+  linkType: 'temporal_tactic_match' | 'network_connection' | 'shared_ioc' | 'lateral_movement_rule';
   /** Confidence score (0-1) */
   confidence: number;
   /** Alert IDs involved in this link */
