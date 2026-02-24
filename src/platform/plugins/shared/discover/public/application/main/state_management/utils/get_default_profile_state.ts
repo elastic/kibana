@@ -44,12 +44,12 @@ export const getDefaultProfileState = ({
         stateUpdate.breakdownField = defaultState.breakdownField;
       }
 
-      if (resetDefaultProfileState.hideChart && defaultState.hideChart !== undefined) {
-        stateUpdate.hideChart = defaultState.hideChart;
+      if (resetDefaultProfileState.hideChart) {
+        stateUpdate.hideChart = defaultState.hideChart ?? false;
       }
 
-      if (resetDefaultProfileState.hideDataTable && defaultState.hideDataTable !== undefined) {
-        stateUpdate.hideDataTable = defaultState.hideDataTable;
+      if (resetDefaultProfileState.hideDataTable) {
+        stateUpdate.hideDataTable = defaultState.hideDataTable ?? false;
       }
 
       return Object.keys(stateUpdate).length ? stateUpdate : undefined;
