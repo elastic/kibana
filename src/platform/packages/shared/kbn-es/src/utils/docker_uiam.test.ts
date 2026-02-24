@@ -166,6 +166,8 @@ describe(`#runUiamContainer()`, () => {
             "--entrypoint",
             "/opt/jboss/container/java/run/run-java-with-custom-ca.sh",
             "--env",
+            "uiam.apikey.convert.validation.endpoint.enabled=false",
+            "--env",
             "quarkus.tls.https.key-store.pem.0.cert=/tmp/server.crt",
             "--env",
             "quarkus.tls.https.key-store.pem.0.key=/tmp/server.key",
