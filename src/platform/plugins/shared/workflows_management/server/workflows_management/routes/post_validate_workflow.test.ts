@@ -7,111 +7,117 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Logger } from '@kbn/core/server';
-import type { IRouter } from '@kbn/core-http-server';
-import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
-import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import { registerPostValidateWorkflowRoute } from './post_validate_workflow';
+import {
+  createMockRequestHandlerContext,
+  createMockResponse,
+  createMockRouterInstance,
+  createMockWorkflowsApi,
+  createSpacesMock,
+  mockLogger,
+} from './test_utils';
 import type { ValidateWorkflowResponse, WorkflowsManagementApi } from '../workflows_management_api';
 
-jest.mock('../lib/with_license_check', () => ({
-  withLicenseCheck: (handler: Function) => handler,
-}));
+jest.mock('../lib/with_license_check');
 
 describe('POST /api/workflows/_validate', () => {
-  let router: jest.Mocked<IRouter>;
-  let mockApi: jest.Mocked<WorkflowsManagementApi>;
-  let mockSpaces: jest.Mocked<SpacesServiceStart>;
-  let mockLogger: jest.Mocked<Logger>;
+  let workflowsApi: WorkflowsManagementApi;
+  let mockRouter: any;
+  let mockSpaces: any;
+  let mockContext: ReturnType<typeof createMockRequestHandlerContext>;
 
   beforeEach(() => {
-    router = httpServiceMock.createRouter();
-    mockApi = {
-      validateWorkflow: jest.fn(),
-    } as any;
-    mockSpaces = {
-      getSpaceId: jest.fn().mockReturnValue('default'),
-    } as any;
-    mockLogger = {
-      debug: jest.fn(),
-      warn: jest.fn(),
-      error: jest.fn(),
-    } as any;
+    mockRouter = createMockRouterInstance();
+    workflowsApi = createMockWorkflowsApi();
+    mockSpaces = createSpacesMock();
+    mockContext = createMockRequestHandlerContext();
+    jest.clearAllMocks();
+  });
 
-    registerPostValidateWorkflowRoute({
-      router,
-      api: mockApi,
-      spaces: mockSpaces,
-      logger: mockLogger,
+  describe('handler logic', () => {
+    let routeHandler: any;
+
+    beforeEach(() => {
+      registerPostValidateWorkflowRoute({
+        router: mockRouter,
+        api: workflowsApi,
+        logger: mockLogger,
+        spaces: mockSpaces,
+      });
+      const postCall = (mockRouter.post as jest.Mock).mock.calls.find(
+        (call) => call[0].path === '/api/workflows/_validate'
+      );
+      routeHandler = postCall?.[1];
     });
-  });
 
-  it('should register a POST route at /api/workflows/_validate', () => {
-    expect(router.post).toHaveBeenCalledTimes(1);
-    const [config] = router.post.mock.calls[0];
-    expect(config.path).toBe('/api/workflows/_validate');
-  });
-
-  it('should return validation result on success', async () => {
-    const validationResult: ValidateWorkflowResponse = {
-      valid: true,
-      diagnostics: [],
-    };
-    mockApi.validateWorkflow.mockResolvedValue(validationResult);
-
-    const [, handler] = router.post.mock.calls[0];
-    const mockRequest = httpServerMock.createKibanaRequest({
-      body: { yaml: 'name: Test' },
+    it('should register a POST route at /api/workflows/_validate', () => {
+      expect(mockRouter.post).toHaveBeenCalledTimes(1);
+      const [config] = (mockRouter.post as jest.Mock).mock.calls[0];
+      expect(config.path).toBe('/api/workflows/_validate');
     });
-    const mockResponse = httpServerMock.createResponseFactory();
 
-    await handler({} as any, mockRequest, mockResponse);
+    it('should return validation result on success', async () => {
+      const validationResult: ValidateWorkflowResponse = {
+        valid: true,
+        diagnostics: [],
+      };
+      workflowsApi.validateWorkflow = jest.fn().mockResolvedValue(validationResult);
 
-    expect(mockApi.validateWorkflow).toHaveBeenCalledWith('name: Test', 'default', mockRequest);
-    expect(mockResponse.ok).toHaveBeenCalledWith({ body: validationResult });
-  });
+      const mockRequest = {
+        body: { yaml: 'name: Test' },
+      };
+      const mockResponse = createMockResponse();
 
-  it('should return diagnostics when validation fails', async () => {
-    const validationResult: ValidateWorkflowResponse = {
-      valid: false,
-      diagnostics: [
-        {
-          severity: 'error',
-          message: 'Required',
-          source: 'schema',
-          path: ['name'],
+      await routeHandler(mockContext, mockRequest, mockResponse);
+
+      expect(workflowsApi.validateWorkflow).toHaveBeenCalledWith(
+        'name: Test',
+        'default',
+        mockRequest
+      );
+      expect(mockResponse.ok).toHaveBeenCalledWith({ body: validationResult });
+    });
+
+    it('should return diagnostics when validation fails', async () => {
+      const validationResult: ValidateWorkflowResponse = {
+        valid: false,
+        diagnostics: [
+          {
+            severity: 'error',
+            message: 'Required',
+            source: 'schema',
+            path: ['name'],
+          },
+        ],
+      };
+      workflowsApi.validateWorkflow = jest.fn().mockResolvedValue(validationResult);
+
+      const mockRequest = {
+        body: { yaml: 'steps: []' },
+      };
+      const mockResponse = createMockResponse();
+
+      await routeHandler(mockContext, mockRequest, mockResponse);
+
+      expect(mockResponse.ok).toHaveBeenCalledWith({ body: validationResult });
+    });
+
+    it('should return 500 on internal error', async () => {
+      workflowsApi.validateWorkflow = jest.fn().mockRejectedValue(new Error('Service unavailable'));
+
+      const mockRequest = {
+        body: { yaml: 'name: Test' },
+      };
+      const mockResponse = createMockResponse();
+
+      await routeHandler(mockContext, mockRequest, mockResponse);
+
+      expect(mockResponse.customError).toHaveBeenCalledWith({
+        statusCode: 500,
+        body: {
+          message: expect.stringContaining('Service unavailable'),
         },
-      ],
-    };
-    mockApi.validateWorkflow.mockResolvedValue(validationResult);
-
-    const [, handler] = router.post.mock.calls[0];
-    const mockRequest = httpServerMock.createKibanaRequest({
-      body: { yaml: 'steps: []' },
-    });
-    const mockResponse = httpServerMock.createResponseFactory();
-
-    await handler({} as any, mockRequest, mockResponse);
-
-    expect(mockResponse.ok).toHaveBeenCalledWith({ body: validationResult });
-  });
-
-  it('should return 500 on internal error', async () => {
-    mockApi.validateWorkflow.mockRejectedValue(new Error('Service unavailable'));
-
-    const [, handler] = router.post.mock.calls[0];
-    const mockRequest = httpServerMock.createKibanaRequest({
-      body: { yaml: 'name: Test' },
-    });
-    const mockResponse = httpServerMock.createResponseFactory();
-
-    await handler({} as any, mockRequest, mockResponse);
-
-    expect(mockResponse.customError).toHaveBeenCalledWith({
-      statusCode: 500,
-      body: {
-        message: expect.stringContaining('Service unavailable'),
-      },
+      });
     });
   });
 });
