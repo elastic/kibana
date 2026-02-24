@@ -10,7 +10,7 @@ import { test } from '../../../fixtures';
 import { generateLogsData } from '../../../fixtures/generators';
 
 const CLASSIC_STREAM = 'logs-classic-license-test';
-const WIRED_STREAM = 'logs';
+const WIRED_STREAM = 'logs.otel';
 
 /**
  * Tests that verify enterprise-only features are hidden on the Advanced tab
