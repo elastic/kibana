@@ -7,7 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type CSSProperties, Fragment, useCallback, useRef, useMemo } from 'react';
+import React, {
+  type CSSProperties,
+  Fragment,
+  useCallback,
+  useRef,
+  useMemo,
+  useLayoutEffect,
+} from 'react';
 import { type Row } from '@tanstack/react-table';
 import { useVirtualizer, defaultRangeExtractor, type VirtualItem } from '@tanstack/react-virtual';
 import type { GroupNode } from '../../../store_provider';
@@ -313,13 +320,10 @@ export const useVirtualizedRowScrollState = ({
 
     let margin = 0;
 
-    for (
-      let i = virtualizer?.range?.startIndex ?? 0;
-      i < (virtualizer?.range?.endIndex ?? rowIndex);
-      i++
-    ) {
+    for (let i = 0; i < rowIndex; i++) {
       margin += sizeCache.get(i) ?? 0;
     }
+
     return margin;
   }, [virtualizer, rowIndex]);
 
@@ -332,6 +336,50 @@ export const useVirtualizedRowScrollState = ({
     }),
     [getScrollMargin, getScrollOffset]
   );
+};
+
+/**
+ * Anchors the scroll position of the virtualizer to the given item index on initial render.
+ * N.B. Anchoring only runs once.
+ */
+export const useAnchorVirtualizerToItemIndex = (
+  virtualizer: UseVirtualizerReturnType,
+  itemIndex: number,
+  restoredScrollOffsetRef?: React.MutableRefObject<boolean>
+) => {
+  const internalRef = useRef<boolean>(false);
+  const resolvedRef = restoredScrollOffsetRef ?? internalRef;
+
+  const restoreScrollOffset = useCallback(() => {
+    if (!Boolean(itemIndex)) return;
+    if (resolvedRef.current) return;
+    if (!virtualizer) return;
+
+    if (itemIndex > 0) {
+      // ℹ️ Re-calculate the measurementsCache
+      // so that the adjustment positions we set are correct.
+      virtualizer.calculateRange();
+    }
+
+    const offsetItemCache = virtualizer.measurementsCache[itemIndex];
+    if (!offsetItemCache) return;
+
+    // Absolute position of the target item within the shared scroll container
+    const targetOffset = virtualizer.options.scrollMargin + offsetItemCache.start;
+    const scrollOffset = virtualizer.scrollOffset!;
+    const adjustments = targetOffset - scrollOffset;
+
+    virtualizer.options.scrollToFn(scrollOffset, { behavior: undefined, adjustments }, virtualizer);
+
+    // Set the scrollOffset within this render,
+    // to display the current range of items.
+    virtualizer.scrollOffset = targetOffset;
+    resolvedRef.current = true;
+  }, [itemIndex, resolvedRef, virtualizer]);
+
+  useLayoutEffect(() => {
+    restoreScrollOffset();
+  }, [restoreScrollOffset]);
 };
 
 /**

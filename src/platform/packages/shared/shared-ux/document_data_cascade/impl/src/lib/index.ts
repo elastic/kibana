@@ -13,3 +13,5 @@ export {
   getCascadeRowLeafDataCacheKey,
   getLeafIdFromCacheKey,
 } from './utils';
+
+export { useAnchorVirtualizerToItemIndex } from './core/virtualizer';
