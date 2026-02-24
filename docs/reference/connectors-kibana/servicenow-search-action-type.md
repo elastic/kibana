@@ -3,7 +3,7 @@ navigation_title: "ServiceNow"
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/servicenow-search-action-type.html
 applies_to:
-  stack: preview
+  stack: preview 9.4
   serverless: preview
 ---
 
@@ -12,7 +12,8 @@ applies_to:
 The ServiceNow connector enables federated search capabilities across ServiceNow tables, including incidents, knowledge articles, change requests, and more, using the ServiceNow Table API.
 
 ::::{note}
-This connector is designed for federated search in Workplace AI. For the ServiceNow ITSM, SecOps, and ITOM connectors used with alerting and cases, refer to [ServiceNow ITSM](/reference/connectors-kibana/servicenow-action-type.md), [ServiceNow SecOps](/reference/connectors-kibana/servicenow-sir-action-type.md), and [ServiceNow ITOM](/reference/connectors-kibana/servicenow-itom-action-type.md).
+This connector is designed for federated search.
+For the ServiceNow ITSM, SecOps, and ITOM connectors used with alerting and cases, refer to [ServiceNow ITSM](/reference/connectors-kibana/servicenow-action-type.md), [ServiceNow SecOps](/reference/connectors-kibana/servicenow-sir-action-type.md), and [ServiceNow ITOM](/reference/connectors-kibana/servicenow-itom-action-type.md).
 ::::
 
 ## Create connectors in {{kib}} [define-servicenow-search-ui]
@@ -38,7 +39,8 @@ Client Secret
 
 ## Test connectors [servicenow-search-action-configuration]
 
-You can test connectors as you're creating or editing the connector in {{kib}}. The test verifies connectivity by querying the `sys_user` table, which is accessible to any authenticated user.
+You can test connectors as you're creating or editing the connector in {{kib}}.
+The test verifies connectivity by querying the `sys_user` table, which is accessible to any authenticated user.
 
 The ServiceNow connector has the following actions:
 
