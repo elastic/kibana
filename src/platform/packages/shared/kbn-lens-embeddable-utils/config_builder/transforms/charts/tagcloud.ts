@@ -40,11 +40,7 @@ import {
   operationFromColumn,
 } from '../utils';
 import { getValueApiColumn, getValueColumn } from '../columns/esql_column';
-import {
-  fromColorByValueLensStateToAPI,
-  fromColorMappingAPIToLensState,
-  fromColorMappingLensStateToAPI,
-} from '../coloring';
+import { fromColorMappingAPIToLensState, fromColorMappingLensStateToAPI } from '../coloring';
 import { fromMetricAPItoLensState } from '../columns/metric';
 import { fromBucketLensApiToLensState } from '../columns/buckets';
 import {
@@ -53,8 +49,6 @@ import {
   getSharedChartAPIToLensState,
   getSharedChartLensStateToAPI,
 } from './utils';
-import { ColorMapping } from '@kbn/coloring';
-import { ColorMappingType } from '../../schema/color';
 
 const ACCESSOR = 'tagcloud_accessor';
 function getAccessorName(type: 'metric' | 'tag') {
@@ -143,16 +137,9 @@ function reverseBuildVisualizationState(
   references: SavedObjectReference[],
   adhocReferences?: SavedObjectReference[]
 ): TagcloudState {
-  // debugger;
   const dataset = getTagcloudDataset(layer, adHocDataViews, references, adhocReferences, layerId);
   const metric = getTagcloudMetric(layer, visualization);
   const tagBy = getTagcloudTagBy(layer, visualization);
-
-  const paletteProps = {
-    ...(visualization.palette && {
-      color: fromColorByValueLensStateToAPI(visualization.palette),
-    }),
-  };
 
   return {
     type: 'tagcloud',
@@ -239,7 +226,6 @@ export function fromAPItoLensState(
 export function fromLensStateToAPI(
   config: LensAttributes
 ): Extract<LensApiState, { type: 'tagcloud' }> {
-  // debugger;
   const { state } = config;
   const visualization = state.visualization as LensTagCloudState;
   const layers = getDatasourceLayers(state);

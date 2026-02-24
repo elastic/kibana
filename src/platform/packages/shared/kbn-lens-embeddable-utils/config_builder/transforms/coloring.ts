@@ -68,14 +68,9 @@ export function fromColorByValueAPIToLensState(
 export function fromColorByValueLensStateToAPI(
   color: PaletteOutput<CustomPaletteParams> | undefined
 ): ColorByValueType | undefined {
-  // console.log('fromColorByValueLensStateToAPI', color);
-  // debugger;
   if (!color || !color.params) {
     return;
   }
-  // if (!color.params) {
-  //   return { type: 'palette' };
-  // }
   const rangeType = color.params.rangeType
     ? LEGACY_TO_API_RANGE_NAMES[color.params.rangeType]
     : LENS_DEFAULT_COLOR_BY_VALUE_RANGE_TYPE;
@@ -144,7 +139,6 @@ export function fromStaticColorAPIToLensState(
 function fromColorLensStateToAPI(
   color: ColorMapping.CategoricalColor | ColorMapping.ColorCode
 ): ColorMappingColorDefType {
-  // console.log({ color });
   if (color.type === 'colorCode') {
     return {
       type: 'colorCode',
@@ -187,14 +181,13 @@ export function fromColorMappingLensStateToAPI(
   colorMapping: ColorMapping.Config | undefined,
   legacyPalette?: PaletteOutput
 ): ColorMappingType | undefined {
-  console.log('fromColorMappingLensStateToAPI', { colorMapping, legacyPalette });
   if (legacyPalette && !colorMapping) {
     return { mode: 'categorical', palette: `LEGACY_PALETTE_${legacyPalette.name}`, mapping: [] };
   }
   if (!colorMapping) {
     return;
   }
-  // debugger;
+
   const unassignedColor = fromUnassignedColorLensStateToAPI(
     colorMapping.specialAssignments[0]?.color
   );
@@ -295,9 +288,7 @@ function fromAPIMappingToAssignments(
 
 export function fromColorMappingAPIToLensState(
   colorMapping: ColorMappingType | undefined
-): { colorMapping: ColorMapping.Config } | { palette: PaletteOutput } | undefined {
-  console.log('fromColorMappingAPIToLensState');
-  console.log({ colorMapping });
+): ColorMapping.Config | { palette: PaletteOutput } | undefined {
   if (!colorMapping) {
     return;
   }
@@ -306,7 +297,6 @@ export function fromColorMappingAPIToLensState(
       palette: { type: 'palette', name: colorMapping.palette.replace('LEGACY_PALETTE_', '') },
     };
   }
-  // debugger;
   const specialAssignments: ColorMapping.SpecialAssignment[] = [
     {
       rules: [

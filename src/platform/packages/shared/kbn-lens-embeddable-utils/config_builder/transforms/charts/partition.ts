@@ -533,7 +533,6 @@ function convertLensStateToAPIGrouping(
   groupIndexForColorMapping: number,
   legacyPalette?: PaletteOutput
 ) {
-  console.log('convertLensStateToAPIGrouping', { vizLayer, legacyPalette });
   const colorMapping = fromColorMappingLensStateToAPI(vizLayer.colorMapping, legacyPalette);
   if (isTextBasedLayer(layer)) {
     return groupByAccessors.map(

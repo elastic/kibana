@@ -32,7 +32,7 @@ export interface SharedPartitionLayerState {
   allowMultipleMetrics?: boolean;
   colorsByDimension?: Record<string, string>;
   collapseFns?: Record<string, CollapseFunction>;
-  numberDisplay?: NumberDisplayType;
+  numberDisplay: NumberDisplayType;
   categoryDisplay: CategoryDisplayType;
   legendDisplay: LegendDisplayType;
   legendPosition?: Position;
