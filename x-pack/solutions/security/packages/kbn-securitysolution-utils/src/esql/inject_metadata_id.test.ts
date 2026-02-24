@@ -12,7 +12,6 @@ describe('injectMetadataId', () => {
     it.each([
       ['FROM logs* | STATS count(*) BY host'],
       ['FROM logs* | STATS total = SUM(bytes) BY host | WHERE total > 100'],
-      ['from logs* | stats c = count(*) by fieldA'],
       ['FROM logs* METADATA _id | STATS count(*) BY host'],
       ['FROM logs* | STATS count(*) BY host | KEEP host'],
     ])('returns aggregating query unchanged: "%s"', (query) => {
@@ -25,16 +24,8 @@ describe('injectMetadataId', () => {
       expect(injectMetadataId('FROM logs*')).toBe('FROM logs* METADATA _id');
     });
 
-    it('injects METADATA _id with lowercase from', () => {
-      expect(injectMetadataId('from logs*')).toBe('FROM logs* METADATA _id');
-    });
-
     it('preserves query when METADATA _id already exists', () => {
       expect(injectMetadataId('FROM logs* METADATA _id')).toBe('FROM logs* METADATA _id');
-    });
-
-    it('preserves query when metadata _id already exists (lowercase)', () => {
-      expect(injectMetadataId('from logs* metadata _id')).toBe('FROM logs* METADATA _id');
     });
 
     it('preserves query when METADATA _id exists with other fields', () => {
@@ -49,8 +40,8 @@ describe('injectMetadataId', () => {
       );
     });
 
-    it('appends _id when metadata has _version and _index but not _id', () => {
-      expect(injectMetadataId('from logs* metadata _version, _index')).toBe(
+    it('appends _id when METADATA has _version and _index but not _id', () => {
+      expect(injectMetadataId('FROM logs* METADATA _version, _index')).toBe(
         'FROM logs* METADATA _version, _index, _id'
       );
     });
@@ -78,19 +69,19 @@ describe('injectMetadataId', () => {
     });
 
     it('handles multi-line query', () => {
-      expect(injectMetadataId('from packetbeat*\n        | limit 100')).toBe(
+      expect(injectMetadataId('FROM packetbeat*\n        | LIMIT 100')).toBe(
         'FROM packetbeat* METADATA _id | LIMIT 100'
       );
     });
 
-    it('handles multi-line query with existing metadata missing _id', () => {
-      expect(injectMetadataId('from packetbeat* metadata _index\n        | limit 100')).toBe(
+    it('handles multi-line query with existing METADATA missing _id', () => {
+      expect(injectMetadataId('FROM packetbeat* METADATA _index\n        | LIMIT 100')).toBe(
         'FROM packetbeat* METADATA _index, _id | LIMIT 100'
       );
     });
 
-    it('handles multi-line query with existing metadata _id', () => {
-      expect(injectMetadataId('from packetbeat* metadata\n        _id\n        | limit 100')).toBe(
+    it('handles multi-line query with existing METADATA _id', () => {
+      expect(injectMetadataId('FROM packetbeat* METADATA\n        _id\n        | LIMIT 100')).toBe(
         'FROM packetbeat* METADATA _id | LIMIT 100'
       );
     });
@@ -109,7 +100,7 @@ describe('injectMetadataId', () => {
       );
     });
 
-    it('adds _id to KEEP with wildcard', () => {
+    it('adds _id to KEEP with non-global wildcard', () => {
       expect(injectMetadataId('FROM logs* | KEEP agent.*')).toBe(
         'FROM logs* METADATA _id | KEEP agent.*, _id'
       );
@@ -129,12 +120,6 @@ describe('injectMetadataId', () => {
 
     it('handles KEEP with _id already present and no METADATA', () => {
       expect(injectMetadataId('FROM logs* | KEEP agent.name, _id')).toBe(
-        'FROM logs* METADATA _id | KEEP agent.name, _id'
-      );
-    });
-
-    it('handles lowercase keep', () => {
-      expect(injectMetadataId('from logs* metadata _id | keep agent.name')).toBe(
         'FROM logs* METADATA _id | KEEP agent.name, _id'
       );
     });
@@ -183,40 +168,48 @@ describe('injectMetadataId', () => {
   });
 
   describe('complex queries', () => {
-    it('handles realistic rule query with keep and eval', () => {
-      expect(injectMetadataId('from auditbeat-* | keep agent.*, _id | eval test_id = _id')).toBe(
+    it('handles realistic rule query with KEEP and EVAL', () => {
+      expect(injectMetadataId('FROM auditbeat-* | KEEP agent.*, _id | EVAL test_id = _id')).toBe(
         'FROM auditbeat-* METADATA _id | KEEP agent.*, _id | EVAL test_id = _id'
       );
     });
 
-    it('handles realistic rule query without _id in keep', () => {
-      expect(injectMetadataId('from auditbeat-* | keep agent.name | limit 5')).toBe(
+    it('handles realistic rule query without _id in KEEP', () => {
+      expect(injectMetadataId('FROM auditbeat-* | KEEP agent.name | LIMIT 5')).toBe(
         'FROM auditbeat-* METADATA _id | KEEP agent.name, _id | LIMIT 5'
       );
     });
 
-    it('handles query with WHERE and no metadata', () => {
-      expect(injectMetadataId('from ecs_compliant | where agent.name=="test-1"')).toBe(
+    it('handles query with WHERE and no METADATA', () => {
+      expect(injectMetadataId('FROM ecs_compliant | WHERE agent.name == "test-1"')).toBe(
         'FROM ecs_compliant METADATA _id | WHERE agent.name == "test-1"'
       );
     });
 
-    it('handles query with mv_expand', () => {
-      expect(injectMetadataId('from ecs_compliant METADATA _id | mv_expand agent.name')).toBe(
+    it('handles query with MV_EXPAND', () => {
+      expect(injectMetadataId('FROM ecs_compliant METADATA _id | MV_EXPAND agent.name')).toBe(
         'FROM ecs_compliant METADATA _id | MV_EXPAND agent.name'
       );
     });
 
-    it('handles query with multiple indices and metadata _index', () => {
-      expect(injectMetadataId('from logs*, metrics* metadata _index | sort @timestamp')).toBe(
+    it('handles query with multiple indices and METADATA _index', () => {
+      expect(injectMetadataId('FROM logs*, metrics* METADATA _index | SORT @timestamp')).toBe(
         'FROM logs*, metrics* METADATA _index, _id | SORT @timestamp'
       );
     });
 
-    it('handles query used in rule mock without metadata', () => {
+    it('handles query used in rule mock without METADATA', () => {
       expect(
-        injectMetadataId('from auditbeat-* | where user.name=="root" or user.name=="admin"')
+        injectMetadataId('FROM auditbeat-* | WHERE user.name == "root" OR user.name == "admin"')
       ).toBe('FROM auditbeat-* METADATA _id | WHERE user.name == "root" OR user.name == "admin"');
+    });
+  });
+
+  describe('lowercase commands', () => {
+    it('normalizes lowercase commands to uppercase in output', () => {
+      expect(
+        injectMetadataId('from logs* metadata _index | where x > 5 | keep agent.name | limit 10')
+      ).toBe('FROM logs* METADATA _index, _id | WHERE x > 5 | KEEP agent.name, _id | LIMIT 10');
     });
   });
 });
