@@ -9,7 +9,6 @@ import { schema } from '@kbn/config-schema';
 import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import { createEmbeddableSetupMock } from '@kbn/embeddable-plugin/server/mocks';
 import { SLO_OVERVIEW_EMBEDDABLE_ID } from '../../../common/embeddables/overview/constants';
-import { overviewEmbeddableSchema } from './schema';
 import { registerOverviewEmbeddableTransforms } from './register_overview_embeddable_transforms';
 
 const createMockDrilldownTransforms = (): DrilldownTransforms => ({

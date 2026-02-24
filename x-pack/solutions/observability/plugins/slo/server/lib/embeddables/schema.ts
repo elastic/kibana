@@ -6,14 +6,11 @@
  */
 
 import type { GetDrilldownsSchemaFnType } from '@kbn/embeddable-plugin/server';
-import type { ObjectType } from '@kbn/config-schema';
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
 import { asCodeFilterSchema } from '@kbn/as-code-filters-schema';
-
-/** Triggers supported by the SLO overview embeddable for drilldowns */
-export const SLO_OVERVIEW_EMBEDDABLE_SUPPORTED_TRIGGERS = ['VALUE_CLICK_TRIGGER'];
+import { SLO_EMBEDDABLE_SUPPORTED_TRIGGERS } from '../../../common/embeddables/overview/constants';
 
 export const SingleOverviewCustomSchema = schema.object({
   slo_id: schema.string({
@@ -52,56 +49,44 @@ export const GroupOverviewCustomSchema = schema.object({
   overview_mode: schema.literal('groups'),
 });
 
-export const SingleOverviewEmbeddableSchema = schema.allOf(
-  [SingleOverviewCustomSchema, serializedTitlesSchema],
-  { meta: { description: 'SLO Single Overview embeddable schema' } }
-);
+function getSingleOverviewEmbeddableSchema(getDrilldownsSchema: GetDrilldownsSchemaFnType) {
+  return schema.allOf(
+    [
+      SingleOverviewCustomSchema,
+      getDrilldownsSchema(SLO_EMBEDDABLE_SUPPORTED_TRIGGERS),
+      serializedTitlesSchema,
+    ],
+    { meta: { description: 'SLO Single Overview embeddable schema' } }
+  );
+}
 
-export const GroupOverviewEmbeddableSchema = schema.allOf(
-  [GroupOverviewCustomSchema, serializedTitlesSchema],
-  { meta: { description: 'SLO Group Overview embeddable schema' } }
-);
+function getGroupOverviewEmbeddableSchema(getDrilldownsSchema: GetDrilldownsSchemaFnType) {
+  return schema.allOf(
+    [
+      GroupOverviewCustomSchema,
+      getDrilldownsSchema(SLO_EMBEDDABLE_SUPPORTED_TRIGGERS),
+      serializedTitlesSchema,
+    ],
+    { meta: { description: 'SLO Group Overview embeddable schema' } }
+  );
+}
 
-const overviewEmbeddableSchemaBase = schema.oneOf(
-  [SingleOverviewEmbeddableSchema, GroupOverviewEmbeddableSchema],
-  { meta: { description: 'SLO Overview embeddable schema' } }
-);
-
-export const overviewEmbeddableSchema = overviewEmbeddableSchemaBase;
-
-/**
- * Permissive drilldowns schema that accepts both client format (triggers array) and
- * server format (trigger string), avoiding "expected value to equal [VALUE_CLICK_TRIGGER]"
- * when the client sends a different shape or trigger id.
- */
-const permissiveDrilldownsSchema = schema.object({
-  drilldowns: schema.maybe(
-    schema.arrayOf(schema.object({}, { unknowns: 'allow' }), { maxSize: 100 })
-  ),
-});
-
-/** Schema that includes drilldowns so dashboard save does not fail with "definition for this key is missing" */
-export const getOverviewEmbeddableSchema = (_getDrilldownsSchema: GetDrilldownsSchemaFnType) => {
+export const getOverviewEmbeddableSchema = (getDrilldownsSchema: GetDrilldownsSchemaFnType) => {
   return schema.oneOf(
     [
-      schema.allOf([
-        permissiveDrilldownsSchema,
-        SingleOverviewEmbeddableSchema as unknown as ObjectType,
-      ]),
-      schema.allOf([
-        permissiveDrilldownsSchema,
-        GroupOverviewEmbeddableSchema as unknown as ObjectType,
-      ]),
+      getSingleOverviewEmbeddableSchema(getDrilldownsSchema),
+      getGroupOverviewEmbeddableSchema(getDrilldownsSchema),
     ],
-    { meta: { description: 'SLO Overview embeddable schema with drilldowns' } }
+    { meta: { description: 'SLO Overview embeddable schema' } }
   );
 };
 
-/** Derived from SingleOverviewCustomSchema - use for type-only imports from common/public */
 export type SingleOverviewCustomState = TypeOf<typeof SingleOverviewCustomSchema>;
-/** Derived from GroupOverviewCustomSchema - use for type-only imports from common/public */
 export type GroupOverviewCustomState = TypeOf<typeof GroupOverviewCustomSchema>;
-
-export type OverviewEmbeddableState = TypeOf<typeof overviewEmbeddableSchema>;
-export type SingleOverviewEmbeddableState = TypeOf<typeof SingleOverviewEmbeddableSchema>;
-export type GroupOverviewEmbeddableState = TypeOf<typeof GroupOverviewEmbeddableSchema>;
+export type OverviewEmbeddableState = TypeOf<ReturnType<typeof getOverviewEmbeddableSchema>>;
+export type SingleOverviewEmbeddableState = TypeOf<
+  ReturnType<typeof getSingleOverviewEmbeddableSchema>
+>;
+export type GroupOverviewEmbeddableState = TypeOf<
+  ReturnType<typeof getGroupOverviewEmbeddableSchema>
+>;
