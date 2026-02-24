@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiBadge,
   EuiButton,
@@ -24,6 +24,10 @@ import {
 } from '@elastic/eui';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
+import { getRouterLinkProps } from '@kbn/router-utils';
+import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
+import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import { useRunningQueriesAppContext } from '../app_context';
 import type { RunningQuery } from '../../../common/types';
 
 interface QueryDetailFlyoutProps {
@@ -67,6 +71,45 @@ export const QueryDetailFlyout: React.FC<QueryDetailFlyoutProps> = ({
   onClose,
   onStopQuery,
 }) => {
+  const { url } = useRunningQueriesAppContext();
+
+  const { rangeFrom, rangeTo } = useMemo(() => {
+    const from = new Date(query.startTime);
+    from.setMinutes(from.getMinutes() - 10);
+
+    return { rangeFrom: from.toISOString(), rangeTo: new Date().toISOString() };
+  }, [query.startTime]);
+
+  const discoverLocator = url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
+
+  const inspectInDiscoverLabel = i18n.translate(
+    'xpack.runningQueries.flyout.inspectInDiscoverLabel',
+    {
+      defaultMessage: 'Inspect in Discover',
+    }
+  );
+
+  const inspectInDiscoverLinkProps = useMemo(() => {
+    if (!query.traceId) {
+      return undefined;
+    }
+
+    const discoverParams: DiscoverAppLocatorParams = {
+      timeRange: { from: rangeFrom, to: rangeTo },
+      query: { language: 'kuery', query: `trace.id:"${query.traceId}"` },
+      filters: [],
+    };
+
+    const discoverHref = discoverLocator?.getRedirectUrl(discoverParams);
+
+    return discoverLocator && discoverHref
+      ? getRouterLinkProps({
+          href: discoverHref,
+          onClick: () => discoverLocator.navigate(discoverParams),
+        })
+      : undefined;
+  }, [discoverLocator, query.traceId, rangeFrom, rangeTo]);
+
   return (
     <EuiFlyout onClose={onClose} size="m" maxWidth={691}>
       <EuiFlyoutBody>
@@ -93,14 +136,33 @@ export const QueryDetailFlyout: React.FC<QueryDetailFlyoutProps> = ({
         {query.traceId && (
           <>
             <EuiSpacer size="s" />
-            <EuiText size="s">
-              <strong>
-                {i18n.translate('xpack.runningQueries.flyout.traceIdLabel', {
-                  defaultMessage: 'Trace ID',
-                })}
-              </strong>{' '}
-              {query.traceId}
-            </EuiText>
+            <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap>
+              <EuiFlexItem grow={false}>
+                <EuiText size="s">
+                  <strong>
+                    {i18n.translate('xpack.runningQueries.flyout.traceIdLabel', {
+                      defaultMessage: 'Trace ID',
+                    })}
+                  </strong>
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiText size="s">{query.traceId}</EuiText>
+              </EuiFlexItem>
+              {inspectInDiscoverLinkProps ? (
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    size="xs"
+                    iconType="discoverApp"
+                    data-test-subj="runningQueriesFlyoutInspectInDiscoverButton"
+                    aria-label={inspectInDiscoverLabel}
+                    {...inspectInDiscoverLinkProps}
+                  >
+                    {inspectInDiscoverLabel}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              ) : null}
+            </EuiFlexGroup>
           </>
         )}
 

@@ -36,8 +36,8 @@ export class RunningQueriesPlugin
       order: 99,
       async mount(params: ManagementAppMountParams) {
         const { renderApp } = await import('./application/mount_plugin');
-        const [coreStart] = await core.getStartServices();
-        return renderApp(coreStart, params);
+        const [coreStart, pluginsStart] = await core.getStartServices();
+        return renderApp(coreStart, pluginsStart, params);
       },
     });
 

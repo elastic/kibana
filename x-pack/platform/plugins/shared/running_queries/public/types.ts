@@ -6,13 +6,15 @@
  */
 
 import type { ManagementSetup } from '@kbn/management-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 
 export interface RunningQueriesSetupDependencies {
   management: ManagementSetup;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface RunningQueriesStartDependencies {}
+export interface RunningQueriesStartDependencies {
+  share: SharePluginStart;
+}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface RunningQueriesPluginSetup {}

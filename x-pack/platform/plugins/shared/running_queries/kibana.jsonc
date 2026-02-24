@@ -11,7 +11,8 @@
     "browser": true,
     "configPath": ["xpack", "running_queries"],
     "requiredPlugins": [
-      "management"
+      "management",
+      "share"
     ],
     "requiredBundles": [
       "esUiShared"
