@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
-import { i18n } from '@kbn/i18n';
 import { syntheticsMonitorAttributes } from '../../../../common/types/saved_objects';
 import { DeleteMonitorAPI } from '../services/delete_monitor_api';
 import type { SyntheticsRestApiRouteFactory } from '../../types';
@@ -28,17 +27,10 @@ export const deleteSyntheticsMonitorProjectRoute: SyntheticsRestApiRouteFactory 
     }),
   },
   handler: async (routeContext): Promise<any> => {
-    const { request, response, monitorConfigRepository } = routeContext;
+    const { request, monitorConfigRepository } = routeContext;
     const { projectName } = request.params;
     const { monitors: monitorsToDelete } = request.body;
     const decodedProjectName = decodeURI(projectName);
-    if (monitorsToDelete.length > MAX_MONITORS_TO_DELETE) {
-      return response.badRequest({
-        body: {
-          message: REQUEST_TOO_LARGE_DELETE,
-        },
-      });
-    }
 
     await validateSpaceId(routeContext);
 
@@ -67,14 +59,3 @@ export const deleteSyntheticsMonitorProjectRoute: SyntheticsRestApiRouteFactory 
     };
   },
 });
-
-export const REQUEST_TOO_LARGE_DELETE = i18n.translate(
-  'xpack.synthetics.server.project.delete.tooLarge',
-  {
-    defaultMessage:
-      'Delete request payload is too large. Please send a max of {maxMonitorsToDelete} monitors to delete per request',
-    values: {
-      maxMonitorsToDelete: MAX_MONITORS_TO_DELETE,
-    },
-  }
-);
