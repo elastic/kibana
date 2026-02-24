@@ -19,7 +19,7 @@ export class InsightService {
     private readonly logger: Logger
   ) {}
 
-  async getClientWithRequest(): Promise<InsightClient> {
+  async getInternalClient(): Promise<InsightClient> {
     const [coreStart] = await this.coreSetup.getStartServices();
 
     const adapter = new StorageIndexAdapter<InsightStorageSettings, Insight>(

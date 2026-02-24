@@ -73,7 +73,7 @@ export class InsightClient {
 
     const response = await this.clients.storageClient.search({
       size: 10_000,
-      track_total_hits: true,
+      track_total_hits: false,
       sort: [
         { [INSIGHT_IMPACT_LEVEL]: 'asc' as const },
         { [INSIGHT_GENERATED_AT]: 'desc' as const },

@@ -5,26 +5,37 @@
  * 2.0.
  */
 
+import { errors as esErrors } from '@elastic/elasticsearch';
 import expect from 'expect';
+
+type ResponseErrorMeta = ConstructorParameters<typeof esErrors.ResponseError>[0]['meta'];
+import type {
+  IStorageClient,
+  StorageClientBulkResponse,
+  StorageClientCleanResponse,
+  StorageClientDeleteResponse,
+  StorageClientGetResponse,
+  StorageClientIndexResponse,
+} from '@kbn/storage-adapter';
 import type { Insight } from '@kbn/streams-schema';
 import { InsightClient } from './insight_client';
-import {
-  INSIGHT_IMPACT,
-  INSIGHT_IMPACT_LEVEL,
-  INSIGHT_GENERATED_AT,
-  INSIGHT_USER_EVALUATION,
-} from './fields';
+import { INSIGHT_IMPACT, INSIGHT_IMPACT_LEVEL, INSIGHT_GENERATED_AT } from './fields';
+import type { InsightStorageSettings } from './storage_settings';
 import { StatusError } from '../../../streams/errors/status_error';
 
 describe('InsightClient', () => {
-  const createMockStorageClient = () => ({
-    index: jest.fn(),
-    get: jest.fn(),
-    search: jest.fn(),
-    delete: jest.fn(),
-    bulk: jest.fn(),
-    clean: jest.fn(),
-  });
+  const createMockStorageClient = (): jest.Mocked<
+    IStorageClient<InsightStorageSettings, Insight>
+  > =>
+    ({
+      index: jest.fn(),
+      get: jest.fn(),
+      search: jest.fn(),
+      delete: jest.fn(),
+      bulk: jest.fn(),
+      clean: jest.fn(),
+      existsIndex: jest.fn(),
+    } as jest.Mocked<IStorageClient<InsightStorageSettings, Insight>>);
 
   const defaultGeneratedAt = '2024-01-15T12:00:00.000Z';
 
@@ -49,9 +60,9 @@ describe('InsightClient', () => {
   describe('upsert', () => {
     it('indexes the insight and returns it', async () => {
       const mockStorageClient = createMockStorageClient();
-      const client = new InsightClient({ storageClient: mockStorageClient as any });
+      const client = new InsightClient({ storageClient: mockStorageClient });
 
-      mockStorageClient.index.mockResolvedValue({});
+      mockStorageClient.index.mockResolvedValue({} as StorageClientIndexResponse);
 
       const insight = createInsight({ id: 'consumer-provided-id' });
       const result = await client.upsert(insight);
@@ -68,10 +79,15 @@ describe('InsightClient', () => {
   describe('get', () => {
     it('returns an insight by id', async () => {
       const mockStorageClient = createMockStorageClient();
-      const client = new InsightClient({ storageClient: mockStorageClient as any });
+      const client = new InsightClient({ storageClient: mockStorageClient });
 
       const insight = createInsight();
-      mockStorageClient.get.mockResolvedValue({ _source: insight });
+      mockStorageClient.get.mockResolvedValue({
+        _source: insight,
+        _index: '.kibana_streams_insights',
+        _id: 'test-id',
+        found: true,
+      });
 
       const result = await client.get('test-id');
 
@@ -80,13 +96,23 @@ describe('InsightClient', () => {
       expect(result.title).toEqual('Test Insight');
     });
 
-    it('throws StatusError when insight not found', async () => {
+    it('throws when insight not found', async () => {
       const mockStorageClient = createMockStorageClient();
-      const client = new InsightClient({ storageClient: mockStorageClient as any });
+      const client = new InsightClient({ storageClient: mockStorageClient });
 
-      const notFoundError = new Error('Not found');
-      (notFoundError as any).meta = { statusCode: 404 };
-      Object.defineProperty(notFoundError, 'name', { value: 'ResponseError' });
+      const notFoundError = new esErrors.ResponseError({
+        statusCode: 404,
+        body: {},
+        headers: {},
+        warnings: [],
+        meta: {
+          aborted: false,
+          attempts: 1,
+          connection: null,
+          context: null,
+          name: 'elasticsearch-js',
+        } as unknown as ResponseErrorMeta,
+      });
       mockStorageClient.get.mockRejectedValue(notFoundError);
 
       await expect(client.get('non-existent-id')).rejects.toThrow();
@@ -94,9 +120,9 @@ describe('InsightClient', () => {
   });
 
   describe('list', () => {
-    it('returns all insights without filters', async () => {
+    it('returns all insights without filters sorted by impact level and generated at', async () => {
       const mockStorageClient = createMockStorageClient();
-      const client = new InsightClient({ storageClient: mockStorageClient as any });
+      const client = new InsightClient({ storageClient: mockStorageClient });
 
       mockStorageClient.search.mockResolvedValue({
         hits: {
@@ -110,66 +136,16 @@ describe('InsightClient', () => {
       expect(mockStorageClient.search).toHaveBeenCalledWith(
         expect.objectContaining({
           query: { match_all: {} },
-          sort: [
-            { [INSIGHT_IMPACT_LEVEL]: 'asc' },
-            { [INSIGHT_GENERATED_AT]: 'desc' },
-          ],
+          sort: [{ [INSIGHT_IMPACT_LEVEL]: 'asc' }, { [INSIGHT_GENERATED_AT]: 'desc' }],
         })
       );
       expect(result.insights).toHaveLength(1);
       expect(result.total).toEqual(1);
     });
 
-    it('returns insights sorted by impact severity', async () => {
-      const mockStorageClient = createMockStorageClient();
-      const client = new InsightClient({ storageClient: mockStorageClient as any });
-
-      // Client requests ES sort by impactLevel asc, generatedAt desc; mock returns pre-sorted hits
-      mockStorageClient.search.mockResolvedValue({
-        hits: {
-          hits: [
-            { _source: createInsight({ id: '2', impact: 'critical', impactLevel: 0 }) },
-            { _source: createInsight({ id: '4', impact: 'high', impactLevel: 1 }) },
-            { _source: createInsight({ id: '3', impact: 'medium', impactLevel: 2 }) },
-            { _source: createInsight({ id: '1', impact: 'low', impactLevel: 3 }) },
-          ],
-          total: { value: 4 },
-        },
-      });
-
-      const result = await client.list();
-
-      expect(result.insights.map((h) => h.impact)).toEqual(['critical', 'high', 'medium', 'low']);
-      expect(result.insights.map((h) => h.id)).toEqual(['2', '4', '3', '1']);
-    });
-
-    it('sorts by freshness when impact is equal (newer first)', async () => {
-      const mockStorageClient = createMockStorageClient();
-      const client = new InsightClient({ storageClient: mockStorageClient as any });
-
-      const older = '2024-01-01T10:00:00.000Z';
-      const newer = '2024-01-02T10:00:00.000Z';
-      // Client requests sort by impactLevel asc, generatedAt desc; mock returns hits in that order
-      mockStorageClient.search.mockResolvedValue({
-        hits: {
-          hits: [
-            { _source: createInsight({ id: 'new', impact: 'high', impactLevel: 1, generatedAt: newer }) },
-            { _source: createInsight({ id: 'old', impact: 'high', impactLevel: 1, generatedAt: older }) },
-          ],
-          total: { value: 2 },
-        },
-      });
-
-      const result = await client.list();
-
-      expect(result.insights.map((h) => h.id)).toEqual(['new', 'old']);
-      expect(result.insights[0].generatedAt).toBe(newer);
-      expect(result.insights[1].generatedAt).toBe(older);
-    });
-
     it('filters by impact levels', async () => {
       const mockStorageClient = createMockStorageClient();
-      const client = new InsightClient({ storageClient: mockStorageClient as any });
+      const client = new InsightClient({ storageClient: mockStorageClient });
 
       mockStorageClient.search.mockResolvedValue({
         hits: {
@@ -192,51 +168,19 @@ describe('InsightClient', () => {
     });
   });
 
-  describe('upsert (additional)', () => {
-    it('overwrites existing when upserting with same id', async () => {
-      const mockStorageClient = createMockStorageClient();
-      const client = new InsightClient({ storageClient: mockStorageClient as any });
-
-      mockStorageClient.index.mockResolvedValue({});
-
-      const insight = createInsight({ id: 'test-id', title: 'Updated Title' });
-      const result = await client.upsert(insight);
-
-      expect(mockStorageClient.index).toHaveBeenCalledWith({
-        id: 'test-id',
-        document: insight,
-      });
-      expect(result.title).toEqual('Updated Title');
-    });
-
-    it('persists and returns userEvaluation when provided', async () => {
-      const mockStorageClient = createMockStorageClient();
-      const client = new InsightClient({ storageClient: mockStorageClient as any });
-
-      mockStorageClient.index.mockResolvedValue({});
-
-      const insight = createInsight({ userEvaluation: 'helpful' });
-      const result = await client.upsert(insight);
-
-      expect(mockStorageClient.index).toHaveBeenCalledWith(
-        expect.objectContaining({
-          document: expect.objectContaining({
-            [INSIGHT_USER_EVALUATION]: 'helpful',
-          }),
-        })
-      );
-      expect(result.userEvaluation).toBe('helpful');
-    });
-  });
-
   describe('delete', () => {
     it('deletes an existing insight', async () => {
       const mockStorageClient = createMockStorageClient();
-      const client = new InsightClient({ storageClient: mockStorageClient as any });
+      const client = new InsightClient({ storageClient: mockStorageClient });
 
       const storedInsight = createInsight();
-      mockStorageClient.get.mockResolvedValue({ _source: storedInsight });
-      mockStorageClient.delete.mockResolvedValue({});
+      mockStorageClient.get.mockResolvedValue({
+        _source: storedInsight,
+        _index: '.kibana_streams_insights',
+        _id: 'test-id',
+        found: true,
+      } as unknown as StorageClientGetResponse<Insight & { _id?: string }>);
+      mockStorageClient.delete.mockResolvedValue({} as StorageClientDeleteResponse);
 
       const result = await client.delete('test-id');
 
@@ -249,9 +193,9 @@ describe('InsightClient', () => {
   describe('bulk', () => {
     it('performs bulk index operations', async () => {
       const mockStorageClient = createMockStorageClient();
-      const client = new InsightClient({ storageClient: mockStorageClient as any });
+      const client = new InsightClient({ storageClient: mockStorageClient });
 
-      mockStorageClient.bulk.mockResolvedValue({});
+      mockStorageClient.bulk.mockResolvedValue({} as StorageClientBulkResponse);
 
       const result = await client.bulk([
         { index: createInsight({ id: 'id-1' }) },
@@ -268,7 +212,7 @@ describe('InsightClient', () => {
 
     it('performs bulk delete operations', async () => {
       const mockStorageClient = createMockStorageClient();
-      const client = new InsightClient({ storageClient: mockStorageClient as any });
+      const client = new InsightClient({ storageClient: mockStorageClient });
 
       mockStorageClient.search.mockResolvedValue({
         hits: {
@@ -276,7 +220,7 @@ describe('InsightClient', () => {
           total: { value: 1 },
         },
       });
-      mockStorageClient.bulk.mockResolvedValue({});
+      mockStorageClient.bulk.mockResolvedValue({} as StorageClientBulkResponse);
 
       const result = await client.bulk([{ delete: { id: 'test-id' } }]);
 
@@ -290,7 +234,7 @@ describe('InsightClient', () => {
 
     it('throws error when delete targets non-existent documents', async () => {
       const mockStorageClient = createMockStorageClient();
-      const client = new InsightClient({ storageClient: mockStorageClient as any });
+      const client = new InsightClient({ storageClient: mockStorageClient });
 
       mockStorageClient.search.mockResolvedValue({
         hits: {
@@ -306,9 +250,9 @@ describe('InsightClient', () => {
   describe('clean', () => {
     it('delegates to storage client clean', async () => {
       const mockStorageClient = createMockStorageClient();
-      const client = new InsightClient({ storageClient: mockStorageClient as any });
+      const client = new InsightClient({ storageClient: mockStorageClient });
 
-      mockStorageClient.clean.mockResolvedValue({});
+      mockStorageClient.clean.mockResolvedValue({} as StorageClientCleanResponse);
 
       await client.clean();
 

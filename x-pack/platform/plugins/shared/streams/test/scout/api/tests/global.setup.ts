@@ -29,7 +29,8 @@ globalSetupHook('Setup environment for Streams API tests', async ({ kbnClient, e
     });
     log.debug('[setup] Significant events feature enabled successfully');
   } catch (error) {
-    log.debug(`[setup] Failed to enable significant events: ${error}`);
+    log.error(`[setup] Failed to enable significant events: ${error}`);
+    throw error;
   }
 
   // Index a document to the 'logs' stream to initialize the data stream

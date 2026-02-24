@@ -60,18 +60,25 @@ export const insightCoreSchema = z.object({
 export type InsightCore = z.infer<typeof insightCoreSchema>;
 
 /**
- * Canonical insight schema (API and storage): core fields plus id, generatedAt, impactLevel, userEvaluation.
+ * Meta fields for an insight (id, generatedAt, impactLevel, userEvaluation).
+ */
+export const insightMetaSchema = z.object({
+  id: z.string(),
+  generatedAt: z.string().datetime(),
+  impactLevel: insightImpactLevelNumericSchema,
+  userEvaluation: insightUserEvaluationSchema.optional(),
+});
+export type InsightMeta = z.infer<typeof insightMetaSchema>;
+
+/**
+ * Canonical insight schema (API and storage): core fields plus meta.
  * impactLevel is the numeric value for sorting (0=critical .. 3=low); impact is the display label.
  */
-export const insightSchema = insightCoreSchema.and(
-  z.object({
-    id: z.string(),
-    generatedAt: z.string(),
-    impactLevel: insightImpactLevelNumericSchema,
-    userEvaluation: insightUserEvaluationSchema.optional(),
-  })
-);
+export const insightSchema = insightCoreSchema.and(insightMetaSchema);
 export type Insight = z.infer<typeof insightSchema>;
+
+/** Body for PUT /_insights/{id}: insight without id (id comes from path). */
+export type SaveInsightBody = Omit<Insight, 'id'>;
 
 export interface GenerateInsightsResult {
   insights: InsightCore[];

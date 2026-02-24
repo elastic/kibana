@@ -134,7 +134,7 @@ export class StreamsPlugin
         attachmentService.getClientWithRequest({ request }),
         featureService.getClientWithRequest({ request }),
         systemService.getClientWithRequest({ request }),
-        insightService.getClientWithRequest(),
+        insightService.getInternalClient(),
         contentService.getClient(),
         queryService.getClientWithRequest({ request }),
       ]);

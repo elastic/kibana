@@ -7,7 +7,12 @@
 
 import { z } from '@kbn/zod';
 import type { TaskResult } from '@kbn/streams-schema';
-import { insightSchema, type Insight } from '@kbn/streams-schema';
+import {
+  insightCoreSchema,
+  insightMetaSchema,
+  insightSchema,
+  type Insight,
+} from '@kbn/streams-schema';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import type {
   InsightsDiscoveryTaskParams,
@@ -186,6 +191,9 @@ const getInsightRoute = createServerRoute({
   },
 });
 
+/** Save body: insight without id (id comes from path). */
+const saveInsightBodySchema = insightCoreSchema.and(insightMetaSchema.omit({ id: true }));
+
 const saveInsightRoute = createServerRoute({
   endpoint: 'PUT /internal/streams/_insights/{id}',
   options: {
@@ -200,13 +208,16 @@ const saveInsightRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({ id: z.string() }),
-    body: insightSchema,
+    body: saveInsightBodySchema,
   }),
   handler: async ({ params, request, getScopedClients, server }): Promise<{ insight: Insight }> => {
     const { insightClient, licensing, uiSettingsClient } = await getScopedClients({ request });
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-    const insight = await insightClient.upsert(params.body);
+    const insight = await insightClient.upsert({
+      ...params.body,
+      id: params.path.id,
+    });
     return { insight };
   },
 });

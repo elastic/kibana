@@ -5,20 +5,21 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
-import { getImpactLevel, type Insight } from '@kbn/streams-schema';
+import { expect } from '@kbn/scout/api';
+import { getImpactLevel, type Insight, type SaveInsightBody } from '@kbn/streams-schema';
 import { v4 as uuidv4 } from 'uuid';
 import { streamsApiTest as apiTest } from '../fixtures';
 import { COMMON_API_HEADERS } from '../fixtures/constants';
-import type { InsightInput } from '../services/streams_api_service';
 
 apiTest.describe('Insights CRUD API', { tag: ['@ess', '@svlOblt'] }, () => {
-  // Helper to create a test insight input (partial, for saveInsight etc.)
-  function createTestInsightInput(overrides: Partial<InsightInput> = {}): InsightInput {
+  function createTestInsight(overrides: Partial<Insight> = {}): Insight {
     return {
+      id: uuidv4(),
+      generatedAt: new Date().toISOString(),
       title: 'Test Insight',
       description: 'This is a test insight for integration testing',
       impact: 'medium',
+      impactLevel: getImpactLevel('medium'),
       evidence: [
         {
           streamName: 'logs',
@@ -32,17 +33,10 @@ apiTest.describe('Insights CRUD API', { tag: ['@ess', '@svlOblt'] }, () => {
     };
   }
 
-  // Helper to create a full Insight for bulk index operations
-  function createTestInsight(
-    overrides: Partial<InsightInput> & { id?: string; generatedAt?: string } = {}
-  ): Insight {
-    const input = createTestInsightInput(overrides);
-    return {
-      ...input,
-      id: overrides.id ?? uuidv4(),
-      generatedAt: overrides.generatedAt ?? new Date().toISOString(),
-      impactLevel: getImpactLevel(input.impact),
-    };
+  /** Body for PUT /_insights/{id}: insight without id (id comes from path). */
+  function saveInsightBody(insight: Insight): SaveInsightBody {
+    const { id: _id, ...rest } = insight;
+    return rest;
   }
 
   // Store created insight IDs for cleanup
@@ -60,29 +54,26 @@ apiTest.describe('Insights CRUD API', { tag: ['@ess', '@svlOblt'] }, () => {
     createdInsightIds.length = 0;
   });
 
-  // Test: Create an insight
+  // Test: Create an insight (PUT with id in path)
   apiTest('should create a new insight', async ({ apiClient, samlAuth }) => {
     const { cookieHeader } = await samlAuth.asStreamsAdmin();
 
-    const input = createTestInsightInput({ title: 'Create Test Insight' });
+    const input = createTestInsight({ title: 'Create Test Insight' });
 
-    const response = await apiClient.post('internal/streams/_insights', {
+    const response = await apiClient.put(`internal/streams/_insights/${input.id}`, {
       headers: { ...COMMON_API_HEADERS, ...cookieHeader },
-      body: input,
+      body: saveInsightBody(input),
       responseType: 'json',
     });
 
     expect(response.statusCode).toBe(200);
-    expect(response.body).toHaveProperty('insight');
-    expect(response.body.insight).toHaveProperty('id');
+    expect(response.body.insight).toBeDefined();
+    expect(response.body.insight.id).toBe(input.id);
     expect(response.body.insight.title).toBe(input.title);
     expect(response.body.insight.description).toBe(input.description);
     expect(response.body.insight.impact).toBe(input.impact);
     expect(response.body.insight.evidence).toHaveLength(1);
     expect(response.body.insight.recommendations).toHaveLength(2);
-    expect(response.body.insight.status).toBe('active');
-    expect(response.body.insight).toHaveProperty('created_at');
-    expect(response.body.insight).toHaveProperty('updated_at');
 
     // Track for cleanup
     createdInsightIds.push(response.body.insight.id);
@@ -93,10 +84,10 @@ apiTest.describe('Insights CRUD API', { tag: ['@ess', '@svlOblt'] }, () => {
     const { cookieHeader } = await samlAuth.asStreamsAdmin();
 
     // First create an insight
-    const input = createTestInsightInput({ title: 'Get Test Insight' });
-    const createResponse = await apiClient.post('internal/streams/_insights', {
+    const input = createTestInsight({ title: 'Get Test Insight' });
+    const createResponse = await apiClient.put(`internal/streams/_insights/${input.id}`, {
       headers: { ...COMMON_API_HEADERS, ...cookieHeader },
-      body: input,
+      body: saveInsightBody(input),
       responseType: 'json',
     });
     expect(createResponse.statusCode).toBe(200);
@@ -127,25 +118,24 @@ apiTest.describe('Insights CRUD API', { tag: ['@ess', '@svlOblt'] }, () => {
   });
 
   // Test: List all insights
-  // TODO: Skip - list endpoint has an issue with ES field name resolution for dot-notation keys
-  apiTest.skip('should list all insights', async ({ apiClient, samlAuth }) => {
+  apiTest('should list all insights', async ({ apiClient, samlAuth }) => {
     const { cookieHeader } = await samlAuth.asStreamsAdmin();
 
     // Create a few insights
-    const input1 = createTestInsightInput({ title: 'List Test Insight 1' });
-    const input2 = createTestInsightInput({ title: 'List Test Insight 2', impact: 'high' });
+    const input1 = createTestInsight({ title: 'List Test Insight 1' });
+    const input2 = createTestInsight({ title: 'List Test Insight 2', impact: 'high' });
 
-    const create1 = await apiClient.post('internal/streams/_insights', {
+    const create1 = await apiClient.put(`internal/streams/_insights/${input1.id}`, {
       headers: { ...COMMON_API_HEADERS, ...cookieHeader },
-      body: input1,
+      body: saveInsightBody(input1),
       responseType: 'json',
     });
     expect(create1.statusCode).toBe(200);
     createdInsightIds.push(create1.body.insight.id);
 
-    const create2 = await apiClient.post('internal/streams/_insights', {
+    const create2 = await apiClient.put(`internal/streams/_insights/${input2.id}`, {
       headers: { ...COMMON_API_HEADERS, ...cookieHeader },
-      body: input2,
+      body: saveInsightBody(input2),
       responseType: 'json',
     });
     expect(create2.statusCode).toBe(200);
@@ -158,9 +148,9 @@ apiTest.describe('Insights CRUD API', { tag: ['@ess', '@svlOblt'] }, () => {
     });
 
     expect(listResponse.statusCode).toBe(200);
-    expect(listResponse.body).toHaveProperty('insights');
-    expect(listResponse.body).toHaveProperty('total');
-    expect(listResponse.body.insights.length).toBeGreaterThanOrEqual(2);
+    expect(listResponse.body.insights).toBeDefined();
+    expect(listResponse.body.total).toBeDefined();
+    expect(listResponse.body.insights.length).toHaveLength(2);
 
     // Verify both created insights are in the list
     const titles = listResponse.body.insights.map((i: { title: string }) => i.title);
@@ -168,67 +158,25 @@ apiTest.describe('Insights CRUD API', { tag: ['@ess', '@svlOblt'] }, () => {
     expect(titles).toContain('List Test Insight 2');
   });
 
-  // Test: List insights with status filter
-  apiTest('should filter insights by status', async ({ apiClient, samlAuth }) => {
-    const { cookieHeader } = await samlAuth.asStreamsAdmin();
-
-    // Create an insight
-    const input = createTestInsightInput({ title: 'Filter Status Test Insight' });
-    const createResponse = await apiClient.post('internal/streams/_insights', {
-      headers: { ...COMMON_API_HEADERS, ...cookieHeader },
-      body: input,
-      responseType: 'json',
-    });
-    expect(createResponse.statusCode).toBe(200);
-    const insightId = createResponse.body.insight.id;
-    createdInsightIds.push(insightId);
-
-    // Update it to dismissed
-    const updateResponse = await apiClient.put(`internal/streams/_insights/${insightId}`, {
-      headers: { ...COMMON_API_HEADERS, ...cookieHeader },
-      body: { status: 'dismissed' },
-      responseType: 'json',
-    });
-    expect(updateResponse.statusCode).toBe(200);
-
-    // Filter by dismissed status
-    const listDismissed = await apiClient.get('internal/streams/_insights?status=dismissed', {
-      headers: { ...COMMON_API_HEADERS, ...cookieHeader },
-      responseType: 'json',
-    });
-
-    expect(listDismissed.statusCode).toBe(200);
-    expect(listDismissed.body.insights.some((i: { id: string }) => i.id === insightId)).toBe(true);
-
-    // Filter by active status should not include dismissed insight
-    const listActive = await apiClient.get('internal/streams/_insights?status=active', {
-      headers: { ...COMMON_API_HEADERS, ...cookieHeader },
-      responseType: 'json',
-    });
-
-    expect(listActive.statusCode).toBe(200);
-    expect(listActive.body.insights.some((i: { id: string }) => i.id === insightId)).toBe(false);
-  });
-
   // Test: List insights with impact filter
   apiTest('should filter insights by impact', async ({ apiClient, samlAuth }) => {
     const { cookieHeader } = await samlAuth.asStreamsAdmin();
 
     // Create insights with different impact levels
-    const inputHigh = createTestInsightInput({ title: 'High Impact Insight', impact: 'high' });
-    const inputLow = createTestInsightInput({ title: 'Low Impact Insight', impact: 'low' });
+    const inputHigh = createTestInsight({ title: 'High Impact Insight', impact: 'high' });
+    const inputLow = createTestInsight({ title: 'Low Impact Insight', impact: 'low' });
 
-    const createHigh = await apiClient.post('internal/streams/_insights', {
+    const createHigh = await apiClient.put(`internal/streams/_insights/${inputHigh.id}`, {
       headers: { ...COMMON_API_HEADERS, ...cookieHeader },
-      body: inputHigh,
+      body: saveInsightBody(inputHigh),
       responseType: 'json',
     });
     expect(createHigh.statusCode).toBe(200);
     createdInsightIds.push(createHigh.body.insight.id);
 
-    const createLow = await apiClient.post('internal/streams/_insights', {
+    const createLow = await apiClient.put(`internal/streams/_insights/${inputLow.id}`, {
       headers: { ...COMMON_API_HEADERS, ...cookieHeader },
-      body: inputLow,
+      body: saveInsightBody(inputLow),
       responseType: 'json',
     });
     expect(createLow.statusCode).toBe(200);
@@ -254,23 +202,27 @@ apiTest.describe('Insights CRUD API', { tag: ['@ess', '@svlOblt'] }, () => {
     const { cookieHeader } = await samlAuth.asStreamsAdmin();
 
     // Create an insight
-    const input = createTestInsightInput({ title: 'Update Test Insight' });
-    const createResponse = await apiClient.post('internal/streams/_insights', {
+    const input = createTestInsight({ title: 'Update Test Insight' });
+    const createResponse = await apiClient.put(`internal/streams/_insights/${input.id}`, {
       headers: { ...COMMON_API_HEADERS, ...cookieHeader },
-      body: input,
+      body: saveInsightBody(input),
       responseType: 'json',
     });
     expect(createResponse.statusCode).toBe(200);
     const insightId = createResponse.body.insight.id;
     createdInsightIds.push(insightId);
 
-    // Update the insight
+    // Update the insight (body without id; id in path)
+    const updatedInput = createTestInsight({
+      ...input,
+      id: insightId,
+      title: 'Updated Title',
+      impact: 'critical',
+      impactLevel: getImpactLevel('critical'),
+    });
     const updateResponse = await apiClient.put(`internal/streams/_insights/${insightId}`, {
       headers: { ...COMMON_API_HEADERS, ...cookieHeader },
-      body: {
-        title: 'Updated Title',
-        impact: 'critical',
-      },
+      body: saveInsightBody(updatedInput),
       responseType: 'json',
     });
 
@@ -281,58 +233,15 @@ apiTest.describe('Insights CRUD API', { tag: ['@ess', '@svlOblt'] }, () => {
     expect(updateResponse.body.insight.description).toBe(input.description);
   });
 
-  // Test: Update insight status to dismissed
-  apiTest('should update insight status to dismissed', async ({ apiClient, samlAuth }) => {
-    const { cookieHeader } = await samlAuth.asStreamsAdmin();
-
-    // Create an insight
-    const input = createTestInsightInput({ title: 'Dismiss Test Insight' });
-    const createResponse = await apiClient.post('internal/streams/_insights', {
-      headers: { ...COMMON_API_HEADERS, ...cookieHeader },
-      body: input,
-      responseType: 'json',
-    });
-    expect(createResponse.statusCode).toBe(200);
-    const insightId = createResponse.body.insight.id;
-    createdInsightIds.push(insightId);
-    expect(createResponse.body.insight.status).toBe('active');
-
-    // Dismiss the insight
-    const updateResponse = await apiClient.put(`internal/streams/_insights/${insightId}`, {
-      headers: { ...COMMON_API_HEADERS, ...cookieHeader },
-      body: { status: 'dismissed' },
-      responseType: 'json',
-    });
-
-    expect(updateResponse.statusCode).toBe(200);
-    expect(updateResponse.body.insight.status).toBe('dismissed');
-  });
-
-  // Test: Update non-existent insight returns 404
-  apiTest(
-    'should return 404 when updating non-existent insight',
-    async ({ apiClient, samlAuth }) => {
-      const { cookieHeader } = await samlAuth.asStreamsAdmin();
-
-      const response = await apiClient.put('internal/streams/_insights/non-existent-id', {
-        headers: { ...COMMON_API_HEADERS, ...cookieHeader },
-        body: { title: 'Updated Title' },
-        responseType: 'json',
-      });
-
-      expect(response.statusCode).toBe(404);
-    }
-  );
-
   // Test: Delete an insight
   apiTest('should delete an insight', async ({ apiClient, samlAuth }) => {
     const { cookieHeader } = await samlAuth.asStreamsAdmin();
 
     // Create an insight
-    const input = createTestInsightInput({ title: 'Delete Test Insight' });
-    const createResponse = await apiClient.post('internal/streams/_insights', {
+    const input = createTestInsight({ title: 'Delete Test Insight' });
+    const createResponse = await apiClient.put(`internal/streams/_insights/${input.id}`, {
       headers: { ...COMMON_API_HEADERS, ...cookieHeader },
-      body: input,
+      body: saveInsightBody(input),
       responseType: 'json',
     });
     expect(createResponse.statusCode).toBe(200);
@@ -373,8 +282,7 @@ apiTest.describe('Insights CRUD API', { tag: ['@ess', '@svlOblt'] }, () => {
   );
 
   // Test: Bulk create insights
-  // TODO: Skip - verifies via list which has dot-notation field name issue
-  apiTest.skip('should bulk create insights', async ({ apiClient, samlAuth }) => {
+  apiTest('should bulk create insights', async ({ apiClient, samlAuth }) => {
     const { cookieHeader } = await samlAuth.asStreamsAdmin();
 
     const bulkResponse = await apiClient.post('internal/streams/_insights/_bulk', {
@@ -409,73 +317,22 @@ apiTest.describe('Insights CRUD API', { tag: ['@ess', '@svlOblt'] }, () => {
     });
   });
 
-  // Test: Bulk update insights
-  apiTest('should bulk update insights', async ({ apiClient, samlAuth }) => {
-    const { cookieHeader } = await samlAuth.asStreamsAdmin();
-
-    // Create insights first
-    const input1 = createTestInsightInput({ title: 'Bulk Update Insight 1' });
-    const input2 = createTestInsightInput({ title: 'Bulk Update Insight 2' });
-
-    const create1 = await apiClient.post('internal/streams/_insights', {
-      headers: { ...COMMON_API_HEADERS, ...cookieHeader },
-      body: input1,
-      responseType: 'json',
-    });
-    const create2 = await apiClient.post('internal/streams/_insights', {
-      headers: { ...COMMON_API_HEADERS, ...cookieHeader },
-      body: input2,
-      responseType: 'json',
-    });
-
-    createdInsightIds.push(create1.body.insight.id);
-    createdInsightIds.push(create2.body.insight.id);
-
-    // Bulk update - note: insight field is required even when just updating status
-    const bulkResponse = await apiClient.post('internal/streams/_insights/_bulk', {
-      headers: { ...COMMON_API_HEADERS, ...cookieHeader },
-      body: {
-        operations: [
-          { update: { id: create1.body.insight.id, insight: { title: 'Updated Bulk 1' } } },
-          { update: { id: create2.body.insight.id, insight: {}, status: 'dismissed' } },
-        ],
-      },
-      responseType: 'json',
-    });
-
-    expect(bulkResponse.statusCode).toBe(200);
-    expect(bulkResponse.body.acknowledged).toBe(true);
-
-    // Verify updates
-    const get1 = await apiClient.get(`internal/streams/_insights/${create1.body.insight.id}`, {
-      headers: { ...COMMON_API_HEADERS, ...cookieHeader },
-      responseType: 'json',
-    });
-    expect(get1.body.insight.title).toBe('Updated Bulk 1');
-
-    const get2 = await apiClient.get(`internal/streams/_insights/${create2.body.insight.id}`, {
-      headers: { ...COMMON_API_HEADERS, ...cookieHeader },
-      responseType: 'json',
-    });
-    expect(get2.body.insight.status).toBe('dismissed');
-  });
-
   // Test: Bulk delete insights
   apiTest('should bulk delete insights', async ({ apiClient, samlAuth }) => {
     const { cookieHeader } = await samlAuth.asStreamsAdmin();
 
     // Create insights first
-    const input1 = createTestInsightInput({ title: 'Bulk Delete Insight 1' });
-    const input2 = createTestInsightInput({ title: 'Bulk Delete Insight 2' });
+    const input1 = createTestInsight({ title: 'Bulk Delete Insight 1' });
+    const input2 = createTestInsight({ title: 'Bulk Delete Insight 2' });
 
-    const create1 = await apiClient.post('internal/streams/_insights', {
+    const create1 = await apiClient.put(`internal/streams/_insights/${input1.id}`, {
       headers: { ...COMMON_API_HEADERS, ...cookieHeader },
-      body: input1,
+      body: saveInsightBody(input1),
       responseType: 'json',
     });
-    const create2 = await apiClient.post('internal/streams/_insights', {
+    const create2 = await apiClient.put(`internal/streams/_insights/${input2.id}`, {
       headers: { ...COMMON_API_HEADERS, ...cookieHeader },
-      body: input2,
+      body: saveInsightBody(input2),
       responseType: 'json',
     });
 
@@ -511,22 +368,21 @@ apiTest.describe('Insights CRUD API', { tag: ['@ess', '@svlOblt'] }, () => {
   });
 
   // Test: Bulk operations with mixed types
-  // TODO: Skip - verifies via list which has dot-notation field name issue
-  apiTest.skip('should handle mixed bulk operations', async ({ apiClient, samlAuth }) => {
+  apiTest('should handle mixed bulk operations', async ({ apiClient, samlAuth }) => {
     const { cookieHeader } = await samlAuth.asStreamsAdmin();
 
     // Create an insight to update and another to delete
-    const input1 = createTestInsightInput({ title: 'Mixed Bulk Update Target' });
-    const input2 = createTestInsightInput({ title: 'Mixed Bulk Delete Target' });
+    const input1 = createTestInsight({ title: 'Mixed Bulk Update Target' });
+    const input2 = createTestInsight({ title: 'Mixed Bulk Delete Target' });
 
-    const create1 = await apiClient.post('internal/streams/_insights', {
+    const create1 = await apiClient.put(`internal/streams/_insights/${input1.id}`, {
       headers: { ...COMMON_API_HEADERS, ...cookieHeader },
-      body: input1,
+      body: saveInsightBody(input1),
       responseType: 'json',
     });
-    const create2 = await apiClient.post('internal/streams/_insights', {
+    const create2 = await apiClient.put(`internal/streams/_insights/${input2.id}`, {
       headers: { ...COMMON_API_HEADERS, ...cookieHeader },
-      body: input2,
+      body: saveInsightBody(input2),
       responseType: 'json',
     });
 
@@ -538,8 +394,7 @@ apiTest.describe('Insights CRUD API', { tag: ['@ess', '@svlOblt'] }, () => {
       headers: { ...COMMON_API_HEADERS, ...cookieHeader },
       body: {
         operations: [
-          { index: createTestInsight({ title: 'Mixed Bulk New Insight' }) },
-          { update: { id: create1.body.insight.id, insight: { impact: 'critical' } } },
+          { index: { id: create1.body.insight.id, insight: { impact: 'critical' } } },
           { delete: { id: create2.body.insight.id } },
         ],
       },
@@ -597,9 +452,10 @@ apiTest.describe('Insights CRUD API', { tag: ['@ess', '@svlOblt'] }, () => {
     const { cookieHeader: readOnlyHeader } = await samlAuth.asStreamsReadOnly();
 
     // Read-only user cannot create (should get 403 for missing manage privilege)
-    const createAttempt = await apiClient.post('internal/streams/_insights', {
+    const forbidInput = createTestInsight({ title: 'Should Fail' });
+    const createAttempt = await apiClient.put(`internal/streams/_insights/${forbidInput.id}`, {
       headers: { ...COMMON_API_HEADERS, ...readOnlyHeader },
-      body: createTestInsightInput({ title: 'Should Fail' }),
+      body: saveInsightBody(forbidInput),
       responseType: 'json',
     });
     expect(createAttempt.statusCode).toBe(403);

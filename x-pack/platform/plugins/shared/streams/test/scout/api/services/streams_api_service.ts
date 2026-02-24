@@ -7,12 +7,12 @@
 
 import type { Condition, StreamlangDSL } from '@kbn/streamlang';
 import type { RoutingStatus, Streams } from '@kbn/streams-schema';
-import { getImpactLevel, type Insight, type InsightInput } from '@kbn/streams-schema';
+import { getImpactLevel, type Insight } from '@kbn/streams-schema';
 import type { KbnClient, ScoutLogger } from '@kbn/scout/src/common';
 import { measurePerformanceAsync } from '@kbn/scout/src/common';
 import type { IngestStream, IngestUpsertRequest } from '@kbn/streams-schema/src/models/ingest';
 
-export type { Insight, InsightInput };
+export type { Insight };
 
 export interface InsightBulkIndexOp {
   index: Insight;
@@ -56,11 +56,9 @@ export interface StreamsTestApiService {
   getLifecycleStats: (streamName: string) => Promise<{ phases: unknown }>;
   cleanupTestStreams: (prefix?: string) => Promise<void>;
   // Insights API
-  listInsights: (filters?: {
-    impact?: string;
-  }) => Promise<{ insights: Insight[]; total: number }>;
+  listInsights: (filters?: { impact?: string }) => Promise<{ insights: Insight[]; total: number }>;
   getInsight: (id: string) => Promise<{ insight: Insight }>;
-  saveInsight: (id: string, input: InsightInput) => Promise<{ insight: Insight }>;
+  saveInsight: (id: string, input: Insight) => Promise<{ insight: Insight }>;
   deleteInsight: (id: string) => Promise<{ acknowledged: boolean }>;
   bulkInsights: (operations: InsightBulkOperation[]) => Promise<{ acknowledged: boolean }>;
   cleanupTestInsights: () => Promise<void>;
@@ -275,7 +273,7 @@ export function getStreamsTestApiService({
       });
     },
 
-    async saveInsight(id: string, input: InsightInput) {
+    async saveInsight(id: string, input: Insight) {
       return measurePerformanceAsync(log, 'streamsTestApi.saveInsight', async () => {
         const body: Insight = {
           ...input,
@@ -318,9 +316,7 @@ export function getStreamsTestApiService({
         try {
           const { insights } = await this.listInsights();
           if (insights.length > 0) {
-            await this.bulkInsights(
-              insights.map((insight) => ({ delete: { id: insight.id } }))
-            );
+            await this.bulkInsights(insights.map((insight) => ({ delete: { id: insight.id } })));
           }
         } catch (error) {
           log.debug(`Failed to cleanup insights: ${error}`);
