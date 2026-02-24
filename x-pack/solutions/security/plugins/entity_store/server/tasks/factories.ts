@@ -8,7 +8,7 @@
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { EntityStoreCoreSetup } from '../types';
-import { LogsExtractionClient } from '../domain/logs_extraction_client';
+import { LogsExtractionClient } from '../domain/logs_extraction/logs_extraction_client';
 import { EngineDescriptorClient } from '../domain/definitions/saved_objects';
 
 export interface LogsExtractionClientFactoryResult {

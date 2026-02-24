@@ -192,5 +192,5 @@ export async function stopExtractEntityTask({
 }): Promise<void> {
   const taskId = getExtractEntityTaskId(type, namespace);
   await taskManager.removeIfExists(taskId);
-  logger.debug(`removed task: ${taskId}`);
+  logger.debug(`removed extract entity task: ${taskId}`);
 }

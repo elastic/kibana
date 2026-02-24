@@ -17,7 +17,6 @@ import type {
   ManagedEntityDefinition,
 } from '../../common/domain/definitions/entity_schema';
 import { scheduleExtractEntityTask, stopExtractEntityTask } from '../tasks/extract_entity_task';
-import { scheduleEntityMaintainerTasks } from '../tasks/entity_maintainer';
 import { installElasticsearchAssets, uninstallElasticsearchAssets } from './assets/install_assets';
 import {
   EngineDescriptorTypeName,
@@ -48,7 +47,7 @@ import {
   getUpdatesComponentTemplateName,
 } from './assets/component_templates';
 import { getUpdatesEntitiesDataStreamName } from './assets/updates_data_stream';
-import type { LogsExtractionClient } from './logs_extraction_client';
+import type { LogsExtractionClient } from './logs_extraction/logs_extraction_client';
 
 interface AssetManagerDependencies {
   logger: Logger;
@@ -91,13 +90,6 @@ export class AssetManager {
       await Promise.all(
         entityTypes.map((type) => this.initEntity(request, type, logExtractionParams))
       );
-
-      await scheduleEntityMaintainerTasks({
-        logger: this.logger,
-        taskManager: this.taskManager,
-        namespace: this.namespace,
-        request,
-      });
     } catch (error) {
       this.logger.error('Error during entity store init:', error);
       throw error;
@@ -235,7 +227,7 @@ export class AssetManager {
     });
   }
 
-  public async install(
+  private async install(
     type: EntityType,
     logExtractionParams?: LogExtractionBodyParams
   ): Promise<boolean> {

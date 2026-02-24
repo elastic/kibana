@@ -14,9 +14,10 @@ import type {
   EntityStoreStartPlugins,
 } from './types';
 import { AssetManager } from './domain/asset_manager';
+import { EntityMaintainersClient } from './domain/entity_maintainers_client';
 import { FeatureFlags } from './infra/feature_flags';
 import { EngineDescriptorClient } from './domain/definitions/saved_objects';
-import { LogsExtractionClient } from './domain/logs_extraction_client';
+import { LogsExtractionClient } from './domain/logs_extraction/logs_extraction_client';
 
 interface EntityStoreApiRequestHandlerContextDeps {
   coreSetup: CoreSetup<EntityStoreStartPlugins, void>;
@@ -70,6 +71,11 @@ export async function createRequestHandlerContext({
       isServerless,
       logsExtractionClient,
       security: startPlugins.security,
+    }),
+    entityMaintainersClient: new EntityMaintainersClient({
+      logger,
+      taskManager: taskManagerStart,
+      namespace,
     }),
     featureFlags: new FeatureFlags(core.uiSettings.client),
     logsExtractionClient,
