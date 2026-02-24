@@ -111,7 +111,7 @@ export interface GetEntityExpandItemsOptions {
   /** Whether entity relationships is currently expanded (controls show/hide label) */
   isEntityRelationshipsExpanded?: boolean;
   /** Callback to toggle entity relationships on/off */
-  onToggleEntityRelationships?: (action: 'show' | 'hide') => void;
+  toggleEntityRelationships?: (action: 'show' | 'hide') => void;
   /** Whether entity relationships should be disabled. Defaults to false. */
   showEntityRelationshipsDisabled?: boolean;
 }
@@ -140,7 +140,7 @@ export const getEntityExpandItems = (
     shouldRender,
     showEntityDetailsDisabled = false,
     isEntityRelationshipsExpanded = false,
-    onToggleEntityRelationships,
+    toggleEntityRelationships,
     showEntityRelationshipsDisabled = false,
   } = options;
 
@@ -167,7 +167,7 @@ export const getEntityExpandItems = (
           ),
       disabled: showEntityRelationshipsDisabled,
       onClick: () => {
-        onToggleEntityRelationships?.(isEntityRelationshipsExpanded ? 'hide' : 'show');
+        toggleEntityRelationships?.(isEntityRelationshipsExpanded ? 'hide' : 'show');
         onClose?.();
       },
       showToolTip: showEntityRelationshipsDisabled,

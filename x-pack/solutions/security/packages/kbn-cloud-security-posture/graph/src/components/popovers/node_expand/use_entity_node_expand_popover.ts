@@ -11,7 +11,12 @@ import type { NodeProps, NodeViewModel } from '../../types';
 import { GRAPH_NODE_EXPAND_POPOVER_TEST_ID } from '../../test_ids';
 import { getEntityExpandItems, getSourceNamespaceFromNode } from './get_entity_expand_items';
 import { getNodeDocumentMode, isEntityNodeEnriched } from '../../utils';
-import { emitFilterToggle, isFilterActiveForScope } from '../../filters/filter_store';
+import {
+  emitFilterToggle,
+  isFilterActiveForScope,
+  emitEntityRelationshipToggle,
+  isEntityRelationshipExpandedForScope,
+} from '../../filters/filter_store';
 
 /**
  * Hook to handle the entity node expand popover.
@@ -19,6 +24,7 @@ import { emitFilterToggle, isFilterActiveForScope } from '../../filters/filter_s
  * The popover contains the actions to show/hide the actions by entity, actions on entity, and related entities.
  *
  * Uses filter event bus for filter state management - emits events via emitFilterToggle().
+ * Uses entity relationship event bus for relationship state - emits events via emitEntityRelationshipToggle().
  *
  * @param scopeId - The unique identifier for the graph instance (used to scope filter state)
  * @param onOpenEventPreview - Optional callback to open event preview with full node data.
@@ -27,9 +33,7 @@ import { emitFilterToggle, isFilterActiveForScope } from '../../filters/filter_s
  */
 export const useEntityNodeExpandPopover = (
   scopeId: string,
-  onOpenEventPreview?: (node: NodeViewModel) => void,
-  expandedEntityIds?: Set<string>,
-  onToggleEntityRelationships?: (node: NodeProps, action: 'show' | 'hide') => void
+  onOpenEventPreview?: (node: NodeViewModel) => void
 ) => {
   const itemsFn = useCallback(
     (node: NodeProps) => {
@@ -55,17 +59,14 @@ export const useEntityNodeExpandPopover = (
           showEntityDetails:
             (isSingleEntity || isGroupedEntities) && onOpenEventPreview !== undefined,
         },
-        // Entity relationships state
-        isEntityRelationshipsExpanded: expandedEntityIds?.has(node.id) ?? false,
-        onToggleEntityRelationships: onToggleEntityRelationships
-          ? (action) => onToggleEntityRelationships(node, action)
-          : undefined,
-        showEntityRelationshipsDisabled: !isEnriched || !onToggleEntityRelationships,
-        // Disable entity details if not enriched (single-entity mode)
+        isEntityRelationshipsExpanded: isEntityRelationshipExpandedForScope(scopeId, node.id),
+        toggleEntityRelationships: (action) =>
+          emitEntityRelationshipToggle(scopeId, node.id, action),
+        showEntityRelationshipsDisabled: !isEnriched,
         showEntityDetailsDisabled: isSingleEntity && !isEnriched,
       });
     },
-    [scopeId, onOpenEventPreview, expandedEntityIds, onToggleEntityRelationships]
+    [scopeId, onOpenEventPreview]
   );
 
   return useNodeExpandPopover({

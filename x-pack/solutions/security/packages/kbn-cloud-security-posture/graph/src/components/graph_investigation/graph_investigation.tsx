@@ -21,7 +21,7 @@ import {
   GRAPH_ACTOR_ENTITY_FIELDS,
   GRAPH_TARGET_ENTITY_FIELDS,
 } from '@kbn/cloud-security-posture-common/constants';
-import { Graph, isEntityNode, type NodeProps } from '../../..';
+import { Graph, isEntityNode } from '../../..';
 import { Callout } from '../callout/callout';
 import { type UseFetchGraphDataParams, useFetchGraphData } from '../../hooks/use_fetch_graph_data';
 import { useGraphCallout } from '../../hooks/use_graph_callout';
@@ -51,14 +51,10 @@ const useGraphPopovers = ({
   scopeId,
   onOpenEventPreview,
   onOpenNetworkPreview,
-  expandedEntityIds,
-  onToggleEntityRelationships,
 }: {
   scopeId: string;
   onOpenEventPreview?: (node: NodeViewModel) => void;
   onOpenNetworkPreview?: (ip: string, scopeId: string) => void;
-  expandedEntityIds: Set<string>;
-  onToggleEntityRelationships: (node: NodeProps, action: 'show' | 'hide') => void;
 }) => {
   const [currentIps, setCurrentIps] = useState<string[]>([]);
   const [currentCountryCodes, setCurrentCountryCodes] = useState<string[]>([]);
@@ -66,12 +62,7 @@ const useGraphPopovers = ({
     null
   );
   const [currentEventText, setCurrentEventText] = useState<string>('');
-  const nodeExpandPopover = useEntityNodeExpandPopover(
-    scopeId,
-    onOpenEventPreview,
-    expandedEntityIds,
-    onToggleEntityRelationships
-  );
+  const nodeExpandPopover = useEntityNodeExpandPopover(scopeId, onOpenEventPreview);
   const labelExpandPopover = useLabelNodeExpandPopover(scopeId, onOpenEventPreview);
   const ipPopover = useIpPopover(currentIps, GRAPH_SCOPE_ID);
   const countryFlagsPopover = useCountryFlagsPopover(currentCountryCodes);
@@ -263,7 +254,10 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
     onOpenEventPreview,
     onOpenNetworkPreview,
   }: GraphInvestigationProps) => {
-    const { searchFilters, setSearchFilters } = useGraphFilters(scopeId, dataView?.id ?? '');
+    const { searchFilters, setSearchFilters, entityIdsForApi } = useGraphFilters(
+      scopeId,
+      dataView?.id ?? ''
+    );
     const [timeRange, setTimeRange] = useState<TimeRange>(initialTimeRange);
     const [searchToggled, setSearchToggled] = useSessionStorage(
       TOGGLE_SEARCH_BAR_STORAGE_KEY,
@@ -272,31 +266,25 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
     const lastValidEsQuery = useRef<EsQuery | undefined>();
     const [kquery, setKQuery] = useState<Query>(EMPTY_QUERY);
 
-    // Track which entities have their relationships expanded
-    const [expandedEntityIds, setExpandedEntityIds] = useState<Set<string>>(() => new Set());
+    // Merge user-expanded entity IDs with initial entity IDs for the API
+    const mergedEntityIdsForApi = useMemo(() => {
+      const initial = entityIds ?? [];
+      const expanded = entityIdsForApi ?? [];
 
-    // Convert expandedEntityIds Set to API format
-    const entityIdsForApi = useMemo(() => {
-      if (expandedEntityIds.size === 0) return undefined;
+      if (initial.length === 0 && expanded.length === 0) return undefined;
 
-      return Array.from(expandedEntityIds).map((id) => ({
-        id,
-        isOrigin: false, // User-expanded entities are not the graph origin
-      }));
-    }, [expandedEntityIds]);
-
-    // Toggle handler for entity relationships
-    const onToggleEntityRelationships = useCallback((node: NodeProps, action: 'show' | 'hide') => {
-      setExpandedEntityIds((prev) => {
-        const next = new Set(prev);
-        if (action === 'show') {
-          next.add(node.id);
-        } else {
-          next.delete(node.id);
+      // Merge: initial entityIds keep their isOrigin flag, expanded ones are not origin
+      const mergedMap = new Map<string, { id: string; isOrigin: boolean }>();
+      for (const entry of initial) {
+        mergedMap.set(entry.id, entry);
+      }
+      for (const entry of expanded) {
+        if (!mergedMap.has(entry.id)) {
+          mergedMap.set(entry.id, entry);
         }
-        return next;
-      });
-    }, []);
+      }
+      return Array.from(mergedMap.values());
+    }, [entityIds, entityIdsForApi]);
 
     const onInvestigateInTimelineCallback = useCallback(() => {
       const query = { ...kquery };
@@ -360,7 +348,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
           esQuery,
           start: timeRange.from,
           end: timeRange.to,
-          entityIds: entityIdsForApi,
+          entityIds: mergedEntityIdsForApi,
           pinnedIds,
         },
         nodesLimit: GRAPH_NODES_LIMIT,
@@ -392,8 +380,6 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       scopeId,
       onOpenEventPreview,
       onOpenNetworkPreview,
-      expandedEntityIds,
-      onToggleEntityRelationships,
     });
 
     const nodeExpandButtonClickHandler = (...args: unknown[]) =>

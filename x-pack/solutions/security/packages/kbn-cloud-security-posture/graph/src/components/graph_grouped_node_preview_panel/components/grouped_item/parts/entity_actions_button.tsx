@@ -16,7 +16,12 @@ import {
 } from '../../../test_ids';
 import type { EntityItem } from '../types';
 import { getEntityExpandItems } from '../../../../popovers/node_expand/get_entity_expand_items';
-import { emitFilterToggle, isFilterActiveForScope } from '../../../../filters/filter_store';
+import {
+  emitFilterToggle,
+  isFilterActiveForScope,
+  emitEntityRelationshipToggle,
+  isEntityRelationshipExpandedForScope,
+} from '../../../../filters/filter_store';
 import { GenericEntityPanelKey, GENERIC_ENTITY_PREVIEW_BANNER } from '../../../constants';
 
 const actionsButtonAriaLabel = i18n.translate(
@@ -69,11 +74,15 @@ export const EntityActionsButton = ({ item, scopeId }: EntityActionsButtonProps)
     isFilterActive: (field, value) => isFilterActiveForScope(scopeId, field, value),
     toggleFilter: (field, value, action) => emitFilterToggle(scopeId, field, value, action),
     shouldRender: {
+      showEntityRelationships: true,
       showActionsByEntity: true,
       showActionsOnEntity: true,
       showRelatedEvents: true,
       showEntityDetails: !!item.availableInEntityStore,
     },
+    isEntityRelationshipsExpanded: isEntityRelationshipExpandedForScope(scopeId, item.id),
+    toggleEntityRelationships: (action) => emitEntityRelationshipToggle(scopeId, item.id, action),
+    showEntityRelationshipsDisabled: !item.availableInEntityStore,
   });
 
   return (

@@ -25,11 +25,26 @@ export interface FilterToggleEvent {
   action: 'show' | 'hide';
 }
 
+/**
+ * Event emitted when an entity relationship toggle action is requested.
+ * Components emit these events to expand/collapse entity relationships in the graph.
+ * FilterStore instances subscribe and handle events for their scopeId.
+ */
+export interface EntityRelationshipEvent {
+  scopeId: string;
+  entityId: string;
+  action: 'show' | 'hide';
+}
+
 // Global event bus for filter toggle actions
 const filterToggleEvents$ = new Subject<FilterToggleEvent>();
 
+// Global event bus for entity relationship toggle actions
+const entityRelationshipEvents$ = new Subject<EntityRelationshipEvent>();
+
 // Store emitted events for testing purposes
 const emittedFilterEvents: FilterToggleEvent[] = [];
+const emittedEntityRelationshipEvents: EntityRelationshipEvent[] = [];
 
 /**
  * Emit a filter toggle event. Any FilterStore listening for this scopeId
@@ -59,6 +74,40 @@ export const emitFilterToggle = (
   const event: FilterToggleEvent = { scopeId, field, value, action };
   emittedFilterEvents.push(event);
   filterToggleEvents$.next(event);
+};
+
+/**
+ * Emit an entity relationship toggle event. Any FilterStore listening for this scopeId
+ * will receive the event and update its expanded entity IDs state.
+ *
+ * @param scopeId - Unique identifier for the graph instance
+ * @param entityId - The entity ID to expand/collapse
+ * @param action - 'show' to expand, 'hide' to collapse
+ */
+export const emitEntityRelationshipToggle = (
+  scopeId: string,
+  entityId: string,
+  action: 'show' | 'hide'
+): void => {
+  const event: EntityRelationshipEvent = { scopeId, entityId, action };
+  emittedEntityRelationshipEvents.push(event);
+  entityRelationshipEvents$.next(event);
+};
+
+/**
+ * Check if an entity's relationships are expanded for the given scope.
+ * Returns false gracefully if no store exists.
+ *
+ * @param scopeId - Unique identifier for the graph instance
+ * @param entityId - The entity ID to check
+ * @returns true if the entity's relationships are expanded
+ */
+export const isEntityRelationshipExpandedForScope = (
+  scopeId: string,
+  entityId: string
+): boolean => {
+  const store = stores.get(scopeId);
+  return store?.isEntityRelationshipExpanded(entityId) ?? false;
 };
 
 /**
@@ -95,6 +144,20 @@ export const __clearEmittedFilterEvents = (): void => {
   emittedFilterEvents.length = 0;
 };
 
+/**
+ * Get all emitted entity relationship events. Primarily for testing.
+ */
+export const __getEmittedEntityRelationshipEvents = (): EntityRelationshipEvent[] => {
+  return [...emittedEntityRelationshipEvents];
+};
+
+/**
+ * Clear all emitted entity relationship events. Primarily for testing.
+ */
+export const __clearEmittedEntityRelationshipEvents = (): void => {
+  emittedEntityRelationshipEvents.length = 0;
+};
+
 // =============================================================================
 // FilterStore Class
 // =============================================================================
@@ -114,16 +177,25 @@ export class FilterStore {
   readonly scopeId: string;
   private dataViewId?: string;
   private readonly filters$ = new BehaviorSubject<Filter[]>([]);
-  private readonly eventSubscription: Subscription;
+  private readonly expandedEntityIds$ = new BehaviorSubject<Set<string>>(new Set());
+  private readonly filterEventSubscription: Subscription;
+  private readonly entityRelationshipEventSubscription: Subscription;
 
   constructor(scopeId: string) {
     this.scopeId = scopeId;
 
     // Subscribe to filter toggle events for this scopeId
-    this.eventSubscription = filterToggleEvents$
+    this.filterEventSubscription = filterToggleEvents$
       .pipe(rxFilter((event) => event.scopeId === this.scopeId))
       .subscribe((event) => {
         this.toggleFilter(event.field, event.value, event.action);
+      });
+
+    // Subscribe to entity relationship toggle events for this scopeId
+    this.entityRelationshipEventSubscription = entityRelationshipEvents$
+      .pipe(rxFilter((event) => event.scopeId === this.scopeId))
+      .subscribe((event) => {
+        this.toggleEntityRelationship(event.entityId, event.action);
       });
   }
 
@@ -183,20 +255,65 @@ export class FilterStore {
     return containsFilter(this.filters$.value, field, value);
   }
 
+  // ===========================================================================
+  // Entity Relationship State
+  // ===========================================================================
+
+  /**
+   * Toggle an entity's relationship expansion state.
+   * @param entityId - The entity ID to expand/collapse
+   * @param action - 'show' to expand, 'hide' to collapse
+   */
+  toggleEntityRelationship(entityId: string, action: 'show' | 'hide'): void {
+    const next = new Set(this.expandedEntityIds$.value);
+    if (action === 'show') {
+      next.add(entityId);
+    } else {
+      next.delete(entityId);
+    }
+    this.expandedEntityIds$.next(next);
+  }
+
+  /**
+   * Check if an entity's relationships are currently expanded.
+   */
+  isEntityRelationshipExpanded(entityId: string): boolean {
+    return this.expandedEntityIds$.value.has(entityId);
+  }
+
+  /**
+   * Get the current set of expanded entity IDs.
+   */
+  getExpandedEntityIds(): Set<string> {
+    return this.expandedEntityIds$.value;
+  }
+
+  /**
+   * Subscribe to expanded entity IDs changes.
+   * @param callback - Function called when expanded entity IDs change
+   * @returns Subscription that should be unsubscribed on cleanup
+   */
+  subscribeToExpandedEntityIds(callback: (expandedEntityIds: Set<string>) => void): Subscription {
+    return this.expandedEntityIds$.subscribe(callback);
+  }
+
   /**
    * Reset the filter store to empty state.
    */
   reset(): void {
     this.filters$.next([]);
+    this.expandedEntityIds$.next(new Set());
   }
 
   /**
-   * Clean up the store by completing the BehaviorSubject and unsubscribing from events.
+   * Clean up the store by completing the BehaviorSubjects and unsubscribing from events.
    * Called when the graph instance unmounts.
    */
   destroy(): void {
-    this.eventSubscription.unsubscribe();
+    this.filterEventSubscription.unsubscribe();
+    this.entityRelationshipEventSubscription.unsubscribe();
     this.filters$.complete();
+    this.expandedEntityIds$.complete();
   }
 }
 
