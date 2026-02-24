@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { TimeRange } from '@kbn/es-query';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public/types';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import React from 'react';
@@ -18,22 +17,16 @@ export function VisualizeLens({
   dataViews,
   uiActions,
   lensConfig,
-  timeRange,
-  searchSessionId,
 }: {
   lens: LensPublicStart;
   dataViews: DataViewsServicePublic;
   uiActions: UiActionsStart;
   lensConfig: any;
-  timeRange?: TimeRange;
-  searchSessionId?: string;
 }) {
   const { lensInput, setLensInput, isLoading } = useLensInput({
     lens,
     dataViews,
     lensConfig,
-    timeRange,
-    searchSessionId,
   });
 
   return (
