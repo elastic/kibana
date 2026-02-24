@@ -63,7 +63,7 @@ export interface UnifiedCorrelation {
   successPercentage?: number;
 }
 
-export interface UnifiedCorrelationsResponse {
+export interface CorrelationsResponse {
   overallHistogram?: HistogramItem[];
   errorHistogram?: HistogramItem[];
   totalDocCount: number;

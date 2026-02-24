@@ -30,7 +30,7 @@ import { fetchPValues } from './queries/fetch_p_values';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import type { TopValuesStats } from '../../../common/correlations/field_stats_types';
 import { CorrelationType } from '../../../common/correlations/types';
-import type { UnifiedCorrelationsResponse } from '../../../common/correlations/types';
+import type { CorrelationsResponse } from '../../../common/correlations/types';
 import { fetchLatencyCorrelations } from './queries/fetch_latency_correlation';
 import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
 
@@ -352,7 +352,7 @@ const correlationTypeRt = t.union([
 ]);
 
 const unifiedCorrelationsRoute = createApmServerRoute({
-  endpoint: 'POST /internal/apm/correlations/latency',
+  endpoint: 'POST /internal/apm/correlations',
   params: t.type({
     body: t.intersection([
       t.type({
@@ -374,7 +374,7 @@ const unifiedCorrelationsRoute = createApmServerRoute({
     ]),
   }),
   security: { authz: { requiredPrivileges: ['apm'] } },
-  handler: async (resources): Promise<UnifiedCorrelationsResponse> => {
+  handler: async (resources): Promise<CorrelationsResponse> => {
     const { context } = resources;
     const { license } = await context.licensing;
     if (!isActivePlatinumLicense(license)) {

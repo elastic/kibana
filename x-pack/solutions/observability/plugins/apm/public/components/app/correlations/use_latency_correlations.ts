@@ -14,10 +14,7 @@ import {
   DEBOUNCE_INTERVAL,
   DEFAULT_PERCENTILE_THRESHOLD,
 } from '../../../../common/correlations/constants';
-import {
-  CorrelationType,
-  type UnifiedCorrelationsResponse,
-} from '../../../../common/correlations/types';
+import { CorrelationType, type CorrelationsResponse } from '../../../../common/correlations/types';
 import type { LatencyCorrelationsResponse } from '../../../../common/correlations/latency_correlations/types';
 
 import { callApmApi } from '../../../services/rest/create_call_apm_api';
@@ -62,7 +59,7 @@ export function useLatencyCorrelations() {
 
     try {
       // Single unified API call that handles all steps internally
-      const unifiedResponse = (await callApmApi('POST /internal/apm/correlations/latency' as any, {
+      const unifiedResponse = (await callApmApi('POST /internal/apm/correlations' as any, {
         signal: abortCtrl.current.signal,
         params: {
           body: {
@@ -71,7 +68,7 @@ export function useLatencyCorrelations() {
             percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
           },
         },
-      })) as UnifiedCorrelationsResponse;
+      })) as CorrelationsResponse;
 
       if (abortCtrl.current.signal.aborted) {
         return;

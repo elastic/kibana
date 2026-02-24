@@ -13,7 +13,7 @@ import { EventOutcome } from '../../../../common/event_outcome';
 import { LatencyDistributionChartType } from '../../../../common/latency_distribution_chart_types';
 import { CorrelationType } from '../../../../common/correlations/types';
 import type {
-  UnifiedCorrelationsResponse,
+  CorrelationsResponse,
   UnifiedCorrelation,
   CommonCorrelationsQueryParams,
   FieldValuePair,
@@ -56,7 +56,7 @@ export async function fetchLatencyCorrelations({
   durationMin: providedDurationMin,
   durationMax: providedDurationMax,
   config,
-}: FetchLatencyCorrelationsParams): Promise<UnifiedCorrelationsResponse> {
+}: FetchLatencyCorrelationsParams): Promise<CorrelationsResponse> {
   const chartType =
     correlationType === CorrelationType.ERROR_RATE
       ? LatencyDistributionChartType.failedTransactionsCorrelations
@@ -87,7 +87,7 @@ export async function fetchLatencyCorrelations({
   const totalDocCount = overallDistribution.totalDocCount ?? 0;
 
   // For error_rate, also get error histogram
-  let errorHistogram: UnifiedCorrelationsResponse['errorHistogram'];
+  let errorHistogram: CorrelationsResponse['errorHistogram'];
   if (correlationType === CorrelationType.ERROR_RATE) {
     const errorDistribution = await getOverallLatencyDistribution({
       chartType,

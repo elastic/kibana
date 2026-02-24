@@ -8,7 +8,7 @@
 import { orderBy } from 'lodash';
 import expect from '@kbn/expect';
 import { CorrelationType } from '@kbn/apm-plugin/common/correlations/types';
-import type { UnifiedCorrelationsResponse } from '@kbn/apm-plugin/common/correlations/types';
+import type { CorrelationsResponse } from '@kbn/apm-plugin/common/correlations/types';
 import type { FailedTransactionsCorrelationsResponse } from '@kbn/apm-plugin/common/correlations/failed_transactions_correlations/types';
 import type { LatencyCorrelationsResponse } from '@kbn/apm-plugin/common/correlations/latency_correlations/types';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
@@ -33,7 +33,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     describe('transaction_duration without data', () => {
       it('handles the empty state', async () => {
         const unifiedResponse = await apmApiClient.readUser({
-          endpoint: 'POST /internal/apm/correlations/latency' as any,
+          endpoint: 'POST /internal/apm/correlations' as any,
           params: {
             body: {
               ...getOptions(),
@@ -48,7 +48,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           `Expected status to be '200', got '${unifiedResponse.status}'`
         );
 
-        const response = unifiedResponse.body as UnifiedCorrelationsResponse;
+        const response = unifiedResponse.body as CorrelationsResponse;
 
         expect(response.percentileThresholdValue).to.be(undefined);
         expect(response.overallHistogram).to.be(undefined);
@@ -61,7 +61,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     describe('error_rate without data', () => {
       it('handles the empty state', async () => {
         const unifiedResponse = await apmApiClient.readUser({
-          endpoint: 'POST /internal/apm/correlations/latency' as any,
+          endpoint: 'POST /internal/apm/correlations' as any,
           params: {
             body: {
               ...getOptions(),
@@ -76,7 +76,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           `Expected status to be '200', got '${unifiedResponse.status}'`
         );
 
-        const response = unifiedResponse.body as UnifiedCorrelationsResponse;
+        const response = unifiedResponse.body as CorrelationsResponse;
 
         expect(response.percentileThresholdValue).to.be(undefined);
         expect(response.overallHistogram).to.be(undefined);
@@ -97,7 +97,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       it('runs unified query and returns results matching legacy endpoint', async () => {
         const unifiedResponse = await apmApiClient.readUser({
-          endpoint: 'POST /internal/apm/correlations/latency' as any,
+          endpoint: 'POST /internal/apm/correlations' as any,
           params: {
             body: {
               ...getOptions(),
@@ -112,7 +112,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           `Expected status to be '200', got '${unifiedResponse.status}'`
         );
 
-        const response = unifiedResponse.body as UnifiedCorrelationsResponse;
+        const response = unifiedResponse.body as CorrelationsResponse;
 
         // Verify field candidates (should match legacy endpoint: 81 candidates)
         expect(response.fieldCandidates.length).to.eql(
@@ -174,7 +174,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       it('runs unified query and returns results matching legacy endpoint', async () => {
         const unifiedResponse = await apmApiClient.readUser({
-          endpoint: 'POST /internal/apm/correlations/latency' as any,
+          endpoint: 'POST /internal/apm/correlations' as any,
           params: {
             body: {
               ...getOptions(),
@@ -189,7 +189,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           `Expected status to be '200', got '${unifiedResponse.status}'`
         );
 
-        const response = unifiedResponse.body as UnifiedCorrelationsResponse;
+        const response = unifiedResponse.body as CorrelationsResponse;
 
         // Verify field candidates (should match legacy endpoint: 80 candidates after filtering EVENT_OUTCOME)
         expect(response.fieldCandidates.length).to.eql(
