@@ -31,7 +31,7 @@ apiTest.describe(
         responseType: 'json',
       });
 
-      expect(response.statusCode).toBe(404);
+      expect(response).toHaveStatusCode(404);
     });
 
     apiTest('returns error when ID is too long', async ({ apiClient }) => {
@@ -45,7 +45,7 @@ apiTest.describe(
         responseType: 'json',
       });
 
-      expect(response.statusCode).toBe(400);
+      expect(response).toHaveStatusCode(400);
       expect(response.body.message).toBe(
         '[request params.id]: value has length [1759] but it must have a maximum length of [1000].'
       );

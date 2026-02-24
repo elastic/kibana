@@ -30,7 +30,7 @@ apiTest.describe(
         responseType: 'json',
       });
 
-      expect(response.statusCode).toBe(200);
+      expect(response).toHaveStatusCode(200);
       expect(response.body[SERVICE_KEY]).toBeDefined();
       expect(Array.isArray(response.body[SERVICE_KEY])).toBe(true);
     });

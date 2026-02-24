@@ -60,7 +60,7 @@ apiTest.describe(
         responseType: 'json',
       });
 
-      expect(getResponse.statusCode).toBe(200);
+      expect(getResponse).toHaveStatusCode(200);
 
       const deleteResponse = await apiClient.delete(`${DATA_VIEW_PATH_LEGACY}/${id}`, {
         headers: {
@@ -70,7 +70,7 @@ apiTest.describe(
         responseType: 'json',
       });
 
-      expect(deleteResponse.statusCode).toBe(200);
+      expect(deleteResponse).toHaveStatusCode(200);
 
       const verifyResponse = await apiClient.get(`${DATA_VIEW_PATH_LEGACY}/${id}`, {
         headers: {
@@ -80,7 +80,7 @@ apiTest.describe(
         responseType: 'json',
       });
 
-      expect(verifyResponse.statusCode).toBe(404);
+      expect(verifyResponse).toHaveStatusCode(404);
     });
 
     apiTest('returns nothing', async ({ apiClient }) => {

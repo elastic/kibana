@@ -45,7 +45,7 @@ apiTest.describe(
         },
       });
 
-      expect(createResponse.statusCode).toBe(200);
+      expect(createResponse).toHaveStatusCode(200);
       const createdId = createResponse.body[SERVICE_KEY].id;
       createdIds.push(createdId);
 
@@ -57,7 +57,7 @@ apiTest.describe(
         responseType: 'json',
       });
 
-      expect(getResponse.statusCode).toBe(200);
+      expect(getResponse).toHaveStatusCode(200);
       expect(getResponse.body[SERVICE_KEY].title).toBe(title);
     });
   }
