@@ -114,7 +114,13 @@ export class ReplacementsRepository {
       return this.decryptValue(this.encryptionKey as string, replacement.original_encrypted);
     }
 
-    return replacement.original ?? '';
+    if (replacement.original !== undefined) {
+      return replacement.original;
+    }
+
+    throw new Error(
+      `Invalid replacements entry for token "${replacement.anonymized}": missing original payload`
+    );
   }
 
   private setStatusCode(error: Error, statusCode: number): Error & { statusCode: number } {

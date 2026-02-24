@@ -193,6 +193,38 @@ describe('createChatCompleteApi', () => {
       expect(response.metadata?.anonymization?.replacementsId).toEqual(expect.any(String));
     });
 
+    it('creates then reuses one replacementsId across turns', async () => {
+      inferenceAdapter.chatComplete.mockReturnValue(of(chunkEvent('chunk-1')));
+
+      const turn1 = await chatComplete({
+        connectorId: 'connectorId',
+        messages: [{ role: MessageRole.User, content: 'turn-1' }],
+        maxRetries: 0,
+      });
+
+      const replacementsId = turn1.metadata?.anonymization?.replacementsId;
+      expect(replacementsId).toEqual(expect.any(String));
+
+      await chatComplete({
+        connectorId: 'connectorId',
+        messages: [{ role: MessageRole.User, content: 'turn-2' }],
+        metadata: {
+          anonymization: {
+            replacementsId,
+          },
+        },
+        maxRetries: 0,
+      });
+
+      expect(mockEsClient.index).toHaveBeenCalledTimes(1);
+      expect(mockEsClient.update).toHaveBeenCalledTimes(1);
+      expect(mockEsClient.get).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: replacementsId,
+        })
+      );
+    });
+
     it('returns a promise resolving with the response', async () => {
       inferenceAdapter.chatComplete.mockReturnValue(
         of(chunkEvent('chunk-1'), chunkEvent('chunk-2'))

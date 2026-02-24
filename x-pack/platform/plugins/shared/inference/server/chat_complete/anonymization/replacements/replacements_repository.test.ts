@@ -125,4 +125,26 @@ describe('ReplacementsRepository', () => {
 
     expect(result?.replacements).toHaveLength(1);
   });
+
+  it('throws when a stored replacement entry has no original payload', async () => {
+    const repo = new ReplacementsRepository(esClient, {
+      encryptionKey: 'test-encryption-key',
+    });
+    const id = 'replacements-invalid';
+
+    (esClient.get as jest.Mock).mockResolvedValue({
+      _source: {
+        id,
+        replacements: [{ anonymized: 'TOKEN_A' }],
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        created_by: 'test',
+        namespace: 'default',
+      },
+    });
+
+    await expect(repo.get('default', id)).rejects.toThrow(
+      'Invalid replacements entry for token "TOKEN_A": missing original payload'
+    );
+  });
 });

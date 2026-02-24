@@ -25,6 +25,9 @@ import {
   LEGACY_ANONYMIZATION_UI_SETTING_KEY,
 } from '../initialization';
 
+const ENSURE_GLOBAL_PROFILE_CACHE_MS = 60_000;
+const ensuredGlobalProfileByNamespace = new Map<string, number>();
+
 const fieldRuleSchema = schema.object({
   field: schema.string(),
   allowed: schema.boolean(),
@@ -197,15 +200,23 @@ export const registerProfileRoutes = (router: IRouter, logger: Logger): void => 
           await ensureProfilesIndex({ esClient, logger });
 
           const repo = new ProfilesRepository(esClient);
-          const settingsString = await coreContext.uiSettings.client.get<string | undefined>(
-            LEGACY_ANONYMIZATION_UI_SETTING_KEY
-          );
-          await ensureAndMigrateGlobalProfile({
-            namespace,
-            profilesRepo: repo,
-            logger,
-            settingsString,
-          });
+          const now = Date.now();
+          const lastEnsuredAt = ensuredGlobalProfileByNamespace.get(namespace);
+          if (
+            lastEnsuredAt === undefined ||
+            now - lastEnsuredAt >= ENSURE_GLOBAL_PROFILE_CACHE_MS
+          ) {
+            const settingsString = await coreContext.uiSettings.client.get<string | undefined>(
+              LEGACY_ANONYMIZATION_UI_SETTING_KEY
+            );
+            await ensureAndMigrateGlobalProfile({
+              namespace,
+              profilesRepo: repo,
+              logger,
+              settingsString,
+            });
+            ensuredGlobalProfileByNamespace.set(namespace, now);
+          }
           const result = await repo.find({
             namespace,
             filter: query.filter,
