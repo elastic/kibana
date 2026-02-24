@@ -137,6 +137,9 @@ EOF
         concurrency_group: "kbn-evals-${group_key_safe}"
         concurrency: ${EVAL_FANOUT_CONCURRENCY}
         agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
           machineType: n2-standard-8
           preemptible: true
         retry:
