@@ -24,6 +24,7 @@ import type { TaskParams } from '../types';
 import { PromptsConfigService } from '../../saved_objects/significant_events/prompts_config_service';
 import { cancellableTask } from '../cancellable_task';
 import { MAX_FEATURE_AGE_MS } from '../../streams/feature/feature_client';
+import { isDefinitionNotFoundError } from '../../streams/errors/definition_not_found_error';
 
 export interface FeaturesIdentificationTaskParams {
   connectorId: string;
@@ -144,6 +145,13 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                   { features }
                 );
               } catch (error) {
+                if (isDefinitionNotFoundError(error)) {
+                  taskContext.logger.debug(
+                    `Stream ${streamName} was deleted before features identification task started, skipping`
+                  );
+                  return getDeleteTaskRunResult();
+                }
+
                 // Get connector info for error enrichment
                 const connector = await inferenceClient.getConnectorById(connectorId);
 
