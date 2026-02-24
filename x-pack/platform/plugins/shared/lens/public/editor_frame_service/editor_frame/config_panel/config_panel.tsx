@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useMemo, memo, useCallback } from 'react';
-import { EuiForm, euiBreakpoint, useEuiTheme, useEuiOverflowScroll } from '@elastic/eui';
+import { EuiForm, euiBreakpoint, useEuiTheme } from '@elastic/eui';
 import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { UPDATE_FILTER_REFERENCES_ACTION } from '@kbn/unified-search-plugin/public';
 
@@ -14,6 +14,7 @@ import type { DragDropIdentifier, DropType } from '@kbn/dom-drag-drop';
 import { css } from '@emotion/react';
 import type { AddLayerFunction, DragDropOperation, Visualization } from '@kbn/lens-common';
 import { UPDATE_FILTER_REFERENCES_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { DRAG_DROP_EXTRA_TARGETS_WIDTH, DRAG_DROP_EXTRA_TARGETS_PADDING } from '@kbn/lens-common';
 import {
   changeIndexPattern,
   onDropToDimension,
@@ -317,21 +318,35 @@ export function ConfigPanel(
     };
   }, [activeVisualization, props.framePublicAPI, selectedLayerId, visualization.state]);
 
-  const euiOverflowScroll = useEuiOverflowScroll('y');
-
   if (layerConfig?.config.hidden || !selectedLayerId || !layerConfig) return null;
 
   return (
     <EuiForm
       css={css`
         .lnsApp & {
+          /* Add left padding and negative margin to create space for drag-drop extra targets
+             (e.g., "Alt/Option to duplicate" tooltip) that are positioned to the left of drop zones. */
           padding: ${euiTheme.size.base} ${euiTheme.size.base} ${euiTheme.size.xl}
-            calc(400px + ${euiTheme.size.base});
-          margin-left: -400px;
-          ${euiOverflowScroll}
+            calc(${DRAG_DROP_EXTRA_TARGETS_PADDING}px + ${euiTheme.size.base});
+          margin-left: -${DRAG_DROP_EXTRA_TARGETS_PADDING}px;
+          /* Background gradient: transparent in the extended left area (for tooltips),
+             solid color for the visible content area */
+          background: linear-gradient(
+            to right,
+            transparent 0,
+            transparent ${DRAG_DROP_EXTRA_TARGETS_PADDING}px,
+            ${euiTheme.colors.emptyShade} ${DRAG_DROP_EXTRA_TARGETS_PADDING}px
+          );
+          /* Override the default max-width of drag-drop extra targets to reduce
+             horizontal overflow space requirements */
+          .domDroppable__extraTargets {
+            width: ${DRAG_DROP_EXTRA_TARGETS_WIDTH}px;
+          }
+          /* Note: overflow scrolling is handled by the parent lnsConfigPanelScrollContainer */
           ${euiBreakpoint(euiThemeContext, ['xs', 's', 'm'])} {
             padding-left: ${euiTheme.size.base};
             margin-left: 0;
+            background: ${euiTheme.colors.emptyShade};
           }
         }
       `}

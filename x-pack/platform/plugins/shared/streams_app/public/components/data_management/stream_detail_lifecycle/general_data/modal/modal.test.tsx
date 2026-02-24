@@ -24,7 +24,9 @@ describe('EditLifecycleModal', () => {
   const mockGetIlmPolicies = jest.fn();
 
   const createMockDefinition = (
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     effectiveLifecycle: any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ingestLifecycle: any = { inherit: {} },
     streamName: string = 'logs-test',
     isWired: boolean = false
@@ -57,6 +59,7 @@ describe('EditLifecycleModal', () => {
         read_failure_store: true,
         manage_failure_store: true,
         view_index_metadata: true,
+        create_snapshot_repository: true,
       },
       effective_failure_store: {
         lifecycle: { enabled: { is_default_retention: true } },
@@ -67,6 +70,7 @@ describe('EditLifecycleModal', () => {
     if (isWired) {
       // Wired effective lifecycle must include a `from` field to satisfy schema
       if ((effectiveLifecycle.dsl || effectiveLifecycle.ilm) && !effectiveLifecycle.from) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (definition as any).effective_lifecycle = {
           ...effectiveLifecycle,
           from: streamName,
@@ -88,6 +92,7 @@ describe('EditLifecycleModal', () => {
     jest.clearAllMocks();
     mockUseKibana.mockReturnValue({
       isServerless: false,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any);
     mockGetIlmPolicies.mockResolvedValue([{ name: 'policy1' }, { name: 'policy2' }] as IlmPolicy[]);
   });
