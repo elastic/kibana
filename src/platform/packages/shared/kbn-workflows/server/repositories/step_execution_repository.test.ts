@@ -7,12 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import {
+  getStepExecutionsByIds,
+  getStepExecutionsByWorkflowExecution,
+} from './step_execution_repository';
 import type { EsWorkflowStepExecution } from '../../types/v1';
-import { getStepExecutionsByIds, getStepExecutionsByWorkflowExecution } from './step_execution_repository';
 
 const INDEX = '.workflows-step-executions';
 
-const createStepExecution = (overrides: Partial<EsWorkflowStepExecution> = {}): EsWorkflowStepExecution =>
+const createStepExecution = (
+  overrides: Partial<EsWorkflowStepExecution> = {}
+): EsWorkflowStepExecution =>
   ({
     id: 'step-1',
     stepId: 'test-step',
