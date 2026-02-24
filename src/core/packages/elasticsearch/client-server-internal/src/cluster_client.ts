@@ -18,13 +18,26 @@ import {
 } from '@kbn/core-http-router-server-internal';
 import type {
   ScopeableRequest,
+  ScopeableUrlRequest,
   UnauthorizedErrorHandler,
   ICustomClusterClient,
+  IScopedClusterClient,
+  ElasticsearchClientConfig,
+  AsScopedOptions,
+  OriginOnlyRouting,
+  SpaceNPRERouting,
+  AllProjectsRouting,
 } from '@kbn/core-elasticsearch-server';
-import type { ElasticsearchClientConfig } from '@kbn/core-elasticsearch-server';
+import { HTTPAuthorizationHeader, isUiamCredential } from '@kbn/core-security-server';
+import type { InternalSecurityServiceSetup } from '@kbn/core-security-server-internal';
 import { configureClient } from './configure_client';
 import { ScopedClusterClient } from './scoped_cluster_client';
-import { getDefaultHeaders, AUTHORIZATION_HEADER, ES_SECONDARY_AUTH_HEADER } from './headers';
+import {
+  getDefaultHeaders,
+  ES_SECONDARY_AUTH_HEADER,
+  ES_SECONDARY_CLIENT_AUTH_HEADER,
+  ES_CLIENT_AUTHENTICATION_HEADER,
+} from './headers';
 import {
   createInternalErrorHandler,
   type InternalUnauthorizedErrorHandler,
@@ -34,15 +47,24 @@ import type { AgentFactoryProvider } from './agent_manager';
 
 const noop = () => undefined;
 
+/**
+ * A factory that produces an {@link OnRequestHandler}, which can be bound to a request context.
+ * @internal
+ */
+export type OnRequestHandlerFactory = (opts: {
+  projectRouting: 'origin-only' | 'all' | ScopeableUrlRequest;
+}) => OnRequestHandler;
+
 /** @internal **/
 export class ClusterClient implements ICustomClusterClient {
   private readonly config: ElasticsearchClientConfig;
   private readonly authHeaders?: IAuthHeadersStorage;
+  private readonly security?: InternalSecurityServiceSetup;
   private readonly rootScopedClient: Client;
   private readonly kibanaVersion: string;
   private readonly getUnauthorizedErrorHandler: () => UnauthorizedErrorHandler | undefined;
   private readonly getExecutionContext: () => string | undefined;
-  private readonly onRequest?: OnRequestHandler;
+  private readonly onRequestHandlerFactory: OnRequestHandlerFactory;
   private isClosed = false;
 
   public readonly asInternalUser: Client;
@@ -52,28 +74,33 @@ export class ClusterClient implements ICustomClusterClient {
     logger,
     type,
     authHeaders,
+    security,
     getExecutionContext = noop,
     getUnauthorizedErrorHandler = noop,
     agentFactoryProvider,
     kibanaVersion,
-    onRequest,
+    onRequestHandlerFactory,
   }: {
     config: ElasticsearchClientConfig;
     logger: Logger;
     type: string;
     authHeaders?: IAuthHeadersStorage;
+    security?: InternalSecurityServiceSetup;
     getExecutionContext?: () => string | undefined;
     getUnauthorizedErrorHandler?: () => UnauthorizedErrorHandler | undefined;
     agentFactoryProvider: AgentFactoryProvider;
     kibanaVersion: string;
-    onRequest?: OnRequestHandler;
+    onRequestHandlerFactory: OnRequestHandlerFactory;
   }) {
     this.config = config;
     this.authHeaders = authHeaders;
+    this.security = security;
     this.kibanaVersion = kibanaVersion;
     this.getExecutionContext = getExecutionContext;
     this.getUnauthorizedErrorHandler = getUnauthorizedErrorHandler;
-    this.onRequest = onRequest;
+    this.onRequestHandlerFactory = onRequestHandlerFactory;
+
+    const internalUserOnRequest = onRequestHandlerFactory({ projectRouting: 'origin-only' });
 
     this.asInternalUser = configureClient(config, {
       logger,
@@ -81,6 +108,7 @@ export class ClusterClient implements ICustomClusterClient {
       getExecutionContext,
       agentFactoryProvider,
       kibanaVersion,
+      onRequest: internalUserOnRequest,
     });
     this.rootScopedClient = configureClient(config, {
       scoped: true,
@@ -89,19 +117,29 @@ export class ClusterClient implements ICustomClusterClient {
       getExecutionContext,
       agentFactoryProvider,
       kibanaVersion,
-      onRequest,
+      onRequest: internalUserOnRequest,
     });
   }
 
-  asScoped(request: ScopeableRequest) {
+  asScoped(request: ScopeableUrlRequest, opts: SpaceNPRERouting): IScopedClusterClient;
+  asScoped(
+    request: ScopeableRequest,
+    opts?: OriginOnlyRouting | AllProjectsRouting
+  ): IScopedClusterClient;
+  asScoped(request: ScopeableRequest, opts: AsScopedOptions = { projectRouting: 'origin-only' }) {
     const createScopedClient = () => {
       const scopedHeaders = this.getScopedHeaders(request);
+      const { projectRouting } = opts;
 
       const transportClass = createTransport({
         scoped: true,
         getExecutionContext: this.getExecutionContext,
         getUnauthorizedErrorHandler: this.createInternalErrorHandlerAccessor(request),
-        onRequest: this.onRequest,
+        onRequest: this.onRequestHandlerFactory(
+          projectRouting === 'space'
+            ? { projectRouting: request as ScopeableUrlRequest }
+            : { projectRouting }
+        ),
       });
 
       return this.rootScopedClient.child({
@@ -161,6 +199,21 @@ export class ClusterClient implements ICustomClusterClient {
       };
     } else {
       scopedHeaders = filterHeaders(request?.headers ?? {}, this.config.requestHeadersWhitelist);
+
+      // If we're creating scoped headers for a fake request, we need to check if we're in UIAM mode
+      // and if the credentials in the headers are UIAM credentials. If so, we need to add the shared
+      // secret to the headers, so that ES can forward it to UIAM service for validation.
+      if (this.security?.uiam) {
+        const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest({
+          headers: scopedHeaders,
+        });
+        if (authorizationHeader && isUiamCredential(authorizationHeader)) {
+          scopedHeaders = {
+            ...scopedHeaders,
+            [ES_CLIENT_AUTHENTICATION_HEADER]: this.security.uiam.sharedSecret,
+          };
+        }
+      }
     }
 
     return {
@@ -171,14 +224,9 @@ export class ClusterClient implements ICustomClusterClient {
   }
 
   private getSecondaryAuthHeaders(request: ScopeableRequest): Headers {
-    const headerSource =
-      isRealRequest(request) && !request.isFakeRequest
-        ? this.authHeaders?.get(request) ?? {}
-        : request.headers;
-    const authorizationHeader = Object.entries(headerSource).find(([key, value]) => {
-      return key.toLowerCase() === AUTHORIZATION_HEADER && value !== undefined;
+    const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest({
+      headers: isRealRequest(request) ? this.authHeaders?.get(request) ?? {} : request.headers,
     });
-
     if (!authorizationHeader) {
       throw new Error(
         `asSecondaryAuthUser called from a client scoped to a request without 'authorization' header.`
@@ -188,7 +236,12 @@ export class ClusterClient implements ICustomClusterClient {
     return {
       ...getDefaultHeaders(this.kibanaVersion),
       ...this.config.customHeaders,
-      [ES_SECONDARY_AUTH_HEADER]: authorizationHeader[1],
+      [ES_SECONDARY_AUTH_HEADER]: authorizationHeader.toString(),
+      // If the credentials in the authorization header are UIAM credentials, we need to pass the
+      // shared secret to ES as well, so that ES can forward it to UIAM service for validation.
+      ...(this.security?.uiam && isUiamCredential(authorizationHeader)
+        ? { [ES_SECONDARY_CLIENT_AUTH_HEADER]: this.security.uiam.sharedSecret }
+        : {}),
     };
   }
 }

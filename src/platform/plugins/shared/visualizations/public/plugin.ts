@@ -65,7 +65,6 @@ import type {
   ContentManagementPublicStart,
 } from '@kbn/content-management-plugin/public';
 import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
-import type { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
 
 import { css, injectGlobal } from '@emotion/css';
 import { VisualizeConstants, VISUALIZE_EMBEDDABLE_TYPE } from '@kbn/visualizations-common';
@@ -73,11 +72,6 @@ import type { KqlPluginStart } from '@kbn/kql/public';
 import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import type { TypesSetup, TypesStart } from './vis_types';
 import type { VisualizeServices } from './visualize_app/types';
-import {
-  aggBasedVisualizationTrigger,
-  dashboardVisualizationPanelTrigger,
-  visualizeEditorTrigger,
-} from './triggers';
 import type { VisEditorsRegistry } from './vis_editors_registry';
 import { createVisEditorsRegistry } from './vis_editors_registry';
 import { showNewVisModal } from './wizard';
@@ -183,7 +177,6 @@ export interface VisualizationsStartDeps {
   contentManagement: ContentManagementPublicStart;
   serverless?: ServerlessPluginStart;
   noDataPage?: NoDataPagePluginStart;
-  embeddableEnhanced?: EmbeddableEnhancedPluginStart;
 }
 
 const styles = {
@@ -481,16 +474,13 @@ export class VisualizationsPlugin
     expressions.registerFunction(rangeExpressionFunction);
     expressions.registerFunction(visDimensionExpressionFunction);
     expressions.registerFunction(xyDimensionExpressionFunction);
-    uiActions.registerTrigger(aggBasedVisualizationTrigger);
-    uiActions.registerTrigger(visualizeEditorTrigger);
-    uiActions.registerTrigger(dashboardVisualizationPanelTrigger);
     embeddable.registerReactEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, async () => {
       const {
-        plugins: { embeddable: embeddableStart, embeddableEnhanced: embeddableEnhancedStart },
+        plugins: { embeddable: embeddableStart },
       } = start();
 
       const { getVisualizeEmbeddableFactory } = await import('./embeddable/embeddable_module');
-      return getVisualizeEmbeddableFactory({ embeddableStart, embeddableEnhancedStart });
+      return getVisualizeEmbeddableFactory({ embeddableStart });
     });
     embeddable.registerAddFromLibraryType<VisualizationSavedObjectAttributes>({
       onAdd: async (container, savedObject) => {

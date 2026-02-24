@@ -18,4 +18,5 @@ export interface AttachmentServiceStart {
     attachment: AttachmentInput<Type, Data>
   ): Promise<ValidateAttachmentResult<Type, Data>>;
   getTypeDefinition(type: string): AttachmentTypeDefinition | undefined;
+  getRegisteredTypeIds(): string[];
 }

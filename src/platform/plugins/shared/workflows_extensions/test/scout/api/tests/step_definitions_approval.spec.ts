@@ -8,14 +8,22 @@
  */
 
 import type { RoleApiCredentials } from '@kbn/scout';
-import { apiTest } from '@kbn/scout';
+import { apiTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { APPROVED_STEP_DEFINITIONS } from '../fixtures/approved_step_definitions';
 import { COMMON_HEADERS } from '../fixtures/constants';
 
 apiTest.describe(
   'Workflows Extensions - Custom Step Definitions Approval',
-  { tag: ['@ess', '@svlSearch', '@svlSecurity', '@svlOblt', '@svlWorkplaceAI'] },
+  {
+    tag: [
+      ...tags.stateful.classic,
+      ...tags.serverless.search,
+      ...tags.serverless.security.complete,
+      ...tags.serverless.observability.complete,
+      ...tags.serverless.workplaceai,
+    ],
+  },
   () => {
     let adminApiCredentials: RoleApiCredentials;
 
