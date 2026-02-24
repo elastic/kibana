@@ -18,9 +18,10 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { StreamQuery, Streams, System } from '@kbn/streams-schema';
+import { isNativeEsqlQuery } from '@kbn/streams-schema';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useDebounceFn } from '@kbn/react-hooks';
-import { CodeEditor } from '@kbn/code-editor';
+import { EsqlQueryEditor } from '../../../esql_query_editor';
 import { UncontrolledStreamsAppSearchBar } from '../../../streams_app_search_bar/uncontrolled_streams_app_bar';
 import { PreviewDataSparkPlot } from '../common/preview_data_spark_plot';
 import { validateQuery } from '../common/validate_query';
@@ -51,7 +52,7 @@ export function ManualFlowForm({
   systems,
   dataViews,
 }: Props) {
-  const [isNativeEsql] = useState(() => !query.kql.query && !!query.esql?.query);
+  const [isNativeEsql] = useState(() => isNativeEsqlQuery(query));
 
   const [touched, setTouched] = useState({
     title: false,
@@ -202,17 +203,9 @@ export function ManualFlowForm({
             {...(touched.kql && { ...validation.kql })}
           >
             {isNativeEsql ? (
-              <CodeEditor
-                languageId="esql"
+              <EsqlQueryEditor
                 value={query.esql?.query ?? ''}
-                height={80}
-                options={{
-                  minimap: { enabled: false },
-                  lineNumbers: 'off',
-                  scrollBeyondLastLine: false,
-                  wordWrap: 'on',
-                  readOnly: isSubmitting,
-                }}
+                isDisabled={isSubmitting}
                 onChange={(value) => {
                   setQuery({ ...query, esql: { query: value } });
                   updateDebouncedQueryText(value);

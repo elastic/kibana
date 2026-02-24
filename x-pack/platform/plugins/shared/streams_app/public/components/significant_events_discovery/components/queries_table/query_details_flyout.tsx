@@ -36,7 +36,8 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useMemo, useState } from 'react';
-import { CodeEditor } from '@kbn/code-editor';
+import { isNativeEsqlQuery } from '@kbn/streams-schema';
+import { EsqlQueryEditor } from '../../../esql_query_editor';
 import type { SignificantEventItem } from '../../../../hooks/use_fetch_significant_events';
 import { InfoPanel } from '../../../info_panel';
 import { SparkPlot } from '../../../spark_plot';
@@ -113,7 +114,7 @@ export function QueryDetailsFlyout({
     setSeverityScore(item.query.severity_score);
   };
   const handleSaveQuery = async () => {
-    const updatedQuery = isNativeEsql(item)
+    const updatedQuery = isNativeEsqlQuery(item.query)
       ? {
           ...item.query,
           title: title.trim(),
@@ -310,20 +311,12 @@ export function QueryDetailsFlyout({
                   />
                 </EuiFormRow>
                 <EuiFormRow label={QUERY_LABEL}>
-                  {isNativeEsql(item) ? (
-                    <CodeEditor
-                      languageId="esql"
+                  {isNativeEsqlQuery(item.query) ? (
+                    <EsqlQueryEditor
                       value={query}
-                      height={80}
-                      options={{
-                        minimap: { enabled: false },
-                        lineNumbers: 'off',
-                        scrollBeyondLastLine: false,
-                        wordWrap: 'on',
-                        readOnly: isSaving,
-                      }}
+                      isDisabled={isSaving}
                       onChange={setQuery}
-                      data-test-subj="queriesTableQueryDetailsFlyoutQueryInput"
+                      dataTestSubj="queriesTableQueryDetailsFlyoutQueryInput"
                     />
                   ) : (
                     <EuiFieldText
@@ -393,12 +386,8 @@ export function QueryDetailsFlyout({
   );
 }
 
-function isNativeEsql(item: SignificantEventItem): boolean {
-  return !item.query.kql?.query && !!item.query.esql?.query;
-}
-
 function getQueryInputValue(item: SignificantEventItem) {
-  if (isNativeEsql(item)) {
+  if (isNativeEsqlQuery(item.query)) {
     return item.query.esql.query;
   }
 
@@ -417,7 +406,7 @@ function getDisplayQueryValue(item: SignificantEventItem) {
 }
 
 function getQueryLanguage(item: SignificantEventItem): 'esql' | 'kql' {
-  return isNativeEsql(item) ? 'esql' : 'kql';
+  return isNativeEsqlQuery(item.query) ? 'esql' : 'kql';
 }
 
 const QUERY_INFORMATION_TITLE = i18n.translate(

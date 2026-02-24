@@ -114,6 +114,12 @@ export const upsertStreamQueryRequestSchema = z.object({
   evidence: z.array(z.string()).optional(),
 });
 
+export function isNativeEsqlQuery(
+  query: { kql?: { query: string }; esql?: { query: string } }
+): boolean {
+  return !query.kql?.query && !!query.esql?.query;
+}
+
 export interface QueriesGetResponse {
   queries: SignificantEventsResponse[];
   page: number;

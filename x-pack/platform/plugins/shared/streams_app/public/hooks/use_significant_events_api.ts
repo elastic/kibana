@@ -11,6 +11,7 @@ import type {
   System,
   SignificantEventsQueriesGenerationTaskResult,
 } from '@kbn/streams-schema';
+import { isNativeEsqlQuery } from '@kbn/streams-schema';
 import { useKibana } from './use_kibana';
 import { getLast24HoursTimeRange } from '../util/time_range';
 
@@ -52,8 +53,9 @@ export function useSignificantEventsApi({ name }: { name: string }): Significant
   const { signal, abort, refresh } = useAbortController();
 
   return {
-    upsertQuery: async ({ id, esql, ...rest }) => {
-      const body = !rest.kql.query && esql?.query ? { ...rest, esql } : rest;
+    upsertQuery: async (query) => {
+      const { id, esql, ...rest } = query;
+      const body = isNativeEsqlQuery(query) ? { ...rest, esql } : rest;
       await streamsRepositoryClient.fetch('PUT /api/streams/{name}/queries/{queryId} 2023-10-31', {
         signal,
         params: {
@@ -90,7 +92,7 @@ export function useSignificantEventsApi({ name }: { name: string }): Significant
             operations: operations.map((op) => {
               if ('index' in op) {
                 const { esql, ...rest } = op.index;
-                const index = !rest.kql.query && esql?.query ? { ...rest, esql } : rest;
+                const index = isNativeEsqlQuery(op.index) ? { ...rest, esql } : rest;
                 return { index };
               }
               return op;

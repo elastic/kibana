@@ -11,13 +11,14 @@ import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { IStorageClient } from '@kbn/storage-adapter';
 import type { StreamQuery, StreamQueryInput, Streams } from '@kbn/streams-schema';
-import { buildEsqlQuery, getIndexPatternsForStream } from '@kbn/streams-schema';
-import { BasicPrettyPrinter, Builder, Parser } from '@kbn/esql-language';
+import { buildEsqlQuery, getIndexPatternsForStream, isNativeEsqlQuery } from '@kbn/streams-schema';
+import { BasicPrettyPrinter, Builder } from '@kbn/esql-language';
 import type { ESQLCommand } from '@kbn/esql-language';
 import { conditionToESQLAst } from '@kbn/streamlang';
 import { isEqual, map, partition } from 'lodash';
 import objectHash from 'object-hash';
 import pLimit from 'p-limit';
+import { extractWhereExpression } from '../../../helpers/esql_helpers';
 import {
   LEGACY_RULE_BACKED_FALLBACK,
   type Query,
@@ -200,6 +201,7 @@ function toStorage(
 
 function hasBreakingChange(currentQuery: StreamQuery, nextQuery: StreamQuery): boolean {
   return (
+    currentQuery.kql.query !== nextQuery.kql.query ||
     currentQuery.esql.query !== nextQuery.esql.query ||
     !isEqual(currentQuery.feature, nextQuery.feature)
   );
@@ -222,11 +224,8 @@ function toQueryLinkFromQuery(query: StreamQuery, stream: string): QueryLink {
  * filter. For legacy KQL-based queries, delegates to buildEsqlQuery.
  */
 function buildRuleEsqlQuery(indices: string[], query: StreamQuery): string {
-  if (!query.kql.query && query.esql.query) {
-    const { root } = Parser.parse(query.esql.query);
-    const whereCmd = root.commands.find(
-      (cmd): cmd is ESQLCommand => 'name' in cmd && cmd.name === 'where'
-    );
+  if (isNativeEsqlQuery(query)) {
+    const whereExpr = extractWhereExpression(query.esql.query);
 
     const fromCommand = Builder.command({
       name: 'from',
@@ -242,15 +241,15 @@ function buildRuleEsqlQuery(indices: string[], query: StreamQuery): string {
       ],
     });
 
-    const commands = [fromCommand];
+    const commands: ESQLCommand[] = [fromCommand];
 
-    if (whereCmd?.args[0]) {
+    if (whereExpr) {
       const whereCondition = query.feature?.filter
         ? Builder.expression.func.binary('and', [
-            whereCmd.args[0],
+            whereExpr,
             conditionToESQLAst(query.feature.filter),
           ])
-        : whereCmd.args[0];
+        : whereExpr;
 
       commands.push(Builder.command({ name: 'where', args: [whereCondition] }));
     } else if (query.feature?.filter) {

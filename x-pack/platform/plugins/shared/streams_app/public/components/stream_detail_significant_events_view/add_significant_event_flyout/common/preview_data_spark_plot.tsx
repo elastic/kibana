@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { StreamQuery, Streams } from '@kbn/streams-schema';
-import { buildEsqlQuery, getIndexPatternsForStream } from '@kbn/streams-schema';
+import { buildEsqlQuery, getIndexPatternsForStream, isNativeEsqlQuery } from '@kbn/streams-schema';
 import React, { useMemo } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { DISCOVER_APP_LOCATOR, type DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
@@ -92,7 +92,7 @@ export function PreviewDataSparkPlot({
   // exist yet during creation or live editing).
   const discoverEsqlQuery = useMemo(() => {
     if (!isQueryValid) return '';
-    if (!query.kql.query && query.esql?.query) return query.esql.query;
+    if (isNativeEsqlQuery(query)) return query.esql.query;
     return buildEsqlQuery(getIndexPatternsForStream(definition), query);
   }, [definition, query, isQueryValid]);
 

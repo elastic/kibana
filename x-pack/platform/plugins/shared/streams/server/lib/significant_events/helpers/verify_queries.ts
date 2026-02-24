@@ -8,7 +8,7 @@
 import type { Logger } from '@kbn/core/server';
 import { kqlQuery } from '@kbn/es-query';
 import { BasicPrettyPrinter, Parser } from '@kbn/esql-language';
-import type { ESQLCommand, ESQLSingleAstItem } from '@kbn/esql-language';
+import { extractWhereExpression } from '../../helpers/esql_helpers';
 import type { Streams } from '@kbn/streams-schema';
 import { getIndexPatternsForStream } from '@kbn/streams-schema';
 import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
@@ -53,22 +53,10 @@ function isNativeEsql(query: Query): boolean {
   return !query.kql && !!query.esql;
 }
 
-/**
- * Extracts the WHERE condition from an ES|QL query and builds a count query
- * targeting the authoritative stream indices with a time-range filter.
- */
 function buildEsqlCountQuery(esql: string, indices: string[]): string {
-  const { root } = Parser.parse(esql);
-  const whereCmd = root.commands.find(
-    (cmd): cmd is ESQLCommand => 'name' in cmd && cmd.name === 'where'
-  );
-  const whereExpr = whereCmd?.args[0];
-
+  const whereExpr = extractWhereExpression(esql);
   const from = `FROM ${indices.join(',')}`;
-  const where =
-    whereExpr && !Array.isArray(whereExpr)
-      ? `| WHERE ${BasicPrettyPrinter.expression(whereExpr as ESQLSingleAstItem)}`
-      : '';
+  const where = whereExpr ? `| WHERE ${BasicPrettyPrinter.expression(whereExpr)}` : '';
 
   return `${from} ${where} | STATS count = COUNT(*)`;
 }

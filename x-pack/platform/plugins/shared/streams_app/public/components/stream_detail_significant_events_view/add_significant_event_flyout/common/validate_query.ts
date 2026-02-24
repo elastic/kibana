@@ -6,15 +6,10 @@
  */
 
 import type { StreamQuery } from '@kbn/streams-schema';
+import { isNativeEsqlQuery } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
 import { fromKueryExpression } from '@kbn/es-query';
 import { Parser } from '@kbn/esql-language';
-
-function isNativeEsql(query: Partial<StreamQuery>): boolean {
-  const kqlQuery = query.kql?.query ?? '';
-  const esqlQuery = query.esql?.query ?? '';
-  return kqlQuery.length === 0 && esqlQuery.length > 0;
-}
 
 export function validateQuery(query: Partial<StreamQuery>): {
   title: { isInvalid: boolean; error?: string };
@@ -29,7 +24,7 @@ export function validateQuery(query: Partial<StreamQuery>): {
       })
     : undefined;
 
-  if (isNativeEsql(query)) {
+  if (isNativeEsqlQuery(query)) {
     const esqlQuery = query.esql!.query;
     let esqlSyntaxError = false;
     try {

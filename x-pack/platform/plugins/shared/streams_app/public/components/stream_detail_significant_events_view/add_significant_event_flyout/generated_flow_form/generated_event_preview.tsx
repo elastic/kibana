@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type { StreamQuery, Streams, System } from '@kbn/streams-schema';
+import { isNativeEsqlQuery } from '@kbn/streams-schema';
 import React, { useState } from 'react';
 import {
   EuiButton,
@@ -23,8 +24,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { CodeEditor } from '@kbn/code-editor';
 import { PreviewDataSparkPlot } from '../common/preview_data_spark_plot';
+import { EsqlQueryEditor } from '../../../esql_query_editor';
 import { validateQuery } from '../common/validate_query';
 import { UncontrolledStreamsAppSearchBar } from '../../../streams_app_search_bar/uncontrolled_streams_app_bar';
 import { SeveritySelector } from '../common/severity_selector';
@@ -243,18 +244,10 @@ export function GeneratedEventPreview({
           }
           {...(touched.kql && { ...validation.kql })}
         >
-          {!query.kql.query && query.esql?.query ? (
-            <CodeEditor
-              languageId="esql"
+          {isNativeEsqlQuery(query) ? (
+            <EsqlQueryEditor
               value={query.esql.query}
-              height={80}
-              options={{
-                minimap: { enabled: false },
-                lineNumbers: 'off',
-                scrollBeyondLastLine: false,
-                wordWrap: 'on',
-                readOnly: !isEditing,
-              }}
+              isDisabled={!isEditing}
               onChange={(value) => {
                 setQuery({ ...query, esql: { query: value } });
                 setTouched((prev) => ({ ...prev, kql: true }));

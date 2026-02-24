@@ -87,6 +87,7 @@ export {
   upsertStreamQueryRequestSchema,
   streamQuerySchema,
   streamQueryInputSchema,
+  isNativeEsqlQuery,
 } from './src/queries';
 
 export {

@@ -7,12 +7,12 @@
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core/server';
-import { BasicPrettyPrinter, Parser } from '@kbn/esql-language';
-import type { ESQLCommand, ESQLSingleAstItem } from '@kbn/esql-language';
+import { BasicPrettyPrinter } from '@kbn/esql-language';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { InferSearchResponseOf } from '@kbn/es-types';
 import type { SignificantEventsPreviewResponse, StreamQuery, Streams } from '@kbn/streams-schema';
-import { getIndexPatternsForStream } from '@kbn/streams-schema';
+import { getIndexPatternsForStream, isNativeEsqlQuery } from '@kbn/streams-schema';
+import { extractWhereExpression } from '../helpers/esql_helpers';
 import { notFound } from '@hapi/boom';
 import type { ChangePointType } from '@kbn/es-types/src';
 import type { Condition } from '@kbn/streamlang';
@@ -21,10 +21,6 @@ import { conditionToQueryDsl } from '@kbn/streamlang';
 type PreviewStreamQuery = Pick<StreamQuery, 'kql' | 'feature'> & {
   esql?: { query: string };
 };
-
-function isNativeEsqlQuery(query: PreviewStreamQuery): boolean {
-  return !query.kql.query && !!query.esql?.query;
-}
 
 function createSearchRequest({
   from,
@@ -113,26 +109,16 @@ function parseBucketSizeMs(bucketSize: string): number {
   return parseInt(value, 10) * (multipliers[unit] || 1000);
 }
 
-/**
- * Extracts the WHERE condition from an ES|QL query and builds a histogram
- * query targeting the authoritative stream indices.
- */
 function buildEsqlHistogramQuery(
   esqlQuery: string,
   indices: string[],
   bucketSize: string
 ): string {
-  const { root } = Parser.parse(esqlQuery);
-  const whereCmd = root.commands.find(
-    (cmd): cmd is ESQLCommand => 'name' in cmd && cmd.name === 'where'
-  );
-  const whereExpr = whereCmd?.args[0];
-
+  const whereExpr = extractWhereExpression(esqlQuery);
   const fromPart = `FROM ${indices.join(',')}`;
-  const wherePart =
-    whereExpr && !Array.isArray(whereExpr)
-      ? `| WHERE ${BasicPrettyPrinter.expression(whereExpr as ESQLSingleAstItem)}`
-      : '';
+  const wherePart = whereExpr
+    ? `| WHERE ${BasicPrettyPrinter.expression(whereExpr)}`
+    : '';
   const interval = toEsqlDuration(bucketSize);
 
   return `${fromPart} ${wherePart} | STATS count = COUNT(*) BY bucket = BUCKET(@timestamp, ${interval})`;
