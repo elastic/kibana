@@ -481,7 +481,7 @@ export default ({ getService }: FtrProviderContext) => {
             .expect(400);
 
           expect(body.message).toBe(
-            '[request body]: investigation_fields: Expected object, received array'
+            '[request body]: investigation_fields: Invalid input: expected object, received array'
           );
         });
       });
