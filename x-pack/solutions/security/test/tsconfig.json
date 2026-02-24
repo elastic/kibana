@@ -5,7 +5,6 @@
     "types": [
       "node",
       "cheerio",
-      "@emotion/react/types/css-prop",
       "@kbn/ambient-ui-types",
       "@kbn/ambient-ftr-types"
     ],
@@ -59,7 +58,6 @@
     "@kbn/repo-info",
     "@kbn/serverless-security-settings",
     "@kbn/rison",
-    "@kbn/core-chrome-browser",
     "@kbn/management-settings-ids",
     "@kbn/connector-schemas",
     "@kbn/cloud-security-posture-graph",

@@ -86,7 +86,6 @@ export const getDocumentCountStatsRequest = (
     ...(changePoints
       ? {
           change_point_request: {
-            // @ts-expect-error missing from ES spec
             change_point: {
               buckets_path: 'eventRate>_count',
             },

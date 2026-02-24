@@ -8,7 +8,8 @@
  */
 
 import { waitFor } from '@testing-library/react';
-import { EsqlControlType, ESQLVariableType, type ESQLControlState } from '@kbn/esql-types';
+import { EsqlControlType, ESQLVariableType } from '@kbn/esql-types';
+import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import { initializeESQLControlManager } from './esql_control_manager';
 import { BehaviorSubject } from 'rxjs';
 
@@ -40,13 +41,13 @@ describe('initializeESQLControlManager', () => {
   describe('values from query', () => {
     test('should load availableOptions but not serialize them', async () => {
       const initialState = {
-        selectedOptions: ['option1'],
-        availableOptions: ['option1', 'option2'], // Test backwards compatibility with serialized availableOptions
-        variableName: 'variable1',
-        variableType: 'values',
-        esqlQuery: 'FROM foo | STATS BY column',
-        controlType: EsqlControlType.VALUES_FROM_QUERY,
-      } as ESQLControlState;
+        selected_options: ['option1'],
+        available_options: ['option1', 'option2'], // Test backwards compatibility with serialized availableOptions
+        variable_name: 'variable1',
+        variable_type: 'values',
+        esql_query: 'FROM foo | STATS BY column',
+        control_type: EsqlControlType.VALUES_FROM_QUERY,
+      } as OptionsListESQLControlState;
 
       let dataHasLoaded = false;
       const selections = initializeESQLControlManager(uuid, dashboardApi, initialState, jest.fn());
@@ -63,15 +64,15 @@ describe('initializeESQLControlManager', () => {
       expect('availableOptions' in latestState).toBeFalsy();
       expect(latestState).toMatchInlineSnapshot(`
         Object {
-          "controlType": "VALUES_FROM_QUERY",
-          "esqlQuery": "FROM foo | STATS BY column",
-          "selectedOptions": Array [
+          "control_type": "VALUES_FROM_QUERY",
+          "esql_query": "FROM foo | STATS BY column",
+          "selected_options": Array [
             "option1",
           ],
-          "singleSelect": true,
+          "single_select": true,
           "title": "",
-          "variableName": "variable1",
-          "variableType": "values",
+          "variable_name": "variable1",
+          "variable_type": "values",
         }
       `);
     });
@@ -80,12 +81,12 @@ describe('initializeESQLControlManager', () => {
   describe('static values', () => {
     test('should not load availableOptions and instead just serialize them', async () => {
       const initialState = {
-        selectedOptions: ['option1'],
-        availableOptions: ['option1', 'option2'],
-        variableName: 'variable1',
-        variableType: 'values',
-        controlType: EsqlControlType.STATIC_VALUES,
-      } as ESQLControlState;
+        selected_options: ['option1'],
+        available_options: ['option1', 'option2'],
+        variable_name: 'variable1',
+        variable_type: 'values',
+        control_type: EsqlControlType.STATIC_VALUES,
+      } as OptionsListESQLControlState;
 
       const selections = initializeESQLControlManager(uuid, dashboardApi, initialState, jest.fn());
 
@@ -97,19 +98,19 @@ describe('initializeESQLControlManager', () => {
       const latestState = selections.getLatestState();
       expect(latestState).toMatchInlineSnapshot(`
         Object {
-          "availableOptions": Array [
+          "available_options": Array [
             "option1",
             "option2",
           ],
-          "controlType": "STATIC_VALUES",
-          "esqlQuery": "",
-          "selectedOptions": Array [
+          "control_type": "STATIC_VALUES",
+          "esql_query": "",
+          "selected_options": Array [
             "option1",
           ],
-          "singleSelect": true,
+          "single_select": true,
           "title": "",
-          "variableName": "variable1",
-          "variableType": "values",
+          "variable_name": "variable1",
+          "variable_type": "values",
         }
       `);
     });
@@ -118,15 +119,15 @@ describe('initializeESQLControlManager', () => {
   describe('esqlVariable$', () => {
     test('should emit single value for single-select mode', async () => {
       const initialState = {
-        selectedOptions: ['option1'],
-        availableOptions: ['option1', 'option2'],
-        variableName: 'myVariable',
-        variableType: 'values',
-        controlType: EsqlControlType.STATIC_VALUES,
-        singleSelect: true,
+        selected_options: ['option1'],
+        available_options: ['option1', 'option2'],
+        variable_name: 'myVariable',
+        variable_type: 'values',
+        control_type: EsqlControlType.STATIC_VALUES,
+        single_select: true,
         title: 'Test Control',
-        esqlQuery: '',
-      } as ESQLControlState;
+        esql_query: '',
+      } as OptionsListESQLControlState;
 
       const selections = initializeESQLControlManager(uuid, dashboardApi, initialState, jest.fn());
       await waitFor(() => {
@@ -144,15 +145,15 @@ describe('initializeESQLControlManager', () => {
 
     test('should emit array for multi-select mode', async () => {
       const initialState = {
-        selectedOptions: ['option1', 'option2'],
-        availableOptions: ['option1', 'option2', 'option3'],
-        variableName: 'myVariable',
-        variableType: 'values',
-        controlType: EsqlControlType.STATIC_VALUES,
-        singleSelect: false,
+        selected_options: ['option1', 'option2'],
+        available_options: ['option1', 'option2', 'option3'],
+        variable_name: 'myVariable',
+        variable_type: 'values',
+        control_type: EsqlControlType.STATIC_VALUES,
+        single_select: false,
         title: 'Test Control',
-        esqlQuery: '',
-      } as ESQLControlState;
+        esql_query: '',
+      } as OptionsListESQLControlState;
 
       const selections = initializeESQLControlManager(uuid, dashboardApi, initialState, jest.fn());
       await waitFor(() => {
@@ -172,15 +173,15 @@ describe('initializeESQLControlManager', () => {
   describe('chaining variables controls', () => {
     test('should refetch values when the query variables change', async () => {
       const initialState = {
-        selectedOptions: [],
-        variableName: 'variable2',
-        variableType: ESQLVariableType.VALUES,
+        selected_options: [],
+        variable_name: 'variable2',
+        variable_type: ESQLVariableType.VALUES,
         // query depends on another variable
-        esqlQuery: 'FROM foo | WHERE column1 == ?variable1 | STATS BY column2',
-        controlType: EsqlControlType.VALUES_FROM_QUERY,
-        singleSelect: true,
+        esql_query: 'FROM foo | WHERE column1 == ?variable1 | STATS BY column2',
+        control_type: EsqlControlType.VALUES_FROM_QUERY,
+        single_select: true,
         title: 'My variable',
-      } as ESQLControlState;
+      } as OptionsListESQLControlState;
 
       const setDataLoadingMock = jest.fn();
       initializeESQLControlManager(uuid, dashboardApi, initialState, setDataLoadingMock);
@@ -220,14 +221,14 @@ describe('initializeESQLControlManager', () => {
 
     test("should not refetch when the variable value doesn't change", async () => {
       const initialState = {
-        selectedOptions: [],
-        variableName: 'variable1',
-        variableType: ESQLVariableType.VALUES,
-        esqlQuery: 'FROM foo | WHERE column1 == ?variable2 | STATS BY column2',
-        controlType: EsqlControlType.VALUES_FROM_QUERY,
-        singleSelect: true,
+        selected_options: [],
+        variable_name: 'variable1',
+        variable_type: ESQLVariableType.VALUES,
+        esql_query: 'FROM foo | WHERE column1 == ?variable2 | STATS BY column2',
+        control_type: EsqlControlType.VALUES_FROM_QUERY,
+        single_select: true,
         title: 'My variable',
-      } as ESQLControlState;
+      } as OptionsListESQLControlState;
 
       const setDataLoadingMock = jest.fn();
       initializeESQLControlManager(uuid, dashboardApi, initialState, setDataLoadingMock);
@@ -263,14 +264,15 @@ describe('initializeESQLControlManager', () => {
 
     test('should refetch values when the timeRange changes', async () => {
       const initialState = {
-        selectedOptions: [],
-        variableName: 'variable1',
-        variableType: ESQLVariableType.VALUES,
-        esqlQuery: 'FROM foo | WHERE @timestamp >= ?start AND @timestamp <= ?end | STATS BY column',
-        controlType: EsqlControlType.VALUES_FROM_QUERY,
-        singleSelect: true,
+        selected_options: [],
+        variable_name: 'variable1',
+        variable_type: ESQLVariableType.VALUES,
+        esql_query:
+          'FROM foo | WHERE @timestamp >= ?start AND @timestamp <= ?end | STATS BY column',
+        control_type: EsqlControlType.VALUES_FROM_QUERY,
+        single_select: true,
         title: 'My variable',
-      } as ESQLControlState;
+      } as OptionsListESQLControlState;
 
       const setDataLoadingMock = jest.fn();
       initializeESQLControlManager(uuid, dashboardApi, initialState, setDataLoadingMock);
