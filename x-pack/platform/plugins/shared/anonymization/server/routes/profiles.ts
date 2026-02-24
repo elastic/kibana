@@ -19,6 +19,7 @@ import {
 } from '../../common';
 import { ProfilesRepository } from '../repository';
 import { ensureProfilesIndex } from '../system_index';
+import { ensureGlobalAnonymizationProfile, isGlobalProfileTarget } from '../initialization';
 
 const fieldRuleSchema = schema.object({
   field: schema.string(),
@@ -57,6 +58,12 @@ const validateFieldRules = (fieldRules: FieldRule[]): string | undefined => {
     if (rule.anonymized && !rule.entityClass) {
       return 'entityClass is required when anonymized is true';
     }
+  }
+};
+
+const validateGlobalProfileRules = (fieldRules: FieldRule[]): string | undefined => {
+  if (fieldRules.length > 0) {
+    return 'Global anonymization profile cannot contain fieldRules';
   }
 };
 
@@ -101,6 +108,12 @@ export const registerProfileRoutes = (router: IRouter, logger: Logger): void => 
           const validationError = validateFieldRules(body.rules.fieldRules);
           if (validationError) {
             return response.badRequest({ body: { message: validationError } });
+          }
+          if (isGlobalProfileTarget(body.targetType, body.targetId)) {
+            const globalProfileValidation = validateGlobalProfileRules(body.rules.fieldRules);
+            if (globalProfileValidation) {
+              return response.badRequest({ body: { message: globalProfileValidation } });
+            }
           }
 
           const coreContext = await context.core;
@@ -180,6 +193,11 @@ export const registerProfileRoutes = (router: IRouter, logger: Logger): void => 
           await ensureProfilesIndex({ esClient, logger });
 
           const repo = new ProfilesRepository(esClient);
+          await ensureGlobalAnonymizationProfile({
+            namespace,
+            profilesRepo: repo,
+            logger,
+          });
           const result = await repo.find({
             namespace,
             filter: query.filter,
@@ -291,6 +309,21 @@ export const registerProfileRoutes = (router: IRouter, logger: Logger): void => 
           const esClient = coreContext.elasticsearch.client.asInternalUser;
 
           const repo = new ProfilesRepository(esClient);
+          const existing = await repo.get(namespace, request.params.id);
+          if (!existing) {
+            return response.notFound({ body: { message: 'Profile not found' } });
+          }
+
+          if (
+            isGlobalProfileTarget(existing.targetType, existing.targetId) &&
+            body.rules?.fieldRules
+          ) {
+            const globalProfileValidation = validateGlobalProfileRules(body.rules.fieldRules);
+            if (globalProfileValidation) {
+              return response.badRequest({ body: { message: globalProfileValidation } });
+            }
+          }
+
           const profile = await repo.update(namespace, request.params.id, {
             ...body,
             updatedBy: coreContext.security.authc.getCurrentUser()?.username ?? 'unknown',

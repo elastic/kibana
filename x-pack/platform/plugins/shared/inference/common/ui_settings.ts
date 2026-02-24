@@ -70,7 +70,9 @@ export const uiSettings: Record<string, UiSettingsParams> = {
       2
     ),
     description: i18n.translate('xpack.inference.anonymizationSettingsDescription', {
-      defaultMessage: `List of anonymization rules
+      defaultMessage: `Deprecated setting. Use GenAI Settings anonymization profiles instead.
+          <br />
+          List of anonymization rules
           <ul>
             <li><strong>type:</strong> "ner" or "regex"</li>
             <li><strong>entityClass:</strong> (regex type only) eg: EMAIL, URL, IP</li>
@@ -86,6 +88,13 @@ export const uiSettings: Record<string, UiSettingsParams> = {
         em: (chunks) => `<em>${chunks}</em>`,
       },
     }),
+    deprecation: {
+      message:
+        'This setting is deprecated. Configure anonymization via the Global Anonymization Profile in GenAI Settings.',
+      docLinksKey: 'advancedSettings',
+    },
+    readonly: true,
+    readonlyMode: 'strict',
     schema: schema.object({
       rules: schema.arrayOf(schema.oneOf([regexRuleSchema, nerRuleSchema])),
     }),

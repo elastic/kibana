@@ -10,9 +10,9 @@ import type { Logger } from '@kbn/logging';
 import type {
   BoundInferenceClient,
   InferenceClient,
-  AnonymizationSettings,
+  AnonymizationRule,
+  ChatCompleteAnonymizationTarget,
 } from '@kbn/inference-common';
-import { aiAnonymizationSettings } from '@kbn/inference-common';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { createClient as createInferenceClient, createChatModel } from './inference_client';
 import { RegexWorkerService } from './chat_complete/anonymization/regex_worker_service';
@@ -74,27 +74,40 @@ export class InferencePlugin
     );
 
     const createAnonymizationRulesPromise = async (request: KibanaRequest) => {
-      const soClient = core.savedObjects.getScopedClient(request);
-      const uiSettingsClient = core.uiSettings.asScopedToClient(soClient);
-      const settingsStr = await uiSettingsClient.get<string | undefined>(aiAnonymizationSettings);
-
-      if (!settingsStr) {
+      const namespace =
+        core.savedObjects.getScopedClient(request).getCurrentNamespace() ?? 'default';
+      const policyService = pluginsStart.anonymization?.getPolicyService();
+      if (!policyService) {
         return [];
       }
 
-      try {
-        const settings = JSON.parse(settingsStr) as AnonymizationSettings;
-        return settings.rules || [];
-      } catch (error) {
-        this.logger.error('Failed to parse anonymization settings:', error);
+      await policyService.ensureGlobalProfile(namespace);
+      const globalProfile = await policyService.getGlobalProfile(namespace);
+      if (!globalProfile) {
         return [];
       }
+
+      const regexRules: AnonymizationRule[] = globalProfile.rules.regexRules.map((rule) => ({
+        type: 'RegExp',
+        enabled: rule.enabled,
+        pattern: rule.pattern,
+        entityClass: rule.entityClass,
+      }));
+      const nerRules: AnonymizationRule[] = globalProfile.rules.nerRules.map((rule) => ({
+        type: 'NER',
+        enabled: rule.enabled,
+        modelId: rule.modelId,
+        allowedEntityClasses: rule.allowedEntityClasses,
+      }));
+
+      return [...regexRules, ...nerRules];
     };
 
     return {
       getClient: <T extends InferenceClientCreateOptions>(options: T) => {
         const namespace =
           core.savedObjects.getScopedClient(options.request).getCurrentNamespace() ?? 'default';
+        const policyService = pluginsStart.anonymization?.getPolicyService();
         return createInferenceClient({
           ...options,
           namespace,
@@ -103,11 +116,24 @@ export class InferencePlugin
           actions: pluginsStart.actions,
           logger: this.logger.get('client'),
           esClient: core.elasticsearch.client.asScoped(options.request).asCurrentUser,
+          saltPromise: policyService?.getSalt(namespace),
+          resolveEffectivePolicy: async (target?: ChatCompleteAnonymizationTarget) => {
+            if (!policyService || !target) {
+              return undefined;
+            }
+            return policyService.resolveEffectivePolicy(namespace, {
+              type: target.targetType,
+              id: target.targetId,
+            });
+          },
           replacementsEncryptionKey: this.config.replacements.encryptionKey,
         }) as T extends InferenceBoundClientCreateOptions ? BoundInferenceClient : InferenceClient;
       },
 
       getChatModel: async (options) => {
+        const namespace =
+          core.savedObjects.getScopedClient(options.request).getCurrentNamespace() ?? 'default';
+        const policyService = pluginsStart.anonymization?.getPolicyService();
         return createChatModel({
           request: options.request,
           connectorId: options.connectorId,
@@ -117,6 +143,16 @@ export class InferencePlugin
           anonymizationRulesPromise: createAnonymizationRulesPromise(options.request),
           regexWorker: this.regexWorker!,
           esClient: core.elasticsearch.client.asScoped(options.request).asCurrentUser,
+          saltPromise: policyService?.getSalt(namespace),
+          resolveEffectivePolicy: async (target?: ChatCompleteAnonymizationTarget) => {
+            if (!policyService || !target) {
+              return undefined;
+            }
+            return policyService.resolveEffectivePolicy(namespace, {
+              type: target.targetType,
+              id: target.targetId,
+            });
+          },
           replacementsEncryptionKey: this.config.replacements.encryptionKey,
           logger: this.logger,
         });

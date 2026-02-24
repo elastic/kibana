@@ -104,7 +104,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Server error.
-      summary: Find anonymization profiles
+      summary: Find anonymization profiles (ensures global profile in current space)
       tags:
         - Anonymization API
         - Anonymization API

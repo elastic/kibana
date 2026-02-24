@@ -10,6 +10,8 @@ import type { FtrProviderContext } from '../../ftr_provider_context';
 
 const PROFILES_API = '/internal/anonymization/profiles';
 const API_VERSION = '1';
+const GLOBAL_PROFILE_TARGET_TYPE = 'index';
+const GLOBAL_PROFILE_TARGET_ID = '__kbn_global_anonymization_profile__';
 
 const defaultProfile = {
   name: 'Test Anonymization Profile',
@@ -163,6 +165,42 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
+    describe('global profile behavior', () => {
+      it('creates or self-heals the global profile on _find', async () => {
+        const { body, status } = await supertest
+          .get(`${PROFILES_API}/_find`)
+          .set('elastic-api-version', API_VERSION);
+
+        expect(status).to.be(200);
+        const globalProfile = body.data.find(
+          (profile: { targetType: string; targetId: string }) =>
+            profile.targetType === GLOBAL_PROFILE_TARGET_TYPE &&
+            profile.targetId === GLOBAL_PROFILE_TARGET_ID
+        );
+
+        expect(globalProfile).to.be.ok();
+        expect(globalProfile.rules.fieldRules).to.eql([]);
+      });
+
+      it('rejects non-empty fieldRules on create for global profile', async () => {
+        const { body, status } = await supertest
+          .post(PROFILES_API)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', API_VERSION)
+          .send({
+            name: 'Invalid global profile',
+            targetType: GLOBAL_PROFILE_TARGET_TYPE,
+            targetId: GLOBAL_PROFILE_TARGET_ID,
+            rules: {
+              fieldRules: [{ field: 'host.name', allowed: true, anonymized: false }],
+            },
+          });
+
+        expect(status).to.be(400);
+        expect(body.message).to.contain('Global anonymization profile cannot contain fieldRules');
+      });
+    });
+
     describe('space isolation', () => {
       it('returns 404 when getting a profile from a different space', async () => {
         const spaceId = `anon-space-${Date.now()}`;
@@ -196,6 +234,27 @@ export default function ({ getService }: FtrProviderContext) {
             .delete(`/s/${spaceId}${PROFILES_API}/${created.id}`)
             .set('kbn-xsrf', 'true')
             .set('elastic-api-version', API_VERSION);
+        } finally {
+          await spaces.delete(spaceId);
+        }
+      });
+
+      it('self-heals global profile in a newly created space on _find', async () => {
+        const spaceId = `anon-global-space-${Date.now()}`;
+        await spaces.create({ id: spaceId, name: spaceId });
+
+        try {
+          const { body, status } = await supertest
+            .get(`/s/${spaceId}${PROFILES_API}/_find`)
+            .set('elastic-api-version', API_VERSION);
+
+          expect(status).to.be(200);
+          const globalProfile = body.data.find(
+            (profile: { targetType: string; targetId: string }) =>
+              profile.targetType === GLOBAL_PROFILE_TARGET_TYPE &&
+              profile.targetId === GLOBAL_PROFILE_TARGET_ID
+          );
+          expect(globalProfile).to.be.ok();
         } finally {
           await spaces.delete(spaceId);
         }

@@ -21,6 +21,11 @@ jest.mock('./initialization', () => ({
   ALERTS_DATA_VIEW_TARGET_TYPE: 'data_view',
   getAlertsDataViewTargetId: (namespace: string) => `security-solution-alert-${namespace}`,
   ensureAlertsDataViewProfile: jest.fn().mockResolvedValue(undefined),
+  GLOBAL_ANONYMIZATION_PROFILE_TARGET_TYPE: 'index',
+  GLOBAL_ANONYMIZATION_PROFILE_TARGET_ID: '__kbn_global_anonymization_profile__',
+  LEGACY_ANONYMIZATION_UI_SETTING_KEY: 'ai:anonymizationSettings',
+  ensureGlobalAnonymizationProfile: jest.fn().mockResolvedValue(undefined),
+  migrateLegacyUiSettingsIntoGlobalProfile: jest.fn().mockResolvedValue(undefined),
 }));
 
 const createProfile = ({

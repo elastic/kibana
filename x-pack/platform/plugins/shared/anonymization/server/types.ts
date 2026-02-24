@@ -35,6 +35,16 @@ export interface AnonymizationPolicyService {
   getProfile: (namespace: string, profileId: string) => Promise<AnonymizationProfile | null>;
 
   /**
+   * Retrieves the global profile for a namespace.
+   */
+  getGlobalProfile: (namespace: string) => Promise<AnonymizationProfile | null>;
+
+  /**
+   * Ensures the global profile exists for a namespace.
+   */
+  ensureGlobalProfile: (namespace: string) => Promise<void>;
+
+  /**
    * Retrieves the per-space salt material for deterministic tokenization.
    */
   getSalt: (namespace: string) => Promise<string>;

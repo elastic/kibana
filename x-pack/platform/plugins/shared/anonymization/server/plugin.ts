@@ -36,6 +36,11 @@ import {
   getAlertsDataViewTargetId,
   ALERTS_DATA_VIEW_TARGET_TYPE,
   ensureAlertsDataViewProfile,
+  ensureGlobalAnonymizationProfile,
+  GLOBAL_ANONYMIZATION_PROFILE_TARGET_ID,
+  GLOBAL_ANONYMIZATION_PROFILE_TARGET_TYPE,
+  LEGACY_ANONYMIZATION_UI_SETTING_KEY,
+  migrateLegacyUiSettingsIntoGlobalProfile,
 } from './initialization';
 
 interface AnonymizationSetupDeps {
@@ -162,10 +167,72 @@ export class AnonymizationPlugin
       }
     };
 
-    // Ensure a default alerts data view profile exists in the default space at startup.
+    const getKnownNamespaces = async (): Promise<string[]> => {
+      const namespaces = new Set<string>(['default']);
+      const internalSoClient = core.savedObjects.getUnsafeInternalClient();
+
+      try {
+        let page = 1;
+        let total = 0;
+
+        do {
+          const result = await internalSoClient.find<Record<string, never>>({
+            type: 'space',
+            page,
+            perPage: 1000,
+          });
+          for (const space of result.saved_objects) {
+            namespaces.add(space.id);
+          }
+          total = result.total;
+          page += 1;
+        } while ((page - 1) * 1000 < total);
+      } catch (err) {
+        this.logger.debug(
+          `Failed to enumerate spaces for global anonymization profile bootstrap: ${
+            (err as Error).message
+          }`
+        );
+      }
+
+      return [...namespaces];
+    };
+
+    const getLegacySettingsForNamespace = async (
+      namespace: string
+    ): Promise<string | undefined> => {
+      const scopedInternalClient = core.savedObjects
+        .getUnsafeInternalClient()
+        .asScopedToNamespace(namespace);
+      const uiSettingsClient = core.uiSettings.asScopedToClient(scopedInternalClient);
+      return uiSettingsClient.get<string | undefined>(LEGACY_ANONYMIZATION_UI_SETTING_KEY);
+    };
+
+    const ensureGlobalProfileForNamespace = async (namespace: string): Promise<void> => {
+      const legacySettings = await getLegacySettingsForNamespace(namespace);
+
+      await ensureGlobalAnonymizationProfile({
+        namespace,
+        profilesRepo,
+        logger: this.logger,
+      });
+
+      await migrateLegacyUiSettingsIntoGlobalProfile({
+        namespace,
+        settingsString: legacySettings,
+        profilesRepo,
+        logger: this.logger,
+      });
+    };
+
+    // Ensure global profiles across spaces + default alerts profile at startup.
     void (async () => {
       try {
         await ensureProfilesIndexReady();
+        const namespaces = await getKnownNamespaces();
+        await Promise.all(
+          namespaces.map((namespace) => ensureGlobalProfileForNamespace(namespace))
+        );
         await ensureAlertsDataViewProfile({
           namespace: 'default',
           profilesRepo,
@@ -182,12 +249,14 @@ export class AnonymizationPlugin
 
     this.policyService = {
       resolveEffectivePolicy: async (namespace, target) => {
+        await ensureProfilesIndexReady();
+        await ensureGlobalProfileForNamespace(namespace);
+
         if (
           target.type === ALERTS_DATA_VIEW_TARGET_TYPE &&
           target.id === getAlertsDataViewTargetId(namespace)
         ) {
           // Lazily ensure the alerts profile in the request namespace.
-          await ensureProfilesIndexReady();
           await ensureAlertsDataViewProfile({
             namespace,
             profilesRepo,
@@ -238,6 +307,19 @@ export class AnonymizationPlugin
 
       getProfile: async (namespace, profileId) => {
         return profilesRepo.get(namespace, profileId);
+      },
+
+      getGlobalProfile: async (namespace) => {
+        return profilesRepo.findByTarget(
+          namespace,
+          GLOBAL_ANONYMIZATION_PROFILE_TARGET_TYPE,
+          GLOBAL_ANONYMIZATION_PROFILE_TARGET_ID
+        );
+      },
+
+      ensureGlobalProfile: async (namespace) => {
+        await ensureProfilesIndexReady();
+        await ensureGlobalProfileForNamespace(namespace);
       },
 
       getSalt: async (namespace) => {

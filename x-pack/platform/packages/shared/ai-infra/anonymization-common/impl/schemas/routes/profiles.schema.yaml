@@ -47,7 +47,7 @@ paths:
       x-codegen-enabled: true
       x-labels: [ess, serverless]
       operationId: FindAnonymizationProfiles
-      summary: Find anonymization profiles
+      summary: Find anonymization profiles (ensures global profile in current space)
       tags: [Anonymization API]
       parameters:
         - in: query
