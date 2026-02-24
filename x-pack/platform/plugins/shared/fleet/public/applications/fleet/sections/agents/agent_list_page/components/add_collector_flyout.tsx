@@ -25,11 +25,14 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+
 import {
   sendGetOneAgentPolicy,
   sendCreateAgentPolicyForRq,
   sendGetEnrollmentAPIKeys,
   useGetFleetServerHosts,
+  useFleetStatus,
 } from '../../../../hooks';
 import { AgentEnrollmentConfirmationStep, usePollingAgentCount } from '../../../../components';
 
@@ -41,18 +44,27 @@ interface AddCollectorFlyoutProps {
 const OPAMP_POLICY_ID = 'opamp';
 export const OPAMP_POLICY_NAME = 'OpAMP';
 
-async function fetchOpampPolicy(): Promise<any | null> {
-  const res = await sendGetOneAgentPolicy(OPAMP_POLICY_ID);
+function getOpAMPPolicyId(spaceId?: string) {
+  return !spaceId || spaceId === '' || spaceId === DEFAULT_SPACE_ID
+    ? OPAMP_POLICY_ID
+    : `${spaceId}-${OPAMP_POLICY_ID}`;
+}
+
+async function fetchOpampPolicy(spaceId?: string): Promise<any | null> {
+  const res = await sendGetOneAgentPolicy(getOpAMPPolicyId(spaceId));
+  if (res?.error?.statusCode === 404) {
+    return null;
+  }
   if (res?.error?.message) {
     throw new Error(res.error.message);
   }
   return res?.data?.item || null;
 }
 
-async function createOpampPolicyWithHook(): Promise<any> {
+async function createOpampPolicyWithHook(spaceId?: string): Promise<any> {
   return sendCreateAgentPolicyForRq({
     name: OPAMP_POLICY_NAME,
-    id: OPAMP_POLICY_ID,
+    id: getOpAMPPolicyId(spaceId),
     namespace: 'default',
     description: 'Agent policy for OpAMP collectors',
     is_managed: true,
@@ -71,10 +83,10 @@ async function fetchEnrollmentTokenWithHook(policyId: string): Promise<any[]> {
   return res?.data?.items || [];
 }
 
-async function ensurePolicyAndFetchToken(): Promise<string | undefined> {
-  let opampPolicy = await fetchOpampPolicy();
+async function ensurePolicyAndFetchToken(spaceId?: string): Promise<string | undefined> {
+  let opampPolicy = await fetchOpampPolicy(spaceId);
   if (!opampPolicy) {
-    const created = await createOpampPolicyWithHook();
+    const created = await createOpampPolicyWithHook(spaceId);
     opampPolicy = created.item || created;
   }
   const tokens = await fetchEnrollmentTokenWithHook(opampPolicy.id);
@@ -88,7 +100,8 @@ export const AddCollectorFlyout: React.FunctionComponent<AddCollectorFlyoutProps
   const fleetServerHosts = useGetFleetServerHosts();
   const defaultFleetServerHost =
     fleetServerHosts.data?.items?.find((item) => item.is_default)?.host_urls?.[0] || '';
-  const { enrolledAgentIds } = usePollingAgentCount(OPAMP_POLICY_ID, {
+  const { spaceId } = useFleetStatus();
+  const { enrolledAgentIds } = usePollingAgentCount(getOpAMPPolicyId(spaceId), {
     noLowerTimeLimit: true,
     pollImmediately: true,
   });
@@ -99,7 +112,7 @@ export const AddCollectorFlyout: React.FunctionComponent<AddCollectorFlyoutProps
     error: queryError,
   } = useQuery<string | undefined, Error>({
     queryKey: ['opampPolicyAndToken'],
-    queryFn: ensurePolicyAndFetchToken,
+    queryFn: () => ensurePolicyAndFetchToken(spaceId),
   });
 
   const error = queryError?.message ?? null;
@@ -174,7 +187,7 @@ service:
       ),
     },
     AgentEnrollmentConfirmationStep({
-      selectedPolicyId: OPAMP_POLICY_ID,
+      selectedPolicyId: getOpAMPPolicyId(spaceId),
       onClickViewAgents,
       troubleshootLink: '', // TODO: add troubleshooting guide link
       agentCount: enrolledAgentIds.length,

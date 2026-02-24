@@ -16,6 +16,7 @@ import {
   sendGetEnrollmentAPIKeys,
   sendGetOneAgentPolicy,
   useGetFleetServerHosts,
+  useFleetStatus,
 } from '../../../../hooks';
 import { usePollingAgentCount } from '../../../../components';
 
@@ -27,6 +28,7 @@ jest.mock('../../../../hooks', () => ({
   sendCreateAgentPolicyForRq: jest.fn(),
   sendGetEnrollmentAPIKeys: jest.fn(),
   useGetFleetServerHosts: jest.fn(),
+  useFleetStatus: jest.fn(),
 }));
 jest.mock('../../../../components', () => ({
   AgentEnrollmentConfirmationStep: () => ({
@@ -41,6 +43,7 @@ const mockedSendCreateAgentPolicyForRq = jest.mocked(sendCreateAgentPolicyForRq)
 const mockedSendGetEnrollmentAPIKeys = jest.mocked(sendGetEnrollmentAPIKeys);
 const mockedUseGetFleetServerHosts = jest.mocked(useGetFleetServerHosts);
 const mockedUsePollingAgentCount = jest.mocked(usePollingAgentCount);
+const mockedUseFleetStatus = jest.mocked(useFleetStatus);
 
 describe('AddCollectorFlyout', () => {
   let renderer: TestRenderer;
@@ -70,6 +73,8 @@ describe('AddCollectorFlyout', () => {
       enrolledAgentIds: [],
       total: 0,
     } as any);
+
+    mockedUseFleetStatus.mockReturnValue({ spaceId: 'default' } as any);
   });
 
   it('uses existing OpAMP policy and renders generated configuration', async () => {
@@ -99,7 +104,7 @@ describe('AddCollectorFlyout', () => {
 
   it('creates OpAMP policy when missing and then fetches enrollment token', async () => {
     mockedSendGetOneAgentPolicy.mockResolvedValue({
-      data: { item: null },
+      error: { statusCode: 404 },
     } as any);
     mockedSendCreateAgentPolicyForRq.mockResolvedValue({
       item: { id: 'opamp' },
@@ -122,6 +127,60 @@ describe('AddCollectorFlyout', () => {
 
     const configYaml = component.getByTestId('opampConfigYaml').textContent;
     expect(configYaml).toContain('Authorization: ApiKey created-token');
+  });
+
+  it('uses space-prefixed policy ID when spaceId is non-default', async () => {
+    mockedUseFleetStatus.mockReturnValue({ spaceId: 'my-space' } as any);
+
+    mockedSendGetOneAgentPolicy.mockResolvedValue({
+      data: { item: { id: 'my-space-opamp' } },
+    } as any);
+    mockedSendGetEnrollmentAPIKeys.mockResolvedValue({
+      data: { items: [{ api_key: 'space-token' }] },
+    } as any);
+
+    const component = renderFlyout();
+
+    await waitFor(() => {
+      expect(mockedSendGetOneAgentPolicy).toHaveBeenCalledWith('my-space-opamp');
+      expect(mockedSendGetEnrollmentAPIKeys).toHaveBeenCalledWith({
+        page: 1,
+        perPage: 1,
+        kuery: 'policy_id:"my-space-opamp"',
+      });
+    });
+
+    const configYaml = component.getByTestId('opampConfigYaml').textContent;
+    expect(configYaml).toContain('Authorization: ApiKey space-token');
+  });
+
+  it('creates space-prefixed policy when missing in non-default space', async () => {
+    mockedUseFleetStatus.mockReturnValue({ spaceId: 'my-space' } as any);
+
+    mockedSendGetOneAgentPolicy.mockResolvedValue({
+      error: { statusCode: 404 },
+    } as any);
+    mockedSendCreateAgentPolicyForRq.mockResolvedValue({
+      item: { id: 'my-space-opamp' },
+    } as any);
+    mockedSendGetEnrollmentAPIKeys.mockResolvedValue({
+      data: { items: [{ api_key: 'space-created-token' }] },
+    } as any);
+
+    const component = renderFlyout();
+
+    await waitFor(() => {
+      expect(mockedSendCreateAgentPolicyForRq).toHaveBeenCalledWith({
+        name: 'OpAMP',
+        id: 'my-space-opamp',
+        namespace: 'default',
+        description: 'Agent policy for OpAMP collectors',
+        is_managed: true,
+      });
+    });
+
+    const configYaml = component.getByTestId('opampConfigYaml').textContent;
+    expect(configYaml).toContain('Authorization: ApiKey space-created-token');
   });
 
   it('renders a user-facing error when policy/token setup fails', async () => {
