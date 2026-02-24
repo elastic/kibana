@@ -86,9 +86,9 @@ export const getLifecycleValue = (
  * In that case, the effective retention is governed by the ILM policy.
  */
 export const isIlmPreferred = (dataStream?: DataStream | null): boolean => {
-  // this doesn't make sense to me as preferILM looks like a setting on the data stream
   return (
     Boolean(dataStream?.ilmPolicyName) &&
+    // todo confirm - this is to ensure that the prefer_ilm setting has been applied and is active
     Boolean(dataStream?.indices?.some(({ preferILM }) => preferILM))
   );
 };

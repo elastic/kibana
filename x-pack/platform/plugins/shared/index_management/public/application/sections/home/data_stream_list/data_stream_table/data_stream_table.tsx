@@ -240,7 +240,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
     ),
     truncateText: true,
     sortable: true,
-    render: (_lifecycle: DataStream['lifecycle'], dataStream) => {
+    render: (lifecycle: DataStream['lifecycle'], dataStream) => {
       const ilmPreferred = isIlmPreferred(dataStream);
 
       return (

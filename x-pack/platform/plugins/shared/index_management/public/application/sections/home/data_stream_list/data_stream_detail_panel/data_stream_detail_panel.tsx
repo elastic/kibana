@@ -398,6 +398,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
         }),
         content: (
           <ConditionalWrap
+            /** I suspect this is duplicate / conflicting */
             condition={isDataStreamFullyManagedByILM(dataStream) && !isIlmPreferred(dataStream)}
             wrap={(children) => <EuiTextColor color="subdued">{children}</EuiTextColor>}
           >
@@ -589,7 +590,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
                   }
                 ),
                 'data-test-subj': 'editDataRetentionButton',
-                icon: <EuiIcon type="pencil" size="m" />,
+                icon: <EuiIcon type="pencil" size="m" aria-hidden={true} />,
                 onClick: () => {
                   closePopover();
                   setIsEditingDataRetention(true);
@@ -605,7 +606,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
                   defaultMessage: 'Configure failure store',
                 }),
                 'data-test-subj': 'configureFailureStoreButton',
-                icon: <EuiIcon type="gear" size="m" />,
+                icon: <EuiIcon type="gear" size="m" aria-hidden={true} />,
                 onClick: () => {
                   closePopover();
                   setIsConfiguringFailureStore(true);
@@ -621,7 +622,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
                   defaultMessage: 'Delete',
                 }),
                 'data-test-subj': 'deleteDataStreamButton',
-                icon: <EuiIcon type="trash" size="m" color="danger" />,
+                icon: <EuiIcon type="trash" size="m" color="danger" aria-hidden={true} />,
                 onClick: () => {
                   closePopover();
                   setIsDeleting(true);
