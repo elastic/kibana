@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { adminTestUser } from '@kbn/test';
 import { getSupertest, type createRoot, type HttpMethod } from '@kbn/core-test-helpers-kbn-server';
 
@@ -28,6 +29,32 @@ export const waitForAlertingVTwoSetup = async (root: Root) => {
   while (await isAlertingVTwoSetupRunning()) {
     await new Promise((resolve) => setTimeout(resolve, 2000));
   }
+};
+
+export const waitForDataStreamsReady = async (
+  esClient: ElasticsearchClient,
+  dataStreamNames: string[]
+) => {
+  const namePattern = dataStreamNames.join(',');
+  const maxAttempts = 30;
+
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    try {
+      const response = await esClient.indices.getDataStream({ name: namePattern });
+      if (response.data_streams.length >= dataStreamNames.length) {
+        break;
+      }
+    } catch (e) {
+      // Data streams not created yet
+    }
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+  }
+
+  await esClient.cluster.health({
+    index: namePattern,
+    wait_for_status: 'yellow',
+    timeout: '60s',
+  });
 };
 
 export function getSupertestWithAdminUser(root: Root, method: HttpMethod, path: string) {
