@@ -9,7 +9,6 @@ import type { GetDrilldownsSchemaFnType } from '@kbn/embeddable-plugin/server';
 import type { ObjectType } from '@kbn/config-schema';
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import { storedFilterSchema } from '@kbn/es-query-server';
 import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
 
 /** Triggers supported by the SLO overview embeddable for drilldowns */
@@ -45,7 +44,7 @@ export const GroupOverviewCustomSchema = schema.object({
         schema.literal('slo.indicator.type'),
       ]),
       groups: schema.maybe(schema.arrayOf(schema.string())),
-      filters: schema.maybe(schema.arrayOf(storedFilterSchema)),
+      filters: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))), // TODO use "as code" filters https://github.com/elastic/kibana/issues/254663 before registering the schema
       kql_query: schema.maybe(schema.string()),
     })
   ),
