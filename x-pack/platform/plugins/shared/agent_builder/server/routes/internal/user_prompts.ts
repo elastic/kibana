@@ -18,7 +18,6 @@ import type {
   BulkDeleteUserPromptsResponse,
   BulkDeleteUserPromptResult,
 } from '../../../common/http_api/user_prompts';
-import { apiPrivileges } from '../../../common/features';
 import { internalApiPath } from '../../../common/constants';
 import { createClient } from '../../services/user_prompts';
 import { AGENT_BUILDER_READ_SECURITY, AGENT_BUILDER_WRITE_SECURITY } from '../route_security';
