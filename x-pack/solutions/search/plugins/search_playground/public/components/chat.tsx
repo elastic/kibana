@@ -130,7 +130,7 @@ export const Chat = () => {
         onSubmit={handleSubmit(onSubmit)}
         data-test-subj="chatPage"
       >
-        <EuiFlexGroup gutterSize="none">
+        <EuiFlexGroup css={{ overflow: 'auto' }} gutterSize="none" wrap>
           <EuiFlexItem
             grow={2}
             css={{
@@ -139,6 +139,7 @@ export const Chat = () => {
               // don't allow the chat to shrink below 700px
               flexBasis: 0,
               minWidth: 700,
+              minHeight: 300,
             }}
           >
             <EuiFlexGroup direction="column" className="eui-fullHeight">

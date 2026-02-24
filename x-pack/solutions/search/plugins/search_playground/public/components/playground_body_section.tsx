@@ -8,6 +8,12 @@
 import type { CSSProperties } from 'react';
 import React from 'react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { css } from '@emotion/react';
+
+const PlaygroundBodySectionStyle = css({
+  display: 'flex',
+  height: '100%',
+});
 
 export const PlaygroundBodySection = ({
   color,
@@ -26,6 +32,7 @@ export const PlaygroundBodySection = ({
       backgroundColor: color,
       justifyContent: 'center',
     }}
+    contentProps={{ css: PlaygroundBodySectionStyle }}
     paddingSize="none"
     className="eui-fullHeight"
     data-test-subj={dataTestSubj}
