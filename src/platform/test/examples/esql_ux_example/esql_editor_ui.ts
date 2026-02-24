@@ -57,13 +57,10 @@ export default function ({ getService }: FtrProviderContext) {
       await esql.toggleDatasourceDropdown(false);
 
       // Search and verify query updated with KQL
-      const kqlTextarea = await retry.try(async () => {
-        const kqlInput = await testSubjects.find('esqlVisorKQLQueryInput');
-        return await kqlInput.findByCssSelector('textarea');
-      });
-      await kqlTextarea.click();
-      await kqlTextarea.type('test');
-      await kqlTextarea.pressKeys(Key.ENTER);
+      const kqlInput = await testSubjects.find('esqlVisorKQLQueryInput');
+      await kqlInput.click();
+      await kqlInput.type('test');
+      await kqlInput.pressKeys(Key.ENTER);
 
       await retry.try(async () => {
         const query = await esql.getEsqlEditorQuery();
