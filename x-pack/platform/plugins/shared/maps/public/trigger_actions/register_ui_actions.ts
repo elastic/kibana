@@ -8,7 +8,7 @@
 import {
   ADD_PANEL_TRIGGER,
   ADD_CANVAS_ELEMENT_TRIGGER,
-  CONTEXT_MENU_TRIGGER,
+  ON_OPEN_PANEL_MENU,
   VISUALIZE_GEO_FIELD_TRIGGER,
 } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { ACTION_VISUALIZE_GEO_FIELD } from '@kbn/ui-actions-plugin/public';
@@ -37,12 +37,12 @@ export function registerUiActions(core: CoreStart, plugins: MapsPluginStartDepen
 
   plugins.uiActions.attachAction(ADD_CANVAS_ELEMENT_TRIGGER, 'addMapPanelAction');
 
-  plugins.uiActions.addTriggerActionAsync(CONTEXT_MENU_TRIGGER, FILTER_BY_MAP_EXTENT, async () => {
+  plugins.uiActions.addTriggerActionAsync(ON_OPEN_PANEL_MENU, FILTER_BY_MAP_EXTENT, async () => {
     const { filterByMapExtentAction } = await import('./context_menu_actions_module');
     return filterByMapExtentAction;
   });
   plugins.uiActions.addTriggerActionAsync(
-    CONTEXT_MENU_TRIGGER,
+    ON_OPEN_PANEL_MENU,
     SYNCHRONIZE_MOVEMENT_ACTION,
     async () => {
       const { synchronizeMovementAction } = await import('./context_menu_actions_module');
