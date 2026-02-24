@@ -40,11 +40,11 @@ export type ResponseActionsApiCommandNames = (typeof RESPONSE_ACTION_API_COMMAND
 
 export type EnabledAutomatedResponseActionsCommands = Extract<
   ResponseActionsApiCommandNames,
-  'isolate'
+  'isolate' | 'suspend-process' | 'kill-process'
 >;
 
 export const ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS: EnabledAutomatedResponseActionsCommands[] =
-  ['isolate'];
+  ['isolate', 'kill-process', 'suspend-process'];
 
 /**
  * The list of possible capabilities, reported by the endpoint in the metadata document
