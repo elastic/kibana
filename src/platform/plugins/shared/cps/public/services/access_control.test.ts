@@ -56,8 +56,16 @@ describe('Access Control Configuration', () => {
           ProjectRoutingAccess.EDITABLE
         );
       });
+      it('should return READONLY for management app', () => {
+        expect(getProjectRoutingAccess('management', '#/')).toBe(ProjectRoutingAccess.READONLY);
+      });
+      it('should return DISABLED for rules list page', () => {
+        expect(
+          getProjectRoutingAccess('management', '/insightsAndAlerting/triggersActions/rules')
+        ).toBe(ProjectRoutingAccess.DISABLED);
+      });
       it('should return DISABLED for unknown apps', () => {
-        expect(getProjectRoutingAccess('management', '#/')).toBe(ProjectRoutingAccess.DISABLED);
+        expect(getProjectRoutingAccess('cases', '#/')).toBe(ProjectRoutingAccess.DISABLED);
       });
     });
 
