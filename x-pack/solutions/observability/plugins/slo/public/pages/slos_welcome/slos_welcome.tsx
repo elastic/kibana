@@ -14,6 +14,7 @@ import {
   EuiPageTemplate,
   EuiSpacer,
   EuiTitle,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
@@ -84,7 +85,7 @@ export function SlosWelcomePage() {
       <SloPermissionsCallout />
       <EuiPageTemplate.EmptyPrompt
         title={
-          <EuiTitle size="l">
+          <EuiTitle size="m">
             <h1>
               {i18n.translate('xpack.slo.sloList.welcomePrompt.title', {
                 defaultMessage: 'Track and deliver on your SLOs',
@@ -93,11 +94,11 @@ export function SlosWelcomePage() {
           </EuiTitle>
         }
         icon={<EuiImage size="fullWidth" src={illustration} alt="" />}
-        color="transparent"
+        color="subdued"
         layout="horizontal"
         hasBorder={false}
         body={
-          <>
+          <EuiText size="s">
             <p>
               {i18n.translate('xpack.slo.sloList.welcomePrompt.messageParagraph1', {
                 defaultMessage:
@@ -112,7 +113,7 @@ export function SlosWelcomePage() {
               })}
             </p>
             <EuiSpacer size="s" />
-          </>
+          </EuiText>
         }
         actions={
           <>
