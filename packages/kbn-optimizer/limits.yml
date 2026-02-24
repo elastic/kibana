@@ -9,7 +9,7 @@ pageLoadAssetSize:
   apm: 38573
   apmSourcesAccess: 2278
   automaticImport: 12162
-  automaticImportVTwo: 15226
+  automaticImportVTwo: 25753
   banners: 4087
   canvas: 14881
   cases: 225900
@@ -120,7 +120,7 @@ pageLoadAssetSize:
   newsfeed: 11369
   noDataPage: 1749
   observability: 107797
-  observabilityAgentBuilder: 7873
+  observabilityAgentBuilder: 9172
   observabilityAIAssistant: 61180
   observabilityAIAssistantApp: 18012
   observabilityAiAssistantManagement: 7126
@@ -164,7 +164,7 @@ pageLoadAssetSize:
   securitySolutionEss: 38689
   securitySolutionServerless: 52082
   serverless: 7451
-  serverlessObservability: 18343
+  serverlessObservability: 21509
   serverlessSearch: 26287
   serverlessWorkplaceAI: 5078
   sessionView: 47912
