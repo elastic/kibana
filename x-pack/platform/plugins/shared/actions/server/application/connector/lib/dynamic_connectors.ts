@@ -40,8 +40,8 @@ export function updateDynamicInMemoryConnectors(
 
   const newConnectors = inferenceEndpointsWithoutConnectors.map(
     (endpoint): InMemoryConnector => ({
-      id: endpoint.inference_id,
-      name: endpoint.service_settings?.model_id ?? endpoint.inference_id,
+      id: getConnectorIdFromEndpoint(endpoint),
+      name: getConnectorNameFromEndpoint(endpoint),
       actionTypeId: '.inference',
       exposeConfig: true,
       config: {
@@ -89,4 +89,23 @@ export function updateDynamicInMemoryConnectors(
       }
     });
   }
+}
+
+function getConnectorIdFromEndpoint(endpoint: InferenceInferenceEndpointInfo) {
+  return endpoint.inference_id;
+}
+
+function getConnectorNameFromEndpoint(endpoint: InferenceInferenceEndpointInfo) {
+  const modelId = endpoint.service_settings?.model_id;
+  if (modelId) {
+    // This is a hack until we have a display name available from the endpoint metadata.
+    const cleanModelId = modelId
+      .replaceAll('-', ' ')
+      .replace(/(^\w{1})|(\s{1}\w{1})/g, (match: string) => match.toUpperCase())
+      .replaceAll('Gpt', 'GPT')
+      .replaceAll('Openai', 'OpenAI');
+    return cleanModelId;
+  }
+
+  return endpoint.inference_id;
 }

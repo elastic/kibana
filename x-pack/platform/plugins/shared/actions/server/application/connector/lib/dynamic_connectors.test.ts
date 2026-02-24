@@ -40,7 +40,7 @@ describe('Dynamic Connectors', () => {
     expect(existingConnectors).toContainConnectors([
       {
         id: '.anthropic-claude-4.5-opus-chat_completion',
-        name: 'anthropic-claude-4.5-opus',
+        name: 'Anthropic Claude 4.5 Opus',
         actionTypeId: '.inference',
         exposeConfig: true,
         config: {
@@ -142,7 +142,7 @@ describe('Dynamic Connectors', () => {
       }),
       createMockInMemoryConnector({
         id: '.anthropic-claude-4.6-opus-chat_completion',
-        name: 'anthropic-claude-4.6-opus',
+        name: 'Anthropic Claude 4.6 Opus',
         actionTypeId: '.inference',
         exposeConfig: true,
         config: {
@@ -194,7 +194,7 @@ describe('Dynamic Connectors', () => {
       },
       {
         id: '.anthropic-claude-4.6-opus-chat_completion',
-        name: 'anthropic-claude-4.6-opus',
+        name: 'Anthropic Claude 4.6 Opus',
         actionTypeId: '.inference',
         exposeConfig: true,
         config: {
@@ -237,7 +237,7 @@ describe('Dynamic Connectors', () => {
       }),
       createMockInMemoryConnector({
         id: '.anthropic-claude-4.6-opus-chat_completion',
-        name: 'anthropic-claude-4.6-opus',
+        name: 'Anthropic Claude 4.6 Opus',
         actionTypeId: '.inference',
         exposeConfig: true,
         config: {
@@ -256,7 +256,7 @@ describe('Dynamic Connectors', () => {
       }),
       createMockInMemoryConnector({
         id: '.anthropic-claude-3.7-sonnet-chat_completion',
-        name: 'anthropic-claude-3.7-sonnet',
+        name: 'Anthropic Claude 3.7 Sonnet',
         actionTypeId: '.inference',
         exposeConfig: true,
         config: {
@@ -308,7 +308,7 @@ describe('Dynamic Connectors', () => {
       },
       {
         id: '.anthropic-claude-4.6-opus-chat_completion',
-        name: 'anthropic-claude-4.6-opus',
+        name: 'Anthropic Claude 4.6 Opus',
         actionTypeId: '.inference',
         exposeConfig: true,
         config: {
@@ -374,7 +374,7 @@ describe('Dynamic Connectors', () => {
       // Old Dynamic connectors
       createMockInMemoryConnector({
         id: '.anthropic-claude-3.7-sonnet-chat_completion',
-        name: 'anthropic-claude-3.7-sonnet',
+        name: 'Anthropic Claude 3.7 Sonnet',
         actionTypeId: '.inference',
         exposeConfig: true,
         config: {
@@ -393,7 +393,7 @@ describe('Dynamic Connectors', () => {
       }),
       createMockInMemoryConnector({
         id: '.openai-gpt-4.1-chat_completion',
-        name: 'openai-gpt-4.1',
+        name: 'OpenAI GPT 4.1',
         actionTypeId: '.inference',
         exposeConfig: true,
         config: {
@@ -489,7 +489,7 @@ describe('Dynamic Connectors', () => {
       },
       {
         id: '.openai-gpt-4.1-chat_completion',
-        name: 'openai-gpt-4.1',
+        name: 'OpenAI GPT 4.1',
         actionTypeId: '.inference',
         exposeConfig: true,
         config: {
@@ -509,7 +509,7 @@ describe('Dynamic Connectors', () => {
       },
       {
         id: '.anthropic-claude-4.6-opus-chat_completion',
-        name: 'anthropic-claude-4.6-opus',
+        name: 'Anthropic Claude 4.6 Opus',
         actionTypeId: '.inference',
         exposeConfig: true,
         config: {
@@ -557,7 +557,7 @@ describe('Dynamic Connectors', () => {
       }),
       createMockInMemoryConnector({
         id: '.anthropic-claude-4.6-opus-chat_completion',
-        name: 'anthropic-claude-4.6-opus',
+        name: 'Anthropic Claude 4.6 Opus',
         actionTypeId: '.inference',
         exposeConfig: true,
         config: {
@@ -576,7 +576,7 @@ describe('Dynamic Connectors', () => {
       }),
       createMockInMemoryConnector({
         id: '.anthropic-claude-3.7-sonnet-chat_completion',
-        name: 'anthropic-claude-3.7-sonnet',
+        name: 'Anthropic Claude 3.7 Sonnet',
         actionTypeId: '.inference',
         exposeConfig: true,
         config: {
@@ -619,7 +619,7 @@ describe('Dynamic Connectors', () => {
       },
       {
         id: '.anthropic-claude-4.6-opus-chat_completion',
-        name: 'anthropic-claude-4.6-opus',
+        name: 'Anthropic Claude 4.6 Opus',
         actionTypeId: '.inference',
         exposeConfig: true,
         config: {
@@ -639,7 +639,7 @@ describe('Dynamic Connectors', () => {
       },
       {
         id: '.anthropic-claude-3.7-sonnet-chat_completion',
-        name: 'anthropic-claude-3.7-sonnet',
+        name: 'Anthropic Claude 3.7 Sonnet',
         actionTypeId: '.inference',
         exposeConfig: true,
         config: {
