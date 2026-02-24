@@ -59,7 +59,7 @@ const SmoothHeight = ({ children }: { children: React.ReactNode }) => {
       ref={outerRef}
       css={css`
         overflow: hidden;
-        transition: height 250ms ease;
+        transition: height 200ms linear;
       `}
     >
       <div ref={innerRef}>{children}</div>
@@ -253,7 +253,7 @@ export const CustomizeNavigationModal = ({
         </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
-        <>
+        <SmoothHeight>
           {lockedItems.length > 0 && (
             <>
               {lockedItems.map((item) => (
@@ -261,20 +261,18 @@ export const CustomizeNavigationModal = ({
               ))}
             </>
           )}
-          <SmoothHeight>
-            <EuiDragDropContext onDragEnd={onVisibleDragEnd}>
-              <EuiDroppable droppableId="visible-nav-items" spacing="none">
-                {visibleItems.map((item, index) => (
-                  <DraggableItem
-                    key={item.id}
-                    item={item}
-                    index={index}
-                    toggleItemVisibility={toggleItemVisibility}
-                  />
-                ))}
-              </EuiDroppable>
-            </EuiDragDropContext>
-          </SmoothHeight>
+          <EuiDragDropContext onDragEnd={onVisibleDragEnd}>
+            <EuiDroppable droppableId="visible-nav-items" spacing="none">
+              {visibleItems.map((item, index) => (
+                <DraggableItem
+                  key={item.id}
+                  item={item}
+                  index={index}
+                  toggleItemVisibility={toggleItemVisibility}
+                />
+              ))}
+            </EuiDroppable>
+          </EuiDragDropContext>
           {hiddenItems.length > 0 && (
             <>
               <EuiSpacer size="m" />
@@ -305,23 +303,21 @@ export const CustomizeNavigationModal = ({
                 </EuiFlexItem>
               </EuiFlexGroup>
               <EuiSpacer size="s" />
-              <SmoothHeight>
-                <EuiDragDropContext onDragEnd={onHiddenDragEnd}>
-                  <EuiDroppable droppableId="hidden-nav-items" spacing="none">
-                    {hiddenItems.map((item, index) => (
-                      <DraggableItem
-                        key={item.id}
-                        item={item}
-                        index={index}
-                        toggleItemVisibility={toggleItemVisibility}
-                      />
-                    ))}
-                  </EuiDroppable>
-                </EuiDragDropContext>
-              </SmoothHeight>
+              <EuiDragDropContext onDragEnd={onHiddenDragEnd}>
+                <EuiDroppable droppableId="hidden-nav-items" spacing="none">
+                  {hiddenItems.map((item, index) => (
+                    <DraggableItem
+                      key={item.id}
+                      item={item}
+                      index={index}
+                      toggleItemVisibility={toggleItemVisibility}
+                    />
+                  ))}
+                </EuiDroppable>
+              </EuiDragDropContext>
             </>
           )}
-        </>
+        </SmoothHeight>
       </EuiModalBody>
       <EuiModalFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
