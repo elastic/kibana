@@ -1,0 +1,1303 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+
+  // This config includes all the rules from the @kbn/eslint-config package.
+
+  // NOTE: Nested `overrides` (found inside the Security Solution section) have been
+  // flattened to top-level override entries, as oxlint does not support nesting.
+
+  // NOTE: All `excludedFiles` have been converted to negated extglob patterns inside
+  // `files` where the exclusion was file-suffix based (e.g. *.test, *.mock).
+  // Directory-based exclusions (e.g. **/integration_tests/**/*) cannot be expressed
+  // inside override `files` globs — those are noted inline and may need to be moved
+  // to top-level `ignorePatterns` if a global exclusion is acceptable.
+
+  "plugins": ["react", "typescript", "import", "jsx-a11y", "react-perf", "node", "jest"],
+
+  "categories": {
+    "correctness": "off"
+  },
+
+  "ignorePatterns": [
+    "**/.storybook/**",
+    "**/cypress/**",
+    "**/ftr_e2e/**",
+    "**/e2e/**",
+    "**/integration_tests/**",
+    "**/json_schemas/**"
+  ],
+
+  "rules": {
+    "@typescript-eslint/adjacent-overload-signatures": "error",
+    "@typescript-eslint/array-type": "off",
+    // "@typescript-eslint/consistent-type-definitions": ["error", "interface"],
+    "@typescript-eslint/consistent-type-assertions": "error",
+    "@typescript-eslint/consistent-type-imports": [
+      "error",
+      {
+        "prefer": "type-imports",
+        "disallowTypeAnnotations": false,
+        "fixStyle": "separate-type-imports"
+      }
+    ],
+    "@typescript-eslint/explicit-member-accessibility": [
+      "error",
+      {
+        "accessibility": "off",
+        "overrides": {
+          "accessors": "explicit",
+          "constructors": "no-public",
+          "parameterProperties": "explicit"
+        }
+      }
+    ],
+    "@typescript-eslint/member-ordering": [
+      "error",
+      {
+        "default": ["public-static-field", "static-field", "instance-field"]
+      }
+    ],
+    "@typescript-eslint/naming-convention": [
+      "error",
+      {
+        "selector": "default",
+        "format": ["camelCase", "PascalCase", "UPPER_CASE", "snake_case"],
+        "leadingUnderscore": "allowSingleOrDouble",
+        "trailingUnderscore": "allowSingleOrDouble"
+      },
+      {
+        "selector": "classMethod",
+        "filter": {
+          "regex": "^UNSAFE_",
+          "match": true
+        },
+        "prefix": ["UNSAFE_"],
+        "format": ["camelCase"]
+      },
+      {
+        "selector": "variable",
+        "format": [
+          "camelCase",
+          "UPPER_CASE", // e.g. const SOMETHING = ...
+          "PascalCase" // e.g. React.FunctionComponent =
+        ],
+        "leadingUnderscore": "allowSingleOrDouble",
+        "trailingUnderscore": "allowSingleOrDouble"
+      },
+      {
+        "selector": "variable",
+        "modifiers": ["destructured"],
+        "format": [
+          "camelCase",
+          "snake_case", // e.g. properties from ES response objects
+          "UPPER_CASE", // e.g. const SOMETHING = ...
+          "PascalCase" // e.g. React.FunctionComponent =
+        ],
+        "leadingUnderscore": "allowSingleOrDouble",
+        "trailingUnderscore": "allowSingleOrDouble"
+      },
+      {
+        "selector": "parameter",
+        "format": ["camelCase", "PascalCase", "snake_case"],
+        "leadingUnderscore": "allowSingleOrDouble",
+        "trailingUnderscore": "allowSingleOrDouble"
+      },
+      {
+        "selector": "function",
+        "format": [
+          "camelCase",
+          "PascalCase" // React.FunctionComponent =
+        ],
+        "leadingUnderscore": "allowSingleOrDouble",
+        "trailingUnderscore": "allowSingleOrDouble"
+      },
+      {
+        "selector": "typeLike",
+        "format": ["PascalCase", "UPPER_CASE"],
+        "leadingUnderscore": "allow",
+        "trailingUnderscore": "allow"
+      },
+      {
+        "selector": "enum",
+        "format": ["PascalCase", "UPPER_CASE", "camelCase"]
+      },
+      // https://typescript-eslint.io/rules/naming-convention/#ignore-properties-that-require-quotes
+      // restore check behavior before https://github.com/typescript-eslint/typescript-eslint/pull/4582
+      {
+        "selector": [
+          "classProperty",
+          "objectLiteralProperty",
+          "typeProperty",
+          "classMethod",
+          "objectLiteralMethod",
+          "typeMethod",
+          "accessor",
+          "enumMember"
+        ],
+        "format": null,
+        "modifiers": ["requiresQuotes"]
+      }
+    ],
+    "@typescript-eslint/no-empty-object-type": "off",
+    "@typescript-eslint/no-restricted-types": [
+      "error",
+      {
+        "types": {
+          "SFC": "Use FC or FunctionComponent instead.",
+          "React.SFC": "Use React.FC instead.",
+          "StatelessComponent": "Use FunctionComponent instead.",
+          "React.StatelessComponent": "Use React.FunctionComponent instead."
+        }
+      }
+    ],
+    "@typescript-eslint/no-empty-interface": "error",
+    "@typescript-eslint/no-extra-non-null-assertion": "error",
+    "@typescript-eslint/no-misused-new": "error",
+    "@typescript-eslint/no-namespace": "error",
+    // "@typescript-eslint/no-shadow": "error"
+    "@typescript-eslint/no-undef": "off",
+    "@typescript-eslint/no-unsafe-function-type": "off",
+    // "@typescript-eslint/no-unused-expressions": ["error", { "allowTaggedTemplates": true }]
+    // "@typescript-eslint/no-var-requires": "error",
+    "@typescript-eslint/no-wrapper-object-types": "off",
+    "@typescript-eslint/prefer-function-type": "error",
+    // "@typescript-eslint/triple-slash-reference": [
+    //   "error",
+    //   {
+    //     "path": "never",
+    //     "types": "never",
+    //     "lib": "never"
+    //   }
+    // ]
+    "@typescript-eslint/unified-signatures": "error",
+    // Old tslint yml override or defined rules
+    // "ban/ban": [
+    //   2,
+    //   { "name": ["describe", "only"], "message": "No exclusive suites." },
+    //   { "name": ["it", "only"], "message": "No exclusive tests." },
+    //   { "name": ["test", "only"], "message": "No exclusive tests." },
+    //   { "name": ["testSuggestions", "only"], "message": "No exclusive tests." },
+    //   { "name": ["testErrorsAndWarnings", "only"], "message": "No exclusive tests." }
+    // ]
+    "block-scoped-var": "error",
+    "camelcase": ["error", { "properties": "never", "allow": ["^UNSAFE_"] }],
+    "consistent-return": "off",
+    "constructor-super": "error",
+    "dot-notation": ["error", { "allowKeywords": true }],
+    // "eslint-comments/no-unused-disable": "error"
+    // 'eslint-comments/no-unused-enable': 'error',
+    // "eqeqeq": ["error", "allow-null"],
+    // "eqeqeq": ["error", "always", { null: "ignore" }],
+    "guard-for-in": "error",
+    "jest/no-focused-tests": "error",
+    // "jest/no-identical-title": "error",
+    // "import/default": "error"
+    // "import/export": "error"
+    // "import/named": "error",
+    // "import/namespace": "error",
+    // "import/no-default-export": "error",
+    // "import/no-duplicates": "error",
+    // "import/no-dynamic-require": "error",
+    // "import/no-named-as-default-member": "error",
+    // "import/no-named-as-default": "error",
+    "import/order": [
+      "error",
+      {
+        "groups": [["external", "builtin"], "internal", ["parent", "sibling", "index"]]
+      }
+    ],
+    // "new-cap": ["error", { "capIsNewExceptions": ["Private"] }],
+    "jsx-a11y/accessible-emoji": "error",
+    "jsx-a11y/alt-text": "error",
+    "jsx-a11y/anchor-has-content": "error",
+    "jsx-a11y/aria-activedescendant-has-tabindex": "error",
+    "jsx-a11y/aria-props": "error",
+    "jsx-a11y/aria-proptypes": "error",
+    "jsx-a11y/aria-role": "error",
+    "jsx-a11y/aria-unsupported-elements": "error",
+    // "jsx-a11y/click-events-have-key-events": "error",
+    "jsx-a11y/heading-has-content": "error",
+    "jsx-a11y/html-has-lang": "error",
+    "jsx-a11y/iframe-has-title": "error",
+    "jsx-a11y/interactive-supports-focus": "error",
+    "jsx-a11y/label-has-associated-control": "error",
+    "jsx-a11y/media-has-caption": "error",
+    "jsx-a11y/mouse-events-have-key-events": "error",
+    "jsx-a11y/no-access-key": "error",
+    "jsx-a11y/no-distracting-elements": "error",
+    "jsx-a11y/no-interactive-element-to-noninteractive-role": "error",
+    "jsx-a11y/no-noninteractive-element-interactions": "error",
+    "jsx-a11y/no-noninteractive-element-to-interactive-role": "error",
+    "jsx-a11y/no-onchange": "error",
+    "jsx-a11y/no-redundant-roles": "error",
+    // "jsx-a11y/role-has-required-aria-props": "error",
+    // "jsx-a11y/role-supports-aria-props": "error",
+    "jsx-a11y/scope": "error",
+    "jsx-a11y/tabindex-no-positive": "error",
+    // "max-classes-per-file": ["error", 1]
+    // "mocha/handle-done-callback": "error",
+    // "mocha/no-exclusive-tests": "error",
+    "no-bitwise": "off",
+    "no-caller": "error",
+    "no-cond-assign": "off",
+    // "no-console": "error"
+    "no-const-assign": "error",
+    "no-debugger": "error",
+    "no-empty": "error",
+    "no-eval": "error",
+    "no-extend-native": "error",
+    // "no-global-assign": "error"
+    "no-irregular-whitespace": "error",
+    "no-iterator": "error",
+    // "no-loop-func": "error"
+    "no-multi-str": "off",
+    // "no-nested-ternary": "error",
+    "no-new": "off",
+    "no-new-wrappers": "error",
+    "no-restricted-syntax": [
+      "error",
+      {
+        "selector": "TSEnumDeclaration[const=true]",
+        "message": "Do not use `const` with enum declarations"
+      }
+    ],
+    // "no-throw-literal": "error",
+    "no-undef-init": "error",
+    // "no-unsafe-finally": "error"
+    // "no-unsanitized/property": "error"
+    "no-unused-labels": "error",
+    // "no-var": "error"
+    "no-path-concat": "off",
+    // "no-proto": "error",
+    "no-redeclare": "error",
+    "no-return-assign": "off",
+    // "no-restricted-globals": ["error", ...RESTRICTED_GLOBALS],
+    // "no-restricted-imports": [2, RESTRICTED_MODULES],
+    // "no-restricted-modules": [2, RESTRICTED_MODULES],
+    "no-script-url": "error",
+    // "no-sequences": "error"
+    "no-shadow": "off",
+    "no-undef": "off",
+    "no-underscore-dangle": "off",
+    "no-unused-expressions": "off",
+    // "no-unsanitized/method": "error",
+    // "no-unsanitized/property": "error",
+    // "no-use-before-define": ["error", "nofunc"],
+    // "no-unused-vars": ["error"],
+    // "no-var": "error",
+    "no-with": "error",
+    "object-shorthand": "error",
+    "one-var": ["error", "never"],
+    // "prefer-const": "error",
+    // "prefer-object-spread": "error",
+    // "prefer-const": "error"
+    // "prefer-rest-params": "error"
+    // "radix": "error"
+    // "react-hooks/exhaustive-deps": "error", // Checks effect dependencies
+    // "react-hooks/rules-of-hooks": "error", // Checks rules of Hooks
+    "react/jsx-no-duplicate-props": ["error"],
+    "react/jsx-no-undef": "error",
+    "react/jsx-pascal-case": "error",
+    "react/jsx-uses-react": "error",
+    "react/jsx-uses-vars": "error",
+    // "react/no-danger": "error",
+    "react/no-is-mounted": "error",
+    "react/no-multi-comp": ["error", { "ignoreStateless": true }],
+    "react/no-unescaped-entities": "error",
+    "react/no-unknown-property": ["error", { "ignore": ["css"] }],
+    "react/no-will-update-set-state": "error",
+    "react/prefer-es6-class": ["error", "always"],
+    "react/prefer-stateless-function": ["error", { "ignorePureComponents": true }],
+    // "react/react-in-jsx-scope": "error",
+    "react/self-closing-comp": "error",
+    "spaced-comment": [
+      "error",
+      "always",
+      {
+        "exceptions": ["/"]
+      }
+    ],
+    "strict": ["error", "never"],
+    // "valid-typeof": "error"
+    "use-isnan": "error"
+    // "yoda": "off",
+  },
+
+  "overrides": [
+    // ── Temporarily disabled React rules ──────────────────────────────────────────
+    {
+      // kibana_react: react-hooks/rules-of-hooks + exhaustive-deps off
+      "files": ["src/platform/plugins/shared/kibana_react/**/*.{js,mjs,ts,tsx}"],
+      "rules": {}
+    },
+    {
+      // kibana_utils: react-hooks/exhaustive-deps off
+      "files": ["src/platform/plugins/shared/kibana_utils/**/*.{js,mjs,ts,tsx}"],
+      "rules": {}
+    },
+    {
+      // canvas: jsx-a11y/click-events-have-key-events off
+      "files": ["x-pack/platform/plugins/private/canvas/**/*.{js,mjs,ts,tsx}"],
+      "rules": {}
+    },
+    {
+      // cross_cluster_replication: jsx-a11y/click-events-have-key-events off
+      "files": ["x-pack/platform/plugins/private/cross_cluster_replication/**/*.{js,mjs,ts,tsx}"],
+      "rules": {}
+    },
+
+    // ── FormatJS / i18n ───────────────────────────────────────────────────────────
+    // NOTE: `formatjs` is not a built-in oxlint plugin; these rules need a JS plugin.
+    {
+      "files": [
+        "src/**/*.{js,mjs,ts,tsx}",
+        "x-pack/**/*.{js,mjs,ts,tsx}",
+        "packages/**/*.{js,mjs,ts,tsx}",
+        "src/platform/packages/**/*.{js,mjs,ts,tsx}",
+        "src/core/packages/**/*.{js,mjs,ts,tsx}",
+        "x-pack/platform/packages/**/*.{js,mjs,ts,tsx}",
+        "x-pack/solutions/*/packages/**/*.{js,mjs,ts,tsx}"
+      ],
+      "rules": {}
+    },
+
+    // ── License headers (all JS/TS) ───────────────────────────────────────────────
+    // NOTE: @kbn/eslint/* rules are custom and not available in oxlint.
+    {
+      "files": ["**/*.{js,mjs,ts,tsx}"],
+      "rules": {}
+    },
+
+    // ── Apache-licensed packages ──────────────────────────────────────────────────
+    {
+      "files": [
+        "packages/kbn-eslint-config/**/*.{js,mjs,ts,tsx}",
+        "src/platform/packages/shared/kbn-datemath/**/*.{js,mjs,ts,tsx}"
+      ],
+      "rules": {}
+    },
+
+    // ── New Platform client-side (import/no-commonjs) ─────────────────────────────
+    {
+      "files": ["{src,x-pack}/plugins/*/public/**/*.{js,mjs,ts,tsx}"],
+      "rules": {}
+    },
+
+    // ── x-pack Elastic license headers ───────────────────────────────────────────
+    {
+      "files": ["x-pack/**/*.{js,mjs,ts,tsx}"],
+      "rules": {}
+    },
+
+    // ── safer-lodash-set special license headers ──────────────────────────────────
+    {
+      "files": ["src/platform/packages/shared/kbn-safer-lodash-set/**/*.{js,mjs,ts,tsx}"],
+      "rules": {}
+    },
+    {
+      "files": ["src/platform/packages/shared/kbn-safer-lodash-set/test/*.{js,mjs,ts,tsx}"],
+      "rules": {}
+    },
+    {
+      "files": ["src/platform/packages/shared/kbn-safer-lodash-set/**/*.d.ts"],
+      "rules": {}
+    },
+
+    // ── @kbn/handlebars special license headers ───────────────────────────────────
+    {
+      "files": ["src/platform/packages/private/kbn-handlebars/**/*.{js,mjs,ts,tsx}"],
+      "rules": {}
+    },
+    {
+      "files": ["src/platform/packages/private/kbn-handlebars/src/spec/**/*.{js,mjs,ts,tsx}"],
+      "rules": {}
+    },
+
+    // ── venn.js fork special license header ───────────────────────────────────────
+    {
+      "files": [
+        "x-pack/platform/plugins/private/graph/public/components/venn_diagram/vennjs/**/*.{js,mjs,ts,tsx}"
+      ],
+      "rules": {}
+    },
+
+    // ── Allow default exports ─────────────────────────────────────────────────────
+    {
+      // NOTE: `excludedFiles` from the original config has been dropped.
+      "files": [
+        "**/*.stories.tsx",
+        "**/*.test.js",
+        "src/platform/test/*/config.ts",
+        "src/platform/test/*/config_open.ts",
+        "src/platform/test/*/*.config.ts",
+        "src/platform/test/*/{tests,test_suites,apis,apps}/**/*",
+        "src/platform/test/server_integration/**/*.ts",
+        "x-pack/solutions/observability/plugins/apm/**/*.js",
+        "x-pack/platform/test/*/{tests,test_suites,apis,apps}/**/*",
+        "x-pack/platform/test/*api_integration*/**/*",
+        "x-pack/platform/test/*/*config.*ts",
+        "x-pack/solutions/*/test/**/{tests,test_suites,apis,apps,fixtures,index.ts}/**/*",
+        "x-pack/solutions/*/test/**/*config*.ts",
+        "x-pack/solutions/*/test/**/tests/**/*",
+        "x-pack/solutions/*/test/api_integration_deployment_agnostic/*configs/**/*",
+        "x-pack/solutions/*/test/alerting_api_integration/**/*",
+        "x-pack/solutions/*/test/serverless/*/configs/**/*",
+        "x-pack/platform/test/saved_object_api_integration/*/apis/**/*",
+        "x-pack/platform/test/ui_capabilities/*/tests/**/*",
+        "x-pack/platform/test/upgrade_assistant_integration/**/*",
+        "**/cypress.config.{js,ts}",
+        "x-pack/platform/test/serverless/shared/config*.ts",
+        "x-pack/platform/test/serverless/*/test_suites/**/*",
+        "x-pack/platform/test/serverless/functional/config*.ts",
+        "x-pack/platform/test/serverless/*/configs/**/*",
+        "x-pack/solutions/security/test/security_solution_api_integration/*/test_suites/**/*",
+        "x-pack/solutions/security/test/security_solution_api_integration/**/config*.ts",
+        "**/playwright.config.ts",
+        "**/*.playwright.config.ts",
+        "**/parallel.playwright.config.ts"
+      ],
+      "rules": {}
+    },
+
+    // ── Single package.json / extraneous-dependencies ─────────────────────────────
+    {
+      "files": ["{src,x-pack,packages}/**/*.{js,mjs,ts,tsx}"],
+      "rules": {}
+    },
+
+    // ── Scripts / pre-node-version-check ─────────────────────────────────────────
+    {
+      "files": ["scripts/**/*.js", "src/setup_node_env/**/*.js"],
+      "rules": {}
+    },
+
+    // ── Browser exec scripts ──────────────────────────────────────────────────────
+    {
+      "files": [
+        "src/platform/packages/shared/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/scroll_into_view_if_necessary.js",
+        "**/browser_exec_scripts/**/*.js"
+      ],
+      "rules": {}
+    },
+
+    // ── After node version check / not transpiled with Babel ──────────────────────
+    // NOTE: Original had `excludedFiles: ['**/integration_tests/**/*']`.
+    // This is a directory-based exclusion and cannot be expressed as a negated glob
+    // inside `files`. If needed globally, add `"**/integration_tests/**/*"` to the
+    // top-level `ignorePatterns` array.
+    {
+      "files": [
+        ".eslintrc.js",
+        "packages/kbn-eslint-plugin-eslint/**/*",
+        "x-pack/gulpfile.js",
+        "x-pack/scripts/*.js",
+        "**/jest.config.js"
+      ],
+      "rules": {}
+    },
+
+    // ── Jest-specific rules ───────────────────────────────────────────────────────
+    {
+      "files": ["**/*.test.{js,mjs,ts,tsx}"],
+      "rules": {}
+    },
+
+    // ── Harden tests ─────────────────────────────────────────────────────────────
+    {
+      "files": [
+        "src/platform/test/harden/*.js",
+        "src/platform/packages/shared/kbn-safer-lodash-set/test/*.js"
+      ],
+      "rules": {}
+    },
+
+    // ── Global JS/TS rules ────────────────────────────────────────────────────────
+    {
+      "files": ["**/*.{js,mjs,ts,tsx}"],
+      "rules": {}
+    },
+
+    // ── common / public — semver restriction ──────────────────────────────────────
+    {
+      "files": ["**/common/**/*.{js,mjs,ts,tsx}", "**/public/**/*.{js,mjs,ts,tsx}"],
+      "rules": {}
+    },
+
+    // ── fields_metadata plugin ────────────────────────────────────────────────────
+    {
+      "files": ["x-pack/platform/plugins/shared/fields_metadata/**/*.{js,mjs,ts,tsx}"],
+      "rules": {}
+    },
+
+    // ── APM / UX / Observability ──────────────────────────────────────────────────
+    {
+      "files": [
+        "x-pack/solutions/observability/plugins/apm/**/*.{js,mjs,ts,tsx}",
+        "x-pack/solutions/observability/plugins/observability/**/*.{js,mjs,ts,tsx}",
+        "x-pack/solutions/observability/plugins/exploratory_view/**/*.{js,mjs,ts,tsx}",
+        "x-pack/solutions/observability/plugins/ux/**/*.{js,mjs,ts,tsx}",
+        "x-pack/solutions/observability/plugins/slo/**/*.{js,mjs,ts,tsx}",
+        "x-pack/solutions/observability/packages/**/*.{js,mjs,ts,tsx}"
+      ],
+      "rules": {}
+    },
+    {
+      // APM / Observability stories
+      "files": [
+        "x-pack/solutions/observability/plugins/apm/**/*.stories.*",
+        "x-pack/solutions/observability/plugins/observability/**/*.stories.*",
+        "x-pack/solutions/observability/plugins/exploratory_view/**/*.stories.*",
+        "x-pack/solutions/observability/plugins/slo/**/*.stories.*",
+        "x-pack/solutions/observability/packages/**/*.{js,mjs,ts,tsx}"
+      ],
+      "rules": {}
+    },
+    {
+      // Observability solution react-hooks/exhaustive-deps (custom hooks)
+      "files": [
+        "x-pack/platform/plugins/shared/observability_solution/**/*.{ts,tsx}",
+        "x-pack/solutions/observability/plugins/**/*.{ts,tsx}",
+        "x-pack/platform/plugins/shared/{streams,streams_app}/**/*.{ts,tsx}",
+        "x-pack/solutions/observability/packages/**/*.{ts,tsx}"
+      ],
+      "rules": {}
+    },
+    {
+      // Telemetry instrumentation
+      "files": [
+        "x-pack/platform/plugins/shared/aiops/**/*.tsx",
+        "x-pack/platform/plugins/shared/observability_solution/**/*.{ts,tsx}",
+        "x-pack/solutions/observability/plugins/**/*.{ts,tsx}",
+        "src/platform/plugins/shared/ai_assistant_management/**/*.tsx",
+        "x-pack/solutions/observability/packages/**/*.{ts,tsx}"
+      ],
+      "rules": {}
+    },
+    {
+      // Search telemetry
+      "files": ["x-pack/solutions/search/**/*.tsx"],
+      "rules": {}
+    },
+    {
+      // i18n string translation — extglob negations were already present in the original ESLint
+      // config's `files` array, so no conversion needed here.
+      "files": [
+        "x-pack/solutions/observability/plugins/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)",
+        "x-pack/solutions/observability/packages/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)",
+        "src/platform/plugins/shared/ai_assistant_management/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)",
+        "x-pack/platform/plugins/shared/streams_app/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)",
+        "src/platform/packages/shared/kbn-unified-chart-section-viewer/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)"
+      ],
+      "rules": {}
+    },
+    {
+      // APM route explicit return types
+      "files": ["x-pack/solutions/observability/plugins/apm/server/**/route.ts"],
+      "rules": {}
+    },
+    {
+      // APM / infra / profiling TypeScript (originally empty rules)
+      "files": [
+        "x-pack/solutions/observability/plugins/apm/**/*.{ts,tsx}",
+        "x-pack/solutions/observability/plugins/apm_data_access/**/*.{ts,tsx}",
+        "x-pack/solutions/observability/plugins/infra/**/*.{ts,tsx}",
+        "x-pack/solutions/observability/plugins/inventory/**/*.{ts,tsx}",
+        "x-pack/solutions/observability/plugins/metrics_data_access/**/*.{ts,tsx}",
+        "x-pack/solutions/observability/plugins/profiling/**/*.{ts,tsx}",
+        "x-pack/solutions/observability/plugins/profiling_data_access/**/*.{ts,tsx}"
+      ],
+      "rules": {}
+    },
+
+    // ── Fleet ─────────────────────────────────────────────────────────────────────
+    // NOTE: `testing-library` is not a built-in oxlint plugin.
+    {
+      "files": ["x-pack/platform/plugins/shared/fleet/**/*.{js,mjs,ts,tsx}"],
+      "rules": {}
+    },
+
+    // ── Integration assistant (automatic_import) ──────────────────────────────────
+    {
+      "files": [
+        "x-pack/platform/plugins/shared/automatic_import/public/**/*.{js,mjs,ts,tsx}",
+        "x-pack/platform/plugins/shared/automatic_import/common/**/*.{js,mjs,ts,tsx}"
+      ],
+      "rules": {}
+    },
+    {
+      "files": [
+        "x-pack/platform/plugins/shared/automatic_import/public/**/*.{ts,tsx}",
+        "x-pack/platform/plugins/shared/automatic_import/common/**/*.{ts,tsx}"
+      ],
+      "rules": {}
+    },
+
+    // ── ML ────────────────────────────────────────────────────────────────────────
+    {
+      "files": [
+        "x-pack/platform/plugins/shared/aiops/**/*.{ts,tsx}",
+        "x-pack/platform/plugins/private/data_visualizer/**/*.{ts,tsx}",
+        "x-pack/platform/plugins/shared/ml/**/*.{ts,tsx}",
+        "x-pack/platform/plugins/private/transform/**/*.{ts,tsx}",
+        "x-pack/platform/packages/shared/ml/**/*.{ts,tsx}",
+        "x-pack/platform/packages/private/ml/**/*.{ts,tsx}",
+        "x-pack/platform/plugins/private/file_upload/**/*.{ts,tsx}"
+      ],
+      "rules": {}
+    },
+
+    // ── Security Solution — front end / common ────────────────────────────────────
+    {
+      "files": [
+        "x-pack/solutions/security/plugins/ecs_data_quality_dashboard/common/**/*.{js,mjs,ts,tsx}",
+        "x-pack/solutions/security/plugins/elastic_assistant/common/**/*.{js,mjs,ts,tsx}",
+        "x-pack/platform/packages/shared/kbn-elastic-assistant/**/*.{js,mjs,ts,tsx}",
+        "x-pack/platform/packages/shared/kbn-elastic-assistant-common/**/*.{js,mjs,ts,tsx}",
+        "x-pack/solutions/security/packages/**/*.{js,mjs,ts,tsx}",
+        "x-pack/solutions/security/plugins/security_solution/public/**/*.{js,mjs,ts,tsx}",
+        "x-pack/solutions/security/plugins/security_solution_ess/public/**/*.{js,mjs,ts,tsx}",
+        "x-pack/solutions/security/plugins/security_solution_serverless/public/**/*.{js,mjs,ts,tsx}",
+        "x-pack/solutions/security/plugins/security_solution/common/**/*.{js,mjs,ts,tsx}",
+        "x-pack/solutions/security/plugins/security_solution_ess/common/**/*.{js,mjs,ts,tsx}",
+        "x-pack/solutions/security/plugins/security_solution_serverless/common/**/*.{js,mjs,ts,tsx}",
+        "x-pack/solutions/security/plugins/timelines/public/**/*.{js,mjs,ts,tsx}",
+        "x-pack/solutions/security/plugins/timelines/common/**/*.{js,mjs,ts,tsx}",
+        "x-pack/platform/plugins/shared/cases/public/**/*.{js,mjs,ts,tsx}",
+        "x-pack/platform/plugins/shared/cases/common/**/*.{js,mjs,ts,tsx}",
+        "src/platform/packages/shared/kbn-cell-actions/**/*.{js,mjs,ts,tsx}"
+      ],
+      "rules": {}
+    },
+    {
+      // Security packages test-api-clients — node imports allowed
+      "files": ["x-pack/solutions/security/packages/test-api-clients/**/*.{js,mjs,ts,tsx}"],
+      "rules": {}
+    },
+    {
+      // Security TypeScript — non-test/mock files only.
+      // Converted from excludedFiles: *.{test,mock,test_helper}.{ts,tsx} per path.
+      // kbn-cell-actions originally used {js,mjs,ts,tsx}; js/mjs kept broad, ts/tsx narrowed.
+      "files": [
+        "x-pack/solutions/security/plugins/ecs_data_quality_dashboard/**/!(*.test|*.mock|*.test_helper).{ts,tsx}",
+        "x-pack/solutions/security/plugins/elastic_assistant/**/!(*.test|*.mock|*.test_helper).{ts,tsx}",
+        "x-pack/platform/plugins/shared/automatic_import/**/!(*.test|*.mock|*.test_helper).{ts,tsx}",
+        "x-pack/platform/packages/shared/kbn-elastic-assistant/**/!(*.test|*.mock|*.test_helper).{ts,tsx}",
+        "x-pack/platform/packages/shared/kbn-elastic-assistant-common/**/!(*.test|*.mock|*.test_helper).{ts,tsx}",
+        "x-pack/platform/packages/shared/kbn-langchain/**/!(*.test|*.mock|*.test_helper).{ts,tsx}",
+        "x-pack/solutions/security/packages/**/!(*.test|*.mock|*.test_helper).{ts,tsx}",
+        "x-pack/solutions/security/plugins/security_solution/**/!(*.test|*.mock|*.test_helper).{ts,tsx}",
+        "x-pack/solutions/security/plugins/security_solution_ess/**/!(*.test|*.mock|*.test_helper).{ts,tsx}",
+        "x-pack/solutions/security/plugins/security_solution_serverless/**/!(*.test|*.mock|*.test_helper).{ts,tsx}",
+        "x-pack/solutions/security/plugins/timelines/**/!(*.test|*.mock|*.test_helper).{ts,tsx}",
+        "x-pack/platform/plugins/shared/cases/**/!(*.test|*.mock|*.test_helper).{ts,tsx}",
+        "src/platform/packages/shared/kbn-cell-actions/**/*.{js,mjs}",
+        "src/platform/packages/shared/kbn-cell-actions/**/!(*.test|*.mock|*.test_helper).{ts,tsx}"
+      ],
+      "rules": {}
+    },
+    {
+      // Security TypeScript — all files
+      "files": [
+        "x-pack/solutions/security/plugins/ecs_data_quality_dashboard/**/*.{ts,tsx}",
+        "x-pack/solutions/security/plugins/elastic_assistant/**/*.{ts,tsx}",
+        "x-pack/platform/plugins/shared/automatic_import/**/*.{ts,tsx}",
+        "x-pack/platform/packages/shared/kbn-elastic-assistant/**/*.{ts,tsx}",
+        "x-pack/platform/packages/shared/kbn-elastic-assistant-common/**/*.{ts,tsx}",
+        "x-pack/platform/packages/shared/kbn-langchain/**/*.{ts,tsx}",
+        "x-pack/solutions/security/packages/**/*.{ts,tsx}",
+        "x-pack/solutions/security/plugins/security_solution/**/*.{ts,tsx}",
+        "x-pack/solutions/security/plugins/security_solution_ess/**/*.{ts,tsx}",
+        "x-pack/solutions/security/plugins/security_solution_serverless/**/*.{ts,tsx}",
+        "x-pack/solutions/security/plugins/timelines/**/*.{ts,tsx}",
+        "x-pack/platform/plugins/shared/cases/**/*.{ts,tsx}",
+        "src/platform/packages/shared/kbn-cell-actions/**/*.{ts,tsx}"
+      ],
+      "rules": {}
+    },
+    {
+      // Security JS/TS — front and back end
+      "files": [
+        "x-pack/solutions/security/plugins/ecs_data_quality_dashboard/**/*.{js,mjs,ts,tsx}",
+        "x-pack/solutions/security/plugins/elastic_assistant/**/*.{js,mjs,ts,tsx}",
+        "x-pack/platform/plugins/shared/automatic_import/**/*.{js,mjs,ts,tsx}",
+        "x-pack/platform/packages/shared/kbn-elastic-assistant/**/*.{js,mjs,ts,tsx}",
+        "x-pack/platform/packages/shared/kbn-elastic-assistant-common/**/*.{js,mjs,ts,tsx}",
+        "x-pack/platform/packages/shared/kbn-langchain/**/*.{js,mjs,ts,tsx}",
+        "x-pack/solutions/security/packages/**/*.{js,mjs,ts,tsx}",
+        "x-pack/solutions/security/plugins/security_solution/**/*.{js,mjs,ts,tsx}",
+        "x-pack/solutions/security/plugins/security_solution_ess/**/*.{js,mjs,ts,tsx}",
+        "x-pack/solutions/security/plugins/security_solution_serverless/**/*.{js,mjs,ts,tsx}",
+        "x-pack/solutions/security/plugins/timelines/**/*.{js,mjs,ts,tsx}",
+        "x-pack/platform/plugins/shared/cases/**/*.{js,mjs,ts,tsx}",
+        "x-pack/solutions/security/packages/data-stream-adapter/**/*.{js,mjs,ts,tsx}",
+        "src/platform/packages/shared/kbn-cell-actions/**/*.{js,mjs,ts,tsx}"
+      ],
+      "env": {
+        "jest": true
+      },
+      "plugins": ["react", "node"],
+      "rules": {}
+    },
+    {
+      // Security — nested override (hoisted): cases + security_solution TS
+      "files": [
+        "x-pack/platform/plugins/shared/cases/**/*.{ts,tsx}",
+        "x-pack/solutions/security/plugins/ecs_data_quality_dashboard/**/*.{ts,tsx}",
+        "x-pack/solutions/security/plugins/security_solution/**/*.{ts,tsx}",
+        "x-pack/solutions/security/plugins/security_solution_ess/**/*.{ts,tsx}",
+        "x-pack/solutions/security/plugins/security_solution_serverless/**/*.{ts,tsx}",
+        "x-pack/solutions/security/packages/data-stream-adapter/**/*.{ts,tsx}",
+        "x-pack/solutions/security/packages/features/**/*.{ts,tsx}",
+        "x-pack/solutions/security/packages/navigation/**/*.{ts,tsx}",
+        "src/platform/packages/shared/kbn-cell-actions/**/*.{ts,tsx}"
+      ],
+      "rules": {}
+    },
+    {
+      // Cases public — converted from excludedFiles: *.{test,mock,test_helper}.{ts,tsx}.
+      // Original files included {js,mjs,ts,tsx}; applied negation uniformly for simplicity.
+      "files": [
+        "x-pack/platform/plugins/shared/cases/public/**/!(*.test|*.mock|*.test_helper).{js,mjs,ts,tsx}"
+      ],
+      "rules": {}
+    },
+    {
+      // Cases test files — testing-library/react (not a built-in oxlint plugin)
+      "files": ["x-pack/platform/plugins/shared/cases/**/*.{test,mock,test_helper}.tsx"],
+      "rules": {}
+    },
+
+    // ── Lists ─────────────────────────────────────────────────────────────────────
+    {
+      "files": [
+        "x-pack/solutions/security/plugins/lists/public/**/*.{js,mjs,ts,tsx}",
+        "x-pack/solutions/security/plugins/lists/common/**/*.{js,mjs,ts,tsx}"
+      ],
+      "rules": {}
+    },
+    {
+      "files": [
+        "x-pack/solutions/security/plugins/lists/public/*.{ts,tsx}",
+        "x-pack/solutions/security/plugins/lists/common/*.{ts,tsx}"
+      ],
+      "rules": {}
+    },
+    {
+      "files": [
+        "x-pack/solutions/security/plugins/lists/public/*.{ts,tsx}",
+        "x-pack/solutions/security/plugins/lists/common/*.{ts,tsx}"
+      ],
+      "env": {
+        "jest": true
+      },
+      "plugins": ["react"],
+      "rules": {}
+    },
+
+    // ── Functional / integration tests (mocha) ────────────────────────────────────
+    // NOTE: `mocha` is not a built-in oxlint plugin.
+    {
+      "files": [
+        "src/platform/test/{accessibility,*functional*}/apps/**/*.{js,ts}",
+        "src/platform/test/*api_integration*/**/*.{js,ts}",
+        "x-pack/platform/test/{accessibility,*functional*}/apps/**/*.{js,ts}",
+        "x-pack/platform/test/*api_integration*/**/*.{js,ts}",
+        "x-pack/platform/test/*functional/tests/**/*.{js,ts}"
+      ],
+      "env": {
+        "mocha": true
+      },
+      "rules": {}
+    },
+
+    // ── Scout / Playwright tests ──────────────────────────────────────────────────
+    // NOTE: `playwright` is not a built-in oxlint plugin.
+    // Converted from excludedFiles: src/platform/packages/shared/kbn-scout/src/playwright/**/*.test.ts
+    {
+      "files": [
+        "src/platform/packages/shared/kbn-scout/src/playwright/**/!(*.test).ts",
+        "x-pack/solutions/**/packages/kbn-scout-*/src/playwright/**/*.ts",
+        "src/platform/{packages,plugins}/**/test/{scout,scout_*}/**/*.ts",
+        "x-pack/platform/{packages,plugins}/**/test/{scout,scout_*}/**/*.ts",
+        "x-pack/solutions/**/{packages,plugins}/**/test/{scout,scout_*}/**/*.ts"
+      ],
+      "rules": {}
+    },
+
+    // ── Lists public — react-perf ─────────────────────────────────────────────────
+    {
+      "files": ["x-pack/solutions/security/plugins/lists/public/**/!(*.test).{js,mjs,ts,tsx}"],
+      "plugins": ["react-perf"],
+      "rules": {}
+    },
+
+    // ── Lists — JS/TS front and back ──────────────────────────────────────────────
+    {
+      "files": ["x-pack/solutions/security/plugins/lists/**/*.{js,mjs,ts,tsx}"],
+      "env": {
+        "jest": true
+      },
+      "plugins": ["node"],
+      "rules": {}
+    },
+
+    // ── Alerting Services ─────────────────────────────────────────────────────────
+    {
+      "files": [
+        "x-pack/platform/plugins/shared/actions/**/*.{ts,tsx}",
+        "x-pack/platform/plugins/shared/alerting/**/*.{ts,tsx}",
+        "x-pack/platform/plugins/shared/stack_alerts/**/*.{ts,tsx}",
+        "x-pack/platform/plugins/shared/task_manager/**/*.{ts,tsx}",
+        "x-pack/platform/plugins/shared/event_log/**/*.{ts,tsx}"
+      ],
+      "rules": {}
+    },
+    {
+      "files": [
+        "x-pack/platform/plugins/shared/stack_connectors/server/**/*.ts",
+        "x-pack/platform/plugins/shared/triggers_actions_ui/server/**/*.ts"
+      ],
+      "rules": {}
+    },
+
+    // ── ResponseOps ───────────────────────────────────────────────────────────────
+    {
+      "files": [
+        "src/platform/packages/shared/response-ops/**/*.{ts,tsx}",
+        "x-pack/platform/plugins/shared/alerting/**/*.{ts,tsx}",
+        "x-pack/platform/plugins/shared/actions/**/*.{ts,tsx}",
+        "x-pack/platform/plugins/shared/stack_alerts/**/*.{ts,tsx}",
+        "x-pack/platform/plugins/shared/stack_connectors/**/*.{ts,tsx}",
+        "x-pack/platform/plugins/shared/triggers_actions_ui/**/*.{ts,tsx}",
+        "x-pack/platform/plugins/shared/event_log/**/*.{ts,tsx}",
+        "x-pack/platform/plugins/shared/rule_registry/**/*.{ts,tsx}",
+        "x-pack/platform/plugins/shared/task_manager/**/*.{ts,tsx}",
+        "x-pack/solutions/observability/packages/kbn-alerts-grouping/**/*.{ts,tsx}",
+        "src/platform/packages/shared/kbn-alerts-ui-shared/**/*.{ts,tsx}",
+        "src/platform/packages/shared/kbn-alerting-types/**/*.{ts,tsx}",
+        "src/platform/packages/shared/kbn-cases-components/**/*.{ts,tsx}",
+        "src/platform/packages/shared/kbn-actions-types/**/*.{ts,tsx}",
+        "src/platform/packages/shared/kbn-alerts-as-data-utils/**/*.{ts,tsx}",
+        "src/platform/packages/shared/kbn-grouping/**/*.{ts,tsx}",
+        "src/platform/packages/shared/kbn-rrule/**/*.{ts,tsx}",
+        "src/platform/packages/shared/kbn-rule-data-utils/**/*.{ts,tsx}",
+        "src/platform/packages/shared/kbn-triggers-actions-ui-types/**/*.{ts,tsx}",
+        "x-pack/platform/packages/shared/kbn-alerting-comparators/**/*.{ts,tsx}",
+        "x-pack/platform/plugins/shared/embeddable_alerts_table/**/*.{ts,tsx}",
+        "x-pack/platform/test/alerting_api_integration/**/*.{ts,tsx}",
+        "x-pack/platform/test/cases_api_integration/**/*.{ts,tsx}",
+        "x-pack/platform/test/reporting_api_integration/**/*.{ts,tsx}",
+        "x-pack/solutions/**/test/cases_api_integration/**/*.{ts,tsx}",
+        "x-pack/platform/test/rule_registry/**/*.{ts,tsx}",
+        "x-pack/platform/test/api_integration/apis/cases/**/*.{ts,tsx}",
+        "x-pack/solutions/**/test/api_integration/apis/cases/**/*.{ts,tsx}"
+      ],
+      "rules": {}
+    },
+
+    // ── Stack Connectors Specs ────────────────────────────────────────────────────
+    {
+      "files": ["src/platform/packages/shared/kbn-connector-specs/**/*.{js,mjs,ts,tsx}"],
+      "rules": {}
+    },
+    {
+      "files": ["src/platform/packages/shared/kbn-connector-specs/src/specs/**/icon/*.{ts,tsx}"],
+      "rules": {}
+    },
+
+    // ── Lens ──────────────────────────────────────────────────────────────────────
+    {
+      "files": ["x-pack/platform/plugins/shared/lens/**/*.{ts,tsx}"],
+      "rules": {}
+    },
+
+    // ── Streams ───────────────────────────────────────────────────────────────────
+    {
+      "files": [
+        "x-pack/platform/plugins/shared/streams/**/*.{ts,tsx}",
+        "x-pack/platform/plugins/shared/streams_app/**/*.{ts,tsx}"
+      ],
+      "rules": {}
+    },
+
+    // ── Discover ──────────────────────────────────────────────────────────────────
+    {
+      "files": [
+        "src/platform/plugins/shared/discover/**/*.{js,mjs,ts,tsx}",
+        "src/platform/plugins/shared/saved_search/**/*.{js,mjs,ts,tsx}"
+      ],
+      "rules": {}
+    },
+    {
+      "files": [
+        "src/platform/plugins/shared/discover/**/*.{ts,tsx}",
+        "src/platform/plugins/shared/saved_search/**/*.{ts,tsx}"
+      ],
+      "rules": {}
+    },
+
+    // ── Search ────────────────────────────────────────────────────────────────────
+    // Converted from excludedFiles: x-pack/solutions/search/**/*.test.tsx (tsx only).
+    // Split into two entries: .ts files are unrestricted, .tsx files exclude *.test.tsx.
+    {
+      "files": ["x-pack/solutions/search/**/*.ts", "x-pack/solutions/search/**/!(*.test).tsx"],
+      "rules": {}
+    },
+
+    // ── Enterprise Search ─────────────────────────────────────────────────────────
+    {
+      "files": ["x-pack/solutions/search/plugins/enterprise_search/**/*.{ts,tsx}"],
+      "rules": {}
+    },
+    {
+      // Source files only — converted from excludedFiles: *.{test,mock,test_helper}.{ts,tsx}
+      "files": [
+        "x-pack/solutions/search/plugins/enterprise_search/**/!(*.test|*.mock|*.test_helper).{ts,tsx}"
+      ],
+      "rules": {}
+    },
+
+    // ── Serverless Search ─────────────────────────────────────────────────────────
+    {
+      "files": [
+        "x-pack/solutions/search/plugins/serverless_search/**/*.{ts,tsx}",
+        "x-pack/solutions/search/packages/kbn-search-*"
+      ],
+      "rules": {}
+    },
+
+    // ── Canvas ────────────────────────────────────────────────────────────────────
+    {
+      "files": ["x-pack/platform/plugins/private/canvas/**/*.js"],
+      "rules": {}
+    },
+    {
+      "files": [
+        "x-pack/platform/plugins/private/canvas/gulpfile.js",
+        "x-pack/platform/plugins/private/canvas/scripts/*.js",
+        "x-pack/platform/plugins/private/canvas/tasks/*.js",
+        "x-pack/platform/plugins/private/canvas/tasks/**/*.js",
+        "x-pack/platform/plugins/private/canvas/__tests__/**/*.js",
+        "x-pack/platform/plugins/private/canvas/**/{__tests__,__test__,__jest__,__fixtures__,__mocks__}/**/*.js"
+      ],
+      "rules": {}
+    },
+    {
+      "files": ["x-pack/platform/plugins/private/canvas/canvas_plugin_src/**/*.js"],
+      "globals": {
+        "canvas": "writable",
+        "$": "writable"
+      },
+      "rules": {}
+    },
+    {
+      "files": ["x-pack/platform/plugins/private/canvas/public/**/*.js"],
+      "env": {
+        "browser": true
+      },
+      "rules": {}
+    },
+
+    // ── kbn-flot-charts ───────────────────────────────────────────────────────────
+    {
+      "files": ["src/platform/packages/shared/kbn-flot-charts/lib/**/*.js"],
+      "env": {
+        "jquery": true
+      },
+      "rules": {}
+    },
+
+    // ── TSVB ──────────────────────────────────────────────────────────────────────
+    {
+      "files": ["src/platform/plugins/shared/vis_types/timeseries/**/*.{js,mjs,ts,tsx}"],
+      "rules": {}
+    },
+
+    // ── Osquery ───────────────────────────────────────────────────────────────────
+    {
+      "files": ["x-pack/platform/plugins/shared/osquery/**/*.{js,mjs,ts,tsx}"],
+      "plugins": ["react", "typescript"],
+      "rules": {}
+    },
+    {
+      "files": ["x-pack/platform/plugins/shared/osquery/**/*.{ts,tsx}"],
+      "rules": {}
+    },
+    {
+      "files": ["x-pack/platform/plugins/shared/osquery/public/**/!(*.test).{js,mjs,ts,tsx}"],
+      "plugins": ["react", "react-perf"],
+      "rules": {}
+    },
+
+    // ── Platform Security Team ────────────────────────────────────────────────────
+    {
+      "files": [
+        "src/platform/plugins/private/interactive_setup/**/*.{js,mjs,ts,tsx}",
+        "src/platform/test/interactive_setup_api_integration/**/*.{js,mjs,ts,tsx}",
+        "src/platform/test/interactive_setup_functional/**/*.{js,mjs,ts,tsx}",
+        "packages/kbn-mock-idp-plugin/**/*.{js,mjs,ts,tsx}",
+        "src/platform/packages/private/kbn-mock-idp-utils/**/*.{js,mjs,ts,tsx}",
+        "src/platform/packages/shared/kbn-security-hardening/**/*.{js,mjs,ts,tsx}",
+        "src/platform/packages/shared/kbn-user-profile-components/**/*.{js,mjs,ts,tsx}",
+        "x-pack/platform/plugins/shared/encrypted_saved_objects/**/*.{js,mjs,ts,tsx}",
+        "x-pack/platform/test/encrypted_saved_objects_api_integration/**/*.{js,mjs,ts,tsx}",
+        "x-pack/platform/plugins/shared/security/**/*.{js,mjs,ts,tsx}",
+        "x-pack/platform/packages/private/security/**/*.{js,mjs,ts,tsx}",
+        "x-pack/platform/packages/shared/security/**/*.{js,mjs,ts,tsx}",
+        "x-pack/platform/test/security_api_integration/**/*.{js,mjs,ts,tsx}",
+        "x-pack/platform/test/security_functional/**/*.{js,mjs,ts,tsx}",
+        "x-pack/platform/plugins/shared/spaces/**/*.{js,mjs,ts,tsx}",
+        "x-pack/platform/test/spaces_api_integration/**/*.{js,mjs,ts,tsx}"
+      ],
+      "rules": {}
+    },
+    {
+      "files": [
+        "src/platform/plugins/private/interactive_setup/**/*.{ts,tsx}",
+        "src/platform/test/interactive_setup_api_integration/**/*.{ts,tsx}",
+        "src/platform/test/interactive_setup_functional/**/*.{ts,tsx}",
+        "packages/kbn-mock-idp-plugin/**/*.{ts,tsx}",
+        "src/platform/packages/private/kbn-mock-idp-utils/**/*.{ts,tsx}",
+        "src/platform/packages/shared/kbn-security-hardening/**/*.{ts,tsx}",
+        "src/platform/packages/shared/kbn-user-profile-components/**/*.{ts,tsx}",
+        "x-pack/platform/plugins/shared/encrypted_saved_objects/**/*.{ts,tsx}",
+        "x-pack/platform/test/encrypted_saved_objects_api_integration/**/*.{ts,tsx}",
+        "x-pack/platform/plugins/shared/security/**/*.{ts,tsx}",
+        "x-pack/platform/packages/private/security/**/*.{ts,tsx}",
+        "x-pack/platform/packages/shared/security/**/*.{ts,tsx}",
+        "x-pack/platform/test/security_api_integration/**/*.{ts,tsx}",
+        "x-pack/platform/test/security_functional/**/*.{ts,tsx}",
+        "x-pack/platform/plugins/shared/spaces/**/*.{ts,tsx}",
+        "x-pack/platform/test/spaces_api_integration/**/*.{ts,tsx}"
+      ],
+      "rules": {}
+    },
+
+    // ── Telemetry / no-any ────────────────────────────────────────────────────────
+    {
+      "files": [
+        "src/platform/packages/shared/kbn-analytics/**",
+        "src/platform/plugins/private/kibana_usage_collection/**",
+        "src/platform/plugins/shared/usage_collection/**",
+        "src/platform/plugins/shared/telemetry/**",
+        "src/platform/plugins/shared/telemetry_collection_manager/**",
+        "src/platform/plugins/shared/telemetry_management_section/**",
+        "x-pack/platform/plugins/private/telemetry_collection_xpack/**"
+      ],
+      "rules": {}
+    },
+
+    // ── Core team ─────────────────────────────────────────────────────────────────
+    {
+      "files": [
+        "src/core/**",
+        "x-pack/platform/plugins/shared/features/**",
+        "x-pack/platform/plugins/shared/licensing/**",
+        "x-pack/platform/plugins/shared/global_search/**",
+        "x-pack/platform/plugins/shared/cloud/**",
+        "src/platform/packages/shared/kbn-config-schema",
+        "src/platform/plugins/shared/saved_objects_management/**",
+        "src/platform/packages/shared/kbn-analytics/**",
+        "src/platform/packages/private/kbn-telemetry-tools/**",
+        "src/platform/plugins/private/kibana_usage_collection/**",
+        "src/platform/plugins/shared/usage_collection/**",
+        "src/platform/plugins/shared/telemetry/**",
+        "src/platform/plugins/shared/telemetry_collection_manager/**",
+        "src/platform/plugins/shared/telemetry_management_section/**",
+        "x-pack/platform/plugins/private/telemetry_collection_xpack/**"
+      ],
+      "rules": {}
+    },
+
+    // ── Workflows Team — generic ──────────────────────────────────────────────────
+    {
+      "files": [
+        "src/platform/plugins/shared/workflows_management/**/*.{js,mjs,ts,tsx}",
+        "src/platform/plugins/shared/workflows_execution_engine/**/*.{js,mjs,ts,tsx}",
+        "src/platform/plugins/shared/workflows_extensions/**/*.{js,mjs,ts,tsx}",
+        "src/platform/packages/shared/kbn-workflows/**/*.{js,mjs,ts,tsx}",
+        "src/platform/packages/shared/kbn-workflows-ui/**/*.{js,mjs,ts,tsx}"
+      ],
+      "env": {
+        "jest": true
+      },
+      "plugins": ["react", "node"],
+      "rules": {}
+    },
+    {
+      // Workflows — public / common
+      "files": [
+        "src/platform/plugins/shared/workflows_management/public/**/*.{js,mjs,ts,tsx}",
+        "src/platform/plugins/shared/workflows_management/common/**/*.{js,mjs,ts,tsx}",
+        "src/platform/plugins/shared/workflows_extensions/public/**/*.{js,mjs,ts,tsx}",
+        "src/platform/plugins/shared/workflows_extensions/common/**/*.{js,mjs,ts,tsx}",
+        "src/platform/packages/shared/kbn-workflows/**/*.{js,mjs,ts,tsx}",
+        "src/platform/packages/shared/kbn-workflows-ui/**/*.{js,mjs,ts,tsx}"
+      ],
+      "rules": {}
+    },
+    {
+      // Workflows — test files (excludedFiles not applicable here — these ARE the test files)
+      "files": [
+        "src/platform/plugins/shared/workflows_management/**/*.{test,mock,test_helper}.{ts,tsx}",
+        "src/platform/plugins/shared/workflows_execution_engine/**/*.{test,mock,test_helper}.{ts,tsx}",
+        "src/platform/plugins/shared/workflows_extensions/**/*.{test,mock,test_helper}.{ts,tsx}",
+        "src/platform/packages/shared/kbn-workflows/**/*.{test,mock,test_helper}.{ts,tsx}",
+        "src/platform/packages/shared/kbn-workflows-ui/**/*.{test,mock,test_helper}.{ts,tsx}"
+      ],
+      "rules": {}
+    },
+    {
+      // Workflows — scripts
+      "files": ["src/platform/packages/shared/kbn-workflows/scripts/**/*.{js,ts}"],
+      "rules": {}
+    },
+
+    // ── No export * in index files ────────────────────────────────────────────────
+    {
+      "files": [
+        "src/core/{server,public,common}/index.ts",
+        "src/platform/plugins/**/{server,public,common}/index.ts",
+        "x-pack/platform/plugins/**/{server,public,common}/index.ts",
+        "x-pack/solutions/*/plugins/**/{server,public,common}/index.ts"
+      ],
+      "rules": {}
+    },
+
+    // ── Enterprise Search — Prettier backtick override ────────────────────────────
+    {
+      "files": ["x-pack/solutions/search/plugins/enterprise_search/**/*.{ts,tsx}"],
+      "rules": {}
+    },
+
+    // ── Cloud Security Team ───────────────────────────────────────────────────────
+    // NOTE: `testing-library` is not a built-in oxlint plugin.
+    {
+      "files": ["x-pack/solutions/security/plugins/cloud_security_posture/**/*.{js,mjs,ts,tsx}"],
+      "rules": {}
+    },
+
+    // ── .buildkite ────────────────────────────────────────────────────────────────
+    {
+      "files": [".buildkite/**/*.{js,ts}"],
+      "rules": {}
+    },
+
+    // ── kbn-repo-* / CLI packages ────────────────────────────────────────────────
+    {
+      "files": [
+        "src/platform/packages/*/kbn-repo-*/**/*",
+        "packages/kbn-repo-*/**/*",
+        "packages/kbn-validate-next-docs-cli/**/*",
+        "packages/kbn-find-used-node-modules/**/*"
+      ],
+      "rules": {}
+    },
+
+    // ── Special cross-boundary exceptions ────────────────────────────────────────
+    {
+      "files": [
+        "scripts/create_observability_rules.js",
+        "src/cli_setup/**",
+        "src/dev/build/tasks/install_chromium.ts",
+        "x-pack/platform/test/plugin_functional/plugins/resolver_test/**"
+      ],
+      "rules": {}
+    },
+
+    // ── Dependency analysis CLI tools ─────────────────────────────────────────────
+    {
+      "files": ["packages/kbn-dependency-usage/**/*.{ts,tsx}"],
+      "rules": {}
+    },
+    {
+      "files": ["packages/kbn-dependency-ownership/**/*.{ts,tsx}"],
+      "rules": {}
+    },
+
+    // ── Cypress — restricted imports ──────────────────────────────────────────────
+    {
+      "files": ["x-pack/**/cypress/**/*.ts"],
+      "rules": {}
+    },
+
+    // ── Scout — platform tests ────────────────────────────────────────────────────
+    {
+      "files": [
+        "src/platform/plugins/**/test/{scout,scout_*}/**/*.ts",
+        "x-pack/platform/**/plugins/**/test/{scout,scout_*}/**/*.ts"
+      ],
+      "rules": {}
+    },
+
+    // ── Scout — observability solution tests ──────────────────────────────────────
+    {
+      "files": ["x-pack/solutions/observability/plugins/**/test/{scout,scout_*}/**/*.ts"],
+      "rules": {}
+    },
+
+    // ── Scout — search solution tests ────────────────────────────────────────────
+    {
+      "files": ["x-pack/solutions/search/plugins/**/test/{scout,scout_*}/**/*.ts"],
+      "rules": {}
+    },
+
+    // ── Scout — security solution tests ──────────────────────────────────────────
+    {
+      "files": ["x-pack/solutions/security/plugins/**/test/{scout,scout_*}/**/*.ts"],
+      "rules": {}
+    },
+
+    // ── Scout — custom rules (Platform & Solutions) ───────────────────────────────
+    {
+      "files": [
+        "src/platform/plugins/**/test/{scout,scout_*}/**/*.ts",
+        "x-pack/platform/**/plugins/**/test/{scout,scout_*}/**/*.ts",
+        "x-pack/solutions/**/plugins/**/test/{scout,scout_*}/**/*.ts"
+      ],
+      "rules": {}
+    },
+
+    // ── Scout — API tests ─────────────────────────────────────────────────────────
+    {
+      "files": [
+        "src/platform/plugins/**/test/{scout,scout_*}/api/**/*.ts",
+        "x-pack/platform/**/plugins/**/test/{scout,scout_*}/api/**/*.ts",
+        "x-pack/solutions/**/plugins/**/test/{scout,scout_*}/api/**/*.ts"
+      ],
+      "rules": {}
+    },
+
+    // ── Deployment-agnostic tests ─────────────────────────────────────────────────
+    {
+      "files": [
+        "x-pack/platform/test/api_integration_deployment_agnostic/apis/**/*.{js,ts}",
+        "x-pack/platform/test/api_integration_deployment_agnostic/services/**/*.{js,ts}",
+        "x-pack/solutions/**/test/api_integration_deployment_agnostic/apis/**/*.{js,ts}",
+        "x-pack/solutions/**/test/api_integration_deployment_agnostic/services/**/*.{js,ts}"
+      ],
+      "rules": {}
+    },
+
+    // ── Restrict fs write imports in production code ───────────────────────────────
+    // Converted from excludedFiles:
+    //   FILE-BASED (converted below): **/*.{test,spec}.ts, **/*.test.ts
+    //   DIRECTORY-BASED (cannot express in override files — add to top-level ignorePatterns
+    //   if a global exclusion is acceptable):
+    //     **/test/**, **/tests/**, **/__tests__/**, **/scripts/**, **/e2e/**,
+    //     **/cypress/**, **/ftr_e2e/**, **/.storybook/**, **/json_schemas/**
+    //   SPECIFIC PACKAGE EXCEPTIONS (removed from files globs below):
+    //     src/platform/plugins/shared/telemetry/** (allowed for telemetry collection)
+    //     x-pack/solutions/security/packages/test-api-clients/**
+    //     x-pack/platform/plugins/shared/automatic_import/** (being migrated)
+    {
+      "files": [
+        "src/platform/plugins/shared/**/!(*.test|*.spec).ts",
+        "x-pack/solutions/**/!(*.test|*.spec).ts",
+        "x-pack/plugins/**/!(*.test|*.spec).ts",
+        "x-pack/platform/plugins/shared/**/!(*.test|*.spec).ts"
+      ],
+      "rules": {}
+    }
+  ]
+}
