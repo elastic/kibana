@@ -54,7 +54,8 @@ export class CPSServerPlugin implements Plugin<CPSServerSetup, CPSServerStart | 
     }
 
     return {
-      createNpreClient: (request: KibanaRequest) => new NpreClient(this.log, core, request),
+      createNpreClient: (request: KibanaRequest) =>
+        new NpreClient(this.log, core.elasticsearch.client.asScoped(request)),
     };
   }
 

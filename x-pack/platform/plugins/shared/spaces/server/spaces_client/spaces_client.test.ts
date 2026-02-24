@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
+
 import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import type { SavedObject } from '@kbn/core-saved-objects-server';
 import type { INpreClient } from '@kbn/cps/server/npre';
@@ -15,7 +17,6 @@ import { SpacesClient } from './spaces_client';
 import type { GetAllSpacesPurpose, Space } from '../../common';
 import type { ConfigType } from '../config';
 import { ConfigSchema } from '../config';
-import { errors } from '@elastic/elasticsearch';
 
 const createMockDebugLogger = () => {
   return jest.fn();

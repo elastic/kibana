@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { CoreStart, IClusterClient, KibanaRequest, Logger } from '@kbn/core/server';
+import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import type { ProjectRouting } from '@kbn/es-query';
 import { errors } from '@elastic/elasticsearch';
 
@@ -55,21 +55,16 @@ export interface INpreClient {
  * Service for managing project routing expressions in Elasticsearch.
  */
 export class NpreClient implements INpreClient {
-  constructor(
-    private readonly logger: Logger,
-    private readonly core: CoreStart,
-    private readonly request: KibanaRequest
-  ) {}
+  constructor(private readonly logger: Logger, private readonly esClient: IScopedClusterClient) {}
 
-  private getClient(): IClusterClient {
-    return this.core.elasticsearch.client;
+  private getClient(): IScopedClusterClient {
+    return this.esClient;
   }
 
   public async getNpre(expressionName: string): Promise<ProjectRouting | undefined> {
     this.logger.debug(`Getting NPRE for expression: ${expressionName}`);
 
     return this.getClient()
-      .asScoped(this.request)
       .asCurrentUser.transport.request<NpreExpressionResponse>({
         method: 'GET',
         path: `/_project_routing/${expressionName}`,
@@ -92,7 +87,6 @@ export class NpreClient implements INpreClient {
 
   public async canGetNpre(): Promise<boolean> {
     return this.getClient()
-      .asScoped(this.request)
       .asCurrentUser.security.hasPrivileges({
         cluster: ['cluster:monitor/project_routing/get'],
       })
@@ -101,7 +95,6 @@ export class NpreClient implements INpreClient {
 
   public async canPutNpre(): Promise<boolean> {
     return this.getClient()
-      .asScoped(this.request)
       .asCurrentUser.security.hasPrivileges({
         cluster: ['cluster:admin/project_routing/put'],
       })
@@ -115,7 +108,6 @@ export class NpreClient implements INpreClient {
     this.logger.debug(`Putting NPRE for expression: ${expressionName} with value: ${expression}`);
 
     return this.getClient()
-      .asScoped(this.request)
       .asCurrentUser.transport.request<{ acknowledged: boolean }>({
         method: 'PUT',
         path: `/_project_routing/${expressionName}`,

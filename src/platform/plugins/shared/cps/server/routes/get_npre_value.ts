@@ -26,10 +26,8 @@ export const registerGetNpreValueRoute = (
       security: {
         authz: {
           requiredPrivileges: [
-            {
-              // this will end up being just read_project_routing but it is not implemented yet.
-              anyRequired: ['read_project_routing', 'cluster:monitor/project_routing/get'],
-            },
+            // this will end up being just read_project_routing but it is not implemented yet.
+            'cluster:monitor/project_routing/get',
           ],
         },
       },
@@ -38,7 +36,7 @@ export const registerGetNpreValueRoute = (
       try {
         const core = await requestHandlerContext.core;
 
-        const npreClient = new NpreClient(logger.get(), core as any, request);
+        const npreClient = new NpreClient(logger.get(), core.elasticsearch.client);
 
         const value = await npreClient.getNpre(request.params.projectRoutingName);
 
@@ -48,7 +46,7 @@ export const registerGetNpreValueRoute = (
 
         return response.ok({ body: value });
       } catch (error) {
-        logger.get().debug(error);
+        logger.get().info(error);
         throw error;
       }
     }

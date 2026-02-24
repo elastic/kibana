@@ -7,12 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  elasticsearchServiceMock,
-  loggingSystemMock,
-  httpServerMock,
-} from '@kbn/core/server/mocks';
-import type { CoreStart } from '@kbn/core/server';
+import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { errors } from '@elastic/elasticsearch';
 
 import { NpreClient } from './npre_client';
@@ -20,30 +15,14 @@ import { NpreClient } from './npre_client';
 describe('NpreClient', () => {
   let service: NpreClient;
   let mockLogger: ReturnType<typeof loggingSystemMock.createLogger>;
-  let mockCoreStart: CoreStart;
-  let mockRequest: ReturnType<typeof httpServerMock.createKibanaRequest>;
-  let mockClusterClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>;
-  let mockScopedClient: ReturnType<
-    ReturnType<typeof elasticsearchServiceMock.createClusterClient>['asScoped']
-  >;
+  let mockScopedClient: ReturnType<typeof elasticsearchServiceMock.createScopedClusterClient>;
 
   beforeEach(() => {
     mockLogger = loggingSystemMock.createLogger();
-    mockRequest = httpServerMock.createKibanaRequest();
 
-    mockClusterClient = elasticsearchServiceMock.createClusterClient();
     mockScopedClient = elasticsearchServiceMock.createScopedClusterClient();
 
-    mockCoreStart = {
-      elasticsearch: {
-        client: {
-          ...mockClusterClient,
-          asScoped: jest.fn(() => mockScopedClient),
-        },
-      },
-    } as unknown as CoreStart;
-
-    service = new NpreClient(mockLogger, mockCoreStart, mockRequest);
+    service = new NpreClient(mockLogger, mockScopedClient);
   });
 
   describe('getNpre', () => {
@@ -219,12 +198,12 @@ describe('NpreClient', () => {
       const expressionName = 'test-expression';
       const mockResponse = { acknowledged: true };
 
-      mockClusterClient.asInternalUser.transport.request.mockResolvedValue(mockResponse);
+      mockScopedClient.asInternalUser.transport.request.mockResolvedValue(mockResponse);
 
       const result = await service.deleteNpre(expressionName);
 
       expect(result).toEqual(mockResponse);
-      expect(mockClusterClient.asInternalUser.transport.request).toHaveBeenCalledWith({
+      expect(mockScopedClient.asInternalUser.transport.request).toHaveBeenCalledWith({
         method: 'DELETE',
         path: '/_project_routing/test-expression',
       });
@@ -237,7 +216,7 @@ describe('NpreClient', () => {
       const expressionName = 'test-expression';
       const error = new Error('Elasticsearch error');
 
-      mockClusterClient.asInternalUser.transport.request.mockRejectedValue(error);
+      mockScopedClient.asInternalUser.transport.request.mockRejectedValue(error);
 
       await expect(service.deleteNpre(expressionName)).rejects.toThrow('Elasticsearch error');
       expect(mockLogger.error).toHaveBeenCalledWith(
@@ -260,7 +239,7 @@ describe('NpreClient', () => {
         meta: {} as any,
       });
 
-      mockClusterClient.asInternalUser.transport.request.mockRejectedValue(error);
+      mockScopedClient.asInternalUser.transport.request.mockRejectedValue(error);
 
       await expect(service.deleteNpre(expressionName)).rejects.toThrow();
       expect(mockLogger.error).toHaveBeenCalledWith(
