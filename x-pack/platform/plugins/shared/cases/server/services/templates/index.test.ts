@@ -840,6 +840,46 @@ describe('TemplatesService', () => {
         })
       ).rejects.toThrow('template does not exist');
     });
+
+    it('carries over usageCount and lastUsedAt from the previous version', async () => {
+      const definition = buildDefinition('Edited Template');
+      const service = createService();
+
+      jest.spyOn(service, 'getTemplate').mockResolvedValue({
+        id: 'template-so-id',
+        attributes: {
+          templateId: 'template-id',
+          name: 'Previous Template',
+          owner: 'securitySolution',
+          definition: buildDefinition('Previous Template'),
+          templateVersion: 3,
+          deletedAt: null,
+          author: 'alice',
+          usageCount: 42,
+          lastUsedAt: '2025-12-01T00:00:00.000Z',
+        },
+      } as SavedObject<Template>);
+
+      unsecuredSavedObjectsClient.create.mockResolvedValue({
+        id: 'template-new-so-id',
+        attributes: {} as Template,
+      } as SavedObject<Template>);
+
+      await service.updateTemplate('template-id', {
+        owner: 'securitySolution',
+        definition,
+      });
+
+      expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+        CASE_TEMPLATE_SAVED_OBJECT,
+        expect.objectContaining({
+          templateVersion: 4,
+          usageCount: 42,
+          lastUsedAt: '2025-12-01T00:00:00.000Z',
+        }),
+        expect.any(Object)
+      );
+    });
   });
 
   describe('deleteTemplate', () => {
