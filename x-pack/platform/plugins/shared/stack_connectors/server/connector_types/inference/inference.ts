@@ -208,11 +208,10 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
         meta: true,
         signal: params.signal,
         ...(params.telemetryMetadata?.pluginId
-          ? {
-              headers: {
-                'X-Elastic-Product-Use-Case': params.telemetryMetadata?.pluginId,
-              },
-            }
+          ? { headers: { 'X-Elastic-Product-Use-Case': params.telemetryMetadata.pluginId } }
+          : {}),
+        ...(params.telemetryMetadata?.useCase
+          ? { headers: { 'X-Elastic-Product-Use-Case-Type': params.telemetryMetadata.useCase } }
           : {}),
       }
     );

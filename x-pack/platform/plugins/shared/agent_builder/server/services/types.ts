@@ -76,4 +76,5 @@ export interface ServicesStartDeps {
   taskManager: TaskManagerStartContract;
   trackingService?: TrackingService;
   analyticsService?: AnalyticsService;
+  telemetryUseCase?: string;
 }

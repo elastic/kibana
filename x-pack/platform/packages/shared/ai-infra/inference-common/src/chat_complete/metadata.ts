@@ -23,4 +23,9 @@ export interface ChatCompleteMetadata {
 export interface ConnectorTelemetryMetadata {
   pluginId?: string;
   aggregateBy?: string;
+  /**
+   * Optional use case identifier forwarded as X-Elastic-Product-Use-Case-Type header to EIS.
+   * Used to distinguish traffic types (e.g. 'smoke_test') from production traffic.
+   */
+  useCase?: string;
 }

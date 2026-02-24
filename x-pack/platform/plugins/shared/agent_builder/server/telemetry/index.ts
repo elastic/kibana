@@ -18,7 +18,14 @@ export {
 } from './usage_counters';
 export { registerTelemetryCollector, type AgentBuilderTelemetry } from './telemetry_collector';
 
-// Used to identify requests to EIS originating from AgentBuilder (moved from old telemetry.ts)
-export const MODEL_TELEMETRY_METADATA = {
-  pluginId: 'agent_builder',
-} as const;
+/**
+ * Builds telemetry metadata forwarded to EIS on every inference request.
+ *
+ * - `pluginId` is sent as the `X-Elastic-Product-Use-Case` header to identify traffic from Agent Builder.
+ * - `useCase` (optional) is sent as the `X-Elastic-Product-Use-Case-Type` header to distinguish
+ *   traffic types, e.g. `'smoke_test'` or `'eval'`.
+ */
+export const buildModelTelemetryMetadata = (useCase?: string) => ({
+  pluginId: 'agent_builder' as const,
+  ...(useCase ? { useCase } : {}),
+});

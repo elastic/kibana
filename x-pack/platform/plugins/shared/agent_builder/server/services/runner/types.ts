@@ -38,6 +38,7 @@ export interface RunnerFactoryDeps {
   skillServiceStart: SkillServiceStart;
   trackingService?: TrackingService;
   hooks: HooksServiceStart;
+  telemetryUseCase?: string;
 }
 
 export interface RunnerFactory {

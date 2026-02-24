@@ -68,6 +68,7 @@ export class ServiceManager {
     taskManager,
     trackingService,
     analyticsService,
+    telemetryUseCase,
   }: ServicesStartDeps): InternalStartServices {
     if (!this.services) {
       throw new Error('#startServices called before #setupServices');
@@ -121,6 +122,7 @@ export class ServiceManager {
       skillServiceStart: skillsServiceStart,
       trackingService,
       hooks,
+      telemetryUseCase,
     });
     runner = runnerFactory.getRunner();
 
@@ -147,6 +149,7 @@ export class ServiceManager {
       spaces,
       trackingService,
       analyticsService,
+      telemetryUseCase,
     });
 
     const execution = createAgentExecutionService({
@@ -161,6 +164,7 @@ export class ServiceManager {
       savedObjects,
       trackingService,
       analyticsService,
+      telemetryUseCase,
     });
 
     this.internalStart = {

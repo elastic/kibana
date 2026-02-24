@@ -70,6 +70,7 @@ export const chatCompleteBaseSchema = schema.object({
         schema.object({
           pluginId: schema.maybe(schema.string()),
           aggregateBy: schema.maybe(schema.string()),
+          useCase: schema.maybe(schema.string()),
         })
       ),
       attributes: schema.maybe(schema.object({}, { unknowns: 'allow' })),

@@ -10,6 +10,9 @@ import { schema, type TypeOf } from '@kbn/config-schema';
 
 export const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
+  telemetryUseCase: schema.string({
+    defaultValue: () => process.env.AGENT_BUILDER_TELEMETRY_USE_CASE ?? 'prod',
+  }),
 });
 
 export type AgentBuilderConfig = TypeOf<typeof configSchema>;

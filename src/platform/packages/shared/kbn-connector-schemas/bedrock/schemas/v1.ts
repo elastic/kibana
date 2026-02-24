@@ -14,6 +14,7 @@ export const TelemetryMetadataSchema = z
   .object({
     pluginId: z.string().optional(),
     aggregateBy: z.string().optional(),
+    useCase: z.string().optional(),
   })
   .strict();
 
