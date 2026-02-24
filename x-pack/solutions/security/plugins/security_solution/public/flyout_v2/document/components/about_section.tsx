@@ -40,10 +40,7 @@ export interface AboutSectionProps {
  * The feature flag will remain disabled until we're ready to ship some of the content. The target is to release an MVP by 9.4 then have it fully functional by 9.5.
  */
 export const AboutSection = memo(({ hit }: AboutSectionProps) => {
-  const isAlert = useMemo(() => {
-    const eventKind = getFieldValue(hit, 'event.kind') as string;
-    return eventKind === 'signal';
-  }, [hit]);
+  const isAlert = useMemo(() => (getFieldValue(hit, 'event.kind') as string) === 'signal', [hit]);
 
   const expanded = useExpandSection({
     storageKey: FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS,

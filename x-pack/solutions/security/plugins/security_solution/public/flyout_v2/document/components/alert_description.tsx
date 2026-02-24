@@ -41,7 +41,8 @@ export const AlertDescription: FC<AlertDescriptionProps> = ({
   onShowRuleSummary,
   ruleSummaryDisabled,
 }) => {
-  const isAlert = useMemo(() => getFieldValue(hit, 'kibana.alert.rule.uuid') as string, [hit]);
+  const isAlert = useMemo(() => (getFieldValue(hit, 'event.kind') as string) === 'signal', [hit]);
+
   const ruleDescription = useMemo(
     () => getFieldValue(hit, 'kibana.alert.rule.description') as string,
     [hit]

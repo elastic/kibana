@@ -25,16 +25,19 @@ const createMockHit = (flattened: DataTableRecord['flattened']): DataTableRecord
   } as DataTableRecord);
 
 const alertHitWithDescription = createMockHit({
+  'event.kind': 'signal',
   'kibana.alert.rule.uuid': '123',
   'kibana.alert.rule.description':
     'This is a very long description of the rule. In theory. this description is long enough that it should be cut off when displayed in collapsed mode.',
 });
 
 const alertHitWithoutDescription = createMockHit({
+  'event.kind': 'signal',
   'kibana.alert.rule.uuid': '123',
 });
 
 const documentHit = createMockHit({
+  'event.kind': 'event',
   'some.other.field': 'value',
 });
 
@@ -115,6 +118,7 @@ describe('<AlertDescription />', () => {
 
   it('should render no data message when rule description is empty string', () => {
     const hitWithEmptyDescription = createMockHit({
+      'event.kind': 'signal',
       'kibana.alert.rule.uuid': '123',
       'kibana.alert.rule.description': '',
     });
