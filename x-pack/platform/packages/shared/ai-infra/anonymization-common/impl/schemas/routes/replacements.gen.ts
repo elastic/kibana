@@ -15,7 +15,6 @@
  */
 
 import { z } from '@kbn/zod';
-
 import {
   ReplacementsSetResponse,
   DeanonymizeRequest,

@@ -89,7 +89,6 @@ components:
       required:
         - id
         - type
-        - modelId
         - allowedEntityClasses
         - enabled
       properties:

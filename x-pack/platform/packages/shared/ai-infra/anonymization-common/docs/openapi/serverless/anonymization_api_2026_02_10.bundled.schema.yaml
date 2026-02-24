@@ -540,7 +540,6 @@ components:
       required:
         - id
         - type
-        - modelId
         - allowedEntityClasses
         - enabled
     ProfileSortField:

@@ -36,11 +36,10 @@ import {
   getAlertsDataViewTargetId,
   ALERTS_DATA_VIEW_TARGET_TYPE,
   ensureAlertsDataViewProfile,
-  ensureGlobalAnonymizationProfile,
   GLOBAL_ANONYMIZATION_PROFILE_TARGET_ID,
   GLOBAL_ANONYMIZATION_PROFILE_TARGET_TYPE,
   LEGACY_ANONYMIZATION_UI_SETTING_KEY,
-  migrateLegacyUiSettingsIntoGlobalProfile,
+  ensureAndMigrateGlobalProfile,
 } from './initialization';
 
 interface AnonymizationSetupDeps {
@@ -55,6 +54,7 @@ interface AnonymizationStartDeps {
 const anonymizationSaltSchemaV1 = schema.object({
   salt: schema.string(),
 });
+const ENSURE_GLOBAL_PROFILE_CACHE_MS = 60_000;
 
 export class AnonymizationPlugin
   implements
@@ -208,21 +208,33 @@ export class AnonymizationPlugin
       return uiSettingsClient.get<string | undefined>(LEGACY_ANONYMIZATION_UI_SETTING_KEY);
     };
 
-    const ensureGlobalProfileForNamespace = async (namespace: string): Promise<void> => {
+    const ensuredGlobalProfiles = new Map<string, number>();
+
+    const ensureGlobalProfileForNamespace = async ({
+      namespace,
+      force = false,
+    }: {
+      namespace: string;
+      force?: boolean;
+    }): Promise<void> => {
+      const now = Date.now();
+      const lastEnsuredAt = ensuredGlobalProfiles.get(namespace);
+      if (
+        !force &&
+        lastEnsuredAt !== undefined &&
+        now - lastEnsuredAt < ENSURE_GLOBAL_PROFILE_CACHE_MS
+      ) {
+        return;
+      }
+
       const legacySettings = await getLegacySettingsForNamespace(namespace);
-
-      await ensureGlobalAnonymizationProfile({
+      await ensureAndMigrateGlobalProfile({
         namespace,
         profilesRepo,
         logger: this.logger,
-      });
-
-      await migrateLegacyUiSettingsIntoGlobalProfile({
-        namespace,
         settingsString: legacySettings,
-        profilesRepo,
-        logger: this.logger,
       });
+      ensuredGlobalProfiles.set(namespace, now);
     };
 
     // Ensure global profiles across spaces + default alerts profile at startup.
@@ -231,7 +243,7 @@ export class AnonymizationPlugin
         await ensureProfilesIndexReady();
         const namespaces = await getKnownNamespaces();
         await Promise.all(
-          namespaces.map((namespace) => ensureGlobalProfileForNamespace(namespace))
+          namespaces.map((namespace) => ensureGlobalProfileForNamespace({ namespace, force: true }))
         );
         await ensureAlertsDataViewProfile({
           namespace: 'default',
@@ -250,7 +262,7 @@ export class AnonymizationPlugin
     this.policyService = {
       resolveEffectivePolicy: async (namespace, target) => {
         await ensureProfilesIndexReady();
-        await ensureGlobalProfileForNamespace(namespace);
+        await ensureGlobalProfileForNamespace({ namespace });
 
         if (
           target.type === ALERTS_DATA_VIEW_TARGET_TYPE &&
@@ -319,7 +331,7 @@ export class AnonymizationPlugin
 
       ensureGlobalProfile: async (namespace) => {
         await ensureProfilesIndexReady();
-        await ensureGlobalProfileForNamespace(namespace);
+        await ensureGlobalProfileForNamespace({ namespace });
       },
 
       getSalt: async (namespace) => {

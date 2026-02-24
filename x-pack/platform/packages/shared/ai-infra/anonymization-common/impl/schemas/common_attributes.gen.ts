@@ -15,7 +15,6 @@
  */
 
 import { z } from '@kbn/zod';
-
 export type ErrorResponse = z.infer<typeof ErrorResponse>;
 export const ErrorResponse = z.object({
   /**
@@ -60,7 +59,7 @@ export type NerRule = z.infer<typeof NerRule>;
 export const NerRule = z.object({
   id: z.string(),
   type: z.literal('ner'),
-  modelId: z.string(),
+  modelId: z.string().optional(),
   allowedEntityClasses: z.array(z.string()),
   enabled: z.boolean(),
 });

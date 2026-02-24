@@ -26,6 +26,7 @@ jest.mock('./initialization', () => ({
   LEGACY_ANONYMIZATION_UI_SETTING_KEY: 'ai:anonymizationSettings',
   ensureGlobalAnonymizationProfile: jest.fn().mockResolvedValue(undefined),
   migrateLegacyUiSettingsIntoGlobalProfile: jest.fn().mockResolvedValue(undefined),
+  ensureAndMigrateGlobalProfile: jest.fn().mockResolvedValue(undefined),
 }));
 
 const createProfile = ({

@@ -19,7 +19,11 @@ import {
 } from '../../common';
 import { ProfilesRepository } from '../repository';
 import { ensureProfilesIndex } from '../system_index';
-import { ensureGlobalAnonymizationProfile, isGlobalProfileTarget } from '../initialization';
+import {
+  ensureAndMigrateGlobalProfile,
+  isGlobalProfileTarget,
+  LEGACY_ANONYMIZATION_UI_SETTING_KEY,
+} from '../initialization';
 
 const fieldRuleSchema = schema.object({
   field: schema.string(),
@@ -39,7 +43,7 @@ const regexRuleSchema = schema.object({
 const nerRuleSchema = schema.object({
   id: schema.string(),
   type: schema.literal('ner'),
-  modelId: schema.string(),
+  modelId: schema.maybe(schema.string()),
   allowedEntityClasses: schema.arrayOf(schema.string()),
   enabled: schema.boolean(),
 });
@@ -193,10 +197,14 @@ export const registerProfileRoutes = (router: IRouter, logger: Logger): void => 
           await ensureProfilesIndex({ esClient, logger });
 
           const repo = new ProfilesRepository(esClient);
-          await ensureGlobalAnonymizationProfile({
+          const settingsString = await coreContext.uiSettings.client.get<string | undefined>(
+            LEGACY_ANONYMIZATION_UI_SETTING_KEY
+          );
+          await ensureAndMigrateGlobalProfile({
             namespace,
             profilesRepo: repo,
             logger,
+            settingsString,
           });
           const result = await repo.find({
             namespace,
