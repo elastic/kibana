@@ -54,7 +54,8 @@ describe('Header', () => {
     timelineType: TimelineTypeEnum.default,
   };
 
-  describe('QueryTabHeader', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/254016
+  describe.skip('QueryTabHeader', () => {
     test('should render the data providers when show is true', async () => {
       const testProps = { ...props, show: true };
       const wrapper = await getWrapper(
