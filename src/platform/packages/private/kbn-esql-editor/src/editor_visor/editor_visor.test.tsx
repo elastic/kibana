@@ -15,7 +15,7 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { QuickSearchVisor, type QuickSearchVisorProps } from '.';
+import { QuickSearchVisor, type QuickSearchVisorProps, NL_TO_ESQL_FLAG } from '.';
 
 describe('Quick search visor', () => {
   const corePluginMock = coreMock.createStart();
@@ -27,7 +27,16 @@ describe('Quick search visor', () => {
     kql: kqlMock,
   };
 
-  function renderESQLVisor(testProps: QuickSearchVisorProps) {
+  function renderESQLVisor(
+    testProps: QuickSearchVisorProps,
+    { nlToEsqlEnabled = false }: { nlToEsqlEnabled?: boolean } = {}
+  ) {
+    (corePluginMock.featureFlags.getBooleanValue as jest.Mock).mockImplementation(
+      (key: string, defaultValue: boolean) => {
+        if (key === NL_TO_ESQL_FLAG) return nlToEsqlEnabled;
+        return defaultValue;
+      }
+    );
     return (
       <KibanaContextProvider services={services}>
         <QuickSearchVisor {...testProps} />
@@ -114,13 +123,22 @@ describe('Quick search visor', () => {
     });
   });
 
-  it('should render the mode selector', () => {
-    const { getByTestId } = renderWithI18n(renderESQLVisor({ ...props }));
+  it('should not render the mode selector when nlToEsql flag is disabled', () => {
+    const { queryByTestId } = renderWithI18n(renderESQLVisor({ ...props }));
+    expect(queryByTestId('esqlVisorModeSelect')).not.toBeInTheDocument();
+  });
+
+  it('should render the mode selector when nlToEsql flag is enabled', () => {
+    const { getByTestId } = renderWithI18n(
+      renderESQLVisor({ ...props }, { nlToEsqlEnabled: true })
+    );
     expect(getByTestId('esqlVisorModeSelect')).toBeInTheDocument();
   });
 
   it('should switch to NL mode and show the NL input when connectors are available', async () => {
-    const { getByTestId, queryByTestId } = renderWithI18n(renderESQLVisor({ ...props }));
+    const { getByTestId, queryByTestId } = renderWithI18n(
+      renderESQLVisor({ ...props }, { nlToEsqlEnabled: true })
+    );
 
     await switchToNlMode(getByTestId);
 
@@ -142,7 +160,9 @@ describe('Quick search visor', () => {
       return Promise.resolve([]);
     });
 
-    const { getByTestId } = renderWithI18n(renderESQLVisor({ ...props }));
+    const { getByTestId } = renderWithI18n(
+      renderESQLVisor({ ...props }, { nlToEsqlEnabled: true })
+    );
 
     await switchToNlMode(getByTestId);
 

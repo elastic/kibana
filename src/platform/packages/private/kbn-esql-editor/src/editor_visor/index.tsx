@@ -30,6 +30,8 @@ import { extractQueryFromLLMMessage } from './utils';
 
 export { VisorMode } from './mode_selector';
 
+export const NL_TO_ESQL_FLAG = 'esql.nlToEsqlEnabled';
+
 export interface QuickSearchVisorProps {
   // Current ESQL query
   query: string;
@@ -64,6 +66,8 @@ export function QuickSearchVisor({
 }: QuickSearchVisorProps) {
   const kibana = useKibana<ESQLEditorDeps>();
   const { kql, core } = kibana.services;
+  // Temporary flag to enable/disable the NL to ES|QL feature, will be removed once the feature is stable.
+  const isNlToEsqlEnabled = core.featureFlags.getBooleanValue(NL_TO_ESQL_FLAG, false);
   const isDarkMode = useKibanaIsDarkMode();
   const { euiTheme } = useEuiTheme();
   const [selectedSources, setSelectedSources] = useState<EuiComboBoxOptionOption[]>([]);
@@ -204,7 +208,8 @@ export function QuickSearchVisor({
     Boolean(isSpaceReduced),
     isVisible,
     isDarkMode,
-    visorMode
+    visorMode,
+    isNlToEsqlEnabled
   );
 
   if (!KQLComponent) {
@@ -228,11 +233,15 @@ export function QuickSearchVisor({
           responsive={false}
           css={styles.visorGradientBox}
         >
-          <EuiFlexItem grow={false} css={styles.modeSelectWrapper}>
-            <ModeSelector onModeChange={onModeChange} />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false} css={styles.separator} />
-          {visorMode === VisorMode.KQL ? (
+          {isNlToEsqlEnabled && (
+            <>
+              <EuiFlexItem grow={false} css={styles.modeSelectWrapper}>
+                <ModeSelector onModeChange={onModeChange} />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false} css={styles.separator} />
+            </>
+          )}
+          {visorMode === VisorMode.KQL || !isNlToEsqlEnabled ? (
             <>
               <EuiFlexItem css={styles.comboBoxWrapper}>
                 <SourcesDropdown

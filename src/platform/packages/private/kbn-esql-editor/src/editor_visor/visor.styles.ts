@@ -25,7 +25,8 @@ export const visorStyles = (
   isSpaceReduced: boolean,
   isVisible: boolean,
   isDarkMode: boolean,
-  mode: VisorMode
+  mode: VisorMode,
+  isNlToEsqlEnabled: boolean = false
 ) => {
   const fontSize = euiFontSizeFromScale('xs', euiTheme);
   const modeSelectWidth = mode === VisorMode.KQL ? MODE_SELECT_WIDTH_KQL : MODE_SELECT_WIDTH_NL;
@@ -67,6 +68,10 @@ export const visorStyles = (
         isSpaceReduced ? `calc(${visorWidthPercentage * 100}% )` : `${comboBoxWidth}px`
       }`,
       overflow: 'hidden',
+      ...(!isNlToEsqlEnabled && {
+        borderBottomLeftRadius: euiTheme.size.s,
+        borderTopLeftRadius: euiTheme.size.s,
+      }),
     },
     closeButtonWrapper: {
       ...gradientBoxStyles,
