@@ -8,6 +8,8 @@
 import type { EntityType, EntityField } from './entity_schema';
 import { oldestValue, newestValue } from './field_retention_operations';
 
+export const ENTITY_ID_FIELD = 'entity.id';
+
 // Copied from x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/entity_definitions/entity_descriptions/common.ts
 
 export const getCommonFieldDescriptions = (
@@ -53,57 +55,57 @@ export const getEntityFieldsDescriptions = (rootField?: EntityType) => {
     newestValue({ source: `${prefix}.url`, destination: 'entity.url' }),
 
     newestValue({
-      source: `${prefix}.attributes.Privileged`,
-      destination: 'entity.attributes.Privileged',
+      source: `${prefix}.attributes.privileged`,
+      destination: 'entity.attributes.privileged',
       mapping: { type: 'boolean' },
       allowAPIUpdate: true,
     }),
     newestValue({
-      source: `${prefix}.attributes.Asset`,
-      destination: 'entity.attributes.Asset',
+      source: `${prefix}.attributes.asset`,
+      destination: 'entity.attributes.asset',
       mapping: { type: 'boolean' },
       allowAPIUpdate: true,
     }),
     newestValue({
-      source: `${prefix}.attributes.Managed`,
-      destination: 'entity.attributes.Managed',
+      source: `${prefix}.attributes.managed`,
+      destination: 'entity.attributes.managed',
       mapping: { type: 'boolean' },
       allowAPIUpdate: true,
     }),
     newestValue({
-      source: `${prefix}.attributes.Mfa_enabled`,
-      destination: 'entity.attributes.Mfa_enabled',
+      source: `${prefix}.attributes.mfa_enabled`,
+      destination: 'entity.attributes.mfa_enabled',
       mapping: { type: 'boolean' },
       allowAPIUpdate: true,
     }),
 
     /* Lifecycle fields should not allow update via the API */
     newestValue({
-      source: `${prefix}.lifecycle.First_seen`,
-      destination: 'entity.lifecycle.First_seen',
+      source: `${prefix}.lifecycle.first_seen`,
+      destination: 'entity.lifecycle.first_seen',
       mapping: { type: 'date' },
     }),
     newestValue({
-      source: `${prefix}.lifecycle.Last_activity`,
-      destination: 'entity.lifecycle.Last_activity',
+      source: `${prefix}.lifecycle.last_activity`,
+      destination: 'entity.lifecycle.last_activity',
       mapping: { type: 'date' },
     }),
 
     newestValue({
-      source: `${prefix}.behaviors.Brute_force_victim`,
-      destination: 'entity.behaviors.Brute_force_victim',
+      source: `${prefix}.behaviors.brute_force_victim`,
+      destination: 'entity.behaviors.brute_force_victim',
       mapping: { type: 'boolean' },
       allowAPIUpdate: true,
     }),
     newestValue({
-      source: `${prefix}.behaviors.New_country_login`,
-      destination: 'entity.behaviors.New_country_login',
+      source: `${prefix}.behaviors.new_country_login`,
+      destination: 'entity.behaviors.new_country_login',
       mapping: { type: 'boolean' },
       allowAPIUpdate: true,
     }),
     newestValue({
-      source: `${prefix}.behaviors.Used_usb_device`,
-      destination: 'entity.behaviors.Used_usb_device',
+      source: `${prefix}.behaviors.used_usb_device`,
+      destination: 'entity.behaviors.used_usb_device',
       mapping: { type: 'boolean' },
       allowAPIUpdate: true,
     }),
