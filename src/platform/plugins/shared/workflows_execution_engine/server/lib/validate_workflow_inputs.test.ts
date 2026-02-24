@@ -31,10 +31,7 @@ describe('validateWorkflowInputs', () => {
     yaml: '',
   });
 
-  const callValidate = (
-    workflow: WorkflowExecutionEngineModel,
-    context: Record<string, unknown>
-  ) =>
+  const callValidate = (workflow: WorkflowExecutionEngineModel, context: Record<string, unknown>) =>
     validateWorkflowInputs(
       workflow,
       context,
