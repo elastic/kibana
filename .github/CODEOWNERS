@@ -828,7 +828,6 @@ src/platform/plugins/shared/telemetry @elastic/kibana-core
 src/platform/plugins/shared/telemetry_collection_manager @elastic/kibana-core
 src/platform/plugins/shared/telemetry_management_section @elastic/kibana-core
 src/platform/plugins/shared/ui_actions @elastic/appex-sharedux
-src/platform/plugins/shared/ui_actions_enhanced @elastic/appex-sharedux
 src/platform/plugins/shared/unified_doc_viewer @elastic/kibana-data-discovery
 src/platform/plugins/shared/unified_search @elastic/kibana-presentation
 src/platform/plugins/shared/usage_collection @elastic/kibana-core
@@ -1283,6 +1282,7 @@ x-pack/solutions/security/test/plugin_functional/plugins/resolver_test @elastic/
 x-pack/solutions/security/test/security_solution_api_integration @elastic/security-detection-engine
 x-pack/solutions/security/test/security_solution_api_integration/config/services/detections_response @elastic/security-detection-engine
 x-pack/solutions/security/test/security_solution_endpoint @elastic/security-defend-workflows
+x-pack/solutions/security/test/security-solution-evals @elastic/security-entity-analytics
 x-pack/solutions/workplaceai/plugins/serverless_workplace_ai @elastic/search-kibana @elastic/workchat-eng
 x-pack/solutions/workplaceai/plugins/workplace_ai_app @elastic/search-kibana @elastic/workchat-eng
 x-pack/solutions/workplaceai/test @elastic/workchat-eng
@@ -1820,12 +1820,18 @@ x-pack/platform/plugins/shared/streams_app/public/components/data_management/str
 /x-pack/solutions/observability/test/serverless/functional/test_suites/discover/logs/ @elastic/obs-exploration-team
 /x-pack/solutions/observability/test/serverless/functional/utils/ @elastic/obs-exploration-team
 /src/platform/test/functional/apps/discover/observability/logs/ @elastic/obs-exploration-team
+/src/platform/plugins/shared/discover/test/scout/ui/traces_experience_parallel.playwright.config.ts @elastic/obs-exploration-team
+/src/platform/plugins/shared/discover/test/scout/ui/fixtures/traces_experience/ @elastic/obs-exploration-team
+/src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/ @elastic/obs-exploration-team
+/src/platform/plugins/shared/discover/test/scout/ui/metrics_experience_parallel.playwright.config.ts @elastic/obs-exploration-team
+/src/platform/plugins/shared/discover/test/scout/ui/fixtures/metrics_experience/ @elastic/obs-exploration-team
+/src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/ @elastic/obs-exploration-team
 
 # obs-onboarding-team
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/dataset_quality @elastic/obs-onboarding-team
 /x-pack/solutions/observability/test/serverless/functional/configs/config.* @elastic/obs-onboarding-team
 /x-pack/solutions/observability/test/serverless/functional/test_suites/landing_page.ts @elastic/obs-onboarding-team
-/x-pack/solutions/observability/test/serverless/functional/test_suites/navigation.ts @elastic/obs-onboarding-team
+/x-pack/solutions/observability/test/serverless/functional/test_suites/navigation.ts @elastic/obs-presentation-team
 /x-pack/solutions/observability/test/functional/page_objects/dataset_quality.ts @elastic/obs-onboarding-team
 /x-pack/solutions/observability/test/serverless/functional/configs/index* @elastic/obs-onboarding-team
 /x-pack/solutions/observability/test/serverless/functional/test_suites/cypress @elastic/obs-onboarding-team
@@ -2001,8 +2007,6 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /x-pack/platform/test/common/ftr_provider_context.ts @elastic/appex-qa
 /x-pack/platform/plugins/shared/maps/test/scout @elastic/appex-qa # temporarily
 /x-pack/platform/plugins/private/discover_enhanced/test/scout/ @elastic/appex-qa # temporarily
-/x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/fixtures/page_objects/metrics_experience.ts @elastic/appex-qa @elastic/obs-exploration-team
-/x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/parallel_tests/metrics_experience/ @elastic/appex-qa @elastic/obs-exploration-team
 /x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/tests/discover_cdp_perf.spec.ts @elastic/kibana-data-discovery # test tracks bundle size limits
 /x-pack/platform/plugins/private/painless_lab/test/scout @elastic/appex-qa # temporarily
 /x-pack/platform/test/functional/fixtures/kbn_archives/packaging.json @elastic/appex-qa # No usages found
@@ -2885,6 +2889,11 @@ src/platform/packages/shared/kbn-connector-schemas/thehive @elastic/kibana-cases
 /x-pack/platform/plugins/shared/stack_connectors/server/usage/inference @elastic/appex-ai-infra
 /src/platform/packages/shared/kbn-connector-schemas/inference @elastic/appex-ai-infra @elastic/security-generative-ai @elastic/obs-ai-team
 
+# HTTP
+/x-pack/platform/plugins/shared/stack_connectors/public/connector_types/http @elastic/workflows-eng
+/x-pack/platform/plugins/shared/stack_connectors/server/connector_types/http @elastic/workflows-eng
+/src/platform/packages/shared/kbn-connector-schemas/http @elastic/workflows-eng
+
 # Token tracking
 x-pack/platform/plugins/shared/actions/server/lib/token_tracking @elastic/security-generative-ai
 
@@ -3288,16 +3297,16 @@ x-pack/solutions/security/test/moon.yml @elastic/kibana-operations
 /AGENTS.md @elastic/kibana-tech-leads
 .cursorignore @elastic/kibana-tech-leads
 /.claude/ @elastic/kibana-tech-leads
-/.agent/skills/ @elastic/kibana-tech-leads
+/.agents/skills/ @elastic/kibana-tech-leads
 
 # Delegate day-to-day edits of currently-existing skills to the QA team without requiring tech lead
 # codeowner review. Any new skill directory will fall back to the `/.agent/skills/` rule above.
-/.agent/skills/ftr-testing/** @elastic/appex-qa
-/.agent/skills/scout-api-testing/** @elastic/appex-qa
-/.agent/skills/scout-best-practices-reviewer/** @elastic/appex-qa
-/.agent/skills/scout-create-scaffold/** @elastic/appex-qa
-/.agent/skills/scout-migrate-from-ftr/** @elastic/appex-qa
-/.agent/skills/scout-ui-testing/** @elastic/appex-qa
+/.agents/skills/ftr-testing/** @elastic/appex-qa
+/.agents/skills/scout-api-testing/** @elastic/appex-qa
+/.agents/skills/scout-best-practices-reviewer/** @elastic/appex-qa
+/.agents/skills/scout-create-scaffold/** @elastic/appex-qa
+/.agents/skills/scout-migrate-from-ftr/** @elastic/appex-qa
+/.agents/skills/scout-ui-testing/** @elastic/appex-qa
 
 ####
 ## These rules are always last so they take ultimate priority over everything else
