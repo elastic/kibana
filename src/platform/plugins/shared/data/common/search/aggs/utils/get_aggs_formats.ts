@@ -180,10 +180,10 @@ export function getAggsFormats(getFieldFormat: GetFieldFormat): FieldFormatInsta
         );
 
         if (val === '__other__' && params.otherBucketLabel) {
-          return params.otherBucketLabel;
+          return String(params.otherBucketLabel);
         }
         if (val === MISSING_TOKEN && params.missingBucketLabel) {
-          return params.missingBucketLabel;
+          return String(params.missingBucketLabel);
         }
 
         return format.convertToReact(val, options);
