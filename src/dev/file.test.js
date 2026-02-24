@@ -20,9 +20,6 @@ describe('dev/File', () => {
       expect(() => new File(1)).toThrow();
       expect(() => new File(false)).toThrow();
       expect(() => new File(null)).toThrow();
-
-      // TODO: REMOVE
-      expect(true).toBe(false);
     });
   });
 
