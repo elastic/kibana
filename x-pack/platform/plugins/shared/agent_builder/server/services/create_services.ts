@@ -157,6 +157,7 @@ export class ServiceManager {
       inference,
       conversationService: conversations,
       agentService: agents,
+      attachmentsService: attachments,
       uiSettings,
       savedObjects,
       trackingService,
