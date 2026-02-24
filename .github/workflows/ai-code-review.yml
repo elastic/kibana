@@ -13,6 +13,25 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 
+env:
+  ADDITIONAL_INSTRUCTIONS: |
+    Your job is to identify:
+
+    - Bugs & Logic Errors: Off-by-one errors, null handling, race conditions
+    - Type Safety: Use of any, unsafe type assertions, missing null checks
+    - Error Handling: Uncaught exceptions, swallowed errors, missing error boundaries
+    - Readability: Complex nested logic, unclear naming, magic numbers
+    - Maintainability: Tight coupling, missing abstractions, code duplication
+
+    Guidelines:
+
+    - Focus on issues that could cause bugs or make the code hard to maintain
+    - Consider edge cases and error scenarios
+    - Be specific about why something is a problem
+    - Don't nitpick style if it follows existing patterns in the codebase
+    - Prioritize issues that could affect production
+    - Do NOT report issues that would be caught by linting or static analysis (e.g., unused variables, missing semicolons, import ordering, formatting, type inference). Assume the project has proper linting configured.
+
 jobs:
   gate:
     runs-on: ubuntu-latest
@@ -46,3 +65,4 @@ jobs:
         with:
           claude-oauth-token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           github-token: ${{ github.token }}
+          additional-instructions: ${{ env.ADDITIONAL_INSTRUCTIONS }}
