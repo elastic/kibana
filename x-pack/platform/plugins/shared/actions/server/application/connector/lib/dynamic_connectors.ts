@@ -13,9 +13,13 @@ export function updateDynamicInMemoryConnectors(
   inMemoryConnectors: InMemoryConnector[],
   preconfiguredInferenceEndpoints: InferenceInferenceEndpointInfo[],
   logger: Logger
-) {
+): boolean {
+  let handledChanges = false;
   if (preconfiguredInferenceEndpoints.length === 0) {
-    return;
+    // If there are no preconfigured inference endpoints, leave everything as-is
+    // Once connected to EIS there should always be at least one endpoint, so this likely means there was an error fetching endpoints.
+    // In that case we should not remove any existing connectors since they may still be valid.
+    return handledChanges;
   }
 
   const inferenceEndpointsWithoutConnectors = preconfiguredInferenceEndpoints.filter((endpoint) => {
@@ -77,6 +81,7 @@ export function updateDynamicInMemoryConnectors(
     newConnectors.forEach((connector) => {
       logger.info(`Added dynamic connector for inference endpoint ${connector.config.inferenceId}`);
     });
+    handledChanges = true;
   }
   if (connectorsToRemove.length > 0) {
     connectorsToRemove.forEach((connector) => {
@@ -87,8 +92,10 @@ export function updateDynamicInMemoryConnectors(
           `Removed dynamic connector "${connector.id}" for inference endpoint "${connector.config.inferenceId}"`
         );
       }
+      handledChanges = true;
     });
   }
+  return handledChanges;
 }
 
 function getConnectorIdFromEndpoint(endpoint: InferenceInferenceEndpointInfo) {

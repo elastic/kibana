@@ -36,7 +36,7 @@ describe('Dynamic Connectors', () => {
       },
     ];
 
-    updateDynamicInMemoryConnectors(existingConnectors, endpoints, logger);
+    expect(updateDynamicInMemoryConnectors(existingConnectors, endpoints, logger)).toEqual(true);
     expect(existingConnectors).toContainConnectors([
       {
         id: '.anthropic-claude-4.5-opus-chat_completion',
@@ -95,7 +95,7 @@ describe('Dynamic Connectors', () => {
       },
     ];
 
-    updateDynamicInMemoryConnectors(existingConnectors, endpoints, logger);
+    expect(updateDynamicInMemoryConnectors(existingConnectors, endpoints, logger)).toEqual(false);
     expect(existingConnectors).toContainConnectors([
       {
         id: 'Anthropic-Claude-Opus-4-5',
@@ -171,7 +171,7 @@ describe('Dynamic Connectors', () => {
       },
     ];
 
-    updateDynamicInMemoryConnectors(existingConnectors, endpoints, logger);
+    expect(updateDynamicInMemoryConnectors(existingConnectors, endpoints, logger)).toEqual(false);
     expect(existingConnectors).toContainConnectors([
       {
         id: 'Anthropic-Claude-Opus-4-5',
@@ -285,7 +285,7 @@ describe('Dynamic Connectors', () => {
       },
     ];
 
-    updateDynamicInMemoryConnectors(existingConnectors, endpoints, logger);
+    expect(updateDynamicInMemoryConnectors(existingConnectors, endpoints, logger)).toEqual(true);
     expect(existingConnectors).toContainConnectors([
       {
         id: 'Anthropic-Claude-Opus-4-5',
@@ -446,7 +446,7 @@ describe('Dynamic Connectors', () => {
       },
     ];
 
-    updateDynamicInMemoryConnectors(existingConnectors, endpoints, logger);
+    expect(updateDynamicInMemoryConnectors(existingConnectors, endpoints, logger)).toEqual(true);
 
     expect(existingConnectors).toContainConnectors([
       {
@@ -596,7 +596,7 @@ describe('Dynamic Connectors', () => {
     ];
     const endpoints: InferenceInferenceEndpointInfo[] = [];
 
-    updateDynamicInMemoryConnectors(existingConnectors, endpoints, logger);
+    expect(updateDynamicInMemoryConnectors(existingConnectors, endpoints, logger)).toEqual(false);
     expect(existingConnectors).toContainConnectors([
       {
         id: 'Anthropic-Claude-Opus-4-5',
@@ -726,7 +726,7 @@ describe('Dynamic Connectors', () => {
       },
     ];
 
-    updateDynamicInMemoryConnectors(existingConnectors, endpoints, logger);
+    expect(updateDynamicInMemoryConnectors(existingConnectors, endpoints, logger)).toEqual(false);
     expect(existingConnectors).toContainConnectors([
       {
         id: 'Anthropic-Claude-Opus-4-5',

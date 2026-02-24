@@ -192,11 +192,11 @@ export interface PluginStartContract {
   /**
    * Takes a list of the current pre-configured EIS inference endpoints and updates the inMemoryConnectors for usage in Kibana.
    * @param preconfiguredInferenceEndpoints List of pre-configured EIS inference endpoints that should have inMemoryConnectors
-   * @returns void
+   * @returns boolean indicating whether any changes were made to the inMemoryConnectors list.
    */
   updateDynamicInMemoryConnectors: (
     preconfiguredInferenceEndpoints: InferenceInferenceEndpointInfo[]
-  ) => void;
+  ) => boolean;
 }
 
 export interface ActionsPluginsSetup {
@@ -717,8 +717,8 @@ export class ActionsPlugin
       },
       updateDynamicInMemoryConnectors: (
         preconfiguredInferenceEndpoints: InferenceInferenceEndpointInfo[]
-      ) => {
-        updateDynamicInMemoryConnectors(
+      ): boolean => {
+        return updateDynamicInMemoryConnectors(
           this.inMemoryConnectors,
           preconfiguredInferenceEndpoints,
           this.logger

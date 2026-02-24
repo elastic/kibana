@@ -62,7 +62,7 @@ const createStartMock = () => {
     inMemoryConnectors: [],
     renderActionParameterTemplates: jest.fn(),
     isSystemActionConnector: jest.fn(),
-    updateDynamicInMemoryConnectors: jest.fn(),
+    updateDynamicInMemoryConnectors: jest.fn().mockReturnValue(false),
   });
 
   return mock;
