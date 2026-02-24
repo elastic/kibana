@@ -1,6 +1,6 @@
-> **⚠️ DISCLAIMER: Do not add production workflows in this direcory**
+> **⚠️ DISCLAIMER: Do not add production workflows in this directory**
 >
-> **Hardcoding workflows like this is not officially supported yet. Do not do this unless this is exclusivly used for testing**
+> **Hardcoding workflows like this is not officially supported yet. Do not do this unless this is exclusively used for testing**
 >
 > This implementation exists **only for development and testing purposes**. Workflows should be created and managed through the proper workflows management APIs or UI, system workflows are not supported yet.
 >
