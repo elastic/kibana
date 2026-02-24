@@ -30,9 +30,8 @@ const allSuggestionsAggregationBuilder: OptionsListSuggestionAggregationBuilder 
     fieldSpec,
     sort,
     size,
-    allowExpensiveQueries,
   }: OptionsListRequestBody) => {
-    let suggestionsAgg: { suggestions: any; unique_terms?: any } = {
+    const suggestionsAgg: { suggestions: any; unique_terms: any } = {
       suggestions: {
         terms: {
           size,
@@ -41,18 +40,12 @@ const allSuggestionsAggregationBuilder: OptionsListSuggestionAggregationBuilder 
           order: getSortType(sort),
         },
       },
-    };
-
-    if (allowExpensiveQueries) {
-      suggestionsAgg = {
-        ...suggestionsAgg,
-        unique_terms: {
-          cardinality: {
-            field: fieldName,
-          },
+      unique_terms: {
+        cardinality: {
+          field: fieldName,
         },
-      };
-    }
+      },
+    };
 
     const subTypeNested = fieldSpec && getFieldSubtypeNested(fieldSpec);
     if (subTypeNested) {
@@ -70,7 +63,7 @@ const allSuggestionsAggregationBuilder: OptionsListSuggestionAggregationBuilder 
 
     return suggestionsAgg;
   },
-  parse: (rawEsResult, { fieldSpec, allowExpensiveQueries }: OptionsListRequestBody) => {
+  parse: (rawEsResult, { fieldSpec }: OptionsListRequestBody) => {
     const subTypeNested = fieldSpec && getFieldSubtypeNested(fieldSpec);
     const suggestions = get(
       rawEsResult,
@@ -87,14 +80,13 @@ const allSuggestionsAggregationBuilder: OptionsListSuggestionAggregationBuilder 
     }, []);
     return {
       suggestions,
-      totalCardinality: allowExpensiveQueries
-        ? get(
-            rawEsResult,
-            `aggregations.${
-              subTypeNested ? 'nestedSuggestions.unique_terms' : 'unique_terms'
-            }.value`
-          )
-        : undefined,
+      totalCardinality:
+        get(
+          rawEsResult,
+          `aggregations.${
+            subTypeNested ? 'nestedSuggestions.unique_terms' : 'unique_terms'
+          }.value`
+        ) ?? 0,
     };
   },
 };
