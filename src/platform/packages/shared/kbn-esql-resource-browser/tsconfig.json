@@ -23,6 +23,7 @@
     "@kbn/field-utils"
   ],
   "exclude": [
-    "target/**/*"
+    "target/**/*",
+    ".storybook/**/*"
   ]
 }
