@@ -24,7 +24,7 @@ import { PLATFORM_WORKFLOWS_SKILL } from './platform_workflows_skill';
 
 export const registerSkills = async (setupDeps: PluginSetupDependencies): Promise<void> => {
   const { agentBuilder } = setupDeps;
-  agentBuilder.skills.register(PLATFORM_WORKFLOW_GENERATION_SKILL);
+  void agentBuilder.skills.register(PLATFORM_WORKFLOW_GENERATION_SKILL);
   await Promise.all([
     agentBuilder.skill.registerSkill(PLATFORM_SEARCH_SKILL),
     agentBuilder.skill.registerSkill(PLATFORM_VISUALIZATION_SKILL),

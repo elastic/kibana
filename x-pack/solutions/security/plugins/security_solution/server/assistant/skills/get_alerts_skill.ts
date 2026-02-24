@@ -133,5 +133,5 @@ invoke_skill({
 3. **Include time ranges**: Mention time periods like "last 24 hours" or "this week"
 4. **Workflow status updates**: Always identify alerts first, then require explicit confirmation with \`confirm: true\` (required for write operations)
 `,
-  getAllowedTools: () => ['security.alerts'],
+  getRegistryTools: () => ['security.alerts'],
 });

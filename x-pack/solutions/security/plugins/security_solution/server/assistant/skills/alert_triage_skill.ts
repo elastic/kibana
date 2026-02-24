@@ -6,14 +6,22 @@
  */
 
 import { z } from '@kbn/zod';
-import type { Skill } from '@kbn/agent-builder-common/skills';
+import type { DynamicStructuredTool } from '@langchain/core/tools';
 import { tool } from '@langchain/core/tools';
+
+interface LegacySkill {
+  namespace: string;
+  name: string;
+  description: string;
+  content: string;
+  tools: DynamicStructuredTool[];
+}
 
 /**
  * Skill for triaging security alerts.
  * This skill provides knowledge about how to triage security alerts.
  */
-const ALERT_TRIAGE_SKILL: Omit<Skill, 'tools'> = {
+const ALERT_TRIAGE_SKILL: Omit<LegacySkill, 'tools'> = {
   namespace: 'security.alert_triage',
   name: 'Alert Triage',
   description: 'Step-by-step guide for triaging security alerts',
@@ -280,8 +288,7 @@ Remember: Effective triage balances thoroughness with efficiency, ensuring real 
 export const createAddAlertNoteLangChainTool = () => {
   return tool(
     ({ alertId, note }) => {
-      console.log(`Note ${note} been added to alert: ${alertId}`);
-      return 'Note added';
+      return `Note "${note}" has been added to alert: ${alertId}`;
     },
     {
       name: 'add_alert_note',
@@ -295,7 +302,7 @@ export const createAddAlertNoteLangChainTool = () => {
   );
 };
 
-export const getAlertTriageSkill = (): Skill => {
+export const getAlertTriageSkill = (): LegacySkill => {
   // Skills require LangChain DynamicStructuredTool instances
   const addAlertNoteLangChainTool = createAddAlertNoteLangChainTool();
 

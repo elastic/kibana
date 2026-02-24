@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export * from './types';
-export { IncrementalProcessor, type GenerateDiscoveryFn } from './incremental_processor';
+export type * from './types';
+export type { IncrementalProcessor, GenerateDiscoveryFn } from './incremental_processor';

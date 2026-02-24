@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
-import type { Skill } from '@kbn/agent-builder-common/skills';
+import type { DynamicStructuredTool } from '@langchain/core/tools';
 import { tool } from '@langchain/core/tools';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools';
 import { executeEsql } from '@kbn/agent-builder-genai-utils';
@@ -25,6 +25,14 @@ import { ENTITY_STORE_INDEX_PATTERN } from '../../../common/entity_analytics/ent
 import { getPrivilegedMonitorUsersIndex } from '../../../common/entity_analytics/privileged_user_monitoring/utils';
 import { createPrivilegedUsersCrudService } from '../../lib/entity_analytics/privilege_monitoring/users/privileged_users_crud';
 
+interface LegacySkill {
+  namespace: string;
+  name: string;
+  description: string;
+  content: string;
+  tools: DynamicStructuredTool[];
+}
+
 /**
  * Safely extracts OneChat context from LangChain tool config.
  * Skill-tools receive context via config.configurable.onechat
@@ -41,7 +49,7 @@ const getOneChatContext = (config: unknown): Omit<ToolHandlerContext, 'resultSto
   return maybeConfig.configurable?.onechat ?? null;
 };
 
-const ENTITY_ANALYTICS_SKILL: Omit<Skill, 'tools'> = {
+const ENTITY_ANALYTICS_SKILL: Omit<LegacySkill, 'tools'> = {
   namespace: 'security.entity_analytics',
   name: 'Entity Analytics',
   description:
@@ -645,7 +653,7 @@ const createSearchAnomaliesTool = () => {
   );
 };
 
-export const getEntityAnalyticsSkill = (): Skill => {
+export const getEntityAnalyticsSkill = (): LegacySkill => {
   return {
     ...ENTITY_ANALYTICS_SKILL,
     tools: [
