@@ -29,4 +29,3 @@ export type {
   TriggerDocumentation,
   TriggerSnippets,
 } from './trigger_registry/types';
-export { untilPluginStartServicesReady } from './kibana_services';
