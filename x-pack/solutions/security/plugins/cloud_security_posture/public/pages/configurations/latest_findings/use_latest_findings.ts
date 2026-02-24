@@ -21,8 +21,6 @@ import type { CspFinding } from '@kbn/cloud-security-posture-common';
 import type { CspBenchmarkRulesStates } from '@kbn/cloud-security-posture-common/schema/rules/latest';
 import type { BaseEsQuery } from '@kbn/cloud-security-posture';
 import { useGetCspBenchmarkRulesStatesApi } from '@kbn/cloud-security-posture/src/hooks/use_get_benchmark_rules_state_api';
-import type { RuntimePrimitiveTypes } from '@kbn/data-views-plugin/common';
-import { CDR_MISCONFIGURATION_DATA_TABLE_RUNTIME_MAPPING_FIELDS } from '../../../common/constants';
 import { useKibana } from '../../../common/hooks/use_kibana';
 import { getAggregationCount, getFindingsCountAggQuery } from '../utils/utils';
 
@@ -41,21 +39,6 @@ interface FindingsAggs {
   count: estypes.AggregationsMultiBucketAggregateBase<estypes.AggregationsStringRareTermsBucketKeys>;
 }
 
-const getRuntimeMappingsFromSort = (sort: string[][]) => {
-  return sort
-    .filter(([field]) => CDR_MISCONFIGURATION_DATA_TABLE_RUNTIME_MAPPING_FIELDS.includes(field))
-    .reduce((acc, [field]) => {
-      const type: RuntimePrimitiveTypes = 'keyword';
-
-      return {
-        ...acc,
-        [field]: {
-          type,
-        },
-      };
-    }, {});
-};
-
 export const getFindingsQuery = (
   { query, sort }: UseFindingsOptions,
   rulesStates: CspBenchmarkRulesStates,
@@ -66,7 +49,6 @@ export const getFindingsQuery = (
   return {
     index: CDR_MISCONFIGURATIONS_INDEX_PATTERN,
     sort: getMultiFieldsSort(sort),
-    runtime_mappings: getRuntimeMappingsFromSort(sort),
     size: MAX_FINDINGS_TO_LOAD,
     aggs: getFindingsCountAggQuery(),
     ignore_unavailable: true,
@@ -121,13 +103,13 @@ const getSortField = ({ field, direction }: { field: string; direction: string }
         type: 'string',
         order: direction,
         script: {
-          source: `doc["${field}"].value.toLowerCase()`,
+          source: `doc.containsKey("${field}") && !doc["${field}"].empty ? doc["${field}"].value.toLowerCase() : ""`,
           lang: 'painless',
         },
       },
     };
   }
-  return { [field]: direction };
+  return { [field]: { order: direction, unmapped_type: 'keyword' } };
 };
 
 export const useLatestFindings = (options: UseFindingsOptions) => {
