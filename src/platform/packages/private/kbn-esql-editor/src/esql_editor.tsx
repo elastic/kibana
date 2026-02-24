@@ -764,15 +764,13 @@ const ESQLEditorInternal = function ESQLEditor({
     setIsFieldsBrowserOpen,
     browserPopoverPosition: fieldsBrowserPosition,
     preloadedFields,
-    simplifiedQuery,
+    indexPattern: fieldsBrowserIndexPattern,
     fullQuery,
     openFieldsBrowser,
     handleFieldsBrowserSelect,
   } = useFieldsBrowser({
     editorRef,
     editorModel,
-    http: core.http,
-    activeSolutionId: activeSolutionId ?? undefined,
     telemetryService,
   });
 
@@ -1456,7 +1454,7 @@ const ESQLEditorInternal = function ESQLEditor({
           <FieldsBrowser
             isOpen={isFieldsBrowserOpen}
             preloadedFields={preloadedFields}
-            simplifiedQuery={simplifiedQuery}
+            indexPattern={fieldsBrowserIndexPattern}
             fullQuery={fullQuery}
             activeSolutionId={activeSolutionId ?? undefined}
             position={fieldsBrowserPosition}

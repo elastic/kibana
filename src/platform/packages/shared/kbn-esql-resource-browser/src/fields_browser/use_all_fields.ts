@@ -18,7 +18,7 @@ import { getEditorExtensions, getEsqlColumns } from '@kbn/esql-utils';
 export interface UseAllFieldsParams {
   isOpen: boolean;
   preloadedFields: Array<{ name: string; type?: string }>;
-  simplifiedQuery: string;
+  indexPattern: string;
   fullQuery: string;
   http?: HttpStart;
   activeSolutionId?: SolutionId;
@@ -30,7 +30,7 @@ export interface UseAllFieldsParams {
 export const useAllFields = ({
   isOpen,
   preloadedFields,
-  simplifiedQuery,
+  indexPattern,
   fullQuery,
   http,
   activeSolutionId,
@@ -75,7 +75,7 @@ export const useAllFields = ({
       return;
     }
 
-    const canFetch = Boolean(simplifiedQuery && search && getTimeRange);
+    const canFetch = Boolean(indexPattern && search && getTimeRange);
     if (!canFetch) {
       return;
     }
@@ -84,7 +84,7 @@ export const useAllFields = ({
       setIsLoading(true);
       try {
         const fetched = await getEsqlColumns({
-          esqlQuery: simplifiedQuery!.trim(),
+          esqlQuery: `FROM ${indexPattern}`.trim(),
           search: search!,
           timeRange: getTimeRange!(),
           signal,
@@ -104,7 +104,7 @@ export const useAllFields = ({
     http,
     isOpen,
     preloadedFields,
-    simplifiedQuery,
+    indexPattern,
     fullQuery,
     search,
     signal,

@@ -8,8 +8,6 @@
  */
 
 import { useCallback, useRef, useState, type MutableRefObject } from 'react';
-import type { HttpStart } from '@kbn/core/public';
-import type { KibanaProject as SolutionId } from '@kbn/projects-solutions-groups';
 import type { monaco } from '@kbn/monaco';
 import { BROWSER_POPOVER_WIDTH, DataSourceSelectionChange } from '@kbn/esql-resource-browser';
 import {
@@ -28,16 +26,12 @@ import {
 interface UseFieldsBrowserParams {
   editorRef: MutableRefObject<monaco.editor.IStandaloneCodeEditor | undefined>;
   editorModel: MutableRefObject<monaco.editor.ITextModel | undefined>;
-  http: HttpStart;
-  activeSolutionId?: SolutionId;
   telemetryService: ESQLEditorTelemetryService;
 }
 
 export function useFieldsBrowser({
   editorRef,
   editorModel,
-  http,
-  activeSolutionId,
   telemetryService,
 }: UseFieldsBrowserParams) {
   const [isFieldsBrowserOpen, setIsFieldsBrowserOpen] = useState(false);
@@ -52,8 +46,9 @@ export function useFieldsBrowser({
   // Field names suggested by autocomplete (passed via command args). When present, we use them to
   // filter the browser list to the contextually relevant fields.
   const preloadedFieldsRef = useRef<Array<{ name: string; type?: string }>>([]);
-  // ES|QL query text used for fetching fields when `preloadedFields` is not provided. Contains only the sources part (e.g. "FROM index1, index2").
-  const simplifiedQueryRef = useRef<string>('');
+  // Index pattern used for fetching fields when `preloadedFields` is not provided.
+  // This is derived from the main FROM/TS sources list (e.g. "index1,index2" or "*").
+  const indexPatternRef = useRef<string>(DEFAULT_FIELDS_BROWSER_INDEX);
   // Full ES|QL query text used for fetching recommended fields.
   const fullQueryRef = useRef<string>('');
 
@@ -101,9 +96,7 @@ export function useFieldsBrowser({
       const indexPattern = mainSources.length
         ? mainSources.join(',')
         : DEFAULT_FIELDS_BROWSER_INDEX;
-      const esqlQuery =
-        simplified.trim() && mainSources.length ? simplified.trim() : `FROM ${indexPattern}`;
-      simplifiedQueryRef.current = esqlQuery;
+      indexPatternRef.current = indexPattern;
 
       // Snapshot the cursor offset.
       const cursorPosition = editor.getPosition();
@@ -159,7 +152,7 @@ export function useFieldsBrowser({
     setIsFieldsBrowserOpen,
     browserPopoverPosition,
     preloadedFields: preloadedFieldsRef.current,
-    simplifiedQuery: simplifiedQueryRef.current,
+    indexPattern: indexPatternRef.current,
     fullQuery: fullQueryRef.current,
     openFieldsBrowser,
     handleFieldsBrowserSelect,

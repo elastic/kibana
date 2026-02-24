@@ -39,8 +39,8 @@ interface FieldsBrowserProps {
    * If empty/undefined, the browser will fetch fields using `getEsqlColumns` when possible.
    */
   preloadedFields: Array<{ name: string; type?: string }>;
-  /** ES|QL query text used for fetching fields when `preloadedFields` is not provided. Contains only the sources part (e.g. "FROM index1, index2"). */
-  simplifiedQuery: string;
+  /** Index pattern derived from the main sources list (e.g. "index1,index2" or "*"). */
+  indexPattern: string;
   /** Full ES|QL query text used for fetching recommended fields. */
   fullQuery: string;
   activeSolutionId?: SolutionId;
@@ -52,7 +52,7 @@ export const FieldsBrowser: React.FC<FieldsBrowserProps> = ({
   onClose,
   onSelect,
   preloadedFields,
-  simplifiedQuery,
+  indexPattern,
   fullQuery,
   activeSolutionId,
   position,
@@ -70,7 +70,7 @@ export const FieldsBrowser: React.FC<FieldsBrowserProps> = ({
   const { allFields, recommendedFields, isLoading } = useAllFields({
     isOpen,
     preloadedFields,
-    simplifiedQuery,
+    indexPattern,
     fullQuery,
     http: services.core.http,
     activeSolutionId,
