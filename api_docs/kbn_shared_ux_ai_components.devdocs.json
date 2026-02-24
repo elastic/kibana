@@ -263,7 +263,7 @@
           "EuiButtonDisplayCommonProps",
           " & ",
           "EuiButtonProps",
-          " & { onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; } & React.ButtonHTMLAttributes<HTMLButtonElement> & { buttonRef?: React.Ref<HTMLButtonElement> | undefined; }, \"fill\" | \"disabled\" | \"iconType\"> & { iconOnly?: false | undefined; fill?: undefined; variant?: \"base\" | \"accent\" | undefined; iconType?: ",
+          " & { onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; } & React.ButtonHTMLAttributes<HTMLButtonElement> & { buttonRef?: React.Ref<HTMLButtonElement> | undefined; }, \"fill\" | \"size\" | \"disabled\" | \"iconType\"> & { iconOnly?: false | undefined; fill?: undefined; size?: AiButtonTextSize | undefined; variant?: \"base\" | \"accent\" | undefined; iconType?: ",
           {
             "pluginId": "@kbn/shared-ux-ai-components",
             "scope": "common",
@@ -279,7 +279,7 @@
           "EuiButtonPropsForAnchor",
           "> & ",
           "EuiButtonProps",
-          " & { href?: string | undefined; onClick?: React.MouseEventHandler<HTMLAnchorElement> | undefined; } & React.AnchorHTMLAttributes<HTMLAnchorElement> & { buttonRef?: React.Ref<HTMLAnchorElement> | undefined; }, \"fill\" | \"disabled\" | \"iconType\"> & { iconOnly?: false | undefined; fill?: undefined; variant?: \"base\" | \"accent\" | undefined; iconType?: ",
+          " & { href?: string | undefined; onClick?: React.MouseEventHandler<HTMLAnchorElement> | undefined; } & React.AnchorHTMLAttributes<HTMLAnchorElement> & { buttonRef?: React.Ref<HTMLAnchorElement> | undefined; }, \"fill\" | \"size\" | \"disabled\" | \"iconType\"> & { iconOnly?: false | undefined; fill?: undefined; size?: AiButtonTextSize | undefined; variant?: \"base\" | \"accent\" | undefined; iconType?: ",
           {
             "pluginId": "@kbn/shared-ux-ai-components",
             "scope": "common",
@@ -453,7 +453,7 @@
           "EuiButtonDisplayCommonProps",
           " & ",
           "EuiButtonProps",
-          " & { onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; } & React.ButtonHTMLAttributes<HTMLButtonElement> & { buttonRef?: React.Ref<HTMLButtonElement> | undefined; }, \"fill\" | \"disabled\" | \"iconType\"> | Omit<",
+          " & { onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; } & React.ButtonHTMLAttributes<HTMLButtonElement> & { buttonRef?: React.Ref<HTMLButtonElement> | undefined; }, \"fill\" | \"size\" | \"disabled\" | \"iconType\"> | Omit<",
           "DisambiguateSet",
           "<",
           "EuiButtonPropsForButton",
@@ -461,7 +461,7 @@
           "EuiButtonPropsForAnchor",
           "> & ",
           "EuiButtonProps",
-          " & { href?: string | undefined; onClick?: React.MouseEventHandler<HTMLAnchorElement> | undefined; } & React.AnchorHTMLAttributes<HTMLAnchorElement> & { buttonRef?: React.Ref<HTMLAnchorElement> | undefined; }, \"fill\" | \"disabled\" | \"iconType\">) & { iconOnly?: false | undefined; fill?: undefined; variant?: \"base\" | \"accent\" | undefined; iconType?: ",
+          " & { href?: string | undefined; onClick?: React.MouseEventHandler<HTMLAnchorElement> | undefined; } & React.AnchorHTMLAttributes<HTMLAnchorElement> & { buttonRef?: React.Ref<HTMLAnchorElement> | undefined; }, \"fill\" | \"size\" | \"disabled\" | \"iconType\">) & { iconOnly?: false | undefined; fill?: undefined; size?: AiButtonTextSize | undefined; variant?: \"base\" | \"accent\" | undefined; iconType?: ",
           {
             "pluginId": "@kbn/shared-ux-ai-components",
             "scope": "common",
@@ -528,7 +528,7 @@
           "; 'aria-label': string; })"
         ],
         "path": "src/platform/packages/shared/shared-ux/ai-components/ai_button/src/types.ts",
-        "lineNumber": 20,
+        "lineNumber": 21,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
