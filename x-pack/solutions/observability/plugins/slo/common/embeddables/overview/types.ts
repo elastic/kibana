@@ -9,6 +9,7 @@
 export type {
   GroupBy,
   GroupFilters,
+  OverviewMode,
   SingleOverviewCustomState,
   GroupOverviewCustomState,
   OverviewEmbeddableState,

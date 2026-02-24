@@ -86,6 +86,9 @@ export const getOverviewEmbeddableSchema = (getDrilldownsSchema: GetDrilldownsSc
 export type GroupBy = TypeOf<typeof groupBySchema>;
 export type SingleOverviewCustomState = TypeOf<typeof SingleOverviewCustomSchema>;
 export type GroupOverviewCustomState = TypeOf<typeof GroupOverviewCustomSchema>;
+export type OverviewMode =
+  | SingleOverviewCustomState['overview_mode']
+  | GroupOverviewCustomState['overview_mode'];
 export type GroupFilters = Required<GroupOverviewCustomState>['group_filters'];
 export type OverviewEmbeddableState = TypeOf<ReturnType<typeof getOverviewEmbeddableSchema>>;
 export type SingleOverviewEmbeddableState = TypeOf<

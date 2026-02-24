@@ -18,8 +18,6 @@ import type {
   OverviewEmbeddableState,
 } from '../../../../common/embeddables/overview/types';
 
-export type OverviewMode = 'single' | 'groups';
-
 export type SloOverviewApi = DefaultEmbeddableApi<OverviewEmbeddableState> &
   PublishesWritableTitle &
   PublishesTitle &
