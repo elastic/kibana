@@ -53,6 +53,10 @@ import { SampleSummary } from './sample_summary';
 import { ErrorSampleContextualInsight } from './error_sample_contextual_insight';
 import { getComparisonEnabled } from '../../../shared/time_comparison/get_comparison_enabled';
 import { buildUrl } from '../../../../utils/build_url';
+import {
+  ENVIRONMENT_NOT_DEFINED,
+  getEnvironmentLabel,
+} from '../../../../../common/environment_filter_values';
 
 const TransactionLinkName = euiStyled.div`
   margin-left: ${({ theme }) => theme.eui.euiSizeS};
@@ -98,7 +102,7 @@ export function ErrorSampleDetails({
     '/mobile-services/{serviceName}/errors-and-crashes/crashes/{groupId}'
   );
 
-  const { kuery } = query;
+  const { kuery, environment } = query;
 
   const loadingErrorSamplesData = isPending(errorSamplesFetchStatus);
   const loadingErrorData = isPending(errorFetchStatus);
@@ -151,7 +155,7 @@ export function ErrorSampleDetails({
 
   const tabs = getTabs(error);
   const currentTab = getCurrentTab(tabs, detailTab) as ErrorTab;
-  const urlFromError = error.error.page?.url || error.url?.full;
+  const urlFromError = error?.error?.page?.url || error?.url?.full;
   const urlFromTransaction = transaction?.transaction?.page?.url || transaction?.url?.full;
   const errorOrTransactionUrl = error?.url ? error : transaction;
   const errorOrTransactionHttp = error?.http ? error : transaction;
@@ -167,9 +171,13 @@ export function ErrorSampleDetails({
   const method = errorOrTransactionHttp?.http?.request?.method;
   const status = errorOrTransactionHttp?.http?.response?.status_code;
   const userAgent = errorOrTransactionUserAgent;
-  const environment = error.service.environment;
-  const serviceVersion = error.service.version;
-  const isUnhandled = error.error.exception?.[0]?.handled === false;
+  const errorEnvironment =
+    error?.service?.environment ??
+    transaction?.service?.environment ??
+    environment ??
+    ENVIRONMENT_NOT_DEFINED.value;
+  const serviceVersion = error?.service?.version ?? transaction?.service?.version ?? undefined;
+  const isUnhandled = error?.error?.exception?.[0]?.handled === false;
 
   return (
     <EuiPanel hasBorder={true}>
@@ -258,15 +266,15 @@ export function ErrorSampleDetails({
                 </TransactionDetailLink>
               </EuiToolTip>
             ),
-            environment ? (
-              <EuiToolTip
-                content={i18n.translate('xpack.apm.errorSampleDetails.serviceEnvironment', {
-                  defaultMessage: 'Environment',
-                })}
-              >
-                <EuiBadge color="hollow">{environment}</EuiBadge>
-              </EuiToolTip>
-            ) : null,
+            <EuiToolTip
+              content={i18n.translate('xpack.apm.errorSampleDetails.serviceEnvironment', {
+                defaultMessage: 'Environment',
+              })}
+            >
+              <EuiBadge color="hollow" tabIndex={0}>
+                {getEnvironmentLabel(errorEnvironment)}
+              </EuiBadge>
+            </EuiToolTip>,
             serviceVersion ? (
               <EuiToolTip
                 content={i18n.translate('xpack.apm.errorSampleDetails.serviceVersion', {
@@ -335,7 +343,7 @@ export function ErrorSampleDetailTabContent({
   currentTab,
 }: {
   error: {
-    service: {
+    service?: {
       language?: {
         name?: string;
       };
@@ -345,13 +353,13 @@ export function ErrorSampleDetailTabContent({
   };
   currentTab: ErrorTab;
 }) {
-  const codeLanguage = error?.service.language?.name;
-  const exceptions = error?.error.exception || [];
+  const codeLanguage = error?.service?.language?.name;
+  const exceptions = error?.error?.exception || [];
   const hasExceptions = exceptions.length > 0;
-  const logStackframes = error?.error.log?.stacktrace;
+  const logStackframes = error?.error?.log?.stacktrace;
   const isPlaintextException = hasExceptions
-    ? !!error.error.stack_trace && exceptions.length === 1 && !exceptions[0].stacktrace
-    : !!error.error.stack_trace;
+    ? !!error?.error?.stack_trace && exceptions.length === 1 && !exceptions[0].stacktrace
+    : !!error?.error?.stack_trace;
 
   switch (currentTab.key) {
     case ErrorTabKey.LogStackTrace:
@@ -359,9 +367,9 @@ export function ErrorSampleDetailTabContent({
     case ErrorTabKey.ExceptionStacktrace:
       return isPlaintextException ? (
         <PlaintextStacktrace
-          message={hasExceptions ? exceptions[0].message : undefined}
-          type={hasExceptions ? exceptions[0].type : undefined}
-          stacktrace={error?.error.stack_trace}
+          message={hasExceptions ? exceptions[0]?.message : undefined}
+          type={hasExceptions ? exceptions[0]?.type : undefined}
+          stacktrace={error?.error?.stack_trace}
           codeLanguage={codeLanguage}
         />
       ) : (
