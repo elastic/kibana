@@ -891,8 +891,8 @@ describe('index= suggestions', () => {
   const contextWithSources: ICommandContext = {
     ...mockContext,
     timeSeriesSources: [
-      { name: 'metrics', mode: 'time_series', aliases: [] },
-      { name: 'logs-tsdb', mode: 'time_series', aliases: [] },
+      { name: 'metrics', mode: 'Timeseries', aliases: [] },
+      { name: 'logs-tsdb', mode: 'Timeseries', aliases: [] },
     ],
   };
 
@@ -944,8 +944,7 @@ describe('index= suggestions', () => {
 describe('label selector suggestions', () => {
   const labelNames = getFieldNamesByType(ESQL_STRING_TYPES, true);
 
-  // TODO: Re-enable when label matcher suggestions are implemented
-  test.skip.each([
+  test.each([
     ['opening brace', 'PROMQL rate(http_requests{'],
     ['comma', 'PROMQL rate(http_requests{job="api", '],
   ])('suggests labels after %s in selector', async (_position, query) => {
@@ -955,8 +954,7 @@ describe('label selector suggestions', () => {
     });
   });
 
-  // TODO: Re-enable when label matcher suggestions are implemented
-  test.skip('suggests labels when cursor is before a typed operator and label name is missing', async () => {
+  test('suggests labels when cursor is before a typed operator and label name is missing', async () => {
     const query =
       'PROMQL step = "5m" sum(avg(quantile_over_time(0, bytes{ = ""}[5m])) by (event.dataset))';
     const cursorPosition = query.indexOf('{ = ""') + 2; // bytes{| = ""}
@@ -978,23 +976,20 @@ describe('label selector suggestions', () => {
     });
   });
 
-  // TODO: Re-enable when label matcher suggestions are implemented
-  test.skip('suggests string placeholder when label value is missing', async () => {
+  test('suggests string placeholder when label value is missing', async () => {
     await expectPromqlSuggestions('PROMQL rate(bytes_counter{job= ', {
       textsContain: ['"${0:value}"'],
     });
   });
 
-  // TODO: Re-enable when label matcher suggestions are implemented
-  test.skip('suggests comma after complete label value', async () => {
+  test('suggests comma after complete label value', async () => {
     await expectPromqlSuggestions('PROMQL rate(http_requests{job="api" ', {
       labelsContain: [','],
       labelsNotContain: labelNames,
     });
   });
 
-  // TODO: Re-enable when label matcher suggestions are implemented
-  test.skip('suggests labels after complete label value', async () => {
+  test('suggests labels after complete label value', async () => {
     await expectPromqlSuggestions('PROMQL rate(http_requests{job="api",', {
       labelsContain: labelNames,
     });

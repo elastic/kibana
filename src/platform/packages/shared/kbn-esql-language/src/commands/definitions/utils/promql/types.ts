@@ -9,7 +9,6 @@
 
 import type {
   PromQLAstNode,
-  PromQLAstQueryExpression,
   PromQLBinaryExpression,
   PromQLFunction,
   PromQLSelector,
@@ -72,7 +71,6 @@ export type PromqlDetailedPositionType =
   | 'inside_grouping'
   | 'inside_function_args'
   | 'after_complete_arg'
-  | 'after_open_paren'
   | 'after_label_brace'
   | 'after_label_name'
   | 'after_label_operator'
@@ -89,21 +87,4 @@ export interface PromqlDetailedPosition {
   isCompleteLabel?: boolean;
   canSuggestCommaInFunctionArgs?: boolean;
   signatureTypes?: PromQLFunctionParamType[];
-}
-
-export interface PromqlCursorModel {
-  cursor: number;
-  text: string;
-  textBeforeCursor: string;
-  lastChar: string | undefined;
-  ast: {
-    root: PromQLAstQueryExpression;
-    match: CursorMatch | undefined;
-    innermostFunc: PromQLFunction | undefined;
-    outermostIncompleteBinary: PromQLBinaryExpression | undefined;
-  };
-  textSignals: {
-    trailingBinaryOperator: string | undefined;
-    labelMapFallback: PromqlDetailedPosition | undefined;
-  };
 }

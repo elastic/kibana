@@ -17,12 +17,17 @@ import type {
 } from '../../../../embedded_languages/promql/types';
 import type { PromQLFunctionParamType } from '../../types';
 import type { CursorMatch, PromqlDetailedPosition } from './types';
-import { isAfterCompleteExpression, isCursorInsideGrouping } from './cursor_context';
+import {
+  findCursorContext,
+  isAfterCompleteExpression,
+  isCursorInsideGrouping,
+} from './cursor_context';
 import {
   computeParamIndexFromArgs,
   findNearestAggregation,
   findSelectorAfterBinaryInArgs,
   getBinaryNodeAtCursor,
+  getLabelMapTextFallbackPosition,
   getMaxParamsForFunction,
   getSignatureTypesFromAncestors,
   hasGroupingTrailingIdentifier,
@@ -34,10 +39,21 @@ import {
   getPromqlFunctionDefinition,
   getPromqlFunctionParamTypes,
 } from '../promql';
-import { buildPromqlCursorModel } from './cursor_model';
+import { promqlOperatorDefinitions } from '../../generated/promql_operators';
 
 const TRAILING_COMMA_WITH_SPACES_REGEX = /,\s*$/;
 const SELECTOR_DURATION_START_REGEX = /^\s*\[$/;
+
+// Builds a regex pattern like `\+|\-|\*|==|and|or|...` from all binary operator definitions.
+// Used to detect trailing operators via text when the AST is incomplete (e.g. `a + |`).
+const PROMQL_BINARY_OPS_PATTERN = promqlOperatorDefinitions
+  .filter((definition) => definition.signatures.some((signature) => signature.params.length >= 2))
+  .map((definition) =>
+    (definition.operator ?? definition.name).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  )
+  .join('|');
+
+const PROMQL_TRAILING_BINARY_OP_REGEX = new RegExp(`(${PROMQL_BINARY_OPS_PATTERN})\\s*$`, 'i');
 
 /** Routes cursor to the appropriate domain resolver based on deepest AST node. */
 export function getQueryPosition(
@@ -45,9 +61,9 @@ export function getQueryPosition(
   cursor: number,
   text: string
 ): PromqlDetailedPosition {
-  const cursorModel = buildPromqlCursorModel(root, cursor, text);
-  const { textBeforeCursor, lastChar } = cursorModel;
-  const { match, innermostFunc, outermostIncompleteBinary } = cursorModel.ast;
+  const textBeforeCursor = text.slice(0, cursor).trimEnd();
+  const lastChar = textBeforeCursor.at(-1);
+  const { match, innermostFunc, outermostIncompleteBinary } = findCursorContext(root, cursor);
   const binaryNodeAtCursor = getBinaryNodeAtCursor(match, outermostIncompleteBinary);
   const funcAtCursor = match
     ? [match.node, match.parent].find((node) => node?.type === 'function')
@@ -68,19 +84,20 @@ export function getQueryPosition(
   };
 
   // Text-based fast paths (operator trailing, label map fallback)
-  if (cursorModel.textSignals.trailingBinaryOperator) {
-    const signatureTypes = getPromqlBinaryOperatorParamTypes(
-      cursorModel.textSignals.trailingBinaryOperator,
-      1
-    );
+  const trailingBinaryOperator = textBeforeCursor.match(PROMQL_TRAILING_BINARY_OP_REGEX)?.[1];
+
+  if (trailingBinaryOperator) {
+    const signatureTypes = getPromqlBinaryOperatorParamTypes(trailingBinaryOperator, 1);
 
     if (signatureTypes.length) {
       return { type: 'after_operator', signatureTypes };
     }
   }
 
-  if (cursorModel.textSignals.labelMapFallback) {
-    return cursorModel.textSignals.labelMapFallback;
+  const labelMapFallback = getLabelMapTextFallbackPosition(text, cursor);
+
+  if (labelMapFallback) {
+    return labelMapFallback;
   }
 
   // AST-based binary operator resolution
@@ -95,7 +112,7 @@ export function getQueryPosition(
   // No AST match: empty query or cursor outside any node
   if (!match) {
     if (lastChar === '(' || lastChar === '=') {
-      return { type: 'after_open_paren', signatureTypes: getSignatureTypes() };
+      return { type: 'inside_function_args', signatureTypes: getSignatureTypes() };
     }
 
     return resolveTopLevelPosition(root, cursor, text, undefined, textBeforeCursor);
@@ -226,7 +243,7 @@ export function getQueryPosition(
 
   // Open paren/equals fallback
   if (lastChar === '(' || lastChar === '=') {
-    return { type: 'after_open_paren', signatureTypes: getSignatureTypes() };
+    return { type: 'inside_function_args', signatureTypes: getSignatureTypes() };
   }
 
   // Default: top-level query position

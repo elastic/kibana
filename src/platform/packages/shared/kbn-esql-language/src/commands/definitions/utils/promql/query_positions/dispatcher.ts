@@ -40,8 +40,7 @@ export const positionHandlers: Partial<Record<PromqlDetailedPositionType, Sugges
   inside_grouping: suggestInsideGrouping,
   inside_function_args: suggestInsideFunctionArgs,
   after_complete_arg: suggestAfterCompleteArg,
-  after_open_paren: suggestInsideFunctionArgs,
-  after_label_brace: suggestInsideGrouping,
+  after_label_brace: suggestInsideGrouping, // same handler as inside_grouping, kept separate for context readability ({} vs by())
   after_label_name: () => suggestLabelMatchers(),
   after_label_operator: () => suggestLabelValues(),
   after_label_selector: ({ position }) => suggestAfterLabelSelector(position),
