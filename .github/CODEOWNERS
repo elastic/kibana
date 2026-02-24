@@ -2879,11 +2879,11 @@ src/platform/packages/shared/kbn-connector-schemas/thehive @elastic/kibana-cases
 /src/platform/packages/shared/kbn-connector-schemas/mcp @elastic/workchat-eng
 
 # Inference API
-/x-pack/platform/plugins/shared/stack_connectors/public/connector_types/inference @elastic/appex-ai-infra @elastic/security-generative-ai @elastic/obs-ai-team
-/x-pack/platform/plugins/shared/stack_connectors/server/connector_types/inference @elastic/appex-ai-infra @elastic/security-generative-ai @elastic/obs-ai-team
-/x-pack/platform/plugins/shared/stack_connectors/common/inference @elastic/appex-ai-infra @elastic/security-generative-ai @elastic/obs-ai-team
-/x-pack/platform/plugins/shared/stack_connectors/server/usage/inference @elastic/appex-ai-infra
-/src/platform/packages/shared/kbn-connector-schemas/inference @elastic/appex-ai-infra @elastic/security-generative-ai @elastic/obs-ai-team
+/x-pack/platform/plugins/shared/stack_connectors/public/connector_types/inference @elastic/search-kibana @elastic/security-generative-ai @elastic/obs-ai-team
+/x-pack/platform/plugins/shared/stack_connectors/server/connector_types/inference @elastic/search-kibana @elastic/security-generative-ai @elastic/obs-ai-team
+/x-pack/platform/plugins/shared/stack_connectors/common/inference @elastic/search-kibana @elastic/security-generative-ai @elastic/obs-ai-team
+/x-pack/platform/plugins/shared/stack_connectors/server/usage/inference @elastic/search-kibana
+/src/platform/packages/shared/kbn-connector-schemas/inference @elastic/search-kibana @elastic/security-generative-ai @elastic/obs-ai-team
 
 # Token tracking
 x-pack/platform/plugins/shared/actions/server/lib/token_tracking @elastic/security-generative-ai
