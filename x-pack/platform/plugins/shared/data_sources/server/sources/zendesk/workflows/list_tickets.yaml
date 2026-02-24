@@ -23,3 +23,51 @@ steps:
     with:
       page: ${{inputs.page}}
       perPage: ${{inputs.per_page}}
+  - name: map-tickets
+    type: data.map
+    items: ${{ steps['list-tickets'].output.tickets }}
+    with:
+      fields:
+        id: "${{ item.id }}"
+        subject: "${{ item.subject }}"
+        description: "${{ item.description }}"
+        status: "${{ item.status }}"
+        priority: "${{ item.priority }}"
+        created_at: "${{ item.created_at }}"
+        updated_at: "${{ item.updated_at }}"
+        url: "${{ item.url }}"
+        requester_id: "${{ item.requester_id }}"
+        assignee_id: "${{ item.assignee_id }}"
+        submitter_id: "${{ item.submitter_id }}"
+        tags: "${{ item.tags }}"
+#        custom_fields:
+#          $map: { items: "${{ item.custom_fields }}", item: "cf" }
+#          id: "${{ cf.id }}"
+#          value: "${{ cf.value }}"
+#         encoded_id: "${{ item.encoded_id }}"
+#         raw_subject: "${{ item.raw_subject }}"
+#         from_messaging_channel: "${{ item.from_messaging_channel }}"
+#         custom_status_id: "${{ item.custom_status_id }}"
+#         external_id: "${{ item.external_id }}"
+#         type: "${{ item.type }}"
+#         via: "${{ item.via }}"
+#         allow_attachments: "${{ item.allow_attachments }}"
+#         allow_channelback: "${{ item.allow_channelback }}"
+#         problem_id: "${{ item.problem_id }}"
+#         due_at: "${{ item.due_at }}"
+#         follower_ids: "${{ item.follower_ids }}"
+#         email_cc_ids: "${{ item.email_cc_ids }}"
+#         collaborator_ids: "${{ item.collaborator_ids }}"
+#         satisfaction_rating: "${{ item.satisfaction_rating }}"
+#         brand_id: "${{ item.brand_id }}"
+#         ticket_form_id: "${{ item.ticket_form_id }}"
+#         group_id: "${{ item.group_id }}"
+#         organization_id: "${{ item.organization_id }}"
+#         followup_ids: "${{ item.followup_ids }}"
+#         recipient: "${{ item.recipient }}"
+#         is_public: "${{ item.is_public }}"
+#         has_incidents: "${{ item.has_incidents }}"
+#         sharing_agreement_ids: "${{ item.sharing_agreement_ids }}"
+#         generated_timestamp: "${{ item.generated_timestamp }}"
+#         forum_topic_id: "${{ item.forum_topic_id }}"
+#         fields: "${{ item.fields }}"
