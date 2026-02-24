@@ -42,7 +42,7 @@ export const monitorFiltersSchema = schema.object({
   ),
   monitor_ids: schema.maybe(
     schema.arrayOf(monitorOptionSchema, {
-      maxSize: 1000,
+      maxSize: 5000,
       meta: { description: 'Filter by monitor IDs' },
     })
   ),
