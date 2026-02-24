@@ -7,6 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { checkFileCasing } from './check_file_casing';
-export { getFilesForCommit } from './get_files_for_commit';
-export { runFileCasingCheck } from './run_file_casing_check';
+process.argv.push('--ref', 'HEAD', '--include-untracked');
+require('./precommit_hook');

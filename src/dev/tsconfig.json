@@ -8,7 +8,8 @@
     "**/*.ts",
     "**/*.mjs",
     "**/*.cjs",
-    "../../typings/**/*"
+    "../../typings/**/*",
+    "../../scripts/*.ts"
   ],
   "exclude": [
     "target/**/*",
