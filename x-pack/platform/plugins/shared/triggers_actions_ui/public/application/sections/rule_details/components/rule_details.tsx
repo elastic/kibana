@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
@@ -13,7 +14,6 @@ import {
   EuiText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiBadge,
   EuiPageSection,
   EuiCallOut,
   EuiSpacer,
@@ -384,28 +384,11 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
         }
         description={
           <EuiFlexGroup gutterSize="m">
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
-                <EuiFlexItem grow={false}>
-                  <EuiText size="s">
-                    <p>
-                      <FormattedMessage
-                        id="xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.ruleTypeTitle"
-                        defaultMessage="Type"
-                      />
-                    </p>
-                  </EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiBadge data-test-subj="ruleTypeLabel">{ruleType.name}</EuiBadge>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
             {hasManageApiKeysCapability(capabilities) && rule.apiKeyOwner && (
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
                   <EuiFlexItem grow={false}>
-                    <EuiText size="s">
+                    <EuiText size="xs" color="subdued">
                       <p>
                         <FormattedMessage
                           id="xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.apiKeyOwnerTitle"
@@ -415,7 +398,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
                     </EuiText>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <EuiText size="s" data-test-subj="apiKeyOwnerLabel">
+                    <EuiText size="xs" color="subdued" data-test-subj="apiKeyOwnerLabel">
                       <b>{rule.apiKeyOwner}</b>
                       {rule.apiKeyCreatedByUser ? (
                         <>
@@ -436,6 +419,30 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
                 </EuiFlexGroup>
               </EuiFlexItem>
             )}
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" color="subdued">
+                <FormattedMessage
+                  id="xpack.triggersActionsUI.sections.ruleDetails.createdAt"
+                  defaultMessage="Created by {creator} on {createdAt}"
+                  values={{
+                    creator: <strong>{rule.createdBy}</strong>,
+                    createdAt: moment(rule.createdAt).format('ll'),
+                  }}
+                />
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" color="subdued">
+                <FormattedMessage
+                  id="xpack.triggersActionsUI.sections.ruleDetails.updatedAt"
+                  defaultMessage="Last updated by {updater} on {updatedAt}"
+                  values={{
+                    updater: <strong>{rule.updatedBy}</strong>,
+                    updatedAt: moment(rule.updatedAt).format('ll'),
+                  }}
+                />
+              </EuiText>
+            </EuiFlexItem>
           </EuiFlexGroup>
         }
         rightSideItems={[

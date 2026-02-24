@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { lazy, useCallback, useMemo } from 'react';
+import React, { lazy, useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiTabbedContent, useEuiTheme } from '@elastic/eui';
 import type { AlertStatusValues } from '@kbn/alerting-plugin/common';
@@ -21,6 +21,8 @@ import type { RuleEventLogListProps } from './rule_event_log_list';
 import type { AlertListItem, RefreshToken } from './types';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 import { suspendedComponentWithProps } from '../../../lib/suspended_component_with_props';
+import { getAlertSummaryWidgetLazy } from '../../../../common/get_rule_alerts_summary';
+import type { AlertSummaryTimeRange } from '../../alert_summary_widget/types';
 import {
   getRuleHealthColor,
   getRuleStatusMessage,
@@ -77,10 +79,25 @@ export function RuleComponent({
     application,
     licensing,
     settings,
+    charts,
+    uiSettings,
   } = useKibana().services;
   // The lastReloadRequestTime should be updated when the refreshToken changes
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const lastReloadRequestTime = useMemo(() => new Date().getTime(), [refreshToken]);
+
+  const getDefaultAlertSummaryTimeRange = (): AlertSummaryTimeRange => {
+    const now = new Date();
+    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    return {
+      utcFrom: thirtyDaysAgo.toISOString(),
+      utcTo: now.toISOString(),
+      fixedInterval: '1d',
+    };
+  };
+
+  const [alertSummaryWidgetTimeRange, setAlertSummaryWidgetTimeRange] =
+    useState<AlertSummaryTimeRange>(getDefaultAlertSummaryTimeRange);
 
   const { euiTheme } = useEuiTheme();
 
@@ -101,6 +118,7 @@ export function RuleComponent({
           query={{ bool: { filter: { term: { [ALERT_RULE_UUID]: rule.id } } } }}
           showAlertStatusWithFlapping
           columns={alertsTableColumns}
+          actionsColumnWidth={120}
           lastReloadRequestTime={lastReloadRequestTime}
           services={{
             data,
@@ -186,6 +204,22 @@ export function RuleComponent({
             refreshToken={refreshToken}
             autoRecoverAlerts={ruleType.autoRecoverAlerts}
           />
+        </EuiFlexItem>
+        <EuiFlexItem css={{ minWidth: 350 }}>
+          {getAlertSummaryWidgetLazy({
+            ruleTypeIds: [rule.ruleTypeId],
+            consumers: [rule.consumer],
+            filter: {
+              term: {
+                'kibana.alert.rule.uuid': rule.id,
+              },
+            },
+            timeRange: alertSummaryWidgetTimeRange,
+            onClick: () => {
+              setAlertSummaryWidgetTimeRange(getDefaultAlertSummaryTimeRange());
+            },
+            dependencies: { charts, uiSettings },
+          })}
         </EuiFlexItem>
         {suspendedComponentWithProps(
           RuleDefinition,
