@@ -52,6 +52,11 @@ List or search for osquery-enabled agents. Use this to find agent IDs by hostnam
 - List all: \`osquery_get_agents({})\`
 Returns: id (agent ID), hostname, status, platform
 
+### osquery_get_table_schema
+Discover columns and types for any osquery table (especially custom Elastic tables like elastic_browser_history).
+- Returns: column names and types for the specified table
+- **ALWAYS use this before querying custom/Elastic-specific tables to avoid "no such column" errors**
+
 ### osquery_run_live_query (requires explicit confirmation from user)
 Execute a live osquery SQL query against agents.
 - **ALWAYS use agent IDs from osquery_get_agents, NOT hostnames!**
@@ -72,10 +77,12 @@ List osquery packs with pagination.
 ## Live Query Workflow (MANDATORY ORDER)
 
 1. **Get agent ID first:** \`osquery_get_agents({ hostname: "..." })\`
-2. **Run query:** \`osquery_run_live_query({ query: "SELECT ...", agentIds: ["<agent_id>"] })\`
+2. **MANDATORY - Get table schema for custom/Elastic tables:** Before querying any custom or Elastic-specific table (e.g., \`elastic_browser_history\`, \`elastic_*\`), you MUST first discover the actual columns using \`osquery_get_table_schema({ tableName: "<table_name>", agentId: "<agent_id>" })\`. Standard osquery tables (e.g., \`processes\`, \`users\`, \`file\`) can be queried directly.
+3. **Run query:** \`osquery_run_live_query({ query: "SELECT ...", agentIds: ["<agent_id>"] })\`
    - Response includes queries[].action_id
-3. **MANDATORY - Fetch results:** \`osquery_get_results({ actionId: "<queries[0].action_id>" })\`
-4. **Analyze results:** Report findings from actual data
+4. **MANDATORY - Fetch results:** \`osquery_get_results({ actionId: "<queries[0].action_id>" })\`
+   - If the result status is "error", analyze the error message and fix the query (e.g., wrong column name, table not found). Do NOT ask the user to rerun — fix it yourself and rerun.
+5. **Analyze results:** Report findings from actual data
 
 ## CRITICAL: Agent ID vs Hostname
 
@@ -269,6 +276,114 @@ const createGetAgentsTool = (
   },
 });
 
+const createGetTableSchemaTool = (
+  osquerySetup: OsqueryPluginSetup
+): BuiltinSkillBoundedTool => ({
+  id: 'security.osquery.get_table_schema',
+  type: ToolType.builtin,
+  description:
+    'Discover columns and types for any osquery table. ALWAYS use before querying custom or Elastic-specific tables (e.g., elastic_browser_history) to avoid "no such column" errors.',
+  schema: z.object({
+    tableName: z.string().describe('The osquery table name (e.g., "elastic_browser_history", "processes")'),
+    agentId: z.string().describe('Agent ID (UUID) to query schema from. Use osquery_get_agents to find IDs first.'),
+  }),
+  handler: async ({ tableName, agentId }, { esClient, spaceId, logger }) => {
+    try {
+      const sanitized = tableName.replace(/[^a-zA-Z0-9_]/g, '');
+      const { response: osqueryAction } = await osquerySetup.createActionService.create(
+        {
+          query: `PRAGMA table_info('${sanitized}')`,
+          agent_ids: [agentId],
+        },
+        { space: { id: spaceId } }
+      );
+
+      const queryActionId =
+        osqueryAction.queries?.[0]?.action_id ?? osqueryAction.action_id;
+
+      const startTime = Date.now();
+      const schemaTimeoutMs = 30_000;
+
+      while (Date.now() - startTime < schemaTimeoutMs) {
+        const [resultCount, responseCount] = await Promise.all([
+          esClient.asInternalUser.count({
+            index: OSQUERY_RESULTS_INDEX,
+            ignore_unavailable: true,
+            query: { bool: { filter: [{ term: { action_id: queryActionId } }] } },
+          }),
+          esClient.asInternalUser.count({
+            index: OSQUERY_ACTION_RESPONSES_INDEX,
+            ignore_unavailable: true,
+            query: { bool: { filter: [{ term: { action_id: queryActionId } }] } },
+          }),
+        ]);
+
+        const results = typeof resultCount.count === 'number' ? resultCount.count : 0;
+        const responses = typeof responseCount.count === 'number' ? responseCount.count : 0;
+
+        if (responses > 0 && results === 0) {
+          const errors = await fetchActionErrors(esClient, queryActionId);
+          if (errors.length > 0) {
+            return {
+              results: [{
+                type: ToolResultType.other,
+                data: {
+                  message: JSON.stringify({
+                    table: sanitized,
+                    status: 'error',
+                    errors,
+                  }),
+                },
+              }],
+            };
+          }
+        }
+
+        if (results > 0) break;
+        await new Promise((resolve) => setTimeout(resolve, 3000));
+      }
+
+      const searchResponse = await esClient.asInternalUser.search({
+        index: OSQUERY_RESULTS_INDEX,
+        ignore_unavailable: true,
+        size: 500,
+        query: { bool: { filter: [{ term: { action_id: queryActionId } }] } },
+      });
+
+      const columns = searchResponse.hits.hits.map((hit) => {
+        const source = (hit._source as Record<string, unknown>)?.osquery as Record<string, unknown> | undefined;
+        return {
+          name: source?.name,
+          type: source?.type,
+        };
+      }).filter((col) => col.name);
+
+      return {
+        results: [{
+          type: ToolResultType.other,
+          data: {
+            message: JSON.stringify({
+              table: sanitized,
+              columns,
+              message: columns.length > 0
+                ? `Table "${sanitized}" has ${columns.length} columns. Use ONLY these column names in your queries.`
+                : `No schema found for table "${sanitized}". The table may not exist on this agent.`,
+            }),
+          },
+        }],
+      };
+    } catch (error) {
+      logger.error(`osquery get_table_schema error: ${error.message}`);
+      return {
+        results: [{
+          type: ToolResultType.error,
+          data: { message: `Error fetching table schema: ${error.message}` },
+        }],
+      };
+    }
+  },
+});
+
 const createRunLiveQueryTool = (
   osquerySetup: OsqueryPluginSetup
 ): BuiltinSkillBoundedTool => ({
@@ -342,11 +457,43 @@ const createRunLiveQueryTool = (
   },
 });
 
+const fetchActionErrors = async (
+  esClient: { asInternalUser: { search: (...args: any[]) => Promise<any> } },
+  actionId: string
+): Promise<Array<{ agent_id: string; error: string }>> => {
+  const errorsResponse = await esClient.asInternalUser.search({
+    index: OSQUERY_ACTION_RESPONSES_INDEX,
+    ignore_unavailable: true,
+    size: 100,
+    query: {
+      bool: {
+        filter: [
+          { term: { action_id: actionId } },
+          { exists: { field: 'error' } },
+        ],
+      },
+    },
+  });
+
+  const errors: Array<{ agent_id: string; error: string }> = [];
+  for (const hit of errorsResponse.hits.hits) {
+    const source = hit._source as Record<string, unknown> | undefined;
+    const errorMsg = source?.error as string | undefined;
+    if (errorMsg) {
+      errors.push({
+        agent_id: (source?.agent_id as string) || 'unknown',
+        error: errorMsg,
+      });
+    }
+  }
+  return errors;
+};
+
 const createGetResultsTool = (): BuiltinSkillBoundedTool => ({
   id: 'security.osquery.get_results',
   type: ToolType.builtin,
   description:
-    'Fetch results from a live osquery query. Polls until results are ready (up to 5 minutes).',
+    'Fetch results from a live osquery query. Polls until results are ready (up to 5 minutes). Returns errors immediately if the query failed on the agent.',
   schema: z.object({
     actionId: z
       .string()
@@ -356,42 +503,49 @@ const createGetResultsTool = (): BuiltinSkillBoundedTool => ({
   handler: async ({ actionId, pageSize = 100 }, { esClient, logger }) => {
     try {
       const startTime = Date.now();
-      let totalHits = 0;
       let settled = false;
 
       while (Date.now() - startTime < MAX_POLL_DURATION_MS) {
-        const countResponse = await esClient.asInternalUser.count({
-          index: OSQUERY_RESULTS_INDEX,
-          ignore_unavailable: true,
-          query: {
-            bool: {
-              filter: [{ term: { action_id: actionId } }],
-            },
-          },
-        });
-
-        const currentCount =
-          typeof countResponse.count === 'number' ? countResponse.count : 0;
-
-        if (currentCount > 0) {
-          const actionResponsesCount = await esClient.asInternalUser.count({
+        const [resultCount, responseCount] = await Promise.all([
+          esClient.asInternalUser.count({
+            index: OSQUERY_RESULTS_INDEX,
+            ignore_unavailable: true,
+            query: { bool: { filter: [{ term: { action_id: actionId } }] } },
+          }),
+          esClient.asInternalUser.count({
             index: OSQUERY_ACTION_RESPONSES_INDEX,
             ignore_unavailable: true,
-            query: {
-              bool: {
-                filter: [{ term: { action_id: actionId } }],
-              },
-            },
-          });
+            query: { bool: { filter: [{ term: { action_id: actionId } }] } },
+          }),
+        ]);
 
-          const responsesCount =
-            typeof actionResponsesCount.count === 'number' ? actionResponsesCount.count : 0;
+        const results = typeof resultCount.count === 'number' ? resultCount.count : 0;
+        const responses = typeof responseCount.count === 'number' ? responseCount.count : 0;
 
-          if (responsesCount > 0 || currentCount > totalHits) {
-            totalHits = currentCount;
-            settled = true;
-            break;
+        if (responses > 0 && results === 0) {
+          const errors = await fetchActionErrors(esClient, actionId);
+          if (errors.length > 0) {
+            return {
+              results: [
+                {
+                  type: ToolResultType.other,
+                  data: {
+                    message: JSON.stringify({
+                      status: 'error',
+                      total_rows: 0,
+                      rows: [],
+                      errors,
+                    }),
+                  },
+                },
+              ],
+            };
           }
+        }
+
+        if (results > 0 && responses > 0) {
+          settled = true;
+          break;
         }
 
         await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL_MS));
@@ -420,29 +574,7 @@ const createGetResultsTool = (): BuiltinSkillBoundedTool => ({
         return source?.osquery ?? source ?? {};
       });
 
-      const errors: Array<{ agent_id: string; error: string }> = [];
-      const errorsResponse = await esClient.asInternalUser.search({
-        index: OSQUERY_ACTION_RESPONSES_INDEX,
-        ignore_unavailable: true,
-        size: 100,
-        query: {
-          bool: {
-            filter: [
-              { term: { action_id: actionId } },
-              { exists: { field: 'error' } },
-            ],
-          },
-        },
-      });
-
-      for (const hit of errorsResponse.hits.hits) {
-        const source = hit._source as Record<string, unknown> | undefined;
-        const errorMsg = source?.error as string | undefined;
-        if (errorMsg) {
-          const agentId = (source?.agent_id as string) || 'unknown';
-          errors.push({ agent_id: agentId, error: errorMsg });
-        }
-      }
+      const errors = await fetchActionErrors(esClient, actionId);
 
       const status = settled
         ? errors.length > 0
@@ -618,6 +750,7 @@ export const createSecurityOsquerySkill = ({
       ];
 
       if (osquerySetup) {
+        tools.push(createGetTableSchemaTool(osquerySetup));
         tools.push(createRunLiveQueryTool(osquerySetup));
       }
 
