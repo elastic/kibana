@@ -9,6 +9,7 @@
       "@testing-library/jest-dom",
       "@emotion/react/types/css-prop",
       "../../../../../../typings/emotion.d.ts"
+      "@kbn/ambient-ui-types",
     ]
   },
   "include": [
