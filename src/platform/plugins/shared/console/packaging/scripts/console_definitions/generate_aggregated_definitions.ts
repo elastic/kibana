@@ -29,6 +29,7 @@ type UrlParamsDef = Record<string, UrlParamsValue>;
 interface EndpointDescription {
   availability?: EndpointAvailability;
   documentation?: string;
+  documentation_serverless?: string;
   id?: string;
   methods?: string[];
   patterns?: string[];
