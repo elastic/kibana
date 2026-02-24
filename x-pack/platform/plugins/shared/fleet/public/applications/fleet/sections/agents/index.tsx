@@ -68,22 +68,24 @@ export const AgentsApp: React.FunctionComponent = () => {
     return <NoAccessPage />;
   }
 
-  const rightColumn = displayInstructions ? (
-    <>
-      <EuiFlexGroup justifyContent="flexEnd">
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            fill
-            iconType="plusInCircle"
-            onClick={() => flyoutContext.openEnrollmentFlyout()}
-            data-test-subj="addAgentBtnTop"
-          >
-            <FormattedMessage id="xpack.fleet.addAgentButton" defaultMessage="Add Agent" />
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </>
-  ) : undefined;
+  // Add Agent button in page header — commented out.
+  // const rightColumn = displayInstructions ? (
+  //   <>
+  //     <EuiFlexGroup justifyContent="flexEnd">
+  //       <EuiFlexItem grow={false}>
+  //         <EuiButton
+  //           fill
+  //           iconType="plusInCircle"
+  //           onClick={() => flyoutContext.openEnrollmentFlyout()}
+  //           data-test-subj="addAgentBtnTop"
+  //         >
+  //           <FormattedMessage id="xpack.fleet.addAgentButton" defaultMessage="Add Agent" />
+  //         </EuiButton>
+  //       </EuiFlexItem>
+  //     </EuiFlexGroup>
+  //   </>
+  // ) : undefined;
+  const rightColumn = undefined;
 
   return (
     <Routes>

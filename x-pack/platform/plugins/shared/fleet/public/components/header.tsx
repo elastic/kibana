@@ -21,7 +21,7 @@ const Container = styled.div`
   }
 
   // should be alice blue
-  background-color: ${(props) => props.theme.eui.euiColorBackgroundBaseSubdued};
+  // background-color: ${(props) => props.theme.eui.euiColorBackgroundBaseSubdued};
 `;
 
 const Wrapper = styled.div<{ maxWidth?: number | string }>`
@@ -32,7 +32,7 @@ const Wrapper = styled.div<{ maxWidth?: number | string }>`
 
   margin-left: auto;
   margin-right: auto;
-  padding-top: ${(props) => props.theme.eui.euiSizeXL};
+  // padding-top: ${(props) => props.theme.eui.euiSizeXL};
   padding-left: ${(props) => props.theme.eui.euiSizeM};
   padding-right: ${(props) => props.theme.eui.euiSizeM};
 `;

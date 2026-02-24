@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiToolTip } from '@elastic/eui';
+import React, { useEffect, useCallback } from 'react';
+import { EuiSpacer } from '@elastic/eui';
 import { MaintenanceWindowCallout } from '@kbn/alerts-ui-shared';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { APP_UI_ID } from '../../../../../common/constants';
 import { SecurityPageName } from '../../../../app/types';
-import { SecuritySolutionLinkButton } from '../../../../common/components/links';
 import { getDetectionEngineUrl } from '../../../../common/components/link_to/redirect_to_detection_engine';
 import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
 import { useBoolState } from '../../../../common/hooks/use_bool_state';
@@ -20,26 +19,21 @@ import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { MissingDetectionsPrivilegesCallOut } from '../../../../detections/components/callouts/missing_detections_privileges_callout';
 import { MlJobCompatibilityCallout } from '../../components/ml_job_compatibility_callout';
 import { NeedAdminForUpdateRulesCallOut } from '../../../rule_management/components/callouts/need_admin_for_update_rules_callout';
-import { AddElasticRulesButton } from '../../components/pre_packaged_rules/add_elastic_rules_button';
 import { ValueListsFlyout } from '../../components/value_lists_management_flyout';
 import { useUserData } from '../../../../detections/components/user_info';
 import { useListsConfig } from '../../../../detections/containers/detection_engine/lists/use_lists_config';
 import { redirectToDetections } from '../../../common/helpers';
-import * as i18n from '../../../common/translations';
 import { AllRules } from '../../components/rules_table';
 import { RulesTableContextProvider } from '../../components/rules_table/rules_table/rules_table_context';
-import { HeaderPage } from '../../../../common/components/header_page';
 import { RuleUpdateCallouts } from '../../components/rule_update_callouts/rule_update_callouts';
 import { RuleImportModal } from '../../components/rule_import_modal/rule_import_modal';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { CreateRuleMenu } from '../../components/create_rule_menu';
 import { RuleSettingsModal } from '../../../rule_gaps/components/rule_settings_modal';
 import {
   GapAutoFillSchedulerProvider,
   useGapAutoFillSchedulerContext,
 } from '../../../rule_gaps/context/gap_auto_fill_scheduler_context';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
-import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
+import { getRulesHeaderAppActionsConfig } from '../../../../app/home/header_app_actions/rules_header_app_actions_config';
 
 const RulesPageContent = () => {
   const [isImportModalVisible, showImportModal, hideImportModal] = useBoolState();
@@ -47,6 +41,7 @@ const RulesPageContent = () => {
   const [isRuleSettingsModalOpen, openRuleSettingsModal, closeRuleSettingsModal] = useBoolState();
   const kibanaServices = useKibana().services;
   const { navigateToApp } = kibanaServices.application;
+  const chrome = kibanaServices.chrome;
 
   const [{ loading: userInfoLoading, isSignalIndexExists, isAuthenticated, hasEncryptionKey }] =
     useUserData();
@@ -61,9 +56,37 @@ const RulesPageContent = () => {
   const loading = userInfoLoading || listsConfigLoading;
   const { canAccessGapAutoFill } = useGapAutoFillSchedulerContext();
 
-  const aiRuleCreationEnabled = useIsExperimentalFeatureEnabled('aiRuleCreationEnabled');
-  const { isAgentBuilderEnabled } = useAgentBuilderAvailability();
-  const isAiRuleCreationAvailable = aiRuleCreationEnabled && isAgentBuilderEnabled;
+  const onAddElasticRules = useCallback(() => {
+    navigateToApp(APP_UI_ID, { deepLinkId: SecurityPageName.rulesAdd });
+  }, [navigateToApp]);
+
+  const onCreateRule = useCallback(() => {
+    navigateToApp(APP_UI_ID, { deepLinkId: SecurityPageName.rulesCreate });
+  }, [navigateToApp]);
+
+  useEffect(() => {
+    if (chrome?.setHeaderAppActionsConfig) {
+      chrome.setHeaderAppActionsConfig(
+        getRulesHeaderAppActionsConfig({
+          onAddElasticRules,
+          onManageValueLists: showValueListFlyout,
+          onImportRules: showImportModal,
+          onSettings: openRuleSettingsModal,
+          onCreateRule,
+        })
+      );
+      return () => {
+        chrome.setHeaderAppActionsConfig(undefined);
+      };
+    }
+  }, [
+    chrome,
+    onAddElasticRules,
+    showValueListFlyout,
+    showImportModal,
+    openRuleSettingsModal,
+    onCreateRule,
+  ]);
 
   if (
     redirectToDetections(
@@ -80,14 +103,6 @@ const RulesPageContent = () => {
     return null;
   }
 
-  // - if lists data stream does not exist and user doesn't have enough privileges to create it,
-  // lists button should be disabled
-  // - if data stream exists and user doesn't have enough privileges to create it,
-  // user still can import value lists, so button should not be disabled if user has enough other privileges
-  const cantCreateNonExistentListIndex = needsListsIndex && !canCreateListsIndex;
-  const isImportValueListDisabled =
-    cantCreateNonExistentListIndex || !canWriteListsIndex || !canEditRules || loading;
-
   return (
     <>
       <NeedAdminForUpdateRulesCallOut />
@@ -101,66 +116,7 @@ const RulesPageContent = () => {
 
       <RulesTableContextProvider>
         <SecuritySolutionPageWrapper>
-          <HeaderPage title={i18n.PAGE_TITLE}>
-            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
-              {canAccessGapAutoFill && (
-                <EuiButtonEmpty
-                  data-test-subj="rules-settings-button"
-                  iconType="gear"
-                  onClick={openRuleSettingsModal}
-                >
-                  {i18n.RULE_SETTINGS_TITLE}
-                </EuiButtonEmpty>
-              )}
-              <EuiFlexItem grow={false}>
-                <AddElasticRulesButton isDisabled={!canReadRules || loading} />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiToolTip
-                  position="top"
-                  content={
-                    cantCreateNonExistentListIndex
-                      ? i18n.UPLOAD_VALUE_LISTS_PRIVILEGES_TOOLTIP
-                      : i18n.UPLOAD_VALUE_LISTS_TOOLTIP
-                  }
-                >
-                  <EuiButtonEmpty
-                    data-test-subj="open-value-lists-modal-button"
-                    iconType="importAction"
-                    isDisabled={isImportValueListDisabled}
-                    onClick={showValueListFlyout}
-                  >
-                    {i18n.IMPORT_VALUE_LISTS}
-                  </EuiButtonEmpty>
-                </EuiToolTip>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  data-test-subj="rules-import-modal-button"
-                  iconType="importAction"
-                  isDisabled={!canEditRules || loading}
-                  onClick={showImportModal}
-                >
-                  {i18n.IMPORT_RULE}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                {isAiRuleCreationAvailable ? (
-                  <CreateRuleMenu loading={loading} isDisabled={!canEditRules || loading} />
-                ) : (
-                  <SecuritySolutionLinkButton
-                    data-test-subj="create-new-rule"
-                    fill
-                    iconType="plusInCircle"
-                    isDisabled={!canEditRules || loading}
-                    deepLinkId={SecurityPageName.rulesCreate}
-                  >
-                    {i18n.ADD_NEW_RULE}
-                  </SecuritySolutionLinkButton>
-                )}
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </HeaderPage>
+          {/* No local header: page title and actions live in the global header (overflow + add button) */}
           {isRuleSettingsModalOpen && canAccessGapAutoFill && (
             <RuleSettingsModal isOpen={isRuleSettingsModalOpen} onClose={closeRuleSettingsModal} />
           )}

@@ -62,12 +62,11 @@ const AttackDiscoveryRunSplitButton: React.FC = () => (
 export function getAttackDiscoveryHeaderAppActionsConfig(): ChromeHeaderAppActionsConfig {
   return {
     primaryActions: [
-      <AttackDiscoveryRunSplitButton key="run" />,
       <EuiButton
         key="schedule"
         css={primaryButtonCss}
         size="s"
-        color="success"
+        color="text"
         minWidth={false}
         iconType="calendar"
         onClick={noop}
@@ -81,6 +80,7 @@ export function getAttackDiscoveryHeaderAppActionsConfig(): ChromeHeaderAppActio
           defaultMessage: 'Schedule',
         })}
       </EuiButton>,
+      <AttackDiscoveryRunSplitButton key="run" />,
     ],
   };
 }

@@ -31,13 +31,13 @@ export const ContentWrapper = styled.div`
 `;
 
 interface Props {
-  restrictWidth?: number;
+  restrictWidth?: number | boolean;
   children?: React.ReactNode;
 }
 
 export const WithoutHeaderLayout: React.FC<Props> = ({ restrictWidth, children }) => (
   <Wrapper>
-    <Page restrictWidth={restrictWidth || 1200}>
+    <Page restrictWidth={restrictWidth ?? false}>
       <EuiPageBody>
         <ContentWrapper>
           <EuiSpacer size="m" />
