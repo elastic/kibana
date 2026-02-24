@@ -14,7 +14,7 @@ const STREAMS_EXPAND_ALL_BUTTON = subj('streamsExpandAllButton');
 const STREAMS_COLLAPSE_ALL_BUTTON = subj('streamsCollapseAllButton');
 const WIRED_CHILD_FIRST = subj('streamsNameLink-logs.perf_child_0001');
 const WIRED_CHILD_MIDDLE = subj('streamsNameLink-logs.perf_child_0050');
-const WIRED_HIERARCHY_COUNT = 100;
+const WIRED_HIERARCHY_COUNT = 1000;
 const WIRED_HIERARCHY_STRATEGY = 'import' as const;
 
 export const journey = new Journey({
