@@ -32,9 +32,7 @@ describe('get_npre_value route', () => {
 
     expect(routeConfig.path).toBe('/internal/cps/project_routing/{projectRoutingName}');
     expect(routeConfig.security?.authz).toEqual({
-      requiredPrivileges: [
-        'cluster:monitor/project_routing/get',
-      ],
+      requiredPrivileges: ['cluster:monitor/project_routing/get'],
     });
   });
 
