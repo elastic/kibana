@@ -44,11 +44,11 @@ export const ZendeskConnector: ConnectorSpec = {
             },
             username: {
               label: i18n.translate('core.kibanaConnectorSpecs.zendesk.auth.username.label', {
-                defaultMessage: 'Email',
+                defaultMessage: 'Username (append /token for API token)',
               }),
               helpText: i18n.translate('core.kibanaConnectorSpecs.zendesk.auth.username.helpText', {
                 defaultMessage:
-                  'Your Zendesk account email with "/token" at the end (e.g. your_email@example.com/token)',
+                  'Your Zendesk account email; add "/token" at the end for API token auth (e.g. your_email@example.com/token)',
               }),
             },
           },
