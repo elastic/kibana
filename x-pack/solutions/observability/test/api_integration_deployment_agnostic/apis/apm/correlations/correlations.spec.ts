@@ -8,8 +8,14 @@
 import { orderBy } from 'lodash';
 import expect from '@kbn/expect';
 import { CorrelationType } from '@kbn/apm-plugin/common/correlations/types';
-import type { CorrelationsResponse } from '@kbn/apm-plugin/common/correlations/types';
-import type { FailedTransactionsCorrelationsResponse } from '@kbn/apm-plugin/common/correlations/failed_transactions_correlations/types';
+import type {
+  CorrelationsResponse,
+  UnifiedCorrelation,
+} from '@kbn/apm-plugin/common/correlations/types';
+import type {
+  FailedTransactionsCorrelationsResponse,
+  FailedTransactionsCorrelation,
+} from '@kbn/apm-plugin/common/correlations/failed_transactions_correlations/types';
 import type { LatencyCorrelationsResponse } from '@kbn/apm-plugin/common/correlations/latency_correlations/types';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { ARCHIVER_ROUTES } from '../constants/archiver';
@@ -17,6 +23,22 @@ import { ARCHIVER_ROUTES } from '../constants/archiver';
 // These tests verify the unified latency correlations endpoint that consolidates
 // all the steps (overall distribution, field candidates, field value pairs, correlations)
 // into a single API call.
+
+function isFailedTransactionsCorrelation(
+  c: UnifiedCorrelation
+): c is UnifiedCorrelation & FailedTransactionsCorrelation {
+  return (
+    c.doc_count !== undefined &&
+    c.bg_count !== undefined &&
+    c.score !== undefined &&
+    c.pValue !== undefined &&
+    c.normalizedScore !== undefined &&
+    c.failurePercentage !== undefined &&
+    c.successPercentage !== undefined &&
+    c.histogram !== undefined
+  );
+}
+
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const apmApiClient = getService('apmApi');
   const esArchiver = getService('esArchiver');
@@ -209,26 +231,12 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           overallHistogram: response.overallHistogram,
           errorHistogram: response.errorHistogram,
           failedTransactionsCorrelations: response.correlations.filter(
-            (
-              c
-            ): c is typeof c & {
-              doc_count: number;
-              bg_count: number;
-              score: number;
-              pValue: number | null;
-              normalizedScore: number;
-              failurePercentage: number;
-              successPercentage: number;
-            } =>
-              c.doc_count !== undefined &&
-              c.bg_count !== undefined &&
-              c.score !== undefined &&
-              c.pValue !== undefined &&
-              c.normalizedScore !== undefined &&
-              c.failurePercentage !== undefined &&
-              c.successPercentage !== undefined
+            isFailedTransactionsCorrelation
           ),
-          fallbackResult: response.fallbackResult,
+          fallbackResult:
+            response.fallbackResult && isFailedTransactionsCorrelation(response.fallbackResult)
+              ? response.fallbackResult
+              : undefined,
         };
 
         // Identified 29 significant correlations.
