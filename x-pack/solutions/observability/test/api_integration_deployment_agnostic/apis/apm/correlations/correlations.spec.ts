@@ -33,7 +33,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     describe('transaction_duration without data', () => {
       it('handles the empty state', async () => {
         const unifiedResponse = await apmApiClient.readUser({
-          endpoint: 'POST /internal/apm/correlations' as any,
+          endpoint: 'POST /internal/apm/correlations',
           params: {
             body: {
               ...getOptions(),
@@ -61,7 +61,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     describe('error_rate without data', () => {
       it('handles the empty state', async () => {
         const unifiedResponse = await apmApiClient.readUser({
-          endpoint: 'POST /internal/apm/correlations' as any,
+          endpoint: 'POST /internal/apm/correlations',
           params: {
             body: {
               ...getOptions(),
@@ -97,7 +97,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       it('runs unified query and returns results matching legacy endpoint', async () => {
         const unifiedResponse = await apmApiClient.readUser({
-          endpoint: 'POST /internal/apm/correlations' as any,
+          endpoint: 'POST /internal/apm/correlations',
           params: {
             body: {
               ...getOptions(),
@@ -136,7 +136,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           latencyCorrelations: response.correlations.filter(
             (c): c is typeof c & { correlation: number; ksTest: number } =>
               c.correlation !== undefined && c.ksTest !== undefined
-          ) as any,
+          ),
         };
 
         // Identified 13 significant correlations out of field/value pairs.
@@ -174,7 +174,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       it('runs unified query and returns results matching legacy endpoint', async () => {
         const unifiedResponse = await apmApiClient.readUser({
-          endpoint: 'POST /internal/apm/correlations' as any,
+          endpoint: 'POST /internal/apm/correlations',
           params: {
             body: {
               ...getOptions(),
@@ -227,8 +227,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
               c.normalizedScore !== undefined &&
               c.failurePercentage !== undefined &&
               c.successPercentage !== undefined
-          ) as any,
-          fallbackResult: response.fallbackResult as any,
+          ),
+          fallbackResult: response.fallbackResult,
         };
 
         // Identified 29 significant correlations.

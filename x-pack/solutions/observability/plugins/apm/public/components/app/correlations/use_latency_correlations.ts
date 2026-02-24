@@ -59,7 +59,7 @@ export function useLatencyCorrelations() {
 
     try {
       // Single unified API call that handles all steps internally
-      const unifiedResponse = (await callApmApi('POST /internal/apm/correlations' as any, {
+      const unifiedResponse = (await callApmApi('POST /internal/apm/correlations', {
         signal: abortCtrl.current.signal,
         params: {
           body: {
