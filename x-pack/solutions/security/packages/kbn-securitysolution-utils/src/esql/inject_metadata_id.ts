@@ -72,7 +72,7 @@ function insertMetadataIdIntoFrom(query: string): string {
   const pipeIndex = query.indexOf('|');
 
   if (pipeIndex === -1) {
-    return query.trimEnd() + ' METADATA _id';
+    return `${query.trimEnd()} METADATA _id`;
   }
 
   const beforePipe = query.slice(0, pipeIndex);
@@ -80,17 +80,14 @@ function insertMetadataIdIntoFrom(query: string): string {
   const trimmed = beforePipe.trimEnd();
   const whitespace = beforePipe.slice(trimmed.length) || ' ';
 
-  return trimmed + ' METADATA _id' + whitespace + afterPipe;
+  return `${trimmed} METADATA _id${whitespace}${afterPipe}`;
 }
 
 /**
  * Appends `_id` to an existing METADATA clause that is missing it.
  */
 function appendIdToExistingMetadata(query: string): string {
-  return query.replace(
-    /\bmetadata\s+[\w_]+(?:\s*,\s*[\w_]+)*/i,
-    (match) => match + ', _id'
-  );
+  return query.replace(/\bmetadata\s+[\w_]+(?:\s*,\s*[\w_]+)*/i, (match) => `${match}, _id`);
 }
 
 /**
@@ -99,9 +96,7 @@ function appendIdToExistingMetadata(query: string): string {
  */
 function ensureKeepIncludesId(query: string): string {
   const { root } = parse(query);
-  const keepCommands = root.commands.filter(
-    (cmd): cmd is ESQLCommand => cmd.name === 'keep'
-  );
+  const keepCommands = root.commands.filter((cmd): cmd is ESQLCommand => cmd.name === 'keep');
 
   if (keepCommands.length === 0) {
     return query;
@@ -115,13 +110,10 @@ function ensureKeepIncludesId(query: string): string {
     return query;
   }
 
-  return query.replace(
-    /\bkeep\s+[\w_.*`]+(?:\s*,\s*[\w_.*`]+)*/gi,
-    (match) => {
-      if (/\b_id\b/.test(match)) {
-        return match;
-      }
-      return match + ', _id';
+  return query.replace(/\bkeep\s+[\w_.*`]+(?:\s*,\s*[\w_.*`]+)*/gi, (match) => {
+    if (/\b_id\b/.test(match)) {
+      return match;
     }
-  );
+    return `${match}, _id`;
+  });
 }

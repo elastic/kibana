@@ -147,9 +147,7 @@ describe('injectMetadataId', () => {
 
   describe('DROP _id (accepted limitation)', () => {
     it('does not modify DROP _id - accepted limitation', () => {
-      expect(injectMetadataId('FROM logs* | DROP _id')).toBe(
-        'FROM logs* METADATA _id | DROP _id'
-      );
+      expect(injectMetadataId('FROM logs* | DROP _id')).toBe('FROM logs* METADATA _id | DROP _id');
     });
 
     it('injects METADATA but does not remove explicit DROP', () => {
@@ -184,9 +182,9 @@ describe('injectMetadataId', () => {
     });
 
     it('handles query with multiple indices and metadata _index', () => {
-      expect(
-        injectMetadataId('from logs*, metrics* metadata _index | sort @timestamp')
-      ).toBe('from logs*, metrics* metadata _index, _id | sort @timestamp');
+      expect(injectMetadataId('from logs*, metrics* metadata _index | sort @timestamp')).toBe(
+        'from logs*, metrics* metadata _index, _id | sort @timestamp'
+      );
     });
 
     it('handles query used in rule mock without metadata', () => {
