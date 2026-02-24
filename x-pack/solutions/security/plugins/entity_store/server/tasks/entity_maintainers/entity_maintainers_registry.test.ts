@@ -47,6 +47,21 @@ describe('EntityMaintainersRegistry', () => {
     });
   });
 
+  describe('get', () => {
+    it('should return undefined when id was not registered', () => {
+      expect(registry.get('maintainer-a')).toBeUndefined();
+    });
+
+    it('should return the entry when id was registered', () => {
+      registry.register({ id: 'maintainer-a', interval: '5m' });
+      expect(registry.get('maintainer-a')).toEqual({
+        id: 'maintainer-a',
+        interval: '5m',
+        taskStatus: EntityMaintainerTaskStatus.NOT_STARTED,
+      });
+    });
+  });
+
   describe('hasId', () => {
     it('should return false when id was not registered', () => {
       expect(registry.hasId('maintainer-a')).toBe(false);

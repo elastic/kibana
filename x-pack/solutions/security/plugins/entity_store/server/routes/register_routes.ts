@@ -12,6 +12,7 @@ import {
   registerForceLogExtraction,
   registerUninstall,
   registerStart,
+  registerStartMaintainer,
   registerStopMaintainer,
 } from './apis';
 import type { EntityStorePluginRouter } from '../types';
@@ -23,5 +24,6 @@ export function registerRoutes(router: EntityStorePluginRouter) {
   registerUninstall(router);
   registerForceLogExtraction(router);
   registerStart(router);
+  registerStartMaintainer(router);
   registerStopMaintainer(router);
 }

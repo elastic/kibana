@@ -15,6 +15,14 @@ export class EntityMaintainersRegistry {
     return this.tasks.has(id);
   }
 
+  get(id: string): EntityMaintainerTaskEntry | void {
+    const config = this.tasks.get(id);
+    if (!config) {
+      return;
+    }
+    return { id, ...config };
+  }
+
   register({ id, interval }: Pick<EntityMaintainerTaskEntry, 'id' | 'interval'>): void {
     this.tasks.set(id, {
       interval,

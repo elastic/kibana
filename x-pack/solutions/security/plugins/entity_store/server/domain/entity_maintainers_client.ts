@@ -32,6 +32,28 @@ export class EntityMaintainersClient {
     this.namespace = deps.namespace;
   }
 
+  public async start(id: string, request: KibanaRequest): Promise<void> {
+    if (!entityMaintainersRegistry.hasId(id)) {
+      return;
+    }
+    this.logger.debug(`Starting entity maintainer task: ${id}`);
+    try {
+      const { interval } = entityMaintainersRegistry.get(id)!;
+      await scheduleEntityMaintainerTask({
+        logger: this.logger,
+        taskManager: this.taskManager,
+        id,
+        interval,
+        namespace: this.namespace,
+        request,
+      });
+      entityMaintainersRegistry.update(id, { taskStatus: EntityMaintainerTaskStatus.STARTED });
+    } catch (error) {
+      this.logger.error(`Failed to start entity maintainer task: ${id}`, { error });
+      throw error;
+    }
+  }
+
   public async startAll(request: KibanaRequest): Promise<void> {
     this.logger.debug('Starting entity maintainer tasks');
     try {
@@ -56,6 +78,9 @@ export class EntityMaintainersClient {
   }
 
   public async stop(id: string): Promise<void> {
+    if (!entityMaintainersRegistry.hasId(id)) {
+      return;
+    }
     this.logger.debug(`Stopping entity maintainer task: ${id}`);
     try {
       await stopEntityMaintainer({

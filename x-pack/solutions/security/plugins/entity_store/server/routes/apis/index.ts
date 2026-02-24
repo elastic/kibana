@@ -11,4 +11,5 @@ export { registerStatus } from './status';
 export { registerForceLogExtraction } from './force_log_extraction';
 export { registerUninstall } from './uninstall';
 export { registerStart } from './start';
+export { registerStartMaintainer } from './entity_maintainers/start';
 export { registerStopMaintainer } from './entity_maintainers/stop';
