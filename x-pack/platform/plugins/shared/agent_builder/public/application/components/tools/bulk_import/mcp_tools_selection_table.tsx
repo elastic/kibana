@@ -79,6 +79,11 @@ export const McpToolsSelectionTable: React.FC<McpToolsSelectionTableProps> = ({
     return tools.filter((tool) => selectedNames.has(tool.name));
   }, [tools, selectedTools]);
 
+  const currentPageItems = useMemo(() => {
+    const start = tablePageIndex * tablePageSize;
+    return filteredTools.slice(start, start + tablePageSize);
+  }, [filteredTools, tablePageIndex, tablePageSize]);
+
   const columns: Array<EuiBasicTableColumn<McpTool>> = useMemo(
     () => [
       {
@@ -122,9 +127,14 @@ export const McpToolsSelectionTable: React.FC<McpToolsSelectionTableProps> = ({
         isSelectAllActiveRef.current = false;
         return;
       }
-      onChange(newSelection);
+
+      // EuiInMemoryTable only reports selected items on the current page.
+      // Merge with selections from other pages to preserve cross-page state.
+      const currentPageNames = new Set(currentPageItems.map((t) => t.name));
+      const otherPageSelections = selectedMcpTools.filter((t) => !currentPageNames.has(t.name));
+      onChange([...otherPageSelections, ...newSelection]);
     },
-    [onChange, tools.length]
+    [onChange, tools.length, currentPageItems, selectedMcpTools]
   );
 
   const handleClearSelection = useCallback(() => {
