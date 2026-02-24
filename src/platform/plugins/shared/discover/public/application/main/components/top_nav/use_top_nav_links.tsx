@@ -350,6 +350,7 @@ export const useTopNavLinks = ({
                     }),
                     iconType: 'save',
                     testId: 'interactiveSaveMenuItem',
+                    disableButton: !persistedDiscoverSession,
                   },
                   {
                     run: async () => {
@@ -408,6 +409,7 @@ export const useTopNavLinks = ({
     hasUnsavedChanges,
     transitionFromDataViewToESQL,
     showCreateRuleV2,
+    persistedDiscoverSession,
   ]);
 
   return useMemo((): AppMenuConfig => {
