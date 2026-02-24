@@ -173,7 +173,7 @@ const Logo = ({
 
     return (
       <EuiHeaderLogo
-        iconType="logoElastic"
+        iconType="faceHappy"
         onClick={navigateHome}
         href={fullHref}
         css={logoCss}
