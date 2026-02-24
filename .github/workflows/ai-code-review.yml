@@ -1,0 +1,48 @@
+name: AI Code Review
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+  issues: read
+  pull-requests: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    if: >-
+      github.event.pull_request.draft == false &&
+      github.event.pull_request.user.type != 'Bot' &&
+      contains(fromJSON('["MEMBER","COLLABORATOR","CONTRIBUTOR"]'), github.event.pull_request.author_association) &&
+      !contains(github.event.pull_request.labels.*.name, 'ai:skip-review')
+    outputs:
+      run_claude: ${{ steps.labels.outputs.run_claude }}
+    steps:
+      - name: Check labels
+        id: labels
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+        with:
+          script: |
+            const labels = context.payload.pull_request.labels.map(l => l.name);
+            const all = labels.includes('ai:review-all');
+            core.setOutput('run_claude', all || labels.includes('ai:review-claude'));
+
+  review-claude:
+    needs: gate
+    if: needs.gate.outputs.run_claude == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Run Claude PR Review (Read-Only)
+        uses: elastic/ai-github-actions/claude-workflows/pr-review/ro@v0
+        with:
+          claude-oauth-token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          github-token: ${{ github.token }}
