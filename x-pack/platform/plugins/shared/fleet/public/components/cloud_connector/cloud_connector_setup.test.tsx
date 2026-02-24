@@ -17,7 +17,6 @@ import { useCloudConnectorSetup } from './hooks/use_cloud_connector_setup';
 import { TestProvider } from './test/test_provider';
 import { getMockPolicyAWS, getMockPackageInfoAWS } from './test/mock';
 import { CloudConnectorTabs } from './cloud_connector_tabs';
-import { AccountTypeSelector } from './components/account_type_selector';
 import { isCloudConnectorReusableEnabled } from './utils';
 import { CloudConnectorSetup, type CloudConnectorSetupProps } from './cloud_connector_setup';
 import { NewCloudConnectorForm } from './form/new_cloud_connector_form';
@@ -40,12 +39,6 @@ jest.mock('./cloud_connector_tabs', () => ({
   CloudConnectorTabs: jest.fn(() => <div data-testid="cloud-connector-tabs">{'MockedTabs'}</div>),
 }));
 
-jest.mock('./components/account_type_selector', () => ({
-  AccountTypeSelector: jest.fn(() => (
-    <div data-test-subj="account-type-selector">{'MockedAccountTypeSelector'}</div>
-  )),
-}));
-
 // Mock hooks
 jest.mock('./hooks/use_get_cloud_connectors');
 jest.mock('./hooks/use_cloud_connector_setup');
@@ -58,9 +51,6 @@ jest.mock('./utils', () => ({
 const mockCloudConnectorTabs = CloudConnectorTabs as jest.MockedFunction<typeof CloudConnectorTabs>;
 const mockNewCloudConnectorForm = NewCloudConnectorForm as jest.MockedFunction<
   typeof NewCloudConnectorForm
->;
-const mockAccountTypeSelector = AccountTypeSelector as jest.MockedFunction<
-  typeof AccountTypeSelector
 >;
 const mockUseGetCloudConnectors = useGetCloudConnectors as jest.MockedFunction<
   typeof useGetCloudConnectors
@@ -363,14 +353,14 @@ describe('CloudConnectorSetup', () => {
       );
     });
 
-    it('should call useGetCloudConnectors hook with default organization account type', () => {
+    it('should call useGetCloudConnectors hook with default single account type', () => {
       setupMocks([]);
 
       renderComponent();
 
       expect(mockUseGetCloudConnectors).toHaveBeenCalledWith({
         cloudProvider: AWS_PROVIDER,
-        accountType: ORGANIZATION_ACCOUNT,
+        accountType: SINGLE_ACCOUNT,
       });
     });
 
@@ -548,7 +538,7 @@ describe('CloudConnectorSetup', () => {
 
       expect(mockUseGetCloudConnectors).toHaveBeenCalledWith({
         cloudProvider: AZURE_PROVIDER,
-        accountType: ORGANIZATION_ACCOUNT,
+        accountType: SINGLE_ACCOUNT,
       });
     });
 
@@ -625,7 +615,7 @@ describe('CloudConnectorSetup', () => {
 
       expect(mockUseGetCloudConnectors).toHaveBeenCalledWith({
         cloudProvider: AWS_PROVIDER,
-        accountType: ORGANIZATION_ACCOUNT,
+        accountType: SINGLE_ACCOUNT,
       });
     });
 
@@ -729,144 +719,6 @@ describe('CloudConnectorSetup', () => {
         updatedPolicy: expect.objectContaining({
           supports_cloud_connector: true,
         }),
-      });
-    });
-  });
-
-  describe('account type selector', () => {
-    describe('visibility', () => {
-      it('should show AccountTypeSelector when accountType prop is not provided', () => {
-        setupMocks([]);
-
-        const { getByTestId } = renderComponent();
-
-        expect(getByTestId('account-type-selector')).toBeInTheDocument();
-        expect(mockAccountTypeSelector).toHaveBeenCalled();
-      });
-
-      it('should hide AccountTypeSelector when accountType prop is provided', () => {
-        setupMocks([]);
-
-        const { queryByTestId } = renderComponent({ accountType: ORGANIZATION_ACCOUNT });
-
-        expect(queryByTestId('account-type-selector')).not.toBeInTheDocument();
-      });
-
-      it('should hide AccountTypeSelector when accountType is single-account', () => {
-        setupMocks([]);
-
-        const { queryByTestId } = renderComponent({ accountType: SINGLE_ACCOUNT });
-
-        expect(queryByTestId('account-type-selector')).not.toBeInTheDocument();
-      });
-    });
-
-    describe('default behavior', () => {
-      it('should default to organization-account when no accountType prop is provided', () => {
-        setupMocks([]);
-
-        renderComponent();
-
-        // Check that useGetCloudConnectors is called with organization-account (the default)
-        expect(mockUseGetCloudConnectors).toHaveBeenCalledWith({
-          cloudProvider: AWS_PROVIDER,
-          accountType: ORGANIZATION_ACCOUNT,
-        });
-      });
-
-      it('should pass disabled=true to AccountTypeSelector on edit pages', () => {
-        setupMocks([]);
-
-        renderComponent({ isEditPage: true });
-
-        expect(mockAccountTypeSelector).toHaveBeenCalledWith(
-          expect.objectContaining({
-            disabled: true,
-          }),
-          {}
-        );
-      });
-
-      it('should pass disabled=false to AccountTypeSelector on create pages', () => {
-        setupMocks([]);
-
-        renderComponent({ isEditPage: false });
-
-        expect(mockAccountTypeSelector).toHaveBeenCalledWith(
-          expect.objectContaining({
-            disabled: false,
-          }),
-          {}
-        );
-      });
-    });
-
-    describe('effective account type usage', () => {
-      it('should use accountType prop when provided for useGetCloudConnectors', () => {
-        setupMocks([]);
-
-        renderComponent({ accountType: SINGLE_ACCOUNT });
-
-        expect(mockUseGetCloudConnectors).toHaveBeenCalledWith({
-          cloudProvider: AWS_PROVIDER,
-          accountType: SINGLE_ACCOUNT,
-        });
-      });
-
-      it('should pass accountType to NewCloudConnectorForm when reusable feature is disabled', () => {
-        mockIsCloudConnectorReusableEnabled.mockReturnValue(false);
-        setupMocks([]);
-
-        renderComponent({ accountType: SINGLE_ACCOUNT });
-
-        expect(mockNewCloudConnectorForm).toHaveBeenCalledWith(
-          expect.objectContaining({
-            accountType: SINGLE_ACCOUNT,
-          }),
-          {}
-        );
-      });
-
-      it('should pass effectiveAccountType (default organization) to NewCloudConnectorForm when no prop', () => {
-        mockIsCloudConnectorReusableEnabled.mockReturnValue(false);
-        setupMocks([]);
-
-        renderComponent();
-
-        expect(mockNewCloudConnectorForm).toHaveBeenCalledWith(
-          expect.objectContaining({
-            accountType: ORGANIZATION_ACCOUNT,
-          }),
-          {}
-        );
-      });
-    });
-
-    describe('account type selector interaction', () => {
-      it('should pass onChange callback to AccountTypeSelector', () => {
-        setupMocks([]);
-
-        renderComponent();
-
-        expect(mockAccountTypeSelector).toHaveBeenCalledWith(
-          expect.objectContaining({
-            onChange: expect.any(Function),
-          }),
-          {}
-        );
-      });
-
-      it('should pass selectedAccountType to AccountTypeSelector', () => {
-        setupMocks([]);
-
-        renderComponent();
-
-        expect(mockAccountTypeSelector).toHaveBeenCalledWith(
-          expect.objectContaining({
-            selectedAccountType: ORGANIZATION_ACCOUNT,
-          }),
-          {}
-        );
       });
     });
   });
