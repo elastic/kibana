@@ -16,6 +16,8 @@ export interface NotificationPolicyResponse {
   matcher?: string;
   group_by?: string[];
   throttle?: { interval: string };
+  apiKeyOwner: string;
+  apiKeyCreatedByUser: boolean;
   createdBy: string | null;
   createdAt: string;
   updatedBy: string | null;

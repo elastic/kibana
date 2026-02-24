@@ -12,6 +12,7 @@ import { registerFeaturePrivileges } from '../lib/security/privileges';
 import { registerSavedObjects } from '../saved_objects';
 import { TaskDefinition } from '../lib/services/task_run_scope_service/create_task_runner';
 import type { PluginConfig } from '../config';
+import type { AlertingServerSetupDependencies } from '../types';
 
 export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
   bind(OnSetup).toConstantValue((container) => {
@@ -22,6 +23,11 @@ export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
 
     registerSavedObjects({
       savedObjects: container.get(CoreSetup('savedObjects')),
+      encryptedSavedObjects: container.get(
+        PluginSetup<AlertingServerSetupDependencies['encryptedSavedObjects']>(
+          'encryptedSavedObjects'
+        )
+      ),
       logger,
     });
 

@@ -32,6 +32,7 @@ import { BasicTransitionStrategy } from '../lib/director/strategies/basic_strate
 import { CountTimeframeStrategy } from '../lib/director/strategies/count_timeframe_strategy';
 import { ResourceManager } from '../lib/services/resource_service/resource_manager';
 import { UserService } from '../lib/services/user_service/user_service';
+import { ApiKeyService } from '../lib/services/api_key_service/api_key_service';
 import { TransitionStrategyToken } from '../lib/director/strategies/types';
 import { TransitionStrategyFactory } from '../lib/director/strategies/strategy_resolver';
 import {
@@ -44,6 +45,7 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(RulesClient).toSelf().inRequestScope();
   bind(NotificationPolicyClient).toSelf().inRequestScope();
   bind(UserService).toSelf().inRequestScope();
+  bind(ApiKeyService).toSelf().inRequestScope();
   bind(AlertingRetryService).toSelf().inSingletonScope();
   bind(RetryServiceToken).toService(AlertingRetryService);
 

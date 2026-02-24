@@ -28,6 +28,10 @@ export const notificationPolicySavedObjectAttributesSchema = schema.object({
       interval: schema.string(),
     })
   ),
+  apiKey: schema.maybe(schema.string()),
+  uiamApiKey: schema.maybe(schema.nullable(schema.string())),
+  apiKeyOwner: schema.string(),
+  apiKeyCreatedByUser: schema.boolean(),
   createdBy: schema.nullable(schema.string()),
   updatedBy: schema.nullable(schema.string()),
   createdAt: schema.string(),

@@ -14,7 +14,8 @@
       "features",
       "spaces",
       "data",
-      "security"
+      "security",
+      "encryptedSavedObjects"
     ],
     "optionalPlugins": ["management"],
     "extraPublicDirs": []

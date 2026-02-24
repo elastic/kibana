@@ -15,14 +15,19 @@ import type { NotificationPolicySavedObjectServiceContract } from '../services/n
 import { NotificationPolicySavedObjectService } from '../services/notification_policy_saved_object_service/notification_policy_saved_object_service';
 import type { UserServiceContract } from '../services/user_service/user_service';
 import { UserService } from '../services/user_service/user_service';
+import type { ApiKeyServiceContract } from '../services/api_key_service/api_key_service';
+import { ApiKeyService } from '../services/api_key_service/api_key_service';
 import type { CreateNotificationPolicyParams, UpdateNotificationPolicyParams } from './types';
+
+const API_KEY_FIELDS = ['apiKey', 'uiamApiKey'] as const;
 
 @injectable()
 export class NotificationPolicyClient {
   constructor(
     @inject(NotificationPolicySavedObjectService)
     private readonly notificationPolicySavedObjectService: NotificationPolicySavedObjectServiceContract,
-    @inject(UserService) private readonly userService: UserServiceContract
+    @inject(UserService) private readonly userService: UserServiceContract,
+    @inject(ApiKeyService) private readonly apiKeyService: ApiKeyServiceContract
   ) {}
 
   public async createNotificationPolicy(
@@ -31,8 +36,11 @@ export class NotificationPolicyClient {
     const userProfileUid = await this.getUserProfileUid();
     const now = new Date().toISOString();
 
+    const apiKeyAttrs = await this.apiKeyService.create(`Notification Policy: ${params.data.name}`);
+
     const attributes: NotificationPolicySavedObjectAttributes = {
       ...params.data,
+      ...apiKeyAttrs,
       createdBy: userProfileUid,
       createdAt: now,
       updatedBy: userProfileUid,
@@ -45,7 +53,7 @@ export class NotificationPolicyClient {
         id: params.options?.id,
       });
 
-      return { id, version, ...attributes };
+      return { id, version, ...omit(attributes, API_KEY_FIELDS) };
     } catch (e) {
       if (SavedObjectsErrorHelpers.isConflictError(e)) {
         const conflictId = params.options?.id ?? 'unknown';
@@ -58,7 +66,7 @@ export class NotificationPolicyClient {
   public async getNotificationPolicy({ id }: { id: string }): Promise<NotificationPolicyResponse> {
     try {
       const doc = await this.notificationPolicySavedObjectService.get(id);
-      return { id, version: doc.version, ...doc.attributes };
+      return { id, version: doc.version, ...omit(doc.attributes, API_KEY_FIELDS) };
     } catch (e) {
       if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
         throw Boom.notFound(`Notification policy with id "${id}" not found`);
@@ -83,7 +91,7 @@ export class NotificationPolicyClient {
         return [];
       }
 
-      return [{ id: doc.id, version: doc.version, ...doc.attributes }];
+      return [{ id: doc.id, version: doc.version, ...omit(doc.attributes, API_KEY_FIELDS) }];
     });
   }
 
@@ -93,15 +101,16 @@ export class NotificationPolicyClient {
     const userProfileUid = await this.getUserProfileUid();
     const now = new Date().toISOString();
 
-    const existingNotificationPolicy = await this.getNotificationPolicy({ id: params.options.id });
-    const existingAttrs: NotificationPolicySavedObjectAttributes = omit(
-      existingNotificationPolicy,
-      ['id', 'version']
-    );
+    const existingDoc = await this.fetchRawNotificationPolicy(params.options.id);
+    const existingAttrs = existingDoc.attributes;
+
+    const policyName = params.data.name ?? existingAttrs.name;
+    const apiKeyAttrs = await this.apiKeyService.create(`Notification Policy: ${policyName}`);
 
     const nextAttrs: NotificationPolicySavedObjectAttributes = {
       ...existingAttrs,
       ...params.data,
+      ...apiKeyAttrs,
       updatedBy: userProfileUid,
       updatedAt: now,
     };
@@ -113,7 +122,11 @@ export class NotificationPolicyClient {
         version: params.options.version,
       });
 
-      return { id: params.options.id, version: updated.version, ...nextAttrs };
+      return {
+        id: params.options.id,
+        version: updated.version,
+        ...omit(nextAttrs, API_KEY_FIELDS),
+      };
     } catch (e) {
       if (SavedObjectsErrorHelpers.isConflictError(e)) {
         throw Boom.conflict(
@@ -127,6 +140,21 @@ export class NotificationPolicyClient {
   public async deleteNotificationPolicy({ id }: { id: string }): Promise<void> {
     await this.getNotificationPolicy({ id });
     await this.notificationPolicySavedObjectService.delete({ id });
+  }
+
+  private async fetchRawNotificationPolicy(id: string): Promise<{
+    attributes: NotificationPolicySavedObjectAttributes;
+    version?: string;
+  }> {
+    try {
+      const doc = await this.notificationPolicySavedObjectService.get(id);
+      return { attributes: doc.attributes, version: doc.version };
+    } catch (e) {
+      if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
+        throw Boom.notFound(`Notification policy with id "${id}" not found`);
+      }
+      throw e;
+    }
   }
 
   private async getUserProfileUid(): Promise<string | null> {
