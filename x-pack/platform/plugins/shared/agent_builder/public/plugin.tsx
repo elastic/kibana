@@ -14,7 +14,6 @@ import {
 import type { Logger } from '@kbn/logging';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import { registerLocators } from './locator/register_locators';
 import { registerAnalytics, registerApp } from './register';
 import { AgentBuilderNavControlInitiator } from './components/nav_control/lazy_agent_builder_nav_control';
@@ -125,7 +124,7 @@ export class AgentBuilderPlugin
     const attachmentsService = new AttachmentsService();
 
     attachmentsService.addAttachmentType(
-      AttachmentType.visualization,
+      'visualization',
       createVisualizationAttachmentDefinition({ startDependencies })
     );
 
