@@ -36,6 +36,7 @@ and integrations > APIs > Zendesk API). For API token auth, the username must be
 | **search** | Search across Zendesk (tickets, users, organizations). Parameters: `query` (required), `sortBy`, `sortOrder`, `page`, `perPage`. |
 | **listTickets** | List tickets with pagination. Parameters: `page`, `perPage`. |
 | **getTicket** | Get full details of a single ticket by ID. Parameters: `ticketId`. |
+| **getTicketComments** | List comments on a ticket. Parameters: `ticketId` (required), `page`, `perPage`, `include`, `includeInlineImages`. |
 
 ## Get API credentials [zendesk-api-credentials]
 

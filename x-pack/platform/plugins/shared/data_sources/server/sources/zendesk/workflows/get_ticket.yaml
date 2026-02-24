@@ -1,6 +1,8 @@
 version: '1'
 name: 'sources.zendesk.get_ticket'
-description: 'Get full details of a single Zendesk ticket by ID. Use when you have a ticket ID and need the complete record including comments and metadata.'
+description: |
+  Get details of a single Zendesk ticket by ID. Use when you have a ticket ID and need the complete record
+  including comment count and metadata.
 tags: ['agent-builder-tool']
 enabled: true
 triggers:

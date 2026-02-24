@@ -15,14 +15,14 @@ inputs:
   - name: sort_by
     type: string
     required: false
-    description: 'Sort field (e.g. updated_at, created_at, priority, status, ticket_type).  Default is unsorted.'
+    description: 'Sort field (e.g. updated_at, created_at, priority, status, ticket_type, relevance).  Default is relevance.'
   - name: sort_order
     type: choice
     options:
       - asc
       - desc
     required: false
-    description: 'Sort order, unsorted is the default.'
+    description: 'Sort order, desc is the default.'
   - name: page
     type: number
     required: false

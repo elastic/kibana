@@ -81,7 +81,6 @@ export const ZendeskConnector: ConnectorSpec = {
 
   actions: {
     search: {
-      isTool: false,
       input: z.object({
         query: z.string(),
         sortBy: z.string().optional(),
@@ -104,7 +103,6 @@ export const ZendeskConnector: ConnectorSpec = {
     },
 
     listTickets: {
-      isTool: false,
       input: z.object({
         page: z.number().optional(),
         perPage: z.number().optional(),
@@ -120,13 +118,38 @@ export const ZendeskConnector: ConnectorSpec = {
     },
 
     getTicket: {
-      isTool: false,
       input: z.object({
         ticketId: z.string(),
       }),
       handler: async (ctx, input) => {
         const baseUrl = buildBaseUrl(ctx);
-        const response = await ctx.client.get(`${baseUrl}/tickets/${input.ticketId}.json`);
+        const response = await ctx.client.get(`${baseUrl}/tickets/${input.ticketId}.json`, {
+          params: { include: 'comment_count' },
+        });
+        return response.data;
+      },
+    },
+
+    getTicketComments: {
+      input: z.object({
+        ticketId: z.string(),
+        page: z.number().optional(),
+        perPage: z.number().optional(),
+        include: z.string().optional(),
+        includeInlineImages: z.boolean().optional(),
+      }),
+      handler: async (ctx, input) => {
+        const baseUrl = buildBaseUrl(ctx);
+        const params: Record<string, string | number | boolean | undefined> = {};
+        if (input.page !== undefined && input.page !== null) params.page = input.page;
+        if (input.perPage !== undefined && input.perPage !== null) params.per_page = input.perPage;
+        if (input.include) params.include = input.include;
+        if (input.includeInlineImages !== undefined)
+          params.include_inline_images = input.includeInlineImages;
+        const response = await ctx.client.get(
+          `${baseUrl}/tickets/${input.ticketId}/comments.json`,
+          { params }
+        );
         return response.data;
       },
     },
