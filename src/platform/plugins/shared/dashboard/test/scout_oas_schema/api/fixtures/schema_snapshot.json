@@ -23,6 +23,50 @@
     "type": "object",
     "description": "Synthetics stats overview embeddable schema",
     "properties": {
+      "description": {
+        "type": "string"
+      },
+      "hide_title": {
+        "type": "boolean"
+      },
+      "title": {
+        "type": "string"
+      },
+      "drilldowns": {
+        "type": "array",
+        "maxItems": 100,
+        "items": {
+          "type": "object",
+          "properties": {
+            "encode_url": {
+              "type": "boolean",
+              "description": "When true, URL is escaped using percent encoding",
+              "default": true
+            },
+            "open_in_new_tab": {
+              "type": "boolean",
+              "default": true
+            },
+            "url": {
+              "type": "string",
+              "description": "Templated Url. Variables documented at https://www.elastic.co/docs/explore-analyze/dashboards/drilldowns#url-template-variable"
+            },
+            "label": {
+              "type": "string"
+            },
+            "trigger": {
+              "type": "string",
+              "enum": ["on_open_panel_menu"]
+            },
+            "type": {
+              "type": "string",
+              "enum": ["url_drilldown"]
+            }
+          },
+          "additionalProperties": false,
+          "required": ["url", "label", "trigger", "type"]
+        }
+      },
       "filters": {
         "type": "object",
         "properties": {
@@ -128,50 +172,6 @@
           }
         },
         "additionalProperties": false
-      },
-      "description": {
-        "type": "string"
-      },
-      "hide_title": {
-        "type": "boolean"
-      },
-      "title": {
-        "type": "string"
-      },
-      "drilldowns": {
-        "type": "array",
-        "maxItems": 100,
-        "items": {
-          "type": "object",
-          "properties": {
-            "encode_url": {
-              "type": "boolean",
-              "description": "When true, URL is escaped using percent encoding",
-              "default": true
-            },
-            "open_in_new_tab": {
-              "type": "boolean",
-              "default": true
-            },
-            "url": {
-              "type": "string",
-              "description": "Templated Url. Variables documented at https://www.elastic.co/docs/explore-analyze/dashboards/drilldowns#url-template-variable"
-            },
-            "label": {
-              "type": "string"
-            },
-            "trigger": {
-              "type": "string",
-              "enum": ["CONTEXT_MENU_TRIGGER"]
-            },
-            "type": {
-              "type": "string",
-              "enum": ["url_drilldown"]
-            }
-          },
-          "additionalProperties": false,
-          "required": ["url", "label", "trigger", "type"]
-        }
       }
     },
     "additionalProperties": false
