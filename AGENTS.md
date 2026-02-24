@@ -14,14 +14,8 @@
 - Utility scripts live in `scripts/` (e.g., `node scripts/generate.js`).
 - If a user correction contradicts this doc or any skills you followed, or missing guidance caused avoidable work, submit DevEx feedback: `echo "..." | scripts/devex_feedback.sh` (include the gap and suggested fix).
 
-
-## Critical Thinking
-- Fix root cause (not band-aid).
-- Unsure: read more code; if still stuck, ask w/ short options. Never guess.
-- Conflicts: call out; pick safer path.
-
 ## Testing
-After any changes, run `node scripts/check_changes.ts
+Always run `node scripts/check_changes.ts` to validate your changes
 
 ### Jest unit
 `yarn test:jest [--config=<pathToConfigFile>] [TestPathPattern]`
@@ -86,6 +80,8 @@ Follow existing patterns in the target area first; below are common defaults.
 - Use `@elastic/eui` components with Emotion (`@emotion/react`) for styling.
 
 ## Contribution Hygiene
+- Unsure: read more code; if still stuck, ask w/ short options. Never guess.
+- Fix root cause (not band-aid).
 - Make focused changes; avoid unrelated refactors.
 - Update docs and tests when behavior or usage changes.
 - Never remove, skip, or comment out tests to make them pass; fix the underlying code.

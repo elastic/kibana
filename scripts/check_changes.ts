@@ -7,5 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// Fast local confidence gate: run quick checks on current pending local changes
+// to address failures before PR CI.
 process.argv.push('--ref', 'HEAD', '--include-untracked');
 require('./precommit_hook');
