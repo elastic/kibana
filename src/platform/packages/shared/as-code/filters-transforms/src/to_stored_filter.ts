@@ -137,15 +137,15 @@ function convertFromSimpleCondition(
 
   const shouldNegate = resolveNegate(baseNegate, condition.negate);
 
-  // Always set meta.negate so filter editor can match operator (getOperatorFromFilter checks meta.negate === operator.negate)
-  const metaWithNegate = { ...baseMeta, negate: shouldNegate };
-
   // EXISTS
   if (condition.operator === ASCODE_FILTER_OPERATOR.EXISTS) {
     return {
       ...baseStored,
       query: { exists: { field: condition.field } },
-      meta: metaWithNegate,
+      meta: {
+        ...baseMeta,
+        ...(shouldNegate ? { negate: true } : {}),
+      },
     };
   }
 
@@ -159,8 +159,9 @@ function convertFromSimpleCondition(
         },
       },
       meta: {
-        ...metaWithNegate,
+        ...baseMeta,
         params: { query: condition.value },
+        ...(shouldNegate ? { negate: true } : {}),
       },
     };
   }
@@ -180,11 +181,12 @@ function convertFromSimpleCondition(
         },
       },
       meta: {
-        ...metaWithNegate,
+        ...baseMeta,
         type: 'phrases',
         key: condition.field,
         field: condition.field,
         params: condition.value,
+        ...(shouldNegate ? { negate: true } : {}),
       },
     };
   }
@@ -207,8 +209,9 @@ function convertFromSimpleCondition(
       ...baseStored,
       query: { range: { [condition.field]: rangeQuery } },
       meta: {
-        ...metaWithNegate,
+        ...baseMeta,
         params: rangeQuery,
+        ...(shouldNegate ? { negate: true } : {}),
       },
     };
   }

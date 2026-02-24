@@ -46,7 +46,9 @@ export function getOperatorFromFilter(filter: Filter) {
     if (isRangeFilter(filter)) {
       return getRangeOperatorFromFilter(filter) === operator.id;
     }
-    return filter.meta.type === operator.type && filter.meta.negate === operator.negate;
+    // Treat missing meta.negate as false so stored filters without negate (e.g. from toStoredFilter) still match
+    const negate = filter.meta.negate ?? false;
+    return filter.meta.type === operator.type && negate === operator.negate;
   });
 }
 
