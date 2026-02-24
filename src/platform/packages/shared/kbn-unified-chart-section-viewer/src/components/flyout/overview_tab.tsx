@@ -11,18 +11,23 @@ import {
   EuiBadge,
   EuiText,
   EuiSpacer,
-  EuiDescriptionList,
   EuiListGroup,
   EuiTablePagination,
   EuiToken,
   useEuiTheme,
+  EuiPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import useWindowSize from 'react-use/lib/useWindowSize';
 import type { MetricField, Dimension } from '../../types';
 import { getUnitLabel } from '../../common/utils';
 import { TabTitleAndDescription } from './tab_title_and_description';
+import { calculateFlyoutContentHeight, DEFAULT_MARGIN_BOTTOM } from './get_height';
+
 interface OverviewTabProps {
   metric: MetricField;
   description?: string;
@@ -34,6 +39,7 @@ export const OverviewTab = ({ metric, description }: OverviewTabProps) => {
   const { euiTheme } = useEuiTheme();
   const [activePage, setActivePage] = useState(0);
   const [itemsPerPage, setItemsPerPage] = useState(DEFAULT_PAGINATION_SIZE);
+  const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
 
   const unitLabel = useMemo(() => getUnitLabel({ unit: metric.unit }), [metric.unit]);
 
@@ -69,105 +75,137 @@ export const OverviewTab = ({ metric, description }: OverviewTabProps) => {
     []
   );
 
-  // Create list items from dimensions
-  const dimensionListItems = paginatedDimensions.map((dimension: Dimension) => {
-    const hasIcon = iconMap.has(dimension.type);
-    return {
+  // Helper function to create description list items
+  const createDescriptionListItem = useCallback(
+    (title: string, value: React.ReactNode, dataTestSubj?: string) => ({
       label: (
-        <div style={{ display: 'flex', alignItems: 'center', gap: euiTheme.size.xs }}>
-          {hasIcon && <EuiToken iconType={iconMap.get(dimension.type)!} size="s" />}
-          <EuiText size="s">{dimension.name}</EuiText>
-          {!hasIcon && (
-            <EuiBadge color="hollow" style={{ marginLeft: euiTheme.size.xs }}>
-              {dimension.type}
-            </EuiBadge>
-          )}
+        <EuiFlexGroup alignItems="center" gutterSize="s" data-test-subj={dataTestSubj}>
+          <EuiFlexItem
+            grow={false}
+            css={css`
+              min-width: ${euiTheme.base * 11.25}px;
+            `}
+          >
+            <EuiText size="xs">
+              <strong>{title}</strong>
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>{value}</EuiFlexItem>
+        </EuiFlexGroup>
+      ),
+    }),
+    [euiTheme.base]
+  );
+
+  // Create description list items
+  const descriptionListItems = useMemo(
+    () => [
+      createDescriptionListItem(
+        i18n.translate('metricsExperience.overviewTab.strong.dataStreamLabel', {
+          defaultMessage: 'Data stream',
+        }),
+        <EuiText color="primary" size="s">
+          {metric.index}
+        </EuiText>
+      ),
+      createDescriptionListItem(
+        i18n.translate('metricsExperience.overviewTab.strong.fieldTypeLabel', {
+          defaultMessage: 'Field type',
+        }),
+        <div>
+          <EuiBadge>{metric.type}</EuiBadge>
         </div>
       ),
-    };
-  });
+      ...(unitLabel
+        ? [
+            createDescriptionListItem(
+              i18n.translate('metricsExperience.overviewTab.strong.metricUnitLabel', {
+                defaultMessage: 'Metric unit',
+              }),
+              <EuiBadge>{unitLabel}</EuiBadge>,
+              'metricsExperienceFlyoutOverviewTabMetricUnitLabel'
+            ),
+          ]
+        : []),
+      ...(metric.instrument
+        ? [
+            createDescriptionListItem(
+              i18n.translate('metricsExperience.overviewTab.strong.metricTypeLabel', {
+                defaultMessage: 'Metric type',
+              }),
+              <div>
+                <EuiBadge>{metric.instrument}</EuiBadge>
+              </div>,
+              'metricsExperienceFlyoutOverviewTabMetricTypeLabel'
+            ),
+          ]
+        : []),
+    ],
+    [metric.index, metric.type, metric.instrument, unitLabel, createDescriptionListItem]
+  );
+
+  useWindowSize(); // trigger re-render on window resize to recalculate the container height
+
+  const containerHeight = containerRef
+    ? calculateFlyoutContentHeight(containerRef, DEFAULT_MARGIN_BOTTOM)
+    : 0;
+
+  // Create list items from dimensions
+  const dimensionListItems = useMemo(
+    () =>
+      paginatedDimensions.map((dimension: Dimension) => {
+        const hasIcon = iconMap.has(dimension.type);
+        return {
+          label: (
+            <EuiFlexGroup alignItems="center" gutterSize="s">
+              {hasIcon && (
+                <EuiFlexItem grow={false}>
+                  <EuiToken iconType={iconMap.get(dimension.type) ?? ''} size="s" />
+                </EuiFlexItem>
+              )}
+              <EuiFlexItem grow={false}>
+                <EuiText size="s">{dimension.name}</EuiText>
+              </EuiFlexItem>
+              {!hasIcon && (
+                <EuiFlexItem grow={false}>
+                  <EuiBadge color="hollow">{dimension.type}</EuiBadge>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          ),
+        };
+      }),
+    [paginatedDimensions, iconMap]
+  );
 
   return (
     <>
       <TabTitleAndDescription metric={metric} description={description} />
 
-      <EuiDescriptionList
-        compressed
-        rowGutterSize="m"
-        data-test-subj="metricsExperienceFlyoutOverviewTabDescriptionList"
-        listItems={[
-          {
-            title: (
-              <EuiText size="s">
-                <strong>
-                  {i18n.translate('metricsExperience.overviewTab.strong.dataStreamLabel', {
-                    defaultMessage: 'Data stream',
-                  })}
-                </strong>
-              </EuiText>
-            ),
-            description: (
-              <EuiText color="primary" size="s">
-                {metric.index}
-              </EuiText>
-            ),
-          },
-          {
-            title: (
-              <EuiText size="s">
-                <strong>
-                  {i18n.translate('metricsExperience.overviewTab.strong.fieldTypeLabel', {
-                    defaultMessage: 'Field type',
-                  })}
-                </strong>
-                <EuiSpacer size="xs" />
-              </EuiText>
-            ),
-            description: <EuiBadge>{metric.type}</EuiBadge>,
-          },
-          ...(unitLabel
-            ? [
-                {
-                  title: (
-                    <EuiText
-                      size="s"
-                      data-test-subj="metricsExperienceFlyoutOverviewTabMetricUnitLabel"
-                    >
-                      <strong>
-                        {i18n.translate('metricsExperience.overviewTab.strong.metricUnitLabel', {
-                          defaultMessage: 'Metric unit',
-                        })}
-                      </strong>
-                      <EuiSpacer size="xs" />
-                    </EuiText>
-                  ),
-                  description: <EuiBadge>{unitLabel}</EuiBadge>,
-                },
-              ]
-            : []),
-          ...(metric.instrument
-            ? [
-                {
-                  title: (
-                    <EuiText
-                      size="s"
-                      data-test-subj="metricsExperienceFlyoutOverviewTabMetricTypeLabel"
-                    >
-                      <strong>
-                        {i18n.translate('metricsExperience.overviewTab.strong.metricTypeLabel', {
-                          defaultMessage: 'Metric type',
-                        })}
-                      </strong>
-                      <EuiSpacer size="xs" />
-                    </EuiText>
-                  ),
-                  description: <EuiBadge>{metric.instrument}</EuiBadge>,
-                },
-              ]
-            : []),
-        ]}
-      />
-
+      <EuiPanel
+        hasShadow={false}
+        hasBorder
+        css={css`
+          padding: ${euiTheme.size.xs} ${euiTheme.size.m};
+        `}
+      >
+        <EuiListGroup
+          data-test-subj="metricsExperienceFlyoutOverviewTabDescriptionList"
+          listItems={descriptionListItems}
+          flush
+          gutterSize="none"
+          wrapText={false}
+          maxWidth={false}
+          css={css`
+            .euiListGroupItem:not(:last-child) {
+              border-bottom: ${euiTheme.border.thin};
+            }
+            .euiListGroupItem__text {
+              padding: ${euiTheme.size.s} ${euiTheme.size.xs};
+            }
+          `}
+        />
+      </EuiPanel>
       {metric.dimensions && metric.dimensions.length > 0 && (
         <>
           <EuiSpacer size="m" />
@@ -178,52 +216,101 @@ export const OverviewTab = ({ metric, description }: OverviewTabProps) => {
               })}
             </strong>
           </EuiText>
-          <div className="euiScreenReaderOnly" aria-live="assertive" aria-atomic="true">
-            {i18n.translate('metricsExperience.overviewTab.dimensionsAnnouncement', {
-              defaultMessage: 'Showing {count} dimensions on page {page} of {total}. {dimensions}',
-              values: {
-                count: paginatedDimensions.length,
-                page: activePage + 1,
-                total: pageCount,
-                dimensions: paginatedDimensions.map((d) => `${d.name}`).join('. '),
-              },
-            })}
-          </div>
-          <EuiListGroup
-            data-test-subj="metricsExperienceFlyoutOverviewTabDimensionsList"
-            listItems={dimensionListItems}
-            flush
-            gutterSize="s"
-            wrapText={false}
-            css={css`
-              .euiListGroupItem__text {
-                padding-inline: 0;
-                min-block-size: ${euiTheme.size.base};
-              }
-              gap: 0px;
-            `}
-          />
           <EuiSpacer size="s" />
-          {sortedDimensions.length >= DEFAULT_PAGINATION_SIZE && (
-            <EuiTablePagination
-              data-test-subj="metricsExperienceFlyoutOverviewTabDimensionsPagination"
-              aria-label={i18n.translate(
-                'metricsExperience.overviewTab.dimensionsPaginationLabel',
-                {
-                  defaultMessage: 'Dimensions pagination',
-                }
-              )}
-              pageCount={pageCount}
-              activePage={activePage}
-              onChangePage={setActivePage}
-              itemsPerPage={itemsPerPage}
-              onChangeItemsPerPage={(newItemsPerPage) => {
-                setItemsPerPage(newItemsPerPage);
-                setActivePage(0);
-              }}
-              itemsPerPageOptions={[0, 10, 20, 50]}
-            />
-          )}
+          <div ref={setContainerRef}>
+            <EuiPanel
+              hasShadow={false}
+              hasBorder
+              paddingSize="none"
+              css={css`
+                padding: ${euiTheme.size.xs} ${euiTheme.size.m};
+                ${containerHeight
+                  ? css`
+                      height: ${containerHeight}px;
+                    `
+                  : css`
+                      max-height: 400px;
+                    `}
+                display: flex;
+                flex-direction: column;
+              `}
+            >
+              <div className="euiScreenReaderOnly" aria-live="assertive" aria-atomic="true">
+                {i18n.translate('metricsExperience.overviewTab.dimensionsAnnouncement', {
+                  defaultMessage:
+                    'Showing {count} dimensions on page {page} of {total}. {dimensions}',
+                  values: {
+                    count: paginatedDimensions.length,
+                    page: activePage + 1,
+                    total: pageCount,
+                    dimensions: paginatedDimensions.map((d) => `${d.name}`).join('. '),
+                  },
+                })}
+              </div>
+              <EuiFlexGroup
+                direction="column"
+                gutterSize="none"
+                css={css`
+                  flex: 1;
+                  min-height: 0;
+                `}
+              >
+                <EuiFlexItem
+                  grow={true}
+                  css={css`
+                    overflow-y: auto;
+                    overflow-x: hidden;
+                    min-height: 0;
+                  `}
+                >
+                  <EuiListGroup
+                    data-test-subj="metricsExperienceFlyoutOverviewTabDimensionsList"
+                    listItems={dimensionListItems}
+                    flush
+                    gutterSize="none"
+                    wrapText={false}
+                    maxWidth={false}
+                    css={css`
+                      .euiListGroupItem {
+                        border-bottom: ${euiTheme.border.thin};
+                      }
+                      .euiListGroupItem__text {
+                        padding: ${euiTheme.size.s} ${euiTheme.size.xs};
+                      }
+                    `}
+                  />
+                </EuiFlexItem>
+                {sortedDimensions.length >= DEFAULT_PAGINATION_SIZE && (
+                  <EuiFlexItem
+                    grow={false}
+                    css={css`
+                      padding-top: ${euiTheme.size.s};
+                      border-top: ${euiTheme.border.thin};
+                    `}
+                  >
+                    <EuiTablePagination
+                      data-test-subj="metricsExperienceFlyoutOverviewTabDimensionsPagination"
+                      aria-label={i18n.translate(
+                        'metricsExperience.overviewTab.dimensionsPaginationLabel',
+                        {
+                          defaultMessage: 'Dimensions pagination',
+                        }
+                      )}
+                      pageCount={pageCount}
+                      activePage={activePage}
+                      onChangePage={setActivePage}
+                      itemsPerPage={itemsPerPage}
+                      onChangeItemsPerPage={(newItemsPerPage) => {
+                        setItemsPerPage(newItemsPerPage);
+                        setActivePage(0);
+                      }}
+                      itemsPerPageOptions={[0, 10, 20, 50]}
+                    />
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
+            </EuiPanel>
+          </div>
         </>
       )}
     </>
