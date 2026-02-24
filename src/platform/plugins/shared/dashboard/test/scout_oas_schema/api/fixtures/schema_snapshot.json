@@ -113,7 +113,7 @@
           "monitor_ids": {
             "type": "array",
             "description": "Filter by monitor IDs",
-            "maxItems": 1000,
+            "maxItems": 5000,
             "items": {
               "type": "object",
               "properties": {
@@ -226,7 +226,7 @@
           "monitor_ids": {
             "type": "array",
             "description": "Filter by monitor IDs",
-            "maxItems": 1000,
+            "maxItems": 5000,
             "items": {
               "type": "object",
               "properties": {
