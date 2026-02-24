@@ -27,7 +27,11 @@ const DateText = styled(EuiText)`
 `;
 
 export const CertStatus: React.FC<Props> = ({ cert, expiryThreshold, ageThreshold }) => {
-  const certStatus = useCertStatus({ expiryThreshold, ageThreshold }, cert?.not_after, cert?.not_before);
+  const certStatus = useCertStatus(
+    { expiryThreshold, ageThreshold },
+    cert?.not_after,
+    cert?.not_before
+  );
 
   const relativeDate = moment(cert?.not_after).fromNow();
 

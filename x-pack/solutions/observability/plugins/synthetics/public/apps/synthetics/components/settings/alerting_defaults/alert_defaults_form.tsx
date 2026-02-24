@@ -179,10 +179,7 @@ export const AlertDefaultsForm = () => {
           />
         }
       >
-        <EuiFormRow
-          label={CERT_EXPIRATION_LABEL}
-          helpText={CERT_EXPIRATION_HELP}
-        >
+        <EuiFormRow label={CERT_EXPIRATION_LABEL} helpText={CERT_EXPIRATION_HELP}>
           <EuiFieldNumber
             data-test-subj="syntheticsCertExpirationThreshold"
             value={formFields.certExpirationThreshold}
@@ -197,10 +194,7 @@ export const AlertDefaultsForm = () => {
             append={DAYS_LABEL}
           />
         </EuiFormRow>
-        <EuiFormRow
-          label={CERT_AGE_LABEL}
-          helpText={CERT_AGE_HELP}
-        >
+        <EuiFormRow label={CERT_AGE_LABEL} helpText={CERT_AGE_HELP}>
           <EuiFieldNumber
             data-test-subj="syntheticsCertAgeThreshold"
             value={formFields.certAgeThreshold}
@@ -266,7 +260,10 @@ const CERT_EXPIRATION_LABEL = i18n.translate(
 
 const CERT_EXPIRATION_HELP = i18n.translate(
   'xpack.synthetics.settings.certExpirationThreshold.help',
-  { defaultMessage: 'Certificates expiring within this number of days will be shown as "Expiring soon".' }
+  {
+    defaultMessage:
+      'Certificates expiring within this number of days will be shown as "Expiring soon".',
+  }
 );
 
 const CERT_AGE_LABEL = i18n.translate('xpack.synthetics.settings.certAgeThreshold.label', {

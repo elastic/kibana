@@ -54,8 +54,7 @@ export const CertificatesPage: React.FC = () => {
 
   const expiryThreshold =
     settings?.certExpirationThreshold ?? DYNAMIC_SETTINGS_DEFAULTS.certExpirationThreshold;
-  const ageThreshold =
-    settings?.certAgeThreshold ?? DYNAMIC_SETTINGS_DEFAULTS.certAgeThreshold;
+  const ageThreshold = settings?.certAgeThreshold ?? DYNAMIC_SETTINGS_DEFAULTS.certAgeThreshold;
 
   const certificates = useCertSearch({
     search,

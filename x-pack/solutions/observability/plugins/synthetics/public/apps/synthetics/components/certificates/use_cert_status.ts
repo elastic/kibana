@@ -18,7 +18,6 @@ export const useCertStatus = (
   expiryDate?: string,
   issueDate?: string
 ) => {
-
   const certValidityDate = new Date(expiryDate ?? '');
 
   const isValidDate = !isNaN(certValidityDate.valueOf());
