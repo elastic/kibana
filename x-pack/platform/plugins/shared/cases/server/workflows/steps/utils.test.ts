@@ -23,7 +23,6 @@ describe('normalizeCaseStepUpdatesForBulkPatch', () => {
         title: 'Updated title',
       })
     ).toEqual({
-      assignees: [],
       connector: {
         id: 'webhook-id',
         name: 'Webhook',

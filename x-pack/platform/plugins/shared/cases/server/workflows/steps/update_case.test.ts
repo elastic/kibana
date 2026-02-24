@@ -99,7 +99,6 @@ describe('updateCaseStepDefinition', () => {
       cases: [
         expect.objectContaining({
           id: 'case-1',
-          assignees: [],
           connector: {
             id: 'webhook-1',
             name: 'Webhook',
