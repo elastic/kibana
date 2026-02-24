@@ -9,6 +9,7 @@ import { EuiComboBox, EuiFormRow, EuiSelect, EuiText } from '@elastic/eui';
 import type { AsCodeFilter } from '@kbn/as-code-filters-schema';
 import { fromStoredFilters, toStoredFilters } from '@kbn/as-code-filters-transforms';
 import type { Filter } from '@kbn/es-query';
+import { FilterStateStore } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { debounce } from 'lodash';
@@ -33,6 +34,15 @@ interface Props {
     value: string | Array<string | undefined> | Filter[] | AsCodeFilter[]
   ) => void;
   selectedFilters: GroupFilters;
+}
+
+/** Ensure each filter has $state so FilterEditor onSubmit runs (it returns early if !$state?.store). */
+function ensureFiltersHaveState(filters: Filter[]): Filter[] {
+  return filters.map((f) =>
+    f.$state?.store != null
+      ? f
+      : { ...f, $state: { store: FilterStateStore.APP_STATE } }
+  );
 }
 
 const mapGroupsToOptions = (groups: string[] | undefined, selectedGroupBy: string) =>
@@ -95,8 +105,8 @@ export function SloGroupFilters({ selectedFilters, onSelected }: Props) {
   });
   const [selectedGroupBy, setSelectedGroupBy] =
     useState<GroupBy>(selectedFilters.group_by) ?? 'status';
-  const [filters, setFilters] = useState<Filter[]>(
-    toStoredFilters(selectedFilters.filters) ?? []
+  const [filters, setFilters] = useState<Filter[]>(() =>
+    ensureFiltersHaveState(toStoredFilters(selectedFilters.filters) ?? [])
   );
   const [kqlQuery, setkqlQuery] = useState(selectedFilters.kql_query);
   const [selectedGroupByLabel, setSelectedGroupByLabel] = useState('Status');
@@ -247,7 +257,7 @@ export function SloGroupFilters({ selectedFilters, onSelected }: Props) {
           showFilterBar={true}
           filters={filters}
           onFiltersUpdated={(newFilters) => {
-            setFilters(newFilters);
+            setFilters(ensureFiltersHaveState(newFilters));
             onSelected('filters', fromStoredFilters(newFilters) ?? []);
           }}
           onQuerySubmit={({ query: value }) => {
@@ -265,7 +275,7 @@ export function SloGroupFilters({ selectedFilters, onSelected }: Props) {
           onClearSavedQuery={() => {}}
           showQueryInput={true}
           onSavedQueryUpdated={(savedQuery) => {
-            const storedFilters = savedQuery.attributes.filters;
+            const storedFilters = ensureFiltersHaveState(savedQuery.attributes.filters ?? []);
             setFilters(storedFilters);
             onSelected('filters', fromStoredFilters(storedFilters) ?? []);
             const kql = String(savedQuery.attributes.query.query);
