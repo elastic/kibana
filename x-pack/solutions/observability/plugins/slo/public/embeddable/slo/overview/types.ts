@@ -20,10 +20,6 @@ import type {
 
 export type OverviewMode = 'single' | 'groups';
 
-export interface SloConfigurationProps {
-  overview_mode?: OverviewMode;
-}
-
 export type SloOverviewApi = DefaultEmbeddableApi<OverviewEmbeddableState> &
   PublishesWritableTitle &
   PublishesTitle &
