@@ -381,26 +381,28 @@ async function createLargeWiredHierarchyViaFork(
 }
 
 /**
- * Build the content pack entries for a wired hierarchy with N children under ROOT_STREAM_ID.
- * Stream names in a content pack are relative to the import target (e.g. importing into 'logs'
- * means a child named 'perf_child_0001' becomes 'logs.perf_child_0001').
+ * Build content pack entries for a batch of wired hierarchy children.
+ *
+ * The root entry includes cumulative routing for ALL children from 1 to batchEnd,
+ * so that each batch's import preserves routing for previously created children.
+ * Only child entries for the current batch (batchStart..batchEnd) are included,
+ * keeping memory usage per batch bounded.
  */
-function buildWiredHierarchyContentPackEntries(count: number) {
-  const childRouting = [];
-  const childEntries = [];
-
-  for (let i = 1; i <= count; i++) {
-    const relativeChildName = `perf_child_${String(i).padStart(4, '0')}`;
-
-    childRouting.push({
-      destination: relativeChildName,
+function buildBatchedContentPackEntries(batchStart: number, batchEnd: number) {
+  const cumulativeRouting = [];
+  for (let i = 1; i <= batchEnd; i++) {
+    cumulativeRouting.push({
+      destination: `perf_child_${String(i).padStart(4, '0')}`,
       where: { field: 'resource.attributes.service.name', eq: `perf-service-${i}` },
       status: 'enabled' as const,
     });
+  }
 
+  const childEntries = [];
+  for (let i = batchStart; i <= batchEnd; i++) {
     childEntries.push({
       type: 'stream' as const,
-      name: relativeChildName,
+      name: `perf_child_${String(i).padStart(4, '0')}`,
       request: {
         stream: {
           description: '',
@@ -427,7 +429,7 @@ function buildWiredHierarchyContentPackEntries(count: number) {
         ingest: {
           processing: { steps: [] as never[] },
           settings: {},
-          wired: { fields: {}, routing: childRouting },
+          wired: { fields: {}, routing: cumulativeRouting },
           lifecycle: { inherit: {} },
           failure_store: { inherit: {} },
         },
@@ -483,39 +485,66 @@ async function uploadContentPack(
 }
 
 /**
- * Phase 5B — Create a large wired hierarchy via the content import bulk path.
- * Builds a content pack zip with all children, then imports it in a single
- * bulkUpsert call (one global lock acquisition regardless of child count).
- * Scales to 1000+ children.
+ * Phase 5B — Create a large wired hierarchy via batched content imports.
+ *
+ * A single content import with 1000+ entries causes Kibana to OOM (the backend's
+ * bulkUpsert fires ~5000 concurrent ES requests for index templates, component
+ * templates, and data streams). Batching into chunks of IMPORT_BATCH_SIZE keeps
+ * each import within proven memory limits.
+ *
+ * Each batch includes cumulative routing in the root entry so that previously
+ * created children remain routable after each import overwrites the root definition.
  */
 async function createLargeWiredHierarchyViaImport(
   kibanaServer: KibanaServer,
   log: ToolingLog,
   count: number
 ) {
-  log.info(`Creating ${count} wired child streams via content import (bulk path)...`);
+  const IMPORT_BATCH_SIZE = 100;
+  const totalBatches = Math.ceil(count / IMPORT_BATCH_SIZE);
 
-  // Enable the content packs feature flag
+  log.info(
+    `Creating ${count} wired child streams via content import ` +
+      `(${totalBatches} batches of up to ${IMPORT_BATCH_SIZE})...`
+  );
+
   await kibanaServer.uiSettings.update({
     'observability:streamsEnableContentPacks': true,
   });
   log.info('  Enabled content packs feature flag');
 
-  // Build content pack entries
-  const entries = buildWiredHierarchyContentPackEntries(count);
-  log.info(`  Built ${entries.length} content pack entries (1 root + ${count} children)`);
+  for (let batchIndex = 0; batchIndex < totalBatches; batchIndex++) {
+    const batchStart = batchIndex * IMPORT_BATCH_SIZE + 1;
+    const batchEnd = Math.min((batchIndex + 1) * IMPORT_BATCH_SIZE, count);
 
-  // Generate zip archive using the same utility the Streams plugin uses
-  const archiveBuffer = await generateArchive(
-    { name: 'perf-wired-hierarchy', description: 'Performance test hierarchy', version: '1.0.0' },
-    entries
-  );
-  log.info(`  Generated archive (${Math.round(archiveBuffer.length / 1024)} KB)`);
+    const entries = buildBatchedContentPackEntries(batchStart, batchEnd);
+    log.info(
+      `  Batch ${batchIndex + 1}/${totalBatches}: ` +
+        `${entries.length} entries (children ${batchStart}-${batchEnd})`
+    );
 
-  // Upload via content import API — this calls streamsClient.bulkUpsert() internally,
-  // batching all upserts into a single State.attemptChanges() call
-  await uploadContentPack(kibanaServer, 'logs', archiveBuffer, { objects: { all: {} } });
-  log.info(`Finished creating ${count} wired child streams via content import`);
+    const archiveBuffer = await generateArchive(
+      {
+        name: `perf-wired-hierarchy-batch-${batchIndex + 1}`,
+        description: `Batch ${batchIndex + 1} of ${totalBatches}`,
+        version: '1.0.0',
+      },
+      entries
+    );
+    log.info(
+      `  Batch ${batchIndex + 1}/${totalBatches}: ` +
+        `archive ${Math.round(archiveBuffer.length / 1024)} KB, importing...`
+    );
+
+    await uploadContentPack(kibanaServer, 'logs', archiveBuffer, { objects: { all: {} } });
+    log.info(`  Batch ${batchIndex + 1}/${totalBatches}: imported successfully`);
+
+    if (batchIndex < totalBatches - 1) {
+      await sleep(2000);
+    }
+  }
+
+  log.info(`Finished creating ${count} wired child streams via batched content import`);
 }
 
 /**
