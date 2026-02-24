@@ -8,7 +8,6 @@
  */
 
 import { EMPTY_LABEL, NULL_LABEL } from '@kbn/field-formats-common';
-import { HTML_CONTEXT_TYPE } from '../content_types';
 import { StringFormat } from './string';
 
 /**
@@ -110,7 +109,7 @@ describe('String Format', () => {
   test('outputs specific empty value', () => {
     const string = new StringFormat();
     expect(string.convert('')).toBe(EMPTY_LABEL);
-    expect(stripSpan(string.convert('', HTML_CONTEXT_TYPE))).toBe(
+    expect(stripSpan(string.convert('', 'html'))).toBe(
       `<span class="ffString__emptyValue">${EMPTY_LABEL}</span>`
     );
   });
@@ -119,10 +118,10 @@ describe('String Format', () => {
     const string = new StringFormat();
     expect(string.convert(null)).toBe(NULL_LABEL);
     expect(string.convert(undefined)).toBe(NULL_LABEL);
-    expect(stripSpan(string.convert(null, HTML_CONTEXT_TYPE))).toBe(
+    expect(stripSpan(string.convert(null, 'html'))).toBe(
       `<span class="ffString__emptyValue">${NULL_LABEL}</span>`
     );
-    expect(stripSpan(string.convert(undefined, HTML_CONTEXT_TYPE))).toBe(
+    expect(stripSpan(string.convert(undefined, 'html'))).toBe(
       `<span class="ffString__emptyValue">${NULL_LABEL}</span>`
     );
   });
