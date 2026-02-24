@@ -35,7 +35,6 @@ export interface ProjectPickerContentProps {
   fetchProjects: () => Promise<ProjectsData | null>;
   isReadonly?: boolean;
   settingsComponent?: React.ReactNode;
-  shouldDisplayReadonlyCallout?: boolean;
 }
 
 const projectPickerOptions = [
@@ -56,7 +55,6 @@ export const ProjectPickerContent = ({
   onProjectRoutingChange,
   fetchProjects,
   isReadonly = false,
-  shouldDisplayReadonlyCallout = true,
   settingsComponent,
 }: ProjectPickerContentProps) => {
   const styles = useMemoCss(projectPickerContentStyles);
@@ -85,7 +83,7 @@ export const ProjectPickerContent = ({
             {settingsComponent && <EuiFlexItem grow={false}>{settingsComponent}</EuiFlexItem>}
           </EuiFlexGroup>
         </EuiPopoverTitle>
-        {isReadonly && shouldDisplayReadonlyCallout && (
+        {isReadonly && (
           <EuiCallOut
             size="s"
             css={styles.callout}
