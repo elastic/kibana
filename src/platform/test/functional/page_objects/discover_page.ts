@@ -146,12 +146,14 @@ export class DiscoverPageObject extends FtrService {
     await this.testSubjects.missingOrFail('loadingSpinner', {
       timeout: this.defaultFindTimeout * 10,
     });
-    // TODO: Should we add a check for `discoverDataGridUpdating` too?
   }
 
   public async waitUntilTabIsLoaded() {
     await this.header.waitUntilLoadingHasFinished();
     await this.waitUntilSearchingHasFinished();
+    await this.testSubjects.missingOrFail('discoverDataGridUpdating', {
+      timeout: this.defaultFindTimeout * 10,
+    });
   }
 
   public async getColumnHeaders() {
@@ -700,7 +702,14 @@ export class DiscoverPageObject extends FtrService {
 
     // If not visible, try the overflow menu
     if (await this.testSubjects.exists('app-menu-overflow-button')) {
-      await this.testSubjects.click('app-menu-overflow-button');
+      await this.retry.try(async () => {
+        try {
+          await this.testSubjects.moveMouseTo('kbnQueryBar');
+        } catch {
+          // Ignore if query bar is not present
+        }
+        await this.testSubjects.click('app-menu-overflow-button');
+      });
 
       if (await this.testSubjects.exists('select-text-based-language-btn')) {
         await this.testSubjects.click('select-text-based-language-btn');

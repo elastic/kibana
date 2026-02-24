@@ -25,6 +25,7 @@ import { initPlugin as initJira } from './jira_simulation';
 import { initPlugin as initResilient } from './resilient_simulation';
 import { initPlugin as initSlack } from './slack_simulation';
 import { initPlugin as initWebhook } from './webhook_simulation';
+import { initPlugin as initHttp } from './http_simulation';
 import { initPlugin as initSFCServer } from './single_file_connector_simulation';
 import { initPlugin as initMSExchange } from './ms_exchage_server_simulation';
 import { initPlugin as initXmatters } from './xmatters_simulation';
@@ -78,6 +79,11 @@ export function getAllExternalServiceSimulatorPaths(): string[] {
 
 export async function getWebhookServer(): Promise<http.Server> {
   const { httpServer } = await initWebhook();
+  return httpServer;
+}
+
+export async function getHttpServer(): Promise<http.Server> {
+  const { httpServer } = await initHttp();
   return httpServer;
 }
 
