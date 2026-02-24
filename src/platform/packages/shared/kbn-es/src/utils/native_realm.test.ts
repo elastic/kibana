@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const { NativeRealm } = require('./native_realm');
-const { ToolingLog } = require('@kbn/tooling-log');
+import { NativeRealm } from './native_realm';
+import { ToolingLog } from '@kbn/tooling-log';
 
 const mockClient = {
   xpack: {
@@ -26,17 +26,21 @@ const mockClient = {
 };
 
 const log = new ToolingLog();
-let nativeRealm;
+let nativeRealm: NativeRealm;
 
 beforeEach(() => {
-  nativeRealm = new NativeRealm({ elasticPassword: 'changeme', client: mockClient, log });
+  nativeRealm = new NativeRealm({
+    elasticPassword: 'changeme',
+    client: mockClient as any,
+    log,
+  });
 });
 
 afterAll(() => {
   jest.clearAllMocks();
 });
 
-function mockXPackInfo(available, enabled) {
+function mockXPackInfo(available: boolean, enabled: boolean) {
   mockClient.xpack.info.mockImplementation(() => ({
     features: {
       security: {
@@ -47,7 +51,7 @@ function mockXPackInfo(available, enabled) {
   }));
 }
 
-function mockClusterStatus(status) {
+function mockClusterStatus(status: string) {
   mockClient.cluster.health.mockImplementation(() => {
     return status;
   });
@@ -72,7 +76,7 @@ describe('isSecurityEnabled', () => {
   test('returns false if 400 error returned', async () => {
     mockClient.xpack.info.mockImplementation(() => {
       const error = new Error('ResponseError');
-      error.meta = {
+      (error as any).meta = {
         statusCode: 400,
       };
       throw error;
@@ -84,7 +88,7 @@ describe('isSecurityEnabled', () => {
   test('rejects if unexpected error is thrown', async () => {
     mockClient.xpack.info.mockImplementation(() => {
       const error = new Error('ResponseError');
-      error.meta = {
+      (error as any).meta = {
         statusCode: 500,
       };
       throw error;
