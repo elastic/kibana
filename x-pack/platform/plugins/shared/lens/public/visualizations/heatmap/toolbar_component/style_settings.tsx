@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 
 import type { VisualizationToolbarProps } from '@kbn/lens-common';
 import { EuiAccordion, EuiHorizontalRule } from '@elastic/eui';
@@ -19,6 +19,7 @@ import {
 } from '../../../shared_components';
 import type { Orientation } from '../../../shared_components';
 import type { HeatmapVisualizationState } from '../types';
+import type { AxisSortOrderProps } from './sort_order';
 import { AxisSortOrder } from './sort_order';
 import { isTimeSeriesOperation } from '../time_series';
 
@@ -82,6 +83,16 @@ export function HeatmapVerticalAxisSettings({
   state,
   setState,
 }: VisualizationToolbarProps<HeatmapVisualizationState>) {
+  const onSortingChange = useCallback<AxisSortOrderProps['onSortingChange']>(
+    (ySortPredicate) => {
+      setState({
+        ...state,
+        gridConfig: { ...state.gridConfig, ySortPredicate },
+      });
+    },
+    [state, setState]
+  );
+
   return (
     <>
       <ToolbarTitleSettings
@@ -112,8 +123,11 @@ export function HeatmapVerticalAxisSettings({
         }}
         isAxisLabelVisible={state?.gridConfig.isYAxisLabelVisible}
       />
-
-      <AxisSortOrder axis="y" state={state} setState={setState} />
+      <AxisSortOrder
+        onSortingChange={onSortingChange}
+        dataTestSubj="lnsHeatmapYAxisSortOrder"
+        sortPredicate={state.gridConfig.ySortPredicate}
+      />
     </>
   );
 }
@@ -130,6 +144,15 @@ export function HeatmapHorizontalAxisSettings({
       : undefined;
   const isTimeBasedXAxis = isTimeSeriesOperation(xOperation);
 
+  const onSortingChange = useCallback<AxisSortOrderProps['onSortingChange']>(
+    (xSortPredicate) => {
+      setState({
+        ...state,
+        gridConfig: { ...state.gridConfig, xSortPredicate },
+      });
+    },
+    [state, setState]
+  );
   return (
     <>
       <ToolbarTitleSettings
@@ -178,9 +201,9 @@ export function HeatmapHorizontalAxisSettings({
         />
       )}
       <AxisSortOrder
-        axis="x"
-        state={state}
-        setState={setState}
+        dataTestSubj="lnsHeatmapXAxisSortOrder"
+        onSortingChange={onSortingChange}
+        sortPredicate={state.gridConfig.xSortPredicate}
         disabled={isTimeBasedXAxis}
         disabledReason={
           isTimeBasedXAxis

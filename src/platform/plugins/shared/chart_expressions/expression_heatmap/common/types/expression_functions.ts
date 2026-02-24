@@ -59,8 +59,10 @@ export type HeatmapLegendConfigResult = HeatmapLegendConfig & {
   type: typeof EXPRESSION_HEATMAP_LEGEND_NAME;
 };
 
-export type HeatmapSortPredicate = 'asc' | 'desc' | 'none';
+// TODO: move to @kbn/lens-common/visualizations/heatmap/types
+export type HeatmapSortPredicate = 'asc' | 'desc';
 
+// TODO: move to @kbn/lens-common/visualizations/heatmap/types
 export interface HeatmapGridConfig {
   // grid
   strokeWidth?: number;

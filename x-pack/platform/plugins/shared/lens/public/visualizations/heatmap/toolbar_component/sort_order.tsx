@@ -8,12 +8,10 @@ import React, { useCallback } from 'react';
 
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
 
-import type { VisualizationToolbarProps } from '@kbn/lens-common';
 import { i18n } from '@kbn/i18n';
-import type { HeatmapSortPredicate } from '@kbn/expression-heatmap-plugin/common/types';
-import type { HeatmapVisualizationState } from '../types';
+import type { HeatmapSortPredicate } from '@kbn/lens-common/visualizations/heatmap/types';
 
-const sortOptions = [
+const SORT_OPTIONS = [
   {
     value: 'none',
     text: i18n.translate('xpack.lens.heatmap.sortOrder.original', {
@@ -34,53 +32,36 @@ const sortOptions = [
   },
 ];
 
-const properties = {
-  x: {
-    dataTestSubj: 'lnsHeatmapXAxisSortOrder',
-    stateProp: 'xSortPredicate' as const,
-  },
-  y: {
-    dataTestSubj: 'lnsHeatmapYAxisSortOrder',
-    stateProp: 'ySortPredicate' as const,
-  },
-};
-
 function isSortPredicate(value: string): value is HeatmapSortPredicate {
-  return ['asc', 'desc', 'none'].includes(value);
+  return ['asc', 'desc'].includes(value);
+}
+
+export interface AxisSortOrderProps {
+  sortPredicate?: HeatmapSortPredicate;
+  disabled?: boolean;
+  disabledReason?: string;
+  dataTestSubj: string;
+  onSortingChange: (sortPredicate?: HeatmapSortPredicate) => void;
 }
 
 export function AxisSortOrder({
-  setState,
-  state,
-  axis,
+  sortPredicate,
   disabled = false,
   disabledReason,
-}: Pick<VisualizationToolbarProps<HeatmapVisualizationState>, 'state' | 'setState'> & {
-  axis: 'x' | 'y';
-  disabled?: boolean;
-  disabledReason?: string;
-}) {
-  const stateProp = properties[axis].stateProp;
-  const currentPredicate = state.gridConfig[stateProp] ?? 'none';
-  const displayedPredicate = disabled ? 'none' : currentPredicate;
-
+  dataTestSubj,
+  onSortingChange,
+}: AxisSortOrderProps) {
   const onChange = useCallback<React.ChangeEventHandler<HTMLSelectElement>>(
     (e) => {
-      if (disabled) {
-        return;
-      }
+      if (disabled) return;
       const predicate = e.target.value;
       if (isSortPredicate(predicate)) {
-        setState({
-          ...state,
-          gridConfig: {
-            ...state.gridConfig,
-            [properties[axis].stateProp]: predicate,
-          },
-        });
+        onSortingChange(predicate);
+      } else {
+        onSortingChange(undefined);
       }
     },
-    [disabled, state, setState, axis]
+    [disabled, onSortingChange]
   );
   return (
     <EuiFormRow
@@ -93,9 +74,11 @@ export function AxisSortOrder({
     >
       <EuiSelect
         compressed
-        data-test-subj={properties[axis].dataTestSubj}
-        options={sortOptions}
-        value={displayedPredicate}
+        data-test-subj={dataTestSubj}
+        options={SORT_OPTIONS}
+        // 'none' is just a convenience value to indicate that no sort predicate is set,
+        // but we are not going to pass it back to onSortingChange as is not a valid predicate, we use undefined instead
+        value={disabled || sortPredicate === undefined ? 'none' : sortPredicate}
         onChange={onChange}
         disabled={disabled}
       />

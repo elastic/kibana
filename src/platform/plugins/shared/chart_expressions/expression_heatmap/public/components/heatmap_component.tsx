@@ -741,12 +741,11 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
               xScale={xScale}
               xSortPredicate={
                 !isTimeBasedSwimLane && xAxisColumn
-                  ? getSortPredicate(xAxisColumn, args.gridConfig.xSortPredicate ?? 'none')
+                  ? getSortPredicate(xAxisColumn, args.gridConfig.xSortPredicate)
                   : undefined
               }
               ySortPredicate={
-                yAxisColumn &&
-                getSortPredicate(yAxisColumn, args.gridConfig.ySortPredicate ?? 'none')
+                yAxisColumn && getSortPredicate(yAxisColumn, args.gridConfig.ySortPredicate)
               }
               xAxisLabelName={xAxisColumn?.name || ''}
               yAxisLabelName={yAxisColumn?.name || ''}

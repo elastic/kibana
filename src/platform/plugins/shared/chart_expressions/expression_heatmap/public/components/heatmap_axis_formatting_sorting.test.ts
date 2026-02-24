@@ -310,7 +310,7 @@ describe('Heatmap axis formatting and sorting', () => {
     expect(debugState?.axes?.x[0].labels).toEqual(['a', 'b', 'c']);
     expect(debugState?.axes?.y[0].labels).toEqual(['x', 'y', 'z']);
   });
-  test('Sort axis values correctly by data', async () => {
+  test('Sort axis values by data index', async () => {
     const { debugState } = await renderChart(
       {
         ...defaultHeatmapProps,
@@ -335,8 +335,8 @@ describe('Heatmap axis formatting and sorting', () => {
           yAccessor: 'y',
           gridConfig: {
             ...basicArgs.gridConfig,
-            xSortPredicate: 'none',
-            ySortPredicate: 'none',
+            xSortPredicate: undefined,
+            ySortPredicate: undefined,
           },
         },
       },

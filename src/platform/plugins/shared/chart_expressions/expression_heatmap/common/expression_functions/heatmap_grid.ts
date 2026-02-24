@@ -69,7 +69,7 @@ export const heatmapGridConfig: ExpressionFunctionDefinition<
     ySortPredicate: {
       types: ['string'],
       help: i18n.translate('expressionHeatmap.function.args.grid.ySortPredicate.help', {
-        defaultMessage: 'Specifies the sort order for the Y-axis (asc, desc, none)',
+        defaultMessage: 'Specifies the sort order for the Y-axis (asc, desc)',
       }),
       required: false,
     },
@@ -102,7 +102,7 @@ export const heatmapGridConfig: ExpressionFunctionDefinition<
     xSortPredicate: {
       types: ['string'],
       help: i18n.translate('expressionHeatmap.function.args.grid.xSortPredicate.help', {
-        defaultMessage: 'Specifies the sort order for the X-axis (asc, desc, none)',
+        defaultMessage: 'Specifies the sort order for the X-axis (asc, desc)',
       }),
       required: false,
     },

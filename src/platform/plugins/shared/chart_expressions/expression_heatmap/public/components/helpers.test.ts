@@ -173,7 +173,7 @@ describe('getSortPredicate', () => {
         },
       },
     } as DatatableColumn;
-    expect(getSortPredicate(column, 'none')).toEqual('dataIndex');
+    expect(getSortPredicate(column)).toEqual('dataIndex');
   });
 
   it('should return numDesc for descending metric sorting', () => {

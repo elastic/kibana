@@ -117,8 +117,8 @@ export const findMinMaxByColumnId = (columnIds: string[], table: Datatable | und
   return minMax;
 };
 
-export const getSortPredicate = (column: DatatableColumn, predicate: HeatmapSortPredicate) => {
-  if (predicate === 'none') {
+export const getSortPredicate = (column: DatatableColumn, predicate?: HeatmapSortPredicate) => {
+  if (!predicate) {
     return 'dataIndex';
   }
   // for now sort only numerical types, and sort the rest as string.
