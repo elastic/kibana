@@ -7,13 +7,16 @@
 
 import React, { useMemo } from 'react';
 import {
+  EuiCallOut,
   EuiHorizontalRule,
   EuiFlexGroup,
   EuiFlexItem,
   EuiEmptyPrompt,
+  EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 
 import {
   getNormalizedInputs,
@@ -107,6 +110,7 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
           {packagePolicyTemplates.map((policyTemplate) => {
             const inputs = getNormalizedInputs(policyTemplate);
             const packagePolicyInputs = packagePolicy.inputs;
+            const isPolicyTemplateDeprecated = !hasIntegrations && !!policyTemplate.deprecated;
 
             const inputsToRender = inputs
               .map((packageInput) => {
@@ -114,6 +118,14 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
                   (input) =>
                     input.type === packageInput.type &&
                     (hasIntegrations ? input.policy_template === policyTemplate.name : true)
+                );
+
+                const packageInputStreams = getRegistryStreamWithDataStreamForInputType(
+                  packageInput.type,
+                  packageInfo,
+                  hasIntegrations && isIntegrationPolicyTemplate(policyTemplate)
+                    ? policyTemplate.data_streams
+                    : []
                 );
 
                 if (
@@ -128,7 +140,7 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
                   return null;
                 }
 
-                return { packageInput, packagePolicyInput };
+                return { packageInput, packagePolicyInput, packageInputStreams };
               })
               .filter(
                 (
@@ -136,6 +148,7 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
                 ): item is {
                   packageInput: RegistryInput;
                   packagePolicyInput: NewPackagePolicyInput;
+                  packageInputStreams: ReturnType<typeof getRegistryStreamWithDataStreamForInputType>;
                 } => item !== null
               );
 
@@ -143,55 +156,75 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
             const isSingleInputAndStreams =
               isSingleInput && inputsToRender[0].packagePolicyInput.streams.length <= 1;
 
-            return inputsToRender.map(({ packageInput, packagePolicyInput }) => {
-              const packageInputStreams = getRegistryStreamWithDataStreamForInputType(
-                packageInput.type,
-                packageInfo,
-                hasIntegrations && isIntegrationPolicyTemplate(policyTemplate)
-                  ? policyTemplate.data_streams
-                  : []
-              );
+            return (
+              <React.Fragment key={policyTemplate.name}>
+                {isPolicyTemplateDeprecated && (
+                  <>
+                    <EuiCallOut
+                      announceOnMount
+                      data-test-subj="deprecatedPolicyTemplateCallout"
+                      title={i18n.translate(
+                        'xpack.fleet.createPackagePolicy.stepConfigure.deprecatedPolicyTemplateTitle',
+                        {
+                          defaultMessage: 'The policy template "{title}" is deprecated',
+                          values: { title: policyTemplate.title },
+                        }
+                      )}
+                      color="warning"
+                      iconType="warning"
+                      size="s"
+                    >
+                      <p>{policyTemplate.deprecated?.description}</p>
+                    </EuiCallOut>
+                    <EuiSpacer size="m" />
+                  </>
+                )}
+                {inputsToRender.map(({ packageInput, packagePolicyInput, packageInputStreams }) => {
 
-              const updatePackagePolicyInput = (updatedInput: Partial<NewPackagePolicyInput>) => {
-                const indexOfUpdatedInput = packagePolicyInputs.findIndex(
-                  (input) =>
-                    input.type === packageInput.type &&
-                    (hasIntegrations ? input.policy_template === policyTemplate.name : true)
-                );
-                const newInputs = [...packagePolicyInputs];
-                newInputs[indexOfUpdatedInput] = {
-                  ...newInputs[indexOfUpdatedInput],
-                  ...updatedInput,
-                };
-                updatePackagePolicy({
-                  inputs: newInputs,
-                });
-              };
+                  const updatePackagePolicyInput = (
+                    updatedInput: Partial<NewPackagePolicyInput>
+                  ) => {
+                    const indexOfUpdatedInput = packagePolicyInputs.findIndex(
+                      (input) =>
+                        input.type === packageInput.type &&
+                        (hasIntegrations ? input.policy_template === policyTemplate.name : true)
+                    );
+                    const newInputs = [...packagePolicyInputs];
+                    newInputs[indexOfUpdatedInput] = {
+                      ...newInputs[indexOfUpdatedInput],
+                      ...updatedInput,
+                    };
+                    updatePackagePolicy({
+                      inputs: newInputs,
+                    });
+                  };
 
-              return (
-                <EuiFlexItem key={packageInput.type}>
-                  <PackagePolicyInputPanel
-                    isSingleInputAndStreams={isSingleInputAndStreams}
-                    packageInput={packageInput}
-                    packageInfo={packageInfo}
-                    packageInputStreams={packageInputStreams}
-                    packagePolicyInput={packagePolicyInput}
-                    updatePackagePolicyInput={updatePackagePolicyInput}
-                    inputValidationResults={
-                      validationResults?.inputs?.[
-                        hasIntegrations
-                          ? `${policyTemplate.name}-${packagePolicyInput.type}`
-                          : packagePolicyInput.type
-                      ] ?? {}
-                    }
-                    forceShowErrors={submitAttempted}
-                    isEditPage={isEditPage}
-                    varGroupSelections={varGroupSelections}
-                  />
-                  <EuiHorizontalRule margin="m" />
-                </EuiFlexItem>
-              );
-            });
+                  return (
+                    <EuiFlexItem key={packageInput.type}>
+                      <PackagePolicyInputPanel
+                        isSingleInputAndStreams={isSingleInputAndStreams}
+                        packageInput={packageInput}
+                        packageInfo={packageInfo}
+                        packageInputStreams={packageInputStreams}
+                        packagePolicyInput={packagePolicyInput}
+                        updatePackagePolicyInput={updatePackagePolicyInput}
+                        inputValidationResults={
+                          validationResults?.inputs?.[
+                            hasIntegrations
+                              ? `${policyTemplate.name}-${packagePolicyInput.type}`
+                              : packagePolicyInput.type
+                          ] ?? {}
+                        }
+                        forceShowErrors={submitAttempted}
+                        isEditPage={isEditPage}
+                        varGroupSelections={varGroupSelections}
+                      />
+                      <EuiHorizontalRule margin="m" />
+                    </EuiFlexItem>
+                  );
+                })}
+              </React.Fragment>
+            );
           })}
         </EuiFlexGroup>
       </>

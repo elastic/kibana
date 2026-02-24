@@ -99,7 +99,6 @@ import { PostInstallGoogleCloudShellModal } from './components/cloud_security_po
 import { PostInstallAzureArmTemplateModal } from './components/cloud_security_posture/post_install_azure_arm_template_modal';
 import { RootPrivilegesCallout } from './root_callout';
 import { useAgentless } from './hooks/setup_technology';
-import { title } from 'vega-lite/build/channeldef';
 
 export const StepsWithLessPadding = styled(EuiSteps)`
   .euiStep__content {
@@ -471,7 +470,8 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       "'package-policy-create' and 'package-policy-replace-define-step' cannot both be registered as UI extensions"
     );
   }
-  const { isAgentlessIntegration, isAgentlessDefault } = useAgentless();
+  const { getAgentlessStatusForPackage, isAgentlessDefault } = useAgentless();
+  const { isAgentless, isDefaultDeploymentMode } = getAgentlessStatusForPackage(packageInfo);
 
   const replaceStepConfigurePackagePolicy =
     replaceDefineStepView && packageInfo?.name ? (
@@ -487,7 +487,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
             validationResults={validationResults}
             isEditPage={false}
             handleSetupTechnologyChange={handleSetupTechnologyChange}
-            isAgentlessEnabled={isAgentlessIntegration(packageInfo) && !addIntegrationFlyoutProps}
+            isAgentlessEnabled={isAgentless && !addIntegrationFlyoutProps}
             defaultSetupTechnology={defaultSetupTechnology}
             integrationToEnable={integrationToEnable}
             setIntegrationToEnable={setIntegrationToEnable}
@@ -497,25 +497,25 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     ) : undefined;
 
   const setupTechnologySelector = useMemo(() => {
-    if (!addIntegrationFlyoutProps && isAgentlessIntegration(packageInfo)) {
+    if (!addIntegrationFlyoutProps && isAgentless) {
       return (
         <SetupTechnologySelector
           disabled={false}
           allowedSetupTechnologies={allowedSetupTechnologies}
           setupTechnology={selectedSetupTechnology}
           onSetupTechnologyChange={handleSetupTechnologyChange}
-          isAgentlessDefault={isAgentlessDefault}
+          isAgentlessDefault={isDefaultDeploymentMode}
           // TODO Put this behind a feature flag
           showBetaBadge={!isAgentlessDefault}
-          useCheckableCards={isAgentlessDefault}
-          hideTitle={isAgentlessDefault}
+          useCheckableCards={isDefaultDeploymentMode}
+          hideTitle={isDefaultDeploymentMode}
         />
       );
     }
     return null;
   }, [
-    packageInfo,
-    isAgentlessIntegration,
+    isAgentless,
+    isDefaultDeploymentMode,
     addIntegrationFlyoutProps,
     allowedSetupTechnologies,
     selectedSetupTechnology,
@@ -543,7 +543,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
           />
 
           {/* Show SetupTechnologySelector for all agentless integrations, including extension views, if agentless is default display as a separate step  */}
-          {!isAgentlessDefault && setupTechnologySelector}
+          {!isDefaultDeploymentMode && setupTechnologySelector}
 
           {/* Only show the out-of-box configuration step if a UI extension is NOT registered */}
           {!extensionView && (
@@ -583,12 +583,12 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       validationResults,
       formState,
       extensionView,
+      isDefaultDeploymentMode,
       integrationToEnable,
       isAgentlessSelected,
       handleExtensionViewOnChange,
       varGroupSelections,
       setupTechnologySelector,
-      isAgentlessDefault,
     ]
   );
 

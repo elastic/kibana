@@ -19,6 +19,8 @@ import {
   EuiHorizontalRule,
   EuiSpacer,
   EuiButtonEmpty,
+  EuiIconTip,
+  useEuiTheme,
 } from '@elastic/eui';
 
 import type {
@@ -97,6 +99,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
     isEditPage = false,
     varGroupSelections = {},
   }) => {
+    const theme = useEuiTheme();
     const defaultDataStreamId = useDataStreamId();
     const { isAgentlessEnabled } = useAgentless();
     // Showing streams toggle state
@@ -168,17 +171,43 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
       </EuiText>
     );
 
-    const errors = hasErrors && (
-      <EuiFlexItem grow={false}>
-        <EuiText color="danger" size="s">
-          <FormattedMessage
-            id="xpack.fleet.createPackagePolicy.stepConfigure.errorCountText"
-            defaultMessage="{count, plural, one {# error} other {# errors}}"
-            values={{ count: errorCount }}
-          />
-        </EuiText>
-      </EuiFlexItem>
+    const allStreamsDeprecated = useMemo(
+      () => packageInputStreams.length > 0 && packageInputStreams.every((s) => !!s.deprecated),
+      [packageInputStreams]
     );
+    const deprecationInfo =
+      packagePolicyInput.deprecated ||
+      (allStreamsDeprecated ? packageInputStreams[0].deprecated : undefined);
+    const isDeprecatedInput = !!deprecationInfo;
+    const deprecatedInputTooltip = deprecationInfo
+      ? deprecationInfo.replaced_by
+        ? i18n.translate(
+            'xpack.fleet.createPackagePolicy.stepConfigure.deprecatedInputReplacedByTooltip',
+            {
+              defaultMessage: '{description} Replaced by: {replacedBy}',
+              values: {
+                description: deprecationInfo.description,
+                replacedBy: Object.values(deprecationInfo.replaced_by).join(', '),
+              },
+            }
+          )
+        : deprecationInfo.description
+      : i18n.translate('xpack.fleet.createPackagePolicy.stepConfigure.deprecatedInputTooltip', {
+          defaultMessage: 'This input is deprecated.',
+        });
+
+    const hasDeprecatedFeatures = useMemo(() => {
+      const inputVarsDeprecated = (packageInput.vars || []).some((v) => !!v.deprecated);
+      const streamVarsDeprecated = packageInputStreams.some(
+        (stream) => stream.vars && stream.vars.some((v) => !!v.deprecated)
+      );
+      const someStreamsDeprecated = packageInputStreams.some((s) => !!s.deprecated);
+      return inputVarsDeprecated || streamVarsDeprecated || someStreamsDeprecated;
+    }, [packageInput.vars, packageInputStreams]);
+
+    if (!isEditPage && (isDeprecatedInput || allStreamsDeprecated)) {
+      return null;
+    }
 
     return (
       <>
@@ -187,12 +216,18 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
           {isSingleInputAndStreams ? (
             <EuiFlexItem grow={false}>
               <EuiTitle size="xs">
-                <h3 data-test-subj="PackagePolicy.InputStreamConfig.title">
+                <h3
+                  data-test-subj="PackagePolicy.InputStreamConfig.title"
+                  style={
+                    isDeprecatedInput
+                      ? { color: theme.euiTheme.colors.textSubdued }
+                      : undefined
+                  }
+                >
                   {packageInput.title || packageInput.type}
                 </h3>
               </EuiTitle>
               <EuiSpacer size="s" />
-              {/* show the description under the top level toggle if theres only one stream */}
               {showTopLevelDescription && topLevelDescription}
             </EuiFlexItem>
           ) : (
@@ -203,11 +238,30 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
                   <EuiFlexGroup alignItems="center" gutterSize="s">
                     <EuiFlexItem grow={false}>
                       <EuiTitle size="xs">
-                        <h3 data-test-subj="PackagePolicy.InputStreamConfig.title">
+                        <h3
+                          data-test-subj="PackagePolicy.InputStreamConfig.title"
+                          style={
+                            isDeprecatedInput
+                              ? { color: theme.euiTheme.colors.textSubdued }
+                              : undefined
+                          }
+                        >
                           {packageInput.title || packageInput.type}
                         </h3>
                       </EuiTitle>
                     </EuiFlexItem>
+                    {isDeprecatedInput && (
+                      <EuiFlexItem grow={false}>
+                        <span data-test-subj="PackagePolicy.InputStreamConfig.deprecatedIcon">
+                          <EuiIconTip
+                            type="warning"
+                            color="warning"
+                            position="top"
+                            content={deprecatedInputTooltip}
+                          />
+                        </span>
+                      </EuiFlexItem>
+                    )}
                   </EuiFlexGroup>
                 }
                 checked={packagePolicyInput.enabled}
@@ -227,13 +281,40 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
                 }}
               />
               <EuiSpacer size="s" />
-              {/* show the description under the top level toggle if theres only one stream */}
               {showTopLevelDescription && topLevelDescription}
             </EuiFlexItem>
           )}
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="s" alignItems="center">
-              {hasErrors ? errors : null}
+              {!isShowingStreams && !isDeprecatedInput && hasDeprecatedFeatures ? (
+                <EuiFlexItem grow={false}>
+                  <span data-test-subj="PackagePolicy.InputStreamConfig.deprecatedFeaturesIcon">
+                    <EuiIconTip
+                      type="warning"
+                      color="warning"
+                      position="top"
+                      content={i18n.translate(
+                        'xpack.fleet.createPackagePolicy.stepConfigure.deprecatedFeaturesWarning',
+                        {
+                          defaultMessage:
+                            'This input contains deprecated features. Expand to show details.',
+                        }
+                      )}
+                    />
+                  </span>
+                </EuiFlexItem>
+              ) : null}
+              {hasErrors ? (
+                <EuiFlexItem grow={false}>
+                  <EuiText color="danger" size="s">
+                    <FormattedMessage
+                      id="xpack.fleet.createPackagePolicy.stepConfigure.errorCountText"
+                      defaultMessage="{count, plural, one {# error} other {# errors}}"
+                      values={{ count: errorCount }}
+                    />
+                  </EuiText>
+                </EuiFlexItem>
+              ) : null}
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
                   color={hasErrors ? 'danger' : 'primary'}
