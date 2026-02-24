@@ -24,14 +24,16 @@ import { EsqlService } from '../services/esql_service';
 import type { EsqlServerPluginStart } from '../types';
 
 const NO_DEFAULT_CONNECTOR = 'NO_DEFAULT_CONNECTOR';
+// Added the limit here to avoid overwhelming the LLM with too many fields. Tokens is not a problem anymore
+// but we don't want to risk the LLM getting stuck or taking too long to generate the query.
+// We can remove or increase this limit if we see that it's a problem.
+const MAX_FIELDS = 200;
 
 const getSourceNames = async (client: ElasticsearchClient): Promise<string[]> => {
   const service = new EsqlService({ client });
   const sources = await service.getAllIndices('local');
   return sources.filter((s) => !s.hidden).map((s) => s.name);
 };
-
-const MAX_FIELDS = 200;
 
 const getFieldsForSource = async (client: ElasticsearchClient, source: string): Promise<string> => {
   const response = await client.fieldCaps({
@@ -142,6 +144,8 @@ export const registerNLtoESQLRoute = (
           request,
         });
 
+        // This should never happen, as the connector check is done in the editor visor.
+        // But we'll handle it just in case.
         if (!connectorId) {
           return response.badRequest({
             body: {
@@ -150,6 +154,7 @@ export const registerNLtoESQLRoute = (
           });
         }
 
+        // The getSourceNames function is a fallback, the visor has already fetched the sources.
         const sourceNames = sources?.length ? sources : await getSourceNames(client);
 
         let fieldsContext: string | undefined;
@@ -157,7 +162,7 @@ export const registerNLtoESQLRoute = (
           try {
             fieldsContext = await getFieldsForSource(client, sources.join(','));
           } catch {
-            // non-critical: proceed without field context
+            // proceed without field context, less precision but still useful
           }
         }
 
