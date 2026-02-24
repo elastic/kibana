@@ -23,6 +23,7 @@ import type { KueryNode } from '@kbn/es-query';
 import type { AxiosInstance } from 'axios';
 import type { SpacesServiceSetup } from '@kbn/spaces-plugin/server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-shared';
+import type { AuthMode } from '@kbn/connector-specs';
 import type { Connector, ConnectorWithExtraFindData } from '../application/connector/types';
 import type { ConnectorType } from '../application/connector/types';
 import { get } from '../application/connector/methods/get';
@@ -42,7 +43,6 @@ import type { ActionExecutorContract } from '../lib';
 import { parseDate } from '../lib';
 import type {
   ActionResult,
-  AuthMode,
   RawAction,
   InMemoryConnector,
   ActionTypeExecutorResult,

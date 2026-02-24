@@ -8,12 +8,12 @@
 import type { AxiosHeaderValue, AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 import axios from 'axios';
 import type { Logger } from '@kbn/core/server';
-import type { GetTokenOpts } from '@kbn/connector-specs';
+import type { AuthMode, GetTokenOpts } from '@kbn/connector-specs';
 import type { ActionInfo } from './action_executor';
 import type { AuthTypeRegistry } from '../auth_types';
 import { getCustomAgents } from './get_custom_agents';
 import type { ActionsConfigurationUtilities } from '../actions_config';
-import type { AuthMode, ConnectorTokenClientContract } from '../types';
+import type { ConnectorTokenClientContract } from '../types';
 import { getBeforeRedirectFn } from './before_redirect';
 import { getOAuthClientCredentialsAccessToken } from './get_oauth_client_credentials_access_token';
 import { getOAuthAuthorizationCodeAccessToken } from './get_oauth_authorization_code_access_token';
