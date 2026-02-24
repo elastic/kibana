@@ -21,7 +21,7 @@ import { useFetchSloGroups } from '../../../../hooks/use_fetch_slo_groups';
 import { SLI_OPTIONS } from '../../../../pages/slo_edit/constants';
 import { useGetSettings } from '../../../../pages/slo_settings/hooks/use_get_settings';
 import { useKibana } from '../../../../hooks/use_kibana';
-import { GroupBy, GroupFilters } from '../../../../../common/embeddables/overview/types';
+import type { GroupBy, GroupFilters } from '../../../../../common/embeddables/overview/types';
 
 interface Option {
   value: string;

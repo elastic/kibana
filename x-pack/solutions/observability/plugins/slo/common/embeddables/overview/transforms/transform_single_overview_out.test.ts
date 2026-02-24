@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { OverviewEmbeddableState } from '@kbn/slo-plugin/server/lib/embeddables/schema';
+import type { OverviewEmbeddableState } from '../../../../server/lib/embeddables/schema';
 import { transformSingleOverviewOut } from './transform_single_overview_out';
 
 describe('transformSingleOverviewOut', () => {

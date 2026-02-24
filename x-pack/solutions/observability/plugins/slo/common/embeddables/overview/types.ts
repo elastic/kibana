@@ -11,4 +11,5 @@ export type {
   GroupFilters,
   SingleOverviewCustomState,
   GroupOverviewCustomState,
+  OverviewEmbeddableState,
 } from '../../../server/lib/embeddables/schema';

@@ -5,22 +5,17 @@
  * 2.0.
  */
 
-import type {
-  DefaultEmbeddableApi,
-  HasDrilldowns,
-  SerializedDrilldowns,
-} from '@kbn/embeddable-plugin/public';
+import type { DefaultEmbeddableApi, HasDrilldowns } from '@kbn/embeddable-plugin/public';
 import type { EmbeddableApiContext, HasSupportedTriggers } from '@kbn/presentation-publishing';
 import type {
   HasEditCapabilities,
   PublishesTitle,
   PublishesWritableTitle,
-  SerializedTitles,
 } from '@kbn/presentation-publishing';
 
 import type {
-  SingleOverviewCustomState,
   GroupOverviewCustomState,
+  OverviewEmbeddableState,
 } from '../../../../common/embeddables/overview/types';
 
 export type OverviewMode = 'single' | 'groups';
@@ -29,12 +24,7 @@ export interface SloConfigurationProps {
   overview_mode?: OverviewMode;
 }
 
-export type SloOverviewState = Partial<SingleOverviewCustomState> &
-  Partial<GroupOverviewCustomState>;
-
-export type SloOverviewEmbeddableState = SerializedTitles & SerializedDrilldowns & SloOverviewState;
-
-export type SloOverviewApi = DefaultEmbeddableApi<SloOverviewEmbeddableState> &
+export type SloOverviewApi = DefaultEmbeddableApi<OverviewEmbeddableState> &
   PublishesWritableTitle &
   PublishesTitle &
   HasDrilldowns &
