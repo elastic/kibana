@@ -16,6 +16,7 @@ import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-i
 import { buildResponse } from '../../../lib/build_response';
 import type { ElasticAssistantRequestHandlerContext } from '../../../types';
 import { WorkflowDataClient, AlertGroupingWorkflowExecutor } from '../../../lib/alert_grouping';
+import type { WorkflowExecutionStatus } from '../../../lib/alert_grouping/types';
 import {
   createCase,
   attachAlertsToCase,
@@ -194,7 +195,7 @@ export const registerWorkflowExecutionRoutes = (
 
           // Create execution record
           const execution = await dataClient.createExecution(
-            workflow.id!,
+            workflow.id ?? request.params.workflow_id,
             'manual',
             request.body.dry_run ?? false
           );
@@ -517,8 +518,8 @@ export const registerWorkflowExecutionRoutes = (
                   }
 
                   // Fetch both Attack Discoveries
-                  const authenticatedUser = await assistantContext.getCurrentUser();
-                  if (!authenticatedUser) {
+                  const currentUser = await assistantContext.getCurrentUser();
+                  if (!currentUser) {
                     return {
                       similarity: 0,
                       shouldMerge: false,
@@ -528,7 +529,7 @@ export const registerWorkflowExecutionRoutes = (
 
                   const [ad1Result, ad2Result] = await Promise.all([
                     adDataClient.findAttackDiscoveryAlerts({
-                      authenticatedUser,
+                      authenticatedUser: currentUser,
                       esClient,
                       findAttackDiscoveryAlertsParams: {
                         ids: [adId1],
@@ -538,7 +539,7 @@ export const registerWorkflowExecutionRoutes = (
                       logger,
                     }),
                     adDataClient.findAttackDiscoveryAlerts({
-                      authenticatedUser,
+                      authenticatedUser: currentUser,
                       esClient,
                       findAttackDiscoveryAlertsParams: {
                         ids: [adId2],
@@ -920,7 +921,7 @@ Only respond with the JSON object, no other text.`;
           const result = await dataClient.findExecutions(request.params.workflow_id, {
             page: request.query.page,
             perPage: request.query.per_page,
-            status: request.query.status as any,
+            status: request.query.status as WorkflowExecutionStatus | undefined,
             start: request.query.start,
             end: request.query.end,
           });

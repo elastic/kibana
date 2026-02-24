@@ -6,12 +6,15 @@
  */
 
 import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { ListPluginSetup } from '@kbn/lists-plugin/server';
 import {
   createToolHandlerContext,
   createToolTestMocks,
   setupMockCoreStartServices,
 } from '../__mocks__/test_helpers';
 import { exceptionListsTool } from './exception_lists_tool';
+import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
 
 jest.mock('uuid', () => ({
   v4: jest.fn(() => 'uuid-1'),
@@ -35,16 +38,19 @@ describe('exceptionListsTool', () => {
       updateEndpointListItem: jest.fn(),
     };
 
-    const soClient = {} as any;
+    const soClient = {} as unknown as SavedObjectsClientContract;
     const [coreStart] = await mockCore.getStartServices();
     coreStart.savedObjects.getScopedClient = jest.fn().mockReturnValue(soClient);
     mockCore.getStartServices.mockResolvedValue([coreStart, {}, {}]);
 
     const lists = {
       getExceptionListClient: jest.fn().mockReturnValue(exceptionsClient),
-    } as any;
+    } as unknown as ListPluginSetup;
 
-    const tool = exceptionListsTool({ core: mockCore as any, lists });
+    const tool = exceptionListsTool({
+      core: mockCore as unknown as SecuritySolutionPluginCoreSetupDependencies,
+      lists,
+    });
     await tool.handler(
       {
         operation: 'create',
@@ -58,7 +64,7 @@ describe('exceptionListsTool', () => {
             tags: [],
           },
         },
-      } as any,
+      } as unknown as Parameters<typeof tool.handler>[0],
       createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
     );
 
@@ -83,16 +89,19 @@ describe('exceptionListsTool', () => {
       updateEndpointListItem: jest.fn(),
     };
 
-    const soClient = {} as any;
+    const soClient = {} as unknown as SavedObjectsClientContract;
     const [coreStart] = await mockCore.getStartServices();
     coreStart.savedObjects.getScopedClient = jest.fn().mockReturnValue(soClient);
     mockCore.getStartServices.mockResolvedValue([coreStart, {}, {}]);
 
     const lists = {
       getExceptionListClient: jest.fn().mockReturnValue(exceptionsClient),
-    } as any;
+    } as unknown as ListPluginSetup;
 
-    const tool = exceptionListsTool({ core: mockCore as any, lists });
+    const tool = exceptionListsTool({
+      core: mockCore as unknown as SecuritySolutionPluginCoreSetupDependencies,
+      lists,
+    });
     await tool.handler(
       {
         operation: 'create',
@@ -106,7 +115,7 @@ describe('exceptionListsTool', () => {
             tags: [],
           },
         },
-      } as any,
+      } as unknown as Parameters<typeof tool.handler>[0],
       createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
     );
 

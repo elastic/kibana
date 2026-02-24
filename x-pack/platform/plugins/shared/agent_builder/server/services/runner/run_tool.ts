@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ZodObject } from '@kbn/zod';
+import type { ZodType } from '@kbn/zod';
 import type { ToolResult, ToolType } from '@kbn/agent-builder-common';
 import {
   createBadRequestError,
@@ -53,13 +53,9 @@ export const runTool = async <TParams = Record<string, unknown>>({
 
   const toolRegistry = await toolsService.getRegistry({ request });
 
-  let tool: InternalToolDefinition<ToolType, any, ZodObject<any>>;
+  let tool: InternalToolDefinition<ToolType, any, ZodType<any>>;
   try {
-    tool = (await toolRegistry.get(toolId)) as InternalToolDefinition<
-      ToolType,
-      any,
-      ZodObject<any>
-    >;
+    tool = (await toolRegistry.get(toolId)) as InternalToolDefinition<ToolType, any, ZodType<any>>;
   } catch (error) {
     if (isToolNotFoundError(error) && scopedParams.source === 'agent') {
       return {

@@ -148,8 +148,6 @@ export const createStateManagerMock = (): StateManagerMock => {
 export const createSkillServiceStartMock = (): SkillServiceStartMock => {
   return {
     getRegistry: jest.fn().mockResolvedValue(createSkillRegistryMock()),
-    getSkillDefinition: jest.fn(),
-    listSkills: jest.fn(),
     registerSkill: jest.fn(),
     unregisterSkill: jest.fn(),
   };

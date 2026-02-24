@@ -9,7 +9,7 @@ import type { KbnClient } from '@kbn/test';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { createRule, findRules } from '../common/detection_rules_services';
 import { prefixedOutputLogger } from '../common/utils';
-import { REF7707_DEMO_DOMAINS, REF7707_DOMAINS } from '../ref7707_lab/constants';
+import { REF7707_DEMO_DOMAINS, REF7707_DOMAINS } from './constants';
 
 /**
  * Creates a detection rule for monitoring malicious domains from Elastic Security Labs report REF7707

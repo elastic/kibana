@@ -56,15 +56,13 @@ const BatchedAttackDiscoveryRequestBody = z.object({
   batchConfig: z
     .object({
       batchSize: z.number().min(10).max(500).optional(),
-      maxAlerts: z.number().min(1).optional(),
+      maxTotalAlerts: z.number().min(1).optional(),
       parallelBatches: z.number().min(1).max(5).optional(),
-      mergeStrategy: z.enum(['simple', 'llm', 'hierarchical']).optional(),
-      deduplicateAlerts: z.boolean().optional(),
+      mergeStrategy: z.enum(['sequential', 'hierarchical', 'map_reduce']).optional(),
+      deduplication: z.boolean().optional(),
     })
     .optional(),
 });
-
-type BatchedAttackDiscoveryRequest = z.infer<typeof BatchedAttackDiscoveryRequestBody>;
 
 /**
  * Response schema for batched attack discovery generation
@@ -168,18 +166,17 @@ export const postBatchedAttackDiscoveryRoute = (
           const batchProcessingConfig: BatchProcessingConfig = {
             ...DEFAULT_BATCH_CONFIG,
             batchSize: batchConfig.batchSize ?? DEFAULT_BATCH_CONFIG.batchSize,
-            maxAlerts: batchConfig.maxAlerts,
+            maxTotalAlerts: batchConfig.maxTotalAlerts ?? DEFAULT_BATCH_CONFIG.maxTotalAlerts,
             parallelBatches: batchConfig.parallelBatches ?? DEFAULT_BATCH_CONFIG.parallelBatches,
             mergeStrategy: batchConfig.mergeStrategy ?? DEFAULT_BATCH_CONFIG.mergeStrategy,
-            deduplicateAlerts:
-              batchConfig.deduplicateAlerts ?? DEFAULT_BATCH_CONFIG.deduplicateAlerts,
+            deduplication: batchConfig.deduplication ?? DEFAULT_BATCH_CONFIG.deduplication,
           };
 
           // Create merge service
           const mergeService = new AttackDiscoveryMergeService({ logger });
 
           // Create batch processor function that uses the existing graph
-          const processBatch = async (alerts: AlertForProcessing[]) => {
+          const processBatch = async (alerts: AlertForProcessing[], _batchIndex: number) => {
             // Convert to size-based config for existing graph
             const result = await generateAttackDiscoveries({
               actionsClient,
@@ -188,12 +185,13 @@ export const postBatchedAttackDiscoveryRoute = (
                 anonymizationFields: request.body.anonymizationFields,
                 apiConfig: request.body.apiConfig,
                 connectorName: request.body.connectorName,
+                subAction: 'invokeAI',
                 filter: {
                   ...request.body.filter,
-                  // Add filter to only process specific alert IDs
                   bool: {
                     must: [
-                      ...(request.body.filter?.bool?.must ?? []),
+                      ...((request.body.filter as Record<string, Record<string, unknown[]>>)?.bool
+                        ?.must ?? []),
                       {
                         terms: {
                           _id: alerts.map((a) => a.id),
@@ -230,6 +228,9 @@ export const postBatchedAttackDiscoveryRoute = (
           const batchProcessor = new BatchProcessor({
             logger,
             config: batchProcessingConfig,
+            processBatch,
+            mergeDiscoveries: (discoveriesA, discoveriesB) =>
+              mergeService.merge(discoveriesA, discoveriesB),
           });
 
           // Start batched processing in background
@@ -242,13 +243,16 @@ export const postBatchedAttackDiscoveryRoute = (
           // First, fetch all matching alerts to get their IDs
           const alertsQuery = await esClient.search({
             index: alertsIndexPattern,
-            size: batchProcessingConfig.maxAlerts ?? 10000,
+            size:
+              batchProcessingConfig.maxTotalAlerts > 0
+                ? batchProcessingConfig.maxTotalAlerts
+                : 10000,
             query: request.body.filter ?? { match_all: {} },
             _source: false, // We only need IDs for now
           });
 
           const alertsForProcessing: AlertForProcessing[] = alertsQuery.hits.hits.map((hit) => ({
-            id: hit._id!,
+            id: hit._id ?? '',
             content: '', // Content will be fetched during batch processing
           }));
 
@@ -258,9 +262,7 @@ export const postBatchedAttackDiscoveryRoute = (
 
           // Process batches (in background, not awaited)
           batchProcessor
-            .process(alertsForProcessing, processBatch, (results) =>
-              mergeService.merge(results[0] ?? [], results[1] ?? [])
-            )
+            .process(alertsForProcessing)
             .then(async (result: BatchProcessingResult) => {
               logger.info(
                 `Batched Attack Discovery generation ${executionUuid} completed: ${result.discoveries.length} discoveries from ${result.totalAlertsProcessed} alerts in ${result.totalDurationMs}ms`

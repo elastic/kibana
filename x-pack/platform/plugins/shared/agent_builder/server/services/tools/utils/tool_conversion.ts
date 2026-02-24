@@ -7,14 +7,14 @@
 
 import type { JsonSchema7ObjectType } from 'zod-to-json-schema';
 import zodToJsonSchema from 'zod-to-json-schema';
-import type { ZodObject } from '@kbn/zod';
+import type { ZodType } from '@kbn/zod';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ToolDefinitionWithSchema, ToolDefinition, ToolType } from '@kbn/agent-builder-common';
 import type { Runner, ExecutableTool, InternalToolDefinition } from '@kbn/agent-builder-server';
 
 export const toExecutableTool = <
   TConfig extends object = {},
-  RunInput extends ZodObject<any> = ZodObject<any>
+  RunInput extends ZodType<any> = ZodType<any>
 >({
   tool,
   runner,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger, CoreStart } from '@kbn/core/server';
+import type { Logger, CoreStart, KibanaRequest } from '@kbn/core/server';
 import type {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
@@ -224,7 +224,7 @@ export class AlertGroupingTask {
 
       // Create a scoped saved objects client for the space
       const scopedSoClient = coreStart.savedObjects.getScopedClient(
-        { headers: {} } as any, // Internal request
+        { headers: {} } as unknown as KibanaRequest,
         { includedHiddenTypes: ['alert-grouping-workflow', 'alert-grouping-execution'] }
       );
 
@@ -251,18 +251,15 @@ export class AlertGroupingTask {
       const execution = await dataClient.createExecution(workflowId, 'schedule', false);
 
       // Get default connector from UI settings if not configured
-      let connectorId = workflow.apiConfig?.connectorId;
+      const connectorId =
+        workflow.apiConfig?.connectorId ?? (await this.getDefaultConnectorId(coreStart, spaceId));
       const actionTypeId = workflow.apiConfig?.actionTypeId;
-
-      if (!connectorId) {
-        connectorId = await this.getDefaultConnectorId(coreStart, spaceId);
-      }
 
       // Get cases client if available
       const casesClient = this.cases
         ? (this.cases.getCasesClientWithRequest({
             headers: {},
-          } as any) as unknown as CasesClientLike)
+          } as unknown as KibanaRequest) as unknown as CasesClientLike)
         : undefined;
 
       // Execute workflow
@@ -376,7 +373,7 @@ export class AlertGroupingTask {
     try {
       const soClient = coreStart.savedObjects.createInternalRepository();
       const uiSettingsClient = coreStart.uiSettings.asScopedToClient(
-        coreStart.savedObjects.getScopedClient({ headers: {} } as any)
+        coreStart.savedObjects.getScopedClient({ headers: {} } as unknown as KibanaRequest)
       );
 
       const defaultConnectorSetting = await uiSettingsClient.get<string | undefined>(

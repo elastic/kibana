@@ -85,7 +85,7 @@ const createListSavedQueriesTool = (getOsqueryContext: GetOsqueryAppContextFn) =
       );
 
       const savedObjects = savedQueries.saved_objects.map((savedObject) => {
-        const ecs_mapping = savedObject.attributes.ecs_mapping;
+        const ecsMapping = savedObject.attributes.ecs_mapping;
         const prebuiltById = savedObject.id && prebuiltSavedQueriesMap[savedObject.id];
         const prebuiltByOriginId =
           !prebuiltById && savedObject.originId
@@ -100,7 +100,7 @@ const createListSavedQueriesTool = (getOsqueryContext: GetOsqueryAppContextFn) =
           interval: savedObject.attributes.interval,
           timeout: savedObject.attributes.timeout,
           platform: savedObject.attributes.platform,
-          ecs_mapping: ecs_mapping ? convertECSMappingToObject(ecs_mapping) : undefined,
+          ecs_mapping: ecsMapping ? convertECSMappingToObject(ecsMapping) : undefined,
           created_at: savedObject.attributes.created_at,
           created_by: savedObject.attributes.created_by,
           updated_at: savedObject.attributes.updated_at,
@@ -137,7 +137,7 @@ const createListSavedQueriesTool = (getOsqueryContext: GetOsqueryAppContextFn) =
  */
 const createGetSavedQueryTool = (getOsqueryContext: GetOsqueryAppContextFn) =>
   tool(
-    async ({ saved_query_id }, config) => {
+    async ({ saved_query_id: savedQueryId }, config) => {
       const onechatContext = getOneChatContext(config);
       if (!onechatContext) {
         throw new Error('OneChat context not available');
@@ -159,7 +159,7 @@ const createGetSavedQueryTool = (getOsqueryContext: GetOsqueryAppContextFn) =>
 
       const savedObject = await spaceScopedClient.get<SavedQuerySavedObject>(
         savedQuerySavedObjectType,
-        saved_query_id
+        savedQueryId
       );
 
       const prebuiltSavedQueriesMap = await getInstalledSavedQueriesMap(
@@ -168,7 +168,7 @@ const createGetSavedQueryTool = (getOsqueryContext: GetOsqueryAppContextFn) =>
         spaceId
       );
 
-      const ecs_mapping = savedObject.attributes.ecs_mapping;
+      const ecsMapping = savedObject.attributes.ecs_mapping;
       const prebuiltById = savedObject.id && prebuiltSavedQueriesMap[savedObject.id];
       const prebuiltByOriginId =
         !prebuiltById && savedObject.originId
@@ -183,7 +183,7 @@ const createGetSavedQueryTool = (getOsqueryContext: GetOsqueryAppContextFn) =>
         interval: savedObject.attributes.interval,
         timeout: savedObject.attributes.timeout,
         platform: savedObject.attributes.platform,
-        ecs_mapping: ecs_mapping ? convertECSMappingToObject(ecs_mapping) : undefined,
+        ecs_mapping: ecsMapping ? convertECSMappingToObject(ecsMapping) : undefined,
         created_at: savedObject.attributes.created_at,
         created_by: savedObject.attributes.created_by,
         updated_at: savedObject.attributes.updated_at,

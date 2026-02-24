@@ -37,6 +37,21 @@ When conducting forensic analysis, you MUST:
 3. **DOCUMENT findings** - Create timelines and add notes to alerts/cases
 4. **CORRELATE evidence** - Cross-reference findings across multiple data sources
 
+## MANDATORY: Always Query \\\`elastic_browser_history\\\`
+
+Every forensic investigation MUST include a query against the \\\`elastic_browser_history\\\` osquery table, regardless of the investigation type. This custom Elastic table provides unified browser history across all installed browsers (Chrome, Firefox, Edge, Safari) in a single normalized schema — a capability unique to Elastic's osquery integration.
+
+**Why this is mandatory:**
+- Browser history is one of the most valuable forensic artifacts for establishing user activity timelines
+- Phishing, C2 callbacks, data exfiltration, and social engineering all leave browser traces
+- The \\\`elastic_browser_history\\\` table eliminates the need to query each browser's SQLite database separately
+- Even investigations that appear unrelated to browser activity often reveal browser-based initial access vectors
+
+**Required steps for every investigation:**
+1. Call \\\`security.osquery.get_table_schema({ tableName: "elastic_browser_history", agentId: "<agent_id>" })\\\` to discover the current column names
+2. Query the table using the discovered schema to collect browser history evidence
+3. Include the browser history findings in your investigation timeline and correlation analysis
+
 ## Investigation Playbooks
 
 ### Playbook 1: Process Forensics
@@ -314,6 +329,48 @@ platform.core.search({
 })
 \`\`\`
 
+### Playbook 8: Cross-Endpoint IOC Sweep
+
+When asked to check if other users or endpoints are affected by a domain, hash, or other IOC, perform a mass query across all osquery-enabled endpoints.
+
+**Step 1: List ALL Agents and Identify Protection Levels**
+\`\`\`
+security.osquery.get_agents({})
+\`\`\`
+Examine the \`policy_name\` field for each agent. Group agents into:
+- **Fully protected**: Agents on policies that include both Elastic Defend and Osquery (policy name typically contains "Defend")
+- **Osquery only**: Agents on policies with only Osquery (no Elastic Defend) — these have reduced visibility and no endpoint protection
+
+**Step 2: Discover Browser History Schema (pick any online agent)**
+\`\`\`
+security.osquery.get_table_schema({ tableName: "elastic_browser_history", agentId: "<any_online_agent_id>" })
+\`\`\`
+
+**Step 3: Query ALL Agents for the Malicious Domain**
+Pass ALL online agent IDs in a single query:
+\`\`\`
+security.osquery.run_live_query({
+  query: "SELECT <columns_from_schema> FROM elastic_browser_history WHERE <url_column> LIKE '%<malicious_domain>%'",
+  agentIds: ["<agent_id_1>", "<agent_id_2>", "<agent_id_3>", ...]
+})
+\`\`\`
+
+**Step 4: Fetch and Correlate Results**
+\`\`\`
+security.osquery.get_results({ actionId: "<queries[0].action_id>" })
+\`\`\`
+Each result row includes an \`_agent_id\` field. Match each \`_agent_id\` back to the agent list from Step 1 to determine:
+- Which additional endpoints visited the malicious domain
+- Whether those endpoints have Elastic Defend or only Osquery
+
+**Step 5: Report Findings**
+For each affected endpoint, report:
+- Hostname and agent ID
+- Policy name and protection level (Defend + Osquery vs Osquery only)
+- The browser history evidence (URL, timestamp, browser)
+- **Highlight endpoints without Elastic Defend** — these have reduced visibility and no endpoint protection
+- Recommend deploying Elastic Defend on unprotected endpoints for complete coverage
+
 ## Key osquery Tables Reference
 
 ### Process Analysis
@@ -369,9 +426,11 @@ platform.core.search({
 - Collect persistence mechanisms
 - Gather file and hash information
 - Pull user activity and authentication logs
+- **ALWAYS query \\\`elastic_browser_history\\\`** — discover schema first via \\\`security.osquery.get_table_schema\\\`, then collect browser history for every endpoint under investigation
 
 ### 3. Analysis & Correlation
 - Correlate osquery findings with ES|QL log analysis
+- Cross-reference browser history from \\\`elastic_browser_history\\\` with process, network, and authentication artifacts
 - Build timeline of attacker activity
 - Identify lateral movement paths
 - Document attack chain (MITRE ATT&CK mapping)
@@ -389,10 +448,11 @@ platform.core.search({
 ## Best Practices
 
 1. **Volatile First**: Collect volatile data (memory, connections, processes) before non-volatile (files, logs)
-2. **Document Everything**: Use timelines and case notes to document each step
-3. **Verify Schema**: ALWAYS call \`security.osquery.get_table_schema\` before querying any \`elastic_*\` custom table — never guess column names
-4. **Wait for Results**: The osquery tool automatically polls - always fetch results
-5. **Cross-Reference**: Validate findings across multiple data sources
-6. **Preserve Evidence**: Note original timestamps and avoid modifying evidence
-7. **Think Like an Attacker**: Follow the attack chain methodically`,
+2. **Always Collect Browser History**: Query \`elastic_browser_history\` in every investigation — browser artifacts reveal phishing, C2, exfiltration, and initial access vectors that other telemetry misses
+3. **Document Everything**: Use timelines and case notes to document each step
+4. **Verify Schema**: ALWAYS call \`security.osquery.get_table_schema\` before querying any \`elastic_*\` custom table — never guess column names
+5. **Wait for Results**: The osquery tool automatically polls - always fetch results
+6. **Cross-Reference**: Validate findings across multiple data sources
+7. **Preserve Evidence**: Note original timestamps and avoid modifying evidence
+8. **Think Like an Attacker**: Follow the attack chain methodically`,
 });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { z, ZodObject } from '@kbn/zod';
+import type { z, ZodType } from '@kbn/zod';
 import type { MaybePromise } from '@kbn/utility-types';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ToolDefinition, ToolType } from '@kbn/agent-builder-common';
@@ -35,7 +35,7 @@ export interface ToolProvider {
  */
 export interface ExecutableTool<
   TConfig extends object = {},
-  TSchema extends ZodObject<any> = ZodObject<any>
+  TSchema extends ZodType<any> = ZodType<any>
 > extends ToolDefinition<ToolType, TConfig> {
   /**
    * Tool's input schema, defined as a zod schema.

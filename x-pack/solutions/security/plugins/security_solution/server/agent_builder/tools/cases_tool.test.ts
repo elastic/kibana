@@ -10,6 +10,7 @@ import {
   createToolTestMocks,
   setupMockCoreStartServices,
 } from '../__mocks__/test_helpers';
+import type { SecuritySolutionPluginStartDependencies } from '../../plugin_contract';
 import { casesTool } from './cases_tool';
 
 describe('casesTool', () => {
@@ -40,7 +41,7 @@ describe('casesTool', () => {
         cases: {
           getCasesClientWithRequest: jest.fn().mockResolvedValue(mockCasesClient),
         },
-      } as any,
+      } as unknown as SecuritySolutionPluginStartDependencies,
       {},
     ]);
 
@@ -54,7 +55,7 @@ describe('casesTool', () => {
           tags: ['tag-1'],
           confirm: true,
         },
-      } as any,
+      } as Record<string, unknown>,
       createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
     );
 
@@ -87,7 +88,7 @@ describe('casesTool', () => {
         cases: {
           getCasesClientWithRequest: jest.fn().mockResolvedValue(mockCasesClient),
         },
-      } as any,
+      } as unknown as SecuritySolutionPluginStartDependencies,
       {},
     ]);
 
@@ -100,7 +101,7 @@ describe('casesTool', () => {
           comment: 'blah',
           confirm: true,
         },
-      } as any,
+      } as Record<string, unknown>,
       createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
     );
 

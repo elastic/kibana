@@ -40,6 +40,9 @@ const runProvisioning: RunFn = async (cliContext) => {
     osqueryOnlyCount: cliContext.flags.osqueryOnlyCount
       ? Number(cliContext.flags.osqueryOnlyCount)
       : undefined,
+    osqueryOnlyCompromisedCount: cliContext.flags.osqueryOnlyCompromisedCount
+      ? Number(cliContext.flags.osqueryOnlyCompromisedCount)
+      : undefined,
     maliciousDomain: cliContext.flags.maliciousDomain as string,
     username: cliContext.flags.username as string,
     createDetectionRule: Boolean(cliContext.flags.createDetectionRule),
@@ -103,7 +106,7 @@ export const cli = () => {
   - Creates detection rule for malicious domain monitoring (REF7707)
   - Creates VirusTotal workflow for domain enrichment
   
-  Default: 1 Defend+Osquery endpoint, 1 Osquery-only endpoint (for local development)
+  Default: 5 Defend+Osquery endpoints, 5 Osquery-only endpoints (10 total)
   Use --defend-osquery-count and --osquery-only-count to customize
 `,
     flags: {
@@ -117,6 +120,7 @@ export const cli = () => {
         'version',
         'defendOsqueryCount',
         'osqueryOnlyCount',
+        'osqueryOnlyCompromisedCount',
         'maliciousDomain',
         'virustotalApiKey',
         'vmGuiUser',
@@ -134,8 +138,9 @@ export const cli = () => {
         apiKey: '',
         spaceId: '',
         version: '',
-        defendOsqueryCount: '1',
-        osqueryOnlyCount: '1',
+        defendOsqueryCount: '5',
+        osqueryOnlyCount: '5',
+        osqueryOnlyCompromisedCount: '2',
         maliciousDomain: 'digert.ictnsc.com',
         createDetectionRule: true,
         createWorkflow: true,
@@ -147,8 +152,9 @@ export const cli = () => {
         vmGuiPassword: 'changeme',
       },
       help: `
-        --defend-osquery-count    Number of endpoints with Elastic Defend + Osquery (default: 1)
-        --osquery-only-count       Number of endpoints with Osquery only (default: 1)
+        --defend-osquery-count    Number of endpoints with Elastic Defend + Osquery (default: 5)
+        --osquery-only-count       Number of endpoints with Osquery only (default: 5)
+        --osquery-only-compromised-count  Number of osquery-only endpoints with malicious browser history (default: 2)
         --malicious-domain         Malicious domain for browser history (default: digert.ictnsc.com)
         --virustotal-api-key       VirusTotal API key (required if --create-workflow is true)
         --create-detection-rule    Create detection rule for malicious domains (default: true)

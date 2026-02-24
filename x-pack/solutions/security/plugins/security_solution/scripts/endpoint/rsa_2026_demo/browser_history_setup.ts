@@ -157,6 +157,9 @@ const injectChromeHistory = async (
   // Create Chrome profile directory if it doesn't exist
   await hostVm.exec(`mkdir -p ${chromeProfileDir}`, { silent: true });
 
+  // Clear immutable flags that Elastic Defend or Chrome may have set on the profile directory
+  await hostVm.exec(`sudo chattr -i ${chromeProfileDir} 2>/dev/null || true`, { silent: true });
+
   // Create a SQL script to inject history (idempotent per-domain)
   const sqlScript = `
 -- Chrome History injection script
@@ -200,7 +203,10 @@ SELECT id, ${timestamp}, 0, 0, 805306368, 0 FROM urls WHERE url = 'https://${dom
   // Upload SQL script and execute it via sqlite's `.read` (no shell redirection required)
   await hostVm.exec('rm -f /tmp/chrome_history.sql', { silent: true });
   await uploadTextFileToVm(hostVm, '/tmp/chrome_history.sql', sqlScript);
-  await hostVm.exec(`sqlite3 ${historyDb} ".read /tmp/chrome_history.sql"`, { silent: true });
+  await hostVm.exec(
+    `sudo chattr -i ${historyDb} 2>/dev/null; sudo rm -f ${historyDb} ${historyDb}-journal 2>/dev/null; sqlite3 ${historyDb} ".read /tmp/chrome_history.sql"`,
+    { silent: true }
+  );
   await hostVm.exec('rm -f /tmp/chrome_history.sql', { silent: true });
 
   // Set proper permissions
@@ -335,10 +341,13 @@ export const setupBrowserHistory = async (
       };
     }
 
-    // Find first Osquery-only endpoint for Firefox history
+    // Inject Firefox history on the first N osquery-only endpoints (N = osqueryOnlyCompromisedCount)
     const osqueryOnlyEndpoints = endpoints.filter((e) => e.policyType === 'osquery-only');
-    if (osqueryOnlyEndpoints.length > 0) {
-      const endpoint = osqueryOnlyEndpoints[0];
+    const compromisedOsqueryEndpoints = osqueryOnlyEndpoints.slice(
+      0,
+      config.osqueryOnlyCompromisedCount
+    );
+    for (const endpoint of compromisedOsqueryEndpoints) {
       logger.info(`Setting up Firefox history on ${endpoint.hostname}`);
 
       await ensureFirefox(endpoint.hostVm, logger);

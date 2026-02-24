@@ -25,7 +25,7 @@ export const convertPersistedDefinition = <
   tool: ToolPersistedDefinition<TPersistedConfig> & { type: TType };
   definition: ToolTypeDefinition<TType, TConfig, TSchema, TPersistedConfig>;
   context: ToolTypeConversionContext;
-}): InternalToolDefinition<TType, TConfig, TSchema> => {
+}): InternalToolDefinition<TType, TConfig> => {
   const { id, type, description, tags, configuration } = tool;
   const { request, spaceId } = context;
 

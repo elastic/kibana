@@ -115,14 +115,13 @@ const schema = z.discriminatedUnion('operation', [
 
 export const casesTool = (
   core: SecuritySolutionPluginCoreSetupDependencies
-): BuiltinToolDefinition => {
+): BuiltinToolDefinition<typeof schema> => {
   return {
     id: securityTool('cases'),
     type: ToolType.builtin,
     description: 'Create/update cases and add comments (no delete).',
-    // BuiltinToolDefinition currently types schema as ZodObject; we use a discriminated union at runtime.
-    schema: schema as unknown as z.ZodObject<any>,
-    handler: async (input: z.infer<typeof schema>, { request }) => {
+    schema,
+    handler: async (input, { request }) => {
       const [, pluginsStart] = await core.getStartServices();
       const cases = pluginsStart.cases;
       if (!cases) {
@@ -140,7 +139,7 @@ export const casesTool = (
             owner: SECURITY_SOLUTION_CASE_OWNER,
             connector: NONE_CONNECTOR,
             settings: DEFAULT_CASE_SETTINGS,
-          } as any);
+          } as Record<string, unknown>);
           return { results: [{ type: 'other', data: { operation: 'create_case', item: res } }] };
         }
         case 'update_case': {
@@ -159,7 +158,7 @@ export const casesTool = (
                 ...(input.params.status !== undefined ? { status: input.params.status } : {}),
               },
             ],
-          } as any);
+          } as Record<string, unknown>);
           return { results: [{ type: 'other', data: { operation: 'update_case', item: res } }] };
         }
         case 'attach_alerts': {
@@ -176,14 +175,14 @@ export const casesTool = (
               },
               owner: SECURITY_SOLUTION_CASE_OWNER,
             },
-          } as any);
+          } as Record<string, unknown>);
           return { results: [{ type: 'other', data: { operation: 'attach_alerts', item: res } }] };
         }
         case 'add_comment': {
           const comment =
             typeof input.params.comment === 'string'
               ? input.params.comment
-              : (input.params.comment as any)?.comment;
+              : input.params.comment.comment;
           try {
             const res = await casesClient.attachments.add({
               caseId: input.params.caseId,
@@ -192,9 +191,9 @@ export const casesTool = (
                 type: 'user',
                 owner: SECURITY_SOLUTION_CASE_OWNER,
               },
-            } as any);
+            } as Record<string, unknown>);
             return { results: [{ type: 'other', data: { operation: 'add_comment', item: res } }] };
-          } catch (e: any) {
+          } catch (e: unknown) {
             return {
               results: [
                 createErrorResult({

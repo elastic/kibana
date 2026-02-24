@@ -11,10 +11,12 @@ import type { Client } from '@elastic/elasticsearch';
 import type { HostVm, SupportedVmManager } from '../common/types';
 
 export interface Rsa2026DemoConfig {
-  /** Number of endpoints with Elastic Defend + Osquery (default: 1 for local dev, 5 for production) */
+  /** Number of endpoints with Elastic Defend + Osquery (default: 5) */
   defendOsqueryCount: number;
-  /** Number of endpoints with Osquery only (default: 1 for local dev, 5 for production) */
+  /** Number of endpoints with Osquery only (default: 5) */
   osqueryOnlyCount: number;
+  /** Number of osquery-only endpoints that should have the malicious domain in browser history (default: 2) */
+  osqueryOnlyCompromisedCount: number;
   /** Malicious domain to use in browser history (default: digert.ictnsc.com) */
   maliciousDomain: string;
   /** Username for browser history entries (default: patryk) */

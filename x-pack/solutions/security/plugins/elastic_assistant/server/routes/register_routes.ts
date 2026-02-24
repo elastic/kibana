@@ -167,5 +167,5 @@ export const registerRoutes = (
   }
 
   // Alert Grouping
-  registerAlertGroupingRoutes(router, logger);
+  registerAlertGroupingRoutes(router);
 };

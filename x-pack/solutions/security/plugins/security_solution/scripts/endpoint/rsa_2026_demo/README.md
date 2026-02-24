@@ -12,23 +12,12 @@ The script provisions:
 
 ## Quick Start
 
-### Local Development (Default: 1+1 endpoints)
+### Local Development (Default: 5+5 endpoints)
 
 ```bash
 node x-pack/solutions/security/plugins/security_solution/scripts/endpoint/run_rsa_2026_demo.js \
   --kibanaUrl http://127.0.0.1:5601 \
   --elasticUrl http://127.0.0.1:9200 \
-  --virustotalApiKey YOUR_VIRUSTOTAL_API_KEY
-```
-
-### Production/Demo (5+5 endpoints)
-
-```bash
-node x-pack/solutions/security/plugins/security_solution/scripts/endpoint/run_rsa_2026_demo.js \
-  --kibanaUrl http://127.0.0.1:5601 \
-  --elasticUrl http://127.0.0.1:9200 \
-  --defend-osquery-count 5 \
-  --osquery-only-count 5 \
   --virustotalApiKey YOUR_VIRUSTOTAL_API_KEY
 ```
 
@@ -47,8 +36,8 @@ node x-pack/solutions/security/plugins/security_solution/scripts/endpoint/run_rs
 ## CLI Options
 
 ### Endpoint Configuration
-- `--defend-osquery-count` - Number of endpoints with Elastic Defend + Osquery (default: 1)
-- `--osquery-only-count` - Number of endpoints with Osquery only (default: 1)
+- `--defend-osquery-count` - Number of endpoints with Elastic Defend + Osquery (default: 5)
+- `--osquery-only-count` - Number of endpoints with Osquery only (default: 5)
 - `--malicious-domain` - Malicious domain for browser history (default: digert.ictnsc.com)
 
 ### Workflow and Rules

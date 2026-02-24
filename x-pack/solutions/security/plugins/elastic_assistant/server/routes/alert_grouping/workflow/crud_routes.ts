@@ -15,6 +15,7 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildResponse } from '../../../lib/build_response';
 import type { ElasticAssistantRequestHandlerContext } from '../../../types';
 import { WorkflowDataClient } from '../../../lib/alert_grouping';
+import type { GroupingStrategy, EntityTypeConfig } from '../../../lib/alert_grouping/types';
 import { performChecks } from '../../helpers';
 
 // Route paths
@@ -181,8 +182,8 @@ export const registerWorkflowCrudRoutes = (
             ...request.body,
             groupingConfig: {
               ...request.body.groupingConfig,
-              strategy: request.body.groupingConfig.strategy as any,
-              entityTypes: request.body.groupingConfig.entityTypes as any,
+              strategy: request.body.groupingConfig.strategy as GroupingStrategy,
+              entityTypes: request.body.groupingConfig.entityTypes as EntityTypeConfig[],
             },
           });
 
@@ -347,8 +348,10 @@ export const registerWorkflowCrudRoutes = (
             groupingConfig: request.body.groupingConfig
               ? {
                   ...request.body.groupingConfig,
-                  strategy: request.body.groupingConfig.strategy as any,
-                  entityTypes: request.body.groupingConfig.entityTypes as any,
+                  strategy: request.body.groupingConfig.strategy as GroupingStrategy | undefined,
+                  entityTypes: request.body.groupingConfig.entityTypes as
+                    | EntityTypeConfig[]
+                    | undefined,
                 }
               : undefined,
           });

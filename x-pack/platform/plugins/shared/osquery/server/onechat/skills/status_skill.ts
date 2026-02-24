@@ -48,7 +48,7 @@ Report ONLY information from the tool results:
  */
 const createGetStatusTool = (getOsqueryContext: GetOsqueryAppContextFn) =>
   tool(
-    async ({}, config) => {
+    async (_params, config) => {
       const onechatContext = getOneChatContext(config);
       if (!onechatContext) {
         throw new Error('OneChat context not available');

@@ -9,11 +9,31 @@ import { z } from '@kbn/zod';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { ToolType } from '@kbn/agent-builder-common';
 import { createErrorResult } from '@kbn/agent-builder-server';
-import type { ListPluginSetup } from '@kbn/lists-plugin/server';
+import type {
+  ListPluginSetup,
+  CreateExceptionListItemOptions,
+  UpdateExceptionListItemOptions,
+} from '@kbn/lists-plugin/server';
 import { v4 as uuidv4 } from 'uuid';
 import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
 import { securityTool } from './constants';
+
+interface BaseEntry {
+  type: 'match' | 'match_any' | 'exists' | 'wildcard' | 'list';
+  field: string;
+  operator?: 'included' | 'excluded';
+  value?: string | string[];
+  list?: { id: string; type: string };
+}
+
+interface NestedEntry {
+  type: 'nested';
+  field: string;
+  entries: ExceptionEntry[];
+}
+
+type ExceptionEntry = BaseEntry | NestedEntry;
 
 const listOperatorSchema = z.enum(['included', 'excluded']);
 
@@ -54,7 +74,7 @@ const entryListSchema = z.object({
   }),
 });
 
-const entrySchema: z.ZodType<any> = z.lazy(() =>
+const entrySchema: z.ZodType<ExceptionEntry> = z.lazy(() =>
   z.union([
     entryMatchSchema,
     entryMatchAnySchema,
@@ -79,7 +99,7 @@ const exceptionItemStructuredSchema = z.object({
   meta: z.record(z.unknown()).optional().describe('Optional metadata (escape hatch)'),
 });
 
-const ensureValidEntries = (entries: Array<any>) => {
+const ensureValidEntries = (entries: ExceptionEntry[]) => {
   const hasList = entries.some((e) => e.type === 'list');
   const hasNonList = entries.some((e) => e.type !== 'list');
   if (hasList && hasNonList) {
@@ -164,7 +184,7 @@ export const exceptionListsTool = ({
       const [coreStart] = await core.getStartServices();
       const soClient = coreStart.savedObjects.getScopedClient(request);
       const username = 'elastic';
-      const exceptionsClient = lists.getExceptionListClient(soClient as any, username);
+      const exceptionsClient = lists.getExceptionListClient(soClient, username);
 
       switch (input.operation) {
         case 'find': {
@@ -177,7 +197,18 @@ export const exceptionListsTool = ({
             page: input.params.page,
             perPage: input.params.perPage,
             filter: input.params.filter,
-          } as any);
+            sortField: undefined,
+            sortOrder: undefined,
+          });
+          if (!res) {
+            return {
+              results: [
+                createErrorResult({
+                  message: `Exception list not found for listId "${input.params.listId}".`,
+                }),
+              ],
+            };
+          }
           return {
             results: [
               {
@@ -187,7 +218,7 @@ export const exceptionListsTool = ({
                   items: res.data,
                   total: res.total,
                   page: res.page,
-                  perPage: res.per_page ?? res.perPage,
+                  perPage: res.per_page,
                 },
               },
             ],
@@ -197,15 +228,16 @@ export const exceptionListsTool = ({
           const namespaceType = input.params.namespaceType ?? 'single';
           const res = await exceptionsClient.getExceptionListItem({
             itemId: input.params.itemId,
+            id: undefined,
             namespaceType,
-          } as any);
+          });
           return { results: [{ type: 'other', data: { operation: 'get', item: res } }] };
         }
         case 'create': {
-          const merged = {
+          const merged: Record<string, unknown> = {
             ...(input.params.rawItem ?? {}),
             ...(input.params.item ?? {}),
-          } as any;
+          };
           const validation = exceptionItemStructuredSchema.safeParse(merged);
           if (!validation.success) {
             const issues = validation.error.issues.slice(0, 6).map((i) => ({
@@ -259,15 +291,16 @@ export const exceptionListsTool = ({
           ensureValidEntries(validation.data.entries);
 
           try {
-            const itemId: string = merged.item_id ?? uuidv4();
+            const itemId: string = typeof merged.item_id === 'string' ? merged.item_id : uuidv4();
             const namespaceType =
               input.params.namespaceType ??
               (input.params.listId === ENDPOINT_LIST_ID ? 'agnostic' : 'single');
 
-            const osTypes = (validation.data.os_types ?? []) as any;
-            const expireTime = (validation.data.expire_time as any) ?? undefined;
-            const meta = (validation.data.meta as any) ?? undefined;
-            const tags = (validation.data.tags ?? []) as any;
+            const osTypes = (validation.data.os_types ??
+              []) as CreateExceptionListItemOptions['osTypes'];
+            const expireTime = validation.data.expire_time ?? undefined;
+            const meta = validation.data.meta ?? undefined;
+            const tags = (validation.data.tags ?? []) as CreateExceptionListItemOptions['tags'];
 
             // Special case: endpoint exceptions list lives in the agnostic namespace and uses a dedicated API.
             // Users often refer to it by listId "endpoint_list".
@@ -275,36 +308,37 @@ export const exceptionListsTool = ({
               input.params.listId === ENDPOINT_LIST_ID
                 ? await exceptionsClient.createEndpointListItem({
                     comments: [],
-                    description: validation.data.description as any,
-                    entries: validation.data.entries as any,
-                    itemId: itemId as any,
+                    description: validation.data.description,
+                    entries: validation.data.entries as CreateExceptionListItemOptions['entries'],
+                    itemId,
                     meta,
-                    name: validation.data.name as any,
+                    name: validation.data.name,
                     osTypes,
                     tags,
-                    type: 'simple' as any,
+                    type: 'simple',
                   })
                 : await exceptionsClient.createExceptionListItem({
                     comments: [],
-                    description: validation.data.description as any,
-                    entries: validation.data.entries as any,
+                    description: validation.data.description,
+                    entries: validation.data.entries as CreateExceptionListItemOptions['entries'],
                     expireTime,
-                    itemId: itemId as any,
-                    listId: input.params.listId as any,
+                    itemId,
+                    listId: input.params.listId,
                     meta,
-                    name: validation.data.name as any,
-                    namespaceType: namespaceType as any,
+                    name: validation.data.name,
+                    namespaceType,
                     osTypes,
                     tags,
-                    type: 'simple' as any,
+                    type: 'simple',
                   });
             return { results: [{ type: 'other', data: { operation: 'create', item: res } }] };
-          } catch (e: any) {
+          } catch (e: unknown) {
+            const err = e as Record<string, unknown>;
             const reason =
-              typeof e?.getReason === 'function'
-                ? e.getReason()
-                : Array.isArray(e?.reason)
-                ? e.reason
+              typeof err?.getReason === 'function'
+                ? (err as { getReason: () => unknown }).getReason()
+                : Array.isArray(err?.reason)
+                ? err.reason
                 : undefined;
             return {
               results: [
@@ -312,9 +346,9 @@ export const exceptionListsTool = ({
                   message:
                     `Failed to create exception list item (operation "create"). ` +
                     `Ensure required fields are present (name, description, entries) and entries are valid. ` +
-                    `Underlying error: ${e?.message ?? String(e)}${
+                    `Underlying error: ${err?.message ?? String(e)}${
                       Array.isArray(reason) && reason.length
-                        ? `. Validation reasons: ${reason.slice(0, 5).join(' | ')}`
+                        ? `. Validation reasons: ${(reason as string[]).slice(0, 5).join(' | ')}`
                         : ''
                     }`,
                   metadata: {
@@ -342,10 +376,10 @@ export const exceptionListsTool = ({
           }
         }
         case 'update': {
-          const merged = {
+          const merged: Record<string, unknown> = {
             ...(input.params.rawItem ?? {}),
             ...(input.params.item ?? {}),
-          } as any;
+          };
           if (merged.entries) {
             const entriesValidation = z.array(entrySchema).min(1).safeParse(merged.entries);
             if (!entriesValidation.success) {
@@ -384,53 +418,61 @@ export const exceptionListsTool = ({
           try {
             const namespaceType = input.params.namespaceType ?? 'single';
             const existing = await exceptionsClient.getExceptionListItem({
-              id: input.params.id as any,
+              id: input.params.id,
               itemId: undefined,
-              namespaceType: namespaceType as any,
+              namespaceType,
             });
 
-            const next = {
-              ...existing,
+            const next: Record<string, unknown> = {
+              ...(existing as Record<string, unknown>),
               ...merged,
-            } as any;
+            };
 
             const isEndpoint = existing?.list_id === ENDPOINT_LIST_ID;
 
-            const updateParams: any = {
+            const updateParams: UpdateExceptionListItemOptions = {
               _version: existing?._version,
               comments: existing?.comments ?? [],
-              entries: next.entries ?? existing?.entries,
-              expireTime: next.expire_time ?? existing?.expire_time,
+              entries: (next.entries ??
+                existing?.entries) as UpdateExceptionListItemOptions['entries'],
+              expireTime: (next.expire_time ??
+                existing?.expire_time) as UpdateExceptionListItemOptions['expireTime'],
               id: input.params.id,
               itemId: undefined,
               namespaceType: isEndpoint ? 'agnostic' : namespaceType,
-              name: next.name ?? existing?.name,
-              description: next.description ?? existing?.description,
-              meta: next.meta ?? existing?.meta,
-              osTypes: next.os_types ?? existing?.os_types ?? [],
-              tags: next.tags ?? existing?.tags,
-              type: next.type ?? existing?.type ?? 'simple',
+              name: (next.name ?? existing?.name) as UpdateExceptionListItemOptions['name'],
+              description: (next.description ??
+                existing?.description) as UpdateExceptionListItemOptions['description'],
+              meta: (next.meta ?? existing?.meta) as UpdateExceptionListItemOptions['meta'],
+              osTypes: (next.os_types ??
+                existing?.os_types ??
+                []) as UpdateExceptionListItemOptions['osTypes'],
+              tags: (next.tags ?? existing?.tags) as UpdateExceptionListItemOptions['tags'],
+              type: (next.type ??
+                existing?.type ??
+                'simple') as UpdateExceptionListItemOptions['type'],
             };
 
             const res = isEndpoint
               ? await exceptionsClient.updateEndpointListItem(updateParams)
               : await exceptionsClient.updateExceptionListItem(updateParams);
             return { results: [{ type: 'other', data: { operation: 'update', item: res } }] };
-          } catch (e: any) {
+          } catch (e: unknown) {
+            const err = e as Record<string, unknown>;
             const reason =
-              typeof e?.getReason === 'function'
-                ? e.getReason()
-                : Array.isArray(e?.reason)
-                ? e.reason
+              typeof err?.getReason === 'function'
+                ? (err as { getReason: () => unknown }).getReason()
+                : Array.isArray(err?.reason)
+                ? err.reason
                 : undefined;
             return {
               results: [
                 createErrorResult({
                   message:
                     `Failed to update exception list item (operation "update"). ` +
-                    `Underlying error: ${e?.message ?? String(e)}${
+                    `Underlying error: ${err?.message ?? String(e)}${
                       Array.isArray(reason) && reason.length
-                        ? `. Validation reasons: ${reason.slice(0, 5).join(' | ')}`
+                        ? `. Validation reasons: ${(reason as string[]).slice(0, 5).join(' | ')}`
                         : ''
                     }`,
                   metadata: {

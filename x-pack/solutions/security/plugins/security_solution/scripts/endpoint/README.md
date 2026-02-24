@@ -73,22 +73,47 @@ node x-pack/solutions/security/plugins/security_solution/scripts/endpoint/run_ag
 
 The Playwright UI script is: `x-pack/solutions/security/plugins/security_solution/scripts/endpoint/agent_skills_demo/ui/agent_skills_demo_ui.mjs`.
 
-## REF7707-like benign lab environment (Linux-only, Multipass)
+## RSA 2026 AI Forensics Agent Demo
 
-This lab script provisions a small Multipass topology and generates **benign** telemetry inspired by the Elastic Security Labs REF7707 report (domains, DNS lookups, downloads, execution, persistence-ish, SSH lateral-ish).
+This script provisions a complete RSA 2026 demo environment for the AI Forensics Agent scenario (REF7707-based).
+It creates endpoints with two policy types (Elastic Defend + Osquery and Osquery-only), injects browser history
+with malicious domain entries, creates a detection rule for REF7707 typosquatting domains, and sets up a VirusTotal
+enrichment workflow.
 
-Key point: `/etc/hosts` does **not** generate DNS telemetry, so this lab sets up a DNS server VM and configures victims to use it to reliably populate `dns.question.name`.
+See `rsa_2026_demo/README.md` for full documentation.
 
-Run:
+### Run
+
+From the Kibana repo root:
 
 ```bash
-node x-pack/solutions/security/plugins/security_solution/scripts/endpoint/run_ref7707_lab.js --help
+node x-pack/solutions/security/plugins/security_solution/scripts/endpoint/run_rsa_2026_demo.js --help
+```
+
+Example (local dev, 1+1 endpoints):
+
+```bash
+node x-pack/solutions/security/plugins/security_solution/scripts/endpoint/run_rsa_2026_demo.js \
+  --kibanaUrl http://127.0.0.1:5601 \
+  --elasticUrl http://127.0.0.1:9200
+```
+
+Example (production, 5+5 endpoints with VirusTotal):
+
+```bash
+node x-pack/solutions/security/plugins/security_solution/scripts/endpoint/run_rsa_2026_demo.js \
+  --kibanaUrl http://127.0.0.1:5601 \
+  --elasticUrl http://127.0.0.1:9200 \
+  --defendOsqueryCount 5 \
+  --osqueryOnlyCount 5 \
+  --osqueryOnlyCompromisedCount 3 \
+  --virustotalApiKey YOUR_KEY
 ```
 
 ### Cleanup
 
-- **Auto cleanup after demo**: pass `--cleanup`
-- **Manual teardown of a VM**: pass `--teardownVm <vmName>`
+- **Auto cleanup**: pass `--cleanup`
+- **Full cleanup (including Kibana artifacts)**: pass `--cleanup --cleanupAll`
 
 ## GCP VM Recovery (when agents go offline)
 

@@ -9,7 +9,8 @@ import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
 import { validateSkillDefinition } from '@kbn/agent-builder-server/skills';
 import type { PublicSkillDefinition } from '@kbn/agent-builder-common';
 import type { ToolRegistry } from '@kbn/agent-builder-server';
-import { createSkillRegistry, createSkillService, type SkillProvider } from './skill_service';
+import { createSkillService, type SkillProvider } from './skill_service';
+import { createSkillRegistry } from './skill_registry';
 
 jest.mock('@kbn/agent-builder-server/skills', () => {
   const actual = jest.requireActual('@kbn/agent-builder-server/skills');

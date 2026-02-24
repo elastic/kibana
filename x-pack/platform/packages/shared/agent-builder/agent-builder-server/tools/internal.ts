@@ -6,7 +6,7 @@
  */
 
 import type { MaybePromise } from '@kbn/utility-types';
-import type { z, ZodObject } from '@kbn/zod';
+import type { z, ZodType } from '@kbn/zod';
 import type { ToolDefinition, ToolType } from '@kbn/agent-builder-common';
 import type { ToolHandlerFn } from './handler';
 import type {
@@ -23,7 +23,7 @@ import type { LlmDescriptionHandler } from '../runner';
 export interface InternalToolDefinition<
   TType extends ToolType = ToolType,
   TConfig extends object = {},
-  TSchema extends ZodObject<any> = ZodObject<any>
+  TSchema extends ZodType<any> = ZodType<any>
 > extends ToolDefinition<TType, TConfig> {
   /**
    * Check if the tool is available for the current context.

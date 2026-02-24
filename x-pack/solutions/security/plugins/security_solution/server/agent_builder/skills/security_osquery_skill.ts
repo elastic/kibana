@@ -8,6 +8,7 @@
 import type { SkillDefinition, BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 import { ToolResultType, ToolType } from '@kbn/agent-builder-common/tools';
+import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { z } from '@kbn/zod';
 import type { OsqueryPluginSetup } from '@kbn/osquery-plugin/server';
 
@@ -48,8 +49,9 @@ Check osquery integration status and availability.
 ### osquery_get_agents (REQUIRED before running queries)
 List or search for osquery-enabled agents. Use this to find agent IDs by hostname.
 - Search by hostname: \`osquery_get_agents({ hostname: "server-name" })\`
+- Filter by policy: \`osquery_get_agents({ policyId: "<policy_uuid>" })\`
 - List all: \`osquery_get_agents({})\`
-Returns: id (agent ID), hostname, status, platform
+Returns: id (agent ID), hostname, status, platform, policy_id, policy_name
 
 ### osquery_get_table_schema (REQUIRED for elastic_* tables)
 Discover columns and types for any osquery table. Call \`security.osquery.get_table_schema({ tableName: "<table>", agentId: "<id>" })\`.
@@ -127,6 +129,29 @@ List osquery packs with pagination.
 - \`elastic_browser_history\` - Unified browser history (**custom Elastic table — columns vary by version, ALWAYS call osquery_get_table_schema first**)
 - \`chrome_extensions\` - Chrome extensions
 
+## Cross-Endpoint Queries
+
+When investigating whether other endpoints are affected (e.g., "did other users visit this domain?"), use these patterns:
+
+### Querying Multiple Agents at Once
+\`osquery_run_live_query\` accepts an array of \`agentIds\`. Pass ALL relevant agent IDs to run a single query across multiple endpoints simultaneously:
+\`\`\`
+osquery_run_live_query({
+  query: "SELECT ... FROM elastic_browser_history WHERE url LIKE '%malicious.com%'",
+  agentIds: ["<id1>", "<id2>", "<id3>"]
+})
+\`\`\`
+
+### Identifying Results Per Agent
+Each row returned by \`osquery_get_results\` includes an \`_agent_id\` field. Match this back to the agent list from \`osquery_get_agents\` to determine which endpoint produced each result.
+
+### Identifying Endpoint Protection Levels
+The \`osquery_get_agents\` tool returns \`policy_name\` for each agent. Use this to distinguish:
+- **Fully protected endpoints**: Policy name includes "Defend" (Elastic Defend + Osquery)
+- **Osquery-only endpoints**: Policy name does NOT include "Defend" (no endpoint protection)
+
+When reporting cross-endpoint findings, always highlight which affected endpoints lack Elastic Defend and recommend deploying it for complete visibility.
+
 ## Read-Only Limitations
 This skill cannot create, modify, or delete packs, saved queries, or configurations.
 
@@ -183,12 +208,13 @@ const createGetStatusTool = (): BuiltinSkillBoundedTool => ({
         ],
       };
     } catch (error) {
-      logger.error(`osquery get_status error: ${error.message}`);
+      const message = error instanceof Error ? error.message : String(error);
+      logger.error(`osquery get_status error: ${message}`);
       return {
         results: [
           {
             type: ToolResultType.error,
-            data: { message: `Error checking osquery status: ${error.message}` },
+            data: { message: `Error checking osquery status: ${message}` },
           },
         ],
       };
@@ -202,10 +228,11 @@ const createGetAgentsTool = (
   id: 'security.osquery.get_agents',
   type: ToolType.builtin,
   description:
-    'List or search for osquery-enabled agents. Use to find agent IDs before running queries.',
+    'List or search for osquery-enabled agents. Use to find agent IDs before running queries. Returns policy_name to identify endpoint protection level.',
   schema: z.object({
     hostname: z.string().optional().describe('Search by hostname (partial match)'),
     agentId: z.string().optional().describe('Search by specific agent ID'),
+    policyId: z.string().optional().describe('Filter by agent policy ID'),
     status: z
       .enum(['online', 'offline', 'inactive', 'unenrolling'])
       .optional()
@@ -213,7 +240,10 @@ const createGetAgentsTool = (
     platform: z.enum(['windows', 'darwin', 'linux']).optional().describe('Filter by platform'),
     perPage: z.number().optional().describe('Number of results (default: 100, max: 100)'),
   }),
-  handler: async ({ hostname, agentId, status, platform, perPage = 100 }, { spaceId, logger }) => {
+  handler: async (
+    { hostname, agentId, policyId, status, platform, perPage = 100 },
+    { spaceId, logger }
+  ) => {
     try {
       const fleetServices = endpointAppContextService.getInternalFleetServices(spaceId);
       const agentClient = fleetServices.agent;
@@ -224,6 +254,9 @@ const createGetAgentsTool = (
       }
       if (agentId) {
         kueryParts.push(`_id:"${agentId}"`);
+      }
+      if (policyId) {
+        kueryParts.push(`policy_id:"${policyId}"`);
       }
       if (status) {
         kueryParts.push(`status:"${status}"`);
@@ -239,12 +272,38 @@ const createGetAgentsTool = (
         showInactive: false,
       });
 
+      const uniquePolicyIds = [
+        ...new Set(result.agents.map((a) => a.policy_id).filter(Boolean)),
+      ] as string[];
+
+      const policyNameMap = new Map<string, string>();
+      if (uniquePolicyIds.length > 0) {
+        const soClient = fleetServices.getSoClient();
+        await Promise.all(
+          uniquePolicyIds.map(async (pid) => {
+            try {
+              const policy = await fleetServices.agentPolicy.get(soClient, pid, false);
+              if (policy) {
+                policyNameMap.set(pid, policy.name);
+              }
+            } catch {
+              // Policy may have been deleted; skip
+            }
+          })
+        );
+      }
+
       const agents = result.agents.map((agent) => ({
         id: agent.id,
-        hostname: (agent.local_metadata as Record<string, any>)?.host?.hostname ?? 'unknown',
+        hostname:
+          (agent.local_metadata as Record<string, Record<string, unknown>>)?.host?.hostname ??
+          'unknown',
         status: agent.status,
-        platform: (agent.local_metadata as Record<string, any>)?.os?.platform ?? 'unknown',
+        platform:
+          (agent.local_metadata as Record<string, Record<string, unknown>>)?.os?.platform ??
+          'unknown',
         policy_id: agent.policy_id,
+        policy_name: agent.policy_id ? policyNameMap.get(agent.policy_id) ?? 'unknown' : 'unknown',
         last_checkin: agent.last_checkin,
       }));
 
@@ -266,12 +325,13 @@ const createGetAgentsTool = (
         ],
       };
     } catch (error) {
-      logger.error(`osquery get_agents error: ${error.message}`);
+      const message = error instanceof Error ? error.message : String(error);
+      logger.error(`osquery get_agents error: ${message}`);
       return {
         results: [
           {
             type: ToolResultType.error,
-            data: { message: `Error fetching agents: ${error.message}` },
+            data: { message: `Error fetching agents: ${message}` },
           },
         ],
       };
@@ -386,12 +446,13 @@ const createGetTableSchemaTool = (osquerySetup: OsqueryPluginSetup): BuiltinSkil
         ],
       };
     } catch (error) {
-      logger.error(`osquery get_table_schema error: ${error.message}`);
+      const message = error instanceof Error ? error.message : String(error);
+      logger.error(`osquery get_table_schema error: ${message}`);
       return {
         results: [
           {
             type: ToolResultType.error,
-            data: { message: `Error fetching table schema: ${error.message}` },
+            data: { message: `Error fetching table schema: ${message}` },
           },
         ],
       };
@@ -455,12 +516,13 @@ const createRunLiveQueryTool = (osquerySetup: OsqueryPluginSetup): BuiltinSkillB
         ],
       };
     } catch (error) {
-      logger.error(`osquery run_live_query error: ${error.message}`);
+      const message = error instanceof Error ? error.message : String(error);
+      logger.error(`osquery run_live_query error: ${message}`);
       return {
         results: [
           {
             type: ToolResultType.error,
-            data: { message: `Error running live query: ${error.message}` },
+            data: { message: `Error running live query: ${message}` },
           },
         ],
       };
@@ -469,7 +531,7 @@ const createRunLiveQueryTool = (osquerySetup: OsqueryPluginSetup): BuiltinSkillB
 });
 
 const fetchActionErrors = async (
-  esClient: { asInternalUser: { search: (...args: any[]) => Promise<any> } },
+  esClient: Pick<IScopedClusterClient, 'asInternalUser'>,
   actionId: string
 ): Promise<Array<{ agent_id: string; error: string }>> => {
   const errorsResponse = await esClient.asInternalUser.search({
@@ -579,7 +641,11 @@ const createGetResultsTool = (): BuiltinSkillBoundedTool => ({
 
       const rows = hits.map((hit) => {
         const source = hit._source as Record<string, unknown> | undefined;
-        return source?.osquery ?? source ?? {};
+        const osqueryData = (source?.osquery as Record<string, unknown>) ?? {};
+        return {
+          ...osqueryData,
+          _agent_id: source?.agent_id,
+        };
       });
 
       const errors = await fetchActionErrors(esClient, actionId);
@@ -608,12 +674,13 @@ const createGetResultsTool = (): BuiltinSkillBoundedTool => ({
         ],
       };
     } catch (error) {
-      logger.error(`osquery get_results error: ${error.message}`);
+      const message = error instanceof Error ? error.message : String(error);
+      logger.error(`osquery get_results error: ${message}`);
       return {
         results: [
           {
             type: ToolResultType.error,
-            data: { message: `Error fetching results: ${error.message}` },
+            data: { message: `Error fetching results: ${message}` },
           },
         ],
       };
@@ -663,12 +730,13 @@ const createListSavedQueriesTool = (): BuiltinSkillBoundedTool => ({
         ],
       };
     } catch (error) {
-      logger.error(`osquery list_saved_queries error: ${error.message}`);
+      const message = error instanceof Error ? error.message : String(error);
+      logger.error(`osquery list_saved_queries error: ${message}`);
       return {
         results: [
           {
             type: ToolResultType.error,
-            data: { message: `Error listing saved queries: ${error.message}` },
+            data: { message: `Error listing saved queries: ${message}` },
           },
         ],
       };
@@ -717,12 +785,13 @@ const createListPacksTool = (): BuiltinSkillBoundedTool => ({
         ],
       };
     } catch (error) {
-      logger.error(`osquery list_packs error: ${error.message}`);
+      const message = error instanceof Error ? error.message : String(error);
+      logger.error(`osquery list_packs error: ${message}`);
       return {
         results: [
           {
             type: ToolResultType.error,
-            data: { message: `Error listing packs: ${error.message}` },
+            data: { message: `Error listing packs: ${message}` },
           },
         ],
       };

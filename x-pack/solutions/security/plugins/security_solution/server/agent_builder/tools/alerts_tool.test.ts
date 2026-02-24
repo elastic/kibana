@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { OtherResult } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools';
 import { runSearchTool } from '@kbn/agent-builder-genai-utils/tools';
@@ -287,17 +288,23 @@ describe('alertsTool', () => {
 
       expect(result.results).toHaveLength(1);
       expect(result.results[0].type).toBe(ToolResultType.other);
-      expect((result.results[0] as any).data.operation).toBe('search');
-      expect((result.results[0] as any).data.index).toBe(`${DEFAULT_ALERTS_INDEX}-default`);
-      expect((result.results[0] as any).data.isCount).toBe(false);
-      expect((result.results[0] as any).data.raw).toEqual(runSearchToolResult);
+      expect((result.results[0] as OtherResult<Record<string, unknown>>).data.operation).toBe(
+        'search'
+      );
+      expect((result.results[0] as OtherResult<Record<string, unknown>>).data.index).toBe(
+        `${DEFAULT_ALERTS_INDEX}-default`
+      );
+      expect((result.results[0] as OtherResult<Record<string, unknown>>).data.isCount).toBe(false);
+      expect((result.results[0] as OtherResult<Record<string, unknown>>).data.raw).toEqual(
+        runSearchToolResult
+      );
     });
 
     it('uses deterministic fallback DSL for structured host/user/hash queries (avoids LLM DSL failures)', async () => {
       (runSearchTool as jest.Mock).mockResolvedValue({ results: [] });
       mockEsClient.asCurrentUser.search.mockResolvedValue({
         hits: { total: { value: 1, relation: 'eq' }, hits: [] },
-      } as any);
+      } as unknown as Awaited<ReturnType<typeof mockEsClient.asCurrentUser.search>>);
 
       const result = await tool.handler(
         {
@@ -315,15 +322,19 @@ describe('alertsTool', () => {
 
       expect(result.results).toHaveLength(1);
       expect(result.results[0].type).toBe(ToolResultType.other);
-      expect((result.results[0] as any).data.raw.strategy).toBe('fallback_dsl');
-      expect((result.results[0] as any).data.index).toBe(`${DEFAULT_ALERTS_INDEX}-default`);
+      expect((result.results[0] as OtherResult<Record<string, unknown>>).data.raw).toEqual(
+        expect.objectContaining({ strategy: 'fallback_dsl' })
+      );
+      expect((result.results[0] as OtherResult<Record<string, unknown>>).data.index).toBe(
+        `${DEFAULT_ALERTS_INDEX}-default`
+      );
     });
 
     it('does deterministic get-by-id lookup when query requests an alert id (avoids misclassifying id as file hash)', async () => {
       (runSearchTool as jest.Mock).mockResolvedValue({ results: [] });
       mockEsClient.asCurrentUser.search.mockResolvedValue({
         hits: { total: { value: 1, relation: 'eq' }, hits: [{ _id: 'abc', _source: {} }] },
-      } as any);
+      } as unknown as Awaited<ReturnType<typeof mockEsClient.asCurrentUser.search>>);
 
       const alertId = '5eefb66806a174d0df2b95891489dc67edbedffaad6d9f39c1bf81d1555a3e83';
       const result = await tool.handler(
@@ -351,8 +362,12 @@ describe('alertsTool', () => {
       );
 
       expect(result.results).toHaveLength(1);
-      expect((result.results[0] as any).data.raw.strategy).toBe('get_by_id');
-      expect((result.results[0] as any).data.raw.alertId).toBe(alertId);
+      expect((result.results[0] as OtherResult<Record<string, unknown>>).data.raw).toEqual(
+        expect.objectContaining({ strategy: 'get_by_id' })
+      );
+      expect((result.results[0] as OtherResult<Record<string, unknown>>).data.raw).toEqual(
+        expect.objectContaining({ alertId })
+      );
     });
   });
 });

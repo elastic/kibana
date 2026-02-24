@@ -8,8 +8,9 @@
 import type { Rsa2026DemoConfig } from './types';
 
 export const DEFAULT_CONFIG: Rsa2026DemoConfig = {
-  defendOsqueryCount: 1, // Local dev default
-  osqueryOnlyCount: 1, // Local dev default
+  defendOsqueryCount: 5,
+  osqueryOnlyCount: 5,
+  osqueryOnlyCompromisedCount: 2,
   maliciousDomain: 'digert.ictnsc.com',
   username: 'patryk',
   browserHistoryTimestamp: Date.now() * 1000, // Convert to microseconds
@@ -23,8 +24,6 @@ export const DEFAULT_CONFIG: Rsa2026DemoConfig = {
 
 export const PRODUCTION_CONFIG: Rsa2026DemoConfig = {
   ...DEFAULT_CONFIG,
-  defendOsqueryCount: 5,
-  osqueryOnlyCount: 5,
 };
 
 /**
@@ -40,14 +39,13 @@ export const getFixedBrowserHistoryTimestamp = (): number => {
  * Merges user config with defaults
  */
 export const mergeConfig = (userConfig: Partial<Rsa2026DemoConfig>): Rsa2026DemoConfig => {
-  const baseConfig =
-    userConfig.defendOsqueryCount === 5 && userConfig.osqueryOnlyCount === 5
-      ? PRODUCTION_CONFIG
-      : DEFAULT_CONFIG;
+  const definedOverrides = Object.fromEntries(
+    Object.entries(userConfig).filter(([, v]) => v !== undefined)
+  );
 
   return {
-    ...baseConfig,
-    ...userConfig,
+    ...DEFAULT_CONFIG,
+    ...definedOverrides,
     browserHistoryTimestamp:
       userConfig.browserHistoryTimestamp ?? getFixedBrowserHistoryTimestamp(),
   };

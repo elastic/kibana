@@ -199,11 +199,15 @@ describe('Entity Analytics Skill', () => {
       mockEsClient.indices.exists = jest.fn().mockResolvedValue(true);
       const mockRiskScore = {
         calculated_score_norm: 75.0,
-        calculated_level: 'High',
+        calculated_score: 60.0,
+        calculated_level: 'High' as const,
         id_value: 'test-user',
         id_field: 'user.name',
         '@timestamp': '2023-01-01T00:00:00Z',
         inputs: [],
+        category_1_score: 60.0,
+        category_1_count: 3,
+        notes: [],
       };
 
       mockCreateGetRiskScores.mockReturnValue(() => Promise.resolve([mockRiskScore]));
@@ -492,7 +496,11 @@ describe('Entity Analytics Skill', () => {
       ];
 
       mockCreatePrivilegedUsersCrudService.mockReturnValue({
+        create: jest.fn(),
+        get: jest.fn(),
+        update: jest.fn(),
         list: jest.fn().mockResolvedValue(mockUsers),
+        delete: jest.fn(),
       } as ReturnType<typeof createPrivilegedUsersCrudService>);
 
       const result = await listPrivilegedUsersTool.invoke(

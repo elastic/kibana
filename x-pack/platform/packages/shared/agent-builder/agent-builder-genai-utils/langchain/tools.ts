@@ -155,15 +155,16 @@ export const toolToLangchain = async ({
     },
     {
       name: toolId ?? tool.id,
-      schema: addReasoningParam
-        ? z.object({
-            _reasoning: z
-              .string()
-              .optional()
-              .describe('Brief reasoning of why you are calling this tool'),
-            ...schema.shape,
-          })
-        : schema,
+      schema:
+        addReasoningParam && 'shape' in schema
+          ? z.object({
+              _reasoning: z
+                .string()
+                .optional()
+                .describe('Brief reasoning of why you are calling this tool'),
+              ...(schema.shape as Record<string, z.ZodTypeAny>),
+            })
+          : schema,
       description,
       verboseParsingErrors: true,
       responseFormat: 'content_and_artifact',

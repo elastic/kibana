@@ -77,8 +77,6 @@ const IncrementalAttackDiscoveryRequestBody = z.object({
   caseId: z.string().optional(),
 });
 
-type IncrementalAttackDiscoveryRequest = z.infer<typeof IncrementalAttackDiscoveryRequestBody>;
-
 /**
  * Response for incremental attack discovery generation
  */
@@ -206,7 +204,7 @@ export const postIncrementalAttackDiscoveryRoute = (
           });
 
           const newAlerts = alertsResponse.hits.hits.map((hit) => ({
-            id: hit._id!,
+            id: hit._id ?? '',
             content: JSON.stringify(hit._source),
           }));
 
@@ -224,6 +222,7 @@ export const postIncrementalAttackDiscoveryRoute = (
                 anonymizationFields: request.body.anonymizationFields,
                 apiConfig: request.body.apiConfig,
                 connectorName: request.body.connectorName,
+                subAction: 'invokeAI',
                 filter: {
                   bool: {
                     must: [
