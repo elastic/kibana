@@ -41,6 +41,7 @@ export const LockedItem = ({ item }: Props) => {
   const panelCss = css`
     padding-left: ${euiTheme.size.s};
     padding-right: ${euiTheme.size.s};
+    cursor: not-allowed;
   `;
 
   const isCoreItem = CORE_ITEM_IDS.has(item.id);

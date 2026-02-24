@@ -42,10 +42,10 @@ export const DraggableItem = ({ item, index, toggleItemVisibility }: Props) => {
   `;
 
   const dragAreaCss = css`
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    flex: 1;
     min-width: 0;
+    max-width: 100%;
     cursor: grab;
   `;
 
