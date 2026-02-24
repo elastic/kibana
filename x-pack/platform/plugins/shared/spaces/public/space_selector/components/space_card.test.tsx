@@ -18,8 +18,8 @@ test('it renders without crashing', () => {
     disabledFeatures: [],
   };
 
-  const { container } = render(<SpaceCard space={space} serverBasePath={'/server-base-path'} />);
-  expect(container).not.toBeEmptyDOMElement();
+  render(<SpaceCard space={space} serverBasePath={'/server-base-path'} />);
+  expect(screen.getByTestId('space-card-')).toBeInTheDocument();
 });
 
 test('links to the indicated space', () => {

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { fireEvent, render, screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
 
 import { I18nProvider } from '@kbn/i18n-react';
@@ -30,13 +31,13 @@ describe('CopyModeControl', () => {
 
     expect(updateSelection).not.toHaveBeenCalled();
 
-    fireEvent.click(screen.getByLabelText(/check for existing objects/i));
+    await userEvent.click(screen.getByLabelText(/check for existing objects/i));
     const createNewCopies = false;
 
-    fireEvent.click(screen.getByLabelText(/request action on conflict/i));
+    await userEvent.click(screen.getByLabelText(/request action on conflict/i));
     expect(updateSelection).toHaveBeenNthCalledWith(2, { createNewCopies, overwrite: false });
 
-    fireEvent.click(screen.getByLabelText(/automatically overwrite conflicts/i));
+    await userEvent.click(screen.getByLabelText(/automatically overwrite conflicts/i));
     expect(updateSelection).toHaveBeenNthCalledWith(3, { createNewCopies, overwrite: true });
   });
 
@@ -44,7 +45,7 @@ describe('CopyModeControl', () => {
     renderWithIntl(<CopyModeControl {...props} />);
 
     expect(screen.getByLabelText(/automatically overwrite conflicts/i)).toBeDisabled();
-    fireEvent.click(screen.getByLabelText(/check for existing objects/i));
+    await userEvent.click(screen.getByLabelText(/check for existing objects/i));
     expect(screen.getByLabelText(/automatically overwrite conflicts/i)).not.toBeDisabled();
   });
 
@@ -54,10 +55,10 @@ describe('CopyModeControl', () => {
     expect(updateSelection).not.toHaveBeenCalled();
     const { overwrite } = initialValues;
 
-    fireEvent.click(screen.getByLabelText(/check for existing objects/i));
+    await userEvent.click(screen.getByLabelText(/check for existing objects/i));
     expect(updateSelection).toHaveBeenNthCalledWith(1, { createNewCopies: false, overwrite });
 
-    fireEvent.click(screen.getByLabelText(/create new objects with random ids/i));
+    await userEvent.click(screen.getByLabelText(/create new objects with random ids/i));
     expect(updateSelection).toHaveBeenNthCalledWith(2, { createNewCopies: true, overwrite });
   });
 });

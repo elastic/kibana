@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import React from 'react';
 
 import { SpaceCards } from './space_cards';
@@ -18,8 +18,6 @@ test('it renders without crashing', () => {
     disabledFeatures: [],
   };
 
-  const { container } = render(
-    <SpaceCards spaces={[space]} serverBasePath={'/server-base-path'} />
-  );
-  expect(container).not.toBeEmptyDOMElement();
+  render(<SpaceCards spaces={[space]} serverBasePath={'/server-base-path'} />);
+  expect(screen.getByTestId('space-card-space-id')).toBeInTheDocument();
 });
