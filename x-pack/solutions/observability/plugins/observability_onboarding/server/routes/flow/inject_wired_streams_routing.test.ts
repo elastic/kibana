@@ -15,7 +15,7 @@ describe('createWiredStreamsRoutingProcessor', () => {
       add_fields: {
         target: '@metadata',
         fields: {
-          raw_index: 'logs',
+          raw_index: 'logs.ecs',
         },
       },
     });

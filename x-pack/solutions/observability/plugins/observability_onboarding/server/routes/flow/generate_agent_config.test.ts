@@ -200,7 +200,7 @@ describe('shouldWriteToLogsStreams conditional logic', () => {
       pkgVersion: '1.0.0',
       title: 'My Custom App',
       config:
-        'inputs:\n  - id: filestream-my_custom_app\n    type: filestream\n    processors:\n      - add_fields:\n          target: "@metadata"\n          fields:\n            raw_index: logs',
+        'inputs:\n  - id: filestream-my_custom_app\n    type: filestream\n    processors:\n      - add_fields:\n          target: "@metadata"\n          fields:\n            raw_index: logs.ecs',
       dataStreams: [{ type: 'logs', dataset: 'my_custom_app' }],
       kibanaAssets: [],
     },
@@ -321,7 +321,7 @@ describe('wired streams routing processor in integration configs', () => {
       add_fields: {
         target: '@metadata',
         fields: {
-          raw_index: 'logs',
+          raw_index: 'logs.ecs',
         },
       },
     });
@@ -336,7 +336,7 @@ describe('wired streams routing processor in integration configs', () => {
       pkgVersion: '1.0.0',
       title: 'My App',
       config:
-        'inputs:\n  - id: filestream-my_app\n    type: filestream\n    streams:\n      - id: filestream-my_app\n        data_stream:\n          type: logs\n          dataset: my_app\n        paths:\n          - /var/log/my_app.log\n        processors:\n          - add_fields:\n              target: "@metadata"\n              fields:\n                raw_index: logs',
+        'inputs:\n  - id: filestream-my_app\n    type: filestream\n    streams:\n      - id: filestream-my_app\n        data_stream:\n          type: logs\n          dataset: my_app\n        paths:\n          - /var/log/my_app.log\n        processors:\n          - add_fields:\n              target: "@metadata"\n              fields:\n                raw_index: logs.ecs',
       dataStreams: [{ type: 'logs', dataset: 'my_app' }],
       kibanaAssets: [],
     };
@@ -352,12 +352,12 @@ describe('wired streams routing processor in integration configs', () => {
 
     const processors = parsedConfig.inputs[0].streams[0].processors;
     const routingProcessor = processors.find(
-      (p) => p.add_fields?.target === '@metadata' && p.add_fields?.fields?.raw_index === 'logs'
+      (p) => p.add_fields?.target === '@metadata' && p.add_fields?.fields?.raw_index === 'logs.ecs'
     );
 
     expect(routingProcessor).toBeDefined();
     expect(routingProcessor?.add_fields.target).toBe('@metadata');
-    expect(routingProcessor?.add_fields.fields.raw_index).toBe('logs');
+    expect(routingProcessor?.add_fields.fields.raw_index).toBe('logs.ecs');
   });
 
   it('registry integration config should NOT contain the routing processor', () => {
@@ -386,7 +386,7 @@ describe('wired streams routing processor in integration configs', () => {
         if (stream.processors) {
           const routingProcessor = stream.processors.find(
             (p) =>
-              p.add_fields?.target === '@metadata' && p.add_fields?.fields?.raw_index === 'logs'
+              p.add_fields?.target === '@metadata' && p.add_fields?.fields?.raw_index === 'logs.ecs'
           );
           expect(routingProcessor).toBeUndefined();
         }
