@@ -80,10 +80,7 @@ const writeOperations: Record<AlertingEntity, string[]> = {
   alert: ['update'],
 };
 const allOperations: Record<AlertingEntity, string[]> = {
-  rule: [
-    ...readOperations.rule,
-    ...writeOperations.rule,
-  ],
+  rule: [...readOperations.rule, ...writeOperations.rule],
   alert: [...readOperations.alert, ...writeOperations.alert],
 };
 
