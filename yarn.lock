@@ -9168,6 +9168,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/test-suites-security-solution-evals@link:x-pack/solutions/security/test/security-solution-evals":
+  version "0.0.0"
+  uid ""
+
 "@kbn/test-suites-src@link:src/platform/test":
   version "0.0.0"
   uid ""
@@ -9301,10 +9305,6 @@
   uid ""
 
 "@kbn/ui-actions-browser@link:src/platform/packages/shared/kbn-ui-actions-browser":
-  version "0.0.0"
-  uid ""
-
-"@kbn/ui-actions-enhanced-plugin@link:src/platform/plugins/shared/ui_actions_enhanced":
   version "0.0.0"
   uid ""
 

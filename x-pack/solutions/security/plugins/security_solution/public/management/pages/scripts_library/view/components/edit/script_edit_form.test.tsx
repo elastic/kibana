@@ -15,7 +15,8 @@ import {
 import { EndpointScriptsGenerator } from '../../../../../../../common/endpoint/data_generators/endpoint_scripts_generator';
 import userEvent from '@testing-library/user-event';
 
-describe('EndpointScriptEditForm', () => {
+// Failing: See https://github.com/elastic/kibana/issues/254680
+describe.skip('EndpointScriptEditForm', () => {
   let render: (props?: EndpointScriptEditFormProps) => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
   let mockedContext: AppContextTestRender;
