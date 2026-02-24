@@ -94,5 +94,4 @@ export const uiSettings: Record<string, UiSettingsParams> = {
     solutionViews: ['classic', 'oblt'],
     technicalPreview: true,
   },
-
 };
