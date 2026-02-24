@@ -13,6 +13,7 @@ import { css } from '@emotion/react';
 const PlaygroundBodySectionStyle = css({
   display: 'flex',
   height: '100%',
+  overflowX: 'auto',
 });
 
 export const PlaygroundBodySection = ({
