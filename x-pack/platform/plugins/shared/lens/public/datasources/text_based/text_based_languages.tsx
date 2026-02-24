@@ -646,23 +646,31 @@ export function getTextBasedDatasource({
     getDatasourceSuggestionsForVisualizeField: getSuggestionsForVisualizeField,
     getDatasourceSuggestionsFromCurrentState: getSuggestionsForState,
     getDatasourceSuggestionsForVisualizeCharts: getSuggestionsForState,
+    /** Treat undefined and “missing property” as equivalent */
     isEqual: (
-      persistableState1: TextBasedPersistedState,
+      persistableState1: TextBasedPersistedState | TextBasedPrivateState,
       references1: Reference[],
-      persistableState2: TextBasedPersistedState,
+      persistableState2: TextBasedPersistedState | TextBasedPrivateState,
       references2: Reference[]
-    ) =>
-      // undefined is not equal to missing
-      isEqual(
-        {
-          initialContext: undefined,
-          ...persistableState1,
-        },
-        {
-          initialContext: undefined,
-          ...persistableState2,
-        }
-      ),
+    ) => {
+      const normalizeState = (state: TextBasedPersistedState | TextBasedPrivateState) => {
+        const normalizedState = Object.fromEntries(
+          Object.entries(state).filter(([, value]) => value !== undefined)
+        );
+        return {
+          ...normalizedState,
+          ...('indexPatternRefs' in state
+            ? {
+                indexPatternRefs: state.indexPatternRefs.map((obj) =>
+                  Object.fromEntries(Object.entries(obj).filter(([, value]) => value !== undefined))
+                ),
+              }
+            : {}),
+        };
+      };
+
+      return isEqual(normalizeState(persistableState1), normalizeState(persistableState2));
+    },
     getDatasourceInfo: async (state, references, dataViewsService) => {
       if (!dataViewsService) {
         return [];
