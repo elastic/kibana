@@ -48,7 +48,7 @@ interface StartDeps {
   history: History;
   prependBasePath: (path: string) => string;
   navLinks: ChromeNavLinks;
-  getUiSettingsHomeRoute: () => string | null;
+  getUiSettingsHomeRoute: () => string | undefined;
   logger: Logger;
   chromeBreadcrumbs$: Observable<ChromeBreadcrumb[]>;
 }
@@ -167,10 +167,12 @@ export class ProjectNavigationService {
 
     return {
       getProjectHome$: () => {
-        const defaultRoute = getUiSettingsHomeRoute();
-        if (defaultRoute) return of(defaultRoute);
         return parsedNavigation$.pipe(
-          map((parsed) => parsed?.navigationTree.find((n) => n.renderAs === 'home')?.href),
+          map((parsed) => {
+            const defaultRoute = getUiSettingsHomeRoute();
+            const navRoute = parsed?.tree.find((n) => n.renderAs === 'home')?.href;
+            return defaultRoute ?? navRoute;
+          }),
           filter((home): home is string => home !== undefined),
           distinctUntilChanged()
         );

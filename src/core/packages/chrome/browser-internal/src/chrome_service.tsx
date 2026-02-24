@@ -157,8 +157,8 @@ export class ChromeService {
         try {
           return uiSettings.get('defaultRoute');
         } catch (e) {
-          // In some cases, such as when the user is unauthenticated and gets a 403 when fetching uiSettings, we want to fail gracefully
-          return null;
+          // In some cases, this might be fetched before the uiSettings client is fully ready (interactive setup mode)
+          return;
         }
       },
       logger: this.logger,
