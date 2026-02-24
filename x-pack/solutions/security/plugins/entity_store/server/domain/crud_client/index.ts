@@ -122,15 +122,17 @@ export class CRUDClient {
       return [];
     }
     this.logger.debug(`Bulk upserted ${objects.length} entities with errors`);
-    return resp.items.map((item) => {
-      const [, value] = Object.entries(item)[0];
-      return {
-        _id: value._id,
-        status: value.status,
-        type: value.error?.type,
-        reason: value.error?.reason,
-      } as BulkObjectResponse;
-    });
+    return resp.items
+      .map((item) => Object.entries(item)[0][1])
+      .filter((value) => value.error !== undefined || value.status >= 400)
+      .map((value) => {
+        return {
+          _id: value._id,
+          status: value.status,
+          type: value.error?.type,
+          reason: value.error?.reason,
+        } as BulkObjectResponse;
+      });
   }
 
   public async deleteEntity(id: string): Promise<void> {
