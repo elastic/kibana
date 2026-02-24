@@ -124,10 +124,8 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
           },
           alerting: {
             rule: {
+              all: testAlertingFeatures,
               read: testAlertingFeatures,
-              manual_run: testAlertingFeatures,
-              enable: testAlertingFeatures,
-              manage_rule_settings: testAlertingFeatures,
             },
           },
           ui: [],
