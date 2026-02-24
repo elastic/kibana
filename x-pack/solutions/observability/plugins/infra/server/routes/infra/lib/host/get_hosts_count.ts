@@ -37,33 +37,36 @@ export async function getHostsCount({
     to,
   });
 
-  const response = await infraMetricsClient.search({
-    allow_no_indices: true,
-    body: {
-      size: 0,
-      track_total_hits: false,
-      query: {
-        bool: {
-          filter: [
-            query,
-            ...rangeQuery(from, to),
-            {
-              bool: {
-                should: [...documentsFilter],
+  const response = await infraMetricsClient.search(
+    {
+      allow_no_indices: true,
+      body: {
+        size: 0,
+        track_total_hits: false,
+        query: {
+          bool: {
+            filter: [
+              query,
+              ...rangeQuery(from, to),
+              {
+                bool: {
+                  should: [...documentsFilter],
+                },
               },
-            },
-          ],
+            ],
+          },
         },
-      },
-      aggs: {
-        totalCount: {
-          cardinality: {
-            field: HOST_NAME_FIELD,
+        aggs: {
+          totalCount: {
+            cardinality: {
+              field: HOST_NAME_FIELD,
+            },
           },
         },
       },
     },
-  });
+    'get hosts count'
+  );
 
   return response.aggregations?.totalCount.value ?? 0;
 }

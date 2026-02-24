@@ -46,19 +46,20 @@ export const getAllHosts = async ({
     to,
   });
 
-  const response = await infraMetricsClient.search({
-    allow_no_indices: true,
-    ignore_unavailable: true,
-    body: {
-      size: 0,
-      track_total_hits: false,
-      query: {
-        bool: {
-          filter: [...termsQuery(HOST_NAME_FIELD, ...hostNames), ...rangeQuery(from, to)],
-          should: [...documentsFilter],
+  const response = await infraMetricsClient.search(
+    {
+      allow_no_indices: true,
+      ignore_unavailable: true,
+      body: {
+        size: 0,
+        track_total_hits: false,
+        query: {
+          bool: {
+            filter: [...termsQuery(HOST_NAME_FIELD, ...hostNames), ...rangeQuery(from, to)],
+            should: [...documentsFilter],
+          },
         },
-      },
-      aggs: {
+        aggs: {
         // find hosts with metrics that are monitored by the system integration.
         monitoredHosts: {
           filter: getFilterByIntegration('system'),
@@ -107,7 +108,8 @@ export const getAllHosts = async ({
         },
       },
     },
-  });
+    'get all hosts'
+  );
 
   const systemIntegrationHosts = new Set(
     response.aggregations?.monitoredHosts.names.buckets.map((p) => p.key) ?? []

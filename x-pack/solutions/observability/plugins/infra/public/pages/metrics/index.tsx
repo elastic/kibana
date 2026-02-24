@@ -19,6 +19,7 @@ import { OBSERVABILITY_ONBOARDING_LOCATOR } from '@kbn/deeplinks-observability';
 import { dynamic } from '@kbn/shared-ux-utility';
 import { KibanaErrorBoundary } from '@kbn/shared-ux-error-boundary';
 import { HelpCenterContent } from '../../components/help_center_content';
+import { InspectorHeaderLink } from '../../components/inspector_header_link';
 import { useReadOnlyBadge } from '../../hooks/use_readonly_badge';
 import { MetricsSettingsPage } from './settings';
 import { MetricsAlertDropdown } from '../../alerting/common/components/metrics_alert_dropdown';
@@ -94,6 +95,7 @@ export const InfrastructurePage = () => {
                         {config.featureFlags.alertsAndRulesDropdownEnabled && (
                           <MetricsAlertDropdown />
                         )}
+                        <InspectorHeaderLink />
                         <Routes>
                           <HeaderLinkAddDataRoute
                             path="/hosts"

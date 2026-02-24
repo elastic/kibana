@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
-import { createRouteValidationFunction } from '@kbn/io-ts-utils';
+import * as rt from 'io-ts';
+import { createRouteValidationFunction, jsonRt } from '@kbn/io-ts-utils';
 import {
   GetInfraMetricsRequestBodyPayloadRT,
   GetInfraMetricsRequestParamsRT,
@@ -22,7 +22,10 @@ import { getInfraAlertsClient } from '../../lib/helpers/get_infra_alerts_client'
 import { getHosts } from './lib/host/get_hosts';
 import { getHostsCount } from './lib/host/get_hosts_count';
 import { getInfraMetricsClient } from '../../lib/helpers/get_infra_metrics_client';
+import { withInspect } from '../../lib/helpers/with_inspect';
 import { getApmDataAccessClient } from '../../lib/helpers/get_apm_data_access_client';
+
+const InspectQueryRT = rt.exact(rt.partial({ _inspect: jsonRt.pipe(rt.boolean) }));
 
 export const initInfraAssetRoutes = (libs: InfraBackendLibs) => {
   const { framework } = libs;
@@ -34,50 +37,33 @@ export const initInfraAssetRoutes = (libs: InfraBackendLibs) => {
       validate: {
         body: createRouteValidationFunction(GetInfraMetricsRequestBodyPayloadRT),
         params: createRouteValidationFunction(GetInfraMetricsRequestParamsRT),
+        query: createRouteValidationFunction(InspectQueryRT),
       },
     },
-    async (context, request, response) => {
+    withInspect(async (context, request) => {
       const { from, to, metrics, limit, query } = request.body;
 
-      try {
-        const apmDataAccessClient = getApmDataAccessClient({ request, libs, context });
+      const apmDataAccessClient = getApmDataAccessClient({ request, libs, context });
 
-        const [infraMetricsClient, alertsClient, apmDataAccessServices] = await Promise.all([
-          getInfraMetricsClient({ request, libs, context }),
-          getInfraAlertsClient({ libs, request }),
-          apmDataAccessClient.getServices(),
-        ]);
+      const [infraMetricsClient, alertsClient, apmDataAccessServices] = await Promise.all([
+        getInfraMetricsClient({ request, libs, context }),
+        getInfraAlertsClient({ libs, request }),
+        apmDataAccessClient.getServices(),
+      ]);
 
-        const hosts = await getHosts({
-          from,
-          to,
-          metrics,
-          limit,
-          query,
-          alertsClient,
-          infraMetricsClient,
-          apmDataAccessServices,
-        });
+      const hosts = await getHosts({
+        from,
+        to,
+        metrics,
+        limit,
+        query,
+        alertsClient,
+        infraMetricsClient,
+        apmDataAccessServices,
+      });
 
-        return response.ok({
-          body: GetInfraMetricsResponsePayloadRT.encode(hosts),
-        });
-      } catch (err) {
-        if (Boom.isBoom(err)) {
-          return response.customError({
-            statusCode: err.output.statusCode,
-            body: { message: err.output.payload.message },
-          });
-        }
-
-        return response.customError({
-          statusCode: err.statusCode ?? 500,
-          body: {
-            message: err.message ?? 'An unexpected error occurred',
-          },
-        });
-      }
-    }
+      return GetInfraMetricsResponsePayloadRT.encode(hosts);
+    })
   );
 
   framework.registerRoute(
@@ -87,50 +73,33 @@ export const initInfraAssetRoutes = (libs: InfraBackendLibs) => {
       validate: {
         body: createRouteValidationFunction(GetInfraAssetCountRequestBodyPayloadRT),
         params: createRouteValidationFunction(GetInfraAssetCountRequestParamsPayloadRT),
+        query: createRouteValidationFunction(InspectQueryRT),
       },
     },
-    async (context, request, response) => {
+    withInspect(async (context, request) => {
       const { body, params } = request;
       const { assetType } = params;
       const { query, from, to } = body;
 
-      try {
-        const apmDataAccessClient = getApmDataAccessClient({ request, libs, context });
+      const apmDataAccessClient = getApmDataAccessClient({ request, libs, context });
 
-        const [infraMetricsClient, apmDataAccessServices] = await Promise.all([
-          getInfraMetricsClient({ request, libs, context }),
-          apmDataAccessClient.getServices(),
-        ]);
+      const [infraMetricsClient, apmDataAccessServices] = await Promise.all([
+        getInfraMetricsClient({ request, libs, context }),
+        apmDataAccessClient.getServices(),
+      ]);
 
-        const count = await getHostsCount({
-          infraMetricsClient,
-          apmDataAccessServices,
-          query,
-          from,
-          to,
-        });
+      const count = await getHostsCount({
+        infraMetricsClient,
+        apmDataAccessServices,
+        query,
+        from,
+        to,
+      });
 
-        return response.ok({
-          body: GetInfraAssetCountResponsePayloadRT.encode({
-            assetType,
-            count,
-          }),
-        });
-      } catch (err) {
-        if (Boom.isBoom(err)) {
-          return response.customError({
-            statusCode: err.output.statusCode,
-            body: { message: err.output.payload.message },
-          });
-        }
-
-        return response.customError({
-          statusCode: err.statusCode ?? 500,
-          body: {
-            message: err.message ?? 'An unexpected error occurred',
-          },
-        });
-      }
-    }
+      return GetInfraAssetCountResponsePayloadRT.encode({
+        assetType,
+        count,
+      });
+    })
   );
 };

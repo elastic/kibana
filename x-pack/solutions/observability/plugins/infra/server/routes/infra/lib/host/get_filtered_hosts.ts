@@ -21,33 +21,36 @@ export const getFilteredHostNames = async ({
 }: Pick<GetHostParameters, 'infraMetricsClient' | 'from' | 'to' | 'limit'> & {
   query?: estypes.QueryDslQueryContainer;
 }) => {
-  const response = await infraMetricsClient.search({
-    allow_no_indices: true,
-    body: {
-      size: 0,
-      track_total_hits: false,
-      query: {
-        bool: {
-          filter: [
-            ...castArray(query),
-            ...rangeQuery(from, to),
-            getFilterByIntegration(SYSTEM_INTEGRATION),
-          ],
+  const response = await infraMetricsClient.search(
+    {
+      allow_no_indices: true,
+      body: {
+        size: 0,
+        track_total_hits: false,
+        query: {
+          bool: {
+            filter: [
+              ...castArray(query),
+              ...rangeQuery(from, to),
+              getFilterByIntegration(SYSTEM_INTEGRATION),
+            ],
+          },
         },
-      },
-      aggs: {
-        uniqueHostNames: {
-          terms: {
+        aggs: {
+          uniqueHostNames: {
+            terms: {
             field: HOST_NAME_FIELD,
             size: limit,
-            order: {
-              _key: 'asc',
+              order: {
+                _key: 'asc',
+              },
             },
           },
         },
       },
     },
-  });
+    'get filtered host names'
+  );
 
   const { uniqueHostNames } = response.aggregations ?? {};
   return uniqueHostNames?.buckets?.map((p) => p.key as string) ?? [];
@@ -61,24 +64,27 @@ export const getHasDataFromSystemIntegration = async ({
 }: Pick<GetHostParameters, 'infraMetricsClient' | 'from' | 'to'> & {
   query?: estypes.QueryDslQueryContainer;
 }) => {
-  const hitCount = await infraMetricsClient.search({
-    allow_no_indices: true,
-    ignore_unavailable: true,
-    body: {
-      size: 0,
-      terminate_after: 1,
-      track_total_hits: true,
-      query: {
-        bool: {
-          filter: [
-            ...castArray(query),
-            ...rangeQuery(from, to),
-            getFilterByIntegration(SYSTEM_INTEGRATION),
-          ],
+  const hitCount = await infraMetricsClient.search(
+    {
+      allow_no_indices: true,
+      ignore_unavailable: true,
+      body: {
+        size: 0,
+        terminate_after: 1,
+        track_total_hits: true,
+        query: {
+          bool: {
+            filter: [
+              ...castArray(query),
+              ...rangeQuery(from, to),
+              getFilterByIntegration(SYSTEM_INTEGRATION),
+            ],
+          },
         },
       },
     },
-  });
+    'check system integration data'
+  );
 
   return hitCount.hits.total.value > 0;
 };
