@@ -94,8 +94,7 @@ export function collectTriggerConditionItems(yamlDocument: Document): TriggerCon
       }
 
       // yaml Range is [start, value-end, node-end]; use start and node-end for full span
-      const startOffset = valueNode.range[0];
-      const endOffset = valueNode.range[valueNode.range.length - 1];
+      const [startOffset, , endOffset] = valueNode.range;
       const start = offsetToLineColumn(text, startOffset);
       const end = offsetToLineColumn(text, endOffset);
 

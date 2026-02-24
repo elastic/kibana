@@ -32,7 +32,7 @@ export type WorkflowDefinitionForContext =
     });
 
 function isZodObject(schema: z.ZodType): schema is z.ZodObject<z.ZodRawShape> {
-  return typeof schema === 'object' && schema !== null && 'shape' in schema;
+  return schema instanceof z.ZodObject;
 }
 
 /**
