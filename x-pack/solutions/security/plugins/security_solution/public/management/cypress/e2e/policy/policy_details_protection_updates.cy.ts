@@ -14,10 +14,17 @@ import {
   setCustomProtectionUpdatesNote,
 } from '../../tasks/endpoint_policy';
 import { login, ROLE } from '../../tasks/login';
-import { loadPage } from '../../tasks/common';
+import {
+  clickAutomaticUpdatesToggle,
+  clickProtectionUpdatesSaveButton,
+  expectSavedButtonToBeDisabled,
+  expectSavedButtonToBeEnabled,
+  getAutomaticUpdatesToggle,
+  loadProtectionUpdatesUrl,
+} from './policy_details_helpers';
 
 describe(
-  'Policy Details',
+  'Policy Details - Protection updates',
   {
     tags: [
       '@ess',
@@ -27,23 +34,10 @@ describe(
     ],
   },
   () => {
-    const getAutomaticUpdatesToggle = () => cy.getByTestSubj('protection-updates-manifest-switch');
-    const clickAutomaticUpdatesToggle = () => getAutomaticUpdatesToggle().click();
-
-    const getProtectionUpdatesSaveButton = () => cy.getByTestSubj('protectionUpdatesSaveButton');
-    const clickProtectionUpdatesSaveButton = () => getProtectionUpdatesSaveButton().click();
-
-    const [expectSavedButtonToBeDisabled, expectSavedButtonToBeEnabled] = [
-      () => getProtectionUpdatesSaveButton().should('be.disabled'),
-      () => getProtectionUpdatesSaveButton().should('be.enabled'),
-    ];
+    const testNote = 'test note';
+    const updatedTestNote = 'updated test note';
 
     describe('Protection updates', () => {
-      const loadProtectionUpdatesUrl = (policyId: string) =>
-        loadPage(`/app/security/administration/policy/${policyId}/protectionUpdates`);
-      const testNote = 'test note';
-      const updatedTestNote = 'updated test note';
-
       describe('Renders and saves protection updates', () => {
         let indexedPolicy: IndexedFleetEndpointPolicyResponse;
         let policy: PolicyData;
@@ -208,15 +202,16 @@ describe(
         let indexedPolicy: IndexedFleetEndpointPolicyResponse;
         let policy: PolicyData;
 
-        const oneWeekAgo = moment.utc().subtract(1, 'weeks').format('YYYY-MM-DD');
-
         beforeEach(() => {
           login();
           getEndpointIntegrationVersion().then((version) => {
             createAgentPolicyTask(version).then((data) => {
               indexedPolicy = data;
               policy = indexedPolicy.integrationPolicies[0];
-              setCustomProtectionUpdatesManifestVersion(policy.id, oneWeekAgo);
+              setCustomProtectionUpdatesManifestVersion(
+                policy.id,
+                moment.utc().subtract(1, 'weeks').format('YYYY-MM-DD')
+              );
               setCustomProtectionUpdatesNote(policy.id, testNote);
             });
           });
@@ -345,48 +340,6 @@ describe(
             cy.getByTestSubj('protection-updates-manifest-note-view-mode').should('not.exist');
             expectSavedButtonToBeDisabled();
           });
-        });
-      });
-    });
-    describe('Policy settings', () => {
-      const loadSettingsUrl = (policyId: string) =>
-        loadPage(`/app/security/administration/policy/${policyId}/settings`);
-
-      describe('Renders policy settings form', () => {
-        let indexedPolicy: IndexedFleetEndpointPolicyResponse;
-        let policy: PolicyData;
-
-        beforeEach(() => {
-          login();
-          getEndpointIntegrationVersion().then((version) => {
-            createAgentPolicyTask(version).then((data) => {
-              indexedPolicy = data;
-              policy = indexedPolicy.integrationPolicies[0];
-            });
-          });
-        });
-
-        afterEach(() => {
-          if (indexedPolicy) {
-            cy.task('deleteIndexedFleetEndpointPolicies', indexedPolicy);
-          }
-        });
-        it('should render disabled button and display modal if unsaved changes are present', () => {
-          loadSettingsUrl(policy.id);
-          cy.getByTestSubj('policyDetailsSaveButton').should('be.disabled');
-          cy.getByTestSubj('endpointPolicyForm-malware-enableDisableSwitch').click();
-          cy.getByTestSubj('policyDetailsSaveButton').should('not.be.disabled');
-          cy.getByTestSubj('policyProtectionUpdatesTab').click();
-          cy.getByTestSubj('policyDetailsUnsavedChangesModal').within(() => {
-            cy.getByTestSubj('confirmModalCancelButton').click();
-          });
-          cy.url().should('include', 'settings');
-          cy.getByTestSubj('policyProtectionUpdatesTab').click();
-
-          cy.getByTestSubj('policyDetailsUnsavedChangesModal').within(() => {
-            cy.getByTestSubj('confirmModalConfirmButton').click();
-          });
-          cy.url().should('include', 'protectionUpdates');
         });
       });
     });
