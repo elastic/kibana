@@ -42,6 +42,7 @@ dependsOn:
   - '@kbn/core-http-server-mocks'
   - '@kbn/core-ui-settings-server-mocks'
   - '@kbn/workflows'
+  - '@kbn/share-plugin'
 tags:
   - plugin
   - prod
