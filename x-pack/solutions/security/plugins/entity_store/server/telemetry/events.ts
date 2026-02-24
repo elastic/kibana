@@ -27,7 +27,7 @@ interface DeletionEventPayload {
 // Event definitions
 // ------------------------------------
 
-const ENTITY_STORE_INITIALIZATION_EVENT = {
+export const ENTITY_STORE_INITIALIZATION_EVENT = {
   eventType: 'entity_store_initialization',
   schema: {
     entityType: {
@@ -52,7 +52,7 @@ const ENTITY_STORE_INITIALIZATION_EVENT = {
   },
 } as const satisfies EventTypeOpts<InitializationEventPayload>;
 
-const ENTITY_STORE_DELETION_EVENT = {
+export const ENTITY_STORE_DELETION_EVENT = {
   eventType: 'entity_store_deletion',
   schema: {
     entityType: {
@@ -94,15 +94,12 @@ interface TelemetryEventMap {
   [ENTITY_STORE_DELETION_EVENT.eventType]: DeletionEventPayload;
 }
 
-export const TELEMETRY = {
-  INIT: ENTITY_STORE_INITIALIZATION_EVENT.eventType,
-  DELETION: ENTITY_STORE_DELETION_EVENT.eventType,
-} as const;
-
 export type TelemetryReporter = ReturnType<typeof reportEvent>;
 
 export const reportEvent =
   (analytics: AnalyticsServiceSetup) =>
-  <T extends keyof TelemetryEventMap>(eventType: T, eventData: TelemetryEventMap[T]) => {
-    analytics.reportEvent(eventType, eventData);
-  };
+  <T extends (typeof ENTITY_STORE_TELEMETRY_EVENTS)[number]>(
+    event: T,
+    eventData: TelemetryEventMap[T['eventType']]
+  ) =>
+    analytics.reportEvent(event.eventType, eventData);

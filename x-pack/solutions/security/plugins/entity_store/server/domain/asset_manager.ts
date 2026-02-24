@@ -48,7 +48,11 @@ import type { LogsExtractionClient } from './logs_extraction_client';
 import type { ManagedEntityDefinition } from '../../common/domain/definitions/entity_schema';
 import { getEntityDefinition } from '../../common/domain/definitions/registry';
 import { installEuidStoredScripts, deleteEuidStoredScripts } from './assets/euid_stored_scripts';
-import { type TelemetryReporter, TELEMETRY } from '../telemetry/events';
+import {
+  type TelemetryReporter,
+  ENTITY_STORE_DELETION_EVENT,
+  ENTITY_STORE_INITIALIZATION_EVENT,
+} from '../telemetry/events';
 import { getErrorMessage } from '../../common';
 
 interface AssetManagerDependencies {
@@ -107,17 +111,18 @@ export class AssetManager {
           logger: this.logger,
         }),
       ]);
-      this.analytics.reportEvent(TELEMETRY.INIT, {
+      this.analytics.reportEvent(ENTITY_STORE_INITIALIZATION_EVENT, {
         entityType: entityTypes.join(','),
         namespace: this.namespace,
       });
     } catch (error) {
-      this.analytics.reportEvent(TELEMETRY.INIT, {
+      this.analytics.reportEvent(ENTITY_STORE_INITIALIZATION_EVENT, {
         entityType: entityTypes.join(','),
         namespace: this.namespace,
         error: getErrorMessage(error),
       });
-      this.logger.error('Error during entity store init:', error);
+      this.logger.error('Error during entity store init');
+      this.logger.error(error);
       throw error;
     }
   }
@@ -185,7 +190,7 @@ export class AssetManager {
         }),
       ]);
       this.logger.get(type).debug(`Uninstalled definition: ${type}`);
-      this.analytics.reportEvent(TELEMETRY.DELETION, {
+      this.analytics.reportEvent(ENTITY_STORE_DELETION_EVENT, {
         entityType: type,
         namespace: this.namespace,
       });
