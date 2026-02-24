@@ -130,7 +130,7 @@ export const SetupTechnologySelector = ({
             <>
               <strong>
                 <FormattedMessage
-                  id="xpack.fleet.setupTechnology.radioCardAgentbasedInputDisplay"
+                  id="xpack.fleet.setupTechnology.agentbasedInputDisplay"
                   defaultMessage="Agent-based"
                 />
               </strong>
@@ -138,8 +138,7 @@ export const SetupTechnologySelector = ({
                 <p>
                   <FormattedMessage
                     id="xpack.fleet.setupTechnology.radioCardAgentbasedInputDescription"
-                    defaultMessage="Deploy Elastic Agent to collect the selected {integrationName} data from your environment. Best if you already run agents or need more control."
-                    values={{ integrationName: packageInfo.title }}
+                    defaultMessage="Deploy an Elastic Agent into your cloud environment"
                   />
                 </p>
               </EuiText>
@@ -232,7 +231,7 @@ export const SetupTechnologySelector = ({
               <EuiText size="s">
                 <p>
                   <FormattedMessage
-                    id="xpack.fleet.setupTechnology.agentbasedInputDescription"
+                    id="xpack.fleet.setupTechnology.radioCardAgentbasedInputDescription"
                     defaultMessage="Deploy Elastic Agent to collect the selected {integrationName} from your environment. Best if you already run agents or need more control."
                     values={{ integrationName: packageInfo.title }}
                   />
