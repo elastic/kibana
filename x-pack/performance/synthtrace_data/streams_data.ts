@@ -494,11 +494,7 @@ async function uploadContentPack(
  * only that batch's children. This final call sets the complete routing table
  * via `PUT /api/streams/logs/_ingest` so all children are routable.
  */
-async function updateRootRouting(
-  kibanaServer: KibanaServer,
-  log: ToolingLog,
-  count: number
-) {
+async function updateRootRouting(kibanaServer: KibanaServer, log: ToolingLog, count: number) {
   log.info(`Updating root stream routing to include all ${count} children...`);
 
   const allRouting = [];
