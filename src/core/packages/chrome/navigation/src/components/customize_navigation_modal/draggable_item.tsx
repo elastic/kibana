@@ -62,19 +62,27 @@ export const DraggableItem = ({ item, index, toggleItemVisibility }: Props) => {
   const panelCss = css`
     padding-left: ${euiTheme.size.s};
     padding-right: ${euiTheme.size.s};
+    background-color: ${euiTheme.colors.backgroundBasePlain};
 
     &:hover {
-      background-color: ${euiTheme.colors.backgroundBaseInteractiveHover};
+      background-color: ${euiTheme.colors.backgroundBasePlain};
+      background-image: linear-gradient(
+        ${euiTheme.colors.backgroundBaseInteractiveHover},
+        ${euiTheme.colors.backgroundBaseInteractiveHover}
+      );
     }
   `;
 
   const panelDraggingCss = css`
-    background-color: ${euiTheme.colors.backgroundBaseInteractiveHover};
+    background-image: linear-gradient(
+      ${euiTheme.colors.backgroundBaseInteractiveHover},
+      ${euiTheme.colors.backgroundBaseInteractiveHover}
+    );
   `;
 
   const panelSuppressHoverCss = css`
     &:hover {
-      background-color: transparent;
+      background-image: none;
     }
   `;
 
@@ -147,6 +155,13 @@ export const DraggableItem = ({ item, index, toggleItemVisibility }: Props) => {
                 onKeyDown={handleKeyDown}
                 css={clickableCellCss}
               >
+                {item.icon && (
+                  <EuiIcon
+                    type={item.icon}
+                    size="m"
+                    css={css`flex-shrink: 0; margin-right: ${euiTheme.size.s};`}
+                  />
+                )}
                 <EuiText size="s" css={css`flex: 1; min-width: 0;`}>
                   {item.title}
                 </EuiText>

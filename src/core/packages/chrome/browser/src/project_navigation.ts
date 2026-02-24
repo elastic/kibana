@@ -316,6 +316,8 @@ export interface NavigationItemInfo {
   id: string;
   /** Display title of the item. */
   title: string;
+  /** Optional icon for the navigation item. */
+  icon?: IconType;
   /** Whether the item is hidden (moved to overflow menu). */
   hidden: boolean;
   /** Whether this is a core item that cannot be reordered or hidden */

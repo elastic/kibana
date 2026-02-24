@@ -298,6 +298,7 @@ export class ProjectNavigationService {
       .map((node) => ({
         id: node.id,
         title: node.title || node.id,
+        icon: node.icon,
         hidden: node.sideNavStatus === 'hiddenByUser',
         locked: node.locked || ProjectNavigationService.DEFAULT_LOCKED_ITEM_IDS.has(node.id),
       }));

@@ -11,10 +11,11 @@ import React from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIconTip,
+  EuiIcon,
   EuiPanel,
   EuiSwitch,
   EuiText,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import type { NavigationItemInfo } from '@kbn/core-chrome-browser';
@@ -26,7 +27,8 @@ const CORE_ITEM_IDS = new Set(['discover', 'dashboards']);
 const CORE_LOCKED_ITEM_TOOLTIP = i18n.translate(
   'core.ui.chrome.sideNavigation.customizeNavigation.coreLockedItemTooltip',
   {
-    defaultMessage: 'Discover and Dashboards are core items for all solutions',
+    defaultMessage:
+      "Discover and Dashboards can't be changed, since they are core items for all solutions",
   }
 );
 
@@ -41,14 +43,6 @@ export const LockedItem = ({ item }: Props) => {
     padding-right: ${euiTheme.size.s};
   `;
 
-  const cellCss = css`
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-    min-width: 0;
-  `;
-
   const isCoreItem = CORE_ITEM_IDS.has(item.id);
 
   const tooltipContent = isCoreItem
@@ -58,32 +52,45 @@ export const LockedItem = ({ item }: Props) => {
         values: { itemTitle: item.title },
       });
 
+  const leftAreaCss = css`
+    display: flex;
+    align-items: center;
+    gap: ${euiTheme.size.s};
+    flex: 1;
+    min-width: 0;
+  `;
+
   return (
     <EuiPanel key={item.id} paddingSize="s" hasShadow={false} disabled css={panelCss}>
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiIconTip type="lock" color="subdued" content={tooltipContent} position="left" />
-        </EuiFlexItem>
         <EuiFlexItem grow={true} style={{ minWidth: 0 }}>
-          <div css={cellCss}>
-            <EuiText size="s" css={css`flex: 1; min-width: 0;`}>
-              {item.title}
-            </EuiText>
-            <EuiSwitch
-              compressed
-              label={i18n.translate(
-                'core.ui.chrome.sideNavigation.customizeNavigation.lockedItemAriaLabel',
-                {
-                  defaultMessage: '{itemTitle} cannot be reordered or hidden',
-                  values: { itemTitle: item.title },
-                }
+          <EuiToolTip content={tooltipContent} position="right" repositionOnScroll={false} anchorProps={{ css: css`display: inline-flex; max-width: fit-content;` }}>
+            <div css={leftAreaCss}>
+              <EuiIcon type="lock" color={euiTheme.colors.textDisabled} css={css`flex-shrink: 0;`} />
+              {item.icon && (
+                <EuiIcon type={item.icon} size="m" css={css`flex-shrink: 0;`} />
               )}
-              showLabel={false}
-              checked={!item.hidden}
-              onChange={() => {}}
-              disabled
-            />
-          </div>
+              <EuiText size="s" css={css`min-width: 0;`}>
+                {item.title}
+              </EuiText>
+            </div>
+          </EuiToolTip>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiSwitch
+            compressed
+            label={i18n.translate(
+              'core.ui.chrome.sideNavigation.customizeNavigation.lockedItemAriaLabel',
+              {
+                defaultMessage: '{itemTitle} cannot be reordered or hidden',
+                values: { itemTitle: item.title },
+              }
+            )}
+            showLabel={false}
+            checked={!item.hidden}
+            onChange={() => {}}
+            disabled
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>

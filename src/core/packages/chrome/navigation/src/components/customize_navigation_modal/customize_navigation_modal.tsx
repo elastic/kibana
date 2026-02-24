@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -59,6 +59,17 @@ export const CustomizeNavigationModal = ({
 }: CustomizeNavigationModalProps) => {
   const [items, setItems] = useState<NavigationItemInfo[]>(() => getNavigationPrimaryItems());
   const [isSaving, setIsSaving] = useState(false);
+  const [didReset, setDidReset] = useState(false);
+  const initialItemsRef = useRef(items);
+  const [defaultItems] = useState<NavigationItemInfo[]>(() => {
+    const currentItems = getNavigationPrimaryItems();
+    setNavigationCustomization(solutionId, undefined);
+    const defaults = getNavigationPrimaryItems();
+    const order = currentItems.map((i) => i.id);
+    const hiddenIds = currentItems.filter((i) => i.hidden).map((i) => i.id);
+    setNavigationCustomization(solutionId, { order, hiddenIds });
+    return defaults;
+  });
   const modalTitleId = useGeneratedHtmlId();
 
   const modalCss = css`
@@ -70,6 +81,22 @@ export const CustomizeNavigationModal = ({
     setIsEditingNavigation(true);
     return () => setIsEditingNavigation(false);
   }, [setIsEditingNavigation]);
+
+  const hasChanges = useMemo(() => {
+    const initial = initialItemsRef.current;
+    if (items.length !== initial.length) return true;
+    return items.some(
+      (item, idx) => item.id !== initial[idx].id || item.hidden !== initial[idx].hidden
+    );
+  }, [items]);
+
+  const isPersistedDefault = useMemo(() => {
+    const persisted = initialItemsRef.current;
+    if (persisted.length !== defaultItems.length) return false;
+    return persisted.every(
+      (item, idx) => item.id === defaultItems[idx].id && item.hidden === defaultItems[idx].hidden
+    );
+  }, [defaultItems]);
 
   const lockedItems = useMemo(() => items.filter((item) => item.locked), [items]);
   const visibleItems = useMemo(
@@ -97,6 +124,7 @@ export const CustomizeNavigationModal = ({
   const onVisibleDragEnd = useCallback(({ source, destination }: DropResult) => {
     if (!destination || source.index === destination.index) return;
 
+    setDidReset(false);
     setItems((prev) => {
       const locked = prev.filter((item) => item.locked);
       const visible = prev.filter((item) => !item.locked && !item.hidden);
@@ -109,6 +137,7 @@ export const CustomizeNavigationModal = ({
   const onHiddenDragEnd = useCallback(({ source, destination }: DropResult) => {
     if (!destination || source.index === destination.index) return;
 
+    setDidReset(false);
     setItems((prev) => {
       const locked = prev.filter((item) => item.locked);
       const visible = prev.filter((item) => !item.locked && !item.hidden);
@@ -119,6 +148,7 @@ export const CustomizeNavigationModal = ({
   }, []);
 
   const toggleItemVisibility = useCallback((itemId: string) => {
+    setDidReset(false);
     setItems((prev) => {
       const idx = prev.findIndex((item) => item.id === itemId);
       if (idx === -1) return prev;
@@ -144,6 +174,7 @@ export const CustomizeNavigationModal = ({
 
   const handleSave = useCallback(() => {
     setIsSaving(true);
+    setDidReset(false);
 
     // Exit editing mode first so the customization gets persisted
     setIsEditingNavigation(false);
@@ -157,10 +188,9 @@ export const CustomizeNavigationModal = ({
   }, [items, solutionId, onClose, setNavigationCustomization, setIsEditingNavigation]);
 
   const handleReset = useCallback(() => {
-    // Reset to defaults (persist) and refresh items
-    setNavigationCustomization(solutionId, undefined);
-    setItems(getNavigationPrimaryItems());
-  }, [solutionId, setNavigationCustomization, getNavigationPrimaryItems]);
+    setItems(defaultItems);
+    setDidReset(true);
+  }, [defaultItems]);
 
   useEffect(() => {
     const originals: Array<{ el: HTMLElement; bg: string }> = [];
@@ -224,7 +254,7 @@ export const CustomizeNavigationModal = ({
                     <h4>
                       <FormattedMessage
                         id="core.ui.chrome.sideNavigation.customizeNavigation.moreLabel"
-                        defaultMessage="Always under More"
+                        defaultMessage="Hide under More"
                       />
                     </h4>
                   </EuiTitle>
@@ -264,23 +294,26 @@ export const CustomizeNavigationModal = ({
       <EuiModalFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              iconType="refresh"
-              color="danger"
-              onClick={handleReset}
-              disabled={isSaving}
-            >
-              <FormattedMessage
-                id="core.ui.chrome.sideNavigation.customizeNavigation.resetButtonText"
-                defaultMessage="Reset"
-              />
-            </EuiButtonEmpty>
+            {!isPersistedDefault && (
+              <EuiButtonEmpty
+                iconType="refresh"
+                color="danger"
+                onClick={handleReset}
+                disabled={isSaving || didReset}
+              >
+                <FormattedMessage
+                  id="core.ui.chrome.sideNavigation.customizeNavigation.resetButtonText"
+                  defaultMessage="Reset to default"
+                />
+              </EuiButtonEmpty>
+            )}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
               fill
               onClick={handleSave}
               isLoading={isSaving}
+              disabled={!hasChanges}
               data-test-subj="customizeNavigationSaveButton"
             >
               <FormattedMessage
