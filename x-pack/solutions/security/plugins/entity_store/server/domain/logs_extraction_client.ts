@@ -38,6 +38,7 @@ import type {
 } from './definitions/saved_objects';
 import { ENGINE_STATUS } from './constants';
 import { parseDurationToMs } from '../infra/time';
+import type { CcsLogsExtractionClient } from './ccs_logs_extraction_client';
 
 interface LogsExtractionOptions {
   specificWindow?: {
@@ -61,14 +62,36 @@ interface ExtractedLogsSummaryError {
 
 type ExtractedLogsSummary = ExtractedLogsSummarySuccess | ExtractedLogsSummaryError;
 
+export interface LogsExtractionClientDependencies {
+  logger: Logger;
+  namespace: string;
+  esClient: ElasticsearchClient;
+  dataViewsService: DataViewsService;
+  engineDescriptorClient: EngineDescriptorClient;
+  ccsLogsExtractionClient: CcsLogsExtractionClient;
+}
+
 export class LogsExtractionClient {
-  constructor(
-    private logger: Logger,
-    private namespace: string,
-    private esClient: ElasticsearchClient,
-    private dataViewsService: DataViewsService,
-    private engineDescriptorClient: EngineDescriptorClient
-  ) {}
+  constructor(private readonly deps: LogsExtractionClientDependencies) {}
+
+  private get logger() {
+    return this.deps.logger;
+  }
+  private get namespace() {
+    return this.deps.namespace;
+  }
+  private get esClient() {
+    return this.deps.esClient;
+  }
+  private get dataViewsService() {
+    return this.deps.dataViewsService;
+  }
+  private get engineDescriptorClient() {
+    return this.deps.engineDescriptorClient;
+  }
+  private get ccsLogsExtractionClient() {
+    return this.deps.ccsLogsExtractionClient;
+  }
 
   public async extractLogs(
     type: EntityType,
@@ -90,12 +113,14 @@ export class LogsExtractionClient {
 
       const delayMs = parseDurationToMs(engineDescriptor.logExtractionState.delay);
       const entityDefinition = getEntityDefinition(type, this.namespace);
-      const { count, pages, indexPatterns } = await this.runQueryAndIngestDocs({
-        engineDescriptor,
-        opts,
-        delayMs,
-        entityDefinition,
-      });
+      const { count, pages, indexPatterns, lastSearchTimestamp } = await this.runQueryAndIngestDocs(
+        {
+          engineDescriptor,
+          opts,
+          delayMs,
+          entityDefinition,
+        }
+      );
 
       const operationResult = {
         success: true as const,
@@ -121,7 +146,8 @@ export class LogsExtractionClient {
             paginationTimestamp: undefined,
             paginationId: undefined,
 
-            lastExecutionTimestamp: moment().utc().toISOString(),
+            // Store last searched timestamp to start window from here
+            lastExecutionTimestamp: lastSearchTimestamp || moment().utc().toISOString(),
           },
 
           // we need to do a full write to overwrite pagination
@@ -140,7 +166,7 @@ export class LogsExtractionClient {
     try {
       const engineDescriptor = await this.engineDescriptorClient.findOrThrow(type);
       const delayMs = parseDurationToMs(engineDescriptor.logExtractionState.delay);
-      const indexPatterns = await this.getIndexPatterns(
+      const indexPatterns = await this.getLocalIndexPatterns(
         engineDescriptor.logExtractionState.additionalIndexPatterns
       );
       const { fromDateISO } = this.getExtractionWindow(
@@ -186,7 +212,7 @@ export class LogsExtractionClient {
     entityDefinition: ManagedEntityDefinition;
   }) {
     const { docsLimit } = engineDescriptor.logExtractionState;
-    const indexPatterns = await this.getIndexPatterns(
+    const { localIndexPatterns, remoteIndexPatterns } = await this.getLocalAndRemoteIndexPatterns(
       engineDescriptor.logExtractionState.additionalIndexPatterns
     );
     const latestIndex = getLatestEntitiesIndexName(this.namespace);
@@ -195,12 +221,60 @@ export class LogsExtractionClient {
       opts?.specificWindow ||
       this.getExtractionWindow(engineDescriptor.logExtractionState, delayMs);
 
-    // This is a sanity check to ensure the extraction window is valid
-    // Ideally we have this validation on the API only and we trust
-    // that our internal logic is correct. For the time being, we validate it here
-    // too, so we have a few runs and understand it.
     this.validateExtractionWindow(fromDateISO, toDateISO);
 
+    const mainPromise = this.runMainExtractionLoop({
+      engineDescriptor,
+      opts,
+      indexPatterns: localIndexPatterns,
+      latestIndex,
+      fromDateISO,
+      toDateISO,
+      docsLimit,
+      entityDefinition,
+    });
+
+    if (remoteIndexPatterns.length > 0) {
+      const ccsPromise = this.ccsLogsExtractionClient.extractToUpdates({
+        type: engineDescriptor.type,
+        remoteIndexPatterns,
+        fromDateISO,
+        toDateISO,
+        docsLimit,
+        entityDefinition,
+        abortController: opts?.abortController,
+      });
+
+      await Promise.all([ccsPromise, mainPromise]);
+      const mainResult = await mainPromise;
+      return {
+        ...mainResult,
+        indexPatterns: [...localIndexPatterns, ...remoteIndexPatterns],
+      };
+    }
+
+    return await mainPromise;
+  }
+
+  private async runMainExtractionLoop({
+    engineDescriptor,
+    opts,
+    indexPatterns,
+    latestIndex,
+    fromDateISO,
+    toDateISO,
+    docsLimit,
+    entityDefinition,
+  }: {
+    engineDescriptor: EngineDescriptor;
+    opts?: LogsExtractionOptions;
+    indexPatterns: string[];
+    latestIndex: string;
+    fromDateISO: string;
+    toDateISO: string;
+    docsLimit: number;
+    entityDefinition: ManagedEntityDefinition;
+  }) {
     let totalCount = 0;
     let pages = 0;
     let pagination: PaginationParams | undefined;
@@ -211,7 +285,7 @@ export class LogsExtractionClient {
     let recoveryId: string | undefined = engineDescriptor.logExtractionState.paginationId;
     if (recoveryId) {
       this.logger.warn(
-        `Recovering from corrupt state, using paginationTimestamp ${fromDateISO} and paginationId ${recoveryId} beggning of the window.`
+        `Recovering from corrupt state, using paginationTimestamp ${fromDateISO} and paginationId ${recoveryId} beginning of the window.`
       );
     }
     do {
@@ -226,7 +300,6 @@ export class LogsExtractionClient {
         recoveryId,
       });
 
-      // Recovery id already used, clean up for next iteration
       recoveryId = undefined;
 
       this.logger.debug(
@@ -260,20 +333,15 @@ export class LogsExtractionClient {
         abortController: opts?.abortController,
       });
 
-      // On pagination we save the pagination to the last seen timestamp cursor
-      // so we can recover from corrupt state
       if (pagination) {
         await this.engineDescriptorClient.update(engineDescriptor.type, {
           logExtractionState: {
             ...engineDescriptor.logExtractionState,
             paginationTimestamp: pagination?.timestampCursor,
             paginationId: pagination?.idCursor,
-            lastExecutionTimestamp: moment().utc().toISOString(),
           },
         });
       }
-
-      // should never be larger than limit, just being safe
     } while (pagination);
 
     opts?.abortController?.signal.removeEventListener('abort', onAbort);
@@ -282,6 +350,7 @@ export class LogsExtractionClient {
       count: totalCount,
       pages,
       indexPatterns,
+      lastSearchTimestamp: toDateISO,
     };
   }
 
@@ -343,7 +412,36 @@ export class LogsExtractionClient {
     return { success: false, error };
   }
 
-  public async getIndexPatterns(additionalIndexPatterns: string[] = []): Promise<string[]> {
+  /**
+   * Returns local and remote (CCS) index patterns separately.
+   * Main extraction uses local only (LOOKUP JOIN does not support CCS).
+   * CCS extraction uses remote only.
+   */
+  public async getLocalAndRemoteIndexPatterns(
+    additionalIndexPatterns: string[] = []
+  ): Promise<{ localIndexPatterns: string[]; remoteIndexPatterns: string[] }> {
+    const all = await this.getAllIndexPatternsIncludingRemote(additionalIndexPatterns);
+    const alertsIndex = getAlertsIndexName(this.namespace);
+    const withoutAlerts = all.filter((index) => index !== alertsIndex);
+    const localIndexPatterns = withoutAlerts.filter((index) => !isCCSRemoteIndexName(index));
+    const remoteIndexPatterns = withoutAlerts.filter((index) => isCCSRemoteIndexName(index));
+    return { localIndexPatterns, remoteIndexPatterns };
+  }
+
+  public async getLocalIndexPatterns(additionalIndexPatterns: string[] = []): Promise<string[]> {
+    const { localIndexPatterns } = await this.getLocalAndRemoteIndexPatterns(
+      additionalIndexPatterns
+    );
+    return localIndexPatterns;
+  }
+
+  /**
+   * Builds the full list of index patterns (updates, additional, security data view)
+   * including CCS remote indices, without filtering by alerts or CCS.
+   */
+  private async getAllIndexPatternsIncludingRemote(
+    additionalIndexPatterns: string[] = []
+  ): Promise<string[]> {
     const updatesDataStream = getUpdatesEntitiesDataStreamName(this.namespace);
     const indexPatterns: string[] = [updatesDataStream, ...additionalIndexPatterns];
 
@@ -351,13 +449,8 @@ export class LogsExtractionClient {
       const secSolDataView = await this.dataViewsService.get(
         getSecuritySolutionDataViewName(this.namespace)
       );
-
-      const alertsIndex = getAlertsIndexName(this.namespace);
-      const cleanIndices = secSolDataView
-        .getIndexPattern()
-        .split(',')
-        .filter((index) => index !== alertsIndex && !isCCSRemoteIndexName(index));
-      indexPatterns.push(...cleanIndices);
+      const secSolIndices = secSolDataView.getIndexPattern().split(',');
+      indexPatterns.push(...secSolIndices);
     } catch (error) {
       this.logger.warn(
         'Problems finding security solution data view indices, defaulting to logs-*'

@@ -40,6 +40,11 @@ interface BulkObjectResponse {
   reason: string;
 }
 
+interface UpsertEntitiesBulkOptions {
+  force?: boolean;
+  timestampGenerator?: () => string;
+}
+
 export class CRUDClient {
   private readonly logger: Logger;
   private readonly esClient: ElasticsearchClient;
@@ -96,13 +101,19 @@ export class CRUDClient {
   // This is considered a bulk asynchronous upsert.
   public async upsertEntitiesBulk(
     objects: BulkObject[],
-    force: boolean
+    { force = false, timestampGenerator }: UpsertEntitiesBulkOptions | undefined = {}
   ): Promise<BulkObjectResponse[]> {
     const operations: (BulkOperationContainer | BulkUpdateAction)[] = [];
 
     this.logger.debug(`Preparing ${objects.length} entities for bulk upsert`);
     for (const { type: entityType, doc } of objects) {
-      const readyDoc = validateAndTransformDocForUpsert(entityType, this.namespace, doc, force);
+      const readyDoc = validateAndTransformDocForUpsert(
+        entityType,
+        this.namespace,
+        doc,
+        force,
+        timestampGenerator
+      );
       operations.push({ create: {} }, readyDoc);
     }
 
