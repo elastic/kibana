@@ -66,6 +66,7 @@ export class StaticLookupFormat extends FieldFormat {
     const mapped = lookupMap[val];
     if (mapped != null && mapped !== '') return mapped as string;
     if (unknownKeyValue != null && unknownKeyValue !== '') return unknownKeyValue;
+    if (val == null) return '';
     return `${val}`;
   };
 }
