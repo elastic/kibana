@@ -13,6 +13,7 @@ import type {
   EsWorkflowCreate,
   HttpMethod,
   InternalConnectorContract,
+  WorkflowStepExecutionDto,
 } from './v1';
 import { ExecutionStatus, KNOWN_HTTP_METHODS, TerminalExecutionStatuses } from './v1';
 import type {
@@ -63,6 +64,13 @@ export function isDangerousStatus(status: ExecutionStatus) {
 
 export function isTerminalStatus(status: ExecutionStatus) {
   return TerminalExecutionStatuses.includes(status);
+}
+
+export function isFailedBeforeSteps(
+  status: ExecutionStatus,
+  stepExecutions: WorkflowStepExecutionDto[]
+) {
+  return status === ExecutionStatus.FAILED && stepExecutions.length === 0;
 }
 
 export function isCancelableStatus(status: ExecutionStatus) {

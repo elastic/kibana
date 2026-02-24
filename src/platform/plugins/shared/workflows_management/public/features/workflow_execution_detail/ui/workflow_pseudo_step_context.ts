@@ -9,7 +9,7 @@
 
 import type { JsonValue } from '@kbn/utility-types';
 import type { WorkflowExecutionDto, WorkflowStepExecutionDto } from '@kbn/workflows';
-import { ExecutionStatus } from '@kbn/workflows';
+import { ExecutionStatus, isFailedBeforeSteps } from '@kbn/workflows';
 
 export type TriggerType = 'alert' | 'scheduled' | 'manual';
 
@@ -58,13 +58,19 @@ export function buildTriggerStepExecutionFromContext(
     return null;
   }
 
+  const failedBeforeSteps = isFailedBeforeSteps(
+    workflowExecution.status,
+    workflowExecution.stepExecutions
+  );
+
   return {
     id: 'trigger',
     stepId: triggerContext.triggerType,
     stepType: `trigger_${triggerContext.triggerType}`,
-    status: ExecutionStatus.COMPLETED,
+    status: failedBeforeSteps ? ExecutionStatus.FAILED : ExecutionStatus.COMPLETED,
     input: triggerContext.input,
     output: undefined,
+    error: failedBeforeSteps ? workflowExecution.error ?? undefined : undefined,
     scopeStack: [],
     workflowRunId: workflowExecution.id,
     workflowId: workflowExecution.workflowId || '',
