@@ -298,6 +298,24 @@ describe('buildAlert', () => {
         };
         expect(intersection).toEqual(expected);
       });
+
+      test('should treat dot and nested notation the same', () => {
+        const a = {
+          'user.email': 'marshall@elastic.co',
+        };
+        const b = {
+          user: {
+            email: 'marshall@elastic.co',
+          },
+        };
+        const intersection = objectPairIntersection(a, b);
+        const expected = {
+          user: {
+            email: 'marshall@elastic.co',
+          },
+        };
+        expect(intersection).toEqual(expected);
+      });
     });
 
     test('should treat numbers and strings as unequal', () => {

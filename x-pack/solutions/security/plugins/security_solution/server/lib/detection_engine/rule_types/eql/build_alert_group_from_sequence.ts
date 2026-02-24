@@ -246,11 +246,123 @@ export const objectArrayIntersection = (objects: object[]) => {
   }
 };
 
+const isPlainObject = (v: unknown): v is Record<string, unknown> =>
+  typeof v === 'object' && v !== null && !Array.isArray(v);
+
 /**
- * Finds the intersection of two objects by recursively
- * finding the "intersection" of each of of their common keys'
+ * Flattens an object to path-value pairs (paths as string arrays).
+ * Dot-notation keys are expanded so 'user.email' and user: { email } yield the same path.
+ */
+const flattenToPathValues = (obj: object): [string[], unknown][] => {
+  const output: [string[], unknown][] = [];
+  const stack: [object, string[]][] = [[obj, []]];
+  while (stack.length > 0 && stack.at(-1) != null) {
+    const [o, prefix] = stack.pop() as [object, string[]];
+    for (const [k, v] of Object.entries(o)) {
+      const path = prefix.concat(k.includes('.') ? k.split('.') : [k]);
+      if (isPlainObject(v)) {
+        stack.push([v, path]);
+      } else {
+        output.push([path, v]);
+      }
+    }
+  }
+  return output;
+};
+
+/**
+ * Builds a nested object from path-value pairs.
+ */
+const unflatten = (pathValues: [string[], unknown][]): Record<string, unknown> => {
+  const result: Record<string, unknown> = {};
+  for (const [path, value] of pathValues) {
+    let current = result;
+    for (let i = 0; i < path.length - 1; i++) {
+      const p = path[i];
+      const next = current[p];
+      if (!isPlainObject(next)) {
+        current[p] = {};
+      }
+      current = current[p] as Record<string, unknown>;
+    }
+    current[path[path.length - 1]] = value;
+  }
+  return result;
+};
+
+/**
+ * Expands dot-notation keys into nested object form so that
+ * { 'user.email': 'x' } and { user: { email: 'x' } } are equivalent.
+ * Output is always in nested form (canonical for intersection result).
+ */
+const normalizeToNested = (obj: object): Record<string, unknown> =>
+  unflatten(flattenToPathValues(obj));
+
+/** Result of intersecting two values: either a literal value to set, or a nested pair to process later. */
+type IntersectionResult =
+  | { kind: 'value'; value: unknown }
+  | { kind: 'nested'; a: Record<string, unknown>; b: Record<string, unknown> };
+
+/**
+ * Computes the intersection of two values (primitives, arrays, or nested objects).
+ * For nested objects, returns a descriptor so the caller can push work onto the stack.
+ */
+const intersectValues = (aVal: unknown, bVal: unknown): IntersectionResult | undefined => {
+  if (isPlainObject(aVal) && isPlainObject(bVal)) {
+    return { kind: 'nested', a: aVal, b: bVal };
+  }
+  if (aVal === bVal) {
+    return { kind: 'value', value: aVal };
+  }
+  if (isArray(aVal) && isArray(bVal)) {
+    return { kind: 'value', value: lodashIntersection(aVal, bVal) };
+  }
+  if (isArray(aVal) && !isArray(bVal)) {
+    return { kind: 'value', value: lodashIntersection(aVal, [bVal]) };
+  }
+  if (!isArray(aVal) && isArray(bVal)) {
+    return { kind: 'value', value: lodashIntersection([aVal], bVal) };
+  }
+  return undefined;
+};
+
+const isEmptyOrAllUndefined = (o: Record<string, unknown>): boolean =>
+  Object.keys(o).length === 0 || Object.values(o).every((v) => v === undefined);
+
+/** Removes nested objects that are empty or have only undefined values (iterative). */
+const pruneEmptyNestedObjects = (obj: Record<string, unknown>): void => {
+  type PruneItem = [Record<string, unknown> | null, string | null, Record<string, unknown>];
+  const pruneStack: PruneItem[] = [[null, null, obj]];
+  const toPrune: PruneItem[] = [];
+  while (pruneStack.length > 0 && pruneStack.at(-1) != null) {
+    const item = pruneStack.pop() as PruneItem;
+    toPrune.push(item);
+    const [, , o] = item;
+    for (const [k, v] of Object.entries(o)) {
+      if (isPlainObject(v)) {
+        pruneStack.push([o, k, v]);
+      }
+    }
+  }
+  for (let i = toPrune.length - 1; i >= 0; i--) {
+    const [parent, key, o] = toPrune[i];
+    if (parent !== null && key !== null && isEmptyOrAllUndefined(o)) {
+      delete parent[key];
+    }
+  }
+};
+
+const hasDefinedValues = (obj: Record<string, unknown>): boolean =>
+  Object.values(obj).some((v) => v !== undefined);
+
+/**
+ * Finds the intersection of two objects iteratively by
+ * finding the "intersection" of each of their common keys'
  * values. If an intersection cannot be found between a key's
  * values, the value will be undefined in the returned object.
+ * Dot-notation keys (e.g. 'user.email') and nested notation
+ * (e.g. user: { email }) are treated as the same; the result
+ * is always in nested form.
  *
  * @param a object
  * @param b object
@@ -260,40 +372,33 @@ export const objectPairIntersection = (a: object | undefined, b: object | undefi
   if (a === undefined || b === undefined) {
     return undefined;
   }
+  const aNorm = normalizeToNested(a) as Record<string, unknown>;
+  const bNorm = normalizeToNested(b) as Record<string, unknown>;
   const intersection: Record<string, unknown> = {};
-  Object.entries(a).forEach(([key, aVal]) => {
-    if (key in b) {
-      const bVal = (b as Record<string, unknown>)[key];
-      if (
-        typeof aVal === 'object' &&
-        !(aVal instanceof Array) &&
-        aVal !== null &&
-        typeof bVal === 'object' &&
-        !(bVal instanceof Array) &&
-        bVal !== null
-      ) {
-        intersection[key] = objectPairIntersection(aVal, bVal);
-      } else if (aVal === bVal) {
-        intersection[key] = aVal;
-      } else if (isArray(aVal) && isArray(bVal)) {
-        intersection[key] = lodashIntersection(aVal, bVal);
-      } else if (isArray(aVal) && !isArray(bVal)) {
-        intersection[key] = lodashIntersection(aVal, [bVal]);
-      } else if (!isArray(aVal) && isArray(bVal)) {
-        intersection[key] = lodashIntersection([aVal], bVal);
+  const stack: [Record<string, unknown>, Record<string, unknown>, Record<string, unknown>][] = [
+    [intersection, aNorm, bNorm],
+  ];
+  while (stack.length > 0) {
+    const [target, aObj, bObj] = stack.pop() as [
+      Record<string, unknown>,
+      Record<string, unknown>,
+      Record<string, unknown>
+    ];
+    for (const [key, aVal] of Object.entries(aObj)) {
+      if (key in bObj) {
+        const result = intersectValues(aVal, bObj[key]);
+        if (result !== undefined) {
+          if (result.kind === 'nested') {
+            const nextTarget: Record<string, unknown> = {};
+            target[key] = nextTarget;
+            stack.push([nextTarget, result.a, result.b]);
+          } else {
+            target[key] = result.value;
+          }
+        }
       }
     }
-  });
-  // Count up the number of entries that are NOT undefined in the intersection
-  // If there are no keys OR all entries are undefined, return undefined
-  if (
-    Object.values(intersection).reduce(
-      (acc: number, value) => (value !== undefined ? acc + 1 : acc),
-      0
-    ) === 0
-  ) {
-    return undefined;
-  } else {
-    return intersection;
   }
+  pruneEmptyNestedObjects(intersection);
+  return hasDefinedValues(intersection) ? intersection : undefined;
 };
