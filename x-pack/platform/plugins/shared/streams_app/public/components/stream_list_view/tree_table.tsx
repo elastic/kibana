@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { Direction, EuiSearchBarProps, CriteriaWithPagination, Query } from '@elastic/eui';
 import {
@@ -68,6 +68,8 @@ const datePickerStyle = css`
     height: 40px;
   }
 `;
+
+const SUGGESTION_STATUS_POLLING_INTERVAL_MS = 2000;
 
 export function StreamsTreeTable({
   loading,
@@ -182,6 +184,30 @@ export function StreamsTreeTable({
       return acc;
     }, {} as Record<string, (typeof suggestionStatusResult.value)[number]>);
   }, [suggestionStatusResult]);
+
+  const hasInProgressSuggestions = React.useMemo(() => {
+    if (!suggestionStatusResult.value) {
+      return false;
+    }
+    return suggestionStatusResult.value.some((item) => item.pipelineInProgressCount > 0);
+  }, [suggestionStatusResult.value]);
+
+  const suggestionRefreshRef = useRef(suggestionStatusResult.refresh);
+  suggestionRefreshRef.current = suggestionStatusResult.refresh;
+
+  useEffect(() => {
+    if (!hasInProgressSuggestions) {
+      return;
+    }
+
+    const intervalId = setInterval(() => {
+      suggestionRefreshRef.current();
+    }, SUGGESTION_STATUS_POLLING_INTERVAL_MS);
+
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, [hasInProgressSuggestions]);
 
   const docCountsLoaded = !!totalDocsResult.value;
   const qualityLoaded =
