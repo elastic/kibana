@@ -25,7 +25,7 @@ import type {
   FieldBasedIndexPatternColumn,
 } from '@kbn/lens-common';
 import type { KqlPluginStart } from '@kbn/kql/public';
-import type { OperationSupportMatrix } from './operation_support';
+import { getSingleValue, type OperationSupportMatrix } from './operation_support';
 import type { OperationType } from '../form_based';
 import type { RequiredReference, GenericOperationDefinition } from '../operations';
 import { getOperationDisplay, isOperationAllowedAsReference } from '../operations';
@@ -287,12 +287,13 @@ export const ReferenceEditor = (props: ReferenceEditorProps) => {
                   return;
                 }
 
-                if (possibleFieldNames?.size === 1 && possibleFieldNames.values()?.next().value) {
-                  const fieldName = possibleFieldNames.values().next().value;
-                  if (fieldName) {
-                    onChooseFunction(operationType, currentIndexPattern.getFieldByName(fieldName));
-                    return;
-                  }
+                const singleFieldName = getSingleValue(possibleFieldNames);
+                if (singleFieldName) {
+                  onChooseFunction(
+                    operationType,
+                    currentIndexPattern.getFieldByName(singleFieldName)
+                  );
+                  return;
                 }
 
                 onChooseFunction(operationType, undefined);

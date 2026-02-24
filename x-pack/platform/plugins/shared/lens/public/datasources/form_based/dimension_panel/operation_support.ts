@@ -73,3 +73,21 @@ export const getOperationSupportMatrix = (props: Props): OperationSupportMatrix 
   const operationsByMetadata = memoizedGetAvailableOperationsByMetadata(currentIndexPattern);
   return memoizedComputeOperationsMatrix(operationsByMetadata, props.filterOperations);
 };
+
+/**
+ * Returns the single value from a Set if it has exactly one element, otherwise undefined.
+ * Useful when auto-selecting the only available option.
+ */
+export function getSingleValue<T>(set: Set<T> | undefined): T | undefined {
+  if (!set || set.size !== 1) return undefined;
+  return set.values().next().value as T;
+}
+
+/**
+ * Returns the first value from a non-empty Set, or undefined if the Set is empty/undefined.
+ * Useful as a fallback when any available option will do.
+ */
+export function getFirstValue<T>(set: Set<T> | undefined): T | undefined {
+  if (!set || set.size === 0) return undefined;
+  return set.values().next().value as T;
+}
