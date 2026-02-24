@@ -18,8 +18,8 @@ import type {
   CaseEventType,
   ObservableAutoExtractor,
   CaseEventTriggerService,
-  type CaseEvent,
-  type TriggerActionRequest,
+  CaseEvent,
+  TriggerActionRequest,
 } from '../../../lib/alert_grouping/cases';
 import { WorkflowDataClient } from '../../../lib/alert_grouping/persistence';
 import { generateAttackDiscoveries } from '../../attack_discovery/helpers/generate_discoveries';

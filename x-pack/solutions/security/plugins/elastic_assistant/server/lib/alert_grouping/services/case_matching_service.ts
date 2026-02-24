@@ -9,9 +9,9 @@ import type { Logger } from '@kbn/logging';
 
 import type {
   ObservableTypeKey,
-  type ExtractedEntity,
-  type GroupingConfig,
-  type CaseMatch,
+  ExtractedEntity,
+  GroupingConfig,
+  CaseMatch,
   GroupingStrategy,
   DEFAULT_ENTITY_TYPE_CONFIGS,
 } from '../types';

@@ -16,8 +16,8 @@ import type {
 } from './types';
 import type {
   AttackDiscoveryMergeService,
-  type AlertForProcessing,
-  type AttackDiscoveryResult,
+  AlertForProcessing,
+  AttackDiscoveryResult,
 } from '../batch_processing';
 
 /**
