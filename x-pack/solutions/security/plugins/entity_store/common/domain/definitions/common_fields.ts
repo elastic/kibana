@@ -6,7 +6,7 @@
  */
 
 import type { EntityType, EntityField } from './entity_schema';
-import { oldestValue, newestValue } from './field_retention_operations';
+import { collectValues, newestValue } from './field_retention_operations';
 
 export const ENTITY_ID_FIELD = 'entity.id';
 
@@ -15,7 +15,7 @@ export const ENTITY_ID_FIELD = 'entity.id';
 export const getCommonFieldDescriptions = (
   ecsField: Omit<EntityType, 'generic'> | 'entity'
 ): EntityField[] => [
-  oldestValue({
+  newestValue({
     source: '_index',
     destination: 'entity.source',
   }),
@@ -28,21 +28,6 @@ export const getCommonFieldDescriptions = (
   newestValue({ source: 'asset.environment' }),
   newestValue({ source: 'asset.criticality' }),
   newestValue({ source: 'asset.business_unit' }),
-  newestValue({
-    source: `${ecsField}.risk.calculated_level`,
-  }),
-  newestValue({
-    source: `${ecsField}.risk.calculated_score`,
-    mapping: {
-      type: 'float',
-    },
-  }),
-  newestValue({
-    source: `${ecsField}.risk.calculated_score_norm`,
-    mapping: {
-      type: 'float',
-    },
-  }),
 ];
 
 export const getEntityFieldsDescriptions = (rootField?: EntityType) => {
@@ -54,10 +39,10 @@ export const getEntityFieldsDescriptions = (rootField?: EntityType) => {
     newestValue({ source: `${prefix}.sub_type`, destination: 'entity.sub_type' }),
     newestValue({ source: `${prefix}.url`, destination: 'entity.url' }),
 
-    newestValue({
-      source: `${prefix}.attributes.privileged`,
-      destination: 'entity.attributes.privileged',
-      mapping: { type: 'boolean' },
+    collectValues({
+      source: `${prefix}.attributes.watchlists`,
+      destination: 'entity.attributes.watchlists',
+      mapping: { type: 'keyword' },
       allowAPIUpdate: true,
     }),
     newestValue({
@@ -79,7 +64,6 @@ export const getEntityFieldsDescriptions = (rootField?: EntityType) => {
       allowAPIUpdate: true,
     }),
 
-    /* Lifecycle fields should not allow update via the API */
     newestValue({
       source: `${prefix}.lifecycle.first_seen`,
       destination: 'entity.lifecycle.first_seen',
@@ -91,42 +75,20 @@ export const getEntityFieldsDescriptions = (rootField?: EntityType) => {
       mapping: { type: 'date' },
     }),
 
-    newestValue({
-      source: `${prefix}.behaviors.brute_force_victim`,
-      destination: 'entity.behaviors.brute_force_victim',
-      mapping: { type: 'boolean' },
+    /* Behaviors: rule/anomaly identifiers (replacing boolean behavior attributes) */
+    collectValues({
+      source: `${prefix}.behaviors.rule_names`,
+      destination: 'entity.behaviors.rule_names',
+      mapping: { type: 'keyword' },
+      fieldHistoryLength: 100,
       allowAPIUpdate: true,
     }),
-    newestValue({
-      source: `${prefix}.behaviors.new_country_login`,
-      destination: 'entity.behaviors.new_country_login',
-      mapping: { type: 'boolean' },
+    collectValues({
+      source: `${prefix}.behaviors.anomaly_job_ids`,
+      destination: 'entity.behaviors.anomaly_job_ids',
+      mapping: { type: 'keyword' },
+      fieldHistoryLength: 100,
       allowAPIUpdate: true,
-    }),
-    newestValue({
-      source: `${prefix}.behaviors.used_usb_device`,
-      destination: 'entity.behaviors.used_usb_device',
-      mapping: { type: 'boolean' },
-      allowAPIUpdate: true,
-    }),
-
-    newestValue({
-      source: `${prefix}.risk.calculated_level`,
-      destination: 'entity.risk.calculated_level',
-    }),
-    newestValue({
-      source: `${prefix}.risk.calculated_score`,
-      destination: 'entity.risk.calculated_score',
-      mapping: {
-        type: 'float',
-      },
-    }),
-    newestValue({
-      source: `${prefix}.risk.calculated_score_norm`,
-      destination: 'entity.risk.calculated_score_norm',
-      mapping: {
-        type: 'float',
-      },
     }),
   ];
 };

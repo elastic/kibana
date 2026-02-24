@@ -5,10 +5,14 @@
  * 2.0.
  */
 
-import { newestValue } from './field_retention_operations';
+import { collectValues as collect, newestValue } from './field_retention_operations';
 import type { EntityDefinitionWithoutId } from './entity_schema';
 import { getCommonFieldDescriptions, getEntityFieldsDescriptions } from './common_fields';
 
+/**
+ * Generic entity: no host.* or user.* (those belong to host/user definitions only).
+ * Entity, asset, cloud, orchestrator, and relationship fields only.
+ */
 export const genericEntityDefinition: EntityDefinitionWithoutId = {
   type: 'generic',
   name: `Security 'generic' Entity Store Definition`,
@@ -18,10 +22,7 @@ export const genericEntityDefinition: EntityDefinitionWithoutId = {
   },
   indexPatterns: [],
   fields: [
-    // entity.id doesn't need to be mapped because it's the main entity field
-    // and it's already mapped by default
-
-    newestValue({ source: `entity.name` }),
+    newestValue({ source: 'entity.name' }),
     ...getEntityFieldsDescriptions(),
 
     newestValue({ source: 'cloud.account.id' }),
@@ -35,61 +36,6 @@ export const genericEntityDefinition: EntityDefinitionWithoutId = {
     newestValue({ source: 'cloud.provider' }),
     newestValue({ source: 'cloud.region' }),
     newestValue({ source: 'cloud.service.name' }),
-
-    newestValue({ source: 'host.architecture' }),
-    newestValue({ source: 'host.boot.id' }),
-    newestValue({
-      source: 'host.cpu.usage',
-      mapping: { type: 'scaled_float', scaling_factor: 1000 },
-    }),
-    newestValue({ source: 'host.disk.read.bytes', mapping: { type: 'long' } }),
-    newestValue({ source: 'host.disk.write.bytes', mapping: { type: 'long' } }),
-    newestValue({ source: 'host.domain' }),
-    newestValue({ source: 'host.hostname' }),
-    newestValue({ source: 'host.id' }),
-    newestValue({ source: 'host.mac' }),
-    newestValue({ source: 'host.name' }),
-    newestValue({ source: 'host.network.egress.bytes', mapping: { type: 'long' } }),
-    newestValue({ source: 'host.network.egress.packets', mapping: { type: 'long' } }),
-    newestValue({ source: 'host.network.ingress.bytes', mapping: { type: 'long' } }),
-    newestValue({ source: 'host.network.ingress.packets', mapping: { type: 'long' } }),
-    newestValue({ source: 'host.pid_ns_ino' }),
-    newestValue({ source: 'host.type' }),
-    newestValue({ source: 'host.uptime', mapping: { type: 'long' } }),
-    newestValue({
-      source: 'host.ip',
-      mapping: {
-        type: 'ip',
-      },
-    }),
-
-    newestValue({ source: 'user.domain' }),
-    newestValue({ source: 'user.email' }),
-    newestValue({ source: 'user.roles' }),
-    newestValue({ source: 'user.hash' }),
-    newestValue({ source: 'user.id' }),
-    newestValue({
-      source: 'user.name',
-      mapping: {
-        type: 'keyword',
-        fields: {
-          text: {
-            type: 'match_only_text',
-          },
-        },
-      },
-    }),
-    newestValue({
-      source: 'user.full_name',
-      mapping: {
-        type: 'keyword',
-        fields: {
-          text: {
-            type: 'match_only_text',
-          },
-        },
-      },
-    }),
 
     newestValue({ source: 'orchestrator.api_version' }),
     newestValue({ source: 'orchestrator.cluster.id' }),
@@ -108,5 +54,69 @@ export const genericEntityDefinition: EntityDefinitionWithoutId = {
     newestValue({ source: 'orchestrator.type' }),
 
     ...getCommonFieldDescriptions('entity'),
+
+    /* Generic definition: relationship types (snake_case, keyword array) */
+    collect({
+      source: 'entity.relationships.Accesses_frequently',
+      destination: 'entity.relationships.accesses_frequently',
+      mapping: { type: 'keyword' },
+      allowAPIUpdate: true,
+    }),
+    collect({
+      source: 'entity.relationships.Communicates_with',
+      destination: 'entity.relationships.communicates_with',
+      mapping: { type: 'keyword' },
+      allowAPIUpdate: true,
+    }),
+    collect({
+      source: 'entity.relationships.Depends_on',
+      destination: 'entity.relationships.depends_on',
+      mapping: { type: 'keyword' },
+      allowAPIUpdate: true,
+    }),
+    collect({
+      source: 'entity.relationships.Owns',
+      destination: 'entity.relationships.owns',
+      mapping: { type: 'keyword' },
+      allowAPIUpdate: true,
+    }),
+    collect({
+      source: 'entity.relationships.Resolved_to',
+      destination: 'entity.relationships.resolved_to',
+      mapping: { type: 'keyword' },
+      allowAPIUpdate: true,
+    }),
+
+    /* Mapping only: populated by maintainers */
+    newestValue({
+      source: 'entity.relationships.owns_inferred',
+      destination: 'entity.relationships.owns_inferred',
+      mapping: { type: 'keyword' },
+    }),
+    newestValue({
+      source: 'entity.relationships.accesses_infrequently',
+      destination: 'entity.relationships.accesses_infrequently',
+      mapping: { type: 'keyword' },
+    }),
+    newestValue({
+      source: 'entity.relationships.resolution.resolved_to',
+      destination: 'entity.relationships.resolution.resolved_to',
+      mapping: { type: 'keyword' },
+    }),
+    newestValue({
+      source: 'entity.relationships.resolution.risk.calculated_level',
+      destination: 'entity.relationships.resolution.risk.calculated_level',
+      mapping: { type: 'keyword' },
+    }),
+    newestValue({
+      source: 'entity.relationships.resolution.risk.calculated_score',
+      destination: 'entity.relationships.resolution.risk.calculated_score',
+      mapping: { type: 'float' },
+    }),
+    newestValue({
+      source: 'entity.relationships.resolution.risk.calculated_score_norm',
+      destination: 'entity.relationships.resolution.risk.calculated_score_norm',
+      mapping: { type: 'float' },
+    }),
   ],
 } as const satisfies EntityDefinitionWithoutId;

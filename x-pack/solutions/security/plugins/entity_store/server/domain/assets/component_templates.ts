@@ -14,6 +14,11 @@ import { ENTITY_BASE_PREFIX } from '../constants';
 
 type MappingProperties = NonNullable<MappingTypeMapping['properties']>;
 
+/**
+ * Entity Store v2 base mapping.
+ * entity.source: keyword (array); entity.risk.*: mapping only, populated by maintainers.
+ * labels and tags both kept; standardize in config if needed.
+ */
 const BASE_ENTITY_INDEX_MAPPING = {
   '@timestamp': { type: 'date' },
   'event.ingested': { type: 'date' },
@@ -22,10 +27,10 @@ const BASE_ENTITY_INDEX_MAPPING = {
   'entity.id': { type: 'keyword' },
   'entity.EngineMetadata.Type': { type: 'keyword' },
   'entity.EngineMetadata.UntypedId': { type: 'keyword' },
-
-  // 'asset.criticality': { type: 'keyword' },
-  // 'entity.name': { type: 'keyword' },
-  // 'entity.source': { type: 'keyword' },
+  'entity.source': { type: 'keyword' },
+  'entity.risk.calculated_level': { type: 'keyword' },
+  'entity.risk.calculated_score': { type: 'float' },
+  'entity.risk.calculated_score_norm': { type: 'float' },
 } as const satisfies MappingProperties;
 
 export const getComponentTemplateName = (type: EntityType, namespace: string) =>

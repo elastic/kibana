@@ -36,23 +36,50 @@ export const serviceEntityDefinition: EntityDefinitionWithoutId = {
     ...getCommonFieldDescriptions('service'),
     ...getEntityFieldsDescriptions('service'),
 
+    /* Relationships: keep one direction only, snake_case, keyword array */
     collect({
-      source: `service.entity.relationships.communicates_with`,
+      source: 'service.entity.relationships.Communicates_with',
       destination: 'entity.relationships.communicates_with',
       mapping: { type: 'keyword' },
       allowAPIUpdate: true,
     }),
     collect({
-      source: `service.entity.relationships.depends_on`,
+      source: 'service.entity.relationships.Depends_on',
       destination: 'entity.relationships.depends_on',
       mapping: { type: 'keyword' },
       allowAPIUpdate: true,
     }),
-    collect({
-      source: `service.entity.relationships.dependent_of`,
-      destination: 'entity.relationships.dependent_of',
+
+    /* Mapping only: populated by maintainers */
+    newestValue({
+      source: 'entity.relationships.owns_inferred',
+      destination: 'entity.relationships.owns_inferred',
       mapping: { type: 'keyword' },
-      allowAPIUpdate: true,
+    }),
+    newestValue({
+      source: 'entity.relationships.accesses_infrequently',
+      destination: 'entity.relationships.accesses_infrequently',
+      mapping: { type: 'keyword' },
+    }),
+    newestValue({
+      source: 'entity.relationships.resolution.resolved_to',
+      destination: 'entity.relationships.resolution.resolved_to',
+      mapping: { type: 'keyword' },
+    }),
+    newestValue({
+      source: 'entity.relationships.resolution.risk.calculated_level',
+      destination: 'entity.relationships.resolution.risk.calculated_level',
+      mapping: { type: 'keyword' },
+    }),
+    newestValue({
+      source: 'entity.relationships.resolution.risk.calculated_score',
+      destination: 'entity.relationships.resolution.risk.calculated_score',
+      mapping: { type: 'float' },
+    }),
+    newestValue({
+      source: 'entity.relationships.resolution.risk.calculated_score_norm',
+      destination: 'entity.relationships.resolution.risk.calculated_score_norm',
+      mapping: { type: 'float' },
     }),
   ],
 } as const satisfies EntityDefinitionWithoutId;
