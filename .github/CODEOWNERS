@@ -1207,7 +1207,6 @@ x-pack/solutions/observability/plugins/profiling_data_access @elastic/obs-presen
 x-pack/solutions/observability/plugins/serverless_observability @elastic/obs-presentation-team
 x-pack/solutions/observability/plugins/slo @elastic/actionable-obs-team
 x-pack/solutions/observability/plugins/synthetics @elastic/actionable-obs-team
-x-pack/solutions/observability/plugins/synthetics/e2e @elastic/actionable-obs-team
 x-pack/solutions/observability/plugins/uptime @elastic/actionable-obs-team
 x-pack/solutions/observability/plugins/ux @elastic/actionable-obs-team
 x-pack/solutions/observability/test
