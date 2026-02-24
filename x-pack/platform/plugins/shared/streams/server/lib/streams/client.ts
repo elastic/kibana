@@ -546,6 +546,8 @@ export class StreamsClient {
       REQUIRED_MANAGE_PRIVILEGES.push('monitor_text_structure');
     }
 
+    const CREATE_SNAPSHOT_REPOSITORY_CLUSTER_PRIVILEGE = 'cluster:admin/repository/put';
+
     const REQUIRED_INDEX_PRIVILEGES = [
       'read',
       'write',
@@ -563,7 +565,7 @@ export class StreamsClient {
 
     const privileges =
       await this.dependencies.scopedClusterClient.asCurrentUser.security.hasPrivileges({
-        cluster: REQUIRED_MANAGE_PRIVILEGES,
+        cluster: [...REQUIRED_MANAGE_PRIVILEGES, CREATE_SNAPSHOT_REPOSITORY_CLUSTER_PRIVILEGE],
         index: [
           {
             names,
@@ -594,6 +596,8 @@ export class StreamsClient {
       text_structure: isServerless ? true : privileges.cluster.monitor_text_structure,
       read_failure_store: names.every((name) => privileges.index[name].read_failure_store),
       manage_failure_store: names.every((name) => privileges.index[name].manage_failure_store),
+      create_snapshot_repository:
+        privileges.cluster[CREATE_SNAPSHOT_REPOSITORY_CLUSTER_PRIVILEGE] === true,
     };
   }
 
