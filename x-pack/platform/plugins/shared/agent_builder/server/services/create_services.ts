@@ -63,6 +63,7 @@ export class ServiceManager {
     inference,
     uiSettings,
     savedObjects,
+    featureFlags,
     actions,
     taskManager,
     trackingService,
@@ -156,6 +157,7 @@ export class ServiceManager {
       inference,
       conversationService: conversations,
       agentService: agents,
+      attachmentsService: attachments,
       uiSettings,
       savedObjects,
       trackingService,
@@ -173,6 +175,10 @@ export class ServiceManager {
       execution,
       taskHandler,
       hooks,
+      spaces,
+      featureFlags,
+      uiSettings,
+      savedObjects,
     };
 
     return this.internalStart;

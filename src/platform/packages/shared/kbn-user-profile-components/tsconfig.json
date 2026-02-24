@@ -7,6 +7,8 @@
       "node",
       "@emotion/react/types/css-prop",
       "@testing-library/jest-dom",
+      "react",
+      "@kbn/ambient-ui-types",
     ]
   },
   "include": [
