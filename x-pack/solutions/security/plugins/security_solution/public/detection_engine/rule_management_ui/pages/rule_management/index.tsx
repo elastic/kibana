@@ -30,7 +30,6 @@ import { AllRules } from '../../components/rules_table';
 import { RulesTableContextProvider } from '../../components/rules_table/rules_table/rules_table_context';
 import { HeaderPage } from '../../../../common/components/header_page';
 import { RuleUpdateCallouts } from '../../components/rule_update_callouts/rule_update_callouts';
-import { BlogPostPrebuiltRuleCustomizationCallout } from '../../components/blog_post_prebuilt_rule_customization_callout';
 import { RuleImportModal } from '../../components/rule_import_modal/rule_import_modal';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { CreateRuleMenu } from '../../components/create_rule_menu';
@@ -171,7 +170,6 @@ const RulesPageContent = () => {
             kibanaServices={kibanaServices}
             categories={[DEFAULT_APP_CATEGORIES.security.id]}
           />
-          <BlogPostPrebuiltRuleCustomizationCallout />
           <AllRules data-test-subj="all-rules" />
         </SecuritySolutionPageWrapper>
       </RulesTableContextProvider>
