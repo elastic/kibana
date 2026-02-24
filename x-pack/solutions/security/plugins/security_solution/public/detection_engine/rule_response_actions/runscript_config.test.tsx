@@ -9,7 +9,13 @@ import type { AppContextTestRender } from '../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../common/mock/endpoint';
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import React from 'react';
-import { RunscriptConfig } from './endpoint/runscript_config';
+import {
+  RUNSCRIPT_CONFIG_REQUIRES_ONE_OS,
+  RunscriptConfig,
+  SCRIPT_ARGUMENTS_REQUIRED_HELP_TEXT,
+  TIMEOUT_VALUE_MUST_BE_GREATER_THAN_ZERO,
+  TIMEOUT_VALUE_MUST_BE_NUMBER,
+} from './endpoint/runscript_config';
 import { useUserPrivileges as _useUserPrivileges } from '../../common/components/user_privileges';
 import { responseActionsHttpMocks } from '../../management/mocks/response_actions_http_mocks';
 import { EndpointScriptsGenerator } from '../../../common/endpoint/data_generators/endpoint_scripts_generator';
@@ -28,6 +34,7 @@ describe('Automated Response actions - Runscript Configuration', () => {
   let testContext: AppContextTestRender;
   let render: () => ReturnType<AppContextTestRender['render']>;
   let apiMocks: ReturnType<typeof responseActionsHttpMocks>;
+  let formMock: ReturnType<typeof useForm>['form'];
 
   beforeEach(() => {
     testContext = createAppRootMockRenderer();
@@ -51,6 +58,7 @@ describe('Automated Response actions - Runscript Configuration', () => {
           ],
         },
       });
+      formMock = form;
       return (
         <Form form={form}>
           <RunscriptConfig
@@ -176,6 +184,80 @@ describe('Automated Response actions - Runscript Configuration', () => {
       expect(getByTestId('runscript-config-field-linux-timeout')).not.toBeDisabled();
     });
 
-    it.todo('should display help text under arguments when script requires input');
+    it('should not display help text under argumnents when script does not require input', async () => {
+      const { getByTestId } = await renderAndSelectScript();
+
+      expect(
+        getByTestId('runscript-config-field-linux-scriptParamsContainer')
+      ).not.toHaveTextContent(SCRIPT_ARGUMENTS_REQUIRED_HELP_TEXT);
+    });
+
+    it('should display help text under arguments when script requires input', async () => {
+      scriptListApiResponse.data[0].meta!.requiresInput = true;
+      const { getByTestId } = await renderAndSelectScript();
+
+      expect(getByTestId('runscript-config-field-linux-scriptParamsContainer')).toHaveTextContent(
+        SCRIPT_ARGUMENTS_REQUIRED_HELP_TEXT
+      );
+      expect(formMock.isValid).toBe(false);
+      expect(formMock.getErrors()).toEqual([
+        'Run script: Linux: Arguments: Selected script requires arguments to be provided',
+      ]);
+    });
+
+    it('should validate timeout for valid value', async () => {
+      const { getByTestId } = await renderAndSelectScript();
+      await userEvent.type(getByTestId('runscript-config-field-linux-timeout'), '10');
+
+      expect(
+        getByTestId('runscript-config-field-linux-timeoutContainer').querySelector(
+          '.euiFormErrorText'
+        )
+      ).toBeNull();
+    });
+
+    it('should validate timeout for invalid value - not a number', async () => {
+      const { getByTestId } = await renderAndSelectScript();
+      await userEvent.type(getByTestId('runscript-config-field-linux-timeout'), 'abc');
+
+      await waitFor(() => {
+        expect(
+          getByTestId('runscript-config-field-linux-timeoutContainer').querySelector(
+            '.euiFormErrorText'
+          )
+        ).toHaveTextContent(TIMEOUT_VALUE_MUST_BE_NUMBER);
+      });
+      expect(formMock.isValid).toBe(false);
+      expect(formMock.getErrors()).toEqual(['Run script: Linux: Timeout: Value must be a number']);
+    });
+
+    it('should validate timeout for invalid value - number less than 1', async () => {
+      const { getByTestId } = await renderAndSelectScript();
+      await userEvent.type(getByTestId('runscript-config-field-linux-timeout'), '0');
+
+      await waitFor(() => {
+        expect(
+          getByTestId('runscript-config-field-linux-timeoutContainer').querySelector(
+            '.euiFormErrorText'
+          )
+        ).toHaveTextContent(TIMEOUT_VALUE_MUST_BE_GREATER_THAN_ZERO);
+      });
+    });
+
+    it('should clear arguments and timeout fields when script is unselected', async () => {
+      const { getByTestId } = await renderAndSelectScript();
+      await userEvent.click(
+        getByTestId('runscript-config-field-linux-scriptSelector-clearSelection')
+      );
+
+      expect(getByTestId('runscript-config-field-linux-scriptParams')).toBeDisabled();
+      expect(getByTestId('runscript-config-field-linux-scriptParams')).toHaveValue('');
+
+      expect(getByTestId('runscript-config-field-linux-timeout')).toBeDisabled();
+      expect(getByTestId('runscript-config-field-linux-timeout')).toHaveValue('');
+
+      expect(formMock.isValid).toBe(false);
+      expect(formMock.getErrors()).toEqual([RUNSCRIPT_CONFIG_REQUIRES_ONE_OS]);
+    });
   });
 });

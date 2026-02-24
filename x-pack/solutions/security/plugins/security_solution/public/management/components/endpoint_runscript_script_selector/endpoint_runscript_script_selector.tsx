@@ -115,6 +115,7 @@ export const EndpointRunscriptScriptSelector = memo<EndpointRunscriptScriptSelec
                   display="empty"
                   onClick={clearCurrentSelectionHandler}
                   aria-label={CLEAR_SELECTION_LABEL}
+                  data-test-subj={getTestId('clearSelection')}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
