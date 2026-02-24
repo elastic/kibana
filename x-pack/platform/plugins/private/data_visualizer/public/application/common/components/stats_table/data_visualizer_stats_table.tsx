@@ -170,7 +170,9 @@ const UnmemoizedDataVisualizerTable = <T extends DataVisualizerTableItem>({
       render: (item: DataVisualizerTableItem) => {
         const displayName = item.displayName ?? item.fieldName;
         if (item.fieldName === undefined) return null;
-        const direction = expandedRowItemIds.includes(item.fieldName) ? 'chevronSingleDown' : 'chevronSingleRight';
+        const direction = expandedRowItemIds.includes(item.fieldName)
+          ? 'chevronSingleDown'
+          : 'chevronSingleRight';
         return (
           <EuiButtonIcon
             data-test-subj={`dataVisualizerDetailsToggle-${item.fieldName}-${direction}`}

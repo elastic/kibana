@@ -116,11 +116,7 @@ const useExpandButtonPopover = () => {
               label="Show actions done to this entity"
               onClick={() => {}}
             />
-            <PopoverListItem
-              iconType="queue"
-              label="Show related events"
-              onClick={() => {}}
-            />
+            <PopoverListItem iconType="queue" label="Show related events" onClick={() => {}} />
             <EuiHorizontalRule margin="xs" />
             <PopoverListItem iconType="maximize" label="Show entity details" onClick={() => {}} />
           </>

@@ -111,7 +111,12 @@ class DataDownloadOptions extends Component<DataDownloadOptionsProps, DataDownlo
   renderFormattedDownloads() {
     const detectedFormulasInTables = detectFormulasInTables(this.props.datatables);
     const button = (
-      <EuiButton iconType="chevronSingleDown" iconSide="right" size="s" onClick={this.onTogglePopover}>
+      <EuiButton
+        iconType="chevronSingleDown"
+        iconSide="right"
+        size="s"
+        onClick={this.onTogglePopover}
+      >
         <FormattedMessage
           id="data.inspector.table.downloadCSVToggleButtonLabel"
           defaultMessage="Download CSV"

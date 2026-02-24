@@ -25,7 +25,12 @@ const NewSavedQueryPageComponent = () => {
     () => (
       <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="m">
         <EuiFlexItem>
-          <EuiButtonEmpty iconType="chevronSingleLeft" {...savedQueryListProps} flush="left" size="xs">
+          <EuiButtonEmpty
+            iconType="chevronSingleLeft"
+            {...savedQueryListProps}
+            flush="left"
+            size="xs"
+          >
             <FormattedMessage
               id="xpack.osquery.addSavedQuery.viewSavedQueriesListTitle"
               defaultMessage="View all saved queries"

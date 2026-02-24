@@ -220,7 +220,9 @@ export const useColumns = (
                   values: { analyticsId: item.config.id },
                 })
           }
-          iconType={expandedRowItemIds.includes(item.config.id) ? 'chevronSingleDown' : 'chevronSingleRight'}
+          iconType={
+            expandedRowItemIds.includes(item.config.id) ? 'chevronSingleDown' : 'chevronSingleRight'
+          }
         />
       ),
       'data-test-subj': 'mlAnalyticsTableRowDetailsToggle',

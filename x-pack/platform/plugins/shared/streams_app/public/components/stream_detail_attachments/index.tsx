@@ -302,7 +302,9 @@ export function StreamDetailAttachments({ definition }: { definition: Streams.al
                           </EuiFlexItem>
                           <EuiFlexItem grow={false}>
                             <EuiIcon
-                              type={isSelectionPopoverOpen ? 'chevronSingleUp' : 'chevronSingleDown'}
+                              type={
+                                isSelectionPopoverOpen ? 'chevronSingleUp' : 'chevronSingleDown'
+                              }
                               size="s"
                             />
                           </EuiFlexItem>

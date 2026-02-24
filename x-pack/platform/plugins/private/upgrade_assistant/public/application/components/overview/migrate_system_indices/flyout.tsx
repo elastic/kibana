@@ -246,7 +246,9 @@ export const SystemIndicesFlyout = ({
           <EuiButtonIcon
             onClick={() => toggleRow(feature)}
             aria-label={expandedRows[feature.feature_name] ? 'Collapse' : 'Expand'}
-            iconType={expandedRows[feature.feature_name] ? 'chevronSingleDown' : 'chevronSingleRight'}
+            iconType={
+              expandedRows[feature.feature_name] ? 'chevronSingleDown' : 'chevronSingleRight'
+            }
           />
         ) : null;
       },

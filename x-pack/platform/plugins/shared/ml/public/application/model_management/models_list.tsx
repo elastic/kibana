@@ -316,7 +316,9 @@ export const ModelsList: FC<Props> = ({
                     defaultMessage: 'Expand',
                   })
             }
-            iconType={itemIdToExpandedRowMap[item.model_id] ? 'chevronSingleDown' : 'chevronSingleRight'}
+            iconType={
+              itemIdToExpandedRowMap[item.model_id] ? 'chevronSingleDown' : 'chevronSingleRight'
+            }
           />
         );
       },

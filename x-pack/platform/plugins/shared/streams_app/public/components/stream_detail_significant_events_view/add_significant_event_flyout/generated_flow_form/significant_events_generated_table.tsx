@@ -127,7 +127,9 @@ export function SignificantEventsGeneratedTable({
           <EuiButtonIcon
             onClick={() => toggleDetails(query)}
             aria-label={itemIdToExpandedRowMapValues[query.id] ? 'Collapse' : 'Expand'}
-            iconType={itemIdToExpandedRowMapValues[query.id] ? 'chevronSingleDown' : 'chevronSingleRight'}
+            iconType={
+              itemIdToExpandedRowMapValues[query.id] ? 'chevronSingleDown' : 'chevronSingleRight'
+            }
           />
         );
       },

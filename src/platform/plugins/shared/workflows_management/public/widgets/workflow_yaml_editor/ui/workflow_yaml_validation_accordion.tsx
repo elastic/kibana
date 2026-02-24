@@ -129,11 +129,7 @@ export function WorkflowYamlValidationAccordion({
     buttonContent = 'Initializing validation...';
   } else if (allValidationErrors?.length === 0) {
     icon = (
-      <EuiIcon
-        type="checkCircleFill"
-        color={euiTheme.colors.vis.euiColorVisSuccess0}
-        size="m"
-      />
+      <EuiIcon type="checkCircleFill" color={euiTheme.colors.vis.euiColorVisSuccess0} size="m" />
     );
     buttonContent = 'No validation errors';
   } else {

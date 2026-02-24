@@ -126,7 +126,9 @@ export const useColumns = (
                   values: { transformId: item.config.id },
                 })
           }
-          iconType={expandedRowItemIds.includes(item.config.id) ? 'chevronSingleDown' : 'chevronSingleRight'}
+          iconType={
+            expandedRowItemIds.includes(item.config.id) ? 'chevronSingleDown' : 'chevronSingleRight'
+          }
           data-test-subj="transformListRowDetailsToggle"
         />
       ),

@@ -204,10 +204,7 @@ function TemplateDescription() {
   const { isImported, setImportedDiagnosticsBundle } = useDiagnosticsContext();
   if (isImported) {
     return (
-      <EuiCallOut
-        title="Displaying results from the uploaded diagnostics report"
-        iconType="upload"
-      >
+      <EuiCallOut title="Displaying results from the uploaded diagnostics report" iconType="upload">
         <EuiButton
           data-test-subj="apmTemplateDescriptionClearBundleButton"
           onClick={() => setImportedDiagnosticsBundle(undefined)}

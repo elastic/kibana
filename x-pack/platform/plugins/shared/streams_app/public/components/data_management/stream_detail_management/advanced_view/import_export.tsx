@@ -58,11 +58,7 @@ export function ImportExportPanel({
                   </EuiButton>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiButton
-                    iconType="upload"
-                    fill
-                    onClick={() => setIsExportFlyoutOpen(true)}
-                  >
+                  <EuiButton iconType="upload" fill onClick={() => setIsExportFlyoutOpen(true)}>
                     {i18n.translate('xpack.streams.streamDetailView.exportButtonLabel', {
                       defaultMessage: 'Export',
                     })}

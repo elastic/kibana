@@ -314,7 +314,9 @@ export function getColumns({
               itemIdToExpandedRowMap[instanceItem.serviceNodeName] ? 'Collapse' : 'Expand'
             }
             iconType={
-              itemIdToExpandedRowMap[instanceItem.serviceNodeName] ? 'chevronSingleUp' : 'chevronSingleDown'
+              itemIdToExpandedRowMap[instanceItem.serviceNodeName]
+                ? 'chevronSingleUp'
+                : 'chevronSingleDown'
             }
           />
         );
