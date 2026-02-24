@@ -7,12 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { setup } from '@kbn/core-test-helpers-http-setup-browser';
-
-export const { http } = setup((injectedMetadata) => {
-  injectedMetadata.getBasePath.mockReturnValue('/hola/daro/');
-});
-
-export const indexFilterMock = { bool: { must: [{ match_all: {} }] } };
-export const runtimeMappingsMock = { myField: { type: 'keyword' } };
-export const projectRoutingMock = 'test-project-id';
+export const ENABLED_TRIGGER_TABS = ['alert', 'index', 'manual', 'historical'] as const;

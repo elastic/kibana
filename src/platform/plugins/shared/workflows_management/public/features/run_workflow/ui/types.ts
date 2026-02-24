@@ -7,12 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { setup } from '@kbn/core-test-helpers-http-setup-browser';
+import type { ENABLED_TRIGGER_TABS } from './constants';
 
-export const { http } = setup((injectedMetadata) => {
-  injectedMetadata.getBasePath.mockReturnValue('/hola/daro/');
-});
-
-export const indexFilterMock = { bool: { must: [{ match_all: {} }] } };
-export const runtimeMappingsMock = { myField: { type: 'keyword' } };
-export const projectRoutingMock = 'test-project-id';
+export type WorkflowTriggerTab = (typeof ENABLED_TRIGGER_TABS)[number];
