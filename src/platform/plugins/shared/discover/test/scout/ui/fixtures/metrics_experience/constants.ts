@@ -7,12 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { tags } from '@kbn/scout';
+import { tags, type KibanaRole } from '@kbn/scout';
 
 export const METRICS_TEST_INDEX_NAME = 'test-metrics-experience';
+export const METRICS_TEST_INDEX_PATTERN = 'test-metrics-*';
+
+export const METRICS_FLYOUT_DIMENSION_ITEM_DATA_TEST_SUBJ =
+  'metricsExperienceFlyoutOverviewTabDimensionItem';
 
 export const ESQL_QUERIES = {
   TS: `TS ${METRICS_TEST_INDEX_NAME}`,
+  TS_WILDCARD: `TS ${METRICS_TEST_INDEX_PATTERN}`,
   FROM: `FROM ${METRICS_TEST_INDEX_NAME}`,
 };
 
@@ -24,4 +29,24 @@ export const KBN_ARCHIVE =
 export const METRICS_EXPERIENCE_TAGS = [
   ...tags.stateful.all,
   ...tags.serverless.observability.complete,
+  ...tags.serverless.security.complete,
 ];
+
+export const METRICS_EXPERIENCE_VIEWER_ROLE: KibanaRole = {
+  elasticsearch: {
+    cluster: [],
+    indices: [
+      {
+        names: [METRICS_TEST_INDEX_NAME, METRICS_TEST_INDEX_PATTERN],
+        privileges: ['read', 'view_index_metadata'],
+      },
+    ],
+  },
+  kibana: [
+    {
+      base: ['read'],
+      feature: {},
+      spaces: ['*'],
+    },
+  ],
+};

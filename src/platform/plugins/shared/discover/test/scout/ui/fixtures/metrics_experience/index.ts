@@ -11,14 +11,22 @@ import type {
   PageObjects,
   ScoutParallelTestFixtures,
   ScoutParallelWorkerFixtures,
+  BrowserAuthFixture,
+  ScoutTestConfig,
 } from '@kbn/scout';
 import { spaceTest as spaceBaseTest, createLazyPageObject } from '@kbn/scout';
 import { MetricsExperiencePage } from './page_objects';
+import { METRICS_EXPERIENCE_VIEWER_ROLE } from './constants';
+
+interface MetricsExperienceBrowserAuthFixture extends BrowserAuthFixture {
+  loginAsMetricsViewer: () => Promise<void>;
+}
 
 export interface MetricsExperienceTestFixtures extends ScoutParallelTestFixtures {
   pageObjects: PageObjects & {
     metricsExperience: MetricsExperiencePage;
   };
+  browserAuth: MetricsExperienceBrowserAuthFixture;
 }
 
 export const spaceTest = spaceBaseTest.extend<
@@ -41,6 +49,19 @@ export const spaceTest = spaceBaseTest.extend<
     };
 
     await use(extendedPageObjects);
+  },
+  browserAuth: async (
+    { browserAuth, config }: { browserAuth: BrowserAuthFixture; config: ScoutTestConfig },
+    use: (browserAuth: MetricsExperienceBrowserAuthFixture) => Promise<void>
+  ) => {
+    const loginAsMetricsViewer = async () => {
+      if (config.serverless && config.projectType === 'security') {
+        return browserAuth.loginWithCustomRole(METRICS_EXPERIENCE_VIEWER_ROLE);
+      }
+      return browserAuth.loginAsViewer();
+    };
+
+    await use({ ...browserAuth, loginAsMetricsViewer });
   },
 });
 
