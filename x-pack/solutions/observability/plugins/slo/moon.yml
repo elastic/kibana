@@ -123,7 +123,6 @@ dependsOn:
   - '@kbn/observability-get-padded-alert-time-range-util'
   - '@kbn/presentation-publishing-schemas'
   - '@kbn/content-management-utils'
-  - '@kbn/es-query-server'
   - '@kbn/observability-agent-builder-plugin'
   - '@kbn/agent-builder-plugin'
 tags:
