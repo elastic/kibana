@@ -11,6 +11,9 @@ import type {
   SearchQuerySubmittedParams,
   SloOverviewFlyoutSearchQueriedParams,
   SloOverviewFlyoutStatusFilteredParams,
+  SloAppRedirectClickedParams,
+  SloCreateFlowStartedParams,
+  SloManageFlowStartedParams,
 } from './types';
 import { TelemetryEventTypes } from './types';
 
@@ -37,5 +40,21 @@ export class TelemetryClient implements ITelemetryClient {
 
   public reportSloInfoShown = (): void => {
     this.analytics.reportEvent(TelemetryEventTypes.SLO_INFO_SHOWN, {});
+  };
+
+  public reportSloCreateFlowStarted = (params: SloCreateFlowStartedParams): void => {
+    this.analytics.reportEvent(TelemetryEventTypes.SLO_CREATE_FLOW_STARTED, params);
+  };
+
+  public reportSloManageFlowStarted = (params: SloManageFlowStartedParams): void => {
+    this.analytics.reportEvent(TelemetryEventTypes.SLO_MANAGE_FLOW_STARTED, params);
+  };
+
+  public reportSloAppRedirectClicked = (params: SloAppRedirectClickedParams): void => {
+    this.analytics.reportEvent(TelemetryEventTypes.SLO_APP_REDIRECT_CLICKED, params);
+  };
+
+  public reportSloTopNavClicked = (): void => {
+    this.analytics.reportEvent(TelemetryEventTypes.SLO_TOP_NAV_CLICKED, {});
   };
 }
