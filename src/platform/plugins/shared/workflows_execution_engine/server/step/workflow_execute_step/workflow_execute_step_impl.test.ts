@@ -46,6 +46,7 @@ const createMockInit = (
 
   const stepExecutionRuntime = {
     contextManager: mockContextManager,
+    abortController: new AbortController(),
     startStep: jest.fn(),
     finishStep: jest.fn(),
     failStep: jest.fn(),
