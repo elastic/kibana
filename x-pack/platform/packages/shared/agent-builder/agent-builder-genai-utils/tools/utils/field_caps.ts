@@ -81,8 +81,8 @@ export const processFieldCapsResponsePerIndex = (
         capability.indices == null
           ? allIndices
           : Array.isArray(capability.indices)
-            ? (capability.indices as string[])
-            : [capability.indices as string];
+          ? (capability.indices as string[])
+          : [capability.indices as string];
 
       for (const idx of targetIndices) {
         result[idx]?.push(field);

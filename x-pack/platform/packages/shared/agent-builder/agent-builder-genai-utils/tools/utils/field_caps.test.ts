@@ -186,8 +186,7 @@ describe('processFieldCapsResponsePerIndex', () => {
 
     const result = processFieldCapsResponsePerIndex(response);
 
-    const sortByPath = (a: { path: string }, b: { path: string }) =>
-      a.path.localeCompare(b.path);
+    const sortByPath = (a: { path: string }, b: { path: string }) => a.path.localeCompare(b.path);
 
     expect(result.index_a.sort(sortByPath)).toEqual([
       { path: 'only_a', type: 'text', meta: {} },
