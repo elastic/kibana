@@ -234,4 +234,101 @@ describe('Color Format', () => {
       );
     });
   });
+
+  describe('fieldType inference from value', () => {
+    test('should infer string type from string value when fieldType is not set', () => {
+      const colorer = new ColorFormat(
+        {
+          colors: [
+            {
+              regex: 'CN',
+              text: 'white',
+              background: 'red',
+            },
+          ],
+        },
+        jest.fn()
+      );
+
+      const result = colorer.convertToReact('CN');
+      const { container } = render(<>{result}</>);
+      expect(container.textContent).toBe('CN');
+      expect(container.querySelector('span')).toHaveStyle({
+        color: 'white',
+        backgroundColor: 'red',
+      });
+    });
+
+    test('should infer number type from number value when fieldType is not set', () => {
+      const colorer = new ColorFormat(
+        {
+          colors: [
+            {
+              range: '100:150',
+              text: 'blue',
+              background: 'yellow',
+            },
+          ],
+        },
+        jest.fn()
+      );
+
+      const result = colorer.convertToReact(125);
+      const { container } = render(<>{result}</>);
+      expect(container.textContent).toBe('125');
+      expect(container.querySelector('span')).toHaveStyle({
+        color: 'blue',
+        backgroundColor: 'yellow',
+      });
+    });
+
+    test('should infer boolean type from boolean value when fieldType is not set', () => {
+      const colorer = new ColorFormat(
+        {
+          colors: [
+            {
+              boolean: 'true',
+              text: 'green',
+              background: 'white',
+            },
+          ],
+        },
+        jest.fn()
+      );
+
+      const result = colorer.convertToReact(true);
+      const { container } = render(<>{result}</>);
+      expect(container.textContent).toBe('true');
+      expect(container.querySelector('span')).toHaveStyle({
+        color: 'green',
+        backgroundColor: 'white',
+      });
+    });
+
+    test('explicit fieldType should take precedence over inferred type', () => {
+      const colorer = new ColorFormat(
+        {
+          fieldType: 'number',
+          colors: [
+            {
+              range: '100:150',
+              text: 'blue',
+              background: 'yellow',
+            },
+            {
+              regex: '.*',
+              text: 'red',
+              background: 'black',
+            },
+          ],
+        },
+        jest.fn()
+      );
+
+      const result = colorer.convertToReact('CN');
+      const { container } = render(<>{result}</>);
+      expect(container.textContent).toBe('CN');
+      expect(container.querySelector('span')).toBeNull();
+    });
+  });
 });

@@ -16,6 +16,7 @@ import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import { css } from '@emotion/react';
 import {
   formatFieldValue,
+  FormatFieldValueReact,
   getFieldValue,
   OTEL_RESOURCE_ATTRIBUTES_TELEMETRY_SDK_LANGUAGE,
 } from '@kbn/discover-utils';
@@ -61,7 +62,7 @@ export const getServiceNameCell =
       props.fieldFormats,
       props.dataView,
       field,
-      'html'
+      'text'
     );
 
     return (
@@ -74,6 +75,15 @@ export const getServiceNameCell =
         property={field}
         core={core}
         share={share}
+        renderValue={() => (
+          <FormatFieldValueReact
+            value={serviceNameValue}
+            hit={props.row.raw}
+            fieldFormats={props.fieldFormats}
+            dataView={props.dataView}
+            field={field}
+          />
+        )}
       />
     );
   };

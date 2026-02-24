@@ -50,8 +50,28 @@ export class ColorFormat extends FieldFormat {
     };
   }
 
+  private getEffectiveFieldType(val: string | number | boolean): string | null {
+    const explicitFieldType = this.param('fieldType');
+    if (explicitFieldType) {
+      return explicitFieldType;
+    }
+
+    if (typeof val === 'boolean') {
+      return 'boolean';
+    }
+    if (typeof val === 'number') {
+      return 'number';
+    }
+    if (typeof val === 'string') {
+      return 'string';
+    }
+    return null;
+  }
+
   findColorRuleForVal(val: string | number | boolean) {
-    switch (this.param('fieldType')) {
+    const fieldType = this.getEffectiveFieldType(val);
+
+    switch (fieldType) {
       case 'string':
         return findLast(this.param('colors'), (colorParam: typeof DEFAULT_CONVERTER_COLOR) => {
           try {
