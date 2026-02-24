@@ -12,4 +12,6 @@ export interface CliOptions {
   kibanaUsername: string;
   kibanaPassword: string;
   elasticsearchHost: string;
+  policySharding?: boolean;
+  numPolicies?: number;
 }

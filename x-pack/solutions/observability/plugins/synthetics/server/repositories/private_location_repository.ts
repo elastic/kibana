@@ -110,6 +110,16 @@ export class PrivateLocationRepository {
     if (!agentPolicy) {
       errorMessages = `Agent policy with id ${location.agentPolicyId} does not exist`;
     }
+
+    if (!errorMessages && location.agentPolicyIds?.length) {
+      const missingPolicyIds = location.agentPolicyIds.filter(
+        (policyId) => !agentPolicies?.some((policy) => policy.id === policyId)
+      );
+      if (missingPolicyIds.length > 0) {
+        errorMessages = `Agent policies with ids ${missingPolicyIds.join(', ')} do not exist`;
+      }
+    }
+
     if (errorMessages) {
       return response.badRequest({
         body: {

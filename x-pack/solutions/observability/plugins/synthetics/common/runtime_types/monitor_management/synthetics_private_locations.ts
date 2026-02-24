@@ -14,6 +14,7 @@ export const PrivateLocationCodec = t.intersection([
     agentPolicyId: t.string,
   }),
   t.partial({
+    agentPolicyIds: t.array(t.string),
     isServiceManaged: t.boolean,
     isInvalid: t.boolean,
     tags: t.array(t.string),
