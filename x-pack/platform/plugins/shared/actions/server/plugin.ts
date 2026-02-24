@@ -40,6 +40,7 @@ import type {
   IEventLogService,
 } from '@kbn/event-log-plugin/server';
 import type { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
+import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
 
 import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
@@ -90,7 +91,10 @@ import { EVENT_LOG_ACTIONS, EVENT_LOG_PROVIDER } from './constants/event_log';
 import { ConnectorTokenClient } from './lib/connector_token_client';
 import { InMemoryMetrics, registerClusterCollector, registerNodeCollector } from './monitoring';
 import type { ConnectorWithOptionalDeprecation } from './application/connector/lib';
-import { isConnectorDeprecated } from './application/connector/lib';
+import {
+  isConnectorDeprecated,
+  updateDynamicInMemoryConnectors,
+} from './application/connector/lib';
 import { createSubActionConnectorFramework } from './sub_action_framework';
 import type {
   ICaseServiceAbstract,
@@ -184,6 +188,15 @@ export interface PluginStartContract {
   ): Params;
 
   isSystemActionConnector: (connectorId: string) => boolean;
+
+  /**
+   * Takes a list of the current pre-configured EIS inference endpoints and updates the inMemoryConnectors for usage in Kibana.
+   * @param preconfiguredInferenceEndpoints List of pre-configured EIS inference endpoints that should have inMemoryConnectors
+   * @returns void
+   */
+  updateDynamicInMemoryConnectors: (
+    preconfiguredInferenceEndpoints: InferenceInferenceEndpointInfo[]
+  ) => void;
 }
 
 export interface ActionsPluginsSetup {
@@ -700,6 +713,15 @@ export class ActionsPlugin
         return this.inMemoryConnectors.some(
           (inMemoryConnector) =>
             inMemoryConnector.isSystemAction && inMemoryConnector.id === connectorId
+        );
+      },
+      updateDynamicInMemoryConnectors: (
+        preconfiguredInferenceEndpoints: InferenceInferenceEndpointInfo[]
+      ) => {
+        updateDynamicInMemoryConnectors(
+          this.inMemoryConnectors,
+          preconfiguredInferenceEndpoints,
+          this.logger
         );
       },
     };
