@@ -383,15 +383,18 @@ async function createLargeWiredHierarchyViaFork(
 /**
  * Build content pack entries for a batch of wired hierarchy children.
  *
- * The root entry includes cumulative routing for ALL children from 1 to batchEnd,
- * so that each batch's import preserves routing for previously created children.
- * Only child entries for the current batch (batchStart..batchEnd) are included,
- * keeping memory usage per batch bounded.
+ * The root entry includes routing ONLY for the current batch's children.
+ * The content import handler's `asTree()` validates that every routing destination
+ * exists within the pack entries, so we cannot use cumulative routing (which
+ * would reference children from previous batches that aren't in the current pack).
+ *
+ * After all batches complete, a separate API call updates the root's routing
+ * to include all children.
  */
 function buildBatchedContentPackEntries(batchStart: number, batchEnd: number) {
-  const cumulativeRouting = [];
-  for (let i = 1; i <= batchEnd; i++) {
-    cumulativeRouting.push({
+  const batchRouting = [];
+  for (let i = batchStart; i <= batchEnd; i++) {
+    batchRouting.push({
       destination: `perf_child_${String(i).padStart(4, '0')}`,
       where: { field: 'resource.attributes.service.name', eq: `perf-service-${i}` },
       status: 'enabled' as const,
@@ -429,7 +432,7 @@ function buildBatchedContentPackEntries(batchStart: number, batchEnd: number) {
         ingest: {
           processing: { steps: [] as never[] },
           settings: {},
-          wired: { fields: {}, routing: cumulativeRouting },
+          wired: { fields: {}, routing: batchRouting },
           lifecycle: { inherit: {} },
           failure_store: { inherit: {} },
         },
@@ -485,6 +488,47 @@ async function uploadContentPack(
 }
 
 /**
+ * Update the root stream's routing to include all wired children.
+ *
+ * After batched content imports, each batch overwrites the root's routing with
+ * only that batch's children. This final call sets the complete routing table
+ * via `PUT /api/streams/logs/_ingest` so all children are routable.
+ */
+async function updateRootRouting(
+  kibanaServer: KibanaServer,
+  log: ToolingLog,
+  count: number
+) {
+  log.info(`Updating root stream routing to include all ${count} children...`);
+
+  const allRouting = [];
+  for (let i = 1; i <= count; i++) {
+    allRouting.push({
+      destination: `logs.perf_child_${String(i).padStart(4, '0')}`,
+      where: { field: 'resource.attributes.service.name', eq: `perf-service-${i}` },
+      status: 'enabled' as const,
+    });
+  }
+
+  await kibanaServer.request({
+    path: '/api/streams/logs/_ingest',
+    method: 'PUT',
+    headers: PUBLIC_API_HEADERS,
+    body: {
+      ingest: {
+        processing: { steps: [] },
+        settings: {},
+        wired: { fields: {}, routing: allRouting },
+        lifecycle: { inherit: {} },
+        failure_store: { inherit: {} },
+      },
+    },
+  });
+
+  log.info(`Root stream routing updated with ${count} routing rules`);
+}
+
+/**
  * Phase 5B — Create a large wired hierarchy via batched content imports.
  *
  * A single content import with 1000+ entries causes Kibana to OOM (the backend's
@@ -492,8 +536,10 @@ async function uploadContentPack(
  * templates, and data streams). Batching into chunks of IMPORT_BATCH_SIZE keeps
  * each import within proven memory limits.
  *
- * Each batch includes cumulative routing in the root entry so that previously
- * created children remain routable after each import overwrites the root definition.
+ * Each batch's root entry only includes routing for that batch's children (the
+ * content import handler's `asTree()` requires all routing destinations to exist
+ * in the pack entries). After all batches, `updateRootRouting()` sets the complete
+ * routing table via the ingest API.
  */
 async function createLargeWiredHierarchyViaImport(
   kibanaServer: KibanaServer,
@@ -543,6 +589,9 @@ async function createLargeWiredHierarchyViaImport(
       await sleep(2000);
     }
   }
+
+  // After all batches, set the complete routing table on the root stream
+  await updateRootRouting(kibanaServer, log, count);
 
   log.info(`Finished creating ${count} wired child streams via batched content import`);
 }
