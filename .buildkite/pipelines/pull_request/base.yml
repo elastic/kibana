@@ -20,7 +20,7 @@ steps:
     agents:
       provider: k8s
       image: docker.elastic.co/ci-agent-images/kibana/ci-minimal
-      cpu: 2
+      cpu: 16
       ephemeralStorage: '20G'
       memory: '8G'
     key: quick_checks
