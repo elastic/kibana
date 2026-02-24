@@ -6737,10 +6737,6 @@
                 "path": "x-pack/platform/plugins/shared/maintenance_windows/server/routes/apis/maintenance_window/external/unarchive/unarchive_maintenance_window_route.ts"
               },
               {
-                "plugin": "cps",
-                "path": "src/platform/plugins/shared/cps/server/routes/get_projects_tags.ts"
-              },
-              {
                 "plugin": "alerting",
                 "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/create/create_rule_route.ts"
               },
@@ -8065,6 +8061,10 @@
                 "path": "src/platform/plugins/shared/content_management/server/plugin.test.ts"
               },
               {
+                "plugin": "cps",
+                "path": "src/platform/plugins/shared/cps/server/routes/get_projects_tags.ts"
+              },
+              {
                 "plugin": "dataViewManagement",
                 "path": "src/platform/plugins/shared/data_view_management/server/routes/preview_scripted_field.ts"
               },
@@ -8299,6 +8299,14 @@
               {
                 "plugin": "alerting",
                 "path": "x-pack/platform/plugins/shared/alerting/server/routes/update_flapping_settings.test.ts"
+              },
+              {
+                "plugin": "dataSources",
+                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.test.ts"
+              },
+              {
+                "plugin": "dataSources",
+                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.test.ts"
               },
               {
                 "plugin": "dataSources",
@@ -16524,10 +16532,6 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/platform/plugins/shared/ml/server/routes/system.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/platform/plugins/shared/ml/server/routes/management.ts"
               },
               {
                 "plugin": "ml",
