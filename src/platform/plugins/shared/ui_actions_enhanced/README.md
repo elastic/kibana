@@ -2,7 +2,7 @@
 
 Registers commercially licensed generic actions like per panel time range and contains some code that supports drilldown work.
 
-- [__Dashboard drilldown user docs__](https://www.elastic.co/guide/en/kibana/master/drilldowns.html)
+- [**Dashboard drilldown user docs**](https://www.elastic.co/guide/en/kibana/master/drilldowns.html)
 
 ## Dynamic Actions Telemetry
 
@@ -42,7 +42,7 @@ dynamicActions.triggers.<trigger>.count
 For example:
 
 ```
-dynamicActions.triggers.VALUE_CLICK_TRIGGER.count
+dynamicActions.triggers.ON_CLICK_VALUE.count
 dynamicActions.triggers.RANGE_SELECT_TRIGGER.count
 ```
 
@@ -57,9 +57,9 @@ dynamicActions.action_triggers.<factory_id>_<trigger>.count
 For example:
 
 ```
-dynamicActions.action_triggers.DASHBOARD_TO_DASHBOARD_DRILLDOWN_VALUE_CLICK_TRIGGER.count
+dynamicActions.action_triggers.DASHBOARD_TO_DASHBOARD_DRILLDOWN_ON_CLICK_VALUE.count
 dynamicActions.action_triggers.DASHBOARD_TO_DASHBOARD_DRILLDOWN_RANGE_SELECT_TRIGGER.count
-dynamicActions.action_triggers.URL_DRILLDOWN_VALUE_CLICK_TRIGGER.count
+dynamicActions.action_triggers.URL_DRILLDOWN_ON_CLICK_VALUE.count
 ```
 
 ### Factory metrics
