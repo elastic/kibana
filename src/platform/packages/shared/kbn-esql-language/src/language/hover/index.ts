@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { ESQLCallbacks } from '@kbn/esql-types';
-import { Walker, within } from '../../ast';
-import { Parser } from '../../parser';
+import { Walker, within } from '@elastic/esql';
+import { Parser } from '@elastic/esql';
 
-import type { ESQLFunction, ESQLSingleAstItem, ESQLSource } from '../../types';
+import type { ESQLFunction, ESQLSingleAstItem, ESQLSource } from '@elastic/esql';
 
 import { getColumnsByTypeRetriever } from '../shared/columns_retrieval_helpers';
 import { getPromqlHoverItem, getVariablesHoverContent } from './helpers';

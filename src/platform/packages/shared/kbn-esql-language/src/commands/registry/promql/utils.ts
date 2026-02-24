@@ -7,12 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { within } from '../../../ast/location';
-import type { ESQLAstAllCommands, ESQLAstPromqlCommand } from '../../../types';
-import { findFinalWord } from '../../definitions/utils/autocomplete/helpers';
-import { correctPromqlQuerySyntax, getBracketsToClose } from '../../definitions/utils/ast';
-import { countTopLevelCommas } from '../../definitions/utils/shared';
-import { PromQLParser } from '../../../embedded_languages/promql';
+import { within } from '@elastic/esql';
+import type { ESQLAstAllCommands, ESQLAstPromqlCommand } from '@elastic/esql';
+import { PromQLParser } from '@elastic/esql';
 import type {
   PromQLAstNode,
   PromQLBinaryExpression,
@@ -21,7 +18,11 @@ import type {
   PromQLGrouping,
   PromQLLabel,
   PromQLSelector,
-} from '../../../embedded_languages/promql/types';
+} from '@elastic/esql';
+import { PromqlWalker } from '@elastic/esql';
+import { findFinalWord } from '../../definitions/utils/autocomplete/helpers';
+import { correctPromqlQuerySyntax, getBracketsToClose } from '../../definitions/utils/ast';
+import { countTopLevelCommas } from '../../definitions/utils/shared';
 import {
   getBinaryOperatorParamTypes,
   getPromqlFunctionDefinition,
@@ -30,7 +31,6 @@ import {
 } from '../../definitions/utils/promql';
 import { promqlOperatorDefinitions } from '../../definitions/generated/promql_operators';
 import type { PromQLFunctionParamType } from '../../definitions/types';
-import { PromqlWalker } from '../../../embedded_languages/promql/ast/walker';
 
 // ============================================================================
 // Types

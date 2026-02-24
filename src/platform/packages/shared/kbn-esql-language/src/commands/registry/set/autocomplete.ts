@@ -6,8 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import type { ESQLAstAllCommands } from '@elastic/esql';
 import { handleFragment } from '../../definitions/utils/autocomplete/helpers';
-import type { ESQLAstAllCommands } from '../../../types';
 import { getSettingsCompletionItems } from '../../definitions/utils/settings';
 import {
   isBinaryExpression,

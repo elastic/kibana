@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLAstHeaderCommand, ESQLAstSetHeaderCommand } from '../../../types';
+import type { ESQLAstHeaderCommand, ESQLAstSetHeaderCommand } from '@elastic/esql';
 import {
   isBinaryExpression,
   isIdentifier,

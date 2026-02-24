@@ -6,8 +6,9 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import type { ESQLAstPromqlCommand, ESQLMapEntry } from '@elastic/esql';
+import { isIdentifier, isList, isSource } from '@elastic/esql';
 import type { ISuggestionItem } from '../../registry/types';
-import type { ESQLAstPromqlCommand, ESQLMapEntry } from '../../../types';
 import { EDITOR_MARKER } from '../constants';
 import {
   ESQL_NUMBER_TYPES,
@@ -21,7 +22,6 @@ import { promqlOperatorDefinitions } from '../generated/promql_operators';
 import { promqlLabelMatcherDefinitions } from '../generated/promql_label_matchers';
 import { buildFunctionDocumentation } from './documentation';
 import { withAutoSuggest } from './autocomplete/helpers';
-import { isIdentifier, isList, isSource } from '../../../ast/is';
 import { SuggestionCategory } from '../../../language/autocomplete/utils/sorting';
 import { techPreviewLabel } from './shared';
 import { arithmeticOperators } from '../all_operators';

@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isFunctionExpression, isOptionNode } from '../../ast/is';
-import { within } from '../../ast/location';
-import type { ESQLAst, ESQLAstAllCommands, ESQLSingleAstItem } from '../../types';
-import { Walker } from '../../ast/walker';
+import { isFunctionExpression, isOptionNode } from '@elastic/esql';
+import { within } from '@elastic/esql';
+import type { ESQLAst, ESQLAstAllCommands, ESQLSingleAstItem } from '@elastic/esql';
+import { Walker } from '@elastic/esql';
 import { Location } from './types';
 import { isTimeseriesSourceCommand } from '../definitions/utils/timeseries_check';
 

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { ESQLCallbacks, ESQLFieldWithMetadata, IndexAutocompleteItem } from '@kbn/esql-types';
+import type { ESQLAstJoinCommand, ESQLAstPromqlCommand } from '@elastic/esql';
 import {
   BasicPrettyPrinter,
   esqlCommandRegistry,
@@ -21,7 +22,6 @@ import {
   type ESQLColumnData,
   type ESQLPolicy,
 } from '../commands/registry/types';
-import type { ESQLAstJoinCommand, ESQLAstPromqlCommand } from '../types';
 import type { IAdditionalFields } from '../commands/registry/registry';
 import { enrichFieldsWithECSInfo } from './enrich_fields_with_ecs';
 import { columnIsPresent } from '../commands/definitions/utils/columns';

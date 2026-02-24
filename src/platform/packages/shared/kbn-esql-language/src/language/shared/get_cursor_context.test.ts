@@ -9,9 +9,9 @@
 
 import { EDITOR_MARKER } from '../../commands/definitions/constants';
 import { correctQuerySyntax, isMarkerNode } from '../../commands/definitions/utils/ast';
-import type { ESQLAstItem } from '../../types';
-import { Parser } from '../../parser';
-import { Walker } from '../../ast';
+import type { ESQLAstItem } from '@elastic/esql';
+import { Parser } from '@elastic/esql';
+import { Walker } from '@elastic/esql';
 import { getCursorContext } from './get_cursor_context';
 
 const assertMarkerRemoved = (_query: string) => {

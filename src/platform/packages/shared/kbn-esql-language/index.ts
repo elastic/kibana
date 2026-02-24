@@ -32,13 +32,10 @@ export type {
   ESQLAstForkCommand,
   ESQLForkParens,
   ESQLAstPromqlCommand,
-} from './src/types';
+} from '@elastic/esql';
 
 export * from './src/constants';
-export * from './src/parser';
-export * from './src/ast';
-export * from './src/composer';
-export * from './src/pretty_print';
+export * from '@elastic/esql';
 export * from './src/commands';
 export * from './src/language';
 

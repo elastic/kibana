@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
+import type { ESQLAstItem } from '@elastic/esql';
 import { UnmappedFieldsStrategy, type ISuggestionItem } from '../types';
-import type { ESQLAstItem } from '../../../types';
 import { isMap, SuggestionCategory } from '../../../..';
 import type { MapParameters } from '../../definitions/utils/autocomplete/map_expression';
 import { getCommandMapExpressionSuggestions } from '../../definitions/utils/autocomplete/map_expression';
