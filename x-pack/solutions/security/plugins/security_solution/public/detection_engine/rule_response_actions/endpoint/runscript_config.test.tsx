@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { AppContextTestRender } from '../../common/mock/endpoint';
-import { createAppRootMockRenderer } from '../../common/mock/endpoint';
+import type { AppContextTestRender } from '../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import React from 'react';
 import {
@@ -15,18 +15,18 @@ import {
   SCRIPT_ARGUMENTS_REQUIRED_HELP_TEXT,
   TIMEOUT_VALUE_MUST_BE_GREATER_THAN_ZERO,
   TIMEOUT_VALUE_MUST_BE_NUMBER,
-} from './endpoint/runscript_config';
-import { useUserPrivileges as _useUserPrivileges } from '../../common/components/user_privileges';
-import { responseActionsHttpMocks } from '../../management/mocks/response_actions_http_mocks';
-import { EndpointScriptsGenerator } from '../../../common/endpoint/data_generators/endpoint_scripts_generator';
+} from './runscript_config';
+import { useUserPrivileges as _useUserPrivileges } from '../../../common/components/user_privileges';
+import { responseActionsHttpMocks } from '../../../management/mocks/response_actions_http_mocks';
+import { EndpointScriptsGenerator } from '../../../../common/endpoint/data_generators/endpoint_scripts_generator';
 import type {
   EndpointScript,
   ResponseActionScriptsApiResponse,
-} from '../../../common/endpoint/types';
+} from '../../../../common/endpoint/types';
 import { waitFor } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 
-jest.mock('../../common/components/user_privileges');
+jest.mock('../../../common/components/user_privileges');
 
 const useUserPrivilegesMock = _useUserPrivileges as jest.Mock;
 
