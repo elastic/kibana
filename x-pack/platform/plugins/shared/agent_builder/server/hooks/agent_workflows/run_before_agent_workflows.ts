@@ -15,8 +15,8 @@ import {
   createWorkflowExecutionError,
 } from '@kbn/agent-builder-common';
 import {
+  AGENT_BUILDER_PRE_PROMPT_WORKFLOW_IDS,
   AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
-  GEN_AI_SETTINGS_PRE_PROMPT_WORKFLOW_IDS,
 } from '@kbn/management-settings-ids';
 import { ExecutionStatus, WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows';
 import type { Logger } from '@kbn/logging';
@@ -156,7 +156,7 @@ async function getWorkflowIds(
   agents: AgentsServiceStart
 ) {
   const globalWorkflowIds = toStringArray(
-    await uiSettingsClient.get(GEN_AI_SETTINGS_PRE_PROMPT_WORKFLOW_IDS)
+    await uiSettingsClient.get(AGENT_BUILDER_PRE_PROMPT_WORKFLOW_IDS)
   );
 
   let agentWorkflowIds: string[] = [];

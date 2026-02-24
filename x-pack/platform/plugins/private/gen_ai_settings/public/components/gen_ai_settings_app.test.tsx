@@ -68,7 +68,7 @@ describe('GenAiSettingsApp', () => {
       value: false,
       type: 'boolean',
     },
-    'genAiSettings:prePromptWorkflowIds': {
+    'agentBuilder:prePromptWorkflowIds': {
       value: [],
       type: 'array',
     },
@@ -125,6 +125,11 @@ describe('GenAiSettingsApp', () => {
     const services = {
       ...coreStart,
       productDocBase: mockProductDocBase,
+      agentBuilder: {
+        tools: {
+          listWorkflows: jest.fn().mockResolvedValue({ results: [] }),
+        },
+      },
       analytics: { reportEvent: jest.fn() },
       ...servicesOverrides,
     };
@@ -183,6 +188,7 @@ describe('GenAiSettingsApp', () => {
       // Feature visibility section (with default settings)
       expect(screen.getByTestId('aiFeatureVisibilitySection')).toBeInTheDocument();
       expect(screen.getByTestId('goToSpacesButton')).toBeInTheDocument();
+      expect(screen.queryByTestId('agentBuilderSectionTitle')).not.toBeInTheDocument();
     });
 
     it('should conditionally render sections based on settings', () => {
@@ -224,6 +230,7 @@ describe('GenAiSettingsApp', () => {
 
       renderComponent();
 
+      expect(await screen.findByTestId('agentBuilderSectionTitle')).toBeInTheDocument();
       expect(await screen.findByTestId('genAiSettingsPrePromptWorkflowPicker')).toBeInTheDocument();
     });
 
@@ -240,6 +247,7 @@ describe('GenAiSettingsApp', () => {
 
       renderComponent();
 
+      expect(screen.queryByTestId('agentBuilderSectionTitle')).not.toBeInTheDocument();
       expect(screen.queryByTestId('genAiSettingsPrePromptWorkflowPicker')).not.toBeInTheDocument();
     });
 
@@ -256,6 +264,7 @@ describe('GenAiSettingsApp', () => {
 
       renderComponent();
 
+      expect(screen.queryByTestId('agentBuilderSectionTitle')).not.toBeInTheDocument();
       expect(screen.queryByTestId('genAiSettingsPrePromptWorkflowPicker')).not.toBeInTheDocument();
     });
   });

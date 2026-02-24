@@ -746,7 +746,7 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       description: 'Restrict to default AI connector only',
     },
   },
-  'genAiSettings:prePromptWorkflowIds': {
+  'agentBuilder:prePromptWorkflowIds': {
     type: 'array',
     items: {
       type: 'keyword',

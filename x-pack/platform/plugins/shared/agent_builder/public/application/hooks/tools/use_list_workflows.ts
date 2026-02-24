@@ -6,40 +6,23 @@
  */
 
 import { useQuery } from '@kbn/react-query';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { HttpSetup } from '@kbn/core/public';
-import type { WorkflowOption } from '../../components/common/workflow_combo_box';
+import type { WorkflowComboBoxOption } from '@kbn/agent-builder-browser';
+import { useAgentBuilderServices } from '../use_agent_builder_service';
 import { queryKeys } from '../../query_keys';
 
-interface UseListWorkflowsKibanaServices {
-  http?: HttpSetup;
-}
-
 interface ListWorkflowsResponse {
-  results: WorkflowOption[];
+  results: WorkflowComboBoxOption[];
 }
 
 export const useListWorkflows = ({ enabled = true }: { enabled?: boolean } = {}) => {
-  const {
-    services: { http },
-  } = useKibana<UseListWorkflowsKibanaServices>();
+  const { toolsService } = useAgentBuilderServices();
 
   const result = useQuery({
     queryKey: queryKeys.tools.workflows.list(),
     queryFn: async (): Promise<ListWorkflowsResponse> => {
-      if (!http) {
-        return { results: [] };
-      }
-      const response = await http.post<ListWorkflowsResponse>('/api/workflows/search', {
-        body: JSON.stringify({
-          size: 1000,
-          page: 1,
-          enabled: [true],
-        }),
-      });
-      return response ?? { results: [] };
+      return await toolsService.listWorkflows({ page: 1, limit: 1000 });
     },
-    enabled: enabled && !!http,
+    enabled,
   });
 
   return {

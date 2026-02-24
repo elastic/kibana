@@ -427,9 +427,10 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
                   <AIAssistantVisibility />
                 </EuiFlexItem>
               )}
-              <PrePromptWorkflowSection />
             </EuiSplitPanel.Inner>
           </EuiSplitPanel.Outer>
+
+          <PrePromptWorkflowSection />
 
           {isAgentExperience && (showChatExperienceSetting || hasAgentBuilderPrivileges) && (
             <>

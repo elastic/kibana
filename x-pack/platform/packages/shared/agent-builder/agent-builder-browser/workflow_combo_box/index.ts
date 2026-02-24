@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { PrePromptWorkflowPicker } from './pre_prompt_workflow_picker';
-export type { PrePromptWorkflowPickerProps } from './pre_prompt_workflow_picker';
+export { WorkflowComboBox } from './workflow_combo_box';
+export type { WorkflowComboBoxProps, WorkflowComboBoxOption } from './workflow_combo_box';

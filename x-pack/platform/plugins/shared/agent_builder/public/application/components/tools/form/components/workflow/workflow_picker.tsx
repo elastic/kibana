@@ -6,11 +6,11 @@
  */
 
 import React from 'react';
+import { WorkflowComboBox } from '@kbn/agent-builder-browser';
+import type { WorkflowComboBoxOption } from '@kbn/agent-builder-browser';
 import { i18n } from '@kbn/i18n';
 import { useController, useFormContext } from 'react-hook-form';
 import { useListWorkflows } from '../../../../../hooks/tools/use_list_workflows';
-import { WorkflowComboBox } from '../../../../common/workflow_combo_box';
-import type { WorkflowOption } from '../../../../common/workflow_combo_box';
 
 export interface WorkflowPickerProps {
   name: string;
@@ -22,7 +22,7 @@ export interface WorkflowPickerProps {
 interface WorkflowPickerVariantProps {
   name: string;
   isDisabled: boolean;
-  workflows: WorkflowOption[];
+  workflows: WorkflowComboBoxOption[];
   isLoading: boolean;
 }
 

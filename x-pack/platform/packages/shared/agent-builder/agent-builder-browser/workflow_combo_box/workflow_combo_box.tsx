@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
 import { EuiComboBox } from '@elastic/eui';
 import type { EuiComboBoxOptionOption, EuiComboBoxProps } from '@elastic/eui';
+import React, { useMemo } from 'react';
 
-export interface WorkflowOption {
+export interface WorkflowComboBoxOption {
   id: string;
   name: string;
 }
@@ -19,7 +19,7 @@ export interface WorkflowComboBoxProps
     EuiComboBoxProps<string>,
     'options' | 'selectedOptions' | 'onChange' | 'singleSelection'
   > {
-  workflows: WorkflowOption[];
+  workflows: WorkflowComboBoxOption[];
   value: string[];
   onChange: (workflowIds: string[]) => void;
   singleSelection?: boolean;
@@ -33,7 +33,7 @@ export const WorkflowComboBox: React.FC<WorkflowComboBoxProps> = ({
   'data-test-subj': dataTestSubj = 'workflowComboBox',
   ...comboBoxProps
 }) => {
-  const toOption = (workflow: WorkflowOption): EuiComboBoxOptionOption<string> => ({
+  const toOption = (workflow: WorkflowComboBoxOption): EuiComboBoxOptionOption<string> => ({
     key: workflow.id,
     label: workflow.name,
     value: workflow.id,

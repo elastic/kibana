@@ -186,7 +186,7 @@ export interface UsageStats {
   'observability:streamsEnableSignificantEventsDiscovery': boolean;
   'genAiSettings:defaultAIConnector': string;
   'genAiSettings:defaultAIConnectorOnly': boolean;
-  'genAiSettings:prePromptWorkflowIds': string[];
+  'agentBuilder:prePromptWorkflowIds': string[];
   'observability:streamsEnableAttachments': boolean;
   'observability:streamsEnableContentPacks': boolean;
   'observability:streamsEnableQueryStreams': boolean;

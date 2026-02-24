@@ -8,9 +8,9 @@
 import type { CoreSetup, CoreStart, Plugin, KibanaRequest } from '@kbn/core/server';
 import type { Logger, PluginInitializerContext } from '@kbn/core/server';
 import {
+  AGENT_BUILDER_PRE_PROMPT_WORKFLOW_IDS,
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
-  GEN_AI_SETTINGS_PRE_PROMPT_WORKFLOW_IDS,
 } from '@kbn/management-settings-ids';
 import { schema } from '@kbn/config-schema';
 import { registerServerRoutes } from './routes/register_routes';
@@ -109,7 +109,7 @@ export class GenAiSettingsPlugin
     });
 
     core.uiSettings.register({
-      [GEN_AI_SETTINGS_PRE_PROMPT_WORKFLOW_IDS]: {
+      [AGENT_BUILDER_PRE_PROMPT_WORKFLOW_IDS]: {
         readonlyMode: 'ui',
         readonly: true,
         schema: schema.arrayOf(schema.string(), { maxSize: 100 }),

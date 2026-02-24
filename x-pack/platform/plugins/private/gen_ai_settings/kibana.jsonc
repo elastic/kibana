@@ -11,6 +11,6 @@
     "configPath": ["xpack", "genAiSettings"],
     "requiredPlugins": ["management", "actions", "inference", "licensing", "productDocBase"],
     "optionalPlugins": ["spaces", "agentBuilder"],
-    "requiredBundles": ["kibanaReact", "productDocBase", "agentBuilder"]
+    "requiredBundles": ["kibanaReact", "productDocBase"]
   }
 }

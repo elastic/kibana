@@ -10,7 +10,7 @@ import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
-import { GEN_AI_SETTINGS_PRE_PROMPT_WORKFLOW_IDS } from '@kbn/management-settings-ids';
+import { AGENT_BUILDER_PRE_PROMPT_WORKFLOW_IDS } from '@kbn/management-settings-ids';
 import { ExecutionStatus } from '@kbn/workflows';
 import { runBeforeAgentWorkflows } from './run_before_agent_workflows';
 import { executeWorkflow } from '../../services/workflow/execute_workflow';
@@ -226,7 +226,7 @@ describe('runBeforeAgentWorkflows', () => {
     const context = createContext();
     const { workflowApi, getInternalServices, uiSettingsClient, registry } = createDeps();
     uiSettingsClient.get.mockImplementation(async (key: string) => {
-      if (key === GEN_AI_SETTINGS_PRE_PROMPT_WORKFLOW_IDS) {
+      if (key === AGENT_BUILDER_PRE_PROMPT_WORKFLOW_IDS) {
         return ['wf-1', 'wf-2', 'wf-2'];
       }
       return true;
