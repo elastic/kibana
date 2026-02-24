@@ -9,8 +9,8 @@ import type { Client } from '@elastic/elasticsearch';
 import { ToolingLog } from '@kbn/tooling-log';
 import type { EsTestCluster } from '@kbn/test';
 import { createTestEsCluster } from '@kbn/test';
-import { buildRelatedAlertsGraph } from './graph_builder';
-import type { EsSearchClient } from './types';
+import { buildRelatedAlertsGraph } from '../graph_builder';
+import type { EsSearchClient } from '../types';
 
 const TEST_INDEX = 'test-alerts';
 
