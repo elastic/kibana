@@ -14,9 +14,11 @@ import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ChatEvent } from '@kbn/agent-builder-common';
-import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
+import { agentBuilderDefaultAgentId, createBadRequestError } from '@kbn/agent-builder-common';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
+import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import { getCurrentSpaceId } from '../../utils/spaces';
+import type { AttachmentServiceStart } from '../attachments';
 import type {
   AgentExecutionService,
   AgentExecution,
@@ -40,6 +42,7 @@ export interface AgentExecutionServiceDeps extends AgentExecutionDeps {
   elasticsearch: ElasticsearchServiceStart;
   taskManager: TaskManagerStartContract;
   spaces?: SpacesPluginStart;
+  attachmentsService: AttachmentServiceStart;
 }
 
 export const createAgentExecutionService = (
@@ -59,6 +62,25 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     this.logger = deps.logger;
   }
 
+  private async validateAttachmentsIfProvided(
+    attachments: AttachmentInput[] | undefined
+  ): Promise<AttachmentInput[] | undefined> {
+    if (!attachments || attachments.length === 0) {
+      return undefined;
+    }
+
+    const validated: AttachmentInput[] = [];
+    for (const attachment of attachments) {
+      const result = await this.deps.attachmentsService.validate(attachment);
+      if (!result.valid) {
+        throw createBadRequestError(`Attachment validation failed: ${result.error}`);
+      }
+      validated.push(result.attachment);
+    }
+
+    return validated;
+  }
+
   async executeAgent({
     request,
     params,
@@ -69,12 +91,19 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     const agentId = params.agentId ?? agentBuilderDefaultAgentId;
     const spaceId = getCurrentSpaceId({ request, spaces: this.deps.spaces });
 
+    const validatedAttachments = await this.validateAttachmentsIfProvided(
+      params.nextInput.attachments
+    );
+    const validatedParams = validatedAttachments
+      ? { ...params, nextInput: { ...params.nextInput, attachments: validatedAttachments } }
+      : params;
+
     const executionClient = this.createExecutionClient();
     const execution = await executionClient.create({
       executionId,
       agentId,
       spaceId,
-      agentParams: params,
+      agentParams: validatedParams,
     });
 
     // Wire up external abort signal to execution abort
