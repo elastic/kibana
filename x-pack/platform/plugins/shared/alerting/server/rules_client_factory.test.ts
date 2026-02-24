@@ -121,10 +121,12 @@ describe('RulesClientFactory', () => {
 
   test('creates a rules client with proper constructor arguments when security is enabled', async () => {
     const factory = new RulesClientFactory();
+    const { securityService: _paramSecurity, ...restParams } = rulesClientFactoryParams;
     factory.initialize({
+      ...restParams,
       securityPluginSetup,
       securityPluginStart,
-      ...rulesClientFactoryParams,
+      securityService,
     });
     const request = mockRouter.createKibanaRequest();
 
@@ -290,18 +292,22 @@ describe('RulesClientFactory', () => {
     await factory.create(mockRouter.createKibanaRequest(), savedObjectsService);
     const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
 
-    const createAPIKeyResult = await constructorCall.createAPIKey();
+    const createAPIKeyResult = await constructorCall.createAPIKey('test');
     expect(createAPIKeyResult).toEqual({ apiKeysEnabled: false });
   });
 
   test('createAPIKey() returns { apiKeysEnabled: false } when security is enabled but ES security is disabled', async () => {
     const factory = new RulesClientFactory();
-    factory.initialize(rulesClientFactoryParams);
+    factory.initialize({
+      ...rulesClientFactoryParams,
+      securityPluginStart,
+      securityService,
+    });
     await factory.create(mockRouter.createKibanaRequest(), savedObjectsService);
     const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
 
-    securityPluginStart.authc.apiKeys.grantAsInternalUser.mockResolvedValueOnce(null);
-    const createAPIKeyResult = await constructorCall.createAPIKey();
+    securityService.authc.apiKeys.grantAsInternalUser.mockResolvedValueOnce(null);
+    const createAPIKeyResult = await constructorCall.createAPIKey('test');
     expect(createAPIKeyResult).toEqual({ apiKeysEnabled: false });
   });
 
@@ -339,7 +345,7 @@ describe('RulesClientFactory', () => {
     });
   });
 
-  test('createAPIKey() returns { apiKeysEnabled: false } when UIAM API key creation fails', async () => {
+  test('createAPIKey() returns { apiKeysEnabled: false } when UIAM grant returns null and ES grant returns null', async () => {
     const factory = new RulesClientFactory();
     factory.initialize({
       ...rulesClientFactoryParams,
@@ -356,6 +362,7 @@ describe('RulesClientFactory', () => {
       invalidate: jest.fn(),
     };
     securityService.authc.apiKeys.uiam = uiamApiKeys as never;
+    securityService.authc.apiKeys.grantAsInternalUser.mockResolvedValueOnce(null);
 
     const createAPIKeyResult = await constructorCall.createAPIKey('test');
 
@@ -363,11 +370,88 @@ describe('RulesClientFactory', () => {
     expect(uiamApiKeys.grant).toHaveBeenCalledWith(expect.any(Object), {
       name: 'uiam-test',
     });
-    expect(securityService.authc.apiKeys.grantAsInternalUser).not.toHaveBeenCalled();
+    expect(securityService.authc.apiKeys.grantAsInternalUser).toHaveBeenCalled();
     expect(uiamApiKeys.invalidate).not.toHaveBeenCalled();
   });
 
-  test('createAPIKey() returns an API key when security is enabled', async () => {
+  test('createAPIKey() logs an error and returns ES API key when uiam.grant returns null but grantAsInternalUser succeeds', async () => {
+    const factory = new RulesClientFactory();
+    factory.initialize({
+      ...rulesClientFactoryParams,
+      securityService,
+      securityPluginSetup,
+      securityPluginStart,
+      shouldGrantUiam: true,
+    });
+    await factory.create(mockRouter.createKibanaRequest(), savedObjectsService);
+    const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
+
+    const uiamApiKeys = {
+      grant: jest.fn().mockResolvedValueOnce(null),
+      invalidate: jest.fn(),
+    };
+    securityService.authc.apiKeys.uiam = uiamApiKeys as never;
+    securityService.authc.apiKeys.grantAsInternalUser.mockResolvedValueOnce({
+      api_key: '123',
+      id: 'abc',
+      name: '',
+    });
+
+    const createAPIKeyResult = await constructorCall.createAPIKey('test');
+
+    expect(createAPIKeyResult).toEqual({
+      apiKeysEnabled: true,
+      result: { api_key: '123', id: 'abc', name: '' },
+    });
+    expect(createAPIKeyResult).not.toHaveProperty('uiamResult');
+    expect(rulesClientFactoryParams.logger.error).toHaveBeenCalledWith(
+      'Failed to create UIAM API key for alerting rule : test'
+    );
+    expect(uiamApiKeys.grant).toHaveBeenCalledWith(expect.any(Object), {
+      name: 'uiam-test',
+    });
+  });
+
+  test('createAPIKey() logs an error and returns ES API key when uiam.grant throws but grantAsInternalUser succeeds', async () => {
+    const factory = new RulesClientFactory();
+    factory.initialize({
+      ...rulesClientFactoryParams,
+      securityService,
+      securityPluginSetup,
+      securityPluginStart,
+      shouldGrantUiam: true,
+    });
+    await factory.create(mockRouter.createKibanaRequest(), savedObjectsService);
+    const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
+
+    const uiamError = new Error('UIAM service unavailable');
+    const uiamApiKeys = {
+      grant: jest.fn().mockRejectedValueOnce(uiamError),
+      invalidate: jest.fn(),
+    };
+    securityService.authc.apiKeys.uiam = uiamApiKeys as never;
+    securityService.authc.apiKeys.grantAsInternalUser.mockResolvedValueOnce({
+      api_key: '123',
+      id: 'abc',
+      name: '',
+    });
+
+    const createAPIKeyResult = await constructorCall.createAPIKey('test');
+
+    expect(createAPIKeyResult).toEqual({
+      apiKeysEnabled: true,
+      result: { api_key: '123', id: 'abc', name: '' },
+    });
+    expect(createAPIKeyResult).not.toHaveProperty('uiamResult');
+    expect(rulesClientFactoryParams.logger.error).toHaveBeenCalledWith(
+      'Failed to create UIAM API key for alerting rule : test: UIAM service unavailable'
+    );
+    expect(uiamApiKeys.grant).toHaveBeenCalledWith(expect.any(Object), {
+      name: 'uiam-test',
+    });
+  });
+
+  test('createAPIKey() returns an API key when security is enabled and grantAsInternalUser succeeds', async () => {
     const factory = new RulesClientFactory();
     factory.initialize({
       ...rulesClientFactoryParams,
@@ -398,7 +482,7 @@ describe('RulesClientFactory', () => {
     );
   });
 
-  test('createAPIKey() throws when security plugin createAPIKey throws an error', async () => {
+  test('createAPIKey() throws when grantAsInternalUser throws an error', async () => {
     const factory = new RulesClientFactory();
     factory.initialize({
       ...rulesClientFactoryParams,
@@ -412,7 +496,7 @@ describe('RulesClientFactory', () => {
     securityService.authc.apiKeys.grantAsInternalUser.mockRejectedValueOnce(
       new Error('TLS disabled')
     );
-    await expect(constructorCall.createAPIKey()).rejects.toThrowErrorMatchingInlineSnapshot(
+    await expect(constructorCall.createAPIKey('test')).rejects.toThrowErrorMatchingInlineSnapshot(
       `"TLS disabled"`
     );
   });
@@ -584,12 +668,14 @@ describe('RulesClientFactory', () => {
     await factory.create(request, savedObjectsService);
     const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
 
-    expect(() => constructorCall.getAuthenticationAPIKey()).toThrowErrorMatchingInlineSnapshot(
+    expect(() =>
+      constructorCall.getAuthenticationAPIKey('test')
+    ).toThrowErrorMatchingInlineSnapshot(
       `"UIAM API keys should only be used in serverless environments"`
     );
   });
 
-  test('getAuthenticationAPIKey() throws when API Key is invalid', async () => {
+  test('getAuthenticationAPIKey() throws when API key credentials cannot be parsed from the request', async () => {
     const factory = new RulesClientFactory();
     factory.initialize({
       ...rulesClientFactoryParams,

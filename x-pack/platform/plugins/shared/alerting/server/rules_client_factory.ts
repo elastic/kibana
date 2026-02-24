@@ -238,13 +238,18 @@ export class RulesClientFactory {
 
         if (shouldCreateUiamApiKey) {
           // if this throws we return bad request where this function is called from
-          createUiamApiKeyResult = await securityService.authc.apiKeys.uiam?.grant(request, {
-            name: `uiam-${name}`,
-          });
+          try {
+            createUiamApiKeyResult = await securityService.authc.apiKeys.uiam?.grant(request, {
+              name: `uiam-${name}`,
+            });
+          } catch (err) {
+            this.logger.error(
+              `Failed to create UIAM API key for alerting rule : ${name}: ${err.message}`
+            );
+          }
 
           if (!createUiamApiKeyResult) {
             this.logger.error(`Failed to create UIAM API key for alerting rule : ${name}`);
-            return { apiKeysEnabled: false };
           }
         }
 
@@ -257,14 +262,18 @@ export class RulesClientFactory {
           });
         } catch (err) {
           // if the ES API key creation failed, we need to invalidate the UIAM API key
-          await invalidateUiamApiKey(createUiamApiKeyResult?.id);
+          if (createUiamApiKeyResult) {
+            await invalidateUiamApiKey(createUiamApiKeyResult?.id);
+          }
           // rethrow the error to be handled by the caller
           throw err;
         }
 
         // if we created a UIAM API key but the ES API key creation failed, we need to invalidate the UIAM API key
         if (!createEsAPIKeyResult) {
-          await invalidateUiamApiKey(createUiamApiKeyResult?.id);
+          if (createUiamApiKeyResult) {
+            await invalidateUiamApiKey(createUiamApiKeyResult?.id);
+          }
           return { apiKeysEnabled: false };
         }
 
