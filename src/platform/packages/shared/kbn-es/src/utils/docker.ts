@@ -1206,7 +1206,57 @@ export async function runLinkedServerlessCluster(log: ToolingLog, options: Serve
 
   log.success('Linked ES cluster is ready.');
 
+  await registerLinkedProjectInOriginSettings(log, options);
+
   return nodeNames;
+}
+
+const REMOTE_CLUSTER_SERVER_PORT = 9400;
+
+/**
+ * Updates the origin cluster's operator settings.json to register the linked project,
+ * so ES can discover it for Cross Project Search via the /_project/tags API.
+ *
+ * The file is bind-mounted from the host, so writing it triggers an ES config reload.
+ */
+async function registerLinkedProjectInOriginSettings(log: ToolingLog, options: ServerlessOptions) {
+  const { linkedProject } = options;
+  if (!linkedProject) {
+    return;
+  }
+
+  const settingsPath = join(SERVERLESS_OPERATOR_PATH, 'settings.json');
+  log.info('Registering linked project in origin operator settings...');
+
+  const currentJson = JSON.parse(await Fsp.readFile(settingsPath, 'utf-8'));
+
+  const esProjectType = esProjectTypeFromKbn.get(options.projectType) ?? options.projectType;
+  const linkedNodeName = `es01${LINKED_CLUSTER_NAME_SUFFIX}`;
+  const linkedEndpoint = `${linkedNodeName}:${REMOTE_CLUSTER_SERVER_PORT}`;
+
+  const linkedProjectInfo = {
+    alias: 'linked_local_project',
+    type: esProjectType,
+    endpoint: linkedEndpoint,
+    server_name: 'linked-local-project',
+    tags: {
+      _alias: 'linked_local_project',
+      _id: linkedProject.projectId,
+      _organization: MOCK_IDP_UIAM_ORGANIZATION_ID,
+      _type: esProjectType,
+      env: 'local',
+    },
+  };
+
+  currentJson.metadata.version = String(Number(currentJson.metadata.version) + 1);
+  currentJson.state.linked = {
+    projects: {
+      [linkedProject.projectId]: linkedProjectInfo,
+    },
+  };
+
+  await Fsp.writeFile(settingsPath, JSON.stringify(currentJson, null, 2));
+  log.success(`Linked project registered: ${linkedProject.projectId} -> ${linkedEndpoint}`);
 }
 
 /**
