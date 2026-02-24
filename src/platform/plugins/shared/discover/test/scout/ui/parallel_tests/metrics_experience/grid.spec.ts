@@ -40,48 +40,44 @@ spaceTest.describe(
     });
 
     spaceTest('should render metrics grid with cards', async ({ pageObjects }) => {
+      await pageObjects.discover.writeEsqlQuery(testData.ESQL_QUERIES.TS);
       const { metricsExperience } = pageObjects;
-      await metricsExperience.runEsqlQuery(testData.ESQL_QUERIES.TS);
       await expect(metricsExperience.grid).toBeVisible();
       await expect(metricsExperience.getCardByIndex(0)).toBeVisible();
     });
 
     spaceTest('should render grid with WHERE filter', async ({ pageObjects }) => {
-      await pageObjects.metricsExperience.runEsqlQuery(
+      await pageObjects.discover.writeEsqlQuery(
         `${testData.ESQL_QUERIES.TS} | WHERE @timestamp > "${DEFAULT_TIME_RANGE.from}" - 100 DAYS`
       );
       await expect(pageObjects.metricsExperience.grid).toBeVisible();
     });
 
     spaceTest('should render grid with LIMIT', async ({ pageObjects }) => {
-      const { metricsExperience } = pageObjects;
-      await metricsExperience.runEsqlQuery(`${testData.ESQL_QUERIES.TS} | LIMIT 5`);
-      await expect(metricsExperience.grid).toBeVisible();
+      await pageObjects.discover.writeEsqlQuery(`${testData.ESQL_QUERIES.TS} | LIMIT 5`);
+      await expect(pageObjects.metricsExperience.grid).toBeVisible();
     });
 
     spaceTest('should render grid with SORT', async ({ pageObjects }) => {
-      const { metricsExperience } = pageObjects;
-      await metricsExperience.runEsqlQuery(
+      await pageObjects.discover.writeEsqlQuery(
         `${testData.ESQL_QUERIES.TS} | SORT @timestamp DESC`
       );
-      await expect(metricsExperience.grid).toBeVisible();
+      await expect(pageObjects.metricsExperience.grid).toBeVisible();
     });
 
     spaceTest('should not render grid with FROM command', async ({ pageObjects }) => {
-      const { metricsExperience } = pageObjects;
-      await metricsExperience.runEsqlQuery(testData.ESQL_QUERIES.FROM);
-      await expect(metricsExperience.grid).toBeHidden();
+      await pageObjects.discover.writeEsqlQuery(testData.ESQL_QUERIES.FROM);
+      await expect(pageObjects.metricsExperience.grid).toBeHidden();
     });
 
     spaceTest('should not render grid with STATS command', async ({ pageObjects }) => {
-      const { metricsExperience } = pageObjects;
-      await metricsExperience.runEsqlQuery(`${testData.ESQL_QUERIES.TS} | STATS count()`);
-      await expect(metricsExperience.grid).toBeHidden();
+      await pageObjects.discover.writeEsqlQuery(`${testData.ESQL_QUERIES.TS} | STATS count()`);
+      await expect(pageObjects.metricsExperience.grid).toBeHidden();
     });
 
     spaceTest('should persist grid when changing time range', async ({ pageObjects }) => {
+      await pageObjects.discover.writeEsqlQuery(testData.ESQL_QUERIES.TS);
       const { metricsExperience, datePicker } = pageObjects;
-      await metricsExperience.runEsqlQuery(testData.ESQL_QUERIES.TS);
       await expect(metricsExperience.grid).toBeVisible();
 
       await datePicker.setCommonlyUsedTime('Last_30 days');

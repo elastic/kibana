@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Locator, PageObjects, ScoutPage } from '@kbn/scout';
-import { KibanaCodeEditorWrapper } from '@kbn/scout';
+import type { Locator, ScoutPage } from '@kbn/scout';
 
 interface MetricsPagination {
   readonly container: Locator;
@@ -29,7 +28,7 @@ function createPagination(parentContainer: Locator): MetricsPagination {
 }
 
 export class MetricsExperiencePage {
-  private readonly codeEditor: KibanaCodeEditorWrapper;
+  // metricsExperienceRendered is the outer wrapper containing header, grid, and pagination
   public readonly container: Locator;
   public readonly grid: Locator;
   public readonly cards: Locator;
@@ -38,12 +37,7 @@ export class MetricsExperiencePage {
   public readonly searchInput: Locator;
   public readonly emptyState: Locator;
 
-  constructor(
-    private readonly page: ScoutPage,
-    private readonly discover: PageObjects['discover']
-  ) {
-    this.codeEditor = new KibanaCodeEditorWrapper(page);
-    // metricsExperienceRendered is the outer wrapper containing header, grid, and pagination
+  constructor(page: ScoutPage) {
     this.container = page.testSubj.locator('metricsExperienceRendered');
     this.grid = page.testSubj.locator('unifiedMetricsExperienceGrid');
     this.cards = this.grid.locator('[data-chart-index]');
@@ -51,16 +45,6 @@ export class MetricsExperiencePage {
     this.searchButton = page.testSubj.locator('metricsExperienceToolbarSearch');
     this.searchInput = page.testSubj.locator('metricsExperienceGridToolbarSearch');
     this.emptyState = page.testSubj.locator('metricsExperienceNoData');
-  }
-
-  /**
-   * Runs an ES|QL query and waits for results.
-   */
-  public async runEsqlQuery(query: string): Promise<void> {
-    await this.discover.selectTextBaseLang();
-    await this.codeEditor.setCodeEditorValue(query);
-    await this.page.testSubj.click('querySubmitButton');
-    await this.discover.waitUntilSearchingHasFinished();
   }
 
   public getCardByIndex(index: number): Locator {
