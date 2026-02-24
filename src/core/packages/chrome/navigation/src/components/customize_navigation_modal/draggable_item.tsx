@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback } from 'react';
 import {
   EuiDraggable,
   EuiFlexGroup,
@@ -29,22 +29,8 @@ interface Props {
   isDraggingAny: boolean;
 }
 
-const HOVER_SUPPRESS_MS = 400;
-
 export const DraggableItem = ({ item, index, toggleItemVisibility, isDraggingAny }: Props) => {
   const { euiTheme } = useEuiTheme();
-  const [isDragging, setIsDragging] = useState(false);
-  const [suppressHover, setSuppressHover] = useState(false);
-  const wasDraggingRef = useRef(false);
-
-  useEffect(() => {
-    if (wasDraggingRef.current && !isDragging) {
-      setSuppressHover(true);
-      const id = setTimeout(() => setSuppressHover(false), HOVER_SUPPRESS_MS);
-      return () => clearTimeout(id);
-    }
-    wasDraggingRef.current = isDragging;
-  }, [isDragging]);
 
   const handleToggle = useCallback(() => {
     toggleItemVisibility(item.id);
@@ -62,13 +48,6 @@ export const DraggableItem = ({ item, index, toggleItemVisibility, isDraggingAny
         ${euiTheme.colors.backgroundBaseInteractiveHover}
       );
     }
-  `;
-
-  const panelDraggingCss = css`
-    background-image: linear-gradient(
-      ${euiTheme.colors.backgroundBaseInteractiveHover},
-      ${euiTheme.colors.backgroundBaseInteractiveHover}
-    );
   `;
 
   const panelSuppressHoverCss = css`
@@ -106,18 +85,13 @@ export const DraggableItem = ({ item, index, toggleItemVisibility, isDraggingAny
       hasInteractiveChildren
       usePortal
     >
-      {(provided, snapshot) => {
-        if (snapshot.isDragging !== isDragging) {
-          setIsDragging(snapshot.isDragging);
-        }
-        return (
+      {(provided, snapshot) => (
         <EuiPanel
           paddingSize="s"
           hasShadow={false}
           css={[
             panelCss,
-            snapshot.isDragging && panelDraggingCss,
-            (isDraggingAny || suppressHover) && panelSuppressHoverCss,
+            isDraggingAny && panelSuppressHoverCss,
             isDraggingAny && !snapshot.isDragging && panelDraggingAnyCss,
           ]}
         >
@@ -158,8 +132,7 @@ export const DraggableItem = ({ item, index, toggleItemVisibility, isDraggingAny
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPanel>
-        );
-      }}
+      )}
     </EuiDraggable>
   );
 };
