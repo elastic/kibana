@@ -11,6 +11,7 @@ import { chunk, mapValues } from 'lodash';
 import pLimit from 'p-limit';
 import { withActiveInferenceSpan } from '@kbn/inference-tracing';
 import { isNotFoundError, isResponseError } from '@kbn/es-errors';
+import { NER_MODEL_ID } from '@kbn/anonymization-common';
 import type { AnonymizationState } from './types';
 import { getEntityMask } from './get_entity_mask';
 
@@ -70,12 +71,7 @@ export async function executeNerRule({
   esClient: ElasticsearchClient;
   salt?: string;
 }): Promise<AnonymizationState> {
-  const { modelId } = rule;
-  if (!modelId) {
-    throw new Error(
-      `NER rule has no modelId. Please specify modelId in the NER anonymization rule.`
-    );
-  }
+  const modelId = rule.modelId ?? NER_MODEL_ID;
 
   const anonymizations: Anonymization[] = state.anonymizations.concat();
 
