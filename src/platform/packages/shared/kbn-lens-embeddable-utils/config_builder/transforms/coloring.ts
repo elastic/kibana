@@ -288,7 +288,7 @@ function fromAPIMappingToAssignments(
 
 export function fromColorMappingAPIToLensState(
   colorMapping: ColorMappingType | undefined
-): ColorMapping.Config | { palette: PaletteOutput } | undefined {
+): { colorMapping: ColorMapping.Config } | { palette: PaletteOutput } | undefined {
   if (!colorMapping) {
     return;
   }
@@ -328,9 +328,11 @@ export function fromColorMappingAPIToLensState(
         };
 
   return {
-    colorMode,
-    paletteId: colorMapping.palette,
-    assignments,
-    specialAssignments,
+    colorMapping: {
+      colorMode,
+      paletteId: colorMapping.palette,
+      assignments,
+      specialAssignments,
+    },
   };
 }
