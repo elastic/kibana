@@ -10,14 +10,12 @@ import { transformTitlesOut } from '@kbn/presentation-publishing';
 import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import { flow } from 'lodash';
 import type { OverviewEmbeddableState } from '../../../../server/lib/embeddables/schema';
-import { transformSingleOverviewOut } from './transform_single_overview_out';
-import { transformGroupOverviewOut } from './transform_group_overview_out';
+import { transformOverviewOut } from './transform_overview_out';
 
 export const getTransformOut = (transformDrilldownsOut: DrilldownTransforms['transformOut']) => {
   const transformOut = (storedState: OverviewEmbeddableState, panelReferences?: Reference[]) => {
     const transformsFlow = flow(
-      transformSingleOverviewOut,
-      transformGroupOverviewOut,
+      transformOverviewOut,
       transformTitlesOut<OverviewEmbeddableState>,
       (state: OverviewEmbeddableState) =>
         transformDrilldownsOut(
