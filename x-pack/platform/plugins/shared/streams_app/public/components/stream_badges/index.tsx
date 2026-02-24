@@ -240,12 +240,34 @@ export function DiscoverBadgeButton({
   );
 }
 
-export function MetricsBadge() {
+export function TimeSeriesBadge() {
   return (
-    <EuiBadge color="hollow" iconType="number" iconSide="left" data-test-subj="metricBadge">
-      {i18n.translate('xpack.streams.entityDetailViewWithoutParams.metricBadgeLabel', {
-        defaultMessage: 'Metric',
+    <EuiToolTip
+      position="top"
+      title={i18n.translate('xpack.streams.badges.timeSeries.title', {
+        defaultMessage: 'Time series stream',
       })}
-    </EuiBadge>
+      content={i18n.translate('xpack.streams.badges.timeSeries.description', {
+        defaultMessage:
+          'Time series streams are optimized for indexing metrics data and help you analyze a sequence of data points as a whole.',
+      })}
+      anchorProps={{
+        css: css`
+          display: inline-flex;
+        `,
+      }}
+    >
+      <EuiBadge
+        color="hollow"
+        iconType="number"
+        iconSide="left"
+        tabIndex={0}
+        data-test-subj="timeSeriesBadge"
+      >
+        {i18n.translate('xpack.streams.badges.timeSeries.label', {
+          defaultMessage: 'Time series',
+        })}
+      </EuiBadge>
+    </EuiToolTip>
   );
 }
