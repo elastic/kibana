@@ -53,7 +53,7 @@ describe('determinePoliciesToCleanup', () => {
     ]);
   });
 
-  it('keeps first legacy when new format does not exist', () => {
+  it('deletes all legacy policies when new format does not exist (sync will recreate)', () => {
     const existingPolicyIds = [
       'monitor1-loc1-space-a',
       'monitor1-loc1-space-b',
@@ -67,11 +67,26 @@ describe('determinePoliciesToCleanup', () => {
       noopDebugLog
     );
 
-    expect(result.policiesToKeep).toEqual(['monitor1-loc1-space-a']);
+    expect(result.policiesToKeep).toEqual([]);
     expect(result.policiesToDelete.sort()).toEqual([
+      'monitor1-loc1-space-a',
       'monitor1-loc1-space-b',
       'monitor1-loc1-space-c',
     ]);
+  });
+
+  it('deletes single legacy policy when new format does not exist (sync will recreate)', () => {
+    const existingPolicyIds = ['monitor1-loc1-space-a'];
+    const expectedNewFormatIds = new Set(['monitor1-loc1']);
+
+    const result = determinePoliciesToCleanup(
+      existingPolicyIds,
+      expectedNewFormatIds,
+      noopDebugLog
+    );
+
+    expect(result.policiesToKeep).toEqual([]);
+    expect(result.policiesToDelete).toEqual(['monitor1-loc1-space-a']);
   });
 
   it('handles multiple monitors with different scenarios', () => {
@@ -91,10 +106,11 @@ describe('determinePoliciesToCleanup', () => {
       noopDebugLog
     );
 
-    expect(result.policiesToKeep.sort()).toEqual(['monitor1-loc1', 'monitor2-loc1-space-a']);
+    expect(result.policiesToKeep).toEqual(['monitor1-loc1']);
     expect(result.policiesToDelete.sort()).toEqual([
       'monitor1-loc1-space-a',
       'monitor1-loc1-space-b',
+      'monitor2-loc1-space-a',
       'monitor2-loc1-space-b',
       'some-random-policy',
     ]);

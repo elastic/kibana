@@ -127,7 +127,7 @@ export async function cleanUpDuplicatedPackagePolicies(
 /**
  * Determines which policies to keep and which to delete:
  * 1. If new format policy exists, keep it and delete all legacy variants
- * 2. If only legacy exists, keep ONE (first found) and delete others
+ * 2. If only legacy policies exist, delete all (sync will recreate with new format)
  * 3. If unknown policies (not matching any monitor) are found, delete them
  */
 export function determinePoliciesToCleanup(
@@ -173,13 +173,10 @@ export function determinePoliciesToCleanup(
         `New format policy exists for ${newFormatId}, marking ${legacyIds.length} legacy policies for deletion`
       );
     } else {
-      const [firstLegacy, ...restLegacy] = legacyIds;
-      policiesToKeep.push(firstLegacy);
-      debugLog(`Keeping legacy policy: ${firstLegacy}`);
-      if (restLegacy.length > 0) {
-        policiesToDelete.push(...restLegacy);
-        debugLog(`Marking ${restLegacy.length} duplicate legacy policies for deletion`);
-      }
+      policiesToDelete.push(...legacyIds);
+      debugLog(
+        `No new format policy for ${newFormatId}, marking ${legacyIds.length} legacy policies for deletion (sync will recreate)`
+      );
     }
   }
 
