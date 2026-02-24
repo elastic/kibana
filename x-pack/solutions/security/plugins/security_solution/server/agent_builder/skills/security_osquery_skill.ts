@@ -52,10 +52,10 @@ List or search for osquery-enabled agents. Use this to find agent IDs by hostnam
 - List all: \`osquery_get_agents({})\`
 Returns: id (agent ID), hostname, status, platform
 
-### osquery_get_table_schema
-Discover columns and types for any osquery table (especially custom Elastic tables like elastic_browser_history).
+### osquery_get_table_schema (REQUIRED for elastic_* tables)
+Discover columns and types for any osquery table. Call \`security.osquery.get_table_schema({ tableName: "<table>", agentId: "<id>" })\`.
 - Returns: column names and types for the specified table
-- **ALWAYS use this before querying custom/Elastic-specific tables to avoid "no such column" errors**
+- **You MUST call this before querying ANY table starting with \`elastic_\` (e.g., \`elastic_browser_history\`). Do NOT guess columns.**
 
 ### osquery_run_live_query (requires explicit confirmation from user)
 Execute a live osquery SQL query against agents.
@@ -83,6 +83,13 @@ List osquery packs with pagination.
 4. **MANDATORY - Fetch results:** \`osquery_get_results({ actionId: "<queries[0].action_id>" })\`
    - If the result status is "error", analyze the error message and fix the query (e.g., wrong column name, table not found). Do NOT ask the user to rerun — fix it yourself and rerun.
 5. **Analyze results:** Report findings from actual data
+
+## CRITICAL: Table Schema Discovery
+
+**Before querying ANY table that starts with \`elastic_\` (e.g., \`elastic_browser_history\`), you MUST call \`security.osquery.get_table_schema\` first to discover the actual columns.**
+- These are custom Elastic tables whose columns are NOT standard osquery columns
+- Do NOT guess column names — they WILL fail with "no such column" errors
+- Only standard osquery tables (processes, users, file, hash, etc.) can be queried without schema discovery
 
 ## CRITICAL: Agent ID vs Hostname
 
@@ -117,8 +124,8 @@ List osquery packs with pagination.
 - \`file\` - File metadata
 - \`hash\` - File hashes (md5, sha1, sha256)
 
-### Browser
-- \`elastic_browser_history\` - Unified browser history
+### Browser (CUSTOM - MUST get schema first)
+- \`elastic_browser_history\` - Unified browser history (**custom Elastic table — columns vary by version, ALWAYS call osquery_get_table_schema first**)
 - \`chrome_extensions\` - Chrome extensions
 
 ## Read-Only Limitations
