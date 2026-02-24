@@ -61,7 +61,7 @@ const manageRuleSettingsOperations: Record<AlertingEntity, string[]> = {
   alert: [],
 };
 
-const ruleWriteOperations: Record<AlertingEntity, string[]> = {
+const writeOperations: Record<AlertingEntity, string[]> = {
   rule: [
     'create',
     'delete',
@@ -77,20 +77,12 @@ const ruleWriteOperations: Record<AlertingEntity, string[]> = {
     'unsnooze',
     'runSoon',
   ],
-  alert: [],
-};
-
-const writeOperations: Record<AlertingEntity, string[]> = {
-  rule: [...ruleWriteOperations.rule],
   alert: ['update'],
 };
 const allOperations: Record<AlertingEntity, string[]> = {
   rule: [
     ...readOperations.rule,
     ...writeOperations.rule,
-    ...enableOperations.rule,
-    ...manualRunOperations.rule,
-    ...manageRuleSettingsOperations.rule,
   ],
   alert: [...readOperations.alert, ...writeOperations.alert],
 };
@@ -120,12 +112,10 @@ export class FeaturePrivilegeAlertingBuilder extends BaseFeaturePrivilegeBuilder
       const manageRuleSettings =
         get(privilegeDefinition.alerting, `${entity}.manage_rule_settings`) ?? [];
       const read = get(privilegeDefinition.alerting, `${entity}.read`) ?? [];
-      const write = get(privilegeDefinition.alerting, `${entity}.write`) ?? [];
 
       return uniq([
         ...getAlertingPrivilege(allOperations[entity], all, entity),
         ...getAlertingPrivilege(readOperations[entity], read, entity),
-        ...getAlertingPrivilege(ruleWriteOperations[entity], write, entity),
         ...getAlertingPrivilege(enableOperations[entity], enable, entity),
         ...getAlertingPrivilege(manualRunOperations[entity], manualRun, entity),
         ...getAlertingPrivilege(manageRuleSettingsOperations[entity], manageRuleSettings, entity),

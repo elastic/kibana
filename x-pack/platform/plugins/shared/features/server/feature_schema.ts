@@ -77,7 +77,6 @@ const alertingRuleSchemaSpec = {
   manual_run: schema.maybe(alertingSchema),
   manage_rule_settings: schema.maybe(alertingSchema),
   read: schema.maybe(alertingSchema),
-  write: schema.maybe(alertingSchema),
 };
 
 const casesSchema = schema.arrayOf(schema.string());
@@ -472,39 +471,6 @@ export function validateKibanaFeature(feature: KibanaFeatureConfig) {
 
   if (privilegeEntries.length === 0) {
     return;
-  }
-
-  // If the main feature has alerting.rule.all defined, sub-features may not define anything in alerting.rule.*
-  const mainPrivileges = feature.privileges
-    ? [feature.privileges.all, feature.privileges.read].filter(Boolean)
-    : [];
-  const mainHasRuleAll = mainPrivileges.some((p) => (p.alerting?.rule?.all?.length ?? 0) > 0);
-  if (mainHasRuleAll) {
-    const alertingRuleKeys = Object.keys(
-      alertingRuleSchemaSpec
-    ) as (keyof typeof alertingRuleSchemaSpec)[];
-    const allSubPrivs = (feature.subFeatures ?? []).flatMap((subFeature) =>
-      (subFeature.privilegeGroups ?? []).flatMap((group) => group.privileges ?? [])
-    );
-    const subViolations = allSubPrivs
-      .map((subPrivilege) => {
-        const rule = subPrivilege.alerting?.rule;
-        if (!rule) return null;
-        const defined = alertingRuleKeys.filter((key) => (rule[key]?.length ?? 0) > 0);
-        return defined.length > 0
-          ? `sub-feature privilege '${subPrivilege.id}' defined ${defined
-              .map((k) => `alerting.rule.${k}`)
-              .join(', ')}`
-          : null;
-      })
-      .filter((v): v is string => v !== null);
-    if (subViolations.length > 0) {
-      throw new Error(
-        `Feature ${feature.id}: You defined alerting.rule.all at the top, but ${subViolations.join(
-          '; '
-        )}.`
-      );
-    }
   }
 
   privilegeEntries.forEach(([privilegeId, privilegeDefinition]) => {
