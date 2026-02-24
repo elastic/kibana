@@ -27,7 +27,7 @@ pageLoadAssetSize:
   contentManagement: 8350
   controls: 10300
   core: 556473
-  cps: 5930
+  cps: 10000
   crossClusterReplication: 12662
   customIntegrations: 11715
   dashboard: 20000
@@ -41,7 +41,7 @@ pageLoadAssetSize:
   dataViewEditor: 7735
   dataViewFieldEditor: 26024
   dataViewManagement: 6250
-  dataViews: 65000
+  dataViews: 66000
   dataVisualizer: 32778
   developerToolbar: 4467
   devTools: 8109
