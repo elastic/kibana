@@ -15,9 +15,9 @@ import { EuiComboBoxTestHarness } from '@kbn/test-eui-helpers';
 import type { HttpSetup } from '@kbn/core/public';
 
 import { runPendingTimersUntil } from '../../../../../../../__jest__/helpers/fake_timers';
-import { ComponentTemplateCreate } from '../../../component_template_wizard';
+import { ComponentTemplateCreate } from '..';
 import { BASE_PATH } from '../../../../../../../common';
-import { WithAppDependencies } from './setup_environment';
+import { WithAppDependencies } from '../../../__jest__/client_integration/helpers/setup_environment';
 
 // Services required for KibanaRenderContextProvider (provides i18n, theme, analytics)
 const startServicesMock = {
