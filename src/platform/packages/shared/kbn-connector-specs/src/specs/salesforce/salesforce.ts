@@ -9,7 +9,6 @@
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
-import { OAuth } from '../../auth_types/oauth';
 
 const SALESFORCE_API_VERSION = 'v59.0';
 
@@ -48,23 +47,20 @@ export const SalesforceConnector: ConnectorSpec = {
   },
 
   auth: {
-    types: [OAuth.id],
+    types: [
+      {
+        type: 'oauth_client_credentials',
+        defaults: {},
+        overrides: {
+          meta: {
+            scope: { hidden: true },
+          },
+        },
+      },
+    ],
   },
 
   actions: {
-    list_objects: {
-      isTool: true,
-      input: z.object({}).optional(),
-      handler: async (ctx) => {
-        const baseUrl = getBaseUrl(ctx);
-        const response = await ctx.client.get(
-          `${baseUrl}/services/data/${SALESFORCE_API_VERSION}/sobjects/`,
-          {}
-        );
-        return response.data;
-      },
-    },
-
     search: {
       isTool: false,
       input: z.object({
