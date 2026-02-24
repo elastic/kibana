@@ -48,6 +48,13 @@ export interface EndpointDescription {
   documentation?: string;
 
   /**
+   * Serverless url of the documentation page of this endpoint.
+   * When `endpointsAvailability` is `serverless`, Console may use this value
+   * (if present) instead of the generic API reference link.
+   */
+  documentation_serverless?: string;
+
+  /**
    * If the endpoint is available different environments (stack, serverless).
    */
   availability?: Record<EndpointsAvailability, boolean>;

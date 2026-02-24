@@ -7,6 +7,7 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
+    "test/**/*",
     "../../../../../typings/**/*",
     ".storybook/**/*"
   ],
@@ -126,7 +127,9 @@
     "@kbn/presentation-publishing-schemas",
     "@kbn/esql",
     "@kbn/controls-schemas",
-    "@kbn/as-code-filters-schema"
+    "@kbn/as-code-filters-schema",
+    "@kbn/scout",
+    "@kbn/synthtrace-client"
   ],
   "exclude": ["target/**/*"]
 }
