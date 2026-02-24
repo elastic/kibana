@@ -26,7 +26,7 @@ xpack.securitySolution.preinstalledWorkflows.enabled: true
 
 ### Enable Security Alerts Attachment
 
-To enable security alerts attachment functionality (required for alert_validation_worklfow.yml workflow), set the following feature flag:
+To enable security alerts attachment functionality (required for alert_validation_workflow.yml workflow), set the following feature flag:
 
 ```yaml
 xpack.aiAssistant.aiAgents.enabled: true
