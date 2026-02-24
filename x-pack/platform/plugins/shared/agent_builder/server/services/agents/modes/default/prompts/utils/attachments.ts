@@ -33,7 +33,7 @@ export const renderAttachmentPrompt = () => {
   return `### RENDERING VISUALIZATIONS
       You may render any attachment in the UI by emitting a custom XML element:
 
-      <${tagName} ${attributes.attachmentId}="TOOL_RESULT_ID_HERE" />
+      <${tagName} ${attributes.attachmentId}="ATTACHMENT_ID" />
 
       **Rules**
       * You can specify an optional version by adding the \`${attributes.version}\` attribute. If not provided latest version will be used.
