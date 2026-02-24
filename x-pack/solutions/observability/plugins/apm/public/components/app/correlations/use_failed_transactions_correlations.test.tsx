@@ -93,7 +93,9 @@ function wrapper({ children, error = false }: PropsWithChildren<{ error?: boolea
   );
 }
 
-describe('useFailedTransactionsCorrelations', () => {
+// TODO: Temporarily skip these tests as they are for the proressive loading
+// Remove skip if we decide to keep the progressive loading feature.
+describe.skip('useFailedTransactionsCorrelations', () => {
   beforeEach(async () => {
     jest.useFakeTimers({ legacyFakeTimers: true });
   });

@@ -135,7 +135,7 @@ export async function fetchLatencyCorrelations({
   // Note: For error_rate, we skip this step and process field candidates directly
   const fieldValuePairs: FieldValuePair[] = [];
 
-  // Step 4: Get correlations (with internal chunking)
+  // Get correlations (with internal chunking)
   let correlations: UnifiedCorrelation[] = [];
   let ccsWarning = false;
   let fallbackResult: UnifiedCorrelation | undefined;
