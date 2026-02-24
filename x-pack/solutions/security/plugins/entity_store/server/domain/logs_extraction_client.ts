@@ -245,8 +245,8 @@ export class LogsExtractionClient {
         abortController: opts?.abortController,
       });
 
-      await Promise.all([ccsPromise, mainPromise]);
-      const mainResult = await mainPromise;
+      const [mainResult] = await Promise.all([mainPromise, ccsPromise]);
+
       return {
         ...mainResult,
         indexPatterns: [...localIndexPatterns, ...remoteIndexPatterns],

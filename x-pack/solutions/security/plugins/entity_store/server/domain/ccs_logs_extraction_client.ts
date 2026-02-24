@@ -127,7 +127,7 @@ export class CcsLogsExtractionClient {
 
         await this.crudClient.upsertEntitiesBulk(bulkObjects, {
           force: true,
-          // It's good to generated a random timestamp to avoid too many ts collisions
+          // It's good to generate a random timestamp to avoid too many ts collisions
           // in the main extraction
           timestampGenerator: () => {
             const randomMs = Math.floor(Math.random() * 10000) + 1;
