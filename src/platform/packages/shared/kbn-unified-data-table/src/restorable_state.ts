@@ -18,11 +18,6 @@ export interface UnifiedDataTableRestorableState {
   selectedDocsMap: Record<SelectedDocId, boolean>;
   isFilterActive: boolean; // show only selected fields
   pageIndex: number;
-  /**
-   * The index of the first visible item in the range, this is determined from the scroll offset.
-   */
-
-  initialDisplayedItemIndex: number;
   inTableSearch?: InTableSearchRestorableState;
 
   // comparison mode

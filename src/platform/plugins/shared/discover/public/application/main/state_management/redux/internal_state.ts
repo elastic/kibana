@@ -29,7 +29,6 @@ import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import type { UnifiedDataTableRestorableState } from '@kbn/unified-data-table';
 import { DISCOVER_QUERY_MODE_KEY } from '../../../../../common/constants';
 import type { DiscoverCustomizationContext } from '../../../../customizations';
 import type { DiscoverServices } from '../../../../build_services';
@@ -48,6 +47,7 @@ import type { DiscoverSearchSessionManager } from '../discover_search_session';
 import { createEsqlDataSource } from '../../../../../common/data_sources';
 import type { CascadedDocumentsStateManager } from '../../data_fetching/cascaded_documents_fetcher';
 import { createCascadedDocumentsStateManager } from './cascaded_documents_state_manager';
+import type { CascadedDocumentsDataGridUiState } from '../../components/layout/cascaded_documents';
 
 const MIDDLEWARE_THROTTLE_MS = 300;
 const MIDDLEWARE_THROTTLE_OPTIONS = { leading: false, trailing: true };
@@ -410,7 +410,7 @@ export const internalStateSlice = createSlice({
       state,
       action: TabAction<{
         nodeId: string;
-        dataGridUiState: Partial<UnifiedDataTableRestorableState>;
+        dataGridUiState: Partial<CascadedDocumentsDataGridUiState>;
       }>
     ) =>
       withTab(state, action.payload, (tab) => {
