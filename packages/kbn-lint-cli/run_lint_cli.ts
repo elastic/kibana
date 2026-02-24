@@ -41,8 +41,6 @@ run(
   }
 );
 
-const OXLINT_PROC_NAME = 'oxlint';
-
 async function lintFiles({
   procRunner,
   options = { fix: false },
@@ -52,10 +50,10 @@ async function lintFiles({
 }) {
   const { stopExisting = false } = options;
   if (stopExisting) {
-    await procRunner.stop(OXLINT_PROC_NAME);
+    await procRunner.stop('oxlint');
   }
 
-  await procRunner.run(OXLINT_PROC_NAME, {
+  await procRunner.run('oxlint', {
     cmd: 'oxlint',
     args: [...(options.fix ? ['--fix'] : []), '--config', '.oxlintrc.json'],
     cwd: REPO_ROOT,
