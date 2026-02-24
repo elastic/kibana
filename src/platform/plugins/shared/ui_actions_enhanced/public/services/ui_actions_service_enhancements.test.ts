@@ -12,6 +12,7 @@ import { UiActionsServiceEnhancements } from './ui_actions_service_enhancements'
 import type { ActionFactoryDefinition } from '../dynamic_actions';
 import { ActionFactory } from '../dynamic_actions';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
+import { ON_CLICK_VALUE } from '@kbn/ui-actions-plugin/common/trigger_ids';
 
 const deps: UiActionsServiceEnhancementsParams = {
   getLicense: () => licensingMock.createLicense(),
@@ -28,7 +29,7 @@ describe('UiActionsService', () => {
       isConfigValid: () => true,
       create: () => ({}),
       supportedTriggers() {
-        return ['VALUE_CLICK_TRIGGER'];
+        return [ON_CLICK_VALUE];
       },
     } as unknown as ActionFactoryDefinition;
     const factoryDefinition2: ActionFactoryDefinition = {
@@ -38,7 +39,7 @@ describe('UiActionsService', () => {
       isConfigValid: () => true,
       create: () => ({}),
       supportedTriggers() {
-        return ['VALUE_CLICK_TRIGGER'];
+        return [ON_CLICK_VALUE];
       },
     } as unknown as ActionFactoryDefinition;
 
