@@ -26,6 +26,7 @@ const streamsStorageSettings = {
       ingest: types.object({ enabled: false }),
       query: types.object({ enabled: false }),
       query_streams: types.object({ enabled: false }),
+      suggestion: types.boolean(),
     },
   },
 } satisfies StorageSettings;

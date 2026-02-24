@@ -307,11 +307,13 @@ export class StreamsClient {
     name,
     where: condition,
     status,
+    suggestion,
   }: {
     parent: string;
     name: string;
     where: Condition;
     status: RoutingStatus;
+    suggestion?: boolean;
   }): Promise<ForkStreamResponse> {
     const parentDefinition = Streams.WiredStream.Definition.parse(await this.getStream(parent));
 
@@ -349,6 +351,7 @@ export class StreamsClient {
             description: '',
             updated_at: now,
             query_streams: [],
+            ...(suggestion ? { suggestion: true } : {}),
             ingest: {
               lifecycle: { inherit: {} },
               processing: { steps: [], updated_at: now },
