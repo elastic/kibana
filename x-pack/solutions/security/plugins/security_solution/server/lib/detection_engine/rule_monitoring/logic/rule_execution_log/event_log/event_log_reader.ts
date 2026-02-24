@@ -328,6 +328,10 @@ const buildEventLogKqlFilter = ({
     filters.push(kqlAnd(dateRangeFilter));
   }
 
+  filters.push(
+    `(${f.TAGS}:final OR ${f.RULE_EXECUTION_STATUS}:running OR ${f.EVENT_ACTION}:${RuleExecutionEventTypeEnum['execution-metrics']} OR (${f.EVENT_ACTION}:${RuleExecutionEventTypeEnum.message} AND ${f.LOG_LEVEL}:(trace OR debug OR info)))`
+  );
+
   return kqlAnd(filters);
 };
 

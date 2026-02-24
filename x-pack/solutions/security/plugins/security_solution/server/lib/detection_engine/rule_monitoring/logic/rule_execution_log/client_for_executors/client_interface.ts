@@ -129,6 +129,7 @@ export interface StatusChangeArgs {
   message?: string;
   metrics?: MetricsArgs;
   userError?: boolean;
+  isFinal?: boolean;
 }
 
 export interface MetricsArgs {

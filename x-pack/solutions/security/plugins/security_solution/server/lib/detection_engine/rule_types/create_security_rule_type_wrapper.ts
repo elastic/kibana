@@ -281,11 +281,13 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   newStatus: RuleExecutionStatusEnum.failed,
                   message: `Data view is not found.\nError: ${exc}`,
                   userError: true,
+                  isFinal: true,
                 });
               } else {
                 await ruleExecutionLogger.logStatusChange({
                   newStatus: RuleExecutionStatusEnum.failed,
                   message: `Check for indices to search failed.\nError: ${exc}`,
+                  isFinal: true,
                 });
               }
 
@@ -380,6 +382,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             tuples,
             remainingGap,
             warningStatusMessage: rangeTuplesWarningMessage,
+            errorStatusMessage: rangeTuplesErrorMessage,
             gap,
             originalFrom,
             originalTo,
@@ -395,6 +398,9 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           });
           if (rangeTuplesWarningMessage != null) {
             wrapperWarnings.push(rangeTuplesWarningMessage);
+          }
+          if (rangeTuplesErrorMessage != null) {
+            wrapperErrors.push(rangeTuplesErrorMessage);
           }
 
           agent.setCustomContext({ [SECURITY_NUM_RANGE_TUPLES]: tuples.length });
@@ -578,7 +584,10 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               wrapperWarnings.push(disabledActionsWarning);
             }
 
-            if (result.warningMessages.length > 0 || wrapperWarnings.length > 0) {
+            const hasWarnings = result.warningMessages.length > 0 || wrapperWarnings.length > 0;
+            const hasErrors = wrapperErrors.length > 0 || result.errors.length > 0;
+
+            if (hasWarnings) {
               // write warning messages first because if we have still have an error to write
               // we want to write the error messages last, so that the errors are set
               // as the current status of the rule.
@@ -591,9 +600,10 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   enrichmentDurations: result.enrichmentTimes,
                   frozenIndicesQueriedCount,
                 },
+                isFinal: !hasErrors,
               });
             }
-            if (wrapperErrors.length > 0 || result.errors.length > 0) {
+            if (hasErrors) {
               await ruleExecutionLogger.logStatusChange({
                 newStatus: RuleExecutionStatusEnum.failed,
                 message: truncateList(result.errors.concat(wrapperErrors)).join(', '),
@@ -608,8 +618,9 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 userError:
                   result.userError ||
                   result.errors.every((err) => checkErrorDetails(err).isUserError),
+                isFinal: true,
               });
-            } else if (!(result.warningMessages.length > 0) && !(wrapperWarnings.length > 0)) {
+            } else if (!hasWarnings) {
               ruleExecutionLogger.debug('Security Rule execution completed');
               ruleExecutionLogger.debug(
                 `Indexed ${createdSignalsCount} alerts into "${ruleDataClient.indexNameWithNamespace(
@@ -629,6 +640,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   enrichmentDurations: result.enrichmentTimes,
                   frozenIndicesQueriedCount,
                 },
+                isFinal: true,
               });
             }
           } catch (error) {
@@ -644,6 +656,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 enrichmentDurations: result.enrichmentTimes,
                 frozenIndicesQueriedCount,
               },
+              isFinal: true,
             });
           }
 

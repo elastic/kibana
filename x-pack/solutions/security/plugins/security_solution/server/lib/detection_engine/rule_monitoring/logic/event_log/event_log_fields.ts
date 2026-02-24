@@ -17,6 +17,7 @@ export const EVENT_CATEGORY = 'event.category' as const;
 export const EVENT_SEQUENCE = 'event.sequence' as const;
 
 export const LOG_LEVEL = 'log.level' as const;
+export const TAGS = 'tags' as const;
 
 // -------------------------------------------------------------------------------------------------
 // Custom fields of Alerting Framework and Security Solution

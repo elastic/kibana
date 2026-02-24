@@ -51,6 +51,7 @@ export interface MessageArgs extends BaseArgs {
 export interface StatusChangeArgs extends BaseArgs {
   newStatus: RuleExecutionStatus;
   message?: string;
+  isFinal?: boolean;
 }
 
 export interface ExecutionMetricsArgs extends BaseArgs {
@@ -111,6 +112,7 @@ export const createEventLogWriter = (eventLogService: IEventLogService): IEventL
       eventLogger.logEvent({
         '@timestamp': nowISO(),
         message: args.message,
+        ...(args.isFinal ? { tags: ['final'] } : {}),
         rule: {
           id: args.ruleId,
           uuid: args.ruleUuid,

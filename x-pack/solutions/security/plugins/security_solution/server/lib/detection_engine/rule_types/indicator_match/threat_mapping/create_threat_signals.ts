@@ -156,7 +156,7 @@ export const createThreatSignals = async ({
     indexFields: threatIndexFields,
   });
 
-  ruleExecutionLogger.info(`Found threat indicators: ${threatListCount}`);
+  ruleExecutionLogger.debug(`Found threat indicators: ${threatListCount}`);
 
   const threatListConfig = {
     fields: threatMapping.map((mapping) => mapping.entries.map((item) => item.value)).flat(),

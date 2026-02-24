@@ -225,9 +225,9 @@ export const createRuleExecutionLogClientForExecutors = (
   };
 
   const writeStatusChangeToEventLog = (args: NormalizedStatusChangeArgs): void => {
-    const { newStatus, message, metrics } = args;
+    const { newStatus, message, metrics, isFinal } = args;
 
-    if (metrics) {
+    if (metrics && isFinal) {
       eventLog.logExecutionMetrics({
         ruleId,
         ruleUuid,
@@ -250,6 +250,7 @@ export const createRuleExecutionLogClientForExecutors = (
       executionId,
       newStatus,
       message,
+      isFinal,
     });
   };
 
@@ -261,6 +262,7 @@ interface NormalizedStatusChangeArgs {
   message: string;
   metrics?: RuleExecutionMetrics;
   userError?: boolean;
+  isFinal?: boolean;
 }
 
 const normalizeStatusChangeArgs = (args: StatusChangeArgs): NormalizedStatusChangeArgs => {
@@ -270,7 +272,7 @@ const normalizeStatusChangeArgs = (args: StatusChangeArgs): NormalizedStatusChan
       message: '',
     };
   }
-  const { newStatus, message, metrics, userError } = args;
+  const { newStatus, message, metrics, userError, isFinal } = args;
 
   return {
     newStatus,
@@ -286,6 +288,7 @@ const normalizeStatusChangeArgs = (args: StatusChangeArgs): NormalizedStatusChan
         }
       : undefined,
     userError,
+    isFinal,
   };
 };
 
