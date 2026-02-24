@@ -589,14 +589,14 @@ export class WorkflowsExecutionEnginePlugin
         throw new Error('Workflows cannot be executed without the user context');
       }
 
-      validateWorkflowInputs(workflow, context);
-
       const { workflowExecution } = await createAndPersistWorkflowExecution(
         workflow,
         context,
         'manual',
         request
       );
+
+      validateWorkflowInputs(workflow, context);
 
       // Check concurrency limits and apply collision strategy if needed
       const canProceed = await this.checkConcurrencyIfNeeded(workflowExecution);
