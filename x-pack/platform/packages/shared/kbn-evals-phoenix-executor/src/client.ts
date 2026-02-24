@@ -22,9 +22,9 @@ import type {
   ExperimentTask,
   RanExperiment,
   TaskOutput,
-} from '../types';
+} from '@kbn/evals';
 import { upsertDataset } from './upsert_dataset';
-import type { PhoenixConfig } from '../utils/get_phoenix_config';
+import type { PhoenixConfig } from './get_phoenix_config';
 
 /**
  * Phoenix-backed eval runner. This remains supported as an option during the migration,

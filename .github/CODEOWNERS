@@ -978,6 +978,7 @@ x-pack/platform/packages/shared/kbn-elastic-assistant-shared-state @elastic/secu
 x-pack/platform/packages/shared/kbn-entities-schema @elastic/obs-entities
 x-pack/platform/packages/shared/kbn-es-snapshot-loader @elastic/obs-ai-team
 x-pack/platform/packages/shared/kbn-evals @elastic/obs-ai-team
+x-pack/platform/packages/shared/kbn-evals-phoenix-executor @elastic/obs-ai-team
 x-pack/platform/packages/shared/kbn-evals-suite-streams @elastic/obs-onboarding-team @elastic/obs-sig-events-team
 x-pack/platform/packages/shared/kbn-event-stacktrace @elastic/obs-presentation-team @elastic/obs-exploration-team
 x-pack/platform/packages/shared/kbn-failure-store-modal @elastic/kibana-management
@@ -1581,6 +1582,7 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/solutions/observability/plugins/observability/public/hooks/use_update_api_key.ts @elastic/actionable-obs-team
 /x-pack/solutions/observability/plugins/observability/public/locators @elastic/actionable-obs-team
 /x-pack/solutions/observability/plugins/observability/public/pages/alert_details @elastic/actionable-obs-team
+/x-pack/solutions/observability/plugins/observability/public/pages/alerts @elastic/actionable-obs-team
 /x-pack/solutions/observability/plugins/observability/public/pages/annotations @elastic/actionable-obs-team
 /x-pack/solutions/observability/plugins/observability/public/pages/cases @elastic/actionable-obs-team
 /x-pack/solutions/observability/plugins/observability/public/pages/rule_details @elastic/actionable-obs-team
@@ -1595,6 +1597,8 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/solutions/observability/plugins/observability/server/routes/rules @elastic/actionable-obs-team
 /x-pack/solutions/observability/plugins/observability/server/saved_objects/threshold.ts @elastic/actionable-obs-team
 /x-pack/solutions/observability/plugins/observability/server/services @elastic/actionable-obs-team
+/x-pack/solutions/observability/plugins/observability/test/scout/ui/fixtures/page_objects/rule_details_page.ts @elastic/actionable-obs-team
+/x-pack/solutions/observability/plugins/observability/test/scout/ui/fixtures/page_objects/rules_page.ts @elastic/actionable-obs-team
 
 # Observability AI Assistant
 /x-pack/platform/test/serverless/api_integration/test_suites/data_usage @elastic/kibana-management
