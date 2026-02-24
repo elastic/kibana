@@ -126,15 +126,23 @@ export const getAxiosInstanceWithAuth = ({
 
       // Debug: log auth type and secret keys (no secret values) to troubleshoot 401s
       logger.debug(
-        `[Connector ${connectorId}] Configuring axios with authType="${authTypeId}", secrets keys: [${Object.keys(secrets).join(', ')}]`
+        `[Connector ${connectorId}] Configuring axios with authType="${authTypeId}", secrets keys: [${Object.keys(
+          secrets
+        ).join(', ')}]`
       );
       if (authTypeId === 'basic') {
         const s = secrets as Record<string, unknown>;
         const hasUsername = 'username' in s && s.username !== null;
         const hasUser = 'user' in s && s.user !== null;
         logger.debug(
-          `[Connector ${connectorId}] Basic auth: username present=${hasUsername} (length=${hasUsername ? String(s.username).length : 0}), ` +
-            `user present=${hasUser} (length=${hasUser ? String(s.user).length : 0}), password present=${'password' in s && s.password != null} (length=${s.password != null ? String(s.password).length : 0})`
+          `[Connector ${connectorId}] Basic auth: username present=${hasUsername} (length=${
+            hasUsername ? String(s.username).length : 0
+          }), ` +
+            `user present=${hasUser} (length=${
+              hasUser ? String(s.user).length : 0
+            }), password present=${'password' in s && s.password != null} (length=${
+              s.password != null ? String(s.password).length : 0
+            })`
         );
         if (!hasUsername && hasUser) {
           logger.warn(
