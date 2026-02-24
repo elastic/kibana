@@ -53,6 +53,7 @@ import type { ServerlessProjectType } from '../common/constants/types';
 import { IncrementalIdTaskManager } from './tasks/incremental_id/incremental_id_task_manager';
 import { createCasesAnalyticsIndexes, registerCasesAnalyticsIndexesTasks } from './cases_analytics';
 import { scheduleCAISchedulerTask } from './cases_analytics/tasks/scheduler_task';
+import { casesUpdateTriggerDefinition } from '@kbn/workflows-extensions/common';
 
 export class CasePlugin
   implements
@@ -200,6 +201,10 @@ export class CasePlugin
       serverlessProjectType,
     });
 
+    if (plugins.workflowsExtensions) {
+      plugins.workflowsExtensions.registerTrigger(casesUpdateTriggerDefinition);
+    }
+
     return {
       attachmentFramework: {
         registerExternalReference: (externalReferenceAttachmentType) => {
@@ -303,6 +308,10 @@ export class CasePlugin
             scopedClusterClient: coreContext.elasticsearch.client.asCurrentUser,
             savedObjectsService: savedObjects,
           });
+        },
+        getWorkflowsExtensions: async () => {
+          const [, plugins] = await core.getStartServices();
+          return plugins.workflowsExtensions;
         },
       };
     };

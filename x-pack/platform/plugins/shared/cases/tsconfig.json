@@ -16,6 +16,7 @@
     "@kbn/lens-plugin",
     "@kbn/security-plugin",
     "@kbn/spaces-plugin",
+    "@kbn/workflows-extensions",
     // Required from './kibana.json'
     "@kbn/actions-plugin",
     "@kbn/rule-registry-plugin",

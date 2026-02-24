@@ -8,6 +8,7 @@
  */
 
 import { workflowExecutionFailedTriggerDefinition } from '../../common/triggers/workflow_execution_failed_trigger';
+import { casesUpdateTriggerDefinition } from '../../common/triggers/cases_update_trigger';
 import type { PublicTriggerRegistry } from '../trigger_registry';
 
 /**
@@ -17,6 +18,7 @@ import type { PublicTriggerRegistry } from '../trigger_registry';
 export const registerInternalTriggers = (triggerRegistry: PublicTriggerRegistry) => {
   try {
     triggerRegistry.register(workflowExecutionFailedTriggerDefinition);
+    triggerRegistry.register(casesUpdateTriggerDefinition);
   } catch (error) {
     console.error('[registerInternalTriggers] Failed to register trigger:', error);
     throw error;

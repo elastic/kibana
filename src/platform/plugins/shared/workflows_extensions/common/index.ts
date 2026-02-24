@@ -15,3 +15,8 @@ export {
   workflowExecutionFailedTriggerDefinition,
   type WorkflowExecutionFailedEventSchema,
 } from './triggers/workflow_execution_failed_trigger';
+export {
+  CasesUpdateTriggerId,
+  casesUpdateTriggerDefinition,
+  type CasesUpdateEventSchema,
+} from './triggers/cases_update_trigger';

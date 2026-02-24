@@ -29,6 +29,7 @@ import type { FilesSetup, FilesStart } from '@kbn/files-plugin/public';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
+import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
 
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
@@ -72,6 +73,7 @@ export interface CasesPublicSetupDependencies {
   management: ManagementSetup;
   home?: HomePublicPluginSetup;
   triggersActionsUi: TriggersActionsSetup;
+  workflowsExtensions?: WorkflowsExtensionsPublicPluginSetup;
 }
 
 export interface CasesPublicStartDependencies {
