@@ -22,7 +22,6 @@ export class DiscoverApp {
 
   async goto() {
     await this.page.gotoApp('discover');
-    await this.page.testSubj.waitForSelector('discoverLayout', { state: 'visible' });
     await this.waitForDataViewSwitch();
   }
 
