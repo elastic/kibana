@@ -3,7 +3,7 @@ navigation_title: User activity
 applies_to:
   stack: ga 9.4
   deployment:
-    self: ga
+    self: ga 9.4
 ---
 
 # User activity
