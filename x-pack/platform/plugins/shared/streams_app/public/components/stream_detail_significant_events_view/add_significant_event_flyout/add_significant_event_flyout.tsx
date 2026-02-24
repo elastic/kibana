@@ -301,9 +301,7 @@ export function AddSignificantEventFlyout({
                         isEditMode={isEditMode}
                         setQuery={(next: StreamQuery) => setQueries([next])}
                         query={queries[0]}
-                        setCanSave={(next: boolean) => {
-                          setCanSave(next);
-                        }}
+                        setCanSave={setCanSave}
                         definition={definition.stream}
                         systems={systems}
                       />

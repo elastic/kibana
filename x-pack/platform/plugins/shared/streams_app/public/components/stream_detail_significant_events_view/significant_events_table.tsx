@@ -116,7 +116,11 @@ export function SignificantEventsTable({
           return '--';
         }
 
-        return <EuiCodeBlock paddingSize="none">{displayQuery}</EuiCodeBlock>;
+        return (
+          <EuiCodeBlock language="esql" paddingSize="none">
+            {displayQuery}
+          </EuiCodeBlock>
+        );
       },
     },
     {

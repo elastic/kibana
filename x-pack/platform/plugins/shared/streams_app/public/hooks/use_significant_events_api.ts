@@ -11,7 +11,6 @@ import type {
   System,
   SignificantEventsQueriesGenerationTaskResult,
 } from '@kbn/streams-schema';
-import { isNativeEsqlQuery } from '@kbn/streams-schema';
 import { useKibana } from './use_kibana';
 import { getLast24HoursTimeRange } from '../util/time_range';
 

@@ -7,7 +7,6 @@
 
 import { useAbortController } from '@kbn/react-hooks';
 import type { StreamQuery } from '@kbn/streams-schema';
-import { isNativeEsqlQuery } from '@kbn/streams-schema';
 import { useMemo } from 'react';
 import { useKibana } from './use_kibana';
 
@@ -40,9 +39,6 @@ export function useQueriesApi(): QueriesApi {
         });
       },
       upsertQuery: async ({ query, streamName }: { query: StreamQuery; streamName: string }) => {
-        const { id, esql, ...rest } = query;
-        const body = isNativeEsqlQuery(query) ? { ...rest, esql } : rest;
-
         await streamsRepositoryClient.fetch(
           'PUT /api/streams/{name}/queries/{queryId} 2023-10-31',
           {

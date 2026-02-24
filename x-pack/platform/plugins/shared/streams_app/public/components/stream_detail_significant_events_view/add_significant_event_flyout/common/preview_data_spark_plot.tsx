@@ -17,7 +17,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { StreamQuery, Streams } from '@kbn/streams-schema';
-import { buildEsqlQuery, getIndexPatternsForStream, isNativeEsqlQuery } from '@kbn/streams-schema';
 import React, { useMemo } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { DISCOVER_APP_LOCATOR, type DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
@@ -56,9 +55,7 @@ export function PreviewDataSparkPlot({
 
   const previewFetch = useSignificantEventPreviewFetch({
     name: definition.name,
-    feature: query.feature,
-    kqlQuery: query.kql.query,
-    esqlQuery: query.esql?.query,
+    esqlQuery: query.esql.query,
     timeRange: timeRange ?? timeState.asAbsoluteTimeRange,
     isQueryValid,
     noOfBuckets,
@@ -92,9 +89,8 @@ export function PreviewDataSparkPlot({
   // exist yet during creation or live editing).
   const discoverEsqlQuery = useMemo(() => {
     if (!isQueryValid) return '';
-    if (isNativeEsqlQuery(query)) return query.esql.query;
-    return buildEsqlQuery(getIndexPatternsForStream(definition), query);
-  }, [definition, query, isQueryValid]);
+    return query.esql.query;
+  }, [query.esql.query, isQueryValid]);
 
   const discoverLink = useUrl<DiscoverAppLocatorParams>(
     () => ({

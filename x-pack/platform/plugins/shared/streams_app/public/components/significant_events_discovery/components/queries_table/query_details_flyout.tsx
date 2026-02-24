@@ -37,7 +37,7 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useMemo, useState } from 'react';
 import { isNativeEsqlQuery } from '@kbn/streams-schema';
-import { EsqlQueryEditor } from '../../../esql_query_editor';
+import { StreamsESQLEditor } from '../../../esql_query_editor';
 import type { SignificantEventItem } from '../../../../hooks/use_fetch_significant_events';
 import { InfoPanel } from '../../../info_panel';
 import { SparkPlot } from '../../../spark_plot';
@@ -312,11 +312,12 @@ export function QueryDetailsFlyout({
                 </EuiFormRow>
                 <EuiFormRow label={QUERY_LABEL}>
                   {isNativeEsqlQuery(item.query) ? (
-                    <EsqlQueryEditor
-                      value={query}
-                      isDisabled={isSaving}
-                      onChange={setQuery}
+                    <StreamsESQLEditor
+                      query={{ esql: query }}
+                      onTextLangQueryChange={(newQuery) => setQuery(newQuery.esql)}
+                      onTextLangQuerySubmit={async () => {}}
                       dataTestSubj="queriesTableQueryDetailsFlyoutQueryInput"
+                      isDisabled={isSaving}
                     />
                   ) : (
                     <EuiFieldText

@@ -8,15 +8,13 @@
 import { calculateAuto } from '@kbn/calculate-auto';
 import type { AbsoluteTimeRange } from '@kbn/es-query';
 import type { AbortableAsyncState } from '@kbn/react-hooks';
-import type { System, SignificantEventsPreviewResponse } from '@kbn/streams-schema';
+import type { SignificantEventsPreviewResponse } from '@kbn/streams-schema';
 import moment from 'moment';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
 
 export function useSignificantEventPreviewFetch({
   name,
-  feature,
-  kqlQuery,
   esqlQuery,
   timeRange,
   isQueryValid,
@@ -24,9 +22,7 @@ export function useSignificantEventPreviewFetch({
 }: {
   noOfBuckets?: number;
   name: string;
-  kqlQuery: string;
-  esqlQuery?: string;
-  feature?: Omit<System, 'description'>;
+  esqlQuery: string;
   timeRange: AbsoluteTimeRange;
   isQueryValid: boolean;
 }): AbortableAsyncState<Promise<SignificantEventsPreviewResponse>> {
@@ -61,9 +57,7 @@ export function useSignificantEventPreviewFetch({
             },
             body: {
               query: {
-                kql: { query: kqlQuery },
-                ...(esqlQuery ? { esql: { query: esqlQuery } } : {}),
-                feature,
+                esql: { query: esqlQuery },
               },
             },
           },
@@ -75,10 +69,8 @@ export function useSignificantEventPreviewFetch({
       timeRange.from,
       timeRange.to,
       noOfBuckets,
-      feature,
       streams.streamsRepositoryClient,
       name,
-      kqlQuery,
       esqlQuery,
     ]
   );

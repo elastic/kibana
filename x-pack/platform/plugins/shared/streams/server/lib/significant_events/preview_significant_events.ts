@@ -9,75 +9,9 @@ import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/type
 import type { IScopedClusterClient } from '@kbn/core/server';
 import { BasicPrettyPrinter } from '@kbn/esql-language';
 import type { ESQLSearchResponse } from '@kbn/es-types';
-import type { InferSearchResponseOf } from '@kbn/es-types';
 import type { SignificantEventsPreviewResponse, StreamQuery, Streams } from '@kbn/streams-schema';
-import { getIndexPatternsForStream, isNativeEsqlQuery } from '@kbn/streams-schema';
+import { getIndexPatternsForStream } from '@kbn/streams-schema';
 import { extractWhereExpression } from '../helpers/esql_helpers';
-import { notFound } from '@hapi/boom';
-import type { ChangePointType } from '@kbn/es-types/src';
-import type { Condition } from '@kbn/streamlang';
-import { conditionToQueryDsl } from '@kbn/streamlang';
-
-type PreviewStreamQuery = Pick<StreamQuery, 'kql' | 'feature'> & {
-  esql?: { query: string };
-};
-
-function createSearchRequest({
-  from,
-  to,
-  kuery,
-  featureFilter,
-  bucketSize,
-}: {
-  from: Date;
-  to: Date;
-  kuery: string;
-  featureFilter?: Condition;
-  bucketSize: string;
-}) {
-  return {
-    size: 0,
-    query: {
-      bool: {
-        filter: [
-          {
-            range: {
-              '@timestamp': {
-                gte: from.toISOString(),
-                lte: to.toISOString(),
-              },
-            },
-          },
-          ...(featureFilter ? [conditionToQueryDsl(featureFilter)] : []),
-          {
-            kql: {
-              query: kuery,
-            },
-            // TODO: kql is not in the ES client's types yet (06-2025)
-          } as QueryDslQueryContainer,
-        ],
-      },
-    },
-    aggs: {
-      occurrences: {
-        date_histogram: {
-          field: '@timestamp',
-          fixed_interval: bucketSize,
-          extended_bounds: {
-            min: from.toISOString(),
-            max: to.toISOString(),
-          },
-        },
-      },
-      change_points: {
-        change_point: {
-          buckets_path: 'occurrences>_count',
-        },
-        // TODO: change_points is not in the ES client's types yet (06-2025)
-      } as {},
-    },
-  };
-}
 
 /**
  * Converts a fixed-interval string (e.g. "300s") to an ES|QL time literal
@@ -109,16 +43,10 @@ function parseBucketSizeMs(bucketSize: string): number {
   return parseInt(value, 10) * (multipliers[unit] || 1000);
 }
 
-function buildEsqlHistogramQuery(
-  esqlQuery: string,
-  indices: string[],
-  bucketSize: string
-): string {
+function buildEsqlHistogramQuery(esqlQuery: string, indices: string[], bucketSize: string): string {
   const whereExpr = extractWhereExpression(esqlQuery);
   const fromPart = `FROM ${indices.join(',')}`;
-  const wherePart = whereExpr
-    ? `| WHERE ${BasicPrettyPrinter.expression(whereExpr)}`
-    : '';
+  const wherePart = whereExpr ? `| WHERE ${BasicPrettyPrinter.expression(whereExpr)}` : '';
   const interval = toEsqlDuration(bucketSize);
 
   return `${fromPart} ${wherePart} | STATS count = COUNT(*) BY bucket = BUCKET(@timestamp, ${interval})`;
@@ -135,9 +63,7 @@ function fillBucketGaps(
   bucketSize: string
 ): Array<{ date: string; count: number }> {
   const intervalMs = parseBucketSizeMs(bucketSize);
-  const existingBuckets = new Map(
-    occurrences.map((o) => [new Date(o.date).getTime(), o.count])
-  );
+  const existingBuckets = new Map(occurrences.map((o) => [new Date(o.date).getTime(), o.count]));
 
   const result: Array<{ date: string; count: number }> = [];
   let current = Math.floor(from.getTime() / intervalMs) * intervalMs;
@@ -154,62 +80,10 @@ function fillBucketGaps(
   return result;
 }
 
-async function previewWithKql(
+export async function previewSignificantEvents(
   params: {
     definition: Streams.all.Definition;
-    query: PreviewStreamQuery;
-    from: Date;
-    to: Date;
-    bucketSize: string;
-  },
-  dependencies: {
-    scopedClusterClient: IScopedClusterClient;
-  }
-): Promise<SignificantEventsPreviewResponse> {
-  const { bucketSize, from, to, definition, query } = params;
-  const { scopedClusterClient } = dependencies;
-
-  const searchRequest = createSearchRequest({
-    bucketSize,
-    from,
-    kuery: query.kql.query,
-    featureFilter: query.feature?.filter,
-    to,
-  });
-
-  const response = (await scopedClusterClient.asCurrentUser.search({
-    index: getIndexPatternsForStream(definition),
-    track_total_hits: false,
-    ...searchRequest,
-  })) as InferSearchResponseOf<unknown, ReturnType<typeof createSearchRequest>>;
-
-  if (!response.aggregations) {
-    throw notFound();
-  }
-
-  const aggregations = response.aggregations as typeof response.aggregations & {
-    change_points: {
-      type: Record<ChangePointType, { p_value: number; change_point: number }>;
-    };
-  };
-
-  return {
-    ...query,
-    change_points: aggregations.change_points,
-    occurrences:
-      aggregations.occurrences.buckets.map((bucket) => {
-        return {
-          date: bucket.key_as_string,
-          count: bucket.doc_count,
-        };
-      }) ?? [],
-  };
-}
-
-async function previewWithEsql(
-  params: {
-    definition: Streams.all.Definition;
-    query: PreviewStreamQuery;
+    query: Pick<StreamQuery, 'esql'>;
     from: Date;
     to: Date;
     bucketSize: string;
@@ -232,7 +106,6 @@ async function previewWithEsql(
             '@timestamp': { gte: from.toISOString(), lte: to.toISOString() },
           },
         },
-        ...(query.feature?.filter ? [conditionToQueryDsl(query.feature.filter)] : []),
       ],
     },
   };
@@ -258,22 +131,4 @@ async function previewWithEsql(
     change_points: { type: {} },
     occurrences,
   };
-}
-
-export async function previewSignificantEvents(
-  params: {
-    definition: Streams.all.Definition;
-    query: PreviewStreamQuery;
-    from: Date;
-    to: Date;
-    bucketSize: string;
-  },
-  dependencies: {
-    scopedClusterClient: IScopedClusterClient;
-  }
-): Promise<SignificantEventsPreviewResponse> {
-  if (isNativeEsqlQuery(params.query)) {
-    return previewWithEsql(params, dependencies);
-  }
-  return previewWithKql(params, dependencies);
 }
