@@ -128,7 +128,7 @@ const outputSchema = z.object({
       label_scores: z.record(z.string(), z.number()),
     })
   ),
-  alerts_sorted: z.array(
+  alerts: z.array(
     z.object({
       alert_id: z.string(),
       alert_index: z.string(),

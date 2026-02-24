@@ -501,7 +501,7 @@ steps:
           # Iterate over every related alert and build a line for each.
           - name: build_related_alert_lines
             type: foreach
-            foreach: "{{ steps.get_related_alerts.output.alerts_sorted | json }}"
+            foreach: "{{ steps.get_related_alerts.output.alerts | json }}"
             steps:
               - name: get_related_alert_timeline_string
                 type: security.renderAlertNarrative

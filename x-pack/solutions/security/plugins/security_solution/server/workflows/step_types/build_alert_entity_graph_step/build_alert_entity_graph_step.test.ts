@@ -57,7 +57,7 @@ const createMockContext = (input: Record<string, unknown>) => ({
 const GRAPH_RESULT: RelatedAlertsGraphOutput = {
   nodes: [{ id: 'alert-1' }, { id: 'alert-2' }],
   edges: [{ from: 'alert-1', to: 'alert-2', score: 3, label_scores: { host: 2, user: 1 } }],
-  alerts_sorted: [
+  alerts: [
     {
       alert_id: 'alert-1',
       alert_index: '.alerts-default',

@@ -264,7 +264,7 @@ describe('buildRelatedAlertsGraph — integration', () => {
     });
 
     expect(result.nodes.map((n) => n.id)).toEqual(['R']);
-    expect(result.alerts_sorted.every((a) => a.alert_id !== 'S')).toBe(true);
+    expect(result.alerts.every((a) => a.alert_id !== 'S')).toBe(true);
   });
 
   it('ignores configured entity values during scoring', async () => {

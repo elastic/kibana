@@ -36,7 +36,7 @@ export interface RelatedAlertsGraphOutput {
      */
     label_scores: Record<string, number>;
   }>;
-  alerts_sorted: Array<{
+  alerts: Array<{
     alert_id: string;
     alert_index: string;
     timestamp?: string;

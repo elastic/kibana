@@ -198,7 +198,7 @@ const formatOutput = (params: {
   return {
     nodes,
     edges,
-    alerts_sorted: alertsSorted.map(({ ts_ms: _tsMs, ...rest }) => rest),
+    alerts: alertsSorted.map(({ ts_ms: _tsMs, ...rest }) => rest),
     stats: {
       depth_reached: depthReached,
       nodes: nodes.length,
@@ -291,7 +291,7 @@ export const buildRelatedAlertsGraph = async (
     return {
       nodes,
       edges: [],
-      alerts_sorted: includeSeed
+      alerts: includeSeed
         ? [
             {
               alert_id: seed.alertId,
