@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
+import type { CoreSetup, ElasticsearchClient, Logger } from '@kbn/core/server';
 import { LockManagerService } from '@kbn/lock-manager';
 import type { StreamsPluginStartDependencies } from '../../types';
 import { createStreamsStorageClient } from './storage/streams_storage_client';
@@ -22,24 +22,25 @@ export class StreamsService {
     private readonly isDev: boolean
   ) {}
 
-  async getClientWithRequest({
-    request,
+  async getClient({
     attachmentClient,
     queryClient,
     systemClient,
     featureClient,
+    currentUser,
+    internalUser,
   }: {
-    request: KibanaRequest;
     attachmentClient: AttachmentClient;
     queryClient: QueryClient;
     systemClient: SystemClient;
     featureClient: FeatureClient;
+    currentUser: ElasticsearchClient;
+    internalUser: ElasticsearchClient;
   }): Promise<StreamsClient> {
     const [coreStart] = await this.coreSetup.getStartServices();
 
     const logger = this.logger;
 
-    const scopedClusterClient = coreStart.elasticsearch.client.asScoped(request);
     const isServerless = coreStart.elasticsearch.getCapabilities().serverless;
 
     return new StreamsClient({
@@ -48,10 +49,10 @@ export class StreamsService {
       logger,
       systemClient,
       featureClient,
-      scopedClusterClient,
+      currentUser,
+      internalUser,
       lockManager: new LockManagerService(this.coreSetup, logger),
-      storageClient: createStreamsStorageClient(scopedClusterClient.asInternalUser, logger),
-      request,
+      storageClient: createStreamsStorageClient(internalUser, logger),
       isServerless,
       isDev: this.isDev,
     });

@@ -134,7 +134,7 @@ export const getFailureStoreSamples = async ({
         documents: failureStoreDocs,
       },
     },
-    scopedClusterClient,
+    currentUser: scopedClusterClient.asCurrentUser,
     streamsClient,
     fieldsMetadataClient,
   });

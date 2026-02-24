@@ -622,13 +622,13 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
     await Promise.all([
       shouldValidateSettingsWithDryRun
         ? validateSettingsWithDryRun({
-            scopedClusterClient: this.dependencies.scopedClusterClient,
+            currentUser: this.dependencies.currentUser,
             streamName: this._definition.name,
             settings: inheritedSettings,
             isServerless: this.dependencies.isServerless,
           })
         : Promise.resolve(),
-      validateSimulation(this._definition, this.dependencies.scopedClusterClient),
+      validateSimulation(this._definition, this.dependencies.currentUser),
     ]);
 
     return { isValid: true, errors: [] };
@@ -636,10 +636,9 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
 
   private async getMatchingDataStream() {
     try {
-      const response =
-        await this.dependencies.scopedClusterClient.asCurrentUser.indices.getDataStream({
-          name: this._definition.name,
-        });
+      const response = await this.dependencies.currentUser.indices.getDataStream({
+        name: this._definition.name,
+      });
 
       if (response.data_streams.length === 0) {
         // the request didn't throw an error, but the data stream doesn't exist
@@ -697,7 +696,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
     }
 
     try {
-      await this.dependencies.scopedClusterClient.asCurrentUser.indices.get({
+      await this.dependencies.currentUser.indices.get({
         index: name,
       });
 

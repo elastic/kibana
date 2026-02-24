@@ -126,7 +126,7 @@ export async function readStream({
         dataStream && privileges.manage
           ? await getUnmanagedElasticsearchAssets({
               dataStream,
-              scopedClusterClient,
+              currentUser: scopedClusterClient.asCurrentUser,
             })
           : undefined,
       data_stream_exists: !!dataStream,

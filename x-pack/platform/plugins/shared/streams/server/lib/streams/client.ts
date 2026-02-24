@@ -13,7 +13,7 @@ import type {
   QueryDslQueryContainer,
   Result,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { IScopedClusterClient, KibanaRequest, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { isNotFoundError } from '@kbn/es-errors';
 import type { LockManagerService } from '@kbn/lock-manager';
 import type { Condition } from '@kbn/streamlang';
@@ -71,14 +71,14 @@ export class StreamsClient {
   constructor(
     private readonly dependencies: {
       lockManager: LockManagerService;
-      scopedClusterClient: IScopedClusterClient;
+      internalUser: ElasticsearchClient;
+      currentUser: ElasticsearchClient;
       attachmentClient: AttachmentClient;
       queryClient: QueryClient;
       systemClient: SystemClient;
       featureClient: FeatureClient;
       storageClient: StreamsStorageClient;
       logger: Logger;
-      request: KibanaRequest;
       isServerless: boolean;
       isDev: boolean;
     }
@@ -158,7 +158,7 @@ export class StreamsClient {
     const elasticsearchStreamsEnabled = await this.checkElasticsearchStreamStatus();
 
     if (!elasticsearchStreamsEnabled) {
-      await this.dependencies.scopedClusterClient.asCurrentUser.transport.request({
+      await this.dependencies.currentUser.transport.request({
         method: 'POST',
         path: '_streams/logs/_enable',
       });
@@ -210,7 +210,7 @@ export class StreamsClient {
     }
 
     if (elasticsearchStreamsEnabled) {
-      await this.dependencies.scopedClusterClient.asCurrentUser.transport.request({
+      await this.dependencies.currentUser.transport.request({
         method: 'POST',
         path: '_streams/logs/_disable',
       });
@@ -454,7 +454,7 @@ export class StreamsClient {
       if (Streams.ingest.all.Definition.is(streamDefinition)) {
         const privileges = await checkAccess({
           name,
-          scopedClusterClient: this.dependencies.scopedClusterClient,
+          currentUser: this.dependencies.currentUser,
         });
         if (!privileges.read) {
           throw new SecurityError(`Cannot read stream, insufficient privileges`);
@@ -482,45 +482,43 @@ export class StreamsClient {
       this.dependencies.storageClient.get({ id: name }).then((response) => {
         return this.getStreamDefinitionFromSource(response._source);
       }),
-      checkAccess({ name, scopedClusterClient: this.dependencies.scopedClusterClient }).then(
-        (privileges) => {
-          if (!privileges.read) {
-            throw new SecurityError(`Cannot read stream, insufficient privileges`);
-          }
+      checkAccess({ name, currentUser: this.dependencies.currentUser }).then((privileges) => {
+        if (!privileges.read) {
+          throw new SecurityError(`Cannot read stream, insufficient privileges`);
         }
-      ),
+      }),
     ]).then(([wiredDefinition]) => {
       return wiredDefinition;
     });
   }
 
   async getDataStream(name: string): Promise<IndicesDataStream> {
-    return wrapEsCall(
-      this.dependencies.scopedClusterClient.asCurrentUser.indices.getDataStream({ name })
-    ).then((response) => {
-      const notFoundErrorBody = {
-        meta: {
-          aborted: false,
-          attempts: 1,
-          connection: null,
-          context: null,
-          name: 'resource_not_found_exception',
-          request: {} as unknown as DiagnosticResult['meta']['request'],
-        },
-        warnings: [],
-        body: 'resource_not_found_exception',
-        statusCode: 404,
-      };
-      if (response.data_streams.length === 0) {
-        throw new errors.ResponseError(notFoundErrorBody);
-      }
+    return wrapEsCall(this.dependencies.currentUser.indices.getDataStream({ name })).then(
+      (response) => {
+        const notFoundErrorBody = {
+          meta: {
+            aborted: false,
+            attempts: 1,
+            connection: null,
+            context: null,
+            name: 'resource_not_found_exception',
+            request: {} as unknown as DiagnosticResult['meta']['request'],
+          },
+          warnings: [],
+          body: 'resource_not_found_exception',
+          statusCode: 404,
+        };
+        if (response.data_streams.length === 0) {
+          throw new errors.ResponseError(notFoundErrorBody);
+        }
 
-      const dataStream = response.data_streams[0];
-      if (!dataStream) {
-        throw new errors.ResponseError(notFoundErrorBody);
+        const dataStream = response.data_streams[0];
+        if (!dataStream) {
+          throw new errors.ResponseError(notFoundErrorBody);
+        }
+        return dataStream;
       }
-      return dataStream;
-    });
+    );
   }
 
   /**
@@ -563,16 +561,15 @@ export class StreamsClient {
       REQUIRED_INDEX_PRIVILEGES.push('manage_ilm');
     }
 
-    const privileges =
-      await this.dependencies.scopedClusterClient.asCurrentUser.security.hasPrivileges({
-        cluster: [...REQUIRED_MANAGE_PRIVILEGES, CREATE_SNAPSHOT_REPOSITORY_CLUSTER_PRIVILEGE],
-        index: [
-          {
-            names,
-            privileges: REQUIRED_INDEX_PRIVILEGES,
-          },
-        ],
-      });
+    const privileges = await this.dependencies.currentUser.security.hasPrivileges({
+      cluster: [...REQUIRED_MANAGE_PRIVILEGES, CREATE_SNAPSHOT_REPOSITORY_CLUSTER_PRIVILEGE],
+      index: [
+        {
+          names,
+          privileges: REQUIRED_INDEX_PRIVILEGES,
+        },
+      ],
+    });
 
     return {
       manage:
@@ -686,9 +683,7 @@ export class StreamsClient {
   private async getUnmanagedDataStreams(): Promise<Streams.ClassicStream.Definition[]> {
     let response: IndicesGetDataStreamResponse;
     try {
-      response = await wrapEsCall(
-        this.dependencies.scopedClusterClient.asCurrentUser.indices.getDataStream()
-      );
+      response = await wrapEsCall(this.dependencies.currentUser.indices.getDataStream());
     } catch (e) {
       // if permissions are insufficient, we just return an empty list
       if (e instanceof Error && 'statusCode' in e && e.statusCode === 403) {
@@ -719,7 +714,7 @@ export class StreamsClient {
   private async getManagedStreams({ query }: { query?: QueryDslQueryContainer } = {}): Promise<
     Streams.all.Definition[]
   > {
-    const { scopedClusterClient, storageClient } = this.dependencies;
+    const { currentUser, storageClient } = this.dependencies;
 
     const streamsSearchResponse = await storageClient.search({
       size: 10000,
@@ -738,7 +733,7 @@ export class StreamsClient {
       names: streams
         .filter((stream) => !Streams.QueryStream.Definition.is(stream))
         .map((stream) => stream.name),
-      scopedClusterClient,
+      currentUser,
     });
 
     return streams.filter((stream) => {
@@ -748,7 +743,7 @@ export class StreamsClient {
   }
 
   private async checkElasticsearchStreamStatus(): Promise<boolean> {
-    const response = (await this.dependencies.scopedClusterClient.asInternalUser.transport.request({
+    const response = (await this.dependencies.internalUser.transport.request({
       method: 'GET',
       path: '/_streams/status',
     })) as { logs: { enabled: boolean } };

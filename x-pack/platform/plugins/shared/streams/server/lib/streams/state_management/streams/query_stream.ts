@@ -203,7 +203,7 @@ export class QueryStream extends StreamActiveRecord<Streams.QueryStream.Definiti
 
       // Validate the ES|QL query can be executed (basic test with LIMIT 0)
       try {
-        await this.dependencies.scopedClusterClient.asCurrentUser.esql.query({
+        await this.dependencies.currentUser.esql.query({
           query: `${this._definition.query.esql}\n| LIMIT 0`,
           format: 'json',
         });
@@ -411,7 +411,7 @@ export class QueryStream extends StreamActiveRecord<Streams.QueryStream.Definiti
       // Verify the view exists before updating
       try {
         await getEsqlView({
-          esClient: this.dependencies.scopedClusterClient.asCurrentUser,
+          esClient: this.dependencies.currentUser,
           logger: this.dependencies.logger,
           name: this._definition.query.view,
         });

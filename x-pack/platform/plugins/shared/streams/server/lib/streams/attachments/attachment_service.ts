@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import type { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
+import type { CoreSetup, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsClient } from '@kbn/core/server';
 import { StorageIndexAdapter } from '@kbn/storage-adapter';
+import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { StreamsPluginStartDependencies } from '../../../types';
 import { AttachmentClient } from './attachment_client';
 import type { AttachmentStorageSettings } from './storage_settings';
@@ -21,8 +22,14 @@ export class AttachmentService {
     private readonly logger: Logger
   ) {}
 
-  async getClientWithRequest({ request }: { request: KibanaRequest }): Promise<AttachmentClient> {
-    const [coreStart, pluginsStart] = await this.coreSetup.getStartServices();
+  async getClient({
+    rulesClient,
+    soClient,
+  }: {
+    rulesClient: RulesClient;
+    soClient: SavedObjectsClientContract;
+  }): Promise<AttachmentClient> {
+    const [coreStart] = await this.coreSetup.getStartServices();
 
     const adapter = new StorageIndexAdapter<AttachmentStorageSettings, AttachmentDocument>(
       coreStart.elasticsearch.client.asInternalUser,
@@ -43,9 +50,9 @@ export class AttachmentService {
 
     return new AttachmentClient({
       storageClient: adapter.getClient(),
-      soClient: coreStart.savedObjects.getScopedClient(request),
+      soClient,
       internalSoClient,
-      rulesClient: await pluginsStart.alerting.getRulesClientWithRequest(request),
+      rulesClient,
     });
   }
 }

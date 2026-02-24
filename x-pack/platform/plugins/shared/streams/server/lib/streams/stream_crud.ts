@@ -15,7 +15,7 @@ import type {
   IngestPipeline,
   UnitMillis,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type {
   EffectiveFailureStore,
   FailureStoreStatsResponse,
@@ -32,7 +32,7 @@ import { DefinitionNotFoundError } from './errors/definition_not_found_error';
 import { parseError } from './errors/parse_error';
 
 interface BaseParams {
-  scopedClusterClient: IScopedClusterClient;
+  currentUser: ElasticsearchClient;
 }
 
 export function getDataStreamLifecycle(
@@ -112,12 +112,12 @@ export interface UnmanagedElasticsearchAssets {
 
 export async function getUnmanagedElasticsearchAssets({
   dataStream,
-  scopedClusterClient,
+  currentUser,
 }: ReadUnmanagedAssetsParams): Promise<UnmanagedElasticsearchAssets> {
   // retrieve linked index template, component template and ingest pipeline
   const templateName = dataStream.template;
   const componentTemplates: string[] = [];
-  const template = await scopedClusterClient.asCurrentUser.indices.getIndexTemplate({
+  const template = await currentUser.indices.getIndexTemplate({
     name: templateName,
   });
   if (template.index_templates.length) {
@@ -126,7 +126,7 @@ export async function getUnmanagedElasticsearchAssets({
     });
   }
   const writeIndexName = dataStream.indices.at(-1)?.index_name!;
-  const currentIndex = await scopedClusterClient.asCurrentUser.indices.get({
+  const currentIndex = await currentUser.indices.get({
     index: writeIndexName,
   });
   const ingestPipelineId = currentIndex[writeIndexName].settings?.index?.default_pipeline;
@@ -158,11 +158,11 @@ export interface UnmanagedElasticsearchAssetDetails {
 }
 
 async function fetchComponentTemplate(
-  scopedClusterClient: IScopedClusterClient,
+  currentUser: ElasticsearchClient,
   name: string
 ): Promise<ClusterComponentTemplate | { name: string; component_template: undefined }> {
   try {
-    const response = await scopedClusterClient.asCurrentUser.cluster.getComponentTemplate({ name });
+    const response = await currentUser.cluster.getComponentTemplate({ name });
     return (
       response.component_templates.find((template) => template.name === name) ?? {
         name,
@@ -179,12 +179,12 @@ async function fetchComponentTemplate(
 }
 
 async function fetchComponentTemplates(
-  scopedClusterClient: IScopedClusterClient,
+  currentUser: ElasticsearchClient,
   names: string[],
   allIndexTemplates: IndicesGetIndexTemplateIndexTemplateItem[]
 ): Promise<UnmanagedComponentTemplateDetails[]> {
   const templates = await Promise.all(
-    names.map((name) => fetchComponentTemplate(scopedClusterClient, name))
+    names.map((name) => fetchComponentTemplate(currentUser, name))
   );
 
   return templates
@@ -203,25 +203,24 @@ async function fetchComponentTemplates(
 }
 
 async function fetchIngestPipeline(
-  scopedClusterClient: IScopedClusterClient,
+  currentUser: ElasticsearchClient,
   pipelineId: string | undefined
 ): Promise<(IngestPipeline & { name: string }) | undefined> {
   if (!pipelineId) return undefined;
-  const response = await scopedClusterClient.asCurrentUser.ingest.getPipeline({ id: pipelineId });
+  const response = await currentUser.ingest.getPipeline({ id: pipelineId });
   return { ...response[pipelineId], name: pipelineId };
 }
 
 export async function getUnmanagedElasticsearchAssetDetails({
-  scopedClusterClient,
+  currentUser,
   assets,
 }: ReadUnmanagedAssetsDetailsParams): Promise<UnmanagedElasticsearchAssetDetails> {
-  const allIndexTemplates = (await scopedClusterClient.asCurrentUser.indices.getIndexTemplate())
-    .index_templates;
+  const allIndexTemplates = (await currentUser.indices.getIndexTemplate()).index_templates;
 
   const [ingestPipeline, componentTemplates, dataStreamResponse] = await Promise.all([
-    fetchIngestPipeline(scopedClusterClient, assets.ingestPipeline),
-    fetchComponentTemplates(scopedClusterClient, assets.componentTemplates, allIndexTemplates),
-    scopedClusterClient.asCurrentUser.indices.getDataStream({ name: assets.dataStream }),
+    fetchIngestPipeline(currentUser, assets.ingestPipeline),
+    fetchComponentTemplates(currentUser, assets.componentTemplates, allIndexTemplates),
+    currentUser.indices.getDataStream({ name: assets.dataStream }),
   ]);
 
   const indexTemplate = allIndexTemplates.find(
@@ -245,11 +244,11 @@ interface CheckAccessParams extends BaseParams {
 
 export async function checkAccess({
   name,
-  scopedClusterClient,
+  currentUser,
 }: CheckAccessParams): Promise<{ read: boolean; write: boolean }> {
   return checkAccessBulk({
     names: [name],
-    scopedClusterClient,
+    currentUser,
   }).then((privileges) => privileges[name]);
 }
 
@@ -259,12 +258,12 @@ interface CheckAccessBulkParams extends BaseParams {
 
 export async function checkAccessBulk({
   names,
-  scopedClusterClient,
+  currentUser,
 }: CheckAccessBulkParams): Promise<Record<string, { read: boolean; write: boolean }>> {
   if (!names.length) {
     return {};
   }
-  const hasPrivilegesResponse = await scopedClusterClient.asCurrentUser.security.hasPrivileges({
+  const hasPrivilegesResponse = await currentUser.security.hasPrivileges({
     index: [{ names, privileges: ['read', 'write'] }],
   });
 
@@ -279,14 +278,14 @@ export async function checkAccessBulk({
 
 export async function getDataStream({
   name,
-  scopedClusterClient,
+  currentUser,
 }: {
   name: string;
-  scopedClusterClient: IScopedClusterClient;
+  currentUser: ElasticsearchClient;
 }): Promise<IndicesDataStream> {
   let dataStream: IndicesDataStream | undefined;
   try {
-    const response = await scopedClusterClient.asCurrentUser.indices.getDataStream({ name });
+    const response = await currentUser.indices.getDataStream({ name });
     dataStream = response.data_streams[0];
   } catch (e) {
     const { statusCode } = parseError(e);
@@ -304,16 +303,16 @@ export async function getDataStream({
 }
 
 export async function getClusterDefaultFailureStoreRetentionValue({
-  scopedClusterClient,
+  currentUser,
   isServerless,
 }: {
-  scopedClusterClient: IScopedClusterClient;
+  currentUser: ElasticsearchClient;
   isServerless: boolean;
 }): Promise<string | undefined> {
   let defaultRetention: string | undefined;
   try {
     if (!isServerless) {
-      const { persistent, defaults } = await scopedClusterClient.asCurrentUser.cluster.getSettings({
+      const { persistent, defaults } = await currentUser.cluster.getSettings({
         include_defaults: true,
       });
       const persistentDSRetention =
@@ -370,17 +369,19 @@ export function getFailureStore({
 
 export async function getFailureStoreStats({
   name,
-  scopedClusterClient,
+  currentUser,
+  secondaryAuthUser,
   isServerless,
 }: {
   name: string;
-  scopedClusterClient: IScopedClusterClient;
+  currentUser: ElasticsearchClient;
+  secondaryAuthUser: ElasticsearchClient;
   isServerless: boolean;
 }): Promise<FailureStoreStatsResponse> {
   const failureStoreDocs = isServerless
-    ? await getFailureStoreMeteringSize({ name, scopedClusterClient })
-    : await getFailureStoreSize({ name, scopedClusterClient });
-  const creationDate = await getFailureStoreCreationDate({ name, scopedClusterClient });
+    ? await getFailureStoreMeteringSize({ name, secondaryAuthUser })
+    : await getFailureStoreSize({ name, currentUser });
+  const creationDate = await getFailureStoreCreationDate({ name, currentUser });
 
   return {
     size: failureStoreDocs?.total_size_in_bytes,
@@ -391,13 +392,13 @@ export async function getFailureStoreStats({
 
 export async function getFailureStoreSize({
   name,
-  scopedClusterClient,
+  currentUser,
 }: {
   name: string;
-  scopedClusterClient: IScopedClusterClient;
+  currentUser: ElasticsearchClient;
 }): Promise<DocStats | undefined> {
   try {
-    const response = await scopedClusterClient.asCurrentUser.indices.stats({
+    const response = await currentUser.indices.stats({
       index: `${name}${FAILURE_STORE_SELECTOR}`,
       metric: ['docs'],
       forbid_closed_indices: false,
@@ -419,13 +420,13 @@ export async function getFailureStoreSize({
 
 export async function getFailureStoreMeteringSize({
   name,
-  scopedClusterClient,
+  secondaryAuthUser,
 }: {
   name: string;
-  scopedClusterClient: IScopedClusterClient;
+  secondaryAuthUser: ElasticsearchClient;
 }): Promise<DocStats | undefined> {
   try {
-    const response = await scopedClusterClient.asSecondaryAuthUser.transport.request<{
+    const response = await secondaryAuthUser.transport.request<{
       _total: { num_docs: number; size_in_bytes: number };
     }>({
       method: 'GET',
@@ -448,14 +449,14 @@ export async function getFailureStoreMeteringSize({
 
 export async function getFailureStoreCreationDate({
   name,
-  scopedClusterClient,
+  currentUser,
 }: {
   name: string;
-  scopedClusterClient: IScopedClusterClient;
+  currentUser: ElasticsearchClient;
 }): Promise<number | undefined> {
   let age: number | undefined;
   try {
-    const response = await scopedClusterClient.asCurrentUser.indices.explainDataLifecycle({
+    const response = await currentUser.indices.explainDataLifecycle({
       index: `${name}${FAILURE_STORE_SELECTOR}`,
     });
     const indices = response.indices;

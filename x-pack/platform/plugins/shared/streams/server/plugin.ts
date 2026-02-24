@@ -18,6 +18,9 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { STREAMS_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import { registerRoutes } from '@kbn/server-route-repository';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import type { RulesClient } from '@kbn/alerting-plugin/server';
+import type { Streams } from '@kbn/streams-schema';
 import type { StreamsConfig } from '../common/config';
 import { configSchema, exposeToBrowserConfig } from '../common/config';
 import {
@@ -119,21 +122,7 @@ export class StreamsPlugin
     }: {
       request: KibanaRequest;
     }): Promise<RouteHandlerScopedClients> => {
-      const [
-        [coreStart, pluginsStart],
-        attachmentClient,
-        featureClient,
-        systemClient,
-        contentClient,
-        queryClient,
-      ] = await Promise.all([
-        core.getStartServices(),
-        attachmentService.getClientWithRequest({ request }),
-        featureService.getClientWithRequest({ request }),
-        systemService.getClientWithRequest({ request }),
-        contentService.getClient(),
-        queryService.getClientWithRequest({ request }),
-      ]);
+      const [coreStart, pluginsStart] = await core.getStartServices();
 
       const uiSettingsClient = coreStart.uiSettings.asScopedToClient(
         coreStart.savedObjects.getScopedClient(request)
@@ -150,12 +139,31 @@ export class StreamsPlugin
         this.logger
       );
 
-      const streamsClient = await streamsService.getClientWithRequest({
-        request,
+      const [attachmentClient, featureClient, systemClient, contentClient, queryClient] =
+        await Promise.all([
+          attachmentService.getClient({
+            soClient,
+            rulesClient: await pluginsStart.alerting.getRulesClientWithRequest(request),
+          }),
+          featureService.getClient(),
+          systemService.getClient(),
+          contentService.getClient(),
+          queryService.getClient({
+            soClient,
+            rulesClient: await pluginsStart.alerting.getRulesClientWithRequestInSpace(
+              request,
+              DEFAULT_SPACE_ID
+            ),
+          }),
+        ]);
+
+      const streamsClient = await streamsService.getClient({
         attachmentClient,
         queryClient,
         systemClient,
         featureClient,
+        currentUser: scopedClusterClient.asCurrentUser,
+        internalUser: coreStart.elasticsearch.client.asInternalUser,
       });
 
       return {
@@ -252,6 +260,49 @@ export class StreamsPlugin
       plugins.globalSearch.registerResultProvider(
         createStreamsGlobalSearchResultProvider(core, this.logger)
       );
+    }
+
+    if (this.config.preconfigured.enabled) {
+      void core.getStartServices().then(async ([coreStart]) => {
+        const esClient = coreStart.elasticsearch.client.asInternalUser;
+        const soClient = coreStart.savedObjects.getUnsafeInternalClient();
+        const rulesClient = {} as RulesClient;
+
+        const [attachmentClient, featureClient, systemClient, queryClient] = await Promise.all([
+          attachmentService.getClient({ soClient, rulesClient }),
+          featureService.getClient(),
+          systemService.getClient(),
+          queryService.getClient({ soClient, rulesClient }),
+        ]);
+
+        const streamsClient = await streamsService.getClient({
+          attachmentClient,
+          queryClient,
+          systemClient,
+          featureClient,
+          currentUser: esClient,
+          internalUser: esClient,
+        });
+
+        await streamsClient.enableStreams();
+
+        for (const { name, parent, where, status } of this.config.preconfigured.forks) {
+          if (!(await streamsClient.existsStream(name))) {
+            await streamsClient.forkStream({
+              parent,
+              name,
+              where,
+              status,
+            });
+          }
+        }
+        await streamsClient.bulkUpsert(
+          this.config.preconfigured.streams as {
+            name: string;
+            request: Streams.all.UpsertRequest;
+          }[]
+        );
+      });
     }
 
     return {};

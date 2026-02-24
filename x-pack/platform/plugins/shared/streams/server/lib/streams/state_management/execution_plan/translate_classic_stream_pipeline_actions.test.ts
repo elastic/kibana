@@ -47,7 +47,7 @@ describe('translateClassicStreamPipelineActions', () => {
         ],
       }));
 
-      await translateClassicStreamPipelineActions(actionsByType, clusterClient);
+      await translateClassicStreamPipelineActions(actionsByType, clusterClient.asCurrentUser);
 
       expect(actionsByType).toEqual({
         ...emptyActionsByType(),
@@ -156,7 +156,7 @@ describe('translateClassicStreamPipelineActions', () => {
         ],
       }));
 
-      await translateClassicStreamPipelineActions(actionsByType, clusterClient);
+      await translateClassicStreamPipelineActions(actionsByType, clusterClient.asCurrentUser);
 
       expect(actionsByType).toEqual({
         ...emptyActionsByType(),
@@ -293,7 +293,7 @@ describe('translateClassicStreamPipelineActions', () => {
           ],
         }));
 
-      await translateClassicStreamPipelineActions(actionsByType, clusterClient);
+      await translateClassicStreamPipelineActions(actionsByType, clusterClient.asCurrentUser);
 
       expect(actionsByType).toEqual({
         ...emptyActionsByType(),
@@ -447,7 +447,7 @@ describe('translateClassicStreamPipelineActions', () => {
         ],
       }));
 
-      await translateClassicStreamPipelineActions(actionsByType, clusterClient);
+      await translateClassicStreamPipelineActions(actionsByType, clusterClient.asCurrentUser);
 
       expect(actionsByType).toEqual({
         ...emptyActionsByType(),
@@ -523,7 +523,7 @@ describe('translateClassicStreamPipelineActions', () => {
         ],
       }));
 
-      await translateClassicStreamPipelineActions(actionsByType, clusterClient);
+      await translateClassicStreamPipelineActions(actionsByType, clusterClient.asCurrentUser);
 
       expect(actionsByType).toEqual({
         ...emptyActionsByType(),
@@ -629,7 +629,7 @@ describe('translateClassicStreamPipelineActions', () => {
         ],
       }));
 
-      await translateClassicStreamPipelineActions(actionsByType, clusterClient);
+      await translateClassicStreamPipelineActions(actionsByType, clusterClient.asCurrentUser);
 
       expect(actionsByType).toEqual({
         ...emptyActionsByType(),
@@ -723,7 +723,7 @@ describe('translateClassicStreamPipelineActions', () => {
         ],
       }));
 
-      await translateClassicStreamPipelineActions(actionsByType, clusterClient);
+      await translateClassicStreamPipelineActions(actionsByType, clusterClient.asCurrentUser);
 
       expect(actionsByType).toEqual({
         ...emptyActionsByType(),
@@ -794,7 +794,7 @@ describe('translateClassicStreamPipelineActions', () => {
         ],
       }));
 
-      await translateClassicStreamPipelineActions(actionsByType, clusterClient);
+      await translateClassicStreamPipelineActions(actionsByType, clusterClient.asCurrentUser);
 
       expect(actionsByType).toEqual({
         ...emptyActionsByType(),
@@ -888,7 +888,7 @@ describe('translateClassicStreamPipelineActions', () => {
         ],
       }));
 
-      await translateClassicStreamPipelineActions(actionsByType, clusterClient);
+      await translateClassicStreamPipelineActions(actionsByType, clusterClient.asCurrentUser);
 
       expect(actionsByType).toEqual({
         ...emptyActionsByType(),
@@ -983,7 +983,7 @@ describe('translateClassicStreamPipelineActions', () => {
         ],
       }));
 
-      await translateClassicStreamPipelineActions(actionsByType, clusterClient);
+      await translateClassicStreamPipelineActions(actionsByType, clusterClient.asCurrentUser);
 
       expect(actionsByType).toEqual({
         ...emptyActionsByType(),
