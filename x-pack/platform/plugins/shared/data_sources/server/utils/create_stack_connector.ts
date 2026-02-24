@@ -37,10 +37,31 @@ function buildSecretsFromConnectorSpec(
     return typeId === 'bearer';
   });
 
+  const hasBasicAuth = connectorSpec.auth?.types.some((authType) => {
+    const typeId = typeof authType === 'string' ? authType : authType.type;
+    return typeId === 'basic';
+  });
+
   const secrets: Record<string, string> = {};
   if (hasBearerAuth) {
     secrets.authType = 'bearer';
     secrets.token = credentials;
+  } else if (hasBasicAuth) {
+    // Zendesk format: "email@example.com/token:api_token" -> username = "email@example.com/token", password = api_token
+    // Use "username" to match Basic auth type schema (auth_types/basic.ts expects username/password)
+    const tokenMarker = '/token:';
+    const idx = credentials.indexOf(tokenMarker);
+    if (idx !== -1) {
+      secrets.authType = 'basic';
+      secrets.username = credentials.slice(0, idx) + '/token';
+      secrets.password = credentials.slice(idx + tokenMarker.length);
+    } else {
+      // Fallback: "username:password" for generic basic auth
+      const colonIdx = credentials.indexOf(':');
+      secrets.authType = 'basic';
+      secrets.username = colonIdx !== -1 ? credentials.slice(0, colonIdx) : credentials;
+      secrets.password = colonIdx !== -1 ? credentials.slice(colonIdx + 1) : '';
+    }
   } else {
     const apiKeyHeaderAuth = connectorSpec.auth?.types.find((authType) => {
       const typeId = typeof authType === 'string' ? authType : authType.type;
@@ -114,6 +135,7 @@ export const createStackConnector = async (
     connectorConfig = mcpConnectorConfig;
     secrets = buildSecretsFromMCPConnectorConfig(mcpConnectorConfig, credentials);
   } else {
+    connectorConfig = stackConnectorConfig.config ?? {};
     secrets = buildSecretsFromConnectorSpec(connectorType, credentials);
   }
 

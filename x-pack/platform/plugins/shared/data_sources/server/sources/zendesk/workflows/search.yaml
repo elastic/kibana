@@ -1,0 +1,41 @@
+version: '1'
+name: 'sources.zendesk.search'
+description: 'Search across Zendesk data (tickets, users, organizations, articles). Use when you need to find items by keyword or criteria.'
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: query
+    type: string
+    required: true
+    description: 'Search query'
+  - name: sort_by
+    type: string
+    required: false
+    description: 'Sort field (e.g. created_at, updated_at)'
+  - name: sort_order
+    type: choice
+    options:
+      - asc
+      - desc
+    required: false
+    description: 'Sort order'
+  - name: page
+    type: number
+    required: false
+    description: 'Page number'
+  - name: per_page
+    type: number
+    required: false
+    description: 'Results per page'
+steps:
+  - name: search-zendesk
+    type: zendesk.search
+    connector-id: <%= zendesk-stack-connector-id %>
+    with:
+      query: "${{inputs.query}}"
+      sortBy: "${{inputs.sort_by}}"
+      sortOrder: "${{inputs.sort_order}}"
+      page: ${{inputs.page}}
+      perPage: ${{inputs.per_page}}

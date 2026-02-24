@@ -473,5 +473,43 @@ describe('createStackConnector', () => {
 
       expect(result).toEqual(mockStackConnector);
     });
+
+    it('should create stack connector with basic auth (Zendesk format email/token:api_token)', async () => {
+      const mockStackConnector = {
+        id: 'zendesk-connector-1',
+        name: '.zendesk',
+        actionTypeId: '.zendesk',
+      };
+
+      const zendeskConnectorConfig: StackConnectorConfig = {
+        type: '.zendesk',
+        config: { subdomain: 'my-company' },
+        importedTools: undefined,
+      };
+
+      mockActionsClient.create.mockResolvedValue(mockStackConnector);
+
+      const result = await createStackConnector(
+        mockActions as any,
+        mockRequest,
+        MOCK_DATA_SOURCE_NAME,
+        zendeskConnectorConfig,
+        'admin@example.com/token:abc123token'
+      );
+
+      expect(result).toEqual(mockStackConnector);
+      expect(mockActionsClient.create).toHaveBeenCalledWith({
+        action: {
+          name: MOCK_DATA_SOURCE_NAME,
+          actionTypeId: '.zendesk',
+          config: { subdomain: 'my-company' },
+          secrets: expect.objectContaining({
+            authType: 'basic',
+            username: 'admin@example.com/token',
+            password: 'abc123token',
+          }),
+        },
+      });
+    });
   });
 });

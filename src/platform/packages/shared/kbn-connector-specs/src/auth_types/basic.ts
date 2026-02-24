@@ -39,12 +39,13 @@ export const BasicAuth: AuthTypeSpec<AuthSchemaType> = {
     axiosInstance: AxiosInstance,
     secret: AuthSchemaType
   ): Promise<AxiosInstance> => {
-    // set global defaults
+    // Support both "username" (schema) and "user" (e.g. from data source activation) for Basic auth
+    const username = secret.username ?? (secret as Record<string, unknown>).user;
+    const password = secret.password;
     axiosInstance.defaults.auth = {
-      username: secret.username,
-      password: secret.password,
+      username: typeof username === 'string' ? username : '',
+      password: typeof password === 'string' ? password : '',
     };
-
     return axiosInstance;
   },
 };

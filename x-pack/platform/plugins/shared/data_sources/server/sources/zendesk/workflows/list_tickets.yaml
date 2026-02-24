@@ -1,0 +1,25 @@
+version: '1'
+name: 'sources.zendesk.list_tickets'
+description: 'List Zendesk tickets. Use when you need to browse or filter tickets (e.g. by page).'
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: page
+    type: number
+    required: false
+    default: 1
+    description: 'Page number for pagination'
+  - name: per_page
+    type: number
+    required: false
+    default: 25
+    description: 'Number of tickets per page'
+steps:
+  - name: list-tickets
+    type: zendesk.listTickets
+    connector-id: <%= zendesk-stack-connector-id %>
+    with:
+      page: ${{inputs.page}}
+      perPage: ${{inputs.per_page}}
