@@ -73,12 +73,18 @@ function configureExperiment({
   task: ExperimentTask<DatasetExample, TaskOutput>;
   evaluators: ReturnType<typeof selectEvaluators>;
 } {
+  const delayMs = parseInt(process.env.EVAL_REQUEST_DELAY_MS ?? '0', 10);
+
   const task: ExperimentTask<DatasetExample, TaskOutput> = async ({ input, output, metadata }) => {
     const agentId = getStringMeta(metadata, 'agentId');
     const response = await chatClient.converse({
       messages: [{ message: input.question }],
       options: agentId ? { agentId } : undefined,
     });
+
+    if (delayMs > 0) {
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+    }
 
     // Running correctness and groundedness evaluators as part of the task since their respective quantitative evaluators need their output
     // Wrap LLM judge calls @kbn/evals spans and assign root context to prevent them from contributing to latency, token use and other metrics of the EvaluateExample span

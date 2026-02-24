@@ -28,6 +28,7 @@ const convertMatchResult = (result: MatchResult): Resource => {
     partial: true,
     content: {
       highlights: result.highlights,
+      snippets: result.snippets,
     },
   };
 };
