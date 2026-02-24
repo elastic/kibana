@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { fromStoredFilters, type StoredFilter } from '@kbn/as-code-filters-transforms';
 import type { Reference } from '@kbn/content-management-utils';
 import type { MapAttributes, StoredMapAttributes } from '../../server';
 import { injectReferences } from '../migrations/references';
@@ -39,12 +40,14 @@ function parseLayerListJSON(layerListJSON?: string) {
 
 function parseMapStateJSON(mapStateJSON?: string) {
   const parsedMapState = parseJSON<{ [key: string]: unknown }>({}, mapStateJSON);
-  const { refreshConfig, ...rest } = dropUnknownKeys(
+  const { refreshConfig, filters, ...rest } = dropUnknownKeys(
     parsedMapState,
     mapStateKeys
-  ) as Partial<MapAttributes> & { refreshConfig: StoredRefreshInterval };
+  ) as Partial<MapAttributes> & { refreshConfig: StoredRefreshInterval; filters: StoredFilter[] };
+
   return {
     ...rest,
+    ...(filters ? { filters: fromStoredFilters(filters) } : {}),
     ...(refreshConfig
       ? { refreshInterval: { pause: refreshConfig.isPaused, value: refreshConfig.interval } }
       : {}),

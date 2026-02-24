@@ -48,6 +48,8 @@ dependsOn:
   - '@kbn/i18n'
   - '@kbn/rison'
   - '@kbn/es-query'
+  - '@kbn/as-code-filters-schema'
+  - '@kbn/as-code-filters-transforms'
   - '@kbn/utility-types'
   - '@kbn/data-views-plugin'
   - '@kbn/std'

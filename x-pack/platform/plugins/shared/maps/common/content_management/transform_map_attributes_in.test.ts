@@ -86,6 +86,32 @@ describe('transformMapIn', () => {
     `);
   });
 
+  test('mapStateJSON should convert as-code filters to stored filters', () => {
+    expect(
+      transformMapAttributesIn({
+        title: 'my map',
+        filters: [
+          {
+            type: 'condition',
+            data_view_id: 'dv1',
+            condition: {
+              field: 'machine.os.keyword',
+              operator: 'exists',
+            },
+          },
+        ],
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "attributes": Object {
+          "mapStateJSON": "{\\"filters\\":[{\\"meta\\":{\\"index\\":\\"dv1\\",\\"key\\":\\"machine.os.keyword\\",\\"field\\":\\"machine.os.keyword\\",\\"type\\":\\"exists\\"},\\"query\\":{\\"exists\\":{\\"field\\":\\"machine.os.keyword\\"}}}]}",
+          "title": "my map",
+        },
+        "references": Array [],
+      }
+    `);
+  });
+
   test('uiStateJSON', () => {
     expect(
       transformMapAttributesIn({
