@@ -2414,8 +2414,6 @@
       "@kbn/typed-react-router-config/*": ["src/platform/packages/shared/kbn-typed-react-router-config/*"],
       "@kbn/ui-actions-browser": ["src/platform/packages/shared/kbn-ui-actions-browser"],
       "@kbn/ui-actions-browser/*": ["src/platform/packages/shared/kbn-ui-actions-browser/*"],
-      "@kbn/ui-actions-enhanced-plugin": ["src/platform/plugins/shared/ui_actions_enhanced"],
-      "@kbn/ui-actions-enhanced-plugin/*": ["src/platform/plugins/shared/ui_actions_enhanced/*"],
       "@kbn/ui-actions-plugin": ["src/platform/plugins/shared/ui_actions"],
       "@kbn/ui-actions-plugin/*": ["src/platform/plugins/shared/ui_actions/*"],
       "@kbn/ui-settings-plugin": ["src/platform/test/plugin_functional/plugins/ui_settings_plugin"],
