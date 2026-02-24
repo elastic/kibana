@@ -3852,7 +3852,9 @@ export function updatePackageInputs(
                 newStream as InputsOverride,
                 true
               );
-              return removeStaleVars(merged, newStream);
+              // deepMergeVars only handles vars; explicitly carry the enabled state from
+              // the old stream so the user's enable/disable choice is preserved.
+              return { ...removeStaleVars(merged, newStream), enabled: oldStream.enabled };
             });
           }
         }

@@ -7964,6 +7964,32 @@ describe('Package policy service', () => {
         expect(celInput?.streams[0]?.vars?.stale_var).toBeUndefined();
       });
 
+      it('carries stream enabled state from old streams even when new package defaults to disabled', () => {
+        // The new CEL stream override starts with enabled: false (package default disabled)
+        const celOverrideWithDisabledStream: InputsOverride[] = [
+          {
+            ...makeCelInputsOverride()[0],
+            streams: [
+              {
+                ...makeCelInputsOverride()[0].streams![0],
+                enabled: false,
+              },
+            ],
+          } as unknown as InputsOverride,
+        ];
+
+        const result = updatePackageInputs(
+          makeBasePolicy(), // old httpjson stream has enabled: true
+          makeCelPackageInfo(),
+          celOverrideWithDisabledStream,
+          false
+        );
+
+        const celInput = result.inputs.find((i) => i.type === 'cel');
+        // Should carry over enabled: true from the old httpjson stream
+        expect(celInput?.streams[0]?.enabled).toBe(true);
+      });
+
       it('falls back to new input defaults when the old input type is not found', () => {
         const policyWithoutHttpjson: NewPackagePolicy = {
           ...makeBasePolicy(),
