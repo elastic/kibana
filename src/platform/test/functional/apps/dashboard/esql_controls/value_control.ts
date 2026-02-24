@@ -83,7 +83,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('saveEsqlControlsFlyoutButton');
       // Wait for the control flyout to close before checking panel count,
       // otherwise waitForRenderComplete may complete based on the old panel count
-      await testSubjects.waitForHidden('create_esql_control_flyout');
+      await testSubjects.waitForEnabled('applyFlyoutButton');
       await dashboard.waitForRenderComplete();
       await retry.try(async () => {
         expect(await dashboard.getPanelCount()).to.be(panelCountBefore + 1);
