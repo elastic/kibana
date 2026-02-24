@@ -51,8 +51,8 @@ export interface ICluster {
 
 export type EsTestCluster<Options extends CreateTestEsClusterOptions = CreateTestEsClusterOptions> =
   Options['nodes'] extends TestEsClusterNodesOptions[]
-    ? ICluster
-    : ICluster & { getUrl: () => string }; // Only allow use of `getUrl` if `nodes` option isn't provided.
+  ? ICluster
+  : ICluster & { getUrl: () => string }; // Only allow use of `getUrl` if `nodes` option isn't provided.
 
 export interface CreateTestEsClusterOptions {
   basePath?: string;
@@ -172,6 +172,20 @@ export interface CreateTestEsClusterOptions {
   secureFiles?: string[];
 }
 
+/**
+ * Resolves a transport port suitable for Docker (single numeric port).
+ * Falls back to TEST_ES_TRANSPORT_PORT (taking the first port from a range like '9300-9400'),
+ * matching the existing behavior in esTestConfig.getTransportPort().
+ */
+const resolveTransportPort = (transportPort: number | string | undefined): number | undefined => {
+  const raw = transportPort ?? esTestConfig.getTransportPort();
+  if (typeof raw === 'number') {
+    return raw;
+  }
+  const parsed = parseInt(String(raw).split('-')[0], 10);
+  return Number.isNaN(parsed) ? undefined : parsed;
+};
+
 export function createTestEsCluster<
   Options extends CreateTestEsClusterOptions = CreateTestEsClusterOptions
 >(options: Options): EsTestCluster<Options> {
@@ -206,9 +220,9 @@ export function createTestEsCluster<
     // For multi-node clusters, we make all nodes master-eligible by default.
     ...(nodes.length > 1
       ? [
-          'discovery.type=multi-node',
-          `cluster.initial_master_nodes=${nodes.map((n) => n.name).join(',')}`,
-        ]
+        'discovery.type=multi-node',
+        `cluster.initial_master_nodes=${nodes.map((n) => n.name).join(',')}`,
+      ]
       : ['discovery.type=single-node']),
   ];
 
@@ -277,7 +291,7 @@ export function createTestEsCluster<
           name: `es-${clusterName}`,
           background: true,
           kill: true,
-          transportPort: transportPort as number | undefined,
+          transportPort: resolveTransportPort(transportPort),
         });
         return;
       } else if (esFrom === 'serverless') {
