@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isIntervalSchedule } from '@kbn/response-ops-scheduling-types';
 import { isString } from 'lodash';
 import type { DenormalizedAction } from '../../../rules_client';
 import type { AdHocRunSO } from '../../../data/ad_hoc_run/types';
@@ -20,16 +21,20 @@ export const transformBackfillParamToAdHocRun = (
   actions: DenormalizedAction[],
   spaceId: string
 ): AdHocRunSO => {
-  const schedule = calculateSchedule(rule.schedule.interval, param.ranges);
+  const schedule = calculateSchedule(rule.schedule, param.ranges);
   const shouldRunActions = param.runActions !== undefined ? param.runActions : true;
   const start = param.ranges[0].start;
   const end = param.ranges[param.ranges.length - 1].end;
+  // Display/metadata only: stored on the ad hoc run and returned in backfill API responses.
+  // For interval rules use the rule's interval; for rrule use a placeholder (run times come from schedule[].runAt).
+  const duration = isIntervalSchedule(rule.schedule) ? rule.schedule.interval : '-';
 
   return {
     apiKeyId: Buffer.from(rule.apiKey!, 'base64').toString().split(':')[0],
     apiKeyToUse: rule.apiKey!,
     createdAt: new Date().toISOString(),
-    duration: rule.schedule.interval,
+    duration,
+    schedule,
     enabled: true,
     end,
     initiator: param.initiator ?? backfillInitiator.USER,
@@ -54,6 +59,5 @@ export const transformBackfillParamToAdHocRun = (
     spaceId,
     start,
     status: adHocRunStatus.PENDING,
-    schedule,
   };
 };

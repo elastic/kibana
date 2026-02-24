@@ -5,11 +5,19 @@
  * 2.0.
  */
 
+import { RRule } from '@kbn/rrule';
+import {
+  isIntervalSchedule,
+  isRruleSchedule,
+  type Rrule,
+} from '@kbn/response-ops-scheduling-types';
 import { adHocRunStatus } from '../../../common/constants';
-import { parseDuration } from '../../../common';
+import { parseDuration, type RuleSchedule } from '../../../common';
 import type { AdHocRunSchedule } from '../../data/ad_hoc_run/types';
 
-const getScheduleFromInterval = (
+const RRULE_BACKFILL_INTERVAL = '-'; // this is a placeholder for the interval metadata in the ad hoc run
+
+const getAdhocRunScheduleFromInterval = (
   start: string,
   interval: string,
   end?: string
@@ -29,11 +37,40 @@ const getScheduleFromInterval = (
   return schedule;
 };
 
+const getAdhocRunScheduleFromRrule = (
+  rrule: Rrule,
+  rangeStart: string,
+  rangeEnd: string
+): AdHocRunSchedule[] => {
+  const start = new Date(rangeStart);
+  const end = new Date(rangeEnd);
+  const _rrule = new RRule({
+    ...rrule,
+    dtstart: rrule.dtstart ? new Date(rrule.dtstart) : new Date(),
+  });
+  const occurrences = _rrule.between(start, end);
+  return occurrences.map((date) => ({
+    status: adHocRunStatus.PENDING,
+    runAt: date.toISOString(),
+    interval: RRULE_BACKFILL_INTERVAL,
+  }));
+};
+
 export function calculateSchedule(
-  interval: string,
+  schedule: RuleSchedule,
   ranges: Array<{ start: string; end: string }>
 ): AdHocRunSchedule[] {
-  return ranges.flatMap((range) => {
-    return getScheduleFromInterval(range.start, interval, range.end);
-  });
+  if (isIntervalSchedule(schedule)) {
+    return ranges.flatMap((range) =>
+      getAdhocRunScheduleFromInterval(range.start, schedule.interval, range.end)
+    );
+  }
+
+  if (isRruleSchedule(schedule)) {
+    return ranges.flatMap((range) =>
+      getAdhocRunScheduleFromRrule(schedule.rrule, range.start, range.end)
+    );
+  }
+
+  throw new Error('Invalid schedule, unable to calculate backfill run times');
 }
