@@ -28,6 +28,9 @@ export {
 export {
   DataMapStepTypeId,
   dataMapStepCommonDefinition,
+  MAP_DIRECTIVE,
+  type FieldsNode,
+  type MapDirectiveValue,
   type DataMapStepInputSchema,
   type DataMapStepOutputSchema,
 } from './data_map_step';
