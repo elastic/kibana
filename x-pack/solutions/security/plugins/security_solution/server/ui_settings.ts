@@ -529,7 +529,7 @@ export const initUiSettings = (
         }
       ),
       type: 'array',
-      schema: schema.arrayOf(schema.string()),
+      schema: schema.arrayOf(schema.string(), { maxSize: 50 }),
       value: DATA_STREAM_NAMESPACES_DEFAULT_SETTING,
       category: [APP_ID],
       requiresPageReload: false,
