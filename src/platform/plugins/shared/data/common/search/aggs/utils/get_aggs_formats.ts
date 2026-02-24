@@ -10,11 +10,14 @@
 /* eslint-disable max-classes-per-file */
 import { i18n } from '@kbn/i18n';
 
+import type { ReactNode } from 'react';
 import type {
   FieldFormatInstanceType,
   FieldFormatsContentType,
   IFieldFormat,
   SerializedFieldFormat,
+  ReactContextTypeConvert,
+  ReactContextTypeOptions,
 } from '@kbn/field-formats-plugin/common';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import type { SerializableRecord } from '@kbn/utility-types';
@@ -166,6 +169,25 @@ export function getAggsFormats(getFieldFormat: GetFieldFormat): FieldFormatInsta
         return format.convert(val, type);
       };
       getConverterFor = (type: FieldFormatsContentType) => (val: string) => this.convert(val, type);
+
+      reactConvert: ReactContextTypeConvert = (
+        val: string,
+        options?: ReactContextTypeOptions
+      ): ReactNode => {
+        const params = this._params;
+        const format = this.getCachedFormat(
+          params as SerializedFieldFormat<{}, SerializableRecord>
+        );
+
+        if (val === '__other__' && params.otherBucketLabel) {
+          return params.otherBucketLabel;
+        }
+        if (val === MISSING_TOKEN && params.missingBucketLabel) {
+          return params.missingBucketLabel;
+        }
+
+        return format.convertToReact(val, options);
+      };
     },
     class AggsMultiTermsFieldFormat extends FieldFormatWithCache {
       static id = 'multi_terms';

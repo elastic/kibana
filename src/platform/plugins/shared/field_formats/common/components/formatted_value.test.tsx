@@ -303,4 +303,54 @@ describe('FormattedValue', () => {
       expect(true).toBe(true); // Documentation test
     });
   });
+
+  describe('integration with ColorFormat', () => {
+    it('should render styled span when color rule matches', async () => {
+      const { ColorFormat } = await import('../converters/color');
+      const colorFormat = new ColorFormat(
+        {
+          colors: [
+            {
+              regex: 'CN',
+              text: '#ffffff',
+              background: '#ff0000',
+            },
+          ],
+        },
+        jest.fn()
+      );
+
+      const { container } = render(<FormattedValue fieldFormat={colorFormat} value="CN" />);
+
+      const span = container.querySelector('span');
+      expect(span).toBeInTheDocument();
+      expect(span).toHaveTextContent('CN');
+      expect(span).toHaveStyle({
+        color: '#ffffff',
+        backgroundColor: '#ff0000',
+      });
+    });
+
+    it('should render plain text when no color rule matches', async () => {
+      const { ColorFormat } = await import('../converters/color');
+      const colorFormat = new ColorFormat(
+        {
+          colors: [
+            {
+              regex: 'CN',
+              text: '#ffffff',
+              background: '#ff0000',
+            },
+          ],
+        },
+        jest.fn()
+      );
+
+      const { container } = render(<FormattedValue fieldFormat={colorFormat} value="US" />);
+
+      expect(container).toHaveTextContent('US');
+      const span = container.querySelector('span[style]');
+      expect(span).not.toBeInTheDocument();
+    });
+  });
 });

@@ -141,6 +141,50 @@ describe('getAggsFormats', () => {
     expect(getFormat).toHaveBeenCalledTimes(1);
   });
 
+  test('terms format delegates reactConvert to nested format', () => {
+    const mockReactResult = '<mocked-react-node>';
+    const mockNestedFormat = {
+      convertToReact: jest.fn().mockReturnValue(mockReactResult),
+    } as unknown as IFieldFormat;
+
+    getFormat.mockReturnValue(mockNestedFormat);
+
+    const mapping = {
+      id: 'terms',
+      params: {
+        otherBucketLabel: 'other bucket',
+        missingBucketLabel: 'missing bucket',
+      },
+    };
+
+    const format = getAggFormat(mapping, getFormat);
+
+    expect(format.convertToReact('test-value')).toBe(mockReactResult);
+    expect(mockNestedFormat.convertToReact).toHaveBeenCalledWith('test-value', expect.anything());
+  });
+
+  test('terms format reactConvert handles special bucket labels', () => {
+    const mockNestedFormat = {
+      convertToReact: jest.fn(),
+    } as unknown as IFieldFormat;
+
+    getFormat.mockReturnValue(mockNestedFormat);
+
+    const mapping = {
+      id: 'terms',
+      params: {
+        otherBucketLabel: 'other bucket',
+        missingBucketLabel: 'missing bucket',
+      },
+    };
+
+    const format = getAggFormat(mapping, getFormat);
+
+    expect(format.convertToReact('__other__')).toBe('other bucket');
+    expect(format.convertToReact(MISSING_TOKEN)).toBe('missing bucket');
+    expect(mockNestedFormat.convertToReact).not.toHaveBeenCalled();
+  });
+
   test('uses a default separator for multi terms', () => {
     const terms = ['source', 'geo.src', 'geo.dest'];
     const mapping = {
