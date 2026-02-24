@@ -28,6 +28,7 @@ const { PAGE_SIZE, TOTAL_PAGES, LAST_PAGE_CARDS } = PAGINATION;
 
 const SEARCH_METRIC_NAME = DEFAULT_CONFIG.metrics[0].name;
 
+// Sort metrics alphabetically to match UI display order
 const SORTED_METRICS = [...DEFAULT_CONFIG.metrics].sort((a, b) => a.name.localeCompare(b.name));
 const FIRST_CARD_PAGE_1 = `${SORTED_METRICS[0].name}-0`;
 const FIRST_CARD_PAGE_2 = `${SORTED_METRICS[PAGE_SIZE].name}-0`;
