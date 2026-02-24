@@ -7,8 +7,17 @@
 
 import React, { memo, useCallback, useEffect, useMemo } from 'react';
 import type { EuiSuperSelectOption, EuiSuperSelectProps } from '@elastic/eui';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSuperSelect } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiSpacer,
+  EuiSuperSelect,
+  EuiToolTip,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { getEmptyString } from '../../../common/components/empty_value';
 import type { EndpointScript } from '../../../../common/endpoint/types';
 import { useGetCustomScripts } from '../../hooks/custom_scripts/use_get_custom_scripts';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
@@ -22,6 +31,14 @@ const CLEAR_SELECTION_LABEL = i18n.translate(
 const SELECT_INPUT_PLACEHOLDER = i18n.translate(
   'xpack.securitySolution.endpointRunscriptScriptSelector.placeholder',
   { defaultMessage: 'Select a script' }
+);
+const SCRIPT_DESCRIPTION_LABEL = i18n.translate(
+  'xpack.securitySolution.endpointRunscriptScriptSelector.description',
+  { defaultMessage: 'Description' }
+);
+const SCRIPT_INSTRUCTION_LABEL = i18n.translate(
+  'xpack.securitySolution.endpointRunscriptScriptSelector.instructions',
+  { defaultMessage: 'Instructions' }
 );
 
 export interface EndpointRunscriptScriptSelectorProps {
@@ -102,25 +119,79 @@ export const EndpointRunscriptScriptSelector = memo<EndpointRunscriptScriptSelec
       }
 
       return data.map<EuiSuperSelectOption<EndpointScript>>((script) => {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        const endpointScript = script.meta!;
+
+        let dropdownDisplay = (
+          <div>
+            <div className="eui-textTruncate" title={endpointScript.name}>
+              <strong>{endpointScript.name}</strong>
+            </div>
+            <div className="eui-textTruncate">{endpointScript.description || getEmptyString()}</div>
+          </div>
+        );
+
+        // If the script has a description and that description either has new line breaks or is
+        // over a certain length, then inject a tooltip to show full content
+        if (
+          endpointScript.description &&
+          (endpointScript.description.includes('\n') || endpointScript.description.length > 40)
+        ) {
+          dropdownDisplay = (
+            <EuiToolTip
+              position="right"
+              display="block"
+              content={
+                <div className="eui-textBreakWord" style={{ whiteSpace: 'pre-wrap' }}>
+                  {endpointScript.description}
+                </div>
+              }
+            >
+              {dropdownDisplay}
+            </EuiToolTip>
+          );
+        }
+
         return {
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          value: script.meta!,
+          value: endpointScript,
           inputDisplay: (
-            <EuiFlexGroup responsive={false} wrap={false} gutterSize="xs" alignItems="center">
-              <EuiFlexItem data-test-subj={getTestId('selectedScript')}>{script.name}</EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  iconType="crossInCircle"
-                  color="text"
-                  display="empty"
-                  onClick={clearCurrentSelectionHandler}
-                  aria-label={CLEAR_SELECTION_LABEL}
-                  data-test-subj={getTestId('clearSelection')}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <EuiToolTip
+              position="top"
+              display="block"
+              content={
+                <div className="eui-textBreakWord" style={{ whiteSpace: 'pre-wrap' }}>
+                  <strong>
+                    <EuiIcon type="documentation" aria-hidden={true} /> {SCRIPT_DESCRIPTION_LABEL}
+                  </strong>
+                  <div>{endpointScript.description}</div>
+
+                  <EuiSpacer size="l" />
+
+                  <strong>
+                    <EuiIcon type="documentation" aria-hidden={true} /> {SCRIPT_INSTRUCTION_LABEL}
+                  </strong>
+                  <div>{endpointScript.instructions}</div>
+                </div>
+              }
+            >
+              <EuiFlexGroup responsive={false} wrap={false} gutterSize="xs" alignItems="center">
+                <EuiFlexItem data-test-subj={getTestId('selectedScript')}>
+                  {endpointScript.name}
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonIcon
+                    iconType="crossInCircle"
+                    color="text"
+                    display="empty"
+                    onClick={clearCurrentSelectionHandler}
+                    aria-label={CLEAR_SELECTION_LABEL}
+                    data-test-subj={getTestId('clearSelection')}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiToolTip>
           ),
-          dropdownDisplay: script.name,
+          dropdownDisplay,
           'data-test-subj': getTestId('option'),
         };
       });
