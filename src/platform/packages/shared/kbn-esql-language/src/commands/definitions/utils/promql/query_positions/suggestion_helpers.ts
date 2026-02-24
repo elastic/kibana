@@ -109,9 +109,7 @@ function wrapFunctionSuggestions(
 
   return suggestions.map(({ text: originalText, ...rest }) => {
     const hasCursorPlaceholder = originalText.includes('$0');
-    const text = hasCursorPlaceholder
-      ? `(${originalText})`
-      : `(${originalText.trimEnd()} $0) `;
+    const text = hasCursorPlaceholder ? `(${originalText})` : `(${originalText.trimEnd()} $0) `;
 
     return { ...rest, text };
   });
