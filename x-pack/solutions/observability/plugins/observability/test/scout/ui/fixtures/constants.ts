@@ -13,7 +13,7 @@ export const SHORTER_TIMEOUT = 5000 as const;
  */
 export const RULES_SETTINGS_TEST_SUBJECTS = {
   // Rules List Page
-  RULE_PAGE_TAB: 'ruleLogsTab',
+  RULE_PAGE_TAB: 'logsTab',
   RULES_SETTINGS_LINK: 'rulesSettingsLink',
   RULES_TABLE_CONTAINER: 'rulesListSection',
   RULES_TABLE: 'rulesList',
