@@ -11,6 +11,7 @@ import type { CaseViewRefreshPropInterface } from '@kbn/cases-plugin/common';
 import { CaseMetricsFeature } from '@kbn/cases-plugin/common';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { CaseViewAlertsTableProps } from '@kbn/cases-plugin/public/components/case_view/types';
+import { EuiPageSection } from '@elastic/eui';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { EasePanelKey } from '../../flyout/ease/constants/panel_keys';
 import { AlertsTable } from '../../detections/components/alerts_table';
@@ -155,8 +156,9 @@ const CaseContainerComponent: React.FC = () => {
 
   return (
     <SecuritySolutionPageWrapper noPadding>
-      <CaseDetailsRefreshContext.Provider value={refreshRef}>
-        {cases.ui.getCases({
+      <EuiPageSection paddingSize="m" component="div" grow>
+        <CaseDetailsRefreshContext.Provider value={refreshRef}>
+          {cases.ui.getCases({
           basePath: CASES_PATH,
           owner: [APP_ID],
           features: {
@@ -217,8 +219,9 @@ const CaseContainerComponent: React.FC = () => {
           renderAlertsTable,
           renderEventsTable: EventsTableForCases,
         })}
-      </CaseDetailsRefreshContext.Provider>
-      <SpyRoute pageName={SecurityPageName.case} />
+        </CaseDetailsRefreshContext.Provider>
+        <SpyRoute pageName={SecurityPageName.case} />
+      </EuiPageSection>
     </SecuritySolutionPageWrapper>
   );
 };

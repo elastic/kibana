@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiSpacer } from '@elastic/eui';
+import { EuiPageSection, EuiSpacer } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { DEFAULT_END, DEFAULT_START } from '@kbn/elastic-assistant-common';
@@ -241,7 +241,12 @@ const AttackDiscoveryPageComponent: React.FC = () => {
       `}
       data-test-subj="fullHeightContainer"
     >
-      <div data-test-subj="attackDiscoveryPage">
+      <EuiPageSection
+        paddingSize="m"
+        component="div"
+        grow
+        data-test-subj="attackDiscoveryPage"
+      >
         {/* Page header commented out
         <HeaderPage border title={pageTitle}>
           <Actions
@@ -291,7 +296,7 @@ const AttackDiscoveryPageComponent: React.FC = () => {
         )}
 
         <SpyRoute pageName={SecurityPageName.attackDiscovery} />
-      </div>
+      </EuiPageSection>
     </div>
   );
 };
