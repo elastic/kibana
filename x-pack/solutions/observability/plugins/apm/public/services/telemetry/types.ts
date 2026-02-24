@@ -47,7 +47,7 @@ export enum TelemetryEventTypes {
   SLO_OVERVIEW_FLYOUT_VIEWED = 'slo_overview_flyout_viewed',
   SLO_OVERVIEW_FLYOUT_SEARCH_QUERIED = 'slo_overview_flyout_search_queried',
   SLO_OVERVIEW_FLYOUT_STATUS_FILTERED = 'slo_overview_flyout_status_filtered',
-  EMBEDDED_SLO_SHOWN = 'embedded_slo_shown',
+  EMBEDDED_SLO_SHOWN = 'apm_embedded_slo_shown',
 }
 
 export type TelemetryEvent =
