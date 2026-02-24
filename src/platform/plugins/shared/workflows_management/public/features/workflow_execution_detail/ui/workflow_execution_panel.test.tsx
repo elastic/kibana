@@ -12,7 +12,10 @@ import React from 'react';
 import type { WorkflowExecutionDto, WorkflowYaml } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import { WorkflowExecutionPanel } from './workflow_execution_panel';
+import { setYamlString } from '../../../entities/workflows/store';
 import { createMockStore } from '../../../entities/workflows/store/__mocks__/store.mock';
+import { mockCapabilities } from '../../../hooks/__mocks__/use_capabilities';
+import { useCapabilities } from '../../../hooks/use_capabilities';
 import { TestWrapper } from '../../../shared/test_utils';
 
 // Mock child components
@@ -23,6 +26,8 @@ jest.mock('./cancel_execution_button', () => ({
     </div>
   ),
 }));
+
+jest.mock('../../../hooks/use_capabilities');
 
 jest.mock('./workflow_step_execution_tree', () => ({
   WorkflowStepExecutionTree: ({
@@ -104,6 +109,7 @@ describe('WorkflowExecutionPanel', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockStore = undefined;
+    jest.mocked(useCapabilities).mockReturnValue(mockCapabilities);
   });
 
   const renderComponent = (props = {}, store?: any) => {
@@ -312,6 +318,9 @@ describe('WorkflowExecutionPanel', () => {
 
     it('should dispatch setReplayExecutionId and setIsTestModalOpen on click', () => {
       const store = createMockStore();
+
+      store.dispatch(setYamlString(mockExecution.yaml)); // starts computation to detect syntax errors
+
       renderComponent(
         {
           showBackButton: false,
@@ -325,6 +334,43 @@ describe('WorkflowExecutionPanel', () => {
       const state = store.getState();
       expect(state.detail.replayExecutionId).toBe('exec-123');
       expect(state.detail.isTestModalOpen).toBe(true);
+    });
+
+    it('should disable replay button when user lacks execute capability', () => {
+      jest.mocked(useCapabilities).mockReturnValue({
+        ...mockCapabilities,
+        canExecuteWorkflow: false,
+      });
+
+      const store = createMockStore();
+      store.dispatch(setYamlString(mockExecution.yaml));
+
+      renderComponent(
+        {
+          showBackButton: false,
+          execution: { ...mockExecution, status: ExecutionStatus.COMPLETED },
+        },
+        store
+      );
+
+      const replayButton = screen.getByTestId('replayExecutionButton');
+      expect(replayButton).toBeDisabled();
+    });
+
+    it('should disable replay button when YAML syntax is invalid', () => {
+      const store = createMockStore();
+      store.dispatch(setYamlString('')); // empty yaml clears computed, making syntax invalid
+
+      renderComponent(
+        {
+          showBackButton: false,
+          execution: { ...mockExecution, status: ExecutionStatus.COMPLETED },
+        },
+        store
+      );
+
+      const replayButton = screen.getByTestId('replayExecutionButton');
+      expect(replayButton).toBeDisabled();
     });
   });
 
