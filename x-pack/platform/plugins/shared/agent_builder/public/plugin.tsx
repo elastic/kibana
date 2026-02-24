@@ -14,6 +14,7 @@ import {
 import type { Logger } from '@kbn/logging';
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import { registerLocators } from './locator/register_locators';
 import { registerAnalytics, registerApp } from './register';
 import { AgentBuilderNavControlInitiator } from './components/nav_control/lazy_agent_builder_nav_control';
@@ -49,7 +50,6 @@ import {
   setSidebarRuntimeContext,
   clearSidebarRuntimeContext,
 } from './sidebar';
-import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import { createVisualizationAttachmentDefinition } from './application/components/attachments/visualization_attachment';
 
 export class AgentBuilderPlugin
