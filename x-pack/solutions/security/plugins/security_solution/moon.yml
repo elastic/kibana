@@ -292,7 +292,6 @@ fileGroups:
     - server/**/*.json
     - scripts/**/*.json
     - public/**/*.json
-    - emotion.d.ts
     - '!target/**/*'
     - '!**/cypress/**'
     - '!public/management/cypress.config.ts'
