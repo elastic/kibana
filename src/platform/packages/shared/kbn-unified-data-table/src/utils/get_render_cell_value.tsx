@@ -19,7 +19,7 @@ import type {
   DataTableRecord,
   ShouldShowFieldInTableHandler,
 } from '@kbn/discover-utils/types';
-import { formatFieldValue } from '@kbn/discover-utils';
+import { formatFieldValueReact } from '@kbn/discover-utils';
 import { UnifiedDataTableContext } from '../table_context';
 import type { CustomCellRenderer } from '../types';
 import { SourceDocument } from '../components/source_document';
@@ -149,14 +149,9 @@ export const getRenderCellValueFn = ({
     }
 
     return (
-      <span
-        className={CELL_CLASS}
-        // formatFieldValue guarantees sanitized values
-        // eslint-disable-next-line react/no-danger
-        dangerouslySetInnerHTML={{
-          __html: formatFieldValue(row.flattened[columnId], row.raw, fieldFormats, dataView, field),
-        }}
-      />
+      <span className={CELL_CLASS}>
+        {formatFieldValueReact(row.flattened[columnId], row.raw, fieldFormats, dataView, field)}
+      </span>
     );
   };
 
@@ -221,19 +216,9 @@ function renderPopoverContent({
     >
       <EuiFlexItem>
         <DataTablePopoverCellValue>
-          <span
-            // formatFieldValue guarantees sanitized values
-            // eslint-disable-next-line react/no-danger
-            dangerouslySetInnerHTML={{
-              __html: formatFieldValue(
-                row.flattened[columnId],
-                row.raw,
-                fieldFormats,
-                dataView,
-                field
-              ),
-            }}
-          />
+          <span>
+            {formatFieldValueReact(row.flattened[columnId], row.raw, fieldFormats, dataView, field)}
+          </span>
         </DataTablePopoverCellValue>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>{closeButton}</EuiFlexItem>

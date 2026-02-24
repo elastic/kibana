@@ -11,7 +11,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/src/services/types';
 import type { EuiDataGridCellPopoverElementProps } from '@elastic/eui';
 import { EuiSpacer, EuiText, useEuiTheme, useResizeObserver } from '@elastic/eui';
-import { getFormattedFields } from '@kbn/discover-utils/src/utils/get_formatted_fields';
+import { getFormattedFieldsReact } from '@kbn/discover-utils/src/utils/get_formatted_fields';
 import { getFlattenedFields } from '@kbn/discover-utils/src/utils/get_flattened_fields';
 import { css } from '@emotion/react';
 import useWindowSize from 'react-use/lib/useWindowSize';
@@ -28,7 +28,7 @@ export type FieldConfigValue = string | number | undefined;
 
 export interface FieldConfiguration {
   title: string;
-  formatter?: (value: FieldConfigValue, formattedValue: string) => React.ReactNode;
+  formatter?: (value: FieldConfigValue, formattedValue: React.ReactNode) => React.ReactNode;
   description?: string;
 }
 
@@ -83,7 +83,7 @@ export function ContentFrameworkTable({
 
   const { formattedHit, flattenedHit } = useMemo(
     () => ({
-      formattedHit: getFormattedFields(hit, fieldNames, { dataView, fieldFormats }),
+      formattedHit: getFormattedFieldsReact(hit, fieldNames, { dataView, fieldFormats }),
       flattenedHit: getFlattenedFields(hit, fieldNames),
     }),
     [dataView, fieldFormats, hit, fieldNames]

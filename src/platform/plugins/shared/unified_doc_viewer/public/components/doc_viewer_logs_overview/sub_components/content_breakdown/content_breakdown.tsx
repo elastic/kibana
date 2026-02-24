@@ -15,13 +15,11 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-
 import {
   getMessageFieldWithFallbacks,
   type DataTableRecord,
   type LogDocumentOverview,
 } from '@kbn/discover-utils';
-import { escapeAndPreserveHighlightTags } from '@kbn/discover-utils';
 import type { ObservabilityStreamsFeature } from '@kbn/discover-shared-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { Badges } from '../badges/badges';
@@ -46,10 +44,7 @@ export const ContentBreakdown = ({
 
   const messageCodeBlockProps = formattedValue
     ? { language: 'json', children: formattedValue }
-    : {
-        language: 'txt',
-        dangerouslySetInnerHTML: { __html: escapeAndPreserveHighlightTags(value ?? '') },
-      };
+    : { language: 'txt', children: value ?? '' };
   const hasMessageField = field && value;
 
   return (

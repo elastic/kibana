@@ -14,6 +14,7 @@ export * from './utils';
 export * from './data_types';
 
 export * from './components/custom_control_columns';
+export { FormattedFieldValue } from './components/formatted_field_value';
 export { AppMenuRegistry } from './components/app_menu/app_menu_registry';
 export type {
   DiscoverAppMenuItemType,
