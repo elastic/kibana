@@ -10,6 +10,7 @@
 import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiButton,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
@@ -17,15 +18,24 @@ import {
   EuiLink,
   EuiPanel,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowExecutionDto, WorkflowYaml } from '@kbn/workflows';
 import { isCancelableStatus, isTerminalStatus } from '@kbn/workflows';
 import { CancelExecutionButton } from './cancel_execution_button';
 import { WorkflowStepExecutionTree } from './workflow_step_execution_tree';
+import { selectIsYamlSyntaxValid } from '../../../entities/workflows/store/workflow_detail/selectors';
+import {
+  setIsTestModalOpen,
+  setReplayExecutionId,
+} from '../../../entities/workflows/store/workflow_detail/slice';
+import { useCapabilities } from '../../../hooks/use_capabilities';
+import { getTestRunTooltipContent } from '../../../shared/ui/workflow_action_buttons/get_workflow_tooltip_content';
 
 const i18nTexts = {
   backToExecutions: i18n.translate('workflows.workflowStepExecutionList.backToExecution', {
@@ -33,6 +43,9 @@ const i18nTexts = {
   }),
   done: i18n.translate('workflows.workflowStepExecutionList.done', {
     defaultMessage: 'Done',
+  }),
+  replay: i18n.translate('workflows.workflowStepExecutionList.replay', {
+    defaultMessage: 'Run again',
   }),
 };
 
@@ -85,7 +98,7 @@ export const WorkflowExecutionPanel = React.memo<WorkflowExecutionPanelProps>(
               <EuiPanel paddingSize="m" hasShadow={false} css={styles.linkCss}>
                 <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="s">
                   <EuiFlexItem grow={false}>
-                    <EuiIcon type="sortLeft" />
+                    <EuiIcon type="sortLeft" aria-hidden={true} />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiTitle size="xxs">
@@ -111,11 +124,11 @@ export const WorkflowExecutionPanel = React.memo<WorkflowExecutionPanelProps>(
           </EuiPanel>
         </EuiFlexItem>
 
-        {(showDoneButton || showCancelButton) && (
+        {execution && (showCancelButton || showDoneButton) && (
           <EuiFlexItem grow={false}>
             <EuiHorizontalRule margin="none" />
             <EuiPanel paddingSize="m" hasShadow={false}>
-              {showCancelButton && execution ? (
+              {showCancelButton ? (
                 <CancelExecutionButton
                   executionId={execution.id}
                   workflowId={execution.workflowId}
@@ -124,15 +137,22 @@ export const WorkflowExecutionPanel = React.memo<WorkflowExecutionPanelProps>(
               ) : (
                 <>
                   {showDoneButton && (
-                    <EuiButton
-                      onClick={onClose}
-                      iconType="check"
-                      size="s"
-                      fullWidth
-                      aria-label={i18nTexts.done}
-                    >
-                      {i18nTexts.done}
-                    </EuiButton>
+                    <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="s">
+                      <EuiFlexItem grow={!showDoneButton}>
+                        <ReplayExecutionButton executionId={execution.id} />
+                      </EuiFlexItem>
+                      <EuiFlexItem>
+                        <EuiButton
+                          onClick={onClose}
+                          iconType="check"
+                          size="s"
+                          fullWidth
+                          aria-label={i18nTexts.done}
+                        >
+                          {i18nTexts.done}
+                        </EuiButton>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
                   )}
                 </>
               )}
@@ -153,3 +173,43 @@ const componentStyles = {
       },
     }),
 };
+
+const ReplayExecutionButton = React.memo<{ executionId: string }>(({ executionId }) => {
+  const dispatch = useDispatch();
+  const replayExecution = useCallback(() => {
+    dispatch(setReplayExecutionId(executionId));
+    dispatch(setIsTestModalOpen(true));
+  }, [executionId, dispatch]);
+
+  const isSyntaxValid = useSelector(selectIsYamlSyntaxValid);
+  const { canExecuteWorkflow } = useCapabilities();
+  const { isRunDisabled, runDisabledTooltipContent } = useMemo<{
+    isRunDisabled: boolean;
+    runDisabledTooltipContent: string | null;
+  }>(() => {
+    return {
+      isRunDisabled: !canExecuteWorkflow || !isSyntaxValid,
+      runDisabledTooltipContent: getTestRunTooltipContent({
+        isValid: isSyntaxValid,
+        canRunWorkflow: canExecuteWorkflow,
+        isExecutionsTab: false,
+      }),
+    };
+  }, [canExecuteWorkflow, isSyntaxValid]);
+
+  return (
+    <EuiToolTip content={runDisabledTooltipContent ?? i18nTexts.replay} disableScreenReaderOutput>
+      <EuiButtonIcon
+        onClick={replayExecution}
+        iconType="refresh"
+        size="s"
+        color="success"
+        aria-label={i18nTexts.replay}
+        display="base"
+        data-test-subj="replayExecutionButton"
+        disabled={isRunDisabled}
+      />
+    </EuiToolTip>
+  );
+});
+ReplayExecutionButton.displayName = 'ReplayExecutionButton';

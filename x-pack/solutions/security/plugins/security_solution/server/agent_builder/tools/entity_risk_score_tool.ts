@@ -10,6 +10,7 @@ import { z } from '@kbn/zod';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition, ToolAvailabilityContext } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_resource_availability';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
 import { IdentifierType } from '../../../common/api/entity_analytics/common/common.gen';
@@ -134,8 +135,16 @@ export const entityRiskScoreTool = (
     schema: entityRiskScoreSchema,
     availability: {
       cacheMode: 'space',
-      handler: async ({ request, spaceId }: ToolAvailabilityContext) => {
+      handler: async ({ request, spaceId, uiSettings }: ToolAvailabilityContext) => {
         try {
+          if ((await uiSettings.get(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID)) === true) {
+            return {
+              status: 'unavailable',
+              reason:
+                'Skills are enabled, which takes precedence over entity risk score tool availability',
+            };
+          }
+
           const availability = await getAgentBuilderResourceAvailability({ core, request, logger });
           if (availability.status === 'available') {
             const [coreStart] = await core.getStartServices();

@@ -9,9 +9,16 @@
 
 import { CPSManager } from './cps_manager';
 import type { ApplicationStart, HttpSetup } from '@kbn/core/public';
+import { ProjectRoutingAccess } from '@kbn/cps-utils';
 import type { CPSProject, ProjectTagsResponse } from '@kbn/cps-utils';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { BehaviorSubject } from 'rxjs';
+
+const mockGetProjectRoutingAccess = jest.fn();
+jest.mock('./async_services', () => ({
+  ...jest.requireActual('./async_services'),
+  getProjectRoutingAccess: (...args: unknown[]) => mockGetProjectRoutingAccess(...args),
+}));
 
 describe('CPSManager', () => {
   let mockHttp: jest.Mocked<HttpSetup>;
@@ -56,6 +63,8 @@ describe('CPSManager', () => {
   };
 
   beforeEach(() => {
+    mockGetProjectRoutingAccess.mockReturnValue(ProjectRoutingAccess.EDITABLE);
+
     mockHttp = {
       post: jest.fn().mockResolvedValue(mockResponse),
     } as unknown as jest.Mocked<HttpSetup>;
@@ -206,6 +215,48 @@ describe('CPSManager', () => {
       await expect(Promise.all([promise, timerPromise])).rejects.toThrow();
 
       jest.useRealTimers();
+    });
+  });
+
+  describe('getProjectRouting', () => {
+    const flushAsync = () => new Promise((resolve) => setTimeout(resolve, 0));
+
+    const changeAccess = async (access: ProjectRoutingAccess) => {
+      mockGetProjectRoutingAccess.mockReturnValue(access);
+      (mockApplication.currentAppId$ as BehaviorSubject<string | undefined>).next('app');
+      await flushAsync();
+    };
+
+    it('returns the override value when provided', () => {
+      expect(cpsManager.getProjectRouting('_alias:*')).toBe('_alias:*');
+      expect(cpsManager.getProjectRouting('_alias:_origin')).toBe('_alias:_origin');
+    });
+
+    it('falls back to current projectRouting$ value when no override is provided', () => {
+      cpsManager.setProjectRouting('_alias:_origin');
+      expect(cpsManager.getProjectRouting()).toBe('_alias:_origin');
+    });
+
+    it('returns DEFAULT_PROJECT_ROUTING when no override and no explicit set', () => {
+      expect(cpsManager.getProjectRouting()).toBe('_alias:*');
+    });
+
+    it('returns undefined when access is DISABLED, regardless of override', async () => {
+      await changeAccess(ProjectRoutingAccess.DISABLED);
+
+      expect(cpsManager.getProjectRouting()).toBeUndefined();
+      expect(cpsManager.getProjectRouting('_alias:_origin')).toBeUndefined();
+    });
+
+    it('resets projectRouting$ to default when access changes to DISABLED', async () => {
+      cpsManager.setProjectRouting('_alias:_origin');
+      expect(cpsManager.getProjectRouting()).toBe('_alias:_origin');
+
+      await changeAccess(ProjectRoutingAccess.DISABLED);
+      expect(cpsManager.getProjectRouting()).toBeUndefined();
+
+      await changeAccess(ProjectRoutingAccess.EDITABLE);
+      expect(cpsManager.getProjectRouting()).toBe('_alias:*');
     });
   });
 });

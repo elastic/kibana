@@ -421,6 +421,67 @@ describe('When the tabular page is loaded', () => {
       expect(deleteAction).toBeEnabled();
     });
   });
+  describe('group by service', () => {
+    beforeAll(() => {
+      window.history.pushState({}, '', '?groupBy=service');
+    });
+    beforeEach(() => {
+      renderTabularPageWithProviders();
+    });
+    afterAll(() => {
+      window.history.pushState({}, '', '/');
+    });
+
+    it('should display accordions with tables for service groups', () => {
+      const groupAccordions = screen.getAllByTestId(/-accordion$/);
+      expect(groupAccordions).toHaveLength(3);
+      const groupTables = screen.getAllByTestId(/-table$/);
+      expect(groupTables).toHaveLength(3);
+    });
+
+    it('should have expected endpoint table columns', () => {
+      const endpointTables = screen.getAllByTestId(/-table$/);
+
+      endpointTables.forEach((table) => {
+        const columnHeaders = within(table).getAllByRole('columnheader');
+        const headerLabels = columnHeaders.map((header) => header.textContent?.trim() ?? '');
+
+        expect(headerLabels).toEqual(['Endpoint', 'Model', '']);
+      });
+    });
+    it('should show expected group labels and endpoint counts', () => {
+      const expectedGroups = [
+        {
+          groupId: 'elasticsearch',
+          label: 'Elasticsearch',
+          countLabel: '5 endpoints',
+        },
+        {
+          groupId: 'elastic',
+          label: 'Elastic Inference Service',
+          countLabel: '5 endpoints',
+        },
+        {
+          groupId: 'openai',
+          label: 'OpenAI',
+          countLabel: '1 endpoint',
+        },
+      ];
+
+      expectedGroups.forEach(({ groupId, label, countLabel }) => {
+        const accordionHeader = screen.getByTestId(`${groupId}-accordion-header`);
+        expect(within(accordionHeader).getByText(label)).toBeInTheDocument();
+        expect(within(accordionHeader).getByText(countLabel)).toBeInTheDocument();
+      });
+    });
+    it('should show empty prompt when search removes all groups', async () => {
+      fireEvent.change(screen.getByTestId('search-field-endpoints'), {
+        target: { value: 'no-matching-endpoint' },
+      });
+
+      expect(await screen.findByText('No items found')).toBeInTheDocument();
+    });
+  });
 
   it('should show the correct task type badge for each endpoint', () => {
     renderTabularPageWithProviders();

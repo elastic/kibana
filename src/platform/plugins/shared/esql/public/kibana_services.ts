@@ -32,6 +32,7 @@ export interface ServiceDeps {
 }
 
 const servicesReady$ = new BehaviorSubject<ServiceDeps | undefined>(undefined);
+export const getKibanaServices = (): ServiceDeps | undefined => servicesReady$.value;
 export const untilPluginStartServicesReady = () => {
   if (servicesReady$.value) return Promise.resolve(servicesReady$.value);
   return new Promise<ServiceDeps>((resolve) => {

@@ -16,7 +16,7 @@ import { ACTION_EDIT_PANEL, ACTION_REMOVE_PANEL } from '@kbn/presentation-panel-
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import {
   ADD_PANEL_TRIGGER,
-  CONTEXT_MENU_TRIGGER,
+  ON_OPEN_PANEL_MENU,
   CONTROL_HOVER_TRIGGER_ID,
   CONTROL_MENU_TRIGGER,
 } from '@kbn/ui-actions-plugin/common/trigger_ids';
@@ -33,13 +33,13 @@ export function registerActions(uiActions: UiActionsStart) {
     const { ClearControlAction } = await import('../controls_module');
     return new ClearControlAction();
   });
-  uiActions.attachAction(CONTEXT_MENU_TRIGGER, ACTION_CLEAR_CONTROL);
+  uiActions.attachAction(ON_OPEN_PANEL_MENU, ACTION_CLEAR_CONTROL);
   uiActions.attachAction(CONTROL_HOVER_TRIGGER_ID, ACTION_CLEAR_CONTROL);
   uiActions.registerActionAsync(ACTION_PIN_CONTROL, async () => {
     const { PinControlAction } = await import('../controls_module');
     return new PinControlAction();
   });
-  uiActions.attachAction(CONTEXT_MENU_TRIGGER, ACTION_PIN_CONTROL);
+  uiActions.attachAction(ON_OPEN_PANEL_MENU, ACTION_PIN_CONTROL);
   uiActions.attachAction(CONTROL_HOVER_TRIGGER_ID, ACTION_PIN_CONTROL);
 
   uiActions.registerActionAsync(ACTION_EDIT_CONTROL_DISPLAY_SETTINGS, async () => {

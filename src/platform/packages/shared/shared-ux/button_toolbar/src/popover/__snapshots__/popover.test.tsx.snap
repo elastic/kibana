@@ -13,7 +13,7 @@ exports[`<ToolbarPopover /> is rendered 1`] = `
       class="emotion-euiButtonDisplayContent"
     >
       <span
-        class="eui-textTruncate"
+        class="eui-textTruncate css-13ifi6d-m"
       >
         test
       </span>

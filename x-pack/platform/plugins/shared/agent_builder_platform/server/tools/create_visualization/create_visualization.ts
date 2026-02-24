@@ -11,11 +11,8 @@ import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import { ToolResultType, SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
-import { AGENT_BUILDER_DASHBOARD_TOOLS_SETTING_ID } from '@kbn/management-settings-ids';
-import type { VisualizationConfig } from './types';
-import { guessChartType } from './guess_chart_type';
-import { createVisualizationGraph } from './graph_lens';
-import { getSchemaForChartType } from './schemas';
+import { buildVisualizationConfig, type VisualizationConfig } from '@kbn/agent-builder-genai-utils';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 
 /** Attachment type for visualization configurations */
 const VISUALIZATION_ATTACHMENT_TYPE = 'visualization';
@@ -68,7 +65,9 @@ This tool will:
     availability: {
       cacheMode: 'space',
       handler: async ({ uiSettings }) => {
-        const enabled = await uiSettings.get<boolean>(AGENT_BUILDER_DASHBOARD_TOOLS_SETTING_ID);
+        const enabled = await uiSettings.get<boolean>(
+          AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID
+        );
         return { status: enabled ? 'available' : 'unavailable' };
       },
     },
@@ -96,48 +95,19 @@ This tool will:
           }
         }
 
-        // Step 2: Determine chart type if not provided
-        let selectedChartType: SupportedChartType = chartType || SupportedChartType.Metric;
-
-        if (!chartType) {
-          logger.debug('Chart type not provided, using LLM to suggest one');
-          selectedChartType = await guessChartType(
-            modelProvider,
-            nlQuery,
-            parsedExistingConfig?.type
-          );
-        }
-
-        // Step 3: Generate visualization configuration using langgraph with validation retry
-        const model = await modelProvider.getDefaultModel();
-        const schema = getSchemaForChartType(selectedChartType);
-
-        // Create and invoke the validation retry graph
-        const graph = createVisualizationGraph(model, logger, events, esClient);
-
-        const finalState = await graph.invoke({
+        // Step 2: Generate visualization configuration with shared chart-type + graph flow
+        const { selectedChartType, validatedConfig, esqlQuery } = await buildVisualizationConfig({
           nlQuery,
           index,
-          chartType: selectedChartType,
-          schema,
+          chartType,
+          esql,
           existingConfig,
           parsedExistingConfig,
-          esqlQuery: esql || '',
-          currentAttempt: 0,
-          actions: [],
-          validatedConfig: null,
-          error: null,
+          modelProvider,
+          logger,
+          events,
+          esClient,
         });
-
-        const { validatedConfig, error, currentAttempt, esqlQuery } = finalState;
-
-        if (!validatedConfig) {
-          throw new Error(
-            `Failed to generate valid configuration after ${currentAttempt} attempts. Last error: ${
-              error || 'Unknown error'
-            }`
-          );
-        }
 
         const visualizationData = {
           query: nlQuery,

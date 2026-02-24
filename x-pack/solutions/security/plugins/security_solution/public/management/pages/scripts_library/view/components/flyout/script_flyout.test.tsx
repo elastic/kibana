@@ -69,54 +69,75 @@ describe('EndpointScriptFlyout', () => {
     jest.resetAllMocks();
   });
 
-  it('should render correctly', () => {
-    render();
-
-    const { getByTestId } = renderResult;
-    expect(getByTestId('test')).toBeInTheDocument();
-  });
-
-  it('should render loading state when `scriptItem` is not provided', () => {
-    mockedUseGetEndpointScript.mockImplementation(() => ({
-      ...defaultGetScriptHookReturn,
-      isRefetching: true,
-    }));
-    act(() => {
-      render({ ...defaultProps, scriptItem: undefined });
+  describe('Rendering', () => {
+    it('should render correctly', () => {
+      render();
+      expect(renderResult.getByTestId('test')).toBeInTheDocument();
     });
-    expect(renderResult.getByTestId('test-loading-header')).toBeInTheDocument();
+
+    it.each(['create', 'details', 'edit'])(
+      'should show script details when show is `%s`',
+      (show) => {
+        // @ts-ignore type checks for show
+        render({ ...defaultProps, show, 'data-test-subj': `test-${show}` });
+        expect(renderResult.getByTestId(`test-${show}-header`)).toBeInTheDocument();
+      }
+    );
   });
 
-  it('should show script details when show is `details`', () => {
-    render({ ...defaultProps, show: 'details', 'data-test-subj': 'test-details' });
-    expect(renderResult.getByTestId('test-details-header')).toBeInTheDocument();
-  });
+  describe('Loading states', () => {
+    it('should render loading state when `scriptItem` is not provided', () => {
+      mockedUseGetEndpointScript.mockImplementation(() => ({
+        ...defaultGetScriptHookReturn,
+        isRefetching: true,
+      }));
+      act(() => {
+        render({ ...defaultProps, scriptItem: undefined });
+      });
+      expect(renderResult.getByTestId('test-loading-header')).toBeInTheDocument();
+    });
 
-  it('should call onCloseFlyout when flyout is closed', () => {
-    render();
-    const { getByTestId, queryByTestId } = renderResult;
-    const flyout = getByTestId('test');
-    expect(flyout).toBeInTheDocument();
-
-    getByTestId('euiFlyoutCloseButton').click();
-    expect(defaultProps.onCloseFlyout).toHaveBeenCalled();
-    waitFor(() => {
-      expect(queryByTestId('test')).not.toBeInTheDocument();
+    it('should render loading state when fetching script data for view or edit', () => {
+      mockedUseGetEndpointScript.mockImplementation(() => ({
+        ...defaultGetScriptHookReturn,
+        isRefetching: true,
+      }));
+      act(() => {
+        // @ts-ignore type checks for show
+        render({ ...defaultProps, show: 'edit', scriptItem: undefined });
+      });
+      expect(renderResult.getByTestId('test-loading-header')).toBeInTheDocument();
     });
   });
 
-  // TODO: also for `edit` in the next PR so using .each here
-  it.each(['details'])('should fetch script data when needed for `%s`', (show) => {
-    const scriptData = scriptsGenerator.generate();
-    const refetchMock = jest.fn().mockResolvedValue({ data: scriptData });
-    mockedUseGetEndpointScript.mockImplementation(() => ({
-      ...defaultGetScriptHookReturn,
-      refetch: refetchMock,
-    }));
-    act(() => {
-      // @ts-ignore type checks for show
-      render({ ...defaultProps, show, scriptItem: undefined });
+  describe('Flyout closing', () => {
+    it('should call onCloseFlyout when flyout is closed', () => {
+      render();
+      const { getByTestId, queryByTestId } = renderResult;
+      const flyout = getByTestId('test');
+      expect(flyout).toBeInTheDocument();
+
+      getByTestId('euiFlyoutCloseButton').click();
+      expect(defaultProps.onCloseFlyout).toHaveBeenCalled();
+      waitFor(() => {
+        expect(queryByTestId('test')).not.toBeInTheDocument();
+      });
     });
-    expect(refetchMock).toHaveBeenCalled();
+  });
+
+  describe('Data fetching and submission', () => {
+    it.each(['details', 'edit'])('should fetch script data when needed for `%s`', (show) => {
+      const scriptData = scriptsGenerator.generate();
+      const refetchMock = jest.fn().mockResolvedValue({ data: scriptData });
+      mockedUseGetEndpointScript.mockImplementation(() => ({
+        ...defaultGetScriptHookReturn,
+        refetch: refetchMock,
+      }));
+      act(() => {
+        // @ts-ignore type checks for show
+        render({ ...defaultProps, show, scriptItem: undefined });
+      });
+      expect(refetchMock).toHaveBeenCalled();
+    });
   });
 });

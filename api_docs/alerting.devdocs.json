@@ -172,7 +172,7 @@
               "tags": [],
               "label": "ruleType",
               "description": [
-                "The rule type that has been registered with Alerting.Server.PluginSetupContract.registerType. If\nno such rule with that id exists, a warning is output to the console log. It used to throw an error, but that was temporarily moved\nbecause it was causing flaky test failures with https://github.com/elastic/kibana/issues/59229 and needs to be\ninvestigated more."
+                "The rule type that has been registered with Alerting.Server.PluginSetupContract.registerType. If"
               ],
               "signature": [
                 "string"
@@ -191,7 +191,7 @@
               "tags": [],
               "label": "handler",
               "description": [
-                "The navigation handler should return either a relative URL, or a state object. This information can be used,\nin conjunction with the consumer id, to navigate the user to a custom URL to view a rule's details."
+                "The navigation handler should return either a relative URL, or a state object. This information can be used,"
               ],
               "signature": [
                 {
@@ -267,7 +267,7 @@
               "tags": [],
               "label": "handler",
               "description": [
-                "The navigation handler should return either a relative URL, or a state object. This information can be used,\nin conjunction with the consumer id, to navigate the user to a custom URL to view a rule's details."
+                "The navigation handler should return either a relative URL, or a state object. This information can be used,"
               ],
               "signature": [
                 {
@@ -2238,6 +2238,66 @@
           },
           {
             "parentPluginId": "alerting",
+            "id": "def-server.AlertingServerStart.getRulesClientWithRequestInSpace",
+            "type": "Function",
+            "tags": [],
+            "label": "getRulesClientWithRequestInSpace",
+            "description": [
+              "\nCreates a RulesClient that is bound to the provided spaceId (namespace) while preserving\nthe original request (and its auth context)."
+            ],
+            "signature": [
+              "(request: ",
+              "KibanaRequest",
+              "<unknown, unknown, unknown, any>, spaceId: string) => Promise<",
+              "RulesClientApi",
+              ">"
+            ],
+            "path": "x-pack/platform/plugins/shared/alerting/server/plugin.ts",
+            "lineNumber": 178,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "alerting",
+                "id": "def-server.AlertingServerStart.getRulesClientWithRequestInSpace.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "request",
+                "description": [],
+                "signature": [
+                  "KibanaRequest",
+                  "<unknown, unknown, unknown, any>"
+                ],
+                "path": "x-pack/platform/plugins/shared/alerting/server/plugin.ts",
+                "lineNumber": 183,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "alerting",
+                "id": "def-server.AlertingServerStart.getRulesClientWithRequestInSpace.$2",
+                "type": "string",
+                "tags": [],
+                "label": "spaceId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/plugins/shared/alerting/server/plugin.ts",
+                "lineNumber": 184,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "alerting",
             "id": "def-server.AlertingServerStart.getAlertingAuthorizationWithRequest",
             "type": "Function",
             "tags": [],
@@ -2265,7 +2325,7 @@
               ">>"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/plugin.ts",
-            "lineNumber": 178,
+            "lineNumber": 186,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2282,7 +2342,7 @@
                   "<unknown, unknown, unknown, any>"
                 ],
                 "path": "x-pack/platform/plugins/shared/alerting/server/plugin.ts",
-                "lineNumber": 179,
+                "lineNumber": 187,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2310,7 +2370,7 @@
               ">"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/plugin.ts",
-            "lineNumber": 181,
+            "lineNumber": 189,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2328,7 +2388,7 @@
         "label": "BulkOperationError",
         "description": [],
         "path": "x-pack/platform/plugins/shared/alerting/server/rules_client/types.ts",
-        "lineNumber": 163,
+        "lineNumber": 168,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2341,7 +2401,7 @@
             "label": "message",
             "description": [],
             "path": "x-pack/platform/plugins/shared/alerting/server/rules_client/types.ts",
-            "lineNumber": 164,
+            "lineNumber": 169,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2357,7 +2417,7 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/rules_client/types.ts",
-            "lineNumber": 165,
+            "lineNumber": 170,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2373,7 +2433,7 @@
               "{ id: string; name: string; }"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/rules_client/types.ts",
-            "lineNumber": 166,
+            "lineNumber": 171,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3159,7 +3219,7 @@
             "label": "actions",
             "description": [],
             "signature": [
-              "Readonly<{ frequency?: Readonly<{} & { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; }> | undefined; alertsFilter?: Readonly<{ query?: Readonly<{ dsl?: string | undefined; } & { kql: string; filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+              "Readonly<{ frequency?: Readonly<{} & { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; }> | undefined; alertsFilter?: Readonly<{ query?: Readonly<{ dsl?: string | undefined; } & { filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
               {
                 "pluginId": "@kbn/es-query-constants",
                 "scope": "common",
@@ -3167,7 +3227,7 @@
                 "section": "def-common.FilterStateStore",
                 "text": "FilterStateStore"
               },
-              "; }> | undefined; } & { meta: Record<string, any>; }>[]; }> | undefined; timeframe?: Readonly<{} & { days: (2 | 1 | 7 | 6 | 5 | 4 | 3)[]; hours: Readonly<{} & { start: string; end: string; }>; timezone: string; }> | undefined; } & {}> | undefined; uuid?: string | undefined; useAlertDataForTemplate?: boolean | undefined; } & { params: Record<string, any>; id: string; actionTypeId: string; group: string; }>[]"
+              "; }> | undefined; } & { meta: Record<string, any>; }>[]; kql: string; }> | undefined; timeframe?: Readonly<{} & { days: (2 | 1 | 7 | 6 | 5 | 4 | 3)[]; hours: Readonly<{} & { start: string; end: string; }>; timezone: string; }> | undefined; } & {}> | undefined; uuid?: string | undefined; useAlertDataForTemplate?: boolean | undefined; } & { params: Record<string, any>; id: string; actionTypeId: string; group: string; }>[]"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/application/rule/types/rule.ts",
             "lineNumber": 60,
@@ -3421,7 +3481,7 @@
             "label": "monitoring",
             "description": [],
             "signature": [
-              "Readonly<{} & { run: Readonly<{} & { history: Readonly<{ outcome?: \"warning\" | \"succeeded\" | \"failed\" | undefined; duration?: number | undefined; } & { timestamp: number; success: boolean; }>[]; calculated_metrics: Readonly<{ p50?: number | undefined; p95?: number | undefined; p99?: number | undefined; } & { success_ratio: number; }>; last_run: Readonly<{} & { timestamp: string; metrics: Readonly<{ duration?: number | undefined; total_search_duration_ms?: number | null | undefined; total_indexing_duration_ms?: number | null | undefined; total_alerts_detected?: number | null | undefined; total_alerts_created?: number | null | undefined; gap_duration_s?: number | null | undefined; gap_range?: Readonly<{} & { gte: string; lte: string; }> | null | undefined; } & {}>; }>; }>; }> | undefined"
+              "Readonly<{} & { run: Readonly<{} & { history: Readonly<{ duration?: number | undefined; outcome?: \"warning\" | \"succeeded\" | \"failed\" | undefined; } & { timestamp: number; success: boolean; }>[]; calculated_metrics: Readonly<{ p50?: number | undefined; p95?: number | undefined; p99?: number | undefined; } & { success_ratio: number; }>; last_run: Readonly<{} & { timestamp: string; metrics: Readonly<{ duration?: number | undefined; total_search_duration_ms?: number | null | undefined; total_indexing_duration_ms?: number | null | undefined; total_alerts_detected?: number | null | undefined; total_alerts_created?: number | null | undefined; gap_duration_s?: number | null | undefined; gap_range?: Readonly<{} & { lte: string; gte: string; }> | null | undefined; } & {}>; }>; }>; }> | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/application/rule/types/rule.ts",
             "lineNumber": 76,
@@ -3485,7 +3545,7 @@
             "label": "lastRun",
             "description": [],
             "signature": [
-              "Readonly<{ warning?: \"execute\" | \"validate\" | \"unknown\" | \"license\" | \"disabled\" | \"ruleExecution\" | \"timeout\" | \"read\" | \"decrypt\" | \"maxExecutableActions\" | \"maxAlerts\" | \"maxQueuedActions\" | null | undefined; outcomeOrder?: number | undefined; outcomeMsg?: string[] | null | undefined; } & { outcome: \"warning\" | \"succeeded\" | \"failed\"; alertsCount: Readonly<{ active?: number | null | undefined; new?: number | null | undefined; recovered?: number | null | undefined; ignored?: number | null | undefined; } & {}>; }> | null | undefined"
+              "Readonly<{ warning?: \"execute\" | \"validate\" | \"unknown\" | \"license\" | \"timeout\" | \"disabled\" | \"ruleExecution\" | \"read\" | \"decrypt\" | \"maxExecutableActions\" | \"maxAlerts\" | \"maxQueuedActions\" | null | undefined; outcomeOrder?: number | undefined; outcomeMsg?: string[] | null | undefined; } & { outcome: \"warning\" | \"succeeded\" | \"failed\"; alertsCount: Readonly<{ active?: number | null | undefined; new?: number | null | undefined; recovered?: number | null | undefined; ignored?: number | null | undefined; } & {}>; }> | null | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/application/rule/types/rule.ts",
             "lineNumber": 80,
@@ -5109,10 +5169,10 @@
         "label": "AlertingRulesConfig",
         "description": [],
         "signature": [
-          "Pick<Readonly<{ overwriteProducer?: \"siem\" | \"observability\" | \"stackAlerts\" | undefined; } & { run: Readonly<{ timeout?: string | undefined; ruleTypeOverrides?: Readonly<{ timeout?: string | undefined; } & { id: string; }>[] | undefined; } & { actions: Readonly<{ connectorTypeOverrides?: Readonly<{ max?: number | undefined; } & { id: string; }>[] | undefined; } & { max: number; }>; alerts: Readonly<{} & { max: number; }>; }>; minimumScheduleInterval: Readonly<{} & { value: string; enforce: boolean; }>; maxScheduledPerMinute: number; }>, \"run\" | \"minimumScheduleInterval\" | \"maxScheduledPerMinute\"> & { isUsingSecurity: boolean; }"
+          "Pick<Readonly<{ overwriteProducer?: \"siem\" | \"observability\" | \"stackAlerts\" | undefined; } & { run: Readonly<{ timeout?: string | undefined; ruleTypeOverrides?: Readonly<{ timeout?: string | undefined; } & { id: string; }>[] | undefined; } & { actions: Readonly<{ connectorTypeOverrides?: Readonly<{ max?: number | undefined; } & { id: string; }>[] | undefined; } & { max: number; }>; alerts: Readonly<{} & { max: number; }>; }>; minimumScheduleInterval: Readonly<{} & { value: string; enforce: boolean; }>; maxScheduledPerMinute: number; apiKeyType: \"es\" | \"uiam\"; }>, \"run\" | \"minimumScheduleInterval\" | \"maxScheduledPerMinute\"> & { isUsingSecurity: boolean; }"
         ],
         "path": "x-pack/platform/plugins/shared/alerting/server/config.ts",
-        "lineNumber": 103,
+        "lineNumber": 106,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -5146,7 +5206,7 @@
           "\"api_key_pending_invalidation\""
         ],
         "path": "x-pack/platform/plugins/shared/alerting/server/saved_objects/index.ts",
-        "lineNumber": 41,
+        "lineNumber": 45,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -5160,7 +5220,7 @@
         "label": "BulkEditOperation",
         "description": [],
         "signature": [
-          "Readonly<{} & { value: string[]; field: \"tags\"; operation: \"delete\" | \"add\" | \"set\"; }> | Readonly<{} & { value: (Readonly<{ actionTypeId?: string | undefined; frequency?: Readonly<{} & { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; }> | undefined; alertsFilter?: Readonly<{ query?: Readonly<{ dsl?: string | undefined; } & { kql: string; filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+          "Readonly<{} & { value: string[]; operation: \"delete\" | \"add\" | \"set\"; field: \"tags\"; }> | Readonly<{} & { value: (Readonly<{ actionTypeId?: string | undefined; frequency?: Readonly<{} & { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; }> | undefined; alertsFilter?: Readonly<{ query?: Readonly<{ dsl?: string | undefined; } & { filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
           {
             "pluginId": "@kbn/es-query-constants",
             "scope": "common",
@@ -5168,7 +5228,7 @@
             "section": "def-common.FilterStateStore",
             "text": "FilterStateStore"
           },
-          "; }> | undefined; } & { meta: Record<string, any>; }>[]; }> | undefined; timeframe?: Readonly<{} & { days: (2 | 1 | 7 | 6 | 5 | 4 | 3)[]; hours: Readonly<{} & { start: string; end: string; }>; timezone: string; }> | undefined; } & {}> | undefined; uuid?: string | undefined; useAlertDataForTemplate?: boolean | undefined; } & { params: Record<string, any>; id: string; group: string; }> | Readonly<{ actionTypeId?: string | undefined; uuid?: string | undefined; } & { params: Record<string, any>; id: string; }>)[]; field: \"actions\"; operation: \"add\" | \"set\"; }> | Readonly<{} & { value: Readonly<{} & { interval: string; }>; field: \"schedule\"; operation: \"set\"; }> | Readonly<{} & { value: string | null; field: \"throttle\"; operation: \"set\"; }> | Readonly<{} & { value: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; field: \"notifyWhen\"; operation: \"set\"; }> | Readonly<{} & { value: Readonly<{ id?: string | undefined; } & { duration: number; rRule: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 1 | 4 | 3 | undefined; until?: string | undefined; byweekday?: string[] | undefined; bymonth?: number[] | undefined; bymonthday?: number[] | undefined; } & { dtstart: string; tzid: string; }>; }>; field: \"snoozeSchedule\"; operation: \"set\"; }> | Readonly<{ value?: string[] | undefined; } & { field: \"snoozeSchedule\"; operation: \"delete\"; }> | Readonly<{} & { field: \"apiKey\"; operation: \"set\"; }>"
+          "; }> | undefined; } & { meta: Record<string, any>; }>[]; kql: string; }> | undefined; timeframe?: Readonly<{} & { days: (2 | 1 | 7 | 6 | 5 | 4 | 3)[]; hours: Readonly<{} & { start: string; end: string; }>; timezone: string; }> | undefined; } & {}> | undefined; uuid?: string | undefined; useAlertDataForTemplate?: boolean | undefined; } & { params: Record<string, any>; id: string; group: string; }> | Readonly<{ actionTypeId?: string | undefined; uuid?: string | undefined; } & { params: Record<string, any>; id: string; }>)[]; operation: \"add\" | \"set\"; field: \"actions\"; }> | Readonly<{} & { value: Readonly<{} & { interval: string; }>; operation: \"set\"; field: \"schedule\"; }> | Readonly<{} & { value: string | null; operation: \"set\"; field: \"throttle\"; }> | Readonly<{} & { value: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; operation: \"set\"; field: \"notifyWhen\"; }> | Readonly<{} & { value: Readonly<{ id?: string | undefined; } & { duration: number; rRule: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 1 | 4 | 3 | undefined; until?: string | undefined; byweekday?: string[] | undefined; bymonth?: number[] | undefined; bymonthday?: number[] | undefined; } & { dtstart: string; tzid: string; }>; }>; operation: \"set\"; field: \"snoozeSchedule\"; }> | Readonly<{ value?: string[] | undefined; } & { operation: \"delete\"; field: \"snoozeSchedule\"; }> | Readonly<{} & { operation: \"set\"; field: \"apiKey\"; }>"
         ],
         "path": "x-pack/platform/plugins/shared/alerting/server/application/rule/methods/bulk_edit/types/bulk_edit_rules_options.ts",
         "lineNumber": 20,
@@ -5369,7 +5429,7 @@
           ">; }"
         ],
         "path": "x-pack/platform/plugins/shared/alerting/server/alert/alert.ts",
-        "lineNumber": 35,
+        "lineNumber": 36,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -5404,7 +5464,7 @@
           "\"alert\""
         ],
         "path": "x-pack/platform/plugins/shared/alerting/server/saved_objects/index.ts",
-        "lineNumber": 38,
+        "lineNumber": 42,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -5509,7 +5569,7 @@
             "section": "def-common.RuleTypeParams",
             "text": "RuleTypeParams"
           },
-          " = never>(params?: Readonly<{ options?: Readonly<{ search?: string | undefined; page?: number | undefined; filter?: string | Record<string, any> | undefined; perPage?: number | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; searchFields?: string[] | undefined; sortField?: string | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; hasReference?: Readonly<{} & { id: string; type: string; }> | Readonly<{} & { id: string; type: string; }>[] | undefined; fields?: string[] | undefined; ruleTypeIds?: string[] | undefined; consumers?: string[] | undefined; } & {}> | undefined; includeSnoozeData?: boolean | undefined; excludeFromPublicApi?: boolean | undefined; } & {}> | undefined) => Promise<",
+          " = never>(params?: Readonly<{ options?: Readonly<{ search?: string | undefined; page?: number | undefined; filter?: string | Record<string, any> | undefined; fields?: string[] | undefined; perPage?: number | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; searchFields?: string[] | undefined; sortField?: string | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; hasReference?: Readonly<{} & { id: string; type: string; }> | Readonly<{} & { id: string; type: string; }>[] | undefined; ruleTypeIds?: string[] | undefined; consumers?: string[] | undefined; } & {}> | undefined; includeSnoozeData?: boolean | undefined; excludeFromPublicApi?: boolean | undefined; } & {}> | undefined) => Promise<",
           {
             "pluginId": "alerting",
             "scope": "server",
@@ -5653,9 +5713,9 @@
           },
           "<never>>; unsnooze: (options: ",
           "UnsnoozeParams",
-          ") => Promise<void>; unmuteAll: (options: { id: string; }) => Promise<void>; muteInstance: (options: { params: Readonly<{} & { alertId: string; alertInstanceId: string; }>; query: Readonly<{ validateAlertsExistence?: boolean | undefined; } & {}>; }) => Promise<void>; bulkMuteInstances: (options: Readonly<{} & { rules: Readonly<{} & { id: string; alertInstanceIds: string[]; }>[]; }>) => Promise<void>; bulkUnmuteInstances: (options: Readonly<{} & { rules: Readonly<{} & { id: string; alertInstanceIds: string[]; }>[]; }>) => Promise<void>; unmuteInstance: (options: Readonly<{} & { alertId: string; alertInstanceId: string; }>) => Promise<void>; bulkUntrackAlerts: (options: Readonly<{ indices?: string[] | undefined; ruleTypeIds?: string[] | undefined; alertUuids?: string[] | undefined; query?: any[] | undefined; } & { isUsingQuery: boolean; }>) => Promise<void>; runSoon: (options: Readonly<{ force?: boolean | undefined; } & { id: string; }>) => Promise<string | undefined>; listRuleTypes: () => Promise<",
+          ") => Promise<void>; unmuteAll: (options: { id: string; }) => Promise<void>; muteInstance: (options: { params: Readonly<{} & { alertId: string; alertInstanceId: string; }>; query: Readonly<{ validateAlertsExistence?: boolean | undefined; } & {}>; }) => Promise<void>; bulkMuteInstances: (options: Readonly<{} & { rules: Readonly<{} & { id: string; alertInstanceIds: string[]; }>[]; }>) => Promise<void>; bulkUnmuteInstances: (options: Readonly<{} & { rules: Readonly<{} & { id: string; alertInstanceIds: string[]; }>[]; }>) => Promise<void>; unmuteInstance: (options: Readonly<{} & { alertId: string; alertInstanceId: string; }>) => Promise<void>; bulkUntrackAlerts: (options: Readonly<{ indices?: string[] | undefined; query?: any[] | undefined; ruleTypeIds?: string[] | undefined; alertUuids?: string[] | undefined; } & { isUsingQuery: boolean; }>) => Promise<void>; runSoon: (options: Readonly<{ force?: boolean | undefined; } & { id: string; }>) => Promise<string | undefined>; listRuleTypes: () => Promise<",
           "RegistryAlertTypeWithAuth",
-          "[]>; scheduleBackfill: (params: Readonly<{ runActions?: boolean | undefined; initiatorId?: string | undefined; } & { ruleId: string; ranges: Readonly<{} & { start: string; end: string; }>[]; initiator: \"user\" | \"system\"; }>[]) => Promise<(Readonly<{ end?: string | undefined; initiatorId?: string | undefined; warnings?: string[] | undefined; } & { id: string; spaceId: string; start: string; enabled: boolean; rule: Readonly<{ apiKeyCreatedByUser?: boolean | null | undefined; } & { params: Record<string, any>; id: string; consumer: string; name: string; enabled: boolean; tags: string[]; actions: Readonly<{ frequency?: Readonly<{} & { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; }> | undefined; alertsFilter?: Readonly<{ query?: Readonly<{ dsl?: string | undefined; } & { kql: string; filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+          "[]>; scheduleBackfill: (params: Readonly<{ runActions?: boolean | undefined; initiatorId?: string | undefined; } & { ranges: Readonly<{} & { start: string; end: string; }>[]; ruleId: string; initiator: \"user\" | \"system\"; }>[]) => Promise<(Readonly<{ end?: string | undefined; initiatorId?: string | undefined; warnings?: string[] | undefined; } & { id: string; spaceId: string; start: string; enabled: boolean; rule: Readonly<{ apiKeyCreatedByUser?: boolean | null | undefined; } & { params: Record<string, any>; id: string; consumer: string; name: string; enabled: boolean; tags: string[]; actions: Readonly<{ frequency?: Readonly<{} & { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; }> | undefined; alertsFilter?: Readonly<{ query?: Readonly<{ dsl?: string | undefined; } & { filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
           {
             "pluginId": "@kbn/es-query-constants",
             "scope": "common",
@@ -5663,7 +5723,7 @@
             "section": "def-common.FilterStateStore",
             "text": "FilterStateStore"
           },
-          "; }> | undefined; } & { meta: Record<string, any>; }>[]; }> | undefined; timeframe?: Readonly<{} & { days: (2 | 1 | 7 | 6 | 5 | 4 | 3)[]; hours: Readonly<{} & { start: string; end: string; }>; timezone: string; }> | undefined; } & {}> | undefined; uuid?: string | undefined; useAlertDataForTemplate?: boolean | undefined; } & { params: Record<string, any>; id: string; actionTypeId: string; group: string; }>[]; alertTypeId: string; schedule: Readonly<{} & { interval: string; }>; createdBy: string | null; updatedBy: string | null; createdAt: string; updatedAt: string; apiKeyOwner: string | null; revision: number; }>; status: \"error\" | \"running\" | \"complete\" | \"pending\" | \"timeout\"; schedule: Readonly<{} & { status: \"error\" | \"running\" | \"complete\" | \"pending\" | \"timeout\"; interval: string; runAt: string; }>[]; createdAt: string; initiator: \"user\" | \"system\"; duration: string; }> | Readonly<{} & { error: Readonly<{ status?: number | undefined; } & { message: string; rule: Readonly<{ name?: string | undefined; } & { id: string; }>; }>; }>)[]>; getBackfill: (id: string) => Promise<Readonly<{ end?: string | undefined; initiatorId?: string | undefined; warnings?: string[] | undefined; } & { id: string; spaceId: string; start: string; enabled: boolean; rule: Readonly<{ apiKeyCreatedByUser?: boolean | null | undefined; } & { params: Record<string, any>; id: string; consumer: string; name: string; enabled: boolean; tags: string[]; actions: Readonly<{ frequency?: Readonly<{} & { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; }> | undefined; alertsFilter?: Readonly<{ query?: Readonly<{ dsl?: string | undefined; } & { kql: string; filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+          "; }> | undefined; } & { meta: Record<string, any>; }>[]; kql: string; }> | undefined; timeframe?: Readonly<{} & { days: (2 | 1 | 7 | 6 | 5 | 4 | 3)[]; hours: Readonly<{} & { start: string; end: string; }>; timezone: string; }> | undefined; } & {}> | undefined; uuid?: string | undefined; useAlertDataForTemplate?: boolean | undefined; } & { params: Record<string, any>; id: string; actionTypeId: string; group: string; }>[]; alertTypeId: string; schedule: Readonly<{} & { interval: string; }>; createdBy: string | null; updatedBy: string | null; createdAt: string; updatedAt: string; apiKeyOwner: string | null; revision: number; }>; duration: string; status: \"error\" | \"timeout\" | \"running\" | \"complete\" | \"pending\"; schedule: Readonly<{} & { interval: string; status: \"error\" | \"timeout\" | \"running\" | \"complete\" | \"pending\"; runAt: string; }>[]; createdAt: string; initiator: \"user\" | \"system\"; }> | Readonly<{} & { error: Readonly<{ status?: number | undefined; } & { message: string; rule: Readonly<{ name?: string | undefined; } & { id: string; }>; }>; }>)[]>; getBackfill: (id: string) => Promise<Readonly<{ end?: string | undefined; initiatorId?: string | undefined; warnings?: string[] | undefined; } & { id: string; spaceId: string; start: string; enabled: boolean; rule: Readonly<{ apiKeyCreatedByUser?: boolean | null | undefined; } & { params: Record<string, any>; id: string; consumer: string; name: string; enabled: boolean; tags: string[]; actions: Readonly<{ frequency?: Readonly<{} & { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; }> | undefined; alertsFilter?: Readonly<{ query?: Readonly<{ dsl?: string | undefined; } & { filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
           {
             "pluginId": "@kbn/es-query-constants",
             "scope": "common",
@@ -5671,7 +5731,7 @@
             "section": "def-common.FilterStateStore",
             "text": "FilterStateStore"
           },
-          "; }> | undefined; } & { meta: Record<string, any>; }>[]; }> | undefined; timeframe?: Readonly<{} & { days: (2 | 1 | 7 | 6 | 5 | 4 | 3)[]; hours: Readonly<{} & { start: string; end: string; }>; timezone: string; }> | undefined; } & {}> | undefined; uuid?: string | undefined; useAlertDataForTemplate?: boolean | undefined; } & { params: Record<string, any>; id: string; actionTypeId: string; group: string; }>[]; alertTypeId: string; schedule: Readonly<{} & { interval: string; }>; createdBy: string | null; updatedBy: string | null; createdAt: string; updatedAt: string; apiKeyOwner: string | null; revision: number; }>; status: \"error\" | \"running\" | \"complete\" | \"pending\" | \"timeout\"; schedule: Readonly<{} & { status: \"error\" | \"running\" | \"complete\" | \"pending\" | \"timeout\"; interval: string; runAt: string; }>[]; createdAt: string; initiator: \"user\" | \"system\"; duration: string; }>>; findBackfill: (params: Readonly<{ start?: string | undefined; end?: string | undefined; sortField?: \"start\" | \"createdAt\" | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; initiator?: \"user\" | \"system\" | undefined; initiatorId?: string | undefined; ruleIds?: string | undefined; } & { page: number; perPage: number; }>) => Promise<Readonly<{} & { page: number; data: Readonly<{ end?: string | undefined; initiatorId?: string | undefined; warnings?: string[] | undefined; } & { id: string; spaceId: string; start: string; enabled: boolean; rule: Readonly<{ apiKeyCreatedByUser?: boolean | null | undefined; } & { params: Record<string, any>; id: string; consumer: string; name: string; enabled: boolean; tags: string[]; actions: Readonly<{ frequency?: Readonly<{} & { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; }> | undefined; alertsFilter?: Readonly<{ query?: Readonly<{ dsl?: string | undefined; } & { kql: string; filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+          "; }> | undefined; } & { meta: Record<string, any>; }>[]; kql: string; }> | undefined; timeframe?: Readonly<{} & { days: (2 | 1 | 7 | 6 | 5 | 4 | 3)[]; hours: Readonly<{} & { start: string; end: string; }>; timezone: string; }> | undefined; } & {}> | undefined; uuid?: string | undefined; useAlertDataForTemplate?: boolean | undefined; } & { params: Record<string, any>; id: string; actionTypeId: string; group: string; }>[]; alertTypeId: string; schedule: Readonly<{} & { interval: string; }>; createdBy: string | null; updatedBy: string | null; createdAt: string; updatedAt: string; apiKeyOwner: string | null; revision: number; }>; duration: string; status: \"error\" | \"timeout\" | \"running\" | \"complete\" | \"pending\"; schedule: Readonly<{} & { interval: string; status: \"error\" | \"timeout\" | \"running\" | \"complete\" | \"pending\"; runAt: string; }>[]; createdAt: string; initiator: \"user\" | \"system\"; }>>; findBackfill: (params: Readonly<{ start?: string | undefined; end?: string | undefined; sortField?: \"start\" | \"createdAt\" | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; initiator?: \"user\" | \"system\" | undefined; initiatorId?: string | undefined; ruleIds?: string | undefined; } & { page: number; perPage: number; }>) => Promise<Readonly<{} & { page: number; total: number; data: Readonly<{ end?: string | undefined; initiatorId?: string | undefined; warnings?: string[] | undefined; } & { id: string; spaceId: string; start: string; enabled: boolean; rule: Readonly<{ apiKeyCreatedByUser?: boolean | null | undefined; } & { params: Record<string, any>; id: string; consumer: string; name: string; enabled: boolean; tags: string[]; actions: Readonly<{ frequency?: Readonly<{} & { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; }> | undefined; alertsFilter?: Readonly<{ query?: Readonly<{ dsl?: string | undefined; } & { filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
           {
             "pluginId": "@kbn/es-query-constants",
             "scope": "common",
@@ -5679,7 +5739,7 @@
             "section": "def-common.FilterStateStore",
             "text": "FilterStateStore"
           },
-          "; }> | undefined; } & { meta: Record<string, any>; }>[]; }> | undefined; timeframe?: Readonly<{} & { days: (2 | 1 | 7 | 6 | 5 | 4 | 3)[]; hours: Readonly<{} & { start: string; end: string; }>; timezone: string; }> | undefined; } & {}> | undefined; uuid?: string | undefined; useAlertDataForTemplate?: boolean | undefined; } & { params: Record<string, any>; id: string; actionTypeId: string; group: string; }>[]; alertTypeId: string; schedule: Readonly<{} & { interval: string; }>; createdBy: string | null; updatedBy: string | null; createdAt: string; updatedAt: string; apiKeyOwner: string | null; revision: number; }>; status: \"error\" | \"running\" | \"complete\" | \"pending\" | \"timeout\"; schedule: Readonly<{} & { status: \"error\" | \"running\" | \"complete\" | \"pending\" | \"timeout\"; interval: string; runAt: string; }>[]; createdAt: string; initiator: \"user\" | \"system\"; duration: string; }>[]; perPage: number; total: number; }>>; deleteBackfill: (id: string) => Promise<{}>; getSpaceId: () => string | undefined; getAuthorization: () => ",
+          "; }> | undefined; } & { meta: Record<string, any>; }>[]; kql: string; }> | undefined; timeframe?: Readonly<{} & { days: (2 | 1 | 7 | 6 | 5 | 4 | 3)[]; hours: Readonly<{} & { start: string; end: string; }>; timezone: string; }> | undefined; } & {}> | undefined; uuid?: string | undefined; useAlertDataForTemplate?: boolean | undefined; } & { params: Record<string, any>; id: string; actionTypeId: string; group: string; }>[]; alertTypeId: string; schedule: Readonly<{} & { interval: string; }>; createdBy: string | null; updatedBy: string | null; createdAt: string; updatedAt: string; apiKeyOwner: string | null; revision: number; }>; duration: string; status: \"error\" | \"timeout\" | \"running\" | \"complete\" | \"pending\"; schedule: Readonly<{} & { interval: string; status: \"error\" | \"timeout\" | \"running\" | \"complete\" | \"pending\"; runAt: string; }>[]; createdAt: string; initiator: \"user\" | \"system\"; }>[]; perPage: number; }>>; deleteBackfill: (id: string) => Promise<{}>; getSpaceId: () => string | undefined; getAuthorization: () => ",
           {
             "pluginId": "alerting",
             "scope": "server",
@@ -5689,7 +5749,7 @@
           },
           "; getAuditLogger: () => ",
           "AuditLogger",
-          " | undefined; getTags: (params: Readonly<{ search?: string | undefined; perPage?: number | undefined; ruleTypeIds?: string[] | undefined; } & { page: number; }>) => Promise<Readonly<{} & { page: number; data: string[]; perPage: number; total: number; }>>; getTemplate: (params: Readonly<{} & { id: string; }>) => Promise<Readonly<{ alertDelay?: Readonly<{} & { active: number; }> | undefined; flapping?: Readonly<{ enabled?: boolean | undefined; } & { lookBackWindow: number; statusChangeThreshold: number; }> | null | undefined; } & { params: Record<string, any>; id: string; name: string; tags: string[]; schedule: Readonly<{} & { interval: string; }>; ruleTypeId: string; }>>; findTemplates: (params: Readonly<{ search?: string | undefined; page?: number | undefined; tags?: string[] | undefined; perPage?: number | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; sortField?: string | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; ruleTypeId?: string | undefined; } & {}>) => Promise<",
+          " | undefined; getTags: (params: Readonly<{ search?: string | undefined; perPage?: number | undefined; ruleTypeIds?: string[] | undefined; } & { page: number; }>) => Promise<Readonly<{} & { page: number; total: number; data: string[]; perPage: number; }>>; getTemplate: (params: Readonly<{} & { id: string; }>) => Promise<Readonly<{ description?: string | undefined; alertDelay?: Readonly<{} & { active: number; }> | undefined; flapping?: Readonly<{ enabled?: boolean | undefined; } & { lookBackWindow: number; statusChangeThreshold: number; }> | null | undefined; artifacts?: Readonly<{ dashboards?: Readonly<{} & { id: string; }>[] | undefined; investigation_guide?: Readonly<{} & { blob: string; }> | undefined; } & {}> | undefined; } & { params: Record<string, any>; id: string; name: string; tags: string[]; schedule: Readonly<{} & { interval: string; }>; ruleTypeId: string; }>>; findTemplates: (params: Readonly<{ search?: string | undefined; page?: number | undefined; tags?: string[] | undefined; perPage?: number | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; sortField?: string | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; ruleTypeId?: string | undefined; } & {}>) => Promise<",
           {
             "pluginId": "alerting",
             "scope": "server",
@@ -5699,7 +5759,7 @@
           },
           ">; getScheduleFrequency: () => Promise<Readonly<{} & { totalScheduledPerMinute: number; remainingSchedulesPerMinute: number; }>>; findGaps: (params: Readonly<{ start?: string | undefined; end?: string | undefined; sortField?: \"@timestamp\" | \"kibana.alert.rule.gap.status\" | \"kibana.alert.rule.gap.total_gap_duration_ms\" | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; statuses?: (\"unfilled\" | \"filled\" | \"partially_filled\")[] | undefined; hasUnfilledIntervals?: boolean | undefined; hasInProgressIntervals?: boolean | undefined; hasFilledIntervals?: boolean | undefined; } & { page: number; perPage: number; ruleId: string; }>) => Promise<{ total: number; data: ",
           "Gap",
-          "[]; page: number; perPage: number; }>; fillGapById: (params: Readonly<{} & { ruleId: string; gapId: string; }>) => Promise<(Readonly<{ end?: string | undefined; initiatorId?: string | undefined; warnings?: string[] | undefined; } & { id: string; spaceId: string; start: string; enabled: boolean; rule: Readonly<{ apiKeyCreatedByUser?: boolean | null | undefined; } & { params: Record<string, any>; id: string; consumer: string; name: string; enabled: boolean; tags: string[]; actions: Readonly<{ frequency?: Readonly<{} & { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; }> | undefined; alertsFilter?: Readonly<{ query?: Readonly<{ dsl?: string | undefined; } & { kql: string; filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+          "[]; page: number; perPage: number; }>; fillGapById: (params: Readonly<{} & { ruleId: string; gapId: string; }>) => Promise<(Readonly<{ end?: string | undefined; initiatorId?: string | undefined; warnings?: string[] | undefined; } & { id: string; spaceId: string; start: string; enabled: boolean; rule: Readonly<{ apiKeyCreatedByUser?: boolean | null | undefined; } & { params: Record<string, any>; id: string; consumer: string; name: string; enabled: boolean; tags: string[]; actions: Readonly<{ frequency?: Readonly<{} & { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; }> | undefined; alertsFilter?: Readonly<{ query?: Readonly<{ dsl?: string | undefined; } & { filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
           {
             "pluginId": "@kbn/es-query-constants",
             "scope": "common",
@@ -5707,13 +5767,13 @@
             "section": "def-common.FilterStateStore",
             "text": "FilterStateStore"
           },
-          "; }> | undefined; } & { meta: Record<string, any>; }>[]; }> | undefined; timeframe?: Readonly<{} & { days: (2 | 1 | 7 | 6 | 5 | 4 | 3)[]; hours: Readonly<{} & { start: string; end: string; }>; timezone: string; }> | undefined; } & {}> | undefined; uuid?: string | undefined; useAlertDataForTemplate?: boolean | undefined; } & { params: Record<string, any>; id: string; actionTypeId: string; group: string; }>[]; alertTypeId: string; schedule: Readonly<{} & { interval: string; }>; createdBy: string | null; updatedBy: string | null; createdAt: string; updatedAt: string; apiKeyOwner: string | null; revision: number; }>; status: \"error\" | \"running\" | \"complete\" | \"pending\" | \"timeout\"; schedule: Readonly<{} & { status: \"error\" | \"running\" | \"complete\" | \"pending\" | \"timeout\"; interval: string; runAt: string; }>[]; createdAt: string; initiator: \"user\" | \"system\"; duration: string; }> | Readonly<{} & { error: Readonly<{ status?: number | undefined; } & { message: string; rule: Readonly<{ name?: string | undefined; } & { id: string; }>; }>; }>)[]>; bulkFillGapsByRuleIds: (params: ",
+          "; }> | undefined; } & { meta: Record<string, any>; }>[]; kql: string; }> | undefined; timeframe?: Readonly<{} & { days: (2 | 1 | 7 | 6 | 5 | 4 | 3)[]; hours: Readonly<{} & { start: string; end: string; }>; timezone: string; }> | undefined; } & {}> | undefined; uuid?: string | undefined; useAlertDataForTemplate?: boolean | undefined; } & { params: Record<string, any>; id: string; actionTypeId: string; group: string; }>[]; alertTypeId: string; schedule: Readonly<{} & { interval: string; }>; createdBy: string | null; updatedBy: string | null; createdAt: string; updatedAt: string; apiKeyOwner: string | null; revision: number; }>; duration: string; status: \"error\" | \"timeout\" | \"running\" | \"complete\" | \"pending\"; schedule: Readonly<{} & { interval: string; status: \"error\" | \"timeout\" | \"running\" | \"complete\" | \"pending\"; runAt: string; }>[]; createdAt: string; initiator: \"user\" | \"system\"; }> | Readonly<{} & { error: Readonly<{ status?: number | undefined; } & { message: string; rule: Readonly<{ name?: string | undefined; } & { id: string; }>; }>; }>)[]>; bulkFillGapsByRuleIds: (params: ",
           "BulkFillGapsByRuleIdsParams",
           ", options: ",
           "BulkFillGapsByRuleIdsOptions",
           ") => Promise<",
           "BulkFillGapsByRuleIdsResult",
-          ">; getRuleIdsWithGaps: (params: Readonly<{ start?: string | undefined; end?: string | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; ruleIds?: string[] | undefined; statuses?: (\"unfilled\" | \"filled\" | \"partially_filled\")[] | undefined; hasUnfilledIntervals?: boolean | undefined; hasInProgressIntervals?: boolean | undefined; hasFilledIntervals?: boolean | undefined; highestPriorityGapFillStatuses?: (\"unfilled\" | \"filled\" | \"in_progress\")[] | undefined; ruleTypes?: Readonly<{} & { type: string; consumer: string; }>[] | undefined; maxRulesToFetch?: number | undefined; } & {}>) => Promise<Readonly<{ latestGapTimestamp?: number | undefined; } & { ruleIds: string[]; total: number; }>>; getGapsSummaryByRuleIds: (params: Readonly<{} & { start: string; end: string; ruleIds: string[]; }>) => Promise<Readonly<{} & { data: Readonly<{ gapFillStatus?: string | undefined; } & { ruleId: string; totalUnfilledDurationMs: number; totalInProgressDurationMs: number; totalFilledDurationMs: number; }>[]; }>>; getRuleTypesByQuery: (params: Readonly<{ filter?: string | undefined; ids?: string[] | undefined; } & {}>) => Promise<Readonly<{} & { ruleTypes: string[]; }>>; createGapAutoFillScheduler: (params: ",
+          ">; getRuleIdsWithGaps: (params: Readonly<{ start?: string | undefined; end?: string | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; ruleIds?: string[] | undefined; statuses?: (\"unfilled\" | \"filled\" | \"partially_filled\")[] | undefined; hasUnfilledIntervals?: boolean | undefined; hasInProgressIntervals?: boolean | undefined; hasFilledIntervals?: boolean | undefined; highestPriorityGapFillStatuses?: (\"unfilled\" | \"filled\" | \"in_progress\")[] | undefined; ruleTypes?: Readonly<{} & { type: string; consumer: string; }>[] | undefined; maxRulesToFetch?: number | undefined; } & {}>) => Promise<Readonly<{ latestGapTimestamp?: number | undefined; } & { total: number; ruleIds: string[]; }>>; getGapsSummaryByRuleIds: (params: Readonly<{} & { start: string; end: string; ruleIds: string[]; }>) => Promise<Readonly<{} & { data: Readonly<{ gapFillStatus?: string | undefined; } & { ruleId: string; totalUnfilledDurationMs: number; totalInProgressDurationMs: number; totalFilledDurationMs: number; }>[]; }>>; getRuleTypesByQuery: (params: Readonly<{ filter?: string | undefined; ids?: string[] | undefined; } & {}>) => Promise<Readonly<{} & { ruleTypes: string[]; }>>; createGapAutoFillScheduler: (params: ",
           "CreateGapAutoFillSchedulerParams",
           ") => Promise<",
           "GapAutoFillSchedulerResponse",
@@ -5723,7 +5783,7 @@
           "UpdateGapAutoFillSchedulerParams",
           ") => Promise<",
           "GapAutoFillSchedulerResponse",
-          ">; deleteGapAutoFillScheduler: (params: Readonly<{} & { id: string; }>) => Promise<void>; findGapAutoFillSchedulerLogs: (params: Readonly<{ statuses?: (\"error\" | \"success\" | \"skipped\" | \"no_gaps\")[] | undefined; } & { id: string; page: number; start: string; end: string; perPage: number; sortField: string; sortDirection: \"asc\" | \"desc\"; }>) => Promise<Readonly<{} & { page: number; data: Readonly<{ message?: string | undefined; timestamp?: string | undefined; status?: string | undefined; results?: Readonly<{ error?: string | undefined; status?: string | undefined; ruleId?: string | undefined; processedGaps?: number | undefined; } & {}>[] | undefined; } & { id: string; }>[]; perPage: number; total: number; }>>; getContext: () => ",
+          ">; deleteGapAutoFillScheduler: (params: Readonly<{} & { id: string; }>) => Promise<void>; findGapAutoFillSchedulerLogs: (params: Readonly<{ statuses?: (\"error\" | \"success\" | \"skipped\" | \"no_gaps\")[] | undefined; } & { id: string; page: number; start: string; end: string; perPage: number; sortField: string; sortDirection: \"asc\" | \"desc\"; }>) => Promise<Readonly<{} & { page: number; total: number; data: Readonly<{ message?: string | undefined; timestamp?: string | undefined; status?: string | undefined; results?: Readonly<{ error?: string | undefined; status?: string | undefined; ruleId?: string | undefined; processedGaps?: number | undefined; } & {}>[] | undefined; } & { id: string; }>[]; perPage: number; }>>; getContext: () => ",
           "RulesClientContext",
           "; }"
         ],
@@ -8865,10 +8925,10 @@
           },
           {
             "parentPluginId": "alerting",
-            "id": "def-common.Rule.throttle",
+            "id": "def-common.Rule.uiamApiKey",
             "type": "CompoundType",
             "tags": [],
-            "label": "throttle",
+            "label": "uiamApiKey",
             "description": [],
             "signature": [
               "string | null | undefined"
@@ -8881,13 +8941,29 @@
           },
           {
             "parentPluginId": "alerting",
+            "id": "def-common.Rule.throttle",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "throttle",
+            "description": [],
+            "signature": [
+              "string | null | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 251,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
             "id": "def-common.Rule.muteAll",
             "type": "boolean",
             "tags": [],
             "label": "muteAll",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
-            "lineNumber": 251,
+            "lineNumber": 252,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8903,7 +8979,7 @@
               "\"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\" | null | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
-            "lineNumber": 252,
+            "lineNumber": 253,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8919,7 +8995,7 @@
               "string[]"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
-            "lineNumber": 253,
+            "lineNumber": 254,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8941,7 +9017,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
-            "lineNumber": 254,
+            "lineNumber": 255,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8964,7 +9040,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
-            "lineNumber": 255,
+            "lineNumber": 256,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8987,7 +9063,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
-            "lineNumber": 256,
+            "lineNumber": 257,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -9003,7 +9079,7 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
-            "lineNumber": 257,
+            "lineNumber": 258,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -9019,7 +9095,7 @@
               "Date | null | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
-            "lineNumber": 258,
+            "lineNumber": 259,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -9042,7 +9118,7 @@
               " | null | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
-            "lineNumber": 259,
+            "lineNumber": 260,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -9058,7 +9134,7 @@
               "Date | null | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
-            "lineNumber": 260,
+            "lineNumber": 261,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -9071,7 +9147,7 @@
             "label": "revision",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
-            "lineNumber": 261,
+            "lineNumber": 262,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -9087,7 +9163,7 @@
               "boolean | null | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
-            "lineNumber": 262,
+            "lineNumber": 263,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -9103,7 +9179,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
-            "lineNumber": 263,
+            "lineNumber": 264,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -9126,7 +9202,7 @@
               " | null | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
-            "lineNumber": 264,
+            "lineNumber": 265,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -9149,7 +9225,7 @@
               " | null | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
-            "lineNumber": 265,
+            "lineNumber": 266,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -9172,7 +9248,7 @@
               " | null | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
-            "lineNumber": 266,
+            "lineNumber": 267,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -9422,7 +9498,7 @@
             "label": "status",
             "description": [],
             "signature": [
-              "\"unknown\" | \"ok\" | \"error\" | \"warning\" | \"pending\" | \"active\""
+              "\"unknown\" | \"ok\" | \"error\" | \"pending\" | \"active\" | \"warning\""
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
             "lineNumber": 114,
@@ -12188,7 +12264,7 @@
           "<unknown>, \"saved_object\"> & { outcome: string; alias_target_id?: string | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
-        "lineNumber": 274,
+        "lineNumber": 275,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -12397,7 +12473,7 @@
         "label": "RuleExecutionStatuses",
         "description": [],
         "signature": [
-          "\"unknown\" | \"ok\" | \"error\" | \"warning\" | \"pending\" | \"active\""
+          "\"unknown\" | \"ok\" | \"error\" | \"pending\" | \"active\" | \"warning\""
         ],
         "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
         "lineNumber": 110,
@@ -12752,7 +12828,7 @@
           "[]; }"
         ],
         "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
-        "lineNumber": 269,
+        "lineNumber": 270,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -13814,15 +13890,46 @@
               },
               {
                 "parentPluginId": "alerting",
+                "id": "def-common.alertMappings.properties.uiamApiKey",
+                "type": "Object",
+                "tags": [],
+                "label": "uiamApiKey",
+                "description": [],
+                "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
+                "lineNumber": 119,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "alerting",
+                    "id": "def-common.alertMappings.properties.uiamApiKey.type",
+                    "type": "string",
+                    "tags": [],
+                    "label": "type",
+                    "description": [],
+                    "signature": [
+                      "\"binary\""
+                    ],
+                    "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
+                    "lineNumber": 120,
+                    "columnNumber": 7,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "alerting",
                 "id": "def-common.alertMappings.properties.throttle",
                 "type": "Object",
                 "tags": [],
                 "label": "throttle",
                 "description": [
-                  "// NEED TO CHECK WITH KIBANA SECURITY\n// apiKey: {\n//   type: 'binary',\n// },\n// NO NEED TO BE INDEXED\n// apiKeyOwner: {\n//   type: 'keyword',\n// },"
+                  "// NO NEED TO BE INDEXED\n// NEED TO CHECK WITH KIBANA SECURITY\n// apiKey: {\n//   type: 'binary',\n// },\n// NO NEED TO BE INDEXED\n// apiKeyOwner: {\n//   type: 'keyword',\n// },"
                 ],
                 "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                "lineNumber": 127,
+                "lineNumber": 131,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -13838,7 +13945,7 @@
                       "\"keyword\""
                     ],
                     "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                    "lineNumber": 128,
+                    "lineNumber": 132,
                     "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
@@ -13853,7 +13960,7 @@
                 "label": "notifyWhen",
                 "description": [],
                 "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                "lineNumber": 130,
+                "lineNumber": 134,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -13869,7 +13976,7 @@
                       "\"keyword\""
                     ],
                     "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                    "lineNumber": 131,
+                    "lineNumber": 135,
                     "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
@@ -13884,7 +13991,7 @@
                 "label": "muteAll",
                 "description": [],
                 "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                "lineNumber": 133,
+                "lineNumber": 137,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -13900,7 +14007,7 @@
                       "\"boolean\""
                     ],
                     "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                    "lineNumber": 134,
+                    "lineNumber": 138,
                     "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
@@ -13915,7 +14022,7 @@
                 "label": "mutedInstanceIds",
                 "description": [],
                 "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                "lineNumber": 136,
+                "lineNumber": 140,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -13931,7 +14038,7 @@
                       "\"keyword\""
                     ],
                     "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                    "lineNumber": 137,
+                    "lineNumber": 141,
                     "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
@@ -13948,7 +14055,7 @@
                   "// NO NEED TO BE INDEXED\n// meta: {\n//   properties: {\n//     versionApiKeyLastmodified: {\n//       type: 'keyword',\n//     },\n//   },\n// },"
                 ],
                 "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                "lineNumber": 147,
+                "lineNumber": 151,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -13961,7 +14068,7 @@
                     "label": "properties",
                     "description": [],
                     "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                    "lineNumber": 148,
+                    "lineNumber": 152,
                     "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false,
@@ -13974,7 +14081,7 @@
                         "label": "run",
                         "description": [],
                         "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                        "lineNumber": 149,
+                        "lineNumber": 153,
                         "columnNumber": 9,
                         "deprecated": false,
                         "trackAdoption": false,
@@ -13987,7 +14094,7 @@
                             "label": "properties",
                             "description": [],
                             "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                            "lineNumber": 150,
+                            "lineNumber": 154,
                             "columnNumber": 11,
                             "deprecated": false,
                             "trackAdoption": false,
@@ -14002,7 +14109,7 @@
                                   "// history: {\n//   properties: {\n//     duration: {\n//       type: 'long',\n//     },\n//     success: {\n//       type: 'boolean',\n//     },\n//     timestamp: {\n//       type: 'date',\n//     },\n//     outcome: {\n//       type: 'keyword',\n//     },\n//   },\n// },"
                                 ],
                                 "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                                "lineNumber": 167,
+                                "lineNumber": 171,
                                 "columnNumber": 13,
                                 "deprecated": false,
                                 "trackAdoption": false,
@@ -14015,7 +14122,7 @@
                                     "label": "properties",
                                     "description": [],
                                     "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                                    "lineNumber": 168,
+                                    "lineNumber": 172,
                                     "columnNumber": 15,
                                     "deprecated": false,
                                     "trackAdoption": false,
@@ -14028,7 +14135,7 @@
                                         "label": "p50",
                                         "description": [],
                                         "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                                        "lineNumber": 169,
+                                        "lineNumber": 173,
                                         "columnNumber": 17,
                                         "deprecated": false,
                                         "trackAdoption": false,
@@ -14044,7 +14151,7 @@
                                               "\"long\""
                                             ],
                                             "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                                            "lineNumber": 170,
+                                            "lineNumber": 174,
                                             "columnNumber": 19,
                                             "deprecated": false,
                                             "trackAdoption": false
@@ -14059,7 +14166,7 @@
                                         "label": "p95",
                                         "description": [],
                                         "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                                        "lineNumber": 172,
+                                        "lineNumber": 176,
                                         "columnNumber": 17,
                                         "deprecated": false,
                                         "trackAdoption": false,
@@ -14075,7 +14182,7 @@
                                               "\"long\""
                                             ],
                                             "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                                            "lineNumber": 173,
+                                            "lineNumber": 177,
                                             "columnNumber": 19,
                                             "deprecated": false,
                                             "trackAdoption": false
@@ -14090,7 +14197,7 @@
                                         "label": "p99",
                                         "description": [],
                                         "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                                        "lineNumber": 175,
+                                        "lineNumber": 179,
                                         "columnNumber": 17,
                                         "deprecated": false,
                                         "trackAdoption": false,
@@ -14106,7 +14213,7 @@
                                               "\"long\""
                                             ],
                                             "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                                            "lineNumber": 176,
+                                            "lineNumber": 180,
                                             "columnNumber": 19,
                                             "deprecated": false,
                                             "trackAdoption": false
@@ -14121,7 +14228,7 @@
                                         "label": "success_ratio",
                                         "description": [],
                                         "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                                        "lineNumber": 178,
+                                        "lineNumber": 182,
                                         "columnNumber": 17,
                                         "deprecated": false,
                                         "trackAdoption": false,
@@ -14137,7 +14244,7 @@
                                               "\"float\""
                                             ],
                                             "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                                            "lineNumber": 179,
+                                            "lineNumber": 183,
                                             "columnNumber": 19,
                                             "deprecated": false,
                                             "trackAdoption": false
@@ -14156,7 +14263,7 @@
                                 "label": "last_run",
                                 "description": [],
                                 "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                                "lineNumber": 183,
+                                "lineNumber": 187,
                                 "columnNumber": 13,
                                 "deprecated": false,
                                 "trackAdoption": false,
@@ -14169,7 +14276,7 @@
                                     "label": "properties",
                                     "description": [],
                                     "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                                    "lineNumber": 184,
+                                    "lineNumber": 188,
                                     "columnNumber": 15,
                                     "deprecated": false,
                                     "trackAdoption": false,
@@ -14182,7 +14289,7 @@
                                         "label": "timestamp",
                                         "description": [],
                                         "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                                        "lineNumber": 185,
+                                        "lineNumber": 189,
                                         "columnNumber": 17,
                                         "deprecated": false,
                                         "trackAdoption": false,
@@ -14198,7 +14305,7 @@
                                               "\"date\""
                                             ],
                                             "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                                            "lineNumber": 186,
+                                            "lineNumber": 190,
                                             "columnNumber": 19,
                                             "deprecated": false,
                                             "trackAdoption": false
@@ -14213,7 +14320,7 @@
                                         "label": "metrics",
                                         "description": [],
                                         "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                                        "lineNumber": 188,
+                                        "lineNumber": 192,
                                         "columnNumber": 17,
                                         "deprecated": false,
                                         "trackAdoption": false,
@@ -14226,7 +14333,7 @@
                                             "label": "properties",
                                             "description": [],
                                             "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                                            "lineNumber": 189,
+                                            "lineNumber": 193,
                                             "columnNumber": 19,
                                             "deprecated": false,
                                             "trackAdoption": false,
@@ -14239,7 +14346,7 @@
                                                 "label": "duration",
                                                 "description": [],
                                                 "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                                                "lineNumber": 190,
+                                                "lineNumber": 194,
                                                 "columnNumber": 21,
                                                 "deprecated": false,
                                                 "trackAdoption": false,
@@ -14255,7 +14362,7 @@
                                                       "\"long\""
                                                     ],
                                                     "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                                                    "lineNumber": 191,
+                                                    "lineNumber": 195,
                                                     "columnNumber": 23,
                                                     "deprecated": false,
                                                     "trackAdoption": false
@@ -14270,7 +14377,7 @@
                                                 "label": "total_search_duration_ms",
                                                 "description": [],
                                                 "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                                                "lineNumber": 193,
+                                                "lineNumber": 197,
                                                 "columnNumber": 21,
                                                 "deprecated": false,
                                                 "trackAdoption": false,
@@ -14286,7 +14393,7 @@
                                                       "\"long\""
                                                     ],
                                                     "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                                                    "lineNumber": 194,
+                                                    "lineNumber": 198,
                                                     "columnNumber": 23,
                                                     "deprecated": false,
                                                     "trackAdoption": false
@@ -14301,7 +14408,7 @@
                                                 "label": "total_indexing_duration_ms",
                                                 "description": [],
                                                 "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                                                "lineNumber": 196,
+                                                "lineNumber": 200,
                                                 "columnNumber": 21,
                                                 "deprecated": false,
                                                 "trackAdoption": false,
@@ -14317,7 +14424,7 @@
                                                       "\"long\""
                                                     ],
                                                     "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                                                    "lineNumber": 197,
+                                                    "lineNumber": 201,
                                                     "columnNumber": 23,
                                                     "deprecated": false,
                                                     "trackAdoption": false
@@ -14332,7 +14439,7 @@
                                                 "label": "total_alerts_detected",
                                                 "description": [],
                                                 "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                                                "lineNumber": 199,
+                                                "lineNumber": 203,
                                                 "columnNumber": 21,
                                                 "deprecated": false,
                                                 "trackAdoption": false,
@@ -14348,7 +14455,7 @@
                                                       "\"float\""
                                                     ],
                                                     "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                                                    "lineNumber": 200,
+                                                    "lineNumber": 204,
                                                     "columnNumber": 23,
                                                     "deprecated": false,
                                                     "trackAdoption": false
@@ -14363,7 +14470,7 @@
                                                 "label": "total_alerts_created",
                                                 "description": [],
                                                 "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                                                "lineNumber": 202,
+                                                "lineNumber": 206,
                                                 "columnNumber": 21,
                                                 "deprecated": false,
                                                 "trackAdoption": false,
@@ -14379,7 +14486,7 @@
                                                       "\"float\""
                                                     ],
                                                     "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                                                    "lineNumber": 203,
+                                                    "lineNumber": 207,
                                                     "columnNumber": 23,
                                                     "deprecated": false,
                                                     "trackAdoption": false
@@ -14394,7 +14501,7 @@
                                                 "label": "gap_duration_s",
                                                 "description": [],
                                                 "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                                                "lineNumber": 205,
+                                                "lineNumber": 209,
                                                 "columnNumber": 21,
                                                 "deprecated": false,
                                                 "trackAdoption": false,
@@ -14410,7 +14517,7 @@
                                                       "\"float\""
                                                     ],
                                                     "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                                                    "lineNumber": 206,
+                                                    "lineNumber": 210,
                                                     "columnNumber": 23,
                                                     "deprecated": false,
                                                     "trackAdoption": false
@@ -14443,7 +14550,7 @@
                   "// There is need to query for a rule by a specific revision"
                 ],
                 "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                "lineNumber": 217,
+                "lineNumber": 221,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -14459,7 +14566,7 @@
                       "\"long\""
                     ],
                     "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                    "lineNumber": 218,
+                    "lineNumber": 222,
                     "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
@@ -14474,7 +14581,7 @@
                 "label": "snoozeSchedule",
                 "description": [],
                 "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                "lineNumber": 220,
+                "lineNumber": 224,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -14490,7 +14597,7 @@
                       "\"nested\""
                     ],
                     "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                    "lineNumber": 221,
+                    "lineNumber": 225,
                     "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
@@ -14503,7 +14610,7 @@
                     "label": "properties",
                     "description": [],
                     "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                    "lineNumber": 222,
+                    "lineNumber": 226,
                     "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false,
@@ -14516,7 +14623,7 @@
                         "label": "id",
                         "description": [],
                         "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                        "lineNumber": 223,
+                        "lineNumber": 227,
                         "columnNumber": 9,
                         "deprecated": false,
                         "trackAdoption": false,
@@ -14532,7 +14639,7 @@
                               "\"keyword\""
                             ],
                             "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                            "lineNumber": 224,
+                            "lineNumber": 228,
                             "columnNumber": 11,
                             "deprecated": false,
                             "trackAdoption": false
@@ -14547,7 +14654,7 @@
                         "label": "duration",
                         "description": [],
                         "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                        "lineNumber": 226,
+                        "lineNumber": 230,
                         "columnNumber": 9,
                         "deprecated": false,
                         "trackAdoption": false,
@@ -14563,7 +14670,7 @@
                               "\"long\""
                             ],
                             "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                            "lineNumber": 227,
+                            "lineNumber": 231,
                             "columnNumber": 11,
                             "deprecated": false,
                             "trackAdoption": false
@@ -14578,7 +14685,7 @@
                         "label": "skipRecurrences",
                         "description": [],
                         "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                        "lineNumber": 229,
+                        "lineNumber": 233,
                         "columnNumber": 9,
                         "deprecated": false,
                         "trackAdoption": false,
@@ -14594,7 +14701,7 @@
                               "\"date\""
                             ],
                             "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                            "lineNumber": 230,
+                            "lineNumber": 234,
                             "columnNumber": 11,
                             "deprecated": false,
                             "trackAdoption": false
@@ -14607,7 +14714,7 @@
                             "label": "format",
                             "description": [],
                             "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                            "lineNumber": 231,
+                            "lineNumber": 235,
                             "columnNumber": 11,
                             "deprecated": false,
                             "trackAdoption": false
@@ -14628,7 +14735,7 @@
                   "// NO NEED TO BE INDEXED\n// flapping: {\n//   index: false,\n//   properties: {\n//     enabled: {\n//       type: 'boolean',\n//     },\n//     lookBackWindow: {\n//       type: 'long',\n//     },\n//     statusChangeThreshold: {\n//       type: 'long',\n//     },\n//   },\n// },\n// NO NEED TO BE INDEXED\n// nextRun: {\n//   type: 'date',\n// },\n// Deprecated, if you need to add new property please do it in `last_run`"
                 ],
                 "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                "lineNumber": 257,
+                "lineNumber": 261,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -14641,7 +14748,7 @@
                     "label": "properties",
                     "description": [],
                     "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                    "lineNumber": 258,
+                    "lineNumber": 262,
                     "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false,
@@ -14654,7 +14761,7 @@
                         "label": "numberOfTriggeredActions",
                         "description": [],
                         "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                        "lineNumber": 259,
+                        "lineNumber": 263,
                         "columnNumber": 9,
                         "deprecated": false,
                         "trackAdoption": false,
@@ -14670,7 +14777,7 @@
                               "\"long\""
                             ],
                             "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                            "lineNumber": 260,
+                            "lineNumber": 264,
                             "columnNumber": 11,
                             "deprecated": false,
                             "trackAdoption": false
@@ -14685,7 +14792,7 @@
                         "label": "status",
                         "description": [],
                         "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                        "lineNumber": 262,
+                        "lineNumber": 266,
                         "columnNumber": 9,
                         "deprecated": false,
                         "trackAdoption": false,
@@ -14701,7 +14808,7 @@
                               "\"keyword\""
                             ],
                             "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                            "lineNumber": 263,
+                            "lineNumber": 267,
                             "columnNumber": 11,
                             "deprecated": false,
                             "trackAdoption": false
@@ -14716,7 +14823,7 @@
                         "label": "lastExecutionDate",
                         "description": [],
                         "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                        "lineNumber": 265,
+                        "lineNumber": 269,
                         "columnNumber": 9,
                         "deprecated": false,
                         "trackAdoption": false,
@@ -14732,7 +14839,7 @@
                               "\"date\""
                             ],
                             "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                            "lineNumber": 266,
+                            "lineNumber": 270,
                             "columnNumber": 11,
                             "deprecated": false,
                             "trackAdoption": false
@@ -14747,7 +14854,7 @@
                         "label": "lastDuration",
                         "description": [],
                         "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                        "lineNumber": 268,
+                        "lineNumber": 272,
                         "columnNumber": 9,
                         "deprecated": false,
                         "trackAdoption": false,
@@ -14763,7 +14870,7 @@
                               "\"long\""
                             ],
                             "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                            "lineNumber": 269,
+                            "lineNumber": 273,
                             "columnNumber": 11,
                             "deprecated": false,
                             "trackAdoption": false
@@ -14778,7 +14885,7 @@
                         "label": "error",
                         "description": [],
                         "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                        "lineNumber": 271,
+                        "lineNumber": 275,
                         "columnNumber": 9,
                         "deprecated": false,
                         "trackAdoption": false,
@@ -14791,7 +14898,7 @@
                             "label": "properties",
                             "description": [],
                             "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                            "lineNumber": 272,
+                            "lineNumber": 276,
                             "columnNumber": 11,
                             "deprecated": false,
                             "trackAdoption": false,
@@ -14804,7 +14911,7 @@
                                 "label": "reason",
                                 "description": [],
                                 "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                                "lineNumber": 273,
+                                "lineNumber": 277,
                                 "columnNumber": 13,
                                 "deprecated": false,
                                 "trackAdoption": false,
@@ -14820,7 +14927,7 @@
                                       "\"keyword\""
                                     ],
                                     "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                                    "lineNumber": 274,
+                                    "lineNumber": 278,
                                     "columnNumber": 15,
                                     "deprecated": false,
                                     "trackAdoption": false
@@ -14835,7 +14942,7 @@
                                 "label": "message",
                                 "description": [],
                                 "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                                "lineNumber": 276,
+                                "lineNumber": 280,
                                 "columnNumber": 13,
                                 "deprecated": false,
                                 "trackAdoption": false,
@@ -14851,7 +14958,7 @@
                                       "\"keyword\""
                                     ],
                                     "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                                    "lineNumber": 277,
+                                    "lineNumber": 281,
                                     "columnNumber": 15,
                                     "deprecated": false,
                                     "trackAdoption": false
@@ -14870,7 +14977,7 @@
                         "label": "warning",
                         "description": [],
                         "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                        "lineNumber": 281,
+                        "lineNumber": 285,
                         "columnNumber": 9,
                         "deprecated": false,
                         "trackAdoption": false,
@@ -14883,7 +14990,7 @@
                             "label": "properties",
                             "description": [],
                             "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                            "lineNumber": 282,
+                            "lineNumber": 286,
                             "columnNumber": 11,
                             "deprecated": false,
                             "trackAdoption": false,
@@ -14896,7 +15003,7 @@
                                 "label": "reason",
                                 "description": [],
                                 "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                                "lineNumber": 283,
+                                "lineNumber": 287,
                                 "columnNumber": 13,
                                 "deprecated": false,
                                 "trackAdoption": false,
@@ -14912,7 +15019,7 @@
                                       "\"keyword\""
                                     ],
                                     "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                                    "lineNumber": 284,
+                                    "lineNumber": 288,
                                     "columnNumber": 15,
                                     "deprecated": false,
                                     "trackAdoption": false
@@ -14927,7 +15034,7 @@
                                 "label": "message",
                                 "description": [],
                                 "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                                "lineNumber": 286,
+                                "lineNumber": 290,
                                 "columnNumber": 13,
                                 "deprecated": false,
                                 "trackAdoption": false,
@@ -14943,7 +15050,7 @@
                                       "\"keyword\""
                                     ],
                                     "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                                    "lineNumber": 287,
+                                    "lineNumber": 291,
                                     "columnNumber": 15,
                                     "deprecated": false,
                                     "trackAdoption": false
@@ -14966,7 +15073,7 @@
                 "label": "lastRun",
                 "description": [],
                 "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                "lineNumber": 293,
+                "lineNumber": 297,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -14979,7 +15086,7 @@
                     "label": "properties",
                     "description": [],
                     "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                    "lineNumber": 294,
+                    "lineNumber": 298,
                     "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false,
@@ -14992,7 +15099,7 @@
                         "label": "outcome",
                         "description": [],
                         "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                        "lineNumber": 295,
+                        "lineNumber": 299,
                         "columnNumber": 9,
                         "deprecated": false,
                         "trackAdoption": false,
@@ -15008,7 +15115,7 @@
                               "\"keyword\""
                             ],
                             "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                            "lineNumber": 296,
+                            "lineNumber": 300,
                             "columnNumber": 11,
                             "deprecated": false,
                             "trackAdoption": false
@@ -15023,7 +15130,7 @@
                         "label": "outcomeOrder",
                         "description": [],
                         "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                        "lineNumber": 298,
+                        "lineNumber": 302,
                         "columnNumber": 9,
                         "deprecated": false,
                         "trackAdoption": false,
@@ -15039,7 +15146,7 @@
                               "\"float\""
                             ],
                             "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                            "lineNumber": 299,
+                            "lineNumber": 303,
                             "columnNumber": 11,
                             "deprecated": false,
                             "trackAdoption": false
@@ -15056,7 +15163,7 @@
                           "// NO NEED TO BE INDEXED\n// warning: {\n//   type: 'text',\n// },\n// outcomeMsg: {\n//   type: 'text',\n// },"
                         ],
                         "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                        "lineNumber": 308,
+                        "lineNumber": 312,
                         "columnNumber": 9,
                         "deprecated": false,
                         "trackAdoption": false,
@@ -15069,7 +15176,7 @@
                             "label": "properties",
                             "description": [],
                             "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                            "lineNumber": 309,
+                            "lineNumber": 313,
                             "columnNumber": 11,
                             "deprecated": false,
                             "trackAdoption": false,
@@ -15082,7 +15189,7 @@
                                 "label": "active",
                                 "description": [],
                                 "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                                "lineNumber": 310,
+                                "lineNumber": 314,
                                 "columnNumber": 13,
                                 "deprecated": false,
                                 "trackAdoption": false,
@@ -15098,7 +15205,7 @@
                                       "\"float\""
                                     ],
                                     "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                                    "lineNumber": 311,
+                                    "lineNumber": 315,
                                     "columnNumber": 15,
                                     "deprecated": false,
                                     "trackAdoption": false
@@ -15113,7 +15220,7 @@
                                 "label": "new",
                                 "description": [],
                                 "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                                "lineNumber": 313,
+                                "lineNumber": 317,
                                 "columnNumber": 13,
                                 "deprecated": false,
                                 "trackAdoption": false,
@@ -15129,7 +15236,7 @@
                                       "\"float\""
                                     ],
                                     "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                                    "lineNumber": 314,
+                                    "lineNumber": 318,
                                     "columnNumber": 15,
                                     "deprecated": false,
                                     "trackAdoption": false
@@ -15144,7 +15251,7 @@
                                 "label": "recovered",
                                 "description": [],
                                 "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                                "lineNumber": 316,
+                                "lineNumber": 320,
                                 "columnNumber": 13,
                                 "deprecated": false,
                                 "trackAdoption": false,
@@ -15160,7 +15267,7 @@
                                       "\"float\""
                                     ],
                                     "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                                    "lineNumber": 317,
+                                    "lineNumber": 321,
                                     "columnNumber": 15,
                                     "deprecated": false,
                                     "trackAdoption": false
@@ -15175,7 +15282,7 @@
                                 "label": "ignored",
                                 "description": [],
                                 "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                                "lineNumber": 319,
+                                "lineNumber": 323,
                                 "columnNumber": 13,
                                 "deprecated": false,
                                 "trackAdoption": false,
@@ -15191,7 +15298,7 @@
                                       "\"float\""
                                     ],
                                     "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                                    "lineNumber": 320,
+                                    "lineNumber": 324,
                                     "columnNumber": 15,
                                     "deprecated": false,
                                     "trackAdoption": false
@@ -15214,7 +15321,7 @@
                 "label": "running",
                 "description": [],
                 "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                "lineNumber": 326,
+                "lineNumber": 330,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -15230,7 +15337,7 @@
                       "\"boolean\""
                     ],
                     "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
-                    "lineNumber": 327,
+                    "lineNumber": 331,
                     "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false

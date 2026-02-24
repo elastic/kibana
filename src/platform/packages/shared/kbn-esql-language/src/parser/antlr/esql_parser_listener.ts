@@ -24,6 +24,7 @@ import { FieldsContext } from "./esql_parser.js";
 import { FieldContext } from "./esql_parser.js";
 import { FromCommandContext } from "./esql_parser.js";
 import { TimeSeriesCommandContext } from "./esql_parser.js";
+import { ExternalCommandContext } from "./esql_parser.js";
 import { IndexPatternAndMetadataFieldsContext } from "./esql_parser.js";
 import { IndexPatternOrSubqueryContext } from "./esql_parser.js";
 import { SubqueryContext } from "./esql_parser.js";
@@ -83,8 +84,10 @@ import { InlineStatsCommandContext } from "./esql_parser.js";
 import { FuseCommandContext } from "./esql_parser.js";
 import { FuseConfigurationContext } from "./esql_parser.js";
 import { FuseKeyByFieldsContext } from "./esql_parser.js";
+import { MetricsInfoCommandContext } from "./esql_parser.js";
 import { LookupCommandContext } from "./esql_parser.js";
 import { InsistCommandContext } from "./esql_parser.js";
+import { UriPartsCommandContext } from "./esql_parser.js";
 import { SetCommandContext } from "./esql_parser.js";
 import { SetFieldContext } from "./esql_parser.js";
 import { MmrCommandContext } from "./esql_parser.js";
@@ -291,6 +294,16 @@ export default class esql_parserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitTimeSeriesCommand?: (ctx: TimeSeriesCommandContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.externalCommand`.
+	 * @param ctx the parse tree
+	 */
+	enterExternalCommand?: (ctx: ExternalCommandContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.externalCommand`.
+	 * @param ctx the parse tree
+	 */
+	exitExternalCommand?: (ctx: ExternalCommandContext) => void;
 	/**
 	 * Enter a parse tree produced by `esql_parser.indexPatternAndMetadataFields`.
 	 * @param ctx the parse tree
@@ -896,6 +909,16 @@ export default class esql_parserListener extends ParseTreeListener {
 	 */
 	exitFuseKeyByFields?: (ctx: FuseKeyByFieldsContext) => void;
 	/**
+	 * Enter a parse tree produced by `esql_parser.metricsInfoCommand`.
+	 * @param ctx the parse tree
+	 */
+	enterMetricsInfoCommand?: (ctx: MetricsInfoCommandContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.metricsInfoCommand`.
+	 * @param ctx the parse tree
+	 */
+	exitMetricsInfoCommand?: (ctx: MetricsInfoCommandContext) => void;
+	/**
 	 * Enter a parse tree produced by `esql_parser.lookupCommand`.
 	 * @param ctx the parse tree
 	 */
@@ -915,6 +938,16 @@ export default class esql_parserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitInsistCommand?: (ctx: InsistCommandContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.uriPartsCommand`.
+	 * @param ctx the parse tree
+	 */
+	enterUriPartsCommand?: (ctx: UriPartsCommandContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.uriPartsCommand`.
+	 * @param ctx the parse tree
+	 */
+	exitUriPartsCommand?: (ctx: UriPartsCommandContext) => void;
 	/**
 	 * Enter a parse tree produced by `esql_parser.setCommand`.
 	 * @param ctx the parse tree

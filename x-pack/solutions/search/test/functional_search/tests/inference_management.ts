@@ -65,6 +65,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await pageObjects.searchInferenceManagementPage.InferenceTabularPage.expectTabularViewToBeLoaded();
         });
 
+        it('can switch to group by service', async () => {
+          await pageObjects.searchInferenceManagementPage.InferenceTabularPage.selectGroupByOption(
+            'service'
+          );
+          await pageObjects.searchInferenceManagementPage.InferenceTabularPage.expectGroupBySelection(
+            'Service'
+          );
+          await pageObjects.searchInferenceManagementPage.InferenceTabularPage.expectGroupByViewToBeDisplayed();
+          await pageObjects.searchInferenceManagementPage.InferenceTabularPage.expectGroupByTable(
+            'elasticsearch'
+          );
+        });
+
         it('can collapse group accordions', async () => {
           const modelGroup = 'elastic';
           await pageObjects.searchInferenceManagementPage.InferenceTabularPage.expectGroupByViewToBeDisplayed();

@@ -11,6 +11,7 @@ import type { JSONSchema7 } from 'json-schema';
 import type { z } from '@kbn/zod/v4';
 import type { LegacyWorkflowInput, WorkflowInputSchema } from '../schema';
 import type { JsonModelSchemaType } from '../schema/common/json_model_schema';
+import type { JsonSchema } from '../schema/common/json_model_shape_schema';
 
 /**
  * Converts a legacy workflow input definition to a JSON Schema property
@@ -62,13 +63,15 @@ function convertLegacyInputToJsonSchemaProperty(input: LegacyWorkflowInput): JSO
 export function convertLegacyInputsToJsonSchema(
   legacyInputs: Array<z.infer<typeof WorkflowInputSchema>>
 ): JsonModelSchemaType {
-  const properties: Record<string, JSONSchema7> = {};
+  const properties: Record<string, JsonSchema> = {};
   const required: string[] = [];
 
   for (const input of legacyInputs) {
     // Skip null/undefined inputs (can happen during partial YAML parsing)
     if (input && typeof input === 'object' && input.name) {
-      properties[input.name] = convertLegacyInputToJsonSchemaProperty(input);
+      properties[input.name] = convertLegacyInputToJsonSchemaProperty(
+        input
+      ) as unknown as JsonSchema;
 
       if (input.required === true) {
         required.push(input.name);

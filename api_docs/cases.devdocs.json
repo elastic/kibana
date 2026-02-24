@@ -16,7 +16,7 @@
           ") => string"
         ],
         "path": "x-pack/platform/plugins/shared/cases/public/common/navigation/paths.ts",
-        "lineNumber": 42,
+        "lineNumber": 63,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -32,7 +32,7 @@
               "CaseViewPathParams"
             ],
             "path": "x-pack/platform/plugins/shared/cases/public/common/navigation/paths.ts",
-            "lineNumber": 42,
+            "lineNumber": 63,
             "columnNumber": 38,
             "deprecated": false,
             "trackAdoption": false,
@@ -145,7 +145,7 @@
           "[]"
         ],
         "path": "x-pack/platform/plugins/shared/cases/public/types.ts",
-        "lineNumber": 190,
+        "lineNumber": 192,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -163,7 +163,7 @@
           "[]"
         ],
         "path": "x-pack/platform/plugins/shared/cases/public/types.ts",
-        "lineNumber": 192,
+        "lineNumber": 194,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -377,7 +377,7 @@
           "CustomFieldTypes",
           ".TEXT; value: string | null; } | { key: string; type: ",
           "CustomFieldTypes",
-          ".NUMBER; value: number | null; })[] | undefined; }, \"title\" | \"description\"> | undefined; }"
+          ".NUMBER; value: number | null; })[] | undefined; }, \"description\" | \"title\"> | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/cases/public/client/ui/get_create_case_flyout.tsx",
         "lineNumber": 15,
@@ -460,7 +460,7 @@
       "label": "CasesPublicStart",
       "description": [],
       "path": "x-pack/platform/plugins/shared/cases/public/types.ts",
-      "lineNumber": 124,
+      "lineNumber": 126,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -515,7 +515,7 @@
             },
             "[] | undefined; assignees?: string | string[] | undefined; reporters?: string | string[] | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; from?: string | undefined; search?: string | undefined; sortField?: \"title\" | \"status\" | \"createdAt\" | \"updatedAt\" | \"severity\" | \"category\" | \"closedAt\" | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; to?: string | undefined; owner?: string | string[] | undefined; category?: string | string[] | undefined; } & Partial<",
             "Pagination",
-            "> & { searchFields?: \"title\" | \"description\" | \"incremental_id.text\" | (\"title\" | \"description\" | \"incremental_id.text\")[] | undefined; }, signal?: AbortSignal | undefined) => Promise<",
+            "> & { searchFields?: \"description\" | \"title\" | \"incremental_id.text\" | (\"description\" | \"title\" | \"incremental_id.text\")[] | undefined; }, signal?: AbortSignal | undefined) => Promise<",
             {
               "pluginId": "cases",
               "scope": "common",
@@ -716,7 +716,7 @@
             "; }; } & { created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; owner: string; pushed_at: string | null; pushed_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; updated_at: string | null; updated_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; })) & { id: string; version: string; })[] | undefined; })[]; errors: { error: string; message: string; status: number | undefined; caseId: string; }[]; }>; }; }"
           ],
           "path": "x-pack/platform/plugins/shared/cases/public/types.ts",
-          "lineNumber": 125,
+          "lineNumber": 127,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -733,7 +733,7 @@
             "GetCasesProps",
             ") => React.ReactElement<",
             "GetCasesProps",
-            ", string | React.JSXElementConstructor<any>>; getCasesContext: () => React.FC<React.PropsWithChildren<",
+            ">; getCasesContext: () => React.FC<React.PropsWithChildren<",
             "GetCasesContextProps",
             ">>; getAllCasesSelectorModal: (props: ",
             {
@@ -751,7 +751,7 @@
               "section": "def-public.GetAllCasesSelectorModalProps",
               "text": "GetAllCasesSelectorModalProps"
             },
-            ", string | React.JSXElementConstructor<any>>; getRecentCases: (props: ",
+            ">; getRecentCases: (props: ",
             {
               "pluginId": "cases",
               "scope": "public",
@@ -767,10 +767,10 @@
               "section": "def-public.GetRecentCasesProps",
               "text": "GetRecentCasesProps"
             },
-            ", string | React.JSXElementConstructor<any>>; }"
+            ">; }"
           ],
           "path": "x-pack/platform/plugins/shared/cases/public/types.ts",
-          "lineNumber": 136,
+          "lineNumber": 138,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -808,7 +808,7 @@
             "; }"
           ],
           "path": "x-pack/platform/plugins/shared/cases/public/types.ts",
-          "lineNumber": 160,
+          "lineNumber": 162,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -846,7 +846,7 @@
             "[][]) => { typeKey: string; value: string; description: string | null; }[]; }"
           ],
           "path": "x-pack/platform/plugins/shared/cases/public/types.ts",
-          "lineNumber": 165,
+          "lineNumber": 167,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -863,7 +863,7 @@
       "label": "CasesPublicSetup",
       "description": [],
       "path": "x-pack/platform/plugins/shared/cases/public/types.ts",
-      "lineNumber": 120,
+      "lineNumber": 122,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -879,7 +879,7 @@
             "AttachmentFramework"
           ],
           "path": "x-pack/platform/plugins/shared/cases/public/types.ts",
-          "lineNumber": 121,
+          "lineNumber": 123,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -901,7 +901,7 @@
           "\nClient wrapper that contains accessor methods for individual entities within the cases system."
         ],
         "path": "x-pack/platform/plugins/shared/cases/server/client/client.ts",
-        "lineNumber": 22,
+        "lineNumber": 24,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -917,7 +917,7 @@
               "any"
             ],
             "path": "x-pack/platform/plugins/shared/cases/server/client/client.ts",
-            "lineNumber": 33,
+            "lineNumber": 36,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -933,7 +933,7 @@
                   "CasesClientArgs"
                 ],
                 "path": "x-pack/platform/plugins/shared/cases/server/client/client.ts",
-                "lineNumber": 33,
+                "lineNumber": 36,
                 "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -941,6 +941,24 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "cases",
+            "id": "def-server.CasesClient.templates",
+            "type": "Object",
+            "tags": [],
+            "label": "templates",
+            "description": [
+              "\nRetrieves an interface for interacting with templates."
+            ],
+            "signature": [
+              "TemplatesSubClient"
+            ],
+            "path": "x-pack/platform/plugins/shared/cases/server/client/client.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "cases",
@@ -955,7 +973,7 @@
               "CasesSubClient"
             ],
             "path": "x-pack/platform/plugins/shared/cases/server/client/client.ts",
-            "lineNumber": 42,
+            "lineNumber": 53,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -973,7 +991,7 @@
               "AttachmentsSubClient"
             ],
             "path": "x-pack/platform/plugins/shared/cases/server/client/client.ts",
-            "lineNumber": 49,
+            "lineNumber": 60,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -991,7 +1009,7 @@
               "UserActionsSubClient"
             ],
             "path": "x-pack/platform/plugins/shared/cases/server/client/client.ts",
-            "lineNumber": 56,
+            "lineNumber": 67,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1009,7 +1027,7 @@
               "ConfigureSubClient"
             ],
             "path": "x-pack/platform/plugins/shared/cases/server/client/client.ts",
-            "lineNumber": 63,
+            "lineNumber": 74,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1027,7 +1045,7 @@
               "MetricsSubClient"
             ],
             "path": "x-pack/platform/plugins/shared/cases/server/client/client.ts",
-            "lineNumber": 70,
+            "lineNumber": 81,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1049,7 +1067,7 @@
       "label": "CasesServerSetup",
       "description": [],
       "path": "x-pack/platform/plugins/shared/cases/server/types.ts",
-      "lineNumber": 101,
+      "lineNumber": 103,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -1065,7 +1083,7 @@
             "AttachmentFramework"
           ],
           "path": "x-pack/platform/plugins/shared/cases/server/types.ts",
-          "lineNumber": 102,
+          "lineNumber": 104,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -1078,10 +1096,10 @@
           "label": "config",
           "description": [],
           "signature": [
-            "{ readonly stack: Readonly<{} & { enabled: boolean; }>; readonly enabled: boolean; readonly incrementalId: Readonly<{} & { enabled: boolean; taskIntervalMinutes: number; taskStartDelayMinutes: number; }>; readonly analytics: Readonly<{} & { index: Readonly<{} & { enabled: boolean; }>; }>; readonly markdownPlugins: Readonly<{} & { lens: boolean; }>; readonly files: Readonly<{ maxSize?: number | undefined; } & { allowedMimeTypes: string[]; }>; }"
+            "{ readonly stack: Readonly<{} & { enabled: boolean; }>; readonly enabled: boolean; readonly attachments: Readonly<{} & { enabled: boolean; }>; readonly incrementalId: Readonly<{} & { enabled: boolean; taskIntervalMinutes: number; taskStartDelayMinutes: number; }>; readonly analytics: Readonly<{} & { index: Readonly<{} & { enabled: boolean; }>; }>; readonly markdownPlugins: Readonly<{} & { lens: boolean; }>; readonly files: Readonly<{ maxSize?: number | undefined; } & { allowedMimeTypes: string[]; }>; readonly templates: Readonly<{} & { enabled: boolean; }>; }"
           ],
           "path": "x-pack/platform/plugins/shared/cases/server/types.ts",
-          "lineNumber": 103,
+          "lineNumber": 105,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -1100,7 +1118,7 @@
         "\nCases server exposed contract for interacting with cases entities."
       ],
       "path": "x-pack/platform/plugins/shared/cases/server/types.ts",
-      "lineNumber": 85,
+      "lineNumber": 86,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -1128,7 +1146,7 @@
             ">"
           ],
           "path": "x-pack/platform/plugins/shared/cases/server/types.ts",
-          "lineNumber": 89,
+          "lineNumber": 90,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -1147,7 +1165,7 @@
                 "<unknown, unknown, unknown, any>"
               ],
               "path": "x-pack/platform/plugins/shared/cases/server/types.ts",
-              "lineNumber": 95,
+              "lineNumber": 96,
               "columnNumber": 29,
               "deprecated": false,
               "trackAdoption": false,
@@ -1170,7 +1188,7 @@
             "ExternalReferenceAttachmentTypeRegistry"
           ],
           "path": "x-pack/platform/plugins/shared/cases/server/types.ts",
-          "lineNumber": 96,
+          "lineNumber": 97,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -1189,7 +1207,26 @@
             "PersistableStateAttachmentTypeRegistry"
           ],
           "path": "x-pack/platform/plugins/shared/cases/server/types.ts",
-          "lineNumber": 97,
+          "lineNumber": 98,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "cases",
+          "id": "def-server.CasesServerStart.getUnifiedAttachmentTypeRegistry",
+          "type": "Function",
+          "tags": [],
+          "label": "getUnifiedAttachmentTypeRegistry",
+          "description": [],
+          "signature": [
+            "() => ",
+            "UnifiedAttachmentTypeRegistry"
+          ],
+          "path": "x-pack/platform/plugins/shared/cases/server/types.ts",
+          "lineNumber": 99,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -1204,10 +1241,10 @@
           "label": "config",
           "description": [],
           "signature": [
-            "{ readonly stack: Readonly<{} & { enabled: boolean; }>; readonly enabled: boolean; readonly incrementalId: Readonly<{} & { enabled: boolean; taskIntervalMinutes: number; taskStartDelayMinutes: number; }>; readonly analytics: Readonly<{} & { index: Readonly<{} & { enabled: boolean; }>; }>; readonly markdownPlugins: Readonly<{} & { lens: boolean; }>; readonly files: Readonly<{ maxSize?: number | undefined; } & { allowedMimeTypes: string[]; }>; }"
+            "{ readonly stack: Readonly<{} & { enabled: boolean; }>; readonly enabled: boolean; readonly attachments: Readonly<{} & { enabled: boolean; }>; readonly incrementalId: Readonly<{} & { enabled: boolean; taskIntervalMinutes: number; taskStartDelayMinutes: number; }>; readonly analytics: Readonly<{} & { index: Readonly<{} & { enabled: boolean; }>; }>; readonly markdownPlugins: Readonly<{} & { lens: boolean; }>; readonly files: Readonly<{ maxSize?: number | undefined; } & { allowedMimeTypes: string[]; }>; readonly templates: Readonly<{} & { enabled: boolean; }>; }"
           ],
           "path": "x-pack/platform/plugins/shared/cases/server/types.ts",
-          "lineNumber": 98,
+          "lineNumber": 100,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -1368,6 +1405,45 @@
       },
       {
         "parentPluginId": "cases",
+        "id": "def-common.getSavedObjectsTypes",
+        "type": "Function",
+        "tags": [],
+        "label": "getSavedObjectsTypes",
+        "description": [
+          "\nIf more values are added here please also add them here: x-pack/test/cases_api_integration/common/plugins"
+        ],
+        "signature": [
+          "(config?: Partial<CasesConfigType> | undefined) => string[]"
+        ],
+        "path": "x-pack/platform/plugins/shared/cases/common/utils/saved_object_types.ts",
+        "lineNumber": 30,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "cases",
+            "id": "def-common.getSavedObjectsTypes.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "config",
+            "description": [],
+            "signature": [
+              "Partial<CasesConfigType> | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/cases/common/utils/saved_object_types.ts",
+            "lineNumber": 30,
+            "columnNumber": 38,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cases",
         "id": "def-common.throwErrors",
         "type": "Function",
         "tags": [],
@@ -1495,7 +1571,7 @@
         "label": "CasesCapabilities",
         "description": [],
         "path": "x-pack/platform/plugins/shared/cases/common/ui/types.ts",
-        "lineNumber": 348,
+        "lineNumber": 356,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1508,7 +1584,7 @@
             "label": "[CREATE_CASES_CAPABILITY]",
             "description": [],
             "path": "x-pack/platform/plugins/shared/cases/common/ui/types.ts",
-            "lineNumber": 349,
+            "lineNumber": 357,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1521,7 +1597,7 @@
             "label": "[READ_CASES_CAPABILITY]",
             "description": [],
             "path": "x-pack/platform/plugins/shared/cases/common/ui/types.ts",
-            "lineNumber": 350,
+            "lineNumber": 358,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1534,7 +1610,7 @@
             "label": "[UPDATE_CASES_CAPABILITY]",
             "description": [],
             "path": "x-pack/platform/plugins/shared/cases/common/ui/types.ts",
-            "lineNumber": 351,
+            "lineNumber": 359,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1547,7 +1623,7 @@
             "label": "[DELETE_CASES_CAPABILITY]",
             "description": [],
             "path": "x-pack/platform/plugins/shared/cases/common/ui/types.ts",
-            "lineNumber": 352,
+            "lineNumber": 360,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1560,7 +1636,7 @@
             "label": "[PUSH_CASES_CAPABILITY]",
             "description": [],
             "path": "x-pack/platform/plugins/shared/cases/common/ui/types.ts",
-            "lineNumber": 353,
+            "lineNumber": 361,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1573,7 +1649,7 @@
             "label": "[CASES_CONNECTORS_CAPABILITY]",
             "description": [],
             "path": "x-pack/platform/plugins/shared/cases/common/ui/types.ts",
-            "lineNumber": 354,
+            "lineNumber": 362,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1586,7 +1662,7 @@
             "label": "[CASES_SETTINGS_CAPABILITY]",
             "description": [],
             "path": "x-pack/platform/plugins/shared/cases/common/ui/types.ts",
-            "lineNumber": 355,
+            "lineNumber": 363,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1599,7 +1675,7 @@
             "label": "[CREATE_COMMENT_CAPABILITY]",
             "description": [],
             "path": "x-pack/platform/plugins/shared/cases/common/ui/types.ts",
-            "lineNumber": 356,
+            "lineNumber": 364,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1612,7 +1688,7 @@
             "label": "[CASES_REOPEN_CAPABILITY]",
             "description": [],
             "path": "x-pack/platform/plugins/shared/cases/common/ui/types.ts",
-            "lineNumber": 357,
+            "lineNumber": 365,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1625,7 +1701,7 @@
             "label": "[ASSIGN_CASE_CAPABILITY]",
             "description": [],
             "path": "x-pack/platform/plugins/shared/cases/common/ui/types.ts",
-            "lineNumber": 358,
+            "lineNumber": 366,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1641,7 +1717,7 @@
         "label": "CasesPermissions",
         "description": [],
         "path": "x-pack/platform/plugins/shared/cases/common/ui/types.ts",
-        "lineNumber": 334,
+        "lineNumber": 342,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1654,7 +1730,7 @@
             "label": "all",
             "description": [],
             "path": "x-pack/platform/plugins/shared/cases/common/ui/types.ts",
-            "lineNumber": 335,
+            "lineNumber": 343,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1667,7 +1743,7 @@
             "label": "create",
             "description": [],
             "path": "x-pack/platform/plugins/shared/cases/common/ui/types.ts",
-            "lineNumber": 336,
+            "lineNumber": 344,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1680,7 +1756,7 @@
             "label": "read",
             "description": [],
             "path": "x-pack/platform/plugins/shared/cases/common/ui/types.ts",
-            "lineNumber": 337,
+            "lineNumber": 345,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1693,7 +1769,7 @@
             "label": "update",
             "description": [],
             "path": "x-pack/platform/plugins/shared/cases/common/ui/types.ts",
-            "lineNumber": 338,
+            "lineNumber": 346,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1706,7 +1782,7 @@
             "label": "delete",
             "description": [],
             "path": "x-pack/platform/plugins/shared/cases/common/ui/types.ts",
-            "lineNumber": 339,
+            "lineNumber": 347,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1719,7 +1795,7 @@
             "label": "push",
             "description": [],
             "path": "x-pack/platform/plugins/shared/cases/common/ui/types.ts",
-            "lineNumber": 340,
+            "lineNumber": 348,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1732,7 +1808,7 @@
             "label": "connectors",
             "description": [],
             "path": "x-pack/platform/plugins/shared/cases/common/ui/types.ts",
-            "lineNumber": 341,
+            "lineNumber": 349,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1745,7 +1821,7 @@
             "label": "settings",
             "description": [],
             "path": "x-pack/platform/plugins/shared/cases/common/ui/types.ts",
-            "lineNumber": 342,
+            "lineNumber": 350,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1758,7 +1834,7 @@
             "label": "reopenCase",
             "description": [],
             "path": "x-pack/platform/plugins/shared/cases/common/ui/types.ts",
-            "lineNumber": 343,
+            "lineNumber": 351,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1771,7 +1847,7 @@
             "label": "createComment",
             "description": [],
             "path": "x-pack/platform/plugins/shared/cases/common/ui/types.ts",
-            "lineNumber": 344,
+            "lineNumber": 352,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1784,7 +1860,7 @@
             "label": "assign",
             "description": [],
             "path": "x-pack/platform/plugins/shared/cases/common/ui/types.ts",
-            "lineNumber": 345,
+            "lineNumber": 353,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1928,7 +2004,7 @@
         "label": "Ecs",
         "description": [],
         "path": "x-pack/platform/plugins/shared/cases/common/ui/types.ts",
-        "lineNumber": 321,
+        "lineNumber": 329,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1941,7 +2017,7 @@
             "label": "_id",
             "description": [],
             "path": "x-pack/platform/plugins/shared/cases/common/ui/types.ts",
-            "lineNumber": 322,
+            "lineNumber": 330,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1957,7 +2033,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/cases/common/ui/types.ts",
-            "lineNumber": 323,
+            "lineNumber": 331,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1974,7 +2050,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/cases/common/ui/types.ts",
-            "lineNumber": 324,
+            "lineNumber": 332,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1992,7 +2068,7 @@
               "; } | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/cases/common/ui/types.ts",
-            "lineNumber": 325,
+            "lineNumber": 333,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2110,7 +2186,7 @@
           "\"cases_assign\""
         ],
         "path": "x-pack/platform/plugins/shared/cases/common/constants/index.ts",
-        "lineNumber": 203,
+        "lineNumber": 217,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2439,7 +2515,7 @@
           "\"cases-comments\""
         ],
         "path": "x-pack/platform/plugins/shared/cases/common/constants/index.ts",
-        "lineNumber": 26,
+        "lineNumber": 32,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2853,7 +2929,7 @@
           "\"cases_connectors\""
         ],
         "path": "x-pack/platform/plugins/shared/cases/common/constants/index.ts",
-        "lineNumber": 200,
+        "lineNumber": 214,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2870,7 +2946,7 @@
           "\"case_reopen\""
         ],
         "path": "x-pack/platform/plugins/shared/cases/common/constants/index.ts",
-        "lineNumber": 201,
+        "lineNumber": 215,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2887,7 +2963,7 @@
           "\"cases_settings\""
         ],
         "path": "x-pack/platform/plugins/shared/cases/common/constants/index.ts",
-        "lineNumber": 199,
+        "lineNumber": 213,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2906,7 +2982,7 @@
           "\"/api/cases\""
         ],
         "path": "x-pack/platform/plugins/shared/cases/common/constants/index.ts",
-        "lineNumber": 46,
+        "lineNumber": 55,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3288,7 +3364,7 @@
           "; }"
         ],
         "path": "x-pack/platform/plugins/shared/cases/common/ui/types.ts",
-        "lineNumber": 127,
+        "lineNumber": 135,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3329,7 +3405,7 @@
           "[]"
         ],
         "path": "x-pack/platform/plugins/shared/cases/common/ui/types.ts",
-        "lineNumber": 126,
+        "lineNumber": 134,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3506,7 +3582,7 @@
           "[]; }"
         ],
         "path": "x-pack/platform/plugins/shared/cases/common/ui/types.ts",
-        "lineNumber": 121,
+        "lineNumber": 129,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3525,7 +3601,7 @@
           "{ refreshCase: () => Promise<void>; } | null"
         ],
         "path": "x-pack/platform/plugins/shared/cases/common/ui/types.ts",
-        "lineNumber": 92,
+        "lineNumber": 97,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3544,7 +3620,7 @@
           "\"create_cases\""
         ],
         "path": "x-pack/platform/plugins/shared/cases/common/constants/index.ts",
-        "lineNumber": 194,
+        "lineNumber": 208,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3561,7 +3637,7 @@
           "\"create_comment\""
         ],
         "path": "x-pack/platform/plugins/shared/cases/common/constants/index.ts",
-        "lineNumber": 202,
+        "lineNumber": 216,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3578,7 +3654,7 @@
           "\"delete_cases\""
         ],
         "path": "x-pack/platform/plugins/shared/cases/common/constants/index.ts",
-        "lineNumber": 197,
+        "lineNumber": 211,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3667,7 +3743,7 @@
           "\"casesGetConnectorsConfigure\""
         ],
         "path": "x-pack/platform/plugins/shared/cases/common/constants/index.ts",
-        "lineNumber": 222,
+        "lineNumber": 236,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3709,7 +3785,7 @@
           "\"/internal/cases/{case_id}/attachments/_bulk_create\""
         ],
         "path": "x-pack/platform/plugins/shared/cases/common/constants/index.ts",
-        "lineNumber": 73,
+        "lineNumber": 82,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3726,7 +3802,7 @@
           "\"/internal/cases/_bulk_get\""
         ],
         "path": "x-pack/platform/plugins/shared/cases/common/constants/index.ts",
-        "lineNumber": 80,
+        "lineNumber": 89,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3777,7 +3853,7 @@
           "\"push_cases\""
         ],
         "path": "x-pack/platform/plugins/shared/cases/common/constants/index.ts",
-        "lineNumber": 198,
+        "lineNumber": 212,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3794,7 +3870,7 @@
           "\"read_cases\""
         ],
         "path": "x-pack/platform/plugins/shared/cases/common/constants/index.ts",
-        "lineNumber": 195,
+        "lineNumber": 209,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3821,25 +3897,6 @@
         "path": "x-pack/platform/plugins/shared/cases/common/types/domain/case/v1.ts",
         "lineNumber": 197,
         "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "cases",
-        "id": "def-common.SAVED_OBJECT_TYPES",
-        "type": "Array",
-        "tags": [],
-        "label": "SAVED_OBJECT_TYPES",
-        "description": [
-          "\nIf more values are added here please also add them here: x-pack/test/cases_api_integration/common/plugins"
-        ],
-        "signature": [
-          "(\"cases\" | \"cases-connector-mappings\" | \"cases-user-actions\" | \"cases-comments\" | \"cases-configure\")[]"
-        ],
-        "path": "x-pack/platform/plugins/shared/cases/common/constants/index.ts",
-        "lineNumber": 34,
-        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3891,7 +3948,7 @@
           "\"update_cases\""
         ],
         "path": "x-pack/platform/plugins/shared/cases/common/constants/index.ts",
-        "lineNumber": 196,
+        "lineNumber": 210,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

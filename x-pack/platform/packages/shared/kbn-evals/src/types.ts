@@ -189,13 +189,9 @@ export interface EvaluationReport {
 export interface EvaluationSpecificWorkerFixtures {
   inferenceClient: BoundInferenceClient;
   /**
-   * Executor client used to run experiments (defaults to in-Kibana; Phoenix-backed via `KBN_EVALS_EXECUTOR=phoenix`).
+   * Executor client used to run experiments.
    */
   executorClient: EvalsExecutorClient;
-  /**
-   * @deprecated Use `executorClient`. Kept for backwards compatibility while suites migrate off Phoenix naming.
-   */
-  phoenixClient: EvalsExecutorClient;
   evaluators: DefaultEvaluators;
   fetch: HttpHandler;
   connector: AvailableConnectorWithId;
@@ -210,13 +206,9 @@ export interface EvaluationSpecificWorkerFixtures {
 export interface EvaluationWorkerFixtures extends ScoutWorkerFixtures {
   inferenceClient: BoundInferenceClient;
   /**
-   * Executor client used to run experiments (defaults to in-Kibana; Phoenix-backed via `KBN_EVALS_EXECUTOR=phoenix`).
+   * Executor client used to run experiments.
    */
   executorClient: EvalsExecutorClient;
-  /**
-   * @deprecated Use `executorClient`. Kept for backwards compatibility while suites migrate off Phoenix naming.
-   */
-  phoenixClient: EvalsExecutorClient;
   evaluators: DefaultEvaluators;
   fetch: HttpHandler;
   connector: AvailableConnectorWithId;

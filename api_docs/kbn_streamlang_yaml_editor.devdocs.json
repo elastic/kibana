@@ -52,7 +52,7 @@
             "tags": [],
             "label": "streamType",
             "description": [
-              "- Optional stream type to filter available actions\nReturns null if schema generation fails, allowing fallback to basic syntax highlighting"
+              "- Optional stream type to filter available actions"
             ],
             "signature": [
               {

@@ -11,7 +11,9 @@
         "label": "createConsoleInspector",
         "description": [],
         "signature": [
-          "() => (inspectionEvent: InspectionEvent) => void"
+          "() => (inspectionEvent: ",
+          "InspectionEvent",
+          ") => void"
         ],
         "path": "src/platform/packages/shared/kbn-xstate-utils/src/console_inspector.ts",
         "lineNumber": 56,
@@ -43,7 +45,7 @@
           "<TContext, TEvent, TSentEvent>"
         ],
         "path": "src/platform/packages/shared/kbn-xstate-utils/src/notification_channel.ts",
-        "lineNumber": 20,
+        "lineNumber": 38,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -59,7 +61,7 @@
               "boolean"
             ],
             "path": "src/platform/packages/shared/kbn-xstate-utils/src/notification_channel.ts",
-            "lineNumber": 21,
+            "lineNumber": 39,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -164,7 +166,7 @@
           "<TContext, TEvent, TSentEvent>"
         ],
         "path": "src/platform/packages/shared/kbn-xstate-utils/src/notification_channel.ts",
-        "lineNumber": 13,
+        "lineNumber": 31,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -182,7 +184,7 @@
               "<TSentEvent>"
             ],
             "path": "src/platform/packages/shared/kbn-xstate-utils/src/notification_channel.ts",
-            "lineNumber": 14,
+            "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -197,16 +199,10 @@
             "label": "notify",
             "description": [],
             "signature": [
-              "(eventExpr: ",
-              "Expr",
-              "<TContext, TEvent, TSentEvent | undefined>) => (context: TContext, event: TEvent, meta: ",
-              "ActionMeta",
-              "<TContext, TEvent, ",
-              "BaseActionObject",
-              ">) => void"
+              "(eventExpr: ExpressionFunction<TContext, TEvent, TSentEvent | undefined>) => NotificationAction<TContext, TEvent>"
             ],
             "path": "src/platform/packages/shared/kbn-xstate-utils/src/notification_channel.ts",
-            "lineNumber": 15,
+            "lineNumber": 33,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -219,11 +215,10 @@
                 "label": "eventExpr",
                 "description": [],
                 "signature": [
-                  "Expr",
-                  "<TContext, TEvent, TSentEvent | undefined>"
+                  "ExpressionFunction<TContext, TEvent, TSentEvent | undefined>"
                 ],
                 "path": "src/platform/packages/shared/kbn-xstate-utils/src/notification_channel.ts",
-                "lineNumber": 16,
+                "lineNumber": 34,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,

@@ -12,8 +12,11 @@ import { BehaviorSubject } from 'rxjs';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { loggingSystemMock, loggingServiceMock } from '@kbn/core-logging-server-mocks';
 import type { InternalLoggingServiceSetup } from '@kbn/core-logging-server-internal';
+import type { UserActivityActionId } from '@kbn/core-user-activity-server';
 import { UserActivityService } from './user_activity_service';
 import type { InternalUserActivityServiceSetup } from './types';
+
+const TEST_ACTION = 'test_action' as UserActivityActionId;
 
 const defaultConfig = {
   enabled: true,
@@ -60,7 +63,7 @@ describe('UserActivityService', () => {
     it('logs a user action with provided message', () => {
       service.trackUserAction({
         message: 'Custom message for action',
-        event: { action: 'create', type: 'creation' },
+        event: { action: TEST_ACTION, type: 'change' },
         object: { id: 'obj-1', name: 'Test Object', type: 'dashboard', tags: ['tag1'] },
       });
 
@@ -69,7 +72,7 @@ describe('UserActivityService', () => {
           'Custom message for action',
           {
             message: 'Custom message for action',
-            event: { action: 'create', type: 'creation' },
+            event: { action: TEST_ACTION, type: 'change' },
             object: { id: 'obj-1', name: 'Test Object', type: 'dashboard', tags: ['tag1'] },
           },
         ],
@@ -78,24 +81,24 @@ describe('UserActivityService', () => {
 
     it('generates default message when not provided', () => {
       service.setInjectedContext({
-        user: { username: 'test_user' },
+        user: { name: 'test_user' },
       });
 
       service.trackUserAction({
-        event: { action: 'delete', type: 'deletion' },
+        event: { action: TEST_ACTION, type: 'change' },
         object: { id: 'obj-2', name: 'My Dashboard', type: 'dashboard', tags: [] },
       });
 
       const logCalls = loggingSystemMock.collect(core.logger).info;
       expect(logCalls).toHaveLength(1);
-      expect(logCalls[0][0]).toBe('User test_user performed delete on My Dashboard (obj-2)');
+      expect(logCalls[0][0]).toBe('User test_user performed test_action on My Dashboard (obj-2)');
     });
 
     it('includes injected context in logs', () => {
       service.setInjectedContext({
         user: {
           id: 'jesuswr',
-          username: 'jesuswr',
+          name: 'jesuswr',
           email: 'jesuswr@test.com',
           roles: ['superuser', 'normaluser', 'magicknight'],
         },
@@ -105,7 +108,7 @@ describe('UserActivityService', () => {
 
       service.trackUserAction({
         message: 'Test action',
-        event: { action: 'update', type: 'change' },
+        event: { action: TEST_ACTION, type: 'change' },
         object: { id: 'obj-3', name: 'Object', type: 'visualization', tags: [] },
       });
 
@@ -113,7 +116,7 @@ describe('UserActivityService', () => {
       expect(logCalls[0][1]).toMatchObject({
         user: {
           id: 'jesuswr',
-          username: 'jesuswr',
+          name: 'jesuswr',
           email: 'jesuswr@test.com',
           roles: ['superuser', 'normaluser', 'magicknight'],
         },
@@ -133,7 +136,7 @@ describe('UserActivityService', () => {
 
       disabledService.trackUserAction({
         message: 'Should not log',
-        event: { action: 'create', type: 'creation' },
+        event: { action: TEST_ACTION, type: 'change' },
         object: { id: 'obj-1', name: 'Test', type: 'test', tags: [] },
       });
 
@@ -148,19 +151,19 @@ describe('UserActivityService', () => {
 
     it('sets user context', () => {
       service.setInjectedContext({
-        user: { id: 'user-1', username: 'testuser' },
+        user: { id: 'user-1', name: 'testuser' },
         client: { ip: '127.0.0.1', address: '127.0.0.1' },
       });
 
       service.trackUserAction({
         message: 'Test',
-        event: { action: 'test', type: 'change' },
+        event: { action: TEST_ACTION, type: 'change' },
         object: { id: '1', name: 'Test', type: 'test', tags: [] },
       });
 
       const logCalls = loggingSystemMock.collect(core.logger).info;
       expect(logCalls[0][1]).toMatchObject({
-        user: { id: 'user-1', username: 'testuser' },
+        user: { id: 'user-1', name: 'testuser' },
         client: { ip: '127.0.0.1', address: '127.0.0.1' },
       });
     });
@@ -172,7 +175,7 @@ describe('UserActivityService', () => {
 
       service.trackUserAction({
         message: 'Test',
-        event: { action: 'test', type: 'change' },
+        event: { action: TEST_ACTION, type: 'change' },
         object: { id: '1', name: 'Test', type: 'test', tags: [] },
       });
 
@@ -190,7 +193,7 @@ describe('UserActivityService', () => {
 
       service.trackUserAction({
         message: 'Test',
-        event: { action: 'test', type: 'change' },
+        event: { action: TEST_ACTION, type: 'change' },
         object: { id: '1', name: 'Test', type: 'test', tags: [] },
       });
 
@@ -207,7 +210,7 @@ describe('UserActivityService', () => {
       });
 
       service.setInjectedContext({
-        user: { username: 'testuser' },
+        user: { name: 'testuser' },
         session: { id: 'session-1' },
       });
 
@@ -217,13 +220,13 @@ describe('UserActivityService', () => {
 
       service.trackUserAction({
         message: 'Test',
-        event: { action: 'test', type: 'change' },
+        event: { action: TEST_ACTION, type: 'change' },
         object: { id: '1', name: 'Test', type: 'test', tags: [] },
       });
 
       const logCalls = loggingSystemMock.collect(core.logger).info;
       expect(logCalls[0][1]).toMatchObject({
-        user: { id: 'user-1', username: 'testuser' },
+        user: { id: 'user-1', name: 'testuser' },
         session: { id: 'session-1' },
         kibana: { space: { id: 'space-1' } },
       });
@@ -232,26 +235,26 @@ describe('UserActivityService', () => {
     it('maintains context isolation across async operations', async () => {
       const chainA = Promise.resolve().then(async () => {
         service.setInjectedContext({
-          user: { username: 'user-a' },
+          user: { name: 'user-a' },
           session: { id: 'session-a' },
         });
         await timer(100);
         service.trackUserAction({
           message: 'Action A',
-          event: { action: 'action-a', type: 'change' },
+          event: { action: TEST_ACTION, type: 'change' },
           object: { id: 'a', name: 'A', type: 'test', tags: [] },
         });
       });
 
       const chainB = Promise.resolve().then(async () => {
         service.setInjectedContext({
-          user: { username: 'user-b' },
+          user: { name: 'user-b' },
           session: { id: 'session-b' },
         });
         await timer(10);
         service.trackUserAction({
           message: 'Action B',
-          event: { action: 'action-b', type: 'change' },
+          event: { action: TEST_ACTION, type: 'change' },
           object: { id: 'b', name: 'B', type: 'test', tags: [] },
         });
       });
@@ -261,12 +264,12 @@ describe('UserActivityService', () => {
       const logCalls = loggingSystemMock.collect(core.logger).info;
       // B finishes first due to shorter timer
       expect(logCalls[0][1]).toMatchObject({
-        user: { username: 'user-b' },
+        user: { name: 'user-b' },
         session: { id: 'session-b' },
       });
       // A finishes second but keeps its values
       expect(logCalls[1][1]).toMatchObject({
-        user: { username: 'user-a' },
+        user: { name: 'user-a' },
         session: { id: 'session-a' },
       });
     });
@@ -275,7 +278,7 @@ describe('UserActivityService', () => {
       await Promise.resolve().then(async () => {
         // Parent sets initial context
         service.setInjectedContext({
-          user: { username: 'parent-user' },
+          user: { name: 'parent-user' },
           session: { id: 'parent-session' },
           kibana: { space: { id: 'parent-space' } },
         });
@@ -291,7 +294,7 @@ describe('UserActivityService', () => {
 
           service.trackUserAction({
             message: 'Child action',
-            event: { action: 'child-action', type: 'change' },
+            event: { action: TEST_ACTION, type: 'change' },
             object: { id: 'child', name: 'Child', type: 'test', tags: [] },
           });
         });
@@ -300,7 +303,7 @@ describe('UserActivityService', () => {
       const logCalls = loggingSystemMock.collect(core.logger).info;
       // Should have both parent's context and child's additions
       expect(logCalls[0][1]).toMatchObject({
-        user: { username: 'parent-user' },
+        user: { name: 'parent-user' },
         session: { id: 'parent-session' },
         kibana: { space: { id: 'child-space' } },
       });
@@ -315,7 +318,7 @@ describe('UserActivityService', () => {
       // Verify service is working
       setupContract.trackUserAction({
         message: 'Before stop',
-        event: { action: 'test', type: 'change' },
+        event: { action: TEST_ACTION, type: 'change' },
         object: { id: '1', name: 'Test', type: 'test', tags: [] },
       });
       expect(loggingSystemMock.collect(core.logger).info).toHaveLength(1);
@@ -326,7 +329,7 @@ describe('UserActivityService', () => {
       // Verify service is disabled
       setupContract.trackUserAction({
         message: 'After stop',
-        event: { action: 'test', type: 'change' },
+        event: { action: TEST_ACTION, type: 'change' },
         object: { id: '2', name: 'Test', type: 'test', tags: [] },
       });
       expect(loggingSystemMock.collect(core.logger).info).toHaveLength(1);
@@ -342,7 +345,7 @@ describe('UserActivityService', () => {
       const trackAction = () => {
         service.trackUserAction({
           message: 'Test action',
-          event: { action: 'test', type: 'change' },
+          event: { action: TEST_ACTION, type: 'change' },
           object: { id: '1', name: 'Test', type: 'test', tags: [] },
         });
       };

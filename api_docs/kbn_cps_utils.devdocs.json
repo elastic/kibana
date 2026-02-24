@@ -640,7 +640,7 @@
             "label": "settingsComponent",
             "description": [],
             "signature": [
-              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+              "React.ReactNode"
             ],
             "path": "src/platform/packages/shared/kbn-cps-utils/components/project_picker_content.tsx",
             "lineNumber": 37,
@@ -780,7 +780,7 @@
             "label": "settingsComponent",
             "description": [],
             "signature": [
-              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+              "React.ReactNode"
             ],
             "path": "src/platform/packages/shared/kbn-cps-utils/components/project_picker.tsx",
             "lineNumber": 36,
@@ -945,7 +945,7 @@
         "label": "ProjectRoutingValue",
         "description": [],
         "signature": [
-          "\"_alias:*\" | \"_alias:_origin\""
+          "\"_alias:_origin\" | \"_alias:*\""
         ],
         "path": "src/platform/packages/shared/kbn-cps-utils/constants.ts",
         "lineNumber": 21,
@@ -963,7 +963,7 @@
         "tags": [],
         "label": "PROJECT_ROUTING",
         "description": [
-          "\nProject routing constants for cross-project search\nThese are stored as strings in saved objects to explicitly override parent values"
+          "\nProject routing constants for Cross-project search\nThese are stored as strings in saved objects to explicitly override parent values"
         ],
         "signature": [
           "{ readonly ALL: \"_alias:*\"; readonly ORIGIN: \"_alias:_origin\"; }"

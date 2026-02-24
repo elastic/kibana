@@ -19,8 +19,62 @@ const makeGroup = (groupId: string, groupLabel: string): GroupedInferenceEndpoin
 
 describe('group by utils', () => {
   describe('GroupByReducer', () => {
-    it('throws when grouping is not enabled', () => {
-      expect(() => GroupByReducer(GroupByOptions.None)).toThrow('Grouping is not enabled');
+    describe('GroupByOptions.Service', () => {
+      const reducer = GroupByReducer(GroupByOptions.Service);
+
+      it('groups endpoints by their service field', () => {
+        const elasticEndpoints = InferenceEndpoints.filter((e) =>
+          [
+            '.anthropic-claude-3.7-sonnet-chat_completion',
+            '.google-gemini-2.5-flash-chat_completion',
+          ].includes(e.inference_id)
+        );
+        const result = elasticEndpoints.reduce(reducer, {});
+
+        expect(Object.keys(result)).toEqual(['elastic']);
+        expect(result.elastic.endpoints).toHaveLength(2);
+      });
+
+      it('accumulates multiple endpoints with the same service under one group', () => {
+        const elasticsearchEndpoints = InferenceEndpoints.filter((e) =>
+          ['.elser-2-elasticsearch', '.multilingual-e5-small-elasticsearch'].includes(
+            e.inference_id
+          )
+        );
+        const result = elasticsearchEndpoints.reduce(reducer, {});
+
+        expect(Object.keys(result)).toEqual(['elasticsearch']);
+        expect(result.elasticsearch.endpoints).toHaveLength(2);
+      });
+
+      it('accumulates endpoints from different services into separate keys', () => {
+        const mixed = InferenceEndpoints.filter((e) =>
+          [
+            '.elser-2-elastic',
+            '.elser-2-elasticsearch',
+            'alibabacloud-endpoint-without-model-id',
+          ].includes(e.inference_id)
+        );
+        const result = mixed.reduce(reducer, {});
+
+        expect(Object.keys(result).sort()).toEqual([
+          'alibabacloud-ai-search',
+          'elastic',
+          'elasticsearch',
+        ]);
+        expect(result.elastic.endpoints).toHaveLength(1);
+        expect(result.elasticsearch.endpoints).toHaveLength(1);
+        expect(result['alibabacloud-ai-search'].endpoints).toHaveLength(1);
+      });
+
+      it('uses the service string as groupId and groupLabel when the provider is not in SERVICE_PROVIDERS', () => {
+        const result = InferenceEndpoints.filter(
+          (e) => e.inference_id === 'hugging-face-endpoint-without-model-id'
+        ).reduce(reducer, {});
+
+        expect(result.hugging_face.groupId).toBe('hugging_face');
+        expect(result.hugging_face.groupLabel).toBe('Hugging Face');
+      });
     });
 
     describe('GroupByOptions.Model', () => {
@@ -101,56 +155,67 @@ describe('group by utils', () => {
     describe('GroupByOptions.Model', () => {
       const sort = GroupBySort(GroupByOptions.Model);
 
-      it('returns 0 when both groups have the same label', () => {
+      it('keeps stable order for groups with the same label', () => {
         const a = makeGroup('some-model', 'Some Model');
         const b = makeGroup('some-model', 'Some Model');
-        expect(sort(a, b)).toBe(0);
+        expect([a, b].sort(sort)).toEqual([a, b]);
       });
 
       it('sorts the Elastic group before any other group', () => {
         const elastic = makeGroup(ELASTIC_GROUP_ID, 'Elastic');
-        const other = makeGroup('openai', 'OpenAI');
-        expect(sort(elastic, other)).toBe(-1);
-        expect(sort(other, elastic)).toBe(1);
+        const openai = makeGroup('openai', 'OpenAI');
+        const anthropic = makeGroup('anthropic', 'Anthropic');
+        expect([openai, anthropic, elastic].sort(sort)).toEqual([elastic, anthropic, openai]);
       });
 
       it('sorts alphabetically by label when neither group is Elastic', () => {
         const anthropic = makeGroup('anthropic', 'Anthropic');
+        const google = makeGroup('google', 'Google');
         const openai = makeGroup('openai', 'OpenAI');
-        expect(sort(anthropic, openai)).toBeLessThan(0);
-        expect(sort(openai, anthropic)).toBeGreaterThan(0);
+        expect([openai, google, anthropic].sort(sort)).toEqual([anthropic, google, openai]);
       });
 
-      it('keeps Elastic first even when compared with a label that sorts before "Elastic" alphabetically', () => {
+      it('keeps Elastic first even when other labels sort before "Elastic" alphabetically', () => {
         const elastic = makeGroup(ELASTIC_GROUP_ID, 'Elastic');
         const aardvark = makeGroup('aardvark', 'Aardvark');
-        expect(sort(elastic, aardvark)).toBe(-1);
-        expect(sort(aardvark, elastic)).toBe(1);
+        const zephyr = makeGroup('zephyr', 'Zephyr');
+        expect([zephyr, aardvark, elastic].sort(sort)).toEqual([elastic, aardvark, zephyr]);
       });
     });
+    describe('GroupByOptions.Service', () => {
+      const sort = GroupBySort(GroupByOptions.Service);
 
-    describe('GroupByOptions.None (default)', () => {
-      const sort = GroupBySort(GroupByOptions.None);
-
-      it('returns 0 when both groups have the same label', () => {
-        const a = makeGroup('model-a', 'Model A');
-        const b = makeGroup('model-a', 'Model A');
-        expect(sort(a, b)).toBe(0);
+      it('keeps stable order for groups with the same label', () => {
+        const a = makeGroup('anthropic', 'Anthropic');
+        const b = makeGroup('anthropic', 'Anthropic');
+        expect([a, b].sort(sort)).toEqual([a, b]);
       });
 
-      it('sorts alphabetically by label in ascending order', () => {
-        const alpha = makeGroup('alpha', 'Alpha');
-        const beta = makeGroup('beta', 'Beta');
-        expect(sort(alpha, beta)).toBeLessThan(0);
-        expect(sort(beta, alpha)).toBeGreaterThan(0);
+      it('sorts elastic and elasticsearch before non-elastic service groups', () => {
+        const elastic = makeGroup('elastic', 'Elastic');
+        const elasticsearch = makeGroup('elasticsearch', 'Elasticsearch');
+        const anthropic = makeGroup('anthropic', 'Anthropic');
+        const openai = makeGroup('openai', 'OpenAI');
+        expect([openai, anthropic, elasticsearch, elastic].sort(sort)).toEqual([
+          elastic,
+          elasticsearch,
+          anthropic,
+          openai,
+        ]);
       });
 
-      it('does NOT give Elastic special priority', () => {
-        const elastic = makeGroup(ELASTIC_GROUP_ID, 'Elastic');
+      it('sorts alphabetically by label when neither group is an elastic service', () => {
+        const anthropic = makeGroup('anthropic', 'Anthropic');
+        const google = makeGroup('google', 'Google');
+        const openai = makeGroup('openai', 'OpenAI');
+        expect([openai, google, anthropic].sort(sort)).toEqual([anthropic, google, openai]);
+      });
+
+      it('keeps elastic services first even when other labels sort before "Elastic" alphabetically', () => {
+        const elastic = makeGroup('elastic', 'Elastic');
         const aardvark = makeGroup('aardvark', 'Aardvark');
-        // 'Elastic' > 'Aardvark' alphabetically, so elastic should sort after
-        expect(sort(elastic, aardvark)).toBeGreaterThan(0);
-        expect(sort(aardvark, elastic)).toBeLessThan(0);
+        const zephyr = makeGroup('zephyr', 'Zephyr');
+        expect([zephyr, aardvark, elastic].sort(sort)).toEqual([elastic, aardvark, zephyr]);
       });
     });
   });

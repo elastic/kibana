@@ -58,7 +58,7 @@
               "RouteConfig",
               "<unknown, unknown, unknown, any>, \"validate\" | \"options\"> & { options?: Pick<",
               "RouteConfigOptions",
-              "<any>, \"tags\" | \"timeout\" | \"body\" | \"authRequired\" | \"xsrfRequired\" | \"excludeFromOAS\" | \"excludeFromRateLimiter\" | \"httpResource\" | \"availability\"> | undefined; access: ",
+              "<any>, \"tags\" | \"timeout\" | \"body\" | \"availability\" | \"authRequired\" | \"xsrfRequired\" | \"excludeFromOAS\" | \"excludeFromRateLimiter\" | \"httpResource\"> | undefined; access: ",
               "RouteAccess",
               "; security?: ",
               "RouteSecurity",

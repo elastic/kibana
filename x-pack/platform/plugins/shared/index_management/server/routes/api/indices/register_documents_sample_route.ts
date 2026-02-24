@@ -6,10 +6,10 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { DEFAULT_DOCS_PER_PAGE } from '@kbn/search-index-documents';
 
 import type { RouteDependencies } from '../../../types';
 import { addInternalBasePath } from '..';
+import { DEFAULT_DOCUMENT_PAGE_SIZE } from '../../../../common/constants';
 
 export function registerDocumentsSampleRoute({
   router,
@@ -37,7 +37,9 @@ export function registerDocumentsSampleRoute({
       try {
         const searchResults = await client.search({
           index: indexName,
-          size: DEFAULT_DOCS_PER_PAGE,
+          size: DEFAULT_DOCUMENT_PAGE_SIZE,
+          track_total_hits: false,
+          sort: ['_doc'],
         });
 
         return response.ok({

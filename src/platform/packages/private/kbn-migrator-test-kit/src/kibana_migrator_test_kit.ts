@@ -33,6 +33,7 @@ import {
   ElasticsearchConfig,
   type ElasticsearchConfigType,
   getCapabilitiesFromClient,
+  getRequestHandlerFactory,
 } from '@kbn/core-elasticsearch-server-internal';
 import { AgentManager, configureClient } from '@kbn/core-elasticsearch-client-server-internal';
 import { type LoggingConfigType, LoggingSystem } from '@kbn/core-logging-server-internal';
@@ -280,6 +281,7 @@ const getElasticsearchClient = async (
       { dnsCacheTtlInSeconds: esClientConfig.dnsCacheTtl?.asSeconds() ?? 0 }
     ),
     kibanaVersion,
+    onRequest: getRequestHandlerFactory(false)({ projectRouting: 'origin-only' }),
   });
 };
 

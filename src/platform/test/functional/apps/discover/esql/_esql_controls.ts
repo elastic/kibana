@@ -61,7 +61,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await esql.waitESQLEditorLoaded('ESQLEditor');
         await esql.setEsqlEditorQuery('FROM logstash-* | STATS BY geo.dest');
 
-        await find.clickByButtonText('Run query');
+        await find.clickByButtonText('Search');
         expect(await testSubjects.exists('esqlValuesPreview')).to.be(true);
         await testSubjects.click('saveEsqlControlsFlyoutButton');
 
@@ -71,8 +71,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardAddPanel.clickAddEsqlPanel();
         await esql.waitESQLEditorLoaded('ESQLEditor');
         await esql.setEsqlEditorQuery('FROM logstash-* | WHERE geo.dest == ?variable');
-        await find.clickByButtonText('Run query');
-        await find.byButtonText('Refresh');
+        await find.clickByButtonText('Search');
+        await find.byButtonText('Search');
         await find.clickByButtonText('Apply and close');
 
         // Wait for the control to be added

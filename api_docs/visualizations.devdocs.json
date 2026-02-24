@@ -478,6 +478,30 @@
           },
           {
             "parentPluginId": "visualizations",
+            "id": "def-public.BaseVisType.getProjectRoutingOverrides",
+            "type": "Function",
+            "tags": [],
+            "label": "getProjectRoutingOverrides",
+            "description": [],
+            "signature": [
+              "((visParams: ",
+              {
+                "pluginId": "@kbn/visualizations-common",
+                "scope": "common",
+                "docId": "kibKbnVisualizationsCommonPluginApi",
+                "section": "def-common.VisParams",
+                "text": "VisParams"
+              },
+              ") => Promise<{ name?: string | undefined; value: string; }[] | undefined>) | undefined"
+            ],
+            "path": "src/platform/plugins/shared/visualizations/public/vis_types/base_vis_type.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
             "id": "def-public.BaseVisType.inspectorAdapters",
             "type": "CompoundType",
             "tags": [],
@@ -502,7 +526,7 @@
               ") | undefined"
             ],
             "path": "src/platform/plugins/shared/visualizations/public/vis_types/base_vis_type.ts",
-            "lineNumber": 50,
+            "lineNumber": 51,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -515,7 +539,7 @@
             "label": "fetchDatatable",
             "description": [],
             "path": "src/platform/plugins/shared/visualizations/public/vis_types/base_vis_type.ts",
-            "lineNumber": 51,
+            "lineNumber": 52,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -563,7 +587,7 @@
               ">"
             ],
             "path": "src/platform/plugins/shared/visualizations/public/vis_types/base_vis_type.ts",
-            "lineNumber": 52,
+            "lineNumber": 53,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -643,7 +667,7 @@
               ">) => React.ReactNode) | undefined"
             ],
             "path": "src/platform/plugins/shared/visualizations/public/vis_types/base_vis_type.ts",
-            "lineNumber": 53,
+            "lineNumber": 54,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -667,7 +691,7 @@
               ") => string | undefined) | undefined"
             ],
             "path": "src/platform/plugins/shared/visualizations/public/vis_types/base_vis_type.ts",
-            "lineNumber": 54,
+            "lineNumber": 55,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -683,7 +707,7 @@
               "Schemas"
             ],
             "path": "src/platform/plugins/shared/visualizations/public/vis_types/base_vis_type.ts",
-            "lineNumber": 55,
+            "lineNumber": 56,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -699,7 +723,7 @@
               "any"
             ],
             "path": "src/platform/plugins/shared/visualizations/public/vis_types/base_vis_type.ts",
-            "lineNumber": 57,
+            "lineNumber": 58,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -722,7 +746,7 @@
                   "<TVisParams>"
                 ],
                 "path": "src/platform/plugins/shared/visualizations/public/vis_types/base_vis_type.ts",
-                "lineNumber": 57,
+                "lineNumber": 58,
                 "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2180,7 +2204,7 @@
           ">"
         ],
         "path": "src/platform/plugins/shared/visualizations/public/index.ts",
-        "lineNumber": 73,
+        "lineNumber": 70,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2384,6 +2408,50 @@
             ],
             "path": "src/platform/plugins/shared/visualizations/public/vis_schemas.ts",
             "lineNumber": 79,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-public.toTableListViewSavedObject",
+        "type": "Function",
+        "tags": [],
+        "label": "toTableListViewSavedObject",
+        "description": [],
+        "signature": [
+          "(savedObject: Record<string, unknown>) => ",
+          {
+            "pluginId": "visualizations",
+            "scope": "public",
+            "docId": "kibVisualizationsPluginApi",
+            "section": "def-public.VisualizeUserContent",
+            "text": "VisualizeUserContent"
+          }
+        ],
+        "path": "src/platform/plugins/shared/visualizations/public/utils/to_table_list_view_saved_object.ts",
+        "lineNumber": 28,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-public.toTableListViewSavedObject.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "savedObject",
+            "description": [],
+            "signature": [
+              "Record<string, unknown>"
+            ],
+            "path": "src/platform/plugins/shared/visualizations/public/utils/to_table_list_view_saved_object.ts",
+            "lineNumber": 29,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3290,7 +3358,7 @@
             "label": "tooltip",
             "description": [],
             "signature": [
-              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+              "React.ReactNode"
             ],
             "path": "src/platform/plugins/shared/visualizations/public/vis_types/types.ts",
             "lineNumber": 51,
@@ -5062,6 +5130,58 @@
           },
           {
             "parentPluginId": "visualizations",
+            "id": "def-public.VisTypeDefinition.getProjectRoutingOverrides",
+            "type": "Function",
+            "tags": [],
+            "label": "getProjectRoutingOverrides",
+            "description": [
+              "\nVega may provide project routing overrides.\nThis method should return an array of project routing values extracted from the vega spec."
+            ],
+            "signature": [
+              "((visParams: ",
+              {
+                "pluginId": "@kbn/visualizations-common",
+                "scope": "common",
+                "docId": "kibKbnVisualizationsCommonPluginApi",
+                "section": "def-common.VisParams",
+                "text": "VisParams"
+              },
+              ") => Promise<{ name?: string | undefined; value: string; }[] | undefined>) | undefined"
+            ],
+            "path": "src/platform/plugins/shared/visualizations/public/vis_types/types.ts",
+            "lineNumber": 130,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "visualizations",
+                "id": "def-public.VisTypeDefinition.getProjectRoutingOverrides.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "visParams",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/visualizations-common",
+                    "scope": "common",
+                    "docId": "kibKbnVisualizationsCommonPluginApi",
+                    "section": "def-common.VisParams",
+                    "text": "VisParams"
+                  }
+                ],
+                "path": "src/platform/plugins/shared/visualizations/public/vis_types/types.ts",
+                "lineNumber": 135,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "visualizations",
             "id": "def-public.VisTypeDefinition.isAccessible",
             "type": "CompoundType",
             "tags": [],
@@ -5071,7 +5191,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/visualizations/public/vis_types/types.ts",
-            "lineNumber": 130,
+            "lineNumber": 138,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5090,7 +5210,7 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/visualizations/public/vis_types/types.ts",
-            "lineNumber": 131,
+            "lineNumber": 139,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5108,7 +5228,7 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/visualizations/public/vis_types/types.ts",
-            "lineNumber": 135,
+            "lineNumber": 143,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5128,7 +5248,7 @@
               "\"experimental\" | \"beta\" | \"production\" | undefined"
             ],
             "path": "src/platform/plugins/shared/visualizations/public/vis_types/types.ts",
-            "lineNumber": 139,
+            "lineNumber": 147,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5146,7 +5266,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/visualizations/public/vis_types/types.ts",
-            "lineNumber": 144,
+            "lineNumber": 152,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5164,7 +5284,7 @@
               "(() => boolean) | undefined"
             ],
             "path": "src/platform/plugins/shared/visualizations/public/vis_types/types.ts",
-            "lineNumber": 148,
+            "lineNumber": 156,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -5193,7 +5313,7 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/visualizations/public/vis_types/types.ts",
-            "lineNumber": 152,
+            "lineNumber": 160,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5211,7 +5331,7 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/visualizations/public/vis_types/types.ts",
-            "lineNumber": 158,
+            "lineNumber": 166,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5229,7 +5349,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/visualizations/public/vis_types/types.ts",
-            "lineNumber": 164,
+            "lineNumber": 172,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5247,7 +5367,7 @@
               "boolean | ((vis: { params: TVisParams; }) => boolean) | undefined"
             ],
             "path": "src/platform/plugins/shared/visualizations/public/vis_types/types.ts",
-            "lineNumber": 170,
+            "lineNumber": 178,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5263,7 +5383,7 @@
               "boolean | ((vis: { params: TVisParams; }) => boolean) | undefined"
             ],
             "path": "src/platform/plugins/shared/visualizations/public/vis_types/types.ts",
-            "lineNumber": 174,
+            "lineNumber": 182,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5294,7 +5414,7 @@
               ") | undefined"
             ],
             "path": "src/platform/plugins/shared/visualizations/public/vis_types/types.ts",
-            "lineNumber": 175,
+            "lineNumber": 183,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5328,7 +5448,7 @@
               ">) => React.ReactNode) | undefined"
             ],
             "path": "src/platform/plugins/shared/visualizations/public/vis_types/types.ts",
-            "lineNumber": 176,
+            "lineNumber": 184,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -5359,7 +5479,7 @@
                   ">"
                 ],
                 "path": "src/platform/plugins/shared/visualizations/public/vis_types/types.ts",
-                "lineNumber": 182,
+                "lineNumber": 190,
                 "columnNumber": 30,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5383,7 +5503,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/visualizations/public/vis_types/types.ts",
-            "lineNumber": 184,
+            "lineNumber": 192,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5433,7 +5553,7 @@
               ">"
             ],
             "path": "src/platform/plugins/shared/visualizations/public/vis_types/types.ts",
-            "lineNumber": 189,
+            "lineNumber": 197,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -5507,7 +5627,7 @@
               ") => string | undefined) | undefined"
             ],
             "path": "src/platform/plugins/shared/visualizations/public/vis_types/types.ts",
-            "lineNumber": 196,
+            "lineNumber": 204,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -5529,7 +5649,7 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/visualizations/public/vis_types/types.ts",
-                "lineNumber": 200,
+                "lineNumber": 208,
                 "columnNumber": 43,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5565,7 +5685,7 @@
               "<TVisParams>>) | undefined"
             ],
             "path": "src/platform/plugins/shared/visualizations/public/vis_types/types.ts",
-            "lineNumber": 202,
+            "lineNumber": 210,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -5588,7 +5708,7 @@
                   "<TVisParams>"
                 ],
                 "path": "src/platform/plugins/shared/visualizations/public/vis_types/types.ts",
-                "lineNumber": 202,
+                "lineNumber": 210,
                 "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5608,7 +5728,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/visualizations/public/vis_types/types.ts",
-            "lineNumber": 204,
+            "lineNumber": 212,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5624,7 +5744,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/visualizations/public/vis_types/types.ts",
-            "lineNumber": 206,
+            "lineNumber": 214,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5642,7 +5762,7 @@
               "> | undefined"
             ],
             "path": "src/platform/plugins/shared/visualizations/public/vis_types/types.ts",
-            "lineNumber": 208,
+            "lineNumber": 216,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5660,7 +5780,7 @@
               "DefaultEditorConfig<TVisParams> | CustomEditorConfig"
             ],
             "path": "src/platform/plugins/shared/visualizations/public/vis_types/types.ts",
-            "lineNumber": 210,
+            "lineNumber": 218,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5678,7 +5798,7 @@
               "{ [x: string]: any; }"
             ],
             "path": "src/platform/plugins/shared/visualizations/public/vis_types/types.ts",
-            "lineNumber": 215,
+            "lineNumber": 223,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5694,7 +5814,7 @@
               "number | undefined"
             ],
             "path": "src/platform/plugins/shared/visualizations/public/vis_types/types.ts",
-            "lineNumber": 222,
+            "lineNumber": 230,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6504,7 +6624,7 @@
           "\"ACTION_CONVERT_AGG_BASED_TO_LENS\""
         ],
         "path": "src/platform/plugins/shared/visualizations/public/triggers/index.ts",
-        "lineNumber": 34,
+        "lineNumber": 11,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -6521,7 +6641,7 @@
           "\"ACTION_CONVERT_DASHBOARD_PANEL_TO_LENS\""
         ],
         "path": "src/platform/plugins/shared/visualizations/public/triggers/index.ts",
-        "lineNumber": 35,
+        "lineNumber": 12,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -6538,24 +6658,7 @@
           "\"ACTION_CONVERT_TO_LENS\""
         ],
         "path": "src/platform/plugins/shared/visualizations/public/triggers/index.ts",
-        "lineNumber": 33,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "visualizations",
-        "id": "def-public.AGG_BASED_VISUALIZATION_TRIGGER",
-        "type": "string",
-        "tags": [],
-        "label": "AGG_BASED_VISUALIZATION_TRIGGER",
-        "description": [],
-        "signature": [
-          "\"AGG_BASED_VISUALIZATION_TRIGGER\""
-        ],
-        "path": "src/platform/plugins/shared/visualizations/public/triggers/index.ts",
-        "lineNumber": 19,
+        "lineNumber": 10,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -6622,23 +6725,6 @@
       },
       {
         "parentPluginId": "visualizations",
-        "id": "def-public.DASHBOARD_VISUALIZATION_PANEL_TRIGGER",
-        "type": "string",
-        "tags": [],
-        "label": "DASHBOARD_VISUALIZATION_PANEL_TRIGGER",
-        "description": [],
-        "signature": [
-          "\"DASHBOARD_VISUALIZATION_PANEL_TRIGGER\""
-        ],
-        "path": "src/platform/plugins/shared/visualizations/public/triggers/index.ts",
-        "lineNumber": 26,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "visualizations",
         "id": "def-public.HasVisualizeConfig",
         "type": "Type",
         "tags": [],
@@ -6647,9 +6733,9 @@
         "signature": [
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
+            "scope": "common",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.HasType",
+            "section": "def-common.HasType",
             "text": "HasType"
           },
           "<\"visualization\"> & { getVis: () => ",
@@ -6843,23 +6929,6 @@
       },
       {
         "parentPluginId": "visualizations",
-        "id": "def-public.VISUALIZE_EDITOR_TRIGGER",
-        "type": "string",
-        "tags": [],
-        "label": "VISUALIZE_EDITOR_TRIGGER",
-        "description": [],
-        "signature": [
-          "\"VISUALIZE_EDITOR_TRIGGER\""
-        ],
-        "path": "src/platform/plugins/shared/visualizations/public/triggers/index.ts",
-        "lineNumber": 12,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "visualizations",
         "id": "def-public.VisualizeEditorInput",
         "type": "Type",
         "tags": [],
@@ -6911,7 +6980,7 @@
           "> & { colors?: Record<string, string> | undefined; legendOpen?: boolean | undefined; }) | undefined; }"
         ],
         "path": "src/platform/plugins/shared/visualizations/public/embeddable/types.ts",
-        "lineNumber": 52,
+        "lineNumber": 53,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -7007,7 +7076,7 @@
             "section": "def-common.ErrorLike",
             "text": "ErrorLike"
           },
-          ", domNode: Element | HTMLElement) => any) | undefined; fatalError?: Error | undefined; getUpdated$: () => Readonly<",
+          ", domNode: HTMLElement | Element) => any) | undefined; fatalError?: Error | undefined; getUpdated$: () => Readonly<",
           "Observable",
           "<",
           {
@@ -7085,6 +7154,38 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-public.VisualizeUserContent",
+        "type": "Type",
+        "tags": [],
+        "label": "VisualizeUserContent",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "visualizations",
+            "scope": "public",
+            "docId": "kibVisualizationsPluginApi",
+            "section": "def-public.VisualizationListItem",
+            "text": "VisualizationListItem"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/content-management-table-list-view-common",
+            "scope": "common",
+            "docId": "kibKbnContentManagementTableListViewCommonPluginApi",
+            "section": "def-common.UserContentCommonSchema",
+            "text": "UserContentCommonSchema"
+          },
+          " & { type: string; attributes: { id: string; title: string; description?: string | undefined; readOnly: boolean; error?: string | undefined; }; }"
+        ],
+        "path": "src/platform/plugins/shared/visualizations/public/utils/to_table_list_view_saved_object.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
       }
     ],
     "objects": [
@@ -7109,7 +7210,7 @@
             "label": "applyFilter",
             "description": [],
             "signature": [
-              "\"FILTER_TRIGGER\""
+              "\"on_apply_filter\""
             ],
             "path": "src/platform/plugins/shared/visualizations/public/embeddable/events.ts",
             "lineNumber": 29,
@@ -7125,7 +7226,7 @@
             "label": "brush",
             "description": [],
             "signature": [
-              "\"SELECT_RANGE_TRIGGER\""
+              "\"on_select_range\""
             ],
             "path": "src/platform/plugins/shared/visualizations/public/embeddable/events.ts",
             "lineNumber": 30,
@@ -7141,7 +7242,7 @@
             "label": "filter",
             "description": [],
             "signature": [
-              "\"VALUE_CLICK_TRIGGER\""
+              "\"on_click_value\""
             ],
             "path": "src/platform/plugins/shared/visualizations/public/embeddable/events.ts",
             "lineNumber": 31,
@@ -7173,7 +7274,7 @@
             "label": "tableRowContextMenuClick",
             "description": [],
             "signature": [
-              "\"ROW_CLICK_TRIGGER\""
+              "\"on_click_row\""
             ],
             "path": "src/platform/plugins/shared/visualizations/public/embeddable/events.ts",
             "lineNumber": 33,
@@ -7262,7 +7363,7 @@
         "; }"
       ],
       "path": "src/platform/plugins/shared/visualizations/public/plugin.ts",
-      "lineNumber": 124,
+      "lineNumber": 122,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -7335,7 +7436,7 @@
         "<any>[]; }"
       ],
       "path": "src/platform/plugins/shared/visualizations/public/plugin.ts",
-      "lineNumber": 134,
+      "lineNumber": 132,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -7348,12 +7449,12 @@
           "label": "showNewVisModal",
           "description": [],
           "signature": [
-            "({ editorParams, onClose, originatingApp, outsideVisualizeApp, showAggsSelection, selectedVisType, }?: ",
+            "({ editorParams, onClose, originatingApp, originatingPath, outsideVisualizeApp, showAggsSelection, selectedVisType, }?: ",
             "ShowNewVisModalParams",
             ") => () => void"
           ],
           "path": "src/platform/plugins/shared/visualizations/public/plugin.ts",
-          "lineNumber": 135,
+          "lineNumber": 133,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -7370,12 +7471,187 @@
                 "ShowNewVisModalParams"
               ],
               "path": "src/platform/plugins/shared/visualizations/public/wizard/show_new_vis.tsx",
-              "lineNumber": 45,
+              "lineNumber": 46,
               "columnNumber": 33,
               "deprecated": false,
               "trackAdoption": false
             }
           ]
+        },
+        {
+          "parentPluginId": "visualizations",
+          "id": "def-public.VisualizationsStart.findListItems",
+          "type": "Function",
+          "tags": [],
+          "label": "findListItems",
+          "description": [],
+          "signature": [
+            "(search: string, size: number, references?: ",
+            {
+              "pluginId": "@kbn/content-management-utils",
+              "scope": "server",
+              "docId": "kibKbnContentManagementUtilsPluginApi",
+              "section": "def-server.Reference",
+              "text": "Reference"
+            },
+            "[] | undefined, referencesToExclude?: ",
+            {
+              "pluginId": "@kbn/content-management-utils",
+              "scope": "server",
+              "docId": "kibKbnContentManagementUtilsPluginApi",
+              "section": "def-server.Reference",
+              "text": "Reference"
+            },
+            "[] | undefined) => Promise<{ total: number; hits: ({ id: string; references: ",
+            {
+              "pluginId": "@kbn/content-management-utils",
+              "scope": "server",
+              "docId": "kibKbnContentManagementUtilsPluginApi",
+              "section": "def-server.Reference",
+              "text": "Reference"
+            },
+            "[]; managed?: boolean | undefined; url: string; savedObjectType?: string | undefined; editor?: { editUrl?: string | undefined; } | undefined; updatedAt?: string | undefined; type?: ",
+            {
+              "pluginId": "visualizations",
+              "scope": "public",
+              "docId": "kibVisualizationsPluginApi",
+              "section": "def-public.BaseVisType",
+              "text": "BaseVisType"
+            },
+            "<",
+            {
+              "pluginId": "@kbn/visualizations-common",
+              "scope": "common",
+              "docId": "kibKbnVisualizationsCommonPluginApi",
+              "section": "def-common.VisParams",
+              "text": "VisParams"
+            },
+            "> | undefined; icon?: ",
+            "IconType",
+            " | undefined; image?: string | undefined; typeTitle?: string | undefined; error?: string | undefined; readOnly?: boolean | undefined; } | { references: ",
+            {
+              "pluginId": "@kbn/content-management-utils",
+              "scope": "server",
+              "docId": "kibKbnContentManagementUtilsPluginApi",
+              "section": "def-server.Reference",
+              "text": "Reference"
+            },
+            "[]; error?: string | undefined; icon: string; id: string; stage?: ",
+            {
+              "pluginId": "visualizations",
+              "scope": "public",
+              "docId": "kibVisualizationsPluginApi",
+              "section": "def-public.VisualizationStage",
+              "text": "VisualizationStage"
+            },
+            " | undefined; savedObjectType: string; title: string; description?: string | undefined; getSupportedTriggers?: (() => string[]) | undefined; typeTitle: string; image?: string | undefined; type?: string | ",
+            {
+              "pluginId": "visualizations",
+              "scope": "public",
+              "docId": "kibVisualizationsPluginApi",
+              "section": "def-public.BaseVisType",
+              "text": "BaseVisType"
+            },
+            "<",
+            {
+              "pluginId": "@kbn/visualizations-common",
+              "scope": "common",
+              "docId": "kibKbnVisualizationsCommonPluginApi",
+              "section": "def-common.VisParams",
+              "text": "VisParams"
+            },
+            "> | undefined; editor?: { editUrl: string; editApp?: string | undefined; } | { onEdit: (savedObjectId: string) => Promise<void>; } | undefined; })[]; }>"
+          ],
+          "path": "src/platform/plugins/shared/visualizations/public/plugin.ts",
+          "lineNumber": 134,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "visualizations",
+              "id": "def-public.VisualizationsStart.findListItems.$1",
+              "type": "string",
+              "tags": [],
+              "label": "search",
+              "description": [],
+              "signature": [
+                "string"
+              ],
+              "path": "src/platform/plugins/shared/visualizations/public/plugin.ts",
+              "lineNumber": 135,
+              "columnNumber": 5,
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            },
+            {
+              "parentPluginId": "visualizations",
+              "id": "def-public.VisualizationsStart.findListItems.$2",
+              "type": "number",
+              "tags": [],
+              "label": "size",
+              "description": [],
+              "signature": [
+                "number"
+              ],
+              "path": "src/platform/plugins/shared/visualizations/public/plugin.ts",
+              "lineNumber": 136,
+              "columnNumber": 5,
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            },
+            {
+              "parentPluginId": "visualizations",
+              "id": "def-public.VisualizationsStart.findListItems.$3",
+              "type": "Array",
+              "tags": [],
+              "label": "references",
+              "description": [],
+              "signature": [
+                {
+                  "pluginId": "@kbn/content-management-utils",
+                  "scope": "server",
+                  "docId": "kibKbnContentManagementUtilsPluginApi",
+                  "section": "def-server.Reference",
+                  "text": "Reference"
+                },
+                "[] | undefined"
+              ],
+              "path": "src/platform/plugins/shared/visualizations/public/plugin.ts",
+              "lineNumber": 137,
+              "columnNumber": 5,
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": false
+            },
+            {
+              "parentPluginId": "visualizations",
+              "id": "def-public.VisualizationsStart.findListItems.$4",
+              "type": "Array",
+              "tags": [],
+              "label": "referencesToExclude",
+              "description": [],
+              "signature": [
+                {
+                  "pluginId": "@kbn/content-management-utils",
+                  "scope": "server",
+                  "docId": "kibKbnContentManagementUtilsPluginApi",
+                  "section": "def-server.Reference",
+                  "text": "Reference"
+                },
+                "[] | undefined"
+              ],
+              "path": "src/platform/plugins/shared/visualizations/public/plugin.ts",
+              "lineNumber": 138,
+              "columnNumber": 5,
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": false
+            }
+          ],
+          "returnComment": []
         }
       ],
       "lifecycle": "start",
@@ -9851,7 +10127,7 @@
         "label": "Operation",
         "description": [],
         "signature": [
-          "\"count\" | \"min\" | \"max\" | \"sum\" | \"median\" | \"filters\" | \"range\" | \"terms\" | \"cumulative_sum\" | \"date_histogram\" | \"average\" | \"percentile\" | \"last_value\" | \"moving_average\" | \"unique_count\" | \"standard_deviation\" | \"percentile_rank\" | \"counter_rate\" | \"differences\" | \"formula\" | \"static_value\" | \"normalize_by_unit\""
+          "\"count\" | \"min\" | \"max\" | \"sum\" | \"median\" | \"range\" | \"terms\" | \"formula\" | \"static_value\" | \"unique_count\" | \"average\" | \"standard_deviation\" | \"last_value\" | \"percentile\" | \"percentile_rank\" | \"differences\" | \"moving_average\" | \"cumulative_sum\" | \"counter_rate\" | \"filters\" | \"date_histogram\" | \"normalize_by_unit\""
         ],
         "path": "src/platform/plugins/shared/visualizations/common/convert_to_lens/types.ts",
         "lineNumber": 201,
@@ -9868,7 +10144,7 @@
         "label": "OperationWithReferences",
         "description": [],
         "signature": [
-          "\"cumulative_sum\" | \"moving_average\" | \"counter_rate\" | \"differences\" | \"formula\" | \"static_value\" | \"normalize_by_unit\""
+          "\"formula\" | \"static_value\" | \"differences\" | \"moving_average\" | \"cumulative_sum\" | \"counter_rate\" | \"normalize_by_unit\""
         ],
         "path": "src/platform/plugins/shared/visualizations/common/convert_to_lens/types.ts",
         "lineNumber": 203,
@@ -9885,7 +10161,7 @@
         "label": "OperationWithSourceField",
         "description": [],
         "signature": [
-          "\"count\" | \"min\" | \"max\" | \"sum\" | \"median\" | \"filters\" | \"range\" | \"terms\" | \"date_histogram\" | \"average\" | \"percentile\" | \"last_value\" | \"unique_count\" | \"standard_deviation\" | \"percentile_rank\""
+          "\"count\" | \"min\" | \"max\" | \"sum\" | \"median\" | \"range\" | \"terms\" | \"unique_count\" | \"average\" | \"standard_deviation\" | \"last_value\" | \"percentile\" | \"percentile_rank\" | \"filters\" | \"date_histogram\""
         ],
         "path": "src/platform/plugins/shared/visualizations/common/convert_to_lens/types.ts",
         "lineNumber": 202,

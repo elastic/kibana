@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { isEnabledFailureStore, Streams } from '@kbn/streams-schema';
+import { getRoot, isEnabledFailureStore, LOGS_ECS_STREAM_NAME, Streams } from '@kbn/streams-schema';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import type { ActorRefFrom, MachineImplementationsFrom, SnapshotFrom } from 'xstate';
 import { assign, cancel, forwardTo, raise, sendTo, setup, stopChild } from 'xstate';
@@ -97,10 +97,12 @@ export const streamEnrichmentMachine = setup({
       }
 
       const isWiredStream = Streams.WiredStream.Definition.is(context.definition.stream);
+      const rootStream = getRoot(context.definition.stream.name);
 
       const validationResult = validateStreamlang(context.nextStreamlangDSL, {
         reservedFields: [],
         streamType: isWiredStream ? 'wired' : 'classic',
+        skipNamespaceValidation: isWiredStream && rootStream === LOGS_ECS_STREAM_NAME,
       });
 
       const errorsByStep = new Map<string, typeof validationResult.errors>();

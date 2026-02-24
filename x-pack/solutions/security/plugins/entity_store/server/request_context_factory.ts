@@ -17,6 +17,7 @@ import { AssetManager } from './domain/asset_manager';
 import { FeatureFlags } from './infra/feature_flags';
 import { EngineDescriptorClient } from './domain/definitions/saved_objects';
 import { LogsExtractionClient } from './domain/logs_extraction_client';
+import { CRUDClient } from './domain/crud_client';
 
 interface EntityStoreApiRequestHandlerContextDeps {
   coreSetup: CoreSetup<EntityStoreStartPlugins, void>;
@@ -50,6 +51,12 @@ export async function createRequestHandlerContext({
     logger
   );
 
+  const crudClient = new CRUDClient({
+    logger,
+    esClient: core.elasticsearch.client.asCurrentUser,
+    namespace,
+  });
+
   const logsExtractionClient = new LogsExtractionClient(
     logger,
     namespace,
@@ -71,6 +78,7 @@ export async function createRequestHandlerContext({
       logsExtractionClient,
       security: startPlugins.security,
     }),
+    crudClient,
     featureFlags: new FeatureFlags(core.uiSettings.client),
     logsExtractionClient,
     security: startPlugins.security,

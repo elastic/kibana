@@ -12,8 +12,10 @@ import {
   type IndicesAutocompleteResult,
   type IndexAutocompleteItem,
   type ResolveIndexResponse,
+  type ESQLFieldWithMetadata,
   SOURCES_TYPES,
 } from '@kbn/esql-types';
+import type { EsqlFieldType } from '@kbn/esql-types';
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import type { ESQLSourceResult, InferenceEndpointsAutocompleteResult } from '@kbn/esql-types';
 import { getListOfCCSIndices } from '../lookup/utils';
@@ -55,12 +57,14 @@ export class EsqlService {
       mode,
     })) as ResolveIndexResponse;
 
+    const mappedMode = this.getIndexSourceType(mode);
+
     sources.indices?.forEach((index) => {
-      indices.push({ name: index.name, mode, aliases: index.aliases ?? [] });
+      indices.push({ name: index.name, mode: mappedMode, aliases: index.aliases ?? [] });
     });
 
     sources.data_streams?.forEach((dataStream) => {
-      indices.push({ name: dataStream.name, mode, aliases: dataStream.aliases ?? [] });
+      indices.push({ name: dataStream.name, mode: mappedMode, aliases: dataStream.aliases ?? [] });
     });
 
     const crossClusterCommonIndices = remoteClusters
@@ -207,5 +211,57 @@ export class EsqlService {
         task_type: endpoint.task_type,
       })),
     };
+  }
+
+  /**
+   * Get enrich policies formatted for ES|QL autocomplete.
+   * @returns A promise that resolves to an array of enrich policy objects.
+   */
+  public async getPolicies(): Promise<
+    Array<{
+      name: string;
+      sourceIndices: string[];
+      matchField: string;
+      enrichFields: string[];
+    }>
+  > {
+    const { client } = this.options;
+
+    const response = await client.enrich.getPolicy();
+    return response.policies.flatMap((p) => {
+      const config = p.config.match ?? p.config.range ?? p.config.geo_match;
+      if (!config?.name) return [];
+      return [
+        {
+          name: config.name,
+          sourceIndices: config.indices as string[],
+          matchField: config.match_field,
+          enrichFields: config.enrich_fields as string[],
+        },
+      ];
+    });
+  }
+
+  /**
+   * Get columns for an ES|QL query by executing it with LIMIT 0.
+   * @param esqlQuery The ES|QL query to get columns for.
+   * @returns A promise that resolves to an array of ESQLFieldWithMetadata.
+   */
+  public async getColumns(esqlQuery: string): Promise<ESQLFieldWithMetadata[]> {
+    const { client } = this.options;
+
+    const response = await client.esql.query({
+      query: `${esqlQuery} | LIMIT 0`,
+      format: 'json',
+    });
+
+    return (
+      (response.columns as Array<{ name: string; type: string }>)?.map((c) => ({
+        name: c.name,
+        type: c.type as EsqlFieldType,
+        hasConflict: false,
+        userDefined: false,
+      })) ?? []
+    );
   }
 }

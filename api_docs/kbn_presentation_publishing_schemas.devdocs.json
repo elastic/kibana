@@ -22,7 +22,7 @@
         "label": "SerializedTitles",
         "description": [],
         "signature": [
-          "{ title?: string | undefined; description?: string | undefined; hidePanelTitles?: boolean | undefined; }"
+          "{ description?: string | undefined; title?: string | undefined; hide_title?: boolean | undefined; }"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing_schemas/src/types.ts",
         "lineNumber": 14,
@@ -56,7 +56,7 @@
             "section": "def-common.Type",
             "text": "Type"
           },
-          "<string | undefined>; hidePanelTitles: ",
+          "<string | undefined>; hide_title: ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",

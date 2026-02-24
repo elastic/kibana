@@ -156,6 +156,7 @@ interface StreamsTabVisitedProps {
     text_structure: boolean;
     read_failure_store: boolean;
     manage_failure_store: boolean;
+    create_snapshot_repository: boolean;
   };
 }
 

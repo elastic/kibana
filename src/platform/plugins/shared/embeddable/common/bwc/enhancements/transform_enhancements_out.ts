@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { APPLY_FILTER_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { ON_APPLY_FILTER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { SerializedDrilldowns } from '../../../server';
 import { generateRefName } from './dynamic_actions/dashboard_drilldown_persistable_state';
 import type { DynamicActionsState, SerializedEvent } from './dynamic_actions/types';
@@ -61,7 +61,7 @@ function convertToDashboardDrilldown(event: SerializedEvent) {
     // Initially dashboard drilldown relied on VALUE_CLICK & RANGE_SELECT - versions unknown
     trigger:
       trigger === 'VALUE_CLICK_TRIGGER' || trigger === 'SELECT_RANGE_TRIGGER'
-        ? APPLY_FILTER_TRIGGER
+        ? ON_APPLY_FILTER
         : trigger,
     type: 'dashboard_drilldown',
     use_filters: useCurrentFilters ?? true,

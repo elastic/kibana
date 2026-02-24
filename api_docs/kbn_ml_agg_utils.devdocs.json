@@ -65,7 +65,7 @@
             "tags": [],
             "label": "shardSize",
             "description": [
-              "- The shard size parameter for the sampler aggregation.\n  A value less than 1 indicates no sampling."
+              "- The shard size parameter for the sampler aggregation."
             ],
             "signature": [
               "number"
@@ -224,7 +224,7 @@
             "tags": [],
             "label": "samplerShardSize",
             "description": [
-              "- The shard size parameter of the sampler aggregation.\n  A value less than 1 indicates no sampling."
+              "- The shard size parameter of the sampler aggregation."
             ],
             "signature": [
               "number"

@@ -191,7 +191,12 @@ describe('Metric Flyout Overview Tab', () => {
       const metric = createMockMetric({ dimensions });
       const { container } = render(<OverviewTab metric={metric} />);
 
-      const listItems = container.querySelectorAll('li.euiListGroupItem');
+      const dimensionsList = container.querySelector(
+        '[data-test-subj="metricsExperienceFlyoutOverviewTabDimensionsList"]'
+      );
+      expect(dimensionsList).toBeInTheDocument();
+
+      const listItems = dimensionsList?.querySelectorAll('li.euiListGroupItem') || [];
       expect(listItems).toHaveLength(3);
 
       // Verify alphabetical order in rendered list

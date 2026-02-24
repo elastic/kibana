@@ -190,6 +190,9 @@ export class PluginA implements PluginMock<Setup, Start> {
 //     line 135 - fn
 //   missing complex type info (1):
 //     line 135 - foo
+//   missing returns (2):
+//     line 104 - getSearchService2
+//     line 135 - fn
 //   no references (23):
 //     line 19 - SearchSpec
 //     line 24 - username

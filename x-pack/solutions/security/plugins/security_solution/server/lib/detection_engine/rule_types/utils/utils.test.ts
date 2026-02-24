@@ -1054,6 +1054,7 @@ describe('utils', () => {
         warning: false,
         warningMessages: [],
         suppressedAlertsCount: 0,
+        totalEventsFound: 0,
       };
       expect(merged).toEqual(expected);
     });
@@ -1109,6 +1110,7 @@ describe('utils', () => {
         warning: true,
         warningMessages: ['warning1', 'warning2'],
         suppressedAlertsCount: 0,
+        totalEventsFound: 0,
       };
       expect(merged).toEqual(expected);
     });

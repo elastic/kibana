@@ -37,9 +37,14 @@ export function transformPanelsOut(
     const panelReferences = getPanelReferences(containerReferences ?? [], panel);
     const { sectionId } = panel.gridData;
     if (sectionId) {
-      sectionsMap[sectionId].panels.push(
-        transformPanelProperties(panel, panelReferences, containerReferences)
-      );
+      if (!sectionsMap[sectionId]) {
+        logger?.warn(`Panel references non-existent section "${sectionId}", treating as top-level`);
+        topLevelPanels.push(transformPanelProperties(panel, panelReferences, containerReferences));
+      } else {
+        sectionsMap[sectionId].panels.push(
+          transformPanelProperties(panel, panelReferences, containerReferences)
+        );
+      }
     } else {
       topLevelPanels.push(transformPanelProperties(panel, panelReferences, containerReferences));
     }

@@ -21,9 +21,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '1')
           .send({
-            data: {
-              title: 'Sample dashboard',
-            },
+            title: 'Sample dashboard',
           });
 
         expect(createResponse.status).to.be(200);
@@ -35,9 +33,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '1')
           .send({
-            data: {
-              title: 'updated title',
-            },
+            title: 'updated title',
           });
 
         expect(updateResponse.status).to.be(200);
@@ -64,9 +60,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '1')
           .send({
-            data: {
-              title: 'Sample dashboard',
-            },
+            title: 'Sample dashboard',
           });
       });
 
@@ -87,9 +81,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '1')
           .send({
-            data: {
-              title: 'updated title',
-            },
+            title: 'updated title',
           });
 
         expect(updateResponse.status).to.be(200);
@@ -124,9 +116,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '1')
           .send({
-            data: {
-              title: 'updated title',
-            },
+            title: 'updated title',
           });
 
         expect(updateResponse.status).to.be(200);

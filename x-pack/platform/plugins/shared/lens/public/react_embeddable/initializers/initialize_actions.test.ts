@@ -79,13 +79,13 @@ describe('Dashboard actions', () => {
       expect(api.setDrilldowns).toBeDefined();
     });
 
-    it('should not expose drilldowns for ES|QL chart types', async () => {
+    it('should expose drilldowns for ES|QL chart types', async () => {
       const api = setupActionsApi(
         createEmptyLensState('lnsXY', faker.lorem.words(), faker.lorem.text(), {
           esql: 'FROM index',
         })
       );
-      expect(api.setDrilldowns).toBeUndefined();
+      expect(api.setDrilldowns).toBeDefined();
     });
   });
 

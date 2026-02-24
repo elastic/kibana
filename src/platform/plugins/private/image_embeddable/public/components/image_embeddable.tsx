@@ -13,6 +13,7 @@ import type { PublishingSubject } from '@kbn/presentation-publishing';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
 import { BehaviorSubject } from 'rxjs';
+import { ON_CLICK_IMAGE } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { ImageEmbeddableApi } from '../types';
 import type { FileImageMetadata, FilesClient } from '../imports';
 import { imageEmbeddableFileKind } from '../imports';
@@ -79,7 +80,7 @@ export const ImageEmbeddable = ({ api, filesClient }: ImageEmbeddableProps) => {
           // note: passing onClick enables the cursor pointer style, so we only pass it if there are compatible actions
           hasTriggerActions
             ? () => {
-                uiActionsService.executeTriggerActions('IMAGE_CLICK_TRIGGER', {
+                uiActionsService.executeTriggerActions(ON_CLICK_IMAGE, {
                   embeddable: api,
                 });
               }

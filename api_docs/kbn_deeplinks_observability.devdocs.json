@@ -690,7 +690,7 @@
           }
         ],
         "path": "src/platform/packages/shared/deeplinks/observability/locators/slo.ts",
-        "lineNumber": 34,
+        "lineNumber": 35,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -703,7 +703,7 @@
             "label": "id",
             "description": [],
             "path": "src/platform/packages/shared/deeplinks/observability/locators/slo.ts",
-            "lineNumber": 35,
+            "lineNumber": 36,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -719,7 +719,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/deeplinks/observability/locators/slo.ts",
-            "lineNumber": 36,
+            "lineNumber": 37,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -735,7 +735,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/deeplinks/observability/locators/slo.ts",
-            "lineNumber": 37,
+            "lineNumber": 38,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -768,7 +768,7 @@
           }
         ],
         "path": "src/platform/packages/shared/deeplinks/observability/locators/slo.ts",
-        "lineNumber": 28,
+        "lineNumber": 29,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -781,7 +781,7 @@
             "label": "sloId",
             "description": [],
             "path": "src/platform/packages/shared/deeplinks/observability/locators/slo.ts",
-            "lineNumber": 29,
+            "lineNumber": 30,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -797,7 +797,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/deeplinks/observability/locators/slo.ts",
-            "lineNumber": 30,
+            "lineNumber": 31,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -820,7 +820,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/deeplinks/observability/locators/slo.ts",
-            "lineNumber": 31,
+            "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -853,7 +853,7 @@
           }
         ],
         "path": "src/platform/packages/shared/deeplinks/observability/locators/slo.ts",
-        "lineNumber": 40,
+        "lineNumber": 41,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -869,7 +869,30 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/deeplinks/observability/locators/slo.ts",
-            "lineNumber": 41,
+            "lineNumber": 42,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/deeplinks-observability",
+            "id": "def-common.SloListLocatorParams.filters",
+            "type": "Array",
+            "tags": [],
+            "label": "filters",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/deeplinks/observability/locators/slo.ts",
+            "lineNumber": 43,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1271,7 +1294,7 @@
           "\"alerts\""
         ],
         "path": "src/platform/packages/shared/deeplinks/observability/locators/slo.ts",
-        "lineNumber": 20,
+        "lineNumber": 21,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1363,7 +1386,7 @@
           "\"definition\""
         ],
         "path": "src/platform/packages/shared/deeplinks/observability/locators/slo.ts",
-        "lineNumber": 19,
+        "lineNumber": 20,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1397,7 +1420,7 @@
           "\"history\""
         ],
         "path": "src/platform/packages/shared/deeplinks/observability/locators/slo.ts",
-        "lineNumber": 18,
+        "lineNumber": 19,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1567,7 +1590,7 @@
           "\"overview\""
         ],
         "path": "src/platform/packages/shared/deeplinks/observability/locators/slo.ts",
-        "lineNumber": 17,
+        "lineNumber": 18,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1652,7 +1675,7 @@
           "\"SLO_DETAILS_HISTORY_LOCATOR\""
         ],
         "path": "src/platform/packages/shared/deeplinks/observability/locators/slo.ts",
-        "lineNumber": 13,
+        "lineNumber": 14,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1669,7 +1692,7 @@
           "\"SLO_DETAILS_LOCATOR\""
         ],
         "path": "src/platform/packages/shared/deeplinks/observability/locators/slo.ts",
-        "lineNumber": 12,
+        "lineNumber": 13,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1686,7 +1709,7 @@
           "\"SLO_EDIT_LOCATOR\""
         ],
         "path": "src/platform/packages/shared/deeplinks/observability/locators/slo.ts",
-        "lineNumber": 14,
+        "lineNumber": 15,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1703,7 +1726,7 @@
           "\"SLO_LIST_LOCATOR\""
         ],
         "path": "src/platform/packages/shared/deeplinks/observability/locators/slo.ts",
-        "lineNumber": 15,
+        "lineNumber": 16,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1717,10 +1740,10 @@
         "label": "SloTabId",
         "description": [],
         "signature": [
-          "\"definition\" | \"history\" | \"alerts\" | \"overview\""
+          "\"history\" | \"alerts\" | \"overview\" | \"definition\""
         ],
         "path": "src/platform/packages/shared/deeplinks/observability/locators/slo.ts",
-        "lineNumber": 22,
+        "lineNumber": 23,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

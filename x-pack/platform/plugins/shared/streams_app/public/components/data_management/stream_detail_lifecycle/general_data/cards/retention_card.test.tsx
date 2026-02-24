@@ -104,6 +104,7 @@ describe('RetentionCard', () => {
           read_failure_store: true,
           manage_failure_store: true,
           view_index_metadata: true,
+          create_snapshot_repository: true,
         },
         effective_failure_store: {
           lifecycle: { enabled: { is_default_retention: true } },
@@ -147,6 +148,7 @@ describe('RetentionCard', () => {
           read_failure_store: true,
           manage_failure_store: true,
           view_index_metadata: true,
+          create_snapshot_repository: true,
         },
         effective_failure_store: {
           lifecycle: { enabled: { is_default_retention: true } },
@@ -275,6 +277,24 @@ describe('RetentionCard', () => {
 
       const editButton = screen.getByTestId('streamsAppRetentionMetadataEditDataRetentionButton');
       expect(editButton).toHaveAttribute('aria-label', 'Edit retention method');
+    });
+
+    it('disables edit button when edit lifecycle flyout is open', async () => {
+      const definition = createMockDefinition({ dsl: { data_retention: '30d' } });
+
+      render(
+        <RetentionCard
+          definition={definition}
+          openEditModal={mockOpenEditModal}
+          isEditLifecycleFlyoutOpen={true}
+        />
+      );
+
+      const editButton = screen.getByTestId('streamsAppRetentionMetadataEditDataRetentionButton');
+      expect(editButton).toBeDisabled();
+
+      await userEvent.click(editButton);
+      expect(mockOpenEditModal).not.toHaveBeenCalled();
     });
   });
 

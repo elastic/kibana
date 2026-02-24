@@ -35,7 +35,7 @@ steps:
       spotZones: us-central1-f,us-central1-c,us-central1-a
     timeout_in_minutes: 60
     depends_on: *on_merge_gates
-    parallelism: 2
+    parallelism: 3
     retry:
       automatic:
         - exit_status: '-1'
@@ -52,7 +52,7 @@ steps:
       spotZones: us-central1-f,us-central1-c,us-central1-a
     timeout_in_minutes: 60
     depends_on: *on_merge_gates
-    parallelism: 10
+    parallelism: 11
     retry:
       automatic:
         - exit_status: '-1'
@@ -69,7 +69,7 @@ steps:
       spotZones: us-central1-f,us-central1-c,us-central1-a
     timeout_in_minutes: 60
     depends_on: *on_merge_gates
-    parallelism: 5
+    parallelism: 6
     retry:
       automatic:
         - exit_status: '-1'
@@ -103,7 +103,7 @@ steps:
       spotZones: us-central1-f,us-central1-c,us-central1-a
     timeout_in_minutes: 60
     depends_on: *on_merge_gates
-    parallelism: 1
+    parallelism: 2
     retry:
       automatic:
         - exit_status: '-1'
@@ -137,7 +137,7 @@ steps:
       spotZones: us-central1-f,us-central1-c,us-central1-a
     timeout_in_minutes: 60
     depends_on: *on_merge_gates
-    parallelism: 1
+    parallelism: 2
     retry:
       automatic:
         - exit_status: '-1'
@@ -154,7 +154,7 @@ steps:
       spotZones: us-central1-f,us-central1-c,us-central1-a
     timeout_in_minutes: 60
     depends_on: *on_merge_gates
-    parallelism: 4
+    parallelism: 5
     retry:
       automatic:
         - exit_status: '-1'
@@ -273,7 +273,7 @@ steps:
       spotZones: us-central1-f,us-central1-c,us-central1-a
     timeout_in_minutes: 60
     depends_on: *on_merge_gates
-    parallelism: 7
+    parallelism: 8
     retry:
       automatic:
         - exit_status: '-1'
@@ -307,7 +307,7 @@ steps:
       spotZones: us-central1-f,us-central1-c,us-central1-a
     timeout_in_minutes: 60
     depends_on: *on_merge_gates
-    parallelism: 1
+    parallelism: 2
     retry:
       automatic:
         - exit_status: '-1'
@@ -375,7 +375,7 @@ steps:
       spotZones: us-central1-f,us-central1-c,us-central1-a
     timeout_in_minutes: 60
     depends_on: *on_merge_gates
-    parallelism: 8
+    parallelism: 9
     retry:
       automatic:
         - exit_status: '-1'
@@ -428,7 +428,7 @@ steps:
       spotZones: us-central1-f,us-central1-c,us-central1-a
     timeout_in_minutes: 60
     depends_on: *on_merge_gates
-    parallelism: 22
+    parallelism: 24
     retry:
       automatic:
         - exit_status: '-1'
@@ -447,7 +447,7 @@ steps:
       spotZones: us-central1-f,us-central1-c,us-central1-a
     timeout_in_minutes: 60
     depends_on: *on_merge_gates
-    parallelism: 14
+    parallelism: 16
     retry:
       automatic:
         - exit_status: '-1'

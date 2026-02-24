@@ -27,27 +27,40 @@ export const rangeSliderControlStyles = (euiThemeContext: UseEuiTheme) => {
       &,
       .euiPopover,
       .euiFormControlLayoutDelimited {
-        background-color: ${euiTheme.colors.backgroundBasePlain};
         width: 100%;
         height: 100%;
       }
 
       // remove the border coming from EUI
-      .euiFormControlLayoutDelimited::after {
-        border: none !important;
+      .euiFormControlLayoutDelimited {
+        box-shadow: none;
+
+        &::after {
+          display: none;
+        }
       }
 
       .euiFormControlLayout {
         border: none;
         border-radius: 0;
+        background-color: transparent;
+
+        .euiFormControlLayout__childrenWrapper,
+        .euiFormControlLayoutDelimited__input {
+          background-color: transparent;
+        }
 
         // Removes the border that appears on hover
         &:hover {
-          z-index: 0 !important;
+          z-index: 1 !important;
 
           .euiFormControlLayout__childrenWrapper {
             outline: none !important;
           }
+        }
+          
+        &:has(:invalid, :focus:not([readonly])) {
+          z-index: 1 !important;
         }
       }
 

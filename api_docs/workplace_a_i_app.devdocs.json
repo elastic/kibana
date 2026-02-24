@@ -86,30 +86,46 @@
     "interfaces": [
       {
         "parentPluginId": "workplaceAIApp",
-        "id": "def-common.GoogleUserInfo",
+        "id": "def-common.ExchangeCodeRequest",
         "type": "Interface",
         "tags": [],
-        "label": "GoogleUserInfo",
+        "label": "ExchangeCodeRequest",
         "description": [],
         "path": "x-pack/solutions/workplaceai/plugins/workplace_ai_app/common/http_api/ears.ts",
-        "lineNumber": 47,
+        "lineNumber": 31,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "workplaceAIApp",
-            "id": "def-common.GoogleUserInfo.name",
+            "id": "def-common.ExchangeCodeRequest.code",
             "type": "string",
             "tags": [],
-            "label": "name",
+            "label": "code",
             "description": [],
             "path": "x-pack/solutions/workplaceai/plugins/workplace_ai_app/common/http_api/ears.ts",
-            "lineNumber": 48,
+            "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
-          },
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "workplaceAIApp",
+        "id": "def-common.GoogleUserInfo",
+        "type": "Interface",
+        "tags": [],
+        "label": "GoogleUserInfo",
+        "description": [],
+        "path": "x-pack/solutions/workplaceai/plugins/workplace_ai_app/common/http_api/ears.ts",
+        "lineNumber": 62,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
           {
             "parentPluginId": "workplaceAIApp",
             "id": "def-common.GoogleUserInfo.picture",
@@ -118,7 +134,7 @@
             "label": "picture",
             "description": [],
             "path": "x-pack/solutions/workplaceai/plugins/workplace_ai_app/common/http_api/ears.ts",
-            "lineNumber": 49,
+            "lineNumber": 63,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -131,39 +147,7 @@
             "label": "email",
             "description": [],
             "path": "x-pack/solutions/workplaceai/plugins/workplace_ai_app/common/http_api/ears.ts",
-            "lineNumber": 50,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "workplaceAIApp",
-        "id": "def-common.StartOAuthRequest",
-        "type": "Interface",
-        "tags": [],
-        "label": "StartOAuthRequest",
-        "description": [],
-        "path": "x-pack/solutions/workplaceai/plugins/workplace_ai_app/common/http_api/ears.ts",
-        "lineNumber": 30,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "workplaceAIApp",
-            "id": "def-common.StartOAuthRequest.scope",
-            "type": "Array",
-            "tags": [],
-            "label": "scope",
-            "description": [],
-            "signature": [
-              "string[]"
-            ],
-            "path": "x-pack/solutions/workplaceai/plugins/workplace_ai_app/common/http_api/ears.ts",
-            "lineNumber": 31,
+            "lineNumber": 64,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -278,13 +262,41 @@
       },
       {
         "parentPluginId": "workplaceAIApp",
-        "id": "def-common.EARS_FETCH_SECRETS_ROUTE",
+        "id": "def-common.EARS_EXCHANGE_CODE_ROUTE",
         "type": "string",
         "tags": [],
-        "label": "EARS_FETCH_SECRETS_ROUTE",
+        "label": "EARS_EXCHANGE_CODE_ROUTE",
         "description": [],
         "path": "x-pack/solutions/workplaceai/plugins/workplace_ai_app/common/routes.ts",
         "lineNumber": 21,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "workplaceAIApp",
+        "id": "def-common.EARS_REFRESH_TOKEN_ROUTE",
+        "type": "string",
+        "tags": [],
+        "label": "EARS_REFRESH_TOKEN_ROUTE",
+        "description": [],
+        "path": "x-pack/solutions/workplaceai/plugins/workplace_ai_app/common/routes.ts",
+        "lineNumber": 22,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "workplaceAIApp",
+        "id": "def-common.EARS_REVOKE_TOKEN_ROUTE",
+        "type": "string",
+        "tags": [],
+        "label": "EARS_REVOKE_TOKEN_ROUTE",
+        "description": [],
+        "path": "x-pack/solutions/workplaceai/plugins/workplace_ai_app/common/routes.ts",
+        "lineNumber": 23,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -306,16 +318,16 @@
       },
       {
         "parentPluginId": "workplaceAIApp",
-        "id": "def-common.FetchSecretsResponse",
+        "id": "def-common.ExchangeCodeResponse",
         "type": "Type",
         "tags": [],
-        "label": "FetchSecretsResponse",
+        "label": "ExchangeCodeResponse",
         "description": [],
         "signature": [
-          "{ access_token: string; }"
+          "{ access_token: string; refresh_token?: string | undefined; }"
         ],
         "path": "x-pack/solutions/workplaceai/plugins/workplace_ai_app/common/http_api/ears.ts",
-        "lineNumber": 45,
+        "lineNumber": 40,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -351,6 +363,40 @@
       },
       {
         "parentPluginId": "workplaceAIApp",
+        "id": "def-common.RefreshTokenResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "RefreshTokenResponse",
+        "description": [],
+        "signature": [
+          "{ access_token: string; }"
+        ],
+        "path": "x-pack/solutions/workplaceai/plugins/workplace_ai_app/common/http_api/ears.ts",
+        "lineNumber": 51,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "workplaceAIApp",
+        "id": "def-common.RevokeTokenResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "RevokeTokenResponse",
+        "description": [],
+        "signature": [
+          "{}"
+        ],
+        "path": "x-pack/solutions/workplaceai/plugins/workplace_ai_app/common/http_api/ears.ts",
+        "lineNumber": 60,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "workplaceAIApp",
         "id": "def-common.STACK_CONNECTORS_MANAGEMENT_ID",
         "type": "string",
         "tags": [],
@@ -362,23 +408,6 @@
         "path": "x-pack/solutions/workplaceai/plugins/workplace_ai_app/common/routes.ts",
         "lineNumber": 16,
         "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "workplaceAIApp",
-        "id": "def-common.StartOAuthResponse",
-        "type": "Type",
-        "tags": [],
-        "label": "StartOAuthResponse",
-        "description": [],
-        "signature": [
-          "{ request_id: string; auth_url: string; }"
-        ],
-        "path": "x-pack/solutions/workplaceai/plugins/workplace_ai_app/common/http_api/ears.ts",
-        "lineNumber": 39,
-        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -438,10 +467,36 @@
       },
       {
         "parentPluginId": "workplaceAIApp",
-        "id": "def-common.fetchSecretsResponseSchema",
+        "id": "def-common.exchangeCodeResponseSchema",
         "type": "Object",
         "tags": [],
-        "label": "fetchSecretsResponseSchema",
+        "label": "exchangeCodeResponseSchema",
+        "description": [],
+        "signature": [
+          "ZodObject",
+          "<{ access_token: ",
+          "ZodString",
+          "; refresh_token: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; }, \"strip\", ",
+          "ZodTypeAny",
+          ", { access_token: string; refresh_token?: string | undefined; }, { access_token: string; refresh_token?: string | undefined; }>"
+        ],
+        "path": "x-pack/solutions/workplaceai/plugins/workplace_ai_app/common/http_api/ears.ts",
+        "lineNumber": 35,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "workplaceAIApp",
+        "id": "def-common.refreshTokenResponseSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "refreshTokenResponseSchema",
         "description": [],
         "signature": [
           "ZodObject",
@@ -452,31 +507,7 @@
           ", { access_token: string; }, { access_token: string; }>"
         ],
         "path": "x-pack/solutions/workplaceai/plugins/workplace_ai_app/common/http_api/ears.ts",
-        "lineNumber": 41,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "workplaceAIApp",
-        "id": "def-common.startOAuthResponseSchema",
-        "type": "Object",
-        "tags": [],
-        "label": "startOAuthResponseSchema",
-        "description": [],
-        "signature": [
-          "ZodObject",
-          "<{ request_id: ",
-          "ZodString",
-          "; auth_url: ",
-          "ZodString",
-          "; }, \"strip\", ",
-          "ZodTypeAny",
-          ", { request_id: string; auth_url: string; }, { request_id: string; auth_url: string; }>"
-        ],
-        "path": "x-pack/solutions/workplaceai/plugins/workplace_ai_app/common/http_api/ears.ts",
-        "lineNumber": 34,
+        "lineNumber": 47,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

@@ -810,7 +810,7 @@ exports[`NetworkHttp Table Component rendering it renders the default NetworkHtt
                   class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                 >
                   <span
-                    class="eui-textTruncate euiButtonEmpty__text"
+                    class="eui-textTruncate euiButtonEmpty__text css-1ryezsz-s"
                   >
                     1
                   </span>

@@ -201,9 +201,9 @@ export async function createInactivityMonitoringTemplate(
       await internalSoClient.create(
         KibanaSavedObjectType.alertingRuleTemplate,
         {
-          name: `[${pkgTitle}] Inactivity monitoring`,
+          name: `[${pkgTitle}] Idle data streams`,
           ruleTypeId: '.es-query',
-          tags: [],
+          tags: [pkgTitle],
           schedule: { interval: '24h' },
           params: {
             searchType: 'esQuery',

@@ -144,7 +144,7 @@
           "label": "initNavigation",
           "description": [],
           "signature": [
-            "(id: \"security\" | \"workplaceai\" | \"oblt\" | \"es\", navigationTree$: ",
+            "(id: \"security\" | \"es\" | \"workplaceai\" | \"oblt\", navigationTree$: ",
             "Observable",
             "<",
             "NavigationTreeDefinition",
@@ -166,7 +166,7 @@
               "label": "id",
               "description": [],
               "signature": [
-                "\"security\" | \"workplaceai\" | \"oblt\" | \"es\""
+                "\"security\" | \"es\" | \"workplaceai\" | \"oblt\""
               ],
               "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
               "lineNumber": 28,

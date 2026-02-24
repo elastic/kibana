@@ -9,7 +9,6 @@
     "@kbn/cloud-security-posture-common",
     "@kbn/data-views-plugin",
     "@kbn/kibana-react-plugin",
-    "@kbn/ui-theme",
     "@kbn/utility-types",
     "@kbn/unified-search-plugin",
     "@kbn/es-query",

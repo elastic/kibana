@@ -657,6 +657,7 @@ export const createSearchAfterReturnType = ({
   errors,
   warningMessages,
   suppressedAlertsCount,
+  totalEventsFound,
 }: {
   success?: boolean | undefined;
   warning?: boolean;
@@ -668,6 +669,7 @@ export const createSearchAfterReturnType = ({
   errors?: string[] | undefined;
   warningMessages?: string[] | undefined;
   suppressedAlertsCount?: number | undefined;
+  totalEventsFound?: number | undefined;
 } = {}): SearchAfterAndBulkCreateReturnType => {
   return {
     success: success ?? true,
@@ -720,6 +722,7 @@ export const mergeReturns = (
       errors: existingErrors,
       warningMessages: existingWarningMessages,
       suppressedAlertsCount: existingSuppressedAlertsCount,
+      totalEventsFound: existingTotalEventsFound,
     }: SearchAfterAndBulkCreateReturnType = prev;
 
     const {
@@ -733,6 +736,7 @@ export const mergeReturns = (
       errors: newErrors,
       warningMessages: newWarningMessages,
       suppressedAlertsCount: newSuppressedAlertsCount,
+      totalEventsFound: newTotalEventsFound,
     }: SearchAfterAndBulkCreateReturnType = next;
 
     return {
@@ -746,6 +750,7 @@ export const mergeReturns = (
       errors: [...new Set([...existingErrors, ...newErrors])],
       warningMessages: [...existingWarningMessages, ...newWarningMessages],
       suppressedAlertsCount: (existingSuppressedAlertsCount ?? 0) + (newSuppressedAlertsCount ?? 0),
+      totalEventsFound: (existingTotalEventsFound ?? 0) + (newTotalEventsFound ?? 0),
     };
   });
 };

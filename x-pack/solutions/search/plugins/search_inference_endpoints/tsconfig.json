@@ -7,8 +7,7 @@
     "__mocks__/**/*",
     "common/**/*",
     "public/**/*",
-    "server/**/*",
-    "../../../../../typings/emotion.d.ts"
+    "server/**/*"
   ],
   "kbn_references": [
     "@kbn/config-schema",
@@ -40,9 +39,9 @@
     "@kbn/object-utils",
     "@kbn/react-query",
     "@kbn/search-api-panels",
-    "@kbn/cloud-plugin",
+    "@kbn/cloud-plugin"
   ],
   "exclude": [
-    "target/**/*",
+    "target/**/*"
   ]
 }

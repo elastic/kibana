@@ -40,8 +40,8 @@ import {
 import { useAiopsAppContext } from '../../../hooks/use_aiops_app_context';
 import { LogRateAnalysisAttachmentsMenu } from './log_rate_analysis_attachments_menu';
 
-export const DEFAULT_SEARCH_QUERY: estypes.QueryDslQueryContainer = { match_all: {} };
-const DEFAULT_SEARCH_BAR_QUERY: estypes.QueryDslQueryContainer = {
+export const DEFAULT_SEARCH_QUERY: NonNullable<estypes.QueryDslQueryContainer> = { match_all: {} };
+const DEFAULT_SEARCH_BAR_QUERY: NonNullable<estypes.QueryDslQueryContainer> = {
   bool: {
     filter: [],
     must: [

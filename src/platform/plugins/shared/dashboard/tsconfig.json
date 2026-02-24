@@ -105,6 +105,8 @@
     "@kbn/core-http-server",
     "@kbn/core-chrome-layout-utils",
     "@kbn/cps",
+    "@kbn/as-code-filters-schema",
+    "@kbn/as-code-filters-transforms",
     "@kbn/scout",
     "@kbn/test",
     "@kbn/core-chrome-app-menu-components",

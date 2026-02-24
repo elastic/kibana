@@ -23,7 +23,7 @@ export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServi
       value: false,
       technicalPreview: true,
       requiresPageReload: true,
-      readonly: false,
+      readonly: true,
     },
   });
 };

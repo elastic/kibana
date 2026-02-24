@@ -6,18 +6,22 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { LifecycleSummary } from './lifecycle_summary';
 import type { Streams, IngestStreamLifecycle } from '@kbn/streams-schema';
 
 // Mock the hooks
-const mockFetch = jest.fn().mockResolvedValue(undefined);
+const mockFetch = jest.fn();
+const mockStreamsRepositoryClient = { fetch: mockFetch };
 const mockAddSuccess = jest.fn();
 const mockAddError = jest.fn();
 
 jest.mock('../../../../hooks/use_kibana', () => ({
   useKibana: () => ({
     core: {
+      application: {
+        navigateToApp: jest.fn(),
+      },
       notifications: {
         toasts: {
           addSuccess: mockAddSuccess,
@@ -28,9 +32,7 @@ jest.mock('../../../../hooks/use_kibana', () => ({
     dependencies: {
       start: {
         streams: {
-          streamsRepositoryClient: {
-            fetch: mockFetch,
-          },
+          streamsRepositoryClient: mockStreamsRepositoryClient,
         },
       },
     },
@@ -111,13 +113,28 @@ describe('LifecycleSummary', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+
+    // Default: avoid noisy async errors from useSnapshotRepositories
+    mockFetch.mockImplementation((endpoint: string) => {
+      if (endpoint === 'GET /internal/streams/lifecycle/_snapshot_repositories') {
+        return Promise.resolve({ repositories: [] });
+      }
+      return Promise.resolve(undefined);
+    });
+
+    // Default: avoid leaking per-test overrides
+    mockUseStreamsAppFetch.mockReturnValue({
+      value: undefined,
+      loading: false,
+      refresh: jest.fn(),
+    });
   });
 
   describe('DSL Lifecycle', () => {
     it('should render DSL lifecycle with retention period', () => {
       const definition = createDslDefinition('30d');
 
-      render(<LifecycleSummary definition={definition} />);
+      render(<LifecycleSummary definition={definition} isMetricsStream />);
 
       expect(screen.getByTestId('dataLifecycleSummary-title')).toBeInTheDocument();
     });
@@ -125,24 +142,36 @@ describe('LifecycleSummary', () => {
     it('should render DSL lifecycle with infinite retention', () => {
       const definition = createDslDefinition(undefined);
 
-      render(<LifecycleSummary definition={definition} />);
+      render(<LifecycleSummary definition={definition} isMetricsStream />);
 
       expect(screen.getByTestId('dataLifecycleTimeline-infinite')).toBeInTheDocument();
     });
 
-    it('should render DSL lifecycle with downsampling', () => {
+    it('should render DSL lifecycle with downsampling when isMetricsStream is true', () => {
       const definition = createDslDefinition('60d', [
         { after: '10d', fixed_interval: '1h' },
         { after: '30d', fixed_interval: '1d' },
       ]);
 
-      render(<LifecycleSummary definition={definition} />);
+      render(<LifecycleSummary definition={definition} isMetricsStream />);
 
       expect(screen.getByTestId('downsamplingBar-label')).toBeInTheDocument();
     });
+
+    it('should not render downsampling bar when isMetricsStream is false', () => {
+      const definition = createDslDefinition('60d', [
+        { after: '10d', fixed_interval: '1h' },
+        { after: '30d', fixed_interval: '1d' },
+      ]);
+
+      render(<LifecycleSummary definition={definition} isMetricsStream={false} />);
+
+      expect(screen.queryByTestId('downsamplingBar-label')).not.toBeInTheDocument();
+    });
+
     it('should render lifecycle summary for disabled lifecycle', () => {
       const definition = createDisabledDefinition();
-      render(<LifecycleSummary definition={definition} />);
+      render(<LifecycleSummary definition={definition} isMetricsStream />);
 
       expect(screen.getByTestId('dataLifecycleSummary-title')).toBeInTheDocument();
       expect(screen.getByTestId('lifecyclePhase-Hot-name')).toBeInTheDocument();
@@ -153,7 +182,7 @@ describe('LifecycleSummary', () => {
     it('should render ILM lifecycle', () => {
       const definition = createIlmDefinition();
 
-      render(<LifecycleSummary definition={definition} />);
+      render(<LifecycleSummary definition={definition} isMetricsStream />);
 
       expect(screen.getByTestId('dataLifecycleSummary-title')).toBeInTheDocument();
     });
@@ -167,11 +196,10 @@ describe('LifecycleSummary', () => {
 
       const definition = createIlmDefinition();
 
-      render(<LifecycleSummary definition={definition} />);
+      render(<LifecycleSummary definition={definition} isMetricsStream />);
 
       expect(screen.getByTestId('dataLifecycleSummary-skeleton')).toBeInTheDocument();
     });
-
     it('should open edit policy modal when removing an ILM phase with affected resources', async () => {
       const policies = [
         {
@@ -198,12 +226,15 @@ describe('LifecycleSummary', () => {
         if (endpoint === 'GET /internal/streams/lifecycle/_policies') {
           return Promise.resolve(policies);
         }
+        if (endpoint === 'GET /internal/streams/lifecycle/_snapshot_repositories') {
+          return Promise.resolve({ repositories: [] });
+        }
         return Promise.resolve(undefined);
       });
 
       const definition = createIlmDefinition();
 
-      render(<LifecycleSummary definition={definition} />);
+      render(<LifecycleSummary definition={definition} isMetricsStream />);
 
       await waitFor(() => {
         expect(screen.getByTestId('lifecyclePhase-warm-name')).toBeInTheDocument();
@@ -250,12 +281,15 @@ describe('LifecycleSummary', () => {
         if (endpoint === 'GET /internal/streams/lifecycle/_policies') {
           return Promise.resolve(policies);
         }
+        if (endpoint === 'GET /internal/streams/lifecycle/_snapshot_repositories') {
+          return Promise.resolve({ repositories: [] });
+        }
         return Promise.resolve(undefined);
       });
 
       const definition = createIlmDefinition();
 
-      render(<LifecycleSummary definition={definition} />);
+      render(<LifecycleSummary definition={definition} isMetricsStream />);
 
       await waitFor(() => {
         expect(screen.getByTestId('lifecyclePhase-warm-name')).toBeInTheDocument();
@@ -280,6 +314,62 @@ describe('LifecycleSummary', () => {
 
       // Modal should not be shown since there are no affected resources
       expect(screen.queryByTestId('editPolicyModalTitle')).not.toBeInTheDocument();
+    });
+
+    it('should render ILM lifecycle with downsampling when isMetricsStream is true', () => {
+      const ilmStatsValue = {
+        phases: {
+          hot: {
+            name: 'hot',
+            min_age: '0ms',
+            size_in_bytes: 1000,
+            rollover: {},
+            downsample: { after: '10d', fixed_interval: '1h' },
+          },
+          warm: { name: 'warm', min_age: '30d', size_in_bytes: 1000 },
+          delete: { name: 'delete', min_age: '60d' },
+        },
+      };
+
+      mockUseStreamsAppFetch.mockReturnValue({
+        value: ilmStatsValue,
+        loading: false,
+        refresh: jest.fn(),
+      });
+
+      const definition = createIlmDefinition();
+
+      render(<LifecycleSummary definition={definition} isMetricsStream />);
+
+      expect(screen.getByTestId('downsamplingBar-label')).toBeInTheDocument();
+    });
+
+    it('should not render ILM downsampling bar when isMetricsStream is false', () => {
+      const ilmStatsValue = {
+        phases: {
+          hot: {
+            name: 'hot',
+            min_age: '0ms',
+            size_in_bytes: 1000,
+            rollover: {},
+            downsample: { after: '10d', fixed_interval: '1h' },
+          },
+          warm: { name: 'warm', min_age: '30d', size_in_bytes: 1000 },
+          delete: { name: 'delete', min_age: '60d' },
+        },
+      };
+
+      mockUseStreamsAppFetch.mockReturnValue({
+        value: ilmStatsValue,
+        loading: false,
+        refresh: jest.fn(),
+      });
+
+      const definition = createIlmDefinition();
+
+      render(<LifecycleSummary definition={definition} isMetricsStream={false} />);
+
+      expect(screen.queryByTestId('downsamplingBar-label')).not.toBeInTheDocument();
     });
   });
 });

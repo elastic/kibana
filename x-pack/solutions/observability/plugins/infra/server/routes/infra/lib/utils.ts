@@ -13,7 +13,7 @@ interface BoolQuery {
 }
 
 const isValidFilter = (query: any): query is BoolQuery => {
-  const boolClause = (query as estypes.QueryDslQueryContainer).bool;
+  const boolClause = (query as estypes.QueryDslQueryContainer)?.bool;
 
   if (!boolClause || Object.keys(boolClause).length === 0) {
     return false;

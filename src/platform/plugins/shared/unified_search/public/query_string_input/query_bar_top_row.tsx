@@ -87,13 +87,9 @@ export const strings = {
     i18n.translate('unifiedSearch.queryBarTopRow.submitButton.cancel', {
       defaultMessage: 'Cancel',
     }),
-  getRunQueryLabel: () =>
-    i18n.translate('unifiedSearch.queryBarTopRow.submitButton.run', {
-      defaultMessage: 'Run query',
-    }),
-  getRunButtonLabel: () =>
-    i18n.translate('unifiedSearch.queryBarTopRow.submitButton.runButton', {
-      defaultMessage: 'Run',
+  getSearchButtonLabel: () =>
+    i18n.translate('unifiedSearch.queryBarTopRow.submitButton.searchButton', {
+      defaultMessage: 'Search',
     }),
   getDisabledDatePickerLabel: () =>
     i18n.translate('unifiedSearch.queryBarTopRow.datePicker.disabledLabel', {
@@ -745,24 +741,47 @@ export const QueryBarTopRow = React.memo(
       );
     }
 
+    const getSubmitButtonProps = () => {
+      if (isQueryLangSelected) {
+        const label = strings.getSearchButtonLabel();
+        return { icon: undefined, text: label, ariaLabel: label, color: 'primary' as const };
+      }
+
+      if (props.isDirty) {
+        return {
+          icon: 'kqlFunction' as const,
+          text: strings.getUpdateButtonLabel(),
+          ariaLabel: strings.getNeedsUpdatingLabel(),
+          color: 'success' as const,
+        };
+      }
+
+      return {
+        icon: 'refresh' as const,
+        text: strings.getRefreshButtonLabel(),
+        ariaLabel: strings.getRefreshQueryLabel(),
+        color: 'primary' as const,
+      };
+    };
+
     function renderDatePickerWithUpdateBtn() {
       if (!shouldRenderUpdateButton() && !shouldRenderDatePicker()) {
         return null;
       }
-      const iconDirty = Boolean(isQueryLangSelected) ? 'playFilled' : 'kqlFunction';
-      const labelDirty = Boolean(isQueryLangSelected)
-        ? strings.getRunQueryLabel()
-        : strings.getNeedsUpdatingLabel();
-      const buttonLabelDirty = Boolean(isQueryLangSelected)
-        ? strings.getRunButtonLabel()
-        : strings.getUpdateButtonLabel();
+
+      const {
+        icon: buttonIcon,
+        text: buttonText,
+        ariaLabel: buttonAriaLabel,
+        color: buttonColor,
+      } = getSubmitButtonProps();
 
       const updateButton = props.useBackgroundSearchButton ? (
         <SplitButton
-          aria-label={props.isDirty ? labelDirty : strings.getRefreshQueryLabel()}
-          color={props.isDirty ? 'success' : 'primary'}
+          aria-label={buttonAriaLabel}
+          color={buttonColor}
           data-test-subj="querySubmitButton"
-          iconType={props.isDirty ? iconDirty : 'refresh'}
+          iconType={buttonIcon}
           isDisabled={isDateRangeInvalid || props.isDisabled}
           isLoading={props.isLoading}
           isSecondaryButtonDisabled={!canSendToBackground}
@@ -775,28 +794,28 @@ export const QueryBarTopRow = React.memo(
           size="s"
           minWidth={BUTTON_MIN_WIDTH}
         >
-          {props.isDirty ? buttonLabelDirty : strings.getRefreshButtonLabel()}
+          {buttonText}
         </SplitButton>
       ) : (
         <EuiSuperUpdateButton
-          iconType={props.isDirty ? iconDirty : 'refresh'}
+          iconType={buttonIcon}
           iconOnly={submitButtonIconOnly}
-          aria-label={props.isDirty ? labelDirty : strings.getRefreshQueryLabel()}
+          aria-label={buttonAriaLabel}
           isDisabled={isDateRangeInvalid || props.isDisabled}
           isLoading={props.isLoading}
           onClick={onClickSubmitButton}
           size="s"
-          color={props.isDirty ? 'success' : 'primary'}
+          color={buttonColor}
           fill={false}
           needsUpdate={props.isDirty}
           data-test-subj="querySubmitButton"
           toolTipProps={{
-            content: props.isDirty ? labelDirty : strings.getRefreshQueryLabel(),
+            content: buttonAriaLabel,
             delay: 'long',
             position: 'bottom',
           }}
         >
-          {props.isDirty ? buttonLabelDirty : strings.getRefreshButtonLabel()}
+          {buttonText}
         </EuiSuperUpdateButton>
       );
 

@@ -74,6 +74,27 @@ export interface MonitorableNode {
   monitor(monitoredContext: StepExecutionRuntime): Promise<void> | void;
 }
 
+/**
+ * Node implementation with explicit cancellation cleanup.
+ *
+ * Steps that hold external resources (child workflow executions, long-running
+ * connections, etc.) implement this to perform teardown when cancelled.
+ * `onCancel` is called after the abort signal fires and the step is marked
+ * as cancelled — it fires in both the running and waiting states, giving
+ * the step a guaranteed cleanup entry point without re-invoking `run()`.
+ *
+ * Implementations must be idempotent.
+ */
+export interface CancellableNode {
+  onCancel(): Promise<void> | void;
+}
+
+export const isCancellableNode = (
+  node: NodeImplementation
+): node is NodeImplementation & CancellableNode => {
+  return typeof (node as unknown as CancellableNode).onCancel === 'function';
+};
+
 export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
   implements NodeImplementation
 {

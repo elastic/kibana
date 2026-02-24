@@ -66,8 +66,14 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
     : undefined;
 
   const flyoutBodyStyles = css`
-    &.euiFlyoutBody {
-      padding-top: ${euiTheme.size.m};
+    padding-top: ${euiTheme.size.m};
+
+    > .euiFlyoutBody__overflow {
+      mask-image: none;
+    }
+
+    .euiFlyoutBody__overflowContent {
+      height: 100%;
     }
   `;
 

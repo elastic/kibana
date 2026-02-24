@@ -97,7 +97,7 @@ evaluate.describe.skip(
     async function runSystemIdentificationExperiment(
       dataset: SystemIdentificationEvaluationDataset,
       {
-        phoenixClient,
+        executorClient,
         apiServices,
         esClient,
         inferenceClient,
@@ -106,7 +106,7 @@ evaluate.describe.skip(
         config,
       }: Pick<
         StreamsEvaluationWorkerFixtures,
-        | 'phoenixClient'
+        | 'executorClient'
         | 'apiServices'
         | 'esClient'
         | 'inferenceClient'
@@ -115,7 +115,7 @@ evaluate.describe.skip(
         | 'config'
       >
     ) {
-      await phoenixClient.runExperiment(
+      await executorClient.runExperiment(
         {
           dataset,
           concurrency: 1,
@@ -346,7 +346,7 @@ evaluate.describe.skip(
             esClient,
             inferenceClient,
             logger,
-            phoenixClient,
+            executorClient,
             apiServices,
             config,
           }) => {
@@ -356,7 +356,7 @@ evaluate.describe.skip(
               evaluators,
               inferenceClient,
               logger,
-              phoenixClient,
+              executorClient,
               config,
             });
           }
@@ -400,7 +400,7 @@ evaluate.describe.skip(
             esClient,
             inferenceClient,
             logger,
-            phoenixClient,
+            executorClient,
             apiServices,
             config,
           }) => {
@@ -426,7 +426,7 @@ evaluate.describe.skip(
                 evaluators,
                 inferenceClient,
                 logger,
-                phoenixClient,
+                executorClient,
                 config,
               }
             );
@@ -457,7 +457,7 @@ evaluate.describe.skip(
             esClient,
             inferenceClient,
             logger,
-            phoenixClient,
+            executorClient,
             apiServices,
             config,
           }) => {
@@ -467,7 +467,7 @@ evaluate.describe.skip(
               evaluators,
               inferenceClient,
               logger,
-              phoenixClient,
+              executorClient,
               config,
             });
           }

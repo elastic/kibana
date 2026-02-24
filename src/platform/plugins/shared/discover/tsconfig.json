@@ -7,6 +7,7 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
+    "test/**/*",
     "../../../../../typings/**/*",
     ".storybook/**/*"
   ],
@@ -123,7 +124,9 @@
     "@kbn/core-chrome-app-menu",
     "@kbn/es-query-constants",
     "@kbn/esql",
-    "@kbn/controls-schemas"
+    "@kbn/controls-schemas",
+    "@kbn/scout",
+    "@kbn/synthtrace-client"
   ],
   "exclude": ["target/**/*"]
 }

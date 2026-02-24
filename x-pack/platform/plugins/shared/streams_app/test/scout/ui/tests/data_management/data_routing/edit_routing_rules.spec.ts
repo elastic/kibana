@@ -22,23 +22,23 @@ test.describe(
     test.beforeEach(async ({ apiServices, browserAuth, pageObjects }) => {
       await browserAuth.loginAsAdmin();
       // Clear existing rules
-      await apiServices.streams.clearStreamChildren('logs');
+      await apiServices.streams.clearStreamChildren('logs.otel');
       // Create a test stream with routing rules first
-      await apiServices.streams.forkStream('logs', 'logs.edit-test', {
+      await apiServices.streams.forkStream('logs.otel', 'logs.otel.edit-test', {
         field: 'service.name',
         eq: 'test-service',
       });
 
-      await pageObjects.streams.gotoPartitioningTab('logs');
+      await pageObjects.streams.gotoPartitioningTab('logs.otel');
     });
 
     test.afterAll(async ({ apiServices }) => {
       // Clear existing rules
-      await apiServices.streams.clearStreamChildren('logs');
+      await apiServices.streams.clearStreamChildren('logs.otel');
     });
 
     test('should edit an existing routing rule', async ({ page, pageObjects }) => {
-      const rountingRuleName = 'logs.edit-test';
+      const rountingRuleName = 'logs.otel.edit-test';
       await pageObjects.streams.clickEditRoutingRule(rountingRuleName);
 
       // Update condition
@@ -46,7 +46,7 @@ test.describe(
       await pageObjects.streams.updateRoutingRule();
 
       // Verify success
-      const routingRule = page.getByTestId('routingRule-logs.edit-test');
+      const routingRule = page.getByTestId('routingRule-logs.otel.edit-test');
       await expect(routingRule.getByTestId('streamsAppConditionDisplayField')).toContainText(
         'service.name'
       );
@@ -62,7 +62,7 @@ test.describe(
       page,
       pageObjects,
     }) => {
-      const rountingRuleName = 'logs.edit-test';
+      const rountingRuleName = 'logs.otel.edit-test';
       await pageObjects.streams.clickEditRoutingRule(rountingRuleName);
 
       await pageObjects.streams.toggleConditionEditorWithSyntaxSwitch();
@@ -82,7 +82,7 @@ test.describe(
     });
 
     test('should cancel editing routing rule', async ({ page, pageObjects }) => {
-      const rountingRuleName = 'logs.edit-test';
+      const rountingRuleName = 'logs.otel.edit-test';
       await pageObjects.streams.clickEditRoutingRule(rountingRuleName);
 
       // Update and cancel changes
@@ -90,7 +90,7 @@ test.describe(
       await pageObjects.streams.cancelRoutingRule();
 
       // Verify success
-      const routingRule = page.getByTestId('routingRule-logs.edit-test');
+      const routingRule = page.getByTestId('routingRule-logs.otel.edit-test');
       await expect(routingRule.getByTestId('streamsAppConditionDisplayField')).toContainText(
         'service.name'
       );
@@ -114,10 +114,10 @@ test.describe(
       await pageObjects.streams.saveRoutingRule();
 
       // Edit first rule
-      await pageObjects.streams.clickEditRoutingRule('logs.edit-test');
+      await pageObjects.streams.clickEditRoutingRule('logs.otel.edit-test');
 
       // Switch to edit second rule without saving
-      await pageObjects.streams.clickEditRoutingRule('logs.edit-test-2');
+      await pageObjects.streams.clickEditRoutingRule('logs.otel.edit-test-2');
 
       // Should now be editing the second rule
       expect(await pageObjects.streams.conditionEditorValueComboBox.getSelectedValue()).toBe(
@@ -125,14 +125,14 @@ test.describe(
       );
 
       // Verify rule still exists
-      await pageObjects.streams.expectRoutingRuleVisible('logs.edit-test');
+      await pageObjects.streams.expectRoutingRuleVisible('logs.otel.edit-test');
     });
 
     test('should disable Update button when syntax editor has empty condition', async ({
       page,
       pageObjects,
     }) => {
-      const routingRuleName = 'logs.edit-test';
+      const routingRuleName = 'logs.otel.edit-test';
       await pageObjects.streams.clickEditRoutingRule(routingRuleName);
 
       // Switch to syntax editor
@@ -154,7 +154,7 @@ test.describe(
       page,
       pageObjects,
     }) => {
-      const routingRuleName = 'logs.edit-test';
+      const routingRuleName = 'logs.otel.edit-test';
       await pageObjects.streams.clickEditRoutingRule(routingRuleName);
 
       // Switch to syntax editor
@@ -176,7 +176,7 @@ test.describe(
       page,
       pageObjects,
     }) => {
-      const routingRuleName = 'logs.edit-test';
+      const routingRuleName = 'logs.otel.edit-test';
       await pageObjects.streams.clickEditRoutingRule(routingRuleName);
 
       // Without making any changes, verify Update button is disabled
@@ -197,26 +197,26 @@ test.describe(
     });
 
     test('should remove routing rule with confirmation', async ({ pageObjects }) => {
-      await pageObjects.streams.clickEditRoutingRule('logs.edit-test');
+      await pageObjects.streams.clickEditRoutingRule('logs.otel.edit-test');
 
       await pageObjects.streams.removeRoutingRule();
 
       // Confirm deletion in modal
-      await pageObjects.streams.confirmStreamDeleteInModal('logs.edit-test');
+      await pageObjects.streams.confirmStreamDeleteInModal('logs.otel.edit-test');
 
-      await pageObjects.streams.expectRoutingRuleHidden('logs.edit-test');
+      await pageObjects.streams.expectRoutingRuleHidden('logs.otel.edit-test');
       await pageObjects.toasts.waitFor();
     });
 
     test('should cancel rule removal', async ({ pageObjects }) => {
-      await pageObjects.streams.clickEditRoutingRule('logs.edit-test');
+      await pageObjects.streams.clickEditRoutingRule('logs.otel.edit-test');
       await pageObjects.streams.removeRoutingRule();
 
       // Cancel deletion
       await pageObjects.streams.cancelDeleteInModal();
 
       // Verify rule still exists
-      await pageObjects.streams.expectRoutingRuleVisible('logs.edit-test');
+      await pageObjects.streams.expectRoutingRuleVisible('logs.otel.edit-test');
     });
   }
 );

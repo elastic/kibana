@@ -60,33 +60,33 @@ export const hostEntityDefinition: EntityDefinitionWithoutId = {
     ...getEntityFieldsDescriptions('host'),
 
     collect({
-      source: `host.entity.relationships.Communicates_with`,
-      destination: 'entity.relationships.Communicates_with',
+      source: `host.entity.relationships.communicates_with`,
+      destination: 'entity.relationships.communicates_with',
       mapping: { type: 'keyword' },
       allowAPIUpdate: true,
     }),
     collect({
-      source: `host.entity.relationships.Depends_on`,
-      destination: 'entity.relationships.Depends_on',
+      source: `host.entity.relationships.depends_on`,
+      destination: 'entity.relationships.depends_on',
       mapping: { type: 'keyword' },
       allowAPIUpdate: true,
     }),
     collect({
-      source: `host.entity.relationships.Dependent_of`,
-      destination: 'entity.relationships.Dependent_of',
+      source: `host.entity.relationships.dependent_of`,
+      destination: 'entity.relationships.dependent_of',
       mapping: { type: 'keyword' },
       allowAPIUpdate: true,
     }),
 
     collect({
-      source: `host.entity.relationships.Owned_by`,
-      destination: 'entity.relationships.Owned_by',
+      source: `host.entity.relationships.owned_by`,
+      destination: 'entity.relationships.owned_by',
       mapping: { type: 'keyword' },
       allowAPIUpdate: true,
     }),
     collect({
-      source: `host.entity.relationships.Accessed_frequently_by`,
-      destination: 'entity.relationships.Accessed_frequently_by',
+      source: `host.entity.relationships.accessed_frequently_by`,
+      destination: 'entity.relationships.accessed_frequently_by',
       mapping: { type: 'keyword' },
       allowAPIUpdate: true,
     }),

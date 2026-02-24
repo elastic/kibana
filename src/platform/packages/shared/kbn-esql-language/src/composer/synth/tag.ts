@@ -61,7 +61,7 @@ export const createTag = <N extends ESQLProperNode>(
     if (Array.isArray(first)) {
       return templateStringTag()(
         first as unknown as TemplateStringsArray,
-        ...(args as any).slice(1)
+        ...(args as SynthTemplateHole[]).slice(1)
       );
     }
 

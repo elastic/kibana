@@ -12,14 +12,14 @@
  *
  * This file is auto-generated. Do not edit manually.
  * Sources: resolved-semconv.yaml + hardcoded OTLP mappings
- * Registry groups: 142
- * Metric groups: 497
+ * Registry groups: 143
+ * Metric groups: 502
  * Hardcoded fields: 34
- * Total fields: 1196
+ * Total fields: 1216
  *
  * @internal
  *
- * WARNING: This object contains 1196+ field definitions (~50KB+ minified).
+ * WARNING: This object contains 1216+ field definitions (~50KB+ minified).
  * Direct import will significantly increase client bundle size.
  *
  * RECOMMENDED USAGE:
@@ -1380,12 +1380,6 @@ export const semconvFlat = {
     type: 'keyword',
     example: 'QdH5CAWJgqVT4rOr0qtumf',
   },
-  'error.message': {
-    name: 'error.message',
-    description: 'A message providing more detail about an error in human-readable form.',
-    type: 'keyword',
-    example: 'Unexpected input type: string',
-  },
   'error.type': {
     name: 'error.type',
     description: 'Describes a class of error the operation ended with.',
@@ -1519,6 +1513,13 @@ export const semconvFlat = {
       'The unique identifier for the flag evaluation context. For example, the targeting key.',
     type: 'keyword',
     example: '5157782b-2203-4c80-a857-dbbd5e7761db',
+  },
+  'feature_flag.error.message': {
+    name: 'feature_flag.error.message',
+    description:
+      'A message providing more detail about an error that occurred during feature flag evaluation in human-readable form.',
+    type: 'keyword',
+    example: 'Unexpected input type: string',
   },
   'feature_flag.key': {
     name: 'feature_flag.key',
@@ -1849,6 +1850,12 @@ export const semconvFlat = {
     description: 'Human-readable name of the GenAI agent provided by the application.',
     type: 'keyword',
     example: 'Math Tutor',
+  },
+  'gen_ai.agent.version': {
+    name: 'gen_ai.agent.version',
+    description: 'The version of the GenAI agent.',
+    type: 'keyword',
+    example: '1.0.0',
   },
   'gen_ai.conversation.id': {
     name: 'gen_ai.conversation.id',
@@ -2966,6 +2973,75 @@ export const semconvFlat = {
     type: 'keyword',
     example: '275ecb36-5aa8-4c2a-9c47-d8bb681b9aff',
   },
+  'k8s.service.annotation': {
+    name: 'k8s.service.annotation',
+    description:
+      'The annotation placed on the Service, the `<key>` being the annotation name, the value being the annotation value, even if the value is empty.',
+    type: 'keyword',
+    example: 'true',
+  },
+  'k8s.service.endpoint.address_type': {
+    name: 'k8s.service.endpoint.address_type',
+    description: 'The address type of the service endpoint.',
+    type: 'keyword',
+    example: 'IPv4',
+  },
+  'k8s.service.endpoint.condition': {
+    name: 'k8s.service.endpoint.condition',
+    description: 'The condition of the service endpoint.',
+    type: 'keyword',
+    example: 'ready',
+  },
+  'k8s.service.endpoint.zone': {
+    name: 'k8s.service.endpoint.zone',
+    description: 'The zone of the service endpoint.',
+    type: 'keyword',
+    example: 'us-east-1a',
+  },
+  'k8s.service.label': {
+    name: 'k8s.service.label',
+    description:
+      'The label placed on the Service, the `<key>` being the label name, the value being the label value, even if the value is empty.',
+    type: 'keyword',
+    example: 'my-service',
+  },
+  'k8s.service.name': {
+    name: 'k8s.service.name',
+    description: 'The name of the Service.',
+    type: 'keyword',
+    example: 'my-service',
+  },
+  'k8s.service.publish_not_ready_addresses': {
+    name: 'k8s.service.publish_not_ready_addresses',
+    description: 'Whether the Service publishes not-ready endpoints.',
+    type: 'boolean',
+    example: 'true',
+  },
+  'k8s.service.selector': {
+    name: 'k8s.service.selector',
+    description:
+      'The selector key-value pair placed on the Service, the `<key>` being the selector key, the value being the selector value.',
+    type: 'keyword',
+    example: 'my-app',
+  },
+  'k8s.service.traffic_distribution': {
+    name: 'k8s.service.traffic_distribution',
+    description: 'The traffic distribution policy for the Service.',
+    type: 'keyword',
+    example: 'PreferSameZone',
+  },
+  'k8s.service.type': {
+    name: 'k8s.service.type',
+    description: 'The type of the Kubernetes Service.',
+    type: 'keyword',
+    example: 'ClusterIP',
+  },
+  'k8s.service.uid': {
+    name: 'k8s.service.uid',
+    description: 'The UID of the Service.',
+    type: 'keyword',
+    example: '275ecb36-5aa8-4c2a-9c47-d8bb681b9aff',
+  },
   'k8s.statefulset.annotation': {
     name: 'k8s.statefulset.annotation',
     description:
@@ -3826,6 +3902,18 @@ export const semconvFlat = {
     description: 'GenAI operation duration.',
     type: 'double',
   },
+  'metrics.gen_ai.client.operation.time_per_output_chunk': {
+    name: 'metrics.gen_ai.client.operation.time_per_output_chunk',
+    description:
+      'Time per output chunk, recorded for each chunk received after the first one, measured as the time elapsed from the end of the previous chunk to the end of the current chunk.',
+    type: 'double',
+  },
+  'metrics.gen_ai.client.operation.time_to_first_chunk': {
+    name: 'metrics.gen_ai.client.operation.time_to_first_chunk',
+    description:
+      'Time to receive the first chunk, measured from when the client issues the generation request to when the first chunk is received in the response stream.',
+    type: 'double',
+  },
   'metrics.gen_ai.client.token.usage': {
     name: 'metrics.gen_ai.client.token.usage',
     description: 'Number of input and output tokens used.',
@@ -4205,6 +4293,11 @@ export const semconvFlat = {
   'metrics.jvm.file_descriptor.count': {
     name: 'metrics.jvm.file_descriptor.count',
     description: 'Number of open file descriptors as reported by the JVM.',
+    type: 'double',
+  },
+  'metrics.jvm.file_descriptor.limit': {
+    name: 'metrics.jvm.file_descriptor.limit',
+    description: 'Measure of max open file descriptors as reported by the JVM.',
     type: 'double',
   },
   'metrics.jvm.gc.duration': {
@@ -4773,6 +4866,17 @@ export const semconvFlat = {
     name: 'metrics.k8s.resourcequota.storage.request.used',
     description:
       'The storage requests in a specific namespace. The value represents the current observed total usage of the resource in the namespace.',
+    type: 'double',
+  },
+  'metrics.k8s.service.endpoint.count': {
+    name: 'metrics.k8s.service.endpoint.count',
+    description: 'Number of endpoints for a service by condition and address type.',
+    type: 'double',
+  },
+  'metrics.k8s.service.load_balancer.ingress.count': {
+    name: 'metrics.k8s.service.load_balancer.ingress.count',
+    description:
+      'Number of load balancer ingress points (external IPs/hostnames) assigned to the service.',
     type: 'double',
   },
   'metrics.k8s.statefulset.pod.current': {
@@ -5706,6 +5810,11 @@ export const semconvFlat = {
     description: 'ONC/Sun RPC program version.',
     type: 'long',
   },
+  'openai.api.type': {
+    name: 'openai.api.type',
+    description: 'The type of OpenAI API being used.',
+    type: 'keyword',
+  },
   'openai.request.service_tier': {
     name: 'openai.request.service_tier',
     description: 'The service tier requested. May be a specific tier, default, or auto.',
@@ -5928,6 +6037,19 @@ export const semconvFlat = {
       'Frames with Function.function_name fully matching the regexp will be kept, even if it matches drop_frames.',
     type: 'keyword',
     example: '/bazinga/',
+  },
+  'pprof.scope.default_sample_type': {
+    name: 'pprof.scope.default_sample_type',
+    description:
+      "Records the pprof's default_sample_type in the original profile. Not set if the default sample type was missing.",
+    type: 'keyword',
+    example: 'cpu',
+  },
+  'pprof.scope.sample_type_order': {
+    name: 'pprof.scope.sample_type_order',
+    description: 'Records the indexes of the sample types in the original profile.',
+    type: 'long',
+    example: '3,0,1,2',
   },
   'process.args_count': {
     name: 'process.args_count',
@@ -6273,7 +6395,7 @@ export const semconvFlat = {
   },
   'server.address': {
     name: 'server.address',
-    description: 'RPC server [host name](https://grpc.github.io/grpc/core/md_doc_naming.html).',
+    description: 'A string identifying a group of RPC server instances request is sent to.',
     type: 'keyword',
     example: 'example.com',
   },

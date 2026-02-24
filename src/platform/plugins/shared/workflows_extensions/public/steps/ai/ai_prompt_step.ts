@@ -129,7 +129,7 @@ See this [JSON Schema reference](https://json-schema.org/learn/getting-started-s
           return AiPromptOutputSchema;
         }
 
-        const zodSchema = fromJSONSchema(input.schema);
+        const zodSchema = fromJSONSchema(input.schema as Record<string, unknown>);
 
         if (!zodSchema) {
           return AiPromptOutputSchema;

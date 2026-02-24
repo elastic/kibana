@@ -171,7 +171,15 @@ describe('createGapFillAutoScheduler()', () => {
 
     expect(ruleTypeRegistry.get).toHaveBeenCalledWith('test-rule-type1');
     expect(ruleTypeRegistry.get).toHaveBeenCalledWith('test-rule-type2');
-    expect(authorization.ensureAuthorized).toHaveBeenCalledTimes(2);
+    expect(authorization.bulkEnsureAuthorized).toHaveBeenCalledTimes(1);
+    expect(authorization.bulkEnsureAuthorized).toHaveBeenCalledWith({
+      ruleTypeIdConsumersPairs: [
+        { ruleTypeId: 'test-rule-type1', consumers: ['test-consumer'] },
+        { ruleTypeId: 'test-rule-type2', consumers: ['test-consumer'] },
+      ],
+      operation: expect.any(String),
+      entity: expect.any(String),
+    });
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
       GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
       expect.objectContaining({ name: 'auto-fill', enabled: true }),
@@ -319,7 +327,7 @@ describe('createGapFillAutoScheduler()', () => {
   });
 
   test('logs and rethrows when authorization fails', async () => {
-    (authorization.ensureAuthorized as jest.Mock).mockImplementationOnce(() => {
+    (authorization.bulkEnsureAuthorized as jest.Mock).mockImplementationOnce(() => {
       throw new Error('no access');
     });
 

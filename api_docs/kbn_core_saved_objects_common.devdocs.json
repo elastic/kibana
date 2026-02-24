@@ -1449,35 +1449,35 @@
           },
           {
             "plugin": "@kbn/response-ops-rule-form",
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_actions/rule_actions_item.tsx"
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/rule_actions/rule_actions_item.tsx"
           },
           {
             "plugin": "@kbn/response-ops-rule-form",
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_actions/rule_actions_item.tsx"
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/rule_actions/rule_actions_item.tsx"
           },
           {
             "plugin": "@kbn/response-ops-rule-form",
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_actions/rule_actions_item.tsx"
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/rule_actions/rule_actions_item.tsx"
           },
           {
             "plugin": "@kbn/response-ops-rule-form",
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_actions/rule_actions_item.tsx"
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/rule_actions/rule_actions_item.tsx"
           },
           {
             "plugin": "@kbn/response-ops-rule-form",
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_actions/rule_actions_system_actions_item.tsx"
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/rule_actions/rule_actions_system_actions_item.tsx"
           },
           {
             "plugin": "@kbn/response-ops-rule-form",
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_actions/rule_actions_system_actions_item.tsx"
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/rule_actions/rule_actions_system_actions_item.tsx"
           },
           {
             "plugin": "@kbn/response-ops-rule-form",
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_actions/rule_actions_system_actions_item.tsx"
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/rule_actions/rule_actions_system_actions_item.tsx"
           },
           {
             "plugin": "@kbn/response-ops-rule-form",
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_actions/rule_actions_system_actions_item.tsx"
+            "path": "x-pack/platform/packages/shared/response-ops/rule_form/src/rule_actions/rule_actions_system_actions_item.tsx"
           }
         ],
         "initialIsOpen": false
@@ -1615,36 +1615,36 @@
             "path": "src/platform/plugins/shared/saved_objects_management/public/services/types/record.ts"
           },
           {
+            "plugin": "savedObjects",
+            "path": "src/platform/plugins/shared/saved_objects/public/types.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/platform/plugins/shared/saved_objects/public/types.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/platform/plugins/shared/saved_objects/public/types.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/platform/plugins/shared/saved_objects/public/types.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/platform/plugins/shared/saved_objects/public/types.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/platform/plugins/shared/saved_objects/public/types.ts"
+          },
+          {
             "plugin": "savedObjectsTagging",
             "path": "x-pack/platform/plugins/shared/saved_objects_tagging/public/ui_api/get_table_column_definition.tsx"
           },
           {
             "plugin": "savedObjectsTagging",
             "path": "x-pack/platform/plugins/shared/saved_objects_tagging/public/ui_api/get_table_column_definition.tsx"
-          },
-          {
-            "plugin": "savedObjects",
-            "path": "src/platform/plugins/shared/saved_objects/public/types.ts"
-          },
-          {
-            "plugin": "savedObjects",
-            "path": "src/platform/plugins/shared/saved_objects/public/types.ts"
-          },
-          {
-            "plugin": "savedObjects",
-            "path": "src/platform/plugins/shared/saved_objects/public/types.ts"
-          },
-          {
-            "plugin": "savedObjects",
-            "path": "src/platform/plugins/shared/saved_objects/public/types.ts"
-          },
-          {
-            "plugin": "savedObjects",
-            "path": "src/platform/plugins/shared/saved_objects/public/types.ts"
-          },
-          {
-            "plugin": "savedObjects",
-            "path": "src/platform/plugins/shared/saved_objects/public/types.ts"
           },
           {
             "plugin": "maps",
@@ -1799,14 +1799,6 @@
             "path": "x-pack/platform/plugins/shared/saved_objects_tagging/public/components/connected/tag_list.tsx"
           },
           {
-            "plugin": "uiActionsEnhanced",
-            "path": "src/platform/plugins/shared/ui_actions_enhanced/public/dynamic_actions/action_factory.ts"
-          },
-          {
-            "plugin": "uiActionsEnhanced",
-            "path": "src/platform/plugins/shared/ui_actions_enhanced/public/dynamic_actions/action_factory.ts"
-          },
-          {
             "plugin": "@kbn/lens-embeddable-utils",
             "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/transforms/charts/metric.ts"
           },
@@ -1937,6 +1929,14 @@
           {
             "plugin": "canvas",
             "path": "x-pack/platform/plugins/private/canvas/canvas_plugin_src/functions/external/embeddable.ts"
+          },
+          {
+            "plugin": "uiActionsEnhanced",
+            "path": "src/platform/plugins/shared/ui_actions_enhanced/public/dynamic_actions/action_factory.ts"
+          },
+          {
+            "plugin": "uiActionsEnhanced",
+            "path": "src/platform/plugins/shared/ui_actions_enhanced/public/dynamic_actions/action_factory.ts"
           },
           {
             "plugin": "savedObjectsTagging",

@@ -9,7 +9,7 @@ import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import type { Streams } from '@kbn/streams-schema';
-import { isRoot } from '@kbn/streams-schema';
+import { isRoot, LOGS_ROOT_STREAM_NAME } from '@kbn/streams-schema';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { getStreamTypeFromDefinition } from '../../../../util/get_stream_type_from_definition';
 import { StreamDiscoveryConfiguration } from '../../../stream_detail_systems/stream_discovery_configuration';
@@ -80,7 +80,7 @@ export function WiredAdvancedView({
         />
         <EuiSpacer size="l" />
       </IndexConfiguration>
-      {!isRoot(definition.stream.name) && (
+      {(!isRoot(definition.stream.name) || definition.stream.name === LOGS_ROOT_STREAM_NAME) && (
         <>
           <EuiSpacer />
           <DeleteStreamPanel definition={definition} />

@@ -127,7 +127,7 @@ export class VisitorContext<
     let i = 0;
     for (const arg of this.arguments()) {
       if (i === index) {
-        return this.visitExpression(arg, input as any);
+        return this.visitExpression(arg, input);
       }
       i++;
     }
@@ -174,7 +174,7 @@ export class QueryVisitorContext<
 
     if (this.node.header) {
       for (const headerCmd of this.node.header) {
-        yield this.visitHeaderCommand(headerCmd, input as any);
+        yield this.visitHeaderCommand(headerCmd, input);
       }
     }
   }
@@ -192,7 +192,7 @@ export class QueryVisitorContext<
     this.ctx.assertMethodExists('visitCommand');
 
     for (const cmd of this.node.commands) {
-      yield this.visitCommand(cmd, input as any);
+      yield this.visitCommand(cmd, input);
     }
   }
 }
@@ -294,7 +294,7 @@ export class CommandVisitorContext<
 
   public visitSubQuery(queryNode: ESQLAstQueryExpression) {
     this.ctx.assertMethodExists('visitQuery');
-    return this.ctx.visitQuery(this, queryNode, undefined as any);
+    return this.ctx.visitQuery(this, queryNode, undefined as VisitorInput<Methods, 'visitQuery'>);
   }
 
   public *visitSubQueries() {
@@ -642,7 +642,10 @@ export class ListLiteralExpressionVisitorContext<
     this.ctx.assertMethodExists('visitExpression');
 
     for (const value of this.node.values) {
-      yield this.visitExpression(value, typeof input === 'function' ? (input as any)() : input);
+      yield this.visitExpression(
+        value,
+        typeof input === 'function' ? (input as Function)() : input
+      );
     }
   }
 }
@@ -664,7 +667,7 @@ export class InlineCastExpressionVisitorContext<
   ): VisitorOutput<Methods, 'visitExpression'> {
     this.ctx.assertMethodExists('visitExpression');
 
-    return this.visitExpression(this.value(), input as any);
+    return this.visitExpression(this.value(), input);
   }
 }
 
@@ -690,7 +693,10 @@ export class MapExpressionVisitorContext<
     this.ctx.assertMethodExists(['visitExpression', 'visitMapEntryExpression']);
 
     for (const value of this.node.entries) {
-      yield this.visitExpression(value, typeof input === 'function' ? (input as any)() : input);
+      yield this.visitExpression(
+        value,
+        typeof input === 'function' ? (input as Function)() : input
+      );
     }
   }
 
@@ -720,7 +726,7 @@ export class MapEntryExpressionVisitorContext<
   ): VisitorOutput<Methods, 'visitExpression'> {
     this.ctx.assertMethodExists('visitExpression');
 
-    return this.visitExpression(this.key(), input as any);
+    return this.visitExpression(this.key(), input);
   }
 
   public visitValue(
@@ -728,7 +734,7 @@ export class MapEntryExpressionVisitorContext<
   ): VisitorOutput<Methods, 'visitExpression'> {
     this.ctx.assertMethodExists('visitExpression');
 
-    return this.visitExpression(this.value(), input as any);
+    return this.visitExpression(this.value(), input);
   }
 }
 
@@ -745,6 +751,6 @@ export class ParensExpressionVisitorContext<
   ): VisitorOutput<Methods, 'visitExpression'> {
     this.ctx.assertMethodExists('visitExpression');
 
-    return this.visitExpression(this.child(), input as any);
+    return this.visitExpression(this.child(), input);
   }
 }

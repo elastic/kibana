@@ -95,6 +95,11 @@ export const EndpointScriptDetailsFlyoutBody = memo<EndpointScriptDetailsFlyoutB
             const appendToLabel =
               key === 'requiresInput' ? (
                 <EuiIconTip content={i18nFlyoutDetailsLabels.requiresInput.tooltip} type="info" />
+              ) : key === 'pathToExecutable' ? (
+                <EuiIconTip
+                  content={i18nFlyoutDetailsLabels.pathToExecutable.tooltip}
+                  type="info"
+                />
               ) : undefined;
             if (value === '' || value == null || (Array.isArray(value) && value.length === 0)) {
               return null;

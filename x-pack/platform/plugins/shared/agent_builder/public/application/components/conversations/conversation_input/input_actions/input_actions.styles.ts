@@ -56,6 +56,13 @@ export const useSelectorListStyles = ({ listId }: { listId: string }) => {
         text-decoration: none;
       }
     }
+    &#${listId} .euiSelectableList__groupLabel {
+      min-height: 32px;
+      cursor: default;
+      :hover {
+        background-color: unset;
+      }
+    }
   `;
   const selectedItemStyles = css`
     &#${listId} .euiSelectableListItem-isFocused {

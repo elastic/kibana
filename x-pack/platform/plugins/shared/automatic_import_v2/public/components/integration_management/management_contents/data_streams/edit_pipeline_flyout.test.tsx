@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, within } from '@testing-library/react';
+import { render, screen, within, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { EditPipelineFlyout } from './edit_pipeline_flyout';
 import type { DataStreamResponse } from '../../../../../common';
@@ -340,7 +340,7 @@ describe('EditPipelineFlyout', () => {
       expect(dateIcon).toBeInTheDocument();
 
       if (dateIcon) {
-        await userEvent.hover(dateIcon);
+        fireEvent.mouseOver(dateIcon);
 
         const tooltip = await screen.findByText('date');
         expect(tooltip).toBeInTheDocument();

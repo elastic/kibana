@@ -98,7 +98,7 @@
         "label": "AssistantScope",
         "description": [],
         "signature": [
-          "\"search\" | \"all\" | \"observability\""
+          "\"search\" | \"observability\" | \"all\""
         ],
         "path": "x-pack/platform/packages/shared/ai-assistant/common/src/types/index.ts",
         "lineNumber": 8,

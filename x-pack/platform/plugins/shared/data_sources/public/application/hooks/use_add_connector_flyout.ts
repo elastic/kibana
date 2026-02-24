@@ -10,6 +10,7 @@ import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 import type { IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useMutation, useQueryClient } from '@kbn/react-query';
+import type { KibanaServerError } from '@kbn/kibana-utils-plugin/common';
 import { useKibana } from './use_kibana';
 import { API_BASE_PATH } from '../../../common/constants';
 import { queryKeys } from '../query_keys';
@@ -107,18 +108,22 @@ export const useAddConnectorFlyout = ({
       // Invalidate queries to refresh Active Sources table
       queryClient.invalidateQueries(queryKeys.dataSources.list());
     },
-    onError: (error, variables) => {
+    onError: (error: { body: KibanaServerError }, variables) => {
       // Dismiss loading toast
       if (loadingToastRef.current) {
         toasts.remove(loadingToastRef.current);
         loadingToastRef.current = undefined;
       }
 
-      // Show error toast
-      toasts.addError(error as Error, {
+      // Show the proper error toast
+      toasts.addError(new Error(error.body?.message || 'Internal Error'), {
         title: i18n.translate('xpack.dataSources.hooks.useAddConnectorFlyout.createErrorTitle', {
-          defaultMessage: 'Failed to create data connector',
+          defaultMessage: 'Failed to create data source {connectorName}',
+          values: {
+            connectorName: variables.name,
+          },
         }),
+        toastMessage: error.body?.message,
       });
     },
   });

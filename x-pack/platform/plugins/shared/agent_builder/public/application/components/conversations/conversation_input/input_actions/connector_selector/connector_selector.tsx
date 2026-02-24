@@ -24,6 +24,7 @@ import { useNavigation } from '../../../../../hooks/use_navigation';
 import { useSendMessage } from '../../../../../context/send_message/send_message_context';
 import { useDefaultConnector } from '../../../../../hooks/chat/use_default_connector';
 import { useKibana } from '../../../../../hooks/use_kibana';
+import { isRecommendedConnector } from '../../../../../../../common/recommended_connectors';
 import {
   getMaxListHeight,
   selectorPopoverPanelStyles,
@@ -44,6 +45,21 @@ const defaultConnectorLabel = i18n.translate(
   {
     defaultMessage: 'Default',
   }
+);
+
+const recommendedSectionLabel = i18n.translate(
+  'xpack.agentBuilder.conversationInput.connectorSelector.recommendedSectionLabel',
+  { defaultMessage: 'Recommended' }
+);
+
+const otherSectionLabel = i18n.translate(
+  'xpack.agentBuilder.conversationInput.connectorSelector.otherSectionLabel',
+  { defaultMessage: 'Other' }
+);
+
+const customSectionLabel = i18n.translate(
+  'xpack.agentBuilder.conversationInput.connectorSelector.customSectionLabel',
+  { defaultMessage: 'Custom' }
 );
 
 const connectorSelectId = 'agentBuilderConnectorSelect';
@@ -150,26 +166,65 @@ export const ConnectorSelector: React.FC<{}> = () => {
 
   const connectors = useMemo(() => aiConnectors ?? [], [aiConnectors]);
 
+  const { recommendedConnectors, otherConnectors, customConnectors } = useMemo(() => {
+    const recommended = connectors.filter((c) => isRecommendedConnector(c.id));
+    const notRecommended = connectors.filter((c) => !isRecommendedConnector(c.id));
+    return {
+      recommendedConnectors: recommended,
+      otherConnectors: notRecommended.filter((c) => c.isPreconfigured),
+      customConnectors: notRecommended.filter((c) => !c.isPreconfigured),
+    };
+  }, [connectors]);
+
   const togglePopover = () => setIsPopoverOpen(!isPopoverOpen);
   const closePopover = () => setIsPopoverOpen(false);
 
   const connectorOptions = useMemo(() => {
-    const options = connectors.map((connector) => {
-      let checked: 'on' | undefined;
-      if (connector.id === selectedConnectorId) {
-        checked = 'on';
-      }
-      const option: ConnectorOptionData = {
-        key: connector.id,
-        label: connector.name,
-        checked,
-        prepend: <ConnectorIcon connectorName={connector.name} />,
-        append: connector.id === defaultConnectorId ? <DefaultConnectorBadge /> : undefined,
-      };
-      return option;
+    const toOption = (connector: (typeof connectors)[0]): ConnectorOptionData => ({
+      key: connector.id,
+      label: connector.name,
+      checked: connector.id === selectedConnectorId ? 'on' : undefined,
+      prepend: <ConnectorIcon connectorName={connector.name} />,
+      append: connector.id === defaultConnectorId ? <DefaultConnectorBadge /> : undefined,
     });
-    return options;
-  }, [connectors, selectedConnectorId, defaultConnectorId]);
+    const groupLabel = (label: string, dataTestSubj: string): ConnectorOptionData =>
+      ({
+        label,
+        isGroupLabel: true as const,
+        'data-test-subj': dataTestSubj,
+      } as ConnectorOptionData);
+
+    const recommendedOptions = recommendedConnectors.map(toOption);
+    const otherOptions = otherConnectors.map(toOption);
+    const customOptions = customConnectors.map(toOption);
+
+    const sections: ConnectorOptionData[] = [];
+    if (recommendedConnectors.length > 0) {
+      sections.push(
+        groupLabel(recommendedSectionLabel, 'connectorSelectorSectionHeader-recommended'),
+        ...recommendedOptions
+      );
+    }
+    if (otherConnectors.length > 0) {
+      sections.push(
+        groupLabel(otherSectionLabel, 'connectorSelectorSectionHeader-other'),
+        ...otherOptions
+      );
+    }
+    if (customConnectors.length > 0) {
+      sections.push(
+        groupLabel(customSectionLabel, 'connectorSelectorSectionHeader-custom'),
+        ...customOptions
+      );
+    }
+    return sections;
+  }, [
+    recommendedConnectors,
+    otherConnectors,
+    customConnectors,
+    selectedConnectorId,
+    defaultConnectorId,
+  ]);
 
   const initialConnectorId = useDefaultConnector({
     connectors,
@@ -221,13 +276,15 @@ export const ConnectorSelector: React.FC<{}> = () => {
         options={connectorOptions}
         onChange={(_options, _event, changedOption) => {
           const { checked, key: connectorId } = changedOption;
-          const isChecked = checked === 'on';
-          if (isChecked && connectorId) {
+          if (checked === 'on' && connectorId) {
             onSelectConnector(connectorId);
             closePopover();
           }
         }}
         renderOption={(option) => {
+          if (option.isGroupLabel) {
+            return <OptionText key={option.label}>{option.label}</OptionText>;
+          }
           const { key: connectorId, label: connectorName } = option;
           return (
             <ConnectorOption

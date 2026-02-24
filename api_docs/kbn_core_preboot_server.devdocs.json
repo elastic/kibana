@@ -72,7 +72,7 @@
                 "tags": [],
                 "label": "reason",
                 "description": [
-                  "A string that explains the reason why this promise should hold `setup`. It's supposed to be a human\nreadable string that will be recorded in the logs or standard output."
+                  "A string that explains the reason why this promise should hold `setup`. It's supposed to be a human"
                 ],
                 "signature": [
                   "string"

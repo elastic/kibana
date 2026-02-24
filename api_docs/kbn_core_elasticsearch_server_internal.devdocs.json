@@ -1206,7 +1206,7 @@
         "label": "pollEsNodesVersion",
         "description": [],
         "signature": [
-          "({ internalClient, log, kibanaVersion, ignoreVersionMismatch, healthCheckInterval, healthCheckStartupInterval, healthCheckRetry, }: ",
+          "({ internalClient, log, kibanaVersion, ignoreVersionMismatch, healthCheckInterval, healthCheckFailureInterval, healthCheckStartupInterval, healthCheckRetry, }: ",
           "PollEsNodesVersionOptions",
           ") => ",
           "Observable",
@@ -1215,7 +1215,7 @@
           ">"
         ],
         "path": "src/core/packages/elasticsearch/server-internal/src/version_check/ensure_es_version.ts",
-        "lineNumber": 177,
+        "lineNumber": 180,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1225,13 +1225,13 @@
             "id": "def-server.pollEsNodesVersion.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  internalClient,\n  log,\n  kibanaVersion,\n  ignoreVersionMismatch,\n  healthCheckInterval,\n  healthCheckStartupInterval,\n  healthCheckRetry,\n}",
+            "label": "{\n  internalClient,\n  log,\n  kibanaVersion,\n  ignoreVersionMismatch,\n  healthCheckInterval,\n  healthCheckFailureInterval,\n  healthCheckStartupInterval,\n  healthCheckRetry,\n}",
             "description": [],
             "signature": [
               "PollEsNodesVersionOptions"
             ],
             "path": "src/core/packages/elasticsearch/server-internal/src/version_check/ensure_es_version.ts",
-            "lineNumber": 177,
+            "lineNumber": 180,
             "columnNumber": 36,
             "deprecated": false,
             "trackAdoption": false,
@@ -1251,7 +1251,7 @@
         "label": "NodeInfo",
         "description": [],
         "path": "src/core/packages/elasticsearch/server-internal/src/version_check/ensure_es_version.ts",
-        "lineNumber": 54,
+        "lineNumber": 57,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1264,7 +1264,7 @@
             "label": "version",
             "description": [],
             "path": "src/core/packages/elasticsearch/server-internal/src/version_check/ensure_es_version.ts",
-            "lineNumber": 56,
+            "lineNumber": 59,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1277,7 +1277,7 @@
             "label": "ip",
             "description": [],
             "path": "src/core/packages/elasticsearch/server-internal/src/version_check/ensure_es_version.ts",
-            "lineNumber": 57,
+            "lineNumber": 60,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1293,7 +1293,7 @@
               "{ publish_address: string; } | undefined"
             ],
             "path": "src/core/packages/elasticsearch/server-internal/src/version_check/ensure_es_version.ts",
-            "lineNumber": 58,
+            "lineNumber": 61,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1306,7 +1306,7 @@
             "label": "name",
             "description": [],
             "path": "src/core/packages/elasticsearch/server-internal/src/version_check/ensure_es_version.ts",
-            "lineNumber": 61,
+            "lineNumber": 64,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1322,7 +1322,7 @@
         "label": "NodesInfo",
         "description": [],
         "path": "src/core/packages/elasticsearch/server-internal/src/version_check/ensure_es_version.ts",
-        "lineNumber": 64,
+        "lineNumber": 67,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1340,7 +1340,7 @@
               "; }"
             ],
             "path": "src/core/packages/elasticsearch/server-internal/src/version_check/ensure_es_version.ts",
-            "lineNumber": 65,
+            "lineNumber": 68,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1356,7 +1356,7 @@
         "label": "NodesVersionCompatibility",
         "description": [],
         "path": "src/core/packages/elasticsearch/server-internal/src/version_check/ensure_es_version.ts",
-        "lineNumber": 70,
+        "lineNumber": 73,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1369,7 +1369,7 @@
             "label": "isCompatible",
             "description": [],
             "path": "src/core/packages/elasticsearch/server-internal/src/version_check/ensure_es_version.ts",
-            "lineNumber": 71,
+            "lineNumber": 74,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1385,7 +1385,7 @@
               "string | undefined"
             ],
             "path": "src/core/packages/elasticsearch/server-internal/src/version_check/ensure_es_version.ts",
-            "lineNumber": 72,
+            "lineNumber": 75,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1402,7 +1402,7 @@
               "[]"
             ],
             "path": "src/core/packages/elasticsearch/server-internal/src/version_check/ensure_es_version.ts",
-            "lineNumber": 73,
+            "lineNumber": 76,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1419,7 +1419,7 @@
               "[]"
             ],
             "path": "src/core/packages/elasticsearch/server-internal/src/version_check/ensure_es_version.ts",
-            "lineNumber": 74,
+            "lineNumber": 77,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1432,7 +1432,7 @@
             "label": "kibanaVersion",
             "description": [],
             "path": "src/core/packages/elasticsearch/server-internal/src/version_check/ensure_es_version.ts",
-            "lineNumber": 75,
+            "lineNumber": 78,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1448,7 +1448,7 @@
               "Error | undefined"
             ],
             "path": "src/core/packages/elasticsearch/server-internal/src/version_check/ensure_es_version.ts",
-            "lineNumber": 76,
+            "lineNumber": 79,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1464,7 +1464,7 @@
         "label": "PollEsNodesVersionOptions",
         "description": [],
         "path": "src/core/packages/elasticsearch/server-internal/src/version_check/ensure_es_version.ts",
-        "lineNumber": 40,
+        "lineNumber": 41,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2468,7 +2468,7 @@
               "; }"
             ],
             "path": "src/core/packages/elasticsearch/server-internal/src/version_check/ensure_es_version.ts",
-            "lineNumber": 42,
+            "lineNumber": 43,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2490,7 +2490,7 @@
               }
             ],
             "path": "src/core/packages/elasticsearch/server-internal/src/version_check/ensure_es_version.ts",
-            "lineNumber": 43,
+            "lineNumber": 44,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2503,7 +2503,7 @@
             "label": "kibanaVersion",
             "description": [],
             "path": "src/core/packages/elasticsearch/server-internal/src/version_check/ensure_es_version.ts",
-            "lineNumber": 44,
+            "lineNumber": 45,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2518,7 +2518,7 @@
             "label": "ignoreVersionMismatch",
             "description": [],
             "path": "src/core/packages/elasticsearch/server-internal/src/version_check/ensure_es_version.ts",
-            "lineNumber": 45,
+            "lineNumber": 46,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2533,7 +2533,25 @@
             "label": "healthCheckInterval",
             "description": [],
             "path": "src/core/packages/elasticsearch/server-internal/src/version_check/ensure_es_version.ts",
-            "lineNumber": 47,
+            "lineNumber": 48,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-elasticsearch-server-internal",
+            "id": "def-server.PollEsNodesVersionOptions.healthCheckFailureInterval",
+            "type": "number",
+            "tags": [
+              "default"
+            ],
+            "label": "healthCheckFailureInterval",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/core/packages/elasticsearch/server-internal/src/version_check/ensure_es_version.ts",
+            "lineNumber": 50,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2549,7 +2567,7 @@
               "number | undefined"
             ],
             "path": "src/core/packages/elasticsearch/server-internal/src/version_check/ensure_es_version.ts",
-            "lineNumber": 49,
+            "lineNumber": 52,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2564,7 +2582,7 @@
             "label": "healthCheckRetry",
             "description": [],
             "path": "src/core/packages/elasticsearch/server-internal/src/version_check/ensure_es_version.ts",
-            "lineNumber": 50,
+            "lineNumber": 53,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2583,7 +2601,7 @@
         "label": "ElasticsearchConfigType",
         "description": [],
         "signature": [
-          "{ readonly username?: string | undefined; readonly password?: string | undefined; readonly serviceAccountToken?: string | undefined; readonly publicBaseUrl?: string | undefined; readonly ssl: Readonly<{ key?: string | undefined; certificate?: string | undefined; certificateAuthorities?: string | string[] | undefined; keyPassphrase?: string | undefined; } & { verificationMode: \"none\" | \"full\" | \"certificate\"; keystore: Readonly<{ password?: string | undefined; path?: string | undefined; } & {}>; truststore: Readonly<{ password?: string | undefined; path?: string | undefined; } & {}>; alwaysPresentCertificate: boolean; }>; readonly healthCheck: Readonly<{} & { retry: number; delay: moment.Duration; startupDelay: moment.Duration; }>; readonly hosts: string | string[]; readonly apiVersion: string; readonly sniffOnStart: boolean; readonly sniffInterval: false | moment.Duration; readonly sniffOnConnectionFault: boolean; readonly maxSockets: number; readonly maxIdleSockets: number; readonly maxResponseSize: false | ",
+          "{ readonly username?: string | undefined; readonly password?: string | undefined; readonly serviceAccountToken?: string | undefined; readonly publicBaseUrl?: string | undefined; readonly ssl: Readonly<{ key?: string | undefined; certificate?: string | undefined; certificateAuthorities?: string | string[] | undefined; keyPassphrase?: string | undefined; } & { verificationMode: \"none\" | \"full\" | \"certificate\"; keystore: Readonly<{ password?: string | undefined; path?: string | undefined; } & {}>; truststore: Readonly<{ password?: string | undefined; path?: string | undefined; } & {}>; alwaysPresentCertificate: boolean; }>; readonly healthCheck: Readonly<{ onFailureDelay?: moment.Duration | undefined; } & { retry: number; delay: moment.Duration; startupDelay: moment.Duration; }>; readonly hosts: string | string[]; readonly apiVersion: string; readonly sniffOnStart: boolean; readonly sniffInterval: false | moment.Duration; readonly sniffOnConnectionFault: boolean; readonly maxSockets: number; readonly maxIdleSockets: number; readonly maxResponseSize: false | ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",
@@ -2899,7 +2917,15 @@
             "section": "def-common.Type",
             "text": "Type"
           },
-          "<moment.Duration>; startupDelay: ",
+          "<moment.Duration>; onFailureDelay: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<moment.Duration | undefined>; startupDelay: ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",

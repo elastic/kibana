@@ -20,6 +20,7 @@ import { type DataAutoCompleteRulesOneOf } from '../../../../lib/autocomplete/ty
 import { populateContext } from '../../../../lib/autocomplete/engine';
 import type { EditorRequest } from '../types';
 import { parseBody, parseLine, parseUrl } from './tokens_utils';
+import { isRecord } from '../../../../../common/utils/record_utils';
 import {
   END_OF_URL_TOKEN,
   i18nTexts,
@@ -217,14 +218,15 @@ export const getUrlParamsCompletionItems = (
   urlPathTokens.push(END_OF_URL_TOKEN);
   const context = populateContextForMethodAndUrl(method, urlPathTokens);
 
-  const urlParamsComponents = context.endpoint?.paramsAutocomplete.getTopLevelComponents(method);
+  const urlParamsComponents =
+    context.endpoint?.paramsAutocomplete.getTopLevelComponents(method) ?? [];
 
   const currentUrlParamToken = urlParamsTokens.pop();
   // check if we are at the param name or the param value
   const urlParamTokenPath = [];
   // if there are 2 tokens in the current url param, then we have the name and the value of the param
   if (currentUrlParamToken && currentUrlParamToken.length > 1) {
-    urlParamTokenPath.push(currentUrlParamToken![0]);
+    urlParamTokenPath.push(currentUrlParamToken[0]);
   }
 
   populateContext(urlParamTokenPath, context, undefined, true, urlParamsComponents);
@@ -287,12 +289,9 @@ export const getBodyCompletionItems = async (
   // needed for scope linking + global term resolving
   context.endpointComponentResolver = getEndpointBodyCompleteComponents;
   context.globalComponentResolver = getGlobalAutocompleteComponents;
-  let components: unknown;
-  if (context.endpoint) {
-    components = context.endpoint.bodyAutocompleteRootComponents;
-  } else {
-    components = getUnmatchedEndpointComponents();
-  }
+  const components = context.endpoint
+    ? context.endpoint.bodyAutocompleteRootComponents
+    : getUnmatchedEndpointComponents();
   context.editor = editor;
   context.requestStartRow = requestStartLineNumber;
   populateContext(bodyTokens, context, editor, true, components);
@@ -449,8 +448,11 @@ export const getInsertText = (
 
   if (template && context.addTemplate) {
     let templateLines;
-    const { __raw, value: templateValue } = template;
-    if (__raw && templateValue) {
+    const templateRecord = isRecord(template) ? template : {};
+    const raw = templateRecord.__raw;
+    const templateValue = templateRecord.value;
+
+    if (raw === true && typeof templateValue === 'string') {
       templateLines = templateValue.split(newLineRegex);
     } else {
       templateLines = JSON.stringify(template, null, 2).split(newLineRegex);

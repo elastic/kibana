@@ -1979,10 +1979,10 @@
           },
           {
             "parentPluginId": "@kbn/alerting-types",
-            "id": "def-common.Rule.throttle",
+            "id": "def-common.Rule.uiamApiKey",
             "type": "CompoundType",
             "tags": [],
-            "label": "throttle",
+            "label": "uiamApiKey",
             "description": [],
             "signature": [
               "string | null | undefined"
@@ -1995,13 +1995,29 @@
           },
           {
             "parentPluginId": "@kbn/alerting-types",
+            "id": "def-common.Rule.throttle",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "throttle",
+            "description": [],
+            "signature": [
+              "string | null | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 251,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-types",
             "id": "def-common.Rule.muteAll",
             "type": "boolean",
             "tags": [],
             "label": "muteAll",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
-            "lineNumber": 251,
+            "lineNumber": 252,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2017,7 +2033,7 @@
               "\"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\" | null | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
-            "lineNumber": 252,
+            "lineNumber": 253,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2033,7 +2049,7 @@
               "string[]"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
-            "lineNumber": 253,
+            "lineNumber": 254,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2055,7 +2071,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
-            "lineNumber": 254,
+            "lineNumber": 255,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2078,7 +2094,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
-            "lineNumber": 255,
+            "lineNumber": 256,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2101,7 +2117,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
-            "lineNumber": 256,
+            "lineNumber": 257,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2117,7 +2133,7 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
-            "lineNumber": 257,
+            "lineNumber": 258,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2133,7 +2149,7 @@
               "Date | null | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
-            "lineNumber": 258,
+            "lineNumber": 259,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2156,7 +2172,7 @@
               " | null | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
-            "lineNumber": 259,
+            "lineNumber": 260,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2172,7 +2188,7 @@
               "Date | null | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
-            "lineNumber": 260,
+            "lineNumber": 261,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2185,7 +2201,7 @@
             "label": "revision",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
-            "lineNumber": 261,
+            "lineNumber": 262,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2201,7 +2217,7 @@
               "boolean | null | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
-            "lineNumber": 262,
+            "lineNumber": 263,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2217,7 +2233,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
-            "lineNumber": 263,
+            "lineNumber": 264,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2240,7 +2256,7 @@
               " | null | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
-            "lineNumber": 264,
+            "lineNumber": 265,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2263,7 +2279,7 @@
               " | null | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
-            "lineNumber": 265,
+            "lineNumber": 266,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2286,7 +2302,7 @@
               " | null | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
-            "lineNumber": 266,
+            "lineNumber": 267,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2536,7 +2552,7 @@
             "label": "status",
             "description": [],
             "signature": [
-              "\"unknown\" | \"ok\" | \"error\" | \"warning\" | \"pending\" | \"active\""
+              "\"unknown\" | \"ok\" | \"error\" | \"pending\" | \"active\" | \"warning\""
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
             "lineNumber": 114,
@@ -3176,7 +3192,7 @@
         "label": "RuleRegistryInspect",
         "description": [],
         "path": "src/platform/packages/shared/kbn-alerting-types/search_strategy_types.ts",
-        "lineNumber": 36,
+        "lineNumber": 37,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3192,7 +3208,7 @@
               "string[]"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/search_strategy_types.ts",
-            "lineNumber": 37,
+            "lineNumber": 38,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3208,7 +3224,7 @@
         "label": "RuleRegistrySearchRequestPagination",
         "description": [],
         "path": "src/platform/packages/shared/kbn-alerting-types/search_strategy_types.ts",
-        "lineNumber": 31,
+        "lineNumber": 32,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3221,7 +3237,7 @@
             "label": "pageIndex",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerting-types/search_strategy_types.ts",
-            "lineNumber": 32,
+            "lineNumber": 33,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3234,7 +3250,7 @@
             "label": "pageSize",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerting-types/search_strategy_types.ts",
-            "lineNumber": 33,
+            "lineNumber": 34,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3284,7 +3300,7 @@
           ">>"
         ],
         "path": "src/platform/packages/shared/kbn-alerting-types/search_strategy_types.ts",
-        "lineNumber": 40,
+        "lineNumber": 41,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3307,7 +3323,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/search_strategy_types.ts",
-            "lineNumber": 41,
+            "lineNumber": 42,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5293,7 +5309,7 @@
           "<unknown>, \"saved_object\"> & { outcome: string; alias_target_id?: string | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
-        "lineNumber": 274,
+        "lineNumber": 275,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -5410,7 +5426,7 @@
         "label": "RuleExecutionStatuses",
         "description": [],
         "signature": [
-          "\"unknown\" | \"ok\" | \"error\" | \"warning\" | \"pending\" | \"active\""
+          "\"unknown\" | \"ok\" | \"error\" | \"pending\" | \"active\" | \"warning\""
         ],
         "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
         "lineNumber": 110,
@@ -5480,7 +5496,7 @@
           "QueryDslFieldAndFormat",
           "[] | undefined; query?: Pick<",
           "QueryDslQueryContainer",
-          ", \"ids\" | \"bool\"> | undefined; sort?: ",
+          ", \"bool\" | \"ids\"> | undefined; sort?: ",
           "SortCombinations",
           "[] | undefined; pagination?: ",
           {
@@ -5492,7 +5508,7 @@
           },
           " | undefined; runtimeMappings?: ",
           "MappingRuntimeFields",
-          " | undefined; minScore?: number | undefined; trackScores?: boolean | undefined; }"
+          " | undefined; minScore?: number | undefined; trackScores?: boolean | undefined; includeDelayedAlerts?: boolean | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-alerting-types/search_strategy_types.ts",
         "lineNumber": 19,
@@ -5649,7 +5665,7 @@
           "[]; }"
         ],
         "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
-        "lineNumber": 269,
+        "lineNumber": 270,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -5722,7 +5738,7 @@
         "label": "SummaryActionContextVariablesFlatten",
         "description": [],
         "signature": [
-          "\"params\" | \"spaceId\" | \"date\" | \"tags\" | \"alertId\" | \"alertInstanceId\" | \"rule.id\" | \"rule.name\" | \"alert.uuid\" | \"alert.flapping\" | \"rule.tags\" | \"rule.type\" | \"alertName\" | \"alertActionGroup\" | \"alertActionGroupName\" | \"kibanaBaseUrl\" | \"rule.spaceId\" | \"rule.url\" | `rule.params.${string}` | \"alert.id\" | \"alert.actionGroup\" | \"alert.actionGroupName\" | \"alert.consecutiveMatches\" | \"rule.params\" | \"alerts.all.count\" | \"alerts.all.data\" | \"alerts.new.count\" | \"alerts.new.data\" | \"alerts.recovered.count\" | \"alerts.recovered.data\" | \"alerts.ongoing.count\" | \"alerts.ongoing.data\""
+          "\"params\" | \"spaceId\" | \"date\" | \"tags\" | \"alertId\" | \"alertInstanceId\" | \"rule.id\" | \"rule.name\" | \"alert.uuid\" | \"alert.flapping\" | \"rule.tags\" | \"rule.type\" | \"alertName\" | \"alertActionGroup\" | \"alertActionGroupName\" | \"kibanaBaseUrl\" | \"rule.spaceId\" | \"rule.url\" | `rule.params.${string}` | \"alert.id\" | \"alert.actionGroup\" | \"alert.actionGroupName\" | \"alert.consecutiveMatches\" | \"rule.params\" | \"alerts.new.count\" | \"alerts.new.data\" | \"alerts.recovered.count\" | \"alerts.recovered.data\" | \"alerts.all.count\" | \"alerts.all.data\" | \"alerts.ongoing.count\" | \"alerts.ongoing.data\""
         ],
         "path": "src/platform/packages/shared/kbn-alerting-types/action_variable.ts",
         "lineNumber": 98,

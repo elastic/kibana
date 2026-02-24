@@ -16,7 +16,7 @@
           ") => React.JSX.Element"
         ],
         "path": "src/core/packages/chrome/navigation/src/components/navigation.tsx",
-        "lineNumber": 78,
+        "lineNumber": 79,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -32,7 +32,7 @@
               "NavigationProps"
             ],
             "path": "src/core/packages/chrome/navigation/src/components/navigation.tsx",
-            "lineNumber": 78,
+            "lineNumber": 79,
             "columnNumber": 28,
             "deprecated": false,
             "trackAdoption": false,
@@ -152,9 +152,11 @@
         "type": "Interface",
         "tags": [],
         "label": "MenuItem",
-        "description": [],
+        "description": [
+          "\nA primary navigation menu item that appears in the main navigation sidebar.\nCan optionally contain nested secondary menu sections."
+        ],
         "path": "src/core/packages/chrome/navigation/types.ts",
-        "lineNumber": 56,
+        "lineNumber": 64,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -169,7 +171,7 @@
               "\nThe URL for the menu item link."
             ],
             "path": "src/core/packages/chrome/navigation/types.ts",
-            "lineNumber": 57,
+            "lineNumber": 69,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -184,10 +186,10 @@
               "\nThe icon to display for the menu item."
             ],
             "signature": [
-              "string | React.ComponentType<{}>"
+              "string | React.ComponentType"
             ],
             "path": "src/core/packages/chrome/navigation/types.ts",
-            "lineNumber": 61,
+            "lineNumber": 73,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -202,7 +204,7 @@
               "\nThe unique identifier of the menu item."
             ],
             "path": "src/core/packages/chrome/navigation/types.ts",
-            "lineNumber": 65,
+            "lineNumber": 77,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -217,7 +219,7 @@
               "\nThe label to display for the menu item."
             ],
             "path": "src/core/packages/chrome/navigation/types.ts",
-            "lineNumber": 69,
+            "lineNumber": 81,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -235,7 +237,7 @@
               "string | undefined"
             ],
             "path": "src/core/packages/chrome/navigation/types.ts",
-            "lineNumber": 73,
+            "lineNumber": 85,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -247,14 +249,14 @@
             "tags": [],
             "label": "badgeType",
             "description": [
-              "\n(optional) The type of badge shown next to the item (e.g. `beta`, `techPreview`)."
+              "\n(optional) The type of badge shown next to the item (e.g. `beta`, `techPreview`, `new`)."
             ],
             "signature": [
               "BadgeType",
               " | undefined"
             ],
             "path": "src/core/packages/chrome/navigation/types.ts",
-            "lineNumber": 77,
+            "lineNumber": 89,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -273,7 +275,7 @@
               "[] | undefined"
             ],
             "path": "src/core/packages/chrome/navigation/types.ts",
-            "lineNumber": 81,
+            "lineNumber": 93,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -289,7 +291,7 @@
         "label": "NavigationProps",
         "description": [],
         "path": "src/core/packages/chrome/navigation/src/components/navigation.tsx",
-        "lineNumber": 36,
+        "lineNumber": 37,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -307,7 +309,7 @@
               "string | undefined"
             ],
             "path": "src/core/packages/chrome/navigation/src/components/navigation.tsx",
-            "lineNumber": 37,
+            "lineNumber": 38,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -322,7 +324,7 @@
               "\nWhether the navigation is collapsed. This can be controlled by the parent component."
             ],
             "path": "src/core/packages/chrome/navigation/src/components/navigation.tsx",
-            "lineNumber": 41,
+            "lineNumber": 42,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -340,7 +342,7 @@
               "NavigationStructure"
             ],
             "path": "src/core/packages/chrome/navigation/src/components/navigation.tsx",
-            "lineNumber": 45,
+            "lineNumber": 46,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -358,7 +360,7 @@
               "SideNavLogo"
             ],
             "path": "src/core/packages/chrome/navigation/src/components/navigation.tsx",
-            "lineNumber": 49,
+            "lineNumber": 50,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -376,7 +378,7 @@
               "(width: number) => void"
             ],
             "path": "src/core/packages/chrome/navigation/src/components/navigation.tsx",
-            "lineNumber": 53,
+            "lineNumber": 54,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -392,7 +394,7 @@
                   "number"
                 ],
                 "path": "src/core/packages/chrome/navigation/src/components/navigation.tsx",
-                "lineNumber": 56,
+                "lineNumber": 57,
                 "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -420,7 +422,7 @@
               ") => void) | undefined"
             ],
             "path": "src/core/packages/chrome/navigation/src/components/navigation.tsx",
-            "lineNumber": 57,
+            "lineNumber": 58,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -440,7 +442,7 @@
                   "SecondaryMenuItem"
                 ],
                 "path": "src/core/packages/chrome/navigation/src/components/navigation.tsx",
-                "lineNumber": 60,
+                "lineNumber": 61,
                 "columnNumber": 18,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -462,7 +464,7 @@
               "(isCollapsed: boolean) => void"
             ],
             "path": "src/core/packages/chrome/navigation/src/components/navigation.tsx",
-            "lineNumber": 61,
+            "lineNumber": 62,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -478,7 +480,7 @@
                   "boolean"
                 ],
                 "path": "src/core/packages/chrome/navigation/src/components/navigation.tsx",
-                "lineNumber": 67,
+                "lineNumber": 68,
                 "columnNumber": 23,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -497,10 +499,10 @@
               "\n(optional) Content to display inside the side panel footer."
             ],
             "signature": [
-              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+              "React.ReactNode"
             ],
             "path": "src/core/packages/chrome/navigation/src/components/navigation.tsx",
-            "lineNumber": 68,
+            "lineNumber": 69,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -518,7 +520,7 @@
               "string | undefined"
             ],
             "path": "src/core/packages/chrome/navigation/src/components/navigation.tsx",
-            "lineNumber": 72,
+            "lineNumber": 73,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -532,9 +534,11 @@
         "type": "Interface",
         "tags": [],
         "label": "NavigationStructure",
-        "description": [],
+        "description": [
+          "\nThe complete navigation structure containing primary and footer menu items.\nThis is the main data structure passed to the Navigation component."
+        ],
         "path": "src/core/packages/chrome/navigation/types.ts",
-        "lineNumber": 87,
+        "lineNumber": 99,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -553,7 +557,7 @@
               "[]"
             ],
             "path": "src/core/packages/chrome/navigation/types.ts",
-            "lineNumber": 88,
+            "lineNumber": 104,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -572,7 +576,7 @@
               "[]"
             ],
             "path": "src/core/packages/chrome/navigation/types.ts",
-            "lineNumber": 92,
+            "lineNumber": 108,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -586,7 +590,9 @@
         "type": "Interface",
         "tags": [],
         "label": "SecondaryMenuItem",
-        "description": [],
+        "description": [
+          "\nA navigation item within a secondary/nested menu.\nSecondary items appear when a primary menu item with sections is clicked or hovered."
+        ],
         "path": "src/core/packages/chrome/navigation/types.ts",
         "lineNumber": 14,
         "columnNumber": 1,
@@ -603,7 +609,7 @@
               "\nThe URL for the menu item link."
             ],
             "path": "src/core/packages/chrome/navigation/types.ts",
-            "lineNumber": 15,
+            "lineNumber": 19,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -618,7 +624,7 @@
               "\nThe unique identifier of the menu item."
             ],
             "path": "src/core/packages/chrome/navigation/types.ts",
-            "lineNumber": 19,
+            "lineNumber": 23,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -633,7 +639,7 @@
               "\nThe label to display for the menu item."
             ],
             "path": "src/core/packages/chrome/navigation/types.ts",
-            "lineNumber": 23,
+            "lineNumber": 27,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -651,7 +657,7 @@
               "string | undefined"
             ],
             "path": "src/core/packages/chrome/navigation/types.ts",
-            "lineNumber": 27,
+            "lineNumber": 31,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -663,14 +669,14 @@
             "tags": [],
             "label": "badgeType",
             "description": [
-              "\n(optional) The type of badge shown next to the item (e.g. `beta`, `techPreview`)."
+              "\n(optional) The type of badge shown next to the item (e.g. `beta`, `techPreview`, `new`)."
             ],
             "signature": [
               "BadgeType",
               " | undefined"
             ],
             "path": "src/core/packages/chrome/navigation/types.ts",
-            "lineNumber": 31,
+            "lineNumber": 35,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -688,7 +694,7 @@
               "boolean | undefined"
             ],
             "path": "src/core/packages/chrome/navigation/types.ts",
-            "lineNumber": 35,
+            "lineNumber": 39,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -702,9 +708,11 @@
         "type": "Interface",
         "tags": [],
         "label": "SecondaryMenuSection",
-        "description": [],
+        "description": [
+          "\nA section grouping within a secondary menu.\nSections help organize related secondary menu items with optional headers."
+        ],
         "path": "src/core/packages/chrome/navigation/types.ts",
-        "lineNumber": 41,
+        "lineNumber": 45,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -719,7 +727,7 @@
               "\nThe unique identifier of the secondary menu section."
             ],
             "path": "src/core/packages/chrome/navigation/types.ts",
-            "lineNumber": 42,
+            "lineNumber": 50,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -738,7 +746,7 @@
               "[]"
             ],
             "path": "src/core/packages/chrome/navigation/types.ts",
-            "lineNumber": 46,
+            "lineNumber": 54,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -756,7 +764,7 @@
               "string | undefined"
             ],
             "path": "src/core/packages/chrome/navigation/types.ts",
-            "lineNumber": 50,
+            "lineNumber": 58,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -772,7 +780,7 @@
         "label": "SideNavLogo",
         "description": [],
         "path": "src/core/packages/chrome/navigation/types.ts",
-        "lineNumber": 113,
+        "lineNumber": 129,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -787,7 +795,7 @@
               "\nThe route ID of the logo, used for the active state."
             ],
             "path": "src/core/packages/chrome/navigation/types.ts",
-            "lineNumber": 114,
+            "lineNumber": 130,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -802,7 +810,7 @@
               "\nThe href of the logo link, typically the home page."
             ],
             "path": "src/core/packages/chrome/navigation/types.ts",
-            "lineNumber": 118,
+            "lineNumber": 134,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -817,7 +825,7 @@
               "\nThe label for the logo, typically the product name."
             ],
             "path": "src/core/packages/chrome/navigation/types.ts",
-            "lineNumber": 122,
+            "lineNumber": 138,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -832,7 +840,7 @@
               "\nThe logo type, e.g. `appObservability`, `appSecurity`, etc."
             ],
             "path": "src/core/packages/chrome/navigation/types.ts",
-            "lineNumber": 126,
+            "lineNumber": 142,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -850,7 +858,7 @@
               "string | undefined"
             ],
             "path": "src/core/packages/chrome/navigation/types.ts",
-            "lineNumber": 130,
+            "lineNumber": 146,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -869,7 +877,7 @@
         "label": "BadgeType",
         "description": [],
         "signature": [
-          "\"beta\" | \"techPreview\""
+          "\"new\" | \"beta\" | \"techPreview\""
         ],
         "path": "src/core/packages/chrome/navigation/types.ts",
         "lineNumber": 12,

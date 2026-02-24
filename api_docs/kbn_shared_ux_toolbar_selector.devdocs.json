@@ -11,7 +11,7 @@
         "label": "ToolbarSelector",
         "description": [],
         "signature": [
-          "({ \"data-test-subj\": dataTestSubj, \"data-selected-value\": dataSelectedValue, buttonLabel, popoverContentBelowSearch, popoverTitle, options, searchable, optionMatcher, onChange, singleSelection, hasArrow, disabled, fullWidth, }: ",
+          "({ \"data-test-subj\": dataTestSubj, \"data-selected-value\": dataSelectedValue, buttonLabel, buttonTooltipContent, popoverContentBelowSearch, popoverTitle, options, searchable, optionMatcher, onChange, singleSelection, hasArrow, disabled, fullWidth, }: ",
           {
             "pluginId": "@kbn/shared-ux-toolbar-selector",
             "scope": "public",
@@ -22,7 +22,7 @@
           ") => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/shared-ux/toolbar_selector/src/toolbar_selector.tsx",
-        "lineNumber": 60,
+        "lineNumber": 61,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -32,7 +32,7 @@
             "id": "def-public.ToolbarSelector.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  'data-test-subj': dataTestSubj,\n  'data-selected-value': dataSelectedValue,\n  buttonLabel,\n  popoverContentBelowSearch,\n  popoverTitle,\n  options,\n  searchable,\n  optionMatcher,\n  onChange,\n  singleSelection,\n  hasArrow = true,\n  disabled = false,\n  fullWidth = false,\n}",
+            "label": "{\n  'data-test-subj': dataTestSubj,\n  'data-selected-value': dataSelectedValue,\n  buttonLabel,\n  buttonTooltipContent,\n  popoverContentBelowSearch,\n  popoverTitle,\n  options,\n  searchable,\n  optionMatcher,\n  onChange,\n  singleSelection,\n  hasArrow = true,\n  disabled = false,\n  fullWidth = false,\n}",
             "description": [],
             "signature": [
               {
@@ -44,7 +44,7 @@
               }
             ],
             "path": "src/platform/packages/shared/shared-ux/toolbar_selector/src/toolbar_selector.tsx",
-            "lineNumber": 60,
+            "lineNumber": 61,
             "columnNumber": 33,
             "deprecated": false,
             "trackAdoption": false,
@@ -106,10 +106,26 @@
             "label": "buttonLabel",
             "description": [],
             "signature": [
-              "string | React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+              "string | React.ReactElement<any>"
             ],
             "path": "src/platform/packages/shared/shared-ux/toolbar_selector/src/toolbar_selector.tsx",
             "lineNumber": 36,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-toolbar-selector",
+            "id": "def-public.BaseToolbarProps.buttonTooltipContent",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "buttonTooltipContent",
+            "description": [],
+            "signature": [
+              "string | React.ReactElement<any> | undefined"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/toolbar_selector/src/toolbar_selector.tsx",
+            "lineNumber": 37,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -122,10 +138,10 @@
             "label": "popoverContentBelowSearch",
             "description": [],
             "signature": [
-              "React.ReactElement<any, string | React.JSXElementConstructor<any>> | undefined"
+              "React.ReactElement<any> | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/toolbar_selector/src/toolbar_selector.tsx",
-            "lineNumber": 37,
+            "lineNumber": 38,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -141,7 +157,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/toolbar_selector/src/toolbar_selector.tsx",
-            "lineNumber": 38,
+            "lineNumber": 39,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -162,11 +178,11 @@
               "EuiSelectableLIOption",
               "<{ value: string; }>> & ",
               "CommonProps",
-              " & { label: string; searchableLabel?: string | undefined; key?: string | undefined; checked?: \"mixed\" | \"off\" | \"on\" | undefined; disabled?: boolean | undefined; isGroupLabel?: false | undefined; prepend?: React.ReactNode; append?: React.ReactNode; ref?: ((optionIndex: number) => void) | undefined; id?: undefined; data?: { [key: string]: any; } | undefined; textWrap?: \"wrap\" | \"truncate\" | undefined; truncationProps?: Partial<Omit<",
+              " & { label: string; searchableLabel?: string | undefined; key?: string | undefined; checked?: \"on\" | \"off\" | \"mixed\" | undefined; disabled?: boolean | undefined; isGroupLabel?: false | undefined; prepend?: React.ReactNode; append?: React.ReactNode; ref?: ((optionIndex: number) => void) | undefined; id?: undefined; data?: { [key: string]: any; } | undefined; textWrap?: \"wrap\" | \"truncate\" | undefined; truncationProps?: Partial<Omit<",
               "EuiTextTruncateProps",
               ", \"text\" | \"children\">> | undefined; toolTipContent?: React.ReactNode; toolTipProps?: Partial<Omit<",
               "EuiToolTipProps",
-              ", \"children\" | \"content\">> | undefined; } & React.HTMLAttributes<HTMLLIElement> & { value: string; }) | (",
+              ", \"content\" | \"children\">> | undefined; } & React.HTMLAttributes<HTMLLIElement> & { value: string; }) | (",
               "DisambiguateSet",
               "<",
               "EuiSelectableLIOption",
@@ -177,7 +193,7 @@
               ", \"isGroupLabel\"> & React.HTMLAttributes<HTMLDivElement> & { isGroupLabel: true; } & { value: string; }))[]"
             ],
             "path": "src/platform/packages/shared/shared-ux/toolbar_selector/src/toolbar_selector.tsx",
-            "lineNumber": 39,
+            "lineNumber": 40,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -190,7 +206,7 @@
             "label": "searchable",
             "description": [],
             "path": "src/platform/packages/shared/shared-ux/toolbar_selector/src/toolbar_selector.tsx",
-            "lineNumber": 40,
+            "lineNumber": 41,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -207,7 +223,7 @@
               "<{}> | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/toolbar_selector/src/toolbar_selector.tsx",
-            "lineNumber": 41,
+            "lineNumber": 42,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -223,7 +239,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/toolbar_selector/src/toolbar_selector.tsx",
-            "lineNumber": 42,
+            "lineNumber": 43,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -239,7 +255,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/toolbar_selector/src/toolbar_selector.tsx",
-            "lineNumber": 43,
+            "lineNumber": 44,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -255,7 +271,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/toolbar_selector/src/toolbar_selector.tsx",
-            "lineNumber": 44,
+            "lineNumber": 45,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -271,7 +287,7 @@
         "label": "ToolbarMultiSelectorProps",
         "description": [],
         "path": "src/platform/packages/shared/shared-ux/toolbar_selector/src/toolbar_selector.tsx",
-        "lineNumber": 52,
+        "lineNumber": 53,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -287,7 +303,7 @@
               "false"
             ],
             "path": "src/platform/packages/shared/shared-ux/toolbar_selector/src/toolbar_selector.tsx",
-            "lineNumber": 53,
+            "lineNumber": 54,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -308,11 +324,11 @@
               "EuiSelectableLIOption",
               "<{ value: string; }>> & ",
               "CommonProps",
-              " & { label: string; searchableLabel?: string | undefined; key?: string | undefined; checked?: \"mixed\" | \"off\" | \"on\" | undefined; disabled?: boolean | undefined; isGroupLabel?: false | undefined; prepend?: React.ReactNode; append?: React.ReactNode; ref?: ((optionIndex: number) => void) | undefined; id?: undefined; data?: { [key: string]: any; } | undefined; textWrap?: \"wrap\" | \"truncate\" | undefined; truncationProps?: Partial<Omit<",
+              " & { label: string; searchableLabel?: string | undefined; key?: string | undefined; checked?: \"on\" | \"off\" | \"mixed\" | undefined; disabled?: boolean | undefined; isGroupLabel?: false | undefined; prepend?: React.ReactNode; append?: React.ReactNode; ref?: ((optionIndex: number) => void) | undefined; id?: undefined; data?: { [key: string]: any; } | undefined; textWrap?: \"wrap\" | \"truncate\" | undefined; truncationProps?: Partial<Omit<",
               "EuiTextTruncateProps",
               ", \"text\" | \"children\">> | undefined; toolTipContent?: React.ReactNode; toolTipProps?: Partial<Omit<",
               "EuiToolTipProps",
-              ", \"children\" | \"content\">> | undefined; } & React.HTMLAttributes<HTMLLIElement> & { value: string; }) | (",
+              ", \"content\" | \"children\">> | undefined; } & React.HTMLAttributes<HTMLLIElement> & { value: string; }) | (",
               "DisambiguateSet",
               "<",
               "EuiSelectableLIOption",
@@ -323,7 +339,7 @@
               ", \"isGroupLabel\"> & React.HTMLAttributes<HTMLDivElement> & { isGroupLabel: true; } & { value: string; }))[] | undefined) => void) | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/toolbar_selector/src/toolbar_selector.tsx",
-            "lineNumber": 54,
+            "lineNumber": 55,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -344,11 +360,11 @@
                   "EuiSelectableLIOption",
                   "<{ value: string; }>> & ",
                   "CommonProps",
-                  " & { label: string; searchableLabel?: string | undefined; key?: string | undefined; checked?: \"mixed\" | \"off\" | \"on\" | undefined; disabled?: boolean | undefined; isGroupLabel?: false | undefined; prepend?: React.ReactNode; append?: React.ReactNode; ref?: ((optionIndex: number) => void) | undefined; id?: undefined; data?: { [key: string]: any; } | undefined; textWrap?: \"wrap\" | \"truncate\" | undefined; truncationProps?: Partial<Omit<",
+                  " & { label: string; searchableLabel?: string | undefined; key?: string | undefined; checked?: \"on\" | \"off\" | \"mixed\" | undefined; disabled?: boolean | undefined; isGroupLabel?: false | undefined; prepend?: React.ReactNode; append?: React.ReactNode; ref?: ((optionIndex: number) => void) | undefined; id?: undefined; data?: { [key: string]: any; } | undefined; textWrap?: \"wrap\" | \"truncate\" | undefined; truncationProps?: Partial<Omit<",
                   "EuiTextTruncateProps",
                   ", \"text\" | \"children\">> | undefined; toolTipContent?: React.ReactNode; toolTipProps?: Partial<Omit<",
                   "EuiToolTipProps",
-                  ", \"children\" | \"content\">> | undefined; } & React.HTMLAttributes<HTMLLIElement> & { value: string; }) | (",
+                  ", \"content\" | \"children\">> | undefined; } & React.HTMLAttributes<HTMLLIElement> & { value: string; }) | (",
                   "DisambiguateSet",
                   "<",
                   "EuiSelectableLIOption",
@@ -359,7 +375,7 @@
                   ", \"isGroupLabel\"> & React.HTMLAttributes<HTMLDivElement> & { isGroupLabel: true; } & { value: string; }))[] | undefined"
                 ],
                 "path": "src/platform/packages/shared/shared-ux/toolbar_selector/src/toolbar_selector.tsx",
-                "lineNumber": 54,
+                "lineNumber": 55,
                 "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -379,7 +395,7 @@
         "label": "ToolbarSingleSelectorProps",
         "description": [],
         "path": "src/platform/packages/shared/shared-ux/toolbar_selector/src/toolbar_selector.tsx",
-        "lineNumber": 47,
+        "lineNumber": 48,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -395,7 +411,7 @@
               "true | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/toolbar_selector/src/toolbar_selector.tsx",
-            "lineNumber": 48,
+            "lineNumber": 49,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -416,11 +432,11 @@
               "EuiSelectableLIOption",
               "<{ value: string; }>> & ",
               "CommonProps",
-              " & { label: string; searchableLabel?: string | undefined; key?: string | undefined; checked?: \"mixed\" | \"off\" | \"on\" | undefined; disabled?: boolean | undefined; isGroupLabel?: false | undefined; prepend?: React.ReactNode; append?: React.ReactNode; ref?: ((optionIndex: number) => void) | undefined; id?: undefined; data?: { [key: string]: any; } | undefined; textWrap?: \"wrap\" | \"truncate\" | undefined; truncationProps?: Partial<Omit<",
+              " & { label: string; searchableLabel?: string | undefined; key?: string | undefined; checked?: \"on\" | \"off\" | \"mixed\" | undefined; disabled?: boolean | undefined; isGroupLabel?: false | undefined; prepend?: React.ReactNode; append?: React.ReactNode; ref?: ((optionIndex: number) => void) | undefined; id?: undefined; data?: { [key: string]: any; } | undefined; textWrap?: \"wrap\" | \"truncate\" | undefined; truncationProps?: Partial<Omit<",
               "EuiTextTruncateProps",
               ", \"text\" | \"children\">> | undefined; toolTipContent?: React.ReactNode; toolTipProps?: Partial<Omit<",
               "EuiToolTipProps",
-              ", \"children\" | \"content\">> | undefined; } & React.HTMLAttributes<HTMLLIElement> & { value: string; }) | (",
+              ", \"content\" | \"children\">> | undefined; } & React.HTMLAttributes<HTMLLIElement> & { value: string; }) | (",
               "DisambiguateSet",
               "<",
               "EuiSelectableLIOption",
@@ -431,7 +447,7 @@
               ", \"isGroupLabel\"> & React.HTMLAttributes<HTMLDivElement> & { isGroupLabel: true; } & { value: string; }) | undefined) => void) | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/toolbar_selector/src/toolbar_selector.tsx",
-            "lineNumber": 49,
+            "lineNumber": 50,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -452,11 +468,11 @@
                   "EuiSelectableLIOption",
                   "<{ value: string; }>> & ",
                   "CommonProps",
-                  " & { label: string; searchableLabel?: string | undefined; key?: string | undefined; checked?: \"mixed\" | \"off\" | \"on\" | undefined; disabled?: boolean | undefined; isGroupLabel?: false | undefined; prepend?: React.ReactNode; append?: React.ReactNode; ref?: ((optionIndex: number) => void) | undefined; id?: undefined; data?: { [key: string]: any; } | undefined; textWrap?: \"wrap\" | \"truncate\" | undefined; truncationProps?: Partial<Omit<",
+                  " & { label: string; searchableLabel?: string | undefined; key?: string | undefined; checked?: \"on\" | \"off\" | \"mixed\" | undefined; disabled?: boolean | undefined; isGroupLabel?: false | undefined; prepend?: React.ReactNode; append?: React.ReactNode; ref?: ((optionIndex: number) => void) | undefined; id?: undefined; data?: { [key: string]: any; } | undefined; textWrap?: \"wrap\" | \"truncate\" | undefined; truncationProps?: Partial<Omit<",
                   "EuiTextTruncateProps",
                   ", \"text\" | \"children\">> | undefined; toolTipContent?: React.ReactNode; toolTipProps?: Partial<Omit<",
                   "EuiToolTipProps",
-                  ", \"children\" | \"content\">> | undefined; } & React.HTMLAttributes<HTMLLIElement> & { value: string; }) | (",
+                  ", \"content\" | \"children\">> | undefined; } & React.HTMLAttributes<HTMLLIElement> & { value: string; }) | (",
                   "DisambiguateSet",
                   "<",
                   "EuiSelectableLIOption",
@@ -467,7 +483,7 @@
                   ", \"isGroupLabel\"> & React.HTMLAttributes<HTMLDivElement> & { isGroupLabel: true; } & { value: string; }) | undefined"
                 ],
                 "path": "src/platform/packages/shared/shared-ux/toolbar_selector/src/toolbar_selector.tsx",
-                "lineNumber": 49,
+                "lineNumber": 50,
                 "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -515,11 +531,11 @@
           "EuiSelectableLIOption",
           "<{ value: string; }>> & ",
           "CommonProps",
-          " & { label: string; searchableLabel?: string | undefined; key?: string | undefined; checked?: \"mixed\" | \"off\" | \"on\" | undefined; disabled?: boolean | undefined; isGroupLabel?: false | undefined; prepend?: React.ReactNode; append?: React.ReactNode; ref?: ((optionIndex: number) => void) | undefined; id?: undefined; data?: { [key: string]: any; } | undefined; textWrap?: \"wrap\" | \"truncate\" | undefined; truncationProps?: Partial<Omit<",
+          " & { label: string; searchableLabel?: string | undefined; key?: string | undefined; checked?: \"on\" | \"off\" | \"mixed\" | undefined; disabled?: boolean | undefined; isGroupLabel?: false | undefined; prepend?: React.ReactNode; append?: React.ReactNode; ref?: ((optionIndex: number) => void) | undefined; id?: undefined; data?: { [key: string]: any; } | undefined; textWrap?: \"wrap\" | \"truncate\" | undefined; truncationProps?: Partial<Omit<",
           "EuiTextTruncateProps",
           ", \"text\" | \"children\">> | undefined; toolTipContent?: React.ReactNode; toolTipProps?: Partial<Omit<",
           "EuiToolTipProps",
-          ", \"children\" | \"content\">> | undefined; } & React.HTMLAttributes<HTMLLIElement> & { value: string; }) | (",
+          ", \"content\" | \"children\">> | undefined; } & React.HTMLAttributes<HTMLLIElement> & { value: string; }) | (",
           "DisambiguateSet",
           "<",
           "EuiSelectableLIOption",
@@ -570,7 +586,7 @@
           ")"
         ],
         "path": "src/platform/packages/shared/shared-ux/toolbar_selector/src/toolbar_selector.tsx",
-        "lineNumber": 57,
+        "lineNumber": 58,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

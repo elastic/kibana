@@ -43,7 +43,7 @@ apiTest.describe('dashboards - delete', { tag: tags.deploymentAgnostic }, () => 
     expect(response.body).toStrictEqual({
       statusCode: 404,
       error: 'Not Found',
-      message: 'A dashboard with ID non-existent-dashboard was not found.',
+      message: 'A dashboard with ID [non-existent-dashboard] was not found.',
     });
   });
 

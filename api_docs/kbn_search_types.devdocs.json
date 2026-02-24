@@ -719,14 +719,14 @@
           {
             "parentPluginId": "@kbn/search-types",
             "id": "def-common.ISearchOptions.strategy",
-            "type": "string",
+            "type": "CompoundType",
             "tags": [],
             "label": "strategy",
             "description": [
               "\nUse this option to force using a specific server side search strategy. Leave empty to use the default strategy."
             ],
             "signature": [
-              "string | undefined"
+              "string | symbol | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-search-types/src/types.ts",
             "lineNumber": 64,
@@ -1123,7 +1123,7 @@
             "section": "def-common.ProjectRouting",
             "text": "ProjectRouting"
           },
-          "; isStored?: boolean | undefined; isRestore?: boolean | undefined; sessionId?: string | undefined; stream?: boolean | undefined; strategy?: string | undefined; legacyHitsTotal?: boolean | undefined; isSearchStored?: boolean | undefined; retrieveResults?: boolean | undefined; }"
+          "; isStored?: boolean | undefined; isRestore?: boolean | undefined; sessionId?: string | undefined; stream?: boolean | undefined; strategy?: string | symbol | undefined; legacyHitsTotal?: boolean | undefined; isSearchStored?: boolean | undefined; retrieveResults?: boolean | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-search-types/src/types.ts",
         "lineNumber": 135,
@@ -1158,7 +1158,7 @@
         "label": "SanitizedConnectionRequestParams",
         "description": [],
         "signature": [
-          "{ method: string; path: string; querystring?: string | undefined; }"
+          "{ path: string; querystring?: string | undefined; method: string; }"
         ],
         "path": "src/platform/packages/shared/kbn-search-types/src/types.ts",
         "lineNumber": 47,

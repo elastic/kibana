@@ -9,10 +9,10 @@ import React, { useMemo, useState, useEffect } from 'react';
 import type { IngestStreamLifecycleAll, IngestStreamLifecycleDSL } from '@kbn/streams-schema';
 import { isDslLifecycle } from '@kbn/streams-schema';
 import {
-  EuiButton,
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiFieldText,
+  EuiFormAppend,
   EuiPopover,
   EuiSpacer,
   EuiText,
@@ -100,16 +100,14 @@ export function DslField({ initialValue, isDisabled, setLifecycle, setSaveButton
             panelPaddingSize="none"
             closePopover={closeUnitMenu}
             button={
-              <EuiButton
-                data-test-subj="streamsAppDslModalButton"
+              <EuiFormAppend
+                element="button"
+                label={selectedUnit.name}
+                iconRight="arrowDown"
                 disabled={isDisabled}
-                iconType="arrowDown"
-                iconSide="right"
-                color="text"
                 onClick={openUnitMenu}
-              >
-                {selectedUnit.name}
-              </EuiButton>
+                data-test-subj="streamsAppDslModalButton"
+              />
             }
           >
             <EuiContextMenuPanel

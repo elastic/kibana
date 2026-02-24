@@ -8,7 +8,7 @@ slug: /kibana-dev-docs/api/dashboardAgent
 title: "dashboardAgent"
 image: https://source.unsplash.com/400x175/?github
 description: API docs for the dashboardAgent plugin
-date: 2026-01-23
+date: 2026-02-24
 tags: ['contributor', 'dev', 'apidocs', 'kibana', 'dashboardAgent']
 ---
 import dashboardAgentObj from './dashboard_agent.devdocs.json';
@@ -21,7 +21,18 @@ Contact [@elastic/appex-ai-infra](https://github.com/orgs/elastic/teams/appex-ai
 
 | Public API count  | Any count | Items lacking comments | Missing exports |
 |-------------------|-----------|------------------------|-----------------|
-| 4 | 0 | 2 | 0 |
+| 9 | 0 | 8 | 0 |
+
+## Client
+
+### Setup
+<DocDefinitionList data={[dashboardAgentObj.client.setup]}/>
+
+### Start
+<DocDefinitionList data={[dashboardAgentObj.client.start]}/>
+
+### Interfaces
+<DocDefinitionList data={dashboardAgentObj.client.interfaces}/>
 
 ## Server
 
@@ -35,7 +46,4 @@ Contact [@elastic/appex-ai-infra](https://github.com/orgs/elastic/teams/appex-ai
 
 ### Objects
 <DocDefinitionList data={dashboardAgentObj.common.objects}/>
-
-### Consts, variables and types
-<DocDefinitionList data={dashboardAgentObj.common.misc}/>
 

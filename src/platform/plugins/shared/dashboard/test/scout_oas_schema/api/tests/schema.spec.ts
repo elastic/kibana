@@ -55,13 +55,13 @@ apiTest.describe('dashboard REST schema', { tag: tags.deploymentAgnostic }, () =
     );
 
     expect(response.statusCode).toBe(200);
-    expect(response.body.paths?.[oasPath]).toBeDefined();
+    expect(response.body.paths?.[`${oasPath}/{id}`]).toBeDefined();
 
     const createBodySchema =
-      response.body.paths[oasPath].post.requestBody.content[
+      response.body.paths[`${oasPath}/{id}`].post.requestBody.content[
         'application/json; Elastic-Api-Version=1'
       ].schema;
-    const panelsSchema = createBodySchema.properties.data.properties.panels;
+    const panelsSchema = createBodySchema.properties.panels;
     expect(panelsSchema).toBeDefined();
     expect(panelsSchema.items?.anyOf?.length).toBeGreaterThan(0);
 

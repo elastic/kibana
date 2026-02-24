@@ -25,12 +25,12 @@ import { getIndexDetailsLink } from '../../../../services/routing';
 import { useAppContext } from '../../../../app_context';
 import { DiscoverLink } from '../../../../lib/discover_link';
 import { ManageIndexButton } from './manage_index_button';
-import { DetailsPageOverview } from './details_page_overview';
 import { DetailsPageMappings } from './details_page_mappings';
 import { DetailsPageSettings } from './details_page_settings';
 import { DetailsPageStats } from './details_page_stats';
 import { DetailsPageTab } from './details_page_tab';
 import { IndexErrorCallout } from './index_error_callout';
+import { DetailsPageOverviewV2 } from './details_page_overview/details_page_overview_v2';
 
 const defaultTabs: IndexDetailsTab[] = [
   {
@@ -38,7 +38,7 @@ const defaultTabs: IndexDetailsTab[] = [
     name: i18n.translate('xpack.idxMgmt.indexDetails.overviewTitle', {
       defaultMessage: 'Overview',
     }),
-    renderTabContent: ({ index }) => <DetailsPageOverview indexDetails={index} />,
+    renderTabContent: ({ index }) => <DetailsPageOverviewV2 indexDetails={index} />,
     order: 10,
   },
   {

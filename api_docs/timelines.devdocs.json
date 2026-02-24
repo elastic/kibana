@@ -15,7 +15,7 @@
         "signature": [
           "(element: HTMLElement | null | undefined) => boolean"
         ],
-        "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
         "lineNumber": 164,
         "columnNumber": 14,
         "deprecated": false,
@@ -31,7 +31,7 @@
             "signature": [
               "HTMLElement | null | undefined"
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
             "lineNumber": 164,
             "columnNumber": 43,
             "deprecated": false,
@@ -54,7 +54,7 @@
         "signature": [
           "({ colindexAttribute, containerElement, ariaColindex, ariaRowindex, rowindexAttribute, }: { colindexAttribute: string; containerElement: Element | null; ariaColindex: number; ariaRowindex: number; rowindexAttribute: string; }) => FocusColumnResult"
         ],
-        "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
         "lineNumber": 101,
         "columnNumber": 14,
         "deprecated": false,
@@ -67,7 +67,7 @@
             "tags": [],
             "label": "{\n  colindexAttribute,\n  containerElement,\n  ariaColindex,\n  ariaRowindex,\n  rowindexAttribute,\n}",
             "description": [],
-            "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
             "lineNumber": 107,
             "columnNumber": 4,
             "deprecated": false,
@@ -80,7 +80,7 @@
                 "tags": [],
                 "label": "colindexAttribute",
                 "description": [],
-                "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+                "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
                 "lineNumber": 108,
                 "columnNumber": 3,
                 "deprecated": false,
@@ -96,7 +96,7 @@
                 "signature": [
                   "Element | null"
                 ],
-                "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+                "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
                 "lineNumber": 109,
                 "columnNumber": 3,
                 "deprecated": false,
@@ -109,7 +109,7 @@
                 "tags": [],
                 "label": "ariaColindex",
                 "description": [],
-                "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+                "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
                 "lineNumber": 110,
                 "columnNumber": 3,
                 "deprecated": false,
@@ -122,7 +122,7 @@
                 "tags": [],
                 "label": "ariaRowindex",
                 "description": [],
-                "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+                "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
                 "lineNumber": 111,
                 "columnNumber": 3,
                 "deprecated": false,
@@ -135,7 +135,7 @@
                 "tags": [],
                 "label": "rowindexAttribute",
                 "description": [],
-                "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+                "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
                 "lineNumber": 112,
                 "columnNumber": 3,
                 "deprecated": false,
@@ -159,7 +159,7 @@
         "signature": [
           "({ containerElement, tableClassName, }: { containerElement: HTMLElement | null; tableClassName: string; }) => HTMLDivElement | null"
         ],
-        "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
         "lineNumber": 334,
         "columnNumber": 14,
         "deprecated": false,
@@ -172,7 +172,7 @@
             "tags": [],
             "label": "{\n  containerElement,\n  tableClassName,\n}",
             "description": [],
-            "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
             "lineNumber": 337,
             "columnNumber": 4,
             "deprecated": false,
@@ -188,7 +188,7 @@
                 "signature": [
                   "HTMLElement | null"
                 ],
-                "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+                "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
                 "lineNumber": 338,
                 "columnNumber": 3,
                 "deprecated": false,
@@ -201,7 +201,7 @@
                 "tags": [],
                 "label": "tableClassName",
                 "description": [],
-                "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+                "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
                 "lineNumber": 339,
                 "columnNumber": 3,
                 "deprecated": false,
@@ -223,7 +223,7 @@
         "signature": [
           "(ariaRowindex: number) => string"
         ],
-        "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
         "lineNumber": 151,
         "columnNumber": 14,
         "deprecated": false,
@@ -239,7 +239,7 @@
             "signature": [
               "number"
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
             "lineNumber": 151,
             "columnNumber": 41,
             "deprecated": false,
@@ -262,7 +262,7 @@
         "signature": [
           "({ containerElement, getFocusedCell, shiftKey, tableHasFocus, tableClassName, }: { containerElement: HTMLElement | null; getFocusedCell: GetFocusedCell; shiftKey: boolean; tableHasFocus: (containerElement: HTMLElement | null) => boolean; tableClassName: string; }) => SkipFocus"
         ],
-        "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
         "lineNumber": 294,
         "columnNumber": 14,
         "deprecated": false,
@@ -275,7 +275,7 @@
             "tags": [],
             "label": "{\n  containerElement,\n  getFocusedCell,\n  shiftKey,\n  tableHasFocus,\n  tableClassName,\n}",
             "description": [],
-            "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
             "lineNumber": 300,
             "columnNumber": 4,
             "deprecated": false,
@@ -291,7 +291,7 @@
                 "signature": [
                   "HTMLElement | null"
                 ],
-                "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+                "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
                 "lineNumber": 301,
                 "columnNumber": 3,
                 "deprecated": false,
@@ -307,7 +307,7 @@
                 "signature": [
                   "({ containerElement, tableClassName, }: { containerElement: HTMLElement | null; tableClassName: string; }) => HTMLDivElement | null"
                 ],
-                "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+                "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
                 "lineNumber": 302,
                 "columnNumber": 3,
                 "deprecated": false,
@@ -324,7 +324,7 @@
                     "signature": [
                       "{ containerElement: HTMLElement | null; tableClassName: string; }"
                     ],
-                    "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+                    "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
                     "lineNumber": 270,
                     "columnNumber": 24,
                     "deprecated": false,
@@ -339,7 +339,7 @@
                 "tags": [],
                 "label": "shiftKey",
                 "description": [],
-                "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+                "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
                 "lineNumber": 303,
                 "columnNumber": 3,
                 "deprecated": false,
@@ -355,7 +355,7 @@
                 "signature": [
                   "(containerElement: HTMLElement | null) => boolean"
                 ],
-                "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+                "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
                 "lineNumber": 304,
                 "columnNumber": 3,
                 "deprecated": false,
@@ -371,7 +371,7 @@
                     "signature": [
                       "HTMLElement | null"
                     ],
-                    "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+                    "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
                     "lineNumber": 304,
                     "columnNumber": 19,
                     "deprecated": false,
@@ -388,7 +388,7 @@
                 "tags": [],
                 "label": "tableClassName",
                 "description": [],
-                "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+                "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
                 "lineNumber": 305,
                 "columnNumber": 3,
                 "deprecated": false,
@@ -412,7 +412,7 @@
         "signature": [
           "({ onSkipFocusBackwards, onSkipFocusForward, skipFocus, }: { onSkipFocusBackwards: () => void; onSkipFocusForward: () => void; skipFocus: SkipFocus; }) => void"
         ],
-        "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
         "lineNumber": 204,
         "columnNumber": 14,
         "deprecated": false,
@@ -425,7 +425,7 @@
             "tags": [],
             "label": "{\n  onSkipFocusBackwards,\n  onSkipFocusForward,\n  skipFocus,\n}",
             "description": [],
-            "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
             "lineNumber": 208,
             "columnNumber": 4,
             "deprecated": false,
@@ -441,7 +441,7 @@
                 "signature": [
                   "() => void"
                 ],
-                "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+                "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
                 "lineNumber": 209,
                 "columnNumber": 3,
                 "deprecated": false,
@@ -459,7 +459,7 @@
                 "signature": [
                   "() => void"
                 ],
-                "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+                "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
                 "lineNumber": 210,
                 "columnNumber": 3,
                 "deprecated": false,
@@ -477,7 +477,7 @@
                 "signature": [
                   "\"SKIP_FOCUS_BACKWARDS\" | \"SKIP_FOCUS_FORWARD\" | \"SKIP_FOCUS_NOOP\""
                 ],
-                "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+                "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
                 "lineNumber": 211,
                 "columnNumber": 3,
                 "deprecated": false,
@@ -501,7 +501,7 @@
         "signature": [
           "(event: React.KeyboardEvent<Element>) => boolean"
         ],
-        "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
         "lineNumber": 54,
         "columnNumber": 14,
         "deprecated": false,
@@ -517,7 +517,7 @@
             "signature": [
               "React.KeyboardEvent<Element>"
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
             "lineNumber": 54,
             "columnNumber": 38,
             "deprecated": false,
@@ -540,7 +540,7 @@
         "signature": [
           "(event: React.KeyboardEvent<Element>) => boolean"
         ],
-        "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
         "lineNumber": 51,
         "columnNumber": 14,
         "deprecated": false,
@@ -556,7 +556,7 @@
             "signature": [
               "React.KeyboardEvent<Element>"
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
             "lineNumber": 51,
             "columnNumber": 27,
             "deprecated": false,
@@ -579,7 +579,7 @@
         "signature": [
           "(event: React.KeyboardEvent<Element>) => boolean"
         ],
-        "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
         "lineNumber": 58,
         "columnNumber": 14,
         "deprecated": false,
@@ -595,7 +595,7 @@
             "signature": [
               "React.KeyboardEvent<Element>"
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
             "lineNumber": 58,
             "columnNumber": 26,
             "deprecated": false,
@@ -618,7 +618,7 @@
         "signature": [
           "(event: React.KeyboardEvent<Element>) => boolean"
         ],
-        "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
         "lineNumber": 61,
         "columnNumber": 14,
         "deprecated": false,
@@ -634,7 +634,7 @@
             "signature": [
               "React.KeyboardEvent<Element>"
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
             "lineNumber": 61,
             "columnNumber": 23,
             "deprecated": false,
@@ -657,7 +657,7 @@
         "signature": [
           "(event: React.KeyboardEvent<Element>) => void"
         ],
-        "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
         "lineNumber": 158,
         "columnNumber": 14,
         "deprecated": false,
@@ -673,7 +673,7 @@
             "signature": [
               "React.KeyboardEvent<Element>"
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
             "lineNumber": 158,
             "columnNumber": 50,
             "deprecated": false,
@@ -704,7 +704,7 @@
           " extends ",
           "HoverActionComponentProps"
         ],
-        "path": "x-pack/platform/plugins/shared/timelines/public/components/hover_actions/actions/add_to_timeline.tsx",
+        "path": "x-pack/solutions/security/plugins/timelines/public/components/hover_actions/actions/add_to_timeline.tsx",
         "lineNumber": 62,
         "columnNumber": 1,
         "deprecated": false,
@@ -754,7 +754,7 @@
               "EuiButtonIconProps",
               " & { href?: string | undefined; onClick?: React.MouseEventHandler<HTMLAnchorElement> | undefined; } & React.AnchorHTMLAttributes<HTMLAnchorElement> & { buttonRef?: React.Ref<HTMLAnchorElement> | undefined; })> | React.FunctionComponent<Props> | undefined"
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/public/components/hover_actions/actions/add_to_timeline.tsx",
+            "path": "x-pack/solutions/security/plugins/timelines/public/components/hover_actions/actions/add_to_timeline.tsx",
             "lineNumber": 63,
             "columnNumber": 3,
             "deprecated": false,
@@ -770,7 +770,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/public/components/hover_actions/actions/add_to_timeline.tsx",
+            "path": "x-pack/solutions/security/plugins/timelines/public/components/hover_actions/actions/add_to_timeline.tsx",
             "lineNumber": 65,
             "columnNumber": 3,
             "deprecated": false,
@@ -801,7 +801,7 @@
               },
               "[] | undefined"
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/public/components/hover_actions/actions/add_to_timeline.tsx",
+            "path": "x-pack/solutions/security/plugins/timelines/public/components/hover_actions/actions/add_to_timeline.tsx",
             "lineNumber": 66,
             "columnNumber": 3,
             "deprecated": false,
@@ -817,7 +817,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/public/components/hover_actions/actions/add_to_timeline.tsx",
+            "path": "x-pack/solutions/security/plugins/timelines/public/components/hover_actions/actions/add_to_timeline.tsx",
             "lineNumber": 67,
             "columnNumber": 3,
             "deprecated": false,
@@ -839,7 +839,7 @@
               "ThemeServiceSetup",
               "; }"
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/public/components/hover_actions/actions/add_to_timeline.tsx",
+            "path": "x-pack/solutions/security/plugins/timelines/public/components/hover_actions/actions/add_to_timeline.tsx",
             "lineNumber": 68,
             "columnNumber": 3,
             "deprecated": false,
@@ -863,7 +863,7 @@
         "signature": [
           "\"aria-colindex\""
         ],
-        "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
         "lineNumber": 19,
         "columnNumber": 14,
         "deprecated": false,
@@ -882,7 +882,7 @@
         "signature": [
           "\"aria-rowindex\""
         ],
-        "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
         "lineNumber": 34,
         "columnNumber": 14,
         "deprecated": false,
@@ -901,7 +901,7 @@
         "signature": [
           "\"data-colindex\""
         ],
-        "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
         "lineNumber": 28,
         "columnNumber": 14,
         "deprecated": false,
@@ -920,7 +920,7 @@
         "signature": [
           "\"data-rowindex\""
         ],
-        "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
         "lineNumber": 42,
         "columnNumber": 14,
         "deprecated": false,
@@ -939,7 +939,7 @@
         "signature": [
           "1"
         ],
-        "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
         "lineNumber": 45,
         "columnNumber": 14,
         "deprecated": false,
@@ -956,7 +956,7 @@
         "signature": [
           "({ newFocusedColumn, newFocusedColumnAriaColindex, }: { newFocusedColumn: HTMLDivElement | null; newFocusedColumnAriaColindex: number | null; }) => void"
         ],
-        "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
         "lineNumber": 143,
         "columnNumber": 1,
         "deprecated": false,
@@ -973,7 +973,7 @@
             "signature": [
               "{ newFocusedColumn: HTMLDivElement | null; newFocusedColumnAriaColindex: number | null; }"
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
             "lineNumber": 143,
             "columnNumber": 32,
             "deprecated": false,
@@ -998,7 +998,7 @@
           "ThemeServiceSetup",
           "; }"
         ],
-        "path": "x-pack/platform/plugins/shared/timelines/public/index.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/public/index.ts",
         "lineNumber": 51,
         "columnNumber": 1,
         "deprecated": false,
@@ -1014,7 +1014,7 @@
       "tags": [],
       "label": "TimelinesUIStart",
       "description": [],
-      "path": "x-pack/platform/plugins/shared/timelines/public/types.ts",
+      "path": "x-pack/solutions/security/plugins/timelines/public/types.ts",
       "lineNumber": 19,
       "columnNumber": 1,
       "deprecated": false,
@@ -1033,16 +1033,12 @@
             "() => ",
             "HoverActionsConfig"
           ],
-          "path": "x-pack/platform/plugins/shared/timelines/public/types.ts",
+          "path": "x-pack/solutions/security/plugins/timelines/public/types.ts",
           "lineNumber": 20,
           "columnNumber": 3,
           "deprecated": true,
           "trackAdoption": false,
           "references": [
-            {
-              "plugin": "osquery",
-              "path": "x-pack/platform/plugins/shared/osquery/public/timelines/add_to_timeline_button.tsx"
-            },
             {
               "plugin": "kubernetesSecurity",
               "path": "x-pack/solutions/security/plugins/kubernetes_security/public/hooks/use_filter.ts"
@@ -1065,7 +1061,7 @@
           "signature": [
             "() => any"
           ],
-          "path": "x-pack/platform/plugins/shared/timelines/public/types.ts",
+          "path": "x-pack/solutions/security/plugins/timelines/public/types.ts",
           "lineNumber": 25,
           "columnNumber": 3,
           "deprecated": false,
@@ -1085,9 +1081,9 @@
             "LastUpdatedAtProps",
             ") => React.ReactElement<",
             "LastUpdatedAtProps",
-            ", string | React.JSXElementConstructor<any>>"
+            ">"
           ],
-          "path": "x-pack/platform/plugins/shared/timelines/public/types.ts",
+          "path": "x-pack/solutions/security/plugins/timelines/public/types.ts",
           "lineNumber": 26,
           "columnNumber": 3,
           "deprecated": false,
@@ -1103,7 +1099,7 @@
               "signature": [
                 "LastUpdatedAtProps"
               ],
-              "path": "x-pack/platform/plugins/shared/timelines/public/types.ts",
+              "path": "x-pack/solutions/security/plugins/timelines/public/types.ts",
               "lineNumber": 26,
               "columnNumber": 20,
               "deprecated": false,
@@ -1126,7 +1122,7 @@
             ") => ",
             "UseAddToTimeline"
           ],
-          "path": "x-pack/platform/plugins/shared/timelines/public/types.ts",
+          "path": "x-pack/solutions/security/plugins/timelines/public/types.ts",
           "lineNumber": 27,
           "columnNumber": 3,
           "deprecated": false,
@@ -1146,7 +1142,7 @@
             "SensorAPI",
             "<string>) => void"
           ],
-          "path": "x-pack/platform/plugins/shared/timelines/public/types.ts",
+          "path": "x-pack/solutions/security/plugins/timelines/public/types.ts",
           "lineNumber": 28,
           "columnNumber": 3,
           "deprecated": false,
@@ -1168,7 +1164,7 @@
             "AnyAction",
             ">) => void"
           ],
-          "path": "x-pack/platform/plugins/shared/timelines/public/types.ts",
+          "path": "x-pack/solutions/security/plugins/timelines/public/types.ts",
           "lineNumber": 29,
           "columnNumber": 3,
           "deprecated": false,
@@ -1187,7 +1183,7 @@
                 "AnyAction",
                 ">"
               ],
-              "path": "x-pack/platform/plugins/shared/timelines/public/types.ts",
+              "path": "x-pack/solutions/security/plugins/timelines/public/types.ts",
               "lineNumber": 29,
               "columnNumber": 30,
               "deprecated": false,
@@ -1216,7 +1212,7 @@
       "tags": [],
       "label": "TimelinesPluginUI",
       "description": [],
-      "path": "x-pack/platform/plugins/shared/timelines/server/types.ts",
+      "path": "x-pack/solutions/security/plugins/timelines/server/types.ts",
       "lineNumber": 12,
       "columnNumber": 1,
       "deprecated": false,
@@ -1232,7 +1228,7 @@
       "tags": [],
       "label": "TimelinesPluginStart",
       "description": [],
-      "path": "x-pack/platform/plugins/shared/timelines/server/types.ts",
+      "path": "x-pack/solutions/security/plugins/timelines/server/types.ts",
       "lineNumber": 14,
       "columnNumber": 1,
       "deprecated": false,
@@ -1265,8 +1261,8 @@
           },
           "[]"
         ],
-        "path": "x-pack/platform/plugins/shared/timelines/common/utils/field_formatters.ts",
-        "lineNumber": 117,
+        "path": "x-pack/solutions/security/plugins/timelines/common/utils/field_formatters.ts",
+        "lineNumber": 128,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1282,8 +1278,8 @@
               "Fields",
               "<unknown[]>"
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/utils/field_formatters.ts",
-            "lineNumber": 118,
+            "path": "x-pack/solutions/security/plugins/timelines/common/utils/field_formatters.ts",
+            "lineNumber": 129,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1299,8 +1295,8 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/utils/field_formatters.ts",
-            "lineNumber": 119,
+            "path": "x-pack/solutions/security/plugins/timelines/common/utils/field_formatters.ts",
+            "lineNumber": 130,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1316,8 +1312,8 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/utils/field_formatters.ts",
-            "lineNumber": 120,
+            "path": "x-pack/solutions/security/plugins/timelines/common/utils/field_formatters.ts",
+            "lineNumber": 131,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1337,7 +1333,7 @@
         "signature": [
           "(field: string) => boolean"
         ],
-        "path": "x-pack/platform/plugins/shared/timelines/common/utils/field_formatters.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/utils/field_formatters.ts",
         "lineNumber": 47,
         "columnNumber": 14,
         "deprecated": false,
@@ -1353,7 +1349,7 @@
             "signature": [
               "string"
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/utils/field_formatters.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/utils/field_formatters.ts",
             "lineNumber": 47,
             "columnNumber": 28,
             "deprecated": false,
@@ -1374,7 +1370,7 @@
         "signature": [
           "<T>(value: T | T[] | null | undefined) => T[]"
         ],
-        "path": "x-pack/platform/plugins/shared/timelines/common/utils/to_array.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/utils/to_array.ts",
         "lineNumber": 8,
         "columnNumber": 14,
         "deprecated": false,
@@ -1390,7 +1386,7 @@
             "signature": [
               "T | T[] | null | undefined"
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/utils/to_array.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/utils/to_array.ts",
             "lineNumber": 8,
             "columnNumber": 28,
             "deprecated": false,
@@ -1411,7 +1407,7 @@
         "signature": [
           "<T>(value: T | T[] | null) => { str: string; isObjectArray?: boolean | undefined; }[]"
         ],
-        "path": "x-pack/platform/plugins/shared/timelines/common/utils/to_array.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/utils/to_array.ts",
         "lineNumber": 32,
         "columnNumber": 14,
         "deprecated": false,
@@ -1427,7 +1423,7 @@
             "signature": [
               "T | T[] | null"
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/utils/to_array.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/utils/to_array.ts",
             "lineNumber": 33,
             "columnNumber": 3,
             "deprecated": false,
@@ -1447,7 +1443,7 @@
         "tags": [],
         "label": "CursorType",
         "description": [],
-        "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/common/index.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/common/index.ts",
         "lineNumber": 16,
         "columnNumber": 1,
         "deprecated": false,
@@ -1464,7 +1460,7 @@
               "Maybe",
               "<string> | undefined"
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/common/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/common/index.ts",
             "lineNumber": 17,
             "columnNumber": 3,
             "deprecated": false,
@@ -1481,7 +1477,7 @@
               "Maybe",
               "<string> | undefined"
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/common/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/common/index.ts",
             "lineNumber": 18,
             "columnNumber": 3,
             "deprecated": false,
@@ -1497,7 +1493,7 @@
         "tags": [],
         "label": "DataProvider",
         "description": [],
-        "path": "x-pack/platform/plugins/shared/timelines/common/types/timeline/data_provider/index.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/types/timeline/data_provider/index.ts",
         "lineNumber": 30,
         "columnNumber": 1,
         "deprecated": false,
@@ -1512,7 +1508,7 @@
             "description": [
               "Uniquely identifies a data provider"
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/types/timeline/data_provider/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/types/timeline/data_provider/index.ts",
             "lineNumber": 31,
             "columnNumber": 3,
             "deprecated": false,
@@ -1527,7 +1523,7 @@
             "description": [
               "Human readable"
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/types/timeline/data_provider/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/types/timeline/data_provider/index.ts",
             "lineNumber": 33,
             "columnNumber": 3,
             "deprecated": false,
@@ -1542,7 +1538,7 @@
             "description": [
               "\nWhen `false`, a data provider is temporarily disabled, but not removed from\nthe timeline. default: `true`"
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/types/timeline/data_provider/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/types/timeline/data_provider/index.ts",
             "lineNumber": 35,
             "columnNumber": 3,
             "deprecated": false,
@@ -1557,7 +1553,7 @@
             "description": [
               "\nWhen `true`, a data provider is excluding the match, but not removed from\nthe timeline. default: `false`"
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/types/timeline/data_provider/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/types/timeline/data_provider/index.ts",
             "lineNumber": 40,
             "columnNumber": 3,
             "deprecated": false,
@@ -1572,7 +1568,7 @@
             "description": [
               "\nReturns the KQL query who have been added by user"
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/types/timeline/data_provider/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/types/timeline/data_provider/index.ts",
             "lineNumber": 45,
             "columnNumber": 3,
             "deprecated": false,
@@ -1596,7 +1592,7 @@
                 "text": "QueryMatch"
               }
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/types/timeline/data_provider/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/types/timeline/data_provider/index.ts",
             "lineNumber": 49,
             "columnNumber": 3,
             "deprecated": false,
@@ -1621,7 +1617,7 @@
               },
               "[]"
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/types/timeline/data_provider/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/types/timeline/data_provider/index.ts",
             "lineNumber": 53,
             "columnNumber": 3,
             "deprecated": false,
@@ -1639,7 +1635,7 @@
             "signature": [
               "\"default\" | \"template\" | undefined"
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/types/timeline/data_provider/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/types/timeline/data_provider/index.ts",
             "lineNumber": 57,
             "columnNumber": 3,
             "deprecated": false,
@@ -1659,7 +1655,7 @@
         "description": [
           "\nThis interface should not be used anymore.\nUse the one from `solutions/security/plugins/security_solution/common/types/timeline`."
         ],
-        "path": "x-pack/platform/plugins/shared/timelines/common/types/timeline/rows/index.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/types/timeline/rows/index.ts",
         "lineNumber": 11,
         "columnNumber": 1,
         "deprecated": true,
@@ -1701,7 +1697,7 @@
             "signature": [
               "DeprecatedRowRendererId"
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/types/timeline/rows/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/types/timeline/rows/index.ts",
             "lineNumber": 17,
             "columnNumber": 3,
             "deprecated": false,
@@ -1725,7 +1721,7 @@
               },
               ") => boolean"
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/types/timeline/rows/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/types/timeline/rows/index.ts",
             "lineNumber": 18,
             "columnNumber": 3,
             "deprecated": false,
@@ -1747,7 +1743,7 @@
                     "text": "EcsSecurityExtension"
                   }
                 ],
-                "path": "x-pack/platform/plugins/shared/timelines/common/types/timeline/rows/index.ts",
+                "path": "x-pack/solutions/security/plugins/timelines/common/types/timeline/rows/index.ts",
                 "lineNumber": 18,
                 "columnNumber": 16,
                 "deprecated": false,
@@ -1775,7 +1771,7 @@
               },
               "; scopeId: string; }) => React.ReactNode"
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/types/timeline/rows/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/types/timeline/rows/index.ts",
             "lineNumber": 19,
             "columnNumber": 3,
             "deprecated": false,
@@ -1788,7 +1784,7 @@
                 "tags": [],
                 "label": "{\n    contextId,\n    data,\n    scopeId,\n  }",
                 "description": [],
-                "path": "x-pack/platform/plugins/shared/timelines/common/types/timeline/rows/index.ts",
+                "path": "x-pack/solutions/security/plugins/timelines/common/types/timeline/rows/index.ts",
                 "lineNumber": 23,
                 "columnNumber": 6,
                 "deprecated": false,
@@ -1804,7 +1800,7 @@
                     "signature": [
                       "string | undefined"
                     ],
-                    "path": "x-pack/platform/plugins/shared/timelines/common/types/timeline/rows/index.ts",
+                    "path": "x-pack/solutions/security/plugins/timelines/common/types/timeline/rows/index.ts",
                     "lineNumber": 24,
                     "columnNumber": 5,
                     "deprecated": false,
@@ -1826,7 +1822,7 @@
                         "text": "EcsSecurityExtension"
                       }
                     ],
-                    "path": "x-pack/platform/plugins/shared/timelines/common/types/timeline/rows/index.ts",
+                    "path": "x-pack/solutions/security/plugins/timelines/common/types/timeline/rows/index.ts",
                     "lineNumber": 25,
                     "columnNumber": 5,
                     "deprecated": false,
@@ -1839,7 +1835,7 @@
                     "tags": [],
                     "label": "scopeId",
                     "description": [],
-                    "path": "x-pack/platform/plugins/shared/timelines/common/types/timeline/rows/index.ts",
+                    "path": "x-pack/solutions/security/plugins/timelines/common/types/timeline/rows/index.ts",
                     "lineNumber": 26,
                     "columnNumber": 5,
                     "deprecated": false,
@@ -1860,7 +1856,7 @@
         "tags": [],
         "label": "EqlFieldsComboBoxOptions",
         "description": [],
-        "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/eql/index.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
         "lineNumber": 25,
         "columnNumber": 1,
         "deprecated": false,
@@ -1877,7 +1873,7 @@
               "EuiComboBoxOptionOption",
               "<string | number | string[] | undefined>[]"
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/eql/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
             "lineNumber": 26,
             "columnNumber": 3,
             "deprecated": false,
@@ -1894,7 +1890,7 @@
               "EuiComboBoxOptionOption",
               "<string | number | string[] | undefined>[]"
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/eql/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
             "lineNumber": 27,
             "columnNumber": 3,
             "deprecated": false,
@@ -1911,7 +1907,7 @@
               "EuiComboBoxOptionOption",
               "<string | number | string[] | undefined>[]"
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/eql/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
             "lineNumber": 28,
             "columnNumber": 3,
             "deprecated": false,
@@ -1927,7 +1923,7 @@
         "tags": [],
         "label": "EqlOptions",
         "description": [],
-        "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/eql/index.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
         "lineNumber": 31,
         "columnNumber": 1,
         "deprecated": false,
@@ -1943,7 +1939,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/eql/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
             "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
@@ -1959,7 +1955,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/eql/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
             "lineNumber": 33,
             "columnNumber": 3,
             "deprecated": false,
@@ -1975,7 +1971,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/eql/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
             "lineNumber": 34,
             "columnNumber": 3,
             "deprecated": false,
@@ -1991,7 +1987,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/eql/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
             "lineNumber": 35,
             "columnNumber": 3,
             "deprecated": false,
@@ -2007,7 +2003,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/eql/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
             "lineNumber": 36,
             "columnNumber": 3,
             "deprecated": false,
@@ -2023,7 +2019,7 @@
         "tags": [],
         "label": "FieldInfo",
         "description": [],
-        "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/index_fields/index.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/index_fields/index.ts",
         "lineNumber": 16,
         "columnNumber": 1,
         "deprecated": false,
@@ -2036,7 +2032,7 @@
             "tags": [],
             "label": "category",
             "description": [],
-            "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/index_fields/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/index_fields/index.ts",
             "lineNumber": 17,
             "columnNumber": 3,
             "deprecated": false,
@@ -2052,7 +2048,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/index_fields/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/index_fields/index.ts",
             "lineNumber": 18,
             "columnNumber": 3,
             "deprecated": false,
@@ -2068,7 +2064,7 @@
             "signature": [
               "string | number | undefined"
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/index_fields/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/index_fields/index.ts",
             "lineNumber": 19,
             "columnNumber": 3,
             "deprecated": false,
@@ -2084,7 +2080,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/index_fields/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/index_fields/index.ts",
             "lineNumber": 20,
             "columnNumber": 3,
             "deprecated": false,
@@ -2097,7 +2093,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/index_fields/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/index_fields/index.ts",
             "lineNumber": 21,
             "columnNumber": 3,
             "deprecated": false,
@@ -2113,7 +2109,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/index_fields/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/index_fields/index.ts",
             "lineNumber": 22,
             "columnNumber": 3,
             "deprecated": false,
@@ -2147,7 +2143,7 @@
           },
           ", \"format\">"
         ],
-        "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/index_fields/index.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/index_fields/index.ts",
         "lineNumber": 25,
         "columnNumber": 1,
         "deprecated": false,
@@ -2162,7 +2158,7 @@
             "description": [
               "Where the field belong"
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/index_fields/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/index_fields/index.ts",
             "lineNumber": 26,
             "columnNumber": 3,
             "deprecated": false,
@@ -2181,7 +2177,7 @@
               "Maybe",
               "<string | number> | undefined"
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/index_fields/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/index_fields/index.ts",
             "lineNumber": 28,
             "columnNumber": 3,
             "deprecated": false,
@@ -2200,7 +2196,7 @@
               "Maybe",
               "<string>[]"
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/index_fields/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/index_fields/index.ts",
             "lineNumber": 30,
             "columnNumber": 3,
             "deprecated": false,
@@ -2219,7 +2215,7 @@
               "Maybe",
               "<string> | undefined"
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/index_fields/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/index_fields/index.ts",
             "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
@@ -2236,7 +2232,7 @@
               "Maybe",
               "<string> | undefined"
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/index_fields/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/index_fields/index.ts",
             "lineNumber": 34,
             "columnNumber": 3,
             "deprecated": false,
@@ -2272,7 +2268,7 @@
           },
           "<any>"
         ],
-        "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/index_fields/index.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/index_fields/index.ts",
         "lineNumber": 59,
         "columnNumber": 1,
         "deprecated": true,
@@ -2321,7 +2317,7 @@
               },
               "[]"
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/index_fields/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/index_fields/index.ts",
             "lineNumber": 63,
             "columnNumber": 3,
             "deprecated": false,
@@ -2337,7 +2333,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/index_fields/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/index_fields/index.ts",
             "lineNumber": 64,
             "columnNumber": 3,
             "deprecated": false,
@@ -2355,7 +2351,7 @@
               "MappingRuntimeField",
               "; }"
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/index_fields/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/index_fields/index.ts",
             "lineNumber": 65,
             "columnNumber": 3,
             "deprecated": false,
@@ -2371,7 +2367,7 @@
         "tags": [],
         "label": "Inspect",
         "description": [],
-        "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/common/index.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/common/index.ts",
         "lineNumber": 21,
         "columnNumber": 1,
         "deprecated": false,
@@ -2387,7 +2383,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/common/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/common/index.ts",
             "lineNumber": 22,
             "columnNumber": 3,
             "deprecated": false,
@@ -2403,7 +2399,7 @@
         "tags": [],
         "label": "LastTimeDetails",
         "description": [],
-        "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
         "lineNumber": 11,
         "columnNumber": 1,
         "deprecated": false,
@@ -2420,7 +2416,7 @@
               "Maybe",
               "<string> | undefined"
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
             "lineNumber": 12,
             "columnNumber": 3,
             "deprecated": false,
@@ -2437,7 +2433,7 @@
               "Maybe",
               "<string> | undefined"
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
             "lineNumber": 13,
             "columnNumber": 3,
             "deprecated": false,
@@ -2454,7 +2450,7 @@
               "Maybe",
               "<string> | undefined"
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
             "lineNumber": 14,
             "columnNumber": 3,
             "deprecated": false,
@@ -2470,7 +2466,7 @@
         "tags": [],
         "label": "PaginationInputPaginated",
         "description": [],
-        "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/common/index.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/common/index.ts",
         "lineNumber": 44,
         "columnNumber": 1,
         "deprecated": false,
@@ -2485,7 +2481,7 @@
             "description": [
               "The activePage parameter defines the page of results you want to fetch"
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/common/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/common/index.ts",
             "lineNumber": 45,
             "columnNumber": 3,
             "deprecated": false,
@@ -2500,7 +2496,7 @@
             "description": [
               "The cursorStart parameter defines the start of the results to be displayed"
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/common/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/common/index.ts",
             "lineNumber": 47,
             "columnNumber": 3,
             "deprecated": false,
@@ -2515,7 +2511,7 @@
             "description": [
               "The fakePossibleCount parameter determines the total count in order to show 5 additional pages"
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/common/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/common/index.ts",
             "lineNumber": 49,
             "columnNumber": 3,
             "deprecated": false,
@@ -2530,7 +2526,7 @@
             "description": [
               "The querySize parameter is the number of items to be returned"
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/common/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/common/index.ts",
             "lineNumber": 51,
             "columnNumber": 3,
             "deprecated": false,
@@ -2546,7 +2542,7 @@
         "tags": [],
         "label": "QueryMatch",
         "description": [],
-        "path": "x-pack/platform/plugins/shared/timelines/common/types/timeline/data_provider/index.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/types/timeline/data_provider/index.ts",
         "lineNumber": 22,
         "columnNumber": 1,
         "deprecated": false,
@@ -2559,7 +2555,7 @@
             "tags": [],
             "label": "field",
             "description": [],
-            "path": "x-pack/platform/plugins/shared/timelines/common/types/timeline/data_provider/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/types/timeline/data_provider/index.ts",
             "lineNumber": 23,
             "columnNumber": 3,
             "deprecated": false,
@@ -2575,7 +2571,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/types/timeline/data_provider/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/types/timeline/data_provider/index.ts",
             "lineNumber": 24,
             "columnNumber": 3,
             "deprecated": false,
@@ -2591,7 +2587,7 @@
             "signature": [
               "string | number | boolean | (string | number | boolean)[]"
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/types/timeline/data_provider/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/types/timeline/data_provider/index.ts",
             "lineNumber": 25,
             "columnNumber": 3,
             "deprecated": false,
@@ -2607,7 +2603,7 @@
             "signature": [
               "string | number | boolean | undefined"
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/types/timeline/data_provider/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/types/timeline/data_provider/index.ts",
             "lineNumber": 26,
             "columnNumber": 3,
             "deprecated": false,
@@ -2623,7 +2619,7 @@
             "signature": [
               "\"includes\" | \":\" | \":*\""
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/types/timeline/data_provider/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/types/timeline/data_provider/index.ts",
             "lineNumber": 27,
             "columnNumber": 3,
             "deprecated": false,
@@ -2649,7 +2645,7 @@
           },
           "<Field>"
         ],
-        "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/common/index.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/common/index.ts",
         "lineNumber": 30,
         "columnNumber": 1,
         "deprecated": false,
@@ -2665,7 +2661,7 @@
             "signature": [
               "Field"
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/common/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/common/index.ts",
             "lineNumber": 31,
             "columnNumber": 3,
             "deprecated": false,
@@ -2687,7 +2683,7 @@
                 "text": "Direction"
               }
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/common/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/common/index.ts",
             "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
@@ -2703,7 +2699,7 @@
         "tags": [],
         "label": "TimelineEdges",
         "description": [],
-        "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/all/index.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
         "lineNumber": 12,
         "columnNumber": 1,
         "deprecated": false,
@@ -2725,7 +2721,7 @@
                 "text": "TimelineItem"
               }
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/all/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
             "lineNumber": 13,
             "columnNumber": 3,
             "deprecated": false,
@@ -2747,7 +2743,7 @@
                 "text": "CursorType"
               }
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/all/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
             "lineNumber": 14,
             "columnNumber": 3,
             "deprecated": false,
@@ -2783,7 +2779,7 @@
           "EqlSearchResponse",
           "<unknown>>"
         ],
-        "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/eql/index.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
         "lineNumber": 18,
         "columnNumber": 1,
         "deprecated": false,
@@ -2806,7 +2802,7 @@
               },
               "[]"
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/eql/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
             "lineNumber": 19,
             "columnNumber": 3,
             "deprecated": false,
@@ -2819,7 +2815,7 @@
             "tags": [],
             "label": "totalCount",
             "description": [],
-            "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/eql/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
             "lineNumber": 20,
             "columnNumber": 3,
             "deprecated": false,
@@ -2835,7 +2831,7 @@
             "signature": [
               "{ activePage: number; querySize: number; }"
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/eql/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
             "lineNumber": 21,
             "columnNumber": 3,
             "deprecated": false,
@@ -2858,7 +2854,7 @@
               },
               " | null"
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/eql/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
             "lineNumber": 22,
             "columnNumber": 3,
             "deprecated": false,
@@ -2892,7 +2888,7 @@
           },
           "<any>"
         ],
-        "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/all/index.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
         "lineNumber": 29,
         "columnNumber": 1,
         "deprecated": false,
@@ -2908,7 +2904,7 @@
             "signature": [
               "{ [x: string]: number; }"
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/all/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
             "lineNumber": 30,
             "columnNumber": 3,
             "deprecated": false,
@@ -2931,7 +2927,7 @@
               },
               "[]"
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/all/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
             "lineNumber": 31,
             "columnNumber": 3,
             "deprecated": false,
@@ -2944,7 +2940,7 @@
             "tags": [],
             "label": "totalCount",
             "description": [],
-            "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/all/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
             "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
@@ -2960,7 +2956,7 @@
             "signature": [
               "{ activePage: number; querySize: number; }"
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/all/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
             "lineNumber": 33,
             "columnNumber": 3,
             "deprecated": false,
@@ -2985,7 +2981,7 @@
               },
               "> | undefined"
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/all/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
             "lineNumber": 34,
             "columnNumber": 3,
             "deprecated": false,
@@ -3001,7 +2997,7 @@
         "tags": [],
         "label": "TimelineEventsDetailsItem",
         "description": [],
-        "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/details/index.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/details/index.ts",
         "lineNumber": 12,
         "columnNumber": 1,
         "deprecated": false,
@@ -3018,7 +3014,7 @@
               "Maybe",
               "<number> | undefined"
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/details/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/details/index.ts",
             "lineNumber": 13,
             "columnNumber": 3,
             "deprecated": false,
@@ -3034,7 +3030,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/details/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/details/index.ts",
             "lineNumber": 14,
             "columnNumber": 3,
             "deprecated": false,
@@ -3047,7 +3043,7 @@
             "tags": [],
             "label": "field",
             "description": [],
-            "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/details/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/details/index.ts",
             "lineNumber": 15,
             "columnNumber": 3,
             "deprecated": false,
@@ -3064,7 +3060,7 @@
               "Maybe",
               "<string[]> | undefined"
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/details/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/details/index.ts",
             "lineNumber": 16,
             "columnNumber": 3,
             "deprecated": false,
@@ -3080,7 +3076,7 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/details/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/details/index.ts",
             "lineNumber": 18,
             "columnNumber": 3,
             "deprecated": false,
@@ -3093,7 +3089,7 @@
             "tags": [],
             "label": "isObjectArray",
             "description": [],
-            "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/details/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/details/index.ts",
             "lineNumber": 19,
             "columnNumber": 3,
             "deprecated": false,
@@ -3127,7 +3123,7 @@
           },
           "<any>"
         ],
-        "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/details/index.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/details/index.ts",
         "lineNumber": 22,
         "columnNumber": 1,
         "deprecated": false,
@@ -3152,7 +3148,7 @@
               },
               "[]> | undefined"
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/details/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/details/index.ts",
             "lineNumber": 23,
             "columnNumber": 3,
             "deprecated": false,
@@ -3177,7 +3173,7 @@
               },
               "> | undefined"
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/details/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/details/index.ts",
             "lineNumber": 24,
             "columnNumber": 3,
             "deprecated": false,
@@ -3202,7 +3198,7 @@
               },
               "> | undefined"
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/details/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/details/index.ts",
             "lineNumber": 25,
             "columnNumber": 3,
             "deprecated": false,
@@ -3219,7 +3215,7 @@
               "Maybe",
               "<object> | undefined"
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/details/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/details/index.ts",
             "lineNumber": 26,
             "columnNumber": 3,
             "deprecated": false,
@@ -3253,7 +3249,7 @@
           },
           "<any>"
         ],
-        "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
         "lineNumber": 17,
         "columnNumber": 1,
         "deprecated": false,
@@ -3269,7 +3265,7 @@
             "signature": [
               "string | null"
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
             "lineNumber": 18,
             "columnNumber": 3,
             "deprecated": false,
@@ -3294,7 +3290,7 @@
               },
               "> | undefined"
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
             "lineNumber": 19,
             "columnNumber": 3,
             "deprecated": false,
@@ -3310,7 +3306,7 @@
         "tags": [],
         "label": "TimelineItem",
         "description": [],
-        "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/all/index.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
         "lineNumber": 17,
         "columnNumber": 1,
         "deprecated": false,
@@ -3323,7 +3319,7 @@
             "tags": [],
             "label": "_id",
             "description": [],
-            "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/all/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
             "lineNumber": 18,
             "columnNumber": 3,
             "deprecated": false,
@@ -3340,7 +3336,7 @@
               "Maybe",
               "<string> | undefined"
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/all/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
             "lineNumber": 19,
             "columnNumber": 3,
             "deprecated": false,
@@ -3363,7 +3359,7 @@
               },
               "[]"
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/all/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
             "lineNumber": 20,
             "columnNumber": 3,
             "deprecated": false,
@@ -3385,7 +3381,7 @@
                 "text": "EcsSecurityExtension"
               }
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/all/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
             "lineNumber": 21,
             "columnNumber": 3,
             "deprecated": false,
@@ -3419,7 +3415,7 @@
           },
           "<any>"
         ],
-        "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
         "lineNumber": 21,
         "columnNumber": 1,
         "deprecated": false,
@@ -3432,7 +3428,7 @@
             "tags": [],
             "label": "destinationIpCount",
             "description": [],
-            "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
             "lineNumber": 22,
             "columnNumber": 3,
             "deprecated": false,
@@ -3457,7 +3453,7 @@
               },
               "> | undefined"
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
             "lineNumber": 23,
             "columnNumber": 3,
             "deprecated": false,
@@ -3470,7 +3466,7 @@
             "tags": [],
             "label": "hostCount",
             "description": [],
-            "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
             "lineNumber": 24,
             "columnNumber": 3,
             "deprecated": false,
@@ -3483,7 +3479,7 @@
             "tags": [],
             "label": "processCount",
             "description": [],
-            "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
             "lineNumber": 25,
             "columnNumber": 3,
             "deprecated": false,
@@ -3496,7 +3492,7 @@
             "tags": [],
             "label": "sourceIpCount",
             "description": [],
-            "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
             "lineNumber": 26,
             "columnNumber": 3,
             "deprecated": false,
@@ -3509,7 +3505,7 @@
             "tags": [],
             "label": "userCount",
             "description": [],
-            "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
             "lineNumber": 27,
             "columnNumber": 3,
             "deprecated": false,
@@ -3525,7 +3521,7 @@
         "tags": [],
         "label": "TimelineNonEcsData",
         "description": [],
-        "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/all/index.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
         "lineNumber": 24,
         "columnNumber": 1,
         "deprecated": false,
@@ -3538,7 +3534,7 @@
             "tags": [],
             "label": "field",
             "description": [],
-            "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/all/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
             "lineNumber": 25,
             "columnNumber": 3,
             "deprecated": false,
@@ -3555,7 +3551,7 @@
               "Maybe",
               "<string[]> | undefined"
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/all/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
             "lineNumber": 26,
             "columnNumber": 3,
             "deprecated": false,
@@ -3571,7 +3567,7 @@
         "tags": [],
         "label": "TimerangeInput",
         "description": [],
-        "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/common/index.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/common/index.ts",
         "lineNumber": 35,
         "columnNumber": 1,
         "deprecated": false,
@@ -3586,7 +3582,7 @@
             "description": [
               "The interval string to use for last bucket. The format is '{value}{unit}'. For example '5m' would return the metrics for the last 5 minutes of the timespan."
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/common/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/common/index.ts",
             "lineNumber": 36,
             "columnNumber": 3,
             "deprecated": false,
@@ -3601,7 +3597,7 @@
             "description": [
               "The end of the timerange"
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/common/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/common/index.ts",
             "lineNumber": 38,
             "columnNumber": 3,
             "deprecated": false,
@@ -3616,7 +3612,7 @@
             "description": [
               "The beginning of the timerange"
             ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/common/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/common/index.ts",
             "lineNumber": 40,
             "columnNumber": 3,
             "deprecated": false,
@@ -3632,7 +3628,7 @@
         "tags": [],
         "label": "TotalValue",
         "description": [],
-        "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/common/index.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/common/index.ts",
         "lineNumber": 11,
         "columnNumber": 1,
         "deprecated": false,
@@ -3645,7 +3641,7 @@
             "tags": [],
             "label": "value",
             "description": [],
-            "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/common/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/common/index.ts",
             "lineNumber": 12,
             "columnNumber": 3,
             "deprecated": false,
@@ -3658,7 +3654,7 @@
             "tags": [],
             "label": "relation",
             "description": [],
-            "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/common/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/common/index.ts",
             "lineNumber": 13,
             "columnNumber": 3,
             "deprecated": false,
@@ -3676,7 +3672,7 @@
         "tags": [],
         "label": "Direction",
         "description": [],
-        "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/common/index.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/common/index.ts",
         "lineNumber": 25,
         "columnNumber": 1,
         "deprecated": false,
@@ -3690,7 +3686,7 @@
         "tags": [],
         "label": "LastEventIndexKey",
         "description": [],
-        "path": "x-pack/platform/plugins/shared/timelines/common/api/search_strategy/timeline/events_last_event_time.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/api/search_strategy/timeline/events_last_event_time.ts",
         "lineNumber": 12,
         "columnNumber": 1,
         "deprecated": false,
@@ -3704,7 +3700,7 @@
         "tags": [],
         "label": "TimelineEventsQueries",
         "description": [],
-        "path": "x-pack/platform/plugins/shared/timelines/common/api/search_strategy/model/timeline_events_queries.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/api/search_strategy/model/timeline_events_queries.ts",
         "lineNumber": 8,
         "columnNumber": 1,
         "deprecated": false,
@@ -3733,7 +3729,7 @@
           },
           "; }"
         ],
-        "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/index_fields/index.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/index_fields/index.ts",
         "lineNumber": 37,
         "columnNumber": 1,
         "deprecated": true,
@@ -3772,7 +3768,7 @@
           "FieldCategory",
           "; }"
         ],
-        "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/index_fields/index.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/index_fields/index.ts",
         "lineNumber": 74,
         "columnNumber": 1,
         "deprecated": true,
@@ -4213,7 +4209,7 @@
         "signature": [
           "Pick<",
           "EuiDataGridColumn",
-          ", \"id\" | \"actions\" | \"display\" | \"schema\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; searchable?: boolean | undefined; dataTableCellActions?: ",
+          ", \"id\" | \"actions\" | \"schema\" | \"display\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; searchable?: boolean | undefined; dataTableCellActions?: ",
           "DataTableCellAction",
           "[] | undefined; category?: string | undefined; columnHeaderType: ",
           "ColumnHeaderType",
@@ -4243,7 +4239,7 @@
           },
           " | undefined; type?: string | undefined; }"
         ],
-        "path": "x-pack/platform/plugins/shared/timelines/common/types/timeline/actions/index.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/types/timeline/actions/index.ts",
         "lineNumber": 63,
         "columnNumber": 1,
         "deprecated": false,
@@ -4258,7 +4254,7 @@
         "label": "DataProvidersAnd",
         "description": [],
         "signature": [
-          "{ id: string; type?: \"default\" | \"template\" | undefined; name: string; enabled: boolean; excluded: boolean; kqlQuery: string; queryMatch: ",
+          "{ id: string; type?: \"default\" | \"template\" | undefined; name: string; enabled: boolean; kqlQuery: string; excluded: boolean; queryMatch: ",
           {
             "pluginId": "timelines",
             "scope": "common",
@@ -4268,7 +4264,7 @@
           },
           "; }"
         ],
-        "path": "x-pack/platform/plugins/shared/timelines/common/types/timeline/data_provider/index.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/types/timeline/data_provider/index.ts",
         "lineNumber": 63,
         "columnNumber": 1,
         "deprecated": false,
@@ -4285,7 +4281,7 @@
         "signature": [
           "\"DELETED_SECURITY_SOLUTION_DATA_VIEW\""
         ],
-        "path": "x-pack/platform/plugins/shared/timelines/common/constants.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/constants.ts",
         "lineNumber": 10,
         "columnNumber": 14,
         "deprecated": false,
@@ -4355,7 +4351,7 @@
           },
           "[] | undefined; setFlyoutAlert?: ((alertId: string) => void) | undefined; scopeId: string; truncate?: boolean | undefined; key?: string | undefined; closeCellPopover?: (() => void) | undefined; enableActions?: boolean | undefined; }"
         ],
-        "path": "x-pack/platform/plugins/shared/timelines/common/types/timeline/cells/index.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/types/timeline/cells/index.ts",
         "lineNumber": 14,
         "columnNumber": 1,
         "deprecated": true,
@@ -4390,7 +4386,7 @@
         "signature": [
           "\"events\" | \"sessions\""
         ],
-        "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/index.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/index.ts",
         "lineNumber": 17,
         "columnNumber": 1,
         "deprecated": false,
@@ -4409,7 +4405,7 @@
         "signature": [
           "\":*\""
         ],
-        "path": "x-pack/platform/plugins/shared/timelines/common/types/timeline/data_provider/index.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/types/timeline/data_provider/index.ts",
         "lineNumber": 14,
         "columnNumber": 14,
         "deprecated": false,
@@ -4433,7 +4429,7 @@
             "text": "EqlOptions"
           }
         ],
-        "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/eql/index.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
         "lineNumber": 39,
         "columnNumber": 1,
         "deprecated": false,
@@ -4455,7 +4451,7 @@
           " : ",
           "IndexFieldsStrategyRequestByIndices"
         ],
-        "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/index_fields/index.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/index_fields/index.ts",
         "lineNumber": 52,
         "columnNumber": 1,
         "deprecated": true,
@@ -4500,7 +4496,7 @@
         "signature": [
           "\":\""
         ],
-        "path": "x-pack/platform/plugins/shared/timelines/common/types/timeline/data_provider/index.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/types/timeline/data_provider/index.ts",
         "lineNumber": 11,
         "columnNumber": 14,
         "deprecated": false,
@@ -4519,7 +4515,7 @@
         "signature": [
           "\"includes\" | \":\" | \":*\""
         ],
-        "path": "x-pack/platform/plugins/shared/timelines/common/types/timeline/data_provider/index.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/types/timeline/data_provider/index.ts",
         "lineNumber": 19,
         "columnNumber": 1,
         "deprecated": false,
@@ -4542,7 +4538,7 @@
             "section": "def-common.Direction",
             "text": "Direction"
           },
-          "; field: string; type?: string | undefined; esTypes?: string[] | undefined; }[]; language: \"eql\"; fieldRequested: string[]; params?: any; id?: string | undefined; size?: number | undefined; runtimeMappings?: Record<string, { type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"lookup\"; format?: string | undefined; script?: string | { source: string; } | { params: Record<string, any>; id: string; } | undefined; fetch_fields?: string[] | undefined; input_field?: string | undefined; target_field?: string | undefined; target_index?: string | undefined; }> | undefined; indexType?: string | undefined; timerange?: { from: string; to: string; interval: string; } | undefined; timestampField?: string | undefined; defaultIndex?: string[] | undefined; entityType?: \"events\" | \"sessions\" | undefined; pagination?: ",
+          "; field: string; type?: string | undefined; esTypes?: string[] | undefined; }[]; language: \"eql\"; fieldRequested: string[]; params?: any; id?: string | undefined; size?: number | undefined; runtimeMappings?: Record<string, { type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"lookup\"; format?: string | undefined; script?: string | { source: string; } | { params: Record<string, any>; id: string; } | undefined; fetch_fields?: string[] | undefined; input_field?: string | undefined; target_field?: string | undefined; target_index?: string | undefined; }> | undefined; timestampField?: string | undefined; indexType?: string | undefined; timerange?: { from: string; to: string; interval: string; } | undefined; defaultIndex?: string[] | undefined; entityType?: \"events\" | \"sessions\" | undefined; pagination?: ",
           "objectInputType",
           "<{ activePage: ",
           "ZodNumber",
@@ -4554,9 +4550,9 @@
           "ZodNumber",
           "; }, ",
           "ZodTypeAny",
-          ", \"passthrough\"> | undefined; filterQuery?: string | Record<string, any> | { range: Record<string, { format: string; gte: number; lte: number; }>; } | { query_string: { query: string; analyze_wildcard: boolean; }; } | { match: Record<string, { operator: string; query: string; zero_terms_query: string; }>; } | { term: Record<string, string>; } | { bool: { filter: {}[]; should: {}[]; must: {}[]; must_not: {}[]; }; } | undefined; filterStatus?: \"open\" | \"closed\" | \"acknowledged\" | undefined; eventCategoryField?: string | undefined; tiebreakerField?: string | undefined; runTimeMappings?: Record<string, { type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"lookup\"; format?: string | undefined; script?: string | { source: string; } | { params: Record<string, any>; id: string; } | undefined; fetch_fields?: string[] | undefined; input_field?: string | undefined; target_field?: string | undefined; target_index?: string | undefined; }> | undefined; }"
+          ", \"passthrough\"> | undefined; filterQuery?: string | Record<string, any> | { range: Record<string, { format: string; lte: number; gte: number; }>; } | { query_string: { query: string; analyze_wildcard: boolean; }; } | { match: Record<string, { query: string; operator: string; zero_terms_query: string; }>; } | { term: Record<string, string>; } | { bool: { filter: {}[]; should: {}[]; must: {}[]; must_not: {}[]; }; } | undefined; filterStatus?: \"open\" | \"closed\" | \"acknowledged\" | undefined; eventCategoryField?: string | undefined; tiebreakerField?: string | undefined; runTimeMappings?: Record<string, { type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"lookup\"; format?: string | undefined; script?: string | { source: string; } | { params: Record<string, any>; id: string; } | undefined; fetch_fields?: string[] | undefined; input_field?: string | undefined; target_field?: string | undefined; target_index?: string | undefined; }> | undefined; }"
         ],
-        "path": "x-pack/platform/plugins/shared/timelines/common/api/search_strategy/timeline/eql.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/api/search_strategy/timeline/eql.ts",
         "lineNumber": 26,
         "columnNumber": 1,
         "deprecated": false,
@@ -4579,7 +4575,7 @@
             "section": "def-common.Direction",
             "text": "Direction"
           },
-          "; field: string; esTypes: string[]; type?: string | undefined; }[]; fields: (string | { field: string; include_unmapped: boolean; })[]; language: \"kuery\" | \"lucene\"; fieldRequested: string[]; factoryQueryType: ",
+          "; field: string; esTypes: string[]; type?: string | undefined; }[]; language: \"kuery\" | \"lucene\"; fields: (string | { field: string; include_unmapped: boolean; })[]; fieldRequested: string[]; factoryQueryType: ",
           {
             "pluginId": "timelines",
             "scope": "common",
@@ -4601,7 +4597,7 @@
           "ZodTypeAny",
           ", \"passthrough\"> | undefined; filterQuery?: any; filterStatus?: \"open\" | \"closed\" | \"acknowledged\" | undefined; authFilter?: {} | undefined; excludeEcsData?: boolean | undefined; }"
         ],
-        "path": "x-pack/platform/plugins/shared/timelines/common/api/search_strategy/timeline/events_all.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/api/search_strategy/timeline/events_all.ts",
         "lineNumber": 41,
         "columnNumber": 1,
         "deprecated": false,
@@ -4636,9 +4632,9 @@
           "ZodNumber",
           "; }, ",
           "ZodTypeAny",
-          ", \"passthrough\"> | undefined; filterQuery?: string | Record<string, any> | { range: Record<string, { format: string; gte: number; lte: number; }>; } | { query_string: { query: string; analyze_wildcard: boolean; }; } | { match: Record<string, { operator: string; query: string; zero_terms_query: string; }>; } | { term: Record<string, string>; } | { bool: { filter: {}[]; should: {}[]; must: {}[]; must_not: {}[]; }; } | undefined; filterStatus?: \"open\" | \"closed\" | \"acknowledged\" | undefined; authFilter?: {} | undefined; }"
+          ", \"passthrough\"> | undefined; filterQuery?: string | Record<string, any> | { range: Record<string, { format: string; lte: number; gte: number; }>; } | { query_string: { query: string; analyze_wildcard: boolean; }; } | { match: Record<string, { query: string; operator: string; zero_terms_query: string; }>; } | { term: Record<string, string>; } | { bool: { filter: {}[]; should: {}[]; must: {}[]; must_not: {}[]; }; } | undefined; filterStatus?: \"open\" | \"closed\" | \"acknowledged\" | undefined; authFilter?: {} | undefined; }"
         ],
-        "path": "x-pack/platform/plugins/shared/timelines/common/api/search_strategy/timeline/events_details.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/api/search_strategy/timeline/events_details.ts",
         "lineNumber": 21,
         "columnNumber": 1,
         "deprecated": false,
@@ -4671,7 +4667,7 @@
           },
           "; params?: any; id?: string | undefined; indexType?: string | undefined; defaultIndex?: string[] | undefined; entityType?: \"events\" | \"sessions\" | undefined; filterStatus?: \"open\" | \"closed\" | \"acknowledged\" | undefined; }"
         ],
-        "path": "x-pack/platform/plugins/shared/timelines/common/api/search_strategy/timeline/events_last_event_time.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/api/search_strategy/timeline/events_last_event_time.ts",
         "lineNumber": 44,
         "columnNumber": 1,
         "deprecated": false,
@@ -4694,9 +4690,9 @@
             "section": "def-common.TimelineEventsQueries",
             "text": "TimelineEventsQueries"
           },
-          ".kpi; params?: any; id?: string | undefined; runtimeMappings?: Record<string, { type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"lookup\"; format?: string | undefined; script?: string | { source: string; } | { params: Record<string, any>; id: string; } | undefined; fetch_fields?: string[] | undefined; input_field?: string | undefined; target_field?: string | undefined; target_index?: string | undefined; }> | undefined; indexType?: string | undefined; timerange?: { from: string; to: string; interval: string; } | undefined; defaultIndex?: string[] | undefined; entityType?: \"events\" | \"sessions\" | undefined; filterQuery?: string | Record<string, any> | { range: Record<string, { format: string; gte: number; lte: number; }>; } | { query_string: { query: string; analyze_wildcard: boolean; }; } | { match: Record<string, { operator: string; query: string; zero_terms_query: string; }>; } | { term: Record<string, string>; } | { bool: { filter: {}[]; should: {}[]; must: {}[]; must_not: {}[]; }; } | undefined; filterStatus?: \"open\" | \"closed\" | \"acknowledged\" | undefined; }"
+          ".kpi; params?: any; id?: string | undefined; runtimeMappings?: Record<string, { type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"lookup\"; format?: string | undefined; script?: string | { source: string; } | { params: Record<string, any>; id: string; } | undefined; fetch_fields?: string[] | undefined; input_field?: string | undefined; target_field?: string | undefined; target_index?: string | undefined; }> | undefined; indexType?: string | undefined; timerange?: { from: string; to: string; interval: string; } | undefined; defaultIndex?: string[] | undefined; entityType?: \"events\" | \"sessions\" | undefined; filterQuery?: string | Record<string, any> | { range: Record<string, { format: string; lte: number; gte: number; }>; } | { query_string: { query: string; analyze_wildcard: boolean; }; } | { match: Record<string, { query: string; operator: string; zero_terms_query: string; }>; } | { term: Record<string, string>; } | { bool: { filter: {}[]; should: {}[]; must: {}[]; must_not: {}[]; }; } | undefined; filterStatus?: \"open\" | \"closed\" | \"acknowledged\" | undefined; }"
         ],
-        "path": "x-pack/platform/plugins/shared/timelines/common/api/search_strategy/timeline/kpi.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/api/search_strategy/timeline/kpi.ts",
         "lineNumber": 16,
         "columnNumber": 1,
         "deprecated": false,
@@ -4712,7 +4708,7 @@
         "tags": [],
         "label": "EMPTY_BROWSER_FIELDS",
         "description": [],
-        "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/index_fields/index.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/index_fields/index.ts",
         "lineNumber": 83,
         "columnNumber": 14,
         "deprecated": false,
@@ -4730,7 +4726,7 @@
         "signature": [
           "{ readonly EVENTS: \"events\"; readonly SESSIONS: \"sessions\"; }"
         ],
-        "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/index.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/index.ts",
         "lineNumber": 13,
         "columnNumber": 14,
         "deprecated": false,

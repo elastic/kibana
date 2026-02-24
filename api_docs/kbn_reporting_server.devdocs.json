@@ -238,7 +238,7 @@
                   "<TaskPayloadType>"
                 ],
                 "path": "src/platform/packages/private/kbn-reporting/server/types.ts",
-                "lineNumber": 49,
+                "lineNumber": 50,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -367,7 +367,7 @@
                 "label": "config",
                 "description": [],
                 "signature": [
-                  "Readonly<{ roles?: Readonly<{} & { enabled: boolean; allow: string[]; }> | undefined; encryptionKey?: string | undefined; } & { enabled: boolean; csv: Readonly<{ enablePanelActionDownload?: boolean | undefined; } & { scroll: Readonly<{} & { size: number; duration: string; strategy: \"scroll\" | \"pit\"; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; maxSizeBytes: number | ",
+                  "Readonly<{ roles?: Readonly<{} & { enabled: boolean; allow: string[]; }> | undefined; encryptionKey?: string | undefined; } & { enabled: boolean; csv: Readonly<{ enablePanelActionDownload?: boolean | undefined; } & { scroll: Readonly<{} & { duration: string; size: number; strategy: \"scroll\" | \"pit\"; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; maxSizeBytes: number | ",
                   {
                     "pluginId": "@kbn/config-schema",
                     "scope": "common",
@@ -416,7 +416,7 @@
                 "description": [],
                 "signature": [
                   "PluginInitializerContext",
-                  "<Readonly<{ roles?: Readonly<{} & { enabled: boolean; allow: string[]; }> | undefined; encryptionKey?: string | undefined; } & { enabled: boolean; csv: Readonly<{ enablePanelActionDownload?: boolean | undefined; } & { scroll: Readonly<{} & { size: number; duration: string; strategy: \"scroll\" | \"pit\"; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; maxSizeBytes: number | ",
+                  "<Readonly<{ roles?: Readonly<{} & { enabled: boolean; allow: string[]; }> | undefined; encryptionKey?: string | undefined; } & { enabled: boolean; csv: Readonly<{ enablePanelActionDownload?: boolean | undefined; } & { scroll: Readonly<{} & { duration: string; size: number; strategy: \"scroll\" | \"pit\"; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; maxSizeBytes: number | ",
                   {
                     "pluginId": "@kbn/config-schema",
                     "scope": "common",
@@ -996,7 +996,7 @@
         "label": "getFullRedirectAppUrl",
         "description": [],
         "signature": [
-          "(config: Readonly<{ roles?: Readonly<{} & { enabled: boolean; allow: string[]; }> | undefined; encryptionKey?: string | undefined; } & { enabled: boolean; csv: Readonly<{ enablePanelActionDownload?: boolean | undefined; } & { scroll: Readonly<{} & { size: number; duration: string; strategy: \"scroll\" | \"pit\"; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; maxSizeBytes: number | ",
+          "(config: Readonly<{ roles?: Readonly<{} & { enabled: boolean; allow: string[]; }> | undefined; encryptionKey?: string | undefined; } & { enabled: boolean; csv: Readonly<{ enablePanelActionDownload?: boolean | undefined; } & { scroll: Readonly<{} & { duration: string; size: number; strategy: \"scroll\" | \"pit\"; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; maxSizeBytes: number | ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",
@@ -1022,7 +1022,7 @@
             "label": "config",
             "description": [],
             "signature": [
-              "Readonly<{ roles?: Readonly<{} & { enabled: boolean; allow: string[]; }> | undefined; encryptionKey?: string | undefined; } & { enabled: boolean; csv: Readonly<{ enablePanelActionDownload?: boolean | undefined; } & { scroll: Readonly<{} & { size: number; duration: string; strategy: \"scroll\" | \"pit\"; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; maxSizeBytes: number | ",
+              "Readonly<{ roles?: Readonly<{} & { enabled: boolean; allow: string[]; }> | undefined; encryptionKey?: string | undefined; } & { enabled: boolean; csv: Readonly<{ enablePanelActionDownload?: boolean | undefined; } & { scroll: Readonly<{} & { duration: string; size: number; strategy: \"scroll\" | \"pit\"; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; maxSizeBytes: number | ",
               {
                 "pluginId": "@kbn/config-schema",
                 "scope": "common",
@@ -1527,6 +1527,22 @@
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-server",
+            "id": "def-server.RunTaskOpts.useInternalUser",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "useInternalUser",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/private/kbn-reporting/server/types.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1539,7 +1555,7 @@
         "label": "TimeRangeParams",
         "description": [],
         "path": "src/platform/packages/private/kbn-reporting/server/types.ts",
-        "lineNumber": 52,
+        "lineNumber": 53,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1555,7 +1571,7 @@
               "string | number | Date | null | undefined"
             ],
             "path": "src/platform/packages/private/kbn-reporting/server/types.ts",
-            "lineNumber": 53,
+            "lineNumber": 54,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1571,7 +1587,7 @@
               "string | number | Date | null | undefined"
             ],
             "path": "src/platform/packages/private/kbn-reporting/server/types.ts",
-            "lineNumber": 54,
+            "lineNumber": 55,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1910,7 +1926,7 @@
         "label": "ReportingConfigType",
         "description": [],
         "signature": [
-          "{ readonly roles?: Readonly<{} & { enabled: boolean; allow: string[]; }> | undefined; readonly encryptionKey?: string | undefined; readonly enabled: boolean; readonly csv: Readonly<{ enablePanelActionDownload?: boolean | undefined; } & { scroll: Readonly<{} & { size: number; duration: string; strategy: \"scroll\" | \"pit\"; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; maxSizeBytes: number | ",
+          "{ readonly roles?: Readonly<{} & { enabled: boolean; allow: string[]; }> | undefined; readonly encryptionKey?: string | undefined; readonly enabled: boolean; readonly csv: Readonly<{ enablePanelActionDownload?: boolean | undefined; } & { scroll: Readonly<{} & { duration: string; size: number; strategy: \"scroll\" | \"pit\"; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; maxSizeBytes: number | ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",
@@ -1921,7 +1937,7 @@
           "; useByteOrderMarkEncoding: boolean; maxConcurrentShardRequests: number; maxRows: number; }>; readonly queue: Readonly<{} & { timeout: number | moment.Duration; pollInterval: number | moment.Duration; indexInterval: string; pollEnabled: boolean; pollIntervalErrorMultiplier: number; }>; readonly capture: Readonly<{} & { maxAttempts: number; }>; readonly kibanaServer: Readonly<{ hostname?: string | undefined; protocol?: string | undefined; port?: number | undefined; } & {}>; readonly poll: Readonly<{} & { jobCompletionNotifier: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; jobsRefresh: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; }>; readonly export_types: Readonly<{} & { csv: Readonly<{} & { enabled: boolean; }>; png: Readonly<{} & { enabled: boolean; }>; pdf: Readonly<{} & { enabled: boolean; }>; }>; readonly statefulSettings: Readonly<{} & { enabled: boolean; }>; }"
         ],
         "path": "src/platform/packages/private/kbn-reporting/server/types.ts",
-        "lineNumber": 57,
+        "lineNumber": 58,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1948,7 +1964,7 @@
           ">"
         ],
         "path": "src/platform/packages/private/kbn-reporting/server/types.ts",
-        "lineNumber": 48,
+        "lineNumber": 49,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1972,7 +1988,7 @@
               "<TaskPayloadType>"
             ],
             "path": "src/platform/packages/private/kbn-reporting/server/types.ts",
-            "lineNumber": 49,
+            "lineNumber": 50,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

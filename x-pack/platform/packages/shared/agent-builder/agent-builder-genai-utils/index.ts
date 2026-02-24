@@ -37,3 +37,8 @@ export {
   type NaturalLanguageSearchResponse,
   runSearchTool,
 } from './tools';
+export {
+  buildVisualizationConfig,
+  getChartTypeSelectionPromptContent,
+  type VisualizationConfig,
+} from './tools/visualization';

@@ -6,6 +6,7 @@
  */
 
 import type { DynamicSettingsAttributes } from '../runtime_types/settings';
+import { MIN_PRIVATE_LOCATIONS_SYNC_INTERVAL } from '../../common/constants';
 
 export const DYNAMIC_SETTINGS_DEFAULTS: DynamicSettingsAttributes = {
   certAgeThreshold: 730,
@@ -16,6 +17,7 @@ export const DYNAMIC_SETTINGS_DEFAULTS: DynamicSettingsAttributes = {
     cc: [],
     bcc: [],
   },
+  privateLocationsSyncInterval: MIN_PRIVATE_LOCATIONS_SYNC_INTERVAL,
 };
 
 export const DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES: DynamicSettingsAttributes =

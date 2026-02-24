@@ -42,7 +42,7 @@
           ">"
         ],
         "path": "x-pack/solutions/security/plugins/security_solution/public/plugin.tsx",
-        "lineNumber": 73,
+        "lineNumber": 75,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -58,7 +58,7 @@
               "any"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/plugin.tsx",
-            "lineNumber": 89,
+            "lineNumber": 91,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -75,7 +75,7 @@
                   "<object>"
                 ],
                 "path": "x-pack/solutions/security/plugins/security_solution/public/plugin.tsx",
-                "lineNumber": 89,
+                "lineNumber": 91,
                 "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -116,7 +116,7 @@
               }
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/plugin.tsx",
-            "lineNumber": 107,
+            "lineNumber": 109,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -143,7 +143,7 @@
                   ">"
                 ],
                 "path": "x-pack/solutions/security/plugins/security_solution/public/plugin.tsx",
-                "lineNumber": 108,
+                "lineNumber": 110,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -160,7 +160,7 @@
                   "SetupPlugins"
                 ],
                 "path": "x-pack/solutions/security/plugins/security_solution/public/plugin.tsx",
-                "lineNumber": 109,
+                "lineNumber": 111,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -302,7 +302,7 @@
               ">"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/plugin.tsx",
-            "lineNumber": 305,
+            "lineNumber": 320,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -375,15 +375,15 @@
             "label": "data",
             "description": [],
             "signature": [
-              "({ id: string; type: \"eql\"; name: string; version: number; enabled: boolean; tags: string[]; actions: { params: {} & { [k: string]: unknown; }; id: string; action_type_id: string; frequency?: { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; } | undefined; group?: string | undefined; uuid?: string | undefined; alerts_filter?: ",
+              "({ id: string; type: \"eql\"; name: string; version: number; enabled: boolean; tags: string[]; actions: { params: {} & { [k: string]: unknown; }; id: string; action_type_id: string; frequency?: { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; } | undefined; uuid?: string | undefined; group?: string | undefined; alerts_filter?: ",
               "objectOutputType",
               "<{}, ",
               "ZodUnknown",
-              ", \"strip\"> | undefined; }[]; setup: string; from: string; to: string; description: string; revision: number; query: string; interval: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; risk_score: number; language: \"eql\"; created_at: string; created_by: string; updated_at: string; updated_by: string; references: string[]; author: string[]; rule_id: string; immutable: boolean; threat: { framework: string; tactic: { id: string; name: string; reference: string; }; technique?: { id: string; name: string; reference: string; subtechnique?: { id: string; name: string; reference: string; }[] | undefined; }[] | undefined; }[]; risk_score_mapping: { value: string; operator: \"equals\"; field: string; risk_score?: number | undefined; }[]; severity_mapping: { value: string; operator: \"equals\"; field: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; }[]; exceptions_list: { id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_devices\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; list_id: string; namespace_type: \"single\" | \"agnostic\"; }[]; false_positives: string[]; max_signals: number; related_integrations: { version: string; package: string; integration?: string | undefined; }[]; required_fields: { type: string; name: string; ecs: boolean; }[]; rule_source: { type: \"external\"; is_customized: boolean; has_base_version: boolean; customized_fields: { field_name: string; }[]; } | { type: \"internal\"; }; meta?: ",
+              ", \"strip\"> | undefined; }[]; setup: string; description: string; query: string; language: \"eql\"; from: string; to: string; interval: string; revision: number; severity: \"medium\" | \"critical\" | \"high\" | \"low\"; risk_score: number; created_at: string; created_by: string; updated_at: string; updated_by: string; references: string[]; author: string[]; rule_id: string; immutable: boolean; threat: { framework: string; tactic: { id: string; name: string; reference: string; }; technique?: { id: string; name: string; reference: string; subtechnique?: { id: string; name: string; reference: string; }[] | undefined; }[] | undefined; }[]; risk_score_mapping: { value: string; field: string; operator: \"equals\"; risk_score?: number | undefined; }[]; severity_mapping: { value: string; field: string; severity: \"medium\" | \"critical\" | \"high\" | \"low\"; operator: \"equals\"; }[]; exceptions_list: { id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_devices\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; list_id: string; namespace_type: \"single\" | \"agnostic\"; }[]; false_positives: string[]; max_signals: number; related_integrations: { version: string; package: string; integration?: string | undefined; }[]; required_fields: { type: string; name: string; ecs: boolean; }[]; rule_source: { type: \"external\"; is_customized: boolean; has_base_version: boolean; customized_fields: { field_name: string; }[]; } | { type: \"internal\"; }; meta?: ",
               "objectOutputType",
               "<{}, ",
               "ZodUnknown",
-              ", \"strip\"> | undefined; namespace?: string | undefined; index?: string[] | undefined; license?: string | undefined; note?: string | undefined; throttle?: string | undefined; outcome?: \"exactMatch\" | \"aliasMatch\" | \"conflict\" | undefined; alias_target_id?: string | undefined; alias_purpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; filters?: unknown[] | undefined; tiebreaker_field?: string | undefined; timestamp_field?: string | undefined; rule_name_override?: string | undefined; timestamp_override?: string | undefined; timestamp_override_fallback_disabled?: boolean | undefined; timeline_id?: string | undefined; timeline_title?: string | undefined; building_block_type?: string | undefined; output_index?: string | undefined; investigation_fields?: { field_names: string[]; } | undefined; response_actions?: ({ params: { query?: string | undefined; timeout?: number | undefined; queries?: { id: string; query: string; snapshot?: boolean | undefined; version?: string | undefined; platform?: string | undefined; ecs_mapping?: ",
+              ", \"strip\"> | undefined; namespace?: string | undefined; index?: string[] | undefined; license?: string | undefined; filters?: unknown[] | undefined; throttle?: string | undefined; outcome?: \"exactMatch\" | \"aliasMatch\" | \"conflict\" | undefined; alias_target_id?: string | undefined; alias_purpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; tiebreaker_field?: string | undefined; timestamp_field?: string | undefined; note?: string | undefined; data_view_id?: string | undefined; rule_name_override?: string | undefined; timestamp_override?: string | undefined; timestamp_override_fallback_disabled?: boolean | undefined; timeline_id?: string | undefined; timeline_title?: string | undefined; building_block_type?: string | undefined; output_index?: string | undefined; investigation_fields?: { field_names: string[]; } | undefined; response_actions?: ({ params: { query?: string | undefined; timeout?: number | undefined; queries?: { id: string; query: string; snapshot?: boolean | undefined; version?: string | undefined; ecs_mapping?: ",
               "objectOutputType",
               "<{}, ",
               "ZodObject",
@@ -403,7 +403,7 @@
               "ZodString",
               ", \"many\">]>>; }, \"strip\", ",
               "ZodTypeAny",
-              ", { value?: string | string[] | undefined; field?: string | undefined; }, { value?: string | string[] | undefined; field?: string | undefined; }>, \"strip\"> | undefined; removed?: boolean | undefined; }[] | undefined; ecs_mapping?: ",
+              ", { value?: string | string[] | undefined; field?: string | undefined; }, { value?: string | string[] | undefined; field?: string | undefined; }>, \"strip\"> | undefined; platform?: string | undefined; removed?: boolean | undefined; }[] | undefined; ecs_mapping?: ",
               "objectOutputType",
               "<{}, ",
               "ZodObject",
@@ -423,15 +423,15 @@
               "ZodString",
               ", \"many\">]>>; }, \"strip\", ",
               "ZodTypeAny",
-              ", { value?: string | string[] | undefined; field?: string | undefined; }, { value?: string | string[] | undefined; field?: string | undefined; }>, \"strip\"> | undefined; saved_query_id?: string | undefined; pack_id?: string | undefined; }; action_type_id: \".osquery\"; } | { params: { command: \"isolate\"; comment?: string | undefined; } | { config: { field: string; overwrite: boolean; }; command: \"kill-process\" | \"suspend-process\"; comment?: string | undefined; }; action_type_id: \".endpoint\"; })[] | undefined; execution_summary?: { last_execution: { message: string; date: string; status: \"running\" | \"succeeded\" | \"failed\" | \"going to run\" | \"partial failure\"; metrics: { total_search_duration_ms?: number | undefined; total_indexing_duration_ms?: number | undefined; gap_range?: { gte: string; lte: string; } | undefined; execution_gap_duration_s?: number | undefined; frozen_indices_queried_count?: number | undefined; total_enrichment_duration_ms?: number | undefined; }; status_order: number; }; } | undefined; data_view_id?: string | undefined; event_category_override?: string | undefined; alert_suppression?: { group_by: string[]; duration?: { value: number; unit: \"m\" | \"s\" | \"h\"; } | undefined; missing_fields_strategy?: \"doNotSuppress\" | \"suppress\" | undefined; } | undefined; } | { id: string; type: \"query\"; name: string; version: number; enabled: boolean; tags: string[]; actions: { params: {} & { [k: string]: unknown; }; id: string; action_type_id: string; frequency?: { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; } | undefined; group?: string | undefined; uuid?: string | undefined; alerts_filter?: ",
+              ", { value?: string | string[] | undefined; field?: string | undefined; }, { value?: string | string[] | undefined; field?: string | undefined; }>, \"strip\"> | undefined; saved_query_id?: string | undefined; pack_id?: string | undefined; }; action_type_id: \".osquery\"; } | { params: { command: \"isolate\"; comment?: string | undefined; } | { config: { field: string; overwrite: boolean; }; command: \"kill-process\" | \"suspend-process\"; comment?: string | undefined; }; action_type_id: \".endpoint\"; })[] | undefined; execution_summary?: { last_execution: { message: string; date: string; metrics: { total_search_duration_ms?: number | undefined; total_indexing_duration_ms?: number | undefined; gap_range?: { lte: string; gte: string; } | undefined; execution_gap_duration_s?: number | undefined; frozen_indices_queried_count?: number | undefined; total_enrichment_duration_ms?: number | undefined; }; status: \"running\" | \"succeeded\" | \"failed\" | \"going to run\" | \"partial failure\"; status_order: number; }; } | undefined; event_category_override?: string | undefined; alert_suppression?: { group_by: string[]; duration?: { value: number; unit: \"m\" | \"s\" | \"h\"; } | undefined; missing_fields_strategy?: \"doNotSuppress\" | \"suppress\" | undefined; } | undefined; } | { id: string; type: \"query\"; name: string; version: number; enabled: boolean; tags: string[]; actions: { params: {} & { [k: string]: unknown; }; id: string; action_type_id: string; frequency?: { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; } | undefined; uuid?: string | undefined; group?: string | undefined; alerts_filter?: ",
               "objectOutputType",
               "<{}, ",
               "ZodUnknown",
-              ", \"strip\"> | undefined; }[]; setup: string; from: string; to: string; description: string; revision: number; query: string; interval: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; risk_score: number; language: \"kuery\" | \"lucene\"; created_at: string; created_by: string; updated_at: string; updated_by: string; references: string[]; author: string[]; rule_id: string; immutable: boolean; threat: { framework: string; tactic: { id: string; name: string; reference: string; }; technique?: { id: string; name: string; reference: string; subtechnique?: { id: string; name: string; reference: string; }[] | undefined; }[] | undefined; }[]; risk_score_mapping: { value: string; operator: \"equals\"; field: string; risk_score?: number | undefined; }[]; severity_mapping: { value: string; operator: \"equals\"; field: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; }[]; exceptions_list: { id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_devices\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; list_id: string; namespace_type: \"single\" | \"agnostic\"; }[]; false_positives: string[]; max_signals: number; related_integrations: { version: string; package: string; integration?: string | undefined; }[]; required_fields: { type: string; name: string; ecs: boolean; }[]; rule_source: { type: \"external\"; is_customized: boolean; has_base_version: boolean; customized_fields: { field_name: string; }[]; } | { type: \"internal\"; }; meta?: ",
+              ", \"strip\"> | undefined; }[]; setup: string; description: string; query: string; language: \"kuery\" | \"lucene\"; from: string; to: string; interval: string; revision: number; severity: \"medium\" | \"critical\" | \"high\" | \"low\"; risk_score: number; created_at: string; created_by: string; updated_at: string; updated_by: string; references: string[]; author: string[]; rule_id: string; immutable: boolean; threat: { framework: string; tactic: { id: string; name: string; reference: string; }; technique?: { id: string; name: string; reference: string; subtechnique?: { id: string; name: string; reference: string; }[] | undefined; }[] | undefined; }[]; risk_score_mapping: { value: string; field: string; operator: \"equals\"; risk_score?: number | undefined; }[]; severity_mapping: { value: string; field: string; severity: \"medium\" | \"critical\" | \"high\" | \"low\"; operator: \"equals\"; }[]; exceptions_list: { id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_devices\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; list_id: string; namespace_type: \"single\" | \"agnostic\"; }[]; false_positives: string[]; max_signals: number; related_integrations: { version: string; package: string; integration?: string | undefined; }[]; required_fields: { type: string; name: string; ecs: boolean; }[]; rule_source: { type: \"external\"; is_customized: boolean; has_base_version: boolean; customized_fields: { field_name: string; }[]; } | { type: \"internal\"; }; meta?: ",
               "objectOutputType",
               "<{}, ",
               "ZodUnknown",
-              ", \"strip\"> | undefined; namespace?: string | undefined; index?: string[] | undefined; license?: string | undefined; note?: string | undefined; throttle?: string | undefined; outcome?: \"exactMatch\" | \"aliasMatch\" | \"conflict\" | undefined; alias_target_id?: string | undefined; alias_purpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; filters?: unknown[] | undefined; rule_name_override?: string | undefined; timestamp_override?: string | undefined; timestamp_override_fallback_disabled?: boolean | undefined; timeline_id?: string | undefined; timeline_title?: string | undefined; building_block_type?: string | undefined; output_index?: string | undefined; investigation_fields?: { field_names: string[]; } | undefined; response_actions?: ({ params: { query?: string | undefined; timeout?: number | undefined; queries?: { id: string; query: string; snapshot?: boolean | undefined; version?: string | undefined; platform?: string | undefined; ecs_mapping?: ",
+              ", \"strip\"> | undefined; namespace?: string | undefined; index?: string[] | undefined; license?: string | undefined; filters?: unknown[] | undefined; throttle?: string | undefined; outcome?: \"exactMatch\" | \"aliasMatch\" | \"conflict\" | undefined; alias_target_id?: string | undefined; alias_purpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; note?: string | undefined; data_view_id?: string | undefined; rule_name_override?: string | undefined; timestamp_override?: string | undefined; timestamp_override_fallback_disabled?: boolean | undefined; timeline_id?: string | undefined; timeline_title?: string | undefined; building_block_type?: string | undefined; output_index?: string | undefined; investigation_fields?: { field_names: string[]; } | undefined; response_actions?: ({ params: { query?: string | undefined; timeout?: number | undefined; queries?: { id: string; query: string; snapshot?: boolean | undefined; version?: string | undefined; ecs_mapping?: ",
               "objectOutputType",
               "<{}, ",
               "ZodObject",
@@ -451,7 +451,7 @@
               "ZodString",
               ", \"many\">]>>; }, \"strip\", ",
               "ZodTypeAny",
-              ", { value?: string | string[] | undefined; field?: string | undefined; }, { value?: string | string[] | undefined; field?: string | undefined; }>, \"strip\"> | undefined; removed?: boolean | undefined; }[] | undefined; ecs_mapping?: ",
+              ", { value?: string | string[] | undefined; field?: string | undefined; }, { value?: string | string[] | undefined; field?: string | undefined; }>, \"strip\"> | undefined; platform?: string | undefined; removed?: boolean | undefined; }[] | undefined; ecs_mapping?: ",
               "objectOutputType",
               "<{}, ",
               "ZodObject",
@@ -471,15 +471,15 @@
               "ZodString",
               ", \"many\">]>>; }, \"strip\", ",
               "ZodTypeAny",
-              ", { value?: string | string[] | undefined; field?: string | undefined; }, { value?: string | string[] | undefined; field?: string | undefined; }>, \"strip\"> | undefined; saved_query_id?: string | undefined; pack_id?: string | undefined; }; action_type_id: \".osquery\"; } | { params: { command: \"isolate\"; comment?: string | undefined; } | { config: { field: string; overwrite: boolean; }; command: \"kill-process\" | \"suspend-process\"; comment?: string | undefined; }; action_type_id: \".endpoint\"; })[] | undefined; execution_summary?: { last_execution: { message: string; date: string; status: \"running\" | \"succeeded\" | \"failed\" | \"going to run\" | \"partial failure\"; metrics: { total_search_duration_ms?: number | undefined; total_indexing_duration_ms?: number | undefined; gap_range?: { gte: string; lte: string; } | undefined; execution_gap_duration_s?: number | undefined; frozen_indices_queried_count?: number | undefined; total_enrichment_duration_ms?: number | undefined; }; status_order: number; }; } | undefined; data_view_id?: string | undefined; alert_suppression?: { group_by: string[]; duration?: { value: number; unit: \"m\" | \"s\" | \"h\"; } | undefined; missing_fields_strategy?: \"doNotSuppress\" | \"suppress\" | undefined; } | undefined; saved_id?: string | undefined; } | { id: string; type: \"saved_query\"; name: string; version: number; enabled: boolean; tags: string[]; actions: { params: {} & { [k: string]: unknown; }; id: string; action_type_id: string; frequency?: { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; } | undefined; group?: string | undefined; uuid?: string | undefined; alerts_filter?: ",
+              ", { value?: string | string[] | undefined; field?: string | undefined; }, { value?: string | string[] | undefined; field?: string | undefined; }>, \"strip\"> | undefined; saved_query_id?: string | undefined; pack_id?: string | undefined; }; action_type_id: \".osquery\"; } | { params: { command: \"isolate\"; comment?: string | undefined; } | { config: { field: string; overwrite: boolean; }; command: \"kill-process\" | \"suspend-process\"; comment?: string | undefined; }; action_type_id: \".endpoint\"; })[] | undefined; execution_summary?: { last_execution: { message: string; date: string; metrics: { total_search_duration_ms?: number | undefined; total_indexing_duration_ms?: number | undefined; gap_range?: { lte: string; gte: string; } | undefined; execution_gap_duration_s?: number | undefined; frozen_indices_queried_count?: number | undefined; total_enrichment_duration_ms?: number | undefined; }; status: \"running\" | \"succeeded\" | \"failed\" | \"going to run\" | \"partial failure\"; status_order: number; }; } | undefined; alert_suppression?: { group_by: string[]; duration?: { value: number; unit: \"m\" | \"s\" | \"h\"; } | undefined; missing_fields_strategy?: \"doNotSuppress\" | \"suppress\" | undefined; } | undefined; saved_id?: string | undefined; } | { id: string; type: \"saved_query\"; name: string; version: number; enabled: boolean; tags: string[]; actions: { params: {} & { [k: string]: unknown; }; id: string; action_type_id: string; frequency?: { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; } | undefined; uuid?: string | undefined; group?: string | undefined; alerts_filter?: ",
               "objectOutputType",
               "<{}, ",
               "ZodUnknown",
-              ", \"strip\"> | undefined; }[]; setup: string; from: string; to: string; description: string; revision: number; interval: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; risk_score: number; language: \"kuery\" | \"lucene\"; created_at: string; created_by: string; updated_at: string; updated_by: string; references: string[]; author: string[]; rule_id: string; immutable: boolean; threat: { framework: string; tactic: { id: string; name: string; reference: string; }; technique?: { id: string; name: string; reference: string; subtechnique?: { id: string; name: string; reference: string; }[] | undefined; }[] | undefined; }[]; risk_score_mapping: { value: string; operator: \"equals\"; field: string; risk_score?: number | undefined; }[]; severity_mapping: { value: string; operator: \"equals\"; field: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; }[]; exceptions_list: { id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_devices\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; list_id: string; namespace_type: \"single\" | \"agnostic\"; }[]; false_positives: string[]; max_signals: number; related_integrations: { version: string; package: string; integration?: string | undefined; }[]; required_fields: { type: string; name: string; ecs: boolean; }[]; rule_source: { type: \"external\"; is_customized: boolean; has_base_version: boolean; customized_fields: { field_name: string; }[]; } | { type: \"internal\"; }; saved_id: string; meta?: ",
+              ", \"strip\"> | undefined; }[]; setup: string; description: string; language: \"kuery\" | \"lucene\"; from: string; to: string; interval: string; revision: number; severity: \"medium\" | \"critical\" | \"high\" | \"low\"; risk_score: number; created_at: string; created_by: string; updated_at: string; updated_by: string; references: string[]; author: string[]; rule_id: string; immutable: boolean; threat: { framework: string; tactic: { id: string; name: string; reference: string; }; technique?: { id: string; name: string; reference: string; subtechnique?: { id: string; name: string; reference: string; }[] | undefined; }[] | undefined; }[]; risk_score_mapping: { value: string; field: string; operator: \"equals\"; risk_score?: number | undefined; }[]; severity_mapping: { value: string; field: string; severity: \"medium\" | \"critical\" | \"high\" | \"low\"; operator: \"equals\"; }[]; exceptions_list: { id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_devices\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; list_id: string; namespace_type: \"single\" | \"agnostic\"; }[]; false_positives: string[]; max_signals: number; related_integrations: { version: string; package: string; integration?: string | undefined; }[]; required_fields: { type: string; name: string; ecs: boolean; }[]; rule_source: { type: \"external\"; is_customized: boolean; has_base_version: boolean; customized_fields: { field_name: string; }[]; } | { type: \"internal\"; }; saved_id: string; meta?: ",
               "objectOutputType",
               "<{}, ",
               "ZodUnknown",
-              ", \"strip\"> | undefined; namespace?: string | undefined; index?: string[] | undefined; license?: string | undefined; note?: string | undefined; throttle?: string | undefined; query?: string | undefined; outcome?: \"exactMatch\" | \"aliasMatch\" | \"conflict\" | undefined; alias_target_id?: string | undefined; alias_purpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; filters?: unknown[] | undefined; rule_name_override?: string | undefined; timestamp_override?: string | undefined; timestamp_override_fallback_disabled?: boolean | undefined; timeline_id?: string | undefined; timeline_title?: string | undefined; building_block_type?: string | undefined; output_index?: string | undefined; investigation_fields?: { field_names: string[]; } | undefined; response_actions?: ({ params: { query?: string | undefined; timeout?: number | undefined; queries?: { id: string; query: string; snapshot?: boolean | undefined; version?: string | undefined; platform?: string | undefined; ecs_mapping?: ",
+              ", \"strip\"> | undefined; namespace?: string | undefined; index?: string[] | undefined; license?: string | undefined; query?: string | undefined; filters?: unknown[] | undefined; throttle?: string | undefined; outcome?: \"exactMatch\" | \"aliasMatch\" | \"conflict\" | undefined; alias_target_id?: string | undefined; alias_purpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; note?: string | undefined; data_view_id?: string | undefined; rule_name_override?: string | undefined; timestamp_override?: string | undefined; timestamp_override_fallback_disabled?: boolean | undefined; timeline_id?: string | undefined; timeline_title?: string | undefined; building_block_type?: string | undefined; output_index?: string | undefined; investigation_fields?: { field_names: string[]; } | undefined; response_actions?: ({ params: { query?: string | undefined; timeout?: number | undefined; queries?: { id: string; query: string; snapshot?: boolean | undefined; version?: string | undefined; ecs_mapping?: ",
               "objectOutputType",
               "<{}, ",
               "ZodObject",
@@ -499,7 +499,7 @@
               "ZodString",
               ", \"many\">]>>; }, \"strip\", ",
               "ZodTypeAny",
-              ", { value?: string | string[] | undefined; field?: string | undefined; }, { value?: string | string[] | undefined; field?: string | undefined; }>, \"strip\"> | undefined; removed?: boolean | undefined; }[] | undefined; ecs_mapping?: ",
+              ", { value?: string | string[] | undefined; field?: string | undefined; }, { value?: string | string[] | undefined; field?: string | undefined; }>, \"strip\"> | undefined; platform?: string | undefined; removed?: boolean | undefined; }[] | undefined; ecs_mapping?: ",
               "objectOutputType",
               "<{}, ",
               "ZodObject",
@@ -519,15 +519,15 @@
               "ZodString",
               ", \"many\">]>>; }, \"strip\", ",
               "ZodTypeAny",
-              ", { value?: string | string[] | undefined; field?: string | undefined; }, { value?: string | string[] | undefined; field?: string | undefined; }>, \"strip\"> | undefined; saved_query_id?: string | undefined; pack_id?: string | undefined; }; action_type_id: \".osquery\"; } | { params: { command: \"isolate\"; comment?: string | undefined; } | { config: { field: string; overwrite: boolean; }; command: \"kill-process\" | \"suspend-process\"; comment?: string | undefined; }; action_type_id: \".endpoint\"; })[] | undefined; execution_summary?: { last_execution: { message: string; date: string; status: \"running\" | \"succeeded\" | \"failed\" | \"going to run\" | \"partial failure\"; metrics: { total_search_duration_ms?: number | undefined; total_indexing_duration_ms?: number | undefined; gap_range?: { gte: string; lte: string; } | undefined; execution_gap_duration_s?: number | undefined; frozen_indices_queried_count?: number | undefined; total_enrichment_duration_ms?: number | undefined; }; status_order: number; }; } | undefined; data_view_id?: string | undefined; alert_suppression?: { group_by: string[]; duration?: { value: number; unit: \"m\" | \"s\" | \"h\"; } | undefined; missing_fields_strategy?: \"doNotSuppress\" | \"suppress\" | undefined; } | undefined; } | { id: string; type: \"threshold\"; name: string; version: number; enabled: boolean; tags: string[]; actions: { params: {} & { [k: string]: unknown; }; id: string; action_type_id: string; frequency?: { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; } | undefined; group?: string | undefined; uuid?: string | undefined; alerts_filter?: ",
+              ", { value?: string | string[] | undefined; field?: string | undefined; }, { value?: string | string[] | undefined; field?: string | undefined; }>, \"strip\"> | undefined; saved_query_id?: string | undefined; pack_id?: string | undefined; }; action_type_id: \".osquery\"; } | { params: { command: \"isolate\"; comment?: string | undefined; } | { config: { field: string; overwrite: boolean; }; command: \"kill-process\" | \"suspend-process\"; comment?: string | undefined; }; action_type_id: \".endpoint\"; })[] | undefined; execution_summary?: { last_execution: { message: string; date: string; metrics: { total_search_duration_ms?: number | undefined; total_indexing_duration_ms?: number | undefined; gap_range?: { lte: string; gte: string; } | undefined; execution_gap_duration_s?: number | undefined; frozen_indices_queried_count?: number | undefined; total_enrichment_duration_ms?: number | undefined; }; status: \"running\" | \"succeeded\" | \"failed\" | \"going to run\" | \"partial failure\"; status_order: number; }; } | undefined; alert_suppression?: { group_by: string[]; duration?: { value: number; unit: \"m\" | \"s\" | \"h\"; } | undefined; missing_fields_strategy?: \"doNotSuppress\" | \"suppress\" | undefined; } | undefined; } | { id: string; type: \"threshold\"; name: string; version: number; enabled: boolean; tags: string[]; actions: { params: {} & { [k: string]: unknown; }; id: string; action_type_id: string; frequency?: { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; } | undefined; uuid?: string | undefined; group?: string | undefined; alerts_filter?: ",
               "objectOutputType",
               "<{}, ",
               "ZodUnknown",
-              ", \"strip\"> | undefined; }[]; setup: string; from: string; to: string; description: string; revision: number; query: string; interval: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; risk_score: number; language: \"kuery\" | \"lucene\"; created_at: string; created_by: string; updated_at: string; updated_by: string; references: string[]; author: string[]; rule_id: string; immutable: boolean; threshold: { value: number; field: string | string[]; cardinality?: { value: number; field: string; }[] | undefined; }; threat: { framework: string; tactic: { id: string; name: string; reference: string; }; technique?: { id: string; name: string; reference: string; subtechnique?: { id: string; name: string; reference: string; }[] | undefined; }[] | undefined; }[]; risk_score_mapping: { value: string; operator: \"equals\"; field: string; risk_score?: number | undefined; }[]; severity_mapping: { value: string; operator: \"equals\"; field: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; }[]; exceptions_list: { id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_devices\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; list_id: string; namespace_type: \"single\" | \"agnostic\"; }[]; false_positives: string[]; max_signals: number; related_integrations: { version: string; package: string; integration?: string | undefined; }[]; required_fields: { type: string; name: string; ecs: boolean; }[]; rule_source: { type: \"external\"; is_customized: boolean; has_base_version: boolean; customized_fields: { field_name: string; }[]; } | { type: \"internal\"; }; meta?: ",
+              ", \"strip\"> | undefined; }[]; setup: string; description: string; query: string; language: \"kuery\" | \"lucene\"; from: string; to: string; interval: string; revision: number; severity: \"medium\" | \"critical\" | \"high\" | \"low\"; risk_score: number; threshold: { value: number; field: string | string[]; cardinality?: { value: number; field: string; }[] | undefined; }; created_at: string; created_by: string; updated_at: string; updated_by: string; references: string[]; author: string[]; rule_id: string; immutable: boolean; threat: { framework: string; tactic: { id: string; name: string; reference: string; }; technique?: { id: string; name: string; reference: string; subtechnique?: { id: string; name: string; reference: string; }[] | undefined; }[] | undefined; }[]; risk_score_mapping: { value: string; field: string; operator: \"equals\"; risk_score?: number | undefined; }[]; severity_mapping: { value: string; field: string; severity: \"medium\" | \"critical\" | \"high\" | \"low\"; operator: \"equals\"; }[]; exceptions_list: { id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_devices\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; list_id: string; namespace_type: \"single\" | \"agnostic\"; }[]; false_positives: string[]; max_signals: number; related_integrations: { version: string; package: string; integration?: string | undefined; }[]; required_fields: { type: string; name: string; ecs: boolean; }[]; rule_source: { type: \"external\"; is_customized: boolean; has_base_version: boolean; customized_fields: { field_name: string; }[]; } | { type: \"internal\"; }; meta?: ",
               "objectOutputType",
               "<{}, ",
               "ZodUnknown",
-              ", \"strip\"> | undefined; namespace?: string | undefined; index?: string[] | undefined; license?: string | undefined; note?: string | undefined; throttle?: string | undefined; outcome?: \"exactMatch\" | \"aliasMatch\" | \"conflict\" | undefined; alias_target_id?: string | undefined; alias_purpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; filters?: unknown[] | undefined; rule_name_override?: string | undefined; timestamp_override?: string | undefined; timestamp_override_fallback_disabled?: boolean | undefined; timeline_id?: string | undefined; timeline_title?: string | undefined; building_block_type?: string | undefined; output_index?: string | undefined; investigation_fields?: { field_names: string[]; } | undefined; response_actions?: ({ params: { query?: string | undefined; timeout?: number | undefined; queries?: { id: string; query: string; snapshot?: boolean | undefined; version?: string | undefined; platform?: string | undefined; ecs_mapping?: ",
+              ", \"strip\"> | undefined; namespace?: string | undefined; index?: string[] | undefined; license?: string | undefined; filters?: unknown[] | undefined; throttle?: string | undefined; outcome?: \"exactMatch\" | \"aliasMatch\" | \"conflict\" | undefined; alias_target_id?: string | undefined; alias_purpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; note?: string | undefined; data_view_id?: string | undefined; rule_name_override?: string | undefined; timestamp_override?: string | undefined; timestamp_override_fallback_disabled?: boolean | undefined; timeline_id?: string | undefined; timeline_title?: string | undefined; building_block_type?: string | undefined; output_index?: string | undefined; investigation_fields?: { field_names: string[]; } | undefined; response_actions?: ({ params: { query?: string | undefined; timeout?: number | undefined; queries?: { id: string; query: string; snapshot?: boolean | undefined; version?: string | undefined; ecs_mapping?: ",
               "objectOutputType",
               "<{}, ",
               "ZodObject",
@@ -547,7 +547,7 @@
               "ZodString",
               ", \"many\">]>>; }, \"strip\", ",
               "ZodTypeAny",
-              ", { value?: string | string[] | undefined; field?: string | undefined; }, { value?: string | string[] | undefined; field?: string | undefined; }>, \"strip\"> | undefined; removed?: boolean | undefined; }[] | undefined; ecs_mapping?: ",
+              ", { value?: string | string[] | undefined; field?: string | undefined; }, { value?: string | string[] | undefined; field?: string | undefined; }>, \"strip\"> | undefined; platform?: string | undefined; removed?: boolean | undefined; }[] | undefined; ecs_mapping?: ",
               "objectOutputType",
               "<{}, ",
               "ZodObject",
@@ -567,15 +567,15 @@
               "ZodString",
               ", \"many\">]>>; }, \"strip\", ",
               "ZodTypeAny",
-              ", { value?: string | string[] | undefined; field?: string | undefined; }, { value?: string | string[] | undefined; field?: string | undefined; }>, \"strip\"> | undefined; saved_query_id?: string | undefined; pack_id?: string | undefined; }; action_type_id: \".osquery\"; } | { params: { command: \"isolate\"; comment?: string | undefined; } | { config: { field: string; overwrite: boolean; }; command: \"kill-process\" | \"suspend-process\"; comment?: string | undefined; }; action_type_id: \".endpoint\"; })[] | undefined; execution_summary?: { last_execution: { message: string; date: string; status: \"running\" | \"succeeded\" | \"failed\" | \"going to run\" | \"partial failure\"; metrics: { total_search_duration_ms?: number | undefined; total_indexing_duration_ms?: number | undefined; gap_range?: { gte: string; lte: string; } | undefined; execution_gap_duration_s?: number | undefined; frozen_indices_queried_count?: number | undefined; total_enrichment_duration_ms?: number | undefined; }; status_order: number; }; } | undefined; data_view_id?: string | undefined; alert_suppression?: { duration: { value: number; unit: \"m\" | \"s\" | \"h\"; }; } | undefined; saved_id?: string | undefined; } | { id: string; type: \"threat_match\"; name: string; version: number; enabled: boolean; tags: string[]; actions: { params: {} & { [k: string]: unknown; }; id: string; action_type_id: string; frequency?: { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; } | undefined; group?: string | undefined; uuid?: string | undefined; alerts_filter?: ",
+              ", { value?: string | string[] | undefined; field?: string | undefined; }, { value?: string | string[] | undefined; field?: string | undefined; }>, \"strip\"> | undefined; saved_query_id?: string | undefined; pack_id?: string | undefined; }; action_type_id: \".osquery\"; } | { params: { command: \"isolate\"; comment?: string | undefined; } | { config: { field: string; overwrite: boolean; }; command: \"kill-process\" | \"suspend-process\"; comment?: string | undefined; }; action_type_id: \".endpoint\"; })[] | undefined; execution_summary?: { last_execution: { message: string; date: string; metrics: { total_search_duration_ms?: number | undefined; total_indexing_duration_ms?: number | undefined; gap_range?: { lte: string; gte: string; } | undefined; execution_gap_duration_s?: number | undefined; frozen_indices_queried_count?: number | undefined; total_enrichment_duration_ms?: number | undefined; }; status: \"running\" | \"succeeded\" | \"failed\" | \"going to run\" | \"partial failure\"; status_order: number; }; } | undefined; alert_suppression?: { duration: { value: number; unit: \"m\" | \"s\" | \"h\"; }; } | undefined; saved_id?: string | undefined; } | { id: string; type: \"threat_match\"; name: string; version: number; enabled: boolean; tags: string[]; actions: { params: {} & { [k: string]: unknown; }; id: string; action_type_id: string; frequency?: { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; } | undefined; uuid?: string | undefined; group?: string | undefined; alerts_filter?: ",
               "objectOutputType",
               "<{}, ",
               "ZodUnknown",
-              ", \"strip\"> | undefined; }[]; setup: string; from: string; to: string; description: string; revision: number; query: string; interval: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; risk_score: number; language: \"kuery\" | \"lucene\"; created_at: string; created_by: string; updated_at: string; updated_by: string; references: string[]; author: string[]; rule_id: string; immutable: boolean; threat: { framework: string; tactic: { id: string; name: string; reference: string; }; technique?: { id: string; name: string; reference: string; subtechnique?: { id: string; name: string; reference: string; }[] | undefined; }[] | undefined; }[]; risk_score_mapping: { value: string; operator: \"equals\"; field: string; risk_score?: number | undefined; }[]; severity_mapping: { value: string; operator: \"equals\"; field: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; }[]; exceptions_list: { id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_devices\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; list_id: string; namespace_type: \"single\" | \"agnostic\"; }[]; false_positives: string[]; max_signals: number; related_integrations: { version: string; package: string; integration?: string | undefined; }[]; required_fields: { type: string; name: string; ecs: boolean; }[]; rule_source: { type: \"external\"; is_customized: boolean; has_base_version: boolean; customized_fields: { field_name: string; }[]; } | { type: \"internal\"; }; threat_query: string; threat_mapping: { entries: { value: string; type: \"mapping\"; field: string; negate?: boolean | undefined; }[]; }[]; threat_index: string[]; meta?: ",
+              ", \"strip\"> | undefined; }[]; setup: string; description: string; query: string; language: \"kuery\" | \"lucene\"; from: string; to: string; interval: string; revision: number; severity: \"medium\" | \"critical\" | \"high\" | \"low\"; risk_score: number; created_at: string; created_by: string; updated_at: string; updated_by: string; references: string[]; author: string[]; rule_id: string; immutable: boolean; threat: { framework: string; tactic: { id: string; name: string; reference: string; }; technique?: { id: string; name: string; reference: string; subtechnique?: { id: string; name: string; reference: string; }[] | undefined; }[] | undefined; }[]; risk_score_mapping: { value: string; field: string; operator: \"equals\"; risk_score?: number | undefined; }[]; severity_mapping: { value: string; field: string; severity: \"medium\" | \"critical\" | \"high\" | \"low\"; operator: \"equals\"; }[]; exceptions_list: { id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_devices\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; list_id: string; namespace_type: \"single\" | \"agnostic\"; }[]; false_positives: string[]; max_signals: number; related_integrations: { version: string; package: string; integration?: string | undefined; }[]; required_fields: { type: string; name: string; ecs: boolean; }[]; rule_source: { type: \"external\"; is_customized: boolean; has_base_version: boolean; customized_fields: { field_name: string; }[]; } | { type: \"internal\"; }; threat_query: string; threat_mapping: { entries: { value: string; type: \"mapping\"; field: string; negate?: boolean | undefined; }[]; }[]; threat_index: string[]; meta?: ",
               "objectOutputType",
               "<{}, ",
               "ZodUnknown",
-              ", \"strip\"> | undefined; namespace?: string | undefined; index?: string[] | undefined; license?: string | undefined; note?: string | undefined; throttle?: string | undefined; outcome?: \"exactMatch\" | \"aliasMatch\" | \"conflict\" | undefined; alias_target_id?: string | undefined; alias_purpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; filters?: unknown[] | undefined; rule_name_override?: string | undefined; timestamp_override?: string | undefined; timestamp_override_fallback_disabled?: boolean | undefined; timeline_id?: string | undefined; timeline_title?: string | undefined; building_block_type?: string | undefined; output_index?: string | undefined; investigation_fields?: { field_names: string[]; } | undefined; response_actions?: ({ params: { query?: string | undefined; timeout?: number | undefined; queries?: { id: string; query: string; snapshot?: boolean | undefined; version?: string | undefined; platform?: string | undefined; ecs_mapping?: ",
+              ", \"strip\"> | undefined; namespace?: string | undefined; index?: string[] | undefined; license?: string | undefined; filters?: unknown[] | undefined; throttle?: string | undefined; outcome?: \"exactMatch\" | \"aliasMatch\" | \"conflict\" | undefined; alias_target_id?: string | undefined; alias_purpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; note?: string | undefined; data_view_id?: string | undefined; rule_name_override?: string | undefined; timestamp_override?: string | undefined; timestamp_override_fallback_disabled?: boolean | undefined; timeline_id?: string | undefined; timeline_title?: string | undefined; building_block_type?: string | undefined; output_index?: string | undefined; investigation_fields?: { field_names: string[]; } | undefined; response_actions?: ({ params: { query?: string | undefined; timeout?: number | undefined; queries?: { id: string; query: string; snapshot?: boolean | undefined; version?: string | undefined; ecs_mapping?: ",
               "objectOutputType",
               "<{}, ",
               "ZodObject",
@@ -595,7 +595,7 @@
               "ZodString",
               ", \"many\">]>>; }, \"strip\", ",
               "ZodTypeAny",
-              ", { value?: string | string[] | undefined; field?: string | undefined; }, { value?: string | string[] | undefined; field?: string | undefined; }>, \"strip\"> | undefined; removed?: boolean | undefined; }[] | undefined; ecs_mapping?: ",
+              ", { value?: string | string[] | undefined; field?: string | undefined; }, { value?: string | string[] | undefined; field?: string | undefined; }>, \"strip\"> | undefined; platform?: string | undefined; removed?: boolean | undefined; }[] | undefined; ecs_mapping?: ",
               "objectOutputType",
               "<{}, ",
               "ZodObject",
@@ -615,15 +615,15 @@
               "ZodString",
               ", \"many\">]>>; }, \"strip\", ",
               "ZodTypeAny",
-              ", { value?: string | string[] | undefined; field?: string | undefined; }, { value?: string | string[] | undefined; field?: string | undefined; }>, \"strip\"> | undefined; saved_query_id?: string | undefined; pack_id?: string | undefined; }; action_type_id: \".osquery\"; } | { params: { command: \"isolate\"; comment?: string | undefined; } | { config: { field: string; overwrite: boolean; }; command: \"kill-process\" | \"suspend-process\"; comment?: string | undefined; }; action_type_id: \".endpoint\"; })[] | undefined; execution_summary?: { last_execution: { message: string; date: string; status: \"running\" | \"succeeded\" | \"failed\" | \"going to run\" | \"partial failure\"; metrics: { total_search_duration_ms?: number | undefined; total_indexing_duration_ms?: number | undefined; gap_range?: { gte: string; lte: string; } | undefined; execution_gap_duration_s?: number | undefined; frozen_indices_queried_count?: number | undefined; total_enrichment_duration_ms?: number | undefined; }; status_order: number; }; } | undefined; data_view_id?: string | undefined; alert_suppression?: { group_by: string[]; duration?: { value: number; unit: \"m\" | \"s\" | \"h\"; } | undefined; missing_fields_strategy?: \"doNotSuppress\" | \"suppress\" | undefined; } | undefined; saved_id?: string | undefined; threat_filters?: unknown[] | undefined; threat_indicator_path?: string | undefined; threat_language?: \"kuery\" | \"lucene\" | undefined; concurrent_searches?: number | undefined; items_per_search?: number | undefined; } | { id: string; type: \"machine_learning\"; name: string; version: number; enabled: boolean; tags: string[]; actions: { params: {} & { [k: string]: unknown; }; id: string; action_type_id: string; frequency?: { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; } | undefined; group?: string | undefined; uuid?: string | undefined; alerts_filter?: ",
+              ", { value?: string | string[] | undefined; field?: string | undefined; }, { value?: string | string[] | undefined; field?: string | undefined; }>, \"strip\"> | undefined; saved_query_id?: string | undefined; pack_id?: string | undefined; }; action_type_id: \".osquery\"; } | { params: { command: \"isolate\"; comment?: string | undefined; } | { config: { field: string; overwrite: boolean; }; command: \"kill-process\" | \"suspend-process\"; comment?: string | undefined; }; action_type_id: \".endpoint\"; })[] | undefined; execution_summary?: { last_execution: { message: string; date: string; metrics: { total_search_duration_ms?: number | undefined; total_indexing_duration_ms?: number | undefined; gap_range?: { lte: string; gte: string; } | undefined; execution_gap_duration_s?: number | undefined; frozen_indices_queried_count?: number | undefined; total_enrichment_duration_ms?: number | undefined; }; status: \"running\" | \"succeeded\" | \"failed\" | \"going to run\" | \"partial failure\"; status_order: number; }; } | undefined; alert_suppression?: { group_by: string[]; duration?: { value: number; unit: \"m\" | \"s\" | \"h\"; } | undefined; missing_fields_strategy?: \"doNotSuppress\" | \"suppress\" | undefined; } | undefined; saved_id?: string | undefined; threat_filters?: unknown[] | undefined; threat_indicator_path?: string | undefined; threat_language?: \"kuery\" | \"lucene\" | undefined; concurrent_searches?: number | undefined; items_per_search?: number | undefined; } | { id: string; type: \"machine_learning\"; name: string; version: number; enabled: boolean; tags: string[]; actions: { params: {} & { [k: string]: unknown; }; id: string; action_type_id: string; frequency?: { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; } | undefined; uuid?: string | undefined; group?: string | undefined; alerts_filter?: ",
               "objectOutputType",
               "<{}, ",
               "ZodUnknown",
-              ", \"strip\"> | undefined; }[]; setup: string; from: string; to: string; description: string; revision: number; interval: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; risk_score: number; created_at: string; created_by: string; updated_at: string; updated_by: string; references: string[]; author: string[]; rule_id: string; immutable: boolean; threat: { framework: string; tactic: { id: string; name: string; reference: string; }; technique?: { id: string; name: string; reference: string; subtechnique?: { id: string; name: string; reference: string; }[] | undefined; }[] | undefined; }[]; risk_score_mapping: { value: string; operator: \"equals\"; field: string; risk_score?: number | undefined; }[]; severity_mapping: { value: string; operator: \"equals\"; field: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; }[]; exceptions_list: { id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_devices\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; list_id: string; namespace_type: \"single\" | \"agnostic\"; }[]; false_positives: string[]; max_signals: number; related_integrations: { version: string; package: string; integration?: string | undefined; }[]; required_fields: { type: string; name: string; ecs: boolean; }[]; rule_source: { type: \"external\"; is_customized: boolean; has_base_version: boolean; customized_fields: { field_name: string; }[]; } | { type: \"internal\"; }; anomaly_threshold: number; machine_learning_job_id: string | string[]; meta?: ",
+              ", \"strip\"> | undefined; }[]; setup: string; description: string; from: string; to: string; interval: string; revision: number; severity: \"medium\" | \"critical\" | \"high\" | \"low\"; risk_score: number; created_at: string; created_by: string; updated_at: string; updated_by: string; references: string[]; author: string[]; rule_id: string; immutable: boolean; threat: { framework: string; tactic: { id: string; name: string; reference: string; }; technique?: { id: string; name: string; reference: string; subtechnique?: { id: string; name: string; reference: string; }[] | undefined; }[] | undefined; }[]; risk_score_mapping: { value: string; field: string; operator: \"equals\"; risk_score?: number | undefined; }[]; severity_mapping: { value: string; field: string; severity: \"medium\" | \"critical\" | \"high\" | \"low\"; operator: \"equals\"; }[]; exceptions_list: { id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_devices\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; list_id: string; namespace_type: \"single\" | \"agnostic\"; }[]; false_positives: string[]; max_signals: number; related_integrations: { version: string; package: string; integration?: string | undefined; }[]; required_fields: { type: string; name: string; ecs: boolean; }[]; rule_source: { type: \"external\"; is_customized: boolean; has_base_version: boolean; customized_fields: { field_name: string; }[]; } | { type: \"internal\"; }; anomaly_threshold: number; machine_learning_job_id: string | string[]; meta?: ",
               "objectOutputType",
               "<{}, ",
               "ZodUnknown",
-              ", \"strip\"> | undefined; namespace?: string | undefined; license?: string | undefined; note?: string | undefined; throttle?: string | undefined; outcome?: \"exactMatch\" | \"aliasMatch\" | \"conflict\" | undefined; alias_target_id?: string | undefined; alias_purpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; rule_name_override?: string | undefined; timestamp_override?: string | undefined; timestamp_override_fallback_disabled?: boolean | undefined; timeline_id?: string | undefined; timeline_title?: string | undefined; building_block_type?: string | undefined; output_index?: string | undefined; investigation_fields?: { field_names: string[]; } | undefined; response_actions?: ({ params: { query?: string | undefined; timeout?: number | undefined; queries?: { id: string; query: string; snapshot?: boolean | undefined; version?: string | undefined; platform?: string | undefined; ecs_mapping?: ",
+              ", \"strip\"> | undefined; namespace?: string | undefined; license?: string | undefined; throttle?: string | undefined; outcome?: \"exactMatch\" | \"aliasMatch\" | \"conflict\" | undefined; alias_target_id?: string | undefined; alias_purpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; note?: string | undefined; rule_name_override?: string | undefined; timestamp_override?: string | undefined; timestamp_override_fallback_disabled?: boolean | undefined; timeline_id?: string | undefined; timeline_title?: string | undefined; building_block_type?: string | undefined; output_index?: string | undefined; investigation_fields?: { field_names: string[]; } | undefined; response_actions?: ({ params: { query?: string | undefined; timeout?: number | undefined; queries?: { id: string; query: string; snapshot?: boolean | undefined; version?: string | undefined; ecs_mapping?: ",
               "objectOutputType",
               "<{}, ",
               "ZodObject",
@@ -643,7 +643,7 @@
               "ZodString",
               ", \"many\">]>>; }, \"strip\", ",
               "ZodTypeAny",
-              ", { value?: string | string[] | undefined; field?: string | undefined; }, { value?: string | string[] | undefined; field?: string | undefined; }>, \"strip\"> | undefined; removed?: boolean | undefined; }[] | undefined; ecs_mapping?: ",
+              ", { value?: string | string[] | undefined; field?: string | undefined; }, { value?: string | string[] | undefined; field?: string | undefined; }>, \"strip\"> | undefined; platform?: string | undefined; removed?: boolean | undefined; }[] | undefined; ecs_mapping?: ",
               "objectOutputType",
               "<{}, ",
               "ZodObject",
@@ -663,15 +663,15 @@
               "ZodString",
               ", \"many\">]>>; }, \"strip\", ",
               "ZodTypeAny",
-              ", { value?: string | string[] | undefined; field?: string | undefined; }, { value?: string | string[] | undefined; field?: string | undefined; }>, \"strip\"> | undefined; saved_query_id?: string | undefined; pack_id?: string | undefined; }; action_type_id: \".osquery\"; } | { params: { command: \"isolate\"; comment?: string | undefined; } | { config: { field: string; overwrite: boolean; }; command: \"kill-process\" | \"suspend-process\"; comment?: string | undefined; }; action_type_id: \".endpoint\"; })[] | undefined; execution_summary?: { last_execution: { message: string; date: string; status: \"running\" | \"succeeded\" | \"failed\" | \"going to run\" | \"partial failure\"; metrics: { total_search_duration_ms?: number | undefined; total_indexing_duration_ms?: number | undefined; gap_range?: { gte: string; lte: string; } | undefined; execution_gap_duration_s?: number | undefined; frozen_indices_queried_count?: number | undefined; total_enrichment_duration_ms?: number | undefined; }; status_order: number; }; } | undefined; alert_suppression?: { group_by: string[]; duration?: { value: number; unit: \"m\" | \"s\" | \"h\"; } | undefined; missing_fields_strategy?: \"doNotSuppress\" | \"suppress\" | undefined; } | undefined; } | { id: string; type: \"new_terms\"; name: string; version: number; enabled: boolean; tags: string[]; actions: { params: {} & { [k: string]: unknown; }; id: string; action_type_id: string; frequency?: { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; } | undefined; group?: string | undefined; uuid?: string | undefined; alerts_filter?: ",
+              ", { value?: string | string[] | undefined; field?: string | undefined; }, { value?: string | string[] | undefined; field?: string | undefined; }>, \"strip\"> | undefined; saved_query_id?: string | undefined; pack_id?: string | undefined; }; action_type_id: \".osquery\"; } | { params: { command: \"isolate\"; comment?: string | undefined; } | { config: { field: string; overwrite: boolean; }; command: \"kill-process\" | \"suspend-process\"; comment?: string | undefined; }; action_type_id: \".endpoint\"; })[] | undefined; execution_summary?: { last_execution: { message: string; date: string; metrics: { total_search_duration_ms?: number | undefined; total_indexing_duration_ms?: number | undefined; gap_range?: { lte: string; gte: string; } | undefined; execution_gap_duration_s?: number | undefined; frozen_indices_queried_count?: number | undefined; total_enrichment_duration_ms?: number | undefined; }; status: \"running\" | \"succeeded\" | \"failed\" | \"going to run\" | \"partial failure\"; status_order: number; }; } | undefined; alert_suppression?: { group_by: string[]; duration?: { value: number; unit: \"m\" | \"s\" | \"h\"; } | undefined; missing_fields_strategy?: \"doNotSuppress\" | \"suppress\" | undefined; } | undefined; } | { id: string; type: \"new_terms\"; name: string; version: number; enabled: boolean; tags: string[]; actions: { params: {} & { [k: string]: unknown; }; id: string; action_type_id: string; frequency?: { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; } | undefined; uuid?: string | undefined; group?: string | undefined; alerts_filter?: ",
               "objectOutputType",
               "<{}, ",
               "ZodUnknown",
-              ", \"strip\"> | undefined; }[]; setup: string; from: string; to: string; description: string; revision: number; query: string; interval: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; risk_score: number; language: \"kuery\" | \"lucene\"; created_at: string; created_by: string; updated_at: string; updated_by: string; references: string[]; author: string[]; rule_id: string; immutable: boolean; threat: { framework: string; tactic: { id: string; name: string; reference: string; }; technique?: { id: string; name: string; reference: string; subtechnique?: { id: string; name: string; reference: string; }[] | undefined; }[] | undefined; }[]; risk_score_mapping: { value: string; operator: \"equals\"; field: string; risk_score?: number | undefined; }[]; severity_mapping: { value: string; operator: \"equals\"; field: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; }[]; exceptions_list: { id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_devices\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; list_id: string; namespace_type: \"single\" | \"agnostic\"; }[]; false_positives: string[]; max_signals: number; related_integrations: { version: string; package: string; integration?: string | undefined; }[]; required_fields: { type: string; name: string; ecs: boolean; }[]; rule_source: { type: \"external\"; is_customized: boolean; has_base_version: boolean; customized_fields: { field_name: string; }[]; } | { type: \"internal\"; }; new_terms_fields: string[]; history_window_start: string; meta?: ",
+              ", \"strip\"> | undefined; }[]; setup: string; description: string; query: string; language: \"kuery\" | \"lucene\"; from: string; to: string; interval: string; revision: number; severity: \"medium\" | \"critical\" | \"high\" | \"low\"; risk_score: number; created_at: string; created_by: string; updated_at: string; updated_by: string; references: string[]; author: string[]; rule_id: string; immutable: boolean; threat: { framework: string; tactic: { id: string; name: string; reference: string; }; technique?: { id: string; name: string; reference: string; subtechnique?: { id: string; name: string; reference: string; }[] | undefined; }[] | undefined; }[]; risk_score_mapping: { value: string; field: string; operator: \"equals\"; risk_score?: number | undefined; }[]; severity_mapping: { value: string; field: string; severity: \"medium\" | \"critical\" | \"high\" | \"low\"; operator: \"equals\"; }[]; exceptions_list: { id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_devices\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; list_id: string; namespace_type: \"single\" | \"agnostic\"; }[]; false_positives: string[]; max_signals: number; related_integrations: { version: string; package: string; integration?: string | undefined; }[]; required_fields: { type: string; name: string; ecs: boolean; }[]; rule_source: { type: \"external\"; is_customized: boolean; has_base_version: boolean; customized_fields: { field_name: string; }[]; } | { type: \"internal\"; }; new_terms_fields: string[]; history_window_start: string; meta?: ",
               "objectOutputType",
               "<{}, ",
               "ZodUnknown",
-              ", \"strip\"> | undefined; namespace?: string | undefined; index?: string[] | undefined; license?: string | undefined; note?: string | undefined; throttle?: string | undefined; outcome?: \"exactMatch\" | \"aliasMatch\" | \"conflict\" | undefined; alias_target_id?: string | undefined; alias_purpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; filters?: unknown[] | undefined; rule_name_override?: string | undefined; timestamp_override?: string | undefined; timestamp_override_fallback_disabled?: boolean | undefined; timeline_id?: string | undefined; timeline_title?: string | undefined; building_block_type?: string | undefined; output_index?: string | undefined; investigation_fields?: { field_names: string[]; } | undefined; response_actions?: ({ params: { query?: string | undefined; timeout?: number | undefined; queries?: { id: string; query: string; snapshot?: boolean | undefined; version?: string | undefined; platform?: string | undefined; ecs_mapping?: ",
+              ", \"strip\"> | undefined; namespace?: string | undefined; index?: string[] | undefined; license?: string | undefined; filters?: unknown[] | undefined; throttle?: string | undefined; outcome?: \"exactMatch\" | \"aliasMatch\" | \"conflict\" | undefined; alias_target_id?: string | undefined; alias_purpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; note?: string | undefined; data_view_id?: string | undefined; rule_name_override?: string | undefined; timestamp_override?: string | undefined; timestamp_override_fallback_disabled?: boolean | undefined; timeline_id?: string | undefined; timeline_title?: string | undefined; building_block_type?: string | undefined; output_index?: string | undefined; investigation_fields?: { field_names: string[]; } | undefined; response_actions?: ({ params: { query?: string | undefined; timeout?: number | undefined; queries?: { id: string; query: string; snapshot?: boolean | undefined; version?: string | undefined; ecs_mapping?: ",
               "objectOutputType",
               "<{}, ",
               "ZodObject",
@@ -691,7 +691,7 @@
               "ZodString",
               ", \"many\">]>>; }, \"strip\", ",
               "ZodTypeAny",
-              ", { value?: string | string[] | undefined; field?: string | undefined; }, { value?: string | string[] | undefined; field?: string | undefined; }>, \"strip\"> | undefined; removed?: boolean | undefined; }[] | undefined; ecs_mapping?: ",
+              ", { value?: string | string[] | undefined; field?: string | undefined; }, { value?: string | string[] | undefined; field?: string | undefined; }>, \"strip\"> | undefined; platform?: string | undefined; removed?: boolean | undefined; }[] | undefined; ecs_mapping?: ",
               "objectOutputType",
               "<{}, ",
               "ZodObject",
@@ -711,15 +711,15 @@
               "ZodString",
               ", \"many\">]>>; }, \"strip\", ",
               "ZodTypeAny",
-              ", { value?: string | string[] | undefined; field?: string | undefined; }, { value?: string | string[] | undefined; field?: string | undefined; }>, \"strip\"> | undefined; saved_query_id?: string | undefined; pack_id?: string | undefined; }; action_type_id: \".osquery\"; } | { params: { command: \"isolate\"; comment?: string | undefined; } | { config: { field: string; overwrite: boolean; }; command: \"kill-process\" | \"suspend-process\"; comment?: string | undefined; }; action_type_id: \".endpoint\"; })[] | undefined; execution_summary?: { last_execution: { message: string; date: string; status: \"running\" | \"succeeded\" | \"failed\" | \"going to run\" | \"partial failure\"; metrics: { total_search_duration_ms?: number | undefined; total_indexing_duration_ms?: number | undefined; gap_range?: { gte: string; lte: string; } | undefined; execution_gap_duration_s?: number | undefined; frozen_indices_queried_count?: number | undefined; total_enrichment_duration_ms?: number | undefined; }; status_order: number; }; } | undefined; data_view_id?: string | undefined; alert_suppression?: { group_by: string[]; duration?: { value: number; unit: \"m\" | \"s\" | \"h\"; } | undefined; missing_fields_strategy?: \"doNotSuppress\" | \"suppress\" | undefined; } | undefined; } | { id: string; type: \"esql\"; name: string; version: number; enabled: boolean; tags: string[]; actions: { params: {} & { [k: string]: unknown; }; id: string; action_type_id: string; frequency?: { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; } | undefined; group?: string | undefined; uuid?: string | undefined; alerts_filter?: ",
+              ", { value?: string | string[] | undefined; field?: string | undefined; }, { value?: string | string[] | undefined; field?: string | undefined; }>, \"strip\"> | undefined; saved_query_id?: string | undefined; pack_id?: string | undefined; }; action_type_id: \".osquery\"; } | { params: { command: \"isolate\"; comment?: string | undefined; } | { config: { field: string; overwrite: boolean; }; command: \"kill-process\" | \"suspend-process\"; comment?: string | undefined; }; action_type_id: \".endpoint\"; })[] | undefined; execution_summary?: { last_execution: { message: string; date: string; metrics: { total_search_duration_ms?: number | undefined; total_indexing_duration_ms?: number | undefined; gap_range?: { lte: string; gte: string; } | undefined; execution_gap_duration_s?: number | undefined; frozen_indices_queried_count?: number | undefined; total_enrichment_duration_ms?: number | undefined; }; status: \"running\" | \"succeeded\" | \"failed\" | \"going to run\" | \"partial failure\"; status_order: number; }; } | undefined; alert_suppression?: { group_by: string[]; duration?: { value: number; unit: \"m\" | \"s\" | \"h\"; } | undefined; missing_fields_strategy?: \"doNotSuppress\" | \"suppress\" | undefined; } | undefined; } | { id: string; type: \"esql\"; name: string; version: number; enabled: boolean; tags: string[]; actions: { params: {} & { [k: string]: unknown; }; id: string; action_type_id: string; frequency?: { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; } | undefined; uuid?: string | undefined; group?: string | undefined; alerts_filter?: ",
               "objectOutputType",
               "<{}, ",
               "ZodUnknown",
-              ", \"strip\"> | undefined; }[]; setup: string; from: string; to: string; description: string; revision: number; query: string; interval: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; risk_score: number; language: \"esql\"; created_at: string; created_by: string; updated_at: string; updated_by: string; references: string[]; author: string[]; rule_id: string; immutable: boolean; threat: { framework: string; tactic: { id: string; name: string; reference: string; }; technique?: { id: string; name: string; reference: string; subtechnique?: { id: string; name: string; reference: string; }[] | undefined; }[] | undefined; }[]; risk_score_mapping: { value: string; operator: \"equals\"; field: string; risk_score?: number | undefined; }[]; severity_mapping: { value: string; operator: \"equals\"; field: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; }[]; exceptions_list: { id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_devices\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; list_id: string; namespace_type: \"single\" | \"agnostic\"; }[]; false_positives: string[]; max_signals: number; related_integrations: { version: string; package: string; integration?: string | undefined; }[]; required_fields: { type: string; name: string; ecs: boolean; }[]; rule_source: { type: \"external\"; is_customized: boolean; has_base_version: boolean; customized_fields: { field_name: string; }[]; } | { type: \"internal\"; }; meta?: ",
+              ", \"strip\"> | undefined; }[]; setup: string; description: string; query: string; language: \"esql\"; from: string; to: string; interval: string; revision: number; severity: \"medium\" | \"critical\" | \"high\" | \"low\"; risk_score: number; created_at: string; created_by: string; updated_at: string; updated_by: string; references: string[]; author: string[]; rule_id: string; immutable: boolean; threat: { framework: string; tactic: { id: string; name: string; reference: string; }; technique?: { id: string; name: string; reference: string; subtechnique?: { id: string; name: string; reference: string; }[] | undefined; }[] | undefined; }[]; risk_score_mapping: { value: string; field: string; operator: \"equals\"; risk_score?: number | undefined; }[]; severity_mapping: { value: string; field: string; severity: \"medium\" | \"critical\" | \"high\" | \"low\"; operator: \"equals\"; }[]; exceptions_list: { id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_devices\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; list_id: string; namespace_type: \"single\" | \"agnostic\"; }[]; false_positives: string[]; max_signals: number; related_integrations: { version: string; package: string; integration?: string | undefined; }[]; required_fields: { type: string; name: string; ecs: boolean; }[]; rule_source: { type: \"external\"; is_customized: boolean; has_base_version: boolean; customized_fields: { field_name: string; }[]; } | { type: \"internal\"; }; meta?: ",
               "objectOutputType",
               "<{}, ",
               "ZodUnknown",
-              ", \"strip\"> | undefined; namespace?: string | undefined; license?: string | undefined; note?: string | undefined; throttle?: string | undefined; outcome?: \"exactMatch\" | \"aliasMatch\" | \"conflict\" | undefined; alias_target_id?: string | undefined; alias_purpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; rule_name_override?: string | undefined; timestamp_override?: string | undefined; timestamp_override_fallback_disabled?: boolean | undefined; timeline_id?: string | undefined; timeline_title?: string | undefined; building_block_type?: string | undefined; output_index?: string | undefined; investigation_fields?: { field_names: string[]; } | undefined; response_actions?: ({ params: { query?: string | undefined; timeout?: number | undefined; queries?: { id: string; query: string; snapshot?: boolean | undefined; version?: string | undefined; platform?: string | undefined; ecs_mapping?: ",
+              ", \"strip\"> | undefined; namespace?: string | undefined; license?: string | undefined; throttle?: string | undefined; outcome?: \"exactMatch\" | \"aliasMatch\" | \"conflict\" | undefined; alias_target_id?: string | undefined; alias_purpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; note?: string | undefined; rule_name_override?: string | undefined; timestamp_override?: string | undefined; timestamp_override_fallback_disabled?: boolean | undefined; timeline_id?: string | undefined; timeline_title?: string | undefined; building_block_type?: string | undefined; output_index?: string | undefined; investigation_fields?: { field_names: string[]; } | undefined; response_actions?: ({ params: { query?: string | undefined; timeout?: number | undefined; queries?: { id: string; query: string; snapshot?: boolean | undefined; version?: string | undefined; ecs_mapping?: ",
               "objectOutputType",
               "<{}, ",
               "ZodObject",
@@ -739,7 +739,7 @@
               "ZodString",
               ", \"many\">]>>; }, \"strip\", ",
               "ZodTypeAny",
-              ", { value?: string | string[] | undefined; field?: string | undefined; }, { value?: string | string[] | undefined; field?: string | undefined; }>, \"strip\"> | undefined; removed?: boolean | undefined; }[] | undefined; ecs_mapping?: ",
+              ", { value?: string | string[] | undefined; field?: string | undefined; }, { value?: string | string[] | undefined; field?: string | undefined; }>, \"strip\"> | undefined; platform?: string | undefined; removed?: boolean | undefined; }[] | undefined; ecs_mapping?: ",
               "objectOutputType",
               "<{}, ",
               "ZodObject",
@@ -759,7 +759,7 @@
               "ZodString",
               ", \"many\">]>>; }, \"strip\", ",
               "ZodTypeAny",
-              ", { value?: string | string[] | undefined; field?: string | undefined; }, { value?: string | string[] | undefined; field?: string | undefined; }>, \"strip\"> | undefined; saved_query_id?: string | undefined; pack_id?: string | undefined; }; action_type_id: \".osquery\"; } | { params: { command: \"isolate\"; comment?: string | undefined; } | { config: { field: string; overwrite: boolean; }; command: \"kill-process\" | \"suspend-process\"; comment?: string | undefined; }; action_type_id: \".endpoint\"; })[] | undefined; execution_summary?: { last_execution: { message: string; date: string; status: \"running\" | \"succeeded\" | \"failed\" | \"going to run\" | \"partial failure\"; metrics: { total_search_duration_ms?: number | undefined; total_indexing_duration_ms?: number | undefined; gap_range?: { gte: string; lte: string; } | undefined; execution_gap_duration_s?: number | undefined; frozen_indices_queried_count?: number | undefined; total_enrichment_duration_ms?: number | undefined; }; status_order: number; }; } | undefined; alert_suppression?: { group_by: string[]; duration?: { value: number; unit: \"m\" | \"s\" | \"h\"; } | undefined; missing_fields_strategy?: \"doNotSuppress\" | \"suppress\" | undefined; } | undefined; })[]"
+              ", { value?: string | string[] | undefined; field?: string | undefined; }, { value?: string | string[] | undefined; field?: string | undefined; }>, \"strip\"> | undefined; saved_query_id?: string | undefined; pack_id?: string | undefined; }; action_type_id: \".osquery\"; } | { params: { command: \"isolate\"; comment?: string | undefined; } | { config: { field: string; overwrite: boolean; }; command: \"kill-process\" | \"suspend-process\"; comment?: string | undefined; }; action_type_id: \".endpoint\"; })[] | undefined; execution_summary?: { last_execution: { message: string; date: string; metrics: { total_search_duration_ms?: number | undefined; total_indexing_duration_ms?: number | undefined; gap_range?: { lte: string; gte: string; } | undefined; execution_gap_duration_s?: number | undefined; frozen_indices_queried_count?: number | undefined; total_enrichment_duration_ms?: number | undefined; }; status: \"running\" | \"succeeded\" | \"failed\" | \"going to run\" | \"partial failure\"; status_order: number; }; } | undefined; alert_suppression?: { group_by: string[]; duration?: { value: number; unit: \"m\" | \"s\" | \"h\"; } | undefined; missing_fields_strategy?: \"doNotSuppress\" | \"suppress\" | undefined; } | undefined; })[]"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management/logic/types.ts",
             "lineNumber": 113,
@@ -880,7 +880,7 @@
               "\nExperimental flag needed to enable the link"
             ],
             "signature": [
-              "\"assistantModelEvaluation\" | \"defendInsightsPolicyResponseFailure\" | \"previewTelemetryUrlEnabled\" | \"extendedRuleExecutionLoggingEnabled\" | \"socTrendsEnabled\" | \"responseActionsSentinelOneRunScriptEnabled\" | \"responseActionsEndpointMemoryDump\" | \"responseActionsEndpointRunScript\" | \"responseActionsScriptLibraryManagement\" | \"enableRiskScoreResetToZero\" | \"enableRiskScorePrivmonModifier\" | \"riskScoreAssistantToolDisabled\" | \"entityDetailsHighlightsEnabled\" | \"entityThreatHuntingEnabled\" | \"esqlRulesDisabled\" | \"microsoftDefenderEndpointDataInAnalyzerEnabled\" | \"storeGapsInEventLogEnabled\" | \"bulkFillRuleGapsEnabled\" | \"filterProcessDescendantsForTrustedAppsEnabled\" | \"bulkEditAlertSuppressionEnabled\" | \"doesNotMatchForIndicatorMatchRuleEnabled\" | \"entityStoreDisabled\" | \"siemMigrationsDisabled\" | \"endpointExceptionsMovedUnderManagement\" | \"crowdstrikeRunScriptEnabled\" | \"newDataViewPickerEnabled\" | \"microsoftDefenderEndpointRunScriptEnabled\" | \"trustedAppsAdvancedMode\" | \"trustedDevices\" | \"automaticDashboardsMigration\" | \"siemReadinessDashboard\" | \"microsoftDefenderEndpointCancelEnabled\" | \"attacksAlertsAlignment\" | \"qradarRulesMigration\" | \"kubernetesEnabled\" | \"entityAnalyticsWatchlistEnabled\" | \"trialCompanionEnabled\" | \"gapAutoFillSchedulerEnabled\" | \"linuxDnsEvents\" | undefined"
+              "\"assistantModelEvaluation\" | \"defendInsightsPolicyResponseFailure\" | \"previewTelemetryUrlEnabled\" | \"extendedRuleExecutionLoggingEnabled\" | \"socTrendsEnabled\" | \"responseActionsSentinelOneRunScriptEnabled\" | \"responseActionsEndpointMemoryDump\" | \"responseActionsEndpointRunScript\" | \"responseActionsScriptLibraryManagement\" | \"enableRiskScoreResetToZero\" | \"enableRiskScorePrivmonModifier\" | \"riskScoreAssistantToolDisabled\" | \"entityDetailsHighlightsEnabled\" | \"entityThreatHuntingEnabled\" | \"esqlRulesDisabled\" | \"microsoftDefenderEndpointDataInAnalyzerEnabled\" | \"storeGapsInEventLogEnabled\" | \"filterProcessDescendantsForTrustedAppsEnabled\" | \"entityStoreDisabled\" | \"aiRuleCreationEnabled\" | \"siemMigrationsDisabled\" | \"endpointExceptionsMovedUnderManagement\" | \"crowdstrikeRunScriptEnabled\" | \"newDataViewPickerEnabled\" | \"microsoftDefenderEndpointRunScriptEnabled\" | \"trustedAppsAdvancedMode\" | \"trustedDevices\" | \"automaticDashboardsMigration\" | \"siemReadinessDashboard\" | \"microsoftDefenderEndpointCancelEnabled\" | \"enableAlertsAndAttacksAlignment\" | \"qradarRulesMigration\" | \"kubernetesEnabled\" | \"entityAnalyticsWatchlistEnabled\" | \"trialCompanionEnabled\" | \"linuxDnsEvents\" | \"splunkV2DashboardsEnabled\" | \"deHealthUIEnabled\" | \"ruleHealthUIEnabled\" | \"automaticTroubleshootingSkill\" | \"newFlyoutSystemEnabled\" | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/common/links/types.ts",
             "lineNumber": 42,
@@ -970,7 +970,7 @@
               "\nExperimental flag needed to disable the link. Opposite of experimentalKey"
             ],
             "signature": [
-              "\"assistantModelEvaluation\" | \"defendInsightsPolicyResponseFailure\" | \"previewTelemetryUrlEnabled\" | \"extendedRuleExecutionLoggingEnabled\" | \"socTrendsEnabled\" | \"responseActionsSentinelOneRunScriptEnabled\" | \"responseActionsEndpointMemoryDump\" | \"responseActionsEndpointRunScript\" | \"responseActionsScriptLibraryManagement\" | \"enableRiskScoreResetToZero\" | \"enableRiskScorePrivmonModifier\" | \"riskScoreAssistantToolDisabled\" | \"entityDetailsHighlightsEnabled\" | \"entityThreatHuntingEnabled\" | \"esqlRulesDisabled\" | \"microsoftDefenderEndpointDataInAnalyzerEnabled\" | \"storeGapsInEventLogEnabled\" | \"bulkFillRuleGapsEnabled\" | \"filterProcessDescendantsForTrustedAppsEnabled\" | \"bulkEditAlertSuppressionEnabled\" | \"doesNotMatchForIndicatorMatchRuleEnabled\" | \"entityStoreDisabled\" | \"siemMigrationsDisabled\" | \"endpointExceptionsMovedUnderManagement\" | \"crowdstrikeRunScriptEnabled\" | \"newDataViewPickerEnabled\" | \"microsoftDefenderEndpointRunScriptEnabled\" | \"trustedAppsAdvancedMode\" | \"trustedDevices\" | \"automaticDashboardsMigration\" | \"siemReadinessDashboard\" | \"microsoftDefenderEndpointCancelEnabled\" | \"attacksAlertsAlignment\" | \"qradarRulesMigration\" | \"kubernetesEnabled\" | \"entityAnalyticsWatchlistEnabled\" | \"trialCompanionEnabled\" | \"gapAutoFillSchedulerEnabled\" | \"linuxDnsEvents\" | undefined"
+              "\"assistantModelEvaluation\" | \"defendInsightsPolicyResponseFailure\" | \"previewTelemetryUrlEnabled\" | \"extendedRuleExecutionLoggingEnabled\" | \"socTrendsEnabled\" | \"responseActionsSentinelOneRunScriptEnabled\" | \"responseActionsEndpointMemoryDump\" | \"responseActionsEndpointRunScript\" | \"responseActionsScriptLibraryManagement\" | \"enableRiskScoreResetToZero\" | \"enableRiskScorePrivmonModifier\" | \"riskScoreAssistantToolDisabled\" | \"entityDetailsHighlightsEnabled\" | \"entityThreatHuntingEnabled\" | \"esqlRulesDisabled\" | \"microsoftDefenderEndpointDataInAnalyzerEnabled\" | \"storeGapsInEventLogEnabled\" | \"filterProcessDescendantsForTrustedAppsEnabled\" | \"entityStoreDisabled\" | \"aiRuleCreationEnabled\" | \"siemMigrationsDisabled\" | \"endpointExceptionsMovedUnderManagement\" | \"crowdstrikeRunScriptEnabled\" | \"newDataViewPickerEnabled\" | \"microsoftDefenderEndpointRunScriptEnabled\" | \"trustedAppsAdvancedMode\" | \"trustedDevices\" | \"automaticDashboardsMigration\" | \"siemReadinessDashboard\" | \"microsoftDefenderEndpointCancelEnabled\" | \"enableAlertsAndAttacksAlignment\" | \"qradarRulesMigration\" | \"kubernetesEnabled\" | \"entityAnalyticsWatchlistEnabled\" | \"trialCompanionEnabled\" | \"linuxDnsEvents\" | \"splunkV2DashboardsEnabled\" | \"deHealthUIEnabled\" | \"ruleHealthUIEnabled\" | \"automaticTroubleshootingSkill\" | \"newFlyoutSystemEnabled\" | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/common/links/types.ts",
             "lineNumber": 64,
@@ -2014,7 +2014,7 @@
             "label": "footerText",
             "description": [],
             "signature": [
-              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+              "React.ReactNode"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
             "lineNumber": 100,
@@ -2030,7 +2030,7 @@
             "label": "loadingText",
             "description": [],
             "signature": [
-              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+              "React.ReactNode"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
             "lineNumber": 101,
@@ -2342,24 +2342,6 @@
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
-          },
-          {
-            "parentPluginId": "securitySolution",
-            "id": "def-public.TimelineModel.confirmingNoteId",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "confirmingNoteId",
-            "description": [
-              "the note id pending deletion"
-            ],
-            "signature": [
-              "string | null | undefined"
-            ],
-            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
-            "lineNumber": 140,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2409,7 +2391,7 @@
           "label": "experimentalFeatures",
           "description": [],
           "signature": [
-            "{ readonly previewTelemetryUrlEnabled: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly socTrendsEnabled: boolean; readonly responseActionsSentinelOneRunScriptEnabled: boolean; readonly responseActionsEndpointMemoryDump: boolean; readonly responseActionsEndpointRunScript: boolean; readonly responseActionsScriptLibraryManagement: boolean; readonly assistantModelEvaluation: boolean; readonly enableRiskScoreResetToZero: boolean; readonly enableRiskScorePrivmonModifier: boolean; readonly riskScoreAssistantToolDisabled: boolean; readonly entityDetailsHighlightsEnabled: boolean; readonly entityThreatHuntingEnabled: boolean; readonly esqlRulesDisabled: boolean; readonly microsoftDefenderEndpointDataInAnalyzerEnabled: boolean; readonly storeGapsInEventLogEnabled: boolean; readonly bulkFillRuleGapsEnabled: boolean; readonly filterProcessDescendantsForTrustedAppsEnabled: boolean; readonly bulkEditAlertSuppressionEnabled: boolean; readonly doesNotMatchForIndicatorMatchRuleEnabled: boolean; readonly entityStoreDisabled: boolean; readonly siemMigrationsDisabled: boolean; readonly defendInsightsPolicyResponseFailure: boolean; readonly endpointExceptionsMovedUnderManagement: boolean; readonly crowdstrikeRunScriptEnabled: boolean; readonly newDataViewPickerEnabled: boolean; readonly microsoftDefenderEndpointRunScriptEnabled: boolean; readonly trustedAppsAdvancedMode: boolean; readonly trustedDevices: boolean; readonly automaticDashboardsMigration: boolean; readonly siemReadinessDashboard: boolean; readonly microsoftDefenderEndpointCancelEnabled: boolean; readonly attacksAlertsAlignment: boolean; readonly qradarRulesMigration: boolean; readonly kubernetesEnabled: boolean; readonly entityAnalyticsWatchlistEnabled: boolean; readonly trialCompanionEnabled: boolean; readonly gapAutoFillSchedulerEnabled: boolean; readonly linuxDnsEvents: boolean; }"
+            "{ readonly previewTelemetryUrlEnabled: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly socTrendsEnabled: boolean; readonly responseActionsSentinelOneRunScriptEnabled: boolean; readonly responseActionsEndpointMemoryDump: boolean; readonly responseActionsEndpointRunScript: boolean; readonly responseActionsScriptLibraryManagement: boolean; readonly assistantModelEvaluation: boolean; readonly enableRiskScoreResetToZero: boolean; readonly enableRiskScorePrivmonModifier: boolean; readonly riskScoreAssistantToolDisabled: boolean; readonly entityDetailsHighlightsEnabled: boolean; readonly entityThreatHuntingEnabled: boolean; readonly esqlRulesDisabled: boolean; readonly microsoftDefenderEndpointDataInAnalyzerEnabled: boolean; readonly storeGapsInEventLogEnabled: boolean; readonly filterProcessDescendantsForTrustedAppsEnabled: boolean; readonly entityStoreDisabled: boolean; readonly aiRuleCreationEnabled: boolean; readonly siemMigrationsDisabled: boolean; readonly defendInsightsPolicyResponseFailure: boolean; readonly endpointExceptionsMovedUnderManagement: boolean; readonly crowdstrikeRunScriptEnabled: boolean; readonly newDataViewPickerEnabled: boolean; readonly microsoftDefenderEndpointRunScriptEnabled: boolean; readonly trustedAppsAdvancedMode: boolean; readonly trustedDevices: boolean; readonly automaticDashboardsMigration: boolean; readonly siemReadinessDashboard: boolean; readonly microsoftDefenderEndpointCancelEnabled: boolean; readonly enableAlertsAndAttacksAlignment: boolean; readonly qradarRulesMigration: boolean; readonly kubernetesEnabled: boolean; readonly entityAnalyticsWatchlistEnabled: boolean; readonly trialCompanionEnabled: boolean; readonly linuxDnsEvents: boolean; readonly splunkV2DashboardsEnabled: boolean; readonly deHealthUIEnabled: boolean; readonly ruleHealthUIEnabled: boolean; readonly automaticTroubleshootingSkill: boolean; readonly newFlyoutSystemEnabled: boolean; }"
           ],
           "path": "x-pack/solutions/security/plugins/security_solution/public/types.ts",
           "lineNumber": 230,
@@ -2492,7 +2474,7 @@
           "label": "setComponents",
           "description": [],
           "signature": [
-            "(components: Partial<{ GetStarted: React.ComponentType<{ indicesExist?: boolean | undefined; }>; DashboardsLandingCallout: React.ComponentType<{}>; AdditionalChargesMessage: React.ComponentType<{}>; }>) => void"
+            "(components: Partial<{ GetStarted: React.ComponentType<{ indicesExist?: boolean | undefined; }>; DashboardsLandingCallout: React.ComponentType; AdditionalChargesMessage: React.ComponentType; }>) => void"
           ],
           "path": "x-pack/solutions/security/plugins/security_solution/public/types.ts",
           "lineNumber": 235,
@@ -2509,7 +2491,7 @@
               "label": "components",
               "description": [],
               "signature": [
-                "{ GetStarted?: React.ComponentType<{ indicesExist?: boolean | undefined; }> | undefined; DashboardsLandingCallout?: React.ComponentType<{}> | undefined; AdditionalChargesMessage?: React.ComponentType<{}> | undefined; }"
+                "{ GetStarted?: React.ComponentType<{ indicesExist?: boolean | undefined; }> | undefined; DashboardsLandingCallout?: React.ComponentType | undefined; AdditionalChargesMessage?: React.ComponentType | undefined; }"
               ],
               "path": "x-pack/solutions/security/plugins/security_solution/public/contract_components.ts",
               "lineNumber": 17,
@@ -2968,7 +2950,7 @@
           ">"
         ],
         "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts",
-        "lineNumber": 165,
+        "lineNumber": 164,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2984,7 +2966,7 @@
               "any"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts",
-            "lineNumber": 197,
+            "lineNumber": 196,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3001,7 +2983,7 @@
                   "<unknown>"
                 ],
                 "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts",
-                "lineNumber": 197,
+                "lineNumber": 196,
                 "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3032,7 +3014,7 @@
               }
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts",
-            "lineNumber": 264,
+            "lineNumber": 271,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3048,7 +3030,7 @@
                   "SecuritySolutionPluginCoreSetupDependencies"
                 ],
                 "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts",
-                "lineNumber": 265,
+                "lineNumber": 272,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3065,7 +3047,7 @@
                   "SecuritySolutionPluginSetupDependencies"
                 ],
                 "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts",
-                "lineNumber": 266,
+                "lineNumber": 273,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3096,7 +3078,7 @@
               }
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts",
-            "lineNumber": 683,
+            "lineNumber": 694,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3112,7 +3094,7 @@
                   "CoreStart"
                 ],
                 "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts",
-                "lineNumber": 684,
+                "lineNumber": 695,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3129,7 +3111,7 @@
                   "SecuritySolutionPluginStartDependencies"
                 ],
                 "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts",
-                "lineNumber": 685,
+                "lineNumber": 696,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3149,7 +3131,7 @@
               "() => void"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts",
-            "lineNumber": 974,
+            "lineNumber": 985,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3980,7 +3962,7 @@
                 }
               ],
               "path": "x-pack/solutions/security/plugins/security_solution/server/lib/product_features_service/product_features_service.ts",
-              "lineNumber": 101,
+              "lineNumber": 108,
               "columnNumber": 41,
               "deprecated": false,
               "trackAdoption": false
@@ -3997,7 +3979,7 @@
             "\nThe security solution generic experimental features"
           ],
           "signature": [
-            "{ readonly previewTelemetryUrlEnabled: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly socTrendsEnabled: boolean; readonly responseActionsSentinelOneRunScriptEnabled: boolean; readonly responseActionsEndpointMemoryDump: boolean; readonly responseActionsEndpointRunScript: boolean; readonly responseActionsScriptLibraryManagement: boolean; readonly assistantModelEvaluation: boolean; readonly enableRiskScoreResetToZero: boolean; readonly enableRiskScorePrivmonModifier: boolean; readonly riskScoreAssistantToolDisabled: boolean; readonly entityDetailsHighlightsEnabled: boolean; readonly entityThreatHuntingEnabled: boolean; readonly esqlRulesDisabled: boolean; readonly microsoftDefenderEndpointDataInAnalyzerEnabled: boolean; readonly storeGapsInEventLogEnabled: boolean; readonly bulkFillRuleGapsEnabled: boolean; readonly filterProcessDescendantsForTrustedAppsEnabled: boolean; readonly bulkEditAlertSuppressionEnabled: boolean; readonly doesNotMatchForIndicatorMatchRuleEnabled: boolean; readonly entityStoreDisabled: boolean; readonly siemMigrationsDisabled: boolean; readonly defendInsightsPolicyResponseFailure: boolean; readonly endpointExceptionsMovedUnderManagement: boolean; readonly crowdstrikeRunScriptEnabled: boolean; readonly newDataViewPickerEnabled: boolean; readonly microsoftDefenderEndpointRunScriptEnabled: boolean; readonly trustedAppsAdvancedMode: boolean; readonly trustedDevices: boolean; readonly automaticDashboardsMigration: boolean; readonly siemReadinessDashboard: boolean; readonly microsoftDefenderEndpointCancelEnabled: boolean; readonly attacksAlertsAlignment: boolean; readonly qradarRulesMigration: boolean; readonly kubernetesEnabled: boolean; readonly entityAnalyticsWatchlistEnabled: boolean; readonly trialCompanionEnabled: boolean; readonly gapAutoFillSchedulerEnabled: boolean; readonly linuxDnsEvents: boolean; }"
+            "{ readonly previewTelemetryUrlEnabled: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly socTrendsEnabled: boolean; readonly responseActionsSentinelOneRunScriptEnabled: boolean; readonly responseActionsEndpointMemoryDump: boolean; readonly responseActionsEndpointRunScript: boolean; readonly responseActionsScriptLibraryManagement: boolean; readonly assistantModelEvaluation: boolean; readonly enableRiskScoreResetToZero: boolean; readonly enableRiskScorePrivmonModifier: boolean; readonly riskScoreAssistantToolDisabled: boolean; readonly entityDetailsHighlightsEnabled: boolean; readonly entityThreatHuntingEnabled: boolean; readonly esqlRulesDisabled: boolean; readonly microsoftDefenderEndpointDataInAnalyzerEnabled: boolean; readonly storeGapsInEventLogEnabled: boolean; readonly filterProcessDescendantsForTrustedAppsEnabled: boolean; readonly entityStoreDisabled: boolean; readonly aiRuleCreationEnabled: boolean; readonly siemMigrationsDisabled: boolean; readonly defendInsightsPolicyResponseFailure: boolean; readonly endpointExceptionsMovedUnderManagement: boolean; readonly crowdstrikeRunScriptEnabled: boolean; readonly newDataViewPickerEnabled: boolean; readonly microsoftDefenderEndpointRunScriptEnabled: boolean; readonly trustedAppsAdvancedMode: boolean; readonly trustedDevices: boolean; readonly automaticDashboardsMigration: boolean; readonly siemReadinessDashboard: boolean; readonly microsoftDefenderEndpointCancelEnabled: boolean; readonly enableAlertsAndAttacksAlignment: boolean; readonly qradarRulesMigration: boolean; readonly kubernetesEnabled: boolean; readonly entityAnalyticsWatchlistEnabled: boolean; readonly trialCompanionEnabled: boolean; readonly linuxDnsEvents: boolean; readonly splunkV2DashboardsEnabled: boolean; readonly deHealthUIEnabled: boolean; readonly ruleHealthUIEnabled: boolean; readonly automaticTroubleshootingSkill: boolean; readonly newFlyoutSystemEnabled: boolean; }"
           ],
           "path": "x-pack/solutions/security/plugins/security_solution/server/plugin_contract.ts",
           "lineNumber": 104,
@@ -4055,7 +4037,7 @@
         "label": "ADD_DATA_PATH",
         "description": [],
         "path": "x-pack/solutions/security/plugins/security_solution/common/constants.ts",
-        "lineNumber": 38,
+        "lineNumber": 42,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4074,7 +4056,7 @@
           "\"securitySolution\""
         ],
         "path": "x-pack/solutions/security/plugins/security_solution/common/constants.ts",
-        "lineNumber": 24,
+        "lineNumber": 28,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4091,7 +4073,7 @@
           "\"/app/security\""
         ],
         "path": "x-pack/solutions/security/plugins/security_solution/common/constants.ts",
-        "lineNumber": 36,
+        "lineNumber": 40,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4108,7 +4090,7 @@
           "\"securitySolutionUI\""
         ],
         "path": "x-pack/solutions/security/plugins/security_solution/common/constants.ts",
-        "lineNumber": 25,
+        "lineNumber": 29,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4125,7 +4107,7 @@
           "\"securitySolutionCasesV3\""
         ],
         "path": "x-pack/solutions/security/plugins/security_solution/common/constants.ts",
-        "lineNumber": 28,
+        "lineNumber": 32,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4142,7 +4124,7 @@
           "\"/api/detection_engine/rules/_find\""
         ],
         "path": "x-pack/solutions/security/plugins/security_solution/common/constants.ts",
-        "lineNumber": 289,
+        "lineNumber": 301,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4197,7 +4179,7 @@
           "string[]"
         ],
         "path": "x-pack/solutions/security/plugins/security_solution/common/constants.ts",
-        "lineNumber": 562,
+        "lineNumber": 575,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4211,7 +4193,7 @@
         "label": "ExperimentalFeatures",
         "description": [],
         "signature": [
-          "{ readonly previewTelemetryUrlEnabled: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly socTrendsEnabled: boolean; readonly responseActionsSentinelOneRunScriptEnabled: boolean; readonly responseActionsEndpointMemoryDump: boolean; readonly responseActionsEndpointRunScript: boolean; readonly responseActionsScriptLibraryManagement: boolean; readonly assistantModelEvaluation: boolean; readonly enableRiskScoreResetToZero: boolean; readonly enableRiskScorePrivmonModifier: boolean; readonly riskScoreAssistantToolDisabled: boolean; readonly entityDetailsHighlightsEnabled: boolean; readonly entityThreatHuntingEnabled: boolean; readonly esqlRulesDisabled: boolean; readonly microsoftDefenderEndpointDataInAnalyzerEnabled: boolean; readonly storeGapsInEventLogEnabled: boolean; readonly bulkFillRuleGapsEnabled: boolean; readonly filterProcessDescendantsForTrustedAppsEnabled: boolean; readonly bulkEditAlertSuppressionEnabled: boolean; readonly doesNotMatchForIndicatorMatchRuleEnabled: boolean; readonly entityStoreDisabled: boolean; readonly siemMigrationsDisabled: boolean; readonly defendInsightsPolicyResponseFailure: boolean; readonly endpointExceptionsMovedUnderManagement: boolean; readonly crowdstrikeRunScriptEnabled: boolean; readonly newDataViewPickerEnabled: boolean; readonly microsoftDefenderEndpointRunScriptEnabled: boolean; readonly trustedAppsAdvancedMode: boolean; readonly trustedDevices: boolean; readonly automaticDashboardsMigration: boolean; readonly siemReadinessDashboard: boolean; readonly microsoftDefenderEndpointCancelEnabled: boolean; readonly attacksAlertsAlignment: boolean; readonly qradarRulesMigration: boolean; readonly kubernetesEnabled: boolean; readonly entityAnalyticsWatchlistEnabled: boolean; readonly trialCompanionEnabled: boolean; readonly gapAutoFillSchedulerEnabled: boolean; readonly linuxDnsEvents: boolean; }"
+          "{ readonly previewTelemetryUrlEnabled: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly socTrendsEnabled: boolean; readonly responseActionsSentinelOneRunScriptEnabled: boolean; readonly responseActionsEndpointMemoryDump: boolean; readonly responseActionsEndpointRunScript: boolean; readonly responseActionsScriptLibraryManagement: boolean; readonly assistantModelEvaluation: boolean; readonly enableRiskScoreResetToZero: boolean; readonly enableRiskScorePrivmonModifier: boolean; readonly riskScoreAssistantToolDisabled: boolean; readonly entityDetailsHighlightsEnabled: boolean; readonly entityThreatHuntingEnabled: boolean; readonly esqlRulesDisabled: boolean; readonly microsoftDefenderEndpointDataInAnalyzerEnabled: boolean; readonly storeGapsInEventLogEnabled: boolean; readonly filterProcessDescendantsForTrustedAppsEnabled: boolean; readonly entityStoreDisabled: boolean; readonly aiRuleCreationEnabled: boolean; readonly siemMigrationsDisabled: boolean; readonly defendInsightsPolicyResponseFailure: boolean; readonly endpointExceptionsMovedUnderManagement: boolean; readonly crowdstrikeRunScriptEnabled: boolean; readonly newDataViewPickerEnabled: boolean; readonly microsoftDefenderEndpointRunScriptEnabled: boolean; readonly trustedAppsAdvancedMode: boolean; readonly trustedDevices: boolean; readonly automaticDashboardsMigration: boolean; readonly siemReadinessDashboard: boolean; readonly microsoftDefenderEndpointCancelEnabled: boolean; readonly enableAlertsAndAttacksAlignment: boolean; readonly qradarRulesMigration: boolean; readonly kubernetesEnabled: boolean; readonly entityAnalyticsWatchlistEnabled: boolean; readonly trialCompanionEnabled: boolean; readonly linuxDnsEvents: boolean; readonly splunkV2DashboardsEnabled: boolean; readonly deHealthUIEnabled: boolean; readonly ruleHealthUIEnabled: boolean; readonly automaticTroubleshootingSkill: boolean; readonly newFlyoutSystemEnabled: boolean; }"
         ],
         "path": "x-pack/solutions/security/plugins/security_solution/common/experimental_features.ts",
         "lineNumber": 8,
@@ -4231,7 +4213,24 @@
           "\"/manage\""
         ],
         "path": "x-pack/solutions/security/plugins/security_solution/common/constants.ts",
-        "lineNumber": 95,
+        "lineNumber": 99,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "securitySolution",
+        "id": "def-common.RULES_FEATURE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "RULES_FEATURE_ID",
+        "description": [],
+        "signature": [
+          "\"securitySolutionRulesV2\""
+        ],
+        "path": "x-pack/solutions/security/plugins/security_solution/common/constants.ts",
+        "lineNumber": 37,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4248,7 +4247,7 @@
           "\"siemV5\""
         ],
         "path": "x-pack/solutions/security/plugins/security_solution/common/constants.ts",
-        "lineNumber": 32,
+        "lineNumber": 36,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4284,7 +4283,7 @@
           "\"siem\""
         ],
         "path": "x-pack/solutions/security/plugins/security_solution/common/constants.ts",
-        "lineNumber": 31,
+        "lineNumber": 35,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4302,7 +4301,7 @@
           "\nA list of allowed values that can be used in `xpack.securitySolution.enableExperimental`.\nThis object is then used to validate and parse the value entered."
         ],
         "signature": [
-          "{ readonly previewTelemetryUrlEnabled: false; readonly extendedRuleExecutionLoggingEnabled: false; readonly socTrendsEnabled: false; readonly responseActionsSentinelOneRunScriptEnabled: true; readonly responseActionsEndpointMemoryDump: false; readonly responseActionsEndpointRunScript: false; readonly responseActionsScriptLibraryManagement: false; readonly assistantModelEvaluation: false; readonly enableRiskScoreResetToZero: true; readonly enableRiskScorePrivmonModifier: true; readonly riskScoreAssistantToolDisabled: false; readonly entityDetailsHighlightsEnabled: true; readonly entityThreatHuntingEnabled: false; readonly esqlRulesDisabled: false; readonly microsoftDefenderEndpointDataInAnalyzerEnabled: true; readonly storeGapsInEventLogEnabled: true; readonly bulkFillRuleGapsEnabled: true; readonly filterProcessDescendantsForTrustedAppsEnabled: false; readonly bulkEditAlertSuppressionEnabled: true; readonly doesNotMatchForIndicatorMatchRuleEnabled: true; readonly entityStoreDisabled: false; readonly siemMigrationsDisabled: false; readonly defendInsightsPolicyResponseFailure: true; readonly endpointExceptionsMovedUnderManagement: false; readonly crowdstrikeRunScriptEnabled: true; readonly newDataViewPickerEnabled: true; readonly microsoftDefenderEndpointRunScriptEnabled: true; readonly trustedAppsAdvancedMode: true; readonly trustedDevices: true; readonly automaticDashboardsMigration: true; readonly siemReadinessDashboard: false; readonly microsoftDefenderEndpointCancelEnabled: true; readonly attacksAlertsAlignment: false; readonly qradarRulesMigration: true; readonly kubernetesEnabled: true; readonly entityAnalyticsWatchlistEnabled: false; readonly trialCompanionEnabled: false; readonly gapAutoFillSchedulerEnabled: false; readonly linuxDnsEvents: false; }"
+          "{ readonly previewTelemetryUrlEnabled: false; readonly extendedRuleExecutionLoggingEnabled: false; readonly socTrendsEnabled: false; readonly responseActionsSentinelOneRunScriptEnabled: true; readonly responseActionsEndpointMemoryDump: true; readonly responseActionsEndpointRunScript: false; readonly responseActionsScriptLibraryManagement: false; readonly assistantModelEvaluation: false; readonly enableRiskScoreResetToZero: true; readonly enableRiskScorePrivmonModifier: true; readonly riskScoreAssistantToolDisabled: false; readonly entityDetailsHighlightsEnabled: true; readonly entityThreatHuntingEnabled: false; readonly esqlRulesDisabled: false; readonly microsoftDefenderEndpointDataInAnalyzerEnabled: true; readonly storeGapsInEventLogEnabled: true; readonly filterProcessDescendantsForTrustedAppsEnabled: true; readonly entityStoreDisabled: false; readonly aiRuleCreationEnabled: false; readonly siemMigrationsDisabled: false; readonly defendInsightsPolicyResponseFailure: true; readonly endpointExceptionsMovedUnderManagement: false; readonly crowdstrikeRunScriptEnabled: true; readonly newDataViewPickerEnabled: true; readonly microsoftDefenderEndpointRunScriptEnabled: true; readonly trustedAppsAdvancedMode: true; readonly trustedDevices: true; readonly automaticDashboardsMigration: true; readonly siemReadinessDashboard: false; readonly microsoftDefenderEndpointCancelEnabled: true; readonly enableAlertsAndAttacksAlignment: false; readonly qradarRulesMigration: true; readonly kubernetesEnabled: true; readonly entityAnalyticsWatchlistEnabled: false; readonly trialCompanionEnabled: false; readonly linuxDnsEvents: true; readonly splunkV2DashboardsEnabled: true; readonly deHealthUIEnabled: false; readonly ruleHealthUIEnabled: false; readonly automaticTroubleshootingSkill: false; readonly newFlyoutSystemEnabled: false; }"
         ],
         "path": "x-pack/solutions/security/plugins/security_solution/common/experimental_features.ts",
         "lineNumber": 14,

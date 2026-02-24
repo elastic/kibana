@@ -141,14 +141,7 @@ export const DateProcessorForm = () => {
 
   return (
     <>
-      <ProcessorFieldSelector
-        fieldKey="from"
-        helpText={i18n.translate(
-          'xpack.streams.streamDetailView.managementTab.enrichment.processor.setDateFieldHelpText',
-          { defaultMessage: 'Field containing date values to parse.' }
-        )}
-        onChange={handleProcessorFieldChange}
-      />
+      <ProcessorFieldSelector fieldKey="from" helpText="" onChange={handleProcessorFieldChange} />
       <DateFormatsField onGenerate={handleGenerateSuggestionClick} />
       <EuiSpacer size="m" />
       <FieldsAccordion>

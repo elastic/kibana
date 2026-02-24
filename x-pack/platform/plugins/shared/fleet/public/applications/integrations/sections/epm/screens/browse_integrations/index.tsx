@@ -5,25 +5,68 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiFlexItem, EuiFlexGroup, useEuiTheme, EuiSpacer } from '@elastic/eui';
+import React, { useCallback, useMemo } from 'react';
+import { EuiFieldSearch, EuiFlexItem, EuiFlexGroup, EuiSpacer, useEuiTheme } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { useHistory, useLocation } from 'react-router-dom';
 
-import { useBreadcrumbs } from '../../../../hooks';
+import { useBreadcrumbs, useStartServices } from '../../../../hooks';
 import { NoEprCallout } from '../../components/no_epr_callout';
 import { categoryExists } from '../home';
 
 import { ResponsivePackageGrid } from './components/responsive_package_grid';
-import { SearchAndFiltersBar } from './components/search_and_filters_bar';
+import { SearchAndFiltersBar, StickyFlexItem } from './components/search_and_filters_bar';
 import { Sidebar } from './components/side_bar';
 import { useBrowseIntegrationHook } from './hooks';
 import { NoDataPrompt } from './components/no_data_prompt';
+import {
+  ManageIntegrationsTable,
+  type CreatedIntegrationRow,
+} from './components/manage_integrations_table';
+import { CreateNewIntegrationButton } from './components/create_new_integration';
 
 export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: boolean }> = ({
   prereleaseIntegrationsEnabled,
 }) => {
   useBreadcrumbs('integrations_all');
 
+  const { automaticImportVTwo, application } = useStartServices();
+  const { pathname, search } = useLocation();
+  const history = useHistory();
   const euiTheme = useEuiTheme();
+
+  const automaticImportCapabilities = (
+    application.capabilities as Record<string, { view?: boolean } | undefined>
+  ).automatic_import;
+  const canReadAutomaticImportIntegrations =
+    automaticImportCapabilities?.view ?? Boolean(automaticImportVTwo);
+
+  const useGetAllIntegrationsHook = canReadAutomaticImportIntegrations
+    ? automaticImportVTwo?.hooks.useGetAllIntegrations ?? useEmptyAllIntegrations
+    : useEmptyAllIntegrations;
+  const {
+    integrations,
+    isLoading: isLoadingCreatedIntegrations,
+    isError: isCreatedIntegrationsError,
+  } = useGetAllIntegrationsHook();
+  const hasCreatedIntegrations = integrations.length > 0;
+  const isManageIntegrationsView = useMemo(() => {
+    const params = new URLSearchParams(search);
+    return canReadAutomaticImportIntegrations && params.get('view') === 'manage';
+  }, [canReadAutomaticImportIntegrations, search]);
+
+  const manageIntegrationsHref = useMemo(() => {
+    const params = new URLSearchParams(search);
+    params.set('view', 'manage');
+    return `${pathname}?${params.toString()}`;
+  }, [pathname, search]);
+  const onManageIntegrationsClick = useCallback(
+    (ev: React.MouseEvent<HTMLAnchorElement>) => {
+      ev.preventDefault();
+      history.push(manageIntegrationsHref);
+    },
+    [history, manageIntegrationsHref]
+  );
 
   const {
     allCategories,
@@ -75,10 +118,38 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
         categories={mainCategories}
         selectedCategory={selectedCategory}
         onCategoryChange={onCategoryChange}
+        CreateIntegrationCardButton={
+          canReadAutomaticImportIntegrations
+            ? automaticImportVTwo?.components.CreateIntegrationSideCardButton
+            : undefined
+        }
+        hasCreatedIntegrations={hasCreatedIntegrations}
+        onManageIntegrationsClick={onManageIntegrationsClick}
       />
       <EuiFlexItem grow={5}>
         <EuiFlexGroup direction="column" gutterSize="none">
-          <SearchAndFiltersBar />
+          {isManageIntegrationsView ? (
+            <StickyFlexItem>
+              <EuiFlexGroup gutterSize="s" alignItems="center">
+                <EuiFlexItem grow>
+                  <EuiFieldSearch
+                    compressed
+                    placeholder={i18n.translate(
+                      'xpack.fleet.epmList.manageIntegrations.searchPlaceholder',
+                      { defaultMessage: 'Search integrations' }
+                    )}
+                    fullWidth
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <CreateNewIntegrationButton />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              <EuiSpacer size="m" />
+            </StickyFlexItem>
+          ) : (
+            <SearchAndFiltersBar />
+          )}
           {noEprCallout ? noEprCallout : null}
           <EuiFlexItem
             grow={1}
@@ -88,7 +159,13 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
               backgroundColor: euiTheme.euiTheme.colors.backgroundBasePlain,
             }}
           >
-            {filteredCards.length === 0 && !isLoading ? (
+            {isManageIntegrationsView ? (
+              <ManageIntegrationsTable
+                integrations={integrations}
+                isLoading={isLoadingCreatedIntegrations}
+                isError={isCreatedIntegrationsError}
+              />
+            ) : filteredCards.length === 0 && !isLoading ? (
               <NoDataPrompt />
             ) : (
               <ResponsivePackageGrid
@@ -104,3 +181,13 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
     </EuiFlexGroup>
   );
 };
+
+function useEmptyAllIntegrations() {
+  return {
+    integrations: [] as CreatedIntegrationRow[],
+    isLoading: false,
+    isError: false,
+    error: null,
+    refetch: () => {},
+  };
+}

@@ -9,7 +9,6 @@
 import { mockContext } from '../../../__tests__/commands/context_fixtures';
 import { validate } from './validate';
 import { expectErrors } from '../../../__tests__/commands/validation';
-import { getNoValidCallSignatureError } from '../../definitions/utils/validation/utils';
 
 const forkExpectErrors = (query: string, expectedErrors: string[], context = mockContext) => {
   return expectErrors(query, expectedErrors, context, 'fork', validate);
@@ -81,17 +80,13 @@ describe('FORK Validation', () => {
   });
 
   describe('... (SUBCOMMAND ...) ...', () => {
-    test('validates within subcommands', () => {
+    test('does not validates subcommands', () => {
       forkExpectErrors(
         `FROM index
 | FORK
     (WHERE TO_UPPER(doubleField) != "" | LIMIT 100)
     (WHERE TO_LOWER(doubleField) == "" | WHERE TRIM(integerField))`,
-        [
-          getNoValidCallSignatureError('to_upper', ['double']),
-          getNoValidCallSignatureError('to_lower', ['double']),
-          getNoValidCallSignatureError('trim', ['integer']),
-        ]
+        []
       );
     });
 

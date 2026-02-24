@@ -26,3 +26,16 @@ export { useContentListSearch } from './search';
 // Selection feature.
 export type { UseContentListSelectionReturn } from './selection';
 export { useContentListSelection } from './selection';
+
+// Delete feature.
+export type {
+  DeleteConfirmationModalProps,
+  DeleteConfirmationComponentProps,
+  UseDeleteConfirmationOptions,
+  UseDeleteConfirmationReturn,
+} from '../components/delete';
+export {
+  DeleteConfirmationModal,
+  DeleteConfirmationComponent,
+  useDeleteConfirmation,
+} from '../components/delete';

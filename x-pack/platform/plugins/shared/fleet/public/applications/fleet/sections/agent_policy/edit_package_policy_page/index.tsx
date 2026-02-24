@@ -119,7 +119,7 @@ export const EditPackagePolicyForm = memo<{
   } = useConfig();
   const { getHref } = useLink();
   const { canUseMultipleAgentPolicies } = useMultipleAgentPolicies();
-  const { isAgentlessAgentPolicy, isAgentlessIntegration } = useAgentless();
+  const { isAgentlessAgentPolicy, getAgentlessStatusForPackage } = useAgentless();
   const {
     // data
     agentPolicies: existingAgentPolicies,
@@ -147,9 +147,9 @@ export const EditPackagePolicyForm = memo<{
     () =>
       existingAgentPolicies.length === 1
         ? existingAgentPolicies.some((policy) => isAgentlessAgentPolicy(policy)) &&
-          isAgentlessIntegration(packageInfo)
+          getAgentlessStatusForPackage(packageInfo).isAgentless
         : false,
-    [existingAgentPolicies, isAgentlessAgentPolicy, packageInfo, isAgentlessIntegration]
+    [existingAgentPolicies, isAgentlessAgentPolicy, packageInfo, getAgentlessStatusForPackage]
   );
 
   // Derive var_group_selections from policy for edit mode

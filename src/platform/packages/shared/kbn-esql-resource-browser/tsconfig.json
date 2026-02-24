@@ -6,23 +6,24 @@
       "jest",
       "node",
       "react",
-      "@emotion/react/types/css-prop"
+      "@kbn/ambient-ui-types",
+      "@kbn/ambient-storybook-types",
+      "@testing-library/jest-dom",
+      "@testing-library/react"
     ]
   },
   "include": [
-    ".storybook/**/*.ts",
-    ".storybook/**/*.tsx",
-    "src/**/*",
     "**/*.ts",
     "**/*.tsx"
-  ],
-  "exclude": [
-    "target/**/*"
   ],
   "kbn_references": [
     "@kbn/i18n",
     "@kbn/esql-types",
     "@kbn/react-field",
-    "@kbn/field-utils",
+    "@kbn/field-utils"
+  ],
+  "exclude": [
+    "target/**/*",
+    ".storybook/**/*"
   ]
 }

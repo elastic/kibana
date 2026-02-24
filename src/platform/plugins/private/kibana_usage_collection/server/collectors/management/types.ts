@@ -50,7 +50,6 @@ export interface UsageStats {
   'observability:aiAssistantSimulatedFunctionCalling': boolean;
   'observability:aiAssistantSearchConnectorIndexPattern': string;
   'ai:anonymizationSettings': string;
-  'agentBuilder:dashboardTools': boolean;
   'agentBuilder:navEnabled': boolean;
   'agentBuilder:externalMcp': boolean;
   'agentBuilder:experimentalFeatures': boolean;

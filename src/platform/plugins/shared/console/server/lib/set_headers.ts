@@ -9,13 +9,21 @@
 
 import { isPlainObject } from 'lodash';
 
-export function setHeaders(originalHeaders: object, newHeaders: object) {
-  if (!isPlainObject(originalHeaders)) {
+const isPlainObjectRecord = (value: unknown): value is Record<string, unknown> =>
+  isPlainObject(value);
+
+export function setHeaders(
+  originalHeaders: Record<string, string | string[] | undefined>,
+  newHeaders: Record<string, unknown>
+): Record<string, unknown>;
+export function setHeaders(originalHeaders: unknown, newHeaders: unknown): Record<string, unknown>;
+export function setHeaders(originalHeaders: unknown, newHeaders: unknown): Record<string, unknown> {
+  if (!isPlainObjectRecord(originalHeaders)) {
     throw new Error(
       `Expected originalHeaders to be an object, but ${typeof originalHeaders} given`
     );
   }
-  if (!isPlainObject(newHeaders)) {
+  if (!isPlainObjectRecord(newHeaders)) {
     throw new Error(`Expected newHeaders to be an object, but ${typeof newHeaders} given`);
   }
 

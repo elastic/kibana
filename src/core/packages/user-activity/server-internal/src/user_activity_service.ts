@@ -90,7 +90,7 @@ export class UserActivityService
     const injectedContext = this.getInjectedContext();
 
     if (!message) {
-      message = `User ${injectedContext.user?.username} performed ${event.action} on ${object.name} (${object.id})`;
+      message = `User ${injectedContext.user?.name} performed ${event.action} on ${object.name} (${object.id})`;
     }
 
     this.logger.info(message, { message, event, object, ...injectedContext });

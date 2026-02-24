@@ -250,20 +250,14 @@ describe('updateGapAutoFillScheduler()', () => {
       })
     );
 
-    // Authorization is checked for both existing and new rule types
-    expect(authorization.ensureAuthorized).toHaveBeenCalledTimes(2);
-    expect(authorization.ensureAuthorized).toHaveBeenCalledWith(
-      expect.objectContaining({
-        ruleTypeId: 'another-rule-type',
-        consumer: 'another-consumer',
-      })
-    );
-    expect(authorization.ensureAuthorized).toHaveBeenCalledWith(
-      expect.objectContaining({
-        ruleTypeId: 'test-rule-type',
-        consumer: 'test-consumer',
-      })
-    );
+    // Authorization is checked for the updated rule types
+    expect(authorization.bulkEnsureAuthorized).toHaveBeenCalledWith({
+      ruleTypeIdConsumersPairs: [
+        { ruleTypeId: updatedRuleTypes[0].type, consumers: [updatedRuleTypes[0].consumer] },
+      ],
+      operation: expect.any(String),
+      entity: expect.any(String),
+    });
   });
 
   test('validates params and throws on invalid payload', async () => {
@@ -283,7 +277,7 @@ describe('updateGapAutoFillScheduler()', () => {
 
   test('logs and rethrows when authorization fails', async () => {
     setupSchedulerSo();
-    (authorization.ensureAuthorized as jest.Mock).mockImplementationOnce(() => {
+    (authorization.bulkEnsureAuthorized as jest.Mock).mockImplementationOnce(() => {
       throw new Error('no access');
     });
 

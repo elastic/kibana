@@ -7,6 +7,7 @@
 
 import React, { memo, useEffect, useMemo, useCallback, useState } from 'react';
 import { useHistory } from 'react-router-dom';
+import { EuiButton } from '@elastic/eui';
 import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
 import { getScriptsLibraryPath } from '../../../../common/url_routing';
 import type {
@@ -25,6 +26,7 @@ import type { ScriptsLibraryUrlParams } from './scripts_library_url_params';
 import { useScriptsLibraryUrlParams } from './scripts_library_url_params';
 import { EndpointScriptFlyout } from './flyout';
 import { EndpointScriptDeleteModal } from './script_delete_modal';
+import { DiscardChangesModal } from './discard_changes_modal';
 
 interface ScriptsLibraryProps {
   'data-test-subj'?: string;
@@ -44,11 +46,14 @@ export const ScriptsLibrary = memo<ScriptsLibraryProps>(({ 'data-test-subj': dat
     show: showFromUrl,
   } = useScriptsLibraryUrlParams();
 
-  const shouldShowFlyoutForm = useMemo(() => {
-    return showFromUrl === 'create' || showFromUrl === 'edit' || showFromUrl === 'details';
-  }, [showFromUrl]);
+  const { canReadScriptsLibrary, canWriteScriptsLibrary } = useUserPrivileges().endpointPrivileges;
 
-  const { canReadScriptsLibrary } = useUserPrivileges().endpointPrivileges;
+  const shouldShowFlyoutForm = useMemo(() => {
+    return (
+      (canWriteScriptsLibrary && (showFromUrl === 'create' || showFromUrl === 'edit')) ||
+      showFromUrl === 'details'
+    );
+  }, [canWriteScriptsLibrary, showFromUrl]);
 
   const [selectedItemForFlyout, setSelectedItemForFlyout] = useState<undefined | EndpointScript>(
     undefined
@@ -56,6 +61,7 @@ export const ScriptsLibrary = memo<ScriptsLibraryProps>(({ 'data-test-subj': dat
   const [selectedItemForDelete, setSelectedItemForDelete] = useState<undefined | EndpointScript>(
     undefined
   );
+  const [showDiscardChangesModal, setShowDiscardChangesModal] = useState(false);
 
   const safePaging = useMemo(
     () => ({
@@ -162,7 +168,7 @@ export const ScriptsLibrary = memo<ScriptsLibraryProps>(({ 'data-test-subj': dat
     [history, queryParams]
   );
 
-  const onCloseFlyout = useCallback(() => {
+  const onConfirmCloseFlyout = useCallback(() => {
     setSelectedItemForFlyout(undefined);
     history.push(
       getScriptsLibraryPath({
@@ -175,21 +181,32 @@ export const ScriptsLibrary = memo<ScriptsLibraryProps>(({ 'data-test-subj': dat
     );
   }, [history, queryParams]);
 
+  const onCloseFlyout = useCallback(
+    (hasFormChanged: boolean) => {
+      if (!hasFormChanged) {
+        onConfirmCloseFlyout();
+      } else {
+        setShowDiscardChangesModal(true);
+      }
+    },
+    [onConfirmCloseFlyout]
+  );
+
   const onDeleteModalSuccess = useCallback(() => {
-    onCloseFlyout();
+    onConfirmCloseFlyout();
     setSelectedItemForDelete(undefined);
     reFetchEndpointScriptsList();
-  }, [onCloseFlyout, reFetchEndpointScriptsList]);
+  }, [onConfirmCloseFlyout, reFetchEndpointScriptsList]);
 
   const onDeleteModalCancel = useCallback(() => {
     setSelectedItemForDelete(undefined);
   }, []);
 
   const onSuccessCreateOrEdit = useCallback(() => {
-    onCloseFlyout();
+    onConfirmCloseFlyout();
     setSelectedItemForFlyout(undefined);
     reFetchEndpointScriptsList();
-  }, [onCloseFlyout, reFetchEndpointScriptsList]);
+  }, [onConfirmCloseFlyout, reFetchEndpointScriptsList]);
 
   useEffect(() => {
     if (!isFetching && scriptsLibraryFetchError) {
@@ -207,6 +224,18 @@ export const ScriptsLibrary = memo<ScriptsLibraryProps>(({ 'data-test-subj': dat
       title={pageLabels.pageTitle}
       subtitle={pageLabels.pageAboutInfo}
       hideHeader={false}
+      actions={
+        canWriteScriptsLibrary ? (
+          <EuiButton
+            fill
+            iconType="upload"
+            onClick={() => onClickAction({ show: 'create' })}
+            data-test-subj={getTestId('uploadScriptButton')}
+          >
+            {pageLabels.pageAddButtonTitle}
+          </EuiButton>
+        ) : null
+      }
     >
       {shouldShowFlyoutForm && (
         <EndpointScriptFlyout
@@ -217,6 +246,20 @@ export const ScriptsLibrary = memo<ScriptsLibraryProps>(({ 'data-test-subj': dat
           show={showFromUrl as Exclude<Required<ScriptsLibraryUrlParams>['show'], 'delete'>}
           scriptItem={selectedItemForFlyout}
           data-test-subj={getTestId(`endpointScriptFlyout-${showFromUrl}`)}
+        />
+      )}
+
+      {showDiscardChangesModal && (
+        <DiscardChangesModal
+          data-test-subj={getTestId('discard-changes-modal')}
+          show={
+            showFromUrl as Exclude<Required<ScriptsLibraryUrlParams>['show'], 'delete' | 'details'>
+          }
+          onCancel={() => setShowDiscardChangesModal(false)}
+          onConfirm={() => {
+            setShowDiscardChangesModal(false);
+            onConfirmCloseFlyout();
+          }}
         />
       )}
 

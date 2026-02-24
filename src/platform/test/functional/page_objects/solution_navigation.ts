@@ -330,9 +330,6 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
         }
       },
       async clickPanelLink(navId: string) {
-        // TODO: find a better way without trying to collapse every time
-        // https://github.com/elastic/kibana/issues/236242
-        await collapseMoreIfNeeded();
         // TODO: properly distinguish between panel link and main nav link
         // https://github.com/elastic/kibana/issues/236242
         await testSubjects.click(`~nav-item-id-${navId}`);

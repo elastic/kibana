@@ -19,7 +19,6 @@ project:
     sourceRoot: examples/portable_dashboards_example
 dependsOn:
   - '@kbn/core'
-  - '@kbn/es-query'
   - '@kbn/data-plugin'
   - '@kbn/dashboard-plugin'
   - '@kbn/navigation-plugin'
@@ -33,6 +32,7 @@ dependsOn:
   - '@kbn/control-group-renderer'
   - '@kbn/ui-actions-plugin'
   - '@kbn/presentation-util-plugin'
+  - '@kbn/as-code-filters-schema'
 tags:
   - plugin
   - prod

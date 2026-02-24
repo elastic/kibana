@@ -1888,7 +1888,7 @@ describe('Agent policy', () => {
       mockedAppContextService.getInternalUserESClient.mockReturnValue(esClient);
       mockedOutputService.getDefaultDataOutputId.mockResolvedValueOnce('default-output');
       mockedGetFullAgentPolicy.mockResolvedValue({
-        id: 'policy123',
+        id: 'test-agentless-policy',
         revision: 1,
         namespaces: ['mySpace'],
         inputs: [
@@ -1955,7 +1955,7 @@ describe('Agent policy', () => {
       mockedAppContextService.getInternalUserESClient.mockReturnValue(esClient);
       mockedOutputService.getDefaultDataOutputId.mockResolvedValueOnce('default-output');
       mockedGetFullAgentPolicy.mockResolvedValue({
-        id: 'policy123',
+        id: 'test-agentless-policy',
         revision: 1,
         namespaces: ['mySpace'],
         inputs: [

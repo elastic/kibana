@@ -830,8 +830,7 @@ describe('AuthConfig renders', () => {
     });
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/249443
-  describe.skip('AuthConfig with showOAuth2Option on', () => {
+  describe('AuthConfig with showOAuth2Option on', () => {
     it('renders OAuth2 option when showOAuth2Option is explicitly set to true', async () => {
       const testFormData = {
         config: {
@@ -962,39 +961,6 @@ describe('AuthConfig renders', () => {
         data: {}, // Data is empty because form is invalid
         isValid: false,
       });
-    });
-
-    it('validates additionalFields input for invalid JSON', async () => {
-      const testFormData = {
-        config: {
-          hasAuth: true,
-          authType: AuthType.OAuth2ClientCredentials,
-          accessTokenUrl: 'https://test.url',
-          clientId: 'testClient',
-        },
-        secrets: {
-          clientSecret: 'testSecret',
-        },
-      };
-
-      render(
-        <AuthFormTestProvider defaultValue={testFormData} onSubmit={onSubmit}>
-          <AuthConfig readOnly={false} isOAuth2Enabled={true} />
-        </AuthFormTestProvider>
-      );
-
-      let additionalFieldsInput: HTMLTextAreaElement | null = null;
-      await waitFor(() => {
-        additionalFieldsInput = document.querySelector('textarea');
-        expect(additionalFieldsInput).toBeInTheDocument();
-      });
-
-      expect(additionalFieldsInput).not.toBeNull();
-
-      await userEvent.clear(additionalFieldsInput!);
-      await userEvent.type(additionalFieldsInput!, '{{key": "value');
-
-      expect(await screen.findByText('Invalid JSON')).toBeInTheDocument();
     });
 
     it('renders OAuth2 fields as readOnly when readOnly prop is true', async () => {

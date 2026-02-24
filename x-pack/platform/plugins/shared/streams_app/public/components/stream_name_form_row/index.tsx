@@ -7,9 +7,8 @@
 
 import {
   EuiFieldText,
-  EuiFormLabel,
+  EuiFormPrepend,
   EuiFormRow,
-  EuiIcon,
   EuiLink,
   EuiScreenReaderOnly,
   EuiTextTruncate,
@@ -237,16 +236,12 @@ export function StreamNameFormRow({
         onChange={handleChange}
         minLength={MIN_NAME_LENGTH}
         prepend={
-          prefix
-            ? [
-                <EuiIcon type="streamsWired" />,
-                <EuiFormLabel
-                  css={css`
-                    inline-size: min(${prefix.length}ch, ${PREFIX_MAX_VISIBLE_CHARACTERS}ch);
-                  `}
-                  id={descriptionId}
-                  data-test-subj="streamsAppRoutingStreamNamePrefix"
-                >
+          prefix ? (
+            <EuiFormPrepend
+              id={descriptionId}
+              iconLeft="streamsWired"
+              label={
+                <>
                   <EuiScreenReaderOnly>
                     <span>
                       {i18n.translate('xpack.streams.streamDetailRouting.screenReaderPrefixLabel', {
@@ -259,9 +254,16 @@ export function StreamNameFormRow({
                     truncation="start"
                     data-test-subj={`streamNamePrefix`}
                   />
-                </EuiFormLabel>,
-              ]
-            : undefined
+                </>
+              }
+              css={css`
+                .euiFormLabel {
+                  inline-size: min(${prefix.length}ch, ${PREFIX_MAX_VISIBLE_CHARACTERS}ch);
+                }
+              `}
+              data-test-subj="streamsAppRoutingStreamNamePrefix"
+            />
+          ) : undefined
         }
       />
     </EuiFormRow>

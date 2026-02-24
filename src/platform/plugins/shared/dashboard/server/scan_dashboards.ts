@@ -40,7 +40,7 @@ export async function scanDashboards(
   const { core } = await ctx.resolve(['core']);
   const soResponse = await core.savedObjects.client.find<DashboardSavedObjectAttributes>({
     type: DASHBOARD_SAVED_OBJECT_TYPE,
-    fields: ['description', 'title', 'panelsJSON'],
+    fields: ['description', 'title', 'panelsJSON', 'sections'],
     perPage,
     page,
   });

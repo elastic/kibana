@@ -16,7 +16,12 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { EMPTY_FILTER_MESSAGE, GROUP_BY_NONE, GROUP_BY_MODELS } from '../../../common/translations';
+import {
+  EMPTY_FILTER_MESSAGE,
+  GROUP_BY_NONE,
+  GROUP_BY_MODELS,
+  GROUP_BY_SERVICE,
+} from '../../../common/translations';
 import { GroupByOptions } from '../../types';
 import { GroupByFilterButton, GroupBySelectableContainer } from './styles';
 
@@ -34,12 +39,18 @@ const GROUP_BY_OPTIONS = [
     key: GroupByOptions.Model,
     label: GROUP_BY_MODELS,
   },
+  {
+    key: GroupByOptions.Service,
+    label: GROUP_BY_SERVICE,
+  },
 ];
 
 function parseGroupByValue(value: string | undefined): GroupByOptions {
   switch (value) {
     case GroupByOptions.Model:
       return GroupByOptions.Model;
+    case GroupByOptions.Service:
+      return GroupByOptions.Service;
     case GroupByOptions.None:
     default:
       return GroupByOptions.None;

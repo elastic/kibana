@@ -11,9 +11,14 @@ import type { Download } from 'playwright-core';
 import type { Locator } from '../../..';
 import type { ScoutPage } from '..';
 import { expect } from '..';
+import { KibanaCodeEditorWrapper } from '../ui_components';
 
 export class DiscoverApp {
-  constructor(private readonly page: ScoutPage) {}
+  private readonly codeEditor: KibanaCodeEditorWrapper;
+
+  constructor(private readonly page: ScoutPage) {
+    this.codeEditor = new KibanaCodeEditorWrapper(page);
+  }
 
   async goto() {
     await this.page.gotoApp('discover');
@@ -325,6 +330,13 @@ export class DiscoverApp {
       await this.page.testSubj.click('select-text-based-language-btn');
       await this.waitForDocTableRendered();
     }
+  }
+
+  async writeEsqlQuery(query: string) {
+    await this.selectTextBaseLang();
+    await this.codeEditor.setCodeEditorValue(query);
+    await this.page.testSubj.click('querySubmitButton');
+    await this.waitUntilSearchingHasFinished();
   }
 
   async waitForDataGridRowWithRefresh(rowLocator: Locator, timeout = 30_000) {

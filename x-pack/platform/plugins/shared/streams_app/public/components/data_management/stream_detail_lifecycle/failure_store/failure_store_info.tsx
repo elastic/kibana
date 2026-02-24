@@ -55,7 +55,11 @@ export const FailureStoreInfo = ({
         }
       >
         {definition.privileges.lifecycle ? (
-          <FailureStoreSummary stats={stats} failureStoreConfig={failureStoreConfig} />
+          <FailureStoreSummary
+            stats={stats}
+            failureStoreConfig={failureStoreConfig}
+            canManageLifecycle={definition.privileges.lifecycle}
+          />
         ) : null}
       </SectionPanel>
       {/* Ingestion Section */}

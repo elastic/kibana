@@ -498,8 +498,8 @@ evaluate.describe('Pattern extraction quality evaluation', () => {
         dataset.examples.forEach((example, idx) => {
           evaluate(
             `${idx + 1}. ${example.input.stream_name}`,
-            async ({ phoenixClient, kbnClient, connector, evaluators }) => {
-              await phoenixClient.runExperiment(
+            async ({ executorClient, kbnClient, connector, evaluators }) => {
+              await executorClient.runExperiment(
                 {
                   dataset: {
                     name: `${label} - ${example.input.stream_name}`,

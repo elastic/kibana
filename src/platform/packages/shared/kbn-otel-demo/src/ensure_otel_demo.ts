@@ -88,7 +88,7 @@ function normalizeElasticsearchHost(host: string): string {
  * @param signal - Abort signal for cleanup
  * @param demoType - Type of demo to deploy (default: 'otel-demo')
  * @param configPath - Optional path to Kibana config file
- * @param logsIndex - Index name for logs (defaults to "logs")
+ * @param logsIndex - Index name for logs (defaults to "logs.otel")
  * @param version - Demo version (defaults to demo's defaultVersion)
  * @param teardown - If true, stops and removes the deployment
  * @param scenarioIds - Optional list of failure scenario IDs to apply

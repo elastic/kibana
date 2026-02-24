@@ -616,7 +616,7 @@
           "ChatCompletion"
         ],
         "path": "src/platform/packages/shared/kbn-ftr-llm-proxy/proxy/create_response.ts",
-        "lineNumber": 41,
+        "lineNumber": 58,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -638,7 +638,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-ftr-llm-proxy/proxy/create_response.ts",
-            "lineNumber": 41,
+            "lineNumber": 58,
             "columnNumber": 38,
             "deprecated": false,
             "trackAdoption": false,
@@ -877,11 +877,11 @@
         "label": "ToolMessage",
         "description": [],
         "signature": [
-          "{ role: \"assistant\"; content: string | null; audio?: ",
-          "ChatCompletionAudio",
-          " | null | undefined; annotations?: ",
+          "{ annotations?: ",
           "ChatCompletionMessage",
-          ".Annotation[] | undefined; tool_calls?: ",
+          ".Annotation[] | undefined; role: \"assistant\"; content: string | null; audio?: ",
+          "ChatCompletionAudio",
+          " | null | undefined; tool_calls?: ",
           "ChatCompletionMessageToolCall",
           "[] | undefined; function_call?: ",
           "ChatCompletionMessage",

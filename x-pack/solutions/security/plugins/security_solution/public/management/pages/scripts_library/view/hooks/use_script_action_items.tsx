@@ -48,19 +48,18 @@ export const useScriptActionItems = ({
             },
           ]
         : []),
-      // TODO : un comment in the next PR when edit flyout is added
-      // ...(canWriteScriptsLibrary
-      // ? [
-      //     {
-      //       'data-test-subj': 'actionEdit',
-      //       icon: 'pencil',
-      //       key: 'edit',
-      //       name: tableActionLabels.table.actions.edit,
-      //       onClick: () => onClickAction({ show: 'edit', script }),
-      //       children: renderActionItem(tableActionLabels.table.actions.edit),
-      //     },
-      //   ]
-      // : []),
+      ...(canWriteScriptsLibrary
+        ? [
+            {
+              'data-test-subj': 'actionEdit',
+              icon: 'pencil',
+              key: 'edit',
+              name: tableActionLabels.table.actions.edit,
+              onClick: () => onClickAction({ show: 'edit', script }),
+              children: renderActionItem(tableActionLabels.table.actions.edit),
+            },
+          ]
+        : []),
       ...(canReadScriptsLibrary
         ? [
             {

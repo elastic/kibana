@@ -113,7 +113,7 @@
             "tags": [],
             "label": "initial",
             "description": [
-              "The initial value that subsequent\nitems will concat with"
+              "The initial value that subsequent"
             ],
             "signature": [
               "T | undefined"
@@ -381,7 +381,7 @@
             "tags": [],
             "label": "initial",
             "description": [
-              "Initial value for the stream, if undefined\nthen the first chunk provided is used as the\ninitial value."
+              "Initial value for the stream, if undefined"
             ],
             "signature": [
               "T | undefined"

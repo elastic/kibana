@@ -34,6 +34,14 @@ const mockWorkflowExecuteManualForm = jest.fn(() => null);
 jest.mock('./workflow_execute_manual_form', () => ({
   WorkflowExecuteManualForm: () => mockWorkflowExecuteManualForm(),
 }));
+const mockWorkflowExecuteHistoricalForm = jest.fn(() => null);
+jest.mock('./workflow_execute_historical_form', () => ({
+  WorkflowExecuteHistoricalForm: () => mockWorkflowExecuteHistoricalForm(),
+}));
+
+jest.mock('../../../entities/workflows/model/use_workflow_execution', () => ({
+  useWorkflowExecution: () => ({ data: null, isLoading: false }),
+}));
 
 // Mock the translations
 jest.mock('../../../../common/translations', () => ({
@@ -59,6 +67,7 @@ describe('WorkflowExecuteModal', () => {
     mockWorkflowExecuteEventForm.mockClear();
     mockWorkflowExecuteIndexForm.mockClear();
     mockWorkflowExecuteManualForm.mockClear();
+    mockWorkflowExecuteHistoricalForm.mockClear();
   });
 
   describe('Basic rendering', () => {
@@ -86,8 +95,9 @@ describe('WorkflowExecuteModal', () => {
       );
 
       expect(getByText('Alert')).toBeInTheDocument();
-      expect(getByText('Index')).toBeInTheDocument();
+      expect(getByText('Document')).toBeInTheDocument();
       expect(getByText('Manual')).toBeInTheDocument();
+      expect(getByText('Historical')).toBeInTheDocument();
     });
 
     it('renders trigger descriptions', () => {
@@ -100,9 +110,10 @@ describe('WorkflowExecuteModal', () => {
         />
       );
 
-      expect(getByText('Manual trigger description')).toBeInTheDocument();
-      expect(getByText('Index trigger description')).toBeInTheDocument();
-      expect(getByText('Alert trigger description')).toBeInTheDocument();
+      expect(getByText('Provide custom JSON data manually.')).toBeInTheDocument();
+      expect(getByText('Choose a document from Elasticsearch.')).toBeInTheDocument();
+      expect(getByText('Choose an existing alert directly.')).toBeInTheDocument();
+      expect(getByText('Reuse input data from previous executions.')).toBeInTheDocument();
     });
 
     it('renders the execute button', () => {
@@ -168,7 +179,7 @@ describe('WorkflowExecuteModal', () => {
         />
       );
 
-      const indexButton = getByText('Index').closest('button');
+      const indexButton = getByText('Document').closest('button');
       fireEvent.click(indexButton!);
 
       await waitFor(() => {
@@ -235,8 +246,8 @@ describe('WorkflowExecuteModal', () => {
       // Initially, event form should be called (alert is default)
       expect(mockWorkflowExecuteEventForm).toHaveBeenCalledTimes(1);
 
-      // Click index trigger
-      const indexButton = getByText('Index').closest('button');
+      // Click index (Document) trigger
+      const indexButton = getByText('Document').closest('button');
       fireEvent.click(indexButton!);
 
       await waitFor(() => {
@@ -377,6 +388,63 @@ describe('WorkflowExecuteModal', () => {
 
       const executeButton = getByTestId('executeWorkflowButton');
       expect(executeButton).not.toBeDisabled();
+    });
+  });
+
+  describe('Historical trigger', () => {
+    it('defaults to historical tab when initialExecutionId is provided', () => {
+      const { getByText } = renderWithProviders(
+        <WorkflowExecuteModal
+          isTestRun={false}
+          definition={null}
+          onClose={mockOnClose}
+          onSubmit={mockOnSubmit}
+          initialExecutionId="exec-123"
+        />
+      );
+
+      const historicalButton = getByText('Historical').closest('button');
+      const historicalRadio = historicalButton?.querySelector('input[type="radio"]');
+      expect(historicalRadio).toBeChecked();
+    });
+
+    it('renders historical form when historical trigger is clicked', async () => {
+      const { getByText } = renderWithProviders(
+        <WorkflowExecuteModal
+          isTestRun={false}
+          definition={null}
+          onClose={mockOnClose}
+          onSubmit={mockOnSubmit}
+        />
+      );
+
+      const historicalButton = getByText('Historical').closest('button');
+      fireEvent.click(historicalButton!);
+
+      await waitFor(() => {
+        expect(mockWorkflowExecuteHistoricalForm).toHaveBeenCalled();
+      });
+    });
+
+    it('should keep historical tab when initialExecutionId is set and definition has alert triggers', () => {
+      const { getByText } = renderWithProviders(
+        <WorkflowExecuteModal
+          isTestRun={false}
+          definition={{
+            ...baseWorkflowDefinition,
+            triggers: [{ type: 'alert' }],
+          }}
+          onClose={mockOnClose}
+          onSubmit={mockOnSubmit}
+          initialExecutionId="exec-123"
+        />
+      );
+
+      // Without initialExecutionId, the useEffect would switch to 'alert'.
+      // With initialExecutionId, it skips the default trigger selection.
+      const historicalButton = getByText('Historical').closest('button');
+      const historicalRadio = historicalButton?.querySelector('input[type="radio"]');
+      expect(historicalRadio).toBeChecked();
     });
   });
 

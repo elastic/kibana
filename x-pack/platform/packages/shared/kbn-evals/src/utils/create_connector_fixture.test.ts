@@ -95,14 +95,20 @@ describe('createConnectorFixture', () => {
       use: mockUse,
     });
 
-    // First call: DELETE (setup cleanup)
+    // First call: GET (check if connector is preconfigured)
     expect(mockFetch).toHaveBeenNthCalledWith(1, {
+      path: `/api/actions/connector/${predefinedConnector.id}`,
+      method: 'GET',
+    });
+
+    // Second call: DELETE (setup cleanup)
+    expect(mockFetch).toHaveBeenNthCalledWith(2, {
       path: `/api/actions/connector/${expectedUuid}`,
       method: 'DELETE',
     });
 
-    // Second call: POST (create)
-    expect(mockFetch).toHaveBeenNthCalledWith(2, {
+    // Third call: POST (create)
+    expect(mockFetch).toHaveBeenNthCalledWith(3, {
       path: `/api/actions/connector/${expectedUuid}`,
       method: 'POST',
       body: JSON.stringify({
@@ -162,8 +168,8 @@ describe('createConnectorFixture', () => {
       use: mockUse,
     });
 
-    // Order: DELETE (cleanup), POST (create), use(), DELETE (teardown)
-    expect(callOrder).toEqual(['DELETE', 'POST', 'use', 'DELETE']);
+    // Order: GET (preconfigured check), DELETE (cleanup), POST (create), use(), DELETE (teardown)
+    expect(callOrder).toEqual(['GET', 'DELETE', 'POST', 'use', 'DELETE']);
   });
 
   it('swallows 404 errors on delete', async () => {
@@ -175,8 +181,11 @@ describe('createConnectorFixture', () => {
       config: {} as any,
     });
 
-    // First call (setup delete) rejects with 404, rest succeed
-    mockFetch.mockRejectedValueOnce(axiosError).mockResolvedValue(undefined);
+    // First call (preconfigured check) succeeds, second call (setup delete) rejects with 404, rest succeed
+    mockFetch
+      .mockResolvedValueOnce({ is_preconfigured: false })
+      .mockRejectedValueOnce(axiosError)
+      .mockResolvedValue(undefined);
 
     await expect(
       createConnectorFixture({
@@ -200,7 +209,8 @@ describe('createConnectorFixture', () => {
       config: {} as any,
     });
 
-    mockFetch.mockRejectedValueOnce(serverError);
+    // First call (preconfigured check) succeeds, second call (setup delete) fails hard
+    mockFetch.mockResolvedValueOnce({ is_preconfigured: false }).mockRejectedValueOnce(serverError);
 
     await expect(
       createConnectorFixture({
@@ -213,6 +223,24 @@ describe('createConnectorFixture', () => {
 
     // Should not proceed to use()
     expect(mockUse).not.toHaveBeenCalled();
+  });
+
+  it('reuses a preconfigured connector and skips create/delete', async () => {
+    mockFetch.mockResolvedValueOnce({ is_preconfigured: true });
+
+    await createConnectorFixture({
+      predefinedConnector,
+      fetch: mockFetch,
+      log: mockLog,
+      use: mockUse,
+    });
+
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+    expect(mockFetch).toHaveBeenCalledWith({
+      path: `/api/actions/connector/${predefinedConnector.id}`,
+      method: 'GET',
+    });
+    expect(mockUse).toHaveBeenCalledWith(predefinedConnector);
   });
 
   describe('when KBN_EVALS_SKIP_CONNECTOR_SETUP is set', () => {

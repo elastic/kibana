@@ -992,7 +992,7 @@
             "label": "toolbar",
             "description": [],
             "signature": [
-              "{ toggleActions?: React.ReactElement<any, string | React.JSXElementConstructor<any>> | undefined; leftSide?: React.ReactNode; rightSide?: ",
+              "{ toggleActions?: React.ReactElement<any> | undefined; leftSide?: React.ReactNode; rightSide?: ",
               {
                 "pluginId": "@kbn/shared-ux-button-toolbar",
                 "scope": "public",
@@ -1016,7 +1016,7 @@
             "label": "toolbarWrapAt",
             "description": [],
             "signature": [
-              "\"m\" | \"s\" | \"l\" | \"xl\" | \"xxl\" | \"xs\" | undefined"
+              "\"m\" | \"s\" | \"xs\" | \"l\" | \"xl\" | \"xxl\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart_section_template.tsx",
             "lineNumber": 29,
@@ -1037,7 +1037,7 @@
           "\nEmitted when the histogram loading status changes"
         ],
         "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
-        "lineNumber": 81,
+        "lineNumber": 82,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1079,7 +1079,7 @@
               " | undefined; }"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
-            "lineNumber": 85,
+            "lineNumber": 86,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1096,15 +1096,15 @@
             "signature": [
               {
                 "pluginId": "@kbn/presentation-publishing",
-                "scope": "public",
+                "scope": "common",
                 "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-public.PublishingSubject",
+                "section": "def-common.PublishingSubject",
                 "text": "PublishingSubject"
               },
               "<boolean | undefined> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
-            "lineNumber": 89,
+            "lineNumber": 90,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1250,7 +1250,7 @@
             "label": "renderCustomChartToggleActions",
             "description": [],
             "signature": [
-              "(() => React.ReactElement<any, string | React.JSXElementConstructor<any>> | undefined) | undefined"
+              "(() => React.ReactElement<any> | undefined) | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
             "lineNumber": 61,
@@ -1433,9 +1433,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/presentation-publishing",
-                "scope": "public",
+                "scope": "common",
                 "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-public.PublishingSubject",
+                "section": "def-common.PublishingSubject",
                 "text": "PublishingSubject"
               },
               "<boolean | undefined> | undefined"
@@ -1793,7 +1793,7 @@
         "label": "UnifiedHistogramFetchParamsExternal",
         "description": [],
         "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
-        "lineNumber": 181,
+        "lineNumber": 182,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1818,7 +1818,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
-            "lineNumber": 182,
+            "lineNumber": 183,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1836,7 +1836,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
-            "lineNumber": 186,
+            "lineNumber": 187,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1854,7 +1854,7 @@
               "AbortController | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
-            "lineNumber": 190,
+            "lineNumber": 191,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1878,7 +1878,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
-            "lineNumber": 194,
+            "lineNumber": 195,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1911,7 +1911,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
-            "lineNumber": 198,
+            "lineNumber": 199,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1936,7 +1936,7 @@
               "[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
-            "lineNumber": 202,
+            "lineNumber": 203,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1961,7 +1961,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
-            "lineNumber": 206,
+            "lineNumber": 207,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1986,7 +1986,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
-            "lineNumber": 210,
+            "lineNumber": 211,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2011,7 +2011,7 @@
               "[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
-            "lineNumber": 214,
+            "lineNumber": 215,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2033,18 +2033,10 @@
                 "section": "def-public.ControlPanelsState",
                 "text": "ControlPanelsState"
               },
-              "<",
-              {
-                "pluginId": "@kbn/esql-types",
-                "scope": "common",
-                "docId": "kibKbnEsqlTypesPluginApi",
-                "section": "def-common.ESQLControlState",
-                "text": "ESQLControlState"
-              },
-              "> | undefined"
+              "<Readonly<{ description?: string | undefined; title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; single_select?: boolean | undefined; available_options?: string[] | undefined; } & { selected_options: string[]; variable_name: string; variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; esql_query: string; control_type: \"STATIC_VALUES\" | \"VALUES_FROM_QUERY\"; }>> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
-            "lineNumber": 218,
+            "lineNumber": 219,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2069,7 +2061,7 @@
               "[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
-            "lineNumber": 222,
+            "lineNumber": 223,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2094,7 +2086,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
-            "lineNumber": 226,
+            "lineNumber": 227,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2112,7 +2104,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
-            "lineNumber": 230,
+            "lineNumber": 231,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2130,7 +2122,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
-            "lineNumber": 234,
+            "lineNumber": 235,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2155,7 +2147,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
-            "lineNumber": 238,
+            "lineNumber": 239,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2170,7 +2162,7 @@
               "\nCallback to modify the default Lens vis attributes used in the chart"
             ],
             "signature": [
-              "((attributes: { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+              "((attributes: { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
               {
                 "pluginId": "@kbn/content-management-utils",
                 "scope": "server",
@@ -2242,7 +2234,7 @@
                 "section": "def-common.XYState",
                 "text": "XYState"
               },
-              "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+              "; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
               {
                 "pluginId": "@kbn/content-management-utils",
                 "scope": "server",
@@ -2314,7 +2306,7 @@
                 "section": "def-common.LensPartitionVisualizationState",
                 "text": "LensPartitionVisualizationState"
               },
-              "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+              "; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
               {
                 "pluginId": "@kbn/content-management-utils",
                 "scope": "server",
@@ -2386,7 +2378,7 @@
                 "section": "def-common.HeatmapVisualizationState",
                 "text": "HeatmapVisualizationState"
               },
-              "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+              "; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
               {
                 "pluginId": "@kbn/content-management-utils",
                 "scope": "server",
@@ -2458,7 +2450,7 @@
                 "section": "def-common.GaugeVisualizationState",
                 "text": "GaugeVisualizationState"
               },
-              "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+              "; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
               {
                 "pluginId": "@kbn/content-management-utils",
                 "scope": "server",
@@ -2530,7 +2522,7 @@
                 "section": "def-common.DatatableVisualizationState",
                 "text": "DatatableVisualizationState"
               },
-              "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+              "; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
               {
                 "pluginId": "@kbn/content-management-utils",
                 "scope": "server",
@@ -2644,7 +2636,7 @@
                 "section": "def-common.CustomPaletteParams",
                 "text": "CustomPaletteParams"
               },
-              "> | undefined; }; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+              "> | undefined; }; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
               {
                 "pluginId": "@kbn/content-management-utils",
                 "scope": "server",
@@ -2716,7 +2708,7 @@
                 "section": "def-common.MetricVisualizationState",
                 "text": "MetricVisualizationState"
               },
-              "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+              "; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
               {
                 "pluginId": "@kbn/content-management-utils",
                 "scope": "server",
@@ -2788,7 +2780,7 @@
                 "section": "def-common.ChoroplethChartState",
                 "text": "ChoroplethChartState"
               },
-              "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+              "; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
               {
                 "pluginId": "@kbn/content-management-utils",
                 "scope": "server",
@@ -2860,7 +2852,7 @@
                 "section": "def-common.LensTagCloudState",
                 "text": "LensTagCloudState"
               },
-              "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+              "; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
               {
                 "pluginId": "@kbn/content-management-utils",
                 "scope": "server",
@@ -2924,7 +2916,7 @@
                 "section": "def-common.TextBasedPersistedState",
                 "text": "TextBasedPersistedState"
               },
-              " | undefined; }; visualization: unknown; }; }) => { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+              " | undefined; }; visualization: unknown; }; }) => { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
               {
                 "pluginId": "@kbn/content-management-utils",
                 "scope": "server",
@@ -2996,7 +2988,7 @@
                 "section": "def-common.XYState",
                 "text": "XYState"
               },
-              "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+              "; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
               {
                 "pluginId": "@kbn/content-management-utils",
                 "scope": "server",
@@ -3068,7 +3060,7 @@
                 "section": "def-common.LensPartitionVisualizationState",
                 "text": "LensPartitionVisualizationState"
               },
-              "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+              "; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
               {
                 "pluginId": "@kbn/content-management-utils",
                 "scope": "server",
@@ -3140,7 +3132,7 @@
                 "section": "def-common.HeatmapVisualizationState",
                 "text": "HeatmapVisualizationState"
               },
-              "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+              "; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
               {
                 "pluginId": "@kbn/content-management-utils",
                 "scope": "server",
@@ -3212,7 +3204,7 @@
                 "section": "def-common.GaugeVisualizationState",
                 "text": "GaugeVisualizationState"
               },
-              "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+              "; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
               {
                 "pluginId": "@kbn/content-management-utils",
                 "scope": "server",
@@ -3284,7 +3276,7 @@
                 "section": "def-common.DatatableVisualizationState",
                 "text": "DatatableVisualizationState"
               },
-              "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+              "; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
               {
                 "pluginId": "@kbn/content-management-utils",
                 "scope": "server",
@@ -3398,7 +3390,7 @@
                 "section": "def-common.CustomPaletteParams",
                 "text": "CustomPaletteParams"
               },
-              "> | undefined; }; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+              "> | undefined; }; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
               {
                 "pluginId": "@kbn/content-management-utils",
                 "scope": "server",
@@ -3470,7 +3462,7 @@
                 "section": "def-common.MetricVisualizationState",
                 "text": "MetricVisualizationState"
               },
-              "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+              "; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
               {
                 "pluginId": "@kbn/content-management-utils",
                 "scope": "server",
@@ -3542,7 +3534,7 @@
                 "section": "def-common.ChoroplethChartState",
                 "text": "ChoroplethChartState"
               },
-              "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+              "; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
               {
                 "pluginId": "@kbn/content-management-utils",
                 "scope": "server",
@@ -3614,7 +3606,7 @@
                 "section": "def-common.LensTagCloudState",
                 "text": "LensTagCloudState"
               },
-              "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+              "; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
               {
                 "pluginId": "@kbn/content-management-utils",
                 "scope": "server",
@@ -3681,7 +3673,7 @@
               " | undefined; }; visualization: unknown; }; }) | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
-            "lineNumber": 242,
+            "lineNumber": 243,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3694,7 +3686,7 @@
                 "label": "attributes",
                 "description": [],
                 "signature": [
-                  "{ version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+                  "{ version?: 2 | undefined; description?: string | undefined; title: string; references: ",
                   {
                     "pluginId": "@kbn/content-management-utils",
                     "scope": "server",
@@ -3766,7 +3758,7 @@
                     "section": "def-common.XYState",
                     "text": "XYState"
                   },
-                  "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+                  "; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
                   {
                     "pluginId": "@kbn/content-management-utils",
                     "scope": "server",
@@ -3838,7 +3830,7 @@
                     "section": "def-common.LensPartitionVisualizationState",
                     "text": "LensPartitionVisualizationState"
                   },
-                  "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+                  "; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
                   {
                     "pluginId": "@kbn/content-management-utils",
                     "scope": "server",
@@ -3910,7 +3902,7 @@
                     "section": "def-common.HeatmapVisualizationState",
                     "text": "HeatmapVisualizationState"
                   },
-                  "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+                  "; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
                   {
                     "pluginId": "@kbn/content-management-utils",
                     "scope": "server",
@@ -3982,7 +3974,7 @@
                     "section": "def-common.GaugeVisualizationState",
                     "text": "GaugeVisualizationState"
                   },
-                  "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+                  "; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
                   {
                     "pluginId": "@kbn/content-management-utils",
                     "scope": "server",
@@ -4054,7 +4046,7 @@
                     "section": "def-common.DatatableVisualizationState",
                     "text": "DatatableVisualizationState"
                   },
-                  "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+                  "; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
                   {
                     "pluginId": "@kbn/content-management-utils",
                     "scope": "server",
@@ -4168,7 +4160,7 @@
                     "section": "def-common.CustomPaletteParams",
                     "text": "CustomPaletteParams"
                   },
-                  "> | undefined; }; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+                  "> | undefined; }; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
                   {
                     "pluginId": "@kbn/content-management-utils",
                     "scope": "server",
@@ -4240,7 +4232,7 @@
                     "section": "def-common.MetricVisualizationState",
                     "text": "MetricVisualizationState"
                   },
-                  "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+                  "; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
                   {
                     "pluginId": "@kbn/content-management-utils",
                     "scope": "server",
@@ -4312,7 +4304,7 @@
                     "section": "def-common.ChoroplethChartState",
                     "text": "ChoroplethChartState"
                   },
-                  "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+                  "; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
                   {
                     "pluginId": "@kbn/content-management-utils",
                     "scope": "server",
@@ -4384,7 +4376,7 @@
                     "section": "def-common.LensTagCloudState",
                     "text": "LensTagCloudState"
                   },
-                  "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+                  "; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
                   {
                     "pluginId": "@kbn/content-management-utils",
                     "scope": "server",
@@ -4451,7 +4443,7 @@
                   " | undefined; }; visualization: unknown; }; }"
                 ],
                 "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
-                "lineNumber": 246,
+                "lineNumber": 247,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4473,7 +4465,7 @@
           "\nThe services required by the Unified Histogram components"
         ],
         "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
-        "lineNumber": 51,
+        "lineNumber": 52,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -4495,7 +4487,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
-            "lineNumber": 55,
+            "lineNumber": 56,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4508,17 +4500,15 @@
             "label": "uiActions",
             "description": [],
             "signature": [
-              "{ readonly registerTrigger: (trigger: ",
+              "{ readonly getTrigger: (triggerId: string) => ",
               {
-                "pluginId": "@kbn/ui-actions-browser",
-                "scope": "common",
-                "docId": "kibKbnUiActionsBrowserPluginApi",
-                "section": "def-common.Trigger",
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.Trigger",
                 "text": "Trigger"
               },
-              ") => void; readonly hasTrigger: (triggerId: string) => boolean; readonly getTrigger: (triggerId: string) => ",
-              "TriggerContract",
-              "<object>; readonly registerAction: <Context extends object>(definition: ",
+              "; readonly registerAction: <Context extends object>(definition: ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -4590,12 +4580,12 @@
                 "section": "def-public.FrequentCompatibilityChangeAction",
                 "text": "FrequentCompatibilityChangeAction"
               },
-              "<object>[]>; readonly executeTriggerActions: (triggerId: string, context: object) => Promise<void>; readonly clear: () => void; readonly fork: () => ",
+              "<object>[]>; readonly executeTriggerActions: (triggerId: string, context: object, alwaysShowPopup?: boolean | undefined) => Promise<void>; readonly clear: () => void; readonly fork: () => ",
               "UiActionsService",
               "; }"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
-            "lineNumber": 56,
+            "lineNumber": 57,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4611,7 +4601,7 @@
               "IUiSettingsClient"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
-            "lineNumber": 57,
+            "lineNumber": 58,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4643,7 +4633,7 @@
               "; }"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
-            "lineNumber": 58,
+            "lineNumber": 59,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4665,7 +4655,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
-            "lineNumber": 59,
+            "lineNumber": 60,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4687,7 +4677,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
-            "lineNumber": 60,
+            "lineNumber": 61,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4709,7 +4699,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
-            "lineNumber": 61,
+            "lineNumber": 62,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4725,7 +4715,7 @@
               "{ [key: string]: Record<string, boolean | Record<string, boolean>>; navLinks: Record<string, boolean>; management: { [sectionId: string]: Record<string, boolean>; }; catalogue: Record<string, boolean>; } & { discover?: {} | undefined; dashboard?: {} | undefined; maps?: {} | undefined; visualize?: {} | undefined; }"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
-            "lineNumber": 62,
+            "lineNumber": 63,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4747,7 +4737,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
-            "lineNumber": 63,
+            "lineNumber": 64,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4770,7 +4760,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
-            "lineNumber": 64,
+            "lineNumber": 65,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4871,9 +4861,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/presentation-publishing",
-                "scope": "public",
+                "scope": "common",
                 "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-public.PublishingSubject",
+                "section": "def-common.PublishingSubject",
                 "text": "PublishingSubject"
               },
               "<boolean | undefined> | undefined"
@@ -4957,7 +4947,7 @@
           "\nUnified Histogram type for recreating a stored Lens vis"
         ],
         "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
-        "lineNumber": 172,
+        "lineNumber": 173,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -4970,7 +4960,7 @@
             "label": "attributes",
             "description": [],
             "signature": [
-              "{ version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+              "{ version?: 2 | undefined; description?: string | undefined; title: string; references: ",
               {
                 "pluginId": "@kbn/content-management-utils",
                 "scope": "server",
@@ -5042,7 +5032,7 @@
                 "section": "def-common.XYState",
                 "text": "XYState"
               },
-              "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+              "; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
               {
                 "pluginId": "@kbn/content-management-utils",
                 "scope": "server",
@@ -5114,7 +5104,7 @@
                 "section": "def-common.LensPartitionVisualizationState",
                 "text": "LensPartitionVisualizationState"
               },
-              "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+              "; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
               {
                 "pluginId": "@kbn/content-management-utils",
                 "scope": "server",
@@ -5186,7 +5176,7 @@
                 "section": "def-common.HeatmapVisualizationState",
                 "text": "HeatmapVisualizationState"
               },
-              "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+              "; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
               {
                 "pluginId": "@kbn/content-management-utils",
                 "scope": "server",
@@ -5258,7 +5248,7 @@
                 "section": "def-common.GaugeVisualizationState",
                 "text": "GaugeVisualizationState"
               },
-              "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+              "; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
               {
                 "pluginId": "@kbn/content-management-utils",
                 "scope": "server",
@@ -5330,7 +5320,7 @@
                 "section": "def-common.DatatableVisualizationState",
                 "text": "DatatableVisualizationState"
               },
-              "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+              "; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
               {
                 "pluginId": "@kbn/content-management-utils",
                 "scope": "server",
@@ -5444,7 +5434,7 @@
                 "section": "def-common.CustomPaletteParams",
                 "text": "CustomPaletteParams"
               },
-              "> | undefined; }; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+              "> | undefined; }; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
               {
                 "pluginId": "@kbn/content-management-utils",
                 "scope": "server",
@@ -5516,7 +5506,7 @@
                 "section": "def-common.MetricVisualizationState",
                 "text": "MetricVisualizationState"
               },
-              "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+              "; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
               {
                 "pluginId": "@kbn/content-management-utils",
                 "scope": "server",
@@ -5588,7 +5578,7 @@
                 "section": "def-common.ChoroplethChartState",
                 "text": "ChoroplethChartState"
               },
-              "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+              "; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
               {
                 "pluginId": "@kbn/content-management-utils",
                 "scope": "server",
@@ -5660,7 +5650,7 @@
                 "section": "def-common.LensTagCloudState",
                 "text": "LensTagCloudState"
               },
-              "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+              "; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
               {
                 "pluginId": "@kbn/content-management-utils",
                 "scope": "server",
@@ -5727,7 +5717,7 @@
               " | undefined; }; visualization: unknown; }; }"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
-            "lineNumber": 176,
+            "lineNumber": 177,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5743,7 +5733,7 @@
               "LensRequestData"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
-            "lineNumber": 177,
+            "lineNumber": 178,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5759,7 +5749,7 @@
               "UnifiedHistogramSuggestionType"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
-            "lineNumber": 178,
+            "lineNumber": 179,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5777,7 +5767,7 @@
         "label": "UnifiedHistogramExternalVisContextStatus",
         "description": [],
         "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
-        "lineNumber": 135,
+        "lineNumber": 136,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -5793,7 +5783,7 @@
           "\nThe fetch status of a Unified Histogram request"
         ],
         "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
-        "lineNumber": 40,
+        "lineNumber": 41,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -5838,7 +5828,7 @@
           " | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
-        "lineNumber": 76,
+        "lineNumber": 77,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

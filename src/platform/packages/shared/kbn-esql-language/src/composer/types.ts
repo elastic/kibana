@@ -63,7 +63,7 @@ export type ParameterShorthandHole = Record<string, unknown>;
  */
 export type SingleKey<T> = IsUnion<keyof T> extends true ? never : {} extends T ? never : T;
 export type IsUnion<T> = [T] extends [UnionToIntersection<T>] ? false : true;
-export type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (
+export type UnionToIntersection<U> = (U extends unknown ? (k: U) => void : never) extends (
   k: infer I
 ) => void
   ? I

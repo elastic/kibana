@@ -8,6 +8,7 @@
  */
 
 import { WorkflowGraph } from '@kbn/workflows/graph';
+import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
 import { buildContextOverride } from './build_step_context_override';
 
 describe('buildContextOverride', () => {
@@ -536,7 +537,7 @@ describe('buildContextOverride', () => {
             },
           },
           additionalProperties: false,
-        },
+        } satisfies JsonModelSchemaType,
       };
       const result = buildContextOverride(workflowGraph, staticDataWithInputs);
 
@@ -587,7 +588,7 @@ describe('buildContextOverride', () => {
             },
           },
           additionalProperties: false,
-        },
+        } satisfies JsonModelSchemaType,
       };
       const result = buildContextOverride(workflowGraph, staticDataWithInputs);
 
@@ -646,7 +647,7 @@ describe('buildContextOverride', () => {
           },
           required: ['user'],
           additionalProperties: false,
-        },
+        } satisfies JsonModelSchemaType,
       };
       const result = buildContextOverride(workflowGraph, staticDataWithInputs);
 

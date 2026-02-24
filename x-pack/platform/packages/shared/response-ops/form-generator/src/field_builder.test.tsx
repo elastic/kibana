@@ -17,8 +17,10 @@ import {
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { getFieldFromSchema, getFieldsFromSchema, renderField } from './field_builder';
 import type { FormConfig } from './form';
-import { addMeta } from './schema_connector_metadata';
+import { getMeta, setMeta, addMeta } from './schema_connector_metadata';
 import { getWidgetComponent } from './widgets';
+
+const meta = { getMeta, setMeta };
 
 jest.mock('./widgets', () => {
   const module = jest.requireActual('./widgets');
@@ -56,7 +58,7 @@ describe('Field Builder', () => {
       const schema = z.string();
       const path = 'username';
 
-      const field = getFieldFromSchema({ schema, path, formConfig });
+      const field = getFieldFromSchema({ schema, path, formConfig, meta });
 
       expect(field).toHaveProperty('path');
       expect(field).toHaveProperty('schema');
@@ -72,7 +74,7 @@ describe('Field Builder', () => {
       const wrappedSchema = innerSchema.optional();
       const path = 'field';
 
-      const field = getFieldFromSchema({ schema: wrappedSchema, path, formConfig });
+      const field = getFieldFromSchema({ schema: wrappedSchema, path, formConfig, meta });
 
       expect(field.schema).toBeInstanceOf(z.ZodString);
     });
@@ -81,7 +83,7 @@ describe('Field Builder', () => {
       const schema = z.string().default('default-value');
       const path = 'field';
 
-      const field = getFieldFromSchema({ schema, path, formConfig });
+      const field = getFieldFromSchema({ schema, path, formConfig, meta });
 
       expect(field.defaultValue).toBe('default-value');
     });
@@ -90,7 +92,7 @@ describe('Field Builder', () => {
       const schema = z.string();
       const path = 'field';
 
-      const field = getFieldFromSchema({ schema, path, formConfig });
+      const field = getFieldFromSchema({ schema, path, formConfig, meta });
 
       expect(field.defaultValue).toBeUndefined();
     });
@@ -99,7 +101,7 @@ describe('Field Builder', () => {
       const schema = z.string().min(3);
       const path = 'field';
 
-      const field = getFieldFromSchema({ schema, path, formConfig });
+      const field = getFieldFromSchema({ schema, path, formConfig, meta });
       const result = field.validate(createValidationArg('test', path));
 
       expect(result).toBeUndefined();
@@ -142,7 +144,7 @@ describe('Field Builder', () => {
         field2: z.number(),
       });
 
-      const fields = getFieldsFromSchema({ schema, rootPath: 'parent', formConfig });
+      const fields = getFieldsFromSchema({ schema, rootPath: 'parent', formConfig, meta });
 
       expect(fields[0].path).toBe('parent.field1');
       expect(fields[1].path).toBe('parent.field2');
@@ -153,7 +155,7 @@ describe('Field Builder', () => {
         field1: z.string(),
       });
 
-      const fields = getFieldsFromSchema({ schema, rootPath: 'level1.level2', formConfig });
+      const fields = getFieldsFromSchema({ schema, rootPath: 'level1.level2', formConfig, meta });
 
       expect(fields[0].path).toBe('level1.level2.field1');
     });
@@ -178,7 +180,7 @@ describe('Field Builder', () => {
       const schema = z.string().min(3);
       const path = 'field';
 
-      const field = getFieldFromSchema({ schema, path, formConfig });
+      const field = getFieldFromSchema({ schema, path, formConfig, meta });
       const result = field.validate(createValidationArg('valid-string', path));
 
       expect(result).toBeUndefined();
@@ -188,7 +190,7 @@ describe('Field Builder', () => {
       const schema = z.string().min(5);
       const path = 'field';
 
-      const field = getFieldFromSchema({ schema, path, formConfig });
+      const field = getFieldFromSchema({ schema, path, formConfig, meta });
       const result = field.validate(createValidationArg('ab', path)) as ValidationError;
 
       expect(result).toBeDefined();
@@ -201,7 +203,7 @@ describe('Field Builder', () => {
       const schema = z.string().min(5);
       const path = 'username';
 
-      const field = getFieldFromSchema({ schema, path, formConfig });
+      const field = getFieldFromSchema({ schema, path, formConfig, meta });
       const result = field.validate(createValidationArg('ab', path)) as ValidationError;
 
       expect(result?.path).toBe(path);
@@ -211,7 +213,7 @@ describe('Field Builder', () => {
       const schema = z.string().min(5, { message: 'Must be at least 5 characters' });
       const path = 'field';
 
-      const field = getFieldFromSchema({ schema, path, formConfig });
+      const field = getFieldFromSchema({ schema, path, formConfig, meta });
       const result = field.validate(createValidationArg('ab', path)) as ValidationError;
 
       expect(result?.message).toContain('Must be at least 5 characters');
@@ -224,7 +226,7 @@ describe('Field Builder', () => {
         .min(6, { message: 'Too short B' });
       const path = 'field';
 
-      const field = getFieldFromSchema({ schema, path, formConfig });
+      const field = getFieldFromSchema({ schema, path, formConfig, meta });
       const result = field.validate(createValidationArg('aa', path)) as ValidationError;
 
       expect(result?.message).toContain('Too short A');
@@ -236,7 +238,7 @@ describe('Field Builder', () => {
       const schema = z.string().refine(() => false, { message: 'First validation failed' });
       const path = 'field';
 
-      const field = getFieldFromSchema({ schema, path, formConfig });
+      const field = getFieldFromSchema({ schema, path, formConfig, meta });
       const result = field.validate(createValidationArg('test', path)) as ValidationError;
 
       expect(result?.message).toContain('First validation failed');
@@ -251,8 +253,8 @@ describe('Field Builder', () => {
       addMeta(schema, { label: 'Test Field' });
       const path = 'testField';
 
-      const field = getFieldFromSchema({ schema, path, formConfig });
-      const element = renderField({ field });
+      const field = getFieldFromSchema({ schema, path, formConfig, meta });
+      const element = renderField({ field, meta });
 
       expect(React.isValidElement(element)).toBe(true);
     });
@@ -262,8 +264,8 @@ describe('Field Builder', () => {
       addMeta(schema, { label: 'Username', placeholder: 'Enter username' });
       const path = 'username';
 
-      const field = getFieldFromSchema({ schema, path, formConfig });
-      const element = renderField({ field });
+      const field = getFieldFromSchema({ schema, path, formConfig, meta });
+      const element = renderField({ field, meta });
 
       render(<TestFormWrapper>{element}</TestFormWrapper>, { wrapper });
 
@@ -276,8 +278,8 @@ describe('Field Builder', () => {
       addMeta(schema, { label: 'Test Field' });
       const path = 'testPath';
 
-      const field = getFieldFromSchema({ schema, path, formConfig });
-      const element = renderField({ field });
+      const field = getFieldFromSchema({ schema, path, formConfig, meta });
+      const element = renderField({ field, meta });
 
       render(<TestFormWrapper>{element}</TestFormWrapper>, { wrapper });
 
@@ -292,8 +294,8 @@ describe('Field Builder', () => {
       addMeta(schema, { label: 'Test Field' });
       const path = 'testField';
 
-      const field = getFieldFromSchema({ schema, path, formConfig });
-      const element = renderField({ field });
+      const field = getFieldFromSchema({ schema, path, formConfig, meta });
+      const element = renderField({ field, meta });
 
       render(<TestFormWrapper>{element}</TestFormWrapper>, { wrapper });
 
@@ -307,8 +309,8 @@ describe('Field Builder', () => {
       addMeta(schema, { label: 'Test Field' });
       const path = 'username';
 
-      const field = getFieldFromSchema({ schema, path, formConfig });
-      const element = renderField({ field });
+      const field = getFieldFromSchema({ schema, path, formConfig, meta });
+      const element = renderField({ field, meta });
 
       render(<TestFormWrapper>{element}</TestFormWrapper>, { wrapper });
 
@@ -321,8 +323,8 @@ describe('Field Builder', () => {
       addMeta(schema, { label: 'Test Field' });
       const path = 'root.field';
 
-      const field = getFieldFromSchema({ schema, path, formConfig });
-      const element = renderField({ field });
+      const field = getFieldFromSchema({ schema, path, formConfig, meta });
+      const element = renderField({ field, meta });
 
       render(<TestFormWrapper>{element}</TestFormWrapper>, { wrapper });
 
@@ -336,8 +338,8 @@ describe('Field Builder', () => {
       addMeta(schema, { label: 'Test Field' });
       const path = 'testField';
 
-      const field = getFieldFromSchema({ schema, path, formConfig: disabledConfig });
-      const element = renderField({ field });
+      const field = getFieldFromSchema({ schema, path, formConfig: disabledConfig, meta });
+      const element = renderField({ field, meta });
 
       render(<TestFormWrapper>{element}</TestFormWrapper>, { wrapper });
 
@@ -350,8 +352,8 @@ describe('Field Builder', () => {
       addMeta(schema, { label: 'Test Field', disabled: true });
       const path = 'testField';
 
-      const field = getFieldFromSchema({ schema, path, formConfig });
-      const element = renderField({ field });
+      const field = getFieldFromSchema({ schema, path, formConfig, meta });
+      const element = renderField({ field, meta });
 
       render(<TestFormWrapper>{element}</TestFormWrapper>, { wrapper });
 
@@ -364,8 +366,8 @@ describe('Field Builder', () => {
       addMeta(schema, { label: 'Test Field', helpText: 'This is helpful text' });
       const path = 'testField';
 
-      const field = getFieldFromSchema({ schema, path, formConfig });
-      const element = renderField({ field });
+      const field = getFieldFromSchema({ schema, path, formConfig, meta });
+      const element = renderField({ field, meta });
 
       render(<TestFormWrapper>{element}</TestFormWrapper>, { wrapper });
 
@@ -398,8 +400,8 @@ describe('mocked getWidgetComponent', () => {
 
     const path = 'username';
 
-    const field = getFieldFromSchema({ schema, path, formConfig });
-    render(renderField({ field }));
+    const field = getFieldFromSchema({ schema, path, formConfig, meta });
+    render(renderField({ field, meta }));
 
     expect(mockWidgetComponent).toHaveBeenCalledTimes(1);
 

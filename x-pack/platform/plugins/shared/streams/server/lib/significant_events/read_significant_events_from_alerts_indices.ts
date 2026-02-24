@@ -113,7 +113,6 @@ export async function readSignificantEventsFromAlertsIndices(
               },
             },
             change_points: {
-              // @ts-expect-error
               change_point: {
                 buckets_path: 'occurrences>_count',
               },

@@ -108,7 +108,7 @@ describe('getGapFillAutoScheduler()', () => {
       'gap-1'
     );
 
-    expect(authorization.ensureAuthorized).toHaveBeenCalledTimes(2);
+    expect(authorization.bulkEnsureAuthorized).toHaveBeenCalledTimes(1);
     expect(auditLogger.log).toHaveBeenCalledTimes(1);
 
     expect(result).toEqual(
@@ -157,7 +157,7 @@ describe('getGapFillAutoScheduler()', () => {
       };
       unsecuredSavedObjectsClient.get.mockResolvedValueOnce(so);
 
-      (authorization.ensureAuthorized as jest.Mock).mockImplementationOnce(() => {
+      (authorization.bulkEnsureAuthorized as jest.Mock).mockImplementationOnce(() => {
         throw new Error('Unauthorized');
       });
 

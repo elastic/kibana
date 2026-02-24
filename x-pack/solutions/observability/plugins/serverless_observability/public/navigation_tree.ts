@@ -175,6 +175,47 @@ export const createNavigationTree = ({
               { link: 'metrics:settings', sideNavStatus: 'hidden' },
             ],
           },
+          {
+            id: 'profiling',
+            title: i18n.translate('xpack.serverlessObservability.nav.profiling', {
+              defaultMessage: 'Profiling',
+            }),
+            children: [
+              {
+                title: i18n.translate(
+                  'xpack.serverlessObservability.navigation.stacktracesLinkLabel',
+                  {
+                    defaultMessage: 'Stacktraces',
+                  }
+                ),
+                id: 'profiling-stacktraces',
+                link: 'profiling:stacktraces',
+                breadcrumbStatus: 'hidden',
+              },
+              {
+                link: 'profiling:flamegraphs',
+                title: i18n.translate(
+                  'xpack.serverlessObservability.navigation.flameGraphsLinkLabel',
+                  {
+                    defaultMessage: 'Flamegraphs',
+                  }
+                ),
+                id: 'profiling-flamegraphs',
+                breadcrumbStatus: 'hidden',
+              },
+              {
+                link: 'profiling:functions',
+                title: i18n.translate(
+                  'xpack.serverlessObservability.navigation.functionsLinkLabel',
+                  {
+                    defaultMessage: 'Functions',
+                  }
+                ),
+                id: 'profiling-functions',
+                breadcrumbStatus: 'hidden',
+              },
+            ],
+          },
         ],
       },
       ...filterForFeatureAvailability(

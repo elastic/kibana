@@ -11,14 +11,13 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
-  EuiButtonIcon,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormControlLayoutDelimited,
-  EuiFormLabel,
   EuiFormFieldset,
   EuiSpacer,
+  EuiFormAppend,
 } from '@elastic/eui';
 
 const StyledFieldset = styled(EuiFormFieldset)`
@@ -154,21 +153,19 @@ export const KeyValuePairsField = ({
               <EuiFormControlLayoutDelimited
                 fullWidth
                 append={
-                  <EuiFormLabel>
-                    <EuiButtonIcon
-                      data-test-subj="syntheticsKeyValuePairsFieldButton"
-                      iconType="trash"
-                      aria-label={i18n.translate(
-                        'xpack.synthetics.keyValuePairsField.deleteItem.label',
-                        {
-                          defaultMessage: 'Delete item number {index}, {key}:{value}',
-                          values: { index: index + 1, key, value },
-                        }
-                      )}
-                      onClick={() => handleDeletePair(index)}
-                      isDisabled={readOnly}
-                    />
-                  </EuiFormLabel>
+                  <EuiFormAppend
+                    iconLeft="trash"
+                    isDisabled={readOnly}
+                    onClick={() => handleDeletePair(index)}
+                    aria-label={i18n.translate(
+                      'xpack.synthetics.keyValuePairsField.deleteItem.label',
+                      {
+                        defaultMessage: 'Delete item number {index}, {key}:{value}',
+                        values: { index: index + 1, key, value },
+                      }
+                    )}
+                    data-test-subj="syntheticsKeyValuePairsFieldButton"
+                  />
                 }
                 startControl={
                   <StyledField

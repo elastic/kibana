@@ -11,7 +11,6 @@ import { createMemoryHistory } from 'history';
 import { firstValueFrom, lastValueFrom, take, BehaviorSubject, of, type Observable } from 'rxjs';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
-import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-browser-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type {
@@ -87,7 +86,6 @@ const setup = ({
     http: httpServiceMock.createStartContract(),
     chromeBreadcrumbs$,
     logger,
-    featureFlags: coreFeatureFlagsMock.createStart(),
     uiSettings: uiSettingsServiceMock.createStartContract(),
   });
 

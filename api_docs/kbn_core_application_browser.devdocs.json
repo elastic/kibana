@@ -334,7 +334,7 @@
               "\nReturns a confirm action, resulting on prompting a message to the user before leaving the\napplication, allowing him to choose if he wants to stay on the app or confirm that he\nwants to leave.\n"
             ],
             "signature": [
-              "(text: string, title?: string | undefined, callback?: (() => void) | undefined, confirmButtonText?: string | undefined, buttonColor?: \"text\" | \"primary\" | \"neutral\" | \"success\" | \"accent\" | \"accentSecondary\" | \"warning\" | \"risk\" | \"danger\" | undefined) => ",
+              "(text: string, title?: string | undefined, callback?: (() => void) | undefined, confirmButtonText?: string | undefined, buttonColor?: \"text\" | \"primary\" | \"success\" | \"warning\" | \"accent\" | \"accentSecondary\" | \"danger\" | \"neutral\" | \"risk\" | undefined) => ",
               "AppLeaveConfirmAction"
             ],
             "path": "src/core/packages/application/browser/src/app_leave.ts",
@@ -426,10 +426,10 @@
                 "tags": [],
                 "label": "buttonColor",
                 "description": [
-                  "(optional) color for the confirmation button\nso we can show to the user the right UX for him to saved his/her/their changes"
+                  "(optional) color for the confirmation button"
                 ],
                 "signature": [
-                  "\"text\" | \"primary\" | \"neutral\" | \"success\" | \"accent\" | \"accentSecondary\" | \"warning\" | \"risk\" | \"danger\" | undefined"
+                  "\"text\" | \"primary\" | \"success\" | \"warning\" | \"accent\" | \"accentSecondary\" | \"danger\" | \"neutral\" | \"risk\" | undefined"
                 ],
                 "path": "src/core/packages/application/browser/src/app_leave.ts",
                 "lineNumber": 99,
@@ -550,7 +550,7 @@
             "label": "buttonColor",
             "description": [],
             "signature": [
-              "\"text\" | \"primary\" | \"neutral\" | \"success\" | \"accent\" | \"accentSecondary\" | \"warning\" | \"risk\" | \"danger\" | undefined"
+              "\"text\" | \"primary\" | \"success\" | \"warning\" | \"accent\" | \"accentSecondary\" | \"danger\" | \"neutral\" | \"risk\" | undefined"
             ],
             "path": "src/core/packages/application/browser/src/app_leave.ts",
             "lineNumber": 65,
@@ -654,7 +654,7 @@
                 "tags": [],
                 "label": "app",
                 "description": [
-                  "- an {@link App }"
+                  "- an {@link App}"
                 ],
                 "signature": [
                   "App",
@@ -990,7 +990,9 @@
                     "type": "string",
                     "tags": [],
                     "label": "path",
-                    "description": [],
+                    "description": [
+                      "- optional path inside application to deep link to"
+                    ],
                     "signature": [
                       "string | undefined"
                     ],
@@ -1006,7 +1008,9 @@
                     "type": "CompoundType",
                     "tags": [],
                     "label": "absolute",
-                    "description": [],
+                    "description": [
+                      "- if true, will returns an absolute url instead of a relative one"
+                    ],
                     "signature": [
                       "boolean | undefined"
                     ],
@@ -1231,11 +1235,11 @@
             "parentPluginId": "@kbn/core-application-browser",
             "id": "def-public.AppMountParameters.setHeaderActionMenu",
             "type": "Function",
-            "tags": [],
-            "label": "setHeaderActionMenu",
-            "description": [
-              "\nA function that can be used to set the mount point used to populate the application action container\nin the chrome header.\n\nCalling the handler multiple time will erase the current content of the action menu with the mount from the latest call.\nCalling the handler with `undefined` will unmount the current mount point.\nCalling the handler after the application has been unmounted will have no effect.\n"
+            "tags": [
+              "deprecated"
             ],
+            "label": "setHeaderActionMenu",
+            "description": [],
             "signature": [
               "(menuMount: ",
               "MountPoint",
@@ -1244,8 +1248,250 @@
             "path": "src/core/packages/application/browser/src/app_mount.ts",
             "lineNumber": 177,
             "columnNumber": 3,
-            "deprecated": false,
+            "deprecated": true,
             "trackAdoption": false,
+            "references": [
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/application/browser-internal/src/ui/app_container.tsx"
+              },
+              {
+                "plugin": "visualizations",
+                "path": "src/platform/plugins/shared/visualizations/public/visualize_app/types.ts"
+              },
+              {
+                "plugin": "visualizations",
+                "path": "src/platform/plugins/shared/visualizations/public/plugin.ts"
+              },
+              {
+                "plugin": "lens",
+                "path": "x-pack/platform/plugins/shared/lens/public/app_plugin/types.ts"
+              },
+              {
+                "plugin": "lens",
+                "path": "x-pack/platform/plugins/shared/lens/public/app_plugin/types.ts"
+              },
+              {
+                "plugin": "lens",
+                "path": "x-pack/platform/plugins/shared/lens/public/app_plugin/mounter.tsx"
+              },
+              {
+                "plugin": "maps",
+                "path": "x-pack/platform/plugins/shared/maps/public/routes/map_page/map_app/map_app.tsx"
+              },
+              {
+                "plugin": "maps",
+                "path": "x-pack/platform/plugins/shared/maps/public/routes/map_page/map_page.tsx"
+              },
+              {
+                "plugin": "maps",
+                "path": "x-pack/platform/plugins/shared/maps/public/render_app.tsx"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/platform/plugins/shared/discover/public/build_services.ts"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/platform/plugins/shared/discover/public/build_services.ts"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/platform/plugins/shared/discover/public/plugin.tsx"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/platform/plugins/shared/discover/public/plugin.tsx"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/platform/plugins/shared/discover/public/plugin.tsx"
+              },
+              {
+                "plugin": "dashboard",
+                "path": "src/platform/plugins/shared/dashboard/public/dashboard_app/types.ts"
+              },
+              {
+                "plugin": "dashboard",
+                "path": "src/platform/plugins/shared/dashboard/public/plugin.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/public/application/components/ml_page/ml_page.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/public/application/routing/router.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/public/application/app.tsx"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/application/browser-mocks/src/application_service.mock.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/public/applications/integrations/components/header/header_portal.tsx"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/public/applications/integrations/components/header/header.tsx"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/public/applications/integrations/app.tsx"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/public/applications/integrations/index.tsx"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/public/applications/integrations/index.tsx"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/public/applications/fleet/app.tsx"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/public/applications/fleet/app.tsx"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/public/applications/fleet/app.tsx"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/public/applications/fleet/index.tsx"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/public/applications/fleet/index.tsx"
+              },
+              {
+                "plugin": "graph",
+                "path": "x-pack/platform/plugins/private/graph/public/components/workspace_layout/workspace_top_nav_menu.tsx"
+              },
+              {
+                "plugin": "graph",
+                "path": "x-pack/platform/plugins/private/graph/public/application.tsx"
+              },
+              {
+                "plugin": "monitoring",
+                "path": "x-pack/platform/plugins/private/monitoring/public/types.ts"
+              },
+              {
+                "plugin": "monitoring",
+                "path": "x-pack/platform/plugins/private/monitoring/public/application/contexts/header_action_menu_context.tsx"
+              },
+              {
+                "plugin": "monitoring",
+                "path": "x-pack/platform/plugins/private/monitoring/public/application/index.tsx"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/platform/plugins/shared/security/public/authentication/logout/logout_app.test.ts"
+              },
+              {
+                "plugin": "observabilityShared",
+                "path": "x-pack/solutions/observability/plugins/observability_shared/public/types.ts"
+              },
+              {
+                "plugin": "exploratoryView",
+                "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/contexts/exploratory_view_config.tsx"
+              },
+              {
+                "plugin": "exploratoryView",
+                "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/obsv_exploratory_view.tsx"
+              },
+              {
+                "plugin": "observability",
+                "path": "x-pack/solutions/observability/plugins/observability/public/pages/overview/components/header_menu/header_menu.tsx"
+              },
+              {
+                "plugin": "profiling",
+                "path": "x-pack/solutions/observability/plugins/profiling/public/app.tsx"
+              },
+              {
+                "plugin": "profiling",
+                "path": "x-pack/solutions/observability/plugins/profiling/public/app.tsx"
+              },
+              {
+                "plugin": "profiling",
+                "path": "x-pack/solutions/observability/plugins/profiling/public/plugin.ts"
+              },
+              {
+                "plugin": "slo",
+                "path": "x-pack/solutions/observability/plugins/slo/public/components/header_menu/header_menu.tsx"
+              },
+              {
+                "plugin": "apm",
+                "path": "x-pack/solutions/observability/plugins/apm/public/components/routing/app_root/index.tsx"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/solutions/observability/plugins/infra/public/containers/header_action_menu_provider.tsx"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/solutions/observability/plugins/infra/public/apps/common_providers.tsx"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/solutions/observability/plugins/infra/public/apps/logs_app.tsx"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/solutions/observability/plugins/infra/public/apps/logs_app.tsx"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/solutions/observability/plugins/infra/public/apps/metrics_app.tsx"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/solutions/observability/plugins/infra/public/apps/metrics_app.tsx"
+              },
+              {
+                "plugin": "observabilityOnboarding",
+                "path": "x-pack/solutions/observability/plugins/observability_onboarding/public/application/shared/header_action_menu.tsx"
+              },
+              {
+                "plugin": "observabilityOnboarding",
+                "path": "x-pack/solutions/observability/plugins/observability_onboarding/public/application/app.tsx"
+              },
+              {
+                "plugin": "synthetics",
+                "path": "x-pack/solutions/observability/plugins/synthetics/public/apps/synthetics/components/common/header/action_menu.tsx"
+              },
+              {
+                "plugin": "uptime",
+                "path": "x-pack/solutions/observability/plugins/uptime/public/legacy_uptime/components/common/header/action_menu.tsx"
+              },
+              {
+                "plugin": "ux",
+                "path": "x-pack/solutions/observability/plugins/ux/public/components/app/rum_dashboard/action_menu/index.tsx"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/public/applications/index.tsx"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/plugin_services.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/types.ts"
+              },
+              {
+                "plugin": "exploratoryView",
+                "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/types.ts"
+              }
+            ],
             "children": [
               {
                 "parentPluginId": "@kbn/core-application-browser",
@@ -1259,7 +1505,7 @@
                   "<HTMLElement> | undefined"
                 ],
                 "path": "src/core/packages/application/browser/src/app_mount.ts",
-                "lineNumber": 206,
+                "lineNumber": 180,
                 "columnNumber": 25,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1284,7 +1530,7 @@
               ">"
             ],
             "path": "src/core/packages/application/browser/src/app_mount.ts",
-            "lineNumber": 208,
+            "lineNumber": 182,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1793,7 +2039,7 @@
           "The places in the UI where a deepLink can be shown"
         ],
         "signature": [
-          "\"home\" | \"kibanaOverview\" | \"globalSearch\" | \"sideNav\""
+          "\"home\" | \"globalSearch\" | \"sideNav\" | \"kibanaOverview\""
         ],
         "path": "src/core/packages/application/browser/src/application.ts",
         "lineNumber": 256,

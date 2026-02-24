@@ -183,6 +183,9 @@ main () {
 
   # Note: We run build commands directly instead of `yarn build:antlr4` to skip
   # the prebuild:antlr4 hook which uses `brew` (macOS only). CI has antlr installed.
+  # Pin the ANTLR version to avoid the broken Sonatype Central version-lookup API
+  # in antlr4-tools (https://github.com/antlr/antlr4-tools/issues/18).
+  export ANTLR4_TOOLS_ANTLR_VERSION="4.13.2"
   cd ./src/platform/packages/shared/kbn-esql-language
   yarn build:antlr4:esql
   yarn build:antlr4:promql

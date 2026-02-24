@@ -8,7 +8,7 @@
 import { useMemo } from 'react';
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 
-import { type FilterOptions, type GroupedInferenceEndpointsData, GroupByOptions } from '../types';
+import type { FilterOptions, GroupedInferenceEndpointsData, GroupByViewOptions } from '../types';
 
 import { useFilteredInferenceEndpoints } from './use_filtered_endpoints';
 import { GroupByReducer, GroupBySort } from '../utils/group_by';
@@ -17,14 +17,10 @@ export type UseGroupedDataResult = GroupedInferenceEndpointsData[];
 
 export const useGroupedData = (
   inferenceEndpoints: InferenceAPIConfigResponse[],
-  groupBy: GroupByOptions,
+  groupBy: GroupByViewOptions,
   filterOptions: FilterOptions,
   searchKey: string
 ): UseGroupedDataResult => {
-  if (groupBy === GroupByOptions.None) {
-    throw new Error('Grouping is not enabled');
-  }
-
   const filteredEndpoints = useFilteredInferenceEndpoints(
     inferenceEndpoints,
     filterOptions,

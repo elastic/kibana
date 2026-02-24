@@ -57,10 +57,56 @@ export async function ensureAgentPoliciesFleetServerKeysAndPolicies({
 
   await scheduleBumpAgentPoliciesTask(appContextService.getTaskManagerStart()!);
 
-  if (outdatedAgentPolicyIds.length) {
+  if (!outdatedAgentPolicyIds.length) {
+    return;
+  }
+
+  // Preconfigured fleet server policies must be deployed synchronously so that
+  // the fleet server agent can read its policy from ES before setup completes.
+  // Scoped to preconfigured policies only (cloud / self-managed setups owned by
+  // Kibana) to avoid risk for user-created fleet server policies whose data may
+  // be in an unexpected state.
+  const fleetServerPoliciesById = new Map(
+    agentPolicies
+      .filter((p) => (p.is_default_fleet_server || p.has_fleet_server) && p.is_preconfigured)
+      .map((p) => [p.id, p])
+  );
+
+  const outdatedFleetServerPolicyIds = outdatedAgentPolicyIds.filter(({ id }) =>
+    fleetServerPoliciesById.has(id)
+  );
+  const outdatedRegularPolicyIds = outdatedAgentPolicyIds.filter(
+    ({ id }) => !fleetServerPoliciesById.has(id)
+  );
+
+  if (outdatedFleetServerPolicyIds.length) {
+    // Group by space so we can use the correctly-scoped soClient for each
+    const bySpace = new Map<string, string[]>();
+    for (const { id, spaceId = 'default' } of outdatedFleetServerPolicyIds) {
+      const ids = bySpace.get(spaceId) ?? [];
+      ids.push(id);
+      bySpace.set(spaceId, ids);
+    }
+
+    for (const [spaceId, ids] of bySpace) {
+      logger.info(
+        `Synchronously deploying fleet server ${
+          ids.length === 1 ? 'policy' : 'policies'
+        } [${ids.join(', ')}] in space [${spaceId}] during setup`
+      );
+      await agentPolicyService.deployPolicies(
+        appContextService.getInternalUserSOClientForSpaceId(spaceId),
+        ids,
+        undefined,
+        { throwOnAnyError: true }
+      );
+    }
+  }
+
+  if (outdatedRegularPolicyIds.length) {
     return scheduleDeployAgentPoliciesTask(
       appContextService.getTaskManagerStart()!,
-      outdatedAgentPolicyIds
+      outdatedRegularPolicyIds
     );
   }
 }

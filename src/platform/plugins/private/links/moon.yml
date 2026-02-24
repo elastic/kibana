@@ -32,7 +32,6 @@ dependsOn:
   - '@kbn/core-saved-objects-server'
   - '@kbn/saved-objects-plugin'
   - '@kbn/ui-actions-plugin'
-  - '@kbn/ui-actions-enhanced-plugin'
   - '@kbn/ui-actions-plugin'
   - '@kbn/logging'
   - '@kbn/core-plugins-server'
@@ -45,6 +44,7 @@ dependsOn:
   - '@kbn/share-plugin'
   - '@kbn/es-query'
   - '@kbn/presentation-util'
+  - '@kbn/kibana-utils-plugin'
 tags:
   - plugin
   - prod

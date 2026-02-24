@@ -163,12 +163,25 @@ export class FeatureClient {
       return { hits: [], total: 0 };
     }
 
+    const filterClauses: QueryDslQueryContainer[] = [
+      ...termsQuery(STREAM_NAME, streams),
+      {
+        bool: {
+          should: [
+            { bool: { must_not: { exists: { field: FEATURE_EXPIRES_AT } } } },
+            ...dateRangeQuery(Date.now(), undefined, FEATURE_EXPIRES_AT),
+          ],
+          minimum_should_match: 1,
+        },
+      },
+    ];
+
     const featuresResponse = await this.clients.storageClient.search({
       size: 10_000,
       track_total_hits: true,
       query: {
         bool: {
-          filter: [{ terms: { [STREAM_NAME]: streams } }],
+          filter: filterClauses,
         },
       },
     });

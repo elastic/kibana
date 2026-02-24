@@ -92,7 +92,7 @@ steps:
   - command: .buildkite/scripts/steps/typecheck/check_types.sh
     label: 'Check Types'
     agents:
-      machineType: c4d-standard-4
+      machineType: c4d-highmem-4
       diskType: hyperdisk-balanced
       preemptible: true
       spotZones: us-central1-c,us-central1-a

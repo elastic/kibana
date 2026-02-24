@@ -16,7 +16,8 @@ import {
   type EuiComboBoxOptionOption,
 } from '@elastic/eui';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
-import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import { getIndexPatternFromESQLQuery, getESQLAdHocDataview } from '@kbn/esql-utils';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { calculateWidthFromCharCount } from '@kbn/calculate-width-from-char-count';
 import { isEqual } from 'lodash';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -53,11 +54,12 @@ export function QuickSearchVisor({
   onToggleVisor,
 }: QuickSearchVisorProps) {
   const kibana = useKibana<ESQLEditorDeps>();
-  const { kql } = kibana.services;
+  const { kql, data } = kibana.services;
   const isDarkMode = useKibanaIsDarkMode();
   const { euiTheme } = useEuiTheme();
   const [selectedSources, setSelectedSources] = useState<EuiComboBoxOptionOption[]>([]);
   const [searchValue, setSearchValue] = useState('');
+  const [adHocDataView, setAdHocDataView] = useState<DataView | null>(null);
   const kqlInputRef = useRef<HTMLDivElement>(null);
   const initializedRef = useRef(false);
   const userSelectedSourceRef = useRef(false);
@@ -105,6 +107,31 @@ export function QuickSearchVisor({
     }
   }, [query, selectedSources]);
 
+  const sourcesKey = useMemo(
+    () => selectedSources.map((source) => source.label).join(', '),
+    [selectedSources]
+  );
+
+  useEffect(() => {
+    if (!isVisible || !sourcesKey) {
+      setAdHocDataView(null);
+      return;
+    }
+    let cancelled = false;
+    getESQLAdHocDataview({
+      dataViewsService: data.dataViews,
+      query: `FROM ${sourcesKey}`,
+      options: { idPrefix: 'esql-visor' },
+    }).then((dataView) => {
+      if (!cancelled) {
+        setAdHocDataView(dataView);
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [isVisible, sourcesKey, data.dataViews]);
+
   useEffect(() => {
     if (isVisible && kqlInputRef.current) {
       // Find the textarea within the KQL input and focus it
@@ -139,6 +166,7 @@ export function QuickSearchVisor({
       responsive={false}
       css={styles.visorContainer}
       data-test-subj="ESQLEditor-quick-search-visor"
+      {...(!isVisible && { inert: '' })}
     >
       <EuiFlexItem grow={false} css={styles.visorWrapper}>
         <EuiFlexGroup
@@ -164,7 +192,7 @@ export function QuickSearchVisor({
                 isDisabled={!isVisible}
                 iconType="search"
                 disableLanguageSwitcher={true}
-                indexPatterns={selectedSources.map((source) => source.label)}
+                indexPatterns={adHocDataView ? [adHocDataView] : []}
                 bubbleSubmitEvent={false}
                 query={{
                   query: searchValue,

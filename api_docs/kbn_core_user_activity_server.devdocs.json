@@ -1,0 +1,494 @@
+{
+  "id": "@kbn/core-user-activity-server",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-user-activity-server",
+        "id": "def-server.TrackUserActionParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "TrackUserActionParams",
+        "description": [],
+        "path": "src/core/packages/user-activity/server/src/types.ts",
+        "lineNumber": 62,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-user-activity-server",
+            "id": "def-server.TrackUserActionParams.message",
+            "type": "string",
+            "tags": [],
+            "label": "message",
+            "description": [
+              "Custom log message. If omitted, a default message is generated."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/core/packages/user-activity/server/src/types.ts",
+            "lineNumber": 64,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-user-activity-server",
+            "id": "def-server.TrackUserActionParams.event",
+            "type": "Object",
+            "tags": [],
+            "label": "event",
+            "description": [
+              "Event attributes written to the log entry."
+            ],
+            "signature": [
+              "UserActivityEvent"
+            ],
+            "path": "src/core/packages/user-activity/server/src/types.ts",
+            "lineNumber": 66,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-user-activity-server",
+            "id": "def-server.TrackUserActionParams.object",
+            "type": "Object",
+            "tags": [],
+            "label": "object",
+            "description": [
+              "Object attributes written to the log entry."
+            ],
+            "signature": [
+              "UserActivityObject"
+            ],
+            "path": "src/core/packages/user-activity/server/src/types.ts",
+            "lineNumber": 68,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-user-activity-server",
+        "id": "def-server.UserActivityActionDefinition",
+        "type": "Interface",
+        "tags": [],
+        "label": "UserActivityActionDefinition",
+        "description": [
+          "\nDefinition for a user-activity action."
+        ],
+        "path": "src/core/packages/user-activity/server/src/user_activity_actions.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-user-activity-server",
+            "id": "def-server.UserActivityActionDefinition.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [
+              "Human-readable description of the action."
+            ],
+            "path": "src/core/packages/user-activity/server/src/user_activity_actions.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-user-activity-server",
+            "id": "def-server.UserActivityActionDefinition.ownerTeam",
+            "type": "string",
+            "tags": [],
+            "label": "ownerTeam",
+            "description": [
+              "Team that owns this action, for example: `@elastic/kibana-core`."
+            ],
+            "path": "src/core/packages/user-activity/server/src/user_activity_actions.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-user-activity-server",
+            "id": "def-server.UserActivityActionDefinition.groupName",
+            "type": "string",
+            "tags": [],
+            "label": "groupName",
+            "description": [
+              "Group name used to organize actions in UIs/docs (for example: `dashboard`, `cases`)."
+            ],
+            "path": "src/core/packages/user-activity/server/src/user_activity_actions.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-user-activity-server",
+            "id": "def-server.UserActivityActionDefinition.versionAddedAt",
+            "type": "string",
+            "tags": [],
+            "label": "versionAddedAt",
+            "description": [
+              "Stack version where the action was introduced (for example: `9.5`)."
+            ],
+            "path": "src/core/packages/user-activity/server/src/user_activity_actions.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-user-activity-server",
+        "id": "def-server.UserActivityEvent",
+        "type": "Interface",
+        "tags": [],
+        "label": "UserActivityEvent",
+        "description": [
+          "\nInformation about the event being performed by the user."
+        ],
+        "path": "src/core/packages/user-activity/server/src/types.ts",
+        "lineNumber": 51,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-user-activity-server",
+            "id": "def-server.UserActivityEvent.action",
+            "type": "string",
+            "tags": [],
+            "label": "action",
+            "description": [
+              "Descriptive action name, e.g., 'view_dashboard', 'edit_case', 'save_search'"
+            ],
+            "signature": [
+              "\"dashboard_created\""
+            ],
+            "path": "src/core/packages/user-activity/server/src/types.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-user-activity-server",
+            "id": "def-server.UserActivityEvent.type",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "type",
+            "description": [
+              "Event type {@link UserActivityEventType}."
+            ],
+            "signature": [
+              "\"info\" | \"error\" | \"start\" | \"end\" | \"group\" | \"user\" | \"indicator\" | \"allowed\" | \"deletion\" | \"admin\" | \"protocol\" | \"creation\" | \"access\" | \"connection\" | \"change\" | \"denied\" | \"installation\""
+            ],
+            "path": "src/core/packages/user-activity/server/src/types.ts",
+            "lineNumber": 58,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-user-activity-server",
+        "id": "def-server.UserActivityObject",
+        "type": "Interface",
+        "tags": [],
+        "label": "UserActivityObject",
+        "description": [
+          "\nInformation about the object being acted upon."
+        ],
+        "path": "src/core/packages/user-activity/server/src/types.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-user-activity-server",
+            "id": "def-server.UserActivityObject.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [
+              "Unique object identifier."
+            ],
+            "path": "src/core/packages/user-activity/server/src/types.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-user-activity-server",
+            "id": "def-server.UserActivityObject.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [
+              "Object name."
+            ],
+            "path": "src/core/packages/user-activity/server/src/types.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-user-activity-server",
+            "id": "def-server.UserActivityObject.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [
+              "Object type (for example, 'dashboard', 'case', 'rule')."
+            ],
+            "path": "src/core/packages/user-activity/server/src/types.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-user-activity-server",
+            "id": "def-server.UserActivityObject.tags",
+            "type": "Array",
+            "tags": [],
+            "label": "tags",
+            "description": [
+              "List of tags assigned to the object."
+            ],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/core/packages/user-activity/server/src/types.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-user-activity-server",
+        "id": "def-server.UserActivityServiceSetup",
+        "type": "Interface",
+        "tags": [],
+        "label": "UserActivityServiceSetup",
+        "description": [
+          "\nAllows plugins to record user actions.\nContextual information (user, session, space, IP) is automatically injected.\n"
+        ],
+        "path": "src/core/packages/user-activity/server/src/types.ts",
+        "lineNumber": 72,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-user-activity-server",
+            "id": "def-server.UserActivityServiceSetup.trackUserAction",
+            "type": "Function",
+            "tags": [],
+            "label": "trackUserAction",
+            "description": [
+              "\nRecords a user action, automatically enriched with user/session/space context."
+            ],
+            "signature": [
+              "(params: ",
+              "TrackUserActionParams",
+              ") => void"
+            ],
+            "path": "src/core/packages/user-activity/server/src/types.ts",
+            "lineNumber": 86,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-user-activity-server",
+                "id": "def-server.UserActivityServiceSetup.trackUserAction.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [
+                  "{@link TrackUserActionParams}"
+                ],
+                "signature": [
+                  "TrackUserActionParams"
+                ],
+                "path": "src/core/packages/user-activity/server/src/types.ts",
+                "lineNumber": 90,
+                "columnNumber": 19,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-user-activity-server",
+        "id": "def-server.UserActivityServiceStart",
+        "type": "Interface",
+        "tags": [],
+        "label": "UserActivityServiceStart",
+        "description": [
+          "\nAllows plugins to record user actions.\nContextual information (user, session, space, IP) is automatically injected."
+        ],
+        "path": "src/core/packages/user-activity/server/src/types.ts",
+        "lineNumber": 93,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-user-activity-server",
+            "id": "def-server.UserActivityServiceStart.trackUserAction",
+            "type": "Function",
+            "tags": [],
+            "label": "trackUserAction",
+            "description": [
+              "\nRecords a user action, automatically enriched with user/session/space context."
+            ],
+            "signature": [
+              "(params: ",
+              "TrackUserActionParams",
+              ") => void"
+            ],
+            "path": "src/core/packages/user-activity/server/src/types.ts",
+            "lineNumber": 99,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-user-activity-server",
+                "id": "def-server.UserActivityServiceStart.trackUserAction.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [
+                  "{@link TrackUserActionParams}"
+                ],
+                "signature": [
+                  "TrackUserActionParams"
+                ],
+                "path": "src/core/packages/user-activity/server/src/types.ts",
+                "lineNumber": 103,
+                "columnNumber": 19,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-user-activity-server",
+        "id": "def-server.UserActivityActionId",
+        "type": "Type",
+        "tags": [],
+        "label": "UserActivityActionId",
+        "description": [
+          "Closed union derived from the keys of {@link userActivityActions}. @public"
+        ],
+        "signature": [
+          "\"dashboard_created\""
+        ],
+        "path": "src/core/packages/user-activity/server/src/user_activity_actions.ts",
+        "lineNumber": 40,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-user-activity-server",
+        "id": "def-server.UserActivityEventType",
+        "type": "Type",
+        "tags": [
+          "see"
+        ],
+        "label": "UserActivityEventType",
+        "description": [
+          "\nEvent type following ECS (Elastic Common Schema) allowed values."
+        ],
+        "signature": [
+          "\"info\" | \"error\" | \"start\" | \"end\" | \"group\" | \"user\" | \"indicator\" | \"allowed\" | \"deletion\" | \"admin\" | \"protocol\" | \"creation\" | \"access\" | \"connection\" | \"change\" | \"denied\" | \"installation\""
+        ],
+        "path": "src/core/packages/user-activity/server/src/types.ts",
+        "lineNumber": 27,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/core-user-activity-server",
+        "id": "def-server.userActivityActions",
+        "type": "Object",
+        "tags": [
+          "private"
+        ],
+        "label": "userActivityActions",
+        "description": [
+          "\nCentral registry of all known user-activity actions.\nTo add a new action, add an entry with a `description`, `ownerTeam`, `groupName` and `versionAddedAt`."
+        ],
+        "signature": [
+          "{ readonly dashboard_created: { readonly description: \"[THIS IS AN EXAMPLE AND WILL BE REMOVED LATER] User created a dashboard in Kibana.\"; readonly ownerTeam: \"@elastic/kibana-core\"; readonly groupName: \"Dashboards\"; readonly versionAddedAt: \"9.4\"; }; }"
+        ],
+        "path": "src/core/packages/user-activity/server/src/user_activity_actions.ts",
+        "lineNumber": 30,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

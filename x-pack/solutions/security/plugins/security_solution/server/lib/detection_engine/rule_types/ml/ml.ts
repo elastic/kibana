@@ -114,6 +114,7 @@ export const mlExecutor = async ({
         isLoggedRequestsEnabled,
       });
       anomalyResults = searchResults.anomalyResults;
+      result.totalEventsFound = anomalyResults.hits.hits.length;
       loggedRequests.push(...(searchResults.loggedRequests ?? []));
     } catch (error) {
       result.errors.push(error.message);
@@ -139,7 +140,7 @@ export const mlExecutor = async ({
 
     const anomalyCount = filteredAnomalyHits.length;
     if (anomalyCount) {
-      ruleExecutionLogger.info(`Alerts from ML anomalies: ${anomalyCount}`);
+      ruleExecutionLogger.debug(`Alerts from ML anomalies: ${anomalyCount}`);
     }
 
     if (

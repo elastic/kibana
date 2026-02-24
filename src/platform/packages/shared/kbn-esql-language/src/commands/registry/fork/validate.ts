@@ -10,7 +10,6 @@ import type { ESQLAst, ESQLAstAllCommands, ESQLAstForkCommand, ESQLMessage } fro
 import { Walker } from '../../../ast/walker';
 import type { ICommandContext, ICommandCallbacks } from '../types';
 import { validateCommandArguments } from '../../definitions/utils/validation';
-import { esqlCommandRegistry } from '..';
 import { errors } from '../../definitions/utils';
 import { isSubQuery } from '../../../ast/is';
 
@@ -35,23 +34,6 @@ export const validate = (
   }
 
   messages.push(...validateCommandArguments(forkCommand, ast, context, callbacks));
-
-  for (const arg of forkCommand.args) {
-    const query = arg.child;
-
-    if (!Array.isArray(query) && query.type === 'query') {
-      // all the args should be commands
-      query.commands.forEach((subCommand) => {
-        const subCommandMethods = esqlCommandRegistry.getCommandMethods(subCommand.name);
-        const validationMessages = subCommandMethods?.validate?.(
-          subCommand,
-          query.commands,
-          context
-        );
-        messages.push(...(validationMessages || []));
-      });
-    }
-  }
 
   const allCommands = Walker.commands(ast);
   const forks = allCommands.filter(({ name }) => name === 'fork');

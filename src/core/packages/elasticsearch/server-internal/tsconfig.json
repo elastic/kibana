@@ -38,6 +38,7 @@
     "@kbn/safer-lodash-set",
     "@kbn/core-security-server-internal",
     "@kbn/core-security-server-mocks",
+    "@kbn/cps-server-utils",
   ],
   "exclude": [
     "target/**/*",

@@ -156,7 +156,6 @@ export class ChromeService {
       http,
       chromeBreadcrumbs$: state.breadcrumbs.classic.$,
       logger: this.logger,
-      featureFlags,
       uiSettings,
     });
 

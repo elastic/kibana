@@ -908,7 +908,9 @@
             "type": "string",
             "tags": [],
             "label": "_modelName",
-            "description": [],
+            "description": [
+              "// use this later to get model family from model name"
+            ],
             "signature": [
               "string | undefined"
             ],
@@ -2566,7 +2568,7 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  "{ id: TId; system?: string | undefined; abortSignal?: AbortSignal | undefined; schema?: TOutputSchema | undefined; input: string; metadata?: ",
+                  "{ id: TId; schema?: TOutputSchema | undefined; metadata?: ",
                   {
                     "pluginId": "@kbn/inference-common",
                     "scope": "common",
@@ -2574,7 +2576,7 @@
                     "section": "def-common.ChatCompleteMetadata",
                     "text": "ChatCompleteMetadata"
                   },
-                  " | undefined; retry?: { onValidationError?: number | boolean | undefined; } | undefined; stream?: TStream | undefined; modelName?: string | undefined; maxRetries?: number | undefined; retryConfiguration?: ",
+                  " | undefined; system?: string | undefined; abortSignal?: AbortSignal | undefined; input: string; retry?: { onValidationError?: number | boolean | undefined; } | undefined; stream?: TStream | undefined; modelName?: string | undefined; maxRetries?: number | undefined; retryConfiguration?: ",
                   {
                     "pluginId": "@kbn/inference-common",
                     "scope": "common",
@@ -6008,7 +6010,7 @@
             "label": "options",
             "description": [],
             "signature": [
-              "{ id: TId; system?: string | undefined; abortSignal?: AbortSignal | undefined; schema?: TOutputSchema | undefined; input: string; metadata?: ",
+              "{ id: TId; schema?: TOutputSchema | undefined; metadata?: ",
               {
                 "pluginId": "@kbn/inference-common",
                 "scope": "common",
@@ -6016,7 +6018,7 @@
                 "section": "def-common.ChatCompleteMetadata",
                 "text": "ChatCompleteMetadata"
               },
-              " | undefined; retry?: { onValidationError?: number | boolean | undefined; } | undefined; stream?: TStream | undefined; modelName?: string | undefined; maxRetries?: number | undefined; retryConfiguration?: ",
+              " | undefined; system?: string | undefined; abortSignal?: AbortSignal | undefined; input: string; retry?: { onValidationError?: number | boolean | undefined; } | undefined; stream?: TStream | undefined; modelName?: string | undefined; maxRetries?: number | undefined; retryConfiguration?: ",
               {
                 "pluginId": "@kbn/inference-common",
                 "scope": "common",
@@ -6847,7 +6849,7 @@
           " ? FromToolSchemaObject<TToolSchema> : TToolSchema extends ToolSchemaTypeArray ? FromToolSchemaArray<TToolSchema> : TToolSchema extends ToolSchemaTypeBoolean ? boolean : TToolSchema extends ToolSchemaTypeNumber ? number : TToolSchema extends ToolSchemaTypeString ? FromToolSchemaString<TToolSchema> : never"
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/tool_schema.ts",
-        "lineNumber": 83,
+        "lineNumber": 84,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -8269,7 +8271,7 @@
           "ToolSchemaTypeObject"
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/tool_schema.ts",
-        "lineNumber": 78,
+        "lineNumber": 79,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -8324,7 +8326,7 @@
           "\nOptions used to call the {@link BoundChatCompleteAPI}"
         ],
         "signature": [
-          "{ system?: string | undefined; timeout?: number | undefined; abortSignal?: AbortSignal | undefined; metadata?: ",
+          "{ timeout?: number | undefined; metadata?: ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -8332,7 +8334,7 @@
             "section": "def-common.ChatCompleteMetadata",
             "text": "ChatCompleteMetadata"
           },
-          " | undefined; temperature?: number | undefined; stream?: boolean | undefined; tools?: ",
+          " | undefined; system?: string | undefined; abortSignal?: AbortSignal | undefined; temperature?: number | undefined; stream?: boolean | undefined; tools?: ",
           "ToolDefinitions",
           " | undefined; toolChoice?: ",
           {
@@ -8402,7 +8404,7 @@
           "\nOptions used to call the {@link BoundOutputAPI}"
         ],
         "signature": [
-          "{ id: TId; system?: string | undefined; abortSignal?: AbortSignal | undefined; schema?: TOutputSchema | undefined; input: string; metadata?: ",
+          "{ id: TId; schema?: TOutputSchema | undefined; metadata?: ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -8410,7 +8412,7 @@
             "section": "def-common.ChatCompleteMetadata",
             "text": "ChatCompleteMetadata"
           },
-          " | undefined; retry?: { onValidationError?: number | boolean | undefined; } | undefined; stream?: TStream | undefined; modelName?: string | undefined; maxRetries?: number | undefined; retryConfiguration?: ",
+          " | undefined; system?: string | undefined; abortSignal?: AbortSignal | undefined; input: string; retry?: { onValidationError?: number | boolean | undefined; } | undefined; stream?: TStream | undefined; modelName?: string | undefined; maxRetries?: number | undefined; retryConfiguration?: ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -8445,9 +8447,7 @@
           "\nOptions used to call the {@link BoundPromptAPI}"
         ],
         "signature": [
-          "{ timeout?: number | undefined; abortSignal?: AbortSignal | undefined; input: ",
-          "input",
-          "<TPrompt[\"input\"]>; metadata?: ",
+          "{ timeout?: number | undefined; metadata?: ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -8455,7 +8455,9 @@
             "section": "def-common.ChatCompleteMetadata",
             "text": "ChatCompleteMetadata"
           },
-          " | undefined; temperature?: number | undefined; stream?: boolean | undefined; toolChoice?: ",
+          " | undefined; abortSignal?: AbortSignal | undefined; input: ",
+          "input",
+          "<TPrompt[\"input\"]>; temperature?: number | undefined; stream?: boolean | undefined; toolChoice?: ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",

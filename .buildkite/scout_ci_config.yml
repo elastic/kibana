@@ -9,6 +9,7 @@ plugins:
     - custom_branding
     - dashboard
     - data_views
+    - discover
     - discover_enhanced
     - entity_store
     - exploratory_view

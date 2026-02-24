@@ -19,6 +19,21 @@ import {
   ReanalyzeDataStreamRequestBody,
 } from '../../common';
 
+const isSecurityExceptionError = (err: unknown): boolean => {
+  if (!(err instanceof Error)) {
+    return false;
+  }
+
+  const elasticsearchError = err as Error & {
+    meta?: { body?: { error?: { type?: string } } };
+  };
+
+  return (
+    elasticsearchError.meta?.body?.error?.type === 'security_exception' ||
+    err.message.includes('security_exception')
+  );
+};
+
 export const registerDataStreamRoutes = (
   router: IRouter<AutomaticImportV2PluginRequestHandlerContext>,
   logger: Logger
@@ -71,8 +86,14 @@ const uploadSamplesRoute = (
           });
           return response.ok({ body: result });
         } catch (err) {
-          logger.error(`registerDataStreamRoutes: Caught error:`, err);
+          logger.error(`uploadSamplesRoute: Caught error: ${err}`);
           const automaticImportResponse = buildAutomaticImportResponse(response);
+          if (isSecurityExceptionError(err)) {
+            return automaticImportResponse.error({
+              statusCode: 403,
+              body: 'Missing required privileges to upload samples. This action requires Elasticsearch cluster privileges to manage index templates (for example: manage_index_templates).',
+            });
+          }
           return automaticImportResponse.error({
             statusCode: 500,
             body: err,

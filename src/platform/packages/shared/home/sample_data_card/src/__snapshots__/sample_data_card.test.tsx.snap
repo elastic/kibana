@@ -75,7 +75,7 @@ exports[`SampleDataCard installed renders with app links 1`] = `
                 class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
               >
                 <span
-                  class="eui-textTruncate euiButtonEmpty__text"
+                  class="eui-textTruncate euiButtonEmpty__text css-13ifi6d-m"
                 >
                   Remove
                 </span>
@@ -99,7 +99,7 @@ exports[`SampleDataCard installed renders with app links 1`] = `
                   class="emotion-euiButtonDisplayContent"
                 >
                   <span
-                    class="eui-textTruncate"
+                    class="eui-textTruncate css-13ifi6d-m"
                   >
                     View data
                   </span>
@@ -193,7 +193,7 @@ exports[`SampleDataCard installed renders without app links 1`] = `
                 class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
               >
                 <span
-                  class="eui-textTruncate euiButtonEmpty__text"
+                  class="eui-textTruncate euiButtonEmpty__text css-13ifi6d-m"
                 >
                   Remove
                 </span>
@@ -213,7 +213,7 @@ exports[`SampleDataCard installed renders without app links 1`] = `
                 class="emotion-euiButtonDisplayContent"
               >
                 <span
-                  class="eui-textTruncate"
+                  class="eui-textTruncate css-13ifi6d-m"
                 >
                   View data
                 </span>
@@ -295,7 +295,7 @@ exports[`SampleDataCard not installed renders 1`] = `
                   data-euiicon-type="download"
                 />
                 <span
-                  class="eui-textTruncate"
+                  class="eui-textTruncate css-13ifi6d-m"
                 >
                   Install data
                 </span>

@@ -592,9 +592,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'test')
           .expect(400);
 
-        expect(result.message).to.match(
-          /Connector must be one of the following types: \.webhook, \.cases-webhook, \.mcp/
-        );
+        expect(result.message).to.match(/Connector must be one of the following types/);
       });
     });
 

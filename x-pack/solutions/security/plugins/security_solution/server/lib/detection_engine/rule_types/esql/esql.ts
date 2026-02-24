@@ -112,6 +112,7 @@ export const esqlExecutor = async ({
      * All alerts for aggregating queries are unique anyway
      */
     let iteration = 0;
+    let totalEventsFound = 0;
     try {
       while (result.createdSignalsCount <= tuple.maxSignals) {
         const totalExcludedDocumentsLength = Object.values(excludedDocuments).reduce(
@@ -171,6 +172,7 @@ export const esqlExecutor = async ({
         );
 
         const results = response.values.map((row) => rowToDocument(response.columns, row));
+        totalEventsFound += results.length;
         const index = getIndexListFromEsqlQuery(completeRule.ruleParams.query);
 
         const sourceDocuments = await fetchSourceDocuments({
@@ -235,8 +237,9 @@ export const esqlExecutor = async ({
             maxNumberOfAlertsMultiplier: 1,
           });
 
-          ruleExecutionLogger.info(`Alerts created: ${bulkCreateResult.createdItemsCount}`);
-          ruleExecutionLogger.info(`Alerts suppressed: ${bulkCreateResult.suppressedItemsCount}`);
+          ruleExecutionLogger.debug(
+            `Alerts bulk creation completed. Alerts created: ${bulkCreateResult.createdItemsCount}, Alerts suppressed: ${bulkCreateResult.suppressedItemsCount}.`
+          );
 
           updateExcludedDocuments({
             excludedDocuments,
@@ -267,7 +270,9 @@ export const esqlExecutor = async ({
           });
 
           addToSearchAfterReturn({ current: result, next: bulkCreateResult });
-          ruleExecutionLogger.info(`Alerts created: ${bulkCreateResult.createdItemsCount}`);
+          ruleExecutionLogger.debug(
+            `Alerts bulk creation completed. Alerts created: ${bulkCreateResult.createdItemsCount}.`
+          );
 
           updateExcludedDocuments({
             excludedDocuments,
@@ -307,6 +312,8 @@ export const esqlExecutor = async ({
       result.errors.push(error.message);
       result.success = false;
     }
+
+    result.totalEventsFound = totalEventsFound;
 
     return {
       ...result,

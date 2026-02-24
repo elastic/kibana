@@ -209,6 +209,7 @@ export enum PromQLFunctionDefinitionTypes {
   SCALAR = 'scalar',
   OPERATOR = 'operator',
   LABEL_MATCHING_OPERATOR = 'label_matching_operator',
+  SCALAR_CONVERSION = 'scalar_conversion',
 }
 
 export type PromQLFunctionParamType = 'instant_vector' | 'range_vector' | 'scalar' | 'string';

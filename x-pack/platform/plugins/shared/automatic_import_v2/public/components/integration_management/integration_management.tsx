@@ -16,6 +16,7 @@ import type { IntegrationFormData } from './forms/types';
 import { PAGE_RESTRICT_WIDTH } from './constants';
 import * as i18n from './translations';
 import { useGetIntegrationById } from '../../common';
+import { normalizeTitleName } from '../../common/lib/helper_functions';
 
 const IntegrationManagementContents: React.FC = () => {
   const { submit, isValid } = useIntegrationForm();
@@ -59,12 +60,19 @@ export const IntegrationManagement = React.memo(() => {
     console.log('Form submitted with done button:', data);
   }, []);
 
+  const existingDataStreamTitles = useMemo(
+    () =>
+      new Set(
+        (integration?.dataStreams ?? []).map((dataStream) => normalizeTitleName(dataStream.title))
+      ),
+    [integration?.dataStreams]
+  );
+
   // Loading state when fetching existing integration
   if (integrationId && isLoading) {
     return <EuiEmptyPrompt icon={<EuiLoadingSpinner size="xl" />} />;
   }
 
-  // Error state: ID provided but integration not found or fetch failed
   // TODO: Refactor into separate component
   if (integrationId && (isError || (!isLoading && !integration))) {
     return (
@@ -86,6 +94,7 @@ export const IntegrationManagement = React.memo(() => {
     <IntegrationFormProvider
       key={integrationId ?? 'new-integration'}
       initialValue={initialFormData}
+      existingDataStreamTitles={existingDataStreamTitles}
       onSubmit={handleSubmit}
     >
       <IntegrationManagementContents />

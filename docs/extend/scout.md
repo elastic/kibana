@@ -36,11 +36,11 @@ Scout is Kibana’s **modern UI and API test framework** built on [Playwright](h
 
 - **Solution-owned tests** → your solution Scout package (it builds on `@kbn/scout`)
 
-| Package               | Use in tests           |
-| --------------------- | ---------------------- |
-| `@kbn/scout-oblt`     | Observability solution |
-| `@kbn/scout-security` | Security solution      |
-| `@kbn/scout-search`   | Search solution        |
+| Package               | Use in tests                                      |
+| --------------------- | ------------------------------------------------- |
+| `@kbn/scout-oblt`     | {icon}`logo_observability` Observability solution |
+| `@kbn/scout-security` | {icon}`logo_security` Security solution           |
+| `@kbn/scout-search`   | {icon}`logo_elasticsearch` Search solution        |
 
 ::::::{note}
 Fixtures, page objects, and API helpers defined in `@kbn/scout` can be imported by solution-specific Scout packages. When they are defined in a solution package or a plugin they will only be available to that solution or plugin.

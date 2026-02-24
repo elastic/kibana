@@ -1649,7 +1649,7 @@
           ", isDarkMode: boolean) => (value: number) => string"
         ],
         "path": "src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/color/color_handling.ts",
-        "lineNumber": 180,
+        "lineNumber": 182,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1665,7 +1665,7 @@
               "GradientColorMode"
             ],
             "path": "src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/color/color_handling.ts",
-            "lineNumber": 181,
+            "lineNumber": 183,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1688,7 +1688,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/color/color_handling.ts",
-            "lineNumber": 182,
+            "lineNumber": 184,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1705,7 +1705,7 @@
               "boolean"
             ],
             "path": "src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/color/color_handling.ts",
-            "lineNumber": 183,
+            "lineNumber": 185,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2367,7 +2367,7 @@
           "(rawValue: unknown) => string"
         ],
         "path": "src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/color/utils.ts",
-        "lineNumber": 12,
+        "lineNumber": 13,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2383,7 +2383,7 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/color/utils.ts",
-            "lineNumber": 15,
+            "lineNumber": 16,
             "columnNumber": 29,
             "deprecated": false,
             "trackAdoption": false,
@@ -4452,7 +4452,7 @@
         "label": "PaletteContinuity",
         "description": [],
         "signature": [
-          "\"none\" | \"all\" | \"above\" | \"below\""
+          "\"none\" | \"above\" | \"below\" | \"all\""
         ],
         "path": "src/platform/packages/shared/kbn-coloring/src/palettes/types.ts",
         "lineNumber": 13,

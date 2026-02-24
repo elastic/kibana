@@ -7,13 +7,16 @@
 
 import React, { useMemo } from 'react';
 import {
+  EuiCallOut,
   EuiHorizontalRule,
   EuiFlexGroup,
   EuiFlexItem,
   EuiEmptyPrompt,
+  EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 
 import {
   getNormalizedInputs,
@@ -104,64 +107,101 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
           {packagePolicyTemplates.map((policyTemplate) => {
             const inputs = getNormalizedInputs(policyTemplate);
             const packagePolicyInputs = packagePolicy.inputs;
-            return inputs.map((packageInput) => {
-              const packagePolicyInput = packagePolicyInputs.find(
-                (input) =>
-                  input.type === packageInput.type &&
-                  (hasIntegrations ? input.policy_template === policyTemplate.name : true)
-              );
-              const packageInputStreams = getRegistryStreamWithDataStreamForInputType(
-                packageInput.type,
-                packageInfo,
-                hasIntegrations && isIntegrationPolicyTemplate(policyTemplate)
-                  ? policyTemplate.data_streams
-                  : []
-              );
+            const isPolicyTemplateDeprecated = !hasIntegrations && !!policyTemplate.deprecated;
+            return (
+              <React.Fragment key={policyTemplate.name}>
+                {isPolicyTemplateDeprecated && (
+                  <>
+                    <EuiCallOut
+                      announceOnMount
+                      data-test-subj="deprecatedPolicyTemplateCallout"
+                      title={i18n.translate(
+                        'xpack.fleet.createPackagePolicy.stepConfigure.deprecatedPolicyTemplateTitle',
+                        {
+                          defaultMessage: 'The policy template "{title}" is deprecated',
+                          values: { title: policyTemplate.title },
+                        }
+                      )}
+                      color="warning"
+                      iconType="warning"
+                      size="s"
+                    >
+                      <p>{policyTemplate.deprecated?.description}</p>
+                    </EuiCallOut>
+                    <EuiSpacer size="m" />
+                  </>
+                )}
+                {inputs.map((packageInput) => {
+                  const packagePolicyInput = packagePolicyInputs.find(
+                    (input) =>
+                      input.type === packageInput.type &&
+                      (hasIntegrations ? input.policy_template === policyTemplate.name : true)
+                  );
+                  const packageInputStreams = getRegistryStreamWithDataStreamForInputType(
+                    packageInput.type,
+                    packageInfo,
+                    hasIntegrations && isIntegrationPolicyTemplate(policyTemplate)
+                      ? policyTemplate.data_streams
+                      : []
+                  );
 
-              const updatePackagePolicyInput = (updatedInput: Partial<NewPackagePolicyInput>) => {
-                const indexOfUpdatedInput = packagePolicyInputs.findIndex(
-                  (input) =>
-                    input.type === packageInput.type &&
-                    (hasIntegrations ? input.policy_template === policyTemplate.name : true)
-                );
-                const newInputs = [...packagePolicyInputs];
-                newInputs[indexOfUpdatedInput] = {
-                  ...newInputs[indexOfUpdatedInput],
-                  ...updatedInput,
-                };
-                updatePackagePolicy({
-                  inputs: newInputs,
-                });
-              };
+                  const updatePackagePolicyInput = (
+                    updatedInput: Partial<NewPackagePolicyInput>
+                  ) => {
+                    const indexOfUpdatedInput = packagePolicyInputs.findIndex(
+                      (input) =>
+                        input.type === packageInput.type &&
+                        (hasIntegrations ? input.policy_template === policyTemplate.name : true)
+                    );
+                    const newInputs = [...packagePolicyInputs];
+                    newInputs[indexOfUpdatedInput] = {
+                      ...newInputs[indexOfUpdatedInput],
+                      ...updatedInput,
+                    };
+                    updatePackagePolicy({
+                      inputs: newInputs,
+                    });
+                  };
 
-              const isInputAvailable =
-                packagePolicyInput &&
-                isInputAllowedForDeploymentMode(packagePolicyInput, deploymentMode, packageInfo) &&
-                isInputCompatibleWithVarGroupSelections(packageInput, varGroupSelections);
-
-              return isInputAvailable ? (
-                <EuiFlexItem key={packageInput.type}>
-                  <PackagePolicyInputPanel
-                    packageInput={packageInput}
-                    packageInfo={packageInfo}
-                    packageInputStreams={packageInputStreams}
-                    packagePolicyInput={packagePolicyInput}
-                    updatePackagePolicyInput={updatePackagePolicyInput}
-                    inputValidationResults={
-                      validationResults?.inputs?.[
-                        hasIntegrations
-                          ? `${policyTemplate.name}-${packagePolicyInput.type}`
-                          : packagePolicyInput.type
-                      ] ?? {}
-                    }
-                    forceShowErrors={submitAttempted}
-                    isEditPage={isEditPage}
-                    varGroupSelections={varGroupSelections}
-                  />
-                  <EuiHorizontalRule margin="m" />
-                </EuiFlexItem>
-              ) : null;
-            });
+                  const allStreamsDeprecated =
+                    packageInputStreams.length > 0 &&
+                    packageInputStreams.every((s) => !!s.deprecated);
+                  const isDeprecatedInput =
+                    !!packagePolicyInput?.deprecated || allStreamsDeprecated;
+                  const isInputAvailable =
+                    packagePolicyInput &&
+                    isInputAllowedForDeploymentMode(
+                      packagePolicyInput,
+                      deploymentMode,
+                      packageInfo
+                    ) &&
+                    isInputCompatibleWithVarGroupSelections(packageInput, varGroupSelections) &&
+                    (!isDeprecatedInput || isEditPage); // Hide deprecated inputs on new installations
+                  return isInputAvailable ? (
+                    <EuiFlexItem key={packageInput.type}>
+                      <PackagePolicyInputPanel
+                        packageInput={packageInput}
+                        packageInfo={packageInfo}
+                        packageInputStreams={packageInputStreams}
+                        packagePolicyInput={packagePolicyInput}
+                        updatePackagePolicyInput={updatePackagePolicyInput}
+                        inputValidationResults={
+                          validationResults?.inputs?.[
+                            hasIntegrations
+                              ? `${policyTemplate.name}-${packagePolicyInput.type}`
+                              : packagePolicyInput.type
+                          ] ?? {}
+                        }
+                        forceShowErrors={submitAttempted}
+                        isEditPage={isEditPage}
+                        varGroupSelections={varGroupSelections}
+                      />
+                      <EuiHorizontalRule margin="m" />
+                    </EuiFlexItem>
+                  ) : null;
+                })}
+              </React.Fragment>
+            );
           })}
         </EuiFlexGroup>
       </>

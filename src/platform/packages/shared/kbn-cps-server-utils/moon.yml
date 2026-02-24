@@ -18,7 +18,6 @@ project:
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-cps-server-utils
 dependsOn:
-  - '@kbn/core-http-server'
   - '@kbn/spaces-utils'
 tags:
   - shared-server

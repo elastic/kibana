@@ -16,15 +16,22 @@
         "0"
       ]
     },
+    "url_components": {
+      "name": [
+        "logs",
+        "logs.otel",
+        "logs.ecs"
+      ]
+    },
     "methods": [
       "POST"
     ],
     "patterns": [
-      "_streams/logs/_disable"
+      "_streams/{name}/_disable"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch#TODO",
     "availability": {
-      "stack": false,
+      "stack": true,
       "serverless": false
     }
   }

@@ -470,7 +470,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       "'package-policy-create' and 'package-policy-replace-define-step' cannot both be registered as UI extensions"
     );
   }
-  const { isAgentlessIntegration, isAgentlessDefault } = useAgentless();
+  const { getAgentlessStatusForPackage, isAgentlessDefault } = useAgentless();
 
   const replaceStepConfigurePackagePolicy =
     replaceDefineStepView && packageInfo?.name ? (
@@ -486,7 +486,9 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
             validationResults={validationResults}
             isEditPage={false}
             handleSetupTechnologyChange={handleSetupTechnologyChange}
-            isAgentlessEnabled={isAgentlessIntegration(packageInfo) && !addIntegrationFlyoutProps}
+            isAgentlessEnabled={
+              getAgentlessStatusForPackage(packageInfo).isAgentless && !addIntegrationFlyoutProps
+            }
             defaultSetupTechnology={defaultSetupTechnology}
             integrationToEnable={integrationToEnable}
             setIntegrationToEnable={setIntegrationToEnable}
@@ -515,7 +517,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
           />
 
           {/* Show SetupTechnologySelector for all agentless integrations, including extension views */}
-          {!isAddIntegrationFlyout && isAgentlessIntegration(packageInfo) && (
+          {!isAddIntegrationFlyout && getAgentlessStatusForPackage(packageInfo).isAgentless && (
             <SetupTechnologySelector
               disabled={false}
               allowedSetupTechnologies={allowedSetupTechnologies}
@@ -568,7 +570,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       validationResults,
       formState,
       extensionView,
-      isAgentlessIntegration,
+      getAgentlessStatusForPackage,
       isAgentlessDefault,
       selectedSetupTechnology,
       integrationToEnable,

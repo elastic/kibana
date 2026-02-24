@@ -141,7 +141,7 @@ export const getDatatableRenderer = (dependencies: {
     handlers.event(chartSizeEvent);
 
     // An entry for each table row, whether it has any actions attached to
-    // ROW_CLICK_TRIGGER trigger.
+    // ON_CLICK_ROW trigger.
     let rowHasRowClickTriggerActions: boolean[] = [];
     if (hasCompatibleActions) {
       if (!!config.data) {

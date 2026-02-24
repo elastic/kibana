@@ -13,12 +13,11 @@ import type {
   ScoutParallelWorkerFixtures,
 } from '@kbn/scout';
 import { test as baseTest, spaceTest as spaceBaseTest, createLazyPageObject } from '@kbn/scout';
-import { DemoPage, MetricsExperiencePage } from './page_objects';
+import { DemoPage } from './page_objects';
 
 export interface ExtScoutTestFixtures extends ScoutTestFixtures {
   pageObjects: PageObjects & {
     demo: DemoPage;
-    metricsExperience: MetricsExperiencePage;
   };
 }
 
@@ -36,7 +35,6 @@ export const test = baseTest.extend<ExtScoutTestFixtures, ScoutWorkerFixtures>({
     const extendedPageObjects = {
       ...pageObjects,
       demo: createLazyPageObject(DemoPage, page),
-      metricsExperience: createLazyPageObject(MetricsExperiencePage, page, pageObjects.discover),
     };
 
     await use(extendedPageObjects);
@@ -46,7 +44,6 @@ export const test = baseTest.extend<ExtScoutTestFixtures, ScoutWorkerFixtures>({
 export interface ExtParallelRunTestFixtures extends ScoutParallelTestFixtures {
   pageObjects: PageObjects & {
     demo: DemoPage;
-    metricsExperience: MetricsExperiencePage;
   };
 }
 
@@ -67,7 +64,6 @@ export const spaceTest = spaceBaseTest.extend<
     const extendedPageObjects = {
       ...pageObjects,
       demo: createLazyPageObject(DemoPage, page),
-      metricsExperience: createLazyPageObject(MetricsExperiencePage, page, pageObjects.discover),
     };
 
     await use(extendedPageObjects);

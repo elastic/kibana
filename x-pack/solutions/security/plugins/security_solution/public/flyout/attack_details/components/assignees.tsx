@@ -10,72 +10,84 @@ import React, { memo, useCallback, useMemo, useState } from 'react';
 
 import {
   EuiButtonIcon,
+  EuiContextMenu,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
+  EuiPopoverTitle,
   EuiToolTip,
-  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
-import { ASSIGNEES_PANEL_WIDTH } from '../../../common/components/assignees/constants';
-import type { AssigneesApplyPanelProps } from '../../../common/components/assignees/assignees_apply_panel';
-import { AssigneesApplyPanel } from '../../../common/components/assignees/assignees_apply_panel';
 import { UsersAvatarsPanel } from '../../../common/components/user_profiles/users_avatars_panel';
-import { useAttackDetailsAssignees } from '../hooks/use_attack_details_assignees';
+import { useBulkGetUserProfiles } from '../../../common/components/user_profiles/use_bulk_get_user_profiles';
+import { useLicense } from '../../../common/hooks/use_license';
+import { useUpsellingMessage } from '../../../common/hooks/use_upselling';
+import { useAttackAssigneesContextMenuItems } from '../../../detections/hooks/attacks/bulk_actions/context_menu_items/use_attack_assignees_context_menu_items';
+import { useAttacksPrivileges } from '../../../detections/hooks/attacks/bulk_actions/use_attacks_privileges';
+import { useInvalidateFindAttackDiscoveries } from '../../../attack_discovery/pages/use_find_attack_discoveries';
+import { useAttackDetailsContext } from '../context';
+import { useHeaderData } from '../hooks/use_header_data';
 import { HEADER_ASSIGNEES_ADD_BUTTON_TEST_ID } from '../constants/test_ids';
 
-const UpdateAssigneesButton: FC<{
+const AssigneesButton: FC<{
   isDisabled: boolean;
   toolTipMessage: string;
-  togglePopover: () => void;
-}> = memo(({ togglePopover, isDisabled, toolTipMessage }) => (
+  onClick: () => void;
+}> = memo(({ onClick, isDisabled, toolTipMessage }) => (
   <EuiToolTip position="bottom" content={toolTipMessage}>
     <EuiButtonIcon
-      aria-label="Update assignees"
+      aria-label={i18n.translate(
+        'xpack.securitySolution.attackDetailsFlyout.header.assignees.ariaLabel',
+        { defaultMessage: 'Update assignees' }
+      )}
       data-test-subj={HEADER_ASSIGNEES_ADD_BUTTON_TEST_ID}
       iconType="plusInCircle"
-      onClick={togglePopover}
+      onClick={onClick}
       isDisabled={isDisabled}
     />
   </EuiToolTip>
 ));
-UpdateAssigneesButton.displayName = 'UpdateAssigneesButton';
+AssigneesButton.displayName = 'AssigneesButton';
 
 /**
  * Assignees block for the Attack details flyout header.
- * Matches the look of document_details assignees (avatars + popover with AssigneesApplyPanel).
+ * Follows the same pattern as status_popover_button: useAttackDetailsContext + useHeaderData
+ * + useAttackAssigneesContextMenuItems, with EuiPopover + EuiContextMenu.
  */
 export const Assignees = memo(() => {
-  const {
-    assignedUserIds,
-    assignedUsers,
-    onApplyAssignees,
-    hasPermission,
-    isPlatinumPlus,
-    upsellingMessage,
-    isLoading,
-  } = useAttackDetailsAssignees();
+  const { attackId, refetch } = useAttackDetailsContext();
+  const { alertIds, assignees } = useHeaderData();
+  const invalidateFindAttackDiscoveries = useInvalidateFindAttackDiscoveries();
+  const { hasIndexWrite, hasAttackIndexWrite, loading: privilegesLoading } = useAttacksPrivileges();
+  const isPlatinumPlus = useLicense().isPlatinumPlus();
+  const upsellingMessage = useUpsellingMessage('alert_assignments');
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const togglePopover = useCallback(() => setIsPopoverOpen((prev) => !prev), []);
+  const closePopover = useCallback(() => setIsPopoverOpen(false), []);
 
-  const togglePopover = useCallback(() => {
-    setIsPopoverOpen((value) => !value);
-  }, []);
-
-  const handleApplyAssignees = useCallback<AssigneesApplyPanelProps['onApply']>(
-    async (assignees) => {
-      setIsPopoverOpen(false);
-      await onApplyAssignees(assignees);
-    },
-    [onApplyAssignees]
+  const attacksWithAssignees = useMemo(
+    () => [{ attackId, relatedAlertIds: alertIds, assignees }],
+    [attackId, alertIds, assignees]
   );
 
-  const searchInputId = useGeneratedHtmlId({
-    prefix: 'attackDetailsAssigneesSearchInput',
+  const onSuccess = useCallback(() => {
+    refetch();
+    invalidateFindAttackDiscoveries();
+  }, [refetch, invalidateFindAttackDiscoveries]);
+
+  const { items, panels } = useAttackAssigneesContextMenuItems({
+    attacksWithAssignees,
+    closePopover,
+    onSuccess,
   });
 
-  const showAssignees = hasPermission && isPlatinumPlus;
+  const uids = useMemo(() => new Set(assignees), [assignees]);
+  const { data: assignedUsers } = useBulkGetUserProfiles({ uids });
+
+  const hasPermission =
+    Boolean(hasIndexWrite) && Boolean(hasAttackIndexWrite) && isPlatinumPlus && !privilegesLoading;
 
   const toolTipMessage =
     upsellingMessage ??
@@ -83,60 +95,59 @@ export const Assignees = memo(() => {
       defaultMessage: 'Assign attack',
     });
 
-  const updateAssigneesPopover = useMemo(
+  const button = useMemo(
     () => (
-      <EuiPopover
-        panelPaddingSize="none"
-        initialFocus={`[id="${searchInputId}"]`}
-        button={
-          <UpdateAssigneesButton
-            togglePopover={togglePopover}
-            isDisabled={!hasPermission || !isPlatinumPlus || isLoading}
-            toolTipMessage={toolTipMessage}
-          />
-        }
-        isOpen={isPopoverOpen}
-        panelStyle={{
-          minWidth: ASSIGNEES_PANEL_WIDTH,
-        }}
-        closePopover={togglePopover}
-      >
-        <AssigneesApplyPanel
-          searchInputId={searchInputId}
-          assignedUserIds={assignedUserIds}
-          onApply={handleApplyAssignees}
-        />
-      </EuiPopover>
+      <AssigneesButton onClick={togglePopover} isDisabled={false} toolTipMessage={toolTipMessage} />
     ),
-    [
-      assignedUserIds,
-      handleApplyAssignees,
-      hasPermission,
-      isPlatinumPlus,
-      isLoading,
-      isPopoverOpen,
-      searchInputId,
-      togglePopover,
-      toolTipMessage,
-    ]
+    [togglePopover, toolTipMessage]
   );
 
-  if (!showAssignees) {
-    return <div data-test-subj="attackDetailsFlyoutHeaderAssigneesEmpty">{getEmptyTagValue()}</div>;
+  if (!hasPermission) {
+    return (
+      <div data-test-subj="attack-details-flyout-header-assignees-empty">{getEmptyTagValue()}</div>
+    );
   }
 
   return (
     <EuiFlexGroup
       gutterSize="none"
       responsive={false}
-      data-test-subj="attackDetailsFlyoutHeaderAssignees"
+      data-test-subj="attack-details-flyout-header-assignees"
     >
       {assignedUsers && assignedUsers.length > 0 && (
         <EuiFlexItem grow={false}>
           <UsersAvatarsPanel userProfiles={assignedUsers} maxVisibleAvatars={2} />
         </EuiFlexItem>
       )}
-      <EuiFlexItem grow={false}>{updateAssigneesPopover}</EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiPopover
+          button={button}
+          isOpen={isPopoverOpen}
+          closePopover={closePopover}
+          panelPaddingSize="none"
+          data-test-subj="attack-details-flyout-header-assignees-popover"
+        >
+          <EuiPopoverTitle paddingSize="m">
+            {i18n.translate(
+              'xpack.securitySolution.attackDetailsFlyout.header.assignees.popoverTitle',
+              {
+                defaultMessage: 'Manage assignees',
+              }
+            )}
+          </EuiPopoverTitle>
+          <EuiContextMenu
+            panels={[
+              {
+                id: 0,
+                items,
+              },
+              ...panels,
+            ]}
+            initialPanelId={0}
+            data-test-subj="attack-details-flyout-header-assignees-context-menu"
+          />
+        </EuiPopover>
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 });

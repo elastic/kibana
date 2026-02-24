@@ -282,7 +282,7 @@ describe('header commands', () => {
 
   test('header commands with various value types', () => {
     const { root } = parse('SET a = 1; SET b = "value"; SET c = true; FROM index');
-    const literals: any[] = [];
+    const literals: (string | number | boolean)[] = [];
 
     new Visitor()
       .on('visitExpression', (ctx) => {

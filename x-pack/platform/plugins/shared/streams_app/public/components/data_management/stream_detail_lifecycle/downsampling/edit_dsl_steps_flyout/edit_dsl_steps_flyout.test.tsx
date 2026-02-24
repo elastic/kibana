@@ -47,7 +47,7 @@ const renderFlyout = (
   };
   const onSelectedStepIndexChange = jest.fn();
 
-  render(
+  const { unmount } = render(
     <Wrapper
       initialSteps={initialSteps}
       onClose={onClose}
@@ -66,6 +66,7 @@ const renderFlyout = (
     onSave,
     initialSteps,
     onSelectedStepIndexChange,
+    unmount,
     setSelectedStepIndex: (index: number | undefined) => {
       act(() => {
         if (!setSelectedStepIndexRef.current) {
@@ -115,6 +116,7 @@ const Wrapper = ({
         onClose={onClose}
         onChange={onChange}
         onSave={onSave}
+        onChangeDebounceMs={0}
         {...props}
       />
     </>
@@ -276,6 +278,83 @@ describe('EditDslStepsFlyout', () => {
       expect(getTab(1).querySelector('[data-euiicon-type="warning"]')).not.toBeNull();
     });
 
+    it('keeps Save disabled when adding a step while an existing step has errors', async () => {
+      const { onSave } = renderFlyout({
+        initialSteps: {
+          dsl: {
+            data_retention: '30d',
+            downsample: [{ after: '30d', fixed_interval: '1h' }],
+          },
+        },
+      });
+
+      await tick();
+
+      const panel = withinStep(0);
+      fireEvent.change(panel.getByTestId(`${DATA_TEST_SUBJ}FixedIntervalValue`), {
+        target: { value: '1.5' },
+      });
+
+      // Trigger validation via submit attempt to ensure the form has recorded blocking errors.
+      fireEvent.click(screen.getByTestId(`${DATA_TEST_SUBJ}SaveButton`));
+      await tick();
+      expect(onSave).toHaveBeenCalledTimes(0);
+      expect(screen.getByTestId(`${DATA_TEST_SUBJ}SaveButton`)).toBeDisabled();
+
+      // Add another step while the first one is still invalid.
+      fireEvent.click(screen.getByTestId(`${DATA_TEST_SUBJ}AddTabButton`));
+      await waitFor(() => expect(getTab(2)).toBeInTheDocument());
+
+      // Save should remain disabled because there are still form errors.
+      await waitFor(() => expect(screen.getByTestId(`${DATA_TEST_SUBJ}SaveButton`)).toBeDisabled());
+    });
+
+    it('re-enables Save after removing the invalid step', async () => {
+      const { onSave } = renderFlyout(
+        {
+          initialSteps: {
+            dsl: {
+              data_retention: '30d',
+              downsample: [
+                { after: '30d', fixed_interval: '1h' },
+                { after: '40d', fixed_interval: '5d' },
+              ],
+            },
+          },
+        },
+        { initialSelectedStepIndex: 1 }
+      );
+
+      await tick();
+
+      const invalidPanel = withinStep(1);
+      fireEvent.change(invalidPanel.getByTestId(`${DATA_TEST_SUBJ}FixedIntervalValue`), {
+        target: { value: '1.5' },
+      });
+
+      // Trigger validation via submit attempt to ensure the form has recorded blocking errors.
+      fireEvent.click(screen.getByTestId(`${DATA_TEST_SUBJ}SaveButton`));
+      await tick();
+      expect(onSave).toHaveBeenCalledTimes(0);
+      expect(screen.getByTestId(`${DATA_TEST_SUBJ}SaveButton`)).toBeDisabled();
+
+      // Remove the invalid step -> save should become enabled again.
+      fireEvent.click(screen.getByTestId(`${DATA_TEST_SUBJ}RemoveStepButton-step-2`));
+      await waitFor(() => expect(queryTab(2)).not.toBeInTheDocument());
+      await waitFor(() =>
+        expect(screen.getByTestId(`${DATA_TEST_SUBJ}SaveButton`)).not.toBeDisabled()
+      );
+
+      fireEvent.click(screen.getByTestId(`${DATA_TEST_SUBJ}SaveButton`));
+      await waitFor(() => expect(onSave).toHaveBeenCalledTimes(1));
+      expect(onSave).toHaveBeenCalledWith({
+        dsl: {
+          data_retention: '30d',
+          downsample: [{ after: '30d', fixed_interval: '1h' }],
+        },
+      });
+    });
+
     it('prevents saving when fixed_interval is less than 5 minutes', async () => {
       const { onSave } = renderFlyout({
         initialSteps: {
@@ -400,6 +479,45 @@ describe('EditDslStepsFlyout', () => {
       expect(panel.getByTestId(`${DATA_TEST_SUBJ}FixedIntervalValue`)).toHaveValue(3);
       expect(panel.getByTestId(`${DATA_TEST_SUBJ}FixedIntervalUnit`)).toHaveValue('h');
     });
+
+    it('does not keep stale tab errors when removing an invalid middle step', async () => {
+      const { onSave } = renderFlyout(
+        {
+          initialSteps: {
+            dsl: {
+              data_retention: '30d',
+              downsample: [
+                { after: '10d', fixed_interval: '1h' },
+                { after: '20d', fixed_interval: '2h' },
+                { after: '30d', fixed_interval: '3h' },
+              ],
+            },
+          },
+        },
+        { initialSelectedStepIndex: 1 }
+      );
+
+      await tick();
+
+      // Make step 2 invalid.
+      const step2Panel = withinStep(1);
+      fireEvent.change(step2Panel.getByTestId(`${DATA_TEST_SUBJ}FixedIntervalValue`), {
+        target: { value: '1.5' },
+      });
+
+      fireEvent.click(screen.getByTestId(`${DATA_TEST_SUBJ}SaveButton`));
+      await tick();
+      expect(onSave).toHaveBeenCalledTimes(0);
+      expect(getTab(2).querySelector('[data-euiicon-type="warning"]')).not.toBeNull();
+
+      // Remove step 2; step 3 shifts to step 2 and should not keep the stale warning icon.
+      fireEvent.click(screen.getByTestId(`${DATA_TEST_SUBJ}RemoveStepButton-step-2`));
+      await waitFor(() => expect(queryTab(3)).not.toBeInTheDocument());
+
+      await waitFor(() =>
+        expect(getTab(2).querySelector('[data-euiicon-type="warning"]')).toBeNull()
+      );
+    });
   });
 
   describe('onChange emission', () => {
@@ -437,6 +555,109 @@ describe('EditDslStepsFlyout', () => {
           ],
         },
       });
+    });
+
+    it('debounces rapid user edits into a single onChange', async () => {
+      jest.useFakeTimers();
+      const clearTimeoutSpy = jest.spyOn(global, 'clearTimeout');
+      try {
+        const onChange = jest.fn();
+        renderFlyout({
+          onChange,
+          onChangeDebounceMs: 100,
+          initialSteps: {
+            dsl: {
+              data_retention: '30d',
+              downsample: [{ after: '30d', fixed_interval: '1h' }],
+            },
+          },
+        });
+
+        // Flush initial mount work.
+        await act(async () => {
+          jest.runOnlyPendingTimers();
+        });
+        onChange.mockClear();
+        clearTimeoutSpy.mockClear();
+
+        const panel = withinStep(0);
+        fireEvent.change(panel.getByTestId(`${DATA_TEST_SUBJ}FixedIntervalValue`), {
+          target: { value: '1' },
+        });
+        fireEvent.change(panel.getByTestId(`${DATA_TEST_SUBJ}FixedIntervalValue`), {
+          target: { value: '2' },
+        });
+        fireEvent.change(panel.getByTestId(`${DATA_TEST_SUBJ}FixedIntervalValue`), {
+          target: { value: '3' },
+        });
+
+        expect(onChange).toHaveBeenCalledTimes(0);
+
+        await act(async () => {
+          jest.advanceTimersByTime(99);
+        });
+        expect(onChange).toHaveBeenCalledTimes(0);
+
+        await act(async () => {
+          jest.advanceTimersByTime(1);
+        });
+
+        expect(onChange).toHaveBeenCalledTimes(1);
+        expect(onChange).toHaveBeenLastCalledWith({
+          dsl: {
+            data_retention: '30d',
+            downsample: [{ after: '30d', fixed_interval: '3h' }],
+          },
+        });
+
+        // Intermediate edits should clear the previous pending debounce timer.
+        expect(clearTimeoutSpy).toHaveBeenCalled();
+      } finally {
+        clearTimeoutSpy.mockRestore();
+        jest.useRealTimers();
+      }
+    });
+
+    it('cleans up a pending debounced onChange on unmount', async () => {
+      jest.useFakeTimers();
+      const clearTimeoutSpy = jest.spyOn(global, 'clearTimeout');
+      try {
+        const onChange = jest.fn();
+        const { unmount } = renderFlyout({
+          onChange,
+          onChangeDebounceMs: 100,
+          initialSteps: {
+            dsl: {
+              data_retention: '30d',
+              downsample: [{ after: '30d', fixed_interval: '1h' }],
+            },
+          },
+        });
+
+        await act(async () => {
+          jest.runOnlyPendingTimers();
+        });
+        onChange.mockClear();
+        clearTimeoutSpy.mockClear();
+
+        const panel = withinStep(0);
+        fireEvent.change(panel.getByTestId(`${DATA_TEST_SUBJ}FixedIntervalValue`), {
+          target: { value: '2' },
+        });
+
+        unmount();
+
+        await act(async () => {
+          jest.runOnlyPendingTimers();
+          jest.advanceTimersByTime(100);
+        });
+
+        expect(onChange).toHaveBeenCalledTimes(0);
+        expect(clearTimeoutSpy).toHaveBeenCalled();
+      } finally {
+        clearTimeoutSpy.mockRestore();
+        jest.useRealTimers();
+      }
     });
   });
 });

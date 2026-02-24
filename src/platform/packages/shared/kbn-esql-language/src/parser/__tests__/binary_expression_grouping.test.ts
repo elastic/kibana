@@ -8,19 +8,19 @@
  */
 
 import { EsqlQuery } from '../../composer/query';
-import type { ESQLAstQueryExpression } from '../../types';
+import type { ESQLAstItem, ESQLAstQueryExpression, ESQLProperNode } from '../../types';
 import { singleItems } from '../../ast/visitor/utils';
 import { Walker } from '../../ast/walker';
 
 const removeParserFields = (tree: ESQLAstQueryExpression): void => {
   Walker.walk(tree, {
-    visitAny: (node) => {
-      delete (node as any).text;
-      delete (node as any).location;
-      delete (node as any).incomplete;
-      const args = (node as any).args;
+    visitAny: (node: Partial<ESQLProperNode>) => {
+      delete node.text;
+      delete node.location;
+      delete node.incomplete;
+      const args = (node as { args?: ESQLAstItem[] }).args;
       if (Array.isArray(args)) {
-        (node as any).args = [...singleItems(args)];
+        (node as { args?: ESQLAstItem[] }).args = [...singleItems(args)];
       }
     },
   });

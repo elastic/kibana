@@ -184,7 +184,7 @@ describe('deleteGapAutoFillScheduler()', () => {
     });
 
     setupSchedulerSo();
-    (authorization.ensureAuthorized as jest.Mock).mockImplementationOnce(() => {
+    (authorization.bulkEnsureAuthorized as jest.Mock).mockImplementationOnce(() => {
       throw new Error('no access');
     });
 

@@ -38,13 +38,13 @@ describe('streamRoutingMachine condition editor validity', () => {
       privileges: { manage: true, simulate: true },
       inherited_fields: {},
       stream: {
-        name: 'logs',
+        name: 'logs.otel',
         ingest: {
           wired: {
             fields: {},
             routing: [
               {
-                destination: 'logs.child',
+                destination: 'logs.otel.child',
                 where: ALWAYS_CONDITION,
                 status: 'enabled',
               },

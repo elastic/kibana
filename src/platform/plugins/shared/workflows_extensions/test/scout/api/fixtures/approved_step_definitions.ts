@@ -26,7 +26,7 @@
 export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string }> = [
   {
     id: 'ai.agent',
-    handlerHash: 'affaf17569853b40868f907f0d6ea4f2a13f55c1f264e29ae59244b45596af28',
+    handlerHash: '800765ba855e1e4a93d5bb7a6fce558ec5e369ed416bfb763047305c5d7f40ca',
   },
   {
     id: 'ai.classify',
@@ -46,7 +46,7 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string 
   },
   {
     id: 'data.map',
-    handlerHash: '6e795a15958a869b328bc8a19836958eafaf088fad7a20a377617fff453dc513',
+    handlerHash: '79ddef521ebd6ae8278e5d9034b7005687e31c2e949796add213eff2ebd21d82',
   },
   {
     id: 'data.regex_extract',

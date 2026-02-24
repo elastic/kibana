@@ -148,7 +148,7 @@
           ") => React.JSX.Element; }"
         ],
         "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/dimension_buttons/dimension_button.tsx",
-        "lineNumber": 143,
+        "lineNumber": 142,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -248,7 +248,7 @@
         "label": "DimensionTrigger",
         "description": [],
         "signature": [
-          "({ id, label, color, dataTestSubj, }: { label: React.ReactNode; id?: string | undefined; color?: \"default\" | \"success\" | \"accent\" | \"accentSecondary\" | \"warning\" | \"danger\" | \"subdued\" | \"ghost\" | ",
+          "({ id, label, color, dataTestSubj, }: { label: React.ReactNode; id?: string | undefined; color?: \"default\" | \"success\" | \"warning\" | \"subdued\" | \"accent\" | \"accentSecondary\" | \"danger\" | \"ghost\" | ",
           "Property",
           ".Color | undefined; dataTestSubj?: string | undefined; }) => React.JSX.Element"
         ],
@@ -279,7 +279,7 @@
                 "label": "label",
                 "description": [],
                 "signature": [
-                  "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+                  "React.ReactNode"
                 ],
                 "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/dimension_buttons/trigger.tsx",
                 "lineNumber": 36,
@@ -311,7 +311,7 @@
                 "label": "color",
                 "description": [],
                 "signature": [
-                  "\"default\" | \"success\" | \"accent\" | \"accentSecondary\" | \"warning\" | \"danger\" | \"subdued\" | \"ghost\" | ",
+                  "\"default\" | \"success\" | \"warning\" | \"subdued\" | \"accent\" | \"accentSecondary\" | \"danger\" | \"ghost\" | ",
                   "Property",
                   ".Color | undefined"
                 ],
@@ -351,7 +351,7 @@
         "label": "DragDropBuckets",
         "description": [],
         "signature": [
-          "({\n  items,\n  onDragStart,\n  onDragEnd,\n  droppableId,\n  children,\n  bgColor,\n}: { items: T[]; droppableId: string; children: React.ReactElement<any, string | React.JSXElementConstructor<any>>[]; onDragStart?: (() => void) | undefined; onDragEnd?: ((items: T[]) => void) | undefined; bgColor?: ",
+          "({\n  items,\n  onDragStart,\n  onDragEnd,\n  droppableId,\n  children,\n  bgColor,\n}: { items: T[]; droppableId: string; children: React.ReactElement<any>[]; onDragStart?: (() => void) | undefined; onDragEnd?: ((items: T[]) => void) | undefined; bgColor?: ",
           "PanelColor",
           " | undefined; }) => React.JSX.Element"
         ],
@@ -411,7 +411,7 @@
                 "label": "children",
                 "description": [],
                 "signature": [
-                  "React.ReactElement<any, string | React.JSXElementConstructor<any>>[]"
+                  "React.ReactElement<any>[]"
                 ],
                 "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/drag_drop_bucket/buckets.tsx",
                 "lineNumber": 75,
@@ -617,7 +617,7 @@
                 "label": "label",
                 "description": [],
                 "signature": [
-                  "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+                  "React.ReactNode"
                 ],
                 "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/dimension_buttons/empty_button.tsx",
                 "lineNumber": 24,
@@ -870,7 +870,7 @@
           "<Icon>; defaultIcon?: string | undefined; }) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/icon_select.tsx",
-        "lineNumber": 42,
+        "lineNumber": 49,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -883,7 +883,7 @@
             "label": "{\n  value,\n  onChange,\n  customIconSet,\n  defaultIcon = 'empty',\n}",
             "description": [],
             "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/icon_select.tsx",
-            "lineNumber": 47,
+            "lineNumber": 54,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
@@ -899,7 +899,7 @@
                   "Icon | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/icon_select.tsx",
-                "lineNumber": 48,
+                "lineNumber": 55,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -915,7 +915,7 @@
                   "(newIcon: Icon) => void"
                 ],
                 "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/icon_select.tsx",
-                "lineNumber": 49,
+                "lineNumber": 56,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -931,7 +931,7 @@
                       "Icon"
                     ],
                     "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/icon_select.tsx",
-                    "lineNumber": 49,
+                    "lineNumber": 56,
                     "columnNumber": 14,
                     "deprecated": false,
                     "trackAdoption": false,
@@ -953,7 +953,7 @@
                   " | Icon | undefined; shouldRotate?: boolean | undefined; }[]"
                 ],
                 "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/icon_select.tsx",
-                "lineNumber": 50,
+                "lineNumber": 57,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -969,7 +969,7 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/icon_select.tsx",
-                "lineNumber": 51,
+                "lineNumber": 58,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -999,7 +999,7 @@
           "<Icon>; defaultIcon?: string | undefined; }) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/icon_select.tsx",
-        "lineNumber": 85,
+        "lineNumber": 92,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1012,7 +1012,7 @@
             "label": "{\n  currentIcon,\n  setIcon,\n  customIconSet,\n  defaultIcon = 'empty',\n}",
             "description": [],
             "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/icon_select.tsx",
-            "lineNumber": 90,
+            "lineNumber": 97,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
@@ -1028,7 +1028,7 @@
                   "Icon | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/icon_select.tsx",
-                "lineNumber": 91,
+                "lineNumber": 98,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1044,7 +1044,7 @@
                   "(icon: Icon) => void"
                 ],
                 "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/icon_select.tsx",
-                "lineNumber": 92,
+                "lineNumber": 99,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1060,7 +1060,7 @@
                       "Icon"
                     ],
                     "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/icon_select.tsx",
-                    "lineNumber": 92,
+                    "lineNumber": 99,
                     "columnNumber": 13,
                     "deprecated": false,
                     "trackAdoption": false,
@@ -1082,7 +1082,7 @@
                   " | Icon | undefined; shouldRotate?: boolean | undefined; }[]"
                 ],
                 "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/icon_select.tsx",
-                "lineNumber": 93,
+                "lineNumber": 100,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1098,7 +1098,7 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/icon_select.tsx",
-                "lineNumber": 94,
+                "lineNumber": 101,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2071,7 +2071,7 @@
             "label": "triggerIconType",
             "description": [],
             "signature": [
-              "\"none\" | \"color\" | \"disabled\" | \"aggregate\" | \"custom\" | \"colorBy\" | \"invisible\" | undefined"
+              "\"none\" | \"custom\" | \"color\" | \"disabled\" | \"aggregate\" | \"colorBy\" | \"invisible\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/dimension_buttons/types.ts",
             "lineNumber": 14,
@@ -2702,7 +2702,7 @@
           " | T | undefined; shouldRotate?: boolean | undefined; }[]"
         ],
         "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/icon_select.tsx",
-        "lineNumber": 19,
+        "lineNumber": 26,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2716,7 +2716,7 @@
         "label": "LineStyle",
         "description": [],
         "signature": [
-          "\"dashed\" | \"solid\" | \"dotted\""
+          "\"dotted\" | \"solid\" | \"dashed\""
         ],
         "path": "src/platform/packages/shared/kbn-visualization-ui-components/types.ts",
         "lineNumber": 14,
@@ -2743,7 +2743,7 @@
             "section": "def-public.SharedSetOfIcons",
             "text": "SharedSetOfIcons"
           },
-          "; label: string; icon?: string | React.ComponentClass<{}, any> | React.FunctionComponent<{}> | undefined; shouldRotate?: boolean | undefined; }[]"
+          "; label: string; icon?: string | React.ComponentType | undefined; shouldRotate?: boolean | undefined; }[]"
         ],
         "path": "src/platform/packages/shared/kbn-visualization-ui-components/util.ts",
         "lineNumber": 45,
@@ -2760,7 +2760,7 @@
         "label": "SharedSetOfIcons",
         "description": [],
         "signature": [
-          "\"alert\" | \"tag\" | \"asterisk\" | \"bell\" | \"bolt\" | \"bug\" | \"editorComment\" | \"empty\" | \"flag\" | \"heart\" | \"mapMarker\" | \"starEmpty\""
+          "\"alert\" | \"asterisk\" | \"bell\" | \"bolt\" | \"bug\" | \"editorComment\" | \"flag\" | \"heart\" | \"mapMarker\" | \"starEmpty\" | \"tag\" | \"empty\""
         ],
         "path": "src/platform/packages/shared/kbn-visualization-ui-components/types.ts",
         "lineNumber": 17,

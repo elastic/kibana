@@ -26,11 +26,7 @@ export const ConvertTypeSelector = () => {
     <EuiFormRow
       label={i18n.translate(
         'xpack.streams.streamDetailView.managementTab.enrichment.processor.convertTypeLabel',
-        { defaultMessage: 'Type' }
-      )}
-      helpText={i18n.translate(
-        'xpack.streams.streamDetailView.managementTab.enrichment.processor.convertTypeHelpText',
-        { defaultMessage: 'Field data type for the output.' }
+        { defaultMessage: 'Output field type' }
       )}
       fullWidth
     >

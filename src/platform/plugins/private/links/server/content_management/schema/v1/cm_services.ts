@@ -43,31 +43,31 @@ export const dashboardLinkSchema = schema.object({
   options: schema.maybe(dashboardNavigationOptionsSchema),
 });
 
+export const externalLinkOptionsSchema = schema.object(
+  {
+    openInNewTab: schema.maybe(
+      schema.boolean({
+        meta: {
+          description: 'Whether to open this link in a new tab when clicked',
+        },
+      })
+    ),
+    encodeUrl: schema.maybe(
+      schema.boolean({
+        meta: {
+          description: 'Whether to escape the URL with percent encoding',
+        },
+      })
+    ),
+  },
+  { unknowns: 'forbid' }
+);
+
 export const externalLinkSchema = schema.object({
   ...baseLinkSchema,
   type: schema.literal(EXTERNAL_LINK_TYPE),
   destination: schema.string({ meta: { description: 'The external URL to link to' } }),
-  options: schema.maybe(
-    schema.object(
-      {
-        openInNewTab: schema.maybe(
-          schema.boolean({
-            meta: {
-              description: 'Whether to open this link in a new tab when clicked',
-            },
-          })
-        ),
-        encodeUrl: schema.maybe(
-          schema.boolean({
-            meta: {
-              description: 'Whether to escape the URL with percent encoding',
-            },
-          })
-        ),
-      },
-      { unknowns: 'forbid' }
-    )
-  ),
+  options: schema.maybe(externalLinkOptionsSchema),
 });
 
 // Shared schema for links array - used by both saved objects and embeddables

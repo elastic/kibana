@@ -162,7 +162,7 @@
             "section": "def-public.AlertsSearchBarProps",
             "text": "AlertsSearchBarProps"
           },
-          ") => React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+          ") => React.ReactElement<any>"
         ],
         "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/alerts_search_bar/index.tsx",
         "lineNumber": 24,
@@ -2264,7 +2264,7 @@
             "label": "iconClass",
             "description": [],
             "signature": [
-              "string | React.ComponentType<{}>"
+              "string | React.ComponentType"
             ],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
             "lineNumber": 131,
@@ -2861,7 +2861,7 @@
             "label": "alertStatus",
             "description": [],
             "signature": [
-              "\"active\" | \"recovered\" | \"untracked\""
+              "\"active\" | \"recovered\" | \"untracked\" | \"delayed\""
             ],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/alert_lifecycle_status_badge/index.tsx",
             "lineNumber": 18,
@@ -3416,7 +3416,7 @@
                 "section": "def-common.Query",
                 "text": "Query"
               },
-              ">) => React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+              ">) => React.ReactElement<any>"
             ],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/alerts_search_bar/types.ts",
             "lineNumber": 41,
@@ -3523,7 +3523,7 @@
             "label": "message",
             "description": [],
             "signature": [
-              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+              "React.ReactNode"
             ],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
             "lineNumber": 25,
@@ -5016,7 +5016,7 @@
             "label": "setRuleProperty",
             "description": [],
             "signature": [
-              "<Prop extends \"params\" | \"id\" | \"consumer\" | \"name\" | \"monitoring\" | \"enabled\" | \"tags\" | \"actions\" | \"schedule\" | \"mapped_params\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"apiKeyCreatedByUser\" | \"throttle\" | \"muteAll\" | \"notifyWhen\" | \"mutedInstanceIds\" | \"executionStatus\" | \"snoozeSchedule\" | \"activeSnoozes\" | \"isSnoozedUntil\" | \"lastRun\" | \"nextRun\" | \"revision\" | \"running\" | \"viewInAppRelativeUrl\" | \"alertDelay\" | \"flapping\" | \"artifacts\" | \"ruleTypeId\">(key: Prop, value: ",
+              "<Prop extends \"params\" | \"id\" | \"consumer\" | \"name\" | \"monitoring\" | \"enabled\" | \"tags\" | \"actions\" | \"schedule\" | \"mapped_params\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"apiKeyCreatedByUser\" | \"uiamApiKey\" | \"throttle\" | \"muteAll\" | \"notifyWhen\" | \"mutedInstanceIds\" | \"executionStatus\" | \"snoozeSchedule\" | \"activeSnoozes\" | \"isSnoozedUntil\" | \"lastRun\" | \"nextRun\" | \"revision\" | \"running\" | \"viewInAppRelativeUrl\" | \"alertDelay\" | \"flapping\" | \"artifacts\" | \"ruleTypeId\">(key: Prop, value: ",
               {
                 "pluginId": "@kbn/alerts-ui-shared",
                 "scope": "public",
@@ -5429,7 +5429,7 @@
                 "section": "def-common.GetFieldsOptions",
                 "text": "GetFieldsOptions"
               },
-              ", \"allowNoIndex\" | \"pattern\"> | undefined) => Promise<",
+              ", \"pattern\" | \"allowNoIndex\"> | undefined) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -6314,7 +6314,7 @@
         "label": "FilterControlConfig",
         "description": [],
         "signature": [
-          "Omit<Readonly<{ sort?: Readonly<{} & { by: \"_key\" | \"_count\"; direction: \"asc\" | \"desc\"; }> | undefined; title?: string | undefined; description?: string | undefined; useGlobalFilters?: boolean | undefined; ignoreValidations?: boolean | undefined; displaySettings?: Readonly<{ placeholder?: string | undefined; hideActionBar?: boolean | undefined; hideExclude?: boolean | undefined; hideExists?: boolean | undefined; hideSort?: boolean | undefined; } & {}> | undefined; searchTechnique?: \"prefix\" | \"wildcard\" | \"exact\" | undefined; existsSelected?: boolean | undefined; runPastTimeout?: boolean | undefined; singleSelect?: boolean | undefined; exclude?: boolean | undefined; selectedOptions?: (string | number)[] | undefined; } & { fieldName: string; dataViewId: string; }>, \"dataViewId\"> & { persist?: boolean | undefined; }"
+          "Omit<Readonly<{ sort?: Readonly<{} & { direction: \"asc\" | \"desc\"; by: \"_key\" | \"_count\"; }> | undefined; description?: string | undefined; title?: string | undefined; use_global_filters?: boolean | undefined; ignore_validations?: boolean | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; single_select?: boolean | undefined; exclude?: boolean | undefined; exists_selected?: boolean | undefined; run_past_timeout?: boolean | undefined; search_technique?: \"prefix\" | \"wildcard\" | \"exact\" | undefined; selected_options?: (string | number)[] | undefined; } & { field_name: string; data_view_id: string; }>, \"data_view_id\"> & { persist?: boolean | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/alert_filter_controls/types.ts",
         "lineNumber": 28,
@@ -6333,42 +6333,42 @@
         "signature": [
           "Pick<",
           {
-            "pluginId": "@kbn/presentation-containers",
-            "scope": "public",
-            "docId": "kibKbnPresentationContainersPluginApi",
-            "section": "def-public.PresentationContainer",
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PresentationContainer",
             "text": "PresentationContainer"
           },
-          "<unknown>, \"children$\" | \"addNewPanel\" | \"replacePanel\"> & Partial<",
+          "<unknown>, \"children$\" | \"addNewPanel\" | \"replacePanel\" | \"removePanel\"> & Partial<",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
+            "scope": "common",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishesUnifiedSearch",
+            "section": "def-common.PublishesUnifiedSearch",
             "text": "PublishesUnifiedSearch"
           },
           "> & ",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
+            "scope": "common",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishesViewMode",
+            "section": "def-common.PublishesViewMode",
             "text": "PublishesViewMode"
           },
           " & ",
           {
-            "pluginId": "@kbn/presentation-containers",
-            "scope": "public",
-            "docId": "kibKbnPresentationContainersPluginApi",
-            "section": "def-public.HasSerializedChildState",
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.HasSerializedChildState",
             "text": "HasSerializedChildState"
           },
           "<object> & Partial<",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
+            "scope": "common",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishesDisabledActionIds",
+            "section": "def-common.PublishesDisabledActionIds",
             "text": "PublishesDisabledActionIds"
           },
           "> & { registerChildApi: (api: ",
@@ -6379,16 +6379,14 @@
             "section": "def-public.DefaultEmbeddableApi",
             "text": "DefaultEmbeddableApi"
           },
-          "<object>) => void; layout$: ",
-          "BehaviorSubject",
-          "<",
-          "ControlsLayout",
-          ">; isCompressed?: (() => boolean) | undefined; } & HasEditorConfig & Pick<",
+          "<object>) => void; isCompressed?: (() => boolean) | undefined; } & ",
+          "HasEditorConfig",
+          " & Pick<",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
+            "scope": "common",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.AppliesFilters",
+            "section": "def-common.AppliesFilters",
             "text": "AppliesFilters"
           },
           ", \"appliedFilters$\"> & ",
@@ -6402,9 +6400,9 @@
           " & ",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
+            "scope": "common",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.AppliesTimeslice",
+            "section": "def-common.AppliesTimeslice",
             "text": "AppliesTimeslice"
           },
           " & { reload: () => void; updateInput: (input: Partial<",
@@ -6433,7 +6431,15 @@
             "section": "def-public.ControlGroupRuntimeState",
             "text": "ControlGroupRuntimeState"
           },
-          "<{}>; openAddDataControlFlyout: (options?: { controlStateTransform?: ",
+          "<{}>; getControls: () => { [id: string]: ",
+          {
+            "pluginId": "@kbn/controls-schemas",
+            "scope": "server",
+            "docId": "kibKbnControlsSchemasPluginApi",
+            "section": "def-server.PinnedControlLayoutState",
+            "text": "PinnedControlLayoutState"
+          },
+          "; }; openAddDataControlFlyout: (options?: { controlStateTransform?: ",
           {
             "pluginId": "@kbn/control-group-renderer",
             "scope": "public",
@@ -6441,7 +6447,7 @@
             "section": "def-public.ControlStateTransform",
             "text": "ControlStateTransform"
           },
-          "<Readonly<{ title?: string | undefined; description?: string | undefined; useGlobalFilters?: boolean | undefined; ignoreValidations?: boolean | undefined; } & { fieldName: string; dataViewId: string; }>> | undefined; } | undefined) => void; }"
+          "<Readonly<{ description?: string | undefined; title?: string | undefined; use_global_filters?: boolean | undefined; ignore_validations?: boolean | undefined; } & { field_name: string; data_view_id: string; }>> | undefined; } | undefined) => void; }"
         ],
         "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/alert_filter_controls/types.ts",
         "lineNumber": 35,
@@ -6458,7 +6464,7 @@
         "label": "FilterUrlFormat",
         "description": [],
         "signature": [
-          "{ [x: string]: Pick<Readonly<{ sort?: Readonly<{} & { by: \"_key\" | \"_count\"; direction: \"asc\" | \"desc\"; }> | undefined; title?: string | undefined; description?: string | undefined; useGlobalFilters?: boolean | undefined; ignoreValidations?: boolean | undefined; displaySettings?: Readonly<{ placeholder?: string | undefined; hideActionBar?: boolean | undefined; hideExclude?: boolean | undefined; hideExists?: boolean | undefined; hideSort?: boolean | undefined; } & {}> | undefined; searchTechnique?: \"prefix\" | \"wildcard\" | \"exact\" | undefined; existsSelected?: boolean | undefined; runPastTimeout?: boolean | undefined; singleSelect?: boolean | undefined; exclude?: boolean | undefined; selectedOptions?: (string | number)[] | undefined; } & { fieldName: string; dataViewId: string; }>, \"title\" | \"fieldName\" | \"existsSelected\" | \"exclude\" | \"selectedOptions\">; }"
+          "{ [x: string]: Pick<Readonly<{ sort?: Readonly<{} & { direction: \"asc\" | \"desc\"; by: \"_key\" | \"_count\"; }> | undefined; description?: string | undefined; title?: string | undefined; use_global_filters?: boolean | undefined; ignore_validations?: boolean | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; single_select?: boolean | undefined; exclude?: boolean | undefined; exists_selected?: boolean | undefined; run_past_timeout?: boolean | undefined; search_technique?: \"prefix\" | \"wildcard\" | \"exact\" | undefined; selected_options?: (string | number)[] | undefined; } & { field_name: string; data_view_id: string; }>, \"title\" | \"field_name\" | \"exclude\" | \"exists_selected\" | \"selected_options\">; }"
         ],
         "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/alert_filter_controls/types.ts",
         "lineNumber": 15,
@@ -6655,6 +6661,14 @@
             "docId": "kibKbnAlertingTypesPluginApi",
             "section": "def-common.Flapping",
             "text": "Flapping"
+          },
+          " | null | undefined; artifacts?: ",
+          {
+            "pluginId": "@kbn/alerting-types",
+            "scope": "common",
+            "docId": "kibKbnAlertingTypesPluginApi",
+            "section": "def-common.Artifacts",
+            "text": "Artifacts"
           },
           " | null | undefined; ruleTypeId: string; }"
         ],
@@ -7285,22 +7299,6 @@
             "section": "def-common.ActionVariable",
             "text": "ActionVariable"
           },
-          ", \"name\">; \"alerts.all.count\": Omit<",
-          {
-            "pluginId": "@kbn/alerting-types",
-            "scope": "common",
-            "docId": "kibKbnAlertingTypesPluginApi",
-            "section": "def-common.ActionVariable",
-            "text": "ActionVariable"
-          },
-          ", \"name\">; \"alerts.all.data\": Omit<",
-          {
-            "pluginId": "@kbn/alerting-types",
-            "scope": "common",
-            "docId": "kibKbnAlertingTypesPluginApi",
-            "section": "def-common.ActionVariable",
-            "text": "ActionVariable"
-          },
           ", \"name\">; \"alerts.new.count\": Omit<",
           {
             "pluginId": "@kbn/alerting-types",
@@ -7326,6 +7324,22 @@
             "text": "ActionVariable"
           },
           ", \"name\">; \"alerts.recovered.data\": Omit<",
+          {
+            "pluginId": "@kbn/alerting-types",
+            "scope": "common",
+            "docId": "kibKbnAlertingTypesPluginApi",
+            "section": "def-common.ActionVariable",
+            "text": "ActionVariable"
+          },
+          ", \"name\">; \"alerts.all.count\": Omit<",
+          {
+            "pluginId": "@kbn/alerting-types",
+            "scope": "common",
+            "docId": "kibKbnAlertingTypesPluginApi",
+            "section": "def-common.ActionVariable",
+            "text": "ActionVariable"
+          },
+          ", \"name\">; \"alerts.all.data\": Omit<",
           {
             "pluginId": "@kbn/alerting-types",
             "scope": "common",

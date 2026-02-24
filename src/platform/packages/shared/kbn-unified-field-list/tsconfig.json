@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["*.ts", "src/**/*", "__mocks__/**/*.ts", "../../../../../typings/emotion.d.ts"],
+  "include": ["*.ts", "src/**/*", "__mocks__/**/*.ts"],
   "kbn_references": [
     "@kbn/i18n",
     "@kbn/data-views-plugin",

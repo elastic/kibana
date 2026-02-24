@@ -97,7 +97,7 @@ describe('SecurityNavControlService', () => {
                 class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
               >
                 <span
-                  class="eui-textTruncate euiButtonEmpty__text"
+                  class="eui-textTruncate euiButtonEmpty__text css-13ifi6d-m"
                 >
                   <span
                     class="euiHeaderSectionItemButton__content emotion-euiHeaderSectionItemButton__content"

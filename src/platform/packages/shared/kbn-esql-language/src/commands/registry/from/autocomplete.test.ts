@@ -70,7 +70,7 @@ describe('FROM Autocomplete', () => {
     );
   });
   describe('... <sources> ...', () => {
-    test('suggests Browse indices in empty source slots when enabled', async () => {
+    test('suggests Browse data sources in empty source slots when enabled', async () => {
       mockCallbacks = {
         ...mockCallbacks,
         canSuggestResourceBrowser: jest.fn().mockResolvedValue(true),
@@ -87,10 +87,10 @@ describe('FROM Autocomplete', () => {
       };
 
       const initialSlotLabels = (await suggest('FROM /')).map((s) => s.label);
-      expect(initialSlotLabels).toContain('Browse indices');
+      expect(initialSlotLabels).toContain('Browse data sources');
 
       const afterCommaLabels = (await suggest('FROM index, /')).map((s) => s.label);
-      expect(afterCommaLabels).toContain('Browse indices');
+      expect(afterCommaLabels).toContain('Browse data sources');
     });
 
     test('suggests visible indices on space', async () => {

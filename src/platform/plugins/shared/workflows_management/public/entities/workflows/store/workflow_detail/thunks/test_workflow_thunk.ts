@@ -10,13 +10,14 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { i18n } from '@kbn/i18n';
 import { WorkflowsBaseTelemetry } from '../../../../../common/service/telemetry';
+import type { WorkflowTriggerTab } from '../../../../../features/run_workflow/ui/types';
 import type { WorkflowsServices } from '../../../../../types';
 import type { RootState } from '../../types';
 import { selectWorkflow, selectYamlString } from '../selectors';
 
 export interface TestWorkflowParams {
   inputs: Record<string, unknown>;
-  triggerTab?: 'manual' | 'alert' | 'index';
+  triggerTab?: WorkflowTriggerTab;
 }
 
 export interface TestWorkflowResponse {

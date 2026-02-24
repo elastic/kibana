@@ -24,6 +24,7 @@
       ],
       "quote": "",
       "should_trim_fields": "__flag__",
+      "should_parse_recursively": "__flag__",
       "timeout": [
         "25s",
         "-1",

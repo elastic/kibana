@@ -5,7 +5,25 @@
     "functions": [],
     "interfaces": [],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "dashboardMarkdown",
+        "id": "def-public.MARKDOWN_EMBEDDABLE_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "MARKDOWN_EMBEDDABLE_TYPE",
+        "description": [],
+        "signature": [
+          "\"DASHBOARD_MARKDOWN\""
+        ],
+        "path": "src/platform/plugins/shared/dashboard_markdown/common/constants.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   },
   "server": {
@@ -14,6 +32,23 @@
     "interfaces": [],
     "enums": [],
     "misc": [
+      {
+        "parentPluginId": "dashboardMarkdown",
+        "id": "def-server.MARKDOWN_EMBEDDABLE_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "MARKDOWN_EMBEDDABLE_TYPE",
+        "description": [],
+        "signature": [
+          "\"DASHBOARD_MARKDOWN\""
+        ],
+        "path": "src/platform/plugins/shared/dashboard_markdown/common/constants.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "dashboardMarkdown",
         "id": "def-server.MarkdownEditorState",
@@ -39,7 +74,7 @@
         "label": "MarkdownEmbeddableState",
         "description": [],
         "signature": [
-          "{ readonly title?: string | undefined; readonly description?: string | undefined; readonly hidePanelTitles?: boolean | undefined; readonly content: string; }"
+          "{ readonly description?: string | undefined; readonly title?: string | undefined; readonly hide_title?: boolean | undefined; readonly content: string; }"
         ],
         "path": "src/platform/plugins/shared/dashboard_markdown/server/schemas.ts",
         "lineNumber": 28,

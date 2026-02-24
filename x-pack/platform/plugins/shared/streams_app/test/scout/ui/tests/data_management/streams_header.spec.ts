@@ -57,7 +57,7 @@ test.describe(
     });
 
     test('shows Wired badge on wired stream', async ({ pageObjects }) => {
-      await pageObjects.streams.gotoDataRetentionTab('logs');
+      await pageObjects.streams.gotoDataRetentionTab('logs.otel');
       await pageObjects.streams.verifyWiredBadge();
     });
 

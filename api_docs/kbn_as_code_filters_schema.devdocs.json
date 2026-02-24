@@ -1,0 +1,636 @@
+{
+  "id": "@kbn/as-code-filters-schema",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/as-code-filters-schema",
+        "id": "def-common.AsCodeGroupFilterRecursive",
+        "type": "Interface",
+        "tags": [],
+        "label": "AsCodeGroupFilterRecursive",
+        "description": [],
+        "path": "src/platform/packages/shared/as-code/filters-schema/src/schemas/filter.ts",
+        "lineNumber": 212,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/as-code-filters-schema",
+            "id": "def-common.AsCodeGroupFilterRecursive.group",
+            "type": "Object",
+            "tags": [],
+            "label": "group",
+            "description": [],
+            "signature": [
+              "{ operator: \"or\" | \"and\"; conditions: (Readonly<{ negate?: boolean | undefined; } & { value: string | number | boolean; field: string; operator: \"is\"; }> | Readonly<{ negate?: boolean | undefined; } & { value: string[] | number[] | boolean[]; field: string; operator: \"is_one_of\"; }> | Readonly<{ negate?: boolean | undefined; } & { value: Readonly<{ format?: string | undefined; lte?: string | number | undefined; gt?: string | number | undefined; gte?: string | number | undefined; lt?: string | number | undefined; } & {}>; field: string; operator: \"range\"; }> | Readonly<{ negate?: boolean | undefined; } & { field: string; operator: \"exists\"; }> | ",
+              {
+                "pluginId": "@kbn/as-code-filters-schema",
+                "scope": "common",
+                "docId": "kibKbnAsCodeFiltersSchemaPluginApi",
+                "section": "def-common.AsCodeGroupFilterRecursive",
+                "text": "AsCodeGroupFilterRecursive"
+              },
+              ")[]; }"
+            ],
+            "path": "src/platform/packages/shared/as-code/filters-schema/src/schemas/filter.ts",
+            "lineNumber": 213,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/as-code-filters-schema",
+        "id": "def-common.AsCodeConditionFilter",
+        "type": "Type",
+        "tags": [],
+        "label": "AsCodeConditionFilter",
+        "description": [],
+        "signature": [
+          "{ label?: string | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; data_view_id?: string | undefined; controlled_by?: string | undefined; is_multi_index?: boolean | undefined; type: \"condition\"; condition: Readonly<{ negate?: boolean | undefined; } & { value: string | number | boolean; field: string; operator: \"is\"; }> | Readonly<{ negate?: boolean | undefined; } & { value: string[] | number[] | boolean[]; field: string; operator: \"is_one_of\"; }> | Readonly<{ negate?: boolean | undefined; } & { value: Readonly<{ format?: string | undefined; lte?: string | number | undefined; gt?: string | number | undefined; gte?: string | number | undefined; lt?: string | number | undefined; } & {}>; field: string; operator: \"range\"; }> | Readonly<{ negate?: boolean | undefined; } & { field: string; operator: \"exists\"; }>; }"
+        ],
+        "path": "src/platform/packages/shared/as-code/filters-schema/src/types.ts",
+        "lineNumber": 26,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/as-code-filters-schema",
+        "id": "def-common.AsCodeDSLFilter",
+        "type": "Type",
+        "tags": [],
+        "label": "AsCodeDSLFilter",
+        "description": [],
+        "signature": [
+          "{ params?: any; label?: string | undefined; field?: string | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; data_view_id?: string | undefined; controlled_by?: string | undefined; is_multi_index?: boolean | undefined; type: \"dsl\"; dsl: Record<string, any>; }"
+        ],
+        "path": "src/platform/packages/shared/as-code/filters-schema/src/types.ts",
+        "lineNumber": 28,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/as-code-filters-schema",
+        "id": "def-common.AsCodeFilter",
+        "type": "Type",
+        "tags": [],
+        "label": "AsCodeFilter",
+        "description": [
+          "\nSchema-inferred types for As Code Filter API\n\nThese types are inferred from validation schemas and provide runtime validation compatibility."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.Writable",
+            "text": "Writable"
+          },
+          "<Readonly<{ label?: string | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; data_view_id?: string | undefined; controlled_by?: string | undefined; is_multi_index?: boolean | undefined; } & { type: \"condition\"; condition: Readonly<{ negate?: boolean | undefined; } & { value: string | number | boolean; field: string; operator: \"is\"; }> | Readonly<{ negate?: boolean | undefined; } & { value: string[] | number[] | boolean[]; field: string; operator: \"is_one_of\"; }> | Readonly<{ negate?: boolean | undefined; } & { value: Readonly<{ format?: string | undefined; lte?: string | number | undefined; gt?: string | number | undefined; gte?: string | number | undefined; lt?: string | number | undefined; } & {}>; field: string; operator: \"range\"; }> | Readonly<{ negate?: boolean | undefined; } & { field: string; operator: \"exists\"; }>; }>> | ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.Writable",
+            "text": "Writable"
+          },
+          "<Readonly<{ label?: string | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; data_view_id?: string | undefined; controlled_by?: string | undefined; is_multi_index?: boolean | undefined; } & { type: \"group\"; group: Readonly<{} & { operator: \"or\" | \"and\"; conditions: (Readonly<{ negate?: boolean | undefined; } & { value: string | number | boolean; field: string; operator: \"is\"; }> | Readonly<{ negate?: boolean | undefined; } & { value: string[] | number[] | boolean[]; field: string; operator: \"is_one_of\"; }> | Readonly<{ negate?: boolean | undefined; } & { value: Readonly<{ format?: string | undefined; lte?: string | number | undefined; gt?: string | number | undefined; gte?: string | number | undefined; lt?: string | number | undefined; } & {}>; field: string; operator: \"range\"; }> | Readonly<{ negate?: boolean | undefined; } & { field: string; operator: \"exists\"; }> | ",
+          {
+            "pluginId": "@kbn/as-code-filters-schema",
+            "scope": "common",
+            "docId": "kibKbnAsCodeFiltersSchemaPluginApi",
+            "section": "def-common.AsCodeGroupFilterRecursive",
+            "text": "AsCodeGroupFilterRecursive"
+          },
+          ")[]; }>; }>> | ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.Writable",
+            "text": "Writable"
+          },
+          "<Readonly<{ params?: any; label?: string | undefined; field?: string | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; data_view_id?: string | undefined; controlled_by?: string | undefined; is_multi_index?: boolean | undefined; } & { type: \"dsl\"; dsl: Record<string, any>; }>> | ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.Writable",
+            "text": "Writable"
+          },
+          "<Readonly<{ label?: string | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; data_view_id?: string | undefined; controlled_by?: string | undefined; is_multi_index?: boolean | undefined; } & { type: \"spatial\"; dsl: Record<string, any>; }>>"
+        ],
+        "path": "src/platform/packages/shared/as-code/filters-schema/src/types.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/as-code-filters-schema",
+        "id": "def-common.AsCodeGroupFilter",
+        "type": "Type",
+        "tags": [],
+        "label": "AsCodeGroupFilter",
+        "description": [],
+        "signature": [
+          "{ label?: string | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; data_view_id?: string | undefined; controlled_by?: string | undefined; is_multi_index?: boolean | undefined; type: \"group\"; group: Readonly<{} & { operator: \"or\" | \"and\"; conditions: (Readonly<{ negate?: boolean | undefined; } & { value: string | number | boolean; field: string; operator: \"is\"; }> | Readonly<{ negate?: boolean | undefined; } & { value: string[] | number[] | boolean[]; field: string; operator: \"is_one_of\"; }> | Readonly<{ negate?: boolean | undefined; } & { value: Readonly<{ format?: string | undefined; lte?: string | number | undefined; gt?: string | number | undefined; gte?: string | number | undefined; lt?: string | number | undefined; } & {}>; field: string; operator: \"range\"; }> | Readonly<{ negate?: boolean | undefined; } & { field: string; operator: \"exists\"; }> | ",
+          {
+            "pluginId": "@kbn/as-code-filters-schema",
+            "scope": "common",
+            "docId": "kibKbnAsCodeFiltersSchemaPluginApi",
+            "section": "def-common.AsCodeGroupFilterRecursive",
+            "text": "AsCodeGroupFilterRecursive"
+          },
+          ")[]; }>; }"
+        ],
+        "path": "src/platform/packages/shared/as-code/filters-schema/src/types.ts",
+        "lineNumber": 27,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/as-code-filters-schema",
+        "id": "def-common.AsCodeSpatialFilter",
+        "type": "Type",
+        "tags": [],
+        "label": "AsCodeSpatialFilter",
+        "description": [],
+        "signature": [
+          "{ label?: string | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; data_view_id?: string | undefined; controlled_by?: string | undefined; is_multi_index?: boolean | undefined; type: \"spatial\"; dsl: Record<string, any>; }"
+        ],
+        "path": "src/platform/packages/shared/as-code/filters-schema/src/types.ts",
+        "lineNumber": 29,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/as-code-filters-schema",
+        "id": "def-common.asCodeConditionFilterSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "asCodeConditionFilterSchema",
+        "description": [
+          "\nDiscriminated union schema combining all condition filter types"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ObjectType",
+            "text": "ObjectType"
+          },
+          "<ExtendedProps<{ disabled: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<boolean | undefined>; negate: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<boolean | undefined>; controlled_by: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<string | undefined>; data_view_id: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<string | undefined>; label: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<string | undefined>; is_multi_index: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<boolean | undefined>; }, { type: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<\"condition\">; condition: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<Readonly<{ negate?: boolean | undefined; } & { value: string | number | boolean; field: string; operator: \"is\"; }> | Readonly<{ negate?: boolean | undefined; } & { value: string[] | number[] | boolean[]; field: string; operator: \"is_one_of\"; }> | Readonly<{ negate?: boolean | undefined; } & { value: Readonly<{ format?: string | undefined; lte?: string | number | undefined; gt?: string | number | undefined; gte?: string | number | undefined; lt?: string | number | undefined; } & {}>; field: string; operator: \"range\"; }> | Readonly<{ negate?: boolean | undefined; } & { field: string; operator: \"exists\"; }>>; }>>"
+        ],
+        "path": "src/platform/packages/shared/as-code/filters-schema/src/schemas/filter.ts",
+        "lineNumber": 222,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/as-code-filters-schema",
+        "id": "def-common.asCodeDSLFilterSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "asCodeDSLFilterSchema",
+        "description": [
+          "\nSchema for DSL filters\nIncludes field and params properties specific to DSL filters for preserving metadata"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ObjectType",
+            "text": "ObjectType"
+          },
+          "<ExtendedProps<{ disabled: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<boolean | undefined>; negate: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<boolean | undefined>; controlled_by: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<string | undefined>; data_view_id: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<string | undefined>; label: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<string | undefined>; is_multi_index: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<boolean | undefined>; }, { type: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<\"dsl\">; dsl: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<Record<string, any>>; field: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<string | undefined>; params: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<any>; }>>"
+        ],
+        "path": "src/platform/packages/shared/as-code/filters-schema/src/schemas/filter.ts",
+        "lineNumber": 271,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/as-code-filters-schema",
+        "id": "def-common.asCodeFilterSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "asCodeFilterSchema",
+        "description": [
+          "\nMain discriminated union schema for Filter\nUses 'type' as discriminator to validate condition, group, dsl, or spatial filters"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<Readonly<{ label?: string | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; data_view_id?: string | undefined; controlled_by?: string | undefined; is_multi_index?: boolean | undefined; } & { type: \"condition\"; condition: Readonly<{ negate?: boolean | undefined; } & { value: string | number | boolean; field: string; operator: \"is\"; }> | Readonly<{ negate?: boolean | undefined; } & { value: string[] | number[] | boolean[]; field: string; operator: \"is_one_of\"; }> | Readonly<{ negate?: boolean | undefined; } & { value: Readonly<{ format?: string | undefined; lte?: string | number | undefined; gt?: string | number | undefined; gte?: string | number | undefined; lt?: string | number | undefined; } & {}>; field: string; operator: \"range\"; }> | Readonly<{ negate?: boolean | undefined; } & { field: string; operator: \"exists\"; }>; }> | Readonly<{ label?: string | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; data_view_id?: string | undefined; controlled_by?: string | undefined; is_multi_index?: boolean | undefined; } & { type: \"group\"; group: Readonly<{} & { operator: \"or\" | \"and\"; conditions: (Readonly<{ negate?: boolean | undefined; } & { value: string | number | boolean; field: string; operator: \"is\"; }> | Readonly<{ negate?: boolean | undefined; } & { value: string[] | number[] | boolean[]; field: string; operator: \"is_one_of\"; }> | Readonly<{ negate?: boolean | undefined; } & { value: Readonly<{ format?: string | undefined; lte?: string | number | undefined; gt?: string | number | undefined; gte?: string | number | undefined; lt?: string | number | undefined; } & {}>; field: string; operator: \"range\"; }> | Readonly<{ negate?: boolean | undefined; } & { field: string; operator: \"exists\"; }> | ",
+          {
+            "pluginId": "@kbn/as-code-filters-schema",
+            "scope": "common",
+            "docId": "kibKbnAsCodeFiltersSchemaPluginApi",
+            "section": "def-common.AsCodeGroupFilterRecursive",
+            "text": "AsCodeGroupFilterRecursive"
+          },
+          ")[]; }>; }> | Readonly<{ params?: any; label?: string | undefined; field?: string | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; data_view_id?: string | undefined; controlled_by?: string | undefined; is_multi_index?: boolean | undefined; } & { type: \"dsl\"; dsl: Record<string, any>; }> | Readonly<{ label?: string | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; data_view_id?: string | undefined; controlled_by?: string | undefined; is_multi_index?: boolean | undefined; } & { type: \"spatial\"; dsl: Record<string, any>; }>>"
+        ],
+        "path": "src/platform/packages/shared/as-code/filters-schema/src/schemas/filter.ts",
+        "lineNumber": 325,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/as-code-filters-schema",
+        "id": "def-common.asCodeGroupFilterSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "asCodeGroupFilterSchema",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ObjectType",
+            "text": "ObjectType"
+          },
+          "<ExtendedProps<{ disabled: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<boolean | undefined>; negate: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<boolean | undefined>; controlled_by: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<string | undefined>; data_view_id: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<string | undefined>; label: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<string | undefined>; is_multi_index: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<boolean | undefined>; }, { type: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<\"group\">; group: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ObjectType",
+            "text": "ObjectType"
+          },
+          "<{ operator: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<\"or\" | \"and\">; conditions: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<(Readonly<{ negate?: boolean | undefined; } & { value: string | number | boolean; field: string; operator: \"is\"; }> | Readonly<{ negate?: boolean | undefined; } & { value: string[] | number[] | boolean[]; field: string; operator: \"is_one_of\"; }> | Readonly<{ negate?: boolean | undefined; } & { value: Readonly<{ format?: string | undefined; lte?: string | number | undefined; gt?: string | number | undefined; gte?: string | number | undefined; lt?: string | number | undefined; } & {}>; field: string; operator: \"range\"; }> | Readonly<{ negate?: boolean | undefined; } & { field: string; operator: \"exists\"; }> | ",
+          {
+            "pluginId": "@kbn/as-code-filters-schema",
+            "scope": "common",
+            "docId": "kibKbnAsCodeFiltersSchemaPluginApi",
+            "section": "def-common.AsCodeGroupFilterRecursive",
+            "text": "AsCodeGroupFilterRecursive"
+          },
+          ")[]>; }>; }>>"
+        ],
+        "path": "src/platform/packages/shared/as-code/filters-schema/src/schemas/filter.ts",
+        "lineNumber": 240,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/as-code-filters-schema",
+        "id": "def-common.asCodeSpatialFilterSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "asCodeSpatialFilterSchema",
+        "description": [
+          "\nSchema for spatial filters\nSimilar to DSL filters but with type='spatial' to preserve spatial_filter meta.type"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ObjectType",
+            "text": "ObjectType"
+          },
+          "<ExtendedProps<{ disabled: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<boolean | undefined>; negate: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<boolean | undefined>; controlled_by: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<string | undefined>; data_view_id: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<string | undefined>; label: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<string | undefined>; is_multi_index: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<boolean | undefined>; }, { type: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<\"spatial\">; dsl: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<Record<string, any>>; }>>"
+        ],
+        "path": "src/platform/packages/shared/as-code/filters-schema/src/schemas/filter.ts",
+        "lineNumber": 306,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

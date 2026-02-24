@@ -13,7 +13,7 @@ steps:
       - linting_with_types
       - check_types
     timeout_in_minutes: 60
-    parallelism: 1
+    parallelism: 2
     retry:
       automatic:
         - exit_status: '-1'

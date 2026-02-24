@@ -7227,7 +7227,7 @@
         "signature": [
           "({ children, options, state }: ",
           "HydrateProps",
-          ") => React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+          ") => React.ReactElement<any>"
         ],
         "path": "node_modules/@tanstack/react-query/build/lib/Hydrate.d.ts",
         "lineNumber": 10,
@@ -10004,7 +10004,7 @@
             "label": "children",
             "description": [],
             "signature": [
-              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+              "React.ReactNode"
             ],
             "path": "node_modules/@tanstack/react-query/build/lib/Hydrate.d.ts",
             "lineNumber": 8,
@@ -14026,16 +14026,16 @@
                 "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-hooks/src/use_find_list_items/index.ts"
               },
               {
+                "plugin": "slo",
+                "path": "x-pack/solutions/observability/plugins/slo/public/hooks/use_fetch_slo_list.ts"
+              },
+              {
                 "plugin": "infra",
                 "path": "x-pack/solutions/observability/plugins/infra/public/pages/metrics/inventory_view/hooks/use_inventory_views.ts"
               },
               {
                 "plugin": "infra",
                 "path": "x-pack/solutions/observability/plugins/infra/public/hooks/use_metrics_explorer_views.ts"
-              },
-              {
-                "plugin": "slo",
-                "path": "x-pack/solutions/observability/plugins/slo/public/hooks/use_fetch_slo_list.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -14093,11 +14093,11 @@
               },
               {
                 "plugin": "@kbn/response-ops-rules-apis",
-                "path": "src/platform/packages/shared/response-ops/rules-apis/hooks/use_get_rule_types_query.ts"
+                "path": "x-pack/platform/packages/shared/response-ops/rules-apis/hooks/use_get_rule_types_query.ts"
               },
               {
                 "plugin": "@kbn/response-ops-rules-apis",
-                "path": "src/platform/packages/shared/response-ops/rules-apis/hooks/use_get_rule_types_query.ts"
+                "path": "x-pack/platform/packages/shared/response-ops/rules-apis/hooks/use_get_rule_types_query.ts"
               },
               {
                 "plugin": "@kbn/alerts-ui-shared",
@@ -14113,11 +14113,11 @@
               },
               {
                 "plugin": "@kbn/response-ops-rules-apis",
-                "path": "src/platform/packages/shared/response-ops/rules-apis/hooks/use_find_templates_query.ts"
+                "path": "x-pack/platform/packages/shared/response-ops/rules-apis/hooks/use_find_templates_query.ts"
               },
               {
                 "plugin": "@kbn/response-ops-rules-apis",
-                "path": "src/platform/packages/shared/response-ops/rules-apis/hooks/use_get_rule_tags_query.ts"
+                "path": "x-pack/platform/packages/shared/response-ops/rules-apis/hooks/use_get_rule_tags_query.ts"
               },
               {
                 "plugin": "triggersActionsUi",
@@ -14133,15 +14133,15 @@
               },
               {
                 "plugin": "@kbn/response-ops-alerts-apis",
-                "path": "src/platform/packages/shared/response-ops/alerts-apis/hooks/use_get_muted_alerts_query.tsx"
+                "path": "x-pack/platform/packages/shared/response-ops/alerts-apis/hooks/use_get_muted_alerts_query.tsx"
               },
               {
                 "plugin": "@kbn/response-ops-alerts-table",
-                "path": "src/platform/packages/shared/response-ops/alerts-table/hooks/use_bulk_get_cases.tsx"
+                "path": "x-pack/platform/packages/shared/response-ops/alerts-table/hooks/use_bulk_get_cases.tsx"
               },
               {
                 "plugin": "@kbn/response-ops-alerts-table",
-                "path": "src/platform/packages/shared/response-ops/alerts-table/hooks/use_bulk_get_maintenance_windows.tsx"
+                "path": "x-pack/platform/packages/shared/response-ops/alerts-table/hooks/use_bulk_get_maintenance_windows.tsx"
               },
               {
                 "plugin": "@kbn/elastic-assistant",
@@ -14217,6 +14217,10 @@
               },
               {
                 "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/public/components/templates_v2/hooks/use_get_template.ts"
+              },
+              {
+                "plugin": "cases",
                 "path": "x-pack/platform/plugins/shared/cases/public/containers/use_get_case.tsx"
               },
               {
@@ -14258,6 +14262,18 @@
               {
                 "plugin": "cases",
                 "path": "x-pack/platform/plugins/shared/cases/public/containers/use_get_case_metrics.tsx"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/public/components/templates_v2/hooks/use_get_templates.ts"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/public/components/templates_v2/hooks/use_get_template_tags.ts"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/public/components/templates_v2/hooks/use_get_template_creators.ts"
               },
               {
                 "plugin": "@kbn/elastic-assistant",
@@ -14373,11 +14389,35 @@
               },
               {
                 "plugin": "streamsApp",
+                "path": "x-pack/platform/plugins/shared/streams_app/public/hooks/use_fetch_significant_events.ts"
+              },
+              {
+                "plugin": "streamsApp",
                 "path": "x-pack/platform/plugins/shared/streams_app/public/components/stream_detail_systems/stream_systems/hooks/use_stream_systems.ts"
               },
               {
                 "plugin": "streamsApp",
-                "path": "x-pack/platform/plugins/shared/streams_app/public/hooks/use_fetch_significant_events.ts"
+                "path": "x-pack/platform/plugins/shared/streams_app/public/hooks/use_stream_features.ts"
+              },
+              {
+                "plugin": "streamsApp",
+                "path": "x-pack/platform/plugins/shared/streams_app/public/hooks/use_unbacked_queries_count.ts"
+              },
+              {
+                "plugin": "streamsApp",
+                "path": "x-pack/platform/plugins/shared/streams_app/public/hooks/use_fetch_features.ts"
+              },
+              {
+                "plugin": "streamsApp",
+                "path": "x-pack/platform/plugins/shared/streams_app/public/hooks/use_fetch_discovery_queries.ts"
+              },
+              {
+                "plugin": "streamsApp",
+                "path": "x-pack/platform/plugins/shared/streams_app/public/hooks/use_fetch_discovery_queries_occurrences.ts"
+              },
+              {
+                "plugin": "streamsApp",
+                "path": "x-pack/platform/plugins/shared/streams_app/public/components/significant_events_discovery/hooks/use_fetch_streams.ts"
               },
               {
                 "plugin": "osquery",
@@ -14400,22 +14440,6 @@
                 "path": "x-pack/solutions/observability/plugins/observability/public/components/annotations/hooks/use_fetch_slo_list.ts"
               },
               {
-                "plugin": "infra",
-                "path": "x-pack/solutions/observability/plugins/infra/public/pages/metrics/inventory_view/hooks/use_inventory_views.ts"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/solutions/observability/plugins/infra/public/pages/metrics/inventory_view/hooks/use_inventory_views.ts"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/solutions/observability/plugins/infra/public/hooks/use_metrics_explorer_views.ts"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/solutions/observability/plugins/infra/public/hooks/use_metrics_explorer_views.ts"
-              },
-              {
                 "plugin": "slo",
                 "path": "x-pack/solutions/observability/plugins/slo/public/hooks/use_fetch_slo_list.ts"
               },
@@ -14430,6 +14454,22 @@
               {
                 "plugin": "slo",
                 "path": "x-pack/solutions/observability/plugins/slo/public/pages/slos/hooks/use_fetch_slos_overview.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/solutions/observability/plugins/infra/public/pages/metrics/inventory_view/hooks/use_inventory_views.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/solutions/observability/plugins/infra/public/pages/metrics/inventory_view/hooks/use_inventory_views.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/solutions/observability/plugins/infra/public/hooks/use_metrics_explorer_views.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/solutions/observability/plugins/infra/public/hooks/use_metrics_explorer_views.ts"
               },
               {
                 "plugin": "searchPlayground",
@@ -14525,6 +14565,10 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/common/components/ml/hooks/use_installed_security_jobs.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/public/common/components/user_profiles/use_get_current_user_profile.tsx"
               },
               {
@@ -14534,14 +14578,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/public/siem_migrations/dashboards/logic/use_get_migration_translation_stats.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/public/common/components/ml/hooks/use_installed_security_jobs.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/public/common/components/user_profiles/use_suggest_users.tsx"
               },
               {
                 "plugin": "securitySolution",
@@ -14562,6 +14598,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_monitoring/components/execution_results_table/use_execution_results.tsx"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/common/components/user_profiles/use_suggest_users.tsx"
               },
               {
                 "plugin": "securitySolution",
@@ -14629,7 +14669,19 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_creation_ui/pages/ai_rule_creation/hooks/use_inference_connectors.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management/logic/prebuilt_rules/use_prebuilt_rules_install_review.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_monitoring/logic/detection_engine_health/use_rule_health.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_monitoring/logic/detection_engine_health/use_space_rules_health.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -16489,7 +16541,7 @@
         "label": "MutationStatus",
         "description": [],
         "signature": [
-          "\"error\" | \"success\" | \"loading\" | \"idle\""
+          "\"error\" | \"success\" | \"idle\" | \"loading\""
         ],
         "path": "node_modules/@tanstack/query-core/build/lib/types.d.ts",
         "lineNumber": 341,
@@ -16506,7 +16558,7 @@
         "label": "NetworkMode",
         "description": [],
         "signature": [
-          "\"online\" | \"always\" | \"offlineFirst\""
+          "\"always\" | \"online\" | \"offlineFirst\""
         ],
         "path": "node_modules/@tanstack/query-core/build/lib/types.d.ts",
         "lineNumber": 28,

@@ -30,14 +30,14 @@ export const expectErrors = (
     arg2: {
       columns: Map<string, ESQLColumnData>;
     }
-  ) => any
+  ) => ESQLMessage[]
 ) => {
   const { root } = Parser.parse(query);
   const command = root.commands.find((cmd) => cmd.name === commandName.toLowerCase());
   if (!command) {
     throw new Error(`${commandName.toUpperCase()} command not found in the parsed query`);
   }
-  const result = validate(command, root.commands, context) as ESQLMessage[];
+  const result = validate(command, root.commands, context);
 
   const errors: string[] = [];
   result.forEach((error) => {

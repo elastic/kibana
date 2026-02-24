@@ -5,43 +5,54 @@
  * 2.0.
  */
 
-import React, { useRef, useState } from 'react';
-import type { Streams } from '@kbn/streams-schema';
-import {
-  isIlmLifecycle,
-  type IngestStreamLifecycle,
-  type IlmPolicyDeletePhase,
-  type IlmPolicyPhase,
-  type IlmPolicy,
-  type IlmPolicyWithUsage,
+import React, { useReducer, useRef } from 'react';
+import { isIlmLifecycle } from '@kbn/streams-schema';
+import type {
+  Streams,
+  IngestStreamLifecycle,
+  IlmPolicyPhases,
+  PhaseName,
+  IlmPolicy,
+  IlmPolicyWithUsage,
 } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
 import { useAbortController } from '@kbn/react-hooks';
+import { isEqual } from 'lodash';
 import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useIlmPhasesColorAndDescription } from './use_ilm_phases_color_and_description';
 import type { DataStreamStats } from './use_data_stream_stats';
-import { formatBytes } from '../helpers/format_bytes';
-import { getILMRatios } from '../helpers/helpers';
-import type { AffectedResource } from '../downsampling/edit_policy_modal/edit_policy_modal';
 import { EditPolicyModal } from '../downsampling/edit_policy_modal/edit_policy_modal';
 import { CreatePolicyModal } from '../downsampling/create_new_policy_modal/create_new_policy_modal';
+import { EditIlmPhasesFlyout } from '../downsampling/edit_ilm_phases_flyout';
+import {
+  createIlmPhasesFlyoutDeserializer,
+  createIlmPhasesFlyoutSerializer,
+} from '../downsampling/edit_ilm_phases_flyout/form';
 import type { LifecyclePhase } from '../common/data_lifecycle/lifecycle_types';
-
-type ModalType = 'delete' | 'createPolicy' | null;
-
-interface DeleteContext {
-  type: 'phase' | 'downsampleStep';
-  name: string;
-  stepNumber?: number;
-  isManaged?: boolean;
-}
+import { useSnapshotRepositories } from './use_snapshot_repositories';
+import {
+  buildModifiedPhasesFromEdit,
+  getModifiedPhases,
+  type DeleteContext,
+  type EsIlmPolicyPhases,
+} from './ilm_policy_phase_helpers';
+import {
+  buildAffectedResources,
+  buildLifecycleSummaryPhases,
+  getSelectedIlmPhases,
+} from './ilm_lifecycle_summary_helpers';
+import {
+  initialLifecycleSummaryUiState,
+  lifecycleSummaryUiReducer,
+} from './use_ilm_lifecycle_summary_state';
 
 interface UseIlmLifecycleSummaryProps {
   definition: Streams.ingest.all.GetResponse;
   stats?: DataStreamStats;
   refreshDefinition?: () => void;
   updateStreamLifecycle: (lifecycle: IngestStreamLifecycle) => Promise<void>;
+  isMetricsStream: boolean;
 }
 
 interface UseIlmLifecycleSummaryResult {
@@ -49,7 +60,15 @@ interface UseIlmLifecycleSummaryResult {
   loading: boolean;
   onRemovePhase?: (phaseName: string) => void;
   onRemoveDownsampleStep?: (stepNumber: number) => void;
+  onEditPhase?: (phaseName: PhaseName) => void;
+  onEditDownsampleStep?: (stepNumber: number, phaseName?: PhaseName) => void;
+  editingPhase?: PhaseName;
   modals: React.ReactNode;
+  ilmSelectedPhasesForAdd?: PhaseName[];
+  ilmExcludedPhasesForAdd?: PhaseName[];
+  onAddIlmPhase?: (phase: PhaseName) => void;
+  isEditLifecycleFlyoutOpen: boolean;
+  hasUnsavedEditLifecycleFlyoutChanges: boolean;
 }
 
 export const useIlmLifecycleSummary = ({
@@ -57,9 +76,10 @@ export const useIlmLifecycleSummary = ({
   stats,
   refreshDefinition,
   updateStreamLifecycle,
+  isMetricsStream,
 }: UseIlmLifecycleSummaryProps): UseIlmLifecycleSummaryResult => {
   const {
-    core: { notifications },
+    core: { notifications, application },
     dependencies: {
       start: {
         streams: { streamsRepositoryClient },
@@ -74,26 +94,28 @@ export const useIlmLifecycleSummary = ({
     ? (definition.effective_lifecycle as { ilm: { policy: string } }).ilm.policy
     : '';
 
-  const [activeModal, setActiveModal] = useState<ModalType>(null);
-  const [deleteContext, setDeleteContext] = useState<DeleteContext | null>(null);
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [uiState, dispatchUi] = useReducer(
+    lifecycleSummaryUiReducer,
+    initialLifecycleSummaryUiState
+  );
+  const {
+    repositories: snapshotRepositories,
+    hasFetched: hasFetchedSnapshotRepositories,
+    isLoading: isLoadingSnapshotRepositories,
+    refresh: refreshSnapshotRepositories,
+  } = useSnapshotRepositories({ enabled: uiState.isEditLifecycleFlyoutOpen });
+
+  const canCreateRepository = definition.privileges.create_snapshot_repository;
   const currentPolicy = useRef<IlmPolicyWithUsage | null>(null);
-  const [policyNames, setPolicyNames] = useState<string[]>([]);
 
-  const buildAffectedResources = (policy: IlmPolicyWithUsage): AffectedResource[] => {
-    const streams = (policy.in_use_by?.data_streams ?? []).filter(
-      (streamName) => streamName !== definition.stream.name
-    );
-    const indices = policy.in_use_by?.indices ?? [];
-
-    return [
-      ...streams.map((streamName) => ({ name: streamName, type: 'stream' as const })),
-      ...indices.map((indexName) => ({ name: indexName, type: 'index' as const })),
-    ];
+  const getCanonicalFlyoutInitialPhases = (initialPhases: IlmPolicyPhases): IlmPolicyPhases => {
+    const deserializer = createIlmPhasesFlyoutDeserializer();
+    const serializer = createIlmPhasesFlyoutSerializer(initialPhases);
+    return serializer(deserializer(initialPhases));
   };
 
   const affectedResources = currentPolicy.current
-    ? buildAffectedResources(currentPolicy.current)
+    ? buildAffectedResources(currentPolicy.current, definition.stream.name)
     : [];
 
   const fetchPolicies = async () => {
@@ -103,75 +125,18 @@ export const useIlmLifecycleSummary = ({
     );
     const foundPolicy = policies.find((policy) => policy.name === policyName);
     currentPolicy.current = foundPolicy ?? null;
-    setPolicyNames(policies.map((policy) => policy.name));
-  };
-
-  const getModifiedPhases = (policy: IlmPolicy, context: DeleteContext) => {
-    const phases = {
-      ...policy.phases,
-    } as Record<string, IlmPolicyPhase | IlmPolicyDeletePhase | undefined>;
-
-    if (context.type === 'phase') {
-      delete phases[context.name as keyof typeof phases];
-      return phases;
-    }
-
-    if (context.type === 'downsampleStep' && context.stepNumber) {
-      const phaseOrder: Array<keyof typeof phases> = ['hot', 'warm', 'cold', 'frozen', 'delete'];
-      let downsampleIndex = 0;
-
-      for (const phaseName of phaseOrder) {
-        const phase = phases[phaseName];
-        if (!phase) {
-          continue;
-        }
-        if (phaseName === 'delete') {
-          continue;
-        }
-
-        // Raw ES policy data has actions.downsample, not top-level downsample
-        const phaseWithActions = phase as IlmPolicyPhase & {
-          actions?: Record<string, unknown>;
-        };
-        const actions = phaseWithActions.actions ?? {};
-        if (!('downsample' in actions)) {
-          continue;
-        }
-
-        downsampleIndex += 1;
-        if (downsampleIndex !== context.stepNumber) {
-          continue;
-        }
-
-        const { downsample: _downsample, ...remainingActions } = actions;
-        (phases[phaseName] as typeof phaseWithActions) = {
-          ...phaseWithActions,
-          actions: remainingActions,
-        };
-        break;
-      }
-    }
-
-    return phases;
+    dispatchUi({ type: 'setPolicyNames', payload: policies.map((policy) => policy.name) });
   };
 
   const handleCancelModal = () => {
-    setActiveModal(null);
-    setDeleteContext(null);
+    dispatchUi({ type: 'closeModals' });
   };
 
   const saveIlmPolicy = async (
-    policy: IlmPolicy,
+    policy: Pick<IlmPolicy, 'name' | 'meta' | 'deprecated'> & { phases: EsIlmPolicyPhases },
     allowOverwrite = false,
     sourcePolicyName?: string
   ) => {
-    const phases = Object.fromEntries(
-      Object.entries(policy.phases).map(([phaseName, phase]) => [
-        phaseName,
-        phase ? { ...phase } : phase,
-      ])
-    );
-
     await streamsRepositoryClient.fetch('POST /internal/streams/lifecycle/_policy', {
       params: {
         query: {
@@ -179,7 +144,7 @@ export const useIlmLifecycleSummary = ({
         },
         body: {
           name: policy.name,
-          phases,
+          phases: policy.phases,
           meta: policy.meta,
           deprecated: policy.deprecated,
           ...(sourcePolicyName ? { source_policy_name: sourcePolicyName } : {}),
@@ -212,14 +177,14 @@ export const useIlmLifecycleSummary = ({
     }
 
     try {
-      setIsProcessing(true);
+      dispatchUi({ type: 'setIsProcessing', payload: true });
 
       if (!currentPolicy.current) {
         throw new Error('Policy not found');
       }
 
       const modifiedPhases = getModifiedPhases(currentPolicy.current, context);
-      const updatedPolicy: IlmPolicy = {
+      const updatedPolicy = {
         name: policyName,
         phases: modifiedPhases,
         meta: currentPolicy.current.meta,
@@ -243,7 +208,7 @@ export const useIlmLifecycleSummary = ({
         }),
       });
     } finally {
-      setIsProcessing(false);
+      dispatchUi({ type: 'setIsProcessing', payload: false });
     }
   };
 
@@ -259,7 +224,7 @@ export const useIlmLifecycleSummary = ({
         throw new Error('Policy not found');
       }
 
-      const resources = buildAffectedResources(currentPolicy.current);
+      const resources = buildAffectedResources(currentPolicy.current, definition.stream.name);
       const isManaged = currentPolicy.current.meta?.managed === true;
 
       if (resources.length === 0 && !isManaged) {
@@ -267,11 +232,13 @@ export const useIlmLifecycleSummary = ({
         return;
       }
 
-      setDeleteContext({
-        ...context,
-        isManaged,
+      dispatchUi({
+        type: 'openDeleteModal',
+        payload: {
+          ...context,
+          isManaged,
+        },
       });
-      setActiveModal('delete');
     } catch (error) {
       notifications.toasts.addError(error as Error, {
         title: i18n.translate('xpack.streams.lifecycleSummary.policyLoadFailed', {
@@ -290,32 +257,90 @@ export const useIlmLifecycleSummary = ({
   };
 
   const handleOverwrite = () => {
-    if (!deleteContext) {
+    if (!uiState.deleteContext) {
       return;
     }
-    applyOverwrite(deleteContext);
+    applyOverwrite(uiState.deleteContext);
   };
 
-  const handleSaveAsNew = async () => {
-    setActiveModal('createPolicy');
-  };
+  const overwriteEditPolicy = async (esPhasesOverride?: EsIlmPolicyPhases) => {
+    if (!isIlm) return;
 
-  const handleCreatePolicy = async (newPolicyName: string) => {
-    if (!deleteContext || !isIlm) {
-      return;
-    }
+    const nextEsPhases = esPhasesOverride ?? uiState.pendingEditEsPhases;
+    if (!nextEsPhases) return;
 
     try {
-      setIsProcessing(true);
+      dispatchUi({ type: 'setIsSavingEditFlyout', payload: true });
+      dispatchUi({ type: 'setIsProcessing', payload: true });
 
+      await fetchPolicies();
       if (!currentPolicy.current) {
         throw new Error('Policy not found');
       }
 
-      const modifiedPhases = getModifiedPhases(currentPolicy.current, deleteContext);
+      const updatedPolicy = {
+        name: policyName,
+        phases: nextEsPhases,
+        meta: currentPolicy.current.meta,
+        deprecated: currentPolicy.current.deprecated,
+      };
+
+      await saveIlmPolicy(updatedPolicy, true);
+
+      notifications.toasts.addSuccess({
+        title: i18n.translate('xpack.streams.lifecycleSummary.policyUpdated', {
+          defaultMessage: 'ILM policy updated successfully',
+        }),
+      });
+
+      await Promise.resolve(refreshDefinition?.());
+      refreshIlmStats();
+      handleCancelModal();
+      closeEditFlyout();
+    } catch (error) {
+      notifications.toasts.addError(error as Error, {
+        title: i18n.translate('xpack.streams.lifecycleSummary.policyUpdateFailed', {
+          defaultMessage: 'Failed to update ILM policy',
+        }),
+      });
+    } finally {
+      dispatchUi({ type: 'setIsSavingEditFlyout', payload: false });
+      dispatchUi({ type: 'setIsProcessing', payload: false });
+    }
+  };
+
+  const handleSaveAsNew = async () => {
+    if (!uiState.deleteContext || !currentPolicy.current) return;
+    dispatchUi({
+      type: 'setPendingNewPolicyEsPhases',
+      payload: getModifiedPhases(currentPolicy.current, uiState.deleteContext),
+    });
+    dispatchUi({ type: 'openCreatePolicyModal', payload: 'delete' });
+  };
+
+  const handleSaveEditsAsNew = async () => {
+    const nextEsPhases = uiState.pendingEditEsPhases;
+    if (!nextEsPhases) return;
+    dispatchUi({ type: 'setPendingNewPolicyEsPhases', payload: nextEsPhases });
+    dispatchUi({ type: 'openCreatePolicyModal', payload: 'edit' });
+  };
+
+  const handleCreatePolicy = async (newPolicyName: string) => {
+    const nextEsPhases = uiState.pendingNewPolicyEsPhases;
+    if (!isIlm || !nextEsPhases) {
+      return;
+    }
+
+    try {
+      dispatchUi({ type: 'setIsProcessing', payload: true });
+
+      await fetchPolicies();
+      if (!currentPolicy.current) {
+        throw new Error('Policy not found');
+      }
 
       const originalHasHot = Boolean(currentPolicy.current.phases.hot);
-      if (originalHasHot && !('hot' in modifiedPhases)) {
+      if (originalHasHot && !('hot' in nextEsPhases)) {
         notifications.toasts.addWarning({
           title: i18n.translate('xpack.streams.lifecycleSummary.cannotCreateWithoutHot', {
             defaultMessage: 'Cannot create policy without hot phase',
@@ -325,16 +350,16 @@ export const useIlmLifecycleSummary = ({
               'The original policy includes a hot phase. A cloned policy must also include it.',
           }),
         });
-        setIsProcessing(false);
+        dispatchUi({ type: 'setIsProcessing', payload: false });
         return;
       }
 
       // Strip the 'managed' field from meta when creating a new policy
       const { managed: _managed, ...restMeta } = currentPolicy.current.meta ?? {};
 
-      const updatedPolicy: IlmPolicy = {
+      const updatedPolicy = {
         name: newPolicyName,
-        phases: modifiedPhases,
+        phases: nextEsPhases,
         meta: restMeta,
       };
 
@@ -351,6 +376,7 @@ export const useIlmLifecycleSummary = ({
       await Promise.resolve(refreshDefinition?.());
       refreshIlmStats();
       handleCancelModal();
+      closeEditFlyout();
     } catch (error) {
       notifications.toasts.addError(error as Error, {
         title: i18n.translate('xpack.streams.lifecycleSummary.newPolicyFailed', {
@@ -358,108 +384,205 @@ export const useIlmLifecycleSummary = ({
         }),
       });
     } finally {
-      setIsProcessing(false);
+      dispatchUi({ type: 'setIsProcessing', payload: false });
     }
   };
 
   const handleBackFromCreatePolicy = () => {
-    setActiveModal('delete');
+    dispatchUi({ type: 'showBackModalFromCreatePolicy' });
   };
 
-  const getPhases = (): LifecyclePhase[] => {
+  const openEditFlyout = async ({
+    phaseName,
+    isAddingNewPhase = false,
+  }: {
+    phaseName?: PhaseName;
+    isAddingNewPhase?: boolean;
+  }) => {
     if (!isIlm) {
-      return [];
+      return;
     }
 
-    const phasesWithGrow = getILMRatios(ilmStatsValue);
-    if (!phasesWithGrow) {
-      return [];
+    // If the flyout is already open, just navigate to the phase tab.
+    // The flyout's ensurePhaseEnabledWithDefaults will enable it if needed.
+    if (uiState.isEditLifecycleFlyoutOpen) {
+      dispatchUi({ type: 'setEditingPhase', payload: phaseName });
+      return;
     }
 
-    // Calculate total docs and distribute based on size ratio
-    const totalDocs = stats?.totalDocs || 0;
-    const totalSize = phasesWithGrow.reduce(
-      (sum, phase) => sum + ('size_in_bytes' in phase ? phase.size_in_bytes : 0),
-      0
-    );
+    try {
+      await fetchPolicies();
+      if (!currentPolicy.current) {
+        throw new Error('Policy not found');
+      }
 
-    // Count non-delete phases to determine if delete should be disabled
-    const nonDeletePhases = phasesWithGrow.filter((phase) => phase.name !== 'delete');
-    const isLastNonDeletePhase = nonDeletePhases.length === 1;
+      // Pass the policy phases to the flyout. The flyout deserializer normalizes
+      // the phases into form state defaults.
+      dispatchUi({
+        type: 'openEditFlyout',
+        payload: {
+          initialPhases: currentPolicy.current.phases,
+          canonicalInitialPhases: getCanonicalFlyoutInitialPhases(currentPolicy.current.phases),
+          editingPhase: phaseName,
+        },
+      });
+    } catch (error) {
+      notifications.toasts.addError(error as Error, {
+        title: i18n.translate('xpack.streams.lifecycleSummary.policyLoadFailed', {
+          defaultMessage: 'Failed to load ILM policy details',
+        }),
+      });
+    }
+  };
 
-    return phasesWithGrow.map((phase, index) => {
-      // Estimate doc count based on size ratio
-      const phaseSize = 'size_in_bytes' in phase ? phase.size_in_bytes : 0;
-      const estimatedDocs =
-        totalSize > 0 && totalDocs > 0
-          ? Math.round((phaseSize / totalSize) * totalDocs)
-          : undefined;
+  const closeEditFlyout = () => {
+    dispatchUi({ type: 'closeEditFlyout' });
+  };
 
-      // Get readonly and searchable_snapshot from the server-side phase data
-      const hasReadonlyAction = 'readonly' in phase && phase.readonly === true;
-      const searchableSnapshotAction =
-        'searchable_snapshot' in phase ? phase.searchable_snapshot : undefined;
+  const handleFlyoutSave = async (nextPhases: IlmPolicyPhases) => {
+    if (!isIlm) return;
 
-      // Determine if remove is disabled for this phase
-      const isRemoveDisabled = phase.name !== 'delete' && isLastNonDeletePhase;
-      const removeDisabledReason = isRemoveDisabled
-        ? i18n.translate('xpack.streams.lifecycleSummary.cannotRemoveLastPhase', {
-            defaultMessage:
-              'An ILM policy must have at least one phase (other than delete). This is the only remaining phase.',
-          })
-        : undefined;
+    try {
+      await fetchPolicies();
+      if (!currentPolicy.current) {
+        throw new Error('Policy not found');
+      }
 
-      return {
-        color: ilmPhases[phase.name].color,
-        name: phase.name,
-        label: phase.name,
-        size: 'size_in_bytes' in phase ? formatBytes(phase.size_in_bytes) : undefined,
-        grow: phase.grow,
-        isDelete: phase.name === 'delete',
-        timelineValue: phasesWithGrow[index + 1]?.min_age,
-        description: ilmPhases[phase.name].description,
-        sizeInBytes: 'size_in_bytes' in phase ? phase.size_in_bytes : undefined,
-        docsCount: estimatedDocs,
-        min_age: phase.min_age,
-        isReadOnly: hasReadonlyAction,
-        downsample: 'downsample' in phase ? phase.downsample : undefined,
-        searchableSnapshot: searchableSnapshotAction,
-        isRemoveDisabled,
-        removeDisabledReason,
-      };
+      const resources = buildAffectedResources(currentPolicy.current, definition.stream.name);
+      const isManaged = currentPolicy.current.meta?.managed === true;
+
+      const modifiedPhases = buildModifiedPhasesFromEdit(currentPolicy.current, nextPhases);
+
+      if (resources.length === 0 && !isManaged) {
+        await overwriteEditPolicy(modifiedPhases);
+        return;
+      }
+
+      dispatchUi({ type: 'setPendingEditEsPhases', payload: modifiedPhases });
+      dispatchUi({ type: 'openEditModal', payload: { isManaged } });
+    } catch (error) {
+      notifications.toasts.addError(error as Error, {
+        title: i18n.translate('xpack.streams.lifecycleSummary.policyUpdateFailed', {
+          defaultMessage: 'Failed to update ILM policy',
+        }),
+      });
+    }
+  };
+
+  // Handler to add a new ILM phase
+  const handleAddIlmPhase = (phase: PhaseName) => {
+    openEditFlyout({ phaseName: phase });
+  };
+
+  const handleNavigateToSnapshotRepositories = () => {
+    application.navigateToApp('management', {
+      path: '/data/snapshot_restore/repositories',
+      openInNewTab: true,
     });
   };
 
+  const phases: LifecyclePhase[] = isIlm
+    ? buildLifecycleSummaryPhases({
+        isEditLifecycleFlyoutOpen: uiState.isEditLifecycleFlyoutOpen,
+        previewPhases: uiState.previewPhases,
+        ilmStatsPhases: ilmStatsValue?.phases,
+        stats,
+        ilmPhases,
+      })
+    : [];
+
+  const selectedPhasesForAdd: PhaseName[] = isIlm
+    ? getSelectedIlmPhases({
+        isEditLifecycleFlyoutOpen: uiState.isEditLifecycleFlyoutOpen,
+        previewPhases: uiState.previewPhases,
+        editFlyoutInitialPhases: uiState.editFlyoutInitialPhases,
+        ilmStatsPhases: ilmStatsValue?.phases,
+      })
+    : [];
+
+  const hasUnsavedEditLifecycleFlyoutChanges =
+    uiState.isEditLifecycleFlyoutOpen &&
+    uiState.previewPhases != null &&
+    uiState.editFlyoutCanonicalInitialPhases != null &&
+    !isEqual(uiState.previewPhases, uiState.editFlyoutCanonicalInitialPhases);
+
   const modals = isIlm ? (
     <>
-      {activeModal === 'delete' && deleteContext && (
+      {uiState.activeModal === 'delete' && uiState.deleteContext && (
         <EditPolicyModal
           affectedResources={affectedResources}
-          isManaged={deleteContext?.isManaged}
-          isProcessing={isProcessing}
+          isManaged={uiState.deleteContext?.isManaged}
+          isProcessing={uiState.isProcessing}
           onCancel={handleCancelModal}
           onOverwrite={handleOverwrite}
           onSaveAsNew={handleSaveAsNew}
         />
       )}
 
-      {activeModal === 'createPolicy' && (
+      {uiState.activeModal === 'edit' && uiState.editContext && (
+        <EditPolicyModal
+          affectedResources={affectedResources}
+          isManaged={uiState.editContext.isManaged}
+          isProcessing={uiState.isProcessing}
+          onCancel={() => dispatchUi({ type: 'clearEditModalState' })}
+          onOverwrite={overwriteEditPolicy}
+          onSaveAsNew={handleSaveEditsAsNew}
+        />
+      )}
+
+      {uiState.activeModal === 'createPolicy' && (
         <CreatePolicyModal
-          policyNames={policyNames}
+          policyNames={uiState.policyNames}
           onBack={handleBackFromCreatePolicy}
           onSave={handleCreatePolicy}
-          isLoading={isProcessing}
+          isLoading={uiState.isProcessing}
           originalPolicyName={policyName}
+        />
+      )}
+
+      {uiState.isEditLifecycleFlyoutOpen && uiState.editFlyoutInitialPhases && (
+        <EditIlmPhasesFlyout
+          initialPhases={uiState.editFlyoutInitialPhases}
+          selectedPhase={uiState.editingPhase}
+          setSelectedPhase={(phase) => dispatchUi({ type: 'setEditingPhase', payload: phase })}
+          onChange={(next) => dispatchUi({ type: 'setPreviewPhases', payload: next })}
+          onSave={handleFlyoutSave}
+          onClose={closeEditFlyout}
+          isSaving={uiState.isSavingEditFlyout}
+          canCreateRepository={canCreateRepository}
+          searchableSnapshotRepositories={snapshotRepositories}
+          isLoadingSearchableSnapshotRepositories={isLoadingSnapshotRepositories}
+          onRefreshSearchableSnapshotRepositories={refreshSnapshotRepositories}
+          onCreateSnapshotRepository={handleNavigateToSnapshotRepositories}
+          data-test-subj="streamsEditIlmPhasesFlyoutFromSummary"
+          isMetricsStream={isMetricsStream}
         />
       )}
     </>
   ) : null;
 
+  // Exclude frozen from the external "Add phase" dropdown when no snapshot repositories
+  // are available and the user cannot create one, matching the flyout's own PhaseTabsRow behaviour.
+  // If we haven't fetched yet, allow selecting frozen; the flyout will fetch and validate.
+  const canSelectFrozen =
+    canCreateRepository || !hasFetchedSnapshotRepositories || snapshotRepositories.length > 0;
+  const ilmExcludedPhasesForAdd: PhaseName[] = canSelectFrozen ? [] : ['frozen'];
+
   return {
-    phases: getPhases(),
+    phases,
     loading: isIlm && ilmLoading,
     onRemovePhase: isIlm ? handleRemovePhase : undefined,
     onRemoveDownsampleStep: isIlm ? handleRemoveIlmDownsampleStep : undefined,
+    onEditPhase: isIlm ? (phaseName) => openEditFlyout({ phaseName }) : undefined,
+    onEditDownsampleStep: isIlm
+      ? (_stepNumber, phaseName) => openEditFlyout({ phaseName })
+      : undefined,
+    editingPhase: uiState.editingPhase,
     modals,
+    ilmSelectedPhasesForAdd: isIlm ? selectedPhasesForAdd : undefined,
+    ilmExcludedPhasesForAdd: isIlm ? ilmExcludedPhasesForAdd : undefined,
+    onAddIlmPhase: isIlm ? handleAddIlmPhase : undefined,
+    isEditLifecycleFlyoutOpen: uiState.isEditLifecycleFlyoutOpen,
+    hasUnsavedEditLifecycleFlyoutChanges,
   };
 };

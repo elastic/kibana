@@ -596,9 +596,7 @@
             "type": "Array",
             "tags": [],
             "label": "populatedFields",
-            "description": [
-              "- The populated fields.\nreturns {string[]} - The array of populated fields from the data view."
-            ],
+            "description": [],
             "signature": [
               "string[] | undefined"
             ],
@@ -656,9 +654,7 @@
             "type": "Function",
             "tags": [],
             "label": "omitBy",
-            "description": [
-              "- Optional callback."
-            ],
+            "description": [],
             "signature": [
               "((key: string) => boolean) | undefined"
             ],
@@ -1075,9 +1071,7 @@
             "type": "number",
             "tags": [],
             "label": "defaultPageSize",
-            "description": [
-              "- Default page size"
-            ],
+            "description": [],
             "signature": [
               "number"
             ],
@@ -1094,9 +1088,7 @@
             "type": "number",
             "tags": [],
             "label": "defaultVisibleColumnsCount",
-            "description": [
-              "- Default count of visible columns"
-            ],
+            "description": [],
             "signature": [
               "number"
             ],
@@ -1113,9 +1105,7 @@
             "type": "Function",
             "tags": [],
             "label": "defaultVisibleColumnsFilter",
-            "description": [
-              "- Optional external columns filter"
-            ],
+            "description": [],
             "signature": [
               "((id: string) => boolean) | undefined"
             ],
@@ -1262,9 +1252,7 @@
             "type": "string",
             "tags": [],
             "label": "resultsField",
-            "description": [
-              "- The results field."
-            ],
+            "description": [],
             "signature": [
               "string | undefined"
             ],
@@ -2769,7 +2757,7 @@
             "section": "def-common.UseDataGridReturnType",
             "text": "UseDataGridReturnType"
           },
-          ", \"status\" | \"baseline\" | \"ccsWarning\" | \"errorMessage\" | \"rowCount\" | \"pagination\" | \"visibleColumns\" | \"chartsVisible\" | \"chartsButtonVisible\" | \"columnsWithCharts\" | \"invalidSortingColumnns\" | \"noDataMessage\" | \"onChangeItemsPerPage\" | \"onChangePage\" | \"onSort\" | \"setPagination\" | \"setVisibleColumns\" | \"rowCountRelation\" | \"sortingColumns\" | \"tableItems\" | \"toggleChartVisibility\" | \"predictionFieldName\" | \"resultsField\">"
+          ", \"baseline\" | \"status\" | \"ccsWarning\" | \"errorMessage\" | \"rowCount\" | \"pagination\" | \"visibleColumns\" | \"chartsVisible\" | \"chartsButtonVisible\" | \"columnsWithCharts\" | \"invalidSortingColumnns\" | \"noDataMessage\" | \"onChangeItemsPerPage\" | \"onChangePage\" | \"onSort\" | \"setPagination\" | \"setVisibleColumns\" | \"rowCountRelation\" | \"sortingColumns\" | \"tableItems\" | \"toggleChartVisibility\" | \"predictionFieldName\" | \"resultsField\">"
         ],
         "path": "x-pack/platform/packages/private/ml/data_grid/lib/types.ts",
         "lineNumber": 126,

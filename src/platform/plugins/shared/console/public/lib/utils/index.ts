@@ -14,14 +14,12 @@ import type {
   RequestResult,
 } from '../../application/hooks/use_send_current_request/send_request';
 import type { DevToolsVariable } from '../../application/components';
+import { asArray } from './array_utils';
 
 const { collapseLiteralStrings, expandLiteralStrings } = XJson;
 
 export function textFromRequest(request: { method: string; url: string; data: string | string[] }) {
-  let data = request.data;
-  if (typeof data !== 'string') {
-    data = data.join('\n');
-  }
+  const data = asArray(request.data).join('\n');
   return request.method + ' ' + request.url + '\n' + data;
 }
 
@@ -141,7 +139,9 @@ export function normalizeUrl(url: string): string {
  *  Sorts the request data by statusCode in increasing order and
  *  returns the last one which will be rendered in network request status bar
  */
-export const getResponseWithMostSevereStatusCode = (requestData: RequestResult[] | null) => {
+export const getResponseWithMostSevereStatusCode = (
+  requestData: RequestResult[] | null | undefined
+) => {
   if (requestData) {
     return requestData
       .slice()

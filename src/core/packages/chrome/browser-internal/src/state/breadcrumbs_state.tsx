@@ -26,32 +26,77 @@ interface BreadcrumbsState {
   breadcrumbsAppendExtensionsWithBadges$: Observable<ChromeBreadcrumbsAppendExtension[]>;
 }
 
+interface BadgesExtensionRenderModel {
+  badges: ChromeBreadcrumbsBadge[];
+  isFirst: boolean;
+}
+
+const toBadgesExtensionRenderModel = (
+  badges: ChromeBreadcrumbsBadge[],
+  extensionCount: number
+): BadgesExtensionRenderModel | undefined => {
+  if (badges.length === 0) {
+    return undefined;
+  }
+
+  return {
+    badges,
+    isFirst: extensionCount === 0,
+  };
+};
+
+const areBadgesRenderModelsEqual = (
+  prev: BadgesExtensionRenderModel | undefined,
+  next: BadgesExtensionRenderModel | undefined
+) => {
+  if (prev === undefined || next === undefined) {
+    return prev === next;
+  }
+
+  return prev.isFirst === next.isFirst && deepEqual(prev.badges, next.badges);
+};
+
+const toBadgesExtension = (
+  badgesRenderModel: BadgesExtensionRenderModel | undefined
+): ChromeBreadcrumbsAppendExtension | undefined => {
+  if (!badgesRenderModel) {
+    return undefined;
+  }
+
+  return {
+    content: mountReactNode(
+      <HeaderBreadcrumbsBadges
+        badges={badgesRenderModel.badges}
+        isFirst={badgesRenderModel.isFirst}
+      />
+    ),
+  };
+};
+
 export const createBreadcrumbsState = (): BreadcrumbsState => {
   const breadcrumbs = createArrayState<ChromeBreadcrumb>();
   const breadcrumbsAppendExtensions = createArrayState<ChromeBreadcrumbsAppendExtension>();
   const breadcrumbsBadges = createArrayState<ChromeBreadcrumbsBadge>();
 
+  const badgesExtension$ = combineLatest([breadcrumbsBadges.$, breadcrumbsAppendExtensions.$]).pipe(
+    map(([badges, extensions]) => toBadgesExtensionRenderModel(badges, extensions.length)),
+    distinctUntilChanged(areBadgesRenderModelsEqual),
+    map(toBadgesExtension),
+    shareReplay({ bufferSize: 1, refCount: true })
+  );
+
   const breadcrumbsAppendExtensionsWithBadges$ = combineLatest([
     breadcrumbsAppendExtensions.$,
-    breadcrumbsBadges.$,
+    badgesExtension$,
   ]).pipe(
-    distinctUntilChanged(([prevExtensions, prevBadges], [nextExtensions, nextBadges]) => {
-      return deepEqual(prevExtensions, nextExtensions) && deepEqual(prevBadges, nextBadges);
-    }),
-    map(([extensions, badges]) => {
-      if (badges.length === 0) {
+    map(([extensions, badgesExtension]) => {
+      if (!badgesExtension) {
         return extensions;
       }
-      return [
-        ...extensions,
-        {
-          content: mountReactNode(
-            <HeaderBreadcrumbsBadges badges={badges} isFirst={extensions.length === 0} />
-          ),
-        },
-      ];
+
+      return [...extensions, badgesExtension];
     }),
-    shareReplay(1)
+    shareReplay({ bufferSize: 1, refCount: true })
   );
 
   return {

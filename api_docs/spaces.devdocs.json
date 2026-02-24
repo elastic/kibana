@@ -2518,7 +2518,7 @@
                 "section": "def-public.SpacesContextProps",
                 "text": "SpacesContextProps"
               },
-              ") => React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+              ") => React.ReactElement<any>"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/ui_api/types.ts",
             "lineNumber": 63,
@@ -2563,7 +2563,7 @@
                 "section": "def-public.ShareToSpaceFlyoutProps",
                 "text": "ShareToSpaceFlyoutProps"
               },
-              ") => React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+              ") => React.ReactElement<any>"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/ui_api/types.ts",
             "lineNumber": 67,
@@ -2608,7 +2608,7 @@
                 "section": "def-public.CopyToSpaceFlyoutProps",
                 "text": "CopyToSpaceFlyoutProps"
               },
-              ") => React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+              ") => React.ReactElement<any>"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/ui_api/types.ts",
             "lineNumber": 73,
@@ -2653,7 +2653,7 @@
                 "section": "def-public.SpaceListProps",
                 "text": "SpaceListProps"
               },
-              ") => React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+              ") => React.ReactElement<any>"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/ui_api/types.ts",
             "lineNumber": 79,
@@ -2698,7 +2698,7 @@
                 "section": "def-public.EmbeddableLegacyUrlConflictProps",
                 "text": "EmbeddableLegacyUrlConflictProps"
               },
-              ") => React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+              ") => React.ReactElement<any>"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/ui_api/types.ts",
             "lineNumber": 88,
@@ -2743,7 +2743,7 @@
                 "section": "def-public.LegacyUrlConflictProps",
                 "text": "LegacyUrlConflictProps"
               },
-              ") => React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+              ") => React.ReactElement<any>"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/ui_api/types.ts",
             "lineNumber": 94,
@@ -2788,7 +2788,7 @@
                 "section": "def-public.SpaceAvatarProps",
                 "text": "SpaceAvatarProps"
               },
-              ") => React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+              ") => React.ReactElement<any>"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/ui_api/types.ts",
             "lineNumber": 112,
@@ -2859,7 +2859,7 @@
             "label": "children",
             "description": [],
             "signature": [
-              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+              "React.ReactNode"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/public/spaces_context/types.ts",
             "lineNumber": 41,
@@ -3173,7 +3173,7 @@
           "\nFunction that returns a promise for a lazy-loadable component."
         ],
         "signature": [
-          "(props: T) => React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+          "(props: T) => React.ReactElement<any>"
         ],
         "path": "x-pack/platform/plugins/shared/spaces/public/ui_api/types.ts",
         "lineNumber": 23,
@@ -4830,7 +4830,7 @@
             "tags": [],
             "label": "spaceId",
             "description": [
-              "[optional] the Kibana space to account for in the route url\n\nExamples:\n- `getRouteUrlForSpace('/api/some_endpoint')` returns `/api/some_endpoint`\n- `getRouteUrlForSpace('/api/some_endpoint', 'default')` returns `/api/some_endpoint`\n- `getRouteUrlForSpace('/api/some_endpoint', 'my_space') returns `/s/my_space/api/some_endpoint`"
+              "[optional] the Kibana space to account for in the route url"
             ],
             "signature": [
               "string | undefined"
@@ -5281,7 +5281,7 @@
         "label": "SolutionView",
         "description": [],
         "signature": [
-          "\"security\" | \"workplaceai\" | \"oblt\" | \"es\" | \"classic\""
+          "\"security\" | \"es\" | \"workplaceai\" | \"oblt\" | \"classic\""
         ],
         "path": "x-pack/platform/plugins/shared/spaces/common/types/space/v1.ts",
         "lineNumber": 12,

@@ -7,10 +7,12 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import type { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
 import { SERVICE_PROVIDERS } from '@kbn/inference-endpoint-ui-common';
 import type { EndpointModelInfoProps } from './endpoint_model_info';
 import { EndpointModelInfo } from './endpoint_model_info';
+import { ServiceIcon } from '../../styles';
 
 interface ServiceProviderProps extends EndpointModelInfoProps {
   service: ServiceProviderKeys;
@@ -25,7 +27,20 @@ export const ServiceProvider: React.FC<ServiceProviderProps> = ({ service, endpo
         <EuiIcon
           data-test-subj={`table-column-service-provider-${service}`}
           type={provider ? provider.icon : 'empty'}
-          style={{ marginRight: '8px' }}
+          css={ServiceIcon}
+          title={
+            provider
+              ? i18n.translate(
+                  'xpack.searchInferenceEndpoints.allInferenceEndpoints.table.serviceColumn.serviceIcon.title',
+                  {
+                    defaultMessage: '{serviceName} service logo',
+                    values: {
+                      serviceName: provider.name,
+                    },
+                  }
+                )
+              : undefined
+          }
         />
       </EuiFlexItem>
       <EuiFlexItem>

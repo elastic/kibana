@@ -877,8 +877,8 @@ describe('index= suggestions', () => {
   const contextWithSources: ICommandContext = {
     ...mockContext,
     timeSeriesSources: [
-      { name: 'metrics', mode: 'time_series', aliases: [] },
-      { name: 'logs-tsdb', mode: 'time_series', aliases: [] },
+      { name: 'metrics', mode: 'Timeseries', aliases: [] },
+      { name: 'logs-tsdb', mode: 'Timeseries', aliases: [] },
     ],
   };
 

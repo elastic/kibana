@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { monaco } from '@kbn/monaco';
 import { getJsonSchemaSuggestions } from './get_json_schema_suggestions';
 import type { ExtendedAutocompleteContext } from '../../context/autocomplete.types';
 
@@ -52,128 +53,119 @@ describe('getJsonSchemaSuggestions', () => {
     };
   };
 
-  describe('property key suggestions', () => {
-    it('should provide property key suggestions on empty line after property definition', () => {
+  describe('enum value suggestions', () => {
+    it('should provide enum value suggestions when in enum array context', () => {
       const context = createMockContext(
-        ['inputs', 'properties'],
-        '      ' // 6 spaces - empty line after property
+        ['inputs', 'properties', 'status', 'enum', 0],
+        '        - '
       );
-
-      const suggestions = getJsonSchemaSuggestions(context);
-
-      expect(suggestions.length).toBeGreaterThan(0);
-      expect(suggestions.some((s) => s.label === 'type')).toBe(true);
-      expect(suggestions.some((s) => s.label === 'default')).toBe(true);
-      expect(suggestions.some((s) => s.label === 'format')).toBe(true);
-    });
-
-    it('should provide property key suggestions when typing property key', () => {
-      const context = createMockContext(
-        ['inputs', 'properties', 'x'],
-        '      type' // typing "type"
-      );
-
-      const suggestions = getJsonSchemaSuggestions(context);
-
-      expect(suggestions.length).toBeGreaterThan(0);
-      expect(suggestions.some((s) => s.label === 'type')).toBe(true);
-    });
-
-    it('should NOT provide property key suggestions when line has property key with colon', () => {
-      const context = createMockContext(
-        ['inputs', 'properties'],
-        '      type: ' // property key with colon - should show value suggestions instead
-      );
-
-      const suggestions = getJsonSchemaSuggestions(context);
-
-      // Should not have property key suggestions when we have "type: "
-      expect(suggestions.some((s) => s.insertText === 'type: ')).toBe(false);
-    });
-  });
-
-  describe('type value suggestions', () => {
-    it('should provide type value suggestions when typing after "type:"', () => {
-      const lineUpToCursor = '      type: ';
-      const typeMatch = lineUpToCursor.match(/^(?<prefix>\s*-?\s*type:)\s*(?<value>.*)$/);
-      const context = createMockContext(
-        ['inputs', 'properties', 'x'],
-        lineUpToCursor,
-        lineUpToCursor,
-        typeMatch
-          ? {
-              matchType: 'type' as const,
-              fullKey: typeMatch.groups?.value?.replace(/['"]/g, '').trim() || '',
-              match: typeMatch,
-              valueStartIndex: (typeMatch.groups?.prefix?.length || 0) + 1,
-            }
-          : null
-      );
-
-      const suggestions = getJsonSchemaSuggestions(context);
-
-      expect(suggestions.length).toBeGreaterThan(0);
-      expect(suggestions.some((s) => s.label === 'string')).toBe(true);
-      expect(suggestions.some((s) => s.label === 'number')).toBe(true);
-      expect(suggestions.some((s) => s.label === 'boolean')).toBe(true);
-    });
-  });
-
-  describe('format value suggestions', () => {
-    it('should provide format value suggestions when typing after "format:"', () => {
-      const context = createMockContext(['inputs', 'properties', 'x'], '      format: ');
-
-      const suggestions = getJsonSchemaSuggestions(context);
-
-      expect(suggestions.length).toBeGreaterThan(0);
-      expect(suggestions.some((s) => s.label === 'email')).toBe(true);
-      expect(suggestions.some((s) => s.label === 'uri')).toBe(true);
-      expect(suggestions.some((s) => s.label === 'date-time')).toBe(true);
-    });
-  });
-
-  describe('empty path inference', () => {
-    it('should infer path from indentation when path is empty on empty line after property', () => {
-      const mockModel = {
-        getLineContent: (lineNum: number) => {
-          if (lineNum === 1) return '    x:';
-          if (lineNum === 2) return '      ';
-          return '';
+      context.workflowDefinition = {
+        inputs: {
+          type: 'object',
+          properties: {
+            status: {
+              type: 'string',
+              enum: ['active', 'inactive', 'pending'],
+            },
+          },
         },
       } as any;
 
-      const context = createMockContext([], '      ', '      ');
-      context.model = mockModel;
-      context.position = { lineNumber: 2, column: 7 } as any;
-
       const suggestions = getJsonSchemaSuggestions(context);
 
-      expect(suggestions.length).toBeGreaterThan(0);
-      expect(suggestions.some((s) => s.label === 'type')).toBe(true);
-      expect(suggestions.some((s) => s.label === 'default')).toBe(true);
+      expect(suggestions.length).toBe(3);
+      expect(suggestions.map((s) => s.label)).toEqual(['active', 'inactive', 'pending']);
+      expect(
+        suggestions.every((s) => s.kind === monaco.languages.CompletionItemKind.EnumMember)
+      ).toBe(true);
     });
 
-    it('should infer path from properties line when path is empty', () => {
-      const mockModel = {
-        getLineContent: (lineNum: number) => {
-          if (lineNum === 1) return '  properties:';
-          if (lineNum === 2) return '      ';
-          return '';
+    it('should provide numeric enum value suggestions', () => {
+      const context = createMockContext(
+        ['inputs', 'properties', 'priority', 'enum', 0],
+        '        - '
+      );
+      context.workflowDefinition = {
+        inputs: {
+          type: 'object',
+          properties: {
+            priority: {
+              type: 'integer',
+              enum: [1, 2, 3],
+            },
+          },
         },
       } as any;
 
-      const context = createMockContext([], '      ', '      ');
-      context.model = mockModel;
-      context.position = { lineNumber: 2, column: 7 } as any;
+      const suggestions = getJsonSchemaSuggestions(context);
+
+      expect(suggestions.length).toBe(3);
+      expect(suggestions.map((s) => s.label)).toEqual(['1', '2', '3']);
+      expect(suggestions.map((s) => s.insertText)).toEqual(['1', '2', '3']);
+    });
+
+    it('should wrap string enum values in quotes', () => {
+      const context = createMockContext(
+        ['inputs', 'properties', 'status', 'enum', 0],
+        '        - '
+      );
+      context.workflowDefinition = {
+        inputs: {
+          type: 'object',
+          properties: {
+            status: {
+              type: 'string',
+              enum: ['active'],
+            },
+          },
+        },
+      } as any;
 
       const suggestions = getJsonSchemaSuggestions(context);
 
-      expect(suggestions.length).toBeGreaterThan(0);
+      expect(suggestions[0].insertText).toBe('"active"');
+    });
+
+    it('should return empty when no workflow definition', () => {
+      const context = createMockContext(
+        ['inputs', 'properties', 'status', 'enum', 0],
+        '        - '
+      );
+
+      const suggestions = getJsonSchemaSuggestions(context);
+
+      expect(suggestions).toEqual([]);
+    });
+
+    it('should return empty when property has no enum values', () => {
+      const context = createMockContext(['inputs', 'properties', 'name', 'enum', 0], '        - ');
+      context.workflowDefinition = {
+        inputs: {
+          type: 'object',
+          properties: {
+            name: {
+              type: 'string',
+            },
+          },
+        },
+      } as any;
+
+      const suggestions = getJsonSchemaSuggestions(context);
+
+      expect(suggestions).toEqual([]);
     });
   });
 
   describe('context validation', () => {
-    it('should return empty array when not in inputs.properties context', () => {
+    it('should return empty when not in enum context', () => {
+      const context = createMockContext(['inputs', 'properties', 'status'], '      ');
+
+      const suggestions = getJsonSchemaSuggestions(context);
+
+      expect(suggestions).toEqual([]);
+    });
+
+    it('should return empty for steps context', () => {
       const context = createMockContext(['steps'], '      ');
 
       const suggestions = getJsonSchemaSuggestions(context);
@@ -181,9 +173,30 @@ describe('getJsonSchemaSuggestions', () => {
       expect(suggestions).toEqual([]);
     });
 
-    it('should return empty array when in triggers context', () => {
-      const context = createMockContext(['inputs', 'properties', 'x'], '      type');
-      context.isInTriggersContext = true;
+    it('should return empty for triggers context', () => {
+      const context = createMockContext(['triggers'], '      ');
+
+      const suggestions = getJsonSchemaSuggestions(context);
+
+      expect(suggestions).toEqual([]);
+    });
+
+    it('should return empty when line does not match list item pattern', () => {
+      const context = createMockContext(
+        ['inputs', 'properties', 'status', 'enum', 0],
+        '        active' // no "- " prefix
+      );
+      context.workflowDefinition = {
+        inputs: {
+          type: 'object',
+          properties: {
+            status: {
+              type: 'string',
+              enum: ['active'],
+            },
+          },
+        },
+      } as any;
 
       const suggestions = getJsonSchemaSuggestions(context);
 

@@ -45,6 +45,7 @@ dependsOn:
   - '@kbn/safer-lodash-set'
   - '@kbn/core-security-server-internal'
   - '@kbn/core-security-server-mocks'
+  - '@kbn/cps-server-utils'
 tags:
   - shared-server
   - package

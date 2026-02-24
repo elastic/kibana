@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { Readable } from 'stream';
+import type { ReadableStream } from 'stream/web';
 import { orderBy } from 'lodash';
-import fetch from 'node-fetch';
 import { format as formatUrl } from 'url';
 
 import expect from '@kbn/expect';
@@ -29,7 +30,17 @@ export default ({ getService }: FtrProviderContext) => {
   const aiops = getService('aiops');
   const supertest = getService('supertest');
   const config = getService('config');
-  const kibanaServerUrl = formatUrl(config.get('servers.kibana'));
+  let kibanaServerUrl = formatUrl(config.get('servers.kibana'));
+  // Native fetch doesn't support credentials in URLs, so we need to extract them
+  const parsedUrl = new URL(kibanaServerUrl);
+  const { username, password } = parsedUrl;
+  parsedUrl.username = '';
+  parsedUrl.password = '';
+  kibanaServerUrl = parsedUrl.toString().slice(0, -1); // Remove trailing slash
+  const authHeader: Record<string, string> =
+    username && password
+      ? { Authorization: `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}` }
+      : {};
   const esArchiver = getService('esArchiver');
 
   describe('POST /internal/aiops/log_rate_analysis - groups only', () => {
@@ -185,6 +196,7 @@ export default ({ getService }: FtrProviderContext) => {
                 'Content-Type': 'application/json',
                 [ELASTIC_HTTP_VERSION_HEADER]: apiVersion,
                 'kbn-xsrf': 'stream',
+                ...authHeader,
               },
               body: JSON.stringify(body),
             });
@@ -209,7 +221,10 @@ export default ({ getService }: FtrProviderContext) => {
               let chunkCounter = 0;
               const parseStreamCallback = (c: number) => (chunkCounter = c);
 
-              for await (const action of parseStream(stream, parseStreamCallback)) {
+              for await (const action of parseStream(
+                Readable.fromWeb(stream as ReadableStream),
+                parseStreamCallback
+              )) {
                 expect(action.type).not.to.be('error');
                 data.push(action);
               }

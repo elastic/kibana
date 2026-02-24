@@ -333,7 +333,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
           [kquery],
           [...searchFilters],
           getEsQueryConfig(uiSettings as Parameters<typeof getEsQueryConfig>[0])
-        );
+        ) as EsQuery;
       } catch (err) {
         notifications?.toasts.addError(err, {
           title: i18n.translate(

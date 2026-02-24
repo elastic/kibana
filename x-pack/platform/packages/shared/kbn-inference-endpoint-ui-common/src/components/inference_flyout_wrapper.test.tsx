@@ -239,19 +239,25 @@ describe('InferenceFlyout', () => {
       await userEvent.click(screen.getByTestId('inference-endpoint-submit-button'));
 
       expect(mockMutationFn).toHaveBeenCalledWith(
-        expect.objectContaining({
-          config: expect.objectContaining({
+        {
+          config: {
+            inferenceId: expect.any(String),
             provider: 'elasticsearch',
-            providerConfig: expect.objectContaining({
-              adaptive_allocations: expect.objectContaining({
+            taskType: 'sparse_embedding',
+            providerConfig: {
+              adaptive_allocations: {
                 enabled: true,
                 min_number_of_allocations: 0,
                 max_number_of_allocations: 10,
-              }),
+              },
+              model_id: '.elser_model_2',
               num_threads: 1,
-            }),
-          }),
-        }),
+            },
+          },
+          secrets: {
+            providerSecrets: {},
+          },
+        },
         false
       );
     });
@@ -265,11 +271,7 @@ describe('InferenceFlyout', () => {
             taskType: 'text_embedding',
             providerConfig: {
               model_id: '.elser_model_2',
-              adaptive_allocations: {
-                enabled: true,
-                min_number_of_allocations: 0,
-                max_number_of_allocations: 5,
-              },
+              'adaptive_allocations.max_number_of_allocations': 5,
             },
           },
           secrets: {
@@ -286,6 +288,40 @@ describe('InferenceFlyout', () => {
         // max_number_of_allocations should be shown with the deserialized value
         expect(screen.getByTestId('max_number_of_allocations-number')).toBeInTheDocument();
         expect(screen.getByTestId('max_number_of_allocations-number')).toHaveValue(5);
+      });
+
+      it('excludes num_allocations from update payload when adaptive allocations is enabled', async () => {
+        const mockEndpoint = {
+          config: {
+            inferenceId: 'test-id',
+            provider: 'elasticsearch',
+            taskType: 'text_embedding',
+            providerConfig: {
+              model_id: '.elser_model_2',
+              num_allocations: 1,
+              'adaptive_allocations.max_number_of_allocations': 5,
+            },
+          },
+          secrets: {
+            providerSecrets: {},
+          },
+        };
+
+        renderComponent({
+          isEdit: true,
+          enforceAdaptiveAllocations: true,
+          inferenceEndpoint: mockEndpoint,
+        });
+
+        await userEvent.click(screen.getByTestId('inference-endpoint-submit-button'));
+
+        const submittedData = mockMutationFn.mock.calls[0][0];
+        expect(submittedData.config.providerConfig.adaptive_allocations).toEqual({
+          enabled: true,
+          min_number_of_allocations: 0,
+          max_number_of_allocations: 5,
+        });
+        expect(submittedData.config.providerConfig).not.toHaveProperty('num_allocations');
       });
     });
   });

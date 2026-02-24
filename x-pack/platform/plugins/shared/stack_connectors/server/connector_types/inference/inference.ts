@@ -285,7 +285,10 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
       false,
       signal
     );
-    return response.rerank!.map(({ relevance_score: score, ...rest }) => ({ score, ...rest }));
+    return (response?.rerank ?? []).map(({ relevance_score: score, ...rest }) => ({
+      score,
+      ...rest,
+    }));
   }
 
   /**
@@ -302,7 +305,7 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
       false,
       signal
     );
-    return response.sparse_embedding!;
+    return response?.sparse_embedding ?? [];
   }
 
   /**
@@ -327,7 +330,7 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
       false,
       signal
     );
-    return response.text_embedding!;
+    return response?.text_embedding ?? [];
   }
 
   /**
@@ -368,7 +371,7 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
       false,
       signal
     );
-    return response.completion!;
+    return response?.completion ?? [];
   }
 
   /**

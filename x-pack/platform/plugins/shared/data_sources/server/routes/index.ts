@@ -171,10 +171,10 @@ export function registerRoutes(dependencies: RouteDependencies) {
     },
     async (context, request, response) => {
       const coreContext = await context.core;
+      const { name, type, credentials, stack_connector_id } = request.body;
+      const [, { actions, dataCatalog, agentBuilder }] = await getStartServices();
 
       try {
-        const { name, type, credentials, stack_connector_id } = request.body;
-        const [, { actions, dataCatalog, agentBuilder }] = await getStartServices();
         const savedObjectsClient = coreContext.savedObjects.client;
 
         // Validate data source type exists
@@ -220,6 +220,20 @@ export function registerRoutes(dependencies: RouteDependencies) {
         });
       } catch (error) {
         logger.error(`Error creating data source: ${(error as Error).message}`);
+
+        /* Roll back the externally-provided connector to avoid leaving it orphaned.
+         * The data source saved object is never created when this catch block is reached,
+         * so we only need to clean up the connector itself.
+         */
+        if (stack_connector_id) {
+          const actionsClient = await actions.getActionsClientWithRequest(request);
+          await actionsClient.delete({ id: stack_connector_id }).catch((deleteError: Error) => {
+            logger.warn(
+              `Failed to roll back connector ${stack_connector_id} after data source creation error: ${deleteError.message}`
+            );
+          });
+        }
+
         return createErrorResponse(response, 'Failed to create data source', error as Error);
       }
     }

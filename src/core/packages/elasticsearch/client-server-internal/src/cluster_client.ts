@@ -18,10 +18,16 @@ import {
 } from '@kbn/core-http-router-server-internal';
 import type {
   ScopeableRequest,
+  ScopeableUrlRequest,
   UnauthorizedErrorHandler,
   ICustomClusterClient,
+  IScopedClusterClient,
+  ElasticsearchClientConfig,
+  AsScopedOptions,
+  OriginOnlyRouting,
+  SpaceNPRERouting,
+  AllProjectsRouting,
 } from '@kbn/core-elasticsearch-server';
-import type { ElasticsearchClientConfig } from '@kbn/core-elasticsearch-server';
 import { HTTPAuthorizationHeader, isUiamCredential } from '@kbn/core-security-server';
 import type { InternalSecurityServiceSetup } from '@kbn/core-security-server-internal';
 import { configureClient } from './configure_client';
@@ -41,6 +47,14 @@ import type { AgentFactoryProvider } from './agent_manager';
 
 const noop = () => undefined;
 
+/**
+ * A factory that produces an {@link OnRequestHandler}, which can be bound to a request context.
+ * @internal
+ */
+export type OnRequestHandlerFactory = (opts: {
+  projectRouting: 'origin-only' | 'all' | ScopeableUrlRequest;
+}) => OnRequestHandler;
+
 /** @internal **/
 export class ClusterClient implements ICustomClusterClient {
   private readonly config: ElasticsearchClientConfig;
@@ -50,7 +64,7 @@ export class ClusterClient implements ICustomClusterClient {
   private readonly kibanaVersion: string;
   private readonly getUnauthorizedErrorHandler: () => UnauthorizedErrorHandler | undefined;
   private readonly getExecutionContext: () => string | undefined;
-  private readonly onRequest?: OnRequestHandler;
+  private readonly onRequestHandlerFactory: OnRequestHandlerFactory;
   private isClosed = false;
 
   public readonly asInternalUser: Client;
@@ -65,7 +79,7 @@ export class ClusterClient implements ICustomClusterClient {
     getUnauthorizedErrorHandler = noop,
     agentFactoryProvider,
     kibanaVersion,
-    onRequest,
+    onRequestHandlerFactory,
   }: {
     config: ElasticsearchClientConfig;
     logger: Logger;
@@ -76,7 +90,7 @@ export class ClusterClient implements ICustomClusterClient {
     getUnauthorizedErrorHandler?: () => UnauthorizedErrorHandler | undefined;
     agentFactoryProvider: AgentFactoryProvider;
     kibanaVersion: string;
-    onRequest?: OnRequestHandler;
+    onRequestHandlerFactory: OnRequestHandlerFactory;
   }) {
     this.config = config;
     this.authHeaders = authHeaders;
@@ -84,7 +98,9 @@ export class ClusterClient implements ICustomClusterClient {
     this.kibanaVersion = kibanaVersion;
     this.getExecutionContext = getExecutionContext;
     this.getUnauthorizedErrorHandler = getUnauthorizedErrorHandler;
-    this.onRequest = onRequest;
+    this.onRequestHandlerFactory = onRequestHandlerFactory;
+
+    const internalUserOnRequest = onRequestHandlerFactory({ projectRouting: 'origin-only' });
 
     this.asInternalUser = configureClient(config, {
       logger,
@@ -92,7 +108,7 @@ export class ClusterClient implements ICustomClusterClient {
       getExecutionContext,
       agentFactoryProvider,
       kibanaVersion,
-      onRequest,
+      onRequest: internalUserOnRequest,
     });
     this.rootScopedClient = configureClient(config, {
       scoped: true,
@@ -101,19 +117,29 @@ export class ClusterClient implements ICustomClusterClient {
       getExecutionContext,
       agentFactoryProvider,
       kibanaVersion,
-      onRequest,
+      onRequest: internalUserOnRequest,
     });
   }
 
-  asScoped(request: ScopeableRequest) {
+  asScoped(request: ScopeableUrlRequest, opts: SpaceNPRERouting): IScopedClusterClient;
+  asScoped(
+    request: ScopeableRequest,
+    opts?: OriginOnlyRouting | AllProjectsRouting
+  ): IScopedClusterClient;
+  asScoped(request: ScopeableRequest, opts: AsScopedOptions = { projectRouting: 'origin-only' }) {
     const createScopedClient = () => {
       const scopedHeaders = this.getScopedHeaders(request);
+      const { projectRouting } = opts;
 
       const transportClass = createTransport({
         scoped: true,
         getExecutionContext: this.getExecutionContext,
         getUnauthorizedErrorHandler: this.createInternalErrorHandlerAccessor(request),
-        onRequest: this.onRequest,
+        onRequest: this.onRequestHandlerFactory(
+          projectRouting === 'space'
+            ? { projectRouting: request as ScopeableUrlRequest }
+            : { projectRouting }
+        ),
       });
 
       return this.rootScopedClient.child({

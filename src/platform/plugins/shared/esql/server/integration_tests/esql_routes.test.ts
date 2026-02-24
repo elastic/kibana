@@ -32,7 +32,7 @@ describe('ESQL routes', () => {
 
     expect(item1).toMatchObject({
       name: 'lookup_index1',
-      mode: 'lookup',
+      mode: 'Lookup',
       aliases: [],
     });
 
@@ -40,7 +40,7 @@ describe('ESQL routes', () => {
 
     expect(item2).toMatchObject({
       name: 'lookup_index2',
-      mode: 'lookup',
+      mode: 'Lookup',
       aliases: ['lookup_index2_alias1', 'lookup_index2_alias2'],
     });
   });
@@ -54,7 +54,7 @@ describe('ESQL routes', () => {
 
     expect(item1).toMatchObject({
       name: 'ts_index1',
-      mode: 'time_series',
+      mode: 'Timeseries',
       aliases: [],
     });
 
@@ -62,7 +62,7 @@ describe('ESQL routes', () => {
 
     expect(item2).toMatchObject({
       name: 'ts_index2',
-      mode: 'time_series',
+      mode: 'Timeseries',
       aliases: ['ts_index2_alias1', 'ts_index2_alias2'],
     });
   });

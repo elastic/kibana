@@ -16,6 +16,7 @@ import type {
   WorkflowDetailDto,
   WorkflowListDto,
 } from '@kbn/workflows';
+import type { WorkflowTriggerTab } from '../../../features/run_workflow/ui/types';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useTelemetry } from '../../../hooks/use_telemetry';
 
@@ -223,7 +224,7 @@ export function useWorkflowActions() {
   const runWorkflow = useMutation<
     RunWorkflowResponseDto,
     HttpError,
-    RunWorkflowCommand & { id: string; triggerTab?: 'manual' | 'alert' | 'index' }
+    RunWorkflowCommand & { id: string; triggerTab?: WorkflowTriggerTab }
   >({
     mutationKey: ['POST', 'workflows', 'id', 'run'],
     mutationFn: ({ id, inputs }) => {

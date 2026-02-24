@@ -9,7 +9,7 @@ import { errors } from '@elastic/elasticsearch';
 import type {
   AggregateName,
   AggregationsMultiTermsAggregate,
-  BulkOperationContainer,
+  BulkDeleteOperation,
   IndicesCreateRequest,
   MsearchRequestItem,
   SearchHit,
@@ -1104,9 +1104,7 @@ export class SessionIndex {
    * @param deleteOperations Bulk delete operations.
    * @returns Returns `true` if the bulk delete affected any session document.
    */
-  private async bulkDeleteSessions(
-    deleteOperations: Array<Required<Pick<BulkOperationContainer, 'delete'>>>
-  ) {
+  private async bulkDeleteSessions(deleteOperations: Array<{ delete: BulkDeleteOperation }>) {
     if (deleteOperations.length === 0) {
       return false;
     }

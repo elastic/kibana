@@ -18,7 +18,7 @@ jest.mock('../../definitions/generated/settings', () => {
   const originalModule = jest.requireActual('../../definitions/generated/settings');
   return {
     ...originalModule,
-    settings: originalModule.settings.map((s: any) =>
+    settings: originalModule.settings.map((s: { name: string; ignoreAsSuggestion?: boolean }) =>
       s.name === 'project_routing' ? { ...s, ignoreAsSuggestion: false } : s
     ),
   };

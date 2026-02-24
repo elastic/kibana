@@ -18,6 +18,7 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiToolTip,
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -30,12 +31,12 @@ import {
   type IlmPhasesFlyoutFormInternal,
   OnFieldErrorsChangeProvider,
   toMilliseconds,
-  type TimeUnit,
   useIlmPhasesFlyoutTabErrors,
 } from './form';
 import { DEFAULT_NEW_PHASE_MIN_AGE, ILM_PHASE_ORDER } from './constants';
 import { GlobalFieldsMount, PhasePanel, PhaseTabsRow } from './sections';
 import { useStyles } from './use_styles';
+import { getDoubledDurationFromPrevious, type PreservedTimeUnit } from '../shared';
 
 export const EditIlmPhasesFlyout = ({
   initialPhases,
@@ -44,7 +45,9 @@ export const EditIlmPhasesFlyout = ({
   onChange,
   onSave,
   onClose,
+  onChangeDebounceMs = 250,
   isSaving,
+  isMetricsStream,
   canCreateRepository = false,
   searchableSnapshotRepositories = [],
   isLoadingSearchableSnapshotRepositories,
@@ -107,47 +110,93 @@ export const EditIlmPhasesFlyout = ({
 
   const { onFieldErrorsChange, tabHasErrors } = useIlmPhasesFlyoutTabErrors(formData);
 
+  const onChangeRef = useRef(onChange);
+  useEffect(() => {
+    onChangeRef.current = onChange;
+  }, [onChange]);
+
   const lastEmittedOutputRef = useRef<IlmPolicyPhases>(initialPhasesRef.current);
+  const pendingOnChangeOutputRef = useRef<IlmPolicyPhases | null>(null);
+  const pendingOnChangeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     const sub = form.subscribe(({ data }) => {
       const next = data.format();
 
       if (isEqual(next, lastEmittedOutputRef.current)) return;
-      lastEmittedOutputRef.current = next;
 
-      onChange(next);
+      pendingOnChangeOutputRef.current = next;
+      if (pendingOnChangeTimeoutRef.current) {
+        clearTimeout(pendingOnChangeTimeoutRef.current);
+      }
+
+      pendingOnChangeTimeoutRef.current = setTimeout(() => {
+        pendingOnChangeTimeoutRef.current = null;
+        const toEmit = pendingOnChangeOutputRef.current;
+        pendingOnChangeOutputRef.current = null;
+        if (!toEmit) return;
+        if (isEqual(toEmit, lastEmittedOutputRef.current)) return;
+        lastEmittedOutputRef.current = toEmit;
+        onChangeRef.current(toEmit);
+      }, onChangeDebounceMs);
     });
 
     return () => {
+      if (pendingOnChangeTimeoutRef.current) {
+        clearTimeout(pendingOnChangeTimeoutRef.current);
+        pendingOnChangeTimeoutRef.current = null;
+      }
+      pendingOnChangeOutputRef.current = null;
       sub.unsubscribe();
     };
-  }, [form, onChange]);
+  }, [form, onChangeDebounceMs]);
 
   const canSelectFrozen = canCreateRepository || searchableSnapshotRepositories.length > 0;
 
-  const getDefaultMinAge = useCallback((): { value: string; unit: TimeUnit } => {
-    const candidates: Array<'warm' | 'cold' | 'frozen' | 'delete'> = [
-      'warm',
-      'cold',
-      'frozen',
-      'delete',
-    ];
-    let last: { value: string; unit: TimeUnit } | undefined;
+  const getDefaultMinAgeForPhase = useCallback(
+    (phase: PhaseName): { value: string; unit: PreservedTimeUnit } => {
+      const phases: Array<'warm' | 'cold' | 'frozen' | 'delete'> = [
+        'warm',
+        'cold',
+        'frozen',
+        'delete',
+      ];
+      const index = phases.indexOf(phase as (typeof phases)[number]);
+      if (index <= 0) return DEFAULT_NEW_PHASE_MIN_AGE;
 
-    candidates.forEach((p) => {
-      const isPhaseEnabled = Boolean(form.getFields()[`_meta.${p}.enabled`]?.value);
-      if (!isPhaseEnabled) return;
+      // Default to 2x the closest enabled previous phase's min_age.
+      const previousPhases = phases.slice(0, index).reverse();
+      const fields = form.getFields();
 
-      const value = String(form.getFields()[`_meta.${p}.minAgeValue`]?.value ?? '').trim();
-      const unit = (form.getFields()[`_meta.${p}.minAgeUnit`]?.value ?? 'd') as TimeUnit;
-      if (value) {
-        last = { value, unit };
+      for (const previousPhase of previousPhases) {
+        const isPhaseEnabled = Boolean(fields[`_meta.${previousPhase}.enabled`]?.value);
+        if (!isPhaseEnabled) continue;
+
+        const previousValue = String(
+          fields[`_meta.${previousPhase}.minAgeValue`]?.value ?? ''
+        ).trim();
+        if (previousValue === '') continue;
+
+        const previousUnit = String(
+          fields[`_meta.${previousPhase}.minAgeUnit`]?.value ?? 'd'
+        ) as PreservedTimeUnit;
+
+        const previousNum = Number(previousValue);
+        if (!Number.isFinite(previousNum) || previousNum < 0) continue;
+
+        const { value, unit } = getDoubledDurationFromPrevious({
+          previousValue,
+          previousUnit,
+          previousValueFallback: previousNum,
+          previousValueMinInclusive: 0,
+        });
+        return { value, unit };
       }
-    });
 
-    return last ?? DEFAULT_NEW_PHASE_MIN_AGE;
-  }, [form]);
+      return DEFAULT_NEW_PHASE_MIN_AGE;
+    },
+    [form]
+  );
 
   const ensurePhaseEnabledWithDefaults = useCallback(
     (phase: PhaseName): boolean => {
@@ -178,23 +227,44 @@ export const EditIlmPhasesFlyout = ({
         const unitField = form.getFields()[unitPath];
 
         // When enabling a previously-disabled phase, preserve existing values.
-        // Otherwise default to the last configured min_age (or 30d).
+        // Otherwise default based on the closest enabled previous phase.
         if (valueField && String(valueField.value ?? '').trim() === '') {
-          const { value, unit } = getDefaultMinAge();
+          const { value, unit } = getDefaultMinAgeForPhase(phase);
           valueField.setValue(value);
           unitField?.setValue(unit);
         }
 
         const resolvedValue = String(form.getFields()[valuePath]?.value ?? '');
-        const resolvedUnit = String(form.getFields()[unitPath]?.value ?? 'd') as TimeUnit;
+        const resolvedUnit = String(form.getFields()[unitPath]?.value ?? 'd') as PreservedTimeUnit;
         const millis =
           resolvedValue.trim() === '' ? -1 : toMilliseconds(resolvedValue, resolvedUnit);
         form.setFieldValue(millisPath, millis);
       }
 
+      // Force re-validation for the (re-)enabled phase.
+      // Phases are not unmounted when disabled, so fields may have been validated while the phase
+      // was disabled (validators no-op) and would otherwise remain "valid" when re-enabled.
+      const fieldsToValidate: string[] = [];
+      if (phase !== 'hot') {
+        fieldsToValidate.push(`_meta.${phase}.minAgeValue`);
+      }
+      if (phase === 'hot' || phase === 'warm' || phase === 'cold') {
+        fieldsToValidate.push(`_meta.${phase}.downsample.fixedIntervalValue`);
+      }
+      if (phase === 'cold' || phase === 'frozen') {
+        fieldsToValidate.push('_meta.searchableSnapshot.repository');
+      }
+      if (fieldsToValidate.length > 0) {
+        // Delay to the next tick so `hook_form_lib` has time to propagate the field value changes
+        // into the form's flattened `formData` snapshot that validators read from.
+        setTimeout(() => {
+          void form.validateFields(fieldsToValidate, /* onlyBlocking */ true);
+        }, 0);
+      }
+
       return true;
     },
-    [canSelectFrozen, enabledPhases, form, getDefaultMinAge, searchableSnapshotRepositories]
+    [canSelectFrozen, enabledPhases, form, getDefaultMinAgeForPhase, searchableSnapshotRepositories]
   );
 
   useEffect(() => {
@@ -213,6 +283,38 @@ export const EditIlmPhasesFlyout = ({
       setSelectedPhase(enabledPhases[0]);
     }
   }, [enabledPhases, ensurePhaseEnabledWithDefaults, isMetaReady, selectedPhase, setSelectedPhase]);
+
+  const hasFormErrors = form.getErrors().length > 0;
+  const isSaveDisabledDueToInvalid = form.isValid === false || hasFormErrors;
+  const isSaveDisabled = isSaveDisabledDueToInvalid || form.isSubmitting;
+
+  const renderSaveButton = () => {
+    const button = (
+      <EuiButton
+        fill
+        isLoading={Boolean(isSaving) || form.isSubmitting}
+        data-test-subj={`${dataTestSubj}SaveButton`}
+        onClick={() => form.submit()}
+        disabled={isSaveDisabled}
+      >
+        {i18n.translate('xpack.streams.editIlmPhasesFlyout.save', {
+          defaultMessage: 'Save',
+        })}
+      </EuiButton>
+    );
+
+    return isSaveDisabledDueToInvalid ? (
+      <EuiToolTip
+        content={i18n.translate('xpack.streams.editIlmPhasesFlyout.saveDisabledTooltip', {
+          defaultMessage: 'Fix the form errors before saving.',
+        })}
+      >
+        {button}
+      </EuiToolTip>
+    ) : (
+      button
+    );
+  };
 
   return (
     <EuiFlyout
@@ -274,6 +376,7 @@ export const EditIlmPhasesFlyout = ({
                 isLoadingSearchableSnapshotRepositories={isLoadingSearchableSnapshotRepositories}
                 onRefreshSearchableSnapshotRepositories={onRefreshSearchableSnapshotRepositories}
                 onCreateSnapshotRepository={onCreateSnapshotRepository}
+                isMetricsStream={isMetricsStream}
               />
             ))}
           </OnFieldErrorsChangeProvider>
@@ -298,19 +401,7 @@ export const EditIlmPhasesFlyout = ({
               })}
             </EuiButtonEmpty>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              fill
-              isLoading={Boolean(isSaving) || form.isSubmitting}
-              data-test-subj={`${dataTestSubj}SaveButton`}
-              onClick={() => form.submit()}
-              disabled={(form.isSubmitted && form.isValid === false) || form.isSubmitting}
-            >
-              {i18n.translate('xpack.streams.editIlmPhasesFlyout.save', {
-                defaultMessage: 'Save',
-              })}
-            </EuiButton>
-          </EuiFlexItem>
+          <EuiFlexItem grow={false}>{renderSaveButton()}</EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>
     </EuiFlyout>

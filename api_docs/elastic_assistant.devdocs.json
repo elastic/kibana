@@ -22,7 +22,7 @@
           "\nInterfaces for registering tools to be used by the elastic assistant"
         ],
         "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
-        "lineNumber": 257,
+        "lineNumber": 266,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -35,7 +35,7 @@
             "label": "id",
             "description": [],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
-            "lineNumber": 262,
+            "lineNumber": 271,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -48,7 +48,7 @@
             "label": "name",
             "description": [],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
-            "lineNumber": 263,
+            "lineNumber": 272,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -61,7 +61,7 @@
             "label": "description",
             "description": [],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
-            "lineNumber": 264,
+            "lineNumber": 273,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -74,7 +74,7 @@
             "label": "sourceRegister",
             "description": [],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
-            "lineNumber": 265,
+            "lineNumber": 274,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -98,7 +98,7 @@
               ") => boolean"
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
-            "lineNumber": 266,
+            "lineNumber": 275,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -120,7 +120,7 @@
                   }
                 ],
                 "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
-                "lineNumber": 266,
+                "lineNumber": 275,
                 "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -152,7 +152,7 @@
               ", any, any> | null>"
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
-            "lineNumber": 267,
+            "lineNumber": 276,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -174,7 +174,7 @@
                   }
                 ],
                 "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
-                "lineNumber": 267,
+                "lineNumber": 276,
                 "columnNumber": 13,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -194,7 +194,7 @@
         "label": "AssistantToolParams",
         "description": [],
         "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
-        "lineNumber": 276,
+        "lineNumber": 285,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -210,7 +210,7 @@
               "string | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
-            "lineNumber": 277,
+            "lineNumber": 286,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -227,7 +227,7 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
-            "lineNumber": 278,
+            "lineNumber": 287,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -243,7 +243,7 @@
               "{ id: string; field: string; namespace?: string | undefined; timestamp?: string | undefined; createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; allowed?: boolean | undefined; anonymized?: boolean | undefined; }[] | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
-            "lineNumber": 279,
+            "lineNumber": 288,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -266,7 +266,7 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
-            "lineNumber": 280,
+            "lineNumber": 289,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -279,7 +279,7 @@
             "label": "isEnabledKnowledgeBase",
             "description": [],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
-            "lineNumber": 281,
+            "lineNumber": 290,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -295,7 +295,7 @@
               "string | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
-            "lineNumber": 282,
+            "lineNumber": 291,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -317,7 +317,7 @@
               }
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
-            "lineNumber": 283,
+            "lineNumber": 292,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -333,7 +333,7 @@
               "string | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
-            "lineNumber": 284,
+            "lineNumber": 293,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1337,7 +1337,7 @@
               "; }"
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
-            "lineNumber": 285,
+            "lineNumber": 294,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1354,7 +1354,7 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
-            "lineNumber": 286,
+            "lineNumber": 295,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1370,7 +1370,7 @@
               "number | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
-            "lineNumber": 287,
+            "lineNumber": 296,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1389,7 +1389,7 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
-            "lineNumber": 288,
+            "lineNumber": 297,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1412,7 +1412,7 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
-            "lineNumber": 289,
+            "lineNumber": 298,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1428,7 +1428,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
-            "lineNumber": 290,
+            "lineNumber": 299,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1450,7 +1450,7 @@
               }
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
-            "lineNumber": 291,
+            "lineNumber": 300,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1470,7 +1470,7 @@
               ", \"strip\">) => void) | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
-            "lineNumber": 292,
+            "lineNumber": 301,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1489,7 +1489,7 @@
                   ", \"strip\">"
                 ],
                 "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
-                "lineNumber": 292,
+                "lineNumber": 301,
                 "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1512,7 +1512,7 @@
               ", \"strip\"> | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
-            "lineNumber": 293,
+            "lineNumber": 302,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1534,14 +1534,14 @@
               "objectOutputType",
               "<{}, ",
               "ZodString",
-              ", \"strip\"> | undefined; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; } | { subAction: \"invokeAI\" | \"invokeStream\"; anonymizationFields: { id: string; field: string; namespace?: string | undefined; timestamp?: string | undefined; createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; allowed?: boolean | undefined; anonymized?: boolean | undefined; }[]; apiConfig: { connectorId: string; actionTypeId: string; provider?: \"Other\" | \"OpenAI\" | \"Azure OpenAI\" | undefined; model?: string | undefined; defaultSystemPromptId?: string | undefined; }; endpointIds: string[]; insightType: \"incompatible_antivirus\" | \"noisy_process_tree\" | \"policy_response_failure\"; model?: string | undefined; replacements?: ",
+              ", \"strip\"> | undefined; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; } | { subAction: \"invokeAI\" | \"invokeStream\"; anonymizationFields: { id: string; field: string; namespace?: string | undefined; timestamp?: string | undefined; createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; allowed?: boolean | undefined; anonymized?: boolean | undefined; }[]; apiConfig: { connectorId: string; actionTypeId: string; provider?: \"Other\" | \"OpenAI\" | \"Azure OpenAI\" | undefined; model?: string | undefined; defaultSystemPromptId?: string | undefined; }; endpointIds: string[]; insightType: \"custom\" | \"incompatible_antivirus\" | \"policy_response_failure\"; model?: string | undefined; replacements?: ",
               "objectOutputType",
               "<{}, ",
               "ZodString",
               ", \"strip\"> | undefined; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; }, any>"
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
-            "lineNumber": 294,
+            "lineNumber": 303,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1557,7 +1557,7 @@
               "number | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
-            "lineNumber": 301,
+            "lineNumber": 310,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1574,7 +1574,7 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
-            "lineNumber": 302,
+            "lineNumber": 311,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1592,7 +1592,7 @@
               ">) | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
-            "lineNumber": 303,
+            "lineNumber": 312,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1610,7 +1610,7 @@
         "label": "ElasticAssistantPluginSetupDependencies",
         "description": [],
         "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
-        "lineNumber": 129,
+        "lineNumber": 135,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1632,7 +1632,7 @@
               }
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
-            "lineNumber": 130,
+            "lineNumber": 136,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1654,7 +1654,30 @@
               }
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
-            "lineNumber": 131,
+            "lineNumber": 137,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "elasticAssistant",
+            "id": "def-server.ElasticAssistantPluginSetupDependencies.cloud",
+            "type": "Object",
+            "tags": [],
+            "label": "cloud",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "cloud",
+                "scope": "server",
+                "docId": "kibCloudPluginApi",
+                "section": "def-server.CloudSetup",
+                "text": "CloudSetup"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "lineNumber": 138,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1676,7 +1699,7 @@
               }
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
-            "lineNumber": 132,
+            "lineNumber": 139,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1714,7 +1737,7 @@
               "TrainedModelsProvider"
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
-            "lineNumber": 133,
+            "lineNumber": 140,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1736,7 +1759,7 @@
               }
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
-            "lineNumber": 134,
+            "lineNumber": 141,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1758,7 +1781,7 @@
               }
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
-            "lineNumber": 135,
+            "lineNumber": 142,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1781,7 +1804,7 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
-            "lineNumber": 136,
+            "lineNumber": 143,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1797,7 +1820,7 @@
         "label": "ElasticAssistantPluginStartDependencies",
         "description": [],
         "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
-        "lineNumber": 138,
+        "lineNumber": 145,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1819,7 +1842,7 @@
               }
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
-            "lineNumber": 139,
+            "lineNumber": 146,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1841,7 +1864,7 @@
               }
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
-            "lineNumber": 140,
+            "lineNumber": 147,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1863,7 +1886,7 @@
               }
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
-            "lineNumber": 141,
+            "lineNumber": 148,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1885,7 +1908,7 @@
               }
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
-            "lineNumber": 142,
+            "lineNumber": 149,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1908,7 +1931,7 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
-            "lineNumber": 143,
+            "lineNumber": 150,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1930,7 +1953,7 @@
               }
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
-            "lineNumber": 144,
+            "lineNumber": 151,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1952,7 +1975,7 @@
               }
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
-            "lineNumber": 145,
+            "lineNumber": 152,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1974,7 +1997,7 @@
               }
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
-            "lineNumber": 146,
+            "lineNumber": 153,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1996,7 +2019,7 @@
         "The plugin setup interface"
       ],
       "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
-      "lineNumber": 76,
+      "lineNumber": 82,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -2018,7 +2041,7 @@
             }
           ],
           "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
-          "lineNumber": 78,
+          "lineNumber": 84,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -2037,7 +2060,7 @@
         "The plugin start interface"
       ],
       "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
-      "lineNumber": 81,
+      "lineNumber": 87,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -2061,7 +2084,7 @@
             }
           ],
           "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
-          "lineNumber": 83,
+          "lineNumber": 89,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -2085,7 +2108,7 @@
             }
           ],
           "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
-          "lineNumber": 87,
+          "lineNumber": 93,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -2111,7 +2134,7 @@
             ">) => void"
           ],
           "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
-          "lineNumber": 91,
+          "lineNumber": 97,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -2129,7 +2152,7 @@
                 "string"
               ],
               "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
-              "lineNumber": 100,
+              "lineNumber": 106,
               "columnNumber": 22,
               "deprecated": false,
               "trackAdoption": false,
@@ -2156,7 +2179,7 @@
                 ">"
               ],
               "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
-              "lineNumber": 100,
+              "lineNumber": 106,
               "columnNumber": 42,
               "deprecated": false,
               "trackAdoption": false,
@@ -2185,7 +2208,7 @@
             }
           ],
           "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
-          "lineNumber": 101,
+          "lineNumber": 107,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -2229,7 +2252,7 @@
             "[]) => void"
           ],
           "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
-          "lineNumber": 106,
+          "lineNumber": 112,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -2247,7 +2270,7 @@
                 "string"
               ],
               "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
-              "lineNumber": 115,
+              "lineNumber": 121,
               "columnNumber": 19,
               "deprecated": false,
               "trackAdoption": false,
@@ -2273,7 +2296,7 @@
                 "[]"
               ],
               "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
-              "lineNumber": 115,
+              "lineNumber": 121,
               "columnNumber": 39,
               "deprecated": false,
               "trackAdoption": false,
@@ -2303,7 +2326,7 @@
             "[]"
           ],
           "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
-          "lineNumber": 116,
+          "lineNumber": 122,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -2344,7 +2367,7 @@
             ", callback: Function) => void"
           ],
           "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
-          "lineNumber": 121,
+          "lineNumber": 127,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -2360,7 +2383,7 @@
                 "CallbackIds"
               ],
               "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
-              "lineNumber": 126,
+              "lineNumber": 132,
               "columnNumber": 22,
               "deprecated": false,
               "trackAdoption": false,
@@ -2377,7 +2400,7 @@
                 "Function"
               ],
               "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
-              "lineNumber": 126,
+              "lineNumber": 132,
               "columnNumber": 47,
               "deprecated": false,
               "trackAdoption": false,

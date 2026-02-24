@@ -243,7 +243,7 @@
           ") => void"
         ],
         "path": "src/core/packages/root/server-internal/src/register_service_config.ts",
-        "lineNumber": 46,
+        "lineNumber": 47,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -259,7 +259,7 @@
               "ConfigService"
             ],
             "path": "src/core/packages/root/server-internal/src/register_service_config.ts",
-            "lineNumber": 46,
+            "lineNumber": 47,
             "columnNumber": 39,
             "deprecated": false,
             "trackAdoption": false,

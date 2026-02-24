@@ -29,7 +29,7 @@ import type { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/public'
 
 import { css } from '@emotion/react';
 import chroma from 'chroma-js';
-import { VALUE_CLICK_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { ON_CLICK_VALUE } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { LegendItem } from './models';
 import { CUSTOM_LEGEND_VIS_TYPES } from './models';
 import { VisLegendItem } from './legend_item';
@@ -211,7 +211,7 @@ export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
 
     const filters = this.props.hasCompatibleActions
       ? await this.props.hasCompatibleActions({
-          name: VALUE_CLICK_TRIGGER,
+          name: ON_CLICK_VALUE,
           data: item.values,
         })
       : false;

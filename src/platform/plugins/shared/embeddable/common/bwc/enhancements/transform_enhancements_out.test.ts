@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { ON_APPLY_FILTER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { transformEnhancementsOut } from './transform_enhancements_out';
 
 describe('transformEnhancementsOut', () => {
@@ -71,7 +72,7 @@ describe('transformEnhancementsOut', () => {
         },
       },
     };
-    expect(transformEnhancementsOut(state).drilldowns?.[0].trigger).toBe('FILTER_TRIGGER');
+    expect(transformEnhancementsOut(state).drilldowns?.[0].trigger).toBe(ON_APPLY_FILTER);
   });
 
   test('should convert discover drilldown event', () => {
@@ -162,7 +163,7 @@ describe('transformEnhancementsOut', () => {
                 name: 'I am an unknown event',
               },
               eventId: '8b3b25b4-1691-4826-82c4-fb6c0478f669',
-              triggers: ['FILTER_TRIGGER'],
+              triggers: [ON_APPLY_FILTER],
             },
           ],
         },

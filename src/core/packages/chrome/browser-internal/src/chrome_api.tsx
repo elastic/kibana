@@ -8,7 +8,7 @@
  */
 
 import React, { type ReactNode } from 'react';
-import { map } from 'rxjs';
+import { distinctUntilChanged, map, shareReplay } from 'rxjs';
 import type { RecentlyAccessedService } from '@kbn/recently-accessed';
 import { SidebarServiceProvider } from '@kbn/core-chrome-sidebar-context';
 import type { SidebarStart } from '@kbn/core-chrome-sidebar';
@@ -65,6 +65,12 @@ export function createChromeApi({
     }
   };
 
+  const hasHeaderBanner$ = state.headerBanner.$.pipe(
+    map((banner) => Boolean(banner)),
+    distinctUntilChanged(),
+    shareReplay(1)
+  );
+
   const project: InternalChromeStart['project'] = {
     setHome: (homeHref) => {
       validateProjectStyle();
@@ -118,6 +124,7 @@ export function createChromeApi({
 
     // Breadcrumbs
     getBreadcrumbs$: () => state.breadcrumbs.classic.$,
+    getBreadcrumbs: () => state.breadcrumbs.classic.get(),
     setBreadcrumbs: (newBreadcrumbs, params = {}) => {
       state.breadcrumbs.classic.set(newBreadcrumbs);
       if (params.project) {
@@ -156,7 +163,7 @@ export function createChromeApi({
 
     // Header Banner
     setHeaderBanner: state.headerBanner.set,
-    hasHeaderBanner$: () => state.headerBanner.$.pipe(map((banner) => Boolean(banner))),
+    hasHeaderBanner$: () => hasHeaderBanner$,
 
     // Chrome Style
     setChromeStyle: state.style.setChromeStyle,

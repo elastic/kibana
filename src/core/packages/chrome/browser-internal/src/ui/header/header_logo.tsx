@@ -50,7 +50,7 @@ export function HeaderLogo({ href, navigateToApp, loadingCount$, customBranding$
     }),
     logoMarkCss: css({
       marginLeft: euiTheme.size.s,
-      fill: euiTheme.colors.ghost,
+      fill: euiTheme.colors.plainLight,
     }),
   };
 

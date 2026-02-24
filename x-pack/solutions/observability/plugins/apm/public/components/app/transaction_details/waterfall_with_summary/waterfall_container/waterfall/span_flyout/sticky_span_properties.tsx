@@ -15,7 +15,10 @@ import {
   SPAN_NAME,
   TRANSACTION_NAME,
 } from '../../../../../../../../common/es_fields/apm';
-import { getNextEnvironmentUrlParam } from '../../../../../../../../common/environment_filter_values';
+import {
+  ENVIRONMENT_NOT_DEFINED,
+  getNextEnvironmentUrlParam,
+} from '../../../../../../../../common/environment_filter_values';
 import { NOT_AVAILABLE_LABEL } from '../../../../../../../../common/i18n';
 import type { Span } from '../../../../../../../../typings/es_schemas/ui/span';
 import type { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
@@ -51,7 +54,7 @@ export function StickySpanProperties({ span, transaction }: Props) {
   const trackEvent = useUiTracker();
 
   const nextEnvironment = getNextEnvironmentUrlParam({
-    requestedEnvironment: transaction?.service.environment,
+    requestedEnvironment: transaction?.service?.environment ?? ENVIRONMENT_NOT_DEFINED.value,
     currentEnvironmentUrlParam: environment,
   });
 

@@ -137,7 +137,7 @@ evaluate.describe(
 
     evaluate(
       'retrieves docs for baseline queries',
-      async ({ phoenixClient, esClient, connector }) => {
+      async ({ executorClient, esClient, connector }) => {
         const logger = createNoopLogger();
         const searchService = new SearchService({
           logger,
@@ -188,7 +188,7 @@ evaluate.describe(
           ],
         };
 
-        await phoenixClient.runExperiment(
+        await executorClient.runExperiment(
           {
             dataset,
             task: async (

@@ -75,7 +75,7 @@ import {
   ADD_CANVAS_ELEMENT_TRIGGER,
   ADD_PANEL_TRIGGER,
   AGG_BASED_VISUALIZATION_TRIGGER,
-  CONTEXT_MENU_TRIGGER,
+  ON_OPEN_PANEL_MENU,
   DASHBOARD_VISUALIZATION_PANEL_TRIGGER,
   IN_APP_EMBEDDABLE_EDIT_TRIGGER,
   VISUALIZE_EDITOR_TRIGGER,
@@ -735,7 +735,7 @@ export class LensPlugin {
     const discoverLocator = startDependencies.share?.url.locators.get('DISCOVER_APP_LOCATOR');
     if (discoverLocator) {
       startDependencies.uiActions.addTriggerActionAsync(
-        CONTEXT_MENU_TRIGGER,
+        ON_OPEN_PANEL_MENU,
         'ACTION_OPEN_IN_DISCOVER',
         async () => {
           const { createOpenInDiscoverAction } = await import('./async_services');

@@ -93,14 +93,14 @@ export function shouldColorByTerms(
 export function getContrastColor(
   color: string,
   isDarkTheme: boolean,
-  darkTextProp: 'euiColorInk' | 'euiTextColor' = 'euiColorInk',
-  lightTextProp: 'euiColorGhost' | 'euiTextColor' = 'euiColorGhost'
+  darkTextProp: 'euiColorTextInk' | 'euiTextColor' = 'euiColorTextInk',
+  lightTextProp: 'euiColorTextGhost' | 'euiTextColor' = 'euiColorTextGhost'
 ) {
-  // when in light theme both text color and colorInk are dark and the choice
+  // when in light theme both text color and textInk are dark and the choice
   // may depends on the specific context.
-  const darkColor = isDarkTheme ? euiDarkVars.euiColorInk : euiLightVars[darkTextProp];
+  const darkColor = isDarkTheme ? euiDarkVars.euiColorTextInk : euiLightVars[darkTextProp];
   // Same thing for light color in dark theme
-  const lightColor = isDarkTheme ? euiDarkVars[lightTextProp] : euiLightVars.euiColorGhost;
+  const lightColor = isDarkTheme ? euiDarkVars[lightTextProp] : euiLightVars.euiColorTextGhost;
   const backgroundColor = isDarkTheme
     ? euiDarkVars.euiPageBackgroundColor
     : euiLightVars.euiPageBackgroundColor;

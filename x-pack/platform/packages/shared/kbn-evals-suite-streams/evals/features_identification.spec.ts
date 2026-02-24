@@ -351,16 +351,16 @@ evaluate.describe(
     async function runFeatureIdentificationExperiment(
       dataset: FeatureIdentificationEvaluationDataset,
       {
-        phoenixClient,
+        executorClient,
         inferenceClient,
         logger,
         evaluators,
       }: Pick<
         StreamsEvaluationWorkerFixtures,
-        'phoenixClient' | 'inferenceClient' | 'logger' | 'evaluators'
+        'executorClient' | 'inferenceClient' | 'logger' | 'evaluators'
       >
     ) {
-      await phoenixClient.runExperiment(
+      await executorClient.runExperiment(
         {
           dataset,
           concurrency: 1,
@@ -402,11 +402,11 @@ evaluate.describe(
       evaluate.describe(dataset.name, () => {
         evaluate(
           'feature identification',
-          async ({ evaluators, inferenceClient, logger, phoenixClient }) => {
+          async ({ evaluators, inferenceClient, logger, executorClient }) => {
             await runFeatureIdentificationExperiment(dataset, {
               inferenceClient,
               logger,
-              phoenixClient,
+              executorClient,
               evaluators,
             });
           }

@@ -447,7 +447,7 @@
             "label": "flow",
             "description": [],
             "signature": [
-              "\"reindex\" | \"all\" | \"readonly\""
+              "\"reindex\" | \"readonly\" | \"all\""
             ],
             "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/types.ts",
             "lineNumber": 35,

@@ -23,7 +23,7 @@ function createConditionNoopProcessor({
 }: {
   conditionId: string;
   condition: Condition;
-}): IngestProcessorContainer[] {
+}): NonNullable<IngestProcessorContainer>[] {
   let painlessIf: string;
   try {
     painlessIf = conditionToPainless(condition);
@@ -68,8 +68,8 @@ function buildSimulationProcessorsFromSteps({
 }: {
   steps: StreamlangStep[];
   parentCondition?: Condition;
-}): IngestProcessorContainer[] {
-  const processors: IngestProcessorContainer[] = [];
+}): NonNullable<IngestProcessorContainer>[] {
+  const processors: NonNullable<IngestProcessorContainer>[] = [];
 
   for (const step of steps) {
     if (isConditionBlock(step)) {
@@ -113,7 +113,7 @@ function buildSimulationProcessorsFromSteps({
     const transpiled = transpileIngestPipeline(
       { steps: [stepWithCombinedWhere] } as StreamlangDSL,
       { ignoreMalformed: true, traceCustomIdentifiers: true }
-    ).processors;
+    ).processors as NonNullable<IngestProcessorContainer>[];
 
     processors.push(...transpiled);
   }
@@ -136,6 +136,6 @@ function buildSimulationProcessorsFromSteps({
  */
 export function buildSimulationProcessorsWithConditionNoops(
   processing: StreamlangDSL
-): IngestProcessorContainer[] {
+): NonNullable<IngestProcessorContainer>[] {
   return buildSimulationProcessorsFromSteps({ steps: processing.steps });
 }

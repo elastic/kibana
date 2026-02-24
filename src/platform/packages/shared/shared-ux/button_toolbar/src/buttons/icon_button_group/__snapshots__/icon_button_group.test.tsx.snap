@@ -27,7 +27,7 @@ exports[`<IconButtonGroup /> is rendered 1`] = `
           data-euiicon-type="visText"
         />
         <span
-          class="eui-textTruncate emotion-euiButtonGroupButton__iconOnly"
+          class="eui-textTruncate css-qv1h57-m-euiButtonGroupButton__iconOnly"
           data-text="Text"
         >
           Text

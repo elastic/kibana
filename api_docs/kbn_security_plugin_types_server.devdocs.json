@@ -32,7 +32,7 @@
           "<Readonly<{ base?: string[] | undefined; feature?: Record<string, string[]> | undefined; } & { spaces: string[] | \"*\"[]; }>[]>"
         ],
         "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/role_schema.ts",
-        "lineNumber": 278,
+        "lineNumber": 286,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -48,7 +48,7 @@
               "() => { global: string[]; space: string[]; }"
             ],
             "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/role_schema.ts",
-            "lineNumber": 279,
+            "lineNumber": 287,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -202,7 +202,7 @@
           "<Record<string, Readonly<{} & { kibana: Readonly<{ base?: string[] | undefined; feature?: Record<string, string[]> | undefined; } & { spaces: string[] | \"*\"[]; }>[]; elasticsearch: Readonly<{ cluster?: string[] | undefined; indices?: Readonly<{ query?: string | undefined; field_security?: Record<\"grant\" | \"except\", string[]> | undefined; allow_restricted_indices?: boolean | undefined; } & { names: string[]; privileges: string[]; }>[] | undefined; remote_cluster?: Readonly<{} & { privileges: string[]; clusters: string[]; }>[] | undefined; remote_indices?: Readonly<{ query?: string | undefined; field_security?: Record<\"grant\" | \"except\", string[]> | undefined; allow_restricted_indices?: boolean | undefined; } & { names: string[]; privileges: string[]; clusters: string[]; }>[] | undefined; run_as?: string[] | undefined; } & {}>; }>>>; }>"
         ],
         "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
-        "lineNumber": 107,
+        "lineNumber": 111,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -218,7 +218,7 @@
               "() => { global: string[]; space: string[]; }"
             ],
             "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
-            "lineNumber": 108,
+            "lineNumber": 112,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -652,6 +652,10 @@
                 "path": "x-pack/platform/plugins/shared/alerting/server/lib/has_required_privilege_granted_in_all_spaces.ts"
               },
               {
+                "plugin": "reporting",
+                "path": "x-pack/platform/plugins/private/reporting/server/core.ts"
+              },
+              {
                 "plugin": "telemetry",
                 "path": "src/platform/plugins/shared/telemetry/server/routes/telemetry_usage_stats.ts"
               },
@@ -710,10 +714,6 @@
               {
                 "plugin": "fleet",
                 "path": "x-pack/platform/plugins/shared/fleet/server/routes/app/index.ts"
-              },
-              {
-                "plugin": "reporting",
-                "path": "x-pack/platform/plugins/private/reporting/server/core.ts"
               },
               {
                 "plugin": "profiling",
@@ -2846,6 +2846,54 @@
       },
       {
         "parentPluginId": "@kbn/security-plugin-types-server",
+        "id": "def-server.ClientAuthentication",
+        "type": "Interface",
+        "tags": [],
+        "label": "ClientAuthentication",
+        "description": [
+          "\nRepresents client authentication information. Don't confuse with the authentication information which represents an\nauthenticated user. For example, if Kibana is making a request to Elasticsearch on behalf of an authenticated user, the\nclient authentication information would represent Kibana's own authentication information (e.g. shared secret), not the\nend user's."
+        ],
+        "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authentication/client_authentication.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-plugin-types-server",
+            "id": "def-server.ClientAuthentication.scheme",
+            "type": "string",
+            "tags": [],
+            "label": "scheme",
+            "description": [
+              "\nThe authentication scheme. Currently only `SharedSecret` scheme is supported."
+            ],
+            "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authentication/client_authentication.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-server",
+            "id": "def-server.ClientAuthentication.value",
+            "type": "string",
+            "tags": [],
+            "label": "value",
+            "description": [
+              "\nThe authentication credentials for the scheme."
+            ],
+            "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authentication/client_authentication.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-plugin-types-server",
         "id": "def-server.CreateCrossClusterAPIKeyParams",
         "type": "Interface",
         "tags": [],
@@ -3296,7 +3344,7 @@
           "\nParameters for granting a UIAM API key."
         ],
         "path": "src/core/packages/security/server/src/authentication/api_keys/uiam/uiam_api_keys.ts",
-        "lineNumber": 56,
+        "lineNumber": 43,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3311,7 +3359,7 @@
               "\nName for the API key"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/uiam/uiam_api_keys.ts",
-            "lineNumber": 60,
+            "lineNumber": 47,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3329,7 +3377,7 @@
               "string | undefined"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/uiam/uiam_api_keys.ts",
-            "lineNumber": 65,
+            "lineNumber": 52,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3600,7 +3648,7 @@
           "\nParameters for invalidating a UIAM API key."
         ],
         "path": "src/core/packages/security/server/src/authentication/api_keys/uiam/uiam_api_keys.ts",
-        "lineNumber": 71,
+        "lineNumber": 58,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3615,7 +3663,7 @@
               "\nID of the API key to invalidate"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/uiam/uiam_api_keys.ts",
-            "lineNumber": 75,
+            "lineNumber": 62,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4373,20 +4421,20 @@
                 "path": "src/platform/plugins/shared/files/server/file_service/file_service_factory.ts"
               },
               {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/services/audit_logging.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/services/audit_logging.ts"
-              },
-              {
                 "plugin": "ruleRegistry",
                 "path": "x-pack/platform/plugins/shared/rule_registry/server/alert_data_client/alerts_client_factory.ts"
               },
               {
                 "plugin": "ruleRegistry",
                 "path": "x-pack/platform/plugins/shared/rule_registry/server/search_strategy/search_strategy.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/audit_logging.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/audit_logging.ts"
               },
               {
                 "plugin": "cases",
@@ -4488,10 +4536,6 @@
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/platform/plugins/shared/alerting/server/rules_client_factory.ts"
-              },
-              {
-                "plugin": "alerting",
                 "path": "x-pack/platform/plugins/shared/alerting/server/invalidate_pending_api_keys/task.ts"
               },
               {
@@ -4501,6 +4545,10 @@
               {
                 "plugin": "alerting",
                 "path": "x-pack/platform/plugins/shared/alerting/server/plugin.ts"
+              },
+              {
+                "plugin": "observabilityAIAssistant",
+                "path": "x-pack/platform/plugins/shared/observability_ai_assistant/server/service/index.ts"
               },
               {
                 "plugin": "fleet",
@@ -4517,10 +4565,6 @@
               {
                 "plugin": "fleet",
                 "path": "x-pack/platform/plugins/shared/fleet/server/routes/setup/handlers.ts"
-              },
-              {
-                "plugin": "observabilityAIAssistant",
-                "path": "x-pack/platform/plugins/shared/observability_ai_assistant/server/service/index.ts"
               },
               {
                 "plugin": "reindexService",
@@ -4649,6 +4693,10 @@
               {
                 "plugin": "cloudSecurityPosture",
                 "path": "x-pack/solutions/security/plugins/cloud_security_posture/server/routes/setup_routes.ts"
+              },
+              {
+                "plugin": "entityStore",
+                "path": "x-pack/solutions/security/plugins/entity_store/server/plugin.ts"
               }
             ]
           },
@@ -4845,7 +4893,7 @@
           "\nInterface for managing UIAM-specific API key operations.\nThis interface handles API key grants and invalidations through the UIAM service."
         ],
         "path": "src/core/packages/security/server/src/authentication/api_keys/uiam/uiam_api_keys.ts",
-        "lineNumber": 15,
+        "lineNumber": 14,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -4871,7 +4919,7 @@
               " | null>"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/uiam/uiam_api_keys.ts",
-            "lineNumber": 20,
+            "lineNumber": 19,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -4890,7 +4938,7 @@
                   "<unknown, unknown, unknown, any>"
                 ],
                 "path": "src/core/packages/security/server/src/authentication/api_keys/uiam/uiam_api_keys.ts",
-                "lineNumber": 28,
+                "lineNumber": 27,
                 "columnNumber": 9,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4909,7 +4957,7 @@
                   "GrantUiamAPIKeyParams"
                 ],
                 "path": "src/core/packages/security/server/src/authentication/api_keys/uiam/uiam_api_keys.ts",
-                "lineNumber": 28,
+                "lineNumber": 27,
                 "columnNumber": 33,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4941,7 +4989,7 @@
               " | null>"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/uiam/uiam_api_keys.ts",
-            "lineNumber": 30,
+            "lineNumber": 29,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -4960,7 +5008,7 @@
                   "<unknown, unknown, unknown, any>"
                 ],
                 "path": "src/core/packages/security/server/src/authentication/api_keys/uiam/uiam_api_keys.ts",
-                "lineNumber": 39,
+                "lineNumber": 38,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4979,7 +5027,7 @@
                   "InvalidateUiamAPIKeyParams"
                 ],
                 "path": "src/core/packages/security/server/src/authentication/api_keys/uiam/uiam_api_keys.ts",
-                "lineNumber": 40,
+                "lineNumber": 39,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4988,50 +5036,6 @@
             ],
             "returnComment": [
               "A promise that resolves to an InvalidateAPIKeyResult object indicating the result of the operation, or null if the license is not enabled."
-            ]
-          },
-          {
-            "parentPluginId": "@kbn/security-plugin-types-server",
-            "id": "def-server.UiamAPIKeysType.getScopedClusterClientWithApiKey",
-            "type": "Function",
-            "tags": [],
-            "label": "getScopedClusterClientWithApiKey",
-            "description": [
-              "\nCreates a scoped Elasticsearch client authenticated with an API key.\n\nThis method creates a scoped cluster client that authenticates using the provided API key.\nIf the API key is a UIAM credential (starts with 'essu_'), it adds the appropriate UIAM\nauthentication headers.\n"
-            ],
-            "signature": [
-              "(apiKey: string) => ",
-              "IScopedClusterClient",
-              " | null"
-            ],
-            "path": "src/core/packages/security/server/src/authentication/api_keys/uiam/uiam_api_keys.ts",
-            "lineNumber": 43,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/security-plugin-types-server",
-                "id": "def-server.UiamAPIKeysType.getScopedClusterClientWithApiKey.$1",
-                "type": "string",
-                "tags": [],
-                "label": "apiKey",
-                "description": [
-                  "The API key secret."
-                ],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/core/packages/security/server/src/authentication/api_keys/uiam/uiam_api_keys.ts",
-                "lineNumber": 53,
-                "columnNumber": 36,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": [
-              "A scoped cluster client configured with API key authentication"
             ]
           }
         ],
@@ -6369,7 +6373,7 @@
           "<Readonly<{} & { names: string[]; }>[] | undefined>; }>; }>"
         ],
         "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
-        "lineNumber": 78,
+        "lineNumber": 80,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -6433,7 +6437,7 @@
           "<Readonly<{} & {}> | undefined>; }>"
         ],
         "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
-        "lineNumber": 68,
+        "lineNumber": 70,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

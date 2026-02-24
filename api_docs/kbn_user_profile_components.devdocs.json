@@ -1048,7 +1048,7 @@
                 "label": "node",
                 "description": [],
                 "signature": [
-                  "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+                  "React.ReactNode"
                 ],
                 "path": "src/platform/packages/shared/react/kibana_mount/to_mount_point.tsx",
                 "lineNumber": 39,
@@ -1116,7 +1116,7 @@
               "\nTitle of the popover"
             ],
             "signature": [
-              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+              "React.ReactNode"
             ],
             "path": "src/platform/packages/shared/kbn-user-profile-components/src/user_profiles_popover.tsx",
             "lineNumber": 23,
@@ -1173,7 +1173,7 @@
           },
           "<Option> extends Pick<",
           "EuiSelectableProps",
-          "<{}>, \"height\" | \"data-test-subj\" | \"errorMessage\" | \"singleSelection\" | \"loadingMessage\" | \"noMatchesMessage\" | \"emptyMessage\">"
+          "<{}>, \"data-test-subj\" | \"errorMessage\" | \"height\" | \"singleSelection\" | \"loadingMessage\" | \"noMatchesMessage\" | \"emptyMessage\">"
         ],
         "path": "src/platform/packages/shared/kbn-user-profile-components/src/user_profiles_selectable.tsx",
         "lineNumber": 35,
@@ -1477,7 +1477,7 @@
               "\nLabel for clear button."
             ],
             "signature": [
-              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+              "React.ReactNode"
             ],
             "path": "src/platform/packages/shared/kbn-user-profile-components/src/user_profiles_selectable.tsx",
             "lineNumber": 110,
@@ -1521,11 +1521,11 @@
               "EuiSelectableLIOption",
               "<{}>> & ",
               "CommonProps",
-              " & { label: string; searchableLabel?: string | undefined; key?: string | undefined; checked?: \"mixed\" | \"off\" | \"on\" | undefined; disabled?: boolean | undefined; isGroupLabel?: false | undefined; prepend?: React.ReactNode; append?: React.ReactNode; ref?: ((optionIndex: number) => void) | undefined; id?: undefined; data?: { [key: string]: any; } | undefined; textWrap?: \"wrap\" | \"truncate\" | undefined; truncationProps?: Partial<Omit<",
+              " & { label: string; searchableLabel?: string | undefined; key?: string | undefined; checked?: \"on\" | \"off\" | \"mixed\" | undefined; disabled?: boolean | undefined; isGroupLabel?: false | undefined; prepend?: React.ReactNode; append?: React.ReactNode; ref?: ((optionIndex: number) => void) | undefined; id?: undefined; data?: { [key: string]: any; } | undefined; textWrap?: \"wrap\" | \"truncate\" | undefined; truncationProps?: Partial<Omit<",
               "EuiTextTruncateProps",
               ", \"text\" | \"children\">> | undefined; toolTipContent?: React.ReactNode; toolTipProps?: Partial<Omit<",
               "EuiToolTipProps",
-              ", \"children\" | \"content\">> | undefined; } & React.HTMLAttributes<HTMLLIElement>) | (",
+              ", \"content\" | \"children\">> | undefined; } & React.HTMLAttributes<HTMLLIElement>) | (",
               "DisambiguateSet",
               "<",
               "EuiSelectableLIOption",

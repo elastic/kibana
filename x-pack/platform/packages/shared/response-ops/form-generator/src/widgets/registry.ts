@@ -8,7 +8,8 @@
 import { z } from '@kbn/zod/v4';
 import type { BaseWidgetProps } from './types';
 import { WidgetType } from './types';
-import { addMeta, getMeta } from '../schema_connector_metadata';
+import { getMeta as defaultGetMeta, setMeta as defaultSetMeta } from '../schema_connector_metadata';
+import type { GetMetaFn, SetMetaFn } from '../meta_types';
 import { TextWidget } from './components/text_widget';
 import { SelectWidget } from './components/select_widget';
 import { PasswordWidget } from './components/password_widget';
@@ -25,7 +26,12 @@ const WIDGET_REGISTRY = {
   [WidgetType.Object]: ObjectWidget,
 };
 
-const getDefaultWidgetForSchema = (schema: z.ZodType) => {
+interface MetaFunctionsParam {
+  getMeta: GetMetaFn;
+  setMeta: SetMetaFn;
+}
+
+const getDefaultWidgetForSchema = (schema: z.ZodType, { getMeta, setMeta }: MetaFunctionsParam) => {
   const meta = getMeta(schema);
   if (meta.hidden) {
     return WidgetType.Hidden;
@@ -42,7 +48,7 @@ const getDefaultWidgetForSchema = (schema: z.ZodType) => {
   } else if (schema instanceof z.ZodObject) {
     return WidgetType.Object;
   } else if (schema instanceof z.ZodLiteral) {
-    addMeta(schema, { disabled: true });
+    setMeta(schema, { ...getMeta(schema), disabled: true });
     return WidgetType.Text;
   } else if (schema instanceof z.ZodURL) {
     return WidgetType.Text;
@@ -51,15 +57,16 @@ const getDefaultWidgetForSchema = (schema: z.ZodType) => {
   return undefined;
 };
 
-function getWidgetType(schema: z.ZodType): WidgetType | undefined {
-  const { widget } = getMeta(schema);
-  return (widget as WidgetType) || getDefaultWidgetForSchema(schema);
+function getWidgetType(schema: z.ZodType, meta: MetaFunctionsParam): WidgetType | undefined {
+  const { widget } = meta.getMeta(schema);
+  return (widget as WidgetType) || getDefaultWidgetForSchema(schema, meta);
 }
 
 export function getWidgetComponent(
-  schema: z.ZodType
+  schema: z.ZodType,
+  meta: MetaFunctionsParam = { getMeta: defaultGetMeta, setMeta: defaultSetMeta }
 ): React.FC<BaseWidgetProps<z.ZodType, unknown, unknown>> {
-  const widgetType = getWidgetType(schema);
+  const widgetType = getWidgetType(schema, meta);
 
   if (!widgetType) {
     throw new Error(

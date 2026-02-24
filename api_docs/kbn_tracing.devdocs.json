@@ -330,7 +330,7 @@
           "BatchSpanProcessor"
         ],
         "path": "src/platform/packages/shared/kbn-tracing/src/otlp_span_processor.ts",
-        "lineNumber": 16,
+        "lineNumber": 18,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -346,7 +346,7 @@
               "any"
             ],
             "path": "src/platform/packages/shared/kbn-tracing/src/otlp_span_processor.ts",
-            "lineNumber": 17,
+            "lineNumber": 19,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -368,7 +368,7 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-tracing/src/otlp_span_processor.ts",
-                "lineNumber": 17,
+                "lineNumber": 19,
                 "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -382,10 +382,10 @@
                 "label": "protocol",
                 "description": [],
                 "signature": [
-                  "\"http\" | \"grpc\""
+                  "\"http\" | \"proto\" | \"grpc\""
                 ],
                 "path": "src/platform/packages/shared/kbn-tracing/src/otlp_span_processor.ts",
-                "lineNumber": 17,
+                "lineNumber": 19,
                 "columnNumber": 41,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -422,7 +422,7 @@
           "; }) => void"
         ],
         "path": "src/platform/packages/shared/kbn-tracing/src/init_tracing.ts",
-        "lineNumber": 21,
+        "lineNumber": 26,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -435,7 +435,7 @@
             "label": "{\n  resource,\n  tracingConfig,\n}",
             "description": [],
             "path": "src/platform/packages/shared/kbn-tracing/src/init_tracing.ts",
-            "lineNumber": 29,
+            "lineNumber": 34,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
@@ -451,7 +451,7 @@
                   "Resource"
                 ],
                 "path": "src/platform/packages/shared/kbn-tracing/src/init_tracing.ts",
-                "lineNumber": 30,
+                "lineNumber": 35,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -473,7 +473,7 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-tracing/src/init_tracing.ts",
-                "lineNumber": 31,
+                "lineNumber": 36,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false

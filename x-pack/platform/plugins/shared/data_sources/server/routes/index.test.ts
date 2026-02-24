@@ -625,6 +625,76 @@ describe('registerRoutes', () => {
         },
       });
     });
+
+    it('should roll back the connector when creation fails and stack_connector_id is provided', async () => {
+      const mockDataSource = {
+        stackConnector: { type: '.mcp' },
+        generateWorkflows: jest.fn(),
+      };
+
+      mockDataCatalog.getCatalog.mockReturnValue({
+        get: jest.fn().mockReturnValue(mockDataSource),
+      });
+
+      mockCreateDataSourceAndRelatedResources.mockRejectedValue(
+        new Error(
+          'an error occurred while running the action: Streamable HTTP error: missing required Authorization header'
+        )
+      );
+      mockActionsClient.delete.mockResolvedValue(undefined);
+
+      registerRoutes(dependencies);
+
+      const routeHandler = mockRouter.post.mock.calls[0][1];
+      const mockRequest = httpServerMock.createKibanaRequest({
+        body: {
+          name: 'My GitHub Data Source',
+          type: 'github',
+          stack_connector_id: 'connector-123',
+        },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(createMockContext(), mockRequest, mockResponse);
+
+      expect(mockActionsClient.delete).toHaveBeenCalledWith({ id: 'connector-123' });
+      expect(mockResponse.customError).toHaveBeenCalledWith({
+        statusCode: 500,
+        body: {
+          message:
+            'Failed to create data source: an error occurred while running the action: Streamable HTTP error: missing required Authorization header',
+        },
+      });
+    });
+
+    it('should not attempt rollback when creation fails without stack_connector_id', async () => {
+      const mockDataSource = {
+        stackConnector: { type: '.bearer_connector' },
+        generateWorkflows: jest.fn(),
+      };
+
+      mockDataCatalog.getCatalog.mockReturnValue({
+        get: jest.fn().mockReturnValue(mockDataSource),
+      });
+
+      mockCreateDataSourceAndRelatedResources.mockRejectedValue(new Error('Creation failed'));
+
+      registerRoutes(dependencies);
+
+      const routeHandler = mockRouter.post.mock.calls[0][1];
+      const mockRequest = httpServerMock.createKibanaRequest({
+        body: {
+          name: 'Test Data Source',
+          type: 'notion',
+          credentials: 'token',
+        },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(createMockContext(), mockRequest, mockResponse);
+
+      expect(mockActionsClient.delete).not.toHaveBeenCalled();
+    });
   });
 
   describe('DELETE /api/data_sources', () => {

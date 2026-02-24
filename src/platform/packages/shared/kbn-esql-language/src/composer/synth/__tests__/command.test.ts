@@ -10,6 +10,7 @@
 import { BasicPrettyPrinter } from '../../../pretty_print';
 import { cmd } from '../command';
 import { exp } from '../expression';
+import type { SynthTemplateHole } from '../types';
 
 test('can create a WHERE command', () => {
   const node = cmd`WHERE coordinates.lat >= 12.123123`;
@@ -24,8 +25,8 @@ test('throws on invalid command', () => {
 
 test('throws on invalid hole', () => {
   expect(() => cmd`WHERE field == ${123}`).not.toThrow();
-  expect(() => cmd`WHERE field == ${{} as any}`).toThrow();
-  expect(() => cmd`WHERE field == ${new Date() as any}`).toThrow();
+  expect(() => cmd`WHERE field == ${{} as SynthTemplateHole}`).toThrow();
+  expect(() => cmd`WHERE field == ${new Date() as unknown as SynthTemplateHole}`).toThrow();
 });
 
 test('can create a ROW command', () => {

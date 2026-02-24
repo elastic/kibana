@@ -56,16 +56,22 @@ const searchContainerStyles = ({ euiTheme }: UseEuiTheme) => css`
   width: ${euiTheme.base * 25}px;
 `;
 
+const DEFAULT_GROUP_BY = GroupByOptions.Model;
+
 const initializeGroupBy = (): GroupByOptions => {
   const params = new URLSearchParams(window.location.search);
-  const groupByParam = params.get('groupBy') ?? '';
+  const groupByParam = (params.get('groupBy') ?? '').toLowerCase();
 
   switch (groupByParam) {
     case GroupByOptions.None:
       return GroupByOptions.None;
+    case GroupByOptions.Service:
+      return GroupByOptions.Service;
     case GroupByOptions.Model:
-    default:
       return GroupByOptions.Model;
+    default:
+      // Fallback to default group by setting
+      return DEFAULT_GROUP_BY;
   }
 };
 
@@ -233,12 +239,7 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <GroupBySelect
-                  value={groupBy ?? GroupByOptions.None}
-                  onChange={(value) => {
-                    setGroupBy(value ?? GroupByOptions.None);
-                  }}
-                />
+                <GroupBySelect value={groupBy} onChange={setGroupBy} />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>

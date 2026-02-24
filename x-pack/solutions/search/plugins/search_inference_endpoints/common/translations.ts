@@ -131,3 +131,24 @@ export const GROUP_BY_MODELS = i18n.translate(
     defaultMessage: 'Models',
   }
 );
+
+export const GROUP_BY_SERVICE = i18n.translate(
+  'xpack.searchInferenceEndpoints.groupBy.options.service.label',
+  {
+    defaultMessage: 'Service',
+  }
+);
+
+export const TOKEN_BASED_BILLING_DESCRIPTION = i18n.translate(
+  'xpack.searchInferenceEndpoints.elastic.description',
+  {
+    defaultMessage: 'Runs on GPUs (token-based billing)',
+  }
+);
+
+export const RESOURCE_BASED_BILLING_DESCRIPTION = i18n.translate(
+  'xpack.searchInferenceEndpoints.elasticsearch.description',
+  {
+    defaultMessage: 'Runs on ML Nodes (resource-based billing)',
+  }
+);

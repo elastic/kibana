@@ -107,7 +107,7 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted renders Bread
               class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
             >
               <span
-                class="eui-textTruncate euiButtonEmpty__text"
+                class="eui-textTruncate euiButtonEmpty__text css-13ifi6d-m"
               >
                 selected image
               </span>
@@ -227,7 +227,7 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted should displa
               class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
             >
               <span
-                class="eui-textTruncate euiButtonEmpty__text"
+                class="eui-textTruncate euiButtonEmpty__text css-13ifi6d-m"
               >
                 selected image
               </span>
@@ -369,7 +369,7 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted should render
               class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
             >
               <span
-                class="eui-textTruncate euiButtonEmpty__text"
+                class="eui-textTruncate euiButtonEmpty__text css-13ifi6d-m"
               >
                 selected image
               </span>
@@ -467,7 +467,7 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted should render
               class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
             >
               <span
-                class="eui-textTruncate euiButtonEmpty__text"
+                class="eui-textTruncate euiButtonEmpty__text css-13ifi6d-m"
               >
                 selected image
               </span>

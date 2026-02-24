@@ -67,10 +67,10 @@ export const PackagePoliciesPage = ({
   const packageInstallStatus = getPackageInstallStatus(name);
 
   const { isPackagePolicyUpgradable } = useIsPackagePolicyUpgradable();
-  const { isAgentlessIntegration } = useAgentless();
+  const { getAgentlessStatusForPackage } = useAgentless();
   const canHaveAgentlessPolicies = useMemo(
-    () => isAgentlessIntegration(packageInfo),
-    [isAgentlessIntegration, packageInfo]
+    () => getAgentlessStatusForPackage(packageInfo).isAgentless,
+    [getAgentlessStatusForPackage, packageInfo]
   );
 
   // Helper function to map raw policies data for consumption by the table

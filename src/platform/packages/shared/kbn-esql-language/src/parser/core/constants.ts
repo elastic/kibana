@@ -9,8 +9,8 @@
 
 import { Token } from 'antlr4';
 
-export const DEFAULT_CHANNEL: number = +(Token as any).DEFAULT_CHANNEL;
-export const HIDDEN_CHANNEL: number = +(Token as any).HIDDEN_CHANNEL;
+export const DEFAULT_CHANNEL: number = +Token.DEFAULT_CHANNEL;
+export const HIDDEN_CHANNEL: number = +Token.HIDDEN_CHANNEL;
 
 export const HEADER_COMMANDS = new Set<string>(['SET']);
 export const SOURCE_COMMANDS = new Set<string>(['FROM', 'ROW', 'SHOW', 'TS', 'EXPLAIN', 'PROMQL']);
