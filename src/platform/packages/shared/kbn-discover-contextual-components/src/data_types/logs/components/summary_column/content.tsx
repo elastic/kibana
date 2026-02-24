@@ -17,11 +17,10 @@ import {
   LOG_LEVEL_REGEX,
   OTEL_MESSAGE_FIELD,
 } from '@kbn/discover-utils';
-import { MESSAGE_FIELD } from '@kbn/discover-utils';
+import { MESSAGE_FIELD, escapeAndPreserveHighlightTags } from '@kbn/discover-utils';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { makeHighContrastColor, useEuiTheme } from '@elastic/eui';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
-import { escape } from 'lodash';
 import { formatJsonDocumentForContent } from './utils';
 
 interface ContentProps extends DataGridCellValueElementProps {
@@ -81,7 +80,7 @@ const getHighlightedMessage = (
     // Use EUI's makeHighContrastColor utility to calculate appropriate text color
     // This function automatically determines the best contrasting color based on WCAG standards
     const textColor = makeHighContrastColor(
-      isDarkTheme ? euiTheme.colors.ghost : euiTheme.colors.ink, // preferred foreground color
+      isDarkTheme ? euiTheme.colors.textGhost : euiTheme.colors.textInk, // preferred foreground color
       4.5 // WCAG AA contrast ratio (default in EUI)
     )(bgColor);
 
@@ -105,7 +104,10 @@ export const Content = ({
   const isDarkTheme = useKibanaIsDarkMode();
 
   const highlightedValue = useMemo(
-    () => (value ? getHighlightedMessage(escape(value), row, euiTheme, isDarkTheme) : value),
+    () =>
+      value
+        ? getHighlightedMessage(escapeAndPreserveHighlightTags(value), row, euiTheme, isDarkTheme)
+        : value,
     [value, row, euiTheme, isDarkTheme]
   );
 
