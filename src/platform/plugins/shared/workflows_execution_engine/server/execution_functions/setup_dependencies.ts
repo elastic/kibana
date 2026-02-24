@@ -9,6 +9,7 @@
 
 import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
 import type { EsWorkflowExecution, WorkflowSettings } from '@kbn/workflows';
+import { WorkflowRepository } from '@kbn/workflows';
 import { WorkflowGraph } from '@kbn/workflows/graph';
 import type { WorkflowsExecutionEngineConfig } from '../config';
 
@@ -18,6 +19,7 @@ import { UrlValidator } from '../lib/url_validator';
 import { StepExecutionRepository } from '../repositories/step_execution_repository';
 import { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import { NodesFactory } from '../step/nodes_factory';
+import type { WorkflowsExecutionEnginePluginStart } from '../types';
 import { StepExecutionRuntimeFactory } from '../workflow_context_manager/step_execution_runtime_factory';
 import type { ContextDependencies } from '../workflow_context_manager/types';
 import { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
@@ -36,7 +38,8 @@ export async function setupDependencies(
   logger: Logger,
   config: WorkflowsExecutionEngineConfig,
   dependencies: ContextDependencies,
-  fakeRequest?: KibanaRequest
+  fakeRequest?: KibanaRequest,
+  workflowsExecutionEngine?: WorkflowsExecutionEnginePluginStart
 ) {
   const { coreStart, actions, taskManager } = dependencies;
 
@@ -45,6 +48,10 @@ export async function setupDependencies(
 
   const workflowExecutionRepository = new WorkflowExecutionRepository(internalEsClient);
   const stepExecutionRepository = new StepExecutionRepository(internalEsClient);
+  const workflowRepository = new WorkflowRepository({
+    esClient: internalEsClient,
+    logger,
+  });
 
   const workflowExecution = await workflowExecutionRepository.getWorkflowExecutionById(
     workflowRunId,
@@ -117,6 +124,16 @@ export async function setupDependencies(
     allowedHosts: config.http.allowedHosts,
   });
 
+  const enhancedDependencies: ContextDependencies = {
+    ...dependencies,
+    workflowRepository,
+    workflowExecutionRepository,
+    stepExecutionRepository,
+    workflowsExecutionEngine,
+    spaceId,
+    request: fakeRequest,
+  };
+
   const stepExecutionRuntimeFactory = new StepExecutionRuntimeFactory({
     workflowExecutionGraph,
     workflowExecutionState,
@@ -124,7 +141,7 @@ export async function setupDependencies(
     esClient,
     fakeRequest,
     coreStart,
-    dependencies,
+    dependencies: enhancedDependencies,
   });
 
   const nodesFactory = new NodesFactory(
@@ -134,7 +151,7 @@ export async function setupDependencies(
     urlValidator,
     workflowExecutionGraph,
     stepExecutionRuntimeFactory,
-    dependencies
+    enhancedDependencies
   );
 
   return {

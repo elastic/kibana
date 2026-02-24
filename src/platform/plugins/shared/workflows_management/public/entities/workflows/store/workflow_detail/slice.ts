@@ -14,6 +14,12 @@ import { addLoadingStateReducers, initialLoadingState } from './utils/loading_st
 import { findStepByLine } from './utils/step_finder';
 import { getWorkflowZodSchema } from '../../../../../common/schema';
 import { triggerSchemas } from '../../../../trigger_schemas';
+import type { WorkflowsResponse } from '../../model/types';
+
+export const initialWorkflowsState: WorkflowsResponse = {
+  workflows: {},
+  totalWorkflows: 0,
+};
 
 // Initial state
 const initialState: WorkflowDetailState = {
@@ -25,6 +31,7 @@ const initialState: WorkflowDetailState = {
   computedExecution: undefined,
   activeTab: undefined,
   connectors: undefined,
+  workflows: initialWorkflowsState,
   schema: getWorkflowZodSchema({}, triggerSchemas.getRegisteredIds()),
   cursorPosition: undefined,
   focusedStepId: undefined,
@@ -78,6 +85,9 @@ const workflowDetailSlice = createSlice({
     },
     setConnectors: (state, action: { payload: WorkflowDetailState['connectors'] }) => {
       state.connectors = action.payload;
+    },
+    setWorkflows: (state, action: { payload: WorkflowDetailState['workflows'] }) => {
+      state.workflows = action.payload;
     },
     setExecution: (state, action: { payload: WorkflowExecutionDto | undefined }) => {
       state.execution = action.payload;
@@ -153,6 +163,7 @@ export const {
   setHighlightedStepId,
   setIsTestModalOpen,
   setConnectors,
+  setWorkflows,
   setExecution,
   clearExecution,
   setActiveTab,
