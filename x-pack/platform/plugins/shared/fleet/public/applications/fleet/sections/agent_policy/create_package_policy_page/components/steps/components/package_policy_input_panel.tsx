@@ -196,6 +196,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
           defaultMessage: 'This input is deprecated.',
         });
 
+    // Check if any vars or streams in this input are deprecated
     const hasDeprecatedFeatures = useMemo(() => {
       const inputVarsDeprecated = (packageInput.vars || []).some((v) => !!v.deprecated);
       const streamVarsDeprecated = packageInputStreams.some(
@@ -205,6 +206,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
       return inputVarsDeprecated || streamVarsDeprecated || someStreamsDeprecated;
     }, [packageInput.vars, packageInputStreams]);
 
+    // On new installations, hide deprecated inputs or inputs that have all streams deprecated
     if (!isEditPage && (isDeprecatedInput || allStreamsDeprecated)) {
       return null;
     }
@@ -284,6 +286,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
           )}
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="s" alignItems="center">
+              {/* Bubble up deprecation warning when collapsed and input has deprecated features */}
               {!isShowingStreams && !isDeprecatedInput && hasDeprecatedFeatures ? (
                 <EuiFlexItem grow={false}>
                   <span data-test-subj="PackagePolicy.InputStreamConfig.deprecatedFeaturesIcon">
