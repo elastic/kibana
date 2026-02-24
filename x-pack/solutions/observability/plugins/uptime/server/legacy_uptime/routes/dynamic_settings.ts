@@ -37,12 +37,12 @@ export const DynamicSettingsSchema = schema.object({
   heartbeatIndices: schema.maybe(schema.string({ minLength: 1 })),
   certAgeThreshold: schema.maybe(schema.number({ min: 1, validate: validateInteger })),
   certExpirationThreshold: schema.maybe(schema.number({ min: 1, validate: validateInteger })),
-  defaultConnectors: schema.maybe(schema.arrayOf(schema.string())),
+  defaultConnectors: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
   defaultEmail: schema.maybe(
     schema.object({
-      to: schema.arrayOf(schema.string()),
-      cc: schema.maybe(schema.arrayOf(schema.string())),
-      bcc: schema.maybe(schema.arrayOf(schema.string())),
+      to: schema.arrayOf(schema.string(), { maxSize: 50 }),
+      cc: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 50 })),
+      bcc: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 50 })),
     })
   ),
 });
