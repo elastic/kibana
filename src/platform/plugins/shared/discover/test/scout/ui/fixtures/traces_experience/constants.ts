@@ -7,13 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PluginInitializerContext } from '@kbn/core/server';
-import type { EsqlServerPluginSetup } from './plugin';
-
-export const plugin = async (initContext: PluginInitializerContext) => {
-  const { EsqlServerPlugin } = await import('./plugin');
-  return new EsqlServerPlugin(initContext);
+export const TRACES = {
+  DEFAULT_START_TIME: '2025-01-01T00:00:00.000Z',
+  DEFAULT_END_TIME: '2025-01-01T00:01:00.000Z',
+  ESQL_QUERY: 'FROM traces-apm*',
+  DATA_VIEW_NAME: 'traces-apm*',
+  KBN_ARCHIVE:
+    'src/platform/plugins/shared/discover/test/scout/ui/fixtures/traces_experience/kbn_archives/traces_data_view.json',
 };
-
-export type { EsqlServerPluginSetup as PluginSetup };
-export { buildServerESQLCallbacks } from './services/build_server_esql_callbacks';
