@@ -8,6 +8,7 @@
  */
 
 import { ExecutionStatus } from '@kbn/workflows';
+import { FakeConnectors } from '../mocks/actions_plugin.mock';
 import { WorkflowRunFixture } from '../workflow_run_fixture';
 
 describe('workflow.fail step', () => {
@@ -102,17 +103,13 @@ steps:
     type: workflow.fail
     if: "\${{ inputs.amount < 0 }}"
     with:
-      message: "Amount cannot be negative: \${{inputs.amount}}"
+      message: "Amount cannot be negative: {{inputs.amount}}"
 
   - name: process
-    type: .slack
+    type: slack
+    connector-id: ${FakeConnectors.slack1.name}
     with:
-      connector-id: \${connectors.byName.Slack.id}
-      subAction: postMessage
-      subActionParams:
-        channels:
-          - general
-        text: "Processing amount: \${{inputs.amount}}"
+      message: "Processing amount: {{inputs.amount}}"
         `,
         inputs: { amount: -10 },
       });
@@ -147,14 +144,10 @@ steps:
       message: "Amount cannot be negative"
 
   - name: process
-    type: .slack
+    type: slack
+    connector-id: ${FakeConnectors.slack1.name}
     with:
-      connector-id: \${connectors.byName.Slack.id}
-      subAction: postMessage
-      subActionParams:
-        channels:
-          - general
-        text: "Processing amount: \${{inputs.amount}}"
+      message: "Processing amount: {{inputs.amount}}"
         `,
         inputs: { amount: 100 },
       });
@@ -189,7 +182,7 @@ steps:
   - name: check_permission
     type: workflow.fail
     with:
-      message: "User '\${{inputs.username}}' with role '\${{inputs.role}}' is not authorized"
+      message: "User '{{inputs.username}}' with role '{{inputs.role}}' is not authorized"
         `,
         inputs: { username: 'john_doe', role: 'viewer' },
       });
@@ -210,19 +203,15 @@ steps:
         workflowYaml: `
 steps:
   - name: check_value
-    type: .slack
+    type: slack
+    connector-id: ${FakeConnectors.slack1.name}
     with:
-      connector-id: \${connectors.byName.Slack.id}
-      subAction: postMessage
-      subActionParams:
-        channels:
-          - general
-        text: "Checking"
+      message: "Checking"
 
   - name: fail_with_context
     type: workflow.fail
     with:
-      message: "Step check_value failed with status: \${{steps.check_value.output.status}}"
+      message: "Step check_value failed with status: {{steps.check_value.output.text}}"
         `,
       });
 
@@ -242,14 +231,10 @@ steps:
         workflowYaml: `
 steps:
   - name: first_step
-    type: .slack
+    type: slack
+    connector-id: ${FakeConnectors.slack1.name}
     with:
-      connector-id: \${connectors.byName.Slack.id}
-      subAction: postMessage
-      subActionParams:
-        channels:
-          - general
-        text: "First"
+      message: "First"
 
   - name: fail_step
     type: workflow.fail
@@ -257,14 +242,10 @@ steps:
       message: "Stopping workflow"
 
   - name: should_not_run
-    type: .slack
+    type: slack
+    connector-id: ${FakeConnectors.slack2.name}
     with:
-      connector-id: \${connectors.byName.Slack.id}
-      subAction: postMessage
-      subActionParams:
-        channels:
-          - general
-        text: "Should not execute"
+      message: "Should not execute"
         `,
       });
 
@@ -298,7 +279,7 @@ steps:
   - name: fail_with_invalid_expression
     type: workflow.fail
     with:
-      message: "Error: \${{steps.nonexistent.output}}"
+      message: "Error: {{steps.nonexistent.output}}"
         `,
       });
 

@@ -173,7 +173,7 @@ export class WorkflowOutputStepImpl implements NodeImplementation {
           // Complete the step successfully with the output values (cancellation is not an error)
           this.stepExecutionRuntime.finishStep(outputValues);
           break;
-        case 'failed':
+        case 'failed': {
           executionStatus = ExecutionStatus.FAILED;
           outcome = 'failure';
           // For workflow.fail steps, use the message from the output if available
@@ -193,9 +193,12 @@ export class WorkflowOutputStepImpl implements NodeImplementation {
             },
           });
 
-          // Fail the step with the error (failStep() calls updateWorkflowExecution({ error }), so workflow-level error is set there)
-          this.stepExecutionRuntime.failStep(failureError);
+          // The step itself completes successfully (it did its job),
+          // but the workflow is marked as failed via setWorkflowError
+          this.stepExecutionRuntime.finishStep(outputValues);
+          this.workflowExecutionRuntime.setWorkflowError(failureError);
           break;
+        }
         default:
           executionStatus = ExecutionStatus.COMPLETED;
           outcome = 'success';

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { ExecutionStatus } from '@kbn/workflows';
 import { ExecutionError } from '@kbn/workflows/server';
 import type { WorkflowExecutionLoopParams } from './types';
 import type { NodeWithErrorCatching } from '../step/node_implementation';
@@ -71,10 +72,13 @@ export async function catchError(
     }
 
     if (failedStepExecutionRuntime.stepExecutionExists()) {
-      failedStepExecutionRuntime.failStep(
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        new ExecutionError(params.workflowExecutionState.getWorkflowExecution().error!)
-      );
+      const stepExecution = failedStepExecutionRuntime.stepExecution;
+      if (stepExecution?.status !== ExecutionStatus.COMPLETED) {
+        failedStepExecutionRuntime.failStep(
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          new ExecutionError(params.workflowExecutionState.getWorkflowExecution().error!)
+        );
+      }
     }
 
     while (

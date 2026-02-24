@@ -8,6 +8,7 @@
  */
 
 import { ExecutionStatus } from '@kbn/workflows';
+import { FakeConnectors } from '../mocks/actions_plugin.mock';
 import { WorkflowRunFixture } from '../workflow_run_fixture';
 
 describe('workflow.output step', () => {
@@ -82,14 +83,10 @@ outputs:
     type: string
 steps:
   - name: first_step
-    type: .slack
+    type: slack
+    connector-id: ${FakeConnectors.slack1.name}
     with:
-      connector-id: \${connectors.byName.Slack.id}
-      subAction: postMessage
-      subActionParams:
-        channels:
-          - general
-        text: "First"
+      message: "First"
 
   - name: out_step
     type: workflow.output
@@ -97,14 +94,10 @@ steps:
       value: "early exit"
 
   - name: should_not_run
-    type: .slack
+    type: slack
+    connector-id: ${FakeConnectors.slack2.name}
     with:
-      connector-id: \${connectors.byName.Slack.id}
-      subAction: postMessage
-      subActionParams:
-        channels:
-          - general
-        text: "Should not execute"
+      message: "Should not execute"
         `,
       });
 
@@ -149,12 +142,12 @@ steps:
   - name: calc
     type: data.set
     with:
-      count: "\${{ inputs.x + inputs.y }}"
+      count: "\${{ inputs.x | plus: inputs.y }}"
 
   - name: emit
     type: workflow.output
     with:
-      summary: "Sum is \${{ steps.calc.output.count }}"
+      summary: "Sum is {{ steps.calc.output.count }}"
       total: "\${{ steps.calc.output.count }}"
         `,
         inputs: { x: 3, y: 7 },
@@ -187,7 +180,7 @@ inputs:
 steps:
   - name: branch
     type: if
-    if: "\${{ inputs.fail }}"
+    condition: "\${{ inputs.fail }}"
     steps:
       - name: fail_out
         type: workflow.output
@@ -224,7 +217,7 @@ inputs:
 steps:
   - name: branch
     type: if
-    if: "\${{ inputs.useElse }}"
+    condition: "\${{ inputs.useElse }}"
     steps:
       - name: then_out
         type: workflow.output
