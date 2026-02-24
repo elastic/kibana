@@ -29,7 +29,7 @@ import type { APMEventClient } from '../../../lib/helpers/create_es_client/creat
 
 const CHUNK_SIZE = 10;
 
-interface FetchLatencyCorrelationsParams extends CommonCorrelationsQueryParams {
+interface FetchCorrelationsParams extends CommonCorrelationsQueryParams {
   apmEventClient: APMEventClient;
   correlationType: CorrelationType;
   fieldCandidates?: string[];
@@ -43,7 +43,7 @@ interface FetchLatencyCorrelationsParams extends CommonCorrelationsQueryParams {
   };
 }
 
-export async function fetchLatencyCorrelations({
+export async function fetchCorrelations({
   apmEventClient,
   correlationType,
   fieldCandidates: providedFieldCandidates,
@@ -56,7 +56,7 @@ export async function fetchLatencyCorrelations({
   durationMin: providedDurationMin,
   durationMax: providedDurationMax,
   config,
-}: FetchLatencyCorrelationsParams): Promise<CorrelationsResponse> {
+}: FetchCorrelationsParams): Promise<CorrelationsResponse> {
   const chartType =
     correlationType === CorrelationType.ERROR_RATE
       ? LatencyDistributionChartType.failedTransactionsCorrelations

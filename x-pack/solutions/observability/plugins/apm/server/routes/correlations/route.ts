@@ -31,7 +31,7 @@ import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import type { TopValuesStats } from '../../../common/correlations/field_stats_types';
 import { CorrelationType } from '../../../common/correlations/types';
 import type { CorrelationsResponse } from '../../../common/correlations/types';
-import { fetchLatencyCorrelations } from './queries/fetch_latency_correlation';
+import { fetchCorrelations } from './queries/fetch_correlations';
 import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
 
 const INVALID_LICENSE = i18n.translate('xpack.apm.correlations.license.text', {
@@ -411,7 +411,7 @@ const unifiedCorrelationsRoute = createApmServerRoute({
       end,
     });
 
-    return fetchLatencyCorrelations({
+    return fetchCorrelations({
       apmEventClient,
       correlationType,
       start,
