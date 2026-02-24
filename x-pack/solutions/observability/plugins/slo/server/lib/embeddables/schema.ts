@@ -33,14 +33,16 @@ const SingleOverviewCustomSchema = schema.object({
   overview_mode: schema.literal('single'),
 });
 
+const groupBySchema = schema.oneOf([
+  schema.literal('slo.tags'),
+  schema.literal('status'),
+  schema.literal('slo.indicator.type'),
+]);
+
 const GroupOverviewCustomSchema = schema.object({
   group_filters: schema.maybe(
     schema.object({
-      group_by: schema.oneOf([
-        schema.literal('slo.tags'),
-        schema.literal('status'),
-        schema.literal('slo.indicator.type'),
-      ]),
+      group_by: groupBySchema,
       groups: schema.maybe(schema.arrayOf(schema.string())),
       filters: schema.maybe(schema.arrayOf(asCodeFilterSchema)),
       kql_query: schema.maybe(schema.string()),
@@ -81,8 +83,10 @@ export const getOverviewEmbeddableSchema = (getDrilldownsSchema: GetDrilldownsSc
   );
 };
 
+export type GroupBy = TypeOf<typeof groupBySchema>;
 export type SingleOverviewCustomState = TypeOf<typeof SingleOverviewCustomSchema>;
 export type GroupOverviewCustomState = TypeOf<typeof GroupOverviewCustomSchema>;
+export type GroupFilters = Required<GroupOverviewCustomState>['group_filters'];
 export type OverviewEmbeddableState = TypeOf<ReturnType<typeof getOverviewEmbeddableSchema>>;
 export type SingleOverviewEmbeddableState = TypeOf<
   ReturnType<typeof getSingleOverviewEmbeddableSchema>

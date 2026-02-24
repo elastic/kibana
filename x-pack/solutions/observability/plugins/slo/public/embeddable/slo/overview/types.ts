@@ -18,21 +18,12 @@ import type {
   SerializedTitles,
 } from '@kbn/presentation-publishing';
 
-import type { AsCodeFilter } from '@kbn/as-code-filters-schema';
 import type {
   SingleOverviewCustomState,
   GroupOverviewCustomState,
 } from '../../../../common/embeddables/overview/types';
 
 export type OverviewMode = 'single' | 'groups';
-export type GroupBy = 'slo.tags' | 'status' | 'slo.indicator.type';
-export interface GroupFilters {
-  group_by: GroupBy;
-  groups?: string[];
-  /** As-code filters for persistence; convert to Filter[] with toStoredFilters for UI (e.g. SearchBar). */
-  filters?: AsCodeFilter[];
-  kql_query?: string;
-}
 
 export interface SloConfigurationProps {
   overview_mode?: OverviewMode;

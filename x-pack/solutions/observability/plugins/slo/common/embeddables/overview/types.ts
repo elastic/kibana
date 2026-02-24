@@ -7,6 +7,8 @@
 
 /** Re-exported from server (derived from schemas there) */
 export type {
+  GroupBy,
+  GroupFilters,
   SingleOverviewCustomState,
   GroupOverviewCustomState,
 } from '../../../server/lib/embeddables/schema';

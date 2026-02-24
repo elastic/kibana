@@ -26,10 +26,11 @@ import type { SearchSLODefinitionItem } from '@kbn/slo-schema';
 import { SloDefinitionSelector } from './slo_definition_selector';
 import { SloInstanceSelector } from './slo_instance_selector';
 
-import type { GroupFilters, OverviewMode } from './types';
+import type { OverviewMode } from './types';
 import { SloGroupFilters } from './group_view/slo_group_filters';
 import { OverviewModeSelector } from './overview_mode_selector';
 import type {
+  GroupFilters,
   GroupOverviewCustomState,
   SingleOverviewCustomState,
 } from '../../../../common/embeddables/overview/types';
