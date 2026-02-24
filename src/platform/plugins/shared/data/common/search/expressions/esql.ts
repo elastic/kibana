@@ -385,6 +385,8 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
                     type === 'date'
                       ? {
                           appliedTimeRange,
+                          // https://github.com/elastic/kibana/issues/215314
+                          // TODO: add interval/timezone params for date histogram required to render the visualization correctly
                           params: {},
                           indexPattern,
                           sourceField: name,
