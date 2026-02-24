@@ -1,6 +1,6 @@
 {
-  "lastModified": "2026-02-20T05:08:57.413Z",
-  "sha1": "9d41d790dc11f8be23ae2c08586d448702ef9b67",
+  "lastModified": "2026-02-24T05:09:57.770Z",
+  "sha1": "b37fbc020d0e0eb51980c3e0795cdc289673c709",
   "tests": [
     {
       "id": "5e91b4cbd08e25e-f2cd2d3cdc77643",
@@ -418,13 +418,15 @@
       "title": "Service overview - header filters Filtering by transaction type - changes url when selecting different value",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/header_filters.spec.ts",
-        "line": 16,
-        "column": 7
+        "line": 20,
+        "column": 9
       }
     },
     {
@@ -432,13 +434,15 @@
       "title": "Service overview - header filters Filtering by searchbar - filters by transaction.name",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/header_filters.spec.ts",
-        "line": 45,
-        "column": 7
+        "line": 49,
+        "column": 9
       }
     },
     {
@@ -836,7 +840,7 @@
     {
       "id": "7cd820d5686e9ff-112d7e5de3e69a6",
       "title": "Span links shows span links for producer-internal-only Span A",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -845,14 +849,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/span_links.spec.ts",
-        "line": 26,
+        "line": 31,
         "column": 9
       }
     },
     {
       "id": "7cd820d5686e9ff-db2064659e35788",
       "title": "Span links shows span links for producer-external-only Span B",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -868,7 +872,7 @@
     {
       "id": "7cd820d5686e9ff-0bed012a7fd6b0e",
       "title": "Span links shows span links flyout details on producer-consumer Transaction C",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -877,14 +881,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/span_links.spec.ts",
-        "line": 112,
+        "line": 107,
         "column": 9
       }
     },
     {
       "id": "7cd820d5686e9ff-0f5d62a5eefef8d",
       "title": "Span links shows span links flyout details on consumer-multiple Transaction D",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -893,14 +897,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/span_links.spec.ts",
-        "line": 142,
+        "line": 140,
         "column": 9
       }
     },
     {
       "id": "7cd820d5686e9ff-db3108594a7760a",
       "title": "Span links shows span links flyout details on consumer-multiple Span E",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -909,7 +913,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/span_links.spec.ts",
-        "line": 172,
+        "line": 173,
         "column": 9
       }
     },
