@@ -7,6 +7,9 @@
 
 import { z } from '@kbn/zod';
 
+/** default NER model **/
+
+export const NER_MODEL_ID = 'elastic__distilbert-base-uncased-finetuned-conll03-english';
 /**
  * Entity classes produced by NER models (CoNLL-03 standard classes).
  * These are the only classes a NER model may emit; used to filter model output.

@@ -39,6 +39,7 @@ export {
   ANONYMIZATION_ENTITY_CLASSES,
   NER_ENTITY_CLASSES,
   TOKEN_SOURCE_TYPES,
+  NER_MODEL_ID,
 } from './src/schemas';
 
 export type { AnonymizationEntityClass, NerEntityClass, TokenSourceType } from './src/schemas';
