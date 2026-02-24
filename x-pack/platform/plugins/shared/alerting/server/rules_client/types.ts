@@ -174,7 +174,7 @@ export interface BulkOperationError {
   };
 }
 
-export type BulkAction = 'DELETE' | 'ENABLE' | 'DISABLE' | 'GET';
+export type BulkAction = 'DELETE' | 'ENABLE' | 'DISABLE' | 'GET' | 'BULK_EDIT' | 'BULK_EDIT_PARAMS';
 
 export interface RuleBulkOperationAggregation {
   alertTypeId: {
