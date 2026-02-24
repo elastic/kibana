@@ -40,6 +40,10 @@ const SCRIPT_INSTRUCTION_LABEL = i18n.translate(
   'xpack.securitySolution.endpointRunscriptScriptSelector.instructions',
   { defaultMessage: 'Instructions' }
 );
+export const NO_SCRIPTS_FOUND_MESSAGE = i18n.translate(
+  'xpack.securitySolution.endpointRunscriptScriptSelector.noScriptsFound',
+  { defaultMessage: 'No scripts found' }
+);
 
 export interface EndpointRunscriptScriptSelectorProps {
   selectedScriptId: string | undefined;
@@ -85,12 +89,7 @@ export const EndpointRunscriptScriptSelector = memo<EndpointRunscriptScriptSelec
       if (isFetched && data?.length === 0) {
         return (
           <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
-            <EuiFlexItem>
-              {i18n.translate(
-                'xpack.securitySolution.endpointRunscriptScriptSelector.noScriptsFound',
-                { defaultMessage: 'No scripts found' }
-              )}
-            </EuiFlexItem>
+            <EuiFlexItem>{NO_SCRIPTS_FOUND_MESSAGE}</EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiIcon type="warning" aria-hidden={true} />
             </EuiFlexItem>
