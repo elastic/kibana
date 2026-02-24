@@ -32,7 +32,6 @@ interface FieldCapabilitiesParams {
   includeEmptyFields?: boolean;
   runtimeMappings?: MappingRuntimeFields;
   abortSignal?: AbortSignal;
-  projectRouting?: string;
 }
 
 /**
@@ -59,7 +58,6 @@ export async function getFieldCapabilities(params: FieldCapabilitiesParams) {
     includeEmptyFields,
     runtimeMappings,
     abortSignal,
-    projectRouting,
   } = params;
 
   const excludedTiers = await uiSettingsClient?.get<string>(DATA_VIEWS_FIELDS_EXCLUDED_TIERS);
@@ -74,7 +72,6 @@ export async function getFieldCapabilities(params: FieldCapabilitiesParams) {
     includeEmptyFields,
     runtimeMappings,
     abortSignal,
-    projectRouting,
   });
   const fieldCapsArr = readFieldCapsResponse(esFieldCaps.body);
   const fieldsFromFieldCapsByName = keyBy(fieldCapsArr, 'name');

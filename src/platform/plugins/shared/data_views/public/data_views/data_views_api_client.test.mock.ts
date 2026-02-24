@@ -15,4 +15,3 @@ export const { http } = setup((injectedMetadata) => {
 
 export const indexFilterMock = { bool: { must: [{ match_all: {} }] } };
 export const runtimeMappingsMock = { myField: { type: 'keyword' } };
-export const projectRoutingMock = 'test-project-id';

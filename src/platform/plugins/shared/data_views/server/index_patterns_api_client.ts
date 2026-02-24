@@ -36,7 +36,6 @@ export class IndexPatternsApiServer implements IDataViewsApiClient {
     abortSignal,
     runtimeMappings,
     allowHidden,
-    projectRouting,
   }: GetFieldsOptions) {
     const indexPatterns = new IndexPatternsFetcher(this.esClient, {
       uiSettingsClient: this.uiSettingsClient,
@@ -55,7 +54,6 @@ export class IndexPatternsApiServer implements IDataViewsApiClient {
         abortSignal,
         runtimeMappings,
         allowHidden,
-        projectRouting,
       })
       .catch((err) => {
         if (

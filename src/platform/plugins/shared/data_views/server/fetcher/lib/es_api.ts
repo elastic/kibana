@@ -52,7 +52,6 @@ interface FieldCapsApiParams {
   includeEmptyFields?: boolean;
   runtimeMappings?: MappingRuntimeFields;
   abortSignal?: AbortSignal;
-  projectRouting?: string;
 }
 
 /**
@@ -82,7 +81,6 @@ export async function callFieldCapsApi(params: FieldCapsApiParams) {
     includeEmptyFields,
     runtimeMappings,
     abortSignal,
-    projectRouting,
   } = params;
   try {
     return await callCluster.fieldCaps(
@@ -95,7 +93,6 @@ export async function callFieldCapsApi(params: FieldCapsApiParams) {
         types: fieldTypes,
         include_empty_fields: includeEmptyFields ?? true,
         runtime_mappings: runtimeMappings,
-        ...(projectRouting ? { project_routing: projectRouting } : {}),
         ...fieldCapsOptions,
       },
       { meta: true, signal: abortSignal }

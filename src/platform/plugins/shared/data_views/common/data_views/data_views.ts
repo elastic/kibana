@@ -662,7 +662,6 @@ export class DataViewsService {
       indexFilter: options.indexFilter,
       allowHidden: options.allowHidden,
       forceRefresh: options.forceRefresh,
-      projectRouting: options.projectRouting,
     });
   };
 
