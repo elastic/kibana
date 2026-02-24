@@ -39,7 +39,7 @@ export interface SLODetailsFlyoutProps {
   hideFooter?: boolean;
   session?: 'start' | 'inherit';
   initialTabId?: SloTabId;
-  origin?: string;
+  location?: string;
 }
 
 const TITLES = {
@@ -63,7 +63,7 @@ export default function SLODetailsFlyout({
   hideFooter = false,
   session = 'inherit',
   initialTabId,
-  origin = 'unknown',
+  location = 'unknown',
 }: SLODetailsFlyoutProps) {
   const { share } = useKibana().services;
   const { telemetry } = usePluginContext();
@@ -84,8 +84,8 @@ export default function SLODetailsFlyout({
   });
 
   useEffect(() => {
-    telemetry?.reportSloDetailsFlyoutViewed({ origin, sloId });
-  }, [telemetry, origin, sloId]);
+    telemetry?.reportSloDetailsFlyoutViewed({ location, sloId });
+  }, [telemetry, location, sloId]);
 
   const isNotFound = isSuccess && !slo;
 
@@ -113,7 +113,7 @@ export default function SLODetailsFlyout({
           data-test-subj="sloDetailsFlyoutTitleLink"
           target="_blank"
           onClick={() =>
-            telemetry?.reportSloDetailsFlyoutOpenInAppClicked({ origin, sloId: slo.id })
+            telemetry?.reportSloDetailsFlyoutOpenInAppClicked({ location, sloId: slo.id })
           }
         >
           {slo.name}
@@ -121,7 +121,7 @@ export default function SLODetailsFlyout({
       );
     }
     return slo?.name ?? '';
-  }, [isError, isNotFound, isLoading, slo, sloDetailsUrl, origin, telemetry]);
+  }, [isError, isNotFound, isLoading, slo, sloDetailsUrl, location, telemetry]);
 
   const renderBody = useCallback(() => {
     if (isError) {
@@ -173,8 +173,8 @@ export default function SLODetailsFlyout({
       return null;
     }
 
-    return <SloOverviewDetailsContent slo={slo} initialTabId={initialTabId} origin={origin} />;
-  }, [sloId, isError, isNotFound, isLoading, slo, initialTabId, origin]);
+    return <SloOverviewDetailsContent slo={slo} initialTabId={initialTabId} location={location} />;
+  }, [sloId, isError, isNotFound, isLoading, slo, initialTabId, location]);
 
   const renderFooter = useCallback(() => {
     if (isError || isNotFound || isLoading || !slo) {
@@ -192,11 +192,11 @@ export default function SLODetailsFlyout({
         slo={slo}
         onClose={onClose}
         onOpenInApp={() =>
-          telemetry?.reportSloDetailsFlyoutOpenInAppClicked({ origin, sloId: slo.id })
+          telemetry?.reportSloDetailsFlyoutOpenInAppClicked({ location, sloId: slo.id })
         }
       />
     );
-  }, [isError, isNotFound, isLoading, slo, onClose, telemetry, origin]);
+  }, [isError, isNotFound, isLoading, slo, onClose, telemetry, location]);
 
   return (
     <EuiFlyout

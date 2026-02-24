@@ -12,23 +12,23 @@ export interface SloTelemetryServiceSetupParams {
 }
 
 export interface SloDetailsFlyoutViewedParams {
-  origin: string;
+  location: string;
   sloId: string;
 }
 
 export interface SloDetailsFlyoutTabChangedParams {
-  origin: string;
+  location: string;
   sloId: string;
   tabId: string;
 }
 
 export interface SloDetailsFlyoutOpenInAppClickedParams {
-  origin: string;
+  location: string;
   sloId: string;
 }
 
 export interface SloCreateFlyoutViewedParams {
-  origin: string;
+  location: string;
 }
 
 export type SloTelemetryEventParams =

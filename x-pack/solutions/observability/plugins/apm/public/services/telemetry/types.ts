@@ -22,40 +22,40 @@ export interface SearchQuerySubmittedParams {
 }
 
 export interface SloOverviewFlyoutViewedParams {
-  origin: string;
+  location: string;
   serviceName: string;
 }
 
 export interface SloOverviewFlyoutServiceNameClickedParams {
-  origin: string;
+  location: string;
   serviceName: string;
 }
 
 export interface SloOverviewFlyoutSloLinkClickedParams {
-  origin: string;
+  location: string;
   serviceName: string;
 }
 
 export interface SloOverviewFlyoutAlertClickedParams {
-  origin: string;
+  location: string;
   serviceName: string;
   sloId: string;
 }
 
 export interface SloOverviewFlyoutSearchQueriedParams {
-  origin: string;
+  location: string;
   serviceName: string;
   searchQuery: string;
 }
 
 export interface SloOverviewFlyoutStatusFilteredParams {
-  origin: string;
+  location: string;
   serviceName: string;
   statuses: string[];
 }
 
 export interface SloOverviewFlyoutSloClickedParams {
-  origin: string;
+  location: string;
   serviceName: string;
   sloId: string;
 }

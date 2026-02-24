@@ -23,19 +23,19 @@ export default function CreateSLOFormFlyout({
   onClose,
   initialValues = {},
   formSettings,
-  origin = 'unknown',
+  location = 'unknown',
 }: {
   onClose: () => void;
   initialValues: RecursivePartial<CreateSLOInput>;
   formSettings?: FormSettings;
-  origin?: string;
+  location?: string;
 }) {
   const { telemetry } = usePluginContext();
   const formInitialValues = transformPartialSLODataToFormState(initialValues);
 
   useEffect(() => {
-    telemetry?.reportSloCreateFlyoutViewed({ origin });
-  }, [telemetry, origin]);
+    telemetry?.reportSloCreateFlyoutViewed({ location });
+  }, [telemetry, location]);
 
   return (
     <EuiFlyout

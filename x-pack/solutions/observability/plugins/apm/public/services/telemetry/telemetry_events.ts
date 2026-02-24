@@ -34,7 +34,7 @@ const searchQuerySubmittedEventType: TelemetryEvent = {
   },
 };
 
-const originSchema = {
+const locationSchema = {
   type: 'keyword' as const,
   _meta: {
     description: 'Where the flyout was opened from (e.g., service_inventory, service_overview)',
@@ -54,7 +54,7 @@ const sloIdSchema = {
 const sloOverviewFlyoutViewedEventType: TelemetryEvent = {
   eventType: TelemetryEventTypes.SLO_OVERVIEW_FLYOUT_VIEWED,
   schema: {
-    origin: originSchema,
+    location: locationSchema,
     serviceName: serviceNameSchema,
   },
 };
@@ -62,7 +62,7 @@ const sloOverviewFlyoutViewedEventType: TelemetryEvent = {
 const sloOverviewFlyoutServiceNameClickedEventType: TelemetryEvent = {
   eventType: TelemetryEventTypes.SLO_OVERVIEW_FLYOUT_SERVICE_NAME_CLICKED,
   schema: {
-    origin: originSchema,
+    location: locationSchema,
     serviceName: serviceNameSchema,
   },
 };
@@ -70,7 +70,7 @@ const sloOverviewFlyoutServiceNameClickedEventType: TelemetryEvent = {
 const sloOverviewFlyoutSloLinkClickedEventType: TelemetryEvent = {
   eventType: TelemetryEventTypes.SLO_OVERVIEW_FLYOUT_SLO_LINK_CLICKED,
   schema: {
-    origin: originSchema,
+    location: locationSchema,
     serviceName: serviceNameSchema,
   },
 };
@@ -78,7 +78,7 @@ const sloOverviewFlyoutSloLinkClickedEventType: TelemetryEvent = {
 const sloOverviewFlyoutAlertClickedEventType: TelemetryEvent = {
   eventType: TelemetryEventTypes.SLO_OVERVIEW_FLYOUT_ALERT_CLICKED,
   schema: {
-    origin: originSchema,
+    location: locationSchema,
     serviceName: serviceNameSchema,
     sloId: sloIdSchema,
   },
@@ -87,7 +87,7 @@ const sloOverviewFlyoutAlertClickedEventType: TelemetryEvent = {
 const sloOverviewFlyoutSearchQueriedEventType: TelemetryEvent = {
   eventType: TelemetryEventTypes.SLO_OVERVIEW_FLYOUT_SEARCH_QUERIED,
   schema: {
-    origin: originSchema,
+    location: locationSchema,
     serviceName: serviceNameSchema,
     searchQuery: {
       type: 'keyword',
@@ -99,7 +99,7 @@ const sloOverviewFlyoutSearchQueriedEventType: TelemetryEvent = {
 const sloOverviewFlyoutStatusFilteredEventType: TelemetryEvent = {
   eventType: TelemetryEventTypes.SLO_OVERVIEW_FLYOUT_STATUS_FILTERED,
   schema: {
-    origin: originSchema,
+    location: locationSchema,
     serviceName: serviceNameSchema,
     statuses: {
       type: 'array',
@@ -116,7 +116,7 @@ const sloOverviewFlyoutStatusFilteredEventType: TelemetryEvent = {
 const sloOverviewFlyoutSloClickedEventType: TelemetryEvent = {
   eventType: TelemetryEventTypes.SLO_OVERVIEW_FLYOUT_SLO_CLICKED,
   schema: {
-    origin: originSchema,
+    location: locationSchema,
     serviceName: serviceNameSchema,
     sloId: sloIdSchema,
   },

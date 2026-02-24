@@ -88,7 +88,7 @@ const STATUS_OPTIONS: Array<{ label: string; value: SloStatusFilter }> = [
 interface Props {
   serviceName: string;
   agentName?: AgentName;
-  origin: string;
+  location: string;
   onClose: () => void;
 }
 
@@ -109,7 +109,7 @@ const STATUS_PRIORITY: Record<string, number> = {
 const SEARCH_DEBOUNCE_MS = 300;
 const ITEMS_PER_PAGE_OPTIONS = [10, 25, 50];
 
-export function SloOverviewFlyout({ serviceName, agentName, origin, onClose }: Props) {
+export function SloOverviewFlyout({ serviceName, agentName, location, onClose }: Props) {
   const flyoutTitleId = useGeneratedHtmlId({ prefix: 'sloOverviewFlyout' });
   const { euiTheme } = useEuiTheme();
   const { services } = useKibana<ApmPluginStartDeps & ApmServices>();
@@ -120,8 +120,8 @@ export function SloOverviewFlyout({ serviceName, agentName, origin, onClose }: P
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
 
   useEffect(() => {
-    telemetry.reportSloOverviewFlyoutViewed({ origin, serviceName });
-  }, [telemetry, origin, serviceName]);
+    telemetry.reportSloOverviewFlyoutViewed({ location, serviceName });
+  }, [telemetry, location, serviceName]);
 
   useDebounce(
     () => {
@@ -129,7 +129,7 @@ export function SloOverviewFlyout({ serviceName, agentName, origin, onClose }: P
       setPage(0);
       if (searchQuery.trim()) {
         telemetry.reportSloOverviewFlyoutSearchQueried({
-          origin,
+          location,
           serviceName,
           searchQuery: searchQuery.trim(),
         });
@@ -202,7 +202,7 @@ export function SloOverviewFlyout({ serviceName, agentName, origin, onClose }: P
   const handleActiveAlertsClick = useCallback(
     (sloItem: SLOWithSummaryResponse) => {
       telemetry.reportSloOverviewFlyoutAlertClicked({
-        origin,
+        location,
         serviceName,
         sloId: sloItem.id,
       });
@@ -214,7 +214,7 @@ export function SloOverviewFlyout({ serviceName, agentName, origin, onClose }: P
         setSelectedSloId(sloItem.id);
       });
     },
-    [telemetry, origin, serviceName]
+    [telemetry, location, serviceName]
   );
 
   const statusCounts = useMemo(() => {
@@ -273,13 +273,13 @@ export function SloOverviewFlyout({ serviceName, agentName, origin, onClose }: P
       setPage(0);
       if (selected.length > 0) {
         telemetry.reportSloOverviewFlyoutStatusFiltered({
-          origin,
+          location,
           serviceName,
           statuses: selected,
         });
       }
     },
-    [telemetry, origin, serviceName]
+    [telemetry, location, serviceName]
   );
 
   const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -289,7 +289,7 @@ export function SloOverviewFlyout({ serviceName, agentName, origin, onClose }: P
   const handleSloClick = useCallback(
     (sloId: string) => {
       telemetry.reportSloOverviewFlyoutSloClicked({
-        origin,
+        location,
         serviceName,
         sloId,
       });
@@ -300,7 +300,7 @@ export function SloOverviewFlyout({ serviceName, agentName, origin, onClose }: P
         setSelectedSloId(sloId);
       });
     },
-    [telemetry, origin, serviceName]
+    [telemetry, location, serviceName]
   );
 
   const handleCloseSloDetails = useCallback(() => {
@@ -337,7 +337,7 @@ export function SloOverviewFlyout({ serviceName, agentName, origin, onClose }: P
         formSettings: {
           allowedIndicatorTypes: [...APM_SLO_INDICATOR_TYPES],
         },
-        origin,
+        location,
       })
     : null;
 
@@ -476,7 +476,7 @@ export function SloOverviewFlyout({ serviceName, agentName, origin, onClose }: P
               target="_blank"
               data-test-subj="sloOverviewFlyoutSloLink"
               onClick={() =>
-                telemetry.reportSloOverviewFlyoutSloLinkClicked({ origin, serviceName })
+                telemetry.reportSloOverviewFlyoutSloLinkClicked({ location, serviceName })
               }
             >
               {flyoutTitle}
@@ -488,7 +488,7 @@ export function SloOverviewFlyout({ serviceName, agentName, origin, onClose }: P
 
         <span
           onClickCapture={() =>
-            telemetry.reportSloOverviewFlyoutServiceNameClicked({ origin, serviceName })
+            telemetry.reportSloOverviewFlyoutServiceNameClicked({ location, serviceName })
           }
         >
           <EuiBadge
@@ -716,7 +716,7 @@ export function SloOverviewFlyout({ serviceName, agentName, origin, onClose }: P
           hideFooter
           session="inherit"
           initialTabId={selectedSloTabId}
-          origin={origin}
+          location={location}
         />
       )}
       {CreateSloFlyout}

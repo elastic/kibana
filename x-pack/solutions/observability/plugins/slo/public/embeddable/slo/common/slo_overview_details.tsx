@@ -38,13 +38,13 @@ import { usePluginContext } from '../../../hooks/use_plugin_context';
 export interface SloOverviewDetailsContentProps {
   slo: SLOWithSummaryResponse;
   initialTabId?: SloTabId;
-  origin?: string;
+  location?: string;
 }
 
 export function SloOverviewDetailsContent({
   slo,
   initialTabId = OVERVIEW_TAB_ID,
-  origin = 'unknown',
+  location = 'unknown',
 }: SloOverviewDetailsContentProps) {
   const { agentBuilder } = useKibana().services;
   const { telemetry } = usePluginContext();
@@ -53,9 +53,9 @@ export function SloOverviewDetailsContent({
   const handleTabChange = useCallback(
     (tabId: SloTabId) => {
       setSelectedTabId(tabId);
-      telemetry?.reportSloDetailsFlyoutTabChanged({ origin, sloId: slo.id, tabId });
+      telemetry?.reportSloDetailsFlyoutTabChanged({ location, sloId: slo.id, tabId });
     },
-    [telemetry, origin, slo.id]
+    [telemetry, location, slo.id]
   );
 
   const { tabs } = useSloDetailsTabs({
