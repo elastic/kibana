@@ -219,9 +219,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
                 <h3
                   data-test-subj="PackagePolicy.InputStreamConfig.title"
                   style={
-                    isDeprecatedInput
-                      ? { color: theme.euiTheme.colors.textSubdued }
-                      : undefined
+                    isDeprecatedInput ? { color: theme.euiTheme.colors.textSubdued } : undefined
                   }
                 >
                   {packageInput.title || packageInput.type}

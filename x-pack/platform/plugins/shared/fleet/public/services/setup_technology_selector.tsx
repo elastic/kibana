@@ -22,15 +22,18 @@ import {
 } from '@elastic/eui';
 
 import { useStartServices } from '../hooks';
+import type { PackageInfo } from '../../common/types';
 import { SetupTechnology } from '../../common/types';
 
 export const SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ = 'setup-technology-selector';
 
 interface SetupTechnologySelectorProps {
   disabled: boolean;
+  packageInfo: PackageInfo;
   onSetupTechnologyChange: (value: SetupTechnology) => void;
   allowedSetupTechnologies?: SetupTechnology[];
   setupTechnology?: SetupTechnology;
+
   isAgentlessDefault?: boolean;
   showBetaBadge?: boolean;
   useDescribedFormGroup?: boolean;
@@ -40,6 +43,7 @@ interface SetupTechnologySelectorProps {
 
 export const SetupTechnologySelector = ({
   disabled,
+  packageInfo,
   allowedSetupTechnologies = [SetupTechnology.AGENT_BASED, SetupTechnology.AGENTLESS],
   setupTechnology,
   onSetupTechnologyChange,
@@ -135,6 +139,7 @@ export const SetupTechnologySelector = ({
                   <FormattedMessage
                     id="xpack.fleet.setupTechnology.radioCardAgentbasedInputDescription"
                     defaultMessage="Deploy Elastic Agent to collect the selected {integrationName} data from your environment. Best if you already run agents or need more control."
+                    values={{ integrationName: packageInfo.title }}
                   />
                 </p>
               </EuiText>
@@ -202,7 +207,7 @@ export const SetupTechnologySelector = ({
                   <FormattedMessage
                     id="xpack.fleet.setupTechnology.radioCardAgentlessInputDescription"
                     defaultMessage="Collect the selected {integrationName} directly without deploying any infrastructure. Best for simple setup and faster onboarding."
-                    values={{ integrationName: 'integration' }}
+                    values={{ integrationName: packageInfo.title }}
                   />
                 </p>
               </EuiText>
@@ -228,7 +233,8 @@ export const SetupTechnologySelector = ({
                 <p>
                   <FormattedMessage
                     id="xpack.fleet.setupTechnology.agentbasedInputDescription"
-                    defaultMessage="Deploy an Elastic Agent into your cloud environment"
+                    defaultMessage="Deploy Elastic Agent to collect the selected {integrationName} from your environment. Best if you already run agents or need more control."
+                    values={{ integrationName: packageInfo.title }}
                   />
                 </p>
               </EuiText>
@@ -280,18 +286,18 @@ export const SetupTechnologySelector = ({
               />
             </h2>
           </EuiTitle>
-          <EuiText size="s" color="subdued">
-            <p>
-              <FormattedMessage
-                id="xpack.fleet.setupTechnology.integrationSubtitle"
-                defaultMessage="How to connect {integrationName} to Elastic."
-                values={{ integrationName: 'your integration' }}
-              />
-            </p>
-          </EuiText>
-          <EuiSpacer size="s" />
         </>
       )}
+      <EuiText size="s" color="subdued">
+        <p>
+          <FormattedMessage
+            id="xpack.fleet.setupTechnology.integrationSubtitle"
+            defaultMessage="How to connect {integrationName} to Elastic."
+            values={{ integrationName: packageInfo.title }}
+          />
+        </p>
+      </EuiText>
+      <EuiSpacer size="s" />
       {selector}
     </>
   );

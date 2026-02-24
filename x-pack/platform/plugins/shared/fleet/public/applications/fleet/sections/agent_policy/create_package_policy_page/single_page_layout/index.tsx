@@ -65,7 +65,7 @@ import {
   ConfirmDeployAgentPolicyModal,
   IncompatibleAgentVersionCallout,
 } from '../../components';
-import { pkgKeyFromPackageInfo } from '../../../../services';
+import { ExperimentalFeaturesService, pkgKeyFromPackageInfo } from '../../../../services';
 
 import type { CreatePackagePolicyParams } from '../types';
 
@@ -472,6 +472,11 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   }
   const { getAgentlessStatusForPackage, isAgentlessDefault } = useAgentless();
   const { isAgentless, isDefaultDeploymentMode } = getAgentlessStatusForPackage(packageInfo);
+  const enableSimplifiedAgentlessUX = ExperimentalFeaturesService.get().enableSimplifiedAgentlessUX;
+
+  const useCheckableCardsForSetupTechnologySelector = useMemo(() => {
+    return enableSimplifiedAgentlessUX && isDefaultDeploymentMode;
+  }, [enableSimplifiedAgentlessUX, isDefaultDeploymentMode]);
 
   const replaceStepConfigurePackagePolicy =
     replaceDefineStepView && packageInfo?.name ? (
@@ -497,23 +502,25 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     ) : undefined;
 
   const setupTechnologySelector = useMemo(() => {
-    if (!addIntegrationFlyoutProps && isAgentless) {
+    if (!addIntegrationFlyoutProps && isAgentless && packageInfo) {
       return (
         <SetupTechnologySelector
           disabled={false}
+          packageInfo={packageInfo}
           allowedSetupTechnologies={allowedSetupTechnologies}
           setupTechnology={selectedSetupTechnology}
           onSetupTechnologyChange={handleSetupTechnologyChange}
           isAgentlessDefault={isDefaultDeploymentMode}
-          // TODO Put this behind a feature flag
           showBetaBadge={!isAgentlessDefault}
-          useCheckableCards={isDefaultDeploymentMode}
-          hideTitle={isDefaultDeploymentMode}
+          useDescribedFormGroup={!useCheckableCardsForSetupTechnologySelector}
+          useCheckableCards={useCheckableCardsForSetupTechnologySelector}
+          hideTitle={useCheckableCardsForSetupTechnologySelector}
         />
       );
     }
     return null;
   }, [
+    useCheckableCardsForSetupTechnologySelector,
     isAgentless,
     isDefaultDeploymentMode,
     addIntegrationFlyoutProps,
@@ -521,6 +528,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     selectedSetupTechnology,
     handleSetupTechnologyChange,
     isAgentlessDefault,
+    packageInfo,
   ]);
 
   const stepConfigurePackagePolicy = useMemo(
@@ -543,7 +551,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
           />
 
           {/* Show SetupTechnologySelector for all agentless integrations, including extension views, if agentless is default display as a separate step  */}
-          {!isDefaultDeploymentMode && setupTechnologySelector}
+          {!useCheckableCardsForSetupTechnologySelector && setupTechnologySelector}
 
           {/* Only show the out-of-box configuration step if a UI extension is NOT registered */}
           {!extensionView && (
@@ -583,12 +591,12 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       validationResults,
       formState,
       extensionView,
-      isDefaultDeploymentMode,
       integrationToEnable,
       isAgentlessSelected,
       handleExtensionViewOnChange,
       varGroupSelections,
       setupTechnologySelector,
+      useCheckableCardsForSetupTechnologySelector,
     ]
   );
 
@@ -617,7 +625,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       headingElement: 'h2',
       status: !pkgName ? 'disabled' : undefined,
     },
-    ...(isAgentlessDefault && setupTechnologySelector
+    ...(useCheckableCardsForSetupTechnologySelector && setupTechnologySelector
       ? [
           {
             title: i18n.translate(

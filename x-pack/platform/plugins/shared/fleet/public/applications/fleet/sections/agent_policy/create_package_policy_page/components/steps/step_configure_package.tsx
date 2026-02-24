@@ -32,7 +32,7 @@ import type {
   RegistryInput,
 } from '../../../../../types';
 import { Loading } from '../../../../../components';
-import { doesPackageHaveIntegrations } from '../../../../../services';
+import { doesPackageHaveIntegrations, ExperimentalFeaturesService } from '../../../../../services';
 
 import type { PackagePolicyValidationResults, VarGroupSelection } from '../../services';
 
@@ -148,13 +148,18 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
                 ): item is {
                   packageInput: RegistryInput;
                   packagePolicyInput: NewPackagePolicyInput;
-                  packageInputStreams: ReturnType<typeof getRegistryStreamWithDataStreamForInputType>;
+                  packageInputStreams: ReturnType<
+                    typeof getRegistryStreamWithDataStreamForInputType
+                  >;
                 } => item !== null
               );
 
             const isSingleInput = isSinglePolicyTemplate && inputsToRender.length === 1;
+            //  Enable simplified agentless UX for single input/datastreams integrations
             const isSingleInputAndStreams =
-              isSingleInput && inputsToRender[0].packagePolicyInput.streams.length <= 1;
+              ExperimentalFeaturesService.get().enableSimplifiedAgentlessUX &&
+              isSingleInput &&
+              inputsToRender[0].packagePolicyInput.streams.length <= 1;
 
             return (
               <React.Fragment key={policyTemplate.name}>
@@ -180,7 +185,6 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
                   </>
                 )}
                 {inputsToRender.map(({ packageInput, packagePolicyInput, packageInputStreams }) => {
-
                   const updatePackagePolicyInput = (
                     updatedInput: Partial<NewPackagePolicyInput>
                   ) => {

@@ -27,6 +27,7 @@ const _allowedExperimentalValues = {
   newBrowseIntegrationUx: false, // When enabled integrations, browse integrations page will use the new UX.
   enableVersionSpecificPolicies: false, // When enabled, version specific policies will be created when packages use agent version conditions
   enableIntegrationInactivityAlerting: false, // When enabled, an inactivity monitoring alerting rule template is created on fresh integration package install.
+  enableSimplifiedAgentlessUX: true, // When enabled, the agentless deployment mode will be simplified for single input/datastreams integrations.
 };
 
 /**
