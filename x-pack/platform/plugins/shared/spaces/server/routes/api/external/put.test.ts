@@ -98,6 +98,7 @@ describe('PUT /api/spaces/space', () => {
   }) => {
     const npreClient: INpreClient = {
       getNpre: jest.fn().mockResolvedValue(options.expression),
+      canGetNpre: jest.fn().mockResolvedValue(false),
       putNpre: jest.fn().mockResolvedValue(undefined),
       deleteNpre: jest.fn().mockResolvedValue(undefined),
       canPutNpre: jest.fn().mockResolvedValue(options.canPut),

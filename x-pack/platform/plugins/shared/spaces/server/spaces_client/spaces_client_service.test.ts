@@ -23,6 +23,7 @@ const createMockCpsStart = (): CPSServerStart => {
   return {
     createNpreClient: jest.fn().mockReturnValue({
       getNpre: jest.fn().mockResolvedValue(undefined),
+      canGetNpre: jest.fn().mockResolvedValue(true),
       putNpre: jest.fn().mockResolvedValue(undefined),
       deleteNpre: jest.fn().mockResolvedValue(undefined),
       canPutNpre: jest.fn().mockResolvedValue(true),

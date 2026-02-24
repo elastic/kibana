@@ -215,6 +215,8 @@ export class SpacesPlugin
           },
           {
             requiredClusterPrivileges: ['cluster:monitor/project_routing/get'],
+            // This will become read_project_routing after it is created in ES
+            // requiredClusterPrivileges: ['read_project_routing'],
             ui: ['read_space_default'],
           },
         ],

@@ -89,9 +89,14 @@ describe('GET space', () => {
     };
   };
 
-  const setupWithCps = async (options: { cpsEnabled: boolean; expression?: string }) => {
+  const setupWithCps = async (options: {
+    cpsEnabled: boolean;
+    expression?: string;
+    canGet?: boolean;
+  }) => {
     const npreClient: INpreClient = {
       getNpre: jest.fn().mockResolvedValue(options.expression),
+      canGetNpre: jest.fn().mockResolvedValue(!!options.canGet),
       putNpre: jest.fn().mockResolvedValue(undefined),
       deleteNpre: jest.fn().mockResolvedValue(undefined),
       canPutNpre: jest.fn().mockResolvedValue(true),
@@ -166,6 +171,7 @@ describe('GET space', () => {
       const { routeHandler, npreClient } = await setupWithCps({
         cpsEnabled: true,
         expression: 'project:test-project',
+        canGet: true,
       });
 
       const request = httpServerMock.createKibanaRequest({
@@ -183,6 +189,29 @@ describe('GET space', () => {
         projectRouting: 'project:test-project',
       });
       expect(npreClient.getNpre).toHaveBeenCalledWith('kibana_space_default_default');
+    });
+
+    it("returns the space without projectRouting when CPS is enabled but the user can't read NPRE", async () => {
+      const { routeHandler, npreClient } = await setupWithCps({
+        cpsEnabled: true,
+        expression: 'project:test-project',
+        canGet: false,
+      });
+
+      const request = httpServerMock.createKibanaRequest({
+        params: {
+          id: 'default',
+        },
+        method: 'get',
+      });
+
+      const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
+
+      expect(response.status).toEqual(200);
+      expect(response.payload).toEqual(spaces.find((s) => s.id === 'default'));
+      expect(response.payload.projectRouting).toBeUndefined();
+      expect(npreClient.canGetNpre).toHaveBeenCalled();
+      expect(npreClient.getNpre).not.toHaveBeenCalled();
     });
 
     it('returns the space without projectRouting when CPS is disabled', async () => {

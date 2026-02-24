@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
 import * as Rx from 'rxjs';
 
 import type { ObjectType } from '@kbn/config-schema';
@@ -92,20 +93,17 @@ describe('Spaces Public API', () => {
     };
   };
 
-  const setupWithCps = async (options: {
-    cpsEnabled: boolean;
-    canDelete?: boolean;
-    expression?: string;
-  }) => {
+  const setupWithCps = async (options: { cpsEnabled: boolean; expression?: string }) => {
     const npreClient: INpreClient = {
       getNpre: jest.fn().mockResolvedValue(options.expression),
+      canGetNpre: jest.fn().mockResolvedValue(false),
       putNpre: jest.fn().mockResolvedValue(undefined),
       deleteNpre: jest.fn().mockResolvedValue(undefined),
       canPutNpre: jest.fn().mockResolvedValue(true),
     };
 
     const mockCpsStart = {
-      createNpreClient: jest.fn().mockReturnValue(npreClient),
+      createNpreClient: jest.fn().mockReturnValue(options.cpsEnabled ? npreClient : undefined),
     };
 
     return {
@@ -224,7 +222,6 @@ describe('Spaces Public API', () => {
     it('deletes the NPRE when CPS is enabled and it exists', async () => {
       const { routeHandler, npreClient } = await setupWithCps({
         cpsEnabled: true,
-        canDelete: true,
         expression: 'some-expression',
       });
 
@@ -246,8 +243,30 @@ describe('Spaces Public API', () => {
     it('returns 204 when the NPRE does not exist', async () => {
       const { routeHandler, npreClient } = await setupWithCps({
         cpsEnabled: true,
-        canDelete: false,
       });
+
+      (npreClient.deleteNpre as jest.Mock).mockRejectedValue(
+        new errors.ResponseError({
+          statusCode: 404,
+          body: {
+            error: {
+              root_cause: [
+                {
+                  type: 'resource_not_found_exception',
+                  reason:
+                    'Project routing expression with name [kibana_space_test-space_defaultttt] not found',
+                },
+              ],
+              type: 'resource_not_found_exception',
+              reason:
+                'Project routing expression with name [kibana_space_test-space_defaultttt] not found',
+            },
+            status: 404,
+          },
+          meta: {} as any,
+          warnings: null,
+        })
+      );
 
       const request = httpServerMock.createKibanaRequest({
         params: {
@@ -261,8 +280,7 @@ describe('Spaces Public API', () => {
       const { status } = response;
 
       expect(status).toEqual(204);
-      expect(npreClient.getNpre).toHaveBeenCalledWith('kibana_space_a-space_default');
-      expect(npreClient.deleteNpre).not.toHaveBeenCalled();
+      expect(npreClient.deleteNpre).toHaveBeenCalledWith('kibana_space_a-space_default');
     });
 
     it('does not call delete NPRE when CPS is disabled', async () => {

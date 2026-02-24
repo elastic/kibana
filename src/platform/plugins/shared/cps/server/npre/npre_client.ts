@@ -25,7 +25,12 @@ export interface INpreClient {
    * Retrieves a project routing expression by name.
    * @param expressionName the name of the expression to retrieve.
    */
-  getNpre(expressionName: string): Promise<ProjectRouting>;
+  getNpre(expressionName: string): Promise<ProjectRouting | undefined>;
+
+  /**
+   * Checks if the current user has permission to retrieve named project routing expressions.
+   */
+  canGetNpre(): Promise<boolean>;
 
   /**
    * Checks if the current user has permission to create or update named project routing expressions.
@@ -60,11 +65,12 @@ export class NpreClient implements INpreClient {
     return this.core.elasticsearch.client;
   }
 
-  public async getNpre(expressionName: string): Promise<ProjectRouting> {
+  public async getNpre(expressionName: string): Promise<ProjectRouting | undefined> {
     this.logger.debug(`Getting NPRE for expression: ${expressionName}`);
 
     return this.getClient()
-      .asInternalUser.transport.request<NpreExpressionResponse>({
+      .asScoped(this.request)
+      .asCurrentUser.transport.request<NpreExpressionResponse>({
         method: 'GET',
         path: `/_project_routing/${expressionName}`,
       })
@@ -82,6 +88,15 @@ export class NpreClient implements INpreClient {
         );
         throw error;
       });
+  }
+
+  public async canGetNpre(): Promise<boolean> {
+    return this.getClient()
+      .asScoped(this.request)
+      .asCurrentUser.security.hasPrivileges({
+        cluster: ['cluster:monitor/project_routing/get'],
+      })
+      .then((response) => response.has_all_requested);
   }
 
   public async canPutNpre(): Promise<boolean> {

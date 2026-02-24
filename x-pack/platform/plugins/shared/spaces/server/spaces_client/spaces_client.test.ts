@@ -15,6 +15,7 @@ import { SpacesClient } from './spaces_client';
 import type { GetAllSpacesPurpose, Space } from '../../common';
 import type { ConfigType } from '../config';
 import { ConfigSchema } from '../config';
+import { errors } from '@elastic/elasticsearch';
 
 const createMockDebugLogger = () => {
   return jest.fn();
@@ -23,6 +24,7 @@ const createMockDebugLogger = () => {
 const createMockNpreClient = (): INpreClient => {
   return {
     getNpre: jest.fn().mockResolvedValue(undefined),
+    canGetNpre: jest.fn().mockResolvedValue(true),
     putNpre: jest.fn().mockResolvedValue(undefined),
     deleteNpre: jest.fn().mockResolvedValue(undefined),
     canPutNpre: jest.fn().mockResolvedValue(true),
@@ -1152,6 +1154,38 @@ describe('projectRouting functionality', () => {
       expect(mockNpreClient.getNpre).toHaveBeenCalledWith('kibana_space_foo_default');
     });
 
+    test('omits projectRouting when user is not authorized to read NPRE', async () => {
+      const mockDebugLogger = createMockDebugLogger();
+      const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+      mockCallWithRequestRepository.get.mockResolvedValue({
+        id: 'foo',
+        type: 'space',
+        references: [],
+        attributes: {
+          name: 'foo-name',
+          disabledFeatures: [],
+        },
+      } as any);
+      const mockConfig = createMockConfig();
+      const mockNpreClient = createMockNpreClient();
+      (mockNpreClient.canGetNpre as jest.Mock).mockResolvedValue(false);
+
+      const client = new SpacesClient(
+        mockDebugLogger,
+        mockConfig,
+        mockCallWithRequestRepository,
+        [],
+        'traditional',
+        featuresStart,
+        mockNpreClient
+      );
+
+      const space = await client.get('foo');
+
+      expect(space.projectRouting).toBeUndefined();
+      expect(mockNpreClient.getNpre).not.toHaveBeenCalled();
+    });
+
     test('does not include projectRouting when npreClient is undefined', async () => {
       const mockDebugLogger = createMockDebugLogger();
       const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
@@ -1521,7 +1555,6 @@ describe('projectRouting functionality', () => {
       mockCallWithRequestRepository.deleteByNamespace.mockResolvedValue({} as any);
       const mockConfig = createMockConfig();
       const mockNpreClient = createMockNpreClient();
-      (mockNpreClient.getNpre as jest.Mock).mockResolvedValue('project:test-project');
 
       const client = new SpacesClient(
         mockDebugLogger,
@@ -1535,7 +1568,60 @@ describe('projectRouting functionality', () => {
 
       await client.delete('foo');
 
-      expect(mockNpreClient.getNpre).toHaveBeenCalledWith('kibana_space_foo_default');
+      expect(mockNpreClient.deleteNpre).toHaveBeenCalledWith('kibana_space_foo_default');
+    });
+
+    test('does not error when CPS is enabled and npre exists', async () => {
+      const mockDebugLogger = createMockDebugLogger();
+      const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+      mockCallWithRequestRepository.get.mockResolvedValue({
+        id: 'foo',
+        type: 'space',
+        references: [],
+        attributes: {
+          name: 'foo-name',
+          disabledFeatures: [],
+        },
+      } as any);
+      mockCallWithRequestRepository.delete.mockResolvedValue({} as any);
+      mockCallWithRequestRepository.deleteByNamespace.mockResolvedValue({} as any);
+      const mockConfig = createMockConfig();
+      const mockNpreClient = createMockNpreClient();
+      (mockNpreClient.deleteNpre as jest.Mock).mockRejectedValue(
+        new errors.ResponseError({
+          statusCode: 404,
+          body: {
+            error: {
+              root_cause: [
+                {
+                  type: 'resource_not_found_exception',
+                  reason:
+                    'Project routing expression with name [kibana_space_test-space_defaultttt] not found',
+                },
+              ],
+              type: 'resource_not_found_exception',
+              reason:
+                'Project routing expression with name [kibana_space_test-space_defaultttt] not found',
+            },
+            status: 404,
+          },
+          meta: {} as any,
+          warnings: null,
+        })
+      );
+
+      const client = new SpacesClient(
+        mockDebugLogger,
+        mockConfig,
+        mockCallWithRequestRepository,
+        [],
+        'traditional',
+        featuresStart,
+        mockNpreClient
+      );
+
+      await client.delete('foo');
+
       expect(mockNpreClient.deleteNpre).toHaveBeenCalledWith('kibana_space_foo_default');
     });
 
@@ -1566,40 +1652,6 @@ describe('projectRouting functionality', () => {
       );
 
       await client.delete('foo');
-    });
-
-    test('allows delete when user is not authorized but no npre exists', async () => {
-      const mockDebugLogger = createMockDebugLogger();
-      const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
-      mockCallWithRequestRepository.get.mockResolvedValue({
-        id: 'foo',
-        type: 'space',
-        references: [],
-        attributes: {
-          name: 'foo-name',
-          disabledFeatures: [],
-        },
-      } as any);
-      mockCallWithRequestRepository.delete.mockResolvedValue({} as any);
-      mockCallWithRequestRepository.deleteByNamespace.mockResolvedValue({} as any);
-      const mockConfig = createMockConfig();
-      const mockNpreClient = createMockNpreClient();
-      (mockNpreClient.getNpre as jest.Mock).mockResolvedValue(undefined);
-
-      const client = new SpacesClient(
-        mockDebugLogger,
-        mockConfig,
-        mockCallWithRequestRepository,
-        [],
-        'traditional',
-        featuresStart,
-        mockNpreClient
-      );
-
-      await client.delete('foo');
-
-      expect(mockCallWithRequestRepository.delete).toHaveBeenCalledWith('space', 'foo');
-      expect(mockCallWithRequestRepository.deleteByNamespace).toHaveBeenCalledWith('foo');
     });
 
     test('deletes space successfully when npreClient is undefined', async () => {

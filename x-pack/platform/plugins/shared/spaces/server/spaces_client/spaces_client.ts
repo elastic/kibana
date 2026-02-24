@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
 
 import type { BuildFlavor } from '@kbn/config/src/types';
@@ -133,7 +134,7 @@ export class SpacesClient implements ISpacesClient {
     const savedObject = await this.repository.get('space', id);
     const space = this.transformSavedObjectToSpace(savedObject);
 
-    if (this.npreClient) {
+    if (this.npreClient && (await this.npreClient.canGetNpre())) {
       space.projectRouting =
         (await this.npreClient.getNpre(getSpaceDefaultNpreName(id))) ?? PROJECT_ROUTING.ALL;
     }
@@ -201,11 +202,13 @@ export class SpacesClient implements ISpacesClient {
 
     const savedSpace = this.transformSavedObjectToSpace(createdSavedObject);
 
-    if (projectRoutingExpression) {
+    if (this.npreClient && projectRoutingExpression) {
       const npreName = getSpaceDefaultNpreName(id);
 
-      await this.npreClient!.putNpre(npreName, projectRoutingExpression);
-      savedSpace.projectRouting = await this.npreClient!.getNpre(npreName);
+      await this.npreClient.putNpre(npreName, projectRoutingExpression);
+      if (await this.npreClient.canGetNpre()) {
+        savedSpace.projectRouting = await this.npreClient.getNpre(npreName);
+      }
     }
 
     return savedSpace;
@@ -254,7 +257,7 @@ export class SpacesClient implements ISpacesClient {
     const updatedSavedObject = await this.repository.get('space', id);
     const updatedSpace = this.transformSavedObjectToSpace(updatedSavedObject);
 
-    if (this.npreClient) {
+    if (this.npreClient && (await this.npreClient.canGetNpre())) {
       updatedSpace.projectRouting = await this.npreClient.getNpre(npreName);
     }
 
@@ -279,8 +282,21 @@ export class SpacesClient implements ISpacesClient {
 
     await this.repository.delete('space', id);
 
-    if (this.npreClient && !!(await this.npreClient.getNpre(getSpaceDefaultNpreName(id)))) {
-      await this.npreClient.deleteNpre(getSpaceDefaultNpreName(id));
+    if (this.npreClient) {
+      try {
+        await this.npreClient.deleteNpre(getSpaceDefaultNpreName(id));
+      } catch (error) {
+        if (
+          error instanceof errors.ResponseError &&
+          error.body?.error?.type === 'resource_not_found_exception'
+        ) {
+          this.debugLogger(
+            'SpacesClient.delete(). No default NPRE found for space, skipping deletion of NPRE.'
+          );
+        } else {
+          throw error;
+        }
+      }
     }
   }
 

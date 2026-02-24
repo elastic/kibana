@@ -95,6 +95,7 @@ describe('Spaces Public API', () => {
   const setupWithCps = async (options: { cpsEnabled: boolean; canPut?: boolean }) => {
     const npreClient: INpreClient = {
       getNpre: jest.fn().mockResolvedValue(undefined),
+      canGetNpre: jest.fn().mockResolvedValue(false),
       putNpre: jest.fn().mockResolvedValue(undefined),
       deleteNpre: jest.fn().mockResolvedValue(undefined),
       canPutNpre: jest.fn().mockResolvedValue(options.canPut),

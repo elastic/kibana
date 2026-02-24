@@ -52,12 +52,12 @@ describe('NpreClient', () => {
       const mockExpression = 'project:test';
       const mockResponse = { expression: mockExpression };
 
-      mockClusterClient.asInternalUser.transport.request.mockResolvedValue(mockResponse);
+      mockScopedClient.asCurrentUser.transport.request.mockResolvedValue(mockResponse);
 
       const result = await service.getNpre(expressionName);
 
       expect(result).toEqual(mockExpression);
-      expect(mockClusterClient.asInternalUser.transport.request).toHaveBeenCalledWith({
+      expect(mockScopedClient.asCurrentUser.transport.request).toHaveBeenCalledWith({
         method: 'GET',
         path: '/_project_routing/test-expression',
       });
@@ -79,7 +79,7 @@ describe('NpreClient', () => {
         meta: {} as any,
       });
 
-      mockClusterClient.asInternalUser.transport.request.mockRejectedValue(error);
+      mockScopedClient.asCurrentUser.transport.request.mockRejectedValue(error);
 
       const result = await service.getNpre(expressionName);
 
@@ -91,7 +91,7 @@ describe('NpreClient', () => {
       const expressionName = 'test-expression';
       const error = new Error('Elasticsearch connection error');
 
-      mockClusterClient.asInternalUser.transport.request.mockRejectedValue(error);
+      mockScopedClient.asCurrentUser.transport.request.mockRejectedValue(error);
 
       await expect(service.getNpre(expressionName)).rejects.toThrow(
         'Elasticsearch connection error'
@@ -116,12 +116,37 @@ describe('NpreClient', () => {
         meta: {} as any,
       });
 
-      mockClusterClient.asInternalUser.transport.request.mockRejectedValue(error);
+      mockScopedClient.asCurrentUser.transport.request.mockRejectedValue(error);
 
       await expect(service.getNpre(expressionName)).rejects.toThrow();
       expect(mockLogger.error).toHaveBeenCalledWith(
         expect.stringContaining('Failed to get project routing expression test-expression')
       );
+    });
+  });
+
+  describe('canGetNpre', () => {
+    it("should return true when user has 'cluster:monitor/project_routing/get' privilege", async () => {
+      mockScopedClient.asCurrentUser.security.hasPrivileges.mockResolvedValue({
+        has_all_requested: true,
+      } as any);
+
+      const result = await service.canGetNpre();
+
+      expect(result).toBe(true);
+      expect(mockScopedClient.asCurrentUser.security.hasPrivileges).toHaveBeenCalledWith({
+        cluster: ['cluster:monitor/project_routing/get'],
+      });
+    });
+
+    it('should return false when user does not have get cluster privilege', async () => {
+      mockScopedClient.asCurrentUser.security.hasPrivileges.mockResolvedValue({
+        has_all_requested: false,
+      } as any);
+
+      const result = await service.canGetNpre();
+
+      expect(result).toBe(false);
     });
   });
 

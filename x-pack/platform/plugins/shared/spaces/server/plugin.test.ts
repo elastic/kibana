@@ -211,6 +211,7 @@ describe('Spaces plugin', () => {
       const cpsStart = {
         createNpreClient: jest.fn().mockReturnValue({
           getNpre: jest.fn(),
+          canGetNpre: jest.fn(),
           putNpre: jest.fn(),
           deleteNpre: jest.fn(),
           canPutNpre: jest.fn(),
