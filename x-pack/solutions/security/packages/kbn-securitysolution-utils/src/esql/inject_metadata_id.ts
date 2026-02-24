@@ -47,6 +47,7 @@ function addIdToKeepCommands(root: ESQLAstQueryExpression): void {
       break;
     }
 
+<<<<<<< HEAD
     if (cmd.name === 'keep') {
       const alreadyHasId = cmd.args.some(
         (arg) => isColumn(arg) && (arg.name === '_id' || arg.name === '*')
@@ -56,4 +57,61 @@ function addIdToKeepCommands(root: ESQLAstQueryExpression): void {
       }
     }
   }
+=======
+  return false;
+}
+
+/**
+ * Inserts `METADATA _id` into a FROM command that has no METADATA clause.
+ * Places it before the first pipe `|` or at the end of the query.
+ */
+function insertMetadataIdIntoFrom(query: string): string {
+  const pipeIndex = query.indexOf('|');
+
+  if (pipeIndex === -1) {
+    return `${query.trimEnd()} METADATA _id`;
+  }
+
+  const beforePipe = query.slice(0, pipeIndex);
+  const afterPipe = query.slice(pipeIndex);
+  const trimmed = beforePipe.trimEnd();
+  const whitespace = beforePipe.slice(trimmed.length) || ' ';
+
+  return `${trimmed} METADATA _id${whitespace}${afterPipe}`;
+}
+
+/**
+ * Appends `_id` to an existing METADATA clause that is missing it.
+ */
+function appendIdToExistingMetadata(query: string): string {
+  return query.replace(/\bmetadata\s+[\w_]+(?:\s*,\s*[\w_]+)*/i, (match) => `${match}, _id`);
+}
+
+/**
+ * For every KEEP command in the query that doesn't already include `_id`,
+ * appends `, _id` to its column list.
+ */
+function ensureKeepIncludesId(query: string): string {
+  const { root } = parse(query);
+  const keepCommands = root.commands.filter((cmd): cmd is ESQLCommand => cmd.name === 'keep');
+
+  if (keepCommands.length === 0) {
+    return query;
+  }
+
+  const needsId = keepCommands.some(
+    (cmd) => !cmd.args.some((arg) => isColumn(arg) && arg.name === '_id')
+  );
+
+  if (!needsId) {
+    return query;
+  }
+
+  return query.replace(/\bkeep\s+[\w_.*`]+(?:\s*,\s*[\w_.*`]+)*/gi, (match) => {
+    if (/\b_id\b/.test(match)) {
+      return match;
+    }
+    return `${match}, _id`;
+  });
+>>>>>>> cd45f624447a217e0ee6588186a57cfde9733fb2
 }
