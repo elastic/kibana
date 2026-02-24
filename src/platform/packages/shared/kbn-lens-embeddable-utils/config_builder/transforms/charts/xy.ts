@@ -8,6 +8,7 @@
  */
 
 import type { TypedLensSerializedState, XYPersistedState } from '@kbn/lens-common';
+import type { SavedObjectReference } from '@kbn/core/server';
 import type { XYState } from '../../schema';
 import {
   getSharedChartLensStateToAPI,
@@ -50,9 +51,12 @@ export function fromAPItoLensState(config: XYState): XYLensWithoutQueryAndFilter
     ...Object.entries(regularDataViewsMap).map(([layerId, dataViewId]) => [layerId, dataViewId]),
     ...internalReferences.map((ref) => [ref.name.replace(LENS_LAYER_SUFFIX, ''), ref.id]),
   ]);
-  const visualizationState = buildVisualizationState(config, dataViewLayerToIdMap);
 
-  const references = regularDataViews.length ? buildReferences(regularDataViewsMap) : [];
+  const references: SavedObjectReference[] = [];
+
+  const visualizationState = buildVisualizationState(config, dataViewLayerToIdMap, references);
+
+  references.push(...(regularDataViews.length ? buildReferences(regularDataViewsMap) : []));
 
   return {
     visualizationType: 'lnsXY',

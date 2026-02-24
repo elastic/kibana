@@ -148,10 +148,13 @@ type LayerToDataView = Record<string, string>;
 
 export function buildVisualizationState(
   config: XYState,
-  usedDataViews: LayerToDataView
+  usedDataViews: LayerToDataView,
+  references: SavedObjectReference[]
 ): XYPersistedState {
   const layers = config.layers
-    .map((layer, index) => buildXYLayer(layer, index, usedDataViews[getIdForLayer(layer, index)]))
+    .map((layer, index) =>
+      buildXYLayer(layer, index, usedDataViews[getIdForLayer(layer, index)], references)
+    )
     .filter(nonNullable);
   return {
     preferredSeriesType: layers.filter(isLensStateDataLayer)[0]?.seriesType ?? 'bar_stacked',

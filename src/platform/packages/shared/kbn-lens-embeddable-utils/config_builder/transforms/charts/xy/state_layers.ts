@@ -16,6 +16,8 @@ import type {
   XYReferenceLineLayerConfig,
   YConfig,
 } from '@kbn/lens-common';
+import type { SavedObjectReference } from '@kbn/core/server';
+import { EVENT_ANNOTATION_GROUP_TYPE } from '@kbn/event-annotation-common';
 import { getValueColumn } from '../../columns/esql_column';
 import type {
   DataLayerType,
@@ -192,7 +194,8 @@ function buildReferenceLineLayer(
 export function buildXYLayer(
   layer: unknown,
   i: number,
-  dataViewId: string
+  dataViewId: string,
+  references: SavedObjectReference[]
 ): XYPersistedLayerConfig | undefined {
   if (!isAPIXYLayer(layer)) {
     return;
@@ -201,7 +204,15 @@ export function buildXYLayer(
   if (isAPIAnnotationLayer(layer)) {
     if ('group_id' in layer) {
       // by-reference annotation layer
+      // TODO: support linked by-value annotation layers as well
       const layerId = getIdForLayer(layer, i);
+
+      references.push({
+        name: `ref-${layerId}`,
+        type: EVENT_ANNOTATION_GROUP_TYPE,
+        id: layer.group_id,
+      });
+
       const persistedLayer: XYPersistedByReferenceAnnotationLayerConfig = {
         layerType: 'annotations',
         persistanceType: 'byReference',
@@ -210,6 +221,8 @@ export function buildXYLayer(
       };
       return persistedLayer;
     }
+
+    // by-value annotation layer
     return buildByValueAnnotationLayer(layer, i, dataViewId);
   }
   if (isAPIReferenceLineLayer(layer)) {
