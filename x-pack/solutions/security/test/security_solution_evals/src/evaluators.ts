@@ -16,9 +16,9 @@ interface ModelUsage {
   totalTokens?: number;
 }
 
-interface TaskOutputWithModelUsage extends TaskOutput {
+type TaskOutputWithModelUsage = TaskOutput & {
   modelUsage?: ModelUsage;
-}
+};
 
 export const createTokenUsageEvaluator = (): Evaluator => ({
   name: 'TokenUsage',
