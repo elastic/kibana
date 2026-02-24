@@ -105,7 +105,6 @@
     "@kbn/cases-plugin",
     "@kbn/cloud-plugin",
     "@kbn/workflows-extensions",
-    "@kbn/workflows",
   ],
   "exclude": [
     "target/**/*",
