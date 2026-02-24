@@ -213,8 +213,7 @@ export function buildStepExecutionsTree(
       stepId: triggeredBy === 'manual' ? 'Inputs' : 'Event',
       stepType: triggeredBy === 'manual' ? '__inputs' : '__trigger',
       executionIndex: 0,
-      stepExecutionId:
-        triggeredBy === 'manual' ? '__pseudo_inputs__' : '__pseudo_trigger__',
+      stepExecutionId: triggeredBy === 'manual' ? '__pseudo_inputs__' : '__pseudo_trigger__',
       status: ExecutionStatus.COMPLETED,
       isTriggerPseudoStep: true,
       children: [],
