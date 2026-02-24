@@ -6,7 +6,7 @@
  */
 
 import type { ESQLCommandOption, EditorError, ESQLAstQueryExpression } from '@kbn/esql-language';
-import { parse, isColumn, isOptionNode } from '@kbn/esql-language';
+import { Parser, isColumn, isOptionNode } from '@kbn/esql-language';
 import { isAggregatingQuery } from './compute_if_esql_query_aggregating';
 
 export interface ParseEsqlQueryResult {
@@ -20,7 +20,7 @@ export interface ParseEsqlQueryResult {
  * - if it's non aggregation query it must have metadata operator
  */
 export const parseEsqlQuery = (query: string): ParseEsqlQueryResult => {
-  const { root, errors } = parse(query);
+  const { root, errors } = Parser.parse(query);
   const isEsqlQueryAggregating = isAggregatingQuery(root);
 
   return {

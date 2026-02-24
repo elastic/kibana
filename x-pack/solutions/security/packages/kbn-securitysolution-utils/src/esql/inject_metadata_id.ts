@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { ESQLAstQueryExpression, ESQLCommand } from '@kbn/esql-language';
-import { parse, isColumn, isOptionNode } from '@kbn/esql-language';
+import type { ESQLAstQueryExpression } from '@kbn/esql-language';
+import { Parser, Builder, BasicPrettyPrinter, mutate, isColumn } from '@kbn/esql-language';
 import { isAggregatingQuery } from './compute_if_esql_query_aggregating';
 
 /**
@@ -19,109 +19,41 @@ import { isAggregatingQuery } from './compute_if_esql_query_aggregating';
  * would be surprising. This remains an accepted limitation.
  */
 export const injectMetadataId = (query: string): string => {
-  const { root } = parse(query);
+  const { root } = Parser.parse(query);
 
   if (isAggregatingQuery(root)) {
     return query;
   }
 
-  let result = query;
+  // Upsert METADATA _id into the FROM command: creates the METADATA clause if
+  // absent, appends _id if the clause exists without it, no-ops if _id is
+  // already present.
+  mutate.commands.from.metadata.upsert(root, '_id');
 
-  const hasMetadata = hasMetadataOption(root);
-  const hasId = hasMetadataIdField(root);
+  // Best-effort: add _id to KEEP commands that would otherwise drop it.
+  addIdToKeepCommands(root);
 
-  if (!hasMetadata) {
-    result = insertMetadataIdIntoFrom(result);
-  } else if (!hasId) {
-    result = appendIdToExistingMetadata(result);
-  }
-
-  result = ensureKeepIncludesId(result);
-
-  return result;
+  return BasicPrettyPrinter.print(root);
 };
 
-function hasMetadataOption(root: ESQLAstQueryExpression): boolean {
-  const fromCommand = root.commands.find((cmd) => cmd.name === 'from');
-  if (!fromCommand) {
-    return false;
-  }
-  return fromCommand.args.some((arg) => isOptionNode(arg) && arg.name === 'metadata');
-}
-
-function hasMetadataIdField(root: ESQLAstQueryExpression): boolean {
-  const fromCommand = root.commands.find((cmd) => cmd.name === 'from');
-  if (!fromCommand) {
-    return false;
-  }
-
-  for (const arg of fromCommand.args) {
-    if (isOptionNode(arg) && arg.name === 'metadata') {
-      return arg.args.some((metaArg) => isColumn(metaArg) && metaArg.name === '_id');
+/**
+ * Walks the pipeline in order and appends `_id` to KEEP commands that don't
+ * already include it (or a `*` wildcard). Stops injecting once a `DROP _id`
+ * is encountered, since `_id` is no longer available downstream.
+ */
+function addIdToKeepCommands(root: ESQLAstQueryExpression): void {
+  for (const cmd of root.commands) {
+    if (cmd.name === 'drop' && cmd.args.some((arg) => isColumn(arg) && arg.name === '_id')) {
+      break;
     }
-  }
 
-  return false;
-}
-
-/**
- * Inserts `METADATA _id` into a FROM command that has no METADATA clause.
- * Places it before the first pipe `|` or at the end of the query.
- */
-function insertMetadataIdIntoFrom(query: string): string {
-  const pipeIndex = query.indexOf('|');
-
-  if (pipeIndex === -1) {
-    return query.trimEnd() + ' METADATA _id';
-  }
-
-  const beforePipe = query.slice(0, pipeIndex);
-  const afterPipe = query.slice(pipeIndex);
-  const trimmed = beforePipe.trimEnd();
-  const whitespace = beforePipe.slice(trimmed.length) || ' ';
-
-  return trimmed + ' METADATA _id' + whitespace + afterPipe;
-}
-
-/**
- * Appends `_id` to an existing METADATA clause that is missing it.
- */
-function appendIdToExistingMetadata(query: string): string {
-  return query.replace(
-    /\bmetadata\s+[\w_]+(?:\s*,\s*[\w_]+)*/i,
-    (match) => match + ', _id'
-  );
-}
-
-/**
- * For every KEEP command in the query that doesn't already include `_id`,
- * appends `, _id` to its column list.
- */
-function ensureKeepIncludesId(query: string): string {
-  const { root } = parse(query);
-  const keepCommands = root.commands.filter(
-    (cmd): cmd is ESQLCommand => cmd.name === 'keep'
-  );
-
-  if (keepCommands.length === 0) {
-    return query;
-  }
-
-  const needsId = keepCommands.some(
-    (cmd) => !cmd.args.some((arg) => isColumn(arg) && arg.name === '_id')
-  );
-
-  if (!needsId) {
-    return query;
-  }
-
-  return query.replace(
-    /\bkeep\s+[\w_.*`]+(?:\s*,\s*[\w_.*`]+)*/gi,
-    (match) => {
-      if (/\b_id\b/.test(match)) {
-        return match;
+    if (cmd.name === 'keep') {
+      const alreadyHasId = cmd.args.some(
+        (arg) => isColumn(arg) && (arg.name === '_id' || arg.name === '*')
+      );
+      if (!alreadyHasId) {
+        cmd.args.push(Builder.expression.column('_id'));
       }
-      return match + ', _id';
     }
-  );
+  }
 }

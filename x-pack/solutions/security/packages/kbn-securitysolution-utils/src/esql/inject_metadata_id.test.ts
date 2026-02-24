@@ -26,7 +26,7 @@ describe('injectMetadataId', () => {
     });
 
     it('injects METADATA _id with lowercase from', () => {
-      expect(injectMetadataId('from logs*')).toBe('from logs* METADATA _id');
+      expect(injectMetadataId('from logs*')).toBe('FROM logs* METADATA _id');
     });
 
     it('preserves query when METADATA _id already exists', () => {
@@ -34,7 +34,7 @@ describe('injectMetadataId', () => {
     });
 
     it('preserves query when metadata _id already exists (lowercase)', () => {
-      expect(injectMetadataId('from logs* metadata _id')).toBe('from logs* metadata _id');
+      expect(injectMetadataId('from logs* metadata _id')).toBe('FROM logs* METADATA _id');
     });
 
     it('preserves query when METADATA _id exists with other fields', () => {
@@ -51,7 +51,7 @@ describe('injectMetadataId', () => {
 
     it('appends _id when metadata has _version and _index but not _id', () => {
       expect(injectMetadataId('from logs* metadata _version, _index')).toBe(
-        'from logs* metadata _version, _index, _id'
+        'FROM logs* METADATA _version, _index, _id'
       );
     });
 
@@ -78,26 +78,21 @@ describe('injectMetadataId', () => {
     });
 
     it('handles multi-line query', () => {
-      const query = `from packetbeat*
-        | limit 100`;
-      const expected = `from packetbeat* METADATA _id
-        | limit 100`;
-      expect(injectMetadataId(query)).toBe(expected);
+      expect(injectMetadataId('from packetbeat*\n        | limit 100')).toBe(
+        'FROM packetbeat* METADATA _id | LIMIT 100'
+      );
     });
 
     it('handles multi-line query with existing metadata missing _id', () => {
-      const query = `from packetbeat* metadata _index
-        | limit 100`;
-      const expected = `from packetbeat* metadata _index, _id
-        | limit 100`;
-      expect(injectMetadataId(query)).toBe(expected);
+      expect(injectMetadataId('from packetbeat* metadata _index\n        | limit 100')).toBe(
+        'FROM packetbeat* METADATA _index, _id | LIMIT 100'
+      );
     });
 
     it('handles multi-line query with existing metadata _id', () => {
-      const query = `from packetbeat* metadata
-        _id
-        | limit 100`;
-      expect(injectMetadataId(query)).toBe(query);
+      expect(injectMetadataId('from packetbeat* metadata\n        _id\n        | limit 100')).toBe(
+        'FROM packetbeat* METADATA _id | LIMIT 100'
+      );
     });
   });
 
@@ -140,16 +135,14 @@ describe('injectMetadataId', () => {
 
     it('handles lowercase keep', () => {
       expect(injectMetadataId('from logs* metadata _id | keep agent.name')).toBe(
-        'from logs* metadata _id | keep agent.name, _id'
+        'FROM logs* METADATA _id | KEEP agent.name, _id'
       );
     });
   });
 
   describe('DROP _id (accepted limitation)', () => {
     it('does not modify DROP _id - accepted limitation', () => {
-      expect(injectMetadataId('FROM logs* | DROP _id')).toBe(
-        'FROM logs* METADATA _id | DROP _id'
-      );
+      expect(injectMetadataId('FROM logs* | DROP _id')).toBe('FROM logs* METADATA _id | DROP _id');
     });
 
     it('injects METADATA but does not remove explicit DROP', () => {
@@ -157,43 +150,73 @@ describe('injectMetadataId', () => {
         'FROM logs* METADATA _id | DROP _id'
       );
     });
+
+    it('does not inject _id into KEEP that appears after DROP _id', () => {
+      expect(injectMetadataId('FROM logs* | DROP _id | KEEP agent.name')).toBe(
+        'FROM logs* METADATA _id | DROP _id | KEEP agent.name'
+      );
+    });
+
+    it('injects _id into KEEP that appears before DROP _id', () => {
+      expect(injectMetadataId('FROM logs* | KEEP agent.name | DROP _id')).toBe(
+        'FROM logs* METADATA _id | KEEP agent.name, _id | DROP _id'
+      );
+    });
+
+    it('does not inject _id into KEEP after DROP _id mid-pipeline', () => {
+      expect(injectMetadataId('FROM logs* | DROP _id | EVAL x = 1 | KEEP x')).toBe(
+        'FROM logs* METADATA _id | DROP _id | EVAL x = 1 | KEEP x'
+      );
+    });
+
+    it('DROP multiple fields including _id stops KEEP injection downstream', () => {
+      expect(injectMetadataId('FROM logs* | DROP _id, agent.type | KEEP host')).toBe(
+        'FROM logs* METADATA _id | DROP _id, agent.type | KEEP host'
+      );
+    });
+
+    it('DROP without _id does not affect KEEP injection', () => {
+      expect(injectMetadataId('FROM logs* | DROP agent.type | KEEP agent.name')).toBe(
+        'FROM logs* METADATA _id | DROP agent.type | KEEP agent.name, _id'
+      );
+    });
   });
 
   describe('complex queries', () => {
     it('handles realistic rule query with keep and eval', () => {
-      const query = 'from auditbeat-* | keep agent.*, _id | eval test_id = _id';
-      const expected = 'from auditbeat-* METADATA _id | keep agent.*, _id | eval test_id = _id';
-      expect(injectMetadataId(query)).toBe(expected);
+      expect(injectMetadataId('from auditbeat-* | keep agent.*, _id | eval test_id = _id')).toBe(
+        'FROM auditbeat-* METADATA _id | KEEP agent.*, _id | EVAL test_id = _id'
+      );
     });
 
     it('handles realistic rule query without _id in keep', () => {
-      const query = 'from auditbeat-* | keep agent.name | limit 5';
-      const expected = 'from auditbeat-* METADATA _id | keep agent.name, _id | limit 5';
-      expect(injectMetadataId(query)).toBe(expected);
+      expect(injectMetadataId('from auditbeat-* | keep agent.name | limit 5')).toBe(
+        'FROM auditbeat-* METADATA _id | KEEP agent.name, _id | LIMIT 5'
+      );
     });
 
     it('handles query with WHERE and no metadata', () => {
-      const query = 'from ecs_compliant | where agent.name=="test-1"';
-      const expected = 'from ecs_compliant METADATA _id | where agent.name=="test-1"';
-      expect(injectMetadataId(query)).toBe(expected);
+      expect(injectMetadataId('from ecs_compliant | where agent.name=="test-1"')).toBe(
+        'FROM ecs_compliant METADATA _id | WHERE agent.name == "test-1"'
+      );
     });
 
     it('handles query with mv_expand', () => {
-      const query = 'from ecs_compliant METADATA _id | mv_expand agent.name';
-      expect(injectMetadataId(query)).toBe(query);
+      expect(injectMetadataId('from ecs_compliant METADATA _id | mv_expand agent.name')).toBe(
+        'FROM ecs_compliant METADATA _id | MV_EXPAND agent.name'
+      );
     });
 
     it('handles query with multiple indices and metadata _index', () => {
-      expect(
-        injectMetadataId('from logs*, metrics* metadata _index | sort @timestamp')
-      ).toBe('from logs*, metrics* metadata _index, _id | sort @timestamp');
+      expect(injectMetadataId('from logs*, metrics* metadata _index | sort @timestamp')).toBe(
+        'FROM logs*, metrics* METADATA _index, _id | SORT @timestamp'
+      );
     });
 
     it('handles query used in rule mock without metadata', () => {
-      const query = 'from auditbeat-* | where user.name=="root" or user.name=="admin"';
-      const expected =
-        'from auditbeat-* METADATA _id | where user.name=="root" or user.name=="admin"';
-      expect(injectMetadataId(query)).toBe(expected);
+      expect(
+        injectMetadataId('from auditbeat-* | where user.name=="root" or user.name=="admin"')
+      ).toBe('FROM auditbeat-* METADATA _id | WHERE user.name == "root" OR user.name == "admin"');
     });
   });
 });

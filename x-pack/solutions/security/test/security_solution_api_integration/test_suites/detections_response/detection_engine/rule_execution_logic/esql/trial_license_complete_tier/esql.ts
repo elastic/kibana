@@ -2444,7 +2444,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(requests).toHaveProperty('0.description', 'ES|QL request to find all matches');
         expect(requests).toHaveProperty('0.duration', expect.any(Number));
         expect(requests![0].request).toContain(
-          `"query": "from ecs_compliant metadata _id | where id==\\\"${id}\\\" | where agent.name==\\\"test-1\\\" | limit 101",`
+          `"query": "FROM ecs_compliant METADATA _id | WHERE id == \\\"${id}\\\" | WHERE agent.name == \\\"test-1\\\" | limit 101",`
         );
 
         expect(requests).toHaveProperty(
