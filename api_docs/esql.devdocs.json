@@ -14,7 +14,7 @@
           "({ children, }: { children: React.ReactNode; }) => React.JSX.Element"
         ],
         "path": "src/platform/plugins/shared/esql/public/lazy_esql_menu.tsx",
-        "lineNumber": 45,
+        "lineNumber": 57,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -30,7 +30,7 @@
               "{ children: React.ReactNode; }"
             ],
             "path": "src/platform/plugins/shared/esql/public/lazy_esql_menu.tsx",
-            "lineNumber": 45,
+            "lineNumber": 57,
             "columnNumber": 84,
             "deprecated": false,
             "trackAdoption": false,
@@ -135,7 +135,7 @@
           "(props: { hideHistory?: boolean | undefined; onESQLDocsFlyoutVisibilityChanged?: ((isOpen: boolean) => void) | undefined; }) => React.JSX.Element"
         ],
         "path": "src/platform/plugins/shared/esql/public/lazy_esql_menu.tsx",
-        "lineNumber": 23,
+        "lineNumber": 38,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -151,7 +151,7 @@
               "{ hideHistory?: boolean | undefined; onESQLDocsFlyoutVisibilityChanged?: ((isOpen: boolean) => void) | undefined; }"
             ],
             "path": "src/platform/plugins/shared/esql/public/lazy_esql_menu.tsx",
-            "lineNumber": 26,
+            "lineNumber": 41,
             "columnNumber": 7,
             "deprecated": false,
             "trackAdoption": false,
@@ -342,7 +342,7 @@
           ">, \"initialState\" | \"onInitialStateChange\"> & React.RefAttributes<never>"
         ],
         "path": "src/platform/packages/private/kbn-esql-editor/src/esql_editor.tsx",
-        "lineNumber": 1500,
+        "lineNumber": 1492,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
