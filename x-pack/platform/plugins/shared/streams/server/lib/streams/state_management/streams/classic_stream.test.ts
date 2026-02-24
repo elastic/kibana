@@ -35,20 +35,18 @@ describe('ClassicStream', () => {
       logger: { debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn() },
       isServerless: false,
       isDev: false,
-      scopedClusterClient: {
-        asCurrentUser: {
-          indices: {
-            getDataStreamSettings: jest.fn().mockResolvedValue({
-              data_streams: [
-                {
-                  name: 'logs-test-default',
-                  effective_settings: {
-                    index: {},
-                  },
+      currentUser: {
+        indices: {
+          getDataStreamSettings: jest.fn().mockResolvedValue({
+            data_streams: [
+              {
+                name: 'logs-test-default',
+                effective_settings: {
+                  index: {},
                 },
-              ],
-            }),
-          },
+              },
+            ],
+          }),
         },
       },
     } as unknown as StateDependencies);
