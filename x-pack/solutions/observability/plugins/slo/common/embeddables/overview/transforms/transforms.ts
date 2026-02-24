@@ -10,4 +10,5 @@ import { getTransformOut } from './get_transform_out';
 
 export const getTransforms = (drilldownTransforms: DrilldownTransforms) => ({
   transformOut: getTransformOut(drilldownTransforms.transformOut),
+  transformIn: drilldownTransforms.transformIn
 });
