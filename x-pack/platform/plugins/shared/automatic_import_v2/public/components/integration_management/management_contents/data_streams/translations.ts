@@ -217,6 +217,27 @@ export const DELETE_MODAL = Object.freeze({
   }),
 });
 
+export const REANALYZE_MODAL = Object.freeze({
+  title: (dataStreamTitle: string) =>
+    i18n.translate('xpack.automaticImportV2.dataStreams.reanalyzeModal.title', {
+      defaultMessage: 'Re-analyze data stream "{dataStreamTitle}"?',
+      values: { dataStreamTitle },
+    }),
+  body: i18n.translate('xpack.automaticImportV2.dataStreams.reanalyzeModal.body', {
+    defaultMessage:
+      'This will re-run the AI analysis on this data stream. The existing data stream will be overwritten.',
+  }),
+  cancelButton: i18n.translate('xpack.automaticImportV2.dataStreams.reanalyzeModal.cancelButton', {
+    defaultMessage: 'Cancel',
+  }),
+  confirmButton: i18n.translate(
+    'xpack.automaticImportV2.dataStreams.reanalyzeModal.confirmButton',
+    {
+      defaultMessage: 'Re-Analyze',
+    }
+  ),
+});
+
 export const EDIT_PIPELINE_FLYOUT = Object.freeze({
   tableCaption: i18n.translate(
     'xpack.automaticImportV2.dataStreams.editPipelineFlyout.tableCaption',
