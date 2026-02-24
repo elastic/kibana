@@ -254,9 +254,9 @@ interface DataCascadeImplBaseProps<G extends GroupNode, L extends LeafNode>
    */
   allowMultipleRowToggle?: boolean;
   /**
-   * Initial vertical scroll position in pixels. When set, the list and scroll container start at this offset.
+   * Index of the initial vertical item visible in within the scroll container. When set the list more or less starts at this item.
    */
-  initialScrollOffset?: number;
+  initialAnchorItemIndex?: number;
   /**
    * Initial scroll rectangle dimensions. When set, the list and scroll container start at this size.
    */

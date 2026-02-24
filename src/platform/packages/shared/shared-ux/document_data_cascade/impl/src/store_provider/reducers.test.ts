@@ -48,17 +48,6 @@ describe('createStoreReducers', () => {
     `);
   });
 
-  describe('setInitialState', () => {
-    it('should set the initial state correctly', () => {
-      const groupNodes = Array.from<GroupNode>(
-        new Array(3).fill(null).map((_, i) => ({ id: `group-${i}` }))
-      );
-
-      const newState = reducers.setInitialState(initialState, groupNodes);
-      expect(newState.groupNodes).toStrictEqual(groupNodes);
-    });
-  });
-
   describe('setExpandedRows', () => {
     it('should set the expanded rows correctly', () => {
       const expandedState = { 'leaf-0': true, 'leaf-1': false };

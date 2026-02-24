@@ -14,4 +14,5 @@ export {
   getLeafIdFromCacheKey,
 } from './utils';
 
-export { useAnchorVirtualizerToItemIndex } from './core/virtualizer';
+export { useAnchorVirtualizerToItemIndex, useCascadeVirtualizer } from './core/virtualizer';
+export type { CascadeVirtualizerProps } from './core/virtualizer';

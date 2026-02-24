@@ -26,7 +26,10 @@ import type { ESQLDataGroupNode } from './blocks';
 export type DataCascadeUiState = DataCascadeUISnapshot<ESQLDataGroupNode, DataTableRecord>;
 
 export type CascadedDocumentsDataGridUiState = UnifiedDataTableRestorableState & {
-  initialDisplayedItemIndex: number;
+  virtualizationMetadata: {
+    initialDisplayedItemIndex: number;
+    scrollRect: { width: number; height: number };
+  };
 };
 
 export type CascadedDocumentsDataGridUiStateMap = Record<

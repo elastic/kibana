@@ -159,11 +159,11 @@ const ESQLDataCascade = React.memo(
       <DataCascade<ESQLDataGroupNode>
         ref={setDataCascadeRef}
         size="s"
-        overscan={25}
+        overscan={15}
         data={cascadeGroupData}
         cascadeGroups={availableCascadeGroups}
         initialGroupColumn={selectedCascadeGroups}
-        initialScrollOffset={dataCascadeUiState?.scrollOffset}
+        initialAnchorItemIndex={dataCascadeUiState?.scrollAnchorItemIndex ?? 0}
         initialTableState={initialTableState}
         initialRect={dataCascadeUiState?.scrollRect}
         customTableHeader={customTableHeading}

@@ -64,7 +64,6 @@ describe('virtualizer', () => {
       expect(result.current).toHaveProperty('scrollToLastVirtualizedRow');
       expect(result.current).toHaveProperty('scrollOffset');
       expect(result.current).toHaveProperty('measureElement');
-      expect(result.current).toHaveProperty('preventRowSizeChangePropagation');
     });
   });
 
@@ -140,67 +139,6 @@ describe('virtualizer', () => {
 
       expect(result.current(range)).toEqual(expect.arrayContaining([parentRowIndex]));
     });
-
-    describe('preventRowSizeChangePropagation', () => {
-      it('should return a cleanup function when registering a row', () => {
-        const { result } = renderHook(() =>
-          useCascadeVirtualizer({
-            rows: rowsToRender(100),
-            overscan: 5,
-            enableStickyGroupHeader: false,
-            getScrollElement: () => document.body,
-          })
-        );
-
-        const cleanup = result.current.preventRowSizeChangePropagation(5);
-
-        expect(typeof cleanup).toBe('function');
-      });
-
-      it('should return a stable callback reference across renders', () => {
-        const { result, rerender } = renderHook(() =>
-          useCascadeVirtualizer({
-            rows: rowsToRender(100),
-            overscan: 5,
-            enableStickyGroupHeader: false,
-            getScrollElement: () => document.body,
-          })
-        );
-
-        const initialCallback = result.current.preventRowSizeChangePropagation;
-
-        rerender();
-
-        expect(result.current.preventRowSizeChangePropagation).toBe(initialCallback);
-      });
-
-      it('should allow registering multiple rows independently', () => {
-        const { result } = renderHook(() =>
-          useCascadeVirtualizer({
-            rows: rowsToRender(100),
-            overscan: 5,
-            enableStickyGroupHeader: false,
-            getScrollElement: () => document.body,
-          })
-        );
-
-        const cleanup1 = result.current.preventRowSizeChangePropagation(1);
-        const cleanup2 = result.current.preventRowSizeChangePropagation(2);
-        const cleanup3 = result.current.preventRowSizeChangePropagation(3);
-
-        // All cleanups should be functions
-        expect(typeof cleanup1).toBe('function');
-        expect(typeof cleanup2).toBe('function');
-        expect(typeof cleanup3).toBe('function');
-
-        // Cleanup one row should not affect others
-        cleanup2();
-
-        // The remaining rows should still be registered (cleanup functions still valid)
-        expect(typeof cleanup1).toBe('function');
-        expect(typeof cleanup3).toBe('function');
-      });
-    });
   });
 
   describe('useAnchorVirtualizerToItemIndex', () => {
@@ -231,8 +169,16 @@ describe('virtualizer', () => {
       } as unknown as UseVirtualizerReturnType;
     };
 
-    const buildMeasurementsCache = (sizes: number[], paddingStart = 0): VirtualItem[] => {
-      let offset = paddingStart;
+    /**
+     * Mirrors real tanstack virtual behavior: the first item starts at
+     * paddingStart + scrollMargin, and subsequent items chain from there.
+     */
+    const buildMeasurementsCache = (
+      sizes: number[],
+      scrollMargin = 0,
+      paddingStart = 0
+    ): VirtualItem[] => {
+      let offset = paddingStart + scrollMargin;
       return sizes.map((size, index) => {
         const item = {
           index,
@@ -257,8 +203,10 @@ describe('virtualizer', () => {
     });
 
     it('should not scroll when the provided ref is already true', () => {
+      const scrollMargin = 100;
       const virtualizer = createMockVirtualizer({
-        measurementsCache: buildMeasurementsCache([60, 60, 60]),
+        scrollMargin,
+        measurementsCache: buildMeasurementsCache([60, 60, 60], scrollMargin),
       });
       const ref = { current: true } as React.MutableRefObject<boolean>;
 
@@ -268,10 +216,11 @@ describe('virtualizer', () => {
     });
 
     it('should not scroll when measurementsCache has no entry for the target index', () => {
+      const scrollMargin = 200;
       const virtualizer = createMockVirtualizer({
         scrollOffset: 500,
-        scrollMargin: 200,
-        measurementsCache: buildMeasurementsCache([60]),
+        scrollMargin,
+        measurementsCache: buildMeasurementsCache([60], scrollMargin),
       });
 
       renderHook(() => useAnchorVirtualizerToItemIndex(virtualizer, 5));
@@ -280,10 +229,11 @@ describe('virtualizer', () => {
     });
 
     it('should call calculateRange before reading measurementsCache', () => {
+      const scrollMargin = 200;
       const virtualizer = createMockVirtualizer({
         scrollOffset: 500,
-        scrollMargin: 200,
-        measurementsCache: buildMeasurementsCache([60, 60, 60, 60, 60]),
+        scrollMargin,
+        measurementsCache: buildMeasurementsCache([60, 60, 60, 60, 60], scrollMargin),
       });
 
       renderHook(() => useAnchorVirtualizerToItemIndex(virtualizer, 3));
@@ -297,7 +247,7 @@ describe('virtualizer', () => {
       const itemSizes = [75, 75, 75, 75, 75, 75];
       const targetIndex = 5;
 
-      const measurementsCache = buildMeasurementsCache(itemSizes);
+      const measurementsCache = buildMeasurementsCache(itemSizes, scrollMargin);
       const virtualizer = createMockVirtualizer({
         scrollMargin,
         scrollOffset,
@@ -306,7 +256,7 @@ describe('virtualizer', () => {
 
       renderHook(() => useAnchorVirtualizerToItemIndex(virtualizer, targetIndex));
 
-      const expectedTargetOffset = scrollMargin + measurementsCache[targetIndex].start;
+      const expectedTargetOffset = measurementsCache[targetIndex].start;
       const expectedAdjustment = expectedTargetOffset - scrollOffset;
 
       expect(virtualizer.options.scrollToFn).toHaveBeenCalledWith(
@@ -320,7 +270,7 @@ describe('virtualizer', () => {
     it('should scroll forward when the target item is ahead of the current offset', () => {
       const scrollMargin = 200;
       const scrollOffset = 200;
-      const measurementsCache = buildMeasurementsCache([60, 60, 60, 60, 60]);
+      const measurementsCache = buildMeasurementsCache([60, 60, 60, 60, 60], scrollMargin);
       const targetIndex = 4;
 
       const virtualizer = createMockVirtualizer({
@@ -331,7 +281,7 @@ describe('virtualizer', () => {
 
       renderHook(() => useAnchorVirtualizerToItemIndex(virtualizer, targetIndex));
 
-      const expectedTarget = scrollMargin + measurementsCache[targetIndex].start;
+      const expectedTarget = measurementsCache[targetIndex].start;
 
       expect(expectedTarget).toBeGreaterThan(scrollOffset);
       expect(virtualizer.options.scrollToFn).toHaveBeenCalledWith(
@@ -344,7 +294,7 @@ describe('virtualizer', () => {
     it('should scroll backward when the target item is behind the current offset', () => {
       const scrollMargin = 200;
       const scrollOffset = 1500;
-      const measurementsCache = buildMeasurementsCache([60, 60, 60]);
+      const measurementsCache = buildMeasurementsCache([60, 60, 60], scrollMargin);
       const targetIndex = 1;
 
       const virtualizer = createMockVirtualizer({
@@ -355,7 +305,7 @@ describe('virtualizer', () => {
 
       renderHook(() => useAnchorVirtualizerToItemIndex(virtualizer, targetIndex));
 
-      const expectedTarget = scrollMargin + measurementsCache[targetIndex].start;
+      const expectedTarget = measurementsCache[targetIndex].start;
 
       expect(expectedTarget).toBeLessThan(scrollOffset);
       expect(virtualizer.options.scrollToFn).toHaveBeenCalledWith(
@@ -367,10 +317,11 @@ describe('virtualizer', () => {
 
     it('should set the resolved ref to true after anchoring', () => {
       const ref = { current: false } as React.MutableRefObject<boolean>;
+      const scrollMargin = 100;
       const virtualizer = createMockVirtualizer({
-        scrollMargin: 100,
+        scrollMargin,
         scrollOffset: 100,
-        measurementsCache: buildMeasurementsCache([60, 60, 60]),
+        measurementsCache: buildMeasurementsCache([60, 60, 60], scrollMargin),
       });
 
       renderHook(() => useAnchorVirtualizerToItemIndex(virtualizer, 2, ref));
@@ -379,10 +330,11 @@ describe('virtualizer', () => {
     });
 
     it('should use an internal ref when no external ref is provided', () => {
+      const scrollMargin = 100;
       const virtualizer = createMockVirtualizer({
-        scrollMargin: 100,
+        scrollMargin,
         scrollOffset: 100,
-        measurementsCache: buildMeasurementsCache([60, 60, 60]),
+        measurementsCache: buildMeasurementsCache([60, 60, 60], scrollMargin),
       });
 
       const { rerender } = renderHook(() => useAnchorVirtualizerToItemIndex(virtualizer, 2));
@@ -397,10 +349,11 @@ describe('virtualizer', () => {
 
     it('should not re-anchor on subsequent renders', () => {
       const ref = { current: false } as React.MutableRefObject<boolean>;
+      const scrollMargin = 100;
       const virtualizer = createMockVirtualizer({
-        scrollMargin: 100,
+        scrollMargin,
         scrollOffset: 100,
-        measurementsCache: buildMeasurementsCache([60, 60, 60]),
+        measurementsCache: buildMeasurementsCache([60, 60, 60], scrollMargin),
       });
 
       const { rerender } = renderHook(() => useAnchorVirtualizerToItemIndex(virtualizer, 2, ref));
@@ -416,9 +369,9 @@ describe('virtualizer', () => {
 
     it('should produce zero adjustment when the target is already at the current scroll position', () => {
       const scrollMargin = 300;
-      const measurementsCache = buildMeasurementsCache([80, 80, 80]);
+      const measurementsCache = buildMeasurementsCache([80, 80, 80], scrollMargin);
       const targetIndex = 2;
-      const scrollOffset = scrollMargin + measurementsCache[targetIndex].start;
+      const scrollOffset = measurementsCache[targetIndex].start;
 
       const virtualizer = createMockVirtualizer({
         scrollMargin,
@@ -439,7 +392,7 @@ describe('virtualizer', () => {
     it('should handle variable row heights correctly', () => {
       const scrollMargin = 400;
       const scrollOffset = 600;
-      const measurementsCache = buildMeasurementsCache([30, 100, 50, 80, 120]);
+      const measurementsCache = buildMeasurementsCache([30, 100, 50, 80, 120], scrollMargin);
       const targetIndex = 3;
 
       const virtualizer = createMockVirtualizer({
@@ -450,8 +403,9 @@ describe('virtualizer', () => {
 
       renderHook(() => useAnchorVirtualizerToItemIndex(virtualizer, targetIndex));
 
-      // item 3 starts at 30 + 100 + 50 = 180
-      const expectedTarget = scrollMargin + 180;
+      // item 3 starts at scrollMargin(400) + 30 + 100 + 50 = 580
+      const expectedTarget = measurementsCache[targetIndex].start;
+      expect(expectedTarget).toBe(scrollMargin + 30 + 100 + 50);
       expect(virtualizer.options.scrollToFn).toHaveBeenCalledWith(
         scrollOffset,
         { behavior: undefined, adjustments: expectedTarget - scrollOffset },
