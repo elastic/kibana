@@ -56,6 +56,7 @@ export const WatchlistsManagementTable: React.FC<{ spaceId: string }> = ({ space
           {hasError && (
             <EuiCallOut
               announceOnMount
+              data-test-subj="watchlistsManagementTableError"
               title={i18n.translate(
                 'xpack.securitySolution.entityAnalytics.watchlists.watchlistsManagementTable.error',
                 {
@@ -75,7 +76,10 @@ export const WatchlistsManagementTable: React.FC<{ spaceId: string }> = ({ space
           <EuiFlexGroup direction="column" gutterSize="s">
             <EuiFlexItem>
               {isLoading && visibleRecords.length === 0 ? (
-                <EuiFlexGroup justifyContent="center">
+                <EuiFlexGroup
+                  justifyContent="center"
+                  data-test-subj="watchlistsManagementTableLoading"
+                >
                   <EuiFlexItem grow={false}>
                     <EuiLoadingElastic size="l" />
                   </EuiFlexItem>
@@ -83,6 +87,7 @@ export const WatchlistsManagementTable: React.FC<{ spaceId: string }> = ({ space
               ) : visibleRecords.length > 0 ? (
                 <EuiBasicTable
                   id={WATCHLISTS_MANAGEMENT_TABLE_ID}
+                  data-test-subj="watchlistsManagementTable"
                   tableCaption={i18n.translate(
                     'xpack.securitySolution.entityAnalytics.watchlists.watchlistsManagementTable.tableCaption',
                     { defaultMessage: 'Watchlists management table' }
@@ -93,7 +98,12 @@ export const WatchlistsManagementTable: React.FC<{ spaceId: string }> = ({ space
                 />
               ) : (
                 !isLoading && (
-                  <EuiText size="s" color="subdued" textAlign="center">
+                  <EuiText
+                    size="s"
+                    color="subdued"
+                    textAlign="center"
+                    data-test-subj="watchlistsManagementTableEmpty"
+                  >
                     <FormattedMessage
                       id="xpack.securitySolution.entityAnalytics.watchlists.watchlistsManagementTable.noData"
                       defaultMessage="No watchlists found"
