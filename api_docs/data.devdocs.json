@@ -2904,7 +2904,7 @@
           ">"
         ],
         "path": "src/platform/plugins/shared/data/public/plugin.ts",
-        "lineNumber": 44,
+        "lineNumber": 45,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2920,7 +2920,7 @@
               "any"
             ],
             "path": "src/platform/plugins/shared/data/public/plugin.ts",
-            "lineNumber": 58,
+            "lineNumber": 59,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2937,7 +2937,7 @@
                   "<Readonly<{} & { search: Readonly<{} & { asyncSearch: Readonly<{ pollInterval?: number | undefined; } & { waitForCompletion: moment.Duration; keepAlive: moment.Duration; batchedReduceSize: number; }>; aggs: Readonly<{} & { shardDelay: Readonly<{} & { enabled: boolean; }>; }>; sessions: Readonly<{} & { enabled: boolean; management: Readonly<{} & { refreshInterval: moment.Duration; maxSessions: number; refreshTimeout: moment.Duration; expiresSoonWarning: moment.Duration; }>; notTouchedTimeout: moment.Duration; maxUpdateRetries: number; defaultExpiration: moment.Duration; }>; }>; query: Readonly<{} & { timefilter: Readonly<{} & { minRefreshInterval: number; }>; }>; enableUiSettingsValidations: boolean; }>>"
                 ],
                 "path": "src/platform/plugins/shared/data/public/plugin.ts",
-                "lineNumber": 58,
+                "lineNumber": 59,
                 "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2978,7 +2978,7 @@
               }
             ],
             "path": "src/platform/plugins/shared/data/public/plugin.ts",
-            "lineNumber": 68,
+            "lineNumber": 69,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3005,7 +3005,7 @@
                   ">"
                 ],
                 "path": "src/platform/plugins/shared/data/public/plugin.ts",
-                "lineNumber": 69,
+                "lineNumber": 70,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3022,7 +3022,7 @@
                   "DataSetupDependencies"
                 ],
                 "path": "src/platform/plugins/shared/data/public/plugin.ts",
-                "lineNumber": 70,
+                "lineNumber": 71,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3053,7 +3053,7 @@
               }
             ],
             "path": "src/platform/plugins/shared/data/public/plugin.ts",
-            "lineNumber": 136,
+            "lineNumber": 137,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3069,7 +3069,7 @@
                   "CoreStart"
                 ],
                 "path": "src/platform/plugins/shared/data/public/plugin.ts",
-                "lineNumber": 137,
+                "lineNumber": 138,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3086,7 +3086,7 @@
                   "DataStartDependencies"
                 ],
                 "path": "src/platform/plugins/shared/data/public/plugin.ts",
-                "lineNumber": 138,
+                "lineNumber": 139,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3106,7 +3106,7 @@
               "() => void"
             ],
             "path": "src/platform/plugins/shared/data/public/plugin.ts",
-            "lineNumber": 225,
+            "lineNumber": 226,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
