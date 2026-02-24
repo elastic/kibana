@@ -9,10 +9,12 @@
 
 import { CPSManager } from './cps_manager';
 import type { ApplicationStart, HttpSetup } from '@kbn/core/public';
-import { ProjectRoutingAccess, PROJECT_ROUTING } from '@kbn/cps-utils';
+import { ProjectRoutingAccess } from '@kbn/cps-utils';
 import type { CPSProject, ProjectTagsResponse } from '@kbn/cps-utils';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { BehaviorSubject } from 'rxjs';
+
+const DEFAULT_NPRE_VALUE = '_alias:default_npre_value';
 
 const mockGetProjectRoutingAccess = jest.fn();
 jest.mock('./async_services', () => ({
@@ -63,6 +65,8 @@ describe('CPSManager', () => {
   };
 
   beforeEach(() => {
+    mockGetProjectRoutingAccess.mockReturnValue(ProjectRoutingAccess.EDITABLE);
+
     mockHttp = {
       post: jest.fn().mockResolvedValue(mockResponse),
       get: jest.fn().mockResolvedValue(undefined),
@@ -274,7 +278,7 @@ describe('CPSManager', () => {
         expect(mockHttp.get).toHaveBeenCalledWith(
           '/internal/cps/project_routing/kibana_space_default_default'
         );
-        expect(manager.getDefaultProjectRouting()).toBe(PROJECT_ROUTING.ALL);
+        expect(manager.getDefaultProjectRouting()).toBe('_alias:*');
         expect(mockLogger.warn).toHaveBeenCalledWith(
           'Failed to fetch default project routing for space',
           expect.any(Error)
@@ -289,7 +293,7 @@ describe('CPSManager', () => {
     beforeEach(() => {
       // Use a resolved NPRE value so defaultProjectRouting is populated for READONLY assertions
       mockGetProjectRoutingAccess.mockReturnValue(ProjectRoutingAccess.EDITABLE);
-      mockHttp.get = jest.fn().mockResolvedValue('@kibana_space_default_default');
+      mockHttp.get = jest.fn().mockResolvedValue(DEFAULT_NPRE_VALUE);
       cpsManager = new CPSManager({
         http: mockHttp,
         logger: mockLogger,
@@ -314,13 +318,22 @@ describe('CPSManager', () => {
       await cpsManager.whenReady();
       await changeAccess(ProjectRoutingAccess.READONLY);
 
-      expect(cpsManager.getProjectRouting()).toBe('@kibana_space_default_default');
+      expect(cpsManager.getProjectRouting()).toBe(DEFAULT_NPRE_VALUE);
     });
 
     it('returns current value when access is EDITABLE', async () => {
       await cpsManager.whenReady();
       await changeAccess(ProjectRoutingAccess.EDITABLE);
 
+      expect(cpsManager.getProjectRouting()).toBe(DEFAULT_NPRE_VALUE);
+    });
+
+    it('returns the override value when provided', () => {
+      expect(cpsManager.getProjectRouting('_alias:*')).toBe('_alias:*');
+      expect(cpsManager.getProjectRouting('_alias:_origin')).toBe('_alias:_origin');
+    });
+
+    it('falls back to current projectRouting$ value when no override is provided', () => {
       cpsManager.setProjectRouting('_alias:_origin');
       expect(cpsManager.getProjectRouting()).toBe('_alias:_origin');
     });
@@ -340,7 +353,7 @@ describe('CPSManager', () => {
       cpsManager.setProjectRouting('_alias:_origin');
 
       await changeAccess(ProjectRoutingAccess.READONLY);
-      expect(cpsManager.getProjectRouting()).toBe('@kibana_space_default_default');
+      expect(cpsManager.getProjectRouting()).toBe(DEFAULT_NPRE_VALUE);
     });
 
     it('restores last editable routing when access returns to EDITABLE', async () => {
@@ -350,6 +363,31 @@ describe('CPSManager', () => {
 
       await changeAccess(ProjectRoutingAccess.DISABLED);
       expect(cpsManager.getProjectRouting()).toBeUndefined();
+
+      await changeAccess(ProjectRoutingAccess.EDITABLE);
+      expect(cpsManager.getProjectRouting()).toBe('_alias:_origin');
+    });
+
+    it('returns DEFAULT_PROJECT_ROUTING when no override and no explicit set', () => {
+      expect(cpsManager.getProjectRouting()).toBe(DEFAULT_NPRE_VALUE);
+    });
+
+    it('returns undefined when access is DISABLED, regardless of override', async () => {
+      await changeAccess(ProjectRoutingAccess.DISABLED);
+
+      expect(cpsManager.getProjectRouting()).toBeUndefined();
+      expect(cpsManager.getProjectRouting('_alias:_origin')).toBeUndefined();
+    });
+
+    it('resets projectRouting$ to default when access changes to DISABLED', async () => {
+      cpsManager.setProjectRouting('_alias:_origin');
+      expect(cpsManager.getProjectRouting()).toBe('_alias:_origin');
+
+      await changeAccess(ProjectRoutingAccess.DISABLED);
+      expect(cpsManager.getProjectRouting()).toBeUndefined();
+
+      await changeAccess(ProjectRoutingAccess.READONLY);
+      expect(cpsManager.getProjectRouting()).toBe(DEFAULT_NPRE_VALUE);
 
       await changeAccess(ProjectRoutingAccess.EDITABLE);
       expect(cpsManager.getProjectRouting()).toBe('_alias:_origin');

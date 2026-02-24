@@ -48,7 +48,7 @@ export interface ICPSManager {
   getTotalProjectCount(): number;
   getProjectRouting$(): Observable<ProjectRouting | undefined>;
   setProjectRouting(projectRouting: ProjectRouting | undefined): void;
-  getProjectRouting(): ProjectRouting | undefined;
+  getProjectRouting(overrideValue?: ProjectRouting): ProjectRouting | undefined;
   getDefaultProjectRouting(): ProjectRouting;
   updateDefaultProjectRouting(projectRouting?: ProjectRouting): void;
   getProjectPickerAccess$(): Observable<ProjectRoutingAccess>;

@@ -44,7 +44,7 @@
                 "tags": [],
                 "label": "mount",
                 "description": [
-                  "{@link MountPoint }"
+                  "{@link MountPoint}"
                 ],
                 "signature": [
                   "MountPoint",
@@ -106,7 +106,7 @@
                 "tags": [],
                 "label": "id",
                 "description": [
-                  "the unique identifier for the banner returned by {@link OverlayBannersStart.add }"
+                  "the unique identifier for the banner returned by {@link OverlayBannersStart.add}"
                 ],
                 "signature": [
                   "string"
@@ -150,7 +150,7 @@
                 "tags": [],
                 "label": "id",
                 "description": [
-                  "the unique identifier for the banner returned by {@link OverlayBannersStart.add }"
+                  "the unique identifier for the banner returned by {@link OverlayBannersStart.add}"
                 ],
                 "signature": [
                   "string | undefined"
@@ -169,7 +169,7 @@
                 "tags": [],
                 "label": "mount",
                 "description": [
-                  "{@link MountPoint }"
+                  "{@link MountPoint}"
                 ],
                 "signature": [
                   "MountPoint",
@@ -274,7 +274,7 @@
                 "tags": [],
                 "label": "mount",
                 "description": [
-                  "{@link MountPoint } - Mounts the children inside a flyout panel"
+                  "{@link MountPoint} - Mounts the children inside a flyout panel"
                 ],
                 "signature": [
                   "MountPoint",
@@ -294,7 +294,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "{@link OverlayFlyoutOpenOptions } - options for the flyout"
+                  "{@link OverlayFlyoutOpenOptions} - options for the flyout"
                 ],
                 "signature": [
                   "OverlayFlyoutOpenOptions",
@@ -446,7 +446,7 @@
             "label": "buttonColor",
             "description": [],
             "signature": [
-              "\"text\" | \"primary\" | \"neutral\" | \"success\" | \"accent\" | \"accentSecondary\" | \"warning\" | \"risk\" | \"danger\" | undefined"
+              "\"text\" | \"primary\" | \"success\" | \"warning\" | \"accent\" | \"accentSecondary\" | \"danger\" | \"neutral\" | \"risk\" | undefined"
             ],
             "path": "src/core/packages/overlays/browser/src/modal.ts",
             "lineNumber": 24,
@@ -634,7 +634,7 @@
                 "tags": [],
                 "label": "mount",
                 "description": [
-                  "{@link MountPoint } - Mounts the children inside the modal"
+                  "{@link MountPoint} - Mounts the children inside the modal"
                 ],
                 "signature": [
                   "MountPoint",
@@ -654,7 +654,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "{@link OverlayModalOpenOptions } - options for the modal"
+                  "{@link OverlayModalOpenOptions} - options for the modal"
                 ],
                 "signature": [
                   "OverlayModalOpenOptions",
@@ -699,7 +699,7 @@
                 "tags": [],
                 "label": "message",
                 "description": [
-                  "{@link MountPoint } - string or mountpoint to be used a the confirm message body"
+                  "{@link MountPoint} - string or mountpoint to be used a the confirm message body"
                 ],
                 "signature": [
                   "string | ",
@@ -720,7 +720,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "{@link OverlayModalConfirmOptions } - options for the confirm modal"
+                  "{@link OverlayModalConfirmOptions} - options for the confirm modal"
                 ],
                 "signature": [
                   "OverlayModalConfirmOptions",
@@ -859,7 +859,7 @@
               "Opens a system flyout that integrates with EUI Flyout Manager"
             ],
             "signature": [
-              "(content: React.ReactElement<any, string | React.JSXElementConstructor<any>>, options?: ",
+              "(content: React.ReactElement<any>, options?: ",
               "OverlaySystemFlyoutOpenOptions",
               " | undefined) => ",
               "OverlayRef"
@@ -879,10 +879,10 @@
                 "label": "content",
                 "description": [],
                 "signature": [
-                  "React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+                  "React.ReactElement<any>"
                 ],
                 "path": "src/core/packages/overlays/browser/src/system_flyout.ts",
-                "lineNumber": 36,
+                "lineNumber": 48,
                 "columnNumber": 8,
                 "deprecated": false,
                 "trackAdoption": false
@@ -899,7 +899,7 @@
                   " | undefined"
                 ],
                 "path": "src/core/packages/overlays/browser/src/system_flyout.ts",
-                "lineNumber": 36,
+                "lineNumber": 48,
                 "columnNumber": 37,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1058,7 +1058,7 @@
           "\nAPIs to open and manage fly-out dialogs.\n"
         ],
         "path": "src/core/packages/overlays/browser/src/system_flyout.ts",
-        "lineNumber": 22,
+        "lineNumber": 34,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1075,13 +1075,13 @@
               "\nOpens a flyout panel with given React element inside. Calling `open` for multiple flyouts allows history navigation.\nYou can use `close()` on the returned FlyoutRef to close the flyout.\n"
             ],
             "signature": [
-              "(content: React.ReactElement<any, string | React.JSXElementConstructor<any>>, options?: ",
+              "(content: React.ReactElement<any>, options?: ",
               "OverlaySystemFlyoutOpenOptions",
               " | undefined) => ",
               "OverlayRef"
             ],
             "path": "src/core/packages/overlays/browser/src/system_flyout.ts",
-            "lineNumber": 28,
+            "lineNumber": 40,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1099,7 +1099,7 @@
                   "React.ReactElement<any, string | React.JSXElementConstructor<any>>"
                 ],
                 "path": "src/core/packages/overlays/browser/src/system_flyout.ts",
-                "lineNumber": 36,
+                "lineNumber": 48,
                 "columnNumber": 8,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1112,14 +1112,14 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "{@link EuiFlyoutProps } - options for the flyout"
+                  "{@link EuiFlyoutProps} - options for the flyout"
                 ],
                 "signature": [
                   "OverlaySystemFlyoutOpenOptions",
                   " | undefined"
                 ],
                 "path": "src/core/packages/overlays/browser/src/system_flyout.ts",
-                "lineNumber": 36,
+                "lineNumber": 48,
                 "columnNumber": 37,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1146,9 +1146,9 @@
           "EuiFlyoutProps",
           "<\"div\" | \"nav\"> | ",
           "EuiFlyoutResizableProps",
-          ", \"onResize\" | \"onClose\" | \"session\"> & { onClose?: ((flyout: ",
+          ", \"onClose\" | \"onResize\" | \"session\"> & { onClose?: ((flyout: ",
           "OverlayRef",
-          ") => void) | undefined; session?: \"never\" | undefined; isResizable?: boolean | undefined; }"
+          ") => void) | undefined; session?: \"never\" | undefined; resizable?: boolean | undefined; isResizable?: boolean | undefined; }"
         ],
         "path": "src/core/packages/overlays/browser/src/flyout.ts",
         "lineNumber": 30,
@@ -1163,11 +1163,15 @@
         "type": "Type",
         "tags": [],
         "label": "OverlaySystemFlyoutOpenOptions",
-        "description": [],
+        "description": [
+          "\nOptions for opening a system flyout."
+        ],
         "signature": [
           "Omit<",
           "OverlayFlyoutOpenOptions",
-          ", \"session\"> & { session?: \"start\" | \"inherit\" | \"never\" | undefined; }"
+          ", \"session\"> & { session?: \"start\" | \"never\" | \"inherit\" | undefined; title?: string | undefined; flyoutMenuProps?: ",
+          "EuiFlyoutMenuProps",
+          " | undefined; }"
         ],
         "path": "src/core/packages/overlays/browser/src/system_flyout.ts",
         "lineNumber": 14,

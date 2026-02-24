@@ -7,7 +7,6 @@
 
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-import { ThemeProvider } from '@emotion/react';
 import { EuiSpacer } from '@elastic/eui';
 import { CountryFlags as CountryFlagsComponent, useCountryFlagsPopover } from './country_flags';
 import { GlobalStylesStorybookDecorator } from '../../../../.storybook/decorators';
@@ -49,7 +48,7 @@ const CountryFlagsStoryComponent: React.FC = () => {
   const countryFlagsPopover = useCountryFlagsPopover(manyCountryCodes);
 
   return (
-    <ThemeProvider theme={{ darkMode: false }}>
+    <>
       <CountryFlagsComponent countryCodes={twoCountries} />
       <EuiSpacer size="l" />
       <CountryFlagsComponent countryCodes={manyCountryCodes} />
@@ -59,7 +58,7 @@ const CountryFlagsStoryComponent: React.FC = () => {
         onCountryClick={countryFlagsPopover.onCountryClick}
       />
       <countryFlagsPopover.PopoverComponent />
-    </ThemeProvider>
+    </>
   );
 };
 
