@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type {
-  AggregationsAggregationContainer,
-  AggregationsAutoDateHistogramAggregation,
-} from '@elastic/elasticsearch/lib/api/types';
+import type { AggregationsAutoDateHistogramAggregation } from '@elastic/elasticsearch/lib/api/types';
 import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import type { ChangePointType } from '@kbn/es-types/src';
 import type { AggregateOf } from '@kbn/es-types/src/search';
@@ -72,8 +69,7 @@ export async function getLogChanges({
                 change_point: {
                   buckets_path: 'over_time>_count',
                 },
-                // elasticsearch@9.0.0 change_point aggregation is missing in the types: https://github.com/elastic/elasticsearch-specification/issues/3671
-              } as AggregationsAggregationContainer,
+              },
             },
           },
         },
