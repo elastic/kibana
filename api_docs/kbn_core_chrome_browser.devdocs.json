@@ -235,7 +235,7 @@
             "tags": [],
             "label": "reset",
             "description": [
-              "\nResets the document title to it's initial value.\n(meaning the one present in the title meta at application load.)"
+              "\nResets the document title to its initial value.\n(meaning the one present in the title meta at application load.)"
             ],
             "signature": [
               "() => void"
@@ -898,10 +898,12 @@
             "parentPluginId": "@kbn/core-chrome-browser",
             "id": "def-public.ChromeNavControls.setHelpMenuLinks",
             "type": "Function",
-            "tags": [],
+            "tags": [
+              "deprecated"
+            ],
             "label": "setHelpMenuLinks",
             "description": [
-              "Set the help menu links"
+              "\nSet the help menu links"
             ],
             "signature": [
               "(links: ",
@@ -911,8 +913,18 @@
             "path": "src/core/packages/chrome/browser/src/nav_controls.ts",
             "lineNumber": 56,
             "columnNumber": 3,
-            "deprecated": false,
+            "deprecated": true,
             "trackAdoption": false,
+            "references": [
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/chrome/browser-internal/src/services/nav_controls/nav_controls_service.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/chrome/browser-internal/src/chrome_api.tsx"
+              }
+            ],
             "children": [
               {
                 "parentPluginId": "@kbn/core-chrome-browser",
@@ -926,7 +938,7 @@
                   "[]"
                 ],
                 "path": "src/core/packages/chrome/browser/src/nav_controls.ts",
-                "lineNumber": 57,
+                "lineNumber": 60,
                 "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1679,7 +1691,9 @@
         "type": "Interface",
         "tags": [],
         "label": "ChromeSetup",
-        "description": [],
+        "description": [
+          "\nChromeSetup exposes APIs available during the setup phase."
+        ],
         "path": "src/core/packages/chrome/browser/src/contracts.ts",
         "lineNumber": 28,
         "columnNumber": 1,
@@ -1693,35 +1707,18 @@
             "tags": [],
             "label": "sidebar",
             "description": [
-              "\n{@link SidebarSetup}"
+              "{@link SidebarSetup}"
             ],
             "signature": [
               "SidebarSetup"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 29,
+            "lineNumber": 33,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
         ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/core-chrome-browser",
-        "id": "def-public.ChromeSetup",
-        "type": "Interface",
-        "tags": [],
-        "label": "ChromeSetup",
-        "description": [
-          "\nChromeSetup exposes APIs available during the setup phase."
-        ],
-        "path": "src/core/packages/chrome/browser/src/contracts.ts",
-        "lineNumber": 35,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [],
         "initialIsOpen": false
       },
       {
@@ -1734,7 +1731,7 @@
           "\nChromeStart allows plugins to customize the global chrome header UI and\nenrich the UX with additional information about the current location of the\nbrowser.\n"
         ],
         "path": "src/core/packages/chrome/browser/src/contracts.ts",
-        "lineNumber": 42,
+        "lineNumber": 37,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1752,7 +1749,7 @@
               "ChromeNavLinks"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 69,
+            "lineNumber": 64,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1770,7 +1767,7 @@
               "ChromeNavControls"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 71,
+            "lineNumber": 66,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1788,7 +1785,7 @@
               "ChromeRecentlyAccessed"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 73,
+            "lineNumber": 68,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1806,7 +1803,7 @@
               "ChromeDocTitle"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 75,
+            "lineNumber": 70,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1826,7 +1823,7 @@
               "<boolean>"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 78,
+            "lineNumber": 73,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1846,7 +1843,7 @@
               "(isVisible: boolean) => void"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 83,
+            "lineNumber": 78,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1862,7 +1859,7 @@
                   "boolean"
                 ],
                 "path": "src/core/packages/chrome/browser/src/contracts.ts",
-                "lineNumber": 88,
+                "lineNumber": 83,
                 "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1888,7 +1885,7 @@
               " | undefined>"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 90,
+            "lineNumber": 85,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1910,7 +1907,7 @@
               " | undefined) => void"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 95,
+            "lineNumber": 90,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1927,7 +1924,7 @@
                   " | undefined"
                 ],
                 "path": "src/core/packages/chrome/browser/src/contracts.ts",
-                "lineNumber": 98,
+                "lineNumber": 93,
                 "columnNumber": 12,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1949,7 +1946,7 @@
               "(node: React.ReactNode) => void"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 100,
+            "lineNumber": 95,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1965,7 +1962,7 @@
                   "React.ReactNode"
                 ],
                 "path": "src/core/packages/chrome/browser/src/contracts.ts",
-                "lineNumber": 103,
+                "lineNumber": 98,
                 "columnNumber": 19,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1989,6 +1986,28 @@
               "<",
               "ChromeBreadcrumb",
               "[]>"
+            ],
+            "path": "src/core/packages/chrome/browser/src/contracts.ts",
+            "lineNumber": 100,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-public.ChromeStart.getBreadcrumbs",
+            "type": "Function",
+            "tags": [],
+            "label": "getBreadcrumbs",
+            "description": [
+              "\nGet the current list of breadcrumbs synchronously"
+            ],
+            "signature": [
+              "() => ",
+              "ChromeBreadcrumb",
+              "[]"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
             "lineNumber": 105,

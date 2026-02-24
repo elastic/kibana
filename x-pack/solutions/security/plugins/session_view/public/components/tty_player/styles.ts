@@ -38,7 +38,7 @@ export const useStyles = (tty?: Teletype, show?: boolean) => {
       padding: `${size.m} ${size.base}`,
     };
 
-    const windowBoundsColor = transparentize(colors.ghost, 0.6); // TODO: Borealis migration - replace transparentize with color token, get rid of ghost color
+    const windowBoundsColor = transparentize(colors.plainLight, 0.6); // TODO: Borealis migration - replace transparentize with color token
 
     const terminal: CSSObject = {
       minHeight: '100%',
@@ -73,7 +73,7 @@ export const useStyles = (tty?: Teletype, show?: boolean) => {
       width: '100%',
       height: 'calc(100% - 112px)',
       overflow: 'auto',
-      backgroundColor: colors.ink,
+      backgroundColor: colors.plainDark,
     };
 
     return {
