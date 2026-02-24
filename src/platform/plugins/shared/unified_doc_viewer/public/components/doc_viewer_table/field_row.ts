@@ -12,7 +12,6 @@ import type { DataTableColumnsMeta, DataTableRecord } from '@kbn/discover-utils/
 import type { IgnoredReason } from '@kbn/discover-utils';
 import {
   convertValueToString,
-  formatFieldValue,
   getIgnoredReason,
   isNestedFieldParent,
 } from '@kbn/discover-utils';
@@ -44,10 +43,8 @@ export class FieldRow {
   readonly #dataView: DataView;
   readonly #fieldFormats: FieldFormatsStart;
 
-  #isFormattedAsHtml: boolean;
   #isFormattedAsText: boolean;
 
-  #formattedAsHtml: string | undefined;
   #formattedAsText: string | undefined;
 
   #fieldType: string | undefined;
@@ -74,7 +71,6 @@ export class FieldRow {
     this.#hit = hit;
     this.#dataView = dataView;
     this.#fieldFormats = fieldFormats;
-    this.#isFormattedAsHtml = false;
     this.#isFormattedAsText = false;
 
     this.name = name;
@@ -87,23 +83,6 @@ export class FieldRow {
     });
     this.isPinned = isPinned;
     this.columnsMeta = columnsMeta;
-  }
-
-  // format as html in a lazy way
-  public get formattedAsHtml(): string | undefined {
-    if (!this.#isFormattedAsHtml) {
-      this.#formattedAsHtml = formatFieldValue(
-        this.flattenedValue,
-        this.#hit.raw,
-        this.#fieldFormats,
-        this.#dataView,
-        this.dataViewField,
-        'html'
-      );
-      this.#isFormattedAsHtml = true;
-    }
-
-    return this.#formattedAsHtml;
   }
 
   // format as text in a lazy way
