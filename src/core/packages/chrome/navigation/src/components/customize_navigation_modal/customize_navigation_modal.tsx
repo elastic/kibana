@@ -309,18 +309,32 @@ export const CustomizeNavigationModal = ({
             )}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton
-              fill
-              onClick={handleSave}
-              isLoading={isSaving}
-              disabled={!hasChanges}
-              data-test-subj="customizeNavigationSaveButton"
-            >
-              <FormattedMessage
-                id="core.ui.chrome.sideNavigation.customizeNavigation.applyButtonText"
-                defaultMessage="Apply"
-              />
-            </EuiButton>
+            <EuiFlexGroup gutterSize="s">
+              {hasChanges && (
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty onClick={handleClose}>
+                    <FormattedMessage
+                      id="core.ui.chrome.sideNavigation.customizeNavigation.cancelButtonText"
+                      defaultMessage="Cancel"
+                    />
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              )}
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  fill
+                  onClick={handleSave}
+                  isLoading={isSaving}
+                  disabled={!hasChanges}
+                  data-test-subj="customizeNavigationSaveButton"
+                >
+                  <FormattedMessage
+                    id="core.ui.chrome.sideNavigation.customizeNavigation.applyButtonText"
+                    defaultMessage="Apply"
+                  />
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiModalFooter>
