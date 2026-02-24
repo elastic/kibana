@@ -1,0 +1,21 @@
+{
+  "id": "example-ndjson",
+  "input_logs": [
+    "{\"@timestamp\":\"2025-01-15T10:30:00Z\",\"level\":\"INFO\",\"message\":\"Service started\"}",
+    "{\"@timestamp\":\"2025-01-15T10:31:00Z\",\"level\":\"WARN\",\"message\":\"High memory\"}"
+  ],
+  "expected_outputs": [
+    {
+      "message": "{\"@timestamp\":\"2025-01-15T10:30:00Z\",\"level\":\"INFO\",\"message\":\"Service started\"}",
+      "@timestamp": "2025-01-15T10:30:00Z",
+      "level": "INFO",
+      "message": "Service started"
+    },
+    {
+      "message": "{\"@timestamp\":\"2025-01-15T10:31:00Z\",\"level\":\"WARN\",\"message\":\"High memory\"}",
+      "@timestamp": "2025-01-15T10:31:00Z",
+      "level": "WARN",
+      "message": "High memory"
+    }
+  ]
+}

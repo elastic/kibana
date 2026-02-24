@@ -24,7 +24,7 @@ const AGENT_RECURSION_LIMIT = 100;
  * @returns The automatic import agent
  */
 export const createAutomaticImportAgent = (params: AutomaticImportAgentParams) => {
-  const { model, subagents } = params;
+  const { model, subagents, messageModifier } = params;
 
   const stateSchema = AutomaticImportAgentState;
   const allTools: StructuredTool[] = [];
@@ -42,13 +42,15 @@ export const createAutomaticImportAgent = (params: AutomaticImportAgentParams) =
   });
   allTools.push(taskTool);
 
+  const systemPrompt = messageModifier ?? AUTOMATIC_IMPORT_AGENT_PROMPT;
+
   // Return createReactAgent with proper configuration
   const baseAgent = createReactAgent<typeof stateSchema, typeof AutomaticImportAgentState>({
     name: 'automatic_import_agent',
     llm: model,
     tools: allTools as any, // TypeScript workaround to appease the expected type
     stateSchema,
-    messageModifier: AUTOMATIC_IMPORT_AGENT_PROMPT,
+    messageModifier: systemPrompt,
   });
 
   return baseAgent.withConfig({

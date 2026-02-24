@@ -27,4 +27,15 @@ export interface AutomaticImportAgentParams {
   instructions?: string;
   model: InferenceChatModel;
   subagents: SubAgent[];
+  /** When set, used as the orchestrator system prompt instead of the default. Used for GEPA evaluation. */
+  messageModifier?: string;
 }
+
+/** Prompt keys that can be overridden for evaluation (e.g. GEPA). */
+export type PromptOverrideKey =
+  | 'AUTOMATIC_IMPORT_AGENT_PROMPT'
+  | 'LOG_ANALYZER_PROMPT'
+  | 'INGEST_PIPELINE_GENERATOR_PROMPT'
+  | 'TEXT_TO_ECS_PROMPT';
+
+export type PromptOverrides = Partial<Record<PromptOverrideKey, string>>;

@@ -818,10 +818,13 @@ describe('AutomaticImportSetupService', () => {
         getStartServices: jest.fn().mockResolvedValue([mockCoreStart, mockPluginsStart]),
       };
 
-      // Mock agent service
+      // Mock agent service (return shape matches InvokeAutomaticImportAgentResult)
       const mockInvokeAgent = jest.fn().mockResolvedValue({
-        current_pipeline: { processors: [] },
-        pipeline_generation_results: [],
+        state: {
+          current_pipeline: { processors: [] },
+          pipeline_generation_results: [],
+        },
+        invokeResult: {},
       });
 
       (taskManagerService as any).agentService = {

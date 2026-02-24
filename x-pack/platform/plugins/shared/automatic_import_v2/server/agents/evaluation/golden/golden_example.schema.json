@@ -1,0 +1,28 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "GoldenExample",
+  "description": "One integration example for GEPA prompt evaluation: input logs and expected pipeline output documents.",
+  "type": "object",
+  "required": ["id", "input_logs", "expected_outputs"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique example/integration id (e.g. filename without extension)"
+    },
+    "input_logs": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "One log entry per element; each string is raw content for one doc. Use for .log lines, NDJSON lines, or stringified JSON."
+    },
+    "expected_outputs": {
+      "type": "array",
+      "items": { "type": "object" },
+      "description": "Expected _source after pipeline (one object per input log, same order)"
+    },
+    "source_format": {
+      "type": "string",
+      "enum": ["lines", "ndjson", "json_array"],
+      "description": "Optional: how the example was produced (lines=.log, ndjson=one JSON per line, json_array=array elements)"
+    }
+  }
+}

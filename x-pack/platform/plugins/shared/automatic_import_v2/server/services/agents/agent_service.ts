@@ -20,8 +20,37 @@ import {
   ingestPipelineValidatorTool,
 } from '../../agents/tools';
 import type { AutomaticImportSamplesIndexService } from '../samples_index/index_service';
-import { INGEST_PIPELINE_GENERATOR_PROMPT } from '../../agents/prompts';
+import {
+  AUTOMATIC_IMPORT_AGENT_PROMPT,
+  INGEST_PIPELINE_GENERATOR_PROMPT,
+} from '../../agents/prompts';
 import type { LangSmithOptions } from '../../routes/types';
+import type { PromptOverrides } from '../../agents/types';
+
+export interface InvokeAutomaticImportAgentOptions {
+  /** When set, use these samples instead of fetching from the index (e.g. for GEPA evaluation). */
+  samples?: string[];
+  /** When set, override the default prompts (e.g. for GEPA optimization). */
+  promptOverrides?: PromptOverrides;
+}
+
+/** Result of agent invocation; includes final state for evaluation. */
+export interface InvokeAutomaticImportAgentResult {
+  /** Final graph state from the agent run. */
+  state: {
+    current_pipeline?: { processors: unknown[]; on_failure?: unknown[] };
+    pipeline_generation_results?: unknown[];
+    pipeline_validation_results?: {
+      success_rate: number;
+      successful_samples: number;
+      failed_samples: number;
+      total_samples: number;
+      failure_details: Array<{ error: string; sample: string }>;
+    };
+  };
+  /** Raw invoke result (messages, etc.) for backward compatibility. */
+  invokeResult: Awaited<ReturnType<ReturnType<typeof createAutomaticImportAgent>['invoke']>>;
+}
 
 export class AgentService {
   private logger: Logger;
@@ -34,43 +63,59 @@ export class AgentService {
   }
 
   /**
-   * Invokes the deep research agent with samples fetched from the index.
+   * Invokes the deep research agent with samples fetched from the index (or inline samples when options.samples is set).
    * Uses tool-based approach:
    * - Service creates tools with samples and esClient
    * - Agent can fetch samples on demand using fetch_log_samples tool
    * - Validator tool has access to all samples
    * - No samples in context unless agent explicitly requests them (saves tokens)
    *
-   * @param integration_id - The integration ID
-   * @param data_stream_id - The data stream ID
+   * @param integrationId - The integration ID
+   * @param dataStreamId - The data stream ID
    * @param esClient - The Elasticsearch client
    * @param model - The model to use for the agent
+   * @param langSmithOptions - Optional LangSmith tracing
+   * @param options - Optional inline samples and/or prompt overrides (e.g. for GEPA evaluation)
    */
   public async invokeAutomaticImportAgent(
     integrationId: string,
     dataStreamId: string,
     esClient: ElasticsearchClient,
     model: InferenceChatModel,
-    langSmithOptions?: LangSmithOptions
-  ) {
+    langSmithOptions?: LangSmithOptions,
+    options?: InvokeAutomaticImportAgentOptions
+  ): Promise<InvokeAutomaticImportAgentResult> {
     this.logger.debug(
       `invokeAutomaticImportAgent: Invoking automatic import agent for integration ${integrationId} and data stream ${dataStreamId}`
     );
 
-    // Fetch samples from the index (decoupled from agent building)
-    const samples = await this.samplesIndexService.getSamplesForDataStream(
-      integrationId,
-      dataStreamId,
-      esClient
-    );
+    const samples =
+      options?.samples !== undefined && options.samples.length > 0
+        ? options.samples
+        : await this.samplesIndexService.getSamplesForDataStream(
+            integrationId,
+            dataStreamId,
+            esClient
+          );
 
-    // Create tools at the service level
-    // Tools capture samples and esClient in their closures
+    const promptOverrides = options?.promptOverrides;
+
+    const logsAnalyzerPrompt =
+      promptOverrides?.LOG_ANALYZER_PROMPT !== undefined
+        ? promptOverrides.LOG_ANALYZER_PROMPT
+        : undefined;
+    const pipelineGeneratorPrompt =
+      promptOverrides?.INGEST_PIPELINE_GENERATOR_PROMPT ?? INGEST_PIPELINE_GENERATOR_PROMPT;
+    const textToEcsPrompt =
+      promptOverrides?.TEXT_TO_ECS_PROMPT !== undefined
+        ? promptOverrides.TEXT_TO_ECS_PROMPT
+        : undefined;
+    const orchestratorPrompt = promptOverrides?.AUTOMATIC_IMPORT_AGENT_PROMPT;
+
     const fetchSamplesToolInstance = fetchSamplesTool(samples);
     const validatorTool = ingestPipelineValidatorTool(esClient, samples);
     const uniqueKeysTool = fetchUniqueKeysTool();
 
-    // Create the sub agents with tools
     const logsAnalyzerSubAgent = createLogsAnalyzerAgent({
       prompt: `You have access to the fetch_log_samples tool. Use it to retrieve log samples, then analyze the format and provide structured analysis for ingest pipeline generation.
       <workflow>
@@ -79,13 +124,14 @@ export class AgentService {
         3. Provide structured analysis output as specified in your system prompt
       </workflow>`,
       tools: [fetchSamplesToolInstance],
+      ...(logsAnalyzerPrompt !== undefined ? { systemPromptOverride: logsAnalyzerPrompt } : {}),
     });
 
     const pipelineGeneratorSubAgent = createIngestPipelineGeneratorAgent({
       name: 'ingest_pipeline_generator',
       description:
         'Generates an Elasticsearch ingest pipeline for the provided log samples and documentation.',
-      prompt: INGEST_PIPELINE_GENERATOR_PROMPT,
+      prompt: pipelineGeneratorPrompt,
       tools: [validatorTool],
       sampleCount: samples.length,
     });
@@ -94,12 +140,13 @@ export class AgentService {
       prompt:
         'You may call tools as needed to inspect recent pipeline outputs and gather sample field values before proposing ECS mappings.',
       tools: [uniqueKeysTool],
+      ...(textToEcsPrompt !== undefined ? { systemPromptOverride: textToEcsPrompt } : {}),
     });
 
-    // Create and invoke the agent
     const automaticImportAgent = createAutomaticImportAgent({
       model,
       subagents: [logsAnalyzerSubAgent, pipelineGeneratorSubAgent, textToEcsSubAgent],
+      ...(orchestratorPrompt !== undefined ? { messageModifier: orchestratorPrompt } : {}),
     });
 
     const langSmithTracers =
@@ -111,7 +158,7 @@ export class AgentService {
           })
         : [];
 
-    const result = await automaticImportAgent.invoke(
+    const invokeResult = await automaticImportAgent.invoke(
       {
         messages: [
           {
@@ -127,6 +174,21 @@ export class AgentService {
       }
     );
 
-    return result;
+    const rawState =
+      (invokeResult as { state?: InvokeAutomaticImportAgentResult['state'] }).state ?? invokeResult;
+
+    return {
+      state: {
+        current_pipeline:
+          (rawState as InvokeAutomaticImportAgentResult['state']).current_pipeline ?? undefined,
+        pipeline_generation_results:
+          (rawState as InvokeAutomaticImportAgentResult['state']).pipeline_generation_results ??
+          undefined,
+        pipeline_validation_results:
+          (rawState as InvokeAutomaticImportAgentResult['state']).pipeline_validation_results ??
+          undefined,
+      },
+      invokeResult,
+    };
   }
 }

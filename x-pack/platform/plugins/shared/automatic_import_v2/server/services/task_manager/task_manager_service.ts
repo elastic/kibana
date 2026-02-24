@@ -221,12 +221,12 @@ export class TaskManagerService {
 
       this.logger.debug(`Task ${taskId} completed successfully`);
 
-      const pipelineObject = (result.current_pipeline || {}) as Pipeline;
-      const pipelineGenerationResultsObjects = result.pipeline_generation_results;
+      const pipelineObject = (result.state.current_pipeline || {}) as Pipeline;
+      const pipelineGenerationResultsObjects = result.state.pipeline_generation_results;
 
       this.logger.debug(`Pipeline object: ${JSON.stringify(pipelineObject)}`);
       this.logger.debug(
-        `Pipeline generation results objects: ${JSON.stringify(result.pipeline_generation_results)}`
+        `Pipeline generation results objects: ${JSON.stringify(result.state.pipeline_generation_results)}`
       );
 
       // Update the data stream saved object with pipeline and task status

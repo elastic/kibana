@@ -1,0 +1,3556 @@
+{
+  "id": "test-ftd-fix",
+  "input_logs": [
+    "<166>Sep 29 2022 15:00:15 hosty : %FTD-6-602303: IPSEC: An outbound LAN-to-LAN SA (SPI= 0xF0079F5A) between 192.168.0.139 and 192.168.0.38 (user= 192.168.0.38) has been created.",
+    "<166>Sep 29 2022 15:00:15 hosty : %FTD-6-602304: IPSEC: An inbound LAN-to-LAN SA (SPI= 0xEAEE970F) between 192.168.0.38 and 192.168.0.139 (user= 192.168.0.38) has been deleted.",
+    "<166>ACA1a-FW-FTDV01 %FTD-6-113005: AAA user authentication Rejected : reason = AAA failure : server = 192.168.0.38 : user = scan : user IP = 192.168.0.139",
+    "<166>%FTD-6-113005: AAA user authentication Rejected : reason = AAA failure : server = 192.168.0.38 : user = ***** : user IP = 192.168.0.139",
+    "<166>:Feb 26 11:26:52 UTC: %FTD--6-852002: Received Full Proxy to Lightweight event from application Snort for TCP flow 10.10.10.10/710 to 11.22.33.44/47873",
+    "<164>%FTD-4-313005: No matching connection for ICMP error message: icmp src LAN:10.8.0.10 dst New-Outside:10.10.4.100 (type 3, code 3) on LAN interface.  Original IP payload: udp src 10.10.4.100/53 dst 10.8.0.10/41330.",
+    "May  5 17:51:17 dev01: %FTD-4-313005: No matching connection for ICMP error message: icmp src srcif:192.168.2.2 dst dstif:192.168.2.3 (type 3, code 3) on myif interface. Original IP payload: udp src 192.168.2.2/53 dst 192.168.2.3/10872.",
+    "May  5 17:51:17 dev01: %FTD-4-313005: No matching connection for ICMP error message: icmp src srcif:192.168.2.2(LOCAL\\testgroup\\testuser) dst dstif:192.168.2.3 (type 3, code 3) on myif interface.  Original IP payload: udp src 192.168.2.2/53 dst 192.168.2.3/10872.",
+    "May  5 17:51:17 dev01: %FTD-4-313005: No matching connection for ICMP error message: icmp src srcif:192.168.2.2(LOCAL\\testuser) dst dstif:192.168.2.3 (type 3, code 3) on myif interface.  Original IP payload: udp src 192.168.2.2/53 dst 192.168.2.3/10872.",
+    "<188>May  5 17:51:17: %FTD-4-313005: No matching connection for ICMP error message: icmp src srcif:192.168.2.2 dst dstif:192.168.2.3 (type 3, code 2) on srcif interface. Original IP payload: icmp src 192.168.2.2 dst 192.168.2.3 (type 0, code 0).",
+    "<188>May  5 17:51:17 dev01: %FTD<Up>-4-313005: No matching connection for ICMP error message: icmp src srcif:192.168.2.2 dst dstif:192.168.2.3 (type 3, code 2) on srcif interface. Original IP payload: protocol 51 src 192.168.2.2 dst 192.168.2.3.",
+    "<188>May  5 17:51:17 dev01: %FTD<Up>-4-313005: No matching connection for ICMP error message: icmp src Processing:192.168.2.2 dst Office:192.168.2.3 (type 3, code 2) on Processing interface. Original IP payload: udp src 192.168.2.2 dst 192.168.2.3.",
+    "<140>Oct 06 2023 10:11:00 myFtdHostname : %FTD-4-313005: No matching connection for ICMP error message: icmp src outside:192.168.2.2(9999:my_SgtName) dst inside:192.168.2.3 (type 3, code 3) on outside interface.  Original IP payload: udp src 192.168.2.3/53 dst 192.168.2.2/60919.",
+    "<140>Oct 06 2023 10:11:00 myFtdHostname : %FTD-4-313005: No matching connection for ICMP error message: icmp src outside:192.168.2.2(9999:my_SgtNameSrc) dst inside:192.168.2.3(8888:my_SgtNameDst) (type 3, code 3) on outside interface.  Original IP payload: udp src 192.168.2.3/53 dst 192.168.2.2/60919.",
+    "<140>Oct 06 2023 10:33:23 myFtdHostname : %FTD-4-313005: No matching connection for ICMP error message: icmp src outside:192.168.2.2(LOCAL\\myUser1234, 9999:my_SgtName) dst inside:192.168.2.3 (type 3, code 3) on outside interface.  Original IP payload: udp src 192.168.2.3/53 dst 192.168.2.2/54860.",
+    "<140>Oct 25 2023 06:53:06 myFtdHostname : %FTD-4-313005: No matching connection for ICMP error message: icmp src outside:192.168.2.2(LOCAL\\myUser1234$, 9999:my_SgtName) dst inside:192.168.2.3 (type 3, code 3) on outside interface.  Original IP payload: udp src 192.168.2.3/53 dst 192.168.2.2/55735.",
+    "<164>Oct 25 2023 14:40:42 myFtdHostname : %FTD-4-313005: No matching connection for ICMP error message: icmp src inside:192.168.2.2 dst outside:myComputer1.myDomain.com (type 3, code 3) on inside interface.  Original IP payload: udp src myComputer1.myDomain.com/53 dst 192.168.2.2/58164.",
+    "<172>Apr 25 2025 17:46:08 myFtdHostname : %FTD-4-313005: No matching connection for ICMP error message: icmp src outside:192.168.2.2(9999:my_SgtName) dst inside:192.168.2.3 (type 3, code 3) on inside interface. Original IP payload: <unknown>.",
+    "<165>%FTD-5-305013: Asymmetric NAT rules matched for forward and reverse flows; Connection for tcp src WAN-PROV:192.168.2.50/556(LOCAL\\charlie) dst LAN:10.0.0.555/7000 denied due to NAT reverse path failure",
+    "<163>%FTD-3-210007: LU allocate xlate failed for dynamic-nat ICMP translation from WAN-PROV:81.2.69.142/0 (81.2.69.142/0) to WAN-PROV:81.2.69.143/0 (10.1.100.200/137)",
+    "<164>%FTD-4-401004: Shunned packet: 1.128.0.10 ==> 1.128.0.20 on interface WAN",
+    "<164>%FTD-4-500004: Invalid transport field for protocol=TCP, from 81.2.69.192/44098 to 81.2.69.193/0",
+    "<163>%FTD-3-305006: regular translation creation failed for icmp src any:81.2.69.195 dst WAN-PROV:81.2.69.200 (type 3, code 0)",
+    "<164>%FTD-4-113042: Non-HTTP connection from WAN-PROV:10.1.10.16/61002 to LAN:10.1.8.22/444 denied by redirect filter; only HTTP connections are supported for redirection.",
+    "<164>Jul 16 2024 12:30:30: %FTD-4-722051: Group <ADM-AnyConnectGroup> User <Test User 1> IP <1.128.0.10> IPv4 Address <1.128.0.20> IPv6 address <::> assigned to session",
+    "<164>Jul 16 2024 12:30:30: %FTD-5-305013: Asymmetric NAT rules matched for forward and reverse flows; Connection for protocol 47 src outside.int:175.16.199.1 dst inside.int:216.160.83.56 denied due to NAT reverse path failure",
+    "<164>Jul 16 2024 12:30:30: %FTD-6-302023: Teardown director TCP connection for INSIDE:192.168.2.2/49001 to OUTSIDE:81.2.69.195/443 duration 0:00:30 forwarded bytes 0 Cluster flow with CLU closed on owner",
+    "<164>Jul 16 2024 12:30:30: %FTD-6-302023: Teardown backup TCP connection for INSIDE:192.168.2.2/49001 to OUTSIDE:81.2.69.195/443 duration 0:00:12 forwarded bytes 5282 Cluster flow with CLU closed on owner",
+    "2019-08-16T09:39:03Z myhost %FTD-1-103001: (Secondary) No response from other firewall (reason code = 4).",
+    "<166>Feb 01 2025 21:57:35 hit_count : %FTD-6-113008: AAA transaction status ACCEPT : user = nice_guy",
+    "<166>Feb 01 2025 21:57:35 hit_count : %FTD-6-113009: AAA retrieved default group policy (DEF_REMOTE_VPN_GROUP) for user = nice_guy",
+    "<166>Feb 01 2025 18:41:45 hit_count : %FTD-6-113014: AAA authentication server not accessible : server = 10.10.10.6 : user = *****",
+    "<166>Feb 01 2025 18:43:42 hit_count : %FTD-6-113014: AAA authentication server not accessible : server =  10.10.10.10 : user = *****",
+    "<165>Feb 01 2025 21:57:37 hit_count : %FTD-5-109201: UAUTH: Session=0x07802000, User=abbie_normal, Assigned IP=10.0.10.101, Succeeded adding entry.",
+    "<165>Feb 01 2025 21:56:23 hit_count : %FTD-5-109207: UAUTH: Session=0x07676000, User=abbie, Assigned IP=10.0.10.109, Succeeded updating entry.",
+    "<165>Feb 01 2025 21:57:53 hit_count : %FTD-5-109210: UAUTH: Session=0x07800000, User=drew, Assigned IP=10.0.10.111, Succeeded removing entry.",
+    "<165>Feb 01 2025 12:00:51: %ASA-5-111008: User 'vold-sauron' executed the 'enable' command.",
+    "<166>Feb 01 2025 22:08:01 hit_count : %FTD-6-210022: LU missed 1 updates",
+    "<182>2025-02-03T18:41:19Z herndon : %FTD-6-305012: Teardown dynamic UDP translation from any:10.1.1.9/23455(LOCAL\\bowser) to WAN:10.2.2.6/23455 duration 0:02:33",
+    "<182>2025-02-03T18:41:19Z herndon : %FTD-6-305012: Teardown dynamic UDP translation from any:10.1.1.9/23455(LOCAL\\\\bowser) to WAN:10.2.2.6/23455 duration 0:02:33",
+    "<166>Feb 01 2025 21:58:39 hit_count : %FTD-6-602101: PMTU-D packet 1480 bytes greater than effective mtu 1390, dest_addr=10.2.2.8, src_addr=10.1.1.3, prot=UDP",
+    "<166>Feb 01 2025 22:32:34 hit_count : %FTD-6-716002: Group <RA_VPN_GP> User <teddy> IP <10.4.3.5> WebVPN session terminated: User Requested.",
+    "<166>Feb 01 2025 18:41:47 hit_count : %FTD-6-716058: Group <RA_VPN> User <teddy> IP <10.6.7.9> AnyConnect session lost connection. Waiting to resume.",
+    "<166>Feb 01 2025 18:42:16 hit_count : %FTD-6-716059: Group <RA_VPN> User <otto> IP <10.6.7.9> AnyConnect session resumed connection from IP <10.7.7.9>.",
+    "<164>Feb 01 2025 18:42:03 hit_count : %FTD-4-722051: Group <RA_VPN_GP> User <otto> IP <10.5.2.6> IPv4 Address <10.7.9.159> IPv6 address <::> assigned to session",
+    "<166>Feb 01 2025 21:57:37 hit_count : %FTD-6-722055: Group <RA_VPN_GP> User <sisyphus> IP <10.2.3.9> Client Type: Cisco AnyConnect VPN Agent for Windows 5.1.6.103",
+    "<167>Feb 01 2025 21:57:37 hit_count : %FTD-7-746012: user-identity: Add IP-User mapping 10.7.5.8 - LOCAL\\dreyfuss Succeeded - VPN user",
+    "<167>Feb 01 2025 21:57:37 hit_count : %FTD-7-746012: user-identity: Add IP-User mapping 10.7.5.8 - LOCAL\\dreyfuss Failure - VPN user",
+    "<167>Feb 01 2025 21:57:53 hit_count : %FTD-7-746013: user-identity: Delete IP-User mapping 10.7.9.4 - LOCAL\\stewart Succeeded - VPN user logout",
+    "<182>2025-03-06T16:54:27Z seattle : %FTD-6-302304: Teardown TCP state-bypass connection 123456789 from carpal-tunnel1:10.123.1.23/38110 to EL_BOW2:10.0.10.123/6379 duration  0:02:02 bytes 54 Connection timeout"
+  ],
+  "expected_outputs": [
+    {
+      "@timestamp": "2022-09-29T15:00:15.000Z",
+      "cisco": {
+        "ftd": {
+          "tunnel_type": "LAN-to-LAN"
+        }
+      },
+      "destination": {
+        "address": "192.168.0.38",
+        "ip": "192.168.0.38"
+      },
+      "ecs": {
+        "version": "8.17.0"
+      },
+      "event": {
+        "action": "created",
+        "code": "602303",
+        "original": "<166>Sep 29 2022 15:00:15 hosty : %FTD-6-602303: IPSEC: An outbound LAN-to-LAN SA (SPI= 0xF0079F5A) between 192.168.0.139 and 192.168.0.38 (user= 192.168.0.38) has been created.",
+        "outcome": "success",
+        "severity": 6,
+        "timezone": "UTC"
+      },
+      "host": {
+        "hostname": "hosty"
+      },
+      "log": {
+        "level": "informational",
+        "syslog": {
+          "facility": {
+            "code": 20
+          },
+          "priority": 166,
+          "severity": {
+            "code": 6
+          }
+        }
+      },
+      "network": {
+        "type": "ipsec"
+      },
+      "observer": {
+        "hostname": "hosty",
+        "product": "ftd",
+        "type": "idps",
+        "vendor": "Cisco"
+      },
+      "related": {
+        "hosts": [
+          "hosty"
+        ],
+        "ip": [
+          "192.168.0.139",
+          "192.168.0.38"
+        ],
+        "user": [
+          "192.168.0.38"
+        ]
+      },
+      "source": {
+        "address": "192.168.0.139",
+        "ip": "192.168.0.139"
+      },
+      "tags": [
+        "preserve_original_event"
+      ],
+      "user": {
+        "name": "192.168.0.38"
+      }
+    },
+    {
+      "@timestamp": "2022-09-29T15:00:15.000Z",
+      "cisco": {
+        "ftd": {
+          "tunnel_type": "LAN-to-LAN"
+        }
+      },
+      "destination": {
+        "address": "192.168.0.139",
+        "ip": "192.168.0.139"
+      },
+      "ecs": {
+        "version": "8.17.0"
+      },
+      "event": {
+        "action": "deleted",
+        "category": [
+          "network"
+        ],
+        "code": "602304",
+        "kind": "event",
+        "original": "<166>Sep 29 2022 15:00:15 hosty : %FTD-6-602304: IPSEC: An inbound LAN-to-LAN SA (SPI= 0xEAEE970F) between 192.168.0.38 and 192.168.0.139 (user= 192.168.0.38) has been deleted.",
+        "outcome": "success",
+        "severity": 6,
+        "timezone": "UTC",
+        "type": [
+          "info",
+          "end",
+          "allowed"
+        ]
+      },
+      "host": {
+        "hostname": "hosty"
+      },
+      "log": {
+        "level": "informational",
+        "syslog": {
+          "facility": {
+            "code": 20
+          },
+          "priority": 166,
+          "severity": {
+            "code": 6
+          }
+        }
+      },
+      "network": {
+        "type": "ipsec"
+      },
+      "observer": {
+        "hostname": "hosty",
+        "product": "ftd",
+        "type": "idps",
+        "vendor": "Cisco"
+      },
+      "related": {
+        "hosts": [
+          "hosty"
+        ],
+        "ip": [
+          "192.168.0.38",
+          "192.168.0.139"
+        ],
+        "user": [
+          "192.168.0.38"
+        ]
+      },
+      "source": {
+        "address": "192.168.0.38",
+        "ip": "192.168.0.38"
+      },
+      "tags": [
+        "preserve_original_event"
+      ],
+      "user": {
+        "name": "192.168.0.38"
+      }
+    },
+    {
+      "destination": {
+        "address": "192.168.0.38",
+        "ip": "192.168.0.38"
+      },
+      "ecs": {
+        "version": "8.17.0"
+      },
+      "event": {
+        "action": "logon-failed",
+        "code": "113005",
+        "original": "<166>ACA1a-FW-FTDV01 %FTD-6-113005: AAA user authentication Rejected : reason = AAA failure : server = 192.168.0.38 : user = scan : user IP = 192.168.0.139",
+        "outcome": "failure",
+        "severity": 6,
+        "timezone": "UTC"
+      },
+      "host": {
+        "hostname": "ACA1a-FW-FTDV01"
+      },
+      "log": {
+        "level": "informational",
+        "syslog": {
+          "facility": {
+            "code": 20
+          },
+          "priority": 166,
+          "severity": {
+            "code": 6
+          }
+        }
+      },
+      "observer": {
+        "hostname": "ACA1a-FW-FTDV01",
+        "product": "ftd",
+        "type": "idps",
+        "vendor": "Cisco"
+      },
+      "related": {
+        "hosts": [
+          "ACA1a-FW-FTDV01"
+        ],
+        "ip": [
+          "192.168.0.139",
+          "192.168.0.38"
+        ],
+        "user": [
+          "scan"
+        ]
+      },
+      "source": {
+        "address": "192.168.0.139",
+        "ip": "192.168.0.139",
+        "user": {
+          "name": "scan"
+        }
+      },
+      "tags": [
+        "preserve_original_event"
+      ]
+    },
+    {
+      "destination": {
+        "address": "192.168.0.38",
+        "ip": "192.168.0.38"
+      },
+      "ecs": {
+        "version": "8.17.0"
+      },
+      "event": {
+        "action": "logon-failed",
+        "code": "113005",
+        "original": "<166>%FTD-6-113005: AAA user authentication Rejected : reason = AAA failure : server = 192.168.0.38 : user = ***** : user IP = 192.168.0.139",
+        "outcome": "failure",
+        "severity": 6,
+        "timezone": "UTC"
+      },
+      "log": {
+        "level": "informational",
+        "syslog": {
+          "facility": {
+            "code": 20
+          },
+          "priority": 166,
+          "severity": {
+            "code": 6
+          }
+        }
+      },
+      "observer": {
+        "product": "ftd",
+        "type": "idps",
+        "vendor": "Cisco"
+      },
+      "related": {
+        "ip": [
+          "192.168.0.139",
+          "192.168.0.38"
+        ]
+      },
+      "source": {
+        "address": "192.168.0.139",
+        "ip": "192.168.0.139"
+      },
+      "tags": [
+        "preserve_original_event"
+      ]
+    },
+    {
+      "ecs": {
+        "version": "8.17.0"
+      },
+      "event": {
+        "action": "firewall-rule",
+        "category": [
+          "network"
+        ],
+        "code": "852002",
+        "kind": "event",
+        "original": "<166>:Feb 26 11:26:52 UTC: %FTD--6-852002: Received Full Proxy to Lightweight event from application Snort for TCP flow 10.10.10.10/710 to 11.22.33.44/47873",
+        "severity": 6,
+        "timezone": "UTC",
+        "type": [
+          "info"
+        ]
+      },
+      "log": {
+        "level": "informational",
+        "syslog": {
+          "facility": {
+            "code": 20
+          },
+          "priority": 166,
+          "severity": {
+            "code": 6
+          }
+        }
+      },
+      "observer": {
+        "product": "ftd",
+        "type": "idps",
+        "vendor": "Cisco"
+      },
+      "tags": [
+        "preserve_original_event"
+      ]
+    },
+    {
+      "cisco": {
+        "ftd": {
+          "destination_interface": "New-Outside",
+          "icmp_code": 3,
+          "icmp_type": 3,
+          "source_interface": "LAN"
+        }
+      },
+      "destination": {
+        "address": "10.8.0.10",
+        "ip": "10.8.0.10",
+        "port": 41330
+      },
+      "ecs": {
+        "version": "8.17.0"
+      },
+      "event": {
+        "action": "firewall-rule",
+        "category": [
+          "network"
+        ],
+        "code": "313005",
+        "kind": "event",
+        "original": "<164>%FTD-4-313005: No matching connection for ICMP error message: icmp src LAN:10.8.0.10 dst New-Outside:10.10.4.100 (type 3, code 3) on LAN interface.  Original IP payload: udp src 10.10.4.100/53 dst 10.8.0.10/41330.",
+        "severity": 4,
+        "timezone": "UTC",
+        "type": [
+          "info"
+        ]
+      },
+      "input": {
+        "type": "udp"
+      },
+      "log": {
+        "level": "warning",
+        "syslog": {
+          "facility": {
+            "code": 20
+          },
+          "priority": 164,
+          "severity": {
+            "code": 4
+          }
+        }
+      },
+      "network": {
+        "community_id": "1:EVFv0LUg6Q2zngisOhg4EkD4fD8=",
+        "iana_number": "1",
+        "transport": "icmp"
+      },
+      "observer": {
+        "egress": {
+          "interface": {
+            "name": "New-Outside"
+          }
+        },
+        "ingress": {
+          "interface": {
+            "name": "LAN"
+          }
+        },
+        "product": "ftd",
+        "type": "idps",
+        "vendor": "Cisco"
+      },
+      "related": {
+        "ip": [
+          "10.10.4.100",
+          "10.8.0.10"
+        ]
+      },
+      "source": {
+        "address": "10.10.4.100",
+        "ip": "10.10.4.100",
+        "port": 53
+      },
+      "tags": [
+        "preserve_original_event"
+      ]
+    },
+    {
+      "@timestamp": "2025-05-05T17:51:17.000Z",
+      "cisco": {
+        "ftd": {
+          "destination_interface": "dstif",
+          "icmp_code": 3,
+          "icmp_type": 3,
+          "source_interface": "srcif"
+        }
+      },
+      "destination": {
+        "address": "192.168.2.3",
+        "ip": "192.168.2.3",
+        "port": 10872
+      },
+      "ecs": {
+        "version": "8.17.0"
+      },
+      "event": {
+        "action": "firewall-rule",
+        "category": [
+          "network"
+        ],
+        "code": "313005",
+        "kind": "event",
+        "original": "May  5 17:51:17 dev01: %FTD-4-313005: No matching connection for ICMP error message: icmp src srcif:192.168.2.2 dst dstif:192.168.2.3 (type 3, code 3) on myif interface. Original IP payload: udp src 192.168.2.2/53 dst 192.168.2.3/10872.",
+        "severity": 4,
+        "timezone": "UTC",
+        "type": [
+          "info"
+        ]
+      },
+      "host": {
+        "hostname": "dev01"
+      },
+      "input": {
+        "type": "udp"
+      },
+      "log": {
+        "level": "warning"
+      },
+      "network": {
+        "community_id": "1:E6cKJx0lLYUlU1tO5oQTlY25dBg=",
+        "iana_number": "1",
+        "transport": "icmp"
+      },
+      "observer": {
+        "egress": {
+          "interface": {
+            "name": "dstif"
+          }
+        },
+        "hostname": "dev01",
+        "ingress": {
+          "interface": {
+            "name": "srcif"
+          }
+        },
+        "product": "ftd",
+        "type": "idps",
+        "vendor": "Cisco"
+      },
+      "related": {
+        "hosts": [
+          "dev01"
+        ],
+        "ip": [
+          "192.168.2.2",
+          "192.168.2.3"
+        ]
+      },
+      "source": {
+        "address": "192.168.2.2",
+        "ip": "192.168.2.2",
+        "port": 53
+      },
+      "tags": [
+        "preserve_original_event"
+      ]
+    },
+    {
+      "@timestamp": "2025-05-05T17:51:17.000Z",
+      "cisco": {
+        "ftd": {
+          "destination_interface": "dstif",
+          "icmp_code": 3,
+          "icmp_type": 3,
+          "source_interface": "srcif"
+        }
+      },
+      "destination": {
+        "address": "192.168.2.3",
+        "ip": "192.168.2.3",
+        "port": 10872
+      },
+      "ecs": {
+        "version": "8.17.0"
+      },
+      "event": {
+        "action": "firewall-rule",
+        "category": [
+          "network"
+        ],
+        "code": "313005",
+        "kind": "event",
+        "original": "May  5 17:51:17 dev01: %FTD-4-313005: No matching connection for ICMP error message: icmp src srcif:192.168.2.2(LOCAL\\testgroup\\testuser) dst dstif:192.168.2.3 (type 3, code 3) on myif interface.  Original IP payload: udp src 192.168.2.2/53 dst 192.168.2.3/10872.",
+        "severity": 4,
+        "timezone": "UTC",
+        "type": [
+          "info"
+        ]
+      },
+      "host": {
+        "hostname": "dev01"
+      },
+      "input": {
+        "type": "udp"
+      },
+      "log": {
+        "level": "warning"
+      },
+      "network": {
+        "community_id": "1:E6cKJx0lLYUlU1tO5oQTlY25dBg=",
+        "iana_number": "1",
+        "transport": "icmp"
+      },
+      "observer": {
+        "egress": {
+          "interface": {
+            "name": "dstif"
+          }
+        },
+        "hostname": "dev01",
+        "ingress": {
+          "interface": {
+            "name": "srcif"
+          }
+        },
+        "product": "ftd",
+        "type": "idps",
+        "vendor": "Cisco"
+      },
+      "related": {
+        "hosts": [
+          "dev01",
+          "LOCAL"
+        ],
+        "ip": [
+          "192.168.2.2",
+          "192.168.2.3"
+        ],
+        "user": [
+          "testuser"
+        ]
+      },
+      "source": {
+        "address": "192.168.2.2",
+        "ip": "192.168.2.2",
+        "port": 53,
+        "user": {
+          "domain": "LOCAL",
+          "group": {
+            "name": "testgroup"
+          },
+          "name": "testuser"
+        }
+      },
+      "tags": [
+        "preserve_original_event"
+      ]
+    },
+    {
+      "@timestamp": "2025-05-05T17:51:17.000Z",
+      "cisco": {
+        "ftd": {
+          "destination_interface": "dstif",
+          "icmp_code": 3,
+          "icmp_type": 3,
+          "source_interface": "srcif"
+        }
+      },
+      "destination": {
+        "address": "192.168.2.3",
+        "ip": "192.168.2.3",
+        "port": 10872
+      },
+      "ecs": {
+        "version": "8.17.0"
+      },
+      "event": {
+        "action": "firewall-rule",
+        "category": [
+          "network"
+        ],
+        "code": "313005",
+        "kind": "event",
+        "original": "May  5 17:51:17 dev01: %FTD-4-313005: No matching connection for ICMP error message: icmp src srcif:192.168.2.2(LOCAL\\testuser) dst dstif:192.168.2.3 (type 3, code 3) on myif interface.  Original IP payload: udp src 192.168.2.2/53 dst 192.168.2.3/10872.",
+        "severity": 4,
+        "timezone": "UTC",
+        "type": [
+          "info"
+        ]
+      },
+      "host": {
+        "hostname": "dev01"
+      },
+      "input": {
+        "type": "udp"
+      },
+      "log": {
+        "level": "warning"
+      },
+      "network": {
+        "community_id": "1:E6cKJx0lLYUlU1tO5oQTlY25dBg=",
+        "iana_number": "1",
+        "transport": "icmp"
+      },
+      "observer": {
+        "egress": {
+          "interface": {
+            "name": "dstif"
+          }
+        },
+        "hostname": "dev01",
+        "ingress": {
+          "interface": {
+            "name": "srcif"
+          }
+        },
+        "product": "ftd",
+        "type": "idps",
+        "vendor": "Cisco"
+      },
+      "related": {
+        "hosts": [
+          "dev01",
+          "LOCAL"
+        ],
+        "ip": [
+          "192.168.2.2",
+          "192.168.2.3"
+        ],
+        "user": [
+          "testuser"
+        ]
+      },
+      "source": {
+        "address": "192.168.2.2",
+        "ip": "192.168.2.2",
+        "port": 53,
+        "user": {
+          "domain": "LOCAL",
+          "name": "testuser"
+        }
+      },
+      "tags": [
+        "preserve_original_event"
+      ]
+    },
+    {
+      "@timestamp": "2025-05-05T17:51:17.000Z",
+      "cisco": {
+        "ftd": {
+          "destination_interface": "dstif",
+          "icmp_code": 2,
+          "icmp_type": 3,
+          "source_interface": "srcif"
+        }
+      },
+      "destination": {
+        "address": "192.168.2.3",
+        "ip": "192.168.2.3"
+      },
+      "ecs": {
+        "version": "8.17.0"
+      },
+      "event": {
+        "action": "firewall-rule",
+        "category": [
+          "network"
+        ],
+        "code": "313005",
+        "kind": "event",
+        "original": "<188>May  5 17:51:17: %FTD-4-313005: No matching connection for ICMP error message: icmp src srcif:192.168.2.2 dst dstif:192.168.2.3 (type 3, code 2) on srcif interface. Original IP payload: icmp src 192.168.2.2 dst 192.168.2.3 (type 0, code 0).",
+        "severity": 4,
+        "timezone": "UTC",
+        "type": [
+          "info"
+        ]
+      },
+      "input": {
+        "type": "icmp"
+      },
+      "log": {
+        "level": "warning",
+        "syslog": {
+          "facility": {
+            "code": 23
+          },
+          "priority": 188,
+          "severity": {
+            "code": 4
+          }
+        }
+      },
+      "network": {
+        "community_id": "1:E6cKJx0lLYUlU1tO5oQTlY25dBg=",
+        "iana_number": "1",
+        "transport": "icmp"
+      },
+      "observer": {
+        "egress": {
+          "interface": {
+            "name": "dstif"
+          }
+        },
+        "ingress": {
+          "interface": {
+            "name": "srcif"
+          }
+        },
+        "product": "ftd",
+        "type": "idps",
+        "vendor": "Cisco"
+      },
+      "related": {
+        "ip": [
+          "192.168.2.2",
+          "192.168.2.3"
+        ]
+      },
+      "source": {
+        "address": "192.168.2.2",
+        "ip": "192.168.2.2"
+      },
+      "tags": [
+        "preserve_original_event"
+      ]
+    },
+    {
+      "@timestamp": "2025-05-05T17:51:17.000Z",
+      "ecs": {
+        "version": "8.17.0"
+      },
+      "event": {
+        "original": "<188>May  5 17:51:17 dev01: %FTD<Up>-4-313005: No matching connection for ICMP error message: icmp src srcif:192.168.2.2 dst dstif:192.168.2.3 (type 3, code 2) on srcif interface. Original IP payload: protocol 51 src 192.168.2.2 dst 192.168.2.3.",
+        "severity": 7,
+        "timezone": "UTC"
+      },
+      "host": {
+        "hostname": "dev01"
+      },
+      "log": {
+        "level": "debug",
+        "syslog": {
+          "facility": {
+            "code": 23
+          },
+          "priority": 188,
+          "severity": {
+            "code": 4
+          }
+        }
+      },
+      "observer": {
+        "hostname": "dev01",
+        "product": "ftd",
+        "type": "idps",
+        "vendor": "Cisco"
+      },
+      "related": {
+        "hosts": [
+          "dev01"
+        ]
+      },
+      "tags": [
+        "preserve_original_event"
+      ]
+    },
+    {
+      "@timestamp": "2025-05-05T17:51:17.000Z",
+      "ecs": {
+        "version": "8.17.0"
+      },
+      "event": {
+        "original": "<188>May  5 17:51:17 dev01: %FTD<Up>-4-313005: No matching connection for ICMP error message: icmp src Processing:192.168.2.2 dst Office:192.168.2.3 (type 3, code 2) on Processing interface. Original IP payload: udp src 192.168.2.2 dst 192.168.2.3.",
+        "severity": 7,
+        "timezone": "UTC"
+      },
+      "host": {
+        "hostname": "dev01"
+      },
+      "log": {
+        "level": "debug",
+        "syslog": {
+          "facility": {
+            "code": 23
+          },
+          "priority": 188,
+          "severity": {
+            "code": 4
+          }
+        }
+      },
+      "observer": {
+        "hostname": "dev01",
+        "product": "ftd",
+        "type": "idps",
+        "vendor": "Cisco"
+      },
+      "related": {
+        "hosts": [
+          "dev01"
+        ]
+      },
+      "tags": [
+        "preserve_original_event"
+      ]
+    },
+    {
+      "@timestamp": "2023-10-06T10:11:00.000Z",
+      "cisco": {
+        "ftd": {
+          "destination_interface": "inside",
+          "icmp_code": 3,
+          "icmp_type": 3,
+          "source_interface": "outside",
+          "source_user_or_sgt": "9999:my_SgtName"
+        }
+      },
+      "destination": {
+        "address": "192.168.2.2",
+        "ip": "192.168.2.2",
+        "port": 60919
+      },
+      "ecs": {
+        "version": "8.17.0"
+      },
+      "event": {
+        "action": "firewall-rule",
+        "category": [
+          "network"
+        ],
+        "code": "313005",
+        "kind": "event",
+        "original": "<140>Oct 06 2023 10:11:00 myFtdHostname : %FTD-4-313005: No matching connection for ICMP error message: icmp src outside:192.168.2.2(9999:my_SgtName) dst inside:192.168.2.3 (type 3, code 3) on outside interface.  Original IP payload: udp src 192.168.2.3/53 dst 192.168.2.2/60919.",
+        "severity": 4,
+        "timezone": "UTC",
+        "type": [
+          "info"
+        ]
+      },
+      "host": {
+        "hostname": "myFtdHostname"
+      },
+      "input": {
+        "type": "udp"
+      },
+      "log": {
+        "level": "warning",
+        "syslog": {
+          "facility": {
+            "code": 17
+          },
+          "priority": 140,
+          "severity": {
+            "code": 4
+          }
+        }
+      },
+      "network": {
+        "community_id": "1:zMYjZI21SRTU6Nyrh5sa7AIAND4=",
+        "iana_number": "1",
+        "transport": "icmp"
+      },
+      "observer": {
+        "egress": {
+          "interface": {
+            "name": "inside"
+          }
+        },
+        "hostname": "myFtdHostname",
+        "ingress": {
+          "interface": {
+            "name": "outside"
+          }
+        },
+        "product": "ftd",
+        "type": "idps",
+        "vendor": "Cisco"
+      },
+      "related": {
+        "hosts": [
+          "myFtdHostname"
+        ],
+        "ip": [
+          "192.168.2.3",
+          "192.168.2.2"
+        ]
+      },
+      "source": {
+        "address": "192.168.2.3",
+        "ip": "192.168.2.3",
+        "port": 53
+      },
+      "tags": [
+        "preserve_original_event"
+      ]
+    },
+    {
+      "@timestamp": "2023-10-06T10:11:00.000Z",
+      "cisco": {
+        "ftd": {
+          "destination_interface": "inside",
+          "destination_user_or_sgt": "8888:my_SgtNameDst",
+          "icmp_code": 3,
+          "icmp_type": 3,
+          "source_interface": "outside",
+          "source_user_or_sgt": "9999:my_SgtNameSrc"
+        }
+      },
+      "destination": {
+        "address": "192.168.2.2",
+        "ip": "192.168.2.2",
+        "port": 60919
+      },
+      "ecs": {
+        "version": "8.17.0"
+      },
+      "event": {
+        "action": "firewall-rule",
+        "category": [
+          "network"
+        ],
+        "code": "313005",
+        "kind": "event",
+        "original": "<140>Oct 06 2023 10:11:00 myFtdHostname : %FTD-4-313005: No matching connection for ICMP error message: icmp src outside:192.168.2.2(9999:my_SgtNameSrc) dst inside:192.168.2.3(8888:my_SgtNameDst) (type 3, code 3) on outside interface.  Original IP payload: udp src 192.168.2.3/53 dst 192.168.2.2/60919.",
+        "severity": 4,
+        "timezone": "UTC",
+        "type": [
+          "info"
+        ]
+      },
+      "host": {
+        "hostname": "myFtdHostname"
+      },
+      "input": {
+        "type": "udp"
+      },
+      "log": {
+        "level": "warning",
+        "syslog": {
+          "facility": {
+            "code": 17
+          },
+          "priority": 140,
+          "severity": {
+            "code": 4
+          }
+        }
+      },
+      "network": {
+        "community_id": "1:zMYjZI21SRTU6Nyrh5sa7AIAND4=",
+        "iana_number": "1",
+        "transport": "icmp"
+      },
+      "observer": {
+        "egress": {
+          "interface": {
+            "name": "inside"
+          }
+        },
+        "hostname": "myFtdHostname",
+        "ingress": {
+          "interface": {
+            "name": "outside"
+          }
+        },
+        "product": "ftd",
+        "type": "idps",
+        "vendor": "Cisco"
+      },
+      "related": {
+        "hosts": [
+          "myFtdHostname"
+        ],
+        "ip": [
+          "192.168.2.3",
+          "192.168.2.2"
+        ]
+      },
+      "source": {
+        "address": "192.168.2.3",
+        "ip": "192.168.2.3",
+        "port": 53
+      },
+      "tags": [
+        "preserve_original_event"
+      ]
+    },
+    {
+      "@timestamp": "2023-10-06T10:33:23.000Z",
+      "cisco": {
+        "ftd": {
+          "destination_interface": "inside",
+          "icmp_code": 3,
+          "icmp_type": 3,
+          "source_interface": "outside",
+          "source_user_or_sgt": "LOCAL\\myUser1234, 9999:my_SgtName"
+        }
+      },
+      "destination": {
+        "address": "192.168.2.2",
+        "ip": "192.168.2.2",
+        "port": 54860
+      },
+      "ecs": {
+        "version": "8.17.0"
+      },
+      "event": {
+        "action": "firewall-rule",
+        "category": [
+          "network"
+        ],
+        "code": "313005",
+        "kind": "event",
+        "original": "<140>Oct 06 2023 10:33:23 myFtdHostname : %FTD-4-313005: No matching connection for ICMP error message: icmp src outside:192.168.2.2(LOCAL\\myUser1234, 9999:my_SgtName) dst inside:192.168.2.3 (type 3, code 3) on outside interface.  Original IP payload: udp src 192.168.2.3/53 dst 192.168.2.2/54860.",
+        "severity": 4,
+        "timezone": "UTC",
+        "type": [
+          "info"
+        ]
+      },
+      "host": {
+        "hostname": "myFtdHostname"
+      },
+      "input": {
+        "type": "udp"
+      },
+      "log": {
+        "level": "warning",
+        "syslog": {
+          "facility": {
+            "code": 17
+          },
+          "priority": 140,
+          "severity": {
+            "code": 4
+          }
+        }
+      },
+      "network": {
+        "community_id": "1:zMYjZI21SRTU6Nyrh5sa7AIAND4=",
+        "iana_number": "1",
+        "transport": "icmp"
+      },
+      "observer": {
+        "egress": {
+          "interface": {
+            "name": "inside"
+          }
+        },
+        "hostname": "myFtdHostname",
+        "ingress": {
+          "interface": {
+            "name": "outside"
+          }
+        },
+        "product": "ftd",
+        "type": "idps",
+        "vendor": "Cisco"
+      },
+      "related": {
+        "hosts": [
+          "myFtdHostname"
+        ],
+        "ip": [
+          "192.168.2.3",
+          "192.168.2.2"
+        ]
+      },
+      "source": {
+        "address": "192.168.2.3",
+        "ip": "192.168.2.3",
+        "port": 53
+      },
+      "tags": [
+        "preserve_original_event"
+      ]
+    },
+    {
+      "@timestamp": "2023-10-25T06:53:06.000Z",
+      "cisco": {
+        "ftd": {
+          "destination_interface": "inside",
+          "icmp_code": 3,
+          "icmp_type": 3,
+          "source_interface": "outside",
+          "source_user_or_sgt": "LOCAL\\myUser1234$, 9999:my_SgtName"
+        }
+      },
+      "destination": {
+        "address": "192.168.2.2",
+        "ip": "192.168.2.2",
+        "port": 55735
+      },
+      "ecs": {
+        "version": "8.17.0"
+      },
+      "event": {
+        "action": "firewall-rule",
+        "category": [
+          "network"
+        ],
+        "code": "313005",
+        "kind": "event",
+        "original": "<140>Oct 25 2023 06:53:06 myFtdHostname : %FTD-4-313005: No matching connection for ICMP error message: icmp src outside:192.168.2.2(LOCAL\\myUser1234$, 9999:my_SgtName) dst inside:192.168.2.3 (type 3, code 3) on outside interface.  Original IP payload: udp src 192.168.2.3/53 dst 192.168.2.2/55735.",
+        "severity": 4,
+        "timezone": "UTC",
+        "type": [
+          "info"
+        ]
+      },
+      "host": {
+        "hostname": "myFtdHostname"
+      },
+      "input": {
+        "type": "udp"
+      },
+      "log": {
+        "level": "warning",
+        "syslog": {
+          "facility": {
+            "code": 17
+          },
+          "priority": 140,
+          "severity": {
+            "code": 4
+          }
+        }
+      },
+      "network": {
+        "community_id": "1:zMYjZI21SRTU6Nyrh5sa7AIAND4=",
+        "iana_number": "1",
+        "transport": "icmp"
+      },
+      "observer": {
+        "egress": {
+          "interface": {
+            "name": "inside"
+          }
+        },
+        "hostname": "myFtdHostname",
+        "ingress": {
+          "interface": {
+            "name": "outside"
+          }
+        },
+        "product": "ftd",
+        "type": "idps",
+        "vendor": "Cisco"
+      },
+      "related": {
+        "hosts": [
+          "myFtdHostname"
+        ],
+        "ip": [
+          "192.168.2.3",
+          "192.168.2.2"
+        ]
+      },
+      "source": {
+        "address": "192.168.2.3",
+        "ip": "192.168.2.3",
+        "port": 53
+      },
+      "tags": [
+        "preserve_original_event"
+      ]
+    },
+    {
+      "@timestamp": "2023-10-25T14:40:42.000Z",
+      "cisco": {
+        "ftd": {
+          "destination_interface": "outside",
+          "icmp_code": 3,
+          "icmp_type": 3,
+          "source_interface": "inside"
+        }
+      },
+      "destination": {
+        "address": "192.168.2.2",
+        "ip": "192.168.2.2",
+        "port": 58164
+      },
+      "ecs": {
+        "version": "8.17.0"
+      },
+      "event": {
+        "action": "firewall-rule",
+        "category": [
+          "network"
+        ],
+        "code": "313005",
+        "kind": "event",
+        "original": "<164>Oct 25 2023 14:40:42 myFtdHostname : %FTD-4-313005: No matching connection for ICMP error message: icmp src inside:192.168.2.2 dst outside:myComputer1.myDomain.com (type 3, code 3) on inside interface.  Original IP payload: udp src myComputer1.myDomain.com/53 dst 192.168.2.2/58164.",
+        "severity": 4,
+        "timezone": "UTC",
+        "type": [
+          "info"
+        ]
+      },
+      "host": {
+        "hostname": "myFtdHostname"
+      },
+      "input": {
+        "type": "udp"
+      },
+      "log": {
+        "level": "warning",
+        "syslog": {
+          "facility": {
+            "code": 20
+          },
+          "priority": 164,
+          "severity": {
+            "code": 4
+          }
+        }
+      },
+      "network": {
+        "iana_number": "1",
+        "transport": "icmp"
+      },
+      "observer": {
+        "egress": {
+          "interface": {
+            "name": "outside"
+          }
+        },
+        "hostname": "myFtdHostname",
+        "ingress": {
+          "interface": {
+            "name": "inside"
+          }
+        },
+        "product": "ftd",
+        "type": "idps",
+        "vendor": "Cisco"
+      },
+      "related": {
+        "hosts": [
+          "myFtdHostname",
+          "myComputer1.myDomain.com"
+        ],
+        "ip": [
+          "192.168.2.2"
+        ]
+      },
+      "source": {
+        "address": "myComputer1.myDomain.com",
+        "domain": "myComputer1.myDomain.com",
+        "port": 53
+      },
+      "tags": [
+        "preserve_original_event"
+      ]
+    },
+    {
+      "@timestamp": "2025-04-25T17:46:08.000Z",
+      "cisco": {
+        "ftd": {
+          "destination_interface": "inside",
+          "icmp_code": 3,
+          "icmp_type": 3,
+          "source_interface": "outside",
+          "source_user_or_sgt": "9999:my_SgtName"
+        }
+      },
+      "destination": {
+        "address": "192.168.2.3",
+        "ip": "192.168.2.3"
+      },
+      "ecs": {
+        "version": "8.17.0"
+      },
+      "event": {
+        "action": "firewall-rule",
+        "category": [
+          "network"
+        ],
+        "code": "313005",
+        "kind": "event",
+        "original": "<172>Apr 25 2025 17:46:08 myFtdHostname : %FTD-4-313005: No matching connection for ICMP error message: icmp src outside:192.168.2.2(9999:my_SgtName) dst inside:192.168.2.3 (type 3, code 3) on inside interface. Original IP payload: <unknown>.",
+        "severity": 4,
+        "timezone": "UTC",
+        "type": [
+          "info"
+        ]
+      },
+      "host": {
+        "hostname": "myFtdHostname"
+      },
+      "input": {
+        "type": "unknown"
+      },
+      "log": {
+        "level": "warning",
+        "syslog": {
+          "facility": {
+            "code": 21
+          },
+          "priority": 172,
+          "severity": {
+            "code": 4
+          }
+        }
+      },
+      "network": {
+        "community_id": "1:E6cKJx0lLYUlU1tO5oQTlY25dBg=",
+        "iana_number": "1",
+        "transport": "icmp"
+      },
+      "observer": {
+        "egress": {
+          "interface": {
+            "name": "inside"
+          }
+        },
+        "hostname": "myFtdHostname",
+        "ingress": {
+          "interface": {
+            "name": "outside"
+          }
+        },
+        "product": "ftd",
+        "type": "idps",
+        "vendor": "Cisco"
+      },
+      "related": {
+        "hosts": [
+          "myFtdHostname"
+        ],
+        "ip": [
+          "192.168.2.2",
+          "192.168.2.3"
+        ]
+      },
+      "source": {
+        "address": "192.168.2.2",
+        "ip": "192.168.2.2"
+      },
+      "tags": [
+        "preserve_original_event"
+      ]
+    },
+    {
+      "cisco": {
+        "ftd": {
+          "destination_interface": "LAN",
+          "source_interface": "WAN-PROV"
+        }
+      },
+      "destination": {
+        "port": 7000
+      },
+      "ecs": {
+        "version": "8.17.0"
+      },
+      "event": {
+        "action": "firewall-rule",
+        "category": [
+          "network"
+        ],
+        "code": "305013",
+        "kind": "event",
+        "original": "<165>%FTD-5-305013: Asymmetric NAT rules matched for forward and reverse flows; Connection for tcp src WAN-PROV:192.168.2.50/556(LOCAL\\charlie) dst LAN:10.0.0.555/7000 denied due to NAT reverse path failure",
+        "severity": 5,
+        "timezone": "UTC",
+        "type": [
+          "info"
+        ]
+      },
+      "log": {
+        "level": "notification",
+        "syslog": {
+          "facility": {
+            "code": 20
+          },
+          "priority": 165,
+          "severity": {
+            "code": 5
+          }
+        }
+      },
+      "network": {
+        "iana_number": "6",
+        "transport": "tcp"
+      },
+      "observer": {
+        "egress": {
+          "interface": {
+            "name": "LAN"
+          }
+        },
+        "ingress": {
+          "interface": {
+            "name": "WAN-PROV"
+          }
+        },
+        "product": "ftd",
+        "type": "idps",
+        "vendor": "Cisco"
+      },
+      "related": {
+        "user": [
+          "charlie"
+        ]
+      },
+      "source": {
+        "port": 556,
+        "user": {
+          "name": "charlie"
+        }
+      },
+      "tags": [
+        "preserve_original_event"
+      ]
+    },
+    {
+      "cisco": {
+        "ftd": {
+          "destination_interface": "WAN-PROV",
+          "mapped_destination_ip": "10.1.100.200",
+          "mapped_destination_port": 137,
+          "mapped_source_ip": "81.2.69.142",
+          "mapped_source_port": 0,
+          "source_interface": "WAN-PROV",
+          "translation_type": "dynamic-nat"
+        }
+      },
+      "destination": {
+        "address": "81.2.69.143",
+        "geo": {
+          "city_name": "London",
+          "continent_name": "Europe",
+          "country_iso_code": "GB",
+          "country_name": "United Kingdom",
+          "location": {
+            "lat": 51.5142,
+            "lon": -0.0931
+          },
+          "region_iso_code": "GB-ENG",
+          "region_name": "England"
+        },
+        "ip": "81.2.69.143",
+        "nat": {
+          "ip": "10.1.100.200",
+          "port": 137
+        },
+        "port": 0
+      },
+      "ecs": {
+        "version": "8.17.0"
+      },
+      "event": {
+        "action": "firewall-rule",
+        "category": [
+          "network"
+        ],
+        "code": "210007",
+        "kind": "event",
+        "original": "<163>%FTD-3-210007: LU allocate xlate failed for dynamic-nat ICMP translation from WAN-PROV:81.2.69.142/0 (81.2.69.142/0) to WAN-PROV:81.2.69.143/0 (10.1.100.200/137)",
+        "severity": 3,
+        "timezone": "UTC",
+        "type": [
+          "info"
+        ]
+      },
+      "log": {
+        "level": "error",
+        "syslog": {
+          "facility": {
+            "code": 20
+          },
+          "priority": 163,
+          "severity": {
+            "code": 3
+          }
+        }
+      },
+      "network": {
+        "protocol": "icmp"
+      },
+      "observer": {
+        "egress": {
+          "interface": {
+            "name": "WAN-PROV"
+          }
+        },
+        "ingress": {
+          "interface": {
+            "name": "WAN-PROV"
+          }
+        },
+        "product": "ftd",
+        "type": "idps",
+        "vendor": "Cisco"
+      },
+      "related": {
+        "ip": [
+          "81.2.69.142",
+          "81.2.69.143",
+          "10.1.100.200"
+        ]
+      },
+      "source": {
+        "address": "81.2.69.142",
+        "geo": {
+          "city_name": "London",
+          "continent_name": "Europe",
+          "country_iso_code": "GB",
+          "country_name": "United Kingdom",
+          "location": {
+            "lat": 51.5142,
+            "lon": -0.0931
+          },
+          "region_iso_code": "GB-ENG",
+          "region_name": "England"
+        },
+        "ip": "81.2.69.142",
+        "port": 0
+      },
+      "tags": [
+        "preserve_original_event"
+      ]
+    },
+    {
+      "cisco": {
+        "ftd": {
+          "destination_interface": "WAN"
+        }
+      },
+      "destination": {
+        "address": "1.128.0.20",
+        "as": {
+          "number": 1221,
+          "organization": {
+            "name": "Telstra Pty Ltd"
+          }
+        },
+        "ip": "1.128.0.20"
+      },
+      "ecs": {
+        "version": "8.17.0"
+      },
+      "event": {
+        "action": "firewall-rule",
+        "category": [
+          "network"
+        ],
+        "code": "401004",
+        "kind": "event",
+        "original": "<164>%FTD-4-401004: Shunned packet: 1.128.0.10 ==> 1.128.0.20 on interface WAN",
+        "severity": 4,
+        "timezone": "UTC",
+        "type": [
+          "info"
+        ]
+      },
+      "log": {
+        "level": "warning",
+        "syslog": {
+          "facility": {
+            "code": 20
+          },
+          "priority": 164,
+          "severity": {
+            "code": 4
+          }
+        }
+      },
+      "observer": {
+        "egress": {
+          "interface": {
+            "name": "WAN"
+          }
+        },
+        "product": "ftd",
+        "type": "idps",
+        "vendor": "Cisco"
+      },
+      "related": {
+        "ip": [
+          "1.128.0.10",
+          "1.128.0.20"
+        ]
+      },
+      "source": {
+        "address": "1.128.0.10",
+        "as": {
+          "number": 1221,
+          "organization": {
+            "name": "Telstra Pty Ltd"
+          }
+        },
+        "ip": "1.128.0.10"
+      },
+      "tags": [
+        "preserve_original_event"
+      ]
+    },
+    {
+      "destination": {
+        "address": "81.2.69.193",
+        "geo": {
+          "city_name": "London",
+          "continent_name": "Europe",
+          "country_iso_code": "GB",
+          "country_name": "United Kingdom",
+          "location": {
+            "lat": 51.5142,
+            "lon": -0.0931
+          },
+          "region_iso_code": "GB-ENG",
+          "region_name": "England"
+        },
+        "ip": "81.2.69.193",
+        "port": 0
+      },
+      "ecs": {
+        "version": "8.17.0"
+      },
+      "event": {
+        "action": "firewall-rule",
+        "category": [
+          "network"
+        ],
+        "code": "500004",
+        "kind": "event",
+        "original": "<164>%FTD-4-500004: Invalid transport field for protocol=TCP, from 81.2.69.192/44098 to 81.2.69.193/0",
+        "severity": 4,
+        "timezone": "UTC",
+        "type": [
+          "info"
+        ]
+      },
+      "log": {
+        "level": "warning",
+        "syslog": {
+          "facility": {
+            "code": 20
+          },
+          "priority": 164,
+          "severity": {
+            "code": 4
+          }
+        }
+      },
+      "network": {
+        "iana_number": "6",
+        "transport": "tcp"
+      },
+      "observer": {
+        "product": "ftd",
+        "type": "idps",
+        "vendor": "Cisco"
+      },
+      "related": {
+        "ip": [
+          "81.2.69.192",
+          "81.2.69.193"
+        ]
+      },
+      "source": {
+        "address": "81.2.69.192",
+        "geo": {
+          "city_name": "London",
+          "continent_name": "Europe",
+          "country_iso_code": "GB",
+          "country_name": "United Kingdom",
+          "location": {
+            "lat": 51.5142,
+            "lon": -0.0931
+          },
+          "region_iso_code": "GB-ENG",
+          "region_name": "England"
+        },
+        "ip": "81.2.69.192",
+        "port": 44098
+      },
+      "tags": [
+        "preserve_original_event"
+      ]
+    },
+    {
+      "cisco": {
+        "ftd": {
+          "destination_interface": "WAN-PROV",
+          "icmp_code": 0,
+          "icmp_type": 3,
+          "source_interface": "any",
+          "translation_type": "regular"
+        }
+      },
+      "destination": {
+        "address": "81.2.69.200",
+        "geo": {
+          "city_name": "London",
+          "continent_name": "Europe",
+          "country_iso_code": "GB",
+          "country_name": "United Kingdom",
+          "location": {
+            "lat": 51.5142,
+            "lon": -0.0931
+          },
+          "region_iso_code": "GB-ENG",
+          "region_name": "England"
+        },
+        "ip": "81.2.69.200"
+      },
+      "ecs": {
+        "version": "8.17.0"
+      },
+      "event": {
+        "action": "firewall-rule",
+        "category": [
+          "network"
+        ],
+        "code": "305006",
+        "kind": "event",
+        "original": "<163>%FTD-3-305006: regular translation creation failed for icmp src any:81.2.69.195 dst WAN-PROV:81.2.69.200 (type 3, code 0)",
+        "severity": 3,
+        "timezone": "UTC",
+        "type": [
+          "info"
+        ]
+      },
+      "log": {
+        "level": "error",
+        "syslog": {
+          "facility": {
+            "code": 20
+          },
+          "priority": 163,
+          "severity": {
+            "code": 3
+          }
+        }
+      },
+      "network": {
+        "protocol": "icmp"
+      },
+      "observer": {
+        "egress": {
+          "interface": {
+            "name": "WAN-PROV"
+          }
+        },
+        "ingress": {
+          "interface": {
+            "name": "any"
+          }
+        },
+        "product": "ftd",
+        "type": "idps",
+        "vendor": "Cisco"
+      },
+      "related": {
+        "ip": [
+          "81.2.69.195",
+          "81.2.69.200"
+        ]
+      },
+      "source": {
+        "address": "81.2.69.195",
+        "geo": {
+          "city_name": "London",
+          "continent_name": "Europe",
+          "country_iso_code": "GB",
+          "country_name": "United Kingdom",
+          "location": {
+            "lat": 51.5142,
+            "lon": -0.0931
+          },
+          "region_iso_code": "GB-ENG",
+          "region_name": "England"
+        },
+        "ip": "81.2.69.195"
+      },
+      "tags": [
+        "preserve_original_event"
+      ]
+    },
+    {
+      "cisco": {
+        "ftd": {
+          "destination_interface": "LAN",
+          "source_interface": "WAN-PROV"
+        }
+      },
+      "destination": {
+        "address": "10.1.8.22",
+        "ip": "10.1.8.22",
+        "port": 444
+      },
+      "ecs": {
+        "version": "8.17.0"
+      },
+      "event": {
+        "action": "firewall-rule",
+        "category": [
+          "network"
+        ],
+        "code": "113042",
+        "kind": "event",
+        "original": "<164>%FTD-4-113042: Non-HTTP connection from WAN-PROV:10.1.10.16/61002 to LAN:10.1.8.22/444 denied by redirect filter; only HTTP connections are supported for redirection.",
+        "severity": 4,
+        "timezone": "UTC",
+        "type": [
+          "info"
+        ]
+      },
+      "log": {
+        "level": "warning",
+        "syslog": {
+          "facility": {
+            "code": 20
+          },
+          "priority": 164,
+          "severity": {
+            "code": 4
+          }
+        }
+      },
+      "observer": {
+        "egress": {
+          "interface": {
+            "name": "LAN"
+          }
+        },
+        "ingress": {
+          "interface": {
+            "name": "WAN-PROV"
+          }
+        },
+        "product": "ftd",
+        "type": "idps",
+        "vendor": "Cisco"
+      },
+      "related": {
+        "ip": [
+          "10.1.10.16",
+          "10.1.8.22"
+        ]
+      },
+      "source": {
+        "address": "10.1.10.16",
+        "ip": "10.1.10.16",
+        "port": 61002
+      },
+      "tags": [
+        "preserve_original_event"
+      ]
+    },
+    {
+      "@timestamp": "2024-07-16T12:30:30.000Z",
+      "cisco": {
+        "ftd": {
+          "assigned_ip": "1.128.0.20",
+          "assigned_ipv6": "::",
+          "webvpn": {
+            "group_name": "ADM-AnyConnectGroup"
+          }
+        }
+      },
+      "ecs": {
+        "version": "8.17.0"
+      },
+      "event": {
+        "action": "firewall-rule",
+        "category": [
+          "network"
+        ],
+        "code": "722051",
+        "kind": "event",
+        "original": "<164>Jul 16 2024 12:30:30: %FTD-4-722051: Group <ADM-AnyConnectGroup> User <Test User 1> IP <1.128.0.10> IPv4 Address <1.128.0.20> IPv6 address <::> assigned to session",
+        "severity": 4,
+        "timezone": "UTC",
+        "type": [
+          "info"
+        ]
+      },
+      "log": {
+        "level": "warning",
+        "syslog": {
+          "facility": {
+            "code": 20
+          },
+          "priority": 164,
+          "severity": {
+            "code": 4
+          }
+        }
+      },
+      "observer": {
+        "product": "ftd",
+        "type": "idps",
+        "vendor": "Cisco"
+      },
+      "related": {
+        "ip": [
+          "1.128.0.10"
+        ],
+        "user": [
+          "Test User 1"
+        ]
+      },
+      "source": {
+        "address": "1.128.0.10",
+        "as": {
+          "number": 1221,
+          "organization": {
+            "name": "Telstra Pty Ltd"
+          }
+        },
+        "ip": "1.128.0.10",
+        "user": {
+          "name": "Test User 1"
+        }
+      },
+      "tags": [
+        "preserve_original_event"
+      ]
+    },
+    {
+      "@timestamp": "2024-07-16T12:30:30.000Z",
+      "cisco": {
+        "ftd": {
+          "destination_interface": "inside.int",
+          "source_interface": "outside.int"
+        }
+      },
+      "ecs": {
+        "version": "8.17.0"
+      },
+      "event": {
+        "action": "firewall-rule",
+        "category": [
+          "network"
+        ],
+        "code": "305013",
+        "kind": "event",
+        "original": "<164>Jul 16 2024 12:30:30: %FTD-5-305013: Asymmetric NAT rules matched for forward and reverse flows; Connection for protocol 47 src outside.int:175.16.199.1 dst inside.int:216.160.83.56 denied due to NAT reverse path failure",
+        "severity": 5,
+        "timezone": "UTC",
+        "type": [
+          "info"
+        ]
+      },
+      "log": {
+        "level": "notification",
+        "syslog": {
+          "facility": {
+            "code": 20
+          },
+          "priority": 164,
+          "severity": {
+            "code": 4
+          }
+        }
+      },
+      "network": {
+        "iana_number": "47"
+      },
+      "observer": {
+        "egress": {
+          "interface": {
+            "name": "inside.int"
+          }
+        },
+        "ingress": {
+          "interface": {
+            "name": "outside.int"
+          }
+        },
+        "product": "ftd",
+        "type": "idps",
+        "vendor": "Cisco"
+      },
+      "tags": [
+        "preserve_original_event"
+      ]
+    },
+    {
+      "@timestamp": "2024-07-16T12:30:30.000Z",
+      "cisco": {
+        "ftd": {
+          "destination_interface": "OUTSIDE",
+          "source_interface": "INSIDE"
+        }
+      },
+      "destination": {
+        "address": "81.2.69.195",
+        "geo": {
+          "city_name": "London",
+          "continent_name": "Europe",
+          "country_iso_code": "GB",
+          "country_name": "United Kingdom",
+          "location": {
+            "lat": 51.5142,
+            "lon": -0.0931
+          },
+          "region_iso_code": "GB-ENG",
+          "region_name": "England"
+        },
+        "ip": "81.2.69.195",
+        "port": 443
+      },
+      "ecs": {
+        "version": "8.17.0"
+      },
+      "event": {
+        "action": "firewall-rule",
+        "category": [
+          "network"
+        ],
+        "code": "302023",
+        "duration": 30000000000,
+        "end": "2024-07-16T12:30:30.000Z",
+        "kind": "event",
+        "original": "<164>Jul 16 2024 12:30:30: %FTD-6-302023: Teardown director TCP connection for INSIDE:192.168.2.2/49001 to OUTSIDE:81.2.69.195/443 duration 0:00:30 forwarded bytes 0 Cluster flow with CLU closed on owner",
+        "reason": "Cluster flow with CLU closed on owner",
+        "severity": 6,
+        "start": "2024-07-16T12:30:00.000Z",
+        "timezone": "UTC",
+        "type": [
+          "info"
+        ]
+      },
+      "log": {
+        "level": "informational",
+        "syslog": {
+          "facility": {
+            "code": 20
+          },
+          "priority": 164,
+          "severity": {
+            "code": 4
+          }
+        }
+      },
+      "network": {
+        "bytes": 0,
+        "community_id": "1:i+psADbWmOtDAm9HJcmOsYQTd+c=",
+        "iana_number": "6",
+        "transport": "tcp"
+      },
+      "observer": {
+        "egress": {
+          "interface": {
+            "name": "OUTSIDE"
+          }
+        },
+        "ingress": {
+          "interface": {
+            "name": "INSIDE"
+          }
+        },
+        "product": "ftd",
+        "type": "idps",
+        "vendor": "Cisco"
+      },
+      "related": {
+        "ip": [
+          "192.168.2.2",
+          "81.2.69.195"
+        ]
+      },
+      "source": {
+        "address": "192.168.2.2",
+        "ip": "192.168.2.2",
+        "port": 49001
+      },
+      "tags": [
+        "preserve_original_event"
+      ]
+    },
+    {
+      "@timestamp": "2024-07-16T12:30:30.000Z",
+      "cisco": {
+        "ftd": {
+          "destination_interface": "OUTSIDE",
+          "source_interface": "INSIDE"
+        }
+      },
+      "destination": {
+        "address": "81.2.69.195",
+        "geo": {
+          "city_name": "London",
+          "continent_name": "Europe",
+          "country_iso_code": "GB",
+          "country_name": "United Kingdom",
+          "location": {
+            "lat": 51.5142,
+            "lon": -0.0931
+          },
+          "region_iso_code": "GB-ENG",
+          "region_name": "England"
+        },
+        "ip": "81.2.69.195",
+        "port": 443
+      },
+      "ecs": {
+        "version": "8.17.0"
+      },
+      "event": {
+        "action": "firewall-rule",
+        "category": [
+          "network"
+        ],
+        "code": "302023",
+        "duration": 12000000000,
+        "end": "2024-07-16T12:30:30.000Z",
+        "kind": "event",
+        "original": "<164>Jul 16 2024 12:30:30: %FTD-6-302023: Teardown backup TCP connection for INSIDE:192.168.2.2/49001 to OUTSIDE:81.2.69.195/443 duration 0:00:12 forwarded bytes 5282 Cluster flow with CLU closed on owner",
+        "reason": "Cluster flow with CLU closed on owner",
+        "severity": 6,
+        "start": "2024-07-16T12:30:18.000Z",
+        "timezone": "UTC",
+        "type": [
+          "info"
+        ]
+      },
+      "log": {
+        "level": "informational",
+        "syslog": {
+          "facility": {
+            "code": 20
+          },
+          "priority": 164,
+          "severity": {
+            "code": 4
+          }
+        }
+      },
+      "network": {
+        "bytes": 5282,
+        "community_id": "1:i+psADbWmOtDAm9HJcmOsYQTd+c=",
+        "iana_number": "6",
+        "transport": "tcp"
+      },
+      "observer": {
+        "egress": {
+          "interface": {
+            "name": "OUTSIDE"
+          }
+        },
+        "ingress": {
+          "interface": {
+            "name": "INSIDE"
+          }
+        },
+        "product": "ftd",
+        "type": "idps",
+        "vendor": "Cisco"
+      },
+      "related": {
+        "ip": [
+          "192.168.2.2",
+          "81.2.69.195"
+        ]
+      },
+      "source": {
+        "address": "192.168.2.2",
+        "ip": "192.168.2.2",
+        "port": 49001
+      },
+      "tags": [
+        "preserve_original_event"
+      ]
+    },
+    {
+      "@timestamp": "2019-08-16T09:39:03.000Z",
+      "ecs": {
+        "version": "8.17.0"
+      },
+      "event": {
+        "action": "firewall-rule",
+        "category": [
+          "network"
+        ],
+        "code": "103001",
+        "kind": "event",
+        "original": "2019-08-16T09:39:03Z myhost %FTD-1-103001: (Secondary) No response from other firewall (reason code = 4).",
+        "reason": "(Secondary) No response from other firewall (reason code = 4).",
+        "severity": 1,
+        "timezone": "UTC",
+        "type": [
+          "info"
+        ]
+      },
+      "host": {
+        "hostname": "myhost"
+      },
+      "log": {
+        "level": "alert"
+      },
+      "observer": {
+        "hostname": "myhost",
+        "product": "ftd",
+        "type": "idps",
+        "vendor": "Cisco"
+      },
+      "related": {
+        "hosts": [
+          "myhost"
+        ]
+      },
+      "tags": [
+        "preserve_original_event"
+      ]
+    },
+    {
+      "@timestamp": "2025-02-01T21:57:35.000Z",
+      "ecs": {
+        "version": "8.17.0"
+      },
+      "event": {
+        "action": "logged-in",
+        "code": "113008",
+        "original": "<166>Feb 01 2025 21:57:35 hit_count : %FTD-6-113008: AAA transaction status ACCEPT : user = nice_guy",
+        "outcome": "success",
+        "severity": 6,
+        "timezone": "UTC"
+      },
+      "log": {
+        "level": "informational",
+        "syslog": {
+          "facility": {
+            "code": 20
+          },
+          "priority": 166,
+          "severity": {
+            "code": 6
+          }
+        }
+      },
+      "observer": {
+        "product": "ftd",
+        "type": "idps",
+        "vendor": "Cisco"
+      },
+      "process": {
+        "name": "hit_count"
+      },
+      "related": {
+        "user": [
+          "nice_guy"
+        ]
+      },
+      "source": {
+        "user": {
+          "name": "nice_guy"
+        }
+      },
+      "tags": [
+        "preserve_original_event"
+      ]
+    },
+    {
+      "@timestamp": "2025-02-01T21:57:35.000Z",
+      "ecs": {
+        "version": "8.17.0"
+      },
+      "event": {
+        "action": "logged-in",
+        "code": "113009",
+        "original": "<166>Feb 01 2025 21:57:35 hit_count : %FTD-6-113009: AAA retrieved default group policy (DEF_REMOTE_VPN_GROUP) for user = nice_guy",
+        "outcome": "success",
+        "severity": 6,
+        "timezone": "UTC"
+      },
+      "log": {
+        "level": "informational",
+        "syslog": {
+          "facility": {
+            "code": 20
+          },
+          "priority": 166,
+          "severity": {
+            "code": 6
+          }
+        }
+      },
+      "observer": {
+        "product": "ftd",
+        "type": "idps",
+        "vendor": "Cisco"
+      },
+      "process": {
+        "name": "hit_count"
+      },
+      "related": {
+        "user": [
+          "nice_guy"
+        ]
+      },
+      "source": {
+        "user": {
+          "group": {
+            "name": "DEF_REMOTE_VPN_GROUP"
+          },
+          "name": "nice_guy"
+        }
+      },
+      "tags": [
+        "preserve_original_event"
+      ]
+    },
+    {
+      "@timestamp": "2025-02-01T18:41:45.000Z",
+      "destination": {
+        "address": "10.10.10.6",
+        "ip": "10.10.10.6"
+      },
+      "ecs": {
+        "version": "8.17.0"
+      },
+      "event": {
+        "action": "logon-failed",
+        "code": "113014",
+        "original": "<166>Feb 01 2025 18:41:45 hit_count : %FTD-6-113014: AAA authentication server not accessible : server = 10.10.10.6 : user = *****",
+        "outcome": "failure",
+        "severity": 6,
+        "timezone": "UTC"
+      },
+      "log": {
+        "level": "informational",
+        "syslog": {
+          "facility": {
+            "code": 20
+          },
+          "priority": 166,
+          "severity": {
+            "code": 6
+          }
+        }
+      },
+      "observer": {
+        "product": "ftd",
+        "type": "idps",
+        "vendor": "Cisco"
+      },
+      "process": {
+        "name": "hit_count"
+      },
+      "related": {
+        "ip": [
+          "10.10.10.6"
+        ]
+      },
+      "tags": [
+        "preserve_original_event"
+      ]
+    },
+    {
+      "@timestamp": "2025-02-01T18:43:42.000Z",
+      "destination": {
+        "address": "10.10.10.10",
+        "ip": "10.10.10.10"
+      },
+      "ecs": {
+        "version": "8.17.0"
+      },
+      "event": {
+        "action": "logon-failed",
+        "code": "113014",
+        "original": "<166>Feb 01 2025 18:43:42 hit_count : %FTD-6-113014: AAA authentication server not accessible : server =  10.10.10.10 : user = *****",
+        "outcome": "failure",
+        "severity": 6,
+        "timezone": "UTC"
+      },
+      "log": {
+        "level": "informational",
+        "syslog": {
+          "facility": {
+            "code": 20
+          },
+          "priority": 166,
+          "severity": {
+            "code": 6
+          }
+        }
+      },
+      "observer": {
+        "product": "ftd",
+        "type": "idps",
+        "vendor": "Cisco"
+      },
+      "process": {
+        "name": "hit_count"
+      },
+      "related": {
+        "ip": [
+          "10.10.10.10"
+        ]
+      },
+      "tags": [
+        "preserve_original_event"
+      ]
+    },
+    {
+      "@timestamp": "2025-02-01T21:57:37.000Z",
+      "ecs": {
+        "version": "8.17.0"
+      },
+      "event": {
+        "action": "firewall-rule",
+        "category": [
+          "network"
+        ],
+        "code": "109201",
+        "kind": "event",
+        "original": "<165>Feb 01 2025 21:57:37 hit_count : %FTD-5-109201: UAUTH: Session=0x07802000, User=abbie_normal, Assigned IP=10.0.10.101, Succeeded adding entry.",
+        "severity": 5,
+        "timezone": "UTC",
+        "type": [
+          "info"
+        ]
+      },
+      "log": {
+        "level": "notification",
+        "syslog": {
+          "facility": {
+            "code": 20
+          },
+          "priority": 165,
+          "severity": {
+            "code": 5
+          }
+        }
+      },
+      "observer": {
+        "product": "ftd",
+        "type": "idps",
+        "vendor": "Cisco"
+      },
+      "process": {
+        "name": "hit_count"
+      },
+      "related": {
+        "ip": [
+          "10.0.10.101"
+        ],
+        "user": [
+          "abbie_normal"
+        ]
+      },
+      "source": {
+        "address": "10.0.10.101",
+        "ip": "10.0.10.101"
+      },
+      "tags": [
+        "preserve_original_event"
+      ],
+      "user": {
+        "name": "abbie_normal"
+      }
+    },
+    {
+      "@timestamp": "2025-02-01T21:56:23.000Z",
+      "ecs": {
+        "version": "8.17.0"
+      },
+      "event": {
+        "action": "firewall-rule",
+        "category": [
+          "network"
+        ],
+        "code": "109207",
+        "kind": "event",
+        "original": "<165>Feb 01 2025 21:56:23 hit_count : %FTD-5-109207: UAUTH: Session=0x07676000, User=abbie, Assigned IP=10.0.10.109, Succeeded updating entry.",
+        "severity": 5,
+        "timezone": "UTC",
+        "type": [
+          "info"
+        ]
+      },
+      "log": {
+        "level": "notification",
+        "syslog": {
+          "facility": {
+            "code": 20
+          },
+          "priority": 165,
+          "severity": {
+            "code": 5
+          }
+        }
+      },
+      "observer": {
+        "product": "ftd",
+        "type": "idps",
+        "vendor": "Cisco"
+      },
+      "process": {
+        "name": "hit_count"
+      },
+      "related": {
+        "ip": [
+          "10.0.10.109"
+        ],
+        "user": [
+          "abbie"
+        ]
+      },
+      "source": {
+        "address": "10.0.10.109",
+        "ip": "10.0.10.109"
+      },
+      "tags": [
+        "preserve_original_event"
+      ],
+      "user": {
+        "name": "abbie"
+      }
+    },
+    {
+      "@timestamp": "2025-02-01T21:57:53.000Z",
+      "ecs": {
+        "version": "8.17.0"
+      },
+      "event": {
+        "action": "firewall-rule",
+        "category": [
+          "network"
+        ],
+        "code": "109210",
+        "kind": "event",
+        "original": "<165>Feb 01 2025 21:57:53 hit_count : %FTD-5-109210: UAUTH: Session=0x07800000, User=drew, Assigned IP=10.0.10.111, Succeeded removing entry.",
+        "severity": 5,
+        "timezone": "UTC",
+        "type": [
+          "info"
+        ]
+      },
+      "log": {
+        "level": "notification",
+        "syslog": {
+          "facility": {
+            "code": 20
+          },
+          "priority": 165,
+          "severity": {
+            "code": 5
+          }
+        }
+      },
+      "observer": {
+        "product": "ftd",
+        "type": "idps",
+        "vendor": "Cisco"
+      },
+      "process": {
+        "name": "hit_count"
+      },
+      "related": {
+        "ip": [
+          "10.0.10.111"
+        ],
+        "user": [
+          "drew"
+        ]
+      },
+      "source": {
+        "address": "10.0.10.111",
+        "ip": "10.0.10.111"
+      },
+      "tags": [
+        "preserve_original_event"
+      ],
+      "user": {
+        "name": "drew"
+      }
+    },
+    {
+      "@timestamp": "2025-02-01T12:00:51.000Z",
+      "cisco": {
+        "ftd": {
+          "command_line_arguments": "'enable' command."
+        }
+      },
+      "ecs": {
+        "version": "8.17.0"
+      },
+      "event": {
+        "action": "firewall-rule",
+        "category": [
+          "network"
+        ],
+        "code": "111008",
+        "kind": "event",
+        "original": "<165>Feb 01 2025 12:00:51: %ASA-5-111008: User 'vold-sauron' executed the 'enable' command.",
+        "severity": 5,
+        "timezone": "UTC",
+        "type": [
+          "info"
+        ]
+      },
+      "log": {
+        "level": "notification",
+        "syslog": {
+          "facility": {
+            "code": 20
+          },
+          "priority": 165,
+          "severity": {
+            "code": 5
+          }
+        }
+      },
+      "observer": {
+        "product": "ftd",
+        "type": "idps",
+        "vendor": "Cisco"
+      },
+      "related": {
+        "user": [
+          "vold-sauron"
+        ]
+      },
+      "server": {
+        "user": {
+          "name": "vold-sauron"
+        }
+      },
+      "tags": [
+        "preserve_original_event"
+      ]
+    },
+    {
+      "@timestamp": "2025-02-01T22:08:01.000Z",
+      "cisco": {
+        "ftd": {
+          "missed_updates_count": 1
+        }
+      },
+      "ecs": {
+        "version": "8.17.0"
+      },
+      "event": {
+        "action": "firewall-rule",
+        "category": [
+          "network"
+        ],
+        "code": "210022",
+        "kind": "event",
+        "original": "<166>Feb 01 2025 22:08:01 hit_count : %FTD-6-210022: LU missed 1 updates",
+        "severity": 6,
+        "timezone": "UTC",
+        "type": [
+          "info"
+        ]
+      },
+      "log": {
+        "level": "informational",
+        "syslog": {
+          "facility": {
+            "code": 20
+          },
+          "priority": 166,
+          "severity": {
+            "code": 6
+          }
+        }
+      },
+      "observer": {
+        "product": "ftd",
+        "type": "idps",
+        "vendor": "Cisco"
+      },
+      "process": {
+        "name": "hit_count"
+      },
+      "tags": [
+        "preserve_original_event"
+      ]
+    },
+    {
+      "@timestamp": "2025-02-03T18:41:19.000Z",
+      "cisco": {
+        "ftd": {
+          "destination_interface": "WAN",
+          "source_interface": "any",
+          "source_username": "LOCAL\\bowser"
+        }
+      },
+      "destination": {
+        "address": "10.2.2.6",
+        "ip": "10.2.2.6",
+        "port": 23455
+      },
+      "ecs": {
+        "version": "8.17.0"
+      },
+      "event": {
+        "action": "flow-expiration",
+        "category": [
+          "network"
+        ],
+        "code": "305012",
+        "duration": 153000000000,
+        "end": "2025-02-03T18:41:19.000Z",
+        "kind": "event",
+        "original": "<182>2025-02-03T18:41:19Z herndon : %FTD-6-305012: Teardown dynamic UDP translation from any:10.1.1.9/23455(LOCAL\\bowser) to WAN:10.2.2.6/23455 duration 0:02:33",
+        "severity": 6,
+        "start": "2025-02-03T18:38:46.000Z",
+        "timezone": "UTC",
+        "type": [
+          "connection",
+          "end"
+        ]
+      },
+      "host": {
+        "hostname": "herndon"
+      },
+      "log": {
+        "level": "informational",
+        "syslog": {
+          "facility": {
+            "code": 22
+          },
+          "priority": 182,
+          "severity": {
+            "code": 6
+          }
+        }
+      },
+      "network": {
+        "community_id": "1:pfkbmcm0MJRrtSV22FY/CRzVNRo=",
+        "iana_number": "17",
+        "transport": "udp"
+      },
+      "observer": {
+        "egress": {
+          "interface": {
+            "name": "WAN"
+          }
+        },
+        "hostname": "herndon",
+        "ingress": {
+          "interface": {
+            "name": "any"
+          }
+        },
+        "product": "ftd",
+        "type": "idps",
+        "vendor": "Cisco"
+      },
+      "related": {
+        "hosts": [
+          "herndon"
+        ],
+        "ip": [
+          "10.1.1.9",
+          "10.2.2.6"
+        ],
+        "user": [
+          "bowser"
+        ]
+      },
+      "source": {
+        "address": "10.1.1.9",
+        "ip": "10.1.1.9",
+        "port": 23455,
+        "user": {
+          "name": "bowser"
+        }
+      },
+      "tags": [
+        "preserve_original_event"
+      ]
+    },
+    {
+      "@timestamp": "2025-02-03T18:41:19.000Z",
+      "cisco": {
+        "ftd": {
+          "destination_interface": "WAN",
+          "source_interface": "any",
+          "source_username": "LOCAL\\bowser"
+        }
+      },
+      "destination": {
+        "address": "10.2.2.6",
+        "ip": "10.2.2.6",
+        "port": 23455
+      },
+      "ecs": {
+        "version": "8.17.0"
+      },
+      "event": {
+        "action": "flow-expiration",
+        "category": [
+          "network"
+        ],
+        "code": "305012",
+        "duration": 153000000000,
+        "end": "2025-02-03T18:41:19.000Z",
+        "kind": "event",
+        "original": "<182>2025-02-03T18:41:19Z herndon : %FTD-6-305012: Teardown dynamic UDP translation from any:10.1.1.9/23455(LOCAL\\\\bowser) to WAN:10.2.2.6/23455 duration 0:02:33",
+        "severity": 6,
+        "start": "2025-02-03T18:38:46.000Z",
+        "timezone": "UTC",
+        "type": [
+          "connection",
+          "end"
+        ]
+      },
+      "host": {
+        "hostname": "herndon"
+      },
+      "log": {
+        "level": "informational",
+        "syslog": {
+          "facility": {
+            "code": 22
+          },
+          "priority": 182,
+          "severity": {
+            "code": 6
+          }
+        }
+      },
+      "network": {
+        "community_id": "1:pfkbmcm0MJRrtSV22FY/CRzVNRo=",
+        "iana_number": "17",
+        "transport": "udp"
+      },
+      "observer": {
+        "egress": {
+          "interface": {
+            "name": "WAN"
+          }
+        },
+        "hostname": "herndon",
+        "ingress": {
+          "interface": {
+            "name": "any"
+          }
+        },
+        "product": "ftd",
+        "type": "idps",
+        "vendor": "Cisco"
+      },
+      "related": {
+        "hosts": [
+          "herndon"
+        ],
+        "ip": [
+          "10.1.1.9",
+          "10.2.2.6"
+        ],
+        "user": [
+          "bowser"
+        ]
+      },
+      "source": {
+        "address": "10.1.1.9",
+        "ip": "10.1.1.9",
+        "port": 23455,
+        "user": {
+          "name": "bowser"
+        }
+      },
+      "tags": [
+        "preserve_original_event"
+      ]
+    },
+    {
+      "@timestamp": "2025-02-01T21:58:39.000Z",
+      "cisco": {
+        "ftd": {
+          "effective_mtu": 1390
+        }
+      },
+      "destination": {
+        "address": "10.2.2.8",
+        "ip": "10.2.2.8"
+      },
+      "ecs": {
+        "version": "8.17.0"
+      },
+      "event": {
+        "action": "vpn-pmtu-d",
+        "code": "602101",
+        "original": "<166>Feb 01 2025 21:58:39 hit_count : %FTD-6-602101: PMTU-D packet 1480 bytes greater than effective mtu 1390, dest_addr=10.2.2.8, src_addr=10.1.1.3, prot=UDP",
+        "severity": 6,
+        "timezone": "UTC"
+      },
+      "log": {
+        "level": "informational",
+        "syslog": {
+          "facility": {
+            "code": 20
+          },
+          "priority": 166,
+          "severity": {
+            "code": 6
+          }
+        }
+      },
+      "network": {
+        "protocol": "udp"
+      },
+      "observer": {
+        "product": "ftd",
+        "type": "idps",
+        "vendor": "Cisco"
+      },
+      "process": {
+        "name": "hit_count"
+      },
+      "related": {
+        "ip": [
+          "10.1.1.3",
+          "10.2.2.8"
+        ]
+      },
+      "source": {
+        "address": "10.1.1.3",
+        "bytes": 1480,
+        "ip": "10.1.1.3"
+      },
+      "tags": [
+        "preserve_original_event"
+      ]
+    },
+    {
+      "@timestamp": "2025-02-01T22:32:34.000Z",
+      "cisco": {
+        "ftd": {
+          "webvpn": {
+            "group_name": "RA_VPN_GP"
+          }
+        }
+      },
+      "ecs": {
+        "version": "8.17.0"
+      },
+      "event": {
+        "action": "firewall-rule",
+        "category": [
+          "network"
+        ],
+        "code": "716002",
+        "kind": "event",
+        "original": "<166>Feb 01 2025 22:32:34 hit_count : %FTD-6-716002: Group <RA_VPN_GP> User <teddy> IP <10.4.3.5> WebVPN session terminated: User Requested.",
+        "reason": "User Requested",
+        "severity": 6,
+        "timezone": "UTC",
+        "type": [
+          "info"
+        ]
+      },
+      "log": {
+        "level": "informational",
+        "syslog": {
+          "facility": {
+            "code": 20
+          },
+          "priority": 166,
+          "severity": {
+            "code": 6
+          }
+        }
+      },
+      "observer": {
+        "product": "ftd",
+        "type": "idps",
+        "vendor": "Cisco"
+      },
+      "process": {
+        "name": "hit_count"
+      },
+      "related": {
+        "ip": [
+          "10.4.3.5"
+        ],
+        "user": [
+          "teddy"
+        ]
+      },
+      "source": {
+        "address": "10.4.3.5",
+        "ip": "10.4.3.5",
+        "user": {
+          "name": "teddy"
+        }
+      },
+      "tags": [
+        "preserve_original_event"
+      ]
+    },
+    {
+      "@timestamp": "2025-02-01T18:41:47.000Z",
+      "cisco": {
+        "ftd": {
+          "webvpn": {
+            "group_name": "RA_VPN"
+          }
+        }
+      },
+      "ecs": {
+        "version": "8.17.0"
+      },
+      "event": {
+        "action": "firewall-rule",
+        "category": [
+          "network"
+        ],
+        "code": "716058",
+        "kind": "event",
+        "original": "<166>Feb 01 2025 18:41:47 hit_count : %FTD-6-716058: Group <RA_VPN> User <teddy> IP <10.6.7.9> AnyConnect session lost connection. Waiting to resume.",
+        "severity": 6,
+        "timezone": "UTC",
+        "type": [
+          "info"
+        ]
+      },
+      "log": {
+        "level": "informational",
+        "syslog": {
+          "facility": {
+            "code": 20
+          },
+          "priority": 166,
+          "severity": {
+            "code": 6
+          }
+        }
+      },
+      "observer": {
+        "product": "ftd",
+        "type": "idps",
+        "vendor": "Cisco"
+      },
+      "process": {
+        "name": "hit_count"
+      },
+      "related": {
+        "ip": [
+          "10.6.7.9"
+        ],
+        "user": [
+          "teddy"
+        ]
+      },
+      "source": {
+        "address": "10.6.7.9",
+        "ip": "10.6.7.9",
+        "user": {
+          "name": "teddy"
+        }
+      },
+      "tags": [
+        "preserve_original_event"
+      ]
+    },
+    {
+      "@timestamp": "2025-02-01T18:42:16.000Z",
+      "cisco": {
+        "ftd": {
+          "mapped_source_ip": "10.7.7.9",
+          "webvpn": {
+            "group_name": "RA_VPN"
+          }
+        }
+      },
+      "ecs": {
+        "version": "8.17.0"
+      },
+      "event": {
+        "action": "firewall-rule",
+        "category": [
+          "network"
+        ],
+        "code": "716059",
+        "kind": "event",
+        "original": "<166>Feb 01 2025 18:42:16 hit_count : %FTD-6-716059: Group <RA_VPN> User <otto> IP <10.6.7.9> AnyConnect session resumed connection from IP <10.7.7.9>.",
+        "severity": 6,
+        "timezone": "UTC",
+        "type": [
+          "info"
+        ]
+      },
+      "log": {
+        "level": "informational",
+        "syslog": {
+          "facility": {
+            "code": 20
+          },
+          "priority": 166,
+          "severity": {
+            "code": 6
+          }
+        }
+      },
+      "observer": {
+        "product": "ftd",
+        "type": "idps",
+        "vendor": "Cisco"
+      },
+      "process": {
+        "name": "hit_count"
+      },
+      "related": {
+        "ip": [
+          "10.6.7.9",
+          "10.7.7.9"
+        ],
+        "user": [
+          "otto"
+        ]
+      },
+      "source": {
+        "address": "10.6.7.9",
+        "ip": "10.6.7.9",
+        "nat": {
+          "ip": "10.7.7.9"
+        },
+        "user": {
+          "name": "otto"
+        }
+      },
+      "tags": [
+        "preserve_original_event"
+      ]
+    },
+    {
+      "@timestamp": "2025-02-01T18:42:03.000Z",
+      "cisco": {
+        "ftd": {
+          "assigned_ip": "10.7.9.159",
+          "assigned_ipv6": "::",
+          "webvpn": {
+            "group_name": "RA_VPN_GP"
+          }
+        }
+      },
+      "ecs": {
+        "version": "8.17.0"
+      },
+      "event": {
+        "action": "firewall-rule",
+        "category": [
+          "network"
+        ],
+        "code": "722051",
+        "kind": "event",
+        "original": "<164>Feb 01 2025 18:42:03 hit_count : %FTD-4-722051: Group <RA_VPN_GP> User <otto> IP <10.5.2.6> IPv4 Address <10.7.9.159> IPv6 address <::> assigned to session",
+        "severity": 4,
+        "timezone": "UTC",
+        "type": [
+          "info"
+        ]
+      },
+      "log": {
+        "level": "warning",
+        "syslog": {
+          "facility": {
+            "code": 20
+          },
+          "priority": 164,
+          "severity": {
+            "code": 4
+          }
+        }
+      },
+      "observer": {
+        "product": "ftd",
+        "type": "idps",
+        "vendor": "Cisco"
+      },
+      "process": {
+        "name": "hit_count"
+      },
+      "related": {
+        "ip": [
+          "10.5.2.6"
+        ],
+        "user": [
+          "otto"
+        ]
+      },
+      "source": {
+        "address": "10.5.2.6",
+        "ip": "10.5.2.6",
+        "user": {
+          "name": "otto"
+        }
+      },
+      "tags": [
+        "preserve_original_event"
+      ]
+    },
+    {
+      "@timestamp": "2025-02-01T21:57:37.000Z",
+      "cisco": {
+        "ftd": {
+          "webvpn": {
+            "group_name": "RA_VPN_GP"
+          }
+        }
+      },
+      "ecs": {
+        "version": "8.17.0"
+      },
+      "event": {
+        "action": "firewall-rule",
+        "category": [
+          "network"
+        ],
+        "code": "722055",
+        "kind": "event",
+        "original": "<166>Feb 01 2025 21:57:37 hit_count : %FTD-6-722055: Group <RA_VPN_GP> User <sisyphus> IP <10.2.3.9> Client Type: Cisco AnyConnect VPN Agent for Windows 5.1.6.103",
+        "severity": 6,
+        "timezone": "UTC",
+        "type": [
+          "info"
+        ]
+      },
+      "log": {
+        "level": "informational",
+        "syslog": {
+          "facility": {
+            "code": 20
+          },
+          "priority": 166,
+          "severity": {
+            "code": 6
+          }
+        }
+      },
+      "observer": {
+        "product": "ftd",
+        "type": "idps",
+        "vendor": "Cisco"
+      },
+      "process": {
+        "name": "hit_count"
+      },
+      "related": {
+        "ip": [
+          "10.2.3.9"
+        ],
+        "user": [
+          "sisyphus"
+        ]
+      },
+      "source": {
+        "address": "10.2.3.9",
+        "ip": "10.2.3.9",
+        "user": {
+          "name": "sisyphus"
+        }
+      },
+      "tags": [
+        "preserve_original_event"
+      ],
+      "user_agent": {
+        "original": "Cisco AnyConnect VPN Agent for Windows 5.1.6.103"
+      }
+    },
+    {
+      "@timestamp": "2025-02-01T21:57:37.000Z",
+      "ecs": {
+        "version": "8.17.0"
+      },
+      "event": {
+        "action": "client-vpn-connected",
+        "code": "746012",
+        "original": "<167>Feb 01 2025 21:57:37 hit_count : %FTD-7-746012: user-identity: Add IP-User mapping 10.7.5.8 - LOCAL\\dreyfuss Succeeded - VPN user",
+        "outcome": "success",
+        "reason": "VPN user",
+        "severity": 7,
+        "timezone": "UTC"
+      },
+      "log": {
+        "level": "debug",
+        "syslog": {
+          "facility": {
+            "code": 20
+          },
+          "priority": 167,
+          "severity": {
+            "code": 7
+          }
+        }
+      },
+      "observer": {
+        "product": "ftd",
+        "type": "idps",
+        "vendor": "Cisco"
+      },
+      "process": {
+        "name": "hit_count"
+      },
+      "related": {
+        "ip": [
+          "10.7.5.8"
+        ],
+        "user": [
+          "dreyfuss"
+        ]
+      },
+      "source": {
+        "address": "10.7.5.8",
+        "ip": "10.7.5.8",
+        "user": {
+          "name": "dreyfuss"
+        }
+      },
+      "tags": [
+        "preserve_original_event"
+      ]
+    },
+    {
+      "@timestamp": "2025-02-01T21:57:37.000Z",
+      "ecs": {
+        "version": "8.17.0"
+      },
+      "event": {
+        "action": "client-vpn-connected",
+        "code": "746012",
+        "original": "<167>Feb 01 2025 21:57:37 hit_count : %FTD-7-746012: user-identity: Add IP-User mapping 10.7.5.8 - LOCAL\\dreyfuss Failure - VPN user",
+        "outcome": "failure",
+        "reason": "VPN user",
+        "severity": 7,
+        "timezone": "UTC"
+      },
+      "log": {
+        "level": "debug",
+        "syslog": {
+          "facility": {
+            "code": 20
+          },
+          "priority": 167,
+          "severity": {
+            "code": 7
+          }
+        }
+      },
+      "observer": {
+        "product": "ftd",
+        "type": "idps",
+        "vendor": "Cisco"
+      },
+      "process": {
+        "name": "hit_count"
+      },
+      "related": {
+        "ip": [
+          "10.7.5.8"
+        ],
+        "user": [
+          "dreyfuss"
+        ]
+      },
+      "source": {
+        "address": "10.7.5.8",
+        "ip": "10.7.5.8",
+        "user": {
+          "name": "dreyfuss"
+        }
+      },
+      "tags": [
+        "preserve_original_event"
+      ]
+    },
+    {
+      "@timestamp": "2025-02-01T21:57:53.000Z",
+      "ecs": {
+        "version": "8.17.0"
+      },
+      "event": {
+        "action": "client-vpn-disconnected",
+        "code": "746013",
+        "original": "<167>Feb 01 2025 21:57:53 hit_count : %FTD-7-746013: user-identity: Delete IP-User mapping 10.7.9.4 - LOCAL\\stewart Succeeded - VPN user logout",
+        "outcome": "success",
+        "reason": "VPN user logout",
+        "severity": 7,
+        "timezone": "UTC"
+      },
+      "log": {
+        "level": "debug",
+        "syslog": {
+          "facility": {
+            "code": 20
+          },
+          "priority": 167,
+          "severity": {
+            "code": 7
+          }
+        }
+      },
+      "observer": {
+        "product": "ftd",
+        "type": "idps",
+        "vendor": "Cisco"
+      },
+      "process": {
+        "name": "hit_count"
+      },
+      "related": {
+        "ip": [
+          "10.7.9.4"
+        ],
+        "user": [
+          "stewart"
+        ]
+      },
+      "source": {
+        "address": "10.7.9.4",
+        "ip": "10.7.9.4",
+        "user": {
+          "name": "stewart"
+        }
+      },
+      "tags": [
+        "preserve_original_event"
+      ]
+    },
+    {
+      "@timestamp": "2025-03-06T16:54:27.000Z",
+      "cisco": {
+        "ftd": {
+          "connection_id": "123456789",
+          "destination_interface": "EL_BOW2",
+          "source_interface": "carpal-tunnel1"
+        }
+      },
+      "destination": {
+        "address": "10.0.10.123",
+        "ip": "10.0.10.123",
+        "port": 6379
+      },
+      "ecs": {
+        "version": "8.17.0"
+      },
+      "event": {
+        "action": "flow-expiration",
+        "category": [
+          "network"
+        ],
+        "code": "302304",
+        "duration": 122000000000,
+        "end": "2025-03-06T16:54:27.000Z",
+        "kind": "event",
+        "original": "<182>2025-03-06T16:54:27Z seattle : %FTD-6-302304: Teardown TCP state-bypass connection 123456789 from carpal-tunnel1:10.123.1.23/38110 to EL_BOW2:10.0.10.123/6379 duration  0:02:02 bytes 54 Connection timeout",
+        "reason": "Connection timeout",
+        "severity": 6,
+        "start": "2025-03-06T16:52:25.000Z",
+        "timezone": "UTC",
+        "type": [
+          "connection",
+          "end"
+        ]
+      },
+      "host": {
+        "hostname": "seattle"
+      },
+      "log": {
+        "level": "informational",
+        "syslog": {
+          "facility": {
+            "code": 22
+          },
+          "priority": 182,
+          "severity": {
+            "code": 6
+          }
+        }
+      },
+      "network": {
+        "bytes": 54,
+        "community_id": "1:D4Df057lp62d4NlwoIuSMbeHLcM=",
+        "iana_number": "6",
+        "transport": "tcp"
+      },
+      "observer": {
+        "egress": {
+          "interface": {
+            "name": "EL_BOW2"
+          }
+        },
+        "hostname": "seattle",
+        "ingress": {
+          "interface": {
+            "name": "carpal-tunnel1"
+          }
+        },
+        "product": "ftd",
+        "type": "idps",
+        "vendor": "Cisco"
+      },
+      "related": {
+        "hosts": [
+          "seattle"
+        ],
+        "ip": [
+          "10.123.1.23",
+          "10.0.10.123"
+        ]
+      },
+      "source": {
+        "address": "10.123.1.23",
+        "ip": "10.123.1.23",
+        "port": 38110
+      },
+      "tags": [
+        "preserve_original_event"
+      ]
+    }
+  ],
+  "source_format": "lines"
+}
