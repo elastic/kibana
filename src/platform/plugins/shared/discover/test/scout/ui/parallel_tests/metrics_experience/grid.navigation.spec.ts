@@ -33,7 +33,8 @@ const FIRST_CARD_PAGE_1 = `${SORTED_METRICS[0].name}-0`;
 const FIRST_CARD_PAGE_2 = `${SORTED_METRICS[PAGE_SIZE].name}-0`;
 const FIRST_CARD_LAST_PAGE = `${SORTED_METRICS[PAGE_SIZE * (TOTAL_PAGES - 1)].name}-0`;
 
-spaceTest.describe(
+// Failing: See https://github.com/elastic/kibana/issues/254759
+spaceTest.describe.skip(
   'Metrics in Discover - Grid Navigation',
   {
     tag: testData.METRICS_EXPERIENCE_TAGS,
