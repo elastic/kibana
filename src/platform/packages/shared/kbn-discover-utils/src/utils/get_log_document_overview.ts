@@ -23,7 +23,14 @@ export function getLogDocumentOverview(
     const value = result.value;
     return (
       value !== undefined && value !== null
-        ? formatFieldValue(value, doc.raw, fieldFormats, dataView, dataView.fields.getByName(field))
+        ? formatFieldValue(
+            value,
+            doc.raw,
+            fieldFormats,
+            dataView,
+            dataView.fields.getByName(field),
+            'text'
+          )
         : undefined
     ) as LogDocumentOverview[T];
   };

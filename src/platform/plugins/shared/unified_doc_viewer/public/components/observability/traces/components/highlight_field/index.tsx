@@ -46,19 +46,11 @@ const FormattedValue = ({
 }) => {
   if (as) {
     const As = as;
-    return (
-      <As
-        // Value returned from formatFieldValue is always sanitized
-        dangerouslySetInnerHTML={{ __html: value }}
-      />
-    );
+    return <As>{value}</As>;
   }
   return (
-    <EuiText
-      className="eui-textTruncate"
-      size={textSize}
-      // Value returned from formatFieldValue is always sanitized
-      dangerouslySetInnerHTML={{ __html: value }}
-    />
+    <EuiText className="eui-textTruncate" size={textSize}>
+      {value}
+    </EuiText>
   );
 };

@@ -18,14 +18,14 @@ describe('HighlightField', () => {
   });
 
   it('renders the formattedValue when provided', () => {
-    const { container } = render(<HighlightField formattedValue="<b>Formatted Value</b>" />);
-    expect(container.querySelector('b')).toHaveTextContent('Formatted Value');
+    const { getByText } = render(<HighlightField formattedValue="Formatted Value" />);
+    expect(getByText('Formatted Value')).toBeInTheDocument();
   });
 
   it('renders children as a function when provided', () => {
     const { getByText } = render(
       <HighlightField
-        formattedValue="<b>Formatted Value</b>"
+        formattedValue="Formatted Value"
         children={({ content }) => <div>{content}</div>}
       />
     );
@@ -38,9 +38,7 @@ describe('HighlightField', () => {
   });
 
   it('renders the formattedValue with a custom HTML element when "as" prop is provided', () => {
-    const { container } = render(
-      <HighlightField formattedValue="<b>Formatted Value</b>" as="span" />
-    );
+    const { container } = render(<HighlightField formattedValue="Formatted Value" as="span" />);
     const spanElement = container.querySelector('span');
     expect(spanElement).toHaveTextContent('Formatted Value');
   });
