@@ -20,6 +20,7 @@ import type { LicenseType } from '@kbn/licensing-types';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type * as z3 from '@kbn/zod';
 import type * as z4 from '@kbn/zod/v4';
+import type { AuthMode } from '@kbn/connector-specs';
 import type { ConnectorTokenClient } from './lib/connector_token_client';
 import type { ActionTypeExecutorResult, SubFeature, ActionTypeSource } from '../common';
 import type { ActionTypeRegistry } from './action_type_registry';
@@ -96,7 +97,7 @@ export interface ActionTypeExecutorOptions<
   request?: KibanaRequest;
   connectorUsageCollector: ConnectorUsageCollector;
   connectorTokenClient?: ConnectorTokenClientContract;
-  authMode?: 'shared' | 'per-user';
+  authMode?: AuthMode;
   profileUid?: string;
 }
 
@@ -274,7 +275,7 @@ export interface RawAction extends Record<string, unknown> {
   isMissingSecrets: boolean;
   config: Record<string, unknown>;
   secrets: Record<string, unknown>;
-  authMode?: 'shared' | 'per-user';
+  authMode?: AuthMode;
 }
 
 export interface ActionTaskParams extends SavedObjectAttributes {

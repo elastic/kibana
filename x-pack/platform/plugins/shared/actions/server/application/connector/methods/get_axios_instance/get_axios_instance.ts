@@ -7,7 +7,7 @@
 
 import type { AxiosInstance } from 'axios';
 import { isWorkflowsOnlyConnectorType } from '../../../../lib/single_file_connectors/is_workflows_only_connector';
-import type { RawAction } from '../../../../types';
+import type { AuthMode, RawAction } from '../../../../types';
 import { getActionKibanaPrivileges } from '../../../../lib/get_action_kibana_privileges';
 import { isPreconfigured } from '../../../../lib/is_preconfigured';
 import { isSystemAction } from '../../../../lib/is_system_action';
@@ -39,7 +39,7 @@ export async function getAxiosInstance(
   } = context;
 
   let actionTypeId: string | undefined;
-  let authMode: 'shared' | 'per-user' | undefined;
+  let authMode: AuthMode | undefined;
 
   try {
     if (isPreconfigured(context, connectorId) || isSystemAction(context, connectorId)) {

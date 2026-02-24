@@ -9,7 +9,7 @@ import { get } from 'lodash';
 import pLimit from 'p-limit';
 import type { Logger } from '@kbn/core/server';
 import type { ActionsConfigurationUtilities } from '../actions_config';
-import type { ConnectorToken, ConnectorTokenClientContract, UserConnectorToken } from '../types';
+import type { AuthMode, ConnectorToken, ConnectorTokenClientContract, UserConnectorToken } from '../types';
 import { requestOAuthRefreshToken } from './request_oauth_refresh_token';
 
 // Per-connector locks to prevent concurrent token refreshes for the same connector
@@ -44,7 +44,7 @@ interface GetOAuthAuthorizationCodeAccessTokenOpts {
   };
   connectorTokenClient: ConnectorTokenClientContract;
   scope?: string;
-  authMode?: 'shared' | 'per-user';
+  authMode?: AuthMode;
   profileUid?: string;
   /**
    * When true, skip the expiration check and force a token refresh.

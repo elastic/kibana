@@ -42,6 +42,7 @@ import type { ActionExecutorContract } from '../lib';
 import { parseDate } from '../lib';
 import type {
   ActionResult,
+  AuthMode,
   RawAction,
   InMemoryConnector,
   ActionTypeExecutorResult,
@@ -440,7 +441,7 @@ export class ActionsClient {
     } else if (type === 'authorization_code') {
       const tokenOpts = options as OAuthAuthorizationCodeParams;
       try {
-        let authMode: 'shared' | 'per-user' | undefined;
+        let authMode: AuthMode | undefined;
         try {
           const rawConnector = await this.context.unsecuredSavedObjectsClient.get<RawAction>(
             'action',

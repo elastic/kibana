@@ -13,7 +13,7 @@ import type { ActionInfo } from './action_executor';
 import type { AuthTypeRegistry } from '../auth_types';
 import { getCustomAgents } from './get_custom_agents';
 import type { ActionsConfigurationUtilities } from '../actions_config';
-import type { ConnectorTokenClientContract } from '../types';
+import type { AuthMode, ConnectorTokenClientContract } from '../types';
 import { getBeforeRedirectFn } from './before_redirect';
 import { getOAuthClientCredentialsAccessToken } from './get_oauth_client_credentials_access_token';
 import { getOAuthAuthorizationCodeAccessToken } from './get_oauth_authorization_code_access_token';
@@ -61,7 +61,7 @@ async function handleOAuth401Error({
   logger: Logger;
   configurationUtilities: ActionsConfigurationUtilities;
   axiosInstance: AxiosInstance;
-  authMode?: 'shared' | 'per-user';
+  authMode?: AuthMode;
   profileUid?: string;
 }): Promise<never | AxiosInstance> {
   // Prevent retry loops - only attempt refresh once per request
@@ -119,7 +119,7 @@ export interface GetAxiosInstanceWithAuthFnOpts {
   connectorId: string;
   connectorTokenClient?: ConnectorTokenClientContract;
   secrets: ValidatedSecrets;
-  authMode?: 'shared' | 'per-user';
+  authMode?: AuthMode;
   profileUid?: string;
 }
 export type GetAxiosInstanceWithAuthFn = (
