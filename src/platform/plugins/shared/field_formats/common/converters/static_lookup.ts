@@ -63,6 +63,9 @@ export class StaticLookupFormat extends FieldFormat {
     const unknownKeyValue = this.param('unknownKeyValue');
 
     const lookupMap = convertLookupEntriesToMap(lookupEntries);
-    return lookupMap[val] || unknownKeyValue || val;
+    const mapped = lookupMap[val];
+    if (mapped != null && mapped !== '') return mapped as string;
+    if (unknownKeyValue != null && unknownKeyValue !== '') return unknownKeyValue;
+    return `${val}`;
   };
 }

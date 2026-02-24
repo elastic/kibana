@@ -48,6 +48,11 @@ jest.mock('@kbn/discover-utils/src/utils/get_formatted_fields', () => ({
     fieldB: 'formattedB',
     fieldC: 'formattedC',
   }),
+  getFormattedFieldsReact: () => ({
+    fieldA: 'formattedA',
+    fieldB: 'formattedB',
+    fieldC: 'formattedC',
+  }),
 }));
 jest.mock('@kbn/discover-utils/src/utils/get_flattened_fields', () => ({
   getFlattenedFields: () => ({
