@@ -124,6 +124,8 @@ include::upgrade-notes.asciidoc[]
 
 The 8.19.12 release includes the following enhancements and fixes.
 
+IMPORTANT: This release contains fixes for potential security vulnerabilities. Check our link:https://discuss.elastic.co/c/announcements/security-announcements/31[security advisory] for more details.
+
 [float]
 [[enhancement-v8.19.12]]
 === Enhancements
