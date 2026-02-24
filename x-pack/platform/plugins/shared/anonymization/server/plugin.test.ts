@@ -28,6 +28,9 @@ jest.mock('./initialization', () => ({
   migrateLegacyUiSettingsIntoGlobalProfile: jest.fn().mockResolvedValue(undefined),
   ensureAndMigrateGlobalProfile: jest.fn().mockResolvedValue(undefined),
 }));
+const initializationMock = jest.requireMock('./initialization') as {
+  ensureAndMigrateGlobalProfile: jest.Mock;
+};
 
 const createProfile = ({
   targetType,
@@ -204,5 +207,37 @@ describe('AnonymizationPlugin policy resolution', () => {
     expect(setup.http.createRouter).toHaveBeenCalled();
     expect(setup.savedObjects.registerType).toHaveBeenCalled();
     expect(encryptedSavedObjects.registerType).toHaveBeenCalled();
+  });
+
+  it('does not bootstrap global profile on start and lazily ensures it on policy resolution', async () => {
+    const initializerContext = coreMock.createPluginInitializerContext();
+    const plugin = new AnonymizationPlugin(initializerContext);
+    const coreStart = coreMock.createStart();
+
+    const resolve = jest.fn().mockResolvedValue({
+      saved_object: { attributes: { title: 'logs-*' } },
+    });
+    const get = jest.fn().mockResolvedValue({ id: 'security-solution-alert-default' });
+    const asScopedToNamespace = jest.fn().mockReturnValue({
+      resolve,
+      get,
+    });
+    coreStart.savedObjects.getUnsafeInternalClient = jest.fn().mockReturnValue({
+      asScopedToNamespace,
+    });
+    jest.spyOn(ProfilesRepository.prototype, 'findByTarget').mockResolvedValue(null);
+
+    const start = plugin.start(coreStart, {
+      encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
+    });
+
+    expect(initializationMock.ensureAndMigrateGlobalProfile).not.toHaveBeenCalled();
+
+    await start.getPolicyService().resolveEffectivePolicy('default', {
+      type: 'data_view',
+      id: 'my-data-view',
+    });
+
+    expect(initializationMock.ensureAndMigrateGlobalProfile).toHaveBeenCalled();
   });
 });

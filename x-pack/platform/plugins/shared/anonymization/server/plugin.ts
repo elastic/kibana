@@ -167,37 +167,6 @@ export class AnonymizationPlugin
       }
     };
 
-    const getKnownNamespaces = async (): Promise<string[]> => {
-      const namespaces = new Set<string>(['default']);
-      const internalSoClient = core.savedObjects.getUnsafeInternalClient();
-
-      try {
-        let page = 1;
-        let total = 0;
-
-        do {
-          const result = await internalSoClient.find<Record<string, never>>({
-            type: 'space',
-            page,
-            perPage: 1000,
-          });
-          for (const space of result.saved_objects) {
-            namespaces.add(space.id);
-          }
-          total = result.total;
-          page += 1;
-        } while ((page - 1) * 1000 < total);
-      } catch (err) {
-        this.logger.debug(
-          `Failed to enumerate spaces for global anonymization profile bootstrap: ${
-            (err as Error).message
-          }`
-        );
-      }
-
-      return [...namespaces];
-    };
-
     const getLegacySettingsForNamespace = async (
       namespace: string
     ): Promise<string | undefined> => {
@@ -212,18 +181,12 @@ export class AnonymizationPlugin
 
     const ensureGlobalProfileForNamespace = async ({
       namespace,
-      force = false,
     }: {
       namespace: string;
-      force?: boolean;
     }): Promise<void> => {
       const now = Date.now();
       const lastEnsuredAt = ensuredGlobalProfiles.get(namespace);
-      if (
-        !force &&
-        lastEnsuredAt !== undefined &&
-        now - lastEnsuredAt < ENSURE_GLOBAL_PROFILE_CACHE_MS
-      ) {
+      if (lastEnsuredAt !== undefined && now - lastEnsuredAt < ENSURE_GLOBAL_PROFILE_CACHE_MS) {
         return;
       }
 
@@ -237,14 +200,11 @@ export class AnonymizationPlugin
       ensuredGlobalProfiles.set(namespace, now);
     };
 
-    // Ensure global profiles across spaces + default alerts profile at startup.
+    // Ensure default alerts profile at startup. Global profile is lazily ensured
+    // on profiles `_find` and anonymization runtime usage.
     void (async () => {
       try {
         await ensureProfilesIndexReady();
-        const namespaces = await getKnownNamespaces();
-        await Promise.all(
-          namespaces.map((namespace) => ensureGlobalProfileForNamespace({ namespace, force: true }))
-        );
         await ensureAlertsDataViewProfile({
           namespace: 'default',
           profilesRepo,

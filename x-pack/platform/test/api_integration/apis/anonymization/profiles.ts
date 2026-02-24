@@ -166,7 +166,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('global profile behavior', () => {
-      it('creates or self-heals the global profile on _find', async () => {
+      it('lazily creates or self-heals the global profile on _find', async () => {
         const { body, status } = await supertest
           .get(`${PROFILES_API}/_find`)
           .set('elastic-api-version', API_VERSION);
