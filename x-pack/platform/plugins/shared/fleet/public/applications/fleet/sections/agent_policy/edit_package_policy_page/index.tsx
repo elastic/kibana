@@ -67,11 +67,12 @@ import { StepsWithLessPadding } from '../create_package_policy_page/single_page_
 
 import { useAgentless } from '../create_package_policy_page/single_page_layout/hooks/setup_technology';
 
+import { useIncompatibleAgentVersionStatus } from '../../../hooks/use_incompatible_agent_version_status';
+
 import { UpgradeStatusCallout } from './components';
 import { usePackagePolicyWithRelatedData, useHistoryBlock } from './hooks';
 import { getNewSecrets } from './utils';
 import { usePackagePolicySteps } from './hooks';
-import { useIncompatibleAgentVersionStatus } from '../../../hooks/use_incompatible_agent_version_status';
 
 export const EditPackagePolicyPage = memo(() => {
   const {
@@ -119,7 +120,7 @@ export const EditPackagePolicyForm = memo<{
   } = useConfig();
   const { getHref } = useLink();
   const { canUseMultipleAgentPolicies } = useMultipleAgentPolicies();
-  const { isAgentlessAgentPolicy, isAgentlessIntegration } = useAgentless();
+  const { isAgentlessAgentPolicy, getAgentlessStatusForPackage } = useAgentless();
   const {
     // data
     agentPolicies: existingAgentPolicies,
@@ -147,9 +148,9 @@ export const EditPackagePolicyForm = memo<{
     () =>
       existingAgentPolicies.length === 1
         ? existingAgentPolicies.some((policy) => isAgentlessAgentPolicy(policy)) &&
-          isAgentlessIntegration(packageInfo)
+          getAgentlessStatusForPackage(packageInfo).isAgentless
         : false,
-    [existingAgentPolicies, isAgentlessAgentPolicy, packageInfo, isAgentlessIntegration]
+    [existingAgentPolicies, isAgentlessAgentPolicy, packageInfo, getAgentlessStatusForPackage]
   );
 
   // Derive var_group_selections from policy for edit mode

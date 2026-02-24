@@ -61,11 +61,8 @@ import {
 } from './lib/filter_editor_utils';
 import { FiltersBuilder } from '../../filters_builder';
 import { FilterBadgeGroup } from '../../filter_badge/filter_badge_group';
-import {
-  MIDDLE_TRUNCATION_PROPS,
-  SINGLE_SELECTION_AS_TEXT_PROPS,
-  flattenFilters,
-} from './lib/helpers';
+import { MIDDLE_TRUNCATION_PROPS, SINGLE_SELECTION_AS_TEXT_PROPS } from './lib/helpers';
+import { flattenFilters } from '../lib/flatten_filters';
 import {
   filterBadgeStyle,
   filterPreviewLabelStyle,
@@ -422,7 +419,7 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
                   id="unifiedSearch.filter.filterBar.preview"
                   defaultMessage="{icon} Preview"
                   values={{
-                    icon: <EuiIcon type="inspect" size="s" />,
+                    icon: <EuiIcon type="inspect" size="s" aria-hidden={true} />,
                   }}
                 />
               </strong>

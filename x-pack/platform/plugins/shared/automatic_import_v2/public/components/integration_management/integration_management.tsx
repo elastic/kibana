@@ -16,6 +16,7 @@ import type { IntegrationFormData } from './forms/types';
 import { PAGE_RESTRICT_WIDTH } from './constants';
 import * as i18n from './translations';
 import { useGetIntegrationById, useKibana } from '../../common';
+import { normalizeTitleName } from '../../common/lib/helper_functions';
 
 const INTEGRATIONS_APP_ID = 'integrations';
 const INTEGRATIONS_MANAGE_PATH = '/browse?view=manage';
@@ -73,12 +74,19 @@ export const IntegrationManagement = React.memo(() => {
 
   const handleSubmit = useCallback(async (_data: IntegrationFormData) => {}, []);
 
+  const existingDataStreamTitles = useMemo(
+    () =>
+      new Set(
+        (integration?.dataStreams ?? []).map((dataStream) => normalizeTitleName(dataStream.title))
+      ),
+    [integration?.dataStreams]
+  );
+
   // Loading state when fetching existing integration
   if (integrationId && isLoading) {
     return <EuiEmptyPrompt icon={<EuiLoadingSpinner size="xl" />} />;
   }
 
-  // Error state: ID provided but integration not found or fetch failed
   if (integrationId && (isError || (!isLoading && !integration))) {
     return (
       <EuiEmptyPrompt
@@ -99,6 +107,7 @@ export const IntegrationManagement = React.memo(() => {
     <IntegrationFormProvider
       key={integrationId ?? 'new-integration'}
       initialValue={initialFormData}
+      existingDataStreamTitles={existingDataStreamTitles}
       onSubmit={handleSubmit}
     >
       <IntegrationManagementContents />
