@@ -205,7 +205,9 @@ exports[`it renders without blowing up 1`] = `
                 "textAccentSecondary": "#16C5C0",
                 "textDanger": "#F6726A",
                 "textDisabled": "#6A7FA0",
+                "textGhost": "#FFFFFF",
                 "textHeading": "#E3E8F2",
+                "textInk": "#07101F",
                 "textInverse": "#07101F",
                 "textNeutral": "#37B8DC",
                 "textParagraph": "#CAD3E2",
@@ -386,7 +388,9 @@ exports[`it renders without blowing up 1`] = `
                 "textAccentSecondary": "#047471",
                 "textDanger": "#A71627",
                 "textDisabled": "#798EAF",
+                "textGhost": "#FFFFFF",
                 "textHeading": "#111C2C",
+                "textInk": "#07101F",
                 "textInverse": "#FFFFFF",
                 "textNeutral": "#0F658A",
                 "textParagraph": "#1D2A3E",
@@ -454,8 +458,6 @@ exports[`it renders without blowing up 1`] = `
                 "warning": "#FACB3D",
                 "warningText": "#825803",
               },
-              "ghost": "#FFFFFF",
-              "ink": "#07101F",
               "plainDark": "#07101F",
               "plainLight": "#FFFFFF",
             },
@@ -771,12 +773,6 @@ exports[`it renders without blowing up 1`] = `
                   ],
                 },
                 "skeletonBackgroundSkeletonMiddleHighContrast": "rgba(255,255,255, 0.3)",
-                "superDatePickerBackgroundSuccees": Computed {
-                  "computer": [Function],
-                  "dependencies": Array [
-                    "colors.backgroundBaseSuccess",
-                  ],
-                },
                 "switchBackgroundOff": Computed {
                   "computer": [Function],
                   "dependencies": Array [
@@ -1209,12 +1205,6 @@ exports[`it renders without blowing up 1`] = `
                   ],
                 },
                 "skeletonBackgroundSkeletonMiddleHighContrast": "rgba(72,89,117, 0.04)",
-                "superDatePickerBackgroundSuccees": Computed {
-                  "computer": [Function],
-                  "dependencies": Array [
-                    "colors.backgroundBaseSuccess",
-                  ],
-                },
                 "switchBackgroundOff": Computed {
                   "computer": [Function],
                   "dependencies": Array [
@@ -2268,6 +2258,10 @@ exports[`it renders without blowing up 1`] = `
             "overrides": Object {
               "HCM": Object {
                 "colors": Object {
+                  "DARK": Object {
+                    "textGhost": "#FFFFFF",
+                    "textInk": "#000000",
+                  },
                   "LIGHT": Object {
                     "severity": Object {
                       "danger": "#EE4C48",
@@ -2277,6 +2271,8 @@ exports[`it renders without blowing up 1`] = `
                       "unknown": "#798EAF",
                       "warning": "#AD7E00",
                     },
+                    "textGhost": "#FFFFFF",
+                    "textInk": "#000000",
                     "vis": Object {
                       "euiColorVis0": "#065B58",
                       "euiColorVis1": "#009E99",
@@ -2333,8 +2329,8 @@ exports[`it renders without blowing up 1`] = `
                       "euiColorVisWarning1": "#AD7E00",
                     },
                   },
-                  "ghost": "#FFFFFF",
-                  "ink": "#000000",
+                  "plainDark": "#000000",
+                  "plainLight": "#FFFFFF",
                 },
               },
             },
