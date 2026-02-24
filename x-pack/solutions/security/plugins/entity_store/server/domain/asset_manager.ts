@@ -52,6 +52,7 @@ import {
   type TelemetryReporter,
   ENTITY_STORE_DELETION_EVENT,
   ENTITY_STORE_INITIALIZATION_EVENT,
+  ENTITY_STORE_INITIALIZATION_FAILURE_EVENT,
 } from '../telemetry/events';
 import { getErrorMessage } from '../../common';
 
@@ -111,13 +112,8 @@ export class AssetManager {
           logger: this.logger,
         }),
       ]);
-      this.analytics.reportEvent(ENTITY_STORE_INITIALIZATION_EVENT, {
-        entityType: entityTypes.join(','),
-        namespace: this.namespace,
-      });
     } catch (error) {
-      this.analytics.reportEvent(ENTITY_STORE_INITIALIZATION_EVENT, {
-        entityType: entityTypes.join(','),
+      this.analytics.reportEvent(ENTITY_STORE_INITIALIZATION_FAILURE_EVENT, {
         namespace: this.namespace,
         error: getErrorMessage(error),
       });
@@ -228,7 +224,10 @@ export class AssetManager {
     if (installed) {
       await this.start(request, type);
     }
-
+    this.analytics.reportEvent(ENTITY_STORE_INITIALIZATION_EVENT, {
+      entityType: type,
+      namespace: this.namespace,
+    });
     return installed;
   }
 

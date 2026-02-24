@@ -9,16 +9,20 @@ import type { AnalyticsServiceSetup } from '@kbn/core/server';
 import type { EventTypeOpts } from '@kbn/core/server';
 
 // ------------------------------------
-// Payload interfaces
+//  Event types
 // ------------------------------------
 
-interface InitializationEventPayload {
+interface InitializationEvent {
   entityType: string;
   namespace: string;
-  error?: string;
 }
 
-interface DeletionEventPayload {
+interface InitializationFailureEvent {
+  error: string;
+  namespace: string;
+}
+
+interface DeletionEvent {
   entityType: string;
   namespace: string;
 }
@@ -42,15 +46,26 @@ export const ENTITY_STORE_INITIALIZATION_EVENT = {
         description: 'Namespace where the entities are stored (e.g. "default")',
       },
     },
+  },
+} as const satisfies EventTypeOpts<InitializationEvent>;
+
+export const ENTITY_STORE_INITIALIZATION_FAILURE_EVENT = {
+  eventType: 'entity_store_initialization_failure',
+  schema: {
     error: {
       type: 'keyword',
       _meta: {
-        optional: true,
-        description: 'Error message for initialization failure',
+        description: 'Error message for a resource initialization failure',
+      },
+    },
+    namespace: {
+      type: 'keyword',
+      _meta: {
+        description: 'Namespace where the entities are stored (e.g. "default")',
       },
     },
   },
-} as const satisfies EventTypeOpts<InitializationEventPayload>;
+} as const satisfies EventTypeOpts<InitializationFailureEvent>;
 
 export const ENTITY_STORE_DELETION_EVENT = {
   eventType: 'entity_store_deletion',
@@ -68,7 +83,7 @@ export const ENTITY_STORE_DELETION_EVENT = {
       },
     },
   },
-} as const satisfies EventTypeOpts<DeletionEventPayload>;
+} as const satisfies EventTypeOpts<DeletionEvent>;
 
 // ------------------------------------
 // Registration
@@ -76,11 +91,12 @@ export const ENTITY_STORE_DELETION_EVENT = {
 
 const ENTITY_STORE_TELEMETRY_EVENTS = [
   ENTITY_STORE_INITIALIZATION_EVENT,
+  ENTITY_STORE_INITIALIZATION_FAILURE_EVENT,
   ENTITY_STORE_DELETION_EVENT,
 ] as const;
 
 export const registerTelemetry = (analytics: AnalyticsServiceSetup) => {
-  ENTITY_STORE_TELEMETRY_EVENTS.forEach((eventConfig) => {
+  ENTITY_STORE_TELEMETRY_EVENTS.forEach((eventConfig: EventTypeOpts<{}>) => {
     analytics.registerEventType(eventConfig);
   });
 };
@@ -90,8 +106,9 @@ export const registerTelemetry = (analytics: AnalyticsServiceSetup) => {
 // ------------------------------------
 
 interface TelemetryEventMap {
-  [ENTITY_STORE_INITIALIZATION_EVENT.eventType]: InitializationEventPayload;
-  [ENTITY_STORE_DELETION_EVENT.eventType]: DeletionEventPayload;
+  [ENTITY_STORE_INITIALIZATION_EVENT.eventType]: InitializationEvent;
+  [ENTITY_STORE_DELETION_EVENT.eventType]: DeletionEvent;
+  [ENTITY_STORE_INITIALIZATION_FAILURE_EVENT.eventType]: InitializationFailureEvent;
 }
 
 export type TelemetryReporter = ReturnType<typeof reportEvent>;
