@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 interface SourcesUtilityBarProps {
   selectedCount: number;
@@ -28,10 +28,11 @@ export const SourcesUtilityBar: React.FC<SourcesUtilityBarProps> = ({ selectedCo
     >
       <EuiFlexItem grow={false} data-test-subj="sources-selected-count">
         <EuiText size="s" color="subdued">
-          {i18n.translate('xpack.dataSources.utilityBar.selectedSources', {
-            defaultMessage: 'Sources selected: {count}',
-            values: { count: selectedCount },
-          })}
+          <FormattedMessage
+            id="xpack.dataSources.utilityBar.selectedSources"
+            defaultMessage="Sources selected: {count}"
+            values={{ count: <strong>{selectedCount}</strong> }}
+          />
         </EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>
