@@ -162,7 +162,13 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
     }
 
     if (actionRequest.command === 'runscript') {
-      const scriptDetails = await this.fetchScript(actionRequest.parameters.scriptId);
+      let scriptDetails: EndpointScript;
+
+      try {
+        scriptDetails = await this.fetchScript(actionRequest.parameters.scriptId);
+      } catch (error) {
+        return { isValid: false, error };
+      }
 
       if (scriptDetails.requiresInput && !(actionRequest.parameters.scriptInput ?? '').trim()) {
         return {

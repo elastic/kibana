@@ -202,9 +202,11 @@ export const endpointResponseAction = async (
               }]: ${stringify(ruleScriptConfig)}`
           );
 
-          // If we have an error OR the rule defined a runscript configuration for this OS type,
+          // If we have an error
+          //  - OR -
+          //  the rule defined a runscript configuration for this OS type
           // then create the action request
-          if (error || ruleScriptConfig) {
+          if (error || (ruleScriptConfig && ruleScriptConfig.scriptId)) {
             response.push(
               responseActionsClient.runscript(
                 {
@@ -224,6 +226,12 @@ export const endpointResponseAction = async (
                   error,
                 }
               )
+            );
+          }
+
+          if (!error && ruleScriptConfig && !ruleScriptConfig.scriptId) {
+            logger.debug(
+              `${logMsgPrefix}: Skipping 'runscript' response action for alert [${alertData.alertId}]: No script defined for OS type [${alertData.hostOsType}]`
             );
           }
         }
