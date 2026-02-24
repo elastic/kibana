@@ -12,7 +12,8 @@ export const zendeskDataSource: DataSource = {
   id: 'zendesk',
   name: 'Zendesk',
   description: i18n.translate('xpack.dataSources.zendesk.description', {
-    defaultMessage: 'Connect to Zendesk to search and retrieve tickets, users, and Help Center content.',
+    defaultMessage:
+      'Connect to Zendesk to search and retrieve tickets, users, and Help Center content.',
   }),
 
   iconType: '.zendesk',

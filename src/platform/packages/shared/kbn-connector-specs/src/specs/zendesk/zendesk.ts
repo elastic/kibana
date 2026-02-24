@@ -42,14 +42,13 @@ export const ZendeskConnector: ConnectorSpec = {
                   'Your Zendesk API token (Admin Center > Apps and integrations > APIs)',
               }),
             },
-            user: {
-              label: i18n.translate('core.kibanaConnectorSpecs.zendesk.auth.user.label', {
+            username: {
+              label: i18n.translate('core.kibanaConnectorSpecs.zendesk.auth.username.label', {
                 defaultMessage: 'Email',
               }),
-              helpText: i18n.translate('core.kibanaConnectorSpecs.zendesk.auth.user.helpText', {
+              helpText: i18n.translate('core.kibanaConnectorSpecs.zendesk.auth.username.helpText', {
                 defaultMessage:
-                  'Zendesk account email (use {email}/token as username for API token auth)',
-                values: { email: 'your_email@example.com' },
+                  'Your Zendesk account email with "/token" at the end (e.g. your_email@example.com/token)',
               }),
             },
           },
