@@ -10585,7 +10585,7 @@
           "items": {
             "type": "keyword",
             "_meta": {
-              "description": "Data stream namespace included in rule execution."
+              "description": "Data stream namespace(s) to be included in rule execution."
             }
           }
         },

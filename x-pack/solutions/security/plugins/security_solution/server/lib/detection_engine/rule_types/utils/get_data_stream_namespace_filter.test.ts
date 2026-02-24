@@ -6,25 +6,22 @@
  */
 
 import { getDataStreamNamespaceFilter } from './get_data_stream_namespace_filter';
-import type { IUiSettingsClient } from '@kbn/core/server';
+import { uiSettingsServiceMock } from '@kbn/core/public/mocks';
 
-const uiSettingsClientMock = {
-  get: jest.fn(),
-} as unknown as IUiSettingsClient;
-
+const uiSettingsClientMock = uiSettingsServiceMock.create().setup();
 describe('getDataStreamNamespaceFilter', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it('should return empty array if ui settings is null or undefined', async () => {
-    (uiSettingsClientMock.get as jest.Mock).mockResolvedValueOnce(null);
+    uiSettingsClientMock.get.mockResolvedValueOnce(null);
     const filters = await getDataStreamNamespaceFilter({
       uiSettingsClient: uiSettingsClientMock,
     });
     expect(filters).toEqual([]);
 
-    (uiSettingsClientMock.get as jest.Mock).mockResolvedValueOnce(undefined);
+    uiSettingsClientMock.get.mockResolvedValueOnce(undefined);
     const filters2 = await getDataStreamNamespaceFilter({
       uiSettingsClient: uiSettingsClientMock,
     });
@@ -33,7 +30,7 @@ describe('getDataStreamNamespaceFilter', () => {
 
   it('should return empty array if terms array is empty', async () => {
     const emptyFilter = [] as String[];
-    (uiSettingsClientMock.get as jest.Mock).mockResolvedValueOnce(emptyFilter);
+    uiSettingsClientMock.get.mockResolvedValueOnce(emptyFilter);
     const filters = await getDataStreamNamespaceFilter({
       uiSettingsClient: uiSettingsClientMock,
     });
@@ -54,7 +51,7 @@ describe('getDataStreamNamespaceFilter', () => {
         },
       },
     };
-    (uiSettingsClientMock.get as jest.Mock).mockResolvedValueOnce(filterConfig);
+    uiSettingsClientMock.get.mockResolvedValueOnce(filterConfig);
     const filters = await getDataStreamNamespaceFilter({
       uiSettingsClient: uiSettingsClientMock,
     });
@@ -76,7 +73,7 @@ describe('getDataStreamNamespaceFilter', () => {
         },
       },
     };
-    (uiSettingsClientMock.get as jest.Mock).mockResolvedValueOnce(filterConfig);
+    uiSettingsClientMock.get.mockResolvedValueOnce(filterConfig);
     const filters = await getDataStreamNamespaceFilter({
       uiSettingsClient: uiSettingsClientMock,
     });
@@ -98,7 +95,7 @@ describe('getDataStreamNamespaceFilter', () => {
         },
       },
     };
-    (uiSettingsClientMock.get as jest.Mock).mockResolvedValueOnce(filterConfig);
+    uiSettingsClientMock.get.mockResolvedValueOnce(filterConfig);
     const filters = await getDataStreamNamespaceFilter({
       uiSettingsClient: uiSettingsClientMock,
     });
@@ -106,9 +103,9 @@ describe('getDataStreamNamespaceFilter', () => {
     expect(filters).toEqual([expected]);
   });
 
-  it('should throw error if filter structure is invalid', async () => {
+  it('returns an empty array of filters if filter structure is invalid', async () => {
     const invalidFilter = 'not-an-array';
-    (uiSettingsClientMock.get as jest.Mock).mockResolvedValueOnce(invalidFilter);
+    uiSettingsClientMock.get.mockResolvedValueOnce(invalidFilter);
 
     const filters = await getDataStreamNamespaceFilter({
       uiSettingsClient: uiSettingsClientMock,
