@@ -292,6 +292,7 @@ describe('SLOs Page', () => {
     });
 
     // FLAKY: https://github.com/elastic/kibana/issues/239819
+    // FLAKY: https://github.com/elastic/kibana/issues/253564
     describe.skip('when API has returned results', () => {
       const setupSloListView = async () => {
         useFetchSloDefinitionsMock.mockReturnValue({ isLoading: false, data: sloDefinitionList });
