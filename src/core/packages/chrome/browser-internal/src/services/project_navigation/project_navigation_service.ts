@@ -46,8 +46,6 @@ import type {
   NavigationTreeDefinitionUI,
 } from '@kbn/core-chrome-browser';
 import type { Logger } from '@kbn/logging';
-import type { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
-
 import { findActiveNodes, flattenNav, parseNavigationTree, stripQueryParams } from './utils';
 import { buildBreadcrumbs } from './breadcrumbs';
 import { getCloudLinks } from './cloud_links';
@@ -58,7 +56,6 @@ interface StartDeps {
   http: InternalHttpStart;
   chromeBreadcrumbs$: Observable<ChromeBreadcrumb[]>;
   logger: Logger;
-  featureFlags: FeatureFlagsStart;
   uiSettings: IUiSettingsClient;
 }
 
@@ -262,13 +259,13 @@ export class ProjectNavigationService {
 
   private findActiveNodes({
     location: _location,
-    flattendTree = this.projectNavigationNavTreeFlattened,
+    flattenedTree = this.projectNavigationNavTreeFlattened,
   }: {
     location?: Location;
-    flattendTree?: Record<string, ChromeProjectNavigationNode>;
+    flattenedTree?: Record<string, ChromeProjectNavigationNode>;
   } = {}): ChromeProjectNavigationNode[][] {
     if (!this.application) return [];
-    if (!Object.keys(flattendTree).length) return [];
+    if (!Object.keys(flattenedTree).length) return [];
 
     const location = _location ?? this.application.history.location;
     let currentPathname = this.http?.basePath.prepend(location.pathname) ?? location.pathname;
@@ -277,7 +274,7 @@ export class ProjectNavigationService {
     // e.g. /app/kibana#/management
     currentPathname = stripQueryParams(`${currentPathname}${location.hash}`);
 
-    return findActiveNodes(currentPathname, flattendTree, location, this.http?.basePath.prepend);
+    return findActiveNodes(currentPathname, flattenedTree, location, this.http?.basePath.prepend);
   }
 
   /**

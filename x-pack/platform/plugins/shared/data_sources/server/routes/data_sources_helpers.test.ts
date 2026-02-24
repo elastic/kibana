@@ -406,7 +406,7 @@ tags:
             description: 'List repository issues List issues',
           },
         ],
-        namespace: 'My MCP Connector',
+        namespace: 'test_type.my-mcp-connector',
       });
       expect(mockSavedObjectsClient.create).toHaveBeenCalledWith(
         DATA_SOURCE_SAVED_OBJECT_TYPE,
@@ -488,7 +488,7 @@ tags:
       );
     });
 
-    it('should throw error when no MCP tools are found', async () => {
+    it('should propagate the error when getNamedMcpTools fails', async () => {
       const actionTypeId = '.mcp';
       const mockStackConnector = {
         id: 'mcp-connector-1',
@@ -504,7 +504,7 @@ tags:
               hasAuth: true,
               authType: 'bearer',
             },
-            importedTools: [{ name: 'nonexistent_tool', description: 'Tool that does not exist' }],
+            importedTools: [{ name: 'get_file_contents', description: 'Get file contents' }],
           },
         ],
         workflows: { directory: '/path/to/workflows' },
@@ -517,7 +517,11 @@ tags:
         },
       ]);
 
-      mockGetNamedMcpTools.mockResolvedValue(undefined);
+      mockGetNamedMcpTools.mockRejectedValue(
+        new Error(
+          'an error occurred while running the action: Streamable HTTP error: missing required Authorization header'
+        )
+      );
       mockActionsClient.create.mockResolvedValue(mockStackConnector);
 
       await expect(
@@ -533,7 +537,9 @@ tags:
           dataSource: mockDataSource as any,
           agentBuilder: mockAgentBuilder as any,
         })
-      ).rejects.toThrow('No imported connector tools found for My MCP Connector');
+      ).rejects.toThrow(
+        'an error occurred while running the action: Streamable HTTP error: missing required Authorization header'
+      );
     });
 
     it('should throw error when bulk creating MCP tools fails', async () => {
