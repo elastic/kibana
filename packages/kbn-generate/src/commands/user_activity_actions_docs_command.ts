@@ -60,7 +60,10 @@ const formatAppliesTo = ({
   if (versionRemovedAt) {
     return `{applies_to}\`stack: ga ${versionAddedAt}, removed ${versionRemovedAt}\``;
   }
-
+  // the feature was introduced in 9.4 so no need to mention that in the actions
+  if (versionAddedAt === '9.4') {
+    return '';
+  }
   return `{applies_to}\`stack: ga ${versionAddedAt}+\``;
 };
 
