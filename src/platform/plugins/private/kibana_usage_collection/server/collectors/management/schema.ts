@@ -26,7 +26,7 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'array',
     items: {
       type: 'keyword',
-      _meta: { description: 'Data stream namespace included in rule execution.' },
+      _meta: { description: 'Data stream namespace(s) to be included in rule execution.' },
     },
   },
   'securitySolution:maxUnassociatedNotes': {
