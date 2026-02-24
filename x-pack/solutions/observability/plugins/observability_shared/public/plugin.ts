@@ -13,7 +13,8 @@ import type {
   SharePluginStart,
 } from '@kbn/share-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import { BehaviorSubject } from 'rxjs';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
+import { BehaviorSubject, type Subscription } from 'rxjs';
 import { createLazyObservabilityPageTemplate } from './components/page_template';
 import { createNavigationRegistry } from './components/page_template/helpers/navigation_registry';
 import { registerProfilingComponent } from './components/profiling/helpers/component_registry';
@@ -45,6 +46,11 @@ import {
 import { updateGlobalNavigation } from './services/update_global_navigation';
 import type { DependencyOverviewLocator } from '../common/locators/apm/dependency_overview_locator';
 import { DependencyOverviewLocatorDefinition } from '../common/locators/apm/dependency_overview_locator';
+import {
+  OBSERVABILITY_APP_IDS,
+  OBSERVABILITY_AGENT_ID,
+  OBSERVABILITY_SESSION_TAG,
+} from '../common/observability_apps';
 export interface ObservabilitySharedSetup {
   share: SharePluginSetup;
 }
@@ -53,6 +59,7 @@ export interface ObservabilitySharedStart {
   spaces?: SpacesPluginStart;
   embeddable: EmbeddableStart;
   share: SharePluginStart;
+  agentBuilder?: AgentBuilderPluginStart;
 }
 
 export type ObservabilitySharedPluginSetup = ReturnType<ObservabilitySharedPlugin['setup']>;
@@ -83,6 +90,7 @@ interface ObservabilitySharedLocators {
 export class ObservabilitySharedPlugin implements Plugin {
   private readonly navigationRegistry = createNavigationRegistry();
   private isSidebarEnabled$: BehaviorSubject<boolean>;
+  private appChangeSubscription?: Subscription;
 
   constructor() {
     this.isSidebarEnabled$ = new BehaviorSubject<boolean>(true);
@@ -106,6 +114,25 @@ export class ObservabilitySharedPlugin implements Plugin {
 
   public start(core: CoreStart, plugins: ObservabilitySharedStart) {
     const { application } = core;
+    const { agentBuilder } = plugins;
+
+    if (agentBuilder?.setConversationFlyoutActiveConfig) {
+      this.appChangeSubscription = application.currentAppId$.subscribe((appId) => {
+        if (appId === undefined) {
+          return;
+        }
+
+        if ((OBSERVABILITY_APP_IDS as readonly string[]).includes(appId)) {
+          agentBuilder.setConversationFlyoutActiveConfig({
+            agentId: OBSERVABILITY_AGENT_ID,
+            sessionTag: OBSERVABILITY_SESSION_TAG,
+            newConversation: true,
+          });
+        } else {
+          agentBuilder.clearConversationFlyoutActiveConfig?.();
+        }
+      });
+    }
 
     const PageTemplate = createLazyObservabilityPageTemplate({
       currentAppId$: application.currentAppId$,
@@ -126,7 +153,9 @@ export class ObservabilitySharedPlugin implements Plugin {
     };
   }
 
-  public stop() {}
+  public stop() {
+    this.appChangeSubscription?.unsubscribe();
+  }
 
   private createLocators(urlService: BrowserUrlService): ObservabilitySharedLocators {
     return {

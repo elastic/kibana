@@ -228,3 +228,10 @@ export {
 export { COMMON_OBSERVABILITY_GROUPING } from './embeddable_grouping';
 
 export { BUILT_IN_ENTITY_TYPES, EntityDataStreamType } from './entity';
+
+export {
+  OBSERVABILITY_APP_IDS,
+  OBSERVABILITY_AGENT_ID,
+  OBSERVABILITY_SESSION_TAG,
+  type ObservabilityAppId,
+} from './observability_apps';
