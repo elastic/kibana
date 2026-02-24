@@ -92,7 +92,7 @@ describe('MetricsNodeDetailsLink', () => {
       expect(discoverLocator.getRedirectUrl).toHaveBeenCalledWith(
         expect.objectContaining({
           query: {
-            esql: 'TS "metrics-*"\n| WHERE `container.id`=="abc-123"',
+            esql: 'FROM "metrics-*"\n| WHERE `container.id`=="abc-123"',
           },
           timeRange: { from: 'now-15m', to: 'now' },
         })
@@ -112,7 +112,7 @@ describe('MetricsNodeDetailsLink', () => {
       expect(discoverLocator.getRedirectUrl).toHaveBeenCalledWith(
         expect.objectContaining({
           query: {
-            esql: 'TS "metrics-*"\n| WHERE `k8s.pod.uid`=="pod-uid-456"',
+            esql: 'FROM "metrics-*"\n| WHERE `k8s.pod.uid`=="pod-uid-456"',
           },
           timeRange: { from: 'now-15m', to: 'now' },
         })
@@ -138,7 +138,7 @@ describe('MetricsNodeDetailsLink', () => {
       expect(discoverLocator.getRedirectUrl).toHaveBeenCalledWith(
         expect.objectContaining({
           query: {
-            esql: 'TS "my-metrics-*"\n| WHERE `container.id`=="abc-123"',
+            esql: 'FROM "my-metrics-*"\n| WHERE `container.id`=="abc-123"',
           },
           timeRange: { from: 'now-15m', to: 'now' },
         })
@@ -157,7 +157,7 @@ describe('MetricsNodeDetailsLink', () => {
       expect(discoverLocator.getRedirectUrl).toHaveBeenCalledWith(
         expect.objectContaining({
           query: {
-            esql: 'TS "metrics-*"\n| WHERE `container.id`=="x"',
+            esql: 'FROM "metrics-*"\n| WHERE `container.id`=="x"',
           },
           timeRange: { from: 'now-15m', to: 'now' },
         })
@@ -181,7 +181,7 @@ describe('MetricsNodeDetailsLink', () => {
       expect(discoverLocator.getRedirectUrl).toHaveBeenCalledWith(
         expect.objectContaining({
           query: {
-            esql: 'TS "metrics-*"\n| WHERE `container.id`=="id-with-\\"quote\\""',
+            esql: 'FROM "metrics-*"\n| WHERE `container.id`=="id-with-\\"quote\\""',
           },
           timeRange: { from: 'now-15m', to: 'now' },
         })
