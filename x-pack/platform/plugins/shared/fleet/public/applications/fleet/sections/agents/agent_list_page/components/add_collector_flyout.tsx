@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
+import { useQuery } from '@kbn/react-query';
 
 import {
   EuiFlyout,
@@ -70,13 +71,20 @@ async function fetchEnrollmentTokenWithHook(policyId: string): Promise<any[]> {
   return res?.data?.items || [];
 }
 
+async function ensurePolicyAndFetchToken(): Promise<string | undefined> {
+  let opampPolicy = await fetchOpampPolicy();
+  if (!opampPolicy) {
+    const created = await createOpampPolicyWithHook();
+    opampPolicy = created.item || created;
+  }
+  const tokens = await fetchEnrollmentTokenWithHook(opampPolicy.id);
+  return tokens[0]?.api_key;
+}
+
 export const AddCollectorFlyout: React.FunctionComponent<AddCollectorFlyoutProps> = ({
   onClose,
   onClickViewAgents,
 }) => {
-  const [loading, setLoading] = useState(true);
-  const [token, setToken] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
   const fleetServerHosts = useGetFleetServerHosts();
   const defaultFleetServerHost =
     fleetServerHosts.data?.items?.find((item) => item.is_default)?.host_urls?.[0] || '';
@@ -85,36 +93,16 @@ export const AddCollectorFlyout: React.FunctionComponent<AddCollectorFlyoutProps
     pollImmediately: true,
   });
 
-  useEffect(() => {
-    let isMounted = true;
-    async function ensurePolicyAndToken() {
-      setLoading(true);
-      setError(null);
-      try {
-        // 1. Check for existing opamp policy
-        let opampPolicy = await fetchOpampPolicy();
-        if (!opampPolicy) {
-          // 2. Create if not exists
-          const created = await createOpampPolicyWithHook();
-          opampPolicy = created.item || created;
-        }
-        // 3. Fetch enrollment token
-        const tokens = await fetchEnrollmentTokenWithHook(opampPolicy.id);
-        const tokenVal = tokens[0]?.api_key;
-        if (isMounted) {
-          setToken(tokenVal);
-        }
-      } catch (e: any) {
-        setError(e?.message || 'Failed to create policy or fetch token');
-      } finally {
-        setLoading(false);
-      }
-    }
-    ensurePolicyAndToken();
-    return () => {
-      isMounted = false;
-    };
-  }, []);
+  const {
+    data: token,
+    isLoading: loading,
+    error: queryError,
+  } = useQuery<string | undefined, Error>({
+    queryKey: ['opampPolicyAndToken'],
+    queryFn: ensurePolicyAndFetchToken,
+  });
+
+  const error = queryError?.message ?? null;
 
   const opampConfig = `extensions:
   opamp:
