@@ -9,6 +9,8 @@ description: Review Scout UI/API tests and FTR → Scout migrations for best pra
 
 Perform a static PR review of Scout UI and API test files (`*.spec.ts`) against Scout best practices and existing Scout abstractions (fixtures, page objects, API helpers). Produce actionable, PR-review-ready feedback that pushes for reuse over one-off implementations.
 
+Important: Do not post GitHub comments unless explicitly stated.
+
 ### Inputs
 
 1. Changed `*.spec.ts` files (and imported helpers/fixtures).
@@ -34,27 +36,77 @@ Perform a static PR review of Scout UI and API test files (`*.spec.ts`) against 
 
 ### Findings
 
-| Concern (from checklist) | Priority | Explanation                                                                                      | Evidence    | Suggested Change                                                                       |
-| :----------------------- | :------- | :----------------------------------------------------------------------------------------------- | :---------- | :------------------------------------------------------------------------------------- |
-| Reuse-first              | major    | PR introduces bespoke selectors/helpers where `pageObjects`/fixtures would keep tests simpler.   | <file:line> | Use existing `pageObjects`/fixtures; if adding a helper, register via fixtures.        |
-| Fixture boundaries       | major    | Endpoint under test is called via `apiServices`, which hides auth scope and reduces readability. | <file:line> | Call the endpoint with `apiClient`; keep `apiServices`/`kbnClient` for setup/teardown. |
-| Flake traps              | minor    | Uses `waitForTimeout()` instead of relying on auto-waiting + readiness signals.                  | <file:line> | Replace with web-first assertions and explicit readiness waits.                        |
+- **Reuse-first — Prefer existing fixtures/page objects**
+  - **Explanation**: PR introduces bespoke selectors/helpers where existing `pageObjects`/fixtures would keep tests simpler and more maintainable.
+  - **Evidence**: `<file:line>`
+  - **Suggested change**: Use existing `pageObjects`/fixtures; if adding a helper, register it via fixtures in the right scope.
+- **Fixture boundaries — Use `apiClient` for the endpoint under test**
+  - **Explanation**: Calling the endpoint under test via `apiServices` hides auth scope and reduces readability. `apiServices`/`kbnClient` are better suited for setup/teardown only.
+  - **Evidence**: `<file:line>`
+  - **Suggested change**: Call the endpoint with `apiClient`; keep `apiServices`/`kbnClient` for setup/teardown.
+- **Flake traps — Avoid `waitForTimeout()`**
+  - **Explanation**: Time-based waits are a common source of flakiness. Prefer auto-waiting + explicit readiness signals/web-first assertions.
+  - **Evidence**: `<file:line>`
+  - **Suggested change**: Replace with web-first assertions and explicit readiness waits.
 
 ## Output format
 
-Output **only** the applicable markdown tables below. Sort findings by priority: `blocker` → `major` → `minor` → `nit`.
+Output **only** the applicable sections below. Use headings and lists (**no tables**). Group issues by priority: `blocker` → `major` → `minor` → `nit`. Omit empty priorities.
 
-### 1. Findings Table
+### 1. Findings
 
-| Concern (from checklist)      | Priority                     | Explanation                         | Evidence    | Suggested Change     |
-| :---------------------------- | :--------------------------- | :---------------------------------- | :---------- | :------------------- |
-| <Use exact checklist heading> | <blocker\|major\|minor\|nit> | <1-3 concise, actionable sentences> | <file:line> | <Specific code edit> |
+#### Blocker
 
-### 2. Migration Parity Table (only if a migration is detected)
+- **<Concern (use exact checklist heading)> — <short summary>**
+  - **Explanation**: <1-3 concise, actionable sentences>
+  - **Evidence**: `<file:line>` (add multiple as needed)
+  - **Suggested change**: <Specific code edit; include a small snippet if helpful>
 
-| Concern (from checklist)      | Priority | Old Behavior | New Behavior | Gap?     | Suggested Fix | Evidence    |
-| :---------------------------- | :------- | :----------- | :----------- | :------- | :------------ | :---------- |
-| <Use exact checklist heading> | <...>    | <...>        | <...>        | <yes/no> | <...>         | <file:line> |
+#### Major
+
+- **<Concern (use exact checklist heading)> — <short summary>**
+  - **Explanation**: <...>
+  - **Evidence**: `<file:line>`
+  - **Suggested change**: <...>
+
+#### Minor
+
+- **<Concern (use exact checklist heading)> — <short summary>**
+  - **Explanation**: <...>
+  - **Evidence**: `<file:line>`
+  - **Suggested change**: <...>
+
+#### Nit
+
+- **<Concern (use exact checklist heading)> — <short summary>**
+  - **Explanation**: <...>
+  - **Evidence**: `<file:line>`
+  - **Suggested change**: <...>
+
+### 2. Migration parity (only if a test migration is detected and action is required)
+
+Include this section only when the PR removes/changes FTR tests alongside new/changed Scout specs **and** you found at least one parity issue that requires someone to step in (code change or an explicit de-scope/sign-off decision).
+Do **not** output an FYI parity map. If everything is equivalent (or differences are clearly benign), omit this section.
+
+#### Blocker
+
+- **<Concern (use exact checklist heading)> — <scenario name>**
+  - **Issue**: <Coverage gap or behavior delta that needs action>
+  - **Old behavior**: <...>
+  - **New behavior**: <...>
+  - **Why it matters**: <1-2 sentences on risk/coverage impact>
+  - **Suggested fix / decision**: <Required. Either a code change or an explicit de-scope/sign-off the reviewer must confirm.>
+  - **Evidence**: `<file:line>`
+
+#### Major / Minor / Nit
+
+- **<Concern (use exact checklist heading)> — <scenario name>**
+  - **Issue**: <Coverage gap or behavior delta that needs action>
+  - **Old behavior**: <...>
+  - **New behavior**: <...>
+  - **Why it matters**: <...>
+  - **Suggested fix / decision**: <Required. Either a code change or an explicit de-scope/sign-off.>
+  - **Evidence**: `<file:line>`
 
 ## Follow-up
 
@@ -72,7 +124,7 @@ Offer to generate the updated code, fully incorporating the suggested improvemen
 - **Cost**: avoid repeating expensive setup; consider a global setup hook for shared one-time operations.
 - **Tags / environment**: validate deployment tags and avoid assumptions that only hold in specific environments.
 
-### Migration parity (required when migration is detected)
+### Migration parity analysis (required when migration is detected)
 
 - **Detect migration** when the PR removes/changes FTR tests (for example `test/functional/**`, `loadTestFile()`, FTR configs) alongside new/changed Scout specs.
 - **If migration is detected**:
@@ -80,6 +132,13 @@ Offer to generate the updated code, fully incorporating the suggested improvemen
   - Confirm the suite is the right **test type** (UI vs API): if the old FTR suite is primarily “data correctness”, prefer migrating it to a Scout API test (or unit/integration) rather than a Scout UI test.
   - Build a parity map from old scenarios → new Scout coverage (roles, setup/teardown, assertions, cleanup).
   - Call out missing behaviors (including error paths) and recommend exactly where to add coverage.
+  - Escalate meaningful **Scout vs FTR deltas** when they could change what’s actually being tested, weaken coverage, or increase flake risk. Treat these as parity issues that require action (code change or explicit de-scope/sign-off), and include them in the “Migration parity” output section.
+    - auth/roles used (e.g., `admin` vs viewer), spaces behavior, and permission realism
+    - headers/internal origin/REST versioning and any other request shaping differences
+    - retries and error handling differences (e.g., helper methods with `ignoreErrors`, automatic retries)
+    - parallelism/isolation differences (worker-scoped fixtures, shared state, cleanup semantics)
+    - classic vs serverless coverage changes (suite removed from one environment but not the other)
+    - assertion strength changes (weaker/stronger checks, removal of side-effect validation)
   - Verify suite wiring/discovery (new specs are picked up by Scout/Playwright config; no orphaned `loadTestFile()`).
   - Ensure any intentional de-scopes are explicit, and that tags/permissions remain equivalent and cloud/serverless compatible where applicable.
-- **Output**: include the “Migration Parity Table”.
+- **Output**: include the “Migration parity” section only when action is required; otherwise omit it.
