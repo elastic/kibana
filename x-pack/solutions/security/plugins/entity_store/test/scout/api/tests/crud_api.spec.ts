@@ -8,6 +8,8 @@
 import { apiTest } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
 import type { Client } from '@elastic/elasticsearch';
+import { hashEuid } from '../../../../server/domain/crud_client/utils';
+import { getEuidFromObject } from '../../../../common/domain/euid';
 import type { Entity, HostEntity } from '../../../../common/domain/definitions/entity.gen';
 import {
   COMMON_HEADERS,
@@ -66,6 +68,9 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
     expect(create.body).toStrictEqual({ ok: true });
 
     expect(await countEntitiesByID(esClient, LATEST_INDEX, entityObj.entity.id)).toBe(1);
+    const euid = getEuidFromObject('generic', entityObj) as string;
+    const check = await esClient.get({ index: LATEST_INDEX, id: hashEuid(euid) });
+    expect(check.found).toBe(true);
   });
 
   apiTest('Should require a force flag', async ({ apiClient, esClient }) => {
@@ -234,11 +239,19 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
     });
     expect(resp.hits.hits).toHaveLength(1);
     expect(resp.hits.hits[0]._id).toBeDefined();
-    const entityId = resp.hits.hits[0]._id as string;
 
-    const del = await apiClient.delete(ENTITY_STORE_ROUTES.CRUD_DELETE(entityId), {
+    const euid = getEuidFromObject('generic', entityObj) as string;
+
+    const expectedHashedEntityId = hashEuid(euid);
+    const hashedEntityId = resp.hits.hits[0]._id as string;
+    expect(hashedEntityId).toBe(expectedHashedEntityId);
+
+    const del = await apiClient.delete(ENTITY_STORE_ROUTES.CRUD_DELETE, {
       headers: defaultHeaders,
       responseType: 'json',
+      body: {
+        entityId: euid,
+      },
     });
     expect(del.body).toStrictEqual({ deleted: true });
     expect(del.statusCode).toBe(200);
@@ -246,13 +259,16 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
     await expect(
       esClient.get({
         index: LATEST_INDEX,
-        id: entityId,
+        id: hashedEntityId,
       })
     ).rejects.toThrow(`"found":false`);
 
-    const apiNotFound = await apiClient.delete(ENTITY_STORE_ROUTES.CRUD_DELETE(entityId), {
+    const apiNotFound = await apiClient.delete(ENTITY_STORE_ROUTES.CRUD_DELETE, {
       headers: defaultHeaders,
       responseType: 'json',
+      body: {
+        entityId: entityObj.entity.id,
+      },
     });
     expect(apiNotFound.body.statusCode).toBe(404);
   });
