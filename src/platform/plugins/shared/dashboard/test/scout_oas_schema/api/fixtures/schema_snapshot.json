@@ -103,7 +103,21 @@
             "filters": {
               "type": "array",
               "items": {
-                "$ref": "#/components/schemas/kbn-es-query-server-storedFilterSchema"
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/@kbn/as-code-filters-schema_asCodeConditionFilterSchema"
+                  },
+                  {
+                    "$ref": "#/components/schemas/@kbn/as-code-filters-schema_asCodeGroupFilterSchema"
+                  },
+                  {
+                    "$ref": "#/components/schemas/@kbn/as-code-filters-schema_asCodeDSLFilterSchema"
+                  },
+                  {
+                    "$ref": "#/components/schemas/@kbn/as-code-filters-schema_asCodeSpatialFilterSchema"
+                  }
+                ],
+                "description": "A filter which can be a condition, group, DSL, or spatial"
               }
             },
             "kql_query": {
