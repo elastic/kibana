@@ -26,11 +26,12 @@ interface Props {
   item: NavigationItemInfo;
   index: number;
   toggleItemVisibility: (id: string) => void;
+  isDraggingAny: boolean;
 }
 
 const HOVER_SUPPRESS_MS = 400;
 
-export const DraggableItem = ({ item, index, toggleItemVisibility }: Props) => {
+export const DraggableItem = ({ item, index, toggleItemVisibility, isDraggingAny }: Props) => {
   const { euiTheme } = useEuiTheme();
   const [isDragging, setIsDragging] = useState(false);
   const [suppressHover, setSuppressHover] = useState(false);
@@ -76,6 +77,10 @@ export const DraggableItem = ({ item, index, toggleItemVisibility }: Props) => {
     }
   `;
 
+  const panelDraggingAnyCss = css`
+    cursor: default;
+  `;
+
   const dragAreaCss = css`
     display: flex;
     align-items: center;
@@ -112,7 +117,8 @@ export const DraggableItem = ({ item, index, toggleItemVisibility }: Props) => {
           css={[
             panelCss,
             snapshot.isDragging && panelDraggingCss,
-            suppressHover && panelSuppressHoverCss,
+            (isDraggingAny || suppressHover) && panelSuppressHoverCss,
+            isDraggingAny && !snapshot.isDragging && panelDraggingAnyCss,
           ]}
         >
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>

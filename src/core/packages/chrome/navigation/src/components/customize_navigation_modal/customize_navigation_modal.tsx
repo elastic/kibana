@@ -60,6 +60,7 @@ export const CustomizeNavigationModal = ({
   const [items, setItems] = useState<NavigationItemInfo[]>(() => getNavigationPrimaryItems());
   const [isSaving, setIsSaving] = useState(false);
   const [didReset, setDidReset] = useState(false);
+  const [isDraggingAny, setIsDraggingAny] = useState(false);
   const initialItemsRef = useRef(items);
   const [defaultItems] = useState<NavigationItemInfo[]>(() => {
     const currentItems = getNavigationPrimaryItems();
@@ -74,6 +75,7 @@ export const CustomizeNavigationModal = ({
 
   const modalCss = css`
     width: 576px;
+    ${isDraggingAny ? 'cursor: no-drop;' : ''}
   `;
 
   // Enable editing mode
@@ -121,7 +123,12 @@ export const CustomizeNavigationModal = ({
     onClose();
   }, [onClose, setIsEditingNavigation]);
 
+  const handleDragStart = useCallback(() => {
+    setIsDraggingAny(true);
+  }, []);
+
   const onVisibleDragEnd = useCallback(({ source, destination }: DropResult) => {
+    setIsDraggingAny(false);
     if (!destination || source.index === destination.index) return;
 
     setDidReset(false);
@@ -135,6 +142,7 @@ export const CustomizeNavigationModal = ({
   }, []);
 
   const onHiddenDragEnd = useCallback(({ source, destination }: DropResult) => {
+    setIsDraggingAny(false);
     if (!destination || source.index === destination.index) return;
 
     setDidReset(false);
@@ -233,7 +241,7 @@ export const CustomizeNavigationModal = ({
               ))}
             </>
           )}
-          <EuiDragDropContext onDragEnd={onVisibleDragEnd}>
+          <EuiDragDropContext onDragStart={handleDragStart} onDragEnd={onVisibleDragEnd}>
             <EuiDroppable droppableId="visible-nav-items" spacing="none">
               {visibleItems.map((item, index) => (
                 <DraggableItem
@@ -241,6 +249,7 @@ export const CustomizeNavigationModal = ({
                   item={item}
                   index={index}
                   toggleItemVisibility={toggleItemVisibility}
+                  isDraggingAny={isDraggingAny}
                 />
               ))}
             </EuiDroppable>
@@ -275,7 +284,7 @@ export const CustomizeNavigationModal = ({
                 </EuiFlexItem>
               </EuiFlexGroup>
               <EuiSpacer size="s" />
-              <EuiDragDropContext onDragEnd={onHiddenDragEnd}>
+              <EuiDragDropContext onDragStart={handleDragStart} onDragEnd={onHiddenDragEnd}>
                 <EuiDroppable droppableId="hidden-nav-items" spacing="none">
                   {hiddenItems.map((item, index) => (
                     <DraggableItem
@@ -283,6 +292,7 @@ export const CustomizeNavigationModal = ({
                       item={item}
                       index={index}
                       toggleItemVisibility={toggleItemVisibility}
+                      isDraggingAny={isDraggingAny}
                     />
                   ))}
                 </EuiDroppable>
