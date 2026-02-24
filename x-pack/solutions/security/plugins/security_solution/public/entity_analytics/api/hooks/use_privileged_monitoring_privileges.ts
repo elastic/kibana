@@ -18,13 +18,3 @@ export const usePrivilegedMonitoringPrivileges = () => {
     retry: 0,
   });
 };
-
-// TODO: update to WATCHLISTS privileges route when backend route is available https://github.com/elastic/security-team/issues/16102
-export const useWatchlistsPrivileges = () => {
-  const { fetchWatchlistPrivileges } = useEntityAnalyticsRoutes();
-  return useQuery<PrivMonPrivilegesResponse, SecurityAppError>({
-    queryKey: ['GET', 'FETCH_WATCHLIST_PRIVILEGES'],
-    queryFn: fetchWatchlistPrivileges,
-    retry: 0,
-  });
-};

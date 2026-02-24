@@ -14,7 +14,7 @@ import { getRowItemsWithActions } from '../../../../../common/components/tables/
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import type { WatchlistTableItemType } from './types';
 
-const COLUMN_WIDTHS = { actions: '5%', '@timestamp': '20%', watchlist_name: '15%' };
+const COLUMN_WIDTHS = { actions: '5%', watchlist_name: '15%' };
 
 const getWatchlistColumn = (): EuiBasicTableColumn<WatchlistTableItemType> =>
   ({
