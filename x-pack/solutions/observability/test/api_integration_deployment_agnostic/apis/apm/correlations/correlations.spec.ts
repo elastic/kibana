@@ -146,9 +146,11 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           `Expected 13 identified correlations, got ${latencyResponse.latencyCorrelations?.length}.`
         );
 
+        // Match legacy test sorting: sort by 'score' (which doesn't exist, so all undefined),
+        // then by fieldName and fieldValue. This makes agent.hostname come before transaction.result alphabetically.
         const sortedCorrelations = orderBy(
           latencyResponse.latencyCorrelations,
-          ['correlation', 'fieldName', 'fieldValue'],
+          ['score', 'fieldName', 'fieldValue'],
           ['desc', 'asc', 'asc']
         );
         const correlation = sortedCorrelations?.[0];
