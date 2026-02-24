@@ -6,9 +6,12 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
+import { MissingPrivilegesCallout } from '../missing_privileges_callout';
 import { WatchlistsManagementTable } from './components/watchlists_management_table';
+import { useWatchlistsPrivileges } from '../../api/hooks/use_watchlists_privileges';
 
 /**
  * TODO:
@@ -19,10 +22,26 @@ import { WatchlistsManagementTable } from './components/watchlists_management_ta
 
 export const Watchlists = () => {
   const spaceId = useSpaceId();
-  // const { data: privileges } = useWatchlistsPrivileges(); // TODO: implement
+  const { data: privileges } = useWatchlistsPrivileges();
+  const hasRequiredPrivileges = privileges?.has_all_required ?? true;
+
   return (
     <EuiFlexGroup direction="column">
-      <EuiFlexItem>{spaceId && <WatchlistsManagementTable spaceId={spaceId} />}</EuiFlexItem>
+      {privileges && !hasRequiredPrivileges ? (
+        <EuiFlexItem>
+          <MissingPrivilegesCallout
+            privileges={privileges}
+            title={
+              <FormattedMessage
+                id="xpack.securitySolution.entityAnalytics.watchlists.missingPrivileges.title"
+                defaultMessage="Insufficient privileges to view the watchlists management table"
+              />
+            }
+          />
+        </EuiFlexItem>
+      ) : (
+        <EuiFlexItem>{spaceId && <WatchlistsManagementTable spaceId={spaceId} />}</EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 };

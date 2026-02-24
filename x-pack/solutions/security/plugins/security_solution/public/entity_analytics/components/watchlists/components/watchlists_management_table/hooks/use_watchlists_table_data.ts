@@ -22,6 +22,7 @@ export const useWatchlistsTableData = (
     data: watchlists,
     isLoading,
     isError,
+    isRefetchError,
     refetch,
   } = useQuery({
     queryKey: ['watchlists-management-table', spaceId],
@@ -51,7 +52,7 @@ export const useWatchlistsTableData = (
   return {
     visibleRecords,
     isLoading,
-    hasError: isError,
+    hasError: isError || isRefetchError,
     refetch,
     inspect,
     hasNextPage: false,

@@ -11,6 +11,7 @@ import {
   EuiFlexItem,
   EuiBasicTable,
   EuiHorizontalRule,
+  EuiLoadingElastic,
   EuiSpacer,
   EuiCallOut,
   EuiText,
@@ -71,27 +72,37 @@ export const WatchlistsManagementTable: React.FC<{ spaceId: string }> = ({ space
               <InspectButton queryId={WATCHLISTS_MANAGEMENT_TABLE_QUERY_ID} />
             </EuiFlexItem>
           </EuiFlexGroup>
-          {visibleRecords.length > 0 ? (
-            <EuiBasicTable
-              id={WATCHLISTS_MANAGEMENT_TABLE_ID}
-              tableCaption={i18n.translate(
-                'xpack.securitySolution.entityAnalytics.watchlists.watchlistsManagementTable.tableCaption',
-                { defaultMessage: 'Watchlists management table' }
-              )}
-              loading={isLoading}
-              items={visibleRecords || []}
-              columns={columns}
-            />
-          ) : (
-            !isLoading && (
-              <EuiText size="s" color="subdued" textAlign="center">
-                <FormattedMessage
-                  id="xpack.securitySolution.entityAnalytics.watchlists.watchlistsManagementTable.noData"
-                  defaultMessage="No watchlists found"
+          <EuiFlexGroup direction="column" gutterSize="s">
+            <EuiFlexItem>
+              {isLoading && visibleRecords.length === 0 ? (
+                <EuiFlexGroup justifyContent="center">
+                  <EuiFlexItem grow={false}>
+                    <EuiLoadingElastic size="l" />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              ) : visibleRecords.length > 0 ? (
+                <EuiBasicTable
+                  id={WATCHLISTS_MANAGEMENT_TABLE_ID}
+                  tableCaption={i18n.translate(
+                    'xpack.securitySolution.entityAnalytics.watchlists.watchlistsManagementTable.tableCaption',
+                    { defaultMessage: 'Watchlists management table' }
+                  )}
+                  loading={isLoading}
+                  items={visibleRecords || []}
+                  columns={columns}
                 />
-              </EuiText>
-            )
-          )}
+              ) : (
+                !isLoading && (
+                  <EuiText size="s" color="subdued" textAlign="center">
+                    <FormattedMessage
+                      id="xpack.securitySolution.entityAnalytics.watchlists.watchlistsManagementTable.noData"
+                      defaultMessage="No watchlists found"
+                    />
+                  </EuiText>
+                )
+              )}
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
     </InspectButtonContainer>
