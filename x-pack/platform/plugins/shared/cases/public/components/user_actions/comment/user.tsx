@@ -9,46 +9,23 @@ import React from 'react';
 import classNames from 'classnames';
 import { css } from '@emotion/react';
 import type { EuiThemeComputed } from '@elastic/eui';
-import { EuiText } from '@elastic/eui';
 
 import type { UserCommentAttachment } from '../../../../common/types/domain';
 import { UserActionTimestamp } from '../timestamp';
 import type { SnakeToCamelCase } from '../../../../common/types';
-import { UserActionMarkdown } from '../markdown_form';
-import { UserActionContentToolbar } from '../content_toolbar';
 import type { UserActionBuilderArgs, UserActionBuilder } from '../types';
 import { HoverableUsernameResolver } from '../../user_profiles/hoverable_username_resolver';
-import { HoverableAvatarResolver } from '../../user_profiles/hoverable_avatar_resolver';
-import { UserCommentPropertyActions } from '../property_actions/user_comment_property_actions';
 import { getMarkdownEditorStorageKey } from '../../markdown_editor/utils';
-import * as i18n from './translations';
+import { CommentChildren } from '../../attachments/comment/comment_children';
+import { CommentActions } from '../../attachments/comment/comment_actions';
+import { CommentTimelineAvatar } from '../../attachments/comment/comment_timeline_avatar';
 
-type BuilderArgs = Pick<
-  UserActionBuilderArgs,
-  | 'handleManageMarkdownEditId'
-  | 'handleSaveComment'
-  | 'handleManageQuote'
-  | 'commentRefs'
-  | 'handleDeleteComment'
-  | 'userProfiles'
-  | 'appId'
-  | 'euiTheme'
-> & {
+type BuilderArgs = Pick<UserActionBuilderArgs, 'userProfiles' | 'appId' | 'euiTheme'> & {
   attachment: SnakeToCamelCase<UserCommentAttachment>;
   caseId: string;
   outlined: boolean;
   isEdit: boolean;
   isLoading: boolean;
-};
-
-const getCommentFooterCss = (euiTheme?: EuiThemeComputed<{}>) => {
-  if (!euiTheme) {
-    return css``;
-  }
-  return css`
-    border-top: ${euiTheme.border.thin};
-    padding: ${euiTheme.size.s};
-  `;
 };
 
 const createCommentActionCss = (euiTheme?: EuiThemeComputed<{}>) => {
@@ -83,13 +60,8 @@ export const createUserAttachmentUserActionBuilder = ({
   outlined,
   isEdit,
   isLoading,
-  commentRefs,
   caseId,
   euiTheme,
-  handleManageMarkdownEditId,
-  handleSaveComment,
-  handleManageQuote,
-  handleDeleteComment,
 }: BuilderArgs): ReturnType<UserActionBuilder> => ({
   build: () => [
     {
@@ -110,47 +82,15 @@ export const createUserAttachmentUserActionBuilder = ({
       }),
       css: createCommentActionCss(euiTheme),
       children: (
-        <>
-          <UserActionMarkdown
-            key={isEdit ? attachment.id : undefined}
-            ref={(element) => (commentRefs.current[attachment.id] = element)}
-            id={attachment.id}
-            content={attachment.comment}
-            isEditable={isEdit}
-            caseId={caseId}
-            onChangeEditable={handleManageMarkdownEditId}
-            onSaveContent={handleSaveComment.bind(null, {
-              id: attachment.id,
-              version: attachment.version,
-            })}
-          />
-          {!isEdit &&
-          !isLoading &&
-          hasDraftComment(appId, caseId, attachment.id, attachment.comment) ? (
-            <EuiText css={getCommentFooterCss(euiTheme)}>
-              <EuiText color="subdued" size="xs" data-test-subj="user-action-comment-unsaved-draft">
-                {i18n.UNSAVED_DRAFT_COMMENT}
-              </EuiText>
-            </EuiText>
-          ) : (
-            ''
-          )}
-        </>
+        <CommentChildren
+          commentId={attachment.id}
+          content={attachment.comment}
+          caseId={caseId}
+          version={attachment.version}
+        />
       ),
-      timelineAvatar: (
-        <HoverableAvatarResolver user={attachment.createdBy} userProfiles={userProfiles} />
-      ),
-      actions: (
-        <UserActionContentToolbar id={attachment.id}>
-          <UserCommentPropertyActions
-            isLoading={isLoading}
-            commentContent={attachment.comment}
-            onEdit={() => handleManageMarkdownEditId(attachment.id)}
-            onDelete={() => handleDeleteComment(attachment.id, i18n.DELETE_COMMENT_SUCCESS_TITLE)}
-            onQuote={() => handleManageQuote(attachment.comment)}
-          />
-        </UserActionContentToolbar>
-      ),
+      timelineAvatar: <CommentTimelineAvatar createdBy={attachment.createdBy} />,
+      actions: <CommentActions commentId={attachment.id} content={attachment.comment} />,
     },
   ],
 });
