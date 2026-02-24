@@ -11,9 +11,11 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiDescribedFormGroup,
+  EuiFieldNumber,
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
+  EuiFormRow,
   EuiSpacer,
   EuiSwitch,
 } from '@elastic/eui';
@@ -160,6 +162,60 @@ export const AlertDefaultsForm = () => {
           onChange={(value) => setFormFields((prevStat) => ({ ...prevStat, defaultEmail: value }))}
         />
       )}
+      <EuiSpacer size="m" />
+      <EuiDescribedFormGroup
+        title={
+          <h4>
+            <FormattedMessage
+              id="xpack.synthetics.settings.certThresholds"
+              defaultMessage="Certificate thresholds"
+            />
+          </h4>
+        }
+        description={
+          <FormattedMessage
+            id="xpack.synthetics.settings.certThresholds.description"
+            defaultMessage="Configure the thresholds used to determine certificate status on the Certificates page."
+          />
+        }
+      >
+        <EuiFormRow
+          label={CERT_EXPIRATION_LABEL}
+          helpText={CERT_EXPIRATION_HELP}
+        >
+          <EuiFieldNumber
+            data-test-subj="syntheticsCertExpirationThreshold"
+            value={formFields.certExpirationThreshold}
+            onChange={(e) =>
+              setFormFields({
+                ...formFields,
+                certExpirationThreshold: Number(e.target.value),
+              })
+            }
+            min={1}
+            disabled={isDisabled}
+            append={DAYS_LABEL}
+          />
+        </EuiFormRow>
+        <EuiFormRow
+          label={CERT_AGE_LABEL}
+          helpText={CERT_AGE_HELP}
+        >
+          <EuiFieldNumber
+            data-test-subj="syntheticsCertAgeThreshold"
+            value={formFields.certAgeThreshold}
+            onChange={(e) =>
+              setFormFields({
+                ...formFields,
+                certAgeThreshold: Number(e.target.value),
+              })
+            }
+            min={1}
+            disabled={isDisabled}
+            append={DAYS_LABEL}
+          />
+        </EuiFormRow>
+      </EuiDescribedFormGroup>
       <EuiSpacer />
       <EuiFlexGroup justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
@@ -201,4 +257,26 @@ const DISCARD_CHANGES = i18n.translate('xpack.synthetics.settings.discardChanges
 
 const APPLY_CHANGES = i18n.translate('xpack.synthetics.settings.applyChanges', {
   defaultMessage: 'Apply changes',
+});
+
+const CERT_EXPIRATION_LABEL = i18n.translate(
+  'xpack.synthetics.settings.certExpirationThreshold.label',
+  { defaultMessage: 'Expiration warning threshold' }
+);
+
+const CERT_EXPIRATION_HELP = i18n.translate(
+  'xpack.synthetics.settings.certExpirationThreshold.help',
+  { defaultMessage: 'Certificates expiring within this number of days will be shown as "Expiring soon".' }
+);
+
+const CERT_AGE_LABEL = i18n.translate('xpack.synthetics.settings.certAgeThreshold.label', {
+  defaultMessage: 'Age limit',
+});
+
+const CERT_AGE_HELP = i18n.translate('xpack.synthetics.settings.certAgeThreshold.help', {
+  defaultMessage: 'Certificates older than this number of days will be shown as "Too old".',
+});
+
+const DAYS_LABEL = i18n.translate('xpack.synthetics.settings.certThresholds.days', {
+  defaultMessage: 'days',
 });

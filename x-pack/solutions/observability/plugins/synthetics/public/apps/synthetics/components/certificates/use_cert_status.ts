@@ -6,12 +6,18 @@
  */
 
 import moment from 'moment';
-import { CERT_STATUS, DYNAMIC_SETTINGS_DEFAULTS } from '../../../../../common/constants';
+import { CERT_STATUS } from '../../../../../common/constants';
 
-export const useCertStatus = (expiryDate?: string, issueDate?: string) => {
-  const expiryThreshold = DYNAMIC_SETTINGS_DEFAULTS.certExpirationThreshold;
+interface CertStatusOptions {
+  expiryThreshold: number;
+  ageThreshold: number;
+}
 
-  const ageThreshold = DYNAMIC_SETTINGS_DEFAULTS.certAgeThreshold;
+export const useCertStatus = (
+  { expiryThreshold, ageThreshold }: CertStatusOptions,
+  expiryDate?: string,
+  issueDate?: string
+) => {
 
   const certValidityDate = new Date(expiryDate ?? '');
 

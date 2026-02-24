@@ -46,9 +46,18 @@ interface Props {
   sort: CertSort;
   onChange: (page: Page, sort: CertSort) => void;
   certificates: CertResult & { isLoading?: boolean };
+  expiryThreshold: number;
+  ageThreshold: number;
 }
 
-export const CertificateList: React.FC<Props> = ({ page, certificates, sort, onChange }) => {
+export const CertificateList: React.FC<Props> = ({
+  page,
+  certificates,
+  sort,
+  onChange,
+  expiryThreshold,
+  ageThreshold,
+}) => {
   const dateFormatter = useDateFormat();
   const pagination = {
     pageIndex: page.index,
@@ -63,7 +72,9 @@ export const CertificateList: React.FC<Props> = ({ page, certificates, sort, onC
       field: 'not_after',
       name: labels.STATUS_COL,
       sortable: true,
-      render: (val: string, item: Cert) => <CertStatus cert={item} />,
+      render: (val: string, item: Cert) => (
+        <CertStatus cert={item} expiryThreshold={expiryThreshold} ageThreshold={ageThreshold} />
+      ),
     },
     {
       name: labels.COMMON_NAME_COL,

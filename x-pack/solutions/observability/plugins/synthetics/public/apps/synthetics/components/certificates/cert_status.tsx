@@ -11,12 +11,14 @@ import styled from 'styled-components';
 import { EuiHealth, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useCertStatus } from './use_cert_status';
-import { CERT_STATUS, DYNAMIC_SETTINGS_DEFAULTS } from '../../../../../common/constants';
+import { CERT_STATUS } from '../../../../../common/constants';
 import type { Cert } from '../../../../../common/runtime_types';
 import * as labels from './translations';
 
 interface Props {
   cert: Cert;
+  expiryThreshold: number;
+  ageThreshold: number;
 }
 
 const DateText = styled(EuiText)`
@@ -24,8 +26,8 @@ const DateText = styled(EuiText)`
   margin-left: 5px;
 `;
 
-export const CertStatus: React.FC<Props> = ({ cert }) => {
-  const certStatus = useCertStatus(cert?.not_after, cert?.not_before);
+export const CertStatus: React.FC<Props> = ({ cert, expiryThreshold, ageThreshold }) => {
+  const certStatus = useCertStatus({ expiryThreshold, ageThreshold }, cert?.not_after, cert?.not_before);
 
   const relativeDate = moment(cert?.not_after).fromNow();
 
@@ -57,8 +59,6 @@ export const CertStatus: React.FC<Props> = ({ cert }) => {
   }
 
   if (certStatus === CERT_STATUS.TOO_OLD) {
-    const ageThreshold = DYNAMIC_SETTINGS_DEFAULTS.certAgeThreshold;
-
     const oldRelativeDate = moment(cert?.not_before).add(ageThreshold, 'days').fromNow();
 
     return (

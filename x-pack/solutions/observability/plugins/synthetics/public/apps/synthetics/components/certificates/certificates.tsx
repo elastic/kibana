@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { EuiSpacer } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import { setCertificatesTotalAction } from '../../state/certificates/certificates';
+import { getDynamicSettingsAction } from '../../state/settings/actions';
+import { selectDynamicSettings } from '../../state/settings/selectors';
+import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../../common/constants';
 import { CertificateSearch } from './cert_search';
 import { useCertSearch } from './use_cert_search';
 import type { CertSort } from './certificates_list';
@@ -41,6 +44,19 @@ export const CertificatesPage: React.FC = () => {
 
   const dispatch = useDispatch();
 
+  const { settings } = useSelector(selectDynamicSettings);
+
+  useEffect(() => {
+    if (typeof settings === 'undefined') {
+      dispatch(getDynamicSettingsAction.get());
+    }
+  }, [dispatch, settings]);
+
+  const expiryThreshold =
+    settings?.certExpirationThreshold ?? DYNAMIC_SETTINGS_DEFAULTS.certExpirationThreshold;
+  const ageThreshold =
+    settings?.certAgeThreshold ?? DYNAMIC_SETTINGS_DEFAULTS.certAgeThreshold;
+
   const certificates = useCertSearch({
     search,
     size: page.size,
@@ -67,6 +83,8 @@ export const CertificatesPage: React.FC = () => {
         }}
         sort={sort}
         certificates={certificates}
+        expiryThreshold={expiryThreshold}
+        ageThreshold={ageThreshold}
       />
     </>
   );
