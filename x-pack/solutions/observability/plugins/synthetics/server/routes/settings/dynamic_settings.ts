@@ -18,6 +18,10 @@ import {
   SYNTHETICS_API_URLS,
   MIN_PRIVATE_LOCATIONS_SYNC_INTERVAL,
   MAX_PRIVATE_LOCATIONS_SYNC_INTERVAL,
+  MAX_DEFAULT_CONNECTORS_PER_REQUEST,
+  MAX_DEFAULT_EMAIL_BCC_PER_REQUEST,
+  MAX_DEFAULT_EMAIL_CC_PER_REQUEST,
+  MAX_DEFAULT_EMAIL_TO_PER_REQUEST,
 } from '../../../common/constants';
 import { runSynPrivateLocationMonitorsTaskSoon } from '../../tasks/sync_private_locations_monitors_task';
 
@@ -95,14 +99,14 @@ export const validateInteger = (value: number): string | undefined => {
 export const DynamicSettingsSchema = schema.object({
   certAgeThreshold: schema.maybe(schema.number({ min: 1, validate: validateInteger })),
   certExpirationThreshold: schema.maybe(schema.number({ min: 1, validate: validateInteger })),
-  defaultConnectors: schema.maybe(schema.arrayOf(schema.string())),
+  defaultConnectors: schema.maybe(schema.arrayOf(schema.string(), { maxSize: MAX_DEFAULT_CONNECTORS_PER_REQUEST })),
   defaultStatusRuleEnabled: schema.maybe(schema.boolean()),
   defaultTLSRuleEnabled: schema.maybe(schema.boolean()),
   defaultEmail: schema.maybe(
     schema.object({
-      to: schema.arrayOf(schema.string()),
-      cc: schema.maybe(schema.arrayOf(schema.string())),
-      bcc: schema.maybe(schema.arrayOf(schema.string())),
+      to: schema.arrayOf(schema.string(), { maxSize: MAX_DEFAULT_EMAIL_TO_PER_REQUEST }),
+      cc: schema.maybe(schema.arrayOf(schema.string(), { maxSize: MAX_DEFAULT_EMAIL_CC_PER_REQUEST })),
+      bcc: schema.maybe(schema.arrayOf(schema.string(), { maxSize: MAX_DEFAULT_EMAIL_BCC_PER_REQUEST })),
     })
   ),
   privateLocationsSyncInterval: schema.maybe(
