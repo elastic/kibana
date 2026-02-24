@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { waitFor } from '@testing-library/react';
+import { act, fireEvent, waitFor } from '@testing-library/react';
 import { EndpointScriptEditForm, type EndpointScriptEditFormProps } from './script_edit_form';
 import {
   createAppRootMockRenderer,
@@ -15,8 +15,7 @@ import {
 import { EndpointScriptsGenerator } from '../../../../../../../common/endpoint/data_generators/endpoint_scripts_generator';
 import userEvent from '@testing-library/user-event';
 
-// Failing: See https://github.com/elastic/kibana/issues/254680
-describe.skip('EndpointScriptEditForm', () => {
+describe('EndpointScriptEditForm', () => {
   let render: (props?: EndpointScriptEditFormProps) => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
   let mockedContext: AppContextTestRender;
@@ -132,8 +131,7 @@ describe.skip('EndpointScriptEditForm', () => {
         expect(fileInput).toHaveAttribute('aria-invalid', 'true');
         const euiFormErrorText = filePickerRow.querySelector('.euiFormErrorText');
         expect(euiFormErrorText?.textContent).toEqual('A script file is required.');
-        expect(onChangeMock).toHaveBeenNthCalledWith(
-          1,
+        expect(onChangeMock).toHaveBeenCalledWith(
           expect.objectContaining({
             script: expect.objectContaining({
               file: undefined,
@@ -156,8 +154,7 @@ describe.skip('EndpointScriptEditForm', () => {
         expect(nameInput).toHaveAttribute('aria-invalid', 'true');
         const euiFormErrorText = nameRow.querySelector('.euiFormErrorText');
         expect(euiFormErrorText?.textContent).toEqual('Name is required.');
-        expect(onChangeMock).toHaveBeenNthCalledWith(
-          1,
+        expect(onChangeMock).toHaveBeenCalledWith(
           expect.objectContaining({
             script: expect.objectContaining({
               name: undefined,
@@ -182,8 +179,7 @@ describe.skip('EndpointScriptEditForm', () => {
         expect(euiFormErrorText?.textContent).toEqual(
           'At least one operating system must be selected.'
         );
-        expect(onChangeMock).toHaveBeenNthCalledWith(
-          1,
+        expect(onChangeMock).toHaveBeenCalledWith(
           expect.objectContaining({
             script: expect.objectContaining({
               platform: undefined,
@@ -211,8 +207,7 @@ describe.skip('EndpointScriptEditForm', () => {
       userEvent.tab();
 
       waitFor(() => {
-        expect(onChangeMock).toHaveBeenNthCalledWith(
-          2,
+        expect(onChangeMock).toHaveBeenCalledWith(
           expect.objectContaining({
             script: expect.objectContaining({
               fileName: 'file.sh',
@@ -299,8 +294,7 @@ describe.skip('EndpointScriptEditForm', () => {
 
       waitFor(() => {
         expect(queryByTestId('test-fake-file-picker')).not.toBeInTheDocument();
-        expect(onChangeMock).toHaveBeenNthCalledWith(
-          2,
+        expect(onChangeMock).toHaveBeenCalledWith(
           expect.objectContaining({
             script: expect.objectContaining({
               file: undefined,
@@ -314,19 +308,20 @@ describe.skip('EndpointScriptEditForm', () => {
       });
     });
 
-    it('should show file required validation error when fake file picker is removed (and no file is uploaded)', async () => {
+    it('should show file required validation error when fake file picker is removed (and no file is uploaded)', () => {
       const { getByTestId } = renderResult;
 
       const removeFileButton = getByTestId('test-remove-file-button');
-      await userEvent.click(removeFileButton); // just click and no blur
+      act(() => {
+        fireEvent.click(removeFileButton);
+      });
 
       const fileInput = getByTestId('test-file-picker');
       expect(fileInput).toHaveAttribute('aria-invalid', 'true');
       const filePickerRow = getByTestId('test-file-picker-row');
       const euiFormErrorText = filePickerRow.querySelector('.euiFormErrorText');
       expect(euiFormErrorText?.textContent).toEqual('A script file is required.');
-      expect(onChangeMock).toHaveBeenNthCalledWith(
-        1,
+      expect(onChangeMock).toHaveBeenCalledWith(
         expect.objectContaining({
           script: expect.objectContaining({
             file: undefined,
