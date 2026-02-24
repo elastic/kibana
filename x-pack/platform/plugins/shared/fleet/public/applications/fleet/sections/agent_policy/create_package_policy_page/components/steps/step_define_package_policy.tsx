@@ -84,12 +84,18 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
       });
 
     // Package-level vars, filtered by var_group visibility
+    // and hiding deprecated vars on new installations
     const { requiredVars, advancedVars } = useMemo(() => {
       const _requiredVars: RegistryVarsEntry[] = [];
       const _advancedVars: RegistryVarsEntry[] = [];
 
       if (packageInfo.vars) {
         packageInfo.vars.forEach((varDef) => {
+          // Hide deprecated vars on new installations
+          if (!isEditPage && !!varDef.deprecated) {
+            return;
+          }
+
           // Check if var should be shown based on var_group selections
           if (
             packageInfo.var_groups &&
@@ -108,7 +114,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
       }
 
       return { requiredVars: _requiredVars, advancedVars: _advancedVars };
-    }, [packageInfo.vars, packageInfo.var_groups, varGroupSelections]);
+    }, [packageInfo.vars, packageInfo.var_groups, varGroupSelections, isEditPage]);
 
     // Outputs
     const {
