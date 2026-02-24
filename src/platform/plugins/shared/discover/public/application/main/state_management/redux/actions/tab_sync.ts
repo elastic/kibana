@@ -105,8 +105,11 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
           urlStateStorage,
           services
         );
+        const appState = appStateContainer.get();
 
-        // Only set default state which is not already set in the URL
+        // Only set default state which is not already set in the URL.
+        // For hideChart/hideDataTable, also consider the tab's app state (e.g. when duplicating,
+        // the tab has the copied state before URL is synced) to preserve collapsed/expanded state.
         dispatch(
           internalStateActions.setResetDefaultProfileState({
             tabId,
@@ -114,8 +117,8 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
               columns: columns === undefined,
               rowHeight: rowHeight === undefined,
               breakdownField: breakdownField === undefined,
-              hideChart: hideChart === undefined,
-              hideDataTable: hideDataTable === undefined,
+              hideChart: hideChart === undefined && appState.hideChart === undefined,
+              hideDataTable: hideDataTable === undefined && appState.hideDataTable === undefined,
             },
           })
         );

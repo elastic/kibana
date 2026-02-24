@@ -87,6 +87,26 @@ describe('getDefaultProfileState', () => {
       }).getPreFetchState();
       expect(appState).toEqual(undefined);
     });
+
+    it('should expand both chart and table when profile does not define hideChart/hideDataTable (e.g. transitioning from metrics to non-metrics)', () => {
+      const appState = getDefaultProfileState({
+        scopedProfilesManager,
+        resetDefaultProfileState: {
+          resetId: 'test',
+          columns: false,
+          rowHeight: false,
+          breakdownField: false,
+          hideChart: true,
+          hideDataTable: true,
+        },
+        dataView: emptyDataView,
+      }).getPreFetchState();
+
+      expect(appState).toMatchObject({
+        hideChart: true,
+        hideDataTable: false,
+      });
+    });
   });
 
   describe('getPostFetchState', () => {

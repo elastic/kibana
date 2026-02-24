@@ -48,11 +48,8 @@ export const getDefaultProfileState = ({
         stateUpdate.hideChart = defaultState.hideChart;
       }
 
-      if (resetDefaultProfileState.hideDataTable) {
-        // Reset to the profile's default, or false (show table) if the profile doesn't define it.
-        // This ensures that switching away from a profile where the table was collapsed
-        // (e.g. metrics) restores the table for profiles that don't manage this state.
-        stateUpdate.hideDataTable = defaultState.hideDataTable ?? false;
+      if (resetDefaultProfileState.hideDataTable && defaultState.hideDataTable !== undefined) {
+        stateUpdate.hideDataTable = defaultState.hideDataTable;
       }
 
       return Object.keys(stateUpdate).length ? stateUpdate : undefined;
@@ -109,7 +106,8 @@ const getDefaultState = (scopedProfilesManager: ScopedProfilesManager, dataView:
   const getDefaultAppState = getMergedAccessor(
     scopedProfilesManager.getProfiles(),
     'getDefaultAppState',
-    () => ({})
+    // Default profile: chart expanded, table expanded (profiles like metrics override as needed)
+    () => ({ hideChart: false, hideDataTable: false })
   );
 
   return getDefaultAppState({ dataView });
