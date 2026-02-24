@@ -13,10 +13,10 @@ import { tagcloudStateSchemaESQL } from '@kbn/lens-embeddable-utils/config_build
 import { xyStateSchema } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/xy';
 import { regionMapStateSchemaESQL } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/region_map';
 import { heatmapStateSchemaESQL } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/heatmap';
-import { generateEsql } from '@kbn/agent-builder-genai-utils';
-import { extractTextContent } from '@kbn/agent-builder-genai-utils/langchain';
 import { type IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
+import { generateEsql } from '..';
+import { extractTextContent } from '../../langchain';
 import type { VisualizationConfig } from './types';
 import {
   GENERATE_ESQL_NODE,
