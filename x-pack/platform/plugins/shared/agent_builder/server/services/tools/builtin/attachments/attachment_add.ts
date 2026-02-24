@@ -16,7 +16,7 @@ import type { AttachmentToolsOptions } from './types';
 const attachmentAddSchema = z.object({
   id: z.string().optional().describe('Optional custom ID for the attachment'),
   type: z.string().describe('Type of attachment (e.g., "text", "json", "code")'),
-  data: z.unknown().describe('The attachment data/content'),
+  data: z.record(z.any()).describe('The attachment data/content as a JSON object, required'),
   description: z.string().optional().describe('Human-readable description of the attachment'),
 });
 
@@ -31,7 +31,7 @@ export const createAttachmentAddTool = ({
   id: platformCoreTools.attachmentAdd,
   type: ToolType.builtin,
   description:
-    'Create a new attachment to store data for later use in the conversation. Attachments persist across conversation rounds and can be read, updated, or deleted.',
+    'Create a new attachment to store data for later use in the conversation. The "data" field is required and must contain the content to store. Attachments persist across conversation rounds and can be read, updated, or deleted.',
   schema: attachmentAddSchema,
   tags: ['attachment'],
   handler: async ({ id, type, data, description }, _context) => {

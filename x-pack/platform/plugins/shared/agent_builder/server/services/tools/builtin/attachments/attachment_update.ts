@@ -15,7 +15,7 @@ import type { AttachmentToolsOptions } from './types';
 
 const attachmentUpdateSchema = z.object({
   attachment_id: z.string().describe('ID of the attachment to update'),
-  data: z.unknown().describe('New data/content for the attachment'),
+  data: z.record(z.any()).describe('New data/content for the attachment as a JSON object'),
   description: z.string().optional().describe('Optional new description for the attachment'),
 });
 
