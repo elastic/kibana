@@ -92,26 +92,22 @@ spaceTest.describe(
       await expect(metricsExperience.grid).toBeVisible();
     });
 
-    spaceTest('should show chart actions menu on metric card', async ({ pageObjects }) => {
+    spaceTest('should show chart actions menu on metric card', async ({ pageObjects, page }) => {
       const { metricsExperience } = pageObjects;
       await metricsExperience.runEsqlQuery(testData.ESQL_QUERIES.TS_TSDB_LOGS);
       await expect(metricsExperience.grid).toBeVisible();
 
       const cardIndex = 0;
 
-      await spaceTest.step('open context menu from first metric card', async () => {
+      await spaceTest.step('context menu shows View details and Copy to dashboard', async () => {
         await metricsExperience.openCardContextMenu(cardIndex);
-      });
-
-      await spaceTest.step('View details action is present', async () => {
         await expect(metricsExperience.chartActions.viewDetails).toBeVisible();
-      });
-
-      await spaceTest.step('Copy to dashboard action is present', async () => {
         await expect(metricsExperience.chartActions.copyToDashboard).toBeVisible();
       });
 
-      await spaceTest.step('Explore action is present', async () => {
+      await spaceTest.step('hover bar shows Explore action', async () => {
+        await page.keyboard.press('Escape');
+        await metricsExperience.getCardByIndex(cardIndex).hover();
         await expect(metricsExperience.getQuickActionsForCard(cardIndex).explore).toBeVisible();
       });
     });

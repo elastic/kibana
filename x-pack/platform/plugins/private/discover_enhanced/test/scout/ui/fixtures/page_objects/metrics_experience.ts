@@ -72,11 +72,12 @@ function createBreakdownSelector(page: ScoutPage): BreakdownSelector {
     'metricsExperienceBreakdownSelectorSelectable'
   );
   const button = page.testSubj.locator('metricsExperienceBreakdownSelectorButton');
+  const selectable = page.testSubj.locator('metricsExperienceBreakdownSelectorSelectable');
 
   return {
     button,
     search: page.testSubj.locator('metricsExperienceBreakdownSelectorSelectorSearch'),
-    selectable: page.testSubj.locator('metricsExperienceBreakdownSelectorSelectable'),
+    selectable,
     getOption: (dimensionName: string) =>
       page.testSubj.locator(`metricsBreakdownOption-${dimensionName}`),
     getButtonWithSelectedDimension: (dimensionName: string) =>
@@ -84,7 +85,6 @@ function createBreakdownSelector(page: ScoutPage): BreakdownSelector {
         `[data-test-subj="metricsExperienceBreakdownSelectorButton"][data-selected-value*="${dimensionName}"]`
       ),
     selectDimension: async (dimensionName: string) => {
-      const selectable = page.testSubj.locator('metricsExperienceBreakdownSelectorSelectable');
       if (!(await selectable.isVisible())) {
         await button.click();
         await selectable.waitFor({ state: 'visible' });

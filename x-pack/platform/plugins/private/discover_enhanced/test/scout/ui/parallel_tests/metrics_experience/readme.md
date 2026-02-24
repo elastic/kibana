@@ -64,6 +64,9 @@ node scripts/scout start-server --arch stateful --domain classic
 
 # For serverless observability tests
 node scripts/scout start-server --arch serverless --domain observability_complete
+
+# For serverless security tests
+node scripts/scout start-server --arch serverless --domain security_complete
 ```
 
 Then, in another terminal, run the tests:
