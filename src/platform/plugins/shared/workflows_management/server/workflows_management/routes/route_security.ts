@@ -34,3 +34,6 @@ export const WORKFLOW_EXECUTION_READ_SECURITY: RouteSecurity = {
 export const WORKFLOW_EXECUTION_CANCEL_SECURITY: RouteSecurity = {
   authz: { requiredPrivileges: [WorkflowsManagementApiActions.cancelExecution] },
 };
+export const WORKFLOW_EXECUTION_RESUME_SECURITY: RouteSecurity = {
+  authz: { requiredPrivileges: [WorkflowsManagementApiActions.execute] },
+};

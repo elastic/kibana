@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EsWorkflowStepExecution, StackFrame } from '@kbn/workflows';
+import type { EsWorkflowExecution, EsWorkflowStepExecution, StackFrame } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
 import { ExecutionError } from '@kbn/workflows/server';
@@ -195,6 +195,14 @@ export class StepExecutionRuntime {
 
   public async flushEventLogs(): Promise<void> {
     await this.stepLogger?.flushEvents();
+  }
+
+  /**
+   * Updates the workflow execution state.
+   * This is useful for steps that need to modify workflow-level context.
+   */
+  public updateWorkflowExecution(update: Partial<EsWorkflowExecution>): void {
+    this.workflowExecutionState.updateWorkflowExecution(update);
   }
 
   /**
