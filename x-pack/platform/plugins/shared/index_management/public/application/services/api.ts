@@ -568,15 +568,6 @@ export function useLoadIndexDocumentsSample(indexName: string) {
   });
 }
 
-export async function deleteDocuments(indexName: string, id: string) {
-  return sendRequest({
-    path: `${INTERNAL_API_BASE_PATH}/indices/${encodeURIComponent(
-      indexName
-    )}/documents/${encodeURIComponent(id)}`,
-    method: 'delete',
-  });
-}
-
 export function updateIndexMappings(indexName: string, newFields: Fields) {
   return sendRequest({
     path: `${API_BASE_PATH}/mapping/${encodeURIComponent(indexName)}`,

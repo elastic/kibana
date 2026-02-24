@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { MappingTypeMapping } from 'elasticsearch-8.x/lib/api/types';
+import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 
 // TODO: Move mappings type from Mappings editor here
 export interface Mappings {

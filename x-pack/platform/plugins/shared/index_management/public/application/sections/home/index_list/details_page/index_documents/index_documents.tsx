@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiTitle, EuiSpacer, EuiHorizontalRule } from '@elastic/eui';
+import { EuiTitle, EuiSpacer, EuiHorizontalRule, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DocumentList } from './document_list';
 import { useLoadIndexDocumentsSample } from '../../../../../services/api';
@@ -15,24 +15,18 @@ import type { MappingsResponse } from '../../../../../../../common';
 interface IndexDocumentsProps {
   indexName: string;
   mappings?: MappingsResponse;
-  hasDeleteDocumentsPrivilege?: boolean;
 }
 
-export const IndexDocuments: React.FC<IndexDocumentsProps> = ({
-  indexName,
-  mappings,
-  hasDeleteDocumentsPrivilege,
-}) => {
-  const { data, isLoading, isInitialRequest, error, resendRequest } =
-    useLoadIndexDocumentsSample(indexName);
+export const IndexDocuments: React.FC<IndexDocumentsProps> = ({ indexName, mappings }) => {
+  const { data, isLoading, error } = useLoadIndexDocumentsSample(indexName);
   const documents = data?.results ?? [];
   const mappingProperties = mappings?.mappings?.properties;
 
-  if ((isLoading && isInitialRequest) || error || documents.length === 0) {
+  if (isLoading || error || documents.length === 0) {
     return null;
   }
   return (
-    <>
+    <EuiFlexItem>
       <EuiHorizontalRule />
       <EuiSpacer size="m" />
       <EuiTitle size="s">
@@ -44,13 +38,7 @@ export const IndexDocuments: React.FC<IndexDocumentsProps> = ({
         </h2>
       </EuiTitle>
       <EuiSpacer size="s" />
-      <DocumentList
-        indexName={indexName}
-        docs={documents}
-        mappingProperties={mappingProperties ?? {}}
-        hasDeleteDocumentsPrivilege={hasDeleteDocumentsPrivilege ?? false}
-        onDocumentsRefresh={resendRequest}
-      />
-    </>
+      <DocumentList docs={documents} mappingProperties={mappingProperties ?? {}} />
+    </EuiFlexItem>
   );
 };

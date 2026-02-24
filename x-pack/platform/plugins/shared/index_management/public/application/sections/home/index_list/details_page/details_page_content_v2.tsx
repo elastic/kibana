@@ -77,7 +77,6 @@ interface Props {
   search: string;
   fetchIndexDetails: () => Promise<void>;
   navigateToIndicesList: () => void;
-  isNewDesignEnabled: boolean;
 }
 export const DetailsPageContentV2: FunctionComponent<Props> = ({
   index,
@@ -86,7 +85,6 @@ export const DetailsPageContentV2: FunctionComponent<Props> = ({
   search,
   fetchIndexDetails,
   navigateToIndicesList,
-  isNewDesignEnabled,
 }) => {
   const {
     core: {
@@ -183,12 +181,7 @@ export const DetailsPageContentV2: FunctionComponent<Props> = ({
           height: 100%;
         `}
       >
-        <DetailsPageTab
-          tabs={tabs}
-          tab={tab}
-          index={index}
-          isNewDesignEnabled={isNewDesignEnabled}
-        />
+        <DetailsPageTab tabs={tabs} tab={tab} index={index} />
       </div>
       {consolePlugin?.EmbeddableConsole ? <consolePlugin.EmbeddableConsole /> : null}
     </>

@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React from 'react';
 import type { MappingProperty, SearchHit } from '@elastic/elasticsearch/lib/api/types';
-import { i18n } from '@kbn/i18n';
 
 import {
   Result,
@@ -17,52 +16,17 @@ import {
 } from '@kbn/search-index-documents';
 
 import { EuiSpacer } from '@elastic/eui';
-
-import { deleteDocuments } from '../../../../../services/api';
-import { notificationService } from '../../../../../services/notification';
 import { RecentDocsActionMessage } from './recent_docs_action_message';
 
 export interface DocumentListProps {
-  indexName: string;
   docs: SearchHit[];
   mappingProperties: Record<string, MappingProperty>;
-  hasDeleteDocumentsPrivilege: boolean;
-  onDocumentsRefresh: () => void;
 }
 
-export const DocumentList = ({
-  indexName,
-  docs,
-  mappingProperties,
-  hasDeleteDocumentsPrivilege,
-  onDocumentsRefresh,
-}: DocumentListProps) => {
-  const handleDocumentDelete = useCallback(
-    async (docId: string) => {
-      const { error } = await deleteDocuments(indexName, docId);
-      if (error) {
-        notificationService.showDangerToast(
-          error.message ??
-            i18n.translate('xpack.idxMgmt.documentList.documentDeleteErrorMessage', {
-              defaultMessage: 'Failed to delete document.',
-            })
-        );
-      } else {
-        notificationService.showSuccessToast(
-          i18n.translate('xpack.idxMgmt.documentList.documentDeletedMessage', {
-            defaultMessage: 'Document {docId} was deleted from index {indexName}.',
-            values: { docId, indexName },
-          })
-        );
-        onDocumentsRefresh();
-      }
-    },
-    [indexName, onDocumentsRefresh]
-  );
-
+export const DocumentList = ({ docs, mappingProperties }: DocumentListProps) => {
   return (
     <>
-      <RecentDocsActionMessage indexName={indexName} />
+      <RecentDocsActionMessage numOfDocs={docs.length} />
       <EuiSpacer size="m" />
       {docs.map((doc) => {
         return (
@@ -70,11 +34,7 @@ export const DocumentList = ({
             <Result
               fields={reorderFieldsInImportance(resultToField(doc, mappingProperties))}
               metaData={resultMetaData(doc)}
-              onDocumentDelete={() => {
-                handleDocumentDelete(doc._id!);
-              }}
               compactCard={false}
-              hasDeleteDocumentsPrivilege={hasDeleteDocumentsPrivilege}
             />
             <EuiSpacer size="s" />
           </React.Fragment>

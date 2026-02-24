@@ -85,7 +85,6 @@ export const DetailsPageOverviewV2: React.FunctionComponent<Props> = ({ indexDet
 
   const { data } = useUserPrivileges(indexDetails.name);
   const hasUpdateMappingsPrivileges = data?.privileges?.canManageIndex === true;
-  const hasDeleteDocumentsPrivileges = data?.privileges?.canDeleteDocuments === true;
 
   const sizeFormatted = formatBytes(size);
   const primarySizeFormatted = formatBytes(primarySize);
@@ -226,13 +225,7 @@ export const DetailsPageOverviewV2: React.FunctionComponent<Props> = ({ indexDet
               consoleRequest={getConsoleRequest('ingestDataIndex', codeSnippetArguments)}
             />
           </EuiFlexItem>
-          <EuiFlexItem>
-            <IndexDocuments
-              indexName={name}
-              mappings={mappingsData ?? undefined}
-              hasDeleteDocumentsPrivilege={hasDeleteDocumentsPrivileges}
-            />
-          </EuiFlexItem>
+          <IndexDocuments indexName={name} mappings={mappingsData ?? undefined} />
         </EuiFlexGroup>
       )}
     </>

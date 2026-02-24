@@ -38,6 +38,8 @@ export function registerDocumentsSampleRoute({
         const searchResults = await client.search({
           index: indexName,
           size: DEFAULT_DOCUMENT_PAGE_SIZE,
+          track_total_hits: false,
+          sort: ['_doc'],
         });
 
         return response.ok({
