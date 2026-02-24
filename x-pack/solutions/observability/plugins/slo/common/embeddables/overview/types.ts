@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
-
-export const SLO_OVERVIEW_EMBEDDABLE_ID = 'SLO_EMBEDDABLE';
-export const SLO_EMBEDDABLE_SUPPORTED_TRIGGERS = [ON_OPEN_PANEL_MENU];
+/** Re-exported from server (derived from schemas there) */
+export type {
+  GroupBy,
+  GroupFilters,
+  OverviewMode,
+  SingleOverviewCustomState,
+  GroupOverviewCustomState,
+  OverviewEmbeddableState,
+} from '../../../server/lib/embeddables/schema';
