@@ -108,7 +108,7 @@ If many files share one-time setup (archives/ingest/settings), add a [global set
 
 ::::::::{step} Enable Scout runs in CI
 
-Add your plugin or package to `.buildkite/scout_ci_config.yml` so Scout tests run in CI. Add **one line** under the appropriate `enabled` list:
+Ensure your plugin or package is listed in `.buildkite/scout_ci_config.yml` so Scout tests run in CI. If not already in the list, add **one line** under the appropriate `enabled` list:
 
 - **Plugins**: Add `- <plugin_name>` under `plugins.enabled`. The name is the path segment(s) after `plugins/` (the plugin folder name, or a slash-separated path for nested plugins).
 - **Packages**: Add `- <package_name>` under `packages.enabled`. The name is the folder name after `packages/`.
