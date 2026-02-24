@@ -70,6 +70,7 @@ describe('getVariableSuggestions', () => {
     isInTriggersContext: false,
     isInWorkflowInputsContext: false,
     workflowDefinition: null,
+    currentWorkflowId: null,
     ...overrides,
   });
 
