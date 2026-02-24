@@ -81,7 +81,9 @@ export const registerEvaluateRoute = (
             undefined,
             {
               samples,
-              promptOverrides: promptOverrides as Partial<Record<PromptOverrideKey, string>> | undefined,
+              promptOverrides: promptOverrides as
+                | Partial<Record<PromptOverrideKey, string>>
+                | undefined,
             }
           );
 

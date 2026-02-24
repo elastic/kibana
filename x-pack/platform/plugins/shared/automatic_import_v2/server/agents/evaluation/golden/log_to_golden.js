@@ -21,7 +21,9 @@ const idArg = args.find((a) => a.startsWith('--id='));
 const outArg = args.find((a) => a.startsWith('--out='));
 
 if (!logPath) {
-  console.error('Usage: node log_to_golden.js <path/to/file.log> [--id=<example-id>] [--out=<path>]');
+  console.error(
+    'Usage: node log_to_golden.js <path/to/file.log> [--id=<example-id>] [--out=<path>]'
+  );
   process.exit(1);
 }
 
@@ -42,7 +44,9 @@ if (input_logs.length === 0) {
   process.exit(1);
 }
 
-const exampleId = idArg ? idArg.slice('--id='.length) : path.basename(absoluteLogPath, path.extname(absoluteLogPath));
+const exampleId = idArg
+  ? idArg.slice('--id='.length)
+  : path.basename(absoluteLogPath, path.extname(absoluteLogPath));
 const expected_outputs = input_logs.map((line) => ({ message: line }));
 
 const golden = {

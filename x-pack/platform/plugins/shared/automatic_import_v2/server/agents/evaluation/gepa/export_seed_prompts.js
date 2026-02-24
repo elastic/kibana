@@ -10,13 +10,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const PROMPTS_TS = path.join(
-  __dirname,
-  '..',
-  '..',
-  '..',
-  'prompts.ts'
-);
+const PROMPTS_TS = path.join(__dirname, '..', '..', '..', 'prompts.ts');
 
 const SEED_JSON = path.join(__dirname, 'seed_prompts.json');
 

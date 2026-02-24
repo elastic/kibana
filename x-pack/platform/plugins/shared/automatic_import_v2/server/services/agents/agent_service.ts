@@ -20,10 +20,7 @@ import {
   ingestPipelineValidatorTool,
 } from '../../agents/tools';
 import type { AutomaticImportSamplesIndexService } from '../samples_index/index_service';
-import {
-  AUTOMATIC_IMPORT_AGENT_PROMPT,
-  INGEST_PIPELINE_GENERATOR_PROMPT,
-} from '../../agents/prompts';
+import { INGEST_PIPELINE_GENERATOR_PROMPT } from '../../agents/prompts';
 import type { LangSmithOptions } from '../../routes/types';
 import type { PromptOverrides } from '../../agents/types';
 

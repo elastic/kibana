@@ -226,7 +226,9 @@ export class TaskManagerService {
 
       this.logger.debug(`Pipeline object: ${JSON.stringify(pipelineObject)}`);
       this.logger.debug(
-        `Pipeline generation results objects: ${JSON.stringify(result.state.pipeline_generation_results)}`
+        `Pipeline generation results objects: ${JSON.stringify(
+          result.state.pipeline_generation_results
+        )}`
       );
 
       // Update the data stream saved object with pipeline and task status
