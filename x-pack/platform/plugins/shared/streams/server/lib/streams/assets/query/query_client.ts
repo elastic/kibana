@@ -228,21 +228,23 @@ function buildRuleEsqlQuery(indices: string[], query: StreamQuery): string {
       (cmd): cmd is ESQLCommand => 'name' in cmd && cmd.name === 'where'
     );
 
-    if (whereCmd?.args[0]) {
-      const fromCommand = Builder.command({
-        name: 'from',
-        args: [
-          Builder.expression.source.index(indices.join(',')),
-          Builder.option({
-            name: 'METADATA',
-            args: [
-              Builder.expression.column({ args: [Builder.identifier({ name: '_id' })] }),
-              Builder.expression.column({ args: [Builder.identifier('_source')] }),
-            ],
-          }),
-        ],
-      });
+    const fromCommand = Builder.command({
+      name: 'from',
+      args: [
+        Builder.expression.source.index(indices.join(',')),
+        Builder.option({
+          name: 'METADATA',
+          args: [
+            Builder.expression.column({ args: [Builder.identifier({ name: '_id' })] }),
+            Builder.expression.column({ args: [Builder.identifier('_source')] }),
+          ],
+        }),
+      ],
+    });
 
+    const commands = [fromCommand];
+
+    if (whereCmd?.args[0]) {
       const whereCondition = query.feature?.filter
         ? Builder.expression.func.binary('and', [
             whereCmd.args[0],
@@ -250,13 +252,14 @@ function buildRuleEsqlQuery(indices: string[], query: StreamQuery): string {
           ])
         : whereCmd.args[0];
 
-      const whereCommand = Builder.command({
-        name: 'where',
-        args: [whereCondition],
-      });
-
-      return BasicPrettyPrinter.print(Builder.expression.query([fromCommand, whereCommand]));
+      commands.push(Builder.command({ name: 'where', args: [whereCondition] }));
+    } else if (query.feature?.filter) {
+      commands.push(
+        Builder.command({ name: 'where', args: [conditionToESQLAst(query.feature.filter)] })
+      );
     }
+
+    return BasicPrettyPrinter.print(Builder.expression.query(commands));
   }
 
   return buildEsqlQuery(indices, query, true);
@@ -487,6 +490,7 @@ export class QueryClient {
           should: [
             ...wildcardQuery(QUERY_TITLE, query),
             ...wildcardQuery(QUERY_KQL_BODY, query),
+            ...wildcardQuery(QUERY_ESQL_QUERY, query),
             ...wildcardQuery(QUERY_FEATURE_NAME, query),
             ...wildcardQuery(QUERY_FEATURE_FILTER, query),
           ],

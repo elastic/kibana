@@ -52,7 +52,8 @@ export function useSignificantEventsApi({ name }: { name: string }): Significant
   const { signal, abort, refresh } = useAbortController();
 
   return {
-    upsertQuery: async ({ id, esql, ...body }) => {
+    upsertQuery: async ({ id, esql, ...rest }) => {
+      const body = !rest.kql.query && esql?.query ? { ...rest, esql } : rest;
       await streamsRepositoryClient.fetch('PUT /api/streams/{name}/queries/{queryId} 2023-10-31', {
         signal,
         params: {
@@ -88,7 +89,8 @@ export function useSignificantEventsApi({ name }: { name: string }): Significant
           body: {
             operations: operations.map((op) => {
               if ('index' in op) {
-                const { esql: _esql, ...index } = op.index;
+                const { esql, ...rest } = op.index;
+                const index = !rest.kql.query && esql?.query ? { ...rest, esql } : rest;
                 return { index };
               }
               return op;
