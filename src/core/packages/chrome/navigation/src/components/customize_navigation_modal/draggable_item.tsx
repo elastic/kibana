@@ -26,10 +26,9 @@ interface Props {
   item: NavigationItemInfo;
   index: number;
   toggleItemVisibility: (id: string) => void;
-  isDraggingAny: boolean;
 }
 
-export const DraggableItem = ({ item, index, toggleItemVisibility, isDraggingAny }: Props) => {
+export const DraggableItem = ({ item, index, toggleItemVisibility }: Props) => {
   const { euiTheme } = useEuiTheme();
 
   const handleToggle = useCallback(() => {
@@ -40,24 +39,6 @@ export const DraggableItem = ({ item, index, toggleItemVisibility, isDraggingAny
     padding-left: ${euiTheme.size.s};
     padding-right: ${euiTheme.size.s};
     background-color: ${euiTheme.colors.backgroundBasePlain};
-
-    &:hover {
-      background-color: ${euiTheme.colors.backgroundBasePlain};
-      background-image: linear-gradient(
-        ${euiTheme.colors.backgroundBaseInteractiveHover},
-        ${euiTheme.colors.backgroundBaseInteractiveHover}
-      );
-    }
-  `;
-
-  const panelSuppressHoverCss = css`
-    &:hover {
-      background-image: none;
-    }
-  `;
-
-  const panelDraggingAnyCss = css`
-    cursor: default;
   `;
 
   const dragAreaCss = css`
@@ -85,15 +66,11 @@ export const DraggableItem = ({ item, index, toggleItemVisibility, isDraggingAny
       hasInteractiveChildren
       usePortal
     >
-      {(provided, snapshot) => (
+      {(provided) => (
         <EuiPanel
           paddingSize="s"
           hasShadow={false}
-          css={[
-            panelCss,
-            isDraggingAny && panelSuppressHoverCss,
-            isDraggingAny && !snapshot.isDragging && panelDraggingAnyCss,
-          ]}
+          css={panelCss}
         >
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
             <EuiFlexItem grow={true} style={{ minWidth: 0 }}>
