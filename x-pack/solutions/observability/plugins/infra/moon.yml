@@ -132,6 +132,10 @@ dependsOn:
   - '@kbn/deeplinks-analytics'
   - '@kbn/esql-composer'
   - '@kbn/fleet-plugin'
+  - '@kbn/observability-agent-builder-plugin'
+  - '@kbn/presentation-publishing'
+  - '@kbn/inspector-plugin'
+  - '@kbn/css-utils'
 tags:
   - plugin
   - prod
