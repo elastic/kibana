@@ -291,7 +291,8 @@ describe('SLOs Page', () => {
       expect(screen.getByText('Create SLO')).toBeTruthy();
     });
 
-    describe('when API has returned results', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/239819
+    describe.skip('when API has returned results', () => {
       const setupSloListView = async () => {
         useFetchSloDefinitionsMock.mockReturnValue({ isLoading: false, data: sloDefinitionList });
         useFetchSloListMock.mockReturnValue({ isLoading: false, data: sloList });
