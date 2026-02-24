@@ -72,11 +72,11 @@ export const getNormalizedInputs = (policyTemplate: RegistryPolicyTemplate): Reg
   if (isIntegrationPolicyTemplate(policyTemplate)) {
     return policyTemplate.inputs || [];
   }
-
   const input: RegistryInput = {
     type: policyTemplate.input,
     title: policyTemplate.title,
     description: policyTemplate.description,
+    ...(policyTemplate.deprecated ? { deprecated: policyTemplate.deprecated } : {}),
   };
 
   return [input];
