@@ -34,4 +34,101 @@ const searchQuerySubmittedEventType: TelemetryEvent = {
   },
 };
 
-export const apmTelemetryEventBasedTypes = [searchQuerySubmittedEventType];
+const originSchema = {
+  type: 'keyword' as const,
+  _meta: {
+    description: 'Where the flyout was opened from (e.g., service_inventory, service_overview)',
+  },
+};
+
+const serviceNameSchema = {
+  type: 'keyword' as const,
+  _meta: { description: 'The APM service name' },
+};
+
+const sloIdSchema = {
+  type: 'keyword' as const,
+  _meta: { description: 'The SLO identifier' },
+};
+
+const sloOverviewFlyoutViewedEventType: TelemetryEvent = {
+  eventType: TelemetryEventTypes.SLO_OVERVIEW_FLYOUT_VIEWED,
+  schema: {
+    origin: originSchema,
+    serviceName: serviceNameSchema,
+  },
+};
+
+const sloOverviewFlyoutServiceNameClickedEventType: TelemetryEvent = {
+  eventType: TelemetryEventTypes.SLO_OVERVIEW_FLYOUT_SERVICE_NAME_CLICKED,
+  schema: {
+    origin: originSchema,
+    serviceName: serviceNameSchema,
+  },
+};
+
+const sloOverviewFlyoutSloLinkClickedEventType: TelemetryEvent = {
+  eventType: TelemetryEventTypes.SLO_OVERVIEW_FLYOUT_SLO_LINK_CLICKED,
+  schema: {
+    origin: originSchema,
+    serviceName: serviceNameSchema,
+  },
+};
+
+const sloOverviewFlyoutAlertClickedEventType: TelemetryEvent = {
+  eventType: TelemetryEventTypes.SLO_OVERVIEW_FLYOUT_ALERT_CLICKED,
+  schema: {
+    origin: originSchema,
+    serviceName: serviceNameSchema,
+    sloId: sloIdSchema,
+  },
+};
+
+const sloOverviewFlyoutSearchQueriedEventType: TelemetryEvent = {
+  eventType: TelemetryEventTypes.SLO_OVERVIEW_FLYOUT_SEARCH_QUERIED,
+  schema: {
+    origin: originSchema,
+    serviceName: serviceNameSchema,
+    searchQuery: {
+      type: 'keyword',
+      _meta: { description: 'The search query entered by the user' },
+    },
+  },
+};
+
+const sloOverviewFlyoutStatusFilteredEventType: TelemetryEvent = {
+  eventType: TelemetryEventTypes.SLO_OVERVIEW_FLYOUT_STATUS_FILTERED,
+  schema: {
+    origin: originSchema,
+    serviceName: serviceNameSchema,
+    statuses: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: {
+          description: 'A status filter value (e.g., VIOLATED, DEGRADING, HEALTHY, NO_DATA)',
+        },
+      },
+    },
+  },
+};
+
+const sloOverviewFlyoutSloClickedEventType: TelemetryEvent = {
+  eventType: TelemetryEventTypes.SLO_OVERVIEW_FLYOUT_SLO_CLICKED,
+  schema: {
+    origin: originSchema,
+    serviceName: serviceNameSchema,
+    sloId: sloIdSchema,
+  },
+};
+
+export const apmTelemetryEventBasedTypes = [
+  searchQuerySubmittedEventType,
+  sloOverviewFlyoutViewedEventType,
+  sloOverviewFlyoutServiceNameClickedEventType,
+  sloOverviewFlyoutSloLinkClickedEventType,
+  sloOverviewFlyoutAlertClickedEventType,
+  sloOverviewFlyoutSearchQueriedEventType,
+  sloOverviewFlyoutStatusFilteredEventType,
+  sloOverviewFlyoutSloClickedEventType,
+];

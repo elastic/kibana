@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import type { SloTabId } from '@kbn/deeplinks-observability';
 import { OVERVIEW_TAB_ID } from '@kbn/deeplinks-observability';
 import {
@@ -33,24 +33,36 @@ import { SloDetails } from '../../../pages/slo_details/components/slo_details';
 import { useSloDetailsTabs } from '../../../pages/slo_details/hooks/use_slo_details_tabs';
 import { getSloFormattedSummary } from '../../../pages/slos/hooks/use_slo_summary';
 import { useKibana } from '../../../hooks/use_kibana';
+import { usePluginContext } from '../../../hooks/use_plugin_context';
 
 export interface SloOverviewDetailsContentProps {
   slo: SLOWithSummaryResponse;
   initialTabId?: SloTabId;
+  origin?: string;
 }
 
 export function SloOverviewDetailsContent({
   slo,
   initialTabId = OVERVIEW_TAB_ID,
+  origin = 'unknown',
 }: SloOverviewDetailsContentProps) {
   const { agentBuilder } = useKibana().services;
+  const { telemetry } = usePluginContext();
   const [selectedTabId, setSelectedTabId] = useState<SloTabId>(initialTabId);
+
+  const handleTabChange = useCallback(
+    (tabId: SloTabId) => {
+      setSelectedTabId(tabId);
+      telemetry?.reportSloDetailsFlyoutTabChanged({ origin, sloId: slo.id, tabId });
+    },
+    [telemetry, origin, slo.id]
+  );
 
   const { tabs } = useSloDetailsTabs({
     slo,
     isAutoRefreshing: false,
     selectedTabId,
-    setSelectedTabId,
+    setSelectedTabId: handleTabChange,
   });
 
   // Configure agent builder global flyout with the SLO attachment
@@ -101,11 +113,13 @@ export function SloOverviewDetailsContent({
 export interface SloOverviewDetailsFlyoutFooterProps {
   slo: SLOWithSummaryResponse;
   onClose: () => void;
+  onOpenInApp?: () => void;
 }
 
 export function SloOverviewDetailsFlyoutFooter({
   slo,
   onClose,
+  onOpenInApp,
 }: SloOverviewDetailsFlyoutFooterProps) {
   const {
     application: { navigateToUrl },
@@ -126,6 +140,7 @@ export function SloOverviewDetailsFlyoutFooter({
         <EuiButton
           fill
           onClick={() => {
+            onOpenInApp?.();
             const { sloDetailsUrl } = getSloFormattedSummary(slo, uiSettings, basePath);
             navigateToUrl(sloDetailsUrl);
           }}

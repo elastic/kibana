@@ -636,6 +636,7 @@ export function ApmServicesTable({
         <SloOverviewFlyout
           serviceName={sloOverviewFlyout.serviceName}
           agentName={sloOverviewFlyout.agentName}
+          origin="service_inventory"
           onClose={closeSloOverviewFlyout}
         />
       )}

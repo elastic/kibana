@@ -36,7 +36,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import numeral from '@elastic/numeral';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
@@ -45,7 +45,7 @@ import { AgentIcon } from '@kbn/custom-icons';
 import type { SloTabId } from '@kbn/deeplinks-observability';
 import { ALERTS_TAB_ID } from '@kbn/deeplinks-observability';
 import type { AgentName } from '@kbn/elastic-agent-utils';
-import type { ApmPluginStartDeps } from '../../../plugin';
+import type { ApmPluginStartDeps, ApmServices } from '../../../plugin';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { useFetcher, isPending } from '../../../hooks/use_fetcher';
@@ -88,6 +88,7 @@ const STATUS_OPTIONS: Array<{ label: string; value: SloStatusFilter }> = [
 interface Props {
   serviceName: string;
   agentName?: AgentName;
+  origin: string;
   onClose: () => void;
 }
 
@@ -108,18 +109,31 @@ const STATUS_PRIORITY: Record<string, number> = {
 const SEARCH_DEBOUNCE_MS = 300;
 const ITEMS_PER_PAGE_OPTIONS = [10, 25, 50];
 
-export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
+export function SloOverviewFlyout({ serviceName, agentName, origin, onClose }: Props) {
   const flyoutTitleId = useGeneratedHtmlId({ prefix: 'sloOverviewFlyout' });
   const { euiTheme } = useEuiTheme();
-  const { uiSettings, slo: sloPlugin } = useKibana<ApmPluginStartDeps>().services;
+  const { services } = useKibana<ApmPluginStartDeps & ApmServices>();
+  const { uiSettings, slo: sloPlugin, telemetry } = services;
   const { link } = useApmRouter();
   const { query } = useAnyOfApmParams('/services', '/services/{serviceName}');
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
+
+  useEffect(() => {
+    telemetry.reportSloOverviewFlyoutViewed({ origin, serviceName });
+  }, [telemetry, origin, serviceName]);
+
   useDebounce(
     () => {
       setDebouncedSearchQuery(searchQuery);
       setPage(0);
+      if (searchQuery.trim()) {
+        telemetry.reportSloOverviewFlyoutSearchQueried({
+          origin,
+          serviceName,
+          searchQuery: searchQuery.trim(),
+        });
+      }
     },
     SEARCH_DEBOUNCE_MS,
     [searchQuery]
@@ -185,15 +199,23 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
     [activeAlerts]
   );
 
-  const handleActiveAlertsClick = useCallback((sloItem: SLOWithSummaryResponse) => {
-    setSelectedSloTabId(undefined);
-    setSelectedSloId(null);
+  const handleActiveAlertsClick = useCallback(
+    (sloItem: SLOWithSummaryResponse) => {
+      telemetry.reportSloOverviewFlyoutAlertClicked({
+        origin,
+        serviceName,
+        sloId: sloItem.id,
+      });
+      setSelectedSloTabId(undefined);
+      setSelectedSloId(null);
 
-    requestAnimationFrame(() => {
-      setSelectedSloTabId(ALERTS_TAB_ID);
-      setSelectedSloId(sloItem.id);
-    });
-  }, []);
+      requestAnimationFrame(() => {
+        setSelectedSloTabId(ALERTS_TAB_ID);
+        setSelectedSloId(sloItem.id);
+      });
+    },
+    [telemetry, origin, serviceName]
+  );
 
   const statusCounts = useMemo(() => {
     const backendCounts = data?.statusCounts;
@@ -242,26 +264,44 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
     }));
   }, [selectedStatuses]);
 
-  const handleStatusFilterChange = useCallback((options: EuiSelectableOption[]) => {
-    const selected = options
-      .filter((option) => option.checked === 'on')
-      .map((option) => option.key as SloStatusFilter);
-    setSelectedStatuses(selected);
-    setPage(0);
-  }, []);
+  const handleStatusFilterChange = useCallback(
+    (options: EuiSelectableOption[]) => {
+      const selected = options
+        .filter((option) => option.checked === 'on')
+        .map((option) => option.key as SloStatusFilter);
+      setSelectedStatuses(selected);
+      setPage(0);
+      if (selected.length > 0) {
+        telemetry.reportSloOverviewFlyoutStatusFiltered({
+          origin,
+          serviceName,
+          statuses: selected,
+        });
+      }
+    },
+    [telemetry, origin, serviceName]
+  );
 
   const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
   }, []);
 
-  const handleSloClick = useCallback((sloId: string) => {
-    setSelectedSloId(null);
-    setSelectedSloTabId(undefined);
+  const handleSloClick = useCallback(
+    (sloId: string) => {
+      telemetry.reportSloOverviewFlyoutSloClicked({
+        origin,
+        serviceName,
+        sloId,
+      });
+      setSelectedSloId(null);
+      setSelectedSloTabId(undefined);
 
-    requestAnimationFrame(() => {
-      setSelectedSloId(sloId);
-    });
-  }, []);
+      requestAnimationFrame(() => {
+        setSelectedSloId(sloId);
+      });
+    },
+    [telemetry, origin, serviceName]
+  );
 
   const handleCloseSloDetails = useCallback(() => {
     setSelectedSloId(null);
@@ -297,6 +337,7 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
         formSettings: {
           allowedIndicatorTypes: [...APM_SLO_INDICATOR_TYPES],
         },
+        origin,
       })
     : null;
 
@@ -429,7 +470,15 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
           <h2 id={flyoutTitleId}>
-            <EuiLink href={sloAppUrl} target="_blank" data-test-subj="sloOverviewFlyoutSloLink">
+            {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
+            <EuiLink
+              href={sloAppUrl}
+              target="_blank"
+              data-test-subj="sloOverviewFlyoutSloLink"
+              onClick={() =>
+                telemetry.reportSloOverviewFlyoutSloLinkClicked({ origin, serviceName })
+              }
+            >
               {flyoutTitle}
             </EuiLink>
           </h2>
@@ -437,21 +486,27 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
 
         <EuiSpacer size="m" />
 
-        <EuiBadge
-          href={serviceOverviewUrl}
-          color="hollow"
-          css={{ color: euiTheme.colors.textPrimary }}
-          data-test-subj="sloOverviewFlyoutServiceLink"
+        <span
+          onClickCapture={() =>
+            telemetry.reportSloOverviewFlyoutServiceNameClicked({ origin, serviceName })
+          }
         >
-          <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-            {agentName && (
-              <EuiFlexItem grow={false}>
-                <AgentIcon agentName={agentName} size="s" role="presentation" />
-              </EuiFlexItem>
-            )}
-            <EuiFlexItem grow={false}>{serviceName}</EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiBadge>
+          <EuiBadge
+            href={serviceOverviewUrl}
+            color="hollow"
+            css={{ color: euiTheme.colors.textPrimary }}
+            data-test-subj="sloOverviewFlyoutServiceLink"
+          >
+            <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+              {agentName && (
+                <EuiFlexItem grow={false}>
+                  <AgentIcon agentName={agentName} size="s" role="presentation" />
+                </EuiFlexItem>
+              )}
+              <EuiFlexItem grow={false}>{serviceName}</EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiBadge>
+        </span>
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
@@ -661,6 +716,7 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
           hideFooter
           session="inherit"
           initialTabId={selectedSloTabId}
+          origin={origin}
         />
       )}
       {CreateSloFlyout}

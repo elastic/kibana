@@ -39,12 +39,16 @@ import type {
   SLOPublicStart,
 } from './types';
 import { registerSloUiActions } from './ui_actions/register_ui_actions';
+import { SloTelemetryService } from './services/telemetry';
+import type { ISloTelemetryClient } from './services/telemetry';
 import { getLazyWithContextProviders } from './utils/get_lazy_with_context_providers';
 
 export class SLOPlugin
   implements Plugin<SLOPublicSetup, SLOPublicStart, SLOPublicPluginsSetup, SLOPublicPluginsStart>
 {
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
+  private readonly telemetryService = new SloTelemetryService();
+  private telemetryClient?: ISloTelemetryClient;
   private experimentalFeatures: ExperimentalFeatures = {
     ruleFormV2: { enabled: false },
   };
@@ -59,6 +63,8 @@ export class SLOPlugin
     plugins: SLOPublicPluginsSetup
   ) {
     const kibanaVersion = this.initContext.env.packageInfo.version;
+
+    this.telemetryService.setup({ analytics: core.analytics });
 
     const sloClient = createRepositoryClient<SLORouteRepository, DefaultClientOptions>(core);
 
@@ -86,6 +92,7 @@ export class SLOPlugin
         isServerless: !!pluginsStart.serverless,
         experimentalFeatures: this.experimentalFeatures,
         sloClient,
+        telemetry: this.telemetryClient,
       });
     };
     const appUpdater$ = this.appUpdater$;
@@ -200,6 +207,8 @@ export class SLOPlugin
 
   public start(core: CoreStart, plugins: SLOPublicPluginsStart) {
     const kibanaVersion = this.initContext.env.packageInfo.version;
+    const telemetryClient = this.telemetryService.start();
+    this.telemetryClient = telemetryClient;
 
     const sloClient = createRepositoryClient<SLORouteRepository, DefaultClientOptions>(core);
 
@@ -213,6 +222,7 @@ export class SLOPlugin
       isServerless: !!plugins.serverless,
       experimentalFeatures: this.experimentalFeatures,
       sloClient,
+      telemetry: telemetryClient,
     });
 
     const getCreateSLOFormFlyout = lazyWithContextProviders(

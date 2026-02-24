@@ -21,14 +21,77 @@ export interface SearchQuerySubmittedParams {
   action: SearchQueryActions;
 }
 
-export type TelemetryEventParams = SearchQuerySubmittedParams;
+export interface SloOverviewFlyoutViewedParams {
+  origin: string;
+  serviceName: string;
+}
+
+export interface SloOverviewFlyoutServiceNameClickedParams {
+  origin: string;
+  serviceName: string;
+}
+
+export interface SloOverviewFlyoutSloLinkClickedParams {
+  origin: string;
+  serviceName: string;
+}
+
+export interface SloOverviewFlyoutAlertClickedParams {
+  origin: string;
+  serviceName: string;
+  sloId: string;
+}
+
+export interface SloOverviewFlyoutSearchQueriedParams {
+  origin: string;
+  serviceName: string;
+  searchQuery: string;
+}
+
+export interface SloOverviewFlyoutStatusFilteredParams {
+  origin: string;
+  serviceName: string;
+  statuses: string[];
+}
+
+export interface SloOverviewFlyoutSloClickedParams {
+  origin: string;
+  serviceName: string;
+  sloId: string;
+}
+
+export type TelemetryEventParams =
+  | SearchQuerySubmittedParams
+  | SloOverviewFlyoutViewedParams
+  | SloOverviewFlyoutServiceNameClickedParams
+  | SloOverviewFlyoutSloLinkClickedParams
+  | SloOverviewFlyoutAlertClickedParams
+  | SloOverviewFlyoutSearchQueriedParams
+  | SloOverviewFlyoutStatusFilteredParams
+  | SloOverviewFlyoutSloClickedParams;
 
 export interface ITelemetryClient {
   reportSearchQuerySubmitted(params: SearchQuerySubmittedParams): void;
+  reportSloOverviewFlyoutViewed(params: SloOverviewFlyoutViewedParams): void;
+  reportSloOverviewFlyoutServiceNameClicked(
+    params: SloOverviewFlyoutServiceNameClickedParams
+  ): void;
+  reportSloOverviewFlyoutSloLinkClicked(params: SloOverviewFlyoutSloLinkClickedParams): void;
+  reportSloOverviewFlyoutAlertClicked(params: SloOverviewFlyoutAlertClickedParams): void;
+  reportSloOverviewFlyoutSearchQueried(params: SloOverviewFlyoutSearchQueriedParams): void;
+  reportSloOverviewFlyoutStatusFiltered(params: SloOverviewFlyoutStatusFilteredParams): void;
+  reportSloOverviewFlyoutSloClicked(params: SloOverviewFlyoutSloClickedParams): void;
 }
 
 export enum TelemetryEventTypes {
   SEARCH_QUERY_SUBMITTED = 'Search Query Submitted',
+  SLO_OVERVIEW_FLYOUT_VIEWED = 'SLO Overview Flyout Viewed',
+  SLO_OVERVIEW_FLYOUT_SERVICE_NAME_CLICKED = 'SLO Overview Flyout Service Name Clicked',
+  SLO_OVERVIEW_FLYOUT_SLO_LINK_CLICKED = 'SLO Overview Flyout SLO Link Clicked',
+  SLO_OVERVIEW_FLYOUT_ALERT_CLICKED = 'SLO Overview Flyout Alert Clicked',
+  SLO_OVERVIEW_FLYOUT_SEARCH_QUERIED = 'SLO Overview Flyout Search Queried',
+  SLO_OVERVIEW_FLYOUT_STATUS_FILTERED = 'SLO Overview Flyout Status Filtered',
+  SLO_OVERVIEW_FLYOUT_SLO_CLICKED = 'SLO Overview Flyout SLO Clicked',
 }
 
 export interface TelemetryEvent {

@@ -22,9 +22,10 @@ import {
 import type { SloTabId, SloDetailsLocatorParams } from '@kbn/deeplinks-observability';
 import { sloDetailsLocatorID } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useEffect } from 'react';
 import { useFetchSloDetails } from '../../../hooks/use_fetch_slo_details';
 import { useKibana } from '../../../hooks/use_kibana';
+import { usePluginContext } from '../../../hooks/use_plugin_context';
 import {
   SloOverviewDetailsContent,
   SloOverviewDetailsFlyoutFooter,
@@ -38,6 +39,7 @@ export interface SLODetailsFlyoutProps {
   hideFooter?: boolean;
   session?: 'start' | 'inherit';
   initialTabId?: SloTabId;
+  origin?: string;
 }
 
 const TITLES = {
@@ -61,8 +63,10 @@ export default function SLODetailsFlyout({
   hideFooter = false,
   session = 'inherit',
   initialTabId,
+  origin = 'unknown',
 }: SLODetailsFlyoutProps) {
   const { share } = useKibana().services;
+  const { telemetry } = usePluginContext();
 
   const flyoutTitleId = useGeneratedHtmlId({
     prefix: 'sloDetailsFlyout',
@@ -78,6 +82,10 @@ export default function SLODetailsFlyout({
     instanceId: sloInstanceId,
     shouldRefetch: false,
   });
+
+  useEffect(() => {
+    telemetry?.reportSloDetailsFlyoutViewed({ origin, sloId });
+  }, [telemetry, origin, sloId]);
 
   const isNotFound = isSuccess && !slo;
 
@@ -99,13 +107,21 @@ export default function SLODetailsFlyout({
     }
     if (slo && sloDetailsUrl) {
       return (
-        <EuiLink href={sloDetailsUrl} data-test-subj="sloDetailsFlyoutTitleLink" target="_blank">
+        /* eslint-disable-next-line @elastic/eui/href-or-on-click */
+        <EuiLink
+          href={sloDetailsUrl}
+          data-test-subj="sloDetailsFlyoutTitleLink"
+          target="_blank"
+          onClick={() =>
+            telemetry?.reportSloDetailsFlyoutOpenInAppClicked({ origin, sloId: slo.id })
+          }
+        >
           {slo.name}
         </EuiLink>
       );
     }
     return slo?.name ?? '';
-  }, [isError, isNotFound, isLoading, slo, sloDetailsUrl]);
+  }, [isError, isNotFound, isLoading, slo, sloDetailsUrl, origin, telemetry]);
 
   const renderBody = useCallback(() => {
     if (isError) {
@@ -157,8 +173,8 @@ export default function SLODetailsFlyout({
       return null;
     }
 
-    return <SloOverviewDetailsContent slo={slo} initialTabId={initialTabId} />;
-  }, [sloId, isError, isNotFound, isLoading, slo, initialTabId]);
+    return <SloOverviewDetailsContent slo={slo} initialTabId={initialTabId} origin={origin} />;
+  }, [sloId, isError, isNotFound, isLoading, slo, initialTabId, origin]);
 
   const renderFooter = useCallback(() => {
     if (isError || isNotFound || isLoading || !slo) {
@@ -171,8 +187,16 @@ export default function SLODetailsFlyout({
       );
     }
 
-    return <SloOverviewDetailsFlyoutFooter slo={slo} onClose={onClose} />;
-  }, [isError, isNotFound, isLoading, slo, onClose]);
+    return (
+      <SloOverviewDetailsFlyoutFooter
+        slo={slo}
+        onClose={onClose}
+        onOpenInApp={() =>
+          telemetry?.reportSloDetailsFlyoutOpenInAppClicked({ origin, sloId: slo.id })
+        }
+      />
+    );
+  }, [isError, isNotFound, isLoading, slo, onClose, telemetry, origin]);
 
   return (
     <EuiFlyout
