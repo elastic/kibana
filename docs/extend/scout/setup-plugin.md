@@ -18,6 +18,8 @@ Generate a working scaffold (folders, configs, and sample tests) by following th
 node scripts/scout.js generate
 ```
 
+This command will also automatically enable your plugin or package's Scout tests in the CI by updating the `.buildkite/scout_ci_config.yml` file.
+
 ::::::::::
 
 ::::::::::{step} Write and run tests
@@ -25,10 +27,6 @@ node scripts/scout.js generate
 Tweak the new Playwright config(s) and [write UI tests](./write-ui-tests.md) or [API tests](./write-api-tests.md).
 
 ::::::::::
-
-::::::::::{step} Enable Scout runs in CI
-
-Then, [enable your plugin or package](#enable-scout-tests-in-ci) in the CI.
 
 ::::::::::
 
@@ -104,36 +102,35 @@ If many files share one-time setup (archives/ingest/settings), add a [global set
 
 :::::::
 
-::::::::::{step} Enable Scout runs in CI
-
-Then, [enable your plugin or package](#enable-scout-tests-in-ci) in the CI.
-
-::::::::::
-
 ::::::::
 
 ::::::::
 
 ::::::::{step} Enable Scout runs in CI
 
-Finally, [enable Scout test runs in the CI](#enable-scout-tests-in-ci) for your plugin or package.
+Add your plugin or package to `.buildkite/scout_ci_config.yml` so Scout tests run in CI. Add **one line** under the appropriate `enabled` list:
 
-::::::::
-
-:::::::::
-
-## Enable Scout tests in CI [enable-scout-tests-in-ci]
-
-To enable Scout CI for your plugin/package, add it to `.buildkite/scout_ci_config.yml`:
+- **Plugins**: Add `- <plugin_name>` under `plugins.enabled`. The name is the path segment(s) after `plugins/` (the plugin folder name, or a slash-separated path for nested plugins).
+- **Packages**: Add `- <package_name>` under `packages.enabled`. The name is the folder name after `packages/`.
 
 ```yaml
 plugins:
   enabled:
-    - <your_plugin_name>
+    - <plugin_name>
   disabled:
 
 packages:
   enabled:
-    - <your_package_name>
+    - <package_name>
   disabled:
 ```
+
+::::::::
+
+::::::::::{step} Write and run tests
+
+Tweak the new Playwright config(s) and [write UI tests](./write-ui-tests.md) or [API tests](./write-api-tests.md).
+
+::::::::::
+
+:::::::::
