@@ -28,6 +28,7 @@ set -e;
 
 check_for_changed_files "$desc" true
 
+sleep 300
 exit 1
 
 # if [[ "${eslint_exit}" != "0" ]]; then
