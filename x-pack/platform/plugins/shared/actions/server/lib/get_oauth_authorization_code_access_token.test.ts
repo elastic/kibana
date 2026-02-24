@@ -41,6 +41,27 @@ const expiredToken = {
   expiresAt: new Date('2024-01-15T11:00:00.000Z').toISOString(),
 };
 
+// Per-user token: access/refresh stored under credentials.accessToken / credentials.refreshToken
+const validPerUserToken = {
+  id: 'token-1',
+  profileUid: 'profile-1',
+  connectorId: 'connector-1',
+  credentialType: 'oauth',
+  credentials: {
+    accessToken: 'stored-per-user-access-token',
+    refreshToken: 'stored-per-user-refresh-token',
+  },
+  createdAt: new Date('2024-01-15T10:00:00.000Z').toISOString(),
+  updatedAt: new Date('2024-01-15T10:00:00.000Z').toISOString(),
+  expiresAt: new Date('2024-01-15T13:00:00.000Z').toISOString(),
+  refreshTokenExpiresAt: new Date('2024-01-22T12:00:00.000Z').toISOString(),
+};
+
+const expiredPerUserToken = {
+  ...validPerUserToken,
+  expiresAt: new Date('2024-01-15T11:00:00.000Z').toISOString(),
+};
+
 const refreshResponse = {
   tokenType: 'Bearer',
   accessToken: 'new-access-token',
@@ -363,6 +384,126 @@ describe('getOAuthAuthorizationCodeAccessToken', () => {
       expect(logger.error).toHaveBeenCalledWith(
         'Failed to refresh access token for connectorId: connector-1. Error: DB write failed'
       );
+    });
+  });
+
+  describe('per-user auth mode', () => {
+    it('returns null and warns when authMode is per-user but profileUid is missing', async () => {
+      const result = await getOAuthAuthorizationCodeAccessToken({
+        ...baseOpts,
+        authMode: 'per-user',
+      });
+
+      expect(result).toBeNull();
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Per-user authMode requires a profileUid for connectorId: connector-1. Cannot retrieve token.'
+      );
+      expect(connectorTokenClient.get).not.toHaveBeenCalled();
+    });
+
+    it('fetches the token using profileUid when authMode is per-user', async () => {
+      connectorTokenClient.get.mockResolvedValueOnce({
+        hasErrors: false,
+        connectorToken: validPerUserToken,
+      });
+
+      await getOAuthAuthorizationCodeAccessToken({
+        ...baseOpts,
+        authMode: 'per-user',
+        profileUid: 'profile-1',
+      });
+
+      expect(connectorTokenClient.get).toHaveBeenCalledWith({
+        profileUid: 'profile-1',
+        connectorId: 'connector-1',
+        tokenType: 'access_token',
+      });
+    });
+
+    it('returns the stored access token from credentials.accessToken for a valid per-user token', async () => {
+      connectorTokenClient.get.mockResolvedValueOnce({
+        hasErrors: false,
+        connectorToken: validPerUserToken,
+      });
+
+      const result = await getOAuthAuthorizationCodeAccessToken({
+        ...baseOpts,
+        authMode: 'per-user',
+        profileUid: 'profile-1',
+      });
+
+      expect(result).toBe('stored-per-user-access-token');
+      expect(requestOAuthRefreshToken).not.toHaveBeenCalled();
+    });
+
+    it('refreshes using credentials.refreshToken for an expired per-user token', async () => {
+      connectorTokenClient.get.mockResolvedValueOnce({
+        hasErrors: false,
+        connectorToken: expiredPerUserToken,
+      });
+      (requestOAuthRefreshToken as jest.Mock).mockResolvedValueOnce(refreshResponse);
+
+      const result = await getOAuthAuthorizationCodeAccessToken({
+        ...baseOpts,
+        authMode: 'per-user',
+        profileUid: 'profile-1',
+      });
+
+      expect(requestOAuthRefreshToken).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.any(Object),
+        expect.objectContaining({ refreshToken: 'stored-per-user-refresh-token' }),
+        expect.any(Object),
+        expect.any(Boolean)
+      );
+      expect(result).toBe('Bearer new-access-token');
+    });
+
+    it('warns and returns null when the per-user token exists but credentials.accessToken is absent', async () => {
+      connectorTokenClient.get.mockResolvedValueOnce({
+        hasErrors: false,
+        connectorToken: { ...validPerUserToken, credentials: {} },
+      });
+
+      const result = await getOAuthAuthorizationCodeAccessToken({
+        ...baseOpts,
+        authMode: 'per-user',
+        profileUid: 'profile-1',
+      });
+
+      expect(result).toBeNull();
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'Stored token has unexpected shape for connectorId: connector-1 (authMode: per-user)'
+        )
+      );
+    });
+  });
+
+  describe('concurrency lock', () => {
+    it('queues concurrent calls for the same connector so only one refresh runs', async () => {
+      const lockedConnectorId = 'connector-lock-test';
+      // First call inside the lock sees an expired token and refreshes it.
+      // Second call (queued behind the first) re-fetches and sees the valid token.
+      connectorTokenClient.get
+        .mockResolvedValueOnce({
+          hasErrors: false,
+          connectorToken: { ...expiredToken, connectorId: lockedConnectorId },
+        })
+        .mockResolvedValueOnce({
+          hasErrors: false,
+          connectorToken: { ...validToken, connectorId: lockedConnectorId },
+        });
+      (requestOAuthRefreshToken as jest.Mock).mockResolvedValueOnce(refreshResponse);
+
+      const [result1, result2] = await Promise.all([
+        getOAuthAuthorizationCodeAccessToken({ ...baseOpts, connectorId: lockedConnectorId }),
+        getOAuthAuthorizationCodeAccessToken({ ...baseOpts, connectorId: lockedConnectorId }),
+      ]);
+
+      expect(requestOAuthRefreshToken).toHaveBeenCalledTimes(1);
+      expect(result1).toBe('Bearer new-access-token');
+      expect(result2).toBe('stored-access-token');
     });
   });
 });
