@@ -26,7 +26,8 @@ interface TemplateFieldsProps {
 export const TemplateFields = React.memo<TemplateFieldsProps>(
   ({ caseData, onUpdateField, isLoading, loadingKey }) => {
     const { data: templateData, isLoading: isLoadingTemplate } = useGetTemplate(
-      caseData.template?.id
+      caseData.template?.id,
+      caseData.template?.version
     );
     const templateFields = templateData?.definition?.fields ?? [];
 

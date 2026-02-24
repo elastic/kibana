@@ -79,15 +79,18 @@ export const getTemplates = async ({
 
 export const getTemplate = async ({
   templateId,
+  version,
   signal,
 }: {
   templateId: string;
+  version?: number;
   signal?: AbortSignal;
 }): Promise<ParsedTemplate> => {
   const response = await KibanaServices.get().http.fetch<ParsedTemplate>(
     INTERNAL_TEMPLATE_DETAILS_URL.replace('{template_id}', templateId),
     {
       method: 'GET',
+      query: version != null ? { version } : undefined,
       signal,
     }
   );

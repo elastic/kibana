@@ -9,6 +9,7 @@ import React, { useMemo } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox, EuiText } from '@elastic/eui';
 import { EditableFieldWrapper } from './editable_field_wrapper';
+import * as i18n from '../translations';
 
 export interface EditComboboxFieldProps {
   title: string;
@@ -43,7 +44,7 @@ export const EditComboboxField = React.memo<EditComboboxFieldProps>(
         onSubmit={onSubmit}
         displayContent={
           <EuiText size="s" data-test-subj={`${dataTestSubj}-value`}>
-            {value.length > 0 ? value.join(', ') : '---'}
+            {value.length > 0 ? value.join(', ') : i18n.FIELD_NOT_DEFINED}
           </EuiText>
         }
         data-test-subj={dataTestSubj}

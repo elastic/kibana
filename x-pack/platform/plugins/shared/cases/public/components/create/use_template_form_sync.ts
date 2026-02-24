@@ -27,6 +27,8 @@ export const useTemplateFormSync = (): UseTemplateFormSyncReturn => {
         appliedRef.current = undefined;
         setFieldValue('description', '');
         setFieldValue('tags', []);
+        setFieldValue('severity', 'low');
+        setFieldValue('category', null);
       }
       return;
     }
@@ -49,6 +51,12 @@ export const useTemplateFormSync = (): UseTemplateFormSyncReturn => {
     }
     if (template.definition.tags?.length) {
       setFieldValue('tags', template.definition.tags);
+    }
+    if (template.definition.severity) {
+      setFieldValue('severity', template.definition.severity);
+    }
+    if (template.definition.category) {
+      setFieldValue('category', template.definition.category);
     }
   }, [templateId, template, setFieldValue]);
 

@@ -57,7 +57,8 @@ import { KibanaServices } from '../../../common/lib/kibana';
 import { TemplateFields } from './template_fields';
 
 const LOCALSTORAGE_SORT_ORDER_KEY = 'cases.userActivity.sortOrder';
-
+// ensure that if template includes severity tags assignees reporter participant tags is coming from a template field
+// ensure change to extended fields applies to a case
 export const CaseViewActivity = ({
   ruleDetailsNavigation,
   caseData,

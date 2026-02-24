@@ -272,6 +272,10 @@ export const DELETED_OBSERVABLES = (totalObservables: number): string =>
       'deleted {totalObservables, plural, =1 {an} other {{totalObservables}}} {totalObservables, plural, =1 {observable} other {observables}}',
   });
 
+export const FIELD_NOT_DEFINED = i18n.translate('xpack.cases.caseView.fieldNotDefined', {
+  defaultMessage: 'Field not defined',
+});
+
 export const UPDATED_OBSERVABLES = (totalObservables: number): string =>
   i18n.translate('xpack.cases.caseView.observables.updatedObservables', {
     values: { totalObservables },

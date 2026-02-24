@@ -8,6 +8,7 @@
 import React from 'react';
 import { EuiTextArea, EuiText } from '@elastic/eui';
 import { EditableFieldWrapper } from './editable_field_wrapper';
+import * as i18n from '../translations';
 
 export interface EditTextareaFieldProps {
   title: string;
@@ -32,7 +33,7 @@ export const EditTextareaField = React.memo<EditTextareaFieldProps>(
       onSubmit={(val) => onSubmit(val.trim())}
       displayContent={
         <EuiText size="s" data-test-subj={`${dataTestSubj}-value`}>
-          {value || '---'}
+          {value || i18n.FIELD_NOT_DEFINED}
         </EuiText>
       }
       data-test-subj={dataTestSubj}

@@ -296,14 +296,17 @@ describe('utils', () => {
       );
     });
 
-    it('excludes templateId and templateVersion from serialized output', () => {
+    it('serializes templateId and templateVersion into a template object', () => {
       expect(
         createFormSerializer([], casesConfigurationsMock, {
           ...dataToSerialize,
           templateId: 'tmpl-1',
-          templateVersion: '2',
+          templateVersion: 2,
         })
-      ).toEqual(serializedFormData);
+      ).toEqual({
+        ...serializedFormData,
+        template: { id: 'tmpl-1', version: 2 },
+      });
     });
   });
 
