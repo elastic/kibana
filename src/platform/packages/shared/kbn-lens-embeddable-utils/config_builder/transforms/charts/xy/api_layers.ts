@@ -113,6 +113,8 @@ function convertDataLayerToAPI(
       visualization.splitAccessors.length > 0 &&
       visualization.xAccessor &&
       layer.columnOrder[0] === visualization.splitAccessors[0]; // TODO temp fix for this PR until XY API will be upgraded to support multiple splits
+
+    const color = fromColorMappingLensStateToAPI(visualization.colorMapping, visualization.palette);
     return {
       ...generateApiLayer(layer),
       ...(x ? { x } : {}),
@@ -123,9 +125,7 @@ function convertDataLayerToAPI(
               ...breakdown_by,
               ...(visualization.collapseFn ? { collapse_by: visualization.collapseFn } : {}),
               ...(aggregate_first ? { aggregate_first: true } : {}),
-              ...(visualization.colorMapping
-                ? { color: fromColorMappingLensStateToAPI(visualization.colorMapping) }
-                : {}),
+              ...(color ? { color } : {}),
             },
           }
         : {}),
@@ -145,6 +145,8 @@ function convertDataLayerToAPI(
       ...(color ? { color: fromStaticColorLensStateToAPI(color) } : {}),
     };
   });
+
+  const color = fromColorMappingLensStateToAPI(visualization.colorMapping, visualization.palette);
   return {
     ...generateApiLayer(layer),
     ...(x ? { x } : {}),
@@ -153,9 +155,7 @@ function convertDataLayerToAPI(
       ? {
           breakdown_by: {
             ...breakdown_by,
-            ...(visualization.colorMapping
-              ? { color: fromColorMappingLensStateToAPI(visualization.colorMapping) }
-              : {}),
+            ...(color ? { color } : {}),
             ...(visualization.collapseFn ? { collapse_by: visualization.collapseFn } : {}),
           },
         }
