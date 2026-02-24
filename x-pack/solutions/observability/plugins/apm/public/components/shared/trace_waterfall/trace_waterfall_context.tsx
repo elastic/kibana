@@ -114,6 +114,8 @@ interface Props {
   entryTransactionId?: string;
 }
 
+const MAX_DEPTH_OPEN_LIMIT = 2;
+
 export function TraceWaterfallContextProvider({
   children,
   traceItems,
@@ -135,23 +137,14 @@ export function TraceWaterfallContextProvider({
   onShowCriticalPathChange,
   entryTransactionId,
 }: Props) {
-  const {
-    duration,
-    traceWaterfall,
-    maxDepth,
-    rootItem,
-    legends,
-    colorBy,
-    traceState,
-    message,
-    errorMarks,
-  } = useTraceWaterfall({
-    traceItems,
-    isFiltered,
-    errors,
-    onErrorClick,
-    entryTransactionId,
-  });
+  const { duration, traceWaterfall, rootItem, legends, colorBy, traceState, message, errorMarks } =
+    useTraceWaterfall({
+      traceItems,
+      isFiltered,
+      errors,
+      onErrorClick,
+      entryTransactionId,
+    });
 
   const [uncontrolledValue, setUncontrolledValue] = useState(defaultShowCriticalPath);
   const isCriticalPathControlled = controlledValue !== undefined;
@@ -166,16 +159,19 @@ export function TraceWaterfallContextProvider({
     },
     [isCriticalPathControlled, onShowCriticalPathChange]
   );
-
+  const maxLevelOpen = traceWaterfall.length > 500 ? MAX_DEPTH_OPEN_LIMIT : traceWaterfall.length;
   const [isAccordionOpen, setAccordionOpen] = useState(true);
   const [accordionStatesMap, setAccordionStateMap] = useState<
     Record<string, EuiAccordionProps['forceState']>
-  >(() =>
-    traceWaterfall.reduce<Record<string, EuiAccordionProps['forceState']>>((acc, item) => {
-      acc[item.id] = 'open';
-      return acc;
-    }, {})
-  );
+  >(() => {
+    return traceWaterfall.reduce<Record<string, EuiAccordionProps['forceState']>>(
+      (acc, item, index) => {
+        acc[item.id] = index < maxLevelOpen ? 'open' : 'closed';
+        return acc;
+      },
+      {}
+    );
+  });
 
   const toggleAccordionState = useCallback((id: string) => {
     setAccordionStateMap((prevStates) => ({
@@ -198,7 +194,7 @@ export function TraceWaterfallContextProvider({
     setAccordionOpen((prev) => !prev);
   }, [isAccordionOpen]);
 
-  const left = TOGGLE_BUTTON_WIDTH + ACCORDION_PADDING_LEFT * maxDepth;
+  const left = TOGGLE_BUTTON_WIDTH + ACCORDION_PADDING_LEFT;
   const right = 40;
 
   const fullTraceWaterfallMap = useMemo(() => groupByParent(traceWaterfall), [traceWaterfall]);
@@ -232,7 +228,7 @@ export function TraceWaterfallContextProvider({
         duration,
         rootItem,
         traceWaterfall,
-        margin: { left: showAccordion ? Math.max(100, left) : left, right },
+        margin: { left: showAccordion ? Math.max(60, left) : left, right },
         traceWaterfallMap,
         criticalPathSegmentsById,
         showAccordion,

@@ -28,6 +28,32 @@ const stories: Meta = {
 
 export default stories;
 
+const DEEP_NESTED_NODE_COUNT = 600;
+const DEEP_NESTED_TRACE_ID = 'deep-nested-trace-id';
+const DEEP_NESTED_START_TIMESTAMP_US = new Date('2025-05-21T18:50:00.000Z').getTime() * 1000;
+
+const createDeepNestedTraceItems = (count: number): TraceItem[] => {
+  return Array.from({ length: count }, (_, index) => {
+    const id = `deep-node-${index + 1}`;
+    return {
+      id,
+      parentId: index > 0 ? `deep-node-${index}` : undefined,
+      timestampUs: DEEP_NESTED_START_TIMESTAMP_US,
+      name: index === 0 ? 'Deep Root Transaction' : `Deep Child Span ${index}`,
+      duration: 1000000,
+      serviceName: `deep-service-${(index % 8) + 1}`,
+      traceId: DEEP_NESTED_TRACE_ID,
+      errors: [],
+      spanLinksCount: { incoming: 0, outgoing: 0 },
+      docType: index === 0 ? 'transaction' : 'span',
+    };
+  });
+};
+
+export const DeepNestedChildren600: StoryFn<{}> = () => {
+  return <TraceWaterfall traceItems={createDeepNestedTraceItems(DEEP_NESTED_NODE_COUNT)} />;
+};
+
 export const ManyChildren: StoryFn<{}> = () => {
   return (
     <TraceWaterfall
@@ -42,6 +68,7 @@ export const ManyChildren: StoryFn<{}> = () => {
           errors: [{ errorDocId: '1' }],
           spanLinksCount: { incoming: 0, outgoing: 0 },
           docType: 'transaction',
+          status: { fieldName: 'event.outcome', value: 'failure' },
         },
         ...Array(200)
           .fill(0)
@@ -133,6 +160,7 @@ export const Example: StoryFn<{}> = () => {
           serviceName: 'frontend',
           spanLinksCount: { incoming: 0, outgoing: 0 },
           docType: 'span',
+          status: { fieldName: 'event.outcome', value: 'failure' },
         },
         {
           id: '41b39c13ec0166a8',
@@ -157,6 +185,7 @@ export const Example: StoryFn<{}> = () => {
           serviceName: 'product-catalog',
           spanLinksCount: { incoming: 0, outgoing: 0 },
           docType: 'span',
+          status: { fieldName: 'event.outcome', value: 'failure' },
         },
       ]}
       highlightedTraceId="41b39c13ec0166a8"
