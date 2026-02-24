@@ -5,12 +5,6 @@
  * 2.0.
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use it except in compliance with the Elastic License 2.0.
- */
-
 import React from 'react';
 import { render } from '@testing-library/react';
 import { ErrorSampleContextualInsight } from './error_sample_contextual_insight';

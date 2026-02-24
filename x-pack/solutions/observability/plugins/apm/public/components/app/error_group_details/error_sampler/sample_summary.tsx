@@ -24,7 +24,7 @@ interface Props {
 }
 export function SampleSummary({ error }: Props) {
   const logMessage = error?.error?.log?.message;
-  const excMessage = error?.error?.exception?.[0].message || error?.error?.message;
+  const excMessage = error?.error?.exception?.[0]?.message || error?.error?.message;
   const culprit = error?.error?.culprit;
 
   if (!error?.error) {
