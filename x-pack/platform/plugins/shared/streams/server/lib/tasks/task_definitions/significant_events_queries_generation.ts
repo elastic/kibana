@@ -23,7 +23,10 @@ import type { TaskParams } from '../types';
 import { PromptsConfigService } from '../../saved_objects/significant_events/prompts_config_service';
 import { cancellableTask } from '../cancellable_task';
 import { generateSignificantEventDefinitions } from '../../significant_events/generate_significant_events';
-import type { FeaturesIdentificationTaskParams } from './features_identification';
+import {
+  type FeaturesIdentificationTaskParams,
+  getFeaturesIdentificationTaskId,
+} from './features_identification';
 import { waitForSubtask, scheduleFeaturesIdentificationTask } from './subtask_helpers';
 
 export interface SignificantEventsQueriesGenerationTaskParams {
@@ -80,23 +83,40 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
 
                 const { significantEventsPromptOverride } = await promptsConfigService.getPrompt();
 
-                try {
-                  const featuresTaskId = await scheduleFeaturesIdentificationTask(
-                    { connectorId, start, end, streamName },
-                    taskClient,
-                    runContext.fakeRequest
+                const featuresTask = await taskClient.get(
+                  getFeaturesIdentificationTaskId(streamName)
+                );
+                const lastCompletedAt = featuresTask.last_completed_at;
+                // Skip re-running features identification if it completed within this window
+                const FEATURES_FRESHNESS_THRESHOLD_MS = 60 * 60 * 1000;
+                const isFeaturesRecent =
+                  lastCompletedAt &&
+                  Date.now() - new Date(lastCompletedAt).getTime() <
+                    FEATURES_FRESHNESS_THRESHOLD_MS;
+
+                if (isFeaturesRecent) {
+                  taskContext.logger.debug(
+                    `Skipping features identification for stream "${streamName}": features were recently identified at ${lastCompletedAt}.`
                   );
-                  await waitForSubtask<FeaturesIdentificationTaskParams, IdentifyFeaturesResult>(
-                    featuresTaskId,
-                    runContext.taskInstance.id,
-                    taskClient
-                  );
-                } catch (error) {
-                  taskContext.logger.warn(
-                    `Features identification failed for stream "${streamName}": ${
-                      parseError(error).message
-                    }. Proceeding with query generation without features.`
-                  );
+                } else {
+                  try {
+                    const featuresTaskId = await scheduleFeaturesIdentificationTask(
+                      { connectorId, start, end, streamName },
+                      taskClient,
+                      runContext.fakeRequest
+                    );
+                    await waitForSubtask<FeaturesIdentificationTaskParams, IdentifyFeaturesResult>(
+                      featuresTaskId,
+                      runContext.taskInstance.id,
+                      taskClient
+                    );
+                  } catch (error) {
+                    taskContext.logger.warn(
+                      `Features identification failed for stream "${streamName}": ${
+                        parseError(error).message
+                      }. Proceeding with query generation without features.`
+                    );
+                  }
                 }
 
                 // If no systems are passed, generate for all data
