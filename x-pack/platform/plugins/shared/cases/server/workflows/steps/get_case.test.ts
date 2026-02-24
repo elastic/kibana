@@ -10,7 +10,8 @@ import { getCaseStepDefinition } from './get_case';
 import { createStepHandlerContext } from './test_utils';
 import type { CasesClient } from '../../client';
 
-const createContext = (input: unknown) => createStepHandlerContext({ input, stepType: 'cases.getCase' });
+const createContext = (input: unknown) =>
+  createStepHandlerContext({ input, stepType: 'cases.getCase' });
 
 describe('getCaseStepDefinition', () => {
   it('creates expected step definition structure', () => {
