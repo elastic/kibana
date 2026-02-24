@@ -103,6 +103,12 @@
       "reason": "Builds from source if required.  Prebuilds are sufficient."
     },
     {
+      "path": "@opentelemetry/otlp-transformer/node_modules/protobufjs",
+      "lifecycle": "postinstall",
+      "required": false,
+      "reason": "Prints warnings about potential dependency version mismatches. Not needed."
+    },
+    {
       "path": "@parcel/watcher",
       "lifecycle": "install",
       "required": false,
