@@ -128,6 +128,7 @@ dependsOn:
   - '@kbn/content-management-utils'
   - '@kbn/presentation-publishing-schemas'
   - '@kbn/maintenance-windows-plugin'
+  - '@kbn/scout-oblt'
 tags:
   - plugin
   - prod
@@ -141,6 +142,7 @@ fileGroups:
     - scripts/**/*
     - public/**/*
     - server/**/*
+    - test/scout/**/*
     - '!target/**/*'
 tasks:
   jest:
