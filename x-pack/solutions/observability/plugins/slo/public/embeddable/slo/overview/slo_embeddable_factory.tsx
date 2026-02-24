@@ -160,7 +160,7 @@ export const getOverviewEmbeddableFactory = ({
         i18n.translate('xpack.slo.editSloOverviewEmbeddableTitle.typeDisplayName', {
           defaultMessage: 'criteria',
         }),
-      isEditingEnabled: () => api.getSloGroupOverviewConfig().overview_mode === 'groups',
+      isEditingEnabled: () => overviewMode$.getValue() === 'groups',
       onEdit: async function onEdit() {
         try {
           const result = await openSloConfiguration(
