@@ -6,8 +6,9 @@
  */
 
 import React from 'react';
-import { camelCase } from 'lodash';
+import { camelCase, snakeCase } from 'lodash';
 import type { CaseUI } from '../../../../common';
+import { CASE_EXTENDED_FIELDS } from '../../../../common/constants';
 import { FieldType } from '../../templates_v2/field_types/constants';
 import { useGetTemplate } from '../../templates_v2/hooks/use_get_template';
 import { EditTextField } from './edit_text_field';
@@ -34,10 +35,15 @@ export const TemplateFields = React.memo<TemplateFieldsProps>(
     return (
       <>
         {templateFields.map((field) => {
-          const fieldIsLoading = isLoadingTemplate || (isLoading && loadingKey === field.name);
-          const onSubmit = (value: unknown) => onUpdateField({ key: field.name, value });
-          const extendedFieldValue =
-            caseData.extendedFields?.[camelCase(`${field.name}_as_${field.type}`)] ?? '';
+          const fieldKey = `${field.name}_as_${field.type}`;
+          const fieldIsLoading =
+            isLoadingTemplate || (isLoading && loadingKey === CASE_EXTENDED_FIELDS);
+          const onSubmit = (value: unknown) =>
+            onUpdateField({
+              key: CASE_EXTENDED_FIELDS,
+              value: { [snakeCase(fieldKey)]: value },
+            });
+          const extendedFieldValue = caseData.extendedFields?.[camelCase(fieldKey)] ?? '';
 
           switch (field.control) {
             case FieldType.INPUT_TEXT:

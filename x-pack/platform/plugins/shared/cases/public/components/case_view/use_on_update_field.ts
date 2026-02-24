@@ -9,6 +9,7 @@ import { useCallback, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
 
 import type { CaseStatuses, CaseAttributes, CaseConnector } from '../../../common/types/domain';
+import { CASE_EXTENDED_FIELDS } from '../../../common/constants';
 import type { CaseUI, UpdateByKey, UpdateKey } from '../../containers/types';
 import { useUpdateCase } from '../../containers/use_update_case';
 import { getTypedPayload } from '../../containers/utils';
@@ -99,16 +100,14 @@ export const useOnUpdateField = ({ caseData }: { caseData: CaseUI }) => {
             callUpdate('customFields', customFields);
           }
           break;
+        case CASE_EXTENDED_FIELDS:
+          const extendedFields = {
+            ...caseData.extendedFields,
+            ...value,
+          };
+          callUpdate(CASE_EXTENDED_FIELDS, extendedFields);
+          break;
         default:
-          // TODO: replace with actual API call when backend is ready
-          setLoadingKey(key);
-          try {
-            onSuccess?.();
-          } catch {
-            onError?.();
-          } finally {
-            setLoadingKey(null);
-          }
           break;
       }
     },
