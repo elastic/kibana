@@ -30,6 +30,7 @@ import {
   isGenerateConfigAction,
   isValidateConfigAction,
 } from './actions_lens';
+import { getChartStyleGuidance } from './chart_style_guidance';
 import { createGenerateConfigPrompt } from './prompts';
 
 // Regex to extract JSON from markdown code blocks
@@ -195,11 +196,14 @@ export const createVisualizationGraph = (
       .filter(Boolean)
       .join('\n');
 
+    const chartStyleGuidance = getChartStyleGuidance(state.chartType);
+
     const additionalInstructions = `IMPORTANT RULES:
 1. The 'dataset' field must contain: { type: "esql", query: "${esqlQuery}" }
 2. Always use { operation: 'value', column: '<esql column name>', ...other options } for operations
 3. All field names must match those available in the ES|QL query result
-4. Follow the schema definition strictly`;
+4. Follow the schema definition strictly
+${chartStyleGuidance ? `\n\n${chartStyleGuidance}` : ''}`;
 
     const additionalContext = previousActionContext
       ? `Previous attempts:\n${previousActionContext}\n\nPlease fix the issues mentioned above.`
