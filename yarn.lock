@@ -9076,10 +9076,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/synthetics-e2e@link:x-pack/solutions/observability/plugins/synthetics/e2e":
-  version "0.0.0"
-  uid ""
-
 "@kbn/synthetics-forge@link:x-pack/solutions/observability/packages/kbn-synthetics-forge":
   version "0.0.0"
   uid ""
