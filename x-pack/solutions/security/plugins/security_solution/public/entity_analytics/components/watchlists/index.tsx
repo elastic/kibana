@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingElastic } from '@elastic/eui';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLoadingElastic } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { MissingPrivilegesCallout } from '../missing_privileges_callout';
@@ -15,12 +15,28 @@ import { useWatchlistsPrivileges } from '../../api/hooks/use_watchlists_privileg
 
 export const Watchlists = () => {
   const spaceId = useSpaceId();
-  const { data: privileges, isLoading } = useWatchlistsPrivileges();
+  const { data: privileges, error, isLoading } = useWatchlistsPrivileges();
   const hasRequiredPrivileges = privileges?.has_all_required ?? false;
 
   return (
     <EuiFlexGroup direction="column">
-      {isLoading ? (
+      {error ? (
+        <EuiFlexItem>
+          <EuiCallOut
+            announceOnMount={false}
+            title={
+              <FormattedMessage
+                id="xpack.securitySolution.entityAnalytics.watchlists.privilegesError.title"
+                defaultMessage="Error loading watchlists privileges"
+              />
+            }
+            color="danger"
+            iconType="cross"
+          >
+            <p>{error.message}</p>
+          </EuiCallOut>
+        </EuiFlexItem>
+      ) : isLoading ? (
         <EuiFlexItem>
           <EuiFlexGroup justifyContent="center">
             <EuiFlexItem grow={false}>
