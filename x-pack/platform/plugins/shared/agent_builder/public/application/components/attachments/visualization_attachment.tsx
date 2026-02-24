@@ -36,13 +36,5 @@ export const createVisualizationAttachmentDefinition = ({
         uiActions={startDependencies.uiActions}
       />
     ),
-    renderCanvasContent: ({ attachment }) => (
-      <VisualizeLens
-        lensConfig={attachment.data.visualization}
-        dataViews={startDependencies.dataViews}
-        lens={startDependencies.lens}
-        uiActions={startDependencies.uiActions}
-      />
-    ),
   };
 };
