@@ -28,8 +28,10 @@ set -e;
 
 check_for_changed_files "$desc" true
 
-if [[ "${eslint_exit}" != "0" ]]; then
-  exit 1
-fi
+exit 1
 
-echo "eslint ✅"
+# if [[ "${eslint_exit}" != "0" ]]; then
+#   exit 1
+# fi
+
+# echo "eslint ✅"
