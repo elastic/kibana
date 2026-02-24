@@ -644,8 +644,23 @@ export const oauthCallbackScriptRoute = (router: IRouter<ActionsRequestHandlerCo
       security: DEFAULT_ACTION_ROUTE_SECURITY,
       options: {
         access: 'public',
+        description: i18n.translate('xpack.actions.oauthCallbackScript.routeDescription', {
+          defaultMessage: 'Returns the OAuth callback script',
+        }),
       },
-      validate: {},
+      validate: {
+        request: {},
+        response: {
+          200: {
+            description: i18n.translate(
+              'xpack.actions.oauthCallbackScript.response200Description',
+              {
+                defaultMessage: 'Returns the OAuth callback script',
+              }
+            ),
+          },
+        },
+      },
     },
     (_context, _req, res) => {
       return res.ok({
