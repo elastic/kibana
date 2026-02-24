@@ -13,6 +13,9 @@ import { attackDiscoverySearchTool } from './attack_discovery_search_tool';
 import { entityRiskScoreTool } from './entity_risk_score_tool';
 import { alertsTool } from './alerts_tool';
 import { createDetectionRuleTool } from './create_detection_rule_tool';
+import { endpointStatusTool } from './endpoint_status_tool';
+import { endpointResponseActionsTool } from './endpoint_response_actions_tool';
+import { endpointActionHistoryTool } from './endpoint_action_history_tool';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
 
 /**
@@ -29,4 +32,7 @@ export const registerTools = async (
   agentBuilder.tools.register(securityLabsSearchTool(core));
   agentBuilder.tools.register(createDetectionRuleTool(core, logger, experimentalFeatures));
   agentBuilder.tools.register(alertsTool(core, logger));
+  agentBuilder.tools.register(endpointStatusTool(core, logger));
+  agentBuilder.tools.register(endpointResponseActionsTool(core, logger));
+  agentBuilder.tools.register(endpointActionHistoryTool(core, logger));
 };
