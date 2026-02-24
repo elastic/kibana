@@ -79,7 +79,8 @@ export const useSwitchModesTour = (): React.ReactNode => {
         <EuiText size="s">
           <p>
             {i18n.translate('discover.tabsView.switchModesCalloutDescription', {
-              defaultMessage: 'Use the tab menu {icon} on each tab to switch between Classic and ES|QL.',
+              defaultMessage:
+                'Use the tab menu {icon} on each tab to switch between Classic and ES|QL.',
               values: {
                 icon: (
                   <EuiIcon
