@@ -7,14 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { render } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
 
 import { UserToolTip } from './user_tooltip';
 
 describe('UserToolTip', () => {
-  it('should render EuiToolTip correctly with UserAvatar', () => {
-    const { container } = render(
+  it('should render tooltip with user avatar, display name, and email on hover', async () => {
+    render(
       <UserToolTip
         user={{
           username: 'delighted_nightingale',
@@ -32,15 +33,16 @@ describe('UserToolTip', () => {
         <button>Toggle</button>
       </UserToolTip>
     );
-    expect(container.children[0]).toMatchInlineSnapshot(`
-      <span
-        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
-        id="generated-id-wrapper"
-      >
-        <button>
-          Toggle
-        </button>
-      </span>
-    `);
+
+    expect(screen.getByText('Toggle')).toBeInTheDocument();
+
+    await userEvent.hover(screen.getByText('Toggle'));
+    await waitFor(() => {
+      expect(screen.getByRole('tooltip')).toBeInTheDocument();
+    });
+
+    expect(screen.getByText('Delighted Nightingale')).toBeInTheDocument();
+    expect(screen.getByText('delighted_nightingale@elastic.co')).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: /Delighted Nightingale/ })).toBeInTheDocument();
   });
 });
