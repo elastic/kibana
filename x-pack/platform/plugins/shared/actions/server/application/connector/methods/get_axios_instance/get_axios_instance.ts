@@ -35,7 +35,7 @@ export async function getAxiosInstance(
     spaces,
     unsecuredSavedObjectsClient,
     connectorTokenClient,
-    getCurrentUserProfileId,
+    getCurrentUserProfileIdFromAPIKey,
   } = context;
 
   let actionTypeId: string | undefined;
@@ -105,7 +105,7 @@ export async function getAxiosInstance(
   const configurationUtilities = actionTypeRegistry.getUtils();
   const validatedSecrets = validateSecrets(actionType, secrets, { configurationUtilities });
 
-  const profileUid = await getCurrentUserProfileId?.(request);
+  const profileUid = await getCurrentUserProfileIdFromAPIKey?.(request);
 
   return await getAxiosInstanceWithAuth({
     connectorId,

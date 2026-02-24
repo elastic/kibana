@@ -73,7 +73,7 @@ export interface ActionExecutorContext {
   eventLogger: IEventLogger;
   inMemoryConnectors: InMemoryConnector[];
   getActionsAuthorizationWithRequest: (request: KibanaRequest) => ActionsAuthorization;
-  getCurrentUserProfileId: (request: KibanaRequest) => Promise<string | undefined>;
+  getCurrentUserProfileIdFromAPIKey: (request: KibanaRequest) => Promise<string | undefined>;
 }
 
 export interface TaskInfo {
@@ -402,7 +402,7 @@ export class ActionExecutor {
     }
 
     const providedProfileUid = request
-      ? await this.actionExecutorContext!.getCurrentUserProfileId(request)
+      ? await this.actionExecutorContext!.getCurrentUserProfileIdFromAPIKey(request)
       : undefined;
 
     return withSpan(

@@ -91,7 +91,7 @@ const actionExecutorInitializationParams = {
   encryptedSavedObjectsClient,
   eventLogger,
   getActionsAuthorizationWithRequest,
-  getCurrentUserProfileId: jest.fn().mockResolvedValue(undefined),
+  getCurrentUserProfileIdFromAPIKey: jest.fn().mockResolvedValue(undefined),
   inMemoryConnectors: [
     createMockInMemoryConnector({
       id: 'preconfigured',

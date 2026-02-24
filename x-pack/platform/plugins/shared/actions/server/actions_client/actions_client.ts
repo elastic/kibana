@@ -120,7 +120,7 @@ export interface ConstructorOptions {
   ) => Promise<AxiosInstance>;
   spaces?: SpacesServiceSetup;
   isESOCanEncrypt: boolean;
-  getCurrentUserProfileId?: (request: KibanaRequest) => Promise<string | undefined>;
+  getCurrentUserProfileIdFromAPIKey?: (request: KibanaRequest) => Promise<string | undefined>;
 }
 
 export interface ActionsClientContext {
@@ -146,11 +146,10 @@ export interface ActionsClientContext {
   ) => Promise<AxiosInstance>;
   spaces?: SpacesServiceSetup;
   isESOCanEncrypt: boolean;
-  getCurrentUserProfileId?: (request: KibanaRequest) => Promise<string | undefined>;
+  getCurrentUserProfileIdFromAPIKey?: (request: KibanaRequest) => Promise<string | undefined>;
 }
 
-const noopGetCurrentUserProfileId = async (_request: KibanaRequest): Promise<string | undefined> =>
-  undefined;
+const noop = async (_request: KibanaRequest): Promise<string | undefined> => undefined;
 
 export class ActionsClient {
   private readonly context: ActionsClientContext;
@@ -176,7 +175,7 @@ export class ActionsClient {
     getAxiosInstanceWithAuth,
     spaces,
     isESOCanEncrypt,
-    getCurrentUserProfileId,
+    getCurrentUserProfileIdFromAPIKey,
   }: ConstructorOptions) {
     this.context = {
       logger,
@@ -199,7 +198,7 @@ export class ActionsClient {
       getAxiosInstanceWithAuth,
       spaces,
       isESOCanEncrypt,
-      getCurrentUserProfileId: getCurrentUserProfileId ?? noopGetCurrentUserProfileId,
+      getCurrentUserProfileIdFromAPIKey: getCurrentUserProfileIdFromAPIKey ?? noop,
     };
   }
 
@@ -454,7 +453,9 @@ export class ActionsClient {
           );
         }
 
-        const profileUid = await this.context.getCurrentUserProfileId?.(this.context.request);
+        const profileUid = await this.context.getCurrentUserProfileIdFromAPIKey?.(
+          this.context.request
+        );
 
         accessToken = await getOAuthAuthorizationCodeAccessToken({
           connectorId: tokenOpts.connectorId,

@@ -560,7 +560,7 @@ export class ActionsPlugin
         spaces: this.spaces?.spacesService,
         isESOCanEncrypt: isESOCanEncrypt!,
         encryptedSavedObjectsClient,
-        getCurrentUserProfileId,
+        getCurrentUserProfileIdFromAPIKey,
       });
     };
 
@@ -641,7 +641,9 @@ export class ActionsPlugin
     const getInternalSavedObjectsRepositoryWithoutAccessToActions = () =>
       core.savedObjects.createInternalRepository();
 
-    const getCurrentUserProfileId = async (request: KibanaRequest): Promise<string | undefined> => {
+    const getCurrentUserProfileIdFromAPIKey = async (
+      request: KibanaRequest
+    ): Promise<string | undefined> => {
       try {
         const response = await core.elasticsearch.client
           .asScoped(request)
@@ -688,7 +690,7 @@ export class ActionsPlugin
         return instantiateAuthorization(request);
       },
       analyticsService: core.analytics,
-      getCurrentUserProfileId,
+      getCurrentUserProfileIdFromAPIKey,
     });
 
     taskRunnerFactory!.initialize({
