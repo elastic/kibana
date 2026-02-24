@@ -21,7 +21,7 @@ export const createJourneyRoute: UMRestApiRouteFactory = (libs: UMServerLibs) =>
       // provides a filter for the types of synthetic events to include
       // when fetching a journey's data
       syntheticEventTypes: schema.maybe(
-        schema.oneOf([schema.arrayOf(schema.string(), { maxSize: 10 }), schema.string()])
+        schema.oneOf([schema.arrayOf(schema.string(), { maxSize: 50 }), schema.string()])
       ),
     }),
   },
