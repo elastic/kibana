@@ -500,6 +500,7 @@ describe('Gap Auto Fill Scheduler Task', () => {
             { ruleId: 'rule-1', processedGaps: 1, status: GapFillSchedulePerRuleStatus.SUCCESS },
             { ruleId: 'rule-2', processedGaps: 1, status: GapFillSchedulePerRuleStatus.SUCCESS },
           ],
+          truncatedRuleIds: [],
         });
 
         const result = await taskRunner.run();
@@ -612,6 +613,7 @@ describe('Gap Auto Fill Scheduler Task', () => {
                   status: gapsStatus[1],
                 },
               ],
+              truncatedRuleIds: [],
             });
           }
 
@@ -726,6 +728,7 @@ describe('Gap Auto Fill Scheduler Task', () => {
             results: [
               { ruleId: 'rule-1', processedGaps: 1, status: GapFillSchedulePerRuleStatus.SUCCESS },
             ],
+            truncatedRuleIds: [],
           });
 
           const result = await taskRunner.run();
@@ -777,6 +780,7 @@ describe('Gap Auto Fill Scheduler Task', () => {
               error: 'Failed to schedule',
             },
           ],
+          truncatedRuleIds: [],
         });
 
         const result = await taskRunner.run();
@@ -829,6 +833,7 @@ describe('Gap Auto Fill Scheduler Task', () => {
                 status: GapFillSchedulePerRuleStatus.SUCCESS,
               },
             ],
+            truncatedRuleIds: [],
           });
 
           const result = await taskRunner.run();
@@ -882,6 +887,7 @@ describe('Gap Auto Fill Scheduler Task', () => {
             results: [
               { ruleId: 'rule-1', processedGaps: 1, status: GapFillSchedulePerRuleStatus.SUCCESS },
             ],
+            truncatedRuleIds: [],
           });
 
           const result = await taskRunner.run();
@@ -1059,6 +1065,7 @@ describe('Gap Auto Fill Scheduler Task', () => {
               status: GapFillSchedulePerRuleStatus.SUCCESS,
             },
           ],
+          truncatedRuleIds: [],
         })
         .mockResolvedValueOnce({
           processedGapsCount: 1,
@@ -1070,6 +1077,7 @@ describe('Gap Auto Fill Scheduler Task', () => {
               status: GapFillSchedulePerRuleStatus.SUCCESS,
             },
           ],
+          truncatedRuleIds: [],
         });
 
       const result = await processRuleBatches({
@@ -1152,6 +1160,7 @@ describe('Gap Auto Fill Scheduler Task', () => {
             status: GapFillSchedulePerRuleStatus.SUCCESS,
           },
         ],
+        truncatedRuleIds: [],
       });
 
       const result = await processRuleBatches({
@@ -1275,6 +1284,7 @@ describe('Gap Auto Fill Scheduler Task', () => {
             status: GapFillSchedulePerRuleStatus.SUCCESS,
           },
         ],
+        truncatedRuleIds: [],
       });
 
       const result = await processGapsForRules({
