@@ -16,16 +16,15 @@ import type {
 } from './types';
 import { registerTools } from './tools';
 import { registerAttachmentTypes } from './attachment_types';
-import { dataExplorationSkill } from './skills';
 
 export class AgentBuilderPlatformPlugin
   implements
-    Plugin<
-      AgentBuilderPlatformPluginSetup,
-      AgentBuilderPlatformPluginStart,
-      PluginSetupDependencies,
-      PluginStartDependencies
-    >
+  Plugin<
+    AgentBuilderPlatformPluginSetup,
+    AgentBuilderPlatformPluginStart,
+    PluginSetupDependencies,
+    PluginStartDependencies
+  >
 {
   // @ts-expect-error unused for now
   private logger: Logger;
@@ -50,9 +49,6 @@ export class AgentBuilderPlatformPlugin
       setupDeps,
     });
 
-    // Register built-in skills
-    setupDeps.agentBuilder.skills.register(dataExplorationSkill);
-
     return {};
   }
 
@@ -60,5 +56,5 @@ export class AgentBuilderPlatformPlugin
     return {};
   }
 
-  stop() {}
+  stop() { }
 }

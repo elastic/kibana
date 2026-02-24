@@ -7,7 +7,6 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
-import { alertAnalysisSampleSkill } from './alert_analysis_skill';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import type { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
 import { createAutomaticTroubleshootingSkill } from './automatic_troubleshooting';
@@ -36,7 +35,6 @@ export const registerSkills = async ({
   logger,
   options,
 }: RegisterSkillsOpts): Promise<void> => {
-  agentBuilder.skills.register(alertAnalysisSampleSkill);
   if (experimentalFeatures.automaticTroubleshootingSkill) {
     agentBuilder.skills.register(
       createAutomaticTroubleshootingSkill(options.endpointAppContextService)
