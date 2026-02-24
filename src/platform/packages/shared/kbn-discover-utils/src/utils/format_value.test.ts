@@ -42,7 +42,7 @@ describe('formatFieldValue', () => {
       'formatted:foo'
     );
     expect(dataViewMock.getFormatterForField).toHaveBeenCalledWith(field);
-    expect(convertMock).toHaveBeenCalledWith('foo', 'html', { field, hit });
+    expect(convertMock).toHaveBeenCalledWith('foo', 'text', { field, hit });
   });
 
   it('should call default string formatter if no field specified', () => {
@@ -52,7 +52,7 @@ describe('formatFieldValue', () => {
     });
     expect(formatFieldValue('foo', hit, services.fieldFormats, dataViewMock)).toBe('formatted:foo');
     expect(services.fieldFormats.getDefaultInstance).toHaveBeenCalledWith('string');
-    expect(convertMock).toHaveBeenCalledWith('foo', 'html', { field: undefined, hit });
+    expect(convertMock).toHaveBeenCalledWith('foo', 'text', { field: undefined, hit });
   });
 
   it('should call default string formatter if no dataView is specified', () => {
@@ -62,6 +62,6 @@ describe('formatFieldValue', () => {
     });
     expect(formatFieldValue('foo', hit, services.fieldFormats)).toBe('formatted:foo');
     expect(services.fieldFormats.getDefaultInstance).toHaveBeenCalledWith('string');
-    expect(convertMock).toHaveBeenCalledWith('foo', 'html', { field: undefined, hit });
+    expect(convertMock).toHaveBeenCalledWith('foo', 'text', { field: undefined, hit });
   });
 });

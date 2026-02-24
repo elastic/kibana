@@ -26,9 +26,9 @@ import type { EsHitRecord } from '../types';
  * @param fieldFormats Field formatters
  * @param dataView The data view if available
  * @param field The field that value was from if available
- * @param contentType Type of a converter
+ * @param contentType Type of a converter (defaults to 'text')
  * @param options Options for the converter
- * @returns An sanitized HTML string, that is safe to be applied via dangerouslySetInnerHTML
+ * @returns A formatted string representation of the value
  */
 export function formatFieldValue(
   value: unknown,
@@ -39,7 +39,7 @@ export function formatFieldValue(
   contentType?: FieldFormatsContentType,
   options?: HtmlContextTypeOptions | TextContextTypeOptions
 ): string {
-  const usedContentType = contentType ?? 'html';
+  const usedContentType = contentType ?? 'text';
   const converterOptions: HtmlContextTypeOptions | TextContextTypeOptions = {
     hit,
     field,
