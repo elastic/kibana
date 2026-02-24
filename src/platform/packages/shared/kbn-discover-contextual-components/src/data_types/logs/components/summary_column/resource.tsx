@@ -29,18 +29,21 @@ export const Resource = ({ fields, limited = false, onFilter, ...props }: Resour
 
   return (
     <EuiFlexGroup gutterSize="s" {...props}>
-      {displayedFields.map(({ name, rawValue, value, ResourceBadge, Icon, property }) => (
-        <ResourceBadge
-          key={name}
-          name={name}
-          property={property}
-          rawValue={rawValue}
-          value={value}
-          icon={Icon}
-          onFilter={onFilter}
-          truncateTitle={true}
-        />
-      ))}
+      {displayedFields.map(
+        ({ name, rawValue, value, ResourceBadge, Icon, property, renderValue }) => (
+          <ResourceBadge
+            key={name}
+            name={name}
+            property={property}
+            rawValue={rawValue}
+            value={value}
+            icon={Icon}
+            onFilter={onFilter}
+            truncateTitle={true}
+            renderValue={renderValue}
+          />
+        )
+      )}
       {extraFieldsCount > 0 && (
         <div>
           <EuiBadge>+{extraFieldsCount}</EuiBadge>

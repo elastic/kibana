@@ -31,7 +31,7 @@ import {
   RESOURCE_FIELDS,
 } from '@kbn/discover-utils';
 import type { TraceDocument } from '@kbn/discover-utils/src';
-import { formatFieldValue } from '@kbn/discover-utils/src';
+import { formatFieldValue, FormatFieldValueReact } from '@kbn/discover-utils/src';
 import { EuiIcon, useEuiTheme } from '@elastic/eui';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { testPatternAgainstAllowedList } from '@kbn/data-view-utils';
@@ -89,6 +89,7 @@ export interface ResourceFieldDescriptor {
   value: string;
   property?: DataViewField;
   rawValue: unknown;
+  renderValue?: (formattedValue: string) => React.ReactNode;
 }
 
 const getResourceBadgeComponent = (
@@ -163,22 +164,25 @@ export const createResourceFields = ({
 
   return availableResourceFields.map((name) => {
     const property = dataView.getFieldByName(name);
-    const value = formatFieldValue(
-      resourceDoc[name],
-      row.raw,
-      fieldFormats,
-      dataView,
-      property,
-      'html'
-    );
+    const rawValue = resourceDoc[name];
+    const value = formatFieldValue(rawValue, row.raw, fieldFormats, dataView, property, 'text');
 
     return {
       name,
-      rawValue: resourceDoc[name],
+      rawValue,
       value,
       property,
       ResourceBadge: getResourceBadgeComponent(name, core, share),
       Icon: getResourceBadgeIcon(name, resourceDoc),
+      renderValue: (_formattedValue: string) => (
+        <FormatFieldValueReact
+          value={rawValue}
+          hit={row.raw}
+          fieldFormats={fieldFormats}
+          dataView={dataView}
+          field={property}
+        />
+      ),
     };
   });
 };
@@ -201,7 +205,7 @@ export const createResourceFieldsWithOtelFallback = ({
   return availableFields.map((name) => {
     const property = dataView.getFieldByName(name);
     const rawValue = row.flattened[name];
-    const value = formatFieldValue(rawValue, row.raw, fieldFormats, dataView, property, 'html');
+    const value = formatFieldValue(rawValue, row.raw, fieldFormats, dataView, property, 'text');
 
     return {
       name,
@@ -210,6 +214,15 @@ export const createResourceFieldsWithOtelFallback = ({
       property,
       ResourceBadge: getResourceBadgeComponent(name, core, share),
       Icon: getResourceBadgeIcon(name, resourceDoc),
+      renderValue: (_formattedValue: string) => (
+        <FormatFieldValueReact
+          value={rawValue}
+          hit={row.raw}
+          fieldFormats={fieldFormats}
+          dataView={dataView}
+          field={property}
+        />
+      ),
     };
   });
 };
