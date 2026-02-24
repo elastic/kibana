@@ -103,6 +103,7 @@ describe('Converter Helpers', () => {
           read_failure_store: true,
           manage_failure_store: true,
           view_index_metadata: true,
+          create_snapshot_repository: true,
         },
         effective_failure_store: {
           disabled: {},
@@ -142,6 +143,7 @@ describe('Converter Helpers', () => {
           read_failure_store: true,
           manage_failure_store: true,
           view_index_metadata: true,
+          create_snapshot_repository: true,
         },
         effective_lifecycle: {
           dsl: {},

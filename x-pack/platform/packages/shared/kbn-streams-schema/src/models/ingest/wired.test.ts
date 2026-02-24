@@ -119,6 +119,7 @@ describe('WiredStream', () => {
           read_failure_store: true,
           manage_failure_store: true,
           view_index_metadata: true,
+          create_snapshot_repository: true,
         },
         effective_lifecycle: {
           dsl: {},
@@ -166,6 +167,7 @@ describe('WiredStream', () => {
           text_structure: true,
           failure_store: true,
           view_index_metadata: true,
+          create_snapshot_repository: true,
         },
         dashboards: [],
         queries: [],
