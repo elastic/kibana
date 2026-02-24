@@ -92,8 +92,7 @@ describe('<KibanaPrivileges>', () => {
   it('renders without crashing', () => {
     const props = buildProps();
     const { container } = renderWithIntl(<KibanaPrivilegesRegion {...props} />);
-    expect(container).not.toBeEmptyDOMElement();
-    expect(container).toMatchSnapshot();
+    expect(container.children[0]).toMatchSnapshot();
   });
 
   it('renders the space-aware privilege form', () => {

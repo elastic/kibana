@@ -1,45 +1,43 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`<KibanaPrivileges> renders without crashing 1`] = `
-<div>
+<div
+  class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-grow-m-m-plain-hasBorder"
+>
   <div
-    class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-grow-m-m-plain-hasBorder"
+    class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-baseline-row"
   >
     <div
-      class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-baseline-row"
+      class="euiFlexItem emotion-euiFlexItem-growZero"
     >
-      <div
-        class="euiFlexItem emotion-euiFlexItem-growZero"
+      <h2
+        class="euiTitle emotion-euiTitle-m"
       >
-        <h2
-          class="euiTitle emotion-euiTitle-m"
-        >
-          <span
-            class="css-t0tl5b-CollapsiblePanelTitle"
-            data-euiicon-type="logoKibana"
-          />
-           
-          Kibana
-        </h2>
-      </div>
-      <div
-        class="euiFlexItem emotion-euiFlexItem-growZero"
-      >
-        <button
-          class="euiLink emotion-euiLink-primary"
-          data-test-subj="showHidePrivilege"
-          type="button"
-        >
-          hide
-        </button>
-      </div>
+        <span
+          class="css-t0tl5b-CollapsiblePanelTitle"
+          data-euiicon-type="logoKibana"
+        />
+         
+        Kibana
+      </h2>
     </div>
     <div
-      class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
-    />
-    <div
-      data-test-subj="spaceAwarePrivilegeSection"
-    />
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+    >
+      <button
+        class="euiLink emotion-euiLink-primary"
+        data-test-subj="showHidePrivilege"
+        type="button"
+      >
+        hide
+      </button>
+    </div>
   </div>
+  <div
+    class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+  />
+  <div
+    data-test-subj="spaceAwarePrivilegeSection"
+  />
 </div>
 `;

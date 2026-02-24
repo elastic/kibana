@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { EuiComboBox } from '@elastic/eui';
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 
@@ -12,6 +13,16 @@ import { I18nProvider } from '@kbn/i18n-react';
 
 import { ClusterPrivileges } from './cluster_privileges';
 import type { Role } from '../../../../../../common';
+
+jest.mock('@elastic/eui', () => {
+  const actual = jest.requireActual('@elastic/eui');
+  return {
+    ...actual,
+    EuiComboBox: jest.fn((props: any) => <actual.EuiComboBox {...props} />),
+  };
+});
+
+const MockedEuiComboBox = EuiComboBox as unknown as jest.Mock;
 
 const renderWithIntl = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
 
@@ -34,7 +45,7 @@ test('it renders without crashing', () => {
       builtinClusterPrivileges={['all', 'manage', 'monitor']}
     />
   );
-  expect(container).not.toBeEmptyDOMElement();
+  expect(container.children[0]).toMatchSnapshot();
 });
 
 test('it renders fields as disabled when not editable', () => {
@@ -49,6 +60,7 @@ test('it renders fields as disabled when not editable', () => {
     kibana: [],
   };
 
+  MockedEuiComboBox.mockClear();
   renderWithIntl(
     <ClusterPrivileges
       role={role}
@@ -57,9 +69,9 @@ test('it renders fields as disabled when not editable', () => {
       editable={false}
     />
   );
-  expect(screen.getByTestId('cluster-privileges-combobox')).toHaveAttribute(
-    'aria-disabled',
-    'true'
+  expect(MockedEuiComboBox).toHaveBeenCalledWith(
+    expect.objectContaining({ isDisabled: true }),
+    expect.anything()
   );
 });
 

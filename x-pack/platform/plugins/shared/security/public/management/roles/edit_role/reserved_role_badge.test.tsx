@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { EuiIconTip } from '@elastic/eui';
 import { render } from '@testing-library/react';
 import React from 'react';
 
@@ -12,6 +13,16 @@ import { I18nProvider } from '@kbn/i18n-react';
 
 import { ReservedRoleBadge } from './reserved_role_badge';
 import type { Role } from '../../../../common';
+
+jest.mock('@elastic/eui', () => {
+  const actual = jest.requireActual('@elastic/eui');
+  return {
+    ...actual,
+    EuiIconTip: jest.fn(() => <div data-test-subj="iconTip-mock" />),
+  };
+});
+
+const MockedEuiIconTip = EuiIconTip as unknown as jest.Mock;
 
 const reservedRole: Role = {
   name: '',
@@ -71,8 +82,9 @@ const unreservedRole = {
 const renderWithIntl = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
 
 test('it renders without crashing', () => {
-  const { container } = renderWithIntl(<ReservedRoleBadge role={reservedRole} />);
-  expect(container).not.toBeEmptyDOMElement();
+  MockedEuiIconTip.mockClear();
+  renderWithIntl(<ReservedRoleBadge role={reservedRole} />);
+  expect(MockedEuiIconTip).toHaveBeenCalledTimes(1);
 });
 
 test('it renders nothing for an unreserved role', () => {

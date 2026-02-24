@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { render, screen } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import React from 'react';
 
 import { DisabledLoginForm } from './disabled_login_form';
@@ -15,8 +15,6 @@ describe('DisabledLoginForm', () => {
     const { container } = render(
       <DisabledLoginForm title={'disabled message title'} message={'disabled message'} />
     );
-    expect(container).toMatchSnapshot();
-    expect(screen.getByText('disabled message title')).toBeInTheDocument();
-    expect(screen.getByText('disabled message')).toBeInTheDocument();
+    expect(container.children[0]).toMatchSnapshot();
   });
 });
