@@ -6,16 +6,20 @@
  */
 
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
-import type { ConfigType } from '../../../../../../config';
 import { withSecuritySpan } from '../../../../../../utils/with_security_span';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../../../../plugin_contract';
 
 import { EXTENDED_RULE_EXECUTION_LOGGING_MIN_LEVEL_SETTING } from '../../../../../../../common/constants';
-import type { RuleExecutionSettings } from '../../../../../../../common/api/detection_engine/rule_monitoring';
-import { LogLevelSetting } from '../../../../../../../common/api/detection_engine/rule_monitoring';
+import type {
+  RuleExecutionSettings,
+  LogLevelSetting,
+} from '../../../../../../../common/api/detection_engine/rule_monitoring';
+import {
+  DEFAULT_EXTENDED_LOGGING_SETTINGS,
+  getExtendedLoggingSettings,
+} from '../../../../../../../common/api/detection_engine/rule_monitoring';
 
 export const fetchRuleExecutionSettings = async (
-  config: ConfigType,
   logger: Logger,
   core: SecuritySolutionPluginCoreSetupDependencies,
   savedObjectsClient: SavedObjectsClientContract
@@ -31,7 +35,13 @@ export const fetchRuleExecutionSettings = async (
         return settingsClient.getAll();
       });
 
-      return getRuleExecutionSettingsFrom(config, kibanaAdvancedSettings);
+      const minLevel = getSetting<LogLevelSetting>(
+        kibanaAdvancedSettings,
+        EXTENDED_RULE_EXECUTION_LOGGING_MIN_LEVEL_SETTING,
+        DEFAULT_EXTENDED_LOGGING_SETTINGS.minLevel
+      );
+
+      return { extendedLogging: getExtendedLoggingSettings(minLevel) };
     });
 
     return ruleExecutionSettings;
@@ -40,40 +50,8 @@ export const fetchRuleExecutionSettings = async (
     const logReason = e instanceof Error ? e.stack ?? e.message : String(e);
     logger.error(`${logMessage}: ${logReason}`);
 
-    return getRuleExecutionSettingsDefault(config);
+    return { extendedLogging: DEFAULT_EXTENDED_LOGGING_SETTINGS };
   }
-};
-
-const getRuleExecutionSettingsFrom = (
-  config: ConfigType,
-  advancedSettings: Record<string, unknown>
-): RuleExecutionSettings => {
-  const featureFlagEnabled = config.experimentalFeatures.extendedRuleExecutionLoggingEnabled;
-  const minLevel = featureFlagEnabled
-    ? getSetting<LogLevelSetting>(
-        advancedSettings,
-        EXTENDED_RULE_EXECUTION_LOGGING_MIN_LEVEL_SETTING,
-        LogLevelSetting.info
-      )
-    : LogLevelSetting.off;
-
-  return {
-    extendedLogging: {
-      isEnabled: featureFlagEnabled && minLevel !== LogLevelSetting.off,
-      minLevel,
-    },
-  };
-};
-
-const getRuleExecutionSettingsDefault = (config: ConfigType): RuleExecutionSettings => {
-  const featureFlagEnabled = config.experimentalFeatures.extendedRuleExecutionLoggingEnabled;
-
-  return {
-    extendedLogging: {
-      isEnabled: featureFlagEnabled,
-      minLevel: featureFlagEnabled ? LogLevelSetting.info : LogLevelSetting.off,
-    },
-  };
 };
 
 const getSetting = <T>(settings: Record<string, unknown>, key: string, defaultValue: T): T => {

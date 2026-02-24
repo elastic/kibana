@@ -15,7 +15,6 @@ describe('initUiSettings', () => {
   const mockExperimentalFeatures = {
     enableAlertsAndAttacksAlignment: false,
     siemReadinessDashboard: false,
-    extendedRuleExecutionLoggingEnabled: false,
   } as ExperimentalFeatures;
 
   beforeEach(() => {

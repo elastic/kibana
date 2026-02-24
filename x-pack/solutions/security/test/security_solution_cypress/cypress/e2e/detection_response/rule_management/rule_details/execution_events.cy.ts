@@ -38,15 +38,6 @@ describe(
   'Execution events table',
   {
     tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
-    env: {
-      ftrConfig: {
-        kbnServerArgs: [
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-            'extendedRuleExecutionLoggingEnabled',
-          ])}`,
-        ],
-      },
-    },
   },
   function () {
     before(() => {

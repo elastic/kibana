@@ -20,3 +20,15 @@ export enum LogLevelSetting {
   'error' = 'error',
   'off' = 'off',
 }
+
+export const getExtendedLoggingSettings = (
+  minLevel: LogLevelSetting = LogLevelSetting.info
+): RuleExecutionSettings['extendedLogging'] => ({
+  isEnabled: minLevel !== LogLevelSetting.off,
+  minLevel,
+});
+
+export const DEFAULT_EXTENDED_LOGGING_SETTINGS: RuleExecutionSettings['extendedLogging'] = {
+  isEnabled: true,
+  minLevel: LogLevelSetting.info,
+};

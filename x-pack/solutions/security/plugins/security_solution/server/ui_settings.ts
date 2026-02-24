@@ -513,85 +513,81 @@ export const initUiSettings = (
       solutionViews: ['classic', 'security'],
     },
     ...getDefaultValueReportSettings(),
-    ...(experimentalFeatures.extendedRuleExecutionLoggingEnabled
-      ? {
-          [EXTENDED_RULE_EXECUTION_LOGGING_MIN_LEVEL_SETTING]: {
-            name: i18n.translate(
-              'xpack.securitySolution.uiSettings.extendedRuleExecutionLoggingMinLevelLabel',
-              {
-                defaultMessage: 'Extended rule execution logging: min level',
-              }
-            ),
-            description: i18n.translate(
-              'xpack.securitySolution.uiSettings.extendedRuleExecutionLoggingMinLevelDescription',
-              {
-                defaultMessage:
-                  '<p>Sets minimum log level starting from which rules will write extended logs to .kibana-event-log-* indices. This affects only events of type Message, other events are being written to .kibana-event-log-* regardless of this setting and their log level.</p>',
-                values: { p: (chunks) => `<p>${chunks}</p>` },
-              }
-            ),
-            type: 'select',
-            schema: schema.oneOf([
-              schema.literal(LogLevelSetting.off),
-              schema.literal(LogLevelSetting.error),
-              schema.literal(LogLevelSetting.warn),
-              schema.literal(LogLevelSetting.info),
-              schema.literal(LogLevelSetting.debug),
-              schema.literal(LogLevelSetting.trace),
-            ]),
-            value: LogLevelSetting.info,
-            options: [
-              LogLevelSetting.off,
-              LogLevelSetting.error,
-              LogLevelSetting.warn,
-              LogLevelSetting.info,
-              LogLevelSetting.debug,
-              LogLevelSetting.trace,
-            ],
-            optionLabels: {
-              [LogLevelSetting.off]: i18n.translate(
-                'xpack.securitySolution.uiSettings.extendedRuleExecutionLoggingMinLevelOff',
-                {
-                  defaultMessage: 'Off',
-                }
-              ),
-              [LogLevelSetting.error]: i18n.translate(
-                'xpack.securitySolution.uiSettings.extendedRuleExecutionLoggingMinLevelError',
-                {
-                  defaultMessage: 'Error',
-                }
-              ),
-              [LogLevelSetting.warn]: i18n.translate(
-                'xpack.securitySolution.uiSettings.extendedRuleExecutionLoggingMinLevelWarn',
-                {
-                  defaultMessage: 'Warn',
-                }
-              ),
-              [LogLevelSetting.info]: i18n.translate(
-                'xpack.securitySolution.uiSettings.extendedRuleExecutionLoggingMinLevelInfo',
-                {
-                  defaultMessage: 'Info',
-                }
-              ),
-              [LogLevelSetting.debug]: i18n.translate(
-                'xpack.securitySolution.uiSettings.extendedRuleExecutionLoggingMinLevelDebug',
-                {
-                  defaultMessage: 'Debug',
-                }
-              ),
-              [LogLevelSetting.trace]: i18n.translate(
-                'xpack.securitySolution.uiSettings.extendedRuleExecutionLoggingMinLevelTrace',
-                {
-                  defaultMessage: 'Trace',
-                }
-              ),
-            },
-            category: [APP_ID],
-            requiresPageReload: false,
-            solutionViews: ['classic', 'security'],
-          },
+    [EXTENDED_RULE_EXECUTION_LOGGING_MIN_LEVEL_SETTING]: {
+      name: i18n.translate(
+        'xpack.securitySolution.uiSettings.extendedRuleExecutionLoggingMinLevelLabel',
+        {
+          defaultMessage: 'Extended rule execution logging: minimum level',
         }
-      : {}),
+      ),
+      description: i18n.translate(
+        'xpack.securitySolution.uiSettings.extendedRuleExecutionLoggingMinLevelDescription',
+        {
+          defaultMessage:
+            '<p>Sets minimum log level starting from which rules will write extended logs to .kibana-event-log-* indices. This affects only events of type Message, other events are being written to .kibana-event-log-* regardless of this setting and their log level.</p>',
+          values: { p: (chunks) => `<p>${chunks}</p>` },
+        }
+      ),
+      type: 'select',
+      schema: schema.oneOf([
+        schema.literal(LogLevelSetting.off),
+        schema.literal(LogLevelSetting.error),
+        schema.literal(LogLevelSetting.warn),
+        schema.literal(LogLevelSetting.info),
+        schema.literal(LogLevelSetting.debug),
+        schema.literal(LogLevelSetting.trace),
+      ]),
+      value: LogLevelSetting.info,
+      options: [
+        LogLevelSetting.off,
+        LogLevelSetting.error,
+        LogLevelSetting.warn,
+        LogLevelSetting.info,
+        LogLevelSetting.debug,
+        LogLevelSetting.trace,
+      ],
+      optionLabels: {
+        [LogLevelSetting.off]: i18n.translate(
+          'xpack.securitySolution.uiSettings.extendedRuleExecutionLoggingMinLevelOff',
+          {
+            defaultMessage: 'Off',
+          }
+        ),
+        [LogLevelSetting.error]: i18n.translate(
+          'xpack.securitySolution.uiSettings.extendedRuleExecutionLoggingMinLevelError',
+          {
+            defaultMessage: 'Error',
+          }
+        ),
+        [LogLevelSetting.warn]: i18n.translate(
+          'xpack.securitySolution.uiSettings.extendedRuleExecutionLoggingMinLevelWarn',
+          {
+            defaultMessage: 'Warn',
+          }
+        ),
+        [LogLevelSetting.info]: i18n.translate(
+          'xpack.securitySolution.uiSettings.extendedRuleExecutionLoggingMinLevelInfo',
+          {
+            defaultMessage: 'Info',
+          }
+        ),
+        [LogLevelSetting.debug]: i18n.translate(
+          'xpack.securitySolution.uiSettings.extendedRuleExecutionLoggingMinLevelDebug',
+          {
+            defaultMessage: 'Debug',
+          }
+        ),
+        [LogLevelSetting.trace]: i18n.translate(
+          'xpack.securitySolution.uiSettings.extendedRuleExecutionLoggingMinLevelTrace',
+          {
+            defaultMessage: 'Trace',
+          }
+        ),
+      },
+      category: [APP_ID],
+      requiresPageReload: false,
+      solutionViews: ['classic', 'security'],
+    },
   };
 
   uiSettings.register(orderSettings(securityUiSettings));

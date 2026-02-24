@@ -137,7 +137,6 @@ export const createRuleMonitoringService = (
           const childLogger = logger.get('ruleExecution');
 
           const ruleExecutionSettings = await fetchRuleExecutionSettings(
-            config,
             childLogger,
             coreSetup,
             savedObjectsClient
