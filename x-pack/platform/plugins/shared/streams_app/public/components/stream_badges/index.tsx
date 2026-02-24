@@ -239,3 +239,13 @@ export function DiscoverBadgeButton({
     />
   );
 }
+
+export function MetricsBadge() {
+  return (
+    <EuiBadge color="hollow" iconType="number" iconSide="left" data-test-subj="metricBadge">
+      {i18n.translate('xpack.streams.entityDetailViewWithoutParams.metricBadgeLabel', {
+        defaultMessage: 'Metric',
+      })}
+    </EuiBadge>
+  );
+}
