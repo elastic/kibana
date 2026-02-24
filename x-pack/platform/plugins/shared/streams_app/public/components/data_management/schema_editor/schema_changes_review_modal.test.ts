@@ -183,4 +183,109 @@ describe('getChanges', () => {
       expect(changes[0].status).toBe('unmapped');
     });
   });
+
+  describe('type unmapped handling (description-only override for wired streams)', () => {
+    it('should not include fields with type="unmapped" as mapping changes', () => {
+      // When a user adds a description-only override in a wired stream, the field
+      // has status='mapped' but type='unmapped'. This represents a doc-only override
+      // that doesn't affect ES mappings.
+      const unmappedTypeField: SchemaEditorField = {
+        ...createMockMappedField({ name: 'doc_only_field' }),
+        type: 'unmapped',
+        description: 'Documentation for this field',
+      };
+
+      const fields: SchemaEditorField[] = [unmappedTypeField];
+      const storedFields: SchemaEditorField[] = [];
+
+      const changes = getChanges(fields, storedFields);
+
+      // type='unmapped' fields should not be considered mapping changes
+      expect(changes).toHaveLength(0);
+    });
+
+    it('should return empty array when all fields have type="unmapped"', () => {
+      const unmappedTypeField1: SchemaEditorField = {
+        ...createMockMappedField({ name: 'doc_field_1' }),
+        type: 'unmapped',
+        description: 'Doc 1',
+      };
+
+      const unmappedTypeField2: SchemaEditorField = {
+        ...createMockMappedField({ name: 'doc_field_2' }),
+        type: 'unmapped',
+        description: 'Doc 2',
+      };
+
+      const fields: SchemaEditorField[] = [unmappedTypeField1, unmappedTypeField2];
+      const storedFields: SchemaEditorField[] = [];
+
+      const changes = getChanges(fields, storedFields);
+
+      // Modal should not be shown since no mapping-affecting changes
+      expect(changes).toHaveLength(0);
+    });
+
+    it('should only include real mapping changes, not type="unmapped" fields', () => {
+      const unmappedTypeField: SchemaEditorField = {
+        ...createMockMappedField({ name: 'doc_only_field' }),
+        type: 'unmapped',
+        description: 'Documentation only',
+      };
+
+      const realMappedField: SchemaEditorField = {
+        ...createMockMappedField({ name: 'real_keyword_field' }),
+        type: 'keyword',
+      };
+
+      const fields: SchemaEditorField[] = [unmappedTypeField, realMappedField];
+      const storedFields: SchemaEditorField[] = [];
+
+      const changes = getChanges(fields, storedFields);
+
+      // Should only include the real keyword field
+      expect(changes).toHaveLength(1);
+      expect(changes[0].name).toBe('real_keyword_field');
+      expect(changes[0].type).toBe('keyword');
+    });
+
+    it('should include the change when transitioning from type="unmapped" to a real type', () => {
+      // A field that previously only had a description now gets a real mapping
+      const originalField: SchemaEditorField = {
+        ...createMockMappedField({ name: 'field' }),
+        type: 'unmapped',
+        description: 'Was just documentation',
+      };
+
+      const updatedField: SchemaEditorField = {
+        ...createMockMappedField({ name: 'field' }),
+        type: 'keyword',
+        description: 'Now has a real mapping',
+      };
+
+      const changes = getChanges([updatedField], [originalField]);
+
+      expect(changes).toHaveLength(1);
+      expect(changes[0].type).toBe('keyword');
+    });
+
+    it('should include the change when transitioning from real type to type="unmapped"', () => {
+      const originalField: SchemaEditorField = {
+        ...createMockMappedField({ name: 'field' }),
+        type: 'keyword',
+      };
+
+      const updatedField: SchemaEditorField = {
+        ...createMockMappedField({ name: 'field' }),
+        type: 'unmapped',
+        description: 'Converted to doc-only',
+      };
+
+      const changes = getChanges([updatedField], [originalField]);
+
+      // This IS a mapping change because we're removing the keyword mapping
+      expect(changes).toHaveLength(1);
+      expect(changes[0].type).toBe('unmapped');
+    });
+  });
 });

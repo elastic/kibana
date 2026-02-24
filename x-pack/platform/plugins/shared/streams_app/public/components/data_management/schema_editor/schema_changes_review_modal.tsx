@@ -88,8 +88,10 @@ export function SchemaChangesReviewModal({
       setSimulationError(null);
       setFieldConflicts([]);
 
+      // Filter for fields that have actual ES mappings to simulate.
+      // Exclude 'unmapped' type since it's a description-only override that doesn't affect ES mappings.
       const mappedFields = changes
-        .filter((field) => field.status === 'mapped')
+        .filter((field) => field.status === 'mapped' && field.type && field.type !== 'unmapped')
         .map((field) => ({
           ...convertToFieldDefinitionConfig(field as MappedSchemaField),
           name: field.name,
@@ -515,6 +517,7 @@ export function getChanges(fields: SchemaEditorField[], storedFields: SchemaEdit
    * We intentionally ignore:
    * - description-only changes
    * - typeless doc-only overrides (`{ description }`)
+   * - fields with `type: 'unmapped'` (description-only overrides for wired streams)
    *
    * We include:
    * - adding/changing/removing real mapping overrides (type/format/advanced params)
@@ -523,8 +526,9 @@ export function getChanges(fields: SchemaEditorField[], storedFields: SchemaEdit
     // Only mapped fields can affect ES mappings; unmapped/inherited entries are either doc-only or inherited.
     if (field.status !== 'mapped') return null;
 
-    // Documentation-only fields (no type) should not be treated as mapping changes.
-    if (!field.type) return null;
+    // Documentation-only fields (no type or type='unmapped') should not be treated as mapping changes.
+    // 'unmapped' type represents a description-only override that doesn't affect ES mappings.
+    if (!field.type || field.type === 'unmapped') return null;
 
     return {
       type: field.type,
