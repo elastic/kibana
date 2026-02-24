@@ -119,8 +119,13 @@ beforeAll(async () => {
   pluginA.manifest.serviceFolders = ['foo'];
   const plugins: PluginOrPackage[] = [pluginA, pluginB];
 
-  const { pluginApiMap, missingApiItems, referencedDeprecations, adoptionTrackedAPIs } =
-    getPluginApiMap(project, plugins, log, { collectReferences: false });
+  const {
+    pluginApiMap,
+    missingApiItems,
+    referencedDeprecations,
+    adoptionTrackedAPIs,
+    unnamedExports,
+  } = getPluginApiMap(project, plugins, log, { collectReferences: false });
 
   doc = pluginApiMap.pluginA;
 
@@ -128,11 +133,13 @@ beforeAll(async () => {
     missingApiItems,
     referencedDeprecations,
     adoptionTrackedAPIs,
+    unnamedExports,
   });
   pluginBStats = collectApiStatsForPlugin(pluginApiMap.pluginB, {
     missingApiItems,
     referencedDeprecations,
     adoptionTrackedAPIs,
+    unnamedExports,
   });
 
   mdxOutputFolder = Path.resolve(__dirname, 'snapshots');
@@ -154,14 +161,26 @@ beforeAll(async () => {
       missingComments: pluginAStats.missingComments.length,
       paramDocMismatches: pluginAStats.paramDocMismatches.length,
       missingComplexTypeInfo: pluginAStats.missingComplexTypeInfo.length,
+      missingReturns: pluginAStats.missingReturns.length,
       isAnyType: pluginAStats.isAnyType.length,
       noReferences: pluginAStats.noReferences.length,
+      unnamedExports: pluginAStats.unnamedExports.length,
     },
     missingComments: pluginAStats.missingComments.map(mapStat),
     paramDocMismatches: pluginAStats.paramDocMismatches.map(mapStat),
     missingComplexTypeInfo: pluginAStats.missingComplexTypeInfo.map(mapStat),
+    missingReturns: pluginAStats.missingReturns.map(mapStat),
     isAnyType: pluginAStats.isAnyType.map(mapStat),
     noReferences: pluginAStats.noReferences.map(mapStat),
+    unnamedExports: pluginAStats.unnamedExports.map(
+      ({ pluginId, scope, path, lineNumber, textSnippet }) => ({
+        pluginId,
+        scope,
+        path,
+        lineNumber,
+        textSnippet,
+      })
+    ),
   };
   fs.writeFileSync(
     Path.resolve(mdxOutputFolder, 'plugin_a.stats.json'),
@@ -693,9 +712,8 @@ describe('validation and stats', () => {
       expect(missingComment).toBeDefined();
     });
 
-    it('validates missingComments includes destructured parameter children', () => {
+    it('does not flag destructured parameter children when documented', () => {
       // crazyFunction has destructured params with nested properties
-      // Current behavior: nested properties without comments are flagged
       const fn = doc.client.find((c) => c.label === 'crazyFunction');
       expect(fn).toBeDefined();
 
@@ -705,34 +723,22 @@ describe('validation and stats', () => {
       const hiProp = objParam!.children?.find((c) => c.label === 'hi');
       expect(hiProp).toBeDefined();
 
-      // Current behavior: property without comment is flagged
-      // Note: This is a false positive that will be fixed in Phase 4.2
-      // Verify the property structure exists and check if it's in missingComments
       expect(hiProp!.description).toBeDefined();
-      const hasDescription = hiProp!.description!.length > 0;
+      expect(hiProp!.description!.length).toBeGreaterThan(0);
       const missingComment = pluginAStats.missingComments.find((d) => d.id === hiProp!.id);
-
-      // If property has no description, it should be in missingComments
-      // If it has a description, it should not be in missingComments
-      if (!hasDescription) {
-        expect(missingComment).toBeDefined();
-      } else {
-        expect(missingComment).toBeUndefined();
-      }
+      expect(missingComment).toBeUndefined();
     });
 
-    it.skip('does not flag destructured params when `@param obj` exists', () => {
+    it('does not flag destructured params when `@param obj` exists', () => {
       const fn = doc.client.find((c) => c.label === 'crazyFunction');
       expect(fn).toBeDefined();
 
       const objParam = fn!.children?.find((c) => c.label === 'obj');
       expect(objParam).toBeDefined();
       expect(objParam!.description).toBeDefined();
-      // Expected once fixed: the @param obj comment is captured.
       expect(objParam!.description!.length).toBeGreaterThan(0);
 
       const missingComment = pluginAStats.missingComments.find((d) => d.id === objParam!.id);
-      // Expected once fixed: the destructured param should not be flagged as missing.
       expect(missingComment).toBeUndefined();
     });
 

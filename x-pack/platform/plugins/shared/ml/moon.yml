@@ -147,6 +147,7 @@ dependsOn:
   - '@kbn/kql'
   - '@kbn/agent-builder-server'
   - '@kbn/agent-builder-plugin'
+  - '@kbn/as-code-filters-transforms'
 tags:
   - plugin
   - prod
