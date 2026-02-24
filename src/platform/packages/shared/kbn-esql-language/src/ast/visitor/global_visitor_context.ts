@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// TODO: Review anys usage in this file.
+// any inside visitWithSpecificContext could be cleaned by getting rid of that method.
+// anys inside visitCommand are more tricky, cleaning it implies taking out the AnyToVoid wrapper.
+
 import * as contexts from './contexts';
 import type {
   ESQLAstChangePointCommand,
