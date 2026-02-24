@@ -38,6 +38,9 @@ export const servers: ScoutServerConfig = {
       `--xpack.security.uiam.ssl.certificate=${KBN_CERT_PATH}`,
       `--xpack.security.uiam.ssl.key=${KBN_KEY_PATH}`,
       '--xpack.security.uiam.ssl.verificationMode=none',
+      `--elasticsearch.publicBaseUrl=${
+        isRunOnCI ? 'https://localhost:9220' : 'https://host.docker.internal:9220'
+      }`,
     ],
   },
 };
