@@ -3258,7 +3258,7 @@
         "TrainedModelsProvider"
       ],
       "path": "x-pack/platform/plugins/shared/ml/server/plugin.ts",
-      "lineNumber": 78,
+      "lineNumber": 77,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -3276,7 +3276,7 @@
         "void"
       ],
       "path": "x-pack/platform/plugins/shared/ml/server/plugin.ts",
-      "lineNumber": 79,
+      "lineNumber": 78,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,

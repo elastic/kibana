@@ -97,6 +97,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           expect(await getEnabled()).to.eql(true);
         });
 
+        it('includes create_snapshot_repository in stream privileges', async () => {
+          const stream = await getStream(apiClient, 'logs');
+          const parsed = Streams.WiredStream.GetResponse.parse(stream);
+          expect(typeof parsed.privileges.create_snapshot_repository).to.eql('boolean');
+        });
+
         // Elasticsearch doesn't support streams in serverless mode yet
         if (!isServerless) {
           it('reports conflict if disabled on Elasticsearch level', async () => {
