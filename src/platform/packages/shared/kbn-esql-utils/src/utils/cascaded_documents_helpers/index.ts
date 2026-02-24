@@ -23,17 +23,19 @@ import {
   type ESQLColumn,
   isBinaryExpression,
   Walker,
+  isInlineCast,
 } from '@kbn/esql-language';
 import type {
   BinaryExpressionComparisonOperator,
   ESQLBinaryExpression,
   ESQLUnaryExpression,
   ESQLPostfixUnaryExpression,
+  ESQLProperNode,
 } from '@kbn/esql-language/src/types';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { FieldSummary } from '@kbn/esql-language/src/commands/registry/types';
-import { getUsedFields, getFieldTerminals } from '../esql_fields_utils';
+import { getUsedFields, getFieldTerminals, getFieldDefinitionFromArg } from '../esql_fields_utils';
 import { extractCategorizeTokens } from '../extract_categorize_tokens';
 import { getOperator } from '../append_to_query/utils';
 import {
@@ -52,6 +54,22 @@ import {
   requiresMatchPhrase,
   isCategorizeFunctionWithFunctionArgument,
 } from './utils';
+
+const hasUnsupportedGroupingFunction = (definition: ESQLProperNode): boolean => {
+  const funcExpr = isFunctionExpression(definition)
+    ? definition
+    : isInlineCast(definition) && isFunctionExpression(definition.value)
+    ? definition.value
+    : null;
+
+  if (!funcExpr) {
+    return false;
+  }
+
+  return (
+    !isSupportedStatsFunction(funcExpr.name) || isCategorizeFunctionWithFunctionArgument(funcExpr)
+  );
+};
 
 type NodeType = 'group' | 'leaf';
 
@@ -96,7 +114,8 @@ export const getESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta =
   for (let j = 0; j < grouping.length; j++) {
     const group = grouping[j];
 
-    if (!group.definition) {
+    const groupDefinition = getFieldDefinitionFromArg(group.arg);
+    if (!groupDefinition) {
       // query received is malformed without complete grouping definition, there's no need to proceed further
       return { groupByFields: [], appliedFunctions: [] };
     }
@@ -139,11 +158,9 @@ export const getESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta =
       }
     }
 
-    if (
-      isFunctionExpression(groupFieldNode.definition) &&
-      (!isSupportedStatsFunction(groupFieldNode.definition.name) ||
-        isCategorizeFunctionWithFunctionArgument(groupFieldNode.definition))
-    ) {
+    const groupFieldDefinition = getFieldDefinitionFromArg(groupFieldNode.arg);
+
+    if (hasUnsupportedGroupingFunction(groupFieldDefinition)) {
       // if the group field has a grouping function that is not supported,
       // this nullifies the entire query to count as a valid query for the cascade experience
       groupByFields.splice(0, groupByFields.length);
@@ -235,10 +252,11 @@ export const getESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta =
   }
 
   Object.values(summarizedStatsCommand.aggregates).forEach((aggregate) => {
+    const aggregateFieldDefinition = getFieldDefinitionFromArg(aggregate.arg);
     appliedFunctions.push({
       identifier: removeBackticks(aggregate.field), // we remove backticks to have a clean identifier that gets displayed in the UI
       aggregation:
-        (aggregate.definition as ESQLFunction).operator?.name ?? aggregate.definition.text,
+        (aggregateFieldDefinition as ESQLFunction).operator?.name ?? aggregateFieldDefinition.text,
     });
   });
 
@@ -344,7 +362,8 @@ export const constructCascadeQuery = ({
       (cmd) => cmd.text === summarizedStatsCommand.command.text
     );
 
-    if (isColumn(groupValue.definition)) {
+    const groupValueDefinition = getFieldDefinitionFromArg(groupValue.arg);
+    if (isColumn(groupValueDefinition)) {
       return handleStatsByColumnLeafOperation(
         EditorESQLQuery,
         operatingStatsCommandIndex,
@@ -353,8 +372,8 @@ export const constructCascadeQuery = ({
         esqlVariables,
         nodePathMap[pathSegment]
       );
-    } else if (isFunctionExpression(groupValue.definition)) {
-      switch (groupValue.definition.name) {
+    } else if (isFunctionExpression(groupValueDefinition)) {
+      switch (groupValueDefinition.name) {
         case 'categorize': {
           return handleStatsByCategorizeLeafOperation(
             EditorESQLQuery,
@@ -366,7 +385,7 @@ export const constructCascadeQuery = ({
         }
         default: {
           throw new Error(
-            `The "${groupValue.definition.name}" function is not supported for leaf node operations`
+            `The "${groupValueDefinition.name}" function is not supported for leaf node operations`
           );
         }
       }
@@ -390,15 +409,15 @@ function handleStatsByColumnLeafOperation(
 ): AggregateQuery {
   // create a new query to populate with the cascade operation query
   const cascadeOperationQuery = EsqlQuery.fromSrc('');
-
-  let operationColumnName = columnNode.definition.name;
+  const columnDefinition = getFieldDefinitionFromArg(columnNode.arg);
+  let operationColumnName = columnDefinition.name;
 
   let operationColumnNameParamValue;
 
   if (
     (operationColumnNameParamValue = getFieldParamDefinition(
       operationColumnName,
-      getFieldTerminals(columnNode.definition),
+      getFieldTerminals(columnNode.arg),
       esqlVariables
     ))
   ) {
@@ -503,8 +522,9 @@ function handleStatsByCategorizeLeafOperation(
 
   // we select the first argument because that's the field being categorized
   // {@link https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/grouping-functions#esql-categorize | here}
+  const categorizedFieldDefinition = getFieldDefinitionFromArg(categorizeCommandNode.arg);
   const categorizedField = (
-    categorizeCommandNode.definition as ESQLFunction<'variadic-call', 'categorize'>
+    categorizedFieldDefinition as ESQLFunction<'variadic-call', 'categorize'>
   ).args[0];
 
   let categorizedFieldName: string;
@@ -521,7 +541,7 @@ function handleStatsByCategorizeLeafOperation(
     if (
       (categorizedFieldNameParamValue = getFieldParamDefinition(
         categorizedFieldName,
-        getFieldTerminals(categorizeCommandNode.definition),
+        getFieldTerminals(categorizeCommandNode.arg),
         esqlVariables
       ))
     ) {
@@ -629,13 +649,13 @@ export const appendFilteringWhereClauseForCascadeLayout = <
 
     // Add used fields from aggregates
     Object.values(operatingStatsCommand.aggregates).forEach((aggregate) => {
-      const usedFields = getUsedFields(aggregate.definition);
+      const usedFields = getUsedFields(aggregate.arg);
       usedFields.forEach((field) => allUsedFieldsInOperatingStats.add(field));
     });
 
     // Add used fields from grouping
     Object.values(operatingStatsCommand.grouping).forEach((group) => {
-      const usedFields = getUsedFields(group.definition);
+      const usedFields = getUsedFields(group.arg);
       usedFields.forEach((field) => allUsedFieldsInOperatingStats.add(field));
     });
 
@@ -711,7 +731,7 @@ export const appendFilteringWhereClauseForCascadeLayout = <
     if (
       (fieldNameParamValue = getFieldParamDefinition(
         fieldName,
-        getFieldTerminals(fieldDeclaration.definition),
+        getFieldTerminals(fieldDeclaration.arg),
         esqlVariables
       ))
     ) {

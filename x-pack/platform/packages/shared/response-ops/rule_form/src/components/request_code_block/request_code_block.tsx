@@ -17,19 +17,20 @@ import {
 import { BASE_ALERTING_API_PATH } from '../../constants';
 import { useRuleFormState } from '../../hooks';
 import { SHOW_REQUEST_MODAL_ERROR } from '../../translations';
-import type { RuleFormData } from '../../types';
+import type { RuleFormData, ShowRequestActivePage } from '../../types';
 
 const stringifyBodyRequest = ({
   formData,
-  isEdit,
+  activeTab,
 }: {
   formData: RuleFormData;
-  isEdit: boolean;
+  activeTab: ShowRequestActivePage;
 }): string => {
   try {
-    const request = isEdit
-      ? transformUpdateRuleBody(pick(formData, UPDATE_FIELDS_WITH_ACTIONS) as UpdateRuleBody)
-      : transformCreateRuleBody(omit(formData, 'id') as CreateRuleBody);
+    const request =
+      activeTab === 'update'
+        ? transformUpdateRuleBody(pick(formData, UPDATE_FIELDS_WITH_ACTIONS) as UpdateRuleBody)
+        : transformCreateRuleBody(omit(formData, 'id') as CreateRuleBody);
     return JSON.stringify(request, null, 2);
   } catch {
     return SHOW_REQUEST_MODAL_ERROR;
@@ -37,11 +38,11 @@ const stringifyBodyRequest = ({
 };
 
 interface RequestCodeBlockProps {
-  isEdit: boolean;
+  activeTab: ShowRequestActivePage;
   'data-test-subj'?: string;
 }
 export const RequestCodeBlock = (props: RequestCodeBlockProps) => {
-  const { isEdit, 'data-test-subj': dataTestSubj } = props;
+  const { 'data-test-subj': dataTestSubj, activeTab } = props;
   const { formData, id, multiConsumerSelection } = useRuleFormState();
 
   const formattedRequest = useMemo(() => {
@@ -50,14 +51,14 @@ export const RequestCodeBlock = (props: RequestCodeBlockProps) => {
         ...formData,
         ...(multiConsumerSelection ? { consumer: multiConsumerSelection } : {}),
       },
-      isEdit,
+      activeTab,
     });
-  }, [formData, isEdit, multiConsumerSelection]);
+  }, [formData, multiConsumerSelection, activeTab]);
 
   return (
     <EuiCodeBlock language="json" isCopyable data-test-subj={dataTestSubj}>
-      {`${isEdit ? 'PUT' : 'POST'} kbn:${BASE_ALERTING_API_PATH}/rule${
-        isEdit ? `/${id}` : ''
+      {`${activeTab === 'update' ? 'PUT' : 'POST'} kbn:${BASE_ALERTING_API_PATH}/rule${
+        activeTab === 'update' ? `/${id}` : ''
       }\n${formattedRequest}`}
     </EuiCodeBlock>
   );

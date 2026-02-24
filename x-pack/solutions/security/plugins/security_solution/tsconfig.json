@@ -271,8 +271,10 @@
     "@kbn/lazy-object",
     "@kbn/ai-assistant-common",
     "@kbn/product-doc-common",
+    "@kbn/sse-utils-client",
     "@kbn/kql",
     "@kbn/babel-register",
-    "@kbn/core-security-common"
+    "@kbn/core-security-common",
+    "@kbn/entity-store"
   ]
 }

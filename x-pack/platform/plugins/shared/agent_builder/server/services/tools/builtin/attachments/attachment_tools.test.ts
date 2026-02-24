@@ -6,10 +6,13 @@
  */
 
 import { ToolResultType } from '@kbn/agent-builder-common';
-import { httpServerMock } from '@kbn/core-http-server-mocks';
+import type { Attachment } from '@kbn/agent-builder-common/attachments';
+import { AttachmentType } from '@kbn/agent-builder-common/attachments';
+import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { createAttachmentTools } from '.';
 
 describe('attachment tools', () => {
@@ -153,39 +156,69 @@ describe('attachment tools', () => {
       expect((result.results[0] as any).data.data).toBe('hello');
     });
 
-    it('returns formatted content for read-only attachments', async () => {
-      const readonlyAttachmentsService = {
-        getTypeDefinition: () => ({
-          id: 'text',
-          validate: (input: unknown) => ({ valid: true, data: input }),
-          format: (attachment: { data: unknown }) => ({
-            getRepresentation: () => ({
-              type: 'text',
-              value: `formatted:${String(attachment.data)}`,
+    it('reads a visualization attachment that was resolved from origin at add time', async () => {
+      const resolvedData = {
+        query: 'My Lens',
+        visualization: { layers: [] },
+        chart_type: 'bar',
+        esql: 'FROM index',
+      };
+      const customAttachmentsService = {
+        getTypeDefinition: () =>
+          ({
+            id: AttachmentType.visualization,
+            validate: (input: unknown) => ({ valid: true, data: input }),
+            validateOrigin: (input: unknown) => ({ valid: true, data: input }),
+            format: (formattedAttachment: Attachment) => ({
+              getRepresentation: () => ({
+                type: 'text',
+                value: JSON.stringify(formattedAttachment.data),
+              }),
             }),
-          }),
-          isReadonly: true,
-        }),
+            resolve: async () => resolvedData,
+            isReadonly: false,
+          } as unknown as AttachmentTypeDefinition),
       } as any;
+      const resolveAttachmentManager = createAttachmentStateManager([], {
+        getTypeDefinition: customAttachmentsService.getTypeDefinition,
+      });
 
+      // Add the attachment with origin — content is resolved during add()
+      const resolveContext = {
+        request: httpServerMock.createKibanaRequest(),
+        spaceId: 'default',
+        savedObjectsClient: {} as any,
+      };
+      const attachment = await resolveAttachmentManager.add(
+        {
+          type: AttachmentType.visualization,
+          origin: { saved_object_id: 'so-123' },
+          description: 'Lens ref',
+        },
+        undefined,
+        resolveContext
+      );
+
+      // Verify origin is stored on the attachment
+      expect(attachment.origin).toEqual({ saved_object_id: 'so-123' });
+
+      // Read should return the resolved data directly — no raw_data, no re-resolve
       const tool = createAttachmentTools({
-        attachmentManager,
-        attachmentsService: readonlyAttachmentsService,
+        attachmentManager: resolveAttachmentManager,
+        attachmentsService: customAttachmentsService,
         formatContext,
       }).find((t) => t.id === 'platform.core.attachment_read')!;
-
-      const attachment = await attachmentManager.add({
-        type: 'text',
-        data: 'hello',
-        description: 'Test',
-      });
 
       const result = (await tool.handler(
         { attachment_id: attachment.id },
         {} as any
       )) as ToolHandlerStandardReturn;
 
-      expect((result.results[0] as any).data.data).toBe('formatted:hello');
+      expect((result.results[0] as any).data.type).toBe(AttachmentType.visualization);
+      // Data is the resolved content stored directly
+      expect((result.results[0] as any).data.data).toEqual(resolvedData);
+      // No raw_data field in the response
+      expect((result.results[0] as any).data.raw_data).toBeUndefined();
     });
 
     it('reads a specific version', async () => {

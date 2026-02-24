@@ -117,6 +117,7 @@ export enum EsqlCommandNames {
   LIMIT = 'limit',
   LOOKUP = 'lookup',
   LOOKUP_JOIN = 'lookup_join',
+  MMR = 'mmr',
   MV_EXPAND = 'mv_expand',
   RENAME = 'rename',
   RERANK = 'rerank',

@@ -121,7 +121,7 @@ export function StreamFeaturesTable({
         loading={isLoadingFeatures}
         tableCaption={TABLE_CAPTION_LABEL}
         items={items}
-        itemId="id"
+        itemId="uuid"
         columns={columns}
         noItemsMessage={noItemsMessage}
         pagination={{

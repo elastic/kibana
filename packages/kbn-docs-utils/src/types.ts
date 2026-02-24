@@ -293,6 +293,8 @@ export interface ApiStats {
   missingComments: ApiDeclaration[];
   isAnyType: ApiDeclaration[];
   noReferences: ApiDeclaration[];
+  paramDocMismatches: ApiDeclaration[];
+  missingComplexTypeInfo: ApiDeclaration[];
   apiCount: number;
   missingExports: number;
   deprecatedAPIsReferencedCount: number;
@@ -306,6 +308,16 @@ export interface ApiStats {
    * Number of adoption-tracked APIs that are still not referenced.
    */
   adoptionTrackedAPIsUnreferencedCount: number;
+}
+
+/**
+ * Collections of issues and metadata indexed by plugin ID.
+ * Used by `collectApiStatsForPlugin` to gather stats for a specific plugin.
+ */
+export interface IssuesByPlugin {
+  missingApiItems: MissingApiItemMap;
+  referencedDeprecations: ReferencedDeprecationsByPlugin;
+  adoptionTrackedAPIs: AdoptionTrackedAPIsByPlugin;
 }
 
 export type PluginMetaInfo = ApiStats & {

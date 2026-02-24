@@ -15,6 +15,7 @@ import {
   INVESTIGATION_GUIDE_API_EDIT,
   RULES_API_ALL,
 } from '@kbn/security-solution-features/constants';
+import { validateRuleResponseActions } from '../../../../../../endpoint/services';
 import type { PatchRuleResponse } from '../../../../../../../common/api/detection_engine/rule_management';
 import {
   PatchRuleRequestBody,
@@ -69,8 +70,10 @@ export const patchRuleRoute = (router: SecuritySolutionPluginRouter) => {
         }
         try {
           const params = request.body;
+          const securitySolutionCtx = await context.securitySolution;
+
           const rulesClient = await (await context.alerting).getRulesClient();
-          const detectionRulesClient = (await context.securitySolution).getDetectionRulesClient();
+          const detectionRulesClient = securitySolutionCtx.getDetectionRulesClient();
 
           const existingRule = await readRules({
             rulesClient,
@@ -85,6 +88,14 @@ export const patchRuleRoute = (router: SecuritySolutionPluginRouter) => {
               statusCode: error.statusCode,
             });
           }
+
+          await validateRuleResponseActions({
+            endpointAuthz: await securitySolutionCtx.getEndpointAuthz(),
+            endpointService: securitySolutionCtx.getEndpointService(),
+            rulePayload: request.body,
+            spaceId: securitySolutionCtx.getSpaceId(),
+            existingRule,
+          });
 
           checkDefaultRuleExceptionListReferences({ exceptionLists: params.exceptions_list });
           await validateRuleDefaultExceptionList({

@@ -248,3 +248,16 @@ export type {
 export { ElasticsearchAssetType } from './types';
 
 export { FleetError } from './errors';
+
+// Cloud connector test subjects - needed by E2E tests and unit tests
+export {
+  AWS_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ,
+  AZURE_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ,
+  CLOUD_CONNECTOR_NAME_INPUT_TEST_SUBJ,
+  CLOUD_CONNECTOR_EDIT_ICON_TEST_SUBJ,
+  getCloudConnectorEditIconTestSubj,
+  CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS,
+  AZURE_CLOUD_CONNECTOR_SETUP_INSTRUCTIONS_TEST_SUBJ,
+  AZURE_LAUNCH_CLOUD_CONNECTOR_ARM_TEMPLATE_TEST_SUBJ,
+  AZURE_INPUT_FIELDS_TEST_SUBJECTS,
+} from './services/cloud_connectors/test_subjects';

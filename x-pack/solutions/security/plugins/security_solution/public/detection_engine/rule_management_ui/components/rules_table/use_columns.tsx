@@ -152,7 +152,7 @@ export const RuleLink = ({ name, id }: Pick<Rule, 'id' | 'name'>) => {
       <SecuritySolutionLinkAnchor
         data-test-subj="ruleName"
         deepLinkId={SecurityPageName.rules}
-        path={ruleDetailsUrl}
+        path={getRuleDetailsTabUrl(id, RuleDetailTabs.overview)}
       >
         {name}
       </SecuritySolutionLinkAnchor>

@@ -15,6 +15,7 @@ import {
   INVESTIGATION_GUIDE_API_EDIT,
   RULES_API_ALL,
 } from '@kbn/security-solution-features/constants';
+import { validateRuleResponseActions } from '../../../../../../endpoint/services';
 import type { UpdateRuleResponse } from '../../../../../../../common/api/detection_engine/rule_management';
 import {
   UpdateRuleRequestBody,
@@ -27,7 +28,6 @@ import { readRules } from '../../../logic/detection_rules_client/read_rules';
 import { checkDefaultRuleExceptionListReferences } from '../../../logic/exceptions/check_for_default_rule_exception_list';
 import { validateRuleDefaultExceptionList } from '../../../logic/exceptions/validate_rule_default_exception_list';
 import { getIdError } from '../../../utils/utils';
-import { validateResponseActionsPermissions } from '../../../utils/validate';
 
 export const updateRuleRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
@@ -93,11 +93,13 @@ export const updateRuleRoute = (router: SecuritySolutionPluginRouter) => {
             });
           }
 
-          await validateResponseActionsPermissions(
-            ctx.securitySolution,
-            request.body,
-            existingRule
-          );
+          await validateRuleResponseActions({
+            endpointAuthz: await ctx.securitySolution.getEndpointAuthz(),
+            endpointService: ctx.securitySolution.getEndpointService(),
+            rulePayload: request.body,
+            spaceId: ctx.securitySolution.getSpaceId(),
+            existingRule,
+          });
 
           const updatedRule = await detectionRulesClient.updateRule({
             ruleUpdate: request.body,

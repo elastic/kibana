@@ -167,6 +167,11 @@ export const expandFirstAlert = () => {
   cy.get(EXPAND_ALERT_BTN).first().trigger('click');
 };
 
+export const expandBulkActions = () => {
+  cy.contains(SELECTED_ALERTS, /Selected \d+ alerts/);
+  cy.get(TAKE_ACTION_POPOVER_BTN).should('be.visible').click();
+};
+
 export const hideMessageTooltip = () => {
   cy.get('body').then(($body) => {
     if ($body.find(TOOLTIP).length > 0) {
@@ -350,8 +355,8 @@ export const openAlertsFieldBrowser = () => {
 };
 
 export const selectNumberOfAlerts = (numberOfAlerts: number) => {
+  waitForAlerts();
   for (let i = 0; i < numberOfAlerts; i++) {
-    waitForAlerts();
     cy.get(ALERT_CHECKBOX).eq(i).as('checkbox').check();
     cy.get('@checkbox').should('be.checked');
   }

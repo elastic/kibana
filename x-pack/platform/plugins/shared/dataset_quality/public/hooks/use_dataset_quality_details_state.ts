@@ -66,7 +66,9 @@ export const useDatasetQualityDetailsState = () => {
     state.matches(
       'initializing.dataStreamSettings.qualityIssues.dataStreamFailedDocs.errorFetchingFailedDocs'
     )
-      ? state.context.dataStreamSettings
+      ? 'dataStreamSettings' in state.context
+        ? state.context.dataStreamSettings
+        : undefined
       : undefined
   );
 
@@ -84,7 +86,9 @@ export const useDatasetQualityDetailsState = () => {
     ),
     dashboard: useSelector(service, (state) =>
       state.matches('initializing.checkAndLoadIntegrationAndDashboards.done')
-        ? state.context.integrationDashboards
+        ? 'integrationDashboards' in state.context
+          ? state.context.integrationDashboards
+          : undefined
         : undefined
     ),
   };
@@ -112,7 +116,9 @@ export const useDatasetQualityDetailsState = () => {
 
   const dataStreamDetails = useSelector(service, (state) =>
     state.matches('initializing.dataStreamDetails.done')
-      ? state.context.dataStreamDetails
+      ? 'dataStreamDetails' in state.context
+        ? state.context.dataStreamDetails
+        : undefined
       : undefined
   );
 
@@ -180,7 +186,7 @@ export const useDatasetQualityDetailsState = () => {
     }) => {
       service.send({
         type: 'UPDATE_FAILURE_STORE',
-        data: {
+        dataStreamsDetails: {
           ...dataStreamDetails,
           failureStoreDataQualityConfig,
           failureStoreStreamConfig,

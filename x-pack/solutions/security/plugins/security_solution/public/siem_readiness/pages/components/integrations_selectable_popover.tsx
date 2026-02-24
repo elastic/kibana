@@ -20,9 +20,13 @@ import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useBasePath } from '../../../common/lib/kibana';
 
-export const IntegrationSelectablePopover = (props: Pick<EuiSelectableProps, 'options'>) => {
+interface IntegrationSelectablePopoverProps extends Pick<EuiSelectableProps, 'options'> {
+  showOnlySelectable?: boolean;
+}
+
+export const IntegrationSelectablePopover = (props: IntegrationSelectablePopoverProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const { options } = props;
+  const { options, showOnlySelectable } = props;
   const { euiTheme } = useEuiTheme();
   const basePath = useBasePath();
 
@@ -37,6 +41,41 @@ export const IntegrationSelectablePopover = (props: Pick<EuiSelectableProps, 'op
       setIsPopoverOpen(false);
     }
   };
+
+  const selectableComponent = (
+    <EuiSelectable
+      aria-label={i18n.translate(
+        'xpack.securitySolution.siemReadiness.integrationSelectablePopover.ariaLabel',
+        {
+          defaultMessage: 'Select integration to see details',
+        }
+      )}
+      searchable
+      singleSelection="always"
+      searchProps={{
+        placeholder: i18n.translate(
+          'xpack.securitySolution.siemReadiness.integrationSelectablePopover.searchPlaceholder',
+          {
+            defaultMessage: 'Filter list',
+          }
+        ),
+        compressed: true,
+      }}
+      options={options}
+      onChange={handleChange}
+    >
+      {(list, search) => (
+        <div style={{ width: '240px' }}>
+          <EuiPopoverTitle paddingSize="s">{search}</EuiPopoverTitle>
+          {list}
+        </div>
+      )}
+    </EuiSelectable>
+  );
+
+  if (showOnlySelectable) {
+    return selectableComponent;
+  }
 
   return (
     <EuiPopover
@@ -96,7 +135,7 @@ export const IntegrationSelectablePopover = (props: Pick<EuiSelectableProps, 'op
         onChange={handleChange}
       >
         {(list, search) => (
-          <div style={{ width: `calc(${euiTheme.base} * 15)` }}>
+          <div style={{ width: '240px' }}>
             <EuiPopoverTitle paddingSize="s">{search}</EuiPopoverTitle>
             {list}
           </div>

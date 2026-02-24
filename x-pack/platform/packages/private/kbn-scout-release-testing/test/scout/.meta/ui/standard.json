@@ -1,17 +1,18 @@
 {
-  "lastModified": "2025-12-03T19:03:01.362Z",
-  "sha1": "911d851d37bb1b70f191f9753808c61bc4f3220e",
+  "lastModified": "2026-02-03T22:04:47.440Z",
+  "sha1": "03b1fb395ea4c6946062a3f541b3313e3e3ebc4e",
   "tests": [
     {
       "id": "e72a87ecc0972d2-130f7b81c105899",
       "title": "Discover app should display selected time range in date picker and matching docs in table",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/discovery_tests/discovery.spec.ts",
-        "line": 57,
+        "line": 58,
         "column": 7
       }
     },
@@ -20,11 +21,12 @@
       "title": "Discover app save query should show toast message and display query name",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/discovery_tests/discovery.spec.ts",
-        "line": 72,
+        "line": 73,
         "column": 7
       }
     },
@@ -33,11 +35,12 @@
       "title": "Discover app should refetch when autofresh is enabled",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/discovery_tests/discovery.spec.ts",
-        "line": 78,
+        "line": 79,
         "column": 7
       }
     },
@@ -46,11 +49,12 @@
       "title": "Discover app load query should show query name",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/discovery_tests/discovery.spec.ts",
-        "line": 101,
+        "line": 102,
         "column": 7
       }
     },
@@ -59,11 +63,12 @@
       "title": "Discover app should show the correct hit count",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/discovery_tests/discovery.spec.ts",
-        "line": 109,
+        "line": 110,
         "column": 7
       }
     },
@@ -72,11 +77,12 @@
       "title": "Discover app should show correct time range string in chart",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/discovery_tests/discovery.spec.ts",
-        "line": 113,
+        "line": 114,
         "column": 7
       }
     },
@@ -85,11 +91,12 @@
       "title": "Discover app should modify the time range when a bar is clicked",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/discovery_tests/discovery.spec.ts",
-        "line": 119,
+        "line": 120,
         "column": 7
       }
     },
@@ -98,11 +105,12 @@
       "title": "Discover app should show correct initial chart interval of Auto",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/discovery_tests/discovery.spec.ts",
-        "line": 138,
+        "line": 139,
         "column": 7
       }
     },
@@ -111,11 +119,12 @@
       "title": "Discover app should show \"no results\"",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/discovery_tests/discovery.spec.ts",
-        "line": 145,
+        "line": 146,
         "column": 7
       }
     },
@@ -124,11 +133,12 @@
       "title": "Discover app should suggest a new time range is picked",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/discovery_tests/discovery.spec.ts",
-        "line": 153,
+        "line": 154,
         "column": 7
       }
     },
@@ -137,11 +147,12 @@
       "title": "Discover app should show matches when time range is expanded",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/discovery_tests/discovery.spec.ts",
-        "line": 162,
+        "line": 163,
         "column": 7
       }
     },
@@ -150,11 +161,12 @@
       "title": "Discover app should hide and show the histogram chart when toggle is clicked",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/discovery_tests/discovery.spec.ts",
-        "line": 178,
+        "line": 179,
         "column": 7
       }
     },
@@ -163,11 +175,12 @@
       "title": "Discover app should navigate to Lens editor when edit visualization is clicked",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/discovery_tests/discovery.spec.ts",
-        "line": 193,
+        "line": 194,
         "column": 7
       }
     },
@@ -176,11 +189,12 @@
       "title": "Discover app drag and drop fields to grid",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/discovery_tests/discovery.spec.ts",
-        "line": 203,
+        "line": 204,
         "column": 7
       }
     },
@@ -189,11 +203,12 @@
       "title": "Discover app type a search query and execute a search",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/discovery_tests/discovery.spec.ts",
-        "line": 219,
+        "line": 220,
         "column": 7
       }
     },
@@ -202,11 +217,12 @@
       "title": "Discover app click Field Stats button and validate Document Stats is present",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/discovery_tests/discovery.spec.ts",
-        "line": 227,
+        "line": 228,
         "column": 7
       }
     },
@@ -215,11 +231,12 @@
       "title": "Discover app navigate to Lens from field statistics",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/discovery_tests/discovery.spec.ts",
-        "line": 234,
+        "line": 235,
         "column": 7
       }
     },
@@ -228,11 +245,12 @@
       "title": "Discover app download CSV report and validate row length",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/discovery_tests/discovery.spec.ts",
-        "line": 244,
+        "line": 245,
         "column": 7
       }
     }
