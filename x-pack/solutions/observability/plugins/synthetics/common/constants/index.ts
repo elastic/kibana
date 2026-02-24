@@ -13,3 +13,4 @@ export * from './ui';
 export * from './synthetics';
 export * from './filters_fields_with_logical_and';
 export * from './locations';
+export * from './global_params';

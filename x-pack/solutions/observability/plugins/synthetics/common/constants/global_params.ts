@@ -1,0 +1,2 @@
+export const MAX_TAGS_PER_GLOBAL_PARAM = 100;
+export const MAX_GLOBAL_PARAMS_PER_REQUEST = 1000;

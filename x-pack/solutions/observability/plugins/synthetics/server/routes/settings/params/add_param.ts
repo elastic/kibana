@@ -16,7 +16,7 @@ import type {
   SyntheticsParamSOAttributes,
 } from '../../../../common/runtime_types';
 import { syntheticsParamType } from '../../../../common/types/saved_objects';
-import { SYNTHETICS_API_URLS } from '../../../../common/constants';
+import { MAX_GLOBAL_PARAMS_PER_REQUEST, MAX_TAGS_PER_GLOBAL_PARAM, SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { asyncGlobalParamsPropagation } from '../../../tasks/sync_global_params_task';
 
 const ParamsObjectSchema = schema.object({
@@ -27,7 +27,7 @@ const ParamsObjectSchema = schema.object({
     minLength: 1,
   }),
   description: schema.maybe(schema.string()),
-  tags: schema.maybe(schema.arrayOf(schema.string())),
+  tags: schema.maybe(schema.arrayOf(schema.string(), { maxSize: MAX_TAGS_PER_GLOBAL_PARAM })),
   share_across_spaces: schema.maybe(schema.boolean()),
 });
 
@@ -39,7 +39,7 @@ export const addSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
   validate: {},
   validation: {
     request: {
-      body: schema.oneOf([ParamsObjectSchema, schema.arrayOf(ParamsObjectSchema)]),
+      body: schema.oneOf([ParamsObjectSchema, schema.arrayOf(ParamsObjectSchema, { maxSize: MAX_GLOBAL_PARAMS_PER_REQUEST })]),
     },
   },
   handler: async ({ request, response, server, savedObjectsClient }) => {
