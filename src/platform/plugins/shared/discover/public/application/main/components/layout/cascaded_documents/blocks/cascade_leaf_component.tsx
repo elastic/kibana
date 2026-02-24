@@ -17,7 +17,10 @@ import {
   DataGridDensity,
   type UnifiedDataTableProps,
 } from '@kbn/unified-data-table';
-import type { DataCascadeRowCellProps } from '@kbn/shared-ux-document-data-cascade';
+import {
+  type DataCascadeRowCellProps,
+  useAnchorVirtualizerToItemIndex,
+} from '@kbn/shared-ux-document-data-cascade';
 import type { DataTableRecord, SortOrder } from '@kbn/discover-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
 import debounce from 'lodash/debounce';
@@ -88,7 +91,9 @@ export const CustomCascadeGridBodyMemoized = React.memo(function CustomCascadeGr
     [data, visibleRowData.startRow, visibleRowData.endRow]
   );
 
-  const hasRestoredNestedScrollRef = useRef(false);
+  // the transitory value for this ref is set by the useAnchorVirtualizerToItemIndex effect
+  const didRestoreScrollPositionRef = useRef(false);
+  const virtualizerRef = useRef<ReturnType<typeof useVirtualizer> | null>(null);
   const initialDisplayedItemIndexRef = useRef(initialDisplayedItemIndex);
   const customGridBodyScrollContainerRef = useRef<HTMLDivElement | null>(null);
 
@@ -102,7 +107,7 @@ export const CustomCascadeGridBodyMemoized = React.memo(function CustomCascadeGr
   // create scroll element reference for custom nested virtualized grid
   const virtualizerScrollElementRef = useRef<Element | null>(getScrollElement());
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const defaultScrollElement = getScrollElement();
 
     if (
@@ -126,17 +131,19 @@ export const CustomCascadeGridBodyMemoized = React.memo(function CustomCascadeGr
   const onVirtualizerChange = useMemo(
     () =>
       debounce((instance: ReturnType<typeof useVirtualizer>) => {
+        if (!didRestoreScrollPositionRef.current && initialDisplayedItemIndexRef.current) return;
+
         const index = instance.getVirtualItemForOffset(instance.scrollOffset!)?.index ?? null;
         if (index != null) {
           propagateTopMostVisibleItemIndex(index);
         }
-      }, 100),
+      }, 50),
     [propagateTopMostVisibleItemIndex]
   );
 
-  const virtualizer = useVirtualizer({
+  virtualizerRef.current = useVirtualizer({
     count: visibleRows.length,
-    estimateSize: () => 50,
+    estimateSize: () => 60,
     overscan: 10, // use a larger overscan since we are expecting large number of rows to be rendered
     initialOffset,
     scrollMargin: getScrollMargin(),
@@ -144,12 +151,18 @@ export const CustomCascadeGridBodyMemoized = React.memo(function CustomCascadeGr
     onChange: onVirtualizerChange,
   });
 
-  useLayoutEffect(() => {
-    if (initialDisplayedItemIndexRef.current != null && !hasRestoredNestedScrollRef.current) {
-      virtualizer.scrollToIndex(initialDisplayedItemIndexRef.current);
-      hasRestoredNestedScrollRef.current = true;
-    }
-  }, [virtualizer]);
+  useAnchorVirtualizerToItemIndex(
+    virtualizerRef.current,
+    initialDisplayedItemIndexRef.current ?? 0,
+    didRestoreScrollPositionRef
+  );
+
+  useEffect(
+    () => () => {
+      onVirtualizerChange.cancel();
+    },
+    [onVirtualizerChange]
+  );
 
   /**
    * Register/unregister this nested virtualizer with the parent based on fullscreen mode.
@@ -159,15 +172,15 @@ export const CustomCascadeGridBodyMemoized = React.memo(function CustomCascadeGr
   useLayoutEffect(() => {
     let unregister: (() => void) | null = null;
 
-    if (virtualizer.scrollElement?.isSameNode(scrollElementGetter())) {
+    if (virtualizerRef.current?.scrollElement?.isSameNode(scrollElementGetter())) {
       // Only register when using the parent's scroll element (i.e. not in fullscreen mode)
       unregister = preventSizeChangePropagation();
     }
 
     return () => unregister?.();
-  }, [preventSizeChangePropagation, scrollElementGetter, virtualizer.scrollElement]);
+  }, [preventSizeChangePropagation, scrollElementGetter]);
 
-  const items = virtualizer.getVirtualItems();
+  const items = virtualizerRef.current?.getVirtualItems();
 
   // Calculate transform using current scroll margin (now reactive from parent)
   const translateY = items.length > 0 ? items[0].start - getScrollMargin() : 0;
@@ -183,7 +196,7 @@ export const CustomCascadeGridBodyMemoized = React.memo(function CustomCascadeGr
         ref={customGridBodyScrollContainerRef}
         css={customCascadeGridBodyStyle.virtualizerContainer}
       >
-        <div style={{ height: virtualizer.getTotalSize() }}>
+        <div style={{ height: virtualizerRef.current?.getTotalSize() }}>
           <div
             css={customCascadeGridBodyStyle.virtualizerInner}
             style={{ transform: `translateY(${translateY}px)` }}
@@ -192,7 +205,7 @@ export const CustomCascadeGridBodyMemoized = React.memo(function CustomCascadeGr
               <div
                 key={virtualRow.key}
                 data-index={virtualRow.index}
-                ref={virtualizer.measureElement}
+                ref={virtualizerRef.current?.measureElement}
                 className="euiDataGridRow"
                 css={customCascadeGridBodyStyle.displayFlex}
               >
@@ -237,27 +250,19 @@ export const ESQLDataCascadeLeafCell = React.memo(
       dataGridDensityState ?? DataGridDensity.COMPACT
     );
 
-    const { getDataCascadeUiState, getDataGridUiStateMap, setDataGridUiState } =
-      useCascadedDocumentsContext();
+    const { getDataGridUiStateMap, setDataGridUiState } = useCascadedDocumentsContext();
 
-    const initialGridState = useMemo(
-      () => getDataGridUiStateMap()?.[cellId],
-      [cellId, getDataGridUiStateMap]
-    );
+    const initialGridState = useMemo(() => {
+      return getDataGridUiStateMap()?.[cellId];
+    }, [cellId, getDataGridUiStateMap]);
 
-    const currentTopMostVisibleRowIndex = useRef<number | undefined>(
+    const initialInViewVirtualItemIndex = useRef<number | undefined>(
       initialGridState?.initialDisplayedItemIndex ?? undefined
     );
 
-    const setCurrentTopMostVisibleRowIndex = useCallback((index: number) => {
-      currentTopMostVisibleRowIndex.current = index;
+    const setInitialInViewVirtualItemIndex = useCallback((index: number) => {
+      initialInViewVirtualItemIndex.current = index;
     }, []);
-
-    // returns the restorable scroll offset if it exists,
-    // otherwise return the current scroll offset, from the root virtualizer.
-    const getInformedScrollOffset = useCallback(() => {
-      return getDataCascadeUiState()?.scrollOffset ?? getScrollOffset();
-    }, [getDataCascadeUiState, getScrollOffset]);
 
     const onInitialStateChange = useCallback<
       NonNullable<UnifiedDataTableProps['onInitialStateChange']>
@@ -265,7 +270,7 @@ export const ESQLDataCascadeLeafCell = React.memo(
       (newInitialGridState) => {
         setDataGridUiState(cellId, {
           ...newInitialGridState,
-          initialDisplayedItemIndex: currentTopMostVisibleRowIndex.current,
+          initialDisplayedItemIndex: initialInViewVirtualItemIndex.current,
         });
       },
       [cellId, setDataGridUiState]
@@ -332,9 +337,9 @@ export const ESQLDataCascadeLeafCell = React.memo(
           setCustomGridBodyProps={setCustomGridBodyProps}
           getScrollElement={getScrollElement}
           preventSizeChangePropagation={preventSizeChangePropagation}
-          initialOffset={getInformedScrollOffset}
+          initialOffset={getScrollOffset}
           isFullScreenMode={isCellInFullScreenMode}
-          propagateTopMostVisibleItemIndex={setCurrentTopMostVisibleRowIndex}
+          propagateTopMostVisibleItemIndex={setInitialInViewVirtualItemIndex}
           initialDisplayedItemIndex={initialGridState?.initialDisplayedItemIndex ?? null}
         />
       ),
@@ -345,8 +350,8 @@ export const ESQLDataCascadeLeafCell = React.memo(
         getScrollMargin,
         getScrollElement,
         preventSizeChangePropagation,
-        getInformedScrollOffset,
-        setCurrentTopMostVisibleRowIndex,
+        getScrollOffset,
+        setInitialInViewVirtualItemIndex,
         initialGridState?.initialDisplayedItemIndex,
       ]
     );
