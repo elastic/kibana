@@ -28,12 +28,15 @@ import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
 import { toStoredFilters } from '@kbn/as-code-filters-transforms';
 import { PluginContext } from '../../../context/plugin_context';
 import type { SLOPublicPluginsStart, SLORepositoryClient } from '../../../types';
-import { SLO_OVERVIEW_EMBEDDABLE_ID } from '../../../../common/embeddables/overview/constants';
+import {
+  SLO_EMBEDDABLE_SUPPORTED_TRIGGERS,
+  SLO_OVERVIEW_EMBEDDABLE_ID,
+} from '../../../../common/embeddables/overview/constants';
 import { GroupSloView } from './group_view/group_view';
 import { SloOverview } from './slo_overview';
 import { SloCardChartList } from './slo_overview_grid';
 import type { SloOverviewApi, SloOverviewEmbeddableState, SloOverviewState } from './types';
-import type { GroupOverviewCustomState } from '../../../../common/embeddables/overview/schema';
+import type { GroupOverviewCustomState } from '../../../../common/embeddables/overview/types';
 import { openSloConfiguration } from './slo_overview_open_configuration';
 
 const getOverviewPanelTitle = () =>
@@ -119,7 +122,7 @@ export const getOverviewEmbeddableFactory = ({
       defaultTitle$,
       hideTitle$: titleManager.api.hideTitle$,
       setHideTitle: titleManager.api.setHideTitle,
-      supportedTriggers: () => [],
+      supportedTriggers: () => SLO_EMBEDDABLE_SUPPORTED_TRIGGERS,
       getTypeDisplayName: () =>
         i18n.translate('xpack.slo.editSloOverviewEmbeddableTitle.typeDisplayName', {
           defaultMessage: 'criteria',

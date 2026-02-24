@@ -32,7 +32,7 @@ import { OverviewModeSelector } from './overview_mode_selector';
 import type {
   GroupOverviewCustomState,
   SingleOverviewCustomState,
-} from '../../../../common/embeddables/overview/schema';
+} from '../../../../common/embeddables/overview/types';
 
 interface SloConfigurationProps {
   initialInput?: GroupOverviewCustomState;

@@ -6,54 +6,18 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
-import { fromStoredFilters } from '@kbn/as-code-filters-transforms';
 import { transformTitlesOut } from '@kbn/presentation-publishing';
 import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import { flow } from 'lodash';
 import type { OverviewEmbeddableState } from '../../../../server/lib/embeddables/schema';
-import { legacyStoredStateToOverviewState } from './legacy_state';
-
-/**
- * Detects if filters are in stored (es-query) format rather than as-code format.
- * Stored filters have meta and query; as-code have condition, group, or dsl.
- */
-function isStoredFilterFormat(filters: unknown): filters is unknown[] {
-  return (
-    Array.isArray(filters) &&
-    filters.length > 0 &&
-    typeof filters[0] === 'object' &&
-    filters[0] !== null &&
-    'meta' in (filters[0] as object) &&
-    'query' in (filters[0] as object)
-  );
-}
-
-/**
- * Converts group_filters.filters from stored format to as-code when reading from storage.
- * Dashboards saved before the as-code migration may have stored filters.
- */
-function convertStoredFiltersToAsCode(state: OverviewEmbeddableState): OverviewEmbeddableState {
-  const groupFilters = (state as Record<string, unknown>).group_filters as
-    | { filters?: unknown[]; group_by?: string; groups?: string[]; kql_query?: string }
-    | undefined;
-  if (!groupFilters?.filters || !isStoredFilterFormat(groupFilters.filters)) {
-    return state;
-  }
-  const asCodeFilters = fromStoredFilters(groupFilters.filters);
-  return {
-    ...state,
-    group_filters: {
-      ...groupFilters,
-      filters: asCodeFilters ?? [],
-    },
-  } as OverviewEmbeddableState;
-}
+import { transformSingleOverviewOut } from './transform_single_overview_out';
+import { transformGroupOverviewOut } from './transform_group_overview_out';
 
 export const getTransformOut = (transformDrilldownsOut: DrilldownTransforms['transformOut']) => {
   const transformOut = (storedState: OverviewEmbeddableState, panelReferences?: Reference[]) => {
     const transformsFlow = flow(
-      legacyStoredStateToOverviewState,
-      convertStoredFiltersToAsCode,
+      transformSingleOverviewOut,
+      transformGroupOverviewOut,
       transformTitlesOut<OverviewEmbeddableState>,
       (state: OverviewEmbeddableState) =>
         transformDrilldownsOut(

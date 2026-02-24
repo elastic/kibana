@@ -17,7 +17,7 @@ import { PluginContext } from '../../../context/plugin_context';
 import type {
   GroupOverviewCustomState,
   SingleOverviewCustomState,
-} from '../../../../common/embeddables/overview/schema';
+} from '../../../../common/embeddables/overview/types';
 
 export async function openSloConfiguration(
   coreStart: CoreStart,

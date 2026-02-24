@@ -22,7 +22,7 @@ import type { AsCodeFilter } from '@kbn/as-code-filters-schema';
 import type {
   SingleOverviewCustomState,
   GroupOverviewCustomState,
-} from '../../../../common/embeddables/overview/schema';
+} from '../../../../common/embeddables/overview/types';
 
 export type OverviewMode = 'single' | 'groups';
 export type GroupBy = 'slo.tags' | 'status' | 'slo.indicator.type';

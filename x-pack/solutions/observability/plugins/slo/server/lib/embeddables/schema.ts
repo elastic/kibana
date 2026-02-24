@@ -12,7 +12,7 @@ import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
 import { asCodeFilterSchema } from '@kbn/as-code-filters-schema';
 import { SLO_EMBEDDABLE_SUPPORTED_TRIGGERS } from '../../../common/embeddables/overview/constants';
 
-export const SingleOverviewCustomSchema = schema.object({
+const SingleOverviewCustomSchema = schema.object({
   slo_id: schema.string({
     meta: { description: 'The ID of the SLO' },
   }),
@@ -33,7 +33,7 @@ export const SingleOverviewCustomSchema = schema.object({
   overview_mode: schema.literal('single'),
 });
 
-export const GroupOverviewCustomSchema = schema.object({
+const GroupOverviewCustomSchema = schema.object({
   group_filters: schema.maybe(
     schema.object({
       group_by: schema.oneOf([
