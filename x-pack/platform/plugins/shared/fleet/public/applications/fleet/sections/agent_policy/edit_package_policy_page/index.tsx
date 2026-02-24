@@ -72,6 +72,7 @@ import { usePackagePolicyWithRelatedData, useHistoryBlock } from './hooks';
 import { getNewSecrets } from './utils';
 import { usePackagePolicySteps } from './hooks';
 import { useIncompatibleAgentVersionStatus } from '../../../hooks/use_incompatible_agent_version_status';
+
 export const EditPackagePolicyPage = memo(() => {
   const {
     params: { packagePolicyId, policyId },
