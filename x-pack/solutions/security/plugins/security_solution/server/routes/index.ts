@@ -123,8 +123,7 @@ export const initRoutes = (
   setUnifiedAlertsAssigneesRoute(router, ruleDataClient);
 
   // Detection Engine index routes that have the REST endpoints of /api/detection_engine/index
-  // All REST index creation, policy management for spaces
-  createIndexRoute(router);
+  createIndexRoute(router, docLinks);
   readIndexRoute(router, ruleDataService);
   readAlertsIndexExistsRoute(router);
   deleteIndexRoute(router);

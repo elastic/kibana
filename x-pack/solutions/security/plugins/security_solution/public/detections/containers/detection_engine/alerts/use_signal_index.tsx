@@ -9,24 +9,19 @@ import { useEffect, useState } from 'react';
 import { isSecurityAppError } from '@kbn/securitysolution-t-grid';
 import { useSelector } from 'react-redux';
 
-import { signalIndexOutdatedSelector } from '../../../../data_view_manager/redux/selectors';
 import { useSignalIndexName } from '../../../../data_view_manager/hooks/use_signal_index_name';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import { createSignalIndex, getSignalIndex } from './api';
+import { getSignalIndex } from './api';
 import * as i18n from './translations';
 import { useAlertsPrivileges } from './use_alerts_privileges';
 import { sourcererSelectors } from '../../../../common/store';
 import type { State } from '../../../../common/store';
 
-type Func = () => Promise<void>;
-
 export interface ReturnSignalIndex {
   loading: boolean;
   signalIndexExists: boolean | null;
   signalIndexName: string | null;
-  signalIndexMappingOutdated: boolean | null;
-  createDeSignalIndex: Func | null;
 }
 
 /**
@@ -37,22 +32,11 @@ export const useSignalIndex = (): ReturnSignalIndex => {
   const [signalIndex, setSignalIndex] = useState<Omit<ReturnSignalIndex, 'loading'>>({
     signalIndexExists: null,
     signalIndexName: null,
-    signalIndexMappingOutdated: null,
-    createDeSignalIndex: null,
   });
   const { addError } = useAppToasts();
   const { hasIndexRead } = useAlertsPrivileges();
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-
-  const oldSignalIndexMappingOutdated = useSelector((state: State) => {
-    return sourcererSelectors.signalIndexMappingOutdated(state);
-  });
-  const experimentalSignalIndexMappingOutdated = useSelector(signalIndexOutdatedSelector);
-
-  const signalIndexMappingOutdated = newDataViewPickerEnabled
-    ? experimentalSignalIndexMappingOutdated
-    : oldSignalIndexMappingOutdated;
 
   const oldSignalIndexName = useSelector((state: State) => {
     return sourcererSelectors.signalIndexName(state);
@@ -76,8 +60,6 @@ export const useSignalIndex = (): ReturnSignalIndex => {
           setSignalIndex({
             signalIndexExists: true,
             signalIndexName: signal.name,
-            signalIndexMappingOutdated: signal.index_mapping_outdated,
-            createDeSignalIndex: createIndex,
           });
         }
       } catch (error) {
@@ -85,8 +67,6 @@ export const useSignalIndex = (): ReturnSignalIndex => {
           setSignalIndex({
             signalIndexExists: false,
             signalIndexName: null,
-            signalIndexMappingOutdated: null,
-            createDeSignalIndex: createIndex,
           });
           if (isSecurityAppError(error) && error.body.status_code !== 404) {
             addError(error, { title: i18n.SIGNAL_GET_NAME_FAILURE });
@@ -98,42 +78,10 @@ export const useSignalIndex = (): ReturnSignalIndex => {
       }
     };
 
-    const createIndex = async () => {
-      let isFetchingData = false;
-      try {
-        setLoading(true);
-        await createSignalIndex({ signal: abortCtrl.signal });
-
-        if (isSubscribed) {
-          isFetchingData = true;
-          fetchData();
-        }
-      } catch (error) {
-        if (isSubscribed) {
-          if (isSecurityAppError(error) && error.body.status_code === 409) {
-            fetchData();
-          } else {
-            setSignalIndex({
-              signalIndexExists: false,
-              signalIndexName: null,
-              signalIndexMappingOutdated: null,
-              createDeSignalIndex: createIndex,
-            });
-            addError(error, { title: i18n.SIGNAL_POST_FAILURE });
-          }
-        }
-      }
-      if (isSubscribed && !isFetchingData) {
-        setLoading(false);
-      }
-    };
-
     if (signalIndexName) {
       setSignalIndex({
         signalIndexExists: true,
         signalIndexName,
-        signalIndexMappingOutdated,
-        createDeSignalIndex: createIndex,
       });
       setLoading(false);
     } else if (hasIndexRead) {
@@ -147,7 +95,7 @@ export const useSignalIndex = (): ReturnSignalIndex => {
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [addError, hasIndexRead, signalIndexName, signalIndexMappingOutdated]);
+  }, [addError, hasIndexRead, signalIndexName]);
 
   return { loading, ...signalIndex };
 };

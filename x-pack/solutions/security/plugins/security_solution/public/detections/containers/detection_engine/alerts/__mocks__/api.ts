@@ -27,9 +27,6 @@ export const getSignalIndex = async ({ signal }: BasicSignals): Promise<AlertsIn
 export const getUserPrivilege = async ({ signal }: BasicSignals): Promise<Privilege> =>
   Promise.resolve(mockUserPrivilege);
 
-export const createSignalIndex = async ({ signal }: BasicSignals): Promise<AlertsIndex> =>
-  Promise.resolve(mockSignalIndex);
-
 // do not delete
 export const getCaseIdsFromAlertId = async ({
   alertId,

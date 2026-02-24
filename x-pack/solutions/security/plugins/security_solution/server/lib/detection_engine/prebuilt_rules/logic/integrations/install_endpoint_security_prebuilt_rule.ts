@@ -7,7 +7,6 @@
 
 import type { KibanaRequest, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { AlertingServerStart } from '@kbn/alerting-plugin/server';
-import { createDetectionIndex } from '../../../routes/index/create_index_route';
 import type { SecuritySolutionApiRequestHandlerContext } from '../../../../../types';
 import { ELASTIC_SECURITY_RULE_ID } from '../../../../../../common';
 import { createPrebuiltRuleObjectsClient } from '../rule_objects/prebuilt_rule_objects_client';
@@ -35,17 +34,6 @@ export const installEndpointSecurityPrebuiltRule = async ({
   alerts,
   soClient,
 }: InstallEndpointSecurityPrebuiltRuleProps): Promise<void> => {
-  // Create detection index & rules (if necessary). move past any failure, this is just a convenience
-  try {
-    await createDetectionIndex(context);
-  } catch (err) {
-    if (err.statusCode !== 409) {
-      // 409 -> detection index already exists, which is fine
-      logger.warn(
-        `Possible problem creating detection signals index (${err.statusCode}): ${err.message}`
-      );
-    }
-  }
   try {
     const rulesClient = await alerts.getRulesClientWithRequest(request);
     const detectionRulesClient = context.getDetectionRulesClient();

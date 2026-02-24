@@ -189,20 +189,6 @@ export const getUserPrivilege = async ({ signal }: BasicSignals): Promise<Privil
   });
 
 /**
- * Create Signal Index if needed it
- *
- * @param signal AbortSignal for cancelling request
- *
- * @throws An error if response is not OK
- */
-export const createSignalIndex = async ({ signal }: BasicSignals): Promise<AlertsIndex> =>
-  KibanaServices.get().http.fetch<AlertsIndex>(DETECTION_ENGINE_INDEX_URL, {
-    version: '2023-10-31',
-    method: 'POST',
-    signal,
-  });
-
-/**
  * Get Host Isolation index
  *
  * @param agent id

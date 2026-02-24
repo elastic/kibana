@@ -30,7 +30,6 @@ export interface SharedDataViewSelectionState {
 
 export interface SignalIndexMetadata {
   name: string;
-  isOutdated: boolean;
 }
 
 export { type DataViewSpec };

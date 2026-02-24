@@ -57,7 +57,6 @@ describe('createInitialState', () => {
       enableExperimental: parseExperimentalConfigValue([]).features,
       kibanaDataViews: [mockSourcererState.defaultDataView],
       signalIndexName: 'siem-signals-default',
-      signalIndexMappingOutdated: false,
     };
     const initState = createInitialState(
       mockPluginState,

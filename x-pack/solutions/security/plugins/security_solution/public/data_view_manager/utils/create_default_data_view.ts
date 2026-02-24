@@ -49,9 +49,8 @@ export const createDefaultDataView = async ({
   let attackDataView: SourcererModel['attackDataView'];
   let kibanaDataViews: SourcererModel['kibanaDataViews'];
 
-  let signal: { name: string | null; index_mapping_outdated: null | boolean } = {
+  let signal: { name: string | null } = {
     name: null,
-    index_mapping_outdated: null,
   };
 
   if (skip) {

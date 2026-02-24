@@ -17,7 +17,6 @@ import { SecuritySolutionPageWrapper } from '../../../common/components/page_wra
 import { SecurityPageName } from '../../../app/types';
 
 import { MigrationRulesTable } from '../components/rules_table';
-import { NeedAdminForUpdateRulesCallOut } from '../../../detection_engine/rule_management/components/callouts/need_admin_for_update_rules_callout';
 import { MissingPrivilegesCallOut } from './missing_privileges_callout';
 import { HeaderButtons, UnknownMigration } from '../../common/components';
 import { useLatestStats } from '../service/hooks/use_latest_stats';
@@ -139,7 +138,6 @@ export const MigrationRulesPage: React.FC<MigrationRulesPageProps> = React.memo(
             onMigrationIdChange={onMigrationIdChange}
           />
         </HeaderPage>
-        <NeedAdminForUpdateRulesCallOut />
         <MissingPrivilegesCallOut />
         <EuiSkeletonLoading
           key={migrationId}

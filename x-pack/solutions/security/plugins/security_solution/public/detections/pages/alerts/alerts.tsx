@@ -17,7 +17,6 @@ import { useListsConfig } from '../../containers/detection_engine/lists/use_list
 import { UserUnauthenticatedEmptyPage } from '../../components/alerts/empty_pages/user_unauthenticated_empty_page';
 import * as i18n from './translations';
 import { useSignalHelpers } from '../../../sourcerer/containers/use_signal_helpers';
-import { NeedAdminForUpdateRulesCallOut } from '../../../detection_engine/rule_management/components/callouts/need_admin_for_update_rules_callout';
 import { MissingDetectionsPrivilegesCallOut } from '../../components/callouts/missing_detections_privileges_callout';
 import { NoPrivileges } from '../../../common/components/no_privileges';
 import { HeaderPage } from '../../../common/components/header_page';
@@ -88,7 +87,6 @@ export const AlertsPage = memo(() => {
   return (
     <>
       <NoApiIntegrationKeyCallOut />
-      <NeedAdminForUpdateRulesCallOut />
       <MissingDetectionsPrivilegesCallOut />
       {privilegesRequired ? (
         <NoPrivileges

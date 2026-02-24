@@ -49,7 +49,7 @@ describe('createDefaultDataView', () => {
     mockUiSettings.get.mockReturnValue(['pattern-*']);
     mockSpaces.getActiveSpace.mockResolvedValue({ id: 'space1' });
     (helpersAccess.hasAccessToSecuritySolution as jest.Mock).mockReturnValue(true);
-    mockHttp.fetch.mockResolvedValue({ name: 'signal-index', index_mapping_outdated: false });
+    mockHttp.fetch.mockResolvedValue({ name: 'signal-index' });
     (createSourcererDataViewModule.createSourcererDataView as jest.Mock).mockResolvedValue({
       defaultDataView: { id: 'dv1', title: 'title1' },
       alertDataView: { id: 'dv2', title: 'title2' },
@@ -61,7 +61,7 @@ describe('createDefaultDataView', () => {
     const result = await createDefaultDataView({ ...defaultDeps, skip: true });
     expect(result.kibanaDataViews).toEqual([]);
     expect(result.defaultDataView).toEqual(initDataView);
-    expect(result.signal).toEqual({ name: null, index_mapping_outdated: null });
+    expect(result.signal).toEqual({ name: null });
   });
 
   it('fetches signal index and creates data views when user has access', async () => {
@@ -83,14 +83,14 @@ describe('createDefaultDataView', () => {
     expect(result.defaultDataView).toMatchObject({ id: 'dv1', title: 'title1' });
     expect(result.alertDataView).toMatchObject({ id: 'dv2', title: 'title2' });
     expect(result.kibanaDataViews[0]).toMatchObject({ id: 'dv1', title: 'title1' });
-    expect(result.signal).toEqual({ name: 'signal-index', index_mapping_outdated: false });
+    expect(result.signal).toEqual({ name: 'signal-index' });
   });
 
   it('does not fetch signal index if user has no access', async () => {
     (helpersAccess.hasAccessToSecuritySolution as jest.Mock).mockReturnValue(false);
     const result = await createDefaultDataView(defaultDeps);
     expect(mockHttp.fetch).not.toHaveBeenCalled();
-    expect(result.signal).toEqual({ name: null, index_mapping_outdated: null });
+    expect(result.signal).toEqual({ name: null });
   });
 
   it('returns error in defaultDataView if an exception is thrown', async () => {

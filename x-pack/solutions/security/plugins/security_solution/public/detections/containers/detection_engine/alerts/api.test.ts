@@ -19,7 +19,6 @@ import {
   fetchQueryUnifiedAlerts,
   getSignalIndex,
   getUserPrivilege,
-  createSignalIndex,
   createHostIsolation,
   updateAlertStatusByQuery,
   updateAlertStatusByIds,
@@ -232,31 +231,6 @@ describe('Detections Alerts API', () => {
         signal: abortCtrl.signal,
       });
       expect(alertsResp).toEqual(mockUserPrivilege);
-    });
-  });
-
-  describe('createSignalIndex', () => {
-    beforeEach(() => {
-      fetchMock.mockClear();
-      fetchMock.mockResolvedValue(mockSignalIndex);
-    });
-
-    test('check parameter url', async () => {
-      await createSignalIndex({ signal: abortCtrl.signal });
-      expect(fetchMock).toHaveBeenCalledWith(
-        '/api/detection_engine/index',
-        expect.objectContaining({
-          method: 'POST',
-          signal: abortCtrl.signal,
-        })
-      );
-    });
-
-    test('happy path', async () => {
-      const alertsResp = await createSignalIndex({
-        signal: abortCtrl.signal,
-      });
-      expect(alertsResp).toEqual(mockSignalIndex);
     });
   });
 

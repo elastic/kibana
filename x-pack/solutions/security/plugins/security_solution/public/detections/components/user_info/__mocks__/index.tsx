@@ -16,7 +16,6 @@ export const initialState = {
   hasIndexRead: true,
   hasIndexUpdateDelete: true,
   signalIndexName: true,
-  signalIndexMappingOutdated: true,
 };
 
 export const useUserData = jest.fn().mockReturnValue([initialState]);

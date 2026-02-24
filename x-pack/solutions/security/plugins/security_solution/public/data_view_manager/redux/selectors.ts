@@ -29,9 +29,3 @@ export const signalIndexNameSelector = createSelector(
   [(state: RootState) => state.dataViewManager],
   (dataViewManager) => dataViewManager.shared.signalIndex?.name ?? ''
 );
-
-// NOTE: This will be subject to cleanup tasks https://github.com/elastic/security-team/issues/11959
-export const signalIndexOutdatedSelector = createSelector(
-  [(state: RootState) => state.dataViewManager],
-  (dataViewManager) => !!dataViewManager.shared.signalIndex?.isOutdated
-);

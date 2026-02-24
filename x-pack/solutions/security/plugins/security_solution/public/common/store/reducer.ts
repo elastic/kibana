@@ -62,13 +62,11 @@ export const createInitialState = (
     defaultDataView,
     kibanaDataViews,
     signalIndexName,
-    signalIndexMappingOutdated,
     enableExperimental,
   }: {
     defaultDataView: SourcererModel['defaultDataView'];
     kibanaDataViews: SourcererModel['kibanaDataViews'];
     signalIndexName: SourcererModel['signalIndexName'];
-    signalIndexMappingOutdated: SourcererModel['signalIndexMappingOutdated'];
     enableExperimental: ExperimentalFeatures;
   },
   dataTableState: DataTableState,
@@ -125,7 +123,6 @@ export const createInitialState = (
       defaultDataView,
       kibanaDataViews: kibanaDataViews.map((dataView) => ({ ...initDataView, ...dataView })),
       signalIndexName,
-      signalIndexMappingOutdated,
     },
     globalUrlParam: initialGlobalUrlParam,
     dataTable: dataTableState.dataTable,

@@ -123,7 +123,6 @@ export const createStoreFactory = async (
       defaultDataView,
       kibanaDataViews,
       signalIndexName: signal.name,
-      signalIndexMappingOutdated: signal.index_mapping_outdated,
       enableExperimental,
     },
     dataTableInitialState,

@@ -5,15 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
-import { waitFor, renderHook } from '@testing-library/react';
-import { useUserInfo, ManageUserInfo } from '.';
-import type { Capabilities } from '@kbn/core/public';
+import { renderHook } from '@testing-library/react';
+import { useUserInfo } from '.';
 
 import { useKibana } from '../../../common/lib/kibana';
-import * as api from '../../containers/detection_engine/alerts/api';
 import { TestProviders } from '../../../common/mock/test_providers';
-import { UserPrivilegesProvider } from '../../../common/components/user_privileges/user_privileges_context';
 import { sourcererSelectors } from '../../../common/store';
 import { SECURITY_FEATURE_ID } from '../../../../common';
 
@@ -36,7 +32,6 @@ describe('useUserInfo', () => {
     });
 
     jest.spyOn(sourcererSelectors, 'signalIndexName').mockReturnValue(null);
-    jest.spyOn(sourcererSelectors, 'signalIndexMappingOutdated').mockReturnValue(null);
   });
   it('returns default state', async () => {
     const { result } = renderHook(() => useUserInfo(), {
@@ -54,32 +49,6 @@ describe('useUserInfo', () => {
       isSignalIndexExists: null,
       loading: true,
       signalIndexName: null,
-      signalIndexMappingOutdated: null,
-    });
-  });
-
-  it('calls createSignalIndex if signal index template is outdated', async () => {
-    const spyOnCreateSignalIndex = jest.spyOn(api, 'createSignalIndex');
-    const spyOnGetSignalIndex = jest.spyOn(api, 'getSignalIndex').mockResolvedValueOnce({
-      name: 'mock-signal-index',
-      index_mapping_outdated: true,
-    });
-    const wrapper = ({ children }: React.PropsWithChildren) => (
-      <TestProviders>
-        <UserPrivilegesProvider
-          kibanaCapabilities={
-            { [SECURITY_FEATURE_ID]: { show: true, crud: true } } as unknown as Capabilities
-          }
-        >
-          <ManageUserInfo>{children}</ManageUserInfo>
-        </UserPrivilegesProvider>
-      </TestProviders>
-    );
-
-    renderHook(() => useUserInfo(), { wrapper });
-    await waitFor(() => {
-      expect(spyOnGetSignalIndex).toHaveBeenCalledTimes(2);
-      expect(spyOnCreateSignalIndex).toHaveBeenCalledTimes(1);
     });
   });
 });

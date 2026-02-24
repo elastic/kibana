@@ -19,7 +19,6 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { MissingDetectionsPrivilegesCallOut } from '../../../../detections/components/callouts/missing_detections_privileges_callout';
 import { MlJobCompatibilityCallout } from '../../components/ml_job_compatibility_callout';
-import { NeedAdminForUpdateRulesCallOut } from '../../../rule_management/components/callouts/need_admin_for_update_rules_callout';
 import { AddElasticRulesButton } from '../../components/pre_packaged_rules/add_elastic_rules_button';
 import { ValueListsFlyout } from '../../components/value_lists_management_flyout';
 import { useUserData } from '../../../../detections/components/user_info';
@@ -90,7 +89,6 @@ const RulesPageContent = () => {
 
   return (
     <>
-      <NeedAdminForUpdateRulesCallOut />
       <MissingDetectionsPrivilegesCallOut />
       <MlJobCompatibilityCallout />
       <ValueListsFlyout showFlyout={isValueListFlyoutVisible} onClose={hideValueListFlyout} />

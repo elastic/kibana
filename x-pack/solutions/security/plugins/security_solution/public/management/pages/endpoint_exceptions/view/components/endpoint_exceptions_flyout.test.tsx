@@ -102,8 +102,6 @@ describe('Endpoint exceptions flyout', () => {
       loading: false,
       signalIndexExists: true,
       signalIndexName: 'mock-signal-index',
-      signalIndexMappingOutdated: false,
-      createDeSignalIndex: jest.fn(),
     });
 
     render = (props) => {

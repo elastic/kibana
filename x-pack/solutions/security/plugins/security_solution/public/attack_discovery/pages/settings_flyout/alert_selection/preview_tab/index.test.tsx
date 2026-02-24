@@ -76,8 +76,6 @@ describe('PreviewTab', () => {
       loading: false,
       signalIndexExists: true,
       signalIndexName: 'mock-signal-index',
-      signalIndexMappingOutdated: false,
-      createDeSignalIndex: jest.fn(),
     });
   });
 
@@ -148,8 +146,6 @@ describe('PreviewTab', () => {
       loading: false,
       signalIndexExists: false,
       signalIndexName: null, // <-- signalIndexName is null
-      signalIndexMappingOutdated: false,
-      createDeSignalIndex: jest.fn(),
     });
 
     const { container } = render(

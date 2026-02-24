@@ -27,8 +27,6 @@ describe('useSignalIndexWithDefault', () => {
       loading: false,
       signalIndexExists: true,
       signalIndexName: mockSignalIndexName,
-      signalIndexMappingOutdated: false,
-      createDeSignalIndex: null,
     });
     mockUseSpaceId.mockReturnValue('default');
 
@@ -42,8 +40,6 @@ describe('useSignalIndexWithDefault', () => {
       loading: false,
       signalIndexExists: false,
       signalIndexName: null,
-      signalIndexMappingOutdated: null,
-      createDeSignalIndex: null,
     });
     mockUseSpaceId.mockReturnValue('custom-space');
 
@@ -64,8 +60,6 @@ describe('useSignalIndexWithDefault', () => {
         loading: false,
         signalIndexExists: false,
         signalIndexName: null,
-        signalIndexMappingOutdated: null,
-        createDeSignalIndex: null,
       });
       mockUseSpaceId.mockReturnValue(spaceId);
 
@@ -81,8 +75,6 @@ describe('useSignalIndexWithDefault', () => {
       loading: false,
       signalIndexExists: true,
       signalIndexName: mockSignalIndexName,
-      signalIndexMappingOutdated: false,
-      createDeSignalIndex: null,
     });
     mockUseSpaceId.mockReturnValue('default');
 
@@ -100,8 +92,6 @@ describe('useSignalIndexWithDefault', () => {
       loading: false,
       signalIndexExists: true,
       signalIndexName: '.alerts-security.alerts-first',
-      signalIndexMappingOutdated: false,
-      createDeSignalIndex: null,
     });
 
     const { result, rerender } = renderHook(() => useSignalIndexWithDefault());
@@ -111,8 +101,6 @@ describe('useSignalIndexWithDefault', () => {
       loading: false,
       signalIndexExists: true,
       signalIndexName: '.alerts-security.alerts-second',
-      signalIndexMappingOutdated: false,
-      createDeSignalIndex: null,
     });
 
     rerender();
@@ -124,8 +112,6 @@ describe('useSignalIndexWithDefault', () => {
       loading: false,
       signalIndexExists: false,
       signalIndexName: null,
-      signalIndexMappingOutdated: null,
-      createDeSignalIndex: null,
     });
 
     mockUseSpaceId.mockReturnValue('first-space');

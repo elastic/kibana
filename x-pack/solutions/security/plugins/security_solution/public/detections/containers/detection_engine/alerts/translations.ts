@@ -14,13 +14,6 @@ export const SIGNAL_GET_NAME_FAILURE = i18n.translate(
   }
 );
 
-export const SIGNAL_POST_FAILURE = i18n.translate(
-  'xpack.securitySolution.containers.detectionEngine.alerts.errorPostAlertDescription',
-  {
-    defaultMessage: 'Failed to create signal index',
-  }
-);
-
 export const HOST_ISOLATION_FAILURE = i18n.translate(
   'xpack.securitySolution.endpoint.hostIsolation.failedToIsolate.title',
   { defaultMessage: 'Failed to isolate host' }

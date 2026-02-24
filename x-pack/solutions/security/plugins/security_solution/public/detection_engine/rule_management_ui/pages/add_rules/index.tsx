@@ -22,7 +22,6 @@ import { AddPrebuiltRulesTable } from '../../components/rules_table/add_prebuilt
 import { AddPrebuiltRulesTableContextProvider } from '../../components/rules_table/add_prebuilt_rules_table/add_prebuilt_rules_table_context';
 import { AddPrebuiltRulesHeaderButtons } from '../../components/rules_table/add_prebuilt_rules_table/add_prebuilt_rules_header_buttons';
 import { APP_UI_ID } from '../../../../../common';
-import { NeedAdminForUpdateRulesCallOut } from '../../../rule_management/components/callouts/need_admin_for_update_rules_callout';
 import { MissingDetectionsPrivilegesCallOut } from '../../../../detections/components/callouts/missing_detections_privileges_callout';
 import { getDetectionEngineUrl } from '../../../../common/components/link_to';
 
@@ -49,7 +48,6 @@ const AddRulesPageComponent: React.FC = () => {
 
   return (
     <>
-      <NeedAdminForUpdateRulesCallOut />
       <MissingDetectionsPrivilegesCallOut />
 
       <AddPrebuiltRulesTableContextProvider>

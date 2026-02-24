@@ -76,7 +76,7 @@ const mockedState: RootState = {
         },
       ],
       status: 'pristine',
-      signalIndex: { name: '', isOutdated: false },
+      signalIndex: { name: '' },
       defaultDataViewId: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
       alertDataViewId: DEFAULT_ALERT_DATA_VIEW_ID,
     },

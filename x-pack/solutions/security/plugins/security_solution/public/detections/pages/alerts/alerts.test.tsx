@@ -16,7 +16,6 @@ import { TestProviders } from '../../../common/mock';
 import { USER_UNAUTHENTICATED_TEST_ID } from '../../components/alerts/empty_pages/user_unauthenticated_empty_page';
 import { NO_INDEX_TEST_ID } from '../../components/alerts/empty_pages/no_index_empty_page';
 import { NO_INTEGRATION_CALLOUT_TEST_ID } from '../../components/callouts/no_api_integration_key_callout';
-import { NEED_ADMIN_CALLOUT_TEST_ID } from '../../../detection_engine/rule_management/components/callouts/need_admin_for_update_rules_callout';
 import { useMissingPrivileges } from '../../../common/hooks/use_missing_privileges';
 
 jest.mock('../../components/user_info');
@@ -162,39 +161,6 @@ describe('<AlertsPageWrapper />', () => {
 
       expect(queryByTestId('header-page-title')).not.toBeInTheDocument();
       expect(getByTestId(NO_INTEGRATION_CALLOUT_TEST_ID)).toBeInTheDocument();
-    });
-
-    it('should render NeedAdminForUpdateRulesCallOut', () => {
-      (useUserData as jest.Mock).mockReturnValue([
-        {
-          loading: false,
-          isAuthenticated: true,
-          hasIndexRead: true,
-          signalIndexMappingOutdated: true,
-          hasIndexManage: false,
-        },
-      ]);
-      doMockRulesPrivileges({ read: true });
-      (useListsConfig as jest.Mock).mockReturnValue({
-        loading: false,
-        needsConfiguration: false,
-      });
-      (useSignalHelpers as jest.Mock).mockReturnValue({
-        signalIndexNeedsInit: false,
-      });
-      (useMissingPrivileges as jest.Mock).mockReturnValue({
-        indexPrivileges: [],
-        featurePrivileges: [],
-      });
-
-      const { getByTestId, queryByTestId } = render(
-        <TestProviders>
-          <AlertsPage />
-        </TestProviders>
-      );
-
-      expect(queryByTestId('header-page-title')).not.toBeInTheDocument();
-      expect(getByTestId(`callout-${NEED_ADMIN_CALLOUT_TEST_ID}`)).toBeInTheDocument();
     });
 
     it('should render MissingPrivilegesCallOut', () => {

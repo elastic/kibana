@@ -58,7 +58,6 @@ export const useInitDataViewManager = () => {
   const {
     loading: loadingSignalIndex,
     signalIndexName,
-    signalIndexMappingOutdated,
   } = useUserInfo();
 
   const onSignalIndexUpdated = useCallback(() => {
@@ -66,12 +65,11 @@ export const useInitDataViewManager = () => {
       dispatch(
         sharedDataViewManagerSlice.actions.setSignalIndex({
           name: signalIndexName,
-          isOutdated: !!signalIndexMappingOutdated,
         })
       );
       logger.debug(`signal index set: ${signalIndexName}`);
     }
-  }, [dispatch, loadingSignalIndex, logger, signalIndexMappingOutdated, signalIndexName]);
+  }, [dispatch, loadingSignalIndex, logger, signalIndexName]);
 
   useEffect(() => {
     // TODO: (new data view picker) remove this in cleanup phase https://github.com/elastic/security-team/issues/12665
