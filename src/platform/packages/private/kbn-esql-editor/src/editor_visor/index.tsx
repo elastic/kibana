@@ -23,6 +23,7 @@ import { isEqual } from 'lodash';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { SourcesDropdown } from './sources_dropdown';
 import { ModeSelector, VisorMode } from './mode_selector';
+import { NoConnectorMessage } from './no_connector_message';
 import { visorStyles, visorWidthPercentage, dropdownWidthPercentage } from './visor.styles';
 import type { ESQLEditorDeps } from '../types';
 import { extractQueryFromLLMMessage } from './utils';
@@ -70,6 +71,8 @@ export function QuickSearchVisor({
   const [visorMode, setVisorMode] = useState<VisorMode>(VisorMode.KQL);
   const [nlValue, setNlValue] = useState('');
   const [isNlLoading, setIsNlLoading] = useState(false);
+  const [hasConnector, setHasConnector] = useState<boolean | undefined>(undefined);
+  const connectorCheckRef = useRef(false);
   const kqlInputRef = useRef<HTMLDivElement>(null);
   const nlInputRef = useRef<HTMLInputElement>(null);
   const initializedRef = useRef(false);
@@ -138,9 +141,26 @@ export function QuickSearchVisor({
     selectedSources,
   ]);
 
-  const onModeChange = useCallback((mode: VisorMode) => {
-    setVisorMode(mode);
-  }, []);
+  const checkConnectorAvailability = useCallback(async () => {
+    if (connectorCheckRef.current) return;
+    connectorCheckRef.current = true;
+    try {
+      const res = await core.http.get<{ connectors: unknown[] }>('/internal/inference/connectors');
+      setHasConnector(res.connectors.length > 0);
+    } catch {
+      setHasConnector(false);
+    }
+  }, [core.http]);
+
+  const onModeChange = useCallback(
+    (mode: VisorMode) => {
+      setVisorMode(mode);
+      if (mode === VisorMode.NaturalLanguage) {
+        checkConnectorAvailability();
+      }
+    },
+    [checkConnectorAvailability]
+  );
 
   useEffect(() => {
     const sourceFromUpdatedQuery = getIndexPatternFromESQLQuery(query);
@@ -254,24 +274,28 @@ export function QuickSearchVisor({
             </>
           ) : (
             <EuiFlexItem css={styles.nlInputWrapper}>
-              <EuiFieldText
-                inputRef={nlInputRef}
-                compressed
-                fullWidth
-                icon="sparkles"
-                placeholder={nlPlaceholder}
-                value={nlValue}
-                isLoading={isNlLoading}
-                disabled={!isVisible || isNlLoading}
-                onChange={(e) => setNlValue(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    onNlSubmit();
-                  }
-                }}
-                data-test-subj="esqlVisorNLQueryInput"
-                css={styles.nlInput}
-              />
+              {hasConnector === false ? (
+                <NoConnectorMessage basePath={core.http.basePath} />
+              ) : (
+                <EuiFieldText
+                  inputRef={nlInputRef}
+                  compressed
+                  fullWidth
+                  icon="sparkles"
+                  placeholder={nlPlaceholder}
+                  value={nlValue}
+                  isLoading={isNlLoading}
+                  disabled={!isVisible || isNlLoading}
+                  onChange={(e) => setNlValue(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      onNlSubmit();
+                    }
+                  }}
+                  data-test-subj="esqlVisorNLQueryInput"
+                  css={styles.nlInput}
+                />
+              )}
             </EuiFlexItem>
           )}
         </EuiFlexGroup>

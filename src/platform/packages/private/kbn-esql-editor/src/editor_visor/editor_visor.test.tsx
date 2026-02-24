@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { renderWithI18n } from '@kbn/test-jest-helpers';
-import { waitFor } from '@testing-library/dom';
+import { waitFor, fireEvent } from '@testing-library/dom';
 import { kqlPluginMock } from '@kbn/kql/public/mocks';
 import { act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -19,17 +19,6 @@ import { QuickSearchVisor, type QuickSearchVisorProps } from '.';
 
 describe('Quick search visor', () => {
   const corePluginMock = coreMock.createStart();
-
-  corePluginMock.http.get = jest.fn().mockImplementation((url: string) => {
-    if (url.includes('/internal/esql/autocomplete/sources/')) {
-      return Promise.resolve([
-        { name: 'test_index', hidden: false, type: 'index' },
-        { name: 'logs', hidden: false, type: 'index' },
-      ]);
-    }
-    return Promise.resolve([]);
-  });
-
   const kqlMock = kqlPluginMock.createStartContract();
   (kqlMock.autocomplete.hasQuerySuggestions as jest.Mock).mockReturnValue(true);
 
@@ -45,8 +34,38 @@ describe('Quick search visor', () => {
       </KibanaContextProvider>
     );
   }
+
+  const switchToNlMode = async (getByTestId: ReturnType<typeof renderWithI18n>['getByTestId']) => {
+    const modeSelect = getByTestId('esqlVisorModeSelect');
+    const input = modeSelect.querySelector('input')!;
+
+    await act(async () => {
+      fireEvent.click(input);
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('Natural language')).toBeInTheDocument();
+    });
+
+    await act(async () => {
+      fireEvent.click(screen.getByText('Natural language'));
+    });
+  };
+
   let props: QuickSearchVisorProps;
   beforeEach(() => {
+    (corePluginMock.http.get as jest.Mock).mockImplementation((url: string) => {
+      if (url.includes('/internal/esql/autocomplete/sources/')) {
+        return Promise.resolve([
+          { name: 'test_index', hidden: false, type: 'index' },
+          { name: 'logs', hidden: false, type: 'index' },
+        ]);
+      }
+      if (url.includes('/internal/inference/connectors')) {
+        return Promise.resolve({ connectors: [{ connectorId: 'test-connector' }] });
+      }
+      return Promise.resolve([]);
+    });
     props = {
       query: 'FROM test_index',
       isSpaceReduced: false,
@@ -56,9 +75,10 @@ describe('Quick search visor', () => {
     };
   });
 
-  afterAll(() => {
+  afterEach(() => {
     jest.clearAllMocks();
   });
+
   it('should render the sources dropdown and the KQL query input', async () => {
     const { getByTestId } = renderWithI18n(renderESQLVisor({ ...props }));
     // find the dropdown
@@ -92,5 +112,44 @@ describe('Quick search visor', () => {
     await waitFor(() => {
       expect(getByTestId('visorSourcesDropdownButton')).toHaveTextContent('test_index');
     });
+  });
+
+  it('should render the mode selector', () => {
+    const { getByTestId } = renderWithI18n(renderESQLVisor({ ...props }));
+    expect(getByTestId('esqlVisorModeSelect')).toBeInTheDocument();
+  });
+
+  it('should switch to NL mode and show the NL input when connectors are available', async () => {
+    const { getByTestId, queryByTestId } = renderWithI18n(renderESQLVisor({ ...props }));
+
+    await switchToNlMode(getByTestId);
+
+    await waitFor(() => {
+      expect(getByTestId('esqlVisorNLQueryInput')).toBeInTheDocument();
+    });
+
+    expect(queryByTestId('ESQLEditor-visor-sources-dropdown')).not.toBeInTheDocument();
+  });
+
+  it('should show the no connector message when no connectors are configured', async () => {
+    (corePluginMock.http.get as jest.Mock).mockImplementation((url: string) => {
+      if (url.includes('/internal/esql/autocomplete/sources/')) {
+        return Promise.resolve([{ name: 'test_index', hidden: false, type: 'index' }]);
+      }
+      if (url.includes('/internal/inference/connectors')) {
+        return Promise.resolve({ connectors: [] });
+      }
+      return Promise.resolve([]);
+    });
+
+    const { getByTestId } = renderWithI18n(renderESQLVisor({ ...props }));
+
+    await switchToNlMode(getByTestId);
+
+    await waitFor(() => {
+      expect(getByTestId('esqlVisorNoConnectorMessage')).toBeInTheDocument();
+    });
+
+    expect(screen.getByText('setup a connector')).toBeInTheDocument();
   });
 });

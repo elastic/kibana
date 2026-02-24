@@ -159,6 +159,7 @@ export const visorStyles = (
     nlInputWrapper: css`
       background: ${euiTheme.colors.backgroundBasePlain};
       justify-content: center;
+      align-self: stretch;
       border-bottom-right-radius: ${euiTheme.size.s};
       border-top-right-radius: ${euiTheme.size.s};
       padding-right: 2px;
