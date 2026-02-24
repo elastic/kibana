@@ -46,7 +46,6 @@ import {
 import { getUpdatesEntitiesDataStreamName } from './assets/updates_data_stream';
 import type { LogsExtractionClient } from './logs_extraction_client';
 import type { ManagedEntityDefinition } from '../../common/domain/definitions/entity_schema';
-import { ALL_ENTITY_TYPES } from '../../common/domain/definitions/entity_schema';
 import { getEntityDefinition } from '../../common/domain/definitions/registry';
 
 interface AssetManagerDependencies {
@@ -168,17 +167,6 @@ export class AssetManager {
       this.logger.get(type).error(`Error uninstalling assets for entity type ${type}`, { error });
       throw error;
     }
-  }
-
-  public async isInstalled(): Promise<boolean> {
-    for (const type of ALL_ENTITY_TYPES) {
-      try {
-        await this.engineDescriptorClient.findOrThrow(type);
-      } catch {
-        return false;
-      }
-    }
-    return true;
   }
 
   public async getStatus(withComponents: boolean = false): Promise<GetStatusResult> {
