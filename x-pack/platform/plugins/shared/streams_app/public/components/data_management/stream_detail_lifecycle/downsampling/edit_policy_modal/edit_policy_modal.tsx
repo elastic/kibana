@@ -157,6 +157,7 @@ export function EditPolicyModal({
               }}
               color="subdued"
               data-test-subj="editPolicyModal-affectedResourcesList"
+              tabIndex={0}
             >
               <EuiFlexGroup direction="column" gutterSize="s">
                 {affectedResources.map((resource) => (
@@ -185,6 +186,7 @@ export function EditPolicyModal({
               data-test-subj="editPolicyModal-cancelButton"
               onClick={onCancel}
               disabled={isProcessing}
+              flush="both"
             >
               {i18n.translate('xpack.streams.editPolicyModal.cancelButton', {
                 defaultMessage: 'Cancel',
@@ -198,7 +200,9 @@ export function EditPolicyModal({
                 <EuiButton
                   data-test-subj="editPolicyModal-overwriteButton"
                   color="danger"
-                  onClick={onOverwrite}
+                  onClick={() => {
+                    onOverwrite();
+                  }}
                   disabled={isProcessing}
                   isLoading={isProcessing}
                 >
