@@ -20,9 +20,15 @@ interface Props {
   pattern: string;
   isDetails: boolean;
   defaultRowHeight?: number;
+  onPatternClick?: (pattern: string) => void;
 }
 
-export const PatternCellRenderer: FC<Props> = ({ pattern, isDetails, defaultRowHeight }) => {
+export const PatternCellRenderer: FC<Props> = ({
+  pattern,
+  isDetails,
+  defaultRowHeight,
+  onPatternClick,
+}) => {
   const { euiTheme } = useEuiTheme();
   const styles = useMemoCss(componentStyles);
 
@@ -75,7 +81,21 @@ export const PatternCellRenderer: FC<Props> = ({ pattern, isDetails, defaultRowH
     );
   }
 
-  return <div css={containerStyle}>{formattedTokens}</div>;
+  return (
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={() => onPatternClick?.(pattern)}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter') {
+          onPatternClick?.(pattern);
+        }
+      }}
+      css={containerStyle}
+    >
+      {formattedTokens}
+    </div>
+  );
 };
 
 const componentStyles = {
@@ -99,7 +119,8 @@ const componentStyles = {
 export function getPatternCellRenderer(
   pattern: unknown,
   isDetails: boolean,
-  defaultRowHeight?: number
+  defaultRowHeight?: number,
+  onPatternClick?: (pattern: string) => void
 ) {
   if (pattern === undefined) {
     return '-';
@@ -109,6 +130,7 @@ export function getPatternCellRenderer(
       pattern={String(pattern)}
       isDetails={isDetails}
       defaultRowHeight={defaultRowHeight}
+      onPatternClick={onPatternClick}
     />
   );
 }

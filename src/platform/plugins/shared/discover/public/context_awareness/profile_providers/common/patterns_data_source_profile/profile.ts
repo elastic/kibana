@@ -25,6 +25,7 @@ export const createPatternsDataSourceProfileProvider = (
   services: ProfileProviderServices
 ): DataSourceProfileProvider<{
   patternColumns: string[];
+  categoryField: string;
 }> => {
   const selectedPattern$ = new BehaviorSubject<SelectedPattern | undefined>(undefined);
 
@@ -36,10 +37,21 @@ export const createPatternsDataSourceProfileProvider = (
         (prev, { context }) =>
         (params) => {
           const { rowHeight } = params;
-          const { patternColumns } = context;
+          const { patternColumns, categoryField } = context;
           if (!patternColumns || patternColumns.length === 0) {
             return prev(params);
           }
+
+          const onPatternClick = (pattern: string) => {
+            const tokens = extractCategorizeTokens(pattern).join(' ');
+            const current = selectedPattern$.getValue();
+            if (current?.pattern === tokens && current?.categoryField === categoryField) {
+              selectedPattern$.next(undefined);
+            } else {
+              selectedPattern$.next({ pattern: tokens, categoryField });
+            }
+          };
+
           const patternRenderers = patternColumns.reduce(
             (acc, column) =>
               Object.assign(acc, {
@@ -47,7 +59,8 @@ export const createPatternsDataSourceProfileProvider = (
                   getPatternCellRenderer(
                     props.row.flattened[props.columnId],
                     props.isDetails,
-                    rowHeight
+                    rowHeight,
+                    onPatternClick
                   ),
               }),
             {}
@@ -171,11 +184,17 @@ export const createPatternsDataSourceProfileProvider = (
         return { isMatch: false };
       }
 
+      const categoryField = getCategorizeField(query.esql)[0];
+      if (!categoryField) {
+        return { isMatch: false };
+      }
+
       return {
         isMatch: true,
         context: {
           category: DataSourceCategory.Default,
           patternColumns,
+          categoryField,
         },
       };
     },
