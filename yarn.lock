@@ -2408,12 +2408,12 @@
     "@elastic/transport" "^8.3.1"
     tslib "^2.4.0"
 
-"@elastic/elasticsearch@9.2.0":
-  version "9.2.0"
-  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch/-/elasticsearch-9.2.0.tgz#33e028d0272838838da686738377c46e3c753ce7"
-  integrity sha512-M59qmMOZOk8pTcI9Ns2ow18PlyMbYrpcXqYwkChjiyXSmmqoCTvFXkC2bGQLxrrQkXaPbYR7aZqWD9b5F1405A==
+"@elastic/elasticsearch@9.3.1":
+  version "9.3.1"
+  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch/-/elasticsearch-9.3.1.tgz#471eec6b9456d538781ce974ae6da65c6ee6de48"
+  integrity sha512-4oujxiqHWLMNRE5ClPR9O7CyWvnyCRCtAHlNItKbMIdP9Fo8YTn43WZaps0qzeYne4iaTwjjdjWmGlL4CrIz2w==
   dependencies:
-    "@elastic/transport" "^9.2.0"
+    "@elastic/transport" "^9.3.3"
     apache-arrow "18.x - 21.x"
     tslib "^2.4.0"
 
@@ -2722,10 +2722,10 @@
     tslib "^2.8.1"
     undici "^6.21.1"
 
-"@elastic/transport@^9.2.0":
-  version "9.3.0"
-  resolved "https://registry.yarnpkg.com/@elastic/transport/-/transport-9.3.0.tgz#aabfd2043254d389fd03ddbe58d373ffe58483bf"
-  integrity sha512-GtfjGjxhJBdLYYhdRxd7/tWBQ9JsntZNDFZiSJp9fymrup9Kj7IojucojwxpC+7QN9yQzeTUU7M67x6uPnAGpg==
+"@elastic/transport@^9.3.3":
+  version "9.3.3"
+  resolved "https://registry.yarnpkg.com/@elastic/transport/-/transport-9.3.3.tgz#808ffed0aeaf99f869cb38cdac7ba896eb7da7d0"
+  integrity sha512-0QeEKScXdpwE8pCU/F4aDv5OO7rgh/WNmVScDhrfHS6vNLjRa0/403hzcvmyqt2ULhfDuN6hNLgnI6mtvKuO/Q==
   dependencies:
     "@opentelemetry/api" "1.x"
     "@opentelemetry/core" "2.x"
@@ -2734,7 +2734,7 @@
     ms "^2.1.3"
     secure-json-parse "^4.0.0"
     tslib "^2.8.1"
-    undici "^7.16.0"
+    undici "^7.19.1"
 
 "@emnapi/runtime@^1.5.0":
   version "1.6.0"
@@ -33631,10 +33631,10 @@ undici@6.23.0, undici@^6.21.1, undici@^6.21.2, undici@^6.21.3:
   resolved "https://registry.yarnpkg.com/undici/-/undici-6.23.0.tgz#7953087744d9095a96f115de3140ca3828aff3a4"
   integrity sha512-VfQPToRA5FZs/qJxLIinmU59u0r7LXqoJkCzinq3ckNJp3vKEh7jTWN589YQ5+aoAC/TGRLyJLCPKcLQbM8r9g==
 
-undici@^7.11.0, undici@^7.16.0:
-  version "7.18.2"
-  resolved "https://registry.yarnpkg.com/undici/-/undici-7.18.2.tgz#6cf724ef799a67d94fd55adf66b1e184176efcdf"
-  integrity sha512-y+8YjDFzWdQlSE9N5nzKMT3g4a5UBX1HKowfdXh0uvAnTaqqwqB92Jt4UXBAeKekDs5IaDKyJFR4X1gYVCgXcw==
+undici@^7.11.0, undici@^7.19.1:
+  version "7.22.0"
+  resolved "https://registry.yarnpkg.com/undici/-/undici-7.22.0.tgz#7a82590a5908e504a47d85c60b0f89ca14240e60"
+  integrity sha512-RqslV2Us5BrllB+JeiZnK4peryVTndy9Dnqq62S3yYRRTj0tFQCwEniUy2167skdGOy3vqRzEvl1Dm4sV2ReDg==
 
 unherit@^1.0.4:
   version "1.1.0"
