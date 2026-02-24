@@ -152,7 +152,7 @@ describe('Automated Response actions - Runscript Configuration', () => {
       renderAndSelectScript = async () => {
         const renderResult = render();
 
-        waitFor(() => {
+        await waitFor(() => {
           expect(apiMocks.responseProvider.fetchScriptList).toHaveBeenCalled();
 
           expect(
