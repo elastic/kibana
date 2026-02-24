@@ -24,6 +24,12 @@ To check for security updates, go to [Security announcements for the Elastic sta
 % FEATURES, ENHANCEMENTS, FIXES
 % Paste in index.md
 
+## 9.3.1 [kibana-9.3.1-release-notes]
+
+:::{important}
+The 9.3.1 release contains fixes for potential security vulnerabilities. Check our [security advisory](https://discuss.elastic.co/c/announcements/security-announcements/31) for more details.
+:::
+
 ### Features and enhancements [kibana-9.3.1-features-enhancements]
 
 **Data ingestion and Fleet**:
@@ -35,8 +41,6 @@ For the Elastic Security 9.3.1 release information, refer to [Elastic Security S
 **Machine Learning**:
 * Adds a dynamic default connector to GenAI settings [#252861]({{kib-pull}}252861).
 * Adds missing ES|QL commands and functions documentation for inference tasks [#249089]({{kib-pull}}249089).
-
-
 
 ### Fixes [kibana-9.3.1-fixes]
 
