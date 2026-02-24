@@ -14,8 +14,7 @@
     "server/**/*.json",
     "scripts/**/*.json",
     "public/**/*.json",
-    "../../../../../typings/**/*",
-    "emotion.d.ts"
+    "../../../../../typings/**/*"
   ],
   "exclude": ["target/**/*", "**/cypress/**", "public/management/cypress.config.ts"],
   "kbn_references": [
