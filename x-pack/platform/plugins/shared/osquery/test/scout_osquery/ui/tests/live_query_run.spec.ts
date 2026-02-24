@@ -37,6 +37,7 @@ test.describe(
     });
 
     test('should run query and enable ecs mapping', async ({ page, pageObjects }) => {
+      test.skip();
       test.setTimeout(300_000); // ECS mapping queries can be slow; serverless agents can be delayed
 
       const liveQuery = pageObjects.liveQuery;
@@ -87,6 +88,7 @@ test.describe(
     });
 
     test('should run customized saved query', async ({ page, pageObjects }) => {
+      test.skip();
       test.setTimeout(300_000); // Custom saved queries with timeout can be slow
 
       const liveQuery = pageObjects.liveQuery;

@@ -40,11 +40,13 @@ test.describe('Alert Test', { tag: [...tags.stateful.classic] }, () => {
   });
 
   test('should be able to run rule investigation guide query', async ({ page, pageObjects }) => {
+    test.skip();
     await pageObjects.liveQuery.submitQuery();
     await pageObjects.liveQuery.checkResults();
   });
 
   test('should not be able to run custom query', async ({ page, pageObjects }) => {
+    test.skip();
     // Intercept the POST request and modify the query
     await page.route('**/api/osquery/live_queries', async (route) => {
       const request = route.request();

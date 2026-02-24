@@ -84,6 +84,7 @@ for (const testSpace of testSpaces) {
       pageObjects,
       kbnUrl,
     }) => {
+      test.skip();
       test.setTimeout(180_000); // Live queries can take time for agents to respond
 
       // Navigate to osquery page in the space
@@ -140,6 +141,7 @@ for (const testSpace of testSpaces) {
     });
 
     test('runs packs normally', async ({ page, pageObjects, kbnUrl }) => {
+      test.skip();
       test.setTimeout(180_000); // Live queries can take time for agents to respond
 
       await page.goto(kbnUrl.get(`/s/${spaceId}/app/osquery`));

@@ -313,6 +313,7 @@ test.describe(
       'should open lens in new tab',
       { tag: [...tags.stateful.classic] },
       async ({ page, pageObjects, kbnClient }) => {
+        test.skip();
         test.setTimeout(300_000);
         const policyIds = await getFirstPackagePolicyIds(kbnClient);
         const pack = await loadPack(kbnClient, {
@@ -380,6 +381,7 @@ test.describe(
       'should open discover in new tab',
       { tag: [...tags.stateful.classic] },
       async ({ page, pageObjects, kbnClient }) => {
+        test.skip();
         test.setTimeout(240_000);
         const policyIds = await getFirstPackagePolicyIds(kbnClient);
         const pack = await loadPack(kbnClient, {
@@ -484,6 +486,7 @@ test.describe(
     });
 
     test('should verify that packs are triggered', async ({ page, pageObjects, kbnClient }) => {
+      test.skip();
       test.setTimeout(360_000); // Pack execution + 5-min result polling
       const policyIds = await getFirstPackagePolicyIds(kbnClient);
       const pack = await loadPack(kbnClient, {

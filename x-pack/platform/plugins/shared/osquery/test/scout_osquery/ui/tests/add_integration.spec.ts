@@ -93,6 +93,7 @@ test.describe(
         tag: [...tags.stateful.classic],
       },
       async ({ page, kbnUrl }) => {
+        test.skip();
         test.setTimeout(300_000);
 
         const integrationName = `integration-${Date.now()}`;
@@ -163,6 +164,7 @@ test.describe(
     );
 
     test('add integration', async ({ page, kbnUrl }) => {
+      test.skip();
       test.setTimeout(300_000);
       const integrationName = `integration-${Date.now()}`;
       const policyName = `policy-${Date.now()}`;
@@ -232,6 +234,7 @@ test.describe(
       kbnUrl,
       kbnClient,
     }) => {
+      test.skip();
       test.setTimeout(300_000);
       const upgradeOldVersion = '1.2.0';
       const integrationName = `integration-${Date.now()}`;

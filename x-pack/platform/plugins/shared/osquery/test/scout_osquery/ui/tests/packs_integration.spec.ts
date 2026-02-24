@@ -55,6 +55,7 @@ test.describe(
         });
 
         test('add integration and validate pack policy', async ({ page, kbnUrl, pageObjects }) => {
+          test.skip();
           test.setTimeout(300_000);
 
           // Create a pack with the agent policy

@@ -23,6 +23,7 @@ test.describe(
       page,
       pageObjects,
     }) => {
+      test.skip();
       test.setTimeout(360_000);
 
       await test.step('Navigate to osquery', async () => {

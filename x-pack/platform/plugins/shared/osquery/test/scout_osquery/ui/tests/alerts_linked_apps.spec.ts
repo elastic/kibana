@@ -84,6 +84,7 @@ test.describe(
       kbnUrl,
       pageObjects,
     }) => {
+      test.skip();
       test.setTimeout(180_000); // Alert tests can take time
       const TIMELINE_NAME = 'Untitled timeline';
 

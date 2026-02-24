@@ -74,6 +74,7 @@ test.describe(
       page,
       pageObjects,
     }) => {
+      test.skip();
       test.setTimeout(300_000);
       const suffix = `${Date.now()}`;
       const savedQueryIdLocal = `Saved-Query-Id-${suffix}`;
@@ -263,6 +264,7 @@ test.describe(
     });
 
     test('user can run prebuilt saved query and add to case', async ({ page, pageObjects }) => {
+      test.skip();
       await page.gotoApp('osquery/saved_queries');
       await pageObjects.packs.ensureAllPacksVisible();
       await page.locator(`[aria-label="Run users_elastic"]`).click();

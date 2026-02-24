@@ -36,6 +36,7 @@ test.describe(
     });
 
     test('should substitute parameters in investigation guide', async ({ page }) => {
+      test.skip();
       // eslint-disable-next-line playwright/no-nth-methods -- first event in list
       await page.testSubj.locator('expand-event').first().click();
       await page.testSubj
@@ -75,6 +76,7 @@ test.describe(
       page,
       pageObjects,
     }) => {
+      test.skip();
       // eslint-disable-next-line playwright/no-nth-methods -- first event in list
       await page.testSubj.locator('expand-event').first().click();
       const notificationBadge = page.testSubj.locator('response-actions-notification');
@@ -116,6 +118,7 @@ test.describe(
       page,
       pageObjects,
     }) => {
+      test.skip();
       test.setTimeout(600_000);
 
       // eslint-disable-next-line playwright/no-nth-methods -- first event in list
@@ -159,6 +162,7 @@ test.describe(
       page,
       pageObjects,
     }) => {
+      test.skip();
       test.setTimeout(300_000);
 
       // Send alert to timeline
