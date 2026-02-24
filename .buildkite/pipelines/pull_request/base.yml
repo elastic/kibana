@@ -18,6 +18,7 @@ steps:
   - command: .buildkite/scripts/steps/quick_checks.sh
     label: 'Quick Checks'
     agents:
+      provider: k8s
       image: docker.elastic.co/ci-agent-images/kibana/ci-minimal
       cpu: 2
       ephemeralStorage: '20G'
