@@ -116,7 +116,9 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
       serverUrl.includes(API_KEY_URL_PLACEHOLDER)
     ) {
       const credential = this.secrets?.token ?? this.secrets?.apiKey ?? '';
-      return credential ? serverUrl.split(API_KEY_URL_PLACEHOLDER).join(credential) : serverUrl;
+      return credential
+        ? serverUrl.split(API_KEY_URL_PLACEHOLDER).join(encodeURIComponent(credential))
+        : serverUrl;
     }
     return serverUrl ?? '';
   }
