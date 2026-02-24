@@ -13,8 +13,17 @@ export {
   getDataStreamMappings,
   type MappingField,
 } from './mappings';
-export { processFieldCapsResponse, type FieldListFromFieldCapsResponse } from './field_caps';
-export { isCcsTarget, partitionByCcs, getFieldsFromFieldCaps } from './ccs';
+export {
+  processFieldCapsResponse,
+  processFieldCapsResponsePerIndex,
+  type FieldListFromFieldCapsResponse,
+} from './field_caps';
+export {
+  isCcsTarget,
+  partitionByCcs,
+  getFieldsFromFieldCaps,
+  getBatchedFieldsFromFieldCaps,
+} from './ccs';
 export { generateXmlTree, type XmlNode } from './formatting';
 export { errorResult, otherResult } from './results';
 export { estimateTokens, truncateTokens } from './token_count';

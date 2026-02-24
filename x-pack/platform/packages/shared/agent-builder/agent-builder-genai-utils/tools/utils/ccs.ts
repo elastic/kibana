@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { MappingField } from './mappings';
-import { processFieldCapsResponse } from './field_caps';
+import { processFieldCapsResponse, processFieldCapsResponsePerIndex } from './field_caps';
 
 /**
  * Returns true if the resource name targets a remote cluster (contains ':'),
@@ -56,4 +56,34 @@ export const getFieldsFromFieldCaps = async ({
   const fieldCapRes = await esClient.fieldCaps({ index: resource, fields: ['*'] });
   const { fields } = processFieldCapsResponse(fieldCapRes);
   return fields;
+};
+
+/**
+ * Issues a single _field_caps request for all provided resource names and
+ * splits the merged response back into per-resource field lists using the
+ * per-capability `indices` property.
+ */
+export const getBatchedFieldsFromFieldCaps = async ({
+  resources,
+  esClient,
+}: {
+  resources: string[];
+  esClient: ElasticsearchClient;
+}): Promise<Record<string, MappingField[]>> => {
+  if (resources.length === 0) {
+    return {};
+  }
+
+  const fieldCapRes = await esClient.fieldCaps({
+    index: resources.join(','),
+    fields: ['*'],
+  });
+
+  const perIndex = processFieldCapsResponsePerIndex(fieldCapRes);
+
+  const result: Record<string, MappingField[]> = {};
+  for (const name of resources) {
+    result[name] = perIndex[name] ?? [];
+  }
+  return result;
 };

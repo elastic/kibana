@@ -19,7 +19,7 @@ import type {
 } from './steps/list_search_sources';
 import { listSearchSources } from './steps/list_search_sources';
 import { flattenMapping, getDataStreamMappings, getIndexMappings } from './utils/mappings';
-import { partitionByCcs, getFieldsFromFieldCaps } from './utils/ccs';
+import { partitionByCcs, getBatchedFieldsFromFieldCaps } from './utils/ccs';
 import { generateXmlTree } from './utils/formatting/xml';
 
 export interface RelevantResource {
@@ -69,19 +69,20 @@ const createIndexSummaries = async ({
     }
   }
 
-  // Remote (CCS) indices: use _field_caps API (CCS-compatible fallback)
+  // Remote (CCS) indices: single batched _field_caps request, then split per index
   if (remote.length > 0) {
-    const remoteDescriptors = await Promise.all(
-      remote.map(async ({ name }) => {
-        const fields = await getFieldsFromFieldCaps({ resource: name, esClient });
-        return {
-          type: EsResourceType.index as const,
-          name,
-          fields: fields.map((f) => f.path),
-        };
-      })
-    );
-    descriptors.push(...remoteDescriptors);
+    const fieldsByIndex = await getBatchedFieldsFromFieldCaps({
+      resources: remote.map((r) => r.name),
+      esClient,
+    });
+
+    for (const { name } of remote) {
+      descriptors.push({
+        type: EsResourceType.index,
+        name,
+        fields: (fieldsByIndex[name] ?? []).map((f) => f.path),
+      });
+    }
   }
 
   return descriptors;
@@ -132,19 +133,20 @@ const createDatastreamSummaries = async ({
     }
   }
 
-  // Remote (CCS) data streams: use _field_caps API (CCS-compatible fallback)
+  // Remote (CCS) data streams: single batched _field_caps request, then split per data stream
   if (remote.length > 0) {
-    const remoteDescriptors = await Promise.all(
-      remote.map(async ({ name }) => {
-        const fields = await getFieldsFromFieldCaps({ resource: name, esClient });
-        return {
-          type: EsResourceType.dataStream as const,
-          name,
-          fields: fields.map((f) => f.path),
-        };
-      })
-    );
-    descriptors.push(...remoteDescriptors);
+    const fieldsByDs = await getBatchedFieldsFromFieldCaps({
+      resources: remote.map((r) => r.name),
+      esClient,
+    });
+
+    for (const { name } of remote) {
+      descriptors.push({
+        type: EsResourceType.dataStream,
+        name,
+        fields: (fieldsByDs[name] ?? []).map((f) => f.path),
+      });
+    }
   }
 
   return descriptors;

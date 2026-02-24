@@ -48,18 +48,35 @@ const buildSearchRequest = ({
 
   // CCS fallback: the simplified RRF retriever syntax does not support
   // cross-cluster index patterns, so we use a multi_match query instead.
+  // semantic_text fields are excluded because multi_match does not support them.
   if (isCcsTarget(index)) {
+    const multiMatchFields = fields.filter((f) => f.type !== 'semantic_text');
+    if (multiMatchFields.length === 0) {
+      throw new Error(
+        `No multi_match-compatible fields available for CCS target "${index}". ` +
+          'All searchable fields are semantic_text, which multi_match does not support.'
+      );
+    }
+
+    const ccsHighlightConfig = {
+      ...highlightConfig,
+      fields: multiMatchFields.reduce(
+        (memo, field) => ({ ...memo, [field.path]: {} }),
+        {} as Record<string, Record<string, never>>
+      ),
+    };
+
     return {
       index,
       size,
       query: {
         multi_match: {
           query: term,
-          fields: fields.map((field) => field.path),
+          fields: multiMatchFields.map((field) => field.path),
           type: 'best_fields',
         },
       },
-      highlight: highlightConfig,
+      highlight: ccsHighlightConfig,
     };
   }
 
