@@ -63,12 +63,6 @@ describe('buildWatchlistsManagementTableColumns', () => {
     expect(column.name).toBeTruthy();
   });
 
-  it('renders created by column', () => {
-    const column = getColumnByField('createdBy');
-    expect(column).toBeTruthy();
-    expect(column.name).toBeTruthy();
-  });
-
   it('renders last updated column', () => {
     const column = getColumnByField('updatedAt');
     expect(column).toBeTruthy();

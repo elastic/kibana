@@ -87,7 +87,6 @@ describe(
             users: [{ name: 'user-1' }, { name: 'user-2' }],
             riskModifier: 50,
             source: 'manual',
-            createdBy: 'elastic',
             updatedAt: '2024-01-01T00:00:00.000Z',
           },
         ],

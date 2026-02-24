@@ -40,7 +40,7 @@ const getWatchlistColumn = (): EuiBasicTableColumn<WatchlistTableItemType> =>
 
 const getNumberOfEntitiesColumn = (): EuiBasicTableColumn<WatchlistTableItemType> =>
   ({
-    field: 'users.length', // TODO: update this function when data is available
+    field: 'users.length', // TODO: update this function when data is available https://github.com/elastic/security-team/issues/16103
     name: (
       <FormattedMessage
         id="xpack.securitySolution.entityAnalytics.watchlistsManagement.table.column.numberOfUsers"
@@ -64,23 +64,11 @@ const getRiskScoreWeightingColumn = (): EuiBasicTableColumn<WatchlistTableItemTy
 
 const getSourceColumn = (): EuiBasicTableColumn<WatchlistTableItemType> =>
   ({
-    field: 'source', // TODO: update this function when data is available
+    field: 'source', // TODO: update this function when data is available https://github.com/elastic/security-team/issues/16104
     name: (
       <FormattedMessage
         id="xpack.securitySolution.entityAnalytics.watchlistsManagement.table.column.source"
         defaultMessage="Source"
-      />
-    ),
-    render: (value: string | undefined) => (typeof value === 'string' ? value : getEmptyTagValue()),
-  } as EuiBasicTableColumn<WatchlistTableItemType>);
-//
-const getCreatedByColumn = (): EuiBasicTableColumn<WatchlistTableItemType> =>
-  ({
-    field: 'createdBy', // TODO: update this function when data is available
-    name: (
-      <FormattedMessage
-        id="xpack.securitySolution.entityAnalytics.watchlistsManagement.table.column.createdBy"
-        defaultMessage="Created By"
       />
     ),
     render: (value: string | undefined) => (typeof value === 'string' ? value : getEmptyTagValue()),
@@ -104,7 +92,7 @@ const getLastUpdatedColumn = (): EuiBasicTableColumn<WatchlistTableItemType> =>
   } as EuiBasicTableColumn<WatchlistTableItemType>);
 
 const getActionsColumn = () => ({
-  // TODO: add actions
+  // TODO: add actions with flyout https://github.com/elastic/security-team/issues/16108
   name: (
     <FormattedMessage
       id="xpack.securitySolution.entityAnalytics.watchlistsManagement.table.columns.actions"
@@ -135,7 +123,6 @@ export const buildWatchlistsManagementTableColumns = (
   getNumberOfEntitiesColumn(),
   getRiskScoreWeightingColumn(),
   getSourceColumn(),
-  getCreatedByColumn(),
   getLastUpdatedColumn(),
   getActionsColumn(),
 ];
