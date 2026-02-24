@@ -164,13 +164,10 @@ export function TraceWaterfallContextProvider({
   const [accordionStatesMap, setAccordionStateMap] = useState<
     Record<string, EuiAccordionProps['forceState']>
   >(() => {
-    return traceWaterfall.reduce<Record<string, EuiAccordionProps['forceState']>>(
-      (acc, item, index) => {
-        acc[item.id] = index < maxLevelOpen ? 'open' : 'closed';
-        return acc;
-      },
-      {}
-    );
+    return traceWaterfall.reduce<Record<string, EuiAccordionProps['forceState']>>((acc, item) => {
+      acc[item.id] = item.depth < maxLevelOpen ? 'open' : 'closed';
+      return acc;
+    }, {});
   });
 
   const toggleAccordionState = useCallback((id: string) => {

@@ -126,10 +126,11 @@ export function WaterfallWithSummary<TSample extends {}>({
     const parentChildMap = getTraceParentChildrenMap(unifiedWaterfallFetchResult.traceItems, false);
     const { rootItem } = getRootItemOrFallback(
       parentChildMap,
-      unifiedWaterfallFetchResult.traceItems
+      unifiedWaterfallFetchResult.traceItems,
+      entryTransaction?.transaction.id
     );
     return rootItem?.duration;
-  }, [useUnified, unifiedWaterfallFetchResult.traceItems]);
+  }, [useUnified, unifiedWaterfallFetchResult.traceItems, entryTransaction?.transaction.id]);
 
   if (!entryTransaction && traceSamples?.length === 0 && isSucceeded) {
     return (

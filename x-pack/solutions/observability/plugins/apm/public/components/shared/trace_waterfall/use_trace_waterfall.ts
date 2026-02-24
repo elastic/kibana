@@ -252,8 +252,12 @@ export function getRootItemOrFallback(
     };
   }
 
-  const rootItem = entryTransactionId
+  const entryTransactionRootItem = entryTransactionId
     ? traceItems.find((item) => item.id === entryTransactionId)
+    : undefined;
+
+  const rootItem = entryTransactionRootItem
+    ? entryTransactionRootItem
     : traceParentChildrenMap.root?.[0];
 
   const parentIds = new Set(traceItems.map(({ id }) => id));
