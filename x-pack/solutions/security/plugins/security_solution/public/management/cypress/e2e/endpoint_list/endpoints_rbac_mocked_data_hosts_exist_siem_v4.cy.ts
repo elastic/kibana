@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import '@emotion/react';
-import type { UseEuiTheme } from '@elastic/eui';
+import { createRbacHostsExistSuite } from './rbac_hosts_exist_test_suite';
 
-declare module '@emotion/react' {
-  // eslint-disable-next-line @typescript-eslint/no-empty-interface
-  export interface Theme extends UseEuiTheme {}
-}
+describe('Endpoints page RBAC - some hosts are enrolled (siem v4)', { tags: ['@ess'] }, () => {
+  createRbacHostsExistSuite('siemV4');
+});

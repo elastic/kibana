@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import '@emotion/react';
-import type { UseEuiTheme } from '@elastic/eui';
+import { createRbacPoliciesExistSuite } from './rbac_policies_exist_test_suite';
 
-declare module '@emotion/react' {
-  // eslint-disable-next-line @typescript-eslint/no-empty-interface
-  export interface Theme extends UseEuiTheme {}
-}
+describe(
+  'Endpoints page RBAC - Defend policy is present, but no hosts (siem v2)',
+  { tags: ['@ess'] },
+  () => {
+    createRbacPoliciesExistSuite('siemV2');
+  }
+);
