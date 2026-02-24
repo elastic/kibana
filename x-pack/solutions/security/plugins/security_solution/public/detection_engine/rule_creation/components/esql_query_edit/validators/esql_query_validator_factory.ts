@@ -5,22 +5,13 @@
  * 2.0.
  */
 
-import type { QueryClient } from '@kbn/react-query';
-import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { parseEsqlQuery } from '@kbn/securitysolution-utils';
 import type { FormData, ValidationError, ValidationFunc } from '../../../../../shared_imports';
 import type { FieldValueQueryBar } from '../../../../rule_creation_ui/components/query_bar_field';
-import { fetchEsqlQueryColumns } from '../../../logic/esql_query_columns';
 import { ESQL_ERROR_CODES } from './error_codes';
 import * as i18n from './translations';
 
-interface EsqlQueryValidatorFactoryParams {
-  queryClient: QueryClient;
-}
-
-export function esqlQueryValidatorFactory({
-  queryClient,
-}: EsqlQueryValidatorFactoryParams): ValidationFunc<FormData, string, FieldValueQueryBar> {
+export function esqlQueryValidatorFactory(): ValidationFunc<FormData, string, FieldValueQueryBar> {
   return async (...args) => {
     const [{ value }] = args;
     const esqlQuery = value.query.query as string;
@@ -30,41 +21,15 @@ export function esqlQueryValidatorFactory({
     }
 
     try {
-      const { isEsqlQueryAggregating, hasMetadataOperator, errors } = parseEsqlQuery(esqlQuery);
+      const { errors } = parseEsqlQuery(esqlQuery);
 
-      // Check if there are any syntax errors
       if (errors.length) {
         return constructSyntaxError(new Error(errors[0].message));
-      }
-
-      // non-aggregating query which does not have metadata, is not a valid one
-      if (!isEsqlQueryAggregating && !hasMetadataOperator) {
-        return {
-          code: ESQL_ERROR_CODES.ERR_MISSING_ID_FIELD_FROM_RESULT,
-          message: i18n.ESQL_VALIDATION_MISSING_METADATA_OPERATOR_IN_QUERY_ERROR,
-        };
-      }
-
-      const columns = await fetchEsqlQueryColumns({
-        esqlQuery,
-        queryClient,
-      });
-
-      // for non-aggregating query, we want to disable queries w/o _id property returned in response
-      if (!isEsqlQueryAggregating && !hasIdColumn(columns)) {
-        return {
-          code: ESQL_ERROR_CODES.ERR_MISSING_ID_FIELD_FROM_RESULT,
-          message: i18n.ESQL_VALIDATION_MISSING_ID_FIELD_IN_QUERY_ERROR,
-        };
       }
     } catch (error) {
       return constructValidationError(error);
     }
   };
-}
-
-function hasIdColumn(columns: DatatableColumn[]): boolean {
-  return columns.some(({ id }) => '_id' === id);
 }
 
 function constructSyntaxError(error: Error): ValidationError {

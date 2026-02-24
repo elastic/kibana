@@ -255,6 +255,73 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('non-aggregating query rules', () => {
+      describe('auto-inject metadata _id', () => {
+        it('should deduplicate alerts when query omits METADATA clause (auto-injected)', async () => {
+          const id = uuidv4();
+          const doc1 = {
+            id,
+            '@timestamp': '2020-10-28T05:55:00.000Z',
+            agent: { name: 'test-1' },
+          };
+
+          const rule: EsqlRuleCreateProps = {
+            ...getCreateEsqlRulesSchemaMock('rule-1', true),
+            query: `from ecs_compliant ${internalIdPipe(id)} | where agent.name=="test-1"`,
+            from: 'now-45m',
+            interval: '30m',
+          };
+
+          await indexListOfDocuments([doc1]);
+
+          const { previewId } = await previewRule({
+            supertest,
+            rule,
+            timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+            invocationCount: 2,
+          });
+
+          const previewAlerts = await getPreviewAlerts({
+            es,
+            previewId,
+            size: 10,
+          });
+
+          expect(previewAlerts).toHaveLength(1);
+        });
+
+        it('should deduplicate alerts when KEEP without _id is used (auto-injected)', async () => {
+          const id = uuidv4();
+          const doc1 = {
+            id,
+            '@timestamp': '2020-10-28T05:55:00.000Z',
+            agent: { name: 'test-1' },
+          };
+
+          const rule: EsqlRuleCreateProps = {
+            ...getCreateEsqlRulesSchemaMock('rule-1', true),
+            query: `from ecs_compliant ${internalIdPipe(id)} | keep agent.name`,
+            from: 'now-45m',
+            interval: '30m',
+          };
+
+          await indexListOfDocuments([doc1]);
+
+          const { previewId } = await previewRule({
+            supertest,
+            rule,
+            timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+            invocationCount: 2,
+          });
+
+          const previewAlerts = await getPreviewAlerts({
+            es,
+            previewId,
+            size: 10,
+          });
+
+          expect(previewAlerts).toHaveLength(1);
+        });
+      });
       it('should add source document to alert', async () => {
         const id = uuidv4();
         const interval: [string, string] = ['2020-10-28T06:00:00.000Z', '2020-10-28T06:10:00.000Z'];
@@ -349,7 +416,7 @@ export default ({ getService }: FtrProviderContext) => {
           ...getCreateEsqlRulesSchemaMock('rule-1', true),
           query: `from ecs_compliant ${internalIdPipe(
             id
-          )} | where agent.name=="test-1" | keep agent.name | rename agent.name as custom_named_agent`,
+          )} | where agent.name=="test-1" | stats count() by agent.name | rename agent.name as custom_named_agent`,
           from: 'now-1h',
           interval: '1h',
         };
@@ -2199,7 +2266,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         await waitForBackfillExecuted(backfill, [createdRule.id], { supertest, log });
         const allNewAlerts = await getAlerts(supertest, log, es, createdRule);
-        expect(allNewAlerts.hits.hits).toHaveLength(2);
+        expect(allNewAlerts.hits.hits).toHaveLength(1);
       });
 
       it('supression per rule execution should work for manual rule runs', async () => {

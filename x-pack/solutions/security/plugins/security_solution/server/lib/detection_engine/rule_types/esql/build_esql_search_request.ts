@@ -7,6 +7,7 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { Filter } from '@kbn/es-query';
+import { injectMetadataId } from '@kbn/securitysolution-utils';
 import type {
   RuleFilterArray,
   TimestampOverride,
@@ -58,7 +59,7 @@ export const buildEsqlSearchRequest = ({
   const requestFilter: estypes.QueryDslQueryContainer[] = [rangeFilter, esFilter];
 
   return {
-    query: `${query} | limit ${size}`,
+    query: `${injectMetadataId(query)} | limit ${size}`,
     filter: {
       bool: {
         filter: requestFilter,

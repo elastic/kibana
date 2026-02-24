@@ -135,28 +135,24 @@ describe.skip(
         cy.get(ESQL_QUERY_BAR).should('not.be.visible');
       });
 
-      it('shows error when non-aggregating ES|QL query does not have metadata operator', function () {
-        const invalidNonAggregatingQuery = 'from auditbeat* | limit 5';
+      it('allows non-aggregating ES|QL query without metadata operator (auto-injected at execution)', function () {
+        const nonAggregatingQuery = 'from auditbeat* | limit 5';
         selectEsqlRuleType();
-        fillEsqlQueryBar(invalidNonAggregatingQuery);
+        fillEsqlQueryBar(nonAggregatingQuery);
         getDefineContinueButton().click();
 
-        cy.get(ESQL_QUERY_BAR).contains(
-          'must include the "metadata _id, _version, _index" operator after the source command'
-        );
+        cy.get(ESQL_QUERY_BAR).should('not.contain', 'metadata _id');
       });
 
-      it('shows error when non-aggregating ES|QL query does not return _id field', function () {
-        const invalidNonAggregatingQuery =
+      it('allows non-aggregating ES|QL query without _id in KEEP (auto-injected at execution)', function () {
+        const queryWithKeep =
           'from auditbeat* metadata _id, _version, _index | keep agent.* | limit 5';
 
         selectEsqlRuleType();
-        fillEsqlQueryBar(invalidNonAggregatingQuery);
+        fillEsqlQueryBar(queryWithKeep);
         getDefineContinueButton().click();
 
-        cy.get(ESQL_QUERY_BAR).contains(
-          'must include the "metadata _id, _version, _index" operator after the source command'
-        );
+        cy.get(ESQL_QUERY_BAR).should('not.contain', 'metadata _id, _version, _index" operator');
       });
 
       it('shows error when ES|QL query is invalid', function () {
@@ -171,7 +167,7 @@ describe.skip(
         cy.get(ESQL_QUERY_BAR).contains('Error validating ES|QL');
       });
 
-      it('shows syntax error when query is syntactically invalid - prioritizing it over missing metadata operator error', function () {
+      it('shows syntax error when query is syntactically invalid', function () {
         const invalidNonAggregatingQuery = 'from auditbeat* | where true test';
         selectEsqlRuleType();
         fillEsqlQueryBar(invalidNonAggregatingQuery);
