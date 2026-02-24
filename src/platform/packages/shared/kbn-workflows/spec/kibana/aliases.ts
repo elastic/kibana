@@ -33,7 +33,7 @@ export const OPERATION_TYPE_OVERRIDES: Record<string, OperationTypeOverride> = {
   'get-streams': { type: 'streams.list', backward: false },
   'get-streams-name': { type: 'streams.get', backward: false },
   'get-streams-name-significant-events': {
-    type: 'streams.get_significant_events',
+    type: 'streams.getSignificantEvents',
     backward: false,
   },
 };
