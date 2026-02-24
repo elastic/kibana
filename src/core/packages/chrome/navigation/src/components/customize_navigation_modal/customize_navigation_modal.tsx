@@ -38,6 +38,34 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { LockedItem } from './locked_item';
 import { DraggableItem } from './draggable_item';
 
+const SmoothHeight = ({ children }: { children: React.ReactNode }) => {
+  const outerRef = useRef<HTMLDivElement>(null);
+  const innerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const inner = innerRef.current;
+    const outer = outerRef.current;
+    if (!inner || !outer) return;
+
+    const observer = new ResizeObserver(() => {
+      outer.style.height = `${inner.scrollHeight}px`;
+    });
+    observer.observe(inner);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div
+      ref={outerRef}
+      css={css`
+        overflow: hidden;
+        transition: height 250ms ease;
+      `}
+    >
+      <div ref={innerRef}>{children}</div>
+    </div>
+  );
+};
 
 export interface CustomizeNavigationModalProps {
   solutionId: SolutionId;
@@ -233,18 +261,20 @@ export const CustomizeNavigationModal = ({
               ))}
             </>
           )}
-          <EuiDragDropContext onDragEnd={onVisibleDragEnd}>
-            <EuiDroppable droppableId="visible-nav-items" spacing="none">
-              {visibleItems.map((item, index) => (
-                <DraggableItem
-                  key={item.id}
-                  item={item}
-                  index={index}
-                  toggleItemVisibility={toggleItemVisibility}
-                />
-              ))}
-            </EuiDroppable>
-          </EuiDragDropContext>
+          <SmoothHeight>
+            <EuiDragDropContext onDragEnd={onVisibleDragEnd}>
+              <EuiDroppable droppableId="visible-nav-items" spacing="none">
+                {visibleItems.map((item, index) => (
+                  <DraggableItem
+                    key={item.id}
+                    item={item}
+                    index={index}
+                    toggleItemVisibility={toggleItemVisibility}
+                  />
+                ))}
+              </EuiDroppable>
+            </EuiDragDropContext>
+          </SmoothHeight>
           {hiddenItems.length > 0 && (
             <>
               <EuiSpacer size="m" />
@@ -275,18 +305,20 @@ export const CustomizeNavigationModal = ({
                 </EuiFlexItem>
               </EuiFlexGroup>
               <EuiSpacer size="s" />
-              <EuiDragDropContext onDragEnd={onHiddenDragEnd}>
-                <EuiDroppable droppableId="hidden-nav-items" spacing="none">
-                  {hiddenItems.map((item, index) => (
-                    <DraggableItem
-                      key={item.id}
-                      item={item}
-                      index={index}
-                      toggleItemVisibility={toggleItemVisibility}
-                    />
-                  ))}
-                </EuiDroppable>
-              </EuiDragDropContext>
+              <SmoothHeight>
+                <EuiDragDropContext onDragEnd={onHiddenDragEnd}>
+                  <EuiDroppable droppableId="hidden-nav-items" spacing="none">
+                    {hiddenItems.map((item, index) => (
+                      <DraggableItem
+                        key={item.id}
+                        item={item}
+                        index={index}
+                        toggleItemVisibility={toggleItemVisibility}
+                      />
+                    ))}
+                  </EuiDroppable>
+                </EuiDragDropContext>
+              </SmoothHeight>
             </>
           )}
         </>
