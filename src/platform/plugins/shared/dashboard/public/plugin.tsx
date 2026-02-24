@@ -167,13 +167,14 @@ export class DashboardPlugin
         new DashboardAppLocatorDefinition({
           useHashedUrl: core.uiSettings.get('state:storeInSessionStorage'),
           getDashboardFilterFields: async (dashboardId: string) => {
-            const [{ dashboardClient }] = await Promise.all([
+            const [{ dashboardClient }, { toStoredFilters }] = await Promise.all([
               import('./dashboard_client'),
+              import('@kbn/as-code-filters-transforms'),
               untilPluginStartServicesReady(),
             ]);
 
             const result = await dashboardClient.get(dashboardId);
-            return result.data.filters ?? [];
+            return toStoredFilters(result.data.filters) ?? [];
           },
         })
       );
