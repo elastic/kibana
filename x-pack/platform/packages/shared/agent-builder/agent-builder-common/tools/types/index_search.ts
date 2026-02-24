@@ -13,6 +13,8 @@ export type IndexSearchToolConfig = {
   pattern: string;
   row_limit?: number;
   custom_instructions?: string;
+  /** When true, pattern (e.g. logs-*) targets all matching indices. When false, a single index is chosen via index explorer. */
+  allow_pattern_target?: boolean;
 };
 
 export type IndexSearchToolDefinition = ToolDefinition<

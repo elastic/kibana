@@ -12,11 +12,18 @@ import { messagesStateReducer } from '@langchain/langgraph';
 import { ToolNode } from '@langchain/langgraph/prebuilt';
 import type { ScopedModel, ToolEventEmitter, ToolHandlerResult } from '@kbn/agent-builder-server';
 import { createErrorResult } from '@kbn/agent-builder-server';
+import { EsResourceType } from '@kbn/agent-builder-common';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { extractTextContent } from '../../langchain';
+import { createToolCallMessage, extractTextContent, generateFakeToolCallId } from '../../langchain';
 import { indexExplorer } from '../index_explorer';
-import { createNaturalLanguageSearchTool, createRelevanceSearchTool } from './inner_tools';
+import { listSearchSources } from '../steps/list_search_sources';
+import {
+  createNaturalLanguageSearchTool,
+  createRelevanceSearchTool,
+  naturalLanguageSearchToolName,
+} from './inner_tools';
 import { getSearchPrompt } from './prompts';
+import { isIndexPattern } from './target_patterns';
 import type { SearchTarget } from './types';
 import { progressMessages } from './i18n';
 
@@ -26,6 +33,8 @@ const StateAnnotation = Annotation.Root({
   targetPattern: Annotation<string | undefined>(),
   rowLimit: Annotation<number | undefined>(),
   customInstructions: Annotation<string | undefined>(),
+  /** When true, pattern targets (e.g. logs-*) search all matching indices. When false, a single index is chosen via index explorer. */
+  allowPatternTarget: Annotation<boolean>(),
   // inner
   indexIsValid: Annotation<boolean>(),
   searchTarget: Annotation<SearchTarget>(),
@@ -42,6 +51,14 @@ const StateAnnotation = Annotation.Root({
 });
 
 export type StateType = typeof StateAnnotation.State;
+
+const isPatternTargetEnabled = (
+  state: StateType
+): state is StateType & { targetPattern: string } => {
+  return Boolean(
+    state.allowPatternTarget && state.targetPattern && isIndexPattern(state.targetPattern)
+  );
+};
 
 export const createSearchToolGraph = ({
   model,
@@ -70,6 +87,33 @@ export const createSearchToolGraph = ({
   const selectAndValidateIndex = async (state: StateType) => {
     events?.reportProgress(progressMessages.selectingTarget());
 
+    if (isPatternTargetEnabled(state)) {
+      const sources = await listSearchSources({
+        pattern: state.targetPattern,
+        excludeIndicesRepresentedAsDatastream: true,
+        excludeIndicesRepresentedAsAlias: false,
+        esClient,
+        includeKibanaIndices: true,
+      });
+      const matchedResourceCount =
+        sources.indices.length + sources.aliases.length + sources.data_streams.length;
+
+      if (matchedResourceCount === 0) {
+        return {
+          indexIsValid: false,
+          error: `No resources found for pattern "${state.targetPattern}"`,
+        };
+      }
+
+      return {
+        indexIsValid: true,
+        searchTarget: {
+          type: EsResourceType.index,
+          name: state.targetPattern,
+        },
+      };
+    }
+
     const explorerRes = await indexExplorer({
       nlQuery: state.nlQuery,
       indexPattern: state.targetPattern ?? '*',
@@ -93,8 +137,11 @@ export const createSearchToolGraph = ({
     }
   };
 
-  const terminateIfInvalidIndex = async (state: StateType) => {
-    return state.indexIsValid ? 'agent' : '__end__';
+  const routeAfterIndexValidation = async (state: StateType) => {
+    if (!state.indexIsValid) {
+      return '__end__';
+    }
+    return isPatternTargetEnabled(state) ? 'get_nl_search_tool' : 'agent';
   };
 
   const callSearchAgent = async (state: StateType) => {
@@ -126,6 +173,25 @@ export const createSearchToolGraph = ({
     return '__end__';
   };
 
+  const getNlSearchTool = async (state: StateType) => {
+    if (!isPatternTargetEnabled(state)) {
+      throw new Error('get_nl_search_tool should only be called for pattern targets');
+    }
+
+    return {
+      messages: [
+        createToolCallMessage({
+          toolCallId: generateFakeToolCallId(),
+          toolName: naturalLanguageSearchToolName,
+          args: {
+            query: state.nlQuery,
+            index: state.searchTarget.name,
+          },
+        }),
+      ],
+    };
+  };
+
   const executeTool = async (state: StateType) => {
     const tools = getTools(state);
     const toolNode = new ToolNode<typeof StateAnnotation.State.messages>(tools);
@@ -142,14 +208,17 @@ export const createSearchToolGraph = ({
   const graph = new StateGraph(StateAnnotation)
     // nodes
     .addNode('check_index', selectAndValidateIndex)
+    .addNode('get_nl_search_tool', getNlSearchTool)
     .addNode('agent', callSearchAgent)
     .addNode('execute_tool', executeTool)
     // edges
     .addEdge('__start__', 'check_index')
-    .addConditionalEdges('check_index', terminateIfInvalidIndex, {
+    .addConditionalEdges('check_index', routeAfterIndexValidation, {
+      get_nl_search_tool: 'get_nl_search_tool',
       agent: 'agent',
       __end__: '__end__',
     })
+    .addEdge('get_nl_search_tool', 'execute_tool')
     .addEdge('agent', 'execute_tool')
     .addConditionalEdges('execute_tool', decideContinueOrEnd, {
       agent: 'agent',

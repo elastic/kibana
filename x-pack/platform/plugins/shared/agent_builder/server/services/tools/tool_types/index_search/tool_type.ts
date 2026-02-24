@@ -34,12 +34,14 @@ export const getIndexSearchToolType = (): ToolTypeDefinition<
               pattern,
               row_limit: rowLimit,
               custom_instructions: customInstructions,
+              allow_pattern_target: allowPatternTarget,
             } = config;
             const results = await runSearchTool({
               nlQuery,
               index: pattern,
               rowLimit,
               customInstructions,
+              allowPatternTarget: allowPatternTarget ?? false,
               esClient: esClient.asCurrentUser,
               model: await modelProvider.getDefaultModel(),
               events,
