@@ -17,6 +17,7 @@ import type {
   ManagedEntityDefinition,
 } from '../../common/domain/definitions/entity_schema';
 import { scheduleExtractEntityTask, stopExtractEntityTask } from '../tasks/extract_entity_task';
+import { scheduleEntityMaintainerTasks } from '../tasks/entity_maintainer';
 import { installElasticsearchAssets, uninstallElasticsearchAssets } from './assets/install_assets';
 import {
   EngineDescriptorTypeName,
@@ -48,6 +49,7 @@ import {
 } from './assets/component_templates';
 import { getUpdatesEntitiesDataStreamName } from './assets/updates_data_stream';
 import type { LogsExtractionClient } from './logs_extraction_client';
+import { installEuidStoredScripts, deleteEuidStoredScripts } from './assets/euid_stored_scripts';
 
 interface AssetManagerDependencies {
   logger: Logger;
@@ -81,16 +83,31 @@ export class AssetManager {
     this.security = deps.security;
   }
 
-  public async initEntity(
+  public async init(
     request: KibanaRequest,
-    type: EntityType,
+    entityTypes: EntityType[],
     logExtractionParams?: LogExtractionBodyParams
-  ): Promise<boolean> {
-    const installed = await this.install(type, logExtractionParams);
-    if (installed) {
-      await this.start(request, type);
+  ) {
+    try {
+      await Promise.all([
+        ...entityTypes.map((type) => this.initEntity(request, type, logExtractionParams)),
+
+        scheduleEntityMaintainerTasks({
+          logger: this.logger,
+          taskManager: this.taskManager,
+          namespace: this.namespace,
+          request,
+        }),
+
+        installEuidStoredScripts({
+          esClient: this.esClient,
+          logger: this.logger,
+        }),
+      ]);
+    } catch (error) {
+      this.logger.error('Error during entity store init:', error);
+      throw error;
     }
-    return installed;
   }
 
   public async start(request: KibanaRequest, type: EntityType) {
@@ -133,39 +150,7 @@ export class AssetManager {
     }
   }
 
-  public async install(
-    type: EntityType,
-    logExtractionParams?: LogExtractionBodyParams
-  ): Promise<boolean> {
-    try {
-      const { engines } = await this.getStatus();
-      if (engines.some((e) => e.type === type)) {
-        return false;
-      }
-
-      this.logger.get(type).debug(`Installing assets for entity type: ${type}`);
-      const definition = getEntityDefinition(type, this.namespace);
-      const initialState: Partial<LogExtractionState> = logExtractionParams ?? {};
-      await Promise.all([
-        this.engineDescriptorClient.init(type, initialState),
-        installElasticsearchAssets({
-          esClient: this.esClient,
-          logger: this.logger,
-          definition,
-          namespace: this.namespace,
-        }),
-      ]);
-      await this.engineDescriptorClient.update(type, { status: ENGINE_STATUS.STARTED });
-      this.logger.debug(`Installed definition: ${type}`);
-
-      return true;
-    } catch (error) {
-      this.logger.error(`Error installing assets for entity type ${type}`, { error });
-      throw error;
-    }
-  }
-
-  public async uninstall(type: EntityType): Promise<boolean> {
+  public async uninstall(type: EntityType) {
     try {
       const { engines } = await this.getStatus();
       if (!engines.some((e) => e.type === type)) {
@@ -181,6 +166,10 @@ export class AssetManager {
           logger: this.logger.get(type),
           definition,
           namespace: this.namespace,
+        }),
+        deleteEuidStoredScripts({
+          esClient: this.esClient,
+          logger: this.logger,
         }),
       ]);
       this.logger.get(type).debug(`Uninstalled definition: ${type}`);
@@ -209,6 +198,19 @@ export class AssetManager {
       this.logger.error('Error getting status', { error });
       throw error;
     }
+  }
+
+  private async initEntity(
+    request: KibanaRequest,
+    type: EntityType,
+    logExtractionParams?: LogExtractionBodyParams
+  ): Promise<boolean> {
+    const installed = await this.install(type, logExtractionParams);
+    if (installed) {
+      await this.start(request, type);
+    }
+
+    return installed;
   }
 
   public async getPrivileges(
@@ -241,6 +243,38 @@ export class AssetManager {
         index: { ...targetIndexPrivileges, ...sourceIndexPrivileges },
       },
     });
+  }
+
+  public async install(
+    type: EntityType,
+    logExtractionParams?: LogExtractionBodyParams
+  ): Promise<boolean> {
+    try {
+      const { engines } = await this.getStatus();
+      if (engines.some((e) => e.type === type)) {
+        return false;
+      }
+
+      this.logger.get(type).debug(`Installing assets for entity type: ${type}`);
+      const definition = getEntityDefinition(type, this.namespace);
+      const initialState: Partial<LogExtractionState> = logExtractionParams ?? {};
+      await Promise.all([
+        this.engineDescriptorClient.init(type, initialState),
+        installElasticsearchAssets({
+          esClient: this.esClient,
+          logger: this.logger,
+          definition,
+          namespace: this.namespace,
+        }),
+      ]);
+      await this.engineDescriptorClient.update(type, { status: ENGINE_STATUS.STARTED });
+      this.logger.debug(`Installed definition: ${type}`);
+
+      return true;
+    } catch (error) {
+      this.logger.error(`Error installing assets for entity type ${type}`, { error });
+      throw error;
+    }
   }
 
   private async getEngineWithComponents(
@@ -354,13 +388,12 @@ export class AssetManager {
     const taskId = getExtractEntityTaskId(type, this.namespace);
     try {
       const task = await this.taskManager.get(taskId);
-      const countResult = await this.logsExtractionClient.extractLogs(type, { countOnly: true });
       return {
         id: taskId,
         installed: true,
         resource: 'task',
         status: task.state.status ?? null,
-        remainingLogsToExtract: countResult.success ? countResult.count : null,
+        remainingLogsToExtract: await this.logsExtractionClient.getRemainingLogsCount(type),
         runs: task.state.runs ?? 0,
         lastError: task.state.lastError ?? null,
       };

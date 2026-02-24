@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FilterOptions } from './types';
+import type { FilterOptions } from '../../types';
 
 export const DEFAULT_FILTER_OPTIONS: FilterOptions = {
   provider: [],

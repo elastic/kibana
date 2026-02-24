@@ -156,7 +156,6 @@ export class ChromeService {
       http,
       chromeBreadcrumbs$: state.breadcrumbs.classic.$,
       logger: this.logger,
-      featureFlags,
       uiSettings,
     });
 
@@ -231,8 +230,10 @@ export class ChromeService {
   }
 
   public stop() {
+    this.navControls.stop();
     this.navLinks.stop();
     this.projectNavigation.stop();
+    this.sidebar.stop();
     this.stop$.next();
   }
 }

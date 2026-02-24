@@ -265,7 +265,7 @@ export class StreamsClient {
       }
     );
 
-    await this.syncAssets(stream.name, request);
+    await this.syncAssets(stream, request);
 
     return {
       acknowledged: true,
@@ -274,10 +274,14 @@ export class StreamsClient {
   }
 
   async bulkUpsert(streams: Array<{ name: string; request: Streams.all.UpsertRequest }>) {
+    const definitions = streams.map(({ name, request }) => {
+      return { request, definition: convertUpsertRequestIntoDefinition(name, request) };
+    });
+
     const result = await State.attemptChanges(
-      streams.map(({ name, request }) => ({
+      definitions.map(({ definition }) => ({
         type: 'upsert',
-        definition: convertUpsertRequestIntoDefinition(name, request),
+        definition,
       })),
       {
         ...this.dependencies,
@@ -285,7 +289,9 @@ export class StreamsClient {
       }
     );
 
-    await Promise.all(streams.map(({ name, request }) => this.syncAssets(name, request)));
+    await Promise.all(
+      definitions.map(({ definition, request }) => this.syncAssets(definition, request))
+    );
 
     return {
       acknowledged: true,
@@ -540,6 +546,8 @@ export class StreamsClient {
       REQUIRED_MANAGE_PRIVILEGES.push('monitor_text_structure');
     }
 
+    const CREATE_SNAPSHOT_REPOSITORY_CLUSTER_PRIVILEGE = 'cluster:admin/repository/put';
+
     const REQUIRED_INDEX_PRIVILEGES = [
       'read',
       'write',
@@ -557,7 +565,7 @@ export class StreamsClient {
 
     const privileges =
       await this.dependencies.scopedClusterClient.asCurrentUser.security.hasPrivileges({
-        cluster: REQUIRED_MANAGE_PRIVILEGES,
+        cluster: [...REQUIRED_MANAGE_PRIVILEGES, CREATE_SNAPSHOT_REPOSITORY_CLUSTER_PRIVILEGE],
         index: [
           {
             names,
@@ -588,6 +596,8 @@ export class StreamsClient {
       text_structure: isServerless ? true : privileges.cluster.monitor_text_structure,
       read_failure_store: names.every((name) => privileges.index[name].read_failure_store),
       manage_failure_store: names.every((name) => privileges.index[name].manage_failure_store),
+      create_snapshot_repository:
+        privileges.cluster[CREATE_SNAPSHOT_REPOSITORY_CLUSTER_PRIVILEGE] === true,
     };
   }
 
@@ -813,12 +823,12 @@ export class StreamsClient {
     }).then((streams) => streams.filter(Streams.WiredStream.Definition.is));
   }
 
-  private async syncAssets(name: string, request: Streams.all.UpsertRequest) {
+  private async syncAssets(definition: Streams.all.Definition, request: Streams.all.UpsertRequest) {
     const { dashboards, queries, rules } = request;
 
     await Promise.all([
       this.dependencies.attachmentClient.syncAttachmentList(
-        name,
+        definition.name,
         dashboards.map((dashboard) => ({
           id: dashboard,
           type: 'dashboard' as const,
@@ -826,14 +836,14 @@ export class StreamsClient {
         'dashboard'
       ),
       this.dependencies.attachmentClient.syncAttachmentList(
-        name,
+        definition.name,
         rules.map((rule) => ({
           id: rule,
           type: 'rule' as const,
         })),
         'rule'
       ),
-      this.dependencies.queryClient.syncQueries(name, queries),
+      this.dependencies.queryClient.syncQueries(definition, queries),
     ]);
   }
 }
