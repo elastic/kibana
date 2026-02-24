@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexItem } from '@elastic/eui';
 import { type DataTableRecord, getFieldValue } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import { FLYOUT_STORAGE_KEYS } from '../../../flyout/document_details/shared/constants/local_storage';
@@ -61,11 +61,9 @@ export const AboutSection = memo(({ hit }: AboutSectionProps) => {
       title={ABOUT_SECTION_TITLE}
     >
       {isAlert ? (
-        <EuiFlexGroup gutterSize="m" direction="column">
-          <EuiFlexItem>
-            <AlertDescription hit={hit} onShowRuleSummary={undefined} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <EuiFlexItem>
+          <AlertDescription hit={hit} onShowRuleSummary={undefined} />
+        </EuiFlexItem>
       ) : null}
     </ExpandableSection>
   );

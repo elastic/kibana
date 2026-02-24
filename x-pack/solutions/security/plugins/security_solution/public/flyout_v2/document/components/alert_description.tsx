@@ -8,10 +8,10 @@
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
-import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { type DataTableRecord, getFieldValue } from '@kbn/discover-utils';
+import { LineClamp } from '../../../common/components/line_clamp';
 import {
   ALERT_DESCRIPTION_DETAILS_TEST_ID,
   ALERT_DESCRIPTION_TITLE_TEST_ID,
@@ -49,27 +49,25 @@ export const AlertDescription: FC<AlertDescriptionProps> = ({
 
   const viewRule = useMemo(
     () => (
-      <EuiFlexItem grow={false}>
-        <EuiButtonEmpty
-          size="s"
-          iconType="expand"
-          onClick={onShowRuleSummary}
-          iconSide="right"
-          data-test-subj={RULE_SUMMARY_BUTTON_TEST_ID}
-          aria-label={i18n.translate(
-            'xpack.securitySolution.flyout.document.about.description.ruleSummaryButtonAriaLabel',
-            {
-              defaultMessage: 'Show rule summary',
-            }
-          )}
-          disabled={ruleSummaryDisabled}
-        >
-          <FormattedMessage
-            id="xpack.securitySolution.flyout.document.about.description.ruleSummaryButtonLabel"
-            defaultMessage="Show rule summary"
-          />
-        </EuiButtonEmpty>
-      </EuiFlexItem>
+      <EuiButtonEmpty
+        size="s"
+        iconType="expand"
+        onClick={onShowRuleSummary}
+        iconSide="right"
+        data-test-subj={RULE_SUMMARY_BUTTON_TEST_ID}
+        aria-label={i18n.translate(
+          'xpack.securitySolution.flyout.document.about.description.ruleSummaryButtonAriaLabel',
+          {
+            defaultMessage: 'Show rule summary',
+          }
+        )}
+        disabled={ruleSummaryDisabled}
+      >
+        <FormattedMessage
+          id="xpack.securitySolution.flyout.document.about.description.ruleSummaryButtonLabel"
+          defaultMessage="Show rule summary"
+        />
+      </EuiButtonEmpty>
     ),
     [onShowRuleSummary, ruleSummaryDisabled]
   );
@@ -89,7 +87,7 @@ export const AlertDescription: FC<AlertDescriptionProps> = ({
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
-      <EuiFlexItem data-test-subj={ALERT_DESCRIPTION_TITLE_TEST_ID}>
+      <EuiFlexItem data-test-subj={ALERT_DESCRIPTION_TITLE_TEST_ID} grow={false}>
         <EuiTitle size="xxs">
           {isAlert ? (
             <EuiFlexGroup
@@ -106,7 +104,7 @@ export const AlertDescription: FC<AlertDescriptionProps> = ({
                   />
                 </h5>
               </EuiFlexItem>
-              {onShowRuleSummary && viewRule}
+              {onShowRuleSummary && <EuiFlexItem grow={false}>{viewRule}</EuiFlexItem>}
             </EuiFlexGroup>
           ) : (
             <h5>
@@ -119,17 +117,7 @@ export const AlertDescription: FC<AlertDescriptionProps> = ({
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem data-test-subj={ALERT_DESCRIPTION_DETAILS_TEST_ID}>
-        <p
-          css={css`
-            word-break: break-word;
-            display: -webkit-box;
-            -webkit-line-clamp: 3;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-          `}
-        >
-          {isAlert ? alertRuleDescription : '-'}
-        </p>
+        <LineClamp>{isAlert ? alertRuleDescription : '-'}</LineClamp>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
