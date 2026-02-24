@@ -11,10 +11,10 @@ import { render, screen, within, fireEvent, waitFor } from '@testing-library/rea
 import { I18nProvider } from '@kbn/i18n-react';
 import { EuiComboBoxTestHarness, EuiSuperSelectTestHarness } from '@kbn/test-eui-helpers';
 
-import { WithAppDependencies } from './helpers/setup_environment';
-import { MappingsEditor } from '../../mappings_editor';
-import { TYPE_DEFINITION } from '../../constants';
-import type { AppDependencies } from '../../../..';
+import { WithAppDependencies } from './__jest__/client_integration/helpers/setup_environment';
+import { MappingsEditor } from './mappings_editor';
+import { TYPE_DEFINITION } from './constants';
+import type { AppDependencies } from '../..';
 
 // Helper to map type values to their display labels
 const getTypeLabel = (typeValue: string): string => {
@@ -22,7 +22,7 @@ const getTypeLabel = (typeValue: string): string => {
   return typeDef?.label || typeValue;
 };
 
-jest.mock('../../../component_templates/component_templates_context', () => ({
+jest.mock('../component_templates/component_templates_context', () => ({
   useComponentTemplatesContext: jest.fn().mockReturnValue({
     toasts: {
       addError: jest.fn(),
@@ -528,8 +528,7 @@ describe('Mappings editor: core', () => {
       };
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/253428
-    describe.skip('props.value and props.onChange', () => {
+    describe('props.value and props.onChange', () => {
       beforeEach(async () => {
         setup({ value: defaultMappings, onChange: onChangeHandler }, ctx);
         await screen.findByTestId('mappingsEditor');
@@ -651,9 +650,7 @@ describe('Mappings editor: core', () => {
       });
     }); // Close inner describe for props.value and props.onChange
 
-    // FLAKY: https://github.com/elastic/kibana/issues/253549
-    // FLAKY: https://github.com/elastic/kibana/issues/253628
-    describe.skip('semantic_text field tests', () => {
+    describe('semantic_text field tests', () => {
       beforeEach(async () => {
         setup({ value: defaultMappings, onChange: onChangeHandler }, ctx);
         await screen.findByTestId('mappingsEditor');
