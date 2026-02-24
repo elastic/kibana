@@ -10,6 +10,7 @@ import { SubActionConnector } from '@kbn/actions-plugin/server';
 import type { ServiceParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import type { AxiosError } from 'axios';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/usage';
+import type { z } from '@kbn/zod';
 import type { MongoConnectorConfig, MongoConnectorSecrets } from './schemas';
 import {
   SUB_ACTION,
@@ -19,7 +20,6 @@ import {
   FindRequestSchema,
   AggregateRequestSchema,
 } from './schemas';
-import type { z } from '@kbn/zod';
 
 const DEFAULT_CONNECT_TIMEOUT_MS = 10000;
 
@@ -29,7 +29,10 @@ const DEFAULT_CONNECT_TIMEOUT_MS = 10000;
  * Uses connect-per-operation: each sub-action creates a MongoClient, runs the operation,
  * and closes the client to avoid connection leaks and keep behavior consistent in serverless.
  */
-export class MongoConnector extends SubActionConnector<MongoConnectorConfig, MongoConnectorSecrets> {
+export class MongoConnector extends SubActionConnector<
+  MongoConnectorConfig,
+  MongoConnectorSecrets
+> {
   constructor(params: ServiceParams<MongoConnectorConfig, MongoConnectorSecrets>) {
     super(params);
     this.registerSubActions();
@@ -180,6 +183,10 @@ export class MongoConnector extends SubActionConnector<MongoConnectorConfig, Mon
     }
   }
 
+  /**
+   * Required by SubActionConnector (typed as AxiosError). This connector uses the Mongo driver,
+   * so HTTP errors are not used; we only use error.message for any thrown error.
+   */
   protected getResponseErrorMessage(error: AxiosError): string {
     return error?.message ?? 'MongoDB connector error';
   }

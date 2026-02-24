@@ -6,7 +6,8 @@
  */
 
 import { ValidatorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
-import { getMongoConnectorType } from './index';
+import type { ValidatorServices } from '@kbn/actions-plugin/server/types';
+import { getMongoConnectorType } from '.';
 import { CONNECTOR_ID, CONNECTOR_NAME, SUB_ACTION } from './schemas';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
@@ -51,21 +52,31 @@ describe('MongoDB connector type', () => {
 
   it('validators throw when secrets lack connectionUri', () => {
     const connectorType = getMongoConnectorType();
-    const secretsValidator = connectorType.validators?.find((v) => v.type === ValidatorType.SECRETS);
-    expect(secretsValidator).toBeDefined();
-    expect(() => (secretsValidator as { validator: (s: unknown) => void }).validator({})).toThrow(
-      'MongoDB connection URI is required'
+    const secretsValidator = connectorType.validators?.find(
+      (v) => v.type === ValidatorType.SECRETS
     );
+    expect(secretsValidator).toBeDefined();
+    const validatorServices = { configurationUtilities: actionsConfigMock.create() };
+    expect(() =>
+      (secretsValidator as { validator: (s: unknown, vs: ValidatorServices) => void }).validator(
+        {},
+        validatorServices
+      )
+    ).toThrow('MongoDB connection URI is required');
   });
 
   it('validators accept valid secrets', () => {
     const connectorType = getMongoConnectorType();
-    const secretsValidator = connectorType.validators?.find((v) => v.type === ValidatorType.SECRETS);
+    const secretsValidator = connectorType.validators?.find(
+      (v) => v.type === ValidatorType.SECRETS
+    );
     expect(secretsValidator).toBeDefined();
+    const validatorServices = { configurationUtilities: actionsConfigMock.create() };
     expect(() =>
-      (secretsValidator as { validator: (s: unknown) => void }).validator({
-        connectionUri: 'mongodb://localhost:27017',
-      })
+      (secretsValidator as { validator: (s: unknown, vs: ValidatorServices) => void }).validator(
+        { connectionUri: 'mongodb://localhost:27017' },
+        validatorServices
+      )
     ).not.toThrow();
   });
 });

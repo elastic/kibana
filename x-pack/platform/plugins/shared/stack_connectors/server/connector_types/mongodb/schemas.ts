@@ -22,13 +22,8 @@ export const SUB_ACTION = {
   AGGREGATE: 'aggregate',
 } as const;
 
-/**
- * Schema for MongoDB connector configuration.
- * Optional default database used when not specified in sub-action params.
- */
-export const MongoConnectorConfigSchema = z.object({
-  defaultDatabase: z.string().optional(),
-});
+/** Schema for MongoDB connector configuration. No config fields required. */
+export const MongoConnectorConfigSchema = z.object({}).strict();
 
 /**
  * Schema for MongoDB connector secrets.
@@ -66,5 +61,5 @@ export const FindRequestSchema = z.object({
 export const AggregateRequestSchema = z.object({
   database: z.string().min(1),
   collection: z.string().min(1),
-  pipeline: z.array(z.record(z.string(), z.unknown())),
+  pipeline: z.array(z.record(z.string(), z.unknown())).min(1),
 });

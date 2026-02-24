@@ -7,6 +7,8 @@
 
 import { MongoConnector } from './mongodb';
 import { SUB_ACTION, CONNECTOR_ID } from './schemas';
+import type { MongoConnectorSecrets } from './schemas';
+import * as mongodb from 'mongodb';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
@@ -68,7 +70,7 @@ describe('MongoConnector', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockClientInstance = createMockClient();
-    (require('mongodb').MongoClient as jest.Mock).mockImplementation(function (this: unknown) {
+    (mongodb.MongoClient as jest.Mock).mockImplementation(function (this: unknown) {
       mockClientInstance = createMockClient();
       return mockClientInstance;
     });
@@ -152,14 +154,14 @@ describe('MongoConnector', () => {
         configurationUtilities: actionsConfigMock.create(),
         connector: { id: 'test-2', type: CONNECTOR_ID },
         config: {},
-        secrets: {},
+        secrets: {} as MongoConnectorSecrets,
         logger,
         services: actionsMock.createServices(),
       });
 
-      await expect(
-        connectorNoSecrets.testConnector({}, connectorUsageCollector)
-      ).rejects.toThrow('MongoDB connection URI is required in secrets');
+      await expect(connectorNoSecrets.testConnector({}, connectorUsageCollector)).rejects.toThrow(
+        'MongoDB connection URI is required in secrets'
+      );
     });
 
     it('should throw when connectionUri is empty string', async () => {
@@ -172,9 +174,9 @@ describe('MongoConnector', () => {
         services: actionsMock.createServices(),
       });
 
-      await expect(
-        connectorEmptyUri.testConnector({}, connectorUsageCollector)
-      ).rejects.toThrow('MongoDB connection URI is required in secrets');
+      await expect(connectorEmptyUri.testConnector({}, connectorUsageCollector)).rejects.toThrow(
+        'MongoDB connection URI is required in secrets'
+      );
     });
   });
 
@@ -199,9 +201,9 @@ describe('MongoConnector', () => {
     it('should close client when listDatabases throws', async () => {
       mockListDatabases.mockRejectedValueOnce(new Error('Auth failed'));
 
-      await expect(
-        connector.listDatabases({}, connectorUsageCollector)
-      ).rejects.toThrow('Auth failed');
+      await expect(connector.listDatabases({}, connectorUsageCollector)).rejects.toThrow(
+        'Auth failed'
+      );
 
       expect(mockClose).toHaveBeenCalledTimes(1);
     });
@@ -211,10 +213,7 @@ describe('MongoConnector', () => {
     it('should return collections and close client', async () => {
       mockToArray.mockResolvedValueOnce([{ name: 'users', type: 'collection' }]);
 
-      const result = await connector.listCollections(
-        { database: 'mydb' },
-        connectorUsageCollector
-      );
+      const result = await connector.listCollections({ database: 'mydb' }, connectorUsageCollector);
 
       expect(result).toEqual({
         collections: [{ name: 'users', type: 'collection' }],
@@ -284,16 +283,18 @@ describe('MongoConnector', () => {
     it('should return error message for AxiosError', () => {
       const error = { message: 'Network error' } as import('axios').AxiosError;
       expect(
-        (connector as unknown as { getResponseErrorMessage(e: import('axios').AxiosError): string })
-          .getResponseErrorMessage(error)
+        (
+          connector as unknown as { getResponseErrorMessage(e: import('axios').AxiosError): string }
+        ).getResponseErrorMessage(error)
       ).toBe('Network error');
     });
 
     it('should return fallback when message is missing', () => {
       const error = {} as import('axios').AxiosError;
       expect(
-        (connector as unknown as { getResponseErrorMessage(e: import('axios').AxiosError): string })
-          .getResponseErrorMessage(error)
+        (
+          connector as unknown as { getResponseErrorMessage(e: import('axios').AxiosError): string }
+        ).getResponseErrorMessage(error)
       ).toBe('MongoDB connector error');
     });
   });

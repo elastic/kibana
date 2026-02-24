@@ -44,7 +44,10 @@ const configValidator = (_config: MongoConnectorConfig, _validatorServices: Vali
   // No URL in config; connectionUri is in secrets. Schema validation is sufficient.
 };
 
-const secretsValidator = (secrets: MongoConnectorSecrets) => {
+const secretsValidator = (
+  secrets: MongoConnectorSecrets,
+  _validatorServices: ValidatorServices
+) => {
   if (!secrets?.connectionUri || typeof secrets.connectionUri !== 'string') {
     throw new Error('MongoDB connection URI is required');
   }
