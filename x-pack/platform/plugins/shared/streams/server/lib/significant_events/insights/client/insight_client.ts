@@ -88,7 +88,7 @@ export class InsightClient {
           : { match_all: {} },
     });
 
-    const insights: Insight[] = response.hits.hits.map((hit) => hit._source! as Insight);
+    const insights = response.hits.hits.map((hit) => hit._source!);
 
     return {
       insights,
