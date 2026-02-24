@@ -46,7 +46,9 @@ export const addSyntheticsProjectMonitorRoute: SyntheticsRestApiRouteFactory = (
       projectName: schema.string(),
     }),
     body: schema.object({
-      monitors: schema.arrayOf(schema.any(), { maxSize: MAX_BROWSER_MONITORS + MAX_LIGHTWEIGHT_MONITORS }),
+      monitors: schema.arrayOf(schema.any(), {
+        maxSize: MAX_BROWSER_MONITORS + MAX_LIGHTWEIGHT_MONITORS,
+      }),
     }),
   },
   options: {
@@ -231,9 +233,9 @@ export const ELASTIC_MANAGED_LOCATIONS_DISABLED = i18n.translate(
 export const REQUEST_TOO_LARGE = i18n.translate('xpack.synthetics.server.project.delete.request', {
   defaultMessage:
     'Request payload is too large. Please send a max of {maxBrowserMonitors} browser monitors per request.',
-    values: {
-      maxBrowserMonitors: MAX_BROWSER_MONITORS,
-    },
+  values: {
+    maxBrowserMonitors: MAX_BROWSER_MONITORS,
+  },
 });
 
 export const REQUEST_TOO_LARGE_LIGHTWEIGHT = i18n.translate(
