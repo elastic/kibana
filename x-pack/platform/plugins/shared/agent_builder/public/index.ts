@@ -18,6 +18,7 @@ import { AGENTBUILDER_FEATURE_ID } from '../common/features';
 
 export type { AgentBuilderPluginSetup, AgentBuilderPluginStart };
 export { AGENTBUILDER_FEATURE_ID };
+export { VisualizeLens } from './application/components/tools/esql/visualize_lens';
 export const plugin: PluginInitializer<
   AgentBuilderPluginSetup,
   AgentBuilderPluginStart,

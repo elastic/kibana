@@ -49,6 +49,8 @@ import {
   setSidebarRuntimeContext,
   clearSidebarRuntimeContext,
 } from './sidebar';
+import { AttachmentType } from '@kbn/agent-builder-common/attachments';
+import { createVisualizationAttachmentDefinition } from './application/components/attachments/visualization_attachment';
 
 export class AgentBuilderPlugin
   implements
@@ -121,6 +123,12 @@ export class AgentBuilderPlugin
 
     const agentService = new AgentService({ http });
     const attachmentsService = new AttachmentsService();
+
+    attachmentsService.addAttachmentType(
+      AttachmentType.visualization,
+      createVisualizationAttachmentDefinition({ startDependencies })
+    );
+
     const eventsService = new EventsService();
     const chatService = new ChatService({ http, events: eventsService });
     const conversationsService = new ConversationsService({ http });

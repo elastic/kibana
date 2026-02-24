@@ -7,6 +7,7 @@
 
 import { useMemo, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
+import type { TimeRange } from '@kbn/es-query';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public/types';
 import type { LensPublicStart, TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builder';
@@ -16,6 +17,8 @@ interface Params {
   dataViews: DataViewsServicePublic;
   lens: LensPublicStart;
   lensConfig: any;
+  timeRange?: TimeRange;
+  searchSessionId?: string;
 }
 
 interface ReturnValue {
@@ -25,7 +28,13 @@ interface ReturnValue {
   error?: Error;
 }
 
-export function useLensInput({ dataViews, lens, lensConfig }: Params): ReturnValue {
+export function useLensInput({
+  dataViews,
+  lens,
+  lensConfig,
+  timeRange,
+  searchSessionId,
+}: Params): ReturnValue {
   const lensHelpersAsync = useAsync(() => {
     return lens.stateHelperApi();
   }, [lens]);
@@ -38,6 +47,8 @@ export function useLensInput({ dataViews, lens, lensConfig }: Params): ReturnVal
   const [lensInput, setLensInput] = useState<TypedLensByValueInput | undefined>({
     attributes: lensAttributes,
     id: uuidv4(),
+    ...(timeRange ? { timeRange } : {}),
+    ...(searchSessionId ? { searchSessionId } : {}),
   });
 
   const isLoading = !lensHelpersAsync.value || !lensInput;
