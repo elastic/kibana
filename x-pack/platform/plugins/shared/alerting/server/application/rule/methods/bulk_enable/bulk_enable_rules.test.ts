@@ -7,6 +7,7 @@
 
 import type { ConstructorOptions } from '../../../../rules_client/rules_client';
 import { RulesClient } from '../../../../rules_client/rules_client';
+import type { RawRule } from '../../../../types';
 import {
   savedObjectsClientMock,
   savedObjectsRepositoryMock,
@@ -169,8 +170,22 @@ describe('bulkEnableRules', () => {
     schedule: rruleSchedule,
   };
 
+  /** Response shape for the point-in-time finder mock; uses RawRule for schedule so interval | rrule is allowed. */
+  interface MockFinderRule {
+    id: string;
+    type: string;
+    attributes: Pick<RawRule, 'schedule'> & Record<string, unknown>;
+    references: unknown;
+    version?: string;
+    score?: number;
+  }
+
+  interface MockFinderResponse {
+    saved_objects: MockFinderRule[];
+  }
+
   const mockCreatePointInTimeFinderAsInternalUser = (
-    response = { saved_objects: [disabledRule1, disabledRule2] }
+    response: MockFinderResponse = { saved_objects: [disabledRule1, disabledRule2] }
   ) => {
     encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser = jest
       .fn()

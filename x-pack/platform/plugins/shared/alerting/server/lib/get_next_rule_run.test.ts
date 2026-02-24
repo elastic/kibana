@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { RuleSchedule } from '../../common';
 import { getNextRuleRun } from './get_next_rule_run';
 
 describe('getNextRuleRun', () => {
@@ -113,9 +114,10 @@ describe('getNextRuleRun', () => {
       ).toThrow('Invalid schedule, unable to calculate next run');
     });
 
-    test('throws when rrule has no next occurrence (until in the past)', () => {
+    test('throws when rrule has no next occurrence (count exhausted before startDate)', () => {
       jest.useFakeTimers();
       jest.setSystemTime(new Date('2025-07-20T12:00:00.000Z'));
+
       expect(() =>
         getNextRuleRun({
           startDate: new Date('2025-07-01T00:00:00.000Z'),
@@ -127,9 +129,9 @@ describe('getNextRuleRun', () => {
               tzid: 'UTC',
               byhour: [1],
               byminute: [0],
-              until: new Date('2025-06-15T00:00:00.000Z'),
+              count: 1,
             },
-          },
+          } as RuleSchedule,
         })
       ).toThrow('Invalid schedule, unable to calculate next run');
       jest.useRealTimers();

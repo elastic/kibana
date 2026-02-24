@@ -17,7 +17,7 @@ import {
   ruleLastRunOutcomeValues as ruleLastRunOutcomeValuesV1,
 } from '../../common/constants/v1';
 import { validateNotifyWhenV1 } from '../../validation';
-import { flappingSchemaV2 } from '../../common';
+import { flappingSchemaV2, scheduleSchemaV1 } from '../../common';
 
 export const actionParamsSchema = schema.recordOf(schema.string(), schema.maybe(schema.any()), {
   meta: {
@@ -44,12 +44,6 @@ export const notifyWhenSchema = schema.oneOf(
     },
   }
 );
-
-const intervalScheduleSchema = schema.object({
-  interval: schema.string({
-    meta: { description: 'The interval is specified in seconds, minutes, hours, or days.' },
-  }),
-});
 
 const actionFrequencySchema = schema.object({
   summary: schema.boolean({ meta: { description: 'Indicates whether the action is a summary.' } }),
@@ -521,7 +515,7 @@ export const ruleResponseSchema = schema.object({
         'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.',
     },
   }),
-  schedule: intervalScheduleSchema,
+  schedule: scheduleSchemaV1,
   actions: schema.arrayOf(actionSchema),
   params: ruleParamsSchemaV1,
   mapped_params: schema.maybe(mappedParamsSchema),

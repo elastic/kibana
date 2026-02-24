@@ -15,15 +15,14 @@ import {
   systemActionRequestSchema,
   flappingSchema,
   artifactsSchema,
+  scheduleSchema,
 } from '../../../schemas';
 
 export const updateRuleDataSchema = schema.object(
   {
     name: schema.string(),
     tags: schema.arrayOf(schema.string(), { defaultValue: [] }),
-    schedule: schema.object({
-      interval: schema.string({ validate: validateDuration }),
-    }),
+    schedule: scheduleSchema,
     throttle: schema.maybe(schema.nullable(schema.string({ validate: validateDuration }))),
     params: ruleParamsSchemaWithDefaultValue,
     actions: schema.arrayOf(actionRequestSchema, { defaultValue: [] }),

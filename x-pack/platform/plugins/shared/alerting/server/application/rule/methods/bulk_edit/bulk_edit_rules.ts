@@ -8,6 +8,7 @@
 import Boom from '@hapi/boom';
 import { cloneDeep } from 'lodash';
 import type { SavedObjectsFindResult } from '@kbn/core/server';
+import { isIntervalSchedule } from '@kbn/response-ops-scheduling-types';
 import type { UntypedNormalizedRuleType } from '../../../../rule_type_registry';
 import { updateRuleInMemory } from '../../../../rules_client/common/bulk_edit';
 import type {
@@ -17,7 +18,7 @@ import type {
   UpdateOperationOpts,
 } from '../../../../rules_client/common/bulk_edit/types';
 import { validateAndAuthorizeSystemActions } from '../../../../lib/validate_authorize_system_actions';
-import type { RuleAction, RuleSystemAction } from '../../../../../common';
+import type { RuleAction, RuleSystemAction, RuleSchedule } from '../../../../../common';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { WriteOperations } from '../../../../authorization';
 import { parseDuration } from '../../../../../common';
@@ -106,7 +107,7 @@ async function bulkUpdateTaskSchedules<Params extends RuleParams>(
   }, []);
 
   try {
-    await context.taskManager.bulkUpdateSchedules(taskIds, scheduleOperation.value);
+    await context.taskManager.bulkUpdateSchedules(taskIds, scheduleOperation.value as RuleSchedule);
     context.logger.debug(
       `Successfully updated schedules for underlying tasks: ${taskIds.join(', ')}`
     );
@@ -161,12 +162,7 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleParams>(
         });
 
         // validate the updated schedule interval
-        validateScheduleInterval(
-          context,
-          result.rule.schedule.interval,
-          ruleType.id,
-          domainRule.id
-        );
+        validateScheduleInterval(context, result.rule.schedule, ruleType.id, domainRule.id);
 
         return result;
       },
@@ -395,13 +391,15 @@ async function getUpdatedAttributesFromOperations<Params extends RuleParams>({
 
 function validateScheduleInterval(
   context: RulesClientContext,
-  scheduleInterval: string,
+  schedule: RuleDomain['schedule'],
   ruleTypeId: string,
   ruleId: string
 ): void {
-  if (!scheduleInterval) {
+  if (!isIntervalSchedule(schedule)) {
     return;
   }
+
+  const scheduleInterval = schedule.interval;
   const isIntervalInvalid = parseDuration(scheduleInterval) < context.minimumScheduleIntervalInMs;
   if (isIntervalInvalid && context.minimumScheduleInterval.enforce) {
     throw Error(
@@ -424,6 +422,10 @@ function validateScheduleOperation(
   actions: RuleDomain['actions'],
   ruleId: string
 ): void {
+  if (!isIntervalSchedule(schedule)) {
+    return;
+  }
+
   const scheduleInterval = parseDuration(schedule.interval);
   const actionsWithInvalidThrottles = [];
 

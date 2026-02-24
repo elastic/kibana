@@ -18,7 +18,7 @@ import {
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
 import { alertingAuthorizationMock } from '../../../../authorization/alerting_authorization.mock';
-import type { IntervalSchedule } from '../../../../types';
+import type { Schedule } from '@kbn/response-ops-scheduling-types';
 import { RuleNotifyWhen } from '../../../../types';
 import { RecoveredActionGroup } from '../../../../../common';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
@@ -51,12 +51,24 @@ jest.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invali
 
 jest.mock('uuid', () => {
   let uuid = 100;
-  return { v4: () => `${uuid++}` };
+  const mock = {
+    v4: () => `${uuid++}`,
+    __reset: () => {
+      uuid = 100;
+    },
+  };
+  return mock;
 });
+
+const uuidMock = jest.requireMock('uuid') as { v4: () => string; __reset: () => void };
 
 jest.mock('../get_schedule_frequency', () => ({
   validateScheduleLimit: jest.fn(),
 }));
+
+const { validateScheduleLimit } = jest.requireMock('../get_schedule_frequency') as {
+  validateScheduleLimit: jest.Mock;
+};
 
 const bulkMarkApiKeysForInvalidationMock = bulkMarkApiKeysForInvalidation as jest.Mock;
 const taskManager = taskManagerMock.createStart();
@@ -99,6 +111,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
 };
 
 beforeEach(() => {
+  uuidMock.__reset();
   getBeforeSetup(rulesClientParams, taskManager, ruleTypeRegistry);
   (auditLogger.log as jest.Mock).mockClear();
 });
@@ -699,7 +712,7 @@ describe('update()', () => {
             params: {
               foo: true,
             },
-            uuid: '103',
+            uuid: '100',
           },
           {
             group: 'default',
@@ -708,7 +721,7 @@ describe('update()', () => {
             params: {
               foo: true,
             },
-            uuid: '104',
+            uuid: '101',
           },
           {
             group: 'custom',
@@ -717,7 +730,7 @@ describe('update()', () => {
             params: {
               foo: true,
             },
-            uuid: '105',
+            uuid: '102',
           },
         ],
         alertTypeId: 'myType',
@@ -947,13 +960,13 @@ describe('update()', () => {
             params: {
               foo: true,
             },
-            uuid: '106',
+            uuid: '100',
           },
           {
             actionRef: 'system_action:system_action-id',
             actionTypeId: 'test',
             params: {},
-            uuid: '107',
+            uuid: '101',
           },
         ],
         muteAll: false,
@@ -1184,7 +1197,7 @@ describe('update()', () => {
             actionTypeId: 'test',
             group: 'default',
             params: { foo: true },
-            uuid: '108',
+            uuid: '100',
           },
         ],
         alertTypeId: 'myType',
@@ -1395,7 +1408,7 @@ describe('update()', () => {
             "params": Object {
               "foo": true,
             },
-            "uuid": "109",
+            "uuid": "100",
           },
         ],
         "alertTypeId": "myType",
@@ -1579,7 +1592,7 @@ describe('update()', () => {
             "params": Object {
               "foo": true,
             },
-            "uuid": "110",
+            "uuid": "100",
           },
         ],
         "alertTypeId": "myType",
@@ -2151,11 +2164,33 @@ describe('update()', () => {
   });
 
   describe('updating an alert schedule', () => {
+    const rruleSchedule = {
+      rrule: {
+        dtstart: '2019-02-12T00:00:00.000Z',
+        freq: 3, // DAILY
+        interval: 1,
+        tzid: 'UTC',
+        byhour: [22],
+        byminute: [0],
+      },
+    };
+
+    const rruleScheduleDifferent = {
+      rrule: {
+        dtstart: '2019-02-12T00:00:00.000Z',
+        freq: 3, // DAILY
+        interval: 1,
+        tzid: 'UTC',
+        byhour: [10],
+        byminute: [30],
+      },
+    };
+
     function mockApiCalls(
       alertId: string,
       taskId: string,
-      currentSchedule: IntervalSchedule,
-      updatedSchedule: IntervalSchedule
+      currentSchedule: Schedule,
+      updatedSchedule: Schedule
     ) {
       // mock return values from deps
       ruleTypeRegistry.get.mockReturnValueOnce({
@@ -2284,6 +2319,262 @@ describe('update()', () => {
       });
 
       expect(taskManager.bulkUpdateSchedules).toHaveBeenCalledWith([taskId], { interval: '1m' });
+    });
+
+    test('updating the alert schedule to rrule should call taskManager.bulkUpdateSchedules with rrule', async () => {
+      const alertId = uuidv4();
+      const taskId = uuidv4();
+
+      mockApiCalls(alertId, taskId, { interval: '1m' }, rruleSchedule);
+
+      await rulesClient.update({
+        id: alertId,
+        data: {
+          schedule: rruleSchedule,
+          name: 'abc',
+          tags: ['foo'],
+          params: {
+            bar: true,
+          },
+          actions: [
+            {
+              group: 'default',
+              id: '1',
+              params: {
+                foo: true,
+              },
+              frequency: {
+                summary: false,
+                notifyWhen: 'onActionGroupChange',
+                throttle: null,
+              },
+            },
+          ],
+        },
+      });
+
+      expect(taskManager.bulkUpdateSchedules).toHaveBeenCalledWith([taskId], rruleSchedule);
+    });
+
+    test('updating the alert without changing the schedule (rrule unchanged) should not call taskManager.bulkUpdateSchedules', async () => {
+      const alertId = uuidv4();
+      const taskId = uuidv4();
+
+      mockApiCalls(alertId, taskId, rruleSchedule, rruleSchedule);
+
+      await rulesClient.update({
+        id: alertId,
+        data: {
+          schedule: rruleSchedule,
+          name: 'abc',
+          tags: ['foo'],
+          params: {
+            bar: true,
+          },
+          actions: [
+            {
+              group: 'default',
+              id: '1',
+              params: {
+                foo: true,
+              },
+              frequency: {
+                summary: false,
+                notifyWhen: 'onActionGroupChange',
+                throttle: null,
+              },
+            },
+          ],
+        },
+      });
+
+      expect(taskManager.bulkUpdateSchedules).not.toHaveBeenCalled();
+    });
+
+    test('updating the alert schedule from rrule to interval should call taskManager.bulkUpdateSchedules with interval', async () => {
+      const alertId = uuidv4();
+      const taskId = uuidv4();
+      const newInterval = { interval: '5m' as const };
+
+      mockApiCalls(alertId, taskId, rruleSchedule, newInterval);
+
+      await rulesClient.update({
+        id: alertId,
+        data: {
+          schedule: newInterval,
+          name: 'abc',
+          tags: ['foo'],
+          params: {
+            bar: true,
+          },
+          actions: [
+            {
+              group: 'default',
+              id: '1',
+              params: {
+                foo: true,
+              },
+              frequency: {
+                summary: false,
+                notifyWhen: 'onActionGroupChange',
+                throttle: null,
+              },
+            },
+          ],
+        },
+      });
+
+      expect(taskManager.bulkUpdateSchedules).toHaveBeenCalledWith([taskId], newInterval);
+    });
+
+    test('updating the alert schedule from one rrule to another rrule should call taskManager.bulkUpdateSchedules with new rrule', async () => {
+      const alertId = uuidv4();
+      const taskId = uuidv4();
+
+      mockApiCalls(alertId, taskId, rruleSchedule, rruleScheduleDifferent);
+
+      await rulesClient.update({
+        id: alertId,
+        data: {
+          schedule: rruleScheduleDifferent,
+          name: 'abc',
+          tags: ['foo'],
+          params: {
+            bar: true,
+          },
+          actions: [
+            {
+              group: 'default',
+              id: '1',
+              params: {
+                foo: true,
+              },
+              frequency: {
+                summary: false,
+                notifyWhen: 'onActionGroupChange',
+                throttle: null,
+              },
+            },
+          ],
+        },
+      });
+
+      expect(taskManager.bulkUpdateSchedules).toHaveBeenCalledWith(
+        [taskId],
+        rruleScheduleDifferent
+      );
+    });
+
+    test('when updating schedule to rrule, validateScheduleLimit is not called', async () => {
+      const alertId = uuidv4();
+      const taskId = uuidv4();
+
+      validateScheduleLimit.mockClear();
+      mockApiCalls(alertId, taskId, { interval: '1m' }, rruleSchedule);
+
+      await rulesClient.update({
+        id: alertId,
+        data: {
+          schedule: rruleSchedule,
+          name: 'abc',
+          tags: ['foo'],
+          params: {
+            bar: true,
+          },
+          actions: [
+            {
+              group: 'default',
+              id: '1',
+              params: {
+                foo: true,
+              },
+              frequency: {
+                summary: false,
+                notifyWhen: 'onActionGroupChange',
+                throttle: null,
+              },
+            },
+          ],
+        },
+      });
+
+      expect(validateScheduleLimit).not.toHaveBeenCalled();
+    });
+
+    test('update result includes the rrule schedule when updating to rrule', async () => {
+      const alertId = uuidv4();
+      const taskId = uuidv4();
+
+      mockApiCalls(alertId, taskId, { interval: '1m' }, rruleSchedule);
+
+      const result = await rulesClient.update({
+        id: alertId,
+        data: {
+          schedule: rruleSchedule,
+          name: 'abc',
+          tags: ['foo'],
+          params: {
+            bar: true,
+          },
+          actions: [
+            {
+              group: 'default',
+              id: '1',
+              params: {
+                foo: true,
+              },
+              frequency: {
+                summary: false,
+                notifyWhen: 'onActionGroupChange',
+                throttle: null,
+              },
+            },
+          ],
+        },
+      });
+
+      expect(result.schedule).toEqual(rruleSchedule);
+    });
+
+    test('logs when update of schedule of an alerts underlying task fails (rrule schedule)', async () => {
+      const alertId = uuidv4();
+      const taskId = uuidv4();
+
+      mockApiCalls(alertId, taskId, { interval: '1m' }, rruleSchedule);
+
+      taskManager.bulkUpdateSchedules.mockReset();
+      taskManager.bulkUpdateSchedules.mockRejectedValue(new Error('Failed to run alert'));
+
+      await rulesClient.update({
+        id: alertId,
+        data: {
+          schedule: rruleSchedule,
+          name: 'abc',
+          tags: ['foo'],
+          params: {
+            bar: true,
+          },
+          actions: [
+            {
+              group: 'default',
+              id: '1',
+              params: {
+                foo: true,
+              },
+              frequency: {
+                summary: false,
+                notifyWhen: 'onActionGroupChange',
+                throttle: null,
+              },
+            },
+          ],
+        },
+      });
+
+      expect(taskManager.bulkUpdateSchedules).toHaveBeenCalledWith([taskId], rruleSchedule);
+      expect(rulesClientParams.logger.error).toHaveBeenCalledWith(
+        `Rule update failed to run its underlying task. TaskManager bulkUpdateSchedules failed with Error: Failed to run alert`
+      );
     });
 
     test('updating the alert without changing the schedule should not call taskManager.bulkUpdateSchedules', async () => {
@@ -2723,7 +3014,7 @@ describe('update()', () => {
             params: {
               foo: true,
             },
-            uuid: '145',
+            uuid: '100',
           },
         ],
         alertTypeId: 'myType',
@@ -2840,6 +3131,10 @@ describe('update()', () => {
       id: '1',
       type: RULE_SAVED_OBJECT_TYPE,
       attributes: {
+        name: 'abc',
+        tags: ['foo'],
+        alertTypeId: 'myType',
+        consumer: 'myApp',
         enabled: true,
         schedule: { interval: '1m' },
         params: {
@@ -2877,6 +3172,11 @@ describe('update()', () => {
           lastExecutionDate: '2019-02-12T21:01:22.479Z',
           status: 'pending',
         },
+        muteAll: false,
+        legacyId: null,
+        snoozeSchedule: [],
+        mutedInstanceIds: [],
+        revision: 1,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       },
@@ -3314,7 +3614,7 @@ describe('update()', () => {
             frequency: { notifyWhen: 'onActiveAlert', summary: false, throttle: null },
             group: 'default',
             params: { foo: true },
-            uuid: '152',
+            uuid: '100',
           },
         ],
         alertTypeId: 'myType',
@@ -3479,7 +3779,7 @@ describe('update()', () => {
             "params": Object {
               "foo": true,
             },
-            "uuid": "153",
+            "uuid": "100",
           },
         ],
         "alertTypeId": "myType",
@@ -3716,13 +4016,13 @@ describe('update()', () => {
               params: {
                 foo: true,
               },
-              uuid: '155',
+              uuid: '100',
             },
             {
               actionRef: 'system_action:system_action-id',
               actionTypeId: 'test',
               params: {},
-              uuid: '156',
+              uuid: '101',
             },
           ],
           executionStatus: {
@@ -3864,13 +4164,13 @@ describe('update()', () => {
           params: {
             foo: true,
           },
-          uuid: '157',
+          uuid: '100',
         },
         {
           actionRef: 'system_action:system_action-id',
           actionTypeId: 'test',
           params: {},
-          uuid: '158',
+          uuid: '101',
         },
       ]);
     });

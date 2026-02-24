@@ -24,6 +24,8 @@ import { artifactsSchema } from './artifacts_schema';
 
 export const mappedParamsSchema = schema.recordOf(schema.string(), schema.maybe(schema.any()));
 
+export { scheduleRruleSchemaV3 as scheduleRruleSchema } from '@kbn/task-manager-plugin/server';
+
 export const scheduleSchema = schema.oneOf([
   schema.object({
     interval: schema.string(),

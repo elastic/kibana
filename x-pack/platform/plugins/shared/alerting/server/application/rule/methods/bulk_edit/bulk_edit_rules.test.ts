@@ -161,6 +161,17 @@ describe('bulkEdit()', () => {
     },
   };
 
+  const rruleSchedule = {
+    rrule: {
+      dtstart: '2019-02-12T00:00:00.000Z',
+      freq: 3,
+      interval: 1,
+      tzid: 'UTC',
+      byhour: [22],
+      byminute: [0],
+    },
+  };
+
   const mockCreatePointInTimeFinderAsInternalUser = (
     response = { saved_objects: [existingDecryptedRule] }
   ) => {
@@ -3242,6 +3253,53 @@ describe('bulkEdit()', () => {
       expect(validateScheduleLimit).toHaveBeenCalledTimes(1);
     });
 
+    test('should call validateScheduleLimit with empty updatedInterval when bulk edit sets schedule to rrule', async () => {
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [
+          {
+            id: '1',
+            type: RULE_SAVED_OBJECT_TYPE,
+            attributes: {
+              enabled: true,
+              tags: ['foo'],
+              alertTypeId: 'myType',
+              schedule: rruleSchedule,
+              consumer: 'myApp',
+              scheduledTaskId: 'task-123',
+              executionStatus: {
+                lastExecutionDate: '2019-02-12T21:01:22.479Z',
+                status: 'pending',
+              },
+              params: {},
+              throttle: null,
+              notifyWhen: null,
+              actions: [],
+              revision: 0,
+            },
+            references: [],
+            version: '123',
+          },
+        ],
+      });
+
+      await rulesClient.bulkEdit({
+        operations: [
+          {
+            field: 'schedule',
+            operation: 'set',
+            value: rruleSchedule,
+          },
+        ],
+      });
+
+      expect(validateScheduleLimit).toHaveBeenCalledTimes(1);
+      expect(validateScheduleLimit).toHaveBeenCalledWith({
+        context: expect.anything(),
+        prevInterval: expect.any(Array),
+        updatedInterval: [],
+      });
+    });
+
     test('should not validate scheduling on system actions', async () => {
       mockCreatePointInTimeFinderAsInternalUser({
         saved_objects: [
@@ -3381,6 +3439,49 @@ describe('bulkEdit()', () => {
       expect(taskManager.bulkUpdateSchedules).toHaveBeenCalledWith(['task-123'], {
         interval: '10m',
       });
+    });
+
+    test('should call task manager bulkUpdateSchedules with rrule when schedule operation sets rrule', async () => {
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [
+          {
+            id: '1',
+            type: RULE_SAVED_OBJECT_TYPE,
+            attributes: {
+              enabled: true,
+              tags: ['foo'],
+              alertTypeId: 'myType',
+              schedule: rruleSchedule,
+              consumer: 'myApp',
+              scheduledTaskId: 'task-123',
+              executionStatus: {
+                lastExecutionDate: '2019-02-12T21:01:22.479Z',
+                status: 'pending',
+              },
+              params: {},
+              throttle: null,
+              notifyWhen: null,
+              actions: [],
+            },
+            references: [],
+            version: '123',
+          },
+        ],
+      });
+
+      await rulesClient.bulkEdit({
+        filter: '',
+        operations: [
+          {
+            field: 'schedule',
+            operation: 'set',
+            value: rruleSchedule,
+          },
+        ],
+      });
+
+      expect(taskManager.bulkUpdateSchedules).toHaveBeenCalledTimes(1);
+      expect(taskManager.bulkUpdateSchedules).toHaveBeenCalledWith(['task-123'], rruleSchedule);
     });
 
     test('should not call task manager method bulkCreateSchedules if operation is not set schedule', async () => {

@@ -131,7 +131,8 @@ describe('createRuleRoute', () => {
   };
 
   const ruleToCreate: CreateRuleRequestBodyV1<{ bar: boolean }> = {
-    ...pick(mockedAlert, 'consumer', 'name', 'schedule', 'tags', 'params', 'throttle', 'enabled'),
+    ...pick(mockedAlert, 'consumer', 'name', 'tags', 'params', 'throttle', 'enabled'),
+    schedule: { interval: '10s' },
     rule_type_id: mockedAlert.alertTypeId,
     notify_when: mockedAlert.notifyWhen,
     actions: [

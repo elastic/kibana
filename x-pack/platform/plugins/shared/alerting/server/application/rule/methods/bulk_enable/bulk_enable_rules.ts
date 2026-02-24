@@ -19,6 +19,7 @@ import type { Logger } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import type { TaskInstanceWithDeprecatedFields } from '@kbn/task-manager-plugin/server/task';
+import { isIntervalSchedule } from '@kbn/response-ops-scheduling-types';
 import { bulkCreateRulesSo } from '../../../../data/rule';
 import type { RawRule } from '../../../../types';
 import type { RuleDomain, RuleParams } from '../../types';
@@ -45,7 +46,10 @@ import type { BulkEnableRulesParams, BulkEnableRulesResult } from './types';
 import { bulkEnableRulesParamsSchema } from './schemas';
 import { transformRuleAttributesToRuleDomain, transformRuleDomainToRule } from '../../transforms';
 import { ruleDomainSchema } from '../../schemas';
-import { isIntervalSchedule } from '@kbn/response-ops-scheduling-types';
+
+const isValidInterval = (interval: string | undefined): interval is string => {
+  return interval !== undefined;
+};
 
 /**
  * Updating too many rules in parallel can cause the denial of service of the
@@ -190,8 +194,13 @@ const bulkEnableRulesWithOCC = async (
       await rulesFinder.close();
 
       const updatedInterval = rulesFinderRules
-        .filter((rule) => isIntervalSchedule(rule.attributes.schedule))
-        .map((rule) => rule.attributes.schedule.interval);
+        .filter((rule) => rule.attributes.schedule)
+        .map((rule) =>
+          isIntervalSchedule(rule.attributes.schedule)
+            ? rule.attributes.schedule.interval
+            : undefined
+        )
+        .filter(isValidInterval);
 
       const validationPayload = await validateScheduleLimit({
         context,
