@@ -140,7 +140,7 @@
     "@kbn/kql",
     "@kbn/core-base-browser-mocks",
     "@kbn/react-kibana-context-env",
-    "@kbn/scout"
+    "@kbn/scout",
   ],
   "exclude": ["target/**/*"]
 }
