@@ -32,23 +32,6 @@ Important: Do not post GitHub comments unless explicitly stated.
   - available fixtures (`docs/extend/scout/fixtures.md` + local `test/scout/**/fixtures`)
   - existing page objects, API services, and fixtures (in `@kbn/scout`, solution Scout packages, and plugin-local `test/scout/**`) before suggesting brand-new helpers
 
-## Sample
-
-### Findings
-
-- **Reuse-first — Prefer existing fixtures/page objects**
-  - **Explanation**: PR introduces bespoke selectors/helpers where existing `pageObjects`/fixtures would keep tests simpler and more maintainable.
-  - **Evidence**: `<file:line>`
-  - **Suggested change**: Use existing `pageObjects`/fixtures; if adding a helper, register it via fixtures in the right scope.
-- **Fixture boundaries — Use `apiClient` for the endpoint under test**
-  - **Explanation**: Calling the endpoint under test via `apiServices` hides auth scope and reduces readability. `apiServices`/`kbnClient` are better suited for setup/teardown only.
-  - **Evidence**: `<file:line>`
-  - **Suggested change**: Call the endpoint with `apiClient`; keep `apiServices`/`kbnClient` for setup/teardown.
-- **Flake traps — Avoid `waitForTimeout()`**
-  - **Explanation**: Time-based waits are a common source of flakiness. Prefer auto-waiting + explicit readiness signals/web-first assertions.
-  - **Evidence**: `<file:line>`
-  - **Suggested change**: Replace with web-first assertions and explicit readiness waits.
-
 ## Output format
 
 Output **only** the applicable sections below. Use headings and lists (**no tables**). Group issues by priority: `blocker` → `major` → `minor` → `nit`. Omit empty priorities.
