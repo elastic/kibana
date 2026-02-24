@@ -7,6 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
+import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentPanel, DashboardAttachmentData } from '@kbn/dashboard-agent-common';
 import {
   DASHBOARD_ATTACHMENT_TYPE,
@@ -18,6 +19,7 @@ import type { Logger } from '@kbn/core/server';
 import { type AttachmentVersion, getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import { MARKDOWN_EMBEDDABLE_TYPE } from '@kbn/dashboard-markdown/server';
 import type { LensApiSchemaType } from '@kbn/lens-embeddable-utils';
+import { z } from '@kbn/zod';
 
 /**
  * Failure record for tracking visualization errors.
@@ -35,54 +37,85 @@ export const getErrorMessage = (error: unknown): string => {
   return error instanceof Error ? error.message : String(error);
 };
 
-/**
- * Filters out visualization IDs from an array.
- * Used by manage_dashboard to remove visualizations before rebuilding the dashboard.
- */
-export const filterVisualizationIds = (
-  visualizationIds: string[],
-  idsToRemove: string[]
-): string[] => {
-  const removeSet = new Set(idsToRemove);
-  return visualizationIds.filter((id) => !removeSet.has(id));
+const visualizationAttachmentDataSchema = z.object({
+  visualization: z.record(z.unknown()),
+  query: z.string().optional(),
+});
+
+const resolvePanelsFromVisualizationAttachment = (data: unknown): LensAttachmentPanel[] => {
+  const parseResult = visualizationAttachmentDataSchema.safeParse(data);
+  if (!parseResult.success) {
+    throw new Error('Visualization attachment does not contain a valid visualization payload.');
+  }
+
+  const { visualization, query } = parseResult.data;
+  const title =
+    typeof visualization.title === 'string'
+      ? visualization.title
+      : query ?? 'Generated visualization';
+
+  return [
+    {
+      type: 'lens',
+      panelId: uuidv4(),
+      visualization: visualization as LensApiSchemaType,
+      title,
+      ...(query ? { query } : {}),
+    },
+  ];
+};
+
+const resolvePanelsFromAttachment = (type: string, data: unknown): AttachmentPanel[] => {
+  if (type === AttachmentType.visualization) {
+    return resolvePanelsFromVisualizationAttachment(data);
+  }
+
+  throw new Error(
+    `Attachment type "${type}" is not supported in add_panels_from_attachments. Only "${AttachmentType.visualization}" is supported.`
+  );
 };
 
 /**
- * Resolves existing visualization attachments and adds them as dashboard panels.
- * - simply looks up pre-built configurations.
+ * Resolves attachment ids into dashboard panel entries.
+ * Supports visualization attachments and dashboard-compatible panel payloads.
  */
-export const resolveExistingVisualizations = async ({
-  visualizationIds,
+export const resolvePanelsFromAttachments = async ({
+  attachmentIds,
   attachments,
   logger,
 }: {
-  visualizationIds?: string[];
+  attachmentIds?: string[];
   attachments: AttachmentStateManager;
   logger: Logger;
-}): Promise<{ panels: LensAttachmentPanel[]; failures: VisualizationFailure[] }> => {
-  if (!visualizationIds || visualizationIds.length === 0) {
+}): Promise<{ panels: AttachmentPanel[]; failures: VisualizationFailure[] }> => {
+  if (!attachmentIds || attachmentIds.length === 0) {
     return { panels: [], failures: [] };
   }
 
-  const panels: LensAttachmentPanel[] = [];
+  const panels: AttachmentPanel[] = [];
   const failures: VisualizationFailure[] = [];
 
-  for (const attachmentId of visualizationIds) {
+  for (const attachmentId of attachmentIds) {
     try {
-      const vizConfig = resolveLensConfigFromAttachment(attachmentId, attachments);
+      const attachmentRecord = attachments.getAttachmentRecord(attachmentId);
+      if (!attachmentRecord) {
+        throw new Error(`Attachment "${attachmentId}" not found.`);
+      }
 
-      const panelEntry: LensAttachmentPanel = {
-        type: 'lens',
-        panelId: uuidv4(),
-        visualization: vizConfig,
-        title: vizConfig.title,
-      };
-      panels.push(panelEntry);
+      const latestVersion = getLatestVersion(attachmentRecord);
+      if (!latestVersion) {
+        throw new Error(`Attachment "${attachmentId}" does not have a readable version.`);
+      }
+
+      const resolvedPanels = resolvePanelsFromAttachment(attachmentRecord.type, latestVersion.data);
+      panels.push(...resolvedPanels);
     } catch (error) {
       const errorMessage = getErrorMessage(error);
-      logger.error(`Error resolving visualization attachment "${attachmentId}": ${errorMessage}`);
+      logger.error(
+        `Error resolving dashboard panels from attachment "${attachmentId}": ${errorMessage}`
+      );
       failures.push({
-        type: 'existing_visualization',
+        type: 'attachment_panels',
         identifier: attachmentId,
         error: errorMessage,
       });
@@ -90,7 +123,7 @@ export const resolveExistingVisualizations = async ({
   }
 
   logger.debug(
-    `Successfully resolved ${panels.length}/${visualizationIds.length} existing visualizations`
+    `Resolved ${panels.length} panels from ${attachmentIds.length} attachment references`
   );
 
   return { panels, failures };
@@ -189,56 +222,6 @@ export const getRemovedPanels = (
     panelsToRemove,
     panelsToKeep,
   };
-};
-
-const isRecord = (value: unknown): value is Record<string, unknown> => {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
-};
-
-const extractLensVisualization = (data: unknown): LensApiSchemaType | undefined => {
-  if (!isRecord(data)) {
-    return undefined;
-  }
-
-  const { visualization } = data;
-  if (!isRecord(visualization)) {
-    return undefined;
-  }
-
-  return visualization as LensApiSchemaType;
-};
-
-/**
- * Resolves a Lens configuration from a visualization attachment.
- * Always uses the latest version of the attachment.
- * @param attachmentId - The visualization attachment ID
- * @param attachments - The attachment state manager
- */
-const resolveLensConfigFromAttachment = (
-  attachmentId: string,
-  attachments: AttachmentStateManager
-): LensApiSchemaType => {
-  const attachmentRecord = attachments.getAttachmentRecord(attachmentId);
-
-  if (!attachmentRecord) {
-    throw new Error(`Attachment "${attachmentId}" not found.`);
-  }
-  const latestVersion = getLatestVersion(attachmentRecord);
-
-  if (!latestVersion) {
-    throw new Error(
-      `Visualization attachment "${attachmentId}" was not found. Make sure you're using an attachment_id from a previous create_visualizations call.`
-    );
-  }
-
-  const visualization = extractLensVisualization(latestVersion.data);
-  if (!visualization) {
-    throw new Error(
-      `Visualization attachment "${attachmentId}" does not contain a valid visualization config.`
-    );
-  }
-
-  return visualization;
 };
 
 /**
