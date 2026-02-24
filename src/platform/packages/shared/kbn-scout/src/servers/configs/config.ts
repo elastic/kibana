@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { ELASTIC_SERVERLESS_SUPERUSER, ELASTIC_SERVERLESS_SUPERUSER_PASSWORD } from '@kbn/es';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { Schema } from 'joi';
 import { cloneDeepWith, get, has, toPath } from 'lodash';
@@ -15,6 +16,8 @@ import * as Url from 'url';
 import { schema } from './schema';
 import { formatCurrentDate, getProjectType, getOrganizationId } from './utils/common';
 import type { ScoutServerConfig, ScoutTestConfig } from '../../types';
+
+const LINKED_PROJECT_PORT = 9230;
 
 const $values = Symbol('values');
 
@@ -133,6 +136,24 @@ export class Config {
         username: this.get('servers.kibana.username'),
         password: this.get('servers.kibana.password'),
       },
+
+      ...(this.get('esServerlessOptions.csp', false)
+        ? {
+            linkedProject: {
+              hosts: {
+                elasticsearch: Url.format({
+                  protocol: this.get('servers.elasticsearch.protocol'),
+                  hostname: this.get('servers.elasticsearch.hostname'),
+                  port: LINKED_PROJECT_PORT,
+                }),
+              },
+              auth: {
+                username: ELASTIC_SERVERLESS_SUPERUSER,
+                password: ELASTIC_SERVERLESS_SUPERUSER_PASSWORD,
+              },
+            },
+          }
+        : {}),
 
       metadata: {
         generatedOn: formatCurrentDate(),

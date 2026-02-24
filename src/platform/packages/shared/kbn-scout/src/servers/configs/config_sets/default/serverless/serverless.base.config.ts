@@ -189,7 +189,9 @@ export const defaultConfig: ScoutServerConfig = {
           type: 'elasticsearch',
           is_default: true,
           is_default_monitoring: true,
-          hosts: ['https://localhost:9200'],
+          hosts: [
+            `${servers.elasticsearch.protocol}://${servers.elasticsearch.hostname}:${servers.elasticsearch.port}`,
+          ],
         },
       ])}`,
     ],

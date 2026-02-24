@@ -8,13 +8,16 @@
  */
 
 import type { ArtifactLicense, ServerlessProjectType } from '@kbn/es';
-import { isServerlessProjectType } from '@kbn/es/src/utils';
+import { isServerlessProjectType, runLinkedServerlessCluster } from '@kbn/es/src/utils';
+import { MOCK_IDP_UIAM_PROJECT_ID2 } from '@kbn/mock-idp-utils';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { cleanupElasticsearch, createTestEsCluster, esTestConfig } from '@kbn/test';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { resolve } from 'path';
 import Url from 'url';
 import type { Config } from './configs';
+
+const LINKED_PROJECT_PORT = 9230;
 
 interface RunElasticsearchOptions {
   log: ToolingLog;
@@ -84,25 +87,24 @@ export async function runElasticsearch(
     config,
   });
 
-  // Enable it to debug why SAML callback randomly returns 401
-  // log.info('Enable authc debug logs for ES');
-  // const clientUrl = new URL(
-  //   Url.format({
-  //     protocol: options.config.get('servers.elasticsearch.protocol'),
-  //     hostname: options.config.get('servers.elasticsearch.hostname'),
-  //     port: options.config.get('servers.elasticsearch.port'),
-  //   })
-  // );
-  // clientUrl.username = options.config.get('servers.kibana.username');
-  // clientUrl.password = options.config.get('servers.kibana.password');
-  // const esClient = createEsClientForTesting({
-  //   esUrl: clientUrl.toString(),
-  // });
-  // await esClient.cluster.putSettings({
-  //   persistent: {
-  //     'logger.org.elasticsearch.xpack.security.authc': 'debug',
-  //   },
-  // });
+  // Start linked cluster for Cross Project Search after origin is ready
+  if (config.esServerlessOptions?.linkedProject) {
+    const serverlessOptions = {
+      basePath: resolve(REPO_ROOT, '.es'),
+      esArgs: config.esArgs,
+      dataPath: `stateless-cluster-${name ?? 'scout'}`,
+      ...config.esServerlessOptions,
+      port: config.port,
+      clean: true,
+      background: true,
+      files: config.files,
+      ssl: config.ssl,
+      kill: false,
+      waitForReady: true,
+    };
+
+    await runLinkedServerlessCluster(log, serverlessOptions);
+  }
 
   return async () => {
     await cleanupElasticsearch(node, config.serverless, logsDir, log);
@@ -160,6 +162,7 @@ interface EsServerlessOptions {
   kibanaUrl: string;
   tag?: string;
   image?: string;
+  linkedProject?: { projectId: string; port: number };
 }
 
 function getESServerlessOptions(
@@ -193,6 +196,8 @@ function getESServerlessOptions(
     throw new Error(`Unsupported serverless projectType: ${projectType}`);
   }
 
+  const csp: boolean = config.get('esServerlessOptions.csp', false);
+
   const commonOptions = {
     projectType,
     host: serverlessHost,
@@ -203,6 +208,14 @@ function getESServerlessOptions(
       hostname: config.get('servers.kibana.hostname'),
       port: config.get('servers.kibana.port'),
     }),
+    ...(csp
+      ? {
+          linkedProject: {
+            projectId: MOCK_IDP_UIAM_PROJECT_ID2,
+            port: LINKED_PROJECT_PORT,
+          },
+        }
+      : {}),
   };
 
   if (esServerlessImageUrlOrTag) {

@@ -25,7 +25,7 @@ export interface ScoutServerConfig {
     ssl: boolean;
     secureFiles?: string[];
   };
-  esServerlessOptions?: { uiam: boolean };
+  esServerlessOptions?: { uiam: boolean; csp?: boolean };
   kbnTestServer: {
     env: any;
     buildArgs: string[];

@@ -197,7 +197,9 @@ export const defaultConfig: ScoutServerConfig = {
           type: 'elasticsearch',
           is_default: true,
           is_default_monitoring: true,
-          hosts: ['https://localhost:9200'],
+          hosts: [
+            `${servers.elasticsearch.protocol}://${servers.elasticsearch.hostname}:${servers.elasticsearch.port}`,
+          ],
         },
       ])}`,
       // Agent policies are now created via Fleet API using the helper function from @kbn-scout

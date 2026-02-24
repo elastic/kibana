@@ -28,3 +28,20 @@ export function getEsArchiver(esClient: EsClient, kbnClient: KbnClient, log: Sco
 
   return esArchiverInstance;
 }
+
+let linkedEsArchiverInstance: EsArchiver | undefined;
+
+export function getLinkedEsArchiver(esClient: EsClient, kbnClient: KbnClient, log: ScoutLogger) {
+  if (!linkedEsArchiverInstance) {
+    linkedEsArchiverInstance = new EsArchiver({
+      log,
+      client: esClient,
+      kbnClient,
+      baseDir: REPO_ROOT,
+    });
+
+    log.serviceLoaded('linkedEsArchiver');
+  }
+
+  return linkedEsArchiverInstance;
+}

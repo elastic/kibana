@@ -14,6 +14,8 @@ export {
   ELASTIC_SERVERLESS_SUPERUSER,
   ELASTIC_SERVERLESS_SUPERUSER_PASSWORD,
   SERVERLESS_NODES,
+  getServerlessNodes,
+  getSharedServerlessParams,
   getDockerFileMountPath,
   verifyDockerInstalled,
   maybeCreateDockerNetwork,
