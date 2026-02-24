@@ -15,7 +15,7 @@ import type {
   UpdateExceptionListItemOptions,
 } from '@kbn/lists-plugin/server';
 import { v4 as uuidv4 } from 'uuid';
-import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
 import { securityTool } from './constants';
 
@@ -190,7 +190,9 @@ export const exceptionListsTool = ({
         case 'find': {
           const namespaceType =
             input.params.namespaceType ??
-            (input.params.listId === ENDPOINT_LIST_ID ? 'agnostic' : 'single');
+            (input.params.listId === ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id
+              ? 'agnostic'
+              : 'single');
           const res = await exceptionsClient.findExceptionListItem({
             listId: input.params.listId,
             namespaceType,
@@ -294,7 +296,9 @@ export const exceptionListsTool = ({
             const itemId: string = typeof merged.item_id === 'string' ? merged.item_id : uuidv4();
             const namespaceType =
               input.params.namespaceType ??
-              (input.params.listId === ENDPOINT_LIST_ID ? 'agnostic' : 'single');
+              (input.params.listId === ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id
+                ? 'agnostic'
+                : 'single');
 
             const osTypes = (validation.data.os_types ??
               []) as CreateExceptionListItemOptions['osTypes'];
@@ -305,7 +309,7 @@ export const exceptionListsTool = ({
             // Special case: endpoint exceptions list lives in the agnostic namespace and uses a dedicated API.
             // Users often refer to it by listId "endpoint_list".
             const res =
-              input.params.listId === ENDPOINT_LIST_ID
+              input.params.listId === ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id
                 ? await exceptionsClient.createEndpointListItem({
                     comments: [],
                     description: validation.data.description,
@@ -356,7 +360,9 @@ export const exceptionListsTool = ({
                     listId: input.params.listId,
                     namespaceType:
                       input.params.namespaceType ??
-                      (input.params.listId === ENDPOINT_LIST_ID ? 'agnostic' : 'single'),
+                      (input.params.listId === ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id
+                        ? 'agnostic'
+                        : 'single'),
                     ...(Array.isArray(reason) ? { validation_reasons: reason } : {}),
                     expected_params_example: {
                       operation: 'create',
@@ -364,7 +370,9 @@ export const exceptionListsTool = ({
                         listId: input.params.listId,
                         namespaceType:
                           input.params.namespaceType ??
-                          (input.params.listId === ENDPOINT_LIST_ID ? 'agnostic' : 'single'),
+                          (input.params.listId === ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id
+                            ? 'agnostic'
+                            : 'single'),
                         item: validation.data,
                         confirm: true,
                       },
@@ -428,7 +436,7 @@ export const exceptionListsTool = ({
               ...merged,
             };
 
-            const isEndpoint = existing?.list_id === ENDPOINT_LIST_ID;
+            const isEndpoint = existing?.list_id === ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id;
 
             const updateParams: UpdateExceptionListItemOptions = {
               _version: existing?._version,

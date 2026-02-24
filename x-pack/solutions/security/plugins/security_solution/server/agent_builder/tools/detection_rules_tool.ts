@@ -244,7 +244,7 @@ export const detectionRulesTool = (
           const rulesClient = await pluginsStart.alerting.getRulesClientWithRequest(request);
           const actionsClient = await pluginsStart.actions.getActionsClientWithRequest(request);
           const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
-          const license = pluginsStart.licensing.license;
+          const license = await pluginsStart.licensing.getLicense();
 
           // Build ML authorization
           const mlAuthz = buildMlAuthz({

@@ -16,7 +16,7 @@ import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-i
 import { buildResponse } from '../../../lib/build_response';
 import type { ElasticAssistantRequestHandlerContext } from '../../../types';
 import { WorkflowDataClient, AlertGroupingWorkflowExecutor } from '../../../lib/alert_grouping';
-import type { WorkflowExecutionStatus } from '../../../lib/alert_grouping/types';
+import { WorkflowExecutionStatus } from '../../../lib/alert_grouping/types';
 import {
   createCase,
   attachAlertsToCase,
@@ -563,14 +563,8 @@ export const registerWorkflowExecutionRoutes = (
                   }
 
                   // Extract attack discovery details for comparison
-                  const ad1Summary =
-                    ad1.attackDiscoveries
-                      ?.map((d) => `Title: ${d.title}\nSummary: ${d.summaryMarkdown}`)
-                      .join('\n\n') ?? 'No attack discoveries';
-                  const ad2Summary =
-                    ad2.attackDiscoveries
-                      ?.map((d) => `Title: ${d.title}\nSummary: ${d.summaryMarkdown}`)
-                      .join('\n\n') ?? 'No attack discoveries';
+                  const ad1Summary = `Title: ${ad1.title}\nSummary: ${ad1.summary_markdown}`;
+                  const ad2Summary = `Title: ${ad2.title}\nSummary: ${ad2.summary_markdown}`;
 
                   // Use LLM to analyze similarity
                   const similarityPrompt = `You are a security analyst comparing two Attack Discovery reports to determine if they describe the same attack or incident.
@@ -800,7 +794,10 @@ Only respond with the JSON object, no other text.`;
 
           // Update execution record
           await dataClient.updateExecution(execution.id, {
-            status: result.errors.length > 0 ? 'failed' : 'completed',
+            status:
+              result.errors.length > 0
+                ? WorkflowExecutionStatus.Failed
+                : WorkflowExecutionStatus.Completed,
             completedAt: new Date().toISOString(),
             error: result.errors.length > 0 ? result.errors.join('; ') : undefined,
             metrics: result.metrics,
@@ -1089,7 +1086,7 @@ Only respond with the JSON object, no other text.`;
 
           // Update status to cancelled
           await dataClient.updateExecution(execution.id, {
-            status: 'cancelled',
+            status: WorkflowExecutionStatus.Cancelled,
             completedAt: new Date().toISOString(),
           });
 

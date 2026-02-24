@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { ListPluginSetup } from '@kbn/lists-plugin/server';
 import {
@@ -106,7 +106,7 @@ describe('exceptionListsTool', () => {
       {
         operation: 'create',
         params: {
-          listId: ENDPOINT_LIST_ID,
+          listId: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
           confirm: true,
           item: {
             name: 'n',
