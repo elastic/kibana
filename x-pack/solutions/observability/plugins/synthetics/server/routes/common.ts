@@ -47,7 +47,7 @@ export const QuerySchema = schema.object({
   perPage: schema.maybe(schema.number()),
   sortField: MonitorSortFieldSchema,
   sortOrder: schema.maybe(schema.oneOf([schema.literal('desc'), schema.literal('asc')])),
-  searchAfter: schema.maybe(schema.arrayOf(schema.string(), { maxSize: MAX_FILTER_VALUES_PER_REQUEST })),
+  searchAfter: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10 })),
   internal: schema.maybe(
     schema.boolean({
       defaultValue: false,
