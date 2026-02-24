@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import originalExpect from 'expect';
 import moment from 'moment';
 import { IndexTemplateName } from '@kbn/synthtrace/src/lib/logs/custom_logsdb_index_templates';
 import type { DatasetQualityFtrProviderContext } from './config';
@@ -471,10 +470,16 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
         await discoverButton.click();
 
-        // Confirm dataset selector text in observability logs explorer
-        await retry.try(async () => {
-          const datasetSelectorText = await PageObjects.discover.getCurrentDataViewId();
-          originalExpect(datasetSelectorText).toMatch(regularDatasetName);
+        // Confirm URL contains ES|QL query for the data stream
+        await retry.tryForTime(5000, async () => {
+          const currentUrl = await browser.getCurrentUrl();
+          const decodedUrl = decodeURIComponent(currentUrl);
+
+          expect(currentUrl).to.contain('/app/discover');
+          expect(decodedUrl).to.contain('esql');
+          expect(decodedUrl).to.contain(`FROM ${regularDataStreamName}`);
+          expect(decodedUrl).to.contain('_ignored');
+          expect(decodedUrl).to.contain('IS NOT NULL');
         });
       });
 
