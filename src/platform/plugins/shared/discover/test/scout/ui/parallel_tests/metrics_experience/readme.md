@@ -12,24 +12,27 @@ discover/test/scout/ui/
 ├── fixtures/
 │   └── metrics_experience/
 │       ├── index.ts                     # spaceTest extension with MetricsExperiencePage
-│       ├── constants.ts                 # Time ranges, queries, data views, tags
+│       ├── constants.ts                 # Queries, data view name, tags
+│       ├── kbn_archives/
+│       │   └── metrics_data_view.json   # Data view pointing to dynamic index
 │       ├── page_objects/
 │       │   └── metrics_experience.ts    # Page object for metrics UI
 │       └── generators/
 │           └── metrics_tsdb_index.ts    # Dynamic TSDB index creation
 └── parallel_tests/
     └── metrics_experience/              # Feature subfolder (you are here)
-        ├── global.setup.ts              # Loads archives + creates test index
+        ├── global.setup.ts              # Creates dynamic test index
         ├── grid.spec.ts                 # Grid activation/command compatibility
         └── grid.navigation.spec.ts      # Pagination and search
 ```
 
 ## Data strategy
 
-Two approaches are used:
+All tests use a single dynamically created TSDB index (`test-metrics-experience`) with 45 metric fields (23 gauge + 22 counter) and 30 dimensions. The index is created in `global.setup.ts` via `createMetricsTestIndexIfNeeded` and is reused across all specs.
 
-- **Static data** (`TSDB_LOGS` archive): For `grid.spec.ts`. Enough for grid activation tests. No dynamic data generation needed, uses the shared archive loaded in global setup.
-- **Dynamic data** (`test-metrics-experience` index): For `grid.navigation.spec.ts`. Contains enough metrics to fill multiple pages. Created via `metrics_tsdb_index.ts` generator. Handles parallel creation races with `resource_already_exists_exception`.
+A matching data view is loaded from `kbn_archives/metrics_data_view.json` in each spec's `beforeAll` hook, pointing Discover to the dynamic index.
+
+This approach keeps the test suite fully self-contained with no dependency on external ES archives.
 
 ## How to add a new test
 

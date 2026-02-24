@@ -11,8 +11,8 @@
  * Grid Navigation tests: pagination and search.
  *
  * These tests use a dynamically created TSDB index (test-metrics-experience)
- * with 45 metric fields (23 gauge + 22 counter) to exercise scenarios that
- * require more metrics than the static TSDB_LOGS archive provides.
+ * with 45 metric fields (23 gauge + 22 counter) to exercise pagination
+ * and search scenarios.
  */
 
 import { expect } from '@kbn/scout/ui';
@@ -28,7 +28,6 @@ const { PAGE_SIZE, TOTAL_PAGES, LAST_PAGE_CARDS } = PAGINATION;
 
 const SEARCH_METRIC_NAME = DEFAULT_CONFIG.metrics[0].name;
 
-// Sort metrics alphabetically to match UI display order
 const SORTED_METRICS = [...DEFAULT_CONFIG.metrics].sort((a, b) => a.name.localeCompare(b.name));
 const FIRST_CARD_PAGE_1 = `${SORTED_METRICS[0].name}-0`;
 const FIRST_CARD_PAGE_2 = `${SORTED_METRICS[PAGE_SIZE].name}-0`;
@@ -41,8 +40,8 @@ spaceTest.describe(
   },
   () => {
     spaceTest.beforeAll(async ({ scoutSpace }) => {
-      await scoutSpace.savedObjects.load(testData.KBN_ARCHIVES.TSDB_LOGS);
-      await scoutSpace.uiSettings.setDefaultIndex(testData.DATA_VIEW_NAME.TSDB_LOGS);
+      await scoutSpace.savedObjects.load(testData.KBN_ARCHIVE);
+      await scoutSpace.uiSettings.setDefaultIndex(testData.DATA_VIEW_NAME);
       await scoutSpace.uiSettings.setDefaultTime(DEFAULT_TIME_RANGE);
     });
 
@@ -58,7 +57,7 @@ spaceTest.describe(
 
     spaceTest('should paginate through metrics', async ({ pageObjects }) => {
       const { metricsExperience } = pageObjects;
-      await metricsExperience.runEsqlQuery(testData.ESQL_QUERIES.TS_METRICS_TEST);
+      await metricsExperience.runEsqlQuery(testData.ESQL_QUERIES.TS);
 
       await spaceTest.step('pagination is visible', async () => {
         await expect(metricsExperience.grid).toBeVisible();
@@ -96,7 +95,7 @@ spaceTest.describe(
 
     spaceTest('should filter metrics using search', async ({ pageObjects }) => {
       const { metricsExperience } = pageObjects;
-      await metricsExperience.runEsqlQuery(testData.ESQL_QUERIES.TS_METRICS_TEST);
+      await metricsExperience.runEsqlQuery(testData.ESQL_QUERIES.TS);
       await expect(metricsExperience.grid).toBeVisible();
 
       await spaceTest.step('search filters results across all pages', async () => {

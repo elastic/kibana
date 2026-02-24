@@ -46,12 +46,8 @@ const INDEX_TIME_RANGE = {
   documentsBaseTime: '2025-01-01T00:30:00.000Z',
 } as const;
 
-/**
- * Time range for UI tests. Covers both TSDB_LOGS (2023) and metrics test data (2025).
- * This wide range is needed because selectTextBaseLang() requires visible data.
- */
 export const DEFAULT_TIME_RANGE = {
-  from: '2023-01-01T00:00:00.000Z',
+  from: '2025-01-01T00:00:00.000Z',
   to: '2025-12-31T23:59:59.000Z',
 } as const;
 
