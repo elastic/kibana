@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { createHash } from 'crypto';
 import { getFlattenedObject } from '@kbn/std';
 import { ENTITY_ID_FIELD } from '../../../common/domain/definitions/common_fields';
 import { BadCRUDRequestError } from '../errors';
@@ -17,6 +18,12 @@ import type {
 } from '../../../common/domain/definitions/entity_schema';
 
 const GENERIC_TYPE = 'generic' as EntityType;
+
+export function hashEuid(id: string): string {
+  // EUID generation uses MD5. It is not a security-related feature.
+  // eslint-disable-next-line @kbn/eslint/no_unsafe_hash
+  return createHash('md5').update(id).digest('hex');
+}
 
 export function validateAndTransformDocForUpsert(
   entityType: EntityType,

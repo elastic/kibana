@@ -13,7 +13,7 @@ import {
 } from '../../../common/domain/definitions/entity_schema';
 import { getEntityDefinition } from '../../../common/domain/definitions/registry';
 import { BadCRUDRequestError } from '../errors';
-import { validateAndTransformDocForUpsert } from './utils';
+import { hashEuid, validateAndTransformDocForUpsert } from './utils';
 
 jest.mock('../../../common/domain/definitions/registry');
 
@@ -48,6 +48,13 @@ const createDefinition = (
 describe('crud_client utils', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  it('hashEuid: returns a valid MD5 hash', () => {
+    const hashedId = hashEuid('entity-id');
+
+    expect(hashedId).toMatch(/^[a-f0-9]{32}$/);
+    expect(hashedId).toBe('169fbe0cb705d8d8811b5098d0cf4588');
   });
 
   it('validateAndTransformDocForUpsert: returns generic document with timestamp', () => {

@@ -13,14 +13,14 @@ import type { EntityStorePluginRouter } from '../../../types';
 import { wrapMiddlewares } from '../../middleware';
 import { EntityNotFoundError } from '../../../domain/errors';
 
-const paramsSchema = z.object({
-  id: z.string(),
+const bodySchema = z.object({
+  entityId: z.string(),
 });
 
 export function registerCRUDDelete(router: EntityStorePluginRouter) {
   router.versioned
     .delete({
-      path: '/internal/security/entity-store/entities/{id}',
+      path: '/internal/security/entity-store/entities/',
       access: 'internal',
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,
@@ -32,7 +32,7 @@ export function registerCRUDDelete(router: EntityStorePluginRouter) {
         version: API_VERSIONS.internal.v2,
         validate: {
           request: {
-            params: buildRouteValidationWithZod(paramsSchema),
+            body: buildRouteValidationWithZod(bodySchema),
           },
         },
       },
@@ -43,7 +43,7 @@ export function registerCRUDDelete(router: EntityStorePluginRouter) {
         logger.debug('CRUD Delete api called');
 
         try {
-          await crudClient.deleteEntity(req.params.id);
+          await crudClient.deleteEntity(req.body.entityId);
         } catch (error) {
           if (error instanceof EntityNotFoundError) {
             return res.customError({

@@ -12,14 +12,13 @@ import type {
   Result,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { createHash } from 'crypto';
 import type { Entity } from '../../../common/domain/definitions/entity.gen';
 import type { EntityType } from '../../../common';
 import { getEuidFromObject } from '../../../common/domain/euid';
 import { getLatestEntitiesIndexName } from '../assets/latest_index';
 import { BadCRUDRequestError, EntityNotFoundError } from '../errors';
 import { getUpdatesEntitiesDataStreamName } from '../assets/updates_data_stream';
-import { validateAndTransformDocForUpsert } from './utils';
+import { hashEuid, validateAndTransformDocForUpsert } from './utils';
 
 const RETRY_ON_CONFLICT = 3;
 
@@ -60,9 +59,6 @@ export class CRUDClient {
     if (id === undefined) {
       throw new BadCRUDRequestError(`Could not derive entity EUID from document`);
     }
-    // EUID generation uses MD5. It is not a security-related feature.
-    // eslint-disable-next-line @kbn/eslint/no_unsafe_hash
-    const hashedId: string = createHash('md5').update(id).digest('hex');
     this.logger.debug(`Upserting entity ID ${id}`);
 
     if (!doc.entity?.id) {
@@ -73,7 +69,7 @@ export class CRUDClient {
 
     const { result } = await this.esClient.update({
       index: getLatestEntitiesIndexName(this.namespace),
-      id: hashedId,
+      id: hashEuid(id),
       doc: readyDoc,
       doc_as_upsert: true,
       retry_on_conflict: RETRY_ON_CONFLICT,
@@ -140,7 +136,7 @@ export class CRUDClient {
       this.logger.debug(`Deleting Entity ID ${id}`);
       await this.esClient.delete({
         index: getLatestEntitiesIndexName(this.namespace),
-        id,
+        id: hashEuid(id),
       });
     } catch (error) {
       if (error.statusCode === 404) {
