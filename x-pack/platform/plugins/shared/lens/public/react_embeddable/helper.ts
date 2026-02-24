@@ -30,6 +30,8 @@ import type {
   GeneralDatasourceStates,
   FormBasedPersistedState,
   TextBasedPersistedState,
+  XYState,
+  XYByReferenceAnnotationLayerConfig,
 } from '@kbn/lens-common';
 import type { LensByValueSerializedAPIConfig, LensSerializedAPIConfig } from '@kbn/lens-common-2';
 
@@ -254,16 +256,18 @@ export function updateAttributesWithAnnotation(
   groupId: string,
   freshGroup: EventAnnotationGroupConfig
 ): LensRuntimeState['attributes'] | undefined {
-  const vizState = attributes.state.visualization as Record<string, unknown> | undefined;
-  if (!Array.isArray(vizState?.layers)) return undefined;
+  if (attributes.visualizationType !== 'lnsXY') return undefined;
+
+  const vizState = attributes.state.visualization as XYState | undefined;
+  if (!vizState?.layers) return undefined;
 
   let changed = false;
-  const layers = (vizState.layers as unknown[]).map((layer) => {
-    const record = layer as Record<string, unknown>;
-    if (record?.annotationGroupId !== groupId) return layer;
+  const layers = vizState.layers.map((layer) => {
+    if (!('annotationGroupId' in layer) || layer.annotationGroupId !== groupId) return layer;
     changed = true;
+    const refLayer = layer as XYByReferenceAnnotationLayerConfig;
     return {
-      ...record,
+      ...refLayer,
       annotations: structuredClone(freshGroup.annotations),
       ignoreGlobalFilters: freshGroup.ignoreGlobalFilters,
       indexPatternId: freshGroup.indexPatternId,
