@@ -13,14 +13,14 @@ import { PrivateLocationRepository } from '../../../repositories/private_locatio
 import { PRIVATE_LOCATION_WRITE_API } from '../../../feature';
 import { migrateLegacyPrivateLocations } from './migrate_legacy_private_locations';
 import type { SyntheticsRestApiRouteFactory } from '../../types';
-import { SYNTHETICS_API_URLS } from '../../../../common/constants';
+import { MAX_TAGS_PER_PRIVATE_LOCATION, SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { toClientContract, toSavedObjectContract } from './helpers';
 import type { PrivateLocation } from '../../../../common/runtime_types';
 
 export const PrivateLocationSchema = schema.object({
   label: schema.string(),
   agentPolicyId: schema.string(),
-  tags: schema.maybe(schema.arrayOf(schema.string())),
+  tags: schema.maybe(schema.arrayOf(schema.string(), { maxSize: MAX_TAGS_PER_PRIVATE_LOCATION })),
   geo: schema.maybe(
     schema.object({
       lat: schema.number(),

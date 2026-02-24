@@ -1,0 +1,1 @@
+export const MAX_TAGS_PER_PRIVATE_LOCATION = 100;
