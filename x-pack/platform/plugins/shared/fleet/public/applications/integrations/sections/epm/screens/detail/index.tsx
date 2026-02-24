@@ -60,6 +60,8 @@ import { WithHeaderLayout } from '../../../../layouts';
 import { SideBarColumn } from '../../components/side_bar_column';
 import { PermissionsError } from '../../../../layouts';
 
+import { wrapTitleWithDeprecated } from '../../components/utils';
+
 import { DeferredAssetsWarning } from './assets/deferred_assets_warning';
 import { useIsFirstTimeAgentUserQuery } from './hooks';
 
@@ -74,6 +76,7 @@ import {
   AddIntegrationButton,
   EditIntegrationButton,
 } from './components';
+import { AlertingPage } from './alerting';
 import { AssetsPage } from './assets';
 import { OverviewPage } from './overview';
 import { PackagePoliciesPage } from './policies';
@@ -91,6 +94,7 @@ export type DetailViewPanelName =
   | 'overview'
   | 'policies'
   | 'assets'
+  | 'alerting'
   | 'settings'
   | 'custom'
   | 'api-reference'
@@ -364,7 +368,7 @@ export function Detail() {
                   <EuiFlexItem grow={false}>
                     <EuiText>
                       {/* Render space in place of package name while package info loads to prevent layout from jumping around */}
-                      <h1>{integrationInfo?.title || packageInfo?.title || '\u00A0'}</h1>
+                      <h1>{wrapTitleWithDeprecated({ packageInfo, integrationInfo })}</h1>
                     </EuiText>
                   </EuiFlexItem>
                   <EuiFlexItem>
@@ -474,14 +478,13 @@ export function Detail() {
 
   const showVersionSelect = useMemo(
     () =>
-      prereleaseIntegrationsEnabled &&
       latestGAVersion &&
       latestPrereleaseVersion &&
       latestGAVersion !== latestPrereleaseVersion &&
       (!packageInfo?.version ||
         packageInfo.version === latestGAVersion ||
         packageInfo.version === latestPrereleaseVersion),
-    [prereleaseIntegrationsEnabled, latestGAVersion, latestPrereleaseVersion, packageInfo?.version]
+    [latestGAVersion, latestPrereleaseVersion, packageInfo?.version]
   );
 
   const versionOptions = useMemo(
@@ -586,7 +589,10 @@ export function Detail() {
                                   : {}),
                               })}
                               missingSecurityConfiguration={missingSecurityConfiguration}
-                              packageName={integrationInfo?.title || packageInfo.title}
+                              packageName={wrapTitleWithDeprecated({
+                                packageInfo,
+                                integrationInfo,
+                              })}
                               onClick={handleAddIntegrationPolicyClick}
                             />
                           </EuiFlexItem>
@@ -613,22 +619,22 @@ export function Detail() {
       ) : undefined,
     [
       packageInfo,
-      updateAvailable,
-      isInstalled,
-      pkgkey,
-      userCanInstallPackages,
-      getHref,
-      integration,
-      agentPolicyIdFromContext,
-      missingSecurityConfiguration,
-      integrationInfo?.title,
-      handleAddIntegrationPolicyClick,
-      onVersionChange,
       showVersionSelect,
       versionLabel,
       versionOptions,
-      handleEditIntegrationClick,
+      updateAvailable,
+      isInstalled,
       isCustomPackage,
+      handleEditIntegrationClick,
+      userCanInstallPackages,
+      getHref,
+      pkgkey,
+      integration,
+      agentPolicyIdFromContext,
+      missingSecurityConfiguration,
+      integrationInfo,
+      handleAddIntegrationPolicyClick,
+      onVersionChange,
     ]
   );
 
@@ -692,6 +698,21 @@ export function Detail() {
         isSelected: panel === 'assets',
         'data-test-subj': `tab-assets`,
         href: getHref('integration_details_assets', pathValues),
+      });
+    }
+
+    if (isInstalled && packageInfo.type === 'integration') {
+      tabs.push({
+        id: 'alerting',
+        name: (
+          <FormattedMessage
+            id="xpack.fleet.epm.packageDetailsNav.packageAlertingLinkText"
+            defaultMessage="Alerting"
+          />
+        ),
+        isSelected: panel === 'alerting',
+        'data-test-subj': `tab-alerting`,
+        href: getHref('integration_details_alerting', pathValues),
       });
     }
 
@@ -819,7 +840,7 @@ export function Detail() {
       `}
     >
       {integrationInfo || packageInfo ? (
-        <Breadcrumbs packageTitle={integrationInfo?.title || packageInfo?.title || ''} />
+        <Breadcrumbs packageTitle={wrapTitleWithDeprecated({ packageInfo, integrationInfo })} />
       ) : null}
       {packageInfoError ? (
         <EuiFlexGroup alignItems="flexStart">
@@ -853,10 +874,14 @@ export function Detail() {
               packageMetadata={packageInfoData?.metadata}
               startServices={services}
               isCustomPackage={isCustomPackage}
+              integrationInfo={integrationInfo}
             />
           </Route>
           <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_assets}>
             <AssetsPage packageInfo={packageInfo} refetchPackageInfo={refetchPackageInfo} />
+          </Route>
+          <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_alerting}>
+            <AlertingPage packageInfo={packageInfo} refetchPackageInfo={refetchPackageInfo} />
           </Route>
           <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_configs}>
             <Configs packageInfo={packageInfo} />
@@ -883,7 +908,11 @@ export function Detail() {
       )}
       {isEditOpen && (
         <EditIntegrationFlyout
-          integrationName={packageInfo?.title || 'Integration'}
+          integrationName={wrapTitleWithDeprecated({
+            packageInfo,
+            integrationInfo,
+            defaultTitle: 'Integration',
+          })}
           onClose={() => setIsEditOpen(false)}
           packageInfo={packageInfo}
           setIsEditOpen={setIsEditOpen}

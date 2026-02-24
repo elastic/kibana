@@ -15,13 +15,16 @@ import {
   INTERNAL_BULK_EXPORT_TEMPLATES_URL,
   INTERNAL_TEMPLATE_CREATORS_URL,
   INTERNAL_TEMPLATE_TAGS_URL,
+  INTERNAL_TEMPLATE_DETAILS_URL,
   INTERNAL_TEMPLATES_URL,
 } from '../../../../common/constants';
 import { KibanaServices } from '../../../common/lib/kibana';
-import { MOCK_TEMPLATES } from './sample_data';
 import { templatesToYaml } from '../utils/templates_to_yaml';
 import type {
+  TemplatesFindRequest,
   TemplatesFindResponse,
+} from '../../../../common/types/api/template/v1';
+import type {
   TemplateUpdateRequest,
   BulkDeleteTemplatesResponse,
   BulkExportTemplatesResponse,
@@ -43,67 +46,50 @@ export const postTemplate = async ({
 };
 
 export const getTemplates = async ({
-  //   signal,
+  signal,
   queryParams,
 }: {
   signal?: AbortSignal;
-  queryParams: {
-    page: number;
-    perPage: number;
-    search: string;
-    sortField: string;
-    sortOrder: 'asc' | 'desc';
-  };
+  queryParams: TemplatesFindRequest;
 }): Promise<TemplatesFindResponse> => {
-  const { page, perPage, search, sortField, sortOrder } = queryParams;
+  const { page, perPage, search, sortField, sortOrder, tags, author, isDeleted } = queryParams;
 
-  // TODO: Replace with actual API call when available
-  // const response = await KibanaServices.get().http.fetch<TemplatesFindResponse>(TEMPLATES_URL, {
-  //   method: 'GET',
-  //   query: { page, perPage, search, sortField, sortOrder },
-  //   signal,
-  // });
-  // return response;
-
-  // Return mock data
-  const filteredTemplates = search
-    ? MOCK_TEMPLATES.filter(
-        (template) =>
-          template.name.toLowerCase().includes(search.toLowerCase()) ||
-          template?.description?.toLowerCase().includes(search.toLowerCase())
-      )
-    : MOCK_TEMPLATES;
-
-  // Sort templates
-  const sortedTemplates = [...filteredTemplates].sort((a, b) => {
-    const aValue = a[sortField as keyof Template];
-    const bValue = b[sortField as keyof Template];
-
-    if (aValue == null || bValue == null) {
-      return 0;
+  const response = await KibanaServices.get().http.fetch<TemplatesFindResponse>(
+    INTERNAL_TEMPLATES_URL,
+    {
+      method: 'GET',
+      query: {
+        page,
+        perPage,
+        search,
+        sortField,
+        sortOrder,
+        isDeleted,
+        ...(tags && tags.length > 0 ? { tags } : {}),
+        ...(author && author.length > 0 ? { author } : {}),
+      },
+      signal,
     }
+  );
 
-    let comparison = 0;
-    if (typeof aValue === 'string' && typeof bValue === 'string') {
-      comparison = aValue.localeCompare(bValue);
-    } else if (typeof aValue === 'number' && typeof bValue === 'number') {
-      comparison = aValue - bValue;
-    } else if (typeof aValue === 'boolean' && typeof bValue === 'boolean') {
-      comparison = Number(aValue) - Number(bValue);
+  return response;
+};
+
+export const getTemplate = async ({
+  templateId,
+  signal,
+}: {
+  templateId: string;
+  signal?: AbortSignal;
+}): Promise<ParsedTemplate> => {
+  const response = await KibanaServices.get().http.fetch<ParsedTemplate>(
+    INTERNAL_TEMPLATE_DETAILS_URL.replace('{template_id}', templateId),
+    {
+      method: 'GET',
+      signal,
     }
-
-    return sortOrder === 'asc' ? comparison : -comparison;
-  });
-
-  const start = (page - 1) * perPage;
-  const end = start + perPage;
-  const paginatedTemplates = sortedTemplates.slice(start, end);
-  return {
-    templates: paginatedTemplates,
-    page,
-    perPage,
-    total: filteredTemplates.length,
-  };
+  );
+  return response;
 };
 
 export const patchTemplate = async ({
@@ -114,28 +100,14 @@ export const patchTemplate = async ({
   template: TemplateUpdateRequest;
   signal?: AbortSignal;
 }): Promise<Template> => {
-  // TODO: Replace with actual API call when available
-  // const response = await KibanaServices.get().http.fetch<Template>(`${TEMPLATES_URL}/${templateId}`, {
-  //   method: 'PATCH',
-  //   body: JSON.stringify(template),
-  //   signal,
-  // });
-  // return response;
-
-  // Return mock data
-  const existingTemplate = MOCK_TEMPLATES.find((t) => t.templateId === templateId);
-
-  if (!existingTemplate) {
-    throw new Error(`Template with id ${templateId} not found`);
-  }
-
-  const updatedTemplate: Template = {
-    ...existingTemplate,
-    ...template,
-    templateVersion: existingTemplate.templateVersion + 1,
-  };
-
-  return updatedTemplate;
+  const response = await KibanaServices.get().http.fetch<Template>(
+    INTERNAL_TEMPLATE_DETAILS_URL.replace('{template_id}', templateId),
+    {
+      method: 'PATCH',
+      body: JSON.stringify(template),
+    }
+  );
+  return response;
 };
 
 export const bulkDeleteTemplates = async ({

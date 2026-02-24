@@ -15,9 +15,6 @@ export { createBreadcrumbsState } from './breadcrumbs_state';
 export { createChromeStyleState } from './chrome_style_state';
 export type { ChromeStyleState } from './chrome_style_state';
 
-export { createFeedbackState } from './feedback_state';
-export type { FeedbackState, FeedbackStateDeps } from './feedback_state';
-
 export { createVisibilityState } from './visibility_state';
 export type { VisibilityState, VisibilityStateDeps } from './visibility_state';
 

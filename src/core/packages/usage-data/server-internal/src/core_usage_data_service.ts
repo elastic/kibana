@@ -129,26 +129,29 @@ export class CoreUsageDataService
           }, new Set<string>())
           .values()
       ).map(async (index) => {
-        // The _cat/indices API returns the _index_ and doesn't return a way
-        // to map back from the index to the alias. So we have to make an API
-        // call for every alias. The document count is the lucene document count.
-        const catIndicesResults = await elasticsearch.client.asInternalUser.cat
-          .indices({
+        // Use indices stats instead of CAT since this data is consumed by telemetry.
+        // We make one request per alias/index-pattern and rely on `_all` to aggregate
+        // matching concrete indices while preserving the alias identifier we report.
+        const indexStatsResults = await elasticsearch.client.asInternalUser.indices
+          .stats({
             index,
-            format: 'JSON',
-            bytes: 'b',
+            metric: ['docs', 'store'],
+            filter_path: [
+              '_all.primaries.docs.count',
+              '_all.primaries.docs.deleted',
+              '_all.total.store.size_in_bytes',
+              '_all.primaries.store.size_in_bytes',
+            ],
           })
           .then((body) => {
-            const stats = body[0];
+            const stats = body._all;
 
             return {
               alias: index,
-              docsCount: stats['docs.count'] ? parseInt(stats['docs.count'], 10) : 0,
-              docsDeleted: stats['docs.deleted'] ? parseInt(stats['docs.deleted'], 10) : 0,
-              storeSizeBytes: stats['store.size'] ? parseInt(stats['store.size'], 10) : 0,
-              primaryStoreSizeBytes: stats['pri.store.size']
-                ? parseInt(stats['pri.store.size'], 10)
-                : 0,
+              docsCount: stats?.primaries?.docs?.count ?? 0,
+              docsDeleted: stats?.primaries?.docs?.deleted ?? 0,
+              storeSizeBytes: stats?.total?.store?.size_in_bytes ?? 0,
+              primaryStoreSizeBytes: stats?.primaries?.store?.size_in_bytes ?? 0,
             };
           });
         // We use the GET <index>/_count API to get the number of saved objects
@@ -163,13 +166,13 @@ export class CoreUsageDataService
             };
           });
         this.logger.debug(
-          `Lucene documents count ${catIndicesResults.docsCount} from index ${catIndicesResults.alias}`
+          `Lucene documents count ${indexStatsResults.docsCount} from index ${indexStatsResults.alias}`
         );
         this.logger.debug(
-          `Saved objects documents count ${savedObjectsCounts.savedObjectsDocsCount} from index ${catIndicesResults.alias}`
+          `Saved objects documents count ${savedObjectsCounts.savedObjectsDocsCount} from index ${indexStatsResults.alias}`
         );
         return {
-          ...catIndicesResults,
+          ...indexStatsResults,
           ...savedObjectsCounts,
         };
       })
