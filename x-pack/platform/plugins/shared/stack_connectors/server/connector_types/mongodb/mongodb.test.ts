@@ -30,7 +30,7 @@ const mockFindCursor = {
 };
 const mockAggregateCursor = { toArray: jest.fn() };
 
-function createMockClient() {
+function mockCreateMockClient() {
   const mockDb = jest.fn().mockReturnValue({
     admin: () => ({
       ping: mockPing,
@@ -50,11 +50,11 @@ function createMockClient() {
   };
 }
 
-let mockClientInstance: ReturnType<typeof createMockClient>;
+let mockClientInstance: ReturnType<typeof mockCreateMockClient>;
 
 jest.mock('mongodb', () => ({
   MongoClient: jest.fn().mockImplementation(function (this: unknown) {
-    mockClientInstance = createMockClient();
+    mockClientInstance = mockCreateMockClient();
     return mockClientInstance;
   }),
 }));
@@ -69,9 +69,9 @@ describe('MongoConnector', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockClientInstance = createMockClient();
+    mockClientInstance = mockCreateMockClient();
     (mongodb.MongoClient as jest.Mock).mockImplementation(function (this: unknown) {
-      mockClientInstance = createMockClient();
+      mockClientInstance = mockCreateMockClient();
       return mockClientInstance;
     });
 

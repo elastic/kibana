@@ -25,6 +25,7 @@ export const connectorTypes: string[] = [
   '.opsgenie',
   '.jira-service-management',
   '.mcp',
+  '.mongodb',
   '.tines',
   '.gen-ai',
   '.bedrock',
