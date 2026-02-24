@@ -1,0 +1,575 @@
+name: "Action Ralph"
+
+on:
+  workflow_dispatch:
+    inputs:
+      prompt:
+        description: "Task for the AI agent to complete"
+        required: true
+        type: string
+      model:
+        description: "AI model override (provider/model format). Leave empty to use LITELLM_MODEL secret."
+        required: false
+        default: ""
+        type: string
+      max_iterations:
+        description: "Maximum agent loop iterations (default: 5)"
+        required: false
+        default: "5"
+        type: string
+  issue_comment:
+    types: [created]
+  pull_request_review_comment:
+    types: [created]
+
+# Prevent parallel runs from the same trigger to avoid wasted spend
+concurrency:
+  group: action-ralph-${{ github.event.issue.number || github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Phase A: Bootstrap the Kibana monorepo and produce a warm-state artifact.
+  # For PR comments, checks out the PR branch instead of main.
+  # Privilege: contents:read (implicit GITHUB_TOKEN for checkout only).
+  # ---------------------------------------------------------------------------
+  prepare:
+    name: "Phase A: Bootstrap"
+    runs-on: ubuntu-24.04-arm64-8core
+    timeout-minutes: 30
+    if: >-
+      github.event_name == 'workflow_dispatch'
+      || (
+        github.event_name == 'issue_comment'
+        && contains(github.event.comment.body, '/action-ralph')
+        && github.event.comment.user.login == 'flash1293'
+      )
+      || (
+        github.event_name == 'pull_request_review_comment'
+        && contains(github.event.comment.body, '/action-ralph')
+        && github.event.comment.user.login == 'flash1293'
+      )
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      is_pr: ${{ steps.context.outputs.is_pr }}
+      pr_number: ${{ steps.context.outputs.pr_number }}
+      pr_branch: ${{ steps.context.outputs.pr_branch }}
+      pr_head_repo: ${{ steps.context.outputs.pr_head_repo }}
+
+    steps:
+      - name: Resolve trigger context
+        id: context
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "pull_request_review_comment" ]; then
+            echo "is_pr=true" >> "$GITHUB_OUTPUT"
+            echo "pr_number=${{ github.event.pull_request.number }}" >> "$GITHUB_OUTPUT"
+            echo "pr_branch=${{ github.event.pull_request.head.ref }}" >> "$GITHUB_OUTPUT"
+            echo "pr_head_repo=${{ github.event.pull_request.head.repo.full_name }}" >> "$GITHUB_OUTPUT"
+          elif [ "${{ github.event_name }}" = "issue_comment" ]; then
+            # issue_comment fires for both issues and PRs; detect which
+            PR_JSON=$(gh api "repos/${{ github.repository }}/pulls/${{ github.event.issue.number }}" 2>/dev/null || echo "")
+            if [ -n "$PR_JSON" ]; then
+              PR_BRANCH=$(echo "$PR_JSON" | jq -r '.head.ref')
+              PR_HEAD_REPO=$(echo "$PR_JSON" | jq -r '.head.repo.full_name')
+              echo "is_pr=true" >> "$GITHUB_OUTPUT"
+              echo "pr_number=${{ github.event.issue.number }}" >> "$GITHUB_OUTPUT"
+              echo "pr_branch=${PR_BRANCH}" >> "$GITHUB_OUTPUT"
+              echo "pr_head_repo=${PR_HEAD_REPO}" >> "$GITHUB_OUTPUT"
+            else
+              echo "is_pr=false" >> "$GITHUB_OUTPUT"
+              echo "pr_number=" >> "$GITHUB_OUTPUT"
+              echo "pr_branch=" >> "$GITHUB_OUTPUT"
+              echo "pr_head_repo=" >> "$GITHUB_OUTPUT"
+            fi
+          else
+            echo "is_pr=false" >> "$GITHUB_OUTPUT"
+            echo "pr_number=" >> "$GITHUB_OUTPUT"
+            echo "pr_branch=" >> "$GITHUB_OUTPUT"
+            echo "pr_head_repo=" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Checkout source
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.context.outputs.is_pr == 'true' && steps.context.outputs.pr_branch || 'main' }}
+          fetch-depth: 1
+          repository: ${{ steps.context.outputs.is_pr == 'true' && steps.context.outputs.pr_head_repo || github.repository }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ".node-version"
+
+      - name: Bootstrap Kibana
+        run: yarn kbn bootstrap --no-vscode
+        env:
+          NODE_OPTIONS: "--max-old-space-size=8192"
+
+      - name: Package warm state
+        run: |
+          set -euo pipefail
+          tar czf /tmp/kibana-warm-state.tar.gz \
+            --exclude='./.git' \
+            --exclude='*/node_modules/.cache' \
+            --exclude='*/target' \
+            --exclude='./data' \
+            --exclude='*.log' \
+            -C "$GITHUB_WORKSPACE" .
+
+      - name: Upload warm state artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: kibana-warm-state
+          path: /tmp/kibana-warm-state.tar.gz
+          retention-days: 1
+          compression-level: 0
+
+  # ---------------------------------------------------------------------------
+  # Phase B: Run the OpenCode agent in a spec-driven loop (inner ralph loop).
+  # The agent iterates on a spec file until status is "done" or "aborted",
+  # or max iterations is reached.
+  # Privilege: NONE — permissions:{} blocks GITHUB_TOKEN injection entirely.
+  # Only LITELLM_API_KEY / LITELLM_BASE_URL / LITELLM_MODEL are available.
+  # ---------------------------------------------------------------------------
+  sandbox:
+    name: "Phase B: Agent Loop"
+    needs: prepare
+    runs-on: ubuntu-24.04-arm64-8core
+    timeout-minutes: 45
+    permissions: {}
+
+    steps:
+      - name: Download warm state artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: kibana-warm-state
+          path: /tmp
+
+      - name: Extract warm state
+        run: |
+          set -euo pipefail
+          mkdir -p "$GITHUB_WORKSPACE"
+          tar xzf /tmp/kibana-warm-state.tar.gz -C "$GITHUB_WORKSPACE"
+          rm /tmp/kibana-warm-state.tar.gz
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ".node-version"
+
+      - name: Install OpenCode CLI
+        run: curl -fsSL https://opencode.ai/install | bash
+
+      - name: Configure OpenCode for LiteLLM
+        env:
+          LITELLM_BASE_URL: ${{ secrets.LITELLM_BASE_URL }}
+          LITELLM_MODEL: ${{ secrets.LITELLM_MODEL }}
+        run: |
+          set -euo pipefail
+          cat > "$GITHUB_WORKSPACE/opencode.json" <<OCEOF
+          {
+            "\$schema": "https://opencode.ai/config.json",
+            "provider": {
+              "litellm": {
+                "npm": "@ai-sdk/openai-compatible",
+                "name": "LiteLLM",
+                "options": {
+                  "baseURL": "${LITELLM_BASE_URL}",
+                  "apiKey": "{env:LITELLM_API_KEY}"
+                },
+                "models": {
+                  "${LITELLM_MODEL}": {
+                    "name": "${LITELLM_MODEL}"
+                  }
+                }
+              }
+            }
+          }
+          OCEOF
+
+      - name: Resolve prompt and model
+        id: prompt
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          INPUT_PROMPT: ${{ inputs.prompt }}
+          INPUT_MODEL: ${{ inputs.model }}
+          COMMENT_BODY: ${{ github.event.comment.body }}
+          ISSUE_BODY: ${{ github.event.issue.body }}
+          LITELLM_MODEL: ${{ secrets.LITELLM_MODEL }}
+          IS_PR: ${{ needs.prepare.outputs.is_pr }}
+          PR_NUMBER: ${{ needs.prepare.outputs.pr_number }}
+        run: |
+          set -euo pipefail
+          DEFAULT_MODEL="litellm/${LITELLM_MODEL}"
+
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            {
+              echo 'task<<RALPH_EOF'
+              printf '%s\n' "$INPUT_PROMPT"
+              echo 'RALPH_EOF'
+            } >> "$GITHUB_OUTPUT"
+            if [ -n "$INPUT_MODEL" ]; then
+              echo "model=${INPUT_MODEL}" >> "$GITHUB_OUTPUT"
+            else
+              echo "model=${DEFAULT_MODEL}" >> "$GITHUB_OUTPUT"
+            fi
+          else
+            PROMPT_TEXT=$(printf '%s' "$COMMENT_BODY" | sed -n 's|.*/action-ralph\s*||p' | head -1)
+
+            if [ "$IS_PR" = "true" ]; then
+              {
+                echo 'task<<RALPH_EOF'
+                echo "You are modifying an existing PR #${PR_NUMBER}."
+                echo ""
+                echo "PR context (from issue/PR body):"
+                printf '%s\n' "$ISSUE_BODY"
+                echo ""
+                echo "Task from comment:"
+                printf '%s\n' "$PROMPT_TEXT"
+                echo 'RALPH_EOF'
+              } >> "$GITHUB_OUTPUT"
+            else
+              {
+                echo 'task<<RALPH_EOF'
+                echo "Issue context:"
+                printf '%s\n' "$ISSUE_BODY"
+                echo ""
+                echo "Task:"
+                printf '%s\n' "$PROMPT_TEXT"
+                echo 'RALPH_EOF'
+              } >> "$GITHUB_OUTPUT"
+            fi
+            echo "model=${DEFAULT_MODEL}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build spec and run inner ralph loop
+        env:
+          LITELLM_API_KEY: ${{ secrets.LITELLM_API_KEY }}
+          PROMPT: ${{ steps.prompt.outputs.task }}
+          MODEL: ${{ steps.prompt.outputs.model }}
+          MAX_ITERATIONS: ${{ inputs.max_iterations || '5' }}
+          IS_PR: ${{ needs.prepare.outputs.is_pr }}
+          PR_NUMBER: ${{ needs.prepare.outputs.pr_number }}
+        run: |
+          set -euo pipefail
+
+          SPEC_FILE="/tmp/ralph-spec.md"
+          PROTOCOL_FILE=".github/action-ralph/AGENT_LOOP_PROTOCOL.md"
+          SESSION_DIR="/tmp/ralph-session"
+          mkdir -p "$SESSION_DIR"
+
+          # Build the initial spec from the prompt
+          if [ "$IS_PR" = "true" ]; then
+            SPEC_CONTEXT="Modifying existing PR #${PR_NUMBER}. Make file changes locally — a separate publish step handles git push."
+          else
+            SPEC_CONTEXT="Creating new changes against main. Make file changes locally — a separate publish step handles PR creation."
+          fi
+
+          cat > "$SPEC_FILE" <<SPEC
+          ## Status
+          pending
+
+          ## Context
+          ${SPEC_CONTEXT}
+
+          ## Tasks
+          * [ ] Understand the request: ${PROMPT}
+          * [ ] Plan and expand this into concrete implementation tasks based on what you find. Keep in mind each task runs in a separate agent session with fresh context, so each should be self-contained. Include validation (run tests).
+          * [ ] (expanded tasks will be added here by the agent)
+
+          ## Definition of done
+          All requested changes are implemented, tests pass, and the spec status is set to "done".
+
+          ## Additional Context
+          (populated by the agent across iterations)
+          SPEC
+
+          echo "=== Inner Ralph Loop ==="
+          echo "Spec: $SPEC_FILE"
+          echo "Max iterations: $MAX_ITERATIONS"
+          echo ""
+
+          for i in $(seq 1 "$MAX_ITERATIONS"); do
+            echo "----------------------------------------------"
+            echo "==> $(date +'%Y-%m-%d %H:%M:%S') Iteration #${i} / ${MAX_ITERATIONS}"
+            echo "----------------------------------------------"
+
+            PROMPT_FILE="${SESSION_DIR}/prompt-$(printf '%04d' "$i").md"
+
+            # Build the full prompt: protocol + metadata + spec
+            {
+              cat "$PROTOCOL_FILE"
+              echo ""
+              echo "---"
+              echo ""
+              echo "**Spec file path:** \`${SPEC_FILE}\`"
+              echo ""
+              echo "**GitHub username:** \`action-ralph\`"
+              echo ""
+              echo "---"
+              echo ""
+              cat "$SPEC_FILE"
+            } > "$PROMPT_FILE"
+
+            # Run the agent
+            AGENT_OUTPUT="${SESSION_DIR}/run-$(printf '%04d' "$i").md"
+            if opencode run "$(cat "$PROMPT_FILE")" --model "$MODEL" 2>&1 | tee "$AGENT_OUTPUT"; then
+              echo "[Iteration #${i} completed successfully]"
+            else
+              echo "[Iteration #${i} exited with code $? - continuing...]"
+            fi
+
+            # Check spec status
+            STATUS=$(awk '
+              BEGIN { in_status = 0 }
+              /^##[[:space:]]+Status[[:space:]]*$/ { in_status = 1; next }
+              in_status {
+                if ($0 ~ /^[[:space:]]*$/) next
+                gsub(/^[[:space:]]+|[[:space:]]+$/, "", $0)
+                print tolower($0)
+                exit
+              }
+            ' "$SPEC_FILE" 2>/dev/null || echo "unknown")
+
+            echo "Spec status after iteration #${i}: ${STATUS}"
+
+            if [ "$STATUS" = "done" ] || [ "$STATUS" = "aborted" ]; then
+              echo ""
+              echo "=============================================="
+              echo "Spec status is '${STATUS}' — exiting loop."
+              echo "=============================================="
+              break
+            fi
+
+            if [ "$i" -ge "$MAX_ITERATIONS" ]; then
+              echo ""
+              echo "=============================================="
+              echo "Reached max iterations (${MAX_ITERATIONS}) — exiting loop."
+              echo "=============================================="
+            fi
+          done
+
+          # Copy the final spec and last agent output for the publish phase
+          mkdir -p /tmp/agent-output
+          cp "$SPEC_FILE" /tmp/agent-output/ralph-spec.md
+          cat "${SESSION_DIR}"/run-*.md > /tmp/agent-output/agent-reasoning.md 2>/dev/null || true
+
+      - name: Create baseline marker for change detection
+        run: echo "baseline marker was set before the agent loop"
+
+      - name: Detect and package changes
+        env:
+          TASK_PROMPT: ${{ steps.prompt.outputs.task }}
+        run: |
+          set -euo pipefail
+
+          # Use git to detect changes since we have the .git-less warm state
+          # Any file that differs from what was in the artifact is a change
+          # We use the spec and agent output already saved to /tmp/agent-output
+
+          # Find all non-artifact files modified by the agent
+          # Compare against the pristine state by checking file modification times
+          # (the warm state was extracted, then the agent ran and modified files)
+
+          # Collect all files that aren't part of the infrastructure
+          find . -newer /tmp/ralph-session/prompt-0001.md \
+            -not -path '*/node_modules/*' \
+            -not -path '*/.git/*' \
+            -not -name '*.log' \
+            -not -path '*/target/*' \
+            -not -path '/tmp/*' \
+            -type f > /tmp/agent-output/changed-files.txt 2>/dev/null || true
+
+          FILE_COUNT=$(wc -l < /tmp/agent-output/changed-files.txt | tr -d ' ')
+          echo "Changed files: ${FILE_COUNT}"
+
+          if [ "$FILE_COUNT" -eq 0 ]; then
+            echo "::error::Agent produced no file changes. Aborting."
+            exit 1
+          fi
+
+          cat /tmp/agent-output/changed-files.txt
+
+          tar czf /tmp/agent-output/agent-changes.tar.gz \
+            -T /tmp/agent-output/changed-files.txt
+
+          printf '%s' "$TASK_PROMPT" | head -c 200 > /tmp/agent-output/prompt-summary.txt
+
+      - name: Upload agent output
+        uses: actions/upload-artifact@v4
+        with:
+          name: agent-changes
+          path: /tmp/agent-output/
+          retention-days: 1
+
+  # ---------------------------------------------------------------------------
+  # Phase C: Apply changes and either push to the existing PR branch or
+  # create a new PR. Privilege: KIBANAMACHINE_TOKEN for repo write access. No AI keys.
+  # ---------------------------------------------------------------------------
+  publish:
+    name: "Phase C: Publish"
+    needs: [prepare, sandbox]
+    if: needs.sandbox.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout target
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.prepare.outputs.is_pr == 'true' && needs.prepare.outputs.pr_branch || 'main' }}
+          fetch-depth: 1
+          token: ${{ secrets.KIBANAMACHINE_TOKEN }}
+          repository: ${{ needs.prepare.outputs.is_pr == 'true' && needs.prepare.outputs.pr_head_repo || github.repository }}
+
+      - name: Download agent changes
+        uses: actions/download-artifact@v4
+        with:
+          name: agent-changes
+          path: /tmp/agent-output
+
+      - name: Apply changes
+        run: |
+          set -euo pipefail
+          tar xzf /tmp/agent-output/agent-changes.tar.gz -C "$GITHUB_WORKSPACE"
+
+          git config user.name "kibanamachine"
+          git config user.email "42973632+kibanamachine@users.noreply.github.com"
+          git add -A
+
+          if git diff --cached --quiet; then
+            echo "::warning::No effective changes after overlay. Skipping."
+            echo "has_changes=false" >> "$GITHUB_ENV"
+          else
+            echo "has_changes=true" >> "$GITHUB_ENV"
+          fi
+
+      - name: Push to existing PR
+        if: env.has_changes == 'true' && needs.prepare.outputs.is_pr == 'true'
+        run: |
+          set -euo pipefail
+          PROMPT_SUMMARY=$(cat /tmp/agent-output/prompt-summary.txt 2>/dev/null || echo "AI-generated changes")
+          RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          CHANGED_COUNT=$(git diff --cached --name-only | wc -l | tr -d ' ')
+
+          COMMIT_MSG="fix: ${PROMPT_SUMMARY}
+
+          Generated by Action Ralph
+          Files changed: ${CHANGED_COUNT}
+          Run: ${RUN_URL}"
+
+          git commit -m "$COMMIT_MSG"
+          git push
+
+          CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD | head -50)
+
+          {
+            echo "Action Ralph applied changes from your \`/action-ralph\` request."
+            echo ""
+            echo "**Workflow run:** ${RUN_URL}"
+            echo ""
+            echo "### Changed files"
+            echo '```'
+            echo "${CHANGED_FILES}"
+            echo '```'
+            echo ""
+            echo "<details>"
+            echo "<summary>Agent reasoning</summary>"
+            echo ""
+            echo '```'
+            if [ -f /tmp/agent-output/agent-reasoning.md ]; then
+              head -c 60000 /tmp/agent-output/agent-reasoning.md
+            fi
+            echo '```'
+            echo "</details>"
+            echo ""
+            echo "cc @flash1293"
+          } > /tmp/pr-comment.md
+
+          PR_NUMBER="${{ needs.prepare.outputs.pr_number }}"
+          gh pr comment "$PR_NUMBER" --body-file /tmp/pr-comment.md
+          echo "::notice::Pushed changes to PR #${PR_NUMBER}"
+        env:
+          GH_TOKEN: ${{ secrets.KIBANAMACHINE_TOKEN }}
+
+      - name: Create new PR
+        if: env.has_changes == 'true' && needs.prepare.outputs.is_pr != 'true'
+        run: |
+          set -euo pipefail
+          PROMPT_SUMMARY=$(cat /tmp/agent-output/prompt-summary.txt 2>/dev/null || echo "AI-generated changes")
+          RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          BRANCH_SUFFIX=$(date +%Y%m%d-%H%M%S)-$(echo "$PROMPT_SUMMARY" | md5sum | head -c 8)
+          BRANCH_NAME="action-ralph/${BRANCH_SUFFIX}"
+
+          git checkout -b "$BRANCH_NAME"
+          CHANGED_COUNT=$(git diff --cached --name-only | wc -l | tr -d ' ')
+
+          COMMIT_MSG="feat: ${PROMPT_SUMMARY}
+
+          Generated by Action Ralph
+          Files changed: ${CHANGED_COUNT}
+          Run: ${RUN_URL}"
+
+          git commit -m "$COMMIT_MSG"
+          git push origin "$BRANCH_NAME"
+
+          CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD | head -50)
+
+          {
+            echo "## Summary"
+            echo ""
+            echo "**Prompt:** ${PROMPT_SUMMARY}"
+            echo ""
+            echo "**Workflow run:** ${RUN_URL}"
+            echo ""
+            echo "---"
+            echo ""
+            echo "### Changed files"
+            echo '```'
+            echo "${CHANGED_FILES}"
+            echo '```'
+            echo ""
+            echo "### Agent reasoning"
+            echo ""
+            echo "<details>"
+            echo "<summary>Expand agent output</summary>"
+            echo ""
+            echo '```'
+            if [ -f /tmp/agent-output/agent-reasoning.md ]; then
+              head -c 60000 /tmp/agent-output/agent-reasoning.md
+            fi
+            echo '```'
+            echo "</details>"
+            echo ""
+            echo "---"
+            echo ""
+            echo '> This PR was generated by Action Ralph and is tagged `ai-generated`.'
+            echo '> It **requires manual review and approval** before merging.'
+            echo ""
+            echo "cc @flash1293"
+          } > /tmp/pr-body.md
+
+          gh pr create \
+            --draft \
+            --title "AI: ${PROMPT_SUMMARY}" \
+            --label "ai-generated" \
+            --body-file /tmp/pr-body.md
+
+          PR_URL=$(gh pr view --json url -q '.url')
+          echo "::notice::PR created: ${PR_URL}"
+
+          if [ "${{ github.event_name }}" = "issue_comment" ]; then
+            ISSUE_NUMBER="${{ github.event.issue.number }}"
+            gh issue comment "$ISSUE_NUMBER" \
+              --body "Action Ralph has completed the task and opened a PR: ${PR_URL}"
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.KIBANAMACHINE_TOKEN }}
