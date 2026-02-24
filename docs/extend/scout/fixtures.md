@@ -30,19 +30,6 @@ test.describe('My suite', { tag: tags.deploymentAgnostic }, () => {
 - **Worker-scoped** fixtures live for the lifetime of a Playwright worker.
 - **Test-scoped** fixtures are created per test.
 
-### Performance implications [scout-fixtures-scope-performance]
-
-Fixture scope is a trade-off between **speed** and **isolation**:
-
-- **Test-scoped** fixtures run once per test. This is the safest default (no shared mutable state), but it can be slower if the fixture does real work each time (logins, data creation, ingest, large API calls).
-- **Worker-scoped** fixtures run once per worker and are reused across tests in that worker. This can significantly speed up suites by avoiding repeated setup, but you must ensure tests don’t leak state through the shared fixture.
-
-Rules of thumb:
-
-- **Use test scope** for anything that represents a *per-test session* or *mutable state* (for example UI `page`/`context`, `browserAuth`, or helpers that change server data as part of the test).
-- **Use worker scope** for expensive, reusable clients and helpers (for example `kbnClient`, `esClient`, `apiServices`) and for setup that’s safe to share within a worker.
-- If you need to run something **once before any workers start** (for example shared data ingestion for parallel suites), use a [global setup hook](./global-setup-hook.md) instead of a worker-scoped fixture.
-
 ## Core Scout fixtures [core-scout-fixtures]
 
 Scout exposes different fixture sets depending on the entrypoint you import.
