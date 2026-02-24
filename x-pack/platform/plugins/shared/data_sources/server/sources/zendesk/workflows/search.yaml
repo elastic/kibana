@@ -9,18 +9,20 @@ inputs:
   - name: query
     type: string
     required: true
-    description: 'Search query'
+    description: |
+      Zendesk query syntax (keyword, type:ticket|user|organization|group, status:open, created<YYYY-MM-DD, "exact phrase").
+      E.g. type:ticket status:open, crawler, "output_sink: console"'. Filter syntax: field:value. Combine with spaces.
   - name: sort_by
     type: string
     required: false
-    description: 'Sort field (e.g. created_at, updated_at)'
+    description: 'Sort field (e.g. updated_at, created_at, priority, status, ticket_type).  Default is unsorted.'
   - name: sort_order
     type: choice
     options:
       - asc
       - desc
     required: false
-    description: 'Sort order'
+    description: 'Sort order, unsorted is the default.'
   - name: page
     type: number
     required: false
