@@ -41,6 +41,7 @@ export class StreamsApp {
   public readonly queryStreamDetailsQueryViewerCodeBlock;
   public readonly deleteQueryStreamModalInput;
   public readonly queryStreamDeletedSuccessToast;
+  public readonly queryStreamCreateErrorToast;
 
   constructor(private readonly page: ScoutPage) {
     this.processorFieldComboBox = new EuiComboBoxWrapper(
@@ -92,6 +93,7 @@ export class StreamsApp {
       'streamsAppDeleteStreamModalStreamNameInput'
     );
     this.queryStreamDeletedSuccessToast = this.page.getByText('Stream deleted');
+    this.queryStreamCreateErrorToast = this.page.getByText('Error creating query stream');
   }
 
   async goto() {

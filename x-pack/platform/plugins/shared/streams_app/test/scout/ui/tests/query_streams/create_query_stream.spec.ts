@@ -35,6 +35,14 @@ test.describe(
       });
     });
 
+    test('should properly handle errors for invalid query streams', async ({ pageObjects }) => {
+      await pageObjects.streams.clickCreateQueryStreamButton();
+      await pageObjects.streams.fillRoutingRuleName('test-query-stream');
+      await pageObjects.streams.kibanaMonacoEditor.setCodeEditorValue('INVALID QUERY');
+      await pageObjects.streams.clickQueryStreamFlyoutSaveButton();
+      await expect(pageObjects.streams.queryStreamCreateErrorToast).toBeVisible();
+    });
+
     test('should properly create a root query stream', async ({ pageObjects, esClient }) => {
       const rootQueryStreamName = 'test-query-stream';
       const rootQueryStreamEsqlQuery = 'FROM logs | WHERE host.name == "host-1"';
