@@ -775,6 +775,47 @@
           "something!"
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "pluginA",
+        "id": "def-public.overloadedFn",
+        "type": "Function",
+        "tags": [],
+        "label": "overloadedFn",
+        "description": [
+          "\nA variable typed with the overloaded function."
+        ],
+        "signature": [
+          {
+            "pluginId": "pluginA",
+            "scope": "public",
+            "docId": "kibPluginAPluginApi",
+            "section": "def-public.OverloadedFunction",
+            "text": "OverloadedFunction"
+          }
+        ],
+        "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/types.ts",
+        "lineNumber": 98,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "pluginA",
+            "id": "def-public.overloadedFn.$1",
+            "type": "string",
+            "tags": [],
+            "label": "input",
+            "description": [],
+            "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/types.ts",
+            "lineNumber": 80,
+            "columnNumber": 4,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [
@@ -1359,6 +1400,150 @@
                 "deprecated": false,
                 "trackAdoption": false
               }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "pluginA",
+        "id": "def-public.OverloadedFunction",
+        "type": "Interface",
+        "tags": [],
+        "label": "OverloadedFunction",
+        "description": [
+          "\nA function type with multiple call signatures (overloads).\nThis demonstrates handling of overloaded function types.\n"
+        ],
+        "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/types.ts",
+        "lineNumber": 67,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "pluginA",
+            "id": "def-public.OverloadedFunction.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Unnamed",
+            "description": [
+              "\nParse a string and return a number."
+            ],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/types.ts",
+            "lineNumber": 75,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "pluginA",
+                "id": "def-public.OverloadedFunction.Unnamed.$1",
+                "type": "string",
+                "tags": [],
+                "label": "input",
+                "description": [
+                  "A string to parse."
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/types.ts",
+                "lineNumber": 80,
+                "columnNumber": 4,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "The parsed number."
+            ]
+          },
+          {
+            "parentPluginId": "pluginA",
+            "id": "def-public.OverloadedFunction.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Unnamed",
+            "description": [
+              "\nDouble a number."
+            ],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/types.ts",
+            "lineNumber": 81,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "pluginA",
+                "id": "def-public.OverloadedFunction.Unnamed.$1",
+                "type": "number",
+                "tags": [],
+                "label": "input",
+                "description": [
+                  "A number to double."
+                ],
+                "signature": [
+                  "number"
+                ],
+                "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/types.ts",
+                "lineNumber": 86,
+                "columnNumber": 4,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "The doubled value as a string."
+            ]
+          },
+          {
+            "parentPluginId": "pluginA",
+            "id": "def-public.OverloadedFunction.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Unnamed",
+            "description": [
+              "\nParse an array of strings."
+            ],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/types.ts",
+            "lineNumber": 87,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "pluginA",
+                "id": "def-public.OverloadedFunction.Unnamed.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "input",
+                "description": [
+                  "An array of strings to parse."
+                ],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/types.ts",
+                "lineNumber": 92,
+                "columnNumber": 4,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "An array of parsed numbers."
             ]
           }
         ],

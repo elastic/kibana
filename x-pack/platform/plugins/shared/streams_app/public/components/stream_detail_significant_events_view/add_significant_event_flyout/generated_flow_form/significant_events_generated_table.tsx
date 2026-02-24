@@ -16,7 +16,7 @@ import {
   EuiCodeBlock,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { StreamQueryKql, Streams, System } from '@kbn/streams-schema';
+import type { StreamQuery, Streams, System } from '@kbn/streams-schema';
 import React, { useCallback, useEffect, useState, type ReactNode } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { PreviewDataSparkPlot } from '../common/preview_data_spark_plot';
@@ -26,12 +26,12 @@ import { SeverityBadge } from '../../../significant_events_discovery/components/
 
 interface Props {
   definition: Streams.all.Definition;
-  generatedQueries: StreamQueryKql[];
+  generatedQueries: StreamQuery[];
   setIsEditingQueries: (isEditingQueries: boolean) => void;
-  onEditQuery: (query: StreamQueryKql) => void;
-  selectedQueries: StreamQueryKql[];
+  onEditQuery: (query: StreamQuery) => void;
+  selectedQueries: StreamQuery[];
   isSubmitting: boolean;
-  onSelectionChange: (selectedItems: StreamQueryKql[]) => void;
+  onSelectionChange: (selectedItems: StreamQuery[]) => void;
   systems: Omit<System, 'description'>[];
   dataViews: DataView[];
 }
@@ -53,7 +53,7 @@ export function SignificantEventsGeneratedTable({
   const [eventsInEditMode, setEventsInEditMode] = useState<string[]>([]);
 
   const setIsEditing = useCallback(
-    (isEditing: boolean, query: StreamQueryKql) => {
+    (isEditing: boolean, query: StreamQuery) => {
       const nextEventsInEditMode = isEditing
         ? [...eventsInEditMode, query.id]
         : eventsInEditMode.filter((id) => id !== query.id);
@@ -63,7 +63,7 @@ export function SignificantEventsGeneratedTable({
     [eventsInEditMode, setIsEditingQueries]
   );
 
-  const toggleDetails = (query: StreamQueryKql) => {
+  const toggleDetails = (query: StreamQuery) => {
     const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
 
     if (itemIdToExpandedRowMapValues[query.id]) {
@@ -105,7 +105,7 @@ export function SignificantEventsGeneratedTable({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [eventsInEditMode, definition, onEditQuery, systems, dataViews, generatedQueries]);
 
-  const columns: Array<EuiBasicTableColumn<StreamQueryKql>> = [
+  const columns: Array<EuiBasicTableColumn<StreamQuery>> = [
     {
       align: 'right',
       width: '40px',
@@ -120,7 +120,7 @@ export function SignificantEventsGeneratedTable({
         </EuiScreenReaderOnly>
       ),
       mobileOptions: { header: false },
-      render: (query: StreamQueryKql) => {
+      render: (query: StreamQuery) => {
         const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
 
         return (
@@ -146,7 +146,7 @@ export function SignificantEventsGeneratedTable({
       name: i18n.translate('xpack.streams.addSignificantEventFlyout.aiFlow.systemColumn', {
         defaultMessage: 'System',
       }),
-      render: (_, item: StreamQueryKql) => {
+      render: (_, item: StreamQuery) => {
         return <EuiBadge color="hollow">{item.feature?.name ?? '--'}</EuiBadge>;
       },
     },
@@ -156,7 +156,7 @@ export function SignificantEventsGeneratedTable({
       name: i18n.translate('xpack.streams.addSignificantEventFlyout.aiFlow.queryColumn', {
         defaultMessage: 'Query',
       }),
-      render: (_, item: StreamQueryKql) => {
+      render: (_, item: StreamQuery) => {
         return <EuiCodeBlock paddingSize="none">{JSON.stringify(item.kql?.query)}</EuiCodeBlock>;
       },
     },
@@ -181,7 +181,7 @@ export function SignificantEventsGeneratedTable({
         </EuiScreenReaderOnly>
       ),
       width: '20%',
-      render: (query: StreamQueryKql) => {
+      render: (query: StreamQuery) => {
         const validation = validateQuery(query);
         return (
           <PreviewDataSparkPlot
@@ -198,7 +198,7 @@ export function SignificantEventsGeneratedTable({
     },
   ];
 
-  const selection: EuiTableSelectionType<StreamQueryKql> = {
+  const selection: EuiTableSelectionType<StreamQuery> = {
     onSelectionChange,
     selected: selectedQueries,
     selectable: () => !isSubmitting,
