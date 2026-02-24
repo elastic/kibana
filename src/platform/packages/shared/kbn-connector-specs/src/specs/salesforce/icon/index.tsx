@@ -11,7 +11,7 @@ import React from 'react';
 
 import { EuiIcon } from '@elastic/eui';
 import type { ConnectorIconProps } from '../../../types';
-import salesforceIcon from './salesforce.jpeg';
+import salesforceIcon from './salesforce.svg';
 
 export default (props: ConnectorIconProps) => {
   return <EuiIcon type={salesforceIcon} {...props} aria-hidden={true} />;

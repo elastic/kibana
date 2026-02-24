@@ -12,26 +12,12 @@ import type { ConnectorSpec } from '../../connector_spec';
 
 const SALESFORCE_API_VERSION = 'v59.0';
 
-function getBaseUrl(ctx: {
-  config?: Record<string, unknown>;
-  secrets?: Record<string, unknown>;
-}): string {
-  const instanceUrl =
-    (ctx.config?.instanceUrl as string | undefined) ??
-    (ctx.secrets?.instanceUrl as string | undefined) ??
-    '';
-  const domain = ctx.secrets?.domain as string | undefined;
-  const rawTokenUrl = ctx.secrets?.tokenUrl as string | undefined;
-  const tokenUrlBase = rawTokenUrl
-    ? (rawTokenUrl.includes('/services/oauth2/token')
-        ? rawTokenUrl.replace(/\/services\/oauth2\/token.*$/, '')
-        : rawTokenUrl
-      ).replace(/\/+$/, '')
-    : '';
-  const base =
-    instanceUrl ||
-    (domain ? `https://${domain.replace(/\/$/, '').replace(/^https?:\/\//, '')}` : '') ||
-    tokenUrlBase;
+/** Derive instance base URL from the full token URL (strip /services/oauth2/token and any path). */
+function getBaseUrl(tokenUrl: string | undefined): string {
+  if (!tokenUrl) return '';
+  const base = tokenUrl.includes('/services/oauth2/token')
+    ? tokenUrl.replace(/\/services\/oauth2\/token.*$/, '')
+    : tokenUrl;
   return base.replace(/\/+$/, '');
 }
 
@@ -62,13 +48,12 @@ export const SalesforceConnector: ConnectorSpec = {
 
   actions: {
     search: {
-      isTool: false,
       input: z.object({
         soql: z.string(),
       }),
       handler: async (ctx, input) => {
         const typedInput = input as { soql: string };
-        const baseUrl = getBaseUrl(ctx);
+        const baseUrl = getBaseUrl(ctx.secrets?.tokenUrl as string | undefined);
         const response = await ctx.client.get(
           `${baseUrl}/services/data/${SALESFORCE_API_VERSION}/query`,
           {
@@ -80,14 +65,13 @@ export const SalesforceConnector: ConnectorSpec = {
     },
 
     get_record: {
-      isTool: false,
       input: z.object({
         sobjectName: z.string(),
         recordId: z.string(),
       }),
       handler: async (ctx, input) => {
         const typedInput = input as { sobjectName: string; recordId: string };
-        const baseUrl = getBaseUrl(ctx);
+        const baseUrl = getBaseUrl(ctx.secrets?.tokenUrl as string | undefined);
         const response = await ctx.client.get(
           `${baseUrl}/services/data/${SALESFORCE_API_VERSION}/sobjects/${typedInput.sobjectName}/${typedInput.recordId}`,
           {}
@@ -97,20 +81,17 @@ export const SalesforceConnector: ConnectorSpec = {
     },
 
     list_records: {
-      isTool: false,
       input: z.object({
         sobjectName: z.string(),
-        limit: z.number().default(200),
+        limit: z.number().default(50),
       }),
       handler: async (ctx, input) => {
         const typedInput = input as {
           sobjectName: string;
-          limit?: number;
-          nextRecordsUrl?: string;
+          limit: number;
         };
-        const baseUrl = getBaseUrl(ctx);
-
-        const limit = Math.min(typedInput.limit ?? 200, 2000);
+        const baseUrl = getBaseUrl(ctx.secrets?.tokenUrl as string | undefined);
+        const limit = Math.min(typedInput.limit, 2000);
         const soql = `SELECT Id FROM ${typedInput.sobjectName} LIMIT ${limit}`;
         const response = await ctx.client.get(
           `${baseUrl}/services/data/${SALESFORCE_API_VERSION}/query`,
@@ -129,7 +110,7 @@ export const SalesforceConnector: ConnectorSpec = {
       ctx.log.debug('Salesforce test handler');
 
       try {
-        const baseUrl = getBaseUrl(ctx);
+        const baseUrl = getBaseUrl(ctx.secrets?.tokenUrl as string | undefined);
         await ctx.client.get(`${baseUrl}/services/data/${SALESFORCE_API_VERSION}/query`, {
           params: { q: 'SELECT Id FROM User LIMIT 1' },
         });

@@ -20,7 +20,7 @@ You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
 Salesforce connectors use OAuth 2.0 Client Credentials and have the following configuration properties:
 
 Token URL
-:   The OAuth 2.0 token endpoint for your Salesforce instance. Use `https://login.salesforce.com/services/oauth2/token` for production, or `https://test.salesforce.com/services/oauth2/token` for sandbox.
+:   The OAuth 2.0 token endpoint for your Salesforce instance. The value is your **domain name** plus `/services/oauth2/token`. Examples: `https://login.salesforce.com/services/oauth2/token` (production), `https://test.salesforce.com/services/oauth2/token` (sandbox), or `https://yourcompany.my.salesforce.com/services/oauth2/token` (My Domain).
 
 Client ID
 :   The Consumer Key from your Salesforce Connected App.
@@ -68,8 +68,7 @@ To use the Salesforce connector, you need a Connected App with OAuth 2.0 Client 
    - Enable **Enable Client Credentials Flow** if your org supports it (required for server-to-server integration).
 6. Save the app. Wait a few minutes for the app to be activated, then click **Manage Consumer Details** and verify or set the **Consumer Key** (Client ID) and **Consumer Secret** (Client Secret).
 7. Use the **Consumer Key** as Client ID and **Consumer Secret** as Client Secret when creating the connector in Kibana.
-8. For Token URL, use:
-   - Production: `https://login.salesforce.com/services/oauth2/token`
-   - Sandbox: `https://test.salesforce.com/services/oauth2/token`
-
-If your Salesforce org uses My Domain, the token endpoint may differ; use the token URL that matches your org’s login endpoint (replace the host with your My Domain host if applicable).
+8. For Token URL, use the formula **domain name** + `/services/oauth2/token`:
+   - Production: `https://login.salesforce.com` + `/services/oauth2/token` → `https://login.salesforce.com/services/oauth2/token`
+   - Sandbox: `https://test.salesforce.com` + `/services/oauth2/token` → `https://test.salesforce.com/services/oauth2/token`
+   - My Domain: `https://yourcompany.my.salesforce.com` + `/services/oauth2/token` → `https://yourcompany.my.salesforce.com/services/oauth2/token`
