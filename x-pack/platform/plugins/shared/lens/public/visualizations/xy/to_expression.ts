@@ -41,6 +41,7 @@ import {
 import type { EventAnnotationConfig } from '@kbn/event-annotation-common';
 import type { SystemPaletteExpressionFunctionDefinition } from '@kbn/charts-plugin/common';
 import { KbnPalette } from '@kbn/palettes';
+import type { KbnPaletteId } from '@kbn/palettes';
 import type { OperationMetadata, DatasourcePublicAPI, DatasourceLayers } from '@kbn/lens-common';
 import type {
   XYState,
@@ -461,7 +462,7 @@ const annotationLayerToExpression = (
  * Returns the default palette for a given series type.
  * Line charts use a line-optimized palette for better contrast between overlapping series.
  */
-function getDefaultPalette(seriesType: LensSeriesType): string {
+function getDefaultPalette(seriesType: LensSeriesType): KbnPaletteId {
   if (isLineSeries(seriesType)) {
     return KbnPalette.ElasticLineOptimized;
   }
