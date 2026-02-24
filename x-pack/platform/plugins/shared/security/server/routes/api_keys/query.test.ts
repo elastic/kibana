@@ -265,4 +265,84 @@ describe('Query API Keys route', () => {
       ]);
     });
   });
+
+  describe('cursor-based pagination with searchAfter', () => {
+    it('should pass searchAfter to Elasticsearch when provided', async () => {
+      esClientMock.asCurrentUser.security.queryApiKeys.mockRestore();
+      esClientMock.asCurrentUser.security.queryApiKeys.mockResponse({
+        api_keys: [{ id: '789', name: 'test-key', invalidated: false, _sort: [1234567890, '789'] }],
+        total: 100,
+      } as any);
+
+      const searchAfterCursor = [1234567800, '456'];
+
+      await routeHandler(
+        mockContext,
+        httpServerMock.createKibanaRequest({
+          body: {
+            searchAfter: searchAfterCursor,
+            size: 25,
+            sort: { field: 'creation', direction: 'desc' },
+          },
+        }),
+        kibanaResponseFactory
+      );
+
+      // Verify that search_after was passed to Elasticsearch
+      expect(esClientMock.asCurrentUser.security.queryApiKeys).toHaveBeenCalledWith(
+        expect.objectContaining({
+          search_after: searchAfterCursor,
+        })
+      );
+    });
+
+    it('should return searchAfter cursor from last API key _sort field', async () => {
+      const expectedSortValues = [1234567890, 'last-key-id'];
+
+      esClientMock.asCurrentUser.security.queryApiKeys.mockRestore();
+      esClientMock.asCurrentUser.security.queryApiKeys.mockResponse({
+        api_keys: [
+          { id: 'first', name: 'first-key', invalidated: false, _sort: [1234567800, 'first'] },
+          { id: 'last', name: 'last-key', invalidated: false, _sort: expectedSortValues },
+        ],
+        total: 100,
+      } as any);
+
+      const response = await routeHandler(
+        mockContext,
+        httpServerMock.createKibanaRequest({
+          body: {
+            size: 25,
+            sort: { field: 'creation', direction: 'desc' },
+          },
+        }),
+        kibanaResponseFactory
+      );
+
+      expect(response.status).toBe(200);
+      expect(response.payload.searchAfter).toEqual(expectedSortValues);
+    });
+
+    it('should return undefined searchAfter when there are no API keys', async () => {
+      esClientMock.asCurrentUser.security.queryApiKeys.mockRestore();
+      esClientMock.asCurrentUser.security.queryApiKeys.mockResponse({
+        api_keys: [],
+        total: 0,
+      } as any);
+
+      const response = await routeHandler(
+        mockContext,
+        httpServerMock.createKibanaRequest({
+          body: {
+            size: 25,
+            sort: { field: 'creation', direction: 'desc' },
+          },
+        }),
+        kibanaResponseFactory
+      );
+
+      expect(response.status).toBe(200);
+      expect(response.payload.searchAfter).toBeUndefined();
+    });
+  });
 });

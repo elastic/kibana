@@ -18,10 +18,10 @@ export function ErrorSampleContextualInsight({
   error,
   transaction,
 }: {
-  error: {
+  error?: {
     [AT_TIMESTAMP]: string;
     error: Pick<APMError['error'], 'log' | 'exception' | 'id'>;
-    service: {
+    service?: {
       name: string;
       environment?: string;
       language?: {
@@ -45,11 +45,11 @@ export function ErrorSampleContextualInsight({
   const [exceptionStacktrace, setExceptionStacktrace] = useState('');
 
   const messages = useMemo<Message[] | undefined>(() => {
-    const serviceName = error.service.name;
-    const languageName = error.service.language?.name ?? '';
-    const runtimeName = error.service.runtime?.name ?? '';
-    const runtimeVersion = error.service.runtime?.version ?? '';
-    const transactionName = transaction?.transaction.name ?? '';
+    const serviceName = error?.service?.name ?? '';
+    const languageName = error?.service?.language?.name ?? '';
+    const runtimeName = error?.service?.runtime?.name ?? '';
+    const runtimeVersion = error?.service?.runtime?.version ?? '';
+    const transactionName = transaction?.transaction?.name ?? '';
 
     return observabilityAIAssistant?.getContextualInsightMessages({
       message: `I'm looking at an exception and trying to understand what it means`,
@@ -78,6 +78,10 @@ export function ErrorSampleContextualInsight({
     });
   }, [error, transaction, logStacktrace, exceptionStacktrace, observabilityAIAssistant]);
 
+  if (!error?.service) {
+    return null;
+  }
+
   return observabilityAIAssistant?.ObservabilityAIAssistantContextualInsight && messages ? (
     <>
       <EuiFlexItem>
@@ -95,7 +99,7 @@ export function ErrorSampleContextualInsight({
         }}
         style={{ display: 'none' }}
       >
-        {error.error.log?.message && (
+        {error?.error?.log?.message && (
           <ErrorSampleDetailTabContent error={error} currentTab={logStacktraceTab} />
         )}
       </div>
@@ -105,7 +109,7 @@ export function ErrorSampleContextualInsight({
         }}
         style={{ display: 'none' }}
       >
-        {error.error.exception?.length && (
+        {error?.error?.exception?.length && (
           <ErrorSampleDetailTabContent error={error} currentTab={exceptionStacktraceTab} />
         )}
       </div>
