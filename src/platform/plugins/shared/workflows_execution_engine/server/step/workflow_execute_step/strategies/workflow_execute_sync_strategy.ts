@@ -99,13 +99,15 @@ export class WorkflowExecuteSyncStrategy {
       };
       this.stepExecutionRuntime.setCurrentStepState(state);
 
+      if (this.stepExecutionRuntime.abortController.signal.aborted) {
+        return { status: 'cancelled' };
+      }
+
       const firstPollInterval = getNextPollInterval(0);
-      // Enter wait state - this will schedule a resume task after firstPollInterval
       if (this.stepExecutionRuntime.tryEnterDelay(firstPollInterval)) {
         this.workflowLogger.logDebug(
           `Entering wait state to poll sub-workflow ${workflowExecutionId} after ${firstPollInterval}`
         );
-        // Exit without navigating - workflow will be resumed by the handle_execution_delay logic (either in-process or task manager)
       }
       return { status: 'waiting' };
     } catch (error) {
@@ -181,6 +183,11 @@ export class WorkflowExecuteSyncStrategy {
         ...state,
         pollCount: nextPollCount,
       });
+
+      if (this.stepExecutionRuntime.abortController.signal.aborted) {
+        return { status: 'cancelled' };
+      }
+
       this.workflowLogger.logDebug(
         `Sub-workflow ${state.executionId} still ${execution.status}, polling again after ${nextInterval}`
       );
