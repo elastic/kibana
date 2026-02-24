@@ -137,7 +137,7 @@ export const SetupTechnologySelector = ({
               <EuiText size="s">
                 <p>
                   <FormattedMessage
-                    id="xpack.fleet.setupTechnology.radioCardAgentbasedInputDescription"
+                    id="xpack.fleet.setupTechnology.agentbasedInputDescription"
                     defaultMessage="Deploy an Elastic Agent into your cloud environment"
                   />
                 </p>
