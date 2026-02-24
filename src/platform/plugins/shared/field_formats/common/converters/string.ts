@@ -10,10 +10,15 @@
 import { escape } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
-import { asPrettyString, getHighlightHtml, shortenDottedString } from '../utils';
+import { asPrettyString, getHighlightHtml, getHighlightReact, shortenDottedString } from '../utils';
 import { FieldFormat } from '../field_format';
-import type { TextContextTypeConvert, HtmlContextTypeConvert } from '../types';
+import type {
+  TextContextTypeConvert,
+  HtmlContextTypeConvert,
+  ReactContextTypeConvert,
+} from '../types';
 import { FIELD_FORMAT_IDS } from '../types';
+import { checkForMissingValueReact } from '../content_types';
 
 const TRANSFORM_OPTIONS = [
   {
@@ -140,5 +145,19 @@ export class StringFormat extends FieldFormat {
     return hit?.highlight?.[field?.name!]
       ? getHighlightHtml(escape(val), hit.highlight[field!.name])
       : escape(this.textConvert(val));
+  };
+
+  reactConvert: ReactContextTypeConvert = (val, options = {}) => {
+    const missing = checkForMissingValueReact(val);
+    if (missing) {
+      return missing;
+    }
+
+    const { hit, field } = options;
+    if (hit?.highlight?.[field?.name!]) {
+      return getHighlightReact(String(val), hit.highlight[field!.name]);
+    }
+
+    return this.textConvert(val);
   };
 }
