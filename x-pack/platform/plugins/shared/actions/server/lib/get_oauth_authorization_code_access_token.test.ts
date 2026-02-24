@@ -17,515 +17,352 @@ jest.mock('./request_oauth_refresh_token', () => ({
   requestOAuthRefreshToken: jest.fn(),
 }));
 
+const NOW = new Date('2024-01-15T12:00:00.000Z');
+
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 const configurationUtilities = actionsConfigMock.create();
 const connectorTokenClient = connectorTokenClientMock.create();
 
-let clock: sinon.SinonFakeTimers;
+// A valid stored token: access token expires 1h from now, refresh token expires in 7 days
+const validToken = {
+  id: 'token-1',
+  connectorId: 'connector-1',
+  tokenType: 'access_token',
+  token: 'stored-access-token',
+  createdAt: new Date('2024-01-15T10:00:00.000Z').toISOString(),
+  expiresAt: new Date('2024-01-15T13:00:00.000Z').toISOString(),
+  refreshToken: 'stored-refresh-token',
+  refreshTokenExpiresAt: new Date('2024-01-22T12:00:00.000Z').toISOString(),
+};
 
-const NOW = new Date('2024-01-01T12:00:00.000Z');
-const FUTURE = new Date('2024-01-02T12:00:00.000Z').toISOString();
-const PAST = new Date('2024-01-01T11:00:00.000Z').toISOString();
+// Same token but with an access token that expired 1h ago
+const expiredToken = {
+  ...validToken,
+  expiresAt: new Date('2024-01-15T11:00:00.000Z').toISOString(),
+};
 
-const BASE_OPTS = {
-  connectorId: 'connector-123',
+const refreshResponse = {
+  tokenType: 'Bearer',
+  accessToken: 'new-access-token',
+  expiresIn: 3600,
+  refreshToken: 'new-refresh-token',
+  refreshTokenExpiresIn: 604800,
+};
+
+const baseOpts = {
+  connectorId: 'connector-1',
   logger,
   configurationUtilities,
   credentials: {
     config: {
-      clientId: 'clientId',
-      tokenUrl: 'https://auth.example.com/oauth2/token',
+      clientId: 'my-client-id',
+      tokenUrl: 'https://auth.example.com/oauth/token',
     },
     secrets: {
-      clientSecret: 'clientSecret',
+      clientSecret: 'my-client-secret',
     },
   },
   connectorTokenClient,
 };
+
+let clock: sinon.SinonFakeTimers;
 
 describe('getOAuthAuthorizationCodeAccessToken', () => {
   beforeAll(() => {
     clock = sinon.useFakeTimers(NOW);
   });
   beforeEach(() => {
-    jest.resetAllMocks();
-    jest.clearAllMocks();
     clock.reset();
+    jest.resetAllMocks();
   });
   afterAll(() => clock.restore());
 
-  describe('shared mode (authMode: "shared" or default)', () => {
-    test('returns the shared token string from ConnectorToken.token when still valid', async () => {
-      connectorTokenClient.get.mockResolvedValueOnce({
-        hasErrors: false,
-        connectorToken: {
-          id: 'shared:token-id-1',
-          connectorId: 'connector-123',
-          tokenType: 'access_token',
-          token: 'Bearer shared-access-token',
-          expiresAt: FUTURE,
-          createdAt: NOW.toISOString(),
-        },
-      });
-
+  describe('credential validation', () => {
+    it('returns null and warns when clientId is missing', async () => {
       const result = await getOAuthAuthorizationCodeAccessToken({
-        ...BASE_OPTS,
-        authMode: 'shared',
-      });
-
-      expect(result).toBe('Bearer shared-access-token');
-      expect(requestOAuthRefreshToken).not.toHaveBeenCalled();
-    });
-
-    test('returns null when shared token shape is missing the .token field', async () => {
-      connectorTokenClient.get.mockResolvedValueOnce({
-        hasErrors: false,
-        connectorToken: {
-          id: 'shared:token-id-1',
-          connectorId: 'connector-123',
-          tokenType: 'access_token',
-          // token field deliberately absent to simulate malformed document
-          token: undefined as unknown as string,
-          expiresAt: FUTURE,
-          createdAt: NOW.toISOString(),
+        ...baseOpts,
+        credentials: {
+          ...baseOpts.credentials,
+          config: { ...baseOpts.credentials.config, clientId: '' },
         },
-      });
-
-      const result = await getOAuthAuthorizationCodeAccessToken({
-        ...BASE_OPTS,
-        authMode: 'shared',
       });
 
       expect(result).toBeNull();
       expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('Stored token has unexpected shape')
+        'Missing required fields for requesting OAuth Authorization Code access token'
       );
+      expect(connectorTokenClient.get).not.toHaveBeenCalled();
     });
 
-    test('refreshes expired shared token using ConnectorToken.refreshToken', async () => {
-      connectorTokenClient.get.mockResolvedValueOnce({
-        hasErrors: false,
-        connectorToken: {
-          id: 'shared:token-id-1',
-          connectorId: 'connector-123',
-          tokenType: 'access_token',
-          token: 'Bearer old-access-token',
-          expiresAt: PAST,
-          refreshToken: 'shared-refresh-token',
-          createdAt: NOW.toISOString(),
-        },
-      });
-
-      (requestOAuthRefreshToken as jest.Mock).mockResolvedValueOnce({
-        tokenType: 'Bearer',
-        accessToken: 'new-shared-access-token',
-        expiresIn: 3600,
-        refreshToken: 'new-shared-refresh-token',
-      });
-
+    it('returns null and warns when clientSecret is missing', async () => {
       const result = await getOAuthAuthorizationCodeAccessToken({
-        ...BASE_OPTS,
-        authMode: 'shared',
-      });
-
-      expect(result).toBe('Bearer new-shared-access-token');
-      expect(requestOAuthRefreshToken).toHaveBeenCalledWith(
-        'https://auth.example.com/oauth2/token',
-        logger,
-        expect.objectContaining({ refreshToken: 'shared-refresh-token' }),
-        configurationUtilities,
-        true
-      );
-      expect(connectorTokenClient.updateWithRefreshToken).toHaveBeenCalledWith(
-        expect.objectContaining({
-          id: 'shared:token-id-1',
-          token: 'Bearer new-shared-access-token',
-          refreshToken: 'new-shared-refresh-token',
-        })
-      );
-    });
-
-    test('returns null when shared token is expired and has no refresh token', async () => {
-      connectorTokenClient.get.mockResolvedValueOnce({
-        hasErrors: false,
-        connectorToken: {
-          id: 'shared:token-id-1',
-          connectorId: 'connector-123',
-          tokenType: 'access_token',
-          token: 'Bearer old-access-token',
-          expiresAt: PAST,
-          createdAt: NOW.toISOString(),
-        },
-      });
-
-      const result = await getOAuthAuthorizationCodeAccessToken({
-        ...BASE_OPTS,
-        authMode: 'shared',
+        ...baseOpts,
+        credentials: { ...baseOpts.credentials, secrets: { clientSecret: '' } },
       });
 
       expect(result).toBeNull();
       expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('no refresh token available')
-      );
-    });
-
-    test('keeps old refresh token when provider does not return a new one', async () => {
-      connectorTokenClient.get.mockResolvedValueOnce({
-        hasErrors: false,
-        connectorToken: {
-          id: 'shared:token-id-1',
-          connectorId: 'connector-123',
-          tokenType: 'access_token',
-          token: 'Bearer old-access-token',
-          expiresAt: PAST,
-          refreshToken: 'original-refresh-token',
-          createdAt: NOW.toISOString(),
-        },
-      });
-
-      (requestOAuthRefreshToken as jest.Mock).mockResolvedValueOnce({
-        tokenType: 'Bearer',
-        accessToken: 'new-shared-access-token',
-        expiresIn: 3600,
-        // no refreshToken in response
-      });
-
-      await getOAuthAuthorizationCodeAccessToken({ ...BASE_OPTS, authMode: 'shared' });
-
-      expect(connectorTokenClient.updateWithRefreshToken).toHaveBeenCalledWith(
-        expect.objectContaining({ refreshToken: 'original-refresh-token' })
-      );
-    });
-  });
-
-  describe('per-user mode (authMode: "per-user")', () => {
-    const PER_USER_OPTS = {
-      ...BASE_OPTS,
-      authMode: 'per-user' as const,
-      profileUid: 'user-profile-uid-abc',
-    };
-
-    test('returns credentials.accessToken from UserConnectorToken when still valid', async () => {
-      connectorTokenClient.get.mockResolvedValueOnce({
-        hasErrors: false,
-        connectorToken: {
-          id: 'per-user:token-id-2',
-          connectorId: 'connector-123',
-          profileUid: 'user-profile-uid-abc',
-          credentialType: 'oauth',
-          credentials: {
-            accessToken: 'Bearer per-user-access-token',
-            refreshToken: 'per-user-refresh-token',
-          },
-          expiresAt: FUTURE,
-          createdAt: NOW.toISOString(),
-          updatedAt: NOW.toISOString(),
-        },
-      });
-
-      const result = await getOAuthAuthorizationCodeAccessToken(PER_USER_OPTS);
-
-      expect(result).toBe('Bearer per-user-access-token');
-      expect(requestOAuthRefreshToken).not.toHaveBeenCalled();
-    });
-
-    test('passes profileUid to connectorTokenClient.get', async () => {
-      connectorTokenClient.get.mockResolvedValueOnce({
-        hasErrors: false,
-        connectorToken: {
-          id: 'per-user:token-id-2',
-          connectorId: 'connector-123',
-          profileUid: 'user-profile-uid-abc',
-          credentialType: 'oauth',
-          credentials: { accessToken: 'Bearer per-user-access-token' },
-          expiresAt: FUTURE,
-          createdAt: NOW.toISOString(),
-          updatedAt: NOW.toISOString(),
-        },
-      });
-
-      await getOAuthAuthorizationCodeAccessToken(PER_USER_OPTS);
-
-      expect(connectorTokenClient.get).toHaveBeenCalledWith(
-        expect.objectContaining({ profileUid: 'user-profile-uid-abc' })
-      );
-    });
-
-    test('returns null when credentials.accessToken is not a string', async () => {
-      connectorTokenClient.get.mockResolvedValueOnce({
-        hasErrors: false,
-        connectorToken: {
-          id: 'per-user:token-id-2',
-          connectorId: 'connector-123',
-          profileUid: 'user-profile-uid-abc',
-          credentialType: 'oauth',
-          credentials: { accessToken: 12345 }, // wrong type
-          expiresAt: FUTURE,
-          createdAt: NOW.toISOString(),
-          updatedAt: NOW.toISOString(),
-        },
-      });
-
-      const result = await getOAuthAuthorizationCodeAccessToken(PER_USER_OPTS);
-
-      expect(result).toBeNull();
-      expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('Stored token has unexpected shape')
-      );
-    });
-
-    test('refreshes expired per-user token using credentials.refreshToken', async () => {
-      connectorTokenClient.get.mockResolvedValueOnce({
-        hasErrors: false,
-        connectorToken: {
-          id: 'per-user:token-id-2',
-          connectorId: 'connector-123',
-          profileUid: 'user-profile-uid-abc',
-          credentialType: 'oauth',
-          credentials: {
-            accessToken: 'Bearer old-per-user-token',
-            refreshToken: 'per-user-refresh-token',
-          },
-          expiresAt: PAST,
-          createdAt: NOW.toISOString(),
-          updatedAt: NOW.toISOString(),
-        },
-      });
-
-      (requestOAuthRefreshToken as jest.Mock).mockResolvedValueOnce({
-        tokenType: 'Bearer',
-        accessToken: 'new-per-user-access-token',
-        expiresIn: 3600,
-        refreshToken: 'new-per-user-refresh-token',
-      });
-
-      const result = await getOAuthAuthorizationCodeAccessToken(PER_USER_OPTS);
-
-      expect(result).toBe('Bearer new-per-user-access-token');
-      expect(requestOAuthRefreshToken).toHaveBeenCalledWith(
-        'https://auth.example.com/oauth2/token',
-        logger,
-        expect.objectContaining({ refreshToken: 'per-user-refresh-token' }),
-        configurationUtilities,
-        true
-      );
-      expect(connectorTokenClient.updateWithRefreshToken).toHaveBeenCalledWith(
-        expect.objectContaining({
-          id: 'per-user:token-id-2',
-          token: 'Bearer new-per-user-access-token',
-          refreshToken: 'new-per-user-refresh-token',
-        })
-      );
-    });
-
-    test('returns null when per-user token is expired and credentials has no refreshToken', async () => {
-      connectorTokenClient.get.mockResolvedValueOnce({
-        hasErrors: false,
-        connectorToken: {
-          id: 'per-user:token-id-2',
-          connectorId: 'connector-123',
-          profileUid: 'user-profile-uid-abc',
-          credentialType: 'oauth',
-          credentials: { accessToken: 'Bearer old-per-user-token' },
-          expiresAt: PAST,
-          createdAt: NOW.toISOString(),
-          updatedAt: NOW.toISOString(),
-        },
-      });
-
-      const result = await getOAuthAuthorizationCodeAccessToken(PER_USER_OPTS);
-
-      expect(result).toBeNull();
-      expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('no refresh token available')
-      );
-    });
-
-    test('returns null and warns when profileUid is missing', async () => {
-      const result = await getOAuthAuthorizationCodeAccessToken({
-        ...BASE_OPTS,
-        authMode: 'per-user',
-        profileUid: undefined,
-      });
-
-      expect(result).toBeNull();
-      expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('Per-user authMode requires a profileUid')
+        'Missing required fields for requesting OAuth Authorization Code access token'
       );
       expect(connectorTokenClient.get).not.toHaveBeenCalled();
     });
   });
 
-  describe('forceRefresh behavior', () => {
-    test('bypasses expiry check and refreshes shared token even when still valid', async () => {
-      connectorTokenClient.get.mockResolvedValueOnce({
-        hasErrors: false,
-        connectorToken: {
-          id: 'shared:token-id-1',
-          connectorId: 'connector-123',
-          tokenType: 'access_token',
-          token: 'Bearer old-valid-token',
-          expiresAt: FUTURE,
-          refreshToken: 'shared-refresh-token',
-          createdAt: NOW.toISOString(),
-        },
-      });
+  describe('stored token retrieval', () => {
+    it('returns null and warns when the token fetch reports errors', async () => {
+      connectorTokenClient.get.mockResolvedValueOnce({ hasErrors: true, connectorToken: null });
 
-      (requestOAuthRefreshToken as jest.Mock).mockResolvedValueOnce({
-        tokenType: 'Bearer',
-        accessToken: 'forced-new-token',
-        expiresIn: 3600,
-      });
+      const result = await getOAuthAuthorizationCodeAccessToken(baseOpts);
 
-      const result = await getOAuthAuthorizationCodeAccessToken({
-        ...BASE_OPTS,
-        authMode: 'shared',
-        forceRefresh: true,
-      });
-
-      expect(result).toBe('Bearer forced-new-token');
-      expect(requestOAuthRefreshToken).toHaveBeenCalled();
+      expect(result).toBeNull();
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Errors fetching connector token for connectorId: connector-1'
+      );
     });
 
-    test('bypasses expiry check and refreshes per-user token even when still valid', async () => {
+    it('returns null and warns when no token is stored (user has not authorized yet)', async () => {
+      connectorTokenClient.get.mockResolvedValueOnce({ hasErrors: false, connectorToken: null });
+
+      const result = await getOAuthAuthorizationCodeAccessToken(baseOpts);
+
+      expect(result).toBeNull();
+      expect(logger.warn).toHaveBeenCalledWith(
+        'No access token found for connectorId: connector-1. User must complete OAuth authorization flow.'
+      );
+    });
+
+    it('returns the stored token without refreshing when it has not expired', async () => {
       connectorTokenClient.get.mockResolvedValueOnce({
         hasErrors: false,
-        connectorToken: {
-          id: 'per-user:token-id-2',
-          connectorId: 'connector-123',
-          profileUid: 'user-profile-uid-abc',
-          credentialType: 'oauth',
-          credentials: {
-            accessToken: 'Bearer old-valid-per-user-token',
-            refreshToken: 'per-user-refresh-token',
-          },
-          expiresAt: FUTURE,
-          createdAt: NOW.toISOString(),
-          updatedAt: NOW.toISOString(),
-        },
+        connectorToken: validToken,
       });
 
-      (requestOAuthRefreshToken as jest.Mock).mockResolvedValueOnce({
-        tokenType: 'Bearer',
-        accessToken: 'forced-new-per-user-token',
-        expiresIn: 3600,
+      const result = await getOAuthAuthorizationCodeAccessToken(baseOpts);
+
+      expect(result).toBe('stored-access-token');
+      expect(requestOAuthRefreshToken).not.toHaveBeenCalled();
+    });
+
+    it('treats a token with no expiresAt as never-expiring', async () => {
+      connectorTokenClient.get.mockResolvedValueOnce({
+        hasErrors: false,
+        connectorToken: { ...validToken, expiresAt: undefined },
       });
 
-      const result = await getOAuthAuthorizationCodeAccessToken({
-        ...BASE_OPTS,
-        authMode: 'per-user',
-        profileUid: 'user-profile-uid-abc',
-        forceRefresh: true,
-      });
+      const result = await getOAuthAuthorizationCodeAccessToken(baseOpts);
 
-      expect(result).toBe('Bearer forced-new-per-user-token');
-      expect(requestOAuthRefreshToken).toHaveBeenCalled();
+      expect(result).toBe('stored-access-token');
+      expect(requestOAuthRefreshToken).not.toHaveBeenCalled();
     });
   });
 
-  describe('refresh token expiry check', () => {
-    test('returns null when refresh token is expired', async () => {
-      const expiredRefreshTokenExpiresAt = PAST;
+  describe('token refresh', () => {
+    it('returns null and warns when access token is expired but no refresh token is stored', async () => {
+      connectorTokenClient.get.mockResolvedValueOnce({
+        hasErrors: false,
+        connectorToken: { ...expiredToken, refreshToken: undefined },
+      });
 
+      const result = await getOAuthAuthorizationCodeAccessToken(baseOpts);
+
+      expect(result).toBeNull();
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Access token expired and no refresh token available for connectorId: connector-1. User must re-authorize.'
+      );
+    });
+
+    it('returns null and warns when the refresh token itself is expired', async () => {
       connectorTokenClient.get.mockResolvedValueOnce({
         hasErrors: false,
         connectorToken: {
-          id: 'shared:token-id-1',
-          connectorId: 'connector-123',
-          tokenType: 'access_token',
-          token: 'Bearer old-access-token',
-          expiresAt: PAST,
-          refreshToken: 'shared-refresh-token',
-          refreshTokenExpiresAt: expiredRefreshTokenExpiresAt,
-          createdAt: NOW.toISOString(),
+          ...expiredToken,
+          refreshTokenExpiresAt: new Date('2024-01-15T11:00:00.000Z').toISOString(),
         },
       });
 
-      const result = await getOAuthAuthorizationCodeAccessToken({
-        ...BASE_OPTS,
-        authMode: 'shared',
-      });
+      const result = await getOAuthAuthorizationCodeAccessToken(baseOpts);
 
       expect(result).toBeNull();
-      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('Refresh token expired'));
-      expect(requestOAuthRefreshToken).not.toHaveBeenCalled();
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Refresh token expired for connectorId: connector-1. User must re-authorize.'
+      );
+    });
+
+    it('returns the refreshed token formatted as "tokenType accessToken"', async () => {
+      connectorTokenClient.get.mockResolvedValueOnce({
+        hasErrors: false,
+        connectorToken: expiredToken,
+      });
+      (requestOAuthRefreshToken as jest.Mock).mockResolvedValueOnce(refreshResponse);
+
+      const result = await getOAuthAuthorizationCodeAccessToken(baseOpts);
+
+      expect(result).toBe('Bearer new-access-token');
+    });
+
+    it('calls requestOAuthRefreshToken with correct arguments including scope', async () => {
+      connectorTokenClient.get.mockResolvedValueOnce({
+        hasErrors: false,
+        connectorToken: expiredToken,
+      });
+      (requestOAuthRefreshToken as jest.Mock).mockResolvedValueOnce(refreshResponse);
+
+      await getOAuthAuthorizationCodeAccessToken({ ...baseOpts, scope: 'openid profile' });
+
+      expect(requestOAuthRefreshToken).toHaveBeenCalledWith(
+        'https://auth.example.com/oauth/token',
+        logger,
+        {
+          refreshToken: 'stored-refresh-token',
+          clientId: 'my-client-id',
+          clientSecret: 'my-client-secret',
+          scope: 'openid profile',
+        },
+        configurationUtilities,
+        true // useBasicAuth defaults to true
+      );
+    });
+
+    it('spreads additionalFields into the refresh request body', async () => {
+      connectorTokenClient.get.mockResolvedValueOnce({
+        hasErrors: false,
+        connectorToken: expiredToken,
+      });
+      (requestOAuthRefreshToken as jest.Mock).mockResolvedValueOnce(refreshResponse);
+
+      await getOAuthAuthorizationCodeAccessToken({
+        ...baseOpts,
+        credentials: {
+          ...baseOpts.credentials,
+          config: {
+            ...baseOpts.credentials.config,
+            additionalFields: { tenant_id: 'abc123', custom_flag: true },
+          },
+        },
+      });
+
+      expect(requestOAuthRefreshToken).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.any(Object),
+        expect.objectContaining({ tenant_id: 'abc123', custom_flag: true }),
+        expect.any(Object),
+        expect.any(Boolean)
+      );
+    });
+
+    it('passes useBasicAuth: false when explicitly configured', async () => {
+      connectorTokenClient.get.mockResolvedValueOnce({
+        hasErrors: false,
+        connectorToken: expiredToken,
+      });
+      (requestOAuthRefreshToken as jest.Mock).mockResolvedValueOnce(refreshResponse);
+
+      await getOAuthAuthorizationCodeAccessToken({
+        ...baseOpts,
+        credentials: {
+          ...baseOpts.credentials,
+          config: { ...baseOpts.credentials.config, useBasicAuth: false },
+        },
+      });
+
+      expect(requestOAuthRefreshToken).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.any(Object),
+        expect.any(Object),
+        expect.any(Object),
+        false
+      );
+    });
+
+    it('persists the refreshed token and the new refresh token from the response', async () => {
+      connectorTokenClient.get.mockResolvedValueOnce({
+        hasErrors: false,
+        connectorToken: expiredToken,
+      });
+      (requestOAuthRefreshToken as jest.Mock).mockResolvedValueOnce(refreshResponse);
+
+      await getOAuthAuthorizationCodeAccessToken(baseOpts);
+
+      expect(connectorTokenClient.updateWithRefreshToken).toHaveBeenCalledWith({
+        id: 'token-1',
+        token: 'Bearer new-access-token',
+        refreshToken: 'new-refresh-token',
+        expiresIn: 3600,
+        refreshTokenExpiresIn: 604800,
+        tokenType: 'access_token',
+      });
+    });
+
+    it('falls back to the existing refresh token when the response omits one', async () => {
+      connectorTokenClient.get.mockResolvedValueOnce({
+        hasErrors: false,
+        connectorToken: expiredToken,
+      });
+      (requestOAuthRefreshToken as jest.Mock).mockResolvedValueOnce({
+        ...refreshResponse,
+        refreshToken: undefined,
+      });
+
+      await getOAuthAuthorizationCodeAccessToken(baseOpts);
+
+      expect(connectorTokenClient.updateWithRefreshToken).toHaveBeenCalledWith(
+        expect.objectContaining({ refreshToken: 'stored-refresh-token' })
+      );
+    });
+  });
+
+  describe('forceRefresh', () => {
+    it('bypasses the expiry check and refreshes a still-valid token', async () => {
+      connectorTokenClient.get.mockResolvedValueOnce({
+        hasErrors: false,
+        connectorToken: validToken,
+      });
+      (requestOAuthRefreshToken as jest.Mock).mockResolvedValueOnce(refreshResponse);
+
+      const result = await getOAuthAuthorizationCodeAccessToken({
+        ...baseOpts,
+        forceRefresh: true,
+      });
+
+      expect(result).toBe('Bearer new-access-token');
+      expect(requestOAuthRefreshToken).toHaveBeenCalledTimes(1);
     });
   });
 
   describe('error handling', () => {
-    test('returns null when connectorTokenClient.get has errors', async () => {
-      connectorTokenClient.get.mockResolvedValueOnce({
-        hasErrors: true,
-        connectorToken: null,
-      });
-
-      const result = await getOAuthAuthorizationCodeAccessToken({
-        ...BASE_OPTS,
-        authMode: 'shared',
-      });
-
-      expect(result).toBeNull();
-      expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('Errors fetching connector token')
-      );
-    });
-
-    test('returns null when no token is stored (user must authorize)', async () => {
+    it('returns null and logs an error when requestOAuthRefreshToken throws', async () => {
       connectorTokenClient.get.mockResolvedValueOnce({
         hasErrors: false,
-        connectorToken: null,
+        connectorToken: expiredToken,
       });
-
-      const result = await getOAuthAuthorizationCodeAccessToken({
-        ...BASE_OPTS,
-        authMode: 'shared',
-      });
-
-      expect(result).toBeNull();
-      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('No access token found'));
-    });
-
-    test('returns null and logs error when requestOAuthRefreshToken throws', async () => {
-      connectorTokenClient.get.mockResolvedValueOnce({
-        hasErrors: false,
-        connectorToken: {
-          id: 'shared:token-id-1',
-          connectorId: 'connector-123',
-          tokenType: 'access_token',
-          token: 'Bearer old-access-token',
-          expiresAt: PAST,
-          refreshToken: 'shared-refresh-token',
-          createdAt: NOW.toISOString(),
-        },
-      });
-
       (requestOAuthRefreshToken as jest.Mock).mockRejectedValueOnce(
-        new Error('Refresh request failed')
+        new Error('token endpoint unreachable')
       );
 
-      const result = await getOAuthAuthorizationCodeAccessToken({
-        ...BASE_OPTS,
-        authMode: 'shared',
-      });
+      const result = await getOAuthAuthorizationCodeAccessToken(baseOpts);
 
       expect(result).toBeNull();
       expect(logger.error).toHaveBeenCalledWith(
-        expect.stringContaining('Failed to refresh access token')
+        'Failed to refresh access token for connectorId: connector-1. Error: token endpoint unreachable'
       );
     });
 
-    test('returns null and warns when required credentials are missing', async () => {
-      const result = await getOAuthAuthorizationCodeAccessToken({
-        ...BASE_OPTS,
-        credentials: {
-          config: { clientId: '', tokenUrl: 'https://auth.example.com/oauth2/token' },
-          secrets: { clientSecret: 'clientSecret' },
-        },
+    it('returns null and logs an error when persisting the refreshed token fails', async () => {
+      connectorTokenClient.get.mockResolvedValueOnce({
+        hasErrors: false,
+        connectorToken: expiredToken,
       });
+      (requestOAuthRefreshToken as jest.Mock).mockResolvedValueOnce(refreshResponse);
+      connectorTokenClient.updateWithRefreshToken.mockRejectedValueOnce(
+        new Error('DB write failed')
+      );
+
+      const result = await getOAuthAuthorizationCodeAccessToken(baseOpts);
 
       expect(result).toBeNull();
-      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('Missing required fields'));
-      expect(connectorTokenClient.get).not.toHaveBeenCalled();
+      expect(logger.error).toHaveBeenCalledWith(
+        'Failed to refresh access token for connectorId: connector-1. Error: DB write failed'
+      );
     });
   });
 });
