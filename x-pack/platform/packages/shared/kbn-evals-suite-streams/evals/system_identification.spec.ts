@@ -24,7 +24,9 @@ import { SYSTEM_IDENTIFICATION_DATASETS } from './system_identification_datasets
 
 evaluate.describe.configure({ timeout: 600_000 });
 
-evaluate.describe(
+// Skipped as part of https://github.com/elastic/kibana/pull/245064 which adds support for running evals on CI
+// TODO: Re-enable this once the prerequisite data is able to be loaded on CI. See: https://github.com/elastic/streams-program/issues/771
+evaluate.describe.skip(
   'Streams systems identification',
   { tag: tags.serverless.observability.complete },
   () => {
@@ -95,7 +97,7 @@ evaluate.describe(
     async function runSystemIdentificationExperiment(
       dataset: SystemIdentificationEvaluationDataset,
       {
-        phoenixClient,
+        executorClient,
         apiServices,
         esClient,
         inferenceClient,
@@ -104,7 +106,7 @@ evaluate.describe(
         config,
       }: Pick<
         StreamsEvaluationWorkerFixtures,
-        | 'phoenixClient'
+        | 'executorClient'
         | 'apiServices'
         | 'esClient'
         | 'inferenceClient'
@@ -113,7 +115,7 @@ evaluate.describe(
         | 'config'
       >
     ) {
-      await phoenixClient.runExperiment(
+      await executorClient.runExperiment(
         {
           dataset,
           concurrency: 1,
@@ -344,7 +346,7 @@ evaluate.describe(
             esClient,
             inferenceClient,
             logger,
-            phoenixClient,
+            executorClient,
             apiServices,
             config,
           }) => {
@@ -354,7 +356,7 @@ evaluate.describe(
               evaluators,
               inferenceClient,
               logger,
-              phoenixClient,
+              executorClient,
               config,
             });
           }
@@ -398,7 +400,7 @@ evaluate.describe(
             esClient,
             inferenceClient,
             logger,
-            phoenixClient,
+            executorClient,
             apiServices,
             config,
           }) => {
@@ -424,7 +426,7 @@ evaluate.describe(
                 evaluators,
                 inferenceClient,
                 logger,
-                phoenixClient,
+                executorClient,
                 config,
               }
             );
@@ -455,7 +457,7 @@ evaluate.describe(
             esClient,
             inferenceClient,
             logger,
-            phoenixClient,
+            executorClient,
             apiServices,
             config,
           }) => {
@@ -465,7 +467,7 @@ evaluate.describe(
               evaluators,
               inferenceClient,
               logger,
-              phoenixClient,
+              executorClient,
               config,
             });
           }

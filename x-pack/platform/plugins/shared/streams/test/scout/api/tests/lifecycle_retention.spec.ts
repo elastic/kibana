@@ -14,19 +14,28 @@ apiTest.describe(
   'Stream lifecycle - retention API',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    // Stream names must be exactly one level deep when forking from 'logs'
-    // Format: logs.<name> where name uses hyphens, not dots
+    // Stream names must be exactly one level deep when forking from 'logs.otel'
+    // Format: logs.otel.<name> where name uses hyphens, not dots
     // The prefix 'lc' is used for cleanup matching
-    const streamNamePrefix = 'logs.lc';
+    // Note: Using logs.otel as it's created by default in fresh installs
+    const rootStream = 'logs.otel';
+    const streamNamePrefix = `${rootStream}.lc`;
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    type ApiClient = any;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    type CookieHeader = any;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    type StreamResponse = any;
 
     // Helper to create a stream and verify it was created
     async function createTestStream(
-      apiClient: any,
-      cookieHeader: any,
+      apiClient: ApiClient,
+      cookieHeader: CookieHeader,
       streamName: string,
       condition: { field: string; eq: string }
     ): Promise<{ success: boolean; error?: string }> {
-      const forkResponse = await apiClient.post('api/streams/logs/_fork', {
+      const forkResponse = await apiClient.post(`api/streams/${rootStream}/_fork`, {
         headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
         body: {
           stream: { name: streamName },
@@ -50,10 +59,10 @@ apiTest.describe(
 
     // Helper to get a stream and verify it exists
     async function getStream(
-      apiClient: any,
-      cookieHeader: any,
+      apiClient: ApiClient,
+      cookieHeader: CookieHeader,
       streamName: string
-    ): Promise<{ success: boolean; stream?: any; error?: string }> {
+    ): Promise<{ success: boolean; stream?: StreamResponse; error?: string }> {
       const response = await apiClient.get(`api/streams/${streamName}`, {
         headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
         responseType: 'json',
@@ -79,7 +88,7 @@ apiTest.describe(
     }
 
     // Helper to extract writeable ingest config (removes read-only fields like 'updated_at')
-    function getWriteableIngest(streamResponse: any): any {
+    function getWriteableIngest(streamResponse: StreamResponse): StreamResponse {
       const ingest = streamResponse.stream.ingest;
       // Remove 'updated_at' from processing as it's a read-only field
       const { updated_at: _, ...processingWithoutUpdatedAt } = ingest.processing || {};
@@ -90,7 +99,7 @@ apiTest.describe(
     }
 
     apiTest.afterEach(async ({ apiServices }) => {
-      // Cleanup test streams - matches any stream starting with 'logs.lc'
+      // Cleanup test streams - matches any stream starting with 'logs.otel.lc'
       await apiServices.streamsTest.cleanupTestStreams(streamNamePrefix);
     });
 
@@ -588,12 +597,12 @@ apiTest.describe(
     // Test: Child stream inherits lifecycle from parent stream
     apiTest('should inherit lifecycle from parent stream', async ({ apiClient, samlAuth }) => {
       const { cookieHeader } = await samlAuth.asStreamsAdmin();
-      // Parent is one level: logs.lc-parent
+      // Parent stream: logs.otel.lc-parent (forked from logs.otel)
       const parentStream = `${streamNamePrefix}-parent`;
-      // Child is two levels: logs.lc-parent.child (forked from logs.lc-parent)
+      // Child stream: logs.otel.lc-parent.child (forked from logs.otel.lc-parent)
       const childStream = `${parentStream}.child`;
 
-      // Create parent stream (forked from logs)
+      // Create parent stream (forked from logs.otel)
       const createParentResult = await createTestStream(apiClient, cookieHeader, parentStream, {
         field: 'service.name',
         eq: 'parent-service',

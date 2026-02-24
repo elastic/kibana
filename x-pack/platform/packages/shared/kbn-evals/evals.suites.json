@@ -8,6 +8,13 @@
       "ciLabels": ["evals:agent-builder"]
     },
     {
+      "id": "esql-generation",
+      "name": "ES|QL Generation Evaluations",
+      "configPath": "x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/esql.playwright.config.ts",
+      "tags": ["platform", "esql"],
+      "ciLabels": ["evals:esql-generation"]
+    },
+    {
       "id": "streams",
       "name": "Streams",
       "configPath": "x-pack/platform/packages/shared/kbn-evals-suite-streams/playwright.config.ts",
