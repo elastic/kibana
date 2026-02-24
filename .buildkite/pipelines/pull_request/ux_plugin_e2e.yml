@@ -1,5 +1,6 @@
 steps:
   - command: .buildkite/scripts/steps/functional/ux_synthetics_e2e.sh
+    cancel_on_build_failing: true
     label: 'UX Plugin @elastic/synthetics Tests'
     agents:
       machineType: n2-standard-4
