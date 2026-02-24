@@ -167,7 +167,7 @@ describe('Color util transforms', () => {
           { color: 'green', gte: 0, lt: 50 },
           { color: 'blue', gte: 50 },
         ],
-      });
+      } satisfies ColorByValueType);
     });
 
     it('should convert percentage range palette to API format', () => {
@@ -202,7 +202,7 @@ describe('Color util transforms', () => {
           { color: 'green', gte: 10, lt: 50 },
           { color: 'blue', gte: 50, lte: 95 },
         ],
-      });
+      } satisfies ColorByValueType);
     });
 
     it('should handle single stop', () => {
@@ -222,7 +222,7 @@ describe('Color util transforms', () => {
         type: 'dynamic',
         range: 'absolute',
         steps: [{ color: 'red', lt: 50 }],
-      });
+      } satisfies ColorByValueType);
     });
 
     it('should handle two stops', () => {
@@ -248,7 +248,7 @@ describe('Color util transforms', () => {
           { color: 'red', lt: 0 },
           { color: 'green', gte: 0 },
         ],
-      });
+      } satisfies ColorByValueType);
     });
 
     it('should default to percentage range when rangeType is not specified', () => {
@@ -265,11 +265,9 @@ describe('Color util transforms', () => {
 
       expect(result).toEqual({
         type: 'dynamic',
-        min: 0,
-        max: 100,
         range: 'percentage',
-        steps: [{ type: 'from', color: '#ff0000', from: 50 }],
-      });
+        steps: [{ lt: 50, color: 'red' }],
+      } satisfies ColorByValueType);
     });
 
     it('should handle empty stops array', () => {
@@ -289,7 +287,7 @@ describe('Color util transforms', () => {
         type: 'dynamic',
         range: 'absolute',
         steps: [],
-      });
+      } satisfies ColorByValueType);
     });
 
     it('should reverse palette stops to API format', () => {
@@ -324,7 +322,7 @@ describe('Color util transforms', () => {
           { color: 'green', gte: 0, lt: 50 },
           { color: 'red', gte: 50 },
         ],
-      });
+      } satisfies ColorByValueType);
     });
   });
 
@@ -340,28 +338,28 @@ describe('Color util transforms', () => {
       expect(result).toEqual({
         type: 'static',
         color: '#ff0000',
-      });
+      } satisfies StaticColorType);
     });
 
     it('should handle hex color codes', () => {
       expect(fromStaticColorLensStateToAPI('#123456')).toEqual({
         type: 'static',
         color: '#123456',
-      });
+      } satisfies StaticColorType);
     });
 
     it('should handle named colors', () => {
       expect(fromStaticColorLensStateToAPI('red')).toEqual({
         type: 'static',
         color: 'red',
-      });
+      } satisfies StaticColorType);
     });
 
     it('should handle rgb colors', () => {
       expect(fromStaticColorLensStateToAPI('rgb(255, 0, 0)')).toEqual({
         type: 'static',
         color: 'rgb(255, 0, 0)',
-      });
+      } satisfies StaticColorType);
     });
   });
 

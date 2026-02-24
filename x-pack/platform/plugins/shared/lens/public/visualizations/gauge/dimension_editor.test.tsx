@@ -115,8 +115,9 @@ describe('GaugeDimensionEditor', () => {
           params: expect.objectContaining({
             // initializes palette with open ended percent range
             rangeType: 'percent',
-            rangeMin: -Infinity,
-            rangeMax: Infinity,
+            continuity: 'all',
+            rangeMin: undefined,
+            rangeMax: undefined,
           }),
         }),
       })

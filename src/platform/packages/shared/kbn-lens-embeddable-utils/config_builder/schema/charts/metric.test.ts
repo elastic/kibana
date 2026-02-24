@@ -91,8 +91,8 @@ describe('Metric Schema', () => {
               type: 'dynamic',
               range: 'absolute',
               steps: [
-                { lt: 0, color: '#blue' },
-                { gte: 100, color: '#red' },
+                { lt: 0, color: 'blue' },
+                { gte: 100, color: 'red' },
               ],
             },
           },
@@ -142,8 +142,8 @@ describe('Metric Schema', () => {
                 type: 'dynamic',
                 range: 'percentage',
                 steps: [
-                  { lt: 0, color: '#blue' },
-                  { gte: 100, color: '#red' },
+                  { lt: 0, color: 'blue' },
+                  { gte: 100, color: 'red' },
                 ],
               },
               fit: false,
@@ -158,7 +158,7 @@ describe('Metric Schema', () => {
       });
 
       it('accepts percentage-based dynamic coloring with breakdown_by', () => {
-        const input = {
+        const input: MetricInput = {
           ...baseMetricConfig,
           metrics: [
             {
@@ -168,11 +168,9 @@ describe('Metric Schema', () => {
               color: {
                 type: 'dynamic',
                 range: 'percentage',
-                min: 0,
-                max: 100,
                 steps: [
-                  { type: 'from', from: 0, color: '#blue' },
-                  { type: 'to', to: 100, color: '#red' },
+                  { lt: 0, color: 'blue' },
+                  { gte: 100, color: 'red' },
                 ],
               },
               fit: false,
@@ -183,6 +181,7 @@ describe('Metric Schema', () => {
             operation: 'terms',
             fields: ['category'],
             columns: 3,
+            size: 5,
           },
         };
 
@@ -190,7 +189,7 @@ describe('Metric Schema', () => {
       });
 
       it('accepts percentage-based dynamic coloring with bar background_chart', () => {
-        const input = {
+        const input: MetricInput = {
           ...baseMetricConfig,
           metrics: [
             {
@@ -200,11 +199,9 @@ describe('Metric Schema', () => {
               color: {
                 type: 'dynamic',
                 range: 'percentage',
-                min: 0,
-                max: 100,
                 steps: [
-                  { type: 'from', from: 0, color: '#blue' },
-                  { type: 'to', to: 100, color: '#red' },
+                  { lt: 0, color: 'blue' },
+                  { gte: 100, color: 'red' },
                 ],
               },
               fit: false,
@@ -274,7 +271,7 @@ describe('Metric Schema', () => {
             empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
             color: {
               type: 'static',
-              color: '#green',
+              color: 'green',
             },
           },
         ],
@@ -512,8 +509,8 @@ describe('Metric Schema', () => {
               type: 'dynamic',
               range: 'absolute',
               steps: [
-                { lt: 0, color: '#red' },
-                { gte: 1000, color: '#green' },
+                { lt: 0, color: 'red' },
+                { gte: 1000, color: 'green' },
               ],
             },
             background_chart: {
