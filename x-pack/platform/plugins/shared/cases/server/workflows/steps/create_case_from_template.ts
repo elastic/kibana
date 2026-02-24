@@ -21,6 +21,7 @@ import {
   type GetInitialCaseValueArgs,
 } from '../../../common/utils/get_initial_case_value';
 
+// TODO: make dynamic once https://github.com/elastic/security-team/issues/15982 has been resolved
 const WORKFLOW_CASE_OWNER = 'securitySolution' as const;
 
 const findTemplateById = (

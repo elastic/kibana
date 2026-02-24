@@ -32,7 +32,7 @@ export const createCaseStepDefinition = (
       CreateCaseStepConfig,
       CreateCaseStepOutput['case']
     >(getCasesClient, async (casesClient, input, config) => {
-      let enrichedInput = getInitialCaseValue(input as unknown as GetInitialCaseValueArgs);
+      let enrichedInput = getInitialCaseValue(input as GetInitialCaseValueArgs);
 
       // If a connector was provided, make sure to resolve its config and add it to the input.
       if (config['connector-id']) {
@@ -42,15 +42,15 @@ export const createCaseStepDefinition = (
         );
 
         if (foundConnector) {
-          enrichedInput = getInitialCaseValue({
-            ...(input as GetInitialCaseValueArgs),
+          enrichedInput = {
+            ...enrichedInput,
             connector: {
               id: foundConnector.id,
               name: foundConnector.name,
               type: foundConnector.actionTypeId as ConnectorTypes,
               fields: null,
             },
-          });
+          };
         } else {
           throw new Error(`Connector configuration not found: ${config['connector-id']}`);
         }

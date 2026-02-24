@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import type { KibanaRequest } from '@kbn/core/server';
-import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
 import { ConnectorTypes } from '../../../common/types/domain';
 import { createCasesStepHandler, normalizeCaseStepUpdatesForBulkPatch } from './utils';
+import { createStepHandlerContext } from './test_utils';
 
 describe('normalizeCaseStepUpdatesForBulkPatch', () => {
   it('normalizes assignees and connector fields while preserving other fields', () => {
@@ -22,7 +21,7 @@ describe('normalizeCaseStepUpdatesForBulkPatch', () => {
           fields: null,
         },
         title: 'Updated title',
-      } as never)
+      })
     ).toEqual({
       assignees: [],
       connector: {
@@ -39,7 +38,7 @@ describe('normalizeCaseStepUpdatesForBulkPatch', () => {
     expect(
       normalizeCaseStepUpdatesForBulkPatch({
         assignees: [{ uid: 'u-1' }],
-      } as never)
+      })
     ).toEqual({
       assignees: [{ uid: 'u-1' }],
     });
@@ -47,28 +46,12 @@ describe('normalizeCaseStepUpdatesForBulkPatch', () => {
 });
 
 describe('createCasesStepHandler', () => {
-  const createContext = (params?: {
-    input?: unknown;
-    config?: Record<string, unknown>;
-    fakeRequest?: KibanaRequest;
-  }): StepHandlerContext =>
-    ({
-      input: params?.input ?? {},
-      rawInput: params?.input ?? {},
-      config: params?.config ?? {},
-      contextManager: {
-        getFakeRequest: jest.fn().mockReturnValue(params?.fakeRequest ?? ({} as KibanaRequest)),
-      },
-      logger: {
-        debug: jest.fn(),
-        info: jest.fn(),
-        warn: jest.fn(),
-        error: jest.fn(),
-      },
-      abortSignal: new AbortController().signal,
-      stepId: 'test-step-id',
+  const createContext = (params?: { input?: unknown; config?: Record<string, unknown> }) =>
+    createStepHandlerContext({
+      input: params?.input,
+      config: params?.config,
       stepType: 'cases.custom',
-    } as unknown as StepHandlerContext);
+    });
 
   it('returns output case on success', async () => {
     const createdCase = {

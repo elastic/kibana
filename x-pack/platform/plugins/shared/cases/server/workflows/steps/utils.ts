@@ -19,7 +19,6 @@ export const normalizeCaseStepUpdatesForBulkPatch = (updates: WorkflowUpdatePayl
 
   return {
     ...restUpdates,
-    ...(assignees === null ? { assignees: [] } : {}),
     ...(assignees ? { assignees } : {}),
     ...(connector ? { connector } : {}),
   };

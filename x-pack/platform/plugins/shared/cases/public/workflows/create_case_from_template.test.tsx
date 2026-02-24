@@ -163,7 +163,7 @@ describe('createCreateCaseFromTemplateStepDefinition', () => {
     ).rejects.toThrow(error.message);
   });
 
-  beforeEach(() => {
+  afterEach(() => {
     getCaseConfigureMock.mockReset();
   });
 });

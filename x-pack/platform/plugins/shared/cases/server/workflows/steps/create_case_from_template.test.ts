@@ -5,30 +5,13 @@
  * 2.0.
  */
 
-import type { KibanaRequest } from '@kbn/core/server';
-import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
 import { createCaseResponseFixture } from '../../../common/fixtures/create_case';
 import { createCaseFromTemplateStepDefinition } from './create_case_from_template';
+import { createStepHandlerContext } from './test_utils';
 import type { CasesClient } from '../../client';
 
-const createContext = (input: unknown, config: Record<string, unknown> = {}): StepHandlerContext =>
-  ({
-    input,
-    rawInput: input,
-    config,
-    contextManager: {
-      getFakeRequest: jest.fn().mockReturnValue({} as KibanaRequest),
-    },
-    logger: {
-      debug: jest.fn(),
-      info: jest.fn(),
-      warn: jest.fn(),
-      error: jest.fn(),
-    },
-    abortSignal: new AbortController().signal,
-    stepId: 'test-step-id',
-    stepType: 'cases.createCaseFromTemplate',
-  } as unknown as StepHandlerContext);
+const createContext = (input: unknown, config: Record<string, unknown> = {}) =>
+  createStepHandlerContext({ input, config, stepType: 'cases.createCaseFromTemplate' });
 
 describe('createCaseFromTemplateStepDefinition', () => {
   it('creates expected step definition structure', () => {

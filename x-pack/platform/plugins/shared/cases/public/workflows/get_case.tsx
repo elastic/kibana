@@ -6,15 +6,14 @@
  */
 
 import React from 'react';
-import type { PublicStepDefinition } from '@kbn/workflows-extensions/public';
-import { ActionsMenuGroup } from '@kbn/workflows-extensions/public';
+import { ActionsMenuGroup, createPublicStepDefinition } from '@kbn/workflows-extensions/public';
 import {
   getCaseStepCommonDefinition,
   GetCaseStepTypeId,
 } from '../../common/workflows/steps/get_case';
 import * as i18n from './translations';
 
-export const getCaseStepDefinition: PublicStepDefinition = {
+export const getCaseStepDefinition = createPublicStepDefinition({
   ...getCaseStepCommonDefinition,
   icon: React.lazy(() =>
     import('@elastic/eui/es/components/icon/assets/magnify').then(({ icon }) => ({
@@ -57,4 +56,4 @@ export const getCaseStepDefinition: PublicStepDefinition = {
     ],
   },
   actionsMenuGroup: ActionsMenuGroup.kibana,
-};
+});

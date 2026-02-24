@@ -6,15 +6,14 @@
  */
 
 import React from 'react';
-import type { PublicStepDefinition } from '@kbn/workflows-extensions/public';
-import { ActionsMenuGroup } from '@kbn/workflows-extensions/public';
+import { ActionsMenuGroup, createPublicStepDefinition } from '@kbn/workflows-extensions/public';
 import {
   addCommentStepCommonDefinition,
   AddCommentStepTypeId,
 } from '../../common/workflows/steps/add_comment';
 import * as i18n from './translations';
 
-export const addCommentStepDefinition: PublicStepDefinition = {
+export const addCommentStepDefinition = createPublicStepDefinition({
   ...addCommentStepCommonDefinition,
   icon: React.lazy(() =>
     import('@elastic/eui/es/components/icon/assets/comment').then(({ icon }) => ({
@@ -37,4 +36,4 @@ export const addCommentStepDefinition: PublicStepDefinition = {
     ],
   },
   actionsMenuGroup: ActionsMenuGroup.kibana,
-};
+});
