@@ -39,9 +39,7 @@ interface Props {
 /** Ensure each filter has $state so FilterEditor onSubmit runs (it returns early if !$state?.store). */
 function ensureFiltersHaveState(filters: Filter[]): Filter[] {
   return filters.map((f) =>
-    f.$state?.store != null
-      ? f
-      : { ...f, $state: { store: FilterStateStore.APP_STATE } }
+    f.$state?.store != null ? f : { ...f, $state: { store: FilterStateStore.APP_STATE } }
   );
 }
 
