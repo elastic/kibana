@@ -13,6 +13,7 @@
       "_dangling"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-dangling-indices-list-dangling-indices",
+    "documentation_serverless": "",
     "availability": {
       "stack": true,
       "serverless": false

@@ -23,6 +23,7 @@
       "_snapshot/{repository}/_cleanup"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-snapshot-cleanup-repository",
+    "documentation_serverless": "",
     "availability": {
       "stack": true,
       "serverless": false

@@ -18,6 +18,7 @@
       "{index}/_ccr/stats"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ccr-follow-stats",
+    "documentation_serverless": "",
     "availability": {
       "stack": true,
       "serverless": false

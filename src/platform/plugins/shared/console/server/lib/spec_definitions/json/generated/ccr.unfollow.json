@@ -18,6 +18,7 @@
       "{index}/_ccr/unfollow"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ccr-unfollow",
+    "documentation_serverless": "",
     "availability": {
       "stack": true,
       "serverless": false

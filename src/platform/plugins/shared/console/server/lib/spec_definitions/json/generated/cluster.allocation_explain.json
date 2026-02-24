@@ -25,6 +25,7 @@
       "_cluster/allocation/explain"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cluster-allocation-explain",
+    "documentation_serverless": "",
     "availability": {
       "stack": true,
       "serverless": false

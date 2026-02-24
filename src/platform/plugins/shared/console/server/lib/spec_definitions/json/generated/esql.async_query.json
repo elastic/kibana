@@ -28,6 +28,7 @@
       "_query/async"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-esql-async-query",
+    "documentation_serverless": "",
     "availability": {
       "stack": true,
       "serverless": false

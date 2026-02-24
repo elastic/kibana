@@ -24,6 +24,7 @@
       "_cluster/settings"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cluster-put-settings",
+    "documentation_serverless": "",
     "availability": {
       "stack": true,
       "serverless": false

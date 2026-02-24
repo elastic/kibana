@@ -18,6 +18,7 @@
       "_inference/chat_completion/{inference_id}/_stream"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-unified-inference",
+    "documentation_serverless": "",
     "availability": {
       "stack": true,
       "serverless": true

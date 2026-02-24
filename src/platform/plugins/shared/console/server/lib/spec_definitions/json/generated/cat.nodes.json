@@ -135,6 +135,7 @@
       "_cat/nodes"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-nodes",
+    "documentation_serverless": "",
     "availability": {
       "stack": true,
       "serverless": false

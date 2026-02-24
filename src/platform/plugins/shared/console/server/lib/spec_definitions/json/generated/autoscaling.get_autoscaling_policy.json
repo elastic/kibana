@@ -18,6 +18,7 @@
       "_autoscaling/policy/{name}"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-autoscaling-get-autoscaling-capacity",
+    "documentation_serverless": "",
     "availability": {
       "stack": false,
       "serverless": false

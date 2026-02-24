@@ -23,6 +23,7 @@
       "_template/{name}"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-delete-template",
+    "documentation_serverless": "",
     "availability": {
       "stack": true,
       "serverless": false

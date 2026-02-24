@@ -18,6 +18,7 @@
       "_security/service/{namespace}/{service}/credential/token/{name}"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-delete-service-token",
+    "documentation_serverless": "",
     "availability": {
       "stack": true,
       "serverless": false

@@ -21,7 +21,9 @@
         "desc"
       ],
       "offset": "",
-      "size": "",
+      "size": [
+        "-1"
+      ],
       "slm_policy_filter": "",
       "sort": [
         "start_time",
@@ -48,6 +50,7 @@
       "_snapshot/{repository}/{snapshot}"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-snapshot-get",
+    "documentation_serverless": "",
     "availability": {
       "stack": true,
       "serverless": false

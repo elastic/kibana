@@ -18,6 +18,7 @@
       "_features"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-features-get-features",
+    "documentation_serverless": "",
     "availability": {
       "stack": true,
       "serverless": false

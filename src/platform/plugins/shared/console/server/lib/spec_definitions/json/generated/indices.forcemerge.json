@@ -27,6 +27,7 @@
       "{index}/_forcemerge"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-forcemerge",
+    "documentation_serverless": "",
     "availability": {
       "stack": true,
       "serverless": false

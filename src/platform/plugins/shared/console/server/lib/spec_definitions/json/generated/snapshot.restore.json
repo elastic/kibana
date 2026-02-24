@@ -19,6 +19,7 @@
       "_snapshot/{repository}/{snapshot}/_restore"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-snapshot-restore",
+    "documentation_serverless": "",
     "availability": {
       "stack": true,
       "serverless": false

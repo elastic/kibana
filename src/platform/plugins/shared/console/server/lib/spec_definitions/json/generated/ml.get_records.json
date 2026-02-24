@@ -30,6 +30,7 @@
       "_ml/anomaly_detectors/{job_id}/results/records"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-get-records",
+    "documentation_serverless": "",
     "availability": {
       "stack": true,
       "serverless": false

@@ -20,6 +20,7 @@
       "{index}/_ilm/explain"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ilm-explain-lifecycle",
+    "documentation_serverless": "",
     "availability": {
       "stack": true,
       "serverless": false

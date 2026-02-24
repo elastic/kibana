@@ -19,6 +19,7 @@
       "_cluster/pending_tasks"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cluster-pending-tasks",
+    "documentation_serverless": "",
     "availability": {
       "stack": true,
       "serverless": false

@@ -49,6 +49,7 @@
       "_cluster/state/{metric}/{index}"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cluster-state",
+    "documentation_serverless": "",
     "availability": {
       "stack": true,
       "serverless": false

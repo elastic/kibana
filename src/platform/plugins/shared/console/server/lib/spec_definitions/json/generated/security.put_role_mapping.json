@@ -19,6 +19,7 @@
       "_security/role_mapping/{name}"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-put-role-mapping",
+    "documentation_serverless": "",
     "availability": {
       "stack": true,
       "serverless": false

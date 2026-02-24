@@ -24,6 +24,7 @@
       "_license/start_basic"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-license-post-start-basic",
+    "documentation_serverless": "",
     "availability": {
       "stack": true,
       "serverless": false

@@ -13,6 +13,7 @@
       "_nodes/{node_id}/_repositories_metering"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-nodes-get-repositories-metering-info",
+    "documentation_serverless": "",
     "availability": {
       "stack": true,
       "serverless": false

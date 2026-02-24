@@ -23,6 +23,7 @@
       "_snapshot/{repository}/_verify"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-snapshot-verify-repository",
+    "documentation_serverless": "",
     "availability": {
       "stack": true,
       "serverless": false

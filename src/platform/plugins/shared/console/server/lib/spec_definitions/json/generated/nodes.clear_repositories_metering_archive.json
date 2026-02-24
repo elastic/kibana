@@ -13,6 +13,7 @@
       "_nodes/{node_id}/_repositories_metering/{max_archive_version}"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-nodes-clear-repositories-metering-archive",
+    "documentation_serverless": "",
     "availability": {
       "stack": true,
       "serverless": false

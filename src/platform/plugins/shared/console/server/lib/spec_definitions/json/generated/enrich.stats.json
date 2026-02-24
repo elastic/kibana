@@ -18,6 +18,7 @@
       "_enrich/_stats"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-enrich-stats",
+    "documentation_serverless": "",
     "availability": {
       "stack": true,
       "serverless": false

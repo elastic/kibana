@@ -52,6 +52,7 @@
       "_cat/nodeattrs"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-nodeattrs",
+    "documentation_serverless": "",
     "availability": {
       "stack": true,
       "serverless": false

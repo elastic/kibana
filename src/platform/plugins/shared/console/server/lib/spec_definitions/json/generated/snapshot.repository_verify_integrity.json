@@ -29,6 +29,7 @@
       "_snapshot/{repository}/_verify_integrity"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-snapshot-repository-verify-integrity",
+    "documentation_serverless": "",
     "availability": {
       "stack": true,
       "serverless": false

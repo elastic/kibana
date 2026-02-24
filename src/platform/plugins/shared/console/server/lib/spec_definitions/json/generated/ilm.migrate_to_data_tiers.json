@@ -19,6 +19,7 @@
       "_ilm/migrate_to_data_tiers"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ilm-migrate-to-data-tiers",
+    "documentation_serverless": "",
     "availability": {
       "stack": true,
       "serverless": false

@@ -23,6 +23,7 @@
       "{index}/_ccr/follow"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ccr-follow",
+    "documentation_serverless": "",
     "availability": {
       "stack": true,
       "serverless": false

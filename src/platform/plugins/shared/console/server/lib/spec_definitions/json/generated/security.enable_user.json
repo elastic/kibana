@@ -19,6 +19,7 @@
       "_security/user/{username}/_enable"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-enable-user",
+    "documentation_serverless": "",
     "availability": {
       "stack": true,
       "serverless": false

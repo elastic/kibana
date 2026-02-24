@@ -65,6 +65,7 @@
       "_cat/thread_pool/{thread_pool_patterns}"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-thread-pool",
+    "documentation_serverless": "",
     "availability": {
       "stack": true,
       "serverless": false

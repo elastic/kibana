@@ -32,6 +32,7 @@
       "{index}/_search_shards"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-search-shards",
+    "documentation_serverless": "",
     "availability": {
       "stack": true,
       "serverless": false

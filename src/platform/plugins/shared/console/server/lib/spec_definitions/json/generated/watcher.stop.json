@@ -18,6 +18,7 @@
       "_watcher/_stop"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-watcher-stop",
+    "documentation_serverless": "",
     "availability": {
       "stack": true,
       "serverless": false

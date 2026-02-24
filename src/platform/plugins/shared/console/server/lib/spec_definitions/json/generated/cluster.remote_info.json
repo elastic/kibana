@@ -13,6 +13,7 @@
       "_remote/info"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cluster-remote-info",
+    "documentation_serverless": "",
     "availability": {
       "stack": true,
       "serverless": false

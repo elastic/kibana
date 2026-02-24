@@ -48,6 +48,7 @@
       "_cat/master"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-master",
+    "documentation_serverless": "",
     "availability": {
       "stack": true,
       "serverless": false

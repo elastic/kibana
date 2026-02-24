@@ -27,6 +27,7 @@
       "_cluster/reroute"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cluster-reroute",
+    "documentation_serverless": "",
     "availability": {
       "stack": true,
       "serverless": false

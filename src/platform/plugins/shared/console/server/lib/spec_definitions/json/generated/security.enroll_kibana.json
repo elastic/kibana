@@ -13,6 +13,7 @@
       "_security/enroll/kibana"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-enroll-kibana",
+    "documentation_serverless": "",
     "availability": {
       "stack": true,
       "serverless": false

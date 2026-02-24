@@ -23,6 +23,7 @@
       "_slm/stop"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-slm-stop",
+    "documentation_serverless": "",
     "availability": {
       "stack": true,
       "serverless": false

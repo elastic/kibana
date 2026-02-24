@@ -61,6 +61,7 @@
       "{index}/_stats/{metric}"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-stats",
+    "documentation_serverless": "",
     "availability": {
       "stack": true,
       "serverless": false

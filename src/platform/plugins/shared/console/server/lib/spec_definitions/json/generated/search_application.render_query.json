@@ -13,6 +13,7 @@
       "_application/search_application/{name}/_render_query"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-search-application-render-query",
+    "documentation_serverless": "",
     "availability": {
       "stack": true,
       "serverless": false

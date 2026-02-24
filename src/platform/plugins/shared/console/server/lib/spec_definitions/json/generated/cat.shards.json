@@ -114,6 +114,7 @@
       "_cat/shards/{index}"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-shards",
+    "documentation_serverless": "",
     "availability": {
       "stack": true,
       "serverless": false

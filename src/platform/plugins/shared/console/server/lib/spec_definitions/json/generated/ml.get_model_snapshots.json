@@ -23,6 +23,7 @@
       "_ml/anomaly_detectors/{job_id}/model_snapshots"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-get-model-snapshots",
+    "documentation_serverless": "",
     "availability": {
       "stack": true,
       "serverless": false

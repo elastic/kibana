@@ -29,6 +29,7 @@
       "{index}/_shard_stores"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-shard-stores",
+    "documentation_serverless": "",
     "availability": {
       "stack": true,
       "serverless": false

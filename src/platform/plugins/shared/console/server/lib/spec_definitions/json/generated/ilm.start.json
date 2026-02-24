@@ -23,6 +23,7 @@
       "_ilm/start"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ilm-start",
+    "documentation_serverless": "",
     "availability": {
       "stack": true,
       "serverless": false

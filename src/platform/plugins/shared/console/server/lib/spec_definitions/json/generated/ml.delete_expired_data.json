@@ -20,6 +20,7 @@
       "_ml/_delete_expired_data"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-delete-expired-data",
+    "documentation_serverless": "",
     "availability": {
       "stack": true,
       "serverless": false

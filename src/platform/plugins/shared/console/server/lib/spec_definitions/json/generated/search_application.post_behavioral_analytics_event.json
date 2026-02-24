@@ -21,6 +21,7 @@
       "_application/analytics/{collection_name}/event/{event_type}"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-search-application-post-behavioral-analytics-event",
+    "documentation_serverless": "",
     "availability": {
       "stack": true,
       "serverless": false

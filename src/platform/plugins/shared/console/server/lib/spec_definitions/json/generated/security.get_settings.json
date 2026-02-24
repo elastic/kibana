@@ -18,6 +18,7 @@
       "_security/settings"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-get-settings",
+    "documentation_serverless": "",
     "availability": {
       "stack": true,
       "serverless": false

@@ -13,6 +13,7 @@
       "_migration/system_features"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-migration-get-feature-upgrade-status",
+    "documentation_serverless": "",
     "availability": {
       "stack": true,
       "serverless": false
