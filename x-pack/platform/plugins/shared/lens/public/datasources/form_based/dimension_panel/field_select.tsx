@@ -18,7 +18,7 @@ import { FieldPicker } from '@kbn/visualization-ui-components';
 import { getFieldIconType } from '@kbn/field-utils';
 import type { IndexPattern } from '@kbn/lens-common';
 import type { OperationType } from '../form_based';
-import type { OperationSupportMatrix } from './operation_support';
+import { getFirstValue, type OperationSupportMatrix } from './operation_support';
 import { fieldContainsData } from '../../../shared_components';
 
 export type FieldChoiceWithOperationType = FieldOptionValue & {
@@ -89,7 +89,7 @@ export const FieldSelect: FC<FieldSelectProps> = ({
           // using .reduce() here instead of .filter().map() for better type handling
           .reduce<FieldOption[]>((fieldOptions, field) => {
             const fieldInstance = currentIndexPattern.getFieldByName(field);
-            const fallbackOperationType = operationByField.get(field)?.values().next().value;
+            const fallbackOperationType = getFirstValue(operationByField.get(field));
 
             if (fieldInstance?.displayName && fallbackOperationType !== undefined) {
               const compatible =
