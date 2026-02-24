@@ -8,7 +8,7 @@
  */
 import uniqBy from 'lodash/uniqBy';
 import { isAssignment, isColumn, isFunctionExpression, isOptionNode } from '@elastic/esql';
-import type { ESQLAstItem, ESQLCommand, ESQLCommandOption } from '@elastic/esql';
+import type { ESQLAstItem, ESQLCommand, ESQLCommandOption } from '@elastic/esql/types';
 import type { SupportedDataType } from '../../definitions/types';
 import { getExpressionType } from '../../definitions/utils';
 import type { ESQLColumnData, ESQLUserDefinedColumn, UnmappedFieldsStrategy } from '../types';

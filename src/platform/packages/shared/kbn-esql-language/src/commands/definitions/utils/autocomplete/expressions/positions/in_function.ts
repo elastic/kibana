@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLFunction, ESQLSingleAstItem } from '@elastic/esql';
+import type { ESQLFunction, ESQLSingleAstItem } from '@elastic/esql/types';
 import { within } from '@elastic/esql';
 import { suggestForExpression } from '../suggestion_engine';
 import type { ExpressionContext, FunctionParameterContext } from '../types';

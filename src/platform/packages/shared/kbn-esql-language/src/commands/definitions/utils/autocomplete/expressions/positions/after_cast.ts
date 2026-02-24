@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ESQLInlineCast } from '@elastic/esql';
+import type { ESQLInlineCast } from '@elastic/esql/types';
 import { Walker, within } from '@elastic/esql';
 import type { SupportedDataType } from '../../../../..';
 import type { ISuggestionItem } from '../../../../../registry/types';

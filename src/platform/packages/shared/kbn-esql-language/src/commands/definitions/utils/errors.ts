@@ -17,7 +17,7 @@ import type {
   ESQLLocation,
   ESQLMessage,
   ESQLSource,
-} from '@elastic/esql';
+} from '@elastic/esql/types';
 import type {
   ErrorTypes,
   ErrorValues,

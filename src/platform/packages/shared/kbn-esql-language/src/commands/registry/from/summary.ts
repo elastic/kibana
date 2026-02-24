@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLCommandOption, ESQLCommand, ESQLAstQueryExpression } from '@elastic/esql';
+import type { ESQLCommandOption, ESQLCommand, ESQLAstQueryExpression } from '@elastic/esql/types';
 import { isColumn, isOptionNode, isSubQuery } from '@elastic/esql';
 import { esqlCommandRegistry } from '../../../..';
 import type { ESQLCommandSummary, FieldSummary } from '../types';

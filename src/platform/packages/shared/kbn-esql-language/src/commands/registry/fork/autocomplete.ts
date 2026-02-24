@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
-import type { ESQLAstAllCommands, ESQLAstForkCommand, ESQLAstQueryExpression } from '@elastic/esql';
+import type {
+  ESQLAstAllCommands,
+  ESQLAstForkCommand,
+  ESQLAstQueryExpression,
+} from '@elastic/esql/types';
 import { withAutoSuggest } from '../../definitions/utils/autocomplete/helpers';
 import { pipeCompleteItem, getCommandAutocompleteDefinitions } from '../complete_items';
 import { pipePrecedesCurrentWord } from '../../definitions/utils/shared';

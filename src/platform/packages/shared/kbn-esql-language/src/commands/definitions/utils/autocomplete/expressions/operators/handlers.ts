@@ -8,7 +8,7 @@
  */
 
 import { isColumn, isList } from '@elastic/esql';
-import type { ESQLColumn, ESQLFunction, ESQLSingleAstItem } from '@elastic/esql';
+import type { ESQLColumn, ESQLFunction, ESQLSingleAstItem } from '@elastic/esql/types';
 import type { ISuggestionItem } from '../../../../../registry/types';
 import {
   listCompleteItem,

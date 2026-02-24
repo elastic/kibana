@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { isSubQuery, within, Walker } from '@elastic/esql';
-import type { ESQLAstQueryExpression } from '@elastic/esql';
+import type { ESQLAstQueryExpression } from '@elastic/esql/types';
 
 /**
  * Finds the innermost subquery containing the cursor position and determines if the query contains subqueries.

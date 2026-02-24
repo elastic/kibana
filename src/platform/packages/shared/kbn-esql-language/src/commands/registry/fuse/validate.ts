@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { walk } from '@elastic/esql';
-import type { ESQLAst, ESQLAstAllCommands, ESQLMessage, ESQLSingleAstItem } from '@elastic/esql';
+import type {
+  ESQLAst,
+  ESQLAstAllCommands,
+  ESQLMessage,
+  ESQLSingleAstItem,
+} from '@elastic/esql/types';
 import type { ICommandContext } from '../types';
 import { buildMissingMetadataMessage } from './utils';
 

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLCommand, ESQLAstForkCommand } from '@elastic/esql';
+import type { ESQLCommand, ESQLAstForkCommand } from '@elastic/esql/types';
 import { esqlCommandRegistry } from '../../../..';
 import type { ESQLCommandSummary, FieldSummary } from '../types';
 

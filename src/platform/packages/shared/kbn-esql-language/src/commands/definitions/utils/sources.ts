@@ -9,7 +9,7 @@
 import type { IndexAutocompleteItem, ESQLSourceResult, EsqlView } from '@kbn/esql-types';
 import { SOURCES_TYPES } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
-import type { ESQLAstAllCommands, ESQLAstJoinCommand, ESQLSource } from '@elastic/esql';
+import type { ESQLAstAllCommands, ESQLAstJoinCommand, ESQLSource } from '@elastic/esql/types';
 import { isAsExpression, Walker } from '@elastic/esql';
 import { LeafPrinter } from '@elastic/esql';
 import type { ISuggestionItem } from '../../registry/types';

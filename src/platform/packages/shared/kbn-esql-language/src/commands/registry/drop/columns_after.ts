@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { walk } from '@elastic/esql';
-import { type ESQLCommand } from '@elastic/esql';
+import type { ESQLCommand } from '@elastic/esql/types';
 import type { ESQLColumnData } from '../types';
 
 export const columnsAfter = (command: ESQLCommand, previousColumns: ESQLColumnData[]) => {

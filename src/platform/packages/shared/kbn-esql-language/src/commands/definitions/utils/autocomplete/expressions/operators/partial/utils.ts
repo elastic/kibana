@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLFunction, ESQLList, ESQLUnknownItem, ESQLSingleAstItem } from '@elastic/esql';
+import type {
+  ESQLFunction,
+  ESQLList,
+  ESQLUnknownItem,
+  ESQLSingleAstItem,
+} from '@elastic/esql/types';
 import { Builder } from '@elastic/esql';
 import type { PartialOperatorDetection } from '../../types';
 import {

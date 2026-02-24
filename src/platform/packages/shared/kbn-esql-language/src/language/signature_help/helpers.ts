@@ -8,7 +8,7 @@
  */
 
 import { within, Walker } from '@elastic/esql';
-import type { ESQLAstBaseItem, ESQLFunction } from '@elastic/esql';
+import type { ESQLAstBaseItem, ESQLFunction } from '@elastic/esql/types';
 import type { PromQLFunction } from '@elastic/esql';
 import { getFormattedPromqlFunctionSignature } from '../../commands/definitions/utils/hover/functions';
 import { getPromqlFunctionDefinition } from '../../commands/definitions/utils/promql';

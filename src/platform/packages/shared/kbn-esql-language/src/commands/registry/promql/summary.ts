@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLAstPromqlCommand, ESQLCommand } from '@elastic/esql';
+import type { ESQLAstPromqlCommand, ESQLCommand } from '@elastic/esql/types';
 import { isBinaryExpression, isIdentifier } from '@elastic/esql';
 import type { ESQLCommandSummary } from '../..';
 import { PromqlParamName } from './utils';

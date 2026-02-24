@@ -8,7 +8,7 @@
  */
 import uniqBy from 'lodash/uniqBy';
 import { LeafPrinter } from '@elastic/esql';
-import { type ESQLAstChangePointCommand, type ESQLCommand } from '@elastic/esql';
+import { type ESQLAstChangePointCommand, type ESQLCommand } from '@elastic/esql/types';
 import type { ESQLColumnData } from '../types';
 
 export const columnsAfter = (

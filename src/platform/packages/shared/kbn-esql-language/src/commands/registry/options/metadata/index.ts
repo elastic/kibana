@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
-import type { ESQLCommandOption, ESQLAstAllCommands } from '@elastic/esql';
+import type { ESQLCommandOption, ESQLAstAllCommands } from '@elastic/esql/types';
 import { isColumn, isOptionNode } from '@elastic/esql';
 import { withAutoSuggest } from '../../../definitions/utils/autocomplete/helpers';
 import type { ISuggestionItem } from '../../types';

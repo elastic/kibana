@@ -8,7 +8,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import { isColumn } from '@elastic/esql';
-import type { ESQLAstAllCommands, ESQLAstFuseCommand } from '@elastic/esql';
+import type { ESQLAstAllCommands, ESQLAstFuseCommand } from '@elastic/esql/types';
 import type { MapParameters } from '../../definitions/utils/autocomplete/map_expression';
 import { getCommandMapExpressionSuggestions } from '../../definitions/utils/autocomplete/map_expression';
 import {

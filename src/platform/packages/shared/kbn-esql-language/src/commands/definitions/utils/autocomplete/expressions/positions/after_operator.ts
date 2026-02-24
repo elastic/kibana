@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLAstItem, ESQLFunction } from '@elastic/esql';
+import type { ESQLAstItem, ESQLFunction } from '@elastic/esql/types';
 import { isLiteral } from '@elastic/esql';
 import type { ISuggestionItem } from '../../../../../registry/types';
 import { listCompleteItem } from '../../../../../registry/complete_items';

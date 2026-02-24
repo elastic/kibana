@@ -9,8 +9,8 @@
 import { i18n } from '@kbn/i18n';
 import { uniqBy } from 'lodash';
 import { isFunctionExpression, isLiteral } from '@elastic/esql';
-import type * as ast from '@elastic/esql';
-import type { ESQLAstCompletionCommand, ESQLAstAllCommands } from '@elastic/esql';
+import type * as ast from '@elastic/esql/types';
+import type { ESQLAstCompletionCommand, ESQLAstAllCommands } from '@elastic/esql/types';
 import { suggestForExpression } from '../../definitions/utils';
 import type { MapParameters } from '../../definitions/utils/autocomplete/map_expression';
 import { getCommandMapExpressionSuggestions } from '../../definitions/utils/autocomplete/map_expression';

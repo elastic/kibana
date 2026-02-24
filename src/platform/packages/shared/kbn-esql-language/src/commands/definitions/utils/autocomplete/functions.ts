@@ -9,7 +9,7 @@
 
 import { isAssignment, isFunctionExpression } from '@elastic/esql';
 
-import type { ESQLAstAllCommands, ESQLAstItem, ESQLFunction } from '@elastic/esql';
+import type { ESQLAstAllCommands, ESQLAstItem, ESQLFunction } from '@elastic/esql/types';
 import type { FunctionParameterType } from '../../types';
 import { FunctionDefinitionTypes } from '../../types';
 import { getFunctionDefinition } from '../functions';

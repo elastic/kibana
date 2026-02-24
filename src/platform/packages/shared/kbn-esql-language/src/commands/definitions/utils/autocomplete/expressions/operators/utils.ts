@@ -8,7 +8,7 @@
  */
 
 import { isList } from '@elastic/esql';
-import type { ESQLSingleAstItem } from '@elastic/esql';
+import type { ESQLSingleAstItem } from '@elastic/esql/types';
 import { isMarkerNode } from '../../../ast';
 import { getOperatorSuggestion } from '../../../operators';
 import type { ISuggestionItem } from '../../../../../registry/types';

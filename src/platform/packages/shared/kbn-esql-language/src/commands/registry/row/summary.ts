@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLCommand } from '@elastic/esql';
+import type { ESQLCommand } from '@elastic/esql/types';
 import { isAssignment, isColumn } from '@elastic/esql';
 import type { ESQLCommandSummary } from '../types';
 

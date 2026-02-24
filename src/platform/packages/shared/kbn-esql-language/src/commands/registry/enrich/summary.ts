@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { isAssignment, isColumn, isOptionNode } from '@elastic/esql';
-import type { ESQLColumn, ESQLCommand, ESQLCommandOption } from '@elastic/esql';
+import type { ESQLColumn, ESQLCommand, ESQLCommandOption } from '@elastic/esql/types';
 import type { ESQLCommandSummary } from '../types';
 
 // The enrich command can add new columns with the WITH option.

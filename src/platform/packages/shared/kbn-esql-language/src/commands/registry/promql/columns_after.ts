@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ESQLCommand, ESQLAstPromqlCommand } from '@elastic/esql';
+import type { ESQLCommand, ESQLAstPromqlCommand } from '@elastic/esql/types';
 import { isBinaryExpression, isIdentifier } from '@elastic/esql';
 import { Walker } from '@elastic/esql';
 import type { ESQLColumnData, ESQLUserDefinedColumn } from '../types';

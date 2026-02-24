@@ -16,7 +16,7 @@ import type {
   ESQLCommand,
   ESQLCommandOption,
   ESQLSingleAstItem,
-} from '@elastic/esql';
+} from '@elastic/esql/types';
 import { buildFieldsDefinitionsWithMetadata } from '../../definitions/utils';
 
 import type { ICommand } from '../registry';

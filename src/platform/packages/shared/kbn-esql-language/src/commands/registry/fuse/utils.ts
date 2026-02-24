@@ -14,8 +14,8 @@ import type {
   ESQLCommandOption,
   ESQLIdentifier,
   ESQLMessage,
-} from '@elastic/esql';
-import { isOptionNode } from '../../../..';
+} from '@elastic/esql/types';
+import { isOptionNode } from '@elastic/esql';
 
 export const FUSE_OPTIONS = ['score by', 'key by', 'group by', 'with'] as const;
 export type FuseOption = (typeof FUSE_OPTIONS)[number];

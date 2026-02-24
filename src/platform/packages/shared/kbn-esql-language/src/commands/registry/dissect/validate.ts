@@ -14,7 +14,7 @@ import type {
   ESQLMessage,
   ESQLCommandOption,
   ESQLAst,
-} from '@elastic/esql';
+} from '@elastic/esql/types';
 import { getMessageFromId } from '../../definitions/utils/errors';
 import type { ICommandContext, ICommandCallbacks } from '../types';
 import { validateCommandArguments } from '../../definitions/utils/validation';

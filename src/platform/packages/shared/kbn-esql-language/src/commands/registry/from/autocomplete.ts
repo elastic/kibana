@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { SOURCES_TYPES } from '@kbn/esql-types';
-import type { ESQLAstAllCommands } from '@elastic/esql';
+import type { ESQLAstAllCommands } from '@elastic/esql/types';
 import { isSubQuery, isSource } from '@elastic/esql';
 import { pipeCompleteItem, commaCompleteItem, subqueryCompleteItem } from '../complete_items';
 import {

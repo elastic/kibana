@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLAstAllCommands } from '@elastic/esql';
+import type { ESQLAstAllCommands } from '@elastic/esql/types';
+import { isColumn } from '@elastic/esql';
+import type { ESQLSingleAstItem } from '@elastic/esql/types';
 import { withAutoSuggest } from '../../definitions/utils/autocomplete/helpers';
 import { getFragmentData } from '../../definitions/utils/autocomplete/helpers';
-import { type ESQLSingleAstItem, isColumn } from '../../../..';
 import { pipeCompleteItem, commaCompleteItem } from '../complete_items';
 import type { ISuggestionItem } from '../types';
 

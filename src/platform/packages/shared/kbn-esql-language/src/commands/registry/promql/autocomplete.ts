@@ -8,7 +8,7 @@
  */
 
 import type { IndexAutocompleteItem } from '@kbn/esql-types';
-import type { ESQLAstAllCommands } from '@elastic/esql';
+import type { ESQLAstAllCommands } from '@elastic/esql/types';
 import { specialIndicesToSuggestions, sourceExists } from '../../definitions/utils/sources';
 import { getFragmentData, withAutoSuggest } from '../../definitions/utils/autocomplete/helpers';
 import { getDateLiterals } from '../../definitions/utils/literals';

@@ -21,7 +21,7 @@ import type {
   ESQLAstItem,
   ESQLFunction,
   ESQLMessage,
-} from '@elastic/esql';
+} from '@elastic/esql/types';
 import type { PromQLFunction } from '@elastic/esql';
 import { errors, getFunctionDefinition } from '..';
 import { FunctionDefinitionTypes } from '../../../../..';

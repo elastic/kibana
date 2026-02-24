@@ -12,7 +12,7 @@ import type {
   ESQLCommandOption,
   ESQLSource,
   ESQLAstAllCommands,
-} from '@elastic/esql';
+} from '@elastic/esql/types';
 import { isColumn, isOptionNode, isSource } from '@elastic/esql';
 import type { ICommandContext } from '../types';
 import { METADATA_FIELDS } from '../options/metadata';

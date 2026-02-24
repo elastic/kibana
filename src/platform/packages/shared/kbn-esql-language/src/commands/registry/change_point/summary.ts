@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLAstChangePointCommand, ESQLCommand } from '@elastic/esql';
+import type { ESQLAstChangePointCommand, ESQLCommand } from '@elastic/esql/types';
 import { LeafPrinter } from '@elastic/esql';
 import type { ESQLCommandSummary } from '../types';
 

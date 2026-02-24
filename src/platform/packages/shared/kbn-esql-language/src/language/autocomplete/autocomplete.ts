@@ -15,7 +15,7 @@ import type {
   ESQLCommandOption,
   ESQLFunction,
   ESQLAstAllCommands,
-} from '@elastic/esql';
+} from '@elastic/esql/types';
 import { isHeaderCommand, Walker } from '@elastic/esql';
 import { parse } from '@elastic/esql';
 import { esqlCommandRegistry } from '../../commands';

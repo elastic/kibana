@@ -8,7 +8,7 @@
  */
 import type { ESQLCallbacks } from '@kbn/esql-types';
 import { EsqlQuery } from '@elastic/esql';
-import { type ESQLSource } from '@elastic/esql';
+import type { ESQLSource } from '@elastic/esql/types';
 import {
   getRecommendedQueriesTemplates,
   getTimeAndCategorizationFields,

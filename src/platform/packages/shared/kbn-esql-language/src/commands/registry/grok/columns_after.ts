@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { uniqBy } from 'lodash';
-import { type ESQLCommand } from '@elastic/esql';
+import type { ESQLCommand } from '@elastic/esql/types';
 import { walk } from '@elastic/esql';
 import type { ESQLColumnData } from '../types';
 import { extractSemanticsFromGrok, unquoteTemplate, type GrokColumn } from './utils';

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { ESQLCallbacks } from '@kbn/esql-types';
-import type { ESQLAstAllCommands, ESQLCommand } from '@elastic/esql';
+import type { ESQLAstAllCommands, ESQLCommand } from '@elastic/esql/types';
 import { Walker } from '@elastic/esql';
 import type { ESQLPolicy } from '../../commands/registry/types';
 import { getPolicyHelper, getSourcesHelper } from '../shared/resources_helpers';

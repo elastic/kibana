@@ -9,7 +9,7 @@
 
 import { EDITOR_MARKER } from '../../commands/definitions/constants';
 import { correctQuerySyntax, isMarkerNode } from '../../commands/definitions/utils/ast';
-import type { ESQLAstItem } from '@elastic/esql';
+import type { ESQLAstItem } from '@elastic/esql/types';
 import { Parser } from '@elastic/esql';
 import { Walker } from '@elastic/esql';
 import { getCursorContext } from './get_cursor_context';

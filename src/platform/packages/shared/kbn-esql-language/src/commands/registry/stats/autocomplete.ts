@@ -16,7 +16,7 @@ import type {
   ESQLSingleAstItem,
   ESQLAstAllCommands,
   ESQLAstQueryExpression,
-} from '@elastic/esql';
+} from '@elastic/esql/types';
 import { within } from '@elastic/esql';
 import type { FunctionParameterContext } from '../../definitions/utils/autocomplete/expressions/types';
 import type { ICommandCallbacks } from '../types';

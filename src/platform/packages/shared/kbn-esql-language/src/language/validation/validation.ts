@@ -8,10 +8,10 @@
  */
 import type { LicenseType } from '@kbn/licensing-types';
 import type { ESQLCallbacks, ESQLFieldWithMetadata } from '@kbn/esql-types';
-import type { ESQLCommand, ESQLMessage } from '@elastic/esql';
+import type { ESQLCommand, ESQLMessage } from '@elastic/esql/types';
 import { EsqlQuery } from '@elastic/esql';
 import { walk } from '@elastic/esql';
-import type { ESQLAstAllCommands } from '@elastic/esql';
+import type { ESQLAstAllCommands } from '@elastic/esql/types';
 import { esqlCommandRegistry } from '../../commands/registry';
 import type { ICommandCallbacks } from '../../commands/registry/types';
 import { UnmappedFieldsStrategy } from '../../commands/registry/types';

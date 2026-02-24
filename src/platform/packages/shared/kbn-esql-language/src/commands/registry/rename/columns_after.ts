@@ -8,7 +8,7 @@
  */
 import uniqBy from 'lodash/uniqBy';
 import { isColumn, isFunctionExpression } from '@elastic/esql';
-import type { ESQLAstBaseItem, ESQLCommand, ESQLFunction } from '@elastic/esql';
+import type { ESQLAstBaseItem, ESQLCommand, ESQLFunction } from '@elastic/esql/types';
 import type { ESQLColumnData } from '../types';
 
 export const columnsAfter = (

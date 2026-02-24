@@ -8,7 +8,7 @@
  */
 import { validate } from './validate';
 import { Parser } from '@elastic/esql';
-import type { ESQLMessage } from '@elastic/esql';
+import type { ESQLMessage } from '@elastic/esql/types';
 
 const setExpectErrors = (query: string, expectedErrors: string[]) => {
   const { root } = Parser.parse(query);

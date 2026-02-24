@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { LeafPrinter } from '@elastic/esql';
-import type { ESQLCommand, ESQLAstRerankCommand } from '@elastic/esql';
+import type { ESQLCommand, ESQLAstRerankCommand } from '@elastic/esql/types';
 import type { ESQLCommandSummary } from '../types';
 
 export const summary = (command: ESQLCommand, query: string): ESQLCommandSummary => {

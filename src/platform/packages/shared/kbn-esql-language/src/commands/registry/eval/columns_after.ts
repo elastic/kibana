@@ -9,7 +9,7 @@
 
 import { uniqBy } from 'lodash';
 import { isAssignment, isColumn } from '@elastic/esql';
-import type { ESQLAstItem, ESQLCommand } from '@elastic/esql';
+import type { ESQLAstItem, ESQLCommand } from '@elastic/esql/types';
 import { getExpressionType } from '../../definitions/utils';
 import type { ESQLColumnData, ESQLUserDefinedColumn, UnmappedFieldsStrategy } from '../types';
 import type { IAdditionalFields } from '../registry';

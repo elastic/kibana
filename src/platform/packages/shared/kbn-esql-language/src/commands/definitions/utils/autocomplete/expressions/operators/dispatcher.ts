@@ -8,7 +8,7 @@
  */
 
 import { isFunctionExpression } from '@elastic/esql';
-import type { ESQLFunction } from '@elastic/esql';
+import type { ESQLFunction } from '@elastic/esql/types';
 import type { ISuggestionItem } from '../../../../../registry/types';
 import type { ExpressionContext } from '../types';
 import { handleListOperator } from './handlers';

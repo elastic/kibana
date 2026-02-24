@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { isFunctionExpression, within, isAssignment, isColumn } from '@elastic/esql';
-import type { ESQLAstAllCommands, ESQLAstField } from '@elastic/esql';
+import type { ESQLAstAllCommands, ESQLAstField } from '@elastic/esql/types';
 import {
   getNewUserDefinedColumnSuggestion,
   pipeCompleteItem,

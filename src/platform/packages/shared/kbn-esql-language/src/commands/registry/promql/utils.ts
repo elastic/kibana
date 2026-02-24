@@ -8,7 +8,7 @@
  */
 
 import { within } from '@elastic/esql';
-import type { ESQLAstAllCommands, ESQLAstPromqlCommand } from '@elastic/esql';
+import type { ESQLAstAllCommands, ESQLAstPromqlCommand } from '@elastic/esql/types';
 import { PromQLParser } from '@elastic/esql';
 import type {
   PromQLAstNode,

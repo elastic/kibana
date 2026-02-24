@@ -14,7 +14,7 @@ import {
   isLiteral,
   isParamLiteral,
 } from '@elastic/esql';
-import type { ESQLAstItem, ESQLFunction, ESQLSingleAstItem } from '@elastic/esql';
+import type { ESQLAstItem, ESQLFunction, ESQLSingleAstItem } from '@elastic/esql/types';
 import { lastItem } from '@elastic/esql';
 import type { PromQLAstExpression } from '@elastic/esql';
 import type {

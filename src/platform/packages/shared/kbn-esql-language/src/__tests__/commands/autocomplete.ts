@@ -16,7 +16,7 @@ import { uniq } from 'lodash';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { EsqlFieldType } from '@kbn/esql-types';
 import { Parser } from '@elastic/esql';
-import type { ESQLAstAllCommands } from '@elastic/esql';
+import type { ESQLAstAllCommands } from '@elastic/esql/types';
 import type {
   ICommandCallbacks,
   ISuggestionItem,

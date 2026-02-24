@@ -9,7 +9,7 @@
 import { cmd } from '@elastic/esql';
 import { columnsAfter } from './columns_after';
 import type { ESQLColumnData, ESQLUserDefinedColumn } from '../types';
-import type { ESQLAstRerankCommand } from '@elastic/esql';
+import type { ESQLAstRerankCommand } from '@elastic/esql/types';
 
 describe('RERANK columnsAfter', () => {
   const previousColumns: ESQLColumnData[] = [

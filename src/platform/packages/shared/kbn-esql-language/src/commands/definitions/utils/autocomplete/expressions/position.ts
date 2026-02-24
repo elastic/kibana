@@ -9,7 +9,7 @@
 
 import { isColumn, isFunctionExpression, isInlineCast, isLiteral } from '@elastic/esql';
 import { within } from '@elastic/esql';
-import type { ESQLSingleAstItem, ESQLFunction } from '@elastic/esql';
+import type { ESQLSingleAstItem, ESQLFunction } from '@elastic/esql/types';
 import type { ESQLColumnData } from '../../../../registry/types';
 import { isNullCheckOperator } from './utils';
 import { checkFunctionInvocationComplete } from '../../functions';

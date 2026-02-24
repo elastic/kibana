@@ -8,7 +8,7 @@
  */
 
 import type { ESQLVariableType } from '@kbn/esql-types';
-import type { ESQLAstAllCommands, ESQLSingleAstItem } from '@elastic/esql';
+import type { ESQLAstAllCommands, ESQLSingleAstItem } from '@elastic/esql/types';
 import type {
   ICommandCallbacks,
   ICommandContext,

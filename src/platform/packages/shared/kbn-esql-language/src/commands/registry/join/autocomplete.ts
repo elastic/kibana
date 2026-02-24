@@ -8,7 +8,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import type { ESQLFieldWithMetadata } from '@kbn/esql-types';
-import type { ESQLAstAllCommands, ESQLAstJoinCommand } from '@elastic/esql';
+import type { ESQLAstAllCommands, ESQLAstJoinCommand } from '@elastic/esql/types';
 import { withAutoSuggest } from '../../definitions/utils/autocomplete/helpers';
 import {
   getLookupIndexCreateSuggestion,

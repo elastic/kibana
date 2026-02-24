@@ -9,7 +9,7 @@
 
 import type { WalkerAstNode } from '@elastic/esql';
 import { isLiteral, walk } from '@elastic/esql';
-import type { ESQLInlineCast, ESQLMessage } from '@elastic/esql';
+import type { ESQLInlineCast, ESQLMessage } from '@elastic/esql/types';
 import type { InlineCastingType } from '../../..';
 import type { ICommandContext } from '../../../registry/types';
 import { errors } from '../errors';

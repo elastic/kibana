@@ -14,7 +14,7 @@ import type {
   ESQLAstPromqlCommand,
   ESQLLocation,
   ESQLMessage,
-} from '@elastic/esql';
+} from '@elastic/esql/types';
 import { Walker } from '@elastic/esql';
 import { isIdentifier, isList, isSource } from '@elastic/esql';
 import type {

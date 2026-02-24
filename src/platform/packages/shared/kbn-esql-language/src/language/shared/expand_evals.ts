@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLCommand } from '@elastic/esql';
+import type { ESQLCommand } from '@elastic/esql/types';
 import { Builder } from '@elastic/esql';
 
 /**

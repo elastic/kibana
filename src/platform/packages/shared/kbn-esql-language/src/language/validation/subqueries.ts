@@ -8,7 +8,7 @@
  */
 
 import { Builder, isSubQuery } from '@elastic/esql';
-import type { ESQLAstForkCommand, ESQLAstHeaderCommand, ESQLCommand } from '@elastic/esql';
+import type { ESQLAstForkCommand, ESQLAstHeaderCommand, ESQLCommand } from '@elastic/esql/types';
 import { expandEvals } from '../shared/expand_evals';
 /**
  * Returns a list of subqueries to validate

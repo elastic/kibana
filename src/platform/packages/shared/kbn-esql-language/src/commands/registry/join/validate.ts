@@ -14,9 +14,9 @@ import type {
   ESQLSource,
   ESQLIdentifier,
   ESQLAst,
-} from '@elastic/esql';
+} from '@elastic/esql/types';
 import { isBinaryExpression, isIdentifier, isSource } from '@elastic/esql';
-import type { ESQLSingleAstItem } from '@elastic/esql';
+import type { ESQLSingleAstItem } from '@elastic/esql/types';
 import type { ICommandCallbacks, ICommandContext } from '../types';
 import { errors } from '../../definitions/utils/errors';
 import { validateCommandArguments } from '../../definitions/utils/validation';

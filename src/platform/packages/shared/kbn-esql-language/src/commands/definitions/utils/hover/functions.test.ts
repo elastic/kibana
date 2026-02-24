@@ -8,7 +8,7 @@
  */
 import { type FunctionDefinition, FunctionDefinitionTypes } from '../../types';
 import { getFormattedFunctionSignature } from './functions';
-import type { ESQLFunction } from '@elastic/esql';
+import type { ESQLFunction } from '@elastic/esql/types';
 import type { ESQLColumnData } from '../../../registry/types';
 import { exp } from '@elastic/esql';
 

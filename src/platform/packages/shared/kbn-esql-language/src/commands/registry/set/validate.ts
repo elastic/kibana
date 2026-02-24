@@ -13,7 +13,7 @@ import type {
   ESQLIdentifier,
   ESQLMessage,
   ESQLSingleAstItem,
-} from '@elastic/esql';
+} from '@elastic/esql/types';
 import { getExpressionType, getMessageFromId } from '../../definitions/utils';
 import { settings } from '../../definitions/generated/settings';
 import type { SupportedDataType } from '../..';

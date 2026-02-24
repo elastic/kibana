@@ -11,7 +11,7 @@ import type { LicenseType } from '@kbn/licensing-types';
 import type { ESQLControlVariable, RecommendedField } from '@kbn/esql-types';
 import { ControlTriggerSource, ESQLVariableType } from '@kbn/esql-types';
 import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
-import type { ESQLAstItem, ESQLFunction } from '@elastic/esql';
+import type { ESQLAstItem, ESQLFunction } from '@elastic/esql/types';
 import { isLiteral } from '@elastic/esql';
 import {
   type FunctionDefinition,

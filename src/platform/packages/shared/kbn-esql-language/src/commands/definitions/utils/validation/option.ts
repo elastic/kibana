@@ -6,7 +6,12 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ESQLAst, ESQLAstAllCommands, ESQLCommandOption, ESQLMessage } from '@elastic/esql';
+import type {
+  ESQLAst,
+  ESQLAstAllCommands,
+  ESQLCommandOption,
+  ESQLMessage,
+} from '@elastic/esql/types';
 import { isColumn, isFunctionExpression } from '@elastic/esql';
 import type { ICommandCallbacks, ICommandContext } from '../../../registry/types';
 import { validateColumnForCommand } from './column';

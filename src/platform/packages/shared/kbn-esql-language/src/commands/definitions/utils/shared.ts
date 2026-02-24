@@ -8,8 +8,8 @@
  */
 import { i18n } from '@kbn/i18n';
 import type { ESQLFieldWithMetadata } from '@kbn/esql-types';
-import type { ESQLColumn, ESQLIdentifier } from '@elastic/esql';
-import type { ESQLAstItem } from '@elastic/esql';
+import type { ESQLColumn, ESQLIdentifier } from '@elastic/esql/types';
+import type { ESQLAstItem } from '@elastic/esql/types';
 import type { ESQLUserDefinedColumn, ICommandContext } from '../../registry/types';
 import { getLastNonWhitespaceChar } from './autocomplete/helpers';
 import type { SupportedDataType } from '../types';

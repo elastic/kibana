@@ -6,6 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import type { ESQLColumn, ESQLCommand } from '@elastic/esql/types';
 import type {
   ColumnExpressionVisitorContext,
   LiteralExpressionVisitorContext,
@@ -14,12 +15,16 @@ import type {
   StatsCommandVisitorContext,
   InlineStatsCommandVisitorContext,
   SharedData,
+  VisitorMethods,
 } from '@elastic/esql';
-import { Visitor } from '@elastic/esql';
-import { singleItems } from '@elastic/esql';
-import { isAssignment, isColumn, isParamLiteral, isWhereExpression } from '@elastic/esql';
-import type { ESQLColumn, ESQLCommand } from '@elastic/esql';
-import type { VisitorMethods } from '@elastic/esql';
+import {
+  Visitor,
+  singleItems,
+  isAssignment,
+  isColumn,
+  isParamLiteral,
+  isWhereExpression,
+} from '@elastic/esql';
 import type { ESQLCommandSummary, FieldSummary } from '../types';
 import { getColumnName } from '../../definitions/utils/columns';
 

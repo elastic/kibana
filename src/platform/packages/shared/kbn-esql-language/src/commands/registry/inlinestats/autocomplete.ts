@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ESQLAstAllCommands } from '@elastic/esql';
+import type { ESQLAstAllCommands } from '@elastic/esql/types';
 import { withAutoSuggest } from '../../definitions/utils/autocomplete/helpers';
 import type { ISuggestionItem, ICommandCallbacks, ICommandContext } from '../types';
 import { autocomplete as statsAutocomplete } from '../stats/autocomplete';

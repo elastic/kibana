@@ -8,7 +8,8 @@
  */
 import { i18n } from '@kbn/i18n';
 import { within } from '@elastic/esql';
-import { isESQLNamedParamLiteral, type ESQLAstItem, type ESQLFunction } from '@elastic/esql';
+import { isESQLNamedParamLiteral } from '@elastic/esql';
+import type { ESQLAstItem, ESQLFunction } from '@elastic/esql/types';
 import { TIME_SYSTEM_PARAMS } from '../../commands';
 import { getFunctionDefinition } from '../../commands/definitions/utils';
 import { fromCache, setToCache } from './hover_cache';

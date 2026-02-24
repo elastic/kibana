@@ -8,7 +8,7 @@
  */
 
 import { Walker, within } from '@elastic/esql';
-import type { ESQLAstQueryExpression } from '@elastic/esql';
+import type { ESQLAstQueryExpression } from '@elastic/esql/types';
 import { pipePrecedesCurrentWord } from '../../commands/definitions/utils';
 import { findAstPosition } from '../../commands/definitions/utils/ast';
 import { findSubquery } from './subqueries_helpers';

@@ -12,7 +12,7 @@ import type {
   ESQLFunction,
   ESQLProperNode,
   ESQLSingleAstItem,
-} from '@elastic/esql';
+} from '@elastic/esql/types';
 import {
   isFunctionExpression,
   isFieldExpression,

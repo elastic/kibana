@@ -17,9 +17,9 @@ import type {
   ESQLAstAllCommands,
   ESQLAstHeaderCommand,
   ESQLAstQueryExpression,
-} from '@elastic/esql';
+} from '@elastic/esql/types';
+import { Walker } from '@elastic/esql';
 import { EDITOR_MARKER } from '../constants';
-import { Walker } from '../../../..';
 
 export function isMarkerNode(node: ESQLAstItem | undefined): boolean {
   if (Array.isArray(node)) {

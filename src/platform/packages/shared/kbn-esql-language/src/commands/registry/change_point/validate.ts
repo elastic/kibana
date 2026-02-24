@@ -12,7 +12,7 @@ import type {
   ESQLAstAllCommands,
   ESQLAstChangePointCommand,
   ESQLMessage,
-} from '@elastic/esql';
+} from '@elastic/esql/types';
 import { isColumn, isOptionNode } from '@elastic/esql';
 import { errors } from '../../definitions/utils';
 import type { SupportedDataType } from '../../definitions/types';

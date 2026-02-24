@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLAstAllCommands, ESQLMessage, ESQLAst, ESQLAstRerankCommand } from '@elastic/esql';
+import type {
+  ESQLAstAllCommands,
+  ESQLMessage,
+  ESQLAst,
+  ESQLAstRerankCommand,
+} from '@elastic/esql/types';
 import type { ICommandContext, ICommandCallbacks } from '../types';
 import { getExpressionType } from '../../definitions/utils/expressions';
 import { validateCommandArguments } from '../../definitions/utils/validation';
