@@ -9,7 +9,14 @@
 
 import type { Row } from '@tanstack/react-table';
 import { debounce } from 'lodash';
-import { useCallback, useLayoutEffect, useImperativeHandle, useMemo, useRef } from 'react';
+import {
+  useCallback,
+  useLayoutEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useEffect,
+} from 'react';
 import {
   useDataCascadeState,
   type GroupNode,
@@ -33,6 +40,11 @@ export interface DataCascadeUISnapshot<
   activeStickyIndex: number | null;
   totalRowCount: number;
   totalSize: number;
+  /**
+   * The index of the topmost virtual item that is currently in view,
+   * value is a derivative of the virtualizer's current scroll offset.
+   */
+  scrollAnchorItemIndex: number | null;
 }
 
 /**
@@ -73,6 +85,11 @@ const createDefaultUISnapshot = <G extends GroupNode, L extends LeafNode>(): Dat
   totalSize: 0,
   expanded: {},
   rowSelection: {},
+  /**
+   * The index of the topmost virtual item that is currently in view,
+   * value is a derivative of the virtualizer's current scroll offset.
+   */
+  scrollAnchorItemIndex: null,
 });
 
 /**
@@ -149,6 +166,7 @@ export function useExposePublicApi<G extends GroupNode, L extends LeafNode>(
   }, []);
 
   const getSnapshot = useCallback((): DataCascadeUISnapshot<G, L> => storeRef.current.snapshot, []);
+
   const getServerSnapshot = useCallback(
     (): DataCascadeUISnapshot<G, L> => storeRef.current.snapshot,
     []
@@ -172,6 +190,8 @@ export function useExposePublicApi<G extends GroupNode, L extends LeafNode>(
       }, 100),
     []
   );
+
+  useEffect(() => () => notifyListeners.cancel(), [notifyListeners]);
 
   /** scans updates from virtualizer instance and updates the store snapshot. */
   const collectVirtualizerStateChanges = useCallback(
@@ -198,6 +218,8 @@ export function useExposePublicApi<G extends GroupNode, L extends LeafNode>(
           activeStickyIndex,
           scrollRect: instance.scrollRect ?? { width: 0, height: 0 },
           totalSize: instance.getTotalSize ? instance.getTotalSize() : 0,
+          scrollAnchorItemIndex:
+            instance.getVirtualItemForOffset(instance.scrollOffset!)?.index ?? null,
         };
 
         notifyListeners();
