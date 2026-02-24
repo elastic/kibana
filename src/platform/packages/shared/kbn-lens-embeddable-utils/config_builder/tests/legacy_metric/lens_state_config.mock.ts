@@ -247,3 +247,86 @@ export const selectorColorByValueAttributes: LensAttributes = {
     },
   ],
 };
+
+export const customColorByValueAttributes: LensAttributes = {
+  visualizationType: 'lnsLegacyMetric',
+  title: 'testing color by value palette',
+  description: '',
+  state: {
+    datasourceStates: {
+      formBased: {
+        layers: {
+          layer_0: {
+            sampling: 1,
+            ignoreGlobalFilters: false,
+            columns: {
+              legacy_metric_accessor: {
+                operationType: 'count',
+                sourceField: '___records___',
+                dataType: 'number',
+                isBucketed: false,
+                label: '',
+                customLabel: false,
+                params: {
+                  // @ts-expect-error
+                  emptyAsNull: true,
+                },
+              },
+            },
+            columnOrder: ['legacy_metric_accessor'],
+          },
+        },
+      },
+    },
+    internalReferences: [],
+    visualization: {
+      layerId: 'layer_0',
+      layerType: 'data',
+      accessor: 'legacy_metric_accessor',
+      colorMode: 'Background',
+      palette: {
+        type: 'palette',
+        name: 'custom',
+        params: {
+          name: 'custom',
+          progression: 'fixed',
+          reverse: false,
+          rangeMin: 0,
+          rangeMax: null,
+          rangeType: 'number',
+          stops: [
+            {
+              color: '#24c292',
+              stop: 0,
+            },
+            {
+              color: '#fcd883',
+              stop: 3130.66,
+            },
+            {
+              color: '#f6726a',
+              stop: 4696,
+            },
+          ],
+          continuity: 'above',
+          steps: 3,
+          maxSteps: 5,
+        },
+      },
+    },
+    adHocDataViews: {},
+    query: {
+      query: '',
+      language: 'kuery',
+    },
+    filters: [],
+  },
+  version: 2,
+  references: [
+    {
+      type: 'index-pattern',
+      id: 'd3d7af60-4c81-11e8-b3d7-01146121b73d',
+      name: 'indexpattern-datasource-layer-layer_0',
+    },
+  ],
+};

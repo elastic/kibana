@@ -12,6 +12,7 @@ import { isNil } from 'lodash';
 import type { ColorMapping, ColorStop, CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 
 import type {
+  AllColoringTypes,
   ColorByValueStep,
   ColorByValueType,
   ColorMappingColorDefType,
@@ -34,8 +35,7 @@ const API_TO_LEGACY_RANGE_NAMES: Record<'percentage' | 'absolute', 'percent' | '
 };
 
 export function fromColorByValueAPIToLensState(
-  config?: ColorByValueType,
-  isLegacyMetric: boolean = false
+  config?: ColorByValueType
 ): PaletteOutput<CustomPaletteParams> | undefined {
   if (!config) return;
 
@@ -57,9 +57,10 @@ export function fromColorByValueAPIToLensState(
 
   const rangeMin = colorStops.at(0)?.stop ?? null;
   const rangeMax = stops.at(-1)?.stop ?? null;
-  const name = config.palette ?? 'custom';
 
-  const needsPaletteShift = isLegacyMetric || (config.palette && config.palette !== 'custom');
+  const isLegacy = config.type === 'legacy-dynamic';
+  const name = isLegacy ? config.palette : 'custom';
+  const needsPaletteShift = isLegacy && config.shift;
 
   return {
     type: 'palette',
@@ -83,7 +84,7 @@ export function fromColorByValueAPIToLensState(
             stop: i === 0 ? (rangeMin as number) : stops[i - 1].stop,
           })),
       // ignore colorStops when shifting palettes stops
-      ...(!needsPaletteShift && { colorStops }),
+      colorStops,
       continuity:
         rangeMin === null && rangeMax === null
           ? 'all'
@@ -99,8 +100,7 @@ export function fromColorByValueAPIToLensState(
 }
 
 export function fromColorByValueLensStateToAPI(
-  config: PaletteOutput<CustomPaletteParams> | undefined,
-  isLegacyMetric: boolean = false
+  config: PaletteOutput<CustomPaletteParams> | undefined
 ): ColorByValueType | undefined {
   const colorParams = config?.params;
 
@@ -108,29 +108,29 @@ export function fromColorByValueLensStateToAPI(
 
   const { rangeType, reverse } = colorParams;
   let originalStops = colorParams.stops ?? [];
-  const baseColorConfig = {
-    type: 'dynamic',
-    range: rangeType
-      ? LEGACY_TO_API_RANGE_NAMES[rangeType]
-      : LENS_DEFAULT_COLOR_BY_VALUE_RANGE_TYPE,
-  } satisfies Partial<ColorByValueType>;
 
-  if (colorParams.name !== 'custom') {
-    // legacy non-custom color stops are incorrectly configured for bwc and "fixed" in client logic
-    // we need to return the incorrect stops to make it work as it does currently.
-    // see https://github.com/elastic/kibana/issues/251135
+  const palette = colorParams.name ?? 'custom';
+  const isLegacy = palette !== 'custom';
+  const needsPaletteShift =
+    isLegacy &&
+    ((colorParams.rangeMin != null && colorParams.rangeMin === originalStops.at(0)?.stop) ||
+      (colorParams.rangeMax != null && colorParams.rangeMax !== originalStops.at(-1)?.stop));
 
-    // All non-custom stops are wrong otherwise check first stop value
-    if (isLegacyMetric || colorParams.rangeMin === originalStops[0]?.stop) {
-      // @ts-expect-error - stop value can be null
-      originalStops = originalStops.map((stop, i) => ({
-        ...stop,
-        stop:
-          i === originalStops.length - 1 ? colorParams.rangeMax ?? null : originalStops[i + 1].stop,
-      }));
-    }
+  // legacy non-custom color stops are incorrectly configured for bwc and "fixed" in client logic
+  // we need to return the incorrect stops to make it work as it does currently.
+  // see https://github.com/elastic/kibana/issues/251135
+  if (needsPaletteShift) {
+    // @ts-expect-error - stop value can be null
+    originalStops = originalStops.map((stop, i) => ({
+      ...stop,
+      stop:
+        i === originalStops.length - 1 ? colorParams.rangeMax ?? null : originalStops[i + 1].stop,
+    }));
   }
 
+  const range = rangeType
+    ? LEGACY_TO_API_RANGE_NAMES[rangeType]
+    : LENS_DEFAULT_COLOR_BY_VALUE_RANGE_TYPE;
   const stops = !reverse
     ? originalStops
     : originalStops
@@ -140,38 +140,48 @@ export function fromColorByValueLensStateToAPI(
           ...originalStops[i],
           color,
         }));
-
-  return {
-    ...baseColorConfig,
-    // some default palette configs are correct
-    ...(colorParams.name !== 'custom' && { palette: colorParams.name }),
-    steps: stops.map((step, i): ColorByValueStep => {
-      const { stop: currentStop, color } = step;
-      if (i === 0) {
-        return {
-          ...(!isNil(colorParams.rangeMin) && { gte: colorParams.rangeMin }),
-          lt: currentStop,
-          color,
-        };
-      }
-
-      const prevStop = stops[i - 1].stop ?? undefined;
-
-      if (i === stops.length - 1) {
-        return {
-          gte: prevStop,
-          // ignores stop value, current logic sets last stop to max domain not user defined rangeMax
-          ...(!isNil(colorParams.rangeMax) && { lte: colorParams.rangeMax }),
-          color,
-        };
-      }
-
+  const steps = stops.map((step, i): ColorByValueStep => {
+    const { stop: currentStop, color } = step;
+    if (i === 0) {
       return {
-        gte: prevStop,
+        ...(!isNil(colorParams.rangeMin) && { gte: colorParams.rangeMin }),
         lt: currentStop,
         color,
       };
-    }),
+    }
+
+    const prevStop = stops[i - 1].stop ?? undefined;
+
+    if (i === stops.length - 1) {
+      return {
+        gte: prevStop,
+        // ignores stop value, current logic sets last stop to max domain not user defined rangeMax
+        ...(!isNil(colorParams.rangeMax) && { lte: colorParams.rangeMax }),
+        color,
+      };
+    }
+
+    return {
+      gte: prevStop,
+      lt: currentStop,
+      color,
+    };
+  });
+
+  if (isLegacy) {
+    return {
+      type: 'legacy-dynamic',
+      range,
+      palette,
+      shift: needsPaletteShift,
+      steps,
+    };
+  }
+
+  return {
+    type: 'dynamic',
+    range,
+    steps,
   };
 }
 
@@ -382,4 +392,14 @@ export function fromColorMappingAPIToLensState(
     assignments,
     specialAssignments,
   };
+}
+
+export function isColorByValueColor(color?: AllColoringTypes): color is ColorByValueType {
+  if (!color || !('type' in color)) return false;
+  return color.type === 'dynamic' || color.type === 'legacy-dynamic';
+}
+
+export function isColorMappingColor(color?: AllColoringTypes): color is ColorMappingType {
+  if (!color || !('mode' in color)) return false;
+  return color.mode === 'categorical' || color.mode === 'gradient';
 }

@@ -23,6 +23,7 @@ import {
   applyColorToSchema,
   colorByValueSchema,
   colorByValueAbsoluteSchema,
+  legacyColorByValueAbsoluteSchema,
 } from '../color';
 import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
 import {
@@ -221,7 +222,9 @@ const metricStateSecondaryMetricOptionsSchema = {
   /**
    * Color configuration
    */
-  color: schema.maybe(schema.oneOf([colorByValueAbsoluteSchema, staticColorSchema])),
+  color: schema.maybe(
+    schema.oneOf([colorByValueAbsoluteSchema, legacyColorByValueAbsoluteSchema, staticColorSchema])
+  ),
 };
 
 const metricStateBreakdownByOptionsSchema = {

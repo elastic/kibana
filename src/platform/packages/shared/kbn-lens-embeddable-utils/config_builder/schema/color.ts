@@ -113,8 +113,6 @@ export const colorByValueStepsSchema = schema.arrayOf(colorByValueStepSchema, {
 const colorByValueBaseSchema = schema.object({
   type: schema.literal('dynamic'),
 
-  palette: schema.maybe(schema.string({ meta: { description: 'The palette name to use.' } })),
-
   /**
    * Determines whether the range is interpreted as absolute or as a percentage of the data.
    */
@@ -131,6 +129,28 @@ const colorByValueBaseSchema = schema.object({
   steps: colorByValueStepsSchema,
 });
 
+export const legacyColorByValueSchema = colorByValueBaseSchema.extends(
+  {
+    type: schema.literal('legacy-dynamic'),
+
+    palette: schema.string({
+      meta: {
+        description: 'The legacy palette name.',
+      },
+    }),
+
+    shift: schema.boolean({ meta: { description: 'Whether to shift the palette.' } }),
+  },
+  {
+    meta: {
+      id: 'legacyColorByValue',
+      title: 'Legacy color by value',
+      description: 'Legacy color by value configuration',
+      deprecated: true,
+    },
+  }
+);
+
 export const colorByValueAbsoluteSchema = colorByValueBaseSchema.extends(
   {
     range: schema.literal('absolute'),
@@ -138,6 +158,17 @@ export const colorByValueAbsoluteSchema = colorByValueBaseSchema.extends(
   {
     meta: {
       id: 'colorByValueAbsolute',
+    },
+  }
+);
+
+export const legacyColorByValueAbsoluteSchema = legacyColorByValueSchema.extends(
+  {
+    range: schema.literal('absolute'),
+  },
+  {
+    meta: {
+      id: 'legacyColorByValueAbsolute',
     },
   }
 );
@@ -154,7 +185,7 @@ export const colorByValuePercentageSchema = colorByValueBaseSchema.extends(
 );
 
 export const colorByValueSchema = schema.oneOf(
-  [colorByValueAbsoluteSchema, colorByValuePercentageSchema],
+  [colorByValueAbsoluteSchema, colorByValuePercentageSchema, legacyColorByValueSchema],
   {
     meta: {
       id: 'colorByValue',

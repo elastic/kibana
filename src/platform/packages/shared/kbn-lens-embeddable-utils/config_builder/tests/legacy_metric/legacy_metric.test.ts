@@ -10,6 +10,7 @@
 import { legacyMetricStateSchema } from '../../schema/charts/legacy_metric';
 import { validateConverter, validateAPIConverter } from '../validate';
 import {
+  customColorByValueAttributes,
   defaultColorByValueAttributes,
   selectorColorByValueAttributes,
   simpleLegacyMetricAttributes,
@@ -37,6 +38,10 @@ describe('Legacy Metric', () => {
 
     it('should convert a selector color by value palette', () => {
       validateConverter(selectorColorByValueAttributes, legacyMetricStateSchema);
+    });
+
+    it('should convert a custom metric with a color by value palette', () => {
+      validateConverter(customColorByValueAttributes, legacyMetricStateSchema);
     });
   });
 

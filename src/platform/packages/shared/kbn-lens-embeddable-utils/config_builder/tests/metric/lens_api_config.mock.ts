@@ -22,7 +22,7 @@ export const breakdownMetricAPIAttributes = {
       color: {
         type: 'dynamic',
         range: 'absolute',
-        steps: [{ type: 'from', from: 0, color: 'red' }],
+        steps: [{ lt: 0, color: 'red' }],
       },
     },
     {
@@ -51,7 +51,7 @@ export const complexMetricAPIAttributes = {
       color: {
         type: 'dynamic',
         range: 'absolute',
-        steps: [{ type: 'from', from: 0, color: 'red' }],
+        steps: [{ lt: 0, color: 'red' }],
       },
       background_chart: {
         type: 'bar',
@@ -109,7 +109,7 @@ export const complexESQLMetricAPIAttributes = {
       color: {
         type: 'dynamic',
         range: 'absolute',
-        steps: [{ type: 'from', from: 0, color: 'red' }],
+        steps: [{ lt: 0, color: 'red' }],
       },
       background_chart: {
         type: 'bar',
@@ -152,7 +152,7 @@ export const metricAPIWithTermsRankedBySecondary = {
       color: {
         type: 'dynamic',
         range: 'absolute',
-        steps: [{ type: 'from', from: 0, color: 'red' }],
+        steps: [{ lt: 0, color: 'red' }],
       },
     },
     {
