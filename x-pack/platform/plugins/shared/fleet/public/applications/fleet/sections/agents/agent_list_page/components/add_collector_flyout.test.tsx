@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { waitFor } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 
 import type { TestRenderer } from '../../../../../../mock';
 import { createFleetTestRendererMock } from '../../../../../../mock';
@@ -126,7 +127,21 @@ describe('AddCollectorFlyout', () => {
   it('renders a user-facing error when policy/token setup fails', async () => {
     mockedSendGetOneAgentPolicy.mockRejectedValue(new Error('setup failed'));
 
-    const component = renderFlyout();
+    const queryClient = new QueryClient({
+      defaultOptions: {
+        queries: { retry: false },
+      },
+    });
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <renderer.AppWrapper>
+        <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+      </renderer.AppWrapper>
+    );
+
+    const component = renderer.render(
+      <AddCollectorFlyout onClose={jest.fn()} onClickViewAgents={jest.fn()} />,
+      { wrapper }
+    );
 
     await waitFor(() => {
       expect(component.getByText('setup failed')).toBeInTheDocument();
