@@ -10,6 +10,7 @@ import type { ObjectType } from '@kbn/config-schema';
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
+import { asCodeFilterSchema } from '@kbn/as-code-filters-schema';
 
 /** Triggers supported by the SLO overview embeddable for drilldowns */
 export const SLO_OVERVIEW_EMBEDDABLE_SUPPORTED_TRIGGERS = ['VALUE_CLICK_TRIGGER'];
@@ -44,7 +45,7 @@ export const GroupOverviewCustomSchema = schema.object({
         schema.literal('slo.indicator.type'),
       ]),
       groups: schema.maybe(schema.arrayOf(schema.string())),
-      filters: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))), // TODO use "as code" filters https://github.com/elastic/kibana/issues/254663 before registering the schema
+      filters: schema.maybe(schema.arrayOf(asCodeFilterSchema)),
       kql_query: schema.maybe(schema.string()),
     })
   ),
