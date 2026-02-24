@@ -6,7 +6,7 @@
  */
 
 import { partition } from 'lodash';
-import React, { useMemo } from 'react';
+import React, { useMemo, type FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { EuiComboBoxOptionOption, EuiComboBoxProps } from '@elastic/eui';
 import { useExistingFieldsReader } from '@kbn/unified-field-list/src/hooks/use_existing_fields';
@@ -41,7 +41,7 @@ export interface FieldSelectProps extends EuiComboBoxProps<EuiComboBoxOptionOpti
   'aria-label'?: string;
 }
 
-export function FieldSelect({
+export const FieldSelect: FC<FieldSelectProps> = ({
   currentIndexPattern,
   incompleteOperation,
   selectedOperationType,
@@ -55,7 +55,7 @@ export function FieldSelect({
   showTimeSeriesDimensions,
   ['aria-describedby']: ariaDescribedby,
   ['aria-label']: ariaLabel,
-}: FieldSelectProps) {
+}) => {
   const { hasFieldData } = useExistingFieldsReader();
   const memoizedFieldOptions = useMemo(() => {
     const fields = [...operationByField.keys()].sort();
@@ -63,7 +63,7 @@ export function FieldSelect({
     const currentOperationType = incompleteOperation ?? selectedOperationType;
 
     function isCompatibleWithCurrentOperation(fieldName: string) {
-      return !currentOperationType || operationByField.get(fieldName)!.has(currentOperationType);
+      return !currentOperationType || operationByField.get(fieldName)?.has(currentOperationType);
     }
 
     const [specialFields, normalFields] = partition(
@@ -84,34 +84,42 @@ export function FieldSelect({
     }
 
     function fieldNamesToOptions(items: string[]): FieldOption[] {
-      // @ts-expect-error upgrade typescript v5.9.3
-      return items
-        .filter((field) => currentIndexPattern.getFieldByName(field)?.displayName)
-        .map((field) => {
-          const compatible =
-            markAllFieldsCompatible || isCompatibleWithCurrentOperation(field) ? 1 : 0;
-          const exists = containsData(field);
-          const fieldInstance = currentIndexPattern.getFieldByName(field);
-          return {
-            label: currentIndexPattern.getFieldByName(field)?.displayName ?? field,
-            value: {
-              type: 'field' as const,
-              field,
-              dataType: fieldInstance ? getFieldIconType(fieldInstance) : undefined,
-              // Use the operation directly, or choose the first compatible operation.
-              // All fields are guaranteed to have at least one operation because they
-              // won't appear in the list otherwise
-              operationType:
-                currentOperationType && isCompatibleWithCurrentOperation(field)
-                  ? currentOperationType
-                  : operationByField.get(field)!.values().next().value, // TODO let's remove these non-null assertion, they are very dangerous
-            },
-            exists,
-            compatible,
-            'data-test-subj': `lns-fieldOption${compatible ? '' : 'Incompatible'}-${field}`,
-          };
-        })
-        .sort((a, b) => b.compatible - a.compatible);
+      return (
+        items
+          // using .reduce() here instead of .filter().map() for better type handling
+          .reduce<FieldOption[]>((fieldOptions, field) => {
+            const fieldInstance = currentIndexPattern.getFieldByName(field);
+            const fallbackOperationType = operationByField.get(field)?.values().next().value;
+
+            if (fieldInstance?.displayName && fallbackOperationType !== undefined) {
+              const compatible =
+                markAllFieldsCompatible || isCompatibleWithCurrentOperation(field) ? 1 : 0;
+              const exists = containsData(field);
+
+              fieldOptions.push({
+                label: fieldInstance.displayName,
+                value: {
+                  type: 'field' as const,
+                  field,
+                  dataType: getFieldIconType(fieldInstance),
+                  // Use the operation directly, or choose the first compatible operation.
+                  // All fields are guaranteed to have at least one operation because they
+                  // won't appear in the list otherwise
+                  operationType:
+                    currentOperationType && isCompatibleWithCurrentOperation(field)
+                      ? currentOperationType
+                      : fallbackOperationType,
+                },
+                exists,
+                compatible,
+                'data-test-subj': `lns-fieldOption${compatible ? '' : 'Incompatible'}-${field}`,
+              });
+            }
+
+            return fieldOptions;
+          }, [])
+          .sort((a, b) => b.compatible - a.compatible)
+      );
     }
 
     const [metaFields, nonMetaFields] = partition(
@@ -217,4 +225,4 @@ export function FieldSelect({
       aria-label={ariaLabel}
     />
   );
-}
+};
