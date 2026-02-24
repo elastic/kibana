@@ -20,6 +20,7 @@ import {
 import type { Orientation } from '../../../shared_components';
 import type { HeatmapVisualizationState } from '../types';
 import { AxisSortOrder } from './sort_order';
+import { isTimeSeriesOperation } from '../time_series';
 
 export function HeatmapStyleSettings(props: VisualizationToolbarProps<HeatmapVisualizationState>) {
   return (
@@ -120,8 +121,14 @@ export function HeatmapVerticalAxisSettings({
 export function HeatmapHorizontalAxisSettings({
   state,
   setState,
+  frame,
 }: VisualizationToolbarProps<HeatmapVisualizationState>) {
   const isXAxisLabelVisible = state?.gridConfig.isXAxisLabelVisible;
+  const xOperation =
+    state?.layerId && state?.xAccessor
+      ? frame.datasourceLayers[state.layerId]?.getOperationForColumnId(state.xAccessor)
+      : undefined;
+  const isTimeBasedXAxis = isTimeSeriesOperation(xOperation);
 
   return (
     <>
@@ -170,7 +177,19 @@ export function HeatmapHorizontalAxisSettings({
           }}
         />
       )}
-      <AxisSortOrder axis="x" state={state} setState={setState} />
+      <AxisSortOrder
+        axis="x"
+        state={state}
+        setState={setState}
+        disabled={isTimeBasedXAxis}
+        disabledReason={
+          isTimeBasedXAxis
+            ? i18n.translate('xpack.lens.heatmap.sortOrder.timeBasedXAxisDisabled', {
+                defaultMessage: 'Sort order is disabled for a time-based horizontal axis.',
+              })
+            : undefined
+        }
+      />
     </>
   );
 }

@@ -224,7 +224,10 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
       | DatatableColumn
       | undefined;
     const xAxisMeta = xAxisColumn?.meta;
-    const isTimeBasedSwimLane = xAxisMeta?.type === 'date';
+    const dateHistogramMeta = xAxisColumn
+      ? datatableUtilities.getDateHistogramMeta(xAxisColumn)
+      : undefined;
+    const isTimeBasedSwimLane = xAxisMeta?.type === 'date' && Boolean(dateHistogramMeta?.interval);
 
     const xValuesFormatter = useMemo(
       () => formatFactory(xAxisMeta?.params),
@@ -426,11 +429,6 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
       });
     }
     const { min, max } = minMaxByColumnId[valueAccessor!];
-    // formatters
-    const dateHistogramMeta = xAxisColumn
-      ? datatableUtilities.getDateHistogramMeta(xAxisColumn)
-      : undefined;
-
     if (!valueColumn) {
       // Chart is not ready
       return null;
@@ -742,8 +740,9 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
               valueFormatter={valueFormatter}
               xScale={xScale}
               xSortPredicate={
-                xAxisColumn &&
-                getSortPredicate(xAxisColumn, args.gridConfig.xSortPredicate ?? 'none')
+                !isTimeBasedSwimLane && xAxisColumn
+                  ? getSortPredicate(xAxisColumn, args.gridConfig.xSortPredicate ?? 'none')
+                  : undefined
               }
               ySortPredicate={
                 yAxisColumn &&

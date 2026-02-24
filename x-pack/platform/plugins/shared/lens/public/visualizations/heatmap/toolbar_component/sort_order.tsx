@@ -53,11 +53,22 @@ export function AxisSortOrder({
   setState,
   state,
   axis,
+  disabled = false,
+  disabledReason,
 }: Pick<VisualizationToolbarProps<HeatmapVisualizationState>, 'state' | 'setState'> & {
   axis: 'x' | 'y';
+  disabled?: boolean;
+  disabledReason?: string;
 }) {
+  const stateProp = properties[axis].stateProp;
+  const currentPredicate = state.gridConfig[stateProp] ?? 'none';
+  const displayedPredicate = disabled ? 'none' : currentPredicate;
+
   const onChange = useCallback<React.ChangeEventHandler<HTMLSelectElement>>(
     (e) => {
+      if (disabled) {
+        return;
+      }
       const predicate = e.target.value;
       if (isSortPredicate(predicate)) {
         setState({
@@ -69,7 +80,7 @@ export function AxisSortOrder({
         });
       }
     },
-    [state, setState, axis]
+    [disabled, state, setState, axis]
   );
   return (
     <EuiFormRow
@@ -77,14 +88,16 @@ export function AxisSortOrder({
       label={i18n.translate('xpack.lens.heatmap.sortOrder.label', {
         defaultMessage: 'Sort order',
       })}
+      helpText={disabled ? disabledReason : undefined}
       fullWidth
     >
       <EuiSelect
         compressed
         data-test-subj={properties[axis].dataTestSubj}
         options={sortOptions}
-        value={state.gridConfig[properties[axis].stateProp] ?? 'none'}
+        value={displayedPredicate}
         onChange={onChange}
+        disabled={disabled}
       />
     </EuiFormRow>
   );
