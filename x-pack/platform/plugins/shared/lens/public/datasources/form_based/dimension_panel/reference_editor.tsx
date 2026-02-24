@@ -275,14 +275,27 @@ export const ReferenceEditor = (props: ReferenceEditorProps) => {
                 const possibleFieldNames =
                   operationSupportMatrix.fieldByOperation.get(operationType);
 
-                const field =
-                  column && 'sourceField' in column && possibleFieldNames?.has(column.sourceField)
-                    ? currentIndexPattern.getFieldByName(column.sourceField)
-                    : possibleFieldNames?.size === 1 // @ts-expect-error upgrade typescript v5.9.3
-                    ? currentIndexPattern.getFieldByName(possibleFieldNames.values().next().value)
-                    : undefined;
+                if (
+                  column &&
+                  'sourceField' in column &&
+                  possibleFieldNames?.has(column.sourceField)
+                ) {
+                  onChooseFunction(
+                    operationType,
+                    currentIndexPattern.getFieldByName(column.sourceField)
+                  );
+                  return;
+                }
 
-                onChooseFunction(operationType, field);
+                if (possibleFieldNames?.size === 1 && possibleFieldNames.values()?.next().value) {
+                  const fieldName = possibleFieldNames.values().next().value;
+                  if (fieldName) {
+                    onChooseFunction(operationType, currentIndexPattern.getFieldByName(fieldName));
+                    return;
+                  }
+                }
+
+                onChooseFunction(operationType, undefined);
                 return;
               }}
             />
