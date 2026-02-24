@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiPageSection } from '@elastic/eui';
 import { ENTITY_ANALYTICS } from '../../app/translations';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { SecurityPageName } from '../../app/types';
@@ -71,35 +71,37 @@ const EntityAnalyticsComponent = () => {
           </FiltersGlobal>
 
           <SecuritySolutionPageWrapper data-test-subj="entityAnalyticsPage">
-            <HeaderPage title={ENTITY_ANALYTICS} />
+            <EuiPageSection paddingSize="m" component="div" grow>
+              {/* <HeaderPage title={ENTITY_ANALYTICS} /> */}
 
-            {isSourcererLoading ? (
-              <EuiLoadingSpinner size="l" data-test-subj="entityAnalyticsLoader" />
-            ) : (
-              <EuiFlexGroup direction="column" data-test-subj="entityAnalyticsSections">
-                <EuiFlexItem>
-                  <EntityAnalyticsHeader />
-                </EuiFlexItem>
-
-                {!isEntityStoreFeatureFlagDisabled ? (
+              {isSourcererLoading ? (
+                <EuiLoadingSpinner size="l" data-test-subj="entityAnalyticsLoader" />
+              ) : (
+                <EuiFlexGroup direction="column" data-test-subj="entityAnalyticsSections">
                   <EuiFlexItem>
-                    <EntityStoreDashboardPanels />
+                    <EntityAnalyticsHeader />
                   </EuiFlexItem>
-                ) : (
-                  <>
-                    {entityTypes.map((entityType) => (
-                      <EuiFlexItem key={entityType}>
-                        <EntityAnalyticsRiskScores riskEntity={entityType} />
-                      </EuiFlexItem>
-                    ))}
-                  </>
-                )}
 
-                <EuiFlexItem>
-                  <EntityAnalyticsAnomalies />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            )}
+                  {!isEntityStoreFeatureFlagDisabled ? (
+                    <EuiFlexItem>
+                      <EntityStoreDashboardPanels />
+                    </EuiFlexItem>
+                  ) : (
+                    <>
+                      {entityTypes.map((entityType) => (
+                        <EuiFlexItem key={entityType}>
+                          <EntityAnalyticsRiskScores riskEntity={entityType} />
+                        </EuiFlexItem>
+                      ))}
+                    </>
+                  )}
+
+                  <EuiFlexItem>
+                    <EntityAnalyticsAnomalies />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              )}
+            </EuiPageSection>
           </SecuritySolutionPageWrapper>
         </>
       )}

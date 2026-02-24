@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
+import { EuiSpacer, EuiTab, EuiTabs, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Redirect, useHistory, useLocation, matchPath } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
@@ -57,6 +57,7 @@ const FindingsTabRedirecter = ({ lastTabSelected }: { lastTabSelected?: Findings
 };
 
 export const Findings = () => {
+  const { euiTheme } = useEuiTheme();
   const history = useHistory();
   const location = useLocation();
 
@@ -95,7 +96,7 @@ export const Findings = () => {
     <>
       {showHeader && (
         <>
-          <EuiTabs>
+          <EuiTabs style={{ paddingInline: euiTheme.size.m }}>
             <EuiTab
               key="configurations"
               onClick={navigateToConfigurationsTab}

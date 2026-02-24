@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiSpacer, EuiWindowEvent } from '@elastic/eui';
+import { EuiPageSection, EuiSpacer, EuiWindowEvent } from '@elastic/eui';
 import styled from '@emotion/styled';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useMemo, useRef } from 'react';
@@ -197,8 +197,9 @@ const HostsComponent = () => {
           </FiltersGlobal>
 
           <SecuritySolutionPageWrapper noPadding={globalFullScreen}>
-            <Display show={!globalFullScreen}>
-              <HeaderPage
+            <EuiPageSection paddingSize="m" component="div" grow>
+              <Display show={!globalFullScreen}>
+                <HeaderPage
                 subtitle={
                   <LastEventTime indexKey={LastEventIndexKey.hosts} indexNames={selectedPatterns} />
                 }
@@ -218,18 +219,19 @@ const HostsComponent = () => {
               />
 
               <EuiSpacer />
-            </Display>
+              </Display>
 
-            <HostsTabs
-              deleteQuery={deleteQuery}
-              to={to}
-              filterQuery={tabsFilterQuery}
-              isInitializing={isInitializing}
-              indexNames={selectedPatterns}
-              setQuery={setQuery}
-              from={from}
-              type={hostsModel.HostsType.page}
-            />
+              <HostsTabs
+                deleteQuery={deleteQuery}
+                to={to}
+                filterQuery={tabsFilterQuery}
+                isInitializing={isInitializing}
+                indexNames={selectedPatterns}
+                setQuery={setQuery}
+                from={from}
+                type={hostsModel.HostsType.page}
+              />
+            </EuiPageSection>
           </SecuritySolutionPageWrapper>
         </StyledFullHeightContainer>
       ) : (
