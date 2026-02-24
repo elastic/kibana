@@ -188,7 +188,7 @@ export function SignificantEventsGeneratedTable({
           <PreviewDataSparkPlot
             definition={definition}
             query={query}
-            isQueryValid={!validation.kql.isInvalid}
+            isQueryValid={!validation.esql.isInvalid}
             showTitle={false}
             compressed={true}
             hideAxis={true}

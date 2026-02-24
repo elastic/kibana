@@ -16,19 +16,17 @@ import {
   EuiSuperSelect,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { DataView } from '@kbn/data-views-plugin/public';
 import type { StreamQuery, Streams, System } from '@kbn/streams-schema';
-import { isNativeEsqlQuery } from '@kbn/streams-schema';
 import React, { useEffect, useMemo, useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
 import { useDebounceFn } from '@kbn/react-hooks';
 import { EsqlQueryEditor } from '../../../esql_query_editor';
-import { UncontrolledStreamsAppSearchBar } from '../../../streams_app_search_bar/uncontrolled_streams_app_bar';
 import { PreviewDataSparkPlot } from '../common/preview_data_spark_plot';
-import { validateQuery } from '../common/validate_query';
 import { SeveritySelector } from '../common/severity_selector';
+import { validateTitle, validateEsqlQuery } from '../common/validate_query';
 import { ALL_DATA_OPTION } from '../../system_selector';
 
-interface Props {
+interface ManualFlowFormProps {
   definition: Streams.all.Definition;
   query: StreamQuery;
   isSubmitting: boolean;
@@ -36,11 +34,30 @@ interface Props {
   setQuery: (query: StreamQuery) => void;
   setCanSave: (canSave: boolean) => void;
   systems: System[];
-  dataViews: DataView[];
+}
+
+interface FormValues {
+  title: string;
+  esqlQuery: string;
+  severityScore?: number;
+  feature?: StreamQuery['feature'];
 }
 
 const DEBOUNCE_DELAY_MS = 300;
 const DEBOUNCE_OPTIONS = { wait: DEBOUNCE_DELAY_MS };
+
+const getDefaultQueryPrefix = (definition: Streams.all.Definition) => `FROM ${definition.name}`;
+
+function enforceFromPrefix(value: string, definition: Streams.all.Definition): string {
+  const fromPrefix = getDefaultQueryPrefix(definition);
+  let esqlQuery = value.trim();
+
+  if (!esqlQuery.startsWith(fromPrefix)) {
+    esqlQuery = esqlQuery.replace(/^FROM\s+\S+/i, '').trim();
+  }
+
+  return [fromPrefix, esqlQuery].filter(Boolean).join(' ').trim();
+}
 
 export function ManualFlowForm({
   definition,
@@ -50,196 +67,185 @@ export function ManualFlowForm({
   isSubmitting,
   isEditMode,
   systems,
-  dataViews,
-}: Props) {
-  const [isNativeEsql] = useState(() => isNativeEsqlQuery(query));
+}: ManualFlowFormProps) {
+  const defaultEsql = query.esql?.query || getDefaultQueryPrefix(definition);
 
-  const [touched, setTouched] = useState({
-    title: false,
-    feature: false,
-    kql: false,
-    severity: false,
+  const {
+    control,
+    formState: { isDirty, isValid },
+  } = useForm<FormValues>({
+    defaultValues: {
+      title: query.title ?? '',
+      esqlQuery: defaultEsql,
+      severityScore: query.severity_score,
+      feature: query.feature,
+    },
+    mode: 'onChange',
   });
 
-  const [debouncedQueryText, setDebouncedQueryText] = useState(
-    isNativeEsql ? (query.esql?.query ?? '') : query.kql.query
-  );
+  useEffect(() => {
+    setCanSave(isValid && isDirty);
+  }, [isValid, isDirty, setCanSave]);
 
-  const { run: updateDebouncedQueryText } = useDebounceFn(
-    (text: string) => setDebouncedQueryText(text),
+  const [debouncedEsql, setDebouncedEsql] = useState(defaultEsql);
+  const { run: updateDebouncedEsql } = useDebounceFn(
+    (text: string) => setDebouncedEsql(text),
     DEBOUNCE_OPTIONS
   );
 
   const debouncedQuery = useMemo(
-    (): StreamQuery =>
-      isNativeEsql
-        ? { ...query, esql: { query: debouncedQueryText } }
-        : { ...query, kql: { query: debouncedQueryText } },
-    [query, debouncedQueryText, isNativeEsql]
+    (): StreamQuery => ({ ...query, esql: { query: debouncedEsql } }),
+    [query, debouncedEsql]
   );
 
-  const validation = validateQuery(query);
-
-  useEffect(() => {
-    const isValid = !validation.title.isInvalid && !validation.kql.isInvalid;
-    const isTouched = touched.title || touched.kql || touched.feature || touched.severity;
-    setCanSave(isValid && isTouched);
-  }, [validation, setCanSave, touched]);
-
-  const options = [
+  const systemOptions = [
     { value: ALL_DATA_OPTION.value, inputDisplay: ALL_DATA_OPTION.label },
-    ...systems.map((system) => ({
-      value: system,
-      inputDisplay: system.name,
-    })),
+    ...systems.map((system) => ({ value: system, inputDisplay: system.name })),
   ];
 
   return (
     <EuiPanel hasShadow={false} color="subdued">
       <EuiFlexGroup direction="column" gutterSize="m">
         <EuiForm fullWidth>
-          <EuiFormRow
-            {...(touched.title && { ...validation.title })}
-            label={
-              <EuiFormLabel>
-                {i18n.translate(
-                  'xpack.streams.addSignificantEventFlyout.manualFlow.formFieldTitleLabel',
-                  { defaultMessage: 'Title' }
-                )}
-              </EuiFormLabel>
-            }
-          >
-            <EuiFieldText
-              value={query?.title}
-              disabled={isSubmitting}
-              onBlur={() => {
-                setTouched((prev) => ({ ...prev, title: true }));
-              }}
-              onChange={(event) => {
-                const next = event.currentTarget.value;
-                setQuery({ ...query, title: next });
-                setTouched((prev) => ({ ...prev, title: true }));
-              }}
-              placeholder={i18n.translate(
-                'xpack.streams.addSignificantEventFlyout.manualFlow.titlePlaceholder',
-                { defaultMessage: 'Add title' }
-              )}
-            />
-          </EuiFormRow>
+          <Controller
+            name="title"
+            control={control}
+            rules={{ validate: (v) => validateTitle(v).error ?? true }}
+            render={({ field, fieldState }) => {
+              const isInvalid = fieldState.isTouched && !!fieldState.error;
+              return (
+                <EuiFormRow
+                  isInvalid={isInvalid}
+                  error={fieldState.error?.message}
+                  label={
+                    <EuiFormLabel>
+                      {i18n.translate(
+                        'xpack.streams.addSignificantEventFlyout.manualFlow.formFieldTitleLabel',
+                        { defaultMessage: 'Title' }
+                      )}
+                    </EuiFormLabel>
+                  }
+                >
+                  <EuiFieldText
+                    isInvalid={isInvalid}
+                    value={field.value}
+                    disabled={isSubmitting}
+                    onBlur={field.onBlur}
+                    onChange={(e) => {
+                      const next = e.currentTarget.value;
+                      field.onChange(next);
+                      setQuery({ ...query, title: next });
+                    }}
+                    placeholder={i18n.translate(
+                      'xpack.streams.addSignificantEventFlyout.manualFlow.titlePlaceholder',
+                      { defaultMessage: 'Add title' }
+                    )}
+                  />
+                </EuiFormRow>
+              );
+            }}
+          />
 
-          <EuiFormRow
-            label={
-              <EuiFormLabel>
-                {i18n.translate(
-                  'xpack.streams.addSignificantEventFlyout.manualFlow.formFieldSeverityLabel',
-                  { defaultMessage: 'Severity' }
-                )}
-              </EuiFormLabel>
-            }
-          >
-            <SeveritySelector
-              severityScore={query.severity_score}
-              onChange={(score) => {
-                setQuery({ ...query, severity_score: score });
-                setTouched((prev) => ({ ...prev, severity: true }));
-              }}
-            />
-          </EuiFormRow>
-
-          <EuiFormRow
-            label={
-              <EuiFormLabel>
-                {i18n.translate(
-                  'xpack.streams.addSignificantEventFlyout.manualFlow.formFieldSystemLabel',
-                  { defaultMessage: 'System' }
-                )}
-              </EuiFormLabel>
-            }
-          >
-            <EuiSuperSelect
-              options={options}
-              valueOfSelected={
-                query.feature
-                  ? options.find(
-                      (option) =>
-                        option.value.name === query.feature?.name &&
-                        option.value.type === query.feature?.type
-                    )?.value
-                  : ALL_DATA_OPTION.value
-              }
-              placeholder={i18n.translate(
-                'xpack.streams.addSignificantEventFlyout.manualFlow.systemPlaceholder',
-                { defaultMessage: 'Select system' }
-              )}
-              disabled={isSubmitting || systems.length === 0 || isEditMode}
-              onBlur={() => {
-                setTouched((prev) => ({ ...prev, feature: true }));
-              }}
-              onChange={(value) => {
-                const feature =
-                  value.type === ALL_DATA_OPTION.value.type
-                    ? undefined
-                    : {
-                        name: value.name,
-                        filter: value.filter,
-                        type: value.type,
-                      };
-                setQuery({ ...query, feature });
-                setTouched((prev) => ({ ...prev, feature: true }));
-              }}
-              fullWidth
-            />
-          </EuiFormRow>
-
-          <EuiFormRow
-            label={
-              <EuiFormLabel>
-                {i18n.translate(
-                  'xpack.streams.addSignificantEventFlyout.manualFlow.formFieldQueryLabel',
-                  { defaultMessage: 'Query' }
-                )}
-              </EuiFormLabel>
-            }
-            {...(touched.kql && { ...validation.kql })}
-          >
-            {isNativeEsql ? (
-              <EsqlQueryEditor
-                value={query.esql?.query ?? ''}
-                isDisabled={isSubmitting}
-                onChange={(value) => {
-                  setQuery({ ...query, esql: { query: value } });
-                  updateDebouncedQueryText(value);
-                  setTouched((prev) => ({ ...prev, kql: true }));
-                }}
-              />
-            ) : (
-              <UncontrolledStreamsAppSearchBar
-                query={
-                  query.kql
-                    ? { language: 'kuery', ...query.kql }
-                    : { language: 'kuery', query: '' }
+          <Controller
+            name="severityScore"
+            control={control}
+            render={({ field }) => (
+              <EuiFormRow
+                label={
+                  <EuiFormLabel>
+                    {i18n.translate(
+                      'xpack.streams.addSignificantEventFlyout.manualFlow.formFieldSeverityLabel',
+                      { defaultMessage: 'Severity' }
+                    )}
+                  </EuiFormLabel>
                 }
-                showQueryInput
-                showSubmitButton={false}
-                isDisabled={isSubmitting}
-                onQueryChange={(next) => {
-                  const nextKqlQuery =
-                    typeof next.query?.query === 'string' ? next.query.query : '';
-                  setQuery({
-                    ...query,
-                    kql: { query: nextKqlQuery },
-                  });
-                  updateDebouncedQueryText(nextKqlQuery);
-                  setTouched((prev) => ({ ...prev, kql: true }));
-                }}
-                placeholder={i18n.translate(
-                  'xpack.streams.addSignificantEventFlyout.manualFlow.queryPlaceholder',
-                  { defaultMessage: 'Enter query' }
-                )}
-                indexPatterns={dataViews}
-              />
+              >
+                <SeveritySelector
+                  severityScore={field.value}
+                  onChange={(score) => {
+                    field.onChange(score);
+                    setQuery({ ...query, severity_score: score });
+                  }}
+                />
+              </EuiFormRow>
             )}
-          </EuiFormRow>
+          />
+
+          <Controller
+            name="feature"
+            control={control}
+            render={({ field }) => (
+              <EuiFormRow
+                label={
+                  <EuiFormLabel>
+                    {i18n.translate(
+                      'xpack.streams.addSignificantEventFlyout.manualFlow.formFieldSystemLabel',
+                      { defaultMessage: 'System' }
+                    )}
+                  </EuiFormLabel>
+                }
+              >
+                <EuiSuperSelect
+                  options={systemOptions}
+                  valueOfSelected={
+                    field.value
+                      ? systemOptions.find(
+                          (opt) =>
+                            opt.value.name === field.value?.name &&
+                            opt.value.type === field.value?.type
+                        )?.value
+                      : ALL_DATA_OPTION.value
+                  }
+                  placeholder={i18n.translate(
+                    'xpack.streams.addSignificantEventFlyout.manualFlow.systemPlaceholder',
+                    { defaultMessage: 'Select system' }
+                  )}
+                  disabled={isSubmitting || systems.length === 0 || isEditMode}
+                  onBlur={field.onBlur}
+                  onChange={(value) => {
+                    const feature =
+                      value.type === ALL_DATA_OPTION.value.type
+                        ? undefined
+                        : { name: value.name, filter: value.filter, type: value.type };
+                    field.onChange(feature);
+                    setQuery({ ...query, feature });
+                  }}
+                  fullWidth
+                />
+              </EuiFormRow>
+            )}
+          />
+
+          <Controller
+            name="esqlQuery"
+            control={control}
+            rules={{ validate: (v) => validateEsqlQuery(v).error ?? true }}
+            render={({ field, fieldState }) => (
+              <EuiFormRow
+                isInvalid={fieldState.isTouched && !!fieldState.error}
+                error={fieldState.error?.message}
+                label={
+                  <EuiFormLabel>
+                    {i18n.translate(
+                      'xpack.streams.addSignificantEventFlyout.manualFlow.formFieldQueryLabel',
+                      { defaultMessage: 'Query' }
+                    )}
+                  </EuiFormLabel>
+                }
+              >
+                <EsqlQueryEditor
+                  value={field.value}
+                  isDisabled={isSubmitting}
+                  onChange={(value) => {
+                    const esql = enforceFromPrefix(value, definition);
+                    field.onChange(esql);
+                    setQuery({ ...query, esql: { query: esql } });
+                    updateDebouncedEsql(esql);
+                  }}
+                />
+              </EuiFormRow>
+            )}
+          />
         </EuiForm>
 
         <EuiHorizontalRule margin="m" />
@@ -247,7 +253,7 @@ export function ManualFlowForm({
         <PreviewDataSparkPlot
           definition={definition}
           query={debouncedQuery}
-          isQueryValid={!validation.kql.isInvalid}
+          isQueryValid={isValid}
         />
       </EuiFlexGroup>
     </EuiPanel>

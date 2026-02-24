@@ -59,7 +59,7 @@ export function GeneratedEventPreview({
     ...systems.map((system) => ({ value: system, inputDisplay: system.name })),
   ];
 
-  const [touched, setTouched] = useState({ title: false, feature: false, kql: false });
+  const [touched, setTouched] = useState({ title: false, feature: false, esql: false });
   const validation = validateQuery(query);
 
   return (
@@ -99,7 +99,7 @@ export function GeneratedEventPreview({
                         setTouched({
                           title: false,
                           feature: false,
-                          kql: false,
+                          esql: false,
                         });
                       }}
                       data-test-subj="significant_events_generated_event_cancel_button"
@@ -114,14 +114,14 @@ export function GeneratedEventPreview({
                     <EuiButton
                       size="s"
                       iconType="save"
-                      disabled={validation.title.isInvalid || validation.kql.isInvalid}
+                      disabled={validation.title.isInvalid || validation.esql.isInvalid}
                       onClick={() => {
                         setIsEditing(false);
                         onSave(query);
                         setTouched({
                           title: false,
                           feature: false,
-                          kql: false,
+                          esql: false,
                         });
                       }}
                       data-test-subj="significant_events_generated_event_save_button"
@@ -242,7 +242,7 @@ export function GeneratedEventPreview({
               )}
             </EuiFormLabel>
           }
-          {...(touched.kql && { ...validation.kql })}
+          {...(touched.esql && { ...validation.esql })}
         >
           {isNativeEsqlQuery(query) ? (
             <EsqlQueryEditor
@@ -250,7 +250,7 @@ export function GeneratedEventPreview({
               isDisabled={!isEditing}
               onChange={(value) => {
                 setQuery({ ...query, esql: { query: value } });
-                setTouched((prev) => ({ ...prev, kql: true }));
+                setTouched((prev) => ({ ...prev, esql: true }));
               }}
             />
           ) : (
@@ -259,7 +259,7 @@ export function GeneratedEventPreview({
                 query.kql ? { language: 'kuery', ...query.kql } : { language: 'kuery', query: '' }
               }
               onQueryChange={() => {
-                setTouched((prev) => ({ ...prev, kql: true }));
+                setTouched((prev) => ({ ...prev, esql: true }));
               }}
               onQuerySubmit={(next) => {
                 setQuery({
@@ -268,7 +268,7 @@ export function GeneratedEventPreview({
                     query: typeof next.query?.query === 'string' ? next.query.query : '',
                   },
                 });
-                setTouched((prev) => ({ ...prev, kql: true }));
+                setTouched((prev) => ({ ...prev, esql: true }));
               }}
               showQueryInput
               showSubmitButton={false}
@@ -289,7 +289,7 @@ export function GeneratedEventPreview({
       <PreviewDataSparkPlot
         definition={definition}
         query={query}
-        isQueryValid={!validation.kql.isInvalid}
+        isQueryValid={!validation.esql.isInvalid}
       />
     </div>
   );

@@ -159,7 +159,7 @@ export function AddSignificantEventFlyout({
               kql: { query: nextQuery.kql },
               esql: nextQuery.esql,
             });
-            return validation.kql.isInvalid === false;
+            return validation.esql.isInvalid === false;
           })
           .map((nextQuery) => ({
             id: v4(),
@@ -305,7 +305,6 @@ export function AddSignificantEventFlyout({
                           setCanSave(next);
                         }}
                         definition={definition.stream}
-                        dataViews={dataViewsFetch.value ?? []}
                         systems={systems}
                       />
                     </>
