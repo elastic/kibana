@@ -149,7 +149,7 @@ export const KIBANA_VALID_SAMPLE_STEPS = [
   },
   {
     name: 'get_stream_significant_events',
-    type: 'kibana.streams.get_significant_events',
+    type: 'kibana.streams.getSignificantEvents',
     with: {
       name: 'my-stream',
       from: '2025-01-01T00:00:00.000Z',
@@ -267,7 +267,7 @@ export const KIBANA_INVALID_SAMPLE_STEPS = [
   {
     step: {
       name: 'get_stream_significant_events_without_required_params',
-      type: 'kibana.streams.get_significant_events',
+      type: 'kibana.streams.getSignificantEvents',
       with: {
         name: 'my-stream',
       },

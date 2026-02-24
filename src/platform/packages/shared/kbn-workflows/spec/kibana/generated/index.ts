@@ -11,7 +11,7 @@
  * AUTO-GENERATED FILE - DO NOT EDIT
  *
  * This file contains Kibana connector definitions generated from Kibana OpenAPI specification.
- * Generated at: 2026-02-17T19:44:49.130Z
+ * Generated at: 2026-02-24T10:29:11.215Z
  * Source: /oas_docs/output/kibana.yaml (9 APIs)
  *
  * To regenerate: node scripts/generate_workflow_kibana_contracts.js

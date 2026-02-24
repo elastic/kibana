@@ -639,6 +639,15 @@ export const cases_alert_identifiers = z.union([
 ]);
 
 /**
+ * Unsuccessful cases API response
+ */
+export const cases_response_4xx = z.object({
+    error: z.optional(z.string()),
+    message: z.optional(z.string()),
+    statusCode: z.optional(z.int())
+});
+
+/**
  * Create case request
  *
  * The create case API request body varies depending on the type of connector.
@@ -913,15 +922,6 @@ export const cases_add_case_comment_request = z.union([
         type: z.literal('user')
     }).and(cases_add_user_comment_request_properties)
 ]);
-
-/**
- * Unsuccessful cases API response
- */
-export const cases_4xx_response = z.object({
-    error: z.optional(z.string()),
-    message: z.optional(z.string()),
-    statusCode: z.optional(z.int())
-});
 
 /**
  * Cross-site request forgery protection

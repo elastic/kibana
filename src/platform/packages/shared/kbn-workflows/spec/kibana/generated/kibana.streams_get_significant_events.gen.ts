@@ -27,7 +27,7 @@ import { FetcherConfigSchema, KibanaStepMetaSchema } from '../../schema';
 
 // export contract
 export const STREAMS_GET_SIGNIFICANT_EVENTS_CONTRACT: InternalConnectorContract = {
-  type: 'kibana.streams.get_significant_events',
+  type: 'kibana.streams.getSignificantEvents',
   summary: `Read the significant events`,
   description: `**Spaces method and path for this operation:**
 
