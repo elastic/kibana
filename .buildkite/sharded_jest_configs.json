@@ -5,5 +5,6 @@
   "x-pack/platform/plugins/shared/cases/jest.config.js": 4,
   "x-pack/solutions/security/plugins/security_solution/public/management/jest.config.js": 2,
   "x-pack/solutions/security/plugins/security_solution/public/flyout/jest.config.js": 2,
-  "x-pack/solutions/security/plugins/security_solution/public/timelines/jest.config.js": 2
+  "x-pack/solutions/security/plugins/security_solution/public/timelines/jest.config.js": 2,
+  "x-pack/solutions/security/plugins/security_solution/server/workflows/jest.config.js": 2
 }
