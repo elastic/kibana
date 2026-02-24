@@ -41,7 +41,7 @@ export const JobMapLegend: FC<{ hasMissingJobNode: boolean }> = ({ hasMissingJob
   const euiSizeM = euiTheme.size.m;
   const euiSizeS = euiTheme.size.s;
   const euiColorFullShade = euiTheme.colors.fullShade;
-  const euiColorGhost = euiTheme.colors.ghost;
+  const euiColorPlainLight = euiTheme.colors.plainLight;
   const euiColorWarning = euiTheme.colors.warning;
   const euiBorderThin = euiTheme.border.thin;
   const euiBorderRadius = euiTheme.border.radius.medium;
@@ -61,10 +61,10 @@ export const JobMapLegend: FC<{ hasMissingJobNode: boolean }> = ({ hasMissingJob
     () => ({
       height: euiSizeM,
       width: euiSizeM,
-      backgroundColor: euiColorGhost,
+      backgroundColor: euiColorPlainLight,
       display: 'inline-block',
     }),
-    [euiSizeM, euiColorGhost]
+    [euiSizeM, euiColorPlainLight]
   );
 
   return (
