@@ -230,7 +230,7 @@ const prepareSimulationProcessors = (processing: StreamlangDSL): IngestProcessor
               field: '_errors',
               value: {
                 message: '{{{ _ingest.on_failure_message }}}',
-                processor_id: processorConfig.tag,
+                processor_id: processorConfig?.tag,
                 type: 'generic_processor_failure',
               },
             },
@@ -584,16 +584,17 @@ const computePipelineSimulationResult = (
 };
 
 const initProcessorMetricsMap = (
-  processors: IngestProcessorContainer[]
+  processors: NonNullable<IngestProcessorContainer>[]
 ): Record<string, ProcessorMetrics> => {
   // Gather unique IDs because the manual ingest pipeline proccessor (for example) will share the same
   // ID across it's nested processors.
   const ids = new Set<string>();
 
   for (const processor of processors) {
-    const type = Object.keys(processor)[0] as keyof IngestProcessorContainer;
-    const config = processor[type] as Record<string, unknown>;
-    const tag = config.tag;
+    const type = Object.keys(processor)[0] as keyof NonNullable<IngestProcessorContainer>;
+    const config = processor[type];
+
+    const tag = config?.tag;
 
     if (typeof tag === 'string') {
       ids.add(tag);
