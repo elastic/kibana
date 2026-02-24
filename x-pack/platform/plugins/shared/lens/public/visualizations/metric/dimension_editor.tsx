@@ -31,6 +31,7 @@ import { getColumnByAccessor } from '@kbn/chart-expressions-common';
 import { DebouncedInput, IconSelect } from '@kbn/visualization-ui-components';
 import { useDebouncedValue } from '@kbn/visualization-utils';
 import { KbnPalette, useKbnPalettes } from '@kbn/palettes';
+import type { KbnPaletteId } from '@kbn/palettes';
 import type {
   VisualizationDimensionEditorProps,
   MetricVisualizationState,
@@ -141,7 +142,7 @@ interface TrendPalette {
   // select id
   id: string;
   // original ref to the palette
-  paletteId: string;
+  paletteId: KbnPaletteId;
   name: string;
   reversed?: boolean;
   colors: [string, string, string];

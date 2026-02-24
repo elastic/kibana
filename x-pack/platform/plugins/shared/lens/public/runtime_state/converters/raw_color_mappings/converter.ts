@@ -27,12 +27,12 @@ export function convertToRawColorMappings(
     specialAssignments: colorMapping.specialAssignments.map((oldAssignment) => {
       if (isValidColorMappingAssignment(oldAssignment)) return oldAssignment;
       return {
-        color: oldAssignment.color,
+        color: oldAssignment.color as ColorMapping.Config['specialAssignments'][number]['color'],
         touched: oldAssignment.touched,
         rules: [oldAssignment.rule],
       };
     }),
-  };
+  } as ColorMapping.Config;
 }
 
 function convertColorMappingAssignment(
@@ -40,7 +40,7 @@ function convertColorMappingAssignment(
   columnMeta?: ColumnMeta | null
 ): ColorMapping.Assignment {
   return {
-    color: oldAssignment.color,
+    color: oldAssignment.color as ColorMapping.Assignment['color'],
     touched: oldAssignment.touched,
     rules: convertColorMappingRule(oldAssignment.rule, columnMeta),
   };

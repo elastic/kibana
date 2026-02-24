@@ -35,7 +35,7 @@ export function getConfigFromPalette(
   if (palette.type === 'categorical') {
     return {
       ...DEFAULT_COLOR_MAPPING_CONFIG,
-      paletteId,
+      paletteId: palette.id,
     };
   }
 

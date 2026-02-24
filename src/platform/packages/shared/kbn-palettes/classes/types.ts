@@ -20,7 +20,7 @@ export interface IKbnPalette {
   /**
    * Unique identifier for the palette
    */
-  id: string;
+  id: KbnPaletteId;
   /**
    * Display name of this palette.
    */

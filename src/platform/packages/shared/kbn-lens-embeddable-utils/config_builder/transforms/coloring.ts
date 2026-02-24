@@ -8,6 +8,7 @@
  */
 
 import type { ColorMapping, CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
+import type { KbnPaletteId } from '@kbn/palettes';
 import type {
   ColorByValueType,
   ColorMappingColorDefType,
@@ -226,7 +227,7 @@ function fromColorDefAPIToLensState(
   }
   return {
     type: 'categorical',
-    paletteId: color.palette ?? LENS_DEFAULT_COLOR_MAPPING_PALETTE,
+    paletteId: (color.palette ?? LENS_DEFAULT_COLOR_MAPPING_PALETTE) as KbnPaletteId,
     colorIndex: color.index,
   };
 }
@@ -314,7 +315,7 @@ export function fromColorMappingAPIToLensState(
 
   return {
     colorMode,
-    paletteId: colorMapping.palette,
+    paletteId: colorMapping.palette as KbnPaletteId,
     assignments,
     specialAssignments,
   };
