@@ -50,11 +50,7 @@ export interface UnifiedDocViewerFlyoutProps
     actions: Pick<DocViewRenderProps, 'filter' | 'onAddColumn' | 'onRemoveColumn'>;
     doc: DataTableRecord;
     renderDefaultContent: () => React.ReactNode;
-    customState?: Record<string, unknown>;
-    onCustomStateChange?: (state: Record<string, unknown>) => void;
   }>;
-  customState?: Record<string, unknown>;
-  onCustomStateChange?: (state: Record<string, unknown>) => void;
   services: {
     toastNotifications?: ToastsStart;
     chrome: ChromeStart;
@@ -98,8 +94,6 @@ export function UnifiedDocViewerFlyout({
   flyoutType,
   flyoutWidthLocalStorageKey,
   FlyoutCustomBody,
-  customState,
-  onCustomStateChange,
   services,
   docViewsRegistry,
   isEsqlQuery,
@@ -280,8 +274,6 @@ export function UnifiedDocViewerFlyout({
       actions={contentActions}
       doc={actualHit}
       renderDefaultContent={renderDefaultContent}
-      customState={customState}
-      onCustomStateChange={onCustomStateChange}
     />
   ) : (
     renderDefaultContent()
