@@ -49,6 +49,7 @@ const createClassicDefinition = (
     read_failure_store: true,
     manage_failure_store: true,
     view_index_metadata: true,
+    create_snapshot_repository: true,
   },
   effective_lifecycle: { dsl: {} },
   effective_settings: {},
@@ -84,6 +85,7 @@ const createWiredDefinition = (
     read_failure_store: true,
     manage_failure_store: true,
     view_index_metadata: true,
+    create_snapshot_repository: true,
   },
   effective_lifecycle: {
     dsl: {},
