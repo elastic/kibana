@@ -1413,6 +1413,237 @@
   "type": "doc",
   "value": {
     "data_stream": "logs-gcp.audit-default",
+    "id": "group-doc-1",
+    "index": ".ds-logs-gcp.audit-default-2024.10.07-000001",
+    "source": {
+      "@timestamp": "2024-09-01T12:34:56.789Z",
+      "user": {
+        "entity": {
+          "id": "group-actor-1@example.com"
+        }
+      },
+      "entity": {
+        "target": {
+          "id": "group-target-1"
+        }
+      },
+      "source": {
+        "geo": {
+          "country_iso_code": "US"
+        }
+      },
+      "event": {
+        "action": "test.pin.group",
+        "id": "group-evt-1",
+        "kind": "event",
+        "outcome": "success"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-gcp.audit-default",
+    "id": "group-doc-2",
+    "index": ".ds-logs-gcp.audit-default-2024.10.07-000001",
+    "source": {
+      "@timestamp": "2024-09-01T12:34:56.789Z",
+      "user": {
+        "entity": {
+          "id": "group-actor-2@example.com"
+        }
+      },
+      "entity": {
+        "target": {
+          "id": "group-target-2"
+        }
+      },
+      "source": {
+        "geo": {
+          "country_iso_code": "US"
+        }
+      },
+      "event": {
+        "action": "test.pin.group",
+        "id": "group-evt-2",
+        "kind": "event",
+        "outcome": "success"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-gcp.audit-default",
+    "id": "group-doc-3",
+    "index": ".ds-logs-gcp.audit-default-2024.10.07-000001",
+    "source": {
+      "@timestamp": "2024-09-01T12:34:56.789Z",
+      "user": {
+        "entity": {
+          "id": "group-actor-3@example.com"
+        }
+      },
+      "entity": {
+        "target": {
+          "id": "group-target-3"
+        }
+      },
+      "source": {
+        "geo": {
+          "country_iso_code": "US"
+        }
+      },
+      "event": {
+        "action": "test.pin.group",
+        "id": "group-evt-3",
+        "kind": "event",
+        "outcome": "success"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-gcp.audit-default",
+    "id": "group-doc-4",
+    "index": ".ds-logs-gcp.audit-default-2024.10.07-000001",
+    "source": {
+      "@timestamp": "2024-09-01T12:34:56.789Z",
+      "user": {
+        "entity": {
+          "id": "group-actor-4@example.com"
+        }
+      },
+      "entity": {
+        "target": {
+          "id": "group-target-4"
+        }
+      },
+      "source": {
+        "geo": {
+          "country_iso_code": "US"
+        }
+      },
+      "event": {
+        "action": "test.pin.group",
+        "id": "group-evt-4",
+        "kind": "event",
+        "outcome": "success"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-gcp.audit-default",
+    "id": "group-doc-5",
+    "index": ".ds-logs-gcp.audit-default-2024.10.07-000001",
+    "source": {
+      "@timestamp": "2024-09-01T12:34:56.789Z",
+      "user": {
+        "entity": {
+          "id": "group-actor-5@example.com"
+        }
+      },
+      "entity": {
+        "target": {
+          "id": "group-target-4"
+        }
+      },
+      "source": {
+        "geo": {
+          "country_iso_code": "US"
+        }
+      },
+      "event": {
+        "action": "test.pin.group",
+        "id": "group-evt-5",
+        "kind": "event",
+        "outcome": "success"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-gcp.audit-default",
+    "id": "group-doc-6",
+    "index": ".ds-logs-gcp.audit-default-2024.10.07-000001",
+    "source": {
+      "@timestamp": "2024-09-01T12:34:56.789Z",
+      "user": {
+        "entity": {
+          "id": "group-actor-6@example.com"
+        }
+      },
+      "entity": {
+        "target": {
+          "id": "group-target-5"
+        }
+      },
+      "source": {
+        "geo": {
+          "country_iso_code": "US"
+        }
+      },
+      "event": {
+        "action": "test.pin.group",
+        "id": "group-evt-6",
+        "kind": "event",
+        "outcome": "success"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-gcp.audit-default",
+    "id": "solo-doc-1",
+    "index": ".ds-logs-gcp.audit-default-2024.10.07-000001",
+    "source": {
+      "@timestamp": "2024-09-01T12:34:56.789Z",
+      "user": {
+        "entity": {
+          "id": "solo-actor@example.com"
+        }
+      },
+      "entity": {
+        "target": {
+          "id": "solo-target"
+        }
+      },
+      "source": {
+        "geo": {
+          "country_iso_code": "US"
+        }
+      },
+      "event": {
+        "action": "test.pin.solo",
+        "id": "solo-evt-1",
+        "kind": "event",
+        "outcome": "success"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-gcp.audit-default",
     "id": "relationships-event-1",
     "index": ".ds-logs-gcp.audit-default-2024.09.12-000001",
     "source": {

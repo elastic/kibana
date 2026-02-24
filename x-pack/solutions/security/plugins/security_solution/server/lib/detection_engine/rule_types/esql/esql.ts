@@ -116,6 +116,7 @@ export const esqlExecutor = async ({
      * All alerts for aggregating queries are unique anyway
      */
     let iteration = 0;
+    let totalEventsFound = 0;
     try {
       while (result.createdSignalsCount <= tuple.maxSignals) {
         const totalExcludedDocumentsLength = Object.values(excludedDocuments).reduce(
@@ -149,7 +150,7 @@ export const esqlExecutor = async ({
         };
         const hasLoggedRequestsReachedLimit = iteration >= 2;
 
-        ruleExecutionLogger.debug(`ES|QL query request: ${JSON.stringify(esqlRequest)}`);
+        ruleExecutionLogger.trace(`ES|QL query to execute\n${JSON.stringify(esqlRequest)}`);
         const exceptionsWarning = getUnprocessedExceptionsWarnings(unprocessedExceptions);
         if (exceptionsWarning) {
           result.warningMessages.push(exceptionsWarning);
@@ -170,11 +171,12 @@ export const esqlExecutor = async ({
         const esqlSearchDuration = performance.now() - esqlSignalSearchStart;
         result.searchAfterTimes.push(makeFloatString(esqlSearchDuration));
 
-        ruleExecutionLogger.debug(
-          `ES|QL query request for ${iteration} iteration took: ${esqlSearchDuration}ms`
+        ruleExecutionLogger.trace(
+          `ES|QL query iteration\nIteration: ${iteration}. Search took: ${esqlSearchDuration}ms.`
         );
 
         const results = response.values.map((row) => rowToDocument(response.columns, row));
+        totalEventsFound += results.length;
         const index = getIndexListFromEsqlQuery(completeRule.ruleParams.query);
 
         const sourceDocuments = await fetchSourceDocuments({
@@ -240,7 +242,7 @@ export const esqlExecutor = async ({
           });
 
           ruleExecutionLogger.debug(
-            `Created ${bulkCreateResult.createdItemsCount} alerts. Suppressed ${bulkCreateResult.suppressedItemsCount} alerts`
+            `Alerts bulk creation completed. Alerts created: ${bulkCreateResult.createdItemsCount}, Alerts suppressed: ${bulkCreateResult.suppressedItemsCount}.`
           );
 
           updateExcludedDocuments({
@@ -272,7 +274,9 @@ export const esqlExecutor = async ({
           });
 
           addToSearchAfterReturn({ current: result, next: bulkCreateResult });
-          ruleExecutionLogger.debug(`Created ${bulkCreateResult.createdItemsCount} alerts`);
+          ruleExecutionLogger.debug(
+            `Alerts bulk creation completed. Alerts created: ${bulkCreateResult.createdItemsCount}.`
+          );
 
           updateExcludedDocuments({
             excludedDocuments,
@@ -297,8 +301,8 @@ export const esqlExecutor = async ({
 
         // no more results will be found
         if (response.values.length < size) {
-          ruleExecutionLogger.debug(
-            `End of search: Found ${response.values.length} results with page size ${size}`
+          ruleExecutionLogger.trace(
+            `End of search. Found ${response.values.length} results\nPage size ${size}.`
           );
           break;
         }
@@ -312,6 +316,8 @@ export const esqlExecutor = async ({
       result.errors.push(error.message);
       result.success = false;
     }
+
+    result.totalEventsFound = totalEventsFound;
 
     return {
       ...result,

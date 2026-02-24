@@ -43,7 +43,6 @@ import {
   EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER,
   EXCLUDED_DATA_TIERS_FOR_RULE_EXECUTION,
   INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION,
-  EXTENDED_RULE_EXECUTION_LOGGING_ENABLED_SETTING,
   EXTENDED_RULE_EXECUTION_LOGGING_MIN_LEVEL_SETTING,
   IP_REPUTATION_LINKS_SETTING,
   IP_REPUTATION_LINKS_SETTING_DEFAULT,
@@ -539,28 +538,6 @@ export const initUiSettings = (
     ...getDefaultValueReportSettings(),
     ...(experimentalFeatures.extendedRuleExecutionLoggingEnabled
       ? {
-          [EXTENDED_RULE_EXECUTION_LOGGING_ENABLED_SETTING]: {
-            name: i18n.translate(
-              'xpack.securitySolution.uiSettings.extendedRuleExecutionLoggingEnabledLabel',
-              {
-                defaultMessage: 'Extended rule execution logging',
-              }
-            ),
-            description: i18n.translate(
-              'xpack.securitySolution.uiSettings.extendedRuleExecutionLoggingEnabledDescription',
-              {
-                defaultMessage:
-                  '<p>Enables extended rule execution logging to .kibana-event-log-* indices. Shows plain execution events on the Rule Details page.</p>',
-                values: { p: (chunks) => `<p>${chunks}</p>` },
-              }
-            ),
-            type: 'boolean',
-            schema: schema.boolean(),
-            value: true,
-            category: [APP_ID],
-            requiresPageReload: false,
-            solutionViews: ['classic', 'security'],
-          },
           [EXTENDED_RULE_EXECUTION_LOGGING_MIN_LEVEL_SETTING]: {
             name: i18n.translate(
               'xpack.securitySolution.uiSettings.extendedRuleExecutionLoggingMinLevelLabel',
@@ -585,7 +562,7 @@ export const initUiSettings = (
               schema.literal(LogLevelSetting.debug),
               schema.literal(LogLevelSetting.trace),
             ]),
-            value: LogLevelSetting.error,
+            value: LogLevelSetting.info,
             options: [
               LogLevelSetting.off,
               LogLevelSetting.error,

@@ -26,7 +26,8 @@ import { ManageAutoUpgradeAgentsModal } from '../../agents/components/manage_aut
 
 import { useCanEnableAutomaticAgentUpgrades } from '../../../../../hooks/use_can_enable_auto_upgrades';
 
-import { AgentPolicyYamlFlyout } from './agent_policy_yaml_flyout';
+import { AgentPolicyYamlFlyout } from '../../../components';
+
 import { AgentPolicyCopyProvider } from './agent_policy_copy_provider';
 import { AgentPolicyDeleteProvider } from './agent_policy_delete_provider';
 

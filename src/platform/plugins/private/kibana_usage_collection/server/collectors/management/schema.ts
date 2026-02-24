@@ -514,10 +514,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       _meta: { description: 'Non-default value of setting.' },
     },
   },
-  'agentBuilder:dashboardTools': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'agentBuilder:navEnabled': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
