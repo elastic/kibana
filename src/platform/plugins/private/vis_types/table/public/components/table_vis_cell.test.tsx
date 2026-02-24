@@ -32,6 +32,6 @@ describe('table vis cell', () => {
     const comp = shallow(<Cell {...cellProps} />);
 
     expect(comp).toMatchSnapshot();
-    expect(formattedColumns.second.formatter.convert).toHaveBeenLastCalledWith(2, 'html');
+    expect(formattedColumns.second.formatter.convert).toHaveBeenLastCalledWith(2, 'react');
   });
 });
