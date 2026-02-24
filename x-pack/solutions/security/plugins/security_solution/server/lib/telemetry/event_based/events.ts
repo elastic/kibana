@@ -667,34 +667,6 @@ export const ENTITY_HIGHLIGHTS_USAGE_EVENT: EventTypeOpts<{
   },
 };
 
-export const ENTITY_STORE_USAGE_EVENT: EventTypeOpts<{
-  storeSize: number;
-  entityType: string;
-  namespace: string;
-}> = {
-  eventType: 'entity_store_usage',
-  schema: {
-    storeSize: {
-      type: 'long',
-      _meta: {
-        description: 'Number of entities stored in the entity store by type and namespace',
-      },
-    },
-    entityType: {
-      type: 'keyword',
-      _meta: {
-        description: 'Type of entities stored (e.g. "host")',
-      },
-    },
-    namespace: {
-      type: 'keyword',
-      _meta: {
-        description: 'Namespace where the entities are stored (e.g. "default")',
-      },
-    },
-  },
-};
-
 export const ENTITY_STORE_API_CALL_EVENT: EventTypeOpts<{
   endpoint: string;
   error?: string;
@@ -1736,7 +1708,6 @@ export const events = [
   ENTITY_ENGINE_RESOURCE_INIT_FAILURE_EVENT,
   ENTITY_ENGINE_INITIALIZATION_EVENT,
   ENTITY_ENGINE_DELETION_EVENT,
-  ENTITY_STORE_USAGE_EVENT,
   ENTITY_HIGHLIGHTS_USAGE_EVENT,
   PRIVMON_ENGINE_INITIALIZATION_EVENT,
   PRIVMON_ENGINE_RESOURCE_INIT_FAILURE_EVENT,

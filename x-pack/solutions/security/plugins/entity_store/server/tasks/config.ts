@@ -26,4 +26,10 @@ export const TasksConfig: Record<EntityStoreTaskType, EntityStoreTaskConfig> = {
     title: 'Entity Store - Entity Maintainer Task',
     type: 'entity_store:v2:entity_maintainer_task',
   },
+  [EntityStoreTaskType.Values.storeUsage]: {
+    title: 'Entity Store - Store Usage Task',
+    type: 'entity_store:v2:store_usage_task',
+    timeout: '25s',
+    interval: '1h',
+  },
 };

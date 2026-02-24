@@ -27,6 +27,11 @@ interface DeletionEvent {
   namespace: string;
 }
 
+interface StoreUsageEventPayload {
+  storeSize: number;
+  entityType: string;
+  namespace: string;
+}
 // ------------------------------------
 // Event definitions
 // ------------------------------------
@@ -85,6 +90,30 @@ export const ENTITY_STORE_DELETION_EVENT = {
   },
 } as const satisfies EventTypeOpts<DeletionEvent>;
 
+export const ENTITY_STORE_USAGE_EVENT = {
+  eventType: 'entity_store_usage',
+  schema: {
+    storeSize: {
+      type: 'long',
+      _meta: {
+        description: 'Number of entities stored in the entity store by type and namespace',
+      },
+    },
+    entityType: {
+      type: 'keyword',
+      _meta: {
+        description: 'Type of entities stored (e.g. "host")',
+      },
+    },
+    namespace: {
+      type: 'keyword',
+      _meta: {
+        description: 'Namespace where the entities are stored (e.g. "default")',
+      },
+    },
+  },
+} as const satisfies EventTypeOpts<StoreUsageEventPayload>;
+
 // ------------------------------------
 // Registration
 // ------------------------------------
@@ -93,6 +122,7 @@ const events = [
   ENTITY_STORE_INITIALIZATION_EVENT,
   ENTITY_STORE_INITIALIZATION_FAILURE_EVENT,
   ENTITY_STORE_DELETION_EVENT,
+  ENTITY_STORE_USAGE_EVENT,
 ] as const;
 
 export const registerTelemetry = (analytics: AnalyticsServiceSetup) => {
@@ -109,6 +139,7 @@ interface TelemetryEventMap {
   [ENTITY_STORE_INITIALIZATION_EVENT.eventType]: InitializationEvent;
   [ENTITY_STORE_DELETION_EVENT.eventType]: DeletionEvent;
   [ENTITY_STORE_INITIALIZATION_FAILURE_EVENT.eventType]: InitializationFailureEvent;
+  [ENTITY_STORE_USAGE_EVENT.eventType]: StoreUsageEventPayload;
 }
 
 export type TelemetryReporter = ReturnType<typeof createReportEvent>;
