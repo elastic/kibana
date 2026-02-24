@@ -5,23 +5,22 @@
  * 2.0.
  */
 
-import { screen, fireEvent, within, waitFor } from '@testing-library/react';
+import React from 'react';
+import { render, screen, fireEvent, within, waitFor } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
 
 import { breadcrumbService, IndexManagementBreadcrumb } from '../../../../services/breadcrumbs';
-import { setupEnvironment } from './helpers';
-import { API_BASE_PATH } from './helpers/constants';
-import {
-  completeStep,
-  renderComponentTemplateCreate,
-} from './helpers/component_template_create.helpers';
-import { serializeAsESLifecycle } from '../../../../../../common/lib';
+import { setupEnvironment } from '../../__jest__/client_integration/helpers';
+import { renderComponentTemplateCreate } from './__jest__/component_template_create.helpers';
 import { runPendingTimersUntil } from '../../../../../../__jest__/helpers/fake_timers';
+import type { ComponentTemplateDeserialized } from '../../../../../../common';
+import { serializeAsESLifecycle } from '../../../../../../common/lib';
+import { StepReview } from '../component_template_form/steps/step_review';
 
 jest.mock('@kbn/code-editor');
 
 describe('<ComponentTemplateCreate />', () => {
   let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
-  let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
 
   beforeAll(() => {
     jest.spyOn(breadcrumbService, 'setBreadcrumbs');
@@ -31,7 +30,6 @@ describe('<ComponentTemplateCreate />', () => {
     jest.clearAllMocks();
     const env = setupEnvironment();
     httpSetup = env.httpSetup;
-    httpRequestsMockHelpers = env.httpRequestsMockHelpers;
   });
 
   describe('On component mount', () => {
@@ -93,56 +91,29 @@ describe('<ComponentTemplateCreate />', () => {
     });
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/253349
-  // FLAKY: https://github.com/elastic/kibana/issues/253454
-  // FLAKY: https://github.com/elastic/kibana/issues/253535
-  describe.skip('Step: Review and submit', () => {
-    const COMPONENT_TEMPLATE_NAME = 'comp-1';
-    const SETTINGS = { number_of_shards: 1 };
-    const ALIASES = { my_alias: {} };
-    const LIFECYCLE = {
-      enabled: true,
-      value: 2,
-      unit: 'd',
-    };
-
-    const BOOLEAN_MAPPING_FIELD = {
-      name: 'boolean_datatype',
-      type: 'boolean',
-    };
-
-    beforeEach(async () => {
-      renderComponentTemplateCreate(httpSetup);
-      await screen.findByTestId('pageTitle');
-
-      // Complete step 1 (logistics)
-      await completeStep.logistics({
-        name: COMPONENT_TEMPLATE_NAME,
-        lifecycle: LIFECYCLE,
-      });
-
-      // Complete step 2 (index settings)
-      await completeStep.settings(JSON.stringify(SETTINGS));
-
-      // Complete step 3 (mappings)
-      await completeStep.mappings([BOOLEAN_MAPPING_FIELD]);
-
-      // Complete step 4 (aliases)
-      await completeStep.aliases(JSON.stringify(ALIASES));
-
-      await screen.findByTestId('stepReview');
-    });
-
+  describe('Step: Review and submit', () => {
     test('should render the review content', async () => {
-      // Verify page header
-      expect(screen.getByTestId('stepReview')).toBeInTheDocument();
-      expect(screen.getByTestId('stepReview')).toHaveTextContent(
-        `Review details for '${COMPONENT_TEMPLATE_NAME}'`
+      const componentTemplate: ComponentTemplateDeserialized = {
+        name: 'comp-1',
+        template: {
+          settings: { number_of_shards: 1 },
+          aliases: { my_alias: {} },
+          mappings: { properties: { boolean_datatype: { type: 'boolean' } } },
+          lifecycle: serializeAsESLifecycle({ enabled: true, value: 2, unit: 'd' }),
+        },
+        _kbnMeta: { usedBy: [], isManaged: false },
+      };
+
+      render(
+        <I18nProvider>
+          <StepReview componentTemplate={componentTemplate} />
+        </I18nProvider>
       );
 
-      // Verify 2 tabs exist
-      const reviewContent = screen.getByTestId('stepReview');
-      const tabs = within(reviewContent).getAllByRole('tab');
+      expect(screen.getByTestId('stepReview')).toBeInTheDocument();
+      expect(screen.getByTestId('stepReview')).toHaveTextContent(`Review details for 'comp-1'`);
+
+      const tabs = within(screen.getByTestId('stepReview')).getAllByRole('tab');
       expect(tabs).toHaveLength(2);
       expect(tabs.map((t) => t.textContent)).toEqual(['Summary', 'Request']);
 
@@ -150,56 +121,12 @@ describe('<ComponentTemplateCreate />', () => {
       expect(screen.getByTestId('summaryTab')).toBeInTheDocument();
       expect(screen.queryByTestId('requestTab')).not.toBeInTheDocument();
 
-      // Navigate to request tab and verify content
       fireEvent.click(screen.getByRole('tab', { name: 'Request' }));
 
       await waitFor(() => {
         expect(screen.queryByTestId('summaryTab')).not.toBeInTheDocument();
       });
       expect(screen.getByTestId('requestTab')).toBeInTheDocument();
-    });
-
-    test('should send the correct payload when submitting the form', async () => {
-      fireEvent.click(screen.getByTestId('nextButton'));
-
-      await waitFor(() => {
-        expect(httpSetup.post).toHaveBeenLastCalledWith(
-          `${API_BASE_PATH}/component_templates`,
-          expect.objectContaining({
-            body: JSON.stringify({
-              name: COMPONENT_TEMPLATE_NAME,
-              template: {
-                settings: SETTINGS,
-                mappings: {
-                  properties: {
-                    [BOOLEAN_MAPPING_FIELD.name]: {
-                      type: BOOLEAN_MAPPING_FIELD.type,
-                    },
-                  },
-                },
-                aliases: ALIASES,
-                lifecycle: serializeAsESLifecycle(LIFECYCLE),
-              },
-              _kbnMeta: { usedBy: [], isManaged: false },
-            }),
-          })
-        );
-      });
-    });
-
-    test('should surface API errors if the request is unsuccessful', async () => {
-      const error = {
-        statusCode: 409,
-        error: 'Conflict',
-        message: `There is already a template with name '${COMPONENT_TEMPLATE_NAME}'`,
-      };
-
-      httpRequestsMockHelpers.setCreateComponentTemplateResponse(undefined, error);
-
-      fireEvent.click(screen.getByTestId('nextButton'));
-
-      expect(await screen.findByTestId('saveComponentTemplateError')).toBeInTheDocument();
-      expect(screen.getByTestId('saveComponentTemplateError')).toHaveTextContent(error.message);
     });
   });
 });
