@@ -9,7 +9,6 @@
 
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
-import type { ZodSchema } from '@kbn/zod';
 
 /**
  * Minimal interface for the agent builder plugin start contract.
@@ -25,12 +24,6 @@ export interface AgentBuilderLike {
       type: string;
       data: Record<string, unknown>;
       hidden?: boolean;
-    }>;
-    browserApiTools?: Array<{
-      id: string;
-      description: string;
-      schema: ZodSchema;
-      handler: (params: never) => void | Promise<void>;
     }>;
   }) => void;
   clearConversationFlyoutActiveConfig: () => void;

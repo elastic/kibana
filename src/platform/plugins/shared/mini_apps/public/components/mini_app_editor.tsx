@@ -54,6 +54,7 @@ import {
 import type { MiniApp, MiniAppVersion } from '../../common';
 import { useMiniAppsContext } from '../context';
 import { useAgentBuilder } from '../hooks/use_agent_builder';
+import { usePollMiniApp } from '../hooks/use_poll_mini_app';
 import { PREACT_PRELUDE_SCRIPTS } from '../runtime/preact_libs';
 import { useNavigateConfirmation } from '../hooks/use_navigate_confirmation';
 import { useDraftStorage } from '../hooks/use_draft_storage';
@@ -157,7 +158,10 @@ export const MiniAppEditor: React.FC = () => {
     script_code: DEFAULT_SCRIPT,
   });
   const [errors, setErrors] = useState<{ name?: string }>({});
-  const savedFormRef = useRef<EditorFormState | null>(null);
+  const [savedForm, setSavedForm] = useState<EditorFormState>({
+    name: '',
+    script_code: DEFAULT_SCRIPT,
+  });
 
   // Draft storage
   const { loadDraft, saveDraft, discardDraft } = useDraftStorage(id);
@@ -182,15 +186,20 @@ export const MiniAppEditor: React.FC = () => {
 
   const pendingAgentRunRef = useRef(false);
 
-  const handleAgentUpdateCode = useCallback((code: string) => {
+  // Saved object ID for agent builder integration.
+  // In edit mode this is the URL param; in create mode it gets set after auto-creating.
+  const [miniAppId, setMiniAppId] = useState<string | undefined>(id);
+
+  const handleServerUpdate = useCallback((scriptCode: string, serverName: string) => {
     setForm((prev) => {
+      if (prev.script_code === scriptCode && prev.name === serverName) return prev;
       setAgentUndoStack((stack) => {
         const next = [...stack, prev.script_code];
         return next.length > MAX_UNDO_STACK ? next.slice(-MAX_UNDO_STACK) : next;
       });
-      return { ...prev, script_code: code };
+      pendingAgentRunRef.current = true;
+      return { name: serverName, script_code: scriptCode };
     });
-    pendingAgentRunRef.current = true;
   }, []);
 
   const handleUndoAgentChange = useCallback(() => {
@@ -202,14 +211,22 @@ export const MiniAppEditor: React.FC = () => {
     });
   }, []);
 
-  // Wire up agent builder with browser tools and screen context
+  // Poll the saved object for changes made by server-side agent tools
+  const { markClientWrite, resetLastKnown } = usePollMiniApp({
+    apiClient,
+    id: miniAppId,
+    enabled: !!agentBuilder && !!miniAppId,
+    onServerUpdate: handleServerUpdate,
+  });
+
+  // Wire up agent builder with screen context (tools are server-side)
   useAgentBuilder({
     agentBuilder,
+    miniAppId,
     name: form.name,
     scriptCode: form.script_code,
     runtimeState: previewState,
     runtimeError: previewError,
-    onUpdateCode: handleAgentUpdateCode,
   });
 
   useEffect(() => {
@@ -221,9 +238,11 @@ export const MiniAppEditor: React.FC = () => {
           setLoading(true);
           const miniApp = await apiClient.get(id);
           serverForm = { name: miniApp.name, script_code: miniApp.script_code };
-          savedFormRef.current = serverForm;
+          setSavedForm(serverForm);
           setForm(serverForm);
           setVersions(miniApp.versions ?? []);
+          setMiniAppId(id);
+          resetLastKnown(miniApp.updated_at);
         } catch (error) {
           coreStart.notifications.toasts.addError(error as Error, {
             title: i18n.translate('miniApps.editor.loadError', {
@@ -253,6 +272,21 @@ export const MiniAppEditor: React.FC = () => {
           discardDraft();
         }
       }
+
+      // For create mode: auto-create a draft saved object so server-side
+      // agent tools have an ID to work with
+      if (!isEditing && agentBuilder) {
+        try {
+          const created = await apiClient.create({
+            name: 'Untitled Mini App',
+            script_code: DEFAULT_SCRIPT,
+          });
+          setMiniAppId(created.id);
+          resetLastKnown(created.updated_at);
+        } catch {
+          // Non-critical: agent tools won't work but manual editing is fine
+        }
+      }
     };
     init();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -266,18 +300,12 @@ export const MiniAppEditor: React.FC = () => {
   }, [form.name, form.script_code, loading, saveDraft]);
 
   const isDraftDirty =
-    savedFormRef.current !== null &&
-    (form.name !== savedFormRef.current.name ||
-      form.script_code !== savedFormRef.current.script_code);
+    form.name !== savedForm.name || form.script_code !== savedForm.script_code;
 
   const handleDiscardDraft = useCallback(() => {
     discardDraft();
-    if (savedFormRef.current) {
-      setForm(savedFormRef.current);
-    } else {
-      setForm({ name: '', script_code: DEFAULT_SCRIPT });
-    }
-  }, [discardDraft]);
+    setForm(savedForm);
+  }, [discardDraft, savedForm]);
 
   const handleNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setForm((prev) => ({ ...prev, name: e.target.value }));
@@ -311,10 +339,14 @@ export const MiniAppEditor: React.FC = () => {
 
       try {
         setSaving(true);
+        markClientWrite();
         let savedApp: MiniApp;
 
-        if (isEditing && id) {
-          savedApp = await apiClient.update(id, {
+        // If we auto-created a draft saved object, update it instead of creating new
+        const effectiveId = isEditing ? id : miniAppId;
+
+        if (effectiveId) {
+          savedApp = await apiClient.update(effectiveId, {
             name: form.name,
             script_code: form.script_code,
             version_message: versionMessage || undefined,
@@ -338,7 +370,7 @@ export const MiniAppEditor: React.FC = () => {
         }
 
         discardDraft();
-        savedFormRef.current = { name: form.name, script_code: form.script_code };
+        setSavedForm({ name: form.name, script_code: form.script_code });
         history.push(`/run/${savedApp.id}`);
       } catch (error) {
         coreStart.notifications.toasts.addError(error as Error, {
@@ -354,11 +386,13 @@ export const MiniAppEditor: React.FC = () => {
       validate,
       isEditing,
       id,
+      miniAppId,
       apiClient,
       form,
       coreStart.notifications.toasts,
       history,
       discardDraft,
+      markClientWrite,
     ]
   );
 

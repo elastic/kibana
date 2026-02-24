@@ -7,82 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useEffect, useRef, useMemo, useCallback } from 'react';
-import { z } from '@kbn/zod';
+import { useEffect, useCallback } from 'react';
 import type { RuntimeState } from '@kbn/script-panel/public';
 import type { AgentBuilderLike } from '../types';
 
-const codeSchema = z.object({
-  code: z.string().describe('The complete JavaScript code for the mini app.'),
-});
-
-const strReplaceSchema = z.object({
-  old_string: z
-    .string()
-    .describe(
-      'The exact text to find in the code. Must match exactly including whitespace and indentation.'
-    ),
-  new_string: z.string().describe('The replacement text. Can be empty to delete the old_string.'),
-  replace_all: z
-    .boolean()
-    .optional()
-    .describe('If true, replace all occurrences. If false/omitted, replace only the first match.'),
-});
-
-const insertAtLineSchema = z.object({
-  line: z
-    .number()
-    .describe(
-      'The line number to insert at (1-indexed). The new code is inserted before this line.'
-    ),
-  code: z.string().describe('The code to insert.'),
-});
-
-const emptySchema = z.object({});
-
-const UPDATE_CODE_DESCRIPTION = `Replace the mini app's JavaScript code entirely. The app instantly reloads with the new code.
-
-Use this tool only when you need to rewrite the entire app from scratch. For incremental changes, prefer:
-- mini_app_str_replace: to modify specific parts of the code
-- mini_app_insert_at_line: to add new code at a specific location
-- mini_app_append_code: to add code at the end
-
-RULES:
-- Provide the COMPLETE code. This replaces everything.
-- NO imports, NO require, NO module system, NO npm packages. Everything is a global in the iframe.
-- The ONLY globals are: preact, preact.hooks, html, Kibana. There is NO "preactHtm", NO "React", NO "ReactDOM".
-- Always start with: const { render } = preact; const { useState, useEffect, useRef, useMemo, useCallback } = preact.hooks;
-- Wrap in an async IIFE: (async () => { ... })();
-- Data: Kibana.esql.query({ query }) for Elasticsearch data. fetch/XHR is blocked.
-- Rendering: Use Preact's render() with htm tagged template: render(html\`<\${App} />\`, document.getElementById('root'))
-- CSS: inline <style> tags only.`;
-
-const APPEND_CODE_DESCRIPTION =
-  'Append JavaScript code to the existing mini app code. Useful for adding new functionality without replacing everything. The appended code runs after the existing code.';
-
-const GET_CODE_DESCRIPTION =
-  'Get the current JavaScript code of the mini app. Returns the full code as a string. Use this to inspect the current state before making targeted edits with mini_app_str_replace.';
-
-const STR_REPLACE_DESCRIPTION = `Replace specific text in the mini app's code. This is the PREFERRED way to make targeted edits.
-
-IMPORTANT:
-- old_string must match EXACTLY (including whitespace and indentation)
-- Include enough context in old_string to make it unique
-- If the match fails, use mini_app_get_code to see the exact current code
-- By default only the first match is replaced; set replace_all: true for all occurrences`;
-
-const INSERT_AT_LINE_DESCRIPTION = `Insert code at a specific line number. The new code is inserted BEFORE the specified line.
-
-Use this for:
-- Adding new functions or components
-- Inserting imports/setup code near the top
-- Adding code in the middle of the file
-
-Line numbers are 1-indexed (first line is 1).`;
-
 /**
  * Builds a comprehensive screen context description that teaches the agent
- * how mini apps work and directs it to use the browser tools.
+ * how mini apps work and directs it to use the server-side tools.
  */
 export const buildScreenContextDescription = ({
   name,
@@ -102,15 +33,15 @@ export const buildScreenContextDescription = ({
 
   parts.push(`CRITICAL INSTRUCTIONS FOR MODIFYING THIS MINI APP:`);
   parts.push(
-    `- Use the browser tools to modify code. Do NOT output code for the user to copy-paste.`
+    `- Use the mini_app_* tools to modify code. Do NOT output code for the user to copy-paste.`
   );
   parts.push(
-    `- When you call any code-modifying tool, the app instantly reloads with the new code.`
+    `- When you call any code-modifying tool, the saved object is updated on the server and the app preview reloads automatically.`
   );
   parts.push(``);
   parts.push(`AVAILABLE TOOLS (prefer targeted edits over full rewrites):`);
   parts.push(
-    `- mini_app_get_code: Read the current code. Use this first if you need to understand the existing code.`
+    `- mini_app_get_code: Read the current code from the server. Use this first if you need to understand the existing code.`
   );
   parts.push(
     `- mini_app_str_replace: Replace specific text. PREFERRED for targeted edits. Requires exact match.`
@@ -121,16 +52,25 @@ export const buildScreenContextDescription = ({
   parts.push(``);
   parts.push(`WORKFLOW FOR EDITS:`);
   parts.push(
-    `1. For small changes: Use mini_app_str_replace with enough context to match uniquely.`
+    `1. ALWAYS call mini_app_get_code first to get the exact current code before using str_replace.`
   );
   parts.push(
-    `2. If str_replace fails (no match): Call mini_app_get_code to see exact current code, then retry.`
+    `2. For small changes: Use mini_app_str_replace with enough context to match uniquely.`
   );
   parts.push(
-    `3. For new functions/components: Use mini_app_insert_at_line to add in the right place.`
+    `3. If str_replace throws an error: The old_string was NOT in the code. Call mini_app_get_code again and retry with the correct text.`
   );
   parts.push(
-    `4. Only use mini_app_update_code when creating a new app or doing a complete rewrite.`
+    `4. For new functions/components: Use mini_app_insert_at_line to add in the right place.`
+  );
+  parts.push(
+    `5. Only use mini_app_update_code when creating a new app or doing a complete rewrite.`
+  );
+  parts.push(
+    `6. For large changes that touch many parts of the code, prefer mini_app_update_code over multiple str_replace calls.`
+  );
+  parts.push(
+    `7. When the app uses ES|QL queries, use the esql tool to test each query BEFORE writing it into the code. This ensures the query syntax is valid and the indices/fields exist. Fix any query errors before proceeding.`
   );
   parts.push(``);
 
@@ -373,114 +313,29 @@ export const buildScreenContextDescription = ({
 
 interface UseAgentBuilderOptions {
   agentBuilder?: AgentBuilderLike;
+  miniAppId: string | undefined;
   name: string;
   scriptCode: string;
   runtimeState: RuntimeState;
   runtimeError: string | null;
-  onUpdateCode: (code: string) => void;
 }
 
 /**
- * Hook that wires up the agent builder flyout with browser tools and
- * screen context for a mini app. Works on both the editor and runner pages.
+ * Hook that wires up the agent builder flyout with screen context for a mini app.
+ * The actual code-editing tools are registered server-side and operate on the
+ * saved object directly. This hook provides context so the LLM knows which
+ * mini app to target (via mini_app_id in the attachment). Using the custom
+ * `mini_app_context` attachment type triggers tool selection so the agent
+ * can access the mini_app_* tools.
  */
 export const useAgentBuilder = ({
   agentBuilder,
+  miniAppId,
   name,
   scriptCode,
   runtimeState,
   runtimeError,
-  onUpdateCode,
 }: UseAgentBuilderOptions) => {
-  const codeRef = useRef(scriptCode);
-  useEffect(() => {
-    codeRef.current = scriptCode;
-  }, [scriptCode]);
-
-  const onUpdateCodeRef = useRef(onUpdateCode);
-  useEffect(() => {
-    onUpdateCodeRef.current = onUpdateCode;
-  }, [onUpdateCode]);
-
-  const tools = useMemo(() => {
-    return [
-      {
-        id: 'mini_app_get_code',
-        description: GET_CODE_DESCRIPTION,
-        schema: emptySchema,
-        handler: () => {
-          const code = codeRef.current;
-          // eslint-disable-next-line no-console
-          console.log('[Mini Apps] Current code retrieved:', code.length, 'characters');
-          return code;
-        },
-      },
-      {
-        id: 'mini_app_update_code',
-        description: UPDATE_CODE_DESCRIPTION,
-        schema: codeSchema,
-        handler: ({ code }: { code: string }) => {
-          onUpdateCodeRef.current(code);
-        },
-      },
-      {
-        id: 'mini_app_append_code',
-        description: APPEND_CODE_DESCRIPTION,
-        schema: codeSchema,
-        handler: ({ code }: { code: string }) => {
-          const existing = codeRef.current;
-          onUpdateCodeRef.current(existing ? `${existing}\n\n${code}` : code);
-        },
-      },
-      {
-        id: 'mini_app_str_replace',
-        description: STR_REPLACE_DESCRIPTION,
-        schema: strReplaceSchema,
-        handler: ({
-          old_string: oldString,
-          new_string: newString,
-          replace_all: replaceAll,
-        }: {
-          old_string: string;
-          new_string: string;
-          replace_all?: boolean;
-        }) => {
-          const existing = codeRef.current;
-          if (!existing.includes(oldString)) {
-            // eslint-disable-next-line no-console
-            console.error(
-              '[Mini Apps] str_replace failed: old_string not found in code. Use mini_app_get_code to see current code.'
-            );
-            return { success: false, error: 'old_string not found in code' };
-          }
-          const updated = replaceAll
-            ? existing.split(oldString).join(newString)
-            : existing.replace(oldString, newString);
-          onUpdateCodeRef.current(updated);
-          // eslint-disable-next-line no-console
-          console.log('[Mini Apps] Code updated via str_replace');
-          return { success: true };
-        },
-      },
-      {
-        id: 'mini_app_insert_at_line',
-        description: INSERT_AT_LINE_DESCRIPTION,
-        schema: insertAtLineSchema,
-        handler: ({ line, code }: { line: number; code: string }) => {
-          const existing = codeRef.current;
-          const lines = existing.split('\n');
-          const insertIndex = Math.max(0, Math.min(line - 1, lines.length));
-          lines.splice(insertIndex, 0, code);
-          const updated = lines.join('\n');
-          onUpdateCodeRef.current(updated);
-          // eslint-disable-next-line no-console
-          console.log(`[Mini Apps] Code inserted at line ${line}`);
-          return { success: true, inserted_at_line: insertIndex + 1 };
-        },
-      },
-    ];
-  }, []);
-
   const setConfig = useCallback(
     (ab: AgentBuilderLike) => {
       const description = buildScreenContextDescription({
@@ -492,17 +347,17 @@ export const useAgentBuilder = ({
 
       ab.setConversationFlyoutActiveConfig({
         sessionTag: 'mini_apps',
-        browserApiTools: tools,
         attachments: [
           {
-            id: 'mini-app-screen-context',
-            type: 'screen_context',
+            id: 'mini-app-context',
+            type: 'mini_app_context',
             data: {
               app: 'mini_apps',
               description,
               additional_data: {
                 runtime_state: runtimeState,
                 ...(runtimeError ? { runtime_error: runtimeError } : {}),
+                ...(miniAppId ? { mini_app_id: miniAppId } : {}),
               },
             } as unknown as Record<string, unknown>,
             hidden: true,
@@ -510,7 +365,7 @@ export const useAgentBuilder = ({
         ],
       });
     },
-    [name, scriptCode, runtimeState, runtimeError, tools]
+    [miniAppId, name, scriptCode, runtimeState, runtimeError]
   );
 
   useEffect(() => {

@@ -16,6 +16,7 @@ import type {
 } from '@kbn/core/server';
 import { miniAppSavedObjectType } from './saved_objects';
 import { defineRoutes } from './routes';
+import { registerMiniAppTools, registerMiniAppAttachmentType } from './tools';
 import type {
   MiniAppsServerPluginSetup,
   MiniAppsServerPluginStart,
@@ -33,7 +34,7 @@ export class MiniAppsPlugin
     this.logger = initializerContext.logger.get();
   }
 
-  public setup(core: CoreSetup<StartDeps>) {
+  public setup(core: CoreSetup<StartDeps>, deps: SetupDeps) {
     this.logger.debug('Mini Apps: Setup');
 
     // Register the saved object type
@@ -42,6 +43,13 @@ export class MiniAppsPlugin
     // Create router and register routes
     const router = core.http.createRouter();
     defineRoutes(router, this.logger);
+
+    // Register server-side tools and attachment type with the agent builder (if available)
+    if (deps.agentBuilder) {
+      registerMiniAppTools(deps.agentBuilder);
+      registerMiniAppAttachmentType(deps.agentBuilder);
+      this.logger.debug('Mini Apps: Registered agent builder tools and attachment type');
+    }
 
     return {};
   }

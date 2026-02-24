@@ -123,7 +123,11 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
           body: html,
           headers: {
             ...options.headers,
-            'content-security-policy': buildCspWithNonce(deps, cspNonce),
+            'content-security-policy': buildCspWithNonce(deps.http.csp.header, cspNonce),
+            'content-security-policy-report-only': buildCspWithNonce(
+              deps.http.csp.reportOnlyHeader,
+              cspNonce
+            ),
           },
         });
       },
@@ -138,7 +142,11 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
           body: html,
           headers: {
             ...options.headers,
-            'content-security-policy': buildCspWithNonce(deps, cspNonce),
+            'content-security-policy': buildCspWithNonce(deps.http.csp.header, cspNonce),
+            'content-security-policy-report-only': buildCspWithNonce(
+              deps.http.csp.reportOnlyHeader,
+              cspNonce
+            ),
           },
         });
       },
@@ -174,13 +182,17 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
 }
 
 /**
- * Takes the base CSP header and adds a per-request nonce to the script-src directive.
+ * Takes a CSP header string and adds a per-request nonce to the script-src directive.
  * This allows sandboxed iframes using srcdoc to execute inline scripts tagged with
  * the nonce, without broadly enabling 'unsafe-inline'.
+ * Applied to both the enforcing and report-only CSP headers so that srcdoc iframes
+ * (which inherit both from the parent) don't generate spurious violations.
  */
-const buildCspWithNonce = (deps: SetupDeps | PrebootDeps, nonce: string): string => {
-  const baseCsp = deps.http.csp.header;
+const buildCspWithNonce = (baseCsp: string, nonce: string): string => {
+  if (!baseCsp) return baseCsp;
   const nonceToken = `'nonce-${nonce}'`;
-  // Inject the nonce into the script-src directive
-  return baseCsp.replace(/script-src\s/, `script-src ${nonceToken} `);
+  if (baseCsp.includes('script-src ')) {
+    return baseCsp.replace(/script-src\s/, `script-src ${nonceToken} `);
+  }
+  return baseCsp;
 };
