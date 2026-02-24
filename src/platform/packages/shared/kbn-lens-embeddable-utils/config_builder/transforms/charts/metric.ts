@@ -512,7 +512,7 @@ function buildFormBasedLayer(layer: MetricStateNoESQL): FormBasedPersistedState[
       operation: 'date_histogram',
       include_empty_rows: true,
       suggested_interval: 'auto',
-      use_original_time_range: true,
+      use_original_time_range: false,
     };
     const trendlineColumn = fromBucketLensApiToLensState(op, []);
 
