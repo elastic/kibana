@@ -131,7 +131,7 @@ test.describe('Stream data retention - ILM policy', { tag: tags.stateful.classic
   test('should delete a downsampling step from an ILM policy', async ({
     page,
     esClient,
-    apiServices,
+    pageObjects,
   }) => {
     const policyName = 'downsampling-policy';
 
@@ -162,19 +162,53 @@ test.describe('Stream data retention - ILM policy', { tag: tags.stateful.classic
     });
 
     try {
-      const extraStreamName = 'logs.downsample';
-      await apiServices.streams.forkStream('logs', extraStreamName, {
-        field: 'service.name',
-        eq: 'downsample',
-      });
-      const extraStreamDefinition = await apiServices.streams.getStreamDefinition(extraStreamName);
-      await apiServices.streams.updateStream(extraStreamName, {
-        ingest: {
-          ...extraStreamDefinition.stream.ingest,
-          processing: omit(extraStreamDefinition.stream.ingest.processing, 'updated_at'),
-          lifecycle: { ilm: { policy: policyName } },
+      // Downsampling UI is only available for TSDB (time_series) streams.
+      const tsdbStreamName = 'streams-ilm-policy-tsdb-delete-step';
+      const extraStreamName = `${tsdbStreamName}-other`;
+      const templateName = `${tsdbStreamName}-template`;
+
+      await esClient.indices.putIndexTemplate({
+        name: templateName,
+        index_patterns: [`${tsdbStreamName}*`],
+        priority: 2000,
+        data_stream: {},
+        template: {
+          settings: { 'index.mode': 'time_series' },
+          mappings: {
+            properties: {
+              '@timestamp': { type: 'date' },
+              'host.name': { type: 'keyword', time_series_dimension: true },
+              'service.name': { type: 'keyword', time_series_dimension: true },
+              cpu_usage: { type: 'float', time_series_metric: 'gauge' },
+              memory_usage: { type: 'float', time_series_metric: 'gauge' },
+            },
+          },
         },
       });
+
+      await esClient.indices.deleteDataStream({ name: tsdbStreamName }).catch(() => {});
+      await esClient.indices.deleteDataStream({ name: extraStreamName }).catch(() => {});
+
+      const now = new Date().toISOString();
+      const operations = [
+        { create: {} },
+        {
+          '@timestamp': now,
+          'host.name': 'host-1',
+          'service.name': 'service-1',
+          cpu_usage: 1,
+          memory_usage: 1,
+        },
+      ];
+
+      await esClient.bulk({ index: tsdbStreamName, operations, refresh: true });
+      await esClient.bulk({ index: extraStreamName, operations, refresh: true });
+      await esClient.indices.putDataStreamSettings({
+        name: extraStreamName,
+        settings: { 'index.lifecycle.name': policyName, 'index.lifecycle.prefer_ilm': true },
+      });
+
+      await pageObjects.streams.gotoDataRetentionTab(tsdbStreamName);
 
       await openRetentionModal(page);
       await toggleInheritSwitch(page, false);
@@ -201,13 +235,22 @@ test.describe('Stream data retention - ILM policy', { tag: tags.stateful.classic
       await expect(page.getByTestId('downsamplingBar-label')).toHaveCount(0);
     } finally {
       await esClient.ilm.deleteLifecycle({ name: policyName }).catch(() => {});
+      await esClient.indices
+        .deleteDataStream({ name: 'streams-ilm-policy-tsdb-delete-step' })
+        .catch(() => {});
+      await esClient.indices
+        .deleteDataStream({ name: 'streams-ilm-policy-tsdb-delete-step-other' })
+        .catch(() => {});
+      await esClient.indices
+        .deleteIndexTemplate({ name: 'streams-ilm-policy-tsdb-delete-step-template' })
+        .catch(() => {});
     }
   });
 
   test('should create a new policy when deleting a downsampling step', async ({
     page,
     esClient,
-    apiServices,
+    pageObjects,
   }) => {
     const policyName = 'downsampling-policy';
     const newPolicyName = `${policyName}-copy`;
@@ -240,19 +283,53 @@ test.describe('Stream data retention - ILM policy', { tag: tags.stateful.classic
     });
 
     try {
-      const extraStreamName = 'logs.downsample-save-as-new';
-      await apiServices.streams.forkStream('logs', extraStreamName, {
-        field: 'service.name',
-        eq: 'downsample-save-as-new',
-      });
-      const extraStreamDefinition = await apiServices.streams.getStreamDefinition(extraStreamName);
-      await apiServices.streams.updateStream(extraStreamName, {
-        ingest: {
-          ...extraStreamDefinition.stream.ingest,
-          processing: omit(extraStreamDefinition.stream.ingest.processing, 'updated_at'),
-          lifecycle: { ilm: { policy: policyName } },
+      // Downsampling UI is only available for TSDB (time_series) streams.
+      const tsdbStreamName = 'streams-ilm-policy-tsdb-save-as-new';
+      const extraStreamName = `${tsdbStreamName}-other`;
+      const templateName = `${tsdbStreamName}-template`;
+
+      await esClient.indices.putIndexTemplate({
+        name: templateName,
+        index_patterns: [`${tsdbStreamName}*`],
+        priority: 2000,
+        data_stream: {},
+        template: {
+          settings: { 'index.mode': 'time_series' },
+          mappings: {
+            properties: {
+              '@timestamp': { type: 'date' },
+              'host.name': { type: 'keyword', time_series_dimension: true },
+              'service.name': { type: 'keyword', time_series_dimension: true },
+              cpu_usage: { type: 'float', time_series_metric: 'gauge' },
+              memory_usage: { type: 'float', time_series_metric: 'gauge' },
+            },
+          },
         },
       });
+
+      await esClient.indices.deleteDataStream({ name: tsdbStreamName }).catch(() => {});
+      await esClient.indices.deleteDataStream({ name: extraStreamName }).catch(() => {});
+
+      const now = new Date().toISOString();
+      const operations = [
+        { create: {} },
+        {
+          '@timestamp': now,
+          'host.name': 'host-1',
+          'service.name': 'service-1',
+          cpu_usage: 1,
+          memory_usage: 1,
+        },
+      ];
+
+      await esClient.bulk({ index: tsdbStreamName, operations, refresh: true });
+      await esClient.bulk({ index: extraStreamName, operations, refresh: true });
+      await esClient.indices.putDataStreamSettings({
+        name: extraStreamName,
+        settings: { 'index.lifecycle.name': policyName, 'index.lifecycle.prefer_ilm': true },
+      });
+
+      await pageObjects.streams.gotoDataRetentionTab(tsdbStreamName);
 
       await openRetentionModal(page);
       await toggleInheritSwitch(page, false);
@@ -279,11 +356,163 @@ test.describe('Stream data retention - ILM policy', { tag: tags.stateful.classic
       await page.getByTestId('createPolicyModal-policyNameInput').fill(newPolicyName);
       await page.getByTestId('createPolicyModal-saveButton').click();
 
-      await expect(page.getByTestId('lifecycleBadge-logs.nginx')).toContainText(newPolicyName);
+      await expect(page.getByTestId(`lifecycleBadge-${tsdbStreamName}`)).toContainText(
+        newPolicyName
+      );
       await expect(page.getByTestId('downsamplingBar-label')).toHaveCount(0);
     } finally {
       await esClient.ilm.deleteLifecycle({ name: policyName }).catch(() => {});
       await esClient.ilm.deleteLifecycle({ name: newPolicyName }).catch(() => {});
+      await esClient.indices
+        .deleteDataStream({ name: 'streams-ilm-policy-tsdb-save-as-new' })
+        .catch(() => {});
+      await esClient.indices
+        .deleteDataStream({ name: 'streams-ilm-policy-tsdb-save-as-new-other' })
+        .catch(() => {});
+      await esClient.indices
+        .deleteIndexTemplate({ name: 'streams-ilm-policy-tsdb-save-as-new-template' })
+        .catch(() => {});
+    }
+  });
+
+  test('should edit a policy phase, add downsampling, and save', async ({
+    page,
+    esClient,
+    pageObjects,
+  }) => {
+    const policyName = 'downsampling-policy-edit';
+
+    await esClient.ilm.deleteLifecycle({ name: policyName }).catch(() => {});
+    await esClient.ilm.putLifecycle({
+      name: policyName,
+      policy: {
+        phases: {
+          hot: {
+            actions: {
+              rollover: { max_age: '30d' },
+            },
+          },
+          warm: {
+            min_age: '1d',
+            actions: {},
+          },
+          delete: {
+            min_age: '7d',
+            actions: {
+              delete: {},
+            },
+          },
+        },
+      },
+    });
+
+    try {
+      // Ensure the policy is also used by another stream so saving edits requires confirmation.
+      // Downsampling UI is only available for TSDB (time_series) streams.
+      const tsdbStreamName = 'streams-ilm-policy-tsdb-edit-phase';
+      const extraStreamName = `${tsdbStreamName}-other`;
+      const templateName = `${tsdbStreamName}-template`;
+
+      await esClient.indices.putIndexTemplate({
+        name: templateName,
+        index_patterns: [`${tsdbStreamName}*`],
+        priority: 2000,
+        data_stream: {},
+        template: {
+          settings: { 'index.mode': 'time_series' },
+          mappings: {
+            properties: {
+              '@timestamp': { type: 'date' },
+              'host.name': { type: 'keyword', time_series_dimension: true },
+              'service.name': { type: 'keyword', time_series_dimension: true },
+              cpu_usage: { type: 'float', time_series_metric: 'gauge' },
+              memory_usage: { type: 'float', time_series_metric: 'gauge' },
+            },
+          },
+        },
+      });
+
+      await esClient.indices.deleteDataStream({ name: tsdbStreamName }).catch(() => {});
+      await esClient.indices.deleteDataStream({ name: extraStreamName }).catch(() => {});
+
+      const now = new Date().toISOString();
+      const operations = [
+        { create: {} },
+        {
+          '@timestamp': now,
+          'host.name': 'host-1',
+          'service.name': 'service-1',
+          cpu_usage: 1,
+          memory_usage: 1,
+        },
+      ];
+
+      await esClient.bulk({ index: tsdbStreamName, operations, refresh: true });
+      await esClient.bulk({ index: extraStreamName, operations, refresh: true });
+      await esClient.indices.putDataStreamSettings({
+        name: extraStreamName,
+        settings: { 'index.lifecycle.name': policyName, 'index.lifecycle.prefer_ilm': true },
+      });
+
+      await pageObjects.streams.gotoDataRetentionTab(tsdbStreamName);
+
+      await openRetentionModal(page);
+      await toggleInheritSwitch(page, false);
+
+      // Click ILM policy button and select the policy
+      await page.getByRole('button', { name: 'ILM policy' }).click();
+      const ilmListbox = page.getByRole('listbox', { name: 'Filter options' });
+      await ilmListbox.waitFor();
+      await page.getByPlaceholder('Filter options').fill(policyName);
+      await page.getByTestId(`ilmPolicy-${policyName}`).click();
+      await saveRetentionChanges(page);
+
+      // Verify there is no downsampling step before editing
+      await expect(page.getByTestId('downsamplingBar-label')).toHaveCount(0);
+
+      // Edit warm phase and enable downsampling
+      await page.getByTestId('lifecyclePhase-warm-button').click();
+      await expect(page.getByTestId('lifecyclePhase-warm-editButton')).toBeVisible();
+      await page.getByTestId('lifecyclePhase-warm-editButton').click();
+
+      const flyout = page.getByTestId('streamsEditIlmPhasesFlyoutFromSummary');
+      await expect(flyout).toBeVisible();
+      await page.getByTestId('streamsEditIlmPhasesFlyoutFromSummaryTab-warm').click();
+
+      // Scope to the visible "Downsampling" section (hot/warm/cold all exist in the DOM)
+      await flyout.getByRole('switch', { name: 'Downsampling' }).click();
+
+      // Set an explicit interval to keep the rendered step deterministic
+      const intervalValue = page.locator(
+        '[data-test-subj="streamsEditIlmPhasesFlyoutFromSummaryDownsamplingIntervalValue"]:visible'
+      );
+      await expect(intervalValue).toBeVisible();
+      await intervalValue.fill('1');
+
+      const intervalUnit = page.locator(
+        '[data-test-subj="streamsEditIlmPhasesFlyoutFromSummaryDownsamplingIntervalUnit"]:visible'
+      );
+      await intervalUnit.selectOption('d');
+
+      await page.getByTestId('streamsEditIlmPhasesFlyoutFromSummarySaveButton').click();
+
+      await expect(page.getByTestId('editPolicyModalTitle')).toBeVisible();
+      await page.getByTestId('editPolicyModal-overwriteButton').click();
+
+      // Verify downsampling is rendered after saving edits
+      await expect(page.getByTestId('downsamplingBar-label')).toBeVisible();
+      await expect(page.getByTestId('downsamplingPhase-1d-label')).toBeVisible();
+    } finally {
+      await esClient.ilm.deleteLifecycle({ name: policyName }).catch(() => {});
+      await esClient.indices
+        .deleteDataStream({ name: 'streams-ilm-policy-tsdb-edit-phase' })
+        .catch(() => {});
+      await esClient.indices
+        .deleteDataStream({ name: 'streams-ilm-policy-tsdb-edit-phase-other' })
+        .catch(() => {});
+      await esClient.indices
+        .deleteIndexTemplate({ name: 'streams-ilm-policy-tsdb-edit-phase-template' })
+        .catch(() => {});
     }
   });
 });
