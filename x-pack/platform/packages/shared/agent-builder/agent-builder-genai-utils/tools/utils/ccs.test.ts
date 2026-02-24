@@ -160,9 +160,7 @@ describe('getIndexFields', () => {
     });
     expect(result['my-index'].rawMapping).toBeDefined();
     expect(result['my-index'].rawMapping?._meta?.description).toBe('test index');
-    expect(result['my-index'].fields).toEqual([
-      { path: 'message', type: 'text', meta: {} },
-    ]);
+    expect(result['my-index'].fields).toEqual([{ path: 'message', type: 'text', meta: {} }]);
   });
 
   it('returns fields without rawMapping for CCS indices via _field_caps API', async () => {
@@ -186,9 +184,7 @@ describe('getIndexFields', () => {
     });
     expect(getIndexMappingsMock).not.toHaveBeenCalled();
     expect(result['remote:logs'].rawMapping).toBeUndefined();
-    expect(result['remote:logs'].fields).toEqual([
-      { path: 'status', type: 'keyword', meta: {} },
-    ]);
+    expect(result['remote:logs'].fields).toEqual([{ path: 'status', type: 'keyword', meta: {} }]);
   });
 
   it('handles a mix of local and CCS indices', async () => {
@@ -224,9 +220,7 @@ describe('getIndexFields', () => {
     expect(esClient.fieldCaps).toHaveBeenCalled();
 
     expect(result['local-index'].rawMapping).toBeDefined();
-    expect(result['local-index'].fields).toEqual([
-      { path: 'name', type: 'keyword', meta: {} },
-    ]);
+    expect(result['local-index'].fields).toEqual([{ path: 'name', type: 'keyword', meta: {} }]);
 
     expect(result['cluster:remote-index'].rawMapping).toBeUndefined();
     expect(result['cluster:remote-index'].fields).toEqual([
