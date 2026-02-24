@@ -360,7 +360,7 @@ export const buildDatasourceStates = (
   let layers: Partial<LensAttributes['state']['datasourceStates']> = {};
 
   // XY charts have dataset encoded per layer not at the root level
-  const mainDataset = 'dataset' in config && config.dataset;
+  const mainDataset = ('dataset' in config && config.dataset) || undefined;
   const usedDataviews: Record<string, APIDataView | APIAdHocDataView> = {};
   // a few charts types support multiple layers
   const hasMultipleLayers = 'layers' in config;
@@ -372,6 +372,10 @@ export const buildDatasourceStates = (
     const dataset = 'dataset' in layer ? layer.dataset : mainDataset;
 
     if (!dataset) {
+      if ('type' in layer && layer.type === 'annotations' && 'group_id' in layer) {
+        // by-ref annotation layers don't require a dataset
+        continue;
+      }
       throw Error('dataset must be defined');
     }
 
