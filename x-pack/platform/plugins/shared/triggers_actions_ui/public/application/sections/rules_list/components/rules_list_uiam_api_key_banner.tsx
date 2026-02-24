@@ -14,7 +14,7 @@ export const RulesListUiamApiKeyBanner = () => {
     <>
       <EuiCallOut
         color="primary"
-        size="s"
+        size="m"
         iconType="info"
         data-test-subj="rulesListUiamApiKeyBanner"
         title={
@@ -27,7 +27,7 @@ export const RulesListUiamApiKeyBanner = () => {
         <p>
           <FormattedMessage
             id="xpack.triggersActionsUI.sections.rulesList.uiamApiKeyBannerDescription"
-            defaultMessage="We are rolling out UIAM API keys to enable support for cross-project search. This change will be applied automatically."
+            defaultMessage="We're upgrading Kibana alerting security. Elasticsearch API keys are being progressively replaced by UIAM API keys in Serverless projects. Failure to migrate may limit certain functionalities. Click here [link] to learn more."
           />
         </p>
       </EuiCallOut>
