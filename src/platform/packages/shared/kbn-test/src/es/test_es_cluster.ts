@@ -51,8 +51,8 @@ export interface ICluster {
 
 export type EsTestCluster<Options extends CreateTestEsClusterOptions = CreateTestEsClusterOptions> =
   Options['nodes'] extends TestEsClusterNodesOptions[]
-  ? ICluster
-  : ICluster & { getUrl: () => string }; // Only allow use of `getUrl` if `nodes` option isn't provided.
+    ? ICluster
+    : ICluster & { getUrl: () => string }; // Only allow use of `getUrl` if `nodes` option isn't provided.
 
 export interface CreateTestEsClusterOptions {
   basePath?: string;
@@ -220,9 +220,9 @@ export function createTestEsCluster<
     // For multi-node clusters, we make all nodes master-eligible by default.
     ...(nodes.length > 1
       ? [
-        'discovery.type=multi-node',
-        `cluster.initial_master_nodes=${nodes.map((n) => n.name).join(',')}`,
-      ]
+          'discovery.type=multi-node',
+          `cluster.initial_master_nodes=${nodes.map((n) => n.name).join(',')}`,
+        ]
       : ['discovery.type=single-node']),
   ];
 
