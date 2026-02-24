@@ -5,12 +5,16 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { Suspense } from 'react';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { VisualizationAttachment } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentUIDefinition } from '@kbn/agent-builder-browser/attachments';
 import type { AgentBuilderStartDependencies } from '../../../types';
-import { VisualizeLens } from '../tools/esql/visualize_lens';
+
+const LazyVisualizeLens = React.lazy(() =>
+  import('../tools/esql/visualize_lens').then((m) => ({ default: m.VisualizeLens }))
+);
 
 /**
  * Factory function that creates the visualization attachment UI definition.
@@ -29,12 +33,14 @@ export const createVisualizationAttachmentDefinition = ({
       }),
     getIcon: () => 'lensApp',
     renderInlineContent: ({ attachment }) => (
-      <VisualizeLens
-        lensConfig={attachment.data.visualization}
-        dataViews={startDependencies.dataViews}
-        lens={startDependencies.lens}
-        uiActions={startDependencies.uiActions}
-      />
+      <Suspense fallback={<EuiLoadingSpinner />}>
+        <LazyVisualizeLens
+          lensConfig={attachment.data.visualization}
+          dataViews={startDependencies.dataViews}
+          lens={startDependencies.lens}
+          uiActions={startDependencies.uiActions}
+        />
+      </Suspense>
     ),
   };
 };
