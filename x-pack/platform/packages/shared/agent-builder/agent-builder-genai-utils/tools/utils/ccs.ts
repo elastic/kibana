@@ -90,15 +90,8 @@ export const getBatchedFieldsFromFieldCaps = async ({
   return result;
 };
 
-/**
- * Per-index result returned by {@link getIndexFields}.
- * Local indices include the full `rawMapping` tree (from the _mapping API);
- * CCS indices only have a flat `fields` list (from the _field_caps API).
- */
 export interface IndexFieldsResult {
-  /** Flattened field list — available for both local and CCS indices */
   fields: MappingField[];
-  /** Raw mapping tree — only present for local indices (via _mapping API) */
   rawMapping?: MappingTypeMapping;
 }
 
