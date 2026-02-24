@@ -95,7 +95,7 @@ export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionTemplateW
             <KibanaPageTemplate.Section
               className="securityPageWrapper"
               data-test-subj="pageContainer"
-              paddingSize="m"
+              paddingSize="none"
               alignment="top"
               component="div"
               grow={true}

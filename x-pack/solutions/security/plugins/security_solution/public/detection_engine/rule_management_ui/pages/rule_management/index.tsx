@@ -26,16 +26,14 @@ import { redirectToDetections } from '../../../common/helpers';
 import { AllRules } from '../../components/rules_table';
 import { RulesTableContextProvider } from '../../components/rules_table/rules_table/rules_table_context';
 import { RuleUpdateCallouts } from '../../components/rule_update_callouts/rule_update_callouts';
+// import { BlogPostPrebuiltRuleCustomizationCallout } from '../../components/blog_post_prebuilt_rule_customization_callout'; // Rendered outside page wrapper in rules/routes.tsx
 import { RuleImportModal } from '../../components/rule_import_modal/rule_import_modal';
 import { RuleSettingsModal } from '../../../rule_gaps/components/rule_settings_modal';
-import {
-  GapAutoFillSchedulerProvider,
-  useGapAutoFillSchedulerContext,
-} from '../../../rule_gaps/context/gap_auto_fill_scheduler_context';
+import { useGapAutoFillCapabilities } from '../../../rule_gaps/logic/use_gap_auto_fill_capabilities';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { getRulesHeaderAppActionsConfig } from '../../../../app/home/header_app_actions/rules_header_app_actions_config';
 
-const RulesPageContent = () => {
+const RulesPageComponent: React.FC = () => {
   const [isImportModalVisible, showImportModal, hideImportModal] = useBoolState();
   const [isValueListFlyoutVisible, showValueListFlyout, hideValueListFlyout] = useBoolState();
   const [isRuleSettingsModalOpen, openRuleSettingsModal, closeRuleSettingsModal] = useBoolState();
@@ -54,7 +52,7 @@ const RulesPageContent = () => {
     needsIndex: needsListsIndex,
   } = useListsConfig();
   const loading = userInfoLoading || listsConfigLoading;
-  const { canAccessGapAutoFill } = useGapAutoFillSchedulerContext();
+  const { canAccessGapAutoFill } = useGapAutoFillCapabilities();
 
   const onAddElasticRules = useCallback(() => {
     navigateToApp(APP_UI_ID, { deepLinkId: SecurityPageName.rulesAdd });
@@ -126,6 +124,8 @@ const RulesPageContent = () => {
             kibanaServices={kibanaServices}
             categories={[DEFAULT_APP_CATEGORIES.security.id]}
           />
+          {/* Callout rendered outside page wrapper in rules/routes.tsx for flush layout */}
+          {/* <BlogPostPrebuiltRuleCustomizationCallout /> */}
           <AllRules data-test-subj="all-rules" />
         </SecuritySolutionPageWrapper>
       </RulesTableContextProvider>
@@ -134,11 +134,5 @@ const RulesPageContent = () => {
     </>
   );
 };
-
-const RulesPageComponent = () => (
-  <GapAutoFillSchedulerProvider>
-    <RulesPageContent />
-  </GapAutoFillSchedulerProvider>
-);
 
 export const RulesPage = React.memo(RulesPageComponent);
