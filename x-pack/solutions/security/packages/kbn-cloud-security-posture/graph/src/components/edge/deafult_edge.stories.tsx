@@ -6,7 +6,6 @@
  */
 
 import React, { memo, useEffect, useMemo, useRef } from 'react';
-import { ThemeProvider } from '@emotion/react';
 import {
   ReactFlow,
   Controls,
@@ -151,7 +150,7 @@ const Template = (args: EdgeViewModel) => {
   }, [setNodes, setEdges, nodes, edges]);
 
   return (
-    <ThemeProvider theme={{ darkMode: false }}>
+    <>
       <SvgDefsMarker />
       <ReactFlow
         fitView
@@ -167,7 +166,7 @@ const Template = (args: EdgeViewModel) => {
         <Controls />
         <Background />
       </ReactFlow>
-    </ThemeProvider>
+    </>
   );
 };
 

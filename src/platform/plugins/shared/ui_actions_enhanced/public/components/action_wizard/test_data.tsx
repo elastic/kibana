@@ -16,9 +16,9 @@ import type {
   UiActionsActionDefinition as ActionDefinition,
 } from '@kbn/ui-actions-plugin/public';
 import {
-  APPLY_FILTER_TRIGGER,
-  VALUE_CLICK_TRIGGER,
-  SELECT_RANGE_TRIGGER,
+  ON_APPLY_FILTER,
+  ON_CLICK_VALUE,
+  ON_SELECT_RANGE,
 } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { ActionFactoryDefinition, BaseActionConfig } from '../../dynamic_actions';
 import { ActionFactory } from '../../dynamic_actions';
@@ -115,7 +115,7 @@ export const dashboardDrilldownActionFactory: ActionFactoryDefinition<
     enhancements: {},
   }),
   supportedTriggers(): string[] {
-    return [APPLY_FILTER_TRIGGER];
+    return [ON_APPLY_FILTER];
   },
 };
 
@@ -178,7 +178,7 @@ export const urlDrilldownActionFactory: ActionFactoryDefinition<UrlDrilldownConf
   },
   create: () => ({} as ActionDefinition),
   supportedTriggers(): string[] {
-    return [VALUE_CLICK_TRIGGER, SELECT_RANGE_TRIGGER];
+    return [ON_CLICK_VALUE, ON_SELECT_RANGE];
   },
 };
 
@@ -192,22 +192,18 @@ export const mockActionFactories: ActionFactory[] = [
   urlFactory,
 ] as unknown as ActionFactory[];
 
-export const mockSupportedTriggers: string[] = [
-  VALUE_CLICK_TRIGGER,
-  SELECT_RANGE_TRIGGER,
-  APPLY_FILTER_TRIGGER,
-];
+export const mockSupportedTriggers: string[] = [ON_CLICK_VALUE, ON_SELECT_RANGE, ON_APPLY_FILTER];
 export const mockGetTriggerInfo = (triggerId: string): Trigger => {
   const titleMap = {
-    [VALUE_CLICK_TRIGGER]: 'Single click',
-    [SELECT_RANGE_TRIGGER]: 'Range selection',
-    [APPLY_FILTER_TRIGGER]: 'Apply filter',
+    [ON_CLICK_VALUE]: 'Single click',
+    [ON_SELECT_RANGE]: 'Range selection',
+    [ON_APPLY_FILTER]: 'Apply filter',
   } as Record<string, string>;
 
   const descriptionMap = {
-    [VALUE_CLICK_TRIGGER]: 'A single point clicked on a visualization',
-    [SELECT_RANGE_TRIGGER]: 'Select a group of values',
-    [APPLY_FILTER_TRIGGER]: 'Apply filter description...',
+    [ON_CLICK_VALUE]: 'A single point clicked on a visualization',
+    [ON_SELECT_RANGE]: 'Select a group of values',
+    [ON_APPLY_FILTER]: 'Apply filter description...',
   } as Record<string, string>;
 
   return {
@@ -265,7 +261,7 @@ export function Demo({
           });
         }}
         getTriggerInfo={mockGetTriggerInfo}
-        triggers={[VALUE_CLICK_TRIGGER, APPLY_FILTER_TRIGGER, SELECT_RANGE_TRIGGER]}
+        triggers={[ON_CLICK_VALUE, ON_APPLY_FILTER, ON_SELECT_RANGE]}
       />
       <div css={{ marginTop: '44px' }} />
       <hr />
