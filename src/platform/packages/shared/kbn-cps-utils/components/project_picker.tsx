@@ -34,6 +34,7 @@ export interface ProjectPickerProps {
   fetchProjects: () => Promise<ProjectsData | null>;
   isReadonly?: boolean;
   settingsComponent?: React.ReactNode;
+  shouldDisplayReadonlyCallout?: boolean;
 }
 
 export const ProjectPicker = ({
@@ -41,6 +42,7 @@ export const ProjectPicker = ({
   onProjectRoutingChange,
   fetchProjects,
   isReadonly = false,
+  shouldDisplayReadonlyCallout = true,
   settingsComponent,
 }: ProjectPickerProps) => {
   const [showPopover, setShowPopover] = useState(false);
@@ -121,6 +123,7 @@ export const ProjectPicker = ({
           onProjectRoutingChange={onProjectRoutingChange}
           fetchProjects={fetchProjects}
           isReadonly={isReadonly}
+          shouldDisplayReadonlyCallout={shouldDisplayReadonlyCallout}
           settingsComponent={settingsComponent}
         />
       </EuiPopover>

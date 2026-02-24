@@ -60,8 +60,8 @@ export class CPSManager implements ICPSManager {
       )
       .subscribe((access) => {
         this.projectPickerAccess$.next(access);
-        // Reset project routing to default when access is disabled
-        if (access === ProjectRoutingAccess.DISABLED) {
+        // Reset project routing to default when access is disabled or readonly
+        if (access === ProjectRoutingAccess.DISABLED || access === ProjectRoutingAccess.READONLY) {
           this.projectRouting$.next(DEFAULT_PROJECT_ROUTING);
         }
       });

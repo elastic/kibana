@@ -71,6 +71,15 @@ export const ACCESS_CONTROL_CONFIG: AccessControlConfig = {
   lens: {
     defaultAccess: ProjectRoutingAccess.EDITABLE,
   },
+  management: {
+    defaultAccess: ProjectRoutingAccess.READONLY,
+    routeRules: [
+      {
+        pattern: /insightsAndAlerting\/triggersActions\/rules/,
+        access: ProjectRoutingAccess.DISABLED,
+      },
+    ],
+  },
   maps: {
     defaultAccess: ProjectRoutingAccess.EDITABLE,
   },
