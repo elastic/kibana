@@ -10,24 +10,24 @@ import { type ToolHandlerContext, type ToolHandlerResult } from '@kbn/agent-buil
 import type { SkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { euid } from '@kbn/entity-store/common';
 import { generateEsql } from '@kbn/agent-builder-genai-utils';
+import { getAssetCriticalityIndex } from '../../../../../../common/entity_analytics/asset_criticality';
 import { EntityTypeToIdentifierField } from '../../../../../../common/entity_analytics/types';
-import {
-  EntityTypeToLevelField,
-  EntityTypeToScoreField,
-} from '../../../../../../common/search_strategy';
-import {
-  getRiskScoreLatestIndex,
-  getRiskScoreTimeSeriesIndex,
-} from '../../../../../../common/entity_analytics/risk_engine';
 import type { EntityType } from '../../../../../../common/api/entity_analytics';
-import type { EntityAnalysisSkillsContext } from '../../entity_analysis_skill';
+import type { EntityAnalyticsSkillsContext } from '../../entity_analytics_skill';
 import type { EntityAnalyticsCommonType } from '../common';
 import { bootstrapCommonServices, entityAnalyticsCommonSchema } from '../common';
-import { ENTITY_ANALYSIS_RISK_SCORE_INLINE_TOOL_ID } from '.';
+import { ENTITY_ANALYTICS_ASSET_CRITICALITY_INLINE_TOOL_ID } from '.';
 
-export const riskScoreDynamicInlineToolHandler = async (
+/**
+ * TODO - asset criticality is moving fully to the entity store v2 so this tool can be removed in favor of
+ * the entity store tool
+ *
+ * We are creating this temporary tool because it's an easy query and allows us to see the agent follow the entity
+ * analysis investigation workflow as outine in the skill description.
+ */
+export const assetCriticalityDynamicInlineToolHandler = async (
   toolArgs: EntityAnalyticsCommonType,
-  toolContext: ToolHandlerContext & EntityAnalysisSkillsContext
+  toolContext: ToolHandlerContext & EntityAnalyticsSkillsContext
 ) => {
   try {
     const { entityType, prompt, queryExtraContext } = toolArgs;
@@ -44,11 +44,10 @@ export const riskScoreDynamicInlineToolHandler = async (
       spaceId,
     });
 
-    const riskScoreIndexPattern = getRiskScoreLatestIndex(spaceId);
-    const riskScoreTimeSeriesIndexPattern = getRiskScoreTimeSeriesIndex(spaceId);
+    const assetCriticalityIndexPattern = getAssetCriticalityIndex(spaceId);
 
     const indexExists = await esClient.asInternalUser.indices.exists({
-      index: riskScoreIndexPattern,
+      index: assetCriticalityIndexPattern,
     });
 
     const identifierFilter = isEntityStoreV2Enabled
@@ -58,16 +57,8 @@ export const riskScoreDynamicInlineToolHandler = async (
     if (indexExists) {
       message = `
         This is a set of rules that you must follow strictly:
-        * Use the latest risk score index pattern: ${riskScoreIndexPattern} when answering questions about the current risk score of entities.
-        * Use the risk score time series patterns: ${riskScoreTimeSeriesIndexPattern} when answering questions about how the risk score changes over time.
-        * When querying the risk score for a entity you must **ALWAYS** use the normalized field '${
-          EntityTypeToScoreField[entityType as EntityType]
-        }'.
-        * The field '${
-          EntityTypeToLevelField[entityType as EntityType]
-        }' contains a textual description of the risk level.
-        * The inputs field inside the risk score document contains the 10 highest-risk documents (sorted by 'kibana.alert.risk_score') that contributed to the risk score of an entity.
-        * When searching the risk score of an entity of type '${entityType}', you must **ALWAYS** use exact and entire filter: "${identifierFilter}"`;
+        * The criticality value is stored in the field 'criticality_level'.,
+        * When searching the asset criticality of an entity of type '${entityType}', you must **ALWAYS** use exact and entire filter: "${identifierFilter}"`;
 
       const model = await modelProvider.getDefaultModel();
       const esqlResponse = await generateEsql({
@@ -76,7 +67,7 @@ export const riskScoreDynamicInlineToolHandler = async (
         events,
         nlQuery: prompt,
         esClient: esClient.asCurrentUser,
-        index: riskScoreIndexPattern,
+        index: assetCriticalityIndexPattern,
         additionalContext: `${message}\n${defaultMessage}\n${queryExtraContext ?? ''}`,
       });
 
@@ -110,7 +101,7 @@ export const riskScoreDynamicInlineToolHandler = async (
         }
       }
     } else {
-      message = `Risk score index does not exist for this space. The user needs to enable the risk engine so that this agent can answer risk-related questions.`;
+      message = `Asset criticality index does not exist for this space.`;
     }
 
     return {
@@ -136,11 +127,16 @@ export const riskScoreDynamicInlineToolHandler = async (
   }
 };
 
-export const getRiskScoreEsqlTool = (ctx: EntityAnalysisSkillsContext): SkillBoundedTool => ({
-  id: ENTITY_ANALYSIS_RISK_SCORE_INLINE_TOOL_ID,
+export const getAssetCriticalityEsqlTool = (
+  ctx: EntityAnalyticsSkillsContext
+): SkillBoundedTool => ({
+  id: ENTITY_ANALYTICS_ASSET_CRITICALITY_INLINE_TOOL_ID,
   type: ToolType.builtin,
   schema: entityAnalyticsCommonSchema,
-  description: `Call this tool to get the latest entity risk score and the inputs that contributed to the calculation for a specific entity (host, user, service, or generic). IMPORTANT: Always use 'calculated_score_norm' (0-100) when reporting risk scores, NOT 'calculated_score' which is a raw value. The 'calculated_score_norm' field is the normalized score suitable for comparison between entities. The 'modifiers' array contains risk adjustments such as asset criticality and privileged user monitoring (watchlist/privmon type).`,
+  description: `Call this tool to get the asset criticality value for security entities (hosts, users, services, generic).`,
   handler: async (args, context) =>
-    riskScoreDynamicInlineToolHandler(args as EntityAnalyticsCommonType, { ...context, ...ctx }),
+    assetCriticalityDynamicInlineToolHandler(args as EntityAnalyticsCommonType, {
+      ...context,
+      ...ctx,
+    }),
 });

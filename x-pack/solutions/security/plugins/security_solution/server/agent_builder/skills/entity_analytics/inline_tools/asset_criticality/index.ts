@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-export const ENTITY_ANALYSIS_ASSET_CRITICALITY_INLINE_TOOL_ID =
-  'security.entity_analysis.asset_criticality';
+export const ENTITY_ANALYTICS_ASSET_CRITICALITY_INLINE_TOOL_ID =
+  'security.entity_analytics.asset_criticality';
 
 export { getAssetCriticalityInlineTool } from './asset_criticality';
 export { getAssetCriticalityEsqlTool } from './asset_criticality_esql';

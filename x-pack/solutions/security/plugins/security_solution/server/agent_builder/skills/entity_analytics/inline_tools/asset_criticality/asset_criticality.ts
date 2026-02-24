@@ -16,9 +16,9 @@ import { EntityTypeToIdentifierField } from '../../../../../../common/entity_ana
 import { getAssetCriticalityIndex } from '../../../../../../common/entity_analytics/asset_criticality';
 import { IdentifierType } from '../../../../../../common/api/entity_analytics/common/common.gen';
 import type { EntityType } from '../../../../../../common/api/entity_analytics';
-import type { EntityAnalysisSkillsContext } from '../../entity_analysis_skill';
+import type { EntityAnalyticsSkillsContext } from '../../entity_analytics_skill';
 
-import { ENTITY_ANALYSIS_ASSET_CRITICALITY_INLINE_TOOL_ID } from '.';
+import { ENTITY_ANALYTICS_ASSET_CRITICALITY_INLINE_TOOL_ID } from '.';
 import { escapeEsqlString } from '../common';
 
 const DEFAULT_LIMIT = 10;
@@ -105,13 +105,13 @@ const applyEsqlQueries = async (opts: BuildEsqlQueryOpts) => {
 
 export const assetCriticalityStaticInlineToolHandler = async (
   toolArgs: AssetCriticalityType,
-  toolContext: ToolHandlerContext & EntityAnalysisSkillsContext
+  toolContext: ToolHandlerContext & EntityAnalyticsSkillsContext
 ) => {
   try {
     const { esClient, logger, spaceId } = toolContext;
 
     logger.info(
-      `${ENTITY_ANALYSIS_ASSET_CRITICALITY_INLINE_TOOL_ID} tool called with args: ${JSON.stringify(
+      `${ENTITY_ANALYTICS_ASSET_CRITICALITY_INLINE_TOOL_ID} tool called with args: ${JSON.stringify(
         toolArgs
       )}`
     );
@@ -160,9 +160,9 @@ export const assetCriticalityStaticInlineToolHandler = async (
 };
 
 export const getAssetCriticalityInlineTool = (
-  ctx: EntityAnalysisSkillsContext
+  ctx: EntityAnalyticsSkillsContext
 ): SkillBoundedTool => ({
-  id: ENTITY_ANALYSIS_ASSET_CRITICALITY_INLINE_TOOL_ID,
+  id: ENTITY_ANALYTICS_ASSET_CRITICALITY_INLINE_TOOL_ID,
   type: ToolType.builtin,
   schema: assetCriticalityStaticSchema,
   description: `Call this tool to get the asset criticality value for security entities (hosts, users, services, generic).`,

@@ -11,7 +11,7 @@ import type { EntityType } from '../../../../../../common/entity_analytics/types
 import { createToolHandlerContext, createToolTestMocks } from '../../../../__mocks__/test_helpers';
 import { riskScoreDynamicInlineToolHandler } from './risk_score_esql';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server';
-import type { EntityAnalysisSkillsContext } from '../../entity_analysis_skill';
+import type { EntityAnalyticsSkillsContext } from '../../entity_analytics_skill';
 
 jest.mock('../common', () => ({
   bootstrapCommonServices: jest.fn(),
@@ -46,7 +46,7 @@ describe('riskScoreInlineToolHandler', () => {
     return {
       ...baseContext,
       getStartServices: mockCore.getStartServices,
-    } as unknown as ToolHandlerContext & EntityAnalysisSkillsContext;
+    } as unknown as ToolHandlerContext & EntityAnalyticsSkillsContext;
   };
 
   beforeEach(() => {

@@ -5,7 +5,4 @@
  * 2.0.
  */
 
-export const ENTITY_ANALYSIS_RISK_SCORE_INLINE_TOOL_ID = 'security.entity_analysis.risk_score';
-
-export { getRiskScoreInlineTool } from './risk_score';
-export { getRiskScoreEsqlTool } from './risk_score_esql';
+export { getEntityAnalyticsSkill } from './entity_analytics_skill';

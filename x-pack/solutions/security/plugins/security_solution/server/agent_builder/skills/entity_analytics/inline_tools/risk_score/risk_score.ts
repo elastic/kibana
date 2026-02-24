@@ -18,9 +18,9 @@ import {
   getRiskScoreLatestIndex,
   getRiskScoreTimeSeriesIndex,
 } from '../../../../../../common/entity_analytics/risk_engine';
-import type { EntityAnalysisSkillsContext } from '../../entity_analysis_skill';
+import type { EntityAnalyticsSkillsContext } from '../../entity_analytics_skill';
 
-import { ENTITY_ANALYSIS_RISK_SCORE_INLINE_TOOL_ID } from '.';
+import { ENTITY_ANALYTICS_RISK_SCORE_INLINE_TOOL_ID } from '.';
 import { getRiskFieldPaths, intervalToEsql } from './utils';
 import { escapeEsqlString } from '../common';
 
@@ -142,13 +142,13 @@ const applyEsqlQueries = async (opts: BuildEsqlQueryOpts) => {
 
 export const riskScoreStaticInlineToolHandler = async (
   toolArgs: RiskScoreType,
-  toolContext: ToolHandlerContext & EntityAnalysisSkillsContext
+  toolContext: ToolHandlerContext & EntityAnalyticsSkillsContext
 ) => {
   try {
     const { esClient, logger, spaceId } = toolContext;
 
     logger.info(
-      `${ENTITY_ANALYSIS_RISK_SCORE_INLINE_TOOL_ID} tool called with args: ${JSON.stringify(
+      `${ENTITY_ANALYTICS_RISK_SCORE_INLINE_TOOL_ID} tool called with args: ${JSON.stringify(
         toolArgs
       )}`
     );
@@ -199,8 +199,8 @@ export const riskScoreStaticInlineToolHandler = async (
   }
 };
 
-export const getRiskScoreInlineTool = (ctx: EntityAnalysisSkillsContext): SkillBoundedTool => ({
-  id: ENTITY_ANALYSIS_RISK_SCORE_INLINE_TOOL_ID,
+export const getRiskScoreInlineTool = (ctx: EntityAnalyticsSkillsContext): SkillBoundedTool => ({
+  id: ENTITY_ANALYTICS_RISK_SCORE_INLINE_TOOL_ID,
   type: ToolType.builtin,
   schema: riskScoreStaticSchema,
   description: `Call this tool to get the latest entity risk score and the inputs that contributed to the calculation for a specific entity (host, user, service, or generic). IMPORTANT: Always use 'calculated_score_norm' (0-100) when reporting risk scores, NOT 'calculated_score' which is a raw value. The 'calculated_score_norm' field is the normalized score suitable for comparison between entities. The 'modifiers' array contains risk adjustments such as asset criticality and privileged user monitoring (watchlist/privmon type).`,

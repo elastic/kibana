@@ -20,13 +20,13 @@ import {
 export const FF_DYNAMICALLY_GENERATE_ESQL = false;
 
 const ENTITY_RISK_SCORE_SIGNFICANT_CHANGE_THRESHOLD = 20; // Define a threshold for significant risk score change
-export interface EntityAnalysisSkillsContext {
+export interface EntityAnalyticsSkillsContext {
   getStartServices: EntityAnalyticsRoutesDeps['getStartServices'];
   kibanaVersion: string;
   logger: Logger;
 }
 
-export const getEntityAnalysisSkill = (ctx: EntityAnalysisSkillsContext) =>
+export const getEntityAnalyticsSkill = (ctx: EntityAnalyticsSkillsContext) =>
   defineSkillType({
     id: 'entity-analytics',
     name: 'entity-analytics',
@@ -44,16 +44,16 @@ Use this skill when:
 ## Entity Analysis Process
 
 ### 1. Find the risky entities
-- Use the 'security.entity_analysis.risk_score' tool to find the riskiest entities based on their normalized risk scores (0-100)
+- Use the 'security.entity_analytics.risk_score' tool to find the riskiest entities based on their normalized risk scores (0-100)
 - These entities will be sorted by their normalized risk score (calculated_score_norm) in descending order
 - When entity ID is provided and no results are found, you must call the tool again with another entity type to find the entity (e.g. if "john" is not found as a user entity, try finding "john" as a host or service entity type)
 
 ### 2. Analyze risk score changes over time
-- Use the 'security.entity_analysis.risk_score' tool to analyze how an entity's risk score has changed over a specified time interval (e.g., last 30, 60, 90 days)
+- Use the 'security.entity_analytics.risk_score' tool to analyze how an entity's risk score has changed over a specified time interval (e.g., last 30, 60, 90 days)
 - Look for significant increases in risk score (e.g., greater than ${ENTITY_RISK_SCORE_SIGNFICANT_CHANGE_THRESHOLD} points) to identify entities that may require further investigation
 
 ### 3. Retrieve asset criticality levels
-- Use the 'security.entity_analysis.asset_criticality' tool to get the asset criticality level for a specific entity
+- Use the 'security.entity_analytics.asset_criticality' tool to get the asset criticality level for a specific entity
 - If no entity ID is provided, retrieve the most critical assets in the environment sorted by their criticality level
 
 ## Examples
@@ -63,8 +63,8 @@ Use this skill when:
 User query: Which users have the highest risk scores?
 
 Steps:
-1. Use the 'security.entity_analysis.risk_score' tool to get the top N users sorted by their normalized risk scores.
-2. Use the 'security.entity_analysis.asset_criticality' tool to get the asset criticality levels for these users
+1. Use the 'security.entity_analytics.risk_score' tool to get the top N users sorted by their normalized risk scores.
+2. Use the 'security.entity_analytics.asset_criticality' tool to get the asset criticality levels for these users
 3. Present the results in a table format showing entity ID, risk score, risk level, and asset criticality level
 
 ### Example 2: Risk Score Changes Over Time
@@ -72,7 +72,7 @@ Steps:
 User query: Who has had the biggest increase in risk score over the last 90 days?
 
 Steps:
-1. Use the 'security.entity_analysis.risk_score' tool with a time interval of '90d' to find entities with risk score increases.
+1. Use the 'security.entity_analytics.risk_score' tool with a time interval of '90d' to find entities with risk score increases.
 2. Present the findings in a table format showing entity ID, previous risk score, current risk score, and risk score change.
 
 ### Example 3: High Impact Assets
@@ -80,8 +80,8 @@ Steps:
 User query: What are the riskiest hosts in my environment that are high impact?
 
 Steps:
-1. Use the 'security.entity_analysis.risk_score' tool to get the top N hosts sorted by their normalized risk scores.
-2. Use the 'security.entity_analysis.asset_criticality' tool to get the asset criticality levels for these hosts
+1. Use the 'security.entity_analytics.risk_score' tool to get the top N hosts sorted by their normalized risk scores.
+2. Use the 'security.entity_analytics.asset_criticality' tool to get the asset criticality levels for these hosts
 3. Filter the results to only show hosts that have a criticality level of "high_impact" or "extreme_impact"
 4. Present the results in a table format showing entity ID, risk score, risk level, and asset criticality level
 
@@ -91,9 +91,9 @@ Steps:
 User query: Has Cielo39's risk score changed significantly?
 
 Steps:
-1. Use the 'security.entity_analysis.risk_score' tool with a time interval of '30d' to analyze Cielo39's risk score changes with host entityType
-2. When no results are returned, use the 'security.entity_analysis.risk_score' tool again to analyze Cielo39's risk score changes with user entityType
-3. When no results are returned, use the 'security.entity_analysis.risk_score' tool again to analyze Cielo39's risk score changes with service entityType
+1. Use the 'security.entity_analytics.risk_score' tool with a time interval of '30d' to analyze Cielo39's risk score changes with host entityType
+2. When no results are returned, use the 'security.entity_analytics.risk_score' tool again to analyze Cielo39's risk score changes with user entityType
+3. When no results are returned, use the 'security.entity_analytics.risk_score' tool again to analyze Cielo39's risk score changes with service entityType
 4. When results are returned, determine if the change in risk score is significant (e.g., greater than ${ENTITY_RISK_SCORE_SIGNFICANT_CHANGE_THRESHOLD} points).
 5. Present the findings in a concise format showing the previous risk score, current risk score, and whether the change is significant.
 
