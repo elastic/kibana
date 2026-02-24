@@ -7,6 +7,8 @@
 
 import type {
   IndicesGetDataStreamResponse,
+  IndicesGetSettingsResponse,
+  IndicesResolveIndexResponse,
   IlmGetLifecycleResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
@@ -52,9 +54,10 @@ const parseRetentionToDays = (retention: string | null | undefined): number | nu
 
 /**
  * Get retention status based on retention days
+ * No retention configured = data kept forever = always compliant
  */
 const getRetentionStatus = (retentionDays: number | null): RetentionStatus => {
-  if (retentionDays === null) return 'non-compliant';
+  if (retentionDays === null) return 'healthy';
   return retentionDays >= RETENTION_THRESHOLD_DAYS ? 'healthy' : 'non-compliant';
 };
 
@@ -71,20 +74,39 @@ const getIlmRetentionPeriod = (policy: IlmGetLifecycleResponse[string]): string 
 
 /**
  * Extract retention info (type, period, policy name) from a data stream
- * Checks DSL first, then falls back to ILM
+ * Respects prefer_ilm setting when both DSL and ILM are configured
  */
 const extractRetentionInfo = (
   dataStream: IndicesGetDataStreamResponse['data_streams'][0],
   ilmPolicies: IlmGetLifecycleResponse
 ): { retentionType: RetentionType; retentionPeriod: string | null; policyName: string | null } => {
-  // Check for DSL (Data Stream Lifecycle) first
-  // Prefer effective_retention (actual applied value) over data_retention (configured value)
+  // Extract DSL retention info
   const lifecycle = dataStream.lifecycle as Record<string, unknown> | undefined;
-  if (lifecycle && lifecycle.enabled !== false) {
-    const effectiveRetention = lifecycle.effective_retention as string | undefined;
-    const dataRetention = lifecycle.data_retention as string | undefined;
+  const dslEnabled = lifecycle && lifecycle.enabled !== false;
 
-    if (effectiveRetention || dataRetention) {
+  // DSL retention: effective_retention is the actual applied value after considering
+  // cluster-level limits and defaults. data_retention is the configured value.
+  // effective_retention takes priority as it reflects what's actually enforced.
+  // Falls back to data_retention for older ES versions or edge cases where
+  // effective_retention isn't computed yet.
+  const effectiveRetention = lifecycle?.effective_retention as string | undefined;
+  const dataRetention = lifecycle?.data_retention as string | undefined;
+  const hasDslRetention = dslEnabled && (effectiveRetention || dataRetention);
+
+  // Extract ILM info (policy may exist without delete phase)
+  const ilmPolicyName = dataStream.ilm_policy ?? null;
+  const ilmPolicy = ilmPolicyName ? ilmPolicies[ilmPolicyName] : undefined;
+  const ilmRetention = ilmPolicy ? getIlmRetentionPeriod(ilmPolicy) : null;
+
+  // Check prefer_ilm setting (default is true)
+  const preferIlm = (lifecycle?.prefer_ilm as boolean | undefined) ?? true;
+
+  // Determine which takes priority
+  if (hasDslRetention && ilmPolicyName) {
+    // Both configured - use prefer_ilm to decide
+    if (preferIlm) {
+      return { retentionType: 'ilm', retentionPeriod: ilmRetention, policyName: ilmPolicyName };
+    } else {
       return {
         retentionType: 'dsl',
         retentionPeriod: effectiveRetention ?? dataRetention ?? null,
@@ -93,19 +115,54 @@ const extractRetentionInfo = (
     }
   }
 
-  // Check for ILM policy (fallback if DSL not configured)
-  if (dataStream.ilm_policy) {
-    const ilmPolicy = ilmPolicies[dataStream.ilm_policy];
-    if (ilmPolicy) {
-      return {
-        retentionType: 'ilm',
-        retentionPeriod: getIlmRetentionPeriod(ilmPolicy),
-        policyName: dataStream.ilm_policy,
-      };
-    }
+  // Only one configured - use whichever is present
+  if (hasDslRetention) {
+    return {
+      retentionType: 'dsl',
+      retentionPeriod: effectiveRetention ?? dataRetention ?? null,
+      policyName: null,
+    };
+  }
+  if (ilmPolicyName) {
+    // ILM policy exists (may or may not have delete phase)
+    return { retentionType: 'ilm', retentionPeriod: ilmRetention, policyName: ilmPolicyName };
   }
 
   return { retentionType: null, retentionPeriod: null, policyName: null };
+};
+
+/**
+ * Extract standalone indices (not part of data streams)
+ * Includes all standalone indices regardless of retention configuration
+ * Standalone indices can only have ILM retention, not DSL
+ */
+const extractStandaloneIndices = (
+  indexSettings: IndicesGetSettingsResponse,
+  ilmPolicies: IlmGetLifecycleResponse
+): RetentionInfo[] => {
+  const results: RetentionInfo[] = [];
+
+  Object.entries(indexSettings).forEach(([indexName, settings]) => {
+    const ilmPolicyName = settings.settings?.index?.lifecycle?.name ?? null;
+
+    let ilmRetention: string | null = null;
+    if (ilmPolicyName) {
+      const ilmPolicy = ilmPolicies[ilmPolicyName];
+      ilmRetention = ilmPolicy ? getIlmRetentionPeriod(ilmPolicy) : null;
+    }
+
+    const retentionDays = parseRetentionToDays(ilmRetention);
+    results.push({
+      indexName,
+      retentionType: ilmPolicyName ? 'ilm' : null,
+      retentionPeriod: ilmRetention,
+      retentionDays,
+      policyName: ilmPolicyName,
+      status: getRetentionStatus(retentionDays),
+    });
+  });
+
+  return results;
 };
 
 export const getReadinessRetentionRoute = (
@@ -142,9 +199,25 @@ export const getReadinessRetentionRoute = (
           // 2. Get all ILM policies
           const ilmPoliciesResponse: IlmGetLifecycleResponse = await esClient.ilm.getLifecycle();
 
-          // 3. Process each data stream and extract retention info (exclude those without retention)
-          const items: RetentionInfo[] = dataStreamsResponse.data_streams
-            .map((dataStream) => {
+          // 3. Resolve index to get standalone indices (excludes backing indices)
+          const resolveIndexResponse: IndicesResolveIndexResponse =
+            await esClient.indices.resolveIndex({
+              name: '*',
+            });
+          const standaloneIndexNames = resolveIndexResponse.indices.map((i) => i.name);
+
+          // 4. Get settings for standalone indices only
+          let indexSettingsResponse: IndicesGetSettingsResponse = {};
+          if (standaloneIndexNames.length > 0) {
+            indexSettingsResponse = await esClient.indices.getSettings({
+              index: standaloneIndexNames,
+              filter_path: '*.settings.index.lifecycle.name',
+            });
+          }
+
+          // 5. Process data streams and extract retention info
+          const dataStreamItems: RetentionInfo[] = dataStreamsResponse.data_streams.map(
+            (dataStream) => {
               const { retentionType, retentionPeriod, policyName } = extractRetentionInfo(
                 dataStream,
                 ilmPoliciesResponse
@@ -159,12 +232,23 @@ export const getReadinessRetentionRoute = (
                 policyName,
                 status: getRetentionStatus(retentionDays),
               };
-            })
-            .filter((item) => item.retentionPeriod !== null);
+            }
+          );
+
+          // 6. Process standalone indices (not part of data streams)
+          const standaloneItems = extractStandaloneIndices(
+            indexSettingsResponse,
+            ilmPoliciesResponse
+          );
+
+          // 7. Combine both sources
+          const items: RetentionInfo[] = [...dataStreamItems, ...standaloneItems];
 
           const responseBody: RetentionResponse = { items };
 
-          logger.info(`Retrieved retention data for ${items.length} data streams`);
+          logger.info(
+            `Retrieved retention data for ${dataStreamItems.length} data streams and ${standaloneItems.length} standalone indices`
+          );
 
           return response.ok({
             body: responseBody,

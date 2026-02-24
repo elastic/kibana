@@ -19,7 +19,12 @@ import {
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useSiemReadinessApi } from '@kbn/siem-readiness';
-import type { RetentionInfo, RetentionStatus, MainCategories } from '@kbn/siem-readiness';
+import type {
+  RetentionInfo,
+  RetentionStatus,
+  RetentionType,
+  MainCategories,
+} from '@kbn/siem-readiness';
 import {
   CategoryAccordionTable,
   type CategoryData,
@@ -203,7 +208,32 @@ export const RetentionTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
         ),
         sortable: true,
         truncateText: true,
-        width: '35%',
+        width: '30%',
+      },
+      {
+        field: 'retentionType',
+        name: i18n.translate(
+          'xpack.securitySolution.siemReadiness.retention.table.column.retentionType',
+          {
+            defaultMessage: 'Managed by',
+          }
+        ),
+        width: '10%',
+        render: (retentionType: RetentionType) => {
+          if (retentionType === 'dsl') {
+            return <EuiText size="xs">{'DSL'}</EuiText>;
+          }
+          if (retentionType === 'ilm') {
+            return <EuiText size="xs">{'ILM'}</EuiText>;
+          }
+          return (
+            <EuiText size="xs" color="subdued">
+              {i18n.translate('xpack.securitySolution.siemReadiness.retention.managedBy.none', {
+                defaultMessage: 'None',
+              })}
+            </EuiText>
+          );
+        },
       },
       {
         field: 'retentionPeriod',

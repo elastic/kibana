@@ -17,12 +17,9 @@ export const RetentionWarningPrompt: React.FC = () => {
   return (
     <EuiCallOut
       announceOnMount
-      title={i18n.translate(
-        'xpack.securitySolution.siemReadiness.retention.warningPrompt.title',
-        {
-          defaultMessage: 'Some indices have shorter retention periods than recommended.',
-        }
-      )}
+      title={i18n.translate('xpack.securitySolution.siemReadiness.retention.warningPrompt.title', {
+        defaultMessage: 'Some indices have shorter retention periods than recommended.',
+      })}
       color="warning"
       iconType="warning"
       size="s"
@@ -30,7 +27,7 @@ export const RetentionWarningPrompt: React.FC = () => {
       <p>
         <FormattedMessage
           id="xpack.securitySolution.siemReadiness.retention.warningPrompt.description"
-          defaultMessage="Review and update any FedRAMP non-compliant ILM policies. You can create a case to track this work and complete it later if needed. Learn more in our {docs}."
+          defaultMessage="Review and update any FedRAMP non-compliant retention policies (ILM or DSL). You can create a case to track this work and complete it later if needed. Learn more in our {docs}."
           values={{
             docs: (
               <EuiLink href={ILM_DOCS_URL} target="_blank" external>
