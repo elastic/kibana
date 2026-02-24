@@ -297,7 +297,7 @@ export function ServiceInventory() {
 
   useEffect(() => {
     if (hasSlos) {
-      telemetry.reportEmbeddedSloShown();
+      telemetry.reportSloInfoShown();
     }
   }, [hasSlos, telemetry]);
 

@@ -47,11 +47,11 @@ describe('TelemetryService', () => {
   it('should report embedded SLO shown event with the properties', async () => {
     const telemetry = service.start();
 
-    telemetry.reportEmbeddedSloShown();
+    telemetry.reportSloInfoShown();
 
     expect(mockCoreStart.analytics.reportEvent).toHaveBeenCalledTimes(1);
     expect(mockCoreStart.analytics.reportEvent).toHaveBeenCalledWith(
-      TelemetryEventTypes.EMBEDDED_SLO_SHOWN,
+      TelemetryEventTypes.SLO_INFO_SHOWN,
       {}
     );
   });

@@ -65,7 +65,7 @@ const sloOverviewFlyoutStatusFilteredEventType: TelemetryEvent = {
 };
 
 const embeddedSloShownEventType: TelemetryEvent = {
-  eventType: TelemetryEventTypes.EMBEDDED_SLO_SHOWN,
+  eventType: TelemetryEventTypes.SLO_INFO_SHOWN,
   schema: {},
 };
 

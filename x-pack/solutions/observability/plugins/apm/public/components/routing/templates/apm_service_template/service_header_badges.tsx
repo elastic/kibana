@@ -70,7 +70,7 @@ export function ServiceHeaderBadges({
 
   useEffect(() => {
     if (showSloBadge) {
-      telemetry.reportEmbeddedSloShown();
+      telemetry.reportSloInfoShown();
     }
   }, [showSloBadge, telemetry]);
 
