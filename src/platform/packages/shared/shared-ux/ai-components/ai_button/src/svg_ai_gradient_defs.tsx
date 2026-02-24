@@ -15,6 +15,11 @@ export interface SvgAiGradientDefsProps {
   readonly endColor: string;
   readonly startOffsetPercent?: number;
   readonly endOffsetPercent?: number;
+  readonly gradientUnits?: 'objectBoundingBox' | 'userSpaceOnUse';
+  readonly x1?: string;
+  readonly y1?: string;
+  readonly x2?: string;
+  readonly y2?: string;
 }
 
 export const SvgAiGradientDefs = ({
@@ -23,13 +28,25 @@ export const SvgAiGradientDefs = ({
   endColor,
   startOffsetPercent = 0,
   endOffsetPercent = 100,
+  gradientUnits = 'objectBoundingBox',
+  x1 = '0',
+  y1 = '0',
+  x2 = '1',
+  y2 = '1',
 }: SvgAiGradientDefsProps) => {
   // SVG icons need gradient defs to fill vector paths with multiple colors.
   // CSS/background gradients style boxes, but defs color the actual icon shape.
   return (
     <svg width="0" height="0" aria-hidden="true" focusable="false" style={{ position: 'absolute' }}>
       <defs>
-        <linearGradient id={gradientId} x1="0" y1="0" x2="1" y2="1">
+        <linearGradient
+          id={gradientId}
+          x1={x1}
+          y1={y1}
+          x2={x2}
+          y2={y2}
+          gradientUnits={gradientUnits}
+        >
           <stop offset={`${startOffsetPercent}%`} stopColor={startColor} />
           <stop offset={`${endOffsetPercent}%`} stopColor={endColor} />
         </linearGradient>

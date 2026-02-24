@@ -31,7 +31,7 @@ export const AiButtonBase = (props: AiButtonProps) => {
     isFilled,
     variant,
   });
-  const { gradientId, iconGradientCss, stops } = useSvgAiGradient({
+  const { gradientId, iconGradientCss, stops, defs } = useSvgAiGradient({
     isFilled,
     variant,
   });
@@ -45,6 +45,7 @@ export const AiButtonBase = (props: AiButtonProps) => {
       endColor={stops.endColor}
       startOffsetPercent={stops.startOffsetPercent}
       endOffsetPercent={stops.endOffsetPercent}
+      {...defs}
     />
   ) : null;
 
