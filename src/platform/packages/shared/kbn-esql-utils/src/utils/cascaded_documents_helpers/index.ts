@@ -31,7 +31,7 @@ import type {
   ESQLUnaryExpression,
   ESQLPostfixUnaryExpression,
   ESQLProperNode,
-} from '@kbn/esql-language/src/types';
+} from '@elastic/esql';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { FieldSummary } from '@kbn/esql-language/src/commands/registry/types';

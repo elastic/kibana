@@ -16,8 +16,8 @@ import {
 } from '@kbn/esql-language';
 import type { DataViewFieldMap } from '@kbn/data-views-plugin/common';
 import { partition } from 'lodash/fp';
-import type { ESQLProperNode } from '@kbn/esql-language/src/types';
-import { isAsExpression, isFieldExpression } from '@kbn/esql-language/src/ast/is';
+import type { ESQLProperNode } from '@elastic/esql';
+import { isAsExpression, isFieldExpression } from '@elastic/esql';
 import * as E from 'fp-ts/Either';
 import { getPrivilegedMonitorUsersIndex } from '../../../../../common/entity_analytics/privileged_user_monitoring/utils';
 
