@@ -11,7 +11,7 @@ import React from 'react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/react';
 import { useDispatch } from 'react-redux';
-import type { KbnPalettes } from '@kbn/palettes';
+import type { KbnPaletteId, KbnPalettes } from '@kbn/palettes';
 import { changeAlpha } from '../../color/color_math';
 import type { ColorMapping } from '../../config';
 import { getGradientColorScale } from '../../color/color_handling';
@@ -25,7 +25,7 @@ export function Gradient({
   isDarkMode,
   palettes,
 }: {
-  paletteId: string;
+  paletteId: KbnPaletteId;
   isDarkMode: boolean;
   colorMode: ColorMapping.Config['colorMode'];
   palettes: KbnPalettes;

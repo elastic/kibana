@@ -158,7 +158,7 @@ function useTrendPalettes(): { defaultPalette: TrendPalette; allPalettes: TrendP
   const palettes = useKbnPalettes();
   const computedPalettes = useMemo(() => {
     const defaultKbnPalette = palettes.get(KbnPalette.CompareTo);
-    const trendPalettes = new Set<string>([KbnPalette.Complementary, KbnPalette.Temperature]);
+    const trendPalettes = new Set<KbnPaletteId>([KbnPalette.Complementary, KbnPalette.Temperature]);
     const defaultPalette = {
       id: defaultKbnPalette.id,
       paletteId: defaultKbnPalette.id,
