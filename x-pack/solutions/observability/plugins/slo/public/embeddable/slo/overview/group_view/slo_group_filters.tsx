@@ -6,6 +6,8 @@
  */
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox, EuiFormRow, EuiSelect, EuiText } from '@elastic/eui';
+import type { AsCodeFilter } from '@kbn/as-code-filters-schema';
+import { fromStoredFilters, toStoredFilters } from '@kbn/as-code-filters-transforms';
 import type { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -26,7 +28,10 @@ interface Option {
 }
 
 interface Props {
-  onSelected: (prop: string, value: string | Array<string | undefined> | Filter[]) => void;
+  onSelected: (
+    prop: string,
+    value: string | Array<string | undefined> | Filter[] | AsCodeFilter[]
+  ) => void;
   selectedFilters: GroupFilters;
 }
 
@@ -90,7 +95,9 @@ export function SloGroupFilters({ selectedFilters, onSelected }: Props) {
   });
   const [selectedGroupBy, setSelectedGroupBy] =
     useState<GroupBy>(selectedFilters.group_by) ?? 'status';
-  const [filters, setFilters] = useState(selectedFilters.filters) ?? [];
+  const [filters, setFilters] = useState<Filter[]>(
+    toStoredFilters(selectedFilters.filters) ?? []
+  );
   const [kqlQuery, setkqlQuery] = useState(selectedFilters.kql_query);
   const [selectedGroupByLabel, setSelectedGroupByLabel] = useState('Status');
   const [groupOptions, setGroupOptions] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
@@ -241,7 +248,7 @@ export function SloGroupFilters({ selectedFilters, onSelected }: Props) {
           filters={filters}
           onFiltersUpdated={(newFilters) => {
             setFilters(newFilters);
-            onSelected('filters', newFilters);
+            onSelected('filters', fromStoredFilters(newFilters) ?? []);
           }}
           onQuerySubmit={({ query: value }) => {
             setkqlQuery(String(value?.query));
@@ -258,8 +265,12 @@ export function SloGroupFilters({ selectedFilters, onSelected }: Props) {
           onClearSavedQuery={() => {}}
           showQueryInput={true}
           onSavedQueryUpdated={(savedQuery) => {
-            setFilters(savedQuery.attributes.filters);
-            setkqlQuery(String(savedQuery.attributes.query.query));
+            const storedFilters = savedQuery.attributes.filters;
+            setFilters(storedFilters);
+            onSelected('filters', fromStoredFilters(storedFilters) ?? []);
+            const kql = String(savedQuery.attributes.query.query);
+            setkqlQuery(kql);
+            onSelected('kql_query', kql);
           }}
         />
       </EuiFormRow>

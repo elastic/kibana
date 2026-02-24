@@ -79,6 +79,8 @@
     "@kbn/field-formats-plugin",
     "@kbn/core-http-server",
     "@kbn/aiops-plugin",
+    "@kbn/as-code-filters-schema",
+    "@kbn/as-code-filters-transforms",
     "@kbn/presentation-publishing",
     "@kbn/aiops-log-rate-analysis",
     "@kbn/data-view-field-editor-plugin",

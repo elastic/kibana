@@ -25,6 +25,7 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React, { useEffect } from 'react';
 import { BehaviorSubject, Subject, merge } from 'rxjs';
 import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
+import { toStoredFilters } from '@kbn/as-code-filters-transforms';
 import { PluginContext } from '../../../context/plugin_context';
 import type { SLOPublicPluginsStart, SLORepositoryClient } from '../../../types';
 import { SLO_OVERVIEW_EMBEDDABLE_ID } from '../../../../common/embeddables/overview/constants';
@@ -209,7 +210,7 @@ export const getOverviewEmbeddableFactory = ({
                       groupBy={groupBy}
                       groups={groups}
                       kqlQuery={kqlQuery}
-                      filters={groupFilters?.filters}
+                      filters={toStoredFilters(groupFilters?.filters) ?? []}
                       reloadSubject={reload$}
                     />
                   </EuiFlexItem>

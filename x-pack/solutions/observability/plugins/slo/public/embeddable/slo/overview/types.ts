@@ -10,7 +10,6 @@ import type {
   HasDrilldowns,
   SerializedDrilldowns,
 } from '@kbn/embeddable-plugin/public';
-import type { Filter } from '@kbn/es-query';
 import type { EmbeddableApiContext, HasSupportedTriggers } from '@kbn/presentation-publishing';
 import type {
   HasEditCapabilities,
@@ -19,6 +18,7 @@ import type {
   SerializedTitles,
 } from '@kbn/presentation-publishing';
 
+import type { AsCodeFilter } from '@kbn/as-code-filters-schema';
 import type {
   SingleOverviewCustomState,
   GroupOverviewCustomState,
@@ -29,7 +29,8 @@ export type GroupBy = 'slo.tags' | 'status' | 'slo.indicator.type';
 export interface GroupFilters {
   group_by: GroupBy;
   groups?: string[];
-  filters?: Filter[];
+  /** As-code filters for persistence; convert to Filter[] with toStoredFilters for UI (e.g. SearchBar). */
+  filters?: AsCodeFilter[];
   kql_query?: string;
 }
 
