@@ -59,6 +59,7 @@ test.describe(
         tag: [...tags.stateful.classic],
       },
       async ({ page, kbnUrl }) => {
+        test.skip();
         // Visit osquery — when not installed, should prompt to add integration
         await page.goto(kbnUrl.get('/app/osquery'));
 

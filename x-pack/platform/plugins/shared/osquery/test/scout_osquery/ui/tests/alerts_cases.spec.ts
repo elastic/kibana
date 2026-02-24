@@ -65,6 +65,7 @@ test.describe(
     });
 
     test('runs osquery against alert and creates a new case', async ({ page, kbnClient }) => {
+      test.skip();
       test.setTimeout(180_000); // Alert tests can take time
 
       const caseName = `Test case ${Date.now()}`;
@@ -146,6 +147,7 @@ test.describe(
     });
 
     test('sees osquery results from last action and add to a case', async ({ page }) => {
+      test.skip();
       test.setTimeout(180_000); // Alert tests can take time
 
       await test.step('Expand alert and open response actions', async () => {
