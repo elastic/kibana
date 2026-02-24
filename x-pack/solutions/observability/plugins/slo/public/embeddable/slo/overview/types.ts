@@ -4,9 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { HasDynamicActions } from '@kbn/embeddable-enhanced-plugin/public';
-import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
-import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
+
+import type {
+  DefaultEmbeddableApi,
+  HasDrilldowns,
+  SerializedDrilldowns,
+} from '@kbn/embeddable-plugin/public';
 import type { Filter } from '@kbn/es-query';
 import type { EmbeddableApiContext, HasSupportedTriggers } from '@kbn/presentation-publishing';
 import type {
@@ -37,14 +40,12 @@ export interface SloConfigurationProps {
 export type SloOverviewState = Partial<SingleOverviewCustomState> &
   Partial<GroupOverviewCustomState>;
 
-export type SloOverviewEmbeddableState = SerializedTitles &
-  Partial<DynamicActionsSerializedState> &
-  SloOverviewState;
+export type SloOverviewEmbeddableState = SerializedTitles & SerializedDrilldowns & SloOverviewState;
 
 export type SloOverviewApi = DefaultEmbeddableApi<SloOverviewEmbeddableState> &
   PublishesWritableTitle &
   PublishesTitle &
-  HasDynamicActions &
+  HasDrilldowns &
   HasSloGroupOverviewConfig &
   HasEditCapabilities &
   HasSupportedTriggers;

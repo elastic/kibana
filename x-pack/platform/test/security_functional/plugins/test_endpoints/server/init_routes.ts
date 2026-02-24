@@ -9,6 +9,8 @@ import { type DiagnosticResult, errors } from '@elastic/elasticsearch';
 
 import { schema } from '@kbn/config-schema';
 import type { CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/server';
+import type { FakeRawRequest, Headers } from '@kbn/core-http-server';
+import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import { ROUTE_TAG_AUTH_FLOW } from '@kbn/security-plugin/server';
 import { restApiKeySchema } from '@kbn/security-plugin-types-server';
 import type {
@@ -488,6 +490,124 @@ export function initRoutes(
         return response.ok({ body: await scopedClient.asCurrentUser.security.authenticate() });
       } catch (err) {
         logger.error(`Failed to authenticate to ES with UIAM API Key: ${err}`, err);
+        return response.customError({
+          statusCode: 500,
+          body: { message: err.message },
+        });
+      }
+    }
+  );
+
+  // UIAM API Key Grant Route
+  router.post(
+    {
+      path: '/test_endpoints/uiam/api_keys/_grant',
+      validate: {
+        body: schema.object({
+          name: schema.string(),
+          expiration: schema.maybe(schema.string()),
+          authcScheme: schema.string(),
+          credential: schema.string(),
+        }),
+      },
+      security: {
+        authc: { enabled: 'optional' },
+        authz: { enabled: false, reason: 'Test endpoint for UIAM API key operations' },
+      },
+    },
+    async (context, request, response) => {
+      try {
+        const { name, expiration, authcScheme, credential } = request.body;
+        const [{ security }] = await core.getStartServices();
+
+        if (!security.authc.apiKeys.uiam) {
+          return response.badRequest({
+            body: { message: 'UIAM API keys service is not available' },
+          });
+        }
+
+        // Create a new request with the provided authentication header
+        const requestHeaders: Headers = {
+          ...request.headers,
+          authorization: `${authcScheme} ${credential}`,
+        };
+        const fakeRawRequest: FakeRawRequest = {
+          headers: requestHeaders,
+          path: request.url.pathname,
+        };
+        const requestToUse = kibanaRequestFactory(fakeRawRequest);
+
+        const result = await security.authc.apiKeys.uiam.grant(requestToUse, {
+          name,
+          expiration,
+        });
+
+        if (!result) {
+          return response.badRequest({
+            body: { message: 'Failed to grant UIAM API key' },
+          });
+        }
+
+        return response.ok({ body: result });
+      } catch (err) {
+        logger.error(`Failed to grant UIAM API key: ${err}`, err);
+        return response.customError({
+          statusCode: 500,
+          body: { message: err.message },
+        });
+      }
+    }
+  );
+
+  // UIAM API Key Invalidate Route
+  router.post(
+    {
+      path: '/test_endpoints/uiam/api_keys/_invalidate',
+      validate: {
+        body: schema.object({
+          id: schema.string(),
+          authcScheme: schema.string(),
+          credential: schema.string(),
+        }),
+      },
+      security: {
+        authc: { enabled: 'optional' },
+        authz: { enabled: false, reason: 'Test endpoint for UIAM API key operations' },
+      },
+    },
+    async (context, request, response) => {
+      try {
+        const { id, authcScheme, credential } = request.body;
+        const [{ security }] = await core.getStartServices();
+
+        if (!security.authc.apiKeys.uiam) {
+          return response.badRequest({
+            body: { message: 'UIAM API keys service is not available' },
+          });
+        }
+
+        // Create a new request with the provided authentication header
+        const requestHeaders: Headers = {
+          ...request.headers,
+          authorization: `${authcScheme} ${credential}`,
+        };
+        const fakeRawRequest: FakeRawRequest = {
+          headers: requestHeaders,
+          path: request.url.pathname,
+        };
+        const requestToUse = kibanaRequestFactory(fakeRawRequest);
+
+        const result = await security.authc.apiKeys.uiam.invalidate(requestToUse, { id });
+
+        if (!result) {
+          return response.badRequest({
+            body: { message: 'Failed to invalidate UIAM API key' },
+          });
+        }
+
+        return response.ok({ body: result });
+      } catch (err) {
+        logger.error(`Failed to invalidate UIAM API key: ${err}`, err);
         return response.customError({
           statusCode: 500,
           body: { message: err.message },

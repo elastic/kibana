@@ -6,16 +6,10 @@
  */
 
 import { useMemo } from 'react';
-import { css, type SerializedStyles } from '@emotion/react';
+import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
 
-export interface EditIlmPhasesFlyoutStyles {
-  sectionStyles: SerializedStyles;
-  headerStyles: SerializedStyles;
-  footerStyles: SerializedStyles;
-}
-
-export const useStyles = (): EditIlmPhasesFlyoutStyles => {
+export const useStyles = () => {
   const { euiTheme } = useEuiTheme();
 
   return useMemo(() => {
@@ -31,6 +25,12 @@ export const useStyles = (): EditIlmPhasesFlyoutStyles => {
       padding: ${euiTheme.size.m} ${euiTheme.size.l};
     `;
 
-    return { sectionStyles, headerStyles, footerStyles };
-  }, [euiTheme.size.l, euiTheme.size.m]);
+    const tabsErrorSelectedUnderlineStyles = css`
+      .streamsIlmPhasesTab--hasErrors.euiTab-isSelected::after {
+        border-color: ${euiTheme.colors.danger};
+      }
+    `;
+
+    return { sectionStyles, headerStyles, footerStyles, tabsErrorSelectedUnderlineStyles };
+  }, [euiTheme.colors.danger, euiTheme.size.l, euiTheme.size.m]);
 };

@@ -1,0 +1,229 @@
+{
+  "id": "@kbn/core-chrome-sidebar-context",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/core-chrome-sidebar-context",
+        "id": "def-common.SidebarServiceProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "SidebarServiceProvider",
+        "description": [],
+        "signature": [
+          "({ children, value }: ",
+          "SidebarProviderProps",
+          ") => React.JSX.Element"
+        ],
+        "path": "src/core/packages/chrome/sidebar/sidebar-context/index.tsx",
+        "lineNumber": 26,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-sidebar-context",
+            "id": "def-common.SidebarServiceProvider.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ children, value }",
+            "description": [],
+            "signature": [
+              "SidebarProviderProps"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar-context/index.tsx",
+            "lineNumber": 26,
+            "columnNumber": 40,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-sidebar-context",
+        "id": "def-common.useSidebarPanel",
+        "type": "Function",
+        "tags": [],
+        "label": "useSidebarPanel",
+        "description": [
+          "Hook for consumer components to access the sidebar panel context. Throws outside SidebarPanel."
+        ],
+        "signature": [
+          "() => ",
+          "SidebarPanelContextValue"
+        ],
+        "path": "src/core/packages/chrome/sidebar/sidebar-context/index.tsx",
+        "lineNumber": 58,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-chrome-sidebar-context",
+        "id": "def-common.SidebarPanelContextValue",
+        "type": "Interface",
+        "tags": [],
+        "label": "SidebarPanelContextValue",
+        "description": [
+          "Context for the sidebar panel, shared with consumer components"
+        ],
+        "path": "src/core/packages/chrome/sidebar/sidebar-context/index.tsx",
+        "lineNumber": 47,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-sidebar-context",
+            "id": "def-common.SidebarPanelContextValue.headingId",
+            "type": "string",
+            "tags": [],
+            "label": "headingId",
+            "description": [
+              "ID to place on the panel's heading element for aria-labelledby"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar-context/index.tsx",
+            "lineNumber": 49,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-sidebar-context",
+            "id": "def-common.SidebarPanelContextValue.setOnFocusRescue",
+            "type": "Function",
+            "tags": [],
+            "label": "setOnFocusRescue",
+            "description": [
+              "Override focus target when the panel unmounts with focus inside. Defaults to main content."
+            ],
+            "signature": [
+              "(callback: (() => void) | undefined) => void"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar-context/index.tsx",
+            "lineNumber": 51,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-chrome-sidebar-context",
+                "id": "def-common.SidebarPanelContextValue.setOnFocusRescue.$1",
+                "type": "Function",
+                "tags": [],
+                "label": "callback",
+                "description": [],
+                "signature": [
+                  "(() => void) | undefined"
+                ],
+                "path": "src/core/packages/chrome/sidebar/sidebar-context/index.tsx",
+                "lineNumber": 52,
+                "columnNumber": 22,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-sidebar-context",
+        "id": "def-common.SidebarProviderProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "SidebarProviderProps",
+        "description": [],
+        "path": "src/core/packages/chrome/sidebar/sidebar-context/index.tsx",
+        "lineNumber": 21,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-sidebar-context",
+            "id": "def-common.SidebarProviderProps.children",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "children",
+            "description": [],
+            "signature": [
+              "React.ReactNode"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar-context/index.tsx",
+            "lineNumber": 22,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-sidebar-context",
+            "id": "def-common.SidebarProviderProps.value",
+            "type": "Object",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "SidebarContextValue"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar-context/index.tsx",
+            "lineNumber": 23,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/core-chrome-sidebar-context",
+        "id": "def-common.SidebarPanelContext",
+        "type": "Object",
+        "tags": [],
+        "label": "SidebarPanelContext",
+        "description": [],
+        "signature": [
+          "React.Context<",
+          "SidebarPanelContextValue",
+          " | null>"
+        ],
+        "path": "src/core/packages/chrome/sidebar/sidebar-context/index.tsx",
+        "lineNumber": 55,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

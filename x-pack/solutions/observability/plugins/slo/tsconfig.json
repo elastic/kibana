@@ -29,7 +29,6 @@
     "@kbn/alerting-plugin",
     "@kbn/rison",
     "@kbn/embeddable-plugin",
-    "@kbn/embeddable-enhanced-plugin",
     "@kbn/lens-plugin",
     "@kbn/es-query",
     "@kbn/react-kibana-mount",
@@ -119,6 +118,8 @@
     "@kbn/observability-get-padded-alert-time-range-util",
     "@kbn/presentation-publishing-schemas",
     "@kbn/content-management-utils",
-    "@kbn/es-query-server"
+    "@kbn/es-query-server",
+    "@kbn/observability-agent-builder-plugin",
+    "@kbn/agent-builder-plugin"
   ]
 }
