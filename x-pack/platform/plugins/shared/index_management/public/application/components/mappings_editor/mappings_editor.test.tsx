@@ -32,7 +32,7 @@ jest.mock('../component_templates/component_templates_context', () => ({
 }));
 
 describe('Mappings editor', () => {
-  describe('Mappings editor: core', () => {
+  describe('core', () => {
     interface TestMappings {
       dynamic?: boolean;
       numeric_detection?: boolean;
