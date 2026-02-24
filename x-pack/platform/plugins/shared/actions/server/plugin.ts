@@ -781,7 +781,7 @@ export class ActionsPlugin
 
   private setSystemActions = () => {
     const systemConnectors = createSystemConnectors(this.actionTypeRegistry?.list() ?? []);
-    this.inMemoryConnectors = [...this.inMemoryConnectors, ...systemConnectors];
+    this.inMemoryConnectors.push(...systemConnectors);
   };
 
   private throwIfSystemActionsInConfig = () => {
