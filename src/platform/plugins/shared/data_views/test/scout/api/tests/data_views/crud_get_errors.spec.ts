@@ -15,10 +15,10 @@ apiTest.describe(
   'GET api/data_views/data_view/{id} - errors (data view api)',
   { tag: tags.deploymentAgnostic },
   () => {
-    let adminApiCredentials: RoleApiCredentials;
+    let viewerApiCredentials: RoleApiCredentials;
 
     apiTest.beforeAll(async ({ requestAuth }) => {
-      adminApiCredentials = await requestAuth.getApiKey('admin');
+      viewerApiCredentials = await requestAuth.getApiKeyForViewer();
     });
 
     apiTest('returns 404 error on non-existing data_view', async ({ apiClient }) => {
@@ -26,7 +26,7 @@ apiTest.describe(
       const response = await apiClient.get(`${DATA_VIEW_PATH}/${id}`, {
         headers: {
           ...COMMON_HEADERS,
-          ...adminApiCredentials.apiKeyHeader,
+          ...viewerApiCredentials.apiKeyHeader,
         },
         responseType: 'json',
       });
@@ -40,7 +40,7 @@ apiTest.describe(
       const response = await apiClient.get(`${DATA_VIEW_PATH}/${id}`, {
         headers: {
           ...COMMON_HEADERS,
-          ...adminApiCredentials.apiKeyHeader,
+          ...viewerApiCredentials.apiKeyHeader,
         },
         responseType: 'json',
       });

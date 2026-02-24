@@ -15,17 +15,17 @@ apiTest.describe(
   'GET api/data_views - get all (data view api)',
   { tag: tags.deploymentAgnostic },
   () => {
-    let adminApiCredentials: RoleApiCredentials;
+    let viewerApiCredentials: RoleApiCredentials;
 
     apiTest.beforeAll(async ({ requestAuth }) => {
-      adminApiCredentials = await requestAuth.getApiKey('admin');
+      viewerApiCredentials = await requestAuth.getApiKeyForViewer();
     });
 
     apiTest('returns list of data views', async ({ apiClient }) => {
       const response = await apiClient.get(SERVICE_PATH, {
         headers: {
           ...COMMON_HEADERS,
-          ...adminApiCredentials.apiKeyHeader,
+          ...viewerApiCredentials.apiKeyHeader,
         },
         responseType: 'json',
       });

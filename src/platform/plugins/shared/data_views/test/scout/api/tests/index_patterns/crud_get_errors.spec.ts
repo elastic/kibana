@@ -15,10 +15,10 @@ apiTest.describe(
   'GET api/index_patterns/index_pattern/{id} - errors (legacy index pattern api)',
   { tag: tags.deploymentAgnostic },
   () => {
-    let adminApiCredentials: RoleApiCredentials;
+    let viewerApiCredentials: RoleApiCredentials;
 
     apiTest.beforeAll(async ({ requestAuth }) => {
-      adminApiCredentials = await requestAuth.getApiKey('admin');
+      viewerApiCredentials = await requestAuth.getApiKeyForViewer();
     });
 
     apiTest('returns 404 error on non-existing index_pattern', async ({ apiClient }) => {
@@ -26,7 +26,7 @@ apiTest.describe(
       const response = await apiClient.get(`${DATA_VIEW_PATH_LEGACY}/${id}`, {
         headers: {
           ...COMMON_HEADERS,
-          ...adminApiCredentials.apiKeyHeader,
+          ...viewerApiCredentials.apiKeyHeader,
         },
         responseType: 'json',
       });
@@ -40,7 +40,7 @@ apiTest.describe(
       const response = await apiClient.get(`${DATA_VIEW_PATH_LEGACY}/${id}`, {
         headers: {
           ...COMMON_HEADERS,
-          ...adminApiCredentials.apiKeyHeader,
+          ...viewerApiCredentials.apiKeyHeader,
         },
         responseType: 'json',
       });
