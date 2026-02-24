@@ -326,9 +326,7 @@
                 "type": "Any",
                 "tags": [],
                 "label": "from",
-                "description": [
-                  "- optional object to read values from,\n used when initializing"
-                ],
+                "description": [],
                 "signature": [
                   "any"
                 ],
@@ -3055,7 +3053,7 @@
               }
             ],
             "path": "src/platform/plugins/shared/data/public/plugin.ts",
-            "lineNumber": 139,
+            "lineNumber": 137,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3071,7 +3069,7 @@
                   "CoreStart"
                 ],
                 "path": "src/platform/plugins/shared/data/public/plugin.ts",
-                "lineNumber": 140,
+                "lineNumber": 138,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3088,7 +3086,7 @@
                   "DataStartDependencies"
                 ],
                 "path": "src/platform/plugins/shared/data/public/plugin.ts",
-                "lineNumber": 141,
+                "lineNumber": 139,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3108,7 +3106,7 @@
               "() => void"
             ],
             "path": "src/platform/plugins/shared/data/public/plugin.ts",
-            "lineNumber": 228,
+            "lineNumber": 226,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3515,7 +3513,7 @@
                 "tags": [],
                 "label": "overwriteType",
                 "description": [
-                  "If `false` is passed in it will disable the overwrite, otherwise\nthe passed in value will be used as the data view type for this search source."
+                  "If `false` is passed in it will disable the overwrite, otherwise"
                 ],
                 "signature": [
                   "string | false | undefined"
@@ -3570,9 +3568,7 @@
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "field",
-                "description": [
-                  ": field name"
-                ],
+                "description": [],
                 "signature": [
                   "K"
                 ],
@@ -3589,9 +3585,7 @@
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "value",
-                "description": [
-                  ": value for the field"
-                ],
+                "description": [],
                 "signature": [
                   {
                     "pluginId": "data",
@@ -3644,9 +3638,7 @@
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "field",
-                "description": [
-                  ": field name"
-                ],
+                "description": [],
                 "signature": [
                   "K"
                 ],
@@ -5427,7 +5419,7 @@
           "<any> | undefined) => boolean"
         ],
         "path": "src/platform/plugins/shared/data/common/search/utils.ts",
-        "lineNumber": 29,
+        "lineNumber": 30,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -5450,7 +5442,7 @@
               "<any> | undefined"
             ],
             "path": "src/platform/plugins/shared/data/common/search/utils.ts",
-            "lineNumber": 29,
+            "lineNumber": 30,
             "columnNumber": 35,
             "deprecated": false,
             "trackAdoption": false,
@@ -9894,23 +9886,6 @@
       },
       {
         "parentPluginId": "data",
-        "id": "def-public.APPLY_FILTER_TRIGGER",
-        "type": "string",
-        "tags": [],
-        "label": "APPLY_FILTER_TRIGGER",
-        "description": [],
-        "signature": [
-          "\"FILTER_TRIGGER\""
-        ],
-        "path": "src/platform/plugins/shared/data/public/triggers/apply_filter_trigger.ts",
-        "lineNumber": 13,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
         "id": "def-public.ES_SEARCH_STRATEGY",
         "type": "string",
         "tags": [],
@@ -13083,7 +13058,7 @@
                 "tags": [],
                 "label": "includeFields",
                 "description": [
-                  "Whether or not to include the `fields` list as part of this spec. If not included, the list\nwill be fetched from Elasticsearch when instantiating a new Data View with this spec."
+                  "Whether or not to include the `fields` list as part of this spec. If not included, the list"
                 ],
                 "signature": [
                   "boolean"
@@ -14765,7 +14740,7 @@
                 "section": "def-common.GetFieldsOptions",
                 "text": "GetFieldsOptions"
               },
-              ", \"allowNoIndex\" | \"pattern\"> | undefined) => Promise<",
+              ", \"pattern\" | \"allowNoIndex\"> | undefined) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -14830,7 +14805,7 @@
                     "section": "def-common.GetFieldsOptions",
                     "text": "GetFieldsOptions"
                   },
-                  ", \"allowNoIndex\" | \"pattern\"> | undefined"
+                  ", \"pattern\" | \"allowNoIndex\"> | undefined"
                 ],
                 "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
                 "lineNumber": 624,
@@ -14973,9 +14948,7 @@
                 "type": "Array",
                 "tags": [],
                 "label": "fields",
-                "description": [
-                  ": FieldSpec[]"
-                ],
+                "description": [],
                 "signature": [
                   {
                     "pluginId": "dataViews",
@@ -14999,9 +14972,7 @@
                 "type": "Object",
                 "tags": [],
                 "label": "fieldAttrs",
-                "description": [
-                  ": FieldAttrs"
-                ],
+                "description": [],
                 "signature": [
                   "FieldAttrsAsObject",
                   " | undefined"
@@ -15818,9 +15789,7 @@
                 "type": "string",
                 "tags": [],
                 "label": "indexPatternId",
-                "description": [
-                  ": Id of kibana Index Pattern to delete"
-                ],
+                "description": [],
                 "signature": [
                   "string"
                 ],
@@ -15945,7 +15914,9 @@
                     "type": "CompoundType",
                     "tags": [],
                     "label": "refreshFields",
-                    "description": [],
+                    "description": [
+                      "- If true, will refresh the fields of the default data view"
+                    ],
                     "signature": [
                       "boolean | undefined"
                     ],
@@ -16566,7 +16537,7 @@
         "label": "search",
         "description": [],
         "path": "src/platform/plugins/shared/data/server/index.ts",
-        "lineNumber": 73,
+        "lineNumber": 74,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -16579,7 +16550,7 @@
             "label": "aggs",
             "description": [],
             "path": "src/platform/plugins/shared/data/server/index.ts",
-            "lineNumber": 74,
+            "lineNumber": 75,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -16602,7 +16573,7 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/data/server/index.ts",
-                "lineNumber": 75,
+                "lineNumber": 76,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -16618,7 +16589,7 @@
                   "(interval: string, shouldForceFixed?: boolean | undefined) => Interval"
                 ],
                 "path": "src/platform/plugins/shared/data/server/index.ts",
-                "lineNumber": 76,
+                "lineNumber": 77,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -16673,7 +16644,7 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/data/server/index.ts",
-                "lineNumber": 77,
+                "lineNumber": 78,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -16689,7 +16660,7 @@
                   "(interval: string) => moment.Duration | null"
                 ],
                 "path": "src/platform/plugins/shared/data/server/index.ts",
-                "lineNumber": 78,
+                "lineNumber": 79,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -16721,7 +16692,7 @@
                   "(maxBucketCount: number, duration: number) => moment.Duration"
                 ],
                 "path": "src/platform/plugins/shared/data/server/index.ts",
-                "lineNumber": 79,
+                "lineNumber": 80,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -18133,7 +18104,7 @@
                 "tags": [],
                 "label": "includeFields",
                 "description": [
-                  "Whether or not to include the `fields` list as part of this spec. If not included, the list\nwill be fetched from Elasticsearch when instantiating a new Data View with this spec."
+                  "Whether or not to include the `fields` list as part of this spec. If not included, the list"
                 ],
                 "signature": [
                   "boolean"
@@ -20862,7 +20833,7 @@
                 "section": "def-common.GetFieldsOptions",
                 "text": "GetFieldsOptions"
               },
-              ", \"allowNoIndex\" | \"pattern\"> | undefined) => Promise<",
+              ", \"pattern\" | \"allowNoIndex\"> | undefined) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -20927,7 +20898,7 @@
                     "section": "def-common.GetFieldsOptions",
                     "text": "GetFieldsOptions"
                   },
-                  ", \"allowNoIndex\" | \"pattern\"> | undefined"
+                  ", \"pattern\" | \"allowNoIndex\"> | undefined"
                 ],
                 "path": "src/platform/plugins/shared/data_views/common/data_views/data_views.ts",
                 "lineNumber": 624,
@@ -21070,9 +21041,7 @@
                 "type": "Array",
                 "tags": [],
                 "label": "fields",
-                "description": [
-                  ": FieldSpec[]"
-                ],
+                "description": [],
                 "signature": [
                   {
                     "pluginId": "dataViews",
@@ -21096,9 +21065,7 @@
                 "type": "Object",
                 "tags": [],
                 "label": "fieldAttrs",
-                "description": [
-                  ": FieldAttrs"
-                ],
+                "description": [],
                 "signature": [
                   "FieldAttrsAsObject",
                   " | undefined"
@@ -21915,9 +21882,7 @@
                 "type": "string",
                 "tags": [],
                 "label": "indexPatternId",
-                "description": [
-                  ": Id of kibana Index Pattern to delete"
-                ],
+                "description": [],
                 "signature": [
                   "string"
                 ],
@@ -22042,7 +22007,9 @@
                     "type": "CompoundType",
                     "tags": [],
                     "label": "refreshFields",
-                    "description": [],
+                    "description": [
+                      "- If true, will refresh the fields of the default data view"
+                    ],
                     "signature": [
                       "boolean | undefined"
                     ],
@@ -25181,7 +25148,7 @@
             "section": "def-common.GetFieldsOptions",
             "text": "GetFieldsOptions"
           },
-          ", \"allowNoIndex\" | \"pattern\"> | undefined) => Promise<",
+          ", \"pattern\" | \"allowNoIndex\"> | undefined) => Promise<",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -25726,7 +25693,7 @@
           "{ query: string | { [key: string]: any; }; language: string; }"
         ],
         "path": "src/platform/packages/shared/kbn-es-query/src/filters/build_filters/types.ts",
-        "lineNumber": 89,
+        "lineNumber": 94,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
