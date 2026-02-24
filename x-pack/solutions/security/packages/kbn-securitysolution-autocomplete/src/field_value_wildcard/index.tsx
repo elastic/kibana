@@ -132,7 +132,6 @@ export const AutocompleteFieldWildcardComponent: React.FC<AutocompleteFieldWildc
           newOptions.length > 0 && searchQuery && searchQuery !== newOptions[0].label;
 
         handleError(undefined);
-        setShowSpacesWarning(false);
         setSearchQuery('');
 
         if (isCustomSearchQuery) {
@@ -154,8 +153,15 @@ export const AutocompleteFieldWildcardComponent: React.FC<AutocompleteFieldWildc
           handleError(err);
           handleWarning(warning);
           if (!err) handleSpacesWarning(searchVal);
-          setSearchQuery(searchVal);
         }
+
+        if (searchVal) {
+          // Clear selected option when user types to allow user to modify value without {backspace}
+          onChange('');
+        }
+
+        // Update search query unconditionally to show correct suggestions even when input is cleared
+        setSearchQuery(searchVal);
       },
       [handleError, handleSpacesWarning, isRequired, selectedField, touched, warning, handleWarning]
     );
