@@ -7,6 +7,10 @@
 
 import { z } from '@kbn/zod/v4';
 
-export const CasesStepBaseConfigSchema = z.object({
-  'push-case': z.boolean().optional().default(false),
-});
+export const CasesStepBaseConfigSchema = z
+  .object({
+    'push-case': z.boolean().optional().default(false),
+  })
+  // Needs to be a partial so it's not required in the YAML editor.
+  // `.otional().default()` will still mark it as required.
+  .partial();
