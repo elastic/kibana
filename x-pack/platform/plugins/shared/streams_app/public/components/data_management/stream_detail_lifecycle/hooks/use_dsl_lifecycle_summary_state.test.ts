@@ -9,12 +9,13 @@ import {
   dslLifecycleSummaryUiReducer,
   initialDslLifecycleSummaryUiState,
 } from './use_dsl_lifecycle_summary_state';
+import type { IngestStreamLifecycleDSL } from '@kbn/streams-schema';
 
 describe('dslLifecycleSummaryUiReducer', () => {
   it('clears pending flyout save when closing the override modal', () => {
-    const pending = {
+    const pending: IngestStreamLifecycleDSL = {
       dsl: { data_retention: '30d', downsample: [{ after: '1d', fixed_interval: '1h' }] },
-    } as any;
+    };
 
     const state = {
       ...initialDslLifecycleSummaryUiState,
@@ -29,9 +30,9 @@ describe('dslLifecycleSummaryUiReducer', () => {
   });
 
   it('opens the edit flyout with initial steps and selected index', () => {
-    const initialSteps = {
+    const initialSteps: IngestStreamLifecycleDSL = {
       dsl: { data_retention: '30d', downsample: [{ after: '1d', fixed_interval: '1h' }] },
-    } as any;
+    };
 
     const next = dslLifecycleSummaryUiReducer(initialDslLifecycleSummaryUiState, {
       type: 'openEditFlyout',
