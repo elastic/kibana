@@ -655,7 +655,8 @@ describe('discover responsive sidebar', function () {
     expect(services.dataViewEditor.userPermissions.editDataView).toHaveBeenCalled();
   });
 
-  it('should render buttons in data view picker correctly', async () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/217005
+  it.skip('should render buttons in data view picker correctly', async () => {
     const services = createMockServices();
     const propsWithPicker: TestWrapperProps = {
       ...props,

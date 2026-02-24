@@ -1148,7 +1148,7 @@
           "EuiFlyoutResizableProps",
           ", \"onClose\" | \"onResize\" | \"session\"> & { onClose?: ((flyout: ",
           "OverlayRef",
-          ") => void) | undefined; session?: \"never\" | undefined; isResizable?: boolean | undefined; }"
+          ") => void) | undefined; session?: \"never\" | undefined; resizable?: boolean | undefined; isResizable?: boolean | undefined; }"
         ],
         "path": "src/core/packages/overlays/browser/src/flyout.ts",
         "lineNumber": 30,
