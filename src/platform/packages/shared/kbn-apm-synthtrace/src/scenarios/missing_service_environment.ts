@@ -13,8 +13,8 @@
  * flyouts, or agent config links for data without environment.
  */
 
-import type { ApmOtelFields, OtelInstance } from '@kbn/synthtrace-client';
-import { apm, ApmSynthtracePipelineSchema } from '@kbn/synthtrace-client';
+import type { ApmOtelFields, OtelInstance } from '@kbn/apm-synthtrace-client';
+import { apm, ApmSynthtracePipelineSchema } from '@kbn/apm-synthtrace-client';
 import { withClient } from '../lib/utils/with_client';
 import type { Scenario } from '../cli/scenario';
 
