@@ -18,8 +18,8 @@ import type {
   IndexSearchSource,
 } from './steps/list_search_sources';
 import { listSearchSources } from './steps/list_search_sources';
-import { flattenMapping, getDataStreamMappings, getIndexMappings } from './utils/mappings';
-import { partitionByCcs, getBatchedFieldsFromFieldCaps } from './utils/ccs';
+import { flattenMapping, getDataStreamMappings } from './utils/mappings';
+import { getIndexFields, partitionByCcs, getBatchedFieldsFromFieldCaps } from './utils/ccs';
 import { generateXmlTree } from './utils/formatting/xml';
 
 export interface RelevantResource {
@@ -39,6 +39,10 @@ export interface ResourceDescriptor {
   fields?: string[];
 }
 
+/**
+ * Builds resource descriptors for a list of indices by delegating
+ * the local-vs-CCS field resolution to {@link getIndexFields}.
+ */
 const createIndexSummaries = async ({
   indices,
   esClient,
@@ -46,46 +50,20 @@ const createIndexSummaries = async ({
   indices: IndexSearchSource[];
   esClient: ElasticsearchClient;
 }): Promise<ResourceDescriptor[]> => {
-  const { local, remote } = partitionByCcs(indices);
-  const descriptors: ResourceDescriptor[] = [];
+  const indexFields = await getIndexFields({
+    indices: indices.map((i) => i.name),
+    esClient,
+  });
 
-  // Local indices: use _mapping API (supports full mapping tree + _meta.description)
-  if (local.length > 0) {
-    const allMappings = await getIndexMappings({
-      indices: local.map((index) => index.name),
-      cleanup: true,
-      esClient,
-    });
-
-    for (const { name: indexName } of local) {
-      const indexMappings = allMappings[indexName];
-      const flattened = flattenMapping(indexMappings.mappings);
-      descriptors.push({
-        type: EsResourceType.index,
-        name: indexName,
-        description: indexMappings?.mappings._meta?.description,
-        fields: flattened.map((field) => field.path),
-      });
-    }
-  }
-
-  // Remote (CCS) indices: single batched _field_caps request, then split per index
-  if (remote.length > 0) {
-    const fieldsByIndex = await getBatchedFieldsFromFieldCaps({
-      resources: remote.map((r) => r.name),
-      esClient,
-    });
-
-    for (const { name } of remote) {
-      descriptors.push({
-        type: EsResourceType.index,
-        name,
-        fields: (fieldsByIndex[name] ?? []).map((f) => f.path),
-      });
-    }
-  }
-
-  return descriptors;
+  return indices.map(({ name }) => {
+    const entry = indexFields[name];
+    return {
+      type: EsResourceType.index,
+      name,
+      description: entry?.rawMapping?._meta?.description,
+      fields: (entry?.fields ?? []).map((f) => f.path),
+    };
+  });
 };
 
 const createAliasSummaries = async ({

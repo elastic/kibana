@@ -23,6 +23,8 @@ export {
   partitionByCcs,
   getFieldsFromFieldCaps,
   getBatchedFieldsFromFieldCaps,
+  getIndexFields,
+  type IndexFieldsResult,
 } from './ccs';
 export { generateXmlTree, type XmlNode } from './formatting';
 export { errorResult, otherResult } from './results';

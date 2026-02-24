@@ -7,11 +7,7 @@
 
 import { z } from '@kbn/zod';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
-import {
-  getIndexMappings,
-  isCcsTarget,
-  getFieldsFromFieldCaps,
-} from '@kbn/agent-builder-genai-utils';
+import { getIndexFields } from '@kbn/agent-builder-genai-utils';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 
@@ -26,47 +22,43 @@ export const getIndexMappingsTool = (): BuiltinToolDefinition<typeof getIndexMap
     description: 'Retrieve mappings for the specified index or indices.',
     schema: getIndexMappingsSchema,
     handler: async ({ indices }, { esClient }) => {
-      // Partition indices into local and remote (CCS) groups.
-      // The _mapping API does not support CCS, so remote indices use _field_caps instead.
-      const localIndices = indices.filter((i) => !isCcsTarget(i));
-      const remoteIndices = indices.filter((i) => isCcsTarget(i));
+      // getIndexFields transparently handles the local-vs-CCS split:
+      //  - local indices use _mapping API (full mapping tree in rawMapping)
+      //  - CCS indices use batched _field_caps API (flat field list)
+      const indexFields = await getIndexFields({
+        indices,
+        esClient: esClient.asCurrentUser,
+      });
 
       const results = [];
 
-      // Local indices: use _mapping API for full mapping tree
-      if (localIndices.length > 0) {
-        const mappings = await getIndexMappings({
-          indices: localIndices,
-          esClient: esClient.asCurrentUser,
-        });
+      // Local indices: return full mapping tree for richer LLM context
+      const localEntries = Object.entries(indexFields).filter(([, v]) => v.rawMapping);
+      if (localEntries.length > 0) {
         results.push({
           type: ToolResultType.other,
           data: {
-            mappings,
-            indices: localIndices,
+            mappings: Object.fromEntries(
+              localEntries.map(([idx, v]) => [idx, { mappings: v.rawMapping }])
+            ),
+            indices: localEntries.map(([idx]) => idx),
           },
         });
       }
 
-      // Remote (CCS) indices: use _field_caps API (CCS-compatible fallback)
-      if (remoteIndices.length > 0) {
-        const fieldsByIndex: Record<string, { fields: Array<{ path: string; type: string }> }> = {};
-        await Promise.all(
-          remoteIndices.map(async (idx) => {
-            const fields = await getFieldsFromFieldCaps({
-              resource: idx,
-              esClient: esClient.asCurrentUser,
-            });
-            fieldsByIndex[idx] = {
-              fields: fields.map(({ path, type }) => ({ path, type })),
-            };
-          })
-        );
+      // Remote (CCS) indices: return flattened field lists
+      const remoteEntries = Object.entries(indexFields).filter(([, v]) => !v.rawMapping);
+      if (remoteEntries.length > 0) {
         results.push({
           type: ToolResultType.other,
           data: {
-            fieldsByIndex,
-            indices: remoteIndices,
+            fieldsByIndex: Object.fromEntries(
+              remoteEntries.map(([idx, v]) => [
+                idx,
+                { fields: v.fields.map(({ path, type }) => ({ path, type })) },
+              ])
+            ),
+            indices: remoteEntries.map(([idx]) => idx),
           },
         });
       }

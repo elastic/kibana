@@ -6,7 +6,8 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { isCcsTarget, partitionByCcs, getFieldsFromFieldCaps } from './ccs';
+import { isCcsTarget, partitionByCcs, getFieldsFromFieldCaps, getIndexFields } from './ccs';
+import { getIndexMappings } from './mappings';
 
 describe('isCcsTarget', () => {
   it('returns true for a CCS pattern with cluster prefix', () => {
@@ -113,5 +114,136 @@ describe('getFieldsFromFieldCaps', () => {
       { path: 'message', type: 'text', meta: {} },
       { path: 'status', type: 'keyword', meta: {} },
     ]);
+  });
+});
+
+jest.mock('./mappings', () => ({
+  ...jest.requireActual('./mappings'),
+  getIndexMappings: jest.fn(),
+}));
+
+const getIndexMappingsMock = getIndexMappings as jest.MockedFunction<typeof getIndexMappings>;
+
+describe('getIndexFields', () => {
+  const createEsClient = (fieldCapsResponse?: unknown) =>
+    ({
+      fieldCaps: jest.fn().mockResolvedValue(fieldCapsResponse ?? { indices: [], fields: {} }),
+      indices: { getMapping: jest.fn() },
+    } as unknown as ElasticsearchClient);
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('returns rawMapping for local indices via _mapping API', async () => {
+    const esClient = createEsClient();
+    getIndexMappingsMock.mockResolvedValue({
+      'my-index': {
+        mappings: {
+          _meta: { description: 'test index' },
+          properties: {
+            message: { type: 'text' },
+          },
+        },
+      },
+    });
+
+    const result = await getIndexFields({
+      indices: ['my-index'],
+      esClient,
+    });
+
+    expect(getIndexMappingsMock).toHaveBeenCalledWith({
+      indices: ['my-index'],
+      cleanup: true,
+      esClient,
+    });
+    expect(result['my-index'].rawMapping).toBeDefined();
+    expect(result['my-index'].rawMapping?._meta?.description).toBe('test index');
+    expect(result['my-index'].fields).toEqual([
+      { path: 'message', type: 'text', meta: {} },
+    ]);
+  });
+
+  it('returns fields without rawMapping for CCS indices via _field_caps API', async () => {
+    const esClient = createEsClient({
+      indices: ['remote:logs'],
+      fields: {
+        status: {
+          keyword: { type: 'keyword', searchable: true, aggregatable: true },
+        },
+      },
+    });
+
+    const result = await getIndexFields({
+      indices: ['remote:logs'],
+      esClient,
+    });
+
+    expect(esClient.fieldCaps).toHaveBeenCalledWith({
+      index: 'remote:logs',
+      fields: ['*'],
+    });
+    expect(getIndexMappingsMock).not.toHaveBeenCalled();
+    expect(result['remote:logs'].rawMapping).toBeUndefined();
+    expect(result['remote:logs'].fields).toEqual([
+      { path: 'status', type: 'keyword', meta: {} },
+    ]);
+  });
+
+  it('handles a mix of local and CCS indices', async () => {
+    getIndexMappingsMock.mockResolvedValue({
+      'local-index': {
+        mappings: {
+          properties: {
+            name: { type: 'keyword' },
+          },
+        },
+      },
+    });
+
+    const esClient = createEsClient({
+      indices: ['cluster:remote-index'],
+      fields: {
+        timestamp: {
+          date: { type: 'date', searchable: true, aggregatable: true },
+        },
+      },
+    });
+
+    const result = await getIndexFields({
+      indices: ['local-index', 'cluster:remote-index'],
+      esClient,
+    });
+
+    expect(getIndexMappingsMock).toHaveBeenCalledWith({
+      indices: ['local-index'],
+      cleanup: true,
+      esClient,
+    });
+    expect(esClient.fieldCaps).toHaveBeenCalled();
+
+    expect(result['local-index'].rawMapping).toBeDefined();
+    expect(result['local-index'].fields).toEqual([
+      { path: 'name', type: 'keyword', meta: {} },
+    ]);
+
+    expect(result['cluster:remote-index'].rawMapping).toBeUndefined();
+    expect(result['cluster:remote-index'].fields).toEqual([
+      { path: 'timestamp', type: 'date', meta: {} },
+    ]);
+  });
+
+  it('returns an empty record for an empty indices list', async () => {
+    const esClient = createEsClient();
+
+    const result = await getIndexFields({
+      indices: [],
+      esClient,
+    });
+
+    expect(result).toEqual({});
+    expect(getIndexMappingsMock).not.toHaveBeenCalled();
+    expect(esClient.fieldCaps).not.toHaveBeenCalled();
   });
 });

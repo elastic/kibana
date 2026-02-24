@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { MappingField } from './mappings';
+import { flattenMapping, getIndexMappings } from './mappings';
 import { processFieldCapsResponse, processFieldCapsResponsePerIndex } from './field_caps';
 
 /**
@@ -85,5 +87,60 @@ export const getBatchedFieldsFromFieldCaps = async ({
   for (const name of resources) {
     result[name] = perIndex[name] ?? [];
   }
+  return result;
+};
+
+/**
+ * Per-index result returned by {@link getIndexFields}.
+ * Local indices include the full `rawMapping` tree (from the _mapping API);
+ * CCS indices only have a flat `fields` list (from the _field_caps API).
+ */
+export interface IndexFieldsResult {
+  /** Flattened field list — available for both local and CCS indices */
+  fields: MappingField[];
+  /** Raw mapping tree — only present for local indices (via _mapping API) */
+  rawMapping?: MappingTypeMapping;
+}
+
+/**
+ * Resolves field information for a list of indices, transparently handling
+ * the local-vs-CCS split. Local indices use the _mapping API (preserving
+ * the full mapping tree in `rawMapping`), while CCS indices fall back to
+ * the batched _field_caps API.
+ */
+export const getIndexFields = async ({
+  indices,
+  esClient,
+  cleanup = true,
+}: {
+  indices: string[];
+  esClient: ElasticsearchClient;
+  cleanup?: boolean;
+}): Promise<Record<string, IndexFieldsResult>> => {
+  const local = indices.filter((i) => !isCcsTarget(i));
+  const remote = indices.filter((i) => isCcsTarget(i));
+  const result: Record<string, IndexFieldsResult> = {};
+
+  if (local.length > 0) {
+    const mappings = await getIndexMappings({ indices: local, cleanup, esClient });
+    for (const idx of local) {
+      const entry = mappings[idx];
+      result[idx] = {
+        fields: flattenMapping(entry.mappings),
+        rawMapping: entry.mappings,
+      };
+    }
+  }
+
+  if (remote.length > 0) {
+    const fieldsByIndex = await getBatchedFieldsFromFieldCaps({
+      resources: remote,
+      esClient,
+    });
+    for (const idx of remote) {
+      result[idx] = { fields: fieldsByIndex[idx] ?? [] };
+    }
+  }
+
   return result;
 };
