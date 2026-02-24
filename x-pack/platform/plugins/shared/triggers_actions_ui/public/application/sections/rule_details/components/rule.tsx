@@ -21,7 +21,6 @@ import type { RuleEventLogListProps } from './rule_event_log_list';
 import type { AlertListItem, RefreshToken } from './types';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 import { suspendedComponentWithProps } from '../../../lib/suspended_component_with_props';
-import { getAlertSummaryWidgetLazy } from '../../../../common/get_rule_alerts_summary';
 import type { AlertSummaryTimeRange } from '../../alert_summary_widget/types';
 import {
   getRuleHealthColor,
@@ -33,6 +32,8 @@ import {
   rulesLastRunOutcomeTranslationMapping,
   rulesStatusesTranslationsMapping,
 } from '../../rules_list/translations';
+import { RuleAlertActionsCell } from './rule_alert_actions_cell';
+import { AlertSummaryWidget } from '../../alert_summary_widget';
 
 const RuleEventLogList = lazy(() => import('./rule_event_log_list'));
 const RuleDefinition = lazy(() => import('./rule_definition'));
@@ -118,6 +119,7 @@ export function RuleComponent({
           query={{ bool: { filter: { term: { [ALERT_RULE_UUID]: rule.id } } } }}
           showAlertStatusWithFlapping
           columns={alertsTableColumns}
+          renderActionsCell={RuleAlertActionsCell}
           actionsColumnWidth={120}
           lastReloadRequestTime={lastReloadRequestTime}
           services={{
@@ -206,20 +208,20 @@ export function RuleComponent({
           />
         </EuiFlexItem>
         <EuiFlexItem css={{ minWidth: 350 }}>
-          {getAlertSummaryWidgetLazy({
-            ruleTypeIds: [rule.ruleTypeId],
-            consumers: [rule.consumer],
-            filter: {
+          <AlertSummaryWidget
+            ruleTypeIds={[rule.ruleTypeId]}
+            consumers={[rule.consumer]}
+            filter={{
               term: {
                 'kibana.alert.rule.uuid': rule.id,
               },
-            },
-            timeRange: alertSummaryWidgetTimeRange,
-            onClick: () => {
+            }}
+            timeRange={alertSummaryWidgetTimeRange}
+            onClick={() => {
               setAlertSummaryWidgetTimeRange(getDefaultAlertSummaryTimeRange());
-            },
-            dependencies: { charts, uiSettings },
-          })}
+            }}
+            dependencies={{ charts, uiSettings }}
+          />
         </EuiFlexItem>
         {suspendedComponentWithProps(
           RuleDefinition,
