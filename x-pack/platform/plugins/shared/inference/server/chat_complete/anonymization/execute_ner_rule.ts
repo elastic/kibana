@@ -73,8 +73,7 @@ export async function executeNerRule({
   const { modelId } = rule;
   if (!modelId) {
     throw new Error(
-      `NER rule has no modelId and no fallback was resolved. ` +
-        `Please set the 'ai:nerModelId' advanced setting or specify modelId in the rule.`
+      `NER rule has no modelId. Please specify modelId in the NER anonymization rule.`
     );
   }
 

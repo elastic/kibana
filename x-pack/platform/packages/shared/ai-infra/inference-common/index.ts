@@ -174,4 +174,4 @@ export {
 
 export { type BoundOptions, type UnboundOptions, bindApi } from './src/bind';
 
-export { aiAnonymizationSettings, aiNerModelId } from './src/ui_settings/settings_keys';
+export { aiAnonymizationSettings } from './src/ui_settings/settings_keys';

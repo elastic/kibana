@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import type { UiSettingsParams } from '@kbn/core-ui-settings-common';
 import { i18n } from '@kbn/i18n';
-import { aiAnonymizationSettings, aiNerModelId } from '@kbn/inference-common';
+import { aiAnonymizationSettings } from '@kbn/inference-common';
 
 const baseRuleSchema = schema.object({
   enabled: schema.boolean(),
@@ -95,20 +95,4 @@ export const uiSettings: Record<string, UiSettingsParams> = {
     technicalPreview: true,
   },
 
-  [aiNerModelId]: {
-    name: i18n.translate('xpack.inference.nerModelIdLabel', {
-      defaultMessage: 'NER Model ID',
-    }),
-    description: i18n.translate('xpack.inference.nerModelIdDescription', {
-      defaultMessage:
-        'The Elasticsearch ML model ID used for Named Entity Recognition (NER) anonymization. ' +
-        'The model must be downloaded and deployed before enabling NER anonymization. ' +
-        'See the <a href="https://www.elastic.co/docs/explore-analyze/machine-learning/nlp/ml-nlp-ner-example">NER documentation</a> for details.',
-    }),
-    value: 'elastic__distilbert-base-uncased-finetuned-conll03-english',
-    schema: schema.string(),
-    type: 'string',
-    requiresPageReload: true,
-    technicalPreview: true,
-  },
 };

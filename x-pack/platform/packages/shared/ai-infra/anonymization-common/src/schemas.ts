@@ -74,7 +74,6 @@ export const nerRuleSchema = z.object({
   type: z.literal('ner'),
   /**
    * The Elasticsearch ML model ID to use for NER inference.
-   * When omitted, the deployment falls back to the `ai:nerModelId` UI setting.
    */
   modelId: z.string().optional(),
   /**

@@ -33,7 +33,6 @@ export interface NamedEntityRecognitionRule extends AnonymizationRuleBase {
   type: 'NER';
   /**
    * The Elasticsearch ML model ID to use for NER inference.
-   * When omitted, falls back to the `ai:nerModelId` UI setting.
    */
   modelId?: string;
   timeoutSeconds?: number;

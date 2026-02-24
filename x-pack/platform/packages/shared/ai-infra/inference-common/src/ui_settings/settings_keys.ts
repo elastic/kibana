@@ -6,6 +6,3 @@
  */
 
 export const aiAnonymizationSettings = 'ai:anonymizationSettings';
-
-/** UI setting key for the NER model ID used by platform-level anonymization. */
-export const aiNerModelId = 'ai:nerModelId';
