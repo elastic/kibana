@@ -47,13 +47,15 @@ export const batchBackfillRuleGaps = async (
         gapsBatch: Gap[],
         processingLimitsByRuleId: Record<string, number>
       ) => {
-        const { processedGapsCount, hasErrors, results, truncatedRuleIds } =
-          await processGapsBatch(context, {
+        const { processedGapsCount, hasErrors, results, truncatedRuleIds } = await processGapsBatch(
+          context,
+          {
             range,
             gapsBatch,
             maxGapsCountToProcess: processingLimitsByRuleId[rule.id],
             initiator: backfillInitiator.USER,
-          });
+          }
+        );
         if (processedGapsCount > 0) {
           hasBeenBackfilled = true;
         }
