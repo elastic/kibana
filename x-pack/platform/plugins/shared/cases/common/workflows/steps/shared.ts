@@ -7,8 +7,6 @@
 
 import { z } from '@kbn/zod/v4';
 
-export const CasesStepBaseConfigSchema = z
-  .object({
-    'push-case': z.boolean().optional().default(false),
-  })
-  .partial();
+export const CasesStepBaseConfigSchema = z.object({
+  'push-case': z.boolean().optional().default(false),
+});
