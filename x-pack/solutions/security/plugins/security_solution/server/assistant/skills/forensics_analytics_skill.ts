@@ -45,38 +45,34 @@ Investigate suspicious processes, their origins, and behaviors.
 
 **Step 1: Current Running Processes**
 \`\`\`
-osquery({ operation: "run_live_query", params: {
+security.osquery.run_live_query({
   query: "SELECT pid, name, path, cmdline, parent, uid, gid, state, start_time, cwd FROM processes ORDER BY start_time DESC LIMIT 100",
-  agent_ids: ["<agent_id>"],
-  confirm: true
-}})
+  agentIds: ["<agent_id>"]
+})
 \`\`\`
 
 **Step 2: Process Network Connections**
 \`\`\`
-osquery({ operation: "run_live_query", params: {
+security.osquery.run_live_query({
   query: "SELECT p.pid, p.name, p.path, pos.local_address, pos.local_port, pos.remote_address, pos.remote_port, pos.state FROM processes p JOIN process_open_sockets pos ON p.pid = pos.pid WHERE pos.remote_address != '' AND pos.remote_address != '127.0.0.1' AND pos.remote_address != '::1'",
-  agent_ids: ["<agent_id>"],
-  confirm: true
-}})
+  agentIds: ["<agent_id>"]
+})
 \`\`\`
 
 **Step 3: Process File Handles**
 \`\`\`
-osquery({ operation: "run_live_query", params: {
+security.osquery.run_live_query({
   query: "SELECT p.pid, p.name, pof.path, pof.fd FROM processes p JOIN process_open_files pof ON p.pid = pof.pid WHERE p.name = '<suspicious_process>'",
-  agent_ids: ["<agent_id>"],
-  confirm: true
-}})
+  agentIds: ["<agent_id>"]
+})
 \`\`\`
 
 **Step 4: Process Parent Chain (Linux/macOS)**
 \`\`\`
-osquery({ operation: "run_live_query", params: {
+security.osquery.run_live_query({
   query: "WITH RECURSIVE process_tree AS (SELECT pid, name, parent, 0 as depth FROM processes WHERE name = '<suspicious_process>' UNION ALL SELECT p.pid, p.name, p.parent, pt.depth + 1 FROM processes p JOIN process_tree pt ON p.pid = pt.parent WHERE pt.depth < 10) SELECT * FROM process_tree",
-  agent_ids: ["<agent_id>"],
-  confirm: true
-}})
+  agentIds: ["<agent_id>"]
+})
 \`\`\`
 
 ### Playbook 2: Persistence Mechanisms
@@ -85,61 +81,54 @@ Identify how an attacker may maintain access to the system.
 
 **Linux Persistence**
 \`\`\`
-osquery({ operation: "run_live_query", params: {
+security.osquery.run_live_query({
   query: "SELECT * FROM crontab",
-  agent_ids: ["<agent_id>"],
-  confirm: true
-}})
+  agentIds: ["<agent_id>"]
+})
 \`\`\`
 
 \`\`\`
-osquery({ operation: "run_live_query", params: {
+security.osquery.run_live_query({
   query: "SELECT id, description, load_state, active_state, sub_state, user, path FROM systemd_units WHERE active_state = 'active'",
-  agent_ids: ["<agent_id>"],
-  confirm: true
-}})
+  agentIds: ["<agent_id>"]
+})
 \`\`\`
 
 **macOS Persistence**
 \`\`\`
-osquery({ operation: "run_live_query", params: {
+security.osquery.run_live_query({
   query: "SELECT name, path, args, status FROM launchd",
-  agent_ids: ["<agent_id>"],
-  confirm: true
-}})
+  agentIds: ["<agent_id>"]
+})
 \`\`\`
 
 \`\`\`
-osquery({ operation: "run_live_query", params: {
+security.osquery.run_live_query({
   query: "SELECT * FROM startup_items",
-  agent_ids: ["<agent_id>"],
-  confirm: true
-}})
+  agentIds: ["<agent_id>"]
+})
 \`\`\`
 
 **Windows Persistence**
 \`\`\`
-osquery({ operation: "run_live_query", params: {
+security.osquery.run_live_query({
   query: "SELECT name, path, data, type FROM registry WHERE key LIKE 'HKEY_LOCAL_MACHINE\\\\SOFTWARE\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Run%' OR key LIKE 'HKEY_CURRENT_USER\\\\SOFTWARE\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Run%'",
-  agent_ids: ["<agent_id>"],
-  confirm: true
-}})
+  agentIds: ["<agent_id>"]
+})
 \`\`\`
 
 \`\`\`
-osquery({ operation: "run_live_query", params: {
+security.osquery.run_live_query({
   query: "SELECT name, display_name, path, start_type, status, user_account FROM services WHERE start_type = 'AUTO_START' OR start_type = 'DEMAND_START'",
-  agent_ids: ["<agent_id>"],
-  confirm: true
-}})
+  agentIds: ["<agent_id>"]
+})
 \`\`\`
 
 \`\`\`
-osquery({ operation: "run_live_query", params: {
+security.osquery.run_live_query({
   query: "SELECT name, action, path, enabled, last_run_time, next_run_time FROM scheduled_tasks WHERE enabled = 1",
-  agent_ids: ["<agent_id>"],
-  confirm: true
-}})
+  agentIds: ["<agent_id>"]
+})
 \`\`\`
 
 ### Playbook 3: Network Forensics
@@ -148,38 +137,34 @@ Investigate network activity and connections.
 
 **Current Network Connections**
 \`\`\`
-osquery({ operation: "run_live_query", params: {
+security.osquery.run_live_query({
   query: "SELECT local_address, local_port, remote_address, remote_port, state, pid FROM process_open_sockets WHERE state = 'ESTABLISHED' OR state = 'LISTEN'",
-  agent_ids: ["<agent_id>"],
-  confirm: true
-}})
+  agentIds: ["<agent_id>"]
+})
 \`\`\`
 
 **Listening Ports**
 \`\`\`
-osquery({ operation: "run_live_query", params: {
+security.osquery.run_live_query({
   query: "SELECT lp.port, lp.protocol, lp.address, p.name, p.path FROM listening_ports lp LEFT JOIN processes p ON lp.pid = p.pid",
-  agent_ids: ["<agent_id>"],
-  confirm: true
-}})
+  agentIds: ["<agent_id>"]
+})
 \`\`\`
 
 **DNS Cache (Windows)**
 \`\`\`
-osquery({ operation: "run_live_query", params: {
+security.osquery.run_live_query({
   query: "SELECT name, type, record, ttl FROM dns_cache",
-  agent_ids: ["<agent_id>"],
-  confirm: true
-}})
+  agentIds: ["<agent_id>"]
+})
 \`\`\`
 
 **ARP Table**
 \`\`\`
-osquery({ operation: "run_live_query", params: {
+security.osquery.run_live_query({
   query: "SELECT address, mac, interface, permanent FROM arp_cache",
-  agent_ids: ["<agent_id>"],
-  confirm: true
-}})
+  agentIds: ["<agent_id>"]
+})
 \`\`\`
 
 ### Playbook 4: User & Authentication Forensics
@@ -188,38 +173,34 @@ Investigate user activity and authentication events.
 
 **Current Logged-in Users**
 \`\`\`
-osquery({ operation: "run_live_query", params: {
+security.osquery.run_live_query({
   query: "SELECT type, user, tty, host, time, pid FROM logged_in_users",
-  agent_ids: ["<agent_id>"],
-  confirm: true
-}})
+  agentIds: ["<agent_id>"]
+})
 \`\`\`
 
 **User Accounts**
 \`\`\`
-osquery({ operation: "run_live_query", params: {
+security.osquery.run_live_query({
   query: "SELECT uid, gid, username, description, directory, shell FROM users",
-  agent_ids: ["<agent_id>"],
-  confirm: true
-}})
+  agentIds: ["<agent_id>"]
+})
 \`\`\`
 
 **Last Login Activity (Linux/macOS)**
 \`\`\`
-osquery({ operation: "run_live_query", params: {
+security.osquery.run_live_query({
   query: "SELECT username, time, host, tty FROM last",
-  agent_ids: ["<agent_id>"],
-  confirm: true
-}})
+  agentIds: ["<agent_id>"]
+})
 \`\`\`
 
 **Shell History (Linux/macOS)**
 \`\`\`
-osquery({ operation: "run_live_query", params: {
+security.osquery.run_live_query({
   query: "SELECT uid, command, history_file FROM shell_history WHERE command != ''",
-  agent_ids: ["<agent_id>"],
-  confirm: true
-}})
+  agentIds: ["<agent_id>"]
+})
 \`\`\`
 
 **ES|QL: Authentication Events**
@@ -233,69 +214,68 @@ Investigate files, hashes, and filesystem artifacts.
 
 **File Metadata by Path**
 \`\`\`
-osquery({ operation: "run_live_query", params: {
+security.osquery.run_live_query({
   query: "SELECT path, filename, size, mode, uid, gid, atime, mtime, ctime, btime, type FROM file WHERE path = '<file_path>'",
-  agent_ids: ["<agent_id>"],
-  confirm: true
-}})
+  agentIds: ["<agent_id>"]
+})
 \`\`\`
 
 **File Hash**
 \`\`\`
-osquery({ operation: "run_live_query", params: {
+security.osquery.run_live_query({
   query: "SELECT path, md5, sha1, sha256 FROM hash WHERE path = '<file_path>'",
-  agent_ids: ["<agent_id>"],
-  confirm: true
-}})
+  agentIds: ["<agent_id>"]
+})
 \`\`\`
 
 **Recently Modified Files in Directory**
 \`\`\`
-osquery({ operation: "run_live_query", params: {
+security.osquery.run_live_query({
   query: "SELECT path, filename, size, mtime, type FROM file WHERE directory = '<directory_path>' ORDER BY mtime DESC LIMIT 50",
-  agent_ids: ["<agent_id>"],
-  confirm: true
-}})
+  agentIds: ["<agent_id>"]
+})
 \`\`\`
 
 **Suspicious Temp Files**
 \`\`\`
-osquery({ operation: "run_live_query", params: {
+security.osquery.run_live_query({
   query: "SELECT path, filename, size, mode, uid, mtime FROM file WHERE (directory = '/tmp' OR directory = '/var/tmp' OR directory LIKE '%\\\\Temp%') AND (filename LIKE '%.exe' OR filename LIKE '%.dll' OR filename LIKE '%.ps1' OR filename LIKE '%.sh' OR filename LIKE '%.py')",
-  agent_ids: ["<agent_id>"],
-  confirm: true
-}})
+  agentIds: ["<agent_id>"]
+})
 \`\`\`
 
 ### Playbook 6: Browser Forensics
 
 Investigate web browser activity for phishing, C2, or data exfiltration.
 
-**Browser History**
+**CRITICAL: \`elastic_browser_history\` is a CUSTOM Elastic table. Column names vary by version and MUST be discovered first.**
+
+**Step 1: Discover Table Schema (MANDATORY)**
+Before running any query against \`elastic_browser_history\`, you MUST call \`security.osquery.get_table_schema\` with \`tableName: "elastic_browser_history"\` to discover the actual column names. Do NOT use the example column names below — they are placeholders only.
+
+**Step 2: Browser History**
+Use ONLY the columns returned by get_table_schema. Example pattern (replace columns with actual schema):
 \`\`\`
-osquery({ operation: "run_live_query", params: {
-  query: "SELECT url, title, visit_count, datetime, hostname, domain, browser, profile_name FROM elastic_browser_history ORDER BY datetime DESC LIMIT 100",
-  agent_ids: ["<agent_id>"],
-  confirm: true
-}})
+security.osquery.run_live_query({
+  query: "SELECT <columns_from_schema> FROM elastic_browser_history ORDER BY <timestamp_column> DESC LIMIT 100",
+  agentIds: ["<agent_id>"]
+})
 \`\`\`
 
-**Search for Specific Domain Access**
+**Step 3: Search for Specific Domain Access**
 \`\`\`
-osquery({ operation: "run_live_query", params: {
-  query: "SELECT url, title, visit_count, datetime, browser FROM elastic_browser_history WHERE url LIKE '%<suspicious_domain>%' OR hostname LIKE '%<suspicious_domain>%'",
-  agent_ids: ["<agent_id>"],
-  confirm: true
-}})
+security.osquery.run_live_query({
+  query: "SELECT <columns_from_schema> FROM elastic_browser_history WHERE <url_column> LIKE '%<suspicious_domain>%'",
+  agentIds: ["<agent_id>"]
+})
 \`\`\`
 
-**Browser Extensions (Chrome)**
+**Step 4: Browser Extensions (Chrome)**
 \`\`\`
-osquery({ operation: "run_live_query", params: {
+security.osquery.run_live_query({
   query: "SELECT name, identifier, version, description, author, path, permissions FROM chrome_extensions",
-  agent_ids: ["<agent_id>"],
-  confirm: true
-}})
+  agentIds: ["<agent_id>"]
+})
 \`\`\`
 
 ### Playbook 7: IOC Hunting
@@ -304,29 +284,27 @@ Search for specific Indicators of Compromise across the environment.
 
 **Hunt for File Hash**
 \`\`\`
-osquery({ operation: "run_live_query", params: {
+security.osquery.run_live_query({
   query: "SELECT path, filename, sha256 FROM hash WHERE sha256 = '<malicious_hash>'",
-  agent_all: true,
-  confirm: true
-}})
+  agentIds: ["<agent_id>"]
+})
 \`\`\`
 
 **Hunt for Malicious Domain Access**
+First call \`security.osquery.get_table_schema({ tableName: "elastic_browser_history", agentId: "<agent_id>" })\`, then use the actual columns:
 \`\`\`
-osquery({ operation: "run_live_query", params: {
-  query: "SELECT url, title, datetime, browser FROM elastic_browser_history WHERE url LIKE '%<malicious_domain>%'",
-  agent_all: true,
-  confirm: true
-}})
+security.osquery.run_live_query({
+  query: "SELECT <columns_from_schema> FROM elastic_browser_history WHERE <url_column> LIKE '%<malicious_domain>%'",
+  agentIds: ["<agent_id>"]
+})
 \`\`\`
 
 **Hunt for Suspicious Process Name**
 \`\`\`
-osquery({ operation: "run_live_query", params: {
+security.osquery.run_live_query({
   query: "SELECT pid, name, path, cmdline, uid, start_time FROM processes WHERE name = '<suspicious_name>' OR cmdline LIKE '%<suspicious_pattern>%'",
-  agent_all: true,
-  confirm: true
-}})
+  agentIds: ["<agent_id>"]
+})
 \`\`\`
 
 **ES|QL: Hunt for Network IOC**
@@ -374,8 +352,8 @@ platform.core.search({
 - \`mounts\` - Mounted filesystems
 - \`disk_encryption\` - Encryption status
 
-### Browser
-- \`elastic_browser_history\` - Unified browser history
+### Browser (CUSTOM - MUST get schema first)
+- \`elastic_browser_history\` - Unified browser history (**custom Elastic table — ALWAYS call security.osquery.get_table_schema before querying**)
 - \`chrome_extensions\` - Chrome extensions
 - \`firefox_addons\` - Firefox add-ons
 
@@ -412,7 +390,7 @@ platform.core.search({
 
 1. **Volatile First**: Collect volatile data (memory, connections, processes) before non-volatile (files, logs)
 2. **Document Everything**: Use timelines and case notes to document each step
-3. **Verify Schema**: Always check osquery table schema before running queries
+3. **Verify Schema**: ALWAYS call \`security.osquery.get_table_schema\` before querying any \`elastic_*\` custom table — never guess column names
 4. **Wait for Results**: The osquery tool automatically polls - always fetch results
 5. **Cross-Reference**: Validate findings across multiple data sources
 6. **Preserve Evidence**: Note original timestamps and avoid modifying evidence

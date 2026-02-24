@@ -398,7 +398,6 @@ const createRunLiveQueryTool = (
   type: ToolType.builtin,
   description:
     'Run a live osquery query against agents. IMPORTANT: agentIds must be UUIDs from osquery_get_agents, not hostnames.',
-  confirmation: { askUser: 'once' },
   schema: z.object({
     query: z.string().describe('Osquery SQL query string'),
     agentIds: z
