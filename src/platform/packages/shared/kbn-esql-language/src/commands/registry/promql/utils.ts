@@ -15,16 +15,20 @@ import { countTopLevelCommas } from '../../definitions/utils/shared';
 import { PromQLParser } from '../../../embedded_languages/promql';
 import type {
   PromQLAstNode,
+  PromQLBinaryExpression,
   PromQLAstQueryExpression,
   PromQLFunction,
+  PromQLGrouping,
   PromQLLabel,
   PromQLSelector,
 } from '../../../embedded_languages/promql/types';
 import {
+  getBinaryOperatorParamTypes,
   getPromqlFunctionDefinition,
   getPromqlParamTypesForFunction,
   isPromqlAcrossSeriesFunction,
 } from '../../definitions/utils/promql';
+import { promqlOperatorDefinitions } from '../../definitions/generated/promql_operators';
 import type { PromQLFunctionParamType } from '../../definitions/types';
 import { PromqlWalker } from '../../../embedded_languages/promql/ast/walker';
 
@@ -38,6 +42,7 @@ type PromqlPositionType =
   | 'after_param_equals' // PROMQL step=| → param values
   | 'inside_query' // fallback inside query zone → [] (no suggestions)
   | 'after_query' // PROMQL (rate(x)) | → pipe, operators, by
+  | 'after_operator' // rate(x) + | → operands (metrics, functions, numbers)
   | 'inside_grouping' // sum(...) by (| → labels (not yet implemented)
   | 'inside_function_args' // sum( | → functions
   | 'after_complete_arg' // sum(1 |) → comma or nothing
@@ -52,6 +57,7 @@ interface PromqlPosition {
   type: PromqlPositionType;
   currentParam?: string; // param name being edited (e.g. 'step' for after_param_equals)
   canAddGrouping?: boolean; // whether by/without can be appended to the the query
+  isAfterAggregationName?: boolean; // whether cursor is after agg name before opening args, e.g. `sum |`
   selector?: PromQLSelector; // selector node at cursor (for duration/label checks)
   canSuggestRangeSelector?: boolean; // whether [5m] range selector can be suggested
   isCompleteLabel?: boolean; // label at cursor is complete (suggest comma instead of new label)
@@ -61,6 +67,21 @@ interface PromqlPosition {
 
 // Shared identifier pattern for param names, column names, etc.
 export const IDENTIFIER_PATTERN = '[A-Za-z_][A-Za-z0-9_]*';
+
+// Binary operator detection (text-based fallback)
+const PROMQL_BINARY_OPS_PATTERN = promqlOperatorDefinitions
+  .filter((d) => d.signatures.some((s) => s.params.length >= 2))
+  .map((d) => (d.operator ?? d.name).replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+  .join('|');
+
+const PROMQL_TRAILING_BINARY_OP_REGEX = new RegExp(`(${PROMQL_BINARY_OPS_PATTERN})\\s*$`, 'i');
+
+// Pre-grouped aggregation detection (e.g. "sum by (labels) ")
+const PROMQL_GROUPING_KEYWORDS: PromQLGrouping['name'][] = ['by', 'without'];
+const PRE_GROUPED_AGG_REGEX = new RegExp(
+  `\\b(${IDENTIFIER_PATTERN})\\s+(?:${PROMQL_GROUPING_KEYWORDS.join('|')})\\s*\\([^)]*\\)\\s*$`,
+  'i'
+);
 
 // Param zone detection
 const TRAILING_PARAM_NAME_REGEX = new RegExp(`(${IDENTIFIER_PATTERN})\\s*$`);
@@ -143,44 +164,60 @@ function getQueryZonePosition(
 
     return { root, cursor: relativeCursor };
   };
+  const parsed = parseQueryAst();
 
-  // Computes canAddGrouping from the parsed AST
-  const computeCanAddGrouping = (): boolean => {
-    const parsed = parseQueryAst();
-
+  // Computes canAddGrouping and whether cursor is right after an aggregation name.
+  const computeGroupingContext = (): {
+    canAddGrouping: boolean;
+    isAfterAggregationName: boolean;
+  } => {
     if (!parsed) {
-      return false;
+      return { canAddGrouping: false, isAfterAggregationName: false };
     }
 
     const { root, cursor } = parsed;
     const textBeforeCursor = querySlice!.text.slice(0, cursor).trimEnd();
     const logicalCursor = textBeforeCursor.length;
+    const afterAggregationName = isAfterAggregationName(textBeforeCursor);
 
     if (logicalCursor === 0) {
-      return false;
+      return { canAddGrouping: false, isAfterAggregationName: false };
     }
 
     const nearest = findNearestAggregation(root, logicalCursor);
 
-    return nearest?.location.max === logicalCursor - 1;
+    return {
+      canAddGrouping: nearest?.location.max === logicalCursor - 1 || afterAggregationName,
+      isAfterAggregationName: afterAggregationName,
+    };
   };
 
   // Zone 1: cursor past everything (including wrapper parens if any)
   if (cursorPosition > (queryBounds.wrappedEnd ?? queryBounds.queryEnd)) {
-    const canAddGrouping = queryBounds.wrappedEnd === undefined && computeCanAddGrouping();
+    const groupingContext =
+      queryBounds.wrappedEnd === undefined
+        ? computeGroupingContext()
+        : { canAddGrouping: false, isAfterAggregationName: false };
 
-    return { type: 'after_query', canAddGrouping };
+    return {
+      type: 'after_query',
+      canAddGrouping: groupingContext.canAddGrouping,
+      isAfterAggregationName: groupingContext.isAfterAggregationName,
+    };
   }
 
   // Zone 2: cursor between inner expression and outer parens wrapper
   if (queryBounds.wrappedEnd !== undefined && cursorPosition > queryBounds.queryEnd) {
-    return { type: 'inside_query', canAddGrouping: computeCanAddGrouping() };
+    const groupingContext = computeGroupingContext();
+    return {
+      type: 'inside_query',
+      canAddGrouping: groupingContext.canAddGrouping,
+      isAfterAggregationName: groupingContext.isAfterAggregationName,
+    };
   }
 
   // Inside query zone: delegate to cursor-first resolver
   if (queryNode && within(cursorPosition, queryNode)) {
-    const parsed = parseQueryAst();
-
     if (parsed) {
       return getQueryPosition(parsed.root, parsed.cursor, querySlice!.text);
     }
@@ -250,15 +287,17 @@ interface CursorMatch {
 interface CursorContext {
   match: CursorMatch | undefined;
   innermostFunc: PromQLFunction | undefined;
+  outermostIncompleteBinary: PromQLBinaryExpression | undefined;
 }
 
 /** Single walker pass: finds narrowest node at cursor AND innermost function containing cursor. */
 function findCursorContext(root: PromQLAstQueryExpression, cursor: number): CursorContext {
   let match: CursorMatch | undefined;
   let innermostFunc: PromQLFunction | undefined;
+  let outermostIncompleteBinary: PromQLBinaryExpression | undefined;
 
   if (!root.expression) {
-    return { match: undefined, innermostFunc: undefined };
+    return { match: undefined, innermostFunc: undefined, outermostIncompleteBinary: undefined };
   }
 
   PromqlWalker.walk(root, {
@@ -286,10 +325,25 @@ function findCursorContext(root: PromQLAstQueryExpression, cursor: number): Curs
           innermostFunc = node as PromQLFunction;
         }
       }
+
+      // Track outermost incomplete binary expression for operator chains
+      if (node.type === 'binary-expression') {
+        const binary = node as PromQLBinaryExpression;
+
+        if (binary.incomplete && binary.right.type === 'unknown') {
+          const binarySpan = outermostIncompleteBinary
+            ? outermostIncompleteBinary.location.max - outermostIncompleteBinary.location.min
+            : -1;
+
+          if (span > binarySpan) {
+            outermostIncompleteBinary = binary;
+          }
+        }
+      }
     },
   });
 
-  return { match, innermostFunc };
+  return { match, innermostFunc, outermostIncompleteBinary };
 }
 
 // ============================================================================
@@ -325,6 +379,13 @@ function findNearestAggregation(
   });
 
   return nearest;
+}
+
+/** Returns true when cursor is after an aggregation function name before `(`, e.g. `sum |`. */
+function isAfterAggregationName(textBeforeCursor: string): boolean {
+  const trailingIdentifier = getTrailingIdentifier(textBeforeCursor.trimEnd());
+
+  return trailingIdentifier ? isPromqlAcrossSeriesFunction(trailingIdentifier) : false;
 }
 
 /** Resolves signature types by walking up to the enclosing function. */
@@ -387,9 +448,13 @@ function findSelectorArgPosition(
     }
 
     const selector = arg as PromQLSelector;
+    const selectorMetricName = selector.metric?.name;
+    const isFunctionLikeMetric =
+      !!selectorMetricName && !!getPromqlFunctionDefinition(selectorMetricName);
 
     // After metric, no labels/duration yet
     if (
+      !isFunctionLikeMetric &&
       selector.metric &&
       !selector.labelMap &&
       !selector.duration &&
@@ -430,6 +495,23 @@ function isAfterCompleteExpression(root: PromQLAstQueryExpression, cursor: numbe
   }
 
   return cursor > expr.location.max + 1;
+}
+
+/** Finds selector in binary RHS where cursor is after it (searches function args only). */
+function findSelectorAfterBinaryInArgs(
+  func: PromQLFunction,
+  cursor: number
+): PromQLSelector | undefined {
+  for (const arg of func.args) {
+    if (arg.type === 'binary-expression') {
+      const { right } = arg as PromQLBinaryExpression;
+
+      if (right.type === 'selector' && cursor >= right.location.max) {
+        return right as PromQLSelector;
+      }
+    }
+  }
+  return undefined;
 }
 
 // ============================================================================
@@ -529,7 +611,7 @@ function getLabelMapTextFallbackPosition(text: string, cursor: number): PromqlPo
       .slice(openBraceIndex + 1)
       .split(',')
       .pop() ?? '';
-  const trimmedEntryBeforeCursor = selectorEntryBeforeCursor.trimEnd();
+  const trimmedEntryBeforeCursor = selectorEntryBeforeCursor.trim();
   const entryHeadIdentifier = getTrailingIdentifier(trimmedEntryBeforeCursor);
   const afterCursor = text.slice(cursor).trimStart();
   const nextChar = afterCursor[0];
@@ -549,7 +631,7 @@ function getLabelMapTextFallbackPosition(text: string, cursor: number): PromqlPo
   const tailAfterIdentifier = leadingIdentifierMatch[2]?.trimStart() ?? '';
 
   if (tailAfterIdentifier.length === 0) {
-    return undefined;
+    return { type: 'after_label_name' };
   }
 
   if (tailAfterIdentifier.includes('"') || tailAfterIdentifier.includes("'")) {
@@ -592,9 +674,16 @@ function resolveSelectorPosition(
   signatureTypes: PromQLFunctionParamType[]
 ): PromqlPosition | undefined {
   const { metric, labelMap } = selector;
+  const metricName = metric?.name;
+  const isFunctionLikeMetric = !!metricName && !!getPromqlFunctionDefinition(metricName);
 
   // Cursor after metric, before labelMap → after_metric
-  if (metric && cursor > metric.location.max && (!labelMap || cursor < labelMap.location.min)) {
+  if (
+    !isFunctionLikeMetric &&
+    metric &&
+    cursor > metric.location.max &&
+    (!labelMap || cursor < labelMap.location.min)
+  ) {
     return { type: 'after_metric', selector };
   }
 
@@ -692,16 +781,7 @@ function resolveFunctionPosition(
       continue;
     }
 
-    const argText = text.slice(arg.location.min, arg.location.max + 1);
-    const trimmedLength = argText.trimEnd().length;
-
-    if (trimmedLength === 0) {
-      continue;
-    }
-
-    const effectiveMax = arg.location.min + trimmedLength - 1;
-
-    if (cursor >= arg.location.min && cursor <= effectiveMax) {
+    if (cursor >= arg.location.min && cursor <= arg.location.max) {
       return { type: 'inside_function_args', signatureTypes };
     }
   }
@@ -778,10 +858,14 @@ function resolveFunctionPosition(
 
   const paramIndex = computeParamIndexFromArgs(func, cursor, text);
 
+  // When after a complete arg, use the outer function's signature types for the current param
+  // Example: sum(rate(...) |) should use sum's param types, not rate's return type
+  const correctSignatureTypes = getPromqlParamTypesForFunction(func.name, paramIndex);
+
   return {
     type: 'after_complete_arg',
     canSuggestCommaInFunctionArgs: paramIndex < maxParams - 1,
-    signatureTypes,
+    signatureTypes: correctSignatureTypes,
   };
 }
 
@@ -809,15 +893,82 @@ function resolveTopLevelPosition(
   textBeforeCursorArg?: string
 ): PromqlPosition {
   if (precomputedCanAddGrouping !== undefined) {
-    return { type: 'inside_query', canAddGrouping: precomputedCanAddGrouping };
+    return {
+      type: 'inside_query',
+      canAddGrouping: precomputedCanAddGrouping,
+      isAfterAggregationName: isAfterAggregationName(textBeforeCursorArg ?? text.slice(0, cursor)),
+    };
   }
 
   const textBeforeCursor = textBeforeCursorArg ?? text.slice(0, cursor).trimEnd();
   const logicalCursor = textBeforeCursor.length;
   const nearest = findNearestAggregation(root, logicalCursor);
-  const canAddGrouping = logicalCursor > 0 && nearest?.location.max === logicalCursor - 1;
+  const afterAggregationName = isAfterAggregationName(textBeforeCursor);
+  const canAddGrouping =
+    logicalCursor > 0 && (nearest?.location.max === logicalCursor - 1 || afterAggregationName);
 
-  return { type: 'inside_query', canAddGrouping };
+  return { type: 'inside_query', canAddGrouping, isAfterAggregationName: afterAggregationName };
+}
+
+/** Gets the binary-expression node nearest to cursor, if present in match chain. */
+function getBinaryNodeAtCursor(
+  match: CursorMatch | undefined,
+  outermostIncompleteBinary: PromQLBinaryExpression | undefined
+): PromQLBinaryExpression | undefined {
+  if (!match) {
+    return undefined;
+  }
+
+  const nodeBinary = match.node.type === 'binary-expression' ? match.node : undefined;
+  const parentBinary = match.parent?.type === 'binary-expression' ? match.parent : undefined;
+
+  // Prefer incomplete binary nodes (where we're typing the RHS operand)
+  if (parentBinary && parentBinary.incomplete && parentBinary.right.type === 'unknown') {
+    return parentBinary;
+  }
+
+  if (nodeBinary && nodeBinary.incomplete && nodeBinary.right.type === 'unknown') {
+    return nodeBinary;
+  }
+
+  if (outermostIncompleteBinary) {
+    return outermostIncompleteBinary;
+  }
+
+  return undefined;
+}
+
+/** Resolves after_operator from available contexts. */
+function resolveAfterOperatorPosition({
+  cursor,
+  binaryNode,
+}: {
+  cursor: number;
+  binaryNode?: PromQLBinaryExpression;
+}): PromqlPosition | undefined {
+  if (!binaryNode) {
+    return undefined;
+  }
+
+  const isExpectingRightOperand =
+    binaryNode.incomplete &&
+    binaryNode.right.type === 'unknown' &&
+    (cursor > binaryNode.left.location.max || cursor >= binaryNode.location.max);
+
+  if (!isExpectingRightOperand) {
+    return undefined;
+  }
+
+  const signatureTypes = getBinaryOperatorParamTypes(binaryNode.name, 1);
+
+  if (!signatureTypes?.length) {
+    return undefined;
+  }
+
+  return {
+    type: 'after_operator',
+    signatureTypes,
+  };
 }
 
 // ============================================================================
@@ -832,7 +983,8 @@ function getQueryPosition(
 ): PromqlPosition {
   const textBeforeCursor = text.slice(0, cursor).trimEnd();
   const lastChar = textBeforeCursor.at(-1);
-  const { match, innermostFunc } = findCursorContext(root, cursor);
+  const { match, innermostFunc, outermostIncompleteBinary } = findCursorContext(root, cursor);
+  const binaryNodeAtCursor = getBinaryNodeAtCursor(match, outermostIncompleteBinary);
   const funcAtCursor = match
     ? [match.node, match.parent].find((n) => n?.type === 'function')
     : undefined;
@@ -852,11 +1004,29 @@ function getQueryPosition(
     return cachedSignatureTypes;
   };
 
+  // Text fallback for trailing binary operators (before AST routing — with EDITOR_MARKER parser creates complete nodes breaking AST detection)
+  const opMatch = textBeforeCursor.match(PROMQL_TRAILING_BINARY_OP_REGEX);
+  if (opMatch) {
+    const signatureTypes = getBinaryOperatorParamTypes(opMatch[1], 1);
+    if (signatureTypes?.length) return { type: 'after_operator', signatureTypes };
+  }
+
   // Text fallback for incomplete label maps (before AST routing — parser may not build label nodes)
   const labelTextFallback = getLabelMapTextFallbackPosition(text, cursor);
 
   if (labelTextFallback) {
     return labelTextFallback;
+  }
+
+  if (binaryNodeAtCursor) {
+    const afterOperator = resolveAfterOperatorPosition({
+      cursor,
+      binaryNode: binaryNodeAtCursor,
+    });
+
+    if (afterOperator) {
+      return afterOperator;
+    }
   }
 
   if (!match) {
@@ -913,12 +1083,16 @@ function getQueryPosition(
   }
 
   // Selector context: also triggers when cursor is on metric identifier inside selector
-  const selectorNode =
-    node.type === 'selector'
-      ? (node as PromQLSelector)
-      : parent?.type === 'selector'
-      ? (parent as PromQLSelector)
-      : undefined;
+  // Also handles cursor after a selector in binary RHS (e.g., "a * bytes |")
+  let selectorNode: PromQLSelector | undefined;
+
+  if (node.type === 'selector') {
+    selectorNode = node as PromQLSelector;
+  } else if (parent?.type === 'selector') {
+    selectorNode = parent as PromQLSelector;
+  } else if (innermostFunc) {
+    selectorNode = findSelectorAfterBinaryInArgs(innermostFunc, cursor);
+  }
 
   if (selectorNode) {
     const selectorPos = resolveSelectorPosition(
@@ -934,6 +1108,7 @@ function getQueryPosition(
 
     // Cursor on metric identifier: use after_metric when at or past metric end
     if (
+      !getPromqlFunctionDefinition(selectorNode.metric?.name) &&
       selectorNode.metric &&
       cursor >= selectorNode.metric.location.max &&
       (!selectorNode.labelMap || cursor < selectorNode.labelMap.location.min)
@@ -956,13 +1131,24 @@ function getQueryPosition(
     }
   }
 
+  const afterOperator = resolveAfterOperatorPosition({
+    cursor,
+    binaryNode: binaryNodeAtCursor,
+  });
+
+  if (afterOperator) {
+    return afterOperator;
+  }
+
   // canAddGrouping takes precedence over function args (matches old priority chain)
   const logicalCursor = textBeforeCursor.length;
   const nearestAgg = findNearestAggregation(root, logicalCursor);
-  const canAddGrouping = logicalCursor > 0 && nearestAgg?.location.max === logicalCursor - 1;
+  const afterAggregationName = isAfterAggregationName(textBeforeCursor);
+  const canAddGrouping =
+    logicalCursor > 0 && (nearestAgg?.location.max === logicalCursor - 1 || afterAggregationName);
 
   if (canAddGrouping || isAfterCompleteExpression(root, cursor)) {
-    return { type: 'inside_query', canAddGrouping };
+    return { type: 'inside_query', canAddGrouping, isAfterAggregationName: afterAggregationName };
   }
 
   // Function context
@@ -1265,6 +1451,8 @@ export enum PromqlParamName {
   Step = 'step',
   Start = 'start',
   End = 'end',
+  Buckets = 'buckets',
+  ScrapeInterval = 'scrape_interval',
 }
 
 export interface PromqlParamDefinition {
@@ -1285,7 +1473,6 @@ export const PROMQL_PARAMS: PromqlParamDefinition[] = [
     name: PromqlParamName.Step,
     description: 'Query resolution step (e.g. 1m, 5m, 1h)',
     valueType: PromqlParamValueType.Static,
-    required: true,
   },
   {
     name: PromqlParamName.Start,
@@ -1296,6 +1483,16 @@ export const PROMQL_PARAMS: PromqlParamDefinition[] = [
     name: PromqlParamName.End,
     description: 'Range query end time (requires start)',
     valueType: PromqlParamValueType.DateLiterals,
+  },
+  {
+    name: PromqlParamName.Buckets,
+    description: 'Number of time buckets (alternative to step)',
+    valueType: PromqlParamValueType.Static,
+  },
+  {
+    name: PromqlParamName.ScrapeInterval,
+    description: 'Scrape interval for implicit range selector window (e.g. 1m)',
+    valueType: PromqlParamValueType.Static,
   },
 ];
 
@@ -1419,6 +1616,13 @@ export function isAtValidColumnSuggestionPosition(
 // ============================================================================
 // Column Assignment Helpers
 // ============================================================================
+
+export function getPreGroupedAggregationName(commandText: string): string | undefined {
+  const match = commandText.trimEnd().match(PRE_GROUPED_AGG_REGEX);
+  if (!match) return undefined;
+
+  return isPromqlAcrossSeriesFunction(match[1]) ? match[1] : undefined;
+}
 
 /** Detects when the cursor is after a custom query assignment like "col0 =". */
 export function isAfterCustomColumnAssignment(commandText: string): boolean {
