@@ -1,6 +1,6 @@
 {
-  "lastModified": "2026-02-20T05:08:26.530Z",
-  "sha1": "7cbe11736ae589ed5649e5b209e057f118b02992",
+  "lastModified": "2026-02-24T05:10:42.058Z",
+  "sha1": "774fb8c8b9c1608226651b1d42e314392b6a8bff",
   "tests": [
     {
       "id": "5e91b4cbd08e25e-f2cd2d3cdc77643",
@@ -71,13 +71,15 @@
       "title": "Dependency Operation Detail Page Renders expected content",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/dependency_operation_detail.spec.ts",
-        "line": 17,
-        "column": 7
+        "line": 21,
+        "column": 9
       }
     },
     {
@@ -85,13 +87,15 @@
       "title": "Dependency Operation Detail Page Links back to dependency operations list",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/dependency_operation_detail.spec.ts",
-        "line": 34,
-        "column": 7
+        "line": 38,
+        "column": 9
       }
     },
     {
@@ -99,13 +103,15 @@
       "title": "Dependency Operation Detail Page Investigate trace popup opens when clicking 'Investigate trace' button",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/dependency_operation_detail.spec.ts",
-        "line": 53,
-        "column": 7
+        "line": 57,
+        "column": 9
       }
     },
     {
@@ -113,13 +119,15 @@
       "title": "Dependency Operation Detail Page Span link flyout opens when clicking 'Span links' button",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/dependency_operation_detail.spec.ts",
-        "line": 67,
-        "column": 7
+        "line": 71,
+        "column": 9
       }
     },
     {
@@ -127,13 +135,15 @@
       "title": "Dependency Operation Detail Page Has no detectable a11y violations on load",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/dependency_operation_detail.spec.ts",
-        "line": 83,
-        "column": 7
+        "line": 87,
+        "column": 9
       }
     },
     {
@@ -141,13 +151,15 @@
       "title": "Dependency Operations Tab Is accessible from the default tab",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/dependency_operations.spec.ts",
-        "line": 18,
-        "column": 7
+        "line": 22,
+        "column": 9
       }
     },
     {
@@ -155,13 +167,15 @@
       "title": "Dependency Operations Tab Renders expected content",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/dependency_operations.spec.ts",
-        "line": 40,
-        "column": 7
+        "line": 44,
+        "column": 9
       }
     },
     {
@@ -169,13 +183,15 @@
       "title": "Dependency Operations Tab Links to dependency operation detail when clicking on an operation in operations table",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/dependency_operations.spec.ts",
-        "line": 53,
-        "column": 7
+        "line": 57,
+        "column": 9
       }
     },
     {
@@ -183,13 +199,15 @@
       "title": "Dependency Operations Tab Has no a11y violations on load",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/dependency_operations.spec.ts",
-        "line": 72,
-        "column": 7
+        "line": 76,
+        "column": 9
       }
     },
     {
@@ -501,13 +519,15 @@
       "title": "Service overview - header filters Filtering by transaction type - changes url when selecting different value",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/header_filters.spec.ts",
-        "line": 16,
-        "column": 7
+        "line": 20,
+        "column": 9
       }
     },
     {
@@ -515,13 +535,15 @@
       "title": "Service overview - header filters Filtering by searchbar - filters by transaction.name",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/header_filters.spec.ts",
-        "line": 45,
-        "column": 7
+        "line": 49,
+        "column": 9
       }
     },
     {
@@ -951,13 +973,15 @@
       "title": "Span links shows span links for producer-internal-only Span A",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/span_links.spec.ts",
-        "line": 21,
-        "column": 7
+        "line": 31,
+        "column": 9
       }
     },
     {
@@ -965,13 +989,15 @@
       "title": "Span links shows span links for producer-external-only Span B",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/span_links.spec.ts",
-        "line": 70,
-        "column": 7
+        "line": 77,
+        "column": 9
       }
     },
     {
@@ -979,13 +1005,15 @@
       "title": "Span links shows span links flyout details on producer-consumer Transaction C",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/span_links.spec.ts",
-        "line": 107,
-        "column": 7
+        "line": 114,
+        "column": 9
       }
     },
     {
@@ -993,13 +1021,15 @@
       "title": "Span links shows span links flyout details on consumer-multiple Transaction D",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/span_links.spec.ts",
-        "line": 137,
-        "column": 7
+        "line": 151,
+        "column": 9
       }
     },
     {
@@ -1007,13 +1037,15 @@
       "title": "Span links shows span links flyout details on consumer-multiple Span E",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/span_links.spec.ts",
-        "line": 167,
-        "column": 7
+        "line": 186,
+        "column": 9
       }
     },
     {
@@ -1021,13 +1053,15 @@
       "title": "Span stacktrace shows APM agent generated stacktrace",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/span_stacktrace.spec.ts",
-        "line": 21,
-        "column": 7
+        "line": 25,
+        "column": 9
       }
     },
     {
@@ -1035,13 +1069,15 @@
       "title": "Span stacktrace shows Otel generated stacktrace",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/span_stacktrace.spec.ts",
-        "line": 46,
-        "column": 7
+        "line": 50,
+        "column": 9
       }
     },
     {
