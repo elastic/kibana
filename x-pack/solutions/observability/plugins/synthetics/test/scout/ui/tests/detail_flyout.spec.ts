@@ -54,10 +54,5 @@ test.describe('MonitorDetailFlyout', { tag: tags.stateful.classic }, () => {
       const flyoutHeader = page.locator('.euiFlyoutHeader');
       await expect(flyoutHeader).toContainText(monitorName);
     });
-
-    await test.step('cleanup monitors', async () => {
-      await pageObjects.syntheticsApp.navigateToMonitorManagement();
-      await pageObjects.syntheticsApp.deleteMonitor(monitorName);
-    });
   });
 });

@@ -33,7 +33,6 @@ test.describe('OverviewSaveLensVisualization', { tag: tags.stateful.classic }, (
       await syntheticsServices.addMonitor('Test Overview Save Lens Visualization Monitor', {
         type: 'http',
         urls: 'https://www.google.com',
-        locations: ['us_central'],
       });
       await pageObjects.syntheticsApp.refreshOverview();
     });

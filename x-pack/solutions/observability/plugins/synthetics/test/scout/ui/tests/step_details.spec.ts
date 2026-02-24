@@ -12,18 +12,18 @@ import { test } from '../fixtures';
 test.describe('StepDetailsPage', { tag: tags.stateful.classic }, () => {
   const configId = 'a47bfc4e-361a-4eb0-83f3-b5bb68781b5b';
   const checkGroup = 'ab240846-8d22-11ed-8fac-52bb19a2321e';
+  let locationId: string;
 
   test.beforeAll(async ({ syntheticsServices }) => {
     await syntheticsServices.cleanUp();
     await syntheticsServices.enable();
+    const location = await syntheticsServices.getDefaultLocation();
+    locationId = location.id;
     await syntheticsServices.addMonitor(
       'https://www.google.com',
       {
         type: 'browser',
         custom_heartbeat_id: configId,
-        locations: [
-          { id: 'us_central', label: 'North America - US Central', isServiceManaged: true },
-        ],
         'source.inline.script':
           "step('step1', async ({ page }) => { await page.goto('https://www.google.com'); });",
       },
@@ -64,6 +64,7 @@ test.describe('StepDetailsPage', { tag: tags.stateful.classic }, () => {
         stepIndex: 1,
         checkGroup,
         configId,
+        locationId,
       });
     });
 

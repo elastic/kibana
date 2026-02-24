@@ -33,7 +33,7 @@ test.describe('FilterMonitors', { tag: tags.stateful.classic }, () => {
     });
 
     await test.step('create test monitors with tags', async () => {
-      const common = { type: 'http', urls: 'https://www.google.com', locations: ['us_central'] };
+      const common = { type: 'http', urls: 'https://www.google.com' };
       await syntheticsServices.addMonitor('Test Filter Monitors 1 Tag', {
         ...common,
         tags: [FIRST_TAG],

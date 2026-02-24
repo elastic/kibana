@@ -39,7 +39,6 @@ test.describe('CustomStatusAlert', { tag: tags.stateful.classic }, () => {
         {
           type: 'http',
           urls: 'https://www.google.com',
-          locations: ['us_central'],
         },
         configId
       );

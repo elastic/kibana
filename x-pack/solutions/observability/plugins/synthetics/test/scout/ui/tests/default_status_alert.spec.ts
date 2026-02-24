@@ -13,9 +13,14 @@ import { test } from '../fixtures';
 
 test.describe('DefaultStatusAlert', { tag: tags.stateful.classic }, () => {
   let configId: string;
+  let locationId: string;
+  let locationLabel: string;
 
   test.beforeAll(async ({ syntheticsServices }) => {
     await syntheticsServices.cleanUp();
+    const location = await syntheticsServices.getDefaultLocation();
+    locationId = location.id;
+    locationLabel = location.label;
   });
 
   test.afterAll(async ({ syntheticsServices }) => {
@@ -36,9 +41,6 @@ test.describe('DefaultStatusAlert', { tag: tags.stateful.classic }, () => {
       configId = await syntheticsServices.addMonitor('Test Monitor', {
         type: 'http',
         urls: 'https://www.google.com',
-        locations: [
-          { id: 'us_central', label: 'North America - US Central', isServiceManaged: true },
-        ],
       });
       await syntheticsServices.addSummaryDocument({
         timestamp: firstCheckTime,
@@ -80,7 +82,7 @@ test.describe('DefaultStatusAlert', { tag: tags.stateful.classic }, () => {
         page.getByText('Alerts are now disabled for the monitor "Test Monitor".')
       ).toBeVisible();
 
-      await page.testSubj.locator('Test Monitor-us_central-metric-item').hover();
+      await page.testSubj.locator(`Test Monitor-${locationId}-metric-item`).hover();
       await page.click('[aria-label="Open actions menu"]');
       await page.click('text=Enable status alert');
     });
@@ -106,7 +108,7 @@ test.describe('DefaultStatusAlert', { tag: tags.stateful.classic }, () => {
 
       const reasonMessage = getReasonMessage({
         name: 'Test Monitor',
-        location: 'North America - US Central',
+        location: locationLabel,
         reason: 'down',
         checks: { downWithinXChecks: 1, down: 1 },
       });
@@ -144,9 +146,6 @@ test.describe('DefaultStatusAlert', { tag: tags.stateful.classic }, () => {
         type: 'http',
         urls: 'https://www.google.com',
         custom_heartbeat_id: monitorId,
-        locations: [
-          { id: 'us_central', label: 'North America - US Central', isServiceManaged: true },
-        ],
       });
       await syntheticsServices.addSummaryDocument({
         monitorId,

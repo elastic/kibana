@@ -27,6 +27,11 @@ export class SyntheticsAppPage {
     await this.waitForMonitorManagementLoadingToFinish();
   }
 
+  async navigateToGettingStarted() {
+    await this.page.goto(this.kbnUrl.get('/app/synthetics/monitors/getting-started'));
+    await this.page.testSubj.waitForSelector('syntheticsGettingStartedPageLink');
+  }
+
   async navigateToOverview(refreshInterval?: number) {
     const url = refreshInterval
       ? `/app/synthetics?refreshInterval=${refreshInterval}`
@@ -48,12 +53,15 @@ export class SyntheticsAppPage {
     configId,
     stepIndex,
     checkGroup,
+    locationId,
   }: {
     checkGroup: string;
     configId: string;
     stepIndex: number;
+    locationId?: string;
   }) {
-    const stepDetailsPath = `/app/synthetics/monitor/${configId}/test-run/${checkGroup}/step/${stepIndex}?locationId=us_central`;
+    const locId = locationId ?? 'test-private-location';
+    const stepDetailsPath = `/app/synthetics/monitor/${configId}/test-run/${checkGroup}/step/${stepIndex}?locationId=${locId}`;
     await this.page.goto(this.kbnUrl.get(stepDetailsPath));
   }
 
@@ -75,8 +83,8 @@ export class SyntheticsAppPage {
     await this.ensureIsOnMonitorConfigPage();
     await this.page.testSubj.click('syntheticsMonitorConfigSubmitButton');
     const msg = isUpdate ? 'Monitor updated successfully.' : 'Monitor added successfully.';
-    await expect(this.page.getByText(msg)).toBeVisible({ timeout: 60_000 });
-    await this.page.testSubj.locator('toastCloseButton').click({ timeout: 20_000 });
+    await expect(this.page.getByText(msg)).toBeVisible();
+    await this.page.testSubj.locator('toastCloseButton').click();
   }
 
   async selectMonitorType(monitorType: string) {
@@ -100,13 +108,12 @@ export class SyntheticsAppPage {
     });
   }
 
-  async fillFirstMonitorDetails({ url, locations }: { url: string; locations: string[] }) {
+  async fillFirstMonitorDetails({ url, location }: { url: string; location: string }) {
     await this.page.testSubj.fill('urls-input', url);
-    await this.page.testSubj.click('comboBoxInput');
-    for (const loc of locations) {
-      await this.page.testSubj.click(`syntheticsServiceLocation--${loc}`);
-    }
-    await this.page.testSubj.click('urls-input');
+    const comboBox = new EuiComboBoxWrapper(this.page, {
+      dataTestSubj: 'syntheticsServiceLocations',
+    });
+    await comboBox.selectMultiOption(location);
   }
 
   async createBasicMonitorDetails({
@@ -227,16 +234,16 @@ export class SyntheticsAppPage {
 
   async enableMonitorManagement(shouldEnable = true) {
     const addMonitorBtn = this.page.getByRole('button', { name: 'Create monitor' });
-    const isDisabled = await addMonitorBtn.isDisabled().catch(() => true);
+    const isDisabled = await addMonitorBtn.isDisabled();
     const isEnabled = !isDisabled;
     if (isEnabled === shouldEnable) {
       return;
     }
     const toggle = this.page.testSubj.locator('syntheticsEnableSwitch');
     const button = this.page.testSubj.locator('syntheticsEnableButton');
-    if (await toggle.isVisible({ timeout: 3000 }).catch(() => false)) {
+    if (await toggle.isVisible({ timeout: 3000 })) {
       await toggle.click();
-    } else if (await button.isVisible({ timeout: 3000 }).catch(() => false)) {
+    } else if (await button.isVisible({ timeout: 3000 })) {
       await button.click();
     }
   }

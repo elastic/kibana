@@ -16,6 +16,7 @@ test.describe('PrivateLocationsSettings', { tag: tags.stateful.classic }, () => 
   test.beforeAll(async ({ syntheticsServices }) => {
     await syntheticsServices.deletePrivateLocations();
     await syntheticsServices.deleteMonitors();
+    await syntheticsServices.deleteSyntheticsIntegrations();
   });
 
   test.afterAll(async ({ syntheticsServices }) => {
@@ -32,10 +33,11 @@ test.describe('PrivateLocationsSettings', { tag: tags.stateful.classic }, () => 
   }) => {
     await test.step('login and navigate to settings', async () => {
       await browserAuth.loginAsAdmin();
-      await pageObjects.syntheticsApp.navigateToSettings();
+      await pageObjects.syntheticsApp.navigateToGettingStarted();
     });
 
     await test.step('create agent policy', async () => {
+      await page.testSubj.click('gettingStartedAddLocationButton');
       await page.click('text=Private Locations');
       await page.click('text=No agent policies found');
       await page.click('text=Create agent policy');
@@ -46,10 +48,10 @@ test.describe('PrivateLocationsSettings', { tag: tags.stateful.classic }, () => 
     });
 
     await test.step('create private location', async () => {
-      await pageObjects.syntheticsApp.navigateToSettings();
-      await page.click('text=Private Locations');
+      await pageObjects.syntheticsApp.navigateToGettingStarted();
+      await page.testSubj.click('gettingStartedAddLocationButton');
       await page.click('button:has-text("Create location")');
-      await page.fill('[aria-label="Location name"]', 'Test private');
+      await page.testSubj.fill('syntheticsLocationFormFieldText', 'Test private');
       await page.click('[aria-label="Select agent policy"]');
       await page.click('button[role="option"]:has-text("Test fleet policyAgents: 0")');
       await page.click('.euiComboBox__inputWrap');

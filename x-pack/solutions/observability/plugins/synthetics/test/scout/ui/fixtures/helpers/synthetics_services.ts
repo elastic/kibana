@@ -57,30 +57,127 @@ export interface SyntheticsServicesFixture {
   deleteMonitors: () => Promise<void>;
   deleteParams: () => Promise<void>;
   deletePrivateLocations: () => Promise<void>;
+  deleteSyntheticsIntegrations: () => Promise<void>;
+  deleteSyntheticsPackagePolicyByName: (name: string) => Promise<void>;
   deleteSettingsAndConnectors: () => Promise<void>;
   enable: () => Promise<void>;
   ensurePrivateLocationExists: () => Promise<PrivateLocation>;
+  getDefaultLocation: () => Promise<PrivateLocation>;
   getMonitor: (monitorId: string) => Promise<any>;
   getPrivateLocations: () => Promise<PrivateLocation[]>;
   setupConnector: () => Promise<any>;
   setupSettings: (connectorId?: string) => Promise<void>;
 }
 
+/**
+ * If caller passed location objects (private locations), pass them through.
+ * Otherwise, use the auto-created private location as default.
+ */
+const resolveLocationPayload = (
+  callerLocations: any[] | undefined,
+  defaultLocation: PrivateLocation
+): Record<string, any> => {
+  if (callerLocations?.some((loc: any) => typeof loc === 'object')) {
+    return { locations: callerLocations };
+  }
+  return { private_locations: [defaultLocation.id] };
+};
+
+const defaultBrowserMonitorData = {
+  type: 'browser',
+  alert: { status: { enabled: true } },
+  form_monitor_type: 'single',
+  enabled: true,
+  schedule: { unit: 'm', number: '10' },
+  'service.name': '',
+  config_id: '',
+  tags: [],
+  timeout: '16',
+  name: 'Monitor 2',
+  namespace: 'default',
+  origin: 'ui',
+  journey_id: '',
+  project_id: '',
+  playwright_options: '',
+  __ui: { script_source: { is_generated_script: false, file_name: '' } },
+  params: '',
+  'url.port': null,
+  'source.inline.script':
+    "step('Go to https://www.google.com', async () => {\n          await page.goto('https://www.google.com');\n          expect(await page.isVisible('text=Data')).toBeTruthy();\n        });",
+  'source.project.content': '',
+  playwright_text_assertion: 'Data',
+  urls: 'https://www.google.com',
+  screenshots: 'on',
+  synthetics_args: [],
+  'filter_journeys.match': '',
+  'filter_journeys.tags': [],
+  ignore_https_errors: false,
+  throttling: {
+    id: 'custom',
+    label: 'Custom',
+    value: { download: '5', upload: '3', latency: '20' },
+  },
+  'ssl.certificate_authorities': '',
+  'ssl.certificate': '',
+  'ssl.key': '',
+  'ssl.key_passphrase': '',
+  'ssl.verification_mode': 'full',
+  'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'],
+};
+
+const projectMonitorBrowser = (
+  name: string,
+  privateLocationId: string,
+  config?: Record<string, unknown>
+) => ({
+  monitors: [
+    {
+      type: 'browser',
+      throttling: { download: 5, upload: 3, latency: 20 },
+      schedule: 10,
+      locations: [],
+      privateLocations: [privateLocationId],
+      params: {},
+      playwrightOptions: { headless: true, chromiumSandbox: false },
+      custom_heartbeat_id: 'check-if-title-is-present',
+      id: 'check-if-title-is-present',
+      tags: [],
+      content:
+        'UEsDBBQACAAIAON5qVQAAAAAAAAAAAAAAAAfAAAAZXhhbXBsZXMvdG9kb3MvYmFzaWMuam91cm5leS50c22Q0WrDMAxF3/sVF7MHB0LMXlc6RvcN+wDPVWNviW0sdUsp/fe5SSiD7UFCWFfHujIGlpnkybwxFTZfoY/E3hsaLEtwhs9RPNWKDU12zAOxkXRIbN4tB9d9pFOJdO6EN2HMqQguWN9asFBuQVMmJ7jiWNII9fIXrbabdUYr58l9IhwhQQZCYORCTFFUC31Btj21NRc7Mq4Nds+4bDD/pNVgT9F52Jyr2Fa+g75LAPttg8yErk+S9ELpTmVotlVwnfNCuh2lepl3+JflUmSBJ3uggt1v9INW/lHNLKze9dJe1J3QJK8pSvWkm6aTtCet5puq+x63+AFQSwcIAPQ3VfcAAACcAQAAUEsBAi0DFAAIAAgA43mpVAD0N1X3AAAAnAEAAB8AAAAAAAAAAAAgAKSBAAAAAGV4YW1wbGVzL3RvZG9zL2Jhc2ljLmpvdXJuZXkudHNQSwUGAAAAAAEAAQBNAAAARAEAAAAA',
+      filter: { match: 'check if title is present' },
+      hash: 'ekrjelkjrelkjre',
+      name,
+      ...config,
+    },
+  ],
+});
+
 function createSyntheticsServices(
   kbnClient: KbnClient,
   esClient: EsClient
 ): SyntheticsServicesFixture {
+  let cachedLocation: PrivateLocation | null = null;
+
+  const getDefaultLocation = async (): Promise<PrivateLocation> => {
+    if (!cachedLocation) {
+      cachedLocation = await ensurePrivateLocationExists();
+    }
+    return cachedLocation;
+  };
+
   const addMonitor = async (
     name: string,
     data: Record<string, any> = { type: 'browser' },
     configId?: string,
     options: { tls: { enabled: boolean } } = { tls: { enabled: false } }
   ): Promise<string> => {
+    const { locations: callerLocations, ...restData } = data;
+    const locationPayload = resolveLocationPayload(callerLocations, await getDefaultLocation());
     const testData = {
       alert: { status: { enabled: true }, tls: options.tls },
-      locations: [{ id: 'us_central', isServiceManaged: true }],
-      ...(data?.type !== 'browser' ? {} : data),
-      ...(data || {}),
+      ...locationPayload,
+      ...(restData?.type !== 'browser' ? {} : restData),
+      ...restData,
       name,
     };
     const response = await kbnClient.request({
@@ -99,13 +196,14 @@ function createSyntheticsServices(
     projectName = 'test-project',
     config?: Record<string, unknown>
   ) => {
+    const location = await getDefaultLocation();
     await kbnClient.request({
       path: SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace(
         '{projectName}',
         projectName
       ),
       method: 'PUT',
-      body: projectMonitorBrowser(name, config),
+      body: projectMonitorBrowser(name, location.id, config),
       headers: PUBLIC_API_HEADERS,
     });
   };
@@ -114,10 +212,12 @@ function createSyntheticsServices(
     name: string,
     params: Record<string, any> = { type: 'browser' }
   ) => {
+    const { locations: callerLocations, ...restParams } = params;
+    const locationPayload = resolveLocationPayload(callerLocations, await getDefaultLocation());
     const testData = {
-      locations: [{ id: 'us_central', isServiceManaged: true }],
-      ...(params?.type !== 'browser' ? {} : defaultBrowserMonitorData),
-      ...(params || {}),
+      ...locationPayload,
+      ...(restParams?.type !== 'browser' ? {} : defaultBrowserMonitorData),
+      ...restParams,
       name,
     };
     await kbnClient.request({
@@ -153,11 +253,15 @@ function createSyntheticsServices(
   } = {}) => {
     let document: Record<string, any> = { '@timestamp': timestamp };
     let index = 'synthetics-http-default';
+    const defaultLocation = cachedLocation ?? {
+      id: 'test-private-location',
+      label: 'Test private location',
+    };
     const commonData = {
       timestamp,
       name,
       testRunId,
-      location: { id: 'us_central', label: locationName ?? 'North America - US Central' },
+      location: { id: defaultLocation.id, label: locationName ?? defaultLocation.label },
       configId,
       monitorId: monitorId ?? configId,
       tlsNotAfter,
@@ -251,6 +355,67 @@ function createSyntheticsServices(
     await kbnClient.savedObjects.clean({
       types: ['synthetics-private-location', 'ingest-agent-policies', 'ingest-package-policies'],
     });
+  };
+
+  /**
+   * Deletes Synthetics package policies (integration policies) by exact name.
+   * Name format: {monitorName}-{locationLabel}-{namespace}, e.g. "https://amazon.com-Test private location-default"
+   */
+  const deleteSyntheticsPackagePolicyByName = async (name: string) => {
+    const { data } = await kbnClient.request({
+      path: '/api/fleet/package_policies',
+      method: 'GET',
+      query: {
+        perPage: 1000,
+        kuery: 'ingest-package-policies.package.name:synthetics',
+      },
+    });
+    const items =
+      (data as { items?: Array<{ id: string; name: string; policy_id: string }> })?.items ?? [];
+    const toDelete = items.filter((p) => p.name === name);
+    for (const pkg of toDelete) {
+      await kbnClient.request({
+        path: `/api/fleet/package_policies/${pkg.id}`,
+        method: 'DELETE',
+        query: { force: true },
+      });
+    }
+  };
+
+  const deleteSyntheticsIntegrations = async () => {
+    const { data } = await kbnClient.request({
+      path: '/api/fleet/agent_policies',
+      method: 'GET',
+      query: {
+        page: 1,
+        perPage: 100,
+        sortField: 'updated_at',
+        sortOrder: 'desc',
+        noAgentCount: true,
+        full: true,
+      },
+    });
+    const policies =
+      (
+        data as {
+          items?: Array<{ id: string; package_policies?: Array<{ package?: { name: string } }> }>;
+        }
+      )?.items ?? [];
+    for (const policy of policies) {
+      const hasSynthetics = policy.package_policies?.some(
+        (pp) => pp.package?.name === 'synthetics'
+      );
+      if (!hasSynthetics) continue;
+      try {
+        await kbnClient.request({
+          path: '/api/fleet/agent_policies/delete',
+          method: 'POST',
+          body: { agentPolicyId: policy.id },
+        });
+      } catch {
+        // policy may already be deleted or protected; continue
+      }
+    }
   };
 
   const deleteSettingsAndConnectors = async () => {
@@ -357,9 +522,12 @@ function createSyntheticsServices(
     deleteMonitors,
     deleteParams,
     deletePrivateLocations,
+    deleteSyntheticsIntegrations,
+    deleteSyntheticsPackagePolicyByName,
     deleteSettingsAndConnectors,
     enable,
     ensurePrivateLocationExists,
+    getDefaultLocation,
     getMonitor,
     getPrivateLocations,
     setupConnector,
@@ -376,70 +544,5 @@ export const syntheticsServicesFixture = base.extend<
       await use(createSyntheticsServices(kbnClient, esClient));
     },
     { scope: 'worker' },
-  ],
-});
-
-const defaultBrowserMonitorData = {
-  type: 'browser',
-  alert: { status: { enabled: true } },
-  form_monitor_type: 'single',
-  enabled: true,
-  schedule: { unit: 'm', number: '10' },
-  'service.name': '',
-  config_id: '',
-  tags: [],
-  timeout: '16',
-  name: 'Monitor 2',
-  locations: [{ id: 'us_central', isServiceManaged: true }],
-  namespace: 'default',
-  origin: 'ui',
-  journey_id: '',
-  project_id: '',
-  playwright_options: '',
-  __ui: { script_source: { is_generated_script: false, file_name: '' } },
-  params: '',
-  'url.port': null,
-  'source.inline.script':
-    "step('Go to https://www.google.com', async () => {\n          await page.goto('https://www.google.com');\n          expect(await page.isVisible('text=Data')).toBeTruthy();\n        });",
-  'source.project.content': '',
-  playwright_text_assertion: 'Data',
-  urls: 'https://www.google.com',
-  screenshots: 'on',
-  synthetics_args: [],
-  'filter_journeys.match': '',
-  'filter_journeys.tags': [],
-  ignore_https_errors: false,
-  throttling: {
-    id: 'custom',
-    label: 'Custom',
-    value: { download: '5', upload: '3', latency: '20' },
-  },
-  'ssl.certificate_authorities': '',
-  'ssl.certificate': '',
-  'ssl.key': '',
-  'ssl.key_passphrase': '',
-  'ssl.verification_mode': 'full',
-  'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'],
-};
-
-const projectMonitorBrowser = (name: string, config?: Record<string, unknown>) => ({
-  monitors: [
-    {
-      type: 'browser',
-      throttling: { download: 5, upload: 3, latency: 20 },
-      schedule: 10,
-      locations: ['us_central'],
-      params: {},
-      playwrightOptions: { headless: true, chromiumSandbox: false },
-      custom_heartbeat_id: 'check-if-title-is-present',
-      id: 'check-if-title-is-present',
-      tags: [],
-      content:
-        'UEsDBBQACAAIAON5qVQAAAAAAAAAAAAAAAAfAAAAZXhhbXBsZXMvdG9kb3MvYmFzaWMuam91cm5leS50c22Q0WrDMAxF3/sVF7MHB0LMXlc6RvcN+wDPVWNviW0sdUsp/fe5SSiD7UFCWFfHujIGlpnkybwxFTZfoY/E3hsaLEtwhs9RPNWKDU12zAOxkXRIbN4tB9d9pFOJdO6EN2HMqQguWN9asFBuQVMmJ7jiWNII9fIXrbabdUYr58l9IhwhQQZCYORCTFFUC31Btj21NRc7Mq4Nds+4bDD/pNVgT9F52Jyr2Fa+g75LAPttg8yErk+S9ELpTmVotlVwnfNCuh2lepl3+JflUmSBJ3uggt1v9INW/lHNLKze9dJe1J3QJK8pSvWkm6aTtCet5puq+x63+AFQSwcIAPQ3VfcAAACcAQAAUEsBAi0DFAAIAAgA43mpVAD0N1X3AAAAnAEAAB8AAAAAAAAAAAAgAKSBAAAAAGV4YW1wbGVzL3RvZG9zL2Jhc2ljLmpvdXJuZXkudHNQSwUGAAAAAAEAAQBNAAAARAEAAAAA',
-      filter: { match: 'check if title is present' },
-      hash: 'ekrjelkjrelkjre',
-      name,
-      ...config,
-    },
   ],
 });

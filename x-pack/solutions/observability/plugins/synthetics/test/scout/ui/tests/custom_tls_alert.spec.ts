@@ -38,7 +38,6 @@ test.describe('CustomTLSAlert', { tag: tags.stateful.classic }, () => {
         {
           type: 'http',
           urls: 'https://www.google.com',
-          locations: ['us_central'],
         },
         configId,
         { tls: { enabled: true } }

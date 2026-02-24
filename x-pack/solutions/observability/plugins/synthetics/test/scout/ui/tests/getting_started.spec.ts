@@ -12,6 +12,12 @@ import { test } from '../fixtures';
 test.describe('GettingStarted', { tag: tags.stateful.classic }, () => {
   test.beforeAll(async ({ syntheticsServices }) => {
     await syntheticsServices.deleteMonitors();
+    await syntheticsServices.ensurePrivateLocationExists();
+  });
+
+  test.afterAll(async ({ syntheticsServices }) => {
+    await syntheticsServices.deleteMonitors();
+    await syntheticsServices.deletePrivateLocations();
   });
 
   test('creates a basic monitor from getting started page', async ({
@@ -21,7 +27,7 @@ test.describe('GettingStarted', { tag: tags.stateful.classic }, () => {
   }) => {
     await test.step('navigate to monitor management and login', async () => {
       await browserAuth.loginAsAdmin();
-      await pageObjects.syntheticsApp.navigateToMonitorManagement();
+      await pageObjects.syntheticsApp.navigateToGettingStarted();
     });
 
     await test.step('enable monitor management', async () => {
@@ -37,7 +43,7 @@ test.describe('GettingStarted', { tag: tags.stateful.classic }, () => {
     await test.step('create basic monitor', async () => {
       await pageObjects.syntheticsApp.fillFirstMonitorDetails({
         url: 'https://www.elastic.co',
-        locations: ['us_central'],
+        location: 'Test private location',
       });
       await pageObjects.syntheticsApp.confirmAndSave();
     });

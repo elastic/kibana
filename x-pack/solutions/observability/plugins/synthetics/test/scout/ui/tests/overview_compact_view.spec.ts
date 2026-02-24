@@ -33,7 +33,6 @@ test.describe('OverviewCompactView', { tag: tags.stateful.classic }, () => {
       await syntheticsServices.addMonitor('Test Overview Compact View Monitor', {
         type: 'http',
         urls: 'https://www.google.com',
-        locations: ['us_central'],
       });
       await pageObjects.syntheticsApp.refreshOverview();
     });
