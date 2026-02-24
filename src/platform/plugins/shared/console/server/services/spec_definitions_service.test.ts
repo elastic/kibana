@@ -29,18 +29,24 @@ const getMockEndpoint = ({
   methods,
   patterns,
   data_autocomplete_rules,
+  documentation,
+  documentation_serverless,
   availability,
 }: {
   endpointName: string;
   methods?: string[];
   patterns?: string[];
   data_autocomplete_rules?: Record<string, unknown>;
+  documentation?: string;
+  documentation_serverless?: string;
   availability?: Record<EndpointsAvailability, boolean>;
 }): EndpointDefinition => ({
   [endpointName]: {
     methods: methods ?? ['GET'],
     patterns: patterns ?? ['/endpoint'],
     data_autocomplete_rules: data_autocomplete_rules ?? undefined,
+    documentation: documentation ?? undefined,
+    documentation_serverless: documentation_serverless ?? undefined,
     availability: availability ?? undefined,
   },
 });
@@ -358,6 +364,54 @@ describe('SpecDefinitionsService', () => {
       endpoint2: {
         id: 'endpoint2',
         documentation: 'https://www.elastic.co/docs/api',
+        methods: ['POST'],
+        patterns: ['/endpoint2'],
+      },
+    });
+  });
+
+  it('uses documentation_serverless for serverless endpoints when present', () => {
+    mockGlobbySync.mockImplementation((pattern) => {
+      if (pattern.includes('generated')) {
+        return ['/generated/endpoint1.json', '/generated/endpoint2.json'];
+      }
+      return [];
+    });
+
+    mockReadFileSync.mockImplementation((path) => {
+      if (path.toString() === '/generated/endpoint1.json') {
+        return JSON.stringify(
+          getMockEndpoint({
+            endpointName: 'endpoint1',
+            availability: { stack: true, serverless: false },
+          })
+        );
+      }
+      if (path.toString() === '/generated/endpoint2.json') {
+        return JSON.stringify(
+          getMockEndpoint({
+            endpointName: 'endpoint2',
+            methods: ['POST'],
+            patterns: ['/endpoint2'],
+            documentation_serverless: 'https://docs.elastic.co/serverless/endpoint2',
+            availability: { stack: true, serverless: true },
+          })
+        );
+      }
+      return '';
+    });
+
+    const specDefinitionsService = new SpecDefinitionsService();
+    specDefinitionsService.start({
+      endpointsAvailability: 'serverless',
+    });
+    const endpoints = specDefinitionsService.asJson().endpoints;
+    expect(endpoints).toEqual({
+      endpoint2: {
+        availability: { stack: true, serverless: true },
+        id: 'endpoint2',
+        documentation: 'https://docs.elastic.co/serverless/endpoint2',
+        documentation_serverless: 'https://docs.elastic.co/serverless/endpoint2',
         methods: ['POST'],
         patterns: ['/endpoint2'],
       },
