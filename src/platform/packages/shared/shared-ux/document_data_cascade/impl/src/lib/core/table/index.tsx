@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type FC, useMemo, useEffect } from 'react';
+import React, { type FC, useMemo } from 'react';
 import {
   createColumnHelper,
   getCoreRowModel,
@@ -43,7 +43,6 @@ export interface TableProps<G, L>
     | 'onRowSelectionChange'
     | 'getRowCanExpand'
   > {
-  initialData: G[];
   allowMultipleRowToggle: boolean;
   header: FC<{ table: Table<G> }>;
   rowCell: FC<CellContext<G, L>>;
@@ -54,16 +53,11 @@ export const useCascadeTable = <G extends GroupNode, L extends LeafNode>({
   enableRowSelection,
   header: Header,
   rowCell: RowCell,
-  initialData,
   ...rest
 }: TableProps<G, L>) => {
   const columnHelper = createColumnHelper<G>();
   const actions = useDataCascadeActions<G, L>();
   const state = useDataCascadeState<G, L>();
-
-  useEffect(() => {
-    actions.setInitialState(initialData);
-  }, [initialData, actions]);
 
   const table = useReactTable<G>({
     ...rest,
