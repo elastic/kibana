@@ -28,11 +28,11 @@ import { getInheritedViewMode } from '@kbn/presentation-publishing';
 import type { UrlTemplateEditorVariable } from '@kbn/kibana-react-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import {
-  CONTEXT_MENU_TRIGGER,
-  IMAGE_CLICK_TRIGGER,
-  ROW_CLICK_TRIGGER,
-  SELECT_RANGE_TRIGGER,
-  VALUE_CLICK_TRIGGER,
+  ON_OPEN_PANEL_MENU,
+  ON_CLICK_IMAGE,
+  ON_CLICK_ROW,
+  ON_SELECT_RANGE,
+  ON_CLICK_VALUE,
 } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import {
   DEFAULT_ENCODE_URL,
@@ -133,14 +133,14 @@ export function getUrlDrilldown(deps: {
 
   function getExampleUrl(trigger?: string): string {
     switch (trigger) {
-      case SELECT_RANGE_TRIGGER:
+      case ON_SELECT_RANGE:
         return 'https://www.example.com/?from={{event.from}}&to={{event.to}}';
-      case CONTEXT_MENU_TRIGGER:
-      case IMAGE_CLICK_TRIGGER:
+      case ON_OPEN_PANEL_MENU:
+      case ON_CLICK_IMAGE:
         return 'https://www.example.com/?panel={{context.panel.title}}';
-      case ROW_CLICK_TRIGGER:
+      case ON_CLICK_ROW:
         return 'https://www.example.com/keys={{event.keys}}&values={{event.values}}';
-      case VALUE_CLICK_TRIGGER:
+      case ON_CLICK_VALUE:
       default:
         return 'https://www.example.com/?{{event.key}}={{event.value}}';
     }
