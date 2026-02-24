@@ -10,10 +10,6 @@
 export * from './palettes';
 export * from './classes';
 export * from './components';
-
 export { DEFAULT_FALLBACK_PALETTE, KbnPalette } from './constants';
-
-import type { KbnPalette } from './constants';
-export type KbnPaletteId = (typeof KbnPalette)[keyof typeof KbnPalette];
 
 export * from './hooks';
