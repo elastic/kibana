@@ -33,8 +33,8 @@ export type CaseFormFieldsSchemaProps = Omit<
   extractObservables: boolean;
   customFields: Record<string, string | boolean>;
   templateId?: string;
-  templateVersion?: string;
-  extended_fields?: Record<string, unknown>;
+  templateVersion?: number;
+  extendedFields?: Record<string, unknown>;
 };
 
 export const schema: FormSchema<CaseFormFieldsSchemaProps> = {
@@ -119,6 +119,9 @@ export const schema: FormSchema<CaseFormFieldsSchemaProps> = {
     defaultValue: '',
   },
   templateVersion: {
-    defaultValue: '',
+    defaultValue: 1,
+  },
+  extendedFields: {
+    defaultValue: {},
   },
 };

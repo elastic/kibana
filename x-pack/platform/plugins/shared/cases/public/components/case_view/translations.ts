@@ -259,6 +259,12 @@ export const ADDED_OBSERVABLES = (totalObservables: number): string =>
       'added {totalObservables, plural, =1 {an} other {{totalObservables}}} {totalObservables, plural, =1 {observable} other {observables}}',
   });
 
+export const EDIT_FIELD_ARIA_LABEL = (fieldName: string) =>
+  i18n.translate('xpack.cases.caseView.editFieldAriaLabel', {
+    values: { fieldName },
+    defaultMessage: 'Edit {fieldName}',
+  });
+
 export const DELETED_OBSERVABLES = (totalObservables: number): string =>
   i18n.translate('xpack.cases.caseView.observables.deletedObservables', {
     values: { totalObservables },

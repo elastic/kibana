@@ -16,7 +16,7 @@ import type { OnUpdateFields } from './types';
 
 export const useOnUpdateField = ({ caseData }: { caseData: CaseUI }) => {
   const { isLoading, mutate: updateCaseProperty } = useUpdateCase();
-  const [loadingKey, setLoadingKey] = useState<UpdateKey | null>(null);
+  const [loadingKey, setLoadingKey] = useState<string | null>(null);
 
   const onUpdateField = useCallback(
     ({ key, value, onSuccess, onError }: OnUpdateFields) => {
@@ -100,10 +100,20 @@ export const useOnUpdateField = ({ caseData }: { caseData: CaseUI }) => {
           }
           break;
         default:
-          return null;
+          // TODO: replace with actual API call when backend is ready
+          setLoadingKey(key);
+          try {
+            onSuccess?.();
+          } catch {
+            onError?.();
+          } finally {
+            setLoadingKey(null);
+          }
+          break;
       }
     },
     [updateCaseProperty, caseData]
   );
+
   return { onUpdateField, isLoading, loadingKey };
 };

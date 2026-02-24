@@ -53,8 +53,52 @@ import { EditCategory } from './edit_category';
 import { parseCaseUsers } from '../../utils';
 import { CustomFields } from './custom_fields';
 import { useReplaceCustomField } from '../../../containers/use_replace_custom_field';
+import { EditTextField } from './edit_text_field';
+import { EditTextareaField } from './edit_textarea_field';
+import { EditNumberField } from './edit_number_field';
+import { EditComboboxField } from './edit_combobox_field';
+import { FieldType } from '../../templates_v2/field_types/constants';
 
 const LOCALSTORAGE_SORT_ORDER_KEY = 'cases.userActivity.sortOrder';
+
+// WIP: Template fields integration
+// - Mock data below will be replaced with fields fetched from the templates API.
+// - Field values (currently empty) should come from case data once the backend supports template field storage.
+// - The onUpdateField default case in useOnUpdateField has a TODO placeholder for the actual API call.
+// - Each control type maps to a corresponding edit component:
+//   SELECT_BASIC → EditComboboxField, INPUT_TEXT → EditTextField,
+//   INPUT_NUMBER → EditNumberField, TEXTAREA → EditTextareaField.
+// - Unit tests for the template fields rendering and update logic are not yet added.
+
+const TEMPLATE_FIELDS_MOCK = [
+  {
+    name: 'severity',
+    label: 'Select label',
+    type: 'keyword',
+    metadata: {
+      options: ['low', 'moderate', 'high', 'critical'],
+    },
+    control: FieldType.SELECT_BASIC,
+  },
+  {
+    name: 'name',
+    label: 'Input text label',
+    type: 'keyword',
+    control: FieldType.INPUT_TEXT,
+  },
+  {
+    name: 'effort',
+    label: 'Input number label',
+    type: 'integer',
+    control: FieldType.INPUT_NUMBER,
+  },
+  {
+    name: 'details',
+    label: 'Textarea label',
+    type: 'keyword',
+    control: FieldType.TEXTAREA,
+  },
+];
 
 export const CaseViewActivity = ({
   ruleDetailsNavigation,
@@ -307,6 +351,7 @@ export const CaseViewActivity = ({
               userProfiles={userProfiles}
             />
           ) : null}
+
           <EditTags
             tags={caseData.tags}
             onSubmit={onSubmitTags}
@@ -335,6 +380,61 @@ export const CaseViewActivity = ({
             customFieldsConfiguration={casesConfiguration.customFields}
             onSubmit={onSubmitCustomField}
           />
+          {TEMPLATE_FIELDS_MOCK.map((field) => {
+            const fieldIsLoading = isLoading && loadingKey === field.name;
+            const onSubmit = (value: unknown) => onUpdateField({ key: field.name, value });
+
+            switch (field.control) {
+              case FieldType.INPUT_TEXT:
+                return (
+                  <EditTextField
+                    key={field.name}
+                    title={field.label}
+                    value=""
+                    onSubmit={onSubmit}
+                    isLoading={fieldIsLoading}
+                    data-test-subj={`template-field-${field.name}`}
+                  />
+                );
+              case FieldType.INPUT_NUMBER:
+                return (
+                  <EditNumberField
+                    key={field.name}
+                    title={field.label}
+                    value=""
+                    onSubmit={onSubmit}
+                    isLoading={fieldIsLoading}
+                    data-test-subj={`template-field-${field.name}`}
+                  />
+                );
+              case FieldType.TEXTAREA:
+                return (
+                  <EditTextareaField
+                    key={field.name}
+                    title={field.label}
+                    value=""
+                    onSubmit={onSubmit}
+                    isLoading={fieldIsLoading}
+                    data-test-subj={`template-field-${field.name}`}
+                  />
+                );
+              case FieldType.SELECT_BASIC:
+                return (
+                  <EditComboboxField
+                    key={field.name}
+                    title={field.label}
+                    value={[]}
+                    options={field.metadata?.options ?? []}
+                    onSubmit={onSubmit}
+                    isLoading={fieldIsLoading}
+                    singleSelection
+                    data-test-subj={`template-field-${field.name}`}
+                  />
+                );
+              default:
+                return null;
+            }
+          })}
         </EuiFlexGroup>
       </EuiFlexItem>
     </>

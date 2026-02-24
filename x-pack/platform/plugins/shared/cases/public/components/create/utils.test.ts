@@ -260,17 +260,6 @@ describe('utils', () => {
       });
     });
 
-    it('excludes templateId, templateVersion, and extended_fields from serialized output', () => {
-      expect(
-        createFormSerializer([], casesConfigurationsMock, {
-          ...dataToSerialize,
-          templateId: 'tmpl-1',
-          templateVersion: '2',
-          extended_fields: { customKey: 'customValue' },
-        })
-      ).toEqual(serializedFormData);
-    });
-
     it('trims form data', () => {
       const untrimmedData = {
         title: '  title  ',
@@ -289,6 +278,32 @@ describe('utils', () => {
         category: untrimmedData.category.trim(),
         tags: ['tag 1', 'tag 2'],
       });
+    });
+
+    it('includes extended_fields in serialized output when present', () => {
+      const extendedFields = { customKey: 'customValue' };
+      expect(
+        createFormSerializer([], casesConfigurationsMock, {
+          ...dataToSerialize,
+          extended_fields: extendedFields,
+        })
+      ).toEqual({ ...serializedFormData, extended_fields: extendedFields });
+    });
+
+    it('omits extended_fields from serialized output when not present', () => {
+      expect(createFormSerializer([], casesConfigurationsMock, dataToSerialize)).toEqual(
+        serializedFormData
+      );
+    });
+
+    it('excludes templateId and templateVersion from serialized output', () => {
+      expect(
+        createFormSerializer([], casesConfigurationsMock, {
+          ...dataToSerialize,
+          templateId: 'tmpl-1',
+          templateVersion: '2',
+        })
+      ).toEqual(serializedFormData);
     });
   });
 
