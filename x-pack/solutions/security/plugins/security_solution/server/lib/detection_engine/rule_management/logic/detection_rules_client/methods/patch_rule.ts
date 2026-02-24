@@ -49,13 +49,6 @@ export const patchRule = async ({
 }: PatchRuleOptions): Promise<RuleResponse> => {
   const { rule_id: ruleId, id, ...rulePatchObjWithoutIds } = rulePatch;
 
-  // Zod v4 union parsing may add optional keys with undefined to the parsed output.
-  // Filter these out so we only consider keys the user actually provided when deciding
-  // whether to use the read-auth path (e.g. exceptions_list-only patch).
-  const rulePatchWithDefinedValuesOnly = Object.fromEntries(
-    Object.entries(rulePatchObjWithoutIds).filter(([, value]) => value !== undefined)
-  ) as typeof rulePatchObjWithoutIds;
-
   const existingRule = await getRuleByIdOrRuleId({
     rulesClient,
     ruleId,
