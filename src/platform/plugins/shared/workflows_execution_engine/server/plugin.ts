@@ -23,11 +23,6 @@ import type {
   WorkflowExecutionEngineModel,
 } from '@kbn/workflows';
 import { WorkflowExecutionNotFoundError } from '@kbn/workflows/common/errors';
-import {
-  applyInputDefaults,
-  makeWorkflowInputsValidator,
-  normalizeInputsToJsonSchema,
-} from '@kbn/workflows/spec/lib/input_conversion';
 import { ConcurrencyManager } from './concurrency/concurrency_manager';
 import type { WorkflowsExecutionEngineConfig } from './config';
 import {
@@ -38,6 +33,7 @@ import {
 import { checkLicense } from './lib/check_license';
 import { getAuthenticatedUser } from './lib/get_user';
 import { WorkflowExecutionTelemetryClient } from './lib/telemetry/workflow_execution_telemetry_client';
+import { validateWorkflowInputs } from './lib/validate_workflow_inputs';
 import { initializeLogsRepositoryDataStream } from './repositories/logs_repository/data_stream';
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
 import type {
@@ -479,32 +475,6 @@ export class WorkflowsExecutionEnginePlugin
       workflowsExtensions: plugins.workflowsExtensions,
     };
 
-    const validateWorkflowInputs = (
-      workflow: WorkflowExecutionEngineModel,
-      context: Record<string, unknown>
-    ): void => {
-      const inputsDef = workflow.definition?.inputs;
-      if (!inputsDef) {
-        return;
-      }
-      const normalizedSchema = normalizeInputsToJsonSchema(inputsDef);
-      if (!normalizedSchema?.properties) {
-        return;
-      }
-      const providedInputs = context.inputs as Record<string, unknown> | undefined;
-      const inputsWithDefaults = applyInputDefaults(providedInputs, normalizedSchema);
-      const validator = makeWorkflowInputsValidator(inputsDef);
-      const result = validator.safeParse(inputsWithDefaults ?? {});
-      if (!result.success) {
-        const issues = result.error.issues
-          .map((issue) => `${issue.path.join('.')}: ${issue.message}`)
-          .join('; ');
-        throw new Error(
-          `Workflow input validation failed for workflow "${workflow.id}": ${issues}`
-        );
-      }
-    };
-
     // Helper function to create and persist a workflow execution
     const createAndPersistWorkflowExecution = async (
       workflow: WorkflowExecutionEngineModel,
@@ -596,7 +566,17 @@ export class WorkflowsExecutionEnginePlugin
         request
       );
 
-      validateWorkflowInputs(workflow, context);
+      const inputsValid = await validateWorkflowInputs(
+        workflow,
+        context,
+        workflowExecution.id as string,
+        workflowExecutionRepository
+      );
+      if (!inputsValid) {
+        return {
+          workflowExecutionId: workflowExecution.id as string,
+        };
+      }
 
       // Check concurrency limits and apply collision strategy if needed
       const canProceed = await this.checkConcurrencyIfNeeded(workflowExecution);
