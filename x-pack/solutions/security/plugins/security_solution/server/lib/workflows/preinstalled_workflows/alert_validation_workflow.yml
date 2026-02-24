@@ -49,7 +49,7 @@ consts:
 
   # When false, the workflow exits early if the alert already carries the
   # workflow tag prefix. Set to true to re-evaluate previously validated alerts.
-  override_previous: true
+  override_previous: false
 
   # --- Auto-close settings ---------------------------------------------------
   # Automatically close alerts classified as false_positive when their
