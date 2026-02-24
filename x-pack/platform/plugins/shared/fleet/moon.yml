@@ -121,6 +121,8 @@ dependsOn:
   - '@kbn/reporting-plugin'
   - '@kbn/rison'
   - '@kbn/rule-data-utils'
+  - '@kbn/agent-builder-server'
+  - '@kbn/agent-builder-plugin'
 tags:
   - plugin
   - prod

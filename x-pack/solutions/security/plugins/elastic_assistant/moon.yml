@@ -105,7 +105,9 @@ dependsOn:
   - '@kbn/core-ui-settings-browser-mocks'
   - '@kbn/management-settings-ids'
   - '@kbn/agent-builder-plugin'
+  - '@kbn/cases-plugin'
   - '@kbn/cloud-plugin'
+  - '@kbn/workflows-extensions'
 tags:
   - plugin
   - prod
