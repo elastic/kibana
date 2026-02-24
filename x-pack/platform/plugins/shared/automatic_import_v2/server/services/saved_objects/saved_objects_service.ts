@@ -35,7 +35,7 @@ export interface UpdateDataStreamParams {
   integrationId: string;
   dataStreamId: string;
   ingestPipeline: Pipeline;
-  pipelineDocs?: Array<estypes.IngestSimulateDocumentResult>;
+  pipelineDocs?: Array<NonNullable<estypes.IngestSimulateDocumentResult['doc']>['_source']>;
   status: keyof typeof TASK_STATUSES;
 }
 

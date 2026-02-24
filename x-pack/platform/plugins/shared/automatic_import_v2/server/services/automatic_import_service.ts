@@ -19,6 +19,8 @@ import type {
   CoreSetup,
   KibanaRequest,
 } from '@kbn/core/server';
+import type { estypes } from '@elastic/elasticsearch';
+import type { Pipeline } from '@kbn/ingest-pipelines-plugin/common/types';
 import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
@@ -64,6 +66,34 @@ function deriveIntegrationStatus(dataStreams: DataStreamAttributes[]): TaskStatu
     return 'completed' as TaskStatus;
   }
   return 'pending' as TaskStatus;
+}
+
+interface ElasticsearchErrorDetails {
+  reason?: string;
+  caused_by?: ElasticsearchErrorDetails;
+  root_cause?: ElasticsearchErrorDetails[];
+}
+
+interface ElasticsearchErrorLike {
+  message?: string;
+  body?: {
+    error?: ElasticsearchErrorDetails;
+  };
+  meta?: {
+    body?: {
+      error?: ElasticsearchErrorDetails;
+    };
+  };
+}
+
+function getElasticsearchErrorReason(error: Error | ElasticsearchErrorLike): string {
+  const errorLike = error as ElasticsearchErrorLike;
+  const esError = errorLike.meta?.body?.error ?? errorLike.body?.error;
+  const rootCauseReason = esError?.root_cause?.[0]?.reason;
+  const causedByReason = esError?.caused_by?.reason;
+  const directReason = esError?.reason;
+
+  return rootCauseReason ?? causedByReason ?? directReason ?? errorLike.message ?? 'Unknown error';
 }
 import { DATA_STREAM_CREATION_TASK_TYPE } from './task_manager';
 import { ErrorUtils } from '../errors/util';
@@ -434,6 +464,76 @@ export class AutomaticImportService {
       ingest_pipeline: ingestPipelineObj,
       results,
     };
+  }
+
+  public async updateDataStreamPipeline(params: {
+    integrationId: string;
+    dataStreamId: string;
+    ingestPipeline: string | Record<string, unknown>;
+    esClient: ElasticsearchClient;
+  }): Promise<{
+    ingest_pipeline: Record<string, unknown>;
+    results: Array<Record<string, unknown>>;
+  }> {
+    assert(this.savedObjectService, 'Saved Objects service not initialized.');
+    const { integrationId, dataStreamId, ingestPipeline, esClient } = params;
+
+    let parsedPipeline: Pipeline;
+    try {
+      const pipelineObject =
+        typeof ingestPipeline === 'string'
+          ? (JSON.parse(ingestPipeline) as Record<string, unknown>)
+          : ingestPipeline;
+      parsedPipeline = pipelineObject as unknown as Pipeline;
+    } catch (e) {
+      throw new Error(`Invalid ingest pipeline JSON: ${(e as Error).message}`);
+    }
+
+    if (!Array.isArray(parsedPipeline.processors)) {
+      throw new Error('Invalid ingest pipeline: "processors" must be an array');
+    }
+
+    const samples = await this.samplesIndexService.getSamplesForDataStream(
+      integrationId,
+      dataStreamId,
+      esClient
+    );
+    if (samples.length === 0) {
+      throw new Error(`No samples found for data stream ${dataStreamId}`);
+    }
+
+    let simulateResponse: estypes.IngestSimulateResponse;
+    try {
+      simulateResponse = await esClient.ingest.simulate({
+        pipeline: parsedPipeline as unknown as estypes.IngestPipeline,
+        docs: samples.map((sample) => ({
+          _source: { message: sample },
+        })),
+      });
+    } catch (e) {
+      throw new Error(
+        `Invalid ingest pipeline: ${getElasticsearchErrorReason(
+          e as Error | ElasticsearchErrorLike
+        )}`
+      );
+    }
+
+    const pipelineDocs = (simulateResponse.docs ?? [])
+      .map((doc) => doc?.doc?._source)
+      .filter(
+        (source): source is NonNullable<estypes.IngestSimulateDocumentResult['doc']>['_source'] =>
+          source !== undefined
+      );
+
+    await this.savedObjectService.updateDataStreamSavedObjectAttributes({
+      integrationId,
+      dataStreamId,
+      ingestPipeline: parsedPipeline,
+      pipelineDocs,
+      status: TASK_STATUSES.completed,
+    });
+
+    return this.getDataStreamResults(integrationId, dataStreamId);
   }
 
   public stop() {
