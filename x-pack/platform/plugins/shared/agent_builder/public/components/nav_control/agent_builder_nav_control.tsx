@@ -12,7 +12,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { isMac } from '@kbn/shared-ux-utility';
 import type { AgentBuilderPluginStart, AgentBuilderStartDependencies } from '../../types';
-import { RobotIcon } from '../../application/components/common/icons/robot';
 import { useUiPrivileges } from '../../application/hooks/use_ui_privileges';
 
 const isSemicolon = (event: KeyboardEvent) => event.code === 'Semicolon' || event.key === ';';
@@ -102,7 +101,7 @@ export function AgentBuilderNavControl() {
           size="s"
           fullWidth={false}
           minWidth={0}
-          iconType={RobotIcon}
+          iconType="productAgent"
         >
           <FormattedMessage
             id="xpack.agentBuilder.navControl.linkLabel"
