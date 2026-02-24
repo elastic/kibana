@@ -1,0 +1,559 @@
+{
+  "id": "@kbn/shared-ux-ai-components",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/shared-ux-ai-components",
+        "id": "def-common.AiButton",
+        "type": "Function",
+        "tags": [],
+        "label": "AiButton",
+        "description": [
+          "\nRenders the AI button with variant-based styling and icon behavior."
+        ],
+        "signature": [
+          "(props: ",
+          {
+            "pluginId": "@kbn/shared-ux-ai-components",
+            "scope": "common",
+            "docId": "kibKbnSharedUxAiComponentsPluginApi",
+            "section": "def-common.AiButtonProps",
+            "text": "AiButtonProps"
+          },
+          ") => React.JSX.Element"
+        ],
+        "path": "src/platform/packages/shared/shared-ux/ai-components/ai_button/src/ai_button.tsx",
+        "lineNumber": 21,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-ai-components",
+            "id": "def-common.AiButton.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "props",
+            "description": [
+              "- AI button configuration."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/shared-ux-ai-components",
+                "scope": "common",
+                "docId": "kibKbnSharedUxAiComponentsPluginApi",
+                "section": "def-common.AiButtonProps",
+                "text": "AiButtonProps"
+              }
+            ],
+            "path": "src/platform/packages/shared/shared-ux/ai-components/ai_button/src/ai_button.tsx",
+            "lineNumber": 21,
+            "columnNumber": 26,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-ai-components",
+        "id": "def-common.AiButtonDefault",
+        "type": "Function",
+        "tags": [],
+        "label": "AiButtonDefault",
+        "description": [
+          "\nRenders the default text AI button variants (`base` and `accent`)."
+        ],
+        "signature": [
+          "(props: ",
+          {
+            "pluginId": "@kbn/shared-ux-ai-components",
+            "scope": "common",
+            "docId": "kibKbnSharedUxAiComponentsPluginApi",
+            "section": "def-common.AiButtonDefaultProps",
+            "text": "AiButtonDefaultProps"
+          },
+          ") => React.JSX.Element"
+        ],
+        "path": "src/platform/packages/shared/shared-ux/ai-components/ai_button/src/ai_button_default.tsx",
+        "lineNumber": 25,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-ai-components",
+            "id": "def-common.AiButtonDefault.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "props",
+            "description": [
+              "- Props accepted by the default AI button variant."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/shared-ux-ai-components",
+                "scope": "common",
+                "docId": "kibKbnSharedUxAiComponentsPluginApi",
+                "section": "def-common.AiButtonDefaultProps",
+                "text": "AiButtonDefaultProps"
+              }
+            ],
+            "path": "src/platform/packages/shared/shared-ux/ai-components/ai_button/src/ai_button_default.tsx",
+            "lineNumber": 25,
+            "columnNumber": 33,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-ai-components",
+        "id": "def-common.AiButtonEmpty",
+        "type": "Function",
+        "tags": [],
+        "label": "AiButtonEmpty",
+        "description": [
+          "\nRenders the empty AI button variant."
+        ],
+        "signature": [
+          "(props: ",
+          {
+            "pluginId": "@kbn/shared-ux-ai-components",
+            "scope": "common",
+            "docId": "kibKbnSharedUxAiComponentsPluginApi",
+            "section": "def-common.AiButtonEmptyProps",
+            "text": "AiButtonEmptyProps"
+          },
+          ") => React.JSX.Element"
+        ],
+        "path": "src/platform/packages/shared/shared-ux/ai-components/ai_button/src/ai_button_empty.tsx",
+        "lineNumber": 26,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-ai-components",
+            "id": "def-common.AiButtonEmpty.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "props",
+            "description": [
+              "- Props accepted by the empty AI button variant."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/shared-ux-ai-components",
+                "scope": "common",
+                "docId": "kibKbnSharedUxAiComponentsPluginApi",
+                "section": "def-common.AiButtonEmptyProps",
+                "text": "AiButtonEmptyProps"
+              }
+            ],
+            "path": "src/platform/packages/shared/shared-ux/ai-components/ai_button/src/ai_button_empty.tsx",
+            "lineNumber": 26,
+            "columnNumber": 31,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-ai-components",
+        "id": "def-common.AiButtonIcon",
+        "type": "Function",
+        "tags": [],
+        "label": "AiButtonIcon",
+        "description": [
+          "\nRenders the icon-only AI button."
+        ],
+        "signature": [
+          "(props: ",
+          {
+            "pluginId": "@kbn/shared-ux-ai-components",
+            "scope": "common",
+            "docId": "kibKbnSharedUxAiComponentsPluginApi",
+            "section": "def-common.AiButtonIconProps",
+            "text": "AiButtonIconProps"
+          },
+          ") => React.JSX.Element"
+        ],
+        "path": "src/platform/packages/shared/shared-ux/ai-components/ai_button/src/ai_button_icon.tsx",
+        "lineNumber": 26,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-ai-components",
+            "id": "def-common.AiButtonIcon.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "props",
+            "description": [
+              "- Props accepted by the icon-only variant."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/shared-ux-ai-components",
+                "scope": "common",
+                "docId": "kibKbnSharedUxAiComponentsPluginApi",
+                "section": "def-common.AiButtonIconProps",
+                "text": "AiButtonIconProps"
+              }
+            ],
+            "path": "src/platform/packages/shared/shared-ux/ai-components/ai_button/src/ai_button_icon.tsx",
+            "lineNumber": 26,
+            "columnNumber": 30,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/shared-ux-ai-components",
+        "id": "def-common.AiButtonDefaultProps",
+        "type": "Type",
+        "tags": [],
+        "label": "AiButtonDefaultProps",
+        "description": [
+          "Props for the default text AI button variants (`base` and `accent`)."
+        ],
+        "signature": [
+          "(Omit<",
+          "DisambiguateSet",
+          "<",
+          "EuiButtonPropsForAnchor",
+          ", ",
+          "EuiButtonPropsForButton",
+          "> & ",
+          "EuiButtonDisplayCommonProps",
+          " & ",
+          "EuiButtonProps",
+          " & { onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; } & React.ButtonHTMLAttributes<HTMLButtonElement> & { buttonRef?: React.Ref<HTMLButtonElement> | undefined; }, \"fill\" | \"size\" | \"disabled\" | \"iconType\"> & { iconOnly?: false | undefined; fill?: undefined; size?: AiButtonTextSize | undefined; variant?: \"base\" | \"accent\" | undefined; iconType?: ",
+          {
+            "pluginId": "@kbn/shared-ux-ai-components",
+            "scope": "common",
+            "docId": "kibKbnSharedUxAiComponentsPluginApi",
+            "section": "def-common.AiButtonIconType",
+            "text": "AiButtonIconType"
+          },
+          " | undefined; }) | (Omit<",
+          "DisambiguateSet",
+          "<",
+          "EuiButtonPropsForButton",
+          ", ",
+          "EuiButtonPropsForAnchor",
+          "> & ",
+          "EuiButtonProps",
+          " & { href?: string | undefined; onClick?: React.MouseEventHandler<HTMLAnchorElement> | undefined; } & React.AnchorHTMLAttributes<HTMLAnchorElement> & { buttonRef?: React.Ref<HTMLAnchorElement> | undefined; }, \"fill\" | \"size\" | \"disabled\" | \"iconType\"> & { iconOnly?: false | undefined; fill?: undefined; size?: AiButtonTextSize | undefined; variant?: \"base\" | \"accent\" | undefined; iconType?: ",
+          {
+            "pluginId": "@kbn/shared-ux-ai-components",
+            "scope": "common",
+            "docId": "kibKbnSharedUxAiComponentsPluginApi",
+            "section": "def-common.AiButtonIconType",
+            "text": "AiButtonIconType"
+          },
+          " | undefined; })"
+        ],
+        "path": "src/platform/packages/shared/shared-ux/ai-components/ai_button/src/ai_button_default.tsx",
+        "lineNumber": 15,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-ai-components",
+        "id": "def-common.AiButtonEmptyProps",
+        "type": "Type",
+        "tags": [],
+        "label": "AiButtonEmptyProps",
+        "description": [
+          "Props for the `AiButtonEmpty` component."
+        ],
+        "signature": [
+          "Omit<Omit<",
+          "DisambiguateSet",
+          "<",
+          "EuiButtonEmptyPropsForAnchor",
+          ", ",
+          "EuiButtonEmptyPropsForButton",
+          "> & ",
+          "CommonEuiButtonEmptyProps",
+          " & { onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; } & React.ButtonHTMLAttributes<HTMLButtonElement>, \"disabled\" | \"iconType\"> & { iconOnly?: false | undefined; variant: \"empty\" | \"outlined\"; iconType?: ",
+          {
+            "pluginId": "@kbn/shared-ux-ai-components",
+            "scope": "common",
+            "docId": "kibKbnSharedUxAiComponentsPluginApi",
+            "section": "def-common.AiButtonIconType",
+            "text": "AiButtonIconType"
+          },
+          " | undefined; }, \"variant\"> | Omit<Omit<",
+          "DisambiguateSet",
+          "<",
+          "EuiButtonEmptyPropsForButton",
+          ", ",
+          "EuiButtonEmptyPropsForAnchor",
+          "> & ",
+          "CommonEuiButtonEmptyProps",
+          " & { href?: string | undefined; onClick?: React.MouseEventHandler<HTMLAnchorElement> | undefined; } & React.AnchorHTMLAttributes<HTMLAnchorElement>, \"disabled\" | \"iconType\"> & { iconOnly?: false | undefined; variant: \"empty\" | \"outlined\"; iconType?: ",
+          {
+            "pluginId": "@kbn/shared-ux-ai-components",
+            "scope": "common",
+            "docId": "kibKbnSharedUxAiComponentsPluginApi",
+            "section": "def-common.AiButtonIconType",
+            "text": "AiButtonIconType"
+          },
+          " | undefined; }, \"variant\">"
+        ],
+        "path": "src/platform/packages/shared/shared-ux/ai-components/ai_button/src/ai_button_empty.tsx",
+        "lineNumber": 16,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-ai-components",
+        "id": "def-common.AiButtonIconProps",
+        "type": "Type",
+        "tags": [],
+        "label": "AiButtonIconProps",
+        "description": [
+          "Props for the icon-only AI button component."
+        ],
+        "signature": [
+          "Omit<Omit<",
+          "DisambiguateSet",
+          "<",
+          "EuiButtonIconPropsForAnchor",
+          ", ",
+          "EuiButtonIconPropsForButton",
+          "> & { type?: \"button\" | \"reset\" | \"submit\" | undefined; } & ",
+          "EuiButtonIconProps",
+          " & { onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; } & React.ButtonHTMLAttributes<HTMLButtonElement> & { buttonRef?: React.Ref<HTMLButtonElement> | undefined; }, \"disabled\" | \"iconType\" | \"display\"> & { iconOnly: true; display?: undefined; variant?: ",
+          {
+            "pluginId": "@kbn/shared-ux-ai-components",
+            "scope": "common",
+            "docId": "kibKbnSharedUxAiComponentsPluginApi",
+            "section": "def-common.AiButtonVariant",
+            "text": "AiButtonVariant"
+          },
+          " | undefined; iconType: ",
+          {
+            "pluginId": "@kbn/shared-ux-ai-components",
+            "scope": "common",
+            "docId": "kibKbnSharedUxAiComponentsPluginApi",
+            "section": "def-common.AiButtonIconType",
+            "text": "AiButtonIconType"
+          },
+          "; 'aria-label': string; }, \"iconOnly\"> | Omit<Omit<",
+          "DisambiguateSet",
+          "<",
+          "EuiButtonIconPropsForButton",
+          ", ",
+          "EuiButtonIconPropsForAnchor",
+          "> & { type?: string | undefined; } & ",
+          "EuiButtonIconProps",
+          " & { href?: string | undefined; onClick?: React.MouseEventHandler<HTMLAnchorElement> | undefined; } & React.AnchorHTMLAttributes<HTMLAnchorElement> & { buttonRef?: React.Ref<HTMLAnchorElement> | undefined; }, \"disabled\" | \"iconType\" | \"display\"> & { iconOnly: true; display?: undefined; variant?: ",
+          {
+            "pluginId": "@kbn/shared-ux-ai-components",
+            "scope": "common",
+            "docId": "kibKbnSharedUxAiComponentsPluginApi",
+            "section": "def-common.AiButtonVariant",
+            "text": "AiButtonVariant"
+          },
+          " | undefined; iconType: ",
+          {
+            "pluginId": "@kbn/shared-ux-ai-components",
+            "scope": "common",
+            "docId": "kibKbnSharedUxAiComponentsPluginApi",
+            "section": "def-common.AiButtonIconType",
+            "text": "AiButtonIconType"
+          },
+          "; 'aria-label': string; }, \"iconOnly\">"
+        ],
+        "path": "src/platform/packages/shared/shared-ux/ai-components/ai_button/src/ai_button_icon.tsx",
+        "lineNumber": 16,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-ai-components",
+        "id": "def-common.AiButtonIconType",
+        "type": "Type",
+        "tags": [],
+        "label": "AiButtonIconType",
+        "description": [
+          "Allowed icon types for AI button components."
+        ],
+        "signature": [
+          "\"productAgent\" | \"sparkles\" | \"aiAssistantLogo\""
+        ],
+        "path": "src/platform/packages/shared/shared-ux/ai-components/ai_button/src/types.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-ai-components",
+        "id": "def-common.AiButtonProps",
+        "type": "Type",
+        "tags": [],
+        "label": "AiButtonProps",
+        "description": [
+          "Props for the `AiButton` component."
+        ],
+        "signature": [
+          "((Omit<",
+          "DisambiguateSet",
+          "<",
+          "EuiButtonPropsForAnchor",
+          ", ",
+          "EuiButtonPropsForButton",
+          "> & ",
+          "EuiButtonDisplayCommonProps",
+          " & ",
+          "EuiButtonProps",
+          " & { onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; } & React.ButtonHTMLAttributes<HTMLButtonElement> & { buttonRef?: React.Ref<HTMLButtonElement> | undefined; }, \"fill\" | \"size\" | \"disabled\" | \"iconType\"> | Omit<",
+          "DisambiguateSet",
+          "<",
+          "EuiButtonPropsForButton",
+          ", ",
+          "EuiButtonPropsForAnchor",
+          "> & ",
+          "EuiButtonProps",
+          " & { href?: string | undefined; onClick?: React.MouseEventHandler<HTMLAnchorElement> | undefined; } & React.AnchorHTMLAttributes<HTMLAnchorElement> & { buttonRef?: React.Ref<HTMLAnchorElement> | undefined; }, \"fill\" | \"size\" | \"disabled\" | \"iconType\">) & { iconOnly?: false | undefined; fill?: undefined; size?: AiButtonTextSize | undefined; variant?: \"base\" | \"accent\" | undefined; iconType?: ",
+          {
+            "pluginId": "@kbn/shared-ux-ai-components",
+            "scope": "common",
+            "docId": "kibKbnSharedUxAiComponentsPluginApi",
+            "section": "def-common.AiButtonIconType",
+            "text": "AiButtonIconType"
+          },
+          " | undefined; }) | ((Omit<",
+          "DisambiguateSet",
+          "<",
+          "EuiButtonEmptyPropsForAnchor",
+          ", ",
+          "EuiButtonEmptyPropsForButton",
+          "> & ",
+          "CommonEuiButtonEmptyProps",
+          " & { onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; } & React.ButtonHTMLAttributes<HTMLButtonElement>, \"disabled\" | \"iconType\"> | Omit<",
+          "DisambiguateSet",
+          "<",
+          "EuiButtonEmptyPropsForButton",
+          ", ",
+          "EuiButtonEmptyPropsForAnchor",
+          "> & ",
+          "CommonEuiButtonEmptyProps",
+          " & { href?: string | undefined; onClick?: React.MouseEventHandler<HTMLAnchorElement> | undefined; } & React.AnchorHTMLAttributes<HTMLAnchorElement>, \"disabled\" | \"iconType\">) & { iconOnly?: false | undefined; variant: \"empty\" | \"outlined\"; iconType?: ",
+          {
+            "pluginId": "@kbn/shared-ux-ai-components",
+            "scope": "common",
+            "docId": "kibKbnSharedUxAiComponentsPluginApi",
+            "section": "def-common.AiButtonIconType",
+            "text": "AiButtonIconType"
+          },
+          " | undefined; }) | ((Omit<",
+          "DisambiguateSet",
+          "<",
+          "EuiButtonIconPropsForAnchor",
+          ", ",
+          "EuiButtonIconPropsForButton",
+          "> & { type?: \"button\" | \"reset\" | \"submit\" | undefined; } & ",
+          "EuiButtonIconProps",
+          " & { onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; } & React.ButtonHTMLAttributes<HTMLButtonElement> & { buttonRef?: React.Ref<HTMLButtonElement> | undefined; }, \"disabled\" | \"iconType\" | \"display\"> | Omit<",
+          "DisambiguateSet",
+          "<",
+          "EuiButtonIconPropsForButton",
+          ", ",
+          "EuiButtonIconPropsForAnchor",
+          "> & { type?: string | undefined; } & ",
+          "EuiButtonIconProps",
+          " & { href?: string | undefined; onClick?: React.MouseEventHandler<HTMLAnchorElement> | undefined; } & React.AnchorHTMLAttributes<HTMLAnchorElement> & { buttonRef?: React.Ref<HTMLAnchorElement> | undefined; }, \"disabled\" | \"iconType\" | \"display\">) & { iconOnly: true; display?: undefined; variant?: ",
+          {
+            "pluginId": "@kbn/shared-ux-ai-components",
+            "scope": "common",
+            "docId": "kibKbnSharedUxAiComponentsPluginApi",
+            "section": "def-common.AiButtonVariant",
+            "text": "AiButtonVariant"
+          },
+          " | undefined; iconType: ",
+          {
+            "pluginId": "@kbn/shared-ux-ai-components",
+            "scope": "common",
+            "docId": "kibKbnSharedUxAiComponentsPluginApi",
+            "section": "def-common.AiButtonIconType",
+            "text": "AiButtonIconType"
+          },
+          "; 'aria-label': string; })"
+        ],
+        "path": "src/platform/packages/shared/shared-ux/ai-components/ai_button/src/types.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-ai-components",
+        "id": "def-common.AiButtonVariant",
+        "type": "Type",
+        "tags": [],
+        "label": "AiButtonVariant",
+        "description": [
+          "Supported visual variants for AI button components."
+        ],
+        "signature": [
+          "\"base\" | \"empty\" | \"accent\" | \"outlined\""
+        ],
+        "path": "src/platform/packages/shared/shared-ux/ai-components/ai_button/src/types.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

@@ -48,10 +48,10 @@ import {
 const SCRIPTS_TABLE_COLUMN_WIDTHS = Object.freeze({
   name: '25%',
   platform: '15%',
-  tags: '150px',
+  tags: '8%',
   updatedBy: '15%',
   updatedAt: '25%',
-  size: '5%',
+  size: '8%',
   actions: '65px',
 });
 
