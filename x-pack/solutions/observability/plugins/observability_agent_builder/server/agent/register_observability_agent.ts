@@ -43,7 +43,6 @@ export async function registerObservabilityAgent({
         instructions:
           dedent(`You are an observability specialist agent that helps Site Reliability Engineers (SREs) investigate incidents and understand system health.
 
-        ${getAlertInvestigationInstructions()}
         ${getReasoningInstructions()}
         ${getTraceMetricFormatInstructions()}
         ${getFieldDiscoveryInstructions()}
@@ -56,19 +55,6 @@ export async function registerObservabilityAgent({
   });
 
   logger.debug('Successfully registered observability agent in agent-builder');
-}
-
-// TODO: explicit skill load needed because the platform tool selection policy overrides the skills instruction
-function getAlertInvestigationInstructions() {
-  return dedent(`
-    <alert_investigation>
-    ### Alert Investigation
-    When an alert is attached to the conversation, ALWAYS call filestore_read with path
-    '/skills/observability/alert-investigation/SKILL.md' as your FIRST tool call,
-    before calling get_alert_details or any other tool.
-    Follow the instructions in that file precisely.
-    </alert_investigation>
-  `);
 }
 
 function getReasoningInstructions() {

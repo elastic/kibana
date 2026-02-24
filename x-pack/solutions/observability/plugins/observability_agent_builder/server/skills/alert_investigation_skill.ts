@@ -15,7 +15,6 @@ const BASE_PATH = 'skills/observability';
  * Alert investigation skill for the Observability Agent.
  *
  * Guides the agent through a structured investigation sequence when an alert is present,
- * mirroring the signal hierarchy validated by the Alert AI Insight component.
  *
  * Signal sequence (APM alerts):
  *   1. Blast radius — get_service_topology (downstream, depth 1)
@@ -32,9 +31,9 @@ export const alertInvestigationSkill = defineSkillType({
   name: NAME,
   basePath: BASE_PATH,
   description:
-    'Investigate an observability alert to find root cause. Use when the user asks ' +
-    'why an alert fired, wants to understand service or infrastructure degradation, ' +
-    'or needs to identify the root cause of a performance or availability problem.',
+    'Observability alert investigation. Use when an alert is attached and the user ' +
+    'asks to investigate it, wants to understand why it fired, or needs a full ' +
+    'root cause analysis.',
   content: `# Observability Alert Investigation
 
 Use this skill when the user wants to understand why an alert fired, investigate a service
@@ -61,7 +60,7 @@ Run all relevant steps before drawing conclusions. Evidence must corroborate.
 
 ### For APM / service alerts (service.name is present)
 
-**2a. Blast radius**
+**2a. Dependency check**
 Call \`observability.get_service_topology\` with:
 - \`serviceName\`: the service from the alert
 - \`direction\`: \`"downstream"\`
@@ -70,7 +69,13 @@ Call \`observability.get_service_topology\` with:
 - \`end\`: \`"now"\`
 
 Look for downstream dependencies with elevated error rates or latency. A dependency
-failure here is often the root cause, not the alerted service itself.
+failure here is often the root cause — the alerted service is an affected service, not the source.
+
+When interpreting topology results, direction determines causality:
+- Downstream services are called BY the alerted service. If they are failing, they are
+  causing the alert — they are the source.
+- Upstream services call the alerted service. If the alerted service is broken, upstream
+  callers are affected by it — they are impacted services, not causes.
 
 **2b. When did it start**
 Call \`observability.get_trace_change_points\` with:
@@ -125,10 +130,10 @@ After gathering all signals, respond with:
 
 **Trigger**: What changed first and when — quote the specific metric, value, and timestamp.
 
-**Blast radius**: Which other services or hosts are affected. If none, say so explicitly.
+**Dependencies**: Which downstream dependencies are degraded or failing. If none, say so explicitly.
 
 **Likely cause**: The best-evidenced hypothesis. Distinguish the source (where the problem
-started) from affected services (downstream victims). If the evidence points clearly to a
+started) from affected services (impacted callers). If the evidence points clearly to a
 downstream dependency, name it. If evidence is weak or conflicting, say so — do not
 fabricate confidence.
 
