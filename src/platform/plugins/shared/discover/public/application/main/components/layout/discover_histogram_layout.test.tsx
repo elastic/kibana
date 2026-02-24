@@ -140,7 +140,7 @@ describe('Discover histogram layout component', () => {
       const user = userEvent.setup();
       await setup();
       expect(screen.queryByTestId('dscPanelsToggleInHistogram')).toBeInTheDocument();
-      expect(screen.queryByTestId('dscPanelsToggleInPage')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('dscPanelsToggleInPage')).toBeInTheDocument();
       await user.click(screen.getByTestId('dscHideHistogramButton'));
       expect(screen.queryByTestId('dscPanelsToggleInHistogram')).not.toBeInTheDocument();
       expect(screen.queryByTestId('dscPanelsToggleInPage')).toBeInTheDocument();
