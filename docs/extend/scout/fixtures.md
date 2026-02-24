@@ -25,10 +25,16 @@ test.describe('My suite', { tag: tags.deploymentAgnostic }, () => {
 });
 ```
 
+The example uses `beforeAll` for worker-scoped setup (`kbnClient`) and `beforeEach` for test-scoped setup (`browserAuth`)—this pattern matches fixture availability (see [Fixture scope](#scout-fixtures-scope)).
+
 ## Fixture scope [scout-fixtures-scope]
 
 - **Worker-scoped** fixtures live for the lifetime of a Playwright worker.
 - **Test-scoped** fixtures are created per test.
+
+::::::{note}
+Scope **affects** where a fixture is available: worker-scoped fixtures work in `beforeAll`, `beforeEach`, the test body, `afterEach`, and `afterAll`; test-scoped fixtures only in `beforeEach`, the test body, and `afterEach` (not in `beforeAll` or `afterAll`, since Playwright creates a new page/context per test).
+::::::
 
 ## Core Scout fixtures [core-scout-fixtures]
 
