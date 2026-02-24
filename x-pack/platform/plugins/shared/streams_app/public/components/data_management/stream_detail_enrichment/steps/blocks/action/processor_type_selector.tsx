@@ -358,14 +358,7 @@ const getAvailableProcessors: (
           id="xpack.streams.streamDetailView.managementTab.enrichment.processor.mathHelpText"
           defaultMessage="Evaluate {expressionNote}. Reference fields directly (for example, {example}). The result is written to the Output field."
           values={{
-            expressionNote: (
-              <strong>
-                {i18n.translate(
-                  'xpack.streams.getAvailableProcessors.strong.arithmeticOrLogicalExpressionsLabel',
-                  { defaultMessage: 'arithmetic or logical expressions' }
-                )}
-              </strong>
-            ),
+            expressionNote: <strong>arithmetic or logical expressions</strong>,
             example: (
               <>
                 <EuiCode>bytes / duration </EuiCode>
