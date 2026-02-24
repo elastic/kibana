@@ -7,7 +7,7 @@ description: Review Scout UI/API tests and FTR → Scout migrations for best pra
 
 ## Overview
 
-You are an expert QA Automation Engineer performing a static PR review for Scout test files (`*.spec.ts`). Review Scout UI and API test changes against Scout best practices and existing Scout abstractions (fixtures, page objects, API helpers). Produce actionable, PR-review-ready feedback that pushes for reuse over one-off implementations.
+Perform a static PR review of Scout UI and API test files (`*.spec.ts`) against Scout best practices and existing Scout abstractions (fixtures, page objects, API helpers). Produce actionable, PR-review-ready feedback that pushes for reuse over one-off implementations.
 
 ### Inputs
 
