@@ -146,7 +146,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(response.body).toEqual({
           statusCode: 400,
           error: 'Bad Request',
-          message: '[request body]: 0.vendor: Required',
+          message: '[request body]: 0.vendor: Invalid option: expected one of "splunk"|"qradar"',
         });
       });
 
@@ -174,7 +174,8 @@ export default ({ getService }: FtrProviderContext) => {
         expect(response.body).toEqual({
           statusCode: 400,
           error: 'Bad Request',
-          message: '[request body]: 0.description: Required',
+          message:
+            '[request body]: 0.description: Invalid input: expected string, received undefined',
         });
       });
 
@@ -188,7 +189,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(response.body).toEqual({
           statusCode: 400,
           error: 'Bad Request',
-          message: '[request body]: 0.query: Required',
+          message: '[request body]: 0.query: Invalid input: expected string, received undefined',
         });
       });
 
@@ -202,7 +203,8 @@ export default ({ getService }: FtrProviderContext) => {
         expect(response.body).toEqual({
           statusCode: 400,
           error: 'Bad Request',
-          message: '[request body]: 0.query_language: Required',
+          message:
+            '[request body]: 0.query_language: Invalid input: expected string, received undefined',
         });
       });
     });
