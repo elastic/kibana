@@ -10,3 +10,7 @@ steps:
       - build
     timeout_in_minutes: 10
     soft_fail: true # Can be removed when we are confident that this check is not too disruptive
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3

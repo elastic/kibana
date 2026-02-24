@@ -21,3 +21,7 @@ steps:
     timeout_in_minutes: 10
     depends_on:
       - build_project_image
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
