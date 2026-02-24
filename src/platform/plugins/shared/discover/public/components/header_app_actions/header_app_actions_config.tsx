@@ -132,6 +132,16 @@ const saveOverflowMenuCss = css`
 
 const DiscoverSaveButton: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const saveSplitButtonCss = css`
+    background-color: transparent !important;
+    height: 28px !important;
+    margin-left: 4px;
+  `;
+  const saveSplitButtonSecondaryCss = css`
+    background-color: transparent !important;
+    height: 28px !important;
+    margin-left: 0;
+  `;
   const panels = [
     {
       id: 0,
@@ -144,6 +154,7 @@ const DiscoverSaveButton: React.FC = () => {
   ];
   return (
     <EuiSplitButton
+      css={saveSplitButtonCss}
       size="s"
       color="text"
       fill={false}
@@ -153,7 +164,7 @@ const DiscoverSaveButton: React.FC = () => {
       })}
     >
       <EuiSplitButton.ActionPrimary
-        css={primaryButtonCss}
+        css={saveSplitButtonCss}
         iconType="save"
         data-test-subj="headerGlobalNav-appActionsSaveButton"
         minWidth={false}
@@ -163,7 +174,7 @@ const DiscoverSaveButton: React.FC = () => {
       <EuiPopover
         button={React.cloneElement(
           <EuiSplitButton.ActionSecondary
-            css={primaryButtonCss}
+            css={saveSplitButtonSecondaryCss}
             iconType="arrowDown"
             aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.saveOptionsAriaLabel', {
               defaultMessage: 'Save options',

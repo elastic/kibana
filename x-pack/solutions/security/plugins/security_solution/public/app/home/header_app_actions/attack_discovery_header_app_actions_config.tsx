@@ -11,48 +11,57 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { ChromeHeaderAppActionsConfig } from '@kbn/core-chrome-browser';
 
-const primaryButtonCss = css`
-  block-size: 28px;
-`;
-
 const noop = () => {};
 
 /**
  * Run split button: left = Run + play icon; right = noop (no popover).
  */
-const AttackDiscoveryRunSplitButton: React.FC = () => (
-  <EuiSplitButton
-    size="s"
-    color="text"
-    fill={false}
-    data-test-subj="headerGlobalNav-appActionsRunSplitButton"
-    aria-label={i18n.translate(
-      'xpack.securitySolution.attackDiscovery.headerAppActions.runAriaLabel',
-      { defaultMessage: 'Run' }
-    )}
-  >
-    <EuiSplitButton.ActionPrimary
-      css={primaryButtonCss}
-      iconType="play"
-      data-test-subj="headerGlobalNav-appActionsRunButton"
-      minWidth={false}
-    >
-      {i18n.translate('xpack.securitySolution.attackDiscovery.headerAppActions.runButton', {
-        defaultMessage: 'Run',
-      })}
-    </EuiSplitButton.ActionPrimary>
-    <EuiSplitButton.ActionSecondary
-      css={primaryButtonCss}
-      iconType="indexSettings"
-      onClick={noop}
+const AttackDiscoveryRunSplitButton: React.FC = () => {
+  const primaryActionButtonCss = css`
+    background-color: transparent !important;
+    height: 28px !important;
+    margin-left: 4px;
+  `;
+  const primaryActionButtonSecondaryCss = css`
+    background-color: transparent !important;
+    height: 28px !important;
+    margin-left: 0;
+  `;
+  return (
+    <EuiSplitButton
+      css={primaryActionButtonCss}
+      size="s"
+      color="text"
+      fill={false}
+      data-test-subj="headerGlobalNav-appActionsRunSplitButton"
       aria-label={i18n.translate(
-        'xpack.securitySolution.attackDiscovery.headerAppActions.runOptionsAriaLabel',
-        { defaultMessage: 'Run options' }
+        'xpack.securitySolution.attackDiscovery.headerAppActions.runAriaLabel',
+        { defaultMessage: 'Run' }
       )}
-      data-test-subj="headerGlobalNav-appActionsRunDropdown"
-    />
-  </EuiSplitButton>
-);
+    >
+      <EuiSplitButton.ActionPrimary
+        css={primaryActionButtonCss}
+        iconType="play"
+        data-test-subj="headerGlobalNav-appActionsRunButton"
+        minWidth={false}
+      >
+        {i18n.translate('xpack.securitySolution.attackDiscovery.headerAppActions.runButton', {
+          defaultMessage: 'Run',
+        })}
+      </EuiSplitButton.ActionPrimary>
+      <EuiSplitButton.ActionSecondary
+        css={primaryActionButtonSecondaryCss}
+        iconType="indexSettings"
+        onClick={noop}
+        aria-label={i18n.translate(
+          'xpack.securitySolution.attackDiscovery.headerAppActions.runOptionsAriaLabel',
+          { defaultMessage: 'Run options' }
+        )}
+        data-test-subj="headerGlobalNav-appActionsRunDropdown"
+      />
+    </EuiSplitButton>
+  );
+};
 
 /**
  * Header app actions config for the Security > Attack Discovery app.
@@ -62,25 +71,35 @@ const AttackDiscoveryRunSplitButton: React.FC = () => (
 export function getAttackDiscoveryHeaderAppActionsConfig(): ChromeHeaderAppActionsConfig {
   return {
     primaryActions: [
-      <EuiButton
-        key="schedule"
-        css={primaryButtonCss}
-        size="s"
-        color="text"
-        minWidth={false}
-        iconType="calendar"
-        onClick={noop}
-        data-test-subj="headerGlobalNav-appActionsScheduleButton"
-        aria-label={i18n.translate(
-          'xpack.securitySolution.attackDiscovery.headerAppActions.scheduleAriaLabel',
-          { defaultMessage: 'Schedule' }
-        )}
-      >
-        {i18n.translate('xpack.securitySolution.attackDiscovery.headerAppActions.scheduleButton', {
-          defaultMessage: 'Schedule',
-        })}
-      </EuiButton>,
+      <AttackDiscoveryScheduleButton key="schedule" />,
       <AttackDiscoveryRunSplitButton key="run" />,
     ],
   };
 }
+
+const AttackDiscoveryScheduleButton: React.FC = () => {
+  const primaryActionButtonCss = css`
+    background-color: transparent !important;
+    height: 28px !important;
+    margin-left: 4px;
+  `;
+  return (
+    <EuiButton
+      css={primaryActionButtonCss}
+      size="s"
+      color="text"
+      minWidth={false}
+      iconType="calendar"
+      onClick={noop}
+      data-test-subj="headerGlobalNav-appActionsScheduleButton"
+      aria-label={i18n.translate(
+        'xpack.securitySolution.attackDiscovery.headerAppActions.scheduleAriaLabel',
+        { defaultMessage: 'Schedule' }
+      )}
+    >
+      {i18n.translate('xpack.securitySolution.attackDiscovery.headerAppActions.scheduleButton', {
+        defaultMessage: 'Schedule',
+      })}
+    </EuiButton>
+  );
+};

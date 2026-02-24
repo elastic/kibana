@@ -11,12 +11,35 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { ChromeHeaderAppActionsConfig } from '@kbn/core-chrome-browser';
 
-const primaryButtonCss = css`
-  block-size: 28px;
-  margin-left: 4px;
-`;
-
 const noop = () => {};
+
+const AlertsManageRulesButton: React.FC = () => {
+  const primaryActionButtonCss = css`
+    background-color: transparent !important;
+    height: 28px !important;
+    margin-left: 4px;
+  `;
+  return (
+    <EuiButton
+      css={primaryActionButtonCss}
+      size="s"
+      color="text"
+      fill={false}
+      minWidth={false}
+      iconType="gear"
+      onClick={noop}
+      data-test-subj="headerGlobalNav-appActionsManageRulesButton"
+      aria-label={i18n.translate(
+        'xpack.securitySolution.alerts.headerAppActions.manageRulesAriaLabel',
+        { defaultMessage: 'Manage rules' }
+      )}
+    >
+      {i18n.translate('xpack.securitySolution.alerts.headerAppActions.manageRulesButton', {
+        defaultMessage: 'Manage rules',
+      })}
+    </EuiButton>
+  );
+};
 
 /**
  * Header app actions config for the Security > Alerts app.
@@ -25,26 +48,6 @@ const noop = () => {};
  */
 export function getAlertsHeaderAppActionsConfig(): ChromeHeaderAppActionsConfig {
   return {
-    primaryActions: [
-      <EuiButton
-        key="alerts-manage-rules"
-        css={primaryButtonCss}
-        size="s"
-        color="text"
-        fill={false}
-        minWidth={false}
-        iconType="gear"
-        onClick={noop}
-        data-test-subj="headerGlobalNav-appActionsManageRulesButton"
-        aria-label={i18n.translate(
-          'xpack.securitySolution.alerts.headerAppActions.manageRulesAriaLabel',
-          { defaultMessage: 'Manage rules' }
-        )}
-      >
-        {i18n.translate('xpack.securitySolution.alerts.headerAppActions.manageRulesButton', {
-          defaultMessage: 'Manage rules',
-        })}
-      </EuiButton>,
-    ],
+    primaryActions: [<AlertsManageRulesButton key="alerts-manage-rules" />],
   };
 }

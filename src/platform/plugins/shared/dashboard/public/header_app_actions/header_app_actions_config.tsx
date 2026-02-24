@@ -53,6 +53,11 @@ const primaryButtonCss = css`
 
 const DashboardSaveSplitButton: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const primaryActionButtonCss = css`
+    background-color: transparent !important;
+    height: 28px !important;
+    margin-left: 4px;
+  `;
   const panels = [
     {
       id: 0,
@@ -65,6 +70,7 @@ const DashboardSaveSplitButton: React.FC = () => {
   ];
   return (
     <EuiSplitButton
+      css={primaryActionButtonCss}
       size="s"
       color="text"
       fill={false}
@@ -74,7 +80,7 @@ const DashboardSaveSplitButton: React.FC = () => {
       })}
     >
       <EuiSplitButton.ActionPrimary
-        css={primaryButtonCss}
+        css={primaryActionButtonCss}
         iconType="save"
         data-test-subj="headerGlobalNav-appActionsSaveButton"
         minWidth={false}
@@ -86,7 +92,7 @@ const DashboardSaveSplitButton: React.FC = () => {
       <EuiPopover
         button={React.cloneElement(
           <EuiSplitButton.ActionSecondary
-            css={primaryButtonCss}
+            css={primaryActionButtonCss}
             iconType="arrowDown"
             aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.saveOptionsAriaLabel', {
               defaultMessage: 'Save options',
@@ -108,6 +114,11 @@ const DashboardSaveSplitButton: React.FC = () => {
 
 const DashboardPrimaryActions: React.FC = () => {
   const [isEditMode, setIsEditMode] = useState(false);
+  const primaryActionButtonCss = css`
+    background-color: transparent !important;
+    height: 28px !important;
+    margin-left: 4px;
+  `;
 
   return (
     <>
@@ -167,7 +178,7 @@ const DashboardPrimaryActions: React.FC = () => {
         </>
       ) : (
         <EuiButton
-          css={primaryButtonCss}
+          css={primaryActionButtonCss}
           size="s"
           color="text"
           fill={false}

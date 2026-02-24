@@ -112,7 +112,7 @@ const GlobalHeaderAppActionsFromConfig: React.FC<{ config: ChromeHeaderAppAction
     />
   );
   return (
-    <EuiHeaderLinks gutterSize="xs" popoverBreakpoints="none">
+    <EuiHeaderLinks gutterSize="none" popoverBreakpoints="none">
       {hasOverflow && (
         <EuiPopover
           button={overflowButton}
