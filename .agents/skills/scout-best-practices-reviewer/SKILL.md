@@ -32,6 +32,37 @@ Important: Do not post GitHub comments unless explicitly stated.
   - available fixtures (`docs/extend/scout/fixtures.md` + local `test/scout/**/fixtures`)
   - existing page objects, API services, and fixtures (in `@kbn/scout`, solution Scout packages, and plugin-local `test/scout/**`) before suggesting brand-new helpers
 
+### Quick checklist (details live in `docs/extend/scout/best-practices.md`)
+
+- **Reuse-first**: prefer existing `pageObjects`, fixtures, and `apiServices`; if adding helpers/page objects, place them in the right scope (plugin vs solution vs `@kbn/scout`) and register via fixtures.
+- **Fixture boundaries**: `apiClient` for the endpoint under test; `apiServices`/`kbnClient` for setup/teardown only; correct auth + common headers.
+- **Correctness**: guardrail assertions before dereferencing response fields; validate contract + side effects; stable error assertions.
+- **UI scope**: UI tests should focus on user interactions and rendering; avoid “data correctness” assertions (for example exact API response shapes or exact table cell values) unless the UI behavior depends on them. Prefer Scout API tests (or unit/integration) for data correctness coverage.
+- **Isolation**: parallel-safe data and resilient cleanup in hooks; no reliance on file ordering or shared mutable state.
+- **RBAC / realism**: minimal permissions (avoid `admin` unless required); space-aware behavior covered or explicitly out of scope.
+- **Flake traps**: avoid `waitForTimeout()` and time-based assertions/retries; rely on auto-waiting + explicit readiness signals.
+- **Cost**: avoid repeating expensive setup; consider a global setup hook for shared one-time operations.
+- **Tags / environment**: validate deployment tags and avoid assumptions that only hold in specific environments.
+
+### Migration parity analysis (required when migration is detected)
+
+- **Detect migration** when the PR removes/changes FTR tests (for example `test/functional/**`, `loadTestFile()`, FTR configs) alongside new/changed Scout specs.
+- **If migration is detected**:
+  - Treat parity gaps as `blocker` unless explicitly de-scoped.
+  - Confirm the suite is the right **test type** (UI vs API): if the old FTR suite is primarily “data correctness”, prefer migrating it to a Scout API test (or unit/integration) rather than a Scout UI test.
+  - Build a parity map from old scenarios → new Scout coverage (roles, setup/teardown, assertions, cleanup).
+  - Call out missing behaviors (including error paths) and recommend exactly where to add coverage.
+  - Escalate meaningful **Scout vs FTR deltas** when they could change what’s actually being tested, weaken coverage, or increase flake risk. Treat these as parity issues that require action (code change or explicit de-scope/sign-off), and include them in the “Migration parity” output section.
+    - auth/roles used (e.g., `admin` vs viewer), spaces behavior, and permission realism
+    - headers/internal origin/REST versioning and any other request shaping differences
+    - retries and error handling differences (e.g., helper methods with `ignoreErrors`, automatic retries)
+    - parallelism/isolation differences (worker-scoped fixtures, shared state, cleanup semantics)
+    - classic vs serverless coverage changes (suite removed from one environment but not the other)
+    - assertion strength changes (weaker/stronger checks, removal of side-effect validation)
+  - Verify suite wiring/discovery (new specs are picked up by Scout/Playwright config; no orphaned `loadTestFile()`).
+  - Ensure any intentional de-scopes are explicit, and that tags/permissions remain equivalent and cloud/serverless compatible where applicable.
+- **Output**: include the “Migration parity” section only when action is required; otherwise omit it.
+
 ## Output format
 
 Output **only** the applicable sections below. Use headings and lists (**no tables**). Group issues by priority: `blocker` → `major` → `minor` → `nit`. Omit empty priorities.
@@ -94,34 +125,3 @@ Do **not** output an FYI parity map. If everything is equivalent (or differences
 ## Follow-up
 
 Offer to generate the updated code, fully incorporating the suggested improvements and resolving any parity gaps.
-
-### Quick checklist (details live in `docs/extend/scout/best-practices.md`)
-
-- **Reuse-first**: prefer existing `pageObjects`, fixtures, and `apiServices`; if adding helpers/page objects, place them in the right scope (plugin vs solution vs `@kbn/scout`) and register via fixtures.
-- **Fixture boundaries**: `apiClient` for the endpoint under test; `apiServices`/`kbnClient` for setup/teardown only; correct auth + common headers.
-- **Correctness**: guardrail assertions before dereferencing response fields; validate contract + side effects; stable error assertions.
-- **UI scope**: UI tests should focus on user interactions and rendering; avoid “data correctness” assertions (for example exact API response shapes or exact table cell values) unless the UI behavior depends on them. Prefer Scout API tests (or unit/integration) for data correctness coverage.
-- **Isolation**: parallel-safe data and resilient cleanup in hooks; no reliance on file ordering or shared mutable state.
-- **RBAC / realism**: minimal permissions (avoid `admin` unless required); space-aware behavior covered or explicitly out of scope.
-- **Flake traps**: avoid `waitForTimeout()` and time-based assertions/retries; rely on auto-waiting + explicit readiness signals.
-- **Cost**: avoid repeating expensive setup; consider a global setup hook for shared one-time operations.
-- **Tags / environment**: validate deployment tags and avoid assumptions that only hold in specific environments.
-
-### Migration parity analysis (required when migration is detected)
-
-- **Detect migration** when the PR removes/changes FTR tests (for example `test/functional/**`, `loadTestFile()`, FTR configs) alongside new/changed Scout specs.
-- **If migration is detected**:
-  - Treat parity gaps as `blocker` unless explicitly de-scoped.
-  - Confirm the suite is the right **test type** (UI vs API): if the old FTR suite is primarily “data correctness”, prefer migrating it to a Scout API test (or unit/integration) rather than a Scout UI test.
-  - Build a parity map from old scenarios → new Scout coverage (roles, setup/teardown, assertions, cleanup).
-  - Call out missing behaviors (including error paths) and recommend exactly where to add coverage.
-  - Escalate meaningful **Scout vs FTR deltas** when they could change what’s actually being tested, weaken coverage, or increase flake risk. Treat these as parity issues that require action (code change or explicit de-scope/sign-off), and include them in the “Migration parity” output section.
-    - auth/roles used (e.g., `admin` vs viewer), spaces behavior, and permission realism
-    - headers/internal origin/REST versioning and any other request shaping differences
-    - retries and error handling differences (e.g., helper methods with `ignoreErrors`, automatic retries)
-    - parallelism/isolation differences (worker-scoped fixtures, shared state, cleanup semantics)
-    - classic vs serverless coverage changes (suite removed from one environment but not the other)
-    - assertion strength changes (weaker/stronger checks, removal of side-effect validation)
-  - Verify suite wiring/discovery (new specs are picked up by Scout/Playwright config; no orphaned `loadTestFile()`).
-  - Ensure any intentional de-scopes are explicit, and that tags/permissions remain equivalent and cloud/serverless compatible where applicable.
-- **Output**: include the “Migration parity” section only when action is required; otherwise omit it.
