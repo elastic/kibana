@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { BehaviorSubject } from 'rxjs';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { extractCategorizeTokens, getCategorizeColumns, getCategorizeField } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
@@ -16,6 +17,7 @@ import type { DataSourceProfileProvider } from '../../../profiles';
 import { DataSourceCategory } from '../../../profiles';
 import { getPatternCellRenderer } from './pattern_cell_renderer';
 import type { ProfileProviderServices } from '../../profile_provider_services';
+import { createChartSection, type SelectedPattern } from './chart_section';
 
 const DOC_LIMIT = 10000;
 
@@ -23,126 +25,159 @@ export const createPatternsDataSourceProfileProvider = (
   services: ProfileProviderServices
 ): DataSourceProfileProvider<{
   patternColumns: string[];
-}> => ({
-  profileId: 'patterns-data-source-profile',
-  profile: {
-    getCellRenderers:
-      (prev, { context }) =>
-      (params) => {
-        const { rowHeight } = params;
-        const { patternColumns } = context;
-        if (!patternColumns || patternColumns.length === 0) {
-          return prev(params);
-        }
-        const patternRenderers = patternColumns.reduce(
-          (acc, column) =>
-            Object.assign(acc, {
-              [column]: (props: DataGridCellValueElementProps) =>
-                getPatternCellRenderer(
-                  props.row.flattened[props.columnId],
-                  props.isDetails,
-                  rowHeight
-                ),
-            }),
-          {}
-        );
+}> => {
+  const selectedPattern$ = new BehaviorSubject<SelectedPattern | undefined>(undefined);
 
+  return {
+    profileId: 'patterns-data-source-profile',
+    profile: {
+      getChartSectionConfiguration: createChartSection(selectedPattern$),
+      getCellRenderers:
+        (prev, { context }) =>
+        (params) => {
+          const { rowHeight } = params;
+          const { patternColumns } = context;
+          if (!patternColumns || patternColumns.length === 0) {
+            return prev(params);
+          }
+          const patternRenderers = patternColumns.reduce(
+            (acc, column) =>
+              Object.assign(acc, {
+                [column]: (props: DataGridCellValueElementProps) =>
+                  getPatternCellRenderer(
+                    props.row.flattened[props.columnId],
+                    props.isDetails,
+                    rowHeight
+                  ),
+              }),
+            {}
+          );
+
+          return {
+            ...prev(params),
+            ...patternRenderers,
+          };
+        },
+      getAdditionalCellActions:
+        (prev, { context }) =>
+        (params) => {
+          return [
+            ...prev(params),
+            {
+              id: 'patterns-action-view-docs-in-discover',
+              getDisplayName: () =>
+                i18n.translate('discover.docViews.patterns.cellAction.viewResults', {
+                  defaultMessage: 'View matching results',
+                }),
+              getIconType: () => 'discoverApp',
+              isCompatible: (compatibleContext) => {
+                const { query, field } = compatibleContext;
+                const { patternColumns } = context;
+                if (!isOfAggregateQueryType(query) || field === undefined) {
+                  return false;
+                }
+                return patternColumns.includes(field.name);
+              },
+              execute: (executeContext) => {
+                const index = executeContext.dataView?.getIndexPattern();
+                if (
+                  !isOfAggregateQueryType(executeContext.query) ||
+                  !executeContext.value ||
+                  !index
+                ) {
+                  return;
+                }
+
+                const pattern = extractCategorizeTokens(executeContext.value as string).join(' ');
+                const categoryField = getCategorizeField(executeContext.query.esql)[0];
+
+                if (!categoryField || !pattern) {
+                  return;
+                }
+
+                const query = {
+                  ...executeContext.query,
+                  esql: `FROM ${index}\n  | WHERE MATCH(${categoryField}, "${pattern}", {"auto_generate_synonyms_phrase_query": false, "fuzziness": 0, "operator": "AND"})\n  | LIMIT ${DOC_LIMIT}`,
+                };
+
+                if (params.actions?.openInNewTab) {
+                  params.actions.openInNewTab({
+                    query,
+                    timeRange: executeContext.timeRange,
+                  });
+                } else {
+                  const discoverLink = services.locator.getRedirectUrl({
+                    query,
+                    timeRange: executeContext.timeRange,
+                    hideChart: false,
+                  });
+                  window.open(discoverLink, '_blank');
+                }
+              },
+            },
+            {
+              id: 'patterns-action-view-pattern-counts',
+              getDisplayName: () =>
+                i18n.translate('discover.docViews.patterns.cellAction.viewPatternCounts', {
+                  defaultMessage: 'View pattern counts',
+                }),
+              getIconType: () => 'visBarVerticalStacked',
+              isCompatible: (compatibleContext) => {
+                const { query, field } = compatibleContext;
+                const { patternColumns } = context;
+                if (!isOfAggregateQueryType(query) || field === undefined) {
+                  return false;
+                }
+                return patternColumns.includes(field.name);
+              },
+              execute: (executeContext) => {
+                if (
+                  !executeContext.value ||
+                  !executeContext.query ||
+                  !isOfAggregateQueryType(executeContext.query)
+                ) {
+                  return;
+                }
+                const pattern = extractCategorizeTokens(executeContext.value as string).join(' ');
+                const categoryField = getCategorizeField(executeContext.query.esql)[0];
+                selectedPattern$.next({ pattern, categoryField });
+              },
+            },
+          ];
+        },
+      getDefaultAppState: (prev) => (params) => {
         return {
           ...prev(params),
-          ...patternRenderers,
+          columns: [
+            { name: 'Count', width: 150 },
+            { name: 'Pattern', width: undefined },
+          ],
         };
       },
-    getAdditionalCellActions:
-      (prev, { context }) =>
-      (params) => {
-        return [
-          ...prev(params),
-          {
-            id: 'patterns-action-view-docs-in-discover',
-            getDisplayName: () =>
-              i18n.translate('discover.docViews.patterns.cellAction.viewResults', {
-                defaultMessage: 'View matching results',
-              }),
-            getIconType: () => 'discoverApp',
-            isCompatible: (compatibleContext) => {
-              const { query, field } = compatibleContext;
-              const { patternColumns } = context;
-              if (!isOfAggregateQueryType(query) || field === undefined) {
-                return false;
-              }
-              return patternColumns.includes(field.name);
-            },
-            execute: (executeContext) => {
-              const index = executeContext.dataView?.getIndexPattern();
-              if (
-                !isOfAggregateQueryType(executeContext.query) ||
-                !executeContext.value ||
-                !index
-              ) {
-                return;
-              }
+    },
+    resolve: (params) => {
+      if (!isDataSourceType(params.dataSource, DataSourceType.Esql)) {
+        return { isMatch: false };
+      }
 
-              const pattern = extractCategorizeTokens(executeContext.value as string).join(' ');
-              const categoryField = getCategorizeField(executeContext.query.esql)[0];
+      const query = params.query;
 
-              if (!categoryField || !pattern) {
-                return;
-              }
+      if (!isOfAggregateQueryType(query)) {
+        return { isMatch: false };
+      }
 
-              const query = {
-                ...executeContext.query,
-                esql: `FROM ${index}\n  | WHERE MATCH(${categoryField}, "${pattern}", {"auto_generate_synonyms_phrase_query": false, "fuzziness": 0, "operator": "AND"})\n  | LIMIT ${DOC_LIMIT}`,
-              };
+      const patternColumns = getCategorizeColumns(query.esql);
+      if (patternColumns.length === 0) {
+        return { isMatch: false };
+      }
 
-              if (params.actions?.openInNewTab) {
-                params.actions.openInNewTab({
-                  query,
-                  timeRange: executeContext.timeRange,
-                });
-              } else {
-                const discoverLink = services.locator.getRedirectUrl({
-                  query,
-                  timeRange: executeContext.timeRange,
-                  hideChart: false,
-                });
-                window.open(discoverLink, '_blank');
-              }
-            },
-          },
-        ];
-      },
-    getDefaultAppState: (prev) => (params) => {
       return {
-        ...prev(params),
-        columns: [
-          { name: 'Count', width: 150 },
-          { name: 'Pattern', width: undefined },
-        ],
+        isMatch: true,
+        context: {
+          category: DataSourceCategory.Default,
+          patternColumns,
+        },
       };
     },
-  },
-  resolve: (params) => {
-    if (!isDataSourceType(params.dataSource, DataSourceType.Esql)) {
-      return { isMatch: false };
-    }
-
-    const query = params.query;
-
-    if (!isOfAggregateQueryType(query)) {
-      return { isMatch: false };
-    }
-
-    const patternColumns = getCategorizeColumns(query.esql);
-    if (patternColumns.length === 0) {
-      return { isMatch: false };
-    }
-
-    return {
-      isMatch: true,
-      context: {
-        category: DataSourceCategory.Default,
-        patternColumns,
-      },
-    };
-  },
-});
+  };
+};
