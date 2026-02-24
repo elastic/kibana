@@ -13,7 +13,7 @@ import {
 describe('Preinstalled Workflows Feature Flag Constants', () => {
   it('should export the correct feature flag', () => {
     expect(PREINSTALLED_WORKFLOWS_FEATURE_FLAG).toBe(
-      'securitySolution:preinstalledWorkflowsEnabled'
+      'securitySolution.preinstalledWorkflowsEnabled'
     );
   });
 
