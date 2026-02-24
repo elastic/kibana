@@ -6,19 +6,14 @@
  */
 
 import moment from 'moment';
-import type { MsearchRequestItem } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/core/server';
-import { TRACE_ID } from '@kbn/apm-types';
 import type {
   ObservabilityAgentBuilderCoreSetup,
   ObservabilityAgentBuilderPluginSetupDependencies,
 } from '../../types';
 import { getObservabilityDataSources } from '../../utils/get_observability_data_sources';
 import { parseDatemath } from '../../utils/time';
-import { timeRangeFilter, termFilter } from '../../utils/dsl_filters';
-import { unwrapEsFields } from '../../utils/unwrap_es_fields';
-import { getTotalHits } from '../../utils/get_total_hits';
 import { getTraceIds } from './get_trace_ids';
 import { DEFAULT_TRACE_FIELDS, DEFAULT_MAX_TRACES, DEFAULT_MAX_DOCS_PER_TRACE } from './constants';
 
@@ -82,6 +77,8 @@ export async function fetchTraceDocuments({
     };
   });
 }
+import { getTraceDocuments } from './get_trace_documents';
+import { DEFAULT_TRACE_FIELDS } from './constants';
 
 export async function getToolHandler({
   core,
@@ -105,22 +102,24 @@ export async function getToolHandler({
   index?: string;
   kqlFilter: string;
   fields?: string[];
-  maxTraces?: number;
-  maxDocsPerTrace?: number;
+  maxTraces: number;
+  maxDocsPerTrace: number;
 }) {
   const dataSources = await getObservabilityDataSources({ core, plugins, logger });
   const apmIndexPatterns = [
     dataSources.apmIndexPatterns.transaction,
     dataSources.apmIndexPatterns.span,
     dataSources.apmIndexPatterns.error,
-  ];
-  const indices = index?.split(',') ?? [...dataSources.logIndexPatterns, ...apmIndexPatterns];
+  ].flatMap((pattern) => pattern.split(','));
+
+  const allObservabilityIndices = [...apmIndexPatterns, ...dataSources.logIndexPatterns];
+
   const startTime = parseDatemath(start);
   const endTime = parseDatemath(end, { roundUp: true });
 
   const traceIds = await getTraceIds({
     esClient,
-    indices,
+    indices: index?.split(',') ?? allObservabilityIndices,
     startTime,
     endTime,
     kqlFilter,
@@ -136,10 +135,10 @@ export async function getToolHandler({
     start: moment(startTime).subtract(5, 'minutes').valueOf(),
     end: moment(endTime).add(5, 'minutes').valueOf(),
   };
-  const traces = await fetchTraceDocuments({
+  const traces = await getTraceDocuments({
     esClient,
     traceIds,
-    index: indices,
+    index: allObservabilityIndices,
     startTime: traceTimeWindow.start,
     endTime: traceTimeWindow.end,
     size: maxDocsPerTrace,

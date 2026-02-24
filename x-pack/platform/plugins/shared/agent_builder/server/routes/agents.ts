@@ -188,6 +188,17 @@ export function registerAgentRoutes({
                     })
                   ),
                   tools: TOOL_SELECTION_SCHEMA,
+                  workflow_ids: schema.maybe(
+                    schema.arrayOf(
+                      schema.string({
+                        meta: {
+                          description:
+                            'Optional list of workflow IDs. When set, these workflows run before every agent execution, in order.',
+                        },
+                      }),
+                      { maxSize: 100 }
+                    )
+                  ),
                 },
                 {
                   meta: { description: 'Configuration settings for the agent.' },
@@ -297,6 +308,17 @@ export function registerAgentRoutes({
                       })
                     ),
                     tools: schema.maybe(TOOL_SELECTION_SCHEMA),
+                    workflow_ids: schema.maybe(
+                      schema.arrayOf(
+                        schema.string({
+                          meta: {
+                            description:
+                              'Updated list of workflow IDs. When set, these workflows run every agent execution, in order.',
+                          },
+                        }),
+                        { maxSize: 100 }
+                      )
+                    ),
                   },
                   {
                     meta: { description: 'Updated configuration settings for the agent.' },

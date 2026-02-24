@@ -54,6 +54,10 @@ const ERROR_INSIGHT_TRACE_FIELDS = [
   HTTP_REQUEST_METHOD,
   URL_FULL,
 ];
+import { getApmIndices } from '../../../utils/get_apm_indices';
+import { parseDatemath } from '../../../utils/time';
+import { getServiceTopology } from '../../../tools/get_service_topology/get_service_topology';
+import { getTraceDocuments } from '../../../tools/get_traces/get_trace_documents';
 
 export interface FetchApmErrorContextParams {
   core: ObservabilityAgentBuilderCoreSetup;
@@ -119,10 +123,14 @@ export async function fetchApmErrorContext({
       start,
       end,
       handler: () =>
-        dataRegistry.getData('apmDownstreamDependencies', {
+        getServiceTopology({
+          core,
+          plugins,
+          dataRegistry,
           request,
+          logger,
           serviceName,
-          serviceEnvironment: environment ?? '',
+          direction: 'downstream',
           start,
           end,
         }),
@@ -136,6 +144,19 @@ export async function fetchApmErrorContext({
       dataSources.apmIndexPatterns.span,
       dataSources.apmIndexPatterns.error,
     ].join(',');
+    const traceContextPromise = (async () => {
+      const apmIndices = await getApmIndices({ core, plugins, logger });
+      return getTraceDocuments({
+        esClient,
+        traceIds: [traceId],
+        index: [apmIndices.transaction, apmIndices.span, apmIndices.error].flatMap((pattern) =>
+          pattern.split(',')
+        ),
+        size: 100,
+        startTime: parsedStart,
+        endTime: parsedEnd,
+      });
+    })();
 
     contextParts.push({
       name: 'TraceDocuments',
@@ -162,6 +183,23 @@ export async function fetchApmErrorContext({
           documents: trace.items,
           isTruncated: trace.isTruncated,
         };
+      },
+    });
+        const [trace] = await traceContextPromise;
+        return {
+          isPartialTrace: trace.isTruncated,
+          documents: trace.items,
+        };
+      },
+    });
+
+    contextParts.push({
+      name: 'TraceServices',
+      start,
+      end,
+      handler: async () => {
+        const [trace] = await traceContextPromise;
+        return trace.services;
       },
     });
   }

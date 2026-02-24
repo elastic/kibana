@@ -66,12 +66,8 @@ describe('validateUrl', () => {
 describe('validateUrlTemplate', () => {
   test('domain in variable is allowed', async () => {
     expect(
-      (
-        await validateUrlTemplate(
-          { template: '{{kibanaUrl}}/test' },
-          { kibanaUrl: 'http://localhost:5601/app' }
-        )
-      ).isValid
+      (await validateUrlTemplate('{{kibanaUrl}}/test', { kibanaUrl: 'http://localhost:5601/app' }))
+        .isValid
     ).toBe(true);
   });
 
@@ -79,7 +75,7 @@ describe('validateUrlTemplate', () => {
     expect(
       (
         await validateUrlTemplate(
-          { template: '{{kibanaUrl}}/test' },
+          '{{kibanaUrl}}/test',
           // eslint-disable-next-line no-script-url
           { kibanaUrl: 'javascript:evil()' }
         )
@@ -89,12 +85,8 @@ describe('validateUrlTemplate', () => {
 
   test('if missing variable then invalid', async () => {
     expect(
-      (
-        await validateUrlTemplate(
-          { template: '{{url}}/test' },
-          { kibanaUrl: 'http://localhost:5601/app' }
-        )
-      ).isValid
+      (await validateUrlTemplate('{{url}}/test', { kibanaUrl: 'http://localhost:5601/app' }))
+        .isValid
     ).toBe(false);
   });
 });
