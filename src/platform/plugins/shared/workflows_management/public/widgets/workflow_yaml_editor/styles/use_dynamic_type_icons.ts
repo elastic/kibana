@@ -15,8 +15,8 @@ import { useKibana } from '../../../hooks/use_kibana';
 import {
   getIconBase64,
   type GetIconBase64Params,
+  getTriggerBoltFallbackDataUrl,
 } from '../../../shared/ui/step_icons/get_icon_base64';
-import { getTriggerBoltFallbackDataUrl } from '../../../shared/ui/step_icons/get_trigger_icon_base64';
 import { HardcodedIcons } from '../../../shared/ui/step_icons/hardcoded_icons';
 import { MonochromeIcons } from '../../../shared/ui/step_icons/monochrome_icons';
 import { triggerSchemas } from '../../../trigger_schemas';
