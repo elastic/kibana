@@ -6,19 +6,12 @@
  */
 
 import React from 'react';
-import { EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { MissingPrivilegesCallout } from '../missing_privileges_callout';
 import { WatchlistsManagementTable } from './components/watchlists_management_table';
 import { useWatchlistsPrivileges } from '../../api/hooks/use_watchlists_privileges';
-
-/**
- * TODO:
- * 1. useWatchlistsPrivileges hook to check for privileges and conditionally render the WatchlistsManagementTable or a callout indicating insufficient privileges
- * 2. Missing privileges callout component to indicate which privileges are missing if the user does not have sufficient privileges to view the WatchlistsManagementTable
- * 3. EuiCallOut to indicate errors loading data -- can you combine privmon and watchlists privileges into a single hook since they require many of the same privileges / display data?
- */
 
 export const Watchlists = () => {
   const spaceId = useSpaceId();
