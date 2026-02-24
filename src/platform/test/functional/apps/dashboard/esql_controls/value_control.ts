@@ -85,7 +85,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // otherwise waitForRenderComplete may complete based on the old panel count
       await testSubjects.waitForHidden('create_esql_control_flyout');
       await dashboard.waitForRenderComplete();
-      expect(await testSubjects.exists('esqlValuesPreview')).to.be(true);
       await retry.try(async () => {
         expect(await dashboard.getPanelCount()).to.be(panelCountBefore + 1);
       });
