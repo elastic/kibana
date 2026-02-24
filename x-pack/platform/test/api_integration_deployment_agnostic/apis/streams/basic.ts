@@ -97,6 +97,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           expect(await getEnabled()).to.eql(true);
         });
 
+        it('includes create_snapshot_repository in stream privileges', async () => {
+          const stream = await getStream(apiClient, 'logs');
+          const parsed = Streams.WiredStream.GetResponse.parse(stream);
+          expect(typeof parsed.privileges.create_snapshot_repository).to.eql('boolean');
+        });
+
         // Elasticsearch doesn't support streams in serverless mode yet
         if (!isServerless) {
           it('reports conflict if disabled on Elasticsearch level', async () => {
@@ -797,6 +803,81 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         };
 
         await putStream(apiClient, 'logs.super.duper.hyper.deeply.nested.streamname', body, 400);
+      });
+
+      describe('stream name validation', () => {
+        const validStreamBody: Streams.WiredStream.UpsertRequest = {
+          ...emptyAssets,
+          stream: {
+            description: '',
+            ingest: {
+              lifecycle: { inherit: {} },
+              processing: { steps: [] },
+              settings: {},
+              wired: { fields: {}, routing: [] },
+              failure_store: { inherit: {} },
+            },
+          },
+        };
+
+        it('fails to create a wired stream with uppercase characters in the name', async () => {
+          const response = await putStream(apiClient, 'logs.UpperCase', validStreamBody, 400);
+          expect((response as unknown as { message: string }).message).to.contain(
+            'Stream name cannot contain uppercase characters.'
+          );
+        });
+
+        it('fails to create a wired stream with spaces in the name', async () => {
+          const response = await putStream(apiClient, 'logs.with space', validStreamBody, 400);
+          expect((response as unknown as { message: string }).message).to.contain(
+            'Stream name cannot contain spaces.'
+          );
+        });
+
+        it('fails to create a wired stream with asterisk in the name', async () => {
+          const response = await putStream(apiClient, 'logs.with*asterisk', validStreamBody, 400);
+          expect((response as unknown as { message: string }).message).to.contain(
+            'Stream name cannot contain "*".'
+          );
+        });
+
+        it('fails to create a wired stream with angle brackets in the name', async () => {
+          const response = await putStream(apiClient, 'logs.with<brackets>', validStreamBody, 400);
+          expect((response as unknown as { message: string }).message).to.contain(
+            'Stream name cannot contain "<".'
+          );
+        });
+
+        it('fails to create a wired stream with question mark in the name', async () => {
+          const response = await putStream(apiClient, 'logs.with?question', validStreamBody, 400);
+          expect((response as unknown as { message: string }).message).to.contain(
+            'Stream name cannot contain "?".'
+          );
+        });
+
+        it('fails to create a wired stream with pipe in the name', async () => {
+          const response = await putStream(apiClient, 'logs.with|pipe', validStreamBody, 400);
+          expect((response as unknown as { message: string }).message).to.contain(
+            'Stream name cannot contain "|".'
+          );
+        });
+
+        it('fails to fork a wired stream with special characters in the destination name', async () => {
+          const body = {
+            stream: {
+              name: 'logs.with*special',
+            },
+            where: {
+              field: 'log.logger',
+              eq: 'test',
+            },
+            status,
+          };
+          const response = await forkStream(apiClient, 'logs', body, 400);
+          expect((response as unknown as { message: string }).message).to.contain(
+            'Stream name cannot contain "*".'
+          );
+        });
       });
     });
   });

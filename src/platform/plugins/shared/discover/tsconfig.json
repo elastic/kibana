@@ -7,6 +7,7 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
+    "test/**/*",
     "../../../../../typings/**/*",
     ".storybook/**/*"
   ],
@@ -57,7 +58,6 @@
     "@kbn/unified-field-list",
     "@kbn/cell-actions",
     "@kbn/shared-ux-utility",
-    "@kbn/core-saved-objects-server",
     "@kbn/discover-utils",
     "@kbn/search-errors",
     "@kbn/search-response-warnings",
@@ -89,7 +89,6 @@
     "@kbn/aiops-plugin",
     "@kbn/data-visualizer-plugin",
     "@kbn/search-types",
-    "@kbn/presentation-containers",
     "@kbn/observability-ai-assistant-plugin",
     "@kbn/fields-metadata-plugin",
     "@kbn/discover-contextual-components",
@@ -99,7 +98,6 @@
     "@kbn/esql-language",
     "@kbn/discover-shared-plugin",
     "@kbn/response-ops-rule-form",
-    "@kbn/embeddable-enhanced-plugin",
     "@kbn/shared-ux-page-analytics-no-data-types",
     "@kbn/core-application-browser-mocks",
     "@kbn/rison",
@@ -126,7 +124,9 @@
     "@kbn/core-chrome-app-menu",
     "@kbn/es-query-constants",
     "@kbn/esql",
-    "@kbn/controls-schemas"
+    "@kbn/controls-schemas",
+    "@kbn/scout",
+    "@kbn/synthtrace-client"
   ],
   "exclude": ["target/**/*"]
 }

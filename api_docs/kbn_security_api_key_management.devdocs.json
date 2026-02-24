@@ -10,7 +10,7 @@
         "label": "APIKeysAPIClient",
         "description": [],
         "path": "x-pack/platform/packages/shared/security/api_key_management/src/components/api_keys_api_client.ts",
-        "lineNumber": 48,
+        "lineNumber": 49,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -26,7 +26,7 @@
               "any"
             ],
             "path": "x-pack/platform/packages/shared/security/api_key_management/src/components/api_keys_api_client.ts",
-            "lineNumber": 49,
+            "lineNumber": 50,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -42,7 +42,7 @@
                   "HttpSetup"
                 ],
                 "path": "x-pack/platform/packages/shared/security/api_key_management/src/components/api_keys_api_client.ts",
-                "lineNumber": 49,
+                "lineNumber": 50,
                 "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -78,7 +78,7 @@
               ">"
             ],
             "path": "x-pack/platform/packages/shared/security/api_key_management/src/components/api_keys_api_client.ts",
-            "lineNumber": 51,
+            "lineNumber": 52,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -101,7 +101,7 @@
                   " | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/security/api_key_management/src/components/api_keys_api_client.ts",
-                "lineNumber": 51,
+                "lineNumber": 52,
                 "columnNumber": 29,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -137,7 +137,7 @@
               ">"
             ],
             "path": "x-pack/platform/packages/shared/security/api_key_management/src/components/api_keys_api_client.ts",
-            "lineNumber": 57,
+            "lineNumber": 58,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -160,7 +160,7 @@
                   "[]"
                 ],
                 "path": "x-pack/platform/packages/shared/security/api_key_management/src/components/api_keys_api_client.ts",
-                "lineNumber": 57,
+                "lineNumber": 58,
                 "columnNumber": 34,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -177,7 +177,7 @@
                   "boolean"
                 ],
                 "path": "x-pack/platform/packages/shared/security/api_key_management/src/components/api_keys_api_client.ts",
-                "lineNumber": 57,
+                "lineNumber": 58,
                 "columnNumber": 65,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -201,7 +201,7 @@
               ">"
             ],
             "path": "x-pack/platform/packages/shared/security/api_key_management/src/components/api_keys_api_client.ts",
-            "lineNumber": 63,
+            "lineNumber": 64,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -217,7 +217,7 @@
                   "CreateAPIKeyParams"
                 ],
                 "path": "x-pack/platform/packages/shared/security/api_key_management/src/components/api_keys_api_client.ts",
-                "lineNumber": 63,
+                "lineNumber": 64,
                 "columnNumber": 29,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -241,7 +241,7 @@
               ">"
             ],
             "path": "x-pack/platform/packages/shared/security/api_key_management/src/components/api_keys_api_client.ts",
-            "lineNumber": 69,
+            "lineNumber": 70,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -257,7 +257,7 @@
                   "UpdateAPIKeyParams"
                 ],
                 "path": "x-pack/platform/packages/shared/security/api_key_management/src/components/api_keys_api_client.ts",
-                "lineNumber": 69,
+                "lineNumber": 70,
                 "columnNumber": 29,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -737,7 +737,7 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"rest\" | \"managed\" | \"cross_cluster\""
+              "\"managed\" | \"rest\" | \"cross_cluster\""
             ],
             "path": "x-pack/platform/packages/shared/security/api_key_management/src/components/api_key_badge.tsx",
             "lineNumber": 15,
@@ -921,7 +921,7 @@
         "label": "InvalidateApiKeysResponse",
         "description": [],
         "path": "x-pack/platform/packages/shared/security/api_key_management/src/components/api_keys_api_client.ts",
-        "lineNumber": 31,
+        "lineNumber": 32,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -944,7 +944,7 @@
               "[]"
             ],
             "path": "x-pack/platform/packages/shared/security/api_key_management/src/components/api_keys_api_client.ts",
-            "lineNumber": 32,
+            "lineNumber": 33,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -960,7 +960,7 @@
               "any[]"
             ],
             "path": "x-pack/platform/packages/shared/security/api_key_management/src/components/api_keys_api_client.ts",
-            "lineNumber": 33,
+            "lineNumber": 34,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -976,7 +976,7 @@
         "label": "QueryApiKeyParams",
         "description": [],
         "path": "x-pack/platform/packages/shared/security/api_key_management/src/components/api_keys_api_client.ts",
-        "lineNumber": 38,
+        "lineNumber": 39,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -991,19 +991,6 @@
             "signature": [
               "QueryContainer"
             ],
-            "path": "x-pack/platform/packages/shared/security/api_key_management/src/components/api_keys_api_client.ts",
-            "lineNumber": 39,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/security-api-key-management",
-            "id": "def-public.QueryApiKeyParams.from",
-            "type": "number",
-            "tags": [],
-            "label": "from",
-            "description": [],
             "path": "x-pack/platform/packages/shared/security/api_key_management/src/components/api_keys_api_client.ts",
             "lineNumber": 40,
             "columnNumber": 3,
@@ -1031,7 +1018,7 @@
             "label": "sort",
             "description": [],
             "signature": [
-              "{ field: \"id\" | \"type\" | \"name\" | \"username\" | \"metadata\" | \"profile_uid\" | \"creation\" | \"access\" | \"realm\" | \"expired\" | \"role_descriptors\" | \"expiration\" | \"invalidated\" | \"invalidation\" | \"realm_type\" | \"limited_by\" | \"_sort\"; direction: \"asc\" | \"desc\"; }"
+              "{ field: \"id\" | \"type\" | \"name\" | \"username\" | \"metadata\" | \"profile_uid\" | \"creation\" | \"access\" | \"expired\" | \"realm\" | \"role_descriptors\" | \"expiration\" | \"invalidated\" | \"invalidation\" | \"realm_type\" | \"limited_by\" | \"_sort\"; direction: \"asc\" | \"desc\"; }"
             ],
             "path": "x-pack/platform/packages/shared/security/api_key_management/src/components/api_keys_api_client.ts",
             "lineNumber": 42,
@@ -1060,6 +1047,23 @@
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-api-key-management",
+            "id": "def-public.QueryApiKeyParams.searchAfter",
+            "type": "Array",
+            "tags": [],
+            "label": "searchAfter",
+            "description": [],
+            "signature": [
+              "SortResults",
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/security/api_key_management/src/components/api_keys_api_client.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1072,7 +1076,7 @@
         "label": "QueryFilters",
         "description": [],
         "path": "x-pack/platform/packages/shared/security/api_key_management/src/components/api_keys_api_client.ts",
-        "lineNumber": 26,
+        "lineNumber": 27,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1088,7 +1092,7 @@
               "string[] | undefined"
             ],
             "path": "x-pack/platform/packages/shared/security/api_key_management/src/components/api_keys_api_client.ts",
-            "lineNumber": 27,
+            "lineNumber": 28,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1101,10 +1105,10 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"rest\" | \"managed\" | \"cross_cluster\" | undefined"
+              "\"managed\" | \"rest\" | \"cross_cluster\" | undefined"
             ],
             "path": "x-pack/platform/packages/shared/security/api_key_management/src/components/api_keys_api_client.ts",
-            "lineNumber": 28,
+            "lineNumber": 29,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1120,7 +1124,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/packages/shared/security/api_key_management/src/components/api_keys_api_client.ts",
-            "lineNumber": 29,
+            "lineNumber": 30,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1246,10 +1250,10 @@
         "label": "QueryApiKeySortOptions",
         "description": [],
         "signature": [
-          "{ field: \"id\" | \"type\" | \"name\" | \"username\" | \"metadata\" | \"profile_uid\" | \"creation\" | \"access\" | \"realm\" | \"expired\" | \"role_descriptors\" | \"expiration\" | \"invalidated\" | \"invalidation\" | \"realm_type\" | \"limited_by\" | \"_sort\"; direction: \"asc\" | \"desc\"; }"
+          "{ field: \"id\" | \"type\" | \"name\" | \"username\" | \"metadata\" | \"profile_uid\" | \"creation\" | \"access\" | \"expired\" | \"realm\" | \"role_descriptors\" | \"expiration\" | \"invalidated\" | \"invalidation\" | \"realm_type\" | \"limited_by\" | \"_sort\"; direction: \"asc\" | \"desc\"; }"
         ],
         "path": "x-pack/platform/packages/shared/security/api_key_management/src/components/api_keys_api_client.ts",
-        "lineNumber": 36,
+        "lineNumber": 37,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
