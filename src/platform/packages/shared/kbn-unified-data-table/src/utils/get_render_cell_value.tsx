@@ -133,8 +133,6 @@ export const getRenderCellValueFn = ({
       });
     }
 
-    // In ES|QL mode we always show the Summary column (`_source`) even if the backing DataView
-    // doesn't define an `_source` field (e.g. ES|QL views, which are not real indices).
     if (
       field?.type === '_source' ||
       useTopLevelObjectColumns ||

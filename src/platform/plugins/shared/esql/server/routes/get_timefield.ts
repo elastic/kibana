@@ -15,10 +15,10 @@ import { Parser } from '@kbn/esql-language';
 import { TIMEFIELD_ROUTE } from '@kbn/esql-types';
 import { EsqlService } from '../services/esql_service';
 
+const ES_TIMESTAMP_FIELD_NAME = '@timestamp';
+
 const hasTimestampInFieldCapsResponse = (result: FieldCapsResponse) =>
   Boolean(result.fields && result.fields['@timestamp']);
-
-const ES_TIMESTAMP_FIELD_NAME = '@timestamp';
 
 const toDebugString = (error: unknown): string =>
   error instanceof Error ? error.stack ?? error.message : String(error);
@@ -30,18 +30,17 @@ const getEsqlColumnsForSource = async ({
   client: ElasticsearchClient;
   sourceName: string;
 }): Promise<ESQLSearchResponse | undefined> => {
-  const candidateQueries = [`FROM ${sourceName} | LIMIT 0`, `FROM ${sourceName} | LIMIT 1`];
+  // Limit 0 is used to get the schema, more performant
+  const query = `FROM ${sourceName} | LIMIT 0`;
 
-  for (const query of candidateQueries) {
-    try {
-      return await client.transport.request<ESQLSearchResponse>({
-        method: 'POST',
-        path: '/_query',
-        body: { query },
-      });
-    } catch {
-      // ignore and try next candidate
-    }
+  try {
+    return await client.transport.request<ESQLSearchResponse>({
+      method: 'POST',
+      path: '/_query',
+      body: { query },
+    });
+  } catch {
+    // ignore
   }
 };
 
@@ -52,8 +51,7 @@ const checkViewLikeSourceForTimestamp = async ({
   client: ElasticsearchClient;
   sourceName: string;
 }): Promise<boolean> => {
-  // ES|QL views are resolved by ES|QL itself, and their schema is the output schema
-  // of the view query (not field caps of a backing index).
+  // ES|QL views are resolved by ES|QL itself, and their schema is the output schema.
   const esqlResp = await getEsqlColumnsForSource({ client, sourceName });
   return Boolean(esqlResp?.columns?.some((col) => col.name === ES_TIMESTAMP_FIELD_NAME));
 };
@@ -131,6 +129,7 @@ export const registerGetTimeFieldRoute = (
         const sourceChecks = await Promise.all(
           indices.map(async (sourceName) => {
             // If ES tells us it's a view, skip fieldCaps and inspect the ES|QL schema instead.
+            // This is temporary until we have a proper way to detect the time field for ES|QL views using field caps.
             if (viewNames.has(sourceName)) {
               return checkViewLikeSourceForTimestamp({ client, sourceName });
             }
@@ -143,10 +142,7 @@ export const registerGetTimeFieldRoute = (
               });
               return hasTimestampInFieldCapsResponse(fieldCapsResp);
             } catch (fieldCapsError) {
-              // Some sources (like ES|QL views) are not real indices and can make fieldCaps fail.
-              // As a fallback, run a minimal ES|QL query and infer the schema from the response.
               logger.get().debug(toDebugString(fieldCapsError));
-              return checkViewLikeSourceForTimestamp({ client, sourceName });
             }
           })
         );

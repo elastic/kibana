@@ -273,7 +273,6 @@ describe('ESQL routes', () => {
         },
       });
 
-      // The underlying index has @timestamp, but the view output drops it
       await client.transport.request({
         method: 'PUT',
         path: `/_query/view/${encodeURIComponent(viewName)}`,
