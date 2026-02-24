@@ -38,7 +38,7 @@ import type {
 } from '@kbn/lens-common';
 import type { PublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import type { DrilldownsState } from '@kbn/embeddable-plugin/server';
+import type { SerializedDrilldowns } from '@kbn/embeddable-plugin/server';
 import type { TimeRange } from '@kbn/es-query';
 
 /**
@@ -46,7 +46,7 @@ import type { TimeRange } from '@kbn/es-query';
  * Excludes runtime/inherited state from unified search and dashboard contexts.
  */
 type LensPersistableState = SerializedTitles & // title, description, hide_title
-  DrilldownsState & { timeRange?: TimeRange }; // panel-level time range override
+  SerializedDrilldowns & { timeRange?: TimeRange }; // panel-level time range override
 
 export type LensByValueSerializedAPIConfig = LensPersistableState & {
   // Temporarily allow both old and new attributes until all chart types are supported and feature flag removed
