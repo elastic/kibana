@@ -18,7 +18,7 @@ export function createWiredStreamsRoutingProcessor(): Processor {
     add_fields: {
       target: '@metadata',
       fields: {
-        raw_index: 'logs',
+        raw_index: 'logs.ecs',
       },
     },
   };

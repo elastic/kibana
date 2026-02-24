@@ -54,7 +54,7 @@ export function buildInstallStackCommand({
     return ` \\
   --set 'collectors.daemon.config.processors.resource\\/wired_streams.attributes[0].action=upsert' \\
   --set 'collectors.daemon.config.processors.resource\\/wired_streams.attributes[0].key=elasticsearch.index' \\
-  --set 'collectors.daemon.config.processors.resource\\/wired_streams.attributes[0].value=logs' \\
+  --set 'collectors.daemon.config.processors.resource\\/wired_streams.attributes[0].value=logs.otel' \\
   --set 'collectors.daemon.config.service.pipelines.logs\\/node.processors[8]=resource/wired_streams'${logsApmOverride}`;
   })();
 

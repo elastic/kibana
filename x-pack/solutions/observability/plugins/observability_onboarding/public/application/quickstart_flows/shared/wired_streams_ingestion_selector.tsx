@@ -182,7 +182,7 @@ export function WiredStreamsIngestionSelector({
             >
               {i18n.translate('xpack.observability_onboarding.wiredStreams.description', {
                 defaultMessage:
-                  "Streams provide our next-generation log ingestion model with a managed hierarchy. Wired Streams is currently in tech preview, and some features may not yet be fully supported. Logs will be routed to a Wired Stream (logs.'<'name'>'), while other signals continue through standard data streams.",
+                  'Streams provide our next-generation log ingestion model with a managed hierarchy. Wired Streams is currently in tech preview, and some features may not yet be fully supported. Logs will be routed to root streams (logs.otel or logs.ecs) based on their format, while other signals continue through standard data streams.',
               })}{' '}
               {streamsDocLink && (
                 <EuiLink

@@ -94,13 +94,15 @@ export function EnableWiredStreamsConfirmModal({
             <ul>
               <li>
                 {i18n.translate('xpack.observability_onboarding.enableWiredStreamsModal.bullet1', {
-                  defaultMessage: 'A root "logs" stream is created for your {envType}',
+                  defaultMessage:
+                    'Root log streams ("logs.otel" and "logs.ecs") are created for your {envType}',
                   values: { envType },
                 })}
               </li>
               <li>
                 {i18n.translate('xpack.observability_onboarding.enableWiredStreamsModal.bullet2', {
-                  defaultMessage: 'Logs from this setup will be routed to the root "logs" stream',
+                  defaultMessage:
+                    'Logs from this setup will be routed to the appropriate root stream',
                 })}
               </li>
               <li>

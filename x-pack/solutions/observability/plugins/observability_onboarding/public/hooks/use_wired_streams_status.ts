@@ -58,7 +58,8 @@ export function useWiredStreamsStatus(): UseWiredStreamsStatusResult {
 
       if (!controller.signal.aborted) {
         setStatus({
-          isEnabled: response?.enabled === true,
+          isEnabled:
+            response?.['logs.otel'] === true && response?.['logs.ecs'] === true,
           isLoading: false,
           error: null,
         });

@@ -45,10 +45,10 @@ export function buildInstallCommand({
   const wiredStreamsSedLinux = (() => {
     if (!useWiredStreams) return '';
     if (isManagedOtlpServiceAvailable) {
-      return ` && sed -i 's/^processors:/&\\n  resource\\/wired_streams:\\n    attributes:\\n      - action: upsert\\n        key: elasticsearch.index\\n        value: logs/' ./otel.yml && sed -i '/logs\\/platformlogs:/,/exporters:/{/processors:/s/\\]/, resource\\/wired_streams]/}' ./otel.yml`;
+      return ` && sed -i 's/^processors:/&\\n  resource\\/wired_streams:\\n    attributes:\\n      - action: upsert\\n        key: elasticsearch.index\\n        value: logs.otel/' ./otel.yml && sed -i '/logs\\/platformlogs:/,/exporters:/{/processors:/s/\\]/, resource\\/wired_streams]/}' ./otel.yml`;
     }
 
-    return ` && sed -i '/^[[:space:]]*elasticsearch\\/otel:/a\\    logs_index: logs' ./otel.yml`;
+    return ` && sed -i '/^[[:space:]]*elasticsearch\\/otel:/a\\    logs_index: logs.otel' ./otel.yml`;
   })();
   const wiredStreamsSedMac = (() => {
     if (!useWiredStreams) return '';
@@ -58,11 +58,11 @@ export function buildInstallCommand({
     attributes:\\
       - action: upsert\\
         key: elasticsearch.index\\
-        value: logs/' ./otel.yml && sed -i '' '/logs\\/platformlogs:/,/exporters:/{ /processors:/s/]/, resource\\/wired_streams]/; }' ./otel.yml`;
+        value: logs.otel/' ./otel.yml && sed -i '' '/logs\\/platformlogs:/,/exporters:/{ /processors:/s/]/, resource\\/wired_streams]/; }' ./otel.yml`;
     }
 
     return ` && sed -i '' '/^[[:space:]]*elasticsearch\\/otel:/a\\
-    logs_index: logs' ./otel.yml`;
+    logs_index: logs.otel' ./otel.yml`;
   })();
 
   switch (platform) {
@@ -100,7 +100,7 @@ $script:inLogsPipeline = $false
         '    attributes:'
         '      - action: upsert'
         '        key: elasticsearch.index'
-        '        value: logs'
+        '        value: logs.otel'
     }
 } | Set-Content .\\otel.yml`;
         }
@@ -109,7 +109,7 @@ $script:inLogsPipeline = $false
 (Get-Content .\\otel.yml) | ForEach-Object {
     $_
     if ($_ -match '^\\s*elasticsearch/otel:') {
-        '    logs_index: logs'
+        '    logs_index: logs.otel'
     }
 } | Set-Content .\\otel.yml`;
       })();

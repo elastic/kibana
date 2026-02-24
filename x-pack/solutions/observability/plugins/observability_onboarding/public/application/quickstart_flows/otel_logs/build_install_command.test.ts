@@ -251,17 +251,17 @@ rm ./otel.yml && cp ./otel_samples/managed_otlp/platformlogs.yml ./otel.yml && m
           useWiredStreams: false,
         });
 
-        expect(command).not.toContain('logs_index: logs');
+        expect(command).not.toContain('logs_index: logs.otel');
       });
 
-      it('injects logs_index: logs config when useWiredStreams is true', () => {
+      it('injects logs_index: logs.otel config when useWiredStreams is true', () => {
         const command = buildInstallCommand({
           ...baseConfig,
           platform: 'linux',
           useWiredStreams: true,
         });
 
-        expect(command).toContain('logs_index: logs');
+        expect(command).toContain('logs_index: logs.otel');
         expect(command).toContain("sed -i '/^[[:space:]]*elasticsearch\\/otel:/a");
       });
     });
@@ -274,17 +274,17 @@ rm ./otel.yml && cp ./otel_samples/managed_otlp/platformlogs.yml ./otel.yml && m
           useWiredStreams: false,
         });
 
-        expect(command).not.toContain('logs_index: logs');
+        expect(command).not.toContain('logs_index: logs.otel');
       });
 
-      it('injects logs_index: logs config when useWiredStreams is true', () => {
+      it('injects logs_index: logs.otel config when useWiredStreams is true', () => {
         const command = buildInstallCommand({
           ...baseConfig,
           platform: 'mac',
           useWiredStreams: true,
         });
 
-        expect(command).toContain('logs_index: logs');
+        expect(command).toContain('logs_index: logs.otel');
         expect(command).toContain("sed -i '' '/^[[:space:]]*elasticsearch\\/otel:/a");
       });
     });
@@ -297,17 +297,17 @@ rm ./otel.yml && cp ./otel_samples/managed_otlp/platformlogs.yml ./otel.yml && m
           useWiredStreams: false,
         });
 
-        expect(command).not.toContain('logs_index: logs');
+        expect(command).not.toContain('logs_index: logs.otel');
       });
 
-      it('injects logs_index: logs config when useWiredStreams is true', () => {
+      it('injects logs_index: logs.otel config when useWiredStreams is true', () => {
         const command = buildInstallCommand({
           ...baseConfig,
           platform: 'windows',
           useWiredStreams: true,
         });
 
-        expect(command).toContain('logs_index: logs');
+        expect(command).toContain('logs_index: logs.otel');
         expect(command).toContain('elasticsearch/otel:');
       });
     });
@@ -365,7 +365,7 @@ rm ./otel.yml && cp ./otel_samples/managed_otlp/platformlogs.yml ./otel.yml && m
         useWiredStreams: true,
       });
 
-      expect(command).toContain('logs_index: logs');
+      expect(command).toContain('logs_index: logs.otel');
       expect(command).toContain('platformlogs_hostmetrics.yml');
     });
   });
