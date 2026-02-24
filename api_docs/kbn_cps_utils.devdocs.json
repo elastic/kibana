@@ -945,7 +945,7 @@
         "label": "ProjectRoutingValue",
         "description": [],
         "signature": [
-          "\"_alias:*\" | \"_alias:_origin\""
+          "\"_alias:_origin\" | \"_alias:*\""
         ],
         "path": "src/platform/packages/shared/kbn-cps-utils/constants.ts",
         "lineNumber": 21,
