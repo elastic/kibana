@@ -63,8 +63,7 @@ function getAccessorName(type: 'metric' | 'tag') {
 
 function buildVisualizationState(config: TagcloudState): LensTagCloudState {
   const layer = config;
-  console.log({ config });
-  // debugger;
+
   return {
     layerId: DEFAULT_LAYER_ID,
     valueAccessor: getAccessorName('metric'),
@@ -122,18 +121,11 @@ function getTagcloudTagBy(
   layer: Omit<FormBasedLayer, 'indexPatternId'> | TextBasedLayer,
   visualization: LensTagCloudState
 ): TagcloudState['tag_by'] {
-  console.log('getTagcloudTagBy', { layer, visualization });
-  // debugger;
   if (visualization.tagAccessor == null) {
     throw new Error('Tag accessor is missing in the visualization state');
   }
 
-  let color: ColorMappingType | undefined;
-  if (visualization.palette) {
-    color = { mode: 'categorical', palette: visualization.palette.name, mapping: [] };
-  } else {
-    color = fromColorMappingLensStateToAPI(visualization.colorMapping);
-  }
+  const color = fromColorMappingLensStateToAPI(visualization.colorMapping, visualization.palette);
 
   return {
     ...(isTextBasedLayer(layer)
@@ -161,7 +153,6 @@ function reverseBuildVisualizationState(
       color: fromColorByValueLensStateToAPI(visualization.palette),
     }),
   };
-  console.log({ visualization, paletteProps });
 
   return {
     type: 'tagcloud',
@@ -231,7 +222,7 @@ export function fromAPItoLensState(
   const references = regularDataViews.length
     ? buildReferences({ [DEFAULT_LAYER_ID]: regularDataViews[0]?.id })
     : [];
-  console.log({ config });
+
   return {
     visualizationType: 'lnsTagcloud',
     ...getSharedChartAPIToLensState(config),
@@ -243,8 +234,6 @@ export function fromAPItoLensState(
       adHocDataViews: config.dataset.type === 'index' ? adHocDataViews : {},
     },
   };
-  console.log('fromAPItoLensState', { before: config, after });
-  return after;
 }
 
 export function fromLensStateToAPI(
@@ -255,7 +244,7 @@ export function fromLensStateToAPI(
   const visualization = state.visualization as LensTagCloudState;
   const layers = getDatasourceLayers(state);
   const [layerId, layer] = getLensStateLayer(layers, visualization.layerId);
-  console.log(' fromLensStateToAPI', { state });
+
   const visualizationState = {
     ...getSharedChartLensStateToAPI(config),
     ...reverseBuildVisualizationState(
@@ -268,6 +257,5 @@ export function fromLensStateToAPI(
     ),
   };
 
-  console.log('fromLensStateToAPI', { before: state, after: visualizationState });
   return visualizationState;
 }
