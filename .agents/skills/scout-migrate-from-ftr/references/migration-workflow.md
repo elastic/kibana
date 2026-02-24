@@ -85,3 +85,41 @@ test('create and edit entity', async () => {
 - Prefer page object methods over direct selectors.
 - Preserve or update tags for deployment targets when needed.
 - Run Scout tests in both stateful and serverless if the plugin supports both.
+
+# Extra:
+
+## FTR vs Scout: high level differences [scout-ftr-to-scout-mapping]
+
+| FTR                                                                                                                | Scout                                                                                                                                                                                                                     |
+| ------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `loadTestFile()` index files can **control ordering** and share setup/teardown across many loaded files.           | No `loadTestFile()`: each `.spec.ts` is **standalone** and file execution order is **not guaranteed**. Use `beforeAll`/`beforeEach` and/or `global.setup.ts` for shared prerequisites.                                    |
+| Browser/session state can effectively carry across multiple `it()` blocks in a suite.                              | Each `test()` runs in a **fresh browser context**. Do login/navigation in `beforeEach` (don’t use `page` / `browserAuth` / `pageObjects` in `beforeAll`). Use `test.step` if multiple FTR `it()` blocks were one journey. |
+| Per-suite flags via config (`kbnServerArgs` / `esServerArgs`) and nested config inheritance are common.            | No FTR-style config nesting and no per-suite server args. Prefer defaults; use `uiSettings` / `scoutSpace.uiSettings`, and (when needed) `apiServices.core.settings(...)`.                                                |
+| Roles often live in config (`security.roles`), and tests mutate a shared user (`security.testUser.setRoles(...)`). | Auth/roles are fixture-driven: `browserAuth` (UI), `requestAuth` (API keys), `samlAuth` (cookies), plus custom roles inline (`loginWithCustomRole`, `getApiKeyForCustomRole`).                                            |
+| `esArchiver.load/unload` is common in suite hooks.                                                                 | Scout uses `esArchiver.loadIfNeeded(...)`. For `parallel_tests/`, ingest via `globalSetupHook` in `global.setup.ts` (don’t use `esArchiver` in spec files).                                                               |
+| “Global state” is often created once and reused by later tests.                                                    | Prefer independent suites. For parallel UI, isolate state per space with `spaceTest` + `scoutSpace`; avoid hardcoded saved object IDs (they can differ per space).                                                        |
+| Imports are not constrained by Scout package conventions.                                                          | Use the correct Scout package (`@kbn/scout` vs `@kbn/scout-<solution>`), and import `expect` from the `/ui` or `/api` entrypoint.                                                                                         |
+| Test structure is flexible (nesting, multiple describes per file).                                                 | Structure is opinionated: **tags are required**, **one suite per file**, **no nested describes**, and no `test.describe.configure()`.                                                                                     |
+
+## Migrating your FTR tests to Scout [scout-ftr-to-scout-recipe]
+
+::::::::{warning}
+If the FTR suite mostly validates **data correctness** (API responses, exact table cell values), migrate it to a **Scout API test** (or unit/integration tests) instead of a Scout UI test. UI tests should focus on **user interactions and rendering**.
+::::::::
+
+1. **Decide UI vs API**: UI = user flow + rendering; API = endpoint behavior + data correctness.
+2. **Split FTR structure**: replace `loadTestFile()` indexes with **independent** `.spec.ts` files (one suite per file).
+3. **Move shared setup**:
+   - shared ingest across many files → `global.setup.ts` + `globalSetupHook`
+   - per-suite setup → `beforeAll` (worker-scoped fixtures only)
+4. **Port auth/roles**:
+   - UI: `browserAuth.loginAs...()` / `loginWithCustomRole(...)` in `beforeEach`
+   - API: `requestAuth.getApiKeyFor...()` / `getApiKeyForCustomRole(...)`
+   - internal endpoints: `samlAuth.asInteractiveUser(...)` (cookie header)
+5. **Replace FTR config flags**:
+   - UI settings/advanced settings → `uiSettings` (or `scoutSpace.uiSettings` in parallel)
+   - Kibana config overrides (test env) → `apiServices.core.settings(...)` (`PUT /internal/core/_settings`)
+6. **Make tests space/parallel-safe**:
+   - don’t hardcode saved object IDs; capture or look them up via APIs
+   - make names unique in parallel (often suffix with `scoutSpace.id` / `Date.now()`)
+7. **Keep tests under Scout’s defaults**: per-test timeout is 60s; extract shared values into a `constants.ts` when it helps.
