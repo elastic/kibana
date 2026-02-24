@@ -9,11 +9,9 @@ import { OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS } from '@kbn/management-sett
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../../fixtures';
+import { deleteQueryStream } from '../../fixtures/query_stream_helpers';
 
-// Stream names created by this spec
 const STREAM_NAMES_CREATED_BY_SPEC = ['logs.host-1', 'test-query-stream'];
-// ES|QL view names
-const ESQL_VIEW_NAMES_CREATED_BY_SPEC = ['$.logs.host-1', '$.test-query-stream'];
 
 test.describe(
   'Query streams - Create query stream',
@@ -29,21 +27,8 @@ test.describe(
 
     test.afterAll(async ({ kbnClient, apiServices, esClient }) => {
       for (const streamName of STREAM_NAMES_CREATED_BY_SPEC) {
-        try {
-          await apiServices.streams.deleteStream(streamName);
-        } catch {
-          // Stream may not exist or already deleted
-        }
-      }
-      for (const viewName of ESQL_VIEW_NAMES_CREATED_BY_SPEC) {
-        try {
-          await esClient.transport.request({
-            method: 'DELETE',
-            path: `/_query/view/${encodeURIComponent(viewName)}`,
-          });
-        } catch {
-          // 404 or other; ignore so afterAll doesn't fail
-        }
+        const esqlViewName = `$.${streamName}`;
+        await deleteQueryStream(apiServices, esClient, streamName, esqlViewName);
       }
       await kbnClient.uiSettings.update({
         [OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS]: false,

@@ -9,6 +9,7 @@ import { OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS } from '@kbn/management-sett
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../../fixtures';
+import { createQueryStream, deleteQueryStream } from '../../fixtures/query_stream_helpers';
 
 const QUERY_STREAM_NAME = 'logs.test';
 const ESQL_VIEW_NAME = `$.${QUERY_STREAM_NAME}`;
@@ -24,41 +25,19 @@ test.describe(
         [OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS]: true,
       });
 
-      // Create the ES|QL view via the Elasticsearch REST API
-      await esClient.transport.request({
-        method: 'PUT',
-        path: `/_query/view/${encodeURIComponent(ESQL_VIEW_NAME)}`,
-        body: { query: INITIAL_ESQL_QUERY },
-      });
-
-      // Create the query stream definition via the Kibana API so it appears in the streams list
-      await kbnClient.request({
-        method: 'PUT',
-        path: `/api/streams/${QUERY_STREAM_NAME}/_query`,
-        headers: {
-          'kbn-xsrf': 'true',
-          'elastic-api-version': '2023-10-31',
-        },
-        body: { query: { esql: INITIAL_ESQL_QUERY } },
-      });
+      await createQueryStream(
+        esClient,
+        kbnClient,
+        QUERY_STREAM_NAME,
+        ESQL_VIEW_NAME,
+        INITIAL_ESQL_QUERY
+      );
 
       await pageObjects.streams.gotoStreamMainPage();
     });
 
     test.afterAll(async ({ kbnClient, apiServices, esClient }) => {
-      try {
-        await apiServices.streams.deleteStream(QUERY_STREAM_NAME);
-      } catch {
-        // Stream may not exist or already deleted
-      }
-      try {
-        await esClient.transport.request({
-          method: 'DELETE',
-          path: `/_query/view/${encodeURIComponent(ESQL_VIEW_NAME)}`,
-        });
-      } catch {
-        // View may already be removed by stream delete or not exist
-      }
+      await deleteQueryStream(apiServices, esClient, QUERY_STREAM_NAME, ESQL_VIEW_NAME);
       await kbnClient.uiSettings.update({
         [OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS]: false,
       });
