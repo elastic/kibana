@@ -81,7 +81,7 @@ describe('checking changes on all registered encrypted SO types', () => {
         "synthetics-monitor": "f1c060b7be3b30187c4adcb35d74f1fa8a4290bd7faf04fec869de2aa387e21b",
         "synthetics-monitor-multi-space": "39c4c6abd28c4173f77c1c89306e92b6b92492c0029274e10620a170be4d4a67",
         "synthetics-param": "747ba9d1b7addf5b131713abe7868bd767af6ce0cf8b6b0f335f4ef34b280c7e",
-        "task": "2d8e9bf532f469805b82051f545b915785d99eabfa050cb1aefbc715c6096b97",
+        "task": "d6cc30871dc78caf3f451de1275a3803879ec9935b4a2e34076dee56878c228f",
         "uptime-synthetics-api-key": "5ca81f180763e85397fa8c6508adcd60efd0f916e29bac6dcd5b4564f1db7375",
       }
     `);
@@ -142,6 +142,7 @@ describe('checking changes on all registered encrypted SO types', () => {
         "ingest-outputs|1",
         "synthetics-monitor|2",
         "synthetics-monitor|1",
+        "task|8",
         "task|7",
         "task|6",
         "task|5",
