@@ -8,16 +8,14 @@
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiPanel, useEuiTheme } from '@elastic/eui';
 import type { ReactNode } from 'react';
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import React, { useLayoutEffect, useRef, useState, useCallback } from 'react';
+import useWindowSize from 'react-use/lib/useWindowSize';
 import { cx } from '@emotion/css';
 import {
   useServiceMapFullScreen,
   applyServiceMapFullScreenBodyClasses,
 } from './use_service_map_fullscreen';
-import {
-  SERVICE_MAP_WRAPPER_FULL_SCREEN_CLASS,
-  SERVICE_MAP_FULL_SCREEN_CLASS,
-} from './constants';
+import { SERVICE_MAP_WRAPPER_FULL_SCREEN_CLASS, SERVICE_MAP_FULL_SCREEN_CLASS } from './constants';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { isActivePlatinumLicense } from '../../../../common/license_check';
 import { invalidLicenseMessage, SERVICE_MAP_TIMEOUT_ERROR } from '../../../../common/service_map';
@@ -115,13 +113,9 @@ export function ServiceMap({
   });
 
   const { ref, height } = useRefDimensions();
+  const windowHeight = useWindowSize().height;
   const { euiTheme } = useEuiTheme();
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [fullScreenHeight, setFullScreenHeight] = useState(() =>
-    typeof window !== 'undefined' ? window.innerHeight : 0
-  );
-  /** Store height when entering full screen so we restore it on exit (avoids scroll bar from viewport-sized height) */
-  const lastNonFullScreenHeightRef = useRef<number | null>(null);
   const { styles, bodyClassesToToggle } = useServiceMapFullScreen();
   const fullScreenContainerStyles = styles[SERVICE_MAP_FULL_SCREEN_CLASS];
 
@@ -129,41 +123,38 @@ export function ServiceMap({
   const PADDING_BOTTOM = 24;
   const heightWithPadding = height - PADDING_BOTTOM;
 
-  const onToggleFullscreen = useCallback(() => {
-    if (!isFullscreen) {
-      lastNonFullScreenHeightRef.current = heightWithPadding;
-    }
-    setIsFullscreen((prev) => !prev);
-  }, [isFullscreen, heightWithPadding]);
+  /** Store height when entering fullscreen; use it when exiting so zoom/actions don't corrupt measurement */
+  const heightBeforeFullscreenRef = useRef(heightWithPadding);
+  const [useStoredHeight, setUseStoredHeight] = useState(false);
 
-  useEffect(() => {
+  if (!isFullscreen && !useStoredHeight) {
+    heightBeforeFullscreenRef.current = heightWithPadding;
+  }
+
+  const mapHeight = isFullscreen
+    ? windowHeight - PADDING_BOTTOM
+    : useStoredHeight
+    ? heightBeforeFullscreenRef.current
+    : heightWithPadding;
+
+  const onToggleFullscreen = useCallback(() => {
+    setIsFullscreen((prev) => {
+      if (prev) {
+        setUseStoredHeight(true);
+      }
+      return !prev;
+    });
+  }, []);
+
+  useLayoutEffect(() => {
     if (isFullscreen) {
       applyServiceMapFullScreenBodyClasses(true, bodyClassesToToggle);
       return () => {
         applyServiceMapFullScreenBodyClasses(false, bodyClassesToToggle);
+        setUseStoredHeight(false);
       };
     }
   }, [isFullscreen, bodyClassesToToggle]);
-
-  // When in full screen, use viewport height and keep it updated on resize so the map fills the screen
-  useEffect(() => {
-    if (!isFullscreen) return;
-    const onResize = () => setFullScreenHeight(window.innerHeight);
-    onResize();
-    window.addEventListener('resize', onResize);
-    return () => window.removeEventListener('resize', onResize);
-  }, [isFullscreen]);
-
-  const effectiveHeightWithPadding =
-    isFullscreen ? fullScreenHeight : (lastNonFullScreenHeightRef.current ?? heightWithPadding);
-  const mapHeight = isFullscreen ? fullScreenHeight : effectiveHeightWithPadding;
-
-  // Keep stored non-FS height in sync with what we display (use effective height so we don't overwrite after exiting FS)
-  useEffect(() => {
-    if (!isFullscreen) {
-      lastNonFullScreenHeightRef.current = effectiveHeightWithPadding;
-    }
-  }, [isFullscreen, effectiveHeightWithPadding]);
 
   if (!license) {
     return null;
@@ -227,19 +218,15 @@ export function ServiceMap({
       <div
         className={cx({
           [SERVICE_MAP_WRAPPER_FULL_SCREEN_CLASS]: isFullscreen,
+          [SERVICE_MAP_FULL_SCREEN_CLASS]: isFullscreen,
         })}
         css={isFullscreen ? fullScreenContainerStyles : undefined}
-        style={isFullscreen ? { display: 'flex', flexDirection: 'column', height: '100%' } : undefined}
       >
-        <EuiPanel
-          hasBorder={true}
-          paddingSize="none"
-          style={isFullscreen ? { flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' } : undefined}
-        >
+        <EuiPanel hasBorder={true} paddingSize="none">
           <div
             data-test-subj="serviceMap"
             style={{
-              height: isFullscreen ? '100%' : effectiveHeightWithPadding,
+              height: isFullscreen ? '100%' : mapHeight,
               zIndex: Number(euiTheme.levels.content) + 1,
               ...(isFullscreen ? { minHeight: 0, flex: 1 } : {}),
             }}

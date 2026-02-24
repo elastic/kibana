@@ -388,7 +388,10 @@ function GraphInner({
               aria-label={fullscreenButtonLabel}
               data-test-subj="serviceMapFullScreenButton"
             >
-              <EuiIcon type={isFullscreen ? 'fullScreenExit' : 'fullScreen'} />
+              <EuiIcon
+                type={isFullscreen ? 'fullScreenExit' : 'fullScreen'}
+                aria-label={fullscreenButtonLabel}
+              />
             </ControlButton>
           )}
         </Controls>

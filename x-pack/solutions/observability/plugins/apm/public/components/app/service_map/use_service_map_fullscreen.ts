@@ -75,6 +75,9 @@ export function useServiceMapFullScreen() {
         inset: 0;
         ${logicalCSS('right', 'var(--euiPushFlyoutOffsetInlineEnd, 0px)')}
         background-color: ${euiTheme.colors.backgroundBasePlain};
+        display: flex;
+        flex-direction: column;
+        height: 100%;
       `,
     }),
     [euiTheme, fullScreenZIndex]
