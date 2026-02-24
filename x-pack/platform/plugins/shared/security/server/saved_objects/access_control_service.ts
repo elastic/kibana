@@ -141,7 +141,7 @@ export class AccessControlService {
     authorizationResult: CheckAuthorizationResult<A>;
     objectsRequiringPrivilegeCheck: ObjectRequiringPrivilegeCheckResult[];
     currentSpace: string;
-    addAuditEventFn?: (types: string[]) => void;
+    addAuditEventFn?: (errMessage: string, types: string[]) => void;
   }) {
     // Derive typesRequiringAccessControl and typesRequiringRbac from the objects array.
     // - typesRequiringAccessControl: types where objects are NOT owned by current user (need manage_access_control)
@@ -163,8 +163,8 @@ export class AccessControlService {
 
     if (authorizationResult.status === 'unauthorized') {
       const rbacTypeList = [...typesRequiringRbac].sort();
-      const allTypes = [...new Set([...typesRequiringRbac, ...typesRequiringAccessControl])].sort();
-      addAuditEventFn?.(allTypes);
+      const errorMsg = buildAccessDeniedMessage(rbacTypeList, objectsRequiringAccessControl);
+      addAuditEventFn?.(errorMsg, rbacTypeList);
       throw SavedObjectsErrorHelpers.decorateForbiddenError(
         new Error(buildAccessDeniedMessage(rbacTypeList, objectsRequiringAccessControl))
       );
@@ -212,15 +212,12 @@ export class AccessControlService {
 
     if (unauthorizedRbacTypes.size > 0 || unauthorizedAccessControlTypes.size > 0) {
       const rbacTypeList = [...unauthorizedRbacTypes].sort();
-      const accessControlTypeList = [...unauthorizedAccessControlTypes].sort();
-      const allUnauthorizedTypes = [...new Set([...rbacTypeList, ...accessControlTypeList])].sort();
       const unauthorizedObjects = objectsRequiringAccessControl.filter((obj) =>
         unauthorizedAccessControlTypes.has(obj.type)
       );
-      addAuditEventFn?.(allUnauthorizedTypes);
-      throw SavedObjectsErrorHelpers.decorateForbiddenError(
-        new Error(buildAccessDeniedMessage(rbacTypeList, unauthorizedObjects))
-      );
+      const errorMsg = buildAccessDeniedMessage(rbacTypeList, unauthorizedObjects);
+      addAuditEventFn?.(errorMsg, rbacTypeList);
+      throw SavedObjectsErrorHelpers.decorateForbiddenError(new Error(errorMsg));
     }
   }
 }
