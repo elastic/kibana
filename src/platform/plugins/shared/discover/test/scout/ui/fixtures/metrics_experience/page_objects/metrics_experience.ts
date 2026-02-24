@@ -125,8 +125,7 @@ function createFlyout(page: ScoutPage): MetricsFlyout {
   return {
     container,
     overview: {
-      // TODO: Replace with page.testSubj.locator() once data-test-subj is added to tabs
-      tab: page.locator('role=tab[name="Overview"]'),
+      tab: page.testSubj.locator('metricsExperienceFlyoutOverviewTab'),
       descriptionList: page.testSubj.locator('metricsExperienceFlyoutOverviewTabDescriptionList'),
       dimensionsPagination: createDimensionsPagination(container),
       dimensionsListItems: page.testSubj
@@ -134,8 +133,7 @@ function createFlyout(page: ScoutPage): MetricsFlyout {
         .locator(`[data-test-subj^="${METRICS_FLYOUT_DIMENSION_ITEM_DATA_TEST_SUBJ}-"]`),
     },
     esqlQuery: {
-      // TODO: Replace with page.testSubj.locator() once data-test-subj is added to tabs
-      tab: page.locator('role=tab[name="ES|QL Query"]'),
+      tab: page.testSubj.locator('metricsExperienceFlyoutEsqlQueryTab'),
       codeBlock: page.testSubj.locator('metricsExperienceFlyoutEsqlQueryCodeBlock'),
     },
   };
