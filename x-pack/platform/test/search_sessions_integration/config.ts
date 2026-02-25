@@ -19,16 +19,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     ...xpackFunctionalConfig.getAll(),
 
     junit: {
-      reportName: 'X-Pack Search Sessions Integration',
+      reportName: 'X-Pack Search Sessions Integration - Async Search',
     },
 
-    testFiles: [
-      resolve(__dirname, './tests/apps/dashboard/async_search'),
-      resolve(__dirname, './tests/apps/dashboard/session_sharing'),
-      resolve(__dirname, './tests/apps/discover'),
-      resolve(__dirname, './tests/apps/lens'),
-      resolve(__dirname, './tests/apps/management/search_sessions'),
-    ],
+    testFiles: [resolve(__dirname, './tests/apps/dashboard/async_search')],
 
     kbnTestServer: {
       ...xpackFunctionalConfig.get('kbnTestServer'),

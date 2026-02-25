@@ -14,3 +14,7 @@ Run all tests from the `x-pack` root directory
   - Run `node ../scripts/functional_test_runner.js --config ./test/functional/apps/maps/group2/config.ts`
   - Run `node ../scripts/functional_test_runner.js --config ./test/functional/apps/maps/group3/config.ts`
   - Run `node ../scripts/functional_test_runner.js --config ./test/functional/apps/maps/group4/config.ts`
+  - Run `node ../scripts/functional_test_runner.js --config ./test/functional/apps/maps/group5/config.ts`
+  - Run `node ../scripts/functional_test_runner.js --config ./test/functional/apps/maps/group6/config.ts`
+  - Run `node ../scripts/functional_test_runner.js --config ./test/functional/apps/maps/group7/config.ts`
+  - Run `node ../scripts/functional_test_runner.js --config ./test/functional/apps/maps/group8/config.ts`
